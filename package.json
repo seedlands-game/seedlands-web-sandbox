@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "test": "node scripts/verify-voxel.mjs",
     "preview": "vite preview",
     "midscene:verify-model": "midscene model verify",
-    "midscene:smoke": "midscene ./midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json"
+    "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json"
   },
   "dependencies": {
     "playcanvas": "^2.21.4"

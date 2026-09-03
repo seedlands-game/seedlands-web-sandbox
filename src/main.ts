@@ -6,6 +6,7 @@ type MeshPart = { voxel: number; positions: Float32Array; normals: Float32Array;
 type WorkerResult = { id: number; key: string; cx: number; cy: number; cz: number; data: Uint16Array; meshes: MeshPart[] };
 type Chunk = { cx: number; cy: number; cz: number; data: Uint16Array; entity: pc.Entity; meshes: pc.Mesh[] };
 type Change = [number, number, number, number];
+type ChunkTask = { id: number; seed: number; cx: number; cy: number; cz: number; changes: Change[] };
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
 const startCard = document.querySelector<HTMLElement>('#start-card')!;
@@ -18,7 +19,19 @@ const hotbar = document.querySelector<HTMLElement>('#hotbar')!;
 class Store {
   private key = 'seedlands-world-v1';
   load(): { seed: string; player: [number, number, number]; changes: Change[] } | null {
-    try { return JSON.parse(localStorage.getItem(this.key) ?? 'null'); } catch { return null; }
+    try {
+      const saved: unknown = JSON.parse(localStorage.getItem(this.key) ?? 'null');
+      if (!saved || typeof saved !== 'object') return null;
+      const record = saved as Record<string, unknown>;
+      if (typeof record.seed !== 'string' || !Array.isArray(record.player) || record.player.length !== 3 || !record.player.every(Number.isFinite)) return null;
+      if (!Array.isArray(record.changes)) return null;
+      const changes: Change[] = [];
+      for (const change of record.changes) {
+        if (!Array.isArray(change) || change.length !== 4 || !change.every(Number.isInteger)) return null;
+        changes.push([change[0], change[1], change[2], change[3]]);
+      }
+      return { seed: record.seed, player: [record.player[0], record.player[1], record.player[2]], changes };
+    } catch { return null; }
   }
   save(seed: string, player: pc.Vec3, changes: Map<string, number>) {
     localStorage.setItem(this.key, JSON.stringify({ seed, player: [player.x, player.y, player.z], changes: [...changes].map(([key, value]) => [...key.split(',').map(Number), value]) }));
@@ -30,14 +43,23 @@ class World {
   readonly chunks = new Map<string, Chunk>();
   readonly requested = new Set<string>();
   readonly changes = new Map<string, number>();
+  private changesByChunk = new Map<string, Map<string, Change>>();
   private latestTask = new Map<string, number>();
+  private queued = new Map<string, ChunkTask>();
+  private inFlight = 0;
+  private readonly maxInFlight = 2;
   private taskId = 0;
-  private pending = 0;
   private lastCenter = '';
   constructor(readonly seedText: string, readonly seed: number, private app: pc.Application, private materials: Map<number, pc.StandardMaterial>) {
     this.worker.onmessage = (event: MessageEvent<WorkerResult>) => this.receive(event.data);
   }
-  get queueSize() { return this.pending; }
+  get queueSize() { return this.inFlight + this.queued.size; }
+  restoreChanges(changes: Change[]) { changes.forEach(([x, y, z, value]) => this.setChange(x, y, z, value)); }
+  dispose() {
+    this.worker.terminate();
+    this.chunks.forEach((chunk) => { chunk.meshes.forEach((mesh) => mesh.destroy()); chunk.entity.destroy(); });
+    this.chunks.clear(); this.requested.clear(); this.queued.clear(); this.latestTask.clear();
+  }
   getVoxel(x: number, y: number, z: number): number {
     const override = this.changes.get(`${x},${y},${z}`); if (override !== undefined) return override;
     const cx = floorDiv(x, CHUNK_SIZE), cy = floorDiv(y, CHUNK_SIZE), cz = floorDiv(z, CHUNK_SIZE);
@@ -56,9 +78,13 @@ class World {
     needs.sort((a, b) => a[3] - b[3]);
     for (const [x, y, z] of needs) this.request(x, y, z);
     for (const [key, chunk] of this.chunks) if (Math.abs(chunk.cx - cx) > 3 || Math.abs(chunk.cz - cz) > 3) this.unload(key, chunk);
+    for (const key of this.requested) {
+      const [x, , z] = key.split(',').map(Number);
+      if (Math.abs(x - cx) > 3 || Math.abs(z - cz) > 3) this.cancel(key);
+    }
   }
   edit(x: number, y: number, z: number, value: number) {
-    this.changes.set(`${x},${y},${z}`, value);
+    this.setChange(x, y, z, value);
     const cx = floorDiv(x, CHUNK_SIZE), cy = floorDiv(y, CHUNK_SIZE), cz = floorDiv(z, CHUNK_SIZE);
     const affected = new Set([chunkKey(cx, cy, cz)]);
     if (mod(x, CHUNK_SIZE) === 0) affected.add(chunkKey(cx - 1, cy, cz)); if (mod(x, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx + 1, cy, cz));
@@ -71,13 +97,23 @@ class World {
   private request(cx: number, cy: number, cz: number, forceRemesh = false) {
     if (cy < 0 || cy > 1) return;
     const key = chunkKey(cx, cy, cz); if (!forceRemesh && (this.chunks.has(key) || this.requested.has(key))) return;
-    const id = ++this.taskId; this.latestTask.set(key, id); this.requested.add(key); this.pending += 1;
-    this.worker.postMessage({ kind: 'chunk', id, seed: this.seed, cx, cy, cz, changes: this.asChanges() });
+    const id = ++this.taskId;
+    this.latestTask.set(key, id); this.requested.add(key); this.queued.delete(key);
+    this.queued.set(key, { id, seed: this.seed, cx, cy, cz, changes: this.relevantChanges(cx, cy, cz) });
+    this.drain();
+  }
+  private drain() {
+    while (this.inFlight < this.maxInFlight) {
+      const next = this.queued.entries().next().value as [string, ChunkTask] | undefined;
+      if (!next) return;
+      const [key, task] = next; this.queued.delete(key); this.inFlight += 1;
+      this.worker.postMessage({ kind: 'chunk', ...task });
+    }
   }
   private receive(result: WorkerResult) {
-    this.pending -= 1;
+    this.inFlight = Math.max(0, this.inFlight - 1);
     // Ignore an obsolete worker result or a result for a chunk that has been unloaded.
-    if (this.latestTask.get(result.key) !== result.id) return;
+    if (this.latestTask.get(result.key) !== result.id) { this.drain(); return; }
     this.latestTask.delete(result.key); this.requested.delete(result.key);
     const entity = new pc.Entity(`Chunk ${result.key}`); const meshes: pc.Mesh[] = [];
     const instances = result.meshes.map((part) => {
@@ -89,9 +125,27 @@ class World {
     const previous = this.chunks.get(result.key);
     if (previous) { previous.meshes.forEach((mesh) => mesh.destroy()); previous.entity.destroy(); }
     this.chunks.set(result.key, { ...result, entity, meshes });
+    this.drain();
   }
-  private unload(key: string, chunk: Chunk) { this.latestTask.delete(key); this.requested.delete(key); chunk.meshes.forEach((mesh) => mesh.destroy()); chunk.entity.destroy(); this.chunks.delete(key); }
-  private asChanges(): Change[] { return [...this.changes].map(([key, value]) => [...key.split(',').map(Number), value] as Change); }
+  private unload(key: string, chunk: Chunk) { this.cancel(key); chunk.meshes.forEach((mesh) => mesh.destroy()); chunk.entity.destroy(); this.chunks.delete(key); }
+  private cancel(key: string) { this.latestTask.delete(key); this.requested.delete(key); this.queued.delete(key); }
+  private setChange(x: number, y: number, z: number, value: number) {
+    const key = `${x},${y},${z}`; this.changes.set(key, value);
+    const owner = chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
+    const bucket = this.changesByChunk.get(owner) ?? new Map<string, Change>();
+    bucket.set(key, [x, y, z, value]); this.changesByChunk.set(owner, bucket);
+  }
+  private relevantChanges(cx: number, cy: number, cz: number): Change[] {
+    const min = [cx * CHUNK_SIZE - 1, cy * CHUNK_SIZE - 1, cz * CHUNK_SIZE - 1];
+    const max = [(cx + 1) * CHUNK_SIZE, (cy + 1) * CHUNK_SIZE, (cz + 1) * CHUNK_SIZE];
+    const changes: Change[] = [];
+    for (let y = cy - 1; y <= cy + 1; y += 1) for (let z = cz - 1; z <= cz + 1; z += 1) for (let x = cx - 1; x <= cx + 1; x += 1) {
+      this.changesByChunk.get(chunkKey(x, y, z))?.forEach((change) => {
+        if (change[0] >= min[0] && change[0] <= max[0] && change[1] >= min[1] && change[1] <= max[1] && change[2] >= min[2] && change[2] <= max[2]) changes.push(change);
+      });
+    }
+    return changes;
+  }
 }
 
 class Game {
@@ -102,18 +156,21 @@ class Game {
   private yaw = 0; private pitch = -16; private onGround = false; private chosen: number = Voxel.Dirt;
   private keys = new Set<string>(); private last = performance.now(); private frames = 0; private fps = 0;
   private store = new Store(); private seedText = '';
+  private onResize = () => this.app?.resizeCanvas();
   start(seedText: string, restore: { player: [number, number, number]; changes: Change[] } | null) {
     this.seedText = seedText;
-    this.app?.destroy(); this.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window) });
+    this.world?.dispose(); this.world = null; this.app?.destroy();
+    this.velocity.set(0, 0, 0); this.keys.clear(); this.onGround = false;
+    this.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window) });
     this.app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW); this.app.setCanvasResolution(pc.RESOLUTION_AUTO); this.app.start();
     this.app.scene.ambientLight = new pc.Color(.55, .65, .8);
     const light = new pc.Entity('Sun'); light.addComponent('light', { type: 'directional', color: new pc.Color(1, .94, .78), intensity: 1.3, castShadows: false }); light.setEulerAngles(45, -35, 0); this.app.root.addChild(light);
     this.camera = new pc.Entity('Player'); this.camera.addComponent('camera', { clearColor: new pc.Color(.48, .70, .84), fov: 72, nearClip: .05, farClip: 180 }); this.app.root.addChild(this.camera);
     const materials = new Map<number, pc.StandardMaterial>();
     Object.entries(voxelColors).forEach(([id, color]) => { const material = new pc.StandardMaterial(); material.diffuse = new pc.Color(...color); material.ambient = new pc.Color(...color); material.update(); materials.set(Number(id), material); });
-    this.world = new World(seedText, normalizeSeed(seedText), this.app, materials); restore?.changes.forEach(([x, y, z, value]) => this.world!.changes.set(`${x},${y},${z}`, value));
+    this.world = new World(seedText, normalizeSeed(seedText), this.app, materials); if (restore) this.world.restoreChanges(restore.changes);
     const p = restore?.player ?? [0, 34, 0]; this.camera.setPosition(...p); this.world.updateStreaming(this.camera.getPosition());
-    this.installInput(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', () => this.app?.resizeCanvas());
+    this.installInput(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', this.onResize);
   }
   private installInput() {
     window.onkeydown = (event) => { this.keys.add(event.code); if (/^Digit[1-4]$/.test(event.code)) { this.chosen = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand][Number(event.code[5]) - 1]; this.renderHotbar(); } };
