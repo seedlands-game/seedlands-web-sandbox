@@ -1,6 +1,7 @@
 import * as pc from 'playcanvas';
 import './style.css';
 import { CHUNK_SIZE, GENERATOR_VERSION, Voxel, baseVoxel, chunkKey, floorDiv, isSolid, mod, normalizeSeed, voxelColors, voxelIndex, voxelNames } from './voxel';
+import { macroAt, type MacroBiome } from './macro-world';
 import { decodeWorldSave, encodeWorldSave, type WorldChange } from './world-storage';
 
 type MeshPart = { voxel: number; positions: Float32Array; normals: Float32Array; indices: Uint32Array };
@@ -18,6 +19,7 @@ declare global {
   interface Window {
     __seedlandsHarness?: {
       snapshot: () => HarnessSnapshot;
+      moveTo: (x: number, z: number) => void;
     };
   }
 }
@@ -29,6 +31,65 @@ const enterButton = document.querySelector<HTMLButtonElement>('#enter')!;
 const hud = document.querySelector<HTMLElement>('#hud')!;
 const debug = document.querySelector<HTMLElement>('#debug')!;
 const hotbar = document.querySelector<HTMLElement>('#hotbar')!;
+const mapToggle = document.querySelector<HTMLButtonElement>('#map-toggle')!;
+const mapPanel = document.querySelector<HTMLElement>('#macro-map-panel')!;
+const mapClose = document.querySelector<HTMLButtonElement>('#map-close')!;
+const mapLayer = document.querySelector<HTMLSelectElement>('#map-layer')!;
+const mapCanvas = document.querySelector<HTMLCanvasElement>('#macro-map')!;
+
+type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hydrology';
+
+class MacroMapViewer {
+  private readonly context = mapCanvas.getContext('2d')!;
+  private seed = 0;
+  private renderId = 0;
+  private active = false;
+  private player: readonly [number, number] = [0, 0];
+  constructor() { mapLayer.onchange = () => this.active && this.render(); }
+  open(seed: number, player: readonly [number, number]) { this.seed = seed; this.player = player; this.active = true; mapPanel.hidden = false; this.render(); }
+  close() { this.active = false; this.renderId += 1; mapPanel.hidden = true; }
+  get isOpen() { return this.active; }
+  private render() {
+    const id = ++this.renderId;
+    const size = mapCanvas.width;
+    const image = this.context.createImageData(size, size);
+    mapPanel.dataset.status = 'sampling';
+    const layer = mapLayer.value as MapLayer;
+    let index = 0;
+    const paint = () => {
+      if (!this.active || this.renderId !== id) return;
+      const deadline = performance.now() + 8;
+      while (index < size * size && performance.now() < deadline) {
+        const px = index % size, pz = Math.floor(index / size);
+        const context = macroAt(this.seed, (px - size / 2) * 24, (pz - size / 2) * 24);
+        const [r, g, b] = this.color(context.biome, context.terrainHeight, context.temperature, context.humidity, context.hydrology.kind, context.hydrology.water, layer);
+        const offset = index * 4; image.data[offset] = r; image.data[offset + 1] = g; image.data[offset + 2] = b; image.data[offset + 3] = 255; index += 1;
+      }
+      this.context.putImageData(image, 0, 0);
+      if (index < size * size) requestAnimationFrame(paint);
+      else { this.paintPlayer(); mapPanel.dataset.status = 'ready'; }
+    };
+    requestAnimationFrame(paint);
+  }
+  private paintPlayer() {
+    const size = mapCanvas.width;
+    const x = Math.round(this.player[0] / 24 + size / 2), z = Math.round(this.player[1] / 24 + size / 2);
+    if (x < 0 || z < 0 || x >= size || z >= size) return;
+    this.context.fillStyle = '#fff'; this.context.fillRect(x - 1, z - 1, 3, 3);
+    this.context.strokeStyle = '#07101a'; this.context.strokeRect(x - 2, z - 2, 5, 5);
+  }
+  private color(biome: MacroBiome, elevation: number, temperature: number, humidity: number, hydrology: string, water: boolean, layer: MapLayer): [number, number, number] {
+    if (layer === 'biome') return ({ plains: [86, 154, 82], forest: [30, 106, 55], mountain: [112, 118, 122], dry: [196, 161, 89], cold: [215, 231, 239], wet: [47, 137, 91] } as Record<MacroBiome, [number, number, number]>)[biome];
+    if (layer === 'temperature') return [Math.round(52 + temperature * 203), Math.round(112 + (1 - temperature) * 105), Math.round(220 - temperature * 170)];
+    if (layer === 'humidity') return [Math.round(175 - humidity * 130), Math.round(92 + humidity * 132), Math.round(54 + humidity * 138)];
+    if (layer === 'hydrology') return water ? (hydrology === 'lake' ? [48, 131, 213] : [75, 177, 229]) : hydrology !== 'dry' ? [53, 103, 122] : [32, 50, 42];
+    if (water) return [56, 132, 194];
+    const light = Math.round(Math.max(0, Math.min(1, (elevation - 8) / 32)) * 170 + 42);
+    return [Math.round(light * .72), Math.round(light * .9), Math.round(light * .62)];
+  }
+}
+
+const macroMapViewer = new MacroMapViewer();
 
 class Store {
   private key = 'seedlands-world-v2';
@@ -164,6 +225,7 @@ class Game {
   private onResize = () => this.app?.resizeCanvas();
   start(seedText: string, restore: { player: [number, number, number]; changes: Change[] } | null) {
     this.seedText = seedText;
+    macroMapViewer.close();
     this.world?.dispose(); this.world = null; this.app?.destroy();
     this.velocity.set(0, 0, 0); this.keys.clear(); this.onGround = false;
     this.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window) });
@@ -175,13 +237,13 @@ class Game {
     Object.entries(voxelColors).forEach(([id, color]) => { const material = new pc.StandardMaterial(); material.diffuse = new pc.Color(...color); material.ambient = new pc.Color(...color); material.update(); materials.set(Number(id), material); });
     this.world = new World(seedText, normalizeSeed(seedText), this.app, materials); if (restore) this.world.restoreChanges(restore.changes);
     const p = restore?.player ?? [0, 34, 0]; this.camera.setPosition(...p); this.world.updateStreaming(this.camera.getPosition());
-    this.installInput(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', this.onResize);
+    this.installInput(); mapToggle.onclick = () => this.toggleMap(); mapClose.onclick = () => macroMapViewer.close(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', this.onResize);
     if (new URLSearchParams(location.search).has('harness')) {
-      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot() };
+      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot(), moveTo: (x, z) => this.moveHarnessPlayer(x, z) };
     }
   }
   private installInput() {
-    window.onkeydown = (event) => { this.keys.add(event.code); if (/^Digit[1-4]$/.test(event.code)) { this.chosen = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand][Number(event.code[5]) - 1]; this.renderHotbar(); } };
+    window.onkeydown = (event) => { if (event.code === 'KeyM') { this.toggleMap(); return; } this.keys.add(event.code); if (/^Digit[1-4]$/.test(event.code)) { this.chosen = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand][Number(event.code[5]) - 1]; this.renderHotbar(); } };
     window.onkeyup = (event) => this.keys.delete(event.code);
     canvas.oncontextmenu = (event) => event.preventDefault(); canvas.onclick = () => canvas.requestPointerLock();
     document.onmousemove = (event) => { if (document.pointerLockElement === canvas) { this.yaw -= event.movementX * .13; this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * .13)); } };
@@ -202,7 +264,9 @@ class Game {
     this.world.updateStreaming(this.camera.getPosition());
     const feetY = this.camera.getPosition().y - 1.6;
     const telemetry = this.world.telemetry;
-    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nMutations  ${this.world.changes.size}`;
+    const macro = macroAt(this.world.seed, this.camera.getPosition().x, this.camera.getPosition().z);
+    const water = macro.hydrology.kind === 'dry' ? 'dry' : `${macro.hydrology.kind}${macro.hydrology.water ? ' water' : ' bank'} (${macro.hydrology.id})`;
+    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nMutations  ${this.world.changes.size}`;
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
   }
   private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
@@ -223,6 +287,11 @@ class Game {
     if (place && this.playerOccupies(target)) return; this.world.edit(...target, place ? this.chosen : Voxel.Air); this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
   }
   private playerOccupies([x, y, z]: [number, number, number]) { const p = this.camera.getPosition(); return x + 1 > p.x - .32 && x < p.x + .32 && z + 1 > p.z - .32 && z < p.z + .32 && y + 1 > p.y - 1.6 && y < p.y + .2; }
+  private toggleMap() {
+    if (!this.world) return;
+    if (macroMapViewer.isOpen) { macroMapViewer.close(); return; }
+    const p = this.camera.getPosition(); macroMapViewer.open(this.world.seed, [p.x, p.z]);
+  }
   private harnessSnapshot(): HarnessSnapshot {
     const p = this.camera.getPosition(); const telemetry = this.world?.telemetry;
     return {
@@ -230,6 +299,10 @@ class Game {
       generationQueue: telemetry?.generationQueue ?? 0, meshingQueue: telemetry?.meshingQueue ?? 0, mutationCount: this.world?.changes.size ?? 0,
       storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
     };
+  }
+  private moveHarnessPlayer(x: number, z: number) {
+    if (!this.world) return;
+    const p = this.camera.getPosition(); this.camera.setPosition(x, p.y, z); this.world.updateStreaming(this.camera.getPosition());
   }
   private renderHotbar() { const ids = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand]; hotbar.innerHTML = ids.map((id, index) => `<div class="slot ${id === this.chosen ? 'active' : ''}">${index + 1} · ${voxelNames[id]}</div>`).join(''); }
 }

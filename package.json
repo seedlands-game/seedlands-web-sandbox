@@ -10,6 +10,7 @@
     "harness:benchmark": "node scripts/run-harness.mjs",
     "harness:baseline": "pnpm test && pnpm build && node scripts/run-harness.mjs --baseline",
     "harness:e2e": "node scripts/browser-harness.mjs",
+    "harness:macro-map": "node scripts/browser-harness.mjs --macro-map-only",
     "harness": "pnpm test && pnpm build && pnpm harness:e2e && node scripts/run-harness.mjs",
     "preview": "vite preview",
     "midscene:verify-model": "midscene model verify",

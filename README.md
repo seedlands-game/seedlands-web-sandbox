@@ -27,12 +27,13 @@ corepack pnpm preview
 | 左键 | 破坏准星指向的体素 |
 | 右键 | 放置选中的体素 |
 | 1–4 | 选择泥土、石头、原木、沙砾 |
+| M / Macro 地图按钮 | 打开或关闭全局 Macro 世界总览；可切换 elevation、biome、温度、湿度、河湖图层 |
 | Esc | 解除鼠标锁定 |
 
 ## 当前能力
 
-- Seed 驱动、坐标确定性的高度、地表、biome 与树木生成；同一 `seed + generatorVersion` 与加载顺序无关。
-- `32³` 的 `Uint16Array` Chunk 数据；基础材料包括 Grass、Dirt、Stone、Wood、Leaves、Sand、Snow 与 Air。
+- Seed 驱动、坐标确定性的 Macro Natural World：连续地理、气候、biome、语义河流与湖泊先于 Chunk 查询；同一 `seed + generatorVersion` 与加载顺序无关。
+- `32³` 的 `Uint16Array` Chunk 数据；基础材料包括 Grass、Dirt、Stone、Wood、Leaves、Sand、Snow、Water 与 Air。
 - 以玩家为中心的双层 Chunk streaming；超出缓存半径的 GPU Mesh/Chunk 会卸载，不会把探索历史永久留在内存中。
 - Worker 承担 Chunk worldgen 和 CPU greedy meshing；主线程负责 PlayCanvas GPU 上传、渲染、输入和玩家控制。
 - Mesh 以 Chunk + 材质为单位，进行不可见面剔除与贪心四边形合并，不产生逐体素 Entity / draw call。
@@ -40,11 +41,13 @@ corepack pnpm preview
 - 中央 `World.edit()` 管理所有改动，边界编辑会同时使邻居 Chunk 失效并重新网格化。
 - `localStorage` 存储 Seed、玩家位置与世界改动（procedural base + mutation delta），刷新后可继续。
 - 屏幕调试面板显示 FPS、backend、Seed、坐标、Chunk、加载数量、任务队列与 mutation 数。
+- HUD 显示当前位置的 Macro region、elevation/relief、temperature/humidity、biome 与河湖解释；全局地图总览以固定 6.1km 采样窗口直接查询 Macro fields，不生成 Chunk 或保存探索历史。
 
 ## 结构
 
 ```text
-src/voxel.ts         Voxel registry、坐标转换、确定性生成函数
+src/macro-world.ts   惰性 Macro geography、climate、biome 与 hydrology 查询
+src/voxel.ts         Voxel registry、坐标转换与 Macro 到 voxel 的具体化
 src/world-worker.ts  Chunk 填充、跨 Chunk 采样、greedy meshing
 src/main.ts          streaming、World Edit、PlayCanvas、玩家与交互、存档
 changes/<change-id>/midscene/  与 change 一起归档的视觉驱动 YAML 自动验证脚本
@@ -77,6 +80,14 @@ corepack pnpm harness:baseline
 ```
 
 该命令更新受版本控制的 `harness/baseline.json`。后续 `harness` 将以相对变化标记 5% warning、15% regression；吞吐量越高越好，其余当前指标越低越好。基准变化只报告，不自动掩盖或替代 correctness/E2E 失败。GPU 内存没有可移植的精确读数，因此报告 Node heap、voxel 与 mesh typed-array 载荷；GPU 资源是否释放仍以真实浏览器 streaming 链路和代码级 `destroy()` 生命周期为证据。
+
+只验证新增的 Macro 地图面板时可运行：
+
+```bash
+corepack pnpm harness:macro-map
+```
+
+它会打开固定 seed 世界、等待地图采样完成并切换河湖图层；结果同样写入被忽略的 `harness/results/`。
 
 ## 已知限制
 
