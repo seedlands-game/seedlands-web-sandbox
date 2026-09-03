@@ -5,6 +5,7 @@ import {
   moveHarnessPlayer,
   prepareCenterExcavation,
   prepareFlatMovement,
+  prepareStepDown,
   removeHarnessVoxel,
   snapshot,
   startHarnessWorld,
@@ -77,6 +78,23 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     const afterSpace = await waitForSnapshot(page, (current) => current.player[1] < falling.player[1] - 0.15);
     await page.keyboard.up('Space');
     expect(afterSpace.onGround).toBe(false);
+  });
+
+  test('steps down from a ledge without remaining embedded in its former surface', async ({ page }) => {
+    await startHarnessWorld(page, 'seedlands-player-collision');
+    await prepareStepDown(page);
+    const before = await snapshot(page);
+    expect(before).not.toBeNull();
+    if (!before) throw new Error('Seedlands harness snapshot is unavailable before stepping down.');
+
+    await lockPointer(page);
+    await page.keyboard.down('KeyW');
+    const after = await waitForSnapshot(
+      page,
+      (current) => current.player[2] < before.player[2] - 3 && Math.abs(current.player[1] - (before.player[1] - 1)) < 0.05,
+    );
+    await page.keyboard.up('KeyW');
+    expect(after.colliding).toBe(false);
   });
 
   test('persists a controlled world edit through the production edit and Store paths', async ({ page }) => {
