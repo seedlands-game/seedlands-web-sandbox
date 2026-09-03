@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-09-03T13:35:31.055Z",
+  "environment": {
+    "node": "v24.20.0",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "metrics": {
+    "worldgenP95Ms": 34.87170800000001,
+    "worldgenThroughputChunksPerSecond": 49.75648649512144,
+    "meshingP95Ms": 16.596499999999992,
+    "meshingThroughputChunksPerSecond": 145.25312878870733,
+    "meshVertices": 269960,
+    "meshTriangles": 134980,
+    "voxelDataBytes": 2293760,
+    "meshDataBytes": 8098800,
+    "jsHeapAfterWork": 22837936,
+    "save10000Bytes": 182912,
+    "totalBuildBytes": 1943383,
+    "jsBundleBytes": 1940135,
+    "gzipJsBundleBytes": 501844
+  }
+}

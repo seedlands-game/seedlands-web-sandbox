@@ -60,6 +60,24 @@ changes/<change-id>/midscene/  与 change 一起归档的视觉驱动 YAML 自�
 
 `corepack pnpm test` 是无需浏览器的确定性基础世界校验。Midscene 脚本会创建固定 Seed 世界，并断言 HUD、渲染后端和已加载 Chunk；其 YAML 与所属 change 同目录存放。运行结果与视觉报告写入被忽略的 `midscene_run/`，因此它是本地浏览器验证证据，不会混入源码提交。
 
+## Regression & Performance Harness
+
+完整 Harness 使用固定 seed、坐标集和操作路径，分别报告 correctness、真实 Chromium 玩法、worldgen/meshing、Node memory proxy、存档体积和生产 bundle。运行：
+
+```bash
+corepack pnpm harness
+```
+
+它会执行确定性/synthetic Chunk 测试、生产构建，以及真实浏览器的 Pointer Lock、移动/跳跃、鼠标破坏/放置、跨 Chunk streaming 与刷新恢复。浏览器用例优先使用本机 Google Chrome；若机器路径不同，可设置 `SEEDLANDS_CHROME_PATH`。最终 JSON 和 Markdown 位于被忽略的 `harness/results/`，所以每次运行只提供本机证据，不污染提交。
+
+首次或有意接受新的性能基线时运行：
+
+```bash
+corepack pnpm harness:baseline
+```
+
+该命令更新受版本控制的 `harness/baseline.json`。后续 `harness` 将以相对变化标记 5% warning、15% regression；吞吐量越高越好，其余当前指标越低越好。基准变化只报告，不自动掩盖或替代 correctness/E2E 失败。GPU 内存没有可移植的精确读数，因此报告 Node heap、voxel 与 mesh typed-array 载荷；GPU 资源是否释放仍以真实浏览器 streaming 链路和代码级 `destroy()` 生命周期为证据。
+
 ## 已知限制
 
 - 这是 Foundation P0 原型，未实现洞穴、水、光照传播、纹理图集、移动端触摸操作、Floating Origin 或远景 LOD。
