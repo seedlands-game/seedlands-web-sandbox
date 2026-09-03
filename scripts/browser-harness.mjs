@@ -75,6 +75,18 @@ try {
   assert.ok(Math.abs(afterFlatMovement.player[1] - beforeFlatMovement.player[1]) < .01, 'Player: flat movement changed the grounded camera height');
   stages.flatMovement = 'PASS';
 
+  await page.evaluate(() => window.__seedlandsHarness?.preparePartialSupport());
+  const beforePartialSupport = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  await page.waitForFunction((y) => (window.__seedlandsHarness?.snapshot().player[1] ?? Infinity) < y - .5, beforePartialSupport.player[1], { timeout: 1000 });
+  const afterPartialSupport = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  assert.equal(afterPartialSupport?.onGround, false, 'Player: a single footprint corner must not count as ground support');
+  await page.keyboard.down('Space');
+  await page.waitForTimeout(120);
+  await page.keyboard.up('Space');
+  const afterAirJump = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  assert.ok(afterAirJump && afterAirJump.player[1] < afterPartialSupport.player[1], 'Player: jump must not re-arm while falling from partial support');
+  stages.partialSupport = 'PASS';
+
   await page.mouse.move(640, 640);
   await page.waitForTimeout(150);
   await page.mouse.click(640, 360, { button: 'left' });
