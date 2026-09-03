@@ -56,7 +56,7 @@ declare global {
       removeVoxelAt: (x: number, y: number, z: number) => void;
       movePlayerTo: (x: number, y: number, z: number) => void;
       prepareFlatMovement: () => void;
-      preparePartialSupport: () => void;
+      prepareCenterExcavation: () => void;
     };
   }
 }
@@ -504,7 +504,7 @@ class Game {
         removeVoxelAt: (x, y, z) => this.removeVoxelForHarness(x, y, z),
         movePlayerTo: (x, y, z) => this.movePlayerForHarness(x, y, z),
         prepareFlatMovement: () => this.prepareFlatMovementFixture(),
-        preparePartialSupport: () => this.preparePartialSupportFixture(),
+        prepareCenterExcavation: () => this.prepareCenterExcavationFixture(),
       };
     }
   }
@@ -721,10 +721,10 @@ class Game {
     this.camera.setPosition(0.5, 58.6, 0.5);
     this.world.updateStreaming(this.camera.getPosition());
   }
-  private preparePartialSupportFixture() {
+  private prepareCenterExcavationFixture() {
     if (!this.world) return;
-    for (let x = -2; x <= 2; x += 1) for (let z = -2; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Air);
-    this.world.edit(0, 56, 0, Voxel.Stone);
+    for (let x = -2; x <= 2; x += 1) for (let z = -2; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Stone);
+    this.world.edit(0, 56, 0, Voxel.Air);
     this.keys.clear();
     this.velocity.set(0, 0, 0);
     this.onGround = false;
