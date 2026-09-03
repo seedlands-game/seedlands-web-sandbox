@@ -1,6 +1,8 @@
 # Player Support Stability
 
-**Status:** Delivered locally
+**Status:** Superseded by `2026-09-04-center-of-mass-grounding`
+
+Follow-up diagnosis showed that the 50% area threshold did not model ordinary downward excavation: removing the center-targeted voxel at an integer player coordinate leaves 75% neighboring overlap and still re-arms `onGround`. Historical validation below remains factual for the narrower one-corner fixture, but that fixture was not sufficient acceptance evidence for the reported bug.
 
 ## Context & Goal
 
