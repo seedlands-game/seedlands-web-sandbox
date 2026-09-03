@@ -1,6 +1,6 @@
 # Sync Main Macro Worldgen with Quality Architecture
 
-**Status:** Ready to merge locally
+**Status:** Complete
 
 ## Context & Goal
 
@@ -27,14 +27,14 @@
 
 - [x] 最新 main 的 Macro Worldgen 与物理修复已合并且路径边界一致。
 - [x] Vitest、static verification、生产构建与 Playwright/Harness 分别通过。
-- [ ] 本地 `main` 已包含整合提交；未执行远端 push。
+- [x] 本地 `main` 已包含整合提交；未执行远端 push。
 
 ## Tasks & Current State
 
 1. [x] 读取并确认 main 的功能/修复提交与当前架构差异。
 2. [x] 在本地整合分支提交当前质量架构：`36821fe`。
 3. [x] 合并 main、解决重组路径冲突并验证。
-4. [in progress] 提交本 change 并合入本地 main。
+4. [x] 提交本 change 并合入本地 main。
 
 ## Delivery Snapshot
 
@@ -43,4 +43,5 @@
 - `corepack pnpm build`：通过。仅有 Vite 的主 bundle 大小警告（1.95 MB，非失败）。
 - `corepack pnpm test:e2e`：Chromium 6 项通过，包括 Macro 地图、真实 Pointer Lock 输入、持久化与 streaming。
 - `corepack pnpm harness`：通过，相关浏览器回归和 benchmark 都为 `PASS`。
-- 本地整合提交与合入 main 尚待执行；没有执行远端 push。
+- 本地整合提交：`b9dcda3`（`chore: integrate main quality architecture`）；本地 `main` 已于 2026-09-03 fast-forward 至该提交。
+- 没有执行远端 push；`origin/main` 仍是合入前的 `8c8af8d`。
