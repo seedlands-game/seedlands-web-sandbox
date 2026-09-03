@@ -1,0 +1,5 @@
+version = 1
+name = "游戏Demo"
+
+[setup]
+script = "CI=true corepack pnpm install --frozen-lockfile"

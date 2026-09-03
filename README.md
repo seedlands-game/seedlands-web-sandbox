@@ -5,15 +5,15 @@
 ## 运行
 
 ```bash
-npm install
-npm run dev
+corepack pnpm install --frozen-lockfile
+corepack pnpm dev
 ```
 
 浏览器打开终端显示的本地地址。生产构建：
 
 ```bash
-npm run build
-npm run preview
+corepack pnpm build
+corepack pnpm preview
 ```
 
 ## 操作
@@ -55,10 +55,10 @@ changes/<change-id>/midscene/  与 change 一起归档的视觉驱动 YAML 自�
 本项目通过项目级 `@midscene/cli` 使用 YAML 脚本进行本地 smoke 验证。官方当前将 DeepSeek 的可用视觉模型配置为 `deepseek-v4-flash-vision-exp`，模型族为 `deepseek`。
 
 1. 将 `.env.example` 复制为 `.env`，在本地填入 `MIDSCENE_MODEL_API_KEY`；不要提交该文件。
-2. 在终端 A 启动游戏：`npm run dev -- --host 127.0.0.1`。
-3. 在终端 B 先运行 `npm run test` 与 `npm run midscene:verify-model`，再运行 `npm run midscene:smoke`。后者会显式使用 `--dotenv-override`，避免开发机已有的模型环境变量覆盖项目配置。
+2. 在终端 A 启动游戏：`corepack pnpm dev -- --host 127.0.0.1`。
+3. 在终端 B 先运行 `corepack pnpm test` 与 `corepack pnpm midscene:verify-model`，再运行 `corepack pnpm midscene:smoke`。后者会显式使用 `--dotenv-override`，避免开发机已有的模型环境变量覆盖项目配置。
 
-`npm run test` 是无需浏览器的确定性基础世界校验。Midscene 脚本会创建固定 Seed 世界，并断言 HUD、渲染后端和已加载 Chunk；其 YAML 与所属 change 同目录存放。运行结果与视觉报告写入被忽略的 `midscene_run/`，因此它是本地浏览器验证证据，不会混入源码提交。
+`corepack pnpm test` 是无需浏览器的确定性基础世界校验。Midscene 脚本会创建固定 Seed 世界，并断言 HUD、渲染后端和已加载 Chunk；其 YAML 与所属 change 同目录存放。运行结果与视觉报告写入被忽略的 `midscene_run/`，因此它是本地浏览器验证证据，不会混入源码提交。
 
 ## 已知限制
 
