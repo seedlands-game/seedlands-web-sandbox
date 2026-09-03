@@ -1,0 +1,26 @@
+ls:
+  src:
+    .dir: kebab-case
+    .ts: kebab-case
+  tests:
+    .dir: kebab-case
+    .test.ts: kebab-case
+    .spec.ts: kebab-case
+  scripts:
+    .dir: kebab-case
+    .mjs: kebab-case
+  changes/*:
+    .dir: regex:\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*
+    .md: kebab-case
+  changes/*/midscene:
+    .dir: kebab-case
+
+ignore:
+  - .git
+  - .husky
+  - .pnpm-store
+  - coverage
+  - dist
+  - harness/results
+  - midscene_run
+  - node_modules

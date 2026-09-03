@@ -15,14 +15,22 @@ export const Voxel = {
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
 
 export const voxelNames: Record<number, string> = {
-  [Voxel.Grass]: '草方块', [Voxel.Dirt]: '泥土', [Voxel.Stone]: '石头',
-  [Voxel.Wood]: '原木', [Voxel.Leaves]: '树叶', [Voxel.Sand]: '沙砾', [Voxel.Snow]: '雪',
+  [Voxel.Grass]: '草方块',
+  [Voxel.Dirt]: '泥土',
+  [Voxel.Stone]: '石头',
+  [Voxel.Wood]: '原木',
+  [Voxel.Leaves]: '树叶',
+  [Voxel.Sand]: '沙砾',
+  [Voxel.Snow]: '雪',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
-  [Voxel.Grass]: [0.25, 0.62, 0.25], [Voxel.Dirt]: [0.42, 0.25, 0.12],
-  [Voxel.Stone]: [0.45, 0.48, 0.52], [Voxel.Wood]: [0.36, 0.20, 0.08],
-  [Voxel.Leaves]: [0.12, 0.40, 0.14], [Voxel.Sand]: [0.76, 0.67, 0.43],
+  [Voxel.Grass]: [0.25, 0.62, 0.25],
+  [Voxel.Dirt]: [0.42, 0.25, 0.12],
+  [Voxel.Stone]: [0.45, 0.48, 0.52],
+  [Voxel.Wood]: [0.36, 0.2, 0.08],
+  [Voxel.Leaves]: [0.12, 0.4, 0.14],
+  [Voxel.Sand]: [0.76, 0.67, 0.43],
   [Voxel.Snow]: [0.9, 0.95, 1],
 };
 
@@ -48,19 +56,19 @@ export function normalizeSeed(raw: string): number {
 
 export function terrainHeight(seed: number, x: number, z: number): number {
   const broad = Math.sin((x + seed * 0.0001) * 0.028) * 5 + Math.cos((z - seed * 0.0002) * 0.024) * 4;
-  const detail = Math.sin(x * 0.113 + z * 0.071) * 1.7 + (hash2(seed, x, z) - .5) * 2;
+  const detail = Math.sin(x * 0.113 + z * 0.071) * 1.7 + (hash2(seed, x, z) - 0.5) * 2;
   return Math.floor(18 + broad + detail);
 }
 
 export function biome(seed: number, x: number, z: number): 'plains' | 'desert' | 'alpine' {
   const v = hash2(seed ^ 0x9e3779b9, floorDiv(x, 14), floorDiv(z, 14));
-  if (v < .20) return 'desert';
-  if (v > .83 || terrainHeight(seed, x, z) > 25) return 'alpine';
+  if (v < 0.2) return 'desert';
+  if (v > 0.83 || terrainHeight(seed, x, z) > 25) return 'alpine';
   return 'plains';
 }
 
 function isTreeOrigin(seed: number, x: number, z: number): boolean {
-  return biome(seed, x, z) === 'plains' && hash2(seed ^ 0x44af, x, z) > .985 && terrainHeight(seed, x, z) >= 15;
+  return biome(seed, x, z) === 'plains' && hash2(seed ^ 0x44af, x, z) > 0.985 && terrainHeight(seed, x, z) >= 15;
 }
 
 export function baseVoxel(seed: number, x: number, y: number, z: number): VoxelId {
@@ -72,12 +80,14 @@ export function baseVoxel(seed: number, x: number, y: number, z: number): VoxelI
     return Voxel.Stone;
   }
   // A feature can be sampled locally from nearby deterministic anchor points.
-  for (let tx = x - 3; tx <= x + 3; tx += 1) for (let tz = z - 3; tz <= z + 3; tz += 1) {
-    if (!isTreeOrigin(seed, tx, tz)) continue;
-    const th = terrainHeight(seed, tx, tz);
-    if (x === tx && z === tz && y > th && y <= th + 4) return Voxel.Wood;
-    const dx = Math.abs(x - tx), dz = Math.abs(z - tz);
-    if (dx <= 2 && dz <= 2 && y >= th + 3 && y <= th + 6 && (dx + dz < 4 || y >= th + 5)) return Voxel.Leaves;
-  }
+  for (let tx = x - 3; tx <= x + 3; tx += 1)
+    for (let tz = z - 3; tz <= z + 3; tz += 1) {
+      if (!isTreeOrigin(seed, tx, tz)) continue;
+      const th = terrainHeight(seed, tx, tz);
+      if (x === tx && z === tz && y > th && y <= th + 4) return Voxel.Wood;
+      const dx = Math.abs(x - tx),
+        dz = Math.abs(z - tz);
+      if (dx <= 2 && dz <= 2 && y >= th + 3 && y <= th + 6 && (dx + dz < 4 || y >= th + 5)) return Voxel.Leaves;
+    }
   return Voxel.Air;
 }

@@ -1,0 +1,9 @@
+.git
+.husky/_
+.pnpm-store
+coverage
+dist
+harness/results
+midscene_run
+node_modules
+pnpm-lock.yaml

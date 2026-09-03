@@ -1,0 +1,26 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "复核确定性 Playwright、Midscene 语义验收和 CDP fallback 的分层及测试资产目录方案。",
+  "evidence": [
+    "当前确定性浏览器自动化位于 scripts/browser-harness.mjs，由 harness:e2e 调用。",
+    "Midscene YAML 已按 change 目录归属，现有入口只运行 foundation smoke。",
+    "仓库当前没有 Playwright config 或独立 E2E 测试目录。",
+    "用户提议 Playwright 负责确定性回归和 benchmark，Midscene 负责需求端到端用例。"
+  ],
+  "necessary_paths": [
+    "package.json",
+    "scripts/browser-harness.mjs",
+    "README.md",
+    "AGENTS.md",
+    "changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml"
+  ],
+  "output_limit": { "max_characters": 1200 },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}

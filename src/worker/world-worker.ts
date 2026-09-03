@@ -1,5 +1,5 @@
-import { chunkKey } from './voxel';
-import { makeChunk, meshChunk, type WorldChange } from './world-mesh';
+import { chunkKey } from '../world/voxel';
+import { makeChunk, meshChunk, type WorldChange } from '../world/mesh';
 
 type Task = { kind: 'chunk'; id: number; seed: number; cx: number; cy: number; cz: number; changes: WorldChange[] };
 

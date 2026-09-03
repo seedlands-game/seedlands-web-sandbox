@@ -5,23 +5,55 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "test": "node scripts/verify-voxel.mjs",
+    "build": "pnpm typecheck && vite build",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint .",
+    "lint:paths": "ls-lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:regression": "playwright test tests/e2e/regression",
+    "test:e2e:benchmark": "playwright test tests/e2e/benchmark",
+    "verify:static": "pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage && pnpm typecheck",
     "harness:benchmark": "node scripts/run-harness.mjs",
     "harness:baseline": "pnpm test && pnpm build && node scripts/run-harness.mjs --baseline",
-    "harness:e2e": "node scripts/browser-harness.mjs",
-    "harness": "pnpm test && pnpm build && pnpm harness:e2e && node scripts/run-harness.mjs",
+    "harness:e2e": "node scripts/run-playwright-harness.mjs",
+    "harness": "pnpm test && pnpm build && node scripts/run-playwright-harness.mjs --aggregate",
     "preview": "vite preview",
     "midscene:verify-model": "midscene model verify",
-    "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json"
+    "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json",
+    "prepare": "husky"
   },
   "dependencies": {
     "playcanvas": "^2.21.4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@eslint/js": "^10.0.1",
+    "@ls-lint/ls-lint": "2.3.1",
     "@midscene/cli": "^1.12.3",
+    "@playwright/test": "1.62.1",
+    "@types/node": "26.4.1",
+    "@vitest/coverage-v8": "^4.1.11",
+    "eslint": "^10.9.1",
+    "globals": "^17.12.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.4.1",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3",
-    "vite": "^7.3.6"
+    "typescript-eslint": "^8.69.0",
+    "vite": "^7.3.6",
+    "vitest": "^4.1.11"
+  },
+  "lint-staged": {
+    "*.{ts,mts,cts,js,mjs,cjs}": [
+      "prettier --check",
+      "eslint"
+    ],
+    "*.{json,css,md,yml,yaml}": "prettier --check"
   },
   "packageManager": "pnpm@11.25.0+sha512.5cde925b4f075f725eb71fbae18a42ffe784524789f19b61c731cb8721ec28aaee160e01a8d5af4fedb2a42cdbf300efe23db356b0d4a17b4d63e11f8ab7c956"
 }
