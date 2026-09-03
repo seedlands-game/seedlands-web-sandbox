@@ -1,6 +1,6 @@
 # Automate Change Commit and Push
 
-**Status:** Delivered locally; push blocked
+**Status:** Delivered locally; push blocked (no remote)
 
 ## Context & Goal
 
@@ -24,15 +24,17 @@
 ## Acceptance & Evidence
 
 - [x] `AGENTS.md` 写明自动 commit/push 与无远端例外。
-- [pending] 已完成 changes 已按语义提交。
-- [pending] 远端/upstream 状态已读取并回填。
+- [x] 已完成 changes 已按语义提交：`f90f1b5`、`365e681`。
+- [x] 已读取远端/upstream：当前仓库未配置任何 remote。
 
 ## Tasks & Current State
 
 1. [done] 写入仓库规则。
-2. [in progress] 提交当前已完成 changes。
-3. [pending] 推送或记录外部阻塞。
+2. [done] 提交当前已完成 changes。
+3. [done] 记录外部阻塞。
 
 ## Delivery Snapshot
 
-Pending Git preflight and commit.
+Local commits: `f90f1b5 chore: establish change delivery workflow`; `365e681 feat: harden voxel streaming and validation`.
+
+Push blocked: `git remote -v` 无输出，当前 `main` 没有 upstream。最小下一步是用户明确提供或授权创建 GitHub 私有仓库的账户与仓库名；随后为 `main` 设置 `origin` 并推送。
