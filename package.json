@@ -7,6 +7,10 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "test": "node scripts/verify-voxel.mjs",
+    "harness:benchmark": "node scripts/run-harness.mjs",
+    "harness:baseline": "pnpm test && pnpm build && node scripts/run-harness.mjs --baseline",
+    "harness:e2e": "node scripts/browser-harness.mjs",
+    "harness": "pnpm test && pnpm build && pnpm harness:e2e && node scripts/run-harness.mjs",
     "preview": "vite preview",
     "midscene:verify-model": "midscene model verify",
     "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json"

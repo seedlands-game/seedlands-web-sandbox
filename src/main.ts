@@ -1,12 +1,26 @@
 import * as pc from 'playcanvas';
 import './style.css';
 import { CHUNK_SIZE, GENERATOR_VERSION, Voxel, baseVoxel, chunkKey, floorDiv, isSolid, mod, normalizeSeed, voxelColors, voxelIndex, voxelNames } from './voxel';
+import { decodeWorldSave, encodeWorldSave, type WorldChange } from './world-storage';
 
 type MeshPart = { voxel: number; positions: Float32Array; normals: Float32Array; indices: Uint32Array };
 type WorkerResult = { id: number; key: string; cx: number; cy: number; cz: number; data: Uint16Array; meshes: MeshPart[] };
 type Chunk = { cx: number; cy: number; cz: number; data: Uint16Array; entity: pc.Entity; meshes: pc.Mesh[] };
-type Change = [number, number, number, number];
+type Change = WorldChange;
 type ChunkTask = { id: number; seed: number; cx: number; cy: number; cz: number; changes: Change[] };
+
+type HarnessSnapshot = {
+  frameMs: number; player: [number, number, number]; loadedChunks: number; renderedChunks: number;
+  generationQueue: number; meshingQueue: number; mutationCount: number; storageBytes: number;
+};
+
+declare global {
+  interface Window {
+    __seedlandsHarness?: {
+      snapshot: () => HarnessSnapshot;
+    };
+  }
+}
 
 const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
 const startCard = document.querySelector<HTMLElement>('#start-card')!;
@@ -17,24 +31,11 @@ const debug = document.querySelector<HTMLElement>('#debug')!;
 const hotbar = document.querySelector<HTMLElement>('#hotbar')!;
 
 class Store {
-  private key = 'seedlands-world-v1';
-  load(): { seed: string; player: [number, number, number]; changes: Change[] } | null {
-    try {
-      const saved: unknown = JSON.parse(localStorage.getItem(this.key) ?? 'null');
-      if (!saved || typeof saved !== 'object') return null;
-      const record = saved as Record<string, unknown>;
-      if (typeof record.seed !== 'string' || !Array.isArray(record.player) || record.player.length !== 3 || !record.player.every(Number.isFinite)) return null;
-      if (!Array.isArray(record.changes)) return null;
-      const changes: Change[] = [];
-      for (const change of record.changes) {
-        if (!Array.isArray(change) || change.length !== 4 || !change.every(Number.isInteger)) return null;
-        changes.push([change[0], change[1], change[2], change[3]]);
-      }
-      return { seed: record.seed, player: [record.player[0], record.player[1], record.player[2]], changes };
-    } catch { return null; }
-  }
+  private key = 'seedlands-world-v2';
+  load() { return decodeWorldSave(localStorage.getItem(this.key)); }
   save(seed: string, player: pc.Vec3, changes: Map<string, number>) {
-    localStorage.setItem(this.key, JSON.stringify({ seed, player: [player.x, player.y, player.z], changes: [...changes].map(([key, value]) => [...key.split(',').map(Number), value]) }));
+    const entries = [...changes].map(([key, value]) => [...key.split(',').map(Number), value] as Change);
+    localStorage.setItem(this.key, encodeWorldSave(seed, [player.x, player.y, player.z], entries));
   }
 }
 
@@ -54,6 +55,9 @@ class World {
     this.worker.onmessage = (event: MessageEvent<WorkerResult>) => this.receive(event.data);
   }
   get queueSize() { return this.inFlight + this.queued.size; }
+  get telemetry() {
+    return { loadedChunks: this.chunks.size, renderedChunks: this.chunks.size, generationQueue: this.queued.size, meshingQueue: this.inFlight };
+  }
   restoreChanges(changes: Change[]) { changes.forEach(([x, y, z, value]) => this.setChange(x, y, z, value)); }
   dispose() {
     this.worker.terminate();
@@ -155,6 +159,7 @@ class Game {
   private velocity = new pc.Vec3();
   private yaw = 0; private pitch = -16; private onGround = false; private chosen: number = Voxel.Dirt;
   private keys = new Set<string>(); private last = performance.now(); private frames = 0; private fps = 0;
+  private frameMs = 0;
   private store = new Store(); private seedText = '';
   private onResize = () => this.app?.resizeCanvas();
   start(seedText: string, restore: { player: [number, number, number]; changes: Change[] } | null) {
@@ -171,6 +176,9 @@ class Game {
     this.world = new World(seedText, normalizeSeed(seedText), this.app, materials); if (restore) this.world.restoreChanges(restore.changes);
     const p = restore?.player ?? [0, 34, 0]; this.camera.setPosition(...p); this.world.updateStreaming(this.camera.getPosition());
     this.installInput(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', this.onResize);
+    if (new URLSearchParams(location.search).has('harness')) {
+      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot() };
+    }
   }
   private installInput() {
     window.onkeydown = (event) => { this.keys.add(event.code); if (/^Digit[1-4]$/.test(event.code)) { this.chosen = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand][Number(event.code[5]) - 1]; this.renderHotbar(); } };
@@ -181,6 +189,7 @@ class Game {
   }
   private update(dt: number) {
     if (!this.world) return;
+    this.frameMs = dt * 1000;
     this.frames += 1; const now = performance.now(); if (now - this.last > 500) { this.fps = this.frames * 1000 / (now - this.last); this.frames = 0; this.last = now; }
     // Let the engine be the sole source of truth for camera orientation and movement axes.
     this.camera.setEulerAngles(this.pitch, this.yaw, 0);
@@ -192,7 +201,8 @@ class Game {
     this.moveAxis('x', this.velocity.x * dt); this.moveAxis('z', this.velocity.z * dt); this.onGround = false; this.moveAxis('y', this.velocity.y * dt);
     this.world.updateStreaming(this.camera.getPosition());
     const feetY = this.camera.getPosition().y - 1.6;
-    debug.textContent = `FPS  ${this.fps.toFixed(0)}\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nLoaded  ${this.world.chunks.size} · Queue ${this.world.queueSize}\nMutations  ${this.world.changes.size}`;
+    const telemetry = this.world.telemetry;
+    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nMutations  ${this.world.changes.size}`;
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
   }
   private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
@@ -213,6 +223,14 @@ class Game {
     if (place && this.playerOccupies(target)) return; this.world.edit(...target, place ? this.chosen : Voxel.Air); this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
   }
   private playerOccupies([x, y, z]: [number, number, number]) { const p = this.camera.getPosition(); return x + 1 > p.x - .32 && x < p.x + .32 && z + 1 > p.z - .32 && z < p.z + .32 && y + 1 > p.y - 1.6 && y < p.y + .2; }
+  private harnessSnapshot(): HarnessSnapshot {
+    const p = this.camera.getPosition(); const telemetry = this.world?.telemetry;
+    return {
+      frameMs: this.frameMs, player: [p.x, p.y, p.z], loadedChunks: telemetry?.loadedChunks ?? 0, renderedChunks: telemetry?.renderedChunks ?? 0,
+      generationQueue: telemetry?.generationQueue ?? 0, meshingQueue: telemetry?.meshingQueue ?? 0, mutationCount: this.world?.changes.size ?? 0,
+      storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
+    };
+  }
   private renderHotbar() { const ids = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand]; hotbar.innerHTML = ids.map((id, index) => `<div class="slot ${id === this.chosen ? 'active' : ''}">${index + 1} · ${voxelNames[id]}</div>`).join(''); }
 }
 
