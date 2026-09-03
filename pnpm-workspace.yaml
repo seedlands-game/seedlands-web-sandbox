@@ -1,0 +1,6 @@
+allowBuilds:
+  '@ffmpeg-installer/darwin-arm64': true
+  esbuild: true
+  node-mac-permissions: true
+  puppeteer: true
+  sharp: true
