@@ -1,6 +1,6 @@
 # Macro Worldgen
 
-**Status:** Delivered
+**Status:** Delivered locally; remote push pending explicit authorization
 
 ## Context & Goal
 
@@ -69,7 +69,7 @@ Macro Region 固定为 256m（8 x 8 Chunk），仅作为自然场的查询/解�
 1. [done] 读取需求、现有实现和已有 Harness，形成 Macro 模型设计。
 2. [done] 用户已于本会话准出设计。
 3. [done] 实现 Macro 查询、Chunk realization、可观测性与验证。
-4. [in_progress] 完成准出、回填证据；仅提交本 change 文件并按配置 upstream 推送。
+4. [blocked] 本地提交已完成；向 `origin` 推送需要用户针对 GitHub 外发的明确授权。
 
 ## Delivery Snapshot
 
@@ -79,4 +79,6 @@ Validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm build` p
 
 Final local Harness: Macro p95 `0.037 ms` (65,692 queries/s; signature `f3ef5cb5`), Chunk worldgen p95 `66.07 ms`, meshing p95 `25.15 ms`. These are machine-local baseline measurements, not a cross-device guarantee. Production bundle remains above Vite's 500 kB compressed warning threshold (`502.70 kB` gzip); this change does not alter bundling scope.
 
-Git: implemented on `codex/macro-worldgen`, based on `f9cf9f6`; final commit and configured-upstream push follow this completed record.
+Git: implemented on `codex/macro-worldgen`, based on `f9cf9f6`; implementation commit `0da6391` (`feat: add macro worldgen`).
+
+Push: 未执行。已配置目标为 `origin`（GitHub）；本地推送请求被安全策略拒绝，未有源码或文档外发。最小下一步是用户明确授权将该分支推送至该目标。
