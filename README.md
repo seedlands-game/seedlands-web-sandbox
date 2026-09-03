@@ -18,16 +18,16 @@ corepack pnpm preview
 
 ## 操作
 
-| 输入 | 行为 |
-| --- | --- |
-| 鼠标点击画面 | 锁定鼠标并开始视角控制 |
-| WASD | 移动 |
-| 鼠标 | 观察 |
-| 空格 | 跳跃 |
-| 左键 | 破坏准星指向的体素 |
-| 右键 | 放置选中的体素 |
-| 1–4 | 选择泥土、石头、原木、沙砾 |
-| Esc | 解除鼠标锁定 |
+| 输入         | 行为                       |
+| ------------ | -------------------------- |
+| 鼠标点击画面 | 锁定鼠标并开始视角控制     |
+| WASD         | 移动                       |
+| 鼠标         | 观察                       |
+| 空格         | 跳跃                       |
+| 左键         | 破坏准星指向的体素         |
+| 右键         | 放置选中的体素             |
+| 1–4          | 选择泥土、石头、原木、沙砾 |
+| Esc          | 解除鼠标锁定               |
 
 ## 当前能力
 
@@ -44,31 +44,58 @@ corepack pnpm preview
 ## 结构
 
 ```text
-src/voxel.ts         Voxel registry、坐标转换、确定性生成函数
-src/world-worker.ts  Chunk 填充、跨 Chunk 采样、greedy meshing
-src/main.ts          streaming、World Edit、PlayCanvas、玩家与交互、存档
+src/app/             浏览器启动、PlayCanvas 生命周期、输入、UI 与样式
+src/world/           无 UI 依赖的 voxel、Chunk mesh 与存档纯逻辑
+src/worker/          Worker 入口及 world 数据传输
+tests/world/         `src/world/` 的 Vitest 单测
+tests/e2e/           Playwright 的确定性浏览器回归、性能样本与共享支持代码
+scripts/             Harness 和本地工程脚本
 changes/<change-id>/midscene/  与 change 一起归档的视觉驱动 YAML 自动验证脚本
 ```
+
+## 静态质量检查
+
+```bash
+corepack pnpm format:check  # Prettier 只读格式检查
+corepack pnpm lint          # ESLint：TS、Node 脚本与运行时 globals
+corepack pnpm lint:paths    # ls-lint：受控目录和文件命名
+corepack pnpm test:coverage # Vitest V8：仅 src/world/，行覆盖率至少 80%
+corepack pnpm verify:static # 上述静态检查的组合入口
+```
+
+`src/world/` 不依赖 DOM、PlayCanvas 或 Web Worker，因而可由 Node/Vitest 可靠验证；当前 coverage 会生成本地 `coverage/` 报告，不纳入版本控制。`src/app/` 和 `src/worker/` 的实际运行时行为由 Playwright、Harness 与 Midscene 分别证明。
+
+依赖安装会启用 Husky。pre-commit 只检查暂存文件的格式与 ESLint，并运行快速的目录规则；commit-msg 接受 `feat`、`fix`、`refactor`、`test`、`docs`、`chore`、`ci`、`build` 前缀及可选 scope，不强制 Conventional Commits 的 body、footer 或 breaking-change 结构。
 
 ## Midscene 视觉自动验证
 
 本项目通过项目级 `@midscene/cli` 使用 YAML 脚本进行本地 smoke 验证。官方当前将 DeepSeek 的可用视觉模型配置为 `deepseek-v4-flash-vision-exp`，模型族为 `deepseek`。
 
 1. 将 `.env.example` 复制为 `.env`，在本地填入 `MIDSCENE_MODEL_API_KEY`；不要提交该文件。
-2. 在终端 A 启动游戏：`corepack pnpm dev -- --host 127.0.0.1`。
+2. 在终端 A 启动游戏：`corepack pnpm exec vite --host 127.0.0.1`。
 3. 在终端 B 先运行 `corepack pnpm test` 与 `corepack pnpm midscene:verify-model`，再运行 `corepack pnpm midscene:smoke`。后者会显式使用 `--dotenv-override`，避免开发机已有的模型环境变量覆盖项目配置。
 
-`corepack pnpm test` 是无需浏览器的确定性基础世界校验。Midscene 脚本会创建固定 Seed 世界，并断言 HUD、渲染后端和已加载 Chunk；其 YAML 与所属 change 同目录存放。运行结果与视觉报告写入被忽略的 `midscene_run/`，因此它是本地浏览器验证证据，不会混入源码提交。
+`corepack pnpm test` 使用 Vitest 在 Node 环境运行 `tests/world/**/*.test.ts`，覆盖无需 UI 的坐标/体素注册、确定性世界生成、Chunk 网格与存档编解码。开发时可运行 `corepack pnpm test:watch`。它不加载 DOM、PlayCanvas 或 Web Worker，因此通过结果只证明纯逻辑；Midscene 与 Harness 仍负责真实浏览器交互、渲染和 Worker 链路。Midscene 脚本会创建固定 Seed 世界，并断言 HUD、渲染后端和已加载 Chunk；其 YAML 与所属 change 同目录存放。运行结果与视觉报告写入被忽略的 `midscene_run/`，因此它是本地浏览器验证证据，不会混入源码提交。
+
+## Playwright 确定性浏览器测试
+
+```bash
+corepack pnpm test:e2e             # Chromium：回归与环境标记的浏览器样本
+corepack pnpm test:e2e:regression  # 固定功能回归
+corepack pnpm test:e2e:benchmark   # 非跨机器门禁的浏览器性能样本
+```
+
+Playwright 用于固定 seed 的功能回归、输入链路和可重复的浏览器样本；其用例位于 `tests/e2e/`，并以单 worker 运行，避免 benchmark 与回归争用同一浏览器资源。默认使用 Chromium：CI 应先执行 `corepack pnpm exec playwright install --with-deps chromium`，本机若需指定浏览器则设置 `SEEDLANDS_CHROME_PATH`。`?harness=1` 的受控入口仅用于确定性 world 编辑与 streaming 状态，并继续调用生产 `World.edit()`、Store 与 `updateStreaming()`；真实键鼠输入另有独立 Playwright 覆盖。Midscene 仍仅承担 change 内 YAML 的用户旅程与语义/视觉验收；可以稳定程序化验证的规则应迁移为 Playwright 回归，而不长期重复两套断言。
 
 ## Regression & Performance Harness
 
-完整 Harness 使用固定 seed、坐标集和操作路径，分别报告 correctness、真实 Chromium 玩法、worldgen/meshing、Node memory proxy、存档体积和生产 bundle。运行：
+完整 Harness 使用固定 seed、坐标集和操作路径，分别报告 correctness、真实 Chromium 玩法、环境关联的浏览器样本、worldgen/meshing、Node memory proxy、存档体积和生产 bundle。运行：
 
 ```bash
 corepack pnpm harness
 ```
 
-它会执行确定性/synthetic Chunk 测试、生产构建，以及真实浏览器的 Pointer Lock、移动/跳跃、鼠标破坏/放置、跨 Chunk streaming 与刷新恢复。浏览器用例优先使用本机 Google Chrome；若机器路径不同，可设置 `SEEDLANDS_CHROME_PATH`。最终 JSON 和 Markdown 位于被忽略的 `harness/results/`，所以每次运行只提供本机证据，不污染提交。
+它会执行确定性/synthetic Chunk 测试、生产构建，以及真实浏览器的 Pointer Lock、移动/跳跃、鼠标破坏/放置、跨 Chunk streaming 与刷新恢复。浏览器结果只在 run id、source SHA 与环境元数据均匹配时才会被汇总，不能将遗留 `browser-e2e.json` 当作本次证据。最终 JSON 和 Markdown 位于被忽略的 `harness/results/`，所以每次运行只提供本机证据，不污染提交。
 
 首次或有意接受新的性能基线时运行：
 
