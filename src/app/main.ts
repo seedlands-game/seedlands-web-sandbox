@@ -56,6 +56,7 @@ declare global {
       removeVoxelAt: (x: number, y: number, z: number) => void;
       movePlayerTo: (x: number, y: number, z: number) => void;
       prepareFlatMovement: () => void;
+      preparePartialSupport: () => void;
     };
   }
 }
@@ -503,6 +504,7 @@ class Game {
         removeVoxelAt: (x, y, z) => this.removeVoxelForHarness(x, y, z),
         movePlayerTo: (x, y, z) => this.movePlayerForHarness(x, y, z),
         prepareFlatMovement: () => this.prepareFlatMovementFixture(),
+        preparePartialSupport: () => this.preparePartialSupportFixture(),
       };
     }
   }
@@ -585,7 +587,7 @@ class Game {
     (p as unknown as Record<string, number>)[axis] += amount;
     if (axis === 'y') {
       const collisionY = amount < 0 ? Math.floor(p.y - PLAYER_FEET_OFFSET) : Math.floor(p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON);
-      const blocked = this.collidesAtY(p, collisionY);
+      const blocked = amount < 0 ? this.hasGroundSupport(p, collisionY) : this.collidesAtY(p, collisionY);
       if (blocked) {
         p.set(p.x, amount < 0 ? collisionY + 1 + PLAYER_FEET_OFFSET : collisionY - PLAYER_HEAD_OFFSET, p.z);
         if (amount < 0) this.onGround = true;
@@ -608,6 +610,23 @@ class Game {
       for (const z of [p.z - PLAYER_HALF_WIDTH, p.z + PLAYER_HALF_WIDTH])
         if (isSolid(this.world.getVoxel(Math.floor(x), y, Math.floor(z)))) return true;
     return false;
+  }
+  private hasGroundSupport(p: pc.Vec3, y: number): boolean {
+    if (!this.world) return false;
+    const minX = p.x - PLAYER_HALF_WIDTH;
+    const maxX = p.x + PLAYER_HALF_WIDTH;
+    const minZ = p.z - PLAYER_HALF_WIDTH;
+    const maxZ = p.z + PLAYER_HALF_WIDTH;
+    let supportedArea = 0;
+    for (let x = Math.floor(minX); x <= Math.floor(maxX - COLLISION_EPSILON); x += 1) {
+      const overlapX = Math.min(maxX, x + 1) - Math.max(minX, x);
+      for (let z = Math.floor(minZ); z <= Math.floor(maxZ - COLLISION_EPSILON); z += 1) {
+        if (isSolid(this.world.getVoxel(x, y, z))) {
+          supportedArea += overlapX * (Math.min(maxZ, z + 1) - Math.max(minZ, z));
+        }
+      }
+    }
+    return supportedArea >= (PLAYER_HALF_WIDTH * 2) ** 2 / 2;
   }
   private interact(place: boolean) {
     this.interactionAttempts += 1;
@@ -700,6 +719,16 @@ class Game {
     this.velocity.set(0, 0, 0);
     this.onGround = true;
     this.camera.setPosition(0.5, 58.6, 0.5);
+    this.world.updateStreaming(this.camera.getPosition());
+  }
+  private preparePartialSupportFixture() {
+    if (!this.world) return;
+    for (let x = -2; x <= 2; x += 1) for (let z = -2; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Air);
+    this.world.edit(0, 56, 0, Voxel.Stone);
+    this.keys.clear();
+    this.velocity.set(0, 0, 0);
+    this.onGround = false;
+    this.camera.setPosition(0, 58.6, 0);
     this.world.updateStreaming(this.camera.getPosition());
   }
   private queueSave() {
