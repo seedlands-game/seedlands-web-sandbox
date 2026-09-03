@@ -23,6 +23,7 @@ declare global {
       burstEdits: () => void;
       prepareFlatMovement: () => void;
       prepareCenterExcavation: () => void;
+      prepareStepDown: () => void;
     };
   }
 }
@@ -258,7 +259,7 @@ class Game {
     const p = restore?.player ?? [0, 34, 0]; this.camera.setPosition(...p); this.world.updateStreaming(this.camera.getPosition());
     this.installInput(); mapToggle.onclick = () => this.toggleMap(); mapClose.onclick = () => macroMapViewer.close(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', this.onResize); window.onpagehide = () => this.flushSave();
     if (new URLSearchParams(location.search).has('harness')) {
-      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot(), moveTo: (x, z) => this.moveHarnessPlayer(x, z), burstEdits: () => this.burstHarnessEdits(), prepareFlatMovement: () => this.prepareFlatMovementFixture(), prepareCenterExcavation: () => this.prepareCenterExcavationFixture() };
+      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot(), moveTo: (x, z) => this.moveHarnessPlayer(x, z), burstEdits: () => this.burstHarnessEdits(), prepareFlatMovement: () => this.prepareFlatMovementFixture(), prepareCenterExcavation: () => this.prepareCenterExcavationFixture(), prepareStepDown: () => this.prepareStepDownFixture() };
     }
   }
   private installInput() {
@@ -289,18 +290,39 @@ class Game {
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
   }
   private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
-    if (!this.world || amount === 0) return; const p = this.camera.getPosition(); (p as unknown as Record<string, number>)[axis] += amount;
+    if (!this.world || amount === 0) return;
+    const p = this.camera.getPosition();
+    const previousOverlap = axis === 'y' ? 0 : this.collisionOverlap(p);
+    (p as unknown as Record<string, number>)[axis] += amount;
     if (axis === 'y') {
       const collisionY = amount < 0 ? Math.floor(p.y - PLAYER_FEET_OFFSET) : Math.floor(p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON);
       const blocked = amount < 0 ? this.hasGroundSupport(p, collisionY) : this.collidesAtY(p, collisionY);
       if (blocked) { p.set(p.x, amount < 0 ? collisionY + 1 + PLAYER_FEET_OFFSET : collisionY - PLAYER_HEAD_OFFSET, p.z); if (amount < 0) this.onGround = true; this.velocity.y = 0; }
-    } else if (this.collides(p)) (p as unknown as Record<string, number>)[axis] -= amount;
+    } else {
+      const nextOverlap = this.collisionOverlap(p);
+      if (nextOverlap > 0 && nextOverlap >= previousOverlap) (p as unknown as Record<string, number>)[axis] -= amount;
+    }
     this.camera.setPosition(p);
   }
   private collides(p: pc.Vec3): boolean {
-    if (!this.world) return false;
-    for (const x of [p.x - PLAYER_HALF_WIDTH, p.x + PLAYER_HALF_WIDTH]) for (const z of [p.z - PLAYER_HALF_WIDTH, p.z + PLAYER_HALF_WIDTH]) for (const y of [p.y - PLAYER_FEET_OFFSET + COLLISION_EPSILON, p.y - .7, p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON]) if (isSolid(this.world.getVoxel(Math.floor(x), Math.floor(y), Math.floor(z)))) return true;
-    return false;
+    return this.collisionOverlap(p) > 0;
+  }
+  private collisionOverlap(p: pc.Vec3): number {
+    if (!this.world) return 0;
+    const minX = p.x - PLAYER_HALF_WIDTH, maxX = p.x + PLAYER_HALF_WIDTH;
+    const minY = p.y - PLAYER_FEET_OFFSET + COLLISION_EPSILON, maxY = p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON;
+    const minZ = p.z - PLAYER_HALF_WIDTH, maxZ = p.z + PLAYER_HALF_WIDTH;
+    let overlap = 0;
+    for (let x = Math.floor(minX); x <= Math.floor(maxX - COLLISION_EPSILON); x += 1) {
+      const overlapX = Math.min(maxX, x + 1) - Math.max(minX, x);
+      for (let y = Math.floor(minY); y <= Math.floor(maxY - COLLISION_EPSILON); y += 1) {
+        const overlapY = Math.min(maxY, y + 1) - Math.max(minY, y);
+        for (let z = Math.floor(minZ); z <= Math.floor(maxZ - COLLISION_EPSILON); z += 1) {
+          if (isSolid(this.world.getVoxel(x, y, z))) overlap += overlapX * overlapY * (Math.min(maxZ, z + 1) - Math.max(minZ, z));
+        }
+      }
+    }
+    return overlap;
   }
   private collidesAtY(p: pc.Vec3, y: number): boolean {
     if (!this.world) return false;
@@ -353,6 +375,15 @@ class Game {
     this.world.edit(0, 56, 0, Voxel.Air);
     this.keys.clear(); this.velocity.set(0, 0, 0); this.onGround = false;
     this.camera.setPosition(0, 58.6, 0); this.world.updateStreaming(this.camera.getPosition());
+  }
+  private prepareStepDownFixture() {
+    if (!this.world) return;
+    for (let x = -2; x <= 2; x += 1) for (let z = -8; z <= 2; z += 1) {
+      this.world.edit(x, 55, z, Voxel.Stone);
+      this.world.edit(x, 56, z, z >= 0 ? Voxel.Stone : Voxel.Air);
+    }
+    this.keys.clear(); this.velocity.set(0, 0, 0); this.onGround = true;
+    this.camera.setPosition(.5, 58.6, .5); this.world.updateStreaming(this.camera.getPosition());
   }
   private queueSave() {
     if (this.saveTimer !== null) return;

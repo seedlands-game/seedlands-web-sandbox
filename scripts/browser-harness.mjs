@@ -88,6 +88,17 @@ try {
   assert.ok(afterCenterAirJump && afterCenterAirJump.player[1] < afterCenterExcavation.player[1], 'Player: surrounding footprint overlap must not re-arm jump after center excavation');
   stages.centerExcavation = 'PASS';
 
+  await page.evaluate(() => window.__seedlandsHarness?.prepareStepDown());
+  const beforeStepDown = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  await page.keyboard.down('KeyW');
+  await page.waitForTimeout(1100);
+  await page.keyboard.up('KeyW');
+  const afterStepDown = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  assert.ok(afterStepDown && afterStepDown.player[2] < beforeStepDown.player[2] - 3, `Player: one-block step-down did not preserve forward movement (${JSON.stringify({ beforeStepDown, afterStepDown })})`);
+  assert.ok(Math.abs(afterStepDown.player[1] - (beforeStepDown.player[1] - 1)) < .05, 'Player: one-block step-down did not settle at the lower surface');
+  assert.equal(afterStepDown?.colliding, false, 'Player: one-block step-down left the body overlapping the previous ledge');
+  stages.stepDown = 'PASS';
+
   await page.mouse.move(640, 640);
   await page.waitForTimeout(150);
   await page.mouse.click(640, 360, { button: 'left' });
