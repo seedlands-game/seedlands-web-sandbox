@@ -51,7 +51,13 @@ try {
   await page.keyboard.down('KeyW');
   await page.waitForTimeout(850);
   await page.keyboard.up('KeyW');
-  await page.keyboard.press('Space');
+  await page.waitForFunction(() => window.__seedlandsHarness?.snapshot().onGround === true, undefined, { timeout: 5000 });
+  const beforeJump = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  await page.keyboard.down('Space');
+  await page.waitForTimeout(80);
+  await page.keyboard.up('Space');
+  await page.waitForFunction((y) => (window.__seedlandsHarness?.snapshot().player[1] ?? 0) > y + .3, beforeJump.player[1], { timeout: 1000 });
+  await page.waitForFunction(() => window.__seedlandsHarness?.snapshot().onGround === true, undefined, { timeout: 3000 });
   const afterInput = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
   assert.ok(afterInput && Math.abs(afterInput.player[2]) > 0.5, 'Input: forward movement did not change player position');
   stages.input = 'PASS';
@@ -64,6 +70,11 @@ try {
   const saveAfterBreak = await page.evaluate(() => localStorage.getItem('seedlands-world-v2'));
   await page.mouse.click(640, 360, { button: 'right' });
   await page.waitForFunction((previous) => localStorage.getItem('seedlands-world-v2') !== null && localStorage.getItem('seedlands-world-v2') !== previous, saveAfterBreak, { timeout: 5000 });
+  const beforeBurst = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  await page.evaluate(() => window.__seedlandsHarness?.burstEdits());
+  await page.waitForFunction(() => (window.__seedlandsHarness?.snapshot().deferredRemeshes ?? 0) > 0, undefined, { timeout: 1000 });
+  await page.waitForFunction((count) => (window.__seedlandsHarness?.snapshot().mutationCount ?? 0) > count, beforeBurst.mutationCount, { timeout: 5000 });
+  await page.waitForFunction(() => (window.__seedlandsHarness?.snapshot().deferredRemeshes ?? 0) === 0, undefined, { timeout: 5000 });
   const afterEdit = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
   assert.ok(afterEdit.storageBytes > 0, 'Persistence: edit did not save a world payload');
   stages.interaction = 'PASS';
