@@ -12,7 +12,7 @@ type ChunkTask = { id: number; seed: number; cx: number; cy: number; cz: number;
 
 type HarnessSnapshot = {
   frameMs: number; player: [number, number, number]; loadedChunks: number; renderedChunks: number;
-  generationQueue: number; meshingQueue: number; mutationCount: number; storageBytes: number;
+  generationQueue: number; meshingQueue: number; deferredRemeshes: number; onGround: boolean; mutationCount: number; storageBytes: number;
 };
 
 declare global {
@@ -20,6 +20,7 @@ declare global {
     __seedlandsHarness?: {
       snapshot: () => HarnessSnapshot;
       moveTo: (x: number, z: number) => void;
+      burstEdits: () => void;
     };
   }
 }
@@ -58,7 +59,7 @@ class MacroMapViewer {
     let index = 0;
     const paint = () => {
       if (!this.active || this.renderId !== id) return;
-      const deadline = performance.now() + 8;
+      const deadline = performance.now() + 4;
       while (index < size * size && performance.now() < deadline) {
         const px = index % size, pz = Math.floor(index / size);
         const context = macroAt(this.seed, (px - size / 2) * 24, (pz - size / 2) * 24);
@@ -108,6 +109,8 @@ class World {
   private changesByChunk = new Map<string, Map<string, Change>>();
   private latestTask = new Map<string, number>();
   private queued = new Map<string, ChunkTask>();
+  private dirtyChunks = new Set<string>();
+  private remeshTimer: number | null = null;
   private inFlight = 0;
   private readonly maxInFlight = 2;
   private taskId = 0;
@@ -117,13 +120,14 @@ class World {
   }
   get queueSize() { return this.inFlight + this.queued.size; }
   get telemetry() {
-    return { loadedChunks: this.chunks.size, renderedChunks: this.chunks.size, generationQueue: this.queued.size, meshingQueue: this.inFlight };
+    return { loadedChunks: this.chunks.size, renderedChunks: this.chunks.size, generationQueue: this.queued.size, meshingQueue: this.inFlight, deferredRemeshes: this.dirtyChunks.size };
   }
   restoreChanges(changes: Change[]) { changes.forEach(([x, y, z, value]) => this.setChange(x, y, z, value)); }
   dispose() {
     this.worker.terminate();
+    if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
     this.chunks.forEach((chunk) => { chunk.meshes.forEach((mesh) => mesh.destroy()); chunk.entity.destroy(); });
-    this.chunks.clear(); this.requested.clear(); this.queued.clear(); this.latestTask.clear();
+    this.chunks.clear(); this.requested.clear(); this.queued.clear(); this.latestTask.clear(); this.dirtyChunks.clear(); this.remeshTimer = null;
   }
   getVoxel(x: number, y: number, z: number): number {
     const override = this.changes.get(`${x},${y},${z}`); if (override !== undefined) return override;
@@ -155,9 +159,9 @@ class World {
     if (mod(x, CHUNK_SIZE) === 0) affected.add(chunkKey(cx - 1, cy, cz)); if (mod(x, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx + 1, cy, cz));
     if (mod(y, CHUNK_SIZE) === 0) affected.add(chunkKey(cx, cy - 1, cz)); if (mod(y, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx, cy + 1, cz));
     if (mod(z, CHUNK_SIZE) === 0) affected.add(chunkKey(cx, cy, cz - 1)); if (mod(z, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx, cy, cz + 1));
-    // Keep the current GPU mesh on screen until the replacement mesh is ready.
-    // A boundary edit queues the same atomic replacement for its loaded neighbours.
-    affected.forEach((key) => { const c = this.chunks.get(key); if (c) this.request(c.cx, c.cy, c.cz, true); });
+    // Persist every edit immediately in memory, then collapse a click burst into one replacement mesh per Chunk.
+    affected.forEach((key) => { if (this.chunks.has(key)) { this.latestTask.delete(key); this.dirtyChunks.add(key); } });
+    this.scheduleRemesh();
   }
   private request(cx: number, cy: number, cz: number, forceRemesh = false) {
     if (cy < 0 || cy > 1) return;
@@ -193,7 +197,15 @@ class World {
     this.drain();
   }
   private unload(key: string, chunk: Chunk) { this.cancel(key); chunk.meshes.forEach((mesh) => mesh.destroy()); chunk.entity.destroy(); this.chunks.delete(key); }
-  private cancel(key: string) { this.latestTask.delete(key); this.requested.delete(key); this.queued.delete(key); }
+  private cancel(key: string) { this.latestTask.delete(key); this.requested.delete(key); this.queued.delete(key); this.dirtyChunks.delete(key); }
+  private scheduleRemesh() {
+    if (this.remeshTimer !== null || this.dirtyChunks.size === 0) return;
+    this.remeshTimer = window.setTimeout(() => {
+      this.remeshTimer = null;
+      const keys = [...this.dirtyChunks]; this.dirtyChunks.clear();
+      for (const key of keys) { const chunk = this.chunks.get(key); if (chunk) this.request(chunk.cx, chunk.cy, chunk.cz, true); }
+    }, 48);
+  }
   private setChange(x: number, y: number, z: number, value: number) {
     const key = `${x},${y},${z}`; this.changes.set(key, value);
     const owner = chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
@@ -221,9 +233,10 @@ class Game {
   private yaw = 0; private pitch = -16; private onGround = false; private chosen: number = Voxel.Dirt;
   private keys = new Set<string>(); private last = performance.now(); private frames = 0; private fps = 0;
   private frameMs = 0;
-  private store = new Store(); private seedText = '';
+  private store = new Store(); private seedText = ''; private saveTimer: number | null = null;
   private onResize = () => this.app?.resizeCanvas();
   start(seedText: string, restore: { player: [number, number, number]; changes: Change[] } | null) {
+    this.flushSave();
     this.seedText = seedText;
     macroMapViewer.close();
     this.world?.dispose(); this.world = null; this.app?.destroy();
@@ -237,9 +250,9 @@ class Game {
     Object.entries(voxelColors).forEach(([id, color]) => { const material = new pc.StandardMaterial(); material.diffuse = new pc.Color(...color); material.ambient = new pc.Color(...color); material.update(); materials.set(Number(id), material); });
     this.world = new World(seedText, normalizeSeed(seedText), this.app, materials); if (restore) this.world.restoreChanges(restore.changes);
     const p = restore?.player ?? [0, 34, 0]; this.camera.setPosition(...p); this.world.updateStreaming(this.camera.getPosition());
-    this.installInput(); mapToggle.onclick = () => this.toggleMap(); mapClose.onclick = () => macroMapViewer.close(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', this.onResize);
+    this.installInput(); mapToggle.onclick = () => this.toggleMap(); mapClose.onclick = () => macroMapViewer.close(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', this.onResize); window.onpagehide = () => this.flushSave();
     if (new URLSearchParams(location.search).has('harness')) {
-      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot(), moveTo: (x, z) => this.moveHarnessPlayer(x, z) };
+      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot(), moveTo: (x, z) => this.moveHarnessPlayer(x, z), burstEdits: () => this.burstHarnessEdits() };
     }
   }
   private installInput() {
@@ -266,12 +279,15 @@ class Game {
     const telemetry = this.world.telemetry;
     const macro = macroAt(this.world.seed, this.camera.getPosition().x, this.camera.getPosition().z);
     const water = macro.hydrology.kind === 'dry' ? 'dry' : `${macro.hydrology.kind}${macro.hydrology.water ? ' water' : ' bank'} (${macro.hydrology.id})`;
-    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nMutations  ${this.world.changes.size}`;
-    if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
+    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nDeferred Remeshes  ${telemetry.deferredRemeshes}\nMutations  ${this.world.changes.size}`;
+    if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
   }
   private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
     if (!this.world || amount === 0) return; const p = this.camera.getPosition(); (p as unknown as Record<string, number>)[axis] += amount;
-    if (this.collides(p)) { (p as unknown as Record<string, number>)[axis] -= amount; if (axis === 'y') { if (amount < 0) this.onGround = true; this.velocity.y = 0; } }
+    if (axis === 'y') {
+      const collisionY = amount < 0 ? Math.floor(p.y - 1.6) : Math.floor(p.y + .15);
+      if (this.collidesAtY(p, collisionY)) { p.set(p.x, amount < 0 ? collisionY + 2.6 : collisionY - .15, p.z); if (amount < 0) this.onGround = true; this.velocity.y = 0; }
+    } else if (this.collides(p)) (p as unknown as Record<string, number>)[axis] -= amount;
     this.camera.setPosition(p);
   }
   private collides(p: pc.Vec3): boolean {
@@ -279,12 +295,17 @@ class Game {
     for (const x of [p.x - .32, p.x + .32]) for (const z of [p.z - .32, p.z + .32]) for (const y of [p.y - 1.6, p.y - .7, p.y + .15]) if (isSolid(this.world.getVoxel(Math.floor(x), Math.floor(y), Math.floor(z)))) return true;
     return false;
   }
+  private collidesAtY(p: pc.Vec3, y: number): boolean {
+    if (!this.world) return false;
+    for (const x of [p.x - .32, p.x + .32]) for (const z of [p.z - .32, p.z + .32]) if (isSolid(this.world.getVoxel(Math.floor(x), y, Math.floor(z)))) return true;
+    return false;
+  }
   private interact(place: boolean) {
     if (!this.world) return; const p = this.camera.getPosition(); const dir = this.camera.forward;
     let last: [number, number, number] | null = null; let hit: [number, number, number] | null = null;
     for (let t = .15; t < 7; t += .08) { const cell: [number, number, number] = [Math.floor(p.x + dir.x * t), Math.floor(p.y + dir.y * t), Math.floor(p.z + dir.z * t)]; if (isSolid(this.world.getVoxel(...cell))) { hit = cell; break; } last = cell; }
     const target = place ? last : hit; if (!target) return;
-    if (place && this.playerOccupies(target)) return; this.world.edit(...target, place ? this.chosen : Voxel.Air); this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
+    if (place && this.playerOccupies(target)) return; this.world.edit(...target, place ? this.chosen : Voxel.Air); this.queueSave();
   }
   private playerOccupies([x, y, z]: [number, number, number]) { const p = this.camera.getPosition(); return x + 1 > p.x - .32 && x < p.x + .32 && z + 1 > p.z - .32 && z < p.z + .32 && y + 1 > p.y - 1.6 && y < p.y + .2; }
   private toggleMap() {
@@ -296,13 +317,27 @@ class Game {
     const p = this.camera.getPosition(); const telemetry = this.world?.telemetry;
     return {
       frameMs: this.frameMs, player: [p.x, p.y, p.z], loadedChunks: telemetry?.loadedChunks ?? 0, renderedChunks: telemetry?.renderedChunks ?? 0,
-      generationQueue: telemetry?.generationQueue ?? 0, meshingQueue: telemetry?.meshingQueue ?? 0, mutationCount: this.world?.changes.size ?? 0,
+      generationQueue: telemetry?.generationQueue ?? 0, meshingQueue: telemetry?.meshingQueue ?? 0, deferredRemeshes: telemetry?.deferredRemeshes ?? 0, onGround: this.onGround, mutationCount: this.world?.changes.size ?? 0,
       storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
     };
   }
   private moveHarnessPlayer(x: number, z: number) {
     if (!this.world) return;
     const p = this.camera.getPosition(); this.camera.setPosition(x, p.y, z); this.world.updateStreaming(this.camera.getPosition());
+  }
+  private burstHarnessEdits() {
+    if (!this.world) return;
+    const p = this.camera.getPosition(), y = Math.floor(p.y - 4), x = Math.floor(p.x) + 4, z = Math.floor(p.z) + 4;
+    for (let index = 0; index < 6; index += 1) this.world.edit(x + index, y, z, index % 2 ? Voxel.Dirt : Voxel.Air);
+    this.queueSave();
+  }
+  private queueSave() {
+    if (this.saveTimer !== null) return;
+    this.saveTimer = window.setTimeout(() => { this.saveTimer = null; this.flushSave(); }, 48);
+  }
+  private flushSave() {
+    if (this.saveTimer !== null) { window.clearTimeout(this.saveTimer); this.saveTimer = null; }
+    if (this.world) this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
   }
   private renderHotbar() { const ids = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand]; hotbar.innerHTML = ids.map((id, index) => `<div class="slot ${id === this.chosen ? 'active' : ''}">${index + 1} · ${voxelNames[id]}</div>`).join(''); }
 }
