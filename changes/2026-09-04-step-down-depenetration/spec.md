@@ -45,4 +45,4 @@ Post-fix validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm
 
 Known limitation: the controller remains axis-separated and does not add upward step climbing or swept high-speed collision. The depenetration exception is monotonic: it only accepts a colliding horizontal candidate when its exact AABB/voxel overlap volume is lower than the current overlap.
 
-Git: local commit pending on `codex/player-ground-collision`; no remote push requested.
+Git: implementation commit `2c4c0cd` on `codex/player-ground-collision`; no remote push requested.
