@@ -47,4 +47,4 @@ Post-fix validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm
 
 Known limitation: the controller remains axis-separated and does not implement step climbing or swept-capsule collision. Center-of-mass grounding intentionally allows a centered pillar to support jump-building while rejecting surrounding-only support.
 
-Git: local commit pending on `codex/player-ground-collision`; no remote push requested.
+Git: implementation commit `0dc7506` on `codex/player-ground-collision`; no remote push requested.
