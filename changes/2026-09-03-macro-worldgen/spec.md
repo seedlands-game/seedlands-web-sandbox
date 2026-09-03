@@ -1,6 +1,6 @@
 # Macro Worldgen
 
-**Status:** Delivered locally; remote push pending explicit authorization
+**Status:** Delivered locally
 
 ## Context & Goal
 
@@ -69,7 +69,7 @@ Macro Region 固定为 256m（8 x 8 Chunk），仅作为自然场的查询/解�
 1. [done] 读取需求、现有实现和已有 Harness，形成 Macro 模型设计。
 2. [done] 用户已于本会话准出设计。
 3. [done] 实现 Macro 查询、Chunk realization、可观测性与验证。
-4. [blocked] 本地提交已完成；向 `origin` 推送需要用户针对 GitHub 外发的明确授权。
+4. [done] 本地提交已完成；按当前项目交付规则，默认不推送。
 
 ## Delivery Snapshot
 
@@ -81,4 +81,4 @@ Final local Harness: Macro p95 `0.037 ms` (65,692 queries/s; signature `f3ef5cb5
 
 Git: implemented on `codex/macro-worldgen`, based on `f9cf9f6`; implementation commit `0da6391` (`feat: add macro worldgen`).
 
-Push: 未执行。已配置目标为 `origin`（GitHub）；本地推送请求被安全策略拒绝，未有源码或文档外发。最小下一步是用户明确授权将该分支推送至该目标。
+Push: 未执行。已配置目标为 `origin`（GitHub）；先前推送请求被安全策略拒绝，未有源码或文档外发。当前项目规则已改为默认只保留 worktree 分支与本地 commit；只有用户在当轮明确要求外发时才推送。
