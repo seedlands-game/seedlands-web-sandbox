@@ -18,21 +18,22 @@ corepack pnpm preview
 
 ## 操作
 
-| 输入         | 行为                       |
-| ------------ | -------------------------- |
-| 鼠标点击画面 | 锁定鼠标并开始视角控制     |
-| WASD         | 移动                       |
-| 鼠标         | 观察                       |
-| 空格         | 跳跃                       |
-| 左键         | 破坏准星指向的体素         |
-| 右键         | 放置选中的体素             |
-| 1–4          | 选择泥土、石头、原木、沙砾 |
-| Esc          | 解除鼠标锁定               |
+| 输入               | 行为                                                  |
+| ------------------ | ----------------------------------------------------- |
+| 鼠标点击画面       | 锁定鼠标并开始视角控制                                |
+| WASD               | 移动                                                  |
+| 鼠标               | 观察                                                  |
+| 空格               | 跳跃                                                  |
+| 左键               | 破坏准星指向的体素                                    |
+| 右键               | 放置选中的体素                                        |
+| 1–4                | 选择泥土、石头、原木、沙砾                            |
+| M / Macro 地图按钮 | 打开或关闭世界总览，并切换高度、biome、气候和河湖图层 |
+| Esc                | 解除鼠标锁定                                          |
 
 ## 当前能力
 
-- Seed 驱动、坐标确定性的高度、地表、biome 与树木生成；同一 `seed + generatorVersion` 与加载顺序无关。
-- `32³` 的 `Uint16Array` Chunk 数据；基础材料包括 Grass、Dirt、Stone、Wood、Leaves、Sand、Snow 与 Air。
+- Seed 驱动、坐标确定性的 Macro geography、气候、biome、河湖与树木生成；同一 `seed + generatorVersion` 与加载顺序无关。
+- `32³` 的 `Uint16Array` Chunk 数据；基础材料包括 Grass、Dirt、Stone、Wood、Leaves、Sand、Snow、Water 与 Air。
 - 以玩家为中心的双层 Chunk streaming；超出缓存半径的 GPU Mesh/Chunk 会卸载，不会把探索历史永久留在内存中。
 - Worker 承担 Chunk worldgen 和 CPU greedy meshing；主线程负责 PlayCanvas GPU 上传、渲染、输入和玩家控制。
 - Mesh 以 Chunk + 材质为单位，进行不可见面剔除与贪心四边形合并，不产生逐体素 Entity / draw call。
@@ -45,7 +46,7 @@ corepack pnpm preview
 
 ```text
 src/app/             浏览器启动、PlayCanvas 生命周期、输入、UI 与样式
-src/world/           无 UI 依赖的 voxel、Chunk mesh 与存档纯逻辑
+src/world/           无 UI 依赖的 Macro、voxel、Chunk mesh 与存档纯逻辑
 src/worker/          Worker 入口及 world 数据传输
 tests/world/         `src/world/` 的 Vitest 单测
 tests/e2e/           Playwright 的确定性浏览器回归、性能样本与共享支持代码
@@ -86,6 +87,12 @@ corepack pnpm test:e2e:benchmark   # 非跨机器门禁的浏览器性能样本
 ```
 
 Playwright 用于固定 seed 的功能回归、输入链路和可重复的浏览器样本；其用例位于 `tests/e2e/`，并以单 worker 运行，避免 benchmark 与回归争用同一浏览器资源。默认使用 Chromium：CI 应先执行 `corepack pnpm exec playwright install --with-deps chromium`，本机若需指定浏览器则设置 `SEEDLANDS_CHROME_PATH`。`?harness=1` 的受控入口仅用于确定性 world 编辑与 streaming 状态，并继续调用生产 `World.edit()`、Store 与 `updateStreaming()`；真实键鼠输入另有独立 Playwright 覆盖。Midscene 仍仅承担 change 内 YAML 的用户旅程与语义/视觉验收；可以稳定程序化验证的规则应迁移为 Playwright 回归，而不长期重复两套断言。
+
+Macro 地图是固定 seed 的确定性浏览器回归，可单独运行：
+
+```bash
+corepack pnpm harness:macro-map
+```
 
 ## Regression & Performance Harness
 

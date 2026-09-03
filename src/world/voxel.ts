@@ -1,5 +1,7 @@
+import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
+
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 1;
+export const GENERATOR_VERSION = 2;
 
 export const Voxel = {
   Air: 0,
@@ -10,6 +12,7 @@ export const Voxel = {
   Leaves: 5,
   Sand: 6,
   Snow: 7,
+  Water: 8,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
@@ -22,6 +25,7 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Leaves]: '树叶',
   [Voxel.Sand]: '沙砾',
   [Voxel.Snow]: '雪',
+  [Voxel.Water]: '水',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -32,9 +36,11 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Leaves]: [0.12, 0.4, 0.14],
   [Voxel.Sand]: [0.76, 0.67, 0.43],
   [Voxel.Snow]: [0.9, 0.95, 1],
+  [Voxel.Water]: [0.12, 0.4, 0.72],
 };
 
-export const isSolid = (id: number) => id !== Voxel.Air;
+export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
+export const isRenderable = (id: number) => id !== Voxel.Air;
 
 export const floorDiv = (n: number, d: number) => Math.floor(n / d);
 export const mod = (n: number, d: number) => ((n % d) + d) % d;
@@ -54,36 +60,49 @@ export function normalizeSeed(raw: string): number {
   return h >>> 0;
 }
 
-export function terrainHeight(seed: number, x: number, z: number): number {
-  const broad = Math.sin((x + seed * 0.0001) * 0.028) * 5 + Math.cos((z - seed * 0.0002) * 0.024) * 4;
-  const detail = Math.sin(x * 0.113 + z * 0.071) * 1.7 + (hash2(seed, x, z) - 0.5) * 2;
-  return Math.floor(18 + broad + detail);
+export const terrainHeight = (seed: number, x: number, z: number): number => macroAt(seed, x, z).terrainHeight;
+
+export const biome = (seed: number, x: number, z: number): MacroBiome => macroAt(seed, x, z).biome;
+
+function isTreeOrigin(seed: number, x: number, z: number, context: MacroContext): boolean {
+  const threshold: Partial<Record<MacroBiome, number>> = { forest: 0.968, plains: 0.987, wet: 0.981, mountain: 0.995 };
+  return (
+    !context.hydrology.water &&
+    context.terrainHeight >= 15 &&
+    hash2(seed ^ 0x44af, x, z) > (threshold[context.biome] ?? 1)
+  );
 }
 
-export function biome(seed: number, x: number, z: number): 'plains' | 'desert' | 'alpine' {
-  const v = hash2(seed ^ 0x9e3779b9, floorDiv(x, 14), floorDiv(z, 14));
-  if (v < 0.2) return 'desert';
-  if (v > 0.83 || terrainHeight(seed, x, z) > 25) return 'alpine';
-  return 'plains';
-}
-
-function isTreeOrigin(seed: number, x: number, z: number): boolean {
-  return biome(seed, x, z) === 'plains' && hash2(seed ^ 0x44af, x, z) > 0.985 && terrainHeight(seed, x, z) >= 15;
-}
-
-export function baseVoxel(seed: number, x: number, y: number, z: number): VoxelId {
-  const h = terrainHeight(seed, x, z);
-  const kind = biome(seed, x, z);
+export function baseVoxel(
+  seed: number,
+  x: number,
+  y: number,
+  z: number,
+  context = macroAt(seed, x, z),
+  queryMacro = (qx: number, qz: number) => macroAt(seed, qx, qz),
+): VoxelId {
+  const h = context.terrainHeight;
+  const kind = context.biome;
+  if (context.hydrology.water && context.hydrology.waterLevel !== null && y > h && y <= context.hydrology.waterLevel)
+    return Voxel.Water;
   if (y <= h) {
-    if (y === h) return kind === 'desert' ? Voxel.Sand : kind === 'alpine' ? Voxel.Snow : Voxel.Grass;
-    if (y > h - 4) return kind === 'desert' ? Voxel.Sand : Voxel.Dirt;
+    if (y === h)
+      return kind === 'dry'
+        ? Voxel.Sand
+        : kind === 'cold'
+          ? Voxel.Snow
+          : kind === 'mountain'
+            ? Voxel.Stone
+            : Voxel.Grass;
+    if (y > h - 4) return kind === 'dry' ? Voxel.Sand : kind === 'mountain' ? Voxel.Stone : Voxel.Dirt;
     return Voxel.Stone;
   }
   // A feature can be sampled locally from nearby deterministic anchor points.
   for (let tx = x - 3; tx <= x + 3; tx += 1)
     for (let tz = z - 3; tz <= z + 3; tz += 1) {
-      if (!isTreeOrigin(seed, tx, tz)) continue;
-      const th = terrainHeight(seed, tx, tz);
+      const treeContext = queryMacro(tx, tz);
+      if (!isTreeOrigin(seed, tx, tz, treeContext)) continue;
+      const th = treeContext.terrainHeight;
       if (x === tx && z === tz && y > th && y <= th + 4) return Voxel.Wood;
       const dx = Math.abs(x - tx),
         dz = Math.abs(z - tz);

@@ -10,7 +10,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       all: true,
-      include: ['src/world/voxel.ts', 'src/world/mesh.ts', 'src/world/storage.ts'],
+      include: ['src/world/voxel.ts', 'src/world/macro-world.ts', 'src/world/mesh.ts', 'src/world/storage.ts'],
       reporter: ['text', 'json-summary', 'lcov'],
       thresholds: {
         lines: 80,

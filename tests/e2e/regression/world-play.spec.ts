@@ -49,9 +49,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     await startHarnessWorld(page, 'seedlands-playwright-regression');
     await removeHarnessVoxel(page, 0, 21, 0);
     await waitForSnapshot(page, (current) => current.mutationCount === 1);
-    const changed = await snapshot(page);
-    expect(changed).not.toBeNull();
-    if (!changed) throw new Error('Seedlands harness snapshot is unavailable after controlled edit.');
+    const changed = await waitForSnapshot(page, (current) => current.storageBytes > 0);
     expect(changed.storageBytes).toBeGreaterThan(0);
     stages.interaction = 'PASS';
 

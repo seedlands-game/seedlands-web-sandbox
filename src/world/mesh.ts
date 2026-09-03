@@ -1,4 +1,5 @@
-import { CHUNK_SIZE, Voxel, baseVoxel, voxelIndex } from './voxel';
+import { CHUNK_SIZE, baseVoxel, chunkKey, isRenderable, voxelIndex } from './voxel';
+import { macroAt, type MacroContext } from './macro-world';
 
 export type WorldChange = [number, number, number, number];
 export type MeshData = { positions: Float32Array; normals: Float32Array; indices: Uint32Array };
@@ -13,16 +14,27 @@ export type MeshOptions = {
   outside?: (x: number, y: number, z: number) => number;
 };
 
-const solid = (id: number) => id !== Voxel.Air;
-
 export function makeChunk(seed: number, cx: number, cy: number, cz: number, changes: WorldChange[]): Uint16Array {
   const data = new Uint16Array(CHUNK_SIZE ** 3);
   const ox = cx * CHUNK_SIZE,
     oy = cy * CHUNK_SIZE,
     oz = cz * CHUNK_SIZE;
-  for (let y = 0; y < CHUNK_SIZE; y += 1)
-    for (let z = 0; z < CHUNK_SIZE; z += 1)
-      for (let x = 0; x < CHUNK_SIZE; x += 1) data[voxelIndex(x, y, z)] = baseVoxel(seed, ox + x, oy + y, oz + z);
+  const macroCache = new Map<string, MacroContext>();
+  const queryMacro = (x: number, z: number) => {
+    const key = chunkKey(x, 0, z);
+    let context = macroCache.get(key);
+    if (!context) {
+      context = macroAt(seed, x, z);
+      macroCache.set(key, context);
+    }
+    return context;
+  };
+  for (let z = 0; z < CHUNK_SIZE; z += 1)
+    for (let x = 0; x < CHUNK_SIZE; x += 1) {
+      const context = queryMacro(ox + x, oz + z);
+      for (let y = 0; y < CHUNK_SIZE; y += 1)
+        data[voxelIndex(x, y, z)] = baseVoxel(seed, ox + x, oy + y, oz + z, context, queryMacro);
+    }
   for (const [x, y, z, value] of changes) {
     if (Math.floor(x / CHUNK_SIZE) === cx && Math.floor(y / CHUNK_SIZE) === cy && Math.floor(z / CHUNK_SIZE) === cz) {
       const lx = ((x % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE,
@@ -37,13 +49,27 @@ export function makeChunk(seed: number, cx: number, cy: number, cz: number, chan
 export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOptions): Record<number, MeshData> {
   const result: Record<number, Quad> = {};
   const overrides = new Map(changes.map(([x, y, z, v]) => [`${x},${y},${z}`, v]));
+  const macroCache = new Map<string, MacroContext>();
+  const queryMacro = (x: number, z: number) => {
+    const key = chunkKey(x, 0, z);
+    let context = macroCache.get(key);
+    if (!context) {
+      context = macroAt(seed, x, z);
+      macroCache.set(key, context);
+    }
+    return context;
+  };
   const sample = (x: number, y: number, z: number): number => {
     if (x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE)
       return data[voxelIndex(x, y, z)];
     const wx = cx * CHUNK_SIZE + x,
       wy = cy * CHUNK_SIZE + y,
       wz = cz * CHUNK_SIZE + z;
-    return overrides.get(`${wx},${wy},${wz}`) ?? outside?.(wx, wy, wz) ?? baseVoxel(seed, wx, wy, wz);
+    return (
+      overrides.get(`${wx},${wy},${wz}`) ??
+      outside?.(wx, wy, wz) ??
+      baseVoxel(seed, wx, wy, wz, queryMacro(wx, wz), queryMacro)
+    );
   };
   const add = (id: number, vertices: number[], normal: number[]) => {
     const q = (result[id] ??= { p: [], n: [], i: [] });
@@ -66,7 +92,11 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOpti
           const a = sample(x[0], x[1], x[2]);
           const b = sample(x[0] + q[0], x[1] + q[1], x[2] + q[2]);
           mask[m++] =
-            solid(a) && !solid(b) ? { id: a, back: false } : solid(b) && !solid(a) ? { id: b, back: true } : null;
+            isRenderable(a) && !isRenderable(b)
+              ? { id: a, back: false }
+              : isRenderable(b) && !isRenderable(a)
+                ? { id: b, back: true }
+                : null;
         }
       x[d] += 1;
       m = 0;

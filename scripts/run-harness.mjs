@@ -102,14 +102,30 @@ function compare(current, baseline) {
 }
 
 {
-  const voxelUrl = await compileModule(resolve(root, 'src/world/voxel.ts'));
+  const macroUrl = await compileModule(resolve(root, 'src/world/macro-world.ts'));
+  const voxelUrl = await compileModule(resolve(root, 'src/world/voxel.ts'), { "'./macro-world'": `'${macroUrl}'` });
+  const macro = await import(macroUrl);
   const voxel = await import(voxelUrl);
-  const meshUrl = await compileModule(resolve(root, 'src/world/mesh.ts'), { "'./voxel'": `'${voxelUrl}'` });
+  const meshUrl = await compileModule(resolve(root, 'src/world/mesh.ts'), {
+    "'./voxel'": `'${voxelUrl}'`,
+    "'./macro-world'": `'${macroUrl}'`,
+  });
   const storageUrl = await compileModule(resolve(root, 'src/world/storage.ts'), { "'./voxel'": `'${voxelUrl}'` });
   const { makeChunk, meshChunk } = await import(meshUrl);
   const { encodeWorldSave } = await import(storageUrl);
   const coordinates = [-3, -2, -1, 0, 1, 2, 3].flatMap((x) => [-2, -1, 0, 1, 2].map((z) => [x, 0, z]));
   const seed = voxel.normalizeSeed('seedlands-harness-benchmark-v1');
+  const macroCoordinates = Array.from({ length: 256 }, (_, index) => [
+    ((index % 16) - 8) * 256,
+    (Math.floor(index / 16) - 8) * 256,
+  ]);
+  const macroTimes = macroCoordinates.map(([x, z]) => {
+    const start = performance.now();
+    macro.macroAt(seed, x, z);
+    return performance.now() - start;
+  });
+  const macroGeneration = summarize(macroTimes);
+  const macroHash = macro.macroSignature(seed, macroCoordinates);
   const generated = [];
   const generationTimes = coordinates.map(([cx, cy, cz]) => {
     const start = performance.now();
@@ -146,6 +162,8 @@ function compare(current, baseline) {
   const bundle = await distMetrics();
   const heapAfterWork = process.memoryUsage().heapUsed;
   const metrics = {
+    macroQueryP95Ms: macroGeneration.p95Ms,
+    macroQueryThroughputPerSecond: (macroCoordinates.length / macroGeneration.totalMs) * 1000,
     worldgenP95Ms: generation.p95Ms,
     worldgenThroughputChunksPerSecond: (coordinates.length / generation.totalMs) * 1000,
     meshingP95Ms: meshing.p95Ms,
@@ -178,6 +196,7 @@ function compare(current, baseline) {
     environment: { node: process.version, platform: process.platform, arch: process.arch },
     correctness: { status: 'PASS', command: 'pnpm test (run before this script)' },
     performance: {
+      macro: { ...macroGeneration, signature: macroHash, throughputPerSecond: metrics.macroQueryThroughputPerSecond },
       worldgen: { ...generation, throughputChunksPerSecond: metrics.worldgenThroughputChunksPerSecond },
       meshing: { ...meshing, throughputChunksPerSecond: metrics.meshingThroughputChunksPerSecond, vertices, triangles },
     },
@@ -212,6 +231,7 @@ function compare(current, baseline) {
     '',
     '## Performance',
     '',
+    `- Macro query p50/p95: ${macroGeneration.p50Ms.toFixed(2)} / ${macroGeneration.p95Ms.toFixed(2)} ms; throughput ${metrics.macroQueryThroughputPerSecond.toFixed(1)} queries/s; signature ${macroHash}.`,
     `- Worldgen p50/p95: ${generation.p50Ms.toFixed(2)} / ${generation.p95Ms.toFixed(2)} ms; throughput ${metrics.worldgenThroughputChunksPerSecond.toFixed(1)} chunks/s.`,
     `- Meshing p50/p95: ${meshing.p50Ms.toFixed(2)} / ${meshing.p95Ms.toFixed(2)} ms; throughput ${metrics.meshingThroughputChunksPerSecond.toFixed(1)} chunks/s.`,
     '',
