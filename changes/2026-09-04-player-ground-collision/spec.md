@@ -43,4 +43,4 @@ Validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm build` p
 
 Known limitation: the controller is still axis-separated and does not implement step climbing or swept-capsule collision.
 
-Git: local commit pending on `codex/player-ground-collision`; no remote push requested.
+Git: implementation commit `d57adf2` on `codex/player-ground-collision`; no remote push requested.
