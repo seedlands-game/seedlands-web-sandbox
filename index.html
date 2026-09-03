@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seedlands · Voxel Sandbox</title>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <main id="ui">
+      <section id="start-card" class="panel">
+        <p class="eyebrow">VOXEL SANDBOX FOUNDATION</p>
+        <h1>Seedlands</h1>
+        <p>一个会随你脚步延展、可被塑造的体素世界。</p>
+        <label>世界 Seed <input id="seed" maxlength="48" placeholder="留空创建随机世界" /></label>
+        <button id="enter">进入世界</button>
+        <small>同一 Seed + 生成器版本会得到同一基础世界</small>
+      </section>
+      <section id="hud" hidden>
+        <div id="crosshair">+</div>
+        <div id="debug" class="panel"></div>
+        <div id="help" class="panel">WASD 移动 · 鼠标视角 · 空格跳跃 · 左键破坏 · 右键放置 · 1–4 选材质 · Esc 解锁鼠标</div>
+        <div id="hotbar"></div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

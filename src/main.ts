@@ -1,0 +1,163 @@
+import * as pc from 'playcanvas';
+import './style.css';
+import { CHUNK_SIZE, GENERATOR_VERSION, Voxel, baseVoxel, chunkKey, floorDiv, isSolid, mod, normalizeSeed, voxelColors, voxelIndex, voxelNames } from './voxel';
+
+type MeshPart = { voxel: number; positions: Float32Array; normals: Float32Array; indices: Uint32Array };
+type WorkerResult = { id: number; key: string; cx: number; cy: number; cz: number; data: Uint16Array; meshes: MeshPart[] };
+type Chunk = { cx: number; cy: number; cz: number; data: Uint16Array; entity: pc.Entity; meshes: pc.Mesh[] };
+type Change = [number, number, number, number];
+
+const canvas = document.querySelector<HTMLCanvasElement>('#game')!;
+const startCard = document.querySelector<HTMLElement>('#start-card')!;
+const seedInput = document.querySelector<HTMLInputElement>('#seed')!;
+const enterButton = document.querySelector<HTMLButtonElement>('#enter')!;
+const hud = document.querySelector<HTMLElement>('#hud')!;
+const debug = document.querySelector<HTMLElement>('#debug')!;
+const hotbar = document.querySelector<HTMLElement>('#hotbar')!;
+
+class Store {
+  private key = 'seedlands-world-v1';
+  load(): { seed: string; player: [number, number, number]; changes: Change[] } | null {
+    try { return JSON.parse(localStorage.getItem(this.key) ?? 'null'); } catch { return null; }
+  }
+  save(seed: string, player: pc.Vec3, changes: Map<string, number>) {
+    localStorage.setItem(this.key, JSON.stringify({ seed, player: [player.x, player.y, player.z], changes: [...changes].map(([key, value]) => [...key.split(',').map(Number), value]) }));
+  }
+}
+
+class World {
+  readonly worker = new Worker(new URL('./world-worker.ts', import.meta.url), { type: 'module' });
+  readonly chunks = new Map<string, Chunk>();
+  readonly requested = new Set<string>();
+  readonly changes = new Map<string, number>();
+  private latestTask = new Map<string, number>();
+  private taskId = 0;
+  private pending = 0;
+  private lastCenter = '';
+  constructor(readonly seedText: string, readonly seed: number, private app: pc.Application, private materials: Map<number, pc.StandardMaterial>) {
+    this.worker.onmessage = (event: MessageEvent<WorkerResult>) => this.receive(event.data);
+  }
+  get queueSize() { return this.pending; }
+  getVoxel(x: number, y: number, z: number): number {
+    const override = this.changes.get(`${x},${y},${z}`); if (override !== undefined) return override;
+    const cx = floorDiv(x, CHUNK_SIZE), cy = floorDiv(y, CHUNK_SIZE), cz = floorDiv(z, CHUNK_SIZE);
+    const chunk = this.chunks.get(chunkKey(cx, cy, cz));
+    return chunk ? chunk.data[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))] : baseVoxel(this.seed, x, y, z);
+  }
+  updateStreaming(position: pc.Vec3) {
+    const cx = floorDiv(position.x, CHUNK_SIZE), cz = floorDiv(position.z, CHUNK_SIZE);
+    const center = `${cx},${cz}`;
+    if (center === this.lastCenter && this.chunks.size) return;
+    this.lastCenter = center;
+    const needs: [number, number, number, number][] = [];
+    for (let y = 0; y <= 1; y += 1) for (let z = cz - 2; z <= cz + 2; z += 1) for (let x = cx - 2; x <= cx + 2; x += 1) {
+      const d = Math.abs(x - cx) + Math.abs(z - cz); needs.push([x, y, z, d]);
+    }
+    needs.sort((a, b) => a[3] - b[3]);
+    for (const [x, y, z] of needs) this.request(x, y, z);
+    for (const [key, chunk] of this.chunks) if (Math.abs(chunk.cx - cx) > 3 || Math.abs(chunk.cz - cz) > 3) this.unload(key, chunk);
+  }
+  edit(x: number, y: number, z: number, value: number) {
+    this.changes.set(`${x},${y},${z}`, value);
+    const cx = floorDiv(x, CHUNK_SIZE), cy = floorDiv(y, CHUNK_SIZE), cz = floorDiv(z, CHUNK_SIZE);
+    const affected = new Set([chunkKey(cx, cy, cz)]);
+    if (mod(x, CHUNK_SIZE) === 0) affected.add(chunkKey(cx - 1, cy, cz)); if (mod(x, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx + 1, cy, cz));
+    if (mod(y, CHUNK_SIZE) === 0) affected.add(chunkKey(cx, cy - 1, cz)); if (mod(y, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx, cy + 1, cz));
+    if (mod(z, CHUNK_SIZE) === 0) affected.add(chunkKey(cx, cy, cz - 1)); if (mod(z, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx, cy, cz + 1));
+    // Keep the current GPU mesh on screen until the replacement mesh is ready.
+    // A boundary edit queues the same atomic replacement for its loaded neighbours.
+    affected.forEach((key) => { const c = this.chunks.get(key); if (c) this.request(c.cx, c.cy, c.cz, true); });
+  }
+  private request(cx: number, cy: number, cz: number, forceRemesh = false) {
+    if (cy < 0 || cy > 1) return;
+    const key = chunkKey(cx, cy, cz); if (!forceRemesh && (this.chunks.has(key) || this.requested.has(key))) return;
+    const id = ++this.taskId; this.latestTask.set(key, id); this.requested.add(key); this.pending += 1;
+    this.worker.postMessage({ kind: 'chunk', id, seed: this.seed, cx, cy, cz, changes: this.asChanges() });
+  }
+  private receive(result: WorkerResult) {
+    this.pending -= 1;
+    // Ignore an obsolete worker result or a result for a chunk that has been unloaded.
+    if (this.latestTask.get(result.key) !== result.id) return;
+    this.latestTask.delete(result.key); this.requested.delete(result.key);
+    const entity = new pc.Entity(`Chunk ${result.key}`); const meshes: pc.Mesh[] = [];
+    const instances = result.meshes.map((part) => {
+      const mesh = new pc.Mesh(this.app.graphicsDevice); mesh.setPositions(part.positions); mesh.setNormals(part.normals); mesh.setIndices(part.indices); mesh.update(); meshes.push(mesh);
+      return new pc.MeshInstance(mesh, this.materials.get(part.voxel)!, entity);
+    });
+    entity.addComponent('render'); entity.render!.meshInstances = instances; entity.setPosition(result.cx * CHUNK_SIZE, result.cy * CHUNK_SIZE, result.cz * CHUNK_SIZE);
+    this.app.root.addChild(entity);
+    const previous = this.chunks.get(result.key);
+    if (previous) { previous.meshes.forEach((mesh) => mesh.destroy()); previous.entity.destroy(); }
+    this.chunks.set(result.key, { ...result, entity, meshes });
+  }
+  private unload(key: string, chunk: Chunk) { this.latestTask.delete(key); this.requested.delete(key); chunk.meshes.forEach((mesh) => mesh.destroy()); chunk.entity.destroy(); this.chunks.delete(key); }
+  private asChanges(): Change[] { return [...this.changes].map(([key, value]) => [...key.split(',').map(Number), value] as Change); }
+}
+
+class Game {
+  private app: pc.Application | null = null;
+  private world: World | null = null;
+  private camera!: pc.Entity;
+  private velocity = new pc.Vec3();
+  private yaw = 0; private pitch = -16; private onGround = false; private chosen: number = Voxel.Dirt;
+  private keys = new Set<string>(); private last = performance.now(); private frames = 0; private fps = 0;
+  private store = new Store(); private seedText = '';
+  start(seedText: string, restore: { player: [number, number, number]; changes: Change[] } | null) {
+    this.seedText = seedText;
+    this.app?.destroy(); this.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window) });
+    this.app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW); this.app.setCanvasResolution(pc.RESOLUTION_AUTO); this.app.start();
+    this.app.scene.ambientLight = new pc.Color(.55, .65, .8);
+    const light = new pc.Entity('Sun'); light.addComponent('light', { type: 'directional', color: new pc.Color(1, .94, .78), intensity: 1.3, castShadows: false }); light.setEulerAngles(45, -35, 0); this.app.root.addChild(light);
+    this.camera = new pc.Entity('Player'); this.camera.addComponent('camera', { clearColor: new pc.Color(.48, .70, .84), fov: 72, nearClip: .05, farClip: 180 }); this.app.root.addChild(this.camera);
+    const materials = new Map<number, pc.StandardMaterial>();
+    Object.entries(voxelColors).forEach(([id, color]) => { const material = new pc.StandardMaterial(); material.diffuse = new pc.Color(...color); material.ambient = new pc.Color(...color); material.update(); materials.set(Number(id), material); });
+    this.world = new World(seedText, normalizeSeed(seedText), this.app, materials); restore?.changes.forEach(([x, y, z, value]) => this.world!.changes.set(`${x},${y},${z}`, value));
+    const p = restore?.player ?? [0, 34, 0]; this.camera.setPosition(...p); this.world.updateStreaming(this.camera.getPosition());
+    this.installInput(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', () => this.app?.resizeCanvas());
+  }
+  private installInput() {
+    window.onkeydown = (event) => { this.keys.add(event.code); if (/^Digit[1-4]$/.test(event.code)) { this.chosen = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand][Number(event.code[5]) - 1]; this.renderHotbar(); } };
+    window.onkeyup = (event) => this.keys.delete(event.code);
+    canvas.oncontextmenu = (event) => event.preventDefault(); canvas.onclick = () => canvas.requestPointerLock();
+    document.onmousemove = (event) => { if (document.pointerLockElement === canvas) { this.yaw -= event.movementX * .13; this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * .13)); } };
+    document.onmousedown = (event) => { if (document.pointerLockElement !== canvas) return; if (event.button === 0) this.interact(false); if (event.button === 2) this.interact(true); };
+  }
+  private update(dt: number) {
+    if (!this.world) return;
+    this.frames += 1; const now = performance.now(); if (now - this.last > 500) { this.fps = this.frames * 1000 / (now - this.last); this.frames = 0; this.last = now; }
+    // Let the engine be the sole source of truth for camera orientation and movement axes.
+    this.camera.setEulerAngles(this.pitch, this.yaw, 0);
+    const forward = new pc.Vec3().copy(this.camera.forward); forward.y = 0; forward.normalize();
+    const right = new pc.Vec3().copy(this.camera.right); right.y = 0; right.normalize();
+    const wish = new pc.Vec3(); if (this.keys.has('KeyW')) wish.add(forward); if (this.keys.has('KeyS')) wish.sub(forward); if (this.keys.has('KeyD')) wish.add(right); if (this.keys.has('KeyA')) wish.sub(right);
+    if (wish.lengthSq() > 0) wish.normalize().mulScalar(5.5); this.velocity.x += (wish.x - this.velocity.x) * Math.min(1, dt * 12); this.velocity.z += (wish.z - this.velocity.z) * Math.min(1, dt * 12);
+    this.velocity.y -= 20 * dt; if (this.keys.has('Space') && this.onGround) { this.velocity.y = 7.5; this.onGround = false; }
+    this.moveAxis('x', this.velocity.x * dt); this.moveAxis('z', this.velocity.z * dt); this.onGround = false; this.moveAxis('y', this.velocity.y * dt);
+    this.world.updateStreaming(this.camera.getPosition());
+    const feetY = this.camera.getPosition().y - 1.6;
+    debug.textContent = `FPS  ${this.fps.toFixed(0)}\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nLoaded  ${this.world.chunks.size} · Queue ${this.world.queueSize}\nMutations  ${this.world.changes.size}`;
+    if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
+  }
+  private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
+    if (!this.world || amount === 0) return; const p = this.camera.getPosition(); (p as unknown as Record<string, number>)[axis] += amount;
+    if (this.collides(p)) { (p as unknown as Record<string, number>)[axis] -= amount; if (axis === 'y') { if (amount < 0) this.onGround = true; this.velocity.y = 0; } }
+    this.camera.setPosition(p);
+  }
+  private collides(p: pc.Vec3): boolean {
+    if (!this.world) return false;
+    for (const x of [p.x - .32, p.x + .32]) for (const z of [p.z - .32, p.z + .32]) for (const y of [p.y - 1.6, p.y - .7, p.y + .15]) if (isSolid(this.world.getVoxel(Math.floor(x), Math.floor(y), Math.floor(z)))) return true;
+    return false;
+  }
+  private interact(place: boolean) {
+    if (!this.world) return; const p = this.camera.getPosition(); const dir = this.camera.forward;
+    let last: [number, number, number] | null = null; let hit: [number, number, number] | null = null;
+    for (let t = .15; t < 7; t += .08) { const cell: [number, number, number] = [Math.floor(p.x + dir.x * t), Math.floor(p.y + dir.y * t), Math.floor(p.z + dir.z * t)]; if (isSolid(this.world.getVoxel(...cell))) { hit = cell; break; } last = cell; }
+    const target = place ? last : hit; if (!target) return;
+    if (place && this.playerOccupies(target)) return; this.world.edit(...target, place ? this.chosen : Voxel.Air); this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
+  }
+  private playerOccupies([x, y, z]: [number, number, number]) { const p = this.camera.getPosition(); return x + 1 > p.x - .32 && x < p.x + .32 && z + 1 > p.z - .32 && z < p.z + .32 && y + 1 > p.y - 1.6 && y < p.y + .2; }
+  private renderHotbar() { const ids = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand]; hotbar.innerHTML = ids.map((id, index) => `<div class="slot ${id === this.chosen ? 'active' : ''}">${index + 1} · ${voxelNames[id]}</div>`).join(''); }
+}
+
+const game = new Game(); const saved = new Store().load(); if (saved) seedInput.value = saved.seed;
+enterButton.onclick = () => { const seed = seedInput.value.trim() || `world-${Math.random().toString(36).slice(2, 10)}`; const restore = saved?.seed === seed ? saved : null; startCard.hidden = true; hud.hidden = false; game.start(seed, restore); };
