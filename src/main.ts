@@ -286,7 +286,8 @@ class Game {
     if (!this.world || amount === 0) return; const p = this.camera.getPosition(); (p as unknown as Record<string, number>)[axis] += amount;
     if (axis === 'y') {
       const collisionY = amount < 0 ? Math.floor(p.y - 1.6) : Math.floor(p.y + .15);
-      if (this.collidesAtY(p, collisionY)) { p.set(p.x, amount < 0 ? collisionY + 2.6 : collisionY - .15, p.z); if (amount < 0) this.onGround = true; this.velocity.y = 0; }
+      const blocked = amount < 0 ? this.hasGroundSupport(p, collisionY) : this.collidesAtY(p, collisionY);
+      if (blocked) { p.set(p.x, amount < 0 ? collisionY + 2.6 : collisionY - .15, p.z); if (amount < 0) this.onGround = true; this.velocity.y = 0; }
     } else if (this.collides(p)) (p as unknown as Record<string, number>)[axis] -= amount;
     this.camera.setPosition(p);
   }
@@ -299,6 +300,9 @@ class Game {
     if (!this.world) return false;
     for (const x of [p.x - .32, p.x + .32]) for (const z of [p.z - .32, p.z + .32]) if (isSolid(this.world.getVoxel(Math.floor(x), y, Math.floor(z)))) return true;
     return false;
+  }
+  private hasGroundSupport(p: pc.Vec3, y: number): boolean {
+    return !!this.world && isSolid(this.world.getVoxel(Math.floor(p.x), y, Math.floor(p.z)));
   }
   private interact(place: boolean) {
     if (!this.world) return; const p = this.camera.getPosition(); const dir = this.camera.forward;
