@@ -8,14 +8,18 @@ const compileModule = async (url, replacements = {}) => {
   const { code } = await transformWithEsbuild(source, url.pathname, { loader: 'ts', target: 'es2022', format: 'esm' });
   return `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 };
-const voxelUrl = await compileModule(new URL('../src/voxel.ts', import.meta.url));
+const macroUrl = await compileModule(new URL('../src/macro-world.ts', import.meta.url));
+const voxelUrl = await compileModule(new URL('../src/voxel.ts', import.meta.url), { "'./macro-world'": `'${macroUrl}'` });
 const voxel = await import(voxelUrl);
+const macro = await import(macroUrl);
 
-const { CHUNK_SIZE, Voxel, baseVoxel, chunkKey, floorDiv, isSolid, mod, normalizeSeed, voxelIndex } = voxel;
+const { CHUNK_SIZE, GENERATOR_VERSION, Voxel, baseVoxel, chunkKey, floorDiv, isRenderable, isSolid, mod, normalizeSeed, voxelIndex } = voxel;
 
 assert.equal(CHUNK_SIZE, 32, 'world chunk size must remain stable');
 assert.equal(isSolid(Voxel.Air), false, 'air must not collide');
 assert.equal(isSolid(Voxel.Stone), true, 'solid voxel must collide');
+assert.equal(isSolid(Voxel.Water), false, 'water must not collide');
+assert.equal(isRenderable(Voxel.Water), true, 'water must remain renderable');
 assert.equal(normalizeSeed('seedlands'), normalizeSeed('seedlands'), 'seed normalization must be deterministic');
 assert.notEqual(normalizeSeed('seedlands-a'), normalizeSeed('seedlands-b'), 'different seeds should not share this fixture hash');
 
@@ -30,13 +34,43 @@ assert.equal(voxelIndex(31, 31, 31), CHUNK_SIZE ** 3 - 1, 'last voxel index must
 assert.equal(chunkKey(-1, 0, 2), '-1,0,2', 'chunk key must preserve signed coordinates');
 
 const seed = normalizeSeed('hardening-determinism');
+assert.equal(GENERATOR_VERSION, 2, 'macro worldgen must advance the save compatibility version');
 const points = Array.from({ length: 49 }, (_, index) => [index - 24, (index * 11) % 40, 24 - index]);
 const firstPass = new Map(points.map(([x, y, z]) => [`${x},${y},${z}`, baseVoxel(seed, x, y, z)]));
 for (const [x, y, z] of [...points].reverse()) {
   assert.equal(baseVoxel(seed, x, y, z), firstPass.get(`${x},${y},${z}`), 'base world must not depend on sampling order');
 }
 
-const meshUrl = await compileModule(new URL('../src/world-mesh.ts', import.meta.url), { "'./voxel'": `'${voxelUrl}'` });
+const macroPoints = Array.from({ length: 81 }, (_, index) => [((index % 9) - 4) * 192, (Math.floor(index / 9) - 4) * 192]);
+const signature = macro.macroSignature(seed, macroPoints);
+assert.equal(macro.macroSignature(seed, [...macroPoints].reverse()), signature, 'macro signature must not depend on query order');
+assert.notEqual(signature, macro.macroSignature(normalizeSeed('hardening-determinism-other'), macroPoints), 'different seeds must produce distinct macro layouts');
+for (const [x, z] of [[31, 73], [255, -91], [-1, 255], [-257, -257]]) {
+  const before = macro.macroAt(seed, x, z), afterX = macro.macroAt(seed, x + 1, z), afterZ = macro.macroAt(seed, x, z + 1);
+  assert.ok(Math.abs(before.terrainHeight - afterX.terrainHeight) <= 5 && Math.abs(before.terrainHeight - afterZ.terrainHeight) <= 5, 'terrain must remain continuous across chunk and region boundaries');
+  assert.ok(Math.abs(before.temperature - afterX.temperature) < .03 && Math.abs(before.humidity - afterZ.humidity) < .03, 'climate must remain continuous across chunk and region boundaries');
+}
+let riverBoundary = null;
+outer: for (let x = -1536; x <= 1536; x += 384) for (let z = -1536; z <= 1536; z += 384) for (const river of macro.riverDescriptorsNear(seed, x, z)) {
+  for (let index = 1; index < river.path.length; index += 1) {
+    const [ax, az] = river.path[index - 1], [bx, bz] = river.path[index];
+    const crossesX = floorDiv(ax, CHUNK_SIZE) !== floorDiv(bx, CHUNK_SIZE);
+    const crossesZ = floorDiv(az, CHUNK_SIZE) !== floorDiv(bz, CHUNK_SIZE);
+    if (!crossesX && !crossesZ) continue;
+    const axis = crossesX ? 0 : 1;
+    const start = axis === 0 ? ax : az, end = axis === 0 ? bx : bz;
+    const boundary = (floorDiv(Math.min(start, end), CHUNK_SIZE) + 1) * CHUNK_SIZE;
+    const t = (boundary - start) / (end - start);
+    if (t <= 0 || t >= 1) continue;
+    const crossX = ax + (bx - ax) * t, crossZ = az + (bz - az) * t;
+    const first = axis === 0 ? macro.macroAt(seed, boundary - .25, crossZ) : macro.macroAt(seed, crossX, boundary - .25);
+    const second = axis === 0 ? macro.macroAt(seed, boundary + .25, crossZ) : macro.macroAt(seed, crossX, boundary + .25);
+    if (first.hydrology.id === river.id && second.hydrology.id === river.id) { riverBoundary = river.id; break outer; }
+  }
+}
+assert.ok(riverBoundary, 'a canonical river must remain continuous across a chunk boundary');
+
+const meshUrl = await compileModule(new URL('../src/world-mesh.ts', import.meta.url), { "'./voxel'": `'${voxelUrl}'`, "'./macro-world'": `'${macroUrl}'` });
 const storageUrl = await compileModule(new URL('../src/world-storage.ts', import.meta.url), { "'./voxel'": `'${voxelUrl}'` });
 const { makeChunk, meshChunk } = await import(meshUrl);
 const { decodeWorldSave, encodeWorldSave } = await import(storageUrl);
@@ -64,7 +98,7 @@ for (const [cx, cy, cz] of [[-2, 0, 1], [0, 1, 0], [3, 0, -4]]) {
 
 const mutation = [[-33, 20, 32, Voxel.Air], [32, 21, -1, Voxel.Wood]];
 const encoded = encodeWorldSave('roundtrip-seed', [1.5, 34, -2], mutation);
-assert.deepEqual(decodeWorldSave(encoded), { seed: 'roundtrip-seed', generatorVersion: 1, player: [1.5, 34, -2], changes: mutation }, 'save codec must round-trip seed, version, player, and mutations');
-assert.equal(decodeWorldSave(JSON.stringify({ seed: 'roundtrip-seed', generatorVersion: 0, player: [0, 0, 0], changes: [] })), null, 'a generator-version mismatch must not restore an incompatible world');
+assert.deepEqual(decodeWorldSave(encoded), { seed: 'roundtrip-seed', generatorVersion: 2, player: [1.5, 34, -2], changes: mutation }, 'save codec must round-trip seed, version, player, and mutations');
+assert.equal(decodeWorldSave(JSON.stringify({ seed: 'roundtrip-seed', generatorVersion: 1, player: [0, 0, 0], changes: [] })), null, 'a generator-version mismatch must not restore an incompatible world');
 
 console.log('Voxel deterministic checks passed.');

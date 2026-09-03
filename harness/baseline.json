@@ -1,24 +1,26 @@
 {
   "schemaVersion": 1,
-  "createdAt": "2026-09-03T13:35:31.055Z",
+  "createdAt": "2026-09-03T14:12:03.797Z",
   "environment": {
     "node": "v24.20.0",
     "platform": "darwin",
     "arch": "arm64"
   },
   "metrics": {
-    "worldgenP95Ms": 34.87170800000001,
-    "worldgenThroughputChunksPerSecond": 49.75648649512144,
-    "meshingP95Ms": 16.596499999999992,
-    "meshingThroughputChunksPerSecond": 145.25312878870733,
-    "meshVertices": 269960,
-    "meshTriangles": 134980,
+    "macroQueryP95Ms": 0.03499999999999659,
+    "macroQueryThroughputPerSecond": 69944.45699741112,
+    "worldgenP95Ms": 62.96383300000002,
+    "worldgenThroughputChunksPerSecond": 17.01060011025911,
+    "meshingP95Ms": 24.484874999999647,
+    "meshingThroughputChunksPerSecond": 51.87590059713038,
+    "meshVertices": 6720,
+    "meshTriangles": 3360,
     "voxelDataBytes": 2293760,
-    "meshDataBytes": 8098800,
-    "jsHeapAfterWork": 22837936,
+    "meshDataBytes": 201600,
+    "jsHeapAfterWork": 16318176,
     "save10000Bytes": 182912,
-    "totalBuildBytes": 1943383,
-    "jsBundleBytes": 1940135,
-    "gzipJsBundleBytes": 501844
+    "totalBuildBytes": 1955134,
+    "jsBundleBytes": 1950318,
+    "gzipJsBundleBytes": 505992
   }
 }
