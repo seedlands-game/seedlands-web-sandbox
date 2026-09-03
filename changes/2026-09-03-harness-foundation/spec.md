@@ -48,3 +48,5 @@ Changed paths: `src/world-mesh.ts`, `src/world-storage.ts`, `src/world-worker.ts
 Validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm harness:baseline` passed; `CI=true corepack pnpm harness` passed. The Chromium E2E stages Load, Input, Player, Interaction, Streaming and Persistence all passed. The baseline records 1,940,135 B production JavaScript / 501,844 B gzip and 182,912 B for 10,000 mutations.
 
 Known limitation: browser GPU memory does not have a portable exact query, so the Harness reports Node heap plus deterministic voxel/mesh typed-array payloads. Timing comparisons report (rather than automatically block) regressions because machine load varies; correctness and browser stages remain independent hard checks.
+
+Git: implementation committed as `f1ab302` on `codex/harness-foundation`; the delivery-record commit and configured-upstream push follow this snapshot.
