@@ -3,6 +3,7 @@ import {
   clickCanvasCenter,
   lockPointer,
   moveHarnessPlayer,
+  prepareFlatMovement,
   removeHarnessVoxel,
   snapshot,
   startHarnessWorld,
@@ -43,6 +44,22 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     await waitForSnapshot(page, (current) => current.interactionAttempts === 1);
     stages.input = 'PASS';
     stages.player = 'PASS';
+  });
+
+  test('moves across a flat voxel platform without overlapping its floor', async ({ page }) => {
+    await startHarnessWorld(page, 'seedlands-player-collision');
+    await prepareFlatMovement(page);
+    const before = await snapshot(page);
+    expect(before).not.toBeNull();
+    if (!before) throw new Error('Seedlands harness snapshot is unavailable before flat movement.');
+    expect(before.colliding).toBe(false);
+
+    await lockPointer(page);
+    await page.keyboard.down('KeyW');
+    const after = await waitForSnapshot(page, (current) => Math.abs(current.player[2] - before.player[2]) > 3);
+    await page.keyboard.up('KeyW');
+    expect(after.player[1]).toBeCloseTo(before.player[1], 2);
+    expect(after.onGround).toBe(true);
   });
 
   test('persists a controlled world edit through the production edit and Store paths', async ({ page }) => {

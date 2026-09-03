@@ -41,6 +41,7 @@ type HarnessSnapshot = {
   meshingQueue: number;
   deferredRemeshes: number;
   onGround: boolean;
+  colliding: boolean;
   interactionAttempts: number;
   mutationCount: number;
   storageBytes: number;
@@ -54,6 +55,7 @@ declare global {
       burstEdits: () => void;
       removeVoxelAt: (x: number, y: number, z: number) => void;
       movePlayerTo: (x: number, y: number, z: number) => void;
+      prepareFlatMovement: () => void;
     };
   }
 }
@@ -70,6 +72,10 @@ const mapPanel = document.querySelector<HTMLElement>('#macro-map-panel')!;
 const mapClose = document.querySelector<HTMLButtonElement>('#map-close')!;
 const mapLayer = document.querySelector<HTMLSelectElement>('#map-layer')!;
 const mapCanvas = document.querySelector<HTMLCanvasElement>('#macro-map')!;
+const PLAYER_HALF_WIDTH = 0.32;
+const PLAYER_FEET_OFFSET = 1.6;
+const PLAYER_HEAD_OFFSET = 0.2;
+const COLLISION_EPSILON = 0.001;
 
 type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hydrology';
 
@@ -496,6 +502,7 @@ class Game {
         burstEdits: () => this.burstHarnessEdits(),
         removeVoxelAt: (x, y, z) => this.removeVoxelForHarness(x, y, z),
         movePlayerTo: (x, y, z) => this.movePlayerForHarness(x, y, z),
+        prepareFlatMovement: () => this.prepareFlatMovementFixture(),
       };
     }
   }
@@ -562,7 +569,7 @@ class Game {
     this.onGround = false;
     this.moveAxis('y', this.velocity.y * dt);
     this.world.updateStreaming(this.camera.getPosition());
-    const feetY = this.camera.getPosition().y - 1.6;
+    const feetY = this.camera.getPosition().y - PLAYER_FEET_OFFSET;
     const telemetry = this.world.telemetry;
     const macro = macroAt(this.world.seed, this.camera.getPosition().x, this.camera.getPosition().z);
     const water =
@@ -577,10 +584,10 @@ class Game {
     const p = this.camera.getPosition();
     (p as unknown as Record<string, number>)[axis] += amount;
     if (axis === 'y') {
-      const collisionY = amount < 0 ? Math.floor(p.y - 1.6) : Math.floor(p.y + 0.15);
-      const blocked = amount < 0 ? this.hasGroundSupport(p, collisionY) : this.collidesAtY(p, collisionY);
+      const collisionY = amount < 0 ? Math.floor(p.y - PLAYER_FEET_OFFSET) : Math.floor(p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON);
+      const blocked = this.collidesAtY(p, collisionY);
       if (blocked) {
-        p.set(p.x, amount < 0 ? collisionY + 2.6 : collisionY - 0.15, p.z);
+        p.set(p.x, amount < 0 ? collisionY + 1 + PLAYER_FEET_OFFSET : collisionY - PLAYER_HEAD_OFFSET, p.z);
         if (amount < 0) this.onGround = true;
         this.velocity.y = 0;
       }
@@ -589,21 +596,18 @@ class Game {
   }
   private collides(p: pc.Vec3): boolean {
     if (!this.world) return false;
-    for (const x of [p.x - 0.32, p.x + 0.32])
-      for (const z of [p.z - 0.32, p.z + 0.32])
-        for (const y of [p.y - 1.6, p.y - 0.7, p.y + 0.15])
+    for (const x of [p.x - PLAYER_HALF_WIDTH, p.x + PLAYER_HALF_WIDTH])
+      for (const z of [p.z - PLAYER_HALF_WIDTH, p.z + PLAYER_HALF_WIDTH])
+        for (const y of [p.y - PLAYER_FEET_OFFSET + COLLISION_EPSILON, p.y - 0.7, p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON])
           if (isSolid(this.world.getVoxel(Math.floor(x), Math.floor(y), Math.floor(z)))) return true;
     return false;
   }
   private collidesAtY(p: pc.Vec3, y: number): boolean {
     if (!this.world) return false;
-    for (const x of [p.x - 0.32, p.x + 0.32])
-      for (const z of [p.z - 0.32, p.z + 0.32])
+    for (const x of [p.x - PLAYER_HALF_WIDTH, p.x + PLAYER_HALF_WIDTH])
+      for (const z of [p.z - PLAYER_HALF_WIDTH, p.z + PLAYER_HALF_WIDTH])
         if (isSolid(this.world.getVoxel(Math.floor(x), y, Math.floor(z)))) return true;
     return false;
-  }
-  private hasGroundSupport(p: pc.Vec3, y: number): boolean {
-    return !!this.world && isSolid(this.world.getVoxel(Math.floor(p.x), y, Math.floor(p.z)));
   }
   private interact(place: boolean) {
     this.interactionAttempts += 1;
@@ -633,7 +637,7 @@ class Game {
   private playerOccupies([x, y, z]: [number, number, number]) {
     const p = this.camera.getPosition();
     return (
-      x + 1 > p.x - 0.32 && x < p.x + 0.32 && z + 1 > p.z - 0.32 && z < p.z + 0.32 && y + 1 > p.y - 1.6 && y < p.y + 0.2
+      x + 1 > p.x - PLAYER_HALF_WIDTH && x < p.x + PLAYER_HALF_WIDTH && z + 1 > p.z - PLAYER_HALF_WIDTH && z < p.z + PLAYER_HALF_WIDTH && y + 1 > p.y - PLAYER_FEET_OFFSET && y < p.y + PLAYER_HEAD_OFFSET
     );
   }
   private toggleMap() {
@@ -658,6 +662,7 @@ class Game {
       meshingQueue: telemetry?.meshingQueue ?? 0,
       deferredRemeshes: telemetry?.deferredRemeshes ?? 0,
       onGround: this.onGround,
+      colliding: this.collides(p),
       interactionAttempts: this.interactionAttempts,
       mutationCount: this.world?.changes.size ?? 0,
       storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
@@ -686,6 +691,15 @@ class Game {
   private movePlayerForHarness(x: number, y: number, z: number) {
     if (!this.world) return;
     this.camera.setPosition(x, y, z);
+    this.world.updateStreaming(this.camera.getPosition());
+  }
+  private prepareFlatMovementFixture() {
+    if (!this.world) return;
+    for (let x = -2; x <= 2; x += 1) for (let z = -8; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Stone);
+    this.keys.clear();
+    this.velocity.set(0, 0, 0);
+    this.onGround = true;
+    this.camera.setPosition(0.5, 58.6, 0.5);
     this.world.updateStreaming(this.camera.getPosition());
   }
   private queueSave() {

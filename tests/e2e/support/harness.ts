@@ -8,6 +8,8 @@ export type HarnessSnapshot = {
   renderedChunks: number;
   generationQueue: number;
   meshingQueue: number;
+  onGround: boolean;
+  colliding: boolean;
   interactionAttempts: number;
   mutationCount: number;
   storageBytes: number;
@@ -18,6 +20,7 @@ type HarnessWindow = Window & {
     snapshot: () => HarnessSnapshot;
     removeVoxelAt: (x: number, y: number, z: number) => void;
     movePlayerTo: (x: number, y: number, z: number) => void;
+    prepareFlatMovement: () => void;
   };
 };
 
@@ -97,4 +100,12 @@ export async function moveHarnessPlayer(page: Page, x: number, y: number, z: num
     },
     [x, y, z],
   );
+}
+
+export async function prepareFlatMovement(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const harness = (window as HarnessWindow).__seedlandsHarness;
+    if (!harness) throw new Error('Seedlands flat-movement fixture is unavailable.');
+    harness.prepareFlatMovement();
+  });
 }
