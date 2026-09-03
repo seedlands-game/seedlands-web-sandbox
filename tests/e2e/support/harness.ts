@@ -22,6 +22,7 @@ type HarnessWindow = Window & {
     movePlayerTo: (x: number, y: number, z: number) => void;
     prepareFlatMovement: () => void;
     prepareCenterExcavation: () => void;
+    prepareStepDown: () => void;
   };
 };
 
@@ -116,5 +117,13 @@ export async function prepareCenterExcavation(page: Page): Promise<void> {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands center-excavation fixture is unavailable.');
     harness.prepareCenterExcavation();
+  });
+}
+
+export async function prepareStepDown(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const harness = (window as HarnessWindow).__seedlandsHarness;
+    if (!harness) throw new Error('Seedlands step-down fixture is unavailable.');
+    harness.prepareStepDown();
   });
 }
