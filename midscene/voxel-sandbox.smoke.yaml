@@ -1,0 +1,20 @@
+# Run with: npm run midscene:smoke
+# Prerequisite: npm run dev -- --host 127.0.0.1
+page:
+  url: ${VOXEL_SANDBOX_URL}
+
+agent:
+  testId: seedlands-voxel-sandbox-smoke
+  groupName: Seedlands local smoke
+  groupDescription: Validates the create-world and rendered-HUD entry path.
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 12
+
+tasks:
+  - name: Create a deterministic voxel world
+    flow:
+      - ai: In the field labelled "世界 Seed", enter "midscene-voxel-smoke-2026" and click the button "进入世界".
+      - sleep: 7000
+      - aiAssert: A running 3D voxel sandbox HUD is visible. It has a center crosshair, a debug panel showing FPS and the seed "midscene-voxel-smoke-2026", and four numbered material slots at the bottom.
+      - aiAssert: The debug panel reports a nonzero Loaded chunk count and identifies a WebGL or WebGPU graphics backend.
