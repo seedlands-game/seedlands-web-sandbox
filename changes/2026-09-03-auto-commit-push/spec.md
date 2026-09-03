@@ -1,6 +1,6 @@
 # Automate Change Commit and Push
 
-**Status:** Delivered locally; push blocked (no remote)
+**Status:** Delivered
 
 ## Context & Goal
 
@@ -25,16 +25,16 @@
 
 - [x] `AGENTS.md` 写明自动 commit/push 与无远端例外。
 - [x] 已完成 changes 已按语义提交：`f90f1b5`、`365e681`。
-- [x] 已读取远端/upstream：当前仓库未配置任何 remote。
+- [x] GitHub 私有仓库已创建，`origin/main` 已配置并完成推送。
 
 ## Tasks & Current State
 
 1. [done] 写入仓库规则。
 2. [done] 提交当前已完成 changes。
-3. [done] 记录外部阻塞。
+3. [done] 创建已授权的远端并完成推送。
 
 ## Delivery Snapshot
 
-Local commits: `f90f1b5 chore: establish change delivery workflow`; `365e681 feat: harden voxel streaming and validation`.
+Remote: `https://github.com/KiritoKing/voxel-sandbox-foundation`（private），默认分支为 `main`。
 
-Push blocked: `git remote -v` 无输出，当前 `main` 没有 upstream。最小下一步是用户明确提供或授权创建 GitHub 私有仓库的账户与仓库名；随后为 `main` 设置 `origin` 并推送。
+Readback: 创建并推送后，本地 HEAD 与 `origin/main` 都为 `cd7a10e64f5067f9c247e56e904954f7c4e4c491`；该状态回填提交会按本规则继续推送。
