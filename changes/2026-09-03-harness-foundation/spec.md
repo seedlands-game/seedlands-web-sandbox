@@ -1,6 +1,6 @@
 # Harness Foundation
 
-**Status:** Delivered
+**Status:** Delivered locally; remote push pending authorization
 
 ## Context & Goal
 
@@ -39,7 +39,7 @@
 1. [done] 提取可复用的生产 Chunk geometry 与 persistence codec。
 2. [done] 扩展确定性测试和新增浏览器 E2E。
 3. [done] 实现基准、baseline 和报告。
-4. [done] 更新 HUD/README，执行准出、提交并推送。
+4. [blocked] 更新 HUD/README，执行准出并创建本地提交；向 GitHub 推送需用户明确授权该外发目标。
 
 ## Delivery Snapshot
 
@@ -49,4 +49,6 @@ Validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm harness:
 
 Known limitation: browser GPU memory does not have a portable exact query, so the Harness reports Node heap plus deterministic voxel/mesh typed-array payloads. Timing comparisons report (rather than automatically block) regressions because machine load varies; correctness and browser stages remain independent hard checks.
 
-Git: implementation committed as `f1ab302` on `codex/harness-foundation`; the delivery-record commit and configured-upstream push follow this snapshot.
+Git: implementation committed as `f1ab302` and delivery record as `e921ae9` on `codex/harness-foundation`.
+
+Push: blocked pending explicit authorization to publish this source and delivery record to `origin` (`https://github.com/KiritoKing/voxel-sandbox-foundation.git`). The remote was not modified.
