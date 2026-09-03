@@ -21,6 +21,7 @@ type HarnessWindow = Window & {
     removeVoxelAt: (x: number, y: number, z: number) => void;
     movePlayerTo: (x: number, y: number, z: number) => void;
     prepareFlatMovement: () => void;
+    prepareCenterExcavation: () => void;
   };
 };
 
@@ -107,5 +108,13 @@ export async function prepareFlatMovement(page: Page): Promise<void> {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands flat-movement fixture is unavailable.');
     harness.prepareFlatMovement();
+  });
+}
+
+export async function prepareCenterExcavation(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const harness = (window as HarnessWindow).__seedlandsHarness;
+    if (!harness) throw new Error('Seedlands center-excavation fixture is unavailable.');
+    harness.prepareCenterExcavation();
   });
 }
