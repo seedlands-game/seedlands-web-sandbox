@@ -19,6 +19,24 @@
       <section id="hud" hidden>
         <div id="crosshair">+</div>
         <div id="debug" class="panel"></div>
+        <button id="map-toggle" class="panel" type="button">Macro 地图</button>
+        <section id="macro-map-panel" class="panel" hidden aria-label="Macro 世界地图总览">
+          <div class="map-header">
+            <strong>Macro 世界总览</strong><button id="map-close" type="button">关闭</button>
+          </div>
+          <label
+            >图层
+            <select id="map-layer">
+              <option value="elevation">Elevation</option>
+              <option value="biome">Biome</option>
+              <option value="temperature">Temperature</option>
+              <option value="humidity">Humidity</option>
+              <option value="hydrology">River / Lake</option>
+            </select></label
+          >
+          <canvas id="macro-map" width="96" height="96"></canvas>
+          <small>以世界原点为中心的 6.1 km Macro 采样；不生成 Chunk。</small>
+        </section>
         <div id="help" class="panel">
           WASD 移动 · 鼠标视角 · 空格跳跃 · 左键破坏 · 右键放置 · 1–4 选材质 · Esc 解锁鼠标
         </div>
