@@ -12,7 +12,7 @@ type ChunkTask = { id: number; seed: number; cx: number; cy: number; cz: number;
 
 type HarnessSnapshot = {
   frameMs: number; player: [number, number, number]; loadedChunks: number; renderedChunks: number;
-  generationQueue: number; meshingQueue: number; deferredRemeshes: number; onGround: boolean; mutationCount: number; storageBytes: number;
+  generationQueue: number; meshingQueue: number; deferredRemeshes: number; onGround: boolean; colliding: boolean; mutationCount: number; storageBytes: number;
 };
 
 declare global {
@@ -21,6 +21,7 @@ declare global {
       snapshot: () => HarnessSnapshot;
       moveTo: (x: number, z: number) => void;
       burstEdits: () => void;
+      prepareFlatMovement: () => void;
     };
   }
 }
@@ -37,6 +38,10 @@ const mapPanel = document.querySelector<HTMLElement>('#macro-map-panel')!;
 const mapClose = document.querySelector<HTMLButtonElement>('#map-close')!;
 const mapLayer = document.querySelector<HTMLSelectElement>('#map-layer')!;
 const mapCanvas = document.querySelector<HTMLCanvasElement>('#macro-map')!;
+const PLAYER_HALF_WIDTH = .32;
+const PLAYER_FEET_OFFSET = 1.6;
+const PLAYER_HEAD_OFFSET = .2;
+const COLLISION_EPSILON = .001;
 
 type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hydrology';
 
@@ -252,7 +257,7 @@ class Game {
     const p = restore?.player ?? [0, 34, 0]; this.camera.setPosition(...p); this.world.updateStreaming(this.camera.getPosition());
     this.installInput(); mapToggle.onclick = () => this.toggleMap(); mapClose.onclick = () => macroMapViewer.close(); this.renderHotbar(); this.app.on('update', (dt: number) => this.update(Math.min(dt, .05))); window.addEventListener('resize', this.onResize); window.onpagehide = () => this.flushSave();
     if (new URLSearchParams(location.search).has('harness')) {
-      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot(), moveTo: (x, z) => this.moveHarnessPlayer(x, z), burstEdits: () => this.burstHarnessEdits() };
+      window.__seedlandsHarness = { snapshot: () => this.harnessSnapshot(), moveTo: (x, z) => this.moveHarnessPlayer(x, z), burstEdits: () => this.burstHarnessEdits(), prepareFlatMovement: () => this.prepareFlatMovementFixture() };
     }
   }
   private installInput() {
@@ -275,7 +280,7 @@ class Game {
     this.velocity.y -= 20 * dt; if (this.keys.has('Space') && this.onGround) { this.velocity.y = 7.5; this.onGround = false; }
     this.moveAxis('x', this.velocity.x * dt); this.moveAxis('z', this.velocity.z * dt); this.onGround = false; this.moveAxis('y', this.velocity.y * dt);
     this.world.updateStreaming(this.camera.getPosition());
-    const feetY = this.camera.getPosition().y - 1.6;
+    const feetY = this.camera.getPosition().y - PLAYER_FEET_OFFSET;
     const telemetry = this.world.telemetry;
     const macro = macroAt(this.world.seed, this.camera.getPosition().x, this.camera.getPosition().z);
     const water = macro.hydrology.kind === 'dry' ? 'dry' : `${macro.hydrology.kind}${macro.hydrology.water ? ' water' : ' bank'} (${macro.hydrology.id})`;
@@ -285,24 +290,21 @@ class Game {
   private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
     if (!this.world || amount === 0) return; const p = this.camera.getPosition(); (p as unknown as Record<string, number>)[axis] += amount;
     if (axis === 'y') {
-      const collisionY = amount < 0 ? Math.floor(p.y - 1.6) : Math.floor(p.y + .15);
-      const blocked = amount < 0 ? this.hasGroundSupport(p, collisionY) : this.collidesAtY(p, collisionY);
-      if (blocked) { p.set(p.x, amount < 0 ? collisionY + 2.6 : collisionY - .15, p.z); if (amount < 0) this.onGround = true; this.velocity.y = 0; }
+      const collisionY = amount < 0 ? Math.floor(p.y - PLAYER_FEET_OFFSET) : Math.floor(p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON);
+      const blocked = this.collidesAtY(p, collisionY);
+      if (blocked) { p.set(p.x, amount < 0 ? collisionY + 1 + PLAYER_FEET_OFFSET : collisionY - PLAYER_HEAD_OFFSET, p.z); if (amount < 0) this.onGround = true; this.velocity.y = 0; }
     } else if (this.collides(p)) (p as unknown as Record<string, number>)[axis] -= amount;
     this.camera.setPosition(p);
   }
   private collides(p: pc.Vec3): boolean {
     if (!this.world) return false;
-    for (const x of [p.x - .32, p.x + .32]) for (const z of [p.z - .32, p.z + .32]) for (const y of [p.y - 1.6, p.y - .7, p.y + .15]) if (isSolid(this.world.getVoxel(Math.floor(x), Math.floor(y), Math.floor(z)))) return true;
+    for (const x of [p.x - PLAYER_HALF_WIDTH, p.x + PLAYER_HALF_WIDTH]) for (const z of [p.z - PLAYER_HALF_WIDTH, p.z + PLAYER_HALF_WIDTH]) for (const y of [p.y - PLAYER_FEET_OFFSET + COLLISION_EPSILON, p.y - .7, p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON]) if (isSolid(this.world.getVoxel(Math.floor(x), Math.floor(y), Math.floor(z)))) return true;
     return false;
   }
   private collidesAtY(p: pc.Vec3, y: number): boolean {
     if (!this.world) return false;
-    for (const x of [p.x - .32, p.x + .32]) for (const z of [p.z - .32, p.z + .32]) if (isSolid(this.world.getVoxel(Math.floor(x), y, Math.floor(z)))) return true;
+    for (const x of [p.x - PLAYER_HALF_WIDTH, p.x + PLAYER_HALF_WIDTH]) for (const z of [p.z - PLAYER_HALF_WIDTH, p.z + PLAYER_HALF_WIDTH]) if (isSolid(this.world.getVoxel(Math.floor(x), y, Math.floor(z)))) return true;
     return false;
-  }
-  private hasGroundSupport(p: pc.Vec3, y: number): boolean {
-    return !!this.world && isSolid(this.world.getVoxel(Math.floor(p.x), y, Math.floor(p.z)));
   }
   private interact(place: boolean) {
     if (!this.world) return; const p = this.camera.getPosition(); const dir = this.camera.forward;
@@ -311,7 +313,7 @@ class Game {
     const target = place ? last : hit; if (!target) return;
     if (place && this.playerOccupies(target)) return; this.world.edit(...target, place ? this.chosen : Voxel.Air); this.queueSave();
   }
-  private playerOccupies([x, y, z]: [number, number, number]) { const p = this.camera.getPosition(); return x + 1 > p.x - .32 && x < p.x + .32 && z + 1 > p.z - .32 && z < p.z + .32 && y + 1 > p.y - 1.6 && y < p.y + .2; }
+  private playerOccupies([x, y, z]: [number, number, number]) { const p = this.camera.getPosition(); return x + 1 > p.x - PLAYER_HALF_WIDTH && x < p.x + PLAYER_HALF_WIDTH && z + 1 > p.z - PLAYER_HALF_WIDTH && z < p.z + PLAYER_HALF_WIDTH && y + 1 > p.y - PLAYER_FEET_OFFSET && y < p.y + PLAYER_HEAD_OFFSET; }
   private toggleMap() {
     if (!this.world) return;
     if (macroMapViewer.isOpen) { macroMapViewer.close(); return; }
@@ -321,7 +323,7 @@ class Game {
     const p = this.camera.getPosition(); const telemetry = this.world?.telemetry;
     return {
       frameMs: this.frameMs, player: [p.x, p.y, p.z], loadedChunks: telemetry?.loadedChunks ?? 0, renderedChunks: telemetry?.renderedChunks ?? 0,
-      generationQueue: telemetry?.generationQueue ?? 0, meshingQueue: telemetry?.meshingQueue ?? 0, deferredRemeshes: telemetry?.deferredRemeshes ?? 0, onGround: this.onGround, mutationCount: this.world?.changes.size ?? 0,
+      generationQueue: telemetry?.generationQueue ?? 0, meshingQueue: telemetry?.meshingQueue ?? 0, deferredRemeshes: telemetry?.deferredRemeshes ?? 0, onGround: this.onGround, colliding: this.collides(p), mutationCount: this.world?.changes.size ?? 0,
       storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
     };
   }
@@ -334,6 +336,12 @@ class Game {
     const p = this.camera.getPosition(), y = Math.floor(p.y - 4), x = Math.floor(p.x) + 4, z = Math.floor(p.z) + 4;
     for (let index = 0; index < 6; index += 1) this.world.edit(x + index, y, z, index % 2 ? Voxel.Dirt : Voxel.Air);
     this.queueSave();
+  }
+  private prepareFlatMovementFixture() {
+    if (!this.world) return;
+    for (let x = -2; x <= 2; x += 1) for (let z = -8; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Stone);
+    this.keys.clear(); this.velocity.set(0, 0, 0); this.onGround = true;
+    this.camera.setPosition(.5, 58.6, .5); this.world.updateStreaming(this.camera.getPosition());
   }
   private queueSave() {
     if (this.saveTimer !== null) return;

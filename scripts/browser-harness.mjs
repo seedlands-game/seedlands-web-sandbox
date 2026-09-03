@@ -63,6 +63,18 @@ try {
   stages.input = 'PASS';
   stages.player = 'PASS';
 
+  await page.evaluate(() => window.__seedlandsHarness?.prepareFlatMovement());
+  const beforeFlatMovement = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  assert.equal(beforeFlatMovement?.colliding, false, 'Player: standing on a flat voxel platform must not overlap its floor');
+  await page.keyboard.down('KeyW');
+  await page.waitForTimeout(850);
+  await page.keyboard.up('KeyW');
+  await page.waitForFunction(() => window.__seedlandsHarness?.snapshot().onGround === true, undefined, { timeout: 3000 });
+  const afterFlatMovement = await page.evaluate(() => window.__seedlandsHarness?.snapshot());
+  assert.ok(afterFlatMovement && Math.abs(afterFlatMovement.player[2] - beforeFlatMovement.player[2]) > 3, `Player: movement on a flat voxel platform was blocked (${JSON.stringify({ beforeFlatMovement, afterFlatMovement })})`);
+  assert.ok(Math.abs(afterFlatMovement.player[1] - beforeFlatMovement.player[1]) < .01, 'Player: flat movement changed the grounded camera height');
+  stages.flatMovement = 'PASS';
+
   await page.mouse.move(640, 640);
   await page.waitForTimeout(150);
   await page.mouse.click(640, 360, { button: 'left' });
