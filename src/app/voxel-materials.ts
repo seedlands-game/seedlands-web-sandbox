@@ -1,4 +1,5 @@
 import * as pc from 'playcanvas';
+import { leafOpacity } from '../client/leaf-opacity';
 import { publicAssetUrl } from '../client/public-asset-url';
 import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '../world/voxel';
 import type { MeshPart } from './app-contracts';
@@ -47,10 +48,7 @@ function drawMirroredTile(image: HTMLImageElement, column: number, row: number, 
       const x = pixel % 128;
       const y = Math.floor(pixel / 128);
       const brightness = (pixels.data[index] + pixels.data[index + 1] * 1.5 + pixels.data[index + 2]) / 3.5;
-      const cellX = Math.floor(x / 16);
-      const cellY = Math.floor(y / 16);
-      const deterministicGap = (cellX * 13 + cellY * 17 + (cellX ^ cellY) * 5) % 7 < 3;
-      pixels.data[index + 3] = brightness < 35 || deterministicGap ? 0 : 255;
+      pixels.data[index + 3] = leafOpacity(x, y, brightness);
     }
     context.putImageData(pixels, 0, 0);
   }
