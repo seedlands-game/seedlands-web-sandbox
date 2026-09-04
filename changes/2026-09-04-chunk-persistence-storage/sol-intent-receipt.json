@@ -1,0 +1,31 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "复核 Change 6 的浏览器内 Chunk 持久化架构：控制快照空间、避免主线程与全量写放大，并明确与 Change 5 事务边界的并行协作契约。",
+  "evidence": [
+    "当前每个 32 立方 Chunk 的 canonical voxel 是 65536 字节 Uint16Array。",
+    "当前浏览器适配器把 Uint16Array 展开为 JSON number 数组，并把全部 snapshot 同步重写到 localStorage。",
+    "当前客户端卸载 GPU Chunk，但 GameServer 的 authoritative Chunk map 没有对应淘汰路径。",
+    "Change 5 尚待精确 hash 审核，并把同步 flushDirtyChunks 与 commit 标脏作为既有边界。",
+    "候选方案是版本化自适应二进制 codec、IndexedDB 分 Chunk 事务写入和异步 load/save/unload。"
+  ],
+  "necessary_paths": [
+    "/Users/bytedance/Downloads/_sorted/documents/Change%206%20%E2%80%94%20Chunk%20Persistence%20Foundation.md",
+    "src/client/browser-chunk-persistence.ts",
+    "src/server/persistence/chunk-persistence.ts",
+    "src/server/game-server.ts",
+    "src/app/main.ts",
+    "changes/2026-09-04-client-server-foundation/spec.md",
+    "/Users/bytedance/.codex/worktrees/c371/游戏Demo/changes/2026-09-04-world-mutation-transaction/spec.md"
+  ],
+  "output_limit": {
+    "max_characters": 1600
+  },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}

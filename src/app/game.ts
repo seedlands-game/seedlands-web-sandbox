@@ -3,6 +3,7 @@ import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
 import { PerformanceTelemetry } from '../client/performance-telemetry';
 import { GameServer } from '../server/game-server';
+import { CHUNK_SIZE, floorDiv } from '../world/voxel';
 import { appElements } from './app-elements';
 import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession, StreamingVariant } from './app-contracts';
 import { BrowserWorldStore } from './browser-world-store';
@@ -31,25 +32,30 @@ export class Game {
   private performanceTelemetry = new PerformanceTelemetry({ now: () => performance.now() });
   private readonly store = new BrowserWorldStore();
   private readonly macroMap = new MacroMapViewer(appElements);
-  private persistence = new BrowserChunkPersistence();
+  private persistence: BrowserChunkPersistence | null = null;
   private serverPlayerId: string | null = null;
   private seedText = '';
   private qualityLevel: QualityLevel = 'medium';
   private saveTimer: number | null = null;
+  private saveInFlight: Promise<void> = Promise.resolve();
   private removeHarness: (() => void) | null = null;
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
 
   constructor() {
     window.addEventListener('resize', () => this.app?.resizeCanvas());
-    window.addEventListener('pagehide', () => this.flushSave());
+    window.addEventListener('pagehide', () => void this.flushSave().catch(() => undefined));
   }
 
   loadSavedSession() {
     return this.store.load();
   }
 
+  async loadLatestWorldSeed() {
+    return (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
+  }
+
   async start(seedText: string, restore: RestoredSession | null) {
-    this.flushSave();
+    await this.flushSave();
     this.disposeRuntime();
     this.seedText = seedText;
     this.qualityLevel = appElements.qualitySelect.value as QualityLevel;
@@ -63,7 +69,9 @@ export class Game {
       chunkLatencyIncidentMs: this.performanceProfile.chunkLatencyIncidentMs,
     });
     this.lastFrameTimestamp = performance.now();
-    this.persistence = restore?.seed === seedText ? restore.persistence : new BrowserChunkPersistence();
+    this.persistence = await BrowserChunkPersistence.open(seedText, {
+      legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
+    });
     this.app = this.createApplication();
     const light = this.createSun(this.app, quality.shadowQuality !== 'off');
     this.camera = this.createCamera(this.app, quality.fogEnd + 18);
@@ -85,7 +93,13 @@ export class Game {
     );
     this.lifecycle.worldInstanceId += 1;
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
-    const position = restore?.player ?? [0, 34, 0];
+    const position: [number, number, number] = this.persistence.restoredPlayer ??
+      (restore?.seed === seedText ? restore.player : null) ?? [0, 34, 0];
+    await server.ensureChunkNeighborhood(
+      floorDiv(position[0], CHUNK_SIZE),
+      floorDiv(position[1], CHUNK_SIZE),
+      floorDiv(position[2], CHUNK_SIZE),
+    );
     this.camera.setPosition(...position);
     this.serverPlayerId = server.createEntity({ kind: 'player', position }).id;
     this.world.updateStreaming(this.camera.getPosition());
@@ -141,7 +155,7 @@ export class Game {
       getEnvironment: () => this.environment,
       onToggleMap: () => this.toggleMap(),
       onQueueSave: () => this.queueSave(),
-      onFlushSave: () => this.flushSave(),
+      onFlushSave: () => void this.flushSave().catch(() => undefined),
     });
   }
 
@@ -237,6 +251,7 @@ export class Game {
       frameMs: this.frameMs,
       qualityLevel: this.qualityLevel,
       serverPlayerId: this.serverPlayerId,
+      persistence: this.persistence,
     });
   }
 
@@ -250,20 +265,31 @@ export class Game {
     if (this.saveTimer !== null) return;
     this.saveTimer = window.setTimeout(() => {
       this.saveTimer = null;
-      this.flushSave();
+      void this.flushSave().catch(() => undefined);
     }, 48);
   }
 
-  private flushSave() {
+  private flushSave(): Promise<void> {
     if (this.saveTimer !== null) {
       window.clearTimeout(this.saveTimer);
       this.saveTimer = null;
     }
-    if (!this.world || !this.camera) return;
-    this.performanceTelemetry.withSpan('persistence', 'FlushWorldSave', () => {
-      this.world?.server.flushDirtyChunks();
-      this.store.save(this.seedText, this.camera!.getPosition(), this.persistence);
+    const world = this.world;
+    const persistence = this.persistence;
+    if (!world || !persistence || !this.camera) return this.saveInFlight;
+    const current = this.camera.getPosition();
+    const player: [number, number, number] = [current.x, current.y, current.z];
+    const save = this.saveInFlight.then(async () => {
+      const span = this.performanceTelemetry.beginSpan('persistence', 'FlushWorldSave');
+      try {
+        await world.server.flushDirtyChunks();
+        await persistence.saveMetadata(player);
+      } finally {
+        this.performanceTelemetry.endSpan(span);
+      }
     });
+    this.saveInFlight = save.catch(() => undefined);
+    return save;
   }
 
   private disposeRuntime() {
@@ -282,6 +308,8 @@ export class Game {
     this.visualResources = null;
     this.app?.destroy();
     this.app = null;
+    this.persistence?.dispose();
+    this.persistence = null;
     this.camera = null;
     this.serverPlayerId = null;
   }

@@ -1,7 +1,7 @@
 import type { FaceMaterialId } from '../world/voxel';
 import type { RenderLayer } from '../world/mesh';
 import type { WorldChange } from '../world/storage';
-import type { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
+import type { SerializedChunkSnapshot } from '../client/browser-chunk-persistence';
 import type { MeshTaskIdentity } from '../client/mesh-task-snapshot';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 
@@ -98,7 +98,7 @@ export type HarnessSnapshot = {
 export type RestoredSession = {
   player: [number, number, number];
   seed: string;
-  persistence: BrowserChunkPersistence;
+  legacySnapshots: readonly SerializedChunkSnapshot[];
   changes: WorldChange[];
 };
 
