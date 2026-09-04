@@ -21,9 +21,34 @@ export async function compileGameplayModules(root, compileModule, voxelUrl) {
   const entityStoreUrl = await compileModule(resolve(root, 'src/server/gameplay/entity-store.ts'), {
     "'./item-registry'": `'${itemRegistryUrl}'`,
   });
+  const poiRegistryUrl = await compileModule(resolve(root, 'src/server/simulation/poi-registry.ts'));
+  const groundNavigatorUrl = await compileModule(resolve(root, 'src/server/simulation/ground-navigator.ts'), {
+    "'../../world/voxel'": `'${voxelUrl}'`,
+  });
+  const actionRuntimeUrl = await compileModule(resolve(root, 'src/server/simulation/action-runtime.ts'), {
+    "'./ground-navigator'": `'${groundNavigatorUrl}'`,
+  });
+  const actorStateUrl = await compileModule(resolve(root, 'src/server/simulation/actor-state.ts'));
+  const perceptionRuntimeUrl = await compileModule(resolve(root, 'src/server/simulation/perception-runtime.ts'), {
+    "'../../world/voxel'": `'${voxelUrl}'`,
+  });
+  const autonomyRuntimeUrl = await compileModule(resolve(root, 'src/server/simulation/autonomy-runtime.ts'), {
+    "'./action-runtime'": `'${actionRuntimeUrl}'`,
+    "'./actor-state'": `'${actorStateUrl}'`,
+    "'./ground-navigator'": `'${groundNavigatorUrl}'`,
+    "'./perception-runtime'": `'${perceptionRuntimeUrl}'`,
+    "'./poi-registry'": `'${poiRegistryUrl}'`,
+  });
+  const gameplaySnapshotUrl = await compileModule(resolve(root, 'src/server/gameplay/gameplay-snapshot.ts'), {
+    "'../simulation/autonomy-runtime'": `'${autonomyRuntimeUrl}'`,
+    "'./entity-store'": `'${entityStoreUrl}'`,
+    "'./player-state'": `'${playerStateUrl}'`,
+  });
   const gameplayRuntimeUrl = await compileModule(resolve(root, 'src/server/gameplay/gameplay-runtime.ts'), {
     "'../../world/voxel'": `'${voxelUrl}'`,
+    "'../simulation/autonomy-runtime'": `'${autonomyRuntimeUrl}'`,
     "'./entity-store'": `'${entityStoreUrl}'`,
+    "'./gameplay-snapshot'": `'${gameplaySnapshotUrl}'`,
     "'./item-registry'": `'${itemRegistryUrl}'`,
     "'./player-state'": `'${playerStateUrl}'`,
     "'./recipe-registry'": `'${recipeRegistryUrl}'`,
@@ -39,7 +64,10 @@ export async function compileGameplayModules(root, compileModule, voxelUrl) {
       "'../gameplay/voxel-gameplay'": `'${voxelGameplayUrl}'`,
     },
   );
-  return { gameServerGameplayUrl, gameplayCommandHandlerUrl };
+  const starterEcologyUrl = await compileModule(resolve(root, 'src/server/simulation/starter-ecology.ts'), {
+    "'../../world/voxel'": `'${voxelUrl}'`,
+  });
+  return { gameServerGameplayUrl, gameplayCommandHandlerUrl, starterEcologyUrl };
 }
 
 export function sampleGameplayMetrics(GameServer) {
@@ -53,6 +81,41 @@ export function sampleGameplayMetrics(GameServer) {
   return server.gameplayMetrics();
 }
 
+export function sampleAutonomyMetrics(GameServer) {
+  const samples = {};
+  for (const count of [10, 100, 500]) {
+    const server = new GameServer({ seedText: `harness-autonomy-${count}` });
+    server.spawnPlayer({ id: 'harness-player', position: [0.5, 32, 0.5] });
+    for (let index = 0; index < count; index += 1) {
+      const x = (index % 23) * 4 - 44;
+      const z = Math.floor(index / 23) * 4 - 44;
+      server.spawnAutonomousActor({
+        id: `actor-${index}`,
+        archetype: index % 10 === 0 ? 'settler' : index % 3 === 0 ? 'night-stalker' : 'grazer',
+        position: [x + 0.5, 32, z + 0.5],
+      });
+    }
+    const startedAt = performance.now();
+    server.advanceGameplay(1.1);
+    samples[count] = { durationMs: performance.now() - startedAt, ...server.simulationMetrics() };
+  }
+  const bounded = new GameServer({ seedText: 'harness-autonomy-boundary' });
+  bounded.spawnPlayer({ id: 'harness-player', position: [0.5, 32, 0.5] });
+  let rejectedAt = 0;
+  try {
+    for (let index = 0; index < 1000; index += 1) {
+      bounded.spawnAutonomousActor({
+        id: `boundary-${index}`,
+        archetype: 'grazer',
+        position: [1000 + index, 32, 0.5],
+      });
+    }
+  } catch {
+    rejectedAt = bounded.simulationMetrics().retainedActorCount;
+  }
+  return { samples, requestedActorCount: 1000, rejectedAt, retainedActorLimit: 512 };
+}
+
 export const gameplaySummaryLines = (gameplay) => [
   '',
   '## Gameplay foundation',
@@ -60,4 +123,15 @@ export const gameplaySummaryLines = (gameplay) => [
   `- Entities: ${gameplay.entityCount}; world items: ${gameplay.worldItemCount}; creatures: ${gameplay.creatureCount}.`,
   `- Nearby buckets/candidates/returned: ${gameplay.nearbyVisitedBucketCount} / ${gameplay.nearbyCandidateCount} / ${gameplay.nearbyReturnedCount}.`,
   `- Inventory operations: ${gameplay.inventoryOperationCount}; gameplay events: ${gameplay.gameplayEventCount}; snapshot: ${gameplay.snapshotBytes} bytes.`,
+];
+
+export const autonomySummaryLines = (autonomy) => [
+  '',
+  '## Creature and NPC simulation',
+  '',
+  ...Object.entries(autonomy.samples).map(
+    ([count, sample]) =>
+      `- ${count} actors: ${sample.durationMs.toFixed(2)} ms; active ${sample.activeActorCount}; LOS ${sample.perceptionLineOfSightCheckCount}; navigation ${sample.navigationPlanCount}/${sample.navigationExpandedNodeCount} nodes.`,
+  ),
+  `- 1000 actor request rejected at ${autonomy.rejectedAt}; retained limit ${autonomy.retainedActorLimit}.`,
 ];

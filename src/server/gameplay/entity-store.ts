@@ -1,6 +1,7 @@
 import { assertItemStack, type ItemStack } from './item-registry';
 
-export type EntityType = 'player' | 'world-item' | 'creature';
+export type EntityType = 'player' | 'world-item' | 'creature' | 'npc';
+export type ActorArchetype = 'grazer' | 'night-stalker' | 'settler';
 export type EntityLifecycle = 'active' | 'despawned';
 type Position = [number, number, number];
 
@@ -13,6 +14,8 @@ export type GameplayEntity = {
   stack?: ItemStack;
   health?: number;
   maxHealth?: number;
+  archetype?: ActorArchetype;
+  persistent?: boolean;
 };
 
 export type EntitySpawn = {
@@ -23,6 +26,8 @@ export type EntitySpawn = {
   stack?: { itemId: string; count: number };
   health?: number;
   maxHealth?: number;
+  archetype?: ActorArchetype;
+  persistent?: boolean;
 };
 
 export type EntityUpdate = Partial<Pick<GameplayEntity, 'position' | 'health'>>;
@@ -47,7 +52,7 @@ export class EntityStore {
 
   spawn(input: EntitySpawn): GameplayEntity {
     const type = input.type ?? input.kind;
-    if (type !== 'player' && type !== 'world-item' && type !== 'creature')
+    if (type !== 'player' && type !== 'world-item' && type !== 'creature' && type !== 'npc')
       throw new TypeError(`Unsupported entity type: ${String(type)}`);
     this.assertPosition(input.position);
     const id = input.id ?? `${type}-${++this.sequence}`;
@@ -65,13 +70,21 @@ export class EntityStore {
       assertItemStack(input.stack);
       entity.stack = { ...input.stack };
     }
-    if (type === 'creature') {
+    if (type === 'creature' || type === 'npc') {
       const maxHealth = input.maxHealth ?? 12;
       const health = input.health ?? maxHealth;
       if (!Number.isFinite(maxHealth) || maxHealth <= 0 || !Number.isFinite(health) || health < 0 || health > maxHealth)
         throw new TypeError('Creature health must be finite and within its maximum.');
       entity.health = health;
       entity.maxHealth = maxHealth;
+      if (input.archetype) {
+        if (!['grazer', 'night-stalker', 'settler'].includes(input.archetype))
+          throw new TypeError(`Unsupported actor archetype: ${String(input.archetype)}`);
+        if ((type === 'npc') !== (input.archetype === 'settler'))
+          throw new TypeError('Settlers must be NPC entities and creature archetypes must be creatures.');
+        entity.archetype = input.archetype;
+        entity.persistent = input.persistent ?? true;
+      }
     }
     this.entities.set(id, entity);
     this.addToBucket(entity);
@@ -89,7 +102,7 @@ export class EntityStore {
     if (update.position) this.move(id, update.position);
     if (update.health !== undefined) {
       if (
-        entity.type !== 'creature' ||
+        (entity.type !== 'creature' && entity.type !== 'npc') ||
         !Number.isFinite(update.health) ||
         update.health < 0 ||
         update.health > entity.maxHealth!

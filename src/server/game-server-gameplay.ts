@@ -1,7 +1,10 @@
 import type { WorldCommitResult, WorldEditBatch } from './game-server';
-import type { EntityQuery, EntitySpawn, EntityUpdate, GameplayEntity } from './gameplay/entity-store';
+import type { ActorArchetype, EntityQuery, EntitySpawn, EntityUpdate, GameplayEntity } from './gameplay/entity-store';
 import { GameplayRuntime } from './gameplay/gameplay-runtime';
 import type { ItemStack } from './gameplay/item-registry';
+import type { ActorActionInput } from './simulation/action-runtime';
+import type { ActorRegistration } from './simulation/autonomy-runtime';
+import type { PoiInput, PoiKind } from './simulation/poi-registry';
 import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 
@@ -10,6 +13,7 @@ type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 export abstract class GameServerGameplayFacade {
   protected readonly gameplay: GameplayRuntime;
   private readonly legacyEntityIds = new Set<string>();
+  private restoredVersion: 1 | 2 | null = null;
 
   protected constructor(private readonly gameplayPersistence?: Persistence) {
     this.gameplay = new GameplayRuntime({
@@ -19,12 +23,15 @@ export abstract class GameServerGameplayFacade {
           actorId,
           edits: [{ x: position[0], y: position[1], z: position[2], value: voxel }],
         }),
+      getWorldTime: () => this.worldTime,
     });
   }
 
+  abstract get worldTime(): number;
   abstract getVoxel(x: number, y: number, z: number): number;
   abstract editBatch(batch: WorldEditBatch): WorldCommitResult;
   abstract flushDirtyChunks(): Promise<string[]>;
+  abstract setWorldTime(hours: number): number;
 
   createEntity(entity: EntitySpawn): GameplayEntity {
     const created = this.gameplay.spawn(entity);
@@ -39,6 +46,27 @@ export abstract class GameServerGameplayFacade {
   }
   spawnWorldItem(position: [number, number, number], stack: ItemStack): GameplayEntity {
     return this.gameplay.spawnWorldItem(position, stack);
+  }
+  spawnAutonomousActor(input: {
+    id?: string;
+    archetype: ActorArchetype;
+    position: [number, number, number];
+    registration?: Omit<ActorRegistration, 'archetype'>;
+  }): GameplayEntity {
+    const type = input.archetype === 'settler' ? 'npc' : 'creature';
+    const maxHealth = input.archetype === 'night-stalker' ? 16 : input.archetype === 'settler' ? 20 : 12;
+    return this.gameplay.spawnAutonomous(
+      {
+        id: input.id,
+        type,
+        archetype: input.archetype,
+        position: input.position,
+        health: maxHealth,
+        maxHealth,
+        persistent: true,
+      },
+      { archetype: input.archetype, ...input.registration },
+    );
   }
   getEntity(id: string): GameplayEntity | null {
     const entity = this.gameplay.getEntity(id);
@@ -129,6 +157,50 @@ export abstract class GameServerGameplayFacade {
   gameplayMetrics() {
     return this.gameplay.metrics();
   }
+  getActorState(id: string) {
+    return this.gameplay.simulation.getActor(id);
+  }
+  startActorAction(actorId: string, input: Omit<ActorActionInput, 'actorId'>) {
+    return this.gameplay.simulation.startAction(actorId, input);
+  }
+  interruptActorAction(actorId: string, reason?: string) {
+    return this.gameplay.simulation.interruptAction(actorId, reason);
+  }
+  getActorAction(actorId: string) {
+    return this.gameplay.simulation.actions.forActor(actorId);
+  }
+  getAction(actionId: string) {
+    return this.gameplay.simulation.actions.get(actionId);
+  }
+  observeActor(actorId: string, range?: number) {
+    return this.gameplay.simulation.observe(actorId, range);
+  }
+  registerPoi(input: PoiInput) {
+    return this.gameplay.simulation.registerPoi(input);
+  }
+  removePoi(id: string) {
+    return this.gameplay.simulation.pois.remove(id);
+  }
+  getPoi(id: string) {
+    return this.gameplay.simulation.pois.get(id);
+  }
+  queryPois(position: [number, number, number], radius: number, kind?: PoiKind) {
+    return this.gameplay.simulation.pois.queryNearby(position, radius, kind);
+  }
+  queryNavigationPath(actorId: string, target: [number, number, number]) {
+    const actor = this.getEntity(actorId);
+    if (!actor) throw new RangeError(`Unknown actor: ${actorId}`);
+    return this.gameplay.simulation.navigator.plan(actor.position, target);
+  }
+  simulationSnapshot() {
+    return this.gameplay.simulation.snapshot();
+  }
+  simulationMetrics() {
+    return this.gameplay.simulation.metrics();
+  }
+  get restoredGameplayVersion() {
+    return this.restoredVersion;
+  }
 
   async save(): Promise<{ savedChunks: string[]; gameplaySaved: boolean }> {
     const snapshot = this.gameplay.createSnapshot();
@@ -142,7 +214,12 @@ export abstract class GameServerGameplayFacade {
 
   async restore(): Promise<void> {
     const snapshot = await this.gameplayPersistence?.loadGameplaySnapshot?.();
-    if (snapshot) return this.gameplay.restoreSnapshot(snapshot);
+    if (snapshot) {
+      const restored = this.gameplay.restoreSnapshot(snapshot);
+      this.restoredVersion = restored.version;
+      if (restored.worldTime !== undefined) this.setWorldTime(restored.worldTime);
+      return;
+    }
     const legacyPosition = await this.gameplayPersistence?.loadLegacyPlayerPosition?.();
     if (legacyPosition) this.gameplay.spawnPlayer({ id: 'player-1', position: legacyPosition });
   }

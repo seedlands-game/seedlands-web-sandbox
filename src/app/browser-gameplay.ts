@@ -37,11 +37,17 @@ export class BrowserGameplay {
 
   advance(seconds: number): void {
     this.breakProjectionElapsedSeconds += seconds;
-    const before = this.options.server.getPlayerState(this.options.playerId).breakAction;
+    const playerBefore = this.options.server.getPlayerState(this.options.playerId);
+    const before = playerBefore.breakAction;
     const result = this.options.server.advanceGameplay(seconds);
     result.commits.forEach((commit) => this.options.consumeCommit(commit));
     if (before && result.commits.length) {
       this.feedback(`掉落 · ${voxelNames[before.voxel] ?? '资源'}`, 'success');
+      this.options.queueSave();
+    }
+    const health = this.options.server.getPlayerState(this.options.playerId).health;
+    if (health < playerBefore.health) {
+      this.feedback(`受击 · 生命 -${playerBefore.health - health}`, 'error');
       this.options.queueSave();
     }
     this.refresh(false);
@@ -50,7 +56,13 @@ export class BrowserGameplay {
   refresh(forceBreakProjection = true): void {
     const player = this.options.server.getPlayerState(this.options.playerId);
     const entities = this.options.server.queryEntities().filter((entity) => entity.type !== 'player');
-    this.presenter.reconcile(entities);
+    const actorStates = new Map(
+      entities.flatMap((entity) => {
+        const actor = this.options.server.getActorState(entity.id);
+        return actor ? [[entity.id, actor] as const] : [];
+      }),
+    );
+    this.presenter.reconcile(entities, actorStates, this.options.server.gameplayTime);
     const worldItems = new Set(entities.filter((entity) => entity.type === 'world-item').map((entity) => entity.id));
     if ([...this.previousWorldItems].some((id) => !worldItems.has(id))) {
       this.feedback('拾取 · 物品已放入背包', 'success');
@@ -103,11 +115,20 @@ export class BrowserGameplay {
       ...projection.interaction,
       presentedEntities: entities.map((entity) => ({
         id: entity.id,
-        type: entity.type as 'world-item' | 'creature',
+        type: entity.type as 'world-item' | 'creature' | 'npc',
+        position: [...entity.position] as [number, number, number],
+        ...(entity.archetype ? { archetype: entity.archetype } : {}),
+        ...(actorStates.get(entity.id) ? { behavior: actorStates.get(entity.id)!.behavior } : {}),
         label:
           entity.type === 'world-item' && entity.stack
             ? `${getItemDefinition(entity.stack.itemId).name}掉落物`
-            : '静止生物',
+            : entity.archetype === 'grazer'
+              ? '温顺林鹿'
+              : entity.archetype === 'night-stalker'
+                ? '夜行兽'
+                : entity.archetype === 'settler'
+                  ? '营地居民'
+                  : '生物',
       })),
     });
   }
@@ -144,7 +165,8 @@ export class BrowserGameplay {
     maxDistance: number,
   ): boolean {
     const target = this.options.server
-      .queryEntities({ type: 'creature' })
+      .queryEntities()
+      .filter((entity) => entity.type === 'creature' || entity.type === 'npc')
       .map((entity) => {
         const offset = entity.position.map((value, index) => value - origin[index]);
         const distance = offset.reduce((sum, value, index) => sum + value * direction[index], 0);

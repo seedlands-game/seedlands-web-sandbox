@@ -1,4 +1,7 @@
 import type { WorldCommitResult } from '../game-server';
+import type { ActorArchetype } from '../gameplay/entity-store';
+import type { ActorActionType } from '../simulation/action-runtime';
+import type { PoiKind } from '../simulation/poi-registry';
 
 export type CommandCategory = 'query' | 'mutation' | 'administrative';
 export type CommandCapability = CommandCategory;
@@ -33,6 +36,10 @@ export type ServerCommand =
   | { type: 'query-item-definitions' }
   | { type: 'query-voxel-definitions' }
   | { type: 'query-recipes'; craftable?: boolean }
+  | { type: 'query-observation'; entityId?: string; range?: number }
+  | { type: 'query-pois'; entityId?: string; radius: number; kind?: PoiKind }
+  | { type: 'query-action'; entityId?: string; actionId?: string }
+  | { type: 'query-path'; entityId?: string; position: readonly [number, number, number] }
   | { type: 'select-slot'; slot: number }
   | { type: 'break-voxel'; position: readonly [number, number, number] }
   | { type: 'cancel-break' }
@@ -42,11 +49,29 @@ export type ServerCommand =
   | { type: 'use-item' }
   | { type: 'craft-recipe'; recipeId: string }
   | { type: 'attack-entity'; entityId: string }
+  | {
+      type: 'start-action';
+      entityId?: string;
+      action: ActorActionType;
+      position?: readonly [number, number, number];
+      targetEntityId?: string;
+      poiId?: string;
+    }
+  | { type: 'interrupt-action'; entityId?: string }
   | { type: 'respawn' }
   | { type: 'give-item'; entityId?: string; itemId: string; count: number }
   | { type: 'remove-item'; entityId?: string; itemId: string; count: number }
   | { type: 'spawn-world-item'; itemId: string; count: number; position: readonly [number, number, number] }
   | { type: 'spawn-creature'; position: readonly [number, number, number] }
+  | { type: 'spawn-actor'; id?: string; archetype: ActorArchetype; position: readonly [number, number, number] }
+  | {
+      type: 'register-poi';
+      id?: string;
+      kind: PoiKind;
+      position: readonly [number, number, number];
+      label: string;
+    }
+  | { type: 'remove-poi'; poiId: string }
   | { type: 'despawn-entity'; entityId: string }
   | { type: 'apply-damage'; entityId?: string; amount: number }
   | { type: 'heal'; entityId?: string; amount: number }
@@ -115,6 +140,10 @@ export function commandCategory(command: ServerCommand): CommandCategory | null 
     case 'query-item-definitions':
     case 'query-voxel-definitions':
     case 'query-recipes':
+    case 'query-observation':
+    case 'query-pois':
+    case 'query-action':
+    case 'query-path':
       return 'query';
     case 'set-block':
     case 'fill':
@@ -130,12 +159,17 @@ export function commandCategory(command: ServerCommand): CommandCategory | null 
     case 'craft-recipe':
     case 'attack-entity':
     case 'respawn':
+    case 'start-action':
+    case 'interrupt-action':
       return 'mutation';
     case 'save':
     case 'give-item':
     case 'remove-item':
     case 'spawn-world-item':
     case 'spawn-creature':
+    case 'spawn-actor':
+    case 'register-poi':
+    case 'remove-poi':
     case 'despawn-entity':
     case 'apply-damage':
     case 'heal':
