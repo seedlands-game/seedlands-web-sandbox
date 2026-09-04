@@ -244,3 +244,11 @@
 本分支实际复验：`pnpm verify:static` 193 passed / 4 skipped、world 行覆盖 94.86%、Svelte 0/0；独立 build 通过；18 项 Playwright（9 基线、3 光影、4 Shell、2 背包整合）全部通过，耗时 1.1 分钟。High/Medium 反射、Low 降级、灯笼保存和十次会话切换均包含于这次复验。仍需自然灯笼配方、Change9、总体性能和完整体验准出，不能据此标记父 Goal 完成。
 
 账户实际查询 42%（项目起点 38%，总上限 58%），预算仍有余量，不自动重置。
+
+### 首轮同机性能基线（2026-09-05 05:53）
+
+`e2e/performance-profile.spec.ts` 显式 `SEEDLANDS_PERFORMANCE_ACCEPTANCE=1` 执行，实际 MacBook Pro M3 Pro（12 CPU / 18 GPU、36GB）、Chrome 152.0.7977.76 headed、1920×1080 viewport、DPR1，测试页全程 visible；已与另一任务错开 GPU。每档预热5秒、稳定采样25秒，四轮共2.5分钟，source `ac0d71c`。报告 `performance-before-autonomy.json`。
+
+Medium 两轮 p95 10.2/9.4ms，p99 10.3/10.2ms；Low p95 9.3ms，High p95 9.5ms。屏幕约120Hz，帧率上限使各档帧时间接近，不能据此声称 Low 提升多少 FPS。实际 render canvas：Medium 1689×950、Low1382×777、High1920×1080（显式分辨率比例）；已载入渲染 Chunk 25/9/49，三角形2238/1132/4582。GPU duration `NOT_COLLECTED`。
+
+此 seed 原点是高度较低、未生成树木的空旷区域，因此只作为静态空地成本基线，不作为 A1/A3/A5/A11 的完整内容或混合性能准出。后续必须补推荐营地和持续 streaming 的同机采样。性能候选准出值尚未因这次结果而放宽。

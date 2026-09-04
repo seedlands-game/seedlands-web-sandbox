@@ -1,6 +1,6 @@
 # 第一人称动作与受击表现
 
-**状态：Active；沿用父 Goal 自主本地 SDD 授权。**
+**状态：Delivered；沿用父 Goal 自主本地 SDD 授权。**
 
 ## 背景与目标
 
@@ -30,9 +30,9 @@
 
 ## 验收与证据
 
-- [ ] Playwright-change：真实选择/采集/取消/减少动态。
-- [ ] Midscene：图示和手部清楚，布局与美术统一。
-- [ ] Static / Build：依赖边界、格式、类型与构建通过。
+- [x] Playwright-change：真实选择/采集/取消/减少动态。
+- [x] Midscene：图示和手部清楚，布局与美术统一。
+- [x] Static / Build：依赖边界、格式、类型与构建通过。
 
 ## 任务与当前状态
 
