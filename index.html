@@ -35,6 +35,29 @@
         <div id="world-clock" class="hud-chip"></div>
         <div id="interaction-feedback" role="status" aria-live="polite"></div>
         <div id="debug" class="panel" hidden></div>
+        <section id="debug-command-shell" class="panel" role="dialog" aria-label="服务端调试命令" hidden>
+          <header>
+            <strong>Server Debug Shell</strong>
+            <span>F4 / Esc 关闭</span>
+          </header>
+          <div id="debug-command-log" role="log" aria-label="最近命令输出" tabindex="0"></div>
+          <form id="debug-command-form">
+            <label for="debug-command-input">命令</label>
+            <div class="command-line">
+              <span aria-hidden="true">›</span>
+              <input
+                id="debug-command-input"
+                name="command"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                placeholder="/inspect voxel 0 0 0"
+              />
+            </div>
+          </form>
+          <div id="debug-command-status" role="status" aria-live="polite">输入 slash command，按 Enter 执行。</div>
+          <small>↑↓ 历史 · /seed · /inspect · /setblock · /fill · /tp · /time · /save</small>
+        </section>
         <button id="map-toggle" class="panel" type="button">Macro 地图</button>
         <section id="macro-map-panel" class="panel" hidden aria-label="Macro 世界地图总览">
           <div class="map-header">
@@ -54,7 +77,7 @@
           <small>以世界原点为中心的 6.1 km Macro 采样；不生成 Chunk。</small>
         </section>
         <div id="help" class="panel">
-          WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–4 选材质 · M 地图 · F3 调试 · P 暂停时间
+          WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–4 选材质 · M 地图 · F3 指标 · F4 命令 · P 暂停时间
         </div>
         <div id="hotbar"></div>
       </section>

@@ -139,9 +139,18 @@ function compare(current, baseline) {
     "'../../world/voxel'": `'${voxelUrl}'`,
     "'../world-mutation'": `'${worldMutationUrl}'`,
   });
+  const commandContractUrl = await compileModule(resolve(root, 'src/server/commands/command-contract.ts'));
+  const commandExecutorUrl = await compileModule(resolve(root, 'src/server/commands/server-command-executor.ts'), {
+    "'../../world/voxel'": `'${voxelUrl}'`,
+    "'../game-server'": `'${gameServerUrl}'`,
+    "'../world-mutation'": `'${worldMutationUrl}'`,
+    "'./fill-command'": `'${fillCommandUrl}'`,
+    "'./command-contract'": `'${commandContractUrl}'`,
+  });
   const { WorldMutationBuffer } = await import(worldMutationUrl);
   const { GameServer } = await import(gameServerUrl);
   const { resolveFillCommand } = await import(fillCommandUrl);
+  const { ALL_COMMAND_CAPABILITIES, ServerCommandExecutor } = await import(commandExecutorUrl);
   globalThis.gc?.();
   const heapBeforeMutation = process.memoryUsage().heapUsed;
   const mutationBaseline = JSON.parse(
@@ -169,20 +178,22 @@ function compare(current, baseline) {
     let lastMetrics = null;
     for (let run = 0; run < 3; run += 1) {
       const server = new GameServer({ seedText: `harness-fill-${count}-${run}` });
+      const executor = new ServerCommandExecutor(server);
+      const source = { actorId: 'harness-fill', sourceType: 'system', capabilities: ALL_COMMAND_CAPABILITIES };
       const warmup = resolveFillCommand({ from: [0, -10, 0], to: mutationFillBounds[count], voxel: voxel.Voxel.Wood });
       materializeMutationChunks(server, warmup);
-      server.editBatch({ actorId: 'harness-warmup', buffers: [warmup] });
+      await executor.execute(source, { type: 'fill', from: [0, -10, 0], to: mutationFillBounds[count], voxel: 4 });
       const samples = [];
       for (let sample = 0; sample < 9; sample += 1) {
-        const buffer = resolveFillCommand({
+        const result = await executor.execute(source, {
+          type: 'fill',
           from: [0, -10, 0],
           to: mutationFillBounds[count],
           voxel: sample % 2 ? voxel.Voxel.Wood : voxel.Voxel.Stone,
         });
-        const startedAt = performance.now();
-        const result = server.editBatch({ actorId: 'harness-fill', buffers: [buffer] });
-        samples.push(performance.now() - startedAt);
-        lastMetrics = result.metrics;
+        if (!result.success || !result.commit) throw new Error(`Structured fill command failed: ${result.message}`);
+        samples.push(result.observation.durationMs);
+        lastMetrics = result.commit.metrics;
       }
       runP50Ms.push(
         percentile(
@@ -436,7 +447,7 @@ function compare(current, baseline) {
     '',
     `- ${worldMutation.status} — 10k single edit p50/p95: ${singleEditMedianP50Ms.toFixed(2)} / ${singleEditMedianP95Ms.toFixed(2)} ms (${singleEditStatus}).`,
     `- 100k sequential/batch p50: ${sequentialMedianP50Ms.toFixed(2)} / ${batchMedianP50Ms.toFixed(2)} ms; speedup ${batchSpeedup.toFixed(2)}x (${batchStatus}).`,
-    `- 100k fill structural events: ${fillSamples[100000].metrics.structuralEventCount}; dirty chunks: ${fillSamples[100000].metrics.dirtyChunkCount}; mesh invalidations: ${fillSamples[100000].metrics.meshInvalidationCount}.`,
+    `- Structured 100k command p50/p95: ${fillSamples[100000].medianP50Ms.toFixed(2)} / ${fillSamples[100000].medianP95Ms.toFixed(2)} ms; structural events: ${fillSamples[100000].metrics.structuralEventCount}; dirty chunks: ${fillSamples[100000].metrics.dirtyChunkCount}; mesh invalidations: ${fillSamples[100000].metrics.meshInvalidationCount}.`,
     `- Overwrite-heavy 100k input / 10k unique: ${overwriteResult.metrics.canonicalWriteCount} canonical writes (${overwriteStatus}).`,
     `- Mutation heap proxy delta: ${heapAfterMutation - heapBeforeMutation} bytes.`,
     '',

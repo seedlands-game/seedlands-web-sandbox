@@ -185,7 +185,7 @@ export class World {
 
   restoreLegacyChanges(changes: WorldChange[]) {
     if (!changes.length) return;
-    this.applyCommit(
+    this.consumeServerCommit(
       this.server.editBatch({
         actorId: 'legacy-storage-migration',
         edits: changes.map(([x, y, z, value]) => ({ x, y, z, value })),
@@ -238,12 +238,12 @@ export class World {
   }
 
   edit(x: number, y: number, z: number, value: number) {
-    this.applyCommit(this.server.edit(x, y, z, value));
+    this.consumeServerCommit(this.server.edit(x, y, z, value));
   }
 
   editBatch(batch: WorldEditBatch) {
     const result = this.server.editBatch(batch);
-    this.applyCommit(result);
+    this.consumeServerCommit(result);
     return result;
   }
 
@@ -251,7 +251,7 @@ export class World {
     return this.editBatch({ actorId, buffers: [resolveFillCommand(command)] });
   }
 
-  private applyCommit(result: WorldCommitResult) {
+  consumeServerCommit(result: WorldCommitResult) {
     const change = result.structuralChange;
     if (!change) return;
     this.aggregateStructuralEventCount += 1;

@@ -1,0 +1,118 @@
+#debug-command-shell {
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  bottom: 118px;
+  width: min(680px, calc(100vw - 28px));
+  max-height: min(420px, calc(100vh - 150px));
+  padding: 13px;
+  transform: translateX(-50%);
+  color: #e9f4e7;
+  pointer-events: auto;
+  user-select: text;
+  font:
+    11px/1.45 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  box-shadow: 0 18px 58px rgba(0, 0, 0, 0.46);
+}
+
+#debug-command-shell header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 9px;
+}
+
+#debug-command-shell header span,
+#debug-command-shell small {
+  color: #9eafa4;
+}
+
+#debug-command-log {
+  display: grid;
+  gap: 6px;
+  min-height: 54px;
+  max-height: 190px;
+  margin-bottom: 9px;
+  padding: 8px;
+  overflow: auto;
+  cursor: text;
+  border: 1px solid rgba(211, 235, 204, 0.12);
+  border-radius: 8px;
+  background: rgba(1, 7, 8, 0.58);
+}
+
+.debug-command-entry {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.debug-command-entry code {
+  color: #d6edb3;
+}
+
+.debug-command-entry[data-state='error'] span {
+  color: #ffb7a9;
+}
+
+#debug-command-form label {
+  display: block;
+  margin-bottom: 4px;
+  color: #b8c9bb;
+}
+
+.command-line {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid rgba(201, 229, 154, 0.45);
+  border-radius: 8px;
+  background: rgba(3, 10, 11, 0.82);
+}
+
+#debug-command-input {
+  width: 100%;
+  padding: 9px 0;
+  color: white;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  user-select: text;
+}
+
+#debug-command-input::placeholder {
+  color: #708079;
+}
+
+#debug-command-status {
+  min-height: 18px;
+  margin-top: 7px;
+  color: #c7d8cb;
+}
+
+#debug-command-status[data-state='success'] {
+  color: #cceba5;
+}
+
+#debug-command-status[data-state='error'] {
+  color: #ffb7a9;
+}
+
+@media (max-width: 720px) {
+  #debug-command-shell {
+    bottom: 74px;
+    max-height: calc(100vh - 94px);
+  }
+
+  #debug-command-log {
+    max-height: 132px;
+  }
+}

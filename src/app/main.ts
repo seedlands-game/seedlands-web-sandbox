@@ -1,5 +1,6 @@
 import { formatBuildWatermark } from '../client/build-watermark';
 import { GENERATOR_VERSION } from '../world/voxel';
+import './styles/debug-command-shell.css';
 import './styles/hud.css';
 import './styles/macro-map.css';
 import { appElements } from './app-elements';
