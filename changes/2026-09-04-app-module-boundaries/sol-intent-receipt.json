@@ -1,0 +1,31 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "只读复核 app 模块拆分合同：判断职责边界、300 行 ESLint 门禁与行为保持验收是否足以安全实施；只输出必须修改的 spec 项或通过结论，不实施代码。",
+  "evidence": [
+    "src/app/main.ts 1454 行，visual-environment.ts 376 行，style.css 448 行。",
+    "main.ts 混合入口、地图、存档、streaming、Worker、GPU、玩家、HUD 与 Harness。",
+    "当前 ESLint 未配置 max-lines；预置治理测试 1/2 按预期失败。",
+    "核心边界要求服务端权威、World.edit、Worker task identity 和资源销毁语义不变。",
+    "拟对 src/app TypeScript 设置 300 有效行硬上限且不允许局部豁免。"
+  ],
+  "necessary_paths": [
+    "AGENTS.md",
+    "changes/2026-09-04-app-module-boundaries/spec.md",
+    "tests/governance/app-module-size-eslint.test.ts",
+    "eslint.config.mjs",
+    "src/app/main.ts",
+    "src/app/visual-environment.ts",
+    "src/app/style.css"
+  ],
+  "output_limit": {
+    "max_characters": 1200
+  },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}

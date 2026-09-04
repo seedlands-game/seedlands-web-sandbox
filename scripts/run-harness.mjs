@@ -1,8 +1,9 @@
-import { gzipSync } from 'node:zlib';
 import { execFileSync } from 'node:child_process';
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve, relative } from 'node:path';
 import { transformWithEsbuild } from 'vite';
+import { currentBrowserEvidence } from './harness-browser-evidence.mjs';
+import { collectDistMetrics } from './harness-file-metrics.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const baselinePath = resolve(root, 'harness/baseline.json');
@@ -36,51 +37,6 @@ const compileModule = async (path, replacements = {}) => {
   const { code } = await transformWithEsbuild(source, path, { loader: 'ts', target: 'es2022', format: 'esm' });
   return `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 };
-
-async function currentBrowserEvidence(path, key, fallback) {
-  if (!expectedBrowserRunId)
-    return { ...fallback, note: `${fallback.note} Run pnpm harness for fresh, correlated browser evidence.` };
-  try {
-    const result = JSON.parse(await readFile(path, 'utf8'));
-    const matchingRun = result.runId === expectedBrowserRunId && result.sourceSha === sourceSha;
-    const matchingEnvironment =
-      result.environment?.node === process.version &&
-      result.environment?.platform === process.platform &&
-      result.environment?.arch === process.arch;
-    if (!matchingRun || !matchingEnvironment)
-      return {
-        status: 'NOT_COLLECTED',
-        note: 'Browser result metadata does not match this Harness run, source SHA, or environment.',
-      };
-    return result[key];
-  } catch {
-    return fallback;
-  }
-}
-
-async function distMetrics() {
-  const files = [];
-  async function walk(dir) {
-    for (const entry of await readdir(dir, { withFileTypes: true })) {
-      const full = resolve(dir, entry.name);
-      if (entry.isDirectory()) await walk(full);
-      else files.push(full);
-    }
-  }
-  await walk(resolve(root, 'dist'));
-  let totalBytes = 0,
-    jsBytes = 0,
-    gzipBytes = 0;
-  for (const file of files) {
-    const content = await readFile(file);
-    totalBytes += content.byteLength;
-    if (file.endsWith('.js')) {
-      jsBytes += content.byteLength;
-      gzipBytes += gzipSync(content).byteLength;
-    }
-  }
-  return { fileCount: files.length, totalBytes, jsBytes, gzipBytes };
-}
 
 function compare(current, baseline) {
   const verdicts = {};
@@ -164,8 +120,228 @@ function compare(current, baseline) {
     ]);
     storage[count] = bytes(encodeWorldSave('seedlands-storage-benchmark-v1', [0, 34, 0], changes));
   }
-  const bundle = await distMetrics();
+  globalThis.gc?.();
   const heapAfterWork = process.memoryUsage().heapUsed;
+  const worldMutationUrl = await compileModule(resolve(root, 'src/server/world-mutation.ts'), {
+    "'../world/voxel'": `'${voxelUrl}'`,
+  });
+  const worldTransactionCommitUrl = await compileModule(resolve(root, 'src/server/world-transaction-commit.ts'), {
+    "'../world/voxel'": `'${voxelUrl}'`,
+    "'./world-mutation'": `'${worldMutationUrl}'`,
+  });
+  const gameServerUrl = await compileModule(resolve(root, 'src/server/game-server.ts'), {
+    "'../world/mesh'": `'${meshUrl}'`,
+    "'../world/voxel'": `'${voxelUrl}'`,
+    "'./world-mutation'": `'${worldMutationUrl}'`,
+    "'./world-transaction-commit'": `'${worldTransactionCommitUrl}'`,
+  });
+  const fillCommandUrl = await compileModule(resolve(root, 'src/server/commands/fill-command.ts'), {
+    "'../../world/voxel'": `'${voxelUrl}'`,
+    "'../world-mutation'": `'${worldMutationUrl}'`,
+  });
+  const { WorldMutationBuffer } = await import(worldMutationUrl);
+  const { GameServer } = await import(gameServerUrl);
+  const { resolveFillCommand } = await import(fillCommandUrl);
+  globalThis.gc?.();
+  const heapBeforeMutation = process.memoryUsage().heapUsed;
+  const mutationBaseline = JSON.parse(
+    await readFile(resolve(root, 'changes/2026-09-04-world-mutation-transaction/performance-baseline.json'), 'utf8'),
+  );
+  const mutationFillBounds = {
+    1: [0, -10, 0],
+    1000: [9, -1, 9],
+    10000: [99, -1, 9],
+    100000: [99, -1, 99],
+  };
+  const materializeMutationChunks = (server, buffer) => {
+    const seen = new Set();
+    for (const run of buffer.chunkRuns) {
+      const key = `${run.cx},${run.cy},${run.cz}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      server.getChunk(run.cx, run.cy, run.cz);
+    }
+  };
+  const fillSamples = {};
+  for (const count of [1, 1000, 10000, 100000]) {
+    const runP50Ms = [];
+    const runP95Ms = [];
+    let lastMetrics = null;
+    for (let run = 0; run < 3; run += 1) {
+      const server = new GameServer({ seedText: `harness-fill-${count}-${run}` });
+      const warmup = resolveFillCommand({ from: [0, -10, 0], to: mutationFillBounds[count], voxel: voxel.Voxel.Wood });
+      materializeMutationChunks(server, warmup);
+      server.editBatch({ actorId: 'harness-warmup', buffers: [warmup] });
+      const samples = [];
+      for (let sample = 0; sample < 9; sample += 1) {
+        const buffer = resolveFillCommand({
+          from: [0, -10, 0],
+          to: mutationFillBounds[count],
+          voxel: sample % 2 ? voxel.Voxel.Wood : voxel.Voxel.Stone,
+        });
+        const startedAt = performance.now();
+        const result = server.editBatch({ actorId: 'harness-fill', buffers: [buffer] });
+        samples.push(performance.now() - startedAt);
+        lastMetrics = result.metrics;
+      }
+      runP50Ms.push(
+        percentile(
+          [...samples].sort((left, right) => left - right),
+          0.5,
+        ),
+      );
+      runP95Ms.push(
+        percentile(
+          [...samples].sort((left, right) => left - right),
+          0.95,
+        ),
+      );
+    }
+    fillSamples[count] = {
+      medianP50Ms: percentile(
+        [...runP50Ms].sort((left, right) => left - right),
+        0.5,
+      ),
+      medianP95Ms: percentile(
+        [...runP95Ms].sort((left, right) => left - right),
+        0.5,
+      ),
+      runP50Ms,
+      runP95Ms,
+      metrics: lastMetrics,
+    };
+  }
+  const sampleSequentialMutations = (server, count, value) => {
+    const startedAt = performance.now();
+    for (let index = 0; index < count; index += 1) {
+      const x = index % 100;
+      const z = Math.floor(index / 100) % 100;
+      const y = -10 + (Math.floor(index / 10000) % 10);
+      server.edit(x, y, z, value);
+    }
+    return performance.now() - startedAt;
+  };
+  const singleEditRunP50Ms = [];
+  const singleEditRunP95Ms = [];
+  const sequentialRunP50Ms = [];
+  const batchRunP50Ms = [];
+  for (let run = 0; run < 3; run += 1) {
+    const single = new GameServer({ seedText: `harness-single-${run}` });
+    const sequential = new GameServer({ seedText: `harness-sequential-${run}` });
+    const batched = new GameServer({ seedText: `harness-batched-${run}` });
+    const fill = resolveFillCommand({ from: [0, -10, 0], to: [99, -1, 99], voxel: voxel.Voxel.Wood });
+    materializeMutationChunks(single, fill);
+    materializeMutationChunks(sequential, fill);
+    materializeMutationChunks(batched, fill);
+    sampleSequentialMutations(single, 10000, voxel.Voxel.Wood);
+    sampleSequentialMutations(sequential, 100000, voxel.Voxel.Wood);
+    batched.editBatch({ actorId: 'harness-warmup', buffers: [fill] });
+    const singleSamples = [];
+    const sequentialSamples = [];
+    const batchSamples = [];
+    for (let sample = 0; sample < 9; sample += 1) {
+      const value = sample % 2 ? voxel.Voxel.Wood : voxel.Voxel.Stone;
+      singleSamples.push(sampleSequentialMutations(single, 10000, value));
+      const buffer = resolveFillCommand({ from: [0, -10, 0], to: [99, -1, 99], voxel: value });
+      if ((run + sample) % 2 === 0) {
+        sequentialSamples.push(sampleSequentialMutations(sequential, 100000, value));
+        const startedAt = performance.now();
+        batched.editBatch({ actorId: 'harness-batch', buffers: [buffer] });
+        batchSamples.push(performance.now() - startedAt);
+      } else {
+        const startedAt = performance.now();
+        batched.editBatch({ actorId: 'harness-batch', buffers: [buffer] });
+        batchSamples.push(performance.now() - startedAt);
+        sequentialSamples.push(sampleSequentialMutations(sequential, 100000, value));
+      }
+    }
+    const sortedSingle = [...singleSamples].sort((left, right) => left - right);
+    singleEditRunP50Ms.push(percentile(sortedSingle, 0.5));
+    singleEditRunP95Ms.push(percentile(sortedSingle, 0.95));
+    sequentialRunP50Ms.push(
+      percentile(
+        [...sequentialSamples].sort((left, right) => left - right),
+        0.5,
+      ),
+    );
+    batchRunP50Ms.push(
+      percentile(
+        [...batchSamples].sort((left, right) => left - right),
+        0.5,
+      ),
+    );
+  }
+  const medianOf = (values) =>
+    percentile(
+      [...values].sort((left, right) => left - right),
+      0.5,
+    );
+  const singleEditMedianP50Ms = medianOf(singleEditRunP50Ms);
+  const singleEditMedianP95Ms = medianOf(singleEditRunP95Ms);
+  const sequentialMedianP50Ms = medianOf(sequentialRunP50Ms);
+  const batchMedianP50Ms = medianOf(batchRunP50Ms);
+  const matchingMutationEnvironment =
+    mutationBaseline.environment.node === process.version &&
+    mutationBaseline.environment.platform === process.platform &&
+    mutationBaseline.environment.arch === process.arch;
+  const singleEditStatus = !matchingMutationEnvironment
+    ? 'NOT_COMPARABLE'
+    : singleEditMedianP50Ms <= mutationBaseline.preChange.singleEdit10000.medianP50Ms * 1.15 &&
+        singleEditMedianP95Ms <= mutationBaseline.preChange.singleEdit10000.medianP95Ms * 1.25
+      ? 'PASS'
+      : 'REGRESSION';
+  const batchSpeedup = sequentialMedianP50Ms / batchMedianP50Ms;
+  const batchStatus = batchSpeedup >= 2 ? 'PASS' : 'REGRESSION';
+  const overwriteServer = new GameServer({ seedText: 'harness-overwrite-heavy' });
+  const overwriteBuffer = new WorldMutationBuffer({
+    sourceId: 'harness-overwrite-heavy',
+    priority: 0,
+    initialCapacity: 100000,
+  });
+  for (let pass = 0; pass < 10; pass += 1)
+    for (let index = 0; index < 10000; index += 1)
+      overwriteBuffer.write(index % 100, -10, Math.floor(index / 100), pass % 2 ? voxel.Voxel.Wood : voxel.Voxel.Stone);
+  const overwriteResult = overwriteServer.editBatch({ actorId: 'harness-overwrite-heavy', buffers: [overwriteBuffer] });
+  const overwriteStatus =
+    overwriteResult.metrics.inputMutationCount === 100000 &&
+    overwriteResult.metrics.canonicalWriteCount === 10000 &&
+    overwriteResult.metrics.structuralEventCount === 1
+      ? 'PASS'
+      : 'REGRESSION';
+  const heapAfterMutation = process.memoryUsage().heapUsed;
+  const worldMutation = {
+    status:
+      singleEditStatus === 'REGRESSION' || batchStatus === 'REGRESSION' || overwriteStatus === 'REGRESSION'
+        ? 'REGRESSION'
+        : 'PASS',
+    environmentComparable: matchingMutationEnvironment,
+    singleEdit: {
+      status: singleEditStatus,
+      medianP50Ms: singleEditMedianP50Ms,
+      medianP95Ms: singleEditMedianP95Ms,
+      p50LimitMs: mutationBaseline.preChange.singleEdit10000.medianP50Ms * 1.15,
+      p95LimitMs: mutationBaseline.preChange.singleEdit10000.medianP95Ms * 1.25,
+      runP50Ms: singleEditRunP50Ms,
+      runP95Ms: singleEditRunP95Ms,
+    },
+    batchComparison: {
+      status: batchStatus,
+      sequentialMedianP50Ms,
+      batchMedianP50Ms,
+      speedup: batchSpeedup,
+      sequentialRunP50Ms,
+      batchRunP50Ms,
+    },
+    overwriteHeavy: { status: overwriteStatus, metrics: overwriteResult.metrics },
+    memoryProxy: {
+      heapBeforeMutation,
+      heapAfterMutation,
+      heapDeltaBytes: heapAfterMutation - heapBeforeMutation,
+      note: 'Process heap delta is an environment-local proxy and includes benchmark-retained objects.',
+    },
+    fillSamples,
+  };
+  const bundle = await collectDistMetrics(root);
   const metrics = {
     macroQueryP95Ms: macroGeneration.p95Ms,
     macroQueryThroughputPerSecond: (macroCoordinates.length / macroGeneration.totalMs) * 1000,
@@ -185,14 +361,20 @@ function compare(current, baseline) {
   };
   const isBaseline = process.argv.includes('--baseline');
   const baseline = isBaseline ? null : JSON.parse(await readFile(baselinePath, 'utf8'));
-  const browserE2E = await currentBrowserEvidence(browserResultPath, 'browserE2E', {
-    status: 'NOT_RUN',
-    note: 'No current correlated browser regression result is available.',
-  });
-  const browserBenchmark = await currentBrowserEvidence(browserBenchmarkPath, 'browserBenchmark', {
-    status: 'NOT_RUN',
-    note: 'No current correlated browser benchmark sample is available.',
-  });
+  const browserE2E = await currentBrowserEvidence(
+    browserResultPath,
+    'browserE2E',
+    { status: 'NOT_RUN', note: 'No current correlated browser regression result is available.' },
+    expectedBrowserRunId,
+    sourceSha,
+  );
+  const browserBenchmark = await currentBrowserEvidence(
+    browserBenchmarkPath,
+    'browserBenchmark',
+    { status: 'NOT_RUN', note: 'No current correlated browser benchmark sample is available.' },
+    expectedBrowserRunId,
+    sourceSha,
+  );
   const result = {
     schemaVersion: 1,
     generatedAt: now,
@@ -215,6 +397,7 @@ function compare(current, baseline) {
     bundle,
     browserE2E,
     browserBenchmark,
+    worldMutation,
     metrics,
     comparison: compare(metrics, baseline),
   };
@@ -249,6 +432,14 @@ function compare(current, baseline) {
     '',
     `- JS: ${bundle.jsBytes} bytes; gzip: ${bundle.gzipBytes} bytes; total output: ${bundle.totalBytes} bytes across ${bundle.fileCount} files.`,
     '',
+    '## World mutation transaction',
+    '',
+    `- ${worldMutation.status} — 10k single edit p50/p95: ${singleEditMedianP50Ms.toFixed(2)} / ${singleEditMedianP95Ms.toFixed(2)} ms (${singleEditStatus}).`,
+    `- 100k sequential/batch p50: ${sequentialMedianP50Ms.toFixed(2)} / ${batchMedianP50Ms.toFixed(2)} ms; speedup ${batchSpeedup.toFixed(2)}x (${batchStatus}).`,
+    `- 100k fill structural events: ${fillSamples[100000].metrics.structuralEventCount}; dirty chunks: ${fillSamples[100000].metrics.dirtyChunkCount}; mesh invalidations: ${fillSamples[100000].metrics.meshInvalidationCount}.`,
+    `- Overwrite-heavy 100k input / 10k unique: ${overwriteResult.metrics.canonicalWriteCount} canonical writes (${overwriteStatus}).`,
+    `- Mutation heap proxy delta: ${heapAfterMutation - heapBeforeMutation} bytes.`,
+    '',
     '## Baseline comparison',
     '',
     ...Object.entries(result.comparison).map(
@@ -277,6 +468,8 @@ function compare(current, baseline) {
     '',
   ];
   await writeFile(resolve(resultsDir, 'latest.md'), lines.join('\n'));
+  const existingRegression = Object.values(result.comparison).some((value) => value.status === 'REGRESSION');
+  if (worldMutation.status === 'REGRESSION' || existingRegression) process.exitCode = 1;
   console.log(
     JSON.stringify(
       {

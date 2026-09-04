@@ -1,0 +1,29 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "在修改生产代码前，复核 World Mutation Transaction 的原子提交、确定性合并、revision、事件边界、FillCommand 与客户端聚合失效方案。",
+  "evidence": [
+    "现有 GameServer.editBatch 会按输入顺序直接写 canonical Chunk，不能原子校验或将最终回原值合并为 no-op。",
+    "现有 mutationCount 是 Chunk revision 求和，没有独立 world revision；批次结果也没有语义事件边界。",
+    "用户提供的 Change 5 要求 mutation buffer、确定性 commit、结构事件聚合、FillCommand 与 100k 压测。",
+    "已建立增量 spec、headless RED 用例与浏览器 100k 聚合消费 RED 用例。"
+  ],
+  "necessary_paths": [
+    "changes/2026-09-04-world-mutation-transaction/spec.md",
+    "tests/server/world-mutation-transaction.test.ts",
+    "changes/2026-09-04-world-mutation-transaction/e2e/world-mutation-transaction.spec.ts",
+    "src/server/game-server.ts",
+    "src/app/main.ts",
+    "tests/e2e/support/harness.ts",
+    "scripts/run-harness.mjs",
+    "changes/2026-09-04-client-server-foundation/spec.md"
+  ],
+  "output_limit": { "max_characters": 1500 },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}
