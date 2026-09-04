@@ -147,7 +147,7 @@ This repository may remain useful independently as an open Web sandbox even if t
 - There are no caves, propagated voxel lighting, mobile touch controls, floating origin, or distant-world LOD yet.
 - Browser persistence favours a simple prototype deployment rather than large-world storage.
 - No AgentServer or LLM service is required or connected. Creature and settler behaviour is a bounded deterministic foundation; there is no dialogue, trading, reproduction, crowd avoidance, or full ecology simulation yet.
-- The current vertical streaming range is sized for this prototype's terrain.
+- The browser MVP renders and permits normal building at y=0–63. Attempts outside this range show a message and keep the selected item. Core world coordinates and stored data remain unrestricted by this presentation limit.
 - The main JavaScript bundle is large and has not yet been split into lazy-loaded runtime chunks.
 
 ## Contributing and security

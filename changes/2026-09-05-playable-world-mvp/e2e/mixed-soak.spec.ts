@@ -47,6 +47,7 @@ test('60分钟真实输入、跨区、背包、存退继续与死亡恢复混合
     stage = 'natural-resource-crafting-building-combat-food-save-journey';
     checkpoint();
     await runNaturalJourney(page, testInfo);
+    sessions = 2;
     await page.getByRole('button', { name: '关闭背包', exact: true }).click();
     await lockPointer(page);
     let cycle = 0;

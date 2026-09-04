@@ -1,3 +1,4 @@
+import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from './browser-world-limits';
 import { entityHitDistance } from '../client/entity-hit-volume';
 import type * as pc from 'playcanvas';
 import type { GameServer, WorldCommitResult } from '../server/game-server';
@@ -206,6 +207,8 @@ export class BrowserGameplay {
   }
 
   place(position: [number, number, number]): void {
+    if (position[1] < BROWSER_MIN_BUILD_Y || position[1] > BROWSER_MAX_BUILD_Y)
+      return this.feedback(`建造高度限 ${BROWSER_MIN_BUILD_Y}–${BROWSER_MAX_BUILD_Y} 层；物品已保留`, 'error');
     const result = this.options.server.placeVoxel(this.options.playerId, position);
     if (!result.success) return this.feedback(`无法放置 · ${result.reason}`, 'error');
     this.options.consumeCommit(result.commit);

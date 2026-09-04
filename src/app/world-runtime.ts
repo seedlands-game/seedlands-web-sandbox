@@ -1,3 +1,4 @@
+import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
 import { CHUNK_SIZE, floorDiv } from '../world/voxel';
 import type { WorldChange } from '../world/storage';
@@ -216,7 +217,7 @@ export class World {
     this.lastCenter = center;
     const span = this.telemetryRecorder.beginSpan('streaming', 'DetermineNeededChunks');
     const needs: [number, number, number, number][] = [];
-    for (let y = 0; y <= 1; y += 1)
+    for (let y = 0; y < BROWSER_VERTICAL_CHUNKS; y += 1)
       for (let z = cz - this.quality.renderRadius; z <= cz + this.quality.renderRadius; z += 1)
         for (let x = cx - this.quality.renderRadius; x <= cx + this.quality.renderRadius; x += 1)
           needs.push([x, y, z, Math.abs(x - cx) + Math.abs(z - cz)]);
