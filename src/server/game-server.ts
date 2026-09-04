@@ -1,4 +1,5 @@
 import { MESH_HALO_SIZE, makeChunk, meshHaloIndex } from '../world/mesh';
+import { macroAt, type MacroContext } from '../world/macro-world';
 import {
   CHUNK_SIZE,
   GENERATOR_VERSION,
@@ -45,6 +46,8 @@ export type DerivedMeshSnapshot = {
   halo: Uint16Array;
   chunkRevision: number;
   haloRevision: string;
+  proceduralVoxelSamples: number;
+  macroContextCount: number;
 };
 
 const snapshotFromChunk = (seedText: string, chunk: ServerChunk): ChunkSnapshot => ({
@@ -117,6 +120,17 @@ export class GameServer {
   createDerivedMeshSnapshot(cx: number, cy: number, cz: number): DerivedMeshSnapshot {
     const chunk = this.getChunk(cx, cy, cz);
     const externalData = new Map<string, Uint16Array | null>();
+    const macroContexts = new Map<string, MacroContext>();
+    let proceduralVoxelSamples = 0;
+    const queryMacro = (x: number, z: number) => {
+      const key = `${x},${z}`;
+      let context = macroContexts.get(key);
+      if (!context) {
+        context = macroAt(this.seed, x, z);
+        macroContexts.set(key, context);
+      }
+      return context;
+    };
     const sample = (x: number, y: number, z: number) => {
       const sampleCx = floorDiv(x, CHUNK_SIZE);
       const sampleCy = floorDiv(y, CHUNK_SIZE);
@@ -133,9 +147,9 @@ export class GameServer {
           (persisted && this.isValidSnapshot(persisted, key, sampleCx, sampleCy, sampleCz) ? persisted.voxels : null);
         externalData.set(key, data);
       }
-      return data
-        ? data[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))]
-        : baseVoxel(this.seed, x, y, z);
+      if (data) return data[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
+      proceduralVoxelSamples += 1;
+      return baseVoxel(this.seed, x, y, z, queryMacro(x, z), queryMacro);
     };
     const halo = new Uint16Array(MESH_HALO_SIZE ** 3);
     let revision = 2166136261;
@@ -155,6 +169,8 @@ export class GameServer {
       halo,
       chunkRevision: chunk.revision,
       haloRevision: `${revision >>> 0}`,
+      proceduralVoxelSamples,
+      macroContextCount: macroContexts.size,
     };
   }
 
