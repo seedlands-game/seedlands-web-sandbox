@@ -152,6 +152,7 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOpti
     material: FaceMaterialId,
     vertices: number[],
     normal: number[],
+    normalAxis: number,
     width: number,
     height: number,
     back: boolean,
@@ -161,7 +162,13 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOpti
     const start = quad.p.length / 3;
     quad.p.push(...vertices);
     quad.n.push(...normal, ...normal, ...normal, ...normal);
-    quad.uv.push(...(back ? [0, 0, 0, height, width, height, width, 0] : [0, 0, width, 0, width, height, 0, height]));
+    if (normalAxis === 0) {
+      // X-facing quads are built Y-first. Swap their UV axes so world Y always
+      // maps to texture V, matching Z-facing quads and keeping side textures upright.
+      quad.uv.push(...(back ? [0, 0, height, 0, height, width, 0, width] : [0, 0, 0, width, height, width, height, 0]));
+    } else {
+      quad.uv.push(...(back ? [0, 0, 0, height, width, height, width, 0] : [0, 0, width, 0, width, height, 0, height]));
+    }
     for (const level of ao) {
       const brightness = AO_BRIGHTNESS[level];
       quad.c.push(brightness, brightness, brightness, 255);
@@ -231,6 +238,7 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOpti
             cell.material,
             cell.back ? [...p, ...p3, ...p2, ...p1] : [...p, ...p1, ...p2, ...p3],
             normal,
+            d,
             width,
             height,
             cell.back,
