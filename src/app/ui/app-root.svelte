@@ -94,7 +94,7 @@
   <MacroMap {shell} {actions} />
   <InventoryCrafting gameplay={shell.gameplay} {actions} />
   <DeathOverlay dead={shell.gameplay.lifecycle === 'dead'} {actions} />
-  <PresentedEntities entities={interaction.presentedEntities} />
+  {#if hud.visible}<PresentedEntities entities={interaction.presentedEntities} />{/if}
   <div id="help" class="game-panel">
     WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–8 快捷栏 · E 背包 · M 地图 · F3 指标 · F4 命令
   </div>

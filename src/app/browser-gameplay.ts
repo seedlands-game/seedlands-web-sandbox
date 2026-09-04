@@ -71,7 +71,7 @@ export class BrowserGameplay {
         return actor ? [[entity.id, actor] as const] : [];
       }),
     );
-    this.presenter.reconcile(entities, actorStates, this.options.server.gameplayTime);
+    this.presenter.reconcile(entities, this.options.server.gameplayTime);
     if (this.previousHealth !== null && player.health < this.previousHealth) this.present({ kind: 'damage' });
     this.previousHealth = player.health;
     const currentBreaking = player.breakAction
