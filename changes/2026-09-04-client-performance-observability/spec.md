@@ -1,6 +1,6 @@
 # 客户端性能可观测性与流式掉帧修复
 
-**状态：** 已实施，等待提交后的关联 Harness 读回
+**状态：** 已交付
 
 ## 背景与目标
 
@@ -54,7 +54,7 @@
 - [x] **Playwright-baseline：** 现有加载、输入、碰撞、保存和 streaming 基线全部通过。
 - [x] **Static：** `pnpm verify:static` 通过，`src/world/**` 行覆盖率为 96.72%。
 - [x] **Build：** `pnpm build` 通过。
-- [进行中] **Harness：** 已得到当前工作树的 structured browser 样本；提交后重新运行，使 source SHA 与最终提交精确关联。不把跨机器绝对时间当硬门槛。
+- [x] **Harness：** 已输出关联 source SHA `7f5086b980cf6876a18abfc2ede454c8ee893ae9` 的 structured browser 样本；不把跨机器绝对时间当硬门槛。
 - [x] **Midscene：** N/A——本 change 的可见变化是开发者 Debug HUD 摘要，掉帧与 trace 正确性由 Playwright/Harness 精确验证；不新增需要视觉语义模型判断的用户旅程。
 
 ## 任务与当前状态
@@ -64,7 +64,7 @@
 3. [已完成] Breaking-flow 审核通过；批准的 spec SHA-256 为 `06f51550b932a6bd1890b00602aca0d7175fc7bce6be046df2bde956d1eb4992`。
 4. [已完成] 实现 telemetry/profile、Worker derived meshing、场景 epoch 隔离与三重 commit budget。
 5. [已完成] 以源码、profile 和浏览器场景确认并修复了同步网格/提交爆发，以及首次实现中一次性构造所有 Halo 快照的次生主线程爆发。
-6. [进行中] 创建仅包含本 change 的语义化本地 Git commit；不 push。提交后补一次关联 Harness 读回。
+6. [已完成] 创建仅包含本 change 的语义化本地 Git commit `7f5086b`，未 push；关联 Harness 读回通过。
 
 ## 交付快照
 
@@ -81,4 +81,4 @@
 - `pnpm verify:static`：63 项 Vitest 通过；Prettier、ESLint、ls-lint、V8 coverage、TypeScript 均通过；world 行覆盖率 96.72%。
 - `pnpm build`：通过。Vite 保留既有的大 bundle 警告，非本 change 新增失败。
 - `pnpm exec playwright test changes/2026-09-04-client-performance-observability/e2e/performance-observability.spec.ts`：通过，验证场景隔离、真实帧 profile、postrender 可见、三重预算、Chrome Trace export 与 integrated server authority。
-- `pnpm harness:e2e`：9 项基线浏览器用例通过；当前工作树的初始 ready 样本为 2399.42 ms。该数值是环境样本，不是跨机器门槛；其结果文件在提交前仍标记旧 `HEAD`，所以最终提交后需要重新关联。
+- `pnpm harness:e2e`：9 项基线浏览器用例通过；关联 commit `7f5086b980cf6876a18abfc2ede454c8ee893ae9` 的初始 ready 样本为 2435.00 ms，所有 load、input、player、interaction、streaming、persistence stage 均为 PASS。该数值是环境样本，不是跨机器门槛。
