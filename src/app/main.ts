@@ -15,7 +15,7 @@ import { type RenderLayer } from '../world/mesh';
 import { decodeWorldSave, type WorldChange } from '../world/storage';
 import { GameServer } from '../server/game-server';
 import { BrowserChunkPersistence, decodeBrowserWorldSave } from '../client/browser-chunk-persistence';
-import { createMeshTaskSnapshot, isCurrentMeshTask, type MeshTaskSnapshot } from '../client/mesh-task-snapshot';
+import { createMeshTaskSnapshot, isCurrentMeshTask, type MeshTaskIdentity } from '../client/mesh-task-snapshot';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
 import { PerformanceTelemetry } from '../client/performance-telemetry';
 import {
@@ -48,6 +48,11 @@ type WorkerResult = {
   cy: number;
   cz: number;
   workerMeshingMs: number;
+  workerGenerationMs?: number;
+  workerHaloMs?: number;
+  computedHaloRevision?: string;
+  canonical?: ArrayBuffer;
+  generatorVersion?: number;
   meshes: MeshPart[];
 };
 type Chunk = {
@@ -61,12 +66,16 @@ type Chunk = {
   meshBytes: number;
 };
 type Change = WorldChange;
-type PendingMeshTask = MeshTaskSnapshot & {
+type StreamingVariant = 'main-snapshot' | 'worker-first';
+type PendingMeshTask = MeshTaskIdentity & {
+  chunkKey: string;
   traceId: string;
   seed: number;
   cx: number;
   cy: number;
   cz: number;
+  generatorVersion: number;
+  variant: StreamingVariant;
 };
 type PendingMeshRequest = {
   traceId: string;
@@ -75,6 +84,7 @@ type PendingMeshRequest = {
   cx: number;
   cy: number;
   cz: number;
+  queuedAt: number;
 };
 type MeshCommitJob = {
   task: PendingMeshTask;
@@ -150,6 +160,7 @@ declare global {
       setView: (yaw: number, pitch: number) => void;
       setSpectatorPosition: (x: number, y: number, z: number) => void;
       beginPerformanceScenario: (name: string) => string;
+      setStreamingVariant: (variant: StreamingVariant) => void;
       exportPerformanceTrace: () => ReturnType<PerformanceTelemetry['exportChromeTrace']>;
     };
   }
@@ -342,6 +353,7 @@ class World {
   private maxMeshPartsInFrame = 0;
   private visibleAfterPostrender = false;
   private lastCenter = '';
+  private streamingVariant: StreamingVariant;
   constructor(
     readonly server: GameServer,
     private readonly app: pc.Application,
@@ -349,7 +361,9 @@ class World {
     private readonly quality: QualityProfile,
     private readonly telemetryRecorder: PerformanceTelemetry,
     private readonly profile: PerformanceProfile,
+    streamingVariant: StreamingVariant,
   ) {
+    this.streamingVariant = streamingVariant;
     this.worker.onmessage = (event: MessageEvent<WorkerResult>) => this.receiveWorker(event.data);
   }
   get seedText() {
@@ -416,6 +430,7 @@ class World {
     this.frameParts = 0;
   }
   beginScenario(name: string): string {
+    this.telemetryRecorder.reset();
     this.scenarioEpoch += 1;
     this.scenarioId = `${name}-${++this.scenarioSequence}`;
     this.queued.clear();
@@ -429,6 +444,13 @@ class World {
     this.visibleAfterPostrender = false;
     this.telemetryRecorder.counter('scenario_epoch', this.scenarioEpoch);
     return this.scenarioId;
+  }
+  setStreamingVariant(variant: StreamingVariant) {
+    if (this.streamingVariant === variant) return;
+    this.streamingVariant = variant;
+    this.beginScenario(`variant-${variant}`);
+    this.chunks.forEach((chunk) => this.destroyChunk(chunk));
+    this.chunks.clear();
   }
   exportTrace() {
     return this.telemetryRecorder.exportChromeTrace();
@@ -485,7 +507,11 @@ class World {
   edit(x: number, y: number, z: number, value: number) {
     const result = this.server.edit(x, y, z, value);
     result.meshChunks.forEach((key) => {
-      if (this.chunks.has(key) || this.latestTasks.has(key)) this.dirtyChunks.add(key);
+      const pending = this.latestTasks.get(key);
+      if (pending) {
+        this.cancel(key);
+        this.request(pending.cx, pending.cy, pending.cz, true);
+      } else if (this.chunks.has(key)) this.dirtyChunks.add(key);
     });
     this.scheduleRemesh();
   }
@@ -541,7 +567,15 @@ class World {
     this.requested.add(key);
     this.latestTasks.delete(key);
     this.queued.delete(key);
-    this.queued.set(key, { traceId, epoch: this.scenarioEpoch, chunkKey: key, cx, cy, cz });
+    this.queued.set(key, {
+      traceId,
+      epoch: this.scenarioEpoch,
+      chunkKey: key,
+      cx,
+      cy,
+      cz,
+      queuedAt: performance.now(),
+    });
     this.telemetryRecorder.markTrace(traceId, 'queued', 'main');
     this.drainWorker();
   }
@@ -555,11 +589,18 @@ class World {
         this.telemetryRecorder.markTrace(request.traceId, 'stale-request', 'main');
         continue;
       }
-      const snapshotSpan = this.telemetryRecorder.beginSpan('streaming', 'HaloSnapshot', 'main', request.traceId);
-      const snapshot = this.server.createDerivedMeshSnapshot(request.cx, request.cy, request.cz);
-      this.telemetryRecorder.endSpan(snapshotSpan);
-      const task: PendingMeshTask = {
-        ...createMeshTaskSnapshot({
+      this.telemetryRecorder.recordCompletedSpan({
+        category: 'worker',
+        name: 'WorkerQueueWait',
+        lane: 'main',
+        durationMs: performance.now() - request.queuedAt,
+        traceId: request.traceId,
+      });
+      if (this.streamingVariant === 'main-snapshot') {
+        const snapshotSpan = this.telemetryRecorder.beginSpan('streaming', 'HaloSnapshot', 'main', request.traceId);
+        const snapshot = this.server.createDerivedMeshSnapshot(request.cx, request.cy, request.cz);
+        this.telemetryRecorder.endSpan(snapshotSpan);
+        const snapshotTask = createMeshTaskSnapshot({
           taskId: ++this.taskSequence,
           epoch: request.epoch,
           chunkKey: key,
@@ -567,19 +608,71 @@ class World {
           haloRevision: snapshot.haloRevision,
           canonical: snapshot.canonical,
           halo: snapshot.halo,
-        }),
+        });
+        const task: PendingMeshTask = {
+          ...snapshotTask,
+          traceId: request.traceId,
+          seed: this.seed,
+          cx: request.cx,
+          cy: request.cy,
+          cz: request.cz,
+          generatorVersion: GENERATOR_VERSION,
+          variant: 'main-snapshot',
+        };
+        this.latestTasks.set(key, task);
+        this.inFlight += 1;
+        this.telemetryRecorder.markTrace(task.traceId, 'worker-start', 'worker-derived');
+        this.worker.postMessage(
+          {
+            kind: 'mesh',
+            taskId: task.taskId,
+            traceId: task.traceId,
+            epoch: task.epoch,
+            chunkKey: task.chunkKey,
+            seed: task.seed,
+            cx: task.cx,
+            cy: task.cy,
+            cz: task.cz,
+            chunkRevision: task.chunkRevision,
+            haloRevision: task.haloRevision,
+            canonical: snapshotTask.canonical.buffer,
+            halo: snapshotTask.halo.buffer,
+          },
+          [snapshotTask.canonical.buffer, snapshotTask.halo.buffer],
+        );
+        continue;
+      }
+      const overlaySpan = this.telemetryRecorder.beginSpan(
+        'streaming',
+        'AuthorityOverlayCopy',
+        'main',
+        request.traceId,
+      );
+      const prepared = this.server.prepareWorkerMeshInput(request.cx, request.cy, request.cz);
+      this.telemetryRecorder.endSpan(overlaySpan);
+      const task: PendingMeshTask = {
+        taskId: ++this.taskSequence,
+        epoch: request.epoch,
+        chunkKey: key,
+        chunkRevision: prepared.chunkRevision,
+        haloRevision: `worker-input-${this.taskSequence}`,
         traceId: request.traceId,
         seed: this.seed,
         cx: request.cx,
         cy: request.cy,
         cz: request.cz,
+        generatorVersion: prepared.generatorVersion,
+        variant: 'worker-first',
       };
       this.latestTasks.set(key, task);
       this.inFlight += 1;
       this.telemetryRecorder.markTrace(task.traceId, 'worker-start', 'worker-derived');
+      const transfers: Transferable[] = [];
+      if (prepared.canonical) transfers.push(prepared.canonical.buffer);
+      prepared.overlays.forEach((overlay) => transfers.push(overlay.voxels.buffer));
       this.worker.postMessage(
         {
-          kind: 'mesh',
+          kind: 'generate-mesh',
           taskId: task.taskId,
           traceId: task.traceId,
           epoch: task.epoch,
@@ -590,10 +683,16 @@ class World {
           cz: task.cz,
           chunkRevision: task.chunkRevision,
           haloRevision: task.haloRevision,
-          canonical: task.canonical.buffer,
-          halo: task.halo.buffer,
+          generatorVersion: task.generatorVersion,
+          ...(prepared.canonical ? { canonical: prepared.canonical.buffer } : {}),
+          overlays: prepared.overlays.map((overlay) => ({
+            cx: overlay.cx,
+            cy: overlay.cy,
+            cz: overlay.cz,
+            voxels: overlay.voxels.buffer,
+          })),
         },
-        [task.canonical.buffer, task.halo.buffer],
+        transfers,
       );
     }
   }
@@ -607,6 +706,43 @@ class World {
       );
       this.drainWorker();
       return;
+    }
+    if (task.variant === 'worker-first') {
+      if (!result.canonical || result.generatorVersion !== task.generatorVersion) {
+        this.discard(task, 'invalid-worker-canonical');
+        this.drainWorker();
+        return;
+      }
+      const accepted = this.server.acceptWorkerCanonical({
+        key: task.chunkKey,
+        cx: task.cx,
+        cy: task.cy,
+        cz: task.cz,
+        chunkRevision: task.chunkRevision,
+        generatorVersion: task.generatorVersion,
+        canonical: new Uint16Array(result.canonical),
+      });
+      if (!accepted) {
+        this.discard(task, 'stale-worker-canonical');
+        this.drainWorker();
+        return;
+      }
+      if (result.workerGenerationMs !== undefined)
+        this.telemetryRecorder.recordCompletedSpan({
+          category: 'worldgen',
+          name: 'WorkerGeneration',
+          lane: 'worker-derived',
+          durationMs: result.workerGenerationMs,
+          traceId: task.traceId,
+        });
+      if (result.workerHaloMs !== undefined)
+        this.telemetryRecorder.recordCompletedSpan({
+          category: 'streaming',
+          name: 'WorkerHaloSample',
+          lane: 'worker-derived',
+          durationMs: result.workerHaloMs,
+          traceId: task.traceId,
+        });
     }
     this.telemetryRecorder.recordCompletedSpan({
       category: 'meshing',
@@ -674,7 +810,7 @@ class World {
       this.telemetryRecorder.completeTrace(job.task.traceId, 'visible-postrender', 'main');
     });
   }
-  private isTaskCurrent(task: MeshTaskSnapshot) {
+  private isTaskCurrent(task: MeshTaskIdentity & { chunkKey: string }) {
     const current = this.latestTasks.get(task.chunkKey);
     return current ? isCurrentMeshTask(task, current) : false;
   }
@@ -809,6 +945,7 @@ class Game {
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
     const server = new GameServer({ seedText, persistence: this.persistence });
     server.setWorldTime(this.environment.worldTime);
+    const requestedVariant = new URLSearchParams(location.search).get('streamingVariant');
     this.world = new World(
       server,
       this.app,
@@ -816,6 +953,7 @@ class Game {
       quality,
       this.performanceTelemetry,
       this.performanceProfile,
+      requestedVariant === 'main-snapshot' ? 'main-snapshot' : 'worker-first',
     );
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
     const p = restore?.player ?? [0, 34, 0];
@@ -861,6 +999,7 @@ class Game {
           this.world?.updateStreaming(this.camera.getPosition());
         },
         beginPerformanceScenario: (name) => this.world?.beginScenario(name) ?? '',
+        setStreamingVariant: (variant) => this.world?.setStreamingVariant(variant),
         exportPerformanceTrace: () => this.world?.exportTrace() ?? { traceEvents: [] },
       };
     }

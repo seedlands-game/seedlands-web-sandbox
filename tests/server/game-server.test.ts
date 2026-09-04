@@ -3,7 +3,7 @@ import { GameServer } from '../../src/server/game-server';
 import type { ChunkPersistence, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
 import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
 import { Voxel, chunkKey } from '../../src/world/voxel';
-import { meshHaloIndex } from '../../src/world/mesh';
+import { createProceduralMeshInput, meshHaloIndex } from '../../src/world/mesh';
 
 describe('GameServer headless authority', () => {
   it('deterministically generates canonical data and runs without a browser client', () => {
@@ -133,6 +133,26 @@ describe('GameServer headless authority', () => {
     const afterBoundaryEdit = server.createDerivedMeshSnapshot(0, 0, 0);
     expect(afterBoundaryEdit.halo[meshHaloIndex(32, 20, 0)]).toBe(Voxel.Wood);
     expect(afterBoundaryEdit.haloRevision).not.toBe(initial.haloRevision);
+  });
+
+  it('prepares only copied authority overlays and accepts a current Worker canonical result once', () => {
+    const server = new GameServer({ seedText: 'worker-canonical' });
+    server.edit(32, 20, 0, Voxel.Wood);
+    const prepared = server.prepareWorkerMeshInput(0, 0, 0);
+    const neighbour = prepared.overlays.find((overlay) => overlay.cx === 1 && overlay.cy === 0 && overlay.cz === 0);
+    expect(prepared.canonical).toBeUndefined();
+    expect(neighbour?.voxels).not.toBe(server.getChunk(1, 0, 0).voxels);
+
+    const canonical = createProceduralMeshInput({
+      seed: server.seed,
+      cx: 0,
+      cy: 0,
+      cz: 0,
+      overlays: prepared.overlays,
+    }).canonical;
+    expect(server.acceptWorkerCanonical({ ...prepared, canonical })).toBe(true);
+    expect(server.acceptWorkerCanonical({ ...prepared, canonical })).toBe(true);
+    expect(server.getChunk(0, 0, 0).voxels).toEqual(canonical);
   });
 
   it('owns minimal entity state and the simulation clock independently of presentation', () => {

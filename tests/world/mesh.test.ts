@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CHUNK_SIZE, FaceMaterial, Voxel, normalizeSeed, voxelIndex } from '../../src/world/voxel';
-import { makeChunk, meshChunk } from '../../src/world/mesh';
+import { createProceduralMeshInput, makeChunk, meshChunk } from '../../src/world/mesh';
 
 const seed = normalizeSeed('vitest-world-mesh');
 
@@ -29,6 +29,22 @@ describe('chunk generation', () => {
     const data = makeChunk(seed, -2, 0, 1, [[-33, 20, 32, Voxel.Wood]]);
 
     expect(data[voxelIndex(31, 20, 0)]).toBe(Voxel.Wood);
+  });
+
+  it('derives a deterministic one-voxel halo and gives authority overlays precedence', () => {
+    const generated = createProceduralMeshInput({ seed, cx: 0, cy: 0, cz: 0 });
+    const overridden = createProceduralMeshInput({
+      seed,
+      cx: 0,
+      cy: 0,
+      cz: 0,
+      overlays: [{ cx: 1, cy: 0, cz: 0, voxels: new Uint16Array(CHUNK_SIZE ** 3).fill(Voxel.Air) }],
+    });
+
+    expect(generated.canonical).toEqual(makeChunk(seed, 0, 0, 0, []));
+    expect(generated.halo).toHaveLength(34 ** 3);
+    expect(generated.haloRevision).toMatch(/^\d+$/);
+    expect(overridden.halo).not.toEqual(generated.halo);
   });
 });
 

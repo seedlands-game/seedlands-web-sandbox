@@ -1,0 +1,29 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "结合浏览器 Voxel Runtime 架构与已采集 profile，复核主线程 streaming 卡顿的优化选型、优先级和逐项 A/B 证据合同。",
+  "evidence": [
+    "排空初始队列后的跨 Chunk profile 显示 frame p95 121.5ms、p99 299.9ms，request-to-visible 323.6ms。",
+    "worker mesh 最高 3.1ms、总计 7.2ms，MeshCommit 最高 0.1ms、SceneAttach 为 0ms，未显示为主因。",
+    "Halo Macro cache 已把 HaloSnapshot 从最高 701.9ms 降至 49.9–111.2ms；剩余主线程同步 canonical 生成与 Halo 采样仍造成长任务。",
+    "用户要求参考 Browser Voxel Runtime Architecture，对每个优化点给出 A/B 对照效果和记录。"
+  ],
+  "necessary_paths": [
+    "changes/2026-09-04-cooperative-chunk-snapshot/spec.md",
+    "changes/2026-09-04-client-performance-observability/spec.md",
+    "src/app/main.ts",
+    "src/server/game-server.ts",
+    "src/worker/world-worker.ts",
+    "src/client/performance-telemetry.ts",
+    "tests/e2e/benchmark",
+    "/Users/bytedance/Downloads/_sorted/documents/Browser%20Voxel%20Runtime%20Architecture.md"
+  ],
+  "output_limit": { "max_characters": 1400 },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}

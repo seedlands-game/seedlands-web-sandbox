@@ -111,6 +111,18 @@ export class PerformanceTelemetry {
     return frameId;
   }
 
+  reset() {
+    this.frames.length = 0;
+    this.events.length = 0;
+    this.traces.clear();
+    this.incidentsBuffer.length = 0;
+    this.gauges.clear();
+    this.activeSpans.clear();
+    this.currentFrame = null;
+    this.droppedFrames = 0;
+    this.droppedEvents = 0;
+  }
+
   endFrame(actualDurationMs?: number): FrameSample | null {
     if (!this.currentFrame) return null;
     const current = this.currentFrame;
