@@ -8,6 +8,7 @@ export type HarnessSnapshot = {
   renderedChunks: number;
   generationQueue: number;
   meshingQueue: number;
+  deferredRemeshes: number;
   onGround: boolean;
   colliding: boolean;
   interactionAttempts: number;
@@ -57,6 +58,21 @@ export type HarnessSnapshot = {
     uploadQueueDepth: number;
     estimatedMeshBytes: number;
   };
+  visualEffects: {
+    activeLocalLights: number;
+    shadowedLocalLights: number;
+    localLightLimit: number;
+    localShadowLimit: number;
+    sunShadows: boolean;
+    sunShadowResolution: number;
+    reflectionEnabled: boolean;
+    reflectionActive: boolean;
+    reflectionResolution: number;
+    reflectionFrameInterval: number;
+    reflectionRenderCount: number;
+    waterPlaneY: number | null;
+    postProcessing: boolean;
+  };
 };
 
 type HarnessWindow = Window & {
@@ -75,6 +91,8 @@ type HarnessWindow = Window & {
     setTimeSpeed: (speed: number) => void;
     setView: (yaw: number, pitch: number) => void;
     setSpectatorPosition: (x: number, y: number, z: number) => void;
+    setVoxelAt: (x: number, y: number, z: number, voxel: number) => void;
+    flushSave: () => Promise<void>;
   };
 };
 

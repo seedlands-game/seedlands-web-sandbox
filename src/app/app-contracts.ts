@@ -4,6 +4,7 @@ import type { SerializedChunkSnapshot } from '../client/browser-chunk-persistenc
 import type { MeshTaskIdentity } from '../client/mesh-task-snapshot';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
+import type { VisualEffectsSnapshot } from './advanced-visual-effects';
 
 export type MeshPart = MeshData;
 
@@ -86,6 +87,7 @@ export type HarnessSnapshot = {
   serverPlayerPosition: [number, number, number];
   serverWorldTime: number;
   performance: PerformanceSummary;
+  visualEffects: VisualEffectsSnapshot;
 };
 
 export type RestoredSession = {

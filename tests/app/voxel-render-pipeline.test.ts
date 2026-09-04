@@ -11,7 +11,8 @@ describe('voxel render pipeline policy', () => {
     expect(renderCategoryForFaceMaterial(FaceMaterial.Stone)).toBe('opaque');
     expect(renderCategoryForFaceMaterial(FaceMaterial.Leaves)).toBe('cutout');
     expect(renderCategoryForFaceMaterial(FaceMaterial.Water)).toBe('transparent');
-    expect(MATERIAL_LAYER_COUNT).toBe(10);
+    expect(renderCategoryForFaceMaterial(FaceMaterial.Lantern)).toBe('opaque');
+    expect(MATERIAL_LAYER_COUNT).toBe(11);
   });
 
   it('declares matching GLSL and WGSL chunks for every custom shader responsibility', () => {

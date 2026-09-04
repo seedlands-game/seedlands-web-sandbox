@@ -7,8 +7,11 @@ import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeli
 import {
   voxelArrayDiffuseGlsl,
   voxelArrayDiffuseWgsl,
+  voxelArrayLanternEmissionGlsl,
+  voxelArrayLanternEmissionWgsl,
   voxelArrayOpacityGlsl,
   voxelArrayOpacityWgsl,
+  voxelWaterReflectionEmissionGlsl,
 } from './shaders/voxel-array-chunks';
 
 const mix = (a: number, b: number, amount: number) => a + (b - a) * amount;
@@ -40,8 +43,14 @@ function drawMirroredTile(image: HTMLImageElement, column: number, row: number, 
   if (leaves) {
     const pixels = context.getImageData(0, 0, 128, 128);
     for (let index = 0; index < pixels.data.length; index += 4) {
+      const pixel = index / 4;
+      const x = pixel % 128;
+      const y = Math.floor(pixel / 128);
       const brightness = (pixels.data[index] + pixels.data[index + 1] * 1.5 + pixels.data[index + 2]) / 3.5;
-      pixels.data[index + 3] = brightness < 35 ? 0 : Math.min(255, Math.round((brightness - 35) * 10));
+      const cellX = Math.floor(x / 16);
+      const cellY = Math.floor(y / 16);
+      const deterministicGap = (cellX * 13 + cellY * 17 + (cellX ^ cellY) * 5) % 7 < 3;
+      pixels.data[index + 3] = brightness < 35 || deterministicGap ? 0 : 255;
     }
     context.putImageData(pixels, 0, 0);
   }
@@ -59,9 +68,9 @@ function waterCanvas() {
   gradient.addColorStop(1, '#2d9ab2');
   context.fillStyle = gradient;
   context.fillRect(0, 0, 128, 128);
-  context.globalAlpha = 0.25;
-  context.strokeStyle = '#b9f2e8';
-  context.lineWidth = 2;
+  context.globalAlpha = 0.44;
+  context.strokeStyle = '#d2fff7';
+  context.lineWidth = 3;
   for (let band = -1; band <= 4; band += 1) {
     context.beginPath();
     for (let x = 0; x <= 128; x += 4) {
@@ -69,6 +78,32 @@ function waterCanvas() {
       if (x === 0) context.moveTo(x, y);
       else context.lineTo(x, y);
     }
+    context.stroke();
+  }
+  return canvas;
+}
+
+function lanternCanvas() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d')!;
+  context.fillStyle = '#352012';
+  context.fillRect(0, 0, 128, 128);
+  const glow = context.createRadialGradient(64, 58, 8, 64, 58, 58);
+  glow.addColorStop(0, '#fff5b8');
+  glow.addColorStop(0.38, '#ffbd43');
+  glow.addColorStop(1, '#9b3f16');
+  context.fillStyle = glow;
+  context.fillRect(18, 14, 92, 100);
+  context.strokeStyle = '#50301c';
+  context.lineWidth = 10;
+  context.strokeRect(10, 8, 108, 112);
+  context.lineWidth = 5;
+  for (const x of [42, 86]) {
+    context.beginPath();
+    context.moveTo(x, 12);
+    context.lineTo(x, 116);
     context.stroke();
   }
   return canvas;
@@ -95,6 +130,7 @@ export type VoxelMaterials = {
   categoryMaterials: Map<RenderCategory, pc.StandardMaterial>;
   resolve: (part: MeshPart) => pc.StandardMaterial;
   water: readonly pc.StandardMaterial[];
+  waterLayer: pc.Layer;
   destroy: () => void;
 };
 
@@ -123,6 +159,19 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
   const water = waterCanvas();
   tileCanvases.set(FaceMaterial.Water, water);
   tiles.set(FaceMaterial.Water, textureFromCanvas(app.graphicsDevice, 'water', water));
+  const lantern = lanternCanvas();
+  tileCanvases.set(FaceMaterial.Lantern, lantern);
+  tiles.set(FaceMaterial.Lantern, textureFromCanvas(app.graphicsDevice, 'lantern', lantern));
+
+  const reflectionFallbackCanvas = document.createElement('canvas');
+  reflectionFallbackCanvas.width = 2;
+  reflectionFallbackCanvas.height = 2;
+  const fallbackContext = reflectionFallbackCanvas.getContext('2d')!;
+  fallbackContext.fillStyle = '#17364a';
+  fallbackContext.fillRect(0, 0, 2, 2);
+  const reflectionFallback = textureFromCanvas(app.graphicsDevice, 'reflection-fallback', reflectionFallbackCanvas);
+  const waterLayer = new pc.Layer({ name: 'Voxel Water' });
+  app.scene.layers.pushTransparent(waterLayer);
 
   const arrayLayers = Array.from({ length: MATERIAL_LAYER_COUNT }, (_unused, layer) => {
     const canvas = tileCanvases.get((layer + 1) as FaceMaterialId);
@@ -164,22 +213,36 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('diffusePS', voxelArrayDiffuseGlsl);
     material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('diffusePS', voxelArrayDiffuseWgsl);
     material.setParameter('texture_voxelArray', textureArray);
+    if (category === 'opaque') {
+      material.emissive = new pc.Color(1, 0.48, 0.1);
+      material.emissiveIntensity = 1.15;
+      material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelArrayLanternEmissionGlsl);
+      material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('emissivePS', voxelArrayLanternEmissionWgsl);
+    }
     if (category === 'cutout' || category === 'transparent') {
       material.opacityMap = tiles.get(sampleId)!;
       material.opacityMapChannel = 'a';
       material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('opacityPS', voxelArrayOpacityGlsl);
       material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('opacityPS', voxelArrayOpacityWgsl);
+      material.setParameter(
+        'uOpacityVoxelLayer',
+        category === 'cutout' ? FaceMaterial.Leaves - 1 : FaceMaterial.Water - 1,
+      );
     }
     if (category === 'cutout') {
-      material.alphaTest = mix(0.36, 0.12, quality.vegetationDensity);
+      material.alphaTest = mix(0.34, 0.5, quality.vegetationDensity);
       material.twoSidedLighting = true;
     }
     if (category === 'transparent') {
       material.emissive = new pc.Color(0.02, 0.11, 0.15);
-      material.opacity = mix(0.5, 0.68, quality.waterQuality);
+      material.opacity = mix(0.56, 0.72, quality.waterQuality);
       material.blendType = pc.BLEND_NORMAL;
       material.depthWrite = false;
       material.opacityFadesSpecular = false;
+      material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelWaterReflectionEmissionGlsl);
+      material.setParameter('texture_planarReflection', reflectionFallback);
+      material.setParameter('uReflectionViewport', new Float32Array([1, 1]));
+      material.setParameter('uReflectionStrength', 0);
     }
     material.update();
     return material;
@@ -193,10 +256,13 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
     categoryMaterials,
     resolve: (part) => categoryMaterials.get(part.renderCategory)!,
     water: [categoryMaterials.get('transparent')!],
+    waterLayer,
     destroy: () => {
       categoryMaterials.forEach((material) => material.destroy());
       tiles.forEach((texture) => texture.destroy());
+      reflectionFallback.destroy();
       textureArray.destroy();
+      app.scene.layers.removeTransparent(waterLayer);
     },
   };
 }

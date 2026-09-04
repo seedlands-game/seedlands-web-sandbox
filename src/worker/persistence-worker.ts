@@ -161,7 +161,7 @@ const load = async (task: LoadTask) => {
     generatorVersion: GENERATOR_VERSION,
     proceduralVoxels,
   });
-  if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= Voxel.Water))
+  if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= Voxel.Lantern))
     throw new Error('Stored Chunk contains a voxel outside the current schema.');
   return {
     status: 'found' as const,

@@ -23,11 +23,14 @@ import { QUALITY_PROFILES, type QualityLevel } from './quality-profile';
 import { createVoxelMaterials, type VoxelMaterials } from './voxel-materials';
 import { WorldEnvironment } from './world-environment';
 import { World } from './world-runtime';
+import { AdvancedVisualEffects } from './advanced-visual-effects';
+import { LIGHTING_QUALITY_BUDGETS, type LightingQualityBudget } from './advanced-lighting-budget';
 
 export class Game {
   private app: pc.Application | null = null;
   private world: World | null = null;
   private environment: WorldEnvironment | null = null;
+  private visualEffects: AdvancedVisualEffects | null = null;
   private visualResources: VoxelMaterials | null = null;
   private controller: PlayerController | null = null;
   private camera: pc.Entity | null = null;
@@ -69,6 +72,7 @@ export class Game {
     this.seedText = seedText;
     this.qualityLevel = appElements.qualitySelect.value as QualityLevel;
     const quality = QUALITY_PROFILES[this.qualityLevel];
+    const lightingBudget = LIGHTING_QUALITY_BUDGETS[this.qualityLevel];
     this.performanceProfile = this.selectPerformanceProfile();
     this.performanceTelemetry = new PerformanceTelemetry({
       now: () => performance.now(),
@@ -82,9 +86,10 @@ export class Game {
       legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
     });
     this.app = this.createApplication();
-    const light = this.createSun(this.app, quality.shadowQuality !== 'off');
+    const light = this.createSun(this.app, lightingBudget);
     this.camera = this.createCamera(this.app, quality.fogEnd + 18);
     this.visualResources = await createVoxelMaterials(this.app, quality);
+    this.camera.camera!.layers = [...this.camera.camera!.layers, this.visualResources.waterLayer.id];
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
     const server = new GameServer({ seedText, persistence: this.persistence });
     server.setWorldTime(this.environment.worldTime);
@@ -99,6 +104,14 @@ export class Game {
       () => {
         this.lifecycle.staleVisibleCommits += 1;
       },
+      this.visualResources.waterLayer.id,
+    );
+    this.visualEffects = new AdvancedVisualEffects(
+      this.app,
+      this.camera,
+      this.world,
+      lightingBudget,
+      this.visualResources,
     );
     this.lifecycle.worldInstanceId += 1;
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
@@ -130,14 +143,19 @@ export class Game {
     return app;
   }
 
-  private createSun(app: pc.Application, castShadows: boolean) {
+  private createSun(app: pc.Application, budget: LightingQualityBudget) {
     const light = new pc.Entity('Sun');
     light.addComponent('light', {
       type: 'directional',
       color: new pc.Color(1, 0.9, 0.72),
       intensity: 1,
-      castShadows,
-      shadowResolution: 512,
+      castShadows: budget.sunShadowResolution > 0,
+      shadowResolution: budget.sunShadowResolution || 512,
+      shadowType: pc.SHADOW_PCF3_32F,
+      shadowUpdateMode: pc.SHADOWUPDATE_REALTIME,
+      shadowDistance: 58,
+      shadowBias: 0.18,
+      normalOffsetBias: 0.06,
     });
     app.root.addChild(light);
     return light;
@@ -216,6 +234,11 @@ export class Game {
       beginPerformanceScenario: (name) => this.world?.beginScenario(name) ?? '',
       setStreamingVariant: (variant) => this.world?.setStreamingVariant(variant),
       exportPerformanceTrace: () => this.world?.exportTrace() ?? { traceEvents: [] },
+      setVoxelAt: (x, y, z, voxel) => {
+        this.world?.edit(x, y, z, voxel);
+        this.queueSave();
+      },
+      flushSave: () => this.flushSave(),
     });
   }
 
@@ -265,6 +288,7 @@ export class Game {
       this.lastFpsSample = now;
     }
     this.controller?.update(dt);
+    this.visualEffects?.update(dt);
     this.world.updateStreaming(this.camera.getPosition());
     this.world.drainCommits();
     if (this.serverPlayerId)
@@ -304,6 +328,7 @@ export class Game {
       qualityLevel: this.qualityLevel,
       serverPlayerId: this.serverPlayerId,
       persistence: this.persistence,
+      visualEffects: this.visualEffects,
     });
   }
 
@@ -357,6 +382,8 @@ export class Game {
       this.lifecycle.disposedWorlds += 1;
     }
     this.world = null;
+    this.visualEffects?.destroy();
+    this.visualEffects = null;
     this.environment = null;
     this.visualResources?.destroy();
     this.visualResources = null;

@@ -2,7 +2,7 @@ import { FaceMaterial, type FaceMaterialId } from '../world/voxel';
 import type { RenderCategory } from '../world/mesh';
 export type { RenderCategory } from '../world/mesh';
 
-export const MATERIAL_LAYER_COUNT = 10;
+export const MATERIAL_LAYER_COUNT = 11;
 
 export const FINAL_RENDER_PIPELINE = {
   drawUnit: 'chunk-render-category',
