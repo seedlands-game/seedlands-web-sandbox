@@ -19,6 +19,7 @@ type Task = {
 self.onmessage = (event: MessageEvent<Task>) => {
   const { taskId, traceId, epoch, chunkKey, seed, cx, cy, cz, chunkRevision, haloRevision, canonical, halo } =
     event.data;
+  const meshingStartedAt = performance.now();
   const meshes = meshChunk({
     seed,
     cx,
@@ -28,6 +29,7 @@ self.onmessage = (event: MessageEvent<Task>) => {
     changes: [],
     halo: new Uint16Array(halo),
   });
+  const workerMeshingMs = performance.now() - meshingStartedAt;
   const packed = Object.values(meshes);
   const transfers: Transferable[] = [];
   packed.forEach((part) =>
@@ -40,7 +42,20 @@ self.onmessage = (event: MessageEvent<Task>) => {
     ),
   );
   self.postMessage(
-    { kind: 'mesh-result', taskId, traceId, epoch, chunkKey, cx, cy, cz, chunkRevision, haloRevision, meshes: packed },
+    {
+      kind: 'mesh-result',
+      taskId,
+      traceId,
+      epoch,
+      chunkKey,
+      cx,
+      cy,
+      cz,
+      chunkRevision,
+      haloRevision,
+      workerMeshingMs,
+      meshes: packed,
+    },
     transfers,
   );
 };

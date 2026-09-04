@@ -57,4 +57,25 @@ describe('客户端性能 telemetry', () => {
 
     expect(telemetry.snapshot()).toMatchObject({ droppedEvents: 1, gauges: { loaded_chunks: 2 } });
   });
+
+  it('记录 Worker duration，但不把它归入主线程 frame span', () => {
+    let now = 0;
+    const telemetry = new PerformanceTelemetry({ now: () => now });
+
+    telemetry.beginFrame();
+    telemetry.recordCompletedSpan({
+      category: 'meshing',
+      name: 'WorkerMesh',
+      lane: 'worker-derived',
+      durationMs: 27,
+      traceId: 'trace-worker',
+    });
+    now += 4;
+    const frame = telemetry.endFrame();
+
+    expect(frame?.topSpans).toEqual([]);
+    expect(telemetry.exportChromeTrace().traceEvents).toContainEqual(
+      expect.objectContaining({ cat: 'meshing', name: 'WorkerMesh', tid: 'worker-derived', dur: 27_000 }),
+    );
+  });
 });
