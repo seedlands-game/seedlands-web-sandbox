@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CHUNK_SIZE, Voxel, normalizeSeed, voxelIndex } from '../../src/world/voxel';
+import { CHUNK_SIZE, FaceMaterial, Voxel, normalizeSeed, voxelIndex } from '../../src/world/voxel';
 import { makeChunk, meshChunk } from '../../src/world/mesh';
 
 const seed = normalizeSeed('vitest-world-mesh');
@@ -62,5 +62,50 @@ describe('greedy chunk meshing', () => {
     const meshes = meshChunk({ seed, cx: 0, cy: 3, cz: 0, data, changes: [], outside: () => Voxel.Air });
 
     expect(sumIndices(meshes)).toBe(36);
+  });
+
+  it('maps grass and wood faces to their directional materials', () => {
+    const grass = meshSynthetic([[4, 4, 4, Voxel.Grass]]);
+    expect(grass[FaceMaterial.GrassTop].indices).toHaveLength(6);
+    expect(grass[FaceMaterial.GrassSide].indices).toHaveLength(24);
+    expect(grass[FaceMaterial.Dirt].indices).toHaveLength(6);
+
+    const wood = meshSynthetic([[4, 4, 4, Voxel.Wood]]);
+    expect(wood[FaceMaterial.WoodEnd].indices).toHaveLength(12);
+    expect(wood[FaceMaterial.WoodSide].indices).toHaveLength(24);
+  });
+
+  it('emits repeating UVs and AO vertex colors with a typed worker contract', () => {
+    const meshes = meshSynthetic([
+      [4, 4, 4, Voxel.Stone],
+      [5, 4, 4, Voxel.Stone],
+      [3, 5, 4, Voxel.Stone],
+      [4, 5, 3, Voxel.Stone],
+      [3, 5, 3, Voxel.Stone],
+    ]);
+    const stone = meshes[FaceMaterial.Stone];
+    expect(Math.max(...stone.uvs)).toBeGreaterThan(1);
+    expect(Math.min(...stone.colors)).toBeLessThan(255);
+    expect(stone.uvs).toHaveLength((stone.positions.length / 3) * 2);
+    expect(stone.colors).toHaveLength((stone.positions.length / 3) * 4);
+    expect(stone.material).toBe(FaceMaterial.Stone);
+    expect(stone.renderLayer).toBe('opaque');
+  });
+
+  it('keeps opaque banks visible through water and removes internal water faces', () => {
+    const bank = meshSynthetic([
+      [4, 4, 4, Voxel.Stone],
+      [5, 4, 4, Voxel.Water],
+    ]);
+    expect(bank[FaceMaterial.Stone].indices).toHaveLength(36);
+    expect(bank[FaceMaterial.Water].indices).toHaveLength(30);
+    expect(bank[FaceMaterial.Water].renderLayer).toBe('water');
+    expect(sumIndices(bank)).toBe(66);
+
+    const water = meshSynthetic([
+      [4, 4, 4, Voxel.Water],
+      [5, 4, 4, Voxel.Water],
+    ]);
+    expect(water[FaceMaterial.Water].indices).toHaveLength(36);
   });
 });

@@ -1,9 +1,34 @@
-import { CHUNK_SIZE, baseVoxel, chunkKey, isRenderable, voxelIndex } from './voxel';
+import {
+  CHUNK_SIZE,
+  FaceMaterial,
+  Voxel,
+  baseVoxel,
+  chunkKey,
+  faceMaterialFor,
+  isSolid,
+  voxelIndex,
+  type FaceMaterialId,
+} from './voxel';
 import { macroAt, type MacroContext } from './macro-world';
 
 export type WorldChange = [number, number, number, number];
-export type MeshData = { positions: Float32Array; normals: Float32Array; indices: Uint32Array };
-type Quad = { p: number[]; n: number[]; i: number[] };
+export type RenderLayer = 'opaque' | 'water';
+export type MeshData = {
+  material: FaceMaterialId;
+  renderLayer: RenderLayer;
+  positions: Float32Array;
+  normals: Float32Array;
+  uvs: Float32Array;
+  colors: Uint8Array;
+  indices: Uint32Array;
+};
+type Quad = { p: number[]; n: number[]; uv: number[]; c: number[]; i: number[] };
+type MaskCell = {
+  material: FaceMaterialId;
+  renderLayer: RenderLayer;
+  back: boolean;
+  ao: readonly [number, number, number, number];
+};
 export type MeshOptions = {
   seed: number;
   cx: number;
@@ -13,6 +38,20 @@ export type MeshOptions = {
   changes: WorldChange[];
   outside?: (x: number, y: number, z: number) => number;
 };
+
+const AO_BRIGHTNESS = [255, 220, 190, 160] as const;
+const FRONT_CORNERS = [
+  [-1, -1],
+  [1, -1],
+  [1, 1],
+  [-1, 1],
+] as const;
+const BACK_CORNERS = [
+  [-1, -1],
+  [-1, 1],
+  [1, 1],
+  [1, -1],
+] as const;
 
 export function makeChunk(seed: number, cx: number, cy: number, cz: number, changes: WorldChange[]): Uint16Array {
   const data = new Uint16Array(CHUNK_SIZE ** 3);
@@ -46,9 +85,47 @@ export function makeChunk(seed: number, cx: number, cy: number, cz: number, chan
   return data;
 }
 
+const isVisibleFace = (source: number, target: number) =>
+  source !== Voxel.Air &&
+  (source === Voxel.Water ? target === Voxel.Air : target === Voxel.Air || target === Voxel.Water);
+
+const sameMaskCell = (left: MaskCell | null | undefined, right: MaskCell) =>
+  left?.material === right.material &&
+  left.renderLayer === right.renderLayer &&
+  left.back === right.back &&
+  left.ao.every((value, index) => value === right.ao[index]);
+
+function vertexAo(
+  block: readonly number[],
+  normalAxis: number,
+  u: number,
+  v: number,
+  back: boolean,
+  sample: (x: number, y: number, z: number) => number,
+): readonly [number, number, number, number] {
+  const normal = back ? -1 : 1;
+  const outside = [...block];
+  outside[normalAxis] += normal;
+  const corners = back ? BACK_CORNERS : FRONT_CORNERS;
+  const values = corners.map(([su, sv]) => {
+    const sideU = [...outside];
+    sideU[u] += su;
+    const sideV = [...outside];
+    sideV[v] += sv;
+    const corner = [...outside];
+    corner[u] += su;
+    corner[v] += sv;
+    const occupiedU = isSolid(sample(sideU[0], sideU[1], sideU[2]));
+    const occupiedV = isSolid(sample(sideV[0], sideV[1], sideV[2]));
+    if (occupiedU && occupiedV) return 3;
+    return Number(occupiedU) + Number(occupiedV) + Number(isSolid(sample(corner[0], corner[1], corner[2])));
+  });
+  return values as unknown as readonly [number, number, number, number];
+}
+
 export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOptions): Record<number, MeshData> {
   const result: Record<number, Quad> = {};
-  const overrides = new Map(changes.map(([x, y, z, v]) => [`${x},${y},${z}`, v]));
+  const overrides = new Map(changes.map(([x, y, z, value]) => [`${x},${y},${z}`, value]));
   const macroCache = new Map<string, MacroContext>();
   const queryMacro = (x: number, z: number) => {
     const key = chunkKey(x, 0, z);
@@ -71,12 +148,26 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOpti
       baseVoxel(seed, wx, wy, wz, queryMacro(wx, wz), queryMacro)
     );
   };
-  const add = (id: number, vertices: number[], normal: number[]) => {
-    const q = (result[id] ??= { p: [], n: [], i: [] });
-    const start = q.p.length / 3;
-    q.p.push(...vertices);
-    q.n.push(...normal, ...normal, ...normal, ...normal);
-    q.i.push(start, start + 1, start + 2, start, start + 2, start + 3);
+  const add = (
+    material: FaceMaterialId,
+    vertices: number[],
+    normal: number[],
+    width: number,
+    height: number,
+    back: boolean,
+    ao: readonly number[],
+  ) => {
+    const quad = (result[material] ??= { p: [], n: [], uv: [], c: [], i: [] });
+    const start = quad.p.length / 3;
+    quad.p.push(...vertices);
+    quad.n.push(...normal, ...normal, ...normal, ...normal);
+    quad.uv.push(...(back ? [0, 0, 0, height, width, height, width, 0] : [0, 0, width, 0, width, height, 0, height]));
+    for (const level of ao) {
+      const brightness = AO_BRIGHTNESS[level];
+      quad.c.push(brightness, brightness, brightness, 255);
+    }
+    if (ao[0] + ao[2] > ao[1] + ao[3]) quad.i.push(start, start + 1, start + 3, start + 1, start + 2, start + 3);
+    else quad.i.push(start, start + 1, start + 2, start, start + 2, start + 3);
   };
   for (let d = 0; d < 3; d += 1) {
     const u = (d + 1) % 3,
@@ -84,19 +175,29 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOpti
     const x = [0, 0, 0];
     const q = [0, 0, 0];
     q[d] = 1;
-    const mask: ({ id: number; back: boolean } | null)[] = new Array(CHUNK_SIZE * CHUNK_SIZE);
+    const mask: (MaskCell | null)[] = new Array(CHUNK_SIZE * CHUNK_SIZE);
     for (x[d] = -1; x[d] < CHUNK_SIZE;) {
       let m = 0;
       for (x[v] = 0; x[v] < CHUNK_SIZE; x[v] += 1)
         for (x[u] = 0; x[u] < CHUNK_SIZE; x[u] += 1) {
           const a = sample(x[0], x[1], x[2]);
           const b = sample(x[0] + q[0], x[1] + q[1], x[2] + q[2]);
-          mask[m++] =
-            isRenderable(a) && !isRenderable(b)
-              ? { id: a, back: false }
-              : isRenderable(b) && !isRenderable(a)
-                ? { id: b, back: true }
-                : null;
+          const forward = isVisibleFace(a, b);
+          const back = !forward && isVisibleFace(b, a);
+          if (!forward && !back) {
+            mask[m++] = null;
+            continue;
+          }
+          const id = back ? b : a;
+          const block = [...x];
+          if (back) block[d] += 1;
+          const material = faceMaterialFor(id, d, !back);
+          mask[m++] = {
+            material,
+            renderLayer: material === FaceMaterial.Water ? 'water' : 'opaque',
+            back,
+            ao: id === Voxel.Water ? [0, 0, 0, 0] : vertexAo(block, d, u, v, back, sample),
+          };
         }
       x[d] += 1;
       m = 0;
@@ -108,36 +209,55 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOpti
             m += 1;
             continue;
           }
-          let w = 1;
-          while (i + w < CHUNK_SIZE && mask[m + w]?.id === cell.id && mask[m + w]?.back === cell.back) w += 1;
-          let h = 1;
-          outer: for (; j + h < CHUNK_SIZE; h += 1)
-            for (let k = 0; k < w; k += 1)
-              if (mask[m + k + h * CHUNK_SIZE]?.id !== cell.id || mask[m + k + h * CHUNK_SIZE]?.back !== cell.back)
-                break outer;
+          let width = 1;
+          while (i + width < CHUNK_SIZE && sameMaskCell(mask[m + width], cell)) width += 1;
+          let height = 1;
+          outer: for (; j + height < CHUNK_SIZE; height += 1)
+            for (let offset = 0; offset < width; offset += 1)
+              if (!sameMaskCell(mask[m + offset + height * CHUNK_SIZE], cell)) break outer;
           x[u] = i;
           x[v] = j;
           const du = [0, 0, 0];
           const dv = [0, 0, 0];
-          du[u] = w;
-          dv[v] = h;
+          du[u] = width;
+          dv[v] = height;
           const p = [x[0], x[1], x[2]];
           const p1 = [x[0] + du[0], x[1] + du[1], x[2] + du[2]];
           const p2 = [x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]];
           const p3 = [x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]];
           const normal = [0, 0, 0];
           normal[d] = cell.back ? -1 : 1;
-          add(cell.id, cell.back ? [...p, ...p3, ...p2, ...p1] : [...p, ...p1, ...p2, ...p3], normal);
-          for (let l = 0; l < h; l += 1) for (let k = 0; k < w; k += 1) mask[m + k + l * CHUNK_SIZE] = null;
-          i += w;
-          m += w;
+          add(
+            cell.material,
+            cell.back ? [...p, ...p3, ...p2, ...p1] : [...p, ...p1, ...p2, ...p3],
+            normal,
+            width,
+            height,
+            cell.back,
+            cell.ao,
+          );
+          for (let row = 0; row < height; row += 1)
+            for (let column = 0; column < width; column += 1) mask[m + column + row * CHUNK_SIZE] = null;
+          i += width;
+          m += width;
         }
     }
   }
   return Object.fromEntries(
-    Object.entries(result).map(([voxel, value]) => [
-      Number(voxel),
-      { positions: new Float32Array(value.p), normals: new Float32Array(value.n), indices: new Uint32Array(value.i) },
-    ]),
+    Object.entries(result).map(([material, value]) => {
+      const materialId = Number(material) as FaceMaterialId;
+      return [
+        materialId,
+        {
+          material: materialId,
+          renderLayer: materialId === FaceMaterial.Water ? 'water' : 'opaque',
+          positions: new Float32Array(value.p),
+          normals: new Float32Array(value.n),
+          uvs: new Float32Array(value.uv),
+          colors: new Uint8Array(value.c),
+          indices: new Uint32Array(value.i),
+        },
+      ];
+    }),
   );
 }

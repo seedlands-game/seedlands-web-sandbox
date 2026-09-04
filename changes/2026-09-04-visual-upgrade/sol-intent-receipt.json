@@ -1,0 +1,29 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "复核 Visual Upgrade 对 Greedy Mesh、顶点 AO、材质分层、昼夜环境和 WebGL2 性能的实现方案与关键风险。",
+  "evidence": [
+    "当前 mesher 只输出 position/normal/index，并按 voxel id 生成 Greedy Mesh。",
+    "当前水 voxel 可渲染但不碰撞，与 opaque 使用同一 StandardMaterial 流程。",
+    "当前天空为单色 clearColor，sun/ambient 固定，无 fog 和 world time。",
+    "Macro Worldgen 已生成连续河湖与树木，本 change 不改变 baseVoxel 确定性。",
+    "性能基线包含 meshing p95、mesh triangles、typed-array bytes 与 bundle bytes。"
+  ],
+  "necessary_paths": [
+    "changes/2026-09-04-visual-upgrade/spec.md",
+    "src/world/mesh.ts",
+    "src/world/voxel.ts",
+    "src/worker/world-worker.ts",
+    "src/app/main.ts",
+    "harness/baseline.json",
+    "tests/world/mesh.test.ts"
+  ],
+  "output_limit": { "max_characters": 1200 },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}

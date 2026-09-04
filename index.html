@@ -9,16 +9,31 @@
     <canvas id="game"></canvas>
     <main id="ui">
       <section id="start-card" class="panel">
-        <p class="eyebrow">VOXEL SANDBOX FOUNDATION</p>
+        <p class="eyebrow">PROCEDURAL FANTASY WORLD</p>
         <h1>Seedlands</h1>
-        <p>一个会随你脚步延展、可被塑造的体素世界。</p>
-        <label>世界 Seed <input id="seed" maxlength="48" placeholder="留空创建随机世界" /></label>
+        <p>走进一个由 Seed 苏醒、会随脚步延展的体素秘境。</p>
+        <div class="world-tags" aria-hidden="true">
+          <span>草原</span><span>森林</span><span>山脉</span><span>河湖</span>
+        </div>
+        <div class="start-fields">
+          <label>世界 Seed <input id="seed" maxlength="48" placeholder="留空创建随机世界" /></label>
+          <label
+            >视觉质量
+            <select id="quality">
+              <option value="low">Low · 省电</option>
+              <option value="medium" selected>Medium · 均衡</option>
+              <option value="high">High · 远景</option>
+            </select></label
+          >
+        </div>
         <button id="enter">进入世界</button>
         <small>同一 Seed + 生成器版本会得到同一基础世界</small>
       </section>
       <section id="hud" hidden>
-        <div id="crosshair">+</div>
-        <div id="debug" class="panel"></div>
+        <div id="crosshair" aria-label="准星"><span></span></div>
+        <div id="world-clock" class="hud-chip"></div>
+        <div id="interaction-feedback" role="status" aria-live="polite"></div>
+        <div id="debug" class="panel" hidden></div>
         <button id="map-toggle" class="panel" type="button">Macro 地图</button>
         <section id="macro-map-panel" class="panel" hidden aria-label="Macro 世界地图总览">
           <div class="map-header">
@@ -38,7 +53,7 @@
           <small>以世界原点为中心的 6.1 km Macro 采样；不生成 Chunk。</small>
         </section>
         <div id="help" class="panel">
-          WASD 移动 · 鼠标视角 · 空格跳跃 · 左键破坏 · 右键放置 · 1–4 选材质 · Esc 解锁鼠标
+          WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–4 选材质 · M 地图 · F3 调试 · P 暂停时间
         </div>
         <div id="hotbar"></div>
       </section>

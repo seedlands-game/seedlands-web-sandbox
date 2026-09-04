@@ -10,14 +10,32 @@ import {
   isSolid,
   mod,
   normalizeSeed,
-  voxelColors,
+  remeshChunkKeysForEdit,
   voxelIndex,
   voxelNames,
+  type FaceMaterialId,
 } from '../world/voxel';
 import { macroAt, type MacroBiome } from '../world/macro-world';
+import type { RenderLayer } from '../world/mesh';
 import { decodeWorldSave, encodeWorldSave, type WorldChange } from '../world/storage';
+import {
+  QUALITY_PROFILES,
+  WorldEnvironment,
+  createVoxelMaterials,
+  type QualityLevel,
+  type QualityProfile,
+  type VoxelMaterials,
+} from './visual-environment';
 
-type MeshPart = { voxel: number; positions: Float32Array; normals: Float32Array; indices: Uint32Array };
+type MeshPart = {
+  material: FaceMaterialId;
+  renderLayer: RenderLayer;
+  positions: Float32Array;
+  normals: Float32Array;
+  uvs: Float32Array;
+  colors: Uint8Array;
+  indices: Uint32Array;
+};
 type WorkerResult = {
   id: number;
   key: string;
@@ -27,7 +45,16 @@ type WorkerResult = {
   data: Uint16Array;
   meshes: MeshPart[];
 };
-type Chunk = { cx: number; cy: number; cz: number; data: Uint16Array; entity: pc.Entity; meshes: pc.Mesh[] };
+type Chunk = {
+  cx: number;
+  cy: number;
+  cz: number;
+  data: Uint16Array;
+  entity: pc.Entity;
+  meshes: pc.Mesh[];
+  triangles: number;
+  drawCalls: number;
+};
 type Change = WorldChange;
 type ChunkTask = { id: number; seed: number; cx: number; cy: number; cz: number; changes: Change[] };
 
@@ -45,6 +72,11 @@ type HarnessSnapshot = {
   interactionAttempts: number;
   mutationCount: number;
   storageBytes: number;
+  worldTime: number;
+  timePaused: boolean;
+  quality: QualityLevel;
+  triangles: number;
+  drawCalls: number;
 };
 
 declare global {
@@ -58,6 +90,11 @@ declare global {
       prepareFlatMovement: () => void;
       prepareCenterExcavation: () => void;
       prepareStepDown: () => void;
+      setWorldTime: (hour: number) => void;
+      setTimePaused: (paused: boolean) => void;
+      setTimeSpeed: (speed: number) => void;
+      setView: (yaw: number, pitch: number) => void;
+      setSpectatorPosition: (x: number, y: number, z: number) => void;
     };
   }
 }
@@ -69,6 +106,9 @@ const enterButton = document.querySelector<HTMLButtonElement>('#enter')!;
 const hud = document.querySelector<HTMLElement>('#hud')!;
 const debug = document.querySelector<HTMLElement>('#debug')!;
 const hotbar = document.querySelector<HTMLElement>('#hotbar')!;
+const worldClock = document.querySelector<HTMLElement>('#world-clock')!;
+const interactionFeedback = document.querySelector<HTMLElement>('#interaction-feedback')!;
+const qualitySelect = document.querySelector<HTMLSelectElement>('#quality')!;
 const mapToggle = document.querySelector<HTMLButtonElement>('#map-toggle')!;
 const mapPanel = document.querySelector<HTMLElement>('#macro-map-panel')!;
 const mapClose = document.querySelector<HTMLButtonElement>('#map-close')!;
@@ -228,6 +268,7 @@ class World {
     readonly seed: number,
     private app: pc.Application,
     private materials: Map<number, pc.StandardMaterial>,
+    private quality: QualityProfile,
   ) {
     this.worker.onmessage = (event: MessageEvent<WorkerResult>) => this.receive(event.data);
   }
@@ -245,6 +286,8 @@ class World {
       generationQueue: this.queued.size,
       meshingQueue: this.inFlight,
       deferredRemeshes: this.dirtyChunks.size,
+      triangles: [...this.chunks.values()].reduce((sum, chunk) => sum + chunk.triangles, 0),
+      drawCalls: [...this.chunks.values()].reduce((sum, chunk) => sum + chunk.drawCalls, 0),
     };
   }
   restoreChanges(changes: Change[]) {
@@ -283,32 +326,24 @@ class World {
     this.lastCenter = center;
     const needs: [number, number, number, number][] = [];
     for (let y = 0; y <= 1; y += 1)
-      for (let z = cz - 2; z <= cz + 2; z += 1)
-        for (let x = cx - 2; x <= cx + 2; x += 1) {
+      for (let z = cz - this.quality.renderRadius; z <= cz + this.quality.renderRadius; z += 1)
+        for (let x = cx - this.quality.renderRadius; x <= cx + this.quality.renderRadius; x += 1) {
           const d = Math.abs(x - cx) + Math.abs(z - cz);
           needs.push([x, y, z, d]);
         }
     needs.sort((a, b) => a[3] - b[3]);
     for (const [x, y, z] of needs) this.request(x, y, z);
+    const cacheRadius = this.quality.renderRadius + 1;
     for (const [key, chunk] of this.chunks)
-      if (Math.abs(chunk.cx - cx) > 3 || Math.abs(chunk.cz - cz) > 3) this.unload(key, chunk);
+      if (Math.abs(chunk.cx - cx) > cacheRadius || Math.abs(chunk.cz - cz) > cacheRadius) this.unload(key, chunk);
     for (const key of this.requested) {
       const [x, , z] = key.split(',').map(Number);
-      if (Math.abs(x - cx) > 3 || Math.abs(z - cz) > 3) this.cancel(key);
+      if (Math.abs(x - cx) > cacheRadius || Math.abs(z - cz) > cacheRadius) this.cancel(key);
     }
   }
   edit(x: number, y: number, z: number, value: number) {
     this.setChange(x, y, z, value);
-    const cx = floorDiv(x, CHUNK_SIZE),
-      cy = floorDiv(y, CHUNK_SIZE),
-      cz = floorDiv(z, CHUNK_SIZE);
-    const affected = new Set([chunkKey(cx, cy, cz)]);
-    if (mod(x, CHUNK_SIZE) === 0) affected.add(chunkKey(cx - 1, cy, cz));
-    if (mod(x, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx + 1, cy, cz));
-    if (mod(y, CHUNK_SIZE) === 0) affected.add(chunkKey(cx, cy - 1, cz));
-    if (mod(y, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx, cy + 1, cz));
-    if (mod(z, CHUNK_SIZE) === 0) affected.add(chunkKey(cx, cy, cz - 1));
-    if (mod(z, CHUNK_SIZE) === CHUNK_SIZE - 1) affected.add(chunkKey(cx, cy, cz + 1));
+    const affected = remeshChunkKeysForEdit(x, y, z);
     // Persist every edit immediately in memory, then collapse a click burst into one replacement mesh per Chunk.
     affected.forEach((key) => {
       if (this.chunks.has(key)) {
@@ -354,10 +389,17 @@ class World {
       const mesh = new pc.Mesh(this.app.graphicsDevice);
       mesh.setPositions(part.positions);
       mesh.setNormals(part.normals);
+      mesh.setUvs(0, part.uvs);
+      mesh.setColors32(part.colors);
       mesh.setIndices(part.indices);
       mesh.update();
       meshes.push(mesh);
-      return new pc.MeshInstance(mesh, this.materials.get(part.voxel)!, entity);
+      const instance = new pc.MeshInstance(mesh, this.materials.get(part.material)!, entity);
+      if (part.renderLayer === 'water') {
+        instance.drawOrder = 1000;
+        instance.castShadow = false;
+      }
+      return instance;
     });
     entity.addComponent('render');
     entity.render!.meshInstances = instances;
@@ -368,7 +410,13 @@ class World {
       previous.meshes.forEach((mesh) => mesh.destroy());
       previous.entity.destroy();
     }
-    this.chunks.set(result.key, { ...result, entity, meshes });
+    this.chunks.set(result.key, {
+      ...result,
+      entity,
+      meshes,
+      triangles: result.meshes.reduce((sum, part) => sum + part.indices.length / 3, 0),
+      drawCalls: result.meshes.length,
+    });
     this.drain();
   }
   private unload(key: string, chunk: Chunk) {
@@ -429,6 +477,8 @@ class World {
 class Game {
   private app: pc.Application | null = null;
   private world: World | null = null;
+  private environment: WorldEnvironment | null = null;
+  private visualResources: VoxelMaterials | null = null;
   private camera!: pc.Entity;
   private velocity = new pc.Vec3();
   private yaw = 0;
@@ -441,51 +491,57 @@ class Game {
   private fps = 0;
   private frameMs = 0;
   private interactionAttempts = 0;
+  private harnessSpectator = false;
   private store = new Store();
   private seedText = '';
+  private qualityLevel: QualityLevel = 'medium';
   private saveTimer: number | null = null;
+  private feedbackTimer: number | null = null;
   private onResize = () => this.app?.resizeCanvas();
-  start(seedText: string, restore: { player: [number, number, number]; changes: Change[] } | null) {
+  async start(seedText: string, restore: { player: [number, number, number]; changes: Change[] } | null) {
     this.flushSave();
     this.seedText = seedText;
+    this.qualityLevel = qualitySelect.value as QualityLevel;
+    const quality = QUALITY_PROFILES[this.qualityLevel];
     macroMapViewer.close();
     this.world?.dispose();
     this.world = null;
+    this.environment = null;
+    this.visualResources?.destroy();
+    this.visualResources = null;
     this.app?.destroy();
     this.velocity.set(0, 0, 0);
     this.keys.clear();
     this.onGround = false;
-    this.app = new pc.Application(canvas, { mouse: new pc.Mouse(canvas), keyboard: new pc.Keyboard(window) });
+    this.harnessSpectator = false;
+    this.app = new pc.Application(canvas, {
+      mouse: new pc.Mouse(canvas),
+      keyboard: new pc.Keyboard(window),
+      graphicsDeviceOptions: { alpha: true },
+    });
     this.app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
     this.app.setCanvasResolution(pc.RESOLUTION_AUTO);
     this.app.start();
-    this.app.scene.ambientLight = new pc.Color(0.55, 0.65, 0.8);
     const light = new pc.Entity('Sun');
     light.addComponent('light', {
       type: 'directional',
-      color: new pc.Color(1, 0.94, 0.78),
-      intensity: 1.3,
-      castShadows: false,
+      color: new pc.Color(1, 0.9, 0.72),
+      intensity: 1,
+      castShadows: quality.shadowQuality !== 'off',
+      shadowResolution: 512,
     });
-    light.setEulerAngles(45, -35, 0);
     this.app.root.addChild(light);
     this.camera = new pc.Entity('Player');
     this.camera.addComponent('camera', {
-      clearColor: new pc.Color(0.48, 0.7, 0.84),
+      clearColor: new pc.Color(0, 0, 0, 0),
       fov: 72,
       nearClip: 0.05,
-      farClip: 180,
+      farClip: quality.fogEnd + 18,
     });
     this.app.root.addChild(this.camera);
-    const materials = new Map<number, pc.StandardMaterial>();
-    Object.entries(voxelColors).forEach(([id, color]) => {
-      const material = new pc.StandardMaterial();
-      material.diffuse = new pc.Color(...color);
-      material.ambient = new pc.Color(...color);
-      material.update();
-      materials.set(Number(id), material);
-    });
-    this.world = new World(seedText, normalizeSeed(seedText), this.app, materials);
+    this.visualResources = await createVoxelMaterials(this.app, quality);
+    this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
+    this.world = new World(seedText, normalizeSeed(seedText), this.app, this.visualResources.materials, quality);
     if (restore) this.world.restoreChanges(restore.changes);
     const p = restore?.player ?? [0, 34, 0];
     this.camera.setPosition(...p);
@@ -494,6 +550,7 @@ class Game {
     mapToggle.onclick = () => this.toggleMap();
     mapClose.onclick = () => macroMapViewer.close();
     this.renderHotbar();
+    debug.hidden = !new URLSearchParams(location.search).has('harness');
     this.app.on('update', (dt: number) => this.update(Math.min(dt, 0.05)));
     window.addEventListener('resize', this.onResize);
     window.onpagehide = () => this.flushSave();
@@ -507,13 +564,50 @@ class Game {
         prepareFlatMovement: () => this.prepareFlatMovementFixture(),
         prepareCenterExcavation: () => this.prepareCenterExcavationFixture(),
         prepareStepDown: () => this.prepareStepDownFixture(),
+        setWorldTime: (hour) => this.environment?.setTime(hour),
+        setTimePaused: (paused) => this.environment?.setPaused(paused),
+        setTimeSpeed: (speed) => {
+          if (this.environment) this.environment.speed = Math.max(0, speed);
+        },
+        setView: (yaw, pitch) => {
+          this.yaw = yaw;
+          this.pitch = Math.max(-88, Math.min(88, pitch));
+          this.camera.setEulerAngles(this.pitch, this.yaw, 0);
+        },
+        setSpectatorPosition: (x, y, z) => {
+          this.harnessSpectator = true;
+          this.velocity.set(0, 0, 0);
+          this.camera.setPosition(x, y, z);
+          this.world?.updateStreaming(this.camera.getPosition());
+        },
       };
     }
   }
   private installInput() {
     window.onkeydown = (event) => {
+      if (event.code === 'F3') {
+        event.preventDefault();
+        debug.hidden = !debug.hidden;
+        return;
+      }
       if (event.code === 'KeyM') {
         this.toggleMap();
+        return;
+      }
+      if (event.code === 'KeyP') {
+        if (this.environment) this.environment.setPaused(!this.environment.paused);
+        return;
+      }
+      if (event.code === 'KeyT') {
+        this.environment?.cycleSpeed();
+        return;
+      }
+      if (event.code === 'BracketLeft') {
+        if (this.environment) this.environment.setTime(this.environment.worldTime - 1);
+        return;
+      }
+      if (event.code === 'BracketRight') {
+        if (this.environment) this.environment.setTime(this.environment.worldTime + 1);
         return;
       }
       this.keys.add(event.code);
@@ -539,6 +633,7 @@ class Game {
   }
   private update(dt: number) {
     if (!this.world) return;
+    this.environment?.update(dt);
     this.frameMs = dt * 1000;
     this.frames += 1;
     const now = performance.now();
@@ -549,29 +644,31 @@ class Game {
     }
     // Let the engine be the sole source of truth for camera orientation and movement axes.
     this.camera.setEulerAngles(this.pitch, this.yaw, 0);
-    const forward = new pc.Vec3().copy(this.camera.forward);
-    forward.y = 0;
-    forward.normalize();
-    const right = new pc.Vec3().copy(this.camera.right);
-    right.y = 0;
-    right.normalize();
-    const wish = new pc.Vec3();
-    if (this.keys.has('KeyW')) wish.add(forward);
-    if (this.keys.has('KeyS')) wish.sub(forward);
-    if (this.keys.has('KeyD')) wish.add(right);
-    if (this.keys.has('KeyA')) wish.sub(right);
-    if (wish.lengthSq() > 0) wish.normalize().mulScalar(5.5);
-    this.velocity.x += (wish.x - this.velocity.x) * Math.min(1, dt * 12);
-    this.velocity.z += (wish.z - this.velocity.z) * Math.min(1, dt * 12);
-    this.velocity.y -= 20 * dt;
-    if (this.keys.has('Space') && this.onGround) {
-      this.velocity.y = 7.5;
+    if (!this.harnessSpectator) {
+      const forward = new pc.Vec3().copy(this.camera.forward);
+      forward.y = 0;
+      forward.normalize();
+      const right = new pc.Vec3().copy(this.camera.right);
+      right.y = 0;
+      right.normalize();
+      const wish = new pc.Vec3();
+      if (this.keys.has('KeyW')) wish.add(forward);
+      if (this.keys.has('KeyS')) wish.sub(forward);
+      if (this.keys.has('KeyD')) wish.add(right);
+      if (this.keys.has('KeyA')) wish.sub(right);
+      if (wish.lengthSq() > 0) wish.normalize().mulScalar(5.5);
+      this.velocity.x += (wish.x - this.velocity.x) * Math.min(1, dt * 12);
+      this.velocity.z += (wish.z - this.velocity.z) * Math.min(1, dt * 12);
+      this.velocity.y -= 20 * dt;
+      if (this.keys.has('Space') && this.onGround) {
+        this.velocity.y = 7.5;
+        this.onGround = false;
+      }
+      this.moveAxis('x', this.velocity.x * dt);
+      this.moveAxis('z', this.velocity.z * dt);
       this.onGround = false;
+      this.moveAxis('y', this.velocity.y * dt);
     }
-    this.moveAxis('x', this.velocity.x * dt);
-    this.moveAxis('z', this.velocity.z * dt);
-    this.onGround = false;
-    this.moveAxis('y', this.velocity.y * dt);
     this.world.updateStreaming(this.camera.getPosition());
     const feetY = this.camera.getPosition().y - PLAYER_FEET_OFFSET;
     const telemetry = this.world.telemetry;
@@ -580,7 +677,11 @@ class Game {
       macro.hydrology.kind === 'dry'
         ? 'dry'
         : `${macro.hydrology.kind}${macro.hydrology.water ? ' water' : ' bank'} (${macro.hydrology.id})`;
-    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nDeferred Remeshes  ${telemetry.deferredRemeshes}\nMutations  ${this.world.changes.size}`;
+    const worldTime = this.environment?.worldTime ?? 0;
+    const hours = Math.floor(worldTime);
+    const minutes = Math.floor((worldTime - hours) * 60);
+    worldClock.textContent = `${this.environment?.phase ?? 'Day'} · ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nQuality  ${QUALITY_PROFILES[this.qualityLevel].label} · Time  ${worldTime.toFixed(2)}h ${this.environment?.paused ? '(paused)' : `${this.environment?.speed ?? 1}×`}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nTriangles  ${telemetry.triangles.toLocaleString()} · Draw Calls  ${telemetry.drawCalls}\nDeferred Remeshes  ${telemetry.deferredRemeshes}\nMutations  ${this.world.changes.size}`;
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
   }
   private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
@@ -698,10 +799,29 @@ class Game {
       last = cell;
     }
     const target = place ? last : hit;
-    if (!target) return;
-    if (place && this.playerOccupies(target)) return;
+    if (!target) {
+      this.showInteractionFeedback('距离过远');
+      return;
+    }
+    if (place && this.playerOccupies(target)) {
+      this.showInteractionFeedback('无法在玩家位置放置');
+      return;
+    }
+    const previous = this.world.getVoxel(...target);
     this.world.edit(...target, place ? this.chosen : Voxel.Air);
+    this.showInteractionFeedback(
+      place ? `放置 · ${voxelNames[this.chosen]}` : `采集 · ${voxelNames[previous] ?? '体素'}`,
+    );
     this.queueSave();
+  }
+  private showInteractionFeedback(message: string) {
+    interactionFeedback.textContent = message;
+    interactionFeedback.dataset.visible = 'true';
+    if (this.feedbackTimer !== null) window.clearTimeout(this.feedbackTimer);
+    this.feedbackTimer = window.setTimeout(() => {
+      interactionFeedback.dataset.visible = 'false';
+      this.feedbackTimer = null;
+    }, 900);
   }
   private playerOccupies([x, y, z]: [number, number, number]) {
     const p = this.camera.getPosition();
@@ -740,6 +860,11 @@ class Game {
       interactionAttempts: this.interactionAttempts,
       mutationCount: this.world?.changes.size ?? 0,
       storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
+      worldTime: this.environment?.worldTime ?? 0,
+      timePaused: this.environment?.paused ?? false,
+      quality: this.qualityLevel,
+      triangles: telemetry?.triangles ?? 0,
+      drawCalls: telemetry?.drawCalls ?? 0,
     };
   }
   private moveHarnessPlayer(x: number, z: number) {
@@ -816,10 +941,17 @@ class Game {
   }
   private renderHotbar() {
     const ids = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand];
+    const atlasTiles: Record<number, readonly [number, number]> = {
+      [Voxel.Dirt]: [2, 0],
+      [Voxel.Stone]: [0, 1],
+      [Voxel.Wood]: [2, 1],
+      [Voxel.Sand]: [1, 1],
+    };
     hotbar.innerHTML = ids
-      .map(
-        (id, index) => `<div class="slot ${id === this.chosen ? 'active' : ''}">${index + 1} · ${voxelNames[id]}</div>`,
-      )
+      .map((id, index) => {
+        const [column, row] = atlasTiles[id];
+        return `<div class="slot ${id === this.chosen ? 'active' : ''}" data-material="${voxelNames[id]}"><span class="slot-key">${index + 1}</span><span class="slot-swatch" style="--tile-x:${column};--tile-y:${row}"></span><span class="slot-name">${voxelNames[id]}</span></div>`;
+      })
       .join('');
   }
 }
@@ -827,10 +959,22 @@ class Game {
 const game = new Game();
 const saved = new Store().load();
 if (saved) seedInput.value = saved.seed;
-enterButton.onclick = () => {
+enterButton.onclick = async () => {
   const seed = seedInput.value.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;
   const restore = saved?.seed === seed ? saved : null;
+  enterButton.disabled = true;
+  enterButton.textContent = '正在唤醒世界…';
+  try {
+    await game.start(seed, restore);
+  } catch (error) {
+    startCard.hidden = false;
+    hud.hidden = true;
+    enterButton.disabled = false;
+    enterButton.textContent = '重试进入';
+    throw error;
+  }
   startCard.hidden = true;
   hud.hidden = false;
-  game.start(seed, restore);
+  enterButton.disabled = false;
+  enterButton.textContent = '进入世界';
 };

@@ -28,6 +28,10 @@ corepack pnpm preview
 | 右键               | 放置选中的体素                                        |
 | 1–4                | 选择泥土、石头、原木、沙砾                            |
 | M / Macro 地图按钮 | 打开或关闭世界总览，并切换高度、biome、气候和河湖图层 |
+| F3                 | 展开或隐藏调试 HUD                                    |
+| P                  | 暂停或继续世界时间                                    |
+| [ / ]              | 向前或向后调整一小时                                  |
+| T                  | 在 1×、20×、100× 时间速度间切换                       |
 | Esc                | 解除鼠标锁定                                          |
 
 ## 当前能力
@@ -36,11 +40,15 @@ corepack pnpm preview
 - `32³` 的 `Uint16Array` Chunk 数据；基础材料包括 Grass、Dirt、Stone、Wood、Leaves、Sand、Snow、Water 与 Air。
 - 以玩家为中心的双层 Chunk streaming；超出缓存半径的 GPU Mesh/Chunk 会卸载，不会把探索历史永久留在内存中。
 - Worker 承担 Chunk worldgen 和 CPU greedy meshing；主线程负责 PlayCanvas GPU 上传、渲染、输入和玩家控制。
-- Mesh 以 Chunk + 材质为单位，进行不可见面剔除与贪心四边形合并，不产生逐体素 Entity / draw call。
+- 一张 68 KiB 原创风格母图提供 Grass/Wood 分面及 Dirt、Stone、Sand、Leaves、Snow 材质；运行时小 tile 隔离 mip，Greedy 大面逐 voxel 重复而不拉伸。
+- Mesh 以 Chunk + 面材质为单位，进行非对称 opaque/water 出面、顶点 AO 与 AO-aware 贪心合并，不产生逐体素 Entity / draw call。
+- 世界时间统一驱动太阳方向/色温/强度、天空渐变、ambient 与 linear fog，连续经过 Dawn、Day、Sunset 和 Night。
+- 河湖使用独立透明水材质、波纹 UV 动画与关闭 depth write 的延后绘制；水下地形面保持可见。
+- 启动页提供 Low/Medium/High 三档视觉质量，分别调整 render/fog distance、resolution scale、水体和叶片密度；High 附带低分辨率阴影。
 - 第一人称移动、重力、跳跃、直接基于 voxel occupancy 的碰撞，以及基于体素 raymarch 的破坏/放置。
 - 中央 `World.edit()` 管理所有改动，边界编辑会同时使邻居 Chunk 失效并重新网格化。
 - `localStorage` 存储 Seed、玩家位置与世界改动（procedural base + mutation delta），刷新后可继续。
-- 屏幕调试面板显示 FPS、backend、Seed、坐标、Chunk、加载数量、任务队列与 mutation 数。
+- Player HUD 仅常驻准星、世界时间、快捷栏与交互反馈；F3 调试面板额外显示 FPS、backend、Seed、坐标、Chunk、队列、三角形、draw call 与 mutation。
 
 ## 结构
 
@@ -114,6 +122,6 @@ corepack pnpm harness:baseline
 
 ## 已知限制
 
-- 这是 Foundation P0 原型，未实现洞穴、水、光照传播、纹理图集、移动端触摸操作、Floating Origin 或远景 LOD。
+- 当前水是静态自然水面，未实现流动/瀑布/压力模拟；也未实现洞穴、voxel 光照传播、移动端触摸操作、Floating Origin 或远景 LOD。
 - 持久化使用易部署的 `localStorage` mutation delta；复杂存档和大批量编辑应升级至 IndexedDB/OPFS。
 - 当前使用两个垂直 Chunk 层，适配本原型的地形高度；未来地下洞穴与高山应让垂直 streaming 跟随玩家扩展。
