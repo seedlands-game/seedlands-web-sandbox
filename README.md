@@ -56,10 +56,23 @@ No private `.env` file is required to run or build the sandbox.
 | 1–4             | Select Dirt, Stone, Wood, or Sand            |
 | M               | Toggle the macro world map                   |
 | F3              | Toggle the debug HUD                         |
+| F4              | Toggle the server debug command shell        |
 | P               | Pause or resume world time                   |
 | [ / ]           | Move world time backward or forward one hour |
 | T               | Cycle 1×, 20×, and 100× time speed           |
 | Esc             | Release the pointer                          |
+
+## Server command debugging
+
+Press F4 after entering a world to open the compact debug shell. It accepts `/setblock`, `/fill`, `/tp`, `/time get`, `/time set`, `/seed`, `/save`, `/inspect voxel`, and `/inspect chunk`. The shell releases pointer lock while open; press Esc to close it. Its log text can be selected and copied with native browser controls, and the input accepts normal paste operations. Use Up and Down to browse the latest 20 submitted commands and return to an unfinished draft.
+
+The same structured command boundary is available without PlayCanvas, Canvas, or the DOM:
+
+```bash
+pnpm server:headless -- --seed my-debug-world
+```
+
+The first headless harness uses in-process memory persistence. `/save` exercises the server persistence boundary and supports reload tests within the process; it does not create a durable world file after the process exits.
 
 ## Architecture
 

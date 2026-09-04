@@ -17,6 +17,7 @@ type PlayerControllerOptions = {
   getWorld: () => World | null;
   getEnvironment: () => WorldEnvironment | null;
   onToggleMap: () => void;
+  onToggleCommandShell: () => void;
   onQueueSave: () => void;
   onFlushSave: () => void;
 };
@@ -53,6 +54,12 @@ export class PlayerController {
   install() {
     const { canvas, debug } = this.options.elements;
     window.onkeydown = (event) => {
+      if (event.code === 'F4') {
+        event.preventDefault();
+        this.options.onToggleCommandShell();
+        return;
+      }
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
       if (event.code === 'F3') {
         event.preventDefault();
         debug.hidden = !debug.hidden;
@@ -142,6 +149,13 @@ export class PlayerController {
       this.moveAxis('y', this.velocity.y * dt);
     }
     this.options.telemetry.endSpan(span);
+  }
+
+  releaseInput() {
+    this.keys.clear();
+    this.velocity.x = 0;
+    this.velocity.z = 0;
+    if (document.pointerLockElement) document.exitPointerLock();
   }
 
   setView(yaw: number, pitch: number) {

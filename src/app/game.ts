@@ -2,12 +2,20 @@ import * as pc from 'playcanvas';
 import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
 import { PerformanceTelemetry } from '../client/performance-telemetry';
+import {
+  ALL_COMMAND_CAPABILITIES,
+  ServerCommandExecutor,
+  type CommandSource,
+} from '../server/commands/server-command-executor';
+import { executeSlashCommand, type SlashCommandExecution } from '../server/commands/slash-command-parser';
+import type { ServerCommand } from '../server/commands/command-contract';
 import { GameServer } from '../server/game-server';
 import { CHUNK_SIZE, floorDiv } from '../world/voxel';
 import { appElements } from './app-elements';
 import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession, StreamingVariant } from './app-contracts';
 import { BrowserWorldStore } from './browser-world-store';
 import { createHarnessSnapshot, installHarness } from './game-harness';
+import { DebugCommandShell } from './debug-command-shell';
 import { updateHud } from './hud-presenter';
 import { MacroMapViewer } from './macro-map-viewer';
 import { PlayerController } from './player-controller';
@@ -39,6 +47,7 @@ export class Game {
   private saveTimer: number | null = null;
   private saveInFlight: Promise<void> = Promise.resolve();
   private removeHarness: (() => void) | null = null;
+  private commandShell: DebugCommandShell | null = null;
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
 
   constructor() {
@@ -154,6 +163,7 @@ export class Game {
       getWorld: () => this.world,
       getEnvironment: () => this.environment,
       onToggleMap: () => this.toggleMap(),
+      onToggleCommandShell: () => this.commandShell?.toggle(),
       onQueueSave: () => this.queueSave(),
       onFlushSave: () => void this.flushSave().catch(() => undefined),
     });
@@ -162,6 +172,21 @@ export class Game {
   private installUiAndHarness() {
     appElements.mapToggle.onclick = () => this.toggleMap();
     appElements.mapClose.onclick = () => this.macroMap.close();
+    const world = this.world;
+    if (world && this.serverPlayerId) {
+      const executor = new ServerCommandExecutor(world.server);
+      const source: CommandSource = {
+        actorId: 'browser-local-developer',
+        sourceType: 'local-developer',
+        entityId: this.serverPlayerId,
+        capabilities: ALL_COMMAND_CAPABILITIES,
+      };
+      this.commandShell = new DebugCommandShell({
+        elements: appElements,
+        execute: (input) => this.executeBrowserCommand(executor, source, input),
+        onOpen: () => this.controller?.releaseInput(),
+      });
+    }
     const harnessEnabled = new URLSearchParams(location.search).has('harness');
     appElements.debug.hidden = !harnessEnabled;
     if (!harnessEnabled || !this.controller) return;
@@ -192,6 +217,33 @@ export class Game {
       setStreamingVariant: (variant) => this.world?.setStreamingVariant(variant),
       exportPerformanceTrace: () => this.world?.exportTrace() ?? { traceEvents: [] },
     });
+  }
+
+  private async executeBrowserCommand(
+    executor: ServerCommandExecutor,
+    source: CommandSource,
+    input: string,
+  ): Promise<SlashCommandExecution> {
+    const execution = await executeSlashCommand(executor, source, input);
+    if (!execution.command || !execution.result.success) return execution;
+    this.consumeBrowserCommand(execution.command, execution.result);
+    return execution;
+  }
+
+  private consumeBrowserCommand(
+    command: ServerCommand,
+    result: Extract<SlashCommandExecution['result'], { success: true }>,
+  ) {
+    if (result.commit) {
+      this.world?.consumeServerCommit(result.commit);
+      this.queueSave();
+    }
+    if (command.type === 'teleport' && this.serverPlayerId) {
+      const entity = this.world?.server.getEntity(this.serverPlayerId);
+      if (entity) this.controller?.movePlayerTo(...entity.position);
+    }
+    if (command.type === 'time-set' && this.world && this.environment)
+      this.environment.setTime(this.world.server.worldTime);
   }
 
   private update(dt: number) {
@@ -293,6 +345,8 @@ export class Game {
   }
 
   private disposeRuntime() {
+    this.commandShell?.dispose();
+    this.commandShell = null;
     this.removeHarness?.();
     this.removeHarness = null;
     this.controller?.dispose();

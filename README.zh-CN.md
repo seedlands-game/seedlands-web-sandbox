@@ -56,10 +56,23 @@ pnpm preview
 | 1–4          | 选择泥土、石头、原木或沙砾        |
 | M            | 开关 Macro 世界地图               |
 | F3           | 开关调试 HUD                      |
+| F4           | 开关服务端调试命令 Shell          |
 | P            | 暂停或继续世界时间                |
 | [ / ]        | 将世界时间向前或向后调整一小时    |
 | T            | 在 1×、20×、100× 时间速度之间切换 |
 | Esc          | 解除鼠标锁定                      |
+
+## 服务端命令调试
+
+进入世界后按 F4 可打开简易 Debug Shell。当前支持 `/setblock`、`/fill`、`/tp`、`/time get`、`/time set`、`/seed`、`/save`、`/inspect voxel` 和 `/inspect chunk`。Shell 打开时会释放鼠标锁定；按 Esc 关闭。日志文本可以用浏览器原生方式选择和复制，输入框支持正常粘贴；上下方向键可浏览最近 20 条已提交命令，并在回到末尾时恢复未执行草稿。
+
+同一套结构化命令边界也可以在没有 PlayCanvas、Canvas 或 DOM 的环境中运行：
+
+```bash
+pnpm server:headless -- --seed my-debug-world
+```
+
+首版无头 Harness 使用进程内存持久化。`/save` 会真实经过服务端 persistence boundary，并可在同一进程的重载测试中恢复；进程退出后不会生成持久世界文件。
 
 ## 架构
 

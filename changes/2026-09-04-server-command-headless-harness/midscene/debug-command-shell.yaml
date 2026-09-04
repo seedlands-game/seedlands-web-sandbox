@@ -1,0 +1,25 @@
+page:
+  url: ${VOXEL_SANDBOX_URL}
+
+agent:
+  testId: seedlands-debug-command-shell
+  groupName: Seedlands server command shell
+  groupDescription: 检查浏览器 Debug Shell 的可读性、命令反馈与 HUD 层级。
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 12
+
+tasks:
+  - name: 检查运行中 Debug Shell
+    flow:
+      - ai: 在“世界 Seed”字段输入“debug-command-shell-visual”，点击“进入世界”，等待世界完成加载，然后按 F4。
+      - sleep: 7000
+      - aiAssert: 一个紧凑且清晰标注为服务端调试命令的开发者 Shell 已打开。它包含 slash 命令输入框、简短帮助和最近输出区域，与游戏画面和 HUD 有明确层级，不遮满世界，没有文字重叠或截断。
+      - ai: 在命令输入框中输入“/seed”并按 Enter。
+      - aiAssert: Shell 中清楚显示刚才的 /seed 命令和成功结果，能读到 debug-command-shell-visual；成功状态不只依赖颜色表达。
+      - ai: 在命令输入框中输入“/unknown”并按 Enter。
+      - aiAssert: Shell 保持打开并显示可读的错误类型或错误消息；此前成功结果与当前错误可以分辨，输入框仍可继续使用。
+      - ai: 在命令输入框中输入“未执行草稿”，先按上方向键，再按下方向键。
+      - aiAssert: 上方向键把最近执行的 /unknown 放回输入框；下方向键恢复“未执行草稿”。Shell 的帮助提示清楚说明可用上下方向键浏览历史，并且日志文本呈现为可选择、复制的普通文本。
+      - ai: 在命令输入框中按 Esc 关闭 Shell。
+      - aiAssert: Debug Shell 已关闭，正常游戏 HUD、准星、世界时钟和快捷栏仍清晰可见且没有残留遮挡。
