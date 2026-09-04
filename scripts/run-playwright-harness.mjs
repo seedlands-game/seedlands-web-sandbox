@@ -15,7 +15,10 @@ const sharedEnvironment = {
   SEEDLANDS_E2E_RUN_ID: runId,
   SEEDLANDS_E2E_SOURCE_SHA: sourceSha(),
 };
-const playwright = spawn('pnpm', ['exec', 'playwright', 'test'], { stdio: 'inherit', env: sharedEnvironment });
+const playwright = spawn('pnpm', ['exec', 'playwright', 'test', 'tests/e2e'], {
+  stdio: 'inherit',
+  env: sharedEnvironment,
+});
 const exitCode = await new Promise((resolve) => playwright.once('exit', (code) => resolve(code ?? 1)));
 if (exitCode !== 0) process.exit(exitCode);
 
