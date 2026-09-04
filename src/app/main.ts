@@ -589,7 +589,8 @@ class Game {
     const previousOverlap = axis === 'y' ? 0 : this.collisionOverlap(p);
     (p as unknown as Record<string, number>)[axis] += amount;
     if (axis === 'y') {
-      const collisionY = amount < 0 ? Math.floor(p.y - PLAYER_FEET_OFFSET) : Math.floor(p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON);
+      const collisionY =
+        amount < 0 ? Math.floor(p.y - PLAYER_FEET_OFFSET) : Math.floor(p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON);
       const blocked = amount < 0 ? this.hasGroundSupport(p, collisionY) : this.collidesAtY(p, collisionY);
       if (blocked) {
         p.set(p.x, amount < 0 ? collisionY + 1 + PLAYER_FEET_OFFSET : collisionY - PLAYER_HEAD_OFFSET, p.z);
@@ -635,21 +636,7 @@ class Game {
     return false;
   }
   private hasGroundSupport(p: pc.Vec3, y: number): boolean {
-    if (!this.world) return false;
-    const minX = p.x - PLAYER_HALF_WIDTH;
-    const maxX = p.x + PLAYER_HALF_WIDTH;
-    const minZ = p.z - PLAYER_HALF_WIDTH;
-    const maxZ = p.z + PLAYER_HALF_WIDTH;
-    let supportedArea = 0;
-    for (let x = Math.floor(minX); x <= Math.floor(maxX - COLLISION_EPSILON); x += 1) {
-      const overlapX = Math.min(maxX, x + 1) - Math.max(minX, x);
-      for (let z = Math.floor(minZ); z <= Math.floor(maxZ - COLLISION_EPSILON); z += 1) {
-        if (isSolid(this.world.getVoxel(x, y, z))) {
-          supportedArea += overlapX * (Math.min(maxZ, z + 1) - Math.max(minZ, z));
-        }
-      }
-    }
-    return supportedArea >= (PLAYER_HALF_WIDTH * 2) ** 2 / 2;
+    return !!this.world && isSolid(this.world.getVoxel(Math.floor(p.x), y, Math.floor(p.z)));
   }
   private interact(place: boolean) {
     this.interactionAttempts += 1;
@@ -679,7 +666,12 @@ class Game {
   private playerOccupies([x, y, z]: [number, number, number]) {
     const p = this.camera.getPosition();
     return (
-      x + 1 > p.x - PLAYER_HALF_WIDTH && x < p.x + PLAYER_HALF_WIDTH && z + 1 > p.z - PLAYER_HALF_WIDTH && z < p.z + PLAYER_HALF_WIDTH && y + 1 > p.y - PLAYER_FEET_OFFSET && y < p.y + PLAYER_HEAD_OFFSET
+      x + 1 > p.x - PLAYER_HALF_WIDTH &&
+      x < p.x + PLAYER_HALF_WIDTH &&
+      z + 1 > p.z - PLAYER_HALF_WIDTH &&
+      z < p.z + PLAYER_HALF_WIDTH &&
+      y + 1 > p.y - PLAYER_FEET_OFFSET &&
+      y < p.y + PLAYER_HEAD_OFFSET
     );
   }
   private toggleMap() {

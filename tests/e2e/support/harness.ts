@@ -66,6 +66,38 @@ export async function waitForSnapshot(
   return current;
 }
 
+export async function waitForPlayerMovement(
+  page: Page,
+  expectation: {
+    axis: 0 | 1 | 2;
+    start: number;
+    minimumDelta: number;
+    direction?: -1 | 1;
+    yTarget?: number;
+    yTolerance?: number;
+  },
+): Promise<HarnessSnapshot> {
+  await page.waitForFunction(
+    (expected) => {
+      const current = (window as HarnessWindow).__seedlandsHarness?.snapshot();
+      if (!current) return false;
+      const delta = current.player[expected.axis] - expected.start;
+      const moved = expected.direction
+        ? delta * expected.direction > expected.minimumDelta
+        : Math.abs(delta) > expected.minimumDelta;
+      const atExpectedHeight =
+        expected.yTarget === undefined ||
+        Math.abs(current.player[1] - expected.yTarget) < (expected.yTolerance ?? 0.05);
+      return moved && atExpectedHeight;
+    },
+    expectation,
+    { timeout: 15_000 },
+  );
+  const current = await snapshot(page);
+  if (!current) throw new Error('Seedlands harness snapshot is unavailable after player movement.');
+  return current;
+}
+
 export async function lockPointer(page: Page): Promise<Locator> {
   const canvas = page.locator('#game');
   const box = await canvas.boundingBox();
