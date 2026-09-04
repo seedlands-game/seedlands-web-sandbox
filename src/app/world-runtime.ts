@@ -58,6 +58,8 @@ export class World {
       variant,
       source: {
         seed: server.seed,
+        beforePrepare: (cx, cy, cz) => server.ensureChunkNeighborhood(cx, cy, cz),
+        releasePrepared: (cx, cy, cz) => server.releaseChunkNeighborhood(cx, cy, cz),
         prepareMainSnapshot: (cx, cy, cz) => server.createDerivedMeshSnapshot(cx, cy, cz),
         prepareWorkerInput: (cx, cy, cz) => server.prepareWorkerMeshInput(cx, cy, cz),
         acceptWorkerCanonical: (task, result) =>
@@ -224,6 +226,7 @@ export class World {
       if (Math.abs(chunk.task.cx - cx) <= cacheRadius && Math.abs(chunk.task.cz - cz) <= cacheRadius) continue;
       this.scheduler.cancel(key);
       this.repository.unload(key);
+      void this.server.evictChunk(chunk.task.cx, chunk.task.cy, chunk.task.cz).catch(() => undefined);
     }
     for (const key of this.scheduler.requestedKeys) {
       const [x, , z] = key.split(',').map(Number);

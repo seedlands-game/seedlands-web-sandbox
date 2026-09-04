@@ -1,5 +1,4 @@
-import type * as pc from 'playcanvas';
-import { BrowserChunkPersistence, decodeBrowserWorldSave } from '../client/browser-chunk-persistence';
+import { decodeBrowserWorldSave } from '../client/browser-chunk-persistence';
 import { decodeWorldSave } from '../world/storage';
 import type { RestoredSession } from './app-contracts';
 
@@ -13,7 +12,7 @@ export class BrowserWorldStore {
       return {
         player: current.player,
         seed: current.seed,
-        persistence: new BrowserChunkPersistence(current.snapshots),
+        legacySnapshots: current.snapshots,
         changes: [],
       };
     const legacy = decodeWorldSave(raw);
@@ -21,13 +20,9 @@ export class BrowserWorldStore {
       ? {
           player: legacy.player,
           seed: legacy.seed,
-          persistence: new BrowserChunkPersistence(),
+          legacySnapshots: [],
           changes: legacy.changes,
         }
       : null;
-  }
-
-  save(seed: string, player: pc.Vec3, persistence: BrowserChunkPersistence) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(persistence.serialize(seed, [player.x, player.y, player.z])));
   }
 }

@@ -39,6 +39,8 @@ type WorkerInput = {
 
 export type MeshTaskSource = {
   seed: number;
+  beforePrepare?: (cx: number, cy: number, cz: number) => Promise<void>;
+  releasePrepared?: (cx: number, cy: number, cz: number) => void;
   prepareMainSnapshot: (cx: number, cy: number, cz: number) => MainSnapshot;
   prepareWorkerInput: (cx: number, cy: number, cz: number) => WorkerInput;
   acceptWorkerCanonical: (task: PendingMeshTask, result: WorkerResult) => boolean;
@@ -68,6 +70,7 @@ export class MeshTaskScheduler {
   private inFlight = 0;
   private epoch = 0;
   private disposed = false;
+  private draining = false;
   private variant: StreamingVariant;
 
   constructor(private readonly options: SchedulerOptions) {
@@ -117,7 +120,7 @@ export class MeshTaskScheduler {
     this.queued.delete(key);
     this.queued.set(key, { traceId, epoch: this.epoch, chunkKey: key, cx, cy, cz, queuedAt: performance.now() });
     this.options.telemetry.markTrace(traceId, 'queued', 'main');
-    this.drain();
+    void this.drain();
   }
 
   latestTask(key: string) {
@@ -161,25 +164,50 @@ export class MeshTaskScheduler {
     this.requested.clear();
   }
 
-  private drain() {
-    while (!this.disposed && this.inFlight < this.options.profile.maxWorkerTasksInFlight) {
-      const next = this.queued.entries().next().value as [string, PendingMeshRequest] | undefined;
-      if (!next) return;
-      const [key, request] = next;
-      this.queued.delete(key);
-      if (!this.requested.has(key) || request.epoch !== this.epoch) {
-        this.options.telemetry.markTrace(request.traceId, 'stale-request', 'main');
-        continue;
+  private async drain() {
+    if (this.draining) return;
+    this.draining = true;
+    try {
+      while (!this.disposed && this.inFlight < this.options.profile.maxWorkerTasksInFlight) {
+        const next = this.queued.entries().next().value as [string, PendingMeshRequest] | undefined;
+        if (!next) return;
+        const [key, request] = next;
+        this.queued.delete(key);
+        if (!this.requested.has(key) || request.epoch !== this.epoch) {
+          this.options.telemetry.markTrace(request.traceId, 'stale-request', 'main');
+          continue;
+        }
+        this.options.telemetry.recordCompletedSpan({
+          category: 'worker',
+          name: 'WorkerQueueWait',
+          lane: 'main',
+          durationMs: performance.now() - request.queuedAt,
+          traceId: request.traceId,
+        });
+        try {
+          if (this.options.source.beforePrepare)
+            await this.options.source.beforePrepare(request.cx, request.cy, request.cz);
+        } catch {
+          this.options.source.releasePrepared?.(request.cx, request.cy, request.cz);
+          if (!this.queued.has(key)) {
+            this.requested.delete(key);
+            this.latestTasks.delete(key);
+          }
+          this.options.telemetry.completeTrace(request.traceId, 'persistence-load-error', 'persistence-worker');
+          continue;
+        }
+        if (this.disposed || !this.requested.has(key) || request.epoch !== this.epoch || this.queued.has(key)) {
+          this.options.source.releasePrepared?.(request.cx, request.cy, request.cz);
+          this.options.telemetry.markTrace(request.traceId, 'stale-after-persistence-load', 'main');
+          continue;
+        }
+        if (this.variant === 'main-snapshot') this.postMainSnapshot(request);
+        else this.postWorkerFirst(request);
       }
-      this.options.telemetry.recordCompletedSpan({
-        category: 'worker',
-        name: 'WorkerQueueWait',
-        lane: 'main',
-        durationMs: performance.now() - request.queuedAt,
-        traceId: request.traceId,
-      });
-      if (this.variant === 'main-snapshot') this.postMainSnapshot(request);
-      else this.postWorkerFirst(request);
+    } finally {
+      this.draining = false;
+      if (!this.disposed && this.queued.size && this.inFlight < this.options.profile.maxWorkerTasksInFlight)
+        void this.drain();
     }
   }
 
@@ -284,18 +312,18 @@ export class MeshTaskScheduler {
     const task = this.latestTasks.get(result.chunkKey);
     if (!task || !isCurrentMeshTask(result, task)) {
       this.incrementCounter('stale_worker_results');
-      this.drain();
+      void this.drain();
       return;
     }
     if (task.variant === 'worker-first') {
       if (!result.canonical || result.generatorVersion !== task.generatorVersion) {
         this.discard(task, 'invalid-worker-canonical');
-        this.drain();
+        void this.drain();
         return;
       }
       if (!this.options.source.acceptWorkerCanonical(task, result)) {
         this.discard(task, 'stale-worker-canonical');
-        this.drain();
+        void this.drain();
         return;
       }
       this.recordWorkerPreparation(task, result);
@@ -310,7 +338,7 @@ export class MeshTaskScheduler {
     this.options.telemetry.markTrace(task.traceId, 'worker-complete', 'worker-derived');
     this.options.onAcceptedResult(task, result);
     this.options.telemetry.markTrace(task.traceId, 'commit-queued', 'main');
-    this.drain();
+    void this.drain();
   }
 
   private recordWorkerPreparation(task: PendingMeshTask, result: WorkerResult) {
