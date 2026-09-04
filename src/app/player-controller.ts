@@ -1,7 +1,6 @@
 import * as pc from 'playcanvas';
 import { Voxel, isSolid, voxelNames } from '../world/voxel';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
-import type { AppElements } from './app-elements';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
 
@@ -12,12 +11,15 @@ const COLLISION_EPSILON = 0.001;
 
 type PlayerControllerOptions = {
   camera: pc.Entity;
-  elements: Pick<AppElements, 'canvas' | 'debug' | 'hotbar' | 'interactionFeedback'>;
+  canvas: HTMLCanvasElement;
   telemetry: PerformanceTelemetry;
   getWorld: () => World | null;
   getEnvironment: () => WorldEnvironment | null;
   onToggleMap: () => void;
+  onToggleDebug: () => void;
   onToggleCommandShell: () => void;
+  onSelectMaterial: (material: number) => void;
+  onFeedback: (message: string, tone: 'info' | 'success' | 'error') => void;
   onQueueSave: () => void;
   onFlushSave: () => void;
 };
@@ -31,7 +33,6 @@ export class PlayerController {
   private readonly keys = new Set<string>();
   private attempts = 0;
   private spectator = false;
-  private feedbackTimer: number | null = null;
 
   constructor(private readonly options: PlayerControllerOptions) {}
 
@@ -52,7 +53,7 @@ export class PlayerController {
   }
 
   install() {
-    const { canvas, debug } = this.options.elements;
+    const { canvas } = this.options;
     window.onkeydown = (event) => {
       if (event.code === 'F4') {
         event.preventDefault();
@@ -62,7 +63,7 @@ export class PlayerController {
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
       if (event.code === 'F3') {
         event.preventDefault();
-        debug.hidden = !debug.hidden;
+        this.options.onToggleDebug();
         return;
       }
       if (event.code === 'KeyM') {
@@ -84,8 +85,7 @@ export class PlayerController {
       }
       this.keys.add(event.code);
       if (/^Digit[1-4]$/.test(event.code)) {
-        this.chosen = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand][Number(event.code[5]) - 1];
-        this.renderHotbar();
+        this.selectMaterial([Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand][Number(event.code[5]) - 1]);
       }
     };
     window.onkeyup = (event) => this.keys.delete(event.code);
@@ -103,7 +103,7 @@ export class PlayerController {
         this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(false));
       if (event.button === 2) this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(true));
     };
-    this.renderHotbar();
+    this.options.onSelectMaterial(this.chosen);
   }
 
   dispose() {
@@ -111,9 +111,8 @@ export class PlayerController {
     window.onkeyup = null;
     document.onmousemove = null;
     document.onmousedown = null;
-    this.options.elements.canvas.onclick = null;
-    this.options.elements.canvas.oncontextmenu = null;
-    if (this.feedbackTimer !== null) window.clearTimeout(this.feedbackTimer);
+    this.options.canvas.onclick = null;
+    this.options.canvas.oncontextmenu = null;
     this.keys.clear();
   }
 
@@ -156,6 +155,13 @@ export class PlayerController {
     this.velocity.x = 0;
     this.velocity.z = 0;
     if (document.pointerLockElement) document.exitPointerLock();
+  }
+
+  selectMaterial(material: number) {
+    const allowed = new Set<number>([Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand]);
+    if (!allowed.has(material)) return;
+    this.chosen = material;
+    this.options.onSelectMaterial(material);
   }
 
   setView(yaw: number, pitch: number) {
@@ -386,23 +392,15 @@ export class PlayerController {
       last = cell;
     }
     const target = place ? last : hit;
-    if (!target) return this.showFeedback('距离过远');
-    if (place && this.playerOccupies(target)) return this.showFeedback('无法在玩家位置放置');
+    if (!target) return this.options.onFeedback('距离过远', 'error');
+    if (place && this.playerOccupies(target)) return this.options.onFeedback('无法在玩家位置放置', 'error');
     const previous = world.getVoxel(...target);
     world.edit(...target, place ? this.chosen : Voxel.Air);
-    this.showFeedback(place ? `放置 · ${voxelNames[this.chosen]}` : `采集 · ${voxelNames[previous] ?? '体素'}`);
+    this.options.onFeedback(
+      place ? `放置 · ${voxelNames[this.chosen]}` : `采集 · ${voxelNames[previous] ?? '体素'}`,
+      'success',
+    );
     this.options.onQueueSave();
-  }
-
-  private showFeedback(message: string) {
-    const feedback = this.options.elements.interactionFeedback;
-    feedback.textContent = message;
-    feedback.dataset.visible = 'true';
-    if (this.feedbackTimer !== null) window.clearTimeout(this.feedbackTimer);
-    this.feedbackTimer = window.setTimeout(() => {
-      feedback.dataset.visible = 'false';
-      this.feedbackTimer = null;
-    }, 900);
   }
 
   private playerOccupies([x, y, z]: [number, number, number]) {
@@ -415,21 +413,5 @@ export class PlayerController {
       y + 1 > position.y - PLAYER_FEET_OFFSET &&
       y < position.y + PLAYER_HEAD_OFFSET
     );
-  }
-
-  private renderHotbar() {
-    const ids = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand];
-    const atlasTiles: Record<number, readonly [number, number]> = {
-      [Voxel.Dirt]: [2, 0],
-      [Voxel.Stone]: [0, 1],
-      [Voxel.Wood]: [2, 1],
-      [Voxel.Sand]: [1, 1],
-    };
-    this.options.elements.hotbar.innerHTML = ids
-      .map((id, index) => {
-        const [column, row] = atlasTiles[id];
-        return `<div class="slot ${id === this.chosen ? 'active' : ''}" data-material="${voxelNames[id]}"><span class="slot-key">${index + 1}</span><span class="slot-swatch" style="--tile-x:${column};--tile-y:${row}"></span><span class="slot-name">${voxelNames[id]}</span></div>`;
-      })
-      .join('');
   }
 }

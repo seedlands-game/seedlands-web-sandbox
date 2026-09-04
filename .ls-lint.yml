@@ -2,6 +2,7 @@ ls:
   src:
     .dir: kebab-case
     .ts: kebab-case
+    .svelte: kebab-case
   tests:
     .dir: kebab-case
     .test.ts: kebab-case

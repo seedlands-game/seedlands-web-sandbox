@@ -20,7 +20,7 @@ The sandbox is an early technical prototype. Its current capabilities include:
 - An in-process authoritative `GameServer` for chunks, player state, entities, and world time.
 - First-person movement, collision, jumping, voxel raycast editing, and material selection.
 - Browser persistence for the seed, player position, and materialized chunk snapshots.
-- A day/night environment, transparent water, quality presets, a macro world map, and a performance/debug HUD.
+- A day/night environment, transparent water, quality presets, a macro world map, and a retained Svelte 5 HUD.
 
 Not yet implemented are the defining systems of the full Seedlands vision: essence and magic, autonomous NPC societies, persistent historical events, longevity and reincarnation, or the content of the six realms.
 
@@ -76,10 +76,10 @@ The first headless harness uses in-process memory persistence. `/save` exercises
 
 ## Architecture
 
-`GameServer.editBatch()` is the authoritative transaction boundary for batched world mutations. The browser runtime is split by responsibility across startup, player control, rendering adapters, world streaming, environment, HUD, and persistence modules.
+`GameServer.editBatch()` is the authoritative transaction boundary for batched world mutations. The browser runtime is split by responsibility across startup, player control, rendering adapters, world streaming, environment, HUD, and persistence modules. One Svelte 5 root owns the runtime UI. Game code publishes small, independently subscribed Shell, HUD, Interaction, and Debug projections through `UiBridge`; components send intents back through an action port and never own authoritative World or Server state.
 
 ```text
-src/app/       Browser startup, PlayCanvas lifecycle, UI, input, and styles
+src/app/       Browser startup, PlayCanvas lifecycle, retained UI bridge, input, and styles
 src/client/    Browser persistence and client-side adapters
 src/server/    Authoritative world, entity, clock, and snapshot interfaces
 src/world/     Deterministic world, voxel, mesh, coordinate, and save logic

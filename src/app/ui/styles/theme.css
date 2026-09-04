@@ -1,0 +1,420 @@
+:root {
+  --ui-color-content: #eef5e7;
+  --ui-color-content-muted: #aabca9;
+  --ui-color-success: #cceba5;
+  --ui-color-error: #ffb7a9;
+  --ui-surface: rgba(13, 24, 27, 0.7);
+  --ui-surface-strong: rgba(3, 10, 11, 0.88);
+  --ui-border: rgba(226, 239, 215, 0.2);
+  --ui-focus: #9fc66e;
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-size-control: 40px;
+  --ui-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
+  --ui-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ui-radius: 14px;
+  --ui-motion-fast: 140ms;
+  --ui-z-overlay: 20;
+}
+
+.game-panel,
+.hud-chip {
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius);
+  background: var(--ui-surface);
+  box-shadow: 0 16px 48px rgba(1, 8, 10, 0.3);
+  backdrop-filter: blur(14px) saturate(120%);
+}
+
+.row {
+  display: flex;
+}
+.column {
+  display: flex;
+  flex-direction: column;
+}
+.center {
+  place-items: center;
+}
+.fill {
+  width: 100%;
+  height: 100%;
+}
+.absolute-fill {
+  position: absolute;
+  inset: 0;
+}
+.no-pointer {
+  pointer-events: none;
+}
+.scroll {
+  overflow: auto;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+}
+
+#crosshair::before,
+#crosshair::after,
+#crosshair span::before,
+#crosshair span::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 246, 0.92);
+  border-radius: 2px;
+}
+
+#crosshair::before,
+#crosshair::after {
+  left: 9px;
+  width: 2px;
+  height: 6px;
+}
+#crosshair::before {
+  top: 0;
+}
+#crosshair::after {
+  bottom: 0;
+}
+#crosshair span::before,
+#crosshair span::after {
+  top: 9px;
+  width: 6px;
+  height: 2px;
+}
+#crosshair span::before {
+  left: 0;
+}
+#crosshair span::after {
+  right: 0;
+}
+
+#world-clock {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 13px;
+  color: var(--ui-color-content);
+  font: 700 11px/1 var(--ui-font-mono);
+  letter-spacing: 0.04em;
+}
+
+#interaction-feedback {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 34px);
+  transform: translate(-50%, 8px);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 5px #000;
+  opacity: 0;
+  transition: var(--ui-motion-fast) ease;
+}
+#interaction-feedback[data-visible='true'] {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+#interaction-feedback[data-tone='error'] {
+  color: var(--ui-color-error);
+}
+
+#debug {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  max-width: min(390px, calc(100vw - 28px));
+  padding: 12px 14px;
+  color: #dce9df;
+  white-space: pre-line;
+  font: 11px/1.5 var(--ui-font-mono);
+}
+
+#help {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  padding: 7px 11px;
+  color: rgba(229, 237, 226, 0.7);
+  font-size: 10px;
+  white-space: nowrap;
+  opacity: 0.72;
+}
+
+#hotbar {
+  position: absolute;
+  left: 50%;
+  bottom: 52px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 7px;
+  padding: 7px;
+  border: 1px solid rgba(224, 238, 211, 0.18);
+  border-radius: 13px;
+  background: rgba(8, 18, 19, 0.58);
+  box-shadow: 0 12px 34px rgba(2, 8, 9, 0.32);
+  backdrop-filter: blur(11px);
+  pointer-events: auto;
+}
+
+.game-slot {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 96px;
+  min-height: 43px;
+  padding: 5px 9px 5px 5px;
+  color: #acbbb0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(5, 14, 15, 0.66);
+  font-size: 11px;
+  transition: var(--ui-motion-fast) ease;
+}
+.slot-key {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  z-index: 1;
+  min-width: 14px;
+  padding: 2px;
+  border-radius: 4px;
+  background: rgba(3, 8, 8, 0.68);
+  color: white;
+  text-align: center;
+  font: 700 9px/1 var(--ui-font-mono);
+}
+.slot-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background-image: url('/assets/voxel-atlas.webp');
+  background-size: 300% 300%;
+  background-position: calc(var(--tile-x) * 50%) calc(var(--tile-y) * 50%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+.slot-name {
+  white-space: nowrap;
+}
+.game-slot.active {
+  transform: translateY(-3px);
+  border-color: #c9e59a;
+  color: white;
+  background: rgba(40, 64, 40, 0.78);
+  box-shadow: 0 0 0 2px rgba(156, 197, 111, 0.18);
+}
+
+.map-toggle {
+  pointer-events: auto;
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: auto;
+  padding: 9px 12px;
+  color: #e8f0e6;
+}
+#macro-map-panel {
+  pointer-events: auto;
+  position: absolute;
+  top: 56px;
+  right: 14px;
+  width: 292px;
+  padding: 13px;
+  color: #e0ece2;
+}
+.map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.map-header button {
+  width: auto;
+  padding: 6px 8px;
+  font-size: 11px;
+}
+#macro-map-panel label {
+  margin: 12px 0;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+#macro-map {
+  display: block;
+  width: 100%;
+  image-rendering: pixelated;
+  border: 1px solid var(--ui-border);
+  border-radius: 7px;
+  background: #0c1b2a;
+}
+#macro-map-panel small {
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+#debug-command-shell {
+  position: absolute;
+  z-index: var(--ui-z-overlay);
+  left: 50%;
+  bottom: 118px;
+  width: min(680px, calc(100vw - 28px));
+  max-height: min(420px, calc(100vh - 150px));
+  padding: 13px;
+  transform: translateX(-50%);
+  color: #e9f4e7;
+  pointer-events: auto;
+  user-select: text;
+  font: 11px/1.45 var(--ui-font-mono);
+  box-shadow: 0 18px 58px rgba(0, 0, 0, 0.46);
+}
+#debug-command-shell header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 9px;
+}
+#debug-command-shell header span,
+#debug-command-shell small {
+  color: #9eafa4;
+}
+#debug-command-log {
+  display: grid;
+  gap: 6px;
+  min-height: 54px;
+  max-height: 190px;
+  margin-bottom: 9px;
+  padding: 8px;
+  overflow: auto;
+  cursor: text;
+  border: 1px solid rgba(211, 235, 204, 0.12);
+  border-radius: 8px;
+  background: rgba(1, 7, 8, 0.58);
+}
+.debug-command-entry {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.debug-command-entry code {
+  color: #d6edb3;
+}
+.debug-command-entry[data-state='error'] span {
+  color: var(--ui-color-error);
+}
+#debug-command-form label {
+  display: block;
+  margin-bottom: 4px;
+  color: #b8c9bb;
+}
+.command-line {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid rgba(201, 229, 154, 0.45);
+  border-radius: 8px;
+  background: var(--ui-surface-strong);
+}
+#debug-command-input {
+  width: 100%;
+  padding: 9px 0;
+  color: white;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  user-select: text;
+}
+#debug-command-input::placeholder {
+  color: #708079;
+}
+#debug-command-status {
+  min-height: 18px;
+  margin-top: 7px;
+  color: #c7d8cb;
+}
+#debug-command-status[data-state='success'] {
+  color: var(--ui-color-success);
+}
+#debug-command-status[data-state='error'] {
+  color: var(--ui-color-error);
+}
+
+#build-watermark {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  color: rgba(232, 240, 230, 0.56);
+  font:
+    9px/1.2 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  user-select: text;
+}
+
+@media (max-width: 720px) {
+  #build-watermark {
+    right: 8px;
+    bottom: 6px;
+    font-size: 8px;
+  }
+  #help {
+    display: none;
+  }
+  #world-clock {
+    top: auto;
+    bottom: 112px;
+  }
+  .game-slot {
+    grid-template-columns: 32px;
+    min-width: 44px;
+    padding: 5px;
+  }
+  .slot-name {
+    display: none;
+  }
+  #debug-command-shell {
+    bottom: 74px;
+    max-height: calc(100vh - 94px);
+  }
+  #debug-command-log {
+    max-height: 132px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

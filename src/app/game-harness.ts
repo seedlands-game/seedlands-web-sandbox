@@ -8,6 +8,7 @@ import type { PlayerController } from './player-controller';
 import type { QualityLevel } from './quality-profile';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
+import type { UiMetrics } from './ui/ui-contracts';
 
 type HarnessApi = {
   snapshot: () => HarnessSnapshot;
@@ -56,6 +57,7 @@ type SnapshotContext = {
   qualityLevel: QualityLevel;
   serverPlayerId: string | null;
   persistence: BrowserChunkPersistence | null;
+  ui: UiMetrics;
 };
 
 const unavailablePerformance = (): HarnessSnapshot['performance'] => ({
@@ -110,6 +112,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       : [0, 0, 0],
     serverWorldTime: context.world?.server.worldTime ?? 0,
     performance: context.world?.performanceSummary ?? unavailablePerformance(),
+    ui: context.ui,
   };
 }
 

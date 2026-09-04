@@ -4,6 +4,7 @@ import type { WorldChange } from '../world/storage';
 import type { SerializedChunkSnapshot } from '../client/browser-chunk-persistence';
 import type { MeshTaskIdentity } from '../client/mesh-task-snapshot';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
+import type { UiMetrics } from './ui/ui-contracts';
 
 export type MeshPart = {
   material: FaceMaterialId;
@@ -93,6 +94,7 @@ export type HarnessSnapshot = {
   serverPlayerPosition: [number, number, number];
   serverWorldTime: number;
   performance: PerformanceSummary;
+  ui: UiMetrics;
 };
 
 export type RestoredSession = {
