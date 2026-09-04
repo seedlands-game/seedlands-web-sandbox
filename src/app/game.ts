@@ -19,7 +19,7 @@ import {
 import { executeSlashCommand, type SlashCommandExecution } from '../server/commands/slash-command-parser';
 import type { ServerCommand } from '../server/commands/command-contract';
 import { GameServer } from '../server/game-server';
-import { CHUNK_SIZE, floorDiv } from '../world/voxel';
+import { preparePlayerEntry } from './world-entry';
 import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession } from './app-contracts';
 import { BrowserGameplay } from './browser-gameplay';
 import { BrowserWorldStore } from './browser-world-store';
@@ -144,14 +144,10 @@ export class Game {
     );
     this.lifecycle.worldInstanceId += 1;
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
-    const restoredPlayer = server.queryEntities({ type: 'player' })[0];
-    const position: [number, number, number] = restoredPlayer?.position ??
-      this.persistence.restoredPlayer ??
-      (restore?.seed === seedText ? restore.player : null) ?? [0, 34, 0];
-    await server.ensureChunkNeighborhood(
-      floorDiv(position[0], CHUNK_SIZE),
-      floorDiv(position[1], CHUNK_SIZE),
-      floorDiv(position[2], CHUNK_SIZE),
+    const { position, restoredPlayer } = await preparePlayerEntry(
+      server,
+      this.persistence.restoredPlayer,
+      restore?.seed === seedText ? restore.player : null,
     );
     this.camera.setPosition(...position);
     this.serverPlayerId = restoredPlayer?.id ?? server.spawnPlayer({ position }).id;
