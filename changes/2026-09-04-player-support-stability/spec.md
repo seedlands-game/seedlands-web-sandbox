@@ -39,10 +39,8 @@ Direct implementation: calculate the exact horizontal overlap area between the p
 
 ## Delivery Snapshot
 
-Changed paths: `src/main.ts`, `scripts/browser-harness.mjs`, and this change record.
-
-Validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm build` passed; `git diff --check` passed; `CI=true corepack pnpm harness:e2e` passed. Chromium stages Load, Input, Player, FlatMovement, PartialSupport, Interaction, Streaming, MacroMap, and Persistence all passed. `PartialSupport` leaves only one of four equal player-footprint quadrants at y=56, verifies at least 0.5 world units of falling without WASD, then holds Space and verifies continuing descent rather than a re-armed jump.
+The area-threshold implementation was rebased into `src/app/main.ts` only as an intermediate historical commit, then superseded by the center-of-mass rule below. Its old runner paths were intentionally replaced by current Playwright support and regression files.
 
 Known limitation: the controller remains axis-separated and does not implement step climbing or swept-capsule collision.
 
-Git: implementation commit `11da248` on `codex/player-ground-collision`; no remote push requested.
+Git: rebased historical commit `da6498b` on `codex/player-ground-collision-integration`; no remote push requested.

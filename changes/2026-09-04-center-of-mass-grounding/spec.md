@@ -39,12 +39,10 @@ Retire the previous one-corner regression because it encoded an area-threshold a
 
 ## Delivery Snapshot
 
-Changed paths: `src/main.ts`, `scripts/browser-harness.mjs`, the superseded `changes/2026-09-04-player-support-stability/spec.md`, and this change record.
+Changed paths after rebase: `src/app/main.ts`, `tests/e2e/support/harness.ts`, `tests/e2e/regression/world-play.spec.ts`, the superseded player-support record, and this change record.
 
-Pre-fix reproduction: `CI=true corepack pnpm harness:e2e` failed at `centerExcavation`. With the center voxel removed and three neighboring footprint quadrants intact, the player stayed at y=`58.599998474121094` for 300ms, `onGround` changed from false to true, and `colliding` remained false. This proves the stall came from the 50% support rule rather than AABB penetration, stale mesh rendering, Worker latency, or input delivery.
-
-Post-fix validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm build` passed; `git diff --check` passed; `CI=true corepack pnpm harness:e2e` passed. Chromium stages Load, Input, Player, FlatMovement, CenterExcavation, Interaction, Streaming, MacroMap, and Persistence all passed. `CenterExcavation` removes the voxel selected below a player on an integer grid coordinate, verifies falling without WASD, then holds Space and verifies continued descent rather than a re-armed jump.
+Current validation: the center-excavation Playwright regression removes the horizontal-center ground voxel through production `World.edit()`, waits for descent without movement, then verifies that Space cannot re-arm grounding while the player continues falling. `corepack pnpm verify:static`, `corepack pnpm build`, and `corepack pnpm harness` passed on the rebased branch.
 
 Known limitation: the controller remains axis-separated and does not implement step climbing or swept-capsule collision. Center-of-mass grounding intentionally allows a centered pillar to support jump-building while rejecting surrounding-only support.
 
-Git: implementation commit `0dc7506` on `codex/player-ground-collision`; no remote push requested.
+Git: rebased implementation commit `17abcdd` on `codex/player-ground-collision-integration`; no remote push requested.

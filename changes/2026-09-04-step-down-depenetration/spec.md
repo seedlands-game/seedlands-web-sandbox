@@ -37,12 +37,10 @@ Preserve normal collision rejection from a clear position, but when vertical mov
 
 ## Delivery Snapshot
 
-Changed paths: `src/main.ts`, `scripts/browser-harness.mjs`, and this change record.
+Changed paths after rebase: `src/app/main.ts`, `tests/e2e/support/harness.ts`, `tests/e2e/regression/world-play.spec.ts`, and this change record.
 
-Pre-fix reproduction: `CI=true corepack pnpm harness:e2e` failed at `stepDown`. Walking forward from `[0.5, 58.599998, 0.5]` onto the platform one voxel lower ended at `[0.5, 57.599998, -0.007543]`: vertical landing succeeded, forward movement stopped at the boundary, and `colliding` was true. This isolates an existing-penetration deadlock after vertical descent rather than incorrect ground height, input loss, or delayed mesh state.
-
-Post-fix validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm build` passed; `git diff --check` passed; `CI=true corepack pnpm harness:e2e` passed. Chromium stages Load, Input, Player, FlatMovement, CenterExcavation, StepDown, Interaction, Streaming, MacroMap, and Persistence all passed. `StepDown` holds real forward input across a constructed one-voxel drop, requires more than three world units of progress, verifies the exact lower resting height, and requires final `colliding=false`.
+Current validation: the step-down Playwright regression builds adjacent upper/lower surfaces through production `World.edit()`, drives real Pointer Lock and forward input, waits for more than three units of forward progress at the lower resting height, and requires a non-colliding final body. `corepack pnpm verify:static`, `corepack pnpm build`, and `corepack pnpm harness` passed on the rebased branch.
 
 Known limitation: the controller remains axis-separated and does not add upward step climbing or swept high-speed collision. The depenetration exception is monotonic: it only accepts a colliding horizontal candidate when its exact AABB/voxel overlap volume is lower than the current overlap.
 
-Git: implementation commit `2c4c0cd` on `codex/player-ground-collision`; no remote push requested.
+Git: rebased implementation commit `08f1439` on `codex/player-ground-collision-integration`; no remote push requested.
