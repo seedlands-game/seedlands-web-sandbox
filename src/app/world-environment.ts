@@ -14,7 +14,7 @@ export class WorldEnvironment {
     private readonly app: pc.Application,
     private readonly sun: pc.Entity,
     private readonly quality: QualityProfile,
-    private readonly water: pc.StandardMaterial,
+    private readonly water: readonly pc.StandardMaterial[],
   ) {
     app.scene.fog.type = pc.FOG_LINEAR;
     app.graphicsDevice.maxPixelRatio = Math.min(window.devicePixelRatio, 2) * quality.resolutionScale;
@@ -25,7 +25,7 @@ export class WorldEnvironment {
     this.elapsed += dt;
     this.worldTime = ((worldTime % 24) + 24) % 24;
     const waterOffset = (this.elapsed * 0.018 * this.quality.waterQuality) % 1;
-    this.water.diffuseMapOffset.set(waterOffset, waterOffset * 0.42);
+    this.water.forEach((material) => material.diffuseMapOffset.set(waterOffset, waterOffset * 0.42));
     this.apply();
   }
 

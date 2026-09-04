@@ -91,7 +91,7 @@ export class Game {
     this.world = new World(
       server,
       this.app,
-      this.visualResources.materials,
+      this.visualResources.resolve,
       quality,
       this.performanceTelemetry,
       this.performanceProfile,

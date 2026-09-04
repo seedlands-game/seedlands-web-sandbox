@@ -6,6 +6,7 @@ import { Voxel } from '../world/voxel';
 import type { HarnessSnapshot, LifecycleSnapshot, StreamingVariant } from './app-contracts';
 import type { PlayerController } from './player-controller';
 import type { QualityLevel } from './quality-profile';
+import { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
 
@@ -103,6 +104,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     triangles: telemetry?.triangles ?? 0,
     drawCalls: telemetry?.drawCalls ?? 0,
     runtime: 'integrated-server',
+    renderPipeline: FINAL_RENDER_PIPELINE,
     serverRevision: context.world?.server.getChunk(0, 0, 0).revision ?? 0,
     voxelAtOrigin: context.world?.getVoxel(0, 0, 0) ?? Voxel.Air,
     serverPlayerPosition: context.serverPlayerId

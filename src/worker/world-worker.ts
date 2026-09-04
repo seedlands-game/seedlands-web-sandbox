@@ -1,4 +1,4 @@
-import { createProceduralMeshInput, makeChunk, meshChunk } from '../world/mesh';
+import { batchMeshData, compactMeshData, createProceduralMeshInput, makeChunk, meshChunk } from '../world/mesh';
 
 type Identity = {
   taskId: number;
@@ -35,7 +35,7 @@ const resultIdentity = ({
 }: Identity): Identity => ({ taskId, traceId, epoch, chunkKey, seed, cx, cy, cz, chunkRevision, haloRevision });
 
 const packMeshes = (meshes: ReturnType<typeof meshChunk>) => {
-  const packed = Object.values(meshes);
+  const packed = batchMeshData(Object.values(meshes)).map(compactMeshData);
   const transfers: Transferable[] = [];
   packed.forEach((part) =>
     transfers.push(

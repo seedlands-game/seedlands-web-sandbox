@@ -1,19 +1,11 @@
-import type { FaceMaterialId } from '../world/voxel';
-import type { RenderLayer } from '../world/mesh';
+import type { MeshData } from '../world/mesh';
 import type { WorldChange } from '../world/storage';
 import type { SerializedChunkSnapshot } from '../client/browser-chunk-persistence';
 import type { MeshTaskIdentity } from '../client/mesh-task-snapshot';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
+import type { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
 
-export type MeshPart = {
-  material: FaceMaterialId;
-  renderLayer: RenderLayer;
-  positions: Float32Array;
-  normals: Float32Array;
-  uvs: Float32Array;
-  colors: Uint8Array;
-  indices: Uint32Array;
-};
+export type MeshPart = MeshData;
 
 export type WorkerResult = {
   kind: 'mesh-result';
@@ -88,6 +80,7 @@ export type HarnessSnapshot = {
   triangles: number;
   drawCalls: number;
   runtime: 'integrated-server';
+  renderPipeline: typeof FINAL_RENDER_PIPELINE;
   serverRevision: number;
   voxelAtOrigin: number;
   serverPlayerPosition: [number, number, number];

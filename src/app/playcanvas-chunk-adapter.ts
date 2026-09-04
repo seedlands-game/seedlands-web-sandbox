@@ -27,21 +27,27 @@ export const summarizeMeshParts = (parts: MeshPart[]): ChunkSummary => ({
 
 export const createPlayCanvasChunkAdapter = (
   app: pc.Application,
-  materials: Map<number, pc.StandardMaterial>,
+  resolveMaterial: (part: MeshPart) => pc.StandardMaterial,
   telemetry: PerformanceTelemetry,
 ): ChunkResourceAdapter<PendingMeshTask, MeshPart, PlayCanvasChunkResource> => ({
   create: (task) => ({ entity: new pc.Entity(`Chunk ${task.chunkKey}`), meshes: [], instances: [] }),
   commitPart: (resource, task, part) => {
     const span = telemetry.beginSpan('render', 'MeshCommit', 'main', task.traceId);
     const mesh = new pc.Mesh(app.graphicsDevice);
-    mesh.setPositions(part.positions);
-    mesh.setNormals(part.normals);
-    mesh.setUvs(0, part.uvs);
+    if (part.layout === 'compact') {
+      mesh.setPositions(part.positions);
+      mesh.setNormals(part.normals);
+      mesh.setVertexStream(pc.SEMANTIC_TEXCOORD0, part.uvs, 2, undefined, pc.TYPE_FLOAT16);
+    } else {
+      mesh.setPositions(part.positions);
+      mesh.setNormals(part.normals);
+      mesh.setUvs(0, part.uvs);
+    }
     mesh.setColors32(part.colors);
     mesh.setIndices(part.indices);
     mesh.update();
-    const instance = new pc.MeshInstance(mesh, materials.get(part.material)!, resource.entity);
-    if (part.renderLayer === 'water') {
+    const instance = new pc.MeshInstance(mesh, resolveMaterial(part), resource.entity);
+    if (part.renderCategory === 'transparent') {
       instance.drawOrder = 1000;
       instance.castShadow = false;
     }

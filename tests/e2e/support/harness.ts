@@ -24,6 +24,13 @@ export type HarnessSnapshot = {
   triangles: number;
   drawCalls: number;
   runtime: 'integrated-server';
+  renderPipeline: {
+    drawUnit: 'chunk-render-category';
+    batchMode: 'category';
+    vertexLayout: 'float16-uv-uint16-index';
+    shaderMode: 'voxel-array-chunks';
+    backend: 'webgl2';
+  };
   serverRevision: number;
   voxelAtOrigin: number;
   serverPlayerPosition: [number, number, number];

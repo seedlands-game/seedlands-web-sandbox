@@ -44,7 +44,7 @@ export class World {
   constructor(
     readonly server: GameServer,
     app: pc.Application,
-    materials: Map<number, pc.StandardMaterial>,
+    resolveMaterial: (part: MeshPart) => pc.StandardMaterial,
     private readonly quality: QualityProfile,
     private readonly telemetryRecorder: PerformanceTelemetry,
     profile: PerformanceProfile,
@@ -76,7 +76,7 @@ export class World {
       onAcceptedResult: (task, result) => this.repository.enqueue(task, result.meshes),
     });
     this.repository = new ChunkResourceRepository({
-      adapter: createPlayCanvasChunkAdapter(app, materials, telemetryRecorder),
+      adapter: createPlayCanvasChunkAdapter(app, resolveMaterial, telemetryRecorder),
       isCurrent: (task) => this.scheduler.isCurrent(task),
       profile,
       now: () => performance.now(),
@@ -128,7 +128,7 @@ export class World {
     this.telemetryRecorder.gauge('mesh_cpu_bytes', meshBytes);
     return {
       loadedChunks: chunks.length,
-      renderedChunks: chunks.length,
+      renderedChunks: chunks.filter((chunk) => chunk.triangles > 0).length,
       generationQueue: this.scheduler.generationQueueSize,
       meshingQueue: this.scheduler.meshingQueueSize,
       uploadQueue: this.repository.queueSize,

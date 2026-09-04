@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { CHUNK_SIZE, FaceMaterial, Voxel, normalizeSeed, voxelIndex } from '../../src/world/voxel';
-import { createProceduralMeshInput, makeChunk, meshChunk } from '../../src/world/mesh';
+import {
+  batchMeshData,
+  compactMeshData,
+  createProceduralMeshInput,
+  decodeCompactMeshData,
+  makeChunk,
+  meshChunk,
+  meshDataByteLength,
+} from '../../src/world/mesh';
 
 const seed = normalizeSeed('vitest-world-mesh');
 
@@ -10,7 +18,7 @@ function meshSynthetic(voxels: readonly (readonly [number, number, number, numbe
   return meshChunk({ seed, cx: 0, cy: 3, cz: 0, data, changes: [], outside: () => Voxel.Air });
 }
 
-function sumIndices(meshes: Record<number, { indices: Uint32Array }>) {
+function sumIndices(meshes: Record<number, { indices: Uint32Array | Uint16Array }>) {
   return Object.values(meshes).reduce((sum, mesh) => sum + mesh.indices.length, 0);
 }
 
@@ -115,7 +123,8 @@ describe('greedy chunk meshing', () => {
     expect(stone.uvs).toHaveLength((stone.positions.length / 3) * 2);
     expect(stone.colors).toHaveLength((stone.positions.length / 3) * 4);
     expect(stone.material).toBe(FaceMaterial.Stone);
-    expect(stone.renderLayer).toBe('opaque');
+    expect(stone.renderCategory).toBe('opaque');
+    expect(stone.layout).toBe('float32');
   });
 
   it('keeps opaque banks visible through water and removes internal water faces', () => {
@@ -125,7 +134,7 @@ describe('greedy chunk meshing', () => {
     ]);
     expect(bank[FaceMaterial.Stone].indices).toHaveLength(36);
     expect(bank[FaceMaterial.Water].indices).toHaveLength(30);
-    expect(bank[FaceMaterial.Water].renderLayer).toBe('water');
+    expect(bank[FaceMaterial.Water].renderCategory).toBe('transparent');
     expect(sumIndices(bank)).toBe(66);
 
     const water = meshSynthetic([
@@ -133,5 +142,43 @@ describe('greedy chunk meshing', () => {
       [5, 4, 4, Voxel.Water],
     ]);
     expect(water[FaceMaterial.Water].indices).toHaveLength(36);
+  });
+
+  it('batches face materials by render category without merging their greedy surfaces', () => {
+    const control = Object.values(
+      meshSynthetic([
+        [4, 4, 4, Voxel.Stone],
+        [6, 4, 4, Voxel.Dirt],
+        [8, 4, 4, Voxel.Leaves],
+        [10, 4, 4, Voxel.Water],
+      ]),
+    );
+    const batched = batchMeshData(control);
+
+    expect(batched.map((part) => part.renderCategory).sort()).toEqual(['cutout', 'opaque', 'transparent']);
+    const opaque = batched.find((part) => part.renderCategory === 'opaque')!;
+    expect(new Set([...opaque.colors].filter((_value, index) => index % 4 === 3))).toEqual(
+      new Set([FaceMaterial.Stone - 1, FaceMaterial.Dirt - 1]),
+    );
+    expect(batched.reduce((sum, part) => sum + part.indices.length, 0)).toBe(
+      control.reduce((sum, part) => sum + part.indices.length, 0),
+    );
+  });
+
+  it('round-trips the compact local vertex layout and reduces transfer bytes', () => {
+    const source = batchMeshData(Object.values(meshSynthetic([[4, 4, 4, Voxel.Stone]])))[0];
+    const compact = compactMeshData(source);
+    const decoded = decodeCompactMeshData(compact);
+
+    expect(compact.layout).toBe('compact');
+    expect(compact.positions).toBeInstanceOf(Float32Array);
+    expect(compact.normals).toBeInstanceOf(Float32Array);
+    expect(compact.uvs).toBeInstanceOf(Uint16Array);
+    expect(compact.indices).toBeInstanceOf(Uint16Array);
+    expect(decoded.positions).toEqual(source.positions);
+    expect(decoded.normals).toEqual(source.normals);
+    expect(decoded.uvs).toEqual(source.uvs);
+    expect(decoded.indices).toEqual(source.indices);
+    expect(meshDataByteLength(compact)).toBeLessThan(meshDataByteLength(source));
   });
 });

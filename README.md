@@ -16,6 +16,7 @@ The sandbox is an early technical prototype. Its current capabilities include:
 
 - Deterministic macro geography, climate, biomes, rivers, lakes, trees, and terrain. The same `seed + generatorVersion` produces the same base world regardless of chunk load order.
 - Compact `32³` `Uint16Array` chunks and chunk-level greedy meshes rather than one entity or draw call per voxel.
+- Chunk meshes are submitted in opaque, cutout, and transparent render-category batches. Voxel-specific GLSL/WGSL chunks sample a texture array, while Float16 UVs and safe Uint16 indices reduce mesh transfer size.
 - Player-centred chunk streaming with bounded CPU/GPU retention.
 - An in-process authoritative `GameServer` for chunks, player state, entities, and world time.
 - First-person movement, collision, jumping, voxel raycast editing, and material selection.

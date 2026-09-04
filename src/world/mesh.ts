@@ -12,23 +12,25 @@ import {
 import { macroAt, type MacroContext } from './macro-world';
 
 export type WorldChange = [number, number, number, number];
-export type RenderLayer = 'opaque' | 'water';
+export type VertexLayout = 'float32' | 'compact';
+export type RenderCategory = 'opaque' | 'cutout' | 'transparent';
 export const MESH_HALO_SIZE = CHUNK_SIZE + 2;
 export const meshHaloIndex = (x: number, y: number, z: number) =>
   x + 1 + MESH_HALO_SIZE * (z + 1 + MESH_HALO_SIZE * (y + 1));
 export type MeshData = {
-  material: FaceMaterialId;
-  renderLayer: RenderLayer;
+  material: FaceMaterialId | null;
+  renderCategory: RenderCategory;
+  layout: VertexLayout;
   positions: Float32Array;
   normals: Float32Array;
-  uvs: Float32Array;
+  uvs: Float32Array | Uint16Array;
   colors: Uint8Array;
-  indices: Uint32Array;
+  indices: Uint32Array | Uint16Array;
 };
 type Quad = { p: number[]; n: number[]; uv: number[]; c: number[]; i: number[] };
 type MaskCell = {
   material: FaceMaterialId;
-  renderLayer: RenderLayer;
+  renderCategory: RenderCategory;
   back: boolean;
   ao: readonly [number, number, number, number];
 };
@@ -174,7 +176,7 @@ const isVisibleFace = (source: number, target: number) =>
 
 const sameMaskCell = (left: MaskCell | null | undefined, right: MaskCell) =>
   left?.material === right.material &&
-  left.renderLayer === right.renderLayer &&
+  left.renderCategory === right.renderCategory &&
   left.back === right.back &&
   left.ao.every((value, index) => value === right.ao[index]);
 
@@ -286,7 +288,8 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
           const material = faceMaterialFor(id, d, !back);
           mask[m++] = {
             material,
-            renderLayer: material === FaceMaterial.Water ? 'water' : 'opaque',
+            renderCategory:
+              material === FaceMaterial.Water ? 'transparent' : material === FaceMaterial.Leaves ? 'cutout' : 'opaque',
             back,
             ao: id === Voxel.Water ? [0, 0, 0, 0] : vertexAo(block, d, u, v, back, sample),
           };
@@ -343,7 +346,13 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
         materialId,
         {
           material: materialId,
-          renderLayer: materialId === FaceMaterial.Water ? 'water' : 'opaque',
+          renderCategory:
+            materialId === FaceMaterial.Water
+              ? 'transparent'
+              : materialId === FaceMaterial.Leaves
+                ? 'cutout'
+                : 'opaque',
+          layout: 'float32',
           positions: new Float32Array(value.p),
           normals: new Float32Array(value.n),
           uvs: new Float32Array(value.uv),
@@ -353,4 +362,101 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
       ];
     }),
   );
+}
+
+export const meshDataByteLength = (mesh: MeshData) =>
+  mesh.positions.byteLength +
+  mesh.normals.byteLength +
+  mesh.uvs.byteLength +
+  mesh.colors.byteLength +
+  mesh.indices.byteLength;
+
+export function batchMeshData(parts: readonly MeshData[]): MeshData[] {
+  const categories: RenderCategory[] = ['opaque', 'cutout', 'transparent'];
+  return categories.flatMap((renderCategory) => {
+    const matching = parts.filter((part) => part.renderCategory === renderCategory);
+    if (!matching.length) return [];
+    const positions: number[] = [];
+    const normals: number[] = [];
+    const uvs: number[] = [];
+    const colors: number[] = [];
+    const indices: number[] = [];
+    for (const part of matching) {
+      if (part.layout !== 'float32' || part.material === null)
+        throw new Error('Render-category batching expects unbatched Float32 mesh parts.');
+      const vertexOffset = positions.length / 3;
+      positions.push(...part.positions);
+      normals.push(...part.normals);
+      uvs.push(...part.uvs);
+      for (let index = 0; index < part.colors.length; index += 4)
+        colors.push(part.colors[index], part.colors[index + 1], part.colors[index + 2], part.material - 1);
+      for (const index of part.indices) indices.push(index + vertexOffset);
+    }
+    return [
+      {
+        material: null,
+        renderCategory,
+        layout: 'float32' as const,
+        positions: new Float32Array(positions),
+        normals: new Float32Array(normals),
+        uvs: new Float32Array(uvs),
+        colors: new Uint8Array(colors),
+        indices: new Uint32Array(indices),
+      },
+    ];
+  });
+}
+
+export function compactMeshData(mesh: MeshData): MeshData {
+  if (mesh.layout !== 'float32') return mesh;
+  const maxIndex = mesh.indices.length ? Math.max(...mesh.indices) : 0;
+  return {
+    ...mesh,
+    layout: 'compact',
+    positions: new Float32Array(mesh.positions),
+    normals: new Float32Array(mesh.normals),
+    uvs: Uint16Array.from(mesh.uvs, float32ToFloat16),
+    indices: maxIndex <= 65_535 ? new Uint16Array(mesh.indices) : new Uint32Array(mesh.indices),
+  };
+}
+
+export function decodeCompactMeshData(mesh: MeshData): MeshData {
+  if (mesh.layout !== 'compact') return mesh;
+  return {
+    ...mesh,
+    layout: 'float32',
+    positions: new Float32Array(mesh.positions),
+    normals: new Float32Array(mesh.normals),
+    uvs: Float32Array.from(mesh.uvs, float16ToFloat32),
+    indices: new Uint32Array(mesh.indices),
+  };
+}
+
+function float32ToFloat16(value: number) {
+  const bits = new Uint32Array(new Float32Array([value]).buffer)[0];
+  const sign = (bits >>> 16) & 0x8000;
+  const exponent = ((bits >>> 23) & 0xff) - 127 + 15;
+  const mantissa = bits & 0x7fffff;
+  if (exponent <= 0) return sign;
+  if (exponent >= 31) return sign | 0x7c00;
+  return sign | (exponent << 10) | (mantissa >>> 13);
+}
+
+function float16ToFloat32(value: number) {
+  const sign = (value & 0x8000) << 16;
+  let exponent = (value >>> 10) & 0x1f;
+  let mantissa = value & 0x3ff;
+  if (exponent === 0) {
+    if (mantissa === 0) return new Float32Array(new Uint32Array([sign]).buffer)[0];
+    while ((mantissa & 0x400) === 0) {
+      mantissa <<= 1;
+      exponent -= 1;
+    }
+    exponent += 1;
+    mantissa &= ~0x400;
+  } else if (exponent === 31) {
+    return new Float32Array(new Uint32Array([sign | 0x7f800000 | (mantissa << 13)]).buffer)[0];
+  }
+  const bits = sign | ((exponent + 127 - 15) << 23) | (mantissa << 13);
+  return new Float32Array(new Uint32Array([bits]).buffer)[0];
 }

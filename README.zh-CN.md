@@ -16,6 +16,7 @@
 
 - 确定性 Macro 地理、气候、biome、河流、湖泊、树木与地形；同一 `seed + generatorVersion` 不受 Chunk 加载顺序影响。
 - 紧凑的 `32³` `Uint16Array` Chunk，以及按 Chunk 生成的 greedy mesh，而非每个体素一个 Entity 或 draw call。
+- Chunk mesh 按 opaque、cutout、transparent 三类批量提交；voxel-specific GLSL/WGSL chunk 从纹理数组采样，Float16 UV 与安全的 Uint16 index 用于缩减网格传输体积。
 - 以玩家为中心、会释放超出范围 CPU/GPU 资源的 Chunk streaming。
 - 同进程 `GameServer` 持有权威 Chunk、玩家状态、实体和世界时钟。
 - 第一人称移动、碰撞、跳跃、体素 raycast 编辑和材质选择。
