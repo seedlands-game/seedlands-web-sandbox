@@ -1,0 +1,125 @@
+page:
+  url: ${VOXEL_SANDBOX_URL}
+
+agent:
+  testId: seedlands-survival-gameplay-foundation
+  groupName: Seedlands 生存玩法与实体底座
+  groupDescription: 检查生存 HUD、物品实体、背包合成、战斗死亡和复活的可见语义。
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 18
+
+tasks:
+  - name: 检查生存 HUD 与背包层级
+    flow:
+      - ai: 在“世界 Seed”字段输入“survival-gameplay-visual”，点击“进入世界”，等待世界完成加载。
+      - sleep: 7000
+      - aiAssert: 运行中的体素世界清晰可见。生命、饥饿、八格快捷栏、当前物品或工具以及准星形成紧凑的生存 HUD，不遮挡主要视野，没有文字或图标重叠，不能只依赖颜色表达生命和饥饿状态。
+      - ai: 按 E 打开背包与合成。
+      - aiAssert: 背包与合成面板有明确标题、槽位数量与选中状态。配方区能区分可合成和缺少材料的配方；按钮、数量、物品名称及关闭方式清楚可读，面板在窄视口思路下没有明显裁切。
+      - ai: 按 Esc 关闭背包与合成。
+      - aiAssert: “背包与合成”面板及其全屏遮罩已经关闭。世界画面恢复清晰，并保留正常生存 HUD，包括准星、生命、饥饿与八格快捷栏；画面中没有背包槽位、合成配方或背包焦点框残留。
+
+  - name: 检查物品、采集和合成反馈
+    flow:
+      - javascript: |
+          (async () => {
+            const api = window.__seedlandsHarness;
+            if (!api) throw new Error('Seedlands Harness unavailable');
+            const inventory = await api.executeGameplayCommand({ type: 'query-inventory' });
+            if (!inventory.success) throw new Error(inventory.error.message);
+            for (const stack of inventory.data.inventory.slots) {
+              const removed = await api.executeGameplayCommand({
+                type: 'remove-item',
+                itemId: stack.itemId,
+                count: stack.count,
+              });
+              if (!removed.success) throw new Error(removed.error.message);
+            }
+            const existing = await api.executeGameplayCommand({ type: 'query-nearby', radius: 100 });
+            if (!existing.success) throw new Error(existing.error.message);
+            for (const entity of existing.data.entities.filter((entity) => entity.type !== 'player')) {
+              const removed = await api.executeGameplayCommand({ type: 'despawn-entity', entityId: entity.id });
+              if (!removed.success) throw new Error(removed.error.message);
+            }
+            await api.executeGameplayCommand({ type: 'fill', from: [-3, 14, -4], to: [3, 14, 2], voxel: 3 });
+            await api.executeGameplayCommand({ type: 'teleport', position: [0.5, 16.6, 0.5] });
+            await api.executeGameplayCommand({ type: 'set-block', position: [0, 15, -2], voxel: 3 });
+            await api.executeGameplayCommand({ type: 'break-voxel', position: [0, 15, -2] });
+            api.advanceGameplay(3);
+            api.setView(0, -22);
+            return api.snapshot().gameplay;
+          })()
+      - sleep: 500
+      - aiAssert: 当前准星附近有一个绿色、轻量的小型球形掉落物，与方块状 terrain 和 HUD 容易区分；生命、饥饿与快捷栏仍清楚可读。
+      - javascript: |
+          (async () => {
+            const api = window.__seedlandsHarness;
+            if (!api) throw new Error('Seedlands Harness unavailable');
+            await api.executeGameplayCommand({ type: 'teleport', position: [0.5, 16.6, -1] });
+            const nearby = await api.executeGameplayCommand({ type: 'query-nearby', radius: 5 });
+            if (!nearby.success) throw new Error(nearby.error.message);
+            const item = nearby.data.entities.find((entity) => entity.type === 'world-item');
+            if (!item) throw new Error('World item fixture unavailable');
+            const pickedUp = await api.executeGameplayCommand({ type: 'pickup-item', entityId: item.id });
+            if (!pickedUp.success) throw new Error(pickedUp.error.message);
+            await api.executeGameplayCommand({ type: 'give-item', itemId: 'wood-block', count: 1 });
+            return api.snapshot().gameplay;
+          })()
+      - aiAssert: 当前画面中不再有绿色掉落物，快捷栏第 1 格清楚显示“石头”和数量 1，足以表达已拾取状态；正常生命、饥饿与快捷栏仍清晰。
+      - aiKeyboardPress: E
+      - javascript: |
+          (async () => {
+            const api = window.__seedlandsHarness;
+            if (!api) throw new Error('Seedlands Harness unavailable');
+            const planks = await api.executeGameplayCommand({ type: 'craft-recipe', recipeId: 'planks' });
+            if (!planks.success) throw new Error(planks.error.message);
+            const axe = await api.executeGameplayCommand({ type: 'craft-recipe', recipeId: 'wood-axe' });
+            if (!axe.success) throw new Error(axe.error.message);
+            return api.snapshot().gameplay;
+          })()
+      - aiAssert: 只检查左侧“背包槽位”区域：第 1 格是石块数量 1，第 2 格是木板数量 1，第 3 格是木斧数量 1，没有原木物品堆栈；右侧配方说明中的“原木 × 1”只是合成需求，不属于背包内容。木斧呈现为单件工具，快捷栏选择与背包第 1 格的白色选中边框一致。
+
+  - name: 检查战斗、死亡与复活反馈
+    flow:
+      - aiKeyboardPress: Escape
+      - javascript: |
+          (async () => {
+            const api = window.__seedlandsHarness;
+            if (!api) throw new Error('Seedlands Harness unavailable');
+            await api.executeGameplayCommand({ type: 'teleport', position: [0.5, 16.6, 0.5] });
+            const spawned = await api.executeGameplayCommand({ type: 'spawn-creature', position: [0.5, 16.6, -2] });
+            if (!spawned.success) throw new Error(spawned.error.message);
+            window.__midsceneCreatureId = spawned.data.entity.id;
+            api.setView(0, 0);
+            return api.snapshot().gameplay;
+          })()
+      - sleep: 500
+      - aiAssert: creature 作为轻量动态实体与 terrain、掉落物和玩家 HUD 容易区分；它没有伪装成已有 voxel，也没有复杂 AI 表现暗示。
+      - javascript: |
+          (async () => {
+            const api = window.__seedlandsHarness;
+            const entityId = window.__midsceneCreatureId;
+            if (!api || !entityId) throw new Error('Creature fixture unavailable');
+            await api.executeGameplayCommand({ type: 'attack-entity', entityId });
+            api.advanceGameplay(0.5);
+            await api.executeGameplayCommand({ type: 'attack-entity', entityId });
+            api.advanceGameplay(0.5);
+            await api.executeGameplayCommand({ type: 'attack-entity', entityId });
+            return api.snapshot().gameplay;
+          })()
+      - aiAssert: 当前画面中不再有红色静止 creature；terrain、准星和生存 HUD 没有残留实体遮挡或错位。
+      - javascript: |
+          (async () => {
+            const api = window.__seedlandsHarness;
+            if (!api) throw new Error('Seedlands Harness unavailable');
+            await api.executeGameplayCommand({ type: 'give-item', itemId: 'berry', count: 1 });
+            await api.executeGameplayCommand({ type: 'apply-damage', amount: 20 });
+            api.movePlayerTo(0.5, 16.6, 2.5);
+            api.setView(0, 0);
+            return api.snapshot().gameplay;
+          })()
+      - sleep: 500
+      - aiAssert: 玩家死亡后出现明确的“你倒下了”状态与复活入口，正常移动/交互 HUD 不会误导为仍可操作；绿色掉落物仍能在世界中辨认。
+      - aiTap: 复活按钮
+      - aiAssert: 死亡面板关闭，生命与饥饿恢复为满值，玩家回到可继续游玩的状态；界面明确这是当前玩法底座的复活规则，没有呈现最终转生世界观承诺。

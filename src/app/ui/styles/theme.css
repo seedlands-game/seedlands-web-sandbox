@@ -175,6 +175,11 @@
   box-shadow: 0 12px 34px rgba(2, 8, 9, 0.32);
   backdrop-filter: blur(11px);
   pointer-events: auto;
+  list-style: none;
+  margin: 0;
+}
+#hotbar li {
+  display: contents;
 }
 
 .game-slot {
@@ -207,16 +212,29 @@
   font: 700 9px/1 var(--ui-font-mono);
 }
 .slot-swatch {
+  display: grid;
+  place-items: center;
   width: 34px;
   height: 34px;
   border-radius: 6px;
-  background-image: url('/assets/voxel-atlas.webp');
-  background-size: 300% 300%;
-  background-position: calc(var(--tile-x) * 50%) calc(var(--tile-y) * 50%);
+  background: linear-gradient(145deg, rgba(161, 191, 116, 0.75), rgba(60, 88, 65, 0.86));
+  color: #f6ffe9;
+  font-weight: 800;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+.game-slot[data-item='empty'] .slot-swatch {
+  background: rgba(255, 255, 255, 0.035);
 }
 .slot-name {
   white-space: nowrap;
+}
+.slot-count {
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  color: white;
+  font: 700 10px/1 var(--ui-font-mono);
+  text-shadow: 0 1px 3px #000;
 }
 .game-slot.active {
   transform: translateY(-3px);
@@ -224,6 +242,232 @@
   color: white;
   background: rgba(40, 64, 40, 0.78);
   box-shadow: 0 0 0 2px rgba(156, 197, 111, 0.18);
+}
+
+#survival-vitals {
+  position: absolute;
+  left: 14px;
+  bottom: 16px;
+  display: grid;
+  gap: 7px;
+  width: 220px;
+  padding: 10px 12px;
+  color: var(--ui-color-content);
+}
+#survival-vitals label {
+  display: grid;
+  grid-template-columns: 38px 1fr 24px;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+}
+#survival-vitals meter {
+  width: 100%;
+  height: 8px;
+  accent-color: #d66856;
+}
+#survival-vitals label:nth-child(2) meter {
+  accent-color: #d7ad55;
+}
+#survival-vitals strong {
+  text-align: right;
+  font: 700 10px/1 var(--ui-font-mono);
+}
+
+#break-progress {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 58px);
+  display: grid;
+  gap: 5px;
+  width: 190px;
+  padding: 8px 10px;
+  transform: translateX(-50%);
+  color: white;
+  text-align: center;
+  font-size: 10px;
+}
+#break-progress progress {
+  width: 100%;
+  height: 7px;
+  accent-color: var(--ui-focus);
+}
+
+.game-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--ui-z-overlay);
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: rgba(2, 8, 9, 0.58);
+  pointer-events: auto;
+}
+.inventory-dialog,
+.death-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(760px, calc(100vw - 32px));
+  padding: 20px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--ui-border);
+  border-radius: 18px;
+  background: var(--ui-surface-strong);
+  color: var(--ui-color-content);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+.inventory-dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.inventory-dialog h2,
+.death-card h2 {
+  margin: 2px 0 0;
+  font-size: 22px;
+}
+.inventory-dialog button,
+.death-card button {
+  width: auto;
+  padding: 8px 12px;
+}
+.inventory-dialog > label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 11px;
+}
+.inventory-dialog input {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--ui-border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+}
+.inventory-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 18px;
+}
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(42px, 1fr));
+  gap: 7px;
+}
+.inventory-grid [role='gridcell'] {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 4px;
+  border: 1px solid var(--ui-border);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.055);
+  color: white;
+}
+.inventory-grid [role='gridcell'].active {
+  border-color: var(--ui-color-accent);
+  box-shadow:
+    inset 0 0 0 1px var(--ui-color-accent),
+    0 0 14px rgba(177, 213, 112, 0.18);
+}
+.inventory-item-name {
+  max-width: 100%;
+  color: var(--ui-color-content);
+  font-size: 9px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.inventory-grid [role='gridcell'] small {
+  position: absolute;
+  left: 4px;
+  top: 3px;
+  color: var(--ui-color-content-muted);
+  font-size: 8px;
+}
+.inventory-grid [role='gridcell'] strong {
+  position: absolute;
+  right: 4px;
+  bottom: 3px;
+  font: 700 10px/1 var(--ui-font-mono);
+}
+.recipe-list {
+  padding: 12px;
+  border: 1px solid var(--ui-border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+.recipe-list h3 {
+  margin: 0 0 9px;
+  font-size: 13px;
+}
+.recipe-list [role='list'] {
+  display: grid;
+  gap: 7px;
+}
+.recipe-list [role='listitem'] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+}
+.recipe-list [role='listitem'].available {
+  border-color: rgba(177, 213, 112, 0.38);
+}
+.recipe-list [role='listitem'] strong,
+.recipe-list [role='listitem'] small {
+  display: block;
+}
+.recipe-list [role='listitem'] small {
+  margin-top: 3px;
+  color: var(--ui-color-content-muted);
+  font-size: 9px;
+  line-height: 1.35;
+}
+.recipe-list button {
+  min-width: 70px;
+  color: var(--ui-color-content);
+}
+.recipe-list p {
+  color: var(--ui-color-content-muted);
+  font-size: 11px;
+}
+.death-card {
+  width: min(440px, calc(100vw - 32px));
+  text-align: center;
+}
+.death-card p {
+  color: var(--ui-color-content-muted);
+  line-height: 1.6;
+}
+.death-card button {
+  min-width: 140px;
+  color: white;
+}
+#presented-entity-semantics {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+#presented-entity-semantics [role='img'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 
 .map-toggle {
@@ -406,6 +650,21 @@
   }
   #debug-command-log {
     max-height: 132px;
+  }
+  #survival-vitals {
+    left: 8px;
+    bottom: 8px;
+    width: 180px;
+  }
+  .inventory-dialog {
+    max-height: calc(100vh - 24px);
+    overflow: auto;
+  }
+  .inventory-layout {
+    grid-template-columns: 1fr;
+  }
+  .inventory-grid {
+    grid-template-columns: repeat(6, minmax(38px, 1fr));
   }
 }
 

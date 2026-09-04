@@ -1,4 +1,5 @@
 import { Voxel } from '../../world/voxel';
+import { getItemDefinition } from '../gameplay/item-registry';
 import type {
   CommandParseFailure,
   CommandParseResult,
@@ -42,6 +43,14 @@ function voxel(token: string): number {
   return value;
 }
 
+function item(token: string): string {
+  try {
+    return getItemDefinition(token.toLowerCase()).id;
+  } catch {
+    throw new ParseProblem(`Unsupported item: ${token}.`);
+  }
+}
+
 function parseTokens(tokens: string[]): ServerCommand {
   const name = tokens[0].toLowerCase();
   switch (name) {
@@ -82,6 +91,76 @@ function parseTokens(tokens: string[]): ServerCommand {
     case '/save':
       exact(tokens, 1, '/save');
       return { type: 'save' };
+    case '/inventory':
+      exact(tokens, 1, '/inventory');
+      return { type: 'query-inventory' };
+    case '/health':
+    case '/hunger':
+      exact(tokens, 1, `${name}`);
+      return { type: 'query-player-state' };
+    case '/give':
+      exact(tokens, 3, '/give <item> <count>');
+      return { type: 'give-item', itemId: item(tokens[1]), count: integer(tokens[2], 'count') };
+    case '/damage':
+      exact(tokens, 2, '/damage <amount>');
+      return { type: 'apply-damage', amount: finite(tokens[1], 'amount') };
+    case '/heal':
+      exact(tokens, 2, '/heal <amount>');
+      return { type: 'heal', amount: finite(tokens[1], 'amount') };
+    case '/craft':
+      exact(tokens, 2, '/craft <recipe>');
+      return { type: 'craft-recipe', recipeId: tokens[1] };
+    case '/spawnitem':
+      exact(tokens, 6, '/spawnitem <item> <count> <x> <y> <z>');
+      return {
+        type: 'spawn-world-item',
+        itemId: item(tokens[1]),
+        count: integer(tokens[2], 'count'),
+        position: [finite(tokens[3], 'x'), finite(tokens[4], 'y'), finite(tokens[5], 'z')],
+      };
+    case '/spawn':
+      if (tokens[1]?.toLowerCase() !== 'creature') throw new ParseProblem('Usage: /spawn creature <x> <y> <z>');
+      exact(tokens, 5, '/spawn creature <x> <y> <z>');
+      return {
+        type: 'spawn-creature',
+        position: [finite(tokens[2], 'x'), finite(tokens[3], 'y'), finite(tokens[4], 'z')],
+      };
+    case '/break':
+      exact(tokens, 4, '/break <x> <y> <z>');
+      return {
+        type: 'break-voxel',
+        position: [integer(tokens[1], 'x'), integer(tokens[2], 'y'), integer(tokens[3], 'z')],
+      };
+    case '/cancelbreak':
+      exact(tokens, 1, '/cancelbreak');
+      return { type: 'cancel-break' };
+    case '/pickup':
+      exact(tokens, 2, '/pickup <entity-id>');
+      return { type: 'pickup-item', entityId: tokens[1] };
+    case '/drop':
+      exact(tokens, 3, '/drop <slot> <count>');
+      return { type: 'drop-item', slot: integer(tokens[1], 'slot'), count: integer(tokens[2], 'count') };
+    case '/place':
+      exact(tokens, 4, '/place <x> <y> <z>');
+      return {
+        type: 'place-voxel',
+        position: [integer(tokens[1], 'x'), integer(tokens[2], 'y'), integer(tokens[3], 'z')],
+      };
+    case '/use':
+      exact(tokens, 1, '/use');
+      return { type: 'use-item' };
+    case '/attack':
+      exact(tokens, 2, '/attack <entity-id>');
+      return { type: 'attack-entity', entityId: tokens[1] };
+    case '/respawn':
+      exact(tokens, 1, '/respawn');
+      return { type: 'respawn' };
+    case '/tick':
+      exact(tokens, 2, '/tick <seconds>');
+      return { type: 'advance-gameplay', seconds: finite(tokens[1], 'seconds') };
+    case '/nearby':
+      exact(tokens, 2, '/nearby <radius>');
+      return { type: 'query-nearby', radius: finite(tokens[1], 'radius') };
     case '/inspect':
       if (tokens[1]?.toLowerCase() === 'voxel') {
         exact(tokens, 5, '/inspect voxel <x> <y> <z>');

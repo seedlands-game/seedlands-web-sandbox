@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import { Voxel, isSolid, voxelNames } from '../world/voxel';
+import { Voxel, isSolid } from '../world/voxel';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
@@ -18,7 +18,18 @@ type PlayerControllerOptions = {
   onToggleMap: () => void;
   onToggleDebug: () => void;
   onToggleCommandShell: () => void;
-  onSelectMaterial: (material: number) => void;
+  onToggleInventory: () => void;
+  onSelectHotbarSlot: (slot: number) => void;
+  onAttackTarget: (
+    origin: [number, number, number],
+    direction: [number, number, number],
+    maxDistance: number,
+  ) => boolean;
+  onBeginBreak: (position: [number, number, number]) => void;
+  onCancelBreak: () => void;
+  onPlace: (position: [number, number, number]) => void;
+  isUiBlockingInput: () => boolean;
+  onCloseUi: () => void;
   onFeedback: (message: string, tone: 'info' | 'success' | 'error') => void;
   onQueueSave: () => void;
   onFlushSave: () => void;
@@ -29,7 +40,6 @@ export class PlayerController {
   private yaw = 0;
   private pitch = -16;
   private grounded = false;
-  private chosen: number = Voxel.Dirt;
   private readonly keys = new Set<string>();
   private attempts = 0;
   private spectator = false;
@@ -61,6 +71,16 @@ export class PlayerController {
         return;
       }
       if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
+      if (event.code === 'KeyE') {
+        event.preventDefault();
+        this.options.onToggleInventory();
+        return;
+      }
+      if (event.code === 'Escape' && this.options.isUiBlockingInput()) {
+        this.options.onCloseUi();
+        return;
+      }
+      if (this.options.isUiBlockingInput()) return;
       if (event.code === 'F3') {
         event.preventDefault();
         this.options.onToggleDebug();
@@ -84,9 +104,7 @@ export class PlayerController {
         return;
       }
       this.keys.add(event.code);
-      if (/^Digit[1-4]$/.test(event.code)) {
-        this.selectMaterial([Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand][Number(event.code[5]) - 1]);
-      }
+      if (/^Digit[1-8]$/.test(event.code)) this.options.onSelectHotbarSlot(Number(event.code[5]) - 1);
     };
     window.onkeyup = (event) => this.keys.delete(event.code);
     canvas.oncontextmenu = (event) => event.preventDefault();
@@ -98,12 +116,18 @@ export class PlayerController {
       }
     };
     document.onmousedown = (event) => {
-      if (document.pointerLockElement !== canvas) return;
+      if (this.options.isUiBlockingInput()) return;
+      if (document.pointerLockElement !== canvas) {
+        if (event.target !== canvas || event.button !== 2) return;
+        void canvas.requestPointerLock();
+      }
       if (event.button === 0)
         this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(false));
       if (event.button === 2) this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(true));
     };
-    this.options.onSelectMaterial(this.chosen);
+    document.onmouseup = (event) => {
+      if (event.button === 0) this.options.onCancelBreak();
+    };
   }
 
   dispose() {
@@ -111,6 +135,7 @@ export class PlayerController {
     window.onkeyup = null;
     document.onmousemove = null;
     document.onmousedown = null;
+    document.onmouseup = null;
     this.options.canvas.onclick = null;
     this.options.canvas.oncontextmenu = null;
     this.keys.clear();
@@ -155,13 +180,6 @@ export class PlayerController {
     this.velocity.x = 0;
     this.velocity.z = 0;
     if (document.pointerLockElement) document.exitPointerLock();
-  }
-
-  selectMaterial(material: number) {
-    const allowed = new Set<number>([Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand]);
-    if (!allowed.has(material)) return;
-    this.chosen = material;
-    this.options.onSelectMaterial(material);
   }
 
   setView(yaw: number, pitch: number) {
@@ -379,6 +397,7 @@ export class PlayerController {
     const direction = this.options.camera.forward;
     let last: [number, number, number] | null = null;
     let hit: [number, number, number] | null = null;
+    let hitDistance = 7;
     for (let distance = 0.15; distance < 7; distance += 0.08) {
       const cell: [number, number, number] = [
         Math.floor(position.x + direction.x * distance),
@@ -387,31 +406,23 @@ export class PlayerController {
       ];
       if (isSolid(world.getVoxel(...cell))) {
         hit = cell;
+        hitDistance = distance;
         break;
       }
       last = cell;
     }
+    if (
+      !place &&
+      this.options.onAttackTarget(
+        [position.x, position.y, position.z],
+        [direction.x, direction.y, direction.z],
+        Math.min(3, hitDistance),
+      )
+    )
+      return;
     const target = place ? last : hit;
     if (!target) return this.options.onFeedback('距离过远', 'error');
-    if (place && this.playerOccupies(target)) return this.options.onFeedback('无法在玩家位置放置', 'error');
-    const previous = world.getVoxel(...target);
-    world.edit(...target, place ? this.chosen : Voxel.Air);
-    this.options.onFeedback(
-      place ? `放置 · ${voxelNames[this.chosen]}` : `采集 · ${voxelNames[previous] ?? '体素'}`,
-      'success',
-    );
-    this.options.onQueueSave();
-  }
-
-  private playerOccupies([x, y, z]: [number, number, number]) {
-    const position = this.options.camera.getPosition();
-    return (
-      x + 1 > position.x - PLAYER_HALF_WIDTH &&
-      x < position.x + PLAYER_HALF_WIDTH &&
-      z + 1 > position.z - PLAYER_HALF_WIDTH &&
-      z < position.z + PLAYER_HALF_WIDTH &&
-      y + 1 > position.y - PLAYER_FEET_OFFSET &&
-      y < position.y + PLAYER_HEAD_OFFSET
-    );
+    if (place) this.options.onPlace(target);
+    else this.options.onBeginBreak(target);
   }
 }

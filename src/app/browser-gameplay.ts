@@ -1,0 +1,211 @@
+import type * as pc from 'playcanvas';
+import type { GameServer, WorldCommitResult } from '../server/game-server';
+import { getItemDefinition } from '../server/gameplay/item-registry';
+import { voxelNames } from '../world/voxel';
+import { GameplayEntityPresenter } from './gameplay-entity-presenter';
+import { projectGameplayUi, type GameplayUiProjection } from './ui/gameplay-ui-projector';
+import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
+
+type Options = {
+  app: pc.Application;
+  server: GameServer;
+  playerId: string;
+  bridge: UiBridge;
+  session: UiWorldSession;
+  nextHudSequence: () => number;
+  nextInteractionSequence: () => number;
+  consumeCommit: (commit: WorldCommitResult) => void;
+  queueSave: () => void;
+  releaseInput: () => void;
+  movePlayer: (position: [number, number, number]) => void;
+};
+
+export class BrowserGameplay {
+  private readonly presenter: GameplayEntityPresenter;
+  private inventoryOpen = false;
+  private previousProjection: GameplayUiProjection | undefined;
+  private previousWorldItems = new Set<string>();
+  private breakProjectionElapsedSeconds = Number.POSITIVE_INFINITY;
+
+  constructor(private readonly options: Options) {
+    this.presenter = new GameplayEntityPresenter(options.app);
+  }
+
+  updatePlayerPosition(position: [number, number, number]): void {
+    this.options.server.updateEntity(this.options.playerId, { position });
+  }
+
+  advance(seconds: number): void {
+    this.breakProjectionElapsedSeconds += seconds;
+    const before = this.options.server.getPlayerState(this.options.playerId).breakAction;
+    const result = this.options.server.advanceGameplay(seconds);
+    result.commits.forEach((commit) => this.options.consumeCommit(commit));
+    if (before && result.commits.length) {
+      this.feedback(`掉落 · ${voxelNames[before.voxel] ?? '资源'}`, 'success');
+      this.options.queueSave();
+    }
+    this.refresh(false);
+  }
+
+  refresh(forceBreakProjection = true): void {
+    const player = this.options.server.getPlayerState(this.options.playerId);
+    const entities = this.options.server.queryEntities().filter((entity) => entity.type !== 'player');
+    this.presenter.reconcile(entities);
+    const worldItems = new Set(entities.filter((entity) => entity.type === 'world-item').map((entity) => entity.id));
+    if ([...this.previousWorldItems].some((id) => !worldItems.has(id))) {
+      this.feedback('拾取 · 物品已放入背包', 'success');
+      this.options.queueSave();
+    }
+    this.previousWorldItems = worldItems;
+    const currentBreaking = player.breakAction
+      ? {
+          progress: Math.min(1, player.breakAction.elapsedSeconds / player.breakAction.requiredSeconds),
+          label: voxelNames[player.breakAction.voxel] ?? '体素',
+        }
+      : null;
+    const previousBreaking = this.previousProjection?.interaction.breaking;
+    const breaking =
+      !forceBreakProjection &&
+      currentBreaking &&
+      previousBreaking &&
+      currentBreaking.label === previousBreaking.label &&
+      this.breakProjectionElapsedSeconds < 0.05
+        ? previousBreaking
+        : currentBreaking;
+    if (breaking !== previousBreaking || forceBreakProjection) this.breakProjectionElapsedSeconds = 0;
+    const projection = projectGameplayUi(
+      {
+        revision: this.options.server.gameplayRevision,
+        player: {
+          lifecycle: player.lifecycle,
+          health: player.health,
+          hunger: player.hunger,
+          selectedHotbarSlot: player.selectedSlot,
+          inventory: player.inventory,
+        },
+        inventoryOpen: this.inventoryOpen,
+        craftableRecipeIds: this.options.server.listCraftableRecipes(this.options.playerId).map((recipe) => recipe.id),
+        target: player.breakAction
+          ? {
+              kind: 'voxel',
+              id: player.breakAction.position.join(','),
+              label: voxelNames[player.breakAction.voxel] ?? '体素',
+            }
+          : null,
+        breaking,
+      },
+      this.previousProjection,
+    );
+    this.previousProjection = projection;
+    this.options.session.publishHud(this.options.nextHudSequence(), projection.hud);
+    this.options.bridge.publishShell(projection.shell);
+    this.options.session.publishInteraction(this.options.nextInteractionSequence(), {
+      ...projection.interaction,
+      presentedEntities: entities.map((entity) => ({
+        id: entity.id,
+        type: entity.type as 'world-item' | 'creature',
+        label:
+          entity.type === 'world-item' && entity.stack
+            ? `${getItemDefinition(entity.stack.itemId).name}掉落物`
+            : '静止生物',
+      })),
+    });
+  }
+
+  selectHotbarSlot(slot: number): void {
+    const result = this.options.server.selectHotbarSlot(this.options.playerId, slot);
+    if (!result.success) return this.feedback('快捷栏槽位无效', 'error');
+    this.refresh();
+  }
+
+  toggleInventory(): void {
+    if (this.options.server.getPlayerState(this.options.playerId).lifecycle === 'dead') return;
+    this.inventoryOpen = !this.inventoryOpen;
+    if (this.inventoryOpen) this.options.releaseInput();
+    this.refresh();
+  }
+
+  closeInventory(): void {
+    if (!this.inventoryOpen) return;
+    this.inventoryOpen = false;
+    this.refresh();
+  }
+
+  craftRecipe(recipeId: string): void {
+    const result = this.options.server.craft(this.options.playerId, recipeId);
+    this.feedback(result.success ? '合成完成' : `合成失败 · ${result.reason}`, result.success ? 'success' : 'error');
+    if (result.success) this.options.queueSave();
+    this.refresh();
+  }
+
+  attackTarget(
+    origin: readonly [number, number, number],
+    direction: readonly [number, number, number],
+    maxDistance: number,
+  ): boolean {
+    const target = this.options.server
+      .queryEntities({ type: 'creature' })
+      .map((entity) => {
+        const offset = entity.position.map((value, index) => value - origin[index]);
+        const distance = offset.reduce((sum, value, index) => sum + value * direction[index], 0);
+        const lateralSquared = offset.reduce(
+          (sum, value, index) => sum + (value - direction[index] * distance) ** 2,
+          0,
+        );
+        return { entity, distance, lateralSquared };
+      })
+      .filter(({ distance, lateralSquared }) => distance > 0 && distance <= maxDistance && lateralSquared <= 0.75 ** 2)
+      .sort((left, right) => left.distance - right.distance)[0]?.entity;
+    if (!target) return false;
+    const result = this.options.server.attackEntity(this.options.playerId, target.id);
+    this.feedback(result.success ? '攻击命中' : `攻击失败 · ${result.reason}`, result.success ? 'success' : 'error');
+    if (result.success) this.options.queueSave();
+    this.refresh();
+    return true;
+  }
+
+  beginBreak(position: [number, number, number]): void {
+    const result = this.options.server.beginBreak(this.options.playerId, position);
+    if (!result.success) this.feedback(`无法采集 · ${result.reason}`, 'error');
+    this.refresh();
+  }
+
+  cancelBreak(): void {
+    this.options.server.cancelBreak(this.options.playerId);
+    this.refresh();
+  }
+
+  place(position: [number, number, number]): void {
+    const result = this.options.server.placeVoxel(this.options.playerId, position);
+    if (!result.success) return this.feedback(`无法放置 · ${result.reason}`, 'error');
+    this.options.consumeCommit(result.commit);
+    this.options.queueSave();
+    this.feedback('放置 · 方块', 'success');
+    this.refresh();
+  }
+
+  respawn(): void {
+    const result = this.options.server.respawnPlayer(this.options.playerId);
+    if (!result.success) return;
+    const entity = this.options.server.getEntity(this.options.playerId);
+    if (entity) this.options.movePlayer(entity.position);
+    this.options.queueSave();
+    this.refresh();
+  }
+
+  get blocksInput(): boolean {
+    return this.inventoryOpen || this.options.server.getPlayerState(this.options.playerId).lifecycle === 'dead';
+  }
+
+  get presentedEntityCount(): number {
+    return this.options.server.queryEntities().filter((entity) => entity.type !== 'player').length;
+  }
+
+  dispose(): void {
+    this.presenter.dispose();
+  }
+
+  private feedback(message: string, tone: 'info' | 'success' | 'error'): void {
+    this.options.session.publishFeedback(this.options.nextInteractionSequence(), { message, tone, durationMs: 1_400 });
+  }
+}

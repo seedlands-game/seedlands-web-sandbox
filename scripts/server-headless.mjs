@@ -26,15 +26,15 @@ const moduleRunner = await createServer({
 });
 
 try {
-  const [{ GameServer }, { MemoryChunkPersistence }, commandModule, parserModule] = await Promise.all([
+  const [{ GameServer }, { MemoryGamePersistence }, commandModule, parserModule] = await Promise.all([
     moduleRunner.ssrLoadModule('/src/server/game-server.ts'),
-    moduleRunner.ssrLoadModule('/src/server/persistence/memory-chunk-persistence.ts'),
+    moduleRunner.ssrLoadModule('/src/server/persistence/memory-game-persistence.ts'),
     moduleRunner.ssrLoadModule('/src/server/commands/server-command-executor.ts'),
     moduleRunner.ssrLoadModule('/src/server/commands/slash-command-parser.ts'),
   ]);
-  const persistence = new MemoryChunkPersistence();
+  const persistence = new MemoryGamePersistence();
   const gameServer = new GameServer({ seedText: options.seed, persistence });
-  gameServer.createEntity({ id: 'headless-player', kind: 'player', position: [0, 34, 0] });
+  gameServer.spawnPlayer({ id: 'headless-player', position: [0, 34, 0] });
   const executor = new commandModule.ServerCommandExecutor(gameServer);
   const source = {
     actorId: 'headless-player',

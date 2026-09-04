@@ -23,10 +23,11 @@ const stages: Record<string, 'PASS' | 'FAIL'> = {
   streaming: 'FAIL',
   persistence: 'FAIL',
 };
+let browserMetrics: Readonly<{ ui: object; gameplay: object }> | undefined;
 
 test.describe.serial('Seedlands deterministic browser regression', () => {
   test.afterAll(async () => {
-    await writeBrowserE2EResult(stages);
+    await writeBrowserE2EResult(stages, browserMetrics);
   });
 
   test('loads a deterministic world and exposes its HUD', async ({ page }) => {
@@ -149,6 +150,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     const moved = await waitForSnapshot(page, (current) => current.streamCenter[0] === 1);
     expect(moved.player[0]).toBe(40);
     expect(moved.loadedChunks).toBeGreaterThan(0);
+    browserMetrics = { ui: moved.ui, gameplay: moved.gameplay };
     stages.streaming = 'PASS';
   });
 });

@@ -1,5 +1,6 @@
 import type { SlashCommandExecution } from '../../server/commands/slash-command-parser';
 import type { QualityLevel } from '../quality-profile';
+import type { GameplayItemPresentation } from './gameplay-ui-projector';
 
 export type ShellPhase = 'boot' | 'menu' | 'loading' | 'playing' | 'error';
 export type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hydrology';
@@ -26,17 +27,29 @@ export type ShellState = Readonly<{
   commandEntries: readonly CommandEntry[];
   commandStatus: string;
   commandStatusState: 'idle' | 'running' | 'success' | 'error';
+  gameplay: Readonly<{
+    inventoryOpen: boolean;
+    lifecycle: 'alive' | 'dead';
+    inventory: readonly GameplayItemPresentation[];
+    selectedHotbarSlot: number;
+    craftableRecipeIds: readonly string[];
+    recipes: readonly Readonly<{
+      id: string;
+      name: string;
+      requirements: string;
+      result: string;
+      craftable: boolean;
+    }>[];
+  }>;
 }>;
 
 export type HudState = Readonly<{
   visible: boolean;
   worldClock: string;
-  selectedMaterial: number;
-  hotbar: readonly Readonly<{
-    id: number;
-    name: string;
-    tile: readonly [number, number];
-  }>[];
+  health: Readonly<{ value: number; max: number }>;
+  hunger: Readonly<{ value: number; max: number }>;
+  selectedHotbarSlot: number;
+  hotbar: readonly GameplayItemPresentation[];
 }>;
 
 export type InteractionTarget = Readonly<{
@@ -48,6 +61,12 @@ export type InteractionTarget = Readonly<{
 export type InteractionState = Readonly<{
   target: InteractionTarget | null;
   feedback: Readonly<{ message: string; tone: FeedbackTone }> | null;
+  breaking: Readonly<{ progress: number; label: string }> | null;
+  presentedEntities: readonly Readonly<{
+    id: string;
+    type: 'world-item' | 'creature';
+    label: string;
+  }>[];
 }>;
 
 export type DebugState = Readonly<{
@@ -76,7 +95,11 @@ export type UiMetrics = Readonly<{
 
 export type UiActionPort = {
   startWorld: (seed: string, quality: QualityLevel) => Promise<void>;
-  selectMaterial: (material: number) => void;
+  selectHotbarSlot: (slot: number) => void;
+  toggleInventory: () => void;
+  closeInventory: () => void;
+  craftRecipe: (recipeId: string) => void;
+  respawn: () => void;
   toggleMap: () => void;
   closeMap: () => void;
   setMapLayer: (layer: MapLayer) => void;

@@ -3,6 +3,11 @@ import type { GameServer, WorldCommitResult } from '../game-server';
 import { WorldMutationBuffer, assertMutationCoordinate, assertVoxelValue } from '../world-mutation';
 import { resolveFillCommand } from './fill-command';
 import {
+  executeGameplayCommand,
+  GameplayCommandPermissionError,
+  type GameplayCommand,
+} from './gameplay-command-handler';
+import {
   commandCategory,
   type CommandCategory,
   type CommandError,
@@ -96,6 +101,12 @@ export class ServerCommandExecutor {
       const payload = await this.run(source, prepared);
       return this.success(source, command, category, startedAt, payload);
     } catch (error) {
+      if (error instanceof GameplayCommandPermissionError)
+        return this.failure(source, command.type, category, startedAt, {
+          kind: 'permission',
+          code: 'COMMAND_PERMISSION_DENIED',
+          message: error.message,
+        });
       return this.failure(source, command.type, category, startedAt, {
         kind: 'execution',
         code: 'COMMAND_EXECUTION_FAILED',
@@ -138,6 +149,8 @@ export class ServerCommandExecutor {
       case 'seed':
       case 'save':
         return { command };
+      default:
+        return { command };
     }
   }
 
@@ -171,10 +184,10 @@ export class ServerCommandExecutor {
           },
         };
       case 'save': {
-        const savedChunks = await this.server.flushDirtyChunks();
+        const { savedChunks, gameplaySaved } = await this.server.save();
         return {
           message: `Saved ${savedChunks.length} dirty Chunk(s).`,
-          data: { savedChunks },
+          data: { savedChunks, gameplaySaved },
           affectedChunks: savedChunks,
         };
       }
@@ -205,6 +218,8 @@ export class ServerCommandExecutor {
           affectedChunks: [chunkKey(...command.chunk)],
         };
       }
+      default:
+        return executeGameplayCommand(this.server, source, command as GameplayCommand);
     }
   }
 
