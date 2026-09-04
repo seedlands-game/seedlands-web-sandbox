@@ -47,6 +47,7 @@ type WorkerResult = {
   cx: number;
   cy: number;
   cz: number;
+  workerMeshingMs: number;
   meshes: MeshPart[];
 };
 type Chunk = {
@@ -607,6 +608,13 @@ class World {
       this.drainWorker();
       return;
     }
+    this.telemetryRecorder.recordCompletedSpan({
+      category: 'meshing',
+      name: 'WorkerMesh',
+      lane: 'worker-derived',
+      durationMs: result.workerMeshingMs,
+      traceId: task.traceId,
+    });
     this.telemetryRecorder.markTrace(task.traceId, 'worker-complete', 'worker-derived');
     this.commitQueue.push({
       task,

@@ -63,6 +63,13 @@ export type PerformanceTelemetryOptions = {
   incidentThresholdMs?: number;
   chunkLatencyIncidentMs?: number;
 };
+export type CompletedSpanInput = {
+  category: SpanCategory | string;
+  name: string;
+  lane: string;
+  durationMs: number;
+  traceId?: string;
+};
 
 type CurrentFrame = { frameId: number; startMs: number; spans: PerformanceSpan[] };
 
@@ -153,6 +160,22 @@ export class PerformanceTelemetry {
     span.endMs = this.options.now();
     span.durationMs = span.endMs - span.startMs;
     this.activeSpans.delete(spanId);
+    this.pushEvent(span);
+    return span;
+  }
+
+  recordCompletedSpan(input: CompletedSpanInput): PerformanceSpan {
+    const endMs = this.options.now();
+    const span: PerformanceSpan = {
+      spanId: `span-${++this.spanSequence}`,
+      ...(input.traceId ? { traceId: input.traceId } : {}),
+      category: input.category,
+      name: input.name,
+      lane: input.lane,
+      startMs: endMs - input.durationMs,
+      endMs,
+      durationMs: input.durationMs,
+    };
     this.pushEvent(span);
     return span;
   }
