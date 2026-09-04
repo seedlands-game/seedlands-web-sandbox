@@ -1,0 +1,25 @@
+page:
+  url: ${VOXEL_SANDBOX_URL}
+
+agent:
+  testId: seedlands-app-module-layout
+  groupName: Seedlands app module refactor
+  groupDescription: Checks the start screen, in-game HUD, and Macro map after CSS modules are split.
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 12
+
+tasks:
+  - name: Verify the start screen hierarchy
+    flow:
+      - aiAssert: The Seedlands start screen is clearly readable. The title, world Seed field, quality selector, and primary button "进入世界" are visible in one coherent panel without overlap or clipped text.
+  - name: Verify the in-game HUD hierarchy
+    flow:
+      - ai: In the field labelled "世界 Seed", enter "app-module-layout-2026" and click the button "进入世界".
+      - sleep: 7000
+      - aiAssert: A running voxel world is visible with a centered crosshair, a readable world clock, a Macro map control, and four numbered material slots aligned along the bottom without overlap.
+  - name: Verify the Macro map panel
+    flow:
+      - ai: Click the control labelled "Macro 地图".
+      - sleep: 1500
+      - aiAssert: The Macro map panel is open and readable above the game. Its title, layer selector, map canvas, legend or explanatory text, and close control are visible without overlap or clipping.

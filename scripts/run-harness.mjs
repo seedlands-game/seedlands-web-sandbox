@@ -1,8 +1,9 @@
-import { gzipSync } from 'node:zlib';
 import { execFileSync } from 'node:child_process';
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve, relative } from 'node:path';
 import { transformWithEsbuild } from 'vite';
+import { currentBrowserEvidence } from './harness-browser-evidence.mjs';
+import { collectDistMetrics } from './harness-file-metrics.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const baselinePath = resolve(root, 'harness/baseline.json');
@@ -36,51 +37,6 @@ const compileModule = async (path, replacements = {}) => {
   const { code } = await transformWithEsbuild(source, path, { loader: 'ts', target: 'es2022', format: 'esm' });
   return `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
 };
-
-async function currentBrowserEvidence(path, key, fallback) {
-  if (!expectedBrowserRunId)
-    return { ...fallback, note: `${fallback.note} Run pnpm harness for fresh, correlated browser evidence.` };
-  try {
-    const result = JSON.parse(await readFile(path, 'utf8'));
-    const matchingRun = result.runId === expectedBrowserRunId && result.sourceSha === sourceSha;
-    const matchingEnvironment =
-      result.environment?.node === process.version &&
-      result.environment?.platform === process.platform &&
-      result.environment?.arch === process.arch;
-    if (!matchingRun || !matchingEnvironment)
-      return {
-        status: 'NOT_COLLECTED',
-        note: 'Browser result metadata does not match this Harness run, source SHA, or environment.',
-      };
-    return result[key];
-  } catch {
-    return fallback;
-  }
-}
-
-async function distMetrics() {
-  const files = [];
-  async function walk(dir) {
-    for (const entry of await readdir(dir, { withFileTypes: true })) {
-      const full = resolve(dir, entry.name);
-      if (entry.isDirectory()) await walk(full);
-      else files.push(full);
-    }
-  }
-  await walk(resolve(root, 'dist'));
-  let totalBytes = 0,
-    jsBytes = 0,
-    gzipBytes = 0;
-  for (const file of files) {
-    const content = await readFile(file);
-    totalBytes += content.byteLength;
-    if (file.endsWith('.js')) {
-      jsBytes += content.byteLength;
-      gzipBytes += gzipSync(content).byteLength;
-    }
-  }
-  return { fileCount: files.length, totalBytes, jsBytes, gzipBytes };
-}
 
 function compare(current, baseline) {
   const verdicts = {};
@@ -169,10 +125,15 @@ function compare(current, baseline) {
   const worldMutationUrl = await compileModule(resolve(root, 'src/server/world-mutation.ts'), {
     "'../world/voxel'": `'${voxelUrl}'`,
   });
+  const worldTransactionCommitUrl = await compileModule(resolve(root, 'src/server/world-transaction-commit.ts'), {
+    "'../world/voxel'": `'${voxelUrl}'`,
+    "'./world-mutation'": `'${worldMutationUrl}'`,
+  });
   const gameServerUrl = await compileModule(resolve(root, 'src/server/game-server.ts'), {
     "'../world/mesh'": `'${meshUrl}'`,
     "'../world/voxel'": `'${voxelUrl}'`,
     "'./world-mutation'": `'${worldMutationUrl}'`,
+    "'./world-transaction-commit'": `'${worldTransactionCommitUrl}'`,
   });
   const fillCommandUrl = await compileModule(resolve(root, 'src/server/commands/fill-command.ts'), {
     "'../../world/voxel'": `'${voxelUrl}'`,
@@ -380,7 +341,7 @@ function compare(current, baseline) {
     },
     fillSamples,
   };
-  const bundle = await distMetrics();
+  const bundle = await collectDistMetrics(root);
   const metrics = {
     macroQueryP95Ms: macroGeneration.p95Ms,
     macroQueryThroughputPerSecond: (macroCoordinates.length / macroGeneration.totalMs) * 1000,
@@ -400,14 +361,20 @@ function compare(current, baseline) {
   };
   const isBaseline = process.argv.includes('--baseline');
   const baseline = isBaseline ? null : JSON.parse(await readFile(baselinePath, 'utf8'));
-  const browserE2E = await currentBrowserEvidence(browserResultPath, 'browserE2E', {
-    status: 'NOT_RUN',
-    note: 'No current correlated browser regression result is available.',
-  });
-  const browserBenchmark = await currentBrowserEvidence(browserBenchmarkPath, 'browserBenchmark', {
-    status: 'NOT_RUN',
-    note: 'No current correlated browser benchmark sample is available.',
-  });
+  const browserE2E = await currentBrowserEvidence(
+    browserResultPath,
+    'browserE2E',
+    { status: 'NOT_RUN', note: 'No current correlated browser regression result is available.' },
+    expectedBrowserRunId,
+    sourceSha,
+  );
+  const browserBenchmark = await currentBrowserEvidence(
+    browserBenchmarkPath,
+    'browserBenchmark',
+    { status: 'NOT_RUN', note: 'No current correlated browser benchmark sample is available.' },
+    expectedBrowserRunId,
+    sourceSha,
+  );
   const result = {
     schemaVersion: 1,
     generatedAt: now,

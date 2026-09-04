@@ -76,7 +76,7 @@ corepack pnpm test:coverage # Vitest V8：仅 src/world/，行覆盖率至少 80
 corepack pnpm verify:static # 上述静态检查的组合入口
 ```
 
-`src/world/` 不依赖 DOM、PlayCanvas、Worker、`src/server/` 或 `src/client/`，由自定义 ESLint 规则与 Vitest 共同验证；`src/server/` 同样禁止 PlayCanvas、DOM 和 Worker 依赖。当前 coverage 会生成本地 `coverage/` 报告，不纳入版本控制。浏览器运行时行为由 Playwright、Harness 与 Midscene 分别证明。
+`src/world/` 不依赖 DOM、PlayCanvas、Worker、`src/server/` 或 `src/client/`，由自定义 ESLint 规则与 Vitest 共同验证；`src/server/` 同样禁止 PlayCanvas、DOM 和 Worker 依赖。ESLint 还统一限制仓库内 JavaScript/TypeScript 单文件最多 500 行有效代码（忽略空行和注释），且禁止文件内关闭规则；超过阈值时应按职责继续拆分。当前 coverage 会生成本地 `coverage/` 报告，不纳入版本控制。浏览器运行时行为由 Playwright、Harness 与 Midscene 分别证明。
 
 依赖安装会启用 Husky。pre-commit 只检查暂存文件的格式与 ESLint，并运行快速的目录规则；commit-msg 接受 `feat`、`fix`、`refactor`、`test`、`docs`、`chore`、`ci`、`build` 前缀及可选 scope，不强制 Conventional Commits 的 body、footer 或 breaking-change 结构。
 
@@ -98,7 +98,7 @@ corepack pnpm test:e2e:regression  # 固定功能回归
 corepack pnpm test:e2e:benchmark   # 非跨机器门禁的浏览器性能样本
 ```
 
-Playwright 用于固定 seed 的功能回归、输入链路和可重复的浏览器样本；其用例位于 `tests/e2e/`，并以单 worker 运行，避免 benchmark 与回归争用同一浏览器资源。默认使用 Chromium：CI 应先执行 `corepack pnpm exec playwright install --with-deps chromium`，本机若需指定浏览器则设置 `SEEDLANDS_CHROME_PATH`。`?harness=1` 的受控入口仅用于确定性 world 编辑与 streaming 状态，并继续调用生产 `World.edit()`、Store 与 `updateStreaming()`；真实键鼠输入另有独立 Playwright 覆盖。Midscene 仍仅承担 change 内 YAML 的用户旅程与语义/视觉验收；可以稳定程序化验证的规则应迁移为 Playwright 回归，而不长期重复两套断言。
+Playwright 用于固定 seed 的功能回归、输入链路和可重复的浏览器样本；其用例位于 `tests/e2e/`，并以单 worker 运行，避免 benchmark 与回归争用同一浏览器资源。默认使用 Chromium：CI 应先执行 `corepack pnpm exec playwright install --with-deps chromium`，本机若需指定浏览器则设置 `SEEDLANDS_CHROME_PATH`。默认测试服务端口为 4173；并行 worktree 可通过 `SEEDLANDS_E2E_PORT` 分配独立端口。`?harness=1` 的受控入口仅用于确定性 world 编辑与 streaming 状态，并继续调用生产 `World.edit()`、Store 与 `updateStreaming()`；真实键鼠输入另有独立 Playwright 覆盖。Midscene 仍仅承担 change 内 YAML 的用户旅程与语义/视觉验收；可以稳定程序化验证的规则应迁移为 Playwright 回归，而不长期重复两套断言。
 
 Macro 地图是固定 seed 的确定性浏览器回归，可单独运行：
 

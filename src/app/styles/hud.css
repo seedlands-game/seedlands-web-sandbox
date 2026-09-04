@@ -1,0 +1,201 @@
+#crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+}
+
+#crosshair::before,
+#crosshair::after,
+#crosshair span::before,
+#crosshair span::after {
+  content: '';
+  position: absolute;
+  background: rgba(255, 255, 246, 0.92);
+  border-radius: 2px;
+}
+
+#crosshair::before,
+#crosshair::after {
+  left: 9px;
+  width: 2px;
+  height: 6px;
+}
+
+#crosshair::before {
+  top: 0;
+}
+
+#crosshair::after {
+  bottom: 0;
+}
+
+#crosshair span::before,
+#crosshair span::after {
+  top: 9px;
+  width: 6px;
+  height: 2px;
+}
+
+#crosshair span::before {
+  left: 0;
+}
+
+#crosshair span::after {
+  right: 0;
+}
+
+#world-clock {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 13px;
+  color: #eef5e7;
+  font:
+    700 11px/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.04em;
+}
+
+#interaction-feedback {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 34px);
+  transform: translate(-50%, 8px);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 5px #000;
+  opacity: 0;
+  transition: 160ms ease;
+}
+
+#interaction-feedback[data-visible='true'] {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+#debug {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  max-width: min(390px, calc(100vw - 28px));
+  padding: 12px 14px;
+  color: #dce9df;
+  white-space: pre-line;
+  font:
+    11px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+
+#help {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  padding: 7px 11px;
+  color: rgba(229, 237, 226, 0.7);
+  font-size: 10px;
+  white-space: nowrap;
+  opacity: 0.72;
+}
+
+#hotbar {
+  position: absolute;
+  left: 50%;
+  bottom: 52px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 7px;
+  padding: 7px;
+  border: 1px solid rgba(224, 238, 211, 0.18);
+  border-radius: 13px;
+  background: rgba(8, 18, 19, 0.58);
+  box-shadow: 0 12px 34px rgba(2, 8, 9, 0.32);
+  backdrop-filter: blur(11px);
+}
+
+.slot {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px auto;
+  grid-template-rows: 1fr;
+  align-items: center;
+  gap: 8px;
+  min-width: 96px;
+  min-height: 43px;
+  padding: 5px 9px 5px 5px;
+  color: #acbbb0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(5, 14, 15, 0.66);
+  font-size: 11px;
+  transition: 140ms ease;
+}
+
+.slot-key {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  z-index: 1;
+  min-width: 14px;
+  padding: 2px;
+  border-radius: 4px;
+  background: rgba(3, 8, 8, 0.68);
+  color: white;
+  text-align: center;
+  font:
+    700 9px/1 ui-monospace,
+    monospace;
+}
+
+.slot-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background-image: url('/assets/voxel-atlas.webp');
+  background-size: 300% 300%;
+  background-position: calc(var(--tile-x) * 50%) calc(var(--tile-y) * 50%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.slot-name {
+  white-space: nowrap;
+}
+
+.slot.active {
+  transform: translateY(-3px);
+  border-color: #c9e59a;
+  color: white;
+  background: rgba(40, 64, 40, 0.78);
+  box-shadow: 0 0 0 2px rgba(156, 197, 111, 0.18);
+}
+
+@media (max-width: 720px) {
+  #help {
+    display: none;
+  }
+
+  #world-clock {
+    top: auto;
+    bottom: 112px;
+  }
+
+  .slot {
+    grid-template-columns: 32px;
+    min-width: 44px;
+    padding: 5px;
+  }
+
+  .slot-name {
+    display: none;
+  }
+}
