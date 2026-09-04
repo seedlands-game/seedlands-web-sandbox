@@ -18,6 +18,11 @@ export type HarnessSnapshot = {
   quality: 'low' | 'medium' | 'high';
   triangles: number;
   drawCalls: number;
+  runtime: 'integrated-server';
+  serverRevision: number;
+  voxelAtOrigin: number;
+  serverPlayerPosition: [number, number, number];
+  serverWorldTime: number;
 };
 
 type HarnessWindow = Window & {

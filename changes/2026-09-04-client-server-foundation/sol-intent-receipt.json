@@ -1,0 +1,27 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "在修改生产代码前，复核第一阶段 GameServer 权威、持久化与 PlayCanvas 客户端边界的正确性、遗漏和迁移风险。",
+  "evidence": [
+    "当前浏览器 World 同时持有 canonical Chunk、Worker 调度、修改、持久化和 PlayCanvas 网格。",
+    "用户提供的 Change 4 要求 Integrated Mode 直接调用、headless GameServer、批量编辑和脏 Chunk 快照。",
+    "已预先写入 headless 与浏览器 Harness 测试来定义目标验收边界。"
+  ],
+  "necessary_paths": [
+    "changes/2026-09-04-client-server-foundation/spec.md",
+    "tests/server/game-server.test.ts",
+    "changes/2026-09-04-client-server-foundation/e2e/client-server-foundation.spec.ts",
+    "src/app/main.ts",
+    "src/world/mesh.ts",
+    "src/world/storage.ts",
+    "src/worker/world-worker.ts"
+  ],
+  "output_limit": { "max_characters": 1200 },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}

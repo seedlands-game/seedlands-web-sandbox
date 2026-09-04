@@ -122,7 +122,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
 
   test('persists a controlled world edit through the production edit and Store paths', async ({ page }) => {
     await startHarnessWorld(page, 'seedlands-playwright-regression');
-    await removeHarnessVoxel(page, 0, 21, 0);
+    await removeHarnessVoxel(page, 0, 0, 0);
     await waitForSnapshot(page, (current) => current.mutationCount === 1);
     const changed = await waitForSnapshot(page, (current) => current.storageBytes > 0);
     expect(changed.storageBytes).toBeGreaterThan(0);
