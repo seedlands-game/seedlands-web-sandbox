@@ -8,7 +8,7 @@ for (const [name, engine] of [
   test(`${name} 启动、背包、设置与正式保存继续`, async ({ baseURL }, testInfo) => {
     test.skip(process.env.SEEDLANDS_COMPATIBILITY_ACCEPTANCE !== '1', '兼容性引擎须显式安装并执行。');
     test.setTimeout(90_000);
-    const browser = await engine.launch({ headless: true });
+    const browser = await engine.launch({ headless: true, executablePath: engine.executablePath(), timeout: 20_000 });
     const context = await browser.newContext({ baseURL, viewport: { width: 1280, height: 720 } });
     const page = await context.newPage();
     const errors: string[] = [];

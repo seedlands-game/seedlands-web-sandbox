@@ -252,3 +252,7 @@
 Medium 两轮 p95 10.2/9.4ms，p99 10.3/10.2ms；Low p95 9.3ms，High p95 9.5ms。屏幕约120Hz，帧率上限使各档帧时间接近，不能据此声称 Low 提升多少 FPS。实际 render canvas：Medium 1689×950、Low1382×777、High1920×1080（显式分辨率比例）；已载入渲染 Chunk 25/9/49，三角形2238/1132/4582。GPU duration `NOT_COLLECTED`。
 
 此 seed 原点是高度较低、未生成树木的空旷区域，因此只作为静态空地成本基线，不作为 A1/A3/A5/A11 的完整内容或混合性能准出。后续必须补推荐营地和持续 streaming 的同机采样。性能候选准出值尚未因这次结果而放宽。
+
+### 06:18 安全入口与兼容性复验
+
+五个固定 seed 的真实新建、落地与保存继续全部通过；Firefox 与 WebKit 独立引擎启动/保存恢复 smoke 通过（不是 Safari 应用实机验收）。兼容测试显式指定各引擎 executablePath，避免继承 Chromium 项目的 Chrome 路径。音频生产输出与参考曲错误恢复用例通过；动作扩展回归发现并修复旧 gesture 重触发。

@@ -1,3 +1,17 @@
+# 最新恢复点：2026-09-05 06:10
+
+Goal 已由用户删除旧项后重新创建，当前 **Active**，token预算3,000,000。账户起点38%，硬上限58%，最新查询43%；不是旧 Goal 的预算暂停状态。以下旧检查点仅为历史。
+
+- 当前功能分支 `codex/playable-world-mvp`；最近整合提交 `a4f37c9`。渲染最终 `11c68d7` 已合入，生存Change8 `a27dc8e` 已合入。高级光影、背包物品移动/食品、灯笼配方/放拆、动作、Shell与Audio均已有本分支真实检查。
+- 自主生物/NPC Change9 仍由任务 `01a06ca5-6fe3-7cb2-bab1-8f9510592f6d` 在worktree5e0f收口；其纯规则/浏览器/关联Harness已通过，正在最终Midscene。只合最终提交，不复制未提交实现。
+- 父分支最新完整Static/Build：201 tests /4 skipped、world94.86%、Svelte0/0；随后实际5seed纯安全出生用例另通过，浏览器5seed尚待执行。
+- 1080p headed空地基线在 `performance-before-autonomy.json`：Medium p95 10.2/9.4ms，DPR1实际canvas1689×950；不是完整营地/生物/streaming验收。
+- 正准备附近生物空间短鸣接线、三引擎兼容性、完整自然旅程与60分钟混合稳定性。生物声音代码/用例尚有未提交改动；动作专项增加放置后再次采集的待运行检查。
+- GPU暂由Change9任务独占做最终视觉复核，已请求释放通知；父当前未跑浏览器。Vite4217为父常驻开发服务器。Firefox/WebKit当前Playwright引擎已安装。
+- 不push、不发布、不自动reset，不触碰AgentServer/LLM。音频输入工具明确返回不支持，不能声称已实际试听；仍需导出完整生产音频并明确区分自动链路验证与人类听觉审美。
+
+---
+
 # 预算暂停检查点
 
 2026-09-05：平台在 301,613 tokens / 2,405 秒时触发父 goal 的 300,000 token 限额，状态为 budget_limited。目标未完成，不是账户额度耗尽；没有使用重置。当前分支不是最终 MVP 准出版本。
