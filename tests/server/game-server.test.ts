@@ -3,7 +3,7 @@ import { GameServer } from '../../src/server/game-server';
 import type { ChunkPersistence, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
 import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
 import { Voxel, chunkKey } from '../../src/world/voxel';
-import { createProceduralMeshInput, meshHaloIndex } from '../../src/world/mesh';
+import { createProceduralMeshInput, meshChunk, meshHaloIndex } from '../../src/world/mesh';
 
 describe('GameServer headless authority', () => {
   it('deterministically generates canonical data and runs without a browser client', () => {
@@ -153,6 +153,45 @@ describe('GameServer headless authority', () => {
     expect(server.acceptWorkerCanonical({ ...prepared, canonical })).toBe(true);
     expect(server.acceptWorkerCanonical({ ...prepared, canonical })).toBe(true);
     expect(server.getChunk(0, 0, 0).voxels).toEqual(canonical);
+  });
+
+  it('keeps Worker-first canonical, halo and mesh byte-equivalent to the synchronous path', () => {
+    const server = new GameServer({ seedText: 'worker-equivalence' });
+    const synchronous = server.createDerivedMeshSnapshot(0, 0, 0);
+    const prepared = server.prepareWorkerMeshInput(0, 0, 0);
+    const workerInput = createProceduralMeshInput({
+      seed: server.seed,
+      cx: 0,
+      cy: 0,
+      cz: 0,
+      canonical: prepared.canonical,
+      overlays: prepared.overlays,
+    });
+
+    expect(workerInput.canonical).toEqual(synchronous.canonical);
+    expect(workerInput.halo).toEqual(synchronous.halo);
+    expect(workerInput.haloRevision).toBe(synchronous.haloRevision);
+    expect(
+      meshChunk({
+        seed: server.seed,
+        cx: 0,
+        cy: 0,
+        cz: 0,
+        data: workerInput.canonical,
+        changes: [],
+        halo: workerInput.halo,
+      }),
+    ).toEqual(
+      meshChunk({
+        seed: server.seed,
+        cx: 0,
+        cy: 0,
+        cz: 0,
+        data: synchronous.canonical,
+        changes: [],
+        halo: synchronous.halo,
+      }),
+    );
   });
 
   it('owns minimal entity state and the simulation clock independently of presentation', () => {
