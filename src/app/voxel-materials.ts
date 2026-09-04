@@ -169,7 +169,11 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
   fallbackContext.fillRect(0, 0, 2, 2);
   const reflectionFallback = textureFromCanvas(app.graphicsDevice, 'reflection-fallback', reflectionFallbackCanvas);
   const waterLayer = new pc.Layer({ name: 'Voxel Water' });
-  app.scene.layers.pushTransparent(waterLayer);
+  // UI 是相机后处理截点；水体须保留主场景深度并一起调色。
+  const uiLayer = app.scene.layers.getLayerById(pc.LAYERID_UI);
+  const uiIndex = uiLayer ? app.scene.layers.getTransparentIndex(uiLayer) : -1;
+  if (uiIndex >= 0) app.scene.layers.insertTransparent(waterLayer, uiIndex);
+  else app.scene.layers.pushTransparent(waterLayer);
 
   const arrayLayers = Array.from({ length: MATERIAL_LAYER_COUNT }, (_unused, layer) => {
     const canvas = tileCanvases.get((layer + 1) as FaceMaterialId);
