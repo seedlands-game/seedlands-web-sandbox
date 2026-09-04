@@ -1,4 +1,5 @@
 import * as pc from 'playcanvas';
+import { publicAssetUrl } from '../client/public-asset-url';
 import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '../world/voxel';
 
 export type QualityLevel = 'low' | 'medium' | 'high';
@@ -173,7 +174,7 @@ function loadAtlas(): Promise<HTMLImageElement> {
     image.decoding = 'async';
     image.onload = () => resolve(image);
     image.onerror = () => reject(new Error('Voxel texture atlas could not be loaded.'));
-    image.src = '/assets/voxel-atlas.webp';
+    image.src = publicAssetUrl(import.meta.env.BASE_URL, 'assets/voxel-atlas.webp');
   });
 }
 

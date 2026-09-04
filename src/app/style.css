@@ -265,6 +265,21 @@ small {
   opacity: 1;
 }
 
+#build-watermark {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  color: rgba(232, 240, 230, 0.56);
+  font:
+    9px/1.2 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  user-select: text;
+}
+
 #debug {
   position: absolute;
   left: 14px;
@@ -434,6 +449,12 @@ small {
   #world-clock {
     top: auto;
     bottom: 112px;
+  }
+
+  #build-watermark {
+    right: 8px;
+    bottom: 6px;
+    font-size: 8px;
   }
 
   .slot {

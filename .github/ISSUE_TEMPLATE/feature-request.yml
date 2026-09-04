@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose an improvement within the current Web sandbox scope.
+title: '[Feature]: '
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Seedlands Web Sandbox is an experimental technical foundation, not the complete Seedlands game. Please describe the user value before the implementation idea.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find the same proposal.
+          required: true
+        - label: I understand this repository is the Web sandbox, not the complete game roadmap.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What user or contributor need is currently unmet?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe observable behavior without prescribing an implementation when possible.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and tradeoffs
+      description: What other approaches or existing capabilities did you consider?
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope notes
+      description: Call out effects on world determinism, saves, performance, public contracts, assets, or accessibility.

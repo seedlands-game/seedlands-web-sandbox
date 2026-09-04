@@ -1,0 +1,18 @@
+# Run against a build created with VITE_COMMIT_SHA set to a full Git commit SHA.
+page:
+  url: ${SEEDLANDS_PAGES_URL}
+
+agent:
+  testId: seedlands-pages-release
+  groupName: Seedlands Pages release
+  groupDescription: Validates the public release identity without obscuring the playable sandbox.
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 8
+
+tasks:
+  - name: Verify the public build watermark
+    flow:
+      - aiAssert: The Seedlands start screen is visible and remains clear and usable.
+      - aiAssert: A subtle but readable watermark shows both a short commit hash and a generator version.
+      - aiAssert: The watermark does not cover the Seed input, quality selector, or "进入世界" button.

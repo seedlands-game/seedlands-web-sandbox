@@ -15,6 +15,7 @@ import { type RenderLayer } from '../world/mesh';
 import { decodeWorldSave, type WorldChange } from '../world/storage';
 import { GameServer } from '../server/game-server';
 import { BrowserChunkPersistence, decodeBrowserWorldSave } from '../client/browser-chunk-persistence';
+import { formatBuildWatermark } from '../client/build-watermark';
 import { createMeshTaskSnapshot, isCurrentMeshTask, type MeshTaskIdentity } from '../client/mesh-task-snapshot';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
 import { PerformanceTelemetry } from '../client/performance-telemetry';
@@ -181,6 +182,19 @@ const mapPanel = document.querySelector<HTMLElement>('#macro-map-panel')!;
 const mapClose = document.querySelector<HTMLButtonElement>('#map-close')!;
 const mapLayer = document.querySelector<HTMLSelectElement>('#map-layer')!;
 const mapCanvas = document.querySelector<HTMLCanvasElement>('#macro-map')!;
+
+const commitSha = import.meta.env.VITE_COMMIT_SHA?.trim();
+const buildWatermark = formatBuildWatermark(commitSha, GENERATOR_VERSION);
+if (buildWatermark && commitSha) {
+  const watermark = document.createElement('div');
+  watermark.id = 'build-watermark';
+  watermark.dataset.commit = commitSha;
+  watermark.textContent = buildWatermark;
+  watermark.title = `Seedlands Web Sandbox build ${commitSha}`;
+  watermark.setAttribute('aria-label', `Build ${buildWatermark}`);
+  document.querySelector<HTMLElement>('#ui')!.append(watermark);
+}
+
 const PLAYER_HALF_WIDTH = 0.32;
 const PLAYER_FEET_OFFSET = 1.6;
 const PLAYER_HEAD_OFFSET = 0.2;

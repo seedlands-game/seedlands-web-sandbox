@@ -66,7 +66,7 @@ type HarnessWindow = Window & {
 };
 
 export async function startHarnessWorld(page: Page, seed: string, query = ''): Promise<void> {
-  await page.goto(`/?harness=1${query}`, { waitUntil: 'networkidle' });
+  await page.goto(`./?harness=1${query}`, { waitUntil: 'networkidle' });
   await page.locator('#seed').fill(seed);
   await page.getByRole('button', { name: '进入世界' }).click();
   await page.locator('#start-card').waitFor({ state: 'hidden' });
