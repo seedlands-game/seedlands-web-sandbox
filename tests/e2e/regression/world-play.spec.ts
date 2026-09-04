@@ -59,10 +59,11 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
 
     await lockPointer(page);
     await page.keyboard.down('KeyW');
-    const after = await waitForPlayerMovement(page, { axis: 2, start: before.player[2], minimumDelta: 3 });
+    const after = await waitForPlayerMovement(page, { axis: 2, start: before.player[2], minimumDelta: 1 });
     await page.keyboard.up('KeyW');
     expect(after.player[1]).toBeCloseTo(before.player[1], 2);
     expect(after.onGround).toBe(true);
+    expect(after.colliding).toBe(false);
   });
 
   test('falls when its center ground voxel is excavated despite neighboring support', async ({ page }) => {

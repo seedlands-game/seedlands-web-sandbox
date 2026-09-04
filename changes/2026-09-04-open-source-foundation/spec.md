@@ -1,6 +1,6 @@
 # 开源仓库基础改造与 Pages 发布
 
-**状态：** 本地实施与验收完成（Breaking flow）
+**状态：** 本地验收完成，远端发布实施中（Breaking flow）
 
 ## Context & Goal
 
@@ -98,10 +98,11 @@ Seedlands 是一个会自行演化、遵循统一世界规律并允许玩家跨�
 - [x] `CI=true pnpm verify:static` 通过；Prettier、ESLint、ls-lint 和 TypeScript 通过，Vitest 11 个文件、71 个用例通过，`src/world/**` 行覆盖率 97.27%。（Static）
 - [x] `SEEDLANDS_BASE_PATH=/seedlands-web-sandbox/ VITE_COMMIT_SHA=0123456789abcdef0123456789abcdef01234567 pnpm build` 通过；构建产物的 CSS 与 JavaScript 都使用仓库子路径 atlas URL，没有错误的根路径。Vite 如实报告主 JavaScript chunk 约 1.98 MB 的非阻塞 warning。（Build）
 - [x] 非代码治理文件已通过 Prettier 格式检查与 diff 评审，未使用 Vitest 文本断言冒充平台验收。GitHub 官方 Actions 的最新 release/tag 与固定 40 位 SHA 已在 2026-09-04 实时读回。（Static；Manual supplement）
-- [ ] 首次远程 run `33863096075` 的三个质量 job 均在依赖安装阶段失败：Node.js 22.12.0 内置旧 Corepack 无法验证当前 pnpm 签名 key id。修复改用官方推荐的 `pnpm/setup` v2.1.0，固定 commit `703c52620218391530e48b9e8870d5c0082e1b9b`，由其校验自包含 pnpm、安装 Node.js 22.12.0 并以锁文件冻结模式安装。待新 SHA 的远程检查读回后更新为终态。（Static；Manual supplement）
-- [ ] 第二次远程 run `33863370052` 已越过 Corepack 并完成 pnpm/Node 安装，但三个 job 的干净安装都因 `ERR_PNPM_IGNORED_BUILDS` 失败：Midscene 的间接依赖 `@ffmpeg-installer/linux-x64` 构建脚本未被供应链策略明确裁决。三个 CI job 不运行 Midscene/视频能力，因此在 `pnpm-workspace.yaml#allowBuilds` 将该 Linux 可选安装器明确设为 `false`，不放宽其他依赖脚本。待新 SHA 远程读回。（Static；Manual supplement）
+- [x] 首次远程 run `33863096075` 的三个质量 job 均在依赖安装阶段失败：Node.js 22.12.0 内置旧 Corepack 无法验证当前 pnpm 签名 key id。修复改用 `pnpm/setup` v2.1.0 固定 commit `703c52620218391530e48b9e8870d5c0082e1b9b`；后续 run `33863561275` 的三个 job 均成功完成该 setup。（Static；Manual supplement）
+- [x] 第二次远程 run `33863370052` 已越过 Corepack，但三个 job 的干净安装因 `ERR_PNPM_IGNORED_BUILDS` 失败。CI 不运行 Midscene/视频能力，因此在 `pnpm-workspace.yaml#allowBuilds` 将其间接 Linux FFmpeg 安装器明确设为 `false`；后续 run `33863561275` 的三个 job 均成功完成冻结依赖安装。（Static；Manual supplement）
+- [ ] 第三次远程 run `33863561275` 的静态与生产构建 job 已通过；Linux Chromium 的平面移动基线在原始执行和一次 failed-job rerun 中均于 3 米等待处超时。该稳定化工作由 `changes/2026-09-04-stabilize-ci-regression/spec.md` 单独记录，等待新 SHA 远端读回。（Playwright-baseline）
 - [x] 对所有可达 Git 历史执行了高置信凭据特征和可疑文件名扫描；未匹配高置信凭据，唯一命名命中为预期受控的 `.env.example`。体素母图的生成记录、处理来源和授权限定已写入 `ASSETS.md`；自动扫描不能证明不存在所有未知秘密。（Manual supplement）
-- [x] 本地实施期间未 push、转移、重命名、公开、启用 Pages 或修改组织/仓库设置，未以本地 workflow 代替 GitHub 真实读回。（Manual supplement）
+- [x] 获得用户独立明确授权后，仓库已转移并重命名为 `seedlands-game/seedlands-web-sandbox`、设为 public，功能分支已 push 并创建 PR #2；Pages 已切换为 GitHub Actions workflow，安全开关已配置并真实读回。main ruleset、合并与真实 URL 验证仍等待 PR 质量门禁通过。（Manual supplement）
 
 ## Tasks & Current State
 
@@ -111,8 +112,8 @@ Seedlands 是一个会自行演化、遵循统一世界规律并允许玩家跨�
 4. [done] 实现双语入口、包元数据、授权边界、社区文件、GitHub 模板、CI/Pages 与 Dependabot。
 5. [done] 实现 Vite 子路径、公共素材 URL 和可追溯水印，将预置用例跑至 GREEN。
 6. [done] 运行定向单元、变更级浏览器、现有浏览器基线、Midscene、静态和构建验证，写回真实证据与 Delivery Snapshot。
-7. [done] 仅暂存本 change 文件，创建语义化本地提交；不 push。
-8. [pending] 获得独立外部授权后，才 push、转移/重命名/公开、启用 Pages、配置 ruleset 与安全开关，并通过 GitHub 与真实 URL 读回。
+7. [done] 仅暂存本 change 文件并创建语义化本地提交。
+8. [in progress] 已获独立外部授权并完成仓库转移/重命名/公开、功能分支 push、PR #2、Pages workflow 与安全开关；等待 CI 全绿后配置 main ruleset、合并并验证真实 URL。
 
 ## Delivery Snapshot
 
@@ -126,4 +127,4 @@ Seedlands 是一个会自行演化、遵循统一世界规律并允许玩家跨�
 
 第二次远程 PR run `33863370052` 证明上述修复已越过 Corepack，随后在干净 Linux 安装中因 Midscene 间接引入的 `@ffmpeg-installer/linux-x64` 脚本未被 `allowBuilds` 裁决而 fail closed。本地 macOS 之前只明确允许了 `darwin-arm64`；修复对 CI 不需要的 Linux FFmpeg 安装器显式拒绝执行脚本，不使用全局 `--ignore-scripts`。
 
-本 change 不包含远程写入。当前尚未 push，也尚未转移/重命名/公开仓库、启用 Pages、配置 ruleset 或 GitHub 安全开关；这些必须在获得独立授权后执行并真实读回。
+用户已独立授权外部动作。仓库现已转移并重命名为公开的 `seedlands-game/seedlands-web-sandbox`；功能分支、PR #2、Pages workflow 和仓库安全开关均已写入并读回。main ruleset、PR 合并、main 部署 run 与真实页面/水印验证继续以远端质量门禁为前置条件。

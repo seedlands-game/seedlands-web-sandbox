@@ -116,22 +116,28 @@ export async function waitForPlayerMovement(
     yTolerance?: number;
   },
 ): Promise<HarnessSnapshot> {
-  await page.waitForFunction(
-    (expected) => {
-      const current = (window as HarnessWindow).__seedlandsHarness?.snapshot();
-      if (!current) return false;
-      const delta = current.player[expected.axis] - expected.start;
-      const moved = expected.direction
-        ? delta * expected.direction > expected.minimumDelta
-        : Math.abs(delta) > expected.minimumDelta;
-      const atExpectedHeight =
-        expected.yTarget === undefined ||
-        Math.abs(current.player[1] - expected.yTarget) < (expected.yTolerance ?? 0.05);
-      return moved && atExpectedHeight;
-    },
-    expectation,
-    { timeout: 15_000 },
-  );
+  try {
+    await page.waitForFunction(
+      (expected) => {
+        const current = (window as HarnessWindow).__seedlandsHarness?.snapshot();
+        if (!current) return false;
+        const delta = current.player[expected.axis] - expected.start;
+        const moved = expected.direction
+          ? delta * expected.direction > expected.minimumDelta
+          : Math.abs(delta) > expected.minimumDelta;
+        const atExpectedHeight =
+          expected.yTarget === undefined ||
+          Math.abs(current.player[1] - expected.yTarget) < (expected.yTolerance ?? 0.05);
+        return moved && atExpectedHeight;
+      },
+      expectation,
+      { timeout: 15_000 },
+    );
+  } catch (error) {
+    throw new Error(`Player movement did not satisfy the expected condition: ${JSON.stringify(await snapshot(page))}`, {
+      cause: error,
+    });
+  }
   const current = await snapshot(page);
   if (!current) throw new Error('Seedlands harness snapshot is unavailable after player movement.');
   return current;
