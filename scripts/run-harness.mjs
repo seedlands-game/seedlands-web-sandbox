@@ -142,7 +142,12 @@ function compare(current, baseline) {
     const meshes = meshChunk({ seed, cx, cy, cz, data, changes: [] });
     meshTimes.push(performance.now() - start);
     for (const mesh of Object.values(meshes)) {
-      meshBytes += mesh.positions.byteLength + mesh.normals.byteLength + mesh.indices.byteLength;
+      meshBytes +=
+        mesh.positions.byteLength +
+        mesh.normals.byteLength +
+        mesh.uvs.byteLength +
+        mesh.colors.byteLength +
+        mesh.indices.byteLength;
       vertices += mesh.positions.length / 3;
       triangles += mesh.indices.length / 3;
     }

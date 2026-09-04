@@ -13,6 +13,11 @@ export type HarnessSnapshot = {
   interactionAttempts: number;
   mutationCount: number;
   storageBytes: number;
+  worldTime: number;
+  timePaused: boolean;
+  quality: 'low' | 'medium' | 'high';
+  triangles: number;
+  drawCalls: number;
 };
 
 type HarnessWindow = Window & {
@@ -23,6 +28,11 @@ type HarnessWindow = Window & {
     prepareFlatMovement: () => void;
     prepareCenterExcavation: () => void;
     prepareStepDown: () => void;
+    setWorldTime: (hour: number) => void;
+    setTimePaused: (paused: boolean) => void;
+    setTimeSpeed: (speed: number) => void;
+    setView: (yaw: number, pitch: number) => void;
+    setSpectatorPosition: (x: number, y: number, z: number) => void;
   };
 };
 
@@ -158,4 +168,38 @@ export async function prepareStepDown(page: Page): Promise<void> {
     if (!harness) throw new Error('Seedlands step-down fixture is unavailable.');
     harness.prepareStepDown();
   });
+}
+
+export async function setHarnessWorldTime(page: Page, hour: number, paused = true): Promise<void> {
+  await page.evaluate(
+    ([targetHour, shouldPause]) => {
+      const harness = (window as HarnessWindow).__seedlandsHarness;
+      if (!harness) throw new Error('Seedlands environment controls are unavailable.');
+      harness.setWorldTime(targetHour);
+      harness.setTimePaused(shouldPause);
+    },
+    [hour, paused] as const,
+  );
+}
+
+export async function setHarnessView(page: Page, yaw: number, pitch: number): Promise<void> {
+  await page.evaluate(
+    ([targetYaw, targetPitch]) => {
+      const harness = (window as HarnessWindow).__seedlandsHarness;
+      if (!harness) throw new Error('Seedlands view controls are unavailable.');
+      harness.setView(targetYaw, targetPitch);
+    },
+    [yaw, pitch] as const,
+  );
+}
+
+export async function moveHarnessSpectator(page: Page, x: number, y: number, z: number): Promise<void> {
+  await page.evaluate(
+    ([targetX, targetY, targetZ]) => {
+      const harness = (window as HarnessWindow).__seedlandsHarness;
+      if (!harness) throw new Error('Seedlands spectator controls are unavailable.');
+      harness.setSpectatorPosition(targetX, targetY, targetZ);
+    },
+    [x, y, z] as const,
+  );
 }

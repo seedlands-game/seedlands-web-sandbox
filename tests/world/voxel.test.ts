@@ -8,6 +8,7 @@ import {
   isSolid,
   mod,
   normalizeSeed,
+  remeshChunkKeysForEdit,
   voxelIndex,
 } from '../../src/world/voxel';
 
@@ -31,6 +32,14 @@ describe('voxel coordinates and registry', () => {
     expect(voxelIndex(0, 0, 0)).toBe(0);
     expect(voxelIndex(31, 31, 31)).toBe(CHUNK_SIZE ** 3 - 1);
     expect(chunkKey(-1, 0, 2)).toBe('-1,0,2');
+  });
+
+  it('invalidates diagonal chunk neighbors when AO samples cross an edited corner', () => {
+    expect(remeshChunkKeysForEdit(31, 31, 31).sort()).toEqual(
+      ['0,0,0', '0,0,1', '0,1,0', '0,1,1', '1,0,0', '1,0,1', '1,1,0', '1,1,1'].sort(),
+    );
+    expect(remeshChunkKeysForEdit(-32, 8, -32).sort()).toEqual(['-1,0,-1', '-1,0,-2', '-2,0,-1', '-2,0,-2'].sort());
+    expect(remeshChunkKeysForEdit(8, 8, 8)).toEqual(['0,0,0']);
   });
 });
 

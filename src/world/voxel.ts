@@ -17,6 +17,34 @@ export const Voxel = {
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
 
+export const FaceMaterial = {
+  GrassTop: 1,
+  GrassSide: 2,
+  Dirt: 3,
+  Stone: 4,
+  Sand: 5,
+  WoodSide: 6,
+  WoodEnd: 7,
+  Leaves: 8,
+  Snow: 9,
+  Water: 10,
+} as const;
+
+export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
+
+export const faceMaterialNames: Record<number, string> = {
+  [FaceMaterial.GrassTop]: 'grass-top',
+  [FaceMaterial.GrassSide]: 'grass-side',
+  [FaceMaterial.Dirt]: 'dirt',
+  [FaceMaterial.Stone]: 'stone',
+  [FaceMaterial.Sand]: 'sand',
+  [FaceMaterial.WoodSide]: 'wood-side',
+  [FaceMaterial.WoodEnd]: 'wood-end',
+  [FaceMaterial.Leaves]: 'leaves',
+  [FaceMaterial.Snow]: 'snow',
+  [FaceMaterial.Water]: 'water',
+};
+
 export const voxelNames: Record<number, string> = {
   [Voxel.Grass]: '草方块',
   [Voxel.Dirt]: '泥土',
@@ -46,6 +74,36 @@ export const floorDiv = (n: number, d: number) => Math.floor(n / d);
 export const mod = (n: number, d: number) => ((n % d) + d) % d;
 export const chunkKey = (x: number, y: number, z: number) => `${x},${y},${z}`;
 export const voxelIndex = (x: number, y: number, z: number) => x + CHUNK_SIZE * (z + CHUNK_SIZE * y);
+
+export function faceMaterialFor(id: number, axis: number, positive: boolean): FaceMaterialId {
+  if (id === Voxel.Grass)
+    return axis === 1 ? (positive ? FaceMaterial.GrassTop : FaceMaterial.Dirt) : FaceMaterial.GrassSide;
+  if (id === Voxel.Wood) return axis === 1 ? FaceMaterial.WoodEnd : FaceMaterial.WoodSide;
+  return (
+    {
+      [Voxel.Dirt]: FaceMaterial.Dirt,
+      [Voxel.Stone]: FaceMaterial.Stone,
+      [Voxel.Leaves]: FaceMaterial.Leaves,
+      [Voxel.Sand]: FaceMaterial.Sand,
+      [Voxel.Snow]: FaceMaterial.Snow,
+      [Voxel.Water]: FaceMaterial.Water,
+    } as Record<number, FaceMaterialId>
+  )[id];
+}
+
+export function remeshChunkKeysForEdit(x: number, y: number, z: number): string[] {
+  const cx = floorDiv(x, CHUNK_SIZE),
+    cy = floorDiv(y, CHUNK_SIZE),
+    cz = floorDiv(z, CHUNK_SIZE);
+  const axes = [
+    [cx, ...(mod(x, CHUNK_SIZE) === 0 ? [cx - 1] : []), ...(mod(x, CHUNK_SIZE) === CHUNK_SIZE - 1 ? [cx + 1] : [])],
+    [cy, ...(mod(y, CHUNK_SIZE) === 0 ? [cy - 1] : []), ...(mod(y, CHUNK_SIZE) === CHUNK_SIZE - 1 ? [cy + 1] : [])],
+    [cz, ...(mod(z, CHUNK_SIZE) === 0 ? [cz - 1] : []), ...(mod(z, CHUNK_SIZE) === CHUNK_SIZE - 1 ? [cz + 1] : [])],
+  ];
+  const keys: string[] = [];
+  for (const ax of axes[0]) for (const ay of axes[1]) for (const az of axes[2]) keys.push(chunkKey(ax, ay, az));
+  return keys;
+}
 
 // Coordinate-only hashing means generation is independent of load / worker order.
 export function hash2(seed: number, x: number, z: number): number {
