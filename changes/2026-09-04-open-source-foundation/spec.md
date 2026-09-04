@@ -95,8 +95,8 @@ Seedlands 是一个会自行演化、遵循统一世界规律并允许玩家跨�
 - [x] `RELEASE-03` 在注入固定 SHA 的子路径环境中 1/1 通过，水印文本、可见性和完整 SHA 均符合合同。（Playwright-change）
 - [x] `RELEASE-04` 在 `/seedlands-web-sandbox/` 子路径下 8/8 通过。（Playwright-baseline）
 - [x] `RELEASE-05` 通过；Midscene 1 个文件、1 个任务成功，确认启动页清晰可用、水印可读且不遮挡表单。（Midscene）
-- [x] `CI=true pnpm verify:static` 通过；Prettier、ESLint、ls-lint 和 TypeScript 通过，Vitest 11 个文件、71 个用例通过，`src/world/**` 行覆盖率 97.27%。（Static）
-- [x] `SEEDLANDS_BASE_PATH=/seedlands-web-sandbox/ VITE_COMMIT_SHA=0123456789abcdef0123456789abcdef01234567 pnpm build` 通过；构建产物的 CSS 与 JavaScript 都使用仓库子路径 atlas URL，没有错误的根路径。Vite 如实报告主 JavaScript chunk 约 1.98 MB 的非阻塞 warning。（Build）
+- [x] 合并本地 `main` 后 `CI=true pnpm verify:static` 通过；Prettier、ESLint、ls-lint 和 TypeScript 通过，Vitest 15 个文件通过、1 个跳过，97 个用例通过、3 个跳过，`src/world/**` 行覆盖率 97.27%。（Static）
+- [x] 合并本地 `main` 后以 Pages 子路径和固定 SHA 运行生产构建通过；构建产物 CSS 与 JavaScript 都使用 `/seedlands-web-sandbox/assets/voxel-atlas.webp`，没有错误的域名根路径。Vite 如实报告主 JavaScript chunk 约 2.00 MB 的非阻塞 warning。（Build）
 - [x] 非代码治理文件已通过 Prettier 格式检查与 diff 评审，未使用 Vitest 文本断言冒充平台验收。GitHub 官方 Actions 的最新 release/tag 与固定 40 位 SHA 已在 2026-09-04 实时读回。（Static；Manual supplement）
 - [x] 首次远程 run `33863096075` 的三个质量 job 均在依赖安装阶段失败：Node.js 22.12.0 内置旧 Corepack 无法验证当前 pnpm 签名 key id。修复改用 `pnpm/setup` v2.1.0 固定 commit `703c52620218391530e48b9e8870d5c0082e1b9b`；后续 run `33863561275` 的三个 job 均成功完成该 setup。（Static；Manual supplement）
 - [x] 第二次远程 run `33863370052` 已越过 Corepack，但三个 job 的干净安装因 `ERR_PNPM_IGNORED_BUILDS` 失败。CI 不运行 Midscene/视频能力，因此在 `pnpm-workspace.yaml#allowBuilds` 将其间接 Linux FFmpeg 安装器明确设为 `false`；后续 run `33863561275` 的三个 job 均成功完成冻结依赖安装。（Static；Manual supplement）
@@ -128,3 +128,5 @@ Seedlands 是一个会自行演化、遵循统一世界规律并允许玩家跨�
 第二次远程 PR run `33863370052` 证明上述修复已越过 Corepack，随后在干净 Linux 安装中因 Midscene 间接引入的 `@ffmpeg-installer/linux-x64` 脚本未被 `allowBuilds` 裁决而 fail closed。本地 macOS 之前只明确允许了 `darwin-arm64`；修复对 CI 不需要的 Linux FFmpeg 安装器显式拒绝执行脚本，不使用全局 `--ignore-scripts`。
 
 用户已独立授权外部动作。仓库现已转移并重命名为公开的 `seedlands-game/seedlands-web-sandbox`；功能分支、PR #2、Pages workflow 和仓库安全开关均已写入并读回。main ruleset、PR 合并、main 部署 run 与真实页面/水印验证继续以远端质量门禁为前置条件。
+
+发布前发现本地 `main@9b2de4e` 比远端主干领先 3 个提交，包含世界修改事务和应用模块拆分。功能分支已合入该本地主干；冲突裁决保留新模块边界，将水印迁移到新的启动入口、将素材 URL 迁移到新的材质模块、同时组合 Pages 子路径与多 worktree E2E 端口能力，没有复活已删除的旧单体样式和环境模块。合并后静态、构建、Pages 子路径长期基线及三个相关 change 的用例均已取得对应合同下的通过证据；下一步是提交 merge 并以新 SHA 重新取得 GitHub Actions 证据。

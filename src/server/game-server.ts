@@ -12,6 +12,10 @@ import {
   type ChunkCoord,
 } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
+import { WorldMutationBuffer, assertMutationCoordinate, assertVoxelValue, type VoxelEdit } from './world-mutation';
+import { commitWorldEditBatch, compareChunkKeys } from './world-transaction-commit';
+
+export type { VoxelEdit } from './world-mutation';
 
 export type ServerChunk = ChunkCoord & {
   key: string;
@@ -21,15 +25,46 @@ export type ServerChunk = ChunkCoord & {
   materialized: boolean;
 };
 
-export type VoxelEdit = { x: number; y: number; z: number; value: number };
-export type WorldEditBatch = { actorId: string; edits: readonly VoxelEdit[] };
+export type WorldSemanticEventInput = { type: string; subjectId: string; data?: unknown };
+export type WorldSemanticEvent = WorldSemanticEventInput & { worldRevision: number };
+export type WorldEditBatch = {
+  actorId: string;
+  edits?: readonly VoxelEdit[];
+  buffers?: readonly WorldMutationBuffer[];
+  semanticEvents?: readonly WorldSemanticEventInput[];
+};
 export type VoxelRegionChanged = {
   type: 'voxel-region-changed';
   actorId: string;
-  editCount: number;
+  worldRevision: number;
+  mutationCount: number;
   chunks: string[];
+  chunkRevisions: Array<{ key: string; revision: number }>;
   meshChunks: string[];
   bounds: { min: [number, number, number]; max: [number, number, number] } | null;
+};
+export type WorldCommitMetrics = {
+  // Single-voxel commits skip wall-clock probes so instrumentation cannot regress the hot path.
+  timingStatus: 'measured' | 'not-collected-hot-path';
+  inputMutationCount: number;
+  canonicalWriteCount: number;
+  dirtyChunkCount: number;
+  meshInvalidationCount: number;
+  structuralEventCount: 0 | 1;
+  semanticEventCount: number;
+  mutationPayloadBytes: number;
+  mutationCapacityBytes: number;
+  validationMs: number;
+  resolveMs: number;
+  applyMs: number;
+  commitMs: number;
+};
+export type WorldCommitResult = {
+  committed: boolean;
+  worldRevision: number;
+  structuralChange: VoxelRegionChanged | null;
+  semanticEvents: readonly WorldSemanticEvent[];
+  metrics: WorldCommitMetrics;
 };
 export type ServerEntity = { id: string; kind: string; position: [number, number, number] };
 export type EntityCreate = Omit<ServerEntity, 'id'> & { id?: string };
@@ -73,6 +108,27 @@ const snapshotFromChunk = (seedText: string, chunk: ServerChunk): ChunkSnapshot 
   voxels: chunk.voxels.slice(),
 });
 
+const EMPTY_SEMANTIC_EVENTS: readonly WorldSemanticEvent[] = Object.freeze([]);
+const singleEditMetrics = (canonicalWriteCount: 0 | 1, meshInvalidationCount: number): WorldCommitMetrics => ({
+  timingStatus: 'not-collected-hot-path',
+  inputMutationCount: 1,
+  canonicalWriteCount,
+  dirtyChunkCount: canonicalWriteCount,
+  meshInvalidationCount,
+  structuralEventCount: canonicalWriteCount,
+  semanticEventCount: 0,
+  mutationPayloadBytes: 14,
+  mutationCapacityBytes: 14,
+  validationMs: 0,
+  resolveMs: 0,
+  applyMs: 0,
+  commitMs: 0,
+});
+const SINGLE_EDIT_NOOP_METRICS = Object.freeze(singleEditMetrics(0, 0));
+const SINGLE_EDIT_METRICS = Array.from({ length: 9 }, (_, meshInvalidationCount) =>
+  Object.freeze(singleEditMetrics(1, meshInvalidationCount)),
+);
+
 export class GameServer {
   readonly seed: number;
   readonly generatorVersion = GENERATOR_VERSION;
@@ -81,6 +137,8 @@ export class GameServer {
   private entitySequence = 0;
   private clock = 0;
   private readonly persistence?: ChunkPersistence;
+  private revision = 0;
+  private appliedMutationCount = 0;
 
   constructor(readonly options: GameServerOptions) {
     this.seed = normalizeSeed(options.seedText);
@@ -96,7 +154,11 @@ export class GameServer {
   }
 
   get mutationCount(): number {
-    return [...this.chunks.values()].reduce((count, chunk) => count + chunk.revision, 0);
+    return this.appliedMutationCount;
+  }
+
+  get worldRevision(): number {
+    return this.revision;
   }
 
   getChunk(cx: number, cy: number, cz: number): ServerChunk {
@@ -205,46 +267,69 @@ export class GameServer {
     return true;
   }
 
-  edit(x: number, y: number, z: number, value: number): VoxelRegionChanged {
-    return this.editBatch({ actorId: 'system', edits: [{ x, y, z, value }] });
+  edit(x: number, y: number, z: number, value: number): WorldCommitResult {
+    assertMutationCoordinate(x);
+    assertMutationCoordinate(y);
+    assertMutationCoordinate(z);
+    assertVoxelValue(value);
+    return this.commitSingleEdit('system', x, y, z, value);
   }
 
-  editBatch(batch: WorldEditBatch): VoxelRegionChanged {
-    const changed = new Map<string, ServerChunk>();
-    const meshChunks = new Set<string>();
-    let editCount = 0;
-    let min: [number, number, number] | null = null;
-    let max: [number, number, number] | null = null;
-    for (const edit of batch.edits) {
-      const cx = floorDiv(edit.x, CHUNK_SIZE);
-      const cy = floorDiv(edit.y, CHUNK_SIZE);
-      const cz = floorDiv(edit.z, CHUNK_SIZE);
-      const chunk = this.getChunk(cx, cy, cz);
-      const index = voxelIndex(mod(edit.x, CHUNK_SIZE), mod(edit.y, CHUNK_SIZE), mod(edit.z, CHUNK_SIZE));
-      if (chunk.voxels[index] === edit.value) continue;
-      chunk.voxels[index] = edit.value;
-      changed.set(chunk.key, chunk);
-      remeshChunkKeysForEdit(edit.x, edit.y, edit.z).forEach((key) => meshChunks.add(key));
-      editCount += 1;
-      min = min
-        ? [Math.min(min[0], edit.x), Math.min(min[1], edit.y), Math.min(min[2], edit.z)]
-        : [edit.x, edit.y, edit.z];
-      max = max
-        ? [Math.max(max[0], edit.x), Math.max(max[1], edit.y), Math.max(max[2], edit.z)]
-        : [edit.x, edit.y, edit.z];
-    }
-    changed.forEach((chunk) => {
-      chunk.revision += 1;
-      chunk.dirty = true;
-      chunk.materialized = true;
-    });
-    return {
+  editBatch(batch: WorldEditBatch): WorldCommitResult {
+    return commitWorldEditBatch(
+      {
+        getChunk: (cx, cy, cz) => this.getChunk(cx, cy, cz),
+        getRevision: () => this.revision,
+        setRevision: (revision) => {
+          this.revision = revision;
+        },
+        addMutationCount: (count) => {
+          this.appliedMutationCount += count;
+        },
+        commitSingleEdit: (actorId, x, y, z, value) => this.commitSingleEdit(actorId, x, y, z, value),
+      },
+      batch,
+    );
+  }
+  private commitSingleEdit(actorId: string, x: number, y: number, z: number, value: number): WorldCommitResult {
+    const cx = floorDiv(x, CHUNK_SIZE);
+    const cy = floorDiv(y, CHUNK_SIZE);
+    const cz = floorDiv(z, CHUNK_SIZE);
+    const chunk = this.getChunk(cx, cy, cz);
+    const index = voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE));
+    if (chunk.voxels[index] === value)
+      return {
+        committed: false,
+        worldRevision: this.revision,
+        structuralChange: null,
+        semanticEvents: EMPTY_SEMANTIC_EVENTS,
+        metrics: SINGLE_EDIT_NOOP_METRICS,
+      };
+    const worldRevision = this.revision + 1;
+    const meshChunks = remeshChunkKeysForEdit(x, y, z);
+    if (meshChunks.length > 1) meshChunks.sort(compareChunkKeys);
+    const structuralChange: VoxelRegionChanged = {
       type: 'voxel-region-changed',
-      actorId: batch.actorId,
-      editCount,
-      chunks: [...changed.keys()],
-      meshChunks: [...meshChunks],
-      bounds: min && max ? { min, max } : null,
+      actorId,
+      worldRevision,
+      mutationCount: 1,
+      chunks: [chunk.key],
+      chunkRevisions: [{ key: chunk.key, revision: chunk.revision + 1 }],
+      meshChunks,
+      bounds: { min: [x, y, z], max: [x, y, z] },
+    };
+    chunk.voxels[index] = value;
+    chunk.revision += 1;
+    chunk.dirty = true;
+    chunk.materialized = true;
+    this.revision = worldRevision;
+    this.appliedMutationCount += 1;
+    return {
+      committed: true,
+      worldRevision,
+      structuralChange,
+      semanticEvents: EMPTY_SEMANTIC_EVENTS,
+      metrics: SINGLE_EDIT_METRICS[meshChunks.length],
     };
   }
 

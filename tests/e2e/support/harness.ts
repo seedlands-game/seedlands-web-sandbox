@@ -12,6 +12,11 @@ export type HarnessSnapshot = {
   colliding: boolean;
   interactionAttempts: number;
   mutationCount: number;
+  worldRevision: number;
+  structuralEventCount: number;
+  remeshSchedulingCount: number;
+  lastCommitMutationCount: number;
+  lastCommitMeshChunkCount: number;
   storageBytes: number;
   worldTime: number;
   timePaused: boolean;
@@ -53,10 +58,11 @@ type HarnessWindow = Window & {
     beginPerformanceScenario: (name: string) => string;
     setStreamingVariant: (variant: 'main-snapshot' | 'worker-first') => void;
     removeVoxelAt: (x: number, y: number, z: number) => void;
+    fillWorld: (command: { from: [number, number, number]; to: [number, number, number]; voxel: number }) => void;
     movePlayerTo: (x: number, y: number, z: number) => void;
-    prepareFlatMovement: () => Promise<void>;
-    prepareCenterExcavation: () => Promise<void>;
-    prepareStepDown: () => Promise<void>;
+    prepareFlatMovement: () => void;
+    prepareCenterExcavation: () => void;
+    prepareStepDown: () => void;
     setWorldTime: (hour: number) => void;
     setTimePaused: (paused: boolean) => void;
     setTimeSpeed: (speed: number) => void;
@@ -170,6 +176,22 @@ export async function removeHarnessVoxel(page: Page, x: number, y: number, z: nu
   );
 }
 
+export async function fillHarnessWorld(
+  page: Page,
+  from: [number, number, number],
+  to: [number, number, number],
+  voxel: number,
+): Promise<void> {
+  await page.evaluate(
+    ({ from: fillFrom, to: fillTo, voxel: fillVoxel }) => {
+      const harness = (window as HarnessWindow).__seedlandsHarness;
+      if (!harness) throw new Error('Seedlands harness fill entry is unavailable.');
+      harness.fillWorld({ from: fillFrom, to: fillTo, voxel: fillVoxel });
+    },
+    { from, to, voxel },
+  );
+}
+
 export async function moveHarnessPlayer(page: Page, x: number, y: number, z: number): Promise<void> {
   await page.evaluate(
     ([targetX, targetY, targetZ]) => {
@@ -182,26 +204,26 @@ export async function moveHarnessPlayer(page: Page, x: number, y: number, z: num
 }
 
 export async function prepareFlatMovement(page: Page): Promise<void> {
-  await page.evaluate(async () => {
+  await page.evaluate(() => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands flat-movement fixture is unavailable.');
-    await harness.prepareFlatMovement();
+    harness.prepareFlatMovement();
   });
 }
 
 export async function prepareCenterExcavation(page: Page): Promise<void> {
-  await page.evaluate(async () => {
+  await page.evaluate(() => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands center-excavation fixture is unavailable.');
-    await harness.prepareCenterExcavation();
+    harness.prepareCenterExcavation();
   });
 }
 
 export async function prepareStepDown(page: Page): Promise<void> {
-  await page.evaluate(async () => {
+  await page.evaluate(() => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands step-down fixture is unavailable.');
-    await harness.prepareStepDown();
+    harness.prepareStepDown();
   });
 }
 

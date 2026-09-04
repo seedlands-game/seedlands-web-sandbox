@@ -63,6 +63,8 @@ No private `.env` file is required to run or build the sandbox.
 
 ## Architecture
 
+`GameServer.editBatch()` is the authoritative transaction boundary for batched world mutations. The browser runtime is split by responsibility across startup, player control, rendering adapters, world streaming, environment, HUD, and persistence modules.
+
 ```text
 src/app/       Browser startup, PlayCanvas lifecycle, UI, input, and styles
 src/client/    Browser persistence and client-side adapters
@@ -87,6 +89,8 @@ pnpm test:e2e:regression
 
 These commands provide different evidence. Unit tests cover deterministic logic; static verification covers formatting, linting, path rules, coverage, and TypeScript; the production build proves bundling; Playwright covers deterministic browser behaviour. Visual semantics are evaluated separately with change-scoped Midscene flows.
 
+The architecture lint also limits JavaScript and TypeScript modules to 500 effective lines, excluding blank lines and comments, so responsibilities continue to be split instead of accumulating in a new monolith.
+
 For the complete development workflow, testing layers, and pull request expectations, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Relationship to Seedlands
@@ -106,6 +110,8 @@ This repository may remain useful independently as an open Web sandbox even if t
 ## Contributing and security
 
 Contributions are welcome within the repository's current scope. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening a pull request.
+
+Playwright uses port 4173 by default; parallel worktrees can set `SEEDLANDS_E2E_PORT` to avoid port collisions.
 
 Please do not report vulnerabilities in public issues. Follow [SECURITY.md](SECURITY.md) instead.
 

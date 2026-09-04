@@ -63,6 +63,8 @@ pnpm preview
 
 ## 架构
 
+`GameServer.editBatch()` 是批量世界修改的权威事务边界。浏览器运行时按职责拆分为启动、玩家控制、渲染适配、世界 streaming、环境、HUD 与持久化模块。
+
 ```text
 src/app/       浏览器启动、PlayCanvas 生命周期、UI、输入与样式
 src/client/    浏览器持久化与客户端适配
@@ -87,6 +89,8 @@ pnpm test:e2e:regression
 
 这些命令提供不同证据：单元测试覆盖确定性逻辑；静态验证覆盖格式、lint、路径规则、覆盖率和 TypeScript；生产构建证明 bundling；Playwright 覆盖确定性浏览器行为。视觉语义由 change 所属的 Midscene 流程独立评估。
 
+架构 lint 还将 JavaScript 与 TypeScript 模块限制为不超过 500 行有效代码（不计空行与注释），避免职责重新堆积为单体文件。
+
 完整开发流程、测试分层和 Pull Request 要求见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 与 Seedlands 的关系
@@ -106,6 +110,8 @@ Seedlands 的目标是一个由统一自然规律、自主居民、持久后果�
 ## 贡献与安全
 
 欢迎在本仓库当前范围内贡献。提交 Pull Request 前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 和 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+
+Playwright 默认使用 4173 端口；并行 worktree 可设置 `SEEDLANDS_E2E_PORT` 避免端口冲突。
 
 请勿在公开 Issue 中报告漏洞，请遵循 [SECURITY.md](SECURITY.md)。
 
