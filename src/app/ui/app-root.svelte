@@ -8,13 +8,22 @@
   import GameButton from './primitives/game-button.svelte';
   import GamePanel from './primitives/game-panel.svelte';
   import StartScreen from './start-screen.svelte';
+  import ShellOverlays from './shell-overlays.svelte';
+  import type { ApplicationShell } from '../application-shell';
 
   let {
     bridge,
     actions,
+    application,
     buildWatermark = '',
     buildCommit = '',
-  }: { bridge: UiBridge; actions: UiActionPort; buildWatermark?: string; buildCommit?: string } = $props();
+  }: {
+    bridge: UiBridge;
+    actions: UiActionPort;
+    application: ApplicationShell;
+    buildWatermark?: string;
+    buildCommit?: string;
+  } = $props();
   const readInitialState = () => ({
     shell: bridge.shell.get(),
     hud: bridge.hud.get(),
@@ -52,7 +61,8 @@
   });
 </script>
 
-<StartScreen {shell} onstart={(seed, quality) => void actions.startWorld(seed, quality)} />
+<StartScreen {shell} {application} onstart={(seed, quality) => void actions.startWorld(seed, quality)} />
+<ShellOverlays {application} />
 
 <section id="hud" hidden={!hud.visible} aria-label="游戏 HUD">
   <div id="crosshair" aria-label="准星"><span></span></div>

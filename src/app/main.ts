@@ -1,8 +1,13 @@
 import { formatBuildWatermark } from '../client/build-watermark';
 import { GENERATOR_VERSION } from '../world/voxel';
 import { Game } from './game';
+import { GlobalAudio } from './audio/global-audio';
+import { installAudioHarness } from './audio/audio-harness';
+import { ApplicationShell } from './application-shell';
+import './ui/styles/shell.css';
 import { installPersistenceHarness } from './game-harness';
 import './ui/styles/theme.css';
+import './ui/styles/presentation.css';
 import { createUiBridge } from './ui/ui-bridge';
 import type { UiActionPort } from './ui/ui-contracts';
 import { mountUi } from './ui/mount-ui';
@@ -16,21 +21,13 @@ const requiredElement = <ElementType extends Element>(selector: string) => {
 const canvas = requiredElement<HTMLCanvasElement>('#game');
 const uiRoot = requiredElement<HTMLElement>('#ui');
 const uiBridge = createUiBridge();
-const game = new Game(canvas, uiBridge);
-const saved = game.loadSavedSession();
+const audio = new GlobalAudio();
+installAudioHarness(audio);
+const game = new Game(canvas, uiBridge, audio);
+const application = new ApplicationShell(game, uiBridge, audio);
 
 const actions: UiActionPort = {
-  async startWorld(seedInput, quality) {
-    const seed = seedInput.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;
-    const restore = saved?.seed === seed ? saved : null;
-    uiBridge.publishShell({ phase: 'loading', seed, quality, enterLabel: '正在唤醒世界…' });
-    try {
-      await game.start(seed, restore, quality);
-    } catch (error) {
-      uiBridge.publishShell({ phase: 'error', enterLabel: '重试进入' });
-      console.error('Seedlands world start failed.', error);
-    }
-  },
+  startWorld: (seed, quality) => application.start(seed, quality),
   selectMaterial: (material) => game.selectMaterial(material),
   toggleMap: () => game.toggleMap(),
   closeMap: () => game.closeMap(),
@@ -42,16 +39,11 @@ const actions: UiActionPort = {
 
 const commitSha = import.meta.env.VITE_COMMIT_SHA?.trim();
 const buildWatermark = commitSha ? (formatBuildWatermark(commitSha, GENERATOR_VERSION) ?? '') : '';
-mountUi(uiRoot, { bridge: uiBridge, actions, buildWatermark, buildCommit: commitSha });
+mountUi(uiRoot, { bridge: uiBridge, actions, application, buildWatermark, buildCommit: commitSha });
 void installPersistenceHarness();
 
-if (saved) uiBridge.publishShell({ phase: 'menu', seed: saved.seed, enterLabel: '进入世界' });
-else
-  void game
-    .loadLatestWorldSeed()
-    .then((seed) => {
-      uiBridge.publishShell({ phase: 'menu', seed: seed ?? '', enterLabel: '进入世界' });
-    })
-    .catch(() => {
-      uiBridge.publishShell({ phase: 'menu', enterLabel: '进入世界' });
-    });
+void application.initialize();
+
+document.addEventListener('click', (event) => {
+  if ((event.target as Element)?.closest('button')) void audio.unlock().then(() => audio.play('confirm'));
+});

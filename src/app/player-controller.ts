@@ -15,6 +15,7 @@ type PlayerControllerOptions = {
   telemetry: PerformanceTelemetry;
   getWorld: () => World | null;
   getEnvironment: () => WorldEnvironment | null;
+  isPaused?: () => boolean;
   onToggleMap: () => void;
   onToggleDebug: () => void;
   onToggleCommandShell: () => void;
@@ -55,6 +56,7 @@ export class PlayerController {
   install() {
     const { canvas } = this.options;
     window.onkeydown = (event) => {
+      if (this.options.isPaused?.()) return;
       if (event.code === 'F4') {
         event.preventDefault();
         this.options.onToggleCommandShell();
@@ -90,7 +92,9 @@ export class PlayerController {
     };
     window.onkeyup = (event) => this.keys.delete(event.code);
     canvas.oncontextmenu = (event) => event.preventDefault();
-    canvas.onclick = () => canvas.requestPointerLock();
+    canvas.onclick = () => {
+      if (!this.options.isPaused?.()) void canvas.requestPointerLock();
+    };
     document.onmousemove = (event) => {
       if (document.pointerLockElement === canvas) {
         this.yaw -= event.movementX * 0.13;
@@ -98,6 +102,7 @@ export class PlayerController {
       }
     };
     document.onmousedown = (event) => {
+      if (this.options.isPaused?.()) return;
       if (document.pointerLockElement !== canvas) return;
       if (event.button === 0)
         this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(false));

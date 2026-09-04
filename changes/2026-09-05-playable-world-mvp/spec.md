@@ -218,3 +218,11 @@
 整体 MVP 尚未完成。上游通过记录仅为上游证据，本集成版本的基线验证待两路合并后运行。
 
 文档校验：`pnpm exec prettier --check changes/2026-09-05-playable-world-mvp/spec.md` 与 `git diff --check` 通过；仅文档变更，不将构建或产品测试记为已执行。整体 change 保持 Active，按里程碑更新；当前可提交合同以便恢复，不将文档提交计为产品准出。
+
+### 2026-09-05 并行交付协调记录
+
+- 当前分支 `codex/playable-world-mvp` 已合并渲染 `abdaf5a23edb4c561e05d93b8cd6eae52e54d450` 和 Retained UI `7c46b73e5d8a429f8bdf8a5f108fa82e9a0d4bb3`；集成提交 `deea3e0`。当时静态/构建与 9 项基线通过。
+- 主任务负责统一表现、音频、Shell、最终生存串联与全量验收。两路已有任务继续在独立工作树推进，禁止读取对方未提交文件作为合并输入。
+- 渲染任务收到明确的高级光影后续范围，负责灯/阴影/水面真实反射/后处理；约定 `Voxel.Lantern=9`、`FaceMaterial.Lantern=11`，原数值不变。父任务集成灯笼物品与配方。
+- UI/玩法任务先交付 Change8 完整本地 SHA，再继续 Change9 纯服务端生物/NPC/感知/导航/Action/POI及可辨动画；父任务最终合并两次检查点。
+- 当前本地 Shell 与音频 change 已有纯逻辑、需求浏览器和静态/构建通过记录，尚未称为整体交付。所有分支不 push。

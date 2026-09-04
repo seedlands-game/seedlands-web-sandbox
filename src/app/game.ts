@@ -1,4 +1,7 @@
 import * as pc from 'playcanvas';
+import { macroAt } from '../world/macro-world';
+import type { GlobalAudio } from './audio/global-audio';
+import { WorldAudio } from './audio/world-audio';
 import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
 import { PerformanceTelemetry } from '../client/performance-telemetry';
@@ -24,6 +27,8 @@ import { WorldEnvironment } from './world-environment';
 import { World } from './world-runtime';
 
 export class Game {
+  private paused = false;
+  private worldAudio: WorldAudio | null = null;
   private app: pc.Application | null = null;
   private world: World | null = null;
   private environment: WorldEnvironment | null = null;
@@ -58,6 +63,7 @@ export class Game {
   constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly uiBridge: UiBridge,
+    private readonly audio?: GlobalAudio,
   ) {
     window.addEventListener('resize', () => this.app?.resizeCanvas());
     window.addEventListener('pagehide', () => void this.flushSave().catch(() => undefined));
@@ -74,6 +80,7 @@ export class Game {
   async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel) {
     await this.flushSave();
     this.disposeRuntime();
+    this.paused = false;
     this.seedText = seedText;
     this.qualityLevel = qualityLevel;
     this.uiSession = this.uiBridge.beginWorldSession(seedText);
@@ -99,6 +106,7 @@ export class Game {
     this.visualResources = await createVoxelMaterials(this.app, quality);
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
     const server = new GameServer({ seedText, persistence: this.persistence });
+    if (this.audio) this.worldAudio = new WorldAudio(this.audio, server.seed);
     server.setWorldTime(this.environment.worldTime);
     this.world = new World(
       server,
@@ -174,6 +182,7 @@ export class Game {
       telemetry: this.performanceTelemetry,
       getWorld: () => this.world,
       getEnvironment: () => this.environment,
+      isPaused: () => this.paused,
       onToggleMap: () => this.toggleMap(),
       onToggleDebug: () => this.toggleDebug(),
       onToggleCommandShell: () => this.toggleCommandShell(),
@@ -249,6 +258,22 @@ export class Game {
     this.controller?.releaseInput();
   }
 
+  setPaused(paused: boolean) {
+    this.paused = paused;
+    this.controller?.releaseInput();
+  }
+
+  async leaveWorld() {
+    await this.flushSave();
+    this.uiSession?.publishHud(++this.hudSequence, { visible: false });
+    this.disposeRuntime();
+    this.uiBridge.publishShell({ phase: 'menu', enterLabel: '进入世界' });
+  }
+
+  abortStart() {
+    this.disposeRuntime();
+  }
+
   selectMaterial(material: number) {
     this.controller?.selectMaterial(material);
   }
@@ -294,6 +319,8 @@ export class Game {
     const now = performance.now();
     const actualFrameMs = now - this.lastFrameTimestamp;
     this.lastFrameTimestamp = now;
+    this.updateAudio();
+    if (this.paused) return;
     this.performanceTelemetry.beginFrame();
     this.world.beginFrame();
     if (this.environment) {
@@ -345,6 +372,26 @@ export class Game {
           seedText: this.seedText,
         }),
       ),
+    );
+  }
+
+  private updateAudio() {
+    if (!this.worldAudio || !this.camera || !this.world) return;
+    const { x, y, z } = this.camera.getPosition();
+    this.worldAudio.update(
+      this.camera,
+      this.controller?.onGround ?? false,
+      this.world.getVoxel(Math.floor(x), Math.floor(y - 1.7), Math.floor(z)),
+      () => {
+        const macro = macroAt(this.world!.seed, x, z);
+        return {
+          biome: macro.biome,
+          worldTime: this.world!.server.worldTime,
+          waterProximity: macro.hydrology.water ? 1 : 0,
+          danger: 0,
+        };
+      },
+      this.paused,
     );
   }
 
@@ -425,6 +472,8 @@ export class Game {
   }
 
   private disposeRuntime() {
+    this.worldAudio?.dispose();
+    this.worldAudio = null;
     this.uiSession?.dispose();
     this.uiSession = null;
     this.commandExecutor = null;
