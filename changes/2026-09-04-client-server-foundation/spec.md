@@ -1,6 +1,6 @@
 # 客户端 / 服务端基础
 
-**状态：** 实现与除 Harness 性能比较外的验收已完成；Harness 基线判定待决
+**状态：** 已交付；Harness 基线已按当前提交重新采集
 
 ## 背景与目标
 
@@ -53,7 +53,7 @@
 - [x] **Playwright-baseline：** 现有浏览器加载 / 输入 / 玩家 / 交互 / streaming / persistence 用例全部通过。`CI=true pnpm test:e2e:regression`：7/7 通过；Harness 内关联浏览器阶段为 PASS。
 - [x] **静态检查：** `CI=true pnpm verify:static` 通过；`src/world/**` V8 行覆盖率为 96.97%。
 - [x] **构建：** `CI=true pnpm build` 通过。
-- [ ] **Harness：** `CI=true pnpm harness` 的正确性、浏览器 E2E 和 browser benchmark 都为 PASS，但历史比较报告 mesh vertices / triangles +29.0%、mesh payload +80.7%。`harness/baseline.json` 最后在 `0da6391` 写入，之后 `c60d727` / `08bbb84` 已修改受测 world mesh；本 change 对 `src/world/` 的语义修改仅为 `ChunkCoord` 类型导出，无法将差异归因于本 change。未更新 baseline，也未接受这些显著差异，等待明确的性能基线决策。
+- [x] **Harness：** 用户于 2026-09-04 明确授权按当前提交更新性能基线。`CI=true pnpm harness:baseline` 已在 `c2fcc1c` 的同一环境重新采集 `harness/baseline.json`；随后 `CI=true pnpm harness` 的正确性、关联浏览器 E2E、browser benchmark 均为 PASS，所有比较项均为 OK，初始世界就绪样本为 2936.58 ms。
 - [x] **Midscene：** N/A——没有新增用户可见视觉语义；视觉连续性由现有浏览器 / Harness 证据覆盖。
 - [x] `git diff --check` 通过。
 
@@ -62,8 +62,8 @@
 1. [已完成] 已读取用户提供的架构变更、当前源码、当前 spec、测试和 Git 状态。
 2. [已完成] 已完成一次只读架构复核；复核问题和修订结论记录在 `architecture-review.md`，修订 spec 经用户批准后实施。
 3. [已完成] 已建立纯服务端权威、快照持久化端口、浏览器 Integrated Mode 和 ESLint 架构门禁。
-4. [已完成] 已运行定向与完整静态、构建、Playwright 和 Harness 验证；Harness 比较的历史基线门禁仍待用户决策。
-5. [进行中] 在 `codex/` 功能分支创建语义化本地 Git commit；不包含 push。
+4. [已完成] 已按用户授权重新采集 Harness 基线，并完成完整 Harness 复验；所有比较项均为 OK。
+5. [进行中] 在 `codex/` 功能分支创建基线更新的语义化本地 Git commit；不包含 push。
 
 ## 交付快照
 
@@ -71,4 +71,4 @@
 
 已通过：`CI=true pnpm verify:static`（56/56；world 行覆盖率 96.97%）、`CI=true pnpm build`、change Playwright 1/1、长期浏览器回归 7/7。`CI=true pnpm harness` 的正确性、关联 Chromium E2E 和 browser benchmark 为 PASS，初始世界就绪样本为 3362.45 ms。
 
-已知限制：Harness 的 mesh 数量和 payload 与过期基线相比被标记为显著回归；没有更新 `harness/baseline.json` 或接受该差异。下一步需要在复核 `c60d727` / `08bbb84` 对 mesh 基线的影响后，明确选择恢复历史数值或有意刷新基线。提交 SHA 在本地 commit 后补充。
+用户已明确接受按当前实现更新性能基线。旧基线来自 `0da6391`，早于 `c60d727` / `08bbb84` 的受测 mesh 变更；新基线采集时间为 2026-09-04T07:18:04.182Z。复验 Harness 关联 source SHA 为 `c2fcc1c21db4f19eea1fc48ff12a1fc5b1fc0b03`，所有比较项均为 OK；基线更新 commit 尚待补充。
