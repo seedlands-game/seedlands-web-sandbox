@@ -12,6 +12,11 @@ export type HarnessSnapshot = {
   colliding: boolean;
   interactionAttempts: number;
   mutationCount: number;
+  worldRevision: number;
+  structuralEventCount: number;
+  remeshSchedulingCount: number;
+  lastCommitMutationCount: number;
+  lastCommitMeshChunkCount: number;
   storageBytes: number;
   worldTime: number;
   timePaused: boolean;
@@ -53,6 +58,7 @@ type HarnessWindow = Window & {
     beginPerformanceScenario: (name: string) => string;
     setStreamingVariant: (variant: 'main-snapshot' | 'worker-first') => void;
     removeVoxelAt: (x: number, y: number, z: number) => void;
+    fillWorld: (command: { from: [number, number, number]; to: [number, number, number]; voxel: number }) => void;
     movePlayerTo: (x: number, y: number, z: number) => void;
     prepareFlatMovement: () => void;
     prepareCenterExcavation: () => void;
@@ -66,7 +72,7 @@ type HarnessWindow = Window & {
 };
 
 export async function startHarnessWorld(page: Page, seed: string, query = ''): Promise<void> {
-  await page.goto(`/?harness=1${query}`, { waitUntil: 'networkidle' });
+  await page.goto(`./?harness=1${query}`, { waitUntil: 'networkidle' });
   await page.locator('#seed').fill(seed);
   await page.getByRole('button', { name: '进入世界' }).click();
   await page.locator('#start-card').waitFor({ state: 'hidden' });
@@ -116,22 +122,28 @@ export async function waitForPlayerMovement(
     yTolerance?: number;
   },
 ): Promise<HarnessSnapshot> {
-  await page.waitForFunction(
-    (expected) => {
-      const current = (window as HarnessWindow).__seedlandsHarness?.snapshot();
-      if (!current) return false;
-      const delta = current.player[expected.axis] - expected.start;
-      const moved = expected.direction
-        ? delta * expected.direction > expected.minimumDelta
-        : Math.abs(delta) > expected.minimumDelta;
-      const atExpectedHeight =
-        expected.yTarget === undefined ||
-        Math.abs(current.player[1] - expected.yTarget) < (expected.yTolerance ?? 0.05);
-      return moved && atExpectedHeight;
-    },
-    expectation,
-    { timeout: 15_000 },
-  );
+  try {
+    await page.waitForFunction(
+      (expected) => {
+        const current = (window as HarnessWindow).__seedlandsHarness?.snapshot();
+        if (!current) return false;
+        const delta = current.player[expected.axis] - expected.start;
+        const moved = expected.direction
+          ? delta * expected.direction > expected.minimumDelta
+          : Math.abs(delta) > expected.minimumDelta;
+        const atExpectedHeight =
+          expected.yTarget === undefined ||
+          Math.abs(current.player[1] - expected.yTarget) < (expected.yTolerance ?? 0.05);
+        return moved && atExpectedHeight;
+      },
+      expectation,
+      { timeout: 15_000 },
+    );
+  } catch (error) {
+    throw new Error(`Player movement did not satisfy the expected condition: ${JSON.stringify(await snapshot(page))}`, {
+      cause: error,
+    });
+  }
   const current = await snapshot(page);
   if (!current) throw new Error('Seedlands harness snapshot is unavailable after player movement.');
   return current;
@@ -161,6 +173,22 @@ export async function removeHarnessVoxel(page: Page, x: number, y: number, z: nu
       harness.removeVoxelAt(targetX, targetY, targetZ);
     },
     [x, y, z],
+  );
+}
+
+export async function fillHarnessWorld(
+  page: Page,
+  from: [number, number, number],
+  to: [number, number, number],
+  voxel: number,
+): Promise<void> {
+  await page.evaluate(
+    ({ from: fillFrom, to: fillTo, voxel: fillVoxel }) => {
+      const harness = (window as HarnessWindow).__seedlandsHarness;
+      if (!harness) throw new Error('Seedlands harness fill entry is unavailable.');
+      harness.fillWorld({ from: fillFrom, to: fillTo, voxel: fillVoxel });
+    },
+    { from, to, voxel },
   );
 }
 

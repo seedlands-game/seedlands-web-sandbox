@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a reproducible problem in Seedlands Web Sandbox.
+title: '[Bug]: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the sandbox. Do not include credentials, personal data, or private logs. Security vulnerabilities must use private vulnerability reporting.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and did not find the same problem.
+          required: true
+        - label: This is not a security vulnerability.
+          required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build watermark or commit
+      description: Copy the lower-right build watermark, or provide the commit you ran locally.
+      placeholder: commit 0123456 · generator v2
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Give the smallest deterministic sequence, including the world Seed when relevant.
+      placeholder: |
+        1. Open ...
+        2. Enter Seed ...
+        3. Perform ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and operating system
+      placeholder: Chrome 140 on macOS 15
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional evidence
+      description: Add a small screenshot, console excerpt, or save details only when safe and relevant.

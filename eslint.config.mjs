@@ -65,12 +65,19 @@ export default tseslint.config(
     ],
   },
   {
-    files: ['scripts/**/*.mjs'],
+    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    linterOptions: { noInlineConfig: true },
+    rules: {
+      'max-lines': ['error', { max: 500, skipBlankLines: true, skipComments: true }],
+    },
+  },
+  {
+    files: ['**/*.{js,mjs,cjs}'],
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.node },
   },
   {
-    files: ['src/**/*.ts', 'tests/**/*.ts'],
+    files: ['**/*.{ts,mts,cts}'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
       globals: { ...globals.browser, ...globals.node, ...globals.worker },

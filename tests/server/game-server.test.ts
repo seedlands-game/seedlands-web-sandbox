@@ -25,14 +25,20 @@ describe('GameServer headless authority', () => {
       ],
     });
 
-    expect(result).toEqual({
+    expect(result.structuralChange).toEqual({
       type: 'voxel-region-changed',
       actorId: 'harness',
-      editCount: 3,
+      worldRevision: 1,
+      mutationCount: 3,
       chunks: [chunkKey(0, 0, 0), chunkKey(1, 0, 0)],
+      chunkRevisions: [
+        { key: chunkKey(0, 0, 0), revision: 1 },
+        { key: chunkKey(1, 0, 0), revision: 1 },
+      ],
       meshChunks: expect.arrayContaining([chunkKey(0, 0, 0), chunkKey(1, 0, 0)]),
       bounds: { min: [31, 0, 0], max: [32, 1, 0] },
     });
+    expect(result).toMatchObject({ committed: true, worldRevision: 1, semanticEvents: [] });
     expect(server.getChunk(0, 0, 0)).toMatchObject({ revision: 1, dirty: true });
     expect(server.getChunk(1, 0, 0)).toMatchObject({ revision: 1, dirty: true });
     expect(server.getVoxel(32, 1, 0)).toBe(Voxel.Water);

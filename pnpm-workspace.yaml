@@ -1,5 +1,6 @@
 allowBuilds:
   '@ffmpeg-installer/darwin-arm64': true
+  '@ffmpeg-installer/linux-x64': false
   esbuild: true
   node-mac-permissions: true
   puppeteer: true
