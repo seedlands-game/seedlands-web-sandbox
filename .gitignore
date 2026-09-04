@@ -7,4 +7,5 @@ midscene_run/
 harness/results/
 playwright-report/
 test-results/
+lighthouse-report.json
 .DS_Store

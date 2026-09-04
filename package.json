@@ -18,7 +18,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "pnpm typecheck && vite build",
+    "build": "pnpm typecheck && vite build && pnpm check:assets",
+    "check:assets": "node scripts/check-build-assets.mjs",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint .",
     "lint:paths": "ls-lint",
@@ -37,6 +38,7 @@
     "harness:e2e": "node scripts/run-playwright-harness.mjs",
     "harness:macro-map": "pnpm test:e2e:macro-map",
     "harness": "pnpm test && pnpm build && node scripts/run-playwright-harness.mjs --aggregate",
+    "audit:lighthouse": "pnpm dlx lighthouse@12.8.2 http://127.0.0.1:4173/ --only-categories=performance,best-practices,accessibility,seo --output=json --output-path=lighthouse-report.json --chrome-flags='--headless --no-sandbox' && node scripts/check-lighthouse-report.mjs lighthouse-report.json",
     "preview": "vite preview",
     "midscene:verify-model": "midscene model verify",
     "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json",

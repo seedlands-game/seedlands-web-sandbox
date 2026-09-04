@@ -1,10 +1,12 @@
 import { formatBuildWatermark } from '../client/build-watermark';
+import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
 import { GENERATOR_VERSION } from '../world/voxel';
 import './styles/hud.css';
 import './styles/macro-map.css';
 import { appElements } from './app-elements';
-import { Game } from './game';
+import { BrowserWorldStore } from './browser-world-store';
 import { installPersistenceHarness } from './game-harness';
+import type { Game } from './game';
 
 const commitSha = import.meta.env.VITE_COMMIT_SHA?.trim();
 const buildWatermark = formatBuildWatermark(commitSha, GENERATOR_VERSION);
@@ -18,19 +20,28 @@ if (buildWatermark && commitSha) {
   document.querySelector<HTMLElement>('#ui')!.append(watermark);
 }
 
-const game = new Game();
 void installPersistenceHarness();
-const saved = game.loadSavedSession();
+const saved = new BrowserWorldStore().load();
+let gamePromise: Promise<Game> | null = null;
+
+const loadGame = () => {
+  gamePromise ??= import('./game')
+    .then(({ Game }) => new Game())
+    .catch((error: unknown) => {
+      gamePromise = null;
+      throw error;
+    });
+  return gamePromise;
+};
 
 appElements.enterButton.disabled = true;
 if (saved) {
   appElements.seedInput.value = saved.seed;
   appElements.enterButton.disabled = false;
 } else {
-  void game
-    .loadLatestWorldSeed()
+  void BrowserChunkPersistence.latestWorld()
     .then((seed) => {
-      if (seed && !appElements.seedInput.value) appElements.seedInput.value = seed;
+      if (seed?.seedText && !appElements.seedInput.value) appElements.seedInput.value = seed.seedText;
     })
     .finally(() => {
       appElements.enterButton.disabled = false;
@@ -43,6 +54,7 @@ appElements.enterButton.onclick = async () => {
   appElements.enterButton.disabled = true;
   appElements.enterButton.textContent = '正在唤醒世界…';
   try {
+    const game = await loadGame();
     await game.start(seed, restore);
   } catch (error) {
     appElements.startCard.hidden = false;
