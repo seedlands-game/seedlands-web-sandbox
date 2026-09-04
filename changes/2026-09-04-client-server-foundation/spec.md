@@ -63,7 +63,7 @@
 2. [已完成] 已完成一次只读架构复核；复核问题和修订结论记录在 `architecture-review.md`，修订 spec 经用户批准后实施。
 3. [已完成] 已建立纯服务端权威、快照持久化端口、浏览器 Integrated Mode 和 ESLint 架构门禁。
 4. [已完成] 已按用户授权重新采集 Harness 基线，并完成完整 Harness 复验；所有比较项均为 OK。
-5. [进行中] 在 `codex/` 功能分支创建基线更新的语义化本地 Git commit；不包含 push。
+5. [已完成] 已在 `codex/` 功能分支创建基线更新的语义化本地 Git commit `cfd3976`；未执行 push。
 
 ## 交付快照
 
@@ -71,4 +71,4 @@
 
 已通过：`CI=true pnpm verify:static`（56/56；world 行覆盖率 96.97%）、`CI=true pnpm build`、change Playwright 1/1、长期浏览器回归 7/7。`CI=true pnpm harness` 的正确性、关联 Chromium E2E 和 browser benchmark 为 PASS，初始世界就绪样本为 3362.45 ms。
 
-用户已明确接受按当前实现更新性能基线。旧基线来自 `0da6391`，早于 `c60d727` / `08bbb84` 的受测 mesh 变更；新基线采集时间为 2026-09-04T07:18:04.182Z。复验 Harness 关联 source SHA 为 `c2fcc1c21db4f19eea1fc48ff12a1fc5b1fc0b03`，所有比较项均为 OK；基线更新 commit 尚待补充。
+用户已明确接受按当前实现更新性能基线。旧基线来自 `0da6391`，早于 `c60d727` / `08bbb84` 的受测 mesh 变更；新基线采集时间为 2026-09-04T07:18:04.182Z。复验 Harness 关联 source SHA 为 `c2fcc1c21db4f19eea1fc48ff12a1fc5b1fc0b03`，所有比较项均为 OK；基线更新提交为 `cfd3976`，未推送。
