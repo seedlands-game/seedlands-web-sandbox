@@ -75,6 +75,16 @@ describe('greedy chunk meshing', () => {
     expect(wood[FaceMaterial.WoodSide].indices).toHaveLength(24);
   });
 
+  it('keeps every vertical block side texture upright', () => {
+    const wood = meshSynthetic([[4, 4, 4, Voxel.Wood]])[FaceMaterial.WoodSide];
+
+    for (let vertex = 0; vertex < wood.positions.length / 3; vertex += 1) {
+      const worldY = wood.positions[vertex * 3 + 1];
+      const textureV = wood.uvs[vertex * 2 + 1];
+      expect(textureV).toBe(worldY - 4);
+    }
+  });
+
   it('emits repeating UVs and AO vertex colors with a typed worker contract', () => {
     const meshes = meshSynthetic([
       [4, 4, 4, Voxel.Stone],

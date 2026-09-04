@@ -17,6 +17,7 @@ Seedlands 已有确定性 Macro Worldgen、河湖、树木、Chunk Streaming 与
 
 - 使用内置 Image Generation 生成一张 3×3 原创体素母图，以 768×768 WebP 作为唯一源资产。运行时对各 tile 构造镜像连续的 128×128 小纹理，镜像是纹理周期本身而非可见 padding 边框；该等价 atlas 方案隔离 mip bleeding，并允许 Greedy 大面用 `repeat` UV 而不拉伸。
 - Mesh 按“面材质”而不再按 voxel id 分组。Grass 为 top/side/dirt，Wood 为 bark/end；其他体素使用单 tile。水使用独立透明材质和 mesh instance，不与 opaque 表面共用 pass 语义。
+- 所有竖直侧面都使用世界 Y 轴作为纹理 V 轴；X/Z 法向只改变水平 U 轴的投影方向，不允许同一竖直方块的一组侧面将树皮旋转 90°。
 - AO 在纯逻辑 mesher 内根据每个顶点外侧的两个 side 与一个 corner occupancy 计算四级亮度，以 vertex color 传到 StandardMaterial。面材质、方向或 AO 四角签名不同时禁止 Greedy 合并；对角线根据 AO 和选择，避免明显插值折线。
 - `World.edit()` 在一个边或角上发生改动时，按各轴 AO 一格采样半径的笛卡尔积失效直交与对角邻 Chunk，避免跨 Chunk 陈旧 AO。
 - Worker 合约显式传输 `material` / `renderLayer` / `uvs` / `colors` 和原有几何 typed arrays，主线程不再用 voxel id 隐式推导材质。
@@ -27,6 +28,7 @@ Seedlands 已有确定性 Macro Worldgen、河湖、树木、Chunk Streaming 与
 ## Behaviour
 
 - Given Grass 或 Wood 的不同朝向面, When Chunk 生成 mesh, Then 上/侧/下面使用对应 tile，且 Greedy 大面纹理逐 voxel 重复。
+- Given 竖直树干的任意 X/Z 法向侧面, When 生成 UV, Then 纹理 V 坐标只随世界 Y 坐标增长，树皮在四个侧面上都朝上。
 - Given 墙角、台阶或洞口邻域, When mesher 输出顶点, Then AO 亮度按 occupancy 变暗，不兼容 AO 图案不被强行合并。
 - Given opaque voxel 与 water/air 相邻, When 渲染, Then 地形保持不透明，水体仅在外露面使用透明层，连续河湖不出现内部面。
 - Given world time 连续运行, When 经过 dawn/day/sunset/night, Then sun、sky、ambient 和 fog 使用同一时间且连续变化；夜间仍保留可玩的最低环境光。
@@ -39,8 +41,9 @@ Seedlands 已有确定性 Macro Worldgen、河湖、树木、Chunk Streaming 与
 - [x] Vertex AO、AO-aware Greedy Mesh、对角 Chunk 失效与顶点合约有确定性 Vitest 证据。
 - [x] 透明水层、水面动画、昼夜、天空、太阳与雾已实现。
 - [x] Player HUD / Debug HUD 分离，质量档与时间 debug/Harness 控制已实现。
-- [x] `CI=true pnpm verify:static` 与 `CI=true pnpm build` 通过；34 tests passed，`src/world/**` line coverage 95.44%。
+- [x] `CI=true pnpm verify:static` 与 `CI=true pnpm build` 通过；35 tests passed，`src/world/**` line coverage 95.46%。
 - [x] 完整 Harness 的 11 个 Chromium 用例通过；视觉截图实际覆盖 plains、forest、mountain、river/water 及 day、sunset、night，并独立人工检查水面、fog、天空、HUD 与夜间可读性。
+- [x] 用户截图暴露的 X 法向树皮横置问题已修正；新增单测逐顶点验证所有竖直侧面的 `textureV = worldY - faceMinY`，专项 Chromium 回归 2/2 通过并检查 forest 截图。
 - [x] Harness 已记录相对性能和资产体积；基线未改写。
 
 ## Tasks & Current State
@@ -49,13 +52,14 @@ Seedlands 已有确定性 Macro Worldgen、河湖、树木、Chunk Streaming 与
 2. [done] Sol/xhigh 只读复核 Mesh/AO/材质分层与环境时间方案，并将四项关键合约纳入实现。
 3. [done] 实现资产、Mesh/Worker 数据、渲染、环境、HUD 与测试。
 4. [done] 运行静态、构建、Playwright/Harness 与浏览器视觉验收。
-5. [done] 补齐 Delivery Snapshot，仅待创建本地语义化 commit。
+5. [done] 补齐 Delivery Snapshot 并创建首轮本地语义化 commit `c60d727`。
+6. [done] 根据用户截图统一竖直侧面 UV 朝向，补定向单测、静态/构建与 Chromium 视觉回归。
 
 ## Delivery Snapshot
 
 Changed paths: `public/assets/voxel-atlas.webp`, `src/world/voxel.ts`, `src/world/mesh.ts`, `src/worker/world-worker.ts`, `src/app/visual-environment.ts`, `src/app/main.ts`, `src/app/style.css`, `index.html`, `tests/world/*.test.ts`, `tests/e2e/support/harness.ts`, `tests/e2e/regression/visual-upgrade.spec.ts`, `scripts/run-harness.mjs`, `README.md` and this change record.
 
-Validation: `CI=true pnpm verify:static` passed (34 Vitest tests, 95.44% world line coverage); `CI=true pnpm build` passed; `CI=true pnpm harness` passed with 11/11 Chromium tests, all load/input/player/interaction/streaming/persistence stages PASS and browser benchmark PASS. Visual screenshots under the ignored `test-results/visual-upgrade/` were inspected for four environment classes and three times of day.
+Validation: after the upright-side UV correction, `CI=true pnpm verify:static` passed (35 Vitest tests, 95.46% world line coverage), `CI=true pnpm build` passed, and the focused visual-upgrade Chromium suite passed 2/2 with the regenerated forest screenshot inspected. The earlier full `CI=true pnpm harness` passed with 11/11 Chromium tests, all load/input/player/interaction/streaming/persistence stages PASS and browser benchmark PASS. Visual screenshots under the ignored `test-results/visual-upgrade/` were inspected for four environment classes and three times of day.
 
 Harness versus the retained pre-upgrade baseline: meshing p95 27.04 ms (+10.4%, WARNING) while throughput was 51.70 chunks/s (-0.3%, OK); AO-aware merge produced 4,336 triangles (+29.0%) and the newly truthful position/normal/UV/color/index payload was 364,224 bytes (+80.7%). These are expected absolute costs of AO/UV vertex data and conservative AO merge boundaries; worldgen p95 improved 1.6%, Node heap was flat, total build output increased 4.4%, gzip JS increased 1.0%, and initial Chromium world ready was 858.73 ms. At the sampled 35 chunks, the absolute geometry/payload remains small enough for this vertical slice; the baseline is intentionally unchanged so future work continues to see the cost.
 
