@@ -34,6 +34,7 @@ describe('原创电子声音素材', () => {
       'damage',
       'confirm',
       'cancel',
+      'creature',
     ] as const) {
       const samples = synthesizeSfx(key, 22050, 17);
       expect(samples).toEqual(synthesizeSfx(key, 22050, 17));
@@ -49,6 +50,7 @@ describe('原创电子声音素材', () => {
       expect(Math.abs(samples[0])).toBeLessThan(0.001);
       expect(Math.abs(samples[samples.length - 1])).toBeLessThan(0.001);
     }
+    expect(synthesizeSfx('creature', 22050, 17).length).toBeGreaterThanOrEqual(22050 * 0.5);
     expect(synthesizeSfx('step-stone', 22050, 17)).not.toEqual(synthesizeSfx('step-grass', 22050, 17));
   });
 });

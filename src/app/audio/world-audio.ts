@@ -1,4 +1,5 @@
 import type * as pc from 'playcanvas';
+import { CreatureAmbience } from '../../client/audio/creature-ambience';
 import { macroAt } from '../../world/macro-world';
 import type { World } from '../world-runtime';
 import { FootstepTracker, MusicCueScheduler } from '../../client/audio/audio-policy';
@@ -13,6 +14,7 @@ import type { GlobalAudio } from './global-audio';
 export class WorldAudio {
   private readonly session: string;
   private readonly steps = new FootstepTracker();
+  private readonly creatures = new CreatureAmbience();
   private readonly scheduler: MusicCueScheduler;
   private readonly loops: { source: AudioBufferSourceNode; gain: GainNode }[] = [];
   private disposed = false;
@@ -36,6 +38,13 @@ export class WorldAudio {
       world.getVoxel(Math.floor(x), Math.floor(y - 1.7), Math.floor(z)),
       () => {
         const macro = macroAt(world.seed, x, z);
+        const nearby = this.paused
+          ? []
+          : world.server
+              .queryNearbyEntities([x, y, z], 18, { type: 'creature' })
+              .filter((entity) => (entity.health ?? 0) > 0);
+        const cue = this.creatures.sample(this.audio.graph!.context.currentTime, [x, y, z], nearby, this.paused);
+        if (cue) this.play('creature', cue.position, 0, cue.id);
         return {
           biome: macro.biome,
           worldTime: world.server.worldTime,
