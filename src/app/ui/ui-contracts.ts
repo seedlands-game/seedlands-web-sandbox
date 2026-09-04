@@ -59,6 +59,7 @@ export type InteractionTarget = Readonly<{
 }>;
 
 export type InteractionState = Readonly<{
+  gesture: Readonly<{ kind: 'attack' | 'place' | 'eat' | 'damage'; sequence: number }> | null;
   target: InteractionTarget | null;
   feedback: Readonly<{ message: string; tone: FeedbackTone }> | null;
   breaking: Readonly<{ progress: number; label: string }> | null;

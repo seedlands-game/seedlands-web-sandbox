@@ -79,6 +79,7 @@ const initialHud = (): HudState => ({
   hotbar: Array.from({ length: 8 }, (_, slot) => ({ slot, itemId: null, count: 0, name: '空槽位', edible: false })),
 });
 const initialInteraction = (): InteractionState => ({
+  gesture: null,
   target: null,
   feedback: null,
   breaking: null,

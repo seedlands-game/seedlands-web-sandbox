@@ -44,13 +44,13 @@ export class BrowserGameplay {
     result.commits.forEach((commit) => this.options.consumeCommit(commit));
     if (before && result.commits.length) {
       this.feedback(`掉落 · ${voxelNames[before.voxel] ?? '资源'}`, 'success');
-      this.options.onPresentation?.({ kind: 'break', voxel: before.voxel, position: before.position });
+      this.present({ kind: 'break', voxel: before.voxel, position: before.position });
       this.options.queueSave();
     }
     for (const pickup of result.pickups) {
       if (pickup.playerId !== this.options.playerId) continue;
       this.feedback('拾取 · 物品已放入背包', 'success');
-      this.options.onPresentation?.({ kind: 'pickup', position: pickup.position });
+      this.present({ kind: 'pickup', position: pickup.position });
       this.options.queueSave();
     }
     this.refresh(false);
@@ -60,8 +60,7 @@ export class BrowserGameplay {
     const player = this.options.server.getPlayerState(this.options.playerId);
     const entities = this.options.server.queryEntities().filter((entity) => entity.type !== 'player');
     this.presenter.reconcile(entities);
-    if (this.previousHealth !== null && player.health < this.previousHealth)
-      this.options.onPresentation?.({ kind: 'damage' });
+    if (this.previousHealth !== null && player.health < this.previousHealth) this.present({ kind: 'damage' });
     this.previousHealth = player.health;
     const currentBreaking = player.breakAction
       ? {
@@ -142,7 +141,7 @@ export class BrowserGameplay {
     this.feedback(result.success ? '合成完成' : `合成失败 · ${result.reason}`, result.success ? 'success' : 'error');
     if (result.success) {
       this.options.queueSave();
-      this.options.onPresentation?.({ kind: 'craft' });
+      this.present({ kind: 'craft' });
     }
     this.refresh();
   }
@@ -168,7 +167,7 @@ export class BrowserGameplay {
     if (!target) return false;
     const result = this.options.server.attackEntity(this.options.playerId, target.id);
     this.feedback(result.success ? '攻击命中' : `攻击失败 · ${result.reason}`, result.success ? 'success' : 'error');
-    if (result.success) this.options.onPresentation?.({ kind: 'attack', position: target.position });
+    if (result.success) this.present({ kind: 'attack', position: target.position });
     if (result.success) this.options.queueSave();
     this.refresh();
     return true;
@@ -191,7 +190,7 @@ export class BrowserGameplay {
     this.options.consumeCommit(result.commit);
     this.options.queueSave();
     this.feedback('放置 · 方块', 'success');
-    this.options.onPresentation?.({ kind: 'place', voxel: this.options.server.getVoxel(...position), position });
+    this.present({ kind: 'place', voxel: this.options.server.getVoxel(...position), position });
     this.refresh();
   }
 
@@ -219,7 +218,7 @@ export class BrowserGameplay {
     const reason = !result.success && result.reason === 'hunger-full' ? '你现在不饿' : '这个物品暂时无法使用';
     this.feedback(result.success ? '食用 · 恢复饥饿' : reason, result.success ? 'success' : 'error');
     if (result.success) {
-      this.options.onPresentation?.({ kind: 'eat' });
+      this.present({ kind: 'eat' });
       this.options.queueSave();
     }
     this.refresh();
@@ -245,8 +244,17 @@ export class BrowserGameplay {
     this.presenter.dispose();
   }
 
+  private present(event: GameplayPresentationEvent): void {
+    this.options.onPresentation?.(event);
+    const kind = event.kind;
+    if (kind === 'attack' || kind === 'place' || kind === 'eat' || kind === 'damage') {
+      const sequence = this.options.nextInteractionSequence();
+      this.options.session.publishInteraction(sequence, { gesture: { kind, sequence } });
+    }
+  }
+
   private feedback(message: string, tone: 'info' | 'success' | 'error'): void {
-    if (tone === 'error') this.options.onPresentation?.({ kind: 'rejected' });
+    if (tone === 'error') this.present({ kind: 'rejected' });
     this.options.session.publishFeedback(this.options.nextInteractionSequence(), { message, tone, durationMs: 1_400 });
   }
 }

@@ -12,6 +12,7 @@
   import StartScreen from './start-screen.svelte';
   import ShellOverlays from './shell-overlays.svelte';
   import type { ApplicationShell } from '../application-shell';
+  import PlayerActionPresentation from './player-action-presentation.svelte';
   import SurvivalHud from './survival-hud.svelte';
   import PresentedEntities from './presented-entities.svelte';
 
@@ -72,6 +73,9 @@
   <div id="crosshair" aria-label="准星"><span></span></div>
   <div id="world-clock" class="hud-chip">{hud.worldClock}</div>
   <SurvivalHud {hud} {interaction} />
+  {#if !shell.gameplay.inventoryOpen && !shell.mapOpen && !shell.commandOpen && shell.gameplay.lifecycle === 'alive'}
+    <PlayerActionPresentation {hud} {interaction} />
+  {/if}
   <div
     id="interaction-feedback"
     role="status"
