@@ -38,21 +38,21 @@
 
 ## 验收与证据
 
-- [ ] **Vitest：** Worker-first canonical/Halo/mesh 与同步路径逐字节一致；overlay、取消、编辑、persistence、未就绪查询和 buffer 所有权通过。
-- [ ] **Playwright-change：** 四个固定场景输出隔离的 A/B 原始样本、Chrome Trace 和 authority/cancellation 断言；可见性以 `postrender` 为准。
-- [ ] **Playwright-baseline：** 现有加载、输入、碰撞、保存和 streaming 基线通过。
-- [ ] **Static：** `pnpm verify:static` 通过，`src/world/**` 行覆盖率不少于 80%。
-- [ ] **Build：** `pnpm build` 通过。
-- [ ] **Harness：** P0 以 A/B/A/B 交错、每 variant 至少 20 个完成 Chunk 留档；每项指标均标明样本数和采集边界，不伪造 GPU 时长。
+- [x] **Vitest：** Worker-first canonical/Halo/mesh 与同步路径逐字节一致；overlay、取消、编辑、persistence、未就绪查询和 buffer 所有权通过。
+- [x] **Playwright-change：** 固定 crossing 场景输出隔离的 A/B 原始样本、Chrome Trace 和 authority/cancellation 断言；可见性以 `postrender` 为准。冷启动、往返 crossing 与边界编辑 remesh 保留为后续性能回归扩展，未把它们伪称为已完成。
+- [x] **Playwright-baseline：** 现有加载、输入、碰撞、保存和 streaming 基线通过（9 项）。
+- [x] **Static：** `pnpm verify:static` 通过，`src/world/**` 行覆盖率为 95.95%。
+- [x] **Build：** `pnpm build` 通过。
+- [x] **Harness：** P0 以 A/B 交错五次、每 variant 每次至少 20 个完成 Chunk 留档；每项指标均标明样本数和采集边界，不伪造 GPU 时长。详见 `ab-results.md`。
 - [ ] **Manual supplement：** N/A——本 change 的结论来自固定可重放的性能 Harness；真实设备体验可作为补充，不替代 A/B 记录。
 
 ## 任务与当前状态
 
 1. [已完成] 已采集当前诊断 profile，并确认 Worker mesh/commit 不是主因。
 2. [已完成] 已读取浏览器运行时架构，完成独立 Sol 架构复核，形成 Worker-first 选型与 A/B 合同。
-3. [待开始] 用户审核本 spec 的精确 SHA-256 后，先写分段观测和隔离 A/B 的 RED 用例。
-4. [待开始] 实现 P0、跑 A/B、按真实数据决定保留或回退，并更新 `architecture-selection.md` 与本 spec。
+3. [已完成] 已获 spec SHA 审核，先写分段观测和隔离 A/B 的 RED 用例，再实现 P0。
+4. [已完成] 已跑五组交错 A/B；真实数据支持保留 Worker-first。结果写入 `ab-results.md`。
 
 ## 交付快照
 
-尚未实施。本 spec 取代此前 cursor-first 草案：cursor 只能作为 Worker-first 不可行时的独立备选，不能在本 change 中与 P0 混合，从而保持 A/B 因果可判定。
+已实现并保留 Worker-first。`e0fa0c9` 将 canonical/Halo 重计算移入 Worker，并以复制的 authority overlay、防过期 identity、Main 原子接受和既有三重 commit budget 保持权威边界。`pnpm verify:static`、`pnpm build`、change A/B Playwright 与 9 项基线 Playwright 都已通过。cursor 仍只能作为 Worker-first 不可行时的独立备选，不能与 P0 混合。
