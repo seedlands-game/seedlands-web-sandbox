@@ -1,5 +1,4 @@
-import { MESH_HALO_SIZE, makeChunk, meshHaloIndex } from '../world/mesh';
-import { macroAt, type MacroContext } from '../world/macro-world';
+import { createProceduralMeshInput, makeChunk, type MeshAuthorityOverlay } from '../world/mesh';
 import {
   CHUNK_SIZE,
   GENERATOR_VERSION,
@@ -10,7 +9,6 @@ import {
   remeshChunkKeysForEdit,
   voxelIndex,
   Voxel,
-  baseVoxel,
   type ChunkCoord,
 } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
@@ -49,6 +47,20 @@ export type DerivedMeshSnapshot = {
   proceduralVoxelSamples: number;
   macroContextCount: number;
 };
+export type WorkerMeshPreparation = {
+  key: string;
+  cx: number;
+  cy: number;
+  cz: number;
+  chunkRevision: number;
+  generatorVersion: number;
+  canonical?: Uint16Array;
+  overlays: MeshAuthorityOverlay[];
+};
+export type WorkerCanonicalResult = Pick<
+  WorkerMeshPreparation,
+  'key' | 'cx' | 'cy' | 'cz' | 'chunkRevision' | 'generatorVersion'
+> & { canonical: Uint16Array };
 
 const snapshotFromChunk = (seedText: string, chunk: ServerChunk): ChunkSnapshot => ({
   key: chunk.key,
@@ -119,59 +131,78 @@ export class GameServer {
 
   createDerivedMeshSnapshot(cx: number, cy: number, cz: number): DerivedMeshSnapshot {
     const chunk = this.getChunk(cx, cy, cz);
-    const externalData = new Map<string, Uint16Array | null>();
-    const macroContexts = new Map<string, MacroContext>();
-    let proceduralVoxelSamples = 0;
-    const queryMacro = (x: number, z: number) => {
-      const key = `${x},${z}`;
-      let context = macroContexts.get(key);
-      if (!context) {
-        context = macroAt(this.seed, x, z);
-        macroContexts.set(key, context);
-      }
-      return context;
-    };
-    const sample = (x: number, y: number, z: number) => {
-      const sampleCx = floorDiv(x, CHUNK_SIZE);
-      const sampleCy = floorDiv(y, CHUNK_SIZE);
-      const sampleCz = floorDiv(z, CHUNK_SIZE);
-      if (sampleCx === cx && sampleCy === cy && sampleCz === cz)
-        return chunk.voxels[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
-      const key = chunkKey(sampleCx, sampleCy, sampleCz);
-      let data = externalData.get(key);
-      if (data === undefined) {
-        const materialized = this.chunks.get(key);
-        const persisted = materialized ? null : this.persistence?.loadSnapshot(key);
-        data =
-          materialized?.voxels ??
-          (persisted && this.isValidSnapshot(persisted, key, sampleCx, sampleCy, sampleCz) ? persisted.voxels : null);
-        externalData.set(key, data);
-      }
-      if (data) return data[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
-      proceduralVoxelSamples += 1;
-      return baseVoxel(this.seed, x, y, z, queryMacro(x, z), queryMacro);
-    };
-    const halo = new Uint16Array(MESH_HALO_SIZE ** 3);
-    let revision = 2166136261;
-    for (let y = -1; y <= CHUNK_SIZE; y += 1)
-      for (let z = -1; z <= CHUNK_SIZE; z += 1)
-        for (let x = -1; x <= CHUNK_SIZE; x += 1) {
-          const value = sample(cx * CHUNK_SIZE + x, cy * CHUNK_SIZE + y, cz * CHUNK_SIZE + z);
-          halo[meshHaloIndex(x, y, z)] = value;
-          revision = Math.imul(revision ^ value, 16777619);
+    const overlays: MeshAuthorityOverlay[] = [];
+    for (let overlayY = cy - 1; overlayY <= cy + 1; overlayY += 1)
+      for (let overlayZ = cz - 1; overlayZ <= cz + 1; overlayZ += 1)
+        for (let overlayX = cx - 1; overlayX <= cx + 1; overlayX += 1) {
+          if (overlayX === cx && overlayY === cy && overlayZ === cz) continue;
+          const source = this.readAuthoritativeChunk(overlayX, overlayY, overlayZ);
+          if (source) overlays.push({ cx: overlayX, cy: overlayY, cz: overlayZ, voxels: source.voxels });
         }
+    const derived = createProceduralMeshInput({ seed: this.seed, cx, cy, cz, canonical: chunk.voxels, overlays });
     return {
       key: chunk.key,
       cx,
       cy,
       cz,
       canonical: chunk.voxels,
-      halo,
+      halo: derived.halo,
       chunkRevision: chunk.revision,
-      haloRevision: `${revision >>> 0}`,
-      proceduralVoxelSamples,
-      macroContextCount: macroContexts.size,
+      haloRevision: derived.haloRevision,
+      proceduralVoxelSamples: derived.proceduralVoxelSamples,
+      macroContextCount: derived.macroContextCount,
     };
+  }
+
+  prepareWorkerMeshInput(cx: number, cy: number, cz: number): WorkerMeshPreparation {
+    const key = chunkKey(cx, cy, cz);
+    const center = this.readAuthoritativeChunk(cx, cy, cz);
+    const overlays: MeshAuthorityOverlay[] = [];
+    for (let overlayY = cy - 1; overlayY <= cy + 1; overlayY += 1)
+      for (let overlayZ = cz - 1; overlayZ <= cz + 1; overlayZ += 1)
+        for (let overlayX = cx - 1; overlayX <= cx + 1; overlayX += 1) {
+          if (overlayX === cx && overlayY === cy && overlayZ === cz) continue;
+          const source = this.readAuthoritativeChunk(overlayX, overlayY, overlayZ);
+          if (source?.materialized)
+            overlays.push({ cx: overlayX, cy: overlayY, cz: overlayZ, voxels: source.voxels.slice() });
+        }
+    return {
+      key,
+      cx,
+      cy,
+      cz,
+      chunkRevision: center?.revision ?? 0,
+      generatorVersion: this.generatorVersion,
+      ...(center?.materialized ? { canonical: center.voxels.slice() } : {}),
+      overlays,
+    };
+  }
+
+  acceptWorkerCanonical(result: WorkerCanonicalResult): boolean {
+    if (
+      result.generatorVersion !== this.generatorVersion ||
+      result.key !== chunkKey(result.cx, result.cy, result.cz) ||
+      result.canonical.length !== CHUNK_SIZE ** 3 ||
+      !result.canonical.every((value) => value >= Voxel.Air && value <= Voxel.Water)
+    )
+      return false;
+    const current = this.chunks.get(result.key);
+    if (current) {
+      if (current.revision !== result.chunkRevision) return false;
+      return current.voxels.every((value, index) => value === result.canonical[index]);
+    }
+    if (result.chunkRevision !== 0) return false;
+    this.chunks.set(result.key, {
+      key: result.key,
+      cx: result.cx,
+      cy: result.cy,
+      cz: result.cz,
+      voxels: result.canonical,
+      revision: 0,
+      dirty: false,
+      materialized: false,
+    });
+    return true;
   }
 
   edit(x: number, y: number, z: number, value: number): VoxelRegionChanged {
@@ -272,5 +303,25 @@ export class GameServer {
       snapshot.voxels.length === CHUNK_SIZE ** 3 &&
       snapshot.voxels.every((value) => value >= Voxel.Air && value <= Voxel.Water)
     );
+  }
+
+  private readAuthoritativeChunk(cx: number, cy: number, cz: number): ServerChunk | undefined {
+    const key = chunkKey(cx, cy, cz);
+    const existing = this.chunks.get(key);
+    if (existing) return existing;
+    const snapshot = this.persistence?.loadSnapshot(key);
+    if (!snapshot || !this.isValidSnapshot(snapshot, key, cx, cy, cz)) return undefined;
+    const restored: ServerChunk = {
+      key,
+      cx,
+      cy,
+      cz,
+      voxels: snapshot.voxels,
+      revision: snapshot.revision,
+      dirty: false,
+      materialized: true,
+    };
+    this.chunks.set(key, restored);
+    return restored;
   }
 }

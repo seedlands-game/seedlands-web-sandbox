@@ -42,6 +42,27 @@ export type MeshOptions = {
   halo?: Uint16Array;
   outside?: (x: number, y: number, z: number) => number;
 };
+export type MeshAuthorityOverlay = {
+  cx: number;
+  cy: number;
+  cz: number;
+  voxels: Uint16Array;
+};
+export type ProceduralMeshInput = {
+  seed: number;
+  cx: number;
+  cy: number;
+  cz: number;
+  canonical?: Uint16Array;
+  overlays?: readonly MeshAuthorityOverlay[];
+};
+export type ProceduralMeshInputResult = {
+  canonical: Uint16Array;
+  halo: Uint16Array;
+  haloRevision: string;
+  proceduralVoxelSamples: number;
+  macroContextCount: number;
+};
 
 const AO_BRIGHTNESS = [255, 220, 190, 160] as const;
 const FRONT_CORNERS = [
@@ -87,6 +108,64 @@ export function makeChunk(seed: number, cx: number, cy: number, cz: number, chan
     }
   }
   return data;
+}
+
+export function createProceduralMeshInput({
+  seed,
+  cx,
+  cy,
+  cz,
+  canonical = makeChunk(seed, cx, cy, cz, []),
+  overlays = [],
+}: ProceduralMeshInput): ProceduralMeshInputResult {
+  const overlayData = new Map(
+    overlays.map((overlay) => [chunkKey(overlay.cx, overlay.cy, overlay.cz), overlay.voxels]),
+  );
+  const macroContexts = new Map<string, MacroContext>();
+  let proceduralVoxelSamples = 0;
+  const queryMacro = (x: number, z: number) => {
+    const key = `${x},${z}`;
+    let context = macroContexts.get(key);
+    if (!context) {
+      context = macroAt(seed, x, z);
+      macroContexts.set(key, context);
+    }
+    return context;
+  };
+  const sample = (x: number, y: number, z: number) => {
+    const sampleCx = Math.floor(x / CHUNK_SIZE);
+    const sampleCy = Math.floor(y / CHUNK_SIZE);
+    const sampleCz = Math.floor(z / CHUNK_SIZE);
+    if (sampleCx === cx && sampleCy === cy && sampleCz === cz)
+      return canonical[voxelIndex(x - cx * CHUNK_SIZE, y - cy * CHUNK_SIZE, z - cz * CHUNK_SIZE)];
+    const source = overlayData.get(chunkKey(sampleCx, sampleCy, sampleCz));
+    if (source)
+      return source[
+        voxelIndex(
+          ((x % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE,
+          ((y % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE,
+          ((z % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE,
+        )
+      ];
+    proceduralVoxelSamples += 1;
+    return baseVoxel(seed, x, y, z, queryMacro(x, z), queryMacro);
+  };
+  const halo = new Uint16Array(MESH_HALO_SIZE ** 3);
+  let revision = 2166136261;
+  for (let y = -1; y <= CHUNK_SIZE; y += 1)
+    for (let z = -1; z <= CHUNK_SIZE; z += 1)
+      for (let x = -1; x <= CHUNK_SIZE; x += 1) {
+        const value = sample(cx * CHUNK_SIZE + x, cy * CHUNK_SIZE + y, cz * CHUNK_SIZE + z);
+        halo[meshHaloIndex(x, y, z)] = value;
+        revision = Math.imul(revision ^ value, 16777619);
+      }
+  return {
+    canonical,
+    halo,
+    haloRevision: `${revision >>> 0}`,
+    proceduralVoxelSamples,
+    macroContextCount: macroContexts.size,
+  };
 }
 
 const isVisibleFace = (source: number, target: number) =>

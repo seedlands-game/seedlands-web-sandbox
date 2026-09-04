@@ -52,3 +52,7 @@ export async function writeBrowserBenchmarkResult(initialWorldReadyMs: number): 
     browserBenchmark: { status: 'PASS', initialWorldReadyMs: Math.round(initialWorldReadyMs * 100) / 100 },
   });
 }
+
+export async function writePerformanceComparisonResult(name: string, result: object): Promise<void> {
+  await writeResult(name, { performanceComparison: result });
+}

@@ -51,6 +51,7 @@ type HarnessWindow = Window & {
   __seedlandsHarness?: {
     snapshot: () => HarnessSnapshot;
     beginPerformanceScenario: (name: string) => string;
+    setStreamingVariant: (variant: 'main-snapshot' | 'worker-first') => void;
     removeVoxelAt: (x: number, y: number, z: number) => void;
     movePlayerTo: (x: number, y: number, z: number) => void;
     prepareFlatMovement: () => void;
@@ -64,8 +65,8 @@ type HarnessWindow = Window & {
   };
 };
 
-export async function startHarnessWorld(page: Page, seed: string): Promise<void> {
-  await page.goto('/?harness=1', { waitUntil: 'networkidle' });
+export async function startHarnessWorld(page: Page, seed: string, query = ''): Promise<void> {
+  await page.goto(`/?harness=1${query}`, { waitUntil: 'networkidle' });
   await page.locator('#seed').fill(seed);
   await page.getByRole('button', { name: '进入世界' }).click();
   await page.locator('#start-card').waitFor({ state: 'hidden' });

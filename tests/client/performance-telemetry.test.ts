@@ -78,4 +78,18 @@ describe('客户端性能 telemetry', () => {
       expect.objectContaining({ cat: 'meshing', name: 'WorkerMesh', tid: 'worker-derived', dur: 27_000 }),
     );
   });
+
+  it('重置场景聚合，防止 A/B 样本混入前一场景', () => {
+    let now = 0;
+    const telemetry = new PerformanceTelemetry({ now: () => now });
+    telemetry.recordFrame({ durationMs: 80, topSpans: [] });
+    telemetry.beginTrace('chunk-request', 'old', 'main');
+
+    telemetry.reset();
+    now += 5;
+    telemetry.recordFrame({ durationMs: 5, topSpans: [] });
+
+    expect(telemetry.frameSummary()).toMatchObject({ count: 1, p95Ms: 5, longFrameCount: 0 });
+    expect(telemetry.traceSummary('chunk-request')).toMatchObject({ count: 0 });
+  });
 });
