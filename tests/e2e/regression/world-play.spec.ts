@@ -9,6 +9,7 @@ import {
   removeHarnessVoxel,
   snapshot,
   startHarnessWorld,
+  waitForPlayerMovement,
   waitForSnapshot,
 } from '../support/harness';
 import { writeBrowserE2EResult } from '../support/result';
@@ -58,7 +59,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
 
     await lockPointer(page);
     await page.keyboard.down('KeyW');
-    const after = await waitForSnapshot(page, (current) => Math.abs(current.player[2] - before.player[2]) > 3);
+    const after = await waitForPlayerMovement(page, { axis: 2, start: before.player[2], minimumDelta: 3 });
     await page.keyboard.up('KeyW');
     expect(after.player[1]).toBeCloseTo(before.player[1], 2);
     expect(after.onGround).toBe(true);
@@ -71,11 +72,21 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     expect(before).not.toBeNull();
     if (!before) throw new Error('Seedlands harness snapshot is unavailable before center excavation.');
 
-    const falling = await waitForSnapshot(page, (current) => current.player[1] < before.player[1] - 0.25);
+    const falling = await waitForPlayerMovement(page, {
+      axis: 1,
+      start: before.player[1],
+      minimumDelta: 0.25,
+      direction: -1,
+    });
     expect(falling.onGround).toBe(false);
     await lockPointer(page);
     await page.keyboard.down('Space');
-    const afterSpace = await waitForSnapshot(page, (current) => current.player[1] < falling.player[1] - 0.15);
+    const afterSpace = await waitForPlayerMovement(page, {
+      axis: 1,
+      start: falling.player[1],
+      minimumDelta: 0.15,
+      direction: -1,
+    });
     await page.keyboard.up('Space');
     expect(afterSpace.onGround).toBe(false);
   });
@@ -89,10 +100,13 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
 
     await lockPointer(page);
     await page.keyboard.down('KeyW');
-    const after = await waitForSnapshot(
-      page,
-      (current) => current.player[2] < before.player[2] - 3 && Math.abs(current.player[1] - (before.player[1] - 1)) < 0.05,
-    );
+    const after = await waitForPlayerMovement(page, {
+      axis: 2,
+      start: before.player[2],
+      minimumDelta: 3,
+      direction: -1,
+      yTarget: before.player[1] - 1,
+    });
     await page.keyboard.up('KeyW');
     expect(after.colliding).toBe(false);
   });
