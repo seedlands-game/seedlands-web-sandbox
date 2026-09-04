@@ -51,6 +51,12 @@ function item(token: string): string {
   }
 }
 
+function actorArchetype(token: string): 'grazer' | 'night-stalker' | 'settler' {
+  if (!['grazer', 'night-stalker', 'settler'].includes(token))
+    throw new ParseProblem(`Unsupported actor archetype: ${token}.`);
+  return token as 'grazer' | 'night-stalker' | 'settler';
+}
+
 function parseTokens(tokens: string[]): ServerCommand {
   const name = tokens[0].toLowerCase();
   switch (name) {
@@ -125,6 +131,48 @@ function parseTokens(tokens: string[]): ServerCommand {
         type: 'spawn-creature',
         position: [finite(tokens[2], 'x'), finite(tokens[3], 'y'), finite(tokens[4], 'z')],
       };
+    case '/summon':
+      exact(tokens, 5, '/summon <grazer|night-stalker|settler> <x> <y> <z>');
+      return {
+        type: 'spawn-actor',
+        archetype: actorArchetype(tokens[1].toLowerCase()),
+        position: [finite(tokens[2], 'x'), finite(tokens[3], 'y'), finite(tokens[4], 'z')],
+      };
+    case '/observe':
+      if (tokens.length > 2) throw new ParseProblem('Usage: /observe [entity-id]');
+      return { type: 'query-observation', ...(tokens[1] ? { entityId: tokens[1] } : {}) };
+    case '/entity':
+      if (tokens[1]?.toLowerCase() === 'action') {
+        exact(tokens, 3, '/entity action <entity-id>');
+        return { type: 'query-action', entityId: tokens[2] };
+      }
+      if (tokens[1]?.toLowerCase() === 'move') {
+        exact(tokens, 6, '/entity move <entity-id> <x> <y> <z>');
+        return {
+          type: 'start-action',
+          entityId: tokens[2],
+          action: 'move-to',
+          position: [finite(tokens[3], 'x'), finite(tokens[4], 'y'), finite(tokens[5], 'z')],
+        };
+      }
+      if (tokens[1]?.toLowerCase() === 'stop') {
+        exact(tokens, 3, '/entity stop <entity-id>');
+        return { type: 'interrupt-action', entityId: tokens[2] };
+      }
+      throw new ParseProblem(
+        'Usage: /entity action <entity-id> | /entity move <entity-id> <x> <y> <z> | /entity stop <entity-id>',
+      );
+    case '/path':
+      exact(tokens, 5, '/path <entity-id> <x> <y> <z>');
+      return {
+        type: 'query-path',
+        entityId: tokens[1],
+        position: [finite(tokens[2], 'x'), finite(tokens[3], 'y'), finite(tokens[4], 'z')],
+      };
+    case '/poi':
+      if (tokens[1]?.toLowerCase() !== 'nearby') throw new ParseProblem('Usage: /poi nearby <entity-id> <radius>');
+      exact(tokens, 4, '/poi nearby <entity-id> <radius>');
+      return { type: 'query-pois', entityId: tokens[2], radius: finite(tokens[3], 'radius') };
     case '/break':
       exact(tokens, 4, '/break <x> <y> <z>');
       return {

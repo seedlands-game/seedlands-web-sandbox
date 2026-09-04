@@ -112,5 +112,5 @@ test('GUI 制作灯笼、装备、真实放置和拆除并保存继续', async (
     .poll(() => page.evaluate(() => window.__seedlandsHarness?.snapshot().visualEffects.activeLocalLights))
     .toBe(0);
   await page.mouse.up();
-  await expect.poll(() => page.evaluate(() => window.__seedlandsHarness?.snapshot().gameplay.worldItemCount)).toBe(1);
+  await expect(page.getByRole('img', { name: '灯笼掉落物', exact: true })).toHaveCount(1);
 });

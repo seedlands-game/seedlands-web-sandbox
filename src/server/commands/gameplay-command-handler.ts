@@ -28,8 +28,8 @@ export class GameplayCommandPermissionError extends Error {}
 const playerId = (source: CommandSource, explicit?: string): string => {
   const id = explicit ?? source.entityId;
   if (!id) throw new TypeError('Gameplay command requires CommandSource.entityId or an explicit entityId.');
-  if (source.sourceType === 'player' && id !== source.entityId)
-    throw new GameplayCommandPermissionError('Player sources may only access their own gameplay state.');
+  if ((source.sourceType === 'player' || source.sourceType === 'agent') && id !== source.entityId)
+    throw new GameplayCommandPermissionError('Player and agent sources may only access their own gameplay state.');
   return id;
 };
 
@@ -98,6 +98,35 @@ export async function executeGameplayCommand(
       const recipes = command.craftable ? server.listCraftableRecipes(playerId(source)) : server.listRecipes();
       return { message: 'Recipe definitions.', data: { recipes } };
     }
+    case 'query-observation': {
+      const id = playerId(source, command.entityId);
+      const observation = server.observeActor(
+        id,
+        command.range === undefined ? undefined : positive(command.range, 'Range'),
+      );
+      return { message: `Observation for ${id}.`, data: { observation } };
+    }
+    case 'query-pois': {
+      const id = playerId(source, command.entityId);
+      const entity = server.getEntity(id);
+      if (!entity) throw new RangeError(`Unknown entity: ${id}`);
+      const pois = server.queryPois(entity.position, positive(command.radius, 'Radius'), command.kind);
+      return { message: `POIs within ${command.radius} of ${id}.`, data: { pois } };
+    }
+    case 'query-action': {
+      if (command.actionId && source.sourceType !== 'player' && source.sourceType !== 'agent')
+        return { message: `Action ${command.actionId}.`, data: { action: server.getAction(command.actionId) } };
+      const id = playerId(source, command.entityId);
+      const action = command.actionId ? server.getAction(command.actionId) : server.getActorAction(id);
+      if (action && action.actorId !== id)
+        throw new GameplayCommandPermissionError('Player and agent sources may only access their own actions.');
+      return { message: `Action for ${id}.`, data: { action } };
+    }
+    case 'query-path': {
+      const id = playerId(source, command.entityId);
+      const path = server.queryNavigationPath(id, position(command.position));
+      return { message: `Navigation path for ${id}.`, data: { path } };
+    }
     case 'select-slot':
       return mutationPayload('Selected hotbar slot.', server.selectHotbarSlot(playerId(source), command.slot));
     case 'break-voxel':
@@ -124,6 +153,20 @@ export async function executeGameplayCommand(
       return mutationPayload('Attacked entity.', server.attackEntity(playerId(source), command.entityId));
     case 'respawn':
       return mutationPayload('Respawned player.', server.respawnPlayer(playerId(source)));
+    case 'start-action': {
+      const id = playerId(source, command.entityId);
+      const action = server.startActorAction(id, {
+        type: command.action,
+        ...(command.position ? { targetPosition: position(command.position) } : {}),
+        ...(command.targetEntityId ? { targetEntityId: command.targetEntityId } : {}),
+        ...(command.poiId ? { poiId: command.poiId } : {}),
+      });
+      return { message: `Started action ${action.id} for ${id}.`, data: { action } };
+    }
+    case 'interrupt-action': {
+      const id = playerId(source, command.entityId);
+      return { message: `Interrupted action for ${id}.`, data: { interrupted: server.interruptActorAction(id) } };
+    }
     case 'give-item': {
       const definition = getItemDefinition(command.itemId);
       return mutationPayload(
@@ -161,6 +204,27 @@ export async function executeGameplayCommand(
       });
       return { message: `Spawned creature ${entity.id}.`, data: { entity } };
     }
+    case 'spawn-actor': {
+      const entity = server.spawnAutonomousActor({
+        id: command.id,
+        archetype: command.archetype,
+        position: position(command.position),
+      });
+      return { message: `Spawned ${command.archetype} ${entity.id}.`, data: { entity } };
+    }
+    case 'register-poi': {
+      if (!command.label.trim()) throw new TypeError('POI label must not be empty.');
+      const poi = server.registerPoi({
+        id: command.id,
+        kind: command.kind,
+        position: position(command.position),
+        label: command.label,
+      });
+      return { message: `Registered POI ${poi.id}.`, data: { poi } };
+    }
+    case 'remove-poi':
+      if (!server.removePoi(command.poiId)) throw new RangeError(`Unknown POI: ${command.poiId}`);
+      return { message: `Removed POI ${command.poiId}.` };
     case 'despawn-entity':
       if (!server.despawnEntity(command.entityId)) throw new RangeError(`Unknown entity: ${command.entityId}`);
       return { message: `Despawned entity ${command.entityId}.` };

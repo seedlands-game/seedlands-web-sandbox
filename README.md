@@ -20,8 +20,9 @@ The sandbox is an early technical prototype. Its current capabilities include:
 - Player-centred chunk streaming with bounded CPU/GPU retention.
 - An in-process authoritative `GameServer` for chunks, player state, entities, and world time.
 - First-person movement, collision, jumping, timed voxel harvesting, item drops, pickup, and inventory-backed placement.
-- A minimal survival loop with health, hunger, 24 inventory slots, an 8-slot hotbar, food, three recipes, tools, static combat targets, death drops, and respawning.
-- Browser persistence for the seed, player state, gameplay entities, inventory, and materialized chunk snapshots.
+- A minimal survival loop with health, hunger, 24 inventory slots, an 8-slot hotbar, food, three recipes, tools, combat, death drops, and respawning.
+- A deterministic starter ecology with a passive grazer, a night-only hostile, a scheduled settler, nearby POIs, bounded voxel ground navigation, and inspectable asynchronous actions.
+- Browser persistence for the seed, world clock, player state, gameplay entities, actor needs/actions, POIs, inventory, and materialized chunk snapshots.
 - A day/night environment, transparent water, quality presets, a macro world map, and a retained Svelte 5 HUD.
 
 Not yet implemented are the defining systems of the full Seedlands vision: essence and magic, autonomous NPC societies, persistent historical events, longevity and reincarnation, or the content of the six realms.
@@ -67,7 +68,7 @@ No private `.env` file is required to run or build the sandbox.
 
 ## Server command debugging
 
-Press F4 after entering a world to open the compact debug shell. World commands include `/setblock`, `/fill`, `/tp`, `/time get`, `/time set`, `/seed`, `/save`, `/inspect voxel`, and `/inspect chunk`. Gameplay commands include `/inventory`, `/give`, `/damage`, `/heal`, `/spawnitem`, `/spawn creature`, `/craft`, `/break`, `/cancelbreak`, `/pickup`, `/drop`, `/place`, `/use`, `/attack`, `/respawn`, `/tick`, and `/nearby`; invalid arguments return usage details in the shell. The shell releases pointer lock while open; press Esc to close it. Its log text can be selected and copied with native browser controls, and the input accepts normal paste operations. Use Up and Down to browse the latest 20 submitted commands and return to an unfinished draft.
+Press F4 after entering a world to open the compact debug shell. World commands include `/setblock`, `/fill`, `/tp`, `/time get`, `/time set`, `/seed`, `/save`, `/inspect voxel`, and `/inspect chunk`. Gameplay commands include `/inventory`, `/give`, `/damage`, `/heal`, `/spawnitem`, `/spawn creature`, `/craft`, `/break`, `/cancelbreak`, `/pickup`, `/drop`, `/place`, `/use`, `/attack`, `/respawn`, `/tick`, and `/nearby`. Actor debugging adds `/summon`, `/observe`, `/entity action`, `/entity move`, `/entity stop`, `/path`, and `/poi nearby`; invalid arguments return usage details in the shell. The shell releases pointer lock while open; press Esc to close it. Its log text can be selected and copied with native browser controls, and the input accepts normal paste operations. Use Up and Down to browse the latest 20 submitted commands and return to an unfinished draft.
 
 The same structured command boundary is available without PlayCanvas, Canvas, or the DOM:
 
@@ -120,7 +121,7 @@ This repository may remain useful independently as an open Web sandbox even if t
 - Water is rendered but not simulated as pressure, flow, or waterfalls.
 - There are no caves, propagated voxel lighting, mobile touch controls, floating origin, or distant-world LOD yet.
 - Browser persistence favours a simple prototype deployment rather than large-world storage.
-- Creatures are static combat foundations without AI, navigation, pursuit, or retaliation.
+- Creature and settler behaviour is a bounded deterministic foundation; there is no dialogue, trading, reproduction, crowd avoidance, or full ecology simulation yet.
 - The current vertical streaming range is sized for this prototype's terrain.
 - The main JavaScript bundle is large and has not yet been split into lazy-loaded runtime chunks.
 

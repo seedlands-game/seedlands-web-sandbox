@@ -4,19 +4,17 @@ import { GameServer } from '../../src/server/game-server';
 import { Voxel } from '../../src/world/voxel';
 
 describe('确定性安全出生', () => {
-  it('五个实际世界种子都可找到不改地形的干燥落点', () => {
-    for (const seedText of [
-      'living-world-autonomy',
-      'seedlands-shell-journey',
-      'seedlands-regression',
-      'seedlands-mvp-river',
-      'seedlands-mvp-highland',
-    ]) {
-      const server = new GameServer({ seedText });
-      const position = findSafePlayerSpawn((x, y, z) => server.getVoxel(x, y, z));
-      expect(position, seedText).not.toBeNull();
-      expect(server.worldRevision, seedText).toBe(0);
-    }
+  it.each([
+    'living-world-autonomy',
+    'seedlands-shell-journey',
+    'seedlands-regression',
+    'seedlands-mvp-river',
+    'seedlands-mvp-highland',
+  ])('实际种子 %s 可找到不改地形的干燥落点', (seedText) => {
+    const server = new GameServer({ seedText });
+    const position = findSafePlayerSpawn((x, y, z) => server.getVoxel(x, y, z));
+    expect(position).not.toBeNull();
+    expect(server.worldRevision).toBe(0);
   });
   it('高于旧出生点的山地也站在地表上方', () => {
     expect(findSafePlayerSpawn((_x, y) => (y <= 70 ? Voxel.Stone : Voxel.Air))).toEqual([0.5, 72.6, 0.5]);

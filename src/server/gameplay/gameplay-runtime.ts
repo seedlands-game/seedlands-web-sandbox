@@ -1,5 +1,7 @@
+import { playerOccupies } from './player-occupancy';
 import { Voxel } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
+import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
 import {
   EntityStore,
   type EntityQuery,
@@ -11,25 +13,20 @@ import { getItemDefinition, type ItemStack } from './item-registry';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import { craftRecipe, listCraftableRecipes, listRecipes } from './recipe-registry';
 import { getVoxelGameplayDefinition } from './voxel-gameplay';
+import { simulationSnapshotFor, validateGameplaySnapshot, type GameplaySnapshotV2 } from './gameplay-snapshot';
+
+export type { GameplaySnapshot, GameplaySnapshotV1, GameplaySnapshotV2 } from './gameplay-snapshot';
 
 type Position = [number, number, number];
 type PickupEvent = { playerId: string; position: Position; stack: ItemStack };
 type GameplayCallbacks = {
   getVoxel: (position: Position) => number;
   editVoxel: (actorId: string, position: Position, voxel: number) => WorldCommitResult;
+  getWorldTime: () => number;
 };
 type Failure = { success: false; reason: string };
 type Success<Data extends object = Record<never, never>> = { success: true } & Data;
 export type GameplayResult<Data extends object = Record<never, never>> = Success<Data> | Failure;
-
-export type GameplaySnapshotV1 = {
-  version: 1;
-  revision: number;
-  gameplayTime: number;
-  entitySequence: number;
-  entities: GameplayEntity[];
-  players: PlayerSnapshot[];
-};
 
 const distanceSquared = (left: readonly number[], right: readonly number[]) =>
   left.reduce((sum, value, index) => sum + (value - right[index]) ** 2, 0);
@@ -39,6 +36,7 @@ const clonePosition = (position: readonly [number, number, number]): Position =>
 
 export class GameplayRuntime {
   readonly entities = new EntityStore();
+  readonly simulation: AutonomyRuntime;
   private readonly players = new Map<string, PlayerState>();
   private readonly pickupAnchors = new Map<string, Map<string, Position>>();
   private time = 0;
@@ -48,7 +46,23 @@ export class GameplayRuntime {
   private eventCount = 0;
   private readonly pickupEvents: PickupEvent[] = [];
 
-  constructor(private readonly callbacks: GameplayCallbacks) {}
+  constructor(private readonly callbacks: GameplayCallbacks) {
+    this.simulation = new AutonomyRuntime({
+      entities: this.entities,
+      getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]),
+      getWorldTime: callbacks.getWorldTime,
+      isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
+      damagePlayer: (actorId, targetId, amount) => this.damagePlayerFromActor(actorId, targetId, amount),
+      consumeWorldItem: (entityId) => {
+        const entity = this.entities.get(entityId);
+        if (!entity || entity.type !== 'world-item') return false;
+        const removed = this.entities.despawn(entityId);
+        if (removed) this.touch();
+        return removed;
+      },
+      spawnWorldItem: (position, stack) => void this.spawnWorldItem(position, stack),
+    });
+  }
 
   get gameplayTime(): number {
     return this.time;
@@ -66,6 +80,7 @@ export class GameplayRuntime {
     const entity = this.entities.spawn(input);
     if (entity.type === 'player')
       this.players.set(entity.id, new PlayerState(entity.id, clonePosition(entity.position)));
+    if (entity.archetype) this.simulation.registerActor(entity.id, { archetype: entity.archetype });
     this.touch();
     return entity;
   }
@@ -76,6 +91,13 @@ export class GameplayRuntime {
 
   spawnWorldItem(position: Position, stack: ItemStack): GameplayEntity {
     const entity = this.spawn({ type: 'world-item', position, stack });
+    return entity;
+  }
+
+  spawnAutonomous(input: EntitySpawn, registration: ActorRegistration): GameplayEntity {
+    const entity = this.entities.spawn(input);
+    this.simulation.registerActor(entity.id, registration);
+    this.touch();
     return entity;
   }
 
@@ -90,6 +112,7 @@ export class GameplayRuntime {
   }
 
   despawnEntity(id: string): boolean {
+    this.simulation.unregisterActor(id);
     const removed = this.entities.despawn(id);
     if (!removed) return false;
     this.players.delete(id);
@@ -238,7 +261,7 @@ export class GameplayRuntime {
     const entity = this.entities.get(id)!;
     if (!this.inRange(entity.position, this.voxelCenter(position), 5))
       return { success: false, reason: 'out-of-range' };
-    if (this.playerOccupies(entity.position, position)) return { success: false, reason: 'player-collision' };
+    if (playerOccupies(entity.position, position)) return { success: false, reason: 'player-collision' };
     if (!getVoxelGameplayDefinition(this.callbacks.getVoxel(position)).replaceable)
       return { success: false, reason: 'target-occupied' };
     const selected = player.inventory.slot(player.selectedSlot);
@@ -282,13 +305,18 @@ export class GameplayRuntime {
     if (player.attackCooldownSeconds > 0) return { success: false, reason: 'cooldown' };
     const attacker = this.entities.get(playerId)!;
     const target = this.entities.get(targetId);
-    if (!target || target.type !== 'creature' || target.health === undefined)
+    if (!target || (target.type !== 'creature' && target.type !== 'npc') || target.health === undefined)
       return { success: false, reason: 'invalid-target' };
     if (!this.inRange(attacker.position, target.position, 3)) return { success: false, reason: 'out-of-range' };
     const damage = 4;
     const health = Math.max(0, target.health - damage);
     this.entities.update(targetId, { health });
-    if (health === 0) this.entities.despawn(targetId);
+    this.simulation.recordAttacked(targetId, playerId);
+    if (health === 0) {
+      const drop = this.simulation.unregisterActor(targetId, 'killed');
+      this.entities.despawn(targetId);
+      if (drop) this.spawnWorldItem(clonePosition(target.position), drop);
+    }
     player.attackCooldownSeconds = 0.5;
     this.touch();
     return { success: true, damage };
@@ -337,6 +365,7 @@ export class GameplayRuntime {
       const step = Math.min(1, remaining);
       this.time += step;
       this.players.forEach((player) => this.advancePlayer(player, step, commits));
+      this.simulation.advance(step);
       remaining -= step;
     }
     if (seconds > 0) {
@@ -346,14 +375,16 @@ export class GameplayRuntime {
     return { commits, pickups: this.pickupEvents.splice(0) };
   }
 
-  createSnapshot(): GameplaySnapshotV1 {
+  createSnapshot(): GameplaySnapshotV2 {
     return {
-      version: 1,
+      version: 2,
       revision: this.revision,
       gameplayTime: this.time,
+      worldTime: this.callbacks.getWorldTime(),
       entitySequence: this.entities.nextSequence,
       entities: this.entities.exportSnapshot(),
       players: [...this.players.values()].map((player) => player.snapshot()),
+      simulation: this.simulation.snapshot(),
     };
   }
 
@@ -364,40 +395,23 @@ export class GameplayRuntime {
       entityCount: entities.length,
       worldItemCount: entities.filter((entity) => entity.type === 'world-item').length,
       creatureCount: entities.filter((entity) => entity.type === 'creature').length,
+      npcCount: entities.filter((entity) => entity.type === 'npc').length,
       nearbyVisitedBucketCount: spatial.visitedBucketCount,
       nearbyCandidateCount: spatial.visitedEntityCount,
       nearbyReturnedCount: spatial.returnedEntityCount,
       inventoryOperationCount: this.inventoryOperationCount,
       gameplayEventCount: this.eventCount,
       snapshotBytes: new TextEncoder().encode(JSON.stringify(this.createSnapshot())).byteLength,
+      ...this.simulation.metrics(),
     };
   }
 
-  restoreSnapshot(raw: unknown): void {
+  restoreSnapshot(raw: unknown): { version: 1 | 2; worldTime?: number } {
     try {
-      const snapshot = raw as GameplaySnapshotV1;
-      if (
-        !snapshot ||
-        snapshot.version !== 1 ||
-        !Number.isInteger(snapshot.revision) ||
-        snapshot.revision < 0 ||
-        !Number.isFinite(snapshot.gameplayTime) ||
-        snapshot.gameplayTime < 0 ||
-        !Number.isInteger(snapshot.entitySequence) ||
-        snapshot.entitySequence < 0 ||
-        !Array.isArray(snapshot.entities) ||
-        !Array.isArray(snapshot.players)
-      )
-        throw new TypeError('header is invalid');
-      const entities = new EntityStore();
-      snapshot.entities.forEach((entity) => entities.spawn(entity));
-      const players = new Map<string, PlayerState>();
-      snapshot.players.forEach((player) => {
-        const entity = entities.get(player.entityId);
-        if (!entity || entity.type !== 'player') throw new TypeError('player entity is missing');
-        players.set(player.entityId, new PlayerState(player.entityId, clonePosition(player.spawnPosition), player));
+      const { snapshot, players } = validateGameplaySnapshot(raw, {
+        getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]),
+        getWorldTime: this.callbacks.getWorldTime,
       });
-      if (entities.query({ type: 'player' }).length !== players.size) throw new TypeError('player state is missing');
       this.entities.restore(snapshot.entities, snapshot.entitySequence);
       this.pickupEvents.length = 0;
       this.players.clear();
@@ -405,6 +419,8 @@ export class GameplayRuntime {
       this.time = snapshot.gameplayTime;
       this.revision = snapshot.revision;
       this.persistedRevision = snapshot.revision;
+      this.simulation.restore(simulationSnapshotFor(snapshot));
+      return snapshot.version === 2 ? { version: 2, worldTime: snapshot.worldTime } : { version: 1 };
     } catch (error) {
       throw new Error(`Invalid gameplay snapshot: ${error instanceof Error ? error.message : String(error)}`, {
         cause: error,
@@ -497,6 +513,16 @@ export class GameplayRuntime {
     player.inventory.clear().forEach((stack) => this.spawnWorldItem(clonePosition(position), stack));
   }
 
+  private damagePlayerFromActor(actorId: string, playerId: string, amount: number): boolean {
+    const player = this.players.get(playerId);
+    if (!player || player.lifecycle !== 'alive') return false;
+    player.health = Math.max(0, player.health - amount);
+    if (player.health === 0) this.killPlayer(player);
+    this.touch();
+    void actorId;
+    return true;
+  }
+
   private player(id: string): PlayerState {
     const player = this.players.get(id);
     if (!player) throw new RangeError(`Unknown player: ${id}`);
@@ -513,17 +539,6 @@ export class GameplayRuntime {
 
   private voxelCenter(position: Position): Position {
     return [position[0] + 0.5, position[1] + 0.5, position[2] + 0.5];
-  }
-
-  private playerOccupies(player: Position, voxel: Position): boolean {
-    return (
-      voxel[0] + 1 > player[0] - 0.32 &&
-      voxel[0] < player[0] + 0.32 &&
-      voxel[2] + 1 > player[2] - 0.32 &&
-      voxel[2] < player[2] + 0.32 &&
-      voxel[1] + 1 > player[1] - 1.6 &&
-      voxel[1] < player[1] + 0.2
-    );
   }
 
   private touch(event = true): void {

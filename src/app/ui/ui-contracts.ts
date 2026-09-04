@@ -65,8 +65,11 @@ export type InteractionState = Readonly<{
   breaking: Readonly<{ progress: number; label: string }> | null;
   presentedEntities: readonly Readonly<{
     id: string;
-    type: 'world-item' | 'creature';
+    type: 'world-item' | 'creature' | 'npc';
     label: string;
+    archetype?: 'grazer' | 'night-stalker' | 'settler';
+    behavior?: string;
+    position: readonly [number, number, number];
   }>[];
 }>;
 

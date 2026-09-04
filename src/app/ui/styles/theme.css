@@ -460,14 +460,37 @@
 }
 #presented-entity-semantics {
   position: absolute;
-  left: 0;
-  top: 0;
+  top: 60px;
+  right: 14px;
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  pointer-events: none;
 }
 #presented-entity-semantics [role='img'] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
+  width: auto;
+  height: auto;
+  padding: 4px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: #edf5ea;
+  background: rgba(11, 18, 20, 0.74);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.24);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+#presented-entity-semantics [role='img']::before {
+  content: '●  ' attr(aria-label);
+  color: #b8d775;
+}
+#presented-entity-semantics [data-archetype='night-stalker']::before {
+  color: #d578ee;
+}
+#presented-entity-semantics [data-archetype='settler']::before {
+  color: #6fcbdc;
+}
+#presented-entity-semantics [data-entity-type='world-item']::before {
+  color: #d8e887;
 }
 
 .map-toggle {

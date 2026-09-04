@@ -128,8 +128,10 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
 
   test('persists a controlled world edit through the production edit and Store paths', async ({ page }) => {
     await startHarnessWorld(page, 'seedlands-playwright-regression');
+    const initial = await snapshot(page);
+    expect(initial).not.toBeNull();
     await removeHarnessVoxel(page, 0, 0, 0);
-    await waitForSnapshot(page, (current) => current.mutationCount === 1);
+    await expect.poll(async () => (await snapshot(page))?.mutationCount).toBe(initial!.mutationCount + 1);
     const changed = await waitForSnapshot(page, (current) => current.storageBytes > 0);
     expect(changed.storageBytes).toBeGreaterThan(0);
     stages.interaction = 'PASS';
@@ -137,10 +139,16 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     await page.reload({ waitUntil: 'networkidle' });
     await page.getByRole('button', { name: '进入世界' }).click();
     await page.locator('#debug').waitFor({ state: 'visible', timeout: 15_000 });
-    await waitForSnapshot(
-      page,
-      (current) => current.mutationCount === 0 && current.serverRevision === 1 && current.voxelAtOrigin === 0,
-    );
+    await expect
+      .poll(async () => {
+        const current = await snapshot(page);
+        return (
+          current?.mutationCount === 0 &&
+          current.serverRevision === changed.serverRevision &&
+          current.voxelAtOrigin === 0
+        );
+      })
+      .toBe(true);
     stages.persistence = 'PASS';
   });
 

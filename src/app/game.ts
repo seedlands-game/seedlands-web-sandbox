@@ -122,6 +122,7 @@ export class Game {
     if (this.audio) this.worldAudio = new WorldAudio(this.audio, server.seed);
     server.setWorldTime(this.environment.worldTime);
     await server.restore();
+    this.environment.setTime(server.worldTime);
     this.world = new World(
       server,
       this.app,
@@ -151,6 +152,7 @@ export class Game {
     );
     this.camera.setPosition(...position);
     this.serverPlayerId = restoredPlayer?.id ?? server.spawnPlayer({ position }).id;
+    server.initializeStarterEcology(position);
     this.world.updateStreaming(this.camera.getPosition());
     this.gameplayClient = new BrowserGameplay({
       app: this.app,

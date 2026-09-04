@@ -7,14 +7,17 @@ import {
   mod,
   normalizeSeed,
   remeshChunkKeysForEdit,
+  terrainHeight,
   voxelIndex,
   Voxel,
+  isSolid,
   type ChunkCoord,
 } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayFacade } from './game-server-gameplay';
 import type { EntitySpawn, GameplayEntity } from './gameplay/entity-store';
+import { createStarterEcology } from './simulation/starter-ecology';
 import { WorldMutationBuffer, assertMutationCoordinate, assertVoxelValue, type VoxelEdit } from './world-mutation';
 import { commitWorldEditBatch, compareChunkKeys } from './world-transaction-commit';
 
@@ -408,6 +411,43 @@ export class GameServer extends GameServerGameplayFacade {
   setWorldTime(hours: number): number {
     this.clock = ((hours % 24) + 24) % 24;
     return this.clock;
+  }
+
+  initializeStarterEcology(center: [number, number, number]) {
+    const current = this.simulationSnapshot();
+    if (this.restoredGameplayVersion !== null || current.starterEcologyVersion > 0 || current.actors.length > 0)
+      return { initialized: false as const, actorIds: [] as string[] };
+    const layout = createStarterEcology(this.seed, center, (x, z, nearY) => this.findSurfaceAir(x, z, nearY));
+    layout.pois.forEach((poi) => this.registerPoi(poi));
+    const actors = layout.actors.map((actor) => this.spawnAutonomousActor(actor));
+    this.spawnWorldItem(layout.foodPosition, { itemId: 'berry', count: 1 });
+    const naturalEdits = layout.naturalEdits.filter((edit) => this.getVoxel(edit.x, edit.y, edit.z) === Voxel.Air);
+    const commit = this.editBatch({
+      actorId: 'starter-ecology-v1',
+      edits: [...layout.campEdits, ...naturalEdits],
+    });
+    this.gameplay.simulation.starterEcologyVersion = layout.version;
+    return { initialized: true as const, actorIds: actors.map((actor) => actor.id), commit };
+  }
+
+  private findSurfaceAir(x: number, z: number, _nearY: number): [number, number, number] {
+    for (let radius = 0; radius <= 6; radius += 1)
+      for (let dx = -radius; dx <= radius; dx += 1)
+        for (let dz = -radius; dz <= radius; dz += 1) {
+          if (Math.max(Math.abs(dx), Math.abs(dz)) !== radius) continue;
+          const candidateX = x + dx;
+          const candidateZ = z + dz;
+          const y = terrainHeight(this.seed, candidateX, candidateZ) + 1;
+          if (
+            isSolid(this.getVoxel(candidateX, y - 1, candidateZ)) &&
+            this.getVoxel(candidateX, y, candidateZ) === Voxel.Air &&
+            this.getVoxel(candidateX, y + 1, candidateZ) === Voxel.Air &&
+            this.getVoxel(candidateX, y + 2, candidateZ) === Voxel.Air &&
+            this.getVoxel(candidateX, y + 3, candidateZ) === Voxel.Air
+          )
+            return [candidateX + 0.5, y, candidateZ + 0.5];
+        }
+    throw new Error(`No dry starter surface found near ${x},${z}.`);
   }
 
   private isValidSnapshot(snapshot: ChunkSnapshot, key: string, cx: number, cy: number, cz: number): boolean {
