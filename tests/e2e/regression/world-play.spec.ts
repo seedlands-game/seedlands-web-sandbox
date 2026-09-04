@@ -91,7 +91,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     expect(afterSpace.onGround).toBe(false);
   });
 
-  test('steps down from a ledge without remaining embedded in its former surface', async ({ page }) => {
+  test('steps down from a ledge and can immediately reverse without remaining embedded', async ({ page }) => {
     await startHarnessWorld(page, 'seedlands-player-collision');
     await prepareStepDown(page);
     const before = await snapshot(page);
@@ -100,15 +100,24 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
 
     await lockPointer(page);
     await page.keyboard.down('KeyW');
-    const after = await waitForPlayerMovement(page, {
+    const steppedDown = await waitForPlayerMovement(page, {
       axis: 2,
       start: before.player[2],
-      minimumDelta: 3,
+      minimumDelta: 0.15,
       direction: -1,
       yTarget: before.player[1] - 1,
     });
     await page.keyboard.up('KeyW');
-    expect(after.colliding).toBe(false);
+    await page.keyboard.down('KeyS');
+    const reversed = await waitForPlayerMovement(page, {
+      axis: 2,
+      start: steppedDown.player[2],
+      minimumDelta: 0.5,
+      direction: 1,
+      yTarget: before.player[1] - 1,
+    });
+    await page.keyboard.up('KeyS');
+    expect(reversed.colliding).toBe(false);
   });
 
   test('persists a controlled world edit through the production edit and Store paths', async ({ page }) => {
