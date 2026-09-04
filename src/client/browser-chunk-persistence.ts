@@ -126,7 +126,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
           !Number.isInteger(snapshot.revision) ||
           snapshot.revision < 0 ||
           snapshot.voxels.length !== 32 ** 3 ||
-          !snapshot.voxels.every((voxel) => Number.isInteger(voxel) && voxel >= Voxel.Air && voxel <= Voxel.Water)
+          !snapshot.voxels.every((voxel) => Number.isInteger(voxel) && voxel >= Voxel.Air && voxel <= Voxel.Lantern)
         )
           throw new Error(`Legacy Chunk snapshot is invalid for ${snapshot.key}.`);
       const snapshots = options.legacySnapshots.map((snapshot) => ({

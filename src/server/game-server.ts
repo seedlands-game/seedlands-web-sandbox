@@ -274,7 +274,7 @@ export class GameServer extends GameServerGameplayFacade {
       result.generatorVersion !== this.generatorVersion ||
       result.key !== chunkKey(result.cx, result.cy, result.cz) ||
       result.canonical.length !== CHUNK_SIZE ** 3 ||
-      !result.canonical.every((value) => value >= Voxel.Air && value <= Voxel.Water)
+      !result.canonical.every((value) => value >= Voxel.Air && value <= Voxel.Lantern)
     )
       return false;
     const current = this.chunks.get(result.key);
@@ -421,7 +421,7 @@ export class GameServer extends GameServerGameplayFacade {
       Number.isInteger(snapshot.revision) &&
       snapshot.revision >= 0 &&
       snapshot.voxels.length === CHUNK_SIZE ** 3 &&
-      snapshot.voxels.every((value) => value >= Voxel.Air && value <= Voxel.Water)
+      snapshot.voxels.every((value) => value >= Voxel.Air && value <= Voxel.Lantern)
     );
   }
 

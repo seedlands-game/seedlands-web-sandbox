@@ -11,6 +11,7 @@ import { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
 import type { UiMetrics } from './ui/ui-contracts';
+import type { AdvancedVisualEffects } from './advanced-visual-effects';
 
 type HarnessApi = {
   snapshot: () => HarnessSnapshot;
@@ -34,6 +35,8 @@ type HarnessApi = {
   exportPerformanceTrace: () => ReturnType<PerformanceTelemetry['exportChromeTrace']>;
   executeGameplayCommand: (command: ServerCommand) => Promise<CommandResult>;
   advanceGameplay: (seconds: number) => void;
+  setVoxelAt: (x: number, y: number, z: number, voxel: number) => void;
+  flushSave: () => Promise<void>;
 };
 
 declare global {
@@ -63,6 +66,7 @@ type SnapshotContext = {
   persistence: BrowserChunkPersistence | null;
   ui: UiMetrics;
   presentedEntityCount: number;
+  visualEffects: AdvancedVisualEffects | null;
 };
 
 const unavailablePerformance = (): HarnessSnapshot['performance'] => ({
@@ -132,6 +136,21 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
         snapshotBytes: 0,
       }),
       presentedEntityCount: context.presentedEntityCount,
+    },
+    visualEffects: context.visualEffects?.snapshot ?? {
+      activeLocalLights: 0,
+      shadowedLocalLights: 0,
+      localLightLimit: 0,
+      localShadowLimit: 0,
+      sunShadows: false,
+      sunShadowResolution: 0,
+      reflectionEnabled: false,
+      reflectionActive: false,
+      reflectionResolution: 0,
+      reflectionFrameInterval: 0,
+      reflectionRenderCount: 0,
+      waterPlaneY: null,
+      postProcessing: false,
     },
   };
 }

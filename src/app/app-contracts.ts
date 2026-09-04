@@ -5,6 +5,7 @@ import type { MeshTaskIdentity } from '../client/mesh-task-snapshot';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
 import type { UiMetrics } from './ui/ui-contracts';
+import type { VisualEffectsSnapshot } from './advanced-visual-effects';
 
 export type MeshPart = MeshData;
 
@@ -100,6 +101,7 @@ export type HarnessSnapshot = {
     snapshotBytes: number;
     presentedEntityCount: number;
   };
+  visualEffects: VisualEffectsSnapshot;
 };
 
 export type RestoredSession = {

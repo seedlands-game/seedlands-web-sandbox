@@ -1,0 +1,82 @@
+page:
+  url: http://127.0.0.1:4173/?harness=1
+
+agent:
+  testId: seedlands-advanced-lighting-water
+  groupName: Seedlands 高级光照与水体
+  groupDescription: 验证人工光源、树叶镂空阴影、真实场景水面反射和 Low 降级后的视觉可读性。
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 14
+
+tasks:
+  - name: High 日落人工光源与树叶镂空阴影
+    flow:
+      - ai: 在“世界 Seed”输入框填写“advanced-lighting-midscene”，把视觉质量选择为 High，然后点击“进入世界”。
+      - sleep: 7000
+      - name: 构造可丢弃的灯笼、树叶和水面 fixture
+        javascript: |
+          (() => {
+            const harness = globalThis.__seedlandsHarness;
+            if (!harness) throw new Error('Seedlands harness is unavailable.');
+            const [px, py, pz] = harness.snapshot().player.map(Math.floor);
+            globalThis.__advancedLightingFixture = { px, py, pz };
+            harness.fillWorld({ from: [px - 7, py - 2, pz - 13], to: [px + 7, py + 7, pz - 1], voxel: 0 });
+            harness.fillWorld({ from: [px - 7, py - 3, pz - 13], to: [px + 7, py - 3, pz - 1], voxel: 3 });
+            harness.fillWorld({ from: [px - 6, py - 2, pz - 12], to: [px + 1, py - 2, pz - 5], voxel: 8 });
+            harness.fillWorld({ from: [px + 3, py - 2, pz - 10], to: [px + 3, py + 2, pz - 10], voxel: 4 });
+            harness.fillWorld({ from: [px + 1, py + 1, pz - 10], to: [px + 5, py + 5, pz - 10], voxel: 5 });
+            harness.setVoxelAt(px - 3, py - 2, pz - 3, 9);
+            harness.setVoxelAt(px + 3, py - 2, pz - 3, 9);
+            harness.setSpectatorPosition(px + 0.5, py + 2, pz + 3);
+            harness.setView(0, -18);
+            harness.setWorldTime(18.5);
+            harness.setTimePaused(true);
+            return harness.snapshot();
+          })()
+      - sleep: 4500
+      - aiAssert: 日落场景中能看到两个暖橙色人工光源形成的局部亮区，近处石面、木柱和树叶仍有可读的颜色与体积，不是整屏统一提亮。
+      - aiAssert: 灯笼方块具有明显暖色发光表面；画面右上方深绿色叶墙有许多能直接透出紫色天空的方形开口，这些开口是真透明而不是较浅的绿色纹理。
+      - aiAssert: 叶墙和树干在地面形成与光源方向一致、接触关系合理的阴影，没有漂浮、反向、闪烁或越过物体边界的异常黑块。
+      - name: 切换到白天水边镜头
+        javascript: |
+          (() => {
+            const harness = globalThis.__seedlandsHarness;
+            if (!harness) throw new Error('Seedlands harness is unavailable.');
+            const { px, py, pz } = globalThis.__advancedLightingFixture;
+            harness.setVoxelAt(px - 3, py - 2, pz - 3, 0);
+            harness.setVoxelAt(px + 3, py - 2, pz - 3, 0);
+            harness.fillWorld({ from: [px + 2, py - 2, pz - 12], to: [px + 5, py - 2, pz - 5], voxel: 3 });
+            harness.setSpectatorPosition(px + 0.5, py + 2.5, pz - 1);
+            harness.setView(0, -42);
+            harness.setWorldTime(10);
+            harness.setTimePaused(true);
+            return harness.snapshot();
+          })()
+      - sleep: 3500
+      - aiAssert: 左侧相连的蓝色水面内能看到一块倒置或镜像的深绿色镂空格纹，其形状与上方真实树叶墙对应，证明水面显示了场景倒影，而不只是统一蓝色或看见水下石底。
+      - aiAssert: 水面仍有可辨认的蓝绿色波纹；右侧与水相邻的干燥灰色石面和 HUD 没有出现水面的倒置绿色格纹，反射没有污染非水材质。
+      - aiAssert: High 调色下的蓝色水面、干燥灰石、棕色树干和绿色树叶仍有各自清楚的纹理与方块轮廓，画面没有整屏偏成单一颜色或丢失大片明暗细节。
+  - name: Low 降级仍保持核心可读性
+    flow:
+      - name: 回到启动页
+        javascript: |
+          location.reload();
+          'reloading'
+      - sleep: 2500
+      - ai: 在“世界 Seed”输入框填写“advanced-lighting-low-midscene”，把视觉质量选择为 Low，然后点击“进入世界”。
+      - sleep: 6500
+      - name: 构造 Low 灯笼 fixture
+        javascript: |
+          (() => {
+            const harness = globalThis.__seedlandsHarness;
+            if (!harness) throw new Error('Seedlands harness is unavailable.');
+            const [px, py, pz] = harness.snapshot().player.map(Math.floor);
+            harness.setVoxelAt(px + 2, py, pz - 3, 9);
+            harness.setWorldTime(0);
+            harness.setTimePaused(true);
+            harness.setView(0, -18);
+            return harness.snapshot();
+          })()
+      - sleep: 2500
+      - aiAssert: Low 夜间仍能辨认灯笼的暖色发光表面、附近地形和准星；关闭反射、后处理和阴影没有导致纯黑画面、错误材质或 HUD 不可读。

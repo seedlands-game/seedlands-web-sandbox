@@ -50,6 +50,7 @@ export class World {
     profile: PerformanceProfile,
     variant: StreamingVariant,
     onStaleVisibleCommit: () => void = () => undefined,
+    waterLayerId?: number,
   ) {
     this.scheduler = new MeshTaskScheduler({
       worker: new Worker(new URL('../worker/world-worker.ts', import.meta.url), { type: 'module' }),
@@ -76,7 +77,7 @@ export class World {
       onAcceptedResult: (task, result) => this.repository.enqueue(task, result.meshes),
     });
     this.repository = new ChunkResourceRepository({
-      adapter: createPlayCanvasChunkAdapter(app, resolveMaterial, telemetryRecorder),
+      adapter: createPlayCanvasChunkAdapter(app, resolveMaterial, telemetryRecorder, waterLayerId),
       isCurrent: (task) => this.scheduler.isCurrent(task),
       profile,
       now: () => performance.now(),

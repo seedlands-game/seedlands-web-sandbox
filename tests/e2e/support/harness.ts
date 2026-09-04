@@ -8,6 +8,7 @@ export type HarnessSnapshot = {
   renderedChunks: number;
   generationQueue: number;
   meshingQueue: number;
+  deferredRemeshes: number;
   onGround: boolean;
   colliding: boolean;
   interactionAttempts: number;
@@ -85,6 +86,21 @@ export type HarnessSnapshot = {
     snapshotBytes: number;
     presentedEntityCount: number;
   };
+  visualEffects: {
+    activeLocalLights: number;
+    shadowedLocalLights: number;
+    localLightLimit: number;
+    localShadowLimit: number;
+    sunShadows: boolean;
+    sunShadowResolution: number;
+    reflectionEnabled: boolean;
+    reflectionActive: boolean;
+    reflectionResolution: number;
+    reflectionFrameInterval: number;
+    reflectionRenderCount: number;
+    waterPlaneY: number | null;
+    postProcessing: boolean;
+  };
 };
 
 type HarnessWindow = Window & {
@@ -105,6 +121,8 @@ type HarnessWindow = Window & {
     setSpectatorPosition: (x: number, y: number, z: number) => void;
     executeGameplayCommand: (command: Record<string, unknown>) => Promise<Record<string, unknown>>;
     advanceGameplay: (seconds: number) => void;
+    setVoxelAt: (x: number, y: number, z: number, voxel: number) => void;
+    flushSave: () => Promise<void>;
   };
 };
 

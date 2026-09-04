@@ -236,3 +236,11 @@
 2026-09-05 05:20，合入 Change8 提交 `a27dc8e5817143bce3282f3347bd51dbb0c3f84c`。解决 Game 生命周期、UI actions、输入和 Svelte props 冲突，保留双方功能；场景创建移入 `scene-bootstrap.ts`，音频取样移入 WorldAudio，维持文件体积门禁。真实回归发现原生 dialog 未被显式 role 选择器识别，打开背包释放 Pointer Lock 错弹暂停；改为读取权威 UI state 并补 change 用例。
 
 本次集成 Static / Build 通过（182 单测、world 行覆盖 94.86%、Svelte 0/0）；9 项长期浏览器基线 + 3 项 Change8 + 4 项 Shell + 1 项 Audio，共 17 项通过（46.6 秒）。性能数值仍待独占设备终验。后续补背包移动/食用、成功事件音效与灯笼配方，再合入两路最终提交。
+
+### 高级光影整合检查点（2026-09-05 05:43）
+
+已合入渲染任务最终 `11c68d7f345e61abee8a424e566cec820c297873`，解决 Game/两端 Harness 契约冲突，保留 Shell/生存/音频生命周期及高级光影两路能力。场景创建与启动参数留在 `scene-bootstrap.ts`，Game 继续满足 500 行上限。
+
+本分支实际复验：`pnpm verify:static` 193 passed / 4 skipped、world 行覆盖 94.86%、Svelte 0/0；独立 build 通过；18 项 Playwright（9 基线、3 光影、4 Shell、2 背包整合）全部通过，耗时 1.1 分钟。High/Medium 反射、Low 降级、灯笼保存和十次会话切换均包含于这次复验。仍需自然灯笼配方、Change9、总体性能和完整体验准出，不能据此标记父 Goal 完成。
+
+账户实际查询 42%（项目起点 38%，总上限 58%），预算仍有余量，不自动重置。

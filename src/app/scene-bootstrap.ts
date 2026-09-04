@@ -1,4 +1,7 @@
+import { PERFORMANCE_PROFILES } from '../client/performance-profile';
+import type { StreamingVariant } from './app-contracts';
 import * as pc from 'playcanvas';
+import type { LightingQualityBudget } from './advanced-lighting-budget';
 
 export function createSceneApplication(canvas: HTMLCanvasElement) {
   const app = new pc.Application(canvas, {
@@ -12,14 +15,19 @@ export function createSceneApplication(canvas: HTMLCanvasElement) {
   return app;
 }
 
-export function createSun(app: pc.Application, castShadows: boolean) {
+export function createSun(app: pc.Application, budget: LightingQualityBudget) {
   const light = new pc.Entity('Sun');
   light.addComponent('light', {
     type: 'directional',
     color: new pc.Color(1, 0.9, 0.72),
     intensity: 1,
-    castShadows,
-    shadowResolution: 512,
+    castShadows: budget.sunShadowResolution > 0,
+    shadowResolution: budget.sunShadowResolution || 512,
+    shadowType: pc.SHADOW_PCF3_32F,
+    shadowUpdateMode: pc.SHADOWUPDATE_REALTIME,
+    shadowDistance: 58,
+    shadowBias: 0.18,
+    normalOffsetBias: 0.06,
   });
   app.root.addChild(light);
   return light;
@@ -35,4 +43,15 @@ export function createCamera(app: pc.Application, farClip: number) {
   });
   app.root.addChild(camera);
   return camera;
+}
+
+export function selectPerformanceProfile(search: string) {
+  const params = new URLSearchParams(search);
+  const name = params.get('performanceProfile');
+  if (name === 'diagnostic' || name === 'benchmark' || name === 'balanced') return PERFORMANCE_PROFILES[name];
+  return params.has('harness') ? PERFORMANCE_PROFILES.benchmark : PERFORMANCE_PROFILES.balanced;
+}
+
+export function requestedStreamingVariant(search: string): StreamingVariant {
+  return new URLSearchParams(search).get('streamingVariant') === 'main-snapshot' ? 'main-snapshot' : 'worker-first';
 }

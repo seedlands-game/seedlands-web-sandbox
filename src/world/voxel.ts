@@ -14,6 +14,7 @@ export const Voxel = {
   Sand: 6,
   Snow: 7,
   Water: 8,
+  Lantern: 9,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
@@ -29,6 +30,7 @@ export const FaceMaterial = {
   Leaves: 8,
   Snow: 9,
   Water: 10,
+  Lantern: 11,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -44,6 +46,7 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Leaves]: 'leaves',
   [FaceMaterial.Snow]: 'snow',
   [FaceMaterial.Water]: 'water',
+  [FaceMaterial.Lantern]: 'lantern',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -55,6 +58,7 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Sand]: '沙砾',
   [Voxel.Snow]: '雪',
   [Voxel.Water]: '水',
+  [Voxel.Lantern]: '灯笼',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -66,6 +70,7 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Sand]: [0.76, 0.67, 0.43],
   [Voxel.Snow]: [0.9, 0.95, 1],
   [Voxel.Water]: [0.12, 0.4, 0.72],
+  [Voxel.Lantern]: [1, 0.58, 0.18],
 };
 
 export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
@@ -88,6 +93,7 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Sand]: FaceMaterial.Sand,
       [Voxel.Snow]: FaceMaterial.Snow,
       [Voxel.Water]: FaceMaterial.Water,
+      [Voxel.Lantern]: FaceMaterial.Lantern,
     } as Record<number, FaceMaterialId>
   )[id];
 }

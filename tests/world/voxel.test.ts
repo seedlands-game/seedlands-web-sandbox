@@ -6,6 +6,7 @@ import {
   chunkKey,
   floorDiv,
   isSolid,
+  faceMaterialFor,
   mod,
   normalizeSeed,
   remeshChunkKeysForEdit,
@@ -17,6 +18,16 @@ describe('voxel coordinates and registry', () => {
     expect(CHUNK_SIZE).toBe(32);
     expect(isSolid(Voxel.Air)).toBe(false);
     expect(isSolid(Voxel.Stone)).toBe(true);
+  });
+
+  it('reserves a stable solid lantern voxel and material without changing generation', () => {
+    expect(Voxel.Lantern).toBe(9);
+    expect(isSolid(Voxel.Lantern)).toBe(true);
+    expect(faceMaterialFor(Voxel.Lantern, 0, true)).toBe(11);
+    const seed = normalizeSeed('lantern-is-edit-only');
+    for (let x = -12; x <= 12; x += 3)
+      for (let y = 0; y <= 42; y += 3)
+        for (let z = -12; z <= 12; z += 3) expect(baseVoxel(seed, x, y, z)).not.toBe(Voxel.Lantern);
   });
 
   it.each([-65, -33, -32, -1, 0, 1, 31, 32, 65])('round-trips world coordinate %i through its chunk', (coordinate) => {

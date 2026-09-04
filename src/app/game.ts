@@ -1,5 +1,11 @@
 import * as pc from 'playcanvas';
-import { createSceneApplication, createSun, createCamera } from './scene-bootstrap';
+import {
+  createSceneApplication,
+  createSun,
+  createCamera,
+  selectPerformanceProfile,
+  requestedStreamingVariant,
+} from './scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
 import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
@@ -14,7 +20,7 @@ import { executeSlashCommand, type SlashCommandExecution } from '../server/comma
 import type { ServerCommand } from '../server/commands/command-contract';
 import { GameServer } from '../server/game-server';
 import { CHUNK_SIZE, floorDiv } from '../world/voxel';
-import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession, StreamingVariant } from './app-contracts';
+import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession } from './app-contracts';
 import { BrowserGameplay } from './browser-gameplay';
 import { BrowserWorldStore } from './browser-world-store';
 import { createHarnessSnapshot, installHarness } from './game-harness';
@@ -26,6 +32,8 @@ import type { MapLayer } from './ui/ui-contracts';
 import { createVoxelMaterials, type VoxelMaterials } from './voxel-materials';
 import { WorldEnvironment } from './world-environment';
 import { World } from './world-runtime';
+import { AdvancedVisualEffects } from './advanced-visual-effects';
+import { LIGHTING_QUALITY_BUDGETS } from './advanced-lighting-budget';
 
 export class Game {
   private paused = false;
@@ -33,6 +41,7 @@ export class Game {
   private app: pc.Application | null = null;
   private world: World | null = null;
   private environment: WorldEnvironment | null = null;
+  private visualEffects: AdvancedVisualEffects | null = null;
   private visualResources: VoxelMaterials | null = null;
   private controller: PlayerController | null = null;
   private gameplayClient: BrowserGameplay | null = null;
@@ -90,7 +99,8 @@ export class Game {
     this.lastClockMinute = -1;
     this.lastClockPublishAt = -Infinity;
     const quality = QUALITY_PROFILES[this.qualityLevel];
-    this.performanceProfile = this.selectPerformanceProfile();
+    const lightingBudget = LIGHTING_QUALITY_BUDGETS[this.qualityLevel];
+    this.performanceProfile = selectPerformanceProfile(location.search);
     this.performanceTelemetry = new PerformanceTelemetry({
       now: () => performance.now(),
       frameCapacity: this.performanceProfile.ringBufferFrames,
@@ -103,9 +113,10 @@ export class Game {
       legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
     });
     this.app = createSceneApplication(this.canvas);
-    const light = createSun(this.app, quality.shadowQuality !== 'off');
+    const light = createSun(this.app, lightingBudget);
     this.camera = createCamera(this.app, quality.fogEnd + 18);
     this.visualResources = await createVoxelMaterials(this.app, quality);
+    this.camera.camera!.layers = [...this.camera.camera!.layers, this.visualResources.waterLayer.id];
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
     const server = new GameServer({ seedText, persistence: this.persistence });
     if (this.audio) this.worldAudio = new WorldAudio(this.audio, server.seed);
@@ -118,10 +129,18 @@ export class Game {
       quality,
       this.performanceTelemetry,
       this.performanceProfile,
-      this.requestedStreamingVariant(),
+      requestedStreamingVariant(location.search),
       () => {
         this.lifecycle.staleVisibleCommits += 1;
       },
+      this.visualResources.waterLayer.id,
+    );
+    this.visualEffects = new AdvancedVisualEffects(
+      this.app,
+      this.camera,
+      this.world,
+      lightingBudget,
+      this.visualResources,
     );
     this.lifecycle.worldInstanceId += 1;
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
@@ -243,23 +262,19 @@ export class Game {
         return result;
       },
       advanceGameplay: (seconds) => this.gameplayClient?.advance(seconds),
+      setVoxelAt: (x, y, z, voxel) => {
+        this.world?.edit(x, y, z, voxel);
+        this.queueSave();
+      },
+      flushSave: () => this.flushSave(),
     });
-  }
-
-  private async executeBrowserCommand(
-    executor: ServerCommandExecutor,
-    source: CommandSource,
-    input: string,
-  ): Promise<SlashCommandExecution> {
-    const execution = await executeSlashCommand(executor, source, input);
-    if (!execution.command || !execution.result.success) return execution;
-    this.consumeBrowserCommand(execution.command, execution.result);
-    return execution;
   }
 
   async executeCommand(input: string): Promise<SlashCommandExecution> {
     if (!this.commandExecutor || !this.commandSource) throw new Error('服务端命令入口尚未就绪。');
-    return this.executeBrowserCommand(this.commandExecutor, this.commandSource, input);
+    const execution = await executeSlashCommand(this.commandExecutor, this.commandSource, input);
+    if (execution.command && execution.result.success) this.consumeBrowserCommand(execution.command, execution.result);
+    return execution;
   }
 
   releaseInput() {
@@ -367,6 +382,7 @@ export class Game {
       this.lastFpsSample = now;
     }
     this.controller?.update(dt);
+    this.visualEffects?.update(dt);
     this.world.updateStreaming(this.camera.getPosition());
     this.world.drainCommits();
     if (this.serverPlayerId) {
@@ -441,6 +457,7 @@ export class Game {
       persistence: this.persistence,
       ui: this.uiBridge.metrics(),
       presentedEntityCount: this.gameplayClient?.presentedEntityCount ?? 0,
+      visualEffects: this.visualEffects,
     });
   }
 
@@ -501,6 +518,8 @@ export class Game {
       this.lifecycle.disposedWorlds += 1;
     }
     this.world = null;
+    this.visualEffects?.destroy();
+    this.visualEffects = null;
     this.environment = null;
     this.visualResources?.destroy();
     this.visualResources = null;
@@ -510,18 +529,5 @@ export class Game {
     this.persistence = null;
     this.camera = null;
     this.serverPlayerId = null;
-  }
-
-  private selectPerformanceProfile() {
-    const params = new URLSearchParams(location.search);
-    const name = params.get('performanceProfile');
-    if (name === 'diagnostic' || name === 'benchmark' || name === 'balanced') return PERFORMANCE_PROFILES[name];
-    return params.has('harness') ? PERFORMANCE_PROFILES.benchmark : PERFORMANCE_PROFILES.balanced;
-  }
-
-  private requestedStreamingVariant(): StreamingVariant {
-    return new URLSearchParams(location.search).get('streamingVariant') === 'main-snapshot'
-      ? 'main-snapshot'
-      : 'worker-first';
   }
 }
