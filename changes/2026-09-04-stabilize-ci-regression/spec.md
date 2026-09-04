@@ -1,6 +1,6 @@
 # 稳定 Linux Chromium 移动回归
 
-**状态：** 本地主干整合与验收完成，等待远端读回（Agile flow）
+**状态：** 已完成（Agile flow）
 
 ## Context & Goal
 
@@ -37,17 +37,19 @@
 - [x] 目标平面移动用例随完整基线本机通过，且仍覆盖真实 Pointer Lock、键盘输入、3 米移动、贴地和无重叠。（Playwright-baseline）
 - [x] 完整 Pages 子路径浏览器基线 8/8 通过。（Playwright-baseline）
 - [x] 合并本地 `main` 后静态基线通过：Vitest 15 个文件通过、1 个跳过，97 个用例通过、3 个跳过，world 行覆盖率 97.27%；生产构建通过，保留主 chunk 约 2.00 MB 的既有 warning。（Static；Build）
-- [ ] PR 新 SHA 的三个质量 job 全部通过。（Static；Build；Playwright-baseline）
+- [x] PR head `2d572420c7386995c253073f29b4bb21b76b488b` 的 GitHub Actions run `33865718194` 三个质量 job 全部通过：Static verification 38 秒、Production build 32 秒、Chromium regression 1 分 52 秒。（Static；Build；Playwright-baseline）
 
 ## Tasks & Current State
 
 1. [done] 读取两次远端失败日志并确认相同失败指纹。
 2. [done] 增加失败快照，依次排除依赖安装、输入未生效与物理步长假设，定位为 Pointer Lock 后 yaw 偏转。
 3. [done] 在依赖固定方向的真实输入用例中于锁定后恢复受控视角，并重新运行本地验收。
-4. [pending] 提交、推送并读取 PR 新 SHA 的远端终态。
+4. [done] 提交、推送并读取 PR 新 SHA 的远端终态。
 
 ## Delivery Snapshot
 
 冲突裁决以本地 `main` 的模块化架构为准，旧单体分支上的 Harness 等帧实现未迁移。失败快照最终证明根因是 Pointer Lock 后的 yaw 偏转；最终实现会在锁定成功后使用既有 Harness 恢复受控视角，同时保留真实 `KeyW/KeyS`、3 米位移、贴地与 `colliding=false` 断言。
 
 最终本机证据：Pages 子路径长期浏览器基线 8/8；`CI=true pnpm verify:static` 全部通过（Vitest 97 个通过、3 个跳过，world 行覆盖率 97.27%）；注入固定 SHA 的 Pages 生产构建通过。app-module 历史 change 的 2 条用例在其原始根路径合同下 2/2 通过；将其与 Pages base path 强行组合时，旧用例按预期拒绝子路径样式 URL，因此未篡改已交付历史用例，Pages 子路径继续由本 change 的专属用例验证并通过。
+
+远端证据：PR head `2d572420c7386995c253073f29b4bb21b76b488b` 的 run `33865718194` 在 GitHub-hosted Ubuntu/Chromium 环境中三个质量 job 全绿，证明视角归一化修复覆盖了此前连续复现的 Linux 失败。
