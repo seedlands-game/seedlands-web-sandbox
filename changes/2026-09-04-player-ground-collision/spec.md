@@ -1,6 +1,6 @@
 # Player Ground Collision Consistency
 
-**Status:** Delivered locally
+**Status:** Integrated into the current quality architecture
 
 ## Context & Goal
 
@@ -37,10 +37,10 @@ Direct implementation: retain separated vertical/horizontal collision, but use `
 
 ## Delivery Snapshot
 
-Changed paths: `src/main.ts`, `scripts/browser-harness.mjs`, and this change record.
+Changed paths after rebase: `src/app/main.ts`, `tests/e2e/support/harness.ts`, `tests/e2e/regression/world-play.spec.ts`, and this change record. The old `src/main.ts` and `scripts/browser-harness.mjs` paths are intentionally not restored.
 
-Validation: `CI=true corepack pnpm test` passed; `CI=true corepack pnpm build` passed; `git diff --check` passed; `CI=true corepack pnpm harness:e2e` passed. Chromium stages Load, Input, Player, FlatMovement, Interaction, Streaming, MacroMap, and Persistence all passed. `FlatMovement` creates a solid y=56 platform, places the player at its exact resting height, asserts the player is not horizontally colliding with the floor, then holds forward and verifies more than three world units of movement with stable camera height.
+Current validation: `corepack pnpm verify:static`, `corepack pnpm build`, and `corepack pnpm harness` passed. The Playwright flat-platform regression constructs its world through the production `World.edit()` path, uses real Pointer Lock and keyboard input, and waits for observable position/grounding state rather than a fixed delay.
 
 Known limitation: the controller is still axis-separated and does not implement step climbing or swept-capsule collision.
 
-Git: implementation commit `d57adf2` on `codex/player-ground-collision`; no remote push requested.
+Git: rebased implementation commit `429a673` on `codex/player-ground-collision-integration`; no remote push requested.
