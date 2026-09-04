@@ -2,6 +2,7 @@ import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
 
 export const CHUNK_SIZE = 32;
 export const GENERATOR_VERSION = 2;
+export type ChunkCoord = { cx: number; cy: number; cz: number };
 
 export const Voxel = {
   Air: 0,

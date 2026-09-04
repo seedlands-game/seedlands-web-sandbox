@@ -1,6 +1,6 @@
 # Seedlands — Web 3D Voxel Sandbox Foundation
 
-一个采用 **TypeScript + Vite + PlayCanvas v2 + Web Worker + Browser Storage** 的可玩 3D 体素沙盒基础原型。
+一个采用 **TypeScript + Vite + PlayCanvas v2 + Browser Storage** 的可玩 3D 体素沙盒基础原型。
 
 ## 运行
 
@@ -39,23 +39,26 @@ corepack pnpm preview
 - Seed 驱动、坐标确定性的 Macro geography、气候、biome、河湖与树木生成；同一 `seed + generatorVersion` 与加载顺序无关。
 - `32³` 的 `Uint16Array` Chunk 数据；基础材料包括 Grass、Dirt、Stone、Wood、Leaves、Sand、Snow、Water 与 Air。
 - 以玩家为中心的双层 Chunk streaming；超出缓存半径的 GPU Mesh/Chunk 会卸载，不会把探索历史永久留在内存中。
-- Worker 承担 Chunk worldgen 和 CPU greedy meshing；主线程负责 PlayCanvas GPU 上传、渲染、输入和玩家控制。
+- `GameServer` 在同进程内持有权威 Chunk、实体和世界时钟；浏览器客户端只读取服务端数据进行渲染，并将已解析的玩家位置写回服务端。
+- Integrated Mode 直接对服务端权威体素数据执行 CPU greedy meshing，并按帧调度首屏 Chunk，避免网格构建阻塞真实输入；独立 Worker 入口保留为实验适配器，不处于权威数据链路。
 - 一张 68 KiB 原创风格母图提供 Grass/Wood 分面及 Dirt、Stone、Sand、Leaves、Snow 材质；运行时小 tile 隔离 mip，Greedy 大面逐 voxel 重复而不拉伸。
 - Mesh 以 Chunk + 面材质为单位，进行非对称 opaque/water 出面、顶点 AO 与 AO-aware 贪心合并，不产生逐体素 Entity / draw call。
 - 世界时间统一驱动太阳方向/色温/强度、天空渐变、ambient 与 linear fog，连续经过 Dawn、Day、Sunset 和 Night。
 - 河湖使用独立透明水材质、波纹 UV 动画与关闭 depth write 的延后绘制；水下地形面保持可见。
 - 启动页提供 Low/Medium/High 三档视觉质量，分别调整 render/fog distance、resolution scale、水体和叶片密度；High 附带低分辨率阴影。
 - 第一人称移动、重力、跳跃、直接基于 voxel occupancy 的碰撞，以及基于体素 raymarch 的破坏/放置。
-- 中央 `World.edit()` 管理所有改动，边界编辑会同时使邻居 Chunk 失效并重新网格化。
-- `localStorage` 存储 Seed、玩家位置与世界改动（procedural base + mutation delta），刷新后可继续。
+- 中央 `World.edit()` 将浏览器编辑提交到服务端批次；边界编辑会同时使邻居 Chunk 失效并重新网格化。
+- `localStorage` 只作为浏览器快照适配器，存储 Seed、玩家位置和 materialized Chunk snapshot；旧 mutation delta 存档会在首次读取时迁移。
 - Player HUD 仅常驻准星、世界时间、快捷栏与交互反馈；F3 调试面板额外显示 FPS、backend、Seed、坐标、Chunk、队列、三角形、draw call 与 mutation。
 
 ## 结构
 
 ```text
 src/app/             浏览器启动、PlayCanvas 生命周期、输入、UI 与样式
-src/world/           无 UI 依赖的 Macro、voxel、Chunk mesh 与存档纯逻辑
-src/worker/          Worker 入口及 world 数据传输
+src/client/          浏览器持久化与客户端适配
+src/server/          Node 可独立运行的权威世界、实体、时钟与快照端口
+src/world/           可共享的确定性 Macro、voxel、Chunk mesh 与存档纯逻辑
+src/worker/          独立的 Worker 实验入口及传输适配
 tests/world/         `src/world/` 的 Vitest 单测
 tests/e2e/           Playwright 的确定性浏览器回归、性能样本与共享支持代码
 scripts/             Harness 和本地工程脚本
@@ -72,7 +75,7 @@ corepack pnpm test:coverage # Vitest V8：仅 src/world/，行覆盖率至少 80
 corepack pnpm verify:static # 上述静态检查的组合入口
 ```
 
-`src/world/` 不依赖 DOM、PlayCanvas 或 Web Worker，因而可由 Node/Vitest 可靠验证；当前 coverage 会生成本地 `coverage/` 报告，不纳入版本控制。`src/app/` 和 `src/worker/` 的实际运行时行为由 Playwright、Harness 与 Midscene 分别证明。
+`src/world/` 不依赖 DOM、PlayCanvas、Worker、`src/server/` 或 `src/client/`，由自定义 ESLint 规则与 Vitest 共同验证；`src/server/` 同样禁止 PlayCanvas、DOM 和 Worker 依赖。当前 coverage 会生成本地 `coverage/` 报告，不纳入版本控制。浏览器运行时行为由 Playwright、Harness 与 Midscene 分别证明。
 
 依赖安装会启用 Husky。pre-commit 只检查暂存文件的格式与 ESLint，并运行快速的目录规则；commit-msg 接受 `feat`、`fix`、`refactor`、`test`、`docs`、`chore`、`ci`、`build` 前缀及可选 scope，不强制 Conventional Commits 的 body、footer 或 breaking-change 结构。
 
@@ -84,7 +87,7 @@ corepack pnpm verify:static # 上述静态检查的组合入口
 2. 在终端 A 启动游戏：`corepack pnpm exec vite --host 127.0.0.1`。
 3. 在终端 B 先运行 `corepack pnpm test` 与 `corepack pnpm midscene:verify-model`，再运行 `corepack pnpm midscene:smoke`。后者会显式使用 `--dotenv-override`，避免开发机已有的模型环境变量覆盖项目配置。
 
-`corepack pnpm test` 使用 Vitest 在 Node 环境运行 `tests/world/**/*.test.ts`，覆盖无需 UI 的坐标/体素注册、确定性世界生成、Chunk 网格与存档编解码。开发时可运行 `corepack pnpm test:watch`。它不加载 DOM、PlayCanvas 或 Web Worker，因此通过结果只证明纯逻辑；Midscene 与 Harness 仍负责真实浏览器交互、渲染和 Worker 链路。Midscene 脚本会创建固定 Seed 世界，并断言 HUD、渲染后端和已加载 Chunk；其 YAML 与所属 change 同目录存放。运行结果与视觉报告写入被忽略的 `midscene_run/`，因此它是本地浏览器验证证据，不会混入源码提交。
+`corepack pnpm test` 使用 Vitest 在 Node 环境运行纯逻辑和 headless 服务端测试，覆盖无需 UI 的坐标/体素注册、确定性世界生成、Chunk 网格、存档编解码和服务端权威状态。开发时可运行 `corepack pnpm test:watch`。它不加载 DOM、PlayCanvas 或 Web Worker，因此通过结果只证明纯逻辑；Midscene 与 Harness 仍负责真实浏览器交互和渲染链路。Midscene 脚本会创建固定 Seed 世界，并断言 HUD、渲染后端和已加载 Chunk；其 YAML 与所属 change 同目录存放。运行结果与视觉报告写入被忽略的 `midscene_run/`，因此它是本地浏览器验证证据，不会混入源码提交。
 
 ## Playwright 确定性浏览器测试
 

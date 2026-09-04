@@ -4,20 +4,17 @@ import {
   CHUNK_SIZE,
   GENERATOR_VERSION,
   Voxel,
-  baseVoxel,
   chunkKey,
   floorDiv,
   isSolid,
-  mod,
-  normalizeSeed,
-  remeshChunkKeysForEdit,
-  voxelIndex,
   voxelNames,
   type FaceMaterialId,
 } from '../world/voxel';
 import { macroAt, type MacroBiome } from '../world/macro-world';
-import type { RenderLayer } from '../world/mesh';
-import { decodeWorldSave, encodeWorldSave, type WorldChange } from '../world/storage';
+import { meshChunk, type RenderLayer } from '../world/mesh';
+import { decodeWorldSave, type WorldChange } from '../world/storage';
+import { GameServer } from '../server/game-server';
+import { BrowserChunkPersistence, decodeBrowserWorldSave } from '../client/browser-chunk-persistence';
 import {
   QUALITY_PROFILES,
   WorldEnvironment,
@@ -56,7 +53,6 @@ type Chunk = {
   drawCalls: number;
 };
 type Change = WorldChange;
-type ChunkTask = { id: number; seed: number; cx: number; cy: number; cz: number; changes: Change[] };
 
 type HarnessSnapshot = {
   frameMs: number;
@@ -77,6 +73,18 @@ type HarnessSnapshot = {
   quality: QualityLevel;
   triangles: number;
   drawCalls: number;
+  runtime: 'integrated-server';
+  serverRevision: number;
+  voxelAtOrigin: number;
+  serverPlayerPosition: [number, number, number];
+  serverWorldTime: number;
+};
+
+type RestoredSession = {
+  player: [number, number, number];
+  seed: string;
+  persistence: BrowserChunkPersistence;
+  changes: Change[];
 };
 
 declare global {
@@ -240,40 +248,57 @@ const macroMapViewer = new MacroMapViewer();
 
 class Store {
   private key = 'seedlands-world-v2';
-  load() {
-    return decodeWorldSave(localStorage.getItem(this.key));
+  load(): RestoredSession | null {
+    const raw = localStorage.getItem(this.key);
+    const current = decodeBrowserWorldSave(raw);
+    if (current)
+      return {
+        player: current.player,
+        seed: current.seed,
+        persistence: new BrowserChunkPersistence(current.snapshots),
+        changes: [] as Change[],
+      };
+    const legacy = decodeWorldSave(raw);
+    return legacy
+      ? {
+          player: legacy.player,
+          seed: legacy.seed,
+          persistence: new BrowserChunkPersistence(),
+          changes: legacy.changes,
+        }
+      : null;
   }
-  save(seed: string, player: pc.Vec3, changes: Map<string, number>) {
-    const entries = [...changes].map(([key, value]) => [...key.split(',').map(Number), value] as Change);
-    localStorage.setItem(this.key, encodeWorldSave(seed, [player.x, player.y, player.z], entries));
+  save(seed: string, player: pc.Vec3, persistence: BrowserChunkPersistence) {
+    localStorage.setItem(this.key, JSON.stringify(persistence.serialize(seed, [player.x, player.y, player.z])));
   }
 }
 
 class World {
-  readonly worker = new Worker(new URL('../worker/world-worker.ts', import.meta.url), { type: 'module' });
   readonly chunks = new Map<string, Chunk>();
   readonly requested = new Set<string>();
-  readonly changes = new Map<string, number>();
-  private changesByChunk = new Map<string, Map<string, Change>>();
-  private latestTask = new Map<string, number>();
-  private queued = new Map<string, ChunkTask>();
+  private readonly pendingMeshes = new Map<string, { cx: number; cy: number; cz: number; id: number }>();
   private dirtyChunks = new Set<string>();
   private remeshTimer: number | null = null;
-  private inFlight = 0;
-  private readonly maxInFlight = 2;
+  private meshTimer: number | null = null;
   private taskId = 0;
   private lastCenter = '';
   constructor(
-    readonly seedText: string,
-    readonly seed: number,
+    readonly server: GameServer,
     private app: pc.Application,
     private materials: Map<number, pc.StandardMaterial>,
     private quality: QualityProfile,
-  ) {
-    this.worker.onmessage = (event: MessageEvent<WorkerResult>) => this.receive(event.data);
+  ) {}
+  get seedText() {
+    return this.server.options.seedText;
+  }
+  get seed() {
+    return this.server.seed;
+  }
+  get mutationCount() {
+    return this.server.mutationCount;
   }
   get queueSize() {
-    return this.inFlight + this.queued.size;
+    return this.pendingMeshes.size;
   }
   get streamCenter(): [number, number] {
     const [x, z] = this.lastCenter.split(',').map(Number);
@@ -283,40 +308,36 @@ class World {
     return {
       loadedChunks: this.chunks.size,
       renderedChunks: this.chunks.size,
-      generationQueue: this.queued.size,
-      meshingQueue: this.inFlight,
+      generationQueue: this.pendingMeshes.size,
+      meshingQueue: this.meshTimer === null ? 0 : 1,
       deferredRemeshes: this.dirtyChunks.size,
       triangles: [...this.chunks.values()].reduce((sum, chunk) => sum + chunk.triangles, 0),
       drawCalls: [...this.chunks.values()].reduce((sum, chunk) => sum + chunk.drawCalls, 0),
     };
   }
-  restoreChanges(changes: Change[]) {
-    changes.forEach(([x, y, z, value]) => this.setChange(x, y, z, value));
+  restoreLegacyChanges(changes: Change[]) {
+    if (!changes.length) return;
+    this.server.editBatch({
+      actorId: 'legacy-storage-migration',
+      edits: changes.map(([x, y, z, value]) => ({ x, y, z, value })),
+    });
   }
   dispose() {
-    this.worker.terminate();
     if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
+    if (this.meshTimer !== null) window.clearTimeout(this.meshTimer);
     this.chunks.forEach((chunk) => {
       chunk.meshes.forEach((mesh) => mesh.destroy());
       chunk.entity.destroy();
     });
     this.chunks.clear();
     this.requested.clear();
-    this.queued.clear();
-    this.latestTask.clear();
+    this.pendingMeshes.clear();
     this.dirtyChunks.clear();
     this.remeshTimer = null;
+    this.meshTimer = null;
   }
   getVoxel(x: number, y: number, z: number): number {
-    const override = this.changes.get(`${x},${y},${z}`);
-    if (override !== undefined) return override;
-    const cx = floorDiv(x, CHUNK_SIZE),
-      cy = floorDiv(y, CHUNK_SIZE),
-      cz = floorDiv(z, CHUNK_SIZE);
-    const chunk = this.chunks.get(chunkKey(cx, cy, cz));
-    return chunk
-      ? chunk.data[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))]
-      : baseVoxel(this.seed, x, y, z);
+    return this.server.getVoxel(x, y, z);
   }
   updateStreaming(position: pc.Vec3) {
     const cx = floorDiv(position.x, CHUNK_SIZE),
@@ -342,12 +363,9 @@ class World {
     }
   }
   edit(x: number, y: number, z: number, value: number) {
-    this.setChange(x, y, z, value);
-    const affected = remeshChunkKeysForEdit(x, y, z);
-    // Persist every edit immediately in memory, then collapse a click burst into one replacement mesh per Chunk.
-    affected.forEach((key) => {
+    const result = this.server.edit(x, y, z, value);
+    result.meshChunks.forEach((key) => {
       if (this.chunks.has(key)) {
-        this.latestTask.delete(key);
         this.dirtyChunks.add(key);
       }
     });
@@ -357,31 +375,50 @@ class World {
     if (cy < 0 || cy > 1) return;
     const key = chunkKey(cx, cy, cz);
     if (!forceRemesh && (this.chunks.has(key) || this.requested.has(key))) return;
+    if (forceRemesh && this.requested.has(key)) return;
     const id = ++this.taskId;
-    this.latestTask.set(key, id);
     this.requested.add(key);
-    this.queued.delete(key);
-    this.queued.set(key, { id, seed: this.seed, cx, cy, cz, changes: this.relevantChanges(cx, cy, cz) });
-    this.drain();
+    this.pendingMeshes.set(key, { cx, cy, cz, id });
+    this.scheduleMesh();
   }
-  private drain() {
-    while (this.inFlight < this.maxInFlight) {
-      const next = this.queued.entries().next().value as [string, ChunkTask] | undefined;
+  private scheduleMesh() {
+    if (this.meshTimer !== null || this.pendingMeshes.size === 0) return;
+    // 每轮只构建一个 Chunk，让真实输入和服务端碰撞不会被首屏网格构建饿死。
+    this.meshTimer = window.setTimeout(() => {
+      this.meshTimer = null;
+      const next = this.pendingMeshes.entries().next().value as
+        [string, { cx: number; cy: number; cz: number; id: number }] | undefined;
       if (!next) return;
       const [key, task] = next;
-      this.queued.delete(key);
-      this.inFlight += 1;
-      this.worker.postMessage({ kind: 'chunk', ...task });
-    }
+      this.pendingMeshes.delete(key);
+      if (!this.requested.has(key)) {
+        this.scheduleMesh();
+        return;
+      }
+      const chunk = this.server.getChunk(task.cx, task.cy, task.cz);
+      this.receive({
+        id: task.id,
+        key,
+        cx: task.cx,
+        cy: task.cy,
+        cz: task.cz,
+        data: chunk.voxels,
+        meshes: Object.values(
+          meshChunk({
+            seed: this.seed,
+            cx: task.cx,
+            cy: task.cy,
+            cz: task.cz,
+            data: chunk.voxels,
+            changes: [],
+            outside: (x, y, z) => this.server.getVoxel(x, y, z),
+          }),
+        ),
+      });
+      this.scheduleMesh();
+    }, 0);
   }
   private receive(result: WorkerResult) {
-    this.inFlight = Math.max(0, this.inFlight - 1);
-    // Ignore an obsolete worker result or a result for a chunk that has been unloaded.
-    if (this.latestTask.get(result.key) !== result.id) {
-      this.drain();
-      return;
-    }
-    this.latestTask.delete(result.key);
     this.requested.delete(result.key);
     const entity = new pc.Entity(`Chunk ${result.key}`);
     const meshes: pc.Mesh[] = [];
@@ -417,7 +454,6 @@ class World {
       triangles: result.meshes.reduce((sum, part) => sum + part.indices.length / 3, 0),
       drawCalls: result.meshes.length,
     });
-    this.drain();
   }
   private unload(key: string, chunk: Chunk) {
     this.cancel(key);
@@ -426,9 +462,8 @@ class World {
     this.chunks.delete(key);
   }
   private cancel(key: string) {
-    this.latestTask.delete(key);
     this.requested.delete(key);
-    this.queued.delete(key);
+    this.pendingMeshes.delete(key);
     this.dirtyChunks.delete(key);
   }
   private scheduleRemesh() {
@@ -442,35 +477,6 @@ class World {
         if (chunk) this.request(chunk.cx, chunk.cy, chunk.cz, true);
       }
     }, 48);
-  }
-  private setChange(x: number, y: number, z: number, value: number) {
-    const key = `${x},${y},${z}`;
-    this.changes.set(key, value);
-    const owner = chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
-    const bucket = this.changesByChunk.get(owner) ?? new Map<string, Change>();
-    bucket.set(key, [x, y, z, value]);
-    this.changesByChunk.set(owner, bucket);
-  }
-  private relevantChanges(cx: number, cy: number, cz: number): Change[] {
-    const min = [cx * CHUNK_SIZE - 1, cy * CHUNK_SIZE - 1, cz * CHUNK_SIZE - 1];
-    const max = [(cx + 1) * CHUNK_SIZE, (cy + 1) * CHUNK_SIZE, (cz + 1) * CHUNK_SIZE];
-    const changes: Change[] = [];
-    for (let y = cy - 1; y <= cy + 1; y += 1)
-      for (let z = cz - 1; z <= cz + 1; z += 1)
-        for (let x = cx - 1; x <= cx + 1; x += 1) {
-          this.changesByChunk.get(chunkKey(x, y, z))?.forEach((change) => {
-            if (
-              change[0] >= min[0] &&
-              change[0] <= max[0] &&
-              change[1] >= min[1] &&
-              change[1] <= max[1] &&
-              change[2] >= min[2] &&
-              change[2] <= max[2]
-            )
-              changes.push(change);
-          });
-        }
-    return changes;
   }
 }
 
@@ -493,12 +499,14 @@ class Game {
   private interactionAttempts = 0;
   private harnessSpectator = false;
   private store = new Store();
+  private persistence = new BrowserChunkPersistence();
+  private serverPlayerId: string | null = null;
   private seedText = '';
   private qualityLevel: QualityLevel = 'medium';
   private saveTimer: number | null = null;
   private feedbackTimer: number | null = null;
   private onResize = () => this.app?.resizeCanvas();
-  async start(seedText: string, restore: { player: [number, number, number]; changes: Change[] } | null) {
+  async start(seedText: string, restore: RestoredSession | null) {
     this.flushSave();
     this.seedText = seedText;
     this.qualityLevel = qualitySelect.value as QualityLevel;
@@ -514,6 +522,7 @@ class Game {
     this.keys.clear();
     this.onGround = false;
     this.harnessSpectator = false;
+    this.persistence = restore?.seed === seedText ? restore.persistence : new BrowserChunkPersistence();
     this.app = new pc.Application(canvas, {
       mouse: new pc.Mouse(canvas),
       keyboard: new pc.Keyboard(window),
@@ -541,10 +550,13 @@ class Game {
     this.app.root.addChild(this.camera);
     this.visualResources = await createVoxelMaterials(this.app, quality);
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
-    this.world = new World(seedText, normalizeSeed(seedText), this.app, this.visualResources.materials, quality);
-    if (restore) this.world.restoreChanges(restore.changes);
+    const server = new GameServer({ seedText, persistence: this.persistence });
+    server.setWorldTime(this.environment.worldTime);
+    this.world = new World(server, this.app, this.visualResources.materials, quality);
+    if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
     const p = restore?.player ?? [0, 34, 0];
     this.camera.setPosition(...p);
+    this.serverPlayerId = server.createEntity({ kind: 'player', position: p }).id;
     this.world.updateStreaming(this.camera.getPosition());
     this.installInput();
     mapToggle.onclick = () => this.toggleMap();
@@ -564,7 +576,11 @@ class Game {
         prepareFlatMovement: () => this.prepareFlatMovementFixture(),
         prepareCenterExcavation: () => this.prepareCenterExcavationFixture(),
         prepareStepDown: () => this.prepareStepDownFixture(),
-        setWorldTime: (hour) => this.environment?.setTime(hour),
+        setWorldTime: (hour) => {
+          if (!this.world || !this.environment) return;
+          this.world.server.setWorldTime(hour);
+          this.environment.setTime(this.world.server.worldTime);
+        },
         setTimePaused: (paused) => this.environment?.setPaused(paused),
         setTimeSpeed: (speed) => {
           if (this.environment) this.environment.speed = Math.max(0, speed);
@@ -603,11 +619,17 @@ class Game {
         return;
       }
       if (event.code === 'BracketLeft') {
-        if (this.environment) this.environment.setTime(this.environment.worldTime - 1);
+        if (this.environment && this.world) {
+          this.world.server.setWorldTime(this.world.server.worldTime - 1);
+          this.environment.setTime(this.world.server.worldTime);
+        }
         return;
       }
       if (event.code === 'BracketRight') {
-        if (this.environment) this.environment.setTime(this.environment.worldTime + 1);
+        if (this.environment && this.world) {
+          this.world.server.setWorldTime(this.world.server.worldTime + 1);
+          this.environment.setTime(this.world.server.worldTime);
+        }
         return;
       }
       this.keys.add(event.code);
@@ -633,7 +655,10 @@ class Game {
   }
   private update(dt: number) {
     if (!this.world) return;
-    this.environment?.update(dt);
+    if (this.environment) {
+      if (!this.environment.paused) this.world.server.advanceClock(dt * 0.04 * this.environment.speed);
+      this.environment.update(dt, this.world.server.worldTime);
+    }
     this.frameMs = dt * 1000;
     this.frames += 1;
     const now = performance.now();
@@ -670,6 +695,10 @@ class Game {
       this.moveAxis('y', this.velocity.y * dt);
     }
     this.world.updateStreaming(this.camera.getPosition());
+    if (this.serverPlayerId)
+      this.world.server.updateEntity(this.serverPlayerId, {
+        position: [this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z],
+      });
     const feetY = this.camera.getPosition().y - PLAYER_FEET_OFFSET;
     const telemetry = this.world.telemetry;
     const macro = macroAt(this.world.seed, this.camera.getPosition().x, this.camera.getPosition().z);
@@ -677,11 +706,11 @@ class Game {
       macro.hydrology.kind === 'dry'
         ? 'dry'
         : `${macro.hydrology.kind}${macro.hydrology.water ? ' water' : ' bank'} (${macro.hydrology.id})`;
-    const worldTime = this.environment?.worldTime ?? 0;
+    const worldTime = this.world.server.worldTime;
     const hours = Math.floor(worldTime);
     const minutes = Math.floor((worldTime - hours) * 60);
     worldClock.textContent = `${this.environment?.phase ?? 'Day'} · ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nQuality  ${QUALITY_PROFILES[this.qualityLevel].label} · Time  ${worldTime.toFixed(2)}h ${this.environment?.paused ? '(paused)' : `${this.environment?.speed ?? 1}×`}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nTriangles  ${telemetry.triangles.toLocaleString()} · Draw Calls  ${telemetry.drawCalls}\nDeferred Remeshes  ${telemetry.deferredRemeshes}\nMutations  ${this.world.changes.size}`;
+    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nQuality  ${QUALITY_PROFILES[this.qualityLevel].label} · Time  ${worldTime.toFixed(2)}h ${this.environment?.paused ? '(paused)' : `${this.environment?.speed ?? 1}×`}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nTriangles  ${telemetry.triangles.toLocaleString()} · Draw Calls  ${telemetry.drawCalls}\nDeferred Remeshes  ${telemetry.deferredRemeshes}\nMaterialized Chunks  ${this.world.mutationCount}`;
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
   }
   private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
@@ -858,13 +887,20 @@ class Game {
       onGround: this.onGround,
       colliding: this.collides(p),
       interactionAttempts: this.interactionAttempts,
-      mutationCount: this.world?.changes.size ?? 0,
+      mutationCount: this.world?.mutationCount ?? 0,
       storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
       worldTime: this.environment?.worldTime ?? 0,
       timePaused: this.environment?.paused ?? false,
       quality: this.qualityLevel,
       triangles: telemetry?.triangles ?? 0,
       drawCalls: telemetry?.drawCalls ?? 0,
+      runtime: 'integrated-server',
+      serverRevision: this.world?.server.getChunk(0, 0, 0).revision ?? 0,
+      voxelAtOrigin: this.world?.getVoxel(0, 0, 0) ?? Voxel.Air,
+      serverPlayerPosition: this.serverPlayerId
+        ? (this.world?.server.getEntity(this.serverPlayerId)?.position ?? [0, 0, 0])
+        : [0, 0, 0],
+      serverWorldTime: this.world?.server.worldTime ?? 0,
     };
   }
   private moveHarnessPlayer(x: number, z: number) {
@@ -885,7 +921,8 @@ class Game {
   private removeVoxelForHarness(x: number, y: number, z: number) {
     if (!this.world) return;
     this.world.edit(x, y, z, Voxel.Air);
-    this.queueSave();
+    // Harness needs a deterministic readback boundary; ordinary player edits remain debounced.
+    this.flushSave();
   }
   private movePlayerForHarness(x: number, y: number, z: number) {
     if (!this.world) return;
@@ -937,7 +974,10 @@ class Game {
       window.clearTimeout(this.saveTimer);
       this.saveTimer = null;
     }
-    if (this.world) this.store.save(this.seedText, this.camera.getPosition(), this.world.changes);
+    if (this.world) {
+      this.world.server.flushDirtyChunks();
+      this.store.save(this.seedText, this.camera.getPosition(), this.persistence);
+    }
   }
   private renderHotbar() {
     const ids = [Voxel.Dirt, Voxel.Stone, Voxel.Wood, Voxel.Sand];

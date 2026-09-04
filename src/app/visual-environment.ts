@@ -329,9 +329,9 @@ export class WorldEnvironment {
     app.graphicsDevice.maxPixelRatio = Math.min(window.devicePixelRatio, 2) * quality.resolutionScale;
     this.apply();
   }
-  update(dt: number) {
+  update(dt: number, worldTime = this.worldTime) {
     this.elapsed += dt;
-    if (!this.paused) this.worldTime = (this.worldTime + dt * 0.04 * this.speed) % 24;
+    this.worldTime = ((worldTime % 24) + 24) % 24;
     const waterOffset = (this.elapsed * 0.018 * this.quality.waterQuality) % 1;
     this.water.diffuseMapOffset.set(waterOffset, waterOffset * 0.42);
     this.apply();

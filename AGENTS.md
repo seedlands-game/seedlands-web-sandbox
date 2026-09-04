@@ -1,5 +1,9 @@
 # Seedlands 开发约定
 
+## 文档语言
+
+- 方案、spec、设计评审和交付记录的正文强制使用简体中文；仅代码标识符、协议名、产品名、命令、文件路径及无法准确替代的通行技术术语可保留英文。标题、说明、验收标准和任务状态同样适用，不得以英文模板替代中文方案。
+
 ## 项目边界
 
 - 这是 TypeScript / Vite / PlayCanvas 的 Web 3D voxel sandbox。`src/world/` 是坐标、体素注册、确定性基础世界、Chunk 网格与存档编解码的纯逻辑源头；`src/worker/world-worker.ts` 负责后台 Chunk 生成与网格传输；`src/app/main.ts` 负责 streaming、编辑、渲染和玩家。
@@ -11,6 +15,7 @@
 ## 代码组织与静态质量
 
 - `src/world/` 只能包含无 DOM、PlayCanvas 与 Worker global 依赖的纯逻辑；新 world 行为应在 `tests/world/` 以 Vitest 覆盖，并保持 `test:coverage` 的 `src/world/**` 行覆盖率不低于 80%。
+- `src/world/` 的纯逻辑边界必须由自定义 ESLint 规则强制执行：禁止导入 `src/server/`、`src/client/` 或 `playcanvas`，并禁止使用 DOM 与 Worker 全局对象。架构决策不得只保留为文档说明；新增或调整边界时必须先补充规则的反例和正例测试。
 - `src/app/` 保存浏览器启动、UI、输入、PlayCanvas 生命周期和样式；`src/worker/` 仅保存 Worker 入口与传输适配。app/worker 可依赖 world，world 不得反向依赖 app/worker。
 - 新增 TypeScript、测试文件、脚本和目录使用 kebab-case；新的 change 目录必须为 `YYYY-MM-DD-kebab-name`。规则的唯一可执行来源为 `.ls-lint.yml`。
 - 格式以 `.prettierrc.json` 为准；不要手动对抗 Prettier。ESLint 配置在 `eslint.config.mjs`：`src/` 与 `tests/` 有 browser/worker/node globals，`scripts/` 使用 Node globals。
