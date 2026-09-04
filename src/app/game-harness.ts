@@ -1,3 +1,5 @@
+import type { BrowserChunkPersistence, ChunkPersistenceCorpusSummary } from '../client/browser-chunk-persistence';
+import type { ChunkPersistenceLoadScenario } from '../client/chunk-persistence-benchmark';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { FillCommand } from '../server/commands/fill-command';
 import { Voxel } from '../world/voxel';
@@ -32,6 +34,17 @@ type HarnessApi = {
 declare global {
   interface Window {
     __seedlandsHarness?: HarnessApi;
+    __seedlandsPersistenceHarness?: {
+      seedCorpus: (database: string, seedText: string, chunkCount: number) => Promise<ChunkPersistenceCorpusSummary>;
+      loadScenario: (
+        database: string,
+        seedText: string,
+        activeChunkCount: number,
+      ) => Promise<ChunkPersistenceLoadScenario>;
+      saveOneChangedChunk: (
+        database: string,
+      ) => Promise<{ encodedChunkCount: number; idbPutCount: number; untouchedChunkReadCount: number }>;
+    };
   }
 }
 
@@ -42,6 +55,7 @@ type SnapshotContext = {
   frameMs: number;
   qualityLevel: QualityLevel;
   serverPlayerId: string | null;
+  persistence: BrowserChunkPersistence | null;
 };
 
 const unavailablePerformance = (): HarnessSnapshot['performance'] => ({
@@ -82,7 +96,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     remeshSchedulingCount: transactions?.remeshSchedulingCount ?? 0,
     lastCommitMutationCount: transactions?.lastCommitMutationCount ?? 0,
     lastCommitMeshChunkCount: transactions?.lastCommitMeshChunkCount ?? 0,
-    storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
+    storageBytes: context.persistence?.metrics().recordBytes ?? 0,
     worldTime: context.environment?.worldTime ?? 0,
     timePaused: context.environment?.paused ?? false,
     quality: context.qualityLevel,
@@ -103,5 +117,19 @@ export function installHarness(api: HarnessApi) {
   window.__seedlandsHarness = api;
   return () => {
     if (window.__seedlandsHarness === api) delete window.__seedlandsHarness;
+  };
+}
+
+export async function installPersistenceHarness() {
+  if (!new URLSearchParams(location.search).has('harness')) return;
+  const {
+    seedBrowserChunkPersistenceCorpus,
+    runBrowserChunkPersistenceLoadScenario,
+    saveOneBrowserChunkPersistenceChange,
+  } = await import('../client/chunk-persistence-benchmark');
+  window.__seedlandsPersistenceHarness = {
+    seedCorpus: seedBrowserChunkPersistenceCorpus,
+    loadScenario: runBrowserChunkPersistenceLoadScenario,
+    saveOneChangedChunk: saveOneBrowserChunkPersistenceChange,
   };
 }
