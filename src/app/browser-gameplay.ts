@@ -65,6 +65,8 @@ export class BrowserGameplay {
 
   refresh(forceBreakProjection = true): void {
     const player = this.options.server.getPlayerState(this.options.playerId);
+    const becameDead = player.lifecycle === 'dead' && this.previousProjection?.shell.gameplay.lifecycle !== 'dead';
+    if (becameDead) this.inventoryOpen = false;
     const entities = this.options.server.queryEntities().filter((entity) => entity.type !== 'player');
     const actorStates = new Map(
       entities.flatMap((entity) => {
@@ -117,6 +119,7 @@ export class BrowserGameplay {
     this.previousProjection = projection;
     this.options.session.publishHud(this.options.nextHudSequence(), projection.hud);
     this.options.bridge.publishShell(projection.shell);
+    if (becameDead) this.options.releaseInput();
     this.options.session.publishInteraction(this.options.nextInteractionSequence(), {
       ...projection.interaction,
       presentedEntities: entities.map((entity) => ({
