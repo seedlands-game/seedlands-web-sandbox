@@ -124,6 +124,10 @@ describe('GameServer headless authority', () => {
     const initial = server.createDerivedMeshSnapshot(0, 0, 0);
     expect(chunks.size).toBe(1);
     expect(initial.halo).toHaveLength(34 ** 3);
+    const profiling = initial as unknown as { proceduralVoxelSamples: number; macroContextCount: number };
+    expect(profiling.proceduralVoxelSamples).toBeGreaterThan(0);
+    expect(profiling.macroContextCount).toBeGreaterThan(0);
+    expect(profiling.macroContextCount).toBeLessThan(profiling.proceduralVoxelSamples);
 
     server.edit(32, 20, 0, Voxel.Wood);
     const afterBoundaryEdit = server.createDerivedMeshSnapshot(0, 0, 0);
