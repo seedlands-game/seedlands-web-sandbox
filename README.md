@@ -12,7 +12,7 @@ The deployment target is [seedlands-game.github.io/seedlands-web-sandbox](https:
 
 ## Current status
 
-The sandbox is an early technical prototype. Its current capabilities include:
+The sandbox now contains a local single-player survival and exploration MVP. Its current capabilities include:
 
 - Deterministic macro geography, climate, biomes, rivers, lakes, trees, and terrain. The same `seed + generatorVersion` produces the same base world regardless of chunk load order.
 - Compact `32³` `Uint16Array` chunks and chunk-level greedy meshes rather than one entity or draw call per voxel.
@@ -20,10 +20,13 @@ The sandbox is an early technical prototype. Its current capabilities include:
 - Player-centred chunk streaming with bounded CPU/GPU retention.
 - An in-process authoritative `GameServer` for chunks, player state, entities, and world time.
 - First-person movement, collision, jumping, timed voxel harvesting, item drops, pickup, and inventory-backed placement.
-- A minimal survival loop with health, hunger, 24 inventory slots, an 8-slot hotbar, food, three recipes, tools, combat, death drops, and respawning.
+- A minimal survival loop with health, hunger, 24 inventory slots, an 8-slot hotbar, food, four recipes, tools, combat, death drops, and respawning.
 - A deterministic starter ecology with a passive grazer, a night-only hostile, a scheduled settler, nearby POIs, bounded voxel ground navigation, and inspectable asynchronous actions.
 - Browser persistence for the seed, world clock, player state, gameplay entities, actor needs/actions, POIs, inventory, and materialized chunk snapshots.
-- A day/night environment, transparent water, quality presets, a macro world map, and a retained Svelte 5 HUD.
+- A complete start/continue/pause/save-and-exit shell, settings, an in-game guide, a macro map, and a retained Svelte 5 HUD with a shared dark-stone, brass, and arcane visual language.
+- Craftable lanterns, bounded artificial lights and shadows, sun shadows with cutout foliage, real scene reflections on water, and quality-dependent color grading.
+- Original sparse electronic music, material-dependent effects, spatial creature calls, separate audio buses, and optional local reference-track import.
+- Held tools, harvesting/use feedback, distinct creature silhouettes, movement animation, and damage feedback.
 
 Not yet implemented are the defining systems of the full Seedlands vision: essence and magic, autonomous NPC societies, persistent historical events, longevity and reincarnation, or the content of the six realms.
 
@@ -46,25 +49,47 @@ pnpm preview
 
 No private `.env` file is required to run or build the sandbox.
 
+## Your first journey
+
+Try **mosslight-68** for a wooded riverbank, or **living-world-autonomy** for a clearer starter camp in dry terrain. The menu's recommended-start button fills the seed without starting a world. Entering an existing seed continues its saved progress.
+
+Harvest a nearby tree and walk over its drops. Press **E** to turn logs into planks and make a wooden axe. Leaves provide berries. Dig a staircase for stone, leaving a route to jump back out; make a stone pickaxe and a lantern, then build a small lit shelter. Grazer and settler routines run locally, and night stalkers become dangerous after dark. Eat selected berries with right click, or select food in the inventory and use its Eat button. Save and exit through the pause menu, then continue from the main menu.
+
+Inventory slots support two-click moves, merges, and swaps. The first eight slots are the hotbar. Current recipes are one log → four planks; three planks → wooden axe; two planks + three stone → stone pickaxe; two planks + one stone → lantern.
+
 ## Controls
 
-| Input           | Action                                          |
-| --------------- | ----------------------------------------------- |
-| Click the scene | Capture the pointer and look around             |
-| WASD            | Move                                            |
-| Mouse           | Look                                            |
-| Space           | Jump                                            |
-| Hold left click | Harvest the targeted voxel or attack a creature |
-| Right click     | Place the selected block item                   |
-| 1–8             | Select a hotbar slot                            |
-| E               | Toggle inventory and crafting                   |
-| M               | Toggle the macro world map                      |
-| F3              | Toggle the debug HUD                            |
-| F4              | Toggle the server debug command shell           |
-| P               | Pause or resume world time                      |
-| [ / ]           | Move world time backward or forward one hour    |
-| T               | Cycle 1×, 20×, and 100× time speed              |
-| Esc             | Release the pointer                             |
+| Input           | Action                                              |
+| --------------- | --------------------------------------------------- |
+| Click the scene | Capture the pointer and look around                 |
+| WASD            | Move                                                |
+| Mouse           | Look                                                |
+| Space           | Jump                                                |
+| Hold left click | Harvest the targeted voxel or attack a creature     |
+| Right click     | Use selected food, or place the selected block item |
+| 1–8             | Select a hotbar slot                                |
+| E               | Toggle inventory and crafting                       |
+| M               | Toggle the macro world map                          |
+| F3              | Toggle the debug HUD                                |
+| F4              | Toggle the server debug command shell               |
+| P               | Pause or resume world time                          |
+| [ / ]           | Move world time backward or forward one hour        |
+| T               | Cycle 1×, 20×, and 100× time speed                  |
+| Esc             | Close the current panel or pause the game           |
+
+## Sound and visual quality
+
+Settings are available from the main and pause menus. Volume changes apply immediately; quality changes apply on the next world entry. Browser audio starts after a user gesture. Built-in music consists of three original sparse cues separated by intentional silence, with wind/water ambience and gameplay effects continuing independently.
+
+A local reference track can be selected in Settings (up to 30 MiB and 10 minutes). It stays on the device and is never uploaded. Refreshing the page requires selecting the file again; removing it returns to built-in music.
+
+| Preset | Local lights / shadowed lights | Sun shadow | Water reflection       | Color grading |
+| ------ | ------------------------------ | ---------- | ---------------------- | ------------- |
+| Low    | 2 / 0                          | Off        | Off                    | Off           |
+| Medium | 4 / 1                          | 512 px     | 128 px, every 8 frames | On            |
+| High   | 6 / 2                          | 1024 px    | 256 px, every 4 frames | On            |
+
+Reflections use one nearby horizontal water plane. High favors visual detail; Medium is the desktop default. These are bounded rendering features, not global illumination or water simulation.
 
 ## Server command debugging
 
@@ -118,10 +143,10 @@ This repository may remain useful independently as an open Web sandbox even if t
 
 ## Known limitations
 
-- Water is rendered but not simulated as pressure, flow, or waterfalls.
+- Water is rendered with a bounded planar reflection path, but is not simulated as pressure, flow, or waterfalls.
 - There are no caves, propagated voxel lighting, mobile touch controls, floating origin, or distant-world LOD yet.
 - Browser persistence favours a simple prototype deployment rather than large-world storage.
-- Creature and settler behaviour is a bounded deterministic foundation; there is no dialogue, trading, reproduction, crowd avoidance, or full ecology simulation yet.
+- No AgentServer or LLM service is required or connected. Creature and settler behaviour is a bounded deterministic foundation; there is no dialogue, trading, reproduction, crowd avoidance, or full ecology simulation yet.
 - The current vertical streaming range is sized for this prototype's terrain.
 - The main JavaScript bundle is large and has not yet been split into lazy-loaded runtime chunks.
 

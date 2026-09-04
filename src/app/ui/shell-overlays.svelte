@@ -109,18 +109,22 @@
       {:else if view.panel === 'guide'}
         <p class="eyebrow">FIRST STEPS</p>
         <h2>操作指南</h2>
-        <p>先寻找树木与石头，收集材料制作工具，再挑一处喜欢的地方安家。</p>
+        <p>
+          从附近树木开始：原木合成木板，再制作木斧。向下挖阶梯取石，留出头顶空间并用空格逐级跳回地面；石块可制作石镐和灯笼。
+        </p>
         <dl class="control-guide">
           <dt>WASD / 空格</dt>
           <dd>移动 / 跳跃；点击世界捕获鼠标，移动鼠标环顾。</dd>
           <dt>鼠标左键 / 右键</dt>
           <dd>采集或攻击 / 放置物品或食用选中的食物。工具可提升采集效率。</dd>
-          <dt>数字键 / 快捷栏</dt>
-          <dd>选择要使用的物品。打开背包整理材料与合成。</dd>
+          <dt>数字键 / E 背包</dt>
+          <dd>选择物品；E 打开背包整理、合成、装备和食用。点击两个格子可移动或交换物品。</dd>
           <dt>M / Esc</dt>
           <dd>地图 / 暂停。暂停中可设置声音、查看指南、保存退出。</dd>
         </dl>
-        <p class="muted">留意饥饿、生命和夜色。死亡后可以重生，并找回落下的物品。</p>
+        <p class="muted">
+          采集树叶可得到浆果，饥饿时选中后右键食用。夜行兽有危险，留意生命与夜色；用灯笼照亮营地。死亡后可以重生并找回落下的物品，离开前在暂停菜单保存退出。
+        </p>
         <GameButton label="返回" onclick={() => application.closePanel()}>返回</GameButton>
       {:else}
         <p class="eyebrow">A MOMENT OF STILLNESS</p>

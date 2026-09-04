@@ -56,10 +56,16 @@
       <select id="quality" bind:value={quality} disabled={shell.phase === 'boot' || shell.phase === 'loading'}>
         <option value="low">Low · 省电</option>
         <option value="medium">Medium · 均衡</option>
-        <option value="high">High · 远景</option>
+        <option value="high">High · 精致</option>
       </select>
     </label>
   </div>
+  <GameButton
+    class="recommended-start"
+    label="推荐起点：林间河岸"
+    disabled={shell.phase === 'boot' || shell.phase === 'loading'}
+    onclick={() => (seed = 'mosslight-68')}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
+  >
   <GameButton
     label={shell.enterLabel}
     disabled={shell.phase === 'boot' || shell.phase === 'loading'}
