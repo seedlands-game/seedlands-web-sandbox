@@ -152,9 +152,9 @@ declare global {
       burstEdits: () => void;
       removeVoxelAt: (x: number, y: number, z: number) => void;
       movePlayerTo: (x: number, y: number, z: number) => void;
-      prepareFlatMovement: () => void;
-      prepareCenterExcavation: () => void;
-      prepareStepDown: () => void;
+      prepareFlatMovement: () => Promise<void>;
+      prepareCenterExcavation: () => Promise<void>;
+      prepareStepDown: () => Promise<void>;
       setWorldTime: (hour: number) => void;
       setTimePaused: (paused: boolean) => void;
       setTimeSpeed: (speed: number) => void;
@@ -1375,26 +1375,28 @@ class Game {
     this.camera.setPosition(x, y, z);
     this.world.updateStreaming(this.camera.getPosition());
   }
-  private prepareFlatMovementFixture() {
+  private async prepareFlatMovementFixture() {
     if (!this.world) return;
     for (let x = -2; x <= 2; x += 1) for (let z = -8; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Stone);
+    await this.waitForHarnessFrame();
     this.keys.clear();
     this.velocity.set(0, 0, 0);
     this.onGround = true;
     this.camera.setPosition(0.5, 58.6, 0.5);
     this.world.updateStreaming(this.camera.getPosition());
   }
-  private prepareCenterExcavationFixture() {
+  private async prepareCenterExcavationFixture() {
     if (!this.world) return;
     for (let x = -2; x <= 2; x += 1) for (let z = -2; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Stone);
     this.world.edit(0, 56, 0, Voxel.Air);
+    await this.waitForHarnessFrame();
     this.keys.clear();
     this.velocity.set(0, 0, 0);
     this.onGround = false;
     this.camera.setPosition(0, 58.6, 0);
     this.world.updateStreaming(this.camera.getPosition());
   }
-  private prepareStepDownFixture() {
+  private async prepareStepDownFixture() {
     if (!this.world) return;
     for (let x = -2; x <= 2; x += 1) {
       for (let z = -8; z <= 2; z += 1) {
@@ -1402,11 +1404,15 @@ class Game {
         this.world.edit(x, 56, z, z >= 0 ? Voxel.Stone : Voxel.Air);
       }
     }
+    await this.waitForHarnessFrame();
     this.keys.clear();
     this.velocity.set(0, 0, 0);
     this.onGround = true;
     this.camera.setPosition(0.5, 58.6, 0.5);
     this.world.updateStreaming(this.camera.getPosition());
+  }
+  private waitForHarnessFrame(): Promise<void> {
+    return new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
   }
   private queueSave() {
     if (this.saveTimer !== null) return;

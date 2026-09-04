@@ -54,9 +54,9 @@ type HarnessWindow = Window & {
     setStreamingVariant: (variant: 'main-snapshot' | 'worker-first') => void;
     removeVoxelAt: (x: number, y: number, z: number) => void;
     movePlayerTo: (x: number, y: number, z: number) => void;
-    prepareFlatMovement: () => void;
-    prepareCenterExcavation: () => void;
-    prepareStepDown: () => void;
+    prepareFlatMovement: () => Promise<void>;
+    prepareCenterExcavation: () => Promise<void>;
+    prepareStepDown: () => Promise<void>;
     setWorldTime: (hour: number) => void;
     setTimePaused: (paused: boolean) => void;
     setTimeSpeed: (speed: number) => void;
@@ -182,26 +182,26 @@ export async function moveHarnessPlayer(page: Page, x: number, y: number, z: num
 }
 
 export async function prepareFlatMovement(page: Page): Promise<void> {
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands flat-movement fixture is unavailable.');
-    harness.prepareFlatMovement();
+    await harness.prepareFlatMovement();
   });
 }
 
 export async function prepareCenterExcavation(page: Page): Promise<void> {
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands center-excavation fixture is unavailable.');
-    harness.prepareCenterExcavation();
+    await harness.prepareCenterExcavation();
   });
 }
 
 export async function prepareStepDown(page: Page): Promise<void> {
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands step-down fixture is unavailable.');
-    harness.prepareStepDown();
+    await harness.prepareStepDown();
   });
 }
 
