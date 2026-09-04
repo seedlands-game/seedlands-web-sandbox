@@ -99,6 +99,7 @@ Seedlands 是一个会自行演化、遵循统一世界规律并允许玩家跨�
 - [x] `SEEDLANDS_BASE_PATH=/seedlands-web-sandbox/ VITE_COMMIT_SHA=0123456789abcdef0123456789abcdef01234567 pnpm build` 通过；构建产物的 CSS 与 JavaScript 都使用仓库子路径 atlas URL，没有错误的根路径。Vite 如实报告主 JavaScript chunk 约 1.98 MB 的非阻塞 warning。（Build）
 - [x] 非代码治理文件已通过 Prettier 格式检查与 diff 评审，未使用 Vitest 文本断言冒充平台验收。GitHub 官方 Actions 的最新 release/tag 与固定 40 位 SHA 已在 2026-09-04 实时读回。（Static；Manual supplement）
 - [ ] 首次远程 run `33863096075` 的三个质量 job 均在依赖安装阶段失败：Node.js 22.12.0 内置旧 Corepack 无法验证当前 pnpm 签名 key id。修复改用官方推荐的 `pnpm/setup` v2.1.0，固定 commit `703c52620218391530e48b9e8870d5c0082e1b9b`，由其校验自包含 pnpm、安装 Node.js 22.12.0 并以锁文件冻结模式安装。待新 SHA 的远程检查读回后更新为终态。（Static；Manual supplement）
+- [ ] 第二次远程 run `33863370052` 已越过 Corepack 并完成 pnpm/Node 安装，但三个 job 的干净安装都因 `ERR_PNPM_IGNORED_BUILDS` 失败：Midscene 的间接依赖 `@ffmpeg-installer/linux-x64` 构建脚本未被供应链策略明确裁决。三个 CI job 不运行 Midscene/视频能力，因此在 `pnpm-workspace.yaml#allowBuilds` 将该 Linux 可选安装器明确设为 `false`，不放宽其他依赖脚本。待新 SHA 远程读回。（Static；Manual supplement）
 - [x] 对所有可达 Git 历史执行了高置信凭据特征和可疑文件名扫描；未匹配高置信凭据，唯一命名命中为预期受控的 `.env.example`。体素母图的生成记录、处理来源和授权限定已写入 `ASSETS.md`；自动扫描不能证明不存在所有未知秘密。（Manual supplement）
 - [x] 本地实施期间未 push、转移、重命名、公开、启用 Pages 或修改组织/仓库设置，未以本地 workflow 代替 GitHub 真实读回。（Manual supplement）
 
@@ -122,5 +123,7 @@ Seedlands 是一个会自行演化、遵循统一世界规律并允许玩家跨�
 已验证：定向 Vitest 3/3，静态基线 71/71，生产构建，Playwright-change 1/1，Pages 子路径浏览器基线 8/8，Midscene 1/1，以及可达历史的高置信凭据扫描。已知非阻塞限制是主 JavaScript chunk 约 1.98 MB；构建工具只报告 warning，本 change 不扩展到运行时拆包。
 
 首次远程 PR run `33863096075` 暴露了 GitHub runner 上的旧 Corepack 签名 key 不兼容，三个 job 的共同根因均是依赖安装前的 `Cannot find matching keyid`，不是产品构建或测试回归。修复将 CI 安装面切换为官方 `pnpm/setup` v2.1.0 的固定 commit，保留锁定 pnpm、Node.js 和 frozen lockfile 的合同。
+
+第二次远程 PR run `33863370052` 证明上述修复已越过 Corepack，随后在干净 Linux 安装中因 Midscene 间接引入的 `@ffmpeg-installer/linux-x64` 脚本未被 `allowBuilds` 裁决而 fail closed。本地 macOS 之前只明确允许了 `darwin-arm64`；修复对 CI 不需要的 Linux FFmpeg 安装器显式拒绝执行脚本，不使用全局 `--ignore-scripts`。
 
 本 change 不包含远程写入。当前尚未 push，也尚未转移/重命名/公开仓库、启用 Pages、配置 ruleset 或 GitHub 安全开关；这些必须在获得独立授权后执行并真实读回。
