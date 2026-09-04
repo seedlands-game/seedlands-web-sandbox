@@ -17,8 +17,10 @@ export type ServerChunk = ChunkCoord & {
   key: string;
   voxels: Uint16Array;
   revision: number;
+  persistedRevision: number;
   dirty: boolean;
   materialized: boolean;
+  accessEpoch: number;
 };
 
 export type VoxelEdit = { x: number; y: number; z: number; value: number };
@@ -80,6 +82,7 @@ export class GameServer {
   private readonly entities = new Map<string, ServerEntity>();
   private entitySequence = 0;
   private clock = 0;
+  private accessSequence = 0;
   private readonly persistence?: ChunkPersistence;
 
   constructor(readonly options: GameServerOptions) {
@@ -102,11 +105,25 @@ export class GameServer {
   getChunk(cx: number, cy: number, cz: number): ServerChunk {
     const key = chunkKey(cx, cy, cz);
     const existing = this.chunks.get(key);
-    if (existing) return existing;
+    if (existing) {
+      existing.accessEpoch = ++this.accessSequence;
+      return existing;
+    }
     const snapshot = this.persistence?.loadSnapshot(key);
     const restored = snapshot && this.isValidSnapshot(snapshot, key, cx, cy, cz);
     const chunk: ServerChunk = restored
-      ? { key, cx, cy, cz, voxels: snapshot.voxels, revision: snapshot.revision, dirty: false, materialized: true }
+      ? {
+          key,
+          cx,
+          cy,
+          cz,
+          voxels: snapshot.voxels,
+          revision: snapshot.revision,
+          persistedRevision: snapshot.revision,
+          dirty: false,
+          materialized: true,
+          accessEpoch: ++this.accessSequence,
+        }
       : {
           key,
           cx,
@@ -114,11 +131,21 @@ export class GameServer {
           cz,
           voxels: makeChunk(this.seed, cx, cy, cz, []),
           revision: 0,
+          persistedRevision: 0,
           dirty: false,
           materialized: false,
+          accessEpoch: ++this.accessSequence,
         };
     this.chunks.set(key, chunk);
     return chunk;
+  }
+
+  async ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
+    await this.persistence?.ensureNeighborhood?.(cx, cy, cz);
+  }
+
+  releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
+    this.persistence?.releaseNeighborhood?.(cx, cy, cz);
   }
 
   getVoxel(x: number, y: number, z: number): number {
@@ -199,8 +226,10 @@ export class GameServer {
       cz: result.cz,
       voxels: result.canonical,
       revision: 0,
+      persistedRevision: 0,
       dirty: false,
       materialized: false,
+      accessEpoch: ++this.accessSequence,
     });
     return true;
   }
@@ -248,15 +277,40 @@ export class GameServer {
     };
   }
 
-  flushDirtyChunks(): string[] {
+  async flushDirtyChunks(): Promise<string[]> {
     const dirty = [...this.chunks.values()].filter((chunk) => chunk.dirty);
     if (!dirty.length) return [];
     if (!this.persistence) return [];
-    this.persistence.saveSnapshots(dirty.map((chunk) => snapshotFromChunk(this.options.seedText, chunk)));
-    dirty.forEach((chunk) => {
-      chunk.dirty = false;
+    const snapshots = dirty.map((chunk) => snapshotFromChunk(this.options.seedText, chunk));
+    await this.persistence.saveSnapshots(snapshots);
+    snapshots.forEach((snapshot) => {
+      const chunk = this.chunks.get(snapshot.key);
+      if (!chunk) return;
+      chunk.persistedRevision = Math.max(chunk.persistedRevision, snapshot.revision);
+      chunk.dirty = chunk.revision > chunk.persistedRevision;
     });
-    return dirty.map((chunk) => chunk.key);
+    return snapshots.map((snapshot) => snapshot.key);
+  }
+
+  async evictChunk(cx: number, cy: number, cz: number): Promise<boolean> {
+    const key = chunkKey(cx, cy, cz);
+    const chunk = this.chunks.get(key);
+    if (!chunk) return true;
+    const accessEpoch = chunk.accessEpoch;
+    const revision = chunk.revision;
+    if (chunk.dirty) await this.flushDirtyChunks();
+    const current = this.chunks.get(key);
+    if (
+      current !== chunk ||
+      current.accessEpoch !== accessEpoch ||
+      current.revision !== revision ||
+      current.dirty ||
+      current.persistedRevision !== current.revision
+    )
+      return false;
+    this.chunks.delete(key);
+    this.persistence?.evictSnapshot?.(key);
+    return true;
   }
 
   createEntity(entity: EntityCreate): ServerEntity {
@@ -308,7 +362,10 @@ export class GameServer {
   private readAuthoritativeChunk(cx: number, cy: number, cz: number): ServerChunk | undefined {
     const key = chunkKey(cx, cy, cz);
     const existing = this.chunks.get(key);
-    if (existing) return existing;
+    if (existing) {
+      existing.accessEpoch = ++this.accessSequence;
+      return existing;
+    }
     const snapshot = this.persistence?.loadSnapshot(key);
     if (!snapshot || !this.isValidSnapshot(snapshot, key, cx, cy, cz)) return undefined;
     const restored: ServerChunk = {
@@ -318,8 +375,10 @@ export class GameServer {
       cz,
       voxels: snapshot.voxels,
       revision: snapshot.revision,
+      persistedRevision: snapshot.revision,
       dirty: false,
       materialized: true,
+      accessEpoch: ++this.accessSequence,
     };
     this.chunks.set(key, restored);
     return restored;
