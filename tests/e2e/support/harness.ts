@@ -12,6 +12,11 @@ export type HarnessSnapshot = {
   colliding: boolean;
   interactionAttempts: number;
   mutationCount: number;
+  worldRevision: number;
+  structuralEventCount: number;
+  remeshSchedulingCount: number;
+  lastCommitMutationCount: number;
+  lastCommitMeshChunkCount: number;
   storageBytes: number;
   worldTime: number;
   timePaused: boolean;
@@ -53,6 +58,7 @@ type HarnessWindow = Window & {
     beginPerformanceScenario: (name: string) => string;
     setStreamingVariant: (variant: 'main-snapshot' | 'worker-first') => void;
     removeVoxelAt: (x: number, y: number, z: number) => void;
+    fillWorld: (command: { from: [number, number, number]; to: [number, number, number]; voxel: number }) => void;
     movePlayerTo: (x: number, y: number, z: number) => void;
     prepareFlatMovement: () => void;
     prepareCenterExcavation: () => void;
@@ -161,6 +167,22 @@ export async function removeHarnessVoxel(page: Page, x: number, y: number, z: nu
       harness.removeVoxelAt(targetX, targetY, targetZ);
     },
     [x, y, z],
+  );
+}
+
+export async function fillHarnessWorld(
+  page: Page,
+  from: [number, number, number],
+  to: [number, number, number],
+  voxel: number,
+): Promise<void> {
+  await page.evaluate(
+    ({ from: fillFrom, to: fillTo, voxel: fillVoxel }) => {
+      const harness = (window as HarnessWindow).__seedlandsHarness;
+      if (!harness) throw new Error('Seedlands harness fill entry is unavailable.');
+      harness.fillWorld({ from: fillFrom, to: fillTo, voxel: fillVoxel });
+    },
+    { from, to, voxel },
   );
 }
 

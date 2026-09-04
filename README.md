@@ -47,7 +47,8 @@ corepack pnpm preview
 - 河湖使用独立透明水材质、波纹 UV 动画与关闭 depth write 的延后绘制；水下地形面保持可见。
 - 启动页提供 Low/Medium/High 三档视觉质量，分别调整 render/fog distance、resolution scale、水体和叶片密度；High 附带低分辨率阴影。
 - 第一人称移动、重力、跳跃、直接基于 voxel occupancy 的碰撞，以及基于体素 raymarch 的破坏/放置。
-- 中央 `World.edit()` 将浏览器编辑提交到服务端批次；边界编辑会同时使邻居 Chunk 失效并重新网格化。
+- `GameServer.editBatch()` 是权威世界修改事务边界：紧凑 mutation buffer 先完整校验并确定性合并，再按 Chunk 一次提交；world / Chunk revision、变化 AABB、脏 Chunk 与结构事件都按 commit 聚合，显式玩法语义事件不会被状态 coalescing 删除。
+- `World.edit()` 保留为单 voxel 快路径；结构化 `FillCommand` 可在一个事务中提交最多 1,000,000 个 voxel，边界编辑仍会准确失效相邻 Chunk，客户端只按聚合结果调度一次 remesh。
 - `localStorage` 只作为浏览器快照适配器，存储 Seed、玩家位置和 materialized Chunk snapshot；旧 mutation delta 存档会在首次读取时迁移。
 - Player HUD 仅常驻准星、世界时间、快捷栏与交互反馈；F3 调试面板额外显示 FPS、backend、Seed、坐标、Chunk、队列、三角形、draw call 与 mutation。
 

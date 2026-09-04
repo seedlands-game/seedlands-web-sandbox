@@ -13,7 +13,8 @@ import {
 import { macroAt, type MacroBiome } from '../world/macro-world';
 import { type RenderLayer } from '../world/mesh';
 import { decodeWorldSave, type WorldChange } from '../world/storage';
-import { GameServer } from '../server/game-server';
+import { GameServer, type WorldCommitResult, type WorldEditBatch } from '../server/game-server';
+import { resolveFillCommand, type FillCommand } from '../server/commands/fill-command';
 import { BrowserChunkPersistence, decodeBrowserWorldSave } from '../client/browser-chunk-persistence';
 import { createMeshTaskSnapshot, isCurrentMeshTask, type MeshTaskIdentity } from '../client/mesh-task-snapshot';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
@@ -122,6 +123,11 @@ type HarnessSnapshot = {
   colliding: boolean;
   interactionAttempts: number;
   mutationCount: number;
+  worldRevision: number;
+  structuralEventCount: number;
+  remeshSchedulingCount: number;
+  lastCommitMutationCount: number;
+  lastCommitMeshChunkCount: number;
   storageBytes: number;
   worldTime: number;
   timePaused: boolean;
@@ -149,6 +155,7 @@ declare global {
       snapshot: () => HarnessSnapshot;
       moveTo: (x: number, z: number) => void;
       burstEdits: () => void;
+      fillWorld: (command: FillCommand) => void;
       removeVoxelAt: (x: number, y: number, z: number) => void;
       movePlayerTo: (x: number, y: number, z: number) => void;
       prepareFlatMovement: () => void;
@@ -341,6 +348,10 @@ class World {
   private readonly commitQueue: MeshCommitJob[] = [];
   private readonly dirtyChunks = new Set<string>();
   private remeshTimer: number | null = null;
+  private aggregateStructuralEventCount = 0;
+  private aggregateRemeshSchedulingCount = 0;
+  private latestCommitMutationCount = 0;
+  private latestCommitMeshChunkCount = 0;
   private taskSequence = 0;
   private inFlight = 0;
   private scenarioSequence = 0;
@@ -374,6 +385,15 @@ class World {
   }
   get mutationCount() {
     return this.server.mutationCount;
+  }
+  get transactionDiagnostics() {
+    return {
+      worldRevision: this.server.worldRevision,
+      structuralEventCount: this.aggregateStructuralEventCount,
+      remeshSchedulingCount: this.aggregateRemeshSchedulingCount,
+      lastCommitMutationCount: this.latestCommitMutationCount,
+      lastCommitMeshChunkCount: this.latestCommitMeshChunkCount,
+    };
   }
   get queueSize() {
     return this.queued.size + this.commitQueue.length;
@@ -457,10 +477,12 @@ class World {
   }
   restoreLegacyChanges(changes: Change[]) {
     if (!changes.length) return;
-    this.server.editBatch({
-      actorId: 'legacy-storage-migration',
-      edits: changes.map(([x, y, z, value]) => ({ x, y, z, value })),
-    });
+    this.applyCommit(
+      this.server.editBatch({
+        actorId: 'legacy-storage-migration',
+        edits: changes.map(([x, y, z, value]) => ({ x, y, z, value })),
+      }),
+    );
   }
   dispose() {
     if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
@@ -505,14 +527,35 @@ class World {
     this.drainWorker();
   }
   edit(x: number, y: number, z: number, value: number) {
-    const result = this.server.edit(x, y, z, value);
-    result.meshChunks.forEach((key) => {
+    this.applyCommit(this.server.edit(x, y, z, value));
+  }
+  editBatch(batch: WorldEditBatch) {
+    const result = this.server.editBatch(batch);
+    this.applyCommit(result);
+    return result;
+  }
+  fill(actorId: string, command: FillCommand) {
+    return this.editBatch({ actorId, buffers: [resolveFillCommand(command)] });
+  }
+  private applyCommit(result: WorldCommitResult) {
+    const change = result.structuralChange;
+    if (!change) return;
+    this.aggregateStructuralEventCount += 1;
+    this.latestCommitMutationCount = change.mutationCount;
+    this.latestCommitMeshChunkCount = change.meshChunks.length;
+    let hasPresentationWork = false;
+    change.meshChunks.forEach((key) => {
       const pending = this.latestTasks.get(key);
       if (pending) {
+        hasPresentationWork = true;
         this.cancel(key);
         this.request(pending.cx, pending.cy, pending.cz, true);
-      } else if (this.chunks.has(key)) this.dirtyChunks.add(key);
+      } else if (this.chunks.has(key)) {
+        hasPresentationWork = true;
+        this.dirtyChunks.add(key);
+      }
     });
+    if (hasPresentationWork) this.aggregateRemeshSchedulingCount += 1;
     this.scheduleRemesh();
   }
   drainCommits() {
@@ -973,6 +1016,7 @@ class Game {
         snapshot: () => this.harnessSnapshot(),
         moveTo: (x, z) => this.moveHarnessPlayer(x, z),
         burstEdits: () => this.burstHarnessEdits(),
+        fillWorld: (command) => this.world?.fill('harness-fill', command),
         removeVoxelAt: (x, y, z) => this.removeVoxelForHarness(x, y, z),
         movePlayerTo: (x, y, z) => this.movePlayerForHarness(x, y, z),
         prepareFlatMovement: () => this.prepareFlatMovementFixture(),
@@ -1293,6 +1337,7 @@ class Game {
   private harnessSnapshot(): HarnessSnapshot {
     const p = this.camera.getPosition();
     const telemetry = this.world?.telemetry;
+    const transactions = this.world?.transactionDiagnostics;
     return {
       frameMs: this.frameMs,
       player: [p.x, p.y, p.z],
@@ -1306,6 +1351,11 @@ class Game {
       colliding: this.collides(p),
       interactionAttempts: this.interactionAttempts,
       mutationCount: this.world?.mutationCount ?? 0,
+      worldRevision: transactions?.worldRevision ?? 0,
+      structuralEventCount: transactions?.structuralEventCount ?? 0,
+      remeshSchedulingCount: transactions?.remeshSchedulingCount ?? 0,
+      lastCommitMutationCount: transactions?.lastCommitMutationCount ?? 0,
+      lastCommitMeshChunkCount: transactions?.lastCommitMeshChunkCount ?? 0,
       storageBytes: new TextEncoder().encode(localStorage.getItem('seedlands-world-v2') ?? '').byteLength,
       worldTime: this.environment?.worldTime ?? 0,
       timePaused: this.environment?.paused ?? false,
@@ -1347,7 +1397,15 @@ class Game {
       y = Math.floor(p.y - 4),
       x = Math.floor(p.x) + 4,
       z = Math.floor(p.z) + 4;
-    for (let index = 0; index < 6; index += 1) this.world.edit(x + index, y, z, index % 2 ? Voxel.Dirt : Voxel.Air);
+    this.world.editBatch({
+      actorId: 'harness-burst',
+      edits: Array.from({ length: 6 }, (_, index) => ({
+        x: x + index,
+        y,
+        z,
+        value: index % 2 ? Voxel.Dirt : Voxel.Air,
+      })),
+    });
     this.queueSave();
   }
   private removeVoxelForHarness(x: number, y: number, z: number) {
@@ -1363,7 +1421,9 @@ class Game {
   }
   private prepareFlatMovementFixture() {
     if (!this.world) return;
-    for (let x = -2; x <= 2; x += 1) for (let z = -8; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Stone);
+    const edits = [];
+    for (let x = -2; x <= 2; x += 1) for (let z = -8; z <= 2; z += 1) edits.push({ x, y: 56, z, value: Voxel.Stone });
+    this.world.editBatch({ actorId: 'harness-flat-movement', edits });
     this.keys.clear();
     this.velocity.set(0, 0, 0);
     this.onGround = true;
@@ -1372,8 +1432,10 @@ class Game {
   }
   private prepareCenterExcavationFixture() {
     if (!this.world) return;
-    for (let x = -2; x <= 2; x += 1) for (let z = -2; z <= 2; z += 1) this.world.edit(x, 56, z, Voxel.Stone);
-    this.world.edit(0, 56, 0, Voxel.Air);
+    const edits = [];
+    for (let x = -2; x <= 2; x += 1) for (let z = -2; z <= 2; z += 1) edits.push({ x, y: 56, z, value: Voxel.Stone });
+    edits.push({ x: 0, y: 56, z: 0, value: Voxel.Air });
+    this.world.editBatch({ actorId: 'harness-center-excavation', edits });
     this.keys.clear();
     this.velocity.set(0, 0, 0);
     this.onGround = false;
@@ -1382,12 +1444,14 @@ class Game {
   }
   private prepareStepDownFixture() {
     if (!this.world) return;
+    const edits = [];
     for (let x = -2; x <= 2; x += 1) {
       for (let z = -8; z <= 2; z += 1) {
-        this.world.edit(x, 55, z, Voxel.Stone);
-        this.world.edit(x, 56, z, z >= 0 ? Voxel.Stone : Voxel.Air);
+        edits.push({ x, y: 55, z, value: Voxel.Stone });
+        edits.push({ x, y: 56, z, value: z >= 0 ? Voxel.Stone : Voxel.Air });
       }
     }
+    this.world.editBatch({ actorId: 'harness-step-down', edits });
     this.keys.clear();
     this.velocity.set(0, 0, 0);
     this.onGround = true;

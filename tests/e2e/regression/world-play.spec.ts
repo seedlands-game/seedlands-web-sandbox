@@ -131,7 +131,10 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     await page.reload({ waitUntil: 'networkidle' });
     await page.getByRole('button', { name: '进入世界' }).click();
     await page.locator('#debug').waitFor({ state: 'visible', timeout: 15_000 });
-    await waitForSnapshot(page, (current) => current.mutationCount === 1);
+    await waitForSnapshot(
+      page,
+      (current) => current.mutationCount === 0 && current.serverRevision === 1 && current.voxelAtOrigin === 0,
+    );
     stages.persistence = 'PASS';
   });
 
