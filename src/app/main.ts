@@ -2,11 +2,26 @@ import './styles/hud.css';
 import './styles/macro-map.css';
 import { appElements } from './app-elements';
 import { Game } from './game';
+import { installPersistenceHarness } from './game-harness';
 
 const game = new Game();
+void installPersistenceHarness();
 const saved = game.loadSavedSession();
 
-if (saved) appElements.seedInput.value = saved.seed;
+appElements.enterButton.disabled = true;
+if (saved) {
+  appElements.seedInput.value = saved.seed;
+  appElements.enterButton.disabled = false;
+} else {
+  void game
+    .loadLatestWorldSeed()
+    .then((seed) => {
+      if (seed && !appElements.seedInput.value) appElements.seedInput.value = seed;
+    })
+    .finally(() => {
+      appElements.enterButton.disabled = false;
+    });
+}
 
 appElements.enterButton.onclick = async () => {
   const seed = appElements.seedInput.value.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;

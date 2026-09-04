@@ -47,26 +47,26 @@ describe('GameServer headless authority', () => {
     expect(server.getChunk(1, 0, 0).revision).toBe(1);
   });
 
-  it('persists only dirty materialized snapshots and reloads them exactly', () => {
+  it('persists only dirty materialized snapshots and reloads them exactly', async () => {
     const persistence = new MemoryChunkPersistence();
     const first = new GameServer({ seedText: 'snapshot-authority', persistence });
     first.getChunk(2, 0, 0);
     first.edit(64, 20, 0, Voxel.Wood);
 
-    expect(first.flushDirtyChunks()).toEqual([chunkKey(2, 0, 0)]);
+    await expect(first.flushDirtyChunks()).resolves.toEqual([chunkKey(2, 0, 0)]);
     expect(persistence.writes).toEqual([chunkKey(2, 0, 0)]);
-    expect(first.flushDirtyChunks()).toEqual([]);
+    await expect(first.flushDirtyChunks()).resolves.toEqual([]);
 
     const reloaded = new GameServer({ seedText: 'snapshot-authority', persistence });
     expect(reloaded.getVoxel(64, 20, 0)).toBe(Voxel.Wood);
     expect(reloaded.getChunk(2, 0, 0)).toMatchObject({ revision: 1, dirty: false, materialized: true });
   });
 
-  it('does not apply a materialized snapshot to a different seed', () => {
+  it('does not apply a materialized snapshot to a different seed', async () => {
     const persistence = new MemoryChunkPersistence();
     const first = new GameServer({ seedText: 'snapshot-seed-a', persistence });
     first.edit(0, 20, 0, Voxel.Wood);
-    first.flushDirtyChunks();
+    await first.flushDirtyChunks();
 
     const otherSeed = new GameServer({ seedText: 'snapshot-seed-b', persistence });
     expect(otherSeed.getChunk(0, 0, 0)).toMatchObject({ revision: 0, dirty: false, materialized: false });
@@ -92,7 +92,7 @@ describe('GameServer headless authority', () => {
     expect(server.getChunk(0, 0, 0).voxels).toHaveLength(32 ** 3);
   });
 
-  it('keeps dirty chunks retryable when snapshot persistence fails', () => {
+  it('keeps dirty chunks retryable when snapshot persistence fails', async () => {
     const persistence: ChunkPersistence = {
       loadSnapshot: () => null,
       saveSnapshots: () => {
@@ -102,11 +102,59 @@ describe('GameServer headless authority', () => {
     const server = new GameServer({ seedText: 'dirty-retry', persistence });
     server.edit(0, 20, 0, Voxel.Wood);
 
-    expect(() => server.flushDirtyChunks()).toThrow('simulated persistence failure');
+    await expect(server.flushDirtyChunks()).rejects.toThrow('simulated persistence failure');
     expect(server.getChunk(0, 0, 0).dirty).toBe(true);
   });
 
-  it('retains both sides of a materialized Chunk boundary after save and reload', () => {
+  it('keeps a newer edit dirty when an older save ACK arrives', async () => {
+    let releaseFirst!: () => void;
+    const firstWrite = new Promise<void>((resolve) => {
+      releaseFirst = resolve;
+    });
+    const revisions: number[] = [];
+    const persistence: ChunkPersistence = {
+      loadSnapshot: () => null,
+      saveSnapshots: async (snapshots) => {
+        revisions.push(snapshots[0].revision);
+        if (snapshots[0].revision === 1) await firstWrite;
+      },
+    };
+    const server = new GameServer({ seedText: 'edit-during-save', persistence });
+    server.edit(0, 20, 0, Voxel.Wood);
+    const firstFlush = server.flushDirtyChunks();
+    server.edit(0, 20, 0, Voxel.Sand);
+    releaseFirst();
+    await firstFlush;
+
+    expect(server.getChunk(0, 0, 0)).toMatchObject({ revision: 2, persistedRevision: 1, dirty: true });
+    await server.flushDirtyChunks();
+    expect(revisions).toEqual([1, 2]);
+    expect(server.getChunk(0, 0, 0)).toMatchObject({ revision: 2, persistedRevision: 2, dirty: false });
+  });
+
+  it('does not let an old ACK regress a newer persisted revision', async () => {
+    const releases = new Map<number, () => void>();
+    const persistence: ChunkPersistence = {
+      loadSnapshot: () => null,
+      saveSnapshots: (snapshots) =>
+        new Promise<void>((resolve) => {
+          releases.set(snapshots[0].revision, resolve);
+        }),
+    };
+    const server = new GameServer({ seedText: 'stale-save-ack', persistence });
+    server.edit(0, 20, 0, Voxel.Wood);
+    const firstFlush = server.flushDirtyChunks();
+    server.edit(0, 20, 0, Voxel.Sand);
+    const secondFlush = server.flushDirtyChunks();
+    releases.get(2)?.();
+    await secondFlush;
+    releases.get(1)?.();
+    await firstFlush;
+
+    expect(server.getChunk(0, 0, 0)).toMatchObject({ revision: 2, persistedRevision: 2, dirty: false });
+  });
+
+  it('retains both sides of a materialized Chunk boundary after save and reload', async () => {
     const persistence = new MemoryChunkPersistence();
     const first = new GameServer({ seedText: 'boundary-reload', persistence });
     first.editBatch({
@@ -116,7 +164,7 @@ describe('GameServer headless authority', () => {
         { x: 32, y: 20, z: 0, value: Voxel.Sand },
       ],
     });
-    first.flushDirtyChunks();
+    await first.flushDirtyChunks();
 
     const reloaded = new GameServer({ seedText: 'boundary-reload', persistence });
     expect(reloaded.getVoxel(31, 20, 0)).toBe(Voxel.Wood);
