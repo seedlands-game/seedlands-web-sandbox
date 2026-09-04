@@ -28,14 +28,14 @@ Rebase the eight commits from `origin/codex/player-ground-collision` onto the cu
 - [x] Eight source commits rebase locally with current paths and no old runner restored.
 - [x] `corepack pnpm verify:static` passes; `src/world/**` line coverage is 94.56%.
 - [x] `corepack pnpm build` and `corepack pnpm harness` pass; Harness reports browser regression and benchmark `PASS`.
-- [ ] Original current branch fast-forwarded to the completed local integration branch; no remote push.
+- [x] Original current branch fast-forwarded to the completed local integration branch; no remote push.
 
 ## Tasks & Current State
 
 1. [x] Fetch source branch and compare its eight commits to the current architecture.
 2. [x] Rebase, resolve obsolete paths, migrate collision behavior and deterministic browser tests.
 3. [x] Run static, build, Chromium and Harness verification.
-4. [in progress] Commit the migration record and fast-forward the original current branch.
+4. [x] Commit the migration record and fast-forward the original current branch.
 
 ## Delivery Snapshot
 
@@ -43,4 +43,4 @@ Rebased commits: `429a673`, `c930b5b`, `da6498b`, `22e9054`, `17abcdd`, `2f987d5
 
 Actual validation: `corepack pnpm verify:static` passed (30 Vitest tests; 94.56% world line coverage); `corepack pnpm build` passed with the existing non-blocking Vite main-bundle warning; `corepack pnpm harness` passed (9 Chromium tests, browser regression PASS, browser benchmark PASS).
 
-No remote push or force-push was performed. The original current branch update is pending the local documentation commit.
+`codex/sync-main-quality-e2e` was fast-forwarded to `7b815ed`; no remote push or force-push was performed. Local `main` remains unchanged because this request scoped the update to the current branch.
