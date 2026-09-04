@@ -26,6 +26,14 @@ const recipes: Readonly<Record<string, Recipe>> = Object.freeze({
     ],
     outputs: [{ itemId: ItemIds.StonePickaxe, count: 1 }],
   },
+  lantern: {
+    id: 'lantern',
+    inputs: [
+      { itemId: ItemIds.Plank, count: 2 },
+      { itemId: ItemIds.StoneBlock, count: 1 },
+    ],
+    outputs: [{ itemId: ItemIds.Lantern, count: 1 }],
+  },
 });
 
 const cloneRecipe = (recipe: Recipe): Recipe => ({

@@ -77,3 +77,40 @@ test('暂停入口紧凑、背包在桌面和窄屏居中且不溢出', async ({
     await page.getByRole('button', { name: '关闭背包' }).click();
   }
 });
+
+test('GUI 制作灯笼、装备、真实放置和拆除并保存继续', async ({ page }) => {
+  await startHarnessWorld(page, 'survival-lantern-journey');
+  await page.evaluate(() => {
+    window.__seedlandsHarness!.prepareFlatMovement();
+    window.__seedlandsHarness!.setView(0, -42);
+  });
+  await command(page, '/give wood-block 1');
+  await command(page, '/give stone-block 1');
+  await page.keyboard.press('KeyE');
+  const inventory = page.getByRole('dialog', { name: '背包与合成' });
+  await inventory.getByRole('button', { name: '合成 木板', exact: true }).click();
+  await inventory.getByRole('button', { name: '合成 灯笼', exact: true }).click();
+  await inventory.getByRole('gridcell', { name: '灯笼 1', exact: true }).click();
+  await inventory.getByRole('button', { name: '装备到当前快捷栏' }).click();
+  await inventory.getByRole('button', { name: '关闭背包' }).click();
+  await lockPointer(page);
+  await page.mouse.click(640, 360, { button: 'right' });
+  await expect
+    .poll(() => page.evaluate(() => window.__seedlandsHarness?.snapshot().visualEffects.activeLocalLights))
+    .toBe(1);
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: '保存并返回主菜单' })).toBeVisible();
+  await page.getByRole('button', { name: '保存并返回主菜单' }).click();
+  await page.getByRole('button', { name: '继续世界', exact: true }).click();
+  await expect
+    .poll(() => page.evaluate(() => window.__seedlandsHarness?.snapshot().visualEffects.activeLocalLights))
+    .toBe(1);
+  await page.evaluate(() => window.__seedlandsHarness!.setView(0, -42));
+  await lockPointer(page);
+  await page.mouse.down();
+  await expect
+    .poll(() => page.evaluate(() => window.__seedlandsHarness?.snapshot().visualEffects.activeLocalLights))
+    .toBe(0);
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => window.__seedlandsHarness?.snapshot().gameplay.worldItemCount)).toBe(1);
+});

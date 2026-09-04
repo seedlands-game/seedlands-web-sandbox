@@ -10,6 +10,13 @@ export type VoxelGameplayDefinition = Readonly<{
 }>;
 
 const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.freeze({
+  [Voxel.Lantern]: {
+    voxel: Voxel.Lantern,
+    hardnessSeconds: 0.45,
+    preferredTool: null,
+    drop: { itemId: ItemIds.Lantern, count: 1 },
+    replaceable: false,
+  },
   [Voxel.Air]: { voxel: Voxel.Air, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: true },
   [Voxel.Grass]: {
     voxel: Voxel.Grass,

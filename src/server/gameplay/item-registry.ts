@@ -9,6 +9,7 @@ export const ItemIds = Object.freeze({
   Plank: 'plank',
   WoodAxe: 'wood-axe',
   StonePickaxe: 'stone-pickaxe',
+  Lantern: 'lantern',
 } as const);
 
 export type ItemId = (typeof ItemIds)[keyof typeof ItemIds];
@@ -24,6 +25,13 @@ export type ItemDefinition = Readonly<{
 }>;
 
 const definitions: Readonly<Record<ItemId, ItemDefinition>> = Object.freeze({
+  [ItemIds.Lantern]: {
+    id: ItemIds.Lantern,
+    name: '灯笼',
+    itemType: 'block',
+    stackLimit: 64,
+    placesVoxel: Voxel.Lantern,
+  },
   [ItemIds.DirtBlock]: {
     id: ItemIds.DirtBlock,
     name: '泥土块',

@@ -69,3 +69,13 @@ Change8 提供服务端生存规则与 GUI，但背包格子不能移动物品�
 - Midscene 17 步最终通过（41.73 秒），报告 run `survival-presentation-2026-09-05_05-38-28-400eaf64`；前一次失败保留为真实布局缺陷证据。
 - 05:39 `pnpm verify:static` 通过：190 tests / 4 skipped，world 行覆盖 94.86%，Svelte 0 errors / 0 warnings；独立 `pnpm build` 通过。期间发现组件直连 server registry，已改为 projector 提供 `edible` 展示数据，治理测试通过。
 - 当前为安全集成检查点，尚未完成灯笼与父分支全部基线，因此本 change 仍 Active。下一步合入高级光影最终 SHA 并完成灯笼玩法及最终专项准出。
+
+### 灯笼阶段 RED
+
+`tests/server/lantern-gameplay.test.ts` 在 05:43 得到 2 个真实 RED：灯笼配方不存在；死亡后仍能合成。灯笼配方冻结为木板×2 + 石块×1 → 灯笼×1，旧物品 ID 不变；拆除用时 0.45 秒，返还自身。死亡合成拒绝且无副作用，沿用所有生存操作的存活门禁。
+
+### 最终专项交付
+
+05:44 灯笼/死亡合成 Vitest 2/2 GREEN；05:45 实际 GUI 制作→装备→右键放置→保存继续→左键拆除通过。05:49 `pnpm verify:static` 195 passed / 4 skipped、world 行覆盖 94.86%、Svelte 0/0；独立 build 通过。14 项 Playwright 整合回归全部通过（44.9 秒），包括 9 基线、3 本 change、1 玩家动作及1音频。
+
+本 change 状态 **Delivered**；灯笼原料入口来自原有自然原木/石头，基础音效来自同一预算化 Audio runtime。完整无 debug 长旅程及 Change9 集成属于父合同后续准出。

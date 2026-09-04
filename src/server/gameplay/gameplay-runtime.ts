@@ -145,8 +145,10 @@ export class GameplayRuntime {
     return { success: true };
   }
 
-  craft(id: string, recipeId: string): ReturnType<typeof craftRecipe> {
-    const result = craftRecipe(this.player(id).inventory, recipeId);
+  craft(id: string, recipeId: string): ReturnType<typeof craftRecipe> | { success: false; reason: 'player-dead' } {
+    const player = this.player(id);
+    if (player.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
+    const result = craftRecipe(player.inventory, recipeId);
     if (result.success) {
       this.inventoryOperationCount += 1;
       this.touch();
