@@ -1,5 +1,7 @@
 import type * as pc from 'playcanvas';
 import { Voxel } from '../../world/voxel';
+import { macroAt } from '../../world/macro-world';
+import type { World } from '../world-runtime';
 import { FootstepTracker, MusicCueScheduler } from '../../client/audio/audio-policy';
 import { audioRandom, type MusicContext, type SfxKey, type SurfaceSound } from '../../client/audio/audio-types';
 import type { GlobalAudio } from './global-audio';
@@ -29,6 +31,25 @@ export class WorldAudio {
     this.session = audio.beginWorld();
     this.scheduler = new MusicCueScheduler(seed);
     this.createAmbience(seed);
+  }
+
+  updateWorld(camera: pc.Entity, world: World, grounded: boolean, paused: boolean) {
+    const { x, y, z } = camera.getPosition();
+    this.update(
+      camera,
+      grounded,
+      world.getVoxel(Math.floor(x), Math.floor(y - 1.7), Math.floor(z)),
+      () => {
+        const macro = macroAt(world.seed, x, z);
+        return {
+          biome: macro.biome,
+          worldTime: world.server.worldTime,
+          waterProximity: macro.hydrology.water ? 1 : 0,
+          danger: 0,
+        };
+      },
+      paused,
+    );
   }
 
   update(camera: pc.Entity, grounded: boolean, surface: number, getContext: () => MusicContext, paused: boolean) {

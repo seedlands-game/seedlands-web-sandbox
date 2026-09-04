@@ -44,9 +44,10 @@ export class ApplicationShell {
     });
     this.controller.subscribe(() => this.publish());
     window.addEventListener('keydown', (event) => {
-      if (event.code !== 'Escape') return;
+      if (event.code !== 'Escape' || event.defaultPrevented) return;
       const state = bridge.shell.get();
-      if (state.mapOpen || state.commandOpen) return;
+      if (state.mapOpen || state.commandOpen || state.gameplay.inventoryOpen || state.gameplay.lifecycle === 'dead')
+        return;
       // 背包等对话框拥有自己的 Escape；只有世界/暂停层处理这里。
       if (document.querySelector('[role="dialog"]:not([hidden])')) return;
       if (this.controller.state.phase === 'playing') this.controller.pause();
@@ -54,7 +55,13 @@ export class ApplicationShell {
     document.addEventListener('pointerlockchange', () => {
       if (document.pointerLockElement || this.controller.state.phase !== 'playing') return;
       const state = bridge.shell.get();
-      if (!state.mapOpen && !state.commandOpen && !document.querySelector('[role="dialog"]:not([hidden])'))
+      if (
+        !state.mapOpen &&
+        !state.commandOpen &&
+        !state.gameplay.inventoryOpen &&
+        state.gameplay.lifecycle !== 'dead' &&
+        !document.querySelector('dialog[open], [role="dialog"]:not([hidden])')
+      )
         this.controller.pause();
     });
     document.addEventListener('visibilitychange', () => {

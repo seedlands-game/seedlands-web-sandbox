@@ -28,7 +28,11 @@ const application = new ApplicationShell(game, uiBridge, audio);
 
 const actions: UiActionPort = {
   startWorld: (seed, quality) => application.start(seed, quality),
-  selectMaterial: (material) => game.selectMaterial(material),
+  selectHotbarSlot: (slot) => game.selectHotbarSlot(slot),
+  toggleInventory: () => game.toggleInventory(),
+  closeInventory: () => game.closeInventory(),
+  craftRecipe: (recipeId) => game.craftRecipe(recipeId),
+  respawn: () => game.respawn(),
   toggleMap: () => game.toggleMap(),
   closeMap: () => game.closeMap(),
   setMapLayer: (layer) => game.setMapLayer(layer),

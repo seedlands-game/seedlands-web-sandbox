@@ -2,6 +2,7 @@ import type { BrowserChunkPersistence, ChunkPersistenceCorpusSummary } from '../
 import type { ChunkPersistenceLoadScenario } from '../client/chunk-persistence-benchmark';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { FillCommand } from '../server/commands/fill-command';
+import type { CommandResult, ServerCommand } from '../server/commands/command-contract';
 import { Voxel } from '../world/voxel';
 import type { HarnessSnapshot, LifecycleSnapshot, StreamingVariant } from './app-contracts';
 import type { PlayerController } from './player-controller';
@@ -31,6 +32,8 @@ type HarnessApi = {
   beginPerformanceScenario: (name: string) => string;
   setStreamingVariant: (variant: StreamingVariant) => void;
   exportPerformanceTrace: () => ReturnType<PerformanceTelemetry['exportChromeTrace']>;
+  executeGameplayCommand: (command: ServerCommand) => Promise<CommandResult>;
+  advanceGameplay: (seconds: number) => void;
 };
 
 declare global {
@@ -59,6 +62,7 @@ type SnapshotContext = {
   serverPlayerId: string | null;
   persistence: BrowserChunkPersistence | null;
   ui: UiMetrics;
+  presentedEntityCount: number;
 };
 
 const unavailablePerformance = (): HarnessSnapshot['performance'] => ({
@@ -115,6 +119,20 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     serverWorldTime: context.world?.server.worldTime ?? 0,
     performance: context.world?.performanceSummary ?? unavailablePerformance(),
     ui: context.ui,
+    gameplay: {
+      ...(context.world?.server.gameplayMetrics() ?? {
+        entityCount: 0,
+        worldItemCount: 0,
+        creatureCount: 0,
+        nearbyVisitedBucketCount: 0,
+        nearbyCandidateCount: 0,
+        nearbyReturnedCount: 0,
+        inventoryOperationCount: 0,
+        gameplayEventCount: 0,
+        snapshotBytes: 0,
+      }),
+      presentedEntityCount: context.presentedEntityCount,
+    },
   };
 }
 

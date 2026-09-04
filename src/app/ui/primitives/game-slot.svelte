@@ -4,16 +4,16 @@
     selected,
     keyLabel,
     name,
-    tileX,
-    tileY,
+    itemId,
+    count = 0,
     onclick,
   }: {
     label: string;
     selected: boolean;
     keyLabel: string;
     name: string;
-    tileX: number;
-    tileY: number;
+    itemId: string | null;
+    count?: number;
     onclick: () => void;
   } = $props();
 </script>
@@ -24,10 +24,11 @@
   class="game-slot slot"
   aria-label={label}
   aria-pressed={selected}
-  data-material={name}
+  data-item={itemId ?? 'empty'}
   {onclick}
 >
   <span class="slot-key">{keyLabel}</span>
-  <span class="slot-swatch" style={`--tile-x:${tileX};--tile-y:${tileY}`}></span>
+  <span class="slot-swatch" aria-hidden="true">{itemId ? name.slice(0, 1) : ''}</span>
   <span class="slot-name">{name}</span>
+  {#if count > 1}<span class="slot-count">{count}</span>{/if}
 </button>

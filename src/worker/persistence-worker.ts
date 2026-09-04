@@ -20,6 +20,7 @@ type SaveMetadataTask = {
   requestId: number;
   player: [number, number, number];
 };
+type SaveGameplayTask = { kind: 'save-gameplay'; requestId: number; snapshot: unknown };
 type StatsTask = { kind: 'stats'; requestId: number };
 type SeedCorpusTask = { kind: 'seed-corpus'; requestId: number; chunkCount: number };
 type MarkLegacyMigratedTask = { kind: 'mark-legacy-migrated'; requestId: number };
@@ -29,6 +30,7 @@ type Task =
   | LoadTask
   | SaveTask
   | SaveMetadataTask
+  | SaveGameplayTask
   | StatsTask
   | SeedCorpusTask
   | MarkLegacyMigratedTask
@@ -49,6 +51,7 @@ type WorldRecord = {
   seedText: string;
   generatorVersion: number;
   player: [number, number, number] | null;
+  gameplaySnapshot?: unknown;
   corpusSummary?: CorpusSummary;
   legacyMigrated?: boolean;
   updatedAt: number;
@@ -132,6 +135,7 @@ const initialize = async (task: InitTask) => {
   await done;
   return {
     player: existing?.player ?? null,
+    gameplaySnapshot: existing?.gameplaySnapshot ?? null,
     corpusSummary: existing?.corpusSummary ?? null,
     legacyMigrated: existing?.legacyMigrated ?? false,
   };
@@ -246,6 +250,19 @@ const saveMetadata = async (task: SaveMetadataTask) => {
     player: task.player,
     updatedAt: Date.now(),
   } satisfies WorldRecord);
+  await done;
+  return { saved: true };
+};
+
+const saveGameplay = async (task: SaveGameplayTask) => {
+  if (!config) throw new Error('Persistence worker is not initialized.');
+  const opened = await database();
+  const transaction = opened.transaction('worlds', 'readwrite', { durability: 'strict' });
+  const done = transactionDone(transaction);
+  const store = transaction.objectStore('worlds');
+  const existing = (await requestResult(store.get(config.worldId))) as WorldRecord | undefined;
+  if (!existing) throw new Error('Stored world metadata is missing.');
+  store.put({ ...existing, gameplaySnapshot: task.snapshot, updatedAt: Date.now() } satisfies WorldRecord);
   await done;
   return { saved: true };
 };
@@ -392,6 +409,7 @@ const handle = async (task: Task): Promise<unknown> => {
   if (task.kind === 'load') return load(task);
   if (task.kind === 'save') return save(task);
   if (task.kind === 'save-metadata') return saveMetadata(task);
+  if (task.kind === 'save-gameplay') return saveGameplay(task);
   if (task.kind === 'stats') return stats();
   if (task.kind === 'mark-legacy-migrated') return markLegacyMigrated();
   return seedCorpus(task);

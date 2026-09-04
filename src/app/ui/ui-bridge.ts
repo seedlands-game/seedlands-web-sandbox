@@ -61,19 +61,29 @@ const initialShell = (): ShellState => ({
   commandEntries: [],
   commandStatus: '输入 slash command，按 Enter 执行。',
   commandStatusState: 'idle',
+  gameplay: {
+    inventoryOpen: false,
+    lifecycle: 'alive',
+    inventory: [],
+    selectedHotbarSlot: 0,
+    craftableRecipeIds: [],
+    recipes: [],
+  },
 });
 const initialHud = (): HudState => ({
   visible: false,
   worldClock: '',
-  selectedMaterial: 2,
-  hotbar: [
-    { id: 2, name: '泥土', tile: [2, 0] },
-    { id: 3, name: '石头', tile: [0, 1] },
-    { id: 4, name: '原木', tile: [2, 1] },
-    { id: 6, name: '沙砾', tile: [1, 1] },
-  ],
+  health: { value: 20, max: 20 },
+  hunger: { value: 20, max: 20 },
+  selectedHotbarSlot: 0,
+  hotbar: Array.from({ length: 8 }, (_, slot) => ({ slot, itemId: null, count: 0, name: '空槽位' })),
 });
-const initialInteraction = (): InteractionState => ({ target: null, feedback: null });
+const initialInteraction = (): InteractionState => ({
+  target: null,
+  feedback: null,
+  breaking: null,
+  presentedEntities: [],
+});
 const initialDebug = (): DebugState => ({ visible: false, text: '' });
 
 export function createUiBridge(options: BridgeOptions = {}) {
@@ -214,6 +224,9 @@ export function createUiBridge(options: BridgeOptions = {}) {
           return accept('hud', sequence) && publishPatch(hud, patch);
         },
         publishTarget,
+        publishInteraction(sequence: number, patch: Partial<InteractionState>) {
+          return accept('interaction', sequence) && publishPatch(interaction, patch);
+        },
         publishFeedback(sequence: number, value: { message: string; tone: FeedbackTone; durationMs: number }) {
           if (!accept('interaction', sequence)) return false;
           if (feedbackTimer !== null) clearTimer(feedbackTimer);

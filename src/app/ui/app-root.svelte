@@ -3,13 +3,17 @@
   import type { UiBridge } from './ui-bridge';
   import type { DebugState, HudState, InteractionState, ShellState, UiActionPort } from './ui-contracts';
   import DebugCommandShell from './debug-command-shell.svelte';
+  import DeathOverlay from './death-overlay.svelte';
   import Hotbar from './hotbar.svelte';
+  import InventoryCrafting from './inventory-crafting.svelte';
   import MacroMap from './macro-map.svelte';
   import GameButton from './primitives/game-button.svelte';
   import GamePanel from './primitives/game-panel.svelte';
   import StartScreen from './start-screen.svelte';
   import ShellOverlays from './shell-overlays.svelte';
   import type { ApplicationShell } from '../application-shell';
+  import SurvivalHud from './survival-hud.svelte';
+  import PresentedEntities from './presented-entities.svelte';
 
   let {
     bridge,
@@ -67,9 +71,11 @@
 <section id="hud" hidden={!hud.visible} aria-label="游戏 HUD">
   <div id="crosshair" aria-label="准星"><span></span></div>
   <div id="world-clock" class="hud-chip">{hud.worldClock}</div>
+  <SurvivalHud {hud} {interaction} />
   <div
     id="interaction-feedback"
     role="status"
+    aria-label="交互反馈"
     aria-live="polite"
     data-visible={interaction.feedback ? 'true' : 'false'}
     data-tone={interaction.feedback?.tone ?? 'info'}
@@ -82,10 +88,13 @@
     Macro 地图
   </GameButton>
   <MacroMap {shell} {actions} />
+  <InventoryCrafting gameplay={shell.gameplay} {actions} />
+  <DeathOverlay dead={shell.gameplay.lifecycle === 'dead'} {actions} />
+  <PresentedEntities entities={interaction.presentedEntities} />
   <div id="help" class="game-panel">
-    WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–4 选材质 · M 地图 · F3 指标 · F4 命令 · P 暂停时间
+    WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–8 快捷栏 · E 背包 · M 地图 · F3 指标 · F4 命令
   </div>
-  <Hotbar slots={hud.hotbar} selected={hud.selectedMaterial} onselect={actions.selectMaterial} />
+  <Hotbar slots={hud.hotbar} selected={hud.selectedHotbarSlot} onselect={actions.selectHotbarSlot} />
 </section>
 
 {#if buildWatermark}

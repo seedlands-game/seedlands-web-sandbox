@@ -19,8 +19,9 @@
 - Chunk mesh 按 opaque、cutout、transparent 三类批量提交；voxel-specific GLSL/WGSL chunk 从纹理数组采样，Float16 UV 与安全的 Uint16 index 用于缩减网格传输体积。
 - 以玩家为中心、会释放超出范围 CPU/GPU 资源的 Chunk streaming。
 - 同进程 `GameServer` 持有权威 Chunk、玩家状态、实体和世界时钟。
-- 第一人称移动、碰撞、跳跃、体素 raycast 编辑和材质选择。
-- 存储 Seed、玩家位置和已 materialize Chunk 快照的浏览器持久化。
+- 第一人称移动、碰撞、跳跃、限时体素采集、掉落物、拾取和由背包物品驱动的放置。
+- 最小生存闭环：生命、饥饿、24 格背包、8 格快捷栏、食物、三条配方、工具、静止战斗目标、死亡掉落与复活。
+- 存储 Seed、玩家状态、玩法实体、背包和已 materialize Chunk 快照的浏览器持久化。
 - 日夜环境、透明水面、质量档位、Macro 世界地图和 Svelte 5 retained HUD。
 
 完整 Seedlands 的核心系统尚未实现：源质与魔法、自主 NPC 社会、持久历史事件、长生与转生，以及六界内容。
@@ -52,9 +53,10 @@ pnpm preview
 | WASD         | 移动                              |
 | 鼠标         | 观察                              |
 | 空格         | 跳跃                              |
-| 左键         | 破坏准星指向的体素                |
-| 右键         | 放置选中的体素                    |
-| 1–4          | 选择泥土、石头、原木或沙砾        |
+| 按住左键     | 采集准星指向的体素或攻击生物      |
+| 右键         | 放置选中的方块物品                |
+| 1–8          | 选择快捷栏槽位                    |
+| E            | 开关背包与合成                    |
 | M            | 开关 Macro 世界地图               |
 | F3           | 开关调试 HUD                      |
 | F4           | 开关服务端调试命令 Shell          |
@@ -65,7 +67,7 @@ pnpm preview
 
 ## 服务端命令调试
 
-进入世界后按 F4 可打开简易 Debug Shell。当前支持 `/setblock`、`/fill`、`/tp`、`/time get`、`/time set`、`/seed`、`/save`、`/inspect voxel` 和 `/inspect chunk`。Shell 打开时会释放鼠标锁定；按 Esc 关闭。日志文本可以用浏览器原生方式选择和复制，输入框支持正常粘贴；上下方向键可浏览最近 20 条已提交命令，并在回到末尾时恢复未执行草稿。
+进入世界后按 F4 可打开简易 Debug Shell。世界命令包括 `/setblock`、`/fill`、`/tp`、`/time get`、`/time set`、`/seed`、`/save`、`/inspect voxel` 和 `/inspect chunk`。玩法命令包括 `/inventory`、`/give`、`/damage`、`/heal`、`/spawnitem`、`/spawn creature`、`/craft`、`/break`、`/cancelbreak`、`/pickup`、`/drop`、`/place`、`/use`、`/attack`、`/respawn`、`/tick` 和 `/nearby`；参数无效时 Shell 会显示用法。Shell 打开时会释放鼠标锁定；按 Esc 关闭。日志文本可以用浏览器原生方式选择和复制，输入框支持正常粘贴；上下方向键可浏览最近 20 条已提交命令，并在回到末尾时恢复未执行草稿。
 
 同一套结构化命令边界也可以在没有 PlayCanvas、Canvas 或 DOM 的环境中运行：
 
@@ -73,7 +75,7 @@ pnpm preview
 pnpm server:headless -- --seed my-debug-world
 ```
 
-首版无头 Harness 使用进程内存持久化。`/save` 会真实经过服务端 persistence boundary，并可在同一进程的重载测试中恢复；进程退出后不会生成持久世界文件。
+首版无头 Harness 使用进程内存持久化。`/save` 会真实经过 Chunk 与 gameplay snapshot 的 persistence boundary，并可在同一进程的重载测试中恢复；进程退出后不会生成持久世界文件。
 
 ## 架构
 
@@ -118,6 +120,7 @@ Seedlands 的目标是一个由统一自然规律、自主居民、持久后果�
 - 水面可渲染，但尚无压力、流动或瀑布模拟。
 - 尚无洞穴、体素光照传播、移动端触摸操作、Floating Origin 或远景 LOD。
 - 浏览器持久化优先保证原型易部署，不是大世界存储方案。
+- 生物目前只是静止的战斗底座，没有 AI、导航、追逐或反击。
 - 当前垂直 streaming 范围只针对本原型的地形高度。
 - 主 JavaScript bundle 体积较大，尚未拆分为延迟加载的运行时 Chunk。
 

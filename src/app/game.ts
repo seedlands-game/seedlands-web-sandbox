@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import { macroAt } from '../world/macro-world';
+import { createSceneApplication, createSun, createCamera } from './scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
 import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
@@ -15,6 +15,7 @@ import type { ServerCommand } from '../server/commands/command-contract';
 import { GameServer } from '../server/game-server';
 import { CHUNK_SIZE, floorDiv } from '../world/voxel';
 import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession, StreamingVariant } from './app-contracts';
+import { BrowserGameplay } from './browser-gameplay';
 import { BrowserWorldStore } from './browser-world-store';
 import { createHarnessSnapshot, installHarness } from './game-harness';
 import { projectDebug, projectWorldClock } from './hud-projector';
@@ -34,6 +35,7 @@ export class Game {
   private environment: WorldEnvironment | null = null;
   private visualResources: VoxelMaterials | null = null;
   private controller: PlayerController | null = null;
+  private gameplayClient: BrowserGameplay | null = null;
   private camera: pc.Entity | null = null;
   private lastFpsSample = performance.now();
   private frames = 0;
@@ -100,14 +102,15 @@ export class Game {
     this.persistence = await BrowserChunkPersistence.open(seedText, {
       legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
     });
-    this.app = this.createApplication();
-    const light = this.createSun(this.app, quality.shadowQuality !== 'off');
-    this.camera = this.createCamera(this.app, quality.fogEnd + 18);
+    this.app = createSceneApplication(this.canvas);
+    const light = createSun(this.app, quality.shadowQuality !== 'off');
+    this.camera = createCamera(this.app, quality.fogEnd + 18);
     this.visualResources = await createVoxelMaterials(this.app, quality);
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
     const server = new GameServer({ seedText, persistence: this.persistence });
     if (this.audio) this.worldAudio = new WorldAudio(this.audio, server.seed);
     server.setWorldTime(this.environment.worldTime);
+    await server.restore();
     this.world = new World(
       server,
       this.app,
@@ -122,7 +125,9 @@ export class Game {
     );
     this.lifecycle.worldInstanceId += 1;
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
-    const position: [number, number, number] = this.persistence.restoredPlayer ??
+    const restoredPlayer = server.queryEntities({ type: 'player' })[0];
+    const position: [number, number, number] = restoredPlayer?.position ??
+      this.persistence.restoredPlayer ??
       (restore?.seed === seedText ? restore.player : null) ?? [0, 34, 0];
     await server.ensureChunkNeighborhood(
       floorDiv(position[0], CHUNK_SIZE),
@@ -130,49 +135,25 @@ export class Game {
       floorDiv(position[2], CHUNK_SIZE),
     );
     this.camera.setPosition(...position);
-    this.serverPlayerId = server.createEntity({ kind: 'player', position }).id;
+    this.serverPlayerId = restoredPlayer?.id ?? server.spawnPlayer({ position }).id;
     this.world.updateStreaming(this.camera.getPosition());
+    this.gameplayClient = new BrowserGameplay({
+      app: this.app,
+      server,
+      playerId: this.serverPlayerId,
+      bridge: this.uiBridge,
+      session: this.uiSession,
+      nextHudSequence: () => ++this.hudSequence,
+      nextInteractionSequence: () => ++this.interactionSequence,
+      consumeCommit: (commit) => this.world?.consumeServerCommit(commit),
+      queueSave: () => this.queueSave(),
+      releaseInput: () => this.controller?.releaseInput(),
+      movePlayer: (target) => this.controller?.movePlayerTo(...target),
+    });
     this.controller = this.createController(this.camera);
     this.controller.install();
     this.installUiAndHarness();
     this.app.on('update', (dt: number) => this.update(Math.min(dt, 0.05)));
-  }
-
-  private createApplication() {
-    const app = new pc.Application(this.canvas, {
-      mouse: new pc.Mouse(this.canvas),
-      keyboard: new pc.Keyboard(window),
-      graphicsDeviceOptions: { alpha: true },
-    });
-    app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
-    app.setCanvasResolution(pc.RESOLUTION_AUTO);
-    app.start();
-    return app;
-  }
-
-  private createSun(app: pc.Application, castShadows: boolean) {
-    const light = new pc.Entity('Sun');
-    light.addComponent('light', {
-      type: 'directional',
-      color: new pc.Color(1, 0.9, 0.72),
-      intensity: 1,
-      castShadows,
-      shadowResolution: 512,
-    });
-    app.root.addChild(light);
-    return light;
-  }
-
-  private createCamera(app: pc.Application, farClip: number) {
-    const camera = new pc.Entity('Player');
-    camera.addComponent('camera', {
-      clearColor: new pc.Color(0, 0, 0, 0),
-      fov: 72,
-      nearClip: 0.05,
-      farClip,
-    });
-    app.root.addChild(camera);
-    return camera;
   }
 
   private createController(camera: pc.Entity) {
@@ -186,7 +167,24 @@ export class Game {
       onToggleMap: () => this.toggleMap(),
       onToggleDebug: () => this.toggleDebug(),
       onToggleCommandShell: () => this.toggleCommandShell(),
-      onSelectMaterial: (material) => this.publishSelectedMaterial(material),
+      onToggleInventory: () => this.toggleInventory(),
+      onSelectHotbarSlot: (slot) => this.selectHotbarSlot(slot),
+      onAttackTarget: (origin, direction, maxDistance) =>
+        this.gameplayClient?.attackTarget(origin, direction, maxDistance) ?? false,
+      onBeginBreak: (position) => this.gameplayClient?.beginBreak(position),
+      onCancelBreak: () => this.gameplayClient?.cancelBreak(),
+      onPlace: (position) => this.gameplayClient?.place(position),
+      isUiBlockingInput: () =>
+        Boolean(
+          this.gameplayClient?.blocksInput ||
+          this.uiBridge.shell.get().commandOpen ||
+          this.uiBridge.shell.get().mapOpen,
+        ),
+      onCloseUi: () => {
+        this.closeInventory();
+        this.closeMap();
+        this.closeCommandShell();
+      },
       onFeedback: (message, tone) =>
         this.uiSession?.publishFeedback(++this.interactionSequence, { message, tone, durationMs: 900 }),
       onQueueSave: () => this.queueSave(),
@@ -208,6 +206,7 @@ export class Game {
     const harnessEnabled = new URLSearchParams(location.search).has('harness');
     this.uiBridge.publishShell({ phase: 'playing', enterLabel: '进入世界', commandOpen: false, mapOpen: false });
     this.uiSession?.publishHud(++this.hudSequence, { visible: true });
+    this.gameplayClient?.refresh();
     this.publishDebugVisibility(harnessEnabled);
     this.uiBridge.beginMeasurementWindow();
     if (!harnessEnabled || !this.controller) return;
@@ -235,6 +234,13 @@ export class Game {
       beginPerformanceScenario: (name) => this.world?.beginScenario(name) ?? '',
       setStreamingVariant: (variant) => this.world?.setStreamingVariant(variant),
       exportPerformanceTrace: () => this.world?.exportTrace() ?? { traceEvents: [] },
+      executeGameplayCommand: async (command) => {
+        if (!this.commandExecutor || !this.commandSource) throw new Error('Harness command runtime is unavailable.');
+        const result = await this.commandExecutor.execute(this.commandSource, command);
+        if (result.success) this.consumeBrowserCommand(command, result);
+        return result;
+      },
+      advanceGameplay: (seconds) => this.gameplayClient?.advance(seconds),
     });
   }
 
@@ -274,8 +280,24 @@ export class Game {
     this.disposeRuntime();
   }
 
-  selectMaterial(material: number) {
-    this.controller?.selectMaterial(material);
+  selectHotbarSlot(slot: number) {
+    this.gameplayClient?.selectHotbarSlot(slot);
+  }
+
+  toggleInventory() {
+    this.gameplayClient?.toggleInventory();
+  }
+
+  closeInventory() {
+    this.gameplayClient?.closeInventory();
+  }
+
+  craftRecipe(recipeId: string) {
+    this.gameplayClient?.craftRecipe(recipeId);
+  }
+
+  respawn() {
+    this.gameplayClient?.respawn();
   }
 
   toggleCommandShell() {
@@ -312,6 +334,7 @@ export class Game {
     }
     if (command.type === 'time-set' && this.world && this.environment)
       this.environment.setTime(this.world.server.worldTime);
+    this.gameplayClient?.refresh();
   }
 
   private update(dt: number) {
@@ -319,7 +342,7 @@ export class Game {
     const now = performance.now();
     const actualFrameMs = now - this.lastFrameTimestamp;
     this.lastFrameTimestamp = now;
-    this.updateAudio();
+    this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, this.paused);
     if (this.paused) return;
     this.performanceTelemetry.beginFrame();
     this.world.beginFrame();
@@ -337,10 +360,11 @@ export class Game {
     this.controller?.update(dt);
     this.world.updateStreaming(this.camera.getPosition());
     this.world.drainCommits();
-    if (this.serverPlayerId)
-      this.world.server.updateEntity(this.serverPlayerId, {
-        position: [this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z],
-      });
+    if (this.serverPlayerId) {
+      const position = this.camera.getPosition();
+      this.gameplayClient?.updatePlayerPosition([position.x, position.y, position.z]);
+      this.gameplayClient?.advance(dt);
+    }
     this.publishUiProjection();
     this.performanceTelemetry.endFrame(actualFrameMs);
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
@@ -375,36 +399,12 @@ export class Game {
     );
   }
 
-  private updateAudio() {
-    if (!this.worldAudio || !this.camera || !this.world) return;
-    const { x, y, z } = this.camera.getPosition();
-    this.worldAudio.update(
-      this.camera,
-      this.controller?.onGround ?? false,
-      this.world.getVoxel(Math.floor(x), Math.floor(y - 1.7), Math.floor(z)),
-      () => {
-        const macro = macroAt(this.world!.seed, x, z);
-        return {
-          biome: macro.biome,
-          worldTime: this.world!.server.worldTime,
-          waterProximity: macro.hydrology.water ? 1 : 0,
-          danger: 0,
-        };
-      },
-      this.paused,
-    );
-  }
-
   private toggleDebug() {
     this.publishDebugVisibility(!this.uiBridge.debug.get().visible);
   }
 
   private publishDebugVisibility(visible: boolean) {
     this.uiBridge.publishDebug({ visible });
-  }
-
-  private publishSelectedMaterial(material: number) {
-    this.uiSession?.publishHud(++this.hudSequence, { selectedMaterial: material });
   }
 
   toggleMap() {
@@ -431,6 +431,7 @@ export class Game {
       serverPlayerId: this.serverPlayerId,
       persistence: this.persistence,
       ui: this.uiBridge.metrics(),
+      presentedEntityCount: this.gameplayClient?.presentedEntityCount ?? 0,
     });
   }
 
@@ -455,13 +456,14 @@ export class Game {
     }
     const world = this.world;
     const persistence = this.persistence;
-    if (!world || !persistence || !this.camera) return this.saveInFlight;
+    if (!world || !persistence || !this.camera || !this.serverPlayerId) return this.saveInFlight;
     const current = this.camera.getPosition();
     const player: [number, number, number] = [current.x, current.y, current.z];
     const save = this.saveInFlight.then(async () => {
       const span = this.performanceTelemetry.beginSpan('persistence', 'FlushWorldSave');
       try {
-        await world.server.flushDirtyChunks();
+        world.server.updateEntity(this.serverPlayerId!, { position: player });
+        await world.server.save();
         await persistence.saveMetadata(player);
       } finally {
         this.performanceTelemetry.endSpan(span);
@@ -482,6 +484,8 @@ export class Game {
     this.removeHarness = null;
     this.controller?.dispose();
     this.controller = null;
+    this.gameplayClient?.dispose();
+    this.gameplayClient = null;
     this.uiBridge.publishShell({ commandOpen: false, mapOpen: false });
     if (this.world) {
       this.world.dispose();

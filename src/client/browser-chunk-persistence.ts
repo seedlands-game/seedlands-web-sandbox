@@ -1,4 +1,5 @@
 import type { ChunkPersistence, ChunkSnapshot } from '../server/persistence/chunk-persistence';
+import type { GameplaySnapshotV1 } from '../server/gameplay/gameplay-runtime';
 import { GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
 
 export type SerializedChunkSnapshot = Omit<ChunkSnapshot, 'voxels'> & { voxels: number[] };
@@ -23,6 +24,7 @@ export type ChunkPersistenceCorpusSummary = {
 };
 type InitResult = {
   player: [number, number, number] | null;
+  gameplaySnapshot: unknown;
   corpusSummary: ChunkPersistenceCorpusSummary | null;
   legacyMigrated: boolean;
 };
@@ -113,6 +115,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       seedText,
     })) as InitResult;
     persistence.playerValue = initialized.player;
+    persistence.gameplaySnapshotValue = initialized.gameplaySnapshot;
     persistence.corpusSummaryValue = initialized.corpusSummary;
     if (options.legacySnapshots?.length && !initialized.legacyMigrated) {
       for (const snapshot of options.legacySnapshots)
@@ -157,9 +160,24 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   private playerValue: [number, number, number] | null = null;
+  private gameplaySnapshotValue: unknown = null;
 
   get restoredPlayer(): [number, number, number] | null {
     return this.playerValue ? [...this.playerValue] : null;
+  }
+
+  loadGameplaySnapshot(): unknown {
+    return structuredClone(this.gameplaySnapshotValue);
+  }
+
+  async saveGameplaySnapshot(snapshot: GameplaySnapshotV1): Promise<void> {
+    const copy = structuredClone(snapshot);
+    await this.request({ kind: 'save-gameplay', snapshot: copy });
+    this.gameplaySnapshotValue = copy;
+  }
+
+  loadLegacyPlayerPosition(): [number, number, number] | null {
+    return this.restoredPlayer;
   }
 
   private request(message: Record<string, unknown>, transfers: Transferable[] = []): Promise<unknown> {

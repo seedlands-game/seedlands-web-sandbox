@@ -12,6 +12,9 @@ import {
   type ChunkCoord,
 } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
+import type { GameplayPersistence } from './persistence/gameplay-persistence';
+import { GameServerGameplayFacade } from './game-server-gameplay';
+import type { EntitySpawn, GameplayEntity } from './gameplay/entity-store';
 import { WorldMutationBuffer, assertMutationCoordinate, assertVoxelValue, type VoxelEdit } from './world-mutation';
 import { commitWorldEditBatch, compareChunkKeys } from './world-transaction-commit';
 
@@ -68,10 +71,10 @@ export type WorldCommitResult = {
   semanticEvents: readonly WorldSemanticEvent[];
   metrics: WorldCommitMetrics;
 };
-export type ServerEntity = { id: string; kind: string; position: [number, number, number] };
-export type EntityCreate = Omit<ServerEntity, 'id'> & { id?: string };
-export type EntityUpdate = Partial<Omit<ServerEntity, 'id'>>;
-export type GameServerOptions = { seedText: string; persistence?: ChunkPersistence };
+export type ServerEntity = GameplayEntity;
+export type EntityCreate = EntitySpawn;
+export type { EntityUpdate } from './gameplay/entity-store';
+export type GameServerOptions = { seedText: string; persistence?: ChunkPersistence & Partial<GameplayPersistence> };
 export type DerivedMeshSnapshot = {
   key: string;
   cx: number;
@@ -131,19 +134,18 @@ const SINGLE_EDIT_METRICS = Array.from({ length: 9 }, (_, meshInvalidationCount)
   Object.freeze(singleEditMetrics(1, meshInvalidationCount)),
 );
 
-export class GameServer {
+export class GameServer extends GameServerGameplayFacade {
   readonly seed: number;
   readonly generatorVersion = GENERATOR_VERSION;
   private readonly chunks = new Map<string, ServerChunk>();
-  private readonly entities = new Map<string, ServerEntity>();
-  private entitySequence = 0;
   private clock = 0;
   private accessSequence = 0;
-  private readonly persistence?: ChunkPersistence;
+  private readonly persistence?: ChunkPersistence & Partial<GameplayPersistence>;
   private revision = 0;
   private appliedMutationCount = 0;
 
   constructor(readonly options: GameServerOptions) {
+    super(options.persistence);
     this.seed = normalizeSeed(options.seedText);
     this.persistence = options.persistence;
   }
@@ -296,12 +298,12 @@ export class GameServer {
     return true;
   }
 
-  edit(x: number, y: number, z: number, value: number): WorldCommitResult {
+  edit(x: number, y: number, z: number, value: number, actorId = 'system'): WorldCommitResult {
     assertMutationCoordinate(x);
     assertMutationCoordinate(y);
     assertMutationCoordinate(z);
     assertVoxelValue(value);
-    return this.commitSingleEdit('system', x, y, z, value);
+    return this.commitSingleEdit(actorId, x, y, z, value);
   }
 
   editBatch(batch: WorldEditBatch): WorldCommitResult {
@@ -396,27 +398,6 @@ export class GameServer {
     this.chunks.delete(key);
     this.persistence?.evictSnapshot?.(key);
     return true;
-  }
-
-  createEntity(entity: EntityCreate): ServerEntity {
-    const id = entity.id ?? `entity-${++this.entitySequence}`;
-    if (this.entities.has(id)) throw new Error(`Entity already exists: ${id}`);
-    const created: ServerEntity = { id, kind: entity.kind, position: [...entity.position] as [number, number, number] };
-    this.entities.set(id, created);
-    return { ...created, position: [...created.position] as [number, number, number] };
-  }
-
-  getEntity(id: string): ServerEntity | null {
-    const entity = this.entities.get(id);
-    return entity ? { ...entity, position: [...entity.position] as [number, number, number] } : null;
-  }
-
-  updateEntity(id: string, update: EntityUpdate): ServerEntity {
-    const entity = this.entities.get(id);
-    if (!entity) throw new Error(`Unknown entity: ${id}`);
-    if (update.kind !== undefined) entity.kind = update.kind;
-    if (update.position !== undefined) entity.position = [...update.position] as [number, number, number];
-    return { ...entity, position: [...entity.position] as [number, number, number] };
   }
 
   advanceClock(hours: number): number {

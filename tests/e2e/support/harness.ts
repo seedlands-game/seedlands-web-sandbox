@@ -73,6 +73,18 @@ export type HarnessSnapshot = {
     debugProjectionRate: number;
     totalPublishRate: number;
   };
+  gameplay: {
+    entityCount: number;
+    worldItemCount: number;
+    creatureCount: number;
+    nearbyVisitedBucketCount: number;
+    nearbyCandidateCount: number;
+    nearbyReturnedCount: number;
+    inventoryOperationCount: number;
+    gameplayEventCount: number;
+    snapshotBytes: number;
+    presentedEntityCount: number;
+  };
 };
 
 type HarnessWindow = Window & {
@@ -91,6 +103,8 @@ type HarnessWindow = Window & {
     setTimeSpeed: (speed: number) => void;
     setView: (yaw: number, pitch: number) => void;
     setSpectatorPosition: (x: number, y: number, z: number) => void;
+    executeGameplayCommand: (command: Record<string, unknown>) => Promise<Record<string, unknown>>;
+    advanceGameplay: (seconds: number) => void;
   };
 };
 

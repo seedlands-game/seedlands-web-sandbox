@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { snapshot, startHarnessWorld } from '../../../tests/e2e/support/harness';
+import { lockPointer, snapshot, startHarnessWorld } from '../../../tests/e2e/support/harness';
 
 test('暂停设置、保存退出与继续保持世界', async ({ page }) => {
   await startHarnessWorld(page, 'seedlands-shell-journey');
@@ -64,4 +64,15 @@ test('十次保存退出和继续后世界与音频资源仍有界', async ({ pa
       await expect(page.getByRole('button', { name: '暂停游戏', exact: true })).toBeVisible();
     }
   }
+});
+
+test('背包释放鼠标和关闭面板不会被暂停菜单抢占', async ({ page }) => {
+  await startHarnessWorld(page, 'seedlands-overlay-ownership');
+  await lockPointer(page);
+  await page.keyboard.press('KeyE');
+  await expect(page.getByRole('dialog', { name: '背包与合成' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '旅途暂歇' })).toBeHidden();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: '背包与合成' })).toBeHidden();
+  await expect(page.getByRole('heading', { name: '旅途暂歇' })).toBeHidden();
 });

@@ -88,6 +88,18 @@ export type HarnessSnapshot = {
   serverWorldTime: number;
   performance: PerformanceSummary;
   ui: UiMetrics;
+  gameplay: {
+    entityCount: number;
+    worldItemCount: number;
+    creatureCount: number;
+    nearbyVisitedBucketCount: number;
+    nearbyCandidateCount: number;
+    nearbyReturnedCount: number;
+    inventoryOperationCount: number;
+    gameplayEventCount: number;
+    snapshotBytes: number;
+    presentedEntityCount: number;
+  };
 };
 
 export type RestoredSession = {
