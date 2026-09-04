@@ -25,14 +25,12 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
-          node-version: 22.12.0
-      - name: Enable pinned pnpm
-        run: corepack enable
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
       - name: Verify static baseline
         run: pnpm verify:static
 
@@ -42,14 +40,12 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
-          node-version: 22.12.0
-      - name: Enable pinned pnpm
-        run: corepack enable
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
       - name: Build repository Pages artifact
         run: pnpm build
       - name: Upload Pages artifact
@@ -65,14 +61,12 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
-          node-version: 22.12.0
-      - name: Enable pinned pnpm
-        run: corepack enable
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
       - name: Run deterministic browser regression
