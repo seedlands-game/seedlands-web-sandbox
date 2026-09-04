@@ -11,10 +11,13 @@ import {
   type FaceMaterialId,
 } from '../world/voxel';
 import { macroAt, type MacroBiome } from '../world/macro-world';
-import { meshChunk, type RenderLayer } from '../world/mesh';
+import { type RenderLayer } from '../world/mesh';
 import { decodeWorldSave, type WorldChange } from '../world/storage';
 import { GameServer } from '../server/game-server';
 import { BrowserChunkPersistence, decodeBrowserWorldSave } from '../client/browser-chunk-persistence';
+import { createMeshTaskSnapshot, isCurrentMeshTask, type MeshTaskSnapshot } from '../client/mesh-task-snapshot';
+import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
+import { PerformanceTelemetry } from '../client/performance-telemetry';
 import {
   QUALITY_PROFILES,
   WorldEnvironment,
@@ -34,25 +37,66 @@ type MeshPart = {
   indices: Uint32Array;
 };
 type WorkerResult = {
-  id: number;
-  key: string;
+  kind: 'mesh-result';
+  taskId: number;
+  traceId: string;
+  epoch: number;
+  chunkKey: string;
+  chunkRevision: number;
+  haloRevision: string;
   cx: number;
   cy: number;
   cz: number;
-  data: Uint16Array;
   meshes: MeshPart[];
 };
 type Chunk = {
   cx: number;
   cy: number;
   cz: number;
-  data: Uint16Array;
   entity: pc.Entity;
   meshes: pc.Mesh[];
   triangles: number;
   drawCalls: number;
+  meshBytes: number;
 };
 type Change = WorldChange;
+type PendingMeshTask = MeshTaskSnapshot & {
+  traceId: string;
+  seed: number;
+  cx: number;
+  cy: number;
+  cz: number;
+};
+type PendingMeshRequest = {
+  traceId: string;
+  epoch: number;
+  chunkKey: string;
+  cx: number;
+  cy: number;
+  cz: number;
+};
+type MeshCommitJob = {
+  task: PendingMeshTask;
+  meshes: MeshPart[];
+  nextPart: number;
+  entity: pc.Entity;
+  gpuMeshes: pc.Mesh[];
+  instances: pc.MeshInstance[];
+};
+type PerformanceSummary = {
+  scenarioId: string;
+  frame: ReturnType<PerformanceTelemetry['frameSummary']>;
+  chunkVisible: ReturnType<PerformanceTelemetry['traceSummary']>;
+  completedChunkTraces: number;
+  traceEventCount: number;
+  maxMeshCommitsInFrame: number;
+  maxMeshPartsInFrame: number;
+  visibleAfterPostrender: boolean;
+  incidents: number;
+  droppedEvents: number;
+  uploadQueueDepth: number;
+  estimatedMeshBytes: number;
+};
 
 type HarnessSnapshot = {
   frameMs: number;
@@ -78,6 +122,7 @@ type HarnessSnapshot = {
   voxelAtOrigin: number;
   serverPlayerPosition: [number, number, number];
   serverWorldTime: number;
+  performance: PerformanceSummary;
 };
 
 type RestoredSession = {
@@ -103,6 +148,8 @@ declare global {
       setTimeSpeed: (speed: number) => void;
       setView: (yaw: number, pitch: number) => void;
       setSpectatorPosition: (x: number, y: number, z: number) => void;
+      beginPerformanceScenario: (name: string) => string;
+      exportPerformanceTrace: () => ReturnType<PerformanceTelemetry['exportChromeTrace']>;
     };
   }
 }
@@ -276,18 +323,34 @@ class Store {
 class World {
   readonly chunks = new Map<string, Chunk>();
   readonly requested = new Set<string>();
-  private readonly pendingMeshes = new Map<string, { cx: number; cy: number; cz: number; id: number }>();
-  private dirtyChunks = new Set<string>();
+  private readonly worker = new Worker(new URL('../worker/world-worker.ts', import.meta.url), { type: 'module' });
+  private readonly queued = new Map<string, PendingMeshRequest>();
+  private readonly latestTasks = new Map<string, PendingMeshTask>();
+  private readonly commitQueue: MeshCommitJob[] = [];
+  private readonly dirtyChunks = new Set<string>();
   private remeshTimer: number | null = null;
-  private meshTimer: number | null = null;
-  private taskId = 0;
+  private taskSequence = 0;
+  private inFlight = 0;
+  private scenarioSequence = 0;
+  private scenarioId = 'default';
+  private scenarioEpoch = 0;
+  private readonly scenarioTraceIds = new Set<string>();
+  private frameCommits = 0;
+  private frameParts = 0;
+  private maxMeshCommitsInFrame = 0;
+  private maxMeshPartsInFrame = 0;
+  private visibleAfterPostrender = false;
   private lastCenter = '';
   constructor(
     readonly server: GameServer,
-    private app: pc.Application,
-    private materials: Map<number, pc.StandardMaterial>,
-    private quality: QualityProfile,
-  ) {}
+    private readonly app: pc.Application,
+    private readonly materials: Map<number, pc.StandardMaterial>,
+    private readonly quality: QualityProfile,
+    private readonly telemetryRecorder: PerformanceTelemetry,
+    private readonly profile: PerformanceProfile,
+  ) {
+    this.worker.onmessage = (event: MessageEvent<WorkerResult>) => this.receiveWorker(event.data);
+  }
   get seedText() {
     return this.server.options.seedText;
   }
@@ -298,22 +361,76 @@ class World {
     return this.server.mutationCount;
   }
   get queueSize() {
-    return this.pendingMeshes.size;
+    return this.queued.size + this.commitQueue.length;
   }
   get streamCenter(): [number, number] {
     const [x, z] = this.lastCenter.split(',').map(Number);
     return [x || 0, z || 0];
   }
   get telemetry() {
+    const chunks = [...this.chunks.values()];
+    const meshBytes = chunks.reduce((sum, chunk) => sum + chunk.meshBytes, 0);
+    this.telemetryRecorder.gauge('loaded_chunks', chunks.length);
+    this.telemetryRecorder.gauge('visible_chunks', chunks.length);
+    this.telemetryRecorder.gauge('generation_queue_depth', this.queued.size);
+    this.telemetryRecorder.gauge('meshing_queue_depth', this.inFlight);
+    this.telemetryRecorder.gauge('upload_queue_depth', this.commitQueue.length);
+    this.telemetryRecorder.gauge('mesh_cpu_bytes', meshBytes);
     return {
-      loadedChunks: this.chunks.size,
-      renderedChunks: this.chunks.size,
-      generationQueue: this.pendingMeshes.size,
-      meshingQueue: this.meshTimer === null ? 0 : 1,
+      loadedChunks: chunks.length,
+      renderedChunks: chunks.length,
+      generationQueue: this.queued.size,
+      meshingQueue: this.inFlight,
+      uploadQueue: this.commitQueue.length,
       deferredRemeshes: this.dirtyChunks.size,
-      triangles: [...this.chunks.values()].reduce((sum, chunk) => sum + chunk.triangles, 0),
-      drawCalls: [...this.chunks.values()].reduce((sum, chunk) => sum + chunk.drawCalls, 0),
+      triangles: chunks.reduce((sum, chunk) => sum + chunk.triangles, 0),
+      drawCalls: chunks.reduce((sum, chunk) => sum + chunk.drawCalls, 0),
+      meshBytes,
     };
+  }
+  get performanceSummary(): PerformanceSummary {
+    const snapshot = this.telemetryRecorder.snapshot();
+    return {
+      scenarioId: this.scenarioId,
+      frame: this.telemetryRecorder.frameSummary(),
+      chunkVisible: this.telemetryRecorder.traceSummaryFor(this.scenarioTraceIds),
+      completedChunkTraces: [...this.scenarioTraceIds].filter(
+        (traceId) => this.telemetryRecorder.trace(traceId)?.complete,
+      ).length,
+      traceEventCount: [...this.scenarioTraceIds].reduce(
+        (count, traceId) => count + (this.telemetryRecorder.trace(traceId)?.marks.length ?? 0),
+        0,
+      ),
+      maxMeshCommitsInFrame: this.maxMeshCommitsInFrame,
+      maxMeshPartsInFrame: this.maxMeshPartsInFrame,
+      visibleAfterPostrender: this.visibleAfterPostrender,
+      incidents: this.telemetryRecorder.incidents().length,
+      droppedEvents: snapshot.droppedEvents,
+      uploadQueueDepth: this.commitQueue.length,
+      estimatedMeshBytes: this.telemetry.meshBytes,
+    };
+  }
+  beginFrame() {
+    this.frameCommits = 0;
+    this.frameParts = 0;
+  }
+  beginScenario(name: string): string {
+    this.scenarioEpoch += 1;
+    this.scenarioId = `${name}-${++this.scenarioSequence}`;
+    this.queued.clear();
+    this.latestTasks.clear();
+    this.requested.clear();
+    this.commitQueue.splice(0).forEach((job) => this.destroyCommitJob(job));
+    this.lastCenter = '';
+    this.scenarioTraceIds.clear();
+    this.maxMeshCommitsInFrame = 0;
+    this.maxMeshPartsInFrame = 0;
+    this.visibleAfterPostrender = false;
+    this.telemetryRecorder.counter('scenario_epoch', this.scenarioEpoch);
+    return this.scenarioId;
+  }
+  exportTrace() {
+    return this.telemetryRecorder.exportChromeTrace();
   }
   restoreLegacyChanges(changes: Change[]) {
     if (!changes.length) return;
@@ -324,35 +441,35 @@ class World {
   }
   dispose() {
     if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
-    if (this.meshTimer !== null) window.clearTimeout(this.meshTimer);
-    this.chunks.forEach((chunk) => {
-      chunk.meshes.forEach((mesh) => mesh.destroy());
-      chunk.entity.destroy();
-    });
+    this.worker.terminate();
+    this.chunks.forEach((chunk) => this.destroyChunk(chunk));
+    this.commitQueue.forEach((job) => this.destroyCommitJob(job));
     this.chunks.clear();
     this.requested.clear();
-    this.pendingMeshes.clear();
+    this.queued.clear();
+    this.latestTasks.clear();
+    this.commitQueue.length = 0;
     this.dirtyChunks.clear();
     this.remeshTimer = null;
-    this.meshTimer = null;
   }
   getVoxel(x: number, y: number, z: number): number {
     return this.server.getVoxel(x, y, z);
   }
   updateStreaming(position: pc.Vec3) {
-    const cx = floorDiv(position.x, CHUNK_SIZE),
-      cz = floorDiv(position.z, CHUNK_SIZE);
+    const cx = floorDiv(position.x, CHUNK_SIZE);
+    const cz = floorDiv(position.z, CHUNK_SIZE);
     const center = `${cx},${cz}`;
     if (center === this.lastCenter && this.chunks.size) return;
     this.lastCenter = center;
+    const streamingSpan = this.telemetryRecorder.beginSpan('streaming', 'DetermineNeededChunks');
     const needs: [number, number, number, number][] = [];
     for (let y = 0; y <= 1; y += 1)
       for (let z = cz - this.quality.renderRadius; z <= cz + this.quality.renderRadius; z += 1)
         for (let x = cx - this.quality.renderRadius; x <= cx + this.quality.renderRadius; x += 1) {
-          const d = Math.abs(x - cx) + Math.abs(z - cz);
-          needs.push([x, y, z, d]);
+          const distance = Math.abs(x - cx) + Math.abs(z - cz);
+          needs.push([x, y, z, distance]);
         }
-    needs.sort((a, b) => a[3] - b[3]);
+    needs.sort((left, right) => left[3] - right[3]);
     for (const [x, y, z] of needs) this.request(x, y, z);
     const cacheRadius = this.quality.renderRadius + 1;
     for (const [key, chunk] of this.chunks)
@@ -361,68 +478,37 @@ class World {
       const [x, , z] = key.split(',').map(Number);
       if (Math.abs(x - cx) > cacheRadius || Math.abs(z - cz) > cacheRadius) this.cancel(key);
     }
+    this.telemetryRecorder.endSpan(streamingSpan);
+    this.drainWorker();
   }
   edit(x: number, y: number, z: number, value: number) {
     const result = this.server.edit(x, y, z, value);
     result.meshChunks.forEach((key) => {
-      if (this.chunks.has(key)) {
-        this.dirtyChunks.add(key);
-      }
+      if (this.chunks.has(key) || this.latestTasks.has(key)) this.dirtyChunks.add(key);
     });
     this.scheduleRemesh();
   }
-  private request(cx: number, cy: number, cz: number, forceRemesh = false) {
-    if (cy < 0 || cy > 1) return;
-    const key = chunkKey(cx, cy, cz);
-    if (!forceRemesh && (this.chunks.has(key) || this.requested.has(key))) return;
-    if (forceRemesh && this.requested.has(key)) return;
-    const id = ++this.taskId;
-    this.requested.add(key);
-    this.pendingMeshes.set(key, { cx, cy, cz, id });
-    this.scheduleMesh();
-  }
-  private scheduleMesh() {
-    if (this.meshTimer !== null || this.pendingMeshes.size === 0) return;
-    // 每轮只构建一个 Chunk，让真实输入和服务端碰撞不会被首屏网格构建饿死。
-    this.meshTimer = window.setTimeout(() => {
-      this.meshTimer = null;
-      const next = this.pendingMeshes.entries().next().value as
-        [string, { cx: number; cy: number; cz: number; id: number }] | undefined;
-      if (!next) return;
-      const [key, task] = next;
-      this.pendingMeshes.delete(key);
-      if (!this.requested.has(key)) {
-        this.scheduleMesh();
-        return;
+  drainCommits() {
+    const startedAt = performance.now();
+    while (
+      this.commitQueue.length &&
+      this.frameCommits < this.profile.maxMeshCommitsPerFrame &&
+      this.frameParts < this.profile.maxMeshPartsPerFrame &&
+      performance.now() - startedAt < this.profile.maxCommitMs
+    ) {
+      const job = this.commitQueue[0];
+      if (!this.isTaskCurrent(job.task)) {
+        this.commitQueue.shift();
+        this.discard(job, 'stale-result');
+        continue;
       }
-      const chunk = this.server.getChunk(task.cx, task.cy, task.cz);
-      this.receive({
-        id: task.id,
-        key,
-        cx: task.cx,
-        cy: task.cy,
-        cz: task.cz,
-        data: chunk.voxels,
-        meshes: Object.values(
-          meshChunk({
-            seed: this.seed,
-            cx: task.cx,
-            cy: task.cy,
-            cz: task.cz,
-            data: chunk.voxels,
-            changes: [],
-            outside: (x, y, z) => this.server.getVoxel(x, y, z),
-          }),
-        ),
-      });
-      this.scheduleMesh();
-    }, 0);
-  }
-  private receive(result: WorkerResult) {
-    this.requested.delete(result.key);
-    const entity = new pc.Entity(`Chunk ${result.key}`);
-    const meshes: pc.Mesh[] = [];
-    const instances = result.meshes.map((part) => {
+      const part = job.meshes[job.nextPart];
+      if (!part) {
+        this.commitQueue.shift();
+        this.attachAfterCommit(job);
+        continue;
+      }
+      const span = this.telemetryRecorder.beginSpan('render', 'MeshCommit', 'main', job.task.traceId);
       const mesh = new pc.Mesh(this.app.graphicsDevice);
       mesh.setPositions(part.positions);
       mesh.setNormals(part.normals);
@@ -430,41 +516,186 @@ class World {
       mesh.setColors32(part.colors);
       mesh.setIndices(part.indices);
       mesh.update();
-      meshes.push(mesh);
-      const instance = new pc.MeshInstance(mesh, this.materials.get(part.material)!, entity);
+      const instance = new pc.MeshInstance(mesh, this.materials.get(part.material)!, job.entity);
       if (part.renderLayer === 'water') {
         instance.drawOrder = 1000;
         instance.castShadow = false;
       }
-      return instance;
-    });
-    entity.addComponent('render');
-    entity.render!.meshInstances = instances;
-    entity.setPosition(result.cx * CHUNK_SIZE, result.cy * CHUNK_SIZE, result.cz * CHUNK_SIZE);
-    this.app.root.addChild(entity);
-    const previous = this.chunks.get(result.key);
-    if (previous) {
-      previous.meshes.forEach((mesh) => mesh.destroy());
-      previous.entity.destroy();
+      job.gpuMeshes.push(mesh);
+      job.instances.push(instance);
+      job.nextPart += 1;
+      this.frameParts += 1;
+      this.telemetryRecorder.endSpan(span);
+      this.telemetryRecorder.markTrace(job.task.traceId, 'mesh-part-commit', 'main');
     }
-    this.chunks.set(result.key, {
-      ...result,
-      entity,
-      meshes,
-      triangles: result.meshes.reduce((sum, part) => sum + part.indices.length / 3, 0),
-      drawCalls: result.meshes.length,
+    this.maxMeshCommitsInFrame = Math.max(this.maxMeshCommitsInFrame, this.frameCommits);
+    this.maxMeshPartsInFrame = Math.max(this.maxMeshPartsInFrame, this.frameParts);
+  }
+  private request(cx: number, cy: number, cz: number, forceRemesh = false) {
+    if (cy < 0 || cy > 1) return;
+    const key = chunkKey(cx, cy, cz);
+    if (!forceRemesh && (this.chunks.has(key) || this.requested.has(key))) return;
+    const traceId = this.telemetryRecorder.beginTrace('chunk-request', key, 'main');
+    this.scenarioTraceIds.add(traceId);
+    this.requested.add(key);
+    this.latestTasks.delete(key);
+    this.queued.delete(key);
+    this.queued.set(key, { traceId, epoch: this.scenarioEpoch, chunkKey: key, cx, cy, cz });
+    this.telemetryRecorder.markTrace(traceId, 'queued', 'main');
+    this.drainWorker();
+  }
+  private drainWorker() {
+    while (this.inFlight < this.profile.maxWorkerTasksInFlight) {
+      const next = this.queued.entries().next().value as [string, PendingMeshRequest] | undefined;
+      if (!next) return;
+      const [key, request] = next;
+      this.queued.delete(key);
+      if (!this.requested.has(key) || request.epoch !== this.scenarioEpoch) {
+        this.telemetryRecorder.markTrace(request.traceId, 'stale-request', 'main');
+        continue;
+      }
+      const snapshotSpan = this.telemetryRecorder.beginSpan('streaming', 'HaloSnapshot', 'main', request.traceId);
+      const snapshot = this.server.createDerivedMeshSnapshot(request.cx, request.cy, request.cz);
+      this.telemetryRecorder.endSpan(snapshotSpan);
+      const task: PendingMeshTask = {
+        ...createMeshTaskSnapshot({
+          taskId: ++this.taskSequence,
+          epoch: request.epoch,
+          chunkKey: key,
+          chunkRevision: snapshot.chunkRevision,
+          haloRevision: snapshot.haloRevision,
+          canonical: snapshot.canonical,
+          halo: snapshot.halo,
+        }),
+        traceId: request.traceId,
+        seed: this.seed,
+        cx: request.cx,
+        cy: request.cy,
+        cz: request.cz,
+      };
+      this.latestTasks.set(key, task);
+      this.inFlight += 1;
+      this.telemetryRecorder.markTrace(task.traceId, 'worker-start', 'worker-derived');
+      this.worker.postMessage(
+        {
+          kind: 'mesh',
+          taskId: task.taskId,
+          traceId: task.traceId,
+          epoch: task.epoch,
+          chunkKey: task.chunkKey,
+          seed: task.seed,
+          cx: task.cx,
+          cy: task.cy,
+          cz: task.cz,
+          chunkRevision: task.chunkRevision,
+          haloRevision: task.haloRevision,
+          canonical: task.canonical.buffer,
+          halo: task.halo.buffer,
+        },
+        [task.canonical.buffer, task.halo.buffer],
+      );
+    }
+  }
+  private receiveWorker(result: WorkerResult) {
+    this.inFlight = Math.max(0, this.inFlight - 1);
+    const task = this.latestTasks.get(result.chunkKey);
+    if (!task || !isCurrentMeshTask(result, task)) {
+      this.telemetryRecorder.counter(
+        'stale_worker_results',
+        (this.telemetryRecorder.snapshot().gauges.stale_worker_results ?? 0) + 1,
+      );
+      this.drainWorker();
+      return;
+    }
+    this.telemetryRecorder.markTrace(task.traceId, 'worker-complete', 'worker-derived');
+    this.commitQueue.push({
+      task,
+      meshes: result.meshes,
+      nextPart: 0,
+      entity: new pc.Entity(`Chunk ${result.chunkKey}`),
+      gpuMeshes: [],
+      instances: [],
     });
+    this.telemetryRecorder.markTrace(task.traceId, 'commit-queued', 'main');
+    this.drainWorker();
+  }
+  private attachAfterCommit(job: MeshCommitJob) {
+    if (!this.isTaskCurrent(job.task)) {
+      this.discard(job, 'stale-result');
+      return;
+    }
+    const span = this.telemetryRecorder.beginSpan('render', 'SceneAttach', 'main', job.task.traceId);
+    job.entity.addComponent('render');
+    job.entity.render!.meshInstances = job.instances;
+    job.entity.setPosition(job.task.cx * CHUNK_SIZE, job.task.cy * CHUNK_SIZE, job.task.cz * CHUNK_SIZE);
+    this.app.root.addChild(job.entity);
+    this.frameCommits += 1;
+    this.maxMeshCommitsInFrame = Math.max(this.maxMeshCommitsInFrame, this.frameCommits);
+    this.telemetryRecorder.endSpan(span);
+    this.telemetryRecorder.markTrace(job.task.traceId, 'scene-attached', 'main');
+    this.app.once('postrender', () => {
+      if (!this.isTaskCurrent(job.task)) {
+        this.discard(job, 'stale-result');
+        return;
+      }
+      const previous = this.chunks.get(job.task.chunkKey);
+      if (previous) this.destroyChunk(previous);
+      const meshBytes = job.meshes.reduce(
+        (sum, part) =>
+          sum +
+          part.positions.byteLength +
+          part.normals.byteLength +
+          part.uvs.byteLength +
+          part.colors.byteLength +
+          part.indices.byteLength,
+        0,
+      );
+      this.chunks.set(job.task.chunkKey, {
+        cx: job.task.cx,
+        cy: job.task.cy,
+        cz: job.task.cz,
+        entity: job.entity,
+        meshes: job.gpuMeshes,
+        triangles: job.meshes.reduce((sum, part) => sum + part.indices.length / 3, 0),
+        drawCalls: job.meshes.length,
+        meshBytes,
+      });
+      this.requested.delete(job.task.chunkKey);
+      this.latestTasks.delete(job.task.chunkKey);
+      this.visibleAfterPostrender = true;
+      this.telemetryRecorder.completeTrace(job.task.traceId, 'visible-postrender', 'main');
+    });
+  }
+  private isTaskCurrent(task: MeshTaskSnapshot) {
+    const current = this.latestTasks.get(task.chunkKey);
+    return current ? isCurrentMeshTask(task, current) : false;
   }
   private unload(key: string, chunk: Chunk) {
     this.cancel(key);
-    chunk.meshes.forEach((mesh) => mesh.destroy());
-    chunk.entity.destroy();
+    this.destroyChunk(chunk);
     this.chunks.delete(key);
   }
   private cancel(key: string) {
+    const task = this.latestTasks.get(key);
+    if (task) this.telemetryRecorder.markTrace(task.traceId, 'cancelled', 'main');
+    this.latestTasks.delete(key);
     this.requested.delete(key);
-    this.pendingMeshes.delete(key);
+    this.queued.delete(key);
     this.dirtyChunks.delete(key);
+  }
+  private discard(value: MeshCommitJob | PendingMeshTask, counter: string) {
+    const task = 'task' in value ? value.task : value;
+    if ('gpuMeshes' in value) this.destroyCommitJob(value);
+    this.telemetryRecorder.markTrace(task.traceId, counter, 'main');
+    this.telemetryRecorder.counter(counter, (this.telemetryRecorder.snapshot().gauges[counter] ?? 0) + 1);
+  }
+  private destroyCommitJob(job: MeshCommitJob) {
+    job.gpuMeshes.forEach((mesh) => mesh.destroy());
+    job.entity.destroy();
+  }
+  private destroyChunk(chunk: Chunk) {
+    chunk.meshes.forEach((mesh) => mesh.destroy());
+    chunk.entity.destroy();
   }
   private scheduleRemesh() {
     if (this.remeshTimer !== null || this.dirtyChunks.size === 0) return;
@@ -496,6 +727,9 @@ class Game {
   private frames = 0;
   private fps = 0;
   private frameMs = 0;
+  private lastFrameTimestamp = performance.now();
+  private performanceProfile: PerformanceProfile = PERFORMANCE_PROFILES.balanced;
+  private performanceTelemetry = new PerformanceTelemetry({ now: () => performance.now() });
   private interactionAttempts = 0;
   private harnessSpectator = false;
   private store = new Store();
@@ -511,6 +745,21 @@ class Game {
     this.seedText = seedText;
     this.qualityLevel = qualitySelect.value as QualityLevel;
     const quality = QUALITY_PROFILES[this.qualityLevel];
+    const profileName = new URLSearchParams(location.search).get('performanceProfile');
+    this.performanceProfile =
+      profileName === 'diagnostic' || profileName === 'benchmark' || profileName === 'balanced'
+        ? PERFORMANCE_PROFILES[profileName]
+        : new URLSearchParams(location.search).has('harness')
+          ? PERFORMANCE_PROFILES.benchmark
+          : PERFORMANCE_PROFILES.balanced;
+    this.performanceTelemetry = new PerformanceTelemetry({
+      now: () => performance.now(),
+      frameCapacity: this.performanceProfile.ringBufferFrames,
+      eventCapacity: this.performanceProfile.ringBufferEvents,
+      incidentThresholdMs: this.performanceProfile.longFrameMs,
+      chunkLatencyIncidentMs: this.performanceProfile.chunkLatencyIncidentMs,
+    });
+    this.lastFrameTimestamp = performance.now();
     macroMapViewer.close();
     this.world?.dispose();
     this.world = null;
@@ -552,7 +801,14 @@ class Game {
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
     const server = new GameServer({ seedText, persistence: this.persistence });
     server.setWorldTime(this.environment.worldTime);
-    this.world = new World(server, this.app, this.visualResources.materials, quality);
+    this.world = new World(
+      server,
+      this.app,
+      this.visualResources.materials,
+      quality,
+      this.performanceTelemetry,
+      this.performanceProfile,
+    );
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
     const p = restore?.player ?? [0, 34, 0];
     this.camera.setPosition(...p);
@@ -596,6 +852,8 @@ class Game {
           this.camera.setPosition(x, y, z);
           this.world?.updateStreaming(this.camera.getPosition());
         },
+        beginPerformanceScenario: (name) => this.world?.beginScenario(name) ?? '',
+        exportPerformanceTrace: () => this.world?.exportTrace() ?? { traceEvents: [] },
       };
     }
   }
@@ -649,19 +907,25 @@ class Game {
     };
     document.onmousedown = (event) => {
       if (document.pointerLockElement !== canvas) return;
-      if (event.button === 0) this.interact(false);
-      if (event.button === 2) this.interact(true);
+      if (event.button === 0)
+        this.performanceTelemetry.withSpan('input', 'PointerInteraction', () => this.interact(false));
+      if (event.button === 2)
+        this.performanceTelemetry.withSpan('input', 'PointerInteraction', () => this.interact(true));
     };
   }
   private update(dt: number) {
     if (!this.world) return;
+    const now = performance.now();
+    const actualFrameMs = now - this.lastFrameTimestamp;
+    this.lastFrameTimestamp = now;
+    this.performanceTelemetry.beginFrame();
+    this.world.beginFrame();
     if (this.environment) {
       if (!this.environment.paused) this.world.server.advanceClock(dt * 0.04 * this.environment.speed);
       this.environment.update(dt, this.world.server.worldTime);
     }
-    this.frameMs = dt * 1000;
+    this.frameMs = actualFrameMs;
     this.frames += 1;
-    const now = performance.now();
     if (now - this.last > 500) {
       this.fps = (this.frames * 1000) / (now - this.last);
       this.frames = 0;
@@ -669,6 +933,7 @@ class Game {
     }
     // Let the engine be the sole source of truth for camera orientation and movement axes.
     this.camera.setEulerAngles(this.pitch, this.yaw, 0);
+    const playerSpan = this.performanceTelemetry.beginSpan('player', 'PlayerMovement');
     if (!this.harnessSpectator) {
       const forward = new pc.Vec3().copy(this.camera.forward);
       forward.y = 0;
@@ -694,7 +959,9 @@ class Game {
       this.onGround = false;
       this.moveAxis('y', this.velocity.y * dt);
     }
+    this.performanceTelemetry.endSpan(playerSpan);
     this.world.updateStreaming(this.camera.getPosition());
+    this.world.drainCommits();
     if (this.serverPlayerId)
       this.world.server.updateEntity(this.serverPlayerId, {
         position: [this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z],
@@ -710,7 +977,11 @@ class Game {
     const hours = Math.floor(worldTime);
     const minutes = Math.floor((worldTime - hours) * 60);
     worldClock.textContent = `${this.environment?.phase ?? 'Day'} · ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nQuality  ${QUALITY_PROFILES[this.qualityLevel].label} · Time  ${worldTime.toFixed(2)}h ${this.environment?.paused ? '(paused)' : `${this.environment?.speed ?? 1}×`}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nTriangles  ${telemetry.triangles.toLocaleString()} · Draw Calls  ${telemetry.drawCalls}\nDeferred Remeshes  ${telemetry.deferredRemeshes}\nMaterialized Chunks  ${this.world.mutationCount}`;
+    const perfSummary = this.world.performanceSummary;
+    const hudSpan = this.performanceTelemetry.beginSpan('hud', 'DebugHud');
+    debug.textContent = `FPS  ${this.fps.toFixed(0)} · Frame  ${this.frameMs.toFixed(1)} ms\nBackend  ${this.app?.graphicsDevice.deviceType ?? 'WebGL2'}\nQuality  ${QUALITY_PROFILES[this.qualityLevel].label} · 性能档位  ${this.performanceProfile.name}\n帧分位  p50 ${perfSummary.frame.p50Ms.toFixed(1)} · p95 ${perfSummary.frame.p95Ms.toFixed(1)} · 最近长帧 ${perfSummary.frame.lastLongFrameMs.toFixed(1)} ms\n区块可见 p95  ${perfSummary.chunkVisible.p95Ms.toFixed(1)} ms · Worker 忙碌 ${telemetry.meshingQueue}\n提交预算  ${perfSummary.maxMeshCommitsInFrame} 区块 / ${perfSummary.maxMeshPartsInFrame} 部件 · 上传队列 ${perfSummary.uploadQueueDepth}\n估算网格内存  ${(perfSummary.estimatedMeshBytes / 1024 / 1024).toFixed(1)} MiB · 事件丢弃 ${perfSummary.droppedEvents}\nTime  ${worldTime.toFixed(2)}h ${this.environment?.paused ? '(paused)' : `${this.environment?.speed ?? 1}×`}\nSeed  ${this.seedText}\nGenerator  v${GENERATOR_VERSION}\nPlayer  ${this.camera.getPosition().x.toFixed(1)}, ${feetY.toFixed(1)}, ${this.camera.getPosition().z.toFixed(1)}\nChunk  ${floorDiv(this.camera.getPosition().x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(this.camera.getPosition().z, 32)}\nMacro Region  ${macro.region.join(',')} · ${macro.biome}\nElevation  ${macro.terrainHeight} · Relief  ${macro.relief.toFixed(2)}\nTemperature  ${macro.temperature.toFixed(2)} · Humidity  ${macro.humidity.toFixed(2)}\nHydrology  ${water}\nLoaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}\nGeneration Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}\nTriangles  ${telemetry.triangles.toLocaleString()} · Draw Calls  ${telemetry.drawCalls}\nDeferred Remeshes  ${telemetry.deferredRemeshes}\nMaterialized Chunks  ${this.world.mutationCount}`;
+    this.performanceTelemetry.endSpan(hudSpan);
+    this.performanceTelemetry.endFrame(actualFrameMs);
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
   }
   private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
@@ -901,6 +1172,20 @@ class Game {
         ? (this.world?.server.getEntity(this.serverPlayerId)?.position ?? [0, 0, 0])
         : [0, 0, 0],
       serverWorldTime: this.world?.server.worldTime ?? 0,
+      performance: this.world?.performanceSummary ?? {
+        scenarioId: 'unavailable',
+        frame: { count: 0, p50Ms: 0, p95Ms: 0, p99Ms: 0, maxMs: 0, longFrameCount: 0, lastLongFrameMs: 0 },
+        chunkVisible: { count: 0, p50Ms: 0, p95Ms: 0, p99Ms: 0, maxMs: 0 },
+        completedChunkTraces: 0,
+        traceEventCount: 0,
+        maxMeshCommitsInFrame: 0,
+        maxMeshPartsInFrame: 0,
+        visibleAfterPostrender: false,
+        incidents: 0,
+        droppedEvents: 0,
+        uploadQueueDepth: 0,
+        estimatedMeshBytes: 0,
+      },
     };
   }
   private moveHarnessPlayer(x: number, z: number) {
@@ -975,8 +1260,10 @@ class Game {
       this.saveTimer = null;
     }
     if (this.world) {
-      this.world.server.flushDirtyChunks();
-      this.store.save(this.seedText, this.camera.getPosition(), this.persistence);
+      this.performanceTelemetry.withSpan('persistence', 'FlushWorldSave', () => {
+        this.world?.server.flushDirtyChunks();
+        this.store.save(this.seedText, this.camera.getPosition(), this.persistence);
+      });
     }
   }
   private renderHotbar() {

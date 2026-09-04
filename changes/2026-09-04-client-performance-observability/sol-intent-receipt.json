@@ -1,0 +1,29 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "在实现前复核客户端性能可观测性、派生 Worker meshing 与按帧 commit budget 的边界、正确性和可验证性。",
+  "evidence": [
+    "当前 Integrated Mode 在主线程的 setTimeout 队列中连续执行整块 meshChunk、Mesh 创建、上传和场景挂载。",
+    "用户报告初始化与 streaming 发生爆发式掉帧；此前 Worker 版本未出现同类主线程爆发。",
+    "用户提供的性能 change 要求先建立可移植 telemetry、端到端 trace、spike capture、Harness 与 A/B 证据。",
+    "已写入 telemetry/profile 与 change Playwright 预期 RED 用例；当前依赖重建被内部包源 DNS 阻断，尚不能执行 RED。"
+  ],
+  "necessary_paths": [
+    "changes/2026-09-04-client-performance-observability/spec.md",
+    "tests/client/performance-telemetry.test.ts",
+    "tests/client/performance-profile.test.ts",
+    "changes/2026-09-04-client-performance-observability/e2e/performance-observability.spec.ts",
+    "src/app/main.ts",
+    "src/worker/world-worker.ts",
+    "src/world/mesh.ts",
+    "tests/e2e/support/harness.ts"
+  ],
+  "output_limit": { "max_characters": 1200 },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}

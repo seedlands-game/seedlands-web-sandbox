@@ -1,14 +1,35 @@
-import { chunkKey } from '../world/voxel';
-import { makeChunk, meshChunk, type WorldChange } from '../world/mesh';
+import { meshChunk } from '../world/mesh';
 
-type Task = { kind: 'chunk'; id: number; seed: number; cx: number; cy: number; cz: number; changes: WorldChange[] };
+type Task = {
+  kind: 'mesh';
+  taskId: number;
+  traceId: string;
+  epoch: number;
+  chunkKey: string;
+  seed: number;
+  cx: number;
+  cy: number;
+  cz: number;
+  chunkRevision: number;
+  haloRevision: string;
+  canonical: ArrayBuffer;
+  halo: ArrayBuffer;
+};
 
 self.onmessage = (event: MessageEvent<Task>) => {
-  const { id, seed, cx, cy, cz, changes } = event.data;
-  const data = makeChunk(seed, cx, cy, cz, changes);
-  const meshes = meshChunk({ seed, cx, cy, cz, data, changes });
+  const { taskId, traceId, epoch, chunkKey, seed, cx, cy, cz, chunkRevision, haloRevision, canonical, halo } =
+    event.data;
+  const meshes = meshChunk({
+    seed,
+    cx,
+    cy,
+    cz,
+    data: new Uint16Array(canonical),
+    changes: [],
+    halo: new Uint16Array(halo),
+  });
   const packed = Object.values(meshes);
-  const transfers: Transferable[] = [data.buffer];
+  const transfers: Transferable[] = [];
   packed.forEach((part) =>
     transfers.push(
       part.positions.buffer,
@@ -18,5 +39,8 @@ self.onmessage = (event: MessageEvent<Task>) => {
       part.indices.buffer,
     ),
   );
-  self.postMessage({ kind: 'chunk', id, key: chunkKey(cx, cy, cz), cx, cy, cz, data, meshes: packed }, transfers);
+  self.postMessage(
+    { kind: 'mesh-result', taskId, traceId, epoch, chunkKey, cx, cy, cz, chunkRevision, haloRevision, meshes: packed },
+    transfers,
+  );
 };
