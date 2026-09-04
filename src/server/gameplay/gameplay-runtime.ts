@@ -495,9 +495,7 @@ export class GameplayRuntime {
           continue;
         }
         if (horizontalDistanceSquared(anchor, position) <= 0.05 ** 2) continue;
-        if (!item.stack || !player.inventory.add(item.stack)) continue;
-        this.inventoryOperationCount += 1;
-        this.entities.despawn(item.id);
+        if (!this.pickupItem(id, item.id).success) continue;
         this.pickupAnchors.delete(item.id);
         pickedUp = true;
       }

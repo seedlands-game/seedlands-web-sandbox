@@ -79,3 +79,9 @@ Change8 提供服务端生存规则与 GUI，但背包格子不能移动物品�
 05:44 灯笼/死亡合成 Vitest 2/2 GREEN；05:45 实际 GUI 制作→装备→右键放置→保存继续→左键拆除通过。05:49 `pnpm verify:static` 195 passed / 4 skipped、world 行覆盖 94.86%、Svelte 0/0；独立 build 通过。14 项 Playwright 整合回归全部通过（44.9 秒），包括 9 基线、3 本 change、1 玩家动作及1音频。
 
 本 change 状态 **Delivered**；灯笼原料入口来自原有自然原木/石头，基础音效来自同一预算化 Audio runtime。完整无 debug 长旅程及 Change9 集成属于父合同后续准出。
+
+### 自然拾取事件修复合同
+
+组合审查发现手动 pickupItem 发送成功事件，但移动触发的 autoPickup 仍走旧重复路径，导致自然拾取没有声音与反馈。Given 玩家进入物品范围后移动，When 正式 advance 执行自动拾取，Then 背包与实体原子变更，并且仅一次返回 pickup 事件；离开范围/满包/生物吃掉食物不能冒充玩家拾取。先扩展 inventory-interaction 单测取得 RED，再复用 pickupItem 生产入口消除重复代码。
+
+移动自动拾取用例实际 RED（背包已拾取但返回事件为空），复用 pickupItem 后7/7 GREEN；build通过。合入自然食物后灯笼专项改为命名实体断言并通过7.3秒。

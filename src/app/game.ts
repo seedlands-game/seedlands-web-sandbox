@@ -19,7 +19,7 @@ import {
 import { executeSlashCommand, type SlashCommandExecution } from '../server/commands/slash-command-parser';
 import type { ServerCommand } from '../server/commands/command-contract';
 import { GameServer } from '../server/game-server';
-import { preparePlayerEntry } from './world-entry';
+import { orientNewPlayer, preparePlayerEntry } from './world-entry';
 import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession } from './app-contracts';
 import { BrowserGameplay } from './browser-gameplay';
 import { BrowserWorldStore } from './browser-world-store';
@@ -145,7 +145,7 @@ export class Game {
     );
     this.lifecycle.worldInstanceId += 1;
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
-    const { position, restoredPlayer } = await preparePlayerEntry(
+    const { position, restoredPlayer, isNew } = await preparePlayerEntry(
       server,
       this.persistence.restoredPlayer,
       restore?.seed === seedText ? restore.player : null,
@@ -169,6 +169,7 @@ export class Game {
       onPresentation: (event) => this.worldAudio?.present(event),
     });
     this.controller = this.createController(this.camera);
+    orientNewPlayer(this.controller, server, position, isNew);
     this.controller.install();
     this.installUiAndHarness();
     this.app.on('update', (dt: number) => this.update(Math.min(dt, 0.05)));
