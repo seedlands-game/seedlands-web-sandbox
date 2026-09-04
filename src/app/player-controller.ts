@@ -30,6 +30,7 @@ type PlayerControllerOptions = {
   onCancelBreak: () => void;
   onPlace: (position: [number, number, number]) => void;
   isUiBlockingInput: () => boolean;
+  onUseHeldItem: () => boolean;
   onCloseUi: () => void;
   onFeedback: (message: string, tone: 'info' | 'success' | 'error') => void;
   onQueueSave: () => void;
@@ -396,6 +397,7 @@ export class PlayerController {
 
   private interact(place: boolean) {
     this.attempts += 1;
+    if (place && this.options.onUseHeldItem()) return;
     const world = this.options.getWorld();
     if (!world) return;
     const position = this.options.camera.getPosition();

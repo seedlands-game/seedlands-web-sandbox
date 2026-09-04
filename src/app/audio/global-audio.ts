@@ -17,6 +17,8 @@ export class GlobalAudio {
   private worldSession = 'menu';
   private sequence = 0;
   private unlocked = false;
+  private readonly recentSounds: { key: SfxKey; sequence: number }[] = [];
+  private playedCount = 0;
   private error = '';
   private readonly subscribers = new Set<() => void>();
 
@@ -44,6 +46,8 @@ export class GlobalAudio {
       unlocked: this.unlocked,
       error: this.error,
       voices: this.voices.size,
+      playedCount: this.playedCount,
+      recentSounds: this.recentSounds.map((sound) => ({ ...sound })),
       cachedSounds: this.sounds.size,
       dropped: this.budget.droppedCount,
       session: this.worldSession,
@@ -142,6 +146,8 @@ export class GlobalAudio {
     voice.once('end', () => this.retire(permit.id));
     this.voices.set(permit.id, voice);
     voice.play();
+    this.recentSounds.push({ key, sequence: ++this.playedCount });
+    if (this.recentSounds.length > 32) this.recentSounds.shift();
     return true;
   }
 

@@ -8,6 +8,7 @@ import './ui/styles/shell.css';
 import { installPersistenceHarness } from './game-harness';
 import './ui/styles/theme.css';
 import './ui/styles/presentation.css';
+import './ui/styles/survival.css';
 import { createUiBridge } from './ui/ui-bridge';
 import type { UiActionPort } from './ui/ui-contracts';
 import { mountUi } from './ui/mount-ui';
@@ -32,6 +33,8 @@ const actions: UiActionPort = {
   toggleInventory: () => game.toggleInventory(),
   closeInventory: () => game.closeInventory(),
   craftRecipe: (recipeId) => game.craftRecipe(recipeId),
+  moveInventorySlot: (source, target) => game.moveInventorySlot(source, target),
+  useInventoryItem: (slot) => game.useInventoryItem(slot),
   respawn: () => game.respawn(),
   toggleMap: () => game.toggleMap(),
   closeMap: () => game.closeMap(),
@@ -49,5 +52,5 @@ void installPersistenceHarness();
 void application.initialize();
 
 document.addEventListener('click', (event) => {
-  if ((event.target as Element)?.closest('button')) void audio.unlock().then(() => audio.play('confirm'));
+  if ((event.target as Element)?.closest('button')) void audio.unlock().then(() => audio.play('hover'));
 });

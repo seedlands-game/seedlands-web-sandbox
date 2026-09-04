@@ -6,6 +6,7 @@ export type GameplayItemPresentation = Readonly<{
   itemId: string | null;
   count: number;
   name: string;
+  edible: boolean;
 }>;
 
 export type GameplayUiSource = Readonly<{
@@ -62,8 +63,14 @@ const projectInventory = (
   Array.from({ length }, (_, slot) => {
     const stack = inventory[slot];
     return stack
-      ? { slot, itemId: stack.itemId, count: stack.count, name: getItemDefinition(stack.itemId).name }
-      : { slot, itemId: null, count: 0, name: '空槽位' };
+      ? {
+          slot,
+          itemId: stack.itemId,
+          count: stack.count,
+          name: getItemDefinition(stack.itemId).name,
+          edible: getItemDefinition(stack.itemId).itemType === 'food',
+        }
+      : { slot, itemId: null, count: 0, name: '空槽位', edible: false };
   });
 
 export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayUiProjection): GameplayUiProjection {

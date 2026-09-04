@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ItemIcon from './item-icon.svelte';
   let {
     label,
     selected,
@@ -28,7 +29,7 @@
   {onclick}
 >
   <span class="slot-key">{keyLabel}</span>
-  <span class="slot-swatch" aria-hidden="true">{itemId ? name.slice(0, 1) : ''}</span>
+  <span class="slot-swatch" aria-hidden="true"><ItemIcon {itemId} /></span>
   <span class="slot-name">{name}</span>
   {#if count > 1}<span class="slot-count">{count}</span>{/if}
 </button>

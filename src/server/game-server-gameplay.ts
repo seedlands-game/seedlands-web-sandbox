@@ -72,6 +72,12 @@ export abstract class GameServerGameplayFacade {
   selectHotbarSlot(id: string, slot: number) {
     return this.gameplay.selectHotbarSlot(id, slot);
   }
+  moveInventorySlot(id: string, source: number, target: number) {
+    return this.gameplay.moveInventorySlot(id, source, target);
+  }
+  useInventoryItem(id: string, slot: number) {
+    return this.gameplay.useInventoryItem(id, slot);
+  }
   craft(id: string, recipeId: string) {
     return this.gameplay.craft(id, recipeId);
   }

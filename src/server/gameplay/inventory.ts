@@ -78,6 +78,36 @@ export class Inventory {
     return true;
   }
 
+  moveStack(sourceIndex: number, targetIndex: number): boolean {
+    if (!this.validIndex(sourceIndex) || !this.validIndex(targetIndex) || sourceIndex === targetIndex) return false;
+    const candidate = this.snapshot();
+    const source = candidate[sourceIndex];
+    const target = candidate[targetIndex];
+    if (!source) return false;
+    if (target?.itemId === source.itemId) {
+      const moved = Math.min(source.count, getItemDefinition(source.itemId).stackLimit - target.count);
+      if (moved <= 0) return false;
+      target.count += moved;
+      source.count -= moved;
+      if (!source.count) candidate[sourceIndex] = null;
+    } else {
+      candidate[targetIndex] = source;
+      candidate[sourceIndex] = target;
+    }
+    this.slots = candidate;
+    return true;
+  }
+
+  removeFromSlot(index: number, count: number): boolean {
+    if (!this.validIndex(index) || !Number.isInteger(count) || count <= 0) return false;
+    const source = this.slots[index];
+    if (!source || source.count < count) return false;
+    const candidate = this.snapshot();
+    candidate[index] = source.count === count ? null : { ...source, count: source.count - count };
+    this.slots = candidate;
+    return true;
+  }
+
   replace(snapshot: readonly InventorySlot[]): void {
     if (snapshot.length !== this.capacity) throw new TypeError('Inventory snapshot capacity does not match.');
     this.slots = snapshot.map((slot) => this.validateSlot(slot));

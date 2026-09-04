@@ -13,6 +13,7 @@ import { craftRecipe, listCraftableRecipes, listRecipes } from './recipe-registr
 import { getVoxelGameplayDefinition } from './voxel-gameplay';
 
 type Position = [number, number, number];
+type PickupEvent = { playerId: string; position: Position; stack: ItemStack };
 type GameplayCallbacks = {
   getVoxel: (position: Position) => number;
   editVoxel: (actorId: string, position: Position, voxel: number) => WorldCommitResult;
@@ -45,6 +46,7 @@ export class GameplayRuntime {
   private persistedRevision = 0;
   private inventoryOperationCount = 0;
   private eventCount = 0;
+  private readonly pickupEvents: PickupEvent[] = [];
 
   constructor(private readonly callbacks: GameplayCallbacks) {}
 
@@ -133,6 +135,16 @@ export class GameplayRuntime {
     return { success: true };
   }
 
+  moveInventorySlot(id: string, source: number, target: number): GameplayResult {
+    const player = this.player(id);
+    const active = this.requireAlive(player);
+    if (active) return active;
+    if (!player.inventory.moveStack(source, target)) return { success: false, reason: 'cannot-move-item' };
+    this.inventoryOperationCount++;
+    this.touch();
+    return { success: true };
+  }
+
   craft(id: string, recipeId: string): ReturnType<typeof craftRecipe> {
     const result = craftRecipe(this.player(id).inventory, recipeId);
     if (result.success) {
@@ -192,6 +204,8 @@ export class GameplayRuntime {
     if (!player.inventory.add(item.stack)) return { success: false, reason: 'inventory-full' };
     this.inventoryOperationCount += 1;
     this.entities.despawn(entityId);
+    if (this.pickupEvents.length >= 128) this.pickupEvents.shift();
+    this.pickupEvents.push({ playerId, position: clonePosition(item.position), stack: { ...item.stack } });
     this.touch();
     return { success: true };
   }
@@ -205,7 +219,7 @@ export class GameplayRuntime {
     if (!Number.isInteger(count) || count <= 0) return { success: false, reason: 'invalid-count' };
     const stack = player.inventory.slot(slot);
     if (!stack || stack.count < count) return { success: false, reason: 'missing-items' };
-    player.inventory.remove({ itemId: stack.itemId, count });
+    player.inventory.removeFromSlot(slot, count);
     this.inventoryOperationCount += 1;
     const entity = this.spawnWorldItem(clonePosition(this.entities.get(playerId)!.position), {
       itemId: stack.itemId,
@@ -231,22 +245,28 @@ export class GameplayRuntime {
     if (definition.placesVoxel === undefined) return { success: false, reason: 'item-not-placeable' };
     const commit = this.callbacks.editVoxel(id, position, definition.placesVoxel);
     if (!commit.committed) return { success: false, reason: 'world-not-changed' };
-    player.inventory.remove({ itemId: selected.itemId, count: 1 });
+    player.inventory.removeFromSlot(player.selectedSlot, 1);
     this.inventoryOperationCount += 1;
     this.touch();
     return { success: true, commit };
   }
 
   useSelectedItem(id: string): GameplayResult {
+    return this.useInventoryItem(id, this.player(id).selectedSlot);
+  }
+
+  useInventoryItem(id: string, slot: number): GameplayResult {
     const player = this.player(id);
     const active = this.requireAlive(player);
     if (active) return active;
-    const selected = player.inventory.slot(player.selectedSlot);
+    if (!Number.isInteger(slot) || slot < 0 || slot >= player.inventory.capacity)
+      return { success: false, reason: 'invalid-slot' };
+    const selected = player.inventory.slot(slot);
     if (!selected) return { success: false, reason: 'no-selected-item' };
     const item = getItemDefinition(selected.itemId);
     if (!item.hungerRestore) return { success: false, reason: 'item-not-usable' };
     if (player.hunger >= player.maxHunger) return { success: false, reason: 'hunger-full' };
-    player.inventory.remove({ itemId: selected.itemId, count: 1 });
+    player.inventory.removeFromSlot(slot, 1);
     this.inventoryOperationCount += 1;
     player.hunger = Math.min(player.maxHunger, player.hunger + item.hungerRestore);
     this.touch();
@@ -306,7 +326,7 @@ export class GameplayRuntime {
     return { success: true };
   }
 
-  advance(seconds: number): { commits: WorldCommitResult[] } {
+  advance(seconds: number): { commits: WorldCommitResult[]; pickups: PickupEvent[] } {
     if (!Number.isFinite(seconds) || seconds < 0)
       throw new TypeError('Gameplay seconds must be non-negative and finite.');
     const commits: WorldCommitResult[] = [];
@@ -321,7 +341,7 @@ export class GameplayRuntime {
       this.autoPickup();
       this.touch(false);
     }
-    return { commits };
+    return { commits, pickups: this.pickupEvents.splice(0) };
   }
 
   createSnapshot(): GameplaySnapshotV1 {
@@ -377,6 +397,7 @@ export class GameplayRuntime {
       });
       if (entities.query({ type: 'player' }).length !== players.size) throw new TypeError('player state is missing');
       this.entities.restore(snapshot.entities, snapshot.entitySequence);
+      this.pickupEvents.length = 0;
       this.players.clear();
       players.forEach((player, id) => this.players.set(id, player));
       this.time = snapshot.gameplayTime;

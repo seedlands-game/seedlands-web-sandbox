@@ -1,19 +1,14 @@
 import type * as pc from 'playcanvas';
-import { Voxel } from '../../world/voxel';
 import { macroAt } from '../../world/macro-world';
 import type { World } from '../world-runtime';
 import { FootstepTracker, MusicCueScheduler } from '../../client/audio/audio-policy';
-import { audioRandom, type MusicContext, type SfxKey, type SurfaceSound } from '../../client/audio/audio-types';
+import { audioRandom, type MusicContext, type SfxKey } from '../../client/audio/audio-types';
+import {
+  surfaceSound,
+  soundForGameplayEvent,
+  type GameplayPresentationEvent,
+} from '../../client/audio/gameplay-audio-events';
 import type { GlobalAudio } from './global-audio';
-
-export function surfaceSound(voxel: number): SurfaceSound {
-  if (voxel === Voxel.Wood || voxel === Voxel.Leaves) return 'wood';
-  if (voxel === Voxel.Grass || voxel === Voxel.Dirt) return 'grass';
-  if (voxel === Voxel.Sand) return 'sand';
-  if (voxel === Voxel.Water) return 'water';
-  if (voxel === Voxel.Snow) return 'snow';
-  return 'stone';
-}
 
 export class WorldAudio {
   private readonly session: string;
@@ -79,6 +74,11 @@ export class WorldAudio {
   play(key: SfxKey, position?: readonly [number, number, number], priority = 1, target?: string) {
     if (this.disposed || this.paused) return false;
     return this.audio.play(key, { session: this.session, position, priority, target });
+  }
+
+  present(event: GameplayPresentationEvent) {
+    const sound = soundForGameplayEvent(event);
+    return this.play(sound.key, sound.position, sound.priority);
   }
 
   dispose() {

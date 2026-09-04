@@ -149,6 +149,7 @@ export class Game {
       queueSave: () => this.queueSave(),
       releaseInput: () => this.controller?.releaseInput(),
       movePlayer: (target) => this.controller?.movePlayerTo(...target),
+      onPresentation: (event) => this.worldAudio?.present(event),
     });
     this.controller = this.createController(this.camera);
     this.controller.install();
@@ -174,6 +175,7 @@ export class Game {
       onBeginBreak: (position) => this.gameplayClient?.beginBreak(position),
       onCancelBreak: () => this.gameplayClient?.cancelBreak(),
       onPlace: (position) => this.gameplayClient?.place(position),
+      onUseHeldItem: () => this.gameplayClient?.useHeldItem() ?? false,
       isUiBlockingInput: () =>
         Boolean(
           this.gameplayClient?.blocksInput ||
@@ -294,6 +296,13 @@ export class Game {
 
   craftRecipe(recipeId: string) {
     this.gameplayClient?.craftRecipe(recipeId);
+  }
+
+  moveInventorySlot(source: number, target: number) {
+    this.gameplayClient?.moveInventorySlot(source, target);
+  }
+  useInventoryItem(slot: number) {
+    this.gameplayClient?.useInventoryItem(slot);
   }
 
   respawn() {

@@ -76,7 +76,7 @@ const initialHud = (): HudState => ({
   health: { value: 20, max: 20 },
   hunger: { value: 20, max: 20 },
   selectedHotbarSlot: 0,
-  hotbar: Array.from({ length: 8 }, (_, slot) => ({ slot, itemId: null, count: 0, name: '空槽位' })),
+  hotbar: Array.from({ length: 8 }, (_, slot) => ({ slot, itemId: null, count: 0, name: '空槽位', edible: false })),
 });
 const initialInteraction = (): InteractionState => ({
   target: null,
