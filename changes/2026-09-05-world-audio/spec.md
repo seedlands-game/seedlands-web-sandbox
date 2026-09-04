@@ -64,3 +64,9 @@
 ## 交付快照
 
 当前未交付。05:00 Static/Build 通过；音频需求浏览器用例通过（12.7 秒），确认 sharedContext、非静音且未削顶的生产录音、无效/有效本地参考文件及移除、退出会话归零。此证据不等同完整听觉审美验收。加入 Tone 后生产入口 JS 2,336.55 kB / gzip 617.35 kB（较此前增加约 261 kB / gzip 69 kB）；框体资产独立缓存。技术来源：[Tone setContext](https://tonejs.github.io/docs/15.0.4/functions/setContext.html)、[PlayCanvas SoundInstance3d](https://api.playcanvas.com/engine/classes/SoundInstance3d.html)。
+
+### 异步参考曲生命周期补充
+
+整合复查发现：慢速解码成功后，MusicPlayer 会主动 stop 当前音乐；若期间已经切世界，就可能停止新世界音乐。新增可执行预期：参考曲是应用级本地选择，解码可更新全局引用，但不能自动停止/播放另一个世界的声音；较早导入和移除后的旧解码不能覆盖新选择。`tests/app/reference-audio-lifecycle.test.ts` 先 RED 再修复。GlobalAudio 只在同一次导入仍有效且世界 session 未变化时开始预览。
+
+06:02 异步导入隔离3项通过：旧解码不能 stop 当前音乐、最新选择优先、移除后不能复活引用、跨世界只保留全局选择但不自动开始预览。该修复在06:03完整静态/构建中通过，后续仍需真实浏览器导入路径最终回归。

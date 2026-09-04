@@ -19,6 +19,7 @@ export class GlobalAudio {
   private unlocked = false;
   private readonly recentSounds: { key: SfxKey; sequence: number }[] = [];
   private playedCount = 0;
+  private importEpoch = 0;
   private error = '';
   private readonly subscribers = new Set<() => void>();
 
@@ -152,19 +153,24 @@ export class GlobalAudio {
   }
 
   async importReference(file: File) {
+    const epoch = ++this.importEpoch;
+    const session = this.worldSession;
     await this.unlock();
-    if (!this.player) return;
+    if (!this.player || epoch !== this.importEpoch) return;
     try {
-      await this.player.importReference(file);
+      const applied = await this.player.importReference(file);
+      if (!applied || epoch !== this.importEpoch) return;
       this.error = '';
-      this.player.start('meadow', 1);
+      if (session === this.worldSession) this.player.start('meadow', 1);
     } catch (error) {
+      if (epoch !== this.importEpoch) return;
       this.error = error instanceof Error ? error.message : '无法读取参考曲。';
     }
     this.publish();
   }
 
   removeReference() {
+    ++this.importEpoch;
     this.player?.removeReference();
     this.error = '';
     this.publish();

@@ -107,10 +107,10 @@ export class MusicPlayer {
       throw new Error('无法读取这首曲子，请选择可播放的音频文件。');
     }
     if (buffer.duration > 600) throw new Error('参考曲最长为 10 分钟。');
-    if (sequence !== this.importSequence) return;
+    if (sequence !== this.importSequence) return false;
     this.reference = buffer;
     this.referenceName = file.name;
-    this.stop();
+    return true;
   }
 
   removeReference() {
