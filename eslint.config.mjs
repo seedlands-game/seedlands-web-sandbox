@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import globals from 'globals';
+import svelte from 'eslint-plugin-svelte';
 import tseslint from 'typescript-eslint';
 
 const worldForbiddenImports = (source) =>
@@ -49,6 +50,53 @@ const seedlands = {
   rules: {
     'world-purity': purityRule(worldForbiddenImports),
     'server-purity': purityRule(serverForbiddenImports),
+    'ui-presentation-boundary': {
+      meta: {
+        type: 'problem',
+        schema: [],
+        messages: { forbidden: 'Player UI 必须经 UiBridge 与 Svelte 渲染，禁止手写 DOM presentation。' },
+      },
+      create(context) {
+        const file = context.filename.replaceAll('\\', '/');
+        if (file.endsWith('/src/app/ui/mount-ui.ts')) return {};
+        const forbiddenAssignments = new Set(['textContent', 'innerHTML', 'hidden']);
+        const forbiddenCalls = new Set(['append', 'appendChild', 'replaceChildren']);
+        return {
+          AssignmentExpression(node) {
+            if (
+              node.left.type === 'MemberExpression' &&
+              !node.left.computed &&
+              node.left.property.type === 'Identifier' &&
+              forbiddenAssignments.has(node.left.property.name)
+            )
+              context.report({ node, messageId: 'forbidden' });
+          },
+          CallExpression(node) {
+            if (node.callee.type !== 'MemberExpression' || node.callee.computed) return;
+            const property = node.callee.property;
+            if (property.type !== 'Identifier') return;
+            if (forbiddenCalls.has(property.name)) {
+              context.report({ node, messageId: 'forbidden' });
+              return;
+            }
+            if (property.name !== 'createElement') return;
+            const object = node.callee.object;
+            if (object.type !== 'Identifier' || object.name !== 'document') return;
+            const [tag] = node.arguments;
+            if (tag?.type === 'Literal' && tag.value === 'canvas') return;
+            const parentCallee = node.parent.type === 'CallExpression' ? node.parent.callee : null;
+            if (
+              parentCallee?.type === 'MemberExpression' &&
+              !parentCallee.computed &&
+              parentCallee.property.type === 'Identifier' &&
+              forbiddenCalls.has(parentCallee.property.name)
+            )
+              return;
+            context.report({ node, messageId: 'forbidden' });
+          },
+        };
+      },
+    },
   },
 };
 
@@ -65,7 +113,7 @@ export default tseslint.config(
     ],
   },
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['**/*.{js,mjs,cjs,ts,mts,cts,svelte}'],
     linterOptions: { noInlineConfig: true },
     rules: {
       'max-lines': ['error', { max: 500, skipBlankLines: true, skipComments: true }],
@@ -85,6 +133,21 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
     },
+  },
+  ...svelte.configs['flat/recommended'],
+  {
+    files: ['**/*.svelte'],
+    languageOptions: {
+      parserOptions: {
+        parser: tseslint.parser,
+      },
+    },
+  },
+  {
+    files: ['src/app/**/*.ts'],
+    ignores: ['src/app/ui/mount-ui.ts'],
+    plugins: { seedlands },
+    rules: { 'seedlands/ui-presentation-boundary': 'error' },
   },
   {
     files: ['src/world/**/*.ts'],

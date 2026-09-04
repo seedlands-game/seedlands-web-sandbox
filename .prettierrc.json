@@ -1,5 +1,6 @@
 {
   "singleQuote": true,
+  "plugins": ["prettier-plugin-svelte"],
   "semi": true,
   "trailingComma": "all",
   "printWidth": 120

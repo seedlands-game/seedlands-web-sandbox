@@ -11,15 +11,14 @@ import { executeSlashCommand, type SlashCommandExecution } from '../server/comma
 import type { ServerCommand } from '../server/commands/command-contract';
 import { GameServer } from '../server/game-server';
 import { CHUNK_SIZE, floorDiv } from '../world/voxel';
-import { appElements } from './app-elements';
 import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession, StreamingVariant } from './app-contracts';
 import { BrowserWorldStore } from './browser-world-store';
 import { createHarnessSnapshot, installHarness } from './game-harness';
-import { DebugCommandShell } from './debug-command-shell';
-import { updateHud } from './hud-presenter';
-import { MacroMapViewer } from './macro-map-viewer';
+import { projectDebug, projectWorldClock } from './hud-projector';
 import { PlayerController } from './player-controller';
 import { QUALITY_PROFILES, type QualityLevel } from './quality-profile';
+import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
+import type { MapLayer } from './ui/ui-contracts';
 import { createVoxelMaterials, type VoxelMaterials } from './voxel-materials';
 import { WorldEnvironment } from './world-environment';
 import { World } from './world-runtime';
@@ -39,7 +38,6 @@ export class Game {
   private performanceProfile: PerformanceProfile = PERFORMANCE_PROFILES.balanced;
   private performanceTelemetry = new PerformanceTelemetry({ now: () => performance.now() });
   private readonly store = new BrowserWorldStore();
-  private readonly macroMap = new MacroMapViewer(appElements);
   private persistence: BrowserChunkPersistence | null = null;
   private serverPlayerId: string | null = null;
   private seedText = '';
@@ -47,10 +45,20 @@ export class Game {
   private saveTimer: number | null = null;
   private saveInFlight: Promise<void> = Promise.resolve();
   private removeHarness: (() => void) | null = null;
-  private commandShell: DebugCommandShell | null = null;
+  private commandExecutor: ServerCommandExecutor | null = null;
+  private commandSource: CommandSource | null = null;
+  private uiSession: UiWorldSession | null = null;
+  private hudSequence = 0;
+  private interactionSequence = 0;
+  private debugSequence = 0;
+  private lastClockMinute = -1;
+  private lastClockPublishAt = -Infinity;
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
 
-  constructor() {
+  constructor(
+    private readonly canvas: HTMLCanvasElement,
+    private readonly uiBridge: UiBridge,
+  ) {
     window.addEventListener('resize', () => this.app?.resizeCanvas());
     window.addEventListener('pagehide', () => void this.flushSave().catch(() => undefined));
   }
@@ -63,11 +71,15 @@ export class Game {
     return (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
   }
 
-  async start(seedText: string, restore: RestoredSession | null) {
+  async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel) {
     await this.flushSave();
     this.disposeRuntime();
     this.seedText = seedText;
-    this.qualityLevel = appElements.qualitySelect.value as QualityLevel;
+    this.qualityLevel = qualityLevel;
+    this.uiSession = this.uiBridge.beginWorldSession(seedText);
+    this.hudSequence = this.interactionSequence = this.debugSequence = 0;
+    this.lastClockMinute = -1;
+    this.lastClockPublishAt = -Infinity;
     const quality = QUALITY_PROFILES[this.qualityLevel];
     this.performanceProfile = this.selectPerformanceProfile();
     this.performanceTelemetry = new PerformanceTelemetry({
@@ -119,8 +131,8 @@ export class Game {
   }
 
   private createApplication() {
-    const app = new pc.Application(appElements.canvas, {
-      mouse: new pc.Mouse(appElements.canvas),
+    const app = new pc.Application(this.canvas, {
+      mouse: new pc.Mouse(this.canvas),
       keyboard: new pc.Keyboard(window),
       graphicsDeviceOptions: { alpha: true },
     });
@@ -158,45 +170,43 @@ export class Game {
   private createController(camera: pc.Entity) {
     return new PlayerController({
       camera,
-      elements: appElements,
+      canvas: this.canvas,
       telemetry: this.performanceTelemetry,
       getWorld: () => this.world,
       getEnvironment: () => this.environment,
       onToggleMap: () => this.toggleMap(),
-      onToggleCommandShell: () => this.commandShell?.toggle(),
+      onToggleDebug: () => this.toggleDebug(),
+      onToggleCommandShell: () => this.toggleCommandShell(),
+      onSelectMaterial: (material) => this.publishSelectedMaterial(material),
+      onFeedback: (message, tone) =>
+        this.uiSession?.publishFeedback(++this.interactionSequence, { message, tone, durationMs: 900 }),
       onQueueSave: () => this.queueSave(),
       onFlushSave: () => void this.flushSave().catch(() => undefined),
     });
   }
 
   private installUiAndHarness() {
-    appElements.mapToggle.onclick = () => this.toggleMap();
-    appElements.mapClose.onclick = () => this.macroMap.close();
     const world = this.world;
     if (world && this.serverPlayerId) {
-      const executor = new ServerCommandExecutor(world.server);
-      const source: CommandSource = {
+      this.commandExecutor = new ServerCommandExecutor(world.server);
+      this.commandSource = {
         actorId: 'browser-local-developer',
         sourceType: 'local-developer',
         entityId: this.serverPlayerId,
         capabilities: ALL_COMMAND_CAPABILITIES,
       };
-      this.commandShell = new DebugCommandShell({
-        elements: appElements,
-        execute: (input) => this.executeBrowserCommand(executor, source, input),
-        onOpen: () => this.controller?.releaseInput(),
-      });
     }
     const harnessEnabled = new URLSearchParams(location.search).has('harness');
-    appElements.debug.hidden = !harnessEnabled;
+    this.uiBridge.publishShell({ phase: 'playing', enterLabel: '进入世界', commandOpen: false, mapOpen: false });
+    this.uiSession?.publishHud(++this.hudSequence, { visible: true });
+    this.publishDebugVisibility(harnessEnabled);
+    this.uiBridge.beginMeasurementWindow();
     if (!harnessEnabled || !this.controller) return;
     this.removeHarness = installHarness({
       snapshot: () => this.harnessSnapshot(),
       lifecycleSnapshot: () => ({ ...this.lifecycle }),
       restartWorld: async (seed) => {
-        await this.start(seed, null);
-        appElements.startCard.hidden = true;
-        appElements.hud.hidden = false;
+        await this.start(seed, null, this.qualityLevel);
       },
       moveTo: (x, z) => this.controller?.moveHarnessPlayer(x, z),
       burstEdits: () => this.controller?.burstEdits(),
@@ -228,6 +238,39 @@ export class Game {
     if (!execution.command || !execution.result.success) return execution;
     this.consumeBrowserCommand(execution.command, execution.result);
     return execution;
+  }
+
+  async executeCommand(input: string): Promise<SlashCommandExecution> {
+    if (!this.commandExecutor || !this.commandSource) throw new Error('服务端命令入口尚未就绪。');
+    return this.executeBrowserCommand(this.commandExecutor, this.commandSource, input);
+  }
+
+  releaseInput() {
+    this.controller?.releaseInput();
+  }
+
+  selectMaterial(material: number) {
+    this.controller?.selectMaterial(material);
+  }
+
+  toggleCommandShell() {
+    const open = !this.uiBridge.shell.get().commandOpen;
+    if (open) this.controller?.releaseInput();
+    this.uiBridge.publishShell({ commandOpen: open });
+  }
+
+  closeCommandShell() {
+    this.uiBridge.publishShell({ commandOpen: false });
+  }
+
+  closeMap() {
+    this.uiBridge.publishShell({ mapOpen: false });
+  }
+
+  setMapLayer(layer: MapLayer) {
+    const shell = this.uiBridge.shell.get();
+    if (shell.mapLayer === layer) return;
+    this.uiBridge.publishShell({ mapLayer: layer, mapRevision: shell.mapRevision + 1 });
   }
 
   private consumeBrowserCommand(
@@ -271,28 +314,64 @@ export class Game {
       this.world.server.updateEntity(this.serverPlayerId, {
         position: [this.camera.getPosition().x, this.camera.getPosition().y, this.camera.getPosition().z],
       });
-    updateHud({
-      world: this.world,
-      environment: this.environment,
-      camera: this.camera,
-      telemetryRecorder: this.performanceTelemetry,
-      elements: appElements,
-      fps: this.fps,
-      frameMs: this.frameMs,
-      qualityLevel: this.qualityLevel,
-      performanceProfile: this.performanceProfile,
-      deviceType: this.app?.graphicsDevice.deviceType ?? 'WebGL2',
-      seedText: this.seedText,
-    });
+    this.publishUiProjection();
     this.performanceTelemetry.endFrame(actualFrameMs);
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
   }
 
-  private toggleMap() {
+  private publishUiProjection() {
+    if (!this.world || !this.camera || !this.uiSession) return;
+    const worldTime = this.world.server.worldTime;
+    const displayMinute = Math.floor(worldTime * 60);
+    const now = performance.now();
+    if (displayMinute !== this.lastClockMinute && now - this.lastClockPublishAt >= 600) {
+      this.lastClockMinute = displayMinute;
+      this.lastClockPublishAt = now;
+      this.uiSession.publishHud(++this.hudSequence, {
+        worldClock: projectWorldClock(worldTime, this.environment?.phase ?? 'Day'),
+      });
+    }
+    this.uiSession.sampleDebug(++this.debugSequence, () =>
+      this.performanceTelemetry.withSpan('ui', 'DebugProjection', () =>
+        projectDebug({
+          world: this.world!,
+          environment: this.environment,
+          camera: this.camera!,
+          fps: this.fps,
+          frameMs: this.frameMs,
+          qualityLevel: this.qualityLevel,
+          performanceProfile: this.performanceProfile,
+          deviceType: this.app?.graphicsDevice.deviceType ?? 'WebGL2',
+          seedText: this.seedText,
+        }),
+      ),
+    );
+  }
+
+  private toggleDebug() {
+    this.publishDebugVisibility(!this.uiBridge.debug.get().visible);
+  }
+
+  private publishDebugVisibility(visible: boolean) {
+    this.uiBridge.publishDebug({ visible });
+  }
+
+  private publishSelectedMaterial(material: number) {
+    this.uiSession?.publishHud(++this.hudSequence, { selectedMaterial: material });
+  }
+
+  toggleMap() {
     if (!this.world || !this.camera) return;
-    if (this.macroMap.isOpen) return this.macroMap.close();
+    if (this.uiBridge.shell.get().mapOpen) return this.closeMap();
     const position = this.camera.getPosition();
-    this.macroMap.open(this.world.seed, [position.x, position.z]);
+    this.controller?.releaseInput();
+    const shell = this.uiBridge.shell.get();
+    this.uiBridge.publishShell({
+      mapOpen: true,
+      mapSeed: this.world.seed,
+      mapCenter: [position.x, position.z],
+      mapRevision: shell.mapRevision + 1,
+    });
   }
 
   private harnessSnapshot(): HarnessSnapshot {
@@ -304,6 +383,7 @@ export class Game {
       qualityLevel: this.qualityLevel,
       serverPlayerId: this.serverPlayerId,
       persistence: this.persistence,
+      ui: this.uiBridge.metrics(),
     });
   }
 
@@ -345,13 +425,15 @@ export class Game {
   }
 
   private disposeRuntime() {
-    this.commandShell?.dispose();
-    this.commandShell = null;
+    this.uiSession?.dispose();
+    this.uiSession = null;
+    this.commandExecutor = null;
+    this.commandSource = null;
     this.removeHarness?.();
     this.removeHarness = null;
     this.controller?.dispose();
     this.controller = null;
-    this.macroMap.close();
+    this.uiBridge.publishShell({ commandOpen: false, mapOpen: false });
     if (this.world) {
       this.world.dispose();
       this.lifecycle.disposedWorlds += 1;

@@ -1,0 +1,19 @@
+page:
+  url: ${VOXEL_SANDBOX_URL}
+  viewportWidth: 700
+  viewportHeight: 720
+
+agent:
+  testId: seedlands-retained-ui-narrow
+  groupName: Seedlands Retained UI 窄屏
+  groupDescription: 检查 retained UI 在固定 700 像素窄视口中的可见层级与命令输入语义。
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 16
+
+tasks:
+  - name: 检查窄屏 Debug Shell
+    flow:
+      - aiAssert: Seedlands 首屏在 700 像素宽视口中完整可读，标题、Seed、视觉质量和进入按钮没有横向裁切。
+      - ai: 在“世界 Seed”输入“retained-ui-narrow”，点击“进入世界”，等待世界完成加载，再按 F4 打开服务端调试命令 Shell。
+      - aiAssert: Debug Shell 在窄屏中仍能看到标题、日志、命令输入和状态，文本没有横向截断；底部 Hotbar 保持可辨识，Shell 和 HUD 没有产生不可操作的重叠。

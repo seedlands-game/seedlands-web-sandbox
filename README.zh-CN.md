@@ -21,7 +21,7 @@
 - 同进程 `GameServer` 持有权威 Chunk、玩家状态、实体和世界时钟。
 - 第一人称移动、碰撞、跳跃、体素 raycast 编辑和材质选择。
 - 存储 Seed、玩家位置和已 materialize Chunk 快照的浏览器持久化。
-- 日夜环境、透明水面、质量档位、Macro 世界地图和性能/调试 HUD。
+- 日夜环境、透明水面、质量档位、Macro 世界地图和 Svelte 5 retained HUD。
 
 完整 Seedlands 的核心系统尚未实现：源质与魔法、自主 NPC 社会、持久历史事件、长生与转生，以及六界内容。
 
@@ -77,10 +77,10 @@ pnpm server:headless -- --seed my-debug-world
 
 ## 架构
 
-`GameServer.editBatch()` 是批量世界修改的权威事务边界。浏览器运行时按职责拆分为启动、玩家控制、渲染适配、世界 streaming、环境、HUD 与持久化模块。
+`GameServer.editBatch()` 是批量世界修改的权威事务边界。浏览器运行时按职责拆分为启动、玩家控制、渲染适配、世界 streaming、环境、HUD 与持久化模块。运行期 UI 由单个 Svelte 5 root 持有；Game 只通过 `UiBridge` 发布可独立订阅的 Shell、HUD、Interaction 与 Debug 小型投影，组件经 action port 回传意图，不持有权威 World 或 Server 状态。
 
 ```text
-src/app/       浏览器启动、PlayCanvas 生命周期、UI、输入与样式
+src/app/       浏览器启动、PlayCanvas 生命周期、retained UI bridge、输入与样式
 src/client/    浏览器持久化与客户端适配
 src/server/    权威世界、实体、时钟与快照接口
 src/world/     确定性世界、体素、网格、坐标与存档逻辑

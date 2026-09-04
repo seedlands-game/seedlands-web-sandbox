@@ -1,59 +1,57 @@
 import { formatBuildWatermark } from '../client/build-watermark';
 import { GENERATOR_VERSION } from '../world/voxel';
-import './styles/debug-command-shell.css';
-import './styles/hud.css';
-import './styles/macro-map.css';
-import { appElements } from './app-elements';
 import { Game } from './game';
 import { installPersistenceHarness } from './game-harness';
+import './ui/styles/theme.css';
+import { createUiBridge } from './ui/ui-bridge';
+import type { UiActionPort } from './ui/ui-contracts';
+import { mountUi } from './ui/mount-ui';
 
-const commitSha = import.meta.env.VITE_COMMIT_SHA?.trim();
-const buildWatermark = formatBuildWatermark(commitSha, GENERATOR_VERSION);
-if (buildWatermark && commitSha) {
-  const watermark = document.createElement('div');
-  watermark.id = 'build-watermark';
-  watermark.dataset.commit = commitSha;
-  watermark.textContent = buildWatermark;
-  watermark.title = `Seedlands Web Sandbox build ${commitSha}`;
-  watermark.setAttribute('aria-label', `Build ${buildWatermark}`);
-  document.querySelector<HTMLElement>('#ui')!.append(watermark);
-}
+const requiredElement = <ElementType extends Element>(selector: string) => {
+  const element = document.querySelector<ElementType>(selector);
+  if (!element) throw new Error(`缺少应用元素：${selector}`);
+  return element;
+};
 
-const game = new Game();
-void installPersistenceHarness();
+const canvas = requiredElement<HTMLCanvasElement>('#game');
+const uiRoot = requiredElement<HTMLElement>('#ui');
+const uiBridge = createUiBridge();
+const game = new Game(canvas, uiBridge);
 const saved = game.loadSavedSession();
 
-appElements.enterButton.disabled = true;
-if (saved) {
-  appElements.seedInput.value = saved.seed;
-  appElements.enterButton.disabled = false;
-} else {
+const actions: UiActionPort = {
+  async startWorld(seedInput, quality) {
+    const seed = seedInput.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;
+    const restore = saved?.seed === seed ? saved : null;
+    uiBridge.publishShell({ phase: 'loading', seed, quality, enterLabel: '正在唤醒世界…' });
+    try {
+      await game.start(seed, restore, quality);
+    } catch (error) {
+      uiBridge.publishShell({ phase: 'error', enterLabel: '重试进入' });
+      console.error('Seedlands world start failed.', error);
+    }
+  },
+  selectMaterial: (material) => game.selectMaterial(material),
+  toggleMap: () => game.toggleMap(),
+  closeMap: () => game.closeMap(),
+  setMapLayer: (layer) => game.setMapLayer(layer),
+  closeCommandShell: () => game.closeCommandShell(),
+  executeCommand: (input) => game.executeCommand(input),
+  releaseInput: () => game.releaseInput(),
+};
+
+const commitSha = import.meta.env.VITE_COMMIT_SHA?.trim();
+const buildWatermark = commitSha ? (formatBuildWatermark(commitSha, GENERATOR_VERSION) ?? '') : '';
+mountUi(uiRoot, { bridge: uiBridge, actions, buildWatermark, buildCommit: commitSha });
+void installPersistenceHarness();
+
+if (saved) uiBridge.publishShell({ phase: 'menu', seed: saved.seed, enterLabel: '进入世界' });
+else
   void game
     .loadLatestWorldSeed()
     .then((seed) => {
-      if (seed && !appElements.seedInput.value) appElements.seedInput.value = seed;
+      uiBridge.publishShell({ phase: 'menu', seed: seed ?? '', enterLabel: '进入世界' });
     })
-    .finally(() => {
-      appElements.enterButton.disabled = false;
+    .catch(() => {
+      uiBridge.publishShell({ phase: 'menu', enterLabel: '进入世界' });
     });
-}
-
-appElements.enterButton.onclick = async () => {
-  const seed = appElements.seedInput.value.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;
-  const restore = saved?.seed === seed ? saved : null;
-  appElements.enterButton.disabled = true;
-  appElements.enterButton.textContent = '正在唤醒世界…';
-  try {
-    await game.start(seed, restore);
-  } catch (error) {
-    appElements.startCard.hidden = false;
-    appElements.hud.hidden = true;
-    appElements.enterButton.disabled = false;
-    appElements.enterButton.textContent = '重试进入';
-    throw error;
-  }
-  appElements.startCard.hidden = true;
-  appElements.hud.hidden = false;
-  appElements.enterButton.disabled = false;
-  appElements.enterButton.textContent = '进入世界';
-};

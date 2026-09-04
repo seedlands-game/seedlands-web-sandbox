@@ -57,6 +57,22 @@ export type HarnessSnapshot = {
     uploadQueueDepth: number;
     estimatedMeshBytes: number;
   };
+  ui: {
+    runtime: 'svelte5';
+    shellPublishCount: number;
+    hudPublishCount: number;
+    interactionPublishCount: number;
+    debugProjectionCount: number;
+    debugPublishCount: number;
+    staleUpdateCount: number;
+    coalescedUpdateCount: number;
+    domCommitCount: number;
+    projectionDurationMs: number;
+    publishDurationMs: number;
+    domCommitDurationMs: number;
+    debugProjectionRate: number;
+    totalPublishRate: number;
+  };
 };
 
 type HarnessWindow = Window & {
