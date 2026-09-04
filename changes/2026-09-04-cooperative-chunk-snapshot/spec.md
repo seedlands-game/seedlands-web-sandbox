@@ -1,6 +1,6 @@
 # Worker 优先的 Chunk 生成与 A/B 性能验证
 
-**状态：** 等待 Breaking-flow 审核
+**状态：** 已交付
 
 ## 背景与目标
 
@@ -44,7 +44,7 @@
 - [x] **Static：** `pnpm verify:static` 通过，`src/world/**` 行覆盖率为 95.95%。
 - [x] **Build：** `pnpm build` 通过。
 - [x] **Harness：** P0 以 A/B 交错五次、每 variant 每次至少 20 个完成 Chunk 留档；每项指标均标明样本数和采集边界，不伪造 GPU 时长。详见 `ab-results.md`。
-- [ ] **Manual supplement：** N/A——本 change 的结论来自固定可重放的性能 Harness；真实设备体验可作为补充，不替代 A/B 记录。
+- [x] **Manual supplement：** N/A——本 change 的结论来自固定可重放的性能 Harness；真实设备体验可作为补充，不替代 A/B 记录。
 
 ## 任务与当前状态
 
