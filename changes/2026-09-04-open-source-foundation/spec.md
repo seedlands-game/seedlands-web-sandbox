@@ -100,7 +100,7 @@ Seedlands 是一个会自行演化、遵循统一世界规律并允许玩家跨�
 - [x] 非代码治理文件已通过 Prettier 格式检查与 diff 评审，未使用 Vitest 文本断言冒充平台验收。GitHub 官方 Actions 的最新 release/tag 与固定 40 位 SHA 已在 2026-09-04 实时读回。（Static；Manual supplement）
 - [x] 首次远程 run `33863096075` 的三个质量 job 均在依赖安装阶段失败：Node.js 22.12.0 内置旧 Corepack 无法验证当前 pnpm 签名 key id。修复改用 `pnpm/setup` v2.1.0 固定 commit `703c52620218391530e48b9e8870d5c0082e1b9b`；后续 run `33863561275` 的三个 job 均成功完成该 setup。（Static；Manual supplement）
 - [x] 第二次远程 run `33863370052` 已越过 Corepack，但三个 job 的干净安装因 `ERR_PNPM_IGNORED_BUILDS` 失败。CI 不运行 Midscene/视频能力，因此在 `pnpm-workspace.yaml#allowBuilds` 将其间接 Linux FFmpeg 安装器明确设为 `false`；后续 run `33863561275` 的三个 job 均成功完成冻结依赖安装。（Static；Manual supplement）
-- [ ] 第三次远程 run `33863561275` 的静态与生产构建 job 已通过；Linux Chromium 的平面移动基线在原始执行和一次 failed-job rerun 中均于 3 米等待处超时。该稳定化工作由 `changes/2026-09-04-stabilize-ci-regression/spec.md` 单独记录，等待新 SHA 远端读回。（Playwright-baseline）
+- [ ] 第三次远程 run `33863561275` 的静态与生产构建 job 已通过；后续 run `33864308334` 与主干整合后的 `33865323428` 逐步取得失败快照，最终定位为 Linux Pointer Lock 取得焦点时的鼠标 delta 改变 yaw，使玩家沿 x 轴离开只为 z 方向准备的平台。稳定化 change 已在锁定后恢复受控视角，并于本机保持长期基线 8/8；等待新 SHA 远端读回。（Playwright-baseline）
 - [x] 对所有可达 Git 历史执行了高置信凭据特征和可疑文件名扫描；未匹配高置信凭据，唯一命名命中为预期受控的 `.env.example`。体素母图的生成记录、处理来源和授权限定已写入 `ASSETS.md`；自动扫描不能证明不存在所有未知秘密。（Manual supplement）
 - [x] 获得用户独立明确授权后，仓库已转移并重命名为 `seedlands-game/seedlands-web-sandbox`、设为 public，功能分支已 push 并创建 PR #2；Pages 已切换为 GitHub Actions workflow，安全开关已配置并真实读回。main ruleset、合并与真实 URL 验证仍等待 PR 质量门禁通过。（Manual supplement）
 

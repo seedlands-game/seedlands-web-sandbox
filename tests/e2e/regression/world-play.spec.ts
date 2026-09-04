@@ -7,6 +7,7 @@ import {
   prepareFlatMovement,
   prepareStepDown,
   removeHarnessVoxel,
+  setHarnessView,
   snapshot,
   startHarnessWorld,
   waitForPlayerMovement,
@@ -39,6 +40,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     const before = await snapshot(page);
     expect(before).not.toBeNull();
     await lockPointer(page);
+    await setHarnessView(page, 0, 0);
     await page.keyboard.down('KeyW');
     await waitForSnapshot(page, (current) => Math.abs(current.player[2]) > 0.5);
     await page.keyboard.up('KeyW');
@@ -58,6 +60,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     expect(before.colliding).toBe(false);
 
     await lockPointer(page);
+    await setHarnessView(page, 0, 0);
     await page.keyboard.down('KeyW');
     const after = await waitForPlayerMovement(page, { axis: 2, start: before.player[2], minimumDelta: 3 });
     await page.keyboard.up('KeyW');
@@ -100,6 +103,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     if (!before) throw new Error('Seedlands harness snapshot is unavailable before stepping down.');
 
     await lockPointer(page);
+    await setHarnessView(page, 0, 0);
     await page.keyboard.down('KeyW');
     const steppedDown = await waitForPlayerMovement(page, {
       axis: 2,
