@@ -1,3 +1,4 @@
+import { entityHitDistance } from '../client/entity-hit-volume';
 import type * as pc from 'playcanvas';
 import type { GameServer, WorldCommitResult } from '../server/game-server';
 import { getItemDefinition } from '../server/gameplay/item-registry';
@@ -175,16 +176,11 @@ export class BrowserGameplay {
     const target = this.options.server
       .queryEntities()
       .filter((entity) => entity.type === 'creature' || entity.type === 'npc')
-      .map((entity) => {
-        const offset = entity.position.map((value, index) => value - origin[index]);
-        const distance = offset.reduce((sum, value, index) => sum + value * direction[index], 0);
-        const lateralSquared = offset.reduce(
-          (sum, value, index) => sum + (value - direction[index] * distance) ** 2,
-          0,
-        );
-        return { entity, distance, lateralSquared };
-      })
-      .filter(({ distance, lateralSquared }) => distance > 0 && distance <= maxDistance && lateralSquared <= 0.75 ** 2)
+      .map((entity) => ({
+        entity,
+        distance: entityHitDistance(entity.position, entity.archetype, origin, direction, maxDistance),
+      }))
+      .filter((hit): hit is typeof hit & { distance: number } => hit.distance !== null)
       .sort((left, right) => left.distance - right.distance)[0]?.entity;
     if (!target) return false;
     const result = this.options.server.attackEntity(this.options.playerId, target.id);
