@@ -596,6 +596,7 @@ class Game {
         p.set(p.x, amount < 0 ? collisionY + 1 + PLAYER_FEET_OFFSET : collisionY - PLAYER_HEAD_OFFSET, p.z);
         if (amount < 0) this.onGround = true;
         this.velocity.y = 0;
+        if (amount < 0) this.depenetrateHorizontally(p);
       }
     } else {
       const nextOverlap = this.collisionOverlap(p);
@@ -627,6 +628,45 @@ class Game {
       }
     }
     return overlap;
+  }
+  private depenetrateHorizontally(p: pc.Vec3) {
+    if (!this.world || this.collisionOverlap(p) === 0) return;
+    const minX = p.x - PLAYER_HALF_WIDTH;
+    const maxX = p.x + PLAYER_HALF_WIDTH;
+    const minY = p.y - PLAYER_FEET_OFFSET + COLLISION_EPSILON;
+    const maxY = p.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON;
+    const minZ = p.z - PLAYER_HALF_WIDTH;
+    const maxZ = p.z + PLAYER_HALF_WIDTH;
+    let left = Infinity;
+    let right = -Infinity;
+    let backward = Infinity;
+    let forward = -Infinity;
+    for (let x = Math.floor(minX); x <= Math.floor(maxX - COLLISION_EPSILON); x += 1) {
+      for (let y = Math.floor(minY); y <= Math.floor(maxY - COLLISION_EPSILON); y += 1) {
+        for (let z = Math.floor(minZ); z <= Math.floor(maxZ - COLLISION_EPSILON); z += 1) {
+          if (!isSolid(this.world.getVoxel(x, y, z))) continue;
+          left = Math.min(left, x - maxX - COLLISION_EPSILON);
+          right = Math.max(right, x + 1 - minX + COLLISION_EPSILON);
+          backward = Math.min(backward, z - maxZ - COLLISION_EPSILON);
+          forward = Math.max(forward, z + 1 - minZ + COLLISION_EPSILON);
+        }
+      }
+    }
+    const candidates: Array<readonly [number, number]> = [
+      [left, 0],
+      [right, 0],
+      [0, backward],
+      [0, forward],
+    ];
+    const resolved = candidates
+      .filter(([x, z]) => Number.isFinite(x) && Number.isFinite(z))
+      .map(([x, z]) => ({ x, z, distance: Math.abs(x) + Math.abs(z) }))
+      .sort((a, b) => a.distance - b.distance)
+      .find((candidate) => {
+        const resolvedPosition = new pc.Vec3(p.x + candidate.x, p.y, p.z + candidate.z);
+        return this.collisionOverlap(resolvedPosition) === 0;
+      });
+    if (resolved) p.set(p.x + resolved.x, p.y, p.z + resolved.z);
   }
   private collidesAtY(p: pc.Vec3, y: number): boolean {
     if (!this.world) return false;
