@@ -3,6 +3,7 @@ import { GameServer } from '../../src/server/game-server';
 import type { ChunkPersistence, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
 import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
 import { Voxel, chunkKey } from '../../src/world/voxel';
+import { meshHaloIndex } from '../../src/world/mesh';
 
 describe('GameServer headless authority', () => {
   it('deterministically generates canonical data and runs without a browser client', () => {
@@ -114,6 +115,20 @@ describe('GameServer headless authority', () => {
     const reloaded = new GameServer({ seedText: 'boundary-reload', persistence });
     expect(reloaded.getVoxel(31, 20, 0)).toBe(Voxel.Wood);
     expect(reloaded.getVoxel(32, 20, 0)).toBe(Voxel.Sand);
+  });
+
+  it('derives a one-voxel mesh halo without materializing procedural neighbours', () => {
+    const server = new GameServer({ seedText: 'derived-mesh-halo' });
+    const chunks = (server as unknown as { chunks: Map<string, unknown> }).chunks;
+
+    const initial = server.createDerivedMeshSnapshot(0, 0, 0);
+    expect(chunks.size).toBe(1);
+    expect(initial.halo).toHaveLength(34 ** 3);
+
+    server.edit(32, 20, 0, Voxel.Wood);
+    const afterBoundaryEdit = server.createDerivedMeshSnapshot(0, 0, 0);
+    expect(afterBoundaryEdit.halo[meshHaloIndex(32, 20, 0)]).toBe(Voxel.Wood);
+    expect(afterBoundaryEdit.haloRevision).not.toBe(initial.haloRevision);
   });
 
   it('owns minimal entity state and the simulation clock independently of presentation', () => {

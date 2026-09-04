@@ -1,4 +1,4 @@
-import { makeChunk } from '../world/mesh';
+import { MESH_HALO_SIZE, makeChunk, meshHaloIndex } from '../world/mesh';
 import {
   CHUNK_SIZE,
   GENERATOR_VERSION,
@@ -9,6 +9,7 @@ import {
   remeshChunkKeysForEdit,
   voxelIndex,
   Voxel,
+  baseVoxel,
   type ChunkCoord,
 } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
@@ -35,6 +36,16 @@ export type ServerEntity = { id: string; kind: string; position: [number, number
 export type EntityCreate = Omit<ServerEntity, 'id'> & { id?: string };
 export type EntityUpdate = Partial<Omit<ServerEntity, 'id'>>;
 export type GameServerOptions = { seedText: string; persistence?: ChunkPersistence };
+export type DerivedMeshSnapshot = {
+  key: string;
+  cx: number;
+  cy: number;
+  cz: number;
+  canonical: Uint16Array;
+  halo: Uint16Array;
+  chunkRevision: number;
+  haloRevision: string;
+};
 
 const snapshotFromChunk = (seedText: string, chunk: ServerChunk): ChunkSnapshot => ({
   key: chunk.key,
@@ -101,6 +112,50 @@ export class GameServer {
     const cz = floorDiv(z, CHUNK_SIZE);
     const chunk = this.getChunk(cx, cy, cz);
     return chunk.voxels[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
+  }
+
+  createDerivedMeshSnapshot(cx: number, cy: number, cz: number): DerivedMeshSnapshot {
+    const chunk = this.getChunk(cx, cy, cz);
+    const externalData = new Map<string, Uint16Array | null>();
+    const sample = (x: number, y: number, z: number) => {
+      const sampleCx = floorDiv(x, CHUNK_SIZE);
+      const sampleCy = floorDiv(y, CHUNK_SIZE);
+      const sampleCz = floorDiv(z, CHUNK_SIZE);
+      if (sampleCx === cx && sampleCy === cy && sampleCz === cz)
+        return chunk.voxels[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
+      const key = chunkKey(sampleCx, sampleCy, sampleCz);
+      let data = externalData.get(key);
+      if (data === undefined) {
+        const materialized = this.chunks.get(key);
+        const persisted = materialized ? null : this.persistence?.loadSnapshot(key);
+        data =
+          materialized?.voxels ??
+          (persisted && this.isValidSnapshot(persisted, key, sampleCx, sampleCy, sampleCz) ? persisted.voxels : null);
+        externalData.set(key, data);
+      }
+      return data
+        ? data[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))]
+        : baseVoxel(this.seed, x, y, z);
+    };
+    const halo = new Uint16Array(MESH_HALO_SIZE ** 3);
+    let revision = 2166136261;
+    for (let y = -1; y <= CHUNK_SIZE; y += 1)
+      for (let z = -1; z <= CHUNK_SIZE; z += 1)
+        for (let x = -1; x <= CHUNK_SIZE; x += 1) {
+          const value = sample(cx * CHUNK_SIZE + x, cy * CHUNK_SIZE + y, cz * CHUNK_SIZE + z);
+          halo[meshHaloIndex(x, y, z)] = value;
+          revision = Math.imul(revision ^ value, 16777619);
+        }
+    return {
+      key: chunk.key,
+      cx,
+      cy,
+      cz,
+      canonical: chunk.voxels,
+      halo,
+      chunkRevision: chunk.revision,
+      haloRevision: `${revision >>> 0}`,
+    };
   }
 
   edit(x: number, y: number, z: number, value: number): VoxelRegionChanged {

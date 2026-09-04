@@ -23,11 +23,34 @@ export type HarnessSnapshot = {
   voxelAtOrigin: number;
   serverPlayerPosition: [number, number, number];
   serverWorldTime: number;
+  performance: {
+    scenarioId: string;
+    frame: {
+      count: number;
+      p50Ms: number;
+      p95Ms: number;
+      p99Ms: number;
+      maxMs: number;
+      longFrameCount: number;
+      lastLongFrameMs: number;
+    };
+    chunkVisible: { count: number; p50Ms: number; p95Ms: number; p99Ms: number; maxMs: number };
+    completedChunkTraces: number;
+    traceEventCount: number;
+    maxMeshCommitsInFrame: number;
+    maxMeshPartsInFrame: number;
+    visibleAfterPostrender: boolean;
+    incidents: number;
+    droppedEvents: number;
+    uploadQueueDepth: number;
+    estimatedMeshBytes: number;
+  };
 };
 
 type HarnessWindow = Window & {
   __seedlandsHarness?: {
     snapshot: () => HarnessSnapshot;
+    beginPerformanceScenario: (name: string) => string;
     removeVoxelAt: (x: number, y: number, z: number) => void;
     movePlayerTo: (x: number, y: number, z: number) => void;
     prepareFlatMovement: () => void;

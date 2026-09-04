@@ -13,6 +13,9 @@ import { macroAt, type MacroContext } from './macro-world';
 
 export type WorldChange = [number, number, number, number];
 export type RenderLayer = 'opaque' | 'water';
+export const MESH_HALO_SIZE = CHUNK_SIZE + 2;
+export const meshHaloIndex = (x: number, y: number, z: number) =>
+  x + 1 + MESH_HALO_SIZE * (z + 1 + MESH_HALO_SIZE * (y + 1));
 export type MeshData = {
   material: FaceMaterialId;
   renderLayer: RenderLayer;
@@ -36,6 +39,7 @@ export type MeshOptions = {
   cz: number;
   data: Uint16Array;
   changes: WorldChange[];
+  halo?: Uint16Array;
   outside?: (x: number, y: number, z: number) => number;
 };
 
@@ -123,7 +127,7 @@ function vertexAo(
   return values as unknown as readonly [number, number, number, number];
 }
 
-export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOptions): Record<number, MeshData> {
+export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: MeshOptions): Record<number, MeshData> {
   const result: Record<number, Quad> = {};
   const overrides = new Map(changes.map(([x, y, z, value]) => [`${x},${y},${z}`, value]));
   const macroCache = new Map<string, MacroContext>();
@@ -142,6 +146,8 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside }: MeshOpti
     const wx = cx * CHUNK_SIZE + x,
       wy = cy * CHUNK_SIZE + y,
       wz = cz * CHUNK_SIZE + z;
+    if (halo && x >= -1 && y >= -1 && z >= -1 && x <= CHUNK_SIZE && y <= CHUNK_SIZE && z <= CHUNK_SIZE)
+      return halo[meshHaloIndex(x, y, z)];
     return (
       overrides.get(`${wx},${wy},${wz}`) ??
       outside?.(wx, wy, wz) ??
