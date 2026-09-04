@@ -1,0 +1,30 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "Review the proposed SDD and testing governance for contradictions, missing lifecycle gates, and executable acceptance gaps before AGENTS.md implementation.",
+  "evidence": [
+    "User requires baseline E2E under tests/e2e and requirement E2E under each change.",
+    "User requires Vitest, Playwright, and Midscene to remain non-substitutable evidence dimensions.",
+    "User requires spec and test cases before production code, with Agile, Breaking, and Exploration flows.",
+    "Current AGENTS.md permits implementation before a later spec and test record.",
+    "Pre-implementation governance suite produced four expected assertion failures."
+  ],
+  "necessary_paths": [
+    "AGENTS.md",
+    "changes/2026-09-04-sdd-testing-governance/spec.md",
+    "tests/governance/sdd-testing-governance.test.ts",
+    "package.json",
+    "playwright.config.ts",
+    "tests/e2e/regression/visual-upgrade.spec.ts"
+  ],
+  "output_limit": {
+    "max_characters": 1600
+  },
+  "boundaries": ["read_only", "no_external_write", "no_credentials"]
+}

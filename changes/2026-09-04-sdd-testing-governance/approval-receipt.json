@@ -1,0 +1,9 @@
+{
+  "flow": "Breaking flow",
+  "spec_path": "changes/2026-09-04-sdd-testing-governance/spec.md",
+  "approved_sha256": "f97a1738944deea4fb68177320122e5f775e58903a1ae7b4fb63d8ad494d8d3e",
+  "approved_on": "2026-09-04",
+  "authority": "explicit_user",
+  "scope": "local implementation and verification only",
+  "excludes": ["git push", "release", "external writes", "destructive operations"]
+}

@@ -5,8 +5,8 @@ const systemChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chro
 const executablePath = process.env.SEEDLANDS_CHROME_PATH ?? (existsSync(systemChrome) ? systemChrome : undefined);
 
 export default defineConfig({
-  testDir: './tests/e2e',
-  testMatch: '**/*.spec.ts',
+  testDir: '.',
+  testMatch: ['tests/e2e/**/*.spec.ts', 'changes/*/e2e/**/*.spec.ts'],
   outputDir: 'test-results',
   fullyParallel: false,
   workers: 1,

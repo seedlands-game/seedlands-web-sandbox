@@ -14,6 +14,9 @@ ls:
     .md: kebab-case
   changes/*/midscene:
     .dir: kebab-case
+  changes/*/e2e:
+    .dir: kebab-case
+    .spec.ts: kebab-case
 
 ignore:
   - .git

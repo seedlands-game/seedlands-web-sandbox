@@ -9,7 +9,7 @@ import {
   snapshot,
   startHarnessWorld,
   waitForSnapshot,
-} from '../support/harness';
+} from '../../../tests/e2e/support/harness';
 
 const seedText = 'seedlands-visual-regression';
 const seed = normalizeSeed(seedText);
