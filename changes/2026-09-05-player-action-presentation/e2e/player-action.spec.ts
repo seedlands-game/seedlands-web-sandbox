@@ -21,4 +21,16 @@ test('手持工具与真实采集动作同步，松开和减少动态保持信�
   await expect(held).toHaveAttribute('data-action', 'mining');
   expect(await page.locator('.held-hand').evaluate((element) => getComputedStyle(element).animationName)).toBe('none');
   await page.mouse.up();
+  await page.evaluate(async () => {
+    await window.__seedlandsHarness!.executeGameplayCommand({ type: 'give-item', itemId: 'wood-block', count: 2 });
+  });
+  await page.keyboard.press('Digit2');
+  const wood = page.getByRole('img', { name: '手持 原木', exact: true });
+  await expect(wood).toBeVisible();
+  await page.mouse.click(640, 360, { button: 'right' });
+  await expect(wood).toHaveAttribute('data-action', 'place');
+  await expect(wood).toHaveAttribute('data-action', 'idle');
+  await page.mouse.down();
+  await expect(wood).toHaveAttribute('data-action', 'mining');
+  await page.mouse.up();
 });

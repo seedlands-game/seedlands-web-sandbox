@@ -4,8 +4,9 @@
   let { hud, interaction }: { hud: HudState; interaction: InteractionState } = $props();
   const held = $derived(hud.hotbar[hud.selectedHotbarSlot]);
   let activeGesture = $state<string | null>(null);
+  const gesture = $derived(interaction.gesture);
   $effect(() => {
-    activeGesture = interaction.gesture?.kind ?? null;
+    activeGesture = gesture?.kind ?? null;
     const timer = setTimeout(() => (activeGesture = null), 420);
     return () => clearTimeout(timer);
   });

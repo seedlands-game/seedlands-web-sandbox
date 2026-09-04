@@ -49,3 +49,7 @@
 05:46 专项 Playwright RED：`手持 木斧` 不存在。实现后该真实输入用例通过（3.6 秒），并在 05:49 的 14 项整合回归内再次通过。Midscene 完整旅程通过（26.26 秒），run `player-action-2026-09-05_05-47-44-cc847642`。
 
 `pnpm verify:static` 195 passed / 4 skipped，world 行覆盖 94.86%，Svelte 0/0；`pnpm build` 通过。状态 **Delivered**；仍随父 change 接受 Change9 最终集成复验。动作是轻量 SVG/CSS 表现，不声称骨骼或真实三维手部模型。
+
+持续整合补充：短动作消退后仍必须允许下一次连续采集；不能因其他 Interaction 投影持续刷新而不断重置短动作定时器。专项浏览器用例增加“放置→短动作消退→再次采集”，待独占浏览器窗口释放后执行，若 RED 则修正只订阅 gesture 的变化。
+
+扩展回归实际 RED：放置后的旧 gesture 随交互投影反复触发，后续采集显示 idle/place。将 effect 依赖收敛到稳定 gesture 引用后，同一真实输入用例 GREEN（4.4 秒）；放置瞬态结束后重新采集显示 mining。
