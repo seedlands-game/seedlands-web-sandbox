@@ -25,16 +25,7 @@ const isCandidatePosition = (position: FluidPosition) =>
   position[1] >= MIN_ACTIVE_Y &&
   position[1] <= MAX_ACTIVE_Y;
 
-const isKnownVoxel = (voxel: number) => Number.isSafeInteger(voxel) && voxel >= Voxel.Air && voxel <= Voxel.Lantern;
-
-const isExistingCellValue = (voxel: number, fluid: number) => {
-  if (!isKnownVoxel(voxel) || !Number.isSafeInteger(fluid)) return false;
-  if (voxel !== Voxel.Water) return fluid === 0;
-  const level = fluid & 0x0f;
-  return fluid >= 1 && fluid <= 0x88 && level >= 1 && level <= 8 && (fluid & ~0x8f) === 0;
-};
-
-const isDerivedCellValue = (voxel: number, fluid: number) =>
+const isPropagationCellValue = (voxel: number, fluid: number) =>
   (voxel === Voxel.Air && fluid === 0) ||
   (voxel === Voxel.Water && Number.isSafeInteger(fluid) && fluid >= 1 && fluid <= 8);
 
@@ -77,8 +68,8 @@ export const isFluidCandidateResultValid = (lease: FluidAuthoritySnapshot, candi
     if (!write || typeof write !== 'object' || !isCandidatePosition(write.position)) return false;
     const key = positionKey(write.position);
     if (!allowedWrites.has(key) || written.has(key) || !leasedChunks.has(chunkKeyFor(write.position))) return false;
-    if (!isExistingCellValue(write.expectedVoxel, write.expectedFluid)) return false;
-    if (!isDerivedCellValue(write.voxel, write.fluid)) return false;
+    if (!isPropagationCellValue(write.expectedVoxel, write.expectedFluid)) return false;
+    if (!isPropagationCellValue(write.voxel, write.fluid)) return false;
     if (write.expectedVoxel === write.voxel && write.expectedFluid === write.fluid) return false;
     written.add(key);
   }

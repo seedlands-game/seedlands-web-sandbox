@@ -307,6 +307,44 @@ describe('fluid transactions', () => {
     ).toEqual({ accepted: false, reason: 'invalid-result' });
   });
 
+  it('rejects terrain deletion disguised as a fluid write', () => {
+    const { authority, candidate } = createSourceFlowLease();
+
+    expect(
+      authority.commitFluidCandidate({
+        ...candidate,
+        writes: [
+          {
+            position: [0, 49, 0],
+            expectedVoxel: Voxel.Stone,
+            expectedFluid: 0,
+            voxel: Voxel.Air,
+            fluid: 0,
+          },
+        ],
+      }),
+    ).toEqual({ accepted: false, reason: 'invalid-result' });
+  });
+
+  it('rejects changing a source Water cell inside the compute candidate', () => {
+    const { authority, candidate } = createSourceFlowLease();
+
+    expect(
+      authority.commitFluidCandidate({
+        ...candidate,
+        writes: [
+          {
+            position: [0, 50, 0],
+            expectedVoxel: Voxel.Water,
+            expectedFluid: 0x88,
+            voxel: Voxel.Water,
+            fluid: 7,
+          },
+        ],
+      }),
+    ).toEqual({ accepted: false, reason: 'invalid-result' });
+  });
+
   it('rejects a remote next frontier and non-finite coordinates', () => {
     const first = createSourceFlowLease();
     expect(first.authority.commitFluidCandidate({ ...first.candidate, nextFrontier: [[20, 50, 20]] })).toEqual({

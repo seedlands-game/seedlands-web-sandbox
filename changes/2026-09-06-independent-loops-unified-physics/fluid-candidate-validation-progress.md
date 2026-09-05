@@ -25,10 +25,12 @@ Given Authority 已租出一个最多 128 个消费位置的流体快照，When 
 
 实现增加独立 `fluid-candidate-validator.ts`，从 Authority 保存的 lease 构造唯一的一跳写入集合与两跳后继集合；先以集合大小拒绝过长数组，再各遍历一次候选内容，因此验证成本由最多 128 个消费位置及其固定邻域约束。它不读取世界、不生成 Chunk、不执行传播算法。
 
+独立复查继续发现旧值转移仍过宽：只要旧值与当前格匹配，候选可把邻域 Stone 删除成 Air，或把 `0x88` 源水降级成普通流体。新增两项正式反例后旧实现为 2 项 RED、19 项通过；验证器将候选写入的旧值与新值同时收紧为 Air 或非源 Water，源水创建/删除和实体方块编辑继续只由权威世界事务处理。
+
 实际 GREEN：
 
-- `tests/server/fluid-transaction.test.ts`：19 项通过。
-- `tests/server/fluid-transaction.test.ts`、`tests/server/voxel-fluid-runtime.test.ts`、`tests/server/fluid-interactive-priority.test.ts`、`tests/server/world-collision-delta.test.ts`、`tests/server/authority-game-server-port.test.ts`：5 个文件、47 项通过。
+- `tests/server/fluid-transaction.test.ts`：21 项通过。
+- `tests/server/fluid-transaction.test.ts`、`tests/server/voxel-fluid-runtime.test.ts`、`tests/server/fluid-interactive-priority.test.ts`、`tests/server/world-collision-delta.test.ts`、`tests/server/authority-game-server-port.test.ts`：5 个文件、49 项通过。
 - `/tmp/seedlands-fluid-candidate-validation.test.ts`：独立反例 1 项通过。
 - 修改文件 Prettier 与 ESLint 通过，`git diff --check` 通过。
 - 全项目源码/测试 TypeScript 检查暂被并行任务正在修改的 `headless-session.ts`、`world-compute-task.ts` 与 `compute-worker-task.test.ts` 可选字段收窄错误阻塞；报错路径不属于本补丁，须在共享改动提交后重跑。
