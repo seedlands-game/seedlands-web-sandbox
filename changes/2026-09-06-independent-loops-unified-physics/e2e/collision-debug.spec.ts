@@ -49,6 +49,9 @@ test('F3+B完整消费，面板等价控制，关闭真实线框资源不残留'
   await page.keyboard.press('F3');
   await expect(page.locator('#debug')).toBeHidden();
   await testInfo.attach('collision-debug-world', { body: await page.screenshot(), contentType: 'image/png' });
+  await page.evaluate(() => window.__seedlandsHarness!.setView(0, -65));
+  await testInfo.attach('collision-debug-player-sensors', { body: await page.screenshot(), contentType: 'image/png' });
+  await page.evaluate(() => window.__seedlandsHarness!.setView(0, 0));
   await page.keyboard.press('F3');
   await expect(page.locator('#debug')).toBeVisible();
   const active = await state(page);
