@@ -2,7 +2,7 @@
 
 父合同与体验修复均Delivered，音乐已由用户明确验收。七项修复、完整自然旅程、三类Midscene、9项长期基线、Static/Build与独占原生Chrome性能均完成；详情以修复spec和evidence/verification.md为准。Medium帧p95最高9.3ms、跨区9.2ms、输入9.1ms，所有性能样本零隐藏/失焦。生产输入SHA-256为 `0008bf68283c749bccaca2674459d110fda5f7bae46a9bea9d5ecb5f78ac1496`。旧60分钟长测仍绑定48d2dd2，未冒称本轮重跑。
 
-最终沿用 `codex/playable-world-mvp`，所有上游均在分支祖先中；本地提交后只需用户合并此分支，不push。预览 http://127.0.0.1:4252/ 已打开在主菜单，原mosslight-68继续入口和High设置保留，未进入或修改用户世界。新增额度起点51%，最新60%，低于71%上限，未使用重置。完成即停止，不扩展AgentServer。
+最终实现与证据提交 `a4db96ffa39a3ce5dbfb28092308bf87e110b42a`；沿用 `codex/playable-world-mvp`，所有上游均在分支祖先中；本地提交后只需用户合并此分支，不push。预览 http://127.0.0.1:4252/ 已打开在主菜单，原mosslight-68继续入口和High设置保留，未进入或修改用户世界。新增额度起点51%，最新60%，低于71%上限，未使用重置。完成即停止，不扩展AgentServer。
 
 以下全部为历史检查点，旧Active/blocked/试听待验文字只表示当时状态。
 
