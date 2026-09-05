@@ -230,37 +230,16 @@ test('mosslight-68自然河岸需Space上岸，角色与掉落物失去支撑后
   try {
     await page.evaluate(async () => {
       const harness = window.__seedlandsHarness as unknown as HarnessApi;
-      await harness.setVoxelAt(27, 16, -30, 0);
-      await harness.setVoxelAt(29, 16, -30, 0);
+      // 林鹿半宽0.75，其真实脚底横跨3×3格；移除整个脚底支撑，不能把只挖中心仍站稳误报为悬空。
+      await harness.fillWorld({ from: [26, 13, -31], to: [30, 16, -29], voxel: 0 });
     });
-    await expect
-      .poll(
-        async () =>
-          (
-            await page.evaluate(
-              ({ actorId, itemId }) => ({
-                actor: window.__seedlandsHarness!.authorityBody(actorId),
-                item: window.__seedlandsHarness!.authorityBody(itemId),
-              }),
-              fallingIds,
-            )
-          ).actor?.velocity[1] ?? 0,
-      )
-      .toBeLessThan(-0.1);
-    await expect
-      .poll(
-        async () =>
-          (
-            await page.evaluate(
-              ({ actorId, itemId }) => ({
-                actor: window.__seedlandsHarness!.authorityBody(actorId),
-                item: window.__seedlandsHarness!.authorityBody(itemId),
-              }),
-              fallingIds,
-            )
-          ).item?.velocity[1] ?? 0,
-      )
-      .toBeLessThan(-0.1);
+    await page.waitForFunction(({ actorId, itemId }) => {
+      const harness = window.__seedlandsHarness!;
+      return (
+        (harness.authorityBody(actorId)?.velocity[1] ?? 0) < -0.1 &&
+        (harness.authorityBody(itemId)?.velocity[1] ?? 0) < -0.1
+      );
+    }, fallingIds);
     await testInfo.attach('natural-river-05-entity-midfall', {
       body: await page.screenshot(),
       contentType: 'image/png',

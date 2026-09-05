@@ -60,3 +60,7 @@
 - 已新增 `changes/2026-09-06-independent-loops-unified-physics/midscene/fluid-geometry-transition.yaml`，观察中间帧的单一前沿、无双层透明墙/双重倒影、静水不闪动、世界空间纹理连续，以及完成后无旧面残片。自然视觉和 1920×1080 Medium 性能仍由 Astra 主线准出，本记录不代替该证据。
 
 当前实现已满足可审查的生产接线、纯逻辑与资源生命周期证据；最终准出仍取决于上述 Playwright-change、Midscene 和主线自然视觉/性能检查。视觉动画不参与权威碰撞、介质或流体提交，跳过动画也不会延迟已提交状态。
+
+## 后继缺失的诊断闭环
+
+`56f9dee` 前台原始取证：目标格子最终为 Water/Air/Water，旧过渡已 superseded，但后继 active/recent 都不存在；队列已清空。现有 Chrome Trace 导出仅保留整段耗时，丢掉已有的具体 trace marks，无法分辨水过渡为何跳过。先补 `tests/client/performance-telemetry.test.ts` 的导出未完成 trace 标记及所属 trace 身份用例（预期 RED），再按需导出已有有界 mark；不新增每帧采样，不改变调度与水物理。

@@ -2,6 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { PerformanceTelemetry } from '../../src/client/performance-telemetry';
 
 describe('客户端性能 telemetry', () => {
+  it('导出尚未完成的跨Worker链路标记及所属trace身份', () => {
+    const telemetry = new PerformanceTelemetry({ now: () => 5 });
+    const traceId = telemetry.beginTrace('chunk-request', '0,1,0', 'main');
+    telemetry.markTrace(traceId, 'water-transition-skipped-renderer', 'main');
+    expect(telemetry.exportChromeTrace().traceEvents).toContainEqual(
+      expect.objectContaining({
+        name: 'water-transition-skipped-renderer',
+        ts: 5000,
+        dur: 0,
+        args: { traceId },
+      }),
+    );
+  });
   it('记录嵌套 span、帧分位数和有界 ring buffer', () => {
     let now = 0;
     const telemetry = new PerformanceTelemetry({ now: () => now, frameCapacity: 2, eventCapacity: 4 });

@@ -53,7 +53,16 @@ export type PerformanceIncident = {
   likelyCategory: string;
 };
 export type ChromeTrace = {
-  traceEvents: Array<{ name: string; cat: string; ph: 'X'; ts: number; dur: number; pid: string; tid: string }>;
+  traceEvents: Array<{
+    name: string;
+    cat: string;
+    ph: 'X';
+    ts: number;
+    dur: number;
+    pid: string;
+    tid: string;
+    args?: { traceId: string };
+  }>;
 };
 
 export type PerformanceTelemetryOptions = {
@@ -328,7 +337,19 @@ export class PerformanceTelemetry {
         pid: 'seedlands-client',
         tid: trace.lane,
       }));
-    return { traceEvents: [...spans, ...traces] };
+    const marks = [...this.traces.values()].flatMap((trace) =>
+      trace.marks.map((mark) => ({
+        name: mark.name,
+        cat: trace.category,
+        ph: 'X' as const,
+        ts: mark.timestampMs * 1000,
+        dur: 0,
+        pid: 'seedlands-client',
+        tid: mark.lane,
+        args: { traceId: trace.traceId },
+      })),
+    );
+    return { traceEvents: [...spans, ...traces, ...marks] };
   }
 
   private pushFrame(frame: FrameSample) {
