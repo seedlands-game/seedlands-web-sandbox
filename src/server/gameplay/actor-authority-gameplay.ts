@@ -1,4 +1,5 @@
 import { traceVoxelRay } from './voxel-ray';
+import { attackTargetPoint } from './gameplay-geometry';
 import type { EntityStore } from './entity-store';
 import { getItemDefinition } from './item-registry';
 import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
@@ -38,8 +39,8 @@ function attack(
   const target = context.entities.get(targetId);
   if (!actor || target?.type !== 'player' || !context.isPlayerAlive(targetId)) return reject('invalid-target');
   if (!inRange(actor.position, target.position, ACTOR_ATTACK_DISTANCE)) return reject('out-of-range');
-  const from: Position = [actor.position[0], actor.position[1] + 0.9, actor.position[2]];
-  const to: Position = [target.position[0], target.position[1] + 0.9, target.position[2]];
+  const from = attackTargetPoint(actor);
+  const to = attackTargetPoint(target);
   const visibility = traceVoxelRay(from, to, (x, y, z) => context.getVoxel([x, y, z]));
   if (visibility !== 'clear') return reject(visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked');
   return executeAuthorityAttack(

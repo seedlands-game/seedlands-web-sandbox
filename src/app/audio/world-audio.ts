@@ -13,6 +13,7 @@ import type { GlobalAudio } from './global-audio';
 import { WaterAudioPolicy } from '../../client/audio/water-audio-policy';
 import type { WaterImmersionSnapshot } from '../../world/water-immersion';
 import { Voxel } from '../../world/voxel';
+import { PLAYER_FEET_OFFSET } from '../player-view-offsets';
 
 export class WorldAudio {
   private readonly session: string;
@@ -48,7 +49,7 @@ export class WorldAudio {
     this.update(
       camera,
       grounded,
-      world.getVoxel(Math.floor(x), Math.floor(y - 1.7), Math.floor(z)),
+      world.getVoxel(Math.floor(x), Math.floor(y - PLAYER_FEET_OFFSET - 0.1), Math.floor(z)),
       () => {
         const proximity = this.actualWaterProximity(world, x, y, z);
         const macro = macroAt(world.seed, x, z, world.generatorVersion);

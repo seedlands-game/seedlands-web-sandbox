@@ -16,6 +16,7 @@ import type {
   AuthorityActionResult,
   AuthorityGameplayView,
 } from '../worker/authority-worker-protocol';
+import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
   gameplay: AuthorityGameplayView;
@@ -238,7 +239,8 @@ export class BrowserGameplay {
       const entity = this.options.authority.gameplay.entities.find(
         (candidate) => candidate.id === this.options.playerId,
       );
-      if (entity) void this.options.movePlayer([entity.position[0], entity.position[1] + 1.6, entity.position[2]]);
+      if (entity)
+        void this.options.movePlayer([entity.position[0], entity.position[1] + PLAYER_FEET_OFFSET, entity.position[2]]);
       this.options.queueSave();
     });
   }

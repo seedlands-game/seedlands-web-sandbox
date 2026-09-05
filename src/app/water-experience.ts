@@ -5,6 +5,7 @@ import type { WaterImmersionSnapshot } from '../world/water-immersion';
 import { UnderwaterVisualEffects } from './underwater-visual-effects';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
+import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
 export class WaterExperience {
   readonly visual: UnderwaterVisualEffects;
@@ -25,7 +26,7 @@ export class WaterExperience {
     const position = camera.getPosition();
     const flow = sampleWaterFlowDirection(
       Math.floor(position.x),
-      Math.floor(position.y - 1.6),
+      Math.floor(position.y - PLAYER_FEET_OFFSET),
       Math.floor(position.z),
       {
         getVoxel: (x, y, z) => world.getVoxel(x, y, z),

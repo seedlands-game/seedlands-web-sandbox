@@ -297,7 +297,7 @@ export class GameplayRuntime {
     if (!target || (target.type !== 'creature' && target.type !== 'npc') || target.health === undefined)
       return { success: false, reason: 'invalid-target' };
     if (!this.inRange(attacker.position, target.position, 3)) return { success: false, reason: 'out-of-range' };
-    const visibility = traceVoxelRay(attacker.position, attackTargetPoint(target), (x, y, z) =>
+    const visibility = traceVoxelRay(attackTargetPoint(attacker), attackTargetPoint(target), (x, y, z) =>
       this.callbacks.getVoxel([x, y, z]),
     );
     if (visibility !== 'clear')
