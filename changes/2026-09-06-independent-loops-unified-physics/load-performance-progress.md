@@ -23,6 +23,14 @@ A/B 使用相同 seed、坐标、命令顺序和编辑体积；每个配置在�
 
 预置用例覆盖：repository 初次 `onVisible` 必须携带是否仍有过渡待显示，scheduler 的一般 Chunk 首见仍立即完成；Morph 进度 0 和 held 状态不完成流体样本；首次进度大于 0 后还需一个 `postrender` 并写入 `water-transition-progress-visible` trace mark；在该帧前取消、卸载或换代不会回调；若动画直接完成到进度 1，则最终静态水面实际 `postrender` 也可作为首见。`FluidFeedbackTracker` 必须读取新的过渡 mark 计算 `attachToVisibleMs/totalMs`，不能回退使用较早的初次挂接时间。
 
+### 交互 revision 首见屏障
+
+真实负载证明，普通流体传播可在玩家编辑的网格计算期间持续推进同一 Chunk revision。现有 replacement 合并会丢弃每个已经完成的较旧结果，直到流体暂时安静；因此 Worker 计算只有十余毫秒，提交到 Worker 开始仍可等待数秒。
+
+修复采用生产提交语义，不由 Harness 采样开关启用。任何已经有可见资源或在途请求的非 `fluid-v2` 交互提交，按其真实 Chunk revision 建立每 Chunk 一个首见屏障；后继 `fluid-v2` 请求继承该屏障。满足屏障 revision 的已准备网格先完成一次真实 `postrender`，期间同 key 后继只保留一个最新 replacement，首见后立即派发最新状态。连续玩家编辑在已有屏障任务开始后最多再保留一个下一屏障 revision，不按 revision 数量增长。
+
+Authority 已经准备的 materialized canonical 可由客户端对 Worker 回传进行逐值复核，用于显示该已接纳历史 revision；它不重新写 Authority，也不降低客户端碰撞镜像 revision。Worker 自行生成的 procedural canonical 仍必须由 Authority 接纳。取消、卸载、场景 epoch 和销毁必须同时清除屏障、下一屏障及延后 replacement；普通 streaming 继续使用原合并与老化规则。
+
 ## RED 设计
 
 `e2e/authority-load-performance.spec.ts` 先声明以下缺失观测，作为生产接线前的类型 RED：
@@ -48,4 +56,6 @@ A/B 使用相同 seed、坐标、命令顺序和编辑体积；每个配置在�
 - [x] `5904dc0` 与 `0d6ec9f` 的准备门禁均在流体采样前 fail closed：16 个新增角色、64 个新增物件、50 个已加载 Chunk 和空 Mesh 队列满足，但 `nearPlayer=79`。先把实体生成移到静态几何完成后，结果仍为 79；附件进一步显示新增角色与物件坐标交叠，统一实体 pair separation 会把至少一个身体推出平台。夹具将角色和物件分区放置；没有减少实体、降低画质或放宽 `nearPlayer>=80`。`0d6ec9f` 原始 JSON 为 `/tmp/seedlands-0d6ec9f-authority-load.jsonlog`，ready 快照解码为 `/tmp/authority-load-ready-general-1-0d6ec9f.json`。
 - [x] 水面真实首见预置 3 组 RED：repository 只回报普通挂接、adapter 未在非零 Morph 实际渲染后回调、tracker 会消费更早的普通 `visible-postrender`。实现保留一般 Chunk 的 scheduler 完成时点；只有流体反馈在 `transitionPending` 时延后，adapter 于首次非零进度或最终静态终态之后再等一个真实 `postrender`，并写 `water-transition-progress-visible`。repository 按当前已安装的 task/resource 身份拒绝卸载或换代旧回调。
 - [x] 水面首见定向 3 个文件、18 项及完整水面/反馈 7 个文件、31 项通过；修改文件 Prettier、ESLint、源码/测试 TypeScript、Svelte 检查与生产构建均通过。held、非零进度、取消、卸载、终态 `postrender` 和新 trace mark 均有确定性覆盖。
-- [ ] 在包含上述优先级修复的不可变生产产物上复跑 20 个样本和 2/3 槽位，确认目标首见 p95≤100ms；若首段已达标而 Mesh 阶段仍超标，再以新 trace 证据决定是否需要窄化 Mesh 调度，不能预先修改阈值。
+- [x] 在不可变 `58f19d0` 产物上完成 2/3 槽各 20 个真实样本：两配置都完成 20 次真实非零水面进度 `postrender`，但二槽 p50/p95 为 `718.0/2064.8ms`，三槽为 `220.5/2564.7ms`，均为 RED。Worker 约 `13–20ms`、挂接到首见约 `32–60ms`，主要延迟是连续流体 replacement 下 `commitToWorkerStart=0.6–2.58s`。帧 p95 为 `17.2/18.2ms`、物理 p95 为 `1.3/1.4ms`，排除物理与主帧为主因。原始日志 `/tmp/seedlands-58f19d0-authority-load-full.jsonlog`，解码附件 `/tmp/seedlands-58f19d0-authority-load-evidence/`；源 `58f19d0b6c2a1610753da2005a13ce5716913ab1`，夹具 SHA-256 `7d105f4c730839bc4848dc2fb0395ada3aeb363bf509060407d4def877730add`，bundle manifest SHA-256 `a8746884b18c16a5866d70c8598811b6b5a480329a25b968d5e43a4a2e546a4b`。
+- [x] 单元 RED 锁定生产交互 revision 屏障、连续 replacement 只保留一个最新后继、首见后恢复、取消/epoch 释放，以及历史 visual canonical 不回滚碰撞。实现后水面、repository、scheduler、反馈与客户端 7 个文件 50 项通过；相关文件 ESLint、源码与测试 TypeScript、Svelte 检查和生产构建通过。
+- [ ] 在上述首见屏障实现的不可变产物上复跑一个真实样本。只有单样本链达到 `≤100ms` 才重新执行完整 20×2 对照。

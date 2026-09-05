@@ -169,6 +169,172 @@ describe('MeshTaskScheduler', () => {
     worker.emit(resultFor(worker.posts[2]!));
     expect(worker.posts.map((post) => post.chunkKey)).toContain('7,0,7');
   });
+
+  it('玩家编辑revision先真实可见，再派发连续流体合并后的唯一最新后继', () => {
+    const worker = new FakeWorker();
+    const accepted: Array<{
+      task: Parameters<MeshTaskScheduler['completeVisible']>[0];
+      result: WorkerResult;
+    }> = [];
+    let revision = 1;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'main-snapshot',
+      source: {
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: revision,
+          haloRevision: `halo-${revision}`,
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: revision, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: (task, result) => accepted.push({ task, result }),
+    });
+
+    scheduler.request(0, 0, 0);
+    scheduler.protectVisibleRevision('0,0,0', 2);
+    revision = 2;
+    scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive' });
+    revision = 3;
+    scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
+
+    worker.emit(resultFor(worker.posts[0]!));
+    expect(worker.posts).toHaveLength(2);
+    expect(worker.posts[1]?.chunkRevision).toBe(3);
+
+    revision = 4;
+    scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
+    worker.emit(resultFor(worker.posts[1]!));
+    expect(accepted.map(({ task }) => task.chunkRevision)).toEqual([3]);
+    expect(worker.posts).toHaveLength(2);
+
+    scheduler.completeVisible(accepted[0]!.task);
+    expect(worker.posts).toHaveLength(3);
+    expect(worker.posts[2]?.chunkRevision).toBe(4);
+  });
+
+  it('取消首见屏障会丢弃延后后继并允许同key新代际重新请求', () => {
+    const worker = new FakeWorker();
+    const accepted: Array<{ task: Parameters<MeshTaskScheduler['completeVisible']>[0]; result: WorkerResult }> = [];
+    let revision = 2;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'main-snapshot',
+      source: {
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: revision,
+          haloRevision: `halo-${revision}`,
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: revision, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: (task, result) => accepted.push({ task, result }),
+    });
+
+    scheduler.protectVisibleRevision('0,0,0', 2);
+    scheduler.request(0, 0, 0, { priority: 'interactive' });
+    worker.emit(resultFor(worker.posts[0]!));
+    revision = 3;
+    scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
+    scheduler.cancel('0,0,0');
+    scheduler.request(0, 0, 0);
+
+    const meshPosts = worker.posts.filter((post) => post.kind === 'mesh');
+    expect(meshPosts).toHaveLength(2);
+    expect(meshPosts[1]?.chunkRevision).toBe(3);
+  });
+
+  it('场景epoch切换清除首见屏障和旧后继', () => {
+    const worker = new FakeWorker();
+    const accepted: Parameters<MeshTaskScheduler['completeVisible']>[0][] = [];
+    let revision = 2;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'main-snapshot',
+      source: {
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: revision,
+          haloRevision: `halo-${revision}`,
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: revision, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: (task) => accepted.push(task),
+    });
+
+    scheduler.protectVisibleRevision('0,0,0', 2);
+    scheduler.request(0, 0, 0, { priority: 'interactive' });
+    worker.emit(resultFor(worker.posts[0]!));
+    revision = 3;
+    scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
+    scheduler.beginScenario();
+    scheduler.request(0, 0, 0);
+
+    expect(worker.posts).toHaveLength(2);
+    expect(worker.posts[1]?.chunkRevision).toBe(3);
+    expect(scheduler.latestTask('0,0,0')?.visibilityBarrierRevision).toBeUndefined();
+    scheduler.completeVisible(accepted[0]!);
+    expect(worker.posts).toHaveLength(2);
+  });
+
+  it('屏障任务开始后的下一次玩家编辑保留一个后继屏障且完成后不残留', () => {
+    const worker = new FakeWorker();
+    const accepted: Parameters<MeshTaskScheduler['completeVisible']>[0][] = [];
+    let revision = 2;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'main-snapshot',
+      source: {
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: revision,
+          haloRevision: `halo-${revision}`,
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: revision, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: (task) => accepted.push(task),
+    });
+
+    scheduler.protectVisibleRevision('0,0,0', 2);
+    scheduler.request(0, 0, 0, { priority: 'interactive' });
+    scheduler.protectVisibleRevision('0,0,0', 3);
+    revision = 3;
+    scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive' });
+    worker.emit(resultFor(worker.posts[0]!));
+    scheduler.completeVisible(accepted[0]!);
+
+    expect(worker.posts[1]?.chunkRevision).toBe(3);
+    expect(scheduler.latestTask('0,0,0')?.visibilityBarrierRevision).toBe(3);
+    worker.emit(resultFor(worker.posts[1]!));
+    scheduler.completeVisible(accepted[1]!);
+    revision = 4;
+    scheduler.request(0, 0, 0);
+    expect(scheduler.latestTask('0,0,0')?.visibilityBarrierRevision).toBeUndefined();
+  });
   it('失败回执释放执行槽，迟到重复结果不能占用或释放下一任务的槽', () => {
     const worker = new FakeWorker();
     const accepted: WorkerResult[] = [];

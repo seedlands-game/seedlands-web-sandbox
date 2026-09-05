@@ -134,7 +134,7 @@ export class World {
       now: () => performance.now(),
       summarize: summarizeMeshParts,
       onVisible: (task, { transitionPending }) => {
-        this.scheduler.completeVisible(task);
+        if (!transitionPending || task.visibilityBarrierRevision === undefined) this.scheduler.completeVisible(task);
         if (!transitionPending)
           this.fluidFeedback.completeVisible(
             task,
@@ -142,13 +142,15 @@ export class World {
             this.scheduler.fluidSchedulingMetrics,
           );
       },
-      onTransitionVisible: (task) =>
+      onTransitionVisible: (task) => {
+        if (task.visibilityBarrierRevision !== undefined) this.scheduler.completeVisible(task);
         this.fluidFeedback.completeVisible(
           task,
           this.telemetryRecorder.trace(task.traceId),
           this.scheduler.fluidSchedulingMetrics,
           'water-transition-progress-visible',
-        ),
+        );
+      },
       onDiscard: (task, reason) => {
         telemetryRecorder.markTrace(task.traceId, reason, 'main');
         telemetryRecorder.counter(reason, (telemetryRecorder.snapshot().gauges[reason] ?? 0) + 1);
@@ -394,12 +396,13 @@ export class World {
     const change = result.structuralChange;
     if (!change) return;
     const fluidPriority = change.actorId === 'fluid-v2';
-    if (fluidPriority) this.fluidFeedback.markFirstCommit(change.chunkRevisions, change.bounds ?? undefined);
+    this.fluidFeedback.markFirstCommit(change.chunkRevisions, change.bounds ?? undefined);
     this.aggregateStructuralEventCount += 1;
     this.latestCommitMutationCount = change.mutationCount;
     this.latestCommitMeshChunkCount = change.meshChunks.length;
     let hasPresentationWork = false;
-    const authorityKeys = new Set(change.chunkRevisions.map(({ key }) => key));
+    const revisions = new Map(change.chunkRevisions.map(({ key, revision }) => [key, revision] as const));
+    const authorityKeys = new Set(revisions.keys());
     const presentationKeys = [...change.meshChunks].sort(
       (left, right) => Number(authorityKeys.has(right)) - Number(authorityKeys.has(left)),
     );
@@ -407,12 +410,16 @@ export class World {
       const pending = this.scheduler.latestTask(key);
       if (pending) {
         hasPresentationWork = true;
+        const revision = revisions.get(key);
+        if (!fluidPriority && revision !== undefined) this.scheduler.protectVisibleRevision(key, revision);
         this.scheduler.request(pending.cx, pending.cy, pending.cz, {
           forceRemesh: true,
           priority: fluidPriority ? 'interactive-fluid' : 'interactive',
         });
       } else if (this.repository.chunks.has(key)) {
         hasPresentationWork = true;
+        const revision = revisions.get(key);
+        if (!fluidPriority && revision !== undefined) this.scheduler.protectVisibleRevision(key, revision);
         this.dirtyChunks.add(key);
         if (fluidPriority) this.fluidDirtyChunks.add(key);
       }

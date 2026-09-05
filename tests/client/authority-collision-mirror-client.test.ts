@@ -283,6 +283,50 @@ describe('生产BrowserAuthorityClient碰撞镜像接线', () => {
     expect(client.getChunkRevision(0, 0, 0)).toBe(6);
   });
 
+  it('首见屏障只显示Authority已准备的历史mesh且不回滚碰撞revision', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    await installBaseline(client, worker);
+    const changed = commit(4, 5, Voxel.Stone, 0);
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: { ...snapshot(1, 1), chunkRevisions: { '0,0,0': 5 } },
+      commits: [changed],
+    });
+    const beforePosts = worker.posts.length;
+    const preparedCanonical = new Uint16Array(CHUNK_SIZE ** 3);
+    const accepting = client.acceptWorkerCanonical(
+      {
+        chunkKey: '0,0,0',
+        cx: 0,
+        cy: 0,
+        cz: 0,
+        chunkRevision: 4,
+        generatorVersion: 3,
+        visibilityBarrierRevision: 4,
+      },
+      { canonical: preparedCanonical.buffer, generatorVersion: 3 },
+    );
+    if (worker.posts.length > beforePosts) {
+      const request = worker.posts.at(-1) as { requestId: number };
+      worker.emit({
+        kind: 'authority-response',
+        protocolVersion: 1,
+        epoch: 'world:1',
+        requestId: request.requestId,
+        ok: true,
+        result: { accepted: true },
+      });
+    }
+
+    await expect(accepting).resolves.toBe(true);
+    expect(worker.posts).toHaveLength(beforePosts);
+    expect(client.getChunkRevision(0, 0, 0)).toBe(5);
+    expect(client.getVoxel(1, 2, 3)).toBe(Voxel.Stone);
+  });
+
   it('缺口失效后拒绝此前已发出但延迟成功的旧网格回执', async () => {
     const worker = new FakeAuthorityWorker();
     const unknown = vi.fn();

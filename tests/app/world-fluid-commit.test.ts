@@ -22,6 +22,7 @@ const fixture = () => {
   const feedback = new FluidFeedbackTracker(() => now);
   feedback.begin({ mergedRequests: 0, supersededInFlight: 0 });
   const request = vi.fn(),
+    protectVisibleRevision = vi.fn(),
     scheduleRemesh = vi.fn();
   const receiver = {
     aggregateStructuralEventCount: 0,
@@ -31,7 +32,7 @@ const fixture = () => {
     dirtyChunks: new Set(),
     fluidDirtyChunks: new Set(),
     fluidFeedback: feedback,
-    scheduler: { latestTask: () => ({ cx: 0, cy: 0, cz: 0 }), request },
+    scheduler: { latestTask: () => ({ cx: 0, cy: 0, cz: 0 }), request, protectVisibleRevision },
     repository: { chunks: new Map() },
     scheduleRemesh,
   };
@@ -58,7 +59,7 @@ const fixture = () => {
       { mergedRequests: 0, supersededInFlight: 0 },
     );
   };
-  return { consume, visible, feedback, request, scheduleRemesh };
+  return { consume, visible, feedback, request, protectVisibleRevision, scheduleRemesh };
 };
 
 describe('权威流体结果到真实客户端提交入口', () => {
@@ -70,10 +71,12 @@ describe('权威流体结果到真实客户端提交入口', () => {
     subject.visible();
     expect(subject.feedback.summary()).toMatchObject({ count: 1, pending: false, p95Ms: 12 });
   });
-  it('普通编辑不会错误完成传播的可见样本', () => {
+  it('玩家编辑建立生产首见屏障并成为用户可见反馈的首次提交', () => {
     const subject = fixture();
     subject.consume('player-edit');
+    expect(subject.protectVisibleRevision).toHaveBeenCalledWith('0,0,0', 4);
+    expect(subject.request).toHaveBeenCalledWith(0, 0, 0, { forceRemesh: true, priority: 'interactive' });
     subject.visible();
-    expect(subject.feedback.summary()).toMatchObject({ count: 0, pending: true });
+    expect(subject.feedback.summary()).toMatchObject({ count: 1, pending: false, p95Ms: 12 });
   });
 });

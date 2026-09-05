@@ -32,6 +32,7 @@ import {
   publishAuthorityCollisionCommits,
 } from './authority-collision-mirror';
 import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
+import { matchesPreparedVisibilityCanonical, type VisibilityTask } from './authority-prepared-mesh-visibility';
 import type {
   AuthorityClientOptions,
   AuthorityCachedMesh,
@@ -262,16 +263,10 @@ export class BrowserAuthorityClient {
   }
 
   async acceptWorkerCanonical(
-    task: Readonly<{
-      chunkKey: string;
-      cx: number;
-      cy: number;
-      cz: number;
-      chunkRevision: number;
-      generatorVersion: number;
-    }>,
+    task: VisibilityTask,
     result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>,
   ): Promise<boolean> {
+    const prepared = this.preparationCache.get(task.chunkKey);
     return acceptAuthorityCollisionBaseline({
       key: task.chunkKey,
       chunkRevision: task.chunkRevision,
@@ -281,6 +276,7 @@ export class BrowserAuthorityClient {
       chunks: this.meshCache,
       guard: this.collisionRevisions,
       accept: async (canonical) => {
+        if (matchesPreparedVisibilityCanonical(task, prepared, canonical)) return true;
         const response = (await this.request(
           { kind: 'accept-generated-chunk', ...task, key: task.chunkKey, canonical: canonical.buffer },
           [canonical.buffer],
