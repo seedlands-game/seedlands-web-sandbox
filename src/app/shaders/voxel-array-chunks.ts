@@ -50,20 +50,22 @@ export const voxelWaterReflectionEmissionGlsl = /* glsl */ `
 uniform vec3 material_emissive;
 uniform float material_emissiveIntensity;
 uniform sampler2D texture_planarReflection;
-uniform vec2 uReflectionViewport;
+uniform mat4 uReflectionTextureMatrix;
 uniform float uReflectionStrength;
 uniform float uReflectionWaterPlaneY;
 
 void getEmission() {
-    vec2 reflectionUv = gl_FragCoord.xy / max(uReflectionViewport, vec2(1.0));
-    reflectionUv.y = 1.0 - reflectionUv.y;
+    vec4 reflectionClip = uReflectionTextureMatrix * vec4(vPositionW, 1.0);
+    vec2 reflectionUv = reflectionClip.xy / max(reflectionClip.w, 0.0001);
+    vec2 edgeDistance = min(reflectionUv, vec2(1.0) - reflectionUv);
+    float validProjection = step(0.0001, reflectionClip.w) * smoothstep(0.0, 0.025, min(edgeDistance.x, edgeDistance.y));
     vec3 reflectedScene = texture(texture_planarReflection, reflectionUv).rgb;
     float upwardSurface = smoothstep(0.72, 0.98, max(dNormalW.y, 0.0));
     vec3 viewDirection = normalize(view_position - vPositionW);
     float fresnel = pow(1.0 - clamp(dot(max(dNormalW, vec3(0.0)), viewDirection), 0.0, 1.0), 3.0);
     float selectedWaterPlane = 1.0 - smoothstep(0.006, 0.02, abs(vPositionW.y - uReflectionWaterPlaneY));
     float reflectionMix = upwardSurface * selectedWaterPlane * mix(0.22, 1.0, fresnel);
-    dEmission = material_emissive * material_emissiveIntensity + reflectedScene * uReflectionStrength * reflectionMix;
+    dEmission = material_emissive * material_emissiveIntensity + reflectedScene * uReflectionStrength * reflectionMix * validProjection;
 }
 `;
 

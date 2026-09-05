@@ -290,7 +290,7 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
       material.opacityFadesSpecular = false;
       material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelWaterReflectionEmissionGlsl);
       material.setParameter('texture_planarReflection', reflectionFallback);
-      material.setParameter('uReflectionViewport', new Float32Array([1, 1]));
+      material.setParameter('uReflectionTextureMatrix', new pc.Mat4().data);
       material.setParameter('uReflectionStrength', 0);
     }
     material.update();

@@ -10,6 +10,7 @@ import {
   type VoxelPosition,
 } from './advanced-lighting-budget';
 import { StylizedPostProcessing } from './stylized-post-effect';
+import { clipReflectionProjection, reflectionTextureMatrix, setReflectedCameraPose } from './reflection-projection';
 import { reflectionPlaneAboveCamera, waterReflectionSurfaceY } from './water-reflection-plane';
 
 export type VisualEffectsSnapshot = {
@@ -36,11 +37,13 @@ class PlanarWaterReflection {
   private readonly cameraEntity: pc.Entity;
   private readonly reflectionStrength: number;
   private frame = 0;
+  private readonly projection = new pc.Mat4();
+  private renderedPlaneY: number | null = null;
   renderCount = 0;
   active = false;
 
   constructor(
-    app: pc.Application,
+    private readonly app: pc.Application,
     private readonly waterMaterials: readonly pc.StandardMaterial[],
     resolution: number,
     private readonly frameInterval: number,
@@ -73,12 +76,14 @@ class PlanarWaterReflection {
       renderTarget: this.target,
       layers: [pc.LAYERID_WORLD, pc.LAYERID_SKYBOX],
     });
+    this.cameraEntity.camera!.calculateProjection = (matrix) => matrix.copy(this.projection);
     this.cameraEntity.enabled = false;
     app.root.addChild(this.cameraEntity);
     for (const material of waterMaterials) {
       material.setParameter('texture_planarReflection', this.texture);
       material.setParameter('uReflectionWaterPlaneY', 0);
       material.setParameter('uReflectionStrength', 0);
+      material.setParameter('uReflectionTextureMatrix', new pc.Mat4().data);
     }
   }
 
@@ -86,7 +91,9 @@ class PlanarWaterReflection {
     this.frame += 1;
     const position = source.getPosition();
     const activeWaterPlaneY = reflectionPlaneAboveCamera(waterPlaneY, position.y);
-    const shouldRender = activeWaterPlaneY !== null && this.frame % this.frameInterval === 0;
+    const shouldRender =
+      activeWaterPlaneY !== null &&
+      (this.renderedPlaneY !== activeWaterPlaneY || this.frame % this.frameInterval === 0);
     this.active = activeWaterPlaneY !== null;
     for (const material of this.waterMaterials) {
       material.setParameter('uReflectionWaterPlaneY', activeWaterPlaneY ?? 0);
@@ -97,24 +104,24 @@ class PlanarWaterReflection {
     const reflectionCamera = this.cameraEntity.camera;
     if (!shouldRender || !sourceCamera || !reflectionCamera || activeWaterPlaneY === null) return;
     reflectionCamera.fov = sourceCamera.fov;
+    reflectionCamera.horizontalFov = sourceCamera.horizontalFov;
+    reflectionCamera.nearClip = sourceCamera.nearClip;
     reflectionCamera.farClip = sourceCamera.farClip;
-    const forward = source.forward;
-    const up = source.up;
-    const reflectedPosition = new pc.Vec3(position.x, activeWaterPlaneY * 2 - position.y, position.z);
-    const reflectedTarget = new pc.Vec3(
-      position.x + forward.x,
-      activeWaterPlaneY * 2 - (position.y + forward.y),
-      position.z + forward.z,
+    reflectionCamera.aspectRatioMode = pc.ASPECT_MANUAL;
+    reflectionCamera.aspectRatio = sourceCamera.aspectRatio;
+    reflectionCamera.clearColor = this.app.scene.fog.color.clone();
+    setReflectedCameraPose(source, this.cameraEntity, activeWaterPlaneY);
+    this.projection.copy(
+      clipReflectionProjection(sourceCamera.projectionMatrix, this.cameraEntity.getWorldTransform(), activeWaterPlaneY),
     );
-    const reflectedUp = new pc.Vec3(up.x, -up.y, up.z);
-    this.cameraEntity.setPosition(reflectedPosition);
-    this.cameraEntity.lookAt(reflectedTarget, reflectedUp);
+    const textureMatrix = reflectionTextureMatrix(
+      this.projection,
+      this.cameraEntity.getWorldTransform(),
+      this.target.flipY,
+    );
+    for (const material of this.waterMaterials) material.setParameter('uReflectionTextureMatrix', textureMatrix.data);
+    this.renderedPlaneY = activeWaterPlaneY;
     this.renderCount += 1;
-  }
-
-  setViewport(width: number, height: number) {
-    for (const material of this.waterMaterials)
-      material.setParameter('uReflectionViewport', new Float32Array([Math.max(1, width), Math.max(1, height)]));
   }
 
   destroy() {
@@ -138,7 +145,7 @@ export class AdvancedVisualEffects {
   private shadowStableFrameCount = 0;
 
   constructor(
-    private readonly app: pc.Application,
+    app: pc.Application,
     private readonly camera: pc.Entity,
     private readonly world: World,
     private readonly budget: LightingQualityBudget,
@@ -187,7 +194,6 @@ export class AdvancedVisualEffects {
       this.scanElapsed = 0;
       this.scanNearbyVoxels();
     }
-    this.reflection?.setViewport(this.app.graphicsDevice.width, this.app.graphicsDevice.height);
     this.reflection?.update(this.camera, this.waterPlaneY);
     if (this.shadowUpdatedThisFrame) this.shadowStableFrameCount = 0;
     else this.shadowStableFrameCount += 1;
