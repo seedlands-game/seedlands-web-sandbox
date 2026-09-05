@@ -113,8 +113,9 @@ test('mosslight-68自然河岸需Space上岸，角色与掉落物失去支撑后
     const reachedOppositeBank = await waitForSnapshot(
       page,
       (value) =>
-        value.serverPlayerPosition[0] > 36 &&
+        value.serverPlayerPosition[0] > 37.5 &&
         value.serverPlayerPosition[0] < 38 &&
+        Math.abs(value.serverPlayerVelocity[0]) < 0.01 &&
         (value.water.wading || value.water.swimming),
     );
     const noJumpStart = reachedOppositeBank;
@@ -124,7 +125,7 @@ test('mosslight-68自然河岸需Space上岸，角色与掉落物失去支撑后
     const blockedByOppositeBank = await state(page);
     expect(blockedByOppositeBank.serverPlayerPosition[0]).toBeLessThan(38);
     expect(blockedByOppositeBank.serverPlayerPosition[0]).toBeGreaterThan(36);
-    expect(blockedByOppositeBank.serverPlayerPosition[0] - noJumpStart.serverPlayerPosition[0]).toBeLessThan(1.5);
+    expect(blockedByOppositeBank.serverPlayerPosition[0] - noJumpStart.serverPlayerPosition[0]).toBeLessThan(0.05);
     expect(blockedByOppositeBank.water.wading || blockedByOppositeBank.water.swimming).toBe(true);
 
     await page.keyboard.down('Space');

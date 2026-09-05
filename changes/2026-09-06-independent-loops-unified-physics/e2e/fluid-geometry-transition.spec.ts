@@ -159,20 +159,32 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
   });
 
   await page.evaluate(() => window.__seedlandsHarness!.setVoxelAt(4, 57, 0, 8));
-  await expect
-    .poll(() =>
-      page.evaluate((traceId) => {
-        const transitions = (window.__seedlandsHarness!.snapshot() as unknown as { waterTransitions: WaterTransitions })
-          .waterTransitions;
-        const oldRecord = transitions.recent.find((record) => record.traceId === traceId);
-        if (!oldRecord) return false;
-        const successor = transitions.active.find(
-          (record) => record.chunkKey === oldRecord.chunkKey && record.targetRevision > oldRecord.targetRevision,
-        );
-        return oldRecord?.superseded === true && oldRecord.completed === false && successor !== undefined;
-      }, interrupted.traceId),
-    )
-    .toBe(true);
+  try {
+    await expect
+      .poll(() =>
+        page.evaluate((traceId) => {
+          const transitions = (
+            window.__seedlandsHarness!.snapshot() as unknown as { waterTransitions: WaterTransitions }
+          ).waterTransitions;
+          const oldRecord = transitions.recent.find((record) => record.traceId === traceId);
+          if (!oldRecord) return false;
+          const successor = transitions.active.find(
+            (record) => record.chunkKey === oldRecord.chunkKey && record.targetRevision > oldRecord.targetRevision,
+          );
+          return oldRecord?.superseded === true && oldRecord.completed === false && successor !== undefined;
+        }, interrupted.traceId),
+      )
+      .toBe(true);
+  } finally {
+    await testInfo.attach('water-morph-supersession-state', {
+      body: JSON.stringify(await page.evaluate(() => window.__seedlandsHarness!.snapshot()), null, 2),
+      contentType: 'application/json',
+    });
+    await testInfo.attach('water-morph-interrupted-identity', {
+      body: JSON.stringify(interrupted, null, 2),
+      contentType: 'application/json',
+    });
+  }
   const successor = await page.evaluate((traceId) => {
     const transitions = (window.__seedlandsHarness!.snapshot() as unknown as { waterTransitions: WaterTransitions })
       .waterTransitions;
