@@ -86,7 +86,7 @@ describe('SnapshotInterpolator', () => {
     position.x = 999;
     const sample = interpolation.sample('a', 10);
     expect(sample.position.x).toBe(1);
-    sample.position.x = 555;
+    Object.assign(sample.position, { x: 555 });
     expect(interpolation.sample('a', 10).position.x).toBe(1);
     expect(interpolation.push({ ...snapshot, physicsTick: 2, integratedPhysicsTimeMs: 9 })).toBe(false);
     expect(() => interpolation.sample('a', NaN)).toThrow();

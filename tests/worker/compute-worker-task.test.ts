@@ -65,6 +65,7 @@ describe('general compute worker task', () => {
       overlays: [],
     });
 
+    if (!('canonical' in result)) throw new Error('生成网格任务未返回 canonical 结果。');
     expect(new Uint16Array(result.canonical)[0]).toBe(Voxel.Stone);
     expect(result.meshes.length).toBeGreaterThan(0);
     expect(result.generatorVersion).toBe(3);

@@ -3,25 +3,40 @@ import { buildLogicObservation } from '../../src/server/authority/logic-observat
 import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
 import type { GameplayEntity } from '../../src/server/gameplay/entity-store';
 
-const snapshot = (): AuthoritySnapshot =>
-  ({
-    kind: 'snapshot',
-    protocolVersion: 1,
-    epoch: 'epoch:logic',
-    physicsTick: 12,
-    activeTimeMs: 200,
-    worldTime: 8,
-    entities: [
-      {
-        id: 'grazer-1',
-        type: 'creature',
-        archetype: 'grazer',
-        body: { position: { x: 2.5, y: 5, z: 2.5 }, velocity: { x: 1, y: 0, z: 0 } },
-        grounded: true,
-        contacts: [],
-      },
-    ],
-  }) as AuthoritySnapshot;
+const snapshot = (): AuthoritySnapshot => ({
+  kind: 'snapshot',
+  protocolVersion: 1,
+  epoch: 'epoch:logic',
+  physicsTick: 12,
+  commitSequence: 12,
+  worldMutationCount: 0,
+  acknowledgedInputSequence: 0,
+  inputResyncRequired: false,
+  integratedPhysicsTimeMs: 200,
+  physicsDebtMs: 0,
+  chunkRevisions: { '0,0,0': 4 },
+  worldRevision: 4,
+  paused: false,
+  player: {
+    id: 'player-1',
+    type: 'player',
+    body: { position: { x: 0.5, y: 5, z: 0.5 }, velocity: { x: 0, y: 0, z: 0 } },
+    grounded: true,
+    contacts: [],
+  },
+  activeTimeMs: 200,
+  worldTime: 8,
+  entities: [
+    {
+      id: 'grazer-1',
+      type: 'creature',
+      archetype: 'grazer',
+      body: { position: { x: 2.5, y: 5, z: 2.5 }, velocity: { x: 1, y: 0, z: 0 } },
+      grounded: true,
+      contacts: [],
+    },
+  ],
+});
 
 const grazer: GameplayEntity = {
   id: 'grazer-1',
