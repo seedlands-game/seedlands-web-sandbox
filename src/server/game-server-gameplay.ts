@@ -150,9 +150,6 @@ export abstract class GameServerGameplayFacade {
   respawnPlayer(playerId: string) {
     return this.gameplay.respawnPlayer(playerId);
   }
-  advanceGameplay(seconds: number) {
-    return this.gameplay.advance(seconds);
-  }
   advanceGameplayRules(seconds: number) {
     return this.gameplay.advanceRules(seconds);
   }

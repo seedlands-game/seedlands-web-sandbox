@@ -29,7 +29,7 @@ describe('自然制作灯笼的生产规则', () => {
     await restored.restore();
     expect(restored.getVoxel(2, 41, 0)).toBe(Voxel.Lantern);
     expect(restored.beginBreak(player.id, [2, 41, 0]).success).toBe(true);
-    restored.advanceGameplay(1);
+    restored.advanceGameplayRules(1);
     expect(restored.getVoxel(2, 41, 0)).toBe(Voxel.Air);
     expect(restored.queryEntities({ type: 'world-item' }).some((item) => item.stack?.itemId === ItemIds.Lantern)).toBe(
       true,

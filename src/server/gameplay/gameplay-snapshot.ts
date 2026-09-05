@@ -179,9 +179,6 @@ export function validateGameplaySnapshot(
     getVoxel: options.getVoxel,
     getWorldTime: options.getWorldTime,
     isPlayerAlive: (id) => players.get(id)?.lifecycle === 'alive',
-    damagePlayer: () => false,
-    consumeWorldItem: () => false,
-    spawnWorldItem: () => undefined,
   });
   validator.restore(simulationSnapshotFor(source));
   const snapshot: GameplaySnapshotV3 = {

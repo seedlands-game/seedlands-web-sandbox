@@ -1,4 +1,4 @@
-import { voxelRayIsClear } from './entity-physics';
+import { voxelRayIsClear } from './voxel-ray';
 import type { EntityStore } from './entity-store';
 import { getItemDefinition } from './item-registry';
 import type { AutonomyRuntime } from '../simulation/autonomy-runtime';

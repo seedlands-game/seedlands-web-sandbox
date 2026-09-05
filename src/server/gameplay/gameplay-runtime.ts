@@ -1,5 +1,5 @@
 import { playerOccupiesVoxelShape } from './player-occupancy';
-import { EntityPhysics, voxelRayIsClear } from './entity-physics';
+import { voxelRayIsClear } from './voxel-ray';
 import { Voxel } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
 import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
@@ -21,7 +21,6 @@ import { attackTargetPoint, clonePosition, distanceSquared } from './gameplay-ge
 export type { GameplaySnapshot, GameplaySnapshotV1, GameplaySnapshotV2, GameplaySnapshotV3 } from './gameplay-snapshot';
 
 type Position = [number, number, number];
-type PickupEvent = { playerId: string; position: Position; stack: ItemStack };
 type GameplayCallbacks = {
   getVoxel: (position: Position) => number;
   editVoxel: (actorId: string, position: Position, voxel: number) => WorldCommitResult;
@@ -34,14 +33,12 @@ export type GameplayResult<Data extends object = Record<never, never>> = Success
 export class GameplayRuntime {
   readonly entities = new EntityStore();
   readonly simulation: AutonomyRuntime;
-  readonly physics: EntityPhysics;
   private readonly players = new Map<string, PlayerState>();
   private time = 0;
   private revision = 0;
   private persistedRevision = 0;
   private inventoryOperationCount = 0;
   private eventCount = 0;
-  private readonly pickupEvents: PickupEvent[] = [];
 
   constructor(private readonly callbacks: GameplayCallbacks) {
     this.simulation = new AutonomyRuntime({
@@ -49,23 +46,6 @@ export class GameplayRuntime {
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]),
       getWorldTime: callbacks.getWorldTime,
       isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
-      damagePlayer: (actorId, targetId, amount) => this.applyDamage(actorId, targetId, amount, 'actor').success,
-      consumeWorldItem: (entityId) => {
-        const entity = this.entities.get(entityId);
-        if (!entity || entity.type !== 'world-item') return false;
-        const removed = this.entities.despawn(entityId);
-        if (removed) this.touch();
-        return removed;
-      },
-      spawnWorldItem: (position, stack) => void this.spawnWorldItem(position, stack),
-    });
-    this.physics = new EntityPhysics({
-      entities: this.entities,
-      getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]),
-      pickupTargets: () =>
-        [...this.players.entries()]
-          .filter(([, player]) => player.lifecycle === 'alive')
-          .map(([id]) => ({ id, position: clonePosition(this.entities.get(id)!.position) })),
     });
   }
 
@@ -236,8 +216,6 @@ export class GameplayRuntime {
     if (!player.inventory.add(item.stack)) return { success: false, reason: 'inventory-full' };
     this.inventoryOperationCount += 1;
     this.entities.despawn(entityId);
-    if (this.pickupEvents.length >= 128) this.pickupEvents.shift();
-    this.pickupEvents.push({ playerId, position: clonePosition(item.position), stack: { ...item.stack } });
     this.touch();
     return { success: true };
   }
@@ -370,18 +348,6 @@ export class GameplayRuntime {
     return { success: true };
   }
 
-  advance(seconds: number): { commits: WorldCommitResult[]; pickups: PickupEvent[] } {
-    const commits: WorldCommitResult[] = [];
-    advanceGameplayClock(seconds, (step) => {
-      this.time += step;
-      this.players.forEach((player) => this.advancePlayer(player, step, commits));
-      this.simulation.advance(step);
-      this.physics.advance(step, () => this.autoPickup());
-    });
-    if (seconds > 0) this.touch(false);
-    return { commits, pickups: this.pickupEvents.splice(0) };
-  }
-
   advanceRules(seconds: number): { commits: WorldCommitResult[] } {
     const commits: WorldCommitResult[] = [];
     advanceGameplayClock(seconds, (step) => {
@@ -432,7 +398,6 @@ export class GameplayRuntime {
         getWorldTime: this.callbacks.getWorldTime,
       });
       this.entities.restore(snapshot.entities, snapshot.entitySequence);
-      this.pickupEvents.length = 0;
       this.players.clear();
       players.forEach((player, id) => this.players.set(id, player));
       this.time = snapshot.gameplayTime;
@@ -497,22 +462,6 @@ export class GameplayRuntime {
     if (!commit.committed) return;
     commits.push(commit);
     if (definition.drop) this.spawnWorldItem(this.voxelCenter(action.position), { ...definition.drop });
-  }
-
-  private autoPickup(): void {
-    let pickedUp = false;
-    [...this.players.entries()]
-      .sort(([left], [right]) => left.localeCompare(right))
-      .forEach(([id, player]) => {
-        if (player.lifecycle !== 'alive') return;
-        const position = this.entities.get(id)?.position;
-        if (!position) return;
-        for (const item of this.entities.queryNearby(position, 0.75, { type: 'world-item' })) {
-          if (!this.pickupItem(id, item.id).success) continue;
-          pickedUp = true;
-        }
-      });
-    if (pickedUp) this.touch();
   }
 
   private killPlayer(player: PlayerState): void {

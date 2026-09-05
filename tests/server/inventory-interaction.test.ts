@@ -19,34 +19,16 @@ describe('玩家背包可用交互', () => {
     expect(second.getInventory(player.id)).toEqual(first.getInventory(player.id));
     expect(second.getPlayerState(player.id).hunger).toBe(14);
   });
-  it('拾取事件只由成功拾取产生且一次消费，恢复不会重播旧事件', async () => {
+  it('拾取只成功一次且恢复不会重复增加物品', async () => {
     const persistence = new MemoryGamePersistence();
     const server = new GameServer({ seedText: 'pickup-event', persistence });
     const player = server.spawnPlayer({ position: [0, 34, 0] });
     const item = server.spawnWorldItem([0, 34, 0], { itemId: ItemIds.Berry, count: 1 });
     expect(server.pickupItem(player.id, item.id).success).toBe(true);
     expect(server.pickupItem(player.id, item.id).success).toBe(false);
-    expect(server.advanceGameplay(0).pickups).toHaveLength(1);
-    expect(server.advanceGameplay(0).pickups).toEqual([]);
-    const other = server.spawnWorldItem([0, 34, 0], { itemId: ItemIds.Berry, count: 1 });
-    server.pickupItem(player.id, other.id);
     await server.save();
     await server.restore();
-    expect(server.advanceGameplay(0).pickups).toEqual([]);
-  });
-  it('站立在附近也会自动吸附且只产生一次成功事件', () => {
-    const server = new GameServer({ seedText: 'auto-pickup-event' });
-    const player = server.spawnPlayer({ position: [0, 34, 0] });
-    server.spawnWorldItem([0, 34, 0], { itemId: ItemIds.Berry, count: 1 });
-
-    const result = server.advanceGameplay(0.1);
-    expect(result.pickups).toHaveLength(1);
-    expect(result.pickups[0]).toMatchObject({
-      playerId: player.id,
-      stack: { itemId: ItemIds.Berry, count: 1 },
-    });
     expect(server.getInventory(player.id).slots).toContainEqual({ itemId: ItemIds.Berry, count: 1 });
-    expect(server.advanceGameplay(0.1).pickups).toEqual([]);
   });
   it('同类部分合并、异类交换、移到空格都守恒', () => {
     const inventory = new Inventory(4, [

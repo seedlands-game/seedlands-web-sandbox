@@ -14,6 +14,7 @@ export type GameplayCommand = Exclude<
   | { type: 'save' }
   | { type: 'inspect-voxel' }
   | { type: 'inspect-chunk' }
+  | { type: 'advance-gameplay' }
 >;
 
 export type GameplayCommandPayload = {
@@ -243,10 +244,6 @@ export async function executeGameplayCommand(
         'Healed player.',
         server.healPlayer(playerId(source, command.entityId), positive(command.amount, 'Heal')),
       );
-    case 'advance-gameplay': {
-      const result = server.advanceGameplay(positive(command.seconds, 'Gameplay seconds'));
-      return { message: `Advanced gameplay by ${command.seconds} second(s).`, data: result };
-    }
   }
 }
 

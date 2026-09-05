@@ -16,10 +16,10 @@ describe('resource loop', () => {
     const revisionBeforeBreak = server.worldRevision;
 
     expect(server.beginBreak('player-1', [1, 33, 0])).toMatchObject({ success: true, requiredSeconds: 1.2 });
-    expect(server.advanceGameplay(1.19).commits).toHaveLength(0);
+    expect(server.advanceGameplayRules(1.19).commits).toHaveLength(0);
     expect(server.getVoxel(1, 33, 0)).toBe(Voxel.Wood);
 
-    const completed = server.advanceGameplay(0.01);
+    const completed = server.advanceGameplayRules(0.01);
     expect(completed.commits).toHaveLength(1);
     expect(completed.commits[0]).toMatchObject({ committed: true, worldRevision: revisionBeforeBreak + 1 });
     expect(server.getVoxel(1, 33, 0)).toBe(Voxel.Air);
@@ -35,15 +35,15 @@ describe('resource loop', () => {
     server.edit(1, 33, 0, Voxel.Wood, 'fixture');
 
     expect(server.beginBreak('player-1', [1, 33, 0])).toMatchObject({ requiredSeconds: 0.4 });
-    server.advanceGameplay(0.39);
+    server.advanceGameplayRules(0.39);
     expect(server.getVoxel(1, 33, 0)).toBe(Voxel.Wood);
     server.cancelBreak('player-1');
-    server.advanceGameplay(1);
+    server.advanceGameplayRules(1);
     expect(server.getVoxel(1, 33, 0)).toBe(Voxel.Wood);
 
     server.beginBreak('player-1', [1, 33, 0]);
     server.edit(1, 33, 0, Voxel.Stone, 'other-actor');
-    server.advanceGameplay(1);
+    server.advanceGameplayRules(1);
     expect(server.getVoxel(1, 33, 0)).toBe(Voxel.Stone);
     expect(server.queryEntities({ type: 'world-item' })).toHaveLength(0);
 
@@ -90,7 +90,7 @@ describe('crafting and survival rules', () => {
 
     for (let frame = 0; frame < 120; frame += 1) {
       server.updateEntity('player-1', { position: [0.5 + frame / 10_000, 34.6, 0.5] });
-      server.advanceGameplay(1 / 60);
+      server.advanceGameplayRules(1 / 60);
     }
 
     expect(server.gameplayMetrics().gameplayEventCount).toBe(before);
@@ -112,14 +112,14 @@ describe('crafting and survival rules', () => {
     long.applyDamage('system', 'player-1', 4, 'test');
     sliced.applyDamage('system', 'player-1', 4, 'test');
 
-    long.advanceGameplay(240);
-    for (let second = 0; second < 240; second += 1) sliced.advanceGameplay(1);
+    long.advanceGameplayRules(240);
+    for (let second = 0; second < 240; second += 1) sliced.advanceGameplayRules(1);
     expect(long.getPlayerState('player-1')).toEqual(sliced.getPlayerState('player-1'));
 
     long.setHungerForDebug('player-1', 0);
     sliced.setHungerForDebug('player-1', 0);
-    long.advanceGameplay(30);
-    for (let second = 0; second < 30; second += 1) sliced.advanceGameplay(1);
+    long.advanceGameplayRules(30);
+    for (let second = 0; second < 30; second += 1) sliced.advanceGameplayRules(1);
     expect(long.getPlayerState('player-1')).toEqual(sliced.getPlayerState('player-1'));
   });
 
@@ -151,7 +151,7 @@ describe('combat, death and respawn', () => {
     expect(server.getEntity(creature.id)).toMatchObject({ health: 8 });
     expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: false, reason: 'cooldown' });
 
-    server.advanceGameplay(0.5);
+    server.advanceGameplayRules(0.5);
     server.updateEntity(creature.id, { position: [20, 34.6, 0.5] });
     expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: false, reason: 'out-of-range' });
   });
@@ -162,10 +162,10 @@ describe('combat, death and respawn', () => {
     expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: true, damage: 4 });
     expect(server.getEntity(creature.id)).toMatchObject({ health: 8 });
     expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: false, reason: 'cooldown' });
-    server.advanceGameplay(0.5);
+    server.advanceGameplayRules(0.5);
     expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: true });
     server.updateEntity(creature.id, { position: [20, 34.6, 0.5] });
-    server.advanceGameplay(0.5);
+    server.advanceGameplayRules(0.5);
     expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: false, reason: 'out-of-range' });
   });
 

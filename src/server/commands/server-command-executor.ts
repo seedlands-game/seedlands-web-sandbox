@@ -21,11 +21,20 @@ import {
 
 export * from './command-contract';
 
+export type SessionAdvanceCommandResult = Readonly<{
+  physicsTick: number;
+  gameplayTime: number;
+  worldTime: number;
+  lanes: Readonly<{ physicsSteps: number; gameplayPeriods: number; fluidPeriods: number }>;
+  commits: readonly WorldCommitResult[];
+}>;
+
 type ExecutorOptions = {
   authorize?: (source: CommandSource, command: ServerCommand, category: CommandCategory) => boolean;
   observe?: (observation: CommandObservation) => void;
   now?: () => number;
   save?: () => Promise<{ savedChunks: string[]; gameplaySaved: boolean; commitSequence: number }>;
+  advanceSession?: (seconds: number) => SessionAdvanceCommandResult | Promise<SessionAdvanceCommandResult>;
 };
 
 type PreparedCommand = {
@@ -190,6 +199,24 @@ export class ServerCommandExecutor {
           message: `Saved ${savedChunks.length} dirty Chunk(s).`,
           data: { savedChunks, gameplaySaved, commitSequence },
           affectedChunks: savedChunks,
+        };
+      }
+      case 'advance-gameplay': {
+        if (!Number.isFinite(command.seconds) || command.seconds <= 0)
+          throw new TypeError('Gameplay seconds must be a positive number.');
+        if (!this.options.advanceSession) throw new Error('Authority session advance port is unavailable.');
+        const result = await this.options.advanceSession(command.seconds);
+        const affectedChunks = [...new Set(result.commits.flatMap((commit) => commit.structuralChange?.chunks ?? []))];
+        return {
+          message: `Advanced session by ${command.seconds} second(s).`,
+          data: {
+            seconds: command.seconds,
+            physicsTick: result.physicsTick,
+            gameplayTime: result.gameplayTime,
+            worldTime: result.worldTime,
+            lanes: result.lanes,
+          },
+          affectedChunks,
         };
       }
       case 'inspect-voxel': {

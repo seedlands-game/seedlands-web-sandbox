@@ -134,7 +134,7 @@ describe('simulation commands and persistence', () => {
     await expect(malformed.restore()).rejects.toThrow(/Invalid gameplay snapshot/);
   });
 
-  it('runs the three actor types through the same headless command executor', async () => {
+  it('spawns the three actor types through the same command executor without a second simulation clock', async () => {
     const server = new GameServer({ seedText: 'headless-autonomy' });
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
     const executor = new ServerCommandExecutor(server);
@@ -146,8 +146,7 @@ describe('simulation commands and persistence', () => {
       });
       expect(result.success).toBe(true);
     }
-    await executor.execute(developer, { type: 'advance-gameplay', seconds: 3 });
-    expect(server.simulationMetrics()).toMatchObject({ retainedActorCount: 3, behaviorEvaluationCount: 9 });
+    expect(server.simulationMetrics()).toMatchObject({ retainedActorCount: 3, behaviorEvaluationCount: 0 });
   });
 
   it('places starter actors on bounded dry surfaces across varied terrain seeds', () => {
