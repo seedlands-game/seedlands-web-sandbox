@@ -2,6 +2,7 @@ import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { bodyWorldAabb } from '../../physics/geometry';
 import type { GameplayEntity } from '../gameplay/entity-store';
 import type { WorldCommitResult } from '../game-server-types';
+import { collisionBoxesForVoxel } from '../../world/voxel-model';
 
 const EXTERNAL_GEOMETRY_RECOVERY_DISTANCE = 2;
 
@@ -12,6 +13,11 @@ export function queueBodyRecoveriesAfterCommit(
 ): void {
   const bounds = commit.structuralChange?.bounds;
   if (!commit.committed || !bounds) return;
+  if (
+    commit.collisionDelta &&
+    !commit.collisionDelta.some((delta) => delta.cells.some((cell) => collisionBoxesForVoxel(cell.voxel).length))
+  )
+    return;
   const changed = {
     min: { x: bounds.min[0], y: bounds.min[1], z: bounds.min[2] },
     max: { x: bounds.max[0] + 1, y: bounds.max[1] + 1, z: bounds.max[2] + 1 },

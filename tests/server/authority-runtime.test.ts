@@ -129,7 +129,11 @@ describe('AuthorityRuntime', () => {
       status: 'recovered',
     });
     const recoveryCount = recovered.diagnostics?.recoveryResults.length;
-    await runtime.editWorld('geometry-recovery-test', [{ x: 8, y: 1, z: 8, value: Voxel.Stone }]);
+    await runtime.editWorld('geometry-recovery-test', [{ x: 24, y: 1, z: 24, value: Voxel.Stone }]);
     expect(runtime.wake(3_000 / 60).diagnostics?.recoveryResults).toHaveLength(recoveryCount ?? 0);
+
+    runtime.setPlayerPosition([8.5, 1, 8.5]);
+    await runtime.editWorld('geometry-recovery-test', [{ x: 8, y: 1, z: 8, value: Voxel.Water }]);
+    expect(runtime.wake(4_000 / 60).diagnostics?.recoveryResults).toHaveLength(recoveryCount ?? 0);
   });
 });
