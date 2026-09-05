@@ -33,19 +33,29 @@ export const selectReachableBodyTarget = (
     targets: readonly ReachableBodyTarget[];
     maxDistance: number;
     maxCandidates: number;
+    startIndex?: number;
   }>,
 ): ReachableBodyTarget | null => {
-  const { state, config, world, targets, maxDistance, maxCandidates } = options;
-  if (!Number.isFinite(maxDistance) || maxDistance < 0 || !Number.isInteger(maxCandidates) || maxCandidates <= 0)
+  const { state, config, world, targets, maxDistance, maxCandidates, startIndex = 0 } = options;
+  if (
+    !Number.isFinite(maxDistance) ||
+    maxDistance < 0 ||
+    !Number.isInteger(maxCandidates) ||
+    maxCandidates <= 0 ||
+    !Number.isSafeInteger(startIndex) ||
+    startIndex < 0
+  )
     throw new RangeError('身体目标查询需要有限距离和正整数候选预算。');
   const candidates = targets
     .map((target) => ({ target, distance: length(displacementTo(state, target.position)) }))
     .filter(({ target, distance }) => finiteVec3(target.position) && distance <= maxDistance + COLLISION_EPSILON)
     .sort(({ target: left, distance: leftDistance }, { target: right, distance: rightDistance }) =>
       leftDistance === rightDistance ? left.id.localeCompare(right.id) : leftDistance - rightDistance,
-    )
-    .slice(0, maxCandidates);
-  return (
-    candidates.find(({ target }) => isBodyPositionReachable(state, config, world, target.position))?.target ?? null
+    );
+  const first = candidates.length === 0 ? 0 : startIndex % candidates.length;
+  const page = Array.from(
+    { length: Math.min(maxCandidates, candidates.length) },
+    (_, index) => candidates[(first + index) % candidates.length]!,
   );
+  return page.find(({ target }) => isBodyPositionReachable(state, config, world, target.position))?.target ?? null;
 };

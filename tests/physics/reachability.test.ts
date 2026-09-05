@@ -44,4 +44,27 @@ describe('身体目标可达性', () => {
       })?.id,
     ).toBe('a-blocked');
   });
+
+  it('游标跨步轮转候选页，让第九个可达目标最终获得固定预算内检查', () => {
+    const cursorState = { ...state, position: { x: 0, y: 0, z: 0 } };
+    const blocked = Array.from({ length: 8 }, (_, index) => ({
+      id: `blocked-${index}`,
+      position: { x: 0.8 + index * 0.1, y: 0, z: 0 },
+    }));
+    const clear = { id: 'clear-ninth', position: { x: -2, y: 0, z: 0 } };
+    const narrowWall: Collider = {
+      id: 'narrow-wall',
+      aabb: { min: { x: 0.4, y: -1, z: -1 }, max: { x: 0.6, y: 2, z: 1 } },
+    };
+    const options = {
+      state: cursorState,
+      config: itemBody,
+      world: world([narrowWall]),
+      targets: [...blocked, clear],
+      maxDistance: 2.25,
+      maxCandidates: 8,
+    };
+    expect(selectReachableBodyTarget(options)).toBeNull();
+    expect(selectReachableBodyTarget({ ...options, startIndex: 8 })?.id).toBe('clear-ninth');
+  });
 });

@@ -65,6 +65,8 @@ const ITEM_ATTRACTION_RADIUS = 2.25;
 const ITEM_ATTRACTION_SPEED = 6;
 const ITEM_PICKUP_RADIUS = 0.75;
 const MAX_PICKUP_TARGET_CANDIDATES = 8;
+const MAX_TRACKED_PICKUP_CURSORS = 512;
+const PICKUP_CURSOR_WRAP = 0x80000000;
 const ITEM_PICKUP_RETRY_TICKS = 15;
 
 const distanceSquared = (left: readonly number[], right: readonly number[]): number =>
@@ -83,6 +85,7 @@ export class AuthoritySession {
   private readonly recoveryQueue = new Map<string, Readonly<{ reason: BodyRecoveryReason; maxDistance: number }>>();
   private readonly recoveryResults: BodyRecoveryDiagnostic[] = [];
   private readonly pickupAttempts = new Map<string, number>();
+  private readonly pickupTargetCursors = new Map<string, number>();
   private physicsTick = 0;
   private gameplayPeriods = 0;
   private fluidPeriods = 0;
@@ -213,6 +216,7 @@ export class AuthoritySession {
     }));
     const selectedTargets = new Map<string, string>();
     const seen = new Set<string>();
+    const worldItemIds = new Set<string>();
     const nextBodies = new Map<string, AuthorityBodySnapshot>();
     const configs = new Map<string, BodyConfig>();
     for (const entity of entities) {
@@ -221,6 +225,15 @@ export class AuthoritySession {
       configs.set(entity.id, config);
       const physicsInput = this.physicsInput(entity, input);
       const initialState = toBodyState(entity);
+      const trackPickupCursor =
+        entity.type === 'world-item' &&
+        (this.pickupTargetCursors.has(entity.id) || this.pickupTargetCursors.size < MAX_TRACKED_PICKUP_CURSORS);
+      const pickupCursor =
+        this.pickupTargetCursors.get(entity.id) ??
+        (trackPickupCursor
+          ? 0
+          : ((this.physicsTick - 1) % (PICKUP_CURSOR_WRAP / MAX_PICKUP_TARGET_CANDIDATES)) *
+            MAX_PICKUP_TARGET_CANDIDATES);
       const target =
         entity.type === 'world-item'
           ? selectReachableBodyTarget({
@@ -230,8 +243,17 @@ export class AuthoritySession {
               targets: physicsTargets,
               maxDistance: ITEM_ATTRACTION_RADIUS,
               maxCandidates: MAX_PICKUP_TARGET_CANDIDATES,
+              startIndex: pickupCursor,
             })
           : null;
+      if (entity.type === 'world-item') {
+        worldItemIds.add(entity.id);
+        if (trackPickupCursor)
+          this.pickupTargetCursors.set(
+            entity.id,
+            target ? pickupCursor : (pickupCursor + MAX_PICKUP_TARGET_CANDIDATES) % PICKUP_CURSOR_WRAP,
+          );
+      }
       if (target) selectedTargets.set(entity.id, target.id);
       const attraction = target ? this.itemAttraction(initialState, target.position) : null;
       const result = stepBody({
@@ -289,6 +311,7 @@ export class AuthoritySession {
     }
     this.processPickups(selectedTargets);
     for (const id of this.bodies.keys()) if (!seen.has(id)) this.bodies.delete(id);
+    for (const id of this.pickupTargetCursors.keys()) if (!worldItemIds.has(id)) this.pickupTargetCursors.delete(id);
     this.commitSequence += 1;
   }
 

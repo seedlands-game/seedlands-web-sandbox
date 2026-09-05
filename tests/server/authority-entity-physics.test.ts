@@ -272,6 +272,28 @@ describe('Authority 实体统一物理接线', () => {
     expect(server.getEntity('item')!.position[0]).toBeLessThan(0.5);
   });
 
+  it('每步八次 sweep 的候选游标会在下一步推进到第九个可达玩家', () => {
+    const server = new EntityPhysicsServer([
+      entity('player', 'player', [-2, 0, 0.5]),
+      entity('item', 'world-item', [0, 0, 0.5]),
+    ]);
+    const blockedTargets = Array.from({ length: 8 }, (_, index) => ({
+      id: `blocked-${index}`,
+      position: [1.2 + index * 0.1, 0, 0.5] as [number, number, number],
+    }));
+    server.queryPickupTargets = () => [...blockedTargets, { id: 'player', position: [-2, 0, 0.5] }];
+    const session = createSession(server, {
+      configFor: (candidate) => (candidate.type === 'world-item' ? smallItemConfig : smallCharacterConfig),
+      voxelAt: (x, y) => (x === 1 && y === 0 ? Voxel.Stone : y === -1 ? Voxel.Stone : Voxel.Air),
+    });
+
+    session.wake(1_000 / 60);
+    expect(server.getEntity('item')!.physicsVelocity?.[0]).toBe(0);
+    session.wake((2 * 1_000) / 60);
+
+    expect(server.getEntity('item')!.physicsVelocity![0]).toBeLessThan(0);
+  });
+
   it('只在显式队列处理相邻体素恢复并记录原因、距离、失败和缺失实体', () => {
     const server = new EntityPhysicsServer([entity('player', 'player', [0, 0, 0])]);
     const session = createSession(server, {
