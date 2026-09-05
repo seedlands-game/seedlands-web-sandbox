@@ -32,6 +32,7 @@ test('水岸低顶阻止真实Space跃出，不能越过碰撞净空', async ({ 
     await page.keyboard.up('KeyW');
   }
   const after = await snapshot(page);
+  await testInfo.attach('geometry-final-frame', { body: await page.screenshot(), contentType: 'image/png' });
   const samples = after.trajectory.filter((item) => item.physicsTick > before.authority.physicsTick);
   await testInfo.attach('low-ceiling-authority-trajectory', {
     body: JSON.stringify(samples),
@@ -55,6 +56,7 @@ test('终端速度下落经过单层平台仍落在真实表面', async ({ page 
   const before = await snapshot(page);
   await waitForSnapshot(page, (value) => value.onGround && Math.abs(value.serverPlayerPosition[1] - 50.6) < 0.001);
   const after = await snapshot(page);
+  await testInfo.attach('geometry-final-frame', { body: await page.screenshot(), contentType: 'image/png' });
   const samples = after.trajectory.filter((item) => item.physicsTick > before.authority.physicsTick);
   await testInfo.attach('terminal-fall-authority-trajectory', {
     body: JSON.stringify(samples),

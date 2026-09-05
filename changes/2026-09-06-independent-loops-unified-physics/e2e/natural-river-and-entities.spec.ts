@@ -256,6 +256,14 @@ test('mosslight-68自然河岸需Space上岸，角色与掉落物失去支撑后
           (await page.evaluate((id) => window.__seedlandsHarness!.authorityBody(id), fallingIds.itemId))?.position[1],
       )
       .toBeLessThan(fallStart.item!.position[1] - 1);
+    await page.waitForFunction(({ actorId, itemId }) => {
+      const h = window.__seedlandsHarness!;
+      return h.authorityBody(actorId)?.grounded && h.authorityBody(itemId)?.grounded;
+    }, fallingIds);
+    await waitForSnapshot(
+      page,
+      (value) => value.meshingQueue === 0 && value.deferredRemeshes === 0 && value.performance.uploadQueueDepth === 0,
+    );
     const fallEvidence = await page.evaluate(() => {
       const target = window as unknown as NaturalEvidenceWindow;
       target.__naturalFallSampling = false;
