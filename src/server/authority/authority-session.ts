@@ -11,6 +11,7 @@ import {
   type PhysicsInput,
 } from '../../physics';
 import { ActiveMonotonicClock } from '../../runtime/active-monotonic-clock';
+import { BoundedCostSamples } from '../../runtime/bounded-cost-samples';
 import { MultiRateScheduler } from '../../runtime/multi-rate-scheduler';
 import { InputCommandBuffer, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type {
@@ -40,6 +41,7 @@ type AuthoritySessionOptions = Readonly<{
   publishLogicObservation?: (snapshot: AuthoritySnapshot) => void;
   worldHoursPerSecond?: number;
   initialCommitSequence?: number;
+  measureNow?: () => number;
 }>;
 
 const toBodyState = (entity: AuthorityEntity): BodyState => ({
@@ -77,6 +79,7 @@ const isCharacter = (entity: AuthorityEntity): boolean =>
 
 export class AuthoritySession {
   private readonly clock: ActiveMonotonicClock;
+  private readonly physicsCost = new BoundedCostSamples();
   private readonly scheduler: MultiRateScheduler;
   private readonly input: InputCommandBuffer;
   private readonly collisionWorld: VoxelCollisionWorld;
@@ -138,7 +141,9 @@ export class AuthoritySession {
     const due = this.scheduler.advanceTo(clock.activeTimeMs);
     for (const step of due.physicsSteps) {
       this.physicsTick = step.tick;
+      const startedAt = this.options.measureNow?.();
       this.stepPhysics(step.dtSeconds);
+      if (startedAt !== undefined) this.physicsCost.record(this.options.measureNow!() - startedAt);
     }
     this.integratedPhysicsTimeMs = due.integratedPhysicsTimeMs;
     this.physicsDebtMs = due.physicsDebtMs;
@@ -504,7 +509,10 @@ export class AuthoritySession {
       worldMutationCount: this.options.server.mutationCount,
       worldTime: this.options.server.worldTime,
       paused: this.clock.paused,
-      diagnostics: { recoveryResults: this.recoveryResults.map((result) => ({ ...result })) },
+      diagnostics: {
+        recoveryResults: this.recoveryResults.map((result) => ({ ...result })),
+        physicsCost: this.options.measureNow ? this.physicsCost.snapshot() : null,
+      },
     };
   }
 }

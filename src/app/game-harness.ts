@@ -185,6 +185,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       physicsDebtMs: authoritySnapshot?.physicsDebtMs ?? 0,
       activeTimeMs: authoritySnapshot?.activeTimeMs ?? 0,
       commitSequence: authoritySnapshot?.commitSequence ?? 0,
+      physicsCost: authoritySnapshot?.diagnostics?.physicsCost ?? null,
     },
     logic: context.logic?.diagnostics ?? { blockStartedCount: 0, blockCompletedCount: 0 },
     trajectory: context.authorityTrajectory,

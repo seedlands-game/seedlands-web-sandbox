@@ -1,4 +1,5 @@
 import type { BodyState, Contact } from '../../physics';
+import type { CostSampleWindow } from '../../runtime/bounded-cost-samples';
 
 export type AuthorityEntity = Readonly<{
   id: string;
@@ -74,7 +75,7 @@ export type AuthoritySnapshot = Readonly<{
   worldRevision: number;
   worldTime: number;
   paused: boolean;
-  diagnostics?: Readonly<{ recoveryResults: readonly BodyRecoveryDiagnostic[] }>;
+  diagnostics?: Readonly<{ recoveryResults: readonly BodyRecoveryDiagnostic[]; physicsCost?: CostSampleWindow | null }>;
 }>;
 
 export type AuthorityLaneTotals = Readonly<{

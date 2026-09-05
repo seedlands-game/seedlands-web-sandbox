@@ -8,6 +8,7 @@ import type { UiMetrics } from './ui/ui-contracts';
 import type { VisualEffectsSnapshot } from './advanced-visual-effects';
 import type { FluidFeedbackSummary } from './fluid-feedback-tracker';
 import type { WaterMeshTransitionSnapshot } from './water-mesh-transition';
+import type { CostSampleWindow } from '../runtime/bounded-cost-samples';
 
 export type MeshPart = MeshData;
 
@@ -99,6 +100,7 @@ export type HarnessSnapshot = {
     physicsDebtMs: number;
     activeTimeMs: number;
     commitSequence: number;
+    physicsCost: CostSampleWindow | null;
   };
   logic: { blockStartedCount: number; blockCompletedCount: number };
   trajectory: readonly {

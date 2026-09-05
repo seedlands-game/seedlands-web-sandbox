@@ -6,12 +6,14 @@
 
 从 `0927ed5` 的 Git archive 在 `/tmp` 独立构建 Vite 生产包，通过独立端口 4273 提供。浏览器测试使用当前 Mac 的 Chrome，避免并行源代码修改和 HMR 污染结果。
 
-- CDP 实际枚举：Authority、Logic、Persistence、Fluid Compute、World Compute 各一个，另有 Tone 的 Blob Worker，总计六个。默认池尚未超过六个总上限，但扩大通用池会越界，且原诊断漏计音频实例。此项保持未通过，后续 `c1b1827` 修订待浏览器复验。
+- CDP 实际枚举：Authority、Logic、Persistence、Fluid Compute、World Compute 各一个，另有 Tone 的 Blob Worker，总计六个。默认池尚未超过六个总上限，但扩大通用池会越界，且原诊断漏计音频实例。`c1b1827` 将 Tone 调度改为 timeout 后，独立前台 CDP 复验确认默认共 5 个、扩展共 6 个，均为预期真实实例，无额外 Blob Worker。
 - 真实 W 在一格河岸侧面受阻；W+Space 经连续权威位置轨迹上岸。按物理 tick 差检查竖直和水平位移上界，并要求存在中间高度。Headless 与前台 Chrome 分别通过，前台两个强交互用例为 `2 passed (7.5s)`。
 - 独立 10 秒前台采样通过：实际 9999.9ms、1201 帧、最大相邻帧间隔 12.1ms；Logic 的实际阻塞窗口覆盖 492.5ms、60 帧，期间完成 29 个物理步、29 个输入确认，最大物理债务 16.4ms。
 - 原始采样保存在 `evidence/authority-logic-block-0927ed5.json`。此采样画布视口为 1280×720，仅用于 A3，不作为 A9 的 1920×1080 性能准出。
 
 运行入口：`SEEDLANDS_E2E_PORT=4273 pnpm exec playwright test changes/2026-09-06-independent-loops-unified-physics/e2e/authority-worker-physics.spec.ts --headed --workers=1`。10 秒采样显式选择 `--grep 'Logic实际'`；线程用例在音频修订前仍为 RED。
+
+`c1b1827` 不可变生产包在端口 4274 完整运行该需求文件：`4 passed (27.9s)`，涵盖两种实际拓扑、10 秒逻辑阻塞和真实跳跃上岸。后续恢复生态与预测接入后仍需最终集成复验。
 
 ## 验收工具自身的纠正
 

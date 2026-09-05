@@ -16,4 +16,4 @@
 
 ## 当前状态
 
-持久端、GameServer 恢复已实现；Session/Runtime 初值由协作者随 `0186b05` 和 `1745cfd` 接入。检查点恢复、冻结保存、Headless 三文件 19 项 GREEN，另保存/玩法/模拟持久化三文件 19 项 GREEN；受影响 ESLint 通过。为遵守 GameServer 500 行上限，将已有单格编辑指标常量原样移到 `world-edit-metrics.ts`，不改变其计算。真实 IndexedDB 浏览器重载与最终生产构建仍待独立复验。
+持久端、GameServer 恢复已实现；Session/Runtime 初值由协作者随 `0186b05` 和 `1745cfd` 接入。检查点恢复、冻结保存、Headless 三文件 19 项 GREEN，另保存/玩法/模拟持久化三文件 19 项 GREEN；受影响 ESLint 通过。为遵守 GameServer 500 行上限，将已有单格编辑指标常量原样移到 `world-edit-metrics.ts`，不改变其计算。`009c0ee` 不可变生产包的真实 IndexedDB 前台 Chrome 重载复验已通过：`1 passed (13.33s)`，刷新前提交序号 821，刷新后立即保存序号 825，两次均由持久事务确认成功。原始回执保存在 `evidence/checkpoint-restart-009c0ee.json`。完整最终生产构建仍待集成准出。
