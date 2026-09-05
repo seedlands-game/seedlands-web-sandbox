@@ -10,7 +10,7 @@
 
 ## 结论
 
-当前模块仍暂不批准。`9b2ec2203021165a29a2f2e073335c377edfbb3d` 已解除恢复请求击穿权威唤醒的 P1，并关闭原始双玩家隔墙反例；但固定 8 个候选的实现会让第 9 个范围内可达目标在静态场景永久饥饿，P2 尚未关闭。
+批准本模块在当前审查范围内准入。`9b2ec2203021165a29a2f2e073335c377edfbb3d` 已解除恢复请求击穿权威唤醒的 P1；`c4a0c64edcb38adeb9e1faedd3243747990c91b3` 以跨物理步的固定分页关闭第 9 个范围内可达目标永久饥饿的 P2，同时保留每页最多 8 次 swept-AABB 查询。此结论不代替整个 change 的浏览器、视觉、静态与构建准出。
 
 ## P1：恢复核心的候选预算异常会终止整个 Authority 物理步
 
@@ -47,4 +47,14 @@ pnpm exec vitest run --root /tmp --globals /tmp/seedlands-authority-review.test.
 - 新增第 8/第 9 个边界反例：物件位于原点，墙后放 8 个更近但不可达的玩家，第 9 个可达玩家位于 `x=-2` 且仍在 2.25 格吸附半径内。当前函数先截断到前 8 个，返回 `null`；状态不变使每个后续 tick 重复同一集合，目标永久饥饿。
 - 实际命令 `pnpm exec vitest run --root /tmp --globals /tmp/seedlands-authority-review.test.ts --reporter=verbose` 得到 4 项中 3 项通过、1 项失败，唯一失败为“八个较近阻挡目标不会让第九个范围内可达目标永久饥饿”。仓库定向回归 7 个文件、56 项全部通过，说明缺口位于现有覆盖之外。
 
-复验结论：P1 批准关闭，P2 继续阻断本模块准入。最低修复要求是在不增加每步 8 次 sweep 预算的前提下，以有界轮转、游标或等价公平机制保证范围内候选最终获得检查机会；不能以限制端口只返回任意 8 个目标规避复数目标合同。修复后重跑保留在 `/tmp` 的四项反例。
+当次复验结论：P1 批准关闭，P2 继续阻断本模块准入。最低修复要求是在不增加每页 8 次 sweep 预算的前提下，以有界轮转、游标或等价公平机制保证范围内候选最终获得检查机会；不能以限制端口只返回任意 8 个目标规避复数目标合同。以下最终复验取代此阶段结论。
+
+## `c4a0c64` 最终复验
+
+- 回修为每个活跃物件保存非负分页游标；按距离、再按 id 得到稳定候选序列，每页长度为 `min(8, 范围内候选数)`。本页没有可达目标时游标增加 8，下一物理步从后续候选开始；目标出现时保留本页，避免吸附方向无故轮换。游标表最多保留 512 个物件，超出表容量的物件改用 `physicsTick` 生成同样有界的页起点，消失物件的游标会清理。
+- 原单次 helper 反例要求一次调用同时跳过 8 个阻挡目标并检查第 9 个，与每页 8 次查询预算互斥，不能作为公平性合同。独立反例已改为跨步验证：第一页恰好触发 8 次 `querySolids` 并返回 `null`；`startIndex=8` 的下一页只触发 1 次查询并选中 `clear-ninth`。
+- 同一 `/tmp/seedlands-authority-review.test.ts` 另以真实 `AuthoritySession`、体素墙和 9 个目标验证接线：第一物理步物件横向速度为 0，第二物理步变为负值并朝第 9 个可达玩家吸附。四项独立反例全部通过，包括最大恢复距离预算降级、隔墙多目标选择和非法碰撞箱错误不被掩盖。
+- 可达性选择仍只让一页最多 8 个候选进入完整路径检查；进入拾取半径后，`processPickups()` 对同一个已选目标再做一次必要的当前位置路径复核。两部分均为常量上界，没有把候选 sweep 扩大为无界工作。目标的距离与 id 排序会遍历端口返回的目标集合，属于原有数据枚举；本回修没有增加同步 Chunk 生成或恢复搜索预算。
+- 实际执行 `pnpm exec vitest run --root /tmp --globals /tmp/seedlands-authority-review.test.ts --reporter=verbose`：1 个文件、4 项全部通过。定向回归 `tests/physics/reachability.test.ts`、`step-body.test.ts`、`body-registry.test.ts`、`tests/server/authority-entity-physics.test.ts`、`authority-session.test.ts`、`authority-runtime.test.ts`、`authority-game-server-port.test.ts`：7 个文件、58 项全部通过。`git diff --check c4a0c64^..c4a0c64` 通过。
+
+最终结论：P1、P2 均关闭，批准 Authority 实体统一物理模块进入主线后续准出。保留的风险是公平性保证以多个物理步为时间边界；候选持续高速增删时只能保证每步工作有界，不能对任意对抗性动态集合承诺固定步数到达，这不影响静态或正常移动目标的最终进展合同。
