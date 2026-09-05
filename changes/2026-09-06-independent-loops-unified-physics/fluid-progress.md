@@ -23,3 +23,25 @@ Authority 入口固定为 `requestFluidWork()`、`commitFluidCandidate(candidate
 - 2026-09-06：`pnpm verify:static` 通过；包含格式、ESLint、路径规则、V8 coverage 与 TypeScript。
 - 2026-09-06：`pnpm build` 通过。Vite 仍报告既有主 bundle 大于 500 kB 的提示，未作为失败。
 - 2026-09-06：`git diff --check` 通过。
+
+## 跨 Chunk 撤源依赖闭包修订（2026-09-06）
+
+### 复现与根因
+
+- 只读审查夹具 `/tmp/seedlands-fluid-review.test.ts` 曾实际 RED：`x=29..33,y=5,z=5` 的流水由 `x=33` 源供给，撤除 `x=28` 的另一个源后，旧清理搜索越过租赁的一跳读集，把未知 Chunk 当作无源并错误删除 `[29,5,5]`。
+- 旧实现还把同一水体组件的多跳搜索分别放在 Authority 与候选计算中，既重复计算，又让 Authority 承担了不应有的流体求解工作。
+- 局部收敛试验定位到另一处实际根因：非源水位改变后未重新激活其相邻格。封闭沟槽内 `[6,5,5]` 从 7 级降到 5 级后，`[7,5,5]` 没有进入下一批，形成假稳定水位链；补齐相邻格激活后，有限批次会继续收敛至退水。
+
+### 修订决策
+
+- 删除撤源时的全连通备用源搜索。`removeSource()` 仅把相邻格放入普通 `frontier`；`cleanupFrontier` 保持既有协议兼容，但候选按相同的局部松弛规则处理，不再触发独立清理算法。
+- 候选只读取本格、上/下格和四个水平邻格。一跳依赖缺失时，若计算结果会使非源水位降低或删水，则保留原水位并重新排队；未知绝不等同于无供水。已知局部供水可以使水位提高。
+- 每次非源水位变化均激活相邻格，使有限批次继续传播真实变化，而不是依赖一次性清空组件的旧捷径。
+
+### 本轮 GREEN 证据
+
+- `pnpm exec vitest run tests/server/fluid-transaction.test.ts tests/server/voxel-fluid-runtime.test.ts`：通过，2 个测试文件、28 个用例。新增覆盖：跨 Chunk 一跳读集、未加载边界保留并在加载后恢复、未知更强邻居不降水、唯一撤源有限收敛、队列满后的分片重扫。
+- `pnpm exec vitest run --config /tmp/seedlands-fluid-review.config.mjs`：通过。该夹具的候选读集仅为 `0,0,0`，且不会写入删除 `[29,5,5]` 的候选。
+- `git diff --check`：通过。
+- `pnpm verify:static`：通过；73 个测试文件通过、2 个跳过，333 个测试通过、4 个跳过；格式、ESLint、路径规则、V8 coverage 与 TypeScript 均通过。
+- `pnpm build`：通过；保留既有主 bundle 大于 500 kB 的 Vite 提示，未作为失败。

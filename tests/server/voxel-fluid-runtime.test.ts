@@ -11,6 +11,16 @@ const clearBox = (server: GameServer, minX: number, maxX: number, minY: number, 
   server.editBatch({ actorId: 'fixture', edits });
 };
 
+const activateKnownFluidNeighborhood = (server: GameServer) => {
+  const keys: string[] = [];
+  for (const cx of [-1, 0])
+    for (const cz of [-1, 0]) {
+      server.getChunk(cx, 1, cz);
+      keys.push(`${cx},1,${cz}`);
+    }
+  server.setFluidActiveChunks(keys);
+};
+
 describe('bounded voxel fluid runtime', () => {
   it('falls before spreading, then attenuates across supported ground', () => {
     const server = new GameServer({ seedText: 'fluid-fall' });
@@ -41,6 +51,7 @@ describe('bounded voxel fluid runtime', () => {
     for (let x = -4; x <= 4; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(1, 50, 0, Voxel.Stone, 'fixture');
     server.edit(0, 50, 0, Voxel.Water, 'fixture');
+    activateKnownFluidNeighborhood(server);
     server.advanceFluid(2);
     expect(server.getVoxel(1, 50, 0)).toBe(Voxel.Stone);
     expect(server.getVoxel(-1, 50, 0)).toBe(Voxel.Water);
@@ -221,6 +232,7 @@ describe('bounded voxel fluid runtime', () => {
     clearBox(server, -2, 2, 50, 52);
     for (let x = -2; x <= 2; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.editBatch({ actorId: 'fixture', edits: [{ x: 0, y: 50, z: 0, value: Voxel.Water }] });
+    activateKnownFluidNeighborhood(server);
     expect(server.getFluidCell(0, 50, 0)).toEqual({ level: 8, source: true });
     server.advanceFluid(1);
     expect(server.getVoxel(-1, 50, 0)).toBe(Voxel.Water);

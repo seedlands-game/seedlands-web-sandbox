@@ -96,11 +96,13 @@ export function computeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCa
   const next = new Set<string>();
   const nextCleanup = new Set<string>();
   let needsRescan = false;
+  let unknownReadCount = 0;
 
   const read = (position: FluidPosition): FluidCellValue | undefined => {
     const chunk = chunks.get(chunkKeyFor(position));
     if (!chunk) {
       needsRescan = true;
+      unknownReadCount += 1;
       return undefined;
     }
     const index = indexFor(position);
@@ -122,9 +124,6 @@ export function computeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCa
   const activate = (position: FluidPosition) => {
     if (isActivePosition(position)) next.add(positionKey(position));
   };
-  const activateCleanup = (position: FluidPosition) => {
-    if (isActivePosition(position)) nextCleanup.add(positionKey(position));
-  };
   const cell = (position: FluidPosition) => {
     const value = read(position);
     if (!value || value.voxel !== Voxel.Water) return value;
@@ -141,25 +140,6 @@ export function computeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCa
     }
     return best;
   };
-  const hasAlternateSource = (origin: FluidPosition): boolean => {
-    const pending = [origin];
-    const visited = new Set<string>();
-    while (pending.length && visited.size < FLUID_FRONTIER_BATCH_SIZE) {
-      const position = pending.shift()!;
-      const key = positionKey(position);
-      if (visited.has(key)) continue;
-      visited.add(key);
-      const current = cell(position);
-      if (!current || current.voxel !== Voxel.Water) continue;
-      if ((current.fluid & 0x80) !== 0) return true;
-      const [x, y, z] = position;
-      for (const candidate of [[x, y + 1, z] as FluidPosition, ...horizontal(position)]) {
-        const neighbor = cell(candidate);
-        if (neighbor?.voxel === Voxel.Water && !visited.has(positionKey(candidate))) pending.push(candidate);
-      }
-    }
-    return false;
-  };
   const place = (position: FluidPosition, level: number) => {
     const previous = read(position);
     if (!previous) return;
@@ -170,27 +150,17 @@ export function computeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCa
     neighborhood(position).forEach(activate);
   };
 
-  for (const position of snapshot.cleanupFrontier ?? []) {
-    const current = cell(position);
-    if (!current || current.voxel !== Voxel.Water) continue;
-    if ((current.fluid & 0x80) !== 0) {
-      neighborhood(position).forEach(activate);
-      continue;
-    }
-    if (hasAlternateSource(position)) {
-      activate(position);
-      continue;
-    }
-    write(position, { voxel: Voxel.Air, fluid: 0 });
-    neighborhood(position).forEach(activateCleanup);
-  }
-
-  for (const position of snapshot.frontier) {
+  // Source removal is ordinary local relaxation. A cell only changes once its
+  // one-cell dependency stencil is known, so an unloaded Chunk is never
+  // interpreted as a dry neighbor and no authority-side component search is
+  // required.
+  for (const position of [...(snapshot.cleanupFrontier ?? []), ...snapshot.frontier]) {
     const current = cell(position);
     if (!current || current.voxel !== Voxel.Water) continue;
     const level = current.fluid & 0x0f;
     const source = (current.fluid & 0x80) !== 0;
     if (!source) {
+      const unknownReadsBefore = unknownReadCount;
       let desired = suppliedLevel(position);
       const [x, y, z] = position;
       const above = cell([x, y + 1, z]);
@@ -199,12 +169,23 @@ export function computeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCa
         return neighbor?.voxel === Voxel.Water && (neighbor.fluid & 0x0f) > level;
       });
       if (above?.voxel !== Voxel.Water && !strongerSide) desired = Math.min(desired, level - 1);
+      // Unknown local cells may contain a stronger supporting source. They are
+      // never proof that a current level can shrink; leave it intact and retry
+      // after the authority can provide that one-hop dependency. A known local
+      // source may still increase the level in this step.
+      if (desired < level && unknownReadCount !== unknownReadsBefore) {
+        activate(position);
+        continue;
+      }
       if (desired <= 0) {
         write(position, { voxel: Voxel.Air, fluid: 0 });
         neighborhood(position).forEach(activate);
         continue;
       }
-      if (desired !== level) write(position, { voxel: Voxel.Water, fluid: desired });
+      if (desired !== level) {
+        write(position, { voxel: Voxel.Water, fluid: desired });
+        neighborhood(position).forEach(activate);
+      }
     }
     const [x, y, z] = position;
     const below: FluidPosition = [x, y - 1, z];
@@ -314,7 +295,7 @@ export class FluidTransactionAuthority {
 
   removeSource(position: FluidPosition): boolean {
     let accepted = true;
-    for (const candidate of horizontal(position)) accepted = this.enqueueCleanup(candidate) && accepted;
+    for (const candidate of horizontal(position)) accepted = this.enqueue(candidate) && accepted;
     return accepted;
   }
 
