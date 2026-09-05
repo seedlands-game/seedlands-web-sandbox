@@ -16,9 +16,12 @@ export class MemoryChunkPersistence implements ChunkPersistence {
   }
 
   saveSnapshots(snapshots: readonly ChunkSnapshot[]): void {
-    snapshots.forEach((snapshot) => {
-      this.snapshots.set(snapshot.key, cloneSnapshot(snapshot));
-      this.writes.push(snapshot.key);
-    });
+    this.commitSnapshots(snapshots);
+  }
+
+  protected commitSnapshots(snapshots: readonly ChunkSnapshot[]): void {
+    const copies = snapshots.map(cloneSnapshot);
+    copies.forEach((snapshot) => this.snapshots.set(snapshot.key, snapshot));
+    this.writes.push(...copies.map((snapshot) => snapshot.key));
   }
 }

@@ -1,6 +1,7 @@
 import type { WorldCommitResult, WorldEditBatch } from './game-server';
 import type { ActorArchetype, EntityQuery, EntitySpawn, EntityUpdate, GameplayEntity } from './gameplay/entity-store';
 import { GameplayRuntime } from './gameplay/gameplay-runtime';
+import { legacyPlayerPositionToFeet } from './gameplay/gameplay-snapshot';
 import type { ItemStack } from './gameplay/item-registry';
 import type { ActorActionInput } from './simulation/action-runtime';
 import type { ActorRegistration } from './simulation/autonomy-runtime';
@@ -30,7 +31,6 @@ export abstract class GameServerGameplayFacade {
   abstract get worldTime(): number;
   abstract getVoxel(x: number, y: number, z: number): number;
   abstract editBatch(batch: WorldEditBatch): WorldCommitResult;
-  abstract flushDirtyChunks(): Promise<string[]>;
   abstract setWorldTime(hours: number): number;
 
   createEntity(entity: EntitySpawn): GameplayEntity {
@@ -211,16 +211,6 @@ export abstract class GameServerGameplayFacade {
     return this.restoredVersion;
   }
 
-  async save(): Promise<{ savedChunks: string[]; gameplaySaved: boolean }> {
-    const snapshot = this.gameplay.createSnapshot();
-    if (this.gameplayPersistence?.saveGameplaySnapshot) {
-      await this.gameplayPersistence.saveGameplaySnapshot(snapshot);
-      this.gameplay.markPersisted(snapshot.revision);
-    }
-    const savedChunks = await this.flushDirtyChunks();
-    return { savedChunks, gameplaySaved: Boolean(this.gameplayPersistence?.saveGameplaySnapshot) };
-  }
-
   async restore(): Promise<void> {
     const snapshot = await this.gameplayPersistence?.loadGameplaySnapshot?.();
     if (snapshot) {
@@ -230,7 +220,16 @@ export abstract class GameServerGameplayFacade {
       return;
     }
     const legacyPosition = await this.gameplayPersistence?.loadLegacyPlayerPosition?.();
-    if (legacyPosition) this.gameplay.spawnPlayer({ id: 'player-1', position: legacyPosition });
+    if (legacyPosition)
+      this.gameplay.spawnPlayer({ id: 'player-1', position: legacyPlayerPositionToFeet(legacyPosition) });
+  }
+
+  protected createGameplaySnapshot() {
+    return this.gameplay.createSnapshot();
+  }
+
+  protected markGameplayPersisted(revision: number): void {
+    this.gameplay.markPersisted(revision);
   }
 
   private legacyEntity(entity: GameplayEntity): GameplayEntity {

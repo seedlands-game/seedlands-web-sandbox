@@ -12,7 +12,6 @@ import {
 } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
-import { createChunkSnapshot } from './persistence/create-chunk-snapshot';
 import { GameServerGameplayFacade } from './game-server-gameplay';
 import { createStarterEcology } from './simulation/starter-ecology';
 import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
@@ -34,6 +33,8 @@ import type { FluidCandidate } from './fluid/fluid-transaction';
 import { findDryStarterSurface } from './starter-surface';
 import { peekLoadedVoxel } from './loaded-voxel-reader';
 import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
+import type { FrozenGameSaveSnapshot } from './persistence/game-save-snapshot';
+import { GameSaveRuntime } from './persistence/game-save-runtime';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -84,6 +85,7 @@ export class GameServer extends GameServerGameplayFacade {
   private readonly fluidChunks: FluidChunkAccess;
   private readonly fluidChunkActivations = new FluidChunkActivationQueue();
   private readonly fluidWindow = new FluidActiveWindow();
+  private readonly saves: GameSaveRuntime;
 
   constructor(readonly options: GameServerOptions) {
     super(options.persistence);
@@ -92,6 +94,15 @@ export class GameServer extends GameServerGameplayFacade {
     if (this.generatorVersion !== 2 && this.generatorVersion !== GENERATOR_VERSION)
       throw new Error(`Unsupported generator version ${this.generatorVersion}.`);
     this.persistence = options.persistence;
+    this.saves = new GameSaveRuntime({
+      seedText: options.seedText,
+      generatorVersion: this.generatorVersion,
+      persistence: this.persistence,
+      chunks: this.chunks,
+      getWorldRevision: () => this.revision,
+      createGameplaySnapshot: () => this.createGameplaySnapshot(),
+      markGameplayPersisted: (revision) => this.markGameplayPersisted(revision),
+    });
     this.fluidChunks = new FluidChunkAccess(this.chunks, (cx, cy, cz) => this.getChunk(cx, cy, cz));
     this.fluidRuntime = new FluidTransactionRuntime({
       epoch: 1,
@@ -427,39 +438,25 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   async flushDirtyChunks(): Promise<string[]> {
-    const dirty = [...this.chunks.values()].filter((chunk) => chunk.dirty);
-    if (!dirty.length) return [];
-    if (!this.persistence) return [];
-    const snapshots = dirty.map((chunk) => createChunkSnapshot(this.options.seedText, chunk));
-    await this.persistence.saveSnapshots(snapshots);
-    snapshots.forEach((snapshot) => {
-      const chunk = this.chunks.get(snapshot.key);
-      if (!chunk) return;
-      chunk.persistedRevision = Math.max(chunk.persistedRevision, snapshot.revision);
-      chunk.dirty = chunk.revision > chunk.persistedRevision;
-    });
-    return snapshots.map((snapshot) => snapshot.key);
+    return this.saves.flushDirtyChunks();
+  }
+
+  freezeSaveSnapshot(commitSequence: number): FrozenGameSaveSnapshot {
+    return this.saves.freeze(commitSequence);
+  }
+
+  saveFrozen(
+    snapshot: FrozenGameSaveSnapshot,
+  ): Promise<{ savedChunks: string[]; gameplaySaved: boolean; commitSequence: number }> {
+    return this.saves.saveFrozen(snapshot);
+  }
+
+  async save(commitSequence = 0) {
+    return this.saves.save(commitSequence);
   }
 
   async evictChunk(cx: number, cy: number, cz: number): Promise<boolean> {
-    const key = chunkKey(cx, cy, cz);
-    const chunk = this.chunks.get(key);
-    if (!chunk) return true;
-    const accessEpoch = chunk.accessEpoch;
-    const revision = chunk.revision;
-    if (chunk.dirty) await this.flushDirtyChunks();
-    const current = this.chunks.get(key);
-    if (
-      current !== chunk ||
-      current.accessEpoch !== accessEpoch ||
-      current.revision !== revision ||
-      current.dirty ||
-      current.persistedRevision !== current.revision
-    )
-      return false;
-    this.chunks.delete(key);
-    this.persistence?.evictSnapshot?.(key);
-    return true;
+    return this.saves.evictChunk(cx, cy, cz);
   }
 
   advanceClock(hours: number): number {

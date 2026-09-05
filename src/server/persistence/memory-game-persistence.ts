@@ -1,4 +1,5 @@
-import type { GameplaySnapshotV1 } from '../gameplay/gameplay-runtime';
+import type { GameplaySnapshot } from '../gameplay/gameplay-runtime';
+import { cloneFrozenGameSaveSnapshot, type FrozenGameSaveSnapshot } from './game-save-snapshot';
 import type { GameplayPersistence } from './gameplay-persistence';
 import { MemoryChunkPersistence } from './memory-chunk-persistence';
 
@@ -24,13 +25,24 @@ export class MemoryGamePersistence extends MemoryChunkPersistence implements Gam
     return clone(this.gameplaySnapshot);
   }
 
-  saveGameplaySnapshot(snapshot: GameplaySnapshotV1): void {
+  saveGameplaySnapshot(snapshot: GameplaySnapshot): void {
+    this.consumeFailure();
+    this.gameplaySnapshot = clone(snapshot);
+  }
+
+  saveFrozenSnapshot(snapshot: FrozenGameSaveSnapshot): void {
+    this.consumeFailure();
+    const copy = cloneFrozenGameSaveSnapshot(snapshot);
+    this.commitSnapshots(copy.chunks);
+    this.gameplaySnapshot = copy.gameplay;
+  }
+
+  private consumeFailure(): void {
     if (this.nextFailure) {
       const failure = this.nextFailure;
       this.nextFailure = null;
       throw failure;
     }
-    this.gameplaySnapshot = clone(snapshot);
   }
 
   loadLegacyPlayerPosition(): [number, number, number] | null {
@@ -38,6 +50,10 @@ export class MemoryGamePersistence extends MemoryChunkPersistence implements Gam
   }
 
   failNextGameplaySave(error: Error): void {
+    this.nextFailure = error;
+  }
+
+  failNextFrozenSave(error: Error): void {
     this.nextFailure = error;
   }
 }

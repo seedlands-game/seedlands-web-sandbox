@@ -112,7 +112,7 @@ describe('gameplay persistence', () => {
     const legacy = new MemoryGamePersistence({ legacyPlayerPosition: [4, 42, 8] });
     const migrated = new GameServer({ seedText: 'legacy-gameplay', persistence: legacy });
     await migrated.restore();
-    expect(migrated.queryEntities({ type: 'player' })).toEqual([expect.objectContaining({ position: [4, 42, 8] })]);
+    expect(migrated.queryEntities({ type: 'player' })).toEqual([expect.objectContaining({ position: [4, 40.4, 8] })]);
     const playerId = migrated.queryEntities({ type: 'player' })[0].id;
     expect(migrated.getPlayerState(playerId)).toMatchObject({ health: 20, hunger: 20, lifecycle: 'alive' });
 
