@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { HarnessApi } from '../../../src/app/game-harness';
-import { prepareFlatMovement, startHarnessWorld } from '../../../tests/e2e/support/harness';
+import { prepareFlatMovement, startHarnessWorld, waitForSnapshot } from '../../../tests/e2e/support/harness';
 
 const state = (page: Page) => page.evaluate(() => (window.__seedlandsHarness as unknown as HarnessApi).snapshot());
 const chord = async (page: Page) => {
@@ -24,6 +24,14 @@ test('F3+B完整消费，面板等价控制，关闭真实线框资源不残留'
     }
     h.setView(0, 0);
   });
+  await waitForSnapshot(
+    page,
+    (value) =>
+      value.generationQueue === 0 &&
+      value.meshingQueue === 0 &&
+      value.deferredRemeshes === 0 &&
+      value.performance.uploadQueueDepth === 0,
+  );
   await page.bringToFront();
   if (await page.locator('#debug').isVisible()) await page.keyboard.press('F3');
   await expect(page.locator('#debug')).toBeHidden();
@@ -45,6 +53,7 @@ test('F3+B完整消费，面板等价控制，关闭真实线框资源不残留'
   await expect(page.locator('#debug')).toContainText('预测青');
   await expect(page.locator('#debug')).toContainText('球形传感器');
   await page.locator('#collision-debug-contacts').check();
+  await page.locator('#collision-debug-contacts').blur();
   await testInfo.attach('collision-debug-enabled', { body: await page.screenshot(), contentType: 'image/png' });
   await page.keyboard.press('F3');
   await expect(page.locator('#debug')).toBeHidden();

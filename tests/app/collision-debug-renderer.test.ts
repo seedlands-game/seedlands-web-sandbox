@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const destroy = vi.fn();
 const meshDestroy = vi.fn();
 const materialDestroy = vi.fn();
+const instanceVertexColors = vi.fn();
 
 vi.mock('playcanvas', () => {
   class Entity {
@@ -27,8 +28,14 @@ vi.mock('playcanvas', () => {
     constructor(readonly device: unknown) {}
     clear() {}
     setPositions() {}
-    setColors() {}
-    update() {}
+    hasColors = false;
+    vertexBuffer: { format: { hasColor: boolean } } | null = null;
+    setColors() {
+      this.hasColors = true;
+    }
+    update() {
+      this.vertexBuffer = { format: { hasColor: this.hasColors } };
+    }
     destroy = meshDestroy;
   }
   class MeshInstance {
@@ -36,10 +43,12 @@ vi.mock('playcanvas', () => {
     castShadow = true;
     receiveShadow = true;
     constructor(
-      readonly mesh: unknown,
+      readonly mesh: Mesh,
       readonly material: unknown,
       readonly entity: unknown,
-    ) {}
+    ) {
+      instanceVertexColors(mesh.vertexBuffer?.format.hasColor ?? false);
+    }
   }
   return {
     Entity,
@@ -84,6 +93,7 @@ describe('碰撞调试渲染资源', () => {
     });
     renderer.setEnabled(true);
     renderer.update(batch);
+    expect(instanceVertexColors).toHaveBeenCalledWith(true);
     expect(renderer.diagnostics).toMatchObject({
       enabled: true,
       entityCount: 1,

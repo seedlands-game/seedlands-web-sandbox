@@ -47,15 +47,21 @@ export class CollisionDebugRenderer {
 
   update(batch: CollisionDebugBatch): void {
     if (!this.enabled || this.disposed) return;
-    this.ensureResources();
-    if (!this.mesh || !this.instance) return;
+    if (!this.mesh) {
+      if (batch.positions.length > 0) this.ensureResources(batch);
+      return;
+    }
+    this.writeBatch(this.mesh, batch);
+    if (this.instance) this.instance.visible = batch.positions.length > 0;
+  }
+
+  private writeBatch(mesh: pc.Mesh, batch: CollisionDebugBatch): void {
     const vertexCount = batch.positions.length / 3;
     this.vertexCapacity = Math.max(this.vertexCapacity, vertexCount);
-    this.mesh.clear(true, false, this.vertexCapacity);
-    this.mesh.setPositions(batch.positions, 3, vertexCount);
-    this.mesh.setColors(batch.colors, 3, vertexCount);
-    this.mesh.update(pc.PRIMITIVE_LINES);
-    this.instance.visible = vertexCount > 0;
+    mesh.clear(true, false, this.vertexCapacity);
+    mesh.setPositions(batch.positions, 3, vertexCount);
+    mesh.setColors(batch.colors, 3, vertexCount);
+    mesh.update(pc.PRIMITIVE_LINES);
   }
 
   dispose(): void {
@@ -65,7 +71,7 @@ export class CollisionDebugRenderer {
     this.releaseResources();
   }
 
-  private ensureResources(): void {
+  private ensureResources(batch: CollisionDebugBatch): void {
     if (this.entity || this.disposed) return;
     const entity = new pc.Entity('Collision Debug');
     const material = new pc.StandardMaterial();
@@ -78,6 +84,8 @@ export class CollisionDebugRenderer {
     material.update();
 
     const mesh = new pc.Mesh(this.app.graphicsDevice);
+    // MeshInstance captures vertex format flags at construction; upload colors first.
+    this.writeBatch(mesh, batch);
     const instance = new pc.MeshInstance(mesh, material, entity);
     instance.castShadow = false;
     instance.receiveShadow = false;
