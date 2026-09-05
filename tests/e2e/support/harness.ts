@@ -167,6 +167,7 @@ type HarnessWindow = Window & {
     advanceGameplay: (seconds: number) => void;
     setVoxelAt: (x: number, y: number, z: number, voxel: number) => void;
     beginFluidFeedbackSample?: () => void;
+    setWaterTransitionHold?: (held: boolean) => void;
     flushSave: () => Promise<void>;
   };
 };

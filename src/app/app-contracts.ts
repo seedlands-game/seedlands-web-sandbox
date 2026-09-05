@@ -7,6 +7,7 @@ import type { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
 import type { UiMetrics } from './ui/ui-contracts';
 import type { VisualEffectsSnapshot } from './advanced-visual-effects';
 import type { FluidFeedbackSummary } from './fluid-feedback-tracker';
+import type { WaterMeshTransitionSnapshot } from './water-mesh-transition';
 
 export type MeshPart = MeshData;
 
@@ -91,6 +92,7 @@ export type HarnessSnapshot = {
   serverWorldTime: number;
   performance: PerformanceSummary;
   fluidFeedback: FluidFeedbackSummary;
+  waterTransitions: WaterMeshTransitionSnapshot;
   ui: UiMetrics;
   gameplay: {
     entityCount: number;

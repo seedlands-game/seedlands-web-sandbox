@@ -12,12 +12,13 @@ type Task = {
 type Resource = {
   destroyed: number;
   postrender: (() => void) | null;
+  transitionDone: (() => void) | null;
 };
 
 const task = (taskId: number): Task => ({ taskId, chunkKey: '0,0,0', cx: 0, cy: 0, cz: 0 });
 
 const createAdapter = (): ChunkResourceAdapter<Task, string, Resource> => ({
-  create: () => ({ destroyed: 0, postrender: null }),
+  create: () => ({ destroyed: 0, postrender: null, transitionDone: null }),
   commitPart: () => undefined,
   attach: (resource, _task, onPostrender) => {
     resource.postrender = onPostrender;
@@ -69,5 +70,36 @@ describe('ChunkResourceRepository', () => {
     repository.dispose();
 
     expect(resource.destroyed).toBe(1);
+  });
+
+  it('keeps the previous resource alive until a replacement transition completes', () => {
+    const prepared = vi.fn();
+    const transitioned = vi.fn();
+    const adapter = createAdapter();
+    adapter.prepareReplacement = (previous, current) => {
+      prepared(previous, current);
+      return true;
+    };
+    adapter.transitionReplacement = (previous, current, _task, done) => {
+      transitioned(previous, current);
+      current.transitionDone = done;
+    };
+    const repository = createRepository(adapter);
+    const previous = repository.enqueue(task(1), ['mesh']);
+    repository.beginFrame();
+    repository.drain();
+    previous.postrender?.();
+
+    const current = repository.enqueue(task(2), ['mesh']);
+    repository.beginFrame();
+    repository.drain();
+    expect(prepared).toHaveBeenCalledWith(previous, current);
+    current.postrender?.();
+
+    expect(transitioned).toHaveBeenCalledWith(previous, current);
+    expect(previous.destroyed).toBe(0);
+    expect(repository.chunks.get('0,0,0')?.resource).toBe(current);
+    current.transitionDone?.();
+    expect(previous.destroyed).toBe(1);
   });
 });

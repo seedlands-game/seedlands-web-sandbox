@@ -17,6 +17,7 @@ import {
 } from './playcanvas-chunk-adapter';
 import type { QualityProfile } from './quality-profile';
 import { FluidFeedbackTracker } from './fluid-feedback-tracker';
+import { WaterMeshTransitionTracker } from './water-mesh-transition';
 
 type WorldTelemetry = {
   loadedChunks: number;
@@ -43,6 +44,7 @@ export class World {
   private scenarioSequence = 0;
   private scenarioId = 'default';
   private readonly fluidFeedback = new FluidFeedbackTracker();
+  private readonly waterTransitions = new WaterMeshTransitionTracker();
   private lastCenter = '';
   private disposed = false;
 
@@ -83,7 +85,13 @@ export class World {
       onAcceptedResult: (task, result) => this.repository.enqueue(task, result.meshes),
     });
     this.repository = new ChunkResourceRepository({
-      adapter: createPlayCanvasChunkAdapter(app, resolveMaterial, telemetryRecorder, waterLayerId),
+      adapter: createPlayCanvasChunkAdapter(
+        app,
+        resolveMaterial,
+        telemetryRecorder,
+        waterLayerId,
+        this.waterTransitions,
+      ),
       isCurrent: (task) => this.scheduler.isCurrent(task),
       profile,
       now: () => performance.now(),
@@ -91,7 +99,7 @@ export class World {
       onVisible: (task) => {
         this.scheduler.completeVisible(task);
         this.fluidFeedback.completeVisible(
-          task.chunkKey,
+          task,
           this.telemetryRecorder.trace(task.traceId),
           this.scheduler.fluidSchedulingMetrics,
         );
@@ -179,8 +187,16 @@ export class World {
     return this.fluidFeedback.summary();
   }
 
+  get waterTransitionSnapshot() {
+    return this.waterTransitions.snapshot();
+  }
+
   beginFluidFeedbackSample() {
     this.fluidFeedback.begin(this.scheduler.fluidSchedulingMetrics);
+  }
+
+  setWaterTransitionHoldForHarness(held: boolean) {
+    this.waterTransitions.setHeldForHarness(held);
   }
 
   beginFrame() {
@@ -193,6 +209,7 @@ export class World {
     this.scheduler.beginScenario();
     this.repository.clear();
     this.fluidFeedback.reset();
+    this.waterTransitions.reset();
     this.lastCenter = '';
     return this.scenarioId;
   }
@@ -276,7 +293,7 @@ export class World {
     const result = this.server.advanceFluid(seconds);
     result.commits.forEach((commit) => {
       if (commit.structuralChange?.actorId === 'fluid-v1')
-        this.fluidFeedback.markFirstCommit(commit.structuralChange.meshChunks);
+        this.fluidFeedback.markFirstCommit(commit.structuralChange.chunkRevisions);
       this.consumeServerCommit(commit);
     });
     return result;
@@ -294,7 +311,11 @@ export class World {
     this.latestCommitMutationCount = change.mutationCount;
     this.latestCommitMeshChunkCount = change.meshChunks.length;
     let hasPresentationWork = false;
-    change.meshChunks.forEach((key) => {
+    const authorityKeys = new Set(change.chunkRevisions.map(({ key }) => key));
+    const presentationKeys = [...change.meshChunks].sort(
+      (left, right) => Number(authorityKeys.has(right)) - Number(authorityKeys.has(left)),
+    );
+    presentationKeys.forEach((key) => {
       const pending = this.scheduler.latestTask(key);
       if (pending) {
         hasPresentationWork = true;

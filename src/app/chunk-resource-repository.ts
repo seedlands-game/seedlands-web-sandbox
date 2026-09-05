@@ -20,6 +20,8 @@ export type ChunkResourceAdapter<Task extends ChunkTask, Part, Resource extends 
   create: (task: Task) => Resource;
   commitPart: (resource: Resource, task: Task, part: Part) => void;
   attach: (resource: Resource, task: Task, onPostrender: () => void) => void;
+  prepareReplacement?: (previous: Resource, current: Resource, task: Task) => boolean;
+  transitionReplacement?: (previous: Resource, current: Resource, task: Task, onComplete: () => void) => void;
   destroy: (resource: Resource) => void;
 };
 
@@ -34,6 +36,8 @@ type CommitJob<Task extends ChunkTask, Part, Resource extends object> = {
   parts: Part[];
   nextPart: number;
   resource: Resource;
+  previous?: ChunkRecord<Task, Resource>;
+  transitionPrepared?: boolean;
 };
 
 type RepositoryOptions<Task extends ChunkTask, Part, Resource extends object> = {
@@ -149,6 +153,9 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       this.discard(job);
       return;
     }
+    job.previous = this.chunks.get(job.task.chunkKey);
+    if (job.previous)
+      job.transitionPrepared = this.options.adapter.prepareReplacement?.(job.previous.resource, job.resource, job.task);
     this.attaching.add(job);
     this.options.adapter.attach(job.resource, job.task, () => this.finishAttach(job));
     this.frameCommits += 1;
@@ -160,13 +167,19 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       this.discard(job);
       return;
     }
-    const previous = this.chunks.get(job.task.chunkKey);
-    if (previous) this.destroy(previous.resource);
+    const previous = job.previous;
     this.chunks.set(job.task.chunkKey, {
       task: job.task,
       resource: job.resource,
       ...this.options.summarize(job.parts),
     });
+    if (previous) {
+      if (job.transitionPrepared && this.options.adapter.transitionReplacement)
+        this.options.adapter.transitionReplacement(previous.resource, job.resource, job.task, () =>
+          this.destroy(previous.resource),
+        );
+      else this.destroy(previous.resource);
+    }
     this.renderedAfterPostrender = true;
     this.options.onVisible(job.task);
   }

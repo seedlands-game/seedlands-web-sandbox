@@ -3,6 +3,10 @@ import type { PerformanceTrace } from '../client/performance-telemetry';
 export type FluidSchedulingMetrics = { mergedRequests: number; supersededInFlight: number };
 
 export type FluidFeedbackSample = {
+  targetChunkKey: string;
+  targetRevision: number;
+  visibleRevision: number;
+  traceId: string;
   editToCommitMs: number;
   commitToWorkerStartMs: number;
   workerMs: number;
@@ -26,9 +30,11 @@ export type FluidFeedbackSummary = {
 type PendingSample = {
   editAcceptedAt: number;
   firstCommitAt: number | null;
-  targetChunks: Set<string>;
+  targetRevisions: Map<string, number>;
   schedulingAtStart: FluidSchedulingMetrics;
 };
+
+export type VisibleFluidMesh = { chunkKey: string; chunkRevision: number; traceId: string };
 
 const percentile = (values: number[], quantile: number) => {
   if (!values.length) return 0;
@@ -49,25 +55,39 @@ export class FluidFeedbackTracker {
     this.pending = {
       editAcceptedAt: this.now(),
       firstCommitAt: null,
-      targetChunks: new Set(),
+      targetRevisions: new Map(),
       schedulingAtStart: { ...metrics },
     };
   }
 
-  markFirstCommit(targetChunks: Iterable<string>) {
+  markFirstCommit(targetChunks: Iterable<{ key: string; revision: number }>) {
     if (!this.pending || this.pending.firstCommitAt !== null) return;
     this.pending.firstCommitAt = this.now();
-    this.pending.targetChunks = new Set(targetChunks);
+    this.pending.targetRevisions = new Map([...targetChunks].map(({ key, revision }) => [key, revision]));
   }
 
-  completeVisible(chunkKey: string, trace: PerformanceTrace | null, metrics: FluidSchedulingMetrics) {
+  completeVisible(visible: VisibleFluidMesh, trace: PerformanceTrace | null, metrics: FluidSchedulingMetrics) {
     const pending = this.pending;
-    if (!pending || pending.firstCommitAt === null || !pending.targetChunks.has(chunkKey)) return;
+    const targetRevision = pending?.targetRevisions.get(visible.chunkKey);
+    if (
+      !pending ||
+      pending.firstCommitAt === null ||
+      targetRevision === undefined ||
+      visible.chunkRevision < targetRevision ||
+      trace?.traceId !== visible.traceId ||
+      !trace.complete ||
+      !trace.marks.some((mark) => mark.name === 'visible-postrender')
+    )
+      return;
     const visibleAt = this.now();
     const workerStartAt = latestMarkAtOrAfter(trace, 'worker-start', pending.firstCommitAt);
     const workerCompleteAt = latestMarkAtOrAfter(trace, 'worker-complete', workerStartAt);
     const attachedAt = latestMarkAtOrAfter(trace, 'scene-attached', workerCompleteAt);
     this.samples.push({
+      targetChunkKey: visible.chunkKey,
+      targetRevision,
+      visibleRevision: visible.chunkRevision,
+      traceId: visible.traceId,
       editToCommitMs: pending.firstCommitAt - pending.editAcceptedAt,
       commitToWorkerStartMs: workerStartAt - pending.firstCommitAt,
       workerMs: workerCompleteAt - workerStartAt,

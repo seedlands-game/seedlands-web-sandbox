@@ -7,10 +7,10 @@ describe('FluidFeedbackTracker', () => {
     const tracker = new FluidFeedbackTracker(() => now);
     tracker.begin({ mergedRequests: 1, supersededInFlight: 2 });
     now = 18;
-    tracker.markFirstCommit(['0,0,0']);
+    tracker.markFirstCommit([{ key: '0,0,0', revision: 4 }]);
     now = 42;
     tracker.completeVisible(
-      '0,0,0',
+      { chunkKey: '0,0,0', chunkRevision: 4, traceId: 'trace-1' },
       {
         traceId: 'trace-1',
         category: 'chunk-request',
@@ -38,6 +38,10 @@ describe('FluidFeedbackTracker', () => {
       totalMs: 32,
       mergedRequests: 3,
       supersededInFlight: 1,
+      targetChunkKey: '0,0,0',
+      targetRevision: 4,
+      visibleRevision: 4,
+      traceId: 'trace-1',
     });
   });
 
@@ -46,9 +50,24 @@ describe('FluidFeedbackTracker', () => {
     const tracker = new FluidFeedbackTracker(() => now);
     tracker.begin({ mergedRequests: 0, supersededInFlight: 0 });
     now = 4;
-    tracker.markFirstCommit(['1,0,1']);
+    tracker.markFirstCommit([{ key: '1,0,1', revision: 3 }]);
     now = 7;
-    tracker.completeVisible('2,0,2', null, { mergedRequests: 0, supersededInFlight: 0 });
+    tracker.completeVisible({ chunkKey: '2,0,2', chunkRevision: 9, traceId: 'trace-2' }, null, {
+      mergedRequests: 0,
+      supersededInFlight: 0,
+    });
+
+    expect(tracker.summary()).toMatchObject({ count: 0, pending: true });
+  });
+
+  it('rejects an older visible revision for the target chunk', () => {
+    const tracker = new FluidFeedbackTracker(() => 10);
+    tracker.begin({ mergedRequests: 0, supersededInFlight: 0 });
+    tracker.markFirstCommit([{ key: '0,0,0', revision: 8 }]);
+    tracker.completeVisible({ chunkKey: '0,0,0', chunkRevision: 7, traceId: 'trace-stale' }, null, {
+      mergedRequests: 0,
+      supersededInFlight: 0,
+    });
 
     expect(tracker.summary()).toMatchObject({ count: 0, pending: true });
   });

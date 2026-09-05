@@ -1,6 +1,6 @@
 # 流体体验修复：河岸、涉水游泳与连续反馈
 
-**状态：Delivered；实现、合并与全部自动准出完成，真实耳机听觉为明确保留的人工补充项。**
+**状态：Delivered（工程完成）；真实听觉验收仍为 Manual supplement 待用户试听。**
 
 ## Context & Goal
 
@@ -43,6 +43,7 @@
 6. 音频混音器把音乐、世界音效和环境声汇入可平滑调节的低通后再接 master；UI 音效直接接 master。世界音频只驱动参数和有界事件，暂停清空节流状态，退出或切换世界必须恢复干声。
 7. 网格调度不尝试中止已发给 worker 的任务。同 key queued 更新覆盖为最新目标但保留最早等待年龄；in-flight 更新记为 replacement，旧结果不挂到场景，完成后立刻以最高近场优先级派发一次最新快照。其他 Chunk 保留年龄公平性。
 8. 首个可见反馈以同机 warm 场景不少于 20 次采样；修复前 p95 为 712.9ms、max 为 2761.8ms，最终实现冻结 p95 不高于 100ms，同时要求无饥饿、所有样本完成、阶段数据完整且连续权威前沿产生多次可见更新。
+9. 服务端仍是唯一流体权威并以 30Hz 有界步进降低最坏等待；客户端只在旧/新权威水网格之间做 180ms 有界透明度交叉渐变。首帧即保留少量新网格贡献，随后单调完成并销毁旧资源；不预测水位、不生成额外流体单元，也不延迟权威任务调度。
 
 ## Behaviour
 
@@ -72,22 +73,31 @@
 - `changes/2026-09-05-fluid-experience-repair/e2e/natural-river.spec.ts`：多个固定 seed 的自然河段/横断面/端点/交汇/跨 Chunk，并真实走入、涉水、游泳、下潜、出水；验证视图状态、速度、权威玩家位置、暂停与存退重载。
 - `changes/2026-09-05-fluid-experience-repair/e2e/fluid-feedback.spec.ts`：warm 场景重复不少于 20 次真实缺口编辑，采集 edit accepted、first fluid commit、worker start/complete、scene attach、visible postrender 与 merge/supersede 数；输出 p50/p95/p99 与逐段数据。
 - `changes/2026-09-05-fluid-experience-repair/midscene/fluid-experience.yaml`：自然岸线、真实进入/水下/离水、连续前沿与流向的视觉语义。程序断言不能代替“自然、清晰、一致”的视觉判断。
+- `changes/2026-09-05-fluid-experience-repair/midscene/fluid-transition.yaml`：独立验证真实缺口流体的权威 revision、中间渐变画面与最终连续水面。
 - Manual supplement：用耳机真实试听浅水脚步、入/出水、持续划水和水下低通；若无人完成真实听觉验收，保持待验。
+
+### 准出复核追加 RED
+
+- `tests/app/chunk-resource-repository.test.ts` 与 `tests/app/water-mesh-transition.test.ts`：替换含水 Chunk 时旧、新资源必须同时存活到渐变完成，进度单调且旧资源最终只销毁一次；当前仓库立即销毁旧资源，预期 RED。
+- `tests/app/fluid-feedback-tracker.test.ts`：只有命中目标 Chunk 且 `task.chunkRevision >= targetRevision` 的同一 trace `visible-postrender` 才能完成样本，并记录目标/实际 revision；当前只按 Chunk key 匹配，预期 RED。
+- `fluid-feedback.spec.ts`：硬断言 20 次样本 p95 不高于 100ms；逐帧读取与目标 trace/revision 绑定的水网格渐变，要求出现 `(0,1)` 中间进度、单调完成和不少于两个渲染帧，不能再以全局 completed trace 计数替代。
+- `fluid-transition.yaml`：独立构造真实缺口，将流体推进到稳定权威 revision，只暂停该 revision 的实际水网格渐变中间态，并验证释放后的最终态；天然河流静态截图不再替代动态流体证据。
+- `scripts/render-fluid-audio-demo.ts`：直接复用生产 `synthesizeSfx()` 导出短 WAV，依次呈现入水、涉水、划水、水下低通示意和出水；该文件只供用户试听，不把生成成功写成主观听觉通过。
 
 ## Acceptance & Evidence
 
-| 编号 | 准出条件                                                        | 所需证据                            | 实际结果                                                            |
-| ---- | --------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------- |
-| F1   | v3 多 seed 自然河水面不高于邻岸，路径/端点/交汇/跨 Chunk 确定   | Vitest、Playwright-change、Midscene | 通过：确定性横断面、真实河岸截图与 Midscene 语义验收均通过          |
-| F2   | v2 已存世界保持原 world id、基础生成与建筑；新 seed 使用 v3     | Vitest、Playwright-change           | 通过：同 seed 同存 v2/v3，旧建筑只在 v2，两个入口均可达             |
-| F3   | 浅水、游泳、上浮、下潜、离水物理符合定义                        | Vitest、Playwright-change           | 通过：真实 W+D 入水、Shift 下潜、Space 上浮并从对岸离水             |
-| F4   | 镜头水下视觉平滑且迟滞稳定，暂停/重载正确                       | Vitest、Playwright-change、Midscene | 通过：迟滞单测、强水下混合、暂停/存退/切世界恢复均通过              |
-| F5   | 入/出水、涉水、划水与低通工程状态正确且无事件爆发               | Vitest、Playwright-change           | 通过：世界声总线低通、UI 干声、暂停无事件增长、退出恢复干声         |
-| F6   | 实际音色、响度与过渡可听且与现有风格一致                        | Manual supplement                   | 待真实听觉验收；不可由波形替代                                      |
-| F7   | 连续流体修订不饥饿、不显示 stale 网格，最终与权威状态一致       | Vitest、Playwright-change           | 通过：replacement 合并、stale 丢弃、远端公平性和逐帧权威前沿均通过  |
-| F8   | warm 缺口样本有完整阶段数据，报告 p50/p95/p99；阈值据基线后冻结 | Playwright-change                   | 通过：合并态 20/20 完成，p50 46.8ms、p95 80.4ms、p99/max 80.6ms     |
-| F9   | 受影响 deterministic 检查、world 覆盖率、静态检查与生产构建通过 | Vitest、Static、Build               | 通过：合并态 306 tests，world 行覆盖率 96.32%，Static 与 Build 通过 |
-| F10  | 现有 9 项长期浏览器基线无回归                                   | Playwright-baseline                 | 通过：合并态 9/9                                                    |
+| 编号 | 准出条件                                                        | 所需证据                            | 实际结果                                                        |
+| ---- | --------------------------------------------------------------- | ----------------------------------- | --------------------------------------------------------------- |
+| F1   | v3 多 seed 自然河水面不高于邻岸，路径/端点/交汇/跨 Chunk 确定   | Vitest、Playwright-change、Midscene | 通过：确定性横断面、真实河岸截图与 Midscene 语义验收均通过      |
+| F2   | v2 已存世界保持原 world id、基础生成与建筑；新 seed 使用 v3     | Vitest、Playwright-change           | 通过：同 seed 同存 v2/v3，旧建筑只在 v2，两个入口均可达         |
+| F3   | 浅水、游泳、上浮、下潜、离水物理符合定义                        | Vitest、Playwright-change           | 通过：真实 W+D 入水、Shift 下潜、Space 上浮并从对岸离水         |
+| F4   | 镜头水下视觉平滑且迟滞稳定，暂停/重载正确                       | Vitest、Playwright-change、Midscene | 通过：迟滞单测、强水下混合、暂停/存退/切世界恢复均通过          |
+| F5   | 入/出水、涉水、划水与低通工程状态正确且无事件爆发               | Vitest、Playwright-change           | 通过：世界声总线低通、UI 干声、暂停无事件增长、退出恢复干声     |
+| F6   | 实际音色、响度与过渡可听且与现有风格一致                        | Manual supplement                   | 工程产物完成：已导出 6 秒 WAV；真实音色、响度与过渡仍待用户试听 |
+| F7   | 连续流体修订不饥饿、不显示 stale 网格，最终与权威状态一致       | Vitest、Playwright-change、Midscene | 通过：逐帧单调交叉渐变、目标 revision 绑定及动态 Midscene 1/1   |
+| F8   | warm 缺口样本有完整阶段数据，报告 p50/p95/p99；阈值据基线后冻结 | Playwright-change                   | 通过：20/20 精确绑定目标 revision，p95 79.8ms，硬阈值 100ms     |
+| F9   | 受影响 deterministic 检查、world 覆盖率、静态检查与生产构建通过 | Vitest、Static、Build               | 通过：310 tests，world 行覆盖率 96.32%，Static 与 Build 通过    |
+| F10  | 现有 9 项长期浏览器基线无回归                                   | Playwright-baseline                 | 通过：合并态 9/9                                                |
 
 ## Tasks & Current State
 
@@ -100,16 +110,18 @@
 - [x] 实现近场优先、同 key 合并和连续流向表现。
 - [x] 完成 focused GREEN、全量静态/构建、change E2E 与 Midscene；真实耳机听觉保持待验。
 - [x] 创建本地语义提交，合并灯笼/阴影提交并完成 9 项基线和重叠区域集成回归。
+- [x] 补有界水网格交叉渐变、目标 revision 反馈追踪和动态 Midscene。
+- [x] 导出可试听 WAV，完成针对性回归并再次快进总分支。
 
-当前没有实现或自动准出阻塞；本 worktree 位于 `codex/fluid-experience-repair`。真实耳机听觉仅作为人工补充项待验，不冒充已完成。账户本周期开始时为 60% 已用，本轮上限为 71%；未使用额度重置。
+当前没有工程实现阻塞；本 worktree 位于 `codex/fluid-experience-repair`。准出复核发现的动态画面连续性和目标 revision 证据缺口已经补齐。真实耳机听觉仍待用户验收，不冒充已完成。账户本周期开始时为 60% 已用，本轮上限为 71%；未使用额度重置。
 
 ## Delivery Snapshot
 
 - 实施前合同 SHA-256：`3031a09e98f24f52ec3fa52d2944f4adb19be552387502492060d335016a3e8c`；后续只补充父任务明确的入口/音频范围/连续可见性约束和实际证据。
-- 生产路径覆盖 `src/world/` 的 v3 河流、介质与流向，`src/server/` 的版本化权威世界与 20Hz 流体，`src/app/` 的移动、视觉、音频和 latest-wins 调度，`src/client/`/worker 的版本选择与持久化链路。
-- RED：新模块导入失败、固定 generator v2、10Hz 流体断言和取消/FIFO 调度断言按预期失败；GREEN：合并态 `pnpm verify:static` 为 69 files、306 tests 通过，world 行覆盖率 96.32%；`pnpm build` 通过。
-- 需求 E2E：流体 3/3、灯笼/裂纹/贴墙 4/4 通过；最终 warm 20 次反馈 p50 46.8ms、p95 80.4ms、p99/max 80.6ms，逐帧权威水位由未到达推进到 `[7,6,5,4]`，同一期间 visible trace 由 139 增至 165。
+- 生产路径覆盖 `src/world/` 的 v3 河流、介质与流向，`src/server/` 的版本化权威世界与 30Hz 流体，`src/app/` 的移动、视觉、音频、latest-wins 调度与 180ms 水网格交叉渐变，`src/client/`/worker 的版本选择与持久化链路。
+- 追加 RED：水资源替换立即销毁旧资源、过渡跟踪模块缺失、反馈 tracker 无目标 revision 参数；GREEN：`pnpm verify:static` 为 70 files、310 tests 通过，world 行覆盖率 96.32%；`pnpm build` 通过。
+- 针对性需求 E2E：流体 3/3 通过；warm 20 次反馈 p50 62.4ms、p95 79.8ms、p99/max 79.9ms，20/20 的可见 revision 均命中 `0,1,0` 的目标 revision 与同一 trace。逐帧记录覆盖多个目标 revision，进度从 0.12 单调走到 1，最终 revision 211 正常完成；被后续权威修订替代的旧过渡也只在已有多帧后有界退出。
 - 长期基线：`pnpm test:e2e` 明确执行并通过 9/9；没有把需求用例混入基线发现路径。
-- Midscene：合并态 `fluid-experience.yaml` 1/1、灯笼/裂纹/贴墙 `repair.yaml` 3/3 通过；证据图为 `evidence/natural-river-bank.png` 与 `evidence/natural-river-underwater.png`。真实耳机音色与响度仍为 Manual supplement 待验，未用工程计数替代。
+- Midscene：既有合并态 `fluid-experience.yaml` 1/1；新增独立动态 `fluid-transition.yaml` 1/1，在 `0,1,0` revision 102 / trace 77 的第 9 帧捕获进度 0.7663，释放后第 13 帧单调完成为 1。证据图新增 `evidence/fluid-front-transition.png`。音频工程产物为 `evidence/fluid-audio-demo.wav`；真实耳机音色与响度仍为 Manual supplement 待验，未用工程计数替代。
 - 功能提交：`7983d39`；与灯笼/阴影提交 `7f2eb57` 的验证合并提交：`3034f85`。冲突按非整格碰撞、水中离岸、版本化 fluid mesh、灯笼模型分类和组合 Harness 契约合并。
 - 预览入口：总分支快进后按 README 的本地开发方式启动；本次未发布、未 push、未部署。

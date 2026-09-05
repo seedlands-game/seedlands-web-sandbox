@@ -42,7 +42,9 @@ export type HarnessApi = {
   getVoxelAt?: (x: number, y: number, z: number) => number | null;
   advanceFluid?: (seconds: number) => void;
   beginFluidFeedbackSample?: () => void;
+  setWaterTransitionHold?: (held: boolean) => void;
   getFluidCell?: (x: number, y: number, z: number) => { level: number; source: boolean } | null;
+  getChunkRevision?: (cx: number, cy: number, cz: number) => number | null;
   sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
   flushSave: () => Promise<void>;
 };
@@ -166,6 +168,11 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       maxMs: 0,
       samples: [],
     },
+    waterTransitions: context.world?.waterTransitionSnapshot ?? {
+      activeCount: 0,
+      active: [],
+      recent: [],
+    },
     ui: context.ui,
     gameplay: {
       ...(context.world?.server.gameplayMetrics() ?? {
@@ -267,7 +274,9 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     executeGameplayCommand: bindings.executeGameplayCommand,
     advanceFluid: (seconds) => bindings.world()?.advanceFluid(seconds),
     beginFluidFeedbackSample: () => bindings.world()?.beginFluidFeedbackSample(),
+    setWaterTransitionHold: (held) => bindings.world()?.setWaterTransitionHoldForHarness(held),
     getFluidCell: (x, y, z) => bindings.world()?.server.getFluidCell(x, y, z) ?? null,
+    getChunkRevision: (cx, cy, cz) => bindings.world()?.server.getChunk(cx, cy, cz).revision ?? null,
     getVoxelAt: (x, y, z) => bindings.world()?.getVoxel(x, y, z) ?? null,
     sunSnapshot: () => {
       const environment = bindings.environment();

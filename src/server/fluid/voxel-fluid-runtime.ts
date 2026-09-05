@@ -4,7 +4,7 @@ import type { WorldCommitResult } from '../game-server-types';
 export type FluidCell = { level: number; source: boolean };
 export type FluidAdvanceResult = { steps: number; processed: number; pending: number; commits: WorldCommitResult[] };
 type Position = readonly [number, number, number];
-const STEP_SECONDS = 0.05;
+const STEP_SECONDS = 1 / 30;
 const MAX_STEPS = 8;
 const STEP_BUDGET = 128;
 const MAX_QUEUE = 8_192;
