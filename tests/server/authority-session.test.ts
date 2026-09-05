@@ -248,7 +248,23 @@ describe('VoxelCollisionWorld', () => {
       }),
     });
 
-    expect(world.sampleFluid!({ min: { x: 0, y: 0, z: 0 }, max: { x: 1, y: 1, z: 1 } })[0]?.aabb.max.y).toBe(1);
-    expect(world.sampleFluid!({ min: { x: 0, y: 1, z: 0 }, max: { x: 1, y: 2, z: 1 } })[0]?.aabb.max.y).toBe(1 + 7 / 8);
+    expect(world.sampleFluid!({ min: { x: 0, y: 0, z: 0 }, max: { x: 1, y: 1, z: 1 } })[0]).toMatchObject({
+      aabb: { max: { y: 1 } },
+    });
+    expect(world.sampleFluid!({ min: { x: 0, y: 0, z: 0 }, max: { x: 1, y: 1, z: 1 } })[0]).not.toHaveProperty(
+      'surfaceY',
+    );
+    expect(world.sampleFluid!({ min: { x: 0, y: 1, z: 0 }, max: { x: 1, y: 2, z: 1 } })[0]).toMatchObject({
+      aabb: { max: { y: 1 + 7 / 8 } },
+      surfaceY: 1 + 7 / 8,
+    });
+
+    const unknownAbove = new VoxelCollisionWorld({
+      getLoadedVoxel: (_x, y) =>
+        y === 0 ? { voxel: Voxel.Water, chunkKey: 'loaded', revision: 2, fluid: { level: 8 } } : null,
+    });
+    expect(unknownAbove.sampleFluid!({ min: { x: 0, y: 0, z: 0 }, max: { x: 1, y: 1, z: 1 } })[0]).not.toHaveProperty(
+      'surfaceY',
+    );
   });
 });

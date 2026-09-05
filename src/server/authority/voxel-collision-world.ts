@@ -76,13 +76,15 @@ export class VoxelCollisionWorld implements PhysicsWorld {
           if (!loaded?.fluid || loaded.fluid.level <= 0) continue;
           const above = this.source.getLoadedVoxel(x, y + 1, z);
           const coveredByWater = Boolean(above?.fluid && above.fluid.level > 0);
+          const surfaceY = y + waterSurfaceHeight(loaded.fluid.level, coveredByWater);
           this.revisions.set(loaded.chunkKey, loaded.revision);
           fluids.push({
             aabb: {
               min: { x, y, z },
-              max: { x: x + 1, y: y + waterSurfaceHeight(loaded.fluid.level, coveredByWater), z: z + 1 },
+              max: { x: x + 1, y: surfaceY, z: z + 1 },
             },
             velocity: loaded.fluid.flow ?? { x: 0, y: 0, z: 0 },
+            ...(above && !coveredByWater ? { surfaceY } : {}),
           });
         }
     return fluids;
