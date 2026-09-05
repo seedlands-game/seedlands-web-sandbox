@@ -233,12 +233,14 @@ export class HeadlessSession {
     if (!Number.isSafeInteger(commandSequence) || commandSequence < 0)
       throw new RangeError('Headless command sequence must be a non-negative safe integer.');
     this.nextCommandSequence = Math.max(this.nextCommandSequence, commandSequence + 1);
-    const receipt = await this.runtime.executeTransaction(
-      { epoch: this.epoch, issuer: 'headless-cli', stream: 'commands', sequence: commandSequence },
-      () =>
-        parsed.command.type === 'advance-gameplay'
-          ? this.executeTick(parsed.command.seconds)
-          : this.runtime.executeCommand(this.source, parsed.command),
+    const receipt = await this.completeWithChunkPreparation(
+      this.runtime.executeTransaction(
+        { epoch: this.epoch, issuer: 'headless-cli', stream: 'commands', sequence: commandSequence },
+        () =>
+          parsed.command.type === 'advance-gameplay'
+            ? this.executeTick(parsed.command.seconds)
+            : this.runtime.executeCommand(this.source, parsed.command),
+      ),
     );
     if (receipt.status !== 'executed')
       return {
@@ -329,8 +331,32 @@ export class HeadlessSession {
     }
   }
 
+  private async completeWithChunkPreparation<Result>(operation: Promise<Result>): Promise<Result> {
+    let completed = false;
+    let value: Result | undefined;
+    let failure: unknown;
+    void operation.then(
+      (result) => {
+        value = result;
+        completed = true;
+      },
+      (error) => {
+        failure = error;
+        completed = true;
+      },
+    );
+    while (!completed) {
+      await Promise.resolve();
+      await this.drainUnknownChunks();
+      if (!completed) await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    }
+    if (failure !== undefined) throw failure;
+    return value!;
+  }
+
   private async loadChunk(key: string): Promise<void> {
-    if (this.loadedChunkKeys.has(key)) return;
+    if (this.loadedChunkKeys.has(key) && this.runtime.readCollisionBaseline(key, 0).status === 'available') return;
+    this.loadedChunkKeys.delete(key);
     const [cx, cy, cz] = parseChunkKey(key);
     const prepared = await this.runtime.prepareMesh(cx, cy, cz);
     const result = await runWorldComputeTask({

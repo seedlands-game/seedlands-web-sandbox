@@ -14,5 +14,6 @@
 - [x] 已实现统一异步准备、同 key 合并、5 秒超时失败与 General Worker 独立 canonical 生成；计算任务只返回 canonical，不提前构造 Mesh。
 - [x] `BrowserWorkerSession` 已把 `authority-chunk-needed` 路由到 General lane，并通过既有 `accept-generated-chunk` 接纳；同 key 在客户端也只保留一个在途生成。
 - [x] 已把旧同步测试调用迁移为 `await`，并验证异步准备时物理 tick 继续增长、库存只在一次成功提交后扣减。
+- [x] Headless 命令适配会在等待同一 Authority 事务时并行清空 General canonical 请求；不再等 5 秒失败后才加载 Chunk，且已缓存 key 被 canonical 驱逐后会重新准备。
 - [x] 定向 Vitest：7 个文件 24 项通过；`tsc -p tsconfig.test.json --noEmit` 通过；`pnpm build` 通过；`git diff --check` 通过。
 - [ ] 真实浏览器 direct edit、长穿越、保存后重载证据由 root 在不可变生产构建中执行。
