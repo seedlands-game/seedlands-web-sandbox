@@ -111,6 +111,28 @@ describe('GameplaySnapshot V3 坐标与物理迁移', () => {
     expect(roundTrip.getEntity('world-item-1')?.position).toEqual([4, 39.8, -2]);
   });
 
+  it.each([1, 2] as const)('把 V%s 普通 creature 迁移为具名 grazer 身体且不注册旧自治循环', (version) => {
+    const current = createCurrentRuntime().createSnapshot();
+    const legacy = version === 1 ? asV1(current) : asV2(current);
+    legacy.entities.push({
+      id: 'legacy-creature',
+      type: 'creature',
+      kind: 'creature',
+      lifecycle: 'active',
+      position: [8, 39, -2],
+      physicsVelocity: [0, 0, 0],
+      health: 12,
+      maxHealth: 12,
+    });
+    const restored = new GameplayRuntime(callbacks);
+
+    expect(restored.restoreSnapshot(legacy)).toMatchObject({ version });
+    expect(restored.getEntity('legacy-creature')).toMatchObject({ archetype: 'grazer' });
+    expect(restored.simulation.snapshot().actors).not.toContainEqual(
+      expect.objectContaining({ entityId: 'legacy-creature' }),
+    );
+  });
+
   it('合法 V3 往返不二次迁移，并保留速度、simulation 和玩家状态', () => {
     const source = createCurrentRuntime();
     source.updateEntity('world-item-1', { physicsVelocity: [1, -2, 0.5] });

@@ -20,7 +20,7 @@ describe('Authority新世界生态bootstrap', () => {
       persistence: new MemoryGamePersistence(),
       initialWorldTime: 9,
       startTimeMs: 0,
-      findInitialWorldBootstrap: async (seed, generatorVersion) => {
+      findInitialWorldBootstrap: async (seed: number, generatorVersion: number) => {
         computed = (await runWorldComputeTask({
           kind: 'find-safe-spawn',
           seed,

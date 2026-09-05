@@ -65,7 +65,7 @@ export class GameplayRuntime {
     const entity = this.entities.spawn(input);
     if (entity.type === 'player')
       this.players.set(entity.id, new PlayerState(entity.id, clonePosition(entity.position)));
-    if (entity.archetype) this.simulation.registerActor(entity.id, { archetype: entity.archetype });
+    if (input.archetype) this.simulation.registerActor(entity.id, { archetype: input.archetype });
     this.touch();
     return entity;
   }

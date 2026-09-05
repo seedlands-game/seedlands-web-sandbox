@@ -84,12 +84,13 @@ export class EntityStore {
         throw new TypeError('Creature health must be finite and within its maximum.');
       entity.health = health;
       entity.maxHealth = maxHealth;
-      if (input.archetype) {
-        if (!['grazer', 'night-stalker', 'settler'].includes(input.archetype))
-          throw new TypeError(`Unsupported actor archetype: ${String(input.archetype)}`);
-        if ((type === 'npc') !== (input.archetype === 'settler'))
+      const archetype = input.archetype ?? (type === 'creature' ? 'grazer' : undefined);
+      if (archetype) {
+        if (!['grazer', 'night-stalker', 'settler'].includes(archetype))
+          throw new TypeError(`Unsupported actor archetype: ${String(archetype)}`);
+        if ((type === 'npc') !== (archetype === 'settler'))
           throw new TypeError('Settlers must be NPC entities and creature archetypes must be creatures.');
-        entity.archetype = input.archetype;
+        entity.archetype = archetype;
         entity.persistent = input.persistent ?? true;
       }
     }

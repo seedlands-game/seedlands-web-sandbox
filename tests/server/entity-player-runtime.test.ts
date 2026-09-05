@@ -14,6 +14,7 @@ describe('entity runtime', () => {
       stack: { itemId: ItemIds.WoodBlock, count: 1 },
     });
     entities.spawn({ id: 'creature-1', type: 'creature', position: [40, 34, 0], health: 12, maxHealth: 12 });
+    expect(entities.get('creature-1')).toMatchObject({ archetype: 'grazer' });
 
     player.position[0] = 999;
     item.lifecycle = 'despawned';
