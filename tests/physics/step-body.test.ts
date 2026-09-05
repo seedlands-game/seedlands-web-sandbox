@@ -4,6 +4,7 @@ import {
   recoverBody,
   separateBodies,
   stepBody,
+  validateBodyConfig,
   type BodyConfig,
   type BodyState,
   type Collider,
@@ -182,7 +183,7 @@ describe('统一 swept-AABB 物理核心', () => {
         state: current,
         config: body,
         input: { wish: { x: 1, z: 0 }, jumpPressed: true, verticalIntent: 1 },
-        world: world([deepFloor, shore], () => [{ aabb: water.aabb, velocity: { x: 0, y: 0, z: 0 } }]),
+        world: world([deepFloor, shore], () => [{ aabb: water.aabb, velocity: { x: 0, y: 0, z: 0 }, surfaceY: 0 }]),
         dt: 1 / 60,
       }).state;
       highest = Math.max(highest, current.position.y);
@@ -190,6 +191,74 @@ describe('统一 swept-AABB 物理核心', () => {
     }
     expect(highest).toBeGreaterThanOrEqual(0);
     expect(reachedShore).toBe(true);
+  });
+
+  it('逐格深水的内部 cell 顶面不能触发水面跃出，只有显式暴露水面可触发', () => {
+    const deepWater = [
+      { aabb: box('water-bottom', [-1, -3, -1], [1, -2, 1]).aabb, velocity: { x: 0, y: 0, z: 0 } },
+      { aabb: box('water-middle', [-1, -2, -1], [1, -1, 1]).aabb, velocity: { x: 0, y: 0, z: 0 } },
+      {
+        aabb: box('water-top', [-1, -1, -1], [1, 0, 1]).aabb,
+        velocity: { x: 0, y: 0, z: 0 },
+        surfaceY: 0,
+      },
+    ];
+    const interior = stepBody({
+      state: state(0, -2.5, 0),
+      config: body,
+      input: { ...idle, jumpPressed: true, verticalIntent: 1 },
+      world: world([], () => deepWater),
+      dt: 1 / 60,
+    });
+    const actualSurface = stepBody({
+      state: state(0, -1.8, 0),
+      config: body,
+      input: { ...idle, jumpPressed: true, verticalIntent: 1 },
+      world: world([], () => deepWater),
+      dt: 1 / 60,
+    });
+    expect(interior.state.velocity.y).toBeCloseTo(0.2, 5);
+    expect(actualSurface.state.velocity.y).toBeCloseTo(7, 5);
+  });
+
+  it('覆水层和顶棚分别不会提前跃出或穿过头顶', () => {
+    const coveredWater = [
+      { aabb: box('inner-water', [-1, -1, -1], [1, 0, 1]).aabb, velocity: { x: 0, y: 0, z: 0 } },
+      {
+        aabb: box('exposed-water', [-1, 0, -1], [1, 0.5, 1]).aabb,
+        velocity: { x: 0, y: 0, z: 0 },
+        surfaceY: 0.5,
+      },
+    ];
+    const covered = stepBody({
+      state: state(0, -1.8, 0),
+      config: body,
+      input: { ...idle, jumpPressed: true, verticalIntent: 1 },
+      world: world([], () => coveredWater),
+      dt: 1 / 60,
+    });
+    expect(covered.state.velocity.y).toBeLessThan(1);
+    const partialSurface = stepBody({
+      state: state(0, -1.3, 0),
+      config: body,
+      input: { ...idle, jumpPressed: true, verticalIntent: 1 },
+      world: world([], () => coveredWater),
+      dt: 1 / 60,
+    });
+    expect(partialSurface.state.velocity.y).toBeCloseTo(7, 5);
+    const ceiling = box('water-ceiling', [-1, 1.6, -1], [1, 2, 1]);
+    let current = state(0, -1.8, 0);
+    for (let index = 0; index < 60; index += 1)
+      current = stepBody({
+        state: current,
+        config: body,
+        input: { ...idle, jumpPressed: true, verticalIntent: 1 },
+        world: world([ceiling], () => [
+          { aabb: box('surface-water', [-1, -2, -1], [1, 0, 1]).aabb, velocity: { x: 0, y: 0, z: 0 }, surfaceY: 0 },
+        ]),
+        dt: 1 / 60,
+      }).state;
+    expect(bodyWorldAabb(current, body).max.y).toBeLessThanOrEqual(1.6 + 1e-5);
   });
 
   it('遵守 body/collider 掩码，传感器报告重叠而不阻挡', () => {
@@ -248,6 +317,16 @@ describe('统一 swept-AABB 物理核心', () => {
       separateBodies({ left, leftConfig: itemBody, right, rightConfig: itemBody, world: world([]), maxDistance: 0.1 })
         .separated,
     ).toBe(false);
+    expect(
+      separateBodies({
+        left,
+        leftConfig: body,
+        right: state(2, 0, 0),
+        rightConfig: body,
+        world: world([]),
+        maxDistance: 0.1,
+      }).separated,
+    ).toBe(true);
   });
 
   it('角色推离以同一静态扫掠约束：贴墙一侧不穿入固体，另一侧可作合法有限推离', () => {
@@ -310,6 +389,16 @@ describe('统一 swept-AABB 物理核心', () => {
     expect(recoverBody({ state: embedded, config: body, world: world(adjacent), maxDistance: 1.2 }).recovered).toBe(
       false,
     );
+    const crowded = Array.from({ length: 30 }, (_, index) =>
+      box(
+        `crowded-${index}`,
+        [-0.4 + index / 100, -0.2 + index / 100, -0.4 + index / 100],
+        [0.4 + index / 100, 1.7 - index / 100, 0.4 + index / 100],
+      ),
+    );
+    expect(() => recoverBody({ state: embedded, config: body, world: world(crowded), maxDistance: 2 })).toThrow(
+      RangeError,
+    );
   });
 
   it('接触点位于实际碰撞面，终点离开窄支撑时不遗留 grounded 状态', () => {
@@ -359,5 +448,7 @@ describe('统一 swept-AABB 物理核心', () => {
         dt: 1 / 60,
       }),
     ).toThrow(RangeError);
+    expect(validateBodyConfig({ ...body, collisionLayer: 0x1_0000_0000 })).toBe(false);
+    expect(validateBodyConfig({ ...body, collisionMask: -1 })).toBe(false);
   });
 });

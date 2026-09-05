@@ -36,7 +36,12 @@ export type Collider = Readonly<{
   sensor?: boolean;
 }>;
 
-export type FluidVolume = Readonly<{ aabb: WorldAabb; velocity: Vec3 }>;
+/**
+ * Every fluid cell contributes its AABB to immersion. `surfaceY` is present
+ * only for an actually exposed free surface; interior cells deliberately omit
+ * it so crossing their cell boundary cannot cause a water-surface jump.
+ */
+export type FluidVolume = Readonly<{ aabb: WorldAabb; velocity: Vec3; surfaceY?: number }>;
 
 /**
  * `querySolids` includes known solid sub-boxes and, when configured by the

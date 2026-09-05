@@ -12,6 +12,7 @@ import {
   colliderMatches,
   sweepBodyThroughWorld,
   validateBodyConfig,
+  validateCollider,
 } from './geometry';
 import type {
   BodyConfig,
@@ -74,7 +75,14 @@ const mediumAt = (bounds: WorldAabb, fluids: readonly FluidVolume[] | undefined)
   let covered = 0;
   let flow = ZERO;
   for (const fluid of fluids) {
-    if (!finiteAabb(fluid.aabb) || !finiteVec3(fluid.velocity))
+    if (
+      !finiteAabb(fluid.aabb) ||
+      !finiteVec3(fluid.velocity) ||
+      (fluid.surfaceY !== undefined &&
+        (!Number.isFinite(fluid.surfaceY) ||
+          fluid.surfaceY < fluid.aabb.min.y - COLLISION_EPSILON ||
+          fluid.surfaceY > fluid.aabb.max.y + COLLISION_EPSILON))
+    )
       throw new RangeError('流体采样必须包含有限的碰撞箱和流速。');
     const volume = overlapVolume(bounds, fluid.aabb);
     if (volume <= 0) continue;
@@ -88,7 +96,8 @@ const mediumAt = (bounds: WorldAabb, fluids: readonly FluidVolume[] | undefined)
 const reachesFluidSurface = (bounds: WorldAabb, fluids: readonly FluidVolume[] | undefined): boolean =>
   !!fluids?.some(
     (fluid) =>
-      bounds.max.y >= fluid.aabb.max.y - COLLISION_EPSILON &&
+      fluid.surfaceY !== undefined &&
+      bounds.max.y >= fluid.surfaceY - COLLISION_EPSILON &&
       bounds.min.x < fluid.aabb.max.x - COLLISION_EPSILON &&
       bounds.max.x > fluid.aabb.min.x + COLLISION_EPSILON &&
       bounds.min.z < fluid.aabb.max.z - COLLISION_EPSILON &&
@@ -101,7 +110,7 @@ const supported = (bounds: WorldAabb, config: BodyConfig, world: PhysicsWorld): 
     max: { x: bounds.max.x, y: bounds.min.y + COLLISION_EPSILON * 4, z: bounds.max.z },
   };
   return world.querySolids(probe).some((collider) => {
-    if (!finiteAabb(collider.aabb)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
+    if (!validateCollider(collider)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
     if (collider.sensor || !colliderMatches(config, collider)) return false;
     const horizontal = overlapDepth(
       { min: { x: bounds.min.x, y: -1, z: bounds.min.z }, max: { x: bounds.max.x, y: 1, z: bounds.max.z } },
@@ -172,7 +181,7 @@ const sensorContacts = (state: BodyState, config: BodyConfig, world: PhysicsWorl
   return world
     .querySolids(bounds)
     .map((collider) => {
-      if (!finiteAabb(collider.aabb)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
+      if (!validateCollider(collider)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
       return collider;
     })
     .filter((collider) => collider.sensor && colliderMatches(config, collider) && overlapDepth(bounds, collider.aabb))

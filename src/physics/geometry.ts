@@ -68,6 +68,9 @@ export const finiteAabb = (aabb: WorldAabb): boolean =>
   aabb.min.y < aabb.max.y &&
   aabb.min.z < aabb.max.z;
 
+const validCollisionBits = (value: number | undefined): boolean =>
+  value === undefined || (Number.isInteger(value) && value >= 0 && value <= 0xffffffff);
+
 /**
  * Call this at shape-registry construction and Worker message boundaries.
  * `stepBody` also defends itself because it is a public pure entry point, but
@@ -90,10 +93,13 @@ export const validateBodyConfig = (config: BodyConfig): boolean => {
     finiteAabb(config.localAabb) &&
     Math.abs(config.localAabb.min.y) <= COLLISION_EPSILON &&
     numericValues.every((value) => value === undefined || Number.isFinite(value)) &&
-    (config.collisionLayer === undefined || Number.isInteger(config.collisionLayer)) &&
-    (config.collisionMask === undefined || Number.isInteger(config.collisionMask))
+    validCollisionBits(config.collisionLayer) &&
+    validCollisionBits(config.collisionMask)
   );
 };
+
+export const validateCollider = (collider: Collider): boolean =>
+  finiteAabb(collider.aabb) && validCollisionBits(collider.layer) && validCollisionBits(collider.mask);
 
 const DEFAULT_LAYER = 1;
 const DEFAULT_MASK = 0xffffffff;
@@ -173,7 +179,7 @@ export const sweepBodyThroughWorld = (
     const hit = world
       .querySolids(swept)
       .map((collider) => {
-        if (!finiteAabb(collider.aabb)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
+        if (!validateCollider(collider)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
         return collider;
       })
       .filter((collider) => !collider.sensor && colliderMatches(config, collider))

@@ -20,4 +20,6 @@
 
 `pnpm prettier --check src/physics/types.ts src/physics/geometry.ts src/physics/step-body.ts src/physics/recovery.ts src/physics/index.ts tests/physics/step-body.test.ts`、`pnpm eslint src/physics tests/physics`、`pnpm tsc --noEmit`、`pnpm build` 与 `git diff --check` 通过。生产构建保留既有大 Chunk 警告，未由本模块新增或掩盖。
 
+2026-09-06：第三轮独立复审发现生产适配器逐水格返回 `FluidVolume` 时，不能从任一格的 `aabb.max.y` 推断自由水面。`FluidVolume.surfaceY` 现为权威适配器专门标注的暴露水面；无标记的覆水格和内部格仍参与浸没计算，但永不产生水面跃出速度。新增逐格三层深水、顶层部分水位、覆水层与低顶回归，覆盖内部边界无冲量、真实暴露面才跃出及连续碰撞顶棚。`separated` 现在准确表示返回状态是否已经完全无重叠，即使调用前本已分离也为 `true`；碰撞层和掩码收紧为无符号 32 位整数。恢复候选在笛卡尔积物化前按固定预算 fail closed，避免极端复合形状的超预算临时分配。
+
 本模块仅交付纯核心；Authority Worker、体素/未知 Chunk 查询适配、客户端预测、眼睛入水滞回和真实碰撞箱调试投影由主线按已冻结合同接入。`sampleFluid` 只计算身体 AABB 的介质比例，刻意不读取相机/眼睛状态。

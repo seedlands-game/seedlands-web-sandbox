@@ -1,4 +1,4 @@
-export { bodyWorldAabb, validateBodyConfig } from './geometry';
+export { bodyWorldAabb, validateBodyConfig, validateCollider } from './geometry';
 export { CollisionLayer, bodyConfigFor, bodyKindForEntity, type BodyKind } from './body-registry';
 export { recoverBody, separateBodies } from './recovery';
 export { stepBody } from './step-body';

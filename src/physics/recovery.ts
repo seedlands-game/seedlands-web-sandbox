@@ -3,13 +3,13 @@ import {
   add,
   bodyWorldAabb,
   colliderMatches,
-  finiteAabb,
   finiteVec3,
   length,
   overlapDepth,
   sweepBodyThroughWorld,
   unionAabb,
   validateBodyConfig,
+  validateCollider,
 } from './geometry';
 import type {
   BodyConfig,
@@ -39,7 +39,7 @@ const relevantColliders = (bounds: WorldAabb, config: BodyConfig, world: Physics
   world
     .querySolids(bounds)
     .map((collider) => {
-      if (!finiteAabb(collider.aabb)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
+      if (!validateCollider(collider)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
       return collider;
     })
     .filter((collider) => !collider.sensor && colliderMatches(config, collider))
@@ -102,6 +102,12 @@ export const recoverBody = (
   if (!colliders.some((collider) => overlapDepth(bounds, collider.aabb)))
     return { state, recovered: false, distance: 0 };
   const coordinates = coordinatesFor(bounds, colliders, maxDistance);
+  if (
+    coordinates.x.length > Math.floor(MAX_RECOVERY_CANDIDATES / Math.max(1, coordinates.y.length)) ||
+    coordinates.x.length * coordinates.y.length >
+      Math.floor(MAX_RECOVERY_CANDIDATES / Math.max(1, coordinates.z.length))
+  )
+    throw new RangeError('恢复候选超过固定预算；调用方必须缩小恢复范围。');
   const candidates: Vec3[] = [];
   for (const x of coordinates.x)
     for (const y of coordinates.y)
@@ -109,8 +115,6 @@ export const recoverBody = (
         const displacement = { x, y, z };
         if (length(displacement) <= maxDistance + COLLISION_EPSILON) candidates.push(displacement);
       }
-  if (candidates.length > MAX_RECOVERY_CANDIDATES)
-    throw new RangeError('恢复候选超过固定预算；调用方必须缩小恢复范围。');
   for (const displacement of candidates.sort(compareDisplacement)) {
     if (length(displacement) <= COLLISION_EPSILON) continue;
     const candidate = { ...state, position: add(state.position, displacement) };
@@ -165,6 +169,10 @@ export const separateBodies = (
     layer: leftConfig.collisionLayer,
     mask: leftConfig.collisionMask,
   };
+  const leftBounds = bodyWorldAabb(left, leftConfig);
+  const rightBounds = bodyWorldAabb(right, rightConfig);
+  const depth = overlapDepth(leftBounds, rightBounds);
+  if (!depth) return { left, right, separated: true };
   if (
     leftConfig.pushable === false ||
     rightConfig.pushable === false ||
@@ -172,10 +180,7 @@ export const separateBodies = (
     !colliderMatches(rightConfig, leftCollider)
   )
     return { left, right, separated: false };
-  const leftBounds = bodyWorldAabb(left, leftConfig);
-  const rightBounds = bodyWorldAabb(right, rightConfig);
-  const depth = overlapDepth(leftBounds, rightBounds);
-  if (!depth || maxDistance <= COLLISION_EPSILON) return { left, right, separated: false };
+  if (maxDistance <= COLLISION_EPSILON) return { left, right, separated: false };
   const axis = depth.x <= depth.z ? 'x' : 'z';
   const leftDirection = left.position[axis] <= right.position[axis] ? -1 : 1;
   let best: SeparationResult = { left, right, separated: false };
