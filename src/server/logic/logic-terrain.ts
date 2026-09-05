@@ -8,6 +8,9 @@ import {
 
 const EPSILON = 1e-6;
 const MAX_NAVIGATION_NODES = 128;
+const validatedTerrainSignatures = new WeakMap<readonly TerrainWindow[], string>();
+const objectIds = new WeakMap<object, number>();
+let nextObjectId = 1;
 
 type CellSample = 'free' | 'solid' | 'unknown';
 type Node = Readonly<{ x: number; y: number; z: number; g: number; f: number; parent: string | null }>;
@@ -15,16 +18,33 @@ export type NavigationStep = Readonly<{ wish: { x: number; z: number }; jumpRequ
 
 const cellKey = (x: number, y: number, z: number) => `${x},${y},${z}`;
 const finiteTuple = (value: readonly number[]) => value.length === 3 && value.every(Number.isFinite);
-const overlaps = (left: TerrainWindow, right: TerrainWindow) =>
-  [0, 1, 2].every(
-    (axis) =>
-      left.origin[axis] < right.origin[axis] + right.size[axis] &&
-      right.origin[axis] < left.origin[axis] + left.size[axis],
-  );
+const objectId = (value: object) => {
+  const existing = objectIds.get(value);
+  if (existing !== undefined) return existing;
+  const created = nextObjectId++;
+  objectIds.set(value, created);
+  return created;
+};
+const terrainSignature = (terrainWindows: readonly TerrainWindow[]) =>
+  terrainWindows
+    .map((terrainWindow) =>
+      JSON.stringify([
+        objectId(terrainWindow),
+        terrainWindow.key,
+        terrainWindow.chunkRevision,
+        terrainWindow.origin,
+        terrainWindow.size,
+        objectId(terrainWindow.occupancy),
+        terrainWindow.occupancy.length,
+      ]),
+    )
+    .join('|');
 
 export function validateTerrainWindows(terrainWindows: readonly TerrainWindow[]): void {
   const keys = new Set<string>();
-  terrainWindows.forEach((terrainWindow, index) => {
+  const occupiedCells = new Set<string>();
+  let totalCells = 0;
+  terrainWindows.forEach((terrainWindow) => {
     if (!terrainWindow.key.trim() || keys.has(terrainWindow.key))
       throw new TypeError('Terrain window key must be unique and non-empty.');
     keys.add(terrainWindow.key);
@@ -39,19 +59,33 @@ export function validateTerrainWindows(terrainWindows: readonly TerrainWindow[])
       throw new TypeError('Terrain window size must contain positive axes no larger than 32.');
     const cells = terrainWindow.size[0] * terrainWindow.size[1] * terrainWindow.size[2];
     if (cells > MAX_LOGIC_TERRAIN_CELLS) throw new TypeError('Terrain window contains too many cells.');
+    totalCells += cells;
+    if (totalCells > MAX_LOGIC_TERRAIN_CELLS) throw new TypeError('Terrain windows exceed the total cell budget.');
     if (!(terrainWindow.occupancy instanceof Uint8Array) || terrainWindow.occupancy.length !== cells)
       throw new TypeError('Terrain window occupancy length does not match its size.');
-    for (let other = 0; other < index; other += 1)
-      if (overlaps(terrainWindow, terrainWindows[other])) throw new TypeError('Terrain windows must not overlap.');
+    for (let z = terrainWindow.origin[2]; z < terrainWindow.origin[2] + terrainWindow.size[2]; z += 1)
+      for (let y = terrainWindow.origin[1]; y < terrainWindow.origin[1] + terrainWindow.size[1]; y += 1)
+        for (let x = terrainWindow.origin[0]; x < terrainWindow.origin[0] + terrainWindow.size[0]; x += 1) {
+          const key = cellKey(x, y, z);
+          if (occupiedCells.has(key)) throw new TypeError('Terrain windows must not overlap.');
+          occupiedCells.add(key);
+        }
   });
 }
+
+const validateTerrainWindowsOnce = (terrainWindows: readonly TerrainWindow[]) => {
+  const signature = terrainSignature(terrainWindows);
+  if (validatedTerrainSignatures.get(terrainWindows) === signature) return;
+  validateTerrainWindows(terrainWindows);
+  validatedTerrainSignatures.set(terrainWindows, signature);
+};
 
 export class LogicTerrain {
   private readonly reads = new Map<string, number>();
   private missing = false;
 
   constructor(private readonly terrainWindows: readonly TerrainWindow[]) {
-    validateTerrainWindows(terrainWindows);
+    validateTerrainWindowsOnce(terrainWindows);
   }
 
   get hasMissingData(): boolean {
@@ -109,6 +143,7 @@ export class LogicTerrain {
     if (!resolvedStart || !resolvedTarget || this.missing) return null;
     const targetKey = cellKey(resolvedTarget.x, resolvedTarget.y, resolvedTarget.z);
     const startKey = cellKey(resolvedStart.x, resolvedStart.y, resolvedStart.z);
+    if (startKey === targetKey) return this.directStep(start, target);
     const open = new Map<string, Node>([
       [
         startKey,
@@ -179,7 +214,10 @@ export class LogicTerrain {
         const candidate = { x: current.x + dx, y: current.y + dy, z: current.z + dz };
         const previouslyMissing = this.missing;
         this.missing = false;
-        if (!this.walkable(kind, candidate)) {
+        if (
+          (dy > 0 && !this.clearBody(kind, { x: current.x, y: candidate.y, z: current.z })) ||
+          !this.walkable(kind, candidate)
+        ) {
           this.missing ||= previouslyMissing;
           continue;
         }
@@ -192,6 +230,27 @@ export class LogicTerrain {
   }
 
   private walkable(kind: BodyKind, node: Pick<Node, 'x' | 'y' | 'z'>): boolean {
+    const { minimum, maximum, position } = this.bodyBounds(kind, node);
+    if (!this.clearBody(kind, node)) return false;
+    const supportY = Math.floor(position.y + bodyConfigFor(kind).localAabb.min.y - EPSILON);
+    for (let z = minimum.z; z <= maximum.z; z += 1)
+      for (let x = minimum.x; x <= maximum.x; x += 1) {
+        const sample = this.sample(x, supportY, z);
+        if (sample === 'solid') return true;
+        if (sample === 'unknown') return false;
+      }
+    return false;
+  }
+
+  private clearBody(kind: BodyKind, node: Pick<Node, 'x' | 'y' | 'z'>): boolean {
+    const { minimum, maximum } = this.bodyBounds(kind, node);
+    for (let y = minimum.y; y <= maximum.y; y += 1)
+      for (let z = minimum.z; z <= maximum.z; z += 1)
+        for (let x = minimum.x; x <= maximum.x; x += 1) if (this.sample(x, y, z) !== 'free') return false;
+    return true;
+  }
+
+  private bodyBounds(kind: BodyKind, node: Pick<Node, 'x' | 'y' | 'z'>) {
     const config = bodyConfigFor(kind);
     const position = { x: node.x + 0.5, y: node.y, z: node.z + 0.5 };
     const minimum = {
@@ -204,18 +263,7 @@ export class LogicTerrain {
       y: Math.floor(position.y + config.localAabb.max.y - EPSILON),
       z: Math.floor(position.z + config.localAabb.max.z - EPSILON),
     };
-    for (let y = minimum.y; y <= maximum.y; y += 1)
-      for (let z = minimum.z; z <= maximum.z; z += 1)
-        for (let x = minimum.x; x <= maximum.x; x += 1) if (this.sample(x, y, z) !== 'free') return false;
-
-    const supportY = Math.floor(position.y + config.localAabb.min.y - EPSILON);
-    for (let z = minimum.z; z <= maximum.z; z += 1)
-      for (let x = minimum.x; x <= maximum.x; x += 1) {
-        const sample = this.sample(x, supportY, z);
-        if (sample === 'solid') return true;
-        if (sample === 'unknown') return false;
-      }
-    return false;
+    return { minimum, maximum, position };
   }
 
   private heuristic(left: Pick<Node, 'x' | 'y' | 'z'>, right: Pick<Node, 'x' | 'y' | 'z'>) {
@@ -237,6 +285,15 @@ export class LogicTerrain {
       wish: { x: dx / length, z: dz / length },
       jumpRequested: current.y > parent.y,
     };
+  }
+
+  private directStep(start: LogicPosition, target: LogicPosition): NavigationStep {
+    const dx = target[0] - start[0];
+    const dz = target[2] - start[2];
+    const length = Math.hypot(dx, dz);
+    return length <= EPSILON
+      ? { wish: { x: 0, z: 0 }, jumpRequested: false }
+      : { wish: { x: dx / length, z: dz / length }, jumpRequested: false };
   }
 }
 
