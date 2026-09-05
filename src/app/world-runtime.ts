@@ -370,7 +370,8 @@ export class World {
   consumeServerCommit(result: WorldCommitResult) {
     const change = result.structuralChange;
     if (!change) return;
-    const fluidPriority = change.actorId === 'fluid-v1';
+    const fluidPriority = change.actorId === 'fluid-v2';
+    if (fluidPriority) this.fluidFeedback.markFirstCommit(change.chunkRevisions);
     this.aggregateStructuralEventCount += 1;
     this.latestCommitMutationCount = change.mutationCount;
     this.latestCommitMeshChunkCount = change.meshChunks.length;
