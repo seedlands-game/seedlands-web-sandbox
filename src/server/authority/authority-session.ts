@@ -12,6 +12,11 @@ export type AuthorityEntity = Readonly<{
   physicsVelocity?: [number, number, number];
 }>;
 
+export type AuthorityPickupTarget = Readonly<{
+  id: string;
+  position: [number, number, number];
+}>;
+
 export type AuthorityServerPort = {
   readonly worldRevision: number;
   readonly mutationCount: number;
@@ -24,6 +29,8 @@ export type AuthorityServerPort = {
   ) => unknown;
   advanceGameplayRules: (seconds: number) => unknown;
   advanceWorldClock?: (hours: number) => unknown;
+  queryPickupTargets?: () => readonly AuthorityPickupTarget[];
+  pickupItem?: (playerId: string, itemId: string) => Readonly<{ success: boolean }>;
 };
 
 export type LogicIntent = Readonly<{

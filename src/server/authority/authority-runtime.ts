@@ -90,6 +90,12 @@ export class AuthorityRuntime {
         return result;
       },
       advanceWorldClock: (hours: number) => server.advanceClock(hours),
+      queryPickupTargets: () =>
+        server
+          .queryEntities({ type: 'player' })
+          .filter((entity) => server.getPlayerState(entity.id).lifecycle === 'alive')
+          .map((entity) => ({ id: entity.id, position: [...entity.position] as [number, number, number] })),
+      pickupItem: (playerId: string, itemId: string) => server.pickupItem(playerId, itemId),
     };
     this.session = new AuthoritySession({
       epoch: options.epoch,
