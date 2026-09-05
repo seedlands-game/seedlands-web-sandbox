@@ -40,18 +40,11 @@ test.use({ video: 'on', viewport: { width: 1920, height: 1080 } });
 test('mosslight-68自然河岸需Space上岸，角色与掉落物失去支撑后走权威物理', async ({ page }, testInfo) => {
   test.setTimeout(90_000);
   await startHarnessWorld(page, 'mosslight-68');
-  const crossSection = await page.evaluate(async () => {
+  await page.evaluate(async () => {
     const harness = window.__seedlandsHarness as unknown as HarnessApi;
     await harness.movePlayerTo(30.5, 13.6, -30.5);
     harness.setView(0, 0);
-    return {
-      bank: harness.getVoxelAt?.(30, 11, -31),
-      waterTopCell: harness.getVoxelAt?.(31, 11, -32),
-      bed: harness.getVoxelAt?.(31, 9, -32),
-      version: harness.snapshot().generatorVersion,
-    };
   });
-  expect(crossSection).toEqual({ bank: 1, waterTopCell: 8, bed: 1, version: 3 });
   await waitForSnapshot(
     page,
     (value) =>
@@ -60,6 +53,16 @@ test('mosslight-68自然河岸需Space上岸，角色与掉落物失去支撑后
       value.deferredRemeshes === 0 &&
       value.performance.uploadQueueDepth === 0,
   );
+  const crossSection = await page.evaluate(() => {
+    const harness = window.__seedlandsHarness as unknown as HarnessApi;
+    return {
+      bank: harness.getVoxelAt?.(30, 11, -31),
+      waterTopCell: harness.getVoxelAt?.(31, 11, -32),
+      bed: harness.getVoxelAt?.(31, 9, -32),
+      version: harness.snapshot().generatorVersion,
+    };
+  });
+  expect(crossSection).toEqual({ bank: 1, waterTopCell: 8, bed: 1, version: 3 });
   await page.bringToFront();
   await lockPointer(page);
   expect((await audio(page)).unlocked).toBe(true);
