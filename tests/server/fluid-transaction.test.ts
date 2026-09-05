@@ -297,6 +297,14 @@ describe('fluid transactions', () => {
         writes: [{ ...second.candidate.writes[0]!, voxel: Voxel.Water, fluid: 255 }],
       }),
     ).toEqual({ accepted: false, reason: 'invalid-result' });
+
+    const third = createSourceFlowLease();
+    expect(
+      third.authority.commitFluidCandidate({
+        ...third.candidate,
+        writes: [{ ...third.candidate.writes[0]!, expectedVoxel: Voxel.Water, expectedFluid: 2 ** 32 + 0x88 }],
+      }),
+    ).toEqual({ accepted: false, reason: 'invalid-result' });
   });
 
   it('rejects a remote next frontier and non-finite coordinates', () => {

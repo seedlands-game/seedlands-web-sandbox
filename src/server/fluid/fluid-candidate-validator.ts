@@ -31,7 +31,7 @@ const isExistingCellValue = (voxel: number, fluid: number) => {
   if (!isKnownVoxel(voxel) || !Number.isSafeInteger(fluid)) return false;
   if (voxel !== Voxel.Water) return fluid === 0;
   const level = fluid & 0x0f;
-  return level >= 1 && level <= 8 && (fluid & ~0x8f) === 0;
+  return fluid >= 1 && fluid <= 0x88 && level >= 1 && level <= 8 && (fluid & ~0x8f) === 0;
 };
 
 const isDerivedCellValue = (voxel: number, fluid: number) =>
