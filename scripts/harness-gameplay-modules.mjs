@@ -44,6 +44,7 @@ export async function compileGameplayModules(root, compileModule, voxelUrl) {
     "'./entity-store'": `'${entityStoreUrl}'`,
     "'./player-state'": `'${playerStateUrl}'`,
   });
+  const playerOccupancyUrl = await compileModule(resolve(root, 'src/server/gameplay/player-occupancy.ts'));
   const gameplayRuntimeUrl = await compileModule(resolve(root, 'src/server/gameplay/gameplay-runtime.ts'), {
     "'../../world/voxel'": `'${voxelUrl}'`,
     "'../simulation/autonomy-runtime'": `'${autonomyRuntimeUrl}'`,
@@ -51,6 +52,7 @@ export async function compileGameplayModules(root, compileModule, voxelUrl) {
     "'./gameplay-snapshot'": `'${gameplaySnapshotUrl}'`,
     "'./item-registry'": `'${itemRegistryUrl}'`,
     "'./player-state'": `'${playerStateUrl}'`,
+    "'./player-occupancy'": `'${playerOccupancyUrl}'`,
     "'./recipe-registry'": `'${recipeRegistryUrl}'`,
     "'./voxel-gameplay'": `'${voxelGameplayUrl}'`,
   });
