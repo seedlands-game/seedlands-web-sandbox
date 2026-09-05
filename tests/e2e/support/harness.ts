@@ -27,6 +27,7 @@ export type HarnessSnapshot = {
   runtime: 'integrated-server' | 'authority-worker';
   authority: {
     physicsHz: 30 | 60 | 120;
+    paused: boolean;
     physicsTick: number;
     commitSequence: number;
     acknowledgedInputSequence: number;

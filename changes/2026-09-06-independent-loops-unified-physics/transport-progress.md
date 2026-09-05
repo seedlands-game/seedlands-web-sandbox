@@ -102,3 +102,5 @@
 补充 RED：`local-player-prediction` 使用全新但拥有相同已加载 revision 的碰撞世界校正时必须保留历史；`browser-authority-client` 收到传送事务携带的权威快照时必须立即发布并推进快照门，随后到达的传送前快照必须拒绝。实现只同步现有 Authority 状态，不在客户端伪造位置或放宽碰撞。
 
 实现后，碰撞世界可按快照涉及的 Chunk key 直接读取已加载 canonical revision；传送事务回执携带同一 Authority 时刻的完整快照，并复用普通快照的顺序门。定向 Vitest 共 5 个文件、37 项通过，受影响 ESLint、源码 TypeScript、测试 TypeScript 与 `git diff --check` 通过。60Hz/50ms、120Hz/150ms、revision 变化和岸边跳跃的真实浏览器复验仍由主线执行，因此本阶段只记录已证明的时序修复，不把浏览器准出标为通过。
+
+A8 浏览器可靠暂停等待不能以 UI 对话框出现代替 Authority 确认；Harness 的 Authority 投影补充权威快照 `paused`，需求用例可先等待它变为 `true`，再检查物理 tick、游戏时间、流体提交和输入释放均冻结。

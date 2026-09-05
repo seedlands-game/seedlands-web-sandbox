@@ -238,6 +238,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     },
     authority: {
       physicsHz: context.authority?.readyState?.frequencies.physicsHz ?? 60,
+      paused: authoritySnapshot?.paused ?? false,
       physicsTick: authoritySnapshot?.physicsTick ?? 0,
       integratedPhysicsTimeMs: authoritySnapshot?.integratedPhysicsTimeMs ?? 0,
       acknowledgedInputSequence: authoritySnapshot?.acknowledgedInputSequence ?? -1,

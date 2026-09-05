@@ -99,6 +99,7 @@ export type HarnessSnapshot = {
   };
   authority: {
     physicsHz: 30 | 60 | 120;
+    paused: boolean;
     physicsTick: number;
     integratedPhysicsTimeMs: number;
     acknowledgedInputSequence: number;
