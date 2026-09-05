@@ -3,6 +3,27 @@ import { startHarnessWorld, waitForSnapshot } from '../../../tests/e2e/support/h
 
 test.setTimeout(60_000);
 
+type WaterTransitionRecord = {
+  chunkKey: string;
+  targetRevision: number;
+  traceId: string;
+  progress: number;
+  completed: boolean;
+  superseded: boolean;
+  geometry?: {
+    mode: string;
+    patchCount: number;
+    visibleWaterMeshCount: number;
+    opacityCrossfade: boolean;
+  };
+};
+
+type WaterTransitions = {
+  activeCount: number;
+  active: WaterTransitionRecord[];
+  recent: WaterTransitionRecord[];
+};
+
 test('已提交水边界使用单几何变形且静水重网格不启动过渡', async ({ page }) => {
   await startHarnessWorld(page, 'fluid-surface-morph-v1');
   await page.evaluate(async () => {
@@ -58,7 +79,6 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
   await page.evaluate(async () => {
     const h = window.__seedlandsHarness!;
     h.setWaterTransitionHold?.(true);
-    h.setTimePaused(false);
     await h.setVoxelAt(1, 57, 0, 0);
   });
   const active = await expect
@@ -66,17 +86,7 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
       page.evaluate(() => {
         const transitions = (
           window.__seedlandsHarness!.snapshot() as unknown as {
-            waterTransitions: {
-              active: Array<{
-                traceId: string;
-                geometry?: {
-                  mode: string;
-                  patchCount: number;
-                  visibleWaterMeshCount: number;
-                  opacityCrossfade: boolean;
-                };
-              }>;
-            };
+            waterTransitions: WaterTransitions;
           }
         ).waterTransitions;
         return transitions.active.find((record) => record.geometry?.mode === 'surface-morph') ?? null;
@@ -87,17 +97,7 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
   const held = await page.evaluate(() => {
     const transitions = (
       window.__seedlandsHarness!.snapshot() as unknown as {
-        waterTransitions: {
-          active: Array<{
-            traceId: string;
-            geometry?: {
-              mode: string;
-              patchCount: number;
-              visibleWaterMeshCount: number;
-              opacityCrossfade: boolean;
-            };
-          }>;
-        };
+        waterTransitions: WaterTransitions;
       }
     ).waterTransitions;
     return transitions.active.find((record) => record.geometry?.mode === 'surface-morph')!;
@@ -113,13 +113,91 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
   await expect
     .poll(() =>
       page.evaluate((traceId) => {
-        const transitions = (
-          window.__seedlandsHarness!.snapshot() as unknown as {
-            waterTransitions: { recent: Array<{ traceId: string; completed: boolean }> };
-          }
-        ).waterTransitions;
-        return transitions.recent.some((record) => record.traceId === traceId && record.completed);
+        const snapshot = window.__seedlandsHarness!.snapshot();
+        const transitions = (snapshot as unknown as { waterTransitions: WaterTransitions }).waterTransitions;
+        return (
+          snapshot.meshingQueue === 0 &&
+          snapshot.deferredRemeshes === 0 &&
+          snapshot.performance.uploadQueueDepth === 0 &&
+          transitions.activeCount === 0 &&
+          transitions.recent.some((record) => record.traceId === traceId && record.completed && record.progress === 1)
+        );
       }, held.traceId),
     )
     .toBe(true);
+
+  await page.evaluate(async () => {
+    const h = window.__seedlandsHarness!;
+    h.setWaterTransitionHold?.(true);
+    await h.setVoxelAt(1, 57, 0, 3);
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const transitions = (window.__seedlandsHarness!.snapshot() as unknown as { waterTransitions: WaterTransitions })
+          .waterTransitions;
+        return transitions.active.find((record) => record.geometry?.mode === 'surface-morph') ?? null;
+      }),
+    )
+    .not.toBeNull();
+  const interrupted = await page.evaluate(() => {
+    const transitions = (window.__seedlandsHarness!.snapshot() as unknown as { waterTransitions: WaterTransitions })
+      .waterTransitions;
+    return transitions.active.find((record) => record.geometry?.mode === 'surface-morph')!;
+  });
+
+  await page.evaluate(() => window.__seedlandsHarness!.setVoxelAt(1, 57, 0, 0));
+  await expect
+    .poll(() =>
+      page.evaluate((traceId) => {
+        const transitions = (window.__seedlandsHarness!.snapshot() as unknown as { waterTransitions: WaterTransitions })
+          .waterTransitions;
+        const oldRecord = transitions.recent.find((record) => record.traceId === traceId);
+        if (!oldRecord) return false;
+        const successor = transitions.active.find(
+          (record) => record.chunkKey === oldRecord.chunkKey && record.targetRevision > oldRecord.targetRevision,
+        );
+        return oldRecord?.superseded === true && oldRecord.completed === false && successor !== undefined;
+      }, interrupted.traceId),
+    )
+    .toBe(true);
+  const successor = await page.evaluate((traceId) => {
+    const transitions = (window.__seedlandsHarness!.snapshot() as unknown as { waterTransitions: WaterTransitions })
+      .waterTransitions;
+    const oldRecord = transitions.recent.find((record) => record.traceId === traceId)!;
+    return transitions.active.find(
+      (record) => record.chunkKey === oldRecord.chunkKey && record.targetRevision > oldRecord.targetRevision,
+    )!;
+  }, interrupted.traceId);
+
+  await page.evaluate(() => window.__seedlandsHarness!.setWaterTransitionHold?.(false));
+  await expect
+    .poll(() =>
+      page.evaluate((traceId) => {
+        const snapshot = window.__seedlandsHarness!.snapshot();
+        const transitions = (snapshot as unknown as { waterTransitions: WaterTransitions }).waterTransitions;
+        return {
+          settled:
+            snapshot.meshingQueue === 0 &&
+            snapshot.deferredRemeshes === 0 &&
+            snapshot.performance.uploadQueueDepth === 0,
+          activeCount: transitions.activeCount,
+          successorCompleted: transitions.recent.some(
+            (record) => record.traceId === traceId && record.completed && record.progress === 1,
+          ),
+          recentCount: transitions.recent.length,
+        };
+      }, successor.traceId),
+    )
+    .toMatchObject({ settled: true, activeCount: 0, successorCompleted: true });
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          window.__seedlandsHarness!.snapshot() as unknown as {
+            waterTransitions: WaterTransitions;
+          }
+        ).waterTransitions.recent.length,
+    ),
+  ).toBeLessThanOrEqual(32);
 });

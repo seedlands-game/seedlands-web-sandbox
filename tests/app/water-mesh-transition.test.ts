@@ -29,4 +29,27 @@ describe('WaterMeshTransitionTracker', () => {
 
     expect(tracker.snapshot().active[0].progressSamples).toEqual([0.2, 0.6, 0.6]);
   });
+
+  it('bounds completed and superseded history while releasing every active record', () => {
+    const tracker = new WaterMeshTransitionTracker();
+    for (let revision = 0; revision < 40; revision += 1) {
+      const traceId = `trace-${revision}`;
+      tracker.begin({ chunkKey: '1,0,0', targetRevision: revision, traceId }, 0);
+      tracker.advance(traceId, 0.25);
+      tracker.cancel(traceId);
+    }
+    tracker.begin({ chunkKey: '1,0,0', targetRevision: 40, traceId: 'trace-terminal' }, 0);
+    tracker.complete('trace-terminal');
+
+    const snapshot = tracker.snapshot();
+    expect(snapshot.activeCount).toBe(0);
+    expect(snapshot.recent).toHaveLength(32);
+    expect(snapshot.recent[0]).toMatchObject({ traceId: 'trace-9', superseded: true });
+    expect(snapshot.recent.at(-1)).toMatchObject({
+      traceId: 'trace-terminal',
+      progress: 1,
+      completed: true,
+      superseded: false,
+    });
+  });
 });

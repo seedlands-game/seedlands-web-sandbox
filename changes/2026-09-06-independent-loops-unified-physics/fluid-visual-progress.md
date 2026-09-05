@@ -47,12 +47,14 @@
 
 ## GREEN 与待验收证据
 
-- `CI=true corepack pnpm exec vitest run tests/app/water-surface-transition.test.ts tests/app/playcanvas-water-transition.test.ts tests/app/playcanvas-water-transition-adapter.test.ts tests/app/water-mesh-transition.test.ts tests/app/chunk-resource-repository.test.ts`：`5` 个文件、`17` 项全部通过。覆盖静水跳过、真实水位高度、贪心拓扑变化、推进/收退、面预算、单实例、无 opacity、连续替换、首次渲染前丢弃、全局并发预算、Morph 权重、创建失败清理和幂等销毁。
+- `CI=true corepack pnpm exec vitest run tests/app/water-surface-transition.test.ts tests/app/playcanvas-water-transition.test.ts tests/app/playcanvas-water-transition-adapter.test.ts tests/app/water-mesh-transition.test.ts tests/app/chunk-resource-repository.test.ts`：`5` 个文件、`18` 项全部通过。覆盖静水跳过、真实水位高度、贪心拓扑变化、推进/收退、面预算、单实例、无 opacity、连续替换、首次渲染前丢弃、全局并发预算、最近记录上限、Morph 权重、创建失败清理和幂等销毁。
 - `CI=true corepack pnpm test` 的最新完整并行运行：`117` 个文件通过、`2` 个失败、`2` 个跳过；失败为 `tests/server/headless-session.test.ts` 与 `tests/server/server-headless-cli.test.ts` 各一项固定 `5s` 超时，均不经过本项水面模块。随后以 `--no-file-parallelism --maxWorkers=1` 单独复验这两个文件，`13` 项全部通过。该结果记录为共享套件并行负载失败，不能把完整 Vitest 记为 GREEN；本项 `17` 项定向用例保持 GREEN。
 - `corepack pnpm exec eslint` 对本项生产、Vitest 与 Playwright 文件执行：通过。
 - 本项完成时曾运行 `corepack pnpm build`，Svelte、生产与测试 TypeScript 检查和 Vite 生产构建均通过。补充 Morph 创建失败清理后再次运行时，共享工作树新出现的 `authority-load-performance.spec.ts` 与 Harness 类型未同步，产生 `13` 个测试 TypeScript 错误，完整 `pnpm build` 因此不再是最新 GREEN。最终源码另以 `corepack pnpm exec tsc --noEmit && corepack pnpm exec vite build` 复验通过；已有大 bundle 提示未变为错误。该外部测试类型阻塞须由其归属任务收口。
 - `corepack pnpm lint:paths`：通过。
-- 已新增 `changes/2026-09-06-independent-loops-unified-physics/e2e/fluid-geometry-transition.spec.ts`，程序化检查静水重网格不启动动画、动态边界只记录一份几何且无 opacity crossfade、动画最终完成。按主线浏览器独占安排，本轮未执行，不能记为 Playwright 通过。
+- 已新增 `changes/2026-09-06-independent-loops-unified-physics/e2e/fluid-geometry-transition.spec.ts`，程序化检查静水重网格不启动动画、动态边界只记录一份几何且无 opacity crossfade、动画最终完成，以及连续提交打断旧动画后由更高 revision 的后继动画完成。完成时同时要求 Mesh 队列、延后重网格、上传队列和 active transition 全部归零；最近完成/取消记录维持 `32` 条硬上限。
+- 生产快照 `3e65ff2` 的首次 headed 运行在旧断言处失败：断言把首次观察到的 held trace 当成必须完成的终态。在 `4278` 上独立重复 `9` 次可复现 `2` 次失败；随后 `/private/tmp/seedlands-preview-3e65ff2/changes/2026-09-06-independent-loops-unified-physics/e2e/fluid-geometry-transition-debug.spec.ts` 连跑 `12` 次，其中 `2` 次捕获该 trace 在进度 `0.28/0.37` 被更高流体提交取消，最终 `activeCount=0` 且 Mesh、延后重网格、上传队列均为 `0`。后继提交的水面几何与当前已接纳终态相同，因此直接显示最新 Mesh，没有产生另一条动画记录；这不是资源泄漏，但旧断言错误等待了已明确 superseded 的 trace。
+- 同一生产快照的独立单例取证确认未被打断的真实过渡约 `200ms` 内从进度 `0` 单调到 `1`，`frameCount=13`、`completed=true`、`activeCount=0`。修订后的用例改用暂停流体的直接世界编辑固定完成一条真实 Morph，再显式制造两个连续已提交 revision：旧 trace 必须 `superseded=true`，后继 trace 必须 `completed=true` 且进度为 `1`。修订后的定向 Vitest `4` 文件 `15` 项、Prettier、ESLint 与 `git diff --check` 均通过；测试 TypeScript 全量检查被其他任务尚未提交的 `browser-authority-client.ts` 未使用导入阻塞。主线浏览器独占切换后尚待在最新不可变生产快照复跑，不能提前记为 Playwright GREEN。
 - 已新增 `changes/2026-09-06-independent-loops-unified-physics/midscene/fluid-geometry-transition.yaml`，观察中间帧的单一前沿、无双层透明墙/双重倒影、静水不闪动、世界空间纹理连续，以及完成后无旧面残片。自然视觉和 1920×1080 Medium 性能仍由 Astra 主线准出，本记录不代替该证据。
 
 当前实现已满足可审查的生产接线、纯逻辑与资源生命周期证据；最终准出仍取决于上述 Playwright-change、Midscene 和主线自然视觉/性能检查。视觉动画不参与权威碰撞、介质或流体提交，跳过动画也不会延迟已提交状态。
