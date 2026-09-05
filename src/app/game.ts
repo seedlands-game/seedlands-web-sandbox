@@ -283,6 +283,7 @@ export class Game {
   setPaused(paused: boolean) {
     this.paused = paused;
     this.controller?.releaseInput();
+    this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, paused);
   }
 
   async leaveWorld() {

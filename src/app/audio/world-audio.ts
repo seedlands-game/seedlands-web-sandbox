@@ -30,7 +30,8 @@ export class WorldAudio {
     this.createAmbience(seed);
   }
 
-  updateWorld(camera: pc.Entity, world: World, grounded: boolean, paused: boolean) {
+  updateWorld(camera: pc.Entity | null, world: World | null, grounded: boolean, paused: boolean) {
+    if (!camera || !world) return;
     const { x, y, z } = camera.getPosition();
     this.update(
       camera,
