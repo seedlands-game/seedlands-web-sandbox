@@ -103,6 +103,8 @@ describe('生产本地玩家预测运行时', () => {
     expect(result.replayed).toBe(0);
     expect(runtime.physicalBody).toEqual(snapshot(1).player.body);
     expect(runtime.lastResetReason).toBe('collision-history-missing');
+    runtime.resynchronize(snapshot(2));
+    expect(runtime.resetCounts).toMatchObject({ 'collision-history-missing': 1, 'authority-resync': 1 });
   });
 
   it('全新碰撞查询实例可按已加载chunk核对revision而不误清历史', () => {

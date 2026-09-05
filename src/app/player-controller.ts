@@ -69,6 +69,7 @@ export class PlayerController {
     return {
       pendingFrames: this.prediction.pendingFrames.length,
       lastResetReason: this.prediction.lastResetReason,
+      resetCounts: this.prediction.resetCounts,
       presentationOffset: this.prediction.presentationOffset,
     };
   }

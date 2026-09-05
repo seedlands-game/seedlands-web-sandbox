@@ -276,6 +276,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     prediction: context.controller?.predictionDiagnostics ?? {
       pendingFrames: 0,
       lastResetReason: null,
+      resetCounts: {},
       presentationOffset: { x: 0, y: 0, z: 0 },
     },
     serverWorldTime: context.world?.worldTime ?? 0,

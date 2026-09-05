@@ -40,6 +40,7 @@ export class LocalPlayerPrediction {
   private offsetValue: Vec3 = cloneVector(ZERO);
   private groundedValue = false;
   private lastResetReasonValue: string | null = null;
+  private readonly resetCountsValue: Record<string, number> = {};
 
   constructor(
     epoch: SessionEpoch,
@@ -72,6 +73,10 @@ export class LocalPlayerPrediction {
 
   get lastResetReason(): string | null {
     return this.lastResetReasonValue;
+  }
+
+  get resetCounts(): Readonly<Record<string, number>> {
+    return { ...this.resetCountsValue };
   }
 
   advance(request: LocalPredictionAdvance): Readonly<{ commands: InputCommand[]; body: BodyState }> {
@@ -142,7 +147,7 @@ export class LocalPlayerPrediction {
     this.offsetValue = cloneVector(result.presentationOffset);
     this.groundedValue = snapshot.player.grounded;
     if (snapshot.inputResyncRequired || result.resetReason) {
-      this.lastResetReasonValue = result.resetReason ?? 'authority-resync';
+      this.recordReset(result.resetReason ?? 'authority-resync');
       this.inputStream.resynchronize(snapshot.physicsTick);
       this.accumulator = 0;
     }
@@ -176,7 +181,7 @@ export class LocalPlayerPrediction {
   }
 
   interrupt(snapshot: AuthoritySnapshot, issuedAtMs: number): InputCommand {
-    this.lastResetReasonValue = 'input-interrupted';
+    this.recordReset('input-interrupted');
     this.prediction.clear('input-interrupted');
     this.accumulator = 0;
     this.offsetValue = cloneVector(ZERO);
@@ -184,7 +189,7 @@ export class LocalPlayerPrediction {
   }
 
   reset(): void {
-    this.lastResetReasonValue = 'external-position-change';
+    this.recordReset('external-position-change');
     this.prediction.clear('external-position-change');
     this.bodyValue = null;
     this.offsetValue = cloneVector(ZERO);
@@ -192,11 +197,16 @@ export class LocalPlayerPrediction {
   }
 
   resynchronize(snapshot: AuthoritySnapshot): void {
-    this.lastResetReasonValue = 'authority-resync';
+    this.recordReset('authority-resync');
     this.inputStream.resynchronize(snapshot.physicsTick);
     this.prediction.clear('authority-resync');
     this.bodyValue = cloneBody(snapshot.player.body);
     this.offsetValue = cloneVector(ZERO);
     this.accumulator = 0;
+  }
+
+  private recordReset(reason: string): void {
+    this.lastResetReasonValue = reason;
+    this.resetCountsValue[reason] = (this.resetCountsValue[reason] ?? 0) + 1;
   }
 }

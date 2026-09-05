@@ -105,6 +105,7 @@ test('150ms延迟下碰撞revision变化会重同步预测且不穿墙', async (
   const before = await snapshot(page);
   if (!before) throw new Error('受控传输墙体测试启动后没有 Harness 快照。');
   expect(before.authority.physicsHz).toBe(120);
+  expect(before.prediction.resetCounts['collision-history-missing'] ?? 0).toBe(0);
 
   await lockPointer(page);
   await setHarnessView(page, 0, 0);
@@ -114,13 +115,13 @@ test('150ms延迟下碰撞revision变化会重同步预测且不穿墙', async (
   const corrected = await waitForSnapshot(
     page,
     (current) =>
-      current.prediction.lastResetReason === 'collision-history-missing' &&
+      (current.prediction.resetCounts['collision-history-missing'] ?? 0) > 0 &&
       Math.hypot(current.serverPlayerVelocity[0], current.serverPlayerVelocity[2]) < 0.05,
   );
   await page.keyboard.up('KeyW');
 
   expect(corrected.colliding).toBe(false);
-  expect(corrected.player[2]).toBeGreaterThanOrEqual(-1.71);
-  expect(corrected.serverPlayerPosition[2]).toBeGreaterThanOrEqual(-1.71);
+  expect(corrected.player[2]).toBeGreaterThanOrEqual(-0.680_01);
+  expect(corrected.serverPlayerPosition[2]).toBeGreaterThanOrEqual(-0.680_01);
   expect(Math.abs(corrected.player[2] - corrected.serverPlayerPosition[2])).toBeLessThan(0.35);
 });

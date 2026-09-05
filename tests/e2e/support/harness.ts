@@ -63,6 +63,7 @@ export type HarnessSnapshot = {
   prediction: {
     pendingFrames: number;
     lastResetReason: string | null;
+    resetCounts: Readonly<Record<string, number>>;
     presentationOffset: Readonly<{ x: number; y: number; z: number }>;
   };
   serverWorldTime: number;
