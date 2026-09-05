@@ -1,5 +1,7 @@
 import { batchMeshData, compactMeshData, createProceduralMeshInput, makeChunk, meshChunk } from '../world/mesh';
 import { findSafePlayerSpawn } from '../server/gameplay/safe-spawn';
+import { createStarterEcology } from '../server/simulation/starter-ecology';
+import { findDryStarterSurface } from '../server/starter-surface';
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
 
 export type MeshTaskPayload = Readonly<{
@@ -42,6 +44,22 @@ export type FindSafeSpawnTaskPayload = Readonly<{
   generatorVersion: number;
 }>;
 
+export type StarterCanonicalChunk = Readonly<{
+  key: string;
+  cx: number;
+  cy: number;
+  cz: number;
+  chunkRevision: 0;
+  generatorVersion: number;
+  canonical: ArrayBuffer;
+}>;
+
+export type InitialWorldBootstrap = Readonly<{
+  kind: 'safe-spawn-result';
+  playerBodyPosition: [number, number, number];
+  starterChunks: readonly StarterCanonicalChunk[];
+}>;
+
 export type WorldComputePayload = MeshTaskPayload | GenerateMeshTaskPayload | FindSafeSpawnTaskPayload;
 
 export class ComputeTaskCancelled extends Error {}
@@ -65,6 +83,25 @@ const checkpoint = async (isCancelled: () => boolean, yieldTurn: () => Promise<v
   if (isCancelled()) throw new ComputeTaskCancelled('Compute task was cancelled.');
 };
 
+function proceduralVoxelReader(
+  seed: number,
+  generatorVersion: number,
+  chunks: Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>,
+) {
+  return (x: number, y: number, z: number) => {
+    const cx = floorDiv(x, CHUNK_SIZE);
+    const cy = floorDiv(y, CHUNK_SIZE);
+    const cz = floorDiv(z, CHUNK_SIZE);
+    const key = chunkKey(cx, cy, cz);
+    let chunk = chunks.get(key);
+    if (!chunk) {
+      chunk = { cx, cy, cz, voxels: makeChunk(seed, cx, cy, cz, [], generatorVersion) };
+      chunks.set(key, chunk);
+    }
+    return chunk.voxels[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
+  };
+}
+
 export async function runWorldComputeTask(
   task: WorldComputePayload,
   isCancelled: () => boolean = () => false,
@@ -72,26 +109,38 @@ export async function runWorldComputeTask(
 ) {
   await checkpoint(isCancelled, yieldTurn);
   if (task.kind === 'find-safe-spawn') {
-    const chunks = new Map<string, Uint16Array>();
-    const getVoxel = (x: number, y: number, z: number) => {
-      const cx = floorDiv(x, CHUNK_SIZE);
-      const cy = floorDiv(y, CHUNK_SIZE);
-      const cz = floorDiv(z, CHUNK_SIZE);
-      const key = chunkKey(cx, cy, cz);
-      let chunk = chunks.get(key);
-      if (!chunk) {
-        chunk = makeChunk(task.seed, cx, cy, cz, [], task.generatorVersion);
-        chunks.set(key, chunk);
-      }
-      return chunk[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
-    };
-    const cameraPosition = findSafePlayerSpawn(getVoxel);
+    const spawnChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
+    const cameraPosition = findSafePlayerSpawn(proceduralVoxelReader(task.seed, task.generatorVersion, spawnChunks));
     await checkpoint(isCancelled, yieldTurn);
     if (!cameraPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');
-    return {
+    const playerBodyPosition: [number, number, number] = [
+      cameraPosition[0],
+      cameraPosition[1] - 1.6,
+      cameraPosition[2],
+    ];
+    const starterChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
+    const readStarterVoxel = proceduralVoxelReader(task.seed, task.generatorVersion, starterChunks);
+    const starter = createStarterEcology(task.seed, playerBodyPosition, (x, z, _nearY) =>
+      findDryStarterSurface(task.seed, task.generatorVersion, x, z, readStarterVoxel),
+    );
+    for (const edit of [...starter.campEdits, ...starter.naturalEdits]) readStarterVoxel(edit.x, edit.y, edit.z);
+    await checkpoint(isCancelled, yieldTurn);
+    const result: InitialWorldBootstrap = {
       kind: 'safe-spawn-result' as const,
-      position: [cameraPosition[0], cameraPosition[1] - 1.6, cameraPosition[2]] as [number, number, number],
+      playerBodyPosition,
+      starterChunks: [...starterChunks.entries()]
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, chunk]) => ({
+          key,
+          cx: chunk.cx,
+          cy: chunk.cy,
+          cz: chunk.cz,
+          chunkRevision: 0,
+          generatorVersion: task.generatorVersion,
+          canonical: chunk.voxels.buffer as ArrayBuffer,
+        })),
     };
+    return result;
   }
   if (task.kind === 'mesh') {
     const meshingStartedAt = performance.now();
@@ -163,7 +212,7 @@ export async function runWorldComputeTask(
 
 export function worldComputeTransfers(result: Awaited<ReturnType<typeof runWorldComputeTask>>): Transferable[] {
   const transfers: Transferable[] = [];
-  if (result.kind === 'safe-spawn-result') return transfers;
+  if (result.kind === 'safe-spawn-result') return result.starterChunks.map((chunk) => chunk.canonical);
   result.meshes.forEach((part) =>
     transfers.push(
       part.positions.buffer,

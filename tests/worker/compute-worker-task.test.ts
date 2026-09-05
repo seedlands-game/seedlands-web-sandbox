@@ -12,7 +12,9 @@ describe('general compute worker task', () => {
 
     expect(result.kind).toBe('safe-spawn-result');
     if (result.kind !== 'safe-spawn-result') throw new Error('Unexpected compute result.');
-    expect(result.position[1] % 1).toBe(0);
+    expect(result.playerBodyPosition[1] % 1).toBe(0);
+    expect(result.starterChunks.length).toBeGreaterThan(0);
+    expect(result.starterChunks.every((chunk) => chunk.chunkRevision === 0)).toBe(true);
   });
 
   it('在生成/halo/mesh阶段间让出事件循环并消费合作式取消', async () => {

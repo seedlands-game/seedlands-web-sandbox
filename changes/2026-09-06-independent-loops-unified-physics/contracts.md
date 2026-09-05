@@ -142,6 +142,9 @@ type ComputeTask = {
 - 队列同时受任务数和字节数限制；普通任务超限返回显式背压，交互任务先淘汰可合并的后台旧任务，否则明确拒绝。
 - 世界切换先增加 epoch，停止接收旧结果，再取消队列、通知运行任务并终止 Worker。
 
+新世界 bootstrap 同样属于 `general` lane 的交互级任务。`find-safe-spawn` 返回
+`{ playerBodyPosition, starterChunks }`；`starterChunks` 是原有 `createStarterEcology()` 表面查询及营地、自然资源编辑所需的完整 canonical Chunk 集合，字段包含 `key/cx/cy/cz/chunkRevision/generatorVersion/canonical`。Authority 必须先验证并接纳全部 Chunk，随后才用只读已加载体素初始化原有营地、三类角色、食物与自然资源并发布 ready。任一 Chunk 缺失、身份不符或无法接纳时初始化失败；Authority 不得在 surface 查询或编辑热路径调用 `makeChunk()` 补齐。
+
 流体候选的结构由流体模块补充，但必须包含 `protocolVersion + epoch + workId + readSet(chunk contentRevision) + expected old cells + writes + consumedFrontier + addedFrontier`。Authority 在物理步边界原子验证并提交；失效或故障时归还租赁 frontier。
 
 ## 客户端预测、插值和碰撞调试

@@ -76,6 +76,21 @@ export type AuthorityMeshPayload = Readonly<{
   }>[];
 }>;
 
+export type AuthorityBootstrapChunk = Readonly<{
+  key: string;
+  cx: number;
+  cy: number;
+  cz: number;
+  chunkRevision: number;
+  generatorVersion: number;
+  canonical: ArrayBuffer;
+}>;
+
+export type AuthorityBootstrapGeneration = Readonly<{
+  playerBodyPosition: [number, number, number];
+  starterChunks: readonly AuthorityBootstrapChunk[];
+}>;
+
 export type AuthorityAction =
   | Readonly<{ type: 'select-hotbar'; slot: number }>
   | Readonly<{ type: 'craft'; recipeId: string }>
@@ -150,6 +165,7 @@ export type AuthorityRequest =
       epoch: SessionEpoch;
       requestId: number;
       playerBodyPosition: [number, number, number];
+      starterChunks: readonly AuthorityBootstrapChunk[];
     }>
   | Readonly<{
       kind: 'set-fluid-active-chunks';

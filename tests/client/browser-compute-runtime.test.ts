@@ -38,10 +38,18 @@ describe('BrowserComputeRuntime', () => {
         epoch: 'world:1',
         taskId: task.taskId,
         ok: true,
-        result: { kind: 'safe-spawn-result', position: [0.5, 33, 0.5] },
+        result: {
+          kind: 'safe-spawn-result',
+          playerBodyPosition: [0.5, 33, 0.5],
+          starterChunks: [],
+        },
       },
     } as MessageEvent<unknown>);
-    await expect(finding).resolves.toEqual([0.5, 33, 0.5]);
+    await expect(finding).resolves.toEqual({
+      kind: 'safe-spawn-result',
+      playerBodyPosition: [0.5, 33, 0.5],
+      starterChunks: [],
+    });
   });
 
   it('把流体事务固定送保留槽并把Mesh旧端口适配到通用池', () => {

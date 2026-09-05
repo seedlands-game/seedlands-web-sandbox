@@ -2,6 +2,7 @@ import type { FluidAuthoritySnapshot, FluidCandidate } from '../server/fluid/flu
 import type { ComputeLane, ComputeTask } from '../runtime/compute-task-queue';
 import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol';
 import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool';
+import type { InitialWorldBootstrap } from '../worker/world-compute-task';
 
 type MeshWorkerPort = {
   onerror?: ((failure: { taskId: number; error: Error }) => void) | null;
@@ -33,7 +34,7 @@ export class BrowserComputeRuntime {
   private readonly fluidWorkIds = new Map<number, string>();
   private readonly spawnRequests = new Map<
     number,
-    { resolve: (position: [number, number, number]) => void; reject: (error: Error) => void }
+    { resolve: (bootstrap: InitialWorldBootstrap) => void; reject: (error: Error) => void }
   >();
   private taskSequence = 0;
   private disposed = false;
@@ -99,10 +100,10 @@ export class BrowserComputeRuntime {
     return false;
   }
 
-  findSafeSpawn(seed: number, generatorVersion: number): Promise<[number, number, number]> {
+  findSafeSpawn(seed: number, generatorVersion: number): Promise<InitialWorldBootstrap> {
     if (this.disposed) return Promise.reject(new Error('Compute runtime is disposed.'));
     const taskId = ++this.taskSequence;
-    const promise = new Promise<[number, number, number]>((resolve, reject) =>
+    const promise = new Promise<InitialWorldBootstrap>((resolve, reject) =>
       this.spawnRequests.set(taskId, { resolve, reject }),
     );
     const result = this.pool.enqueue({
@@ -178,10 +179,16 @@ export class BrowserComputeRuntime {
     const spawn = this.spawnRequests.get(task.taskId);
     if (spawn) {
       this.spawnRequests.delete(task.taskId);
-      const value = result as { kind?: string; position?: [number, number, number] };
-      if (value.kind !== 'safe-spawn-result' || !value.position)
+      const value = result as Partial<InitialWorldBootstrap>;
+      if (
+        value.kind !== 'safe-spawn-result' ||
+        !Array.isArray(value.playerBodyPosition) ||
+        value.playerBodyPosition.length !== 3 ||
+        !value.playerBodyPosition.every(Number.isFinite) ||
+        !Array.isArray(value.starterChunks)
+      )
         spawn.reject(new Error('Safe spawn compute result is invalid.'));
-      else spawn.resolve(value.position);
+      else spawn.resolve(value as InitialWorldBootstrap);
       return;
     }
     if (task.category === 'fluid') {

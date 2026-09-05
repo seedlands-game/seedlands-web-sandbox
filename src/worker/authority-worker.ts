@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/browser-chunk-persistence';
-import { AuthorityRuntime } from '../server/authority/authority-runtime';
+import { AuthorityRuntime, type AuthorityInitialWorldBootstrap } from '../server/authority/authority-runtime';
 import { PROTOCOL_VERSION } from '../runtime/session-protocol';
 import type { AuthorityRequest, AuthorityResponse } from './authority-worker-protocol';
 
@@ -15,7 +15,7 @@ let lastGameplayPublishedAt = Number.NEGATIVE_INFINITY;
 let bootstrapRequestSequence = 0;
 let pendingBootstrap: {
   requestId: number;
-  resolve: (position: [number, number, number]) => void;
+  resolve: (bootstrap: AuthorityInitialWorldBootstrap) => void;
   reject: (error: Error) => void;
 } | null = null;
 
@@ -115,7 +115,7 @@ const tick = () => {
 const requestBootstrap = (seed: number, generatorVersion: number) => {
   if (pendingBootstrap) return Promise.reject(new Error('Authority bootstrap generation is already pending.'));
   const requestId = ++bootstrapRequestSequence;
-  const promise = new Promise<[number, number, number]>((resolve, reject) => {
+  const promise = new Promise<AuthorityInitialWorldBootstrap>((resolve, reject) => {
     pendingBootstrap = { requestId, resolve, reject };
   });
   post({
@@ -144,7 +144,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     initialWorldTime: message.initialWorldTime,
     startTimeMs: 0,
     now: () => performance.now(),
-    findInitialPlayerBodyPosition: requestBootstrap,
+    findInitialWorldBootstrap: requestBootstrap,
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
     onLogicObservation: (observation) =>
       post(
@@ -169,9 +169,20 @@ const handle = async (message: AuthorityRequest) => {
     if (message.epoch !== epoch || !pendingBootstrap || message.requestId !== pendingBootstrap.requestId) return;
     const pending = pendingBootstrap;
     pendingBootstrap = null;
-    if (message.playerBodyPosition.length !== 3 || !message.playerBodyPosition.every((value) => Number.isFinite(value)))
+    if (
+      message.playerBodyPosition.length !== 3 ||
+      !message.playerBodyPosition.every((value) => Number.isFinite(value)) ||
+      !Array.isArray(message.starterChunks)
+    )
       pending.reject(new Error('Safe spawn compute result is invalid.'));
-    else pending.resolve(message.playerBodyPosition);
+    else
+      pending.resolve({
+        playerBodyPosition: message.playerBodyPosition,
+        starterChunks: message.starterChunks.map((chunk) => ({
+          ...chunk,
+          canonical: new Uint16Array(chunk.canonical),
+        })),
+      });
     return;
   }
   const current = assertCurrent(message);

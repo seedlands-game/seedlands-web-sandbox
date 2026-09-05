@@ -19,19 +19,13 @@ import { AuthoritySession, type AuthoritySnapshot, type LogicIntent } from './au
 import { buildLogicObservation } from './logic-observation-builder';
 import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch, type LogicObservation } from '../logic/logic-protocol';
 import { CHUNK_SIZE } from '../../world/voxel';
+import type {
+  AuthorityAdvanceResult,
+  AuthorityFrequencies,
+  AuthorityInitialWorldBootstrap,
+} from './authority-runtime-types';
 
-export type AuthorityFrequencies = Readonly<{
-  physicsHz: 30 | 60 | 120;
-  gameplayHz: 10 | 20;
-  fluidHz: 20 | 30;
-}>;
-
-export type AuthorityAdvanceResult = Readonly<{
-  snapshot: AuthoritySnapshot;
-  lanes: Readonly<{ physicsSteps: number; gameplayPeriods: number; fluidPeriods: number }>;
-  gameplay: AuthorityGameplayView;
-  commits: readonly WorldCommitResult[];
-}>;
+export type * from './authority-runtime-types';
 
 type AuthorityPersistence = ChunkPersistence &
   Partial<GameplayPersistence> & { metrics?: () => Readonly<{ recordBytes: number }> };
@@ -44,7 +38,7 @@ export type AuthorityRuntimeOptions = Readonly<{
   initialWorldTime: number;
   startTimeMs: number;
   initialPlayerBodyPosition?: [number, number, number];
-  findInitialPlayerBodyPosition?: (seed: number, generatorVersion: number) => Promise<[number, number, number]>;
+  findInitialWorldBootstrap?: (seed: number, generatorVersion: number) => Promise<AuthorityInitialWorldBootstrap>;
   now?: () => number;
   frequencies?: AuthorityFrequencies;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
@@ -157,18 +151,27 @@ export class AuthorityRuntime {
     let player = server.queryEntities({ type: 'player' })[0];
     const isNew = !player;
     if (!player) {
-      const bodyPosition =
-        options.initialPlayerBodyPosition ??
-        (await options.findInitialPlayerBodyPosition?.(server.seed, server.generatorVersion));
+      const bootstrap = options.initialPlayerBodyPosition
+        ? null
+        : await options.findInitialWorldBootstrap?.(server.seed, server.generatorVersion);
+      const bodyPosition = options.initialPlayerBodyPosition ?? bootstrap?.playerBodyPosition;
       if (!bodyPosition) throw new Error('新世界必须由通用计算Worker提供安全出生点。');
+      if (bootstrap) {
+        for (const chunk of bootstrap.starterChunks)
+          if (!server.acceptWorkerCanonical(chunk)) throw new Error(`Authority拒绝新世界生态Chunk：${chunk.key}。`);
+        const ecology = server.initializeStarterEcologyFromLoadedWorld(bodyPosition);
+        if (!ecology.initialized) throw new Error('新世界生态初始化未执行。');
+      }
       player = server.spawnPlayer({ position: bodyPosition });
     }
-    return new AuthorityRuntime(
+    const runtime = new AuthorityRuntime(
       { ...options, startTimeMs: options.now?.() ?? options.startTimeMs },
       server,
       player.id,
       isNew,
     );
+    if (isNew) runtime.session.commitExternalState(false);
+    return runtime;
   }
 
   ready(): AuthorityReady {

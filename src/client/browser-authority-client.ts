@@ -16,6 +16,7 @@ import type { WorldOpenMode } from './world-version-policy';
 import type {
   AuthorityAction,
   AuthorityActionResult,
+  AuthorityBootstrapGeneration,
   AuthorityGameplayView,
   AuthorityMeshPayload,
   AuthorityReady,
@@ -37,7 +38,10 @@ type ClientOptions = Readonly<{
   onCommit?: (commit: WorldCommitResult) => void;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (observation: LogicObservation) => void;
-  onBootstrapGeneration?: (request: { seed: number; generatorVersion: number }) => Promise<[number, number, number]>;
+  onBootstrapGeneration?: (request: {
+    seed: number;
+    generatorVersion: number;
+  }) => Promise<AuthorityBootstrapGeneration>;
   onUnknownChunk?: (key: string) => void;
   onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
   onFatal?: (error: Error) => void;
@@ -494,17 +498,21 @@ export class BrowserAuthorityClient {
     try {
       if (!this.options.onBootstrapGeneration)
         throw new Error('Authority requested safe spawn generation without a compute provider.');
-      const playerBodyPosition = await this.options.onBootstrapGeneration({
+      const bootstrap = await this.options.onBootstrapGeneration({
         seed: message.seed,
         generatorVersion: message.generatorVersion,
       });
-      this.post({
-        kind: 'authority-bootstrap-result',
-        protocolVersion: PROTOCOL_VERSION,
-        epoch: this.epoch,
-        requestId: message.requestId,
-        playerBodyPosition,
-      });
+      this.post(
+        {
+          kind: 'authority-bootstrap-result',
+          protocolVersion: PROTOCOL_VERSION,
+          epoch: this.epoch,
+          requestId: message.requestId,
+          playerBodyPosition: bootstrap.playerBodyPosition,
+          starterChunks: bootstrap.starterChunks,
+        },
+        bootstrap.starterChunks.map((chunk) => chunk.canonical),
+      );
     } catch (error) {
       this.failAll(error instanceof Error ? error : new Error(String(error)));
     }

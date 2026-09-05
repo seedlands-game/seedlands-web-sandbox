@@ -134,10 +134,16 @@ export class HeadlessSession {
       initialWorldTime: options.initialWorldTime ?? 9,
       startTimeMs: 0,
       frequencies,
-      findInitialPlayerBodyPosition: async (seed, generatorVersion) => {
+      findInitialWorldBootstrap: async (seed, generatorVersion) => {
         const result = await runWorldComputeTask({ kind: 'find-safe-spawn', seed, generatorVersion });
         if (result.kind !== 'safe-spawn-result') throw new Error('安全出生点计算返回了错误的结果类型。');
-        return result.position;
+        return {
+          playerBodyPosition: result.playerBodyPosition,
+          starterChunks: result.starterChunks.map((chunk) => ({
+            ...chunk,
+            canonical: new Uint16Array(chunk.canonical),
+          })),
+        };
       },
       onUnknownChunk: (key) => holder.session?.pendingChunkKeys.add(key),
       onFluidWork: (snapshot) => {

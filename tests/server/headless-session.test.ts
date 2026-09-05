@@ -14,7 +14,9 @@ describe('HeadlessSession', () => {
 
     expect(expected.kind).toBe('safe-spawn-result');
     if (expected.kind !== 'safe-spawn-result') throw new Error('Expected a safe spawn result.');
-    expect(session.runtime.ready().playerBodyPosition).toEqual(expected.position);
+    expect(session.runtime.ready().playerBodyPosition).toEqual(expected.playerBodyPosition);
+    expect(session.runtime.ready().campPosition).toBeDefined();
+    expect(session.runtime.view().actors).toHaveLength(3);
     expect(session.persistence.loadGameplaySnapshot()).toBeNull();
   });
 
@@ -92,10 +94,11 @@ describe('HeadlessSession', () => {
 
   it('deduplicates commands by the headless transaction identity', async () => {
     const session = await HeadlessSession.create({ seedText: 'headless-deduplication' });
+    const initialWorldRevision = session.runtime.server.worldRevision;
     const first = await session.executeLine('/setblock 1 30 1 wood', 7);
     const replay = await session.executeLine('/setblock 1 30 1 wood', 7);
 
     expect(first.result).toEqual(replay.result);
-    expect(session.runtime.server.worldRevision).toBe(1);
+    expect(session.runtime.server.worldRevision).toBe(initialWorldRevision + 1);
   });
 });

@@ -464,24 +464,38 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   initializeStarterEcology(center: [number, number, number]) {
+    return this.initializeStarterEcologyWithReader(center, (x, y, z) => this.getVoxel(x, y, z));
+  }
+
+  initializeStarterEcologyFromLoadedWorld(center: [number, number, number]) {
+    return this.initializeStarterEcologyWithReader(center, (x, y, z) => {
+      const loaded = this.peekLoadedVoxel(x, y, z);
+      if (!loaded) throw new Error(`Starter ecology requires loaded canonical voxel ${x},${y},${z}.`);
+      return loaded.voxel;
+    });
+  }
+
+  private initializeStarterEcologyWithReader(
+    center: [number, number, number],
+    getVoxel: (x: number, y: number, z: number) => number,
+  ) {
     const current = this.simulationSnapshot();
     if (this.restoredGameplayVersion !== null || current.starterEcologyVersion > 0 || current.actors.length > 0)
       return { initialized: false as const, actorIds: [] as string[] };
-    const layout = createStarterEcology(this.seed, center, (x, z, nearY) => this.findSurfaceAir(x, z, nearY));
+    const layout = createStarterEcology(this.seed, center, (x, z) =>
+      findDryStarterSurface(this.seed, this.generatorVersion, x, z, getVoxel),
+    );
+    for (const edit of [...layout.campEdits, ...layout.naturalEdits]) getVoxel(edit.x, edit.y, edit.z);
+    const naturalEdits = layout.naturalEdits.filter((edit) => getVoxel(edit.x, edit.y, edit.z) === Voxel.Air);
     layout.pois.forEach((poi) => this.registerPoi(poi));
     const actors = layout.actors.map((actor) => this.spawnAutonomousActor(actor));
     this.spawnWorldItem(layout.foodPosition, { itemId: 'berry', count: 1 });
-    const naturalEdits = layout.naturalEdits.filter((edit) => this.getVoxel(edit.x, edit.y, edit.z) === Voxel.Air);
     const commit = this.editBatch({
       actorId: 'starter-ecology-v1',
       edits: [...layout.campEdits, ...naturalEdits],
     });
     this.gameplay.simulation.starterEcologyVersion = layout.version;
     return { initialized: true as const, actorIds: actors.map((actor) => actor.id), commit };
-  }
-
-  private findSurfaceAir(x: number, z: number, _nearY: number): [number, number, number] {
-    return findDryStarterSurface(this.seed, this.generatorVersion, x, z, (...position) => this.getVoxel(...position));
   }
 
   private isValidSnapshot(snapshot: ChunkSnapshot, key: string, cx: number, cy: number, cz: number): boolean {
