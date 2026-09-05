@@ -116,3 +116,23 @@ RED 实测在半个统一 epsilon 的回退处把 `false` 报成 `true`。实现
 同一轮暂停用例确认事务回执到达，但 Harness 的 `authority.paused` 持续为 `false`。Authority 停钟后不再自然发布新快照，而 pause/resume 回执只有布尔值；客户端因此无法观察已确认的冻结状态。RED 要求控制回执携带该停钟时刻的 Authority 快照，同一 physics/commit/ack 版本只要 `paused` 状态发生变化仍可通过快照门；完全相同的重复回执继续拒绝。
 
 RED 实测 3 项失败：重复 bootstrap 调用两次计算、暂停状态变化被快照门判为 duplicate、暂停回执未发布快照。实现增加单次 bootstrap 身份协调器；相同 requestId 重放直接复用，第二个不同身份 fail closed。pause/resume Worker 回执携同一停钟时刻快照，客户端先校验布尔与快照一致再发布；快照门只把同版本且同 paused 状态判为重复。Browser 客户端、控制状态、传送和 Authority Session 共 4 个文件 24 项通过，受影响 ESLint 与源码 TypeScript 通过。测试 TypeScript 仅被并行流体优先级测试对已变更接口的 4 项调用阻塞；最终启动/暂停浏览器复验仍待主线执行。
+
+## A7 权威碰撞镜像发布
+
+### 审计结论与合同
+
+生产 `performAction` 的放置、连续挖掘完成和异步流体提交虽然已经在 Authority 生效，但 Browser 的碰撞查询仍只读取网格任务完成后写入的 `meshCache`。网格队列是表现层派生工作，不能承担物理事实发布；真实浏览器已观察到放置成功、库存扣除且世界 mutation 前进后，客户端五秒仍把目标体素读为空气。
+
+决定由每个结构提交携带按 Chunk 分组的稀疏权威碰撞增量：`previousRevision`、`revision` 以及各局部 `index` 的最终 `voxel` 与 `fluid`。客户端只在本地 revision 精确等于 `previousRevision` 时原位应用；重复或更旧增量忽略，revision 有缺口、结构提交缺增量或本地无基线时使该 Chunk 保持未知并请求权威基线。网格完成只能安装不旧于当前镜像的基线，不能回滚更高 revision。
+
+### RED 测试设计
+
+- `tests/client/authority-collision-mirror.test.ts`：合法体素与流体增量原位更新；重复增量幂等；revision 缺口和缺失增量失效缓存并请求基线；旧网格不能覆盖新碰撞镜像。
+- `tests/client/browser-authority-client.test.ts`：真实 `gameplay-action` 回执和异步 `authority-snapshot` 提交在 Promise 完成或快照发布前更新同一个生产查询源，不等待 `acceptWorkerCanonical`。
+- `changes/2026-09-06-independent-loops-unified-physics/e2e/authority-transport.spec.ts` 与主线跳搭/连续挖掘旅程：放置或破坏确认后，目标体素和 revision 立即可见，预测身体按新地形碰撞；由主线浏览器独占阶段执行。
+
+预期 RED：当前客户端没有权威碰撞增量模块，`performAction` 与流体快照提交只触发重网格，旧 `meshCache` 保持不变。
+
+RED 实测：纯模块导入失败；补上合同后，生产客户端两项接线仍失败，`gameplay-action` 放置后体素保持 Air，异步流体提交后流体仍为空。
+
+客户端实现已把所有响应与快照携带的提交先应用到统一碰撞镜像，再发布表现层结构事件或完成事务 Promise。连续增量同时推进 canonical、fluid 与 Chunk revision；缺失或跳跃增量使旧缓存失效并触发基线请求；网格基线安装会拒绝回滚更高 revision。纯模块、生产 action 与异步流体共 3 个测试文件 15 项通过，受影响 ESLint、源码与测试 TypeScript 通过。Authority 端精确增量生成由同一变更的服务端接线继续完成；未携带增量的旧结构提交会安全失效缓存，不宣称即时镜像已完整准出。

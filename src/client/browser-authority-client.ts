@@ -21,7 +21,7 @@ import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from './client-request-registry';
 import { ClientReadyWait } from './client-ready-wait';
 import { createAuthorityTransport } from './authority-transport';
-import { applyAcknowledgedWorldEdits } from './acknowledged-world-edit-cache';
+import { cacheAuthorityCollisionBaseline, publishAuthorityCollisionCommits } from './authority-collision-mirror';
 import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
 import type {
   AuthorityClientOptions,
@@ -260,7 +260,7 @@ export class BrowserAuthorityClient {
     )) as { accepted: boolean };
     if (!response.accepted) return false;
     const prepared = this.preparationCache.get(task.chunkKey);
-    this.meshCache.set(task.chunkKey, {
+    cacheAuthorityCollisionBaseline(this.meshCache, task.chunkKey, {
       canonical,
       fluid: prepared?.fluid?.slice() ?? legacyFluid(canonical),
       chunkRevision: task.chunkRevision,
@@ -300,9 +300,7 @@ export class BrowserAuthorityClient {
   }
 
   async editWorld(actorId: string, edits: readonly VoxelEdit[]): Promise<WorldCommitResult> {
-    const result = (await this.request({ kind: 'world-edit', actorId, edits }, [], 'world-edit')) as WorldCommitResult;
-    applyAcknowledgedWorldEdits({ edits, result, getCachedChunk: (key) => this.meshCache.get(key) });
-    return result;
+    return this.request({ kind: 'world-edit', actorId, edits }, [], 'world-edit') as Promise<WorldCommitResult>;
   }
 
   async setPlayerPosition(position: [number, number, number]): Promise<AuthorityPlayerPositionResult> {
@@ -463,7 +461,7 @@ export class BrowserAuthorityClient {
         if (!message.ok) this.requests.reject(message.requestId, new Error(message.error));
         else {
           if (message.gameplay) this.updateGameplay(message.gameplay);
-          message.commits?.forEach((commit) => this.options.onCommit?.(commit));
+          publishAuthorityCollisionCommits(message.commits, this.meshCache, this.options);
           this.requests.resolve(message.requestId, message.result);
         }
         break;
@@ -512,7 +510,7 @@ export class BrowserAuthorityClient {
     if (this.snapshotGate.accept(snapshot)) return;
     this.snapshotValue = snapshot;
     if (gameplay) this.updateGameplay(gameplay);
-    commits?.forEach((commit) => this.options.onCommit?.(commit));
+    publishAuthorityCollisionCommits(commits, this.meshCache, this.options);
     this.options.onSnapshot?.(snapshot);
   }
 

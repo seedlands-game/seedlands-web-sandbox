@@ -421,17 +421,27 @@ describe('BrowserAuthorityClient', () => {
 
     const editing = client.editWorld('player-1', [{ x: 0, y: 0, z: 0, value: 0 }]);
     const editRequest = worker.posts.at(-1) as { requestId: number };
+    const editCommit = {
+      committed: true,
+      structuralChange: { chunks: ['0,0,0'], chunkRevisions: [{ key: '0,0,0', revision: 5 }] },
+      collisionDelta: [
+        {
+          key: '0,0,0',
+          previousRevision: 4,
+          revision: 5,
+          cells: [{ index: 0, voxel: 0, fluid: 0 }],
+        },
+      ],
+    };
     worker.emit({
       kind: 'authority-response',
       protocolVersion: 1,
       epoch: 'world:1',
       requestId: editRequest.requestId,
       ok: true,
-      result: {
-        committed: true,
-        structuralChange: { chunkRevisions: [{ key: '0,0,0', revision: 5 }] },
-      },
-    });
+      result: editCommit,
+      commits: [editCommit],
+    } as unknown as AuthorityResponse);
     await editing;
     expect(client.getVoxel(0, 0, 0)).toBe(0);
     expect(client.getChunkRevision(0, 0, 0)).toBe(5);
