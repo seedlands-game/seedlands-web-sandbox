@@ -235,6 +235,31 @@ describe('AuthoritySession', () => {
     expect(fluidRequests).toEqual([3]);
     expect('advanceFluid' in server).toBe(false);
   });
+
+  it('身体恢复诊断只保留最近 32 条且快照副本隔离', () => {
+    const server = new MemoryAuthorityServer(player());
+    const session = new AuthoritySession({
+      epoch: 'test-world:1',
+      playerId: 'player-1',
+      server,
+      bodyConfigFor: () => bodyConfig,
+      voxelSource: {
+        getLoadedVoxel: (_x, y) => ({ voxel: y === -1 ? Voxel.Stone : Voxel.Air, chunkKey: 'loaded', revision: 0 }),
+      },
+      frequencies: { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
+      startTimeMs: 0,
+    });
+    for (let index = 0; index < 40; index += 1)
+      expect(session.requestBodyRecovery(`missing-${index}`, 'external-geometry-change', 1)).toBe(true);
+    expect(() => session.requestBodyRecovery('player-1', 'legacy-restore', 9)).toThrow(/0\.\.8/);
+
+    const first = session.wake(1_000 / 60);
+    expect(first.diagnostics?.recoveryResults).toHaveLength(32);
+    const originalStatus = first.diagnostics!.recoveryResults[0]!.status;
+    (first.diagnostics!.recoveryResults[0] as { status: string }).status = 'mutated';
+
+    expect(session.wake(1_000 / 60).diagnostics?.recoveryResults[0]?.status).toBe(originalStatus);
+  });
 });
 
 describe('VoxelCollisionWorld', () => {
