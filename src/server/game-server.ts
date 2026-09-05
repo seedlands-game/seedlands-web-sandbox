@@ -16,7 +16,7 @@ import { GameServerGameplayFacade } from './game-server-gameplay';
 import { createStarterEcology } from './simulation/starter-ecology';
 import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
 import { commitWorldEditBatch, compareChunkKeys } from './world-transaction-commit';
-import type { FluidAdvanceResult, FluidCell } from './fluid/voxel-fluid-runtime';
+import type { FluidCell } from './fluid/fluid-cell';
 import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
@@ -312,11 +312,6 @@ export class GameServer extends GameServerGameplayFacade {
     return result;
   }
 
-  advanceFluid(seconds: number): FluidAdvanceResult {
-    this.fluidChunkActivations.pumpRuntime(this.fluidRuntime, this.fluidChunks);
-    return this.fluidRuntime.advance(seconds);
-  }
-
   requestFluidWork() {
     this.fluidChunkActivations.pumpRuntime(this.fluidRuntime, this.fluidChunks);
     return this.fluidRuntime.requestFluidWork();
@@ -330,6 +325,10 @@ export class GameServer extends GameServerGameplayFacade {
 
   abortFluidWork(workId: string, reason: string) {
     return this.fluidRuntime.abortLease(workId, reason);
+  }
+
+  get fluidDiagnostics() {
+    return this.fluidRuntime.diagnostics;
   }
 
   setFluidActiveChunks(keys: readonly string[]): void {

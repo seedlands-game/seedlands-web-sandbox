@@ -21,6 +21,15 @@ describe('唯一权威会话推进边界', () => {
     expect(() => source('src/server/gameplay/entity-physics.ts')).toThrow();
   });
 
+  it('服务端不再公开带第二时钟的同步流体推进器', () => {
+    const server = new GameServer({ seedText: 'authority-only-fluid' });
+    expect('advanceFluid' in server).toBe(false);
+    expect(source('src/server/fluid/fluid-transaction-runtime.ts')).not.toMatch(
+      /computeFluidCandidate|\badvance\(seconds/,
+    );
+    expect(() => source('src/server/fluid/voxel-fluid-runtime.ts')).toThrow();
+  });
+
   it('没有权威会话端口时拒绝 /tick，且不会偷偷推进旧规则时钟', async () => {
     const server = new GameServer({ seedText: 'authority-only-command' });
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });

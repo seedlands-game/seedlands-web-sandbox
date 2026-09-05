@@ -2,7 +2,7 @@ import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '../../wo
 import type { ServerChunk, WorldEditBatch } from '../game-server-types';
 import { hasAdjacentWater } from './fluid-cell-state';
 import type { FluidCellValue, FluidChunkSnapshot, FluidPosition } from './fluid-transaction';
-import type { FluidCell } from './voxel-fluid-runtime';
+import type { FluidCell } from './fluid-cell';
 
 export type PreviousFluidState = { x: number; y: number; z: number; voxel: number; cell: FluidCell | null };
 

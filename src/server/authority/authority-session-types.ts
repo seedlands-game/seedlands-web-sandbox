@@ -1,5 +1,6 @@
 import type { BodyState, Contact } from '../../physics';
 import type { CostSampleWindow } from '../../runtime/bounded-cost-samples';
+import type { FluidAuthorityDiagnostics } from '../fluid/fluid-transaction';
 
 export type AuthorityEntity = Readonly<{
   id: string;
@@ -18,6 +19,7 @@ export type AuthorityServerPort = {
   readonly worldRevision: number;
   readonly mutationCount: number;
   readonly worldTime: number;
+  readonly fluidDiagnostics?: FluidAuthorityDiagnostics;
   getEntity: (id: string) => AuthorityEntity | null;
   queryEntities: () => AuthorityEntity[];
   updateEntity: (
@@ -75,7 +77,11 @@ export type AuthoritySnapshot = Readonly<{
   worldRevision: number;
   worldTime: number;
   paused: boolean;
-  diagnostics?: Readonly<{ recoveryResults: readonly BodyRecoveryDiagnostic[]; physicsCost?: CostSampleWindow | null }>;
+  diagnostics?: Readonly<{
+    recoveryResults: readonly BodyRecoveryDiagnostic[];
+    physicsCost?: CostSampleWindow | null;
+    fluid?: FluidAuthorityDiagnostics;
+  }>;
 }>;
 
 export type AuthorityLaneTotals = Readonly<{

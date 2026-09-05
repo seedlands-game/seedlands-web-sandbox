@@ -11,6 +11,13 @@ class MemoryAuthorityServer implements AuthorityServerPort {
   worldRevision = 0;
   mutationCount = 0;
   worldTime = 8;
+  fluidDiagnostics = {
+    pendingCellCount: 1_024,
+    inFlightLeaseCount: 1,
+    acceptedCandidateCount: 8,
+    rejectedCandidateCount: 2,
+    returnedLeaseCount: 3,
+  };
   readonly entities = new Map<string, Entity>();
   gameplayAdvanceSeconds = 0;
 
@@ -94,6 +101,7 @@ describe('AuthoritySession', () => {
     expect(due.commitSequence).toBe(4);
     expect(due.worldMutationCount).toBe(7);
     expect(due.worldTime).toBeCloseTo(8.002, 7);
+    expect(due.diagnostics?.fluid).toEqual(server.fluidDiagnostics);
 
     session.commitExternalState();
     expect(session.wake(50).commitSequence).toBe(5);

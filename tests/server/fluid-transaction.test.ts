@@ -61,6 +61,39 @@ const createAuthority = (chunks: Map<string, FluidChunkSnapshot>, maxQueue?: num
   });
 
 describe('fluid transactions', () => {
+  it('reports real queue, lease, acceptance, rejection, and return counts', () => {
+    const chunks = new Map([[chunkKey(0, 1, 0), makeChunk(0, 1, 0)]]);
+    const authority = createAuthority(chunks);
+
+    expect(authority.diagnostics).toEqual({
+      pendingCellCount: 0,
+      inFlightLeaseCount: 0,
+      acceptedCandidateCount: 0,
+      rejectedCandidateCount: 0,
+      returnedLeaseCount: 0,
+    });
+
+    authority.activate([0, 50, 0]);
+    expect(authority.diagnostics.pendingCellCount).toBeGreaterThan(0);
+    const aborted = authority.requestFluidWork()!;
+    expect(authority.diagnostics.inFlightLeaseCount).toBe(1);
+    expect(authority.abortLease(aborted.workId, 'worker-crash')).toBe(true);
+    expect(authority.diagnostics).toMatchObject({ inFlightLeaseCount: 0, returnedLeaseCount: 1 });
+
+    const rejected = computeFluidCandidate(authority.requestFluidWork()!);
+    expect(authority.commitFluidCandidate({ ...rejected, epoch: 2 })).toEqual({ accepted: false, reason: 'epoch' });
+    expect(authority.diagnostics).toMatchObject({ rejectedCandidateCount: 1, returnedLeaseCount: 2 });
+
+    const accepted = computeFluidCandidate(authority.requestFluidWork()!);
+    expect(authority.commitFluidCandidate(accepted)).toEqual(expect.objectContaining({ accepted: true }));
+    expect(authority.diagnostics).toMatchObject({
+      inFlightLeaseCount: 0,
+      acceptedCandidateCount: 1,
+      rejectedCandidateCount: 1,
+      returnedLeaseCount: 2,
+    });
+  });
+
   it('computes from a versioned local snapshot without an authority callback', () => {
     const snapshot: FluidAuthoritySnapshot = {
       protocolVersion: 1,

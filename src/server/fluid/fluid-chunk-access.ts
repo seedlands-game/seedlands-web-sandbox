@@ -1,7 +1,7 @@
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../../world/voxel';
 import type { ServerChunk } from '../game-server-types';
 import { fluidCellInChunk, writeFluidCellInChunk } from './fluid-cell-state';
-import type { FluidCell } from './voxel-fluid-runtime';
+import type { FluidCell } from './fluid-cell';
 
 export class FluidChunkAccess {
   constructor(

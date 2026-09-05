@@ -10,6 +10,7 @@ import {
   type BodyState,
   type PhysicsInput,
 } from '../../physics';
+import { WORLD_ITEM_INTERACTION } from '../../physics/body-registry';
 import { ActiveMonotonicClock } from '../../runtime/active-monotonic-clock';
 import { BoundedCostSamples } from '../../runtime/bounded-cost-samples';
 import { MultiRateScheduler } from '../../runtime/multi-rate-scheduler';
@@ -63,9 +64,6 @@ const MAX_RECOVERY_RESULTS = 32;
 const MAX_RECOVERY_DISTANCE = 8;
 const MAX_RECOVERIES_PER_STEP = 4;
 const CHARACTER_SEPARATION_DISTANCE = 0.1;
-const ITEM_ATTRACTION_RADIUS = 2.25;
-const ITEM_ATTRACTION_SPEED = 6;
-const ITEM_PICKUP_RADIUS = 0.75;
 const MAX_PICKUP_TARGET_CANDIDATES = 8;
 const MAX_TRACKED_PICKUP_CURSORS = 512;
 const PICKUP_CURSOR_WRAP = 0x80000000;
@@ -246,7 +244,7 @@ export class AuthoritySession {
               config,
               world: this.collisionWorld,
               targets: physicsTargets,
-              maxDistance: ITEM_ATTRACTION_RADIUS,
+              maxDistance: WORLD_ITEM_INTERACTION.attractionRadius,
               maxCandidates: MAX_PICKUP_TARGET_CANDIDATES,
               startIndex: pickupCursor,
             })
@@ -335,9 +333,9 @@ export class AuthoritySession {
     const distance = Math.hypot(delta.x, delta.y, delta.z);
     if (distance <= Number.EPSILON) return null;
     return {
-      x: (delta.x / distance) * ITEM_ATTRACTION_SPEED,
-      y: (delta.y / distance) * ITEM_ATTRACTION_SPEED,
-      z: (delta.z / distance) * ITEM_ATTRACTION_SPEED,
+      x: (delta.x / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
+      y: (delta.y / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
+      z: (delta.z / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
     };
   }
 
@@ -355,14 +353,15 @@ export class AuthoritySession {
         !item ||
         !target ||
         selectedTargets.get(itemId) !== targetId ||
-        distanceSquared(item.position, target.position) > ITEM_PICKUP_RADIUS ** 2
+        distanceSquared(item.position, target.position) > WORLD_ITEM_INTERACTION.pickupRadius ** 2
       )
         this.pickupAttempts.delete(attempt);
     }
     if (!this.options.server.pickupItem) return;
     for (const item of entities.filter((entity) => entity.type === 'world-item')) {
       const target = targets.find((candidate) => candidate.id === selectedTargets.get(item.id));
-      if (!target || distanceSquared(item.position, target.position) > ITEM_PICKUP_RADIUS ** 2) continue;
+      if (!target || distanceSquared(item.position, target.position) > WORLD_ITEM_INTERACTION.pickupRadius ** 2)
+        continue;
       const body = this.bodies.get(item.id);
       if (!body) continue;
       const targetPosition = { x: target.position[0], y: target.position[1], z: target.position[2] };
@@ -512,6 +511,7 @@ export class AuthoritySession {
       diagnostics: {
         recoveryResults: this.recoveryResults.map((result) => ({ ...result })),
         physicsCost: this.options.measureNow ? this.physicsCost.snapshot() : null,
+        ...(this.options.server.fluidDiagnostics ? { fluid: { ...this.options.server.fluidDiagnostics } } : {}),
       },
     };
   }

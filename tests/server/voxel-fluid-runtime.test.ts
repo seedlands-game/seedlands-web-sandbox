@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { GameServer } from '../../src/server/game-server';
+import { GameServer, type WorldCommitResult } from '../../src/server/game-server';
+import { computeFluidCandidate } from '../../src/server/fluid/fluid-transaction';
 import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
 import { WorldMutationBuffer } from '../../src/server/world-mutation';
 import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
@@ -21,6 +22,22 @@ const activateKnownFluidNeighborhood = (server: GameServer) => {
   server.setFluidActiveChunks(keys);
 };
 
+const runFluidCandidates = (server: GameServer, maxCandidates: number) => {
+  const commits: WorldCommitResult[] = [];
+  let steps = 0;
+  let processed = 0;
+  while (steps < maxCandidates) {
+    const lease = server.requestFluidWork();
+    if (!lease) break;
+    processed += lease.frontier.length + (lease.cleanupFrontier?.length ?? 0);
+    const result = server.commitFluidCandidate(computeFluidCandidate(lease));
+    if (!result.accepted) throw new Error(`Fluid candidate rejected: ${result.reason}`);
+    if (result.commit) commits.push(result.commit);
+    steps += 1;
+  }
+  return { steps, processed, pending: server.fluidDiagnostics.pendingCellCount, commits };
+};
+
 describe('bounded voxel fluid runtime', () => {
   it('falls before spreading, then attenuates across supported ground', () => {
     const server = new GameServer({ seedText: 'fluid-fall' });
@@ -28,7 +45,7 @@ describe('bounded voxel fluid runtime', () => {
     for (let x = -4; x <= 4; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(0, 54, 0, Voxel.Water, 'fixture');
 
-    server.advanceFluid(2);
+    runFluidCandidates(server, 8);
 
     expect(server.getVoxel(0, 50, 0)).toBe(Voxel.Water);
     expect(server.getFluidCell(0, 50, 0)).toMatchObject({ level: 8, source: false });
@@ -36,13 +53,15 @@ describe('bounded voxel fluid runtime', () => {
     expect(server.getVoxel(4, 54, 0)).toBe(Voxel.Air);
   });
 
-  it('advances the first bounded flow step at 30Hz for interactive feedback', () => {
+  it('runs one bounded worker lease without leaving authority work in flight', () => {
     const server = new GameServer({ seedText: 'fluid-30hz' });
     clearBox(server, -1, 1, 50, 51);
     server.edit(0, 49, 0, Voxel.Stone, 'fixture');
     server.edit(0, 50, 0, Voxel.Water, 'fixture');
-    expect(server.advanceFluid(0.032).steps).toBe(0);
-    expect(server.advanceFluid(0.002).steps).toBe(1);
+    const result = runFluidCandidates(server, 1);
+    expect(result.steps).toBe(1);
+    expect(result.processed).toBeLessThanOrEqual(128);
+    expect(server.fluidDiagnostics.inFlightLeaseCount).toBe(0);
   });
 
   it('respects obstacles and retracts unsupported flow after source removal', () => {
@@ -52,13 +71,13 @@ describe('bounded voxel fluid runtime', () => {
     server.edit(1, 50, 0, Voxel.Stone, 'fixture');
     server.edit(0, 50, 0, Voxel.Water, 'fixture');
     activateKnownFluidNeighborhood(server);
-    server.advanceFluid(2);
+    runFluidCandidates(server, 8);
     expect(server.getVoxel(1, 50, 0)).toBe(Voxel.Stone);
     expect(server.getVoxel(-1, 50, 0)).toBe(Voxel.Water);
     expect(server.getFluidCell(-1, 50, 0)?.source).toBe(false);
 
     server.edit(0, 50, 0, Voxel.Air, 'fixture');
-    for (let index = 0; index < 20; index += 1) server.advanceFluid(0.8);
+    for (let index = 0; index < 20; index += 1) runFluidCandidates(server, 8);
     expect(server.getVoxel(-1, 50, 0)).toBe(Voxel.Air);
   });
 
@@ -68,7 +87,7 @@ describe('bounded voxel fluid runtime', () => {
     clearBox(first, 29, 35, 50, 52);
     for (let x = 29; x <= 35; x += 1) first.edit(x, 49, 0, Voxel.Stone, 'fixture');
     first.edit(31, 50, 0, Voxel.Water, 'fixture');
-    first.advanceFluid(1);
+    runFluidCandidates(first, 8);
     expect(first.getVoxel(32, 50, 0)).toBe(Voxel.Water);
     const before = first.getFluidCell(32, 50, 0);
     await first.flushDirtyChunks();
@@ -88,8 +107,8 @@ describe('bounded voxel fluid runtime', () => {
     };
     const whole = make();
     const sliced = make();
-    const result = whole.advanceFluid(100);
-    for (let i = 0; i < 8; i += 1) sliced.advanceFluid(0.034);
+    const result = runFluidCandidates(whole, 8);
+    for (let i = 0; i < 8; i += 1) runFluidCandidates(sliced, 1);
     expect(result.steps).toBe(8);
     expect(result.processed).toBeLessThanOrEqual(8 * 128);
     for (let x = -10; x <= 10; x += 1)
@@ -101,10 +120,10 @@ describe('bounded voxel fluid runtime', () => {
     clearBox(server, -2, 2, 50, 52);
     for (let x = -2; x <= 2; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(0, 50, 0, Voxel.Water, 'fixture');
-    server.advanceFluid(0.8);
+    runFluidCandidates(server, 8);
     const before = server.getChunk(0, 1, 0).revision;
     server.edit(0, 50, 0, Voxel.Air, 'fixture');
-    const result = server.advanceFluid(0.1);
+    const result = runFluidCandidates(server, 3);
     expect(result.commits.some((commit) => commit.structuralChange?.meshChunks.includes('0,1,0'))).toBe(true);
     expect(server.getChunk(0, 1, 0).revision).toBeGreaterThan(before);
     expect(server.getChunk(0, 1, 0).dirty).toBe(true);
@@ -115,13 +134,13 @@ describe('bounded voxel fluid runtime', () => {
     const first = new GameServer({ seedText: 'fluid-resume', persistence });
     clearBox(first, -2, 2, 50, 54);
     first.edit(0, 54, 0, Voxel.Water, 'fixture');
-    first.advanceFluid(0.2);
+    runFluidCandidates(first, 6);
     await first.flushDirtyChunks();
     const restored = new GameServer({ seedText: 'fluid-resume', persistence });
     restored.setFluidActiveChunks(['0,1,0']);
     expect(restored.getVoxel(0, 53, 0)).toBe(Voxel.Water);
     let processed = 0;
-    for (let index = 0; index < 20; index += 1) processed += restored.advanceFluid(0.8).processed;
+    for (let index = 0; index < 20; index += 1) processed += runFluidCandidates(restored, 8).processed;
     expect(processed).toBeGreaterThan(0);
     expect(restored.getVoxel(0, 52, 0)).toBe(Voxel.Water);
   });
@@ -135,7 +154,7 @@ describe('bounded voxel fluid runtime', () => {
     server.edit(31, 50, 0, Voxel.Water, 'fixture');
     const materializedBefore = server.materializedChunkCount;
 
-    for (let index = 0; index < 100; index += 1) server.advanceFluid(0.8);
+    for (let index = 0; index < 100; index += 1) runFluidCandidates(server, 8);
 
     expect(server.materializedChunkCount).toBe(materializedBefore);
   });
@@ -146,7 +165,7 @@ describe('bounded voxel fluid runtime', () => {
     clearBox(server, 28, 31, 50, 52);
     for (let x = 28; x <= 31; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(31, 50, 0, Voxel.Water, 'fixture');
-    server.advanceFluid(0.8);
+    runFluidCandidates(server, 8);
 
     const canonical = new Uint16Array(CHUNK_SIZE ** 3);
     canonical[voxelIndex(0, 17, 0)] = Voxel.Stone;
@@ -161,7 +180,7 @@ describe('bounded voxel fluid runtime', () => {
         canonical,
       }),
     ).toBe(true);
-    server.advanceFluid(0.8);
+    runFluidCandidates(server, 8);
 
     expect(server.getFluidCell(32, 50, 0)).toEqual({ level: 7, source: false });
   });
@@ -222,7 +241,7 @@ describe('bounded voxel fluid runtime', () => {
     server.setFluidActiveChunks(['0,0,0', '1,1,0']);
     for (let index = 0; index < 30; index += 1) {
       server.setFluidActiveChunks(['0,0,0', '1,1,0']);
-      server.advanceFluid(0.8);
+      runFluidCandidates(server, 8);
     }
     expect(server.getVoxel(33, 50, 1)).toBe(Voxel.Air);
   });
@@ -234,13 +253,13 @@ describe('bounded voxel fluid runtime', () => {
     server.editBatch({ actorId: 'fixture', edits: [{ x: 0, y: 50, z: 0, value: Voxel.Water }] });
     activateKnownFluidNeighborhood(server);
     expect(server.getFluidCell(0, 50, 0)).toEqual({ level: 8, source: true });
-    server.advanceFluid(1);
+    runFluidCandidates(server, 8);
     expect(server.getVoxel(-1, 50, 0)).toBe(Voxel.Water);
 
     const edits = WorldMutationBuffer.forUniqueCoordinates({ sourceId: 'remove-source' }).write(0, 50, 0, Voxel.Air);
     server.editBatch({ actorId: 'fixture', buffers: [edits] });
     expect(server.getFluidCell(0, 50, 0)).toBeNull();
-    for (let index = 0; index < 20; index += 1) server.advanceFluid(0.8);
+    for (let index = 0; index < 20; index += 1) runFluidCandidates(server, 8);
     expect(server.getVoxel(-1, 50, 0)).toBe(Voxel.Air);
   });
 
@@ -253,7 +272,7 @@ describe('bounded voxel fluid runtime', () => {
     const beforeLeft = server.getChunk(0, 1, 0).revision;
     const beforeRight = server.getChunk(1, 1, 0).revision;
 
-    server.advanceFluid(0.034);
+    runFluidCandidates(server, 1);
 
     expect(server.getVoxel(32, 50, 0)).toBe(Voxel.Water);
     expect(server.getChunk(0, 1, 0).revision).toBe(beforeLeft + 1);
@@ -266,11 +285,11 @@ describe('bounded voxel fluid runtime', () => {
     for (let x = -3; x <= 3; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(-2, 50, 0, Voxel.Water, 'fixture');
     server.edit(2, 50, 0, Voxel.Water, 'fixture');
-    server.advanceFluid(2);
+    runFluidCandidates(server, 8);
     expect(server.getVoxel(0, 50, 0)).toBe(Voxel.Water);
 
     server.edit(-2, 50, 0, Voxel.Air, 'fixture');
-    for (let index = 0; index < 20; index += 1) server.advanceFluid(0.8);
+    for (let index = 0; index < 20; index += 1) runFluidCandidates(server, 8);
 
     expect(server.getVoxel(0, 50, 0)).toBe(Voxel.Water);
     expect(server.getFluidCell(0, 50, 0)?.source).toBe(false);

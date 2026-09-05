@@ -1,7 +1,7 @@
 import { Voxel } from '../../world/voxel';
 import { CHUNK_SIZE, voxelIndex } from '../../world/voxel';
 import type { ServerChunk } from '../game-server-types';
-import type { FluidCell } from './voxel-fluid-runtime';
+import type { FluidCell } from './fluid-cell';
 
 export const legacyFluid = (voxels: Uint16Array): Uint8Array =>
   Uint8Array.from(voxels, (voxel) => (voxel === Voxel.Water ? 0x88 : 0));

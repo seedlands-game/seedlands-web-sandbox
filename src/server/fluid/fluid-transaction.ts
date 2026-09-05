@@ -47,6 +47,13 @@ export type FluidCandidate = {
 export type FluidCandidateCommit =
   | { accepted: true; commitSequence: number }
   | { accepted: false; reason: 'epoch' | 'work-id' | 'read-set' | 'cell-conflict' };
+export type FluidAuthorityDiagnostics = Readonly<{
+  pendingCellCount: number;
+  inFlightLeaseCount: number;
+  acceptedCandidateCount: number;
+  rejectedCandidateCount: number;
+  returnedLeaseCount: number;
+}>;
 
 const MIN_ACTIVE_Y = 0;
 const MAX_ACTIVE_Y = 63;
@@ -262,6 +269,9 @@ export class FluidTransactionAuthority {
   private readonly rescanJobs = new Map<string, number>();
   private nextWorkId = 1;
   private nextCommitSequence = 1;
+  private acceptedCandidateCount = 0;
+  private rejectedCandidateCount = 0;
+  private returnedLeaseCount = 0;
   private readonly maxQueue: number;
 
   constructor(private readonly options: AuthorityOptions) {
@@ -285,6 +295,16 @@ export class FluidTransactionAuthority {
         0,
       )
     );
+  }
+
+  get diagnostics(): FluidAuthorityDiagnostics {
+    return {
+      pendingCellCount: this.pending,
+      inFlightLeaseCount: this.leases.size,
+      acceptedCandidateCount: this.acceptedCandidateCount,
+      rejectedCandidateCount: this.rejectedCandidateCount,
+      returnedLeaseCount: this.returnedLeaseCount,
+    };
   }
 
   activate(position: FluidPosition): boolean {
@@ -331,20 +351,17 @@ export class FluidTransactionAuthority {
   commitFluidCandidate(candidate: FluidCandidate): FluidCandidateCommit {
     const lease = this.leases.get(candidate.workId);
     if (candidate.protocolVersion !== FLUID_TRANSACTION_PROTOCOL_VERSION || candidate.epoch !== this.epoch) {
-      if (lease) this.returnLease(lease);
-      return { accepted: false, reason: 'epoch' };
+      return this.rejectCandidate(lease, 'epoch');
     }
     if (
       !lease ||
       !sameFrontier(lease.frontier, candidate.consumedFrontier) ||
       !sameFrontier(lease.cleanupFrontier ?? [], candidate.consumedCleanupFrontier ?? [])
     ) {
-      if (lease) this.returnLease(lease);
-      return { accepted: false, reason: 'work-id' };
+      return this.rejectCandidate(lease, 'work-id');
     }
     if (!sameReadSet(lease, candidate.readSet)) {
-      this.returnLease(lease);
-      return { accepted: false, reason: 'read-set' };
+      return this.rejectCandidate(lease, 'read-set');
     }
     if (
       candidate.readSet.some((entry) => {
@@ -352,8 +369,7 @@ export class FluidTransactionAuthority {
         return !chunk || chunk.revision !== entry.revision;
       })
     ) {
-      this.returnLease(lease);
-      return { accepted: false, reason: 'read-set' };
+      return this.rejectCandidate(lease, 'read-set');
     }
     if (
       candidate.writes.some((write) => {
@@ -361,8 +377,7 @@ export class FluidTransactionAuthority {
         return !current || current.voxel !== write.expectedVoxel || current.fluid !== write.expectedFluid;
       })
     ) {
-      this.returnLease(lease);
-      return { accepted: false, reason: 'cell-conflict' };
+      return this.rejectCandidate(lease, 'cell-conflict');
     }
     this.options.apply(candidate);
     this.leases.delete(candidate.workId);
@@ -372,6 +387,7 @@ export class FluidTransactionAuthority {
       [...candidate.consumedFrontier, ...(candidate.consumedCleanupFrontier ?? [])].forEach((position) =>
         this.scheduleRescan(chunkKeyFor(position)),
       );
+    this.acceptedCandidateCount += 1;
     return { accepted: true, commitSequence: this.nextCommitSequence++ };
   }
 
@@ -410,6 +426,7 @@ export class FluidTransactionAuthority {
 
   private returnLease(lease: FluidAuthoritySnapshot): void {
     this.leases.delete(lease.workId);
+    this.returnedLeaseCount += 1;
     for (let index = lease.frontier.length - 1; index >= 0; index -= 1) {
       const position = lease.frontier[index];
       this.requeue(position, this.frontier, this.queued);
@@ -418,6 +435,15 @@ export class FluidTransactionAuthority {
       const position = lease.cleanupFrontier![index];
       this.requeue(position, this.cleanupFrontier, this.cleanupQueued);
     }
+  }
+
+  private rejectCandidate(
+    lease: FluidAuthoritySnapshot | undefined,
+    reason: Extract<FluidCandidateCommit, { accepted: false }>['reason'],
+  ): FluidCandidateCommit {
+    this.rejectedCandidateCount += 1;
+    if (lease) this.returnLease(lease);
+    return { accepted: false, reason };
   }
 
   private requeue(position: FluidPosition, queue: FluidPosition[], queued: Set<string>): void {
