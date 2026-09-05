@@ -202,14 +202,16 @@ const handle = async (message: AuthorityRequest) => {
       break;
     case 'pause-authority':
       await transact(message, () => {
-        current.pause(performance.now());
-        return { result: { paused: true } };
+        const now = performance.now();
+        current.pause(now);
+        return { result: { paused: true, snapshot: current.wake(now) } };
       });
       break;
     case 'resume-authority':
       await transact(message, () => {
-        current.resume(performance.now());
-        return { result: { paused: false } };
+        const now = performance.now();
+        current.resume(now);
+        return { result: { paused: false, snapshot: current.wake(now) } };
       });
       break;
     case 'prepare-mesh': {

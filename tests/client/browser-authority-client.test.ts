@@ -160,15 +160,18 @@ describe('BrowserAuthorityClient', () => {
       initialWorldTime: 9,
       frequencies,
     });
-    worker.emit({
+    const needed = {
       kind: 'authority-bootstrap-needed',
       protocolVersion: 1,
       epoch: 'world:1',
       requestId: 9,
       seed: 7,
       generatorVersion: 3,
-    });
+    } as const;
+    worker.emit(needed);
+    worker.emit(needed);
     await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledWith({ seed: 7, generatorVersion: 3 }));
+    expect(bootstrap).toHaveBeenCalledTimes(1);
     expect(worker.posts.at(-1)).toMatchObject({
       kind: 'authority-bootstrap-result',
       requestId: 9,
@@ -297,7 +300,7 @@ describe('BrowserAuthorityClient', () => {
       epoch: 'world:1',
       requestId: resumeRequest.requestId,
       ok: true,
-      result: { paused: false },
+      result: { paused: false, snapshot: ready().snapshot },
     });
     await expect(resuming).resolves.toEqual({ paused: false });
     worker.emit({
@@ -306,7 +309,7 @@ describe('BrowserAuthorityClient', () => {
       epoch: 'world:1',
       requestId: pauseRequest.requestId,
       ok: true,
-      result: { paused: true },
+      result: { paused: true, snapshot: { ...ready().snapshot, paused: true } },
     });
     await expect(pausing).resolves.toEqual({ paused: true });
     worker.emit({
@@ -315,7 +318,7 @@ describe('BrowserAuthorityClient', () => {
       epoch: 'world:1',
       requestId: pauseRequest.requestId,
       ok: true,
-      result: { paused: true },
+      result: { paused: true, snapshot: { ...ready().snapshot, paused: true } },
     });
   });
 

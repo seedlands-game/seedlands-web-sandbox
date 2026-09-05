@@ -108,3 +108,11 @@ A8 浏览器可靠暂停等待不能以 UI 对话框出现代替 Authority 确�
 浏览器频率矩阵还暴露一个与延迟强相关的诊断偏差：`PlayerController.isColliding` 使用私有 `1e-7` 阈值，而统一物理解算使用 `COLLISION_EPSILON=1e-6`。测试先锁定规则：静止接触和小于统一 epsilon 的数值回退不能报告重叠，超过 epsilon 的真实穿入必须报告重叠。当前实现对半个统一 epsilon 的回退预期 RED。
 
 RED 实测在半个统一 epsilon 的回退处把 `false` 报成 `true`。实现删除独立阈值并直接复用物理核心 `overlapDepth`；诊断仍读取 prediction 的双精度 physical body 或 Authority body，不从 PlayCanvas 单精度渲染矩阵反推物理。相关 3 个文件、28 项 Vitest 与受影响 ESLint、源码及测试 TypeScript、`git diff --check` 通过；最终浏览器频率矩阵仍待主线复验。
+
+## A7/A8 真实浏览器阻断复审
+
+`c0a4e46` 生产包在开启入站重复/乱序后，新世界启动收到重复 `authority-bootstrap-needed`，客户端会并发提交两个相同 safe-spawn 计算；其中一个会在启动失败清理时以 `epoch-switch` 结束，并由现在的可靠 fatal 路径暴露。RED 要求同一 bootstrap `requestId` 无论重复到达几次，只启动并回送一次计算。
+
+同一轮暂停用例确认事务回执到达，但 Harness 的 `authority.paused` 持续为 `false`。Authority 停钟后不再自然发布新快照，而 pause/resume 回执只有布尔值；客户端因此无法观察已确认的冻结状态。RED 要求控制回执携带该停钟时刻的 Authority 快照，同一 physics/commit/ack 版本只要 `paused` 状态发生变化仍可通过快照门；完全相同的重复回执继续拒绝。
+
+RED 实测 3 项失败：重复 bootstrap 调用两次计算、暂停状态变化被快照门判为 duplicate、暂停回执未发布快照。实现增加单次 bootstrap 身份协调器；相同 requestId 重放直接复用，第二个不同身份 fail closed。pause/resume Worker 回执携同一停钟时刻快照，客户端先校验布尔与快照一致再发布；快照门只把同版本且同 paused 状态判为重复。Browser 客户端、控制状态、传送和 Authority Session 共 4 个文件 24 项通过，受影响 ESLint 与源码 TypeScript 通过。测试 TypeScript 仅被并行流体优先级测试对已变更接口的 4 项调用阻塞；最终启动/暂停浏览器复验仍待主线执行。

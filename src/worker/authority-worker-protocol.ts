@@ -110,6 +110,7 @@ export type AuthorityActionResult = Readonly<{
 }>;
 
 export type AuthorityPlayerPositionResult = Readonly<{ moved: true; snapshot: AuthoritySnapshot }>;
+export type AuthoritySessionControlResult = Readonly<{ paused: boolean; snapshot: AuthoritySnapshot }>;
 
 export type AuthorityTransactionKey = Readonly<{
   issuer: string;

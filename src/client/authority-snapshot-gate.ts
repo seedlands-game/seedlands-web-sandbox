@@ -19,7 +19,8 @@ export class AuthoritySnapshotGate {
       else if (
         snapshot.physicsTick === this.latest.physicsTick &&
         snapshot.commitSequence === this.latest.commitSequence &&
-        snapshot.acknowledgedInputSequence === this.latest.acknowledgedInputSequence
+        snapshot.acknowledgedInputSequence === this.latest.acknowledgedInputSequence &&
+        snapshot.paused === this.latest.paused
       )
         reason = 'duplicate';
     }

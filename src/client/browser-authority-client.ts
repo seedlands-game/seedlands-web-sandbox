@@ -14,6 +14,7 @@ import type {
   AuthorityReady,
   AuthorityRequest,
   AuthorityResponse,
+  AuthoritySessionControlResult,
 } from '../worker/authority-worker-protocol';
 import type { LogicIntentBatch } from '../server/logic/logic-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
@@ -21,7 +22,7 @@ import { ClientRequestRegistry } from './client-request-registry';
 import { ClientReadyWait } from './client-ready-wait';
 import { createAuthorityTransport } from './authority-transport';
 import { applyAcknowledgedWorldEdits } from './acknowledged-world-edit-cache';
-import { provideAuthorityBootstrap } from './authority-bootstrap-client';
+import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
 import type {
   AuthorityClientOptions,
   AuthorityCachedMesh,
@@ -38,6 +39,7 @@ export class BrowserAuthorityClient {
   private readonly transactionSequences = new Map<string, number>();
   private readonly requests: ClientRequestRegistry;
   private readonly snapshotGate: AuthoritySnapshotGate;
+  private readonly bootstrap: AuthorityBootstrapCoordinator;
   private readonly meshLoads = new Map<string, Promise<void>>();
   private readonly meshCache = new Map<string, AuthorityCachedMesh>();
   private readonly preparationCache = new Map<string, AuthorityCachedPreparation>();
@@ -58,6 +60,11 @@ export class BrowserAuthorityClient {
     this.requests = new ClientRequestRegistry(options.requestTimeoutMs);
     this.readyWait = new ClientReadyWait(options.requestTimeoutMs);
     this.snapshotGate = new AuthoritySnapshotGate(epoch);
+    this.bootstrap = new AuthorityBootstrapCoordinator(
+      options.onBootstrapGeneration,
+      (request, transfer) => this.post(request, transfer),
+      (error) => this.failAll(error),
+    );
     worker.onmessage = (event) => this.receive(event.data);
     worker.onerror = (event) => this.failAll(new Error(event.message || 'Authority Worker failed.'));
   }
@@ -434,7 +441,7 @@ export class BrowserAuthorityClient {
         this.readyWait.resolve(message.ready);
         break;
       case 'authority-bootstrap-needed':
-        void this.provideBootstrap(message);
+        this.bootstrap.receive(message);
         break;
       case 'authority-chunk-needed':
         this.options.onUnknownChunk?.(message.key);
@@ -509,16 +516,6 @@ export class BrowserAuthorityClient {
     this.options.onSnapshot?.(snapshot);
   }
 
-  private async provideBootstrap(message: Extract<AuthorityResponse, { kind: 'authority-bootstrap-needed' }>) {
-    try {
-      await provideAuthorityBootstrap(message, this.options.onBootstrapGeneration, (request, transfer) =>
-        this.post(request, transfer),
-      );
-    } catch (error) {
-      this.failAll(error instanceof Error ? error : new Error(String(error)));
-    }
-  }
-
   private requireReady(): AuthorityReady {
     if (!this.readyValue) throw new Error('Authority client is not ready.');
     return this.readyValue;
@@ -530,8 +527,10 @@ export class BrowserAuthorityClient {
         { kind: paused ? 'pause-authority' : 'resume-authority' },
         [],
         'session-control',
-      )) as { paused?: unknown };
-      if (result.paused !== paused) throw new Error('Authority session control acknowledgement is invalid.');
+      )) as Partial<AuthoritySessionControlResult>;
+      if (result.paused !== paused || !result.snapshot || result.snapshot.paused !== paused)
+        throw new Error('Authority session control acknowledgement is invalid.');
+      this.acceptSnapshot(result.snapshot);
       return { paused };
     } catch (error) {
       const failure = error instanceof Error ? error : new Error(String(error));
