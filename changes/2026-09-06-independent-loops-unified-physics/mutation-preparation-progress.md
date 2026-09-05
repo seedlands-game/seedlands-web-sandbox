@@ -22,5 +22,7 @@
 
 新增正式反例要求物理查询已保存但已驱逐的 Chunk 时，必须先完成 Worker 内持久化预检；命中耐久快照不得请求 procedural，读取失败不得伪装成 missing，同 key 并发观察只允许一个预检。生产修复前定向运行 5 项中 1 项 RED，实际为目标 baseline 持续 `unavailable`。修复把所有 Authority unknown 统一路由到有界、合并的持久化优先准备；只有明确 missing 才请求 General Worker，迟到 revision 0 仍由现有接纳版本检查拒绝。
 
+`d65b2b5` 不可变生产包的真实浏览器往返用例 1 项通过，用时 27.34 秒。Medium 路径请求 300 个 Chunk；最远处 canonical 驻留为 256、累计驱逐 44、拒绝接纳 0，返程累计驱逐 88。IndexedDB 精确记录 `[worldId,0,1,0]` 在出发、最远处、返程和重载后始终为 revision 1、`procedural-diff-v1`，checksum 始终为 `4167765130`；返程客户端为 Lantern/revision 1，Authority `inspect-voxel` 同为 Lantern，重载后两者仍一致。原始 Playwright JSON 为 `/tmp/canonical-d65-run-2.json`。
+
 - [x] 定向 Vitest：7 个文件 24 项通过；`tsc -p tsconfig.test.json --noEmit` 通过；`pnpm build` 通过；`git diff --check` 通过。
 - [ ] 真实浏览器 direct edit、长穿越、保存后重载证据由 root 在不可变生产构建中执行。
