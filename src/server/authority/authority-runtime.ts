@@ -20,6 +20,19 @@ import { buildLogicObservation } from './logic-observation-builder';
 import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch, type LogicObservation } from '../logic/logic-protocol';
 import { CHUNK_SIZE } from '../../world/voxel';
 
+export type AuthorityFrequencies = Readonly<{
+  physicsHz: 30 | 60 | 120;
+  gameplayHz: 10 | 20;
+  fluidHz: 20 | 30;
+}>;
+
+export type AuthorityAdvanceResult = Readonly<{
+  snapshot: AuthoritySnapshot;
+  lanes: Readonly<{ physicsSteps: number; gameplayPeriods: number; fluidPeriods: number }>;
+  gameplay: AuthorityGameplayView;
+  commits: readonly WorldCommitResult[];
+}>;
+
 type AuthorityPersistence = ChunkPersistence &
   Partial<GameplayPersistence> & { metrics?: () => Readonly<{ recordBytes: number }> };
 
@@ -33,7 +46,7 @@ export type AuthorityRuntimeOptions = Readonly<{
   initialPlayerBodyPosition?: [number, number, number];
   findInitialPlayerBodyPosition?: (seed: number, generatorVersion: number) => Promise<[number, number, number]>;
   now?: () => number;
-  frequencies?: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
+  frequencies?: AuthorityFrequencies;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (observation: LogicObservation) => void;
   onUnknownChunk?: (key: string) => void;
@@ -55,6 +68,7 @@ export type AuthorityTransactionReceipt<T> = Readonly<
 export class AuthorityRuntime {
   readonly server: GameServer;
   readonly playerId: string;
+  readonly frequencies: AuthorityFrequencies;
   private readonly session: AuthoritySession;
   private readonly newPlayer: boolean;
   private readonly initialBodyPosition: [number, number, number];
@@ -65,6 +79,7 @@ export class AuthorityRuntime {
   private readonly entityIdentities = new Map<string, { signature: string; revision: number }>();
   private readonly logicObservations = new Map<number, LogicObservation>();
   private logicObservationRequested = false;
+  private currentTimeMs: number;
   private readonly transactions: TransactionDeduplicator<Promise<AuthorityTransactionReceipt<unknown>>>;
 
   private constructor(
@@ -74,6 +89,8 @@ export class AuthorityRuntime {
     isNew: boolean,
   ) {
     this.server = server;
+    this.frequencies = options.frequencies ?? { physicsHz: 60, gameplayHz: 20, fluidHz: 30 };
+    this.currentTimeMs = options.startTimeMs;
     this.transactions = new TransactionDeduplicator(options.epoch);
     this.playerId = playerId;
     this.newPlayer = isNew;
@@ -112,7 +129,7 @@ export class AuthorityRuntime {
       server: serverPort,
       bodyConfigFor: (entity) => bodyConfigFor(bodyKindForEntity(entity)),
       voxelSource: { getLoadedVoxel: (x, y, z) => server.peekLoadedVoxel(x, y, z) },
-      frequencies: options.frequencies ?? { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
+      frequencies: this.frequencies,
       startTimeMs: options.startTimeMs,
       requestUnknownChunk: (key) => this.requestUnknownChunk(key),
       requestFluidWork: () => this.requestFluidWork(),
@@ -171,8 +188,36 @@ export class AuthorityRuntime {
 
   wake(nowMs: number): AuthoritySnapshot {
     const snapshot = this.session.wake(nowMs);
+    this.currentTimeMs = nowMs;
     this.latestPhysicsTick = snapshot.physicsTick;
     return snapshot;
+  }
+
+  advanceSession(elapsedMs: number): AuthorityAdvanceResult {
+    if (!Number.isFinite(elapsedMs) || elapsedMs < 0 || elapsedMs > 60_000)
+      throw new RangeError('Authority session advance must be finite and within 0..60000ms.');
+    const before = this.session.laneTotals;
+    const intervalMs = 1_000 / Math.max(...Object.values(this.frequencies));
+    const targetTimeMs = this.currentTimeMs + elapsedMs;
+    let snapshot = this.wake(this.currentTimeMs);
+    while (this.currentTimeMs < targetTimeMs) {
+      const nextTimeMs = Math.min(targetTimeMs, this.currentTimeMs + intervalMs);
+      snapshot = this.wake(nextTimeMs);
+    }
+    const physicsIntervalMs = 1_000 / this.frequencies.physicsHz;
+    while (!snapshot.paused && snapshot.physicsDebtMs + 1e-7 >= physicsIntervalMs)
+      snapshot = this.wake(this.currentTimeMs);
+    const after = this.session.laneTotals;
+    return {
+      snapshot,
+      lanes: {
+        physicsSteps: after.physicsSteps - before.physicsSteps,
+        gameplayPeriods: after.gameplayPeriods - before.gameplayPeriods,
+        fluidPeriods: after.fluidPeriods - before.fluidPeriods,
+      },
+      gameplay: this.view(),
+      commits: this.takeCommits(),
+    };
   }
 
   receiveInput(command: InputCommand): SequenceDecision {
@@ -193,7 +238,7 @@ export class AuthorityRuntime {
     if (!observation || batch.expiresAtPhysicsTick < this.latestPhysicsTick) return false;
     const observedById = new Map(observation.entities.map((entity) => [entity.id, entity] as const));
     const currentById = new Map(this.server.queryEntities().map((entity) => [entity.id, entity] as const));
-    const maximumPoseStaleness = Math.ceil((this.options.frequencies?.physicsHz ?? 60) * 0.2);
+    const maximumPoseStaleness = Math.ceil(this.frequencies.physicsHz * 0.2);
     const accepted: LogicIntent[] = [];
     for (const intent of batch.intents) {
       const observed = observedById.get(intent.entityId);
@@ -256,10 +301,12 @@ export class AuthorityRuntime {
 
   pause(nowMs: number): void {
     this.session.pause(nowMs);
+    this.currentTimeMs = nowMs;
   }
 
   resume(nowMs: number): void {
     this.session.resume(nowMs);
+    this.currentTimeMs = nowMs;
   }
 
   async prepareMesh(cx: number, cy: number, cz: number): Promise<AuthorityMeshPayload> {

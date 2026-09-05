@@ -92,6 +92,12 @@ export type AuthoritySnapshot = Readonly<{
   diagnostics?: Readonly<{ recoveryResults: readonly BodyRecoveryDiagnostic[] }>;
 }>;
 
+export type AuthorityLaneTotals = Readonly<{
+  physicsSteps: number;
+  gameplayPeriods: number;
+  fluidPeriods: number;
+}>;
+
 type AuthoritySessionOptions = Readonly<{
   epoch: string;
   playerId: string;
@@ -148,6 +154,8 @@ export class AuthoritySession {
   private readonly recoveryResults: BodyRecoveryDiagnostic[] = [];
   private readonly pickupAttempts = new Map<string, number>();
   private physicsTick = 0;
+  private gameplayPeriods = 0;
+  private fluidPeriods = 0;
   private commitSequence = 0;
   private activeTimeMs = 0;
   private integratedPhysicsTimeMs = 0;
@@ -196,12 +204,16 @@ export class AuthoritySession {
     this.integratedPhysicsTimeMs = due.integratedPhysicsTimeMs;
     this.physicsDebtMs = due.physicsDebtMs;
     if (due.gameplay.due) {
+      this.gameplayPeriods += due.gameplay.elapsedPeriods;
       const gameplaySeconds = due.gameplay.elapsedPeriods / this.options.frequencies.gameplayHz;
       this.options.server.advanceWorldClock?.(gameplaySeconds * (this.options.worldHoursPerSecond ?? 0.04));
       this.options.server.advanceGameplayRules(gameplaySeconds);
       this.commitSequence += 1;
     }
-    if (due.fluid.due) this.options.requestFluidWork?.(due.fluid.elapsedPeriods);
+    if (due.fluid.due) {
+      this.fluidPeriods += due.fluid.elapsedPeriods;
+      this.options.requestFluidWork?.(due.fluid.elapsedPeriods);
+    }
     const snapshot = this.snapshot();
     if (due.gameplay.due) this.options.publishLogicObservation?.(snapshot);
     return snapshot;
@@ -219,6 +231,14 @@ export class AuthoritySession {
 
   get currentCommitSequence() {
     return this.commitSequence;
+  }
+
+  get laneTotals(): AuthorityLaneTotals {
+    return {
+      physicsSteps: this.physicsTick,
+      gameplayPeriods: this.gameplayPeriods,
+      fluidPeriods: this.fluidPeriods,
+    };
   }
 
   get inputResyncRequired() {
