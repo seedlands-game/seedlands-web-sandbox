@@ -29,6 +29,7 @@ export type AuthorityClientOptions = Readonly<{
   onLogicObservation?: (observation: LogicObservation) => void;
   onBootstrapGeneration?: Parameters<typeof provideAuthorityBootstrap>[1];
   onUnknownChunk?: (key: string) => void;
+  onAuthorityChunkNeeded?: (key: string) => void;
   onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
   onFatal?: (error: Error) => void;
   requestTimeoutMs?: number;

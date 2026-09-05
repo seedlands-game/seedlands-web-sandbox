@@ -9,6 +9,7 @@ import type {
   AuthorityAction,
   AuthorityActionResult,
   AuthorityGameplayView,
+  AuthorityMeshPayload,
   AuthorityPlayerPositionResult,
   AuthorityReady,
   AuthorityRequest,
@@ -20,6 +21,7 @@ import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from './client-request-registry';
 import { ClientReadyWait } from './client-ready-wait';
 import { createAuthorityTransport } from './authority-transport';
+import { acceptAuthorityMeshPreparation } from './authority-mesh-preparation';
 import {
   AuthorityCollisionRevisionGuard,
   acceptAuthorityCollisionBaseline,
@@ -184,10 +186,23 @@ export class BrowserAuthorityClient {
     const inFlight = this.meshLoads.get(key);
     if (inFlight) return inFlight;
     const requestId = ++this.requestSequence;
+    const baselineLease = this.collisionRevisions.beginBaseline(key);
     const request = this.requests
       .create(requestId)
-      .then(() => undefined)
-      .finally(() => this.meshLoads.delete(key));
+      .then((value) => {
+        const prepared = acceptAuthorityMeshPreparation(
+          value as AuthorityMeshPayload,
+          key,
+          this.meshCache,
+          this.collisionRevisions,
+          baselineLease,
+        );
+        if (prepared) this.preparationCache.set(key, prepared);
+      })
+      .finally(() => {
+        this.collisionRevisions.finishBaseline(baselineLease);
+        if (this.meshLoads.get(key) === request) this.meshLoads.delete(key);
+      });
     this.meshLoads.set(key, request);
     try {
       this.post({
@@ -207,6 +222,7 @@ export class BrowserAuthorityClient {
 
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
     const key = chunkKey(cx, cy, cz);
+    this.meshLoads.delete(key);
     this.meshCache.delete(key);
     this.collisionRevisions.release(key);
     this.releasePreparation(cx, cy, cz);
@@ -441,7 +457,7 @@ export class BrowserAuthorityClient {
         this.bootstrap.receive(message);
         break;
       case 'authority-chunk-needed':
-        this.options.onUnknownChunk?.(message.key);
+        this.options.onAuthorityChunkNeeded?.(message.key);
         break;
       case 'authority-snapshot':
         this.acceptSnapshot(message.snapshot, message.gameplay, message.commits);
@@ -467,20 +483,7 @@ export class BrowserAuthorityClient {
       }
       case 'mesh-prepared': {
         if (!this.requests.has(message.requestId)) return;
-        const payload = message.payload;
-        this.preparationCache.set(payload.key, {
-          payload,
-          ...(payload.canonical ? { canonical: new Uint16Array(payload.canonical) } : {}),
-          ...(payload.fluid ? { fluid: new Uint8Array(payload.fluid) } : {}),
-          overlays: payload.overlays.map((overlay) => ({
-            cx: overlay.cx,
-            cy: overlay.cy,
-            cz: overlay.cz,
-            voxels: new Uint16Array(overlay.voxels),
-            ...(overlay.fluid ? { fluid: new Uint8Array(overlay.fluid) } : {}),
-          })),
-        });
-        this.requests.resolve(message.requestId, undefined);
+        this.requests.resolve(message.requestId, message.payload);
         break;
       }
       case 'fluid-work':

@@ -359,7 +359,7 @@ describe('BrowserAuthorityClient', () => {
     vi.useRealTimers();
   });
 
-  it('异步准备Worker输入，并只在权威接纳计算结果后开放本地只读副本', async () => {
+  it('异步准备Worker输入并立即开放权威准备快照，后续接纳结果保持版本校验', async () => {
     const worker = new FakeAuthorityWorker();
     const client = new BrowserAuthorityClient(worker, 'world:1');
     const preparing = client.ensureChunkNeighborhood(0, 0, 0);
@@ -387,7 +387,7 @@ describe('BrowserAuthorityClient', () => {
     });
     await preparing;
 
-    expect(client.getVoxel(0, 0, 0)).toBe(0);
+    expect(client.getVoxel(0, 0, 0)).toBe(3);
     const first = client.prepareWorkerInput(0, 0, 0);
     const second = client.prepareWorkerInput(0, 0, 0);
     expect(first.canonical).not.toBe(second.canonical);

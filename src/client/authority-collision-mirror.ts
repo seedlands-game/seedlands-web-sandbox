@@ -21,7 +21,7 @@ export type AuthorityCollisionCommit = Readonly<{
   collisionDelta?: readonly AuthorityCollisionDelta[];
 }>;
 
-type AuthorityCollisionBaselineLease = Readonly<{
+export type AuthorityCollisionBaselineLease = Readonly<{
   key: string;
   generation: number;
 }>;

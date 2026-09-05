@@ -152,3 +152,11 @@ RED 在 `tests/client/authority-transport.test.ts` 使用真实 `structuredClone
 入站乱序还必须把“运动快照状态”和“提交事件流”分开判序：较新的无提交快照先到后，较旧快照携带的唯一结构提交仍要按 `worldRevision` 一次性消费，但不能回退玩家运动状态。重复快照中的相同提交不能再次触发碰撞更新或重网格。
 
 RED 实测三类失败：重复入站的第二份缓冲区已 detached；延迟出站闭包引用的原缓冲区已 detached；卸载后在途旧基线错误重建缓存。乱序快照携带的唯一提交也被运动快照顺序门整体丢弃。实现后，Harness 在投递前同步建立独立副本，普通无故障路径仍直接使用原生传输；碰撞基线以卸载代际校验安装资格；提交流以 `worldRevision` 单独去重和补序。正式定向 4 个文件 26 项通过，两项独立竞态复核用例通过。真实 30Hz 重复/乱序启动仍须由主线用生产浏览器包复验。
+
+## A7 权威准备快照提前发布
+
+岸边旅程持续出现 `authority-resync`：Authority 的 `prepare-mesh` 已返回中心 Chunk 的完整 canonical、fluid 与 revision，但客户端只把它保存为网格输入；碰撞镜像要等网格计算完成并再次接纳后才安装。高频流体修订会持续让网格结果过期，导致首次或缺口恢复基线长期饥饿，玩家诊断一直把近场视为未知。
+
+RED 要求初始 `mesh-prepared` 回执一完成，生产 `getVoxel` 与 `getChunkRevision` 就能读取该权威快照；revision 缺口失效后，新的 `mesh-prepared` 同样立即恢复碰撞基线，不等待 GPU/网格结果。卸载代际仍必须阻止迟到 prepare 回执复活已释放缓存。
+
+RED 实测初始 prepare 后 `getVoxel` 仍返回 Air。实现把请求开始时的碰撞基线代际绑定到 prepare 回执，在回执完成 Promise 前复制并安装权威 canonical、fluid 和 revision；网格派生计算继续使用独立副本。初始加载、缺口恢复和卸载后迟到回执三条生产用例均通过，碰撞事实不再依赖网格任务是否赶上流体 revision。
