@@ -25,3 +25,26 @@ test('超出浏览器可见高度的放置有反馈且不消耗物品', async ({
   await page.keyboard.press('KeyE');
   await expect(page.getByRole('gridcell', { name: '石块 1', exact: true })).toBeVisible();
 });
+
+test('底层采集被明确拒绝，不进入未呈现的负高度石层', async ({ page }) => {
+  await startHarnessWorld(page, 'browser-bottom-boundary');
+  await page.evaluate(() => {
+    const h = window.__seedlandsHarness!;
+    h.fillWorld({ from: [-2, 1, -2], to: [2, 4, 2], voxel: 0 });
+    h.movePlayerTo(0.5, 2.6, 0.5);
+  });
+  await waitForSnapshot(
+    page,
+    (s) => s.onGround && !s.colliding && s.meshingQueue === 0 && s.performance.uploadQueueDepth === 0,
+  );
+  await lockPointer(page);
+  await page.evaluate(() => window.__seedlandsHarness!.setView(0, -88));
+  const before = (await snapshot(page))!.worldRevision;
+  await page.mouse.down();
+  try {
+    await expect(page.getByRole('status', { name: '交互反馈', exact: true })).toContainText('底层');
+    expect((await snapshot(page))!.worldRevision).toBe(before);
+  } finally {
+    await page.mouse.up();
+  }
+});

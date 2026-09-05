@@ -196,6 +196,8 @@ export class BrowserGameplay {
   }
 
   beginBreak(position: [number, number, number]): void {
+    if (position[1] <= BROWSER_MIN_BUILD_Y) return this.feedback('已到达浏览器世界底层；保留基底石层', 'error');
+    if (position[1] > BROWSER_MAX_BUILD_Y) return this.feedback(`采集高度限 1–${BROWSER_MAX_BUILD_Y} 层`, 'error');
     const result = this.options.server.beginBreak(this.options.playerId, position);
     if (!result.success) this.feedback(`无法采集 · ${result.reason}`, 'error');
     this.refresh();
