@@ -140,7 +140,13 @@ describe('Authority 实体统一物理接线', () => {
         voxelAt: (x, y) => (y === -1 || (x === -1 && y === 0) ? Voxel.Stone : Voxel.Air),
       });
 
-      const snapshot = wakeSteps(session, 3);
+      session.wake(0);
+      const first = session.wake(1_000 / 60);
+      expect(first.entities.find((body) => body.id === 'grazer')?.contacts).toEqual(
+        expect.arrayContaining([expect.objectContaining({ normal: { x: 0, y: 1, z: 0 } })]),
+      );
+      session.wake((2 * 1_000) / 60);
+      const snapshot = session.wake((3 * 1_000) / 60);
       const player = server.getEntity('player')!;
       const grazer = server.getEntity('grazer')!;
       const item = server.getEntity('item')!;
@@ -171,11 +177,25 @@ describe('Authority 实体统一物理接线', () => {
     const session = createSession(server);
 
     session.wake(1_000 / 60);
-    expect(server.getEntity('item')?.position[0]).toBeCloseTo(1.9, 6);
-    expect(server.getEntity('item')?.physicsVelocity?.[0]).toBeCloseTo(-6, 6);
+    expect(server.getEntity('item')?.position[0]).toBeCloseTo(1.983333, 6);
+    expect(server.getEntity('item')?.physicsVelocity?.[0]).toBeCloseTo(-1, 6);
 
-    for (let step = 2; step <= 15; step += 1) session.wake((step * 1_000) / 60);
+    for (let step = 2; step <= 6; step += 1) session.wake((step * 1_000) / 60);
+    expect(server.getEntity('item')?.physicsVelocity?.[0]).toBeCloseTo(-6, 6);
+    for (let step = 7; step <= 15; step += 1) session.wake((step * 1_000) / 60);
     expect(server.pickupCalls).toEqual([{ playerId: 'player', itemId: 'item' }]);
+  });
+
+  it('吸附以有界加速度进入单次三维积分，不重置既有下落速度', () => {
+    const fallingItem = { ...entity('item', 'world-item', [2, 4, 0.5]), physicsVelocity: [0, -4, 0] } as Entity;
+    const server = new EntityPhysicsServer([entity('player', 'player', [0, 4, 0.5]), fallingItem]);
+    const session = createSession(server, { voxelAt: () => Voxel.Air });
+
+    session.wake(1_000 / 60);
+
+    expect(server.getEntity('item')!.physicsVelocity![0]).toBeLessThan(0);
+    expect(server.getEntity('item')!.physicsVelocity![0]).toBeGreaterThanOrEqual(-1.01);
+    expect(server.getEntity('item')!.physicsVelocity![1]).toBeLessThan(-3);
   });
 
   it('真实灯笼薄碰撞箱阻挡吸附路径，距离虽小于拾取阈值也不跨墙提交', () => {
@@ -191,10 +211,49 @@ describe('Authority 实体统一物理接线', () => {
       },
     });
 
-    wakeSteps(session, 4);
+    wakeSteps(session, 8);
 
     expect(server.getEntity('item')?.position[0]).toBeLessThanOrEqual(0.2 + 1e-6);
     expect(server.pickupCalls).toEqual([]);
+  });
+
+  it('完整三维身体 sweep 阻挡灯笼底面的近距离拾取', () => {
+    const lowItemConfig: BodyConfig = {
+      ...smallItemConfig,
+      localAabb: { min: { x: -0.05, y: 0, z: -0.05 }, max: { x: 0.05, y: 0.05, z: 0.05 } },
+    };
+    const lowCharacterConfig: BodyConfig = {
+      ...smallCharacterConfig,
+      localAabb: { min: { x: -0.05, y: 0, z: -0.05 }, max: { x: 0.05, y: 0.1, z: 0.05 } },
+    };
+    const server = new EntityPhysicsServer([
+      entity('player', 'player', [0.8, 0.3, 0.5]),
+      entity('item', 'world-item', [0.5, -0.1, 0.5]),
+    ]);
+    const session = createSession(server, {
+      configFor: (candidate) => (candidate.type === 'world-item' ? lowItemConfig : lowCharacterConfig),
+      voxelAt: (x, y, z) => (key(x, y, z) === '0,0,0' ? Voxel.Lantern : Voxel.Air),
+    });
+
+    wakeSteps(session, 2);
+
+    expect(server.pickupCalls).toEqual([]);
+  });
+
+  it('拾取失败只做有界退避，玩法状态改变后可成功重试且只删除一次', () => {
+    const server = new EntityPhysicsServer([
+      entity('player', 'player', [0, 0, 0.5]),
+      entity('item', 'world-item', [0.7, 0, 0.5]),
+    ]);
+    const session = createSession(server);
+    session.wake(1_000 / 60);
+    expect(server.pickupCalls).toHaveLength(1);
+    server.pickupSucceeds = true;
+
+    for (let step = 2; step <= 20; step += 1) session.wake((step * 1_000) / 60);
+
+    expect(server.pickupCalls).toHaveLength(2);
+    expect(server.getEntity('item')).toBeNull();
   });
 
   it('只在显式队列处理相邻体素恢复并记录原因、距离、失败和缺失实体', () => {
@@ -253,10 +312,24 @@ describe('Authority 实体统一物理接线', () => {
       voxelAt: (x, y) => (x === 1 && y >= 0 ? null : y === -1 ? Voxel.Stone : Voxel.Air),
     });
 
-    wakeSteps(session, 4);
+    wakeSteps(session, 8);
 
     expect(requests.length).toBeGreaterThan(0);
     expect(server.getEntity('item')!.position[0]).toBeLessThanOrEqual(0.8 + 1e-6);
     expect(server.pickupCalls).toEqual([]);
+  });
+
+  it('每个物理步只处理固定数量的恢复请求并保留余项', () => {
+    const server = new EntityPhysicsServer([entity('player', 'player', [0, 0, 0.5])]);
+    const session = createSession(server);
+    for (let index = 0; index < 10; index += 1)
+      expect(session.requestBodyRecovery(`missing-${index}`, 'external-geometry-change', 8)).toBe(true);
+
+    const first = session.wake(1_000 / 60);
+    expect(first.diagnostics?.recoveryResults).toHaveLength(4);
+    const second = session.wake((2 * 1_000) / 60);
+    expect(second.diagnostics?.recoveryResults).toHaveLength(8);
+    const third = session.wake((3 * 1_000) / 60);
+    expect(third.diagnostics?.recoveryResults).toHaveLength(11);
   });
 });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   bodyWorldAabb,
+  probeBodyContacts,
   recoverBody,
   separateBodies,
   stepBody,
@@ -169,6 +170,29 @@ describe('统一 swept-AABB 物理核心', () => {
     expect(result.medium.flow.x).toBeCloseTo(3, 5);
     expect(result.state.velocity.x).toBeGreaterThan(0);
     expect(result.state.velocity.y).toBeGreaterThan(-1);
+  });
+
+  it('外部加速度在同一次三维积分内按身体上限裁剪，并保留既有竖直速度', () => {
+    const result = stepBody({
+      state: state(0, 3, 0, { y: -4 }),
+      config: {
+        ...itemBody,
+        gravity: 0,
+        groundAcceleration: 0,
+        airAcceleration: 0,
+        maxExternalAcceleration: 60,
+      },
+      input: { ...idle, externalAcceleration: { x: -1_000, y: 1_000, z: 0 } },
+      world: world([]),
+      dt: 1 / 60,
+    });
+    const velocityDelta = {
+      x: result.state.velocity.x,
+      y: result.state.velocity.y + 4,
+      z: result.state.velocity.z,
+    };
+    expect(Math.hypot(velocityDelta.x, velocityDelta.y, velocityDelta.z)).toBeCloseTo(1, 6);
+    expect(result.state.velocity.y).toBeLessThan(-3);
   });
 
   it('深水中按住 Space 的上浮与前进经同一连续碰撞轨迹登上齐水面的岸', () => {
@@ -423,6 +447,19 @@ describe('统一 swept-AABB 物理核心', () => {
     expect(offEdge.grounded).toBe(false);
   });
 
+  it('纯接触探测返回实际支撑与墙面，不执行时间积分', () => {
+    const floor = box('floor', [-2, -1, -2], [2, 0, 2]);
+    const wall = box('wall', [0.3, 0, -2], [1, 3, 2]);
+    const current = state(0, 0, 0, { x: 3, y: -4 });
+    const probe = probeBodyContacts({ state: current, config: body, world: world([wall, floor]) });
+    expect(probe.grounded).toBe(true);
+    expect(probe.contacts).toEqual([
+      expect.objectContaining({ colliderId: 'floor', normal: { x: 0, y: 1, z: 0 } }),
+      expect.objectContaining({ colliderId: 'wall', normal: { x: -1, y: 0, z: 0 } }),
+    ]);
+    expect(current).toEqual(state(0, 0, 0, { x: 3, y: -4 }));
+  });
+
   it('拒绝非有限姿态和无效 dt，避免传播 NaN', () => {
     expect(() => stepBody({ state: state(0, 0, 0), config: body, input: idle, world: world([]), dt: 0 })).toThrow(
       RangeError,
@@ -450,5 +487,15 @@ describe('统一 swept-AABB 物理核心', () => {
     ).toThrow(RangeError);
     expect(validateBodyConfig({ ...body, collisionLayer: 0x1_0000_0000 })).toBe(false);
     expect(validateBodyConfig({ ...body, collisionMask: -1 })).toBe(false);
+    expect(validateBodyConfig({ ...body, maxExternalAcceleration: -1 })).toBe(false);
+    expect(() =>
+      stepBody({
+        state: state(0, 0, 0),
+        config: body,
+        input: { ...idle, externalAcceleration: { x: Number.NaN, y: 0, z: 0 } },
+        world: world([]),
+        dt: 1 / 60,
+      }),
+    ).toThrow(RangeError);
   });
 });

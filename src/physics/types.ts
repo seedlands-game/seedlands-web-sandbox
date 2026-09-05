@@ -18,6 +18,7 @@ export type BodyConfig = Readonly<{
   buoyancy?: number;
   fluidDrag?: number;
   swimAcceleration?: number;
+  maxExternalAcceleration?: number;
 }>;
 
 export type BodyState = Readonly<{ position: Vec3; velocity: Vec3 }>;
@@ -26,7 +27,10 @@ export type PhysicsInput = Readonly<{
   wish: Readonly<{ x: number; z: number }>;
   jumpPressed: boolean;
   verticalIntent: -1 | 0 | 1;
+  externalAcceleration?: Vec3;
 }>;
+
+export type BodyContactProbe = Readonly<{ contacts: readonly Contact[]; grounded: boolean }>;
 
 export type Collider = Readonly<{
   id?: string;

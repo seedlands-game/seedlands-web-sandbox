@@ -42,6 +42,7 @@ const configs: Readonly<Record<BodyKind, BodyConfig>> = Object.freeze({
     airAcceleration: 8,
     buoyancy: 0.7,
     fluidDrag: 7,
+    maxExternalAcceleration: 60,
   },
   grazer: character(0.75, 1.9, 2.1),
   'night-stalker': character(0.65, 2.1, 2.8),

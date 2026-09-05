@@ -1,9 +1,10 @@
-export { bodyWorldAabb, validateBodyConfig, validateCollider } from './geometry';
+export { bodyWorldAabb, sweepBodyThroughWorld, validateBodyConfig, validateCollider } from './geometry';
 export { CollisionLayer, bodyConfigFor, bodyKindForEntity, type BodyKind } from './body-registry';
 export { recoverBody, separateBodies } from './recovery';
-export { stepBody } from './step-body';
+export { probeBodyContacts, stepBody } from './step-body';
 export type {
   BodyConfig,
+  BodyContactProbe,
   BodyState,
   Collider,
   Contact,

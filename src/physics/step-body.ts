@@ -16,6 +16,7 @@ import {
 } from './geometry';
 import type {
   BodyConfig,
+  BodyContactProbe,
   BodyState,
   Collider,
   Contact,
@@ -41,6 +42,8 @@ const assertValid = (state: BodyState, config: BodyConfig, input: PhysicsInput, 
     throw new RangeError('物理步需要有限的姿态、碰撞箱和正 dt。');
   if (!Number.isFinite(input.wish.x) || !Number.isFinite(input.wish.z) || ![-1, 0, 1].includes(input.verticalIntent))
     throw new RangeError('移动意图必须是有限数值。');
+  if (input.externalAcceleration && !finiteVec3(input.externalAcceleration))
+    throw new RangeError('外部加速度必须是有限向量。');
 };
 
 const contactAt = (position: Vec3, config: BodyConfig, normal: Vec3, collider: Collider): Contact => {
@@ -104,23 +107,68 @@ const reachesFluidSurface = (bounds: WorldAabb, fluids: readonly FluidVolume[] |
       bounds.max.z > fluid.aabb.min.z + COLLISION_EPSILON,
   );
 
-const supported = (bounds: WorldAabb, config: BodyConfig, world: PhysicsWorld): boolean => {
-  const probe: WorldAabb = {
-    min: { x: bounds.min.x, y: bounds.min.y - COLLISION_EPSILON * 4, z: bounds.min.z },
-    max: { x: bounds.max.x, y: bounds.min.y + COLLISION_EPSILON * 4, z: bounds.max.z },
+const CONTACT_TOLERANCE = COLLISION_EPSILON * 4;
+
+const overlapsFace = (leftMin: number, leftMax: number, rightMin: number, rightMax: number): boolean =>
+  Math.min(leftMax, rightMax) - Math.max(leftMin, rightMin) > COLLISION_EPSILON;
+
+const contactNormals = (bounds: WorldAabb, collider: Collider): Vec3[] => {
+  const xOverlap = overlapsFace(bounds.min.x, bounds.max.x, collider.aabb.min.x, collider.aabb.max.x);
+  const yOverlap = overlapsFace(bounds.min.y, bounds.max.y, collider.aabb.min.y, collider.aabb.max.y);
+  const zOverlap = overlapsFace(bounds.min.z, bounds.max.z, collider.aabb.min.z, collider.aabb.max.z);
+  const normals: Vec3[] = [];
+  if (yOverlap && zOverlap) {
+    if (Math.abs(bounds.min.x - collider.aabb.max.x) <= CONTACT_TOLERANCE) normals.push({ x: 1, y: 0, z: 0 });
+    if (Math.abs(bounds.max.x - collider.aabb.min.x) <= CONTACT_TOLERANCE) normals.push({ x: -1, y: 0, z: 0 });
+  }
+  if (xOverlap && zOverlap) {
+    if (Math.abs(bounds.min.y - collider.aabb.max.y) <= CONTACT_TOLERANCE) normals.push({ x: 0, y: 1, z: 0 });
+    if (Math.abs(bounds.max.y - collider.aabb.min.y) <= CONTACT_TOLERANCE) normals.push({ x: 0, y: -1, z: 0 });
+  }
+  if (xOverlap && yOverlap) {
+    if (Math.abs(bounds.min.z - collider.aabb.max.z) <= CONTACT_TOLERANCE) normals.push({ x: 0, y: 0, z: 1 });
+    if (Math.abs(bounds.max.z - collider.aabb.min.z) <= CONTACT_TOLERANCE) normals.push({ x: 0, y: 0, z: -1 });
+  }
+  return normals;
+};
+
+export const probeBodyContacts = (
+  options: Readonly<{ state: BodyState; config: BodyConfig; world: PhysicsWorld }>,
+): BodyContactProbe => {
+  const { state, config, world } = options;
+  if (!finiteVec3(state.position) || !finiteVec3(state.velocity) || !validateBodyConfig(config))
+    throw new RangeError('接触探测需要有限的姿态和碰撞箱。');
+  const bounds = bodyWorldAabb(state, config);
+  const queryBounds: WorldAabb = {
+    min: {
+      x: bounds.min.x - CONTACT_TOLERANCE,
+      y: bounds.min.y - CONTACT_TOLERANCE,
+      z: bounds.min.z - CONTACT_TOLERANCE,
+    },
+    max: {
+      x: bounds.max.x + CONTACT_TOLERANCE,
+      y: bounds.max.y + CONTACT_TOLERANCE,
+      z: bounds.max.z + CONTACT_TOLERANCE,
+    },
   };
-  return world.querySolids(probe).some((collider) => {
-    if (!validateCollider(collider)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
-    if (collider.sensor || !colliderMatches(config, collider)) return false;
-    const horizontal = overlapDepth(
-      { min: { x: bounds.min.x, y: -1, z: bounds.min.z }, max: { x: bounds.max.x, y: 1, z: bounds.max.z } },
-      {
-        min: { x: collider.aabb.min.x, y: -1, z: collider.aabb.min.z },
-        max: { x: collider.aabb.max.x, y: 1, z: collider.aabb.max.z },
-      },
+  const contacts = world
+    .querySolids(queryBounds)
+    .map((collider) => {
+      if (!validateCollider(collider)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
+      return collider;
+    })
+    .filter((collider) => !collider.sensor && colliderMatches(config, collider))
+    .flatMap((collider) =>
+      contactNormals(bounds, collider).map((normal) => contactAt(state.position, config, normal, collider)),
+    )
+    .sort(
+      (left, right) =>
+        (left.colliderId ?? '').localeCompare(right.colliderId ?? '') ||
+        right.normal.y - left.normal.y ||
+        right.normal.x - left.normal.x ||
+        right.normal.z - left.normal.z,
     );
-    return !!horizontal && Math.abs(bounds.min.y - collider.aabb.max.y) <= COLLISION_EPSILON * 4;
-  });
+  return { contacts, grounded: contacts.some((contact) => contact.normal.y > 0) };
 };
 
 const accelerateHorizontal = (
@@ -152,6 +200,16 @@ const integrateVelocity = (
   dt: number,
 ): Vec3 => {
   let velocity = accelerateHorizontal(state.velocity, input, config, grounded, dt);
+  if (input.externalAcceleration) {
+    const maximum = config.maxExternalAcceleration ?? 0;
+    const magnitude = Math.hypot(
+      input.externalAcceleration.x,
+      input.externalAcceleration.y,
+      input.externalAcceleration.z,
+    );
+    const factor = magnitude > maximum && magnitude > 0 ? maximum / magnitude : 1;
+    velocity = add(velocity, scale(input.externalAcceleration, factor * dt));
+  }
   if (grounded && input.jumpPressed) velocity = { ...velocity, y: config.jumpSpeed ?? 6.5 };
   const gravity = config.gravity ?? 18;
   const buoyancy = config.buoyancy ?? 1;
@@ -195,7 +253,7 @@ export const stepBody = (
   const { state, config, input, world, dt } = options;
   assertValid(state, config, input, dt);
   const initialBounds = bodyWorldAabb(state, config);
-  const groundedBefore = supported(initialBounds, config, world);
+  const groundedBefore = probeBodyContacts({ state, config, world }).grounded;
   const initialFluids = world.sampleFluid?.(initialBounds);
   const initialMedium = mediumAt(initialBounds, initialFluids);
   const surfaceJump =
@@ -206,7 +264,7 @@ export const stepBody = (
     contactAt(contact.position, config, contact.normal, contact.collider),
   );
   const moved = { state: { position: sweep.position, velocity }, contacts };
-  const grounded = supported(bodyWorldAabb(moved.state, config), config, world);
+  const grounded = probeBodyContacts({ state: moved.state, config, world }).grounded;
   const finalVelocity = moved.contacts.reduce<Vec3>(
     (current, contact) =>
       dot(current, contact.normal) < 0 ? add(current, scale(contact.normal, -dot(current, contact.normal))) : current,

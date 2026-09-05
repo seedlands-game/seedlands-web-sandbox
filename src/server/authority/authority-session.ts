@@ -1,8 +1,10 @@
 import {
   bodyWorldAabb,
+  probeBodyContacts,
   recoverBody,
   separateBodies,
   stepBody,
+  sweepBodyThroughWorld,
   type BodyConfig,
   type BodyState,
   type Contact,
@@ -121,10 +123,13 @@ const ZERO_PHYSICS_INPUT: PhysicsInput = {
 const MAX_RECOVERY_QUEUE = 512;
 const MAX_RECOVERY_RESULTS = 32;
 const MAX_RECOVERY_DISTANCE = 8;
+const MAX_RECOVERIES_PER_STEP = 4;
 const CHARACTER_SEPARATION_DISTANCE = 0.1;
 const ITEM_ATTRACTION_RADIUS = 2.25;
 const ITEM_ATTRACTION_SPEED = 6;
 const ITEM_PICKUP_RADIUS = 0.75;
+const ITEM_PICKUP_RETRY_TICKS = 15;
+const PICKUP_PATH_EPSILON = 1e-6;
 
 const distanceSquared = (left: readonly number[], right: readonly number[]): number =>
   left.reduce((sum, value, index) => sum + (value - right[index]) ** 2, 0);
@@ -141,7 +146,7 @@ export class AuthoritySession {
   private readonly logicIntents = new Map<string, LogicIntent>();
   private readonly recoveryQueue = new Map<string, Readonly<{ reason: BodyRecoveryReason; maxDistance: number }>>();
   private readonly recoveryResults: BodyRecoveryDiagnostic[] = [];
-  private readonly pickupAttempts = new Set<string>();
+  private readonly pickupAttempts = new Map<string, number>();
   private physicsTick = 0;
   private commitSequence = 0;
   private activeTimeMs = 0;
@@ -248,9 +253,22 @@ export class AuthoritySession {
       const physicsInput = this.physicsInput(entity, input);
       const attraction = entity.type === 'world-item' ? this.itemAttraction(entity, pickupTargets) : null;
       const initialState = toBodyState(entity);
-      const result = attraction
-        ? this.stepAttractedItem(initialState, config, attraction, dt)
-        : stepBody({ state: initialState, config, input: physicsInput, world: this.collisionWorld, dt });
+      const result = stepBody({
+        state: initialState,
+        config: attraction ? { ...config, groundAcceleration: 0, airAcceleration: 0 } : config,
+        input: attraction
+          ? {
+              ...ZERO_PHYSICS_INPUT,
+              externalAcceleration: {
+                x: (attraction.x - initialState.velocity.x) / dt,
+                y: (attraction.y - initialState.velocity.y) / dt,
+                z: (attraction.z - initialState.velocity.z) / dt,
+              },
+            }
+          : physicsInput,
+        world: this.collisionWorld,
+        dt,
+      });
       nextBodies.set(entity.id, {
         id: entity.id,
         type: entity.type,
@@ -276,8 +294,8 @@ export class AuthoritySession {
           world: this.collisionWorld,
           maxDistance: CHARACTER_SEPARATION_DISTANCE,
         });
-        nextBodies.set(left.id, this.afterSeparation(left, separation.left, configs.get(left.id)!, dt));
-        nextBodies.set(right.id, this.afterSeparation(right, separation.right, configs.get(right.id)!, dt));
+        nextBodies.set(left.id, this.afterSeparation(left, separation.left, configs.get(left.id)!));
+        nextBodies.set(right.id, this.afterSeparation(right, separation.right, configs.get(right.id)!));
       }
 
     for (const entity of entities) {
@@ -293,27 +311,10 @@ export class AuthoritySession {
     this.commitSequence += 1;
   }
 
-  private afterSeparation(
-    snapshot: AuthorityBodySnapshot,
-    body: BodyState,
-    config: BodyConfig,
-    dt: number,
-  ): AuthorityBodySnapshot {
+  private afterSeparation(snapshot: AuthorityBodySnapshot, body: BodyState, config: BodyConfig): AuthorityBodySnapshot {
     if (snapshot.body === body) return snapshot;
-    const probe = stepBody({
-      state: { position: body.position, velocity: { x: 0, y: 0, z: 0 } },
-      config: {
-        ...config,
-        gravity: 0,
-        maxHorizontalSpeed: 0,
-        groundAcceleration: 0,
-        airAcceleration: 0,
-      },
-      input: ZERO_PHYSICS_INPUT,
-      world: this.collisionWorld,
-      dt,
-    });
-    return { ...snapshot, body, grounded: probe.grounded, contacts: [] };
+    const probe = probeBodyContacts({ state: body, config, world: this.collisionWorld });
+    return { ...snapshot, body, grounded: probe.grounded, contacts: probe.contacts };
   }
 
   private itemAttraction(
@@ -338,54 +339,13 @@ export class AuthoritySession {
     };
   }
 
-  private stepAttractedItem(
-    state: BodyState,
-    config: BodyConfig,
-    attractionVelocity: BodyState['velocity'],
-    dt: number,
-  ) {
-    const attraction = stepBody({
-      state: {
-        position: state.position,
-        velocity: { x: attractionVelocity.x, y: 0, z: attractionVelocity.z },
-      },
-      config: { ...config, gravity: 0, groundAcceleration: 0, airAcceleration: 0 },
-      input: ZERO_PHYSICS_INPUT,
-      world: this.collisionWorld,
-      dt,
-    });
-    const vertical = stepBody({
-      state: {
-        position: attraction.state.position,
-        velocity: { x: 0, y: attractionVelocity.y, z: 0 },
-      },
-      config: { ...config, maxHorizontalSpeed: 0, groundAcceleration: 0, airAcceleration: 0 },
-      input: ZERO_PHYSICS_INPUT,
-      world: this.collisionWorld,
-      dt,
-    });
-    return {
-      ...vertical,
-      state: {
-        position: vertical.state.position,
-        velocity: {
-          x: attraction.state.velocity.x,
-          y: vertical.state.velocity.y,
-          z: attraction.state.velocity.z,
-        },
-      },
-      contacts: [...attraction.contacts, ...vertical.contacts],
-      sensors: [...attraction.sensors, ...vertical.sensors],
-    };
-  }
-
   private processPickups(): void {
     const entities = this.options.server.queryEntities().sort((left, right) => left.id.localeCompare(right.id));
     const entityIds = new Set(entities.map((entity) => entity.id));
     const targets = [...(this.options.server.queryPickupTargets?.() ?? [])].sort((left, right) =>
       left.id.localeCompare(right.id),
     );
-    for (const attempt of [...this.pickupAttempts]) {
+    for (const attempt of this.pickupAttempts.keys()) {
       const [itemId, targetId] = attempt.split('\0');
       const item = entities.find((entity) => entity.id === itemId);
       const target = targets.find((candidate) => candidate.id === targetId);
@@ -399,10 +359,25 @@ export class AuthoritySession {
       );
       if (!target) continue;
       const body = this.bodies.get(item.id);
-      if (body?.contacts.some((contact) => contact.normal.x !== 0 || contact.normal.z !== 0)) continue;
+      if (!body) continue;
+      const targetPosition = { x: target.position[0], y: target.position[1], z: target.position[2] };
+      const path = sweepBodyThroughWorld(body.body, this.options.bodyConfigFor(item), this.collisionWorld, {
+        x: targetPosition.x - body.body.position.x,
+        y: targetPosition.y - body.body.position.y,
+        z: targetPosition.z - body.body.position.z,
+      });
+      if (
+        distanceSquared(
+          [path.position.x, path.position.y, path.position.z],
+          [targetPosition.x, targetPosition.y, targetPosition.z],
+        ) >
+        PICKUP_PATH_EPSILON ** 2
+      )
+        continue;
       const attempt = `${item.id}\0${target.id}`;
-      if (this.pickupAttempts.has(attempt)) continue;
-      this.pickupAttempts.add(attempt);
+      const previousTick = this.pickupAttempts.get(attempt);
+      if (previousTick !== undefined && this.physicsTick - previousTick < ITEM_PICKUP_RETRY_TICKS) continue;
+      this.pickupAttempts.set(attempt, this.physicsTick);
       if (this.options.server.pickupItem(target.id, item.id).success) {
         this.bodies.delete(item.id);
         entityIds.delete(item.id);
@@ -412,9 +387,11 @@ export class AuthoritySession {
   }
 
   private processRecoveryQueue(): void {
-    const requests = [...this.recoveryQueue].sort(([left], [right]) => left.localeCompare(right));
-    this.recoveryQueue.clear();
+    const requests = [...this.recoveryQueue]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .slice(0, MAX_RECOVERIES_PER_STEP);
     for (const [entityId, request] of requests) {
+      this.recoveryQueue.delete(entityId);
       const entity = this.options.server.getEntity(entityId);
       if (!entity) {
         this.recordRecovery({

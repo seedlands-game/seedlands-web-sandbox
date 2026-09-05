@@ -253,12 +253,13 @@ describe('AuthoritySession', () => {
       expect(session.requestBodyRecovery(`missing-${index}`, 'external-geometry-change', 1)).toBe(true);
     expect(() => session.requestBodyRecovery('player-1', 'legacy-restore', 9)).toThrow(/0\.\.8/);
 
-    const first = session.wake(1_000 / 60);
+    let first = session.wake(0);
+    for (let step = 1; step <= 11; step += 1) first = session.wake((step * 1_000) / 60);
     expect(first.diagnostics?.recoveryResults).toHaveLength(32);
     const originalStatus = first.diagnostics!.recoveryResults[0]!.status;
     (first.diagnostics!.recoveryResults[0] as { status: string }).status = 'mutated';
 
-    expect(session.wake(1_000 / 60).diagnostics?.recoveryResults[0]?.status).toBe(originalStatus);
+    expect(session.wake((11 * 1_000) / 60).diagnostics?.recoveryResults[0]?.status).toBe(originalStatus);
   });
 });
 

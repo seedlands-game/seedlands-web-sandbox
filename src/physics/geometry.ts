@@ -88,11 +88,13 @@ export const validateBodyConfig = (config: BodyConfig): boolean => {
     config.buoyancy,
     config.fluidDrag,
     config.swimAcceleration,
+    config.maxExternalAcceleration,
   ];
   return (
     finiteAabb(config.localAabb) &&
     Math.abs(config.localAabb.min.y) <= COLLISION_EPSILON &&
     numericValues.every((value) => value === undefined || Number.isFinite(value)) &&
+    (config.maxExternalAcceleration === undefined || config.maxExternalAcceleration >= 0) &&
     validCollisionBits(config.collisionLayer) &&
     validCollisionBits(config.collisionMask)
   );
