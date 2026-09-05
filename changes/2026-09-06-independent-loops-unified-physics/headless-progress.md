@@ -65,6 +65,8 @@ Logic 指标为零不等于 AI 停止：审计用固定 seed 的真实 Headless 
 
 安全出生 RED 实测 2 项失败：旧函数仍返回眼睛高度 `72.6`，地面断言也读到空气。实现后 `findSafePlayerSpawn()` 直接返回注册身体脚底原点，净空格数由玩家 `localAabb` 高度推导，计算任务删除 `-1.6` 二次转换。Headless 5 秒用例同时确认 100 个 Logic batch 与 starter actor 的真实 Authority 位移。安全出生、计算任务、Headless 共 3 个文件 21 项通过，受影响 ESLint、源码 TypeScript 与 `git diff --check` 通过；测试 TypeScript 暂被并行流体优先级测试对已变更接口的 4 项调用阻塞，本阶段文件没有诊断。
 
+组合 coverage 并发执行时，安全出生与五秒 Logic 活体旅程保留全部世界生成和 100 个 batch 断言，但默认五秒 runner 上限先于断言完成。两项重型集成用例显式使用十五秒上限；这只修正测试运行预算，不改变游戏频率、推进时长、性能阈值或验收内容。
+
 ## Delivery Snapshot
 
 - 生产入口：`src/server/headless/headless-session.ts`、`scripts/server-headless.mjs`。

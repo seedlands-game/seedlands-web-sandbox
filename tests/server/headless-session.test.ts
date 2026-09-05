@@ -18,7 +18,7 @@ describe('HeadlessSession', () => {
     expect(session.runtime.ready().campPosition).toBeDefined();
     expect(session.runtime.view().actors).toHaveLength(3);
     expect(session.persistence.loadGameplaySnapshot()).toBeNull();
-  });
+  }, 15_000);
 
   it('advances every lane through Authority and performs real entity physics', async () => {
     const session = await HeadlessSession.create({ seedText: 'headless-multi-rate' });
@@ -63,7 +63,7 @@ describe('HeadlessSession', () => {
 
     expect(advanced.lanes.logicBatches).toBe(100);
     expect(Math.max(...distances)).toBeGreaterThan(0.1);
-  });
+  }, 15_000);
 
   it('computes and commits fluid work during session advancement', async () => {
     const session = await HeadlessSession.create({ seedText: 'headless-fluid' });
