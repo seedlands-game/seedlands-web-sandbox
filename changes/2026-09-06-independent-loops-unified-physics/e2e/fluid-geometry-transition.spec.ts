@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { startHarnessWorld, waitForSnapshot } from '../../../tests/e2e/support/harness';
 
 test.setTimeout(60_000);
+test.use({ video: 'on' });
 
 type WaterTransitionRecord = {
   chunkKey: string;
@@ -24,21 +25,20 @@ type WaterTransitions = {
   recent: WaterTransitionRecord[];
 };
 
-test('已提交水边界使用单几何变形且静水重网格不启动过渡', async ({ page }) => {
+test('已提交水边界使用单几何变形且静水重网格不启动过渡', async ({ page }, testInfo) => {
   await startHarnessWorld(page, 'fluid-surface-morph-v1');
   await page.evaluate(async () => {
     const h = window.__seedlandsHarness!;
     h.setTimePaused(true);
-    await h.fillWorld({ from: [-1, 56, -1], to: [5, 60, 1], voxel: 0 });
-    await h.fillWorld({ from: [-1, 56, -1], to: [5, 56, 1], voxel: 3 });
-    await h.fillWorld({ from: [-1, 57, -1], to: [5, 57, -1], voxel: 3 });
-    await h.fillWorld({ from: [-1, 57, 1], to: [5, 57, 1], voxel: 3 });
-    await h.setVoxelAt(-1, 57, 0, 3);
-    await h.setVoxelAt(5, 57, 0, 3);
-    await h.setVoxelAt(1, 57, 0, 3);
+    await h.fillWorld({ from: [-3, 57, -3], to: [7, 62, 7], voxel: 0 });
+    await h.fillWorld({ from: [-3, 56, -3], to: [7, 56, 7], voxel: 3 });
+    // 三个独立封闭井，真实流体无需暂停也会稳定，日夜暂停只固定照明。
+    await h.fillWorld({ from: [-1, 57, -1], to: [5, 57, 1], voxel: 3 });
+    for (const x of [0, 2, 4]) await h.setVoxelAt(x, 57, 0, 0);
     await h.setVoxelAt(0, 57, 0, 8);
-    h.movePlayerTo(2.5, 59.6, 5.5);
-    h.setView(0, -24);
+    await h.fillWorld({ from: [1, 57, 4], to: [3, 58, 6], voxel: 3 });
+    await h.movePlayerTo(2.5, 60.6, 5.5);
+    h.setView(0, -30);
   });
   await waitForSnapshot(
     page,
@@ -75,11 +75,12 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
           .waterTransitions.recent.length,
     ),
   ).toBe(recentBefore);
+  await testInfo.attach('water-morph-01-before', { body: await page.screenshot(), contentType: 'image/png' });
 
   await page.evaluate(async () => {
     const h = window.__seedlandsHarness!;
     h.setWaterTransitionHold?.(true);
-    await h.setVoxelAt(1, 57, 0, 0);
+    await h.setVoxelAt(2, 57, 0, 8);
   });
   const active = await expect
     .poll(() =>
@@ -110,6 +111,16 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
   expect(held.geometry!.patchCount).toBeGreaterThan(0);
 
   await page.evaluate(() => window.__seedlandsHarness!.setWaterTransitionHold?.(false));
+  await page.waitForFunction((traceId) => {
+    const h = window.__seedlandsHarness!;
+    const transitions = (h.snapshot() as unknown as { waterTransitions: WaterTransitions }).waterTransitions;
+    const frame = transitions.active.find((record) => record.traceId === traceId);
+    if (!frame || frame.progress < 0.3 || frame.progress > 0.85) return false;
+    h.setWaterTransitionHold?.(true);
+    return true;
+  }, held.traceId);
+  await testInfo.attach('water-morph-02-middle', { body: await page.screenshot(), contentType: 'image/png' });
+  await page.evaluate(() => window.__seedlandsHarness!.setWaterTransitionHold?.(false));
   await expect
     .poll(() =>
       page.evaluate((traceId) => {
@@ -125,11 +136,12 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
       }, held.traceId),
     )
     .toBe(true);
+  await testInfo.attach('water-morph-03-complete', { body: await page.screenshot(), contentType: 'image/png' });
 
   await page.evaluate(async () => {
     const h = window.__seedlandsHarness!;
     h.setWaterTransitionHold?.(true);
-    await h.setVoxelAt(1, 57, 0, 3);
+    await h.setVoxelAt(2, 57, 0, 0);
   });
   await expect
     .poll(() =>
@@ -146,7 +158,7 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
     return transitions.active.find((record) => record.geometry?.mode === 'surface-morph')!;
   });
 
-  await page.evaluate(() => window.__seedlandsHarness!.setVoxelAt(1, 57, 0, 0));
+  await page.evaluate(() => window.__seedlandsHarness!.setVoxelAt(4, 57, 0, 8));
   await expect
     .poll(() =>
       page.evaluate((traceId) => {
@@ -169,6 +181,7 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
       (record) => record.chunkKey === oldRecord.chunkKey && record.targetRevision > oldRecord.targetRevision,
     )!;
   }, interrupted.traceId);
+  await testInfo.attach('water-morph-04-replacement', { body: await page.screenshot(), contentType: 'image/png' });
 
   await page.evaluate(() => window.__seedlandsHarness!.setWaterTransitionHold?.(false));
   await expect
