@@ -1,5 +1,6 @@
 import * as pc from 'playcanvas';
 import { BreakOverlayState, type BreakOverlaySnapshot } from './break-overlay-state';
+import { crackSegmentsForStage } from './break-overlay-pattern';
 
 function crackCanvas(stage: number) {
   const canvas = document.createElement('canvas');
@@ -10,23 +11,11 @@ function crackCanvas(stage: number) {
   context.strokeStyle = 'rgba(8, 6, 5, 0.92)';
   context.lineCap = 'round';
   context.lineJoin = 'round';
-  context.lineWidth = 2.2 + stage * 0.16;
-  const branches = 3 + stage;
-  for (let branch = 0; branch < branches; branch += 1) {
-    const angle = ((branch * 137.5 + stage * 11) * Math.PI) / 180;
-    const startX = 64 + Math.cos(angle * 1.7) * (4 + (branch % 3) * 3);
-    const startY = 62 + Math.sin(angle * 1.3) * (4 + (branch % 2) * 4);
+  context.lineWidth = 2.6;
+  for (const segment of crackSegmentsForStage(stage)) {
     context.beginPath();
-    context.moveTo(startX, startY);
-    const segments = 2 + Math.floor(stage / 2);
-    for (let segment = 1; segment <= segments; segment += 1) {
-      const distance = 8 + segment * (5 + stage * 0.45);
-      const jitter = Math.sin((branch + 1) * (segment + 2) * 1.73) * 5;
-      context.lineTo(
-        startX + Math.cos(angle) * distance + Math.cos(angle + Math.PI / 2) * jitter,
-        startY + Math.sin(angle) * distance + Math.sin(angle + Math.PI / 2) * jitter,
-      );
-    }
+    context.moveTo(segment.from[0], segment.from[1]);
+    context.lineTo(segment.to[0], segment.to[1]);
     context.stroke();
   }
   return canvas;
