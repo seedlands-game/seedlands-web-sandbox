@@ -26,6 +26,8 @@ type WaterTransitions = {
 };
 
 test('已提交水边界使用单几何变形且静水重网格不启动过渡', async ({ page }, testInfo) => {
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.stack ?? error.message));
   await startHarnessWorld(page, 'fluid-surface-morph-v1');
   await page.evaluate(async () => {
     const h = window.__seedlandsHarness!;
@@ -176,6 +178,10 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
       )
       .toBe(true);
   } finally {
+    await testInfo.attach('water-morph-runtime-errors', {
+      body: JSON.stringify(pageErrors),
+      contentType: 'application/json',
+    });
     await testInfo.attach('water-morph-supersession-state', {
       body: JSON.stringify(await page.evaluate(() => window.__seedlandsHarness!.snapshot()), null, 2),
       contentType: 'application/json',
@@ -237,4 +243,5 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
         ).waterTransitions.recent.length,
     ),
   ).toBeLessThanOrEqual(32);
+  expect(pageErrors).toEqual([]);
 });

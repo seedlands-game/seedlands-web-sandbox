@@ -22,6 +22,7 @@ export type PlayCanvasChunkResource = {
   waterInstances: pc.MeshInstance[];
   waterParts: MeshPart[];
   waterTransition: PlayCanvasWaterTransition | null;
+  waterTransitionLayer?: pc.Layer;
   transitionCancel: (() => void) | null;
 };
 
@@ -29,21 +30,12 @@ const setWaterVisible = (resource: PlayCanvasChunkResource, visible: boolean) =>
   for (const instance of resource.waterInstances) instance.visible = visible;
 };
 
-const categoryInstances = (resource: PlayCanvasChunkResource, entity: pc.Entity) => [
-  ...resource.instances.filter((instance) => instance.node === entity),
-  ...(resource.waterTransition?.instance.node === entity ? [resource.waterTransition.instance] : []),
-];
-
-const refreshCategoryInstances = (resource: PlayCanvasChunkResource, entity: pc.Entity) => {
-  if (entity.render) entity.render.meshInstances = categoryInstances(resource, entity);
-};
-
 const clearWaterTransition = (resource: PlayCanvasChunkResource) => {
   const transition = resource.waterTransition;
   if (!transition) return;
   resource.waterTransition = null;
-  const transparent = resource.categoryEntities.get('transparent');
-  if (transparent) refreshCategoryInstances(resource, transparent);
+  resource.waterTransitionLayer?.removeMeshInstances([transition.instance]);
+  resource.waterTransitionLayer = undefined;
   transition.destroy();
 };
 
@@ -118,8 +110,17 @@ export const createPlayCanvasChunkAdapter = (
     const span = telemetry.beginSpan('render', 'SceneAttach', 'main', task.traceId);
     for (const [category, entity] of resource.categoryEntities) {
       entity.addComponent('render');
-      entity.render!.meshInstances = categoryInstances(resource, entity);
+      entity.render!.meshInstances = resource.instances.filter((instance) => instance.node === entity);
       if (category === 'transparent' && waterLayerId !== undefined) entity.render!.layers = [waterLayerId];
+    }
+    if (resource.waterTransition) {
+      // RenderComponent owns its static instances and destroys them on reassignment.
+      // The temporary morph keeps separate ownership and only borrows the Water layer.
+      const layer = app.scene.layers.getLayerById(waterLayerId ?? pc.LAYERID_WORLD);
+      if (layer) {
+        layer.addMeshInstances([resource.waterTransition.instance]);
+        resource.waterTransitionLayer = layer;
+      } else resource.transitionCancel?.();
     }
     resource.entity.setPosition(task.cx * CHUNK_SIZE, task.cy * CHUNK_SIZE, task.cz * CHUNK_SIZE);
     app.root.addChild(resource.entity);

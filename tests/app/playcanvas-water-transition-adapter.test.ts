@@ -65,6 +65,48 @@ const resource = (part: MeshPart): PlayCanvasChunkResource => {
 };
 
 describe('PlayCanvas water transition adapter', () => {
+  it('过渡完成不把RenderComponent已拥有的静态实例重新交给破坏性setter', () => {
+    vi.stubGlobal('performance', { now: () => 0 });
+    let frame: FrameRequestCallback | undefined;
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      frame = callback;
+      return 1;
+    });
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const destroy = vi.fn();
+    const adapter = createPlayCanvasChunkAdapter(
+      { graphicsDevice: {} } as pc.Application,
+      () => ({}) as pc.StandardMaterial,
+      telemetry,
+      undefined,
+      undefined,
+      () => ({ instance: {} as pc.MeshInstance, setProgress: vi.fn(), destroy }),
+    );
+    const previous = resource(waterPart(8));
+    const current = resource(waterPart(4));
+    expect(adapter.prepareReplacement?.(previous, current, task)).toBe(true);
+    const ownedStaticInstances = current.instances;
+    const transitionInstance = current.waterTransition!.instance;
+    const removeMeshInstances = vi.fn();
+    current.waterTransitionLayer = { removeMeshInstances } as unknown as pc.Layer;
+    Object.defineProperty(current.categoryEntities.get('transparent')!, 'render', {
+      value: {
+        get meshInstances() {
+          return ownedStaticInstances;
+        },
+        set meshInstances(_instances: pc.MeshInstance[]) {
+          throw new Error('RenderComponent setter destroys its current mesh instances');
+        },
+      },
+    });
+    adapter.transitionReplacement?.(previous, current, task, vi.fn());
+    expect(() => frame!(200)).not.toThrow();
+    expect(current.waterInstances[0].visible).toBe(true);
+    expect(destroy).toHaveBeenCalledOnce();
+    expect(removeMeshInstances).toHaveBeenCalledWith([transitionInstance]);
+    expect(removeMeshInstances.mock.invocationCallOrder[0]).toBeLessThan(destroy.mock.invocationCallOrder[0]!);
+    vi.unstubAllGlobals();
+  });
   it('shows one geometry morph without changing either water mesh opacity', () => {
     vi.stubGlobal('performance', { now: () => 0 });
     let frame: FrameRequestCallback | undefined;

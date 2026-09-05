@@ -64,3 +64,9 @@
 ## 后继缺失的诊断闭环
 
 `56f9dee` 前台原始取证：目标格子最终为 Water/Air/Water，旧过渡已 superseded，但后继 active/recent 都不存在；队列已清空。现有 Chrome Trace 导出仅保留整段耗时，丢掉已有的具体 trace marks，无法分辨水过渡为何跳过。先补 `tests/client/performance-telemetry.test.ts` 的导出未完成 trace 标记及所属 trace 身份用例（预期 RED），再按需导出已有有界 mark；不新增每帧采样，不改变调度与水物理。
+
+### 已定位生产错误与修复设计
+
+`efffcb5` 的真实 pageerror 为 `Cannot read properties of null (reading prepareRenderState)`，栈为 `clearWaterTransition → refreshCategoryInstances → RenderComponent.meshInstances setter`。所安装 PlayCanvas 的 setter 会先 `destroyMeshInstances()`，随后旧代码把仍被引用的已销毁静态实例重新交回 setter；首个过渡完成即损坏静态水面，后续 prepareReplacement 在清理旧过渡时再次抛错，尚未执行 scene-attached。
+
+先在 adapter 单元测试加入 RenderComponent 所有权不可二次转交的 RED；修复保持静态 category 实例归 RenderComponent 独占，临时 Morph 则由过渡资源独占，在 Water Layer 单独加入/移除，不再重设静态 meshInstances。完成、取消、卸载分别验证只清理临时资源，实际浏览器必须无 pageerror 且后继动画达到完成。
