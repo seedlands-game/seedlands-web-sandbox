@@ -4,6 +4,8 @@ import { lockPointer, startHarnessWorld, waitForSnapshot } from '../../../tests/
 
 const snapshot = (page: Page) => page.evaluate(() => (window.__seedlandsHarness as unknown as HarnessApi).snapshot());
 
+test.use({ video: 'on' });
+
 test('水岸低顶阻止真实Space跃出，不能越过碰撞净空', async ({ page }, testInfo) => {
   await startHarnessWorld(page, 'authority-low-bank-ceiling');
   await page.evaluate(async () => {
