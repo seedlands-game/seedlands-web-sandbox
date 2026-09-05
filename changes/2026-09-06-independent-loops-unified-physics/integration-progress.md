@@ -35,6 +35,8 @@
 - 浏览器实际接线 RED：新增 `changes/2026-09-06-independent-loops-unified-physics/e2e/authority-worker-physics.spec.ts`，先定义生产 Worker 数量、Logic Worker 阻塞 500ms 时 Authority 物理与真实输入继续、一格岸真实 W 阻挡及 W+Space 连续轨迹。执行拓扑用例后按预期失败：Harness 实际返回 `runtime: "integrated-server"`，而合同要求 `authority-worker`；证明当前浏览器仍是旧主线程权威，不能以纯模块测试冒充完成。
 - Authority Worker 运行时 RED：`pnpm exec vitest run tests/server/authority-runtime.test.ts tests/server/authority-game-server-port.test.ts`，新套件因 `src/server/authority/authority-runtime.ts` 尚不存在而失败；同时确认 GameServer 已有的 `peekLoadedVoxel()` 可携带已装载流体而不生成未知 Chunk。
 - Authority Worker 运行时 GREEN：`pnpm exec vitest run tests/server/authority-runtime.test.ts tests/server/authority-game-server-port.test.ts tests/server/authority-session.test.ts tests/client/compute-worker-pool.test.ts`，4 个文件、21 个测试全部通过。`AuthorityRuntime` 是唯一创建 `GameServer` 的会话工厂，创建脚底中心玩家、驱动固定步物理、按已装载数据查询碰撞并异步准备可转移网格副本；`authority-worker.ts` 使用独立计时器、嵌套 Persistence Worker、流体租约和 Logic observation 消息。
+- 浏览器 Authority 端口 RED：`pnpm exec vitest run tests/client/browser-authority-client.test.ts` 因 `src/client/browser-authority-client.ts` 尚不存在而失败。
+- 浏览器 Authority 端口 GREEN：同一命令 1 个文件、2 个测试通过。客户端等待真实 Worker ready、拒绝旧 epoch、把网格响应保存为只读镜像并为计算 Worker 复制独立传输数组；输入、暂停、事务、保存、流体和 Logic 路由只走消息端口。
 
 ## 集成提交
 
