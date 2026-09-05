@@ -237,4 +237,18 @@ describe('VoxelCollisionWorld', () => {
       }),
     ]);
   });
+
+  it('流体体积与渲染水面共用7/8源水高度且上方覆水时才满格', () => {
+    const world = new VoxelCollisionWorld({
+      getLoadedVoxel: (_x, y) => ({
+        voxel: y === 0 || y === 1 ? Voxel.Water : Voxel.Air,
+        chunkKey: 'loaded',
+        revision: 2,
+        ...(y === 0 || y === 1 ? { fluid: { level: 8 } } : {}),
+      }),
+    });
+
+    expect(world.sampleFluid!({ min: { x: 0, y: 0, z: 0 }, max: { x: 1, y: 1, z: 1 } })[0]?.aabb.max.y).toBe(1);
+    expect(world.sampleFluid!({ min: { x: 0, y: 1, z: 0 }, max: { x: 1, y: 2, z: 1 } })[0]?.aabb.max.y).toBe(1 + 7 / 8);
+  });
 });

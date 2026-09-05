@@ -1,3 +1,4 @@
+import { validateBodyConfig } from './geometry';
 import type { BodyConfig } from './types';
 
 export const CollisionLayer = Object.freeze({
@@ -22,6 +23,7 @@ const character = (halfWidth: number, height: number, maxHorizontalSpeed: number
   groundAcceleration: 50,
   airAcceleration: 20,
   jumpSpeed: 6.5,
+  waterSurfaceJumpSpeed: 6.5,
   buoyancy: 1,
   fluidDrag: 6,
   swimAcceleration: 12,
@@ -45,6 +47,9 @@ const configs: Readonly<Record<BodyKind, BodyConfig>> = Object.freeze({
   'night-stalker': character(0.65, 2.1, 2.8),
   settler: character(0.65, 2.35, 2.2),
 });
+
+for (const config of Object.values(configs))
+  if (!validateBodyConfig(config)) throw new TypeError('Body registry contains an invalid body configuration.');
 
 export function bodyConfigFor(kind: BodyKind): BodyConfig {
   const config = configs[kind];

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CollisionLayer, bodyConfigFor, bodyKindForEntity, type BodyKind } from '../../src/physics/body-registry';
+import { validateBodyConfig } from '../../src/physics';
 import { entityHitDistance } from '../../src/client/entity-hit-volume';
 
 describe('统一身体注册表', () => {
@@ -16,6 +17,7 @@ describe('统一身体注册表', () => {
     expect(box.max.x - box.min.x).toBeCloseTo(width);
     expect(box.max.y - box.min.y).toBeCloseTo(height);
     expect(box.max.z - box.min.z).toBeCloseTo(width);
+    expect(validateBodyConfig(bodyConfigFor(kind))).toBe(true);
   });
 
   it('角色相互阻挡而掉落物彼此不阻挡', () => {
@@ -26,6 +28,7 @@ describe('统一身体注册表', () => {
     expect(player.collisionMask! & CollisionLayer.Character).not.toBe(0);
     expect(item.collisionLayer).toBe(CollisionLayer.Item);
     expect(item.collisionMask! & CollisionLayer.Item).toBe(0);
+    expect(player.waterSurfaceJumpSpeed).toBeGreaterThan(0);
   });
 
   it('实体类型和 archetype 只映射到具名身体', () => {

@@ -1,6 +1,7 @@
 import type { Collider, FluidVolume, PhysicsWorld, WorldAabb } from '../../physics';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
 import { collisionBoxesForVoxel } from '../../world/voxel-model';
+import { waterSurfaceHeight } from '../../world/water-mesh-height';
 
 export type LoadedVoxel = Readonly<{
   voxel: number;
@@ -73,11 +74,13 @@ export class VoxelCollisionWorld implements PhysicsWorld {
         for (let z = zRange.from; z <= zRange.to; z += 1) {
           const loaded = this.source.getLoadedVoxel(x, y, z);
           if (!loaded?.fluid || loaded.fluid.level <= 0) continue;
+          const above = this.source.getLoadedVoxel(x, y + 1, z);
+          const coveredByWater = Boolean(above?.fluid && above.fluid.level > 0);
           this.revisions.set(loaded.chunkKey, loaded.revision);
           fluids.push({
             aabb: {
               min: { x, y, z },
-              max: { x: x + 1, y: y + Math.min(8, loaded.fluid.level) / 8, z: z + 1 },
+              max: { x: x + 1, y: y + waterSurfaceHeight(loaded.fluid.level, coveredByWater), z: z + 1 },
             },
             velocity: loaded.fluid.flow ?? { x: 0, y: 0, z: 0 },
           });
