@@ -3,10 +3,16 @@ import { CHUNK_SIZE } from '../world/voxel';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { MeshPart, PendingMeshTask } from './app-contracts';
 import type { ChunkResourceAdapter, ChunkSummary } from './chunk-resource-repository';
+import {
+  createPlayCanvasWaterTransition,
+  type PlayCanvasWaterTransition,
+  type PlayCanvasWaterTransitionFactory,
+} from './playcanvas-water-transition';
+import { buildWaterSurfaceTransition } from './water-surface-transition';
 import { WaterMeshTransitionTracker } from './water-mesh-transition';
 
 export const WATER_MESH_TRANSITION_MS = 180;
-const INITIAL_WATER_AUTHORITY_BLEND = 0.12;
+export const MAX_ACTIVE_WATER_TRANSITIONS = 8;
 
 export type PlayCanvasChunkResource = {
   entity: pc.Entity;
@@ -14,14 +20,31 @@ export type PlayCanvasChunkResource = {
   meshes: pc.Mesh[];
   instances: pc.MeshInstance[];
   waterInstances: pc.MeshInstance[];
-  waterBlend: number;
+  waterParts: MeshPart[];
+  waterTransition: PlayCanvasWaterTransition | null;
   transitionCancel: (() => void) | null;
 };
 
-const setWaterBlend = (resource: PlayCanvasChunkResource, blend: number) => {
-  resource.waterBlend = Math.max(0, Math.min(1, blend));
-  for (const instance of resource.waterInstances)
-    instance.setParameter('material_opacity', (instance.material as pc.StandardMaterial).opacity * resource.waterBlend);
+const setWaterVisible = (resource: PlayCanvasChunkResource, visible: boolean) => {
+  for (const instance of resource.waterInstances) instance.visible = visible;
+};
+
+const categoryInstances = (resource: PlayCanvasChunkResource, entity: pc.Entity) => [
+  ...resource.instances.filter((instance) => instance.node === entity),
+  ...(resource.waterTransition?.instance.node === entity ? [resource.waterTransition.instance] : []),
+];
+
+const refreshCategoryInstances = (resource: PlayCanvasChunkResource, entity: pc.Entity) => {
+  if (entity.render) entity.render.meshInstances = categoryInstances(resource, entity);
+};
+
+const clearWaterTransition = (resource: PlayCanvasChunkResource) => {
+  const transition = resource.waterTransition;
+  if (!transition) return;
+  resource.waterTransition = null;
+  const transparent = resource.categoryEntities.get('transparent');
+  if (transparent) refreshCategoryInstances(resource, transparent);
+  transition.destroy();
 };
 
 export const summarizeMeshParts = (parts: MeshPart[]): ChunkSummary => ({
@@ -45,6 +68,7 @@ export const createPlayCanvasChunkAdapter = (
   telemetry: PerformanceTelemetry,
   waterLayerId?: number,
   transitions = new WaterMeshTransitionTracker(),
+  createWaterTransition: PlayCanvasWaterTransitionFactory = createPlayCanvasWaterTransition,
 ): ChunkResourceAdapter<PendingMeshTask, MeshPart, PlayCanvasChunkResource> => ({
   create: (task) => ({
     entity: new pc.Entity(`Chunk ${task.chunkKey}`),
@@ -52,7 +76,8 @@ export const createPlayCanvasChunkAdapter = (
     meshes: [],
     instances: [],
     waterInstances: [],
-    waterBlend: 1,
+    waterParts: [],
+    waterTransition: null,
     transitionCancel: null,
   }),
   commitPart: (resource, task, part) => {
@@ -82,6 +107,7 @@ export const createPlayCanvasChunkAdapter = (
       instance.drawOrder = 1000;
       instance.castShadow = false;
       resource.waterInstances.push(instance);
+      resource.waterParts.push(part);
     }
     resource.meshes.push(mesh);
     resource.instances.push(instance);
@@ -92,7 +118,7 @@ export const createPlayCanvasChunkAdapter = (
     const span = telemetry.beginSpan('render', 'SceneAttach', 'main', task.traceId);
     for (const [category, entity] of resource.categoryEntities) {
       entity.addComponent('render');
-      entity.render!.meshInstances = resource.instances.filter((instance) => instance.node === entity);
+      entity.render!.meshInstances = categoryInstances(resource, entity);
       if (category === 'transparent' && waterLayerId !== undefined) entity.render!.layers = [waterLayerId];
     }
     resource.entity.setPosition(task.cx * CHUNK_SIZE, task.cy * CHUNK_SIZE, task.cz * CHUNK_SIZE);
@@ -102,22 +128,77 @@ export const createPlayCanvasChunkAdapter = (
     app.once('postrender', onPostrender);
   },
   prepareReplacement: (previous, current, task) => {
-    if (!previous.waterInstances.length && !current.waterInstances.length) return false;
+    if (!previous.waterParts.length && !current.waterParts.length) return false;
     previous.transitionCancel?.();
     current.transitionCancel?.();
-    setWaterBlend(previous, 1 - INITIAL_WATER_AUTHORITY_BLEND);
-    setWaterBlend(current, INITIAL_WATER_AUTHORITY_BLEND);
+    if (transitions.activeCount >= MAX_ACTIVE_WATER_TRANSITIONS) {
+      telemetry.markTrace(task.traceId, 'water-transition-skipped-active-budget', 'main');
+      return false;
+    }
+    const plan = buildWaterSurfaceTransition(previous.waterParts, current.waterParts);
+    if (plan.kind !== 'transition') {
+      if (plan.kind === 'budget-exceeded') telemetry.markTrace(task.traceId, 'water-transition-skipped-budget', 'main');
+      return false;
+    }
+    let transparent = current.categoryEntities.get('transparent');
+    if (!transparent) {
+      transparent = new pc.Entity(`${current.entity.name} transparent`);
+      current.categoryEntities.set('transparent', transparent);
+      current.entity.addChild(transparent);
+    }
+    const material = current.waterInstances[0]?.material ?? previous.waterInstances[0]?.material;
+    if (!material) return false;
+    try {
+      current.waterTransition = createWaterTransition(app, plan.geometry, material, transparent);
+    } catch {
+      clearWaterTransition(current);
+      telemetry.markTrace(task.traceId, 'water-transition-skipped-renderer', 'main');
+      return false;
+    }
+    setWaterVisible(previous, false);
+    setWaterVisible(current, false);
     transitions.begin(
-      { chunkKey: task.chunkKey, targetRevision: task.chunkRevision, traceId: task.traceId },
-      INITIAL_WATER_AUTHORITY_BLEND,
+      {
+        chunkKey: task.chunkKey,
+        targetRevision: task.chunkRevision,
+        traceId: task.traceId,
+        geometry: {
+          mode: 'surface-morph',
+          patchCount: plan.patchCount,
+          retainedPatchCount: plan.retainedPatchCount,
+          addedPatchCount: plan.addedPatchCount,
+          removedPatchCount: plan.removedPatchCount,
+          visibleWaterMeshCount: 1,
+          opacityCrossfade: false,
+        },
+      },
+      0,
     );
+    const preparedTransition = current.waterTransition;
+    const cancelPrepared = () => {
+      if (current.waterTransition !== preparedTransition) return;
+      previous.transitionCancel = null;
+      current.transitionCancel = null;
+      clearWaterTransition(current);
+      setWaterVisible(previous, true);
+      setWaterVisible(current, true);
+      transitions.cancel(task.traceId);
+    };
+    previous.transitionCancel = cancelPrepared;
+    current.transitionCancel = cancelPrepared;
     telemetry.markTrace(task.traceId, 'water-transition-first-visible', 'main');
     return true;
   },
   transitionReplacement: (previous, current, task, onComplete) => {
+    const transition = current.waterTransition;
+    if (!transition) {
+      onComplete();
+      return;
+    }
+    previous.transitionCancel = null;
+    current.transitionCancel = null;
     let previousFrameAt = performance.now();
     let elapsed = 0;
-    const previousBlend = previous.waterBlend;
     let animationFrame = 0;
     let finished = false;
     const finish = (cancelled: boolean) => {
@@ -128,11 +209,12 @@ export const createPlayCanvasChunkAdapter = (
       current.transitionCancel = null;
       if (cancelled) transitions.cancel(task.traceId);
       else {
-        setWaterBlend(previous, 0);
-        setWaterBlend(current, 1);
+        transition.setProgress(1);
         transitions.complete(task.traceId);
         telemetry.markTrace(task.traceId, 'water-transition-complete', 'main');
       }
+      clearWaterTransition(current);
+      setWaterVisible(current, true);
       onComplete();
     };
     const update = (now: number) => {
@@ -143,11 +225,8 @@ export const createPlayCanvasChunkAdapter = (
       }
       elapsed += Math.max(0, now - previousFrameAt);
       previousFrameAt = now;
-      const progress =
-        INITIAL_WATER_AUTHORITY_BLEND +
-        (1 - INITIAL_WATER_AUTHORITY_BLEND) * Math.min(1, elapsed / WATER_MESH_TRANSITION_MS);
-      setWaterBlend(previous, previousBlend * (1 - progress));
-      setWaterBlend(current, progress);
+      const progress = Math.min(1, elapsed / WATER_MESH_TRANSITION_MS);
+      transition.setProgress(progress);
       transitions.advance(task.traceId, progress);
       if (progress >= 1) finish(false);
       else animationFrame = requestAnimationFrame(update);
@@ -159,6 +238,7 @@ export const createPlayCanvasChunkAdapter = (
   },
   destroy: (resource) => {
     resource.transitionCancel?.();
+    clearWaterTransition(resource);
     resource.meshes.forEach((mesh) => mesh.destroy());
     resource.entity.destroy();
   },

@@ -1,0 +1,77 @@
+# 运行时由主线指定当前预览地址；本文件只定义本 change 的视觉观察项。
+web:
+  url: http://127.0.0.1:4288/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+
+tasks:
+  - name: 已提交水边界的单几何推进与收退
+    flow:
+      - aiInput: fluid-surface-morph-v1
+        locate: 世界 Seed 输入框
+      - aiTap: 进入世界
+      - aiWaitFor: 体素世界、中央准星和底部快捷栏已经显示。
+      - javascript: |
+          (async () => {
+            var h = window.__seedlandsHarness;
+            h.setTimePaused(true);
+            await h.fillWorld({ from: [-1, 56, -1], to: [5, 60, 1], voxel: 0 });
+            await h.fillWorld({ from: [-1, 56, -1], to: [5, 56, 1], voxel: 3 });
+            await h.fillWorld({ from: [-1, 57, -1], to: [5, 57, -1], voxel: 3 });
+            await h.fillWorld({ from: [-1, 57, 1], to: [5, 57, 1], voxel: 3 });
+            await h.setVoxelAt(-1, 57, 0, 3);
+            await h.setVoxelAt(5, 57, 0, 3);
+            await h.setVoxelAt(1, 57, 0, 3);
+            await h.setVoxelAt(0, 57, 0, 8);
+            await h.movePlayerTo(2.5, 59.6, 5.5);
+            h.setView(0, -24);
+            for (var settle = 0; settle < 120; settle += 1) {
+              var state = h.snapshot();
+              if (
+                state.generationQueue === 0 &&
+                state.meshingQueue === 0 &&
+                state.deferredRemeshes === 0 &&
+                state.performance.uploadQueueDepth === 0 &&
+                state.waterTransitions.activeCount === 0
+              )
+                break;
+              await new Promise((resolve) => setTimeout(resolve, 25));
+            }
+            h.setTimePaused(false);
+            await h.setVoxelAt(1, 57, 0, 0);
+            for (var attempt = 0; attempt < 120; attempt += 1) {
+              var active = h
+                .snapshot()
+                .waterTransitions.active.find(
+                  (record) =>
+                    record.geometry &&
+                    record.geometry.mode === 'surface-morph' &&
+                    record.progress >= 0.35 &&
+                    record.progress <= 0.82,
+                );
+              if (active) {
+                h.setWaterTransitionHold(true);
+                return active;
+              }
+              await new Promise((resolve) => requestAnimationFrame(resolve));
+            }
+            throw new Error('没有捕获到水边界几何过渡中间帧');
+          })()
+      - aiAssert: >-
+          当前暂停帧中，狭窄水槽内的蓝色水面从源水格沿开口连续向前推进，前沿是处于格间位置的一份几何边界；
+          不能同时看见旧前沿和新前沿两层完整透明水墙，不能有双重倒影、透明重影或整块 Chunk 一起变淡。
+          源水格内未变化的静水保持稳定，纹理尺度连续，没有因邻近重网格而整片闪烁。
+      - javascript: |
+          (async () => {
+            var h = window.__seedlandsHarness;
+            h.setWaterTransitionHold(false);
+            for (var attempt = 0; attempt < 160; attempt += 1) {
+              var state = h.snapshot();
+              if (state.waterTransitions.activeCount === 0 && h.getFluidCell(1, 57, 0)) return state;
+              await new Promise((resolve) => setTimeout(resolve, 25));
+            }
+            throw new Error('水边界几何过渡没有在有界时间内完成');
+          })()
+      - aiAssert: >-
+          完成帧中水槽内只保留最终已提交水面，前沿外没有旧透明墙、倒影残片或悬空薄片；
+          水面高度与方块边界吻合，石质槽壁、世界空间倒影和水纹仍清楚可辨。

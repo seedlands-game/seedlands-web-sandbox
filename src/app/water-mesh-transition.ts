@@ -2,6 +2,15 @@ export type WaterMeshTransitionIdentity = {
   chunkKey: string;
   targetRevision: number;
   traceId: string;
+  geometry?: {
+    mode: 'surface-morph';
+    patchCount: number;
+    retainedPatchCount: number;
+    addedPatchCount: number;
+    removedPatchCount: number;
+    visibleWaterMeshCount: 1;
+    opacityCrossfade: false;
+  };
 };
 
 export type WaterMeshTransitionRecord = WaterMeshTransitionIdentity & {
@@ -30,6 +39,10 @@ export class WaterMeshTransitionTracker {
 
   get held() {
     return this.heldForHarness;
+  }
+
+  get activeCount() {
+    return this.active.size;
   }
 
   setHeldForHarness(held: boolean) {
