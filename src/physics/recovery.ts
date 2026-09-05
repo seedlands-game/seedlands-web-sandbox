@@ -107,7 +107,9 @@ export const recoverBody = (
     coordinates.x.length * coordinates.y.length >
       Math.floor(MAX_RECOVERY_CANDIDATES / Math.max(1, coordinates.z.length))
   )
-    throw new RangeError('恢复候选超过固定预算；调用方必须缩小恢复范围。');
+    // Exhausting the declared search budget is a normal bounded failure. Invalid
+    // inputs and malformed colliders still throw before reaching this branch.
+    return { state, recovered: false, distance: 0 };
   const candidates: Vec3[] = [];
   for (const x of coordinates.x)
     for (const y of coordinates.y)

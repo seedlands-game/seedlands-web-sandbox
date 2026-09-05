@@ -420,9 +420,11 @@ describe('统一 swept-AABB 物理核心', () => {
         [0.4 + index / 100, 1.7 - index / 100, 0.4 + index / 100],
       ),
     );
-    expect(() => recoverBody({ state: embedded, config: body, world: world(crowded), maxDistance: 2 })).toThrow(
-      RangeError,
-    );
+    expect(recoverBody({ state: embedded, config: body, world: world(crowded), maxDistance: 2 })).toEqual({
+      state: embedded,
+      recovered: false,
+      distance: 0,
+    });
   });
 
   it('接触点位于实际碰撞面，终点离开窄支撑时不遗留 grounded 状态', () => {

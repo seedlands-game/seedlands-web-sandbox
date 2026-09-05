@@ -256,6 +256,22 @@ describe('Authority 实体统一物理接线', () => {
     expect(server.getEntity('item')).toBeNull();
   });
 
+  it('较近但隔墙的玩家不会遮蔽范围内可达的稳定吸附目标', () => {
+    const server = new EntityPhysicsServer([
+      entity('a-blocked', 'player', [2.4, 0, 0.5]),
+      entity('player', 'player', [-1.5, 0, 0.5]),
+      entity('item', 'world-item', [0.5, 0, 0.5]),
+    ]);
+    const session = createSession(server, {
+      configFor: (candidate) => (candidate.type === 'world-item' ? smallItemConfig : smallCharacterConfig),
+      voxelAt: (x, y) => (x === 1 && y === 0 ? Voxel.Stone : y === -1 ? Voxel.Stone : Voxel.Air),
+    });
+
+    wakeSteps(session, 120);
+
+    expect(server.getEntity('item')!.position[0]).toBeLessThan(0.5);
+  });
+
   it('只在显式队列处理相邻体素恢复并记录原因、距离、失败和缺失实体', () => {
     const server = new EntityPhysicsServer([entity('player', 'player', [0, 0, 0])]);
     const session = createSession(server, {
@@ -331,5 +347,23 @@ describe('Authority 实体统一物理接线', () => {
     expect(second.diagnostics?.recoveryResults).toHaveLength(8);
     const third = session.wake((3 * 1_000) / 60);
     expect(third.diagnostics?.recoveryResults).toHaveLength(11);
+  });
+
+  it('合法最大距离的稠密恢复耗尽候选预算时记录阻挡，并继续同批请求和物理步', () => {
+    const server = new EntityPhysicsServer([entity('player', 'player', [0.5, -0.5, 0.5])]);
+    const session = createSession(server, {
+      configFor: () => characterConfig,
+      voxelAt: (_x, y) => (y <= 0 ? Voxel.Stone : Voxel.Air),
+    });
+    expect(session.requestBodyRecovery('player', 'external-geometry-change', 8)).toBe(true);
+    expect(session.requestBodyRecovery('z-after', 'external-geometry-change', 1)).toBe(true);
+
+    expect(() => session.wake(1_000 / 60)).not.toThrow();
+    const snapshot = session.wake(1_000 / 60);
+    expect(snapshot.physicsTick).toBe(1);
+    expect(snapshot.diagnostics?.recoveryResults).toEqual([
+      expect.objectContaining({ entityId: 'player', status: 'blocked', distance: 0 }),
+      expect.objectContaining({ entityId: 'z-after', status: 'missing', distance: 0 }),
+    ]);
   });
 });

@@ -1,10 +1,11 @@
 import {
   bodyWorldAabb,
+  isBodyPositionReachable,
   probeBodyContacts,
   recoverBody,
+  selectReachableBodyTarget,
   separateBodies,
   stepBody,
-  sweepBodyThroughWorld,
   type BodyConfig,
   type BodyState,
   type Contact,
@@ -134,8 +135,8 @@ const CHARACTER_SEPARATION_DISTANCE = 0.1;
 const ITEM_ATTRACTION_RADIUS = 2.25;
 const ITEM_ATTRACTION_SPEED = 6;
 const ITEM_PICKUP_RADIUS = 0.75;
+const MAX_PICKUP_TARGET_CANDIDATES = 8;
 const ITEM_PICKUP_RETRY_TICKS = 15;
-const PICKUP_PATH_EPSILON = 1e-6;
 
 const distanceSquared = (left: readonly number[], right: readonly number[]): number =>
   left.reduce((sum, value, index) => sum + (value - right[index]) ** 2, 0);
@@ -263,6 +264,11 @@ export class AuthoritySession {
     const pickupTargets = [...(this.options.server.queryPickupTargets?.() ?? [])].sort((left, right) =>
       left.id.localeCompare(right.id),
     );
+    const physicsTargets = pickupTargets.map((target) => ({
+      id: target.id,
+      position: { x: target.position[0], y: target.position[1], z: target.position[2] },
+    }));
+    const selectedTargets = new Map<string, string>();
     const seen = new Set<string>();
     const nextBodies = new Map<string, AuthorityBodySnapshot>();
     const configs = new Map<string, BodyConfig>();
@@ -271,8 +277,20 @@ export class AuthoritySession {
       const config = this.options.bodyConfigFor(entity);
       configs.set(entity.id, config);
       const physicsInput = this.physicsInput(entity, input);
-      const attraction = entity.type === 'world-item' ? this.itemAttraction(entity, pickupTargets) : null;
       const initialState = toBodyState(entity);
+      const target =
+        entity.type === 'world-item'
+          ? selectReachableBodyTarget({
+              state: initialState,
+              config,
+              world: this.collisionWorld,
+              targets: physicsTargets,
+              maxDistance: ITEM_ATTRACTION_RADIUS,
+              maxCandidates: MAX_PICKUP_TARGET_CANDIDATES,
+            })
+          : null;
+      if (target) selectedTargets.set(entity.id, target.id);
+      const attraction = target ? this.itemAttraction(initialState, target.position) : null;
       const result = stepBody({
         state: initialState,
         config: attraction ? { ...config, groundAcceleration: 0, airAcceleration: 0 } : config,
@@ -326,7 +344,7 @@ export class AuthoritySession {
       });
       this.bodies.set(entity.id, body);
     }
-    this.processPickups();
+    this.processPickups(selectedTargets);
     for (const id of this.bodies.keys()) if (!seen.has(id)) this.bodies.delete(id);
     this.commitSequence += 1;
   }
@@ -337,18 +355,11 @@ export class AuthoritySession {
     return { ...snapshot, body, grounded: probe.grounded, contacts: probe.contacts };
   }
 
-  private itemAttraction(
-    entity: AuthorityEntity,
-    targets: readonly AuthorityPickupTarget[],
-  ): BodyState['velocity'] | null {
-    const target = targets.find(
-      (candidate) => distanceSquared(entity.position, candidate.position) <= ITEM_ATTRACTION_RADIUS ** 2,
-    );
-    if (!target) return null;
+  private itemAttraction(state: BodyState, target: BodyState['position']): BodyState['velocity'] | null {
     const delta = {
-      x: target.position[0] - entity.position[0],
-      y: target.position[1] - entity.position[1],
-      z: target.position[2] - entity.position[2],
+      x: target.x - state.position.x,
+      y: target.y - state.position.y,
+      z: target.z - state.position.z,
     };
     const distance = Math.hypot(delta.x, delta.y, delta.z);
     if (distance <= Number.EPSILON) return null;
@@ -359,7 +370,7 @@ export class AuthoritySession {
     };
   }
 
-  private processPickups(): void {
+  private processPickups(selectedTargets: ReadonlyMap<string, string>): void {
     const entities = this.options.server.queryEntities().sort((left, right) => left.id.localeCompare(right.id));
     const entityIds = new Set(entities.map((entity) => entity.id));
     const targets = [...(this.options.server.queryPickupTargets?.() ?? [])].sort((left, right) =>
@@ -369,30 +380,22 @@ export class AuthoritySession {
       const [itemId, targetId] = attempt.split('\0');
       const item = entities.find((entity) => entity.id === itemId);
       const target = targets.find((candidate) => candidate.id === targetId);
-      if (!item || !target || distanceSquared(item.position, target.position) > ITEM_PICKUP_RADIUS ** 2)
+      if (
+        !item ||
+        !target ||
+        selectedTargets.get(itemId) !== targetId ||
+        distanceSquared(item.position, target.position) > ITEM_PICKUP_RADIUS ** 2
+      )
         this.pickupAttempts.delete(attempt);
     }
     if (!this.options.server.pickupItem) return;
     for (const item of entities.filter((entity) => entity.type === 'world-item')) {
-      const target = targets.find(
-        (candidate) => distanceSquared(item.position, candidate.position) <= ITEM_PICKUP_RADIUS ** 2,
-      );
-      if (!target) continue;
+      const target = targets.find((candidate) => candidate.id === selectedTargets.get(item.id));
+      if (!target || distanceSquared(item.position, target.position) > ITEM_PICKUP_RADIUS ** 2) continue;
       const body = this.bodies.get(item.id);
       if (!body) continue;
       const targetPosition = { x: target.position[0], y: target.position[1], z: target.position[2] };
-      const path = sweepBodyThroughWorld(body.body, this.options.bodyConfigFor(item), this.collisionWorld, {
-        x: targetPosition.x - body.body.position.x,
-        y: targetPosition.y - body.body.position.y,
-        z: targetPosition.z - body.body.position.z,
-      });
-      if (
-        distanceSquared(
-          [path.position.x, path.position.y, path.position.z],
-          [targetPosition.x, targetPosition.y, targetPosition.z],
-        ) >
-        PICKUP_PATH_EPSILON ** 2
-      )
+      if (!isBodyPositionReachable(body.body, this.options.bodyConfigFor(item), this.collisionWorld, targetPosition))
         continue;
       const attempt = `${item.id}\0${target.id}`;
       const previousTick = this.pickupAttempts.get(attempt);
