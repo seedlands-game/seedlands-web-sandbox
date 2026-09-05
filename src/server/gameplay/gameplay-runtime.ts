@@ -1,5 +1,5 @@
 import { playerOccupiesVoxelShape } from './player-occupancy';
-import { voxelRayIsClear } from './voxel-ray';
+import { traceVoxelRay } from './voxel-ray';
 import { Voxel } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
 import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
@@ -22,7 +22,7 @@ export type { GameplaySnapshot, GameplaySnapshotV1, GameplaySnapshotV2, Gameplay
 
 type Position = [number, number, number];
 type GameplayCallbacks = {
-  getVoxel: (position: Position) => number;
+  getVoxel: (position: Position) => number | undefined;
   editVoxel: (actorId: string, position: Position, voxel: number) => WorldCommitResult;
   getWorldTime: () => number;
 };
@@ -43,7 +43,7 @@ export class GameplayRuntime {
   constructor(private readonly callbacks: GameplayCallbacks) {
     this.simulation = new AutonomyRuntime({
       entities: this.entities,
-      getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]),
+      getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: callbacks.getWorldTime,
       isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
     });
@@ -180,6 +180,7 @@ export class GameplayRuntime {
     if (!this.inRange(entity.position, this.voxelCenter(position), 5))
       return { success: false, reason: 'out-of-range' };
     const voxel = this.callbacks.getVoxel(position);
+    if (voxel === undefined) return { success: false, reason: 'chunk-unavailable' };
     const definition = getVoxelGameplayDefinition(voxel);
     if (definition.hardnessSeconds === null) return { success: false, reason: 'unbreakable' };
     const selected = player.inventory.slot(player.selectedSlot);
@@ -211,8 +212,9 @@ export class GameplayRuntime {
     if (!item || item.type !== 'world-item' || !item.stack) return { success: false, reason: 'invalid-item' };
     const entity = this.entities.get(playerId)!;
     if (!this.inRange(entity.position, item.position, 1.5)) return { success: false, reason: 'out-of-range' };
-    if (!voxelRayIsClear(item.position, entity.position, (x, y, z) => this.callbacks.getVoxel([x, y, z])))
-      return { success: false, reason: 'blocked' };
+    const visibility = traceVoxelRay(item.position, entity.position, (x, y, z) => this.callbacks.getVoxel([x, y, z]));
+    if (visibility !== 'clear')
+      return { success: false, reason: visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
     if (!player.inventory.add(item.stack)) return { success: false, reason: 'inventory-full' };
     this.inventoryOperationCount += 1;
     this.entities.despawn(entityId);
@@ -246,8 +248,9 @@ export class GameplayRuntime {
     const entity = this.entities.get(id)!;
     if (!this.inRange(entity.position, this.voxelCenter(position), 5))
       return { success: false, reason: 'out-of-range' };
-    if (!getVoxelGameplayDefinition(this.callbacks.getVoxel(position)).replaceable)
-      return { success: false, reason: 'target-occupied' };
+    const currentVoxel = this.callbacks.getVoxel(position);
+    if (currentVoxel === undefined) return { success: false, reason: 'chunk-unavailable' };
+    if (!getVoxelGameplayDefinition(currentVoxel).replaceable) return { success: false, reason: 'target-occupied' };
     const selected = player.inventory.slot(player.selectedSlot);
     if (!selected) return { success: false, reason: 'no-selected-item' };
     const definition = getItemDefinition(selected.itemId);
@@ -294,8 +297,11 @@ export class GameplayRuntime {
     if (!target || (target.type !== 'creature' && target.type !== 'npc') || target.health === undefined)
       return { success: false, reason: 'invalid-target' };
     if (!this.inRange(attacker.position, target.position, 3)) return { success: false, reason: 'out-of-range' };
-    if (!voxelRayIsClear(attacker.position, attackTargetPoint(target), (x, y, z) => this.callbacks.getVoxel([x, y, z])))
-      return { success: false, reason: 'blocked' };
+    const visibility = traceVoxelRay(attacker.position, attackTargetPoint(target), (x, y, z) =>
+      this.callbacks.getVoxel([x, y, z]),
+    );
+    if (visibility !== 'clear')
+      return { success: false, reason: visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
     const damage = 4;
     const health = Math.max(0, target.health - damage);
     this.entities.update(targetId, { health });
@@ -394,7 +400,7 @@ export class GameplayRuntime {
   restoreSnapshot(raw: unknown): { version: 1 | 2 | 3; worldTime?: number } {
     try {
       const { snapshot, sourceVersion, players } = GameplaySnapshot.validateGameplaySnapshot(raw, {
-        getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]),
+        getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
         getWorldTime: this.callbacks.getWorldTime,
       });
       this.entities.restore(snapshot.entities, snapshot.entitySequence);
@@ -447,10 +453,9 @@ export class GameplayRuntime {
     const action = player.breakAction;
     if (!action) return;
     const entity = this.entities.get(player.entityId)!;
-    if (
-      this.callbacks.getVoxel(action.position) !== action.voxel ||
-      !this.inRange(entity.position, this.voxelCenter(action.position), 5)
-    ) {
+    const currentVoxel = this.callbacks.getVoxel(action.position);
+    if (currentVoxel === undefined) return;
+    if (currentVoxel !== action.voxel || !this.inRange(entity.position, this.voxelCenter(action.position), 5)) {
       player.breakAction = null;
       return;
     }

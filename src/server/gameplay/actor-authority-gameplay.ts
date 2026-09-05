@@ -1,4 +1,4 @@
-import { voxelRayIsClear } from './voxel-ray';
+import { traceVoxelRay } from './voxel-ray';
 import type { EntityStore } from './entity-store';
 import { getItemDefinition } from './item-registry';
 import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
@@ -18,7 +18,7 @@ type Position = [number, number, number];
 export type ActorAuthorityGameplayContext = Readonly<{
   entities: EntityStore;
   simulation: AutonomyRuntime;
-  getVoxel: (position: Position) => number;
+  getVoxel: (position: Position) => number | undefined;
   isPlayerAlive: (id: string) => boolean;
   damagePlayer: (actorId: string, targetId: string, amount: number) => boolean;
   touch: () => void;
@@ -40,7 +40,8 @@ function attack(
   if (!inRange(actor.position, target.position, ACTOR_ATTACK_DISTANCE)) return reject('out-of-range');
   const from: Position = [actor.position[0], actor.position[1] + 0.9, actor.position[2]];
   const to: Position = [target.position[0], target.position[1] + 0.9, target.position[2]];
-  if (!voxelRayIsClear(from, to, (x, y, z) => context.getVoxel([x, y, z]))) return reject('blocked');
+  const visibility = traceVoxelRay(from, to, (x, y, z) => context.getVoxel([x, y, z]));
+  if (visibility !== 'clear') return reject(visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked');
   return executeAuthorityAttack(
     context.simulation.authorityRulesContext(),
     actorId,
@@ -63,8 +64,8 @@ function consume(
   if (!actor || target?.type !== 'world-item' || !target.stack || item?.itemType !== 'food')
     return reject('invalid-food');
   if (!inRange(actor.position, target.position, ACTOR_CONSUME_DISTANCE)) return reject('out-of-range');
-  if (!voxelRayIsClear(actor.position, target.position, (x, y, z) => context.getVoxel([x, y, z])))
-    return reject('blocked');
+  const visibility = traceVoxelRay(actor.position, target.position, (x, y, z) => context.getVoxel([x, y, z]));
+  if (visibility !== 'clear') return reject(visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked');
   const result = executeAuthorityConsume(
     context.simulation.authorityRulesContext(),
     actorId,

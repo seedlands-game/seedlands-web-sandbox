@@ -38,6 +38,7 @@ import {
   maintainCanonicalChunks,
 } from './chunk-residency';
 import { createServerDerivedMeshSnapshot, prepareServerWorkerMeshInput } from './server-mesh-snapshots';
+import { createLoadedGameplayVoxelReader, readCanonicalVoxel } from './server-voxel-access';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -71,6 +72,7 @@ export class GameServer extends GameServerGameplayFacade {
   private readonly fluidWindow = new FluidActiveWindow();
   private readonly saves: GameSaveRuntime;
   private readonly canonicalResidency: CanonicalChunkResidency;
+  private readonly gameplayVoxelReader: (x: number, y: number, z: number) => number | undefined;
 
   constructor(readonly options: GameServerOptions) {
     super(options.persistence);
@@ -80,6 +82,9 @@ export class GameServer extends GameServerGameplayFacade {
       throw new Error(`Unsupported generator version ${this.generatorVersion}.`);
     this.persistence = options.persistence;
     this.canonicalResidency = new CanonicalChunkResidency(options.canonicalResidency);
+    this.gameplayVoxelReader = options.onUnknownChunk
+      ? createLoadedGameplayVoxelReader(this.chunks, options.onUnknownChunk)
+      : this.getVoxel;
     this.saves = new GameSaveRuntime({
       seedText: options.seedText,
       generatorVersion: this.generatorVersion,
@@ -212,16 +217,12 @@ export class GameServer extends GameServerGameplayFacade {
     this.maintainCanonicalResidency();
   }
 
-  getVoxel(x: number, y: number, z: number): number {
-    const cx = floorDiv(x, CHUNK_SIZE);
-    const cy = floorDiv(y, CHUNK_SIZE);
-    const cz = floorDiv(z, CHUNK_SIZE);
-    const chunk = this.getChunk(cx, cy, cz);
-    return chunk.voxels[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
-  }
+  getVoxel = (x: number, y: number, z: number) => readCanonicalVoxel((...at) => this.getChunk(...at), x, y, z);
 
-  peekLoadedVoxel(x: number, y: number, z: number) {
-    return peekLoadedVoxel(this.chunks, x, y, z);
+  peekLoadedVoxel = (x: number, y: number, z: number) => peekLoadedVoxel(this.chunks, x, y, z);
+
+  protected override readGameplayVoxel(x: number, y: number, z: number): number | undefined {
+    return this.gameplayVoxelReader(x, y, z);
   }
 
   createDerivedMeshSnapshot(cx: number, cy: number, cz: number): DerivedMeshSnapshot {
