@@ -55,7 +55,7 @@ type InputCommand = {
   sequence: number;
   targetPhysicsTick: number;
   issuedAtMs: number;
-  state: { forward: number; right: number; verticalIntent: -1 | 0 | 1 };
+  state: { moveX: number; moveZ: number; verticalIntent: -1 | 0 | 1; jumpHeld: boolean };
   edges: { jumpPressed: boolean };
 };
 
@@ -71,7 +71,7 @@ type TransactionCommand = {
 ```
 
 - `sequence` 在同一 epoch 内严格递增；Authority 对已提交 sequence 返回相同回执，不重复执行。
-- 持续输入状态可被较新状态覆盖，但按下/松开边沿必须按 sequence 消费一次。
+- `moveX/moveZ` 是客户端根据即时镜头朝向算出的世界坐标移动意图；Authority 不读取客户端 yaw 猜方向。持续输入状态和 `jumpHeld` 可被较新状态覆盖，但按下/松开边沿必须按 sequence 消费一次。持续按住 Space 时，每次重新获得合法向上支撑后可再次起跳，不能只依赖首次 `jumpPressed`。
 - 事务包括编辑、库存、伤害、拾取、保存和调试快照订阅；它们不得静默丢弃。
 - 所有响应都带 `protocolVersion + epoch`。旧 epoch、重复及乱序响应由接收方明确忽略并计数。
 
@@ -142,15 +142,15 @@ type ComputeTask = {
 
 - `PredictionBuffer` 只预测本地玩家，保存 `{input, predictedBody, collisionRevisionVector}`。快照确认后回退到权威身体并重放未确认输入；缺少旧碰撞版本时清空历史并报告 `collision-history-missing`。
 - 小误差只平滑表现偏移；权威碰撞或大误差立即校正，表现插值不得穿过固体。
-- `SnapshotInterpolator` 用 `(physicsTick, activeTimeMs)` 插值其他实体，最多有限外推；超时保持最后状态。
+- `SnapshotInterpolator` 用 `(physicsTick, integratedPhysicsTimeMs)` 插值其他实体；`activeTimeMs` 只用于估算当前 Worker 会话时钟映射和展示 debt，不能在发生 debt 时当作实体已积分时间。最多有限外推，超时保持最后状态。
 - `visibilitychange`、`blur`、死亡和世界退出都必须经直接 Authority 输入通道发送全零持续状态，并清空未消费按键边沿。
 - `CollisionDebugProjection` 只从物理 `BodyConfig`、Authority `BodyState`、本地预测 `BodyState` 和方块形状注册表生成批量线段。F3+B 完整消费，面板开关发送订阅事务；关闭时不请求调试快照且释放批量资源。
 
 ## 保存与 headless
 
 - 保存事务在 Authority 冻结一个 `commitSequence` 后创建 Chunk、流体、实体/库存、时钟和物理状态的一致快照；持久化确认后才返回成功。
-- 新快照版本保留 `seed + generatorVersion + voxel id`，旧 `GameplaySnapshotV1` 保持可读；旧玩家坐标经显式版本适配为脚底中心。迁移失败返回原因且不覆盖原记录。
-- `HeadlessSession` 复用 `AuthoritySession`、协议和调度器，通过内存端口运行；支持 `advancePhysics(steps)`、`advanceLogic(steps)`、`advanceFluid(steps)` 与 `advanceSession(ms)`。旧 `/tick` 映射为推进整个会话一个 gameplay 周期，并在输出中标明实际推进的各 lane 数。
+- 新快照版本保留 `seed + generatorVersion + voxel id`，旧 `GameplaySnapshotV1` 和 `GameplaySnapshotV2` 均保持可读；旧玩家坐标经显式版本适配为脚底中心。迁移失败返回原因且不覆盖原记录。
+- `HeadlessSession` 复用 `AuthoritySession`、协议和调度器，通过内存端口运行；支持 `advancePhysics(steps)`、`advanceLogic(steps)`、`advanceFluid(steps)` 与 `advanceSession(ms)`。旧 `/tick <seconds>` 保留参数的秒语义并映射为 `advanceSession(seconds * 1000)`，在输出中标明实际推进的各 lane 数。
 
 ## 最小接线顺序
 

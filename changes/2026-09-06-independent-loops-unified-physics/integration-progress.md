@@ -10,7 +10,7 @@
 
 ## RED / GREEN 记录
 
-待执行。每条记录包含命令、失败/通过摘要和对应代码 SHA。
+- RED（`3337ed5` 后的工作树）：`pnpm exec vitest run tests/runtime tests/client/compute-task-queue.test.ts tests/client/snapshot-interpolator.test.ts tests/governance/runtime-purity-eslint.test.ts`。结果为 6 个测试文件失败：5 个生产模块尚不存在；纯 runtime/physics ESLint 边界的 2 个反例未被规则拒绝，正例通过。该失败与预期一致，发生在生产实现之前。
 
 ## 集成提交
 
