@@ -348,6 +348,10 @@ export class AuthorityRuntime {
     return accepted;
   }
 
+  readCollisionBaseline(key: string, minimumRevision: number) {
+    return this.server.readCollisionBaseline(key, minimumRevision);
+  }
+
   releaseMesh(cx: number, cy: number, cz: number): void {
     this.server.releaseChunkNeighborhood(cx, cy, cz);
   }

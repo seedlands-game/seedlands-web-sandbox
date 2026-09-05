@@ -56,6 +56,15 @@ export type WorldCollisionChunkDelta = Readonly<{
   revision: number;
   cells: readonly WorldCollisionCellDelta[];
 }>;
+export type AuthorityCollisionBaselineResult =
+  | Readonly<{ status: 'unavailable'; key: string }>
+  | Readonly<{
+      status: 'available';
+      key: string;
+      chunkRevision: number;
+      canonical: ArrayBuffer;
+      fluid: ArrayBuffer;
+    }>;
 export type WorldCommitResult = {
   committed: boolean;
   reason?: 'chunk-unavailable';

@@ -29,6 +29,7 @@ import {
 import { createServerDerivedMeshSnapshot, prepareServerWorkerMeshInput } from './server-mesh-snapshots';
 import { createLoadedGameplayVoxelReader, readCanonicalVoxel } from './server-voxel-access';
 import { commitSingleWorldEdit } from './single-world-edit';
+import { readLoadedCollisionBaseline } from './loaded-collision-baseline';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -216,6 +217,10 @@ export class GameServer extends GameServerGameplayFacade {
   getVoxel = (x: number, y: number, z: number) => readCanonicalVoxel((...at) => this.getChunk(...at), x, y, z);
 
   peekLoadedVoxel = (x: number, y: number, z: number) => peekLoadedVoxel(this.chunks, x, y, z);
+
+  readCollisionBaseline(key: string, minimumRevision: number) {
+    return readLoadedCollisionBaseline(this.chunks, key, minimumRevision);
+  }
 
   protected override readGameplayVoxel(x: number, y: number, z: number): number | undefined {
     return this.gameplayVoxelReader(x, y, z);

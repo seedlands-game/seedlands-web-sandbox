@@ -149,6 +149,14 @@ export type AuthorityRequest =
       cz: number;
     }>
   | Readonly<{
+      kind: 'request-collision-baseline';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      key: string;
+      minimumRevision: number;
+    }>
+  | Readonly<{
       kind: 'release-mesh';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;

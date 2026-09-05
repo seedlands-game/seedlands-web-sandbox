@@ -233,6 +233,23 @@ const handle = async (message: AuthorityRequest) => {
       );
       break;
     }
+    case 'request-collision-baseline': {
+      const result = current.readCollisionBaseline(message.key, message.minimumRevision);
+      if (result.status === 'unavailable') respond(message.requestId, result);
+      else
+        post(
+          {
+            kind: 'authority-response',
+            protocolVersion: PROTOCOL_VERSION,
+            epoch,
+            requestId: message.requestId,
+            ok: true,
+            result,
+          },
+          [result.canonical, result.fluid],
+        );
+      break;
+    }
     case 'accept-generated-chunk':
       respond(message.requestId, {
         accepted: current.acceptGeneratedChunk({
