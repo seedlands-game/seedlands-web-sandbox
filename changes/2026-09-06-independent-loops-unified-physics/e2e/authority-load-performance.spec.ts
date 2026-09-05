@@ -25,6 +25,7 @@ const TARGETS = [
   [12, -36],
 ] as const;
 const TARGET_FLUID_SAMPLES = TARGETS.length;
+const FIRST_SAMPLE_DIAGNOSTIC = process.env.SEEDLANDS_AUTHORITY_LOAD_FIRST_SAMPLE === '1';
 const EXPECTED_STREAMED_CHUNKS = 50;
 const SCENARIO_SOURCE = {
   seed: 'authority-controlled-load',
@@ -231,7 +232,12 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
   }
 }
 
-async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWorkers: 1 | 2) {
+async function runConfiguration(
+  browser: Browser,
+  testInfo: TestInfo,
+  generalWorkers: 1 | 2,
+  targetFluidSamples: number = TARGET_FLUID_SAMPLES,
+) {
   const context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
   try {
@@ -309,7 +315,7 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
       body: JSON.stringify(loaded, null, 2),
       contentType: 'application/json',
     });
-    for (let index = 0; index < TARGET_FLUID_SAMPLES; index += 1)
+    for (let index = 0; index < targetFluidSamples; index += 1)
       await sampleTargetFluid(page, testInfo, generalWorkers, index);
     await expect
       .poll(async () => (await snapshot(page)).performance.completedChunkTraces, { timeout: 15_000 })
@@ -342,7 +348,7 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
     const physicsCosts = final.authority.physicsCost?.samplesMs ?? [];
     const result = {
       sourceSha: process.env.SEEDLANDS_E2E_SOURCE_SHA ?? 'UNSPECIFIED',
-      scenarioSource: SCENARIO_SOURCE,
+      scenarioSource: { ...SCENARIO_SOURCE, targetFluidSamples },
       browser: browser.version(),
       generalWorkers,
       totalComputeSlots: 1 + generalWorkers,
@@ -386,7 +392,16 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
   }
 }
 
+test('单个近场流体反馈诊断保留完整提交与网格链', async ({ browser }, testInfo) => {
+  test.skip(!FIRST_SAMPLE_DIAGNOSTIC, '仅在显式单样本诊断时运行。');
+  test.setTimeout(120_000);
+  const result = await runConfiguration(browser, testInfo, 1, 1);
+  expect(result.fluidFeedback.count).toBe(1);
+  expect(result.fluidFeedback.p95Ms).toBeLessThanOrEqual(100);
+});
+
 test('同机受控负载比较二槽与三槽计算池，不预设扩池收益', async ({ browser }, testInfo) => {
+  test.skip(FIRST_SAMPLE_DIAGNOSTIC, '单样本诊断不重复执行完整 20 样本对照。');
   test.setTimeout(300_000);
   const twoSlots = await runConfiguration(browser, testInfo, 1);
   const threeSlots = await runConfiguration(browser, testInfo, 2);
