@@ -25,6 +25,8 @@
 - 协议有界窗口 GREEN：`pnpm exec vitest run tests/runtime/session-protocol.test.ts tests/server/authority-session.test.ts`，2 个文件、18 个测试全部通过。输入默认最多保留 256 条且不超过未来 240 tick；目标 tick 倒序或超限时清空未消费历史并要求完整状态重同步，随后较新合法状态可恢复。事务每流只保留有限回执，淘汰后的旧 sequence 明确返回 `expired`，不会再次执行；输入 ack 始终只在物理步消费后推进且不回退。
 - 计算池控制器 RED：`pnpm exec vitest run tests/client/compute-worker-pool.test.ts` 因浏览器池模块尚不存在而失败。
 - 计算池控制器 GREEN：`pnpm exec vitest run tests/client/compute-worker-pool.test.ts tests/client/compute-task-queue.test.ts`，2 个文件、9 个测试全部通过。池固定一个流体槽并只允许 1/2 个通用槽；通用任务无法占流体槽，两个通用槽可并行。任务数/字节背压、合作式取消、过期结果计数及世界切换时终止并重建 Worker 均已覆盖，计算 Worker 总数硬上限为 3。
+- 计算池故障恢复 RED：新增用例复现 `Worker.onerror` 后复用已死实例，以及 `postMessage()` 同步抛错时任务占用槽且没有失败回执；两项均失败。
+- 计算池故障恢复 GREEN：`pnpm exec vitest run tests/client/compute-worker-pool.test.ts tests/client/compute-task-queue.test.ts`，2 个文件、12 个测试全部通过。坏实例先终止再以指数退避有界重建；Worker 工厂持续失败最多重试三次并报告槽不可用；同步传输失败立即释放槽并向调用方返回任务失败，使流体租约能够被 Authority 归还。
 - 物理审查修订已接入：本地提交 `f042740` 合入全局候选恢复、world-aware 实体分离、身体配置验证、终点接地判定和有限水面跃出；冲突只保留身体注册表导出并同时导出 `validateBodyConfig`。
 - 水面同源与注册校验 RED：`pnpm exec vitest run tests/server/authority-session.test.ts tests/physics/body-registry.test.ts`，2 项按预期失败：物理源水按满格采样而渲染为 7/8；玩家注册表未显式配置水面跳速。
 - 水面同源与注册校验 GREEN：`pnpm exec vitest run tests/server/authority-session.test.ts tests/physics/body-registry.test.ts tests/physics/step-body.test.ts`，3 个文件、30 个测试全部通过。物理流体 AABB 复用 `waterSurfaceHeight()` 并检查上方覆水；身体注册加载时执行 `validateBodyConfig()`，角色显式配置有限水面跃出速度。

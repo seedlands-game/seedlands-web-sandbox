@@ -7,8 +7,13 @@ class FakeWorker implements ComputeWorkerPort {
   onerror: ((event: ErrorEvent) => void) | null = null;
   readonly posts: unknown[] = [];
   terminated = false;
+  throwNextPost = false;
 
   postMessage(message: unknown) {
+    if (this.throwNextPost) {
+      this.throwNextPost = false;
+      throw new Error('post failed');
+    }
     this.posts.push(message);
   }
 
@@ -133,5 +138,99 @@ describe('ComputeWorkerPool', () => {
           createWorker: create,
         }),
     ).toThrow(/generalWorkerCount/);
+  });
+
+  it('Worker error后终止坏实例并有界重建，下一任务不会派给已死槽', () => {
+    const workers: FakeWorker[] = [];
+    const failures = vi.fn();
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 4,
+      maxBytes: 512,
+      createWorker: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      onFailure: failures,
+      setTimer: (callback) => {
+        callback();
+        return 1;
+      },
+    });
+    pool.enqueue(task(1, 'general'));
+
+    workers[1].onerror?.({ message: 'worker crashed' } as ErrorEvent);
+    expect(workers[1].terminated).toBe(true);
+    expect(failures).toHaveBeenCalledWith(expect.objectContaining({ taskId: 1 }), expect.any(Error));
+    expect(workers).toHaveLength(3);
+
+    pool.enqueue(task(2, 'general'));
+    expect(workers[2].posts).toHaveLength(1);
+  });
+
+  it('postMessage同步抛错会回收槽、报告失败并由新Worker继续', () => {
+    const workers: FakeWorker[] = [];
+    const failures = vi.fn();
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 4,
+      maxBytes: 512,
+      createWorker: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      onFailure: failures,
+      setTimer: (callback) => {
+        callback();
+        return 1;
+      },
+    });
+    workers[1].throwNextPost = true;
+
+    expect(pool.enqueue(task(1, 'general')).status).toBe('queued');
+    expect(failures).toHaveBeenCalledWith(expect.objectContaining({ taskId: 1 }), expect.any(Error));
+    expect(workers[1].terminated).toBe(true);
+    pool.enqueue(task(2, 'general'));
+    expect(workers[2].posts).toHaveLength(1);
+  });
+
+  it('Worker工厂持续失败时只按上限重试并报告槽永久不可用', () => {
+    const workers: FakeWorker[] = [];
+    const poolFailures = vi.fn();
+    let createCalls = 0;
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 4,
+      maxBytes: 512,
+      createWorker: () => {
+        createCalls += 1;
+        if (createCalls > 2) throw new Error('worker factory unavailable');
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      onPoolFailure: poolFailures,
+      maxWorkerRestarts: 3,
+      setTimer: (callback) => {
+        callback();
+        return createCalls;
+      },
+    });
+
+    workers[1].onerror?.({ message: 'worker crashed' } as ErrorEvent);
+
+    expect(createCalls).toBe(5);
+    expect(workers[1].terminated).toBe(true);
+    expect(poolFailures).toHaveBeenCalledTimes(1);
+    expect(poolFailures).toHaveBeenCalledWith(
+      'general',
+      expect.objectContaining({ message: 'worker factory unavailable' }),
+    );
+    expect(pool.diagnostics()).toMatchObject({ workerCount: 1, generalWorkerCount: 1, running: 0 });
   });
 });
