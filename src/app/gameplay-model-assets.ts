@@ -210,7 +210,15 @@ export class GameplayModelAssets {
 
   private addBlock(parent: pc.Entity, itemId: string, scale: number): void {
     const material: MaterialName =
-      itemId === 'stone-block' ? 'stone' : itemId === 'sand-block' ? 'sand' : itemId === 'wood-block' ? 'wood' : 'dirt';
+      itemId === 'stone-block'
+        ? 'stone'
+        : itemId === 'sand-block'
+          ? 'sand'
+          : itemId === 'wood-block'
+            ? 'wood'
+            : itemId === 'glowstone-block'
+              ? 'glow'
+              : 'dirt';
     const half = 0.19 * scale;
     this.addBox(parent, 'block-core', material, { x: 0, y: 0, z: 0 }, { x: half * 2, y: half * 2, z: half * 2 });
     const cap: MaterialName = itemId === 'wood-block' ? 'wood-end' : material;

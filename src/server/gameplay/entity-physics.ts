@@ -1,4 +1,5 @@
 import { isSolid } from '../../world/voxel';
+import { collisionBoxesForVoxel } from '../../world/voxel-model';
 import type { EntityStore, GameplayEntity } from './entity-store';
 
 type Position = [number, number, number];
@@ -126,10 +127,18 @@ export class EntityPhysics {
     for (let x = minimumX; x <= maximumX; x += 1)
       for (let z = minimumZ; z <= maximumZ; z += 1)
         for (let y = Math.floor(nextBottom); y <= Math.floor(previousBottom - Number.EPSILON); y += 1) {
-          if (!isSolid(this.options.getVoxel(x, y, z))) continue;
-          const top = y + 1;
-          if (top < nextBottom - Number.EPSILON) continue;
-          if (highest === null || top > highest) highest = top;
+          for (const box of collisionBoxesForVoxel(this.options.getVoxel(x, y, z))) {
+            if (
+              x + box.max[0] <= position[0] - halfWidth ||
+              x + box.min[0] >= position[0] + halfWidth ||
+              z + box.max[2] <= position[2] - halfWidth ||
+              z + box.min[2] >= position[2] + halfWidth
+            )
+              continue;
+            const top = y + box.max[1];
+            if (top < nextBottom - Number.EPSILON) continue;
+            if (highest === null || top > highest) highest = top;
+          }
         }
     return highest;
   }

@@ -11,6 +11,7 @@ import { GameplayEntityPresenter } from './gameplay-entity-presenter';
 import { projectGameplayUi, type GameplayUiProjection } from './ui/gameplay-ui-projector';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
 import type { GameplayPresentationEvent } from '../client/audio/gameplay-audio-events';
+import { VoxelBreakOverlay } from './voxel-break-overlay';
 
 type Options = {
   app: pc.Application;
@@ -32,6 +33,7 @@ export class BrowserGameplay {
   private readonly presenter: GameplayEntityPresenter;
   private readonly viewmodel: FirstPersonViewmodel;
   private readonly outline: VoxelTargetOutline;
+  private readonly breakOverlay: VoxelBreakOverlay;
   private aimTarget: VoxelTarget | null = null;
   private gestureSeconds = 0;
   private inventoryOpen = false;
@@ -43,6 +45,7 @@ export class BrowserGameplay {
     this.presenter = new GameplayEntityPresenter(options.app);
     this.viewmodel = new FirstPersonViewmodel(options.app, options.camera);
     this.outline = new VoxelTargetOutline(options.app);
+    this.breakOverlay = new VoxelBreakOverlay(options.app);
   }
 
   setSuspended(suspended: boolean): void {
@@ -109,6 +112,10 @@ export class BrowserGameplay {
           label: voxelNames[player.breakAction.voxel] ?? '体素',
         }
       : null;
+    this.breakOverlay.update(
+      player.breakAction ? player.breakAction.position : null,
+      player.breakAction ? player.breakAction.elapsedSeconds / player.breakAction.requiredSeconds : null,
+    );
     const previousBreaking = this.previousProjection?.interaction.breaking;
     const breaking =
       !forceBreakProjection &&
@@ -293,8 +300,13 @@ export class BrowserGameplay {
     return this.options.server.queryEntities().filter((entity) => entity.type !== 'player').length;
   }
 
+  get presentationSnapshot() {
+    return { breakingOverlay: this.breakOverlay.snapshot, viewmodel: this.viewmodel.snapshot } as const;
+  }
+
   dispose(): void {
     this.presenter.dispose();
+    this.breakOverlay.destroy();
     this.viewmodel.dispose();
   }
 

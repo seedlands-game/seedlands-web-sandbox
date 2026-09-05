@@ -60,7 +60,28 @@ export const LIGHTING_QUALITY_BUDGETS: Record<QualityLevel, LightingQualityBudge
   },
 };
 
-type VoxelPosition = readonly [number, number, number];
+export type VoxelPosition = readonly [number, number, number];
+
+const samePosition = (left: VoxelPosition, right: VoxelPosition) =>
+  left[0] === right[0] && left[1] === right[1] && left[2] === right[2];
+
+export function reconcileLocalLightSlots(
+  previous: readonly VoxelPosition[],
+  selected: readonly VoxelPosition[],
+  limit: number,
+): [number, number, number][] {
+  const retained = previous.filter((position) => selected.some((candidate) => samePosition(position, candidate)));
+  const additions = selected.filter((position) => !retained.some((candidate) => samePosition(position, candidate)));
+  return [...retained, ...additions].slice(0, limit).map((position) => [position[0], position[1], position[2]]);
+}
+
+export function localShadowNeedsUpdate({
+  previousWorldRevision,
+  worldRevision,
+  slotsChanged,
+}: Readonly<{ previousWorldRevision: number; worldRevision: number; slotsChanged: boolean }>): boolean {
+  return slotsChanged || previousWorldRevision !== worldRevision;
+}
 
 export function selectNearestLanterns(
   origin: VoxelPosition,

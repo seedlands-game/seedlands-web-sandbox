@@ -1,22 +1,15 @@
-import {
-  CHUNK_SIZE,
-  FaceMaterial,
-  Voxel,
-  baseVoxel,
-  chunkKey,
-  faceMaterialFor,
-  isSolid,
-  mod,
-  voxelIndex,
-  type FaceMaterialId,
-} from './voxel';
+import { CHUNK_SIZE, Voxel, baseVoxel, chunkKey, faceMaterialFor, mod, voxelIndex, type FaceMaterialId } from './voxel';
 import { macroAt, type MacroContext } from './macro-world';
 import { sameMeshMaskCell, type MeshMaskCell } from './mesh-mask';
 import { shapeWaterFace, waterStepFace, waterSurfaceHeight } from './water-mesh-height';
+import { modelBoxesForVoxel, voxelOccludesFullFace } from './voxel-model';
+import { renderCategoryForMaterial, type RenderCategory } from './mesh-render-category';
+import { forEachVoxelModelFace } from './voxel-model-mesh';
+
+export type { RenderCategory } from './mesh-render-category';
 
 export type WorldChange = [number, number, number, number];
 export type VertexLayout = 'float32' | 'compact';
-export type RenderCategory = 'opaque' | 'cutout' | 'transparent';
 export const MESH_HALO_SIZE = CHUNK_SIZE + 2;
 export const meshHaloIndex = (x: number, y: number, z: number) =>
   x + 1 + MESH_HALO_SIZE * (z + 1 + MESH_HALO_SIZE * (y + 1));
@@ -193,9 +186,12 @@ export function createProceduralMeshInput({
   };
 }
 
+const isGreedyVoxel = (voxel: number) => voxel !== Voxel.Air && modelBoxesForVoxel(voxel).length === 0;
 const isVisibleFace = (source: number, target: number) =>
-  source !== Voxel.Air &&
-  (source === Voxel.Water ? target === Voxel.Air : target === Voxel.Air || target === Voxel.Water);
+  isGreedyVoxel(source) &&
+  (source === Voxel.Water
+    ? target === Voxel.Air || (target !== Voxel.Water && !voxelOccludesFullFace(target))
+    : target === Voxel.Air || target === Voxel.Water || !voxelOccludesFullFace(target));
 
 function vertexAo(
   block: readonly number[],
@@ -217,10 +213,12 @@ function vertexAo(
     const corner = [...outside];
     corner[u] += su;
     corner[v] += sv;
-    const occupiedU = isSolid(sample(sideU[0], sideU[1], sideU[2]));
-    const occupiedV = isSolid(sample(sideV[0], sideV[1], sideV[2]));
+    const occupiedU = voxelOccludesFullFace(sample(sideU[0], sideU[1], sideU[2]));
+    const occupiedV = voxelOccludesFullFace(sample(sideV[0], sideV[1], sideV[2]));
     if (occupiedU && occupiedV) return 3;
-    return Number(occupiedU) + Number(occupiedV) + Number(isSolid(sample(corner[0], corner[1], corner[2])));
+    return (
+      Number(occupiedU) + Number(occupiedV) + Number(voxelOccludesFullFace(sample(corner[0], corner[1], corner[2])))
+    );
   });
   return values as unknown as readonly [number, number, number, number];
 }
@@ -331,8 +329,7 @@ export function meshChunk({
           const material = faceMaterialFor(id, d, !back);
           mask[m++] = {
             material,
-            renderCategory:
-              material === FaceMaterial.Water ? 'transparent' : material === FaceMaterial.Leaves ? 'cutout' : 'opaque',
+            renderCategory: renderCategoryForMaterial(material),
             back,
             ao: id === Voxel.Water ? [0, 0, 0, 0] : vertexAo(block, d, u, v, back, sample),
             fluidLevel: id === Voxel.Water ? (step?.high ?? (back ? bHeight : aHeight)) : 0,
@@ -386,6 +383,20 @@ export function meshChunk({
         }
     }
   }
+  forEachVoxelModelFace(data, (face) =>
+    add(
+      face.material,
+      face.positions,
+      face.normal,
+      face.dimension,
+      face.width,
+      face.height,
+      face.back,
+      [0, 0, 0, 0],
+      0,
+      0,
+    ),
+  );
   return Object.fromEntries(
     Object.entries(result).map(([material, value]) => {
       const materialId = Number(material) as FaceMaterialId;
@@ -393,12 +404,7 @@ export function meshChunk({
         materialId,
         {
           material: materialId,
-          renderCategory:
-            materialId === FaceMaterial.Water
-              ? 'transparent'
-              : materialId === FaceMaterial.Leaves
-                ? 'cutout'
-                : 'opaque',
+          renderCategory: renderCategoryForMaterial(materialId),
           layout: 'float32',
           positions: new Float32Array(value.p),
           normals: new Float32Array(value.n),
@@ -419,7 +425,7 @@ export const meshDataByteLength = (mesh: MeshData) =>
   mesh.indices.byteLength;
 
 export function batchMeshData(parts: readonly MeshData[]): MeshData[] {
-  const categories: RenderCategory[] = ['opaque', 'cutout', 'transparent'];
+  const categories: RenderCategory[] = ['opaque', 'cutout', 'emissive', 'transparent'];
   return categories.flatMap((renderCategory) => {
     const matching = parts.filter((part) => part.renderCategory === renderCategory);
     if (!matching.length) return [];

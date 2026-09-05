@@ -35,6 +35,26 @@ describe('自然制作灯笼的生产规则', () => {
       true,
     );
   });
+  it('旧数值 9 保持辉光石语义，新灯笼使用数值 10 且不会生成 gameplay entity', async () => {
+    const persistence = new MemoryGamePersistence();
+    const server = new GameServer({ seedText: 'lantern-v10-compatibility', persistence });
+    const player = server.spawnPlayer({ position: [0.5, 42.6, 0.5] });
+    server.editBatch({
+      actorId: 'fixture',
+      edits: [
+        { x: 2, y: 41, z: 0, value: Voxel.Glowstone },
+        { x: 3, y: 41, z: 0, value: Voxel.Lantern },
+      ],
+    });
+    await server.save();
+    const restored = new GameServer({ seedText: 'lantern-v10-compatibility', persistence });
+    await restored.restore();
+    expect(restored.getVoxel(2, 41, 0)).toBe(9);
+    expect(restored.getVoxel(3, 41, 0)).toBe(10);
+    expect(getItemDefinition(ItemIds.Lantern).placesVoxel).toBe(10);
+    expect(restored.queryEntities().some((entity) => entity.position.join(',') === '3,41,0')).toBe(false);
+    expect(restored.getEntity(player.id)?.type).toBe('player');
+  });
   it('死亡不能合成，即使外部赠予了足量材料也不消耗', () => {
     const server = new GameServer({ seedText: 'dead-craft' });
     const player = server.spawnPlayer({ position: [0, 34, 0] });

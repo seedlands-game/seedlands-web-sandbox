@@ -2,7 +2,7 @@ import type { FaceMaterialId } from './voxel';
 
 export type MeshMaskCell = {
   material: FaceMaterialId;
-  renderCategory: 'opaque' | 'cutout' | 'transparent';
+  renderCategory: 'opaque' | 'cutout' | 'emissive' | 'transparent';
   back: boolean;
   ao: readonly [number, number, number, number];
   fluidLevel: number;

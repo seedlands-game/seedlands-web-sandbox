@@ -24,7 +24,7 @@ The sandbox now contains a local single-player survival and exploration MVP. Its
 - A deterministic starter ecology with a passive grazer, a night-only hostile, a scheduled settler, nearby POIs, bounded voxel ground navigation, and inspectable asynchronous actions.
 - Browser persistence for the seed, world clock, player state, gameplay entities, actor needs/actions, POIs, inventory, and materialized chunk snapshots.
 - A complete start/continue/pause/save-and-exit shell, settings, an in-game guide, a macro map, and a retained Svelte 5 HUD with a shared dark-stone, brass, and arcane visual language.
-- Craftable lanterns, bounded artificial lights and shadows, sun shadows with cutout foliage, real scene reflections on water, and quality-dependent color grading.
+- Craftable non-full-cube 3D lantern blocks with compact collision, legacy full-cube glowstone, bounded artificial lights and stable local shadows, sun shadows with cutout foliage, real scene reflections on water, and quality-dependent color grading.
 - Original sparse electronic music, material-dependent effects, spatial creature calls, separate audio buses, and optional local reference-track import.
 - Real 3D first-person hands and tools, textured voxel creature models, movement animation, and damage feedback.
 - Reach-limited block outlines and a top target card; icon-based health and hunger above a compact hotbar.

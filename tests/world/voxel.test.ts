@@ -20,10 +20,12 @@ describe('voxel coordinates and registry', () => {
     expect(isSolid(Voxel.Stone)).toBe(true);
   });
 
-  it('reserves a stable solid lantern voxel and material without changing generation', () => {
-    expect(Voxel.Lantern).toBe(9);
+  it('保留辉光石数值并为灯笼追加稳定数值且不改变生成', () => {
+    expect(Voxel.Glowstone).toBe(9);
+    expect(Voxel.Lantern).toBe(10);
     expect(isSolid(Voxel.Lantern)).toBe(true);
-    expect(faceMaterialFor(Voxel.Lantern, 0, true)).toBe(11);
+    expect(faceMaterialFor(Voxel.Glowstone, 0, true)).toBe(11);
+    expect(faceMaterialFor(Voxel.Lantern, 0, true)).toBe(12);
     const seed = normalizeSeed('lantern-is-edit-only');
     for (let x = -12; x <= 12; x += 3)
       for (let y = 0; y <= 42; y += 3)

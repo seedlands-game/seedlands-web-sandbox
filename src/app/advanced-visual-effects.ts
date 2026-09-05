@@ -3,7 +3,12 @@ import { Voxel } from '../world/voxel';
 import type { World } from './world-runtime';
 import type { VoxelMaterials } from './voxel-materials';
 import type { LightingQualityBudget } from './advanced-lighting-budget';
-import { selectNearestLanterns } from './advanced-lighting-budget';
+import {
+  localShadowNeedsUpdate,
+  reconcileLocalLightSlots,
+  selectNearestLanterns,
+  type VoxelPosition,
+} from './advanced-lighting-budget';
 import { StylizedPostProcessing } from './stylized-post-effect';
 import { reflectionPlaneAboveCamera, waterReflectionSurfaceY } from './water-reflection-plane';
 
@@ -21,6 +26,8 @@ export type VisualEffectsSnapshot = {
   reflectionRenderCount: number;
   waterPlaneY: number | null;
   postProcessing: boolean;
+  shadowUpdateCount: number;
+  shadowStableFrameCount: number;
 };
 
 class PlanarWaterReflection {
@@ -124,6 +131,11 @@ export class AdvancedVisualEffects {
   private scanElapsed = Number.POSITIVE_INFINITY;
   private activeLocalLights = 0;
   private waterPlaneY: number | null = null;
+  private lightSlots: VoxelPosition[] = [];
+  private shadowWorldRevision = -1;
+  private shadowUpdatedThisFrame = false;
+  private shadowUpdateCount = 0;
+  private shadowStableFrameCount = 0;
 
   constructor(
     private readonly app: pc.Application,
@@ -143,7 +155,7 @@ export class AdvancedVisualEffects {
         castShadows: castsShadow,
         shadowResolution: castsShadow ? budget.localShadowResolution : 128,
         shadowType: pc.SHADOW_PCF1_32F,
-        shadowUpdateMode: castsShadow ? pc.SHADOWUPDATE_REALTIME : pc.SHADOWUPDATE_NONE,
+        shadowUpdateMode: pc.SHADOWUPDATE_NONE,
         shadowBias: 0.18,
         normalOffsetBias: 0.08,
       });
@@ -169,6 +181,7 @@ export class AdvancedVisualEffects {
   }
 
   update(dt: number) {
+    this.shadowUpdatedThisFrame = false;
     this.scanElapsed += dt;
     if (this.scanElapsed >= this.budget.scanIntervalSeconds) {
       this.scanElapsed = 0;
@@ -176,6 +189,8 @@ export class AdvancedVisualEffects {
     }
     this.reflection?.setViewport(this.app.graphicsDevice.width, this.app.graphicsDevice.height);
     this.reflection?.update(this.camera, this.waterPlaneY);
+    if (this.shadowUpdatedThisFrame) this.shadowStableFrameCount = 0;
+    else this.shadowStableFrameCount += 1;
   }
 
   get snapshot(): VisualEffectsSnapshot {
@@ -193,6 +208,8 @@ export class AdvancedVisualEffects {
       reflectionRenderCount: this.reflection?.renderCount ?? 0,
       waterPlaneY: this.waterPlaneY,
       postProcessing: this.postProcessing !== null,
+      shadowUpdateCount: this.shadowUpdateCount,
+      shadowStableFrameCount: this.shadowStableFrameCount,
     };
   }
 
@@ -235,12 +252,30 @@ export class AdvancedVisualEffects {
       verticalRadius,
       limit: this.budget.maxLocalLights,
     });
-    this.activeLocalLights = selected.length;
-    this.localLights.forEach((light, index) => {
-      const voxel = selected[index];
-      light.enabled = voxel !== undefined;
-      if (voxel) light.setPosition(voxel[0] + 0.5, voxel[1] + 0.62, voxel[2] + 0.5);
+    const slots = reconcileLocalLightSlots(this.lightSlots, selected, this.budget.maxLocalLights);
+    const slotsChanged =
+      slots.length !== this.lightSlots.length ||
+      slots.some((slot, index) => this.lightSlots[index]?.some((value, axis) => value !== slot[axis]));
+    const worldRevision = this.world.transactionDiagnostics.worldRevision;
+    const updateShadows = localShadowNeedsUpdate({
+      previousWorldRevision: this.shadowWorldRevision,
+      worldRevision,
+      slotsChanged,
     });
+    this.lightSlots = slots;
+    this.shadowWorldRevision = worldRevision;
+    this.activeLocalLights = slots.length;
+    this.localLights.forEach((light, index) => {
+      const voxel = slots[index];
+      light.enabled = voxel !== undefined;
+      if (voxel) light.setPosition(voxel[0] + 0.5, voxel[1] + 0.46, voxel[2] + 0.5);
+      if (light.light?.castShadows)
+        light.light.shadowUpdateMode = updateShadows ? pc.SHADOWUPDATE_THISFRAME : pc.SHADOWUPDATE_NONE;
+    });
+    if (updateShadows && this.activeLocalLights > 0 && this.budget.maxShadowedLocalLights > 0) {
+      this.shadowUpdatedThisFrame = true;
+      this.shadowUpdateCount += 1;
+    }
     this.waterPlaneY = nearestWater?.surfaceY ?? null;
   }
 }

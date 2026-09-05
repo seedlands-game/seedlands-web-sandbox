@@ -455,6 +455,7 @@ export class Game {
       persistence: this.persistence,
       ui: this.uiBridge.metrics(),
       presentedEntityCount: this.gameplayClient?.presentedEntityCount ?? 0,
+      presentation: this.gameplayClient?.presentationSnapshot,
       visualEffects: this.visualEffects,
     });
   }

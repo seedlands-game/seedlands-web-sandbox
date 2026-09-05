@@ -1,4 +1,4 @@
-import { playerOccupies } from './player-occupancy';
+import { playerOccupiesVoxelShape } from './player-occupancy';
 import { EntityPhysics, voxelRayIsClear } from './entity-physics';
 import { Voxel } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
@@ -274,13 +274,14 @@ export class GameplayRuntime {
     const entity = this.entities.get(id)!;
     if (!this.inRange(entity.position, this.voxelCenter(position), 5))
       return { success: false, reason: 'out-of-range' };
-    if (playerOccupies(entity.position, position)) return { success: false, reason: 'player-collision' };
     if (!getVoxelGameplayDefinition(this.callbacks.getVoxel(position)).replaceable)
       return { success: false, reason: 'target-occupied' };
     const selected = player.inventory.slot(player.selectedSlot);
     if (!selected) return { success: false, reason: 'no-selected-item' };
     const definition = getItemDefinition(selected.itemId);
     if (definition.placesVoxel === undefined) return { success: false, reason: 'item-not-placeable' };
+    if (playerOccupiesVoxelShape(entity.position, position, definition.placesVoxel))
+      return { success: false, reason: 'player-collision' };
     const commit = this.callbacks.editVoxel(id, position, definition.placesVoxel);
     if (!commit.committed) return { success: false, reason: 'world-not-changed' };
     player.inventory.removeFromSlot(player.selectedSlot, 1);

@@ -60,6 +60,7 @@ export const createPlayCanvasChunkAdapter = (
       resource.entity.addChild(categoryEntity);
     }
     const instance = new pc.MeshInstance(mesh, resolveMaterial(part), categoryEntity);
+    if (part.renderCategory === 'emissive') instance.castShadow = false;
     if (part.renderCategory === 'transparent') {
       instance.drawOrder = 1000;
       instance.castShadow = false;

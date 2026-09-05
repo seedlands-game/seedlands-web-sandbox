@@ -70,6 +70,10 @@ type SnapshotContext = {
   persistence: BrowserChunkPersistence | null;
   ui: UiMetrics;
   presentedEntityCount: number;
+  presentation?: {
+    breakingOverlay: { position: [number, number, number]; stage: number } | null;
+    viewmodel: { isolatedLayer: boolean };
+  };
   visualEffects: AdvancedVisualEffects | null;
 };
 
@@ -153,6 +157,8 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       }),
       presentedEntityCount: context.presentedEntityCount,
     },
+    breakingOverlay: context.presentation?.breakingOverlay ?? null,
+    viewmodel: context.presentation?.viewmodel ?? { isolatedLayer: false },
     visualEffects: context.visualEffects?.snapshot ?? {
       activeLocalLights: 0,
       shadowedLocalLights: 0,
@@ -167,6 +173,8 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       reflectionRenderCount: 0,
       waterPlaneY: null,
       postProcessing: false,
+      shadowUpdateCount: 0,
+      shadowStableFrameCount: 0,
     },
   };
 }
