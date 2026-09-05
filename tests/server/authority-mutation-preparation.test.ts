@@ -123,4 +123,34 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
     await expect(executing).resolves.toMatchObject({ success: true });
     expect(runtime.server.peekLoadedVoxel(2_080, 32, 0)?.voxel).toBe(Voxel.Wood);
   });
+
+  it('拒绝的错配生成结果不能借已加载坐标释放另一个key的待提交事务', async () => {
+    const requests: string[] = [];
+    const runtime = await AuthorityRuntime.create({
+      epoch: 'mutation-preparation:4',
+      seedText: 'mutation-preparation-mismatch',
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+      onUnknownChunk: (key) => requests.push(key),
+    });
+    expect(runtime.acceptGeneratedChunk(canonical(runtime, 0, 1, 0))).toBe(true);
+    const editing = runtime.editWorld('player-edit', [{ x: 2_048, y: 32, z: 0, value: Voxel.Stone }]);
+    await vi.waitFor(() => expect(requests).toEqual(['64,1,0']));
+
+    expect(
+      runtime.acceptGeneratedChunk({
+        ...canonical(runtime, 0, 1, 0),
+        key: '64,1,0',
+      }),
+    ).toBe(false);
+    let settled = false;
+    void editing.then(() => (settled = true));
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(runtime.server.peekLoadedVoxel(2_048, 32, 0)).toBeNull();
+    expect(settled).toBe(false);
+
+    expect(runtime.acceptGeneratedChunk(canonical(runtime, 64, 1, 0))).toBe(true);
+    await expect(editing).resolves.toMatchObject({ committed: true });
+  });
 });

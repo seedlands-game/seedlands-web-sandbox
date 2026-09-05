@@ -18,7 +18,7 @@ import type { CommandSource, ServerCommand } from '../commands/command-contract'
 import { AuthoritySession, type AuthoritySnapshot, type LogicIntent } from './authority-session';
 import { buildLogicObservation } from './logic-observation-builder';
 import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch, type LogicObservation } from '../logic/logic-protocol';
-import { CHUNK_SIZE } from '../../world/voxel';
+import { CHUNK_SIZE, chunkKey } from '../../world/voxel';
 import type * as R from './authority-runtime-types';
 import { createAuthorityAdvanceCommandPort } from './authority-command-advance';
 import type { AuthorityTransactionIdentity, AuthorityTransactionReceipt } from './authority-runtime-types';
@@ -343,7 +343,8 @@ export class AuthorityRuntime {
 
   acceptGeneratedChunk(result: WorkerCanonicalResult): boolean {
     const accepted = this.server.acceptWorkerCanonical(result);
-    if (accepted || this.server.peekLoadedVoxel(result.cx * CHUNK_SIZE, result.cy * CHUNK_SIZE, result.cz * CHUNK_SIZE))
+    const exactKey = result.key === chunkKey(result.cx, result.cy, result.cz);
+    if (accepted || (exactKey && this.server.readCollisionBaseline(result.key, 0).status === 'available'))
       this.mutationPreparation.acceptAvailable(result.key);
     return accepted;
   }
