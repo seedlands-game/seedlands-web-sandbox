@@ -55,6 +55,7 @@ export class GlobalAudio {
       sharedContext: this.player?.sharedContext ?? false,
       referenceName: this.player?.referenceName ?? '',
       cue: this.player?.cue ?? '',
+      underwaterFilterHz: this.mixer?.underwaterFilter?.frequency.value ?? 18_000,
     };
   }
 
@@ -111,6 +112,7 @@ export class GlobalAudio {
       position?: readonly [number, number, number];
       priority?: number;
       target?: string;
+      scope?: 'world' | 'ui';
     } = {},
   ) {
     const mixer = this.mixer;
@@ -143,7 +145,7 @@ export class GlobalAudio {
           volume: 0.55,
         })
       : new pc.SoundInstance(mixer.manager, sound, { volume: 0.4 });
-    voice.setExternalNodes(mixer.sfx, mixer.output);
+    voice.setExternalNodes(options.scope === 'ui' || key === 'hover' ? mixer.uiSfx : mixer.sfx, mixer.output);
     voice.once('end', () => this.retire(permit.id));
     this.voices.set(permit.id, voice);
     voice.play();

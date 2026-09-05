@@ -1,44 +1,15 @@
 import * as pc from 'playcanvas';
 import { Voxel, isSolid } from '../world/voxel';
-import type { PerformanceTelemetry } from '../client/performance-telemetry';
-import type { WorldEnvironment } from './world-environment';
-import type { World } from './world-runtime';
 import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../client/voxel-target';
+import { DRY_WATER_IMMERSION, sampleWaterImmersion, type WaterImmersionSnapshot } from '../world/water-immersion';
+import { resolveWaterMovement } from './water-movement-policy';
+import type { PlayerControllerOptions } from './player-controller-types';
 
 const PLAYER_HALF_WIDTH = 0.32;
 export const PLAYER_FEET_OFFSET = 1.6;
 const PLAYER_HEAD_OFFSET = 0.2;
 const COLLISION_EPSILON = 0.001;
-
-type PlayerControllerOptions = {
-  camera: pc.Entity;
-  canvas: HTMLCanvasElement;
-  telemetry: PerformanceTelemetry;
-  getWorld: () => World | null;
-  getEnvironment: () => WorldEnvironment | null;
-  isPaused?: () => boolean;
-  onToggleMap: () => void;
-  onToggleDebug: () => void;
-  onToggleCommandShell: () => void;
-  onToggleInventory: () => void;
-  onSelectHotbarSlot: (slot: number) => void;
-  onAttackTarget: (
-    origin: [number, number, number],
-    direction: [number, number, number],
-    maxDistance: number,
-  ) => boolean;
-  onBeginBreak: (position: [number, number, number]) => void;
-  onCancelBreak: () => void;
-  onPlace: (position: [number, number, number]) => void;
-  isUiBlockingInput: () => boolean;
-  onUseHeldItem: () => boolean;
-  onCloseUi: () => void;
-  onFeedback: (message: string, tone: 'info' | 'success' | 'error') => void;
-  onQueueSave: () => void;
-  onFlushSave: () => void;
-  onAimTarget?: (target: VoxelTarget | null) => void;
-};
 
 export class PlayerController {
   readonly velocity = new pc.Vec3();
@@ -53,6 +24,7 @@ export class PlayerController {
   private attackCooldownSeconds = 0;
   private attackBlocking = false;
   private publishedAimTarget: VoxelTarget | null = null;
+  private immersion: WaterImmersionSnapshot = DRY_WATER_IMMERSION;
 
   constructor(private readonly options: PlayerControllerOptions) {}
 
@@ -62,6 +34,10 @@ export class PlayerController {
 
   get interactionAttempts() {
     return this.attempts;
+  }
+
+  get waterImmersion(): WaterImmersionSnapshot {
+    return { ...this.immersion };
   }
 
   get position() {
@@ -193,12 +169,22 @@ export class PlayerController {
   update(dt: number) {
     const world = this.options.getWorld();
     if (!world) {
+      this.immersion = DRY_WATER_IMMERSION;
       this.stopMining();
       this.publishAimTarget(null);
       return;
     }
     const camera = this.options.camera;
     camera.setEulerAngles(this.pitch, this.yaw, 0);
+    const cameraPosition = camera.getPosition();
+    this.immersion = sampleWaterImmersion({
+      position: [cameraPosition.x, cameraPosition.y, cameraPosition.z],
+      feetOffset: PLAYER_FEET_OFFSET,
+      headOffset: PLAYER_HEAD_OFFSET,
+      previousCameraSubmerged: this.immersion.cameraSubmerged,
+      getVoxel: (x, y, z) => world.getVoxel(x, y, z),
+      getFluidLevel: (x, y, z) => world.server.getFluidCell(x, y, z)?.level ?? null,
+    });
     const span = this.options.telemetry.beginSpan('player', 'PlayerMovement');
     if (!this.spectator) {
       const forward = new pc.Vec3().copy(camera.forward);
@@ -212,11 +198,13 @@ export class PlayerController {
       if (this.keys.has('KeyS')) wish.sub(forward);
       if (this.keys.has('KeyD')) wish.add(right);
       if (this.keys.has('KeyA')) wish.sub(right);
-      if (wish.lengthSq() > 0) wish.normalize().mulScalar(5.5);
-      this.velocity.x += (wish.x - this.velocity.x) * Math.min(1, dt * 12);
-      this.velocity.z += (wish.z - this.velocity.z) * Math.min(1, dt * 12);
-      this.velocity.y -= 20 * dt;
-      if (this.keys.has('Space') && this.grounded) {
+      const verticalInput: -1 | 0 | 1 = this.keys.has('Space') ? 1 : this.keys.has('ShiftLeft') ? -1 : 0;
+      const movement = resolveWaterMovement(this.immersion, this.velocity.y, dt, verticalInput);
+      if (wish.lengthSq() > 0) wish.normalize().mulScalar(movement.horizontalSpeed);
+      this.velocity.x += (wish.x - this.velocity.x) * Math.min(1, dt * movement.horizontalResponse);
+      this.velocity.z += (wish.z - this.velocity.z) * Math.min(1, dt * movement.horizontalResponse);
+      this.velocity.y = movement.verticalVelocity;
+      if (this.keys.has('Space') && this.grounded && movement.jumpAllowed) {
         this.velocity.y = 7.5;
         this.grounded = false;
       }
@@ -369,10 +357,26 @@ export class PlayerController {
       }
     } else {
       const nextOverlap = this.collisionOverlap(position);
-      if (nextOverlap > 0 && nextOverlap >= previousOverlap)
-        (position as unknown as Record<string, number>)[axis] -= amount;
+      if (nextOverlap > 0 && nextOverlap >= previousOverlap) {
+        const climbedOut = this.tryWaterExitStep(position);
+        if (!climbedOut) (position as unknown as Record<string, number>)[axis] -= amount;
+      }
     }
     this.options.camera.setPosition(position);
+  }
+
+  private tryWaterExitStep(position: pc.Vec3) {
+    if (!this.immersion.wading || !this.keys.has('Space')) return false;
+    const originalY = position.y;
+    for (let lift = 0.1; lift <= 1.3; lift += 0.1) {
+      position.y = originalY + lift;
+      if (this.collisionOverlap(position) === 0) {
+        this.velocity.y = Math.max(0, this.velocity.y);
+        return true;
+      }
+    }
+    position.y = originalY;
+    return false;
   }
 
   private collides(position: pc.Vec3) {

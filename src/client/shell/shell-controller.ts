@@ -1,4 +1,5 @@
 export type ShellQuality = 'low' | 'medium' | 'high';
+import type { WorldOpenMode } from '../world-version-policy';
 export type ApplicationShellState = Readonly<{
   phase: 'menu' | 'loading' | 'playing' | 'paused' | 'saving';
   seed: string;
@@ -6,7 +7,7 @@ export type ApplicationShellState = Readonly<{
   error: string;
 }>;
 type GamePort = {
-  start: (seed: string, quality: ShellQuality) => Promise<void>;
+  start: (seed: string, quality: ShellQuality, openMode: WorldOpenMode) => Promise<void>;
   leave: () => Promise<void>;
   pause: (paused: boolean) => void;
 };
@@ -31,11 +32,11 @@ export class ShellController {
     };
   }
 
-  async start(seed: string, quality: ShellQuality) {
+  async start(seed: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {
     if (this.value.phase !== 'menu') return;
     this.publish({ phase: 'loading', seed, quality, error: '' });
     try {
-      await this.game.start(seed, quality);
+      await this.game.start(seed, quality, openMode);
       this.publish({ phase: 'playing' });
     } catch (error) {
       this.publish({ phase: 'menu', error: this.message(error, '世界未能启动，请重试。') });

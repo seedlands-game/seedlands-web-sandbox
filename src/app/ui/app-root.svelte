@@ -67,7 +67,11 @@
   });
 </script>
 
-<StartScreen {shell} {application} onstart={(seed, quality) => void actions.startWorld(seed, quality)} />
+<StartScreen
+  {shell}
+  {application}
+  onstart={(seed, quality, openMode) => void actions.startWorld(seed, quality, openMode)}
+/>
 <ShellOverlays {application} />
 
 <section id="hud" hidden={!hud.visible} aria-label="游戏 HUD">

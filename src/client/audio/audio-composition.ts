@@ -38,33 +38,44 @@ const hashKey = (key: string) => {
 export function synthesizeSfx(key: SfxKey, sampleRate: number, seed: number) {
   const random = audioRandom(seed ^ hashKey(key));
   const creature = key === 'creature';
+  const waterMovement = key.startsWith('water-');
   const chime = ['pickup', 'confirm', 'hover', 'discovery'].includes(key);
   const damage = key === 'damage' || key === 'attack';
   const material = key.split('-')[1] ?? 'grass';
-  const pitch = creature
-    ? 220
-    : chime
-      ? key === 'hover'
-        ? 620
-        : 880
-      : damage
-        ? 95
-        : material === 'stone'
-          ? 460
-          : material === 'wood'
-            ? 170
-            : 110;
-  const duration = creature
-    ? 0.7
-    : key === 'discovery'
-      ? 1.6
+  const pitch = waterMovement
+    ? key === 'water-enter'
+      ? 92
+      : key === 'water-exit'
+        ? 128
+        : 74
+    : creature
+      ? 220
       : chime
-        ? 0.38
-        : key.startsWith('break')
-          ? 0.28
-          : damage
-            ? 0.26
-            : 0.16;
+        ? key === 'hover'
+          ? 620
+          : 880
+        : damage
+          ? 95
+          : material === 'stone'
+            ? 460
+            : material === 'wood'
+              ? 170
+              : 110;
+  const duration = waterMovement
+    ? key === 'water-enter' || key === 'water-exit'
+      ? 0.44
+      : 0.28
+    : creature
+      ? 0.7
+      : key === 'discovery'
+        ? 1.6
+        : chime
+          ? 0.38
+          : key.startsWith('break')
+            ? 0.28
+            : damage
+              ? 0.26
+              : 0.16;
   const count = Math.max(2, Math.ceil(sampleRate * duration));
   const samples = new Float32Array(count);
   let noiseState = 0;
@@ -82,8 +93,10 @@ export function synthesizeSfx(key: SfxKey, sampleRate: number, seed: number) {
     const callTone =
       Math.sin(2 * Math.PI * pitch * time + 1.3 * Math.sin(2 * Math.PI * 4 * time)) * 0.45 +
       Math.sin(Math.PI * pitch * time) * 0.2;
+    const waterTone = Math.sin(2 * Math.PI * (pitch + 28 * Math.sin(time * 11)) * time) * 0.08;
     samples[i] =
-      ((creature ? callTone : tone) + noiseState * (creature ? 0.04 : chime ? 0.008 : 0.65)) *
+      ((waterMovement ? waterTone : creature ? callTone : tone) +
+        noiseState * (waterMovement ? 0.82 : creature ? 0.04 : chime ? 0.008 : 0.65)) *
       envelope *
       (damage ? 0.7 : 0.48);
   }

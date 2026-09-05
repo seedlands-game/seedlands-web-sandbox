@@ -1,4 +1,5 @@
 import type { BrowserChunkPersistence, ChunkPersistenceCorpusSummary } from '../client/browser-chunk-persistence';
+import type * as pc from 'playcanvas';
 import type { ChunkPersistenceLoadScenario } from '../client/chunk-persistence-benchmark';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { FillCommand } from '../server/commands/fill-command';
@@ -12,8 +13,10 @@ import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
 import type { UiMetrics } from './ui/ui-contracts';
 import type { AdvancedVisualEffects } from './advanced-visual-effects';
+import type { BrowserGameplay } from './browser-gameplay';
+import type { UnderwaterVisualEffects } from './underwater-visual-effects';
 
-type HarnessApi = {
+export type HarnessApi = {
   snapshot: () => HarnessSnapshot;
   lifecycleSnapshot: () => LifecycleSnapshot;
   restartWorld: (seed: string) => Promise<void>;
@@ -38,8 +41,30 @@ type HarnessApi = {
   setVoxelAt: (x: number, y: number, z: number, voxel: number) => void;
   getVoxelAt?: (x: number, y: number, z: number) => number | null;
   advanceFluid?: (seconds: number) => void;
+  beginFluidFeedbackSample?: () => void;
   getFluidCell?: (x: number, y: number, z: number) => { level: number; source: boolean } | null;
   sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
+  flushSave: () => Promise<void>;
+};
+
+type RuntimeHarnessBindings = {
+  lifecycleSnapshot: () => LifecycleSnapshot;
+  restartWorld: (seed: string) => Promise<void>;
+  world: () => World | null;
+  controller: () => PlayerController | null;
+  camera: () => pc.Entity | null;
+  environment: () => WorldEnvironment | null;
+  gameplay: () => BrowserGameplay | null;
+  frameMs: () => number;
+  qualityLevel: () => QualityLevel;
+  serverPlayerId: () => string | null;
+  persistence: () => BrowserChunkPersistence | null;
+  ui: () => UiMetrics;
+  visualEffects: () => AdvancedVisualEffects | null;
+  underwaterVisual: () => UnderwaterVisualEffects | null;
+  executeGameplayCommand: (command: ServerCommand) => Promise<CommandResult>;
+  setWorldTime: (hour: number) => void;
+  queueSave: () => void;
   flushSave: () => Promise<void>;
 };
 
@@ -71,6 +96,7 @@ type SnapshotContext = {
   ui: UiMetrics;
   presentedEntityCount: number;
   visualEffects: AdvancedVisualEffects | null;
+  underwaterVisual: UnderwaterVisualEffects | null;
 };
 
 const unavailablePerformance = (): HarnessSnapshot['performance'] => ({
@@ -118,6 +144,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     triangles: telemetry?.triangles ?? 0,
     drawCalls: telemetry?.drawCalls ?? 0,
     runtime: 'integrated-server',
+    generatorVersion: context.world?.server.generatorVersion ?? 0,
     renderPipeline: FINAL_RENDER_PIPELINE,
     serverRevision: context.world?.server.getChunk(0, 0, 0).revision ?? 0,
     voxelAtOrigin: context.world?.getVoxel(0, 0, 0) ?? Voxel.Air,
@@ -126,6 +153,15 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       : [0, 0, 0],
     serverWorldTime: context.world?.server.worldTime ?? 0,
     performance: context.world?.performanceSummary ?? unavailablePerformance(),
+    fluidFeedback: context.world?.fluidFeedbackSummary ?? {
+      count: 0,
+      pending: false,
+      p50Ms: 0,
+      p95Ms: 0,
+      p99Ms: 0,
+      maxMs: 0,
+      samples: [],
+    },
     ui: context.ui,
     gameplay: {
       ...(context.world?.server.gameplayMetrics() ?? {
@@ -168,6 +204,75 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       waterPlaneY: null,
       postProcessing: false,
     },
+    water: {
+      ...(context.controller?.waterImmersion ?? {
+        bodyFraction: 0,
+        wading: false,
+        swimming: false,
+        cameraSubmerged: false,
+        cameraDepth: Number.NEGATIVE_INFINITY,
+        waterSurfaceY: null,
+      }),
+      underwaterBlend: context.underwaterVisual?.amount ?? 0,
+    },
+  };
+}
+
+export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): HarnessApi {
+  return {
+    snapshot: () =>
+      createHarnessSnapshot({
+        world: bindings.world(),
+        environment: bindings.environment(),
+        controller: bindings.controller(),
+        frameMs: bindings.frameMs(),
+        qualityLevel: bindings.qualityLevel(),
+        serverPlayerId: bindings.serverPlayerId(),
+        persistence: bindings.persistence(),
+        ui: bindings.ui(),
+        presentedEntityCount: bindings.gameplay()?.presentedEntityCount ?? 0,
+        visualEffects: bindings.visualEffects(),
+        underwaterVisual: bindings.underwaterVisual(),
+      }),
+    lifecycleSnapshot: bindings.lifecycleSnapshot,
+    restartWorld: bindings.restartWorld,
+    moveTo: (x, z) => bindings.controller()?.moveHarnessPlayer(x, z),
+    burstEdits: () => bindings.controller()?.burstEdits(),
+    fillWorld: (command) => bindings.world()?.fill('harness-fill', command),
+    removeVoxelAt: (x, y, z) => bindings.controller()?.removeVoxel(x, y, z),
+    movePlayerTo: (x, y, z) => bindings.controller()?.movePlayerTo(x, y, z),
+    prepareFlatMovement: () => bindings.controller()?.prepareFlatMovement(),
+    prepareCenterExcavation: () => bindings.controller()?.prepareCenterExcavation(),
+    prepareStepDown: () => bindings.controller()?.prepareStepDown(),
+    setWorldTime: bindings.setWorldTime,
+    setTimePaused: (paused) => bindings.environment()?.setPaused(paused),
+    setTimeSpeed: (speed) => {
+      const environment = bindings.environment();
+      if (environment) environment.speed = Math.max(0, speed);
+    },
+    setView: (yaw, pitch) => bindings.controller()?.setView(yaw, pitch),
+    setSpectatorPosition: (x, y, z) => bindings.controller()?.setSpectatorPosition(x, y, z),
+    beginPerformanceScenario: (name) => bindings.world()?.beginScenario(name) ?? '',
+    setStreamingVariant: (variant) => bindings.world()?.setStreamingVariant(variant),
+    exportPerformanceTrace: () => bindings.world()?.exportTrace() ?? { traceEvents: [] },
+    executeGameplayCommand: bindings.executeGameplayCommand,
+    advanceFluid: (seconds) => bindings.world()?.advanceFluid(seconds),
+    beginFluidFeedbackSample: () => bindings.world()?.beginFluidFeedbackSample(),
+    getFluidCell: (x, y, z) => bindings.world()?.server.getFluidCell(x, y, z) ?? null,
+    getVoxelAt: (x, y, z) => bindings.world()?.getVoxel(x, y, z) ?? null,
+    sunSnapshot: () => {
+      const environment = bindings.environment();
+      const camera = bindings.camera();
+      return environment && camera
+        ? environment.sunSnapshot(camera)
+        : { direction: [0, 0, 0], screen: null, facing: false };
+    },
+    advanceGameplay: (seconds) => bindings.gameplay()?.advance(seconds),
+    setVoxelAt: (x, y, z, voxel) => {
+      bindings.world()?.edit(x, y, z, voxel);
+      bindings.queueSave();
+    },
+    flushSave: bindings.flushSave,
   };
 }
 

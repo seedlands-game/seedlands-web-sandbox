@@ -7,10 +7,8 @@ import {
   mod,
   normalizeSeed,
   remeshChunkKeysForEdit,
-  terrainHeight,
   voxelIndex,
   Voxel,
-  isSolid,
 } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
@@ -25,6 +23,7 @@ import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
 import { hasAdjacentWater, legacyFluid } from './fluid/fluid-cell-state';
+import { findDryStarterSurface } from './starter-surface';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -64,7 +63,7 @@ const SINGLE_EDIT_METRICS = Array.from({ length: 9 }, (_, meshInvalidationCount)
 
 export class GameServer extends GameServerGameplayFacade {
   readonly seed: number;
-  readonly generatorVersion = GENERATOR_VERSION;
+  readonly generatorVersion: number;
   private readonly chunks = new Map<string, ServerChunk>();
   private clock = 0;
   private accessSequence = 0;
@@ -81,6 +80,9 @@ export class GameServer extends GameServerGameplayFacade {
   constructor(readonly options: GameServerOptions) {
     super(options.persistence);
     this.seed = normalizeSeed(options.seedText);
+    this.generatorVersion = options.generatorVersion ?? GENERATOR_VERSION;
+    if (this.generatorVersion !== 2 && this.generatorVersion !== GENERATOR_VERSION)
+      throw new Error(`Unsupported generator version ${this.generatorVersion}.`);
     this.persistence = options.persistence;
     this.fluidChunks = new FluidChunkAccess(this.chunks, (cx, cy, cz) => this.getChunk(cx, cy, cz));
     this.fluidRuntime = new VoxelFluidRuntime({
@@ -146,7 +148,7 @@ export class GameServer extends GameServerGameplayFacade {
           cx,
           cy,
           cz,
-          voxels: makeChunk(this.seed, cx, cy, cz, []),
+          voxels: makeChunk(this.seed, cx, cy, cz, [], this.generatorVersion),
           revision: 0,
           persistedRevision: 0,
           dirty: false,
@@ -161,6 +163,11 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   async ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
+    let alreadyResident = true;
+    for (let y = Math.max(0, cy - 1); y <= Math.min(1, cy + 1); y += 1)
+      for (let z = cz - 1; z <= cz + 1; z += 1)
+        for (let x = cx - 1; x <= cx + 1; x += 1) if (!this.chunks.has(chunkKey(x, y, z))) alreadyResident = false;
+    if (alreadyResident) return;
     await this.persistence?.ensureNeighborhood?.(cx, cy, cz);
   }
 
@@ -189,6 +196,7 @@ export class GameServer extends GameServerGameplayFacade {
         }
     const derived = createProceduralMeshInput({
       seed: this.seed,
+      generatorVersion: this.generatorVersion,
       cx,
       cy,
       cz,
@@ -461,23 +469,7 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   private findSurfaceAir(x: number, z: number, _nearY: number): [number, number, number] {
-    for (let radius = 0; radius <= 6; radius += 1)
-      for (let dx = -radius; dx <= radius; dx += 1)
-        for (let dz = -radius; dz <= radius; dz += 1) {
-          if (Math.max(Math.abs(dx), Math.abs(dz)) !== radius) continue;
-          const candidateX = x + dx;
-          const candidateZ = z + dz;
-          const y = terrainHeight(this.seed, candidateX, candidateZ) + 1;
-          if (
-            isSolid(this.getVoxel(candidateX, y - 1, candidateZ)) &&
-            this.getVoxel(candidateX, y, candidateZ) === Voxel.Air &&
-            this.getVoxel(candidateX, y + 1, candidateZ) === Voxel.Air &&
-            this.getVoxel(candidateX, y + 2, candidateZ) === Voxel.Air &&
-            this.getVoxel(candidateX, y + 3, candidateZ) === Voxel.Air
-          )
-            return [candidateX + 0.5, y, candidateZ + 0.5];
-        }
-    throw new Error(`No dry starter surface found near ${x},${z}.`);
+    return findDryStarterSurface(this.seed, this.generatorVersion, x, z, (...position) => this.getVoxel(...position));
   }
 
   private isValidSnapshot(snapshot: ChunkSnapshot, key: string, cx: number, cy: number, cz: number): boolean {

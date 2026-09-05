@@ -1,5 +1,6 @@
 import {
   CHUNK_SIZE,
+  GENERATOR_VERSION,
   FaceMaterial,
   Voxel,
   baseVoxel,
@@ -13,8 +14,10 @@ import {
 import { macroAt, type MacroContext } from './macro-world';
 import { sameMeshMaskCell, type MeshMaskCell } from './mesh-mask';
 import { shapeWaterFace, waterStepFace, waterSurfaceHeight } from './water-mesh-height';
+import { makeChunk, type WorldChange } from './chunk-generation';
 
-export type WorldChange = [number, number, number, number];
+export { makeChunk } from './chunk-generation';
+export type { WorldChange } from './chunk-generation';
 export type VertexLayout = 'float32' | 'compact';
 export type RenderCategory = 'opaque' | 'cutout' | 'transparent';
 export const MESH_HALO_SIZE = CHUNK_SIZE + 2;
@@ -42,6 +45,7 @@ export type MeshOptions = {
   fluid?: Uint8Array;
   fluidHalo?: Uint8Array;
   outside?: (x: number, y: number, z: number) => number;
+  generatorVersion?: number;
 };
 export type MeshAuthorityOverlay = {
   cx: number;
@@ -58,6 +62,7 @@ export type ProceduralMeshInput = {
   canonical?: Uint16Array;
   overlays?: readonly MeshAuthorityOverlay[];
   fluid?: Uint8Array;
+  generatorVersion?: number;
 };
 export type ProceduralMeshInputResult = {
   canonical: Uint16Array;
@@ -83,44 +88,13 @@ const BACK_CORNERS = [
   [1, -1],
 ] as const;
 
-export function makeChunk(seed: number, cx: number, cy: number, cz: number, changes: WorldChange[]): Uint16Array {
-  const data = new Uint16Array(CHUNK_SIZE ** 3);
-  const ox = cx * CHUNK_SIZE,
-    oy = cy * CHUNK_SIZE,
-    oz = cz * CHUNK_SIZE;
-  const macroCache = new Map<string, MacroContext>();
-  const queryMacro = (x: number, z: number) => {
-    const key = chunkKey(x, 0, z);
-    let context = macroCache.get(key);
-    if (!context) {
-      context = macroAt(seed, x, z);
-      macroCache.set(key, context);
-    }
-    return context;
-  };
-  for (let z = 0; z < CHUNK_SIZE; z += 1)
-    for (let x = 0; x < CHUNK_SIZE; x += 1) {
-      const context = queryMacro(ox + x, oz + z);
-      for (let y = 0; y < CHUNK_SIZE; y += 1)
-        data[voxelIndex(x, y, z)] = baseVoxel(seed, ox + x, oy + y, oz + z, context, queryMacro);
-    }
-  for (const [x, y, z, value] of changes) {
-    if (Math.floor(x / CHUNK_SIZE) === cx && Math.floor(y / CHUNK_SIZE) === cy && Math.floor(z / CHUNK_SIZE) === cz) {
-      const lx = ((x % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE,
-        ly = ((y % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE,
-        lz = ((z % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
-      data[voxelIndex(lx, ly, lz)] = value;
-    }
-  }
-  return data;
-}
-
 export function createProceduralMeshInput({
   seed,
   cx,
   cy,
   cz,
-  canonical = makeChunk(seed, cx, cy, cz, []),
+  generatorVersion = GENERATOR_VERSION,
+  canonical = makeChunk(seed, cx, cy, cz, [], generatorVersion),
   overlays = [],
   fluid,
 }: ProceduralMeshInput): ProceduralMeshInputResult {
@@ -136,7 +110,7 @@ export function createProceduralMeshInput({
     const key = `${x},${z}`;
     let context = macroContexts.get(key);
     if (!context) {
-      context = macroAt(seed, x, z);
+      context = macroAt(seed, x, z, generatorVersion);
       macroContexts.set(key, context);
     }
     return context;
@@ -236,6 +210,7 @@ export function meshChunk({
   halo,
   fluid,
   fluidHalo,
+  generatorVersion = GENERATOR_VERSION,
 }: MeshOptions): Record<number, MeshData> {
   const result: Record<number, Quad> = {};
   const overrides = new Map(changes.map(([x, y, z, value]) => [`${x},${y},${z}`, value]));
@@ -244,7 +219,7 @@ export function meshChunk({
     const key = chunkKey(x, 0, z);
     let context = macroCache.get(key);
     if (!context) {
-      context = macroAt(seed, x, z);
+      context = macroAt(seed, x, z, generatorVersion);
       macroCache.set(key, context);
     }
     return context;

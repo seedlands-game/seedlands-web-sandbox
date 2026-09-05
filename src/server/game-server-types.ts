@@ -58,7 +58,11 @@ export type WorldCommitResult = {
 export type ServerEntity = GameplayEntity;
 export type EntityCreate = EntitySpawn;
 export type { EntityUpdate };
-export type GameServerOptions = { seedText: string; persistence?: ChunkPersistence & Partial<GameplayPersistence> };
+export type GameServerOptions = {
+  seedText: string;
+  generatorVersion?: number;
+  persistence?: ChunkPersistence & Partial<GameplayPersistence>;
+};
 export type DerivedMeshSnapshot = {
   key: string;
   cx: number;

@@ -80,11 +80,12 @@ self.onmessage = (event: MessageEvent<Task>) => {
   const generationStartedAt = performance.now();
   const canonical = task.canonical
     ? new Uint16Array(task.canonical)
-    : makeChunk(task.seed, task.cx, task.cy, task.cz, []);
+    : makeChunk(task.seed, task.cx, task.cy, task.cz, [], task.generatorVersion);
   const workerGenerationMs = performance.now() - generationStartedAt;
   const haloStartedAt = performance.now();
   const generated = createProceduralMeshInput({
     seed: task.seed,
+    generatorVersion: task.generatorVersion,
     cx: task.cx,
     cy: task.cy,
     cz: task.cz,

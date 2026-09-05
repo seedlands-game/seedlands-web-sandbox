@@ -3,6 +3,7 @@ import type { GlobalAudio } from './audio/global-audio';
 import type { Game } from './game';
 import type { UiBridge } from './ui/ui-bridge';
 import { isUserPointerUnlock } from './pointer-lock';
+import type { WorldOpenMode } from '../client/world-version-policy';
 
 const QUALITY_KEY = 'seedlands.quality.v1';
 
@@ -24,12 +25,12 @@ export class ApplicationShell {
       /* 使用默认。 */
     }
     this.controller = new ShellController({
-      start: async (seed, quality) => {
+      start: async (seed, quality, openMode) => {
         await audio.unlock();
         const restore = game.loadSavedSession();
         bridge.publishShell({ phase: 'loading', seed, quality, enterLabel: '正在唤醒世界…' });
         try {
-          await game.start(seed, restore?.seed === seed ? restore : null, quality);
+          await game.start(seed, restore?.seed === seed ? restore : null, quality, openMode);
         } catch (error) {
           game.abortStart();
           bridge.publishShell({ phase: 'error', enterLabel: '重试进入' });
@@ -75,10 +76,10 @@ export class ApplicationShell {
     this.bridge.publishShell({ phase: 'menu', seed: this.latestSeed, quality: this.quality, enterLabel: '进入世界' });
   }
 
-  async start(seedInput: string, quality: ShellQuality) {
+  async start(seedInput: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {
     this.setQuality(quality);
     const seed = seedInput.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;
-    await this.controller.start(seed, quality);
+    await this.controller.start(seed, quality, openMode);
   }
 
   continueWorld() {

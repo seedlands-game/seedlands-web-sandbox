@@ -44,6 +44,7 @@ const createScheduler = (worker: FakeWorker, accepted: WorkerResult[]) =>
     variant: 'main-snapshot',
     source: {
       seed: 7,
+      generatorVersion: 3,
       prepareMainSnapshot: () => ({
         chunkRevision: 1,
         haloRevision: 'halo-1',
@@ -92,5 +93,46 @@ describe('MeshTaskScheduler', () => {
     expect(accepted).toHaveLength(0);
     scheduler.dispose();
     expect(worker.terminated).toBe(true);
+  });
+
+  it('优先派发近场流体替换并把同 key 连续修订合并为最新一次', () => {
+    const worker = new FakeWorker();
+    const accepted: WorkerResult[] = [];
+    let revision = 1;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'main-snapshot',
+      source: {
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: revision,
+          haloRevision: `halo-${revision}`,
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: revision, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: (_task, result) => accepted.push(result),
+    });
+
+    scheduler.request(8, 0, 8);
+    scheduler.request(7, 0, 7);
+    for (revision = 2; revision <= 11; revision += 1)
+      scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
+    revision = 11;
+
+    const first = worker.posts[0]!;
+    worker.emit(resultFor(first));
+    expect(worker.posts[1]?.chunkKey).toBe('0,0,0');
+    expect(worker.posts[1]?.chunkRevision).toBe(11);
+    worker.emit(resultFor(worker.posts[1]!));
+    expect(accepted.map((result) => result.chunkKey)).toContain('0,0,0');
+
+    worker.emit(resultFor(worker.posts[2]!));
+    expect(worker.posts.map((post) => post.chunkKey)).toContain('7,0,7');
   });
 });

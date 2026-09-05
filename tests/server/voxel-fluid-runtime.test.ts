@@ -25,6 +25,15 @@ describe('bounded voxel fluid runtime', () => {
     expect(server.getVoxel(4, 54, 0)).toBe(Voxel.Air);
   });
 
+  it('advances the first bounded flow step at 20Hz for interactive feedback', () => {
+    const server = new GameServer({ seedText: 'fluid-20hz' });
+    clearBox(server, -1, 1, 50, 51);
+    server.edit(0, 49, 0, Voxel.Stone, 'fixture');
+    server.edit(0, 50, 0, Voxel.Water, 'fixture');
+    expect(server.advanceFluid(0.049).steps).toBe(0);
+    expect(server.advanceFluid(0.002).steps).toBe(1);
+  });
+
   it('respects obstacles and retracts unsupported flow after source removal', () => {
     const server = new GameServer({ seedText: 'fluid-retract' });
     clearBox(server, -4, 4, 50, 52);
@@ -68,7 +77,7 @@ describe('bounded voxel fluid runtime', () => {
     const whole = make();
     const sliced = make();
     const result = whole.advanceFluid(100);
-    for (let i = 0; i < 8; i += 1) sliced.advanceFluid(0.1);
+    for (let i = 0; i < 8; i += 1) sliced.advanceFluid(0.05);
     expect(result.steps).toBe(8);
     expect(result.processed).toBeLessThanOrEqual(8 * 128);
     for (let x = -10; x <= 10; x += 1)

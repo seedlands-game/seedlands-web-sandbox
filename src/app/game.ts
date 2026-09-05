@@ -9,7 +9,9 @@ import {
 } from './scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
+import { WaterExperience } from './water-experience';
 import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
+import type { WorldOpenMode } from '../client/world-version-policy';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
 import type { ServerCommandExecutor, CommandSource } from '../server/commands/server-command-executor';
 import { browserCommandContext } from './browser-command-context';
@@ -17,10 +19,10 @@ import { executeSlashCommand, type SlashCommandExecution } from '../server/comma
 import type { ServerCommand } from '../server/commands/command-contract';
 import { GameServer } from '../server/game-server';
 import { orientNewPlayer, preparePlayerEntry } from './world-entry';
-import type { HarnessSnapshot, LifecycleSnapshot, RestoredSession } from './app-contracts';
+import type { LifecycleSnapshot, RestoredSession } from './app-contracts';
 import { BrowserGameplay } from './browser-gameplay';
 import { BrowserWorldStore } from './browser-world-store';
-import { createHarnessSnapshot, installHarness } from './game-harness';
+import { createRuntimeHarnessApi, installHarness } from './game-harness';
 import { projectDebug, projectWorldClock } from './hud-projector';
 import { PlayerController } from './player-controller';
 import { QUALITY_PROFILES, type QualityLevel } from './quality-profile';
@@ -35,6 +37,7 @@ import { LIGHTING_QUALITY_BUDGETS } from './advanced-lighting-budget';
 export class Game {
   private paused = false;
   private worldAudio: WorldAudio | null = null;
+  private waterExperience: WaterExperience | null = null;
   private app: pc.Application | null = null;
   private world: World | null = null;
   private environment: WorldEnvironment | null = null;
@@ -85,7 +88,12 @@ export class Game {
     return (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
   }
 
-  async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel) {
+  async start(
+    seedText: string,
+    restore: RestoredSession | null,
+    qualityLevel: QualityLevel,
+    openMode: WorldOpenMode = 'continue',
+  ) {
     await this.flushSave();
     this.disposeRuntime();
     this.paused = false;
@@ -102,6 +110,7 @@ export class Game {
     this.lastFrameTimestamp = performance.now();
     this.persistence = await BrowserChunkPersistence.open(seedText, {
       legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
+      openMode,
     });
     this.app = createSceneApplication(this.canvas);
     const light = createSun(this.app, lightingBudget);
@@ -109,7 +118,11 @@ export class Game {
     this.visualResources = await createVoxelMaterials(this.app, quality);
     this.camera.camera!.layers = [...this.camera.camera!.layers, this.visualResources.waterLayer.id];
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
-    const server = new GameServer({ seedText, persistence: this.persistence });
+    const server = new GameServer({
+      seedText,
+      generatorVersion: this.persistence.generatorVersion,
+      persistence: this.persistence,
+    });
     if (this.audio) this.worldAudio = new WorldAudio(this.audio, server.seed);
     server.setWorldTime(this.environment.worldTime);
     await server.restore();
@@ -134,6 +147,7 @@ export class Game {
       lightingBudget,
       this.visualResources,
     );
+    this.waterExperience = new WaterExperience(this.camera.camera ?? null, this.app.graphicsDevice);
     this.lifecycle.worldInstanceId += 1;
     if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
     const { position, restoredPlayer, isNew } = await preparePlayerEntry(
@@ -219,50 +233,35 @@ export class Game {
     this.publishDebugVisibility(harnessEnabled);
     this.uiBridge.beginMeasurementWindow();
     if (!harnessEnabled || !this.controller) return;
-    this.removeHarness = installHarness({
-      snapshot: () => this.harnessSnapshot(),
-      lifecycleSnapshot: () => ({ ...this.lifecycle }),
-      restartWorld: async (seed) => {
-        await this.start(seed, null, this.qualityLevel);
-      },
-      moveTo: (x, z) => this.controller?.moveHarnessPlayer(x, z),
-      burstEdits: () => this.controller?.burstEdits(),
-      fillWorld: (command) => this.world?.fill('harness-fill', command),
-      removeVoxelAt: (x, y, z) => this.controller?.removeVoxel(x, y, z),
-      movePlayerTo: (x, y, z) => this.controller?.movePlayerTo(x, y, z),
-      prepareFlatMovement: () => this.controller?.prepareFlatMovement(),
-      prepareCenterExcavation: () => this.controller?.prepareCenterExcavation(),
-      prepareStepDown: () => this.controller?.prepareStepDown(),
-      setWorldTime: (hour) => this.setWorldTime(hour),
-      setTimePaused: (paused) => this.environment?.setPaused(paused),
-      setTimeSpeed: (speed) => {
-        if (this.environment) this.environment.speed = Math.max(0, speed);
-      },
-      setView: (yaw, pitch) => this.controller?.setView(yaw, pitch),
-      setSpectatorPosition: (x, y, z) => this.controller?.setSpectatorPosition(x, y, z),
-      beginPerformanceScenario: (name) => this.world?.beginScenario(name) ?? '',
-      setStreamingVariant: (variant) => this.world?.setStreamingVariant(variant),
-      exportPerformanceTrace: () => this.world?.exportTrace() ?? { traceEvents: [] },
-      executeGameplayCommand: async (command) => {
-        if (!this.commandExecutor || !this.commandSource) throw new Error('Harness command runtime is unavailable.');
-        const result = await this.commandExecutor.execute(this.commandSource, command);
-        if (result.success) this.consumeBrowserCommand(command, result);
-        return result;
-      },
-      advanceFluid: (seconds) => this.world?.advanceFluid(seconds),
-      getFluidCell: (x, y, z) => this.world?.server.getFluidCell(x, y, z) ?? null,
-      getVoxelAt: (x, y, z) => this.world?.getVoxel(x, y, z) ?? null,
-      sunSnapshot: () =>
-        this.environment && this.camera
-          ? this.environment.sunSnapshot(this.camera)
-          : { direction: [0, 0, 0], screen: null, facing: false },
-      advanceGameplay: (seconds) => this.gameplayClient?.advance(seconds),
-      setVoxelAt: (x, y, z, voxel) => {
-        this.world?.edit(x, y, z, voxel);
-        this.queueSave();
-      },
-      flushSave: () => this.flushSave(),
-    });
+    this.removeHarness = installHarness(
+      createRuntimeHarnessApi({
+        lifecycleSnapshot: () => ({ ...this.lifecycle }),
+        restartWorld: async (seed) => {
+          await this.start(seed, null, this.qualityLevel);
+        },
+        world: () => this.world,
+        controller: () => this.controller,
+        camera: () => this.camera,
+        environment: () => this.environment,
+        gameplay: () => this.gameplayClient,
+        frameMs: () => this.frameMs,
+        qualityLevel: () => this.qualityLevel,
+        serverPlayerId: () => this.serverPlayerId,
+        persistence: () => this.persistence,
+        ui: () => this.uiBridge.metrics(),
+        visualEffects: () => this.visualEffects,
+        underwaterVisual: () => this.waterExperience?.visual ?? null,
+        setWorldTime: (hour) => this.setWorldTime(hour),
+        executeGameplayCommand: async (command) => {
+          if (!this.commandExecutor || !this.commandSource) throw new Error('Harness command runtime is unavailable.');
+          const result = await this.commandExecutor.execute(this.commandSource, command);
+          if (result.success) this.consumeBrowserCommand(command, result);
+          return result;
+        },
+        queueSave: () => this.queueSave(),
+        flushSave: () => this.flushSave(),
+      }),
+    );
   }
 
   async executeCommand(input: string): Promise<SlashCommandExecution> {
@@ -280,7 +279,13 @@ export class Game {
     this.paused = paused;
     this.gameplayClient?.setSuspended(paused);
     this.controller?.releaseInput();
-    this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, paused);
+    this.worldAudio?.updateWorld(
+      this.camera,
+      this.world,
+      this.controller?.onGround ?? false,
+      paused,
+      this.controller?.waterImmersion,
+    );
   }
 
   async leaveWorld() {
@@ -363,11 +368,18 @@ export class Game {
     const now = performance.now();
     const actualFrameMs = now - this.lastFrameTimestamp;
     this.lastFrameTimestamp = now;
-    this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, this.paused);
+    this.worldAudio?.updateWorld(
+      this.camera,
+      this.world,
+      this.controller?.onGround ?? false,
+      this.paused,
+      this.controller?.waterImmersion,
+    );
     if (this.paused) return;
     this.performanceTelemetry.beginFrame();
     this.world.beginFrame();
     if (this.environment) {
+      this.waterExperience?.updateFlow(dt, this.camera, this.world, this.environment);
       if (!this.environment.paused) this.world.server.advanceClock(dt * 0.04 * this.environment.speed);
       this.environment.update(dt, this.world.server.worldTime);
     }
@@ -379,6 +391,7 @@ export class Game {
       this.lastFpsSample = now;
     }
     this.controller?.update(dt);
+    this.waterExperience?.updateImmersion(dt, this.controller?.waterImmersion, this.environment);
     this.visualEffects?.update(dt);
     this.world.advanceFluid(dt);
     this.world.updateStreaming(this.camera.getPosition());
@@ -444,21 +457,6 @@ export class Game {
     });
   }
 
-  private harnessSnapshot(): HarnessSnapshot {
-    return createHarnessSnapshot({
-      world: this.world,
-      environment: this.environment,
-      controller: this.controller,
-      frameMs: this.frameMs,
-      qualityLevel: this.qualityLevel,
-      serverPlayerId: this.serverPlayerId,
-      persistence: this.persistence,
-      ui: this.uiBridge.metrics(),
-      presentedEntityCount: this.gameplayClient?.presentedEntityCount ?? 0,
-      visualEffects: this.visualEffects,
-    });
-  }
-
   private setWorldTime(hour: number) {
     if (!this.world || !this.environment) return;
     this.world.server.setWorldTime(hour);
@@ -518,6 +516,8 @@ export class Game {
     this.world = null;
     this.visualEffects?.destroy();
     this.visualEffects = null;
+    this.waterExperience?.destroy();
+    this.waterExperience = null;
     this.environment?.destroy();
     this.environment = null;
     this.visualResources?.destroy();

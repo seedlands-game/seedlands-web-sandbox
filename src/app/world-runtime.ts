@@ -9,12 +9,14 @@ import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { MeshPart, PendingMeshTask, PerformanceSummary, StreamingVariant } from './app-contracts';
 import { ChunkResourceRepository } from './chunk-resource-repository';
 import { MeshTaskScheduler } from './mesh-task-scheduler';
+import type { MeshRequestOptions } from './mesh-task-scheduler';
 import {
   createPlayCanvasChunkAdapter,
   summarizeMeshParts,
   type PlayCanvasChunkResource,
 } from './playcanvas-chunk-adapter';
 import type { QualityProfile } from './quality-profile';
+import { FluidFeedbackTracker } from './fluid-feedback-tracker';
 
 type WorldTelemetry = {
   loadedChunks: number;
@@ -32,6 +34,7 @@ export class World {
   private readonly scheduler: MeshTaskScheduler;
   private readonly repository: ChunkResourceRepository<PendingMeshTask, MeshPart, PlayCanvasChunkResource>;
   private readonly dirtyChunks = new Set<string>();
+  private readonly fluidDirtyChunks = new Set<string>();
   private remeshTimer: number | null = null;
   private aggregateStructuralEventCount = 0;
   private aggregateRemeshSchedulingCount = 0;
@@ -39,6 +42,7 @@ export class World {
   private latestCommitMeshChunkCount = 0;
   private scenarioSequence = 0;
   private scenarioId = 'default';
+  private readonly fluidFeedback = new FluidFeedbackTracker();
   private lastCenter = '';
   private disposed = false;
 
@@ -60,6 +64,7 @@ export class World {
       variant,
       source: {
         seed: server.seed,
+        generatorVersion: server.generatorVersion,
         beforePrepare: (cx, cy, cz) => server.ensureChunkNeighborhood(cx, cy, cz),
         releasePrepared: (cx, cy, cz) => server.releaseChunkNeighborhood(cx, cy, cz),
         prepareMainSnapshot: (cx, cy, cz) => server.createDerivedMeshSnapshot(cx, cy, cz),
@@ -83,7 +88,14 @@ export class World {
       profile,
       now: () => performance.now(),
       summarize: summarizeMeshParts,
-      onVisible: (task) => this.scheduler.completeVisible(task),
+      onVisible: (task) => {
+        this.scheduler.completeVisible(task);
+        this.fluidFeedback.completeVisible(
+          task.chunkKey,
+          this.telemetryRecorder.trace(task.traceId),
+          this.scheduler.fluidSchedulingMetrics,
+        );
+      },
       onDiscard: (task, reason) => {
         telemetryRecorder.markTrace(task.traceId, reason, 'main');
         telemetryRecorder.counter(reason, (telemetryRecorder.snapshot().gauges[reason] ?? 0) + 1);
@@ -163,6 +175,14 @@ export class World {
     };
   }
 
+  get fluidFeedbackSummary() {
+    return this.fluidFeedback.summary();
+  }
+
+  beginFluidFeedbackSample() {
+    this.fluidFeedback.begin(this.scheduler.fluidSchedulingMetrics);
+  }
+
   beginFrame() {
     this.repository.beginFrame();
   }
@@ -172,6 +192,7 @@ export class World {
     this.scenarioId = `${name}-${++this.scenarioSequence}`;
     this.scheduler.beginScenario();
     this.repository.clear();
+    this.fluidFeedback.reset();
     this.lastCenter = '';
     return this.scenarioId;
   }
@@ -202,6 +223,7 @@ export class World {
     this.scheduler.dispose();
     this.repository.dispose();
     this.dirtyChunks.clear();
+    this.fluidDirtyChunks.clear();
     this.remeshTimer = null;
   }
 
@@ -252,7 +274,11 @@ export class World {
 
   advanceFluid(seconds: number) {
     const result = this.server.advanceFluid(seconds);
-    result.commits.forEach((commit) => this.consumeServerCommit(commit));
+    result.commits.forEach((commit) => {
+      if (commit.structuralChange?.actorId === 'fluid-v1')
+        this.fluidFeedback.markFirstCommit(commit.structuralChange.meshChunks);
+      this.consumeServerCommit(commit);
+    });
     return result;
   }
 
@@ -263,6 +289,7 @@ export class World {
   consumeServerCommit(result: WorldCommitResult) {
     const change = result.structuralChange;
     if (!change) return;
+    const fluidPriority = change.actorId === 'fluid-v1';
     this.aggregateStructuralEventCount += 1;
     this.latestCommitMutationCount = change.mutationCount;
     this.latestCommitMeshChunkCount = change.meshChunks.length;
@@ -271,37 +298,50 @@ export class World {
       const pending = this.scheduler.latestTask(key);
       if (pending) {
         hasPresentationWork = true;
-        this.scheduler.cancel(key);
-        this.scheduler.request(pending.cx, pending.cy, pending.cz, true);
+        this.scheduler.request(pending.cx, pending.cy, pending.cz, {
+          forceRemesh: true,
+          priority: fluidPriority ? 'interactive-fluid' : 'interactive',
+        });
       } else if (this.repository.chunks.has(key)) {
         hasPresentationWork = true;
         this.dirtyChunks.add(key);
+        if (fluidPriority) this.fluidDirtyChunks.add(key);
       }
     });
     if (hasPresentationWork) this.aggregateRemeshSchedulingCount += 1;
-    this.scheduleRemesh();
+    this.scheduleRemesh(fluidPriority ? 0 : 48);
   }
 
   drainCommits() {
     this.repository.drain();
   }
 
-  private request(cx: number, cy: number, cz: number, forceRemesh = false) {
+  private request(cx: number, cy: number, cz: number, options: boolean | MeshRequestOptions = false) {
     const key = `${cx},${cy},${cz}`;
+    const forceRemesh = typeof options === 'boolean' ? options : (options.forceRemesh ?? false);
     if (!forceRemesh && this.repository.chunks.has(key)) return;
-    this.scheduler.request(cx, cy, cz, forceRemesh);
+    this.scheduler.request(cx, cy, cz, options);
   }
 
-  private scheduleRemesh() {
-    if (this.remeshTimer !== null || this.dirtyChunks.size === 0) return;
+  private scheduleRemesh(delayMs: number) {
+    if (this.dirtyChunks.size === 0) return;
+    if (this.remeshTimer !== null) {
+      if (delayMs > 0) return;
+      window.clearTimeout(this.remeshTimer);
+    }
     this.remeshTimer = window.setTimeout(() => {
       this.remeshTimer = null;
       const keys = [...this.dirtyChunks];
       this.dirtyChunks.clear();
       for (const key of keys) {
         const chunk = this.repository.chunks.get(key);
-        if (chunk) this.scheduler.request(chunk.task.cx, chunk.task.cy, chunk.task.cz, true);
+        if (chunk)
+          this.scheduler.request(chunk.task.cx, chunk.task.cy, chunk.task.cz, {
+            forceRemesh: true,
+            priority: this.fluidDirtyChunks.has(key) ? 'interactive-fluid' : 'interactive',
+          });
+        this.fluidDirtyChunks.delete(key);
       }
-    }, 48);
+    }, delayMs);
   }
 }

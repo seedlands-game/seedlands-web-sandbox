@@ -1,6 +1,7 @@
 import type { SlashCommandExecution } from '../../server/commands/slash-command-parser';
 import type { QualityLevel } from '../quality-profile';
 import type { GameplayItemPresentation } from './gameplay-ui-projector';
+import type { WorldOpenMode } from '../../client/world-version-policy';
 
 export type ShellPhase = 'boot' | 'menu' | 'loading' | 'playing' | 'error';
 export type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hydrology';
@@ -99,7 +100,7 @@ export type UiMetrics = Readonly<{
 }>;
 
 export type UiActionPort = {
-  startWorld: (seed: string, quality: QualityLevel) => Promise<void>;
+  startWorld: (seed: string, quality: QualityLevel, openMode?: WorldOpenMode) => Promise<void>;
   selectHotbarSlot: (slot: number) => void;
   toggleInventory: () => void;
   closeInventory: () => void;

@@ -4,6 +4,7 @@ import type { QualityProfile } from './quality-profile';
 import { celestialDirection, SkySun } from './sky-sun';
 
 const normalizedColor = ([r, g, b]: Rgb) => new pc.Color(r > 1 ? r / 255 : r, g > 1 ? g / 255 : g, b > 1 ? b / 255 : b);
+const UNDERWATER_FOG = new pc.Color(0.035, 0.22, 0.29, 1);
 
 export class WorldEnvironment {
   worldTime = 9.5;
@@ -11,6 +12,8 @@ export class WorldEnvironment {
   speed = 1;
   private elapsed = 0;
   private readonly skySun: SkySun;
+  private underwaterBlend = 0;
+  private waterFlow: readonly [number, number] = [0.92, 0.39];
 
   constructor(
     private readonly app: pc.Application,
@@ -27,8 +30,10 @@ export class WorldEnvironment {
   update(dt: number, worldTime = this.worldTime) {
     this.elapsed += dt;
     this.worldTime = ((worldTime % 24) + 24) % 24;
-    const waterOffset = (this.elapsed * 0.018 * this.quality.waterQuality) % 1;
-    this.water.forEach((material) => material.diffuseMapOffset.set(waterOffset, waterOffset * 0.42));
+    const waterOffset = (this.elapsed * 0.026 * this.quality.waterQuality) % 1;
+    this.water.forEach((material) =>
+      material.diffuseMapOffset.set(waterOffset * this.waterFlow[0], waterOffset * this.waterFlow[1]),
+    );
     this.apply();
   }
 
@@ -39,6 +44,16 @@ export class WorldEnvironment {
 
   setPaused(paused: boolean) {
     this.paused = paused;
+  }
+
+  setUnderwaterBlend(amount: number) {
+    this.underwaterBlend = Math.max(0, Math.min(1, amount));
+    this.apply();
+  }
+
+  setWaterFlowDirection(direction: readonly [number, number] | null) {
+    const length = direction ? Math.hypot(direction[0], direction[1]) : 0;
+    if (direction && length > 0.001) this.waterFlow = [direction[0] / length, direction[1] / length];
   }
 
   destroy() {
@@ -72,9 +87,9 @@ export class WorldEnvironment {
       this.sun.light.color = normalizedColor(state.sun);
     }
     this.app.scene.ambientLight = normalizedColor(state.ambient);
-    this.app.scene.fog.color.copy(normalizedColor(state.fog));
-    this.app.scene.fog.start = this.quality.fogStart;
-    this.app.scene.fog.end = this.quality.fogEnd;
+    this.app.scene.fog.color.lerp(normalizedColor(state.fog), UNDERWATER_FOG, this.underwaterBlend);
+    this.app.scene.fog.start = this.quality.fogStart + (0.35 - this.quality.fogStart) * this.underwaterBlend;
+    this.app.scene.fog.end = this.quality.fogEnd + (17 - this.quality.fogEnd) * this.underwaterBlend;
     document.documentElement.style.setProperty('--sky-top', cssRgb(state.top));
     document.documentElement.style.setProperty('--sky-horizon', cssRgb(state.horizon));
     document.documentElement.style.setProperty('--sky-glow', cssRgb(state.sun));

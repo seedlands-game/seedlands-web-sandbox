@@ -1,7 +1,7 @@
 import { createMeshTaskSnapshot, isCurrentMeshTask } from '../client/mesh-task-snapshot';
 import type { PerformanceProfile } from '../client/performance-profile';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
-import { GENERATOR_VERSION, chunkKey } from '../world/voxel';
+import { chunkKey } from '../world/voxel';
 import type { PendingMeshTask, StreamingVariant, WorkerResult } from './app-contracts';
 
 export type { WorkerResult } from './app-contracts';
@@ -14,7 +14,11 @@ type PendingMeshRequest = {
   cy: number;
   cz: number;
   queuedAt: number;
+  priority: MeshRequestPriority;
 };
+
+export type MeshRequestPriority = 'streaming' | 'interactive' | 'interactive-fluid';
+export type MeshRequestOptions = { forceRemesh?: boolean; priority?: MeshRequestPriority };
 
 type MainSnapshot = {
   chunkRevision: number;
@@ -43,6 +47,7 @@ type WorkerInput = {
 
 export type MeshTaskSource = {
   seed: number;
+  generatorVersion: number;
   beforePrepare?: (cx: number, cy: number, cz: number) => Promise<void>;
   releasePrepared?: (cx: number, cy: number, cz: number) => void;
   prepareMainSnapshot: (cx: number, cy: number, cz: number) => MainSnapshot;
@@ -69,6 +74,8 @@ export class MeshTaskScheduler {
   private readonly queued = new Map<string, PendingMeshRequest>();
   private readonly latestTasks = new Map<string, PendingMeshTask>();
   private readonly requested = new Set<string>();
+  private readonly replacements = new Map<string, PendingMeshRequest>();
+  private readonly inFlightKeys = new Set<string>();
   private readonly scenarioTraceIds = new Set<string>();
   private taskSequence = 0;
   private inFlight = 0;
@@ -76,6 +83,8 @@ export class MeshTaskScheduler {
   private disposed = false;
   private draining = false;
   private variant: StreamingVariant;
+  private mergedRequests = 0;
+  private supersededInFlight = 0;
 
   constructor(private readonly options: SchedulerOptions) {
     this.variant = options.variant;
@@ -98,6 +107,10 @@ export class MeshTaskScheduler {
     return this.scenarioTraceIds;
   }
 
+  get fluidSchedulingMetrics() {
+    return { mergedRequests: this.mergedRequests, supersededInFlight: this.supersededInFlight };
+  }
+
   setVariant(variant: StreamingVariant) {
     if (this.variant === variant) return false;
     this.variant = variant;
@@ -109,20 +122,39 @@ export class MeshTaskScheduler {
     this.queued.clear();
     this.latestTasks.clear();
     this.requested.clear();
+    this.replacements.clear();
+    this.inFlightKeys.clear();
     this.scenarioTraceIds.clear();
     this.options.telemetry.counter('scenario_epoch', this.epoch);
   }
 
-  request(cx: number, cy: number, cz: number, forceRemesh = false) {
+  request(cx: number, cy: number, cz: number, options: boolean | MeshRequestOptions = false) {
     if (this.disposed || cy < 0 || cy > 1) return;
+    const forceRemesh = typeof options === 'boolean' ? options : (options.forceRemesh ?? false);
+    const priority = typeof options === 'boolean' ? 'streaming' : (options.priority ?? 'streaming');
     const key = chunkKey(cx, cy, cz);
     if (!forceRemesh && this.requested.has(key)) return;
-    const traceId = this.options.telemetry.beginTrace('chunk-request', key, 'main');
+    const existing = this.queued.get(key) ?? this.replacements.get(key);
+    const traceId = existing?.traceId ?? this.options.telemetry.beginTrace('chunk-request', key, 'main');
     this.scenarioTraceIds.add(traceId);
     this.requested.add(key);
+    const request: PendingMeshRequest = {
+      traceId,
+      epoch: this.epoch,
+      chunkKey: key,
+      cx,
+      cy,
+      cz,
+      queuedAt: existing?.queuedAt ?? performance.now(),
+      priority: this.higherPriority(existing?.priority, priority),
+    };
+    if (existing) this.mergedRequests += 1;
+    if (this.inFlightKeys.has(key)) {
+      this.replacements.set(key, request);
+      return;
+    }
     this.latestTasks.delete(key);
-    this.queued.delete(key);
-    this.queued.set(key, { traceId, epoch: this.epoch, chunkKey: key, cx, cy, cz, queuedAt: performance.now() });
+    this.queued.set(key, request);
     this.options.telemetry.markTrace(traceId, 'queued', 'main');
     void this.drain();
   }
@@ -133,13 +165,15 @@ export class MeshTaskScheduler {
 
   isCurrent(task: PendingMeshTask) {
     const current = this.latestTasks.get(task.chunkKey);
-    return current ? isCurrentMeshTask(task, current) : false;
+    return current && !this.replacements.has(task.chunkKey) ? isCurrentMeshTask(task, current) : false;
   }
 
   cancel(key: string) {
     const task = this.latestTasks.get(key);
     if (task) this.options.telemetry.markTrace(task.traceId, 'cancelled', 'main');
     this.latestTasks.delete(key);
+    this.inFlightKeys.delete(key);
+    this.replacements.delete(key);
     this.requested.delete(key);
     this.queued.delete(key);
   }
@@ -166,6 +200,8 @@ export class MeshTaskScheduler {
     this.queued.clear();
     this.latestTasks.clear();
     this.requested.clear();
+    this.replacements.clear();
+    this.inFlightKeys.clear();
   }
 
   private async drain() {
@@ -173,7 +209,7 @@ export class MeshTaskScheduler {
     this.draining = true;
     try {
       while (!this.disposed && this.inFlight < this.options.profile.maxWorkerTasksInFlight) {
-        const next = this.queued.entries().next().value as [string, PendingMeshRequest] | undefined;
+        const next = this.nextQueuedRequest();
         if (!next) return;
         const [key, request] = next;
         this.queued.delete(key);
@@ -237,11 +273,12 @@ export class MeshTaskScheduler {
       cx: request.cx,
       cy: request.cy,
       cz: request.cz,
-      generatorVersion: GENERATOR_VERSION,
+      generatorVersion: this.options.source.generatorVersion,
       variant: 'main-snapshot',
     };
     this.latestTasks.set(request.chunkKey, task);
     this.inFlight += 1;
+    this.inFlightKeys.add(request.chunkKey);
     this.options.telemetry.markTrace(task.traceId, 'worker-start', 'worker-derived');
     this.options.worker.postMessage(
       {
@@ -290,6 +327,7 @@ export class MeshTaskScheduler {
     };
     this.latestTasks.set(request.chunkKey, task);
     this.inFlight += 1;
+    this.inFlightKeys.add(request.chunkKey);
     this.options.telemetry.markTrace(task.traceId, 'worker-start', 'worker-derived');
     const transfers: Transferable[] = [];
     if (prepared.canonical) transfers.push(prepared.canonical.buffer);
@@ -328,9 +366,20 @@ export class MeshTaskScheduler {
 
   private receive(result: WorkerResult) {
     this.inFlight = Math.max(0, this.inFlight - 1);
+    this.inFlightKeys.delete(result.chunkKey);
     const task = this.latestTasks.get(result.chunkKey);
     if (!task || !isCurrentMeshTask(result, task)) {
       this.incrementCounter('stale_worker_results');
+      void this.drain();
+      return;
+    }
+    const replacement = this.replacements.get(result.chunkKey);
+    if (replacement) {
+      this.replacements.delete(result.chunkKey);
+      this.latestTasks.delete(result.chunkKey);
+      this.queued.set(result.chunkKey, replacement);
+      this.supersededInFlight += 1;
+      this.options.telemetry.completeTrace(task.traceId, 'superseded-worker-result', 'main');
       void this.drain();
       return;
     }
@@ -377,6 +426,26 @@ export class MeshTaskScheduler {
         durationMs: result.workerHaloMs,
         traceId: task.traceId,
       });
+  }
+
+  private nextQueuedRequest(): [string, PendingMeshRequest] | undefined {
+    const rank: Record<MeshRequestPriority, number> = { streaming: 0, interactive: 1, 'interactive-fluid': 2 };
+    let selected: [string, PendingMeshRequest] | undefined;
+    for (const entry of this.queued) {
+      if (
+        !selected ||
+        rank[entry[1].priority] > rank[selected[1].priority] ||
+        (rank[entry[1].priority] === rank[selected[1].priority] && entry[1].queuedAt < selected[1].queuedAt)
+      )
+        selected = entry;
+    }
+    return selected;
+  }
+
+  private higherPriority(current: MeshRequestPriority | undefined, next: MeshRequestPriority): MeshRequestPriority {
+    if (current === 'interactive-fluid' || next === 'interactive-fluid') return 'interactive-fluid';
+    if (current === 'interactive' || next === 'interactive') return 'interactive';
+    return 'streaming';
   }
 
   private discard(task: PendingMeshTask, counter: string) {

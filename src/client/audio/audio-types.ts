@@ -22,7 +22,11 @@ export type SfxKey =
   | 'attack'
   | 'discovery'
   | 'creature'
-  | 'hover';
+  | 'hover'
+  | 'water-enter'
+  | 'water-exit'
+  | 'water-wade'
+  | 'water-swim';
 
 export const MUSIC_CUE_DURATION = 96;
 

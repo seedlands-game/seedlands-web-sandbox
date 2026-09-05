@@ -6,10 +6,11 @@ import {
   type StoredChunkRecord,
   validateStoredFluid,
 } from '../world/chunk-snapshot-codec';
-import { GENERATOR_VERSION, Voxel, normalizeSeed } from '../world/voxel';
+import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, normalizeSeed } from '../world/voxel';
+import { selectWorldGeneratorVersion, type WorldOpenMode } from '../client/world-version-policy';
 
-type WorkerConfig = { databaseName: string; worldId: string; seedText: string };
-type InitTask = { kind: 'init'; requestId: number } & WorkerConfig;
+type WorkerConfig = { databaseName: string; worldId: string; seedText: string; generatorVersion: number };
+type InitTask = { kind: 'init'; requestId: number; openMode: WorldOpenMode } & WorkerConfig;
 type LoadTask = { kind: 'load'; requestId: number; cx: number; cy: number; cz: number };
 type SaveTask = {
   kind: 'save';
@@ -107,7 +108,7 @@ const database = () => {
 
 const proceduralChunk = (cx: number, cy: number, cz: number) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  return makeChunk(normalizeSeed(config.seedText), cx, cy, cz, []);
+  return makeChunk(normalizeSeed(config.seedText), cx, cy, cz, [], config.generatorVersion);
 };
 
 const normalizeRecord = (value: unknown): StoredChunkRecord => {
@@ -132,25 +133,42 @@ const normalizeRecord = (value: unknown): StoredChunkRecord => {
 };
 
 const initialize = async (task: InitTask) => {
-  config = { databaseName: task.databaseName, worldId: task.worldId, seedText: task.seedText };
   databasePromise = openDatabase(task.databaseName);
-  const opened = await database();
+  const opened = await databasePromise;
   const transaction = opened.transaction('worlds', 'readwrite');
   const done = transactionDone(transaction);
   const store = transaction.objectStore('worlds');
-  const existing = (await requestResult(store.get(task.worldId))) as WorldRecord | undefined;
-  if (existing && (existing.seedText !== task.seedText || existing.generatorVersion !== GENERATOR_VERSION))
+  const records = (await requestResult(store.getAll())) as WorldRecord[];
+  const supportedRecords = records.filter(
+    (record) => record.generatorVersion === GENERATOR_VERSION || record.generatorVersion === LEGACY_GENERATOR_VERSION,
+  );
+  const generatorVersion = selectWorldGeneratorVersion(
+    supportedRecords,
+    task.seedText,
+    GENERATOR_VERSION,
+    task.openMode,
+  );
+  if (generatorVersion !== GENERATOR_VERSION && generatorVersion !== LEGACY_GENERATOR_VERSION)
+    throw new Error(`Stored world uses unsupported generator version ${generatorVersion}.`);
+  const worldId = `seedlands:g${generatorVersion}:${task.seedText}`;
+  config = { databaseName: task.databaseName, worldId, seedText: task.seedText, generatorVersion };
+  const existing = records.find((record) => record.worldId === worldId);
+  if (task.openMode === 'continue-legacy' && generatorVersion === GENERATOR_VERSION)
+    throw new Error('这个 Seed 没有可继续的旧版 v2 世界。');
+  if (existing && (existing.seedText !== task.seedText || existing.generatorVersion !== generatorVersion))
     throw new Error('Stored world metadata is incompatible with the requested seed or generator.');
   if (!existing)
     store.put({
-      worldId: task.worldId,
+      worldId,
       seedText: task.seedText,
-      generatorVersion: GENERATOR_VERSION,
+      generatorVersion,
       player: null,
       updatedAt: Date.now(),
     } satisfies WorldRecord);
   await done;
   return {
+    worldId,
+    generatorVersion,
     player: existing?.player ?? null,
     gameplaySnapshot: existing?.gameplaySnapshot ?? null,
     corpusSummary: existing?.corpusSummary ?? null,
@@ -179,7 +197,7 @@ const load = async (task: LoadTask) => {
     revision: record.revision,
     formatVersion: 1,
     voxelSchemaVersion: 1,
-    generatorVersion: GENERATOR_VERSION,
+    generatorVersion: config.generatorVersion,
     proceduralVoxels,
   });
   const fluid = validateStoredFluid(record);
@@ -214,7 +232,7 @@ const save = async (task: SaveTask) => {
       revision: snapshot.revision,
       formatVersion: 1,
       voxelSchemaVersion: 1,
-      generatorVersion: GENERATOR_VERSION,
+      generatorVersion: config!.generatorVersion,
       voxels,
       proceduralVoxels: proceduralChunk(snapshot.cx, snapshot.cy, snapshot.cz),
       ...(snapshot.fluid ? { fluid: new Uint8Array(snapshot.fluid) } : {}),
@@ -266,7 +284,7 @@ const saveMetadata = async (task: SaveMetadataTask) => {
     ...existing,
     worldId: config.worldId,
     seedText: config.seedText,
-    generatorVersion: GENERATOR_VERSION,
+    generatorVersion: config.generatorVersion,
     player: task.player,
     updatedAt: Date.now(),
   } satisfies WorldRecord);
@@ -308,7 +326,9 @@ const latestWorld = async (task: LatestWorldTask) => {
     const worlds = (await requestResult(transaction.objectStore('worlds').getAll())) as WorldRecord[];
     await done;
     const latest = worlds
-      .filter((world) => world.generatorVersion === GENERATOR_VERSION)
+      .filter(
+        (world) => world.generatorVersion === GENERATOR_VERSION || world.generatorVersion === LEGACY_GENERATOR_VERSION,
+      )
       .sort((left, right) => right.updatedAt - left.updatedAt)[0];
     return latest ? { seedText: latest.seedText } : null;
   } finally {
@@ -390,7 +410,7 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
         revision: 1,
         formatVersion: 1,
         voxelSchemaVersion: 1,
-        generatorVersion: GENERATOR_VERSION,
+        generatorVersion: config.generatorVersion,
         voxels,
         proceduralVoxels: procedural,
       });
@@ -414,7 +434,7 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
   metadataTransaction.objectStore('worlds').put({
     worldId: config.worldId,
     seedText: config.seedText,
-    generatorVersion: GENERATOR_VERSION,
+    generatorVersion: config.generatorVersion,
     player: null,
     corpusSummary: summary,
     updatedAt: Date.now(),

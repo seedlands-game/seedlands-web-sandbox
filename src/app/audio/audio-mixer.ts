@@ -9,7 +9,9 @@ export class AudioMixer {
   readonly master: GainNode;
   readonly music: GainNode;
   readonly sfx: GainNode;
+  readonly uiSfx: GainNode;
   readonly ambience: GainNode;
+  readonly underwaterFilter: BiquadFilterNode;
   readonly output: DynamicsCompressorNode;
   readonly analyser: AnalyserNode;
   private settings = sanitizeAudioSettings(null);
@@ -21,7 +23,12 @@ export class AudioMixer {
     this.master = context.createGain();
     this.music = context.createGain();
     this.sfx = context.createGain();
+    this.uiSfx = context.createGain();
     this.ambience = context.createGain();
+    this.underwaterFilter = context.createBiquadFilter();
+    this.underwaterFilter.type = 'lowpass';
+    this.underwaterFilter.frequency.value = 18_000;
+    this.underwaterFilter.Q.value = 0.65;
     this.output = context.createDynamicsCompressor();
     this.analyser = context.createAnalyser();
     this.analyser.fftSize = 1024;
@@ -30,9 +37,11 @@ export class AudioMixer {
     this.output.ratio.value = 4;
     this.output.attack.value = 0.006;
     this.output.release.value = 0.2;
-    this.music.connect(this.master);
-    this.sfx.connect(this.master);
-    this.ambience.connect(this.master);
+    this.music.connect(this.underwaterFilter);
+    this.sfx.connect(this.underwaterFilter);
+    this.ambience.connect(this.underwaterFilter);
+    this.underwaterFilter.connect(this.master);
+    this.uiSfx.connect(this.master);
     this.master.connect(this.output);
     this.output.connect(this.analyser);
     this.output.connect(context.destination);
@@ -48,6 +57,14 @@ export class AudioMixer {
     this.settings = sanitizeAudioSettings(settings);
     for (const key of ['master', 'music', 'sfx', 'ambience'] as const)
       this[key].gain.setTargetAtTime(this.settings[key], this.context.currentTime, 0.025);
+    this.uiSfx.gain.setTargetAtTime(this.settings.sfx, this.context.currentTime, 0.025);
+  }
+
+  setUnderwaterMix(amount: number) {
+    const blend = Math.max(0, Math.min(1, amount));
+    const frequency = 18_000 * Math.pow(850 / 18_000, blend);
+    this.underwaterFilter.frequency.setTargetAtTime(frequency, this.context.currentTime, blend > 0 ? 0.08 : 0.14);
+    this.underwaterFilter.Q.setTargetAtTime(0.65 + blend * 0.75, this.context.currentTime, 0.08);
   }
 
   snapshot() {

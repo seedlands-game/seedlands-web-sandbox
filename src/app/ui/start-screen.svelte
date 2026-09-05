@@ -7,13 +7,17 @@
   import GamePanel from './primitives/game-panel.svelte';
   import GameTextField from './primitives/game-text-field.svelte';
   import SeedlandsMark from './primitives/seedlands-mark.svelte';
+  import type { WorldOpenMode } from '../../client/world-version-policy';
 
   let {
     shell,
     application,
     onstart,
-  }: { shell: ShellState; application: ApplicationShell; onstart: (seed: string, quality: QualityLevel) => void } =
-    $props();
+  }: {
+    shell: ShellState;
+    application: ApplicationShell;
+    onstart: (seed: string, quality: QualityLevel, openMode: WorldOpenMode) => void;
+  } = $props();
   let latestSeed = $state('');
   let error = $state('');
   onMount(() =>
@@ -25,6 +29,7 @@
   );
   let seed = $state('');
   let quality = $state<QualityLevel>('medium');
+  let openMode = $state<WorldOpenMode>('continue');
   let initialized = false;
   let previousPhase: ShellState['phase'] = 'boot';
 
@@ -60,6 +65,14 @@
       </select>
     </label>
   </div>
+  <label class="world-version-choice" for="world-version-mode">
+    世界版本
+    <select id="world-version-mode" bind:value={openMode} disabled={shell.phase === 'loading'}>
+      <option value="continue">默认继续（优先已有新版）</option>
+      <option value="continue-legacy">明确继续旧版 v2</option>
+      <option value="new-current">新建或进入新版 v3（保留旧档）</option>
+    </select>
+  </label>
   <GameButton
     class="recommended-start"
     label="推荐起点：林间河岸"
@@ -69,7 +82,7 @@
   <GameButton
     label={shell.enterLabel}
     disabled={shell.phase === 'boot' || shell.phase === 'loading'}
-    onclick={() => onstart(seed, quality)}
+    onclick={() => onstart(seed, quality, openMode)}
   >
     {shell.enterLabel}
   </GameButton>
@@ -82,5 +95,5 @@
     >
   </div>
   {#if error}<p class="start-error" role="alert">{error}</p>{/if}
-  <small>相同 Seed 会继续已有世界；留空开始新的旅程。</small>
+  <small>旧版河岸不会自动改变；版本选择可继续 v2，也可为同名 Seed 保留旧档并进入 v3。</small>
 </GamePanel>

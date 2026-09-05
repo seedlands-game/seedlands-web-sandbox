@@ -1,6 +1,7 @@
 import type { ChunkPersistence, ChunkSnapshot } from '../server/persistence/chunk-persistence';
 import type { GameplaySnapshotV1 } from '../server/gameplay/gameplay-runtime';
-import { GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
+import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
+import type { WorldOpenMode } from './world-version-policy';
 
 export type SerializedChunkSnapshot = Omit<ChunkSnapshot, 'voxels' | 'fluid'> & { voxels: number[]; fluid?: number[] };
 export type BrowserWorldSave = {
@@ -23,6 +24,8 @@ export type ChunkPersistenceCorpusSummary = {
   codecs: Record<string, number>;
 };
 type InitResult = {
+  worldId: string;
+  generatorVersion: number;
   player: [number, number, number] | null;
   gameplaySnapshot: unknown;
   corpusSummary: ChunkPersistenceCorpusSummary | null;
@@ -69,7 +72,8 @@ const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
 });
 
 export class BrowserChunkPersistence implements ChunkPersistence {
-  readonly worldId: string;
+  worldId: string;
+  generatorVersion = GENERATOR_VERSION;
   private readonly snapshots = new Map<string, ChunkSnapshot>();
   private readonly missing = new Set<string>();
   private readonly loads = new Map<string, Promise<void>>();
@@ -111,7 +115,11 @@ export class BrowserChunkPersistence implements ChunkPersistence {
 
   static async open(
     seedText: string,
-    options: { databaseName?: string; legacySnapshots?: readonly SerializedChunkSnapshot[] } = {},
+    options: {
+      databaseName?: string;
+      legacySnapshots?: readonly SerializedChunkSnapshot[];
+      openMode?: WorldOpenMode;
+    } = {},
   ): Promise<BrowserChunkPersistence> {
     const persistence = new BrowserChunkPersistence(seedText, null);
     const initialized = (await persistence.request({
@@ -119,7 +127,10 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       databaseName: options.databaseName ?? 'seedlands-chunks-v1',
       worldId: persistence.worldId,
       seedText,
+      openMode: options.openMode ?? 'continue',
     })) as InitResult;
+    persistence.worldId = initialized.worldId;
+    persistence.generatorVersion = initialized.generatorVersion;
     persistence.playerValue = initialized.player;
     persistence.gameplaySnapshotValue = initialized.gameplaySnapshot;
     persistence.corpusSummaryValue = initialized.corpusSummary;
@@ -127,7 +138,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       for (const snapshot of options.legacySnapshots)
         if (
           snapshot.seedText !== seedText ||
-          snapshot.generatorVersion !== GENERATOR_VERSION ||
+          snapshot.generatorVersion !== persistence.generatorVersion ||
           snapshot.key !== chunkKey(snapshot.cx, snapshot.cy, snapshot.cz) ||
           !Number.isInteger(snapshot.revision) ||
           snapshot.revision < 0 ||
@@ -235,7 +246,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       cx,
       cy,
       cz,
-      generatorVersion: GENERATOR_VERSION,
+      generatorVersion: this.generatorVersion,
       revision: result.revision,
       voxels: new Uint16Array(result.voxels),
       ...(result.fluid ? { fluidVersion: result.fluidVersion, fluid: new Uint8Array(result.fluid) } : {}),
@@ -352,7 +363,7 @@ export function decodeBrowserWorldSave(raw: string | null): BrowserWorldSave | n
     const record = value as Record<string, unknown>;
     if (
       typeof record.seed !== 'string' ||
-      record.generatorVersion !== GENERATOR_VERSION ||
+      (record.generatorVersion !== GENERATOR_VERSION && record.generatorVersion !== LEGACY_GENERATOR_VERSION) ||
       !Array.isArray(record.player) ||
       record.player.length !== 3 ||
       !record.player.every(Number.isFinite) ||

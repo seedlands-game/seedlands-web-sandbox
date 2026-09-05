@@ -29,7 +29,7 @@ const game = new Game(canvas, uiBridge, audio);
 const application = new ApplicationShell(game, uiBridge, audio);
 
 const actions: UiActionPort = {
-  startWorld: (seed, quality) => application.start(seed, quality),
+  startWorld: (seed, quality, openMode) => application.start(seed, quality, openMode),
   selectHotbarSlot: (slot) => game.selectHotbarSlot(slot),
   toggleInventory: () => game.toggleInventory(),
   closeInventory: () => game.closeInventory(),
@@ -53,5 +53,6 @@ void installPersistenceHarness();
 void application.initialize();
 
 document.addEventListener('click', (event) => {
-  if ((event.target as Element)?.closest('button')) void audio.unlock().then(() => audio.play('hover'));
+  if ((event.target as Element)?.closest('button'))
+    void audio.unlock().then(() => audio.play('hover', { scope: 'ui' }));
 });

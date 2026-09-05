@@ -10,6 +10,9 @@ import {
   type GameplayPresentationEvent,
 } from '../../client/audio/gameplay-audio-events';
 import type { GlobalAudio } from './global-audio';
+import { WaterAudioPolicy } from '../../client/audio/water-audio-policy';
+import type { WaterImmersionSnapshot } from '../../world/water-immersion';
+import { Voxel } from '../../world/voxel';
 
 export class WorldAudio {
   private readonly session: string;
@@ -20,6 +23,9 @@ export class WorldAudio {
   private disposed = false;
   private nextContextAt = 0;
   private paused = false;
+  private readonly waterPolicy = new WaterAudioPolicy();
+  private traveledDistance = 0;
+  private previousPosition: readonly [number, number, number] | null = null;
 
   constructor(
     private readonly audio: GlobalAudio,
@@ -30,7 +36,13 @@ export class WorldAudio {
     this.createAmbience(seed);
   }
 
-  updateWorld(camera: pc.Entity | null, world: World | null, grounded: boolean, paused: boolean) {
+  updateWorld(
+    camera: pc.Entity | null,
+    world: World | null,
+    grounded: boolean,
+    paused: boolean,
+    immersion?: WaterImmersionSnapshot,
+  ) {
     if (!camera || !world) return;
     const { x, y, z } = camera.getPosition();
     this.update(
@@ -38,7 +50,8 @@ export class WorldAudio {
       grounded,
       world.getVoxel(Math.floor(x), Math.floor(y - 1.7), Math.floor(z)),
       () => {
-        const macro = macroAt(world.seed, x, z);
+        const proximity = this.actualWaterProximity(world, x, y, z);
+        const macro = macroAt(world.seed, x, z, world.server.generatorVersion);
         const nearby = this.paused
           ? []
           : world.server
@@ -49,15 +62,23 @@ export class WorldAudio {
         return {
           biome: macro.biome,
           worldTime: world.server.worldTime,
-          waterProximity: macro.hydrology.water ? 1 : 0,
+          waterProximity: proximity,
           danger: 0,
         };
       },
       paused,
+      immersion,
     );
   }
 
-  update(camera: pc.Entity, grounded: boolean, surface: number, getContext: () => MusicContext, paused: boolean) {
+  update(
+    camera: pc.Entity,
+    grounded: boolean,
+    surface: number,
+    getContext: () => MusicContext,
+    paused: boolean,
+    immersion?: WaterImmersionSnapshot,
+  ) {
     if (this.disposed) return;
     const graph = this.audio.graph;
     if (!graph) return;
@@ -65,9 +86,21 @@ export class WorldAudio {
     graph.manager.listener.setOrientation(camera.getWorldTransform());
     this.paused = paused || document.hidden;
     const position = camera.getPosition();
+    const currentPosition: readonly [number, number, number] = [position.x, position.y, position.z];
+    if (this.previousPosition)
+      this.traveledDistance += Math.hypot(
+        currentPosition[0] - this.previousPosition[0],
+        currentPosition[1] - this.previousPosition[1],
+        currentPosition[2] - this.previousPosition[2],
+      );
+    this.previousPosition = currentPosition;
     const count = this.steps.sample([position.x, position.y, position.z], grounded && !this.paused);
     if (!this.paused && count) this.play(`step-${surfaceSound(surface)}`, undefined, 0);
     const now = graph.context.currentTime;
+    const medium = immersion ?? { wading: false, swimming: false, cameraSubmerged: false };
+    graph.setUnderwaterMix(medium.cameraSubmerged ? 1 : 0);
+    for (const event of this.waterPolicy.sample(medium, this.traveledDistance, now, this.paused))
+      this.play(event, undefined, 2);
     if (now < this.nextContextAt && !this.paused) return;
     this.nextContextAt = now + 0.5;
     const context = getContext();
@@ -101,6 +134,20 @@ export class WorldAudio {
     }
     this.loops.length = 0;
     this.audio.endWorld();
+    this.audio.graph?.setUnderwaterMix(0);
+  }
+
+  private actualWaterProximity(world: World, x: number, y: number, z: number): number {
+    let nearest = Infinity;
+    for (let dy = -3; dy <= 2; dy += 1)
+      for (let dz = -6; dz <= 6; dz += 1)
+        for (let dx = -6; dx <= 6; dx += 1) {
+          const distance = Math.hypot(dx, dz, dy * 0.6);
+          if (distance >= nearest || distance > 6) continue;
+          if (world.getVoxel(Math.floor(x) + dx, Math.floor(y) + dy, Math.floor(z) + dz) === Voxel.Water)
+            nearest = distance;
+        }
+    return nearest === Infinity ? 0 : Math.max(0, 1 - nearest / 6);
   }
 
   private createAmbience(seed: number) {

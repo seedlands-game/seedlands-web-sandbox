@@ -1,7 +1,8 @@
-import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
+import { CURRENT_MACRO_GENERATOR_VERSION, macroAt, type MacroBiome, type MacroContext } from './macro-world';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 2;
+export const GENERATOR_VERSION = CURRENT_MACRO_GENERATOR_VERSION;
+export const LEGACY_GENERATOR_VERSION = 2;
 export type ChunkCoord = { cx: number; cy: number; cz: number };
 
 export const Voxel = {
@@ -125,9 +126,11 @@ export function normalizeSeed(raw: string): number {
   return h >>> 0;
 }
 
-export const terrainHeight = (seed: number, x: number, z: number): number => macroAt(seed, x, z).terrainHeight;
+export const terrainHeight = (seed: number, x: number, z: number, generatorVersion = GENERATOR_VERSION): number =>
+  macroAt(seed, x, z, generatorVersion).terrainHeight;
 
-export const biome = (seed: number, x: number, z: number): MacroBiome => macroAt(seed, x, z).biome;
+export const biome = (seed: number, x: number, z: number, generatorVersion = GENERATOR_VERSION): MacroBiome =>
+  macroAt(seed, x, z, generatorVersion).biome;
 
 function isTreeOrigin(seed: number, x: number, z: number, context: MacroContext): boolean {
   const threshold: Partial<Record<MacroBiome, number>> = { forest: 0.968, plains: 0.987, wet: 0.981, mountain: 0.995 };
@@ -143,8 +146,8 @@ export function baseVoxel(
   x: number,
   y: number,
   z: number,
-  context = macroAt(seed, x, z),
-  queryMacro = (qx: number, qz: number) => macroAt(seed, qx, qz),
+  context = macroAt(seed, x, z, GENERATOR_VERSION),
+  queryMacro = (qx: number, qz: number) => macroAt(seed, qx, qz, GENERATOR_VERSION),
 ): VoxelId {
   const h = context.terrainHeight;
   const kind = context.biome;

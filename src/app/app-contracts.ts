@@ -6,6 +6,7 @@ import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
 import type { UiMetrics } from './ui/ui-contracts';
 import type { VisualEffectsSnapshot } from './advanced-visual-effects';
+import type { FluidFeedbackSummary } from './fluid-feedback-tracker';
 
 export type MeshPart = MeshData;
 
@@ -82,12 +83,14 @@ export type HarnessSnapshot = {
   triangles: number;
   drawCalls: number;
   runtime: 'integrated-server';
+  generatorVersion: number;
   renderPipeline: typeof FINAL_RENDER_PIPELINE;
   serverRevision: number;
   voxelAtOrigin: number;
   serverPlayerPosition: [number, number, number];
   serverWorldTime: number;
   performance: PerformanceSummary;
+  fluidFeedback: FluidFeedbackSummary;
   ui: UiMetrics;
   gameplay: {
     entityCount: number;
@@ -114,6 +117,15 @@ export type HarnessSnapshot = {
     presentedEntityCount: number;
   };
   visualEffects: VisualEffectsSnapshot;
+  water: {
+    bodyFraction: number;
+    wading: boolean;
+    swimming: boolean;
+    cameraSubmerged: boolean;
+    cameraDepth: number;
+    waterSurfaceY: number | null;
+    underwaterBlend: number;
+  };
 };
 
 export type RestoredSession = {

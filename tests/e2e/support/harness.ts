@@ -25,6 +25,7 @@ export type HarnessSnapshot = {
   triangles: number;
   drawCalls: number;
   runtime: 'integrated-server';
+  generatorVersion: number;
   renderPipeline: {
     drawUnit: 'chunk-render-category';
     batchMode: 'category';
@@ -57,6 +58,24 @@ export type HarnessSnapshot = {
     droppedEvents: number;
     uploadQueueDepth: number;
     estimatedMeshBytes: number;
+  };
+  fluidFeedback: {
+    count: number;
+    pending: boolean;
+    p50Ms: number;
+    p95Ms: number;
+    p99Ms: number;
+    maxMs: number;
+    samples: Array<{
+      editToCommitMs: number;
+      commitToWorkerStartMs: number;
+      workerMs: number;
+      workerToAttachMs: number;
+      attachToVisibleMs: number;
+      totalMs: number;
+      mergedRequests: number;
+      supersededInFlight: number;
+    }>;
   };
   ui: {
     runtime: 'svelte5';
@@ -113,6 +132,15 @@ export type HarnessSnapshot = {
     waterPlaneY: number | null;
     postProcessing: boolean;
   };
+  water: {
+    bodyFraction: number;
+    wading: boolean;
+    swimming: boolean;
+    cameraSubmerged: boolean;
+    cameraDepth: number;
+    waterSurfaceY: number | null;
+    underwaterBlend: number;
+  };
 };
 
 type HarnessWindow = Window & {
@@ -134,6 +162,7 @@ type HarnessWindow = Window & {
     executeGameplayCommand: (command: Record<string, unknown>) => Promise<Record<string, unknown>>;
     advanceGameplay: (seconds: number) => void;
     setVoxelAt: (x: number, y: number, z: number, voxel: number) => void;
+    beginFluidFeedbackSample?: () => void;
     flushSave: () => Promise<void>;
   };
 };
