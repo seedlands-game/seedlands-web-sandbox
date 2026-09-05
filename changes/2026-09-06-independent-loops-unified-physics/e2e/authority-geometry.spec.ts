@@ -78,7 +78,7 @@ test('灯笼使用0.94格真实碰撞高度而不是整格模型包围盒', asyn
     const h = window.__seedlandsHarness as unknown as HarnessApi;
     await h.fillWorld({ from: [-2, 48, -2], to: [2, 48, 2], voxel: 3 });
     await h.fillWorld({ from: [-2, 49, -2], to: [2, 55, 2], voxel: 0 });
-    await h.setVoxelAt(0, 49, 0, 9);
+    await h.setVoxelAt(0, 49, 0, 10);
     await h.movePlayerTo(0.5, 54.6, 0.5);
   });
   await waitForSnapshot(page, (value) => value.onGround && Math.abs(value.serverPlayerPosition[1] - 51.54) < 0.001);

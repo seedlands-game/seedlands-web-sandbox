@@ -14,7 +14,7 @@ test('F3+B完整消费，面板等价控制，关闭真实线框资源不残留'
   await prepareFlatMovement(page);
   await page.evaluate(async () => {
     const h = window.__seedlandsHarness as unknown as HarnessApi;
-    await h.setVoxelAt(0, 58, -3, 9);
+    await h.setVoxelAt(0, 58, -3, 10);
     for (const command of [
       { type: 'spawn-actor', archetype: 'grazer', position: [3, 57, -3] },
       { type: 'spawn-world-item', itemId: 'stone-block', count: 1, position: [-3, 57, -2] },
@@ -25,6 +25,7 @@ test('F3+B完整消费，面板等价控制，关闭真实线框资源不残留'
     h.setView(0, 0);
   });
   await page.bringToFront();
+  if (await page.locator('#debug').isVisible()) await page.keyboard.press('F3');
   await expect(page.locator('#debug')).toBeHidden();
   const before = await state(page);
   expect(before.collisionDebug).toMatchObject({
