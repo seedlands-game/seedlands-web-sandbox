@@ -283,6 +283,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     fluidFeedback: context.world?.fluidFeedbackSummary ?? {
       count: 0,
       pending: false,
+      pendingSample: null,
       p50Ms: 0,
       p95Ms: 0,
       p99Ms: 0,

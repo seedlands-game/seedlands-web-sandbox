@@ -282,7 +282,7 @@ export class GameServer extends GameServerGameplayFacade {
         value === Voxel.Water ||
         hasAdjacentWater((...at) => this.fluidChunks.peekVoxel(...at), x, y, z)
       )
-        this.fluidRuntime.activate([x, y, z]);
+        this.fluidRuntime.activate([x, y, z], this.fluidPriorityForActor(actorId));
       if (previousFluid?.source && value !== Voxel.Water) this.fluidRuntime.removeSource([x, y, z]);
     }
     return result;
@@ -352,7 +352,7 @@ export class GameServer extends GameServerGameplayFacade {
         includeEditedPosition: (x, y, z) => this.fluidWindow.includeEditedPosition(x, y, z),
         writeCell: (x, y, z, cell) => this.fluidChunks.write(x, y, z, cell),
         peekVoxel: (x, y, z) => this.fluidChunks.peekVoxel(x, y, z),
-        activate: (position) => this.fluidRuntime.activate(position),
+        activate: (position) => this.fluidRuntime.activate(position, this.fluidPriorityForBatch(batch)),
         removeSource: (position) => this.fluidRuntime.removeSource(position),
       });
     return result;

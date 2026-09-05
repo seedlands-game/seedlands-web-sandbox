@@ -1,6 +1,7 @@
 import {
   FluidTransactionAuthority,
   type FluidAuthoritySnapshot,
+  type FluidActivationPriority,
   type FluidCandidate,
   type FluidCellValue,
   type FluidChunkSnapshot,
@@ -22,8 +23,8 @@ export class FluidTransactionRuntime<TCommit> {
     });
   }
 
-  activate(position: FluidPosition): boolean {
-    return this.authority.activate(position);
+  activate(position: FluidPosition, priority: FluidActivationPriority = 'ordinary'): boolean {
+    return this.authority.activate(position, priority);
   }
 
   removeSource(position: FluidPosition): boolean {

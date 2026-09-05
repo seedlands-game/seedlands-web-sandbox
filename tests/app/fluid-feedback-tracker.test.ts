@@ -63,6 +63,31 @@ describe('FluidFeedbackTracker', () => {
     expect(tracker.summary()).toMatchObject({ count: 0, pending: true });
   });
 
+  it('reports the bounded pending stage and target revision chain for failure attachments', () => {
+    let now = 2;
+    const tracker = new FluidFeedbackTracker(() => now);
+    tracker.begin(
+      { mergedRequests: 0, supersededInFlight: 0 },
+      { x: 33, y: 49, z: 1, radius: 1, chunkRevisions: [{ key: '1,1,0', revision: 7 }] },
+    );
+    now = 6;
+    expect(tracker.summary().pendingSample).toEqual({
+      stage: 'awaiting-fluid-commit',
+      elapsedMs: 4,
+      target: { x: 33, y: 49, z: 1, radius: 1 },
+      targetRevisions: [],
+    });
+
+    tracker.markFirstCommit([{ key: '1,1,0', revision: 8 }], { min: [32, 49, 0], max: [34, 49, 2] });
+    now = 11;
+    expect(tracker.summary().pendingSample).toEqual({
+      stage: 'awaiting-visible-mesh',
+      elapsedMs: 9,
+      target: { x: 33, y: 49, z: 1, radius: 1 },
+      targetRevisions: [{ key: '1,1,0', revision: 8 }],
+    });
+  });
+
   it('ignores an unrelated fluid commit before the requested target region commits', () => {
     let now = 0;
     const tracker = new FluidFeedbackTracker(() => now);

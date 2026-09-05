@@ -31,6 +31,12 @@ export type FluidFeedbackSample = {
 export type FluidFeedbackSummary = {
   count: number;
   pending: boolean;
+  pendingSample: {
+    stage: 'awaiting-fluid-commit' | 'awaiting-visible-mesh';
+    elapsedMs: number;
+    target: Omit<FluidFeedbackTarget, 'chunkRevisions'> | null;
+    targetRevisions: { key: string; revision: number }[];
+  } | null;
   p50Ms: number;
   p95Ms: number;
   p99Ms: number;
@@ -148,9 +154,18 @@ export class FluidFeedbackTracker {
 
   summary(): FluidFeedbackSummary {
     const totals = this.samples.map((sample) => sample.totalMs);
+    const requested = this.pending?.requestedTarget;
     return {
       count: totals.length,
       pending: this.pending !== null,
+      pendingSample: this.pending
+        ? {
+            stage: this.pending.firstCommitAt === null ? 'awaiting-fluid-commit' : 'awaiting-visible-mesh',
+            elapsedMs: Math.max(0, this.now() - this.pending.editAcceptedAt),
+            target: requested ? { x: requested.x, y: requested.y, z: requested.z, radius: requested.radius } : null,
+            targetRevisions: [...this.pending.targetRevisions].map(([key, revision]) => ({ key, revision })),
+          }
+        : null,
       p50Ms: percentile(totals, 0.5),
       p95Ms: percentile(totals, 0.95),
       p99Ms: percentile(totals, 0.99),

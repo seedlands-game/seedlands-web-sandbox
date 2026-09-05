@@ -2,7 +2,30 @@ import { expect, test, type Browser, type Page, type TestInfo } from '@playwrigh
 import type { HarnessApi } from '../../../src/app/game-harness';
 import { startHarnessWorld } from '../../../tests/e2e/support/harness';
 
-const TARGET_FLUID_SAMPLES = 20;
+const TARGETS = [
+  [-24, -12],
+  [-15, -12],
+  [-6, -12],
+  [3, -12],
+  [12, -12],
+  [-24, -20],
+  [-15, -20],
+  [-6, -20],
+  [3, -20],
+  [12, -20],
+  [-24, -28],
+  [-15, -28],
+  [-6, -28],
+  [3, -28],
+  [12, -28],
+  [-24, -36],
+  [-15, -36],
+  [-6, -36],
+  [3, -36],
+  [12, -36],
+] as const;
+const TARGET_FLUID_SAMPLES = TARGETS.length;
+const EXPECTED_STREAMED_CHUNKS = 50;
 const SCENARIO_SOURCE = {
   seed: 'authority-controlled-load',
   actorSpawns: 16,
@@ -60,10 +83,11 @@ const stopFrameSampling = (page: Page) =>
   });
 
 async function establishAuthorityLoad(page: Page) {
-  await page.evaluate(async () => {
+  await page.evaluate(async (targets) => {
     const harness = window.__seedlandsHarness as unknown as HarnessApi;
-    await harness.fillWorld({ from: [-20, 49, -20], to: [52, 56, 20], voxel: 0 });
-    await harness.fillWorld({ from: [-20, 48, -20], to: [52, 48, 20], voxel: 3 });
+    harness.setTimePaused(true);
+    await harness.fillWorld({ from: [-14, 49, -11], to: [14, 56, 3], voxel: 0 });
+    await harness.fillWorld({ from: [-14, 48, -11], to: [14, 48, 3], voxel: 3 });
     // Harness 坐标是相机/眼睛位置；50.6 对应脚底 y=49，避免嵌入 y=48 的地板。
     await harness.movePlayerTo(0, 50.6, 0);
     for (let index = 0; index < 16; index += 1) {
@@ -71,7 +95,7 @@ async function establishAuthorityLoad(page: Page) {
         type: 'spawn-actor',
         id: `load-actor-${index}`,
         archetype: (['grazer', 'night-stalker', 'settler'] as const)[index % 3]!,
-        position: [-7 + (index % 8) * 2, 49, 4 + Math.floor(index / 8) * 3],
+        position: [-7 + (index % 8) * 2, 49, -3 - Math.floor(index / 8) * 3],
       });
       if (!result.success) throw new Error(result.error.message);
     }
@@ -80,45 +104,123 @@ async function establishAuthorityLoad(page: Page) {
         type: 'spawn-world-item',
         itemId: 'stone-block',
         count: 1,
-        position: [-15 + (index % 8), 49.4, 4 + Math.floor(index / 8)],
+        position: [-12 + (index % 8), 49.4, -2 - Math.floor(index / 8)],
       });
       if (!result.success) throw new Error(result.error.message);
     }
-    await harness.fillWorld({ from: [19, 48, -17], to: [52, 48, 16], voxel: 3 });
-    await harness.fillWorld({ from: [19, 49, -17], to: [19, 49, 16], voxel: 3 });
-    await harness.fillWorld({ from: [52, 49, -17], to: [52, 49, 16], voxel: 3 });
-    await harness.fillWorld({ from: [20, 49, -17], to: [51, 49, -17], voxel: 3 });
-    await harness.fillWorld({ from: [20, 49, 16], to: [51, 49, 16], voxel: 3 });
+    for (const [x, z] of targets) {
+      await harness.fillWorld({ from: [x - 1, 48, z - 1], to: [x + 1, 49, z + 1], voxel: 3 });
+      await harness.setVoxelAt(x, 49, z, 0);
+      await harness.setVoxelAt(x + 1, 49, z, 0);
+    }
+    await harness.fillWorld({ from: [15, 49, 15], to: [48, 52, 48], voxel: 0 });
+    await harness.fillWorld({ from: [15, 48, 15], to: [48, 48, 48], voxel: 3 });
+    await harness.fillWorld({ from: [15, 49, 15], to: [15, 49, 48], voxel: 3 });
+    await harness.fillWorld({ from: [48, 49, 15], to: [48, 49, 48], voxel: 3 });
+    await harness.fillWorld({ from: [16, 49, 15], to: [47, 49, 15], voxel: 3 });
+    await harness.fillWorld({ from: [16, 49, 48], to: [47, 49, 48], voxel: 3 });
+  }, TARGETS);
+}
+
+async function activateAuthorityFluidLoad(page: Page) {
+  await page.evaluate(async () => {
+    const harness = window.__seedlandsHarness as unknown as HarnessApi;
+    harness.setTimePaused(false);
     // 32×32 个源水格经生产 editBatch 激活真实权威 frontier；不写诊断计数。
-    await harness.fillWorld({ from: [20, 49, -16], to: [51, 49, 15], voxel: 8 });
+    await harness.fillWorld({ from: [16, 49, 16], to: [47, 49, 47], voxel: 8 });
   });
 }
 
-async function sampleTargetFluid(page: Page, index: number) {
-  const x = -18 + (index % 10) * 4;
-  const z = -10 - Math.floor(index / 10) * 4;
-  await page.evaluate(
-    async ({ x, z }) => {
+async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers: 1 | 2, index: number) {
+  const [x, z] = TARGETS[index]!;
+  const targetBefore = await page.evaluate(
+    ({ x, z }) => {
       const harness = window.__seedlandsHarness as unknown as HarnessApi;
-      await harness.fillWorld({ from: [x - 1, 49, z - 1], to: [x + 1, 49, z + 1], voxel: 3 });
-      await harness.setVoxelAt(x, 49, z, 0);
-      await harness.setVoxelAt(x + 1, 49, z, 0);
       harness.setView((Math.atan2(-x, -z) * 180) / Math.PI, -8);
+      return {
+        voxel: harness.getVoxelAt?.(x, 49, z) ?? null,
+        fluid: harness.getFluidCell?.(x, 49, z) ?? null,
+        chunkRevision: harness.getChunkRevision?.(Math.floor(x / 32), 1, Math.floor(z / 32)) ?? null,
+      };
     },
     { x, z },
   );
+  expect(targetBefore.voxel).toBe(0);
+  expect(targetBefore.fluid).toBeNull();
+  await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
   const before = await snapshot(page);
-  await page.evaluate(
-    async ({ x, z }) => {
-      const harness = window.__seedlandsHarness as unknown as HarnessApi;
-      harness.beginFluidFeedbackSample?.({ x, y: 49, z, radius: 1 });
-      await harness.setVoxelAt(x, 49, z, 8);
-    },
-    { x, z },
-  );
-  await expect
-    .poll(async () => (await snapshot(page)).fluidFeedback.count, { timeout: 15_000 })
-    .toBe(before.fluidFeedback.count + 1);
+  try {
+    await page.evaluate(
+      async ({ x, z }) => {
+        const harness = window.__seedlandsHarness as unknown as HarnessApi;
+        harness.beginFluidFeedbackSample?.({ x, y: 49, z, radius: 1 });
+        await harness.setVoxelAt(x, 49, z, 8);
+      },
+      { x, z },
+    );
+    await expect
+      .poll(async () => (await snapshot(page)).fluidFeedback.count, { timeout: 15_000 })
+      .toBe(before.fluidFeedback.count + 1);
+  } finally {
+    const evidence = await page.evaluate(
+      ({ x, z }) => {
+        const harness = window.__seedlandsHarness as unknown as HarnessApi;
+        const current = harness.snapshot();
+        const targetChunkKey = `${Math.floor(x / 32)},${Math.floor(49 / 32)},${Math.floor(z / 32)}`;
+        return {
+          target: { x, y: 49, z, targetChunkKey },
+          targetCells: [-1, 0, 1].flatMap((offsetZ) =>
+            [-1, 0, 1].map((offsetX) => ({
+              x: x + offsetX,
+              y: 49,
+              z: z + offsetZ,
+              voxel: harness.getVoxelAt?.(x + offsetX, 49, z + offsetZ) ?? null,
+              fluid: harness.getFluidCell?.(x + offsetX, 49, z + offsetZ) ?? null,
+            })),
+          ),
+          snapshot: {
+            loadedChunks: current.loadedChunks,
+            renderedChunks: current.renderedChunks,
+            generationQueue: current.generationQueue,
+            meshingQueue: current.meshingQueue,
+            deferredRemeshes: current.deferredRemeshes,
+            uploadQueueDepth: current.performance.uploadQueueDepth,
+            structuralEventCount: current.structuralEventCount,
+            remeshSchedulingCount: current.remeshSchedulingCount,
+            worldRevision: current.worldRevision,
+            targetChunkRevision: harness.getChunkRevision?.(Math.floor(x / 32), 1, Math.floor(z / 32)) ?? null,
+            authorityFluid: current.authority.fluid,
+            fluidFeedback: current.fluidFeedback,
+            compute: current.compute,
+          },
+          targetChunkTrace: harness
+            .exportPerformanceTrace()
+            .traceEvents.filter((event) => event.name === targetChunkKey)
+            .slice(-16),
+        };
+      },
+      { x, z },
+    );
+    await testInfo.attach(`authority-fluid-target-${generalWorkers}-${index}`, {
+      body: JSON.stringify(
+        {
+          index,
+          expectedFeedbackCount: before.fluidFeedback.count + 1,
+          targetBefore,
+          before: {
+            fluidFeedback: before.fluidFeedback,
+            authorityFluid: before.authority.fluid,
+            structuralEventCount: before.structuralEventCount,
+            remeshSchedulingCount: before.remeshSchedulingCount,
+          },
+          after: evidence,
+        },
+        null,
+        2,
+      ),
+      contentType: 'application/json',
+    });
+  }
 }
 
 async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWorkers: 1 | 2) {
@@ -126,7 +228,48 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
   const page = await context.newPage();
   try {
     await startHarnessWorld(page, SCENARIO_SOURCE.seed, `&generalWorkers=${generalWorkers}`);
+    const scenarioId = await page.evaluate(() =>
+      (window.__seedlandsHarness as unknown as HarnessApi).beginPerformanceScenario('authority-controlled-load'),
+    );
     await establishAuthorityLoad(page);
+    const ready = await expect
+      .poll(
+        async () => {
+          const current = await snapshot(page);
+          return {
+            loadedChunks: current.loadedChunks,
+            generationQueue: current.generationQueue,
+            meshingQueue: current.meshingQueue,
+            deferredRemeshes: current.deferredRemeshes,
+            uploadQueueDepth: current.performance.uploadQueueDepth,
+            presentedEntities: current.gameplay.presentedEntityCount,
+          };
+        },
+        { timeout: 30_000 },
+      )
+      .toMatchObject({
+        loadedChunks: EXPECTED_STREAMED_CHUNKS,
+        generationQueue: 0,
+        meshingQueue: 0,
+        deferredRemeshes: 0,
+        uploadQueueDepth: 0,
+        presentedEntities: 84,
+      });
+    void ready;
+    const prepared = await snapshot(page);
+    await testInfo.attach(`authority-load-ready-general-${generalWorkers}`, {
+      body: JSON.stringify(prepared, null, 2),
+      contentType: 'application/json',
+    });
+    expect(prepared.renderedChunks).toBeGreaterThanOrEqual(25);
+    expect(prepared.triangles).toBeGreaterThan(1_000);
+    expect(prepared.gameplay.activeActorCount).toBeGreaterThanOrEqual(16);
+    expect(prepared.gameplay.worldItemCount).toBeGreaterThanOrEqual(64);
+    expect(prepared.authority.bodies.actors).toBeGreaterThanOrEqual(16);
+    expect(prepared.authority.bodies.worldItems).toBeGreaterThanOrEqual(64);
+    expect(prepared.authority.bodies.nearPlayer).toBeGreaterThanOrEqual(80);
+    await startFrameSampling(page);
+    await activateAuthorityFluidLoad(page);
     await expect
       .poll(async () => (await snapshot(page)).authority.fluid.pendingCellCount, { timeout: 10_000 })
       .toBeGreaterThanOrEqual(1_024);
@@ -135,16 +278,8 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
       body: JSON.stringify(loaded, null, 2),
       contentType: 'application/json',
     });
-    expect(loaded.gameplay.activeActorCount).toBeGreaterThanOrEqual(16);
-    expect(loaded.gameplay.worldItemCount).toBeGreaterThanOrEqual(64);
-    expect(loaded.authority.bodies.actors).toBeGreaterThanOrEqual(16);
-    expect(loaded.authority.bodies.worldItems).toBeGreaterThanOrEqual(64);
-    expect(loaded.authority.bodies.nearPlayer).toBeGreaterThanOrEqual(80);
-    const scenarioId = await page.evaluate(() =>
-      (window.__seedlandsHarness as unknown as HarnessApi).beginPerformanceScenario('authority-controlled-load'),
-    );
-    await startFrameSampling(page);
-    for (let index = 0; index < TARGET_FLUID_SAMPLES; index += 1) await sampleTargetFluid(page, index);
+    for (let index = 0; index < TARGET_FLUID_SAMPLES; index += 1)
+      await sampleTargetFluid(page, testInfo, generalWorkers, index);
     await expect
       .poll(async () => (await snapshot(page)).performance.completedChunkTraces, { timeout: 15_000 })
       .toBeGreaterThan(0);

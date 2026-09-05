@@ -20,7 +20,7 @@ export abstract class GameServerGameplayFacade {
 
   protected constructor(private readonly gameplayPersistence?: Persistence) {
     this.gameplay = new GameplayRuntime({
-      getVoxel: (position) => this.getVoxel(...position),
+      getVoxel: (position) => this.readGameplayVoxel(...position),
       editVoxel: (actorId, position, voxel) =>
         this.editBatch({
           actorId,
@@ -34,6 +34,10 @@ export abstract class GameServerGameplayFacade {
   abstract getVoxel(x: number, y: number, z: number): number;
   abstract editBatch(batch: WorldEditBatch): WorldCommitResult;
   abstract setWorldTime(hours: number): number;
+
+  protected readGameplayVoxel(x: number, y: number, z: number): number | undefined {
+    return this.getVoxel(x, y, z);
+  }
 
   createEntity(entity: EntitySpawn): GameplayEntity {
     const created = this.gameplay.spawn(entity);
@@ -158,7 +162,7 @@ export abstract class GameServerGameplayFacade {
       {
         entities: this.gameplay.entities,
         simulation: this.gameplay.simulation,
-        getVoxel: (position) => this.getVoxel(...position),
+        getVoxel: (position) => this.readGameplayVoxel(...position),
         isPlayerAlive: (id) => this.gameplay.getPlayerState(id).lifecycle === 'alive',
         damagePlayer: (source, target, amount) => this.gameplay.applyDamage(source, target, amount, 'actor').success,
         touch: () => this.gameplay.recordAuthorityMutation(),
@@ -239,6 +243,16 @@ export abstract class GameServerGameplayFacade {
 
   protected createGameplaySnapshot() {
     return this.gameplay.createSnapshot();
+  }
+
+  protected fluidPriorityForActor(actorId: string) {
+    return actorId === 'player-edit' || this.gameplay.getEntity(actorId)?.type === 'player'
+      ? 'interactive'
+      : 'ordinary';
+  }
+
+  protected fluidPriorityForBatch(batch: WorldEditBatch) {
+    return batch.edits?.length === 1 && !batch.buffers?.length ? this.fluidPriorityForActor(batch.actorId) : 'ordinary';
   }
 
   protected markGameplayPersisted(revision: number): void {
