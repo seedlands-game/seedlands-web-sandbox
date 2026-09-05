@@ -266,6 +266,96 @@ describe('BrowserAuthorityClient', () => {
     vi.useRealTimers();
   });
 
+  it('以同一幂等事务流确认暂停与恢复，并只完成配对回执', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const pausing = client.pause();
+    const pauseRequest = worker.posts.at(-1) as {
+      kind: string;
+      requestId: number;
+      transaction: { stream: string; sequence: number };
+    };
+    const resuming = client.resume();
+    const resumeRequest = worker.posts.at(-1) as {
+      kind: string;
+      requestId: number;
+      transaction: { stream: string; sequence: number };
+    };
+
+    expect(pauseRequest).toMatchObject({
+      kind: 'pause-authority',
+      transaction: { stream: 'session-control', sequence: 0 },
+    });
+    expect(resumeRequest).toMatchObject({
+      kind: 'resume-authority',
+      transaction: { stream: 'session-control', sequence: 1 },
+    });
+
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: resumeRequest.requestId,
+      ok: true,
+      result: { paused: false },
+    });
+    await expect(resuming).resolves.toEqual({ paused: false });
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: pauseRequest.requestId,
+      ok: true,
+      result: { paused: true },
+    });
+    await expect(pausing).resolves.toEqual({ paused: true });
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: pauseRequest.requestId,
+      ok: true,
+      result: { paused: true },
+    });
+  });
+
+  it('会话控制超时后只报告一次fatal、拒绝新请求并忽略迟到快照', async () => {
+    vi.useFakeTimers();
+    const worker = new FakeAuthorityWorker();
+    const fatal = vi.fn();
+    const snapshots = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'world:1', {
+      onFatal: fatal,
+      onSnapshot: snapshots,
+      requestTimeoutMs: 100,
+    });
+    const starting = client.start({
+      seedText: 'worker-client',
+      openMode: 'continue',
+      legacySnapshots: [],
+      initialWorldTime: 9,
+      frequencies,
+    });
+    worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch: 'world:1', ready: ready() });
+    await starting;
+
+    const pausing = client.pause();
+    vi.advanceTimersByTime(100);
+    await expect(pausing).rejects.toThrow(/timed out/i);
+    expect(fatal).toHaveBeenCalledTimes(1);
+    expect(client.isReady).toBe(false);
+    await expect(client.resume()).rejects.toThrow(/failed/i);
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: { ...ready().snapshot, physicsTick: 2, commitSequence: 1 },
+    });
+    expect(snapshots).not.toHaveBeenCalled();
+    expect(fatal).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
   it('异步准备Worker输入，并只在权威接纳计算结果后开放本地只读副本', async () => {
     const worker = new FakeAuthorityWorker();
     const client = new BrowserAuthorityClient(worker, 'world:1');

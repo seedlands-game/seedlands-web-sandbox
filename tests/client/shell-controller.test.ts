@@ -63,4 +63,31 @@ describe('游戏外壳异步状态', () => {
     expect(sanitizeQuality('extreme')).toBe('medium');
     expect(sanitizeQuality('high')).toBe('high');
   });
+
+  it('运行时故障停止陈旧世界并保留可重试错误', async () => {
+    const game = port();
+    const shell = new ShellController(game);
+    await shell.start('oak', 'medium');
+    shell.fail(new Error('Authority Worker失联'));
+    expect(shell.state).toMatchObject({ phase: 'menu', error: 'Authority Worker失联' });
+    await shell.start('oak', 'medium');
+    expect(shell.state).toMatchObject({ phase: 'playing', error: '' });
+  });
+
+  it('启动期间的运行时故障不会被迟到的成功结果复活', async () => {
+    const game = port();
+    let resolve!: () => void;
+    game.start.mockImplementationOnce(
+      () =>
+        new Promise<void>((done) => {
+          resolve = done;
+        }),
+    );
+    const shell = new ShellController(game);
+    const starting = shell.start('oak', 'medium');
+    shell.fail(new Error('Authority启动失联'));
+    resolve();
+    await starting;
+    expect(shell.state).toMatchObject({ phase: 'menu', error: 'Authority启动失联' });
+  });
 });

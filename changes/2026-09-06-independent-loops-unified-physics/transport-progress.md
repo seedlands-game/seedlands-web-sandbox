@@ -62,3 +62,30 @@
 - Playwright-change：用例已完成，按主线浏览器独占安排待执行；此项尚不记为通过。
 
 阶段：生产实现与确定性验证完成，等待主线真实浏览器准出。
+
+## A8 会话控制与故障闭环
+
+### 审计结论与设计
+
+- 当前 `pause-authority` / `resume-authority` 是无 `requestId`、无事务键、无回执的单向消息。UI 会立即切换状态，却无法确认 Authority 是否执行；重复投递也没有可证明的一次性边界。
+- Worker 请求超时只拒绝单个 Promise。Authority Worker 已崩溃或会话控制已失联时，客户端仍继续接受旧快照、保留 `isReady=true`，界面只显示四秒反馈，随后继续展示无法前进的陈旧世界。
+- 失焦与页面隐藏已有真实输入释放路径，但必须保持“先发送全零输入，再请求暂停”的顺序，且暂停失败必须进入同一故障闭环。
+
+决定把暂停与恢复纳入同一个 `session-control` 幂等事务流，使用递增 sequence、`requestId` 和显式 `{ paused }` 回执。受控重复投递复用同一事务身份；乱序或迟到回执只按 `requestId` 完成原请求，不能改变新的会话意图。控制请求拒绝或超时视为 Authority 会话失联：客户端只触发一次 fatal、拒绝新请求并忽略后续快照。游戏立即释放输入、销毁失效运行时并进入带错误信息且可重新进入世界的界面，不继续展示陈旧世界，也不在主线程启动替代 Authority。
+
+### RED 与验收用例
+
+- `tests/client/browser-authority-client.test.ts`：暂停/恢复必须共享递增事务流并等待配对回执；重复、倒序和旧 epoch 回执不能重复完成或回退；控制超时只触发一次 fatal，之后 `isReady=false`、新请求立即拒绝、迟到快照忽略。
+- `tests/client/shell-controller.test.ts`：运行时 fatal 必须从游玩态进入保留错误的可重试菜单；在启动未完成时 fatal 不能被迟到的成功结果重新覆盖为游玩态。
+- 既有 `tests/app/player-input-gates.test.ts` 继续证明 `blur` 与 `visibilityState=hidden` 会清空按键；浏览器 `authority-lifecycle.spec.ts` 已覆盖 Worker 阻塞与世界重启，本阶段不复制该旅程。
+- 浏览器故障旅程由现有 `authority-lifecycle.spec.ts` 扩展“故障后错误界面可见、陈旧世界已销毁且可重新进入”断言，避免新增一条重复启动与重启的高成本用例；由主线在独占浏览器时执行。
+
+预期 RED：生产协议中的暂停/恢复没有 `requestId` 与事务字段，客户端方法返回 `void`；`ShellController` 没有运行时失败入口，迟到的启动完成会无条件恢复为 `playing`。
+
+### 实施与 GREEN
+
+- 暂停/恢复现使用 `session-control` 事务流，Worker 仅在 Authority 执行后返回配对 `{ paused }`；重复消息复用事务收据，重复或乱序回执不会重复完成请求。
+- 控制回执非法、明确拒绝或超时都会把客户端锁定为 fatal。fatal 只发布一次；`isReady` 立即变为 false，新请求立即拒绝，后续快照与迟到回执不再进入表现层。
+- `Game` 保持先释放输入再请求暂停。运行时 fatal 会通知 `ApplicationShell`，后者把状态转为带错误信息的可重试菜单并销毁原 Worker、世界和表现资源；启动期间迟到成功也不能重新把失效世界发布为 `playing`。
+- RED 实测为 4 项失败：暂停请求缺事务、暂停返回 `void`、两项 `ShellController.fail` 不存在。实现后 `browser-authority-client`、`shell-controller`、`player-input-gates` 共 23 项通过；受影响 ESLint 与源码 TypeScript 通过。
+- 测试 TypeScript 当前只被并行 A12 尚未创建的 `src/worker/compute-worker-entry-lifecycle.ts` 阻塞，本阶段文件没有其他诊断。浏览器现有生命周期用例的扩展与执行交还主线统一完成，因此不记为本代理通过。

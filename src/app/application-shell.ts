@@ -44,6 +44,13 @@ export class ApplicationShell {
       },
       pause: (paused) => game.setPaused(paused),
     });
+    game.onRuntimeFailure = (error) => {
+      game.releaseInput();
+      this.controller.fail(error);
+      bridge.publishShell({ phase: 'error', enterLabel: '重新进入世界' });
+      this.publish();
+      game.abortStart();
+    };
     this.controller.subscribe(() => this.publish());
     window.addEventListener('keydown', (event) => {
       if (event.code !== 'Escape' || event.defaultPrevented) return;

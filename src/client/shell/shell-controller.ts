@@ -18,6 +18,7 @@ export function sanitizeQuality(value: unknown): ShellQuality {
 
 export class ShellController {
   private value: ApplicationShellState = { phase: 'menu', seed: '', quality: 'medium', error: '' };
+  private transitionSequence = 0;
   private readonly subscribers = new Set<(value: ApplicationShellState) => void>();
   constructor(private readonly game: GamePort) {}
   get state() {
@@ -34,12 +35,14 @@ export class ShellController {
 
   async start(seed: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {
     if (this.value.phase !== 'menu') return;
+    const transition = ++this.transitionSequence;
     this.publish({ phase: 'loading', seed, quality, error: '' });
     try {
       await this.game.start(seed, quality, openMode);
-      this.publish({ phase: 'playing' });
+      if (transition === this.transitionSequence) this.publish({ phase: 'playing' });
     } catch (error) {
-      this.publish({ phase: 'menu', error: this.message(error, '世界未能启动，请重试。') });
+      if (transition === this.transitionSequence)
+        this.publish({ phase: 'menu', error: this.message(error, '世界未能启动，请重试。') });
     }
   }
 
@@ -64,6 +67,11 @@ export class ShellController {
     } catch (error) {
       this.publish({ phase: 'paused', error: this.message(error, '保存失败，世界已保留，请重试。') });
     }
+  }
+
+  fail(error: unknown) {
+    this.transitionSequence += 1;
+    this.publish({ phase: 'menu', error: this.message(error, 'Authority运行时故障，请重新进入世界。') });
   }
 
   private publish(patch: Partial<ApplicationShellState>) {

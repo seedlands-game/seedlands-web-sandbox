@@ -1,18 +1,11 @@
-import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import type { CommandResult, CommandSource, ServerCommand } from '../server/commands/command-contract';
-import type { FluidCandidate, FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
+import type { AuthoritySnapshot } from '../server/authority/authority-session';
+import type { FluidCandidate } from '../server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '../server/game-server-types';
 import { legacyFluid } from '../server/fluid/fluid-cell-state';
 import type { VoxelEdit } from '../server/world-mutation';
-import {
-  PROTOCOL_VERSION,
-  type InputCommand,
-  type SequenceDecision,
-  type SessionEpoch,
-} from '../runtime/session-protocol';
+import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '../runtime/session-protocol';
 import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
-import type { SerializedChunkSnapshot } from './browser-chunk-persistence';
-import type { WorldOpenMode } from './world-version-policy';
 import type {
   AuthorityAction,
   AuthorityActionResult,
@@ -22,42 +15,19 @@ import type {
   AuthorityRequest,
   AuthorityResponse,
 } from '../worker/authority-worker-protocol';
-import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-protocol';
+import type { LogicIntentBatch } from '../server/logic/logic-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from './client-request-registry';
 import { ClientReadyWait } from './client-ready-wait';
-import { createAuthorityTransport, type AuthorityTransportFaults } from './authority-transport';
+import { createAuthorityTransport } from './authority-transport';
 import { applyAcknowledgedWorldEdits } from './acknowledged-world-edit-cache';
 import { provideAuthorityBootstrap } from './authority-bootstrap-client';
-
-export type AuthorityWorkerPort = {
-  onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null;
-  onerror: ((event: ErrorEvent) => void) | null;
-  postMessage(message: unknown, transfer?: Transferable[]): void;
-  terminate(): void;
-};
-
-export type ClientOptions = Readonly<{
-  onSnapshot?: (snapshot: AuthoritySnapshot) => void;
-  onGameplay?: (view: AuthorityGameplayView) => void;
-  onCommit?: (commit: WorldCommitResult) => void;
-  onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
-  onLogicObservation?: (observation: LogicObservation) => void;
-  onBootstrapGeneration?: Parameters<typeof provideAuthorityBootstrap>[1];
-  onUnknownChunk?: (key: string) => void;
-  onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
-  onFatal?: (error: Error) => void;
-  requestTimeoutMs?: number;
-  transportFaults?: AuthorityTransportFaults;
-}>;
-
-type StartOptions = Readonly<{
-  seedText: string;
-  openMode: WorldOpenMode;
-  legacySnapshots: readonly SerializedChunkSnapshot[];
-  initialWorldTime: number;
-  frequencies: AuthorityReady['frequencies'];
-}>;
+import type {
+  AuthorityClientOptions,
+  AuthorityStartOptions,
+  AuthorityWorkerPort,
+} from './browser-authority-client-contract';
+export type { AuthorityWorkerPort } from './browser-authority-client-contract';
 
 type CachedMesh = {
   canonical: Uint16Array;
@@ -71,6 +41,8 @@ type CachedPreparation = {
   fluid?: Uint8Array;
   overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
 };
+const failedClientError = (failure: Error) =>
+  new Error(`Authority client failed: ${failure.message}`, { cause: failure });
 
 export class BrowserAuthorityClient {
   private requestSequence = 0;
@@ -85,13 +57,14 @@ export class BrowserAuthorityClient {
   private gameplayValue: AuthorityGameplayView | null = null;
   private readonly readyWait: ClientReadyWait<AuthorityReady>;
   private disposed = false;
+  private failureValue: Error | null = null;
   private storageBytesValue = 0;
   private lastInputDecisionSequence = -1;
 
   constructor(
     private readonly worker: AuthorityWorkerPort,
     readonly epoch: SessionEpoch,
-    private readonly options: ClientOptions = {},
+    private readonly options: AuthorityClientOptions = {},
   ) {
     this.requests = new ClientRequestRegistry(options.requestTimeoutMs);
     this.readyWait = new ClientReadyWait(options.requestTimeoutMs);
@@ -100,7 +73,7 @@ export class BrowserAuthorityClient {
     worker.onerror = (event) => this.failAll(new Error(event.message || 'Authority Worker failed.'));
   }
 
-  static create(epoch: SessionEpoch, options: ClientOptions = {}) {
+  static create(epoch: SessionEpoch, options: AuthorityClientOptions = {}) {
     const raw = new Worker(new URL('../worker/authority-worker.ts', import.meta.url), { type: 'module' });
     return new BrowserAuthorityClient(
       createAuthorityTransport(raw, options.transportFaults ?? { harnessEnabled: false }),
@@ -109,8 +82,9 @@ export class BrowserAuthorityClient {
     );
   }
 
-  start(options: StartOptions): Promise<AuthorityReady> {
+  start(options: AuthorityStartOptions): Promise<AuthorityReady> {
     if (this.disposed) return Promise.reject(new Error('Authority client is disposed.'));
+    if (this.failureValue) return Promise.reject(failedClientError(this.failureValue));
     if (this.readyWait.pending || this.readyValue)
       return Promise.reject(new Error('Authority client already started.'));
     const ready = this.readyWait.start();
@@ -137,7 +111,7 @@ export class BrowserAuthorityClient {
   }
 
   get isReady(): boolean {
-    return Boolean(this.readyValue) && !this.disposed;
+    return Boolean(this.readyValue) && !this.disposed && !this.failureValue;
   }
 
   get snapshot(): AuthoritySnapshot | null {
@@ -197,12 +171,12 @@ export class BrowserAuthorityClient {
     this.post(command);
   }
 
-  pause(): void {
-    this.post({ kind: 'pause-authority', protocolVersion: PROTOCOL_VERSION, epoch: this.epoch });
+  pause(): Promise<{ paused: true }> {
+    return this.controlSession(true);
   }
 
-  resume(): void {
-    this.post({ kind: 'resume-authority', protocolVersion: PROTOCOL_VERSION, epoch: this.epoch });
+  resume(): Promise<{ paused: false }> {
+    return this.controlSession(false);
   }
 
   ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
@@ -414,6 +388,7 @@ export class BrowserAuthorityClient {
     transactionStream?: string,
   ): Promise<unknown> {
     if (this.disposed) return Promise.reject(new Error('Authority client is disposed.'));
+    if (this.failureValue) return Promise.reject(failedClientError(this.failureValue));
     const requestId = ++this.requestSequence;
     const promise = this.requests.create(requestId);
     const transaction = transactionStream
@@ -442,12 +417,18 @@ export class BrowserAuthorityClient {
   }
 
   private post(message: AuthorityRequest, transfer: Transferable[] = []): void {
-    if (this.disposed) return;
+    if (this.disposed || this.failureValue) return;
     this.worker.postMessage(message, transfer);
   }
 
   private receive(message: AuthorityResponse): void {
-    if (this.disposed || message.protocolVersion !== PROTOCOL_VERSION || message.epoch !== this.epoch) return;
+    if (
+      this.disposed ||
+      this.failureValue ||
+      message.protocolVersion !== PROTOCOL_VERSION ||
+      message.epoch !== this.epoch
+    )
+      return;
     switch (message.kind) {
       case 'authority-ready':
         if (!this.readyWait.pending) return;
@@ -540,7 +521,25 @@ export class BrowserAuthorityClient {
     return this.readyValue;
   }
 
+  private async controlSession<Paused extends boolean>(paused: Paused): Promise<{ paused: Paused }> {
+    try {
+      const result = (await this.request(
+        { kind: paused ? 'pause-authority' : 'resume-authority' },
+        [],
+        'session-control',
+      )) as { paused?: unknown };
+      if (result.paused !== paused) throw new Error('Authority session control acknowledgement is invalid.');
+      return { paused };
+    } catch (error) {
+      const failure = error instanceof Error ? error : new Error(String(error));
+      this.failAll(failure);
+      throw failure;
+    }
+  }
+
   private failAll(error: Error): void {
+    if (this.failureValue) return;
+    this.failureValue = error;
     this.cancelAll(error);
     this.options.onFatal?.(error);
   }

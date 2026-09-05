@@ -58,7 +58,9 @@ const transact = async (
         | 'gameplay-action'
         | 'server-command'
         | 'set-world-time'
-        | 'set-world-clock-rate';
+        | 'set-world-clock-rate'
+        | 'pause-authority'
+        | 'resume-authority';
     }
   >,
   operation: () => TransactionResponse | Promise<TransactionResponse>,
@@ -199,10 +201,16 @@ const handle = async (message: AuthorityRequest) => {
       });
       break;
     case 'pause-authority':
-      current.pause(performance.now());
+      await transact(message, () => {
+        current.pause(performance.now());
+        return { result: { paused: true } };
+      });
       break;
     case 'resume-authority':
-      current.resume(performance.now());
+      await transact(message, () => {
+        current.resume(performance.now());
+        return { result: { paused: false } };
+      });
       break;
     case 'prepare-mesh': {
       const payload = await current.prepareMesh(message.cx, message.cy, message.cz);

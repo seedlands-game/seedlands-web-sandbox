@@ -76,6 +76,7 @@ export class Game {
   private sessionSequence = 0;
   private readonly authoritySync = new AuthorityPresentationSync(() => this.controller);
   private collisionDebug: CollisionDebugRuntime | null = null;
+  onRuntimeFailure: ((error: Error) => void) | null = null;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -137,7 +138,10 @@ export class Game {
       onInputDecision: ({ decision, requiresResync }) => {
         if (requiresResync || !['accepted', 'duplicate'].includes(decision)) this.controller?.resynchronizeInput();
       },
-      onFatal: (error) => runtimeControls.reportRuntimeFailure(this.uiSession, ++this.interactionSequence, error),
+      onFatal: (error) => {
+        runtimeControls.reportRuntimeFailure(this.uiSession, ++this.interactionSequence, error);
+        this.onRuntimeFailure?.(error);
+      },
     });
     const { authority, compute: computeRuntime, logic: logicClient, ready } = session;
     this.authority = authority;
@@ -300,8 +304,8 @@ export class Game {
   setPaused(paused: boolean) {
     this.paused = paused;
     this.controller?.releaseInput();
-    if (paused) this.authority?.pause();
-    else this.authority?.resume();
+    const control = paused ? this.authority?.pause() : this.authority?.resume();
+    void control?.catch(() => undefined);
     this.gameplayClient?.setSuspended(paused);
     this.worldAudio?.updateWorld(
       this.camera,

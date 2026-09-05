@@ -129,8 +129,13 @@ export type AuthorityRequest =
       frequencies: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
     }>
   | InputCommand
-  | Readonly<{ kind: 'pause-authority'; protocolVersion: typeof PROTOCOL_VERSION; epoch: SessionEpoch }>
-  | Readonly<{ kind: 'resume-authority'; protocolVersion: typeof PROTOCOL_VERSION; epoch: SessionEpoch }>
+  | Readonly<{
+      kind: 'pause-authority' | 'resume-authority';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      transaction: AuthorityTransactionKey;
+    }>
   | Readonly<{
       kind: 'prepare-mesh';
       protocolVersion: typeof PROTOCOL_VERSION;
