@@ -29,6 +29,7 @@ import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnost
 import { AuthorityMutationPreparation, unavailableWorldCommit } from './authority-mutation-preparation';
 import { applyAuthorityPlayerAction } from './authority-player-action';
 import { queueBodyRecoveriesAfterCommit } from './authority-geometry-recovery';
+import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from './authority-canonical-preparation';
 
 export type * from './authority-runtime-types';
 
@@ -74,6 +75,7 @@ export class AuthorityRuntime {
   private readonly transactions: TransactionDeduplicator<Promise<AuthorityTransactionReceipt<unknown>>>;
   private readonly residency: AuthorityResidencyRuntime;
   private readonly mutationPreparation: AuthorityMutationPreparation;
+  private readonly canonicalPreparation: AuthorityCanonicalPreparation;
 
   private constructor(
     private readonly options: AuthorityRuntimeOptions,
@@ -87,6 +89,11 @@ export class AuthorityRuntime {
     this.transactions = new TransactionDeduplicator(options.epoch);
     this.residency = new AuthorityResidencyRuntime(server, () => this.session.currentCommitSequence);
     this.mutationPreparation = new AuthorityMutationPreparation(server, (key) => this.requestUnknownChunk(key));
+    this.canonicalPreparation = new AuthorityCanonicalPreparation(
+      server,
+      (key) => options.onUnknownChunk?.(key),
+      (key) => this.mutationPreparation.acceptAvailable(key),
+    );
     this.playerId = playerId;
     this.newPlayer = isNew;
     const player = server.getEntity(playerId);
@@ -147,12 +154,13 @@ export class AuthorityRuntime {
   }
 
   static async create(options: AuthorityRuntimeOptions): Promise<AuthorityRuntime> {
+    const unknownChunks = createAuthorityCanonicalRouter();
     const server = new GameServer({
       seedText: options.seedText,
       ...(options.generatorVersion === undefined ? {} : { generatorVersion: options.generatorVersion }),
       ...(options.persistence ? { persistence: options.persistence } : {}),
       ...(options.canonicalResidency ? { canonicalResidency: options.canonicalResidency } : {}),
-      ...(options.onUnknownChunk ? { onUnknownChunk: options.onUnknownChunk } : {}),
+      onUnknownChunk: unknownChunks.request,
     });
     server.setWorldTime(options.initialWorldTime);
     await server.restore();
@@ -178,6 +186,7 @@ export class AuthorityRuntime {
       player.id,
       isNew,
     );
+    unknownChunks.bind((key) => runtime.requestUnknownChunk(key));
     if (isNew) runtime.session.commitExternalState(false);
     return runtime;
   }
@@ -456,7 +465,7 @@ export class AuthorityRuntime {
   }
 
   private requestUnknownChunk(key: string): void {
-    this.options.onUnknownChunk?.(key);
+    this.canonicalPreparation.request(key);
   }
 
   private recordWorldCommit(commit: WorldCommitResult): void {

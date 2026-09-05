@@ -102,6 +102,38 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
     expect(unknown).not.toHaveBeenCalled();
   });
 
+  it('物理查询已保存但已驱逐的Chunk时先回载持久数据，不抢跑procedural生成', async () => {
+    const persistence = new AsyncCachePersistence();
+    const unknown: string[] = [];
+    const runtime = await AuthorityRuntime.create({
+      epoch: 'mutation-preparation:physics-restore',
+      seedText: 'mutation-preparation-physics-restore',
+      persistence,
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+      onUnknownChunk: (key) => unknown.push(key),
+    });
+    expect(runtime.acceptGeneratedChunk(canonical(runtime, 5, 1, 0))).toBe(true);
+    await expect(
+      runtime.editWorld('saved-edit', [{ x: 160, y: 33, z: 0, value: Voxel.Lantern }]),
+    ).resolves.toMatchObject({ committed: true });
+    await runtime.save();
+    expect(await runtime.server.evictChunk(5, 1, 0)).toBe(true);
+
+    runtime.setPlayerPosition([160.5, 33, 0.5]);
+    runtime.wake(20);
+
+    await vi.waitFor(() =>
+      expect(runtime.server.readCollisionBaseline('5,1,0', 1)).toMatchObject({
+        status: 'available',
+        chunkRevision: 1,
+      }),
+    );
+    expect(runtime.server.peekLoadedVoxel(160, 33, 0)?.voxel).toBe(Voxel.Lantern);
+    expect(unknown).not.toContain('5,1,0');
+  });
+
   it('远端set-block命令复用同一准备门，不在Authority热路径同步生成', async () => {
     const requests: string[] = [];
     const runtime = await AuthorityRuntime.create({

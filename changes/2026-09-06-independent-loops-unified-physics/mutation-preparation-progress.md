@@ -15,5 +15,12 @@
 - [x] `BrowserWorkerSession` 已把 `authority-chunk-needed` 路由到 General lane，并通过既有 `accept-generated-chunk` 接纳；同 key 在客户端也只保留一个在途生成。
 - [x] 已把旧同步测试调用迁移为 `await`，并验证异步准备时物理 tick 继续增长、库存只在一次成功提交后扣减。
 - [x] Headless 命令适配会在等待同一 Authority 事务时并行清空 General canonical 请求；不再等 5 秒失败后才加载 Chunk，且已缓存 key 被 canonical 驱逐后会重新准备。
+
+## 驱逐后物理回载竞态
+
+真实浏览器跨 300 个 Chunk 往返的预置用例在 `4cf5cea` 不可变生产包得到 RED：起点 Lantern 编辑已完成保存 ACK，最远处驻留收敛到 256；返回后客户端与 Authority `inspect-voxel` 都读到 Air，目标 Chunk revision 回到 0。原因是物理 unknown 直接请求 General Worker 的 procedural canonical，可能早于 Persistence Worker 回载已保存 revision 1；revision 0 一旦先驻留，后续网格准备便不会再消费耐久快照。
+
+新增正式反例要求物理查询已保存但已驱逐的 Chunk 时，必须先完成 Worker 内持久化预检；命中耐久快照不得请求 procedural，读取失败不得伪装成 missing，同 key 并发观察只允许一个预检。生产修复前定向运行 5 项中 1 项 RED，实际为目标 baseline 持续 `unavailable`。修复把所有 Authority unknown 统一路由到有界、合并的持久化优先准备；只有明确 missing 才请求 General Worker，迟到 revision 0 仍由现有接纳版本检查拒绝。
+
 - [x] 定向 Vitest：7 个文件 24 项通过；`tsc -p tsconfig.test.json --noEmit` 通过；`pnpm build` 通过；`git diff --check` 通过。
 - [ ] 真实浏览器 direct edit、长穿越、保存后重载证据由 root 在不可变生产构建中执行。
