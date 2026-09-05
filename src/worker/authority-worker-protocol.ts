@@ -64,11 +64,15 @@ export type AuthorityMeshPayload = Readonly<{
   cz: number;
   chunkRevision: number;
   generatorVersion: number;
-  canonical: ArrayBuffer;
-  halo: ArrayBuffer;
-  fluid: ArrayBuffer;
-  fluidHalo: ArrayBuffer;
-  haloRevision: string;
+  canonical?: ArrayBuffer;
+  fluid?: ArrayBuffer;
+  overlays: readonly Readonly<{
+    cx: number;
+    cy: number;
+    cz: number;
+    voxels: ArrayBuffer;
+    fluid?: ArrayBuffer;
+  }>[];
 }>;
 
 export type AuthorityAction =
@@ -118,6 +122,26 @@ export type AuthorityRequest =
       cx: number;
       cy: number;
       cz: number;
+    }>
+  | Readonly<{
+      kind: 'accept-generated-chunk';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      key: string;
+      cx: number;
+      cy: number;
+      cz: number;
+      chunkRevision: number;
+      generatorVersion: number;
+      canonical: ArrayBuffer;
+    }>
+  | Readonly<{
+      kind: 'authority-bootstrap-result';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      playerBodyPosition: [number, number, number];
     }>
   | Readonly<{
       kind: 'set-fluid-active-chunks';
@@ -198,10 +222,24 @@ export type AuthorityRequest =
 
 export type AuthorityResponse =
   | Readonly<{
+      kind: 'authority-bootstrap-needed';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      seed: number;
+      generatorVersion: number;
+    }>
+  | Readonly<{
       kind: 'authority-ready';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
       ready: AuthorityReady;
+    }>
+  | Readonly<{
+      kind: 'authority-chunk-needed';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      key: string;
     }>
   | Readonly<{
       kind: 'authority-snapshot';

@@ -49,3 +49,5 @@
 - 物理核心与流体候选模块由并行隔离 worktree 实现，必须通过接口审核后再合并。
 - 独立物理审查发现实体对实体分离与显式恢复仍有夹持几何问题；Authority 暂未调用该路径，等待物理修订后再接入，禁止以客户端脱困补丁绕过。
 - 浏览器自然场景、视觉语义和 2/3 Worker 同机对照尚未执行。
+- Worker-first 权威接纳 RED：`pnpm exec vitest run tests/server/authority-runtime.test.ts tests/client/browser-authority-client.test.ts tests/app/mesh-task-scheduler.test.ts`，4 项按预期失败：Authority 仍同步生成 canonical/halo，客户端仍缓存主线程快照，scheduler 未等待异步权威接纳，体素变更数错误复用了物理提交序号。
+- Worker-first 权威接纳 GREEN：`pnpm exec vitest run tests/worker/compute-worker-task.test.ts tests/client/browser-compute-runtime.test.ts tests/client/browser-authority-client.test.ts tests/server/authority-runtime.test.ts tests/app/mesh-task-scheduler.test.ts tests/server/authority-session.test.ts`，6 个文件、23 个测试全部通过；`pnpm exec tsc --noEmit` 通过。Authority 只加载持久化覆盖并返回生成输入，General Worker 负责缺失 Chunk 的 canonical/halo/mesh；结果必须先异步回送唯一 Authority 校验 epoch/revision 后才进入本地只读碰撞镜像和渲染。新世界安全出生点搜索也在 General Worker 执行，Authority bootstrap 完成后才建立会话时间原点，加载耗时不形成物理欠债；未知碰撞只发加载请求并保持合成阻挡。`worldMutationCount`、`physicsTick` 与全局 `commitSequence` 已在快照端口分栏，外部事务统一提交序号仍在下一阶段接线。

@@ -13,6 +13,12 @@ let interval: ReturnType<typeof setInterval> | null = null;
 let epoch = '';
 let lastSnapshotPublishedAt = Number.NEGATIVE_INFINITY;
 let lastGameplayPublishedAt = Number.NEGATIVE_INFINITY;
+let bootstrapRequestSequence = 0;
+let pendingBootstrap: {
+  requestId: number;
+  resolve: (position: [number, number, number]) => void;
+  reject: (error: Error) => void;
+} | null = null;
 
 const post = (message: AuthorityResponse, transfer: Transferable[] = []) => scope.postMessage(message, transfer);
 
@@ -66,6 +72,23 @@ const tick = () => {
   if (publishGameplay) lastGameplayPublishedAt = now;
 };
 
+const requestBootstrap = (seed: number, generatorVersion: number) => {
+  if (pendingBootstrap) return Promise.reject(new Error('Authority bootstrap generation is already pending.'));
+  const requestId = ++bootstrapRequestSequence;
+  const promise = new Promise<[number, number, number]>((resolve, reject) => {
+    pendingBootstrap = { requestId, resolve, reject };
+  });
+  post({
+    kind: 'authority-bootstrap-needed',
+    protocolVersion: PROTOCOL_VERSION,
+    epoch,
+    requestId,
+    seed,
+    generatorVersion,
+  });
+  return promise;
+};
+
 const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority' }>) => {
   if (runtime || persistence) throw new Error('Authority Worker already owns a running session.');
   epoch = message.epoch;
@@ -73,14 +96,15 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     legacySnapshots: message.legacySnapshots as readonly SerializedChunkSnapshot[],
     openMode: message.openMode,
   });
-  const startTimeMs = performance.now();
   runtime = await AuthorityRuntime.create({
     epoch,
     seedText: message.seedText,
     generatorVersion: persistence.generatorVersion,
     persistence,
     initialWorldTime: message.initialWorldTime,
-    startTimeMs,
+    startTimeMs: 0,
+    now: () => performance.now(),
+    findInitialPlayerBodyPosition: requestBootstrap,
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
     onLogicObservation: (observationSequence, snapshot) =>
       post({
@@ -90,6 +114,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
         observationSequence,
         snapshot,
       }),
+    onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
   });
   post({ kind: 'authority-ready', protocolVersion: PROTOCOL_VERSION, epoch, ready: runtime.ready() });
   interval = setInterval(tick, 8);
@@ -98,6 +123,15 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
 const handle = async (message: AuthorityRequest) => {
   if (!message || message.protocolVersion !== PROTOCOL_VERSION) return;
   if (message.kind === 'start-authority') return start(message);
+  if (message.kind === 'authority-bootstrap-result') {
+    if (message.epoch !== epoch || !pendingBootstrap || message.requestId !== pendingBootstrap.requestId) return;
+    const pending = pendingBootstrap;
+    pendingBootstrap = null;
+    if (message.playerBodyPosition.length !== 3 || !message.playerBodyPosition.every((value) => Number.isFinite(value)))
+      pending.reject(new Error('Safe spawn compute result is invalid.'));
+    else pending.resolve(message.playerBodyPosition);
+    return;
+  }
   const current = assertCurrent(message);
   switch (message.kind) {
     case 'input':
@@ -111,6 +145,11 @@ const handle = async (message: AuthorityRequest) => {
       break;
     case 'prepare-mesh': {
       const payload = await current.prepareMesh(message.cx, message.cy, message.cz);
+      const transfers = [
+        ...(payload.canonical ? [payload.canonical] : []),
+        ...(payload.fluid ? [payload.fluid] : []),
+        ...payload.overlays.flatMap((overlay) => [overlay.voxels, ...(overlay.fluid ? [overlay.fluid] : [])]),
+      ];
       post(
         {
           kind: 'mesh-prepared',
@@ -119,10 +158,23 @@ const handle = async (message: AuthorityRequest) => {
           requestId: message.requestId,
           payload,
         },
-        [payload.canonical, payload.halo, payload.fluid, payload.fluidHalo],
+        transfers,
       );
       break;
     }
+    case 'accept-generated-chunk':
+      respond(message.requestId, {
+        accepted: current.acceptGeneratedChunk({
+          key: message.key,
+          cx: message.cx,
+          cy: message.cy,
+          cz: message.cz,
+          chunkRevision: message.chunkRevision,
+          generatorVersion: message.generatorVersion,
+          canonical: new Uint16Array(message.canonical),
+        }),
+      });
+      break;
     case 'release-mesh':
       current.releaseMesh(message.cx, message.cy, message.cz);
       break;
@@ -169,6 +221,8 @@ const handle = async (message: AuthorityRequest) => {
       interval = null;
       persistence?.dispose();
       persistence = null;
+      pendingBootstrap?.reject(new Error('Authority Worker was disposed during bootstrap.'));
+      pendingBootstrap = null;
       runtime = null;
       scope.close();
       break;

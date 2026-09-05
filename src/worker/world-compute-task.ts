@@ -1,4 +1,6 @@
 import { batchMeshData, compactMeshData, createProceduralMeshInput, makeChunk, meshChunk } from '../world/mesh';
+import { findSafePlayerSpawn } from '../server/gameplay/safe-spawn';
+import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
 
 export type MeshTaskPayload = Readonly<{
   kind: 'mesh';
@@ -34,11 +36,17 @@ export type GenerateMeshTaskPayload = Readonly<{
   overlays: readonly { cx: number; cy: number; cz: number; voxels: ArrayBuffer; fluid?: ArrayBuffer }[];
 }>;
 
-export type WorldComputePayload = MeshTaskPayload | GenerateMeshTaskPayload;
+export type FindSafeSpawnTaskPayload = Readonly<{
+  kind: 'find-safe-spawn';
+  seed: number;
+  generatorVersion: number;
+}>;
+
+export type WorldComputePayload = MeshTaskPayload | GenerateMeshTaskPayload | FindSafeSpawnTaskPayload;
 
 export class ComputeTaskCancelled extends Error {}
 
-const resultIdentity = (task: WorldComputePayload) => ({
+const resultIdentity = (task: MeshTaskPayload | GenerateMeshTaskPayload) => ({
   traceId: task.traceId,
   epoch: task.epoch,
   chunkKey: task.chunkKey,
@@ -63,6 +71,28 @@ export async function runWorldComputeTask(
   yieldTurn: () => Promise<void> = () => Promise.resolve(),
 ) {
   await checkpoint(isCancelled, yieldTurn);
+  if (task.kind === 'find-safe-spawn') {
+    const chunks = new Map<string, Uint16Array>();
+    const getVoxel = (x: number, y: number, z: number) => {
+      const cx = floorDiv(x, CHUNK_SIZE);
+      const cy = floorDiv(y, CHUNK_SIZE);
+      const cz = floorDiv(z, CHUNK_SIZE);
+      const key = chunkKey(cx, cy, cz);
+      let chunk = chunks.get(key);
+      if (!chunk) {
+        chunk = makeChunk(task.seed, cx, cy, cz, [], task.generatorVersion);
+        chunks.set(key, chunk);
+      }
+      return chunk[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
+    };
+    const cameraPosition = findSafePlayerSpawn(getVoxel);
+    await checkpoint(isCancelled, yieldTurn);
+    if (!cameraPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');
+    return {
+      kind: 'safe-spawn-result' as const,
+      position: [cameraPosition[0], cameraPosition[1] - 1.6, cameraPosition[2]] as [number, number, number],
+    };
+  }
   if (task.kind === 'mesh') {
     const meshingStartedAt = performance.now();
     const meshes = meshChunk({
@@ -133,6 +163,7 @@ export async function runWorldComputeTask(
 
 export function worldComputeTransfers(result: Awaited<ReturnType<typeof runWorldComputeTask>>): Transferable[] {
   const transfers: Transferable[] = [];
+  if (result.kind === 'safe-spawn-result') return transfers;
   result.meshes.forEach((part) =>
     transfers.push(
       part.positions.buffer,

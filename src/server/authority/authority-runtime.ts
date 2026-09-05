@@ -7,17 +7,13 @@ import type {
   AuthorityMeshPayload,
   AuthorityReady,
 } from '../../worker/authority-worker-protocol';
-import { CHUNK_SIZE, floorDiv } from '../../world/voxel';
 import { GameServer } from '../game-server';
-import type { WorldCommitResult } from '../game-server-types';
+import type { WorkerCanonicalResult, WorldCommitResult } from '../game-server-types';
 import type { ChunkPersistence } from '../persistence/chunk-persistence';
 import type { GameplayPersistence } from '../persistence/gameplay-persistence';
-import { findSafePlayerSpawn } from '../gameplay/safe-spawn';
 import type { FluidAuthoritySnapshot, FluidCandidate } from '../fluid/fluid-transaction';
 import type { VoxelEdit } from '../world-mutation';
 import { AuthoritySession, type AuthoritySnapshot, type LogicIntent } from './authority-session';
-
-const LEGACY_PLAYER_EYE_HEIGHT = 1.6;
 
 type AuthorityPersistence = ChunkPersistence & Partial<GameplayPersistence>;
 
@@ -28,6 +24,9 @@ export type AuthorityRuntimeOptions = Readonly<{
   generatorVersion?: number;
   initialWorldTime: number;
   startTimeMs: number;
+  initialPlayerBodyPosition?: [number, number, number];
+  findInitialPlayerBodyPosition?: (seed: number, generatorVersion: number) => Promise<[number, number, number]>;
+  now?: () => number;
   frequencies?: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (sequence: number, snapshot: AuthoritySnapshot) => void;
@@ -58,6 +57,9 @@ export class AuthorityRuntime {
     const serverPort = {
       get worldRevision() {
         return server.worldRevision;
+      },
+      get mutationCount() {
+        return server.mutationCount;
       },
       get worldTime() {
         return server.worldTime;
@@ -96,27 +98,18 @@ export class AuthorityRuntime {
     let player = server.queryEntities({ type: 'player' })[0];
     const isNew = !player;
     if (!player) {
-      const legacyCameraPosition = findSafePlayerSpawn((x, y, z) => server.getVoxel(x, y, z));
-      if (!legacyCameraPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');
-      const bodyPosition: [number, number, number] = [
-        legacyCameraPosition[0],
-        legacyCameraPosition[1] - LEGACY_PLAYER_EYE_HEIGHT,
-        legacyCameraPosition[2],
-      ];
+      const bodyPosition =
+        options.initialPlayerBodyPosition ??
+        (await options.findInitialPlayerBodyPosition?.(server.seed, server.generatorVersion));
+      if (!bodyPosition) throw new Error('新世界必须由通用计算Worker提供安全出生点。');
       player = server.spawnPlayer({ position: bodyPosition });
     }
-    await server.ensureChunkNeighborhood(
-      floorDiv(player.position[0], CHUNK_SIZE),
-      floorDiv(player.position[1], CHUNK_SIZE),
-      floorDiv(player.position[2], CHUNK_SIZE),
+    return new AuthorityRuntime(
+      { ...options, startTimeMs: options.now?.() ?? options.startTimeMs },
+      server,
+      player.id,
+      isNew,
     );
-    server.getChunk(
-      floorDiv(player.position[0], CHUNK_SIZE),
-      floorDiv(player.position[1], CHUNK_SIZE),
-      floorDiv(player.position[2], CHUNK_SIZE),
-    );
-    server.initializeStarterEcology(player.position);
-    return new AuthorityRuntime(options, server, player.id, isNew);
   }
 
   ready(): AuthorityReady {
@@ -157,20 +150,28 @@ export class AuthorityRuntime {
 
   async prepareMesh(cx: number, cy: number, cz: number): Promise<AuthorityMeshPayload> {
     await this.server.ensureChunkNeighborhood(cx, cy, cz);
-    const snapshot = this.server.createDerivedMeshSnapshot(cx, cy, cz);
+    const prepared = this.server.prepareWorkerMeshInput(cx, cy, cz);
     return {
-      key: snapshot.key,
+      key: prepared.key,
       cx,
       cy,
       cz,
-      chunkRevision: snapshot.chunkRevision,
+      chunkRevision: prepared.chunkRevision,
       generatorVersion: this.server.generatorVersion,
-      canonical: snapshot.canonical.slice().buffer,
-      halo: snapshot.halo.slice().buffer,
-      fluid: snapshot.fluid.slice().buffer,
-      fluidHalo: snapshot.fluidHalo.slice().buffer,
-      haloRevision: snapshot.haloRevision,
+      ...(prepared.canonical ? { canonical: prepared.canonical.buffer as ArrayBuffer } : {}),
+      ...(prepared.fluid ? { fluid: prepared.fluid.buffer as ArrayBuffer } : {}),
+      overlays: prepared.overlays.map((overlay) => ({
+        cx: overlay.cx,
+        cy: overlay.cy,
+        cz: overlay.cz,
+        voxels: overlay.voxels.buffer as ArrayBuffer,
+        ...(overlay.fluid ? { fluid: overlay.fluid.buffer as ArrayBuffer } : {}),
+      })),
     };
+  }
+
+  acceptGeneratedChunk(result: WorkerCanonicalResult): boolean {
+    return this.server.acceptWorkerCanonical(result);
   }
 
   releaseMesh(cx: number, cy: number, cz: number): void {
@@ -267,9 +268,5 @@ export class AuthorityRuntime {
 
   private requestUnknownChunk(key: string): void {
     this.options.onUnknownChunk?.(key);
-    const [cx, cy, cz] = key.split(',').map(Number);
-    void this.server.ensureChunkNeighborhood(cx, cy, cz).then(() => {
-      this.server.getChunk(cx, cy, cz);
-    });
   }
 }

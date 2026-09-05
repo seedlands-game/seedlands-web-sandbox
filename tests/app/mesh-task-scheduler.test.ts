@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { PERFORMANCE_PROFILES } from '../../src/client/performance-profile';
 import { PerformanceTelemetry } from '../../src/client/performance-telemetry';
 import { MeshTaskScheduler, type MeshWorkerPort, type WorkerResult } from '../../src/app/mesh-task-scheduler';
@@ -62,6 +62,38 @@ const createScheduler = (worker: FakeWorker, accepted: WorkerResult[]) =>
   });
 
 describe('MeshTaskScheduler', () => {
+  it('等待Authority异步接纳canonical后才发布网格', async () => {
+    const worker = new FakeWorker();
+    const accepted: WorkerResult[] = [];
+    let releaseAcceptance!: (accepted: boolean) => void;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'worker-first',
+      source: {
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: 0,
+          haloRevision: 'unused',
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: 0, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => new Promise((resolve) => (releaseAcceptance = resolve)),
+      },
+      onAcceptedResult: (_task, result) => accepted.push(result),
+    });
+    scheduler.request(0, 0, 0);
+    const post = worker.posts[0]!;
+    worker.emit({ ...resultFor(post), canonical: new Uint16Array(32 ** 3).buffer, generatorVersion: 3 });
+    await Promise.resolve();
+    expect(accepted).toEqual([]);
+    releaseAcceptance(true);
+    await vi.waitFor(() => expect(accepted).toHaveLength(1));
+  });
+
   it('accepts only the latest identity after a forced replacement', () => {
     const worker = new FakeWorker();
     const accepted: WorkerResult[] = [];

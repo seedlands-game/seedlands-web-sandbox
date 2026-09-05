@@ -32,6 +32,10 @@ export class BrowserComputeRuntime {
   private readonly pool: ComputeWorkerPool;
   private readonly originalMeshTaskIds = new Map<number, number>();
   private readonly fluidWorkIds = new Map<number, string>();
+  private readonly spawnRequests = new Map<
+    number,
+    { resolve: (position: [number, number, number]) => void; reject: (error: Error) => void }
+  >();
   private taskSequence = 0;
   private disposed = false;
 
@@ -52,6 +56,8 @@ export class BrowserComputeRuntime {
       onDrop: (taskId) => {
         this.originalMeshTaskIds.delete(taskId);
         this.fluidWorkIds.delete(taskId);
+        this.spawnRequests.get(taskId)?.reject(new Error('Safe spawn compute task was replaced.'));
+        this.spawnRequests.delete(taskId);
       },
       onPoolFailure: options.onPoolFailure,
     });
@@ -89,6 +95,30 @@ export class BrowserComputeRuntime {
     return false;
   }
 
+  findSafeSpawn(seed: number, generatorVersion: number): Promise<[number, number, number]> {
+    if (this.disposed) return Promise.reject(new Error('Compute runtime is disposed.'));
+    const taskId = ++this.taskSequence;
+    const promise = new Promise<[number, number, number]>((resolve, reject) =>
+      this.spawnRequests.set(taskId, { resolve, reject }),
+    );
+    const result = this.pool.enqueue({
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: this.options.epoch,
+      taskId,
+      lane: 'general',
+      category: 'chunk-generation',
+      priority: 'interaction',
+      key: 'initial-safe-spawn',
+      revision: `${seed}:${generatorVersion}`,
+      dependencies: [],
+      estimatedBytes: 0,
+      payload: { kind: 'find-safe-spawn', seed, generatorVersion },
+    });
+    if (result.status === 'queued' || result.status === 'merged') return promise;
+    this.spawnRequests.delete(taskId);
+    return Promise.reject(new Error(`Safe spawn compute enqueue failed: ${result.status}`));
+  }
+
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
@@ -96,6 +126,8 @@ export class BrowserComputeRuntime {
     this.meshPort.onmessage = null;
     this.originalMeshTaskIds.clear();
     this.fluidWorkIds.clear();
+    this.spawnRequests.forEach(({ reject }) => reject(new Error('Compute runtime was disposed.')));
+    this.spawnRequests.clear();
   }
 
   private enqueueMesh(message: Record<string, unknown>, transfer: Transferable[]): void {
@@ -132,6 +164,15 @@ export class BrowserComputeRuntime {
   }
 
   private receive(task: ComputeTask, result: unknown): void {
+    const spawn = this.spawnRequests.get(task.taskId);
+    if (spawn) {
+      this.spawnRequests.delete(task.taskId);
+      const value = result as { kind?: string; position?: [number, number, number] };
+      if (value.kind !== 'safe-spawn-result' || !value.position)
+        spawn.reject(new Error('Safe spawn compute result is invalid.'));
+      else spawn.resolve(value.position);
+      return;
+    }
     if (task.category === 'fluid') {
       this.fluidWorkIds.delete(task.taskId);
       this.options.onFluidCandidate(result as FluidCandidate);
@@ -144,6 +185,12 @@ export class BrowserComputeRuntime {
   }
 
   private fail(task: ComputeTask, error: Error): void {
+    const spawn = this.spawnRequests.get(task.taskId);
+    if (spawn) {
+      this.spawnRequests.delete(task.taskId);
+      spawn.reject(error);
+      return;
+    }
     if (task.category === 'fluid') {
       const workId = this.fluidWorkIds.get(task.taskId);
       this.fluidWorkIds.delete(task.taskId);

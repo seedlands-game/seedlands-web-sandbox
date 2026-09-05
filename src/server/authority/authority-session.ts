@@ -14,6 +14,7 @@ export type AuthorityEntity = Readonly<{
 
 export type AuthorityServerPort = {
   readonly worldRevision: number;
+  readonly mutationCount: number;
   readonly worldTime: number;
   getEntity: (id: string) => AuthorityEntity | null;
   queryEntities: () => AuthorityEntity[];
@@ -47,6 +48,7 @@ export type AuthoritySnapshot = Readonly<{
   epoch: string;
   physicsTick: number;
   commitSequence: number;
+  worldMutationCount: number;
   acknowledgedInputSequence: number;
   activeTimeMs: number;
   integratedPhysicsTimeMs: number;
@@ -234,6 +236,7 @@ export class AuthoritySession {
       entities: [...this.bodies.values()],
       chunkRevisions: this.collisionWorld.revisionVector(),
       worldRevision: this.options.server.worldRevision,
+      worldMutationCount: this.options.server.mutationCount,
       worldTime: this.options.server.worldTime,
       paused: this.clock.paused,
     };

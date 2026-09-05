@@ -11,10 +11,15 @@ describe('AuthorityRuntime', () => {
       persistence: new MemoryGamePersistence(),
       initialWorldTime: 9,
       startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
     });
     const ready = runtime.ready();
     expect(ready.playerBodyPosition[1] % 1).toBe(0);
     expect(ready.snapshot.player.body.position.y).toBe(ready.playerBodyPosition[1]);
+    const prepared = await runtime.prepareMesh(0, 1, 0);
+    const canonical = new Uint16Array(32 ** 3);
+    canonical[0] = 3;
+    expect(runtime.acceptGeneratedChunk({ ...prepared, canonical })).toBe(true);
 
     runtime.receiveInput({
       kind: 'input',
@@ -38,21 +43,27 @@ describe('AuthorityRuntime', () => {
     ]);
   });
 
-  it('异步准备网格后返回可传输副本且不分离权威Chunk存储', async () => {
+  it('只返回Worker生成输入并在显式接纳后建立权威碰撞副本', async () => {
     const runtime = await AuthorityRuntime.create({
       epoch: 'world:2',
       seedText: 'authority-mesh',
       persistence: new MemoryGamePersistence(),
       initialWorldTime: 9,
       startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
     });
 
     const first = await runtime.prepareMesh(0, 0, 0);
     const second = await runtime.prepareMesh(0, 0, 0);
 
-    expect(first.canonical).not.toBe(second.canonical);
-    expect(first.canonical.byteLength).toBe(32 ** 3 * Uint16Array.BYTES_PER_ELEMENT);
-    expect(first.fluid.byteLength).toBe(32 ** 3 * Uint8Array.BYTES_PER_ELEMENT);
-    expect(first.haloRevision).toBe(second.haloRevision);
+    expect(first.canonical).toBeUndefined();
+    expect(first.overlays).toEqual([]);
+    expect(second.canonical).toBeUndefined();
+    expect(runtime.server.peekLoadedVoxel(0, 0, 0)).toBeNull();
+
+    const canonical = new Uint16Array(32 ** 3);
+    canonical[0] = 3;
+    expect(runtime.acceptGeneratedChunk({ ...first, canonical })).toBe(true);
+    expect(runtime.server.peekLoadedVoxel(0, 0, 0)?.voxel).toBe(3);
   });
 });

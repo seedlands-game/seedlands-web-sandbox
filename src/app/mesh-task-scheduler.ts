@@ -52,7 +52,7 @@ export type MeshTaskSource = {
   releasePrepared?: (cx: number, cy: number, cz: number) => void;
   prepareMainSnapshot: (cx: number, cy: number, cz: number) => MainSnapshot;
   prepareWorkerInput: (cx: number, cy: number, cz: number) => WorkerInput;
-  acceptWorkerCanonical: (task: PendingMeshTask, result: WorkerResult) => boolean;
+  acceptWorkerCanonical: (task: PendingMeshTask, result: WorkerResult) => boolean | Promise<boolean>;
 };
 
 export type MeshWorkerPort = {
@@ -88,7 +88,7 @@ export class MeshTaskScheduler {
 
   constructor(private readonly options: SchedulerOptions) {
     this.variant = options.variant;
-    options.worker.onmessage = (event) => this.receive(event.data);
+    options.worker.onmessage = (event) => void this.receive(event.data);
   }
 
   get generationQueueSize() {
@@ -364,7 +364,7 @@ export class MeshTaskScheduler {
     );
   }
 
-  private receive(result: WorkerResult) {
+  private async receive(result: WorkerResult) {
     this.inFlight = Math.max(0, this.inFlight - 1);
     this.inFlightKeys.delete(result.chunkKey);
     const task = this.latestTasks.get(result.chunkKey);
@@ -389,8 +389,13 @@ export class MeshTaskScheduler {
         void this.drain();
         return;
       }
-      if (!this.options.source.acceptWorkerCanonical(task, result)) {
+      if (!(await this.options.source.acceptWorkerCanonical(task, result))) {
         this.discard(task, 'stale-worker-canonical');
+        void this.drain();
+        return;
+      }
+      if (!this.isCurrent(task)) {
+        this.discard(task, 'stale-after-authority-accept');
         void this.drain();
         return;
       }

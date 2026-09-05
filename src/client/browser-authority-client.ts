@@ -2,6 +2,7 @@ import type { AuthoritySnapshot, LogicIntent } from '../server/authority/authori
 import type { CommandResult, CommandSource, ServerCommand } from '../server/commands/command-contract';
 import type { FluidCandidate, FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '../server/game-server-types';
+import { legacyFluid } from '../server/fluid/fluid-cell-state';
 import type { VoxelEdit } from '../server/world-mutation';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '../runtime/session-protocol';
 import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
@@ -30,6 +31,8 @@ type ClientOptions = Readonly<{
   onCommit?: (commit: WorldCommitResult) => void;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (sequence: number, snapshot: AuthoritySnapshot) => void;
+  onBootstrapGeneration?: (request: { seed: number; generatorVersion: number }) => Promise<[number, number, number]>;
+  onUnknownChunk?: (key: string) => void;
   onFatal?: (error: Error) => void;
 }>;
 
@@ -41,11 +44,15 @@ type StartOptions = Readonly<{
 }>;
 
 type CachedMesh = {
-  payload: AuthorityMeshPayload;
   canonical: Uint16Array;
-  halo: Uint16Array;
   fluid: Uint8Array;
-  fluidHalo: Uint8Array;
+};
+
+type CachedPreparation = {
+  payload: AuthorityMeshPayload;
+  canonical?: Uint16Array;
+  fluid?: Uint8Array;
+  overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
 };
 
 type PendingRequest = { resolve: (value: unknown) => void; reject: (error: Error) => void };
@@ -55,6 +62,7 @@ export class BrowserAuthorityClient {
   private readonly pending = new Map<number, PendingRequest>();
   private readonly meshLoads = new Map<string, Promise<void>>();
   private readonly meshCache = new Map<string, CachedMesh>();
+  private readonly preparationCache = new Map<string, CachedPreparation>();
   private readyValue: AuthorityReady | null = null;
   private snapshotValue: AuthoritySnapshot | null = null;
   private gameplayValue: AuthorityGameplayView | null = null;
@@ -133,6 +141,14 @@ export class BrowserAuthorityClient {
   }
 
   get mutationCount(): number {
+    return this.snapshotValue?.worldMutationCount ?? 0;
+  }
+
+  get physicsTick(): number {
+    return this.snapshotValue?.physicsTick ?? 0;
+  }
+
+  get commitSequence(): number {
     return this.snapshotValue?.commitSequence ?? 0;
   }
 
@@ -170,21 +186,64 @@ export class BrowserAuthorityClient {
   }
 
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
-    this.meshCache.delete(chunkKey(cx, cy, cz));
+    const key = chunkKey(cx, cy, cz);
+    this.meshCache.delete(key);
+    this.preparationCache.delete(key);
     this.post({ kind: 'release-mesh', protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, cx, cy, cz });
   }
 
-  prepareMainSnapshot(cx: number, cy: number, cz: number) {
-    const cached = this.meshCache.get(chunkKey(cx, cy, cz));
-    if (!cached) throw new Error(`Authority mesh is not prepared for ${cx},${cy},${cz}.`);
+  prepareWorkerInput(cx: number, cy: number, cz: number) {
+    const cached = this.preparationCache.get(chunkKey(cx, cy, cz));
+    if (!cached) throw new Error(`Authority worker input is not prepared for ${cx},${cy},${cz}.`);
     return {
       chunkRevision: cached.payload.chunkRevision,
-      haloRevision: cached.payload.haloRevision,
-      canonical: cached.canonical.slice(),
-      halo: cached.halo.slice(),
-      fluid: cached.fluid.slice(),
-      fluidHalo: cached.fluidHalo.slice(),
+      generatorVersion: cached.payload.generatorVersion,
+      ...(cached.canonical ? { canonical: cached.canonical.slice() } : {}),
+      ...(cached.fluid ? { fluid: cached.fluid.slice() } : {}),
+      overlays: cached.overlays.map((overlay) => ({
+        cx: overlay.cx,
+        cy: overlay.cy,
+        cz: overlay.cz,
+        voxels: overlay.voxels.slice(),
+        ...(overlay.fluid ? { fluid: overlay.fluid.slice() } : {}),
+      })),
     };
+  }
+
+  async acceptWorkerCanonical(
+    task: Readonly<{
+      chunkKey: string;
+      cx: number;
+      cy: number;
+      cz: number;
+      chunkRevision: number;
+      generatorVersion: number;
+    }>,
+    result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>,
+  ): Promise<boolean> {
+    if (!result.canonical || result.generatorVersion !== task.generatorVersion) return false;
+    const canonical = new Uint16Array(result.canonical).slice();
+    const authorityCanonical = canonical.slice();
+    const response = (await this.request(
+      {
+        kind: 'accept-generated-chunk',
+        key: task.chunkKey,
+        cx: task.cx,
+        cy: task.cy,
+        cz: task.cz,
+        chunkRevision: task.chunkRevision,
+        generatorVersion: task.generatorVersion,
+        canonical: authorityCanonical.buffer,
+      },
+      [authorityCanonical.buffer],
+    )) as { accepted: boolean };
+    if (!response.accepted) return false;
+    const prepared = this.preparationCache.get(task.chunkKey);
+    this.meshCache.set(task.chunkKey, {
+      canonical,
+      fluid: prepared?.fluid?.slice() ?? legacyFluid(canonical),
+    });
+    return true;
   }
 
   getVoxel(x: number, y: number, z: number): number {
@@ -272,18 +331,22 @@ export class BrowserAuthorityClient {
     this.worker.terminate();
     this.failAll(new Error('Authority client was disposed.'));
     this.meshCache.clear();
+    this.preparationCache.clear();
   }
 
-  private request(payload: Record<string, unknown>): Promise<unknown> {
+  private request(payload: Record<string, unknown>, transfer: Transferable[] = []): Promise<unknown> {
     const requestId = ++this.requestSequence;
     const promise = new Promise((resolve, reject) => this.pending.set(requestId, { resolve, reject }));
-    this.post({ ...payload, protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, requestId } as AuthorityRequest);
+    this.post(
+      { ...payload, protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, requestId } as AuthorityRequest,
+      transfer,
+    );
     return promise;
   }
 
-  private post(message: AuthorityRequest): void {
+  private post(message: AuthorityRequest, transfer: Transferable[] = []): void {
     if (this.disposed) return;
-    this.worker.postMessage(message);
+    this.worker.postMessage(message, transfer);
   }
 
   private receive(message: AuthorityResponse): void {
@@ -296,6 +359,12 @@ export class BrowserAuthorityClient {
         this.resolveReady?.(message.ready);
         this.resolveReady = null;
         this.rejectReady = null;
+        break;
+      case 'authority-bootstrap-needed':
+        void this.provideBootstrap(message);
+        break;
+      case 'authority-chunk-needed':
+        this.options.onUnknownChunk?.(message.key);
         break;
       case 'authority-snapshot':
         this.snapshotValue = message.snapshot;
@@ -320,12 +389,17 @@ export class BrowserAuthorityClient {
         if (!pending) return;
         this.pending.delete(message.requestId);
         const payload = message.payload;
-        this.meshCache.set(payload.key, {
+        this.preparationCache.set(payload.key, {
           payload,
-          canonical: new Uint16Array(payload.canonical),
-          halo: new Uint16Array(payload.halo),
-          fluid: new Uint8Array(payload.fluid),
-          fluidHalo: new Uint8Array(payload.fluidHalo),
+          ...(payload.canonical ? { canonical: new Uint16Array(payload.canonical) } : {}),
+          ...(payload.fluid ? { fluid: new Uint8Array(payload.fluid) } : {}),
+          overlays: payload.overlays.map((overlay) => ({
+            cx: overlay.cx,
+            cy: overlay.cy,
+            cz: overlay.cz,
+            voxels: new Uint16Array(overlay.voxels),
+            ...(overlay.fluid ? { fluid: new Uint8Array(overlay.fluid) } : {}),
+          })),
         });
         pending.resolve(undefined);
         break;
@@ -345,6 +419,26 @@ export class BrowserAuthorityClient {
   private updateGameplay(view: AuthorityGameplayView): void {
     this.gameplayValue = view;
     this.options.onGameplay?.(view);
+  }
+
+  private async provideBootstrap(message: Extract<AuthorityResponse, { kind: 'authority-bootstrap-needed' }>) {
+    try {
+      if (!this.options.onBootstrapGeneration)
+        throw new Error('Authority requested safe spawn generation without a compute provider.');
+      const playerBodyPosition = await this.options.onBootstrapGeneration({
+        seed: message.seed,
+        generatorVersion: message.generatorVersion,
+      });
+      this.post({
+        kind: 'authority-bootstrap-result',
+        protocolVersion: PROTOCOL_VERSION,
+        epoch: this.epoch,
+        requestId: message.requestId,
+        playerBodyPosition,
+      });
+    } catch (error) {
+      this.failAll(error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
   private requireReady(): AuthorityReady {

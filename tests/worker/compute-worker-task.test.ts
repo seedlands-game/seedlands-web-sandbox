@@ -3,6 +3,18 @@ import { ComputeTaskCancelled, runWorldComputeTask } from '../../src/worker/worl
 import { CHUNK_SIZE, Voxel } from '../../src/world/voxel';
 
 describe('general compute worker task', () => {
+  it('在通用计算Worker内搜索脚底中心安全出生点', async () => {
+    const result = await runWorldComputeTask({
+      kind: 'find-safe-spawn',
+      seed: 7,
+      generatorVersion: 3,
+    });
+
+    expect(result.kind).toBe('safe-spawn-result');
+    if (result.kind !== 'safe-spawn-result') throw new Error('Unexpected compute result.');
+    expect(result.position[1] % 1).toBe(0);
+  });
+
   it('在生成/halo/mesh阶段间让出事件循环并消费合作式取消', async () => {
     let checkpoints = 0;
     const payload = {

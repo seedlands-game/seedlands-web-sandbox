@@ -91,6 +91,7 @@ const ready = (): AuthorityReady => ({
     epoch: 'world:1',
     physicsTick: 0,
     commitSequence: 0,
+    worldMutationCount: 0,
     acknowledgedInputSequence: -1,
     activeTimeMs: 0,
     integratedPhysicsTimeMs: 0,
@@ -106,6 +107,27 @@ const ready = (): AuthorityReady => ({
 });
 
 describe('BrowserAuthorityClient', () => {
+  it('把新世界出生点生成握手交给通用计算池', async () => {
+    const worker = new FakeAuthorityWorker();
+    const bootstrap = vi.fn(async () => [0.5, 33, 0.5] as [number, number, number]);
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onBootstrapGeneration: bootstrap });
+    void client.start({ seedText: 'worker-client', openMode: 'continue', legacySnapshots: [], initialWorldTime: 9 });
+    worker.emit({
+      kind: 'authority-bootstrap-needed',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: 9,
+      seed: 7,
+      generatorVersion: 3,
+    });
+    await vi.waitFor(() => expect(bootstrap).toHaveBeenCalledWith({ seed: 7, generatorVersion: 3 }));
+    expect(worker.posts.at(-1)).toMatchObject({
+      kind: 'authority-bootstrap-result',
+      requestId: 9,
+      playerBodyPosition: [0.5, 33, 0.5],
+    });
+  });
+
   it('等待真实Worker ready并忽略旧epoch快照', async () => {
     const worker = new FakeAuthorityWorker();
     const snapshots = vi.fn();
@@ -129,7 +151,7 @@ describe('BrowserAuthorityClient', () => {
     expect(snapshots).not.toHaveBeenCalled();
   });
 
-  it('异步准备网格后保留本地只读副本并为计算Worker返回独立数组', async () => {
+  it('异步准备Worker输入，并只在权威接纳计算结果后开放本地只读副本', async () => {
     const worker = new FakeAuthorityWorker();
     const client = new BrowserAuthorityClient(worker, 'world:1');
     const preparing = client.ensureChunkNeighborhood(0, 0, 0);
@@ -151,19 +173,64 @@ describe('BrowserAuthorityClient', () => {
         chunkRevision: 4,
         generatorVersion: 3,
         canonical: canonical.buffer,
-        halo: new Uint16Array(34 ** 3).buffer,
         fluid: fluid.buffer,
-        fluidHalo: new Uint8Array(34 ** 3).buffer,
-        haloRevision: 'halo:4',
+        overlays: [],
       },
     });
     await preparing;
 
-    expect(client.getVoxel(0, 0, 0)).toBe(3);
-    expect(client.getFluidCell(0, 0, 0)).toEqual({ level: 8, source: true });
-    const first = client.prepareMainSnapshot(0, 0, 0);
-    const second = client.prepareMainSnapshot(0, 0, 0);
+    expect(client.getVoxel(0, 0, 0)).toBe(0);
+    const first = client.prepareWorkerInput(0, 0, 0);
+    const second = client.prepareWorkerInput(0, 0, 0);
     expect(first.canonical).not.toBe(second.canonical);
-    expect(first.canonical[0]).toBe(3);
+    expect(first.canonical?.[0]).toBe(3);
+
+    const workerCanonical = new Uint16Array(32 ** 3);
+    workerCanonical[0] = 4;
+    const accepting = client.acceptWorkerCanonical(
+      {
+        chunkKey: '0,0,0',
+        cx: 0,
+        cy: 0,
+        cz: 0,
+        chunkRevision: 4,
+        generatorVersion: 3,
+      },
+      { canonical: workerCanonical.buffer, generatorVersion: 3 },
+    );
+    const acceptRequest = worker.posts.at(-1) as { kind: string; requestId: number };
+    expect(acceptRequest.kind).toBe('accept-generated-chunk');
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: acceptRequest.requestId,
+      ok: true,
+      result: { accepted: true },
+    });
+    await expect(accepting).resolves.toBe(true);
+    expect(client.getVoxel(0, 0, 0)).toBe(4);
+  });
+
+  it('区分世界写入次数、全局提交序号与物理tick', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const starting = client.start({
+      seedText: 'worker-client',
+      openMode: 'continue',
+      legacySnapshots: [],
+      initialWorldTime: 9,
+    });
+    const base = ready();
+    const current = {
+      ...base,
+      snapshot: { ...base.snapshot, physicsTick: 60, commitSequence: 8, worldMutationCount: 2 },
+    };
+    worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch: 'world:1', ready: current });
+    await starting;
+
+    expect(client.physicsTick).toBe(60);
+    expect(client.commitSequence).toBe(8);
+    expect(client.mutationCount).toBe(2);
   });
 });
