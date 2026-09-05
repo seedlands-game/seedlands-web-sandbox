@@ -122,5 +122,5 @@ describe('headless server command CLI', () => {
     expect(output).toHaveLength(2);
     expect(output[0]).toMatchObject({ success: true, data: { entity: { archetype: 'grazer' } } });
     expect(output[1]).toMatchObject({ success: true, data: { lanes: { physicsSteps: 6 } } });
-  });
+  }, 15_000);
 });

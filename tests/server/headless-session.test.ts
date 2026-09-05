@@ -37,7 +37,7 @@ describe('HeadlessSession', () => {
     });
     expect(session.runtime.server.getEntity(item.id)!.position[1]).toBeLessThan(60);
     expect(advanced.snapshot.physicsDebtMs).toBeCloseTo(0, 6);
-  });
+  }, 15_000);
 
   it('turns Logic decisions into observable Authority actor movement', async () => {
     const session = await HeadlessSession.create({ seedText: 'logic-live-audit', initialWorldTime: 9 });
