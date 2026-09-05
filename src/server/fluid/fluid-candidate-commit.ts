@@ -56,14 +56,19 @@ export function commitFluidCandidate(options: {
       min = min ? [Math.min(min[0], x), Math.min(min[1], y), Math.min(min[2], z)] : [x, y, z];
       max = max ? [Math.max(max[0], x), Math.max(max[1], y), Math.max(max[2], z)] : [x, y, z];
     }
+  const collisionDelta = plans.map(({ key, writes, chunk }) => ({
+    key,
+    previousRevision: chunk!.revision,
+    revision: chunk!.revision + 1,
+    cells: writes.map((write) => ({
+      index: fluidWriteIndex(chunk!, write),
+      voxel: write.voxel,
+      fluid: write.fluid,
+    })),
+  }));
   for (const { writes, chunk } of plans) {
     for (const write of writes) {
-      const [x, y, z] = write.position;
-      const index =
-        x -
-        chunk!.cx * CHUNK_SIZE +
-        (z - chunk!.cz * CHUNK_SIZE) * CHUNK_SIZE +
-        (y - chunk!.cy * CHUNK_SIZE) * CHUNK_SIZE ** 2;
+      const index = fluidWriteIndex(chunk!, write);
       chunk!.voxels[index] = write.voxel;
       chunk!.fluid[index] = write.fluid;
     }
@@ -87,6 +92,7 @@ export function commitFluidCandidate(options: {
       bounds: { min: min!, max: max! },
     },
     semanticEvents: [],
+    collisionDelta,
     metrics: {
       timingStatus: 'not-collected-hot-path',
       inputMutationCount: options.candidate.consumedFrontier.length,
@@ -107,3 +113,10 @@ export function commitFluidCandidate(options: {
 
 const compareWrites = (left: FluidCellWrite, right: FluidCellWrite) =>
   left.position[0] - right.position[0] || left.position[1] - right.position[1] || left.position[2] - right.position[2];
+
+const fluidWriteIndex = (chunk: ServerChunk, write: FluidCellWrite) => {
+  const [x, y, z] = write.position;
+  return (
+    x - chunk.cx * CHUNK_SIZE + (z - chunk.cz * CHUNK_SIZE) * CHUNK_SIZE + (y - chunk.cy * CHUNK_SIZE) * CHUNK_SIZE ** 2
+  );
+};

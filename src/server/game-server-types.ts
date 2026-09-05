@@ -49,11 +49,19 @@ export type WorldCommitMetrics = {
   applyMs: number;
   commitMs: number;
 };
+export type WorldCollisionCellDelta = Readonly<{ index: number; voxel: number; fluid: number }>;
+export type WorldCollisionChunkDelta = Readonly<{
+  key: string;
+  previousRevision: number;
+  revision: number;
+  cells: readonly WorldCollisionCellDelta[];
+}>;
 export type WorldCommitResult = {
   committed: boolean;
   worldRevision: number;
   structuralChange: VoxelRegionChanged | null;
   semanticEvents: readonly WorldSemanticEvent[];
+  collisionDelta?: readonly WorldCollisionChunkDelta[];
   metrics: WorldCommitMetrics;
 };
 export type ServerEntity = GameplayEntity;

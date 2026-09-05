@@ -1,21 +1,11 @@
 import { makeChunk } from '../world/mesh';
-import {
-  CHUNK_SIZE,
-  GENERATOR_VERSION,
-  chunkKey,
-  floorDiv,
-  mod,
-  normalizeSeed,
-  remeshChunkKeysForEdit,
-  voxelIndex,
-  Voxel,
-} from '../world/voxel';
+import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey, normalizeSeed, Voxel } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayFacade } from './game-server-gameplay';
 import { createStarterEcology } from './simulation/starter-ecology';
 import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
-import { commitWorldEditBatch, compareChunkKeys } from './world-transaction-commit';
+import { commitWorldEditBatch } from './world-transaction-commit';
 import type { FluidCell } from './fluid/fluid-cell';
 import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
@@ -30,7 +20,6 @@ import { peekLoadedVoxel } from './loaded-voxel-reader';
 import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
 import type { FrozenGameSaveSnapshot } from './persistence/game-save-snapshot';
 import { GameSaveRuntime } from './persistence/game-save-runtime';
-import { SINGLE_EDIT_METRICS, SINGLE_EDIT_NOOP_METRICS } from './world-edit-metrics';
 import { readGameSaveCheckpoint } from './persistence/game-save-checkpoint';
 import {
   CanonicalChunkResidency,
@@ -39,6 +28,7 @@ import {
 } from './chunk-residency';
 import { createServerDerivedMeshSnapshot, prepareServerWorkerMeshInput } from './server-mesh-snapshots';
 import { createLoadedGameplayVoxelReader, readCanonicalVoxel } from './server-voxel-access';
+import { commitSingleWorldEdit } from './single-world-edit';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -46,15 +36,11 @@ import type {
   DerivedMeshSnapshot,
   GameServerOptions,
   ServerChunk,
-  VoxelRegionChanged,
   WorkerCanonicalResult,
   WorkerMeshPreparation,
   WorldCommitResult,
   WorldEditBatch,
-  WorldSemanticEvent,
 } from './game-server-types';
-
-const EMPTY_SEMANTIC_EVENTS: readonly WorldSemanticEvent[] = Object.freeze([]);
 
 export class GameServer extends GameServerGameplayFacade {
   readonly seed: number;
@@ -374,46 +360,17 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   private commitSingleEdit(actorId: string, x: number, y: number, z: number, value: number): WorldCommitResult {
-    const cx = floorDiv(x, CHUNK_SIZE);
-    const cy = floorDiv(y, CHUNK_SIZE);
-    const cz = floorDiv(z, CHUNK_SIZE);
-    const chunk = this.getChunk(cx, cy, cz);
-    const index = voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE));
-    if (chunk.voxels[index] === value) {
-      return {
-        committed: false,
-        worldRevision: this.revision,
-        structuralChange: null,
-        semanticEvents: EMPTY_SEMANTIC_EVENTS,
-        metrics: SINGLE_EDIT_NOOP_METRICS,
-      };
-    }
-    const worldRevision = this.revision + 1;
-    const meshChunks = remeshChunkKeysForEdit(x, y, z);
-    if (meshChunks.length > 1) meshChunks.sort(compareChunkKeys);
-    const structuralChange: VoxelRegionChanged = {
-      type: 'voxel-region-changed',
+    return commitSingleWorldEdit({
       actorId,
-      worldRevision,
-      mutationCount: 1,
-      chunks: [chunk.key],
-      chunkRevisions: [{ key: chunk.key, revision: chunk.revision + 1 }],
-      meshChunks,
-      bounds: { min: [x, y, z], max: [x, y, z] },
-    };
-    chunk.voxels[index] = value;
-    chunk.revision += 1;
-    chunk.dirty = true;
-    chunk.materialized = true;
-    this.revision = worldRevision;
-    this.appliedMutationCount += 1;
-    return {
-      committed: true,
-      worldRevision,
-      structuralChange,
-      semanticEvents: EMPTY_SEMANTIC_EVENTS,
-      metrics: SINGLE_EDIT_METRICS[meshChunks.length],
-    };
+      x,
+      y,
+      z,
+      value,
+      worldRevision: this.revision,
+      getChunk: (cx, cy, cz) => this.getChunk(cx, cy, cz),
+      setWorldRevision: (revision) => (this.revision = revision),
+      addMutationCount: (count) => (this.appliedMutationCount += count),
+    });
   }
 
   async flushDirtyChunks(): Promise<string[]> {
