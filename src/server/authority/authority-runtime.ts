@@ -160,7 +160,7 @@ export class AuthorityRuntime {
       ...(options.generatorVersion === undefined ? {} : { generatorVersion: options.generatorVersion }),
       ...(options.persistence ? { persistence: options.persistence } : {}),
       ...(options.canonicalResidency ? { canonicalResidency: options.canonicalResidency } : {}),
-      onUnknownChunk: unknownChunks.request,
+      ...(options.onUnknownChunk ? { onUnknownChunk: unknownChunks.request } : {}),
     });
     server.setWorldTime(options.initialWorldTime);
     await server.restore();
