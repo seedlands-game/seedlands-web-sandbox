@@ -28,6 +28,7 @@
 - 物理审查修订已接入：本地提交 `f042740` 合入全局候选恢复、world-aware 实体分离、身体配置验证、终点接地判定和有限水面跃出；冲突只保留身体注册表导出并同时导出 `validateBodyConfig`。
 - 水面同源与注册校验 RED：`pnpm exec vitest run tests/server/authority-session.test.ts tests/physics/body-registry.test.ts`，2 项按预期失败：物理源水按满格采样而渲染为 7/8；玩家注册表未显式配置水面跳速。
 - 水面同源与注册校验 GREEN：`pnpm exec vitest run tests/server/authority-session.test.ts tests/physics/body-registry.test.ts tests/physics/step-body.test.ts`，3 个文件、30 个测试全部通过。物理流体 AABB 复用 `waterSurfaceHeight()` 并检查上方覆水；身体注册加载时执行 `validateBodyConfig()`，角色显式配置有限水面跃出速度。
+- 浏览器实际接线 RED：新增 `changes/2026-09-06-independent-loops-unified-physics/e2e/authority-worker-physics.spec.ts`，先定义生产 Worker 数量、Logic Worker 阻塞 500ms 时 Authority 物理与真实输入继续、一格岸真实 W 阻挡及 W+Space 连续轨迹。执行拓扑用例后按预期失败：Harness 实际返回 `runtime: "integrated-server"`，而合同要求 `authority-worker`；证明当前浏览器仍是旧主线程权威，不能以纯模块测试冒充完成。
 
 ## 集成提交
 
