@@ -41,6 +41,22 @@ class AsyncCachePersistence implements ChunkPersistence {
   }
 }
 
+class BlockedAsyncCachePersistence extends AsyncCachePersistence {
+  ensureStarted = false;
+  private releaseEnsure!: () => void;
+  private readonly ensureRelease = new Promise<void>((resolve) => (this.releaseEnsure = resolve));
+
+  override async ensureNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
+    this.ensureStarted = true;
+    await this.ensureRelease;
+    await super.ensureNeighborhood(cx, cy, cz);
+  }
+
+  release(): void {
+    this.releaseEnsure();
+  }
+}
+
 const canonical = (runtime: AuthorityRuntime, cx: number, cy: number, cz: number) => ({
   key: chunkKey(cx, cy, cz),
   cx,
@@ -132,6 +148,66 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
     );
     expect(runtime.server.peekLoadedVoxel(160, 33, 0)?.voxel).toBe(Voxel.Lantern);
     expect(unknown).not.toContain('5,1,0');
+  });
+
+  it('持久化预检阻塞期间保持unknown并继续物理，不抢跑General生成', async () => {
+    const persistence = new BlockedAsyncCachePersistence();
+    const unknown: string[] = [];
+    const runtime = await AuthorityRuntime.create({
+      epoch: 'mutation-preparation:blocked-durable-preflight',
+      seedText: 'mutation-preparation-blocked-durable-preflight',
+      persistence,
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+      onUnknownChunk: (key) => unknown.push(key),
+    });
+    expect(runtime.acceptGeneratedChunk(canonical(runtime, 5, 1, 0))).toBe(true);
+    await expect(
+      runtime.editWorld('saved-edit', [{ x: 160, y: 33, z: 0, value: Voxel.Lantern }]),
+    ).resolves.toMatchObject({ committed: true });
+    await runtime.save();
+    expect(await runtime.server.evictChunk(5, 1, 0)).toBe(true);
+
+    runtime.setPlayerPosition([160.5, 33, 0.5]);
+    const beforeTick = runtime.ready().snapshot.physicsTick;
+    runtime.wake(20);
+
+    expect(persistence.ensureStarted).toBe(true);
+    expect(unknown).not.toContain('5,1,0');
+    expect(runtime.server.readCollisionBaseline('5,1,0', 0)).toEqual({ status: 'unavailable', key: '5,1,0' });
+    expect(runtime.wake(40).physicsTick).toBeGreaterThan(beforeTick);
+    expect(unknown).not.toContain('5,1,0');
+
+    persistence.release();
+    await vi.waitFor(() =>
+      expect(runtime.server.readCollisionBaseline('5,1,0', 1)).toMatchObject({
+        status: 'available',
+        chunkRevision: 1,
+      }),
+    );
+    expect(runtime.server.peekLoadedVoxel(160, 33, 0)?.voxel).toBe(Voxel.Lantern);
+    expect(unknown).not.toContain('5,1,0');
+  });
+
+  it('没有General端口时在确认durable miss后使用本地确定性canonical', async () => {
+    const runtime = await AuthorityRuntime.create({
+      epoch: 'mutation-preparation:local-fallback',
+      seedText: 'mutation-preparation-local-fallback',
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+    });
+
+    runtime.setPlayerPosition([160.5, 33, 0.5]);
+    runtime.wake(20);
+
+    await vi.waitFor(() =>
+      expect(runtime.server.readCollisionBaseline('5,1,0', 0)).toMatchObject({
+        status: 'available',
+        chunkRevision: 0,
+      }),
+    );
   });
 
   it('远端set-block命令复用同一准备门，不在Authority热路径同步生成', async () => {

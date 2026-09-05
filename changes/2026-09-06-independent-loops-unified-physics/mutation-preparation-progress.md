@@ -26,3 +26,9 @@
 
 - [x] 定向 Vitest：7 个文件 24 项通过；`tsc -p tsconfig.test.json --noEmit` 通过；`pnpm build` 通过；`git diff --check` 通过。
 - [ ] 真实浏览器 direct edit、长穿越、保存后重载证据由 root 在不可变生产构建中执行。
+
+## 独立竞态复核
+
+补充两条不复用作者断言的 Authority 集成反例。第一条把持久化回载显式阻塞，要求期间 Chunk 保持 unknown、General 生成请求数为零，同时物理 tick 继续前进；解除阻塞后必须恢复 revision 1 的 Lantern。该用例在 durable-first 修复前的 `7be2f4b` 上实际 RED：持久化预检没有启动。第二条不配置 General 端口，要求明确 durable miss 后仍能通过本地确定性 canonical 继续 Headless 物理；该用例在 local fallback 修复前的 `2a0b55a` 上实际 RED：碰撞基线持续 unavailable。
+
+当前后继实现上同一测试文件 7/7 GREEN。复核同时确认：同 key 持久化预检在途时由 `AuthorityCanonicalPreparation` 合并；存储异常保持 fail closed，等待后续观察或事务重试；外部 General 端口不存在时才启用本地生成。未发现把持久化读取失败误判为耐久 missing、在预检期间抢跑 procedural，或阻塞物理 tick 的路径。
