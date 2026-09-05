@@ -26,6 +26,8 @@ export type AuthorityCollisionBaselineLease = Readonly<{
   generation: number;
 }>;
 
+export const AUTHORITY_COMMIT_REORDER_WINDOW = 2_048;
+
 type AuthorityCollisionRevisionState = {
   generation: number;
   minimumRevision: number;
@@ -38,6 +40,8 @@ export class AuthorityCollisionRevisionGuard {
   private readonly states = new Map<string, AuthorityCollisionRevisionState>();
   private contiguousCommitRevision: number | null = null;
   private readonly outOfOrderCommits = new Set<number>();
+  private highestPublishedCommitRevision: number | null = null;
+  private commitResyncRequired = false;
 
   beginBaseline(key: string): AuthorityCollisionBaselineLease {
     const state = this.stateFor(key);
@@ -99,18 +103,35 @@ export class AuthorityCollisionRevisionGuard {
     this.states.clear();
     this.contiguousCommitRevision = null;
     this.outOfOrderCommits.clear();
+    this.highestPublishedCommitRevision = null;
+    this.commitResyncRequired = false;
   }
 
   initializeCommitDelivery(worldRevision: number): void {
-    if (this.contiguousCommitRevision === null) this.contiguousCommitRevision = worldRevision;
+    if (this.contiguousCommitRevision === null) {
+      this.contiguousCommitRevision = worldRevision;
+      this.highestPublishedCommitRevision = worldRevision;
+    }
   }
 
   shouldPublishCommit(worldRevision: number): boolean {
     if (this.contiguousCommitRevision === null) this.contiguousCommitRevision = worldRevision - 1;
     if (worldRevision <= this.contiguousCommitRevision || this.outOfOrderCommits.has(worldRevision)) return false;
     this.outOfOrderCommits.add(worldRevision);
+    this.highestPublishedCommitRevision = Math.max(this.highestPublishedCommitRevision ?? worldRevision, worldRevision);
     while (this.outOfOrderCommits.delete(this.contiguousCommitRevision + 1)) this.contiguousCommitRevision += 1;
+    if (this.outOfOrderCommits.size > AUTHORITY_COMMIT_REORDER_WINDOW) {
+      this.contiguousCommitRevision = this.highestPublishedCommitRevision;
+      this.outOfOrderCommits.clear();
+      this.commitResyncRequired = true;
+    }
     return true;
+  }
+
+  takeCommitResyncRequired(): boolean {
+    const required = this.commitResyncRequired;
+    this.commitResyncRequired = false;
+    return required;
   }
 
   private stateFor(key: string): AuthorityCollisionRevisionState {
@@ -230,6 +251,13 @@ export function publishAuthorityCollisionCommits<Commit extends AuthorityCollisi
   const requestedBaselines = new Set<string>();
   for (const commit of commits) {
     if (guard && !guard.shouldPublishCommit(commit.worldRevision)) continue;
+    if (guard?.takeCommitResyncRequired()) {
+      for (const key of [...chunks.keys()]) {
+        guard.release(key);
+        chunks.delete(key);
+        callbacks.onUnknownChunk?.(key);
+      }
+    }
     const newlyRequired = new Set<string>();
     commit.structuralChange?.chunkRevisions.forEach(({ key, revision }) => {
       if (!guard || guard.require(key, revision)) newlyRequired.add(key);

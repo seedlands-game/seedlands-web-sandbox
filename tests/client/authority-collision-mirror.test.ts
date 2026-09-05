@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  AuthorityCollisionRevisionGuard,
   applyAuthorityCollisionCommit,
   installAuthorityCollisionBaseline,
+  publishAuthorityCollisionCommits,
   type AuthorityCollisionCachedChunk,
   type AuthorityCollisionCommit,
 } from '../../src/client/authority-collision-mirror';
@@ -82,5 +84,39 @@ describe('权威碰撞镜像', () => {
 
     expect(installAuthorityCollisionBaseline(current, stale)).toBe(current);
     expect(installAuthorityCollisionBaseline(current, newer)).toBe(newer);
+  });
+
+  it('提交缺口超过重排窗口时请求全量镜像重同步并永久去重旧提交', () => {
+    const guard = new AuthorityCollisionRevisionGuard();
+    guard.initializeCommitDelivery(0);
+    for (let revision = 2; revision <= 4_100; revision += 2) expect(guard.shouldPublishCommit(revision)).toBe(true);
+
+    expect(guard.takeCommitResyncRequired()).toBe(true);
+    expect(guard.shouldPublishCommit(2)).toBe(false);
+    expect(guard.shouldPublishCommit(1)).toBe(false);
+    expect(guard.shouldPublishCommit(4_102)).toBe(true);
+    expect(guard.takeCommitResyncRequired()).toBe(false);
+  });
+
+  it('提交缺口重同步会失效现有镜像并让表现层重新请求权威Chunk', () => {
+    const guard = new AuthorityCollisionRevisionGuard();
+    guard.initializeCommitDelivery(0);
+    const chunks = new Map([['0,0,0', chunk(4)]]);
+    const onCommit = vi.fn();
+    const onUnknownChunk = vi.fn();
+    const commits = Array.from({ length: 2_050 }, (_, index) => ({
+      committed: true,
+      worldRevision: (index + 1) * 2,
+      structuralChange: null,
+    }));
+
+    publishAuthorityCollisionCommits(commits, chunks, { onCommit, onUnknownChunk }, guard);
+
+    expect(chunks.size).toBe(0);
+    expect(onUnknownChunk).toHaveBeenCalledOnce();
+    expect(onUnknownChunk).toHaveBeenCalledWith('0,0,0');
+    expect(onCommit).toHaveBeenCalledTimes(2_050);
+    publishAuthorityCollisionCommits([commits[0]!], chunks, { onCommit, onUnknownChunk }, guard);
+    expect(onCommit).toHaveBeenCalledTimes(2_050);
   });
 });
