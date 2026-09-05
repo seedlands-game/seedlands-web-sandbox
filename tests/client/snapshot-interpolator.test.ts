@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { SnapshotInterpolator } from '../../src/client/snapshot-interpolator';
 
 describe('SnapshotInterpolator', () => {
-  it('按快照活跃时间插值其他实体', () => {
+  it('按快照已积分物理时间插值其他实体', () => {
     const interpolator = new SnapshotInterpolator({ interpolationDelayMs: 100, maxExtrapolationMs: 50 });
     interpolator.push({
       epoch: 'world:1',
@@ -54,7 +54,7 @@ describe('SnapshotInterpolator', () => {
     ).toBe(false);
   });
 
-  it('有限外推后停止在最后可信状态', () => {
+  it('有限外推后停在外推边界，不突然弹回旧快照位置', () => {
     const interpolator = new SnapshotInterpolator({ interpolationDelayMs: 0, maxExtrapolationMs: 50 });
     interpolator.push({
       epoch: 'world:1',
@@ -75,6 +75,21 @@ describe('SnapshotInterpolator', () => {
       position: { x: 12.5, y: 0, z: 0 },
       mode: 'extrapolated',
     });
-    expect(interpolator.sample('world:1', 500)).toMatchObject({ position: { x: 10, y: 0, z: 0 }, mode: 'held' });
+    expect(interpolator.sample('world:1', 500)).toMatchObject({ position: { x: 15, y: 0, z: 0 }, mode: 'held' });
+  });
+  it('非有限或物理时间倒退的快照不污染历史，输入输出均隔离', () => {
+    const interpolation = new SnapshotInterpolator({ interpolationDelayMs: 0, maxExtrapolationMs: 50 });
+    const position = { x: 1, y: 0, z: 0 };
+    const snapshot = { epoch: 'a', physicsTick: 1, integratedPhysicsTimeMs: 10, activeTimeMs: 10, position };
+    expect(interpolation.push({ ...snapshot, position: { x: NaN, y: 0, z: 0 } })).toBe(false);
+    expect(interpolation.push(snapshot)).toBe(true);
+    position.x = 999;
+    const sample = interpolation.sample('a', 10);
+    expect(sample.position.x).toBe(1);
+    sample.position.x = 555;
+    expect(interpolation.sample('a', 10).position.x).toBe(1);
+    expect(interpolation.push({ ...snapshot, physicsTick: 2, integratedPhysicsTimeMs: 9 })).toBe(false);
+    expect(() => interpolation.sample('a', NaN)).toThrow();
+    expect(() => new SnapshotInterpolator({ interpolationDelayMs: -1, maxExtrapolationMs: 50 })).toThrow();
   });
 });
