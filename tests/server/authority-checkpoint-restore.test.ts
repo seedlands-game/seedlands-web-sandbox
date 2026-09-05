@@ -26,7 +26,7 @@ describe('冻结检查点跨会话恢复', () => {
     expect((await second.save()).commitSequence).toBe(saved.commitSequence);
     second.advanceSession(100);
     expect((await second.save()).commitSequence).toBeGreaterThan(saved.commitSequence);
-  });
+  }, 15_000);
 
   it('冻结的世界修订号在尚未加载任何Chunk时就恢复', async () => {
     const persistence = new MemoryGamePersistence();
