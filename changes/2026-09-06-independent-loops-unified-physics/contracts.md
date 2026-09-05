@@ -23,13 +23,13 @@ physics ──────┼─> runtime ─> server ─> worker adapters
 - `Vec3 = { x: number; y: number; z: number }`
 - `LocalAabb = { min: Vec3; max: Vec3 }`，相对实体脚底中心原点。
 - `WorldAabb = { min: Vec3; max: Vec3 }`
-- `BodyConfig = { localAabb; collisionLayer; collisionMask; medium?; gravity?; buoyancy?; drag?; maxSpeed? }`
+- `BodyConfig = { localAabb; collisionLayer?; collisionMask?; gravity?; terminalVelocity?; maxHorizontalSpeed?; groundAcceleration?; airAcceleration?; jumpSpeed?; buoyancy?; fluidDrag?; swimAcceleration? }`
 - `BodyState = { position: Vec3; velocity: Vec3 }`
 - `PhysicsInput = { wish: { x: number; z: number }; jumpPressed: boolean; verticalIntent: -1 | 0 | 1 }`
-- `Collider = { id?; aabb: WorldAabb; layer?; mask? }`
+- `Collider = { id?; aabb: WorldAabb; layer?; mask?; sensor? }`
 - `FluidVolume = { aabb: WorldAabb; velocity: Vec3 }`
 - `PhysicsWorld = { querySolids(bounds): readonly Collider[]; sampleFluid?(bounds): readonly FluidVolume[]; unknownIsSolid?: boolean }`
-- `stepBody({ state, config, input, world, dt })` 返回 `{ state, contacts, grounded, medium, recovery? }`。
+- `stepBody({ state, config, input, world, dt })` 返回 `{ state, contacts, sensors, grounded, medium }`；`recoverBody` 是单独的显式恢复入口。
 
 普通固定步不得自动爬阶、按中心格判定支撑或反复传送脱困。有限重叠恢复只能由初始化、旧档迁移或外部几何变化显式请求。
 
@@ -52,6 +52,7 @@ type InputCommand = {
   kind: 'input';
   protocolVersion: 1;
   epoch: SessionEpoch;
+  stream: string;
   sequence: number;
   targetPhysicsTick: number;
   issuedAtMs: number;
@@ -63,6 +64,8 @@ type TransactionCommand = {
   kind: 'transaction';
   protocolVersion: 1;
   epoch: SessionEpoch;
+  issuer: string;
+  stream: string;
   sequence: number;
   expectedCommitSequence?: number;
   issuedAtMs: number;
@@ -70,7 +73,8 @@ type TransactionCommand = {
 };
 ```
 
-- `sequence` 在同一 epoch 内严格递增；Authority 对已提交 sequence 返回相同回执，不重复执行。
+- 幂等键是 `epoch + issuer/stream + sequence`；输入 ack 只推进对应输入 stream，不能被无关事务 sequence 推进。Authority 对已提交事务返回相同回执，不重复执行。
+- 同一输入 stream 采用严格递增的有限过期拒绝：若 release 的较新 sequence 先到，迟到的旧 press 被拒绝且不得重新触发跳跃或造成粘键。
 - `moveX/moveZ` 是客户端根据即时镜头朝向算出的世界坐标移动意图；Authority 不读取客户端 yaw 猜方向。持续输入状态和 `jumpHeld` 可被较新状态覆盖，但按下/松开边沿必须按 sequence 消费一次。持续按住 Space 时，每次重新获得合法向上支撑后可再次起跳，不能只依赖首次 `jumpPressed`。
 - 事务包括编辑、库存、伤害、拾取、保存和调试快照订阅；它们不得静默丢弃。
 - 所有响应都带 `protocolVersion + epoch`。旧 epoch、重复及乱序响应由接收方明确忽略并计数。

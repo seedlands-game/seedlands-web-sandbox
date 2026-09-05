@@ -3,7 +3,12 @@ import { MultiRateScheduler } from '../../src/runtime/multi-rate-scheduler';
 
 describe('MultiRateScheduler', () => {
   it.each([30, 60, 120] as const)('以 %sHz 独立产生固定物理步', (physicsHz) => {
-    const scheduler = new MultiRateScheduler({ physicsHz, gameplayHz: 20, fluidHz: 30 });
+    const scheduler = new MultiRateScheduler({
+      physicsHz,
+      gameplayHz: 20,
+      fluidHz: 30,
+      maxPhysicsCatchUpSteps: 240,
+    });
 
     const result = scheduler.advanceTo(1_000);
 
@@ -13,7 +18,12 @@ describe('MultiRateScheduler', () => {
   });
 
   it('为非整数频率比保存独立 deadline', () => {
-    const scheduler = new MultiRateScheduler({ physicsHz: 60, gameplayHz: 11, fluidHz: 7 });
+    const scheduler = new MultiRateScheduler({
+      physicsHz: 60,
+      gameplayHz: 11,
+      fluidHz: 7,
+      maxPhysicsCatchUpSteps: 120,
+    });
 
     const result = scheduler.advanceTo(1_000);
 

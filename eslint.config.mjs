@@ -6,6 +6,13 @@ import tseslint from 'typescript-eslint';
 const worldForbiddenImports = (source) =>
   source === 'playcanvas' || source.includes('/server/') || source.includes('/client/');
 const serverForbiddenImports = (source) => source === 'playcanvas' || source.includes('/client/');
+const pureRuntimeForbiddenImports = (source, filename) =>
+  source === 'playcanvas' ||
+  source.includes('/app/') ||
+  source.includes('/client/') ||
+  source.includes('/server/') ||
+  source.includes('/worker/') ||
+  (filename.replaceAll('\\', '/').includes('/src/physics/') && source.includes('/runtime/'));
 const forbiddenRuntimeGlobals = new Set([
   'window',
   'document',
@@ -24,7 +31,7 @@ const purityRule = (forbiddenImport) => ({
   create(context) {
     const reportImport = (node) => {
       const source = typeof node.source?.value === 'string' ? node.source.value : null;
-      if (source && forbiddenImport(source))
+      if (source && forbiddenImport(source, context.filename))
         context.report({ node, messageId: 'forbidden', data: { dependency: source } });
     };
     return {
@@ -33,7 +40,11 @@ const purityRule = (forbiddenImport) => ({
       CallExpression(node) {
         if (node.callee.type !== 'Identifier' || node.callee.name !== 'require') return;
         const [argument] = node.arguments;
-        if (argument?.type === 'Literal' && typeof argument.value === 'string' && forbiddenImport(argument.value))
+        if (
+          argument?.type === 'Literal' &&
+          typeof argument.value === 'string' &&
+          forbiddenImport(argument.value, context.filename)
+        )
           context.report({ node, messageId: 'forbidden', data: { dependency: argument.value } });
       },
       Identifier(node) {
@@ -50,6 +61,7 @@ const seedlands = {
   rules: {
     'world-purity': purityRule(worldForbiddenImports),
     'server-purity': purityRule(serverForbiddenImports),
+    'pure-runtime': purityRule(pureRuntimeForbiddenImports),
     'ui-presentation-boundary': {
       meta: {
         type: 'problem',
@@ -154,6 +166,12 @@ export default tseslint.config(
     plugins: { seedlands },
     languageOptions: { globals: globals.node },
     rules: { 'seedlands/world-purity': 'error' },
+  },
+  {
+    files: ['src/runtime/**/*.ts', 'src/physics/**/*.ts'],
+    plugins: { seedlands },
+    languageOptions: { globals: globals.node },
+    rules: { 'seedlands/pure-runtime': 'error' },
   },
   {
     files: ['src/server/**/*.ts'],
