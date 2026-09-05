@@ -1,4 +1,22 @@
-# 最新恢复点：2026-09-05 08:54
+# 最新恢复点：2026-09-05 09:00
+
+**工程交付已收口；唯一剩余外部验收是实际音频试听。不要重复跑通过的测试，也不要为消耗额度扩scope。**
+
+分支 `codex/playable-world-mvp`，生产源码提交 `025db21b6f61dee7267f3d9eb530c64ebb36b00c`；之后只追加证据与交付文档。渲染11c68d7、Change8 a27dc8e、Change9 c7a1072均已验证为祖先，用户合并本分支即可，不push。
+
+最终关联Harness run `c781a344-00d3-4298-8178-bb43dc49b441`：234单测/4明确skip、Build、9浏览器21.0秒、Node汇总通过，无REGRESSION，父harness-current.json。完整Static234/4skip、world95.03%、Svelte0/0通过。原生独立Chrome152/macOS26.6.2/M3Pro36GiB/1920×1080DPR1/noDefaults性能1项3.1分钟通过：Medium p959.2/9.1、p9910.0/10.1ms；实际Canvas1689×950；Low1382×777、High1920×1080。四组0失焦/隐藏帧。跨区p959.4ms，输入p9510.1ms。报告performance-native-final.json。
+
+60分钟固定48d2dd2长测3600.378秒、17sessions、74centers、1自然死亡GUI恢复、0errors。其XR泄漏已由025db21关闭无用XR管理器修复：20次退出总监听器56/DOM1268/XR0稳定，独立RED/GREEN留档。后续快速背包Escape迟到pointer事件修复20项46.1秒通过；最终Shell/光影/资源8项52.5秒通过。不同source分别记录，不称修复版已经另跑1小时。
+
+视觉9原始帧及Midscene、5seed、自然完整旅程、Firefox/WebKit兼容、真实后台音频、完整3Cue生产录音等证据均已归档父spec。当前模型没有音频听觉输入；音色、接缝、空间方位和混音层次不能凭波形代替。父A8/A9和音频子change仍Active。最小剩余动作：由能实际听音频的人听三首录音并在游戏内试听代表性SFX/空间声；按反馈修正后才能完成goal。本轮首次进入只剩此外部验收的状态；未达到连续三轮blocked阈值，不误标complete或提前blocked。
+
+本地游戏生产预览 `http://127.0.0.1:4252/`（session98163），画面/音频 `http://127.0.0.1:4251/final-world-scenes/`（session35923），两页已在Codex in-app打开。gallery9场景切换/原图加载/3播放器检查通过并实际看过整页。固定旧preview4242/4246、静态4247与旧dev4217已仅对本任务进程SIGINT清理；dev4241也将在交付前关闭。没有停止用户Chrome/其他应用，用户数据无修改。
+
+Goal3,000,000tokens ACTIVE；最新查询tokensUsed2,047,921，剩952,079（之后还有少量收口消耗）。账户50%，起点38%，已用约12个百分点，硬上限58%；未重置。最终文档提交后核git status干净，记录SHA即可结束本轮；等待试听，不重复同一长测或新增系统。
+
+---
+
+# 历史恢复点：2026-09-05 08:54
 
 分支codex/playable-world-mvp，三路上游最终SHA均在祖先中。60分钟固定48d2dd2长测已完成3600.378秒、17sessions、74centers、1自然死亡恢复、0errors。发现每会话XR监听器泄漏并在scene-bootstrap禁用未使用XR管理器，20会话总监听器56/DOM1268稳定、XR0。新增背包快速Escape竞态修复：主动释放原因和锁状态转换一起判断，处理排队的重复pointerlockchange。新用例10个隔离Context各开闭与真Escape，20PASS46.1秒；最后8项Shell/光影/资源组合正在收口。
 
