@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import {
   clickCanvasCenter,
+  fillHarnessWorld,
   lockPointer,
   moveHarnessPlayer,
   prepareCenterExcavation,
@@ -63,67 +64,95 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     await lockPointer(page);
     await setHarnessView(page, 0, 0);
     await page.keyboard.down('KeyW');
-    const after = await waitForPlayerMovement(page, { axis: 2, start: before.player[2], minimumDelta: 3 });
+    const after = await waitForPlayerMovement(page, {
+      axis: 2,
+      start: before.player[2],
+      minimumDelta: 3,
+    });
     await page.keyboard.up('KeyW');
     expect(after.player[1]).toBeCloseTo(before.player[1], 2);
     expect(after.onGround).toBe(true);
     expect(after.colliding).toBe(false);
   });
 
-  test('falls when its center ground voxel is excavated despite neighboring support', async ({ page }) => {
+  test('keeps real edge support and falls only after all supporting voxels are removed', async ({ page }) => {
     await startHarnessWorld(page, 'seedlands-player-collision');
     await prepareCenterExcavation(page);
-    const before = await snapshot(page);
-    expect(before).not.toBeNull();
-    if (!before) throw new Error('Seedlands harness snapshot is unavailable before center excavation.');
+    const supported = await waitForSnapshot(page, (current) => current.onGround && !current.colliding);
+    await expect
+      .poll(async () => (await snapshot(page))!.authority.physicsTick)
+      .toBeGreaterThan(supported.authority.physicsTick + 15);
+    const stillSupported = (await snapshot(page))!;
+    expect(stillSupported.player[1]).toBeCloseTo(supported.player[1], 4);
+    expect(stillSupported.onGround).toBe(true);
+    expect(stillSupported.colliding).toBe(false);
 
+    await fillHarnessWorld(page, [-1, 56, -1], [0, 56, 0], 0);
     const falling = await waitForPlayerMovement(page, {
       axis: 1,
-      start: before.player[1],
+      start: supported.player[1],
       minimumDelta: 0.25,
       direction: -1,
     });
     expect(falling.onGround).toBe(false);
     await lockPointer(page);
     await page.keyboard.down('Space');
-    const afterSpace = await waitForPlayerMovement(page, {
-      axis: 1,
-      start: falling.player[1],
-      minimumDelta: 0.15,
-      direction: -1,
-    });
-    await page.keyboard.up('Space');
-    expect(afterSpace.onGround).toBe(false);
+    try {
+      const afterSpace = await waitForPlayerMovement(page, {
+        axis: 1,
+        start: falling.player[1],
+        minimumDelta: 0.15,
+        direction: -1,
+      });
+      expect(afterSpace.onGround).toBe(false);
+      expect(afterSpace.colliding).toBe(false);
+    } finally {
+      await page.keyboard.up('Space');
+    }
   });
 
-  test('steps down from a ledge and can immediately reverse without remaining embedded', async ({ page }) => {
+  test('walks down a ledge and requires a real jump to return without overlap', async ({ page }) => {
     await startHarnessWorld(page, 'seedlands-player-collision');
     await prepareStepDown(page);
-    const before = await snapshot(page);
-    expect(before).not.toBeNull();
-    if (!before) throw new Error('Seedlands harness snapshot is unavailable before stepping down.');
-
+    const before = await waitForSnapshot(page, (current) => current.onGround && !current.colliding);
     await lockPointer(page);
     await setHarnessView(page, 0, 0);
     await page.keyboard.down('KeyW');
-    const steppedDown = await waitForPlayerMovement(page, {
-      axis: 2,
-      start: before.player[2],
-      minimumDelta: 0.15,
-      direction: -1,
-      yTarget: before.player[1] - 1,
-    });
-    await page.keyboard.up('KeyW');
+    try {
+      await waitForPlayerMovement(page, {
+        axis: 2,
+        start: before.player[2],
+        minimumDelta: 1.5,
+        direction: -1,
+        yTarget: before.player[1] - 1,
+      });
+    } finally {
+      await page.keyboard.up('KeyW');
+    }
+    await waitForSnapshot(page, (current) => current.onGround && !current.colliding);
     await page.keyboard.down('KeyS');
-    const reversed = await waitForPlayerMovement(page, {
-      axis: 2,
-      start: steppedDown.player[2],
-      minimumDelta: 0.5,
-      direction: 1,
-      yTarget: before.player[1] - 1,
-    });
-    await page.keyboard.up('KeyS');
-    expect(reversed.colliding).toBe(false);
+    try {
+      await waitForSnapshot(
+        page,
+        (current) => current.player[2] > -0.4 && current.player[2] < -0.3 && current.onGround,
+      );
+      const blocked = (await snapshot(page))!;
+      expect(blocked.player[1]).toBeCloseTo(before.player[1] - 1, 2);
+      expect(blocked.colliding).toBe(false);
+      await page.keyboard.down('Space');
+      const returned = await waitForPlayerMovement(page, {
+        axis: 2,
+        start: blocked.player[2],
+        minimumDelta: 0.8,
+        direction: 1,
+        yTarget: before.player[1],
+        yTolerance: 0.15,
+      });
+      expect(returned.colliding).toBe(false);
+    } finally {
+      await page.keyboard.up('Space');
+      await page.keyboard.up('KeyS');
+    }
   });
 
   test('persists a controlled world edit through the production edit and Store paths', async ({ page }) => {

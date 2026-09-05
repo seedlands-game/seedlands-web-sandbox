@@ -24,7 +24,8 @@ export type HarnessSnapshot = {
   quality: 'low' | 'medium' | 'high';
   triangles: number;
   drawCalls: number;
-  runtime: 'integrated-server';
+  runtime: 'integrated-server' | 'authority-worker';
+  authority: { physicsTick: number; commitSequence: number };
   generatorVersion: number;
   renderPipeline: {
     drawUnit: 'chunk-render-category';
@@ -48,7 +49,13 @@ export type HarnessSnapshot = {
       longFrameCount: number;
       lastLongFrameMs: number;
     };
-    chunkVisible: { count: number; p50Ms: number; p95Ms: number; p99Ms: number; maxMs: number };
+    chunkVisible: {
+      count: number;
+      p50Ms: number;
+      p95Ms: number;
+      p99Ms: number;
+      maxMs: number;
+    };
     completedChunkTraces: number;
     traceEventCount: number;
     maxMeshCommitsInFrame: number;
@@ -152,20 +159,24 @@ type HarnessWindow = Window & {
     snapshot: () => HarnessSnapshot;
     beginPerformanceScenario: (name: string) => string;
     setStreamingVariant: (variant: 'main-snapshot' | 'worker-first') => void;
-    removeVoxelAt: (x: number, y: number, z: number) => void;
-    fillWorld: (command: { from: [number, number, number]; to: [number, number, number]; voxel: number }) => void;
-    movePlayerTo: (x: number, y: number, z: number) => void;
-    prepareFlatMovement: () => void;
-    prepareCenterExcavation: () => void;
-    prepareStepDown: () => void;
-    setWorldTime: (hour: number) => void;
+    removeVoxelAt: (x: number, y: number, z: number) => Promise<unknown>;
+    fillWorld: (command: {
+      from: [number, number, number];
+      to: [number, number, number];
+      voxel: number;
+    }) => Promise<unknown>;
+    movePlayerTo: (x: number, y: number, z: number) => Promise<unknown>;
+    prepareFlatMovement: () => Promise<unknown>;
+    prepareCenterExcavation: () => Promise<unknown>;
+    prepareStepDown: () => Promise<unknown>;
+    setWorldTime: (hour: number) => Promise<unknown>;
     setTimePaused: (paused: boolean) => void;
     setTimeSpeed: (speed: number) => void;
     setView: (yaw: number, pitch: number) => void;
     setSpectatorPosition: (x: number, y: number, z: number) => void;
     executeGameplayCommand: (command: Record<string, unknown>) => Promise<Record<string, unknown>>;
     advanceGameplay: (seconds: number) => void;
-    setVoxelAt: (x: number, y: number, z: number, voxel: number) => void;
+    setVoxelAt: (x: number, y: number, z: number, voxel: number) => Promise<unknown>;
     beginFluidFeedbackSample?: () => void;
     setWaterTransitionHold?: (held: boolean) => void;
     flushSave: () => Promise<void>;
@@ -251,6 +262,7 @@ export async function waitForPlayerMovement(
 }
 
 export async function lockPointer(page: Page): Promise<Locator> {
+  await page.bringToFront();
   const canvas = page.locator('#game');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Game canvas has no visible bounding box.');
@@ -263,7 +275,9 @@ export async function clickCanvasCenter(page: Page, button: 'left' | 'right'): P
   const canvas = page.locator('#game');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Game canvas has no visible bounding box.');
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, { button });
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, {
+    button,
+  });
 }
 
 export async function removeHarnessVoxel(page: Page, x: number, y: number, z: number): Promise<void> {
@@ -271,7 +285,7 @@ export async function removeHarnessVoxel(page: Page, x: number, y: number, z: nu
     ([targetX, targetY, targetZ]) => {
       const harness = (window as HarnessWindow).__seedlandsHarness;
       if (!harness) throw new Error('Seedlands harness edit entry is unavailable.');
-      harness.removeVoxelAt(targetX, targetY, targetZ);
+      return harness.removeVoxelAt(targetX, targetY, targetZ);
     },
     [x, y, z],
   );
@@ -287,7 +301,11 @@ export async function fillHarnessWorld(
     ({ from: fillFrom, to: fillTo, voxel: fillVoxel }) => {
       const harness = (window as HarnessWindow).__seedlandsHarness;
       if (!harness) throw new Error('Seedlands harness fill entry is unavailable.');
-      harness.fillWorld({ from: fillFrom, to: fillTo, voxel: fillVoxel });
+      return harness.fillWorld({
+        from: fillFrom,
+        to: fillTo,
+        voxel: fillVoxel,
+      });
     },
     { from, to, voxel },
   );
@@ -298,7 +316,7 @@ export async function moveHarnessPlayer(page: Page, x: number, y: number, z: num
     ([targetX, targetY, targetZ]) => {
       const harness = (window as HarnessWindow).__seedlandsHarness;
       if (!harness) throw new Error('Seedlands harness movement entry is unavailable.');
-      harness.movePlayerTo(targetX, targetY, targetZ);
+      return harness.movePlayerTo(targetX, targetY, targetZ);
     },
     [x, y, z],
   );
@@ -308,32 +326,62 @@ export async function prepareFlatMovement(page: Page): Promise<void> {
   await page.evaluate(() => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands flat-movement fixture is unavailable.');
-    harness.prepareFlatMovement();
+    return harness.prepareFlatMovement();
   });
+  await waitForSnapshot(
+    page,
+    (current) =>
+      current.onGround &&
+      !current.colliding &&
+      Math.abs(current.player[0] - 0.5) < 0.001 &&
+      Math.abs(current.player[1] - 58.6) < 0.001 &&
+      Math.abs(current.serverPlayerPosition[1] - 58.6) < 0.001 &&
+      Math.abs(current.player[2] - 0.5) < 0.001,
+  );
 }
 
 export async function prepareCenterExcavation(page: Page): Promise<void> {
   await page.evaluate(() => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands center-excavation fixture is unavailable.');
-    harness.prepareCenterExcavation();
+    return harness.prepareCenterExcavation();
   });
+  await waitForSnapshot(
+    page,
+    (current) =>
+      current.onGround &&
+      !current.colliding &&
+      Math.abs(current.player[0] - 0) < 0.001 &&
+      Math.abs(current.player[1] - 58.6) < 0.001 &&
+      Math.abs(current.serverPlayerPosition[1] - 58.6) < 0.001 &&
+      Math.abs(current.player[2] - 0) < 0.001,
+  );
 }
 
 export async function prepareStepDown(page: Page): Promise<void> {
   await page.evaluate(() => {
     const harness = (window as HarnessWindow).__seedlandsHarness;
     if (!harness) throw new Error('Seedlands step-down fixture is unavailable.');
-    harness.prepareStepDown();
+    return harness.prepareStepDown();
   });
+  await waitForSnapshot(
+    page,
+    (current) =>
+      current.onGround &&
+      !current.colliding &&
+      Math.abs(current.player[0] - 0.5) < 0.001 &&
+      Math.abs(current.player[1] - 58.6) < 0.001 &&
+      Math.abs(current.serverPlayerPosition[1] - 58.6) < 0.001 &&
+      Math.abs(current.player[2] - 0.5) < 0.001,
+  );
 }
 
 export async function setHarnessWorldTime(page: Page, hour: number, paused = true): Promise<void> {
   await page.evaluate(
-    ([targetHour, shouldPause]) => {
+    async ([targetHour, shouldPause]) => {
       const harness = (window as HarnessWindow).__seedlandsHarness;
       if (!harness) throw new Error('Seedlands environment controls are unavailable.');
-      harness.setWorldTime(targetHour);
+      await harness.setWorldTime(targetHour);
       harness.setTimePaused(shouldPause);
     },
     [hour, paused] as const,
