@@ -4,7 +4,7 @@ import type { FluidCandidate } from '../server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '../server/game-server-types';
 import type { VoxelEdit } from '../server/world-mutation';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '../runtime/session-protocol';
-import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
+import { chunkKey } from '../world/voxel';
 import type {
   AuthorityAction,
   AuthorityActionResult,
@@ -22,6 +22,10 @@ import { ClientRequestRegistry } from './client-request-registry';
 import { ClientReadyWait } from './client-ready-wait';
 import { createAuthorityTransport } from './authority-transport';
 import { acceptAuthorityMeshPreparation } from './authority-mesh-preparation';
+import {
+  AuthorityCollisionBaselineClient,
+  type AuthorityCollisionBaselinePayload,
+} from './authority-collision-baseline-client';
 import {
   AuthorityCollisionRevisionGuard,
   acceptAuthorityCollisionBaseline,
@@ -48,6 +52,11 @@ export class BrowserAuthorityClient {
   private readonly meshLoads = new Map<string, Promise<void>>();
   private readonly meshCache = new Map<string, AuthorityCachedMesh>();
   private readonly collisionRevisions = new AuthorityCollisionRevisionGuard();
+  private readonly collisionBaselines = new AuthorityCollisionBaselineClient(
+    this.meshCache,
+    this.collisionRevisions,
+    (request) => this.request(request) as Promise<AuthorityCollisionBaselinePayload>,
+  );
   private readonly preparationCache = new Map<string, AuthorityCachedPreparation>();
   private readyValue: AuthorityReady | null = null;
   private snapshotValue: AuthoritySnapshot | null = null;
@@ -282,25 +291,15 @@ export class BrowserAuthorityClient {
   }
 
   getVoxel(x: number, y: number, z: number): number {
-    const cached = this.meshCache.get(
-      chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)),
-    );
-    if (!cached) return Voxel.Air;
-    return cached.canonical[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
+    return this.collisionBaselines.getVoxel(x, y, z);
   }
 
   getFluidCell(x: number, y: number, z: number): { level: number; source: boolean } | null {
-    const cached = this.meshCache.get(
-      chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)),
-    );
-    if (!cached) return null;
-    const value = cached.fluid[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
-    const level = value & 0x0f;
-    return level ? { level, source: (value & 0x80) !== 0 } : null;
+    return this.collisionBaselines.getFluidCell(x, y, z);
   }
 
   getChunkRevision(cx: number, cy: number, cz: number): number | null {
-    return this.meshCache.get(chunkKey(cx, cy, cz))?.chunkRevision ?? null;
+    return this.collisionBaselines.getChunkRevision(cx, cy, cz);
   }
 
   setFluidActiveChunks(keys: readonly string[]): void {
@@ -513,6 +512,7 @@ export class BrowserAuthorityClient {
     if (gameplay) this.updateGameplay(gameplay);
     if (this.snapshotGate.accept(snapshot)) return;
     this.snapshotValue = snapshot;
+    this.collisionBaselines.synchronize(snapshot.chunkRevisions);
     this.options.onSnapshot?.(snapshot);
   }
 

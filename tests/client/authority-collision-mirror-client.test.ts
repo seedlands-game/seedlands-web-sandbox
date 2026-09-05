@@ -393,4 +393,72 @@ describe('生产BrowserAuthorityClient碰撞镜像接线', () => {
     expect(client.snapshot?.physicsTick).toBe(2);
     expect(onCommit).toHaveBeenCalledTimes(1);
   });
+
+  it('权威运动快照发现缺失物理Chunk时绕过网格队列只请求一次碰撞基线', async () => {
+    const worker = new FakeAuthorityWorker();
+    const unknown = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onUnknownChunk: unknown });
+
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: snapshot(1, 1),
+    });
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: snapshot(2, 1),
+    });
+
+    const requests = worker.posts.filter(
+      (post): post is { kind: string; requestId: number } =>
+        typeof post === 'object' && post !== null && (post as { kind?: string }).kind === 'request-collision-baseline',
+    );
+    expect(requests).toHaveLength(1);
+    expect(unknown).not.toHaveBeenCalled();
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: requests[0]!.requestId,
+      ok: true,
+      result: { status: 'unavailable', key: '0,0,0' },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(client.getChunkRevision(0, 0, 0)).toBeNull();
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: snapshot(3, 1),
+    });
+    const retry = worker.posts.filter(
+      (post): post is { kind: string; requestId: number } =>
+        typeof post === 'object' && post !== null && (post as { kind?: string }).kind === 'request-collision-baseline',
+    );
+    expect(retry).toHaveLength(2);
+    const canonical = new Uint16Array(CHUNK_SIZE ** 3);
+    canonical[0] = Voxel.Stone;
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: retry[1]!.requestId,
+      ok: true,
+      result: {
+        status: 'available',
+        key: '0,0,0',
+        chunkRevision: 5,
+        canonical: canonical.buffer,
+        fluid: new Uint8Array(CHUNK_SIZE ** 3).buffer,
+      },
+    });
+    await vi.waitFor(() => expect(client.getChunkRevision(0, 0, 0)).toBe(5));
+    expect(client.getVoxel(0, 0, 0)).toBe(Voxel.Stone);
+    expect(client.snapshot?.physicsTick).toBe(3);
+  });
 });

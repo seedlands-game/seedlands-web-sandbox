@@ -31,6 +31,7 @@ type AuthorityCollisionRevisionState = {
   minimumRevision: number;
   pending: number;
   released: boolean;
+  baselineRequested: boolean;
 };
 
 export class AuthorityCollisionRevisionGuard {
@@ -49,13 +50,17 @@ export class AuthorityCollisionRevisionGuard {
     const state = this.states.get(lease.key);
     if (!state) return;
     state.pending = Math.max(0, state.pending - 1);
+    if (lease.generation === state.generation && state.pending === 0) state.baselineRequested = false;
     if (state.pending === 0 && state.released) this.states.delete(lease.key);
   }
 
-  require(key: string, revision: number): void {
+  require(key: string, revision: number): boolean {
     const state = this.stateFor(key);
     state.released = false;
     state.minimumRevision = Math.max(revision, state.minimumRevision);
+    if (state.baselineRequested) return false;
+    state.baselineRequested = true;
+    return true;
   }
 
   accepts(key: string, revision: number, lease?: AuthorityCollisionBaselineLease): boolean {
@@ -68,10 +73,16 @@ export class AuthorityCollisionRevisionGuard {
     );
   }
 
+  isReadable(key: string, revision: number): boolean {
+    const state = this.states.get(key);
+    return !state || (!state.released && revision >= state.minimumRevision);
+  }
+
   satisfy(key: string, revision: number): void {
     const state = this.states.get(key);
     if (!state || !this.accepts(key, revision)) return;
     state.minimumRevision = 0;
+    state.baselineRequested = false;
   }
 
   release(key: string): void {
@@ -80,6 +91,7 @@ export class AuthorityCollisionRevisionGuard {
     state.generation += 1;
     state.minimumRevision = 0;
     state.released = true;
+    state.baselineRequested = false;
     if (state.pending === 0) this.states.delete(key);
   }
 
@@ -104,7 +116,7 @@ export class AuthorityCollisionRevisionGuard {
   private stateFor(key: string): AuthorityCollisionRevisionState {
     let state = this.states.get(key);
     if (!state) {
-      state = { generation: 0, minimumRevision: 0, pending: 0, released: false };
+      state = { generation: 0, minimumRevision: 0, pending: 0, released: false, baselineRequested: false };
       this.states.set(key, state);
     }
     return state;
@@ -218,13 +230,17 @@ export function publishAuthorityCollisionCommits<Commit extends AuthorityCollisi
   const requestedBaselines = new Set<string>();
   for (const commit of commits) {
     if (guard && !guard.shouldPublishCommit(commit.worldRevision)) continue;
-    commit.structuralChange?.chunkRevisions.forEach(({ key, revision }) => guard?.require(key, revision));
+    const newlyRequired = new Set<string>();
+    commit.structuralChange?.chunkRevisions.forEach(({ key, revision }) => {
+      if (!guard || guard.require(key, revision)) newlyRequired.add(key);
+    });
     applyAuthorityCollisionCommit(commit, {
       getChunk: (key) => chunks.get(key),
       invalidateChunk: (key) => chunks.delete(key),
       requestBaseline: (key) => {
         if (requestedBaselines.has(key)) return;
         requestedBaselines.add(key);
+        if (!newlyRequired.has(key)) return;
         callbacks.onUnknownChunk?.(key);
       },
     });

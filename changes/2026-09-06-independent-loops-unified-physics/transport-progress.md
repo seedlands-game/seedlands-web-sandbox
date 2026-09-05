@@ -160,3 +160,9 @@ RED 实测三类失败：重复入站的第二份缓冲区已 detached；延迟�
 RED 要求初始 `mesh-prepared` 回执一完成，生产 `getVoxel` 与 `getChunkRevision` 就能读取该权威快照；revision 缺口失效后，新的 `mesh-prepared` 同样立即恢复碰撞基线，不等待 GPU/网格结果。卸载代际仍必须阻止迟到 prepare 回执复活已释放缓存。
 
 RED 实测初始 prepare 后 `getVoxel` 仍返回 Air。实现把请求开始时的碰撞基线代际绑定到 prepare 回执，在回执完成 Promise 前复制并安装权威 canonical、fluid 和 revision；网格派生计算继续使用独立副本。初始加载、缺口恢复和卸载后迟到回执三条生产用例均通过，碰撞事实不再依赖网格任务是否赶上流体 revision。
+
+首次真实浏览器复验进一步确认：30Hz/0ms 重复乱序已通过；60Hz/50ms 移动时 Authority 身体与镜头位置一致且没有穿入，但跨过 Chunk 边界后身体覆盖格的客户端 revision 全为 `null`，`VoxelCollisionWorld` 按未知即阻挡报告假碰撞，预测反复以 `collision-history-missing` 重置。此时该 Chunk 仍排在网格 streaming 队列中，尚未发出 prepare，因此仅提前消费 prepare 还不足以保证物理近场。
+
+新增 RED 要求：每个已接受的 Authority 运动快照都核对其物理活跃 `chunkRevisions`；本地缺失或落后时立即请求权威碰撞基线，同一 revision 在请求完成前只发一次，不能等待表现网格排队。请求失败或收到更高 revision 后允许有界重试。
+
+实现增加专用只读 `request-collision-baseline` RPC：Authority 只复制已驻留且不低于请求 revision 的 canonical 与 fluid，不加载、不生成、不增加 mesh pin；客户端以 snapshot 物理 read-set 驱动该请求。旧本地数据在水位补齐前保持不可读但暂存，以便乱序迟到的连续 delta 仍可补齐；请求明确 unavailable 后，下一份快照会重试。客户端、服务端合同与 runtime 共 4 个文件 22 项定向用例通过，源码和测试 TypeScript、受影响 ESLint 与 `git diff --check` 通过；真实浏览器复验待本提交生产构建后执行。
