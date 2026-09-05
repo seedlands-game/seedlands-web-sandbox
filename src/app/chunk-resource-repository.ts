@@ -21,7 +21,13 @@ export type ChunkResourceAdapter<Task extends ChunkTask, Part, Resource extends 
   commitPart: (resource: Resource, task: Task, part: Part) => void;
   attach: (resource: Resource, task: Task, onPostrender: () => void) => void;
   prepareReplacement?: (previous: Resource, current: Resource, task: Task) => boolean;
-  transitionReplacement?: (previous: Resource, current: Resource, task: Task, onComplete: () => void) => void;
+  transitionReplacement?: (
+    previous: Resource,
+    current: Resource,
+    task: Task,
+    onComplete: () => void,
+    onTransitionVisible?: () => void,
+  ) => boolean;
   destroy: (resource: Resource) => void;
 };
 
@@ -46,7 +52,8 @@ type RepositoryOptions<Task extends ChunkTask, Part, Resource extends object> = 
   profile: CommitProfile;
   now: () => number;
   summarize: (parts: Part[]) => ChunkSummary;
-  onVisible: (task: Task) => void;
+  onVisible: (task: Task, state: { transitionPending: boolean }) => void;
+  onTransitionVisible: (task: Task) => void;
   onDiscard: (task: Task, reason: string) => void;
 };
 
@@ -173,15 +180,26 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       resource: job.resource,
       ...this.options.summarize(job.parts),
     });
+    let transitionPending = false;
     if (previous) {
       if (job.transitionPrepared && this.options.adapter.transitionReplacement)
-        this.options.adapter.transitionReplacement(previous.resource, job.resource, job.task, () =>
-          this.destroy(previous.resource),
+        transitionPending = this.options.adapter.transitionReplacement(
+          previous.resource,
+          job.resource,
+          job.task,
+          () => this.destroy(previous.resource),
+          () => this.finishTransitionVisible(job),
         );
       else this.destroy(previous.resource);
     }
     this.renderedAfterPostrender = true;
-    this.options.onVisible(job.task);
+    this.options.onVisible(job.task, { transitionPending });
+  }
+
+  private finishTransitionVisible(job: CommitJob<Task, Part, Resource>) {
+    const current = this.chunks.get(job.task.chunkKey);
+    if (this.disposed || current?.task !== job.task || current.resource !== job.resource) return;
+    this.options.onTransitionVisible(job.task);
   }
 
   private discard(job: CommitJob<Task, Part, Resource>) {

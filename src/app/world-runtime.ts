@@ -133,14 +133,22 @@ export class World {
       profile,
       now: () => performance.now(),
       summarize: summarizeMeshParts,
-      onVisible: (task) => {
+      onVisible: (task, { transitionPending }) => {
         this.scheduler.completeVisible(task);
+        if (!transitionPending)
+          this.fluidFeedback.completeVisible(
+            task,
+            this.telemetryRecorder.trace(task.traceId),
+            this.scheduler.fluidSchedulingMetrics,
+          );
+      },
+      onTransitionVisible: (task) =>
         this.fluidFeedback.completeVisible(
           task,
           this.telemetryRecorder.trace(task.traceId),
           this.scheduler.fluidSchedulingMetrics,
-        );
-      },
+          'water-transition-progress-visible',
+        ),
       onDiscard: (task, reason) => {
         telemetryRecorder.markTrace(task.traceId, reason, 'main');
         telemetryRecorder.counter(reason, (telemetryRecorder.snapshot().gauges[reason] ?? 0) + 1);

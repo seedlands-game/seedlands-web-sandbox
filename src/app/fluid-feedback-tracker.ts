@@ -53,6 +53,7 @@ type PendingSample = {
 };
 
 export type VisibleFluidMesh = { chunkKey: string; chunkRevision: number; traceId: string };
+export type FluidVisibleTraceMark = 'visible-postrender' | 'water-transition-progress-visible';
 
 const percentile = (values: number[], quantile: number) => {
   if (!values.length) return 0;
@@ -109,7 +110,12 @@ export class FluidFeedbackTracker {
     this.pending.targetRevisions = new Map(revisions.map(({ key, revision }) => [key, revision]));
   }
 
-  completeVisible(visible: VisibleFluidMesh, trace: PerformanceTrace | null, metrics: FluidSchedulingMetrics) {
+  completeVisible(
+    visible: VisibleFluidMesh,
+    trace: PerformanceTrace | null,
+    metrics: FluidSchedulingMetrics,
+    visibleTraceMark: FluidVisibleTraceMark = 'visible-postrender',
+  ) {
     const pending = this.pending;
     const targetRevision = pending?.targetRevisions.get(visible.chunkKey);
     if (
@@ -127,7 +133,7 @@ export class FluidFeedbackTracker {
     if (workerCompleteAt === undefined) return;
     const attachedAt = latestMarkAtOrAfter(trace, 'scene-attached', workerCompleteAt);
     if (attachedAt === undefined) return;
-    const visibleMarkAt = latestMarkAtOrAfter(trace, 'visible-postrender', attachedAt);
+    const visibleMarkAt = latestMarkAtOrAfter(trace, visibleTraceMark, attachedAt);
     if (visibleMarkAt === undefined) return;
     const visibleAt = Math.max(this.now(), visibleMarkAt);
     this.samples.push({

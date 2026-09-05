@@ -42,6 +42,8 @@ const telemetry = {
   markTrace: vi.fn(),
 } as unknown as PerformanceTelemetry;
 
+const eventApp = () => Object.assign(new pc.EventHandler(), { graphicsDevice: {} }) as unknown as pc.Application;
+
 const resource = (part: MeshPart): PlayCanvasChunkResource => {
   const entity = new pc.Entity('chunk');
   const transparent = new pc.Entity('water');
@@ -65,6 +67,74 @@ const resource = (part: MeshPart): PlayCanvasChunkResource => {
 };
 
 describe('PlayCanvas water transition adapter', () => {
+  it('reports transition visibility only after positive progress is rendered', () => {
+    vi.stubGlobal('performance', { now: () => 0 });
+    let frame: FrameRequestCallback | undefined;
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      frame = callback;
+      return 1;
+    });
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const app = eventApp();
+    const transitions = new WaterMeshTransitionTracker();
+    const visible = vi.fn();
+    const adapter = createPlayCanvasChunkAdapter(
+      app,
+      () => ({}) as pc.StandardMaterial,
+      telemetry,
+      undefined,
+      transitions,
+      () => ({ instance: {} as pc.MeshInstance, setProgress: vi.fn(), destroy: vi.fn() }),
+    );
+    const previous = resource(waterPart(8));
+    const current = resource(waterPart(4));
+
+    transitions.setHeldForHarness(true);
+    expect(adapter.prepareReplacement?.(previous, current, task)).toBe(true);
+    adapter.transitionReplacement?.(previous, current, task, vi.fn(), visible);
+    frame!(16);
+    app.fire('postrender');
+    expect(visible).not.toHaveBeenCalled();
+
+    transitions.setHeldForHarness(false);
+    frame!(32);
+    expect(visible).not.toHaveBeenCalled();
+    app.fire('postrender');
+    expect(visible).toHaveBeenCalledOnce();
+    expect(telemetry.markTrace).toHaveBeenCalledWith(task.traceId, 'water-transition-progress-visible', 'main');
+    vi.unstubAllGlobals();
+  });
+
+  it('does not report a positive morph frame cancelled before postrender', () => {
+    vi.stubGlobal('performance', { now: () => 0 });
+    let frame: FrameRequestCallback | undefined;
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      frame = callback;
+      return 1;
+    });
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    const app = eventApp();
+    const visible = vi.fn();
+    const adapter = createPlayCanvasChunkAdapter(
+      app,
+      () => ({}) as pc.StandardMaterial,
+      telemetry,
+      undefined,
+      undefined,
+      () => ({ instance: {} as pc.MeshInstance, setProgress: vi.fn(), destroy: vi.fn() }),
+    );
+    const previous = resource(waterPart(8));
+    const current = resource(waterPart(4));
+
+    expect(adapter.prepareReplacement?.(previous, current, task)).toBe(true);
+    adapter.transitionReplacement?.(previous, current, task, vi.fn(), visible);
+    frame!(16);
+    current.transitionCancel?.();
+    app.fire('postrender');
+
+    expect(visible).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
   it('过渡完成不把RenderComponent已拥有的静态实例重新交给破坏性setter', () => {
     vi.stubGlobal('performance', { now: () => 0 });
     let frame: FrameRequestCallback | undefined;
@@ -123,9 +193,10 @@ describe('PlayCanvas water transition adapter', () => {
       setProgress,
       destroy,
     });
+    const app = eventApp();
     const transitions = new WaterMeshTransitionTracker();
     const adapter = createPlayCanvasChunkAdapter(
-      { graphicsDevice: {} } as pc.Application,
+      app,
       () => ({}) as pc.StandardMaterial,
       telemetry,
       undefined,
@@ -148,7 +219,8 @@ describe('PlayCanvas water transition adapter', () => {
     });
 
     const complete = vi.fn();
-    adapter.transitionReplacement?.(previous, current, task, complete);
+    const visible = vi.fn();
+    adapter.transitionReplacement?.(previous, current, task, complete, visible);
     expect(frame).toBeDefined();
     (frame as FrameRequestCallback)(200);
 
@@ -156,6 +228,9 @@ describe('PlayCanvas water transition adapter', () => {
     expect(current.waterInstances[0].visible).toBe(true);
     expect(destroy).toHaveBeenCalledTimes(1);
     expect(complete).toHaveBeenCalledTimes(1);
+    expect(visible).not.toHaveBeenCalled();
+    app.fire('postrender');
+    expect(visible).toHaveBeenCalledOnce();
     vi.unstubAllGlobals();
   });
 

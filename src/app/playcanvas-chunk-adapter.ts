@@ -187,14 +187,14 @@ export const createPlayCanvasChunkAdapter = (
     };
     previous.transitionCancel = cancelPrepared;
     current.transitionCancel = cancelPrepared;
-    telemetry.markTrace(task.traceId, 'water-transition-first-visible', 'main');
+    telemetry.markTrace(task.traceId, 'water-transition-prepared', 'main');
     return true;
   },
-  transitionReplacement: (previous, current, task, onComplete) => {
+  transitionReplacement: (previous, current, task, onComplete, onTransitionVisible) => {
     const transition = current.waterTransition;
     if (!transition) {
       onComplete();
-      return;
+      return false;
     }
     previous.transitionCancel = null;
     current.transitionCancel = null;
@@ -202,9 +202,31 @@ export const createPlayCanvasChunkAdapter = (
     let elapsed = 0;
     let animationFrame = 0;
     let finished = false;
+    let cancelled = false;
+    let visiblePostrenderPending = false;
+    let visibleReported = false;
+    const reportTransitionVisible = () => {
+      visiblePostrenderPending = false;
+      if (cancelled || visibleReported) return;
+      visibleReported = true;
+      if (finished && current.transitionCancel === cancelPendingVisible) current.transitionCancel = null;
+      telemetry.markTrace(task.traceId, 'water-transition-progress-visible', 'main');
+      onTransitionVisible?.();
+    };
+    const cancelPendingVisible = () => {
+      if (visiblePostrenderPending) app.off('postrender', reportTransitionVisible);
+      visiblePostrenderPending = false;
+      if (finished && current.transitionCancel === cancelPendingVisible) current.transitionCancel = null;
+    };
+    const scheduleTransitionVisible = () => {
+      if (!onTransitionVisible || cancelled || visibleReported || visiblePostrenderPending) return;
+      visiblePostrenderPending = true;
+      app.once('postrender', reportTransitionVisible);
+    };
     const finish = (cancelled: boolean) => {
       if (finished) return;
       finished = true;
+      if (cancelled) cancelPendingVisible();
       cancelAnimationFrame(animationFrame);
       previous.transitionCancel = null;
       current.transitionCancel = null;
@@ -216,6 +238,10 @@ export const createPlayCanvasChunkAdapter = (
       }
       clearWaterTransition(current);
       setWaterVisible(current, true);
+      if (!cancelled) {
+        scheduleTransitionVisible();
+        if (visiblePostrenderPending) current.transitionCancel = cancelPendingVisible;
+      }
       onComplete();
     };
     const update = (now: number) => {
@@ -229,13 +255,18 @@ export const createPlayCanvasChunkAdapter = (
       const progress = Math.min(1, elapsed / WATER_MESH_TRANSITION_MS);
       transition.setProgress(progress);
       transitions.advance(task.traceId, progress);
+      if (progress > 0) scheduleTransitionVisible();
       if (progress >= 1) finish(false);
       else animationFrame = requestAnimationFrame(update);
     };
-    const cancel = () => finish(true);
+    const cancel = () => {
+      cancelled = true;
+      finish(true);
+    };
     previous.transitionCancel = cancel;
     current.transitionCancel = cancel;
     animationFrame = requestAnimationFrame(update);
+    return true;
   },
   destroy: (resource) => {
     resource.transitionCancel?.();

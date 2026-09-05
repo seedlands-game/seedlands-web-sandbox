@@ -17,7 +17,11 @@ A/B 使用相同 seed、坐标、命令顺序和编辑体积；每个配置在�
 - 流体从编辑、目标区域 `fluid-v2` 权威提交、目标 Chunk 的 Worker 网格、场景挂接到 `postrender` 首见的 20 个样本；
 - Mesh 排队和完整可见延迟，且在持续交互流体任务期间，先进入队列的 streaming trace 最终完成。
 
-流体样本必须在 `beginFluidFeedbackSample({x,y,z,radius})` 中固定目标区域和开始时 Chunk revision。`fluid-v2` 提交只有在变更 bounds 与目标区域相交、且对应目标 Chunk revision 前进时才能成为该样本的首次提交；其他 Chunk 或同 Chunk 其他区域的水流提交不能抢先完成样本。可见完成继续要求匹配该提交 revision 的网格 trace 已出现 `visible-postrender`。
+流体样本必须在 `beginFluidFeedbackSample({x,y,z,radius})` 中固定目标区域和开始时 Chunk revision。`fluid-v2` 提交只有在变更 bounds 与目标区域相交、且对应目标 Chunk revision 前进时才能成为该样本的首次提交；其他 Chunk 或同 Chunk 其他区域的水流提交不能抢先完成样本。无水面过渡的网格可在新静态资源首次 `postrender` 后完成样本；有水面 Morph 的网格在初次挂接时仍处于进度 0，只能在首次非零进度实际经过 `postrender` 后完成。被 held、取消、卸载或更新代际替换的旧 Morph 不得误报可见。
+
+### 水面真实首见 TDD
+
+预置用例覆盖：repository 初次 `onVisible` 必须携带是否仍有过渡待显示，scheduler 的一般 Chunk 首见仍立即完成；Morph 进度 0 和 held 状态不完成流体样本；首次进度大于 0 后还需一个 `postrender` 并写入 `water-transition-progress-visible` trace mark；在该帧前取消、卸载或换代不会回调；若动画直接完成到进度 1，则最终静态水面实际 `postrender` 也可作为首见。`FluidFeedbackTracker` 必须读取新的过渡 mark 计算 `attachToVisibleMs/totalMs`，不能回退使用较早的初次挂接时间。
 
 ## RED 设计
 
@@ -41,5 +45,7 @@ A/B 使用相同 seed、坐标、命令顺序和编辑体积；每个配置在�
 - [x] 定位首段延迟为权威流体 FIFO：1024 水源形成的普通 frontier 排在单格玩家编辑前，单个 128 格 lease 无近场优先入口。先写 `tests/server/fluid-interactive-priority.test.ts`，确认普通/交互公平、队内提升、8192 hard cap、reject/abort 精确恢复、Gameplay 采集/放置和 Harness 单格编辑共 6 项预期 RED，hard cap 项保持 GREEN。
 - [x] 实现两条有界 frontier：每个无 cleanup 的 128 格 lease 先取至多 32 个交互格并保留 96 个普通格；普通格不足时才用交互格填满剩余预算。已排队格提升不增加 pending，未知格在 hard cap 下不增长，拒绝或中止按原 lane 和顺序恢复。只有 `player-edit` 或真实 `player` 实体发起的单 `edits` 提交进入交互 lane；多编辑与 mutation buffer 继续走普通 lane。
 - [x] 优先级定向 7 项、既有流体事务/运行时、Gameplay 与世界事务合计 5 文件 61 项及测试 TypeScript 通过。
-- [x] `5904dc0` 不可变产物的首次复跑在流体采样前 fail closed：16 个角色、64 个物件、50 个已加载 Chunk 和空 Mesh 队列均满足，但 `nearPlayer=79`。原因是先生成实体、再执行数十次静态几何提交，给自主角色留下了离开近场的准备时间。夹具改为静态几何全部提交后才生成同样的 16+64 实体；没有减少实体、降低画质或放宽 `nearPlayer>=80`。
+- [x] `5904dc0` 与 `0d6ec9f` 的准备门禁均在流体采样前 fail closed：16 个新增角色、64 个新增物件、50 个已加载 Chunk 和空 Mesh 队列满足，但 `nearPlayer=79`。先把实体生成移到静态几何完成后，结果仍为 79；附件进一步显示新增角色与物件坐标交叠，统一实体 pair separation 会把至少一个身体推出平台。夹具将角色和物件分区放置；没有减少实体、降低画质或放宽 `nearPlayer>=80`。`0d6ec9f` 原始 JSON 为 `/tmp/seedlands-0d6ec9f-authority-load.jsonlog`，ready 快照解码为 `/tmp/authority-load-ready-general-1-0d6ec9f.json`。
+- [x] 水面真实首见预置 3 组 RED：repository 只回报普通挂接、adapter 未在非零 Morph 实际渲染后回调、tracker 会消费更早的普通 `visible-postrender`。实现保留一般 Chunk 的 scheduler 完成时点；只有流体反馈在 `transitionPending` 时延后，adapter 于首次非零进度或最终静态终态之后再等一个真实 `postrender`，并写 `water-transition-progress-visible`。repository 按当前已安装的 task/resource 身份拒绝卸载或换代旧回调。
+- [x] 水面首见定向 3 个文件、18 项及完整水面/反馈 7 个文件、31 项通过；修改文件 Prettier、ESLint、源码/测试 TypeScript、Svelte 检查与生产构建均通过。held、非零进度、取消、卸载、终态 `postrender` 和新 trace mark 均有确定性覆盖。
 - [ ] 在包含上述优先级修复的不可变生产产物上复跑 20 个样本和 2/3 槽位，确认目标首见 p95≤100ms；若首段已达标而 Mesh 阶段仍超标，再以新 trace 证据决定是否需要窄化 Mesh 调度，不能预先修改阈值。

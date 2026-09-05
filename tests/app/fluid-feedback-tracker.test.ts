@@ -149,6 +149,47 @@ describe('FluidFeedbackTracker', () => {
     expect(tracker.summary()).toMatchObject({ count: 0, pending: true });
   });
 
+  it('waits for the rendered positive-progress mark when a water transition is pending', () => {
+    let now = 0;
+    const tracker = new FluidFeedbackTracker(() => now);
+    tracker.begin({ mergedRequests: 0, supersededInFlight: 0 });
+    now = 1;
+    tracker.markFirstCommit([{ key: '0,0,0', revision: 2 }]);
+    const trace = {
+      traceId: 'transition',
+      category: 'chunk-request',
+      name: '0,0,0',
+      lane: 'main',
+      startMs: 0,
+      complete: true,
+      marks: [
+        { name: 'worker-start', lane: 'worker-derived', timestampMs: 2 },
+        { name: 'worker-complete', lane: 'worker-derived', timestampMs: 8 },
+        { name: 'scene-attached', lane: 'main', timestampMs: 12 },
+        { name: 'visible-postrender', lane: 'main', timestampMs: 14 },
+      ],
+    };
+    now = 20;
+    tracker.completeVisible(
+      { chunkKey: '0,0,0', chunkRevision: 2, traceId: trace.traceId },
+      trace,
+      { mergedRequests: 0, supersededInFlight: 0 },
+      'water-transition-progress-visible',
+    );
+    expect(tracker.summary()).toMatchObject({ count: 0, pending: true });
+
+    now = 24;
+    trace.marks.push({ name: 'water-transition-progress-visible', lane: 'main', timestampMs: 24 });
+    tracker.completeVisible(
+      { chunkKey: '0,0,0', chunkRevision: 2, traceId: trace.traceId },
+      trace,
+      { mergedRequests: 0, supersededInFlight: 0 },
+      'water-transition-progress-visible',
+    );
+
+    expect(tracker.summary().samples[0]).toMatchObject({ attachToVisibleMs: 12, totalMs: 24 });
+  });
+
   it('rejects an older visible revision for the target chunk', () => {
     const tracker = new FluidFeedbackTracker(() => 10);
     tracker.begin({ mergedRequests: 0, supersededInFlight: 0 });
