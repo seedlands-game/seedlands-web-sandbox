@@ -117,6 +117,8 @@ export type HarnessSnapshot = {
     simulationTime: number;
     presentedEntityCount: number;
   };
+  breakingOverlay: { position: [number, number, number]; stage: number } | null;
+  viewmodel: { isolatedLayer: boolean };
   visualEffects: {
     activeLocalLights: number;
     shadowedLocalLights: number;
@@ -131,6 +133,8 @@ export type HarnessSnapshot = {
     reflectionRenderCount: number;
     waterPlaneY: number | null;
     postProcessing: boolean;
+    shadowUpdateCount: number;
+    shadowStableFrameCount: number;
   };
   water: {
     bodyFraction: number;

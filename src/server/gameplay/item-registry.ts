@@ -9,6 +9,7 @@ export const ItemIds = Object.freeze({
   Plank: 'plank',
   WoodAxe: 'wood-axe',
   StonePickaxe: 'stone-pickaxe',
+  GlowstoneBlock: 'glowstone-block',
   Lantern: 'lantern',
 } as const);
 
@@ -25,6 +26,13 @@ export type ItemDefinition = Readonly<{
 }>;
 
 const definitions: Readonly<Record<ItemId, ItemDefinition>> = Object.freeze({
+  [ItemIds.GlowstoneBlock]: {
+    id: ItemIds.GlowstoneBlock,
+    name: '辉光石',
+    itemType: 'block',
+    stackLimit: 64,
+    placesVoxel: Voxel.Glowstone,
+  },
   [ItemIds.Lantern]: {
     id: ItemIds.Lantern,
     name: '灯笼',

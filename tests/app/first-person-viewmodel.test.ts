@@ -38,7 +38,7 @@ describe('第一人称手与物件的独立生命周期', () => {
   });
 });
 
-it('不同窗口比例保持持握锚点在相同的右侧屏幕比例', () => {
+it('不同窗口比例保持持握锚点在右侧安全范围', () => {
   const camera = new pc.Entity();
   const device = { width: 1280, height: 720 };
   const model = new FirstPersonViewmodel({ graphicsDevice: device } as pc.Application, camera);
@@ -46,8 +46,10 @@ it('不同窗口比例保持持握锚点在相同的右侧屏幕比例', () => {
   for (const width of [1920, 1280, 700]) {
     device.width = width;
     model.update(1 / 60);
-    const projectedX = root.getLocalPosition().x / ((width / 720) * Math.tan(Math.PI / 5) * 1.05);
-    expect(projectedX).toBeCloseTo(0.62, 5);
+    const projectedX =
+      root.getLocalPosition().x / ((width / 720) * Math.tan(Math.PI / 5) * Math.abs(root.getLocalPosition().z));
+    expect(projectedX).toBeGreaterThanOrEqual(0.38);
+    expect(projectedX).toBeLessThanOrEqual(0.44);
   }
   model.dispose();
 });

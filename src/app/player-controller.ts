@@ -1,15 +1,21 @@
 import * as pc from 'playcanvas';
-import { Voxel, isSolid } from '../world/voxel';
+import { Voxel } from '../world/voxel';
 import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../client/voxel-target';
 import { DRY_WATER_IMMERSION, sampleWaterImmersion, type WaterImmersionSnapshot } from '../world/water-immersion';
 import { resolveWaterMovement } from './water-movement-policy';
 import type { PlayerControllerOptions } from './player-controller-types';
+import {
+  COLLISION_EPSILON,
+  PLAYER_FEET_OFFSET,
+  PLAYER_HEAD_OFFSET,
+  playerCeilingBottom,
+  playerCollisionOverlap,
+  playerGroundSupportTop,
+  playerHorizontalDepenetration,
+} from './player-collision-shapes';
 
-const PLAYER_HALF_WIDTH = 0.32;
-export const PLAYER_FEET_OFFSET = 1.6;
-const PLAYER_HEAD_OFFSET = 0.2;
-const COLLISION_EPSILON = 0.001;
+export { PLAYER_FEET_OFFSET } from './player-collision-shapes';
 
 export class PlayerController {
   readonly velocity = new pc.Vec3();
@@ -337,18 +343,21 @@ export class PlayerController {
     const world = this.options.getWorld();
     if (!world || amount === 0) return;
     const position = this.options.camera.getPosition();
-    const previousOverlap = axis === 'y' ? 0 : this.collisionOverlap(position);
+    const previousOverlap = axis === 'y' ? 0 : playerCollisionOverlap(world, position);
     (position as unknown as Record<string, number>)[axis] += amount;
     if (axis === 'y') {
       const collisionY =
         amount < 0
           ? Math.floor(position.y - PLAYER_FEET_OFFSET)
           : Math.floor(position.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON);
-      const blocked = amount < 0 ? this.hasGroundSupport(position, collisionY) : this.collidesAtY(position, collisionY);
-      if (blocked) {
+      const collisionBoundary =
+        amount < 0
+          ? playerGroundSupportTop(world, position, collisionY)
+          : playerCeilingBottom(world, position, collisionY);
+      if (collisionBoundary !== null) {
         position.set(
           position.x,
-          amount < 0 ? collisionY + 1 + PLAYER_FEET_OFFSET : collisionY - PLAYER_HEAD_OFFSET,
+          amount < 0 ? collisionBoundary + PLAYER_FEET_OFFSET : collisionBoundary - PLAYER_HEAD_OFFSET,
           position.z,
         );
         if (amount < 0) this.grounded = true;
@@ -356,7 +365,7 @@ export class PlayerController {
         if (amount < 0) this.depenetrateHorizontally(position);
       }
     } else {
-      const nextOverlap = this.collisionOverlap(position);
+      const nextOverlap = playerCollisionOverlap(world, position);
       if (nextOverlap > 0 && nextOverlap >= previousOverlap) {
         const climbedOut = this.tryWaterExitStep(position);
         if (!climbedOut) (position as unknown as Record<string, number>)[axis] -= amount;
@@ -370,7 +379,7 @@ export class PlayerController {
     const originalY = position.y;
     for (let lift = 0.1; lift <= 1.3; lift += 0.1) {
       position.y = originalY + lift;
-      if (this.collisionOverlap(position) === 0) {
+      if (!this.collides(position)) {
         this.velocity.y = Math.max(0, this.velocity.y);
         return true;
       }
@@ -380,78 +389,15 @@ export class PlayerController {
   }
 
   private collides(position: pc.Vec3) {
-    return this.collisionOverlap(position) > 0;
-  }
-
-  private collisionOverlap(position: pc.Vec3) {
     const world = this.options.getWorld();
-    if (!world) return 0;
-    const minX = position.x - PLAYER_HALF_WIDTH;
-    const maxX = position.x + PLAYER_HALF_WIDTH;
-    const minY = position.y - PLAYER_FEET_OFFSET + COLLISION_EPSILON;
-    const maxY = position.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON;
-    const minZ = position.z - PLAYER_HALF_WIDTH;
-    const maxZ = position.z + PLAYER_HALF_WIDTH;
-    let overlap = 0;
-    for (let x = Math.floor(minX); x <= Math.floor(maxX - COLLISION_EPSILON); x += 1) {
-      const overlapX = Math.min(maxX, x + 1) - Math.max(minX, x);
-      for (let y = Math.floor(minY); y <= Math.floor(maxY - COLLISION_EPSILON); y += 1) {
-        const overlapY = Math.min(maxY, y + 1) - Math.max(minY, y);
-        for (let z = Math.floor(minZ); z <= Math.floor(maxZ - COLLISION_EPSILON); z += 1)
-          if (isSolid(world.getVoxel(x, y, z)))
-            overlap += overlapX * overlapY * (Math.min(maxZ, z + 1) - Math.max(minZ, z));
-      }
-    }
-    return overlap;
+    return !!world && playerCollisionOverlap(world, position) > 0;
   }
 
   private depenetrateHorizontally(position: pc.Vec3) {
     const world = this.options.getWorld();
-    if (!world || this.collisionOverlap(position) === 0) return;
-    const minX = position.x - PLAYER_HALF_WIDTH;
-    const maxX = position.x + PLAYER_HALF_WIDTH;
-    const minY = position.y - PLAYER_FEET_OFFSET + COLLISION_EPSILON;
-    const maxY = position.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON;
-    const minZ = position.z - PLAYER_HALF_WIDTH;
-    const maxZ = position.z + PLAYER_HALF_WIDTH;
-    let left = Infinity,
-      right = -Infinity,
-      backward = Infinity,
-      forward = -Infinity;
-    for (let x = Math.floor(minX); x <= Math.floor(maxX - COLLISION_EPSILON); x += 1)
-      for (let y = Math.floor(minY); y <= Math.floor(maxY - COLLISION_EPSILON); y += 1)
-        for (let z = Math.floor(minZ); z <= Math.floor(maxZ - COLLISION_EPSILON); z += 1) {
-          if (!isSolid(world.getVoxel(x, y, z))) continue;
-          left = Math.min(left, x - maxX - COLLISION_EPSILON);
-          right = Math.max(right, x + 1 - minX + COLLISION_EPSILON);
-          backward = Math.min(backward, z - maxZ - COLLISION_EPSILON);
-          forward = Math.max(forward, z + 1 - minZ + COLLISION_EPSILON);
-        }
-    const resolved = [
-      [left, 0],
-      [right, 0],
-      [0, backward],
-      [0, forward],
-    ]
-      .filter(([x, z]) => Number.isFinite(x) && Number.isFinite(z))
-      .map(([x, z]) => ({ x, z, distance: Math.abs(x) + Math.abs(z) }))
-      .sort((a, b) => a.distance - b.distance)
-      .find(({ x, z }) => this.collisionOverlap(new pc.Vec3(position.x + x, position.y, position.z + z)) === 0);
+    if (!world) return;
+    const resolved = playerHorizontalDepenetration(world, position);
     if (resolved) position.set(position.x + resolved.x, position.y, position.z + resolved.z);
-  }
-
-  private collidesAtY(position: pc.Vec3, y: number) {
-    const world = this.options.getWorld();
-    if (!world) return false;
-    for (const x of [position.x - PLAYER_HALF_WIDTH, position.x + PLAYER_HALF_WIDTH])
-      for (const z of [position.z - PLAYER_HALF_WIDTH, position.z + PLAYER_HALF_WIDTH])
-        if (isSolid(world.getVoxel(Math.floor(x), y, Math.floor(z)))) return true;
-    return false;
-  }
-
-  private hasGroundSupport(position: pc.Vec3, y: number) {
-    const world = this.options.getWorld();
-    return !!world && isSolid(world.getVoxel(Math.floor(position.x), y, Math.floor(position.z)));
   }
 
   private interact(place: boolean) {

@@ -95,6 +95,10 @@ type SnapshotContext = {
   persistence: BrowserChunkPersistence | null;
   ui: UiMetrics;
   presentedEntityCount: number;
+  presentation?: {
+    breakingOverlay: { position: [number, number, number]; stage: number } | null;
+    viewmodel: { isolatedLayer: boolean };
+  };
   visualEffects: AdvancedVisualEffects | null;
   underwaterVisual: UnderwaterVisualEffects | null;
 };
@@ -189,6 +193,8 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       }),
       presentedEntityCount: context.presentedEntityCount,
     },
+    breakingOverlay: context.presentation?.breakingOverlay ?? null,
+    viewmodel: context.presentation?.viewmodel ?? { isolatedLayer: false },
     visualEffects: context.visualEffects?.snapshot ?? {
       activeLocalLights: 0,
       shadowedLocalLights: 0,
@@ -203,6 +209,8 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       reflectionRenderCount: 0,
       waterPlaneY: null,
       postProcessing: false,
+      shadowUpdateCount: 0,
+      shadowStableFrameCount: 0,
     },
     water: {
       ...(context.controller?.waterImmersion ?? {
@@ -231,6 +239,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
         persistence: bindings.persistence(),
         ui: bindings.ui(),
         presentedEntityCount: bindings.gameplay()?.presentedEntityCount ?? 0,
+        presentation: bindings.gameplay()?.presentationSnapshot,
         visualEffects: bindings.visualEffects(),
         underwaterVisual: bindings.underwaterVisual(),
       }),

@@ -28,8 +28,9 @@ uniform float material_emissiveIntensity;
 
 void getEmission() {
     float voxelLayer = floor(vVertexColor.a * 255.0 + 0.5);
-    float lanternMask = 1.0 - step(0.5, abs(voxelLayer - 10.0));
-    dEmission = material_emissive * material_emissiveIntensity * lanternMask;
+    float glowstoneMask = 1.0 - step(0.5, abs(voxelLayer - 10.0));
+    float lanternMask = 1.0 - step(0.5, abs(voxelLayer - 12.0));
+    dEmission = material_emissive * material_emissiveIntensity * max(glowstoneMask, lanternMask);
 }
 `;
 
@@ -39,8 +40,9 @@ uniform material_emissiveIntensity: f32;
 
 fn getEmission() {
     let voxelLayer: f32 = round(vVertexColor.a * 255.0);
-    let lanternMask: f32 = 1.0 - step(0.5, abs(voxelLayer - 10.0));
-    dEmission = uniform.material_emissive * uniform.material_emissiveIntensity * lanternMask;
+    let glowstoneMask: f32 = 1.0 - step(0.5, abs(voxelLayer - 10.0));
+    let lanternMask: f32 = 1.0 - step(0.5, abs(voxelLayer - 12.0));
+    dEmission = uniform.material_emissive * uniform.material_emissiveIntensity * max(glowstoneMask, lanternMask);
 }
 `;
 

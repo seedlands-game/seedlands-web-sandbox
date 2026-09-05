@@ -2,7 +2,7 @@ import { FaceMaterial, type FaceMaterialId } from '../world/voxel';
 import type { RenderCategory } from '../world/mesh';
 export type { RenderCategory } from '../world/mesh';
 
-export const MATERIAL_LAYER_COUNT = 11;
+export const MATERIAL_LAYER_COUNT = 13;
 
 export const FINAL_RENDER_PIPELINE = {
   drawUnit: 'chunk-render-category',
@@ -15,6 +15,7 @@ export const FINAL_RENDER_PIPELINE = {
 export function renderCategoryForFaceMaterial(material: FaceMaterialId): RenderCategory {
   if (material === FaceMaterial.Leaves) return 'cutout';
   if (material === FaceMaterial.Water) return 'transparent';
+  if (material === FaceMaterial.LanternGlow) return 'emissive';
   return 'opaque';
 }
 

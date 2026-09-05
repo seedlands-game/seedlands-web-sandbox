@@ -4,7 +4,7 @@ export type ItemVisualKind =
   | Readonly<{ kind: 'voxel-block'; faces: 6 }>
   | Readonly<{ kind: 'lantern' | 'berry-cluster' | 'plank' | 'wood-axe' | 'stone-pickaxe' }>;
 
-const blockItems = new Set(['dirt-block', 'stone-block', 'wood-block', 'sand-block']);
+const blockItems = new Set(['dirt-block', 'stone-block', 'wood-block', 'sand-block', 'glowstone-block']);
 
 export function itemVisualKind(itemId: string): ItemVisualKind {
   if (blockItems.has(itemId)) return { kind: 'voxel-block', faces: 6 };

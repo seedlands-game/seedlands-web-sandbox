@@ -81,7 +81,7 @@ function waterCanvas() {
   return canvas;
 }
 
-function lanternCanvas() {
+function glowstoneCanvas() {
   const canvas = document.createElement('canvas');
   canvas.width = 128;
   canvas.height = 128;
@@ -104,6 +104,45 @@ function lanternCanvas() {
     context.lineTo(x, 116);
     context.stroke();
   }
+  return canvas;
+}
+
+function lanternFrameCanvas() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d')!;
+  const gradient = context.createLinearGradient(0, 0, 128, 128);
+  gradient.addColorStop(0, '#4a2917');
+  gradient.addColorStop(0.45, '#b77a34');
+  gradient.addColorStop(0.7, '#6e3d1d');
+  gradient.addColorStop(1, '#2b1a12');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 128, 128);
+  context.strokeStyle = '#d09a44';
+  context.globalAlpha = 0.35;
+  context.lineWidth = 3;
+  for (let offset = -128; offset < 256; offset += 24) {
+    context.beginPath();
+    context.moveTo(offset, 0);
+    context.lineTo(offset + 128, 128);
+    context.stroke();
+  }
+  return canvas;
+}
+
+function lanternGlowCanvas() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const context = canvas.getContext('2d')!;
+  const glow = context.createRadialGradient(64, 58, 6, 64, 64, 82);
+  glow.addColorStop(0, '#fffbd2');
+  glow.addColorStop(0.35, '#ffd467');
+  glow.addColorStop(0.72, '#e77b24');
+  glow.addColorStop(1, '#713218');
+  context.fillStyle = glow;
+  context.fillRect(0, 0, 128, 128);
   return canvas;
 }
 
@@ -157,9 +196,15 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
   const water = waterCanvas();
   tileCanvases.set(FaceMaterial.Water, water);
   tiles.set(FaceMaterial.Water, textureFromCanvas(app.graphicsDevice, 'water', water));
-  const lantern = lanternCanvas();
-  tileCanvases.set(FaceMaterial.Lantern, lantern);
-  tiles.set(FaceMaterial.Lantern, textureFromCanvas(app.graphicsDevice, 'lantern', lantern));
+  const glowstone = glowstoneCanvas();
+  tileCanvases.set(FaceMaterial.Glowstone, glowstone);
+  tiles.set(FaceMaterial.Glowstone, textureFromCanvas(app.graphicsDevice, 'glowstone', glowstone));
+  const lanternFrame = lanternFrameCanvas();
+  tileCanvases.set(FaceMaterial.LanternFrame, lanternFrame);
+  tiles.set(FaceMaterial.LanternFrame, textureFromCanvas(app.graphicsDevice, 'lantern-frame', lanternFrame));
+  const lanternGlow = lanternGlowCanvas();
+  tileCanvases.set(FaceMaterial.LanternGlow, lanternGlow);
+  tiles.set(FaceMaterial.LanternGlow, textureFromCanvas(app.graphicsDevice, 'lantern-glow', lanternGlow));
 
   const reflectionFallbackCanvas = document.createElement('canvas');
   reflectionFallbackCanvas.width = 2;
@@ -203,7 +248,9 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
         ? FaceMaterial.Leaves
         : category === 'transparent'
           ? FaceMaterial.Water
-          : FaceMaterial.Stone;
+          : category === 'emissive'
+            ? FaceMaterial.LanternGlow
+            : FaceMaterial.Stone;
     const material = new pc.StandardMaterial();
     material.name = `voxel-${category}`;
     material.diffuse = category === 'transparent' ? new pc.Color(0.52, 0.88, 0.94) : pc.Color.WHITE;
@@ -215,9 +262,9 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('diffusePS', voxelArrayDiffuseGlsl);
     material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('diffusePS', voxelArrayDiffuseWgsl);
     material.setParameter('texture_voxelArray', textureArray);
-    if (category === 'opaque') {
+    if (category === 'opaque' || category === 'emissive') {
       material.emissive = new pc.Color(1, 0.48, 0.1);
-      material.emissiveIntensity = 1.15;
+      material.emissiveIntensity = category === 'emissive' ? 1.4 : 1.15;
       material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelArrayLanternEmissionGlsl);
       material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('emissivePS', voxelArrayLanternEmissionWgsl);
     }
@@ -252,6 +299,7 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
   const categoryMaterials = new Map<RenderCategory, pc.StandardMaterial>([
     ['opaque', createCategoryMaterial('opaque')],
     ['cutout', createCategoryMaterial('cutout')],
+    ['emissive', createCategoryMaterial('emissive')],
     ['transparent', createCategoryMaterial('transparent')],
   ]);
   return {

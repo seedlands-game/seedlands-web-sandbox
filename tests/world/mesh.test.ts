@@ -99,6 +99,30 @@ describe('greedy chunk meshing', () => {
     expect(wood[FaceMaterial.WoodSide].indices).toHaveLength(24);
   });
 
+  it('adds a non-full-cube lantern model while preserving the adjacent stone face', () => {
+    const lantern = meshSynthetic([[4, 4, 4, Voxel.Lantern]]);
+    const frame = lantern[FaceMaterial.LanternFrame];
+    const glow = lantern[FaceMaterial.LanternGlow];
+    const xs = [...frame.positions].filter((_value, index) => index % 3 === 0);
+    const ys = [...frame.positions].filter((_value, index) => index % 3 === 1);
+    const zs = [...frame.positions].filter((_value, index) => index % 3 === 2);
+    expect(frame.indices.length).toBeGreaterThan(36);
+    expect(glow.indices.length).toBe(36);
+    expect(glow.renderCategory).toBe('emissive');
+    expect(Math.min(...xs)).toBeGreaterThan(4);
+    expect(Math.max(...xs)).toBeLessThan(5);
+    expect(Math.min(...ys)).toBe(4);
+    expect(Math.max(...ys)).toBeLessThanOrEqual(5);
+    expect(Math.min(...zs)).toBeGreaterThan(4);
+    expect(Math.max(...zs)).toBeLessThan(5);
+
+    const adjacent = meshSynthetic([
+      [4, 4, 4, Voxel.Lantern],
+      [5, 4, 4, Voxel.Stone],
+    ]);
+    expect(adjacent[FaceMaterial.Stone].indices).toHaveLength(36);
+  });
+
   it('keeps every vertical block side texture upright', () => {
     const wood = meshSynthetic([[4, 4, 4, Voxel.Wood]])[FaceMaterial.WoodSide];
 

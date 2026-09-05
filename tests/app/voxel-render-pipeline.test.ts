@@ -7,12 +7,14 @@ import {
 import { FaceMaterial } from '../../src/world/voxel';
 
 describe('voxel render pipeline policy', () => {
-  it('maps face materials to three stable render categories', () => {
+  it('maps face materials to four stable render categories', () => {
     expect(renderCategoryForFaceMaterial(FaceMaterial.Stone)).toBe('opaque');
     expect(renderCategoryForFaceMaterial(FaceMaterial.Leaves)).toBe('cutout');
     expect(renderCategoryForFaceMaterial(FaceMaterial.Water)).toBe('transparent');
-    expect(renderCategoryForFaceMaterial(FaceMaterial.Lantern)).toBe('opaque');
-    expect(MATERIAL_LAYER_COUNT).toBe(11);
+    expect(renderCategoryForFaceMaterial(FaceMaterial.Glowstone)).toBe('opaque');
+    expect(renderCategoryForFaceMaterial(FaceMaterial.LanternFrame)).toBe('opaque');
+    expect(renderCategoryForFaceMaterial(FaceMaterial.LanternGlow)).toBe('emissive');
+    expect(MATERIAL_LAYER_COUNT).toBe(13);
   });
 
   it('declares matching GLSL and WGSL chunks for every custom shader responsibility', () => {

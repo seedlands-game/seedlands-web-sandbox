@@ -116,6 +116,8 @@ export type HarnessSnapshot = {
     simulationTime: number;
     presentedEntityCount: number;
   };
+  breakingOverlay: { position: [number, number, number]; stage: number } | null;
+  viewmodel: { isolatedLayer: boolean };
   visualEffects: VisualEffectsSnapshot;
   water: {
     bodyFraction: number;

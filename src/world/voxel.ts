@@ -15,7 +15,8 @@ export const Voxel = {
   Sand: 6,
   Snow: 7,
   Water: 8,
-  Lantern: 9,
+  Glowstone: 9,
+  Lantern: 10,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
@@ -31,7 +32,9 @@ export const FaceMaterial = {
   Leaves: 8,
   Snow: 9,
   Water: 10,
-  Lantern: 11,
+  Glowstone: 11,
+  LanternFrame: 12,
+  LanternGlow: 13,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -47,7 +50,9 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Leaves]: 'leaves',
   [FaceMaterial.Snow]: 'snow',
   [FaceMaterial.Water]: 'water',
-  [FaceMaterial.Lantern]: 'lantern',
+  [FaceMaterial.Glowstone]: 'glowstone',
+  [FaceMaterial.LanternFrame]: 'lantern-frame',
+  [FaceMaterial.LanternGlow]: 'lantern-glow',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -59,6 +64,7 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Sand]: '沙砾',
   [Voxel.Snow]: '雪',
   [Voxel.Water]: '水',
+  [Voxel.Glowstone]: '辉光石',
   [Voxel.Lantern]: '灯笼',
 };
 
@@ -71,7 +77,8 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Sand]: [0.76, 0.67, 0.43],
   [Voxel.Snow]: [0.9, 0.95, 1],
   [Voxel.Water]: [0.12, 0.4, 0.72],
-  [Voxel.Lantern]: [1, 0.58, 0.18],
+  [Voxel.Glowstone]: [1, 0.58, 0.18],
+  [Voxel.Lantern]: [0.86, 0.58, 0.22],
 };
 
 export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
@@ -94,7 +101,8 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Sand]: FaceMaterial.Sand,
       [Voxel.Snow]: FaceMaterial.Snow,
       [Voxel.Water]: FaceMaterial.Water,
-      [Voxel.Lantern]: FaceMaterial.Lantern,
+      [Voxel.Glowstone]: FaceMaterial.Glowstone,
+      [Voxel.Lantern]: FaceMaterial.LanternFrame,
     } as Record<number, FaceMaterialId>
   )[id];
 }

@@ -12,7 +12,8 @@
     5: 'berry',
     6: 'sand-block',
     7: 'stone-block',
-    9: 'lantern',
+    9: 'glowstone-block',
+    10: 'lantern',
   };
 </script>
 
@@ -35,9 +36,7 @@
     {/if}
     <div class="target-details">
       <strong>{interaction.target.label}</strong>
-      {#if interaction.breaking}
-        <progress id="break-progress" aria-label="采集进度" max="1" value={interaction.breaking.progress}></progress>
-      {:else}<small>Seedlands</small>{/if}
+      <small>{interaction.breaking ? '采集中' : 'Seedlands'}</small>
     </div>
     <img class="target-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/arcane-crest.png')} alt="" />
   </div>
