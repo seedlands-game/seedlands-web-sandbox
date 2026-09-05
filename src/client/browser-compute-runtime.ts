@@ -2,7 +2,8 @@ import type { FluidAuthoritySnapshot, FluidCandidate } from '../server/fluid/flu
 import type { ComputeLane, ComputeTask } from '../runtime/compute-task-queue';
 import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol';
 import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool';
-import type { InitialWorldBootstrap } from '../worker/world-compute-task';
+import type { GeneratedCanonicalChunk, InitialWorldBootstrap } from '../worker/world-compute-task';
+import { CHUNK_SIZE } from '../world/voxel';
 
 type MeshWorkerPort = {
   onerror?: ((failure: { taskId: number; error: Error }) => void) | null;
@@ -36,6 +37,11 @@ export class BrowserComputeRuntime {
     number,
     { resolve: (bootstrap: InitialWorldBootstrap) => void; reject: (error: Error) => void }
   >();
+  private readonly canonicalRequests = new Map<
+    number,
+    { key: string; resolve: (chunk: GeneratedCanonicalChunk) => void; reject: (error: Error) => void }
+  >();
+  private readonly canonicalByKey = new Map<string, Promise<GeneratedCanonicalChunk>>();
   private taskSequence = 0;
   private disposed = false;
 
@@ -63,6 +69,7 @@ export class BrowserComputeRuntime {
         if (workId) this.options.onFluidFailure?.(workId, error);
         this.spawnRequests.get(taskId)?.reject(error);
         this.spawnRequests.delete(taskId);
+        this.rejectCanonical(taskId, error);
       },
       onPoolFailure: options.onPoolFailure,
     });
@@ -124,6 +131,42 @@ export class BrowserComputeRuntime {
     return Promise.reject(new Error(`Safe spawn compute enqueue failed: ${result.status}`));
   }
 
+  generateCanonicalChunk(seed: number, generatorVersion: number, key: string): Promise<GeneratedCanonicalChunk> {
+    if (this.disposed) return Promise.reject(new Error('Compute runtime is disposed.'));
+    const existing = this.canonicalByKey.get(key);
+    if (existing) return existing;
+    const coordinates = key.split(',').map(Number);
+    if (coordinates.length !== 3 || !coordinates.every(Number.isInteger))
+      return Promise.reject(new TypeError(`Canonical generation Chunk key is invalid: ${key}.`));
+    const [cx, cy, cz] = coordinates as [number, number, number];
+    const taskId = ++this.taskSequence;
+    const promise = new Promise<GeneratedCanonicalChunk>((resolve, reject) =>
+      this.canonicalRequests.set(taskId, { key, resolve, reject }),
+    );
+    this.canonicalByKey.set(key, promise);
+    const cleanup = () => {
+      if (this.canonicalByKey.get(key) === promise) this.canonicalByKey.delete(key);
+    };
+    void promise.then(cleanup, cleanup);
+    const result = this.pool.enqueue({
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: this.options.epoch,
+      taskId,
+      lane: 'general',
+      category: 'chunk-generation',
+      priority: 'interaction',
+      key: `canonical:${key}`,
+      revision: `${seed}:${generatorVersion}`,
+      dependencies: [],
+      estimatedBytes: 0,
+      payload: { kind: 'generate-canonical', seed, generatorVersion, key, cx, cy, cz },
+    });
+    if (result.status === 'queued' || result.status === 'merged') return promise;
+    this.canonicalRequests.delete(taskId);
+    this.canonicalByKey.delete(key);
+    return Promise.reject(new Error(`Canonical compute enqueue failed: ${result.status}`));
+  }
+
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
@@ -134,6 +177,9 @@ export class BrowserComputeRuntime {
     this.fluidWorkIds.clear();
     this.spawnRequests.forEach(({ reject }) => reject(new Error('Compute runtime was disposed.')));
     this.spawnRequests.clear();
+    this.canonicalRequests.forEach(({ reject }) => reject(new Error('Compute runtime was disposed.')));
+    this.canonicalRequests.clear();
+    this.canonicalByKey.clear();
   }
 
   private enqueueMesh(message: Record<string, unknown>, transfer: Transferable[]): void {
@@ -191,6 +237,25 @@ export class BrowserComputeRuntime {
       else spawn.resolve(value as InitialWorldBootstrap);
       return;
     }
+    const canonical = this.canonicalRequests.get(task.taskId);
+    if (canonical) {
+      this.canonicalRequests.delete(task.taskId);
+      const value = result as Partial<GeneratedCanonicalChunk>;
+      if (
+        value.kind !== 'canonical-result' ||
+        value.key !== canonical.key ||
+        !Number.isInteger(value.cx) ||
+        !Number.isInteger(value.cy) ||
+        !Number.isInteger(value.cz) ||
+        value.chunkRevision !== 0 ||
+        !Number.isInteger(value.generatorVersion) ||
+        !(value.voxels instanceof ArrayBuffer) ||
+        value.voxels.byteLength !== CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT
+      )
+        canonical.reject(new Error('Canonical compute result is invalid.'));
+      else canonical.resolve(value as GeneratedCanonicalChunk);
+      return;
+    }
     if (task.category === 'fluid') {
       this.fluidWorkIds.delete(task.taskId);
       this.options.onFluidCandidate(result as FluidCandidate);
@@ -214,6 +279,10 @@ export class BrowserComputeRuntime {
       spawn.reject(error);
       return;
     }
+    if (this.canonicalRequests.has(task.taskId)) {
+      this.rejectCanonical(task.taskId, error);
+      return;
+    }
     if (task.category === 'fluid') {
       const workId = this.fluidWorkIds.get(task.taskId);
       this.fluidWorkIds.delete(task.taskId);
@@ -223,5 +292,12 @@ export class BrowserComputeRuntime {
     const originalTaskId = this.originalMeshTaskIds.get(task.taskId);
     this.originalMeshTaskIds.delete(task.taskId);
     if (originalTaskId !== undefined) this.meshFailure(originalTaskId, error);
+  }
+
+  private rejectCanonical(taskId: number, error: Error): void {
+    const canonical = this.canonicalRequests.get(taskId);
+    if (!canonical) return;
+    this.canonicalRequests.delete(taskId);
+    canonical.reject(error);
   }
 }

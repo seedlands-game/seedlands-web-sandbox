@@ -26,6 +26,8 @@ import type { CanonicalChunkResidencyLimits } from '../chunk-residency';
 import { AuthorityResidencyRuntime, type AuthorityResidencyDiagnostics } from './authority-residency-runtime';
 import { advanceAuthoritySession } from './authority-session-advance';
 import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnostics';
+import { AuthorityMutationPreparation, unavailableWorldCommit } from './authority-mutation-preparation';
+import { applyAuthorityPlayerAction } from './authority-player-action';
 
 export type * from './authority-runtime-types';
 
@@ -70,6 +72,7 @@ export class AuthorityRuntime {
   private currentTimeMs: number;
   private readonly transactions: TransactionDeduplicator<Promise<AuthorityTransactionReceipt<unknown>>>;
   private readonly residency: AuthorityResidencyRuntime;
+  private readonly mutationPreparation: AuthorityMutationPreparation;
 
   private constructor(
     private readonly options: AuthorityRuntimeOptions,
@@ -82,6 +85,7 @@ export class AuthorityRuntime {
     this.currentTimeMs = options.startTimeMs;
     this.transactions = new TransactionDeduplicator(options.epoch);
     this.residency = new AuthorityResidencyRuntime(server, () => this.session.currentCommitSequence);
+    this.mutationPreparation = new AuthorityMutationPreparation(server, (key) => this.requestUnknownChunk(key));
     this.playerId = playerId;
     this.newPlayer = isNew;
     const player = server.getEntity(playerId);
@@ -338,7 +342,10 @@ export class AuthorityRuntime {
   }
 
   acceptGeneratedChunk(result: WorkerCanonicalResult): boolean {
-    return this.server.acceptWorkerCanonical(result);
+    const accepted = this.server.acceptWorkerCanonical(result);
+    if (accepted || this.server.peekLoadedVoxel(result.cx * CHUNK_SIZE, result.cy * CHUNK_SIZE, result.cz * CHUNK_SIZE))
+      this.mutationPreparation.acceptAvailable(result.key);
+    return accepted;
   }
 
   releaseMesh(cx: number, cy: number, cz: number): void {
@@ -349,7 +356,9 @@ export class AuthorityRuntime {
     this.server.setFluidActiveChunks(keys);
   }
 
-  editWorld(actorId: string, edits: readonly VoxelEdit[]) {
+  async editWorld(actorId: string, edits: readonly VoxelEdit[]) {
+    if (!(await this.mutationPreparation.prepareEdits(edits)))
+      return unavailableWorldCommit(this.server.worldRevision, edits.length);
     const result = this.server.editBatch({ actorId, edits });
     if (result.committed) {
       this.pendingCommits.push(result);
@@ -363,41 +372,13 @@ export class AuthorityRuntime {
     this.session.synchronizeExternalState();
   }
 
-  performAction(action: AuthorityAction): AuthorityActionResult {
+  async performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
+    if (!(await this.mutationPreparation.prepareAction(action, this.playerId)))
+      return { result: { success: false, reason: 'chunk-unavailable' }, gameplay: this.view(), commits: [] };
     const before = this.serverStateVersion();
-    let result: unknown;
-    switch (action.type) {
-      case 'select-hotbar':
-        result = this.server.selectHotbarSlot(this.playerId, action.slot);
-        break;
-      case 'craft':
-        result = this.server.craft(this.playerId, action.recipeId);
-        break;
-      case 'attack':
-        result = this.server.attackEntity(this.playerId, action.targetId);
-        break;
-      case 'begin-break':
-        result = this.server.beginBreak(this.playerId, action.position);
-        break;
-      case 'cancel-break':
-        result = this.server.cancelBreak(this.playerId);
-        break;
-      case 'place': {
-        result = this.server.placeVoxel(this.playerId, action.position);
-        const commit = (result as { success?: boolean; commit?: WorldCommitResult }).commit;
-        if (commit) this.pendingCommits.push(commit);
-        break;
-      }
-      case 'respawn':
-        result = this.server.respawnPlayer(this.playerId);
-        break;
-      case 'move-inventory':
-        result = this.server.moveInventorySlot(this.playerId, action.source, action.target);
-        break;
-      case 'use-inventory':
-        result = this.server.useInventoryItem(this.playerId, action.slot);
-        break;
-    }
+    const result = applyAuthorityPlayerAction(this.server, this.playerId, action, (commit) =>
+      this.pendingCommits.push(commit),
+    );
     this.commitIfServerChanged(before);
     return { result, gameplay: this.view(), commits: this.takeCommits() };
   }
@@ -419,6 +400,8 @@ export class AuthorityRuntime {
         (elapsedMs) => this.advanceSession(elapsedMs),
         (commits) => this.pendingCommits.push(...commits),
       ),
+      prepareWorld: (commandSource, preparedCommand, buffer) =>
+        this.mutationPreparation.prepareCommand(commandSource, preparedCommand, buffer),
     }).execute(source, command);
     if (command.type !== 'advance-gameplay') this.commitIfServerChanged(before);
     return result;

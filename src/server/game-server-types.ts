@@ -58,6 +58,7 @@ export type WorldCollisionChunkDelta = Readonly<{
 }>;
 export type WorldCommitResult = {
   committed: boolean;
+  reason?: 'chunk-unavailable';
   worldRevision: number;
   structuralChange: VoxelRegionChanged | null;
   semanticEvents: readonly WorldSemanticEvent[];

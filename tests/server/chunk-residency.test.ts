@@ -110,9 +110,9 @@ describe('GameServer canonical residency integration', () => {
       canonicalResidency: { target: 4, hardLimit: 8, evictionBatch: 2 },
     });
     for (let cx = 0; cx < 6; cx += 1)
-      expect(runtime.editWorld('residency-test', [{ x: cx * 32, y: 63, z: 0, value: Voxel.Lantern }]).committed).toBe(
-        true,
-      );
+      expect(
+        (await runtime.editWorld('residency-test', [{ x: cx * 32, y: 63, z: 0, value: Voxel.Lantern }])).committed,
+      ).toBe(true);
     persistence.failNextFrozenSave(new Error('residency checkpoint failed'));
 
     runtime.wake(20);

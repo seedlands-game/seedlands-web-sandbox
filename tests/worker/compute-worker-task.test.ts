@@ -17,6 +17,28 @@ describe('general compute worker task', () => {
     expect(result.starterChunks.every((chunk) => chunk.chunkRevision === 0)).toBe(true);
   });
 
+  it('只生成Authority需要的canonical且不在通用Worker提前构造Mesh', async () => {
+    const result = await runWorldComputeTask({
+      kind: 'generate-canonical',
+      seed: 7,
+      generatorVersion: 3,
+      key: '64,1,0',
+      cx: 64,
+      cy: 1,
+      cz: 0,
+    });
+
+    expect(result).toMatchObject({
+      kind: 'canonical-result',
+      key: '64,1,0',
+      chunkRevision: 0,
+      generatorVersion: 3,
+    });
+    if (result.kind !== 'canonical-result') throw new Error('Unexpected compute result.');
+    expect(new Uint16Array(result.voxels)).toHaveLength(CHUNK_SIZE ** 3);
+    expect(result).not.toHaveProperty('meshes');
+  });
+
   it('在生成/halo/mesh阶段间让出事件循环并消费合作式取消', async () => {
     let checkpoints = 0;
     const payload = {

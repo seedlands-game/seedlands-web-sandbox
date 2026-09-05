@@ -336,7 +336,7 @@ export class World {
     const cz = floorDiv(position.z, CHUNK_SIZE);
     const center = `${cx},${cz}`;
     const centerChanged = center !== this.lastCenter;
-    if (!centerChanged && this.repository.chunks.size && !this.streamingAdmissionRetry.consumeDueRetry()) return;
+    if (!centerChanged && !this.streamingAdmissionRetry.consumeDueRetry()) return;
     if (centerChanged) this.streamingAdmissionRetry.reset();
     this.lastCenter = center;
     const span = this.telemetryRecorder.beginSpan('streaming', 'DetermineNeededChunks');

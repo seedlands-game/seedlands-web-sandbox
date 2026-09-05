@@ -6,10 +6,8 @@ import { ItemIds } from '../../src/server/gameplay/item-registry';
 import { Voxel, chunkKey } from '../../src/world/voxel';
 
 describe('玩法事务只读取已加载权威Chunk', () => {
-  it('未知目标返回chunk-unavailable，不同步生成、不扣库存，并可在异步准备期间继续物理步', async () => {
+  it('未知目标等待General异步准备，不同步生成、不提前扣库存，并在等待期间继续物理步', async () => {
     const requested: string[] = [];
-    const runtimeRef: { current?: AuthorityRuntime } = {};
-    let prepared: Promise<void> | undefined;
     const runtime = await AuthorityRuntime.create({
       epoch: 'unknown-gameplay:1',
       seedText: 'unknown-gameplay',
@@ -18,41 +16,36 @@ describe('玩法事务只读取已加载权威Chunk', () => {
       initialPlayerBodyPosition: [0.5, 33, 0.5],
       onUnknownChunk: (key) => {
         requested.push(key);
-        if (key !== chunkKey(64, 2, 0) || prepared) return;
-        prepared = Promise.resolve().then(() => {
-          const accepted = runtimeRef.current!.acceptGeneratedChunk({
-            key,
-            cx: 64,
-            cy: 2,
-            cz: 0,
-            chunkRevision: 0,
-            generatorVersion: runtimeRef.current!.server.generatorVersion,
-            canonical: new Uint16Array(32 ** 3),
-          });
-          expect(accepted).toBe(true);
-        });
       },
     });
-    runtimeRef.current = runtime;
     const ready = runtime.ready();
     runtime.setPlayerPosition([2_048.5, 80, 0.5]);
     runtime.server.giveItem(ready.playerId, { itemId: ItemIds.DirtBlock, count: 2 });
     runtime.server.selectHotbarSlot(ready.playerId, 0);
     const beforeInventory = runtime.server.getInventory(ready.playerId);
 
-    const unavailable = runtime.performAction({ type: 'place', position: [2_049, 80, 0] });
-    expect(unavailable.result).toEqual({ success: false, reason: 'chunk-unavailable' });
+    const placing = runtime.performAction({ type: 'place', position: [2_049, 80, 0] });
+    await vi.waitFor(() => expect(requested).toContain('64,2,0'));
     expect(runtime.server.getInventory(ready.playerId)).toEqual(beforeInventory);
     expect(runtime.server.canonicalResidencyDiagnostics.residentCount).toBe(0);
-    expect(requested).toContain('64,2,0');
 
     const tickBefore = ready.snapshot.physicsTick;
     const duringPrepare = runtime.wake(100);
     expect(duringPrepare.physicsTick).toBeGreaterThan(tickBefore);
-    await prepared;
+    expect(
+      runtime.acceptGeneratedChunk({
+        key: chunkKey(64, 2, 0),
+        cx: 64,
+        cy: 2,
+        cz: 0,
+        chunkRevision: 0,
+        generatorVersion: runtime.server.generatorVersion,
+        canonical: new Uint16Array(32 ** 3),
+      }),
+    ).toBe(true);
 
-    const retry = runtime.performAction({ type: 'place', position: [2_049, 80, 0] });
-    expect(retry.result).toMatchObject({ success: true });
+    const result = await placing;
+    expect(result.result).toMatchObject({ success: true });
     expect(runtime.server.peekLoadedVoxel(2_049, 80, 0)?.voxel).toBe(Voxel.Dirt);
     expect(runtime.server.getInventory(ready.playerId).slots[0]).toEqual({
       itemId: ItemIds.DirtBlock,

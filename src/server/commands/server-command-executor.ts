@@ -35,6 +35,7 @@ type ExecutorOptions = {
   now?: () => number;
   save?: () => Promise<{ savedChunks: string[]; gameplaySaved: boolean; commitSequence: number }>;
   advanceSession?: (seconds: number) => SessionAdvanceCommandResult | Promise<SessionAdvanceCommandResult>;
+  prepareWorld?: (source: CommandSource, command: ServerCommand, buffer?: WorldMutationBuffer) => Promise<boolean>;
 };
 
 type PreparedCommand = {
@@ -108,6 +109,8 @@ export class ServerCommandExecutor {
     }
 
     try {
+      if (this.options.prepareWorld && !(await this.options.prepareWorld(source, command, prepared.mutationBuffer)))
+        throw new Error('Authority Chunk is unavailable after asynchronous preparation.');
       const payload = await this.run(source, prepared);
       return this.success(source, command, category, startedAt, payload);
     } catch (error) {

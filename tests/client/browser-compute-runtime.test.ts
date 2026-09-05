@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { BrowserComputeRuntime } from '../../src/client/browser-compute-runtime';
 import type { ComputeWorkerPort } from '../../src/client/compute-worker-pool';
 import type { ComputeLane } from '../../src/runtime/compute-task-queue';
+import { CHUNK_SIZE } from '../../src/world/voxel';
 
 class FakeWorker implements ComputeWorkerPort {
   onmessage: ((event: MessageEvent<unknown>) => void) | null = null;
@@ -111,6 +112,52 @@ describe('BrowserComputeRuntime', () => {
     } as MessageEvent<unknown>);
     expect(mesh).toHaveBeenCalledWith({ data: expect.objectContaining({ taskId: 7 }) });
   });
+
+  it('合并同一canonical请求并通过通用槽返回纯Chunk结果', async () => {
+    const workers: Array<{ lane: ComputeLane; worker: FakeWorker }> = [];
+    const runtime = new BrowserComputeRuntime({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      createWorker: (lane) => {
+        const worker = new FakeWorker();
+        workers.push({ lane, worker });
+        return worker;
+      },
+      onFluidCandidate: () => undefined,
+    });
+
+    const first = runtime.generateCanonicalChunk(7, 3, '64,1,0');
+    const duplicate = runtime.generateCanonicalChunk(7, 3, '64,1,0');
+    expect(duplicate).toBe(first);
+    const general = workers.find(({ lane }) => lane === 'general')!.worker;
+    const task = (general.posts[0] as { task: { taskId: number; priority: string; payload: unknown } }).task;
+    expect(task).toMatchObject({
+      priority: 'interaction',
+      payload: { kind: 'generate-canonical', key: '64,1,0', cx: 64, cy: 1, cz: 0 },
+    });
+    const canonical = new Uint16Array(CHUNK_SIZE ** 3);
+    general.onmessage?.({
+      data: {
+        kind: 'compute-result',
+        protocolVersion: 1,
+        epoch: 'world:1',
+        taskId: task.taskId,
+        ok: true,
+        result: {
+          kind: 'canonical-result',
+          key: '64,1,0',
+          cx: 64,
+          cy: 1,
+          cz: 0,
+          chunkRevision: 0,
+          generatorVersion: 3,
+          voxels: canonical.buffer,
+        },
+      },
+    } as MessageEvent<unknown>);
+    await expect(first).resolves.toMatchObject({ kind: 'canonical-result', key: '64,1,0' });
+  });
+
   it('向旧Mesh端口转发失败与取消回执并保留交互优先级', () => {
     const workers: FakeWorker[] = [];
     const runtime = new BrowserComputeRuntime({

@@ -14,7 +14,7 @@ describe('World streaming admission backpressure', () => {
       telemetryRecorder: { beginSpan: vi.fn(() => 1), endSpan: vi.fn() },
       authority: { setFluidActiveChunks: vi.fn(), releaseChunkNeighborhood: vi.fn() },
       repository: {
-        chunks: new Map([['0,0,0', { task: { cx: 0, cy: 0, cz: 0 } }]]),
+        chunks: new Map(),
         unload: vi.fn(),
       },
       scheduler: { requestedKeys: new Set<string>(), cancel: vi.fn() },

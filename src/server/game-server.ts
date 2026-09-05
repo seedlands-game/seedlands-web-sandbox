@@ -197,6 +197,16 @@ export class GameServer extends GameServerGameplayFacade {
     await this.persistence?.ensureNeighborhood?.(cx, cy, cz);
   }
 
+  async prepareCanonicalChunkForMutation(cx: number, cy: number, cz: number): Promise<boolean> {
+    if (this.chunks.has(chunkKey(cx, cy, cz))) return true;
+    if (this.persistence?.ensureSnapshot) await this.persistence.ensureSnapshot(cx, cy, cz);
+    else await this.persistence?.ensureNeighborhood?.(cx, cy, cz);
+    if (this.readAuthoritativeChunk(cx, cy, cz)) return true;
+    if (this.options.onUnknownChunk) return false;
+    this.getChunk(cx, cy, cz);
+    return true;
+  }
+
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
     this.canonicalResidency.releaseMesh(chunkKey(cx, cy, cz));
     this.persistence?.releaseNeighborhood?.(cx, cy, cz);
@@ -464,7 +474,9 @@ export class GameServer extends GameServerGameplayFacade {
     }
     if (!this.prepareCanonicalAdmission(key)) return undefined;
     const snapshot = this.persistence?.loadSnapshot(key);
-    if (!snapshot || !this.isValidSnapshot(snapshot, key, cx, cy, cz)) return undefined;
+    if (!snapshot) return undefined;
+    if (!this.isValidSnapshot(snapshot, key, cx, cy, cz))
+      throw new Error(`Persisted canonical Chunk is invalid for ${key}.`);
     const restored: ServerChunk = {
       key,
       cx,

@@ -253,8 +253,8 @@ const handle = async (message: AuthorityRequest) => {
       current.setFluidActiveChunks(message.keys);
       break;
     case 'world-edit':
-      await transact(message, () => ({
-        result: current.editWorld(message.actorId, message.edits),
+      await transact(message, async () => ({
+        result: await current.editWorld(message.actorId, message.edits),
         gameplay: current.view(),
         commits: current.takeCommits(),
       }));
@@ -266,8 +266,8 @@ const handle = async (message: AuthorityRequest) => {
       });
       break;
     case 'gameplay-action': {
-      await transact(message, () => {
-        const result = current.performAction(message.action);
+      await transact(message, async () => {
+        const result = await current.performAction(message.action);
         return { result, gameplay: result.gameplay, commits: [...result.commits] };
       });
       break;

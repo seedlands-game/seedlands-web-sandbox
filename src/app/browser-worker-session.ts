@@ -39,6 +39,9 @@ type Options = Readonly<{
 
 export async function startBrowserWorkerSession(options: Options): Promise<BrowserWorkerSession> {
   const epoch = createSessionEpoch(`seedlands:${options.seedText}`, options.epochSequence);
+  let authorityReady: BrowserWorkerSession['ready'] | null = null;
+  const queuedAuthorityChunks = new Set<string>();
+  const generatingAuthorityChunks = new Set<string>();
   const compute = new BrowserComputeRuntime({
     epoch,
     generalWorkerCount: options.generalWorkerCount,
@@ -52,6 +55,31 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     },
     onFatal: options.onFatal,
   });
+  const generateAuthorityChunk = (key: string) => {
+    if (!authorityReady) {
+      queuedAuthorityChunks.add(key);
+      return;
+    }
+    if (generatingAuthorityChunks.has(key)) return;
+    generatingAuthorityChunks.add(key);
+    void compute
+      .generateCanonicalChunk(authorityReady.seed, authorityReady.generatorVersion, key)
+      .then((chunk) =>
+        authority.acceptWorkerCanonical(
+          {
+            chunkKey: chunk.key,
+            cx: chunk.cx,
+            cy: chunk.cy,
+            cz: chunk.cz,
+            chunkRevision: chunk.chunkRevision,
+            generatorVersion: chunk.generatorVersion,
+          },
+          { canonical: chunk.voxels, generatorVersion: chunk.generatorVersion },
+        ),
+      )
+      .catch(() => false)
+      .finally(() => generatingAuthorityChunks.delete(key));
+  };
   const authority = BrowserAuthorityClient.create(epoch, {
     onSnapshot: options.onSnapshot,
     onGameplay: (view) => {
@@ -62,6 +90,7 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     onFluidWork: (snapshot: FluidAuthoritySnapshot) => compute.enqueueFluid(snapshot),
     onLogicObservation: (observation: LogicObservation) => logic.sendObservation(observation),
     onBootstrapGeneration: ({ seed, generatorVersion }) => compute.findSafeSpawn(seed, generatorVersion),
+    onAuthorityChunkNeeded: generateAuthorityChunk,
     onUnknownChunk: options.onUnknownChunk,
     onInputDecision: options.onInputDecision,
     onFatal: options.onFatal,
@@ -76,6 +105,9 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
       initialWorldTime: options.initialWorldTime,
       frequencies: options.frequencies,
     });
+    authorityReady = ready;
+    queuedAuthorityChunks.forEach(generateAuthorityChunk);
+    queuedAuthorityChunks.clear();
     return { authority, compute, logic, ready };
   } catch (error) {
     logic.dispose();

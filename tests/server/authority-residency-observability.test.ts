@@ -19,7 +19,8 @@ describe('Authority canonical residency observability', () => {
     });
     for (let cx = 0; cx < 4; cx += 1)
       expect(
-        runtime.editWorld('residency-observability', [{ x: cx * 32, y: 63, z: 0, value: Voxel.Lantern }]).committed,
+        (await runtime.editWorld('residency-observability', [{ x: cx * 32, y: 63, z: 0, value: Voxel.Lantern }]))
+          .committed,
       ).toBe(true);
     persistence.failNextFrozenSave(new Error('observable residency save failure'));
 

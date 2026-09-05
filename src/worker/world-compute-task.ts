@@ -44,6 +44,27 @@ export type FindSafeSpawnTaskPayload = Readonly<{
   generatorVersion: number;
 }>;
 
+export type GenerateCanonicalTaskPayload = Readonly<{
+  kind: 'generate-canonical';
+  seed: number;
+  generatorVersion: number;
+  key: string;
+  cx: number;
+  cy: number;
+  cz: number;
+}>;
+
+export type GeneratedCanonicalChunk = Readonly<{
+  kind: 'canonical-result';
+  key: string;
+  cx: number;
+  cy: number;
+  cz: number;
+  chunkRevision: 0;
+  generatorVersion: number;
+  voxels: ArrayBuffer;
+}>;
+
 export type StarterCanonicalChunk = Readonly<{
   key: string;
   cx: number;
@@ -60,7 +81,8 @@ export type InitialWorldBootstrap = Readonly<{
   starterChunks: readonly StarterCanonicalChunk[];
 }>;
 
-export type WorldComputePayload = MeshTaskPayload | GenerateMeshTaskPayload | FindSafeSpawnTaskPayload;
+export type WorldComputePayload =
+  MeshTaskPayload | GenerateMeshTaskPayload | FindSafeSpawnTaskPayload | GenerateCanonicalTaskPayload;
 
 export class ComputeTaskCancelled extends Error {}
 
@@ -139,6 +161,22 @@ export async function runWorldComputeTask(
     };
     return result;
   }
+  if (task.kind === 'generate-canonical') {
+    if (task.key !== chunkKey(task.cx, task.cy, task.cz))
+      throw new TypeError(`Canonical generation Chunk key is invalid: ${task.key}.`);
+    const canonical = makeChunk(task.seed, task.cx, task.cy, task.cz, [], task.generatorVersion);
+    await checkpoint(isCancelled, yieldTurn);
+    return {
+      kind: 'canonical-result' as const,
+      key: task.key,
+      cx: task.cx,
+      cy: task.cy,
+      cz: task.cz,
+      chunkRevision: 0 as const,
+      generatorVersion: task.generatorVersion,
+      voxels: canonical.buffer as ArrayBuffer,
+    } satisfies GeneratedCanonicalChunk;
+  }
   if (task.kind === 'mesh') {
     const meshingStartedAt = performance.now();
     const meshes = meshChunk({
@@ -210,6 +248,7 @@ export async function runWorldComputeTask(
 export function worldComputeTransfers(result: Awaited<ReturnType<typeof runWorldComputeTask>>): Transferable[] {
   const transfers: Transferable[] = [];
   if (result.kind === 'safe-spawn-result') return result.starterChunks.map((chunk) => chunk.canonical);
+  if (result.kind === 'canonical-result') return [result.voxels];
   result.meshes.forEach((part) =>
     transfers.push(
       part.positions.buffer,
