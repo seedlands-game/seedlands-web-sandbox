@@ -31,12 +31,12 @@ describe('headless server command CLI', () => {
         '/summon grazer 1 34 1',
         '/summon night-stalker 2 34 1',
         '/summon settler 3 34 1',
-        '/observe creature-1',
-        '/entity move creature-1 4 34 1',
-        '/entity action creature-1',
-        '/entity stop creature-1',
-        '/path creature-1 5 34 1',
-        '/poi nearby creature-1 10',
+        '/observe creature-2',
+        '/entity move creature-2 4 34 1',
+        '/entity action creature-2',
+        '/entity stop creature-2',
+        '/path creature-2 5 34 1',
+        '/poi nearby creature-2 10',
         '',
       ].join('\n'),
       env: { ...process.env, CI: 'true' },
@@ -52,6 +52,26 @@ describe('headless server command CLI', () => {
     expect(output[0]).toMatchObject({ data: { entity: { archetype: 'grazer' } } });
     expect(output[1]).toMatchObject({ data: { entity: { archetype: 'night-stalker' } } });
     expect(output[2]).toMatchObject({ data: { entity: { archetype: 'settler', type: 'npc' } } });
-    expect(output[5]).toMatchObject({ data: { action: { actorId: 'creature-1', status: 'pending' } } });
+    expect(output[5]).toMatchObject({ data: { action: { actorId: 'creature-2', status: 'pending' } } });
+  });
+
+  it('maps legacy tick seconds to the shared multi-rate Authority scheduler', () => {
+    const run = spawnSync('pnpm', ['--silent', 'server:headless', '--', '--seed', 'tick-cli-test', '--json'], {
+      cwd: new URL('../..', import.meta.url),
+      encoding: 'utf8',
+      input: '/tick 1\n',
+      env: { ...process.env, CI: 'true' },
+    });
+
+    expect(run.status, run.stderr).toBe(0);
+    const output = JSON.parse(run.stdout.trim()) as Record<string, unknown>;
+    expect(output).toMatchObject({
+      success: true,
+      data: {
+        seconds: 1,
+        elapsedMs: 1_000,
+        lanes: { physicsSteps: 60, gameplayPeriods: 20, fluidPeriods: 30 },
+      },
+    });
   });
 });
