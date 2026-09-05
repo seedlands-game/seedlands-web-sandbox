@@ -1,3 +1,5 @@
+import { bodyConfigFor } from '../physics/body-registry';
+
 type Point = readonly [number, number, number];
 
 /** 模型以脚底为锚点；返回射线进入躯干体积的距离，受体素遮挡上限约束。 */
@@ -8,10 +10,10 @@ export function entityHitDistance(
   direction: Point,
   maxDistance: number,
 ): number | null {
-  const halfWidth = archetype === 'grazer' ? 0.75 : 0.65;
-  const height = archetype === 'grazer' ? 1.9 : archetype === 'settler' ? 2.35 : 2.1;
-  const low = [feet[0] - halfWidth, feet[1], feet[2] - halfWidth];
-  const high = [feet[0] + halfWidth, feet[1] + height, feet[2] + halfWidth];
+  const kind = archetype === 'grazer' || archetype === 'settler' ? archetype : 'night-stalker';
+  const box = bodyConfigFor(kind).localAabb;
+  const low = [feet[0] + box.min.x, feet[1] + box.min.y, feet[2] + box.min.z];
+  const high = [feet[0] + box.max.x, feet[1] + box.max.y, feet[2] + box.max.z];
   let near = 0;
   let far = maxDistance;
   for (let axis = 0; axis < 3; axis++) {

@@ -17,6 +17,8 @@
 - RED（`1a07f93`）：`pnpm exec vitest run tests/server/authority-game-server-port.test.ts`，2 个测试按预期失败：`GameServer.peekLoadedVoxel()` 与 `advanceGameplayRules()` 尚不存在。
 - GREEN（当前工作树）：`pnpm exec vitest run tests/server/authority-game-server-port.test.ts tests/server/authority-session.test.ts tests/server/dropped-item-physics.test.ts tests/server/entity-player-runtime.test.ts tests/server/gameplay-command-persistence.test.ts`，5 个文件、22 个测试全部通过。只读已加载体素不生成未知 Chunk；可靠 gameplay 时间可推进饥饿/采集规则而不调用旧实体重力和导航移动。
 - 协议复查 GREEN：`pnpm exec vitest run tests/runtime/session-protocol.test.ts tests/server/authority-session.test.ts tests/server/authority-game-server-port.test.ts`，3 个文件、16 个测试全部通过。输入按 `targetPhysicsTick` 保留历史，ack 只在物理步实际消费后推进；迟到输入进入明确重同步状态；暂停期间不会借旧 debt 积分，消息分批与预先批量到达得到相同身体状态，despawn 身体从快照删除。
+- 身体注册表 RED：`pnpm exec vitest run tests/physics/body-registry.test.ts` 因 `src/physics/body-registry.ts` 尚不存在而失败。
+- 身体注册表 GREEN：`pnpm exec vitest run tests/physics/body-registry.test.ts tests/client/entity-hit-volume.test.ts tests/physics/step-body.test.ts`，3 个文件、20 个测试全部通过。玩家、掉落物与三类角色使用脚底中心具名身体；战斗射线改为消费同一注册表，不再保留 client 硬编码碰撞尺寸。
 
 ## 集成提交
 
