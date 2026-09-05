@@ -23,11 +23,21 @@ const queryRange = (minimum: number, maximum: number) => {
 
 export class VoxelCollisionWorld implements PhysicsWorld {
   private readonly revisions = new Map<string, number>();
+  private readonly touchedChunkKeys = new Set<string>();
 
   constructor(
     private readonly source: LoadedVoxelSource,
     private readonly requestUnknownChunk: (chunkKey: string) => void = () => undefined,
   ) {}
+
+  beginStep(): void {
+    this.revisions.clear();
+    this.touchedChunkKeys.clear();
+  }
+
+  get activeChunkKeys(): readonly string[] {
+    return [...this.touchedChunkKeys].sort((left, right) => left.localeCompare(right));
+  }
 
   querySolids(bounds: WorldAabb): readonly Collider[] {
     const colliders: Collider[] = [];
@@ -38,6 +48,7 @@ export class VoxelCollisionWorld implements PhysicsWorld {
     for (let x = xRange.from; x <= xRange.to; x += 1)
       for (let y = yRange.from; y <= yRange.to; y += 1)
         for (let z = zRange.from; z <= zRange.to; z += 1) {
+          this.touch(x, y, z);
           const loaded = this.source.getLoadedVoxel(x, y, z);
           if (!loaded) {
             const key = chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
@@ -73,8 +84,10 @@ export class VoxelCollisionWorld implements PhysicsWorld {
     for (let x = xRange.from; x <= xRange.to; x += 1)
       for (let y = yRange.from; y <= yRange.to; y += 1)
         for (let z = zRange.from; z <= zRange.to; z += 1) {
+          this.touch(x, y, z);
           const loaded = this.source.getLoadedVoxel(x, y, z);
           if (!loaded?.fluid || loaded.fluid.level <= 0) continue;
+          this.touch(x, y + 1, z);
           const above = this.source.getLoadedVoxel(x, y + 1, z);
           const coveredByWater = Boolean(above?.fluid && above.fluid.level > 0);
           const surfaceY = y + waterSurfaceHeight(loaded.fluid.level, coveredByWater);
@@ -99,5 +112,9 @@ export class VoxelCollisionWorld implements PhysicsWorld {
       if (revision !== undefined && revision !== null) revisions.push([key, revision]);
     }
     return Object.fromEntries(revisions.sort(([left], [right]) => left.localeCompare(right)));
+  }
+
+  private touch(x: number, y: number, z: number): void {
+    this.touchedChunkKeys.add(chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)));
   }
 }

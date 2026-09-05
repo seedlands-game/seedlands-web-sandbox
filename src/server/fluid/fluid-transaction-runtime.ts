@@ -57,4 +57,8 @@ export class FluidTransactionRuntime<TCommit> {
   get diagnostics() {
     return this.authority.diagnostics;
   }
+
+  get leasedChunkKeys() {
+    return this.authority.leasedChunkKeys;
+  }
 }

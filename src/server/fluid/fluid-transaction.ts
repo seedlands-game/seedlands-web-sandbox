@@ -307,6 +307,12 @@ export class FluidTransactionAuthority {
     };
   }
 
+  get leasedChunkKeys(): readonly string[] {
+    return [...new Set([...this.leases.values()].flatMap((lease) => lease.chunks.map((chunk) => chunk.key)))].sort(
+      compareChunkKeys,
+    );
+  }
+
   activate(position: FluidPosition): boolean {
     let accepted = true;
     for (const candidate of neighborhood(position)) accepted = this.enqueue(candidate) && accepted;

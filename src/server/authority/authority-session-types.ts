@@ -28,6 +28,7 @@ export type AuthorityServerPort = {
   ) => unknown;
   advanceGameplayRules: (seconds: number) => unknown;
   advanceWorldClock?: (hours: number) => unknown;
+  setPhysicsActiveChunks?: (keys: readonly string[]) => void;
   queryPickupTargets?: () => readonly AuthorityPickupTarget[];
   pickupItem?: (playerId: string, itemId: string) => Readonly<{ success: boolean }>;
 };

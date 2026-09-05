@@ -81,9 +81,10 @@ export class GameSaveRuntime {
     const key = chunkKey(cx, cy, cz);
     const chunk = this.options.chunks.get(key);
     if (!chunk) return true;
-    const accessEpoch = chunk.accessEpoch;
-    const revision = chunk.revision;
-    if (chunk.dirty) await this.flushDirtyChunks();
+    return this.evictChunkIfCurrent(key, chunk, chunk.accessEpoch, chunk.revision);
+  }
+
+  evictChunkIfCurrent(key: string, chunk: ServerChunk, accessEpoch: number, revision: number): boolean {
     const current = this.options.chunks.get(key);
     if (
       current !== chunk ||

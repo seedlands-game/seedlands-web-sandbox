@@ -19,3 +19,16 @@ export type AuthorityInitialWorldBootstrap = Readonly<{
   playerBodyPosition: [number, number, number];
   starterChunks: readonly WorkerCanonicalResult[];
 }>;
+
+export type AuthorityTransactionIdentity = Readonly<{
+  epoch: string;
+  issuer: string;
+  stream: string;
+  sequence: number;
+  expectedCommitSequence?: number;
+}>;
+
+export type AuthorityTransactionReceipt<T> = Readonly<
+  | { status: 'executed'; commitSequence: number; result: T }
+  | { status: 'conflict' | 'expired' | 'capacity'; commitSequence: number }
+>;

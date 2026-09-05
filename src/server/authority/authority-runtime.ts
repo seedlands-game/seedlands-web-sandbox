@@ -21,6 +21,10 @@ import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch, type LogicObservation } 
 import { CHUNK_SIZE } from '../../world/voxel';
 import type * as R from './authority-runtime-types';
 import { createAuthorityAdvanceCommandPort } from './authority-command-advance';
+import type { AuthorityTransactionIdentity, AuthorityTransactionReceipt } from './authority-runtime-types';
+import type { CanonicalChunkResidencyLimits } from '../chunk-residency';
+import { AuthorityResidencyRuntime, type AuthorityResidencyDiagnostics } from './authority-residency-runtime';
+import { advanceAuthoritySession } from './authority-session-advance';
 
 export type * from './authority-runtime-types';
 
@@ -41,20 +45,12 @@ export type AuthorityRuntimeOptions = Readonly<{
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (observation: LogicObservation) => void;
   onUnknownChunk?: (key: string) => void;
+  canonicalResidency?: Partial<CanonicalChunkResidencyLimits>;
 }>;
 
-export type AuthorityTransactionIdentity = Readonly<{
-  epoch: string;
-  issuer: string;
-  stream: string;
-  sequence: number;
-  expectedCommitSequence?: number;
-}>;
+export type { AuthorityResidencyDiagnostics } from './authority-residency-runtime';
 
-export type AuthorityTransactionReceipt<T> = Readonly<
-  | { status: 'executed'; commitSequence: number; result: T }
-  | { status: 'conflict' | 'expired' | 'capacity'; commitSequence: number }
->;
+export type { AuthorityTransactionIdentity, AuthorityTransactionReceipt } from './authority-runtime-types';
 
 export class AuthorityRuntime {
   readonly server: GameServer;
@@ -72,6 +68,7 @@ export class AuthorityRuntime {
   private logicObservationRequested = false;
   private currentTimeMs: number;
   private readonly transactions: TransactionDeduplicator<Promise<AuthorityTransactionReceipt<unknown>>>;
+  private readonly residency: AuthorityResidencyRuntime;
 
   private constructor(
     private readonly options: AuthorityRuntimeOptions,
@@ -83,6 +80,7 @@ export class AuthorityRuntime {
     this.frequencies = options.frequencies ?? { physicsHz: 60, gameplayHz: 20, fluidHz: 30 };
     this.currentTimeMs = options.startTimeMs;
     this.transactions = new TransactionDeduplicator(options.epoch);
+    this.residency = new AuthorityResidencyRuntime(server, () => this.session.currentCommitSequence);
     this.playerId = playerId;
     this.newPlayer = isNew;
     const player = server.getEntity(playerId);
@@ -110,6 +108,7 @@ export class AuthorityRuntime {
         return result;
       },
       advanceWorldClock: (hours: number) => server.advanceClock(hours),
+      setPhysicsActiveChunks: (keys: readonly string[]) => server.setPhysicsActiveChunks(keys),
       queryPickupTargets: () =>
         server
           .queryEntities({ type: 'player' })
@@ -146,6 +145,7 @@ export class AuthorityRuntime {
       seedText: options.seedText,
       ...(options.generatorVersion === undefined ? {} : { generatorVersion: options.generatorVersion }),
       ...(options.persistence ? { persistence: options.persistence } : {}),
+      ...(options.canonicalResidency ? { canonicalResidency: options.canonicalResidency } : {}),
     });
     server.setWorldTime(options.initialWorldTime);
     await server.restore();
@@ -196,34 +196,24 @@ export class AuthorityRuntime {
     const snapshot = this.session.wake(nowMs);
     this.currentTimeMs = nowMs;
     this.latestPhysicsTick = snapshot.physicsTick;
+    this.residency.maintain(snapshot.activeTimeMs);
     return snapshot;
   }
 
+  get residencyDiagnostics(): AuthorityResidencyDiagnostics {
+    return this.residency.diagnostics;
+  }
+
   advanceSession(elapsedMs: number): R.AuthorityAdvanceResult {
-    if (!Number.isFinite(elapsedMs) || elapsedMs < 0 || elapsedMs > 60_000)
-      throw new RangeError('Authority session advance must be finite and within 0..60000ms.');
-    const before = this.session.laneTotals;
-    const intervalMs = 1_000 / Math.max(...Object.values(this.frequencies));
-    const targetTimeMs = this.currentTimeMs + elapsedMs;
-    let snapshot = this.wake(this.currentTimeMs);
-    while (this.currentTimeMs < targetTimeMs) {
-      const nextTimeMs = Math.min(targetTimeMs, this.currentTimeMs + intervalMs);
-      snapshot = this.wake(nextTimeMs);
-    }
-    const physicsIntervalMs = 1_000 / this.frequencies.physicsHz;
-    while (!snapshot.paused && snapshot.physicsDebtMs + 1e-7 >= physicsIntervalMs)
-      snapshot = this.wake(this.currentTimeMs);
-    const after = this.session.laneTotals;
-    return {
-      snapshot,
-      lanes: {
-        physicsSteps: after.physicsSteps - before.physicsSteps,
-        gameplayPeriods: after.gameplayPeriods - before.gameplayPeriods,
-        fluidPeriods: after.fluidPeriods - before.fluidPeriods,
-      },
-      gameplay: this.view(),
-      commits: this.takeCommits(),
-    };
+    return advanceAuthoritySession({
+      elapsedMs,
+      currentTimeMs: this.currentTimeMs,
+      frequencies: this.frequencies,
+      laneTotals: () => this.session.laneTotals,
+      wake: (nowMs) => this.wake(nowMs),
+      view: () => this.view(),
+      takeCommits: () => this.takeCommits(),
+    });
   }
 
   receiveInput(command: InputCommand): SequenceDecision {
@@ -320,6 +310,7 @@ export class AuthorityRuntime {
   }
 
   async prepareMesh(cx: number, cy: number, cz: number): Promise<AuthorityMeshPayload> {
+    this.server.retainMeshChunk(cx, cy, cz);
     await this.server.ensureChunkNeighborhood(cx, cy, cz);
     const prepared = this.server.prepareWorkerMeshInput(cx, cy, cz);
     return {
@@ -444,6 +435,7 @@ export class AuthorityRuntime {
   async save() {
     const frozen = this.server.freezeSaveSnapshot(this.session.currentCommitSequence);
     const result = await this.server.saveFrozen(frozen);
+    this.residency.recordSaveSuccess();
     return { ...result, storageBytes: this.options.persistence?.metrics?.().recordBytes ?? 0 };
   }
 

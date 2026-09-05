@@ -26,6 +26,7 @@ import type {
   LogicIntent,
 } from './authority-session-types';
 import { VoxelCollisionWorld, type LoadedVoxelSource } from './voxel-collision-world';
+import { bodyActiveChunkKeys } from './authority-physics-active-chunks';
 
 export type * from './authority-session-types';
 
@@ -207,6 +208,7 @@ export class AuthoritySession {
   }
 
   private stepPhysics(dt: number) {
+    this.collisionWorld.beginStep();
     this.processRecoveryQueue();
     const input = this.input.consumeForTick(this.physicsTick);
     const entities = this.options.server.queryEntities().sort((left, right) => left.id.localeCompare(right.id));
@@ -315,6 +317,7 @@ export class AuthoritySession {
     this.processPickups(selectedTargets);
     for (const id of this.bodies.keys()) if (!seen.has(id)) this.bodies.delete(id);
     for (const id of this.pickupTargetCursors.keys()) if (!worldItemIds.has(id)) this.pickupTargetCursors.delete(id);
+    this.options.server.setPhysicsActiveChunks?.(this.collisionWorld.activeChunkKeys);
     this.commitSequence += 1;
   }
 
@@ -462,7 +465,8 @@ export class AuthoritySession {
   }
 
   private refreshBodies() {
-    this.options.server.queryEntities().forEach((entity) => {
+    const entities = this.options.server.queryEntities();
+    entities.forEach((entity) => {
       this.bodies.set(entity.id, {
         id: entity.id,
         type: entity.type,
@@ -472,6 +476,7 @@ export class AuthoritySession {
         contacts: [],
       });
     });
+    this.options.server.setPhysicsActiveChunks?.(bodyActiveChunkKeys(entities, this.options.bodyConfigFor));
   }
 
   private stopPlayerHorizontalVelocity() {

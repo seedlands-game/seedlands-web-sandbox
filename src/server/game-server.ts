@@ -1,4 +1,4 @@
-import { createProceduralMeshInput, makeChunk, type MeshAuthorityOverlay } from '../world/mesh';
+import { makeChunk } from '../world/mesh';
 import {
   CHUNK_SIZE,
   GENERATOR_VERSION,
@@ -21,12 +21,7 @@ import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
 import { hasAdjacentWater, legacyFluid } from './fluid/fluid-cell-state';
-import {
-  captureBatchFluidState,
-  commitBatchFluidSidecars,
-  readFluidCell,
-  readFluidChunk,
-} from './fluid/fluid-edit-sidecars';
+import * as FluidSidecars from './fluid/fluid-edit-sidecars';
 import { commitFluidCandidate } from './fluid/fluid-candidate-commit';
 import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
@@ -37,6 +32,12 @@ import type { FrozenGameSaveSnapshot } from './persistence/game-save-snapshot';
 import { GameSaveRuntime } from './persistence/game-save-runtime';
 import { SINGLE_EDIT_METRICS, SINGLE_EDIT_NOOP_METRICS } from './world-edit-metrics';
 import { readGameSaveCheckpoint } from './persistence/game-save-checkpoint';
+import {
+  CanonicalChunkResidency,
+  CanonicalChunkResidencyPressureError,
+  maintainCanonicalChunks,
+} from './chunk-residency';
+import { createServerDerivedMeshSnapshot, prepareServerWorkerMeshInput } from './server-mesh-snapshots';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -69,6 +70,7 @@ export class GameServer extends GameServerGameplayFacade {
   private readonly fluidChunkActivations = new FluidChunkActivationQueue();
   private readonly fluidWindow = new FluidActiveWindow();
   private readonly saves: GameSaveRuntime;
+  private readonly canonicalResidency: CanonicalChunkResidency;
 
   constructor(readonly options: GameServerOptions) {
     super(options.persistence);
@@ -77,6 +79,7 @@ export class GameServer extends GameServerGameplayFacade {
     if (this.generatorVersion !== 2 && this.generatorVersion !== GENERATOR_VERSION)
       throw new Error(`Unsupported generator version ${this.generatorVersion}.`);
     this.persistence = options.persistence;
+    this.canonicalResidency = new CanonicalChunkResidency(options.canonicalResidency);
     this.saves = new GameSaveRuntime({
       seedText: options.seedText,
       generatorVersion: this.generatorVersion,
@@ -89,9 +92,10 @@ export class GameServer extends GameServerGameplayFacade {
     this.fluidChunks = new FluidChunkAccess(this.chunks, (cx, cy, cz) => this.getChunk(cx, cy, cz));
     this.fluidRuntime = new FluidTransactionRuntime({
       epoch: 1,
-      readChunk: (key) => readFluidChunk(key, (candidate) => this.fluidWindow.allowsKey(candidate), this.chunks),
+      readChunk: (key) =>
+        FluidSidecars.readFluidChunk(key, (candidate) => this.fluidWindow.allowsKey(candidate), this.chunks),
       readCell: (position) =>
-        readFluidCell(position, (x, y, z) => this.fluidWindow.allowsPosition(x, y, z), this.chunks),
+        FluidSidecars.readFluidCell(position, (x, y, z) => this.fluidWindow.allowsPosition(x, y, z), this.chunks),
       apply: (candidate) => this.applyFluidCandidate(candidate),
     });
   }
@@ -123,6 +127,33 @@ export class GameServer extends GameServerGameplayFacade {
     return this.revision;
   }
 
+  get canonicalResidencyDiagnostics() {
+    return this.canonicalResidency.diagnostics(this.chunks);
+  }
+
+  get canonicalResidencyNeedsMaintenance(): boolean {
+    return this.chunks.size > this.canonicalResidency.limits.target;
+  }
+
+  maintainCanonicalResidency(): number {
+    return maintainCanonicalChunks(this.canonicalResidency, this.chunks, (candidate) =>
+      this.saves.evictChunkIfCurrent(
+        candidate.key,
+        candidate.chunk as ServerChunk,
+        candidate.accessEpoch,
+        candidate.revision,
+      ),
+    );
+  }
+
+  setPhysicsActiveChunks(keys: readonly string[]): void {
+    this.canonicalResidency.replacePins('physics', keys);
+  }
+
+  retainMeshChunk(cx: number, cy: number, cz: number): void {
+    this.canonicalResidency.retainMesh(chunkKey(cx, cy, cz));
+  }
+
   getChunk(cx: number, cy: number, cz: number): ServerChunk {
     const key = chunkKey(cx, cy, cz);
     const existing = this.chunks.get(key);
@@ -130,6 +161,7 @@ export class GameServer extends GameServerGameplayFacade {
       existing.accessEpoch = ++this.accessSequence;
       return existing;
     }
+    if (!this.prepareCanonicalAdmission(key)) throw new CanonicalChunkResidencyPressureError(key);
     const snapshot = this.persistence?.loadSnapshot(key);
     const restored = snapshot && this.isValidSnapshot(snapshot, key, cx, cy, cz);
     const chunk: ServerChunk = restored
@@ -175,7 +207,9 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
+    this.canonicalResidency.releaseMesh(chunkKey(cx, cy, cz));
     this.persistence?.releaseNeighborhood?.(cx, cy, cz);
+    this.maintainCanonicalResidency();
   }
 
   getVoxel(x: number, y: number, z: number): number {
@@ -191,71 +225,11 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   createDerivedMeshSnapshot(cx: number, cy: number, cz: number): DerivedMeshSnapshot {
-    const chunk = this.getChunk(cx, cy, cz);
-    const overlays: MeshAuthorityOverlay[] = [];
-    for (let overlayY = cy - 1; overlayY <= cy + 1; overlayY += 1)
-      for (let overlayZ = cz - 1; overlayZ <= cz + 1; overlayZ += 1)
-        for (let overlayX = cx - 1; overlayX <= cx + 1; overlayX += 1) {
-          if (overlayX === cx && overlayY === cy && overlayZ === cz) continue;
-          const source = this.readAuthoritativeChunk(overlayX, overlayY, overlayZ);
-          if (source)
-            overlays.push({ cx: overlayX, cy: overlayY, cz: overlayZ, voxels: source.voxels, fluid: source.fluid });
-        }
-    const derived = createProceduralMeshInput({
-      seed: this.seed,
-      generatorVersion: this.generatorVersion,
-      cx,
-      cy,
-      cz,
-      canonical: chunk.voxels,
-      fluid: chunk.fluid,
-      overlays,
-    });
-    return {
-      key: chunk.key,
-      cx,
-      cy,
-      cz,
-      canonical: chunk.voxels,
-      halo: derived.halo,
-      fluid: derived.fluid,
-      fluidHalo: derived.fluidHalo,
-      chunkRevision: chunk.revision,
-      haloRevision: derived.haloRevision,
-      proceduralVoxelSamples: derived.proceduralVoxelSamples,
-      macroContextCount: derived.macroContextCount,
-    };
+    return createServerDerivedMeshSnapshot(this.meshSnapshotSource(), cx, cy, cz);
   }
 
   prepareWorkerMeshInput(cx: number, cy: number, cz: number): WorkerMeshPreparation {
-    const key = chunkKey(cx, cy, cz);
-    const center = this.readAuthoritativeChunk(cx, cy, cz);
-    const overlays: MeshAuthorityOverlay[] = [];
-    for (let overlayY = cy - 1; overlayY <= cy + 1; overlayY += 1)
-      for (let overlayZ = cz - 1; overlayZ <= cz + 1; overlayZ += 1)
-        for (let overlayX = cx - 1; overlayX <= cx + 1; overlayX += 1) {
-          if (overlayX === cx && overlayY === cy && overlayZ === cz) continue;
-          const source = this.readAuthoritativeChunk(overlayX, overlayY, overlayZ);
-          if (source?.materialized)
-            overlays.push({
-              cx: overlayX,
-              cy: overlayY,
-              cz: overlayZ,
-              voxels: source.voxels.slice(),
-              fluid: source.fluid.slice(),
-            });
-        }
-    return {
-      key,
-      cx,
-      cy,
-      cz,
-      chunkRevision: center?.revision ?? 0,
-      generatorVersion: this.generatorVersion,
-      ...(center?.materialized ? { canonical: center.voxels.slice() } : {}),
-      ...(center?.materialized ? { fluid: center.fluid.slice() } : {}),
-      overlays,
-    };
+    return prepareServerWorkerMeshInput(this.meshSnapshotSource(), cx, cy, cz);
   }
 
   acceptWorkerCanonical(result: WorkerCanonicalResult): boolean {
@@ -272,6 +246,7 @@ export class GameServer extends GameServerGameplayFacade {
       return current.voxels.every((value, index) => value === result.canonical[index]);
     }
     if (result.chunkRevision !== 0) return false;
+    if (!this.prepareCanonicalAdmission(result.key)) return false;
     const accepted: ServerChunk = {
       key: result.key,
       cx: result.cx,
@@ -287,6 +262,7 @@ export class GameServer extends GameServerGameplayFacade {
     };
     this.chunks.set(result.key, accepted);
     if (this.fluidWindow.allowsKey(result.key)) this.fluidChunkActivations.schedule(accepted);
+    this.maintainCanonicalResidency();
     return true;
   }
 
@@ -314,17 +290,24 @@ export class GameServer extends GameServerGameplayFacade {
 
   requestFluidWork() {
     this.fluidChunkActivations.pumpRuntime(this.fluidRuntime, this.fluidChunks);
-    return this.fluidRuntime.requestFluidWork();
+    const work = this.fluidRuntime.requestFluidWork();
+    this.syncFluidLeasePins();
+    return work;
   }
 
   commitFluidCandidate(candidate: FluidCandidate) {
     const result = this.fluidRuntime.commitFluidCandidate(candidate);
     const commit = result.accepted ? this.fluidRuntime.takeLastCommit() : undefined;
+    this.syncFluidLeasePins();
+    this.maintainCanonicalResidency();
     return { ...result, ...(commit ? { commit } : {}) };
   }
 
   abortFluidWork(workId: string, reason: string) {
-    return this.fluidRuntime.abortLease(workId, reason);
+    const aborted = this.fluidRuntime.abortLease(workId, reason);
+    this.syncFluidLeasePins();
+    this.maintainCanonicalResidency();
+    return aborted;
   }
 
   get fluidDiagnostics() {
@@ -332,8 +315,10 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   setFluidActiveChunks(keys: readonly string[]): void {
+    this.canonicalResidency.replacePins('streaming', keys);
     this.fluidChunkActivations.sync(keys, this.chunks);
     this.fluidWindow.update(keys);
+    this.maintainCanonicalResidency();
   }
 
   getFluidCell(x: number, y: number, z: number): FluidCell | null {
@@ -343,7 +328,7 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   editBatch(batch: WorldEditBatch): WorldCommitResult {
-    const previousFluid = captureBatchFluidState(batch, {
+    const previousFluid = FluidSidecars.captureBatchFluidState(batch, {
       getVoxel: (x, y, z) => this.getVoxel(x, y, z),
       getCell: (x, y, z) => this.fluidChunks.cell(x, y, z, true),
     });
@@ -362,7 +347,7 @@ export class GameServer extends GameServerGameplayFacade {
       batch,
     );
     if (result.committed)
-      commitBatchFluidSidecars(previousFluid, {
+      FluidSidecars.commitBatchFluidSidecars(previousFluid, {
         getVoxel: (x, y, z) => this.getVoxel(x, y, z),
         includeEditedPosition: (x, y, z) => this.fluidWindow.includeEditedPosition(x, y, z),
         writeCell: (x, y, z, cell) => this.fluidChunks.write(x, y, z, cell),
@@ -441,14 +426,18 @@ export class GameServer extends GameServerGameplayFacade {
   saveFrozen(
     snapshot: FrozenGameSaveSnapshot,
   ): Promise<{ savedChunks: string[]; gameplaySaved: boolean; commitSequence: number }> {
-    return this.saves.saveFrozen(snapshot);
+    return this.saves.saveFrozen(snapshot).then((result) => {
+      this.maintainCanonicalResidency();
+      return result;
+    });
   }
 
   async save(commitSequence = 0) {
-    return this.saves.save(commitSequence);
+    return this.saveFrozen(this.freezeSaveSnapshot(commitSequence));
   }
 
   async evictChunk(cx: number, cy: number, cz: number): Promise<boolean> {
+    if (this.canonicalResidency.isPinned(chunkKey(cx, cy, cz))) return false;
     return this.saves.evictChunk(cx, cy, cz);
   }
 
@@ -515,6 +504,7 @@ export class GameServer extends GameServerGameplayFacade {
       existing.accessEpoch = ++this.accessSequence;
       return existing;
     }
+    if (!this.prepareCanonicalAdmission(key)) return undefined;
     const snapshot = this.persistence?.loadSnapshot(key);
     if (!snapshot || !this.isValidSnapshot(snapshot, key, cx, cy, cz)) return undefined;
     const restored: ServerChunk = {
@@ -533,5 +523,26 @@ export class GameServer extends GameServerGameplayFacade {
     this.chunks.set(key, restored);
     this.fluidChunkActivations.schedule(restored);
     return restored;
+  }
+
+  private syncFluidLeasePins(): void {
+    this.canonicalResidency.replacePins('fluid', this.fluidRuntime.leasedChunkKeys);
+  }
+
+  private meshSnapshotSource() {
+    return {
+      seed: this.seed,
+      generatorVersion: this.generatorVersion,
+      getChunk: (cx: number, cy: number, cz: number) => this.getChunk(cx, cy, cz),
+      readAuthoritativeChunk: (cx: number, cy: number, cz: number) => this.readAuthoritativeChunk(cx, cy, cz),
+    };
+  }
+
+  private prepareCanonicalAdmission(key: string): boolean {
+    if (this.chunks.has(key)) return true;
+    this.maintainCanonicalResidency();
+    if (this.canonicalResidency.canAdmit(this.chunks, key)) return true;
+    this.canonicalResidency.recordRejectedAdmission();
+    return false;
   }
 }

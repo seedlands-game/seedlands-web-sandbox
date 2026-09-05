@@ -4,6 +4,7 @@ import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { EntitySpawn, EntityUpdate, GameplayEntity } from './gameplay/entity-store';
 import type { VoxelEdit, WorldMutationBuffer } from './world-mutation';
+import type { CanonicalChunkResidencyLimits } from './chunk-residency';
 
 export type ServerChunk = ChunkCoord & {
   key: string;
@@ -62,6 +63,7 @@ export type GameServerOptions = {
   seedText: string;
   generatorVersion?: number;
   persistence?: ChunkPersistence & Partial<GameplayPersistence>;
+  canonicalResidency?: Partial<CanonicalChunkResidencyLimits>;
 };
 export type DerivedMeshSnapshot = {
   key: string;
