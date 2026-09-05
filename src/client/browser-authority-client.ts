@@ -2,7 +2,6 @@ import type { CommandResult, CommandSource, ServerCommand } from '../server/comm
 import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import type { FluidCandidate } from '../server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '../server/game-server-types';
-import { legacyFluid } from '../server/fluid/fluid-cell-state';
 import type { VoxelEdit } from '../server/world-mutation';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '../runtime/session-protocol';
 import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
@@ -21,7 +20,11 @@ import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from './client-request-registry';
 import { ClientReadyWait } from './client-ready-wait';
 import { createAuthorityTransport } from './authority-transport';
-import { cacheAuthorityCollisionBaseline, publishAuthorityCollisionCommits } from './authority-collision-mirror';
+import {
+  AuthorityCollisionRevisionGuard,
+  acceptAuthorityCollisionBaseline,
+  publishAuthorityCollisionCommits,
+} from './authority-collision-mirror';
 import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
 import type {
   AuthorityClientOptions,
@@ -42,6 +45,7 @@ export class BrowserAuthorityClient {
   private readonly bootstrap: AuthorityBootstrapCoordinator;
   private readonly meshLoads = new Map<string, Promise<void>>();
   private readonly meshCache = new Map<string, AuthorityCachedMesh>();
+  private readonly collisionRevisions = new AuthorityCollisionRevisionGuard();
   private readonly preparationCache = new Map<string, AuthorityCachedPreparation>();
   private readyValue: AuthorityReady | null = null;
   private snapshotValue: AuthoritySnapshot | null = null;
@@ -204,6 +208,7 @@ export class BrowserAuthorityClient {
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
     const key = chunkKey(cx, cy, cz);
     this.meshCache.delete(key);
+    this.collisionRevisions.release(key);
     this.releasePreparation(cx, cy, cz);
   }
 
@@ -242,30 +247,22 @@ export class BrowserAuthorityClient {
     }>,
     result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>,
   ): Promise<boolean> {
-    if (!result.canonical || result.generatorVersion !== task.generatorVersion) return false;
-    const canonical = new Uint16Array(result.canonical).slice();
-    const authorityCanonical = canonical.slice();
-    const response = (await this.request(
-      {
-        kind: 'accept-generated-chunk',
-        key: task.chunkKey,
-        cx: task.cx,
-        cy: task.cy,
-        cz: task.cz,
-        chunkRevision: task.chunkRevision,
-        generatorVersion: task.generatorVersion,
-        canonical: authorityCanonical.buffer,
-      },
-      [authorityCanonical.buffer],
-    )) as { accepted: boolean };
-    if (!response.accepted) return false;
-    const prepared = this.preparationCache.get(task.chunkKey);
-    cacheAuthorityCollisionBaseline(this.meshCache, task.chunkKey, {
-      canonical,
-      fluid: prepared?.fluid?.slice() ?? legacyFluid(canonical),
+    return acceptAuthorityCollisionBaseline({
+      key: task.chunkKey,
       chunkRevision: task.chunkRevision,
+      generatorVersion: task.generatorVersion,
+      result,
+      preparedFluid: this.preparationCache.get(task.chunkKey)?.fluid,
+      chunks: this.meshCache,
+      guard: this.collisionRevisions,
+      accept: async (canonical) => {
+        const response = (await this.request(
+          { kind: 'accept-generated-chunk', ...task, key: task.chunkKey, canonical: canonical.buffer },
+          [canonical.buffer],
+        )) as { accepted: boolean };
+        return response.accepted;
+      },
     });
-    return true;
   }
 
   getVoxel(x: number, y: number, z: number): number {
@@ -379,6 +376,7 @@ export class BrowserAuthorityClient {
     this.worker.terminate();
     this.cancelAll(new Error('Authority client was disposed.'));
     this.meshCache.clear();
+    this.collisionRevisions.clear();
     this.preparationCache.clear();
   }
 
@@ -461,7 +459,7 @@ export class BrowserAuthorityClient {
         if (!message.ok) this.requests.reject(message.requestId, new Error(message.error));
         else {
           if (message.gameplay) this.updateGameplay(message.gameplay);
-          publishAuthorityCollisionCommits(message.commits, this.meshCache, this.options);
+          publishAuthorityCollisionCommits(message.commits, this.meshCache, this.options, this.collisionRevisions);
           this.requests.resolve(message.requestId, message.result);
         }
         break;
@@ -510,7 +508,7 @@ export class BrowserAuthorityClient {
     if (this.snapshotGate.accept(snapshot)) return;
     this.snapshotValue = snapshot;
     if (gameplay) this.updateGameplay(gameplay);
-    publishAuthorityCollisionCommits(commits, this.meshCache, this.options);
+    publishAuthorityCollisionCommits(commits, this.meshCache, this.options, this.collisionRevisions);
     this.options.onSnapshot?.(snapshot);
   }
 

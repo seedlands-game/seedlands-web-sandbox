@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BrowserAuthorityClient, type AuthorityWorkerPort } from '../../src/client/browser-authority-client';
 import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
 import type { WorldCommitResult } from '../../src/server/game-server-types';
@@ -177,5 +177,42 @@ describe('生产BrowserAuthorityClient碰撞镜像接线', () => {
     await expect(staleAcceptance).resolves.toBe(true);
     expect(client.getVoxel(1, 2, 3)).toBe(Voxel.Water);
     expect(client.getChunkRevision(0, 0, 0)).toBe(6);
+  });
+
+  it('缺口失效后拒绝此前已发出但延迟成功的旧网格回执', async () => {
+    const worker = new FakeAuthorityWorker();
+    const unknown = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onUnknownChunk: unknown });
+    await installBaseline(client, worker);
+    const staleCanonical = new Uint16Array(CHUNK_SIZE ** 3);
+    staleCanonical[0] = Voxel.Dirt;
+    const acceptingStale = client.acceptWorkerCanonical(
+      { chunkKey: '0,0,0', cx: 0, cy: 0, cz: 0, chunkRevision: 5, generatorVersion: 3 },
+      { canonical: staleCanonical.buffer, generatorVersion: 3 },
+    );
+    const staleRequest = worker.posts.at(-1) as { requestId: number };
+
+    const skipped = commit(5, 6, Voxel.Stone, 0);
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: { ...snapshot(2, 2), chunkRevisions: { '0,0,0': 6 } },
+      commits: [skipped],
+    });
+    expect(client.getChunkRevision(0, 0, 0)).toBeNull();
+    expect(unknown).toHaveBeenCalledWith('0,0,0');
+
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: staleRequest.requestId,
+      ok: true,
+      result: { accepted: true },
+    });
+    await acceptingStale;
+    expect(client.getChunkRevision(0, 0, 0)).toBeNull();
+    expect(client.getVoxel(0, 0, 0)).toBe(Voxel.Air);
   });
 });
