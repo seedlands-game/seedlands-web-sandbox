@@ -13,6 +13,15 @@ describe('GameServer Authority port', () => {
     expect(server.peekLoadedVoxel(1, 20, 1)).toMatchObject({ chunkKey: '0,0,0', revision: 0 });
   });
 
+  it('物理热路径只读取已装载流体且不会为未知坐标生成 Chunk', () => {
+    const server = new GameServer({ seedText: 'authority-loaded-fluid' });
+
+    expect(server.peekLoadedVoxel(2_000, 20, 2_000)).toBeNull();
+    expect(server.materializedChunkCount).toBe(0);
+    server.edit(0, 5, 0, Voxel.Water, 'test');
+    expect(server.peekLoadedVoxel(0, 5, 0)).toMatchObject({ fluid: { level: 8 } });
+  });
+
   it('规则时钟推进饥饿等可靠玩法截止时间但不调用旧实体重力或导航位移', () => {
     const server = new GameServer({ seedText: 'authority-rules-only' });
     server.spawnPlayer({ id: 'player-1', position: [0, 34, 0] });

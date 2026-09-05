@@ -318,7 +318,9 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   commitFluidCandidate(candidate: FluidCandidate) {
-    return this.fluidRuntime.commitFluidCandidate(candidate);
+    const result = this.fluidRuntime.commitFluidCandidate(candidate);
+    const commit = result.accepted ? this.fluidRuntime.takeLastCommit() : undefined;
+    return { ...result, ...(commit ? { commit } : {}) };
   }
 
   abortFluidWork(workId: string, reason: string) {

@@ -143,6 +143,10 @@ export class AuthoritySession {
     this.clock.resume(nowMs);
   }
 
+  synchronizeExternalState() {
+    this.refreshBodies();
+  }
+
   private stepPhysics(dt: number) {
     const input = this.input.consumeForTick(this.physicsTick);
     const seen = new Set<string>();
