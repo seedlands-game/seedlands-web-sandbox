@@ -66,6 +66,45 @@ test('跨300个Chunk往返时canonical驻留收敛，编辑经原子保存与重
     page,
     (snapshot) => snapshot.streamCenter[0] === 0 && snapshot.generationQueue === 0 && snapshot.meshingQueue === 0,
   );
+  const returned = await page.evaluate(() => window.__seedlandsHarness!.snapshot());
+  const localVoxelBeforeAuthorityRead = await page.evaluate(
+    ({ x, y, z }) => window.__seedlandsHarness!.getVoxelAt?.(x, y, z),
+    EDIT,
+  );
+  const localRevisionBeforeAuthorityRead = await page.evaluate(() =>
+    window.__seedlandsHarness!.getChunkRevision?.(0, 1, 0),
+  );
+  const authorityRead = await page.evaluate(
+    async ({ x, y, z }) =>
+      await window.__seedlandsHarness!.executeGameplayCommand({ type: 'inspect-voxel', position: [x, y, z] }),
+    EDIT,
+  );
+  const authorityVoxel = authorityRead.success
+    ? (authorityRead.data as { voxel?: unknown } | undefined)?.voxel
+    : undefined;
+  await testInfo.attach('canonical-residency-return-diagnostic', {
+    body: JSON.stringify(
+      {
+        seed: SEED,
+        returned: returned.authority.residency,
+        returnedWorldRevision: returned.worldRevision,
+        returnedCommitSequence: returned.authority.commitSequence,
+        localVoxelBeforeAuthorityRead,
+        localRevisionBeforeAuthorityRead,
+        authorityRead,
+        authorityVoxel,
+        generationQueue: returned.generationQueue,
+        meshingQueue: returned.meshingQueue,
+        compute: returned.compute,
+        storageBytes: returned.storageBytes,
+      },
+      null,
+      2,
+    ),
+    contentType: 'application/json',
+  });
+  expect(authorityRead.success).toBe(true);
+  expect(authorityVoxel).toBe(Voxel.Lantern);
   await expect
     .poll(() => page.evaluate(({ x, y, z }) => window.__seedlandsHarness!.getVoxelAt?.(x, y, z), EDIT))
     .toBe(Voxel.Lantern);
