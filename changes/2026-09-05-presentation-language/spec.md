@@ -1,6 +1,6 @@
 # 统一表现语言与界面美术
 
-**状态：Active；父 goal 已授权自主 SDD。**
+**状态：Delivered；父 goal 已授权自主 SDD，生存与最终画面已整合验收。**
 
 ## 背景与目标
 
@@ -41,18 +41,18 @@ Retained UI 已建立单 Svelte root 与分片 UiBridge，但原样式仍为绿�
 
 ## 验收与证据
 
-- [ ] **Midscene / Manual supplement：** 面板、框体、槽位和图标统一，主菜单、HUD、地图与命令面板可读；生存背包/合成集成后同样验证。
-- [ ] **Playwright-baseline：** 现有输入、Hotbar、地图、命令、持久化等行为无回归。
-- [ ] **Playwright-change / Midscene：** 窄屏与 reduced-motion 的布局/信息保持，由当前 change 显式场景验证。
-- [ ] **Static：** 格式、lint、路径、Svelte/TypeScript 与 world coverage 不退化。
-- [ ] **Build：** 生产构建成功，原创资产打包可用，记录资产体积。
+- [x] **Midscene / Manual supplement：** 面板、框体、槽位和图标统一，主菜单、HUD、地图与命令面板可读；生存背包/合成集成后同样验证。
+- [x] **Playwright-baseline：** 现有输入、Hotbar、地图、命令、持久化等行为无回归，父合同最终关联Harness单列。
+- [x] **Playwright-change / Midscene：** 窄屏与 reduced-motion 的布局/信息保持，由父change最终原始帧验证。
+- [x] **Static：** 格式、lint、路径、Svelte/TypeScript 与 world coverage 不退化。
+- [x] **Build：** 生产构建成功，原创资产打包可用，记录资产体积。
 
 ## 任务与当前状态
 
 1. [已完成] 读取原始概念图、已批准路线、Retained UI 源码与父合同。
 2. [已完成] 实现前建立本合同与可观察的视觉 RED。
 3. [已完成] 原创框体与 SVG 标志、语义 tokens、九宫格框体/槽位与状态样式已接入。
-4. [进行中] 主菜单/HUD/地图/命令两条 Midscene 通过；700px 减少动态与 shell Playwright 已通过，等待生存背包/合成合入。
+4. [已完成] 主菜单/HUD/地图/命令、背包/合成与700px减少动态均通过实际浏览器与视觉语义检查。
 
 ## 交付快照
 
@@ -63,3 +63,11 @@ Retained UI 已建立单 Svelte root 与分片 UiBridge，但原样式仍为绿�
 2026-09-05 06:44 实际林地镜头中，16像素单元的固定随机孔洞呈现明显棋盘格，与轻手绘材质语言不一致。只替换叶片 alpha 的程序轮廓为平滑周期形状，保留原彩色 atlas、cutout 管线、世界数据和阴影采样路径。`tests/client/leaf-opacity.test.ts` 先 RED：周期边界一致、实际空洞/实体比例有界，像素0–255；随后真实林地与高级阴影专项、Midscene复验。不得把叶子改成不透明实体以隐藏问题。
 
 叶片轮廓单测1项通过；06:49完整Static/Build通过；06:49高级光影3项与标签1项浏览器通过23.9秒；06:50 Midscene明确验证连续镂空及保留天空空隙，通过23.52秒。
+
+### 最终交付快照
+
+初版生产提交 `f6517a1`，叶片轮廓修订 `aff5086`，现已与Change8/9、Shell、光影和音频整体集成。原始主菜单/地图/命令两条语义已通过，08:01 Shell两任务再通过42.59秒，08:02背包图示、移动、合成材料与快捷槽语义通过43.97秒（报告 `survival-presentation-2026-09-05_08-02-16-b67796ce.html`）。
+
+父 `presentation-delivery.spec.ts` 实际启用700px与减少动态，设置/指南/Low午夜原始画面用例通过4.2秒；相应Midscene三条断言通过5.35秒，报告 `presentation-delivery-2026-09-05_08-03-54-aa7a21b1.html`。08:04最终昼暮夜×林河营地Midscene两任务通过89.07秒，报告 `world-reference-matrix-2026-09-05_08-04-35-309b4ccb.html`；全部原始画面另存父交付预览，不用概念图替代实际游戏。
+
+当前Static234 passed/4 skipped、world95.03%、Svelte0/0及独立Build通过。原创框体PNG2,119,538字节，随公开静态资源缓存；无需网络字体或第三方美术服务才能启动。此前“尚未交付”段落保留为初版历史状态，本节为当前准出记录。

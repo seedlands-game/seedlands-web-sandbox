@@ -1,6 +1,6 @@
 # 游戏外壳、暂停、设置与世界生命周期
 
-**状态：Active；父 goal 授权自主 SDD。**
+**状态：Delivered；父 goal 授权自主 SDD，08:04 完成最终组合复验。**
 
 ## 背景与目标
 
@@ -36,18 +36,22 @@
 
 ## 验收与证据
 
-- [ ] **Vitest：** Shell 异步与错误状态、重复请求和暂停规则通过。
-- [ ] **Playwright-change：** 新建→游玩→暂停→设置→保存退出→继续→刷新路径通过，10 次世界会话后资源计数有界。
-- [ ] **Playwright-change：** 暂停时世界不前进、后台无积压，返回可继续；保存失败不清空运行世界。
-- [ ] **Midscene：** 主菜单/暂停/设置/指南具有统一美术语言，状态与操作清楚。
-- [ ] **Static / Build / Playwright-baseline：** 静态、构建与现有旅程通过。
+- [x] **Vitest：** Shell 异步与错误状态、重复请求和暂停规则通过。
+- [x] **Playwright-change：** 新建→游玩→暂停→设置→保存退出→继续→刷新路径通过，10 次世界会话后资源计数有界。
+- [x] **Vitest / Playwright-change：** 暂停时世界不前进、返回可继续；保存失败不清空运行世界由可注入持久化失败的Shell单测证明，不能将其写成真实磁盘故障E2E。
+- [x] **Midscene：** 主菜单/暂停/设置/指南具有统一美术语言，状态与操作清楚。
+- [x] **Static / Build / Playwright-baseline：** 静态、构建与现有旅程通过，父合同再执行最终关联Harness。
 
 ## 任务与当前状态
 
 1. [已完成] 合同与可执行用例设计。
 2. [已完成] Shell controller 模块缺失 RED（2026-09-05 04:51），随后 4 项 Vitest GREEN。
-3. [进行中] Svelte 与生命周期已连接；两项 Playwright-change 于 04:56 通过，继续视觉与综合验证。
+3. [已完成] Svelte 与生命周期连接；四项当前Shell浏览器用例、视觉和组合回归通过。
 
 ## 交付快照
 
-尚未交付。已实现主菜单、继续、暂停、设置、指南与保存退出；04:51 模块缺失 RED，04:51:42 纯逻辑 4 项 GREEN；首个浏览器 RED 是设置按钮不存在，之后 2 项 Playwright-change 通过（4.5 秒）。05:00 当前组合树 Static 与 Build 通过，153 项单测，world 行覆盖率 94.86%，Svelte 无错误/警告。10 次重建、完整生存集成和视觉证据仍待完成。
+已实现主菜单、继续、暂停、设置、指南与保存退出；04:51 模块缺失 RED，04:51:42 纯逻辑 4 项 GREEN；首个浏览器 RED 是设置按钮不存在，之后 2 项 Playwright-change 通过（4.5 秒）。
+
+最终组合含生存、三类自主实体和高级光影。07:59 `pnpm exec playwright test changes/2026-09-05-game-shell/e2e changes/2026-09-05-world-audio/e2e/world-audio.spec.ts` 共5项通过24.7秒，其中Shell4项涵盖10次存退、700px减少动态、设置持久化和背包鼠标所有权；退出世界后最多一个全局音乐时钟Worker。08:01 Midscene两条旅程通过42.59秒，报告 `game-shell-2026-09-05_08-01-00-2de66dde.html`。当前Static234 passed/4 skipped、world95.03%、Svelte0/0及独立Build通过。09项长期基线最近组合通过见父记录，最后关联Harness单列；不将本项10次会话测试替代60分钟稳定性。
+
+保存失败保留世界、错误可重试由Shell controller单测直接注入失败验证；没有破坏真实用户磁盘来制造故障。后续死亡鼠标恢复见 `2026-09-05-death-input-recovery`，该修复保留本change输入隔离。
