@@ -4,6 +4,7 @@ import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol
 import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool';
 
 type MeshWorkerPort = {
+  onerror?: ((failure: { taskId: number; error: Error }) => void) | null;
   onmessage: ((event: MessageEvent<unknown>) => void) | null;
   postMessage(message: Record<string, unknown>, transfer: Transferable[]): void;
   terminate(): void;
@@ -53,10 +54,15 @@ export class BrowserComputeRuntime {
       createWorker: options.createWorker ?? workerFactory,
       onResult: (task, result) => this.receive(task, result),
       onFailure: (task, error) => this.fail(task, error),
-      onDrop: (taskId) => {
+      onDrop: (taskId, reason) => {
+        const error = new Error(`Compute task ended: ${reason}`);
+        const meshId = this.originalMeshTaskIds.get(taskId);
         this.originalMeshTaskIds.delete(taskId);
+        if (meshId !== undefined) this.meshFailure(meshId, error);
+        const workId = this.fluidWorkIds.get(taskId);
         this.fluidWorkIds.delete(taskId);
-        this.spawnRequests.get(taskId)?.reject(new Error('Safe spawn compute task was replaced.'));
+        if (workId) this.options.onFluidFailure?.(workId, error);
+        this.spawnRequests.get(taskId)?.reject(error);
         this.spawnRequests.delete(taskId);
       },
       onPoolFailure: options.onPoolFailure,
@@ -124,6 +130,7 @@ export class BrowserComputeRuntime {
     this.disposed = true;
     this.pool.dispose();
     this.meshPort.onmessage = null;
+    this.meshPort.onerror = null;
     this.originalMeshTaskIds.clear();
     this.fluidWorkIds.clear();
     this.spawnRequests.forEach(({ reject }) => reject(new Error('Compute runtime was disposed.')));
@@ -133,6 +140,11 @@ export class BrowserComputeRuntime {
   private enqueueMesh(message: Record<string, unknown>, transfer: Transferable[]): void {
     if (this.disposed) return;
     const originalTaskId = message.taskId;
+    if (message.kind === 'cancel-mesh') {
+      for (const [taskId, original] of this.originalMeshTaskIds)
+        if (original === originalTaskId) this.pool.cancel(taskId);
+      return;
+    }
     const key = message.chunkKey;
     const revision = `${String(message.chunkRevision)}:${String(message.haloRevision)}`;
     if (!Number.isSafeInteger(originalTaskId) || typeof key !== 'string')
@@ -146,7 +158,8 @@ export class BrowserComputeRuntime {
         taskId,
         lane: 'general',
         category: message.kind === 'generate-mesh' ? 'chunk-generation' : 'mesh',
-        priority: 'streaming',
+        priority:
+          message.priority === 'interactive' || message.priority === 'interactive-fluid' ? 'interaction' : 'streaming',
         key,
         revision,
         dependencies: [],
@@ -160,7 +173,7 @@ export class BrowserComputeRuntime {
     );
     if (result.status === 'queued' || result.status === 'merged') return;
     this.originalMeshTaskIds.delete(taskId);
-    this.options.onMeshFailure?.(originalTaskId as number, new Error(`Mesh compute enqueue failed: ${result.status}`));
+    this.meshFailure(originalTaskId as number, new Error(`Mesh compute enqueue failed: ${result.status}`));
   }
 
   private receive(task: ComputeTask, result: unknown): void {
@@ -184,6 +197,11 @@ export class BrowserComputeRuntime {
     this.meshPort.onmessage?.({ data: { ...(result as object), taskId: originalTaskId } } as MessageEvent<unknown>);
   }
 
+  private meshFailure(taskId: number, error: Error) {
+    this.meshPort.onerror?.({ taskId, error });
+    this.options.onMeshFailure?.(taskId, error);
+  }
+
   private fail(task: ComputeTask, error: Error): void {
     const spawn = this.spawnRequests.get(task.taskId);
     if (spawn) {
@@ -199,6 +217,6 @@ export class BrowserComputeRuntime {
     }
     const originalTaskId = this.originalMeshTaskIds.get(task.taskId);
     this.originalMeshTaskIds.delete(task.taskId);
-    if (originalTaskId !== undefined) this.options.onMeshFailure?.(originalTaskId, error);
+    if (originalTaskId !== undefined) this.meshFailure(originalTaskId, error);
   }
 }

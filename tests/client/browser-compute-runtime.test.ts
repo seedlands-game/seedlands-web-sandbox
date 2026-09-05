@@ -103,4 +103,42 @@ describe('BrowserComputeRuntime', () => {
     } as MessageEvent<unknown>);
     expect(mesh).toHaveBeenCalledWith({ data: expect.objectContaining({ taskId: 7 }) });
   });
+  it('向旧Mesh端口转发失败与取消回执并保留交互优先级', () => {
+    const workers: FakeWorker[] = [];
+    const runtime = new BrowserComputeRuntime({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      createWorker: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      onFluidCandidate: () => undefined,
+    });
+    const failure = vi.fn();
+    runtime.meshPort.onerror = failure;
+    runtime.meshPort.postMessage({ kind: 'mesh', taskId: 7, chunkKey: '0,0,0', priority: 'interactive-fluid' }, []);
+    const task = (workers[1].posts[0] as { task: { taskId: number; priority: string } }).task;
+    expect(task.priority).toBe('interaction');
+    workers[1].onmessage?.({
+      data: {
+        kind: 'compute-result',
+        protocolVersion: 1,
+        epoch: 'world:1',
+        taskId: task.taskId,
+        ok: false,
+        error: 'bad mesh',
+      },
+    } as MessageEvent<unknown>);
+    expect(failure).toHaveBeenCalledWith({ taskId: 7, error: expect.any(Error) });
+    runtime.meshPort.postMessage({ kind: 'mesh', taskId: 8, chunkKey: '0,0,0' }, []);
+    const next = (workers[1].posts[1] as { task: { taskId: number } }).task;
+    runtime.meshPort.postMessage({ kind: 'cancel-mesh', taskId: 8 }, []);
+    expect(workers[1].posts.at(-1)).toMatchObject({ kind: 'cancel-compute-task', taskId: next.taskId });
+    workers[1].onmessage?.({
+      data: { kind: 'compute-result', protocolVersion: 1, epoch: 'world:1', taskId: next.taskId, ok: true, result: {} },
+    } as MessageEvent<unknown>);
+    expect(failure).toHaveBeenCalledWith({ taskId: 8, error: expect.any(Error) });
+    runtime.dispose();
+  });
 });

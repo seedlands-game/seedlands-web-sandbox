@@ -5,6 +5,7 @@ import { MeshTaskScheduler, type MeshWorkerPort, type WorkerResult } from '../..
 
 class FakeWorker implements MeshWorkerPort {
   onmessage: ((event: MessageEvent<WorkerResult>) => void) | null = null;
+  onerror: MeshWorkerPort['onerror'] = null;
   readonly posts: Array<Record<string, unknown>> = [];
   terminated = false;
 
@@ -36,13 +37,14 @@ const resultFor = (post: Record<string, unknown>): WorkerResult => ({
   meshes: [],
 });
 
-const createScheduler = (worker: FakeWorker, accepted: WorkerResult[]) =>
+const createScheduler = (worker: FakeWorker, accepted: WorkerResult[], releasePrepared = vi.fn()) =>
   new MeshTaskScheduler({
     worker,
     profile: PERFORMANCE_PROFILES.benchmark,
     telemetry: new PerformanceTelemetry({ now: () => 1 }),
     variant: 'main-snapshot',
     source: {
+      releasePrepared,
       seed: 7,
       generatorVersion: 3,
       prepareMainSnapshot: () => ({
@@ -166,5 +168,50 @@ describe('MeshTaskScheduler', () => {
 
     worker.emit(resultFor(worker.posts[2]!));
     expect(worker.posts.map((post) => post.chunkKey)).toContain('7,0,7');
+  });
+  it('失败回执释放执行槽，迟到重复结果不能占用或释放下一任务的槽', () => {
+    const worker = new FakeWorker();
+    const accepted: WorkerResult[] = [];
+    const scheduler = createScheduler(worker, accepted);
+    scheduler.request(1, 0, 0);
+    scheduler.request(2, 0, 0);
+    scheduler.request(3, 0, 0);
+    const failed = worker.posts[0]!;
+    worker.onerror?.({ taskId: failed.taskId as number, error: new Error('worker failed') });
+    expect(worker.posts).toHaveLength(2);
+    worker.emit(resultFor(failed));
+    expect(worker.posts).toHaveLength(2);
+    expect(scheduler.meshingQueueSize).toBe(1);
+    worker.emit(resultFor(worker.posts[1]!));
+    expect(worker.posts).toHaveLength(3);
+  });
+
+  it('持续流体重网格不能让旧streaming请求永久排队', () => {
+    const worker = new FakeWorker();
+    const scheduler = createScheduler(worker, []);
+    scheduler.request(0, 0, 0);
+    scheduler.request(99, 0, 0);
+    for (let index = 1; index < 40; index += 1) {
+      scheduler.request(index, 0, 0, { priority: 'interactive-fluid' });
+      worker.emit(resultFor(worker.posts.at(-1)!));
+      if (worker.posts.some((post) => post.chunkKey === '99,0,0')) break;
+    }
+    expect(worker.posts.some((post) => post.chunkKey === '99,0,0')).toBe(true);
+  });
+  it('成功失败关闭都只释放一次准备租约，重复回执不重复释放', () => {
+    const worker = new FakeWorker();
+    const release = vi.fn();
+    const scheduler = createScheduler(worker, [], release);
+    scheduler.request(1, 0, 0);
+    const first = worker.posts[0]!;
+    worker.emit(resultFor(first));
+    worker.emit(resultFor(first));
+    expect(release).toHaveBeenCalledTimes(1);
+    scheduler.request(2, 0, 0);
+    worker.onerror?.({ taskId: worker.posts[1]!.taskId as number, error: new Error('failed') });
+    expect(release).toHaveBeenCalledTimes(2);
+    scheduler.request(3, 0, 0);
+    scheduler.dispose();
+    expect(release).toHaveBeenCalledTimes(3);
   });
 });
