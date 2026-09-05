@@ -149,6 +149,8 @@ describe('ComputeWorkerPool', () => {
       maxQueued: 1,
       maxQueuedBytes: 160,
       completedTasks: 2,
+      submittedTasks: 3,
+      submittedBytes: 560,
       workerTaskDuration: {
         fluid: { count: 1, capacity: 256, samplesMs: [3.25] },
         general: { count: 1, capacity: 256, samplesMs: [7.5] },

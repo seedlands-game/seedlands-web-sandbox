@@ -148,6 +148,8 @@ const unavailableCompute = (): HarnessSnapshot['compute'] => ({
   staleResults: 0,
   failedTasks: 0,
   completedTasks: 0,
+  submittedTasks: 0,
+  submittedBytes: 0,
   maxQueued: 0,
   maxQueuedBytes: 0,
   workerTaskDuration: {

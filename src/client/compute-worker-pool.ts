@@ -62,6 +62,8 @@ export type ComputePoolDiagnostics = Readonly<{
   staleResults: number;
   failedTasks: number;
   completedTasks: number;
+  submittedTasks: number;
+  submittedBytes: number;
   maxQueued: number;
   maxQueuedBytes: number;
   workerTaskDuration: Readonly<Record<ComputeLane, CostSampleWindow>>;
@@ -91,6 +93,8 @@ export class ComputeWorkerPool {
   private staleResults = 0;
   private failedTasks = 0;
   private completedTasks = 0;
+  private submittedTasks = 0;
+  private submittedBytes = 0;
   private maxQueued = 0;
   private maxQueuedBytes = 0;
   private readonly workerTaskDuration: Record<ComputeLane, BoundedCostSamples> = {
@@ -112,6 +116,8 @@ export class ComputeWorkerPool {
     if (this.disposed) return { status: 'rejected', reason: 'invalid-task' };
     const result = this.queue.enqueue(task);
     if (result.status === 'queued' || result.status === 'merged') {
+      this.submittedTasks += 1;
+      this.submittedBytes += task.estimatedBytes;
       if (result.status === 'merged') {
         this.transfers.delete(result.replacedTaskId);
         this.options.onDrop?.(result.replacedTaskId, 'merged');
@@ -174,6 +180,8 @@ export class ComputeWorkerPool {
       staleResults: this.staleResults,
       failedTasks: this.failedTasks,
       completedTasks: this.completedTasks,
+      submittedTasks: this.submittedTasks,
+      submittedBytes: this.submittedBytes,
       maxQueued: this.maxQueued,
       maxQueuedBytes: this.maxQueuedBytes,
       workerTaskDuration: {

@@ -3,6 +3,13 @@ import type { HarnessApi } from '../../../src/app/game-harness';
 import { startHarnessWorld } from '../../../tests/e2e/support/harness';
 
 const TARGET_FLUID_SAMPLES = 20;
+const SCENARIO_SOURCE = {
+  seed: 'authority-controlled-load',
+  actorSpawns: 16,
+  worldItemSpawns: 64,
+  frontierSourceCells: 1_024,
+  targetFluidSamples: TARGET_FLUID_SAMPLES,
+} as const;
 type LoadFrame = {
   at: number;
   debtMs: number;
@@ -57,13 +64,14 @@ async function establishAuthorityLoad(page: Page) {
     const harness = window.__seedlandsHarness as unknown as HarnessApi;
     await harness.fillWorld({ from: [-20, 49, -20], to: [52, 56, 20], voxel: 0 });
     await harness.fillWorld({ from: [-20, 48, -20], to: [52, 48, 20], voxel: 3 });
-    await harness.movePlayerTo(0, 49, 0);
+    // Harness 坐标是相机/眼睛位置；50.6 对应脚底 y=49，避免嵌入 y=48 的地板。
+    await harness.movePlayerTo(0, 50.6, 0);
     for (let index = 0; index < 16; index += 1) {
       const result = await harness.executeGameplayCommand({
         type: 'spawn-actor',
         id: `load-actor-${index}`,
         archetype: (['grazer', 'night-stalker', 'settler'] as const)[index % 3]!,
-        position: [-7 + (index % 8) * 2, 49, -7 + Math.floor(index / 8) * 3],
+        position: [-7 + (index % 8) * 2, 49, 4 + Math.floor(index / 8) * 3],
       });
       if (!result.success) throw new Error(result.error.message);
     }
@@ -72,7 +80,7 @@ async function establishAuthorityLoad(page: Page) {
         type: 'spawn-world-item',
         itemId: 'stone-block',
         count: 1,
-        position: [-15 + (index % 8), 49.4, -12 + Math.floor(index / 8)],
+        position: [-15 + (index % 8), 49.4, 4 + Math.floor(index / 8)],
       });
       if (!result.success) throw new Error(result.error.message);
     }
@@ -88,13 +96,14 @@ async function establishAuthorityLoad(page: Page) {
 
 async function sampleTargetFluid(page: Page, index: number) {
   const x = -18 + (index % 10) * 4;
-  const z = 10 + Math.floor(index / 10) * 4;
+  const z = -10 - Math.floor(index / 10) * 4;
   await page.evaluate(
     async ({ x, z }) => {
       const harness = window.__seedlandsHarness as unknown as HarnessApi;
       await harness.fillWorld({ from: [x - 1, 49, z - 1], to: [x + 1, 49, z + 1], voxel: 3 });
       await harness.setVoxelAt(x, 49, z, 0);
       await harness.setVoxelAt(x + 1, 49, z, 0);
+      harness.setView((Math.atan2(-x, -z) * 180) / Math.PI, -8);
     },
     { x, z },
   );
@@ -116,12 +125,16 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
   const context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
   try {
-    await startHarnessWorld(page, `authority-controlled-load-${generalWorkers}`, `&generalWorkers=${generalWorkers}`);
+    await startHarnessWorld(page, SCENARIO_SOURCE.seed, `&generalWorkers=${generalWorkers}`);
     await establishAuthorityLoad(page);
     await expect
       .poll(async () => (await snapshot(page)).authority.fluid.pendingCellCount, { timeout: 10_000 })
       .toBeGreaterThanOrEqual(1_024);
     const loaded = await snapshot(page);
+    await testInfo.attach(`authority-load-setup-general-${generalWorkers}`, {
+      body: JSON.stringify(loaded, null, 2),
+      contentType: 'application/json',
+    });
     expect(loaded.gameplay.activeActorCount).toBeGreaterThanOrEqual(16);
     expect(loaded.gameplay.worldItemCount).toBeGreaterThanOrEqual(64);
     expect(loaded.authority.bodies.actors).toBeGreaterThanOrEqual(16);
@@ -160,28 +173,15 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
           : { status: 'unavailable' as const },
       };
     });
-    expect(environment.viewport).toEqual([1920, 1080]);
-    expect(environment.dpr).toBe(2);
-    expect(environment.internal[0]).toBeGreaterThanOrEqual(1920 * 2 * 0.88 - 2);
-    expect(environment.internal[1]).toBeGreaterThanOrEqual(1080 * 2 * 0.88 - 2);
-    expect(final.quality).toBe('medium');
-    expect(final.compute.workerCount).toBe(1 + generalWorkers);
-    expect(final.compute.maxQueued).toBeGreaterThan(0);
-    expect(final.compute.maxQueuedBytes).toBeGreaterThan(0);
-    expect(final.compute.workerTaskDuration.fluid.count).toBeGreaterThan(0);
-    expect(final.compute.workerTaskDuration.general.count).toBeGreaterThan(0);
-    expect(final.fluidFeedback.count).toBe(TARGET_FLUID_SAMPLES);
-    expect(final.fluidFeedback.p95Ms).toBeLessThanOrEqual(100);
-    expect(final.performance.completedChunkTraces).toBeGreaterThan(0);
-    expect(final.performance.visibleAfterPostrender).toBe(true);
-    expect(Math.max(...frames.map((frame) => frame.generationQueue + frame.meshingQueue))).toBeGreaterThan(0);
     const physicsCosts = final.authority.physicsCost?.samplesMs ?? [];
     const result = {
       sourceSha: process.env.SEEDLANDS_E2E_SOURCE_SHA ?? 'UNSPECIFIED',
+      scenarioSource: SCENARIO_SOURCE,
       browser: browser.version(),
       generalWorkers,
       totalComputeSlots: 1 + generalWorkers,
       scenarioId,
+      quality: final.quality,
       environment,
       load: {
         gameplay: final.gameplay,
@@ -199,6 +199,7 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
       },
       fluidFeedback: final.fluidFeedback,
       meshVisible: final.performance.chunkVisible,
+      meshVisibleAfterPostrender: final.performance.visibleAfterPostrender,
       compute: final.compute,
       observedQueuePeaks: {
         generation: Math.max(0, ...frames.map((frame) => frame.generationQueue)),
@@ -227,4 +228,24 @@ test('同机受控负载比较二槽与三槽计算池，不预设扩池收益',
     body: JSON.stringify({ twoSlots, threeSlots }, null, 2),
     contentType: 'application/json',
   });
+  expect(threeSlots.scenarioSource).toEqual(twoSlots.scenarioSource);
+  expect(threeSlots.compute.submittedTasks).toBe(twoSlots.compute.submittedTasks);
+  expect(threeSlots.compute.submittedBytes).toBe(twoSlots.compute.submittedBytes);
+  for (const result of [twoSlots, threeSlots]) {
+    expect(result.environment.viewport).toEqual([1920, 1080]);
+    expect(result.environment.dpr).toBe(2);
+    expect(result.environment.internal[0]).toBeGreaterThanOrEqual(1920 * 2 * 0.88 - 2);
+    expect(result.environment.internal[1]).toBeGreaterThanOrEqual(1080 * 2 * 0.88 - 2);
+    expect(result.quality).toBe('medium');
+    expect(result.compute.workerCount).toBe(result.totalComputeSlots);
+    expect(result.compute.maxQueued).toBeGreaterThan(0);
+    expect(result.compute.maxQueuedBytes).toBeGreaterThan(0);
+    expect(result.compute.workerTaskDuration.fluid.count).toBeGreaterThan(0);
+    expect(result.compute.workerTaskDuration.general.count).toBeGreaterThan(0);
+    expect(result.fluidFeedback.count).toBe(TARGET_FLUID_SAMPLES);
+    expect(result.fluidFeedback.p95Ms).toBeLessThanOrEqual(100);
+    expect(result.meshVisible.count).toBeGreaterThan(0);
+    expect(result.meshVisibleAfterPostrender).toBe(true);
+    expect(result.observedQueuePeaks.generation + result.observedQueuePeaks.meshing).toBeGreaterThan(0);
+  }
 });
