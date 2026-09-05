@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { lockPointer, snapshot, startHarnessWorld, waitForSnapshot } from '../../../tests/e2e/support/harness';
 
-type IndependentSnapshot = NonNullable<Awaited<ReturnType<typeof snapshot>>> & {
+type IndependentSnapshot = Omit<NonNullable<Awaited<ReturnType<typeof snapshot>>>, 'runtime'> & {
   runtime: 'authority-worker';
   workers: {
     total: number;
@@ -20,7 +20,9 @@ type IndependentHarness = {
 };
 
 const independentSnapshot = (page: Page) =>
-  page.evaluate(() => (window.__seedlandsHarness as typeof window.__seedlandsHarness & IndependentHarness).snapshot());
+  page.evaluate(() =>
+    (window.__seedlandsHarness as typeof window.__seedlandsHarness & IndependentHarness).snapshot(),
+  ) as unknown as Promise<IndependentSnapshot>;
 
 test('生产会话只创建一个 Authority、一个 Logic、一个 Persistence 和不超过三个计算 Worker', async ({ page }) => {
   await startHarnessWorld(page, 'authority-worker-topology');

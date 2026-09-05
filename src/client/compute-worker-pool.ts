@@ -169,7 +169,8 @@ export class ComputeWorkerPool {
   }
 
   private createSlots(): void {
-    const lanes: ComputeLane[] = ['fluid', ...Array.from({ length: this.options.generalWorkerCount }, () => 'general')];
+    const lanes: ComputeLane[] = ['fluid'];
+    for (let index = 0; index < this.options.generalWorkerCount; index += 1) lanes.push('general');
     this.slots = lanes.map((lane, index) => ({ lane, index, worker: null, task: null, restartAttempts: 0 }));
     try {
       this.slots.forEach((slot) => this.attachWorker(slot));

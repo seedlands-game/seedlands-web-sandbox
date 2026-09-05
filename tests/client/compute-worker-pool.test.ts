@@ -132,7 +132,7 @@ describe('ComputeWorkerPool', () => {
       () =>
         new ComputeWorkerPool({
           epoch: 'world:1',
-          generalWorkerCount: 3,
+          generalWorkerCount: 3 as 1,
           maxTasks: 1,
           maxBytes: 1,
           createWorker: create,
