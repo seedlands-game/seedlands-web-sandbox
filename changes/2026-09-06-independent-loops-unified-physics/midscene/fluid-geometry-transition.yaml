@@ -1,6 +1,6 @@
 # 运行时由主线指定当前预览地址；本文件只定义本 change 的视觉观察项。
 web:
-  url: http://127.0.0.1:4288/?harness=1
+  url: http://127.0.0.1:4280/?harness=1
   viewportWidth: 1280
   viewportHeight: 720
 
@@ -15,17 +15,18 @@ tasks:
           (async () => {
             var h = window.__seedlandsHarness;
             h.setTimePaused(true);
-            await h.fillWorld({ from: [-1, 56, -1], to: [5, 60, 1], voxel: 0 });
-            await h.fillWorld({ from: [-1, 56, -1], to: [5, 56, 1], voxel: 3 });
+            await h.fillWorld({ from: [-3, 57, -3], to: [7, 62, 7], voxel: 0 });
+            await h.fillWorld({ from: [-3, 56, -3], to: [7, 56, 7], voxel: 3 });
             await h.fillWorld({ from: [-1, 57, -1], to: [5, 57, -1], voxel: 3 });
             await h.fillWorld({ from: [-1, 57, 1], to: [5, 57, 1], voxel: 3 });
             await h.setVoxelAt(-1, 57, 0, 3);
             await h.setVoxelAt(5, 57, 0, 3);
             await h.setVoxelAt(1, 57, 0, 3);
             await h.setVoxelAt(0, 57, 0, 8);
-            await h.movePlayerTo(2.5, 59.6, 5.5);
-            h.setView(0, -24);
-            for (var settle = 0; settle < 120; settle += 1) {
+            await h.fillWorld({ from: [1, 57, 4], to: [3, 58, 6], voxel: 3 });
+            await h.movePlayerTo(2.5, 60.6, 5.5);
+            h.setView(0, -30);
+            for (var settle = 0; settle < 1200; settle += 1) {
               var state = h.snapshot();
               if (
                 state.generationQueue === 0 &&
