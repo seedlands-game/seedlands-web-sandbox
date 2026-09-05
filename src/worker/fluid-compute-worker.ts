@@ -1,13 +1,8 @@
 /// <reference lib="webworker" />
 
 import { PROTOCOL_VERSION } from '../runtime/session-protocol';
+import { computeFluidCandidate, type FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
 import type { ComputeWorkerRequest } from './compute-worker-protocol';
-import {
-  ComputeTaskCancelled,
-  runWorldComputeTask,
-  worldComputeTransfers,
-  type WorldComputePayload,
-} from './world-compute-task';
 
 const scope = self as DedicatedWorkerGlobalScope;
 const cancelled = new Set<number>();
@@ -20,30 +15,32 @@ scope.onmessage = (event: MessageEvent<ComputeWorkerRequest>) => {
     return;
   }
   const task = message.task;
-  void runWorldComputeTask(task.payload as WorldComputePayload, () => cancelled.has(task.taskId), yieldTurn)
-    .then((result) => {
-      if (cancelled.delete(task.taskId)) return;
-      scope.postMessage(
-        {
-          kind: 'compute-result',
-          protocolVersion: PROTOCOL_VERSION,
-          epoch: task.epoch,
-          taskId: task.taskId,
-          ok: true,
-          result,
-        },
-        worldComputeTransfers(result),
-      );
+  void yieldTurn()
+    .then(() => {
+      if (cancelled.has(task.taskId)) throw new Error('cancelled');
+      return computeFluidCandidate(task.payload as FluidAuthoritySnapshot);
+    })
+    .then(async (result) => {
+      await yieldTurn();
+      if (cancelled.delete(task.taskId)) throw new Error('cancelled');
+      scope.postMessage({
+        kind: 'compute-result',
+        protocolVersion: PROTOCOL_VERSION,
+        epoch: task.epoch,
+        taskId: task.taskId,
+        ok: true,
+        result,
+      });
     })
     .catch((error) => {
-      const wasCancelled = error instanceof ComputeTaskCancelled || cancelled.delete(task.taskId);
+      cancelled.delete(task.taskId);
       scope.postMessage({
         kind: 'compute-result',
         protocolVersion: PROTOCOL_VERSION,
         epoch: task.epoch,
         taskId: task.taskId,
         ok: false,
-        error: wasCancelled ? 'cancelled' : error instanceof Error ? error.message : String(error),
+        error: error instanceof Error ? error.message : String(error),
       });
     });
 };
