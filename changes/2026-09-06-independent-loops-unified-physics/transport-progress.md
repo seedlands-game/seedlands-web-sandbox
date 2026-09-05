@@ -104,3 +104,7 @@
 实现后，碰撞世界可按快照涉及的 Chunk key 直接读取已加载 canonical revision；传送事务回执携带同一 Authority 时刻的完整快照，并复用普通快照的顺序门。定向 Vitest 共 5 个文件、37 项通过，受影响 ESLint、源码 TypeScript、测试 TypeScript 与 `git diff --check` 通过。60Hz/50ms、120Hz/150ms、revision 变化和岸边跳跃的真实浏览器复验仍由主线执行，因此本阶段只记录已证明的时序修复，不把浏览器准出标为通过。
 
 A8 浏览器可靠暂停等待不能以 UI 对话框出现代替 Authority 确认；Harness 的 Authority 投影补充权威快照 `paused`，需求用例可先等待它变为 `true`，再检查物理 tick、游戏时间、流体提交和输入释放均冻结。
+
+浏览器频率矩阵还暴露一个与延迟强相关的诊断偏差：`PlayerController.isColliding` 使用私有 `1e-7` 阈值，而统一物理解算使用 `COLLISION_EPSILON=1e-6`。测试先锁定规则：静止接触和小于统一 epsilon 的数值回退不能报告重叠，超过 epsilon 的真实穿入必须报告重叠。当前实现对半个统一 epsilon 的回退预期 RED。
+
+RED 实测在半个统一 epsilon 的回退处把 `false` 报成 `true`。实现删除独立阈值并直接复用物理核心 `overlapDepth`；诊断仍读取 prediction 的双精度 physical body 或 Authority body，不从 PlayCanvas 单精度渲染矩阵反推物理。相关 3 个文件、28 项 Vitest 与受影响 ESLint、源码及测试 TypeScript、`git diff --check` 通过；最终浏览器频率矩阵仍待主线复验。
