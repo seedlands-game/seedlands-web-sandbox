@@ -65,7 +65,7 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
         .recent.length,
   );
 
-  await page.evaluate(() => window.__seedlandsHarness!.setVoxelAt(3, 58, 1, 3));
+  await page.evaluate(() => window.__seedlandsHarness!.setVoxelAt(6, 57, 6, 3));
   await waitForSnapshot(
     page,
     (state) => state.meshingQueue === 0 && state.deferredRemeshes === 0 && state.performance.uploadQueueDepth === 0,

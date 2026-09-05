@@ -70,3 +70,5 @@
 `efffcb5` 的真实 pageerror 为 `Cannot read properties of null (reading prepareRenderState)`，栈为 `clearWaterTransition → refreshCategoryInstances → RenderComponent.meshInstances setter`。所安装 PlayCanvas 的 setter 会先 `destroyMeshInstances()`，随后旧代码把仍被引用的已销毁静态实例重新交回 setter；首个过渡完成即损坏静态水面，后续 prepareReplacement 在清理旧过渡时再次抛错，尚未执行 scene-attached。
 
 先在 adapter 单元测试加入 RenderComponent 所有权不可二次转交的 RED；修复保持静态 category 实例归 RenderComponent 独占，临时 Morph 则由过渡资源独占，在 Water Layer 单独加入/移除，不再重设静态 meshInstances。完成、取消、卸载分别验证只清理临时资源，实际浏览器必须无 pageerror 且后继动画达到完成。
+
+`09fd411` 独立归档完整构建通过，4285 返回的 `index-CHnJvUL-.js` 与该产物逐字节相同。前台真实 A6 单项 17.7 秒通过：静水重网格不启动过渡、单几何的中间帧、旧过渡取消、后继完成、有界记录和零 pageerror 均通过。原始截图经主任务查看，完成后静态水面真实可见，修复前同位置则水面消失。原始证据 `/tmp/seedlands-09fd411-fluid-visual.jsonlog` 与 `/tmp/seedlands-fluid-09f/`。这不替代最终整合后的视觉语义、负载性能和全套验收。
