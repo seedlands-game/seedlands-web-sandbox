@@ -28,6 +28,7 @@ import { advanceAuthoritySession } from './authority-session-advance';
 import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnostics';
 import { AuthorityMutationPreparation, unavailableWorldCommit } from './authority-mutation-preparation';
 import { applyAuthorityPlayerAction } from './authority-player-action';
+import { queueBodyRecoveriesAfterCommit } from './authority-geometry-recovery';
 
 export type * from './authority-runtime-types';
 
@@ -109,7 +110,7 @@ export class AuthorityRuntime {
       updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) => server.updateEntity(id, update),
       advanceGameplayRules: (seconds: number) => {
         const result = server.advanceGameplayRules(seconds);
-        this.pendingCommits.push(...result.commits);
+        result.commits.forEach((commit) => this.recordWorldCommit(commit));
         return result;
       },
       advanceWorldClock: (hours: number) => server.advanceClock(hours),
@@ -366,7 +367,7 @@ export class AuthorityRuntime {
       return unavailableWorldCommit(this.server.worldRevision, edits.length);
     const result = this.server.editBatch({ actorId, edits });
     if (result.committed) {
-      this.pendingCommits.push(result);
+      this.recordWorldCommit(result);
       this.session.commitExternalState(false);
     }
     return result;
@@ -382,7 +383,7 @@ export class AuthorityRuntime {
       return { result: { success: false, reason: 'chunk-unavailable' }, gameplay: this.view(), commits: [] };
     const before = this.serverStateVersion();
     const result = applyAuthorityPlayerAction(this.server, this.playerId, action, (commit) =>
-      this.pendingCommits.push(commit),
+      this.recordWorldCommit(commit),
     );
     this.commitIfServerChanged(before);
     return { result, gameplay: this.view(), commits: this.takeCommits() };
@@ -391,7 +392,7 @@ export class AuthorityRuntime {
   commitFluidCandidate(candidate: FluidCandidate) {
     const result = this.server.commitFluidCandidate(candidate);
     if (result.accepted && result.commit?.committed) {
-      this.pendingCommits.push(result.commit);
+      this.recordWorldCommit(result.commit);
       this.session.commitExternalState(false);
     }
     return result;
@@ -408,6 +409,7 @@ export class AuthorityRuntime {
       prepareWorld: (commandSource, preparedCommand, buffer) =>
         this.mutationPreparation.prepareCommand(commandSource, preparedCommand, buffer),
     }).execute(source, command);
+    if (result.success && result.commit?.committed) this.recordWorldCommit(result.commit);
     if (command.type !== 'advance-gameplay') this.commitIfServerChanged(before);
     return result;
   }
@@ -455,6 +457,13 @@ export class AuthorityRuntime {
 
   private requestUnknownChunk(key: string): void {
     this.options.onUnknownChunk?.(key);
+  }
+
+  private recordWorldCommit(commit: WorldCommitResult): void {
+    this.pendingCommits.push(commit);
+    queueBodyRecoveriesAfterCommit(commit, this.server.queryEntities(), (entityId, maxDistance) =>
+      this.session.requestBodyRecovery(entityId, 'external-geometry-change', maxDistance),
+    );
   }
 
   private buildLogicObservation(sequence: number, snapshot: AuthoritySnapshot): LogicObservation {
