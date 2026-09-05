@@ -3,8 +3,16 @@ import type { StreamingVariant } from './app-contracts';
 import * as pc from 'playcanvas';
 import type { LightingQualityBudget } from './advanced-lighting-budget';
 
+class DesktopApplication extends pc.Application {
+  override init(options: pc.AppOptions) {
+    // AppOptions defaults xr to null at runtime; its declaration omits null.
+    // Desktop worlds need no XR manager or its persistent devicechange listener.
+    super.init(Object.assign(options, { xr: null }));
+  }
+}
+
 export function createSceneApplication(canvas: HTMLCanvasElement) {
-  const app = new pc.Application(canvas, {
+  const app = new DesktopApplication(canvas, {
     mouse: new pc.Mouse(canvas),
     keyboard: new pc.Keyboard(window),
     graphicsDeviceOptions: { alpha: true },

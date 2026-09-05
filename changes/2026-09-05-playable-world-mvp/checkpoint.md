@@ -1,4 +1,14 @@
-# 最新恢复点：2026-09-05 08:22
+# 最新恢复点：2026-09-05 08:54
+
+分支codex/playable-world-mvp，三路上游最终SHA均在祖先中。60分钟固定48d2dd2长测已完成3600.378秒、17sessions、74centers、1自然死亡恢复、0errors。发现每会话XR监听器泄漏并在scene-bootstrap禁用未使用XR管理器，20会话总监听器56/DOM1268稳定、XR0。新增背包快速Escape竞态修复：主动释放原因和锁状态转换一起判断，处理排队的重复pointerlockchange。新用例10个隔离Context各开闭与真Escape，20PASS46.1秒；最后8项Shell/光影/资源组合正在收口。
+
+完整Static234/4skip、world95.03%、Build通过，改测试后单独格式/ESLint/typecheck通过。尚未提交这些最终生命周期修复和证据，核git status；完成组合后写两个子spec并本地提交，再执行当前源码pnpm harness关联检查和独占原生Chrome性能（native noDefaults helper已提交，尚未实际跑）。现有7a36850的Harness run8a254d1f通过，父harness-final.json已保存；包体只更新3个成本基线，旧值留档。
+
+当前音频主观试听仍不可由本模型完成；工程链路和3首完整录音已验证，不能将整体goal标为完成。最终要整理父A表、最新Delivery Snapshot、原生性能JSON、核干净分支、预览gallery与当前游戏、清理仅本任务服务器。额度最新50%（起点38%，上限58%），Goal3M active，不重置。
+
+---
+
+# 历史恢复点：2026-09-05 08:22
 
 当前HEAD **75a3251**，分支codex/playable-world-mvp。全部上游最终SHA已验证为HEAD祖先，无需再合并其他worktree。当前Goal3M active，已用1,785,547tokens；账户49%（起点38%，硬上限58%），未重置。
 

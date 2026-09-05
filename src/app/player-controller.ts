@@ -3,6 +3,7 @@ import { Voxel, isSolid } from '../world/voxel';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
+import { releasePointerLock } from './pointer-lock';
 
 const PLAYER_HALF_WIDTH = 0.32;
 export const PLAYER_FEET_OFFSET = 1.6;
@@ -185,7 +186,7 @@ export class PlayerController {
     this.keys.clear();
     this.velocity.x = 0;
     this.velocity.z = 0;
-    if (document.pointerLockElement) document.exitPointerLock();
+    releasePointerLock();
   }
 
   setView(yaw: number, pitch: number) {

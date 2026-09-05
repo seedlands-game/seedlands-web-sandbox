@@ -2,6 +2,7 @@ import { ShellController, sanitizeQuality, type ShellQuality } from '../client/s
 import type { GlobalAudio } from './audio/global-audio';
 import type { Game } from './game';
 import type { UiBridge } from './ui/ui-bridge';
+import { isUserPointerUnlock } from './pointer-lock';
 
 const QUALITY_KEY = 'seedlands.quality.v1';
 
@@ -53,7 +54,7 @@ export class ApplicationShell {
       if (this.controller.state.phase === 'playing') this.controller.pause();
     });
     document.addEventListener('pointerlockchange', () => {
-      if (document.pointerLockElement || this.controller.state.phase !== 'playing') return;
+      if (!isUserPointerUnlock() || this.controller.state.phase !== 'playing') return;
       const state = bridge.shell.get();
       if (
         !state.mapOpen &&

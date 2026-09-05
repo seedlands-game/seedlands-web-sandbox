@@ -17,7 +17,7 @@
 - 本机概念图：`/Users/chlorinec/Downloads/_sorted/images/Living World UI Concept.png`，已实际查看。该图锚定风格，不把其中武器、城堡、法术、装备和全部按钮自动变成产品需求。
 - 当前仓库 `AGENTS.md`、`README.md`、`package.json`、相关 change、实际环境/质量配置与 GameServer 源码，以及两个被引用任务的实时内容。
 
-### 当前事实与依赖终点
+### 启动时的事实与依赖终点（历史快照）
 
 核对日期：2026-09-05。以下是本次读取时的快照，正式集成前需再确认。
 
@@ -155,17 +155,17 @@
 
 | 编号 | 准出标准                                                                                                                         | 证据类型                                                        | 当前                                                                                    |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| A1   | 无 debug 命令完成黄金旅程的采集→工具→建造/照明→食物/危险→保存继续；30–60 分钟试玩能观察到这些内容                                | Playwright-change、Midscene、Manual supplement                  | 完整自然旅程通过；60分钟混合运行中；未冒称人类趣味性试玩                                |
+| A1   | 无 debug 命令完成黄金旅程的采集→工具→建造/照明→食物/危险→保存继续；30–60 分钟试玩能观察到这些内容                                | Playwright-change、Midscene、Manual supplement                  | 完整自然旅程和3600.378秒混合运行通过；未冒称人类趣味性试玩                              |
 | A2   | 背包/合成/采集/放置/战斗/死亡的成功与失败保持原子性；保存刷新不复制或丢失已成功保存的物品                                        | Vitest、Playwright-change                                       | 通过；生存规则、自然旅程、输入/高度边界专项                                             |
-| A3   | 被动、敌对、基础 NPC 三类行为在真实地形和 Headless 均成立；障碍、不可达、重算、跨 Chunk 与中断有结果                             | Vitest、Playwright-change、Midscene                             | 通过；Change9、方向/受击真实帧；最终关联Harness待归档                                   |
+| A3   | 被动、敌对、基础 NPC 三类行为在真实地形和 Headless 均成立；障碍、不可达、重算、跨 Chunk 与中断有结果                             | Vitest、Playwright-change、Midscene                             | 通过；Change9、方向/受击真实帧；关联Harness已归档                                       |
 | A4   | 新建/继续/暂停/设置/保存/离开全部从 GUI 可达，输入隔离、错误与重试正确；10 次会话切换无旧状态串入                                | Playwright-change、Midscene                                     | 通过；Shell4项、音频组合5项24.7秒、菜单视觉42.59秒；失败注入另由Vitest证明              |
 | A5   | 白天/黄昏/夜间 × 林地/河岸/营地参考镜头可读、材质统一；树叶实际镂空及对应阴影正确，人工光源照亮附近材质，水体无明显接缝/排序错误 | Playwright-change、Midscene、Manual supplement                  | 通过；最终九镜头37.5秒、Midscene89.07秒、真实遮挡像素对照                               |
 | A6   | High 中至少一条真实场景水面反射路径可见且正确，后处理/调色可开关；Low 降级后核心目标/危险仍可辨认；修改画质不改变世界状态        | Vitest、Playwright-change、Midscene                             | 通过；三档光影专项、Low午夜原始帧与性能/资源对照                                        |
 | A7   | 主菜单/加载/HUD/背包/设置/反馈使用统一材质、图标和动效语义；小字号可读、无截断，reduced-motion 有等价信息                        | Playwright-change、Midscene                                     | 通过；背包视觉43.97秒、700px减少动态+Low原始帧视觉5.35秒                                |
 | A8   | 默认内置音频可听，材质 SFX、环境/空间与有留白的 BGM 实际工作；至少覆盖日间探索、林水环境、夜间三个上下文，所有总线可调且保存     | Vitest、Playwright-change、Manual supplement                    | 工程/波形/完整三Cue生产录音通过；主观试听未完成                                         |
-| A9   | 音频未解锁/后台恢复/事件暴增/切世界均受控，失败命令不冒充成功音效；声音预算受界且无跨世界残留                                    | Vitest、Playwright-change、Manual supplement                    | 预算/成功事件/异步隔离/进出通过；真实标签后台专项补验中，试听仍待                       |
+| A9   | 音频未解锁/后台恢复/事件暴增/切世界均受控，失败命令不冒充成功音效；声音预算受界且无跨世界残留                                    | Vitest、Playwright-change、Manual supplement                    | 预算/成功事件/异步隔离/进出和真实后台暂停通过；试听仍待                                 |
 | A10  | 3 个固定回归 seed 与至少 2 个额外固定 seed 能安全进入并取得基础资源；推荐 seed 有无 debug 的完整内容旅程                         | Vitest、Playwright-change、Manual supplement                    | 通过；五seed自然采集/拾取/保存恢复、完整黄金旅程                                        |
-| A11  | 60 分钟混合运行及跨区往返无未处理异常、持续资源增长或玩法阻断；负载与设备实况可追溯                                              | Playwright-change、Manual supplement                            | 48d2dd2固定生产长测进行中；旧ad2c98e失败不计通过                                        |
+| A11  | 60 分钟混合运行及跨区往返无未处理异常、持续资源增长或玩法阻断；负载与设备实况可追溯                                              | Playwright-change、Manual supplement                            | 3600秒功能长测通过；发现XR泄漏并由后续20会话专项修复；证据分源记录                      |
 | A12  | 保留 server/world/presentation 依赖边界、版本化存档、受身份限定的观察/动作 API；本次运行不依赖 Agent 服务                        | Vitest、Static、Build                                           | 通过；234单测、world95.03%、静态边界与Build；未接AgentServer                            |
 | A13  | `pnpm verify:static`、`pnpm build`、当前长期浏览器基线、子 change 专项和父 change 总体验收均通过；每种证据独立记录               | Static、Build、Playwright-baseline、Playwright-change、Midscene | Static/Build与多项组合已通过；最终关联Harness与长测待归档，音频试听未通过不能称全量准出 |
 
@@ -198,12 +198,12 @@
 ### 集成原则
 
 - 不修改运行中其他 worktree，不以未提交文件作稳定依赖；等其完成后核对最终提交、工作区和 Delivery Snapshot。
-- 当前任务从 `863ff08` 建立 `codex/` 功能分支后，按已提交谱系做本地合并，避免重复 cherry-pick 同一祖先。当前已快进接入渲染最终提交 `abdaf5a23edb4c561e05d93b8cd6eae52e54d450`，等待 Change 8 完成提交。
+- 当前任务从 `863ff08` 建立 `codex/playable-world-mvp` 后，按已提交谱系做本地合并。渲染11c68d7、Change8 a27dc8e、Change9 c7a1072最终提交均已位于本分支，不需再等待上游。
 - 重点冲突区域：`game.ts`、启动/销毁、Harness、README、构建配置、实体 presentation、材质资源和设置。
 - 合并通过只是起点；两个分支分别通过不代表其组合通过。每次整合后验证输入、恢复、资源生命周期、原核心旅程。
 - 完成的子 change 自动本地语义化提交，父合同记录最终组合 SHA 与验收 run id。最终合入目标本地分支时遵循用户已明确的目标；不自行 push。
 
-### 当前完成与待讨论
+### 当前完成与剩余验收
 
 - [x] 读取两个被引用 Codex 任务及三个直接相关 ChatGPT 对话。
 - [x] 核对当前源码、分支、上游 spec、既有路线与美术概念图。
@@ -217,6 +217,10 @@
 - [ ] 最终关联Harness、60分钟稳定性归档和音频试听准出。
 
 ## 八、交付快照
+
+最新组合、证据与限制见本节末尾；下列按时间保留启动与集成历史，不代表当前未合并。
+
+### 初始合同快照（历史）
 
 当前分支：`codex/playable-world-mvp`，原始基底 `863ff08`。已接入渲染分支 `abdaf5a`；原作者已确认工作区干净，无遗漏修复或证据。Change 8 在原任务收口，未搬运未提交文件。
 
@@ -288,6 +292,8 @@ Medium两次差异0.4ms，处于刷新同步环境的小幅抖动范围；不能
 单列30秒streaming路线用生产setSpectatorPosition→updateStreaming，每3秒跨20/-16米，帧间隔p95=9.2ms、p99=10.2ms，满足预置33.3ms；这不是自然步行内容验收。末尾仍有17个后台生成请求，累计Chunk可见延迟p95约4.28秒（含启动），没有把低帧间隔误称为所有Chunk立即就绪。20次真实E键到背包DOM提交后下一帧的反馈p95=9.5ms，通过100ms门槛。并无GPU计时或移动设备性能结论。
 
 ### 最终组合与当前证据索引（08:20）
+
+长测资源复核：逐会话GC后的DOM监听器有小幅增长，虽然堆增长仍低于预置30MiB门槛，也不能直接称为没有泄漏。新增 `e2e/listener-recovery.spec.ts` 快速重复世界进入/退出并记录全局/文档/Canvas监听器来源与GC计数，区分延迟清理、工具观测和持续保留；查明前A11保持待完成。
 
 后台验证暴露Playwright默认强制focus emulation，因此旧性能样本的`hiddenFrames=0`只能作为自动化环境状态。最终性能用例升级为独立临时Chrome profile和公开`connectOverCDP(noDefaults:true)`，保留原seed、1920×1080/DPR1、画质循环、30秒/5秒预热、streaming及输入采样。新增真实焦点与隐藏帧断言，不改变帧时间门槛；在60分钟长测结束后独占设备复测，以避免把仿真焦点当成真实前台证据。此前样本保留作历史对照，不悄悄替换出处。
 

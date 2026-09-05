@@ -24,15 +24,15 @@ Given 同一MVP构建，When Harness比较包体，Then 与新功能基线比较
 
 ## 验收与证据
 
-- [ ] Static：JSON/脚本格式、ESLint与路径检查通过。
-- [ ] 配置检查：只改变三个包体数值，其余原指标完整保留，旧包体值与来源留档。
-- [ ] Vitest / Build / Playwright-baseline / Harness：当前源码完整关联准出，运行时比较保持原门槛。
+- [x] Static：JSON/脚本格式、ESLint与路径检查通过。
+- [x] 配置检查：只改变三个包体数值，其余原指标完整保留，旧包体值与来源留档。
+- [x] Vitest / Build / Playwright-baseline / Harness：当前源码完整关联准出，运行时比较保持原门槛。
 - N/A：本change不修改生产图像、音频、UI或规则，视觉语义仍使用父合同的独立证据。
 
 ## 任务与当前状态
 
-已明确并记录新增功能成本，尚未更新基线。
+Delivered：只更新三个包体基线，其余指标逐项保持原值。
 
 ## 交付快照
 
-待最终关联结果。
+2026-09-05 最终执行 `SEEDLANDS_E2E_PORT=4250 pnpm harness` 成功，源码 `7a368506eccf9879e1c7a6681862bdb4b7acaba9`，关联run `8a254d1f-01bc-4757-a130-7539f4ae8e63`：234项Vitest通过、4项明确跳过、Build通过、9项浏览器基线21.3秒通过；Node worldMutation、浏览器回归与性能采样均PASS，比较无REGRESSION。父合同 `harness-final.json` 保存同次报告；脚本ESLint/Prettier/路径门禁通过。该证据不替代音频主观试听。
