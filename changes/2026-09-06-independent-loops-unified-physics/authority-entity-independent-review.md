@@ -10,7 +10,7 @@
 
 ## 结论
 
-本模块暂不批准。角色、物件的 Authority 固定步接线、一次三维外部加速度、完整 AABB 拾取路径、失败拾取退避、墙约束角色推离、最终静态接触探测与未知 Chunk 保守阻挡已有对应实现和 GREEN 证据，但合法的恢复请求可击穿整个权威物理唤醒。这违反显式有界恢复不能拖垮持续物理产出的合同。
+当前模块仍暂不批准。`9b2ec2203021165a29a2f2e073335c377edfbb3d` 已解除恢复请求击穿权威唤醒的 P1，并关闭原始双玩家隔墙反例；但固定 8 个候选的实现会让第 9 个范围内可达目标在静态场景永久饥饿，P2 尚未关闭。
 
 ## P1：恢复核心的候选预算异常会终止整个 Authority 物理步
 
@@ -28,7 +28,7 @@ pnpm exec vitest run --root /tmp --globals /tmp/seedlands-authority-review.test.
 
 `itemAttraction()` 对按 id 排序的目标使用第一个半径内匹配项，不判断完整身体路径；`processPickups()` 同样只检查第一个拾取半径内目标，路径阻挡后直接跳过该物件。反例使用两个真实玩家：`a-blocked` 位于实心墙另一侧，`b-clear` 位于物件同侧，两者距物件均为 2 格。物件始终朝 `a-blocked` 加速并停在墙前 `x=0.95`，运行 120 个 60Hz 物理步后仍未转向可达的 `b-clear`。
 
-当前浏览器 MVP 为单玩家，因此此项不单独提升为本次阻断；但 Authority 端口和实际适配器已经返回复数玩家，不能把该行为记录成普遍正确的多目标拾取合同。后续应按稳定顺序选择可达候选，并让吸附和提交使用一致目标；路径检查继续复用完整 AABB 和有界世界查询。
+初审时因当前浏览器 MVP 为单玩家，此项没有单独提升为阻断；但 Authority 端口和实际适配器已经返回复数玩家，不能把该行为记录成普遍正确的多目标拾取合同。`9b2ec22` 复验进一步明确要求固定预算下也要保证候选最终进展，以下复验结论取代初审分级。
 
 ## 已确认的正向证据与边界
 
@@ -38,4 +38,13 @@ pnpm exec vitest run --root /tmp --globals /tmp/seedlands-authority-review.test.
 - 掉落物吸附通过 `externalAcceleration` 进入一次 `stepBody()`；流体阻力、浮力、重力和三轴 sweep 没有第二条 Authority 积分分支。灯笼横向与底面薄碰撞箱、未知 Chunk 和失败后第 15 tick 重试均有真实 `VoxelCollisionWorld` 回归。
 - Authority 的玩法到期调用 `advanceGameplayRules()`，实际映射到不含旧实体物理的 `advanceRules()`，因此该运行路径没有再次执行旧掉落物重力。旧 `advanceGameplay()` 与 `EntityPhysics` 仍留给旧公开路径，其最终删除和全 change 的 A1/A10 准出不属于这两个提交已经完成的证据。
 
-修复 P1 后需按同一 spec hash 和本反例复审；P2 应在启用多玩家目标前关闭或明确收窄端口合同。
+以上为 `9b2ec22` 之前的初审证据；回修后的实际状态如下。
+
+## `9b2ec22` 回修复验
+
+- 原 `/tmp/seedlands-authority-review.test.ts` 两项反例均已转为 GREEN。稠密地下的合法 `maxDistance=8` 恢复现在返回 `recovered:false`，Authority 记录 `blocked` 并继续同批请求和物理步；无效 Collider 仍抛出明确错误，没有被容量降级掩盖。
+- 可达性选择先按距离、再按 id 排序，并在 `.slice(0, 8)` 后执行 swept-AABB，故每个物件每步至多 8 次路径查询；未发现通过放大为无界路径工作换取通过。
+- 新增第 8/第 9 个边界反例：物件位于原点，墙后放 8 个更近但不可达的玩家，第 9 个可达玩家位于 `x=-2` 且仍在 2.25 格吸附半径内。当前函数先截断到前 8 个，返回 `null`；状态不变使每个后续 tick 重复同一集合，目标永久饥饿。
+- 实际命令 `pnpm exec vitest run --root /tmp --globals /tmp/seedlands-authority-review.test.ts --reporter=verbose` 得到 4 项中 3 项通过、1 项失败，唯一失败为“八个较近阻挡目标不会让第九个范围内可达目标永久饥饿”。仓库定向回归 7 个文件、56 项全部通过，说明缺口位于现有覆盖之外。
+
+复验结论：P1 批准关闭，P2 继续阻断本模块准入。最低修复要求是在不增加每步 8 次 sweep 预算的前提下，以有界轮转、游标或等价公平机制保证范围内候选最终获得检查机会；不能以限制端口只返回任意 8 个目标规避复数目标合同。修复后重跑保留在 `/tmp` 的四项反例。
