@@ -122,10 +122,13 @@ export function executeAuthorityConsume(
   return { accepted: true, changed: true, action: context.actions.get(action.id)! };
 }
 
-export function tickAuthorityActorRules(context: ActorAuthorityRulesContext): void {
+export function tickAuthorityActorRules(context: ActorAuthorityRulesContext, elapsedSeconds: number): void {
+  if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < 0)
+    throw new RangeError('Actor rule elapsed seconds must be non-negative and finite.');
   context.actors.forEach((actor) => {
     context.updateActive(actor);
-    actor.attackCooldownSeconds = Math.round(Math.max(0, actor.attackCooldownSeconds - 0.1) * 1_000_000) / 1_000_000;
+    actor.attackCooldownSeconds =
+      Math.round(Math.max(0, actor.attackCooldownSeconds - elapsedSeconds) * 1_000_000) / 1_000_000;
     if (actor.attackCooldownSeconds === 0 && actor.behavior === 'attack') {
       actor.behavior = 'idle';
       actor.targetEntityId = null;

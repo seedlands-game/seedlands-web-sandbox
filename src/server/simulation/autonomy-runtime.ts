@@ -141,7 +141,7 @@ export class AutonomyRuntime {
       this.stepAccumulator = round(this.stepAccumulator - STEP_SECONDS);
       this.time = round(this.time + STEP_SECONDS);
       this.needsAccumulator = round(this.needsAccumulator + STEP_SECONDS);
-      tickAuthorityActorRules(this.authorityRulesContext());
+      tickAuthorityActorRules(this.authorityRulesContext(), STEP_SECONDS);
       if (this.needsAccumulator + Number.EPSILON >= 5) {
         this.needsAccumulator = round(this.needsAccumulator - 5);
         this.actors.forEach((actor) => (actor.hunger = round(Math.min(100, actor.hunger + 1))));

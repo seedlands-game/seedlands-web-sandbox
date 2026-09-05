@@ -39,7 +39,14 @@ describe('Authority actor rules', () => {
     });
     expect(server.getPlayerState('player').health).toBe(18);
 
-    server.advanceGameplayRules(1);
+    server.advanceGameplayRules(0.25);
+    // Actor rules advance in bounded 100 ms quanta; the unconsumed 50 ms remains in the accumulator.
+    expect(server.getActorState('hostile')?.attackCooldownSeconds).toBeCloseTo(0.8, 6);
+    expect(server.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
+      accepted: false,
+      reason: 'cooldown',
+    });
+    server.advanceGameplayRules(0.75);
     expect(server.getActorState('hostile')?.attackCooldownSeconds).toBe(0);
     expect(server.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
       accepted: true,

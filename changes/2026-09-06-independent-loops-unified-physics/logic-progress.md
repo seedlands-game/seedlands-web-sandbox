@@ -98,3 +98,7 @@ Cannot find module '../../src/worker/game-logic-worker'
 - `pnpm exec tsc --noEmit` 当前只被并行 world-clock Worker 协议接线的两项诊断阻塞；本补充文件未出现在诊断中，由主线接口收敛后统一复验。
 
 阶段：Authority Actor 规则实现与局部验证完成，交还主线完成 Worker 与浏览器整体准出。
+
+### 冷却墙钟语义复审
+
+独立循环复审最初怀疑 `tickAuthorityActorRules()` 会被 60 Hz 物理循环直接调用并在每次调用固定扣除 0.1 秒。源码与 RED 证明该假设不成立：`AutonomyRuntime` 自带 0.1 秒有界累加器，推进 0.25 秒只执行两个规则步并保留 0.05 秒债务，因此此时冷却应剩余 0.8 秒；累计推进到 1 秒时才归零。为解除冷却规则与 `STEP_SECONDS` 的隐式魔数耦合，规则入口改为显式接收本次真实步长。用例同时锁定量化后的中间态、累计墙钟语义和冷却期间拒绝攻击，防止未来调整规则频率后按调用次数加速或减速。
