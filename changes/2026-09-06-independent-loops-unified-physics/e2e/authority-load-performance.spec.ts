@@ -83,8 +83,10 @@ const stopFrameSampling = (page: Page) =>
   });
 
 async function establishAuthorityLoad(page: Page) {
-  await page.evaluate(async (targets) => {
+  return page.evaluate(async (targets) => {
     const harness = window.__seedlandsHarness as unknown as HarnessApi;
+    const actorIds: string[] = [];
+    const worldItemIds: string[] = [];
     harness.setTimePaused(true);
     await harness.fillWorld({ from: [-14, 49, -11], to: [14, 56, 3], voxel: 0 });
     await harness.fillWorld({ from: [-14, 48, -11], to: [14, 48, 3], voxel: 3 });
@@ -107,9 +109,10 @@ async function establishAuthorityLoad(page: Page) {
         type: 'spawn-actor',
         id: `load-actor-${index}`,
         archetype: (['grazer', 'night-stalker', 'settler'] as const)[index % 3]!,
-        position: [-7 + (index % 8) * 2, 49, -3 - Math.floor(index / 8) * 3],
+        position: [1 + (index % 8), 49, -2 - Math.floor(index / 8) * 3],
       });
       if (!result.success) throw new Error(result.error.message);
+      actorIds.push(`load-actor-${index}`);
     }
     for (let index = 0; index < 64; index += 1) {
       const result = await harness.executeGameplayCommand({
@@ -119,7 +122,11 @@ async function establishAuthorityLoad(page: Page) {
         position: [-12 + (index % 8), 49.4, -2 - Math.floor(index / 8)],
       });
       if (!result.success) throw new Error(result.error.message);
+      const entityId = (result.data as { entity?: { id?: unknown } } | undefined)?.entity?.id;
+      if (typeof entityId !== 'string') throw new Error('Spawned load item did not return an entity id.');
+      worldItemIds.push(entityId);
     }
+    return { actorIds, worldItemIds };
   }, TARGETS);
 }
 
@@ -232,7 +239,7 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
     const scenarioId = await page.evaluate(() =>
       (window.__seedlandsHarness as unknown as HarnessApi).beginPerformanceScenario('authority-controlled-load'),
     );
-    await establishAuthorityLoad(page);
+    const spawned = await establishAuthorityLoad(page);
     const ready = await expect
       .poll(
         async () => {
@@ -258,10 +265,33 @@ async function runConfiguration(browser: Browser, testInfo: TestInfo, generalWor
       });
     void ready;
     const prepared = await snapshot(page);
+    const spawnedBodies = await page.evaluate(({ actorIds, worldItemIds }) => {
+      const harness = window.__seedlandsHarness as unknown as HarnessApi;
+      const player = harness.snapshot().serverPlayerPosition;
+      const inspect = (id: string) => ({ id, body: harness.authorityBody(id) });
+      const nearPlayer = ({ body }: ReturnType<typeof inspect>) =>
+        body !== null &&
+        (body.position[0] - player[0]) ** 2 +
+          (body.position[1] - player[1]) ** 2 +
+          (body.position[2] - player[2]) ** 2 <=
+          32 ** 2;
+      const actors = actorIds.map(inspect);
+      const worldItems = worldItemIds.map(inspect);
+      return {
+        actors,
+        worldItems,
+        nearActorIds: actors.filter(nearPlayer).map(({ id }) => id),
+        nearWorldItemIds: worldItems.filter(nearPlayer).map(({ id }) => id),
+      };
+    }, spawned);
     await testInfo.attach(`authority-load-ready-general-${generalWorkers}`, {
-      body: JSON.stringify(prepared, null, 2),
+      body: JSON.stringify({ snapshot: prepared, spawnedBodies }, null, 2),
       contentType: 'application/json',
     });
+    expect(spawnedBodies.actors).toHaveLength(SCENARIO_SOURCE.actorSpawns);
+    expect(spawnedBodies.worldItems).toHaveLength(SCENARIO_SOURCE.worldItemSpawns);
+    expect(spawnedBodies.nearActorIds).toHaveLength(SCENARIO_SOURCE.actorSpawns);
+    expect(spawnedBodies.nearWorldItemIds).toHaveLength(SCENARIO_SOURCE.worldItemSpawns);
     expect(prepared.renderedChunks).toBeGreaterThanOrEqual(25);
     expect(prepared.triangles).toBeGreaterThan(1_000);
     expect(prepared.gameplay.activeActorCount).toBeGreaterThanOrEqual(16);
