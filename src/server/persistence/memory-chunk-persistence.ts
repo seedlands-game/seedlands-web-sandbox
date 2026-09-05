@@ -1,6 +1,10 @@
 import type { ChunkPersistence, ChunkSnapshot } from './chunk-persistence';
 
-const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({ ...snapshot, voxels: snapshot.voxels.slice() });
+const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
+  ...snapshot,
+  voxels: snapshot.voxels.slice(),
+  ...(snapshot.fluid ? { fluid: snapshot.fluid.slice() } : {}),
+});
 
 export class MemoryChunkPersistence implements ChunkPersistence {
   readonly writes: string[] = [];

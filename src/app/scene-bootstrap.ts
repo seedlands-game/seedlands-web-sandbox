@@ -1,4 +1,5 @@
-import { PERFORMANCE_PROFILES } from '../client/performance-profile';
+import { PerformanceTelemetry } from '../client/performance-telemetry';
+import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
 import type { StreamingVariant } from './app-contracts';
 import * as pc from 'playcanvas';
 import type { LightingQualityBudget } from './advanced-lighting-budget';
@@ -62,4 +63,14 @@ export function selectPerformanceProfile(search: string) {
 
 export function requestedStreamingVariant(search: string): StreamingVariant {
   return new URLSearchParams(search).get('streamingVariant') === 'main-snapshot' ? 'main-snapshot' : 'worker-first';
+}
+
+export function createPerformanceTelemetry(profile: PerformanceProfile) {
+  return new PerformanceTelemetry({
+    now: () => performance.now(),
+    frameCapacity: profile.ringBufferFrames,
+    eventCapacity: profile.ringBufferEvents,
+    incidentThresholdMs: profile.longFrameMs,
+    chunkLatencyIncidentMs: profile.chunkLatencyIncidentMs,
+  });
 }

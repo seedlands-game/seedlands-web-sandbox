@@ -93,7 +93,7 @@ describe('gameplay persistence', () => {
     first.giveItem('player-1', { itemId: ItemIds.Berry, count: 3 });
     first.setHungerForDebug('player-1', 11);
     first.applyDamage('system', 'player-1', 5, 'test');
-    first.spawnWorldItem([2, 40, -2], { itemId: ItemIds.StoneBlock, count: 2 });
+    first.spawnWorldItem([4, 40, -2], { itemId: ItemIds.StoneBlock, count: 2 });
     first.advanceGameplay(7.5);
     await first.save();
 

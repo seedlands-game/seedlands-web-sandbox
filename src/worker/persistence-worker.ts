@@ -4,6 +4,7 @@ import {
   decodeStoredChunkRecord,
   storedChunkRecordBytes,
   type StoredChunkRecord,
+  validateStoredFluid,
 } from '../world/chunk-snapshot-codec';
 import { GENERATOR_VERSION, Voxel, normalizeSeed } from '../world/voxel';
 
@@ -13,7 +14,16 @@ type LoadTask = { kind: 'load'; requestId: number; cx: number; cy: number; cz: n
 type SaveTask = {
   kind: 'save';
   requestId: number;
-  snapshots: Array<{ key: string; cx: number; cy: number; cz: number; revision: number; voxels: ArrayBuffer }>;
+  snapshots: Array<{
+    key: string;
+    cx: number;
+    cy: number;
+    cz: number;
+    revision: number;
+    voxels: ArrayBuffer;
+    fluidVersion?: 1;
+    fluid?: ArrayBuffer;
+  }>;
 };
 type SaveMetadataTask = {
   kind: 'save-metadata';
@@ -111,7 +121,14 @@ const normalizeRecord = (value: unknown): StoredChunkRecord => {
         ? new Uint8Array(storedPayload)
         : null;
   if (!payload) throw new Error('Stored Chunk payload is corrupt.');
-  return { ...record, payload };
+  const storedFluid = (value as { fluid?: unknown }).fluid;
+  const fluid =
+    storedFluid instanceof Uint8Array
+      ? storedFluid
+      : storedFluid instanceof ArrayBuffer
+        ? new Uint8Array(storedFluid)
+        : undefined;
+  return { ...record, payload, ...(fluid ? { fluid } : {}) };
 };
 
 const initialize = async (task: InitTask) => {
@@ -165,6 +182,7 @@ const load = async (task: LoadTask) => {
     generatorVersion: GENERATOR_VERSION,
     proceduralVoxels,
   });
+  const fluid = validateStoredFluid(record);
   if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= Voxel.Lantern))
     throw new Error('Stored Chunk contains a voxel outside the current schema.');
   return {
@@ -178,6 +196,7 @@ const load = async (task: LoadTask) => {
     recordBytes: storedChunkRecordBytes(record),
     decodeMs: performance.now() - startedAt,
     voxels: voxels.buffer,
+    ...(fluid ? { fluidVersion: 1 as const, fluid: fluid.buffer } : {}),
   };
 };
 
@@ -198,6 +217,7 @@ const save = async (task: SaveTask) => {
       generatorVersion: GENERATOR_VERSION,
       voxels,
       proceduralVoxels: proceduralChunk(snapshot.cx, snapshot.cy, snapshot.cz),
+      ...(snapshot.fluid ? { fluid: new Uint8Array(snapshot.fluid) } : {}),
     });
   });
   const encodeMs = performance.now() - startedAt;

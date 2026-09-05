@@ -21,6 +21,8 @@ type MainSnapshot = {
   haloRevision: string;
   canonical: Uint16Array;
   halo: Uint16Array;
+  fluid?: Uint8Array;
+  fluidHalo?: Uint8Array;
 };
 
 type WorkerOverlay = {
@@ -28,12 +30,14 @@ type WorkerOverlay = {
   cy: number;
   cz: number;
   voxels: Uint16Array;
+  fluid?: Uint8Array;
 };
 
 type WorkerInput = {
   chunkRevision: number;
   generatorVersion: number;
   canonical?: Uint16Array;
+  fluid?: Uint8Array;
   overlays: WorkerOverlay[];
 };
 
@@ -223,6 +227,8 @@ export class MeshTaskScheduler {
       haloRevision: snapshot.haloRevision,
       canonical: snapshot.canonical,
       halo: snapshot.halo,
+      fluid: snapshot.fluid,
+      fluidHalo: snapshot.fluidHalo,
     });
     const task: PendingMeshTask = {
       ...snapshotTask,
@@ -252,8 +258,15 @@ export class MeshTaskScheduler {
         haloRevision: task.haloRevision,
         canonical: snapshotTask.canonical.buffer,
         halo: snapshotTask.halo.buffer,
+        fluid: snapshotTask.fluid!.buffer,
+        fluidHalo: snapshotTask.fluidHalo!.buffer,
       },
-      [snapshotTask.canonical.buffer, snapshotTask.halo.buffer],
+      [
+        snapshotTask.canonical.buffer,
+        snapshotTask.halo.buffer,
+        snapshotTask.fluid!.buffer,
+        snapshotTask.fluidHalo!.buffer,
+      ],
     );
   }
 
@@ -280,7 +293,11 @@ export class MeshTaskScheduler {
     this.options.telemetry.markTrace(task.traceId, 'worker-start', 'worker-derived');
     const transfers: Transferable[] = [];
     if (prepared.canonical) transfers.push(prepared.canonical.buffer);
-    prepared.overlays.forEach((overlay) => transfers.push(overlay.voxels.buffer));
+    if (prepared.fluid) transfers.push(prepared.fluid.buffer);
+    prepared.overlays.forEach((overlay) => {
+      transfers.push(overlay.voxels.buffer);
+      if (overlay.fluid) transfers.push(overlay.fluid.buffer);
+    });
     this.options.worker.postMessage(
       {
         kind: 'generate-mesh',
@@ -296,11 +313,13 @@ export class MeshTaskScheduler {
         haloRevision: task.haloRevision,
         generatorVersion: task.generatorVersion,
         ...(prepared.canonical ? { canonical: prepared.canonical.buffer } : {}),
+        ...(prepared.fluid ? { fluid: prepared.fluid.buffer } : {}),
         overlays: prepared.overlays.map((overlay) => ({
           cx: overlay.cx,
           cy: overlay.cy,
           cz: overlay.cz,
           voxels: overlay.voxels.buffer,
+          ...(overlay.fluid ? { fluid: overlay.fluid.buffer } : {}),
         })),
       },
       transfers,

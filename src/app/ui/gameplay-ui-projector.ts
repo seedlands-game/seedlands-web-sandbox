@@ -20,7 +20,7 @@ export type GameplayUiSource = Readonly<{
   }>;
   inventoryOpen: boolean;
   craftableRecipeIds: readonly string[];
-  target: Readonly<{ kind: 'voxel' | 'entity'; id: string; label: string }> | null;
+  target: Readonly<{ kind: 'voxel' | 'entity'; id: string; label: string; voxel?: number }> | null;
   breaking: Readonly<{ progress: number; label: string }> | null;
 }>;
 

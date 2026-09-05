@@ -1,6 +1,7 @@
 import * as pc from 'playcanvas';
 import {
   createSceneApplication,
+  createPerformanceTelemetry,
   createSun,
   createCamera,
   selectPerformanceProfile,
@@ -10,12 +11,8 @@ import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
 import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
-import { PerformanceTelemetry } from '../client/performance-telemetry';
-import {
-  ALL_COMMAND_CAPABILITIES,
-  ServerCommandExecutor,
-  type CommandSource,
-} from '../server/commands/server-command-executor';
+import type { ServerCommandExecutor, CommandSource } from '../server/commands/server-command-executor';
+import { browserCommandContext } from './browser-command-context';
 import { executeSlashCommand, type SlashCommandExecution } from '../server/commands/slash-command-parser';
 import type { ServerCommand } from '../server/commands/command-contract';
 import { GameServer } from '../server/game-server';
@@ -52,7 +49,7 @@ export class Game {
   private frameMs = 0;
   private lastFrameTimestamp = performance.now();
   private performanceProfile: PerformanceProfile = PERFORMANCE_PROFILES.balanced;
-  private performanceTelemetry = new PerformanceTelemetry({ now: () => performance.now() });
+  private performanceTelemetry = createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
   private readonly store = new BrowserWorldStore();
   private persistence: BrowserChunkPersistence | null = null;
   private serverPlayerId: string | null = null;
@@ -101,13 +98,7 @@ export class Game {
     const quality = QUALITY_PROFILES[this.qualityLevel];
     const lightingBudget = LIGHTING_QUALITY_BUDGETS[this.qualityLevel];
     this.performanceProfile = selectPerformanceProfile(location.search);
-    this.performanceTelemetry = new PerformanceTelemetry({
-      now: () => performance.now(),
-      frameCapacity: this.performanceProfile.ringBufferFrames,
-      eventCapacity: this.performanceProfile.ringBufferEvents,
-      incidentThresholdMs: this.performanceProfile.longFrameMs,
-      chunkLatencyIncidentMs: this.performanceProfile.chunkLatencyIncidentMs,
-    });
+    this.performanceTelemetry = createPerformanceTelemetry(this.performanceProfile);
     this.lastFrameTimestamp = performance.now();
     this.persistence = await BrowserChunkPersistence.open(seedText, {
       legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
@@ -156,6 +147,7 @@ export class Game {
     this.world.updateStreaming(this.camera.getPosition());
     this.gameplayClient = new BrowserGameplay({
       app: this.app,
+      camera: this.camera,
       server,
       playerId: this.serverPlayerId,
       bridge: this.uiBridge,
@@ -190,6 +182,7 @@ export class Game {
       onSelectHotbarSlot: (slot) => this.selectHotbarSlot(slot),
       onAttackTarget: (origin, direction, maxDistance) =>
         this.gameplayClient?.attackTarget(origin, direction, maxDistance) ?? false,
+      onAimTarget: (target) => this.gameplayClient?.setAimTarget(target),
       onBeginBreak: (position) => this.gameplayClient?.beginBreak(position),
       onCancelBreak: () => this.gameplayClient?.cancelBreak(),
       onPlace: (position) => this.gameplayClient?.place(position),
@@ -215,13 +208,9 @@ export class Game {
   private installUiAndHarness() {
     const world = this.world;
     if (world && this.serverPlayerId) {
-      this.commandExecutor = new ServerCommandExecutor(world.server);
-      this.commandSource = {
-        actorId: 'browser-local-developer',
-        sourceType: 'local-developer',
-        entityId: this.serverPlayerId,
-        capabilities: ALL_COMMAND_CAPABILITIES,
-      };
+      const { executor, source } = browserCommandContext(world.server, this.serverPlayerId);
+      this.commandExecutor = executor;
+      this.commandSource = source;
     }
     const harnessEnabled = new URLSearchParams(location.search).has('harness');
     this.uiBridge.publishShell({ phase: 'playing', enterLabel: '进入世界', commandOpen: false, mapOpen: false });
@@ -260,6 +249,13 @@ export class Game {
         if (result.success) this.consumeBrowserCommand(command, result);
         return result;
       },
+      advanceFluid: (seconds) => this.world?.advanceFluid(seconds),
+      getFluidCell: (x, y, z) => this.world?.server.getFluidCell(x, y, z) ?? null,
+      getVoxelAt: (x, y, z) => this.world?.getVoxel(x, y, z) ?? null,
+      sunSnapshot: () =>
+        this.environment && this.camera
+          ? this.environment.sunSnapshot(this.camera)
+          : { direction: [0, 0, 0], screen: null, facing: false },
       advanceGameplay: (seconds) => this.gameplayClient?.advance(seconds),
       setVoxelAt: (x, y, z, voxel) => {
         this.world?.edit(x, y, z, voxel);
@@ -282,6 +278,7 @@ export class Game {
 
   setPaused(paused: boolean) {
     this.paused = paused;
+    this.gameplayClient?.setSuspended(paused);
     this.controller?.releaseInput();
     this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, paused);
   }
@@ -383,6 +380,7 @@ export class Game {
     }
     this.controller?.update(dt);
     this.visualEffects?.update(dt);
+    this.world.advanceFluid(dt);
     this.world.updateStreaming(this.camera.getPosition());
     this.world.drainCommits();
     if (this.serverPlayerId) {
@@ -520,6 +518,7 @@ export class Game {
     this.world = null;
     this.visualEffects?.destroy();
     this.visualEffects = null;
+    this.environment?.destroy();
     this.environment = null;
     this.visualResources?.destroy();
     this.visualResources = null;

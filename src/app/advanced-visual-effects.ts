@@ -5,6 +5,7 @@ import type { VoxelMaterials } from './voxel-materials';
 import type { LightingQualityBudget } from './advanced-lighting-budget';
 import { selectNearestLanterns } from './advanced-lighting-budget';
 import { StylizedPostProcessing } from './stylized-post-effect';
+import { reflectionPlaneAboveCamera, waterReflectionSurfaceY } from './water-reflection-plane';
 
 export type VisualEffectsSnapshot = {
   activeLocalLights: number;
@@ -26,6 +27,7 @@ class PlanarWaterReflection {
   private readonly texture: pc.Texture;
   private readonly target: pc.RenderTarget;
   private readonly cameraEntity: pc.Entity;
+  private readonly reflectionStrength: number;
   private frame = 0;
   renderCount = 0;
   active = false;
@@ -36,6 +38,7 @@ class PlanarWaterReflection {
     resolution: number,
     private readonly frameInterval: number,
   ) {
+    this.reflectionStrength = resolution >= 256 ? 0.68 : 0.44;
     this.texture = new pc.Texture(app.graphicsDevice, {
       name: 'planar-water-reflection',
       width: resolution,
@@ -67,27 +70,33 @@ class PlanarWaterReflection {
     app.root.addChild(this.cameraEntity);
     for (const material of waterMaterials) {
       material.setParameter('texture_planarReflection', this.texture);
-      material.setParameter('uReflectionStrength', resolution >= 256 ? 0.68 : 0.44);
+      material.setParameter('uReflectionWaterPlaneY', 0);
+      material.setParameter('uReflectionStrength', 0);
     }
   }
 
   update(source: pc.Entity, waterPlaneY: number | null) {
     this.frame += 1;
-    const shouldRender = waterPlaneY !== null && this.frame % this.frameInterval === 0;
-    this.active = waterPlaneY !== null;
+    const position = source.getPosition();
+    const activeWaterPlaneY = reflectionPlaneAboveCamera(waterPlaneY, position.y);
+    const shouldRender = activeWaterPlaneY !== null && this.frame % this.frameInterval === 0;
+    this.active = activeWaterPlaneY !== null;
+    for (const material of this.waterMaterials) {
+      material.setParameter('uReflectionWaterPlaneY', activeWaterPlaneY ?? 0);
+      material.setParameter('uReflectionStrength', activeWaterPlaneY === null ? 0 : this.reflectionStrength);
+    }
     this.cameraEntity.enabled = shouldRender;
     const sourceCamera = source.camera;
     const reflectionCamera = this.cameraEntity.camera;
-    if (!shouldRender || !sourceCamera || !reflectionCamera || waterPlaneY === null) return;
+    if (!shouldRender || !sourceCamera || !reflectionCamera || activeWaterPlaneY === null) return;
     reflectionCamera.fov = sourceCamera.fov;
     reflectionCamera.farClip = sourceCamera.farClip;
-    const position = source.getPosition();
     const forward = source.forward;
     const up = source.up;
-    const reflectedPosition = new pc.Vec3(position.x, waterPlaneY * 2 - position.y, position.z);
+    const reflectedPosition = new pc.Vec3(position.x, activeWaterPlaneY * 2 - position.y, position.z);
     const reflectedTarget = new pc.Vec3(
       position.x + forward.x,
-      waterPlaneY * 2 - (position.y + forward.y),
+      activeWaterPlaneY * 2 - (position.y + forward.y),
       position.z + forward.z,
     );
     const reflectedUp = new pc.Vec3(up.x, -up.y, up.z);
@@ -201,7 +210,7 @@ export class AdvancedVisualEffects {
     const radius = Math.max(this.budget.horizontalScanRadius, this.budget.reflectionSearchRadius);
     const verticalRadius = this.budget.verticalScanRadius;
     const lanterns: [number, number, number][] = [];
-    let nearestWater: { y: number; distance: number } | null = null;
+    let nearestWater: { surfaceY: number; distance: number } | null = null;
     for (let y = Math.max(0, centerY - verticalRadius); y <= centerY + verticalRadius; y += 1)
       for (let z = centerZ - radius; z <= centerZ + radius; z += 1)
         for (let x = centerX - radius; x <= centerX + radius; x += 1) {
@@ -215,8 +224,10 @@ export class AdvancedVisualEffects {
             voxel === Voxel.Water &&
             this.world.getVoxel(x, y + 1, z) !== Voxel.Water
           ) {
-            const distance = horizontalDistance + (y + 1 - position.y) ** 2;
-            if (!nearestWater || distance < nearestWater.distance) nearestWater = { y: y + 1, distance };
+            const surfaceY = waterReflectionSurfaceY(y, this.world.server.getFluidCell(x, y, z)?.level ?? 8, false);
+            if (surfaceY === null) continue;
+            const distance = horizontalDistance + (surfaceY - position.y) ** 2;
+            if (!nearestWater || distance < nearestWater.distance) nearestWater = { surfaceY, distance };
           }
         }
     const selected = selectNearestLanterns([position.x, position.y, position.z], lanterns, {
@@ -230,6 +241,6 @@ export class AdvancedVisualEffects {
       light.enabled = voxel !== undefined;
       if (voxel) light.setPosition(voxel[0] + 0.5, voxel[1] + 0.62, voxel[2] + 0.5);
     });
-    this.waterPlaneY = nearestWater?.y ?? null;
+    this.waterPlaneY = nearestWater?.surfaceY ?? null;
   }
 }

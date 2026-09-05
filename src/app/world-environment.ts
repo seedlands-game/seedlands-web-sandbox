@@ -1,6 +1,7 @@
 import * as pc from 'playcanvas';
-import { clamp01, cssRgb, sampleEnvironment, type Rgb } from './environment-palette';
+import { cssRgb, sampleEnvironment, type Rgb } from './environment-palette';
 import type { QualityProfile } from './quality-profile';
+import { celestialDirection, SkySun } from './sky-sun';
 
 const normalizedColor = ([r, g, b]: Rgb) => new pc.Color(r > 1 ? r / 255 : r, g > 1 ? g / 255 : g, b > 1 ? b / 255 : b);
 
@@ -9,6 +10,7 @@ export class WorldEnvironment {
   paused = false;
   speed = 1;
   private elapsed = 0;
+  private readonly skySun: SkySun;
 
   constructor(
     private readonly app: pc.Application,
@@ -18,6 +20,7 @@ export class WorldEnvironment {
   ) {
     app.scene.fog.type = pc.FOG_LINEAR;
     app.graphicsDevice.maxPixelRatio = Math.min(window.devicePixelRatio, 2) * quality.resolutionScale;
+    this.skySun = new SkySun(app);
     this.apply();
   }
 
@@ -38,8 +41,16 @@ export class WorldEnvironment {
     this.paused = paused;
   }
 
+  destroy() {
+    this.skySun.destroy();
+  }
+
   cycleSpeed() {
     this.speed = this.speed === 1 ? 20 : this.speed === 20 ? 100 : 1;
+  }
+
+  sunSnapshot(camera: pc.Entity) {
+    return this.skySun.snapshot(camera);
   }
 
   get phase() {
@@ -67,7 +78,8 @@ export class WorldEnvironment {
     document.documentElement.style.setProperty('--sky-top', cssRgb(state.top));
     document.documentElement.style.setProperty('--sky-horizon', cssRgb(state.horizon));
     document.documentElement.style.setProperty('--sky-glow', cssRgb(state.sun));
-    document.documentElement.style.setProperty('--sun-x', `${clamp01(0.5 + Math.cos(sunAngle) * 0.42) * 100}%`);
-    document.documentElement.style.setProperty('--sun-y', `${clamp01(0.72 - elevation * 0.54) * 100}%`);
+    const camera = this.app.root.findByName('Player');
+    if (camera instanceof pc.Entity)
+      this.skySun.update(camera, celestialDirection(this.worldTime), normalizedColor(state.sun));
   }
 }

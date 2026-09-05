@@ -11,6 +11,7 @@ export type GameplayEntity = {
   kind: EntityType;
   lifecycle: EntityLifecycle;
   position: Position;
+  physicsVelocity?: Position;
   stack?: ItemStack;
   health?: number;
   maxHealth?: number;
@@ -23,6 +24,7 @@ export type EntitySpawn = {
   type?: EntityType;
   kind?: EntityType | string;
   position: readonly [number, number, number];
+  physicsVelocity?: readonly [number, number, number];
   stack?: { itemId: string; count: number };
   health?: number;
   maxHealth?: number;
@@ -30,12 +32,13 @@ export type EntitySpawn = {
   persistent?: boolean;
 };
 
-export type EntityUpdate = Partial<Pick<GameplayEntity, 'position' | 'health'>>;
+export type EntityUpdate = Partial<Pick<GameplayEntity, 'position' | 'physicsVelocity' | 'health'>>;
 export type EntityQuery = { type?: EntityType };
 
 const clone = (entity: GameplayEntity): GameplayEntity => ({
   ...entity,
   position: [...entity.position],
+  ...(entity.physicsVelocity ? { physicsVelocity: [...entity.physicsVelocity] } : {}),
   ...(entity.stack ? { stack: { ...entity.stack } } : {}),
 });
 
@@ -65,6 +68,10 @@ export class EntityStore {
       lifecycle: 'active',
       position: [...input.position],
     };
+    if (input.physicsVelocity) {
+      this.assertPosition(input.physicsVelocity);
+      entity.physicsVelocity = [...input.physicsVelocity];
+    } else if (type !== 'player') entity.physicsVelocity = [0, 0, 0];
     if (type === 'world-item') {
       if (!input.stack) throw new TypeError('World item entity requires an item stack.');
       assertItemStack(input.stack);
@@ -100,6 +107,10 @@ export class EntityStore {
     const entity = this.entities.get(id);
     if (!entity) throw new Error(`Unknown entity: ${id}`);
     if (update.position) this.move(id, update.position);
+    if (update.physicsVelocity) {
+      this.assertPosition(update.physicsVelocity);
+      entity.physicsVelocity = [...update.physicsVelocity];
+    }
     if (update.health !== undefined) {
       if (
         (entity.type !== 'creature' && entity.type !== 'npc') ||

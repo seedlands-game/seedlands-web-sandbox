@@ -36,6 +36,10 @@ type HarnessApi = {
   executeGameplayCommand: (command: ServerCommand) => Promise<CommandResult>;
   advanceGameplay: (seconds: number) => void;
   setVoxelAt: (x: number, y: number, z: number, voxel: number) => void;
+  getVoxelAt?: (x: number, y: number, z: number) => number | null;
+  advanceFluid?: (seconds: number) => void;
+  getFluidCell?: (x: number, y: number, z: number) => { level: number; source: boolean } | null;
+  sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
   flushSave: () => Promise<void>;
 };
 

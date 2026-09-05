@@ -11,110 +11,35 @@ import {
   voxelIndex,
   Voxel,
   isSolid,
-  type ChunkCoord,
 } from '../world/voxel';
 import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
+import { createChunkSnapshot } from './persistence/create-chunk-snapshot';
 import { GameServerGameplayFacade } from './game-server-gameplay';
-import type { EntitySpawn, GameplayEntity } from './gameplay/entity-store';
 import { createStarterEcology } from './simulation/starter-ecology';
-import { WorldMutationBuffer, assertMutationCoordinate, assertVoxelValue, type VoxelEdit } from './world-mutation';
+import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
 import { commitWorldEditBatch, compareChunkKeys } from './world-transaction-commit';
+import { VoxelFluidRuntime, type FluidAdvanceResult, type FluidCell } from './fluid/voxel-fluid-runtime';
+import { commitFluidMetadata } from './fluid/fluid-metadata-commit';
+import { FluidActiveWindow } from './fluid/fluid-active-window';
+import { FluidChunkAccess } from './fluid/fluid-chunk-access';
+import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
+import { hasAdjacentWater, legacyFluid } from './fluid/fluid-cell-state';
 
 export type { VoxelEdit } from './world-mutation';
-
-export type ServerChunk = ChunkCoord & {
-  key: string;
-  voxels: Uint16Array;
-  revision: number;
-  persistedRevision: number;
-  dirty: boolean;
-  materialized: boolean;
-  accessEpoch: number;
-};
-
-export type WorldSemanticEventInput = { type: string; subjectId: string; data?: unknown };
-export type WorldSemanticEvent = WorldSemanticEventInput & { worldRevision: number };
-export type WorldEditBatch = {
-  actorId: string;
-  edits?: readonly VoxelEdit[];
-  buffers?: readonly WorldMutationBuffer[];
-  semanticEvents?: readonly WorldSemanticEventInput[];
-};
-export type VoxelRegionChanged = {
-  type: 'voxel-region-changed';
-  actorId: string;
-  worldRevision: number;
-  mutationCount: number;
-  chunks: string[];
-  chunkRevisions: Array<{ key: string; revision: number }>;
-  meshChunks: string[];
-  bounds: { min: [number, number, number]; max: [number, number, number] } | null;
-};
-export type WorldCommitMetrics = {
-  // Single-voxel commits skip wall-clock probes so instrumentation cannot regress the hot path.
-  timingStatus: 'measured' | 'not-collected-hot-path';
-  inputMutationCount: number;
-  canonicalWriteCount: number;
-  dirtyChunkCount: number;
-  meshInvalidationCount: number;
-  structuralEventCount: 0 | 1;
-  semanticEventCount: number;
-  mutationPayloadBytes: number;
-  mutationCapacityBytes: number;
-  validationMs: number;
-  resolveMs: number;
-  applyMs: number;
-  commitMs: number;
-};
-export type WorldCommitResult = {
-  committed: boolean;
-  worldRevision: number;
-  structuralChange: VoxelRegionChanged | null;
-  semanticEvents: readonly WorldSemanticEvent[];
-  metrics: WorldCommitMetrics;
-};
-export type ServerEntity = GameplayEntity;
-export type EntityCreate = EntitySpawn;
-export type { EntityUpdate } from './gameplay/entity-store';
-export type GameServerOptions = { seedText: string; persistence?: ChunkPersistence & Partial<GameplayPersistence> };
-export type DerivedMeshSnapshot = {
-  key: string;
-  cx: number;
-  cy: number;
-  cz: number;
-  canonical: Uint16Array;
-  halo: Uint16Array;
-  chunkRevision: number;
-  haloRevision: string;
-  proceduralVoxelSamples: number;
-  macroContextCount: number;
-};
-export type WorkerMeshPreparation = {
-  key: string;
-  cx: number;
-  cy: number;
-  cz: number;
-  chunkRevision: number;
-  generatorVersion: number;
-  canonical?: Uint16Array;
-  overlays: MeshAuthorityOverlay[];
-};
-export type WorkerCanonicalResult = Pick<
+export type * from './game-server-types';
+import type {
+  DerivedMeshSnapshot,
+  GameServerOptions,
+  ServerChunk,
+  VoxelRegionChanged,
+  WorkerCanonicalResult,
   WorkerMeshPreparation,
-  'key' | 'cx' | 'cy' | 'cz' | 'chunkRevision' | 'generatorVersion'
-> & { canonical: Uint16Array };
-
-const snapshotFromChunk = (seedText: string, chunk: ServerChunk): ChunkSnapshot => ({
-  key: chunk.key,
-  seedText,
-  cx: chunk.cx,
-  cy: chunk.cy,
-  cz: chunk.cz,
-  generatorVersion: GENERATOR_VERSION,
-  revision: chunk.revision,
-  voxels: chunk.voxels.slice(),
-});
+  WorldCommitMetrics,
+  WorldCommitResult,
+  WorldEditBatch,
+  WorldSemanticEvent,
+} from './game-server-types';
 
 const EMPTY_SEMANTIC_EVENTS: readonly WorldSemanticEvent[] = Object.freeze([]);
 const singleEditMetrics = (canonicalWriteCount: 0 | 1, meshInvalidationCount: number): WorldCommitMetrics => ({
@@ -146,11 +71,35 @@ export class GameServer extends GameServerGameplayFacade {
   private readonly persistence?: ChunkPersistence & Partial<GameplayPersistence>;
   private revision = 0;
   private appliedMutationCount = 0;
+  private readonly fluidRuntime: VoxelFluidRuntime;
+  private readonly fluidChunks: FluidChunkAccess;
+  private readonly fluidChunkActivations = new FluidChunkActivationQueue();
+  private readonly fluidWindow = new FluidActiveWindow();
+  private fluidEdit = false;
+  private fluidCellChanged = false;
 
   constructor(readonly options: GameServerOptions) {
     super(options.persistence);
     this.seed = normalizeSeed(options.seedText);
     this.persistence = options.persistence;
+    this.fluidChunks = new FluidChunkAccess(this.chunks, (cx, cy, cz) => this.getChunk(cx, cy, cz));
+    this.fluidRuntime = new VoxelFluidRuntime({
+      getVoxel: ([x, y, z]) =>
+        this.fluidWindow.allowsPosition(x, y, z) ? this.fluidChunks.peekVoxel(x, y, z) : undefined,
+      getCell: ([x, y, z]) => (this.fluidWindow.allowsPosition(x, y, z) ? this.fluidChunks.cell(x, y, z, false) : null),
+      setCell: ([x, y, z], cell) => {
+        this.fluidCellChanged = this.fluidChunks.write(x, y, z, cell);
+      },
+      edit: ([x, y, z], value) => {
+        this.fluidEdit = true;
+        try {
+          return this.commitSingleEdit('fluid-v1', x, y, z, value);
+        } finally {
+          this.fluidEdit = false;
+          this.fluidCellChanged = false;
+        }
+      },
+    });
   }
 
   get worldTime(): number {
@@ -190,6 +139,7 @@ export class GameServer extends GameServerGameplayFacade {
           dirty: false,
           materialized: true,
           accessEpoch: ++this.accessSequence,
+          fluid: snapshot.fluid?.slice() ?? legacyFluid(snapshot.voxels),
         }
       : {
           key,
@@ -202,8 +152,11 @@ export class GameServer extends GameServerGameplayFacade {
           dirty: false,
           materialized: false,
           accessEpoch: ++this.accessSequence,
+          fluid: new Uint8Array(CHUNK_SIZE ** 3),
         };
+    if (!restored) chunk.fluid = legacyFluid(chunk.voxels);
     this.chunks.set(key, chunk);
+    if (this.fluidWindow.allowsKey(key)) this.fluidChunkActivations.schedule(chunk);
     return chunk;
   }
 
@@ -231,9 +184,18 @@ export class GameServer extends GameServerGameplayFacade {
         for (let overlayX = cx - 1; overlayX <= cx + 1; overlayX += 1) {
           if (overlayX === cx && overlayY === cy && overlayZ === cz) continue;
           const source = this.readAuthoritativeChunk(overlayX, overlayY, overlayZ);
-          if (source) overlays.push({ cx: overlayX, cy: overlayY, cz: overlayZ, voxels: source.voxels });
+          if (source)
+            overlays.push({ cx: overlayX, cy: overlayY, cz: overlayZ, voxels: source.voxels, fluid: source.fluid });
         }
-    const derived = createProceduralMeshInput({ seed: this.seed, cx, cy, cz, canonical: chunk.voxels, overlays });
+    const derived = createProceduralMeshInput({
+      seed: this.seed,
+      cx,
+      cy,
+      cz,
+      canonical: chunk.voxels,
+      fluid: chunk.fluid,
+      overlays,
+    });
     return {
       key: chunk.key,
       cx,
@@ -241,6 +203,8 @@ export class GameServer extends GameServerGameplayFacade {
       cz,
       canonical: chunk.voxels,
       halo: derived.halo,
+      fluid: derived.fluid,
+      fluidHalo: derived.fluidHalo,
       chunkRevision: chunk.revision,
       haloRevision: derived.haloRevision,
       proceduralVoxelSamples: derived.proceduralVoxelSamples,
@@ -258,7 +222,13 @@ export class GameServer extends GameServerGameplayFacade {
           if (overlayX === cx && overlayY === cy && overlayZ === cz) continue;
           const source = this.readAuthoritativeChunk(overlayX, overlayY, overlayZ);
           if (source?.materialized)
-            overlays.push({ cx: overlayX, cy: overlayY, cz: overlayZ, voxels: source.voxels.slice() });
+            overlays.push({
+              cx: overlayX,
+              cy: overlayY,
+              cz: overlayZ,
+              voxels: source.voxels.slice(),
+              fluid: source.fluid.slice(),
+            });
         }
     return {
       key,
@@ -268,6 +238,7 @@ export class GameServer extends GameServerGameplayFacade {
       chunkRevision: center?.revision ?? 0,
       generatorVersion: this.generatorVersion,
       ...(center?.materialized ? { canonical: center.voxels.slice() } : {}),
+      ...(center?.materialized ? { fluid: center.fluid.slice() } : {}),
       overlays,
     };
   }
@@ -286,7 +257,7 @@ export class GameServer extends GameServerGameplayFacade {
       return current.voxels.every((value, index) => value === result.canonical[index]);
     }
     if (result.chunkRevision !== 0) return false;
-    this.chunks.set(result.key, {
+    const accepted: ServerChunk = {
       key: result.key,
       cx: result.cx,
       cy: result.cy,
@@ -297,7 +268,10 @@ export class GameServer extends GameServerGameplayFacade {
       dirty: false,
       materialized: false,
       accessEpoch: ++this.accessSequence,
-    });
+      fluid: legacyFluid(result.canonical),
+    };
+    this.chunks.set(result.key, accepted);
+    if (this.fluidWindow.allowsKey(result.key)) this.fluidChunkActivations.schedule(accepted);
     return true;
   }
 
@@ -306,11 +280,41 @@ export class GameServer extends GameServerGameplayFacade {
     assertMutationCoordinate(y);
     assertMutationCoordinate(z);
     assertVoxelValue(value);
-    return this.commitSingleEdit(actorId, x, y, z, value);
+    const previous = this.getVoxel(x, y, z);
+    const previousFluid = previous === Voxel.Water ? this.fluidChunks.cell(x, y, z, true) : null;
+    const result = this.commitSingleEdit(actorId, x, y, z, value);
+    if (result.committed && !this.fluidEdit) {
+      this.fluidWindow.includeEditedPosition(x, y, z);
+      this.fluidChunks.write(x, y, z, value === Voxel.Water ? { level: 8, source: true } : null);
+      if (
+        previous === Voxel.Water ||
+        value === Voxel.Water ||
+        hasAdjacentWater((...at) => this.fluidChunks.peekVoxel(...at), x, y, z)
+      )
+        this.fluidRuntime.activate([x, y, z]);
+      if (previousFluid?.source && value !== Voxel.Water) this.fluidRuntime.removeSource([x, y, z]);
+    }
+    return result;
+  }
+
+  advanceFluid(seconds: number): FluidAdvanceResult {
+    this.fluidChunkActivations.pumpRuntime(this.fluidRuntime, this.fluidChunks);
+    return this.fluidRuntime.advance(seconds);
+  }
+
+  setFluidActiveChunks(keys: readonly string[]): void {
+    this.fluidChunkActivations.sync(keys, this.chunks);
+    this.fluidWindow.update(keys);
+  }
+
+  getFluidCell(x: number, y: number, z: number): FluidCell | null {
+    return this.getVoxel(x, y, z) === Voxel.Water
+      ? (this.fluidChunks.cell(x, y, z, true) ?? { level: 8, source: true })
+      : null;
   }
 
   editBatch(batch: WorldEditBatch): WorldCommitResult {
-    return commitWorldEditBatch(
+    const result = commitWorldEditBatch(
       {
         getChunk: (cx, cy, cz) => this.getChunk(cx, cy, cz),
         getRevision: () => this.revision,
@@ -324,6 +328,17 @@ export class GameServer extends GameServerGameplayFacade {
       },
       batch,
     );
+    if (result.committed && !this.fluidEdit)
+      for (const edit of batch.edits ?? []) {
+        this.fluidWindow.includeEditedPosition(edit.x, edit.y, edit.z);
+        this.fluidChunks.write(edit.x, edit.y, edit.z, edit.value === Voxel.Water ? { level: 8, source: true } : null);
+        if (
+          edit.value === Voxel.Water ||
+          hasAdjacentWater((...at) => this.fluidChunks.peekVoxel(...at), edit.x, edit.y, edit.z)
+        )
+          this.fluidRuntime.activate([edit.x, edit.y, edit.z]);
+      }
+    return result;
   }
   private commitSingleEdit(actorId: string, x: number, y: number, z: number, value: number): WorldCommitResult {
     const cx = floorDiv(x, CHUNK_SIZE);
@@ -331,7 +346,21 @@ export class GameServer extends GameServerGameplayFacade {
     const cz = floorDiv(z, CHUNK_SIZE);
     const chunk = this.getChunk(cx, cy, cz);
     const index = voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE));
-    if (chunk.voxels[index] === value)
+    if (chunk.voxels[index] === value) {
+      if (this.fluidEdit && this.fluidCellChanged) {
+        const committed = commitFluidMetadata({
+          actorId,
+          x,
+          y,
+          z,
+          chunk,
+          worldRevision: this.revision,
+          metrics: (count) => SINGLE_EDIT_METRICS[count],
+        });
+        this.revision = committed.worldRevision;
+        this.appliedMutationCount += 1;
+        return committed.result;
+      }
       return {
         committed: false,
         worldRevision: this.revision,
@@ -339,6 +368,7 @@ export class GameServer extends GameServerGameplayFacade {
         semanticEvents: EMPTY_SEMANTIC_EVENTS,
         metrics: SINGLE_EDIT_NOOP_METRICS,
       };
+    }
     const worldRevision = this.revision + 1;
     const meshChunks = remeshChunkKeysForEdit(x, y, z);
     if (meshChunks.length > 1) meshChunks.sort(compareChunkKeys);
@@ -371,7 +401,7 @@ export class GameServer extends GameServerGameplayFacade {
     const dirty = [...this.chunks.values()].filter((chunk) => chunk.dirty);
     if (!dirty.length) return [];
     if (!this.persistence) return [];
-    const snapshots = dirty.map((chunk) => snapshotFromChunk(this.options.seedText, chunk));
+    const snapshots = dirty.map((chunk) => createChunkSnapshot(this.options.seedText, chunk));
     await this.persistence.saveSnapshots(snapshots);
     snapshots.forEach((snapshot) => {
       const chunk = this.chunks.get(snapshot.key);
@@ -461,6 +491,10 @@ export class GameServer extends GameServerGameplayFacade {
       Number.isInteger(snapshot.revision) &&
       snapshot.revision >= 0 &&
       snapshot.voxels.length === CHUNK_SIZE ** 3 &&
+      (snapshot.fluid === undefined ||
+        (snapshot.fluidVersion === 1 &&
+          snapshot.fluid.length === CHUNK_SIZE ** 3 &&
+          snapshot.fluid.every((value) => value === 0 || ((value & 0x0f) >= 1 && (value & 0x0f) <= 8)))) &&
       snapshot.voxels.every((value) => value >= Voxel.Air && value <= Voxel.Lantern)
     );
   }
@@ -485,8 +519,10 @@ export class GameServer extends GameServerGameplayFacade {
       dirty: false,
       materialized: true,
       accessEpoch: ++this.accessSequence,
+      fluid: snapshot.fluid?.slice() ?? legacyFluid(snapshot.voxels),
     };
     this.chunks.set(key, restored);
+    this.fluidChunkActivations.schedule(restored);
     return restored;
   }
 }

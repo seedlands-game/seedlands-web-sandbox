@@ -34,16 +34,18 @@ describe('玩家背包可用交互', () => {
     await server.restore();
     expect(server.advanceGameplay(0).pickups).toEqual([]);
   });
-  it('移动自动拾取同样产生一次成功事件', () => {
+  it('站立在附近也会自动吸附且只产生一次成功事件', () => {
     const server = new GameServer({ seedText: 'auto-pickup-event' });
     const player = server.spawnPlayer({ position: [0, 34, 0] });
     server.spawnWorldItem([0, 34, 0], { itemId: ItemIds.Berry, count: 1 });
-    expect(server.advanceGameplay(0.1).pickups).toEqual([]);
-    server.updateEntity(player.id, { position: [0.2, 34, 0] });
+
     const result = server.advanceGameplay(0.1);
-    expect(result.pickups).toEqual([
-      { playerId: player.id, position: [0, 34, 0], stack: { itemId: ItemIds.Berry, count: 1 } },
-    ]);
+    expect(result.pickups).toHaveLength(1);
+    expect(result.pickups[0]).toMatchObject({
+      playerId: player.id,
+      stack: { itemId: ItemIds.Berry, count: 1 },
+    });
+    expect(server.getInventory(player.id).slots).toContainEqual({ itemId: ItemIds.Berry, count: 1 });
     expect(server.advanceGameplay(0.1).pickups).toEqual([]);
   });
   it('同类部分合并、异类交换、移到空格都守恒', () => {

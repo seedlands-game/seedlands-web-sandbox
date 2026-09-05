@@ -2,7 +2,7 @@ import type { ChunkPersistence, ChunkSnapshot } from '../server/persistence/chun
 import type { GameplaySnapshotV1 } from '../server/gameplay/gameplay-runtime';
 import { GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
 
-export type SerializedChunkSnapshot = Omit<ChunkSnapshot, 'voxels'> & { voxels: number[] };
+export type SerializedChunkSnapshot = Omit<ChunkSnapshot, 'voxels' | 'fluid'> & { voxels: number[]; fluid?: number[] };
 export type BrowserWorldSave = {
   seed: string;
   generatorVersion: number;
@@ -41,6 +41,8 @@ type LoadResult =
       recordBytes: number;
       decodeMs: number;
       voxels: ArrayBuffer;
+      fluidVersion?: 1;
+      fluid?: ArrayBuffer;
     };
 type SaveResult = {
   saved: Array<{ key: string; revision: number }>;
@@ -60,7 +62,11 @@ export type BrowserPersistenceMetrics = {
   codecs: Record<string, number>;
 };
 
-const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({ ...snapshot, voxels: snapshot.voxels.slice() });
+const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
+  ...snapshot,
+  voxels: snapshot.voxels.slice(),
+  ...(snapshot.fluid ? { fluid: snapshot.fluid.slice() } : {}),
+});
 
 export class BrowserChunkPersistence implements ChunkPersistence {
   readonly worldId: string;
@@ -129,9 +135,10 @@ export class BrowserChunkPersistence implements ChunkPersistence {
           !snapshot.voxels.every((voxel) => Number.isInteger(voxel) && voxel >= Voxel.Air && voxel <= Voxel.Lantern)
         )
           throw new Error(`Legacy Chunk snapshot is invalid for ${snapshot.key}.`);
-      const snapshots = options.legacySnapshots.map((snapshot) => ({
+      const snapshots: ChunkSnapshot[] = options.legacySnapshots.map(({ voxels, fluid, ...snapshot }) => ({
         ...snapshot,
-        voxels: Uint16Array.from(snapshot.voxels),
+        voxels: Uint16Array.from(voxels),
+        ...(fluid ? { fluid: Uint8Array.from(fluid) } : {}),
       }));
       await persistence.saveSnapshots(snapshots);
       for (const snapshot of snapshots) {
@@ -231,6 +238,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       generatorVersion: GENERATOR_VERSION,
       revision: result.revision,
       voxels: new Uint16Array(result.voxels),
+      ...(result.fluid ? { fluidVersion: result.fluidVersion, fluid: new Uint8Array(result.fluid) } : {}),
     });
   }
 
@@ -250,8 +258,15 @@ export class BrowserChunkPersistence implements ChunkPersistence {
 
   async saveSnapshots(snapshots: readonly ChunkSnapshot[]): Promise<void> {
     if (!snapshots.length) return;
-    const copies = snapshots.map((snapshot) => ({ ...snapshot, voxels: snapshot.voxels.slice() }));
-    const transfers = copies.map((snapshot) => snapshot.voxels.buffer as Transferable);
+    const copies = snapshots.map((snapshot) => ({
+      ...snapshot,
+      voxels: snapshot.voxels.slice(),
+      ...(snapshot.fluid ? { fluid: snapshot.fluid.slice() } : {}),
+    }));
+    const transfers = copies.flatMap((snapshot) => [
+      snapshot.voxels.buffer as Transferable,
+      ...(snapshot.fluid ? [snapshot.fluid.buffer as Transferable] : []),
+    ]);
     const result = (await this.request(
       {
         kind: 'save',
@@ -262,6 +277,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
           cz: snapshot.cz,
           revision: snapshot.revision,
           voxels: snapshot.voxels.buffer,
+          ...(snapshot.fluid ? { fluidVersion: 1, fluid: snapshot.fluid.buffer } : {}),
         })),
       },
       transfers,

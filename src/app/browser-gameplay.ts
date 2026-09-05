@@ -1,3 +1,6 @@
+import { FirstPersonViewmodel } from './first-person-viewmodel';
+import { VoxelTargetOutline } from './voxel-target-outline';
+import type { VoxelTarget } from '../client/voxel-target';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from './browser-world-limits';
 import { entityHitDistance } from '../client/entity-hit-volume';
 import type * as pc from 'playcanvas';
@@ -11,6 +14,7 @@ import type { GameplayPresentationEvent } from '../client/audio/gameplay-audio-e
 
 type Options = {
   app: pc.Application;
+  camera: pc.Entity;
   server: GameServer;
   playerId: string;
   bridge: UiBridge;
@@ -26,6 +30,10 @@ type Options = {
 
 export class BrowserGameplay {
   private readonly presenter: GameplayEntityPresenter;
+  private readonly viewmodel: FirstPersonViewmodel;
+  private readonly outline: VoxelTargetOutline;
+  private aimTarget: VoxelTarget | null = null;
+  private gestureSeconds = 0;
   private inventoryOpen = false;
   private previousProjection: GameplayUiProjection | undefined;
   private previousHealth: number | null = null;
@@ -33,6 +41,16 @@ export class BrowserGameplay {
 
   constructor(private readonly options: Options) {
     this.presenter = new GameplayEntityPresenter(options.app);
+    this.viewmodel = new FirstPersonViewmodel(options.app, options.camera);
+    this.outline = new VoxelTargetOutline(options.app);
+  }
+
+  setSuspended(suspended: boolean): void {
+    this.viewmodel.setVisible(!suspended && !this.blocksInput);
+  }
+
+  setAimTarget(target: VoxelTarget | null): void {
+    this.aimTarget = target?.inRange ? target : null;
   }
 
   updatePlayerPosition(position: [number, number, number]): void {
@@ -41,6 +59,13 @@ export class BrowserGameplay {
 
   advance(seconds: number): void {
     this.breakProjectionElapsedSeconds += seconds;
+    this.outline.update(this.blocksInput ? null : this.aimTarget);
+    this.gestureSeconds = Math.max(0, this.gestureSeconds - seconds);
+    const state = this.options.server.getPlayerState(this.options.playerId);
+    this.viewmodel.setHeldItem(state.inventory[state.selectedSlot]?.itemId ?? null);
+    this.viewmodel.setVisible(!this.blocksInput);
+    if (!this.gestureSeconds) this.viewmodel.setAction(state.breakAction ? 'mine' : 'idle');
+    this.viewmodel.update(seconds);
     const playerBefore = this.options.server.getPlayerState(this.options.playerId);
     const before = playerBefore.breakAction;
     const result = this.options.server.advanceGameplay(seconds);
@@ -106,13 +131,15 @@ export class BrowserGameplay {
         },
         inventoryOpen: this.inventoryOpen,
         craftableRecipeIds: this.options.server.listCraftableRecipes(this.options.playerId).map((recipe) => recipe.id),
-        target: player.breakAction
-          ? {
-              kind: 'voxel',
-              id: player.breakAction.position.join(','),
-              label: voxelNames[player.breakAction.voxel] ?? '体素',
-            }
-          : null,
+        target:
+          this.aimTarget && !this.blocksInput
+            ? {
+                kind: 'voxel',
+                id: this.aimTarget.position.join(','),
+                label: voxelNames[this.aimTarget.voxel] ?? '体素',
+                voxel: this.aimTarget.voxel,
+              }
+            : null,
         breaking,
       },
       this.previousProjection,
@@ -268,11 +295,16 @@ export class BrowserGameplay {
 
   dispose(): void {
     this.presenter.dispose();
+    this.viewmodel.dispose();
   }
 
   private present(event: GameplayPresentationEvent): void {
     this.options.onPresentation?.(event);
     const kind = event.kind;
+    if (kind === 'attack' || kind === 'place' || kind === 'eat') {
+      this.viewmodel.setAction(kind);
+      this.gestureSeconds = 0.42;
+    }
     if (kind === 'attack' || kind === 'place' || kind === 'eat' || kind === 'damage') {
       const sequence = this.options.nextInteractionSequence();
       this.options.session.publishInteraction(sequence, { gesture: { kind, sequence } });

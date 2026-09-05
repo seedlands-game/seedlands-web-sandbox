@@ -60,6 +60,6 @@ Loaded  ${telemetry.loadedChunks} · Rendered  ${telemetry.renderedChunks}
 Generation Queue  ${telemetry.generationQueue} · Meshing Queue  ${telemetry.meshingQueue}
 Triangles  ${telemetry.triangles.toLocaleString()} · Draw Calls  ${telemetry.drawCalls}
 Deferred Remeshes  ${telemetry.deferredRemeshes}
-Materialized Chunks  ${world.mutationCount}`,
+World Mutations      ${world.mutationCount}`,
   };
 }

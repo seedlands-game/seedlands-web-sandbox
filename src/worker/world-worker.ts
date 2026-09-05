@@ -12,12 +12,19 @@ type Identity = {
   chunkRevision: number;
   haloRevision: string;
 };
-type MeshTask = Identity & { kind: 'mesh'; canonical: ArrayBuffer; halo: ArrayBuffer };
+type MeshTask = Identity & {
+  kind: 'mesh';
+  canonical: ArrayBuffer;
+  halo: ArrayBuffer;
+  fluid: ArrayBuffer;
+  fluidHalo: ArrayBuffer;
+};
 type GenerateMeshTask = Identity & {
   kind: 'generate-mesh';
   generatorVersion: number;
   canonical?: ArrayBuffer;
-  overlays: Array<{ cx: number; cy: number; cz: number; voxels: ArrayBuffer }>;
+  fluid?: ArrayBuffer;
+  overlays: Array<{ cx: number; cy: number; cz: number; voxels: ArrayBuffer; fluid?: ArrayBuffer }>;
 };
 type Task = MeshTask | GenerateMeshTask;
 
@@ -61,6 +68,8 @@ self.onmessage = (event: MessageEvent<Task>) => {
       data: new Uint16Array(task.canonical),
       changes: [],
       halo: new Uint16Array(task.halo),
+      fluid: new Uint8Array(task.fluid),
+      fluidHalo: new Uint8Array(task.fluidHalo),
     });
     const workerMeshingMs = performance.now() - meshingStartedAt;
     const { packed, transfers } = packMeshes(meshes);
@@ -80,7 +89,12 @@ self.onmessage = (event: MessageEvent<Task>) => {
     cy: task.cy,
     cz: task.cz,
     canonical,
-    overlays: task.overlays.map((overlay) => ({ ...overlay, voxels: new Uint16Array(overlay.voxels) })),
+    ...(task.fluid ? { fluid: new Uint8Array(task.fluid) } : {}),
+    overlays: task.overlays.map(({ voxels, fluid, ...overlay }) => ({
+      ...overlay,
+      voxels: new Uint16Array(voxels),
+      ...(fluid ? { fluid: new Uint8Array(fluid) } : {}),
+    })),
   });
   const workerHaloMs = performance.now() - haloStartedAt;
   const meshingStartedAt = performance.now();
@@ -92,6 +106,8 @@ self.onmessage = (event: MessageEvent<Task>) => {
     data: generated.canonical,
     changes: [],
     halo: generated.halo,
+    fluid: generated.fluid,
+    fluidHalo: generated.fluidHalo,
   });
   const workerMeshingMs = performance.now() - meshingStartedAt;
   const { packed, transfers } = packMeshes(meshes);

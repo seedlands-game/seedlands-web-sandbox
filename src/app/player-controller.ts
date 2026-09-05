@@ -4,6 +4,7 @@ import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
 import { releasePointerLock } from './pointer-lock';
+import { traceVoxelTarget, type VoxelTarget } from '../client/voxel-target';
 
 const PLAYER_HALF_WIDTH = 0.32;
 export const PLAYER_FEET_OFFSET = 1.6;
@@ -36,6 +37,7 @@ type PlayerControllerOptions = {
   onFeedback: (message: string, tone: 'info' | 'success' | 'error') => void;
   onQueueSave: () => void;
   onFlushSave: () => void;
+  onAimTarget?: (target: VoxelTarget | null) => void;
 };
 
 export class PlayerController {
@@ -46,6 +48,11 @@ export class PlayerController {
   private readonly keys = new Set<string>();
   private attempts = 0;
   private spectator = false;
+  private miningHeld = false;
+  private activeMiningTarget: string | null = null;
+  private attackCooldownSeconds = 0;
+  private attackBlocking = false;
+  private publishedAimTarget: VoxelTarget | null = null;
 
   constructor(private readonly options: PlayerControllerOptions) {}
 
@@ -65,10 +72,33 @@ export class PlayerController {
     return this.collides(this.options.camera.getPosition());
   }
 
+  get interactionBlocked() {
+    return Boolean(this.options.isPaused?.() || this.options.isUiBlockingInput());
+  }
+
+  get aimTarget(): VoxelTarget | null {
+    if (this.interactionBlocked) return null;
+    const target = this.traceTarget();
+    return target?.inRange ? target : null;
+  }
+
+  private traceTarget(): VoxelTarget | null {
+    const world = this.options.getWorld();
+    if (!world) return null;
+    const position = this.options.camera.getPosition();
+    const direction = this.options.camera.forward;
+    return traceVoxelTarget([position.x, position.y, position.z], [direction.x, direction.y, direction.z], (x, y, z) =>
+      world.getVoxel(x, y, z),
+    );
+  }
+
   install() {
     const { canvas } = this.options;
     window.onkeydown = (event) => {
-      if (this.options.isPaused?.()) return;
+      if (this.options.isPaused?.()) {
+        this.stopMining();
+        return;
+      }
       if (event.code === 'F4') {
         event.preventDefault();
         this.options.onToggleCommandShell();
@@ -84,14 +114,17 @@ export class PlayerController {
         this.options.onCloseUi();
         return;
       }
-      if (this.options.isUiBlockingInput()) return;
+      if (event.code === 'KeyM') {
+        this.options.onToggleMap();
+        return;
+      }
+      if (this.interactionBlocked) {
+        this.stopMining();
+        return;
+      }
       if (event.code === 'F3') {
         event.preventDefault();
         this.options.onToggleDebug();
-        return;
-      }
-      if (event.code === 'KeyM') {
-        this.options.onToggleMap();
         return;
       }
       if (event.code === 'KeyP') {
@@ -108,12 +141,15 @@ export class PlayerController {
         return;
       }
       this.keys.add(event.code);
-      if (/^Digit[1-8]$/.test(event.code)) this.options.onSelectHotbarSlot(Number(event.code[5]) - 1);
+      if (/^Digit[1-8]$/.test(event.code)) {
+        this.options.onSelectHotbarSlot(Number(event.code[5]) - 1);
+        if (this.miningHeld) this.cancelActiveMining();
+      }
     };
     window.onkeyup = (event) => this.keys.delete(event.code);
     canvas.oncontextmenu = (event) => event.preventDefault();
     canvas.onclick = () => {
-      if (!this.options.isPaused?.()) void canvas.requestPointerLock();
+      if (!this.interactionBlocked) void canvas.requestPointerLock();
     };
     document.onmousemove = (event) => {
       if (document.pointerLockElement === canvas) {
@@ -121,19 +157,21 @@ export class PlayerController {
         this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * 0.13));
       }
     };
+    document.onpointerlockchange = () => {
+      if (document.pointerLockElement !== canvas) this.stopMining();
+    };
+    window.onblur = () => this.stopMining();
     document.onmousedown = (event) => {
-      if (this.options.isPaused?.()) return;
-      if (this.options.isUiBlockingInput()) return;
+      if (this.interactionBlocked) return;
       if (document.pointerLockElement !== canvas) {
         if (event.target !== canvas || event.button !== 2) return;
         void canvas.requestPointerLock();
       }
-      if (event.button === 0)
-        this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(false));
+      if (event.button === 0) this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.startMining());
       if (event.button === 2) this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(true));
     };
     document.onmouseup = (event) => {
-      if (event.button === 0) this.options.onCancelBreak();
+      if (event.button === 0) this.stopMining();
     };
   }
 
@@ -143,14 +181,22 @@ export class PlayerController {
     document.onmousemove = null;
     document.onmousedown = null;
     document.onmouseup = null;
+    document.onpointerlockchange = null;
+    window.onblur = null;
     this.options.canvas.onclick = null;
     this.options.canvas.oncontextmenu = null;
     this.keys.clear();
+    this.stopMining();
+    this.publishAimTarget(null);
   }
 
   update(dt: number) {
     const world = this.options.getWorld();
-    if (!world) return;
+    if (!world) {
+      this.stopMining();
+      this.publishAimTarget(null);
+      return;
+    }
     const camera = this.options.camera;
     camera.setEulerAngles(this.pitch, this.yaw, 0);
     const span = this.options.telemetry.beginSpan('player', 'PlayerMovement');
@@ -179,6 +225,13 @@ export class PlayerController {
       this.grounded = false;
       this.moveAxis('y', this.velocity.y * dt);
     }
+    this.attackCooldownSeconds = Math.max(0, this.attackCooldownSeconds - dt);
+    const target = this.aimTarget;
+    this.publishAimTarget(target);
+    if (this.miningHeld) {
+      if (this.interactionBlocked) this.stopMining();
+      else this.continueMining(target);
+    }
     this.options.telemetry.endSpan(span);
   }
 
@@ -186,6 +239,7 @@ export class PlayerController {
     this.keys.clear();
     this.velocity.x = 0;
     this.velocity.z = 0;
+    this.stopMining();
     releasePointerLock();
   }
 
@@ -399,38 +453,81 @@ export class PlayerController {
   private interact(place: boolean) {
     this.attempts += 1;
     if (place && this.options.onUseHeldItem()) return;
-    const world = this.options.getWorld();
-    if (!world) return;
+    const target = this.aimTarget;
+    if (!target) return this.options.onFeedback('距离过远', 'error');
+    if (place) {
+      if (!target.adjacent) return this.options.onFeedback('无法放置', 'error');
+      this.options.onPlace(target.adjacent);
+    }
+  }
+
+  private startMining() {
+    this.attempts += 1;
+    this.miningHeld = true;
+    this.attackCooldownSeconds = 0;
+    this.continueMining(this.aimTarget);
+  }
+
+  private continueMining(target: VoxelTarget | null) {
     const position = this.options.camera.getPosition();
     const direction = this.options.camera.forward;
-    let last: [number, number, number] | null = null;
-    let hit: [number, number, number] | null = null;
-    let hitDistance = 7;
-    for (let distance = 0.15; distance < 7; distance += 0.08) {
-      const cell: [number, number, number] = [
-        Math.floor(position.x + direction.x * distance),
-        Math.floor(position.y + direction.y * distance),
-        Math.floor(position.z + direction.z * distance),
-      ];
-      if (isSolid(world.getVoxel(...cell))) {
-        hit = cell;
-        hitDistance = distance;
-        break;
-      }
-      last = cell;
-    }
-    if (
-      !place &&
-      this.options.onAttackTarget(
+    if (this.attackCooldownSeconds === 0) {
+      this.attackCooldownSeconds = 0.2;
+      const obstacle = this.traceTarget();
+      this.attackBlocking = this.options.onAttackTarget(
         [position.x, position.y, position.z],
         [direction.x, direction.y, direction.z],
-        Math.min(3, hitDistance),
-      )
-    )
+        Math.min(3, obstacle?.distance ?? 3),
+      );
+      if (this.attackBlocking) {
+        this.cancelActiveMining();
+        return;
+      }
+    }
+    if (this.attackBlocking) return;
+    const targetKey = target?.position.join(',') ?? null;
+    if (!target || !targetKey) {
+      this.cancelActiveMining();
       return;
-    const target = place ? last : hit;
-    if (!target) return this.options.onFeedback('距离过远', 'error');
-    if (place) this.options.onPlace(target);
-    else this.options.onBeginBreak(target);
+    }
+    if (targetKey === this.activeMiningTarget) return;
+    this.cancelActiveMining();
+    this.options.onBeginBreak(target.position);
+    this.activeMiningTarget = targetKey;
+  }
+
+  private cancelActiveMining() {
+    if (!this.activeMiningTarget) return;
+    this.options.onCancelBreak();
+    this.activeMiningTarget = null;
+  }
+
+  private stopMining() {
+    this.miningHeld = false;
+    this.cancelActiveMining();
+  }
+
+  private publishAimTarget(target: VoxelTarget | null) {
+    const previous = this.publishedAimTarget;
+    const adjacentEqual =
+      previous?.adjacent === target?.adjacent ||
+      Boolean(
+        previous?.adjacent &&
+        target?.adjacent &&
+        previous.adjacent.every((value, index) => value === target.adjacent![index]),
+      );
+    const equal =
+      previous === target ||
+      Boolean(
+        previous &&
+        target &&
+        previous.voxel === target.voxel &&
+        previous.inRange === target.inRange &&
+        previous.position.every((value, index) => value === target.position[index]) &&
+        adjacentEqual,
+      );
+    if (equal) return;
+    this.publishedAimTarget = target;
+    this.options.onAimTarget?.(target);
   }
 }

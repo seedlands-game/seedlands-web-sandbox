@@ -13,6 +13,7 @@
   import ShellOverlays from './shell-overlays.svelte';
   import type { ApplicationShell } from '../application-shell';
   import PlayerActionPresentation from './player-action-presentation.svelte';
+  import TargetCard from './target-card.svelte';
   import SurvivalHud from './survival-hud.svelte';
   import PresentedEntities from './presented-entities.svelte';
 
@@ -71,8 +72,8 @@
 
 <section id="hud" hidden={!hud.visible} aria-label="游戏 HUD">
   <div id="crosshair" aria-label="准星"><span></span></div>
-  <div id="world-clock" class="hud-chip">{hud.worldClock}</div>
-  <SurvivalHud {hud} {interaction} />
+  <div id="world-clock" class="game-panel">{hud.worldClock}</div>
+  <TargetCard {interaction} />
   {#if !shell.gameplay.inventoryOpen && !shell.mapOpen && !shell.commandOpen && shell.gameplay.lifecycle === 'alive'}
     <PlayerActionPresentation {hud} {interaction} />
   {/if}
@@ -94,11 +95,17 @@
   <MacroMap {shell} {actions} />
   <InventoryCrafting gameplay={shell.gameplay} {actions} />
   <DeathOverlay dead={shell.gameplay.lifecycle === 'dead'} {actions} />
-  {#if hud.visible}<PresentedEntities entities={interaction.presentedEntities} />{/if}
+  {#if hud.visible && debug.visible}<PresentedEntities entities={interaction.presentedEntities} />{/if}
   <div id="help" class="game-panel">
     WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–8 快捷栏 · E 背包 · M 地图 · F3 指标 · F4 命令
   </div>
-  <Hotbar slots={hud.hotbar} selected={hud.selectedHotbarSlot} onselect={actions.selectHotbarSlot} />
+  <div id="survival-deck">
+    <div id="held-item-name">
+      {hud.hotbar[hud.selectedHotbarSlot]?.itemId ? hud.hotbar[hud.selectedHotbarSlot].name : ''}
+    </div>
+    <SurvivalHud {hud} />
+    <Hotbar slots={hud.hotbar} selected={hud.selectedHotbarSlot} onselect={actions.selectHotbarSlot} />
+  </div>
 </section>
 
 {#if buildWatermark}

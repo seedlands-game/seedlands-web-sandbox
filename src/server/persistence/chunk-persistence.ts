@@ -6,6 +6,8 @@ export type ChunkSnapshot = ChunkCoord & {
   generatorVersion: number;
   revision: number;
   voxels: Uint16Array;
+  fluidVersion?: 1;
+  fluid?: Uint8Array;
 };
 
 export interface ChunkPersistence {

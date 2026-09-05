@@ -18,6 +18,14 @@
   } = $props();
 </script>
 
-<button {id} type="button" class={className} aria-label={label} aria-pressed={pressed} {disabled} {onclick}>
+<button
+  {id}
+  type="button"
+  class={`game-button ${className}`}
+  aria-label={label}
+  aria-pressed={pressed}
+  {disabled}
+  {onclick}
+>
   {@render children?.()}
 </button>

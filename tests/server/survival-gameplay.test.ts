@@ -136,6 +136,26 @@ describe('crafting and survival rules', () => {
 });
 
 describe('combat, death and respawn', () => {
+  it('rejects an entity attack through a solid wall and allows it after the wall is removed', () => {
+    const server = createPlayerServer();
+    const creature = server.spawnEntity({ type: 'creature', position: [2.5, 34.6, 0.5], health: 12, maxHealth: 12 });
+    server.edit(1, 34, 0, Voxel.Stone, 'fixture');
+    server.edit(1, 35, 0, Voxel.Stone, 'fixture');
+
+    expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: false, reason: 'blocked' });
+    expect(server.getEntity(creature.id)).toMatchObject({ health: 12 });
+
+    server.edit(1, 34, 0, Voxel.Air, 'fixture');
+    server.edit(1, 35, 0, Voxel.Air, 'fixture');
+    expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: true, damage: 4 });
+    expect(server.getEntity(creature.id)).toMatchObject({ health: 8 });
+    expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: false, reason: 'cooldown' });
+
+    server.advanceGameplay(0.5);
+    server.updateEntity(creature.id, { position: [20, 34.6, 0.5] });
+    expect(server.attackEntity('player-1', creature.id)).toMatchObject({ success: false, reason: 'out-of-range' });
+  });
+
   it('enforces target range and cooldown before applying damage', () => {
     const server = createPlayerServer();
     const creature = server.spawnEntity({ type: 'creature', position: [2, 34.6, 0.5], health: 12, maxHealth: 12 });

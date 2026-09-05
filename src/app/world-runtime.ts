@@ -1,6 +1,6 @@
 import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
-import { CHUNK_SIZE, floorDiv } from '../world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '../world/voxel';
 import type { WorldChange } from '../world/storage';
 import type { GameServer, WorldCommitResult, WorldEditBatch } from '../server/game-server';
 import { resolveFillCommand, type FillCommand } from '../server/commands/fill-command';
@@ -222,6 +222,7 @@ export class World {
         for (let x = cx - this.quality.renderRadius; x <= cx + this.quality.renderRadius; x += 1)
           needs.push([x, y, z, Math.abs(x - cx) + Math.abs(z - cz)]);
     needs.sort((left, right) => left[3] - right[3]);
+    this.server.setFluidActiveChunks(needs.map(([x, y, z]) => chunkKey(x, y, z)));
     for (const [x, y, z] of needs) this.request(x, y, z);
     const cacheRadius = this.quality.renderRadius + 1;
     for (const [key, chunk] of this.repository.chunks) {
@@ -246,6 +247,12 @@ export class World {
   editBatch(batch: WorldEditBatch) {
     const result = this.server.editBatch(batch);
     this.consumeServerCommit(result);
+    return result;
+  }
+
+  advanceFluid(seconds: number) {
+    const result = this.server.advanceFluid(seconds);
+    result.commits.forEach((commit) => this.consumeServerCommit(commit));
     return result;
   }
 

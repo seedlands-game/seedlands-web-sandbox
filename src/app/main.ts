@@ -9,6 +9,7 @@ import { installPersistenceHarness } from './game-harness';
 import './ui/styles/theme.css';
 import './ui/styles/presentation.css';
 import './ui/styles/survival.css';
+import './ui/styles/experience.css';
 import { createUiBridge } from './ui/ui-bridge';
 import type { UiActionPort } from './ui/ui-contracts';
 import { mountUi } from './ui/mount-ui';

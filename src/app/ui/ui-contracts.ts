@@ -56,6 +56,7 @@ export type InteractionTarget = Readonly<{
   kind: 'voxel' | 'entity';
   id: string;
   label: string;
+  voxel?: number;
 }>;
 
 export type InteractionState = Readonly<{

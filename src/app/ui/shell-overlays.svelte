@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { publicAssetUrl } from '../../client/public-asset-url';
   import { onMount } from 'svelte';
   import type { ApplicationShell } from '../application-shell';
   import type { AudioSettings } from '../../client/audio/audio-types';
@@ -58,9 +59,11 @@
   >
     <GamePanel
       class="shell-dialog"
+      kind={view.panel ?? 'pause'}
       role="dialog"
       label={view.panel === 'settings' ? '设置' : view.panel === 'guide' ? '操作指南' : '暂停游戏'}
     >
+      <img class="menu-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/arcane-crest.png')} alt="" />
       {#if view.panel === 'settings'}
         <p class="eyebrow">YOUR WORLD, YOUR PACE</p>
         <h2>设置</h2>
@@ -132,7 +135,7 @@
       {:else}
         <p class="eyebrow">A MOMENT OF STILLNESS</p>
         <h2>旅途暂歇</h2>
-        <p>世界正在等待你。</p>
+        <p class="pause-subtitle">世界正在等待你</p>
         <div class="pause-actions">
           <GameButton
             label="继续游戏"

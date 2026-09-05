@@ -6,10 +6,13 @@ import {
   chunkKey,
   faceMaterialFor,
   isSolid,
+  mod,
   voxelIndex,
   type FaceMaterialId,
 } from './voxel';
 import { macroAt, type MacroContext } from './macro-world';
+import { sameMeshMaskCell, type MeshMaskCell } from './mesh-mask';
+import { shapeWaterFace, waterStepFace, waterSurfaceHeight } from './water-mesh-height';
 
 export type WorldChange = [number, number, number, number];
 export type VertexLayout = 'float32' | 'compact';
@@ -28,12 +31,6 @@ export type MeshData = {
   indices: Uint32Array | Uint16Array;
 };
 type Quad = { p: number[]; n: number[]; uv: number[]; c: number[]; i: number[] };
-type MaskCell = {
-  material: FaceMaterialId;
-  renderCategory: RenderCategory;
-  back: boolean;
-  ao: readonly [number, number, number, number];
-};
 export type MeshOptions = {
   seed: number;
   cx: number;
@@ -42,6 +39,8 @@ export type MeshOptions = {
   data: Uint16Array;
   changes: WorldChange[];
   halo?: Uint16Array;
+  fluid?: Uint8Array;
+  fluidHalo?: Uint8Array;
   outside?: (x: number, y: number, z: number) => number;
 };
 export type MeshAuthorityOverlay = {
@@ -49,6 +48,7 @@ export type MeshAuthorityOverlay = {
   cy: number;
   cz: number;
   voxels: Uint16Array;
+  fluid?: Uint8Array;
 };
 export type ProceduralMeshInput = {
   seed: number;
@@ -57,10 +57,13 @@ export type ProceduralMeshInput = {
   cz: number;
   canonical?: Uint16Array;
   overlays?: readonly MeshAuthorityOverlay[];
+  fluid?: Uint8Array;
 };
 export type ProceduralMeshInputResult = {
   canonical: Uint16Array;
   halo: Uint16Array;
+  fluid: Uint8Array;
+  fluidHalo: Uint8Array;
   haloRevision: string;
   proceduralVoxelSamples: number;
   macroContextCount: number;
@@ -119,9 +122,13 @@ export function createProceduralMeshInput({
   cz,
   canonical = makeChunk(seed, cx, cy, cz, []),
   overlays = [],
+  fluid,
 }: ProceduralMeshInput): ProceduralMeshInputResult {
   const overlayData = new Map(
     overlays.map((overlay) => [chunkKey(overlay.cx, overlay.cy, overlay.cz), overlay.voxels]),
+  );
+  const overlayFluid = new Map(
+    overlays.map((overlay) => [chunkKey(overlay.cx, overlay.cy, overlay.cz), overlay.fluid]),
   );
   const macroContexts = new Map<string, MacroContext>();
   let proceduralVoxelSamples = 0;
@@ -153,17 +160,33 @@ export function createProceduralMeshInput({
     return baseVoxel(seed, x, y, z, queryMacro(x, z), queryMacro);
   };
   const halo = new Uint16Array(MESH_HALO_SIZE ** 3);
+  const canonicalFluid = fluid?.slice() ?? Uint8Array.from(canonical, (voxel) => (voxel === Voxel.Water ? 0x88 : 0));
+  const fluidHalo = new Uint8Array(MESH_HALO_SIZE ** 3);
   let revision = 2166136261;
   for (let y = -1; y <= CHUNK_SIZE; y += 1)
     for (let z = -1; z <= CHUNK_SIZE; z += 1)
       for (let x = -1; x <= CHUNK_SIZE; x += 1) {
         const value = sample(cx * CHUNK_SIZE + x, cy * CHUNK_SIZE + y, cz * CHUNK_SIZE + z);
         halo[meshHaloIndex(x, y, z)] = value;
+        const wx = cx * CHUNK_SIZE + x;
+        const wy = cy * CHUNK_SIZE + y;
+        const wz = cz * CHUNK_SIZE + z;
+        const sampleCx = Math.floor(wx / CHUNK_SIZE);
+        const sampleCy = Math.floor(wy / CHUNK_SIZE);
+        const sampleCz = Math.floor(wz / CHUNK_SIZE);
+        const localIndex = voxelIndex(mod(wx, CHUNK_SIZE), mod(wy, CHUNK_SIZE), mod(wz, CHUNK_SIZE));
+        const sampledFluid =
+          sampleCx === cx && sampleCy === cy && sampleCz === cz
+            ? canonicalFluid[localIndex]
+            : overlayFluid.get(chunkKey(sampleCx, sampleCy, sampleCz))?.[localIndex];
+        fluidHalo[meshHaloIndex(x, y, z)] = sampledFluid ?? (value === Voxel.Water ? 0x88 : 0);
         revision = Math.imul(revision ^ value, 16777619);
       }
   return {
     canonical,
     halo,
+    fluid: canonicalFluid,
+    fluidHalo,
     haloRevision: `${revision >>> 0}`,
     proceduralVoxelSamples,
     macroContextCount: macroContexts.size,
@@ -173,12 +196,6 @@ export function createProceduralMeshInput({
 const isVisibleFace = (source: number, target: number) =>
   source !== Voxel.Air &&
   (source === Voxel.Water ? target === Voxel.Air : target === Voxel.Air || target === Voxel.Water);
-
-const sameMaskCell = (left: MaskCell | null | undefined, right: MaskCell) =>
-  left?.material === right.material &&
-  left.renderCategory === right.renderCategory &&
-  left.back === right.back &&
-  left.ao.every((value, index) => value === right.ao[index]);
 
 function vertexAo(
   block: readonly number[],
@@ -208,7 +225,18 @@ function vertexAo(
   return values as unknown as readonly [number, number, number, number];
 }
 
-export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: MeshOptions): Record<number, MeshData> {
+export function meshChunk({
+  seed,
+  cx,
+  cy,
+  cz,
+  data,
+  changes,
+  outside,
+  halo,
+  fluid,
+  fluidHalo,
+}: MeshOptions): Record<number, MeshData> {
   const result: Record<number, Quad> = {};
   const overrides = new Map(changes.map(([x, y, z, value]) => [`${x},${y},${z}`, value]));
   const macroCache = new Map<string, MacroContext>();
@@ -235,6 +263,15 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
       baseVoxel(seed, wx, wy, wz, queryMacro(wx, wz), queryMacro)
     );
   };
+  const sampleFluid = (x: number, y: number, z: number): number => {
+    if (x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE)
+      return fluid?.[voxelIndex(x, y, z)] ?? (data[voxelIndex(x, y, z)] === Voxel.Water ? 0x88 : 0);
+    if (fluidHalo && x >= -1 && y >= -1 && z >= -1 && x <= CHUNK_SIZE && y <= CHUNK_SIZE && z <= CHUNK_SIZE)
+      return fluidHalo[meshHaloIndex(x, y, z)];
+    return sample(x, y, z) === Voxel.Water ? 0x88 : 0;
+  };
+  const fluidSurfaceAt = (x: number, y: number, z: number) =>
+    waterSurfaceHeight(Math.max(1, sampleFluid(x, y, z) & 0x0f), sample(x, y + 1, z) === Voxel.Water);
   const add = (
     material: FaceMaterialId,
     vertices: number[],
@@ -244,9 +281,12 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
     height: number,
     back: boolean,
     ao: readonly number[],
+    fluidLevel: number,
+    fluidFloorHeight: number,
   ) => {
     const quad = (result[material] ??= { p: [], n: [], uv: [], c: [], i: [] });
     const start = quad.p.length / 3;
+    shapeWaterFace(material, normalAxis, back, fluidLevel, fluidFloorHeight, vertices);
     quad.p.push(...vertices);
     quad.n.push(...normal, ...normal, ...normal, ...normal);
     if (normalAxis === 0) {
@@ -269,15 +309,18 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
     const x = [0, 0, 0];
     const q = [0, 0, 0];
     q[d] = 1;
-    const mask: (MaskCell | null)[] = new Array(CHUNK_SIZE * CHUNK_SIZE);
+    const mask: (MeshMaskCell | null)[] = new Array(CHUNK_SIZE * CHUNK_SIZE);
     for (x[d] = -1; x[d] < CHUNK_SIZE;) {
       let m = 0;
       for (x[v] = 0; x[v] < CHUNK_SIZE; x[v] += 1)
         for (x[u] = 0; x[u] < CHUNK_SIZE; x[u] += 1) {
           const a = sample(x[0], x[1], x[2]);
           const b = sample(x[0] + q[0], x[1] + q[1], x[2] + q[2]);
-          const forward = isVisibleFace(a, b);
-          const back = !forward && isVisibleFace(b, a);
+          const aHeight = a === Voxel.Water ? fluidSurfaceAt(x[0], x[1], x[2]) : 0;
+          const bHeight = b === Voxel.Water ? fluidSurfaceAt(x[0] + q[0], x[1] + q[1], x[2] + q[2]) : 0;
+          const step = waterStepFace(d, a, b, aHeight, bHeight);
+          const forward = step?.forward ?? isVisibleFace(a, b);
+          const back = step?.back ?? (!forward && isVisibleFace(b, a));
           if (!forward && !back) {
             mask[m++] = null;
             continue;
@@ -292,6 +335,8 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
               material === FaceMaterial.Water ? 'transparent' : material === FaceMaterial.Leaves ? 'cutout' : 'opaque',
             back,
             ao: id === Voxel.Water ? [0, 0, 0, 0] : vertexAo(block, d, u, v, back, sample),
+            fluidLevel: id === Voxel.Water ? (step?.high ?? (back ? bHeight : aHeight)) : 0,
+            fluidFloorHeight: step?.low ?? 0,
           };
         }
       x[d] += 1;
@@ -305,11 +350,11 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
             continue;
           }
           let width = 1;
-          while (i + width < CHUNK_SIZE && sameMaskCell(mask[m + width], cell)) width += 1;
+          while (i + width < CHUNK_SIZE && sameMeshMaskCell(mask[m + width], cell)) width += 1;
           let height = 1;
           outer: for (; j + height < CHUNK_SIZE; height += 1)
             for (let offset = 0; offset < width; offset += 1)
-              if (!sameMaskCell(mask[m + offset + height * CHUNK_SIZE], cell)) break outer;
+              if (!sameMeshMaskCell(mask[m + offset + height * CHUNK_SIZE], cell)) break outer;
           x[u] = i;
           x[v] = j;
           const du = [0, 0, 0];
@@ -331,6 +376,8 @@ export function meshChunk({ seed, cx, cy, cz, data, changes, outside, halo }: Me
             height,
             cell.back,
             cell.ao,
+            cell.fluidLevel,
+            cell.fluidFloorHeight,
           );
           for (let row = 0; row < height; row += 1)
             for (let column = 0; column < width; column += 1) mask[m + column + row * CHUNK_SIZE] = null;
