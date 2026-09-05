@@ -158,5 +158,24 @@ describe('生产BrowserAuthorityClient碰撞镜像接线', () => {
     expect(client.getVoxel(1, 2, 3)).toBe(Voxel.Water);
     expect(client.getFluidCell(1, 2, 3)).toEqual({ level: 8, source: true });
     expect(client.getChunkRevision(0, 0, 0)).toBe(6);
+
+    const staleCanonical = new Uint16Array(CHUNK_SIZE ** 3);
+    staleCanonical[voxelIndex(1, 2, 3)] = Voxel.Dirt;
+    const staleAcceptance = client.acceptWorkerCanonical(
+      { chunkKey: '0,0,0', cx: 0, cy: 0, cz: 0, chunkRevision: 4, generatorVersion: 3 },
+      { canonical: staleCanonical.buffer, generatorVersion: 3 },
+    );
+    const staleRequest = worker.posts.at(-1) as { requestId: number };
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: staleRequest.requestId,
+      ok: true,
+      result: { accepted: true },
+    });
+    await expect(staleAcceptance).resolves.toBe(true);
+    expect(client.getVoxel(1, 2, 3)).toBe(Voxel.Water);
+    expect(client.getChunkRevision(0, 0, 0)).toBe(6);
   });
 });
