@@ -29,7 +29,7 @@ export type CollisionDebugSnapshot = Readonly<{
   epoch: string;
   physicsTick: number;
   authoritative: readonly CollisionDebugBody[];
-  predictedPlayer?: Readonly<{ id: string; kind: 'player'; state: BodyState }>;
+  predictedPlayer?: Readonly<{ id: string; kind: 'player'; state: BodyState; physicsTick?: number }>;
   targetVoxel?: Readonly<{ position: readonly [number, number, number]; voxel: number }>;
   truncatedBodyCount: number;
 }>;
@@ -230,7 +230,7 @@ export function createCollisionDebugBatch(
       source: 'predicted-body',
       color: PREDICTION_COLOR,
       entityId: snapshot.predictedPlayer.id,
-      physicsTick: snapshot.physicsTick,
+      physicsTick: snapshot.predictedPlayer.physicsTick ?? snapshot.physicsTick,
     });
   }
 

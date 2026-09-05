@@ -51,7 +51,15 @@ type TransactionResponse = Readonly<{
 const transact = async (
   message: Extract<
     AuthorityRequest,
-    { kind: 'world-edit' | 'set-player-position' | 'gameplay-action' | 'server-command' | 'set-world-time' }
+    {
+      kind:
+        | 'world-edit'
+        | 'set-player-position'
+        | 'gameplay-action'
+        | 'server-command'
+        | 'set-world-time'
+        | 'set-world-clock-rate';
+    }
   >,
   operation: () => TransactionResponse | Promise<TransactionResponse>,
 ) => {
@@ -254,8 +262,8 @@ const handle = async (message: AuthorityRequest) => {
       await transact(message, () => ({ result: { worldTime: current.setWorldTime(message.hours) } }));
       break;
     }
-    case 'advance-world-clock':
-      current.advanceWorldClock(message.hours);
+    case 'set-world-clock-rate':
+      await transact(message, () => ({ result: { rate: current.setWorldClockRate(message.rate) } }));
       break;
     case 'save-authority':
       respond(message.requestId, await current.save(), { gameplay: true });

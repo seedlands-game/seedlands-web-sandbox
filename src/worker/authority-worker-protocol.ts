@@ -200,10 +200,12 @@ export type AuthorityRequest =
       hours: number;
     }>
   | Readonly<{
-      kind: 'advance-world-clock';
+      kind: 'set-world-clock-rate';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
-      hours: number;
+      requestId: number;
+      transaction: AuthorityTransactionKey;
+      rate: number;
     }>
   | Readonly<{
       kind: 'save-authority';

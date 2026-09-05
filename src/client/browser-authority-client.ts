@@ -321,8 +321,8 @@ export class BrowserAuthorityClient {
     return this.request({ kind: 'set-world-time', hours }, [], 'world-time') as Promise<{ worldTime: number }>;
   }
 
-  advanceWorldClock(hours: number): void {
-    this.post({ kind: 'advance-world-clock', protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, hours });
+  setWorldClockRate(rate: number): Promise<{ rate: number }> {
+    return this.request({ kind: 'set-world-clock-rate', rate }, [], 'world-clock-rate') as Promise<{ rate: number }>;
   }
 
   async save(): Promise<{

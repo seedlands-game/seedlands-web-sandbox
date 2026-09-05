@@ -8,96 +8,24 @@ import {
   stepBody,
   type BodyConfig,
   type BodyState,
-  type Contact,
   type PhysicsInput,
 } from '../../physics';
 import { ActiveMonotonicClock } from '../../runtime/active-monotonic-clock';
 import { MultiRateScheduler } from '../../runtime/multi-rate-scheduler';
 import { InputCommandBuffer, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
+import type {
+  AuthorityBodySnapshot,
+  AuthorityEntity,
+  AuthorityLaneTotals,
+  AuthorityServerPort,
+  AuthoritySnapshot,
+  BodyRecoveryDiagnostic,
+  BodyRecoveryReason,
+  LogicIntent,
+} from './authority-session-types';
 import { VoxelCollisionWorld, type LoadedVoxelSource } from './voxel-collision-world';
 
-export type AuthorityEntity = Readonly<{
-  id: string;
-  type: 'player' | 'world-item' | 'creature' | 'npc';
-  archetype?: 'grazer' | 'night-stalker' | 'settler';
-  position: [number, number, number];
-  physicsVelocity?: [number, number, number];
-}>;
-
-export type AuthorityPickupTarget = Readonly<{
-  id: string;
-  position: [number, number, number];
-}>;
-
-export type AuthorityServerPort = {
-  readonly worldRevision: number;
-  readonly mutationCount: number;
-  readonly worldTime: number;
-  getEntity: (id: string) => AuthorityEntity | null;
-  queryEntities: () => AuthorityEntity[];
-  updateEntity: (
-    id: string,
-    update: { position: [number, number, number]; physicsVelocity: [number, number, number] },
-  ) => unknown;
-  advanceGameplayRules: (seconds: number) => unknown;
-  advanceWorldClock?: (hours: number) => unknown;
-  queryPickupTargets?: () => readonly AuthorityPickupTarget[];
-  pickupItem?: (playerId: string, itemId: string) => Readonly<{ success: boolean }>;
-};
-
-export type LogicIntent = Readonly<{
-  entityId: string;
-  wish: Readonly<{ x: number; z: number }>;
-  jumpRequested: boolean;
-  verticalIntent: -1 | 0 | 1;
-  expiresAtPhysicsTick: number;
-}>;
-
-export type AuthorityBodySnapshot = Readonly<{
-  id: string;
-  type: AuthorityEntity['type'];
-  archetype?: AuthorityEntity['archetype'];
-  body: BodyState;
-  grounded: boolean;
-  contacts: readonly Contact[];
-}>;
-
-export type BodyRecoveryReason = 'initialization' | 'legacy-restore' | 'external-geometry-change';
-
-export type BodyRecoveryDiagnostic = Readonly<{
-  entityId: string;
-  reason: BodyRecoveryReason;
-  status: 'recovered' | 'blocked' | 'missing';
-  distance: number;
-  physicsTick: number;
-}>;
-
-export type AuthoritySnapshot = Readonly<{
-  kind: 'snapshot';
-  protocolVersion: 1;
-  epoch: string;
-  physicsTick: number;
-  commitSequence: number;
-  worldMutationCount: number;
-  acknowledgedInputSequence: number;
-  inputResyncRequired: boolean;
-  activeTimeMs: number;
-  integratedPhysicsTimeMs: number;
-  physicsDebtMs: number;
-  player: AuthorityBodySnapshot;
-  entities: readonly AuthorityBodySnapshot[];
-  chunkRevisions: Readonly<Record<string, number>>;
-  worldRevision: number;
-  worldTime: number;
-  paused: boolean;
-  diagnostics?: Readonly<{ recoveryResults: readonly BodyRecoveryDiagnostic[] }>;
-}>;
-
-export type AuthorityLaneTotals = Readonly<{
-  physicsSteps: number;
-  gameplayPeriods: number;
-  fluidPeriods: number;
-}>;
+export type * from './authority-session-types';
 
 type AuthoritySessionOptions = Readonly<{
   epoch: string;
@@ -111,6 +39,7 @@ type AuthoritySessionOptions = Readonly<{
   requestFluidWork?: (elapsedPeriods: number) => void;
   publishLogicObservation?: (snapshot: AuthoritySnapshot) => void;
   worldHoursPerSecond?: number;
+  initialCommitSequence?: number;
 }>;
 
 const toBodyState = (entity: AuthorityEntity): BodyState => ({
@@ -157,12 +86,18 @@ export class AuthoritySession {
   private physicsTick = 0;
   private gameplayPeriods = 0;
   private fluidPeriods = 0;
-  private commitSequence = 0;
+  private commitSequence: number;
   private activeTimeMs = 0;
   private integratedPhysicsTimeMs = 0;
   private physicsDebtMs = 0;
+  private worldClockRate: number;
 
   constructor(private readonly options: AuthoritySessionOptions) {
+    this.commitSequence = options.initialCommitSequence ?? 0;
+    if (!Number.isSafeInteger(this.commitSequence) || this.commitSequence < 0)
+      throw new RangeError('Initial commit sequence must be a non-negative safe integer.');
+    this.worldClockRate = options.worldHoursPerSecond ?? 0.04;
+    this.assertWorldClockRate(this.worldClockRate);
     this.clock = new ActiveMonotonicClock(options.startTimeMs);
     this.scheduler = new MultiRateScheduler({ ...options.frequencies, maxPhysicsCatchUpSteps: 4 });
     this.input = new InputCommandBuffer(options.epoch, 'player-input');
@@ -207,7 +142,7 @@ export class AuthoritySession {
     if (due.gameplay.due) {
       this.gameplayPeriods += due.gameplay.elapsedPeriods;
       const gameplaySeconds = due.gameplay.elapsedPeriods / this.options.frequencies.gameplayHz;
-      this.options.server.advanceWorldClock?.(gameplaySeconds * (this.options.worldHoursPerSecond ?? 0.04));
+      this.options.server.advanceWorldClock?.(gameplaySeconds * this.worldClockRate);
       this.options.server.advanceGameplayRules(gameplaySeconds);
       this.commitSequence += 1;
     }
@@ -240,6 +175,14 @@ export class AuthoritySession {
       gameplayPeriods: this.gameplayPeriods,
       fluidPeriods: this.fluidPeriods,
     };
+  }
+
+  setWorldClockRate(rate: number): number {
+    this.assertWorldClockRate(rate);
+    if (rate === this.worldClockRate) return rate;
+    this.worldClockRate = rate;
+    this.commitSequence += 1;
+    return rate;
   }
 
   get inputResyncRequired() {
@@ -510,6 +453,11 @@ export class AuthoritySession {
     const velocity: [number, number, number] = [0, entity.physicsVelocity?.[1] ?? 0, 0];
     this.options.server.updateEntity(entity.id, { position: [...entity.position], physicsVelocity: velocity });
     this.refreshBodies();
+  }
+
+  private assertWorldClockRate(rate: number): void {
+    if (!Number.isFinite(rate) || rate < 0 || rate > 24)
+      throw new RangeError('World clock rate must be finite and within 0..24 hours per second.');
   }
 
   private snapshot(): AuthoritySnapshot {

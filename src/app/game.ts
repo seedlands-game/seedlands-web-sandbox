@@ -38,6 +38,8 @@ import { startBrowserWorkerSession } from './browser-worker-session';
 import { createGamePlayerController, orientPlayerTowardCamp } from './game-player-controller';
 import { AuthorityPresentationSync } from './authority-presentation-sync';
 import { GameUiProjection } from './game-ui-projection';
+import { CollisionDebugRuntime } from './collision-debug-runtime';
+import * as runtimeControls from './game-runtime-controls';
 
 export class Game {
   private paused = false;
@@ -78,6 +80,7 @@ export class Game {
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
   private sessionSequence = 0;
   private readonly authoritySync = new AuthorityPresentationSync(() => this.controller);
+  private collisionDebug: CollisionDebugRuntime | null = null;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -112,6 +115,7 @@ export class Game {
     this.performanceTelemetry = createPerformanceTelemetry(this.performanceProfile);
     this.lastFrameTimestamp = performance.now();
     this.app = createSceneApplication(this.canvas);
+    this.collisionDebug = new CollisionDebugRuntime(this.app);
     const light = createSun(this.app, lightingBudget);
     this.camera = createCamera(this.app, quality.fogEnd + 18);
     this.visualResources = await createVoxelMaterials(this.app, quality);
@@ -135,11 +139,11 @@ export class Game {
       onSnapshot: (snapshot) => this.authoritySync.receive(snapshot),
       onGameplay: () => this.gameplayClient?.refresh(),
       onCommit: (commit) => this.world?.consumeServerCommit(commit),
-      onUnknownChunk: (key) => this.requestAuthorityChunk(key),
+      onUnknownChunk: (key) => runtimeControls.requestAuthorityChunk(this.world, key),
       onInputDecision: ({ decision, requiresResync }) => {
         if (requiresResync || !['accepted', 'duplicate'].includes(decision)) this.controller?.resynchronizeInput();
       },
-      onFatal: (error) => this.reportRuntimeFailure(error),
+      onFatal: (error) => runtimeControls.reportRuntimeFailure(this.uiSession, ++this.interactionSequence, error),
     });
     const { authority, compute: computeRuntime, logic: logicClient, ready } = session;
     this.authority = authority;
@@ -219,8 +223,13 @@ export class Game {
       actions: {
         toggleMap: () => this.toggleMap(),
         toggleDebug: () => this.toggleDebug(),
+        toggleCollisionDebug: () => this.collisionDebug?.toggle(),
         toggleCommandShell: () => this.toggleCommandShell(),
         toggleInventory: () => this.toggleInventory(),
+        setWorldClockPaused: (paused) =>
+          void runtimeControls.setAuthorityWorldClockPaused(this.environment, authority, paused),
+        setWorldClockSpeed: (speed) =>
+          void runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed),
         closeMap: () => this.closeMap(),
         closeCommandShell: () => this.closeCommandShell(),
         closeInventory: () => this.closeInventory(),
@@ -268,8 +277,8 @@ export class Game {
         visualEffects: () => this.visualEffects,
         underwaterVisual: () => this.waterExperience?.visual ?? null,
         setWorldTime: (hour) => this.setWorldTime(hour),
-        setTimePaused: (paused) => this.setWorldClockPaused(paused),
-        setTimeSpeed: (speed) => this.setWorldClockSpeed(speed),
+        setTimePaused: (paused) => runtimeControls.setAuthorityWorldClockPaused(this.environment, authority, paused),
+        setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed),
         blockLogicWorker: (ms) =>
           this.logicClient?.blockForHarness(ms) ?? Promise.reject(new Error('Logic Worker不可用。')),
         executeGameplayCommand: async (command) => {
@@ -395,6 +404,11 @@ export class Game {
       this.lastFpsSample = now;
     }
     this.controller?.update(dt);
+    this.collisionDebug?.update(
+      this.authority?.snapshot ?? null,
+      this.controller?.predictedPhysicsState ?? null,
+      this.controller?.aimTarget ?? null,
+    );
     this.waterExperience?.updateImmersion(dt, this.controller?.waterImmersion, this.environment);
     this.visualEffects?.update(dt);
     this.world.updateStreaming(this.camera.getPosition());
@@ -414,6 +428,7 @@ export class Game {
       frameMs: this.frameMs,
       nextHudSequence: () => ++this.hudSequence,
       nextDebugSequence: () => ++this.debugSequence,
+      collisionDebug: this.collisionDebug?.status ?? null,
     });
     this.performanceTelemetry.endFrame(actualFrameMs);
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
@@ -484,6 +499,8 @@ export class Game {
     this.removeHarness = null;
     this.controller?.dispose();
     this.controller = null;
+    this.collisionDebug?.dispose();
+    this.collisionDebug = null;
     this.gameplayClient?.dispose();
     this.gameplayClient = null;
     this.uiBridge.publishShell({ commandOpen: false, mapOpen: false });
@@ -511,25 +528,5 @@ export class Game {
     this.app = null;
     this.camera = null;
     this.serverPlayerId = null;
-  }
-
-  private requestAuthorityChunk(key: string): void {
-    const [cx, cy, cz] = key.split(',').map(Number);
-    if (![cx, cy, cz].every(Number.isInteger)) return;
-    this.world?.requestChunk(cx, cy, cz);
-  }
-
-  private setWorldClockPaused = (paused: boolean) => this.environment?.setPaused(paused);
-
-  private setWorldClockSpeed = (speed: number) => {
-    if (this.environment) this.environment.speed = Math.max(0, speed);
-  };
-
-  private reportRuntimeFailure(error: Error): void {
-    this.uiSession?.publishFeedback(++this.interactionSequence, {
-      message: `运行时故障：${error.message}`,
-      tone: 'error',
-      durationMs: 4_000,
-    });
   }
 }

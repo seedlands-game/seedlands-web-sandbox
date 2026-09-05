@@ -21,6 +21,12 @@ type Options = Readonly<{
   frameMs: number;
   nextHudSequence: () => number;
   nextDebugSequence: () => number;
+  collisionDebug: Readonly<{
+    authorityTick: number;
+    predictionTick: number;
+    visibleBodyCount: number;
+    truncatedBodyCount: number;
+  }> | null;
 }>;
 
 export class GameUiProjection {
@@ -44,8 +50,8 @@ export class GameUiProjection {
       });
     }
     options.session.sampleDebug(options.nextDebugSequence(), () =>
-      options.telemetry.withSpan('ui', 'DebugProjection', () =>
-        projectDebug({
+      options.telemetry.withSpan('ui', 'DebugProjection', () => {
+        const projection = projectDebug({
           world: options.world,
           environment: options.environment,
           camera: options.camera,
@@ -55,8 +61,15 @@ export class GameUiProjection {
           performanceProfile: options.performanceProfile,
           deviceType: options.deviceType,
           seedText: options.seedText,
-        }),
-      ),
+        });
+        const collision = options.collisionDebug;
+        return collision
+          ? {
+              ...projection,
+              text: `${projection.text}\n碰撞箱  权威 tick ${collision.authorityTick} · 预测 tick ${collision.predictionTick} · 实体 ${collision.visibleBodyCount} · 截断 ${collision.truncatedBodyCount}`,
+            }
+          : projection;
+      }),
     );
   }
 }

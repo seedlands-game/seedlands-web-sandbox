@@ -4,15 +4,17 @@ import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../client/voxel-target';
 import { DRY_WATER_IMMERSION, sampleWaterImmersion, type WaterImmersionSnapshot } from '../world/water-immersion';
 import type { PlayerControllerOptions } from './player-controller-types';
-import { PLAYER_FEET_OFFSET, PLAYER_HEAD_OFFSET } from './player-collision-shapes';
+import { PLAYER_FEET_OFFSET, PLAYER_HEAD_OFFSET } from './player-view-offsets';
 import { PlayerInputStream } from '../client/player-input-stream';
 import { PredictionBuffer } from '../client/prediction-buffer';
-import { bodyConfigFor, bodyWorldAabb, stepBody, type BodyState, type WorldAabb } from '../physics';
+import { bodyConfigFor, stepBody, type BodyState } from '../physics';
 import { VoxelCollisionWorld } from '../server/authority/voxel-collision-world';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '../world/voxel';
 import type { AuthoritySnapshot } from '../server/authority/authority-session';
+import { PlayerDebugTimeKeys } from './player-debug-time-keys';
+import { bodyOverlapsWorld } from './player-collision-query';
 
-export { PLAYER_FEET_OFFSET } from './player-collision-shapes';
+export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
 export class PlayerController {
   readonly velocity = new pc.Vec3();
@@ -33,9 +35,11 @@ export class PlayerController {
   private predictedBody: BodyState | null = null;
   private latestSnapshot: AuthoritySnapshot | null = null;
   private predictionAccumulator = 0;
+  private readonly debugTimeKeys: PlayerDebugTimeKeys;
 
   constructor(private readonly options: PlayerControllerOptions) {
     this.inputStream = new PlayerInputStream(options.authority?.epoch ?? 'unit-test');
+    this.debugTimeKeys = new PlayerDebugTimeKeys(options);
   }
 
   get onGround() {
@@ -54,14 +58,19 @@ export class PlayerController {
     return this.options.camera.getPosition();
   }
 
+  get predictedPhysicsState() {
+    if (!this.predictedBody) return null;
+    return {
+      state: this.predictedBody,
+      physicsTick: this.prediction.frames.at(-1)?.targetPhysicsTick ?? this.latestSnapshot?.physicsTick ?? 0,
+    };
+  }
+
   get isColliding() {
     const world = this.options.getWorld();
     const body = this.predictedBody ?? this.latestSnapshot?.player.body;
     if (!world || !body) return false;
-    const bounds = bodyWorldAabb(body, bodyConfigFor('player'));
-    return this.collisionWorld(world)
-      .querySolids(bounds)
-      .some((collider) => this.overlaps(bounds, collider.aabb));
+    return bodyOverlapsWorld(body, bodyConfigFor('player'), this.collisionWorld(world));
   }
 
   get interactionBlocked() {
@@ -114,20 +123,7 @@ export class PlayerController {
         this.stopMining();
         return;
       }
-      if (event.code === 'F3') {
-        event.preventDefault();
-        this.options.onToggleDebug();
-        return;
-      }
-      if (event.code === 'KeyP') {
-        const environment = this.options.getEnvironment();
-        if (environment) environment.setPaused(!environment.paused);
-        return;
-      }
-      if (event.code === 'KeyT') {
-        this.options.getEnvironment()?.cycleSpeed();
-        return;
-      }
+      if (this.debugTimeKeys.handleKeyDown(event)) return;
       if (event.code === 'BracketLeft' || event.code === 'BracketRight') {
         this.shiftWorldTime(event.code === 'BracketLeft' ? -1 : 1);
         return;
@@ -138,7 +134,10 @@ export class PlayerController {
         if (this.miningHeld) this.cancelActiveMining();
       }
     };
-    window.onkeyup = (event) => this.keys.delete(event.code);
+    window.onkeyup = (event) => {
+      this.debugTimeKeys.handleKeyUp(event.code);
+      this.keys.delete(event.code);
+    };
     canvas.oncontextmenu = (event) => event.preventDefault();
     canvas.onclick = () => {
       if (!this.interactionBlocked) void canvas.requestPointerLock();
@@ -152,7 +151,10 @@ export class PlayerController {
     document.onpointerlockchange = () => {
       if (document.pointerLockElement !== canvas) this.stopMining();
     };
-    window.onblur = () => this.stopMining();
+    window.onblur = () => {
+      this.debugTimeKeys.clear();
+      this.stopMining();
+    };
     document.onmousedown = (event) => {
       if (this.interactionBlocked) return;
       if (document.pointerLockElement !== canvas) {
@@ -178,6 +180,7 @@ export class PlayerController {
     this.options.canvas.onclick = null;
     this.options.canvas.oncontextmenu = null;
     this.keys.clear();
+    this.debugTimeKeys.clear();
     this.stopMining();
     this.publishAimTarget(null);
   }
@@ -270,6 +273,7 @@ export class PlayerController {
 
   releaseInput() {
     this.keys.clear();
+    this.debugTimeKeys.clear();
     this.velocity.x = 0;
     this.velocity.z = 0;
     this.stopMining();
@@ -438,18 +442,6 @@ export class PlayerController {
         };
       },
     });
-  }
-
-  private overlaps(left: WorldAabb, right: WorldAabb) {
-    const epsilon = 1e-7;
-    return (
-      left.min.x < right.max.x - epsilon &&
-      left.max.x > right.min.x + epsilon &&
-      left.min.y < right.max.y - epsilon &&
-      left.max.y > right.min.y + epsilon &&
-      left.min.z < right.max.z - epsilon &&
-      left.max.z > right.min.z + epsilon
-    );
   }
 
   private interact(place: boolean) {

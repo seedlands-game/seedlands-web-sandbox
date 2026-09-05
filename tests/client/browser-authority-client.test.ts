@@ -37,9 +37,9 @@ const gameplay = {
     spawnPosition: [0.5, 33, 0.5] as [number, number, number],
     lifecycle: 'alive' as const,
     health: 20,
-    maxHealth: 20,
+    maxHealth: 20 as const,
     hunger: 20,
-    maxHunger: 20,
+    maxHunger: 20 as const,
     inventory: [],
     selectedSlot: 0,
     hotbarSize: 8 as const,
@@ -266,5 +266,32 @@ describe('BrowserAuthorityClient', () => {
       commitSequence: 4,
     });
     await expect(editing).resolves.toEqual({ committed: false });
+  });
+
+  it('以幂等事务设置Authority世界时钟速率', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const setting = client.setWorldClockRate(0);
+    const request = worker.posts.at(-1) as {
+      kind: string;
+      requestId: number;
+      rate: number;
+      transaction: unknown;
+    };
+
+    expect(request).toMatchObject({
+      kind: 'set-world-clock-rate',
+      rate: 0,
+      transaction: { issuer: 'browser:world:1', stream: 'world-clock-rate', sequence: 0 },
+    });
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: request.requestId,
+      ok: true,
+      result: { rate: 0 },
+    });
+    await expect(setting).resolves.toEqual({ rate: 0 });
   });
 });

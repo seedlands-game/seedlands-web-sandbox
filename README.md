@@ -73,6 +73,7 @@ Inventory slots support two-click moves, merges, and swaps. The first eight slot
 | E               | Toggle inventory and crafting                       |
 | M               | Toggle the macro world map                          |
 | F3              | Toggle the debug HUD                                |
+| F3 + B          | Toggle authoritative and predicted collision boxes  |
 | F4              | Toggle the server debug command shell               |
 | P               | Pause or resume world time                          |
 | [ / ]           | Move world time backward or forward one hour        |

@@ -1,7 +1,7 @@
 import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import type { HarnessSnapshot } from './app-contracts';
 import type { PlayerController } from './player-controller';
-import { PLAYER_FEET_OFFSET } from './player-collision-shapes';
+import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
 export class AuthorityPresentationSync {
   private readonly samples: HarnessSnapshot['trajectory'][number][] = [];

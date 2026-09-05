@@ -19,6 +19,7 @@ describe('碰撞调试投影', () => {
         predictedPlayer: {
           id: 'player-1',
           kind: 'player',
+          physicsTick: 45,
           state: { position: { x: 3.1, y: 10, z: -2 }, velocity: { x: 0, y: 0, z: 0 } },
         },
         truncatedBodyCount: 0,
@@ -36,6 +37,7 @@ describe('碰撞调试投影', () => {
     expect(batch.lines.filter((line) => line.source === 'predicted-body')).toHaveLength(12);
     expect(batch.lines[0]?.color).not.toEqual(batch.lines[12]?.color);
     expect(batch.lines[0]).toMatchObject({ entityId: 'player-1', grounded: true, physicsTick: 42 });
+    expect(batch.lines[12]).toMatchObject({ source: 'predicted-body', entityId: 'player-1', physicsTick: 45 });
   });
 
   it('只保留32格内最多128个实体，并保留截断信息供面板显示', () => {

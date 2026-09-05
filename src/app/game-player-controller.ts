@@ -25,8 +25,11 @@ type Options = Readonly<{
   actions: Readonly<{
     toggleMap: () => void;
     toggleDebug: () => void;
+    toggleCollisionDebug: () => void;
     toggleCommandShell: () => void;
     toggleInventory: () => void;
+    setWorldClockPaused: (paused: boolean) => void;
+    setWorldClockSpeed: (speed: number) => void;
     closeMap: () => void;
     closeCommandShell: () => void;
     closeInventory: () => void;
@@ -45,8 +48,11 @@ export function createGamePlayerController(options: Options): PlayerController {
     isPaused: options.isPaused,
     onToggleMap: options.actions.toggleMap,
     onToggleDebug: options.actions.toggleDebug,
+    onToggleCollisionDebug: options.actions.toggleCollisionDebug,
     onToggleCommandShell: options.actions.toggleCommandShell,
     onToggleInventory: options.actions.toggleInventory,
+    onSetWorldClockPaused: options.actions.setWorldClockPaused,
+    onSetWorldClockSpeed: options.actions.setWorldClockSpeed,
     onSelectHotbarSlot: options.actions.selectHotbarSlot,
     onAttackTarget: (origin, direction, maxDistance) =>
       gameplay()?.attackTarget(origin, direction, maxDistance) ?? false,

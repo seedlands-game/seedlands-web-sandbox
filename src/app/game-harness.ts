@@ -18,7 +18,7 @@ import type { UiMetrics } from './ui/ui-contracts';
 import type { AdvancedVisualEffects } from './advanced-visual-effects';
 import type { BrowserGameplay } from './browser-gameplay';
 import type { UnderwaterVisualEffects } from './underwater-visual-effects';
-import { PLAYER_FEET_OFFSET } from './player-collision-shapes';
+import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
 export type HarnessApi = {
   snapshot: () => HarnessSnapshot;
