@@ -14,11 +14,11 @@ import { getItemDefinition, type ItemStack } from './item-registry';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import { craftRecipe, listCraftableRecipes, listRecipes } from './recipe-registry';
 import { getVoxelGameplayDefinition } from './voxel-gameplay';
-import { simulationSnapshotFor, validateGameplaySnapshot, type GameplaySnapshotV2 } from './gameplay-snapshot';
+import * as GameplaySnapshot from './gameplay-snapshot';
 import { advanceGameplayClock } from './gameplay-clock';
 import { attackTargetPoint, clonePosition, distanceSquared } from './gameplay-geometry';
 
-export type { GameplaySnapshot, GameplaySnapshotV1, GameplaySnapshotV2 } from './gameplay-snapshot';
+export type { GameplaySnapshot, GameplaySnapshotV1, GameplaySnapshotV2, GameplaySnapshotV3 } from './gameplay-snapshot';
 
 type Position = [number, number, number];
 type PickupEvent = { playerId: string; position: Position; stack: ItemStack };
@@ -388,9 +388,9 @@ export class GameplayRuntime {
     return { commits };
   }
 
-  createSnapshot(): GameplaySnapshotV2 {
+  createSnapshot(): GameplaySnapshot.GameplaySnapshotV3 {
     return {
-      version: 2,
+      version: 3,
       revision: this.revision,
       gameplayTime: this.time,
       worldTime: this.callbacks.getWorldTime(),
@@ -398,6 +398,7 @@ export class GameplayRuntime {
       entities: this.entities.exportSnapshot(),
       players: [...this.players.values()].map((player) => player.snapshot()),
       simulation: this.simulation.snapshot(),
+      ...GameplaySnapshot.createGameplaySnapshotMetadata(),
     };
   }
 
@@ -419,9 +420,9 @@ export class GameplayRuntime {
     };
   }
 
-  restoreSnapshot(raw: unknown): { version: 1 | 2; worldTime?: number } {
+  restoreSnapshot(raw: unknown): { version: 1 | 2 | 3; worldTime?: number } {
     try {
-      const { snapshot, players } = validateGameplaySnapshot(raw, {
+      const { snapshot, sourceVersion, players } = GameplaySnapshot.validateGameplaySnapshot(raw, {
         getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]),
         getWorldTime: this.callbacks.getWorldTime,
       });
@@ -432,8 +433,8 @@ export class GameplayRuntime {
       this.time = snapshot.gameplayTime;
       this.revision = snapshot.revision;
       this.persistedRevision = snapshot.revision;
-      this.simulation.restore(simulationSnapshotFor(snapshot));
-      return snapshot.version === 2 ? { version: 2, worldTime: snapshot.worldTime } : { version: 1 };
+      this.simulation.restore(GameplaySnapshot.simulationSnapshotFor(snapshot));
+      return sourceVersion === 1 ? { version: 1 } : { version: sourceVersion, worldTime: snapshot.worldTime };
     } catch (error) {
       throw new Error(`Invalid gameplay snapshot: ${error instanceof Error ? error.message : String(error)}`, {
         cause: error,
