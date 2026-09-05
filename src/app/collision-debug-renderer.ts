@@ -1,6 +1,16 @@
 import * as pc from 'playcanvas';
 import type { CollisionDebugBatch } from '../client/collision-debug-projection';
 
+export type CollisionDebugRendererDiagnostics = Readonly<{
+  enabled: boolean;
+  entityCount: number;
+  meshCount: number;
+  materialCount: number;
+  visibleBatchCount: number;
+  vertexCapacity: number;
+  buildCount: number;
+}>;
+
 /**
  * A single transient debug mesh. The Immediate layer is present on the player camera but excluded
  * from the planar reflection camera, so physics diagnostics cannot contaminate water reflections.
@@ -13,8 +23,21 @@ export class CollisionDebugRenderer {
   private enabled = false;
   private disposed = false;
   private vertexCapacity = 0;
+  private buildCount = 0;
 
   constructor(private readonly app: pc.Application) {}
+
+  get diagnostics(): CollisionDebugRendererDiagnostics {
+    return {
+      enabled: this.enabled && !this.disposed,
+      entityCount: this.entity ? 1 : 0,
+      meshCount: this.mesh ? 1 : 0,
+      materialCount: this.material ? 1 : 0,
+      visibleBatchCount: this.instance?.visible ? 1 : 0,
+      vertexCapacity: this.vertexCapacity,
+      buildCount: this.buildCount,
+    };
+  }
 
   setEnabled(enabled: boolean): void {
     if (this.disposed || this.enabled === enabled) return;
@@ -67,6 +90,7 @@ export class CollisionDebugRenderer {
     this.material = material;
     this.mesh = mesh;
     this.instance = instance;
+    this.buildCount += 1;
   }
 
   private releaseResources(): void {

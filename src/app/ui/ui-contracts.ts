@@ -80,6 +80,19 @@ export type DebugState = Readonly<{
   text: string;
   fps?: number;
   position?: readonly [number, number, number];
+  collisionDebug: CollisionDebugUiState | null;
+}>;
+
+export type CollisionDebugUiState = Readonly<{
+  enabled: true;
+  includeContacts: boolean;
+  includeSensors: boolean;
+  authorityTick: number;
+  predictionTick: number;
+  visibleBodyCount: number;
+  truncatedBodyCount: number;
+  contactCount: number;
+  sensorCount: number;
 }>;
 
 export type UiMetrics = Readonly<{
@@ -109,6 +122,9 @@ export type UiActionPort = {
   useInventoryItem: (slot: number) => void;
   respawn: () => void;
   toggleMap: () => void;
+  toggleCollisionDebug: () => void;
+  setCollisionDebugContacts: (enabled: boolean) => void;
+  setCollisionDebugSensors: (enabled: boolean) => void;
   closeMap: () => void;
   setMapLayer: (layer: MapLayer) => void;
   closeCommandShell: () => void;

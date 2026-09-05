@@ -85,7 +85,7 @@ const initialInteraction = (): InteractionState => ({
   breaking: null,
   presentedEntities: [],
 });
-const initialDebug = (): DebugState => ({ visible: false, text: '' });
+const initialDebug = (): DebugState => ({ visible: false, text: '', collisionDebug: null });
 
 export function createUiBridge(options: BridgeOptions = {}) {
   const now = options.now ?? (() => performance.now());

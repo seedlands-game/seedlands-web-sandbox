@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { CollisionLayer, bodyConfigFor, bodyKindForEntity, type BodyKind } from '../../src/physics/body-registry';
+import {
+  CollisionLayer,
+  WORLD_ITEM_INTERACTION,
+  bodyConfigFor,
+  bodyKindForEntity,
+  bodySensorsFor,
+  type BodyKind,
+} from '../../src/physics/body-registry';
 import { validateBodyConfig } from '../../src/physics';
 import { entityHitDistance } from '../../src/client/entity-hit-volume';
 
@@ -48,5 +55,14 @@ describe('统一身体注册表', () => {
     const distance = entityHitDistance([0, 0, 0], 'grazer', [-2, 0.95, 0], [1, 0, 0], 5);
 
     expect(distance).toBeCloseTo(2 + config.localAabb.min.x);
+  });
+
+  it('掉落物吸附、拾取和调试投影共享具名传感器配置', () => {
+    expect(WORLD_ITEM_INTERACTION).toEqual({ attractionRadius: 2.25, attractionSpeed: 6, pickupRadius: 0.75 });
+    expect(bodySensorsFor('player')).toEqual([]);
+    expect(bodySensorsFor('world-item')).toEqual([
+      { purpose: 'attraction', shape: 'sphere', radius: 2.25 },
+      { purpose: 'pickup', shape: 'sphere', radius: 0.75 },
+    ]);
   });
 });

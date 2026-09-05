@@ -9,6 +9,7 @@ import type { VisualEffectsSnapshot } from './advanced-visual-effects';
 import type { FluidFeedbackSummary } from './fluid-feedback-tracker';
 import type { WaterMeshTransitionSnapshot } from './water-mesh-transition';
 import type { CostSampleWindow } from '../runtime/bounded-cost-samples';
+import type { CollisionDebugRendererDiagnostics } from './collision-debug-renderer';
 
 export type MeshPart = MeshData;
 
@@ -84,6 +85,7 @@ export type HarnessSnapshot = {
   quality: 'low' | 'medium' | 'high';
   triangles: number;
   drawCalls: number;
+  collisionDebug: CollisionDebugRendererDiagnostics & { authorityRequestCount: 0 };
   runtime: 'authority-worker';
   workers: {
     total: number;
@@ -94,6 +96,7 @@ export type HarnessSnapshot = {
     general: number;
   };
   authority: {
+    physicsHz: 30 | 60 | 120;
     physicsTick: number;
     integratedPhysicsTimeMs: number;
     acknowledgedInputSequence: number;
@@ -101,6 +104,7 @@ export type HarnessSnapshot = {
     activeTimeMs: number;
     commitSequence: number;
     physicsCost: CostSampleWindow | null;
+    snapshotRejections: Readonly<Record<string, number>>;
   };
   logic: { blockStartedCount: number; blockCompletedCount: number };
   trajectory: readonly {
@@ -113,6 +117,12 @@ export type HarnessSnapshot = {
   serverRevision: number;
   voxelAtOrigin: number;
   serverPlayerPosition: [number, number, number];
+  serverPlayerVelocity: [number, number, number];
+  prediction: {
+    pendingFrames: number;
+    lastResetReason: string | null;
+    presentationOffset: Readonly<{ x: number; y: number; z: number }>;
+  };
   serverWorldTime: number;
   performance: PerformanceSummary;
   fluidFeedback: FluidFeedbackSummary;

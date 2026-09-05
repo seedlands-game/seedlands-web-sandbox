@@ -99,8 +99,16 @@ describe('碰撞调试投影', () => {
           contacts: [{ point: { x: 0, y: 0, z: 0 }, normal: { x: 0, y: 1, z: 0 } }],
           sensors: [
             {
+              purpose: 'attraction' as const,
+              shape: 'sphere' as const,
+              center: { x: 0, y: 0, z: 0 },
+              radius: 2,
+            },
+            {
               purpose: 'pickup' as const,
-              aabb: { min: { x: -1, y: 0, z: -1 }, max: { x: 1, y: 2, z: 1 } },
+              shape: 'sphere' as const,
+              center: { x: 0, y: 0, z: 0 },
+              radius: 1,
             },
           ],
         },
@@ -119,6 +127,14 @@ describe('碰撞调试投影', () => {
       createCollisionDebugBatch(snapshot, { x: 0, y: 0, z: 0 }, { includePickupSensors: true }).lines.filter(
         (line) => line.source === 'pickup-sensor' && line.sensorPurpose === 'pickup',
       ),
-    ).toHaveLength(12);
+    ).toHaveLength(72);
+    expect(
+      createCollisionDebugBatch(snapshot, { x: 0, y: 0, z: 0 }, { includePickupSensors: true }).lines.filter(
+        (line) => line.source === 'attraction-sensor' && line.sensorPurpose === 'attraction',
+      ),
+    ).toHaveLength(72);
+    const detailed = createCollisionDebugBatch(snapshot, { x: 0, y: 0, z: 0 }, { includeSensors: true });
+    expect(detailed.visibleSensorCount).toBe(2);
+    expect(detailed.contactCount).toBe(0);
   });
 });

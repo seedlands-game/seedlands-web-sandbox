@@ -56,6 +56,7 @@ describe('UiBridge retained presentation channels', () => {
     expect(bridge.interaction.get()).toBe(initial.interaction);
     expect(bridge.debug.get()).toBe(initial.debug);
     expect(bridge.shell.get()).not.toBe(initial.shell);
+    expect(bridge.debug.get().collisionDebug).toBeNull();
 
     unsubscribers.forEach((unsubscribe) => unsubscribe());
   });

@@ -19,6 +19,7 @@ import type { AdvancedVisualEffects } from './advanced-visual-effects';
 import type { BrowserGameplay } from './browser-gameplay';
 import type { UnderwaterVisualEffects } from './underwater-visual-effects';
 import { PLAYER_FEET_OFFSET } from './player-view-offsets';
+import type { CollisionDebugRuntime } from './collision-debug-runtime';
 
 export type HarnessApi = {
   snapshot: () => HarnessSnapshot;
@@ -67,6 +68,7 @@ type RuntimeHarnessBindings = {
   authority: () => BrowserAuthorityClient | null;
   compute: () => BrowserComputeRuntime | null;
   logic: () => BrowserLogicClient | null;
+  collisionDebug?: () => CollisionDebugRuntime | null;
   authorityTrajectory: () => HarnessSnapshot['trajectory'];
   ui: () => UiMetrics;
   visualEffects: () => AdvancedVisualEffects | null;
@@ -106,6 +108,7 @@ type SnapshotContext = {
   authority: BrowserAuthorityClient | null;
   compute: BrowserComputeRuntime | null;
   logic: BrowserLogicClient | null;
+  collisionDebug?: CollisionDebugRuntime | null;
   authorityTrajectory: HarnessSnapshot['trajectory'];
   ui: UiMetrics;
   presentedEntityCount: number;
@@ -169,6 +172,16 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     quality: context.qualityLevel,
     triangles: telemetry?.triangles ?? 0,
     drawCalls: telemetry?.drawCalls ?? 0,
+    collisionDebug: context.collisionDebug?.diagnostics ?? {
+      enabled: false,
+      entityCount: 0,
+      meshCount: 0,
+      materialCount: 0,
+      visibleBatchCount: 0,
+      vertexCapacity: 0,
+      buildCount: 0,
+      authorityRequestCount: 0,
+    },
     runtime: 'authority-worker',
     workers: {
       total: authorityWorkers + logicWorkers + authorityWorkers + fluidWorkers + generalWorkers,
@@ -179,6 +192,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       general: generalWorkers,
     },
     authority: {
+      physicsHz: context.authority?.readyState?.frequencies.physicsHz ?? 60,
       physicsTick: authoritySnapshot?.physicsTick ?? 0,
       integratedPhysicsTimeMs: authoritySnapshot?.integratedPhysicsTimeMs ?? 0,
       acknowledgedInputSequence: authoritySnapshot?.acknowledgedInputSequence ?? -1,
@@ -186,6 +200,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       activeTimeMs: authoritySnapshot?.activeTimeMs ?? 0,
       commitSequence: authoritySnapshot?.commitSequence ?? 0,
       physicsCost: authoritySnapshot?.diagnostics?.physicsCost ?? null,
+      snapshotRejections: context.authority?.snapshotRejections ?? {},
     },
     logic: context.logic?.diagnostics ?? { blockStartedCount: 0, blockCompletedCount: 0 },
     trajectory: context.authorityTrajectory,
@@ -196,6 +211,18 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     serverPlayerPosition: authorityPlayer
       ? [authorityPlayer.x, authorityPlayer.y + PLAYER_FEET_OFFSET, authorityPlayer.z]
       : [0, 0, 0],
+    serverPlayerVelocity: authoritySnapshot
+      ? [
+          authoritySnapshot.player.body.velocity.x,
+          authoritySnapshot.player.body.velocity.y,
+          authoritySnapshot.player.body.velocity.z,
+        ]
+      : [0, 0, 0],
+    prediction: context.controller?.predictionDiagnostics ?? {
+      pendingFrames: 0,
+      lastResetReason: null,
+      presentationOffset: { x: 0, y: 0, z: 0 },
+    },
     serverWorldTime: context.world?.worldTime ?? 0,
     performance: context.world?.performanceSummary ?? unavailablePerformance(),
     fluidFeedback: context.world?.fluidFeedbackSummary ?? {
@@ -284,6 +311,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
         authority: bindings.authority(),
         compute: bindings.compute(),
         logic: bindings.logic(),
+        collisionDebug: bindings.collisionDebug?.() ?? null,
         authorityTrajectory: bindings.authorityTrajectory(),
         ui: bindings.ui(),
         presentedEntityCount: bindings.gameplay()?.presentedEntityCount ?? 0,

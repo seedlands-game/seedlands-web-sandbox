@@ -214,6 +214,30 @@
 #debug {
   top: 66px;
 }
+.collision-debug-controls {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--ui-border-quiet);
+  pointer-events: auto;
+}
+.collision-debug-controls .game-button {
+  min-height: 30px;
+  padding: 3px 9px;
+  font: 11px/1.2 var(--ui-font-body);
+}
+.collision-debug-controls label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.collision-debug-controls input {
+  min-height: auto;
+}
 #ui .game-button {
   position: relative;
   border: 5px solid transparent;

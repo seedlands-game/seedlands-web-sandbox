@@ -9,6 +9,25 @@ export const CollisionLayer = Object.freeze({
 });
 
 export type BodyKind = 'player' | 'world-item' | 'grazer' | 'night-stalker' | 'settler';
+export type BodySensorPurpose = 'attraction' | 'pickup';
+export type BodySensorConfig = Readonly<{ purpose: BodySensorPurpose; shape: 'sphere'; radius: number }>;
+
+export const WORLD_ITEM_INTERACTION = Object.freeze({
+  attractionRadius: 2.25,
+  attractionSpeed: 6,
+  pickupRadius: 0.75,
+});
+
+const radialSensor = (purpose: BodySensorPurpose, radius: number): BodySensorConfig => ({
+  purpose,
+  shape: 'sphere',
+  radius,
+});
+
+const worldItemSensors: readonly BodySensorConfig[] = Object.freeze([
+  radialSensor('attraction', WORLD_ITEM_INTERACTION.attractionRadius),
+  radialSensor('pickup', WORLD_ITEM_INTERACTION.pickupRadius),
+]);
 
 const character = (halfWidth: number, height: number, maxHorizontalSpeed: number): BodyConfig => ({
   localAabb: {
@@ -56,6 +75,10 @@ export function bodyConfigFor(kind: BodyKind): BodyConfig {
   const config = configs[kind];
   if (!config) throw new RangeError(`Unknown body kind: ${String(kind)}`);
   return config;
+}
+
+export function bodySensorsFor(kind: BodyKind): readonly BodySensorConfig[] {
+  return kind === 'world-item' ? worldItemSensors : [];
 }
 
 export function bodyKindForEntity(entity: { type: string; archetype?: string }): BodyKind {

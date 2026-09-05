@@ -5,6 +5,7 @@ afterEach(() => vi.unstubAllGlobals());
 
 it('昼夜时钟暂停仍能操作，游戏暂停和界面阻挡才阻止世界交互', () => {
   const options = {
+    physicsHz: 60,
     getEnvironment: () => ({ paused: true }),
     isPaused: () => false,
     isUiBlockingInput: () => false,
@@ -27,6 +28,7 @@ it('打开背包后 E 仍能关闭界面', () => {
   const toggle = vi.fn();
   const options = {
     canvas: {},
+    physicsHz: 60,
     getEnvironment: () => ({ paused: false }),
     isPaused: () => false,
     isUiBlockingInput: () => true,
@@ -48,6 +50,7 @@ it('昼夜暂停和加速按键通过Authority回调而非只改本地显示', (
   const setSpeed = vi.fn();
   const options = {
     canvas: {},
+    physicsHz: 60,
     getEnvironment: () => ({ paused: false, speed: 1 }),
     isPaused: () => false,
     isUiBlockingInput: () => false,
@@ -77,6 +80,7 @@ it('按住F3再按B切换真实碰撞箱', () => {
   const toggleCollisionDebug = vi.fn();
   const options = {
     canvas: {},
+    physicsHz: 60,
     getEnvironment: () => null,
     isPaused: () => false,
     isUiBlockingInput: () => false,
@@ -106,6 +110,7 @@ it('单独短按F3只在松开时切换普通调试面板', () => {
   const toggleDebug = vi.fn();
   const options = {
     canvas: {},
+    physicsHz: 60,
     getEnvironment: () => null,
     isPaused: () => false,
     isUiBlockingInput: () => false,
@@ -120,4 +125,40 @@ it('单独短按F3只在松开时切换普通调试面板', () => {
   expect(toggleDebug).not.toHaveBeenCalled();
   windowStub.onkeyup!({ code: 'F3' });
   expect(toggleDebug).toHaveBeenCalledOnce();
+});
+
+it('窗口失焦通过生产控制器立即发送递增序号的全零输入', () => {
+  const windowStub = { onblur: null as null | (() => void) };
+  vi.stubGlobal('window', windowStub);
+  vi.stubGlobal('document', { pointerLockElement: null });
+  vi.stubGlobal('HTMLInputElement', class {});
+  vi.stubGlobal('HTMLTextAreaElement', class {});
+  const sendInput = vi.fn();
+  const options = {
+    canvas: {},
+    physicsHz: 60,
+    authority: {
+      epoch: 'world:1',
+      snapshot: () => ({ physicsTick: 20 }),
+      sendInput,
+    },
+    getEnvironment: () => null,
+    isPaused: () => false,
+    isUiBlockingInput: () => false,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0];
+  const controller = new PlayerController(options);
+  controller.install();
+
+  windowStub.onblur?.();
+
+  expect(sendInput).toHaveBeenCalledWith(
+    expect.objectContaining({
+      kind: 'input',
+      epoch: 'world:1',
+      sequence: 0,
+      targetPhysicsTick: 22,
+      state: { moveX: 0, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+      edges: { jumpPressed: false },
+    }),
+  );
 });

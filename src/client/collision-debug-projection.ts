@@ -7,12 +7,14 @@ export const COLLISION_DEBUG_BODY_LIMIT = 128;
 
 export type CollisionDebugColor = readonly [number, number, number];
 export type CollisionDebugLineSource =
-  'authoritative-body' | 'predicted-body' | 'target-voxel' | 'contact-normal' | 'pickup-sensor';
+  'authoritative-body' | 'predicted-body' | 'target-voxel' | 'contact-normal' | 'attraction-sensor' | 'pickup-sensor';
 
 export type CollisionDebugSensor = Readonly<{
   id?: string;
-  aabb: WorldAabb;
-  purpose: 'pickup';
+  shape: 'sphere';
+  center: Vec3;
+  radius: number;
+  purpose: 'attraction' | 'pickup';
 }>;
 
 export type CollisionDebugBody = Readonly<{
@@ -36,6 +38,7 @@ export type CollisionDebugSnapshot = Readonly<{
 
 export type CollisionDebugProjectionOptions = Readonly<{
   includeContacts?: boolean;
+  includeSensors?: boolean;
   includePickupSensors?: boolean;
 }>;
 
@@ -47,7 +50,7 @@ export type CollisionDebugLine = Readonly<{
   entityId?: string;
   voxel?: number;
   grounded?: boolean;
-  sensorPurpose?: 'pickup';
+  sensorPurpose?: CollisionDebugSensor['purpose'];
 }>;
 
 export type CollisionDebugBatch = Readonly<{
@@ -58,6 +61,8 @@ export type CollisionDebugBatch = Readonly<{
   lines: readonly CollisionDebugLine[];
   visibleBodyCount: number;
   truncatedBodyCount: number;
+  visibleSensorCount: number;
+  contactCount: number;
 }>;
 
 const AUTHORITY_COLOR: CollisionDebugColor = [1, 0.5, 0.12];
@@ -65,7 +70,9 @@ const PREDICTION_COLOR: CollisionDebugColor = [0.1, 0.92, 1];
 const TARGET_COLOR: CollisionDebugColor = [1, 0.85, 0.42];
 const CONTACT_COLOR: CollisionDebugColor = [1, 0.3, 0.16];
 const PICKUP_SENSOR_COLOR: CollisionDebugColor = [0.68, 0.3, 1];
+const ATTRACTION_SENSOR_COLOR: CollisionDebugColor = [0.34, 0.5, 1];
 const CONTACT_NORMAL_LENGTH = 0.28;
+const SENSOR_RING_SEGMENTS = 24;
 
 const EDGE_CORNERS = [
   [0, 0, 0],
@@ -148,6 +155,29 @@ function appendAabb(
     appendLine(positions, colors, lines, corners[first], corners[second], line);
 }
 
+function appendSphere(
+  positions: number[],
+  colors: number[],
+  lines: MutableLine[],
+  center: Vec3,
+  radius: number,
+  line: Omit<MutableLine, 'vertexOffset'>,
+): void {
+  const point = (plane: number, angle: number): Vec3 => {
+    const cosine = Math.cos(angle) * radius;
+    const sine = Math.sin(angle) * radius;
+    if (plane === 0) return { x: center.x + cosine, y: center.y + sine, z: center.z };
+    if (plane === 1) return { x: center.x + cosine, y: center.y, z: center.z + sine };
+    return { x: center.x, y: center.y + cosine, z: center.z + sine };
+  };
+  for (let plane = 0; plane < 3; plane += 1)
+    for (let segment = 0; segment < SENSOR_RING_SEGMENTS; segment += 1) {
+      const start = (segment / SENSOR_RING_SEGMENTS) * Math.PI * 2;
+      const end = ((segment + 1) / SENSOR_RING_SEGMENTS) * Math.PI * 2;
+      appendLine(positions, colors, lines, point(plane, start), point(plane, end), line);
+    }
+}
+
 function bodyAabb(body: Pick<CollisionDebugBody, 'kind' | 'state'>): WorldAabb {
   const localAabb = bodyConfigFor(body.kind).localAabb;
   return {
@@ -199,6 +229,8 @@ export function createCollisionDebugBatch(
   const positions: number[] = [];
   const colors: number[] = [];
   const lines: MutableLine[] = [];
+  let visibleSensorCount = 0;
+  let contactCount = 0;
   const inRange = snapshot.authoritative
     .filter((body) => withinRadius(body.state.position, viewerPosition))
     .map((body, index) => ({ body, index, distance: squaredDistance(body.state.position, viewerPosition) }))
@@ -213,16 +245,21 @@ export function createCollisionDebugBatch(
       grounded: body.grounded,
       physicsTick: snapshot.physicsTick,
     });
-    if (options.includeContacts) appendContacts(positions, colors, lines, body, snapshot.physicsTick);
-    if (options.includePickupSensors)
-      for (const sensor of body.sensors ?? [])
-        appendAabb(positions, colors, lines, sensor.aabb, {
-          source: 'pickup-sensor',
-          color: PICKUP_SENSOR_COLOR,
+    if (options.includeContacts) {
+      appendContacts(positions, colors, lines, body, snapshot.physicsTick);
+      contactCount += body.contacts.length;
+    }
+    if (options.includeSensors || options.includePickupSensors)
+      for (const sensor of body.sensors ?? []) {
+        appendSphere(positions, colors, lines, sensor.center, sensor.radius, {
+          source: sensor.purpose === 'pickup' ? 'pickup-sensor' : 'attraction-sensor',
+          color: sensor.purpose === 'pickup' ? PICKUP_SENSOR_COLOR : ATTRACTION_SENSOR_COLOR,
           entityId: body.id,
           sensorPurpose: sensor.purpose,
           physicsTick: snapshot.physicsTick,
         });
+        visibleSensorCount += 1;
+      }
   }
 
   if (snapshot.predictedPlayer) {
@@ -262,5 +299,7 @@ export function createCollisionDebugBatch(
     lines,
     visibleBodyCount: inRange.length,
     truncatedBodyCount: snapshot.truncatedBodyCount + snapshot.authoritative.length - inRange.length,
+    visibleSensorCount,
+    contactCount,
   };
 }

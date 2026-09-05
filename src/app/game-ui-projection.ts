@@ -3,6 +3,7 @@ import type { PerformanceProfile } from '../client/performance-profile';
 import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { QualityLevel } from './quality-profile';
 import type { UiWorldSession } from './ui/ui-bridge';
+import type { CollisionDebugUiState } from './ui/ui-contracts';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
 import { projectDebug, projectWorldClock } from './hud-projector';
@@ -21,13 +22,14 @@ type Options = Readonly<{
   frameMs: number;
   nextHudSequence: () => number;
   nextDebugSequence: () => number;
-  collisionDebug: Readonly<{
-    authorityTick: number;
-    predictionTick: number;
-    visibleBodyCount: number;
-    truncatedBodyCount: number;
-  }> | null;
+  collisionDebug: CollisionDebugUiState | null;
 }>;
+
+export function projectCollisionDebugDetails(collision: CollisionDebugUiState): string {
+  return `碰撞箱  权威 tick ${collision.authorityTick} · 预测 tick ${collision.predictionTick} · 实体 ${collision.visibleBodyCount} · 截断 ${collision.truncatedBodyCount}
+来源  权威橙 · 预测青 · 接触红 · 吸附蓝 · 拾取紫
+细节  接触 ${collision.includeContacts ? `开 (${collision.contactCount})` : '关'} · 球形传感器 ${collision.includeSensors ? `开 (${collision.sensorCount})` : '关'}`;
+}
 
 export class GameUiProjection {
   private lastClockMinute = -1;
@@ -66,9 +68,10 @@ export class GameUiProjection {
         return collision
           ? {
               ...projection,
-              text: `${projection.text}\n碰撞箱  权威 tick ${collision.authorityTick} · 预测 tick ${collision.predictionTick} · 实体 ${collision.visibleBodyCount} · 截断 ${collision.truncatedBodyCount}`,
+              collisionDebug: collision,
+              text: `${projection.text}\n${projectCollisionDebugDetails(collision)}`,
             }
-          : projection;
+          : { ...projection, collisionDebug: null };
       }),
     );
   }
