@@ -12,6 +12,8 @@
 
 - RED（`3337ed5` 后的工作树）：`pnpm exec vitest run tests/runtime tests/client/compute-task-queue.test.ts tests/client/snapshot-interpolator.test.ts tests/governance/runtime-purity-eslint.test.ts`。结果为 6 个测试文件失败：5 个生产模块尚不存在；纯 runtime/physics ESLint 边界的 2 个反例未被规则拒绝，正例通过。该失败与预期一致，发生在生产实现之前。
 - GREEN（物理提交 `7502d70` 后）：`pnpm exec vitest run tests/runtime tests/client/compute-task-queue.test.ts tests/client/snapshot-interpolator.test.ts tests/governance/runtime-purity-eslint.test.ts tests/physics/step-body.test.ts`，7 个文件、36 个测试全部通过。覆盖活跃时钟暂停/恢复、跨执行环境时间换算、30/60/120Hz、非整数频率比、有限追赶与欠债、输入/事务独立幂等流、迟到按键拒绝、流体保留队列、依赖/合并/背压/epoch、物理时间插值和纯模块静态边界。
+- RED（`65834d5`）：`pnpm exec vitest run tests/server/authority-session.test.ts` 因 Authority 会话和只读已加载体素适配器尚不存在而失败，发生在对应生产实现之前。
+- GREEN（当前工作树）：`pnpm exec vitest run tests/server/authority-session.test.ts tests/runtime/session-protocol.test.ts tests/physics/step-body.test.ts`，3 个文件、20 个测试全部通过。Authority 现在按固定步推进所有传入实体；逻辑无返回时物理继续，暂停不补算时间，流体 lane 只派生请求；未知 Chunk 产生合成阻挡和异步加载请求，已加载空气与灯笼注册形状明确区分。
 
 ## 集成提交
 
@@ -20,4 +22,5 @@
 ## 阻塞与未满足准出
 
 - 物理核心与流体候选模块由并行隔离 worktree 实现，必须通过接口审核后再合并。
+- 独立物理审查发现实体对实体分离与显式恢复仍有夹持几何问题；Authority 暂未调用该路径，等待物理修订后再接入，禁止以客户端脱困补丁绕过。
 - 浏览器自然场景、视觉语义和 2/3 Worker 同机对照尚未执行。

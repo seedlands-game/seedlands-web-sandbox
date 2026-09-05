@@ -28,10 +28,12 @@ physics ──────┼─> runtime ─> server ─> worker adapters
 - `PhysicsInput = { wish: { x: number; z: number }; jumpPressed: boolean; verticalIntent: -1 | 0 | 1 }`
 - `Collider = { id?; aabb: WorldAabb; layer?; mask?; sensor? }`
 - `FluidVolume = { aabb: WorldAabb; velocity: Vec3 }`
-- `PhysicsWorld = { querySolids(bounds): readonly Collider[]; sampleFluid?(bounds): readonly FluidVolume[]; unknownIsSolid?: boolean }`
+- `PhysicsWorld = { querySolids(bounds): readonly Collider[]; sampleFluid?(bounds): readonly FluidVolume[] }`；未知 Chunk 由 Authority 查询适配器显式返回带 `unknown:` 标识的合成阻挡。
 - `stepBody({ state, config, input, world, dt })` 返回 `{ state, contacts, sensors, grounded, medium }`；`recoverBody` 是单独的显式恢复入口。
 
 普通固定步不得自动爬阶、按中心格判定支撑或反复传送脱困。有限重叠恢复只能由初始化、旧档迁移或外部几何变化显式请求。
+
+`src/physics/body-registry.ts` 是身体形状的唯一注册表，导出 `BodyKind = 'player' | 'world-item' | 'grazer' | 'night-stalker' | 'settler'`、`bodyConfigFor(kind): BodyConfig` 和 `bodyKindForEntity(entity): BodyKind`。Authority 求解、战斗射线身体、拾取传感器和碰撞调试都从这里取身体；如受击体积需要不同于阻挡身体，必须以具名 `hitSensor` 配置显式导出和显示，禁止在 client 另写无名尺寸。
 
 ## 会话与命令协议
 
@@ -149,6 +151,7 @@ type ComputeTask = {
 - `SnapshotInterpolator` 用 `(physicsTick, integratedPhysicsTimeMs)` 插值其他实体；`activeTimeMs` 只用于估算当前 Worker 会话时钟映射和展示 debt，不能在发生 debt 时当作实体已积分时间。最多有限外推，超时保持最后状态。
 - `visibilitychange`、`blur`、死亡和世界退出都必须经直接 Authority 输入通道发送全零持续状态，并清空未消费按键边沿。
 - `CollisionDebugProjection` 只从物理 `BodyConfig`、Authority `BodyState`、本地预测 `BodyState` 和方块形状注册表生成批量线段。F3+B 完整消费，面板开关发送订阅事务；关闭时不请求调试快照且释放批量资源。
+- 独立碰撞调试模块接收 `CollisionDebugSnapshot = { epoch; physicsTick; authoritative: readonly { id; kind: BodyKind; state: BodyState; grounded; contacts }[]; predictedPlayer?: { id; kind: 'player'; state: BodyState }; targetVoxel?: { position: [number, number, number]; voxel: number }; truncatedBodyCount }`，从 `bodyConfigFor()` 与 `collisionBoxesForVoxel()` 生成一个 `Float32Array` 线段批次及来源元数据。它不接收模型 Entity，也不拥有 Worker 或 UI 状态。
 
 ## 保存与 headless
 

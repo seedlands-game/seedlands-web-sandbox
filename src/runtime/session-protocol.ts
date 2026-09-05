@@ -90,8 +90,17 @@ export class InputCommandBuffer {
     const decision = this.gate.accept(command.epoch, command.stream, command.sequence);
     if (decision !== 'accepted') return decision;
     this.currentValue = command;
-    this.jumpEdgePending = command.edges.jumpPressed;
+    this.jumpEdgePending ||= command.edges.jumpPressed;
     return decision;
+  }
+
+  clear() {
+    this.currentValue = {
+      ...this.currentValue,
+      state: { moveX: 0, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+      edges: { jumpPressed: false },
+    };
+    this.jumpEdgePending = false;
   }
 
   consumeJumpRequest() {

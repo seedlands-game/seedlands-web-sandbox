@@ -1,0 +1,91 @@
+import type { Collider, FluidVolume, PhysicsWorld, WorldAabb } from '../../physics';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
+import { collisionBoxesForVoxel } from '../../world/voxel-model';
+
+export type LoadedVoxel = Readonly<{
+  voxel: number;
+  chunkKey: string;
+  revision: number;
+  fluid?: Readonly<{ level: number; flow?: Readonly<{ x: number; y: number; z: number }> }>;
+}>;
+
+export type LoadedVoxelSource = Readonly<{
+  getLoadedVoxel: (x: number, y: number, z: number) => LoadedVoxel | null;
+}>;
+
+const queryRange = (minimum: number, maximum: number) => {
+  const from = Math.floor(minimum);
+  const to = Math.floor(maximum - Number.EPSILON);
+  return { from, to };
+};
+
+export class VoxelCollisionWorld implements PhysicsWorld {
+  private readonly revisions = new Map<string, number>();
+
+  constructor(
+    private readonly source: LoadedVoxelSource,
+    private readonly requestUnknownChunk: (chunkKey: string) => void = () => undefined,
+  ) {}
+
+  querySolids(bounds: WorldAabb): readonly Collider[] {
+    const colliders: Collider[] = [];
+    const requested = new Set<string>();
+    const xRange = queryRange(bounds.min.x, bounds.max.x);
+    const yRange = queryRange(bounds.min.y, bounds.max.y);
+    const zRange = queryRange(bounds.min.z, bounds.max.z);
+    for (let x = xRange.from; x <= xRange.to; x += 1)
+      for (let y = yRange.from; y <= yRange.to; y += 1)
+        for (let z = zRange.from; z <= zRange.to; z += 1) {
+          const loaded = this.source.getLoadedVoxel(x, y, z);
+          if (!loaded) {
+            const key = chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
+            if (!requested.has(key)) {
+              requested.add(key);
+              this.requestUnknownChunk(key);
+            }
+            colliders.push({
+              id: `unknown:${x},${y},${z}`,
+              aabb: { min: { x, y, z }, max: { x: x + 1, y: y + 1, z: z + 1 } },
+            });
+            continue;
+          }
+          this.revisions.set(loaded.chunkKey, loaded.revision);
+          collisionBoxesForVoxel(loaded.voxel).forEach((box, index) => {
+            colliders.push({
+              id: `voxel:${x},${y},${z}:${index}`,
+              aabb: {
+                min: { x: x + box.min[0], y: y + box.min[1], z: z + box.min[2] },
+                max: { x: x + box.max[0], y: y + box.max[1], z: z + box.max[2] },
+              },
+            });
+          });
+        }
+    return colliders;
+  }
+
+  sampleFluid(bounds: WorldAabb): readonly FluidVolume[] {
+    const fluids: FluidVolume[] = [];
+    const xRange = queryRange(bounds.min.x, bounds.max.x);
+    const yRange = queryRange(bounds.min.y, bounds.max.y);
+    const zRange = queryRange(bounds.min.z, bounds.max.z);
+    for (let x = xRange.from; x <= xRange.to; x += 1)
+      for (let y = yRange.from; y <= yRange.to; y += 1)
+        for (let z = zRange.from; z <= zRange.to; z += 1) {
+          const loaded = this.source.getLoadedVoxel(x, y, z);
+          if (!loaded?.fluid || loaded.fluid.level <= 0) continue;
+          this.revisions.set(loaded.chunkKey, loaded.revision);
+          fluids.push({
+            aabb: {
+              min: { x, y, z },
+              max: { x: x + 1, y: y + Math.min(8, loaded.fluid.level) / 8, z: z + 1 },
+            },
+            velocity: loaded.fluid.flow ?? { x: 0, y: 0, z: 0 },
+          });
+        }
+    return fluids;
+  }
+
+  revisionVector(): Readonly<Record<string, number>> {
+    return Object.fromEntries([...this.revisions].sort(([left], [right]) => left.localeCompare(right)));
+  }
+}
