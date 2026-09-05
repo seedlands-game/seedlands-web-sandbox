@@ -42,7 +42,12 @@
 
 ## 集成提交
 
-待记录。不会推送远端。
+- `db876e6 feat: expose real collision debug controls`
+- `2613958 refactor: enforce authority fluid scheduling`
+- `0d6b8a9 fix: migrate plain creatures to registered bodies`
+- `6cf0e15 refactor: unify player water immersion sampling`
+
+以上均为当前功能分支的本地语义提交，不推送远端。
 
 ## 阻塞与未满足准出
 
@@ -65,3 +70,7 @@
 - 旧玩家碰撞路径清理 GREEN：删除客户端旧轴分离、中心格、step-down、脱嵌和第二套 epsilon 的死实现；玩家脚底到视角的偏移由 `bodyConfigFor('player')` 的真实高度派生，旧代码不再作为不可达备用权威。定向测试验证视角偏移与身体注册表同源，源码与测试树中无旧模块或旧函数引用。
 - 新世界生态 bootstrap RED/GREEN：生产 Worker 入口没有调用 `initializeStarterEcology()`，直接补调用又会在 Authority 内同步生成未知 Chunk。新增两项用例先复现 General 结果缺少近场 canonical 数据、loaded-only 初始化端口不存在。实现后 `find-safe-spawn` 在 General lane 同时生成原有生态表面查询与全部营地编辑所需 Chunk；Authority 校验并接纳完整集合后，才用只读已加载体素建立营地、三类角色、莓果和自然资源并发布 ready，旧存档继续跳过初始化。`pnpm exec vitest run tests/server/authority-starter-ecology.test.ts tests/worker/compute-worker-task.test.ts tests/client/browser-compute-runtime.test.ts tests/client/browser-authority-client.test.ts tests/server/headless-session.test.ts tests/server/authority-runtime.test.ts tests/server/simulation-command-persistence.test.ts --no-file-parallelism --maxWorkers=1` 共 7 文件、33 项通过；source TypeScript 与所涉 ESLint、Prettier、diff-check 通过。
 - 旧双推进路径 RED/GREEN：新增边界用例先证明 `GameServer.advanceGameplay()`、`GameplayRuntime` 内的旧 `EntityPhysics`、`AutonomyRuntime.advanceMovement()` 仍能绕开唯一 Authority 直接积分或改写位置，且无 Authority 端口的 `/tick` 会偷偷推进旧时钟。实现后删除旧实体物理模块、同步自动吸附和旧自主导航移动循环；玩法层仅保留由 Authority gameplay lane 调用的 needs、动作生命周期和采集规则。`/tick <seconds>` 现在必须经显式 `advanceSession(seconds)` 端口推进全部 lane，无端口时 fail closed。`pnpm exec vitest run tests/server/authority-only-advancement.test.ts tests/server/simulation-command-persistence.test.ts tests/server/inventory-interaction.test.ts tests/server/survival-gameplay.test.ts tests/server/gameplay-command-persistence.test.ts tests/server/lantern-gameplay.test.ts tests/server/authority-actor-rules.test.ts tests/server/authority-entity-physics.test.ts --reporter=dot` 共 8 文件、53 项通过；旧自动物理与自主移动专项已随被替代实现删除。
+- 流体唯一调度路径 RED/GREEN：边界用例先证明 `GameServer.advanceFluid()` 和 `FluidTransactionRuntime.advance(seconds)` 仍保留第二个 30Hz 累加器、最多八步后丢弃欠债并在 Authority 线程同步执行候选计算。实现后删除这两个入口及旧 `VoxelFluidRuntime`；生产只允许 scheduler 触发租约并经 Fluid Worker 执行 `requestFluidWork → computeFluidCandidate → commitFluidCandidate`。原世界集成测试改用显式单候选测试适配器，不再重建生产时钟。流体诊断直接读取 Authority 队列与租约，报告 `pendingCellCount`、`inFlightLeaseCount`、接纳、拒绝和归还累计数。`pnpm exec vitest run tests/server/fluid-transaction.test.ts tests/server/voxel-fluid-runtime.test.ts tests/server/authority-only-advancement.test.ts tests/server/authority-session.test.ts --reporter=dot` 共 4 文件、43 项通过。
+- 碰撞调试细节 RED/GREEN：面板、同源传感器和真实资源统计用例先分别因入口或字段缺失失败。实现后 F3 面板提供碰撞箱等价开关及可选接触/传感器细节，图例明确 Authority 橙、预测青、接触红、吸附蓝与拾取紫；掉落物真实 Euclidean 吸附/拾取半径由统一身体注册表提供，并以三圈球形线框呈现。关闭时 Authority 快照不携带任何 debug 专用传感器字段，客户端也不会派生或重建；Renderer 诊断从实际 Entity、Mesh、材质、可见实例与顶点容量读取，关闭后全部资源归零且累计构建数不增长。`pnpm exec vitest run tests/app/collision-debug-renderer.test.ts tests/app/collision-debug-ui.test.ts tests/app/ui-bridge.test.ts tests/physics/body-registry.test.ts tests/client/collision-debug-projection.test.ts --reporter=dot` 共 5 文件、21 项通过；源码与测试 TypeScript、Svelte 检查通过。真实浏览器 F3+B、面板与 GPU 生命周期由 change E2E 继续准出。
+- 普通 creature 兼容 RED/GREEN：真实 headless `/spawn creature` 后首次 Authority tick 因 `creature:undefined` 无身体注册而退出，V1/V2 普通 creature 同样无法进入统一物理。创建和恢复边界现把无 archetype 的 creature 规范为 `grazer` 身体，但不会因此注册被删除的旧自治推进循环；命令后 tick、V1/V2 迁移和实体存储测试均覆盖。`pnpm exec vitest run tests/server/entity-player-runtime.test.ts tests/server/gameplay-snapshot-migration.test.ts tests/server/server-headless-cli.test.ts --reporter=dot` 共 3 文件、16 项通过。
+- 水介质同源 RED/GREEN：原视听介质只采玩家中心 x/z 单列，身体边缘已经与水 AABB 相交并进入物理阻力时仍返回全干。新纯采样入口接收由玩家统一身体注册表投影出的世界 AABB，以身体和逐格真实水面 AABB 的相交体积计算 `bodyFraction`；镜头入水仍独立采中心列并保留入水/离水滞回。旧客户端 `water-movement-policy` 的第二套速度、重力、浮力和跳跃参数连同专项测试已删除。`pnpm exec vitest run tests/world/water-immersion.test.ts tests/client/water-audio-policy.test.ts tests/physics/step-body.test.ts tests/client/local-player-prediction.test.ts tests/app/player-input-gates.test.ts --reporter=dot` 共 5 文件、39 项通过；源码与测试 TypeScript、Prettier、ESLint、diff-check 通过。
