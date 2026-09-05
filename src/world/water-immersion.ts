@@ -20,9 +20,11 @@ export const DRY_WATER_IMMERSION: WaterImmersionSnapshot = Object.freeze({
 });
 
 export type WaterImmersionInput = {
-  position: readonly [number, number, number];
-  feetOffset: number;
-  headOffset: number;
+  cameraPosition: readonly [number, number, number];
+  bodyBounds: Readonly<{
+    min: readonly [number, number, number];
+    max: readonly [number, number, number];
+  }>;
   previousCameraSubmerged: boolean;
   getVoxel: (x: number, y: number, z: number) => number;
   getFluidLevel: (x: number, y: number, z: number) => number | null;
@@ -35,23 +37,34 @@ const WADING_FRACTION = 0.04;
 const SWIMMING_FRACTION = 0.58;
 
 export function sampleWaterImmersion(input: WaterImmersionInput): WaterImmersionSnapshot {
-  const [rawX, cameraY, rawZ] = input.position;
-  const x = Math.floor(rawX);
-  const z = Math.floor(rawZ);
-  const bodyBottom = cameraY - input.feetOffset;
-  const bodyTop = cameraY + input.headOffset;
-  const bodyHeight = Math.max(0.001, bodyTop - bodyBottom);
-  let immersedHeight = 0;
+  const [cameraX, cameraY, cameraZ] = input.cameraPosition;
+  const { min, max } = input.bodyBounds;
+  const bodyVolume = Math.max(0.001, (max[0] - min[0]) * (max[1] - min[1]) * (max[2] - min[2]));
+  const xFrom = Math.floor(min[0]);
+  const xTo = Math.ceil(max[0]) - 1;
+  const yFrom = Math.floor(min[1]);
+  const yTo = Math.ceil(max[1]) - 1;
+  const zFrom = Math.floor(min[2]);
+  const zTo = Math.ceil(max[2]) - 1;
+  const cameraVoxelX = Math.floor(cameraX);
+  const cameraVoxelZ = Math.floor(cameraZ);
+  let immersedVolume = 0;
   let waterSurfaceY: number | null = null;
-  for (let y = Math.floor(bodyBottom); y <= Math.floor(bodyTop); y += 1) {
-    if (input.getVoxel(x, y, z) !== Voxel.Water) continue;
-    const level = input.getFluidLevel(x, y, z) ?? 8;
-    const covered = input.getVoxel(x, y + 1, z) === Voxel.Water;
-    const surfaceY = y + waterSurfaceHeight(level, covered);
-    waterSurfaceY = Math.max(waterSurfaceY ?? Number.NEGATIVE_INFINITY, surfaceY);
-    immersedHeight += Math.max(0, Math.min(bodyTop, surfaceY) - Math.max(bodyBottom, y));
-  }
-  const bodyFraction = clamp01(immersedHeight / bodyHeight);
+  for (let x = xFrom; x <= xTo; x += 1)
+    for (let y = yFrom; y <= yTo; y += 1)
+      for (let z = zFrom; z <= zTo; z += 1) {
+        if (input.getVoxel(x, y, z) !== Voxel.Water) continue;
+        const level = input.getFluidLevel(x, y, z) ?? 8;
+        const covered = input.getVoxel(x, y + 1, z) === Voxel.Water;
+        const surfaceY = y + waterSurfaceHeight(level, covered);
+        const width = Math.max(0, Math.min(max[0], x + 1) - Math.max(min[0], x));
+        const height = Math.max(0, Math.min(max[1], surfaceY) - Math.max(min[1], y));
+        const depth = Math.max(0, Math.min(max[2], z + 1) - Math.max(min[2], z));
+        immersedVolume += width * height * depth;
+        if (x === cameraVoxelX && z === cameraVoxelZ)
+          waterSurfaceY = Math.max(waterSurfaceY ?? Number.NEGATIVE_INFINITY, surfaceY);
+      }
+  const bodyFraction = clamp01(immersedVolume / bodyVolume);
   const cameraDepth = waterSurfaceY === null ? Number.NEGATIVE_INFINITY : waterSurfaceY - cameraY;
   const cameraSubmerged = input.previousCameraSubmerged
     ? cameraDepth >= -CAMERA_EXIT_CLEARANCE

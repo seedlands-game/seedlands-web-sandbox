@@ -4,7 +4,7 @@ import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../client/voxel-target';
 import { DRY_WATER_IMMERSION, sampleWaterImmersion, type WaterImmersionSnapshot } from '../world/water-immersion';
 import type { PlayerControllerOptions } from './player-controller-types';
-import { PLAYER_FEET_OFFSET, PLAYER_HEAD_OFFSET } from './player-view-offsets';
+import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 import { LocalPlayerPrediction } from '../client/local-player-prediction';
 import { bodyConfigFor } from '../physics';
 import { VoxelCollisionWorld } from '../server/authority/voxel-collision-world';
@@ -203,10 +203,14 @@ export class PlayerController {
     const camera = this.options.camera;
     camera.setEulerAngles(this.pitch, this.yaw, 0);
     const cameraPosition = camera.getPosition();
+    const playerBounds = bodyConfigFor('player').localAabb;
+    const feetY = cameraPosition.y - PLAYER_FEET_OFFSET;
     this.immersion = sampleWaterImmersion({
-      position: [cameraPosition.x, cameraPosition.y, cameraPosition.z],
-      feetOffset: PLAYER_FEET_OFFSET,
-      headOffset: PLAYER_HEAD_OFFSET,
+      cameraPosition: [cameraPosition.x, cameraPosition.y, cameraPosition.z],
+      bodyBounds: {
+        min: [cameraPosition.x + playerBounds.min.x, feetY + playerBounds.min.y, cameraPosition.z + playerBounds.min.z],
+        max: [cameraPosition.x + playerBounds.max.x, feetY + playerBounds.max.y, cameraPosition.z + playerBounds.max.z],
+      },
       previousCameraSubmerged: this.immersion.cameraSubmerged,
       getVoxel: (x, y, z) => world.getVoxel(x, y, z),
       getFluidLevel: (x, y, z) => world.getFluidCell(x, y, z)?.level ?? null,
