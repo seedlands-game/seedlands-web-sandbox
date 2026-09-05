@@ -107,7 +107,9 @@ export class ComputeWorkerPool {
   }
 
   cancel(taskId: number): boolean {
-    if (this.queue.cancel(taskId)) {
+    if (this.queue.hasQueued(taskId)) {
+      const removed = this.queue.fail(taskId);
+      for (const task of removed) if (task.taskId !== taskId) this.reportDependencyFailure(task);
       this.transfers.delete(taskId);
       this.cancellationRequests += 1;
       this.options.onDrop?.(taskId, 'cancelled');
@@ -131,7 +133,7 @@ export class ComputeWorkerPool {
   }
 
   switchEpoch(epoch: SessionEpoch): void {
-    if (!epoch || epoch === this.epoch) return;
+    if (this.disposed || !epoch || epoch === this.epoch) return;
     for (const taskId of this.transfers.keys()) this.options.onDrop?.(taskId, 'epoch-switch');
     this.clearRestartTimers();
     this.terminateSlots();
@@ -158,6 +160,8 @@ export class ComputeWorkerPool {
   dispose(): void {
     if (this.disposed) return;
     this.disposed = true;
+    for (const taskId of this.transfers.keys()) this.options.onDrop?.(taskId, 'epoch-switch');
+    this.queue.switchEpoch(this.epoch);
     this.clearRestartTimers();
     this.terminateSlots();
     this.transfers.clear();
@@ -218,6 +222,7 @@ export class ComputeWorkerPool {
     const cancelled = this.cancelledRunning.delete(task.taskId);
     if (value.epoch !== this.epoch || task.epoch !== this.epoch || cancelled) {
       this.staleResults += 1;
+      this.failDependencies(task.taskId);
       this.options.onDrop?.(task.taskId, cancelled ? 'cancelled' : 'epoch-switch');
     } else if (!value.ok) this.failTask(task, new Error(value.error || 'Compute worker task failed.'));
     else {
@@ -232,7 +237,19 @@ export class ComputeWorkerPool {
     this.recoverSlot(slot, error);
   }
 
+  private failDependencies(taskId: number): void {
+    for (const dependent of this.queue.fail(taskId)) this.reportDependencyFailure(dependent);
+  }
+
+  private reportDependencyFailure(task: ComputeTask): void {
+    this.transfers.delete(task.taskId);
+    this.failedTasks += 1;
+    this.options.onFailure?.(task, new Error('Compute dependency was cancelled or failed.'));
+  }
+
   private failTask(task: ComputeTask, error: Error): void {
+    this.cancelledRunning.delete(task.taskId);
+    this.failDependencies(task.taskId);
     this.failedTasks += 1;
     this.options.onFailure?.(task, error);
   }

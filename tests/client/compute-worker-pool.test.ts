@@ -233,4 +233,61 @@ describe('ComputeWorkerPool', () => {
     );
     expect(pool.diagnostics()).toMatchObject({ workerCount: 1, generalWorkerCount: 1, running: 0 });
   });
+  it('运行任务失败或取消后，依赖任务收到失败且队列释放', () => {
+    for (const cancelled of [false, true]) {
+      const workers: FakeWorker[] = [];
+      const failures = vi.fn();
+      const pool = new ComputeWorkerPool({
+        epoch: 'world:1',
+        generalWorkerCount: 1,
+        maxTasks: 8,
+        maxBytes: 1024,
+        createWorker: () => {
+          const worker = new FakeWorker();
+          workers.push(worker);
+          return worker;
+        },
+        onFailure: failures,
+        setTimer: (callback) => {
+          callback();
+          return 1;
+        },
+      });
+      pool.enqueue(task(1, 'general'));
+      pool.enqueue(task(2, 'general', { dependencies: [1] }));
+      pool.enqueue(task(3, 'general', { dependencies: [2] }));
+      if (cancelled) {
+        pool.cancel(1);
+        workers[1].finish('world:1', 1);
+      } else workers[1].onerror?.({ message: 'failed' } as ErrorEvent);
+      expect(failures.mock.calls.map(([entry]) => entry.taskId)).toContain(2);
+      expect(failures.mock.calls.map(([entry]) => entry.taskId)).toContain(3);
+      expect(pool.diagnostics()).toMatchObject({ queued: 0, queuedBytes: 0, running: 0 });
+      pool.dispose();
+    }
+  });
+
+  it('dispose拒绝排队任务并阻止切epoch后复活Worker', () => {
+    const workers: FakeWorker[] = [];
+    const dropped = vi.fn();
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 8,
+      maxBytes: 1024,
+      createWorker: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      onDrop: dropped,
+    });
+    pool.enqueue(task(1, 'general'));
+    pool.enqueue(task(2, 'general'));
+    pool.dispose();
+    expect(dropped.mock.calls.map(([id]) => id).sort()).toEqual([1, 2]);
+    pool.switchEpoch('world:2');
+    expect(workers).toHaveLength(2);
+    expect(pool.diagnostics()).toMatchObject({ workerCount: 0, queued: 0, queuedBytes: 0 });
+  });
 });

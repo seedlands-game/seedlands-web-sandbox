@@ -37,10 +37,19 @@ export class ComputeTaskQueue {
   private readonly mergeKeys = new Map<string, number>();
   private readonly completed = new Set<number>();
   private queuedBytes = 0;
+  private highWatermark = -1;
+  private readonly running = new Set<number>();
+  private readonly dispatchCount: Record<ComputeLane, number> = { fluid: 0, general: 0 };
+  private readonly enqueuedAt = new Map<number, number>();
 
   constructor(private readonly options: Readonly<{ epoch: SessionEpoch; maxTasks: number; maxBytes: number }>) {
     this.epoch = options.epoch;
-    if (!Number.isInteger(options.maxTasks) || options.maxTasks < 1 || options.maxBytes < 1)
+    if (
+      !Number.isSafeInteger(options.maxTasks) ||
+      options.maxTasks < 1 ||
+      !Number.isSafeInteger(options.maxBytes) ||
+      options.maxBytes < 1
+    )
       throw new RangeError('Compute queue limits must be positive.');
   }
 
@@ -54,11 +63,25 @@ export class ComputeTaskQueue {
 
   enqueue(task: ComputeTask): ComputeQueueResult {
     if (task.epoch !== this.epoch) return { status: 'rejected', reason: 'wrong-epoch' };
-    if (!this.validTask(task)) return { status: 'rejected', reason: 'invalid-task' };
+    if (
+      !this.validTask(task) ||
+      task.taskId <= this.highWatermark ||
+      task.dependencies.some((id) => !this.tasks.has(id) && !this.running.has(id) && !this.completed.has(id))
+    )
+      return { status: 'rejected', reason: 'invalid-task' };
     const mergeKey = this.mergeKey(task);
     const replacedTaskId = this.mergeKeys.get(mergeKey);
-    const replaced = replacedTaskId === undefined ? undefined : this.tasks.get(replacedTaskId);
-    const nextTask = replaced ? { ...task, priority: this.higherPriority(replaced.priority, task.priority) } : task;
+    const candidate = replacedTaskId === undefined ? undefined : this.tasks.get(replacedTaskId);
+    const required =
+      candidate &&
+      (task.dependencies.includes(candidate.taskId) ||
+        [...this.tasks.values()].some((entry) => entry.dependencies.includes(candidate.taskId)));
+    const replaced = required ? undefined : candidate;
+    const nextTask = {
+      ...task,
+      priority: replaced ? this.higherPriority(replaced.priority, task.priority) : task.priority,
+      dependencies: task.dependencies.filter((id) => !this.completed.has(id)),
+    };
     const nextCount = this.tasks.size + (replaced ? 0 : 1);
     const nextBytes = this.queuedBytes - (replaced?.estimatedBytes ?? 0) + task.estimatedBytes;
     const overTasks = nextCount > this.options.maxTasks;
@@ -68,7 +91,10 @@ export class ComputeTaskQueue {
         status: 'backpressure',
         reason: overTasks && overBytes ? 'task-and-byte-limit' : overTasks ? 'task-limit' : 'byte-limit',
       };
-    if (replaced) this.tasks.delete(replaced.taskId);
+    const ageOrigin = replaced ? this.enqueuedAt.get(replaced.taskId)! : this.dispatchCount[task.lane];
+    if (replaced) this.remove(replaced);
+    this.highWatermark = task.taskId;
+    this.enqueuedAt.set(task.taskId, ageOrigin);
     this.tasks.set(task.taskId, nextTask);
     this.mergeKeys.set(mergeKey, task.taskId);
     this.queuedBytes = nextBytes;
@@ -76,25 +102,57 @@ export class ComputeTaskQueue {
   }
 
   take(lane: ComputeLane): ComputeTask | null {
+    if (this.running.size >= 3) return null;
+    const effectivePriority = (task: ComputeTask) =>
+      priorityRank[task.priority] + Math.floor((this.dispatchCount[lane] - this.enqueuedAt.get(task.taskId)!) / 8);
     const task = [...this.tasks.values()]
-      .filter((candidate) => candidate.lane === lane)
-      .filter((candidate) => candidate.dependencies.every((dependency) => this.completed.has(dependency)))
-      .sort(
-        (left, right) => priorityRank[right.priority] - priorityRank[left.priority] || left.taskId - right.taskId,
-      )[0];
+      .filter((candidate) => candidate.lane === lane && candidate.dependencies.length === 0)
+      .sort((left, right) => effectivePriority(right) - effectivePriority(left) || left.taskId - right.taskId)[0];
     if (!task) return null;
     this.remove(task);
+    this.running.add(task.taskId);
+    this.dispatchCount[lane] += 1;
     return task;
   }
 
   complete(taskId: number) {
+    if (!this.running.delete(taskId)) return;
     this.completed.add(taskId);
+    for (const [id, task] of this.tasks) {
+      if (task.dependencies.includes(taskId))
+        this.tasks.set(id, { ...task, dependencies: task.dependencies.filter((dependency) => dependency !== taskId) });
+    }
+    while (this.completed.size > this.options.maxTasks * 4)
+      this.completed.delete(this.completed.values().next().value!);
+  }
+
+  hasQueued(taskId: number) {
+    return this.tasks.has(taskId);
+  }
+
+  fail(taskId: number): ComputeTask[] {
+    this.running.delete(taskId);
+    this.completed.delete(taskId);
+    const failed = new Set([taskId]);
+    const removed: ComputeTask[] = [];
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const task of this.tasks.values()) {
+        if (failed.has(task.taskId) || task.dependencies.some((id) => failed.has(id))) {
+          this.remove(task);
+          failed.add(task.taskId);
+          removed.push(task);
+          changed = true;
+        }
+      }
+    }
+    return removed;
   }
 
   cancel(taskId: number) {
-    const task = this.tasks.get(taskId);
-    if (!task) return false;
-    this.remove(task);
+    if (!this.tasks.has(taskId)) return false;
+    this.fail(taskId);
     return true;
   }
 
@@ -103,12 +161,18 @@ export class ComputeTaskQueue {
     this.tasks.clear();
     this.mergeKeys.clear();
     this.completed.clear();
+    this.running.clear();
+    this.enqueuedAt.clear();
+    this.highWatermark = -1;
+    this.dispatchCount.fluid = 0;
+    this.dispatchCount.general = 0;
     this.queuedBytes = 0;
   }
 
   private remove(task: ComputeTask) {
     this.tasks.delete(task.taskId);
-    this.mergeKeys.delete(this.mergeKey(task));
+    if (this.mergeKeys.get(this.mergeKey(task)) === task.taskId) this.mergeKeys.delete(this.mergeKey(task));
+    this.enqueuedAt.delete(task.taskId);
     this.queuedBytes -= task.estimatedBytes;
   }
 
@@ -125,7 +189,14 @@ export class ComputeTaskQueue {
       task.protocolVersion === PROTOCOL_VERSION &&
       Number.isSafeInteger(task.taskId) &&
       task.taskId >= 0 &&
+      typeof task.key === 'string' &&
       task.key.length > 0 &&
+      typeof task.revision === 'string' &&
+      Object.hasOwn(priorityRank, task.priority) &&
+      ['fluid', 'chunk-generation', 'mesh', 'navigation'].includes(task.category) &&
+      Array.isArray(task.dependencies) &&
+      task.dependencies.length <= this.options.maxTasks &&
+      task.dependencies.every((id) => Number.isSafeInteger(id) && id >= 0 && id < task.taskId) &&
       task.revision.length > 0 &&
       Number.isSafeInteger(task.estimatedBytes) &&
       task.estimatedBytes >= 0 &&
