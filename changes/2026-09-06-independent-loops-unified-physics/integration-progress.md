@@ -19,6 +19,8 @@
 - 协议复查 GREEN：`pnpm exec vitest run tests/runtime/session-protocol.test.ts tests/server/authority-session.test.ts tests/server/authority-game-server-port.test.ts`，3 个文件、16 个测试全部通过。输入按 `targetPhysicsTick` 保留历史，ack 只在物理步实际消费后推进；迟到输入进入明确重同步状态；暂停期间不会借旧 debt 积分，消息分批与预先批量到达得到相同身体状态，despawn 身体从快照删除。
 - 身体注册表 RED：`pnpm exec vitest run tests/physics/body-registry.test.ts` 因 `src/physics/body-registry.ts` 尚不存在而失败。
 - 身体注册表 GREEN：`pnpm exec vitest run tests/physics/body-registry.test.ts tests/client/entity-hit-volume.test.ts tests/physics/step-body.test.ts`，3 个文件、20 个测试全部通过。玩家、掉落物与三类角色使用脚底中心具名身体；战斗射线改为消费同一注册表，不再保留 client 硬编码碰撞尺寸。
+- 流体 Worker 端口 RED：`pnpm exec vitest run tests/server/authority-game-server-port.test.ts` 因 `GameServer.requestFluidWork()` 尚不存在而失败；证明用例没有落回同步 `advanceFluid()`。
+- 流体 Worker 端口 GREEN：`pnpm exec vitest run tests/server/authority-game-server-port.test.ts tests/server/fluid-transaction.test.ts tests/server/voxel-fluid-runtime.test.ts`，3 个文件、26 个测试全部通过。Authority 可租赁只读快照、接纳候选或归还租约；请求端口不执行候选计算。同步 `advanceFluid()` 仅保留旧路径兼容，最终生产调度不得调用。
 
 ## 集成提交
 

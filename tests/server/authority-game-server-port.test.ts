@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GameServer } from '../../src/server/game-server';
+import { computeFluidCandidate } from '../../src/server/fluid/fluid-transaction';
+import { Voxel } from '../../src/world/voxel';
 
 describe('GameServer Authority port', () => {
   it('只读已装载体素不会同步生成未知 Chunk', () => {
@@ -21,5 +23,19 @@ describe('GameServer Authority port', () => {
     expect(server.gameplayTime).toBe(120);
     expect(server.getPlayerState('player-1').hunger).toBe(19);
     expect(server.queryEntities({ type: 'world-item' })[0]?.position).toEqual([4, 44, 0]);
+  });
+
+  it('公开租赁/接纳/归还接口供保留流体 Worker 使用且不在请求时同步计算', () => {
+    const server = new GameServer({ seedText: 'authority-fluid-port' });
+    server.setFluidActiveChunks(['0,0,0']);
+    server.edit(0, 5, 0, Voxel.Water, 'test');
+    const work = server.requestFluidWork();
+
+    expect(work).not.toBeNull();
+    expect(server.requestFluidWork()).toBeNull();
+    const candidate = computeFluidCandidate(work!);
+    expect(server.commitFluidCandidate(candidate)).toMatchObject({ accepted: true });
+    const second = server.requestFluidWork();
+    if (second) expect(server.abortFluidWork(second.workId, 'test')).toBe(true);
   });
 });

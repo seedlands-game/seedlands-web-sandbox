@@ -33,6 +33,7 @@ import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
 import { findDryStarterSurface } from './starter-surface';
 import { peekLoadedVoxel } from './loaded-voxel-reader';
+import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -311,6 +312,19 @@ export class GameServer extends GameServerGameplayFacade {
     return this.fluidRuntime.advance(seconds);
   }
 
+  requestFluidWork() {
+    this.fluidChunkActivations.pumpRuntime(this.fluidRuntime, this.fluidChunks);
+    return this.fluidRuntime.requestFluidWork();
+  }
+
+  commitFluidCandidate(candidate: FluidCandidate) {
+    return this.fluidRuntime.commitFluidCandidate(candidate);
+  }
+
+  abortFluidWork(workId: string, reason: string) {
+    return this.fluidRuntime.abortLease(workId, reason);
+  }
+
   setFluidActiveChunks(keys: readonly string[]): void {
     this.fluidChunkActivations.sync(keys, this.chunks);
     this.fluidWindow.update(keys);
@@ -478,22 +492,14 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   private isValidSnapshot(snapshot: ChunkSnapshot, key: string, cx: number, cy: number, cz: number): boolean {
-    return (
-      snapshot.seedText === this.options.seedText &&
-      snapshot.generatorVersion === this.generatorVersion &&
-      snapshot.key === key &&
-      snapshot.cx === cx &&
-      snapshot.cy === cy &&
-      snapshot.cz === cz &&
-      Number.isInteger(snapshot.revision) &&
-      snapshot.revision >= 0 &&
-      snapshot.voxels.length === CHUNK_SIZE ** 3 &&
-      (snapshot.fluid === undefined ||
-        (snapshot.fluidVersion === 1 &&
-          snapshot.fluid.length === CHUNK_SIZE ** 3 &&
-          snapshot.fluid.every((value) => value === 0 || ((value & 0x0f) >= 1 && (value & 0x0f) <= 8)))) &&
-      snapshot.voxels.every((value) => value >= Voxel.Air && value <= Voxel.Lantern)
-    );
+    return isValidChunkSnapshot(snapshot, {
+      seedText: this.options.seedText,
+      generatorVersion: this.generatorVersion,
+      key,
+      cx,
+      cy,
+      cz,
+    });
   }
 
   private readAuthoritativeChunk(cx: number, cy: number, cz: number): ServerChunk | undefined {
