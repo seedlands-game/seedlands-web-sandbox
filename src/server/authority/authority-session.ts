@@ -23,6 +23,7 @@ export type AuthorityServerPort = {
     update: { position: [number, number, number]; physicsVelocity: [number, number, number] },
   ) => unknown;
   advanceGameplayRules: (seconds: number) => unknown;
+  advanceWorldClock?: (hours: number) => unknown;
 };
 
 export type LogicIntent = Readonly<{
@@ -50,6 +51,7 @@ export type AuthoritySnapshot = Readonly<{
   commitSequence: number;
   worldMutationCount: number;
   acknowledgedInputSequence: number;
+  inputResyncRequired: boolean;
   activeTimeMs: number;
   integratedPhysicsTimeMs: number;
   physicsDebtMs: number;
@@ -72,6 +74,7 @@ type AuthoritySessionOptions = Readonly<{
   requestUnknownChunk?: (chunkKey: string) => void;
   requestFluidWork?: (elapsedPeriods: number) => void;
   publishLogicObservation?: (snapshot: AuthoritySnapshot) => void;
+  worldHoursPerSecond?: number;
 }>;
 
 const toBodyState = (entity: AuthorityEntity): BodyState => ({
@@ -127,8 +130,12 @@ export class AuthoritySession {
     }
     this.integratedPhysicsTimeMs = due.integratedPhysicsTimeMs;
     this.physicsDebtMs = due.physicsDebtMs;
-    if (due.gameplay.due)
-      this.options.server.advanceGameplayRules(due.gameplay.elapsedPeriods / this.options.frequencies.gameplayHz);
+    if (due.gameplay.due) {
+      const gameplaySeconds = due.gameplay.elapsedPeriods / this.options.frequencies.gameplayHz;
+      this.options.server.advanceWorldClock?.(gameplaySeconds * (this.options.worldHoursPerSecond ?? 0.04));
+      this.options.server.advanceGameplayRules(gameplaySeconds);
+      this.commitSequence += 1;
+    }
     if (due.fluid.due) this.options.requestFluidWork?.(due.fluid.elapsedPeriods);
     const snapshot = this.snapshot();
     if (due.gameplay.due) this.options.publishLogicObservation?.(snapshot);
@@ -145,8 +152,23 @@ export class AuthoritySession {
     this.clock.resume(nowMs);
   }
 
+  get currentCommitSequence() {
+    return this.commitSequence;
+  }
+
+  get inputResyncRequired() {
+    return this.input.requiresResync;
+  }
+
+  commitExternalState(refreshBodies = true) {
+    if (refreshBodies) this.refreshBodies();
+    this.commitSequence += 1;
+    return this.commitSequence;
+  }
+
   synchronizeExternalState() {
     this.refreshBodies();
+    this.commitSequence += 1;
   }
 
   private stepPhysics(dt: number) {
@@ -229,6 +251,7 @@ export class AuthoritySession {
       physicsTick: this.physicsTick,
       commitSequence: this.commitSequence,
       acknowledgedInputSequence: this.input.acknowledgedSequence,
+      inputResyncRequired: this.input.requiresResync,
       activeTimeMs: this.activeTimeMs,
       integratedPhysicsTimeMs: this.integratedPhysicsTimeMs,
       physicsDebtMs: this.physicsDebtMs,

@@ -6,7 +6,7 @@ import type { CommandResult, CommandSource, ServerCommand } from '../server/comm
 import type { FluidCandidate, FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '../server/game-server-types';
 import type { VoxelEdit } from '../server/world-mutation';
-import type { InputCommand } from '../runtime/session-protocol';
+import type { InputCommand, SequenceDecision } from '../runtime/session-protocol';
 import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol';
 import type { WorldOpenMode } from '../client/world-version-policy';
 
@@ -92,6 +92,13 @@ export type AuthorityActionResult = Readonly<{
   commits: readonly WorldCommitResult[];
 }>;
 
+export type AuthorityTransactionKey = Readonly<{
+  issuer: string;
+  stream: string;
+  sequence: number;
+  expectedCommitSequence?: number;
+}>;
+
 export type AuthorityRequest =
   | Readonly<{
       kind: 'start-authority';
@@ -154,6 +161,7 @@ export type AuthorityRequest =
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
       requestId: number;
+      transaction: AuthorityTransactionKey;
       actorId: string;
       edits: readonly VoxelEdit[];
     }>
@@ -161,7 +169,8 @@ export type AuthorityRequest =
       kind: 'set-player-position';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
-      requestId?: number;
+      requestId: number;
+      transaction: AuthorityTransactionKey;
       position: [number, number, number];
     }>
   | Readonly<{
@@ -169,6 +178,7 @@ export type AuthorityRequest =
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
       requestId: number;
+      transaction: AuthorityTransactionKey;
       action: AuthorityAction;
     }>
   | Readonly<{
@@ -176,6 +186,7 @@ export type AuthorityRequest =
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
       requestId: number;
+      transaction: AuthorityTransactionKey;
       source: CommandSource;
       command: ServerCommand;
     }>
@@ -183,7 +194,8 @@ export type AuthorityRequest =
       kind: 'set-world-time';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
-      requestId?: number;
+      requestId: number;
+      transaction: AuthorityTransactionKey;
       hours: number;
     }>
   | Readonly<{
@@ -250,12 +262,21 @@ export type AuthorityResponse =
       commits?: readonly WorldCommitResult[];
     }>
   | Readonly<{
+      kind: 'input-decision';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      sequence: number;
+      decision: SequenceDecision;
+      requiresResync: boolean;
+    }>
+  | Readonly<{
       kind: 'authority-response';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
       requestId: number;
       ok: true;
       result: unknown;
+      commitSequence?: number;
       gameplay?: AuthorityGameplayView;
       commits?: readonly WorldCommitResult[];
     }>

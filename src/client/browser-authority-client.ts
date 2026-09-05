@@ -4,7 +4,12 @@ import type { FluidCandidate, FluidAuthoritySnapshot } from '../server/fluid/flu
 import type { WorldCommitResult } from '../server/game-server-types';
 import { legacyFluid } from '../server/fluid/fluid-cell-state';
 import type { VoxelEdit } from '../server/world-mutation';
-import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '../runtime/session-protocol';
+import {
+  PROTOCOL_VERSION,
+  type InputCommand,
+  type SequenceDecision,
+  type SessionEpoch,
+} from '../runtime/session-protocol';
 import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
 import type { SerializedChunkSnapshot } from './browser-chunk-persistence';
 import type { WorldOpenMode } from './world-version-policy';
@@ -33,6 +38,7 @@ type ClientOptions = Readonly<{
   onLogicObservation?: (sequence: number, snapshot: AuthoritySnapshot) => void;
   onBootstrapGeneration?: (request: { seed: number; generatorVersion: number }) => Promise<[number, number, number]>;
   onUnknownChunk?: (key: string) => void;
+  onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
   onFatal?: (error: Error) => void;
 }>;
 
@@ -59,6 +65,7 @@ type PendingRequest = { resolve: (value: unknown) => void; reject: (error: Error
 
 export class BrowserAuthorityClient {
   private requestSequence = 0;
+  private readonly transactionSequences = new Map<string, number>();
   private readonly pending = new Map<number, PendingRequest>();
   private readonly meshLoads = new Map<string, Promise<void>>();
   private readonly meshCache = new Map<string, CachedMesh>();
@@ -274,23 +281,23 @@ export class BrowserAuthorityClient {
   }
 
   editWorld(actorId: string, edits: readonly VoxelEdit[]): Promise<WorldCommitResult> {
-    return this.request({ kind: 'world-edit', actorId, edits }) as Promise<WorldCommitResult>;
+    return this.request({ kind: 'world-edit', actorId, edits }, [], 'world-edit') as Promise<WorldCommitResult>;
   }
 
   setPlayerPosition(position: [number, number, number]): Promise<unknown> {
-    return this.request({ kind: 'set-player-position', position });
+    return this.request({ kind: 'set-player-position', position }, [], 'teleport');
   }
 
   performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
-    return this.request({ kind: 'gameplay-action', action }) as Promise<AuthorityActionResult>;
+    return this.request({ kind: 'gameplay-action', action }, [], 'gameplay-action') as Promise<AuthorityActionResult>;
   }
 
   executeCommand(source: CommandSource, command: ServerCommand): Promise<CommandResult> {
-    return this.request({ kind: 'server-command', source, command }) as Promise<CommandResult>;
+    return this.request({ kind: 'server-command', source, command }, [], 'server-command') as Promise<CommandResult>;
   }
 
   setWorldTime(hours: number): Promise<{ worldTime: number }> {
-    return this.request({ kind: 'set-world-time', hours }) as Promise<{ worldTime: number }>;
+    return this.request({ kind: 'set-world-time', hours }, [], 'world-time') as Promise<{ worldTime: number }>;
   }
 
   advanceWorldClock(hours: number): void {
@@ -334,11 +341,29 @@ export class BrowserAuthorityClient {
     this.preparationCache.clear();
   }
 
-  private request(payload: Record<string, unknown>, transfer: Transferable[] = []): Promise<unknown> {
+  private request(
+    payload: Record<string, unknown>,
+    transfer: Transferable[] = [],
+    transactionStream?: string,
+  ): Promise<unknown> {
     const requestId = ++this.requestSequence;
     const promise = new Promise((resolve, reject) => this.pending.set(requestId, { resolve, reject }));
+    const transaction = transactionStream
+      ? {
+          issuer: `browser:${this.epoch}`,
+          stream: transactionStream,
+          sequence: (this.transactionSequences.get(transactionStream) ?? -1) + 1,
+        }
+      : undefined;
+    if (transaction) this.transactionSequences.set(transactionStream!, transaction.sequence);
     this.post(
-      { ...payload, protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, requestId } as AuthorityRequest,
+      {
+        ...payload,
+        protocolVersion: PROTOCOL_VERSION,
+        epoch: this.epoch,
+        requestId,
+        ...(transaction ? { transaction } : {}),
+      } as AuthorityRequest,
       transfer,
     );
     return promise;
@@ -371,6 +396,13 @@ export class BrowserAuthorityClient {
         if (message.gameplay) this.updateGameplay(message.gameplay);
         message.commits?.forEach((commit) => this.options.onCommit?.(commit));
         this.options.onSnapshot?.(message.snapshot);
+        break;
+      case 'input-decision':
+        this.options.onInputDecision?.({
+          sequence: message.sequence,
+          decision: message.decision,
+          requiresResync: message.requiresResync,
+        });
         break;
       case 'authority-response': {
         const pending = this.pending.get(message.requestId);

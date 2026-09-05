@@ -9,6 +9,7 @@ type Entity = ReturnType<AuthorityServerPort['queryEntities']>[number];
 
 class MemoryAuthorityServer implements AuthorityServerPort {
   worldRevision = 0;
+  mutationCount = 0;
   worldTime = 8;
   readonly entities = new Map<string, Entity>();
   gameplayAdvanceSeconds = 0;
@@ -37,6 +38,10 @@ class MemoryAuthorityServer implements AuthorityServerPort {
 
   advanceGameplayRules(seconds: number) {
     this.gameplayAdvanceSeconds += seconds;
+  }
+
+  advanceWorldClock(hours: number) {
+    this.worldTime += hours;
   }
 }
 
@@ -70,6 +75,30 @@ const input = (sequence: number, moveX: number, jumpHeld = false): InputCommand 
 });
 
 describe('AuthoritySession', () => {
+  it('以单一序号排序物理、玩法和外部权威提交，并单列体素写入次数', () => {
+    const server = new MemoryAuthorityServer(player());
+    const session = new AuthoritySession({
+      epoch: 'test-world:1',
+      playerId: 'player-1',
+      server,
+      bodyConfigFor: () => bodyConfig,
+      voxelSource: {
+        getLoadedVoxel: (_x, y) => ({ voxel: y === -1 ? Voxel.Stone : Voxel.Air, chunkKey: 'loaded', revision: 0 }),
+      },
+      frequencies: { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
+      startTimeMs: 0,
+    });
+    server.mutationCount = 7;
+    const due = session.wake(50);
+    expect(due.physicsTick).toBe(3);
+    expect(due.commitSequence).toBe(4);
+    expect(due.worldMutationCount).toBe(7);
+    expect(due.worldTime).toBeCloseTo(8.002, 7);
+
+    session.commitExternalState();
+    expect(session.wake(50).commitSequence).toBe(5);
+  });
+
   it('在逻辑没有返回新意图时仍独立产出固定物理快照', () => {
     const server = new MemoryAuthorityServer(player());
     const session = new AuthoritySession({

@@ -1,5 +1,5 @@
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
-import type { InputCommand, SequenceDecision } from '../../runtime/session-protocol';
+import { TransactionDeduplicator, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type {
   AuthorityAction,
   AuthorityActionResult,
@@ -13,6 +13,8 @@ import type { ChunkPersistence } from '../persistence/chunk-persistence';
 import type { GameplayPersistence } from '../persistence/gameplay-persistence';
 import type { FluidAuthoritySnapshot, FluidCandidate } from '../fluid/fluid-transaction';
 import type { VoxelEdit } from '../world-mutation';
+import { ServerCommandExecutor } from '../commands/server-command-executor';
+import type { CommandSource, ServerCommand } from '../commands/command-contract';
 import { AuthoritySession, type AuthoritySnapshot, type LogicIntent } from './authority-session';
 
 type AuthorityPersistence = ChunkPersistence & Partial<GameplayPersistence>;
@@ -33,6 +35,19 @@ export type AuthorityRuntimeOptions = Readonly<{
   onUnknownChunk?: (key: string) => void;
 }>;
 
+export type AuthorityTransactionIdentity = Readonly<{
+  epoch: string;
+  issuer: string;
+  stream: string;
+  sequence: number;
+  expectedCommitSequence?: number;
+}>;
+
+export type AuthorityTransactionReceipt<T> = Readonly<
+  | { status: 'executed'; commitSequence: number; result: T }
+  | { status: 'conflict' | 'expired' | 'capacity'; commitSequence: number }
+>;
+
 export class AuthorityRuntime {
   readonly server: GameServer;
   readonly playerId: string;
@@ -41,6 +56,7 @@ export class AuthorityRuntime {
   private readonly initialBodyPosition: [number, number, number];
   private pendingCommits: WorldCommitResult[] = [];
   private logicObservationSequence = 0;
+  private readonly transactions: TransactionDeduplicator<Promise<AuthorityTransactionReceipt<unknown>>>;
 
   private constructor(
     private readonly options: AuthorityRuntimeOptions,
@@ -49,6 +65,7 @@ export class AuthorityRuntime {
     isNew: boolean,
   ) {
     this.server = server;
+    this.transactions = new TransactionDeduplicator(options.epoch);
     this.playerId = playerId;
     this.newPlayer = isNew;
     const player = server.getEntity(playerId);
@@ -72,6 +89,7 @@ export class AuthorityRuntime {
         this.pendingCommits.push(...result.commits);
         return result;
       },
+      advanceWorldClock: (hours: number) => server.advanceClock(hours),
     };
     this.session = new AuthoritySession({
       epoch: options.epoch,
@@ -136,8 +154,42 @@ export class AuthorityRuntime {
     return this.session.receiveInput(command);
   }
 
+  get inputResyncRequired(): boolean {
+    return this.session.inputResyncRequired;
+  }
+
   receiveLogicIntents(epoch: string, intents: readonly LogicIntent[]): boolean {
     return this.session.receiveLogicIntents(epoch, intents);
+  }
+
+  async executeTransaction<T>(
+    identity: AuthorityTransactionIdentity,
+    operation: () => T | Promise<T>,
+  ): Promise<AuthorityTransactionReceipt<T>> {
+    const outcome = this.transactions.execute(
+      identity.epoch,
+      identity.issuer,
+      identity.stream,
+      identity.sequence,
+      async () => {
+        if (
+          identity.expectedCommitSequence !== undefined &&
+          identity.expectedCommitSequence !== this.session.currentCommitSequence
+        )
+          return {
+            status: 'conflict' as const,
+            commitSequence: this.session.currentCommitSequence,
+          };
+        const result = await operation();
+        return {
+          status: 'executed' as const,
+          commitSequence: this.session.currentCommitSequence,
+          result,
+        };
+      },
+    );
+    if (!('receipt' in outcome)) return { status: outcome.status, commitSequence: this.session.currentCommitSequence };
+    return outcome.receipt as Promise<AuthorityTransactionReceipt<T>>;
   }
 
   pause(nowMs: number): void {
@@ -184,7 +236,10 @@ export class AuthorityRuntime {
 
   editWorld(actorId: string, edits: readonly VoxelEdit[]) {
     const result = this.server.editBatch({ actorId, edits });
-    if (result.committed) this.pendingCommits.push(result);
+    if (result.committed) {
+      this.pendingCommits.push(result);
+      this.session.commitExternalState(false);
+    }
     return result;
   }
 
@@ -194,6 +249,7 @@ export class AuthorityRuntime {
   }
 
   performAction(action: AuthorityAction): AuthorityActionResult {
+    const before = this.serverStateVersion();
     let result: unknown;
     switch (action.type) {
       case 'select-hotbar':
@@ -219,7 +275,6 @@ export class AuthorityRuntime {
       }
       case 'respawn':
         result = this.server.respawnPlayer(this.playerId);
-        this.session.synchronizeExternalState();
         break;
       case 'move-inventory':
         result = this.server.moveInventorySlot(this.playerId, action.source, action.target);
@@ -228,13 +283,38 @@ export class AuthorityRuntime {
         result = this.server.useInventoryItem(this.playerId, action.slot);
         break;
     }
+    this.commitIfServerChanged(before);
     return { result, gameplay: this.view(), commits: this.takeCommits() };
   }
 
   commitFluidCandidate(candidate: FluidCandidate) {
     const result = this.server.commitFluidCandidate(candidate);
-    if (result.accepted && result.commit?.committed) this.pendingCommits.push(result.commit);
+    if (result.accepted && result.commit?.committed) {
+      this.pendingCommits.push(result.commit);
+      this.session.commitExternalState(false);
+    }
     return result;
+  }
+
+  async executeCommand(source: CommandSource, command: ServerCommand) {
+    const before = this.serverStateVersion();
+    const result = await new ServerCommandExecutor(this.server).execute(source, command);
+    this.commitIfServerChanged(before);
+    return result;
+  }
+
+  setWorldTime(hours: number): number {
+    const before = this.server.worldTime;
+    const value = this.server.setWorldTime(hours);
+    if (value !== before) this.session.commitExternalState(false);
+    return value;
+  }
+
+  advanceWorldClock(hours: number): number {
+    if (!hours) return this.server.worldTime;
+    const value = this.server.advanceClock(hours);
+    this.session.commitExternalState(false);
+    return value;
   }
 
   abortFluidWork(workId: string, reason: string): boolean {
@@ -268,5 +348,22 @@ export class AuthorityRuntime {
 
   private requestUnknownChunk(key: string): void {
     this.options.onUnknownChunk?.(key);
+  }
+
+  private serverStateVersion() {
+    return {
+      gameplayRevision: this.server.gameplayRevision,
+      worldRevision: this.server.worldRevision,
+      worldTime: this.server.worldTime,
+    };
+  }
+
+  private commitIfServerChanged(before: ReturnType<AuthorityRuntime['serverStateVersion']>) {
+    if (
+      before.gameplayRevision !== this.server.gameplayRevision ||
+      before.worldRevision !== this.server.worldRevision ||
+      before.worldTime !== this.server.worldTime
+    )
+      this.session.commitExternalState();
   }
 }

@@ -93,6 +93,7 @@ const ready = (): AuthorityReady => ({
     commitSequence: 0,
     worldMutationCount: 0,
     acknowledgedInputSequence: -1,
+    inputResyncRequired: false,
     activeTimeMs: 0,
     integratedPhysicsTimeMs: 0,
     physicsDebtMs: 0,
@@ -107,6 +108,21 @@ const ready = (): AuthorityReady => ({
 });
 
 describe('BrowserAuthorityClient', () => {
+  it('把迟到/非法输入与重同步要求显式反馈预测层', () => {
+    const worker = new FakeAuthorityWorker();
+    const decisions = vi.fn();
+    new BrowserAuthorityClient(worker, 'world:1', { onInputDecision: decisions });
+    worker.emit({
+      kind: 'input-decision',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      sequence: 4,
+      decision: 'late',
+      requiresResync: true,
+    });
+    expect(decisions).toHaveBeenCalledWith({ sequence: 4, decision: 'late', requiresResync: true });
+  });
+
   it('把新世界出生点生成握手交给通用计算池', async () => {
     const worker = new FakeAuthorityWorker();
     const bootstrap = vi.fn(async () => [0.5, 33, 0.5] as [number, number, number]);
@@ -232,5 +248,23 @@ describe('BrowserAuthorityClient', () => {
     expect(client.physicsTick).toBe(60);
     expect(client.commitSequence).toBe(8);
     expect(client.mutationCount).toBe(2);
+  });
+
+  it('为不同生产者事务携带独立幂等流序号', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const editing = client.editWorld('player-1', [{ x: 0, y: 0, z: 0, value: 1 }]);
+    const request = worker.posts.at(-1) as { requestId: number; transaction: unknown };
+    expect(request.transaction).toEqual({ issuer: 'browser:world:1', stream: 'world-edit', sequence: 0 });
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: request.requestId,
+      ok: true,
+      result: { committed: false },
+      commitSequence: 4,
+    });
+    await expect(editing).resolves.toEqual({ committed: false });
   });
 });

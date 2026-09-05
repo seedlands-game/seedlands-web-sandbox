@@ -13,7 +13,7 @@ type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 export abstract class GameServerGameplayFacade {
   protected readonly gameplay: GameplayRuntime;
   private readonly legacyEntityIds = new Set<string>();
-  private restoredVersion: 1 | 2 | null = null;
+  private restoredVersion: 1 | 2 | 3 | null = null;
 
   protected constructor(private readonly gameplayPersistence?: Persistence) {
     this.gameplay = new GameplayRuntime({

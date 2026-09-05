@@ -66,4 +66,28 @@ describe('AuthorityRuntime', () => {
     expect(runtime.acceptGeneratedChunk({ ...first, canonical })).toBe(true);
     expect(runtime.server.peekLoadedVoxel(0, 0, 0)?.voxel).toBe(3);
   });
+
+  it('按epoch+issuer+stream+sequence复用事务回执并拒绝过期提交视图', async () => {
+    const runtime = await AuthorityRuntime.create({
+      epoch: 'world:3',
+      seedText: 'authority-transactions',
+      persistence: new MemoryGamePersistence(),
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+    });
+    let executions = 0;
+    const identity = { epoch: 'world:3', issuer: 'browser', stream: 'actions', sequence: 1 };
+    const first = await runtime.executeTransaction(identity, async () => ({ executions: ++executions }));
+    const duplicate = await runtime.executeTransaction(identity, async () => ({ executions: ++executions }));
+    expect(duplicate).toBe(first);
+    expect(executions).toBe(1);
+
+    const conflict = await runtime.executeTransaction(
+      { ...identity, sequence: 2, expectedCommitSequence: first.commitSequence - 1 },
+      async () => ({ executions: ++executions }),
+    );
+    expect(conflict).toMatchObject({ status: 'conflict', commitSequence: first.commitSequence });
+    expect(executions).toBe(1);
+  });
 });

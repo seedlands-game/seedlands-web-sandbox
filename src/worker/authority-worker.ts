@@ -2,7 +2,6 @@
 
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/browser-chunk-persistence';
 import { AuthorityRuntime } from '../server/authority/authority-runtime';
-import { ServerCommandExecutor } from '../server/commands/server-command-executor';
 import { PROTOCOL_VERSION } from '../runtime/session-protocol';
 import type { AuthorityRequest, AuthorityResponse } from './authority-worker-protocol';
 
@@ -40,6 +39,39 @@ const respond = (requestId: number, result: unknown, options: { gameplay?: boole
     result,
     ...(options.gameplay ? { gameplay: current.view() } : {}),
     ...(options.commits ? { commits: current.takeCommits() } : {}),
+  });
+};
+
+type TransactionResponse = Readonly<{
+  result: unknown;
+  gameplay?: ReturnType<AuthorityRuntime['view']>;
+  commits?: ReturnType<AuthorityRuntime['takeCommits']>;
+}>;
+
+const transact = async (
+  message: Extract<
+    AuthorityRequest,
+    { kind: 'world-edit' | 'set-player-position' | 'gameplay-action' | 'server-command' | 'set-world-time' }
+  >,
+  operation: () => TransactionResponse | Promise<TransactionResponse>,
+) => {
+  const current = runtime!;
+  const receipt = await current.executeTransaction({ epoch, ...message.transaction }, operation);
+  if (receipt.status !== 'executed') {
+    fail(message.requestId ?? -1, new Error(`Authority transaction ${receipt.status} at ${receipt.commitSequence}.`));
+    return;
+  }
+  if (message.requestId === undefined) return;
+  post({
+    kind: 'authority-response',
+    protocolVersion: PROTOCOL_VERSION,
+    epoch,
+    requestId: message.requestId,
+    ok: true,
+    result: receipt.result.result,
+    commitSequence: receipt.commitSequence,
+    ...(receipt.result.gameplay ? { gameplay: receipt.result.gameplay } : {}),
+    ...(receipt.result.commits?.length ? { commits: receipt.result.commits } : {}),
   });
 };
 
@@ -135,7 +167,14 @@ const handle = async (message: AuthorityRequest) => {
   const current = assertCurrent(message);
   switch (message.kind) {
     case 'input':
-      current.receiveInput(message);
+      post({
+        kind: 'input-decision',
+        protocolVersion: PROTOCOL_VERSION,
+        epoch,
+        sequence: message.sequence,
+        decision: current.receiveInput(message),
+        requiresResync: current.inputResyncRequired,
+      });
       break;
     case 'pause-authority':
       current.pause(performance.now());
@@ -182,27 +221,39 @@ const handle = async (message: AuthorityRequest) => {
       current.setFluidActiveChunks(message.keys);
       break;
     case 'world-edit':
-      respond(message.requestId, current.editWorld(message.actorId, message.edits), { gameplay: true, commits: true });
+      await transact(message, () => ({
+        result: current.editWorld(message.actorId, message.edits),
+        gameplay: current.view(),
+        commits: current.takeCommits(),
+      }));
       break;
     case 'set-player-position':
-      current.setPlayerPosition(message.position);
-      if (message.requestId !== undefined) respond(message.requestId, { moved: true }, { gameplay: true });
+      await transact(message, () => {
+        current.setPlayerPosition(message.position);
+        return { result: { moved: true }, gameplay: current.view() };
+      });
       break;
-    case 'gameplay-action':
-      respond(message.requestId, current.performAction(message.action), { gameplay: true, commits: true });
+    case 'gameplay-action': {
+      await transact(message, () => {
+        const result = current.performAction(message.action);
+        return { result, gameplay: result.gameplay, commits: [...result.commits] };
+      });
       break;
+    }
     case 'server-command': {
-      const result = await new ServerCommandExecutor(current.server).execute(message.source, message.command);
-      respond(message.requestId, result, { gameplay: true, commits: true });
+      await transact(message, async () => ({
+        result: await current.executeCommand(message.source, message.command),
+        gameplay: current.view(),
+        commits: current.takeCommits(),
+      }));
       break;
     }
     case 'set-world-time': {
-      const worldTime = current.server.setWorldTime(message.hours);
-      if (message.requestId !== undefined) respond(message.requestId, { worldTime });
+      await transact(message, () => ({ result: { worldTime: current.setWorldTime(message.hours) } }));
       break;
     }
     case 'advance-world-clock':
-      current.server.advanceClock(message.hours);
+      current.advanceWorldClock(message.hours);
       break;
     case 'save-authority':
       respond(message.requestId, await current.save(), { gameplay: true });
