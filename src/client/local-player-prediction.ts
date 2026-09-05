@@ -12,7 +12,7 @@ import { PlayerInputStream, type PlayerInputKeys } from './player-input-stream';
 import { PredictionBuffer, type PredictionReconciliationResult } from './prediction-buffer';
 
 export type RevisionedPredictionWorld = PhysicsWorld & {
-  revisionVector(): Readonly<Record<string, number>>;
+  revisionVector(keys?: Iterable<string>): Readonly<Record<string, number>>;
 };
 
 export type LocalPredictionAdvance = Readonly<{
@@ -124,7 +124,7 @@ export class LocalPlayerPrediction {
       acknowledgedInputSequence: snapshot.acknowledgedInputSequence,
       authoritativeBody: snapshot.player.body,
       collisionRevisionVector: snapshot.chunkRevisions,
-      availableCollisionRevisionVector: world.revisionVector(),
+      availableCollisionRevisionVector: world.revisionVector(Object.keys(snapshot.chunkRevisions)),
       replay: (body, command) =>
         stepBody({
           state: body,

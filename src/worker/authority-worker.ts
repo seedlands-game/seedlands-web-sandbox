@@ -260,7 +260,7 @@ const handle = async (message: AuthorityRequest) => {
     case 'set-player-position':
       await transact(message, () => {
         current.setPlayerPosition(message.position);
-        return { result: { moved: true }, gameplay: current.view() };
+        return { result: { moved: true, snapshot: current.wake(performance.now()) }, gameplay: current.view() };
       });
       break;
     case 'gameplay-action': {

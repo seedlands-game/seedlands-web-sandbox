@@ -3,7 +3,12 @@ import type { FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '../server/game-server-types';
 import type { LogicObservation } from '../server/logic/logic-protocol';
 import type { SequenceDecision } from '../runtime/session-protocol';
-import type { AuthorityGameplayView, AuthorityReady, AuthorityResponse } from '../worker/authority-worker-protocol';
+import type {
+  AuthorityGameplayView,
+  AuthorityMeshPayload,
+  AuthorityReady,
+  AuthorityResponse,
+} from '../worker/authority-worker-protocol';
 import type { SerializedChunkSnapshot } from './browser-chunk-persistence';
 import type { AuthorityTransportFaults } from './authority-transport';
 import type { provideAuthorityBootstrap } from './authority-bootstrap-client';
@@ -37,3 +42,16 @@ export type AuthorityStartOptions = Readonly<{
   initialWorldTime: number;
   frequencies: AuthorityReady['frequencies'];
 }>;
+
+export type AuthorityCachedMesh = {
+  canonical: Uint16Array;
+  fluid: Uint8Array;
+  chunkRevision: number;
+};
+
+export type AuthorityCachedPreparation = {
+  payload: AuthorityMeshPayload;
+  canonical?: Uint16Array;
+  fluid?: Uint8Array;
+  overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
+};

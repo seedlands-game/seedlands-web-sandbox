@@ -10,7 +10,7 @@ import type {
   AuthorityAction,
   AuthorityActionResult,
   AuthorityGameplayView,
-  AuthorityMeshPayload,
+  AuthorityPlayerPositionResult,
   AuthorityReady,
   AuthorityRequest,
   AuthorityResponse,
@@ -24,23 +24,12 @@ import { applyAcknowledgedWorldEdits } from './acknowledged-world-edit-cache';
 import { provideAuthorityBootstrap } from './authority-bootstrap-client';
 import type {
   AuthorityClientOptions,
+  AuthorityCachedMesh,
+  AuthorityCachedPreparation,
   AuthorityStartOptions,
-  AuthorityWorkerPort,
 } from './browser-authority-client-contract';
-export type { AuthorityWorkerPort } from './browser-authority-client-contract';
+export type AuthorityWorkerPort = import('./browser-authority-client-contract').AuthorityWorkerPort;
 
-type CachedMesh = {
-  canonical: Uint16Array;
-  fluid: Uint8Array;
-  chunkRevision: number;
-};
-
-type CachedPreparation = {
-  payload: AuthorityMeshPayload;
-  canonical?: Uint16Array;
-  fluid?: Uint8Array;
-  overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
-};
 const failedClientError = (failure: Error) =>
   new Error(`Authority client failed: ${failure.message}`, { cause: failure });
 
@@ -50,8 +39,8 @@ export class BrowserAuthorityClient {
   private readonly requests: ClientRequestRegistry;
   private readonly snapshotGate: AuthoritySnapshotGate;
   private readonly meshLoads = new Map<string, Promise<void>>();
-  private readonly meshCache = new Map<string, CachedMesh>();
-  private readonly preparationCache = new Map<string, CachedPreparation>();
+  private readonly meshCache = new Map<string, AuthorityCachedMesh>();
+  private readonly preparationCache = new Map<string, AuthorityCachedPreparation>();
   private readyValue: AuthorityReady | null = null;
   private snapshotValue: AuthoritySnapshot | null = null;
   private gameplayValue: AuthorityGameplayView | null = null;
@@ -309,8 +298,14 @@ export class BrowserAuthorityClient {
     return result;
   }
 
-  setPlayerPosition(position: [number, number, number]): Promise<unknown> {
-    return this.request({ kind: 'set-player-position', position }, [], 'teleport');
+  async setPlayerPosition(position: [number, number, number]): Promise<AuthorityPlayerPositionResult> {
+    const result = (await this.request(
+      { kind: 'set-player-position', position },
+      [],
+      'teleport',
+    )) as AuthorityPlayerPositionResult;
+    this.acceptSnapshot(result.snapshot);
+    return result;
   }
 
   performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
@@ -445,11 +440,7 @@ export class BrowserAuthorityClient {
         this.options.onUnknownChunk?.(message.key);
         break;
       case 'authority-snapshot':
-        if (this.snapshotGate.accept(message.snapshot)) return;
-        this.snapshotValue = message.snapshot;
-        if (message.gameplay) this.updateGameplay(message.gameplay);
-        message.commits?.forEach((commit) => this.options.onCommit?.(commit));
-        this.options.onSnapshot?.(message.snapshot);
+        this.acceptSnapshot(message.snapshot, message.gameplay, message.commits);
         break;
       case 'input-decision':
         if (message.sequence <= this.lastInputDecisionSequence) return;
@@ -504,6 +495,18 @@ export class BrowserAuthorityClient {
     if (this.gameplayValue && view.gameplayRevision <= this.gameplayValue.gameplayRevision) return;
     this.gameplayValue = view;
     this.options.onGameplay?.(view);
+  }
+
+  private acceptSnapshot(
+    snapshot: AuthoritySnapshot,
+    gameplay?: AuthorityGameplayView,
+    commits?: readonly WorldCommitResult[],
+  ): void {
+    if (this.snapshotGate.accept(snapshot)) return;
+    this.snapshotValue = snapshot;
+    if (gameplay) this.updateGameplay(gameplay);
+    commits?.forEach((commit) => this.options.onCommit?.(commit));
+    this.options.onSnapshot?.(snapshot);
   }
 
   private async provideBootstrap(message: Extract<AuthorityResponse, { kind: 'authority-bootstrap-needed' }>) {

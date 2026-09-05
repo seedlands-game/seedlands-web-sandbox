@@ -89,3 +89,16 @@
 - `Game` 保持先释放输入再请求暂停。运行时 fatal 会通知 `ApplicationShell`，后者把状态转为带错误信息的可重试菜单并销毁原 Worker、世界和表现资源；启动期间迟到成功也不能重新把失效世界发布为 `playing`。
 - RED 实测为 4 项失败：暂停请求缺事务、暂停返回 `void`、两项 `ShellController.fail` 不存在。实现后 `browser-authority-client`、`shell-controller`、`player-input-gates` 共 23 项通过；受影响 ESLint 与源码 TypeScript 通过。
 - 测试 TypeScript 当前只被并行 A12 尚未创建的 `src/worker/compute-worker-entry-lifecycle.ts` 阻塞，本阶段文件没有其他诊断。浏览器现有生命周期用例的扩展与执行交还主线统一完成，因此不记为本代理通过。
+
+## A7 浏览器失败复审
+
+主线首次真实浏览器矩阵发现 60Hz/50ms、120Hz/150ms、revision 变化和岸边跳跃旅程的本地身体仍可能报告与世界重叠；30Hz/0ms 通过。保持原 `colliding=false` 与连续轨迹断言，不把真实失败改成容差。
+
+只读审计发现两个可独立复现的时序缺陷：
+
+1. `PlayerController` 每次快照校正都新建 `VoxelCollisionWorld`，但 `LocalPlayerPrediction` 在该世界执行任何查询之前就读取 `revisionVector()`，得到空集合。已有未确认帧会被错误判为“当前碰撞镜像缺失”，反复重置预测。
+2. `set-player-position` 事务回执只返回 `{ moved: true }`。Harness 或重生传送在回执后重置预测，但客户端下一帧仍可能从传送前的 `latestSnapshot` 初始化；入站延迟和乱序会扩大该窗口。
+
+补充 RED：`local-player-prediction` 使用全新但拥有相同已加载 revision 的碰撞世界校正时必须保留历史；`browser-authority-client` 收到传送事务携带的权威快照时必须立即发布并推进快照门，随后到达的传送前快照必须拒绝。实现只同步现有 Authority 状态，不在客户端伪造位置或放宽碰撞。
+
+实现后，碰撞世界可按快照涉及的 Chunk key 直接读取已加载 canonical revision；传送事务回执携带同一 Authority 时刻的完整快照，并复用普通快照的顺序门。定向 Vitest 共 5 个文件、37 项通过，受影响 ESLint、源码 TypeScript、测试 TypeScript 与 `git diff --check` 通过。60Hz/50ms、120Hz/150ms、revision 变化和岸边跳跃的真实浏览器复验仍由主线执行，因此本阶段只记录已证明的时序修复，不把浏览器准出标为通过。

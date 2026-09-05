@@ -41,8 +41,20 @@ class RevisionWorld implements PhysicsWorld {
       ? [{ id: 'wall', aabb: { min: { x: this.wallMin, y: 0, z: -1 }, max: { x: this.wallMax, y: 8, z: 1 } } }]
       : [];
   }
-  revisionVector() {
+  revisionVector(_keys?: Iterable<string>): Record<string, number> {
     return { '0,0,0': this.revision };
+  }
+}
+
+class LazyRevisionWorld extends RevisionWorld {
+  private queried = false;
+  override querySolids(bounds: WorldAabb): readonly Collider[] {
+    this.queried = true;
+    return super.querySolids(bounds);
+  }
+  override revisionVector(keys?: Iterable<string>): Record<string, number> {
+    if (keys) return Object.fromEntries([...keys].map((key) => [key, this.revision]));
+    return this.queried ? super.revisionVector() : {};
   }
 }
 
@@ -91,6 +103,22 @@ describe('生产本地玩家预测运行时', () => {
     expect(result.replayed).toBe(0);
     expect(runtime.physicalBody).toEqual(snapshot(1).player.body);
     expect(runtime.lastResetReason).toBe('collision-history-missing');
+  });
+
+  it('全新碰撞查询实例可按已加载chunk核对revision而不误清历史', () => {
+    const runtime = new LocalPlayerPrediction('world:1', 60);
+    runtime.advance({
+      elapsedSeconds: 1 / 60,
+      snapshot: snapshot(),
+      world: new LazyRevisionWorld(),
+      issuedAtMs: 1,
+      ...controls,
+    });
+
+    const result = runtime.applyAuthoritySnapshot(snapshot(1), new LazyRevisionWorld());
+
+    expect(result.resetReason).toBeNull();
+    expect(result.replayed).toBe(1);
   });
 
   it('小误差只形成安全表现偏移，偏移会与墙相交时立即清零', () => {

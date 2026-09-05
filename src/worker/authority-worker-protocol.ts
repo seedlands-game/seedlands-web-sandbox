@@ -109,6 +109,8 @@ export type AuthorityActionResult = Readonly<{
   commits: readonly WorldCommitResult[];
 }>;
 
+export type AuthorityPlayerPositionResult = Readonly<{ moved: true; snapshot: AuthoritySnapshot }>;
+
 export type AuthorityTransactionKey = Readonly<{
   issuer: string;
   stream: string;

@@ -401,6 +401,10 @@ export class PlayerController {
 
   private collisionWorld(world: NonNullable<ReturnType<PlayerControllerOptions['getWorld']>>) {
     return new VoxelCollisionWorld({
+      getChunkRevision: (key) => {
+        const [cx, cy, cz] = key.split(',').map(Number);
+        return world.getChunkRevision(cx!, cy!, cz!);
+      },
       getLoadedVoxel: (x, y, z) => {
         const cx = floorDiv(x, CHUNK_SIZE);
         const cy = floorDiv(y, CHUNK_SIZE);

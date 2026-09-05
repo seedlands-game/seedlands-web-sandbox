@@ -12,6 +12,7 @@ export type LoadedVoxel = Readonly<{
 
 export type LoadedVoxelSource = Readonly<{
   getLoadedVoxel: (x: number, y: number, z: number) => LoadedVoxel | null;
+  getChunkRevision?: (key: string) => number | null;
 }>;
 
 const queryRange = (minimum: number, maximum: number) => {
@@ -90,7 +91,13 @@ export class VoxelCollisionWorld implements PhysicsWorld {
     return fluids;
   }
 
-  revisionVector(): Readonly<Record<string, number>> {
-    return Object.fromEntries([...this.revisions].sort(([left], [right]) => left.localeCompare(right)));
+  revisionVector(keys?: Iterable<string>): Readonly<Record<string, number>> {
+    if (!keys) return Object.fromEntries([...this.revisions].sort(([left], [right]) => left.localeCompare(right)));
+    const revisions: Array<[string, number]> = [];
+    for (const key of keys) {
+      const revision = this.source.getChunkRevision?.(key) ?? this.revisions.get(key);
+      if (revision !== undefined && revision !== null) revisions.push([key, revision]);
+    }
+    return Object.fromEntries(revisions.sort(([left], [right]) => left.localeCompare(right)));
   }
 }
