@@ -32,6 +32,7 @@ export type TransactionCommand<T = unknown> = Readonly<{
 
 export type SequenceDecision =
   | 'accepted'
+  | 'invalid'
   | 'duplicate'
   | 'out-of-order'
   | 'late'
@@ -76,6 +77,30 @@ const idleInput = (epoch: SessionEpoch, stream: string): InputCommand => ({
   edges: { jumpPressed: false },
 });
 
+const copyInput = (command: InputCommand): InputCommand => ({
+  ...command,
+  state: { ...command.state },
+  edges: { ...command.edges },
+});
+
+function validMotionInput(command: InputCommand): boolean {
+  return Boolean(
+    command &&
+    command.kind === 'input' &&
+    command.protocolVersion === PROTOCOL_VERSION &&
+    Number.isFinite(command.issuedAtMs) &&
+    command.state &&
+    Number.isFinite(command.state.moveX) &&
+    Math.abs(command.state.moveX) <= 1 &&
+    Number.isFinite(command.state.moveZ) &&
+    Math.abs(command.state.moveZ) <= 1 &&
+    [-1, 0, 1].includes(command.state.verticalIntent) &&
+    typeof command.state.jumpHeld === 'boolean' &&
+    command.edges &&
+    typeof command.edges.jumpPressed === 'boolean',
+  );
+}
+
 export class InputCommandBuffer {
   private readonly gate: EpochSequenceGate;
   private currentValue: InputCommand;
@@ -111,7 +136,7 @@ export class InputCommandBuffer {
   }
 
   get current() {
-    return this.currentValue;
+    return copyInput(this.currentValue);
   }
 
   get requiresResync() {
@@ -119,7 +144,7 @@ export class InputCommandBuffer {
   }
 
   push(command: InputCommand): SequenceDecision {
-    if (command.protocolVersion !== PROTOCOL_VERSION) return 'out-of-order';
+    if (!validMotionInput(command)) return 'invalid';
     const decision = this.gate.accept(command.epoch, command.stream, command.sequence);
     if (decision !== 'accepted') return decision;
     if (!Number.isSafeInteger(command.targetPhysicsTick) || command.targetPhysicsTick < 0) {
@@ -142,7 +167,7 @@ export class InputCommandBuffer {
       this.invalidatePending();
       return 'capacity';
     }
-    this.pending.push(command);
+    this.pending.push(copyInput(command));
     this.lastAcceptedTargetTick = command.targetPhysicsTick;
     this.resyncRequired = false;
     return 'accepted';
@@ -171,7 +196,7 @@ export class InputCommandBuffer {
       jumpEdge ||= command.edges.jumpPressed;
     }
     return {
-      state: this.currentValue.state,
+      state: { ...this.currentValue.state },
       jumpRequested: jumpEdge || this.currentValue.state.jumpHeld,
       acknowledgedSequence: this.consumedSequence,
     };

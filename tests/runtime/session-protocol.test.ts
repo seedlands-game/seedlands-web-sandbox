@@ -140,7 +140,7 @@ describe('runtime session protocol', () => {
       sequence,
       targetPhysicsTick,
       issuedAtMs: sequence,
-      state: { moveX: sequence, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+      state: { moveX: 1, moveZ: 0, verticalIntent: 0, jumpHeld: false },
       edges: { jumpPressed: false },
     });
 
@@ -188,6 +188,63 @@ describe('runtime session protocol', () => {
     });
     expect(transactions.execute('epoch-a', 'other', 'edits', 1, execute)).toEqual({ status: 'capacity' });
     expect(executions).toBe(3);
+  });
+
+  it('拒绝不完整和非有限运动输入，且无效高序号不污染合法输入流', () => {
+    const command: InputCommand = {
+      kind: 'input',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: 'world:1',
+      stream: 'player-input',
+      sequence: 1,
+      targetPhysicsTick: 2,
+      issuedAtMs: 1,
+      state: { moveX: 1, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+      edges: { jumpPressed: false },
+    };
+    const invalid = [
+      null,
+      { ...command, kind: 'transaction' },
+      { ...command, issuedAtMs: Number.NaN },
+      { ...command, state: undefined },
+      { ...command, state: { ...command.state, moveX: Number.NaN } },
+      { ...command, state: { ...command.state, moveZ: Number.POSITIVE_INFINITY } },
+      { ...command, state: { ...command.state, moveX: 2 } },
+      { ...command, state: { ...command.state, verticalIntent: 0.5 } },
+      { ...command, state: { ...command.state, jumpHeld: 'yes' } },
+      { ...command, edges: { jumpPressed: 1 } },
+    ];
+    for (const raw of invalid) {
+      const buffer = new InputCommandBuffer('world:1', 'player-input');
+      expect(buffer.push((raw === null ? raw : { ...raw, sequence: 999 }) as InputCommand)).toBe('invalid');
+      expect(buffer.push(command)).toBe('accepted');
+      expect(buffer.consumeForTick(2).state.moveX).toBe(1);
+    }
+  });
+
+  it('输入入队和读取使用独立快照，调用方修改不能篡改后续物理输入', () => {
+    const buffer = new InputCommandBuffer('world:1', 'player-input');
+    const state = { moveX: 1, moveZ: 0, verticalIntent: 0 as const, jumpHeld: false };
+    const edges = { jumpPressed: false };
+    buffer.push({
+      kind: 'input',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: 'world:1',
+      stream: 'player-input',
+      sequence: 1,
+      targetPhysicsTick: 2,
+      issuedAtMs: 1,
+      state,
+      edges,
+    });
+    state.moveX = 0;
+    edges.jumpPressed = true;
+    const consumed = buffer.consumeForTick(2);
+    expect(consumed.state.moveX).toBe(1);
+    expect(consumed.jumpRequested).toBe(false);
+    (consumed.state as { moveX: number }).moveX = -1;
+    (buffer.current.state as { moveX: number }).moveX = -1;
+    expect(buffer.consumeForTick(3).state.moveX).toBe(1);
   });
 
   it('创建非空且递增隔离的会话 epoch', () => {
