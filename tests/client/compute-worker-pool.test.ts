@@ -231,7 +231,12 @@ describe('ComputeWorkerPool', () => {
       'general',
       expect.objectContaining({ message: 'worker factory unavailable' }),
     );
-    expect(pool.diagnostics()).toMatchObject({ workerCount: 1, generalWorkerCount: 1, running: 0 });
+    expect(pool.diagnostics()).toMatchObject({
+      workerCount: 1,
+      fluidWorkerCount: 1,
+      generalWorkerCount: 0,
+      running: 0,
+    });
   });
   it('运行任务失败或取消后，依赖任务收到失败且队列释放', () => {
     for (const cancelled of [false, true]) {
