@@ -32,6 +32,21 @@ export type HarnessSnapshot = {
     commitSequence: number;
     acknowledgedInputSequence: number;
     snapshotRejections: Readonly<Record<string, number>>;
+    residency: {
+      residentCount: number;
+      target: number;
+      hardLimit: number;
+      pinnedCount: number;
+      dirtyCount: number;
+      evictableCleanCount: number;
+      evictionCount: number;
+      rejectedAdmissionCount: number;
+      oversubscribed: boolean;
+      autoSaveInFlight: boolean;
+      autoSaveFailureCount: number;
+      nextRetryActiveTimeMs: number;
+      lastSaveError: string | null;
+    } | null;
   };
   generatorVersion: number;
   renderPipeline: {

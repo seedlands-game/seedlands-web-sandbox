@@ -48,7 +48,7 @@ export class AuthorityResidencyRuntime {
       })
       .catch((error: unknown) => {
         this.autoSaveFailures += 1;
-        const delayMs = Math.min(30_000, 1_000 * 2 ** Math.min(4, this.autoSaveFailures - 1));
+        const delayMs = canonicalResidencyRetryDelayMs(this.autoSaveFailures);
         this.retryActiveTimeMs = this.activeTimeMs + delayMs;
         this.lastSaveError = error instanceof Error ? error.message : String(error);
       })
@@ -65,3 +65,6 @@ export class AuthorityResidencyRuntime {
     this.lastSaveError = null;
   }
 }
+
+export const canonicalResidencyRetryDelayMs = (failureCount: number): number =>
+  Math.min(30_000, 1_000 * 2 ** Math.max(0, failureCount - 1));

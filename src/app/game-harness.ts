@@ -253,6 +253,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
         rejectedCandidateCount: 0,
         returnedLeaseCount: 0,
       },
+      residency: authoritySnapshot?.diagnostics?.residency ?? null,
       bodies: authorityBodies,
       snapshotRejections: context.authority?.snapshotRejections ?? {},
     },

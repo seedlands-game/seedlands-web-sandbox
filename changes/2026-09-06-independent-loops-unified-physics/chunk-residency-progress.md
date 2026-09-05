@@ -15,6 +15,9 @@ pin 来源限定为当前 streaming/fluid active 集合、当前物理步真实�
 - [x] 已实现内部驻留管理、Authority pin 接线与非阻塞压力保存；物理 pin 每步只来自实际碰撞查询，流体 lease、streaming 与 mesh prepare 分别独立持有。
 - [x] 定向 `Vitest`：7 文件 57 项通过；源码 TypeScript、Svelte 检查与所改文件 ESLint 通过。
 - [x] 生产 `vite build` 通过；完整测试 TypeScript 与封装式 `pnpm build` 暂被同 change 正在 RED 的 `tests/server/fluid-interactive-priority.test.ts` 四处新 API 调用阻挡。驻留实现自身无类型诊断，待交互流体实现转绿后复跑封装入口。
-- [ ] 真实浏览器长距离探索由主任务在稳定不可变产物上另行安排，不以 Node 用例代替。
+- [x] 浏览器快照投影真实 canonical 驻留、pin、dirty、驱逐、接纳拒绝与自动保存失败/退避状态；Authority 接纳失败后同一 streaming 中心以 100ms 到 2s 有界退避重试，不因中心未变化永久缺块。
+- [x] 新增当前 change 的 `e2e/canonical-residency-long-traverse.spec.ts`：Medium 下以生产 `movePlayerTo` → `updateStreaming` 访问 6 个互不重叠中心，共覆盖 300 个 Chunk 请求，等待驻留收敛后回到原点，并验证编辑经原子保存、重载仍存在。该用例已经定义，尚待根任务在不可变产物上实际执行，不以 Node 用例代替。
+- [x] 本轮补充验证：4 文件 17 项 `Vitest`、源码与测试 TypeScript、定向 ESLint、`git diff --check` 和生产 `pnpm build` 均通过。
+- [ ] 独立审查发现已保存 Chunk 驱逐后，未经过 mesh prepare 的直接写事务仍可能把持久化缓存未命中误判为耐久 missing；已取得独立 RED，下一提交将以持久化可用性三态与统一异步写入预载关闭，不以本轮长穿越脚本掩盖。
 
 极端 pin/dirty 集合允许超过正常目标，以数据安全优先。现有 `EntityStore` 对 world-item 数量没有独立玩法上限，因此本 change 不宣称恶意无限生成下的数学绝对内存上界；本次保证健康自然探索收敛，并在持久化持续失败且达到 2048 时停止接纳新的 streaming canonical、保留现有世界并等待可恢复重试。

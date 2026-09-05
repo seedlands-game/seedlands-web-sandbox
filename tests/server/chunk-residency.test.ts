@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
+import { canonicalResidencyRetryDelayMs } from '../../src/server/authority/authority-residency-runtime';
 import { CanonicalChunkResidency, type CanonicalResidencyChunk } from '../../src/server/chunk-residency';
 import { GameServer } from '../../src/server/game-server';
 import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
@@ -14,6 +15,12 @@ const chunk = (key: string, accessEpoch: number, revision = 0): CanonicalResiden
 });
 
 describe('Canonical Chunk residency', () => {
+  it('保存失败退避按1/2/4秒增长并在30秒封顶', () => {
+    expect([1, 2, 3, 4, 5, 6, 20].map(canonicalResidencyRetryDelayMs)).toEqual([
+      1_000, 2_000, 4_000, 8_000, 16_000, 30_000, 30_000,
+    ]);
+  });
+
   it('按accessEpoch有限批回收clean LRU并保留所有pin', () => {
     const residency = new CanonicalChunkResidency({ target: 4, hardLimit: 8, evictionBatch: 2 });
     const chunks = new Map(Array.from({ length: 10 }, (_, index) => [`${index},0,0`, chunk(`${index},0,0`, index)]));

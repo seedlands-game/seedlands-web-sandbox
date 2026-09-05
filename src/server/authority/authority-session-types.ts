@@ -1,6 +1,7 @@
 import type { BodyState, Contact } from '../../physics';
 import type { CostSampleWindow } from '../../runtime/bounded-cost-samples';
 import type { FluidAuthorityDiagnostics } from '../fluid/fluid-transaction';
+import type { AuthorityResidencyDiagnostics } from './authority-residency-runtime';
 
 export type AuthorityEntity = Readonly<{
   id: string;
@@ -82,6 +83,7 @@ export type AuthoritySnapshot = Readonly<{
     recoveryResults: readonly BodyRecoveryDiagnostic[];
     physicsCost?: CostSampleWindow | null;
     fluid?: FluidAuthorityDiagnostics;
+    residency?: AuthorityResidencyDiagnostics;
   }>;
 }>;
 

@@ -25,6 +25,7 @@ import type { AuthorityTransactionIdentity, AuthorityTransactionReceipt } from '
 import type { CanonicalChunkResidencyLimits } from '../chunk-residency';
 import { AuthorityResidencyRuntime, type AuthorityResidencyDiagnostics } from './authority-residency-runtime';
 import { advanceAuthoritySession } from './authority-session-advance';
+import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnostics';
 
 export type * from './authority-runtime-types';
 
@@ -187,7 +188,10 @@ export class AuthorityRuntime {
       generatorVersion: this.server.generatorVersion,
       worldTime: this.server.worldTime,
       frequencies: this.frequencies,
-      snapshot: this.session.wake(this.options.startTimeMs),
+      snapshot: withAuthorityResidencyDiagnostics(
+        this.session.wake(this.options.startTimeMs),
+        this.residency.diagnostics,
+      ),
       gameplay: this.view(),
       ...(camp ? { campPosition: [...camp.position] as [number, number, number] } : {}),
     };
@@ -198,7 +202,7 @@ export class AuthorityRuntime {
     this.currentTimeMs = nowMs;
     this.latestPhysicsTick = snapshot.physicsTick;
     this.residency.maintain(snapshot.activeTimeMs);
-    return snapshot;
+    return withAuthorityResidencyDiagnostics(snapshot, this.residency.diagnostics);
   }
 
   get residencyDiagnostics(): AuthorityResidencyDiagnostics {

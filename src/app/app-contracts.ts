@@ -12,6 +12,7 @@ import type { CostSampleWindow } from '../runtime/bounded-cost-samples';
 import type { CollisionDebugRendererDiagnostics } from './collision-debug-renderer';
 import type { ComputePoolDiagnostics } from '../client/compute-worker-pool';
 import type { FluidAuthorityDiagnostics } from '../server/fluid/fluid-transaction';
+import type { AuthorityResidencyDiagnostics } from '../server/authority/authority-residency-runtime';
 
 export type MeshPart = MeshData;
 
@@ -108,6 +109,7 @@ export type HarnessSnapshot = {
     commitSequence: number;
     physicsCost: CostSampleWindow | null;
     fluid: FluidAuthorityDiagnostics;
+    residency: AuthorityResidencyDiagnostics | null;
     bodies: { total: number; actors: number; worldItems: number; nearPlayer: number };
     snapshotRejections: Readonly<Record<string, number>>;
   };
