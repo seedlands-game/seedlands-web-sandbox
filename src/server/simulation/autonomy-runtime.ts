@@ -2,21 +2,28 @@ import type { EntityStore, GameplayEntity } from '../gameplay/entity-store';
 import type { ItemStack } from '../gameplay/item-registry';
 import { ActionRuntime, type ActorAction, type ActorActionInput, type ActorActionType } from './action-runtime';
 import {
-  ACTIVE_RADIUS_SQUARED,
   MAX_RETAINED_ACTORS,
   STEP_SECONDS,
   cloneActor,
   rangeByArchetype,
   roundSimulation as round,
-  simulationDistanceSquared as distanceSquared,
   speedByArchetype,
   type ActorRegistration,
   type ActorState,
   type SimulationSnapshot,
 } from './actor-state';
-import { GroundNavigator, type NavigationPosition } from './ground-navigator';
+import { GroundNavigator } from './ground-navigator';
 import { PerceptionRuntime, type PerceptionSnapshot } from './perception-runtime';
 import { PoiRegistry, type PoiInput } from './poi-registry';
+import {
+  actorIsAtPoi,
+  ensureActorAction,
+  fleeTarget,
+  resolveActionTarget,
+  updateActorActive,
+  wanderTarget,
+} from './autonomy-helpers';
+import { tickAuthorityActorRules, type ActorAuthorityRulesContext } from './actor-authority-rules';
 
 export type { ActorBehavior, ActorRegistration, ActorState, SimulationSnapshot } from './actor-state';
 
@@ -83,7 +90,7 @@ export class AutonomyRuntime {
       wanderIndex: 0,
     };
     this.actors.set(entityId, actor);
-    this.updateActive(actor);
+    updateActorActive(actor, this.options.entities, this.options.isPlayerAlive);
     return cloneActor(actor);
   }
 
@@ -135,8 +142,26 @@ export class AutonomyRuntime {
   }
 
   recordAttacked(entityId: string, attackerId: string): void {
-    if (!this.actors.has(entityId)) return;
+    const actor = this.actors.get(entityId);
+    if (!actor) return;
+    actor.behavior = 'flee';
+    actor.targetEntityId = attackerId;
     this.perception.record(entityId, { type: 'attacked', subjectId: attackerId });
+  }
+
+  advanceAuthorityRules(seconds: number): void {
+    if (!Number.isFinite(seconds) || seconds < 0) throw new TypeError('Actor rule seconds must be non-negative.');
+    this.stepAccumulator = round(this.stepAccumulator + seconds);
+    while (this.stepAccumulator + Number.EPSILON >= STEP_SECONDS) {
+      this.stepAccumulator = round(this.stepAccumulator - STEP_SECONDS);
+      this.time = round(this.time + STEP_SECONDS);
+      this.needsAccumulator = round(this.needsAccumulator + STEP_SECONDS);
+      tickAuthorityActorRules(this.authorityRulesContext());
+      if (this.needsAccumulator + Number.EPSILON >= 5) {
+        this.needsAccumulator = round(this.needsAccumulator - 5);
+        this.actors.forEach((actor) => (actor.hunger = round(Math.min(100, actor.hunger + 1))));
+      }
+    }
   }
 
   advance(seconds: number): void {
@@ -233,7 +258,7 @@ export class AutonomyRuntime {
     this.perceptionAccumulator = round(this.perceptionAccumulator + STEP_SECONDS);
     this.behaviorAccumulator = round(this.behaviorAccumulator + STEP_SECONDS);
     this.actors.forEach((actor) => {
-      this.updateActive(actor);
+      updateActorActive(actor, this.options.entities, this.options.isPlayerAlive);
       actor.attackCooldownSeconds = round(Math.max(0, actor.attackCooldownSeconds - STEP_SECONDS));
       if (actor.active) this.advanceMovement(actor);
     });
@@ -268,7 +293,7 @@ export class AutonomyRuntime {
     const attacked = perception.observations.find((event) => event.type === 'attacked');
     if ((threat || attacked) && actor.archetype !== 'night-stalker') {
       const source = this.options.entities.get(threat?.entityId ?? attacked!.subjectId);
-      const target = this.fleeTarget(entity.position, source?.position);
+      const target = fleeTarget(entity.position, source?.position);
       actor.behavior = 'flee';
       actor.targetEntityId = source?.id ?? null;
       this.ensureAction(actor, 'flee', { targetPosition: target });
@@ -298,7 +323,7 @@ export class AutonomyRuntime {
     const target = night ? perception.threats[0] : undefined;
     if (!target) {
       actor.targetEntityId = null;
-      if (actor.homePoiId && !this.atPoi(entity, actor.homePoiId)) {
+      if (actor.homePoiId && !actorIsAtPoi(entity, actor.homePoiId, this.pois)) {
         actor.behavior = 'wander';
         this.ensureAction(actor, 'go-to-poi', { poiId: actor.homePoiId });
       } else {
@@ -326,7 +351,7 @@ export class AutonomyRuntime {
   private evaluateSettler(actor: ActorState, entity: GameplayEntity): void {
     if (actor.hunger >= 60 && actor.foodPoiId) {
       actor.behavior = 'seek-food';
-      if (this.atPoi(entity, actor.foodPoiId)) actor.hunger = 0;
+      if (actorIsAtPoi(entity, actor.foodPoiId, this.pois)) actor.hunger = 0;
       else this.ensureAction(actor, 'go-to-poi', { poiId: actor.foodPoiId });
       return;
     }
@@ -335,7 +360,7 @@ export class AutonomyRuntime {
     const poiId = daytime ? actor.workPoiId : actor.homePoiId;
     actor.behavior = daytime ? 'routine-work' : 'routine-home';
     actor.targetEntityId = null;
-    if (poiId && !this.atPoi(entity, poiId)) this.ensureAction(actor, 'go-to-poi', { poiId });
+    if (poiId && !actorIsAtPoi(entity, poiId, this.pois)) this.ensureAction(actor, 'go-to-poi', { poiId });
     else if (!poiId) this.ensureWander(actor, entity);
   }
 
@@ -370,7 +395,7 @@ export class AutonomyRuntime {
 
   private planAction(action: ActorAction): boolean {
     const entity = this.options.entities.get(action.actorId);
-    const target = this.actionTarget(action);
+    const target = resolveActionTarget(action, this.options.entities, this.pois);
     if (!entity || !target) {
       this.finishFailure(action.id, entity ? 'target-missing' : 'actor-missing');
       return false;
@@ -392,7 +417,7 @@ export class AutonomyRuntime {
     this.pathRecomputeCount += 1;
     if (count > 3) return this.finishFailure(action.id, 'path-invalidated');
     const entity = this.options.entities.get(action.actorId);
-    const target = this.actionTarget(action);
+    const target = resolveActionTarget(action, this.options.entities, this.pois);
     if (!entity || !target) return this.finishFailure(action.id, 'target-missing');
     const result = this.navigator.plan(entity.position, target, { maxExpanded: 384 });
     this.navigationPlanCount += 1;
@@ -428,7 +453,7 @@ export class AutonomyRuntime {
     const current = this.actions.forActor(actor.entityId);
     if (current) return;
     actor.wanderIndex += 1;
-    const target = this.wanderTarget(entity, actor.wanderIndex);
+    const target = wanderTarget(entity, actor.wanderIndex);
     this.startAction(actor.entityId, { type: 'wander', targetPosition: target });
   }
 
@@ -437,62 +462,27 @@ export class AutonomyRuntime {
     type: ActorActionType,
     target: Partial<Pick<ActorActionInput, 'targetPosition' | 'targetEntityId' | 'poiId'>>,
   ): void {
-    const current = this.actions.forActor(actor.entityId);
-    if (
-      current?.type === type &&
-      current.targetEntityId === target.targetEntityId &&
-      current.poiId === target.poiId &&
-      JSON.stringify(current.targetPosition) === JSON.stringify(target.targetPosition)
-    )
-      return;
-    this.startAction(actor.entityId, { type, ...target });
-  }
-
-  private actionTarget(action: ActorAction): NavigationPosition | null {
-    if (action.targetPosition) return [...action.targetPosition];
-    if (action.targetEntityId) return this.options.entities.get(action.targetEntityId)?.position ?? null;
-    if (action.poiId) return this.pois.get(action.poiId)?.position ?? null;
-    return null;
-  }
-
-  private atPoi(entity: GameplayEntity, poiId: string): boolean {
-    const poi = this.pois.get(poiId);
-    return Boolean(poi && distanceSquared(entity.position, poi.position) <= 0.8 ** 2);
-  }
-
-  private fleeTarget(
-    from: readonly [number, number, number],
-    threat?: readonly [number, number, number],
-  ): NavigationPosition {
-    const dx = threat ? from[0] - threat[0] : 1;
-    const dz = threat ? from[2] - threat[2] : 0;
-    const length = Math.hypot(dx, dz) || 1;
-    return [from[0] + (dx / length) * 6, from[1], from[2] + (dz / length) * 6];
-  }
-
-  private wanderTarget(entity: GameplayEntity, index: number): NavigationPosition {
-    const seed = [...entity.id].reduce((sum, character) => sum + character.charCodeAt(0), 0) + index;
-    const [dx, dz] = [
-      [3, 0],
-      [0, 3],
-      [-3, 0],
-      [0, -3],
-    ][seed % 4];
-    return [entity.position[0] + dx, entity.position[1], entity.position[2] + dz];
-  }
-
-  private updateActive(actor: ActorState): void {
-    const entity = this.options.entities.get(actor.entityId);
-    actor.active = Boolean(
-      entity &&
-      this.options.entities
-        .query({ type: 'player' })
-        .some(
-          (player) =>
-            this.options.isPlayerAlive(player.id) &&
-            distanceSquared(entity.position, player.position) <= ACTIVE_RADIUS_SQUARED,
-        ),
+    ensureActorAction(
+      this.actions,
+      actor,
+      type,
+      target,
+      () => void this.startAction(actor.entityId, { type, ...target }),
     );
+  }
+
+  authorityRulesContext(): ActorAuthorityRulesContext {
+    return {
+      actors: this.actors,
+      actions: this.actions,
+      entities: this.options.entities,
+      time: this.time,
+      worldTime: this.options.getWorldTime(),
+      updateActive: (actor) => updateActorActive(actor, this.options.entities, this.options.isPlayerAlive),
+      actionTarget: (action) => resolveActionTarget(action, this.options.entities, this.pois),
+      finishSuccess: (id, result) => this.finishSuccess(id, result),
+      finishFailure: (id, reason) => this.finishFailure(id, reason),
+    };
   }
 
   private finishSuccess(id: string, result?: unknown): void {

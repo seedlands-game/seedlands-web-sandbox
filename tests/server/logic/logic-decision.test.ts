@@ -149,6 +149,19 @@ describe('Game Logic Worker 的纯意图计算', () => {
     });
   });
 
+  it('保留 Authority 记录的受击逃跑状态，并生成远离攻击者的意图', () => {
+    const grazer = entity({ position: [8.5, 1, 2.5] });
+    const attacker = entity({ id: 'player', bodyKind: 'player', position: [6.5, 1, 2.5] });
+    const fleeing = actor({ behavior: 'flee', targetEntityId: 'player' });
+
+    const batch = decideLogicIntents(observation([{ state: fleeing, identityRevision: 1 }], [grazer, attacker]));
+
+    expect(batch.intents[0]).toMatchObject({
+      wish: { x: 1, z: 0 },
+      action: { type: 'move-to', target: [14.5, 1, 2.5] },
+    });
+  });
+
   it('延续匹配的既有高层 Action，而不在 Worker 内创建第二份 canonical 状态', () => {
     const state = actor({ homePoiId: 'home' });
     const activeAction: ActorActionSnapshot = {

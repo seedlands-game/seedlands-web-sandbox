@@ -143,6 +143,16 @@ export class EntityStore {
     return true;
   }
 
+  consumeWorldItemUnit(id: string): { itemId: string; remainingCount: number } | null {
+    const entity = this.entities.get(id);
+    if (!entity?.stack || entity.type !== 'world-item') return null;
+    const itemId = entity.stack.itemId;
+    entity.stack.count -= 1;
+    const remainingCount = entity.stack.count;
+    if (remainingCount === 0) this.despawn(id);
+    return { itemId, remainingCount };
+  }
+
   query(filter: EntityQuery = {}): GameplayEntity[] {
     return [...this.entities.values()].filter((entity) => !filter.type || entity.type === filter.type).map(clone);
   }

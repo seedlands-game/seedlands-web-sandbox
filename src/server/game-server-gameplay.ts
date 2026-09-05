@@ -5,6 +5,8 @@ import { legacyPlayerPositionToFeet } from './gameplay/gameplay-snapshot';
 import type { ItemStack } from './gameplay/item-registry';
 import type { ActorActionInput } from './simulation/action-runtime';
 import type { ActorRegistration } from './simulation/autonomy-runtime';
+import type { ActorAuthorityAction } from './simulation/actor-authority-rules';
+import { applyActorAuthorityAction as applyActorAction } from './gameplay/actor-authority-gameplay';
 import type { PoiInput, PoiKind } from './simulation/poi-registry';
 import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
@@ -153,6 +155,20 @@ export abstract class GameServerGameplayFacade {
   }
   advanceGameplayRules(seconds: number) {
     return this.gameplay.advanceRules(seconds);
+  }
+  applyActorAuthorityAction(actorId: string, action: ActorAuthorityAction) {
+    return applyActorAction(
+      {
+        entities: this.gameplay.entities,
+        simulation: this.gameplay.simulation,
+        getVoxel: (position) => this.getVoxel(...position),
+        isPlayerAlive: (id) => this.gameplay.getPlayerState(id).lifecycle === 'alive',
+        damagePlayer: (source, target, amount) => this.gameplay.applyDamage(source, target, amount, 'actor').success,
+        touch: () => this.gameplay.recordAuthorityMutation(),
+      },
+      actorId,
+      action,
+    );
   }
   get gameplayTime(): number {
     return this.gameplay.gameplayTime;

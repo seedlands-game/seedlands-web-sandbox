@@ -49,7 +49,7 @@ export class GameplayRuntime {
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]),
       getWorldTime: callbacks.getWorldTime,
       isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
-      damagePlayer: (actorId, targetId, amount) => this.damagePlayerFromActor(actorId, targetId, amount),
+      damagePlayer: (actorId, targetId, amount) => this.applyDamage(actorId, targetId, amount, 'actor').success,
       consumeWorldItem: (entityId) => {
         const entity = this.entities.get(entityId);
         if (!entity || entity.type !== 'world-item') return false;
@@ -332,6 +332,10 @@ export class GameplayRuntime {
     return { success: true, damage };
   }
 
+  recordAuthorityMutation(): void {
+    this.touch();
+  }
+
   applyDamage(_actorId: string, playerId: string, amount: number, _cause: string): GameplayResult {
     const player = this.player(playerId);
     if (!Number.isFinite(amount) || amount <= 0) return { success: false, reason: 'invalid-damage' };
@@ -383,6 +387,7 @@ export class GameplayRuntime {
     advanceGameplayClock(seconds, (step) => {
       this.time += step;
       this.players.forEach((player) => this.advancePlayer(player, step, commits));
+      this.simulation.advanceAuthorityRules(step);
     });
     if (seconds > 0) this.touch(false);
     return { commits };
@@ -516,16 +521,6 @@ export class GameplayRuntime {
     player.attackCooldownSeconds = 0;
     const position = this.entities.get(player.entityId)!.position;
     player.inventory.clear().forEach((stack) => this.spawnWorldItem(clonePosition(position), stack));
-  }
-
-  private damagePlayerFromActor(actorId: string, playerId: string, amount: number): boolean {
-    const player = this.players.get(playerId);
-    if (!player || player.lifecycle !== 'alive') return false;
-    player.health = Math.max(0, player.health - amount);
-    if (player.health === 0) this.killPlayer(player);
-    this.touch();
-    void actorId;
-    return true;
   }
 
   private player(id: string): PlayerState {

@@ -121,6 +121,16 @@ function chooseGoal(
   const state = entry.state;
   if (!state.active) return { kind: 'hold' };
   const perceptionRange = rangeByArchetype[state.archetype];
+  const recordedAttacker =
+    state.behavior === 'flee' && state.targetEntityId
+      ? observation.entities.find((candidate) => candidate.id === state.targetEntityId)
+      : undefined;
+  if (recordedAttacker)
+    return {
+      kind: 'move',
+      target: fleeTarget(entity, recordedAttacker),
+      targetEntityId: recordedAttacker.id,
+    };
   const threat = visibleNearest(
     entity,
     observation.entities.filter(

@@ -131,6 +131,7 @@ export class AuthorityRuntime {
       voxelSource: { getLoadedVoxel: (x, y, z) => server.peekLoadedVoxel(x, y, z) },
       frequencies: this.frequencies,
       startTimeMs: options.startTimeMs,
+      initialCommitSequence: server.restoredCommitSequence,
       requestUnknownChunk: (key) => this.requestUnknownChunk(key),
       requestFluidWork: () => this.requestFluidWork(),
       publishLogicObservation: (snapshot) => {
@@ -236,10 +237,12 @@ export class AuthorityRuntime {
     if (batch.protocolVersion !== LOGIC_PROTOCOL_VERSION || batch.epoch !== this.options.epoch) return false;
     const observation = this.logicObservations.get(batch.observationSequence);
     if (!observation || batch.expiresAtPhysicsTick < this.latestPhysicsTick) return false;
+    this.logicObservations.delete(batch.observationSequence);
     const observedById = new Map(observation.entities.map((entity) => [entity.id, entity] as const));
     const currentById = new Map(this.server.queryEntities().map((entity) => [entity.id, entity] as const));
     const maximumPoseStaleness = Math.ceil(this.frequencies.physicsHz * 0.2);
     const accepted: LogicIntent[] = [];
+    let canonicalChanged = false;
     for (const intent of batch.intents) {
       const observed = observedById.get(intent.entityId);
       const current = currentById.get(intent.entityId);
@@ -250,10 +253,13 @@ export class AuthorityRuntime {
         observed.poseRevision !== intent.observedPoseRevision ||
         this.identityRevision(current) !== intent.identityRevision ||
         this.latestPhysicsTick - intent.observedPoseRevision > maximumPoseStaleness ||
-        !this.currentChunkRevisions(intent.readChunkRevisions)
+        !this.currentChunkRevisions(intent.readChunkRevisions) ||
+        !this.validLogicIntent(intent)
       )
         continue;
-      this.applyLogicAction(intent.entityId, intent.action);
+      const action = this.applyLogicAction(intent.entityId, intent.action);
+      canonicalChanged ||= action?.changed ?? false;
+      if (action && !action.accepted) continue;
       accepted.push({
         entityId: intent.entityId,
         wish: { x: intent.wish.x, z: intent.wish.z },
@@ -262,6 +268,7 @@ export class AuthorityRuntime {
         expiresAtPhysicsTick: batch.expiresAtPhysicsTick,
       });
     }
+    if (canonicalChanged) this.session.commitExternalState(false);
     return this.session.receiveLogicIntents(batch.epoch, accepted);
   }
 
@@ -419,11 +426,8 @@ export class AuthorityRuntime {
     return value;
   }
 
-  advanceWorldClock(hours: number): number {
-    if (!hours) return this.server.worldTime;
-    const value = this.server.advanceClock(hours);
-    this.session.commitExternalState(false);
-    return value;
+  setWorldClockRate(rate: number): number {
+    return this.session.setWorldClockRate(rate);
   }
 
   abortFluidWork(workId: string, reason: string): boolean {
@@ -494,21 +498,22 @@ export class AuthorityRuntime {
     });
   }
 
-  private applyLogicAction(entityId: string, action: LogicIntentBatch['intents'][number]['action']): void {
-    if (!action) return;
-    if (action.type === 'start-existing-action') return;
-    if (action.type === 'move-to') {
-      this.server.startActorAction(entityId, { type: 'move-to', targetPosition: action.target });
-      return;
-    }
-    if (action.type === 'attack') {
-      this.server.startActorAction(entityId, { type: 'attack', targetEntityId: action.targetId });
-      const target = this.server.getEntity(action.targetId);
-      if (target?.type === 'player') this.server.applyDamage(entityId, action.targetId, 2, 'logic-worker-attack');
-      return;
-    }
-    this.server.startActorAction(entityId, { type: 'eat', targetEntityId: action.targetId });
-    this.server.despawnEntity(action.targetId);
+  private applyLogicAction(entityId: string, action: LogicIntentBatch['intents'][number]['action']) {
+    return action ? this.server.applyActorAuthorityAction(entityId, action) : null;
+  }
+
+  private validLogicIntent(intent: LogicIntentBatch['intents'][number]): boolean {
+    if (
+      !Number.isFinite(intent.wish.x) ||
+      !Number.isFinite(intent.wish.z) ||
+      ![-1, 0, 1].includes(intent.verticalIntent)
+    )
+      return false;
+    const action = intent.action;
+    if (!action) return true;
+    if (action.type === 'move-to') return action.target.length === 3 && action.target.every(Number.isFinite);
+    if (action.type === 'start-existing-action') return Boolean(action.actionId.trim());
+    return Boolean(action.targetId.trim());
   }
 
   private serverStateVersion() {
