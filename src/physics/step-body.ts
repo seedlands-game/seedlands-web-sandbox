@@ -6,12 +6,12 @@ import {
   dot,
   finiteAabb,
   finiteVec3,
-  length,
   overlapDepth,
   overlapVolume,
   scale,
-  translateAabb,
-  unionAabb,
+  colliderMatches,
+  sweepBodyThroughWorld,
+  validateBodyConfig,
 } from './geometry';
 import type {
   BodyConfig,
@@ -27,22 +27,7 @@ import type {
   WorldAabb,
 } from './types';
 
-const DEFAULT_LAYER = 1;
-const DEFAULT_MASK = 0xffffffff;
-const MAX_COLLISION_ITERATIONS = 4;
 const ZERO: Vec3 = { x: 0, y: 0, z: 0 };
-
-type SweepHit = Readonly<{ collider: Collider; normal: Vec3; time: number }>;
-
-const compareCollider = (left: Collider, right: Collider): number => {
-  const leftKey = `${left.id ?? ''}:${left.aabb.min.x}:${left.aabb.min.y}:${left.aabb.min.z}`;
-  const rightKey = `${right.id ?? ''}:${right.aabb.min.x}:${right.aabb.min.y}:${right.aabb.min.z}`;
-  return leftKey.localeCompare(rightKey);
-};
-
-const collides = (config: BodyConfig, collider: Collider): boolean =>
-  ((config.collisionMask ?? DEFAULT_MASK) & (collider.layer ?? DEFAULT_LAYER)) !== 0 &&
-  ((collider.mask ?? DEFAULT_MASK) & (config.collisionLayer ?? DEFAULT_LAYER)) !== 0;
 
 const assertValid = (state: BodyState, config: BodyConfig, input: PhysicsInput, dt: number): void => {
   if (
@@ -50,54 +35,38 @@ const assertValid = (state: BodyState, config: BodyConfig, input: PhysicsInput, 
     dt <= 0 ||
     !finiteVec3(state.position) ||
     !finiteVec3(state.velocity) ||
-    !finiteAabb(config.localAabb)
+    !validateBodyConfig(config)
   )
     throw new RangeError('物理步需要有限的姿态、碰撞箱和正 dt。');
-  if (!Number.isFinite(input.wish.x) || !Number.isFinite(input.wish.z))
+  if (!Number.isFinite(input.wish.x) || !Number.isFinite(input.wish.z) || ![-1, 0, 1].includes(input.verticalIntent))
     throw new RangeError('移动意图必须是有限数值。');
 };
 
-const axisSweep = (
-  minimum: number,
-  maximum: number,
-  obstacleMinimum: number,
-  obstacleMaximum: number,
-  delta: number,
-): [number, number] | null => {
-  if (Math.abs(delta) <= COLLISION_EPSILON)
-    return maximum > obstacleMinimum + COLLISION_EPSILON && minimum < obstacleMaximum - COLLISION_EPSILON
-      ? [-Infinity, Infinity]
-      : null;
-  if (delta > 0 && minimum >= obstacleMaximum - COLLISION_EPSILON) return null;
-  if (delta < 0 && maximum <= obstacleMinimum + COLLISION_EPSILON) return null;
-  const first = delta > 0 ? (obstacleMinimum - maximum) / delta : (obstacleMaximum - minimum) / delta;
-  const second = delta > 0 ? (obstacleMaximum - minimum) / delta : (obstacleMinimum - maximum) / delta;
-  return [Math.min(first, second), Math.max(first, second)];
+const contactAt = (position: Vec3, config: BodyConfig, normal: Vec3, collider: Collider): Contact => {
+  if (normal.x === 0 && normal.y === 0 && normal.z === 0) return { colliderId: collider.id, normal, point: position };
+  const bounds = bodyWorldAabb({ position, velocity: ZERO }, config);
+  const middle = (firstMin: number, firstMax: number, secondMin: number, secondMax: number): number =>
+    (Math.max(firstMin, secondMin) + Math.min(firstMax, secondMax)) / 2;
+  const point =
+    normal.x !== 0
+      ? {
+          x: normal.x < 0 ? bounds.max.x : bounds.min.x,
+          y: middle(bounds.min.y, bounds.max.y, collider.aabb.min.y, collider.aabb.max.y),
+          z: middle(bounds.min.z, bounds.max.z, collider.aabb.min.z, collider.aabb.max.z),
+        }
+      : normal.y !== 0
+        ? {
+            x: middle(bounds.min.x, bounds.max.x, collider.aabb.min.x, collider.aabb.max.x),
+            y: normal.y < 0 ? bounds.max.y : bounds.min.y,
+            z: middle(bounds.min.z, bounds.max.z, collider.aabb.min.z, collider.aabb.max.z),
+          }
+        : {
+            x: middle(bounds.min.x, bounds.max.x, collider.aabb.min.x, collider.aabb.max.x),
+            y: middle(bounds.min.y, bounds.max.y, collider.aabb.min.y, collider.aabb.max.y),
+            z: normal.z < 0 ? bounds.max.z : bounds.min.z,
+          };
+  return { colliderId: collider.id, normal, point };
 };
-
-const sweep = (body: WorldAabb, delta: Vec3, collider: Collider): SweepHit | null => {
-  const x = axisSweep(body.min.x, body.max.x, collider.aabb.min.x, collider.aabb.max.x, delta.x);
-  const y = axisSweep(body.min.y, body.max.y, collider.aabb.min.y, collider.aabb.max.y, delta.y);
-  const z = axisSweep(body.min.z, body.max.z, collider.aabb.min.z, collider.aabb.max.z, delta.z);
-  if (!x || !y || !z) return null;
-  const entry = Math.max(x[0], y[0], z[0]);
-  const exit = Math.min(x[1], y[1], z[1]);
-  if (entry > exit + COLLISION_EPSILON || exit < -COLLISION_EPSILON || entry > 1 + COLLISION_EPSILON) return null;
-  const time = Math.max(0, entry);
-  const normal =
-    x[0] >= y[0] - COLLISION_EPSILON && x[0] >= z[0] - COLLISION_EPSILON
-      ? { x: delta.x > 0 ? -1 : 1, y: 0, z: 0 }
-      : y[0] >= z[0] - COLLISION_EPSILON
-        ? { x: 0, y: delta.y > 0 ? -1 : 1, z: 0 }
-        : { x: 0, y: 0, z: delta.z > 0 ? -1 : 1 };
-  return { collider, normal, time };
-};
-
-const contactAt = (position: Vec3, normal: Vec3, collider: Collider): Contact => ({
-  colliderId: collider.id,
-  normal,
-  point: position,
-});
 
 const mediumAt = (bounds: WorldAabb, fluids: readonly FluidVolume[] | undefined): MediumSample => {
   if (!fluids?.length) return { submersion: 0, flow: ZERO };
@@ -105,6 +74,8 @@ const mediumAt = (bounds: WorldAabb, fluids: readonly FluidVolume[] | undefined)
   let covered = 0;
   let flow = ZERO;
   for (const fluid of fluids) {
+    if (!finiteAabb(fluid.aabb) || !finiteVec3(fluid.velocity))
+      throw new RangeError('流体采样必须包含有限的碰撞箱和流速。');
     const volume = overlapVolume(bounds, fluid.aabb);
     if (volume <= 0) continue;
     covered += volume;
@@ -114,13 +85,24 @@ const mediumAt = (bounds: WorldAabb, fluids: readonly FluidVolume[] | undefined)
   return submersion > 0 ? { submersion, flow: scale(flow, 1 / covered) } : { submersion: 0, flow: ZERO };
 };
 
+const reachesFluidSurface = (bounds: WorldAabb, fluids: readonly FluidVolume[] | undefined): boolean =>
+  !!fluids?.some(
+    (fluid) =>
+      bounds.max.y >= fluid.aabb.max.y - COLLISION_EPSILON &&
+      bounds.min.x < fluid.aabb.max.x - COLLISION_EPSILON &&
+      bounds.max.x > fluid.aabb.min.x + COLLISION_EPSILON &&
+      bounds.min.z < fluid.aabb.max.z - COLLISION_EPSILON &&
+      bounds.max.z > fluid.aabb.min.z + COLLISION_EPSILON,
+  );
+
 const supported = (bounds: WorldAabb, config: BodyConfig, world: PhysicsWorld): boolean => {
   const probe: WorldAabb = {
     min: { x: bounds.min.x, y: bounds.min.y - COLLISION_EPSILON * 4, z: bounds.min.z },
     max: { x: bounds.max.x, y: bounds.min.y + COLLISION_EPSILON * 4, z: bounds.max.z },
   };
   return world.querySolids(probe).some((collider) => {
-    if (collider.sensor || !collides(config, collider)) return false;
+    if (!finiteAabb(collider.aabb)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
+    if (collider.sensor || !colliderMatches(config, collider)) return false;
     const horizontal = overlapDepth(
       { min: { x: bounds.min.x, y: -1, z: bounds.min.z }, max: { x: bounds.max.x, y: 1, z: bounds.max.z } },
       {
@@ -157,6 +139,7 @@ const integrateVelocity = (
   input: PhysicsInput,
   grounded: boolean,
   medium: MediumSample,
+  surfaceJump: boolean,
   dt: number,
 ): Vec3 => {
   let velocity = accelerateHorizontal(state.velocity, input, config, grounded, dt);
@@ -178,55 +161,23 @@ const integrateVelocity = (
     };
   }
   const maxFall = config.terminalVelocity ?? 24;
-  return { ...velocity, y: Math.max(-maxFall, velocity.y - gravity * (1 - buoyancy * medium.submersion) * dt) };
-};
-
-const sweepMove = (
-  state: BodyState,
-  config: BodyConfig,
-  world: PhysicsWorld,
-  delta: Vec3,
-): { state: BodyState; contacts: Contact[] } => {
-  let position = state.position;
-  let remaining = delta;
-  const contacts: Contact[] = [];
-  for (
-    let iteration = 0;
-    iteration < MAX_COLLISION_ITERATIONS && length(remaining) > COLLISION_EPSILON;
-    iteration += 1
-  ) {
-    const current = bodyWorldAabb({ ...state, position }, config);
-    const swept = unionAabb(current, translateAabb(current, remaining));
-    const hit = world
-      .querySolids(swept)
-      .filter((collider) => !collider.sensor && collides(config, collider))
-      .sort(compareCollider)
-      .map((collider) => sweep(current, remaining, collider))
-      .filter((candidate): candidate is SweepHit => candidate !== null)
-      .sort((left, right) => left.time - right.time || compareCollider(left.collider, right.collider))[0];
-    if (!hit) {
-      position = add(position, remaining);
-      break;
-    }
-    const retreat = Math.min(hit.time, COLLISION_EPSILON / Math.max(length(remaining), COLLISION_EPSILON));
-    position = add(position, scale(remaining, Math.max(0, hit.time - retreat)));
-    contacts.push(contactAt(position, hit.normal, hit.collider));
-    const afterImpact = scale(remaining, 1 - hit.time);
-    remaining =
-      dot(afterImpact, hit.normal) < 0
-        ? add(afterImpact, scale(hit.normal, -dot(afterImpact, hit.normal)))
-        : afterImpact;
-  }
-  return { state: { position, velocity: state.velocity }, contacts };
+  velocity = { ...velocity, y: Math.max(-maxFall, velocity.y - gravity * (1 - buoyancy * medium.submersion) * dt) };
+  if (surfaceJump)
+    velocity = { ...velocity, y: Math.max(velocity.y, config.waterSurfaceJumpSpeed ?? config.jumpSpeed ?? 6.5) };
+  return velocity;
 };
 
 const sensorContacts = (state: BodyState, config: BodyConfig, world: PhysicsWorld): Contact[] => {
   const bounds = bodyWorldAabb(state, config);
   return world
     .querySolids(bounds)
-    .filter((collider) => collider.sensor && collides(config, collider) && overlapDepth(bounds, collider.aabb))
-    .sort(compareCollider)
-    .map((collider) => contactAt(state.position, ZERO, collider));
+    .map((collider) => {
+      if (!finiteAabb(collider.aabb)) throw new RangeError('碰撞查询返回了无效碰撞箱。');
+      return collider;
+    })
+    .filter((collider) => collider.sensor && colliderMatches(config, collider) && overlapDepth(bounds, collider.aabb))
+    .sort((left, right) => (left.id ?? '').localeCompare(right.id ?? ''))
+    .map((collider) => contactAt(state.position, config, ZERO, collider));
 };
 
 export const stepBody = (
@@ -236,12 +187,17 @@ export const stepBody = (
   assertValid(state, config, input, dt);
   const initialBounds = bodyWorldAabb(state, config);
   const groundedBefore = supported(initialBounds, config, world);
-  const initialMedium = mediumAt(initialBounds, world.sampleFluid?.(initialBounds));
-  const velocity = integrateVelocity(state, config, input, groundedBefore, initialMedium, dt);
-  const moved = sweepMove({ ...state, velocity }, config, world, scale(velocity, dt));
-  const grounded =
-    moved.contacts.some((contact) => contact.normal.y > 0.5) ||
-    supported(bodyWorldAabb(moved.state, config), config, world);
+  const initialFluids = world.sampleFluid?.(initialBounds);
+  const initialMedium = mediumAt(initialBounds, initialFluids);
+  const surfaceJump =
+    input.jumpPressed && initialMedium.submersion > 0 && reachesFluidSurface(initialBounds, initialFluids);
+  const velocity = integrateVelocity(state, config, input, groundedBefore, initialMedium, surfaceJump, dt);
+  const sweep = sweepBodyThroughWorld({ ...state, velocity }, config, world, scale(velocity, dt));
+  const contacts = sweep.contacts.map((contact) =>
+    contactAt(contact.position, config, contact.normal, contact.collider),
+  );
+  const moved = { state: { position: sweep.position, velocity }, contacts };
+  const grounded = supported(bodyWorldAabb(moved.state, config), config, world);
   const finalVelocity = moved.contacts.reduce<Vec3>(
     (current, contact) =>
       dot(current, contact.normal) < 0 ? add(current, scale(contact.normal, -dot(current, contact.normal))) : current,

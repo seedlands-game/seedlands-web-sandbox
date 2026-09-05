@@ -14,6 +14,7 @@ export type BodyConfig = Readonly<{
   groundAcceleration?: number;
   airAcceleration?: number;
   jumpSpeed?: number;
+  waterSurfaceJumpSpeed?: number;
   buoyancy?: number;
   fluidDrag?: number;
   swimAcceleration?: number;
@@ -61,4 +62,9 @@ export type PhysicsStepResult = Readonly<{
 
 export type RecoveryResult = Readonly<{ state: BodyState; recovered: boolean; distance: number }>;
 
+/**
+ * `separated` means the two body boxes no longer overlap.  A bounded push may
+ * still move one or both bodies while returning `false` when a wall or the
+ * caller's per-body distance limit prevents a full separation.
+ */
 export type SeparationResult = Readonly<{ left: BodyState; right: BodyState; separated: boolean }>;

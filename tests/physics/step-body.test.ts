@@ -22,7 +22,7 @@ const body: BodyConfig = {
 
 const itemBody: BodyConfig = {
   ...body,
-  localAabb: { min: { x: -0.2, y: -0.2, z: -0.2 }, max: { x: 0.2, y: 0.2, z: 0.2 } },
+  localAabb: { min: { x: -0.2, y: 0, z: -0.2 }, max: { x: 0.2, y: 0.4, z: 0.2 } },
   collisionLayer: 2,
   collisionMask: 1,
   pushable: false,
@@ -132,16 +132,17 @@ describe('统一 swept-AABB 物理核心', () => {
     const floor = box('floor', [-2, -1, -2], [4, 0, 2]);
     const shore = box('shore', [0.7, 0, -1], [3, 1, 1]);
     const noJump = stepBody({
-      state: state(0, 0, 0, { x: 5 }),
+      state: state(0, 0, 0),
       config: { ...body, gravity: 0 },
-      input: idle,
+      input: { ...idle, wish: { x: 1, z: 0 } },
       world: world([floor, shore]),
       dt: 0.3,
     });
     expect(noJump.state.position.y).toBeCloseTo(0, 5);
     expect(noJump.state.position.x).toBeLessThanOrEqual(0.4 + 1e-5);
+    expect(noJump.contacts.some((contact) => contact.normal.x === -1)).toBe(true);
 
-    let current = state(0, 0, 0, { x: 5 });
+    let current = state(0, 0, 0);
     for (let index = 0; index < 36; index += 1)
       current = stepBody({
         state: current,
@@ -167,6 +168,28 @@ describe('统一 swept-AABB 物理核心', () => {
     expect(result.medium.flow.x).toBeCloseTo(3, 5);
     expect(result.state.velocity.x).toBeGreaterThan(0);
     expect(result.state.velocity.y).toBeGreaterThan(-1);
+  });
+
+  it('深水中按住 Space 的上浮与前进经同一连续碰撞轨迹登上齐水面的岸', () => {
+    const deepFloor = box('deep-floor', [-3, -3.2, -2], [4, -3, 2]);
+    const shore = box('shore', [0.7, -3, -1], [4, 0, 1]);
+    const water = box('deep-water', [-3, -3, -2], [0.7, 0, 2]);
+    let current = state(0, -2, 0);
+    let highest = current.position.y;
+    let reachedShore = false;
+    for (let index = 0; index < 240; index += 1) {
+      current = stepBody({
+        state: current,
+        config: body,
+        input: { wish: { x: 1, z: 0 }, jumpPressed: true, verticalIntent: 1 },
+        world: world([deepFloor, shore], () => [{ aabb: water.aabb, velocity: { x: 0, y: 0, z: 0 } }]),
+        dt: 1 / 60,
+      }).state;
+      highest = Math.max(highest, current.position.y);
+      reachedShore ||= current.position.x > 0.7 && current.position.y >= 0;
+    }
+    expect(highest).toBeGreaterThanOrEqual(0);
+    expect(reachedShore).toBe(true);
   });
 
   it('遵守 body/collider 掩码，传感器报告重叠而不阻挡', () => {
@@ -210,13 +233,105 @@ describe('统一 swept-AABB 物理核心', () => {
   it('有限推离只处理角色身体，掉落物可经掩码选择重叠', () => {
     const left = state(0, 0, 0);
     const right = state(0.2, 0, 0);
-    const separated = separateBodies({ left, leftConfig: body, right, rightConfig: body, maxDistance: 0.1 });
-    expect(separated.separated).toBe(true);
+    const separated = separateBodies({
+      left,
+      leftConfig: body,
+      right,
+      rightConfig: body,
+      world: world([]),
+      maxDistance: 0.1,
+    });
+    expect(separated.separated).toBe(false);
     expect(separated.left.position.x).toBeLessThan(0);
     expect(separated.right.position.x).toBeGreaterThan(0.2);
     expect(
-      separateBodies({ left, leftConfig: itemBody, right, rightConfig: itemBody, maxDistance: 0.1 }).separated,
+      separateBodies({ left, leftConfig: itemBody, right, rightConfig: itemBody, world: world([]), maxDistance: 0.1 })
+        .separated,
     ).toBe(false);
+  });
+
+  it('角色推离以同一静态扫掠约束：贴墙一侧不穿入固体，另一侧可作合法有限推离', () => {
+    const wall = box('wall', [-1, -1, -1], [-0.3, 3, 1]);
+    const left = state(0, 0, 0);
+    const right = state(0.4, 0, 0);
+    const first = separateBodies({
+      left,
+      leftConfig: body,
+      right,
+      rightConfig: body,
+      world: world([wall]),
+      maxDistance: 0.1,
+    });
+    const swapped = separateBodies({
+      left: right,
+      leftConfig: body,
+      right: left,
+      rightConfig: body,
+      world: world([wall]),
+      maxDistance: 0.1,
+    });
+    expect(bodyWorldAabb(first.left, body).min.x).toBeGreaterThanOrEqual(-0.3 - 1e-5);
+    expect(bodyWorldAabb(first.right, body).min.x).toBeGreaterThanOrEqual(-0.3 - 1e-5);
+    expect(first.left.position).toEqual(swapped.right.position);
+    expect(first.right.position).toEqual(swapped.left.position);
+    let moving = first.left;
+    for (let index = 0; index < 8; index += 1)
+      moving = stepBody({
+        state: moving,
+        config: { ...body, gravity: 0 },
+        input: { ...idle, wish: { x: 1, z: 0 } },
+        world: world([wall]),
+        dt: 1 / 60,
+      }).state;
+    expect(moving.position.x).toBeGreaterThan(first.left.position.x);
+    expect(bodyWorldAabb(moving, body).min.x).toBeGreaterThanOrEqual(-0.3 - 1e-5);
+  });
+
+  it('显式恢复从相邻箱、墙角和复合子箱的全局候选中找出口，且查询顺序不影响结果', () => {
+    const adjacent = [box('left', [-1, -1, -1], [0, 3, 1]), box('right', [0, -1, -1], [1, 3, 1])];
+    const embedded = state(0, 0, 0);
+    const normal = recoverBody({ state: embedded, config: body, world: world(adjacent), maxDistance: 2 });
+    const reversed = recoverBody({
+      state: embedded,
+      config: body,
+      world: world([...adjacent].reverse()),
+      maxDistance: 2,
+    });
+    const corner = recoverBody({
+      state: embedded,
+      config: body,
+      world: world([...adjacent, box('corner-child', [-1, -1, 0], [1, 3, 1])]),
+      maxDistance: 2,
+    });
+    expect(normal.recovered).toBe(true);
+    expect(reversed).toEqual(normal);
+    expect(corner.recovered).toBe(true);
+    expect(Math.abs(normal.state.position.x)).toBeGreaterThanOrEqual(1.3);
+    expect(recoverBody({ state: embedded, config: body, world: world(adjacent), maxDistance: 1.2 }).recovered).toBe(
+      false,
+    );
+  });
+
+  it('接触点位于实际碰撞面，终点离开窄支撑时不遗留 grounded 状态', () => {
+    const wall = box('wall', [1, -1, -1], [1.2, 3, 1]);
+    const hit = stepBody({
+      state: state(0, 0, 0, { x: 8 }),
+      config: { ...body, gravity: 0 },
+      input: { ...idle, wish: { x: 1, z: 0 } },
+      world: world([wall]),
+      dt: 0.2,
+    });
+    expect(hit.contacts[0]?.point.x).toBeCloseTo(1, 4);
+    const platform = box('narrow-platform', [-1, -1, -1], [0.31, 0, 1]);
+    const offEdge = stepBody({
+      state: state(0, 0, 0),
+      config: body,
+      input: { ...idle, wish: { x: 1, z: 0 } },
+      world: world([platform]),
+      dt: 0.2,
+    });
+    expect(offEdge.state.position.x).toBeGreaterThan(1);
+    expect(offEdge.grounded).toBe(false);
   });
 
   it('拒绝非有限姿态和无效 dt，避免传播 NaN', () => {
@@ -225,6 +340,24 @@ describe('统一 swept-AABB 物理核心', () => {
     );
     expect(() =>
       stepBody({ state: state(Number.NaN, 0, 0), config: body, input: idle, world: world([]), dt: 1 / 60 }),
+    ).toThrow(RangeError);
+    expect(() =>
+      stepBody({
+        state: state(0, 0, 0),
+        config: { ...body, gravity: Number.NaN },
+        input: idle,
+        world: world([]),
+        dt: 1 / 60,
+      }),
+    ).toThrow(RangeError);
+    expect(() =>
+      stepBody({
+        state: state(0, 0, 0),
+        config: { ...body, localAabb: { ...body.localAabb, min: { ...body.localAabb.min, y: -0.1 } } },
+        input: idle,
+        world: world([]),
+        dt: 1 / 60,
+      }),
     ).toThrow(RangeError);
   });
 });

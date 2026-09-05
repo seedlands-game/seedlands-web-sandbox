@@ -12,8 +12,12 @@
 
 2026-09-06：已预置 `tests/physics/step-body.test.ts`，在生产模块尚不存在时导入失败，覆盖薄平台高速下落、低顶、稳定角落滑动、灯笼子箱、无自动一格上升、真实跳搭支撑、浸没/流速、掩码/传感器、有限数值及显式重叠恢复。
 
+2026-09-06：独立评审后补充的墙—角色—角色夹持、相邻体素恢复、深水齐水岸上浮、终点支撑及接触点夹具在修复前分别暴露了无 world 推离穿墙、局部贪心恢复失败、深水上浮停在半浸没平衡、历史接触滞留和原点点位错误。相关最小反例、规则及准入条件记录于 `physics-independent-review.md`。
+
 ## GREEN 与交付
 
-2026-09-06：`pnpm vitest run tests/physics/step-body.test.ts` 通过，10 项用例全部 GREEN。`pnpm eslint src/physics tests/physics`、`pnpm tsc --noEmit`、`pnpm tsc -p tsconfig.test.json --noEmit`、`pnpm build` 与 `git diff --check` 通过。生产构建保留既有大 Chunk 警告，未由本模块新增或掩盖。
+2026-09-06：独立评审阻断项修复后，`pnpm vitest run tests/physics/step-body.test.ts` 通过，14 项用例全部 GREEN。修复将角色推离改为必经 `PhysicsWorld` 的静态 swept-AABB 有界位移；`separated` 仅表示完全脱离，受墙限制的合法部分推离保持 `false`。显式恢复改为有限全局候选搜索并在完整静态集合验证后原子提交，失败不改状态；普通步仍不调用恢复。接触点现在落在真实接触面，最终 `grounded` 只由终点实际支撑决定。`validateBodyConfig` 供形状注册与 Worker 边界一次性校验，公共入口同时防御有限数据和脚底中心原点。深水按住 Space 通过受水面条件的有限 `waterSurfaceJumpSpeed` 产生速度，岸和顶棚仍由同一连续扫掠处理。
+
+`pnpm prettier --check src/physics/types.ts src/physics/geometry.ts src/physics/step-body.ts src/physics/recovery.ts src/physics/index.ts tests/physics/step-body.test.ts`、`pnpm eslint src/physics tests/physics`、`pnpm tsc --noEmit`、`pnpm build` 与 `git diff --check` 通过。生产构建保留既有大 Chunk 警告，未由本模块新增或掩盖。
 
 本模块仅交付纯核心；Authority Worker、体素/未知 Chunk 查询适配、客户端预测、眼睛入水滞回和真实碰撞箱调试投影由主线按已冻结合同接入。`sampleFluid` 只计算身体 AABB 的介质比例，刻意不读取相机/眼睛状态。
