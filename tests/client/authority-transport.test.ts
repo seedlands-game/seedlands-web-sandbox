@@ -104,4 +104,40 @@ describe('Authority 受控传输', () => {
     expect(failed).toHaveBeenCalledWith(expect.objectContaining({ message: 'clone failed' }));
     vi.useRealTimers();
   });
+
+  it('让含ArrayBuffer的入站重复副本拥有独立可转移存储', () => {
+    vi.useFakeTimers();
+    const raw = new RawPort();
+    const transport = createAuthorityTransport(raw, { harnessEnabled: true, duplicateInbound: true });
+    const values: Array<number | undefined> = [];
+    const buffers: ArrayBuffer[] = [];
+    transport.onmessage = (event) => {
+      const payload = event.data as { occupancy: Uint8Array };
+      values.push(payload.occupancy[0]);
+      buffers.push(payload.occupancy.buffer as ArrayBuffer);
+      if (payload.occupancy.buffer.byteLength)
+        structuredClone(payload, { transfer: [payload.occupancy.buffer as ArrayBuffer] });
+    };
+
+    raw.emit({ occupancy: new Uint8Array([7, 8, 9]) });
+    vi.runAllTimers();
+
+    expect(values).toEqual([7, 7]);
+    expect(buffers[0]).not.toBe(buffers[1]);
+    vi.useRealTimers();
+  });
+
+  it('在故障延迟边界立即复制出站transfer消息', () => {
+    vi.useFakeTimers();
+    const raw = new RawPort();
+    const transport = createAuthorityTransport(raw, { harnessEnabled: true, latencyMs: 50 });
+    const occupancy = new Uint8Array([7, 8, 9]);
+    transport.postMessage({ occupancy }, [occupancy.buffer]);
+    structuredClone(occupancy, { transfer: [occupancy.buffer] });
+
+    vi.advanceTimersByTime(50);
+
+    expect((raw.posts[0] as { occupancy: Uint8Array }).occupancy).toEqual(new Uint8Array([7, 8, 9]));
+    vi.useRealTimers();
+  });
 });

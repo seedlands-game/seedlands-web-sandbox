@@ -215,4 +215,78 @@ describe('生产BrowserAuthorityClient碰撞镜像接线', () => {
     expect(client.getChunkRevision(0, 0, 0)).toBeNull();
     expect(client.getVoxel(0, 0, 0)).toBe(Voxel.Air);
   });
+
+  it('卸载后不让在途旧网格回执复活碰撞镜像，重新请求的新代际仍可安装', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    await installBaseline(client, worker);
+    const staleCanonical = new Uint16Array(CHUNK_SIZE ** 3);
+    staleCanonical[0] = Voxel.Dirt;
+    const acceptingStale = client.acceptWorkerCanonical(
+      { chunkKey: '0,0,0', cx: 0, cy: 0, cz: 0, chunkRevision: 5, generatorVersion: 3 },
+      { canonical: staleCanonical.buffer, generatorVersion: 3 },
+    );
+    const staleRequest = worker.posts.at(-1) as { requestId: number };
+
+    client.releaseChunkNeighborhood(0, 0, 0);
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: staleRequest.requestId,
+      ok: true,
+      result: { accepted: true },
+    });
+    await expect(acceptingStale).resolves.toBe(true);
+    expect(client.getChunkRevision(0, 0, 0)).toBeNull();
+    expect(client.getVoxel(0, 0, 0)).toBe(Voxel.Air);
+
+    const freshCanonical = new Uint16Array(CHUNK_SIZE ** 3);
+    freshCanonical[0] = Voxel.Stone;
+    const acceptingFresh = client.acceptWorkerCanonical(
+      { chunkKey: '0,0,0', cx: 0, cy: 0, cz: 0, chunkRevision: 6, generatorVersion: 3 },
+      { canonical: freshCanonical.buffer, generatorVersion: 3 },
+    );
+    const freshRequest = worker.posts.at(-1) as { requestId: number };
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: freshRequest.requestId,
+      ok: true,
+      result: { accepted: true },
+    });
+    await expect(acceptingFresh).resolves.toBe(true);
+    expect(client.getChunkRevision(0, 0, 0)).toBe(6);
+    expect(client.getVoxel(0, 0, 0)).toBe(Voxel.Stone);
+  });
+
+  it('旧运动快照迟到时仍消费其唯一提交，并让重复投递保持一次性', async () => {
+    const worker = new FakeAuthorityWorker();
+    const onCommit = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onCommit });
+    await installBaseline(client, worker);
+    const changed = commit(4, 5, Voxel.Stone, 0);
+
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: { ...snapshot(2, 6), chunkRevisions: { '0,0,0': 5 } },
+    });
+    const delayed = {
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: { ...snapshot(1, 5), chunkRevisions: { '0,0,0': 5 } },
+      commits: [changed],
+    } as const;
+    worker.emit(delayed);
+    worker.emit(delayed);
+
+    expect(client.getVoxel(1, 2, 3)).toBe(Voxel.Stone);
+    expect(client.getChunkRevision(0, 0, 0)).toBe(5);
+    expect(client.snapshot?.physicsTick).toBe(2);
+    expect(onCommit).toHaveBeenCalledTimes(1);
+  });
 });

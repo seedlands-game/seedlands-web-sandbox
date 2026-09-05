@@ -13,6 +13,7 @@ export type AuthorityCollisionDelta = Readonly<{
 
 export type AuthorityCollisionCommit = Readonly<{
   committed: boolean;
+  worldRevision: number;
   structuralChange: Readonly<{
     chunks: readonly string[];
     chunkRevisions: readonly Readonly<{ key: string; revision: number }>[];
@@ -20,45 +21,93 @@ export type AuthorityCollisionCommit = Readonly<{
   collisionDelta?: readonly AuthorityCollisionDelta[];
 }>;
 
-export class AuthorityCollisionRevisionGuard {
-  private readonly minimum = new Map<string, number>();
-  private readonly pending = new Map<string, number>();
-  private readonly released = new Set<string>();
+type AuthorityCollisionBaselineLease = Readonly<{
+  key: string;
+  generation: number;
+}>;
 
-  beginBaseline(key: string): () => void {
-    this.pending.set(key, (this.pending.get(key) ?? 0) + 1);
-    return () => {
-      const remaining = (this.pending.get(key) ?? 1) - 1;
-      if (remaining > 0) this.pending.set(key, remaining);
-      else {
-        this.pending.delete(key);
-        if (this.released.delete(key)) this.minimum.delete(key);
-      }
-    };
+type AuthorityCollisionRevisionState = {
+  generation: number;
+  minimumRevision: number;
+  pending: number;
+  released: boolean;
+};
+
+export class AuthorityCollisionRevisionGuard {
+  private readonly states = new Map<string, AuthorityCollisionRevisionState>();
+  private contiguousCommitRevision: number | null = null;
+  private readonly outOfOrderCommits = new Set<number>();
+
+  beginBaseline(key: string): AuthorityCollisionBaselineLease {
+    const state = this.stateFor(key);
+    state.released = false;
+    state.pending += 1;
+    return { key, generation: state.generation };
+  }
+
+  finishBaseline(lease: AuthorityCollisionBaselineLease): void {
+    const state = this.states.get(lease.key);
+    if (!state) return;
+    state.pending = Math.max(0, state.pending - 1);
+    if (state.pending === 0 && state.released) this.states.delete(lease.key);
   }
 
   require(key: string, revision: number): void {
-    this.minimum.set(key, Math.max(revision, this.minimum.get(key) ?? 0));
+    const state = this.stateFor(key);
+    state.released = false;
+    state.minimumRevision = Math.max(revision, state.minimumRevision);
   }
 
-  accepts(key: string, revision: number): boolean {
-    return revision >= (this.minimum.get(key) ?? 0);
+  accepts(key: string, revision: number, lease?: AuthorityCollisionBaselineLease): boolean {
+    const state = this.states.get(key);
+    if (!state) return lease === undefined;
+    return (
+      !state.released &&
+      (!lease || (lease.key === key && lease.generation === state.generation)) &&
+      revision >= state.minimumRevision
+    );
   }
 
   satisfy(key: string, revision: number): void {
-    if (this.accepts(key, revision)) this.minimum.delete(key);
-    this.released.delete(key);
+    const state = this.states.get(key);
+    if (!state || !this.accepts(key, revision)) return;
+    state.minimumRevision = 0;
   }
 
   release(key: string): void {
-    if (this.pending.has(key)) this.released.add(key);
-    else this.minimum.delete(key);
+    const state = this.states.get(key);
+    if (!state) return;
+    state.generation += 1;
+    state.minimumRevision = 0;
+    state.released = true;
+    if (state.pending === 0) this.states.delete(key);
   }
 
   clear(): void {
-    this.minimum.clear();
-    this.pending.clear();
-    this.released.clear();
+    this.states.clear();
+    this.contiguousCommitRevision = null;
+    this.outOfOrderCommits.clear();
+  }
+
+  initializeCommitDelivery(worldRevision: number): void {
+    if (this.contiguousCommitRevision === null) this.contiguousCommitRevision = worldRevision;
+  }
+
+  shouldPublishCommit(worldRevision: number): boolean {
+    if (this.contiguousCommitRevision === null) this.contiguousCommitRevision = worldRevision - 1;
+    if (worldRevision <= this.contiguousCommitRevision || this.outOfOrderCommits.has(worldRevision)) return false;
+    this.outOfOrderCommits.add(worldRevision);
+    while (this.outOfOrderCommits.delete(this.contiguousCommitRevision + 1)) this.contiguousCommitRevision += 1;
+    return true;
+  }
+
+  private stateFor(key: string): AuthorityCollisionRevisionState {
+    let state = this.states.get(key);
+    if (!state) {
+      state = { generation: 0, minimumRevision: 0, pending: 0, released: false };
+      this.states.set(key, state);
+    }
+    return state;
   }
 }
 
@@ -75,7 +124,7 @@ export async function acceptAuthorityCollisionBaseline(
   }>,
 ): Promise<boolean> {
   if (!options.result.canonical || options.result.generatorVersion !== options.generatorVersion) return false;
-  const finish = options.guard.beginBaseline(options.key);
+  const lease = options.guard.beginBaseline(options.key);
   try {
     const canonical = new Uint16Array(options.result.canonical).slice();
     if (!(await options.accept(canonical.slice()))) return false;
@@ -88,10 +137,11 @@ export async function acceptAuthorityCollisionBaseline(
         chunkRevision: options.chunkRevision,
       },
       options.guard,
+      lease,
     );
     return true;
   } finally {
-    finish();
+    options.guard.finishBaseline(lease);
   }
 }
 
@@ -107,8 +157,9 @@ export function cacheAuthorityCollisionBaseline(
   key: string,
   baseline: AuthorityCollisionCachedChunk,
   guard?: AuthorityCollisionRevisionGuard,
+  lease?: AuthorityCollisionBaselineLease,
 ): boolean {
-  if (guard && !guard.accepts(key, baseline.chunkRevision)) return false;
+  if (guard && !guard.accepts(key, baseline.chunkRevision, lease)) return false;
   chunks.set(key, installAuthorityCollisionBaseline(chunks.get(key), baseline));
   guard?.satisfy(key, chunks.get(key)!.chunkRevision);
   return true;
@@ -166,6 +217,7 @@ export function publishAuthorityCollisionCommits<Commit extends AuthorityCollisi
   if (!commits?.length) return;
   const requestedBaselines = new Set<string>();
   for (const commit of commits) {
+    if (guard && !guard.shouldPublishCommit(commit.worldRevision)) continue;
     commit.structuralChange?.chunkRevisions.forEach(({ key, revision }) => guard?.require(key, revision));
     applyAuthorityCollisionCommit(commit, {
       getChunk: (key) => chunks.get(key),

@@ -433,6 +433,7 @@ export class BrowserAuthorityClient {
         if (this.snapshotGate.accept(message.ready.snapshot)) return;
         this.readyValue = message.ready;
         this.snapshotValue = message.ready.snapshot;
+        this.collisionRevisions.initializeCommitDelivery(message.ready.snapshot.worldRevision);
         this.updateGameplay(message.ready.gameplay);
         this.readyWait.resolve(message.ready);
         break;
@@ -505,10 +506,10 @@ export class BrowserAuthorityClient {
     gameplay?: AuthorityGameplayView,
     commits?: readonly WorldCommitResult[],
   ): void {
+    publishAuthorityCollisionCommits(commits, this.meshCache, this.options, this.collisionRevisions);
+    if (gameplay) this.updateGameplay(gameplay);
     if (this.snapshotGate.accept(snapshot)) return;
     this.snapshotValue = snapshot;
-    if (gameplay) this.updateGameplay(gameplay);
-    publishAuthorityCollisionCommits(commits, this.meshCache, this.options, this.collisionRevisions);
     this.options.onSnapshot?.(snapshot);
   }
 

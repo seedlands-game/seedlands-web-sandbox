@@ -62,8 +62,20 @@ export function createAuthorityTransport<Message>(
 
   raw.onmessage = (event) => {
     const reorderDelay = options.reorderInbound && inboundSequence++ % 2 === 0 ? REORDER_HOLD_MS : 0;
-    later(() => onmessage?.(event), latencyMs + reorderDelay);
-    if (options.duplicateInbound) later(() => onmessage?.(event), latencyMs + reorderDelay + 1);
+    if (!options.duplicateInbound) {
+      later(() => onmessage?.(event), latencyMs + reorderDelay);
+      return;
+    }
+    try {
+      // Harness may deliver a copy after the first consumer transfers its buffers.
+      // Clone both copies before either callback can detach the source graph.
+      const first = structuredClone(event.data);
+      const duplicate = structuredClone(event.data);
+      later(() => onmessage?.({ data: first } as MessageEvent<Message>), latencyMs + reorderDelay);
+      later(() => onmessage?.({ data: duplicate } as MessageEvent<Message>), latencyMs + reorderDelay + 1);
+    } catch (error) {
+      reportError(error);
+    }
   };
   raw.onerror = (event) => later(() => onerror?.(event), latencyMs);
 
@@ -82,7 +94,20 @@ export function createAuthorityTransport<Message>(
     },
     postMessage(message, transfer = []) {
       if (disposed) return;
-      later(() => send(message, transfer), latencyMs);
+      let queuedMessage = message;
+      let queuedTransfer = transfer;
+      if (hasFault(options) && transfer.length > 0) {
+        try {
+          // A delayed Harness transport cannot retain references to buffers that
+          // the caller still owns and may transfer immediately after this call.
+          queuedMessage = structuredClone(message);
+          queuedTransfer = [];
+        } catch (error) {
+          reportError(error);
+          return;
+        }
+      }
+      later(() => send(queuedMessage, queuedTransfer), latencyMs);
       if (options.duplicateOutbound && transfer.length === 0 && isRepeatableOutbound(message))
         later(() => {
           try {

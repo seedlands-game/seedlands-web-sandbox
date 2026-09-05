@@ -19,6 +19,7 @@ const commit = (
   cells = [{ index: voxelIndex(1, 2, 3), voxel: Voxel.Stone, fluid: 0x88 }],
 ): AuthorityCollisionCommit => ({
   committed: true,
+  worldRevision: revision,
   structuralChange: {
     chunks: ['0,0,0'],
     chunkRevisions: [{ key: '0,0,0', revision }],
@@ -64,6 +65,7 @@ describe('权威碰撞镜像', () => {
     chunks.set('0,0,0', chunk(5));
     apply({
       committed: true,
+      worldRevision: 6,
       structuralChange: { chunks: ['0,0,0'], chunkRevisions: [{ key: '0,0,0', revision: 6 }] },
     });
     expect(chunks.has('0,0,0')).toBe(false);
