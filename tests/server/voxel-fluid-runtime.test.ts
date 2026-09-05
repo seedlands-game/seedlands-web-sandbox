@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { GameServer } from '../../src/server/game-server';
 import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
+import { WorldMutationBuffer } from '../../src/server/world-mutation';
 import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
 
 const clearBox = (server: GameServer, minX: number, maxX: number, minY: number, maxY: number) => {
@@ -213,5 +214,53 @@ describe('bounded voxel fluid runtime', () => {
       server.advanceFluid(0.8);
     }
     expect(server.getVoxel(33, 50, 1)).toBe(Voxel.Air);
+  });
+
+  it('keeps batch and mutation-buffer water sidecars consistent through source removal', () => {
+    const server = new GameServer({ seedText: 'fluid-buffer-source-removal' });
+    clearBox(server, -2, 2, 50, 52);
+    for (let x = -2; x <= 2; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
+    server.editBatch({ actorId: 'fixture', edits: [{ x: 0, y: 50, z: 0, value: Voxel.Water }] });
+    expect(server.getFluidCell(0, 50, 0)).toEqual({ level: 8, source: true });
+    server.advanceFluid(1);
+    expect(server.getVoxel(-1, 50, 0)).toBe(Voxel.Water);
+
+    const edits = WorldMutationBuffer.forUniqueCoordinates({ sourceId: 'remove-source' }).write(0, 50, 0, Voxel.Air);
+    server.editBatch({ actorId: 'fixture', buffers: [edits] });
+    expect(server.getFluidCell(0, 50, 0)).toBeNull();
+    for (let index = 0; index < 20; index += 1) server.advanceFluid(0.8);
+    expect(server.getVoxel(-1, 50, 0)).toBe(Voxel.Air);
+  });
+
+  it('accepts one cross-chunk candidate as one revision per changed chunk', () => {
+    const server = new GameServer({ seedText: 'fluid-cross-chunk-atomic' });
+    server.setFluidActiveChunks(['0,1,0', '1,1,0']);
+    clearBox(server, 30, 33, 50, 51);
+    for (let x = 30; x <= 33; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
+    server.edit(31, 50, 0, Voxel.Water, 'fixture');
+    const beforeLeft = server.getChunk(0, 1, 0).revision;
+    const beforeRight = server.getChunk(1, 1, 0).revision;
+
+    server.advanceFluid(0.034);
+
+    expect(server.getVoxel(32, 50, 0)).toBe(Voxel.Water);
+    expect(server.getChunk(0, 1, 0).revision).toBe(beforeLeft + 1);
+    expect(server.getChunk(1, 1, 0).revision).toBe(beforeRight + 1);
+  });
+
+  it('keeps a flow supplied by a second source when the first source is removed', () => {
+    const server = new GameServer({ seedText: 'fluid-two-source-cleanup' });
+    clearBox(server, -3, 3, 50, 51);
+    for (let x = -3; x <= 3; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
+    server.edit(-2, 50, 0, Voxel.Water, 'fixture');
+    server.edit(2, 50, 0, Voxel.Water, 'fixture');
+    server.advanceFluid(2);
+    expect(server.getVoxel(0, 50, 0)).toBe(Voxel.Water);
+
+    server.edit(-2, 50, 0, Voxel.Air, 'fixture');
+    for (let index = 0; index < 20; index += 1) server.advanceFluid(0.8);
+
+    expect(server.getVoxel(0, 50, 0)).toBe(Voxel.Water);
+    expect(server.getFluidCell(0, 50, 0)?.source).toBe(false);
   });
 });

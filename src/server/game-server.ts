@@ -17,12 +17,20 @@ import { GameServerGameplayFacade } from './game-server-gameplay';
 import { createStarterEcology } from './simulation/starter-ecology';
 import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
 import { commitWorldEditBatch, compareChunkKeys } from './world-transaction-commit';
-import { VoxelFluidRuntime, type FluidAdvanceResult, type FluidCell } from './fluid/voxel-fluid-runtime';
-import { commitFluidMetadata } from './fluid/fluid-metadata-commit';
+import type { FluidAdvanceResult, FluidCell } from './fluid/voxel-fluid-runtime';
 import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
 import { hasAdjacentWater, legacyFluid } from './fluid/fluid-cell-state';
+import {
+  captureBatchFluidState,
+  commitBatchFluidSidecars,
+  readFluidCell,
+  readFluidChunk,
+} from './fluid/fluid-edit-sidecars';
+import { commitFluidCandidate } from './fluid/fluid-candidate-commit';
+import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
+import type { FluidCandidate } from './fluid/fluid-transaction';
 import { findDryStarterSurface } from './starter-surface';
 import { peekLoadedVoxel } from './loaded-voxel-reader';
 
@@ -71,12 +79,10 @@ export class GameServer extends GameServerGameplayFacade {
   private readonly persistence?: ChunkPersistence & Partial<GameplayPersistence>;
   private revision = 0;
   private appliedMutationCount = 0;
-  private readonly fluidRuntime: VoxelFluidRuntime;
+  private readonly fluidRuntime: FluidTransactionRuntime<WorldCommitResult>;
   private readonly fluidChunks: FluidChunkAccess;
   private readonly fluidChunkActivations = new FluidChunkActivationQueue();
   private readonly fluidWindow = new FluidActiveWindow();
-  private fluidEdit = false;
-  private fluidCellChanged = false;
 
   constructor(readonly options: GameServerOptions) {
     super(options.persistence);
@@ -86,22 +92,12 @@ export class GameServer extends GameServerGameplayFacade {
       throw new Error(`Unsupported generator version ${this.generatorVersion}.`);
     this.persistence = options.persistence;
     this.fluidChunks = new FluidChunkAccess(this.chunks, (cx, cy, cz) => this.getChunk(cx, cy, cz));
-    this.fluidRuntime = new VoxelFluidRuntime({
-      getVoxel: ([x, y, z]) =>
-        this.fluidWindow.allowsPosition(x, y, z) ? this.fluidChunks.peekVoxel(x, y, z) : undefined,
-      getCell: ([x, y, z]) => (this.fluidWindow.allowsPosition(x, y, z) ? this.fluidChunks.cell(x, y, z, false) : null),
-      setCell: ([x, y, z], cell) => {
-        this.fluidCellChanged = this.fluidChunks.write(x, y, z, cell);
-      },
-      edit: ([x, y, z], value) => {
-        this.fluidEdit = true;
-        try {
-          return this.commitSingleEdit('fluid-v1', x, y, z, value);
-        } finally {
-          this.fluidEdit = false;
-          this.fluidCellChanged = false;
-        }
-      },
+    this.fluidRuntime = new FluidTransactionRuntime({
+      epoch: 1,
+      readChunk: (key) => readFluidChunk(key, (candidate) => this.fluidWindow.allowsKey(candidate), this.chunks),
+      readCell: (position) =>
+        readFluidCell(position, (x, y, z) => this.fluidWindow.allowsPosition(x, y, z), this.chunks),
+      apply: (candidate) => this.applyFluidCandidate(candidate),
     });
   }
 
@@ -296,7 +292,7 @@ export class GameServer extends GameServerGameplayFacade {
     const previous = this.getVoxel(x, y, z);
     const previousFluid = previous === Voxel.Water ? this.fluidChunks.cell(x, y, z, true) : null;
     const result = this.commitSingleEdit(actorId, x, y, z, value);
-    if (result.committed && !this.fluidEdit) {
+    if (result.committed) {
       this.fluidWindow.includeEditedPosition(x, y, z);
       this.fluidChunks.write(x, y, z, value === Voxel.Water ? { level: 8, source: true } : null);
       if (
@@ -327,6 +323,10 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   editBatch(batch: WorldEditBatch): WorldCommitResult {
+    const previousFluid = captureBatchFluidState(batch, {
+      getVoxel: (x, y, z) => this.getVoxel(x, y, z),
+      getCell: (x, y, z) => this.fluidChunks.cell(x, y, z, true),
+    });
     const result = commitWorldEditBatch(
       {
         getChunk: (cx, cy, cz) => this.getChunk(cx, cy, cz),
@@ -341,18 +341,32 @@ export class GameServer extends GameServerGameplayFacade {
       },
       batch,
     );
-    if (result.committed && !this.fluidEdit)
-      for (const edit of batch.edits ?? []) {
-        this.fluidWindow.includeEditedPosition(edit.x, edit.y, edit.z);
-        this.fluidChunks.write(edit.x, edit.y, edit.z, edit.value === Voxel.Water ? { level: 8, source: true } : null);
-        if (
-          edit.value === Voxel.Water ||
-          hasAdjacentWater((...at) => this.fluidChunks.peekVoxel(...at), edit.x, edit.y, edit.z)
-        )
-          this.fluidRuntime.activate([edit.x, edit.y, edit.z]);
-      }
+    if (result.committed)
+      commitBatchFluidSidecars(previousFluid, {
+        getVoxel: (x, y, z) => this.getVoxel(x, y, z),
+        includeEditedPosition: (x, y, z) => this.fluidWindow.includeEditedPosition(x, y, z),
+        writeCell: (x, y, z, cell) => this.fluidChunks.write(x, y, z, cell),
+        peekVoxel: (x, y, z) => this.fluidChunks.peekVoxel(x, y, z),
+        activate: (position) => this.fluidRuntime.activate(position),
+        removeSource: (position) => this.fluidRuntime.removeSource(position),
+      });
     return result;
   }
+
+  private applyFluidCandidate(candidate: FluidCandidate): WorldCommitResult {
+    return commitFluidCandidate({
+      candidate,
+      chunks: this.chunks,
+      worldRevision: this.revision,
+      setWorldRevision: (revision) => {
+        this.revision = revision;
+      },
+      addMutationCount: (count) => {
+        this.appliedMutationCount += count;
+      },
+    });
+  }
+
   private commitSingleEdit(actorId: string, x: number, y: number, z: number, value: number): WorldCommitResult {
     const cx = floorDiv(x, CHUNK_SIZE);
     const cy = floorDiv(y, CHUNK_SIZE);
@@ -360,20 +374,6 @@ export class GameServer extends GameServerGameplayFacade {
     const chunk = this.getChunk(cx, cy, cz);
     const index = voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE));
     if (chunk.voxels[index] === value) {
-      if (this.fluidEdit && this.fluidCellChanged) {
-        const committed = commitFluidMetadata({
-          actorId,
-          x,
-          y,
-          z,
-          chunk,
-          worldRevision: this.revision,
-          metrics: (count) => SINGLE_EDIT_METRICS[count],
-        });
-        this.revision = committed.worldRevision;
-        this.appliedMutationCount += 1;
-        return committed.result;
-      }
       return {
         committed: false,
         worldRevision: this.revision,
