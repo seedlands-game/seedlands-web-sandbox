@@ -247,7 +247,7 @@ export class AdvancedVisualEffects {
             voxel === Voxel.Water &&
             this.world.getVoxel(x, y + 1, z) !== Voxel.Water
           ) {
-            const surfaceY = waterReflectionSurfaceY(y, this.world.server.getFluidCell(x, y, z)?.level ?? 8, false);
+            const surfaceY = waterReflectionSurfaceY(y, this.world.getFluidCell(x, y, z)?.level ?? 8, false);
             if (surfaceY === null) continue;
             const distance = horizontalDistance + (surfaceY - position.y) ** 2;
             if (!nearestWater || distance < nearestWater.distance) nearestWater = { surfaceY, distance };

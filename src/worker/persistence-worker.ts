@@ -8,6 +8,7 @@ import {
 } from '../world/chunk-snapshot-codec';
 import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, normalizeSeed } from '../world/voxel';
 import { selectWorldGeneratorVersion, type WorldOpenMode } from '../client/world-version-policy';
+import { persistFrozenGameSnapshot, type FrozenSaveTaskSnapshot } from './persistence-frozen-save';
 
 type WorkerConfig = { databaseName: string; worldId: string; seedText: string; generatorVersion: number };
 type InitTask = { kind: 'init'; requestId: number; openMode: WorldOpenMode } & WorkerConfig;
@@ -32,6 +33,11 @@ type SaveMetadataTask = {
   player: [number, number, number];
 };
 type SaveGameplayTask = { kind: 'save-gameplay'; requestId: number; snapshot: unknown };
+type SaveFrozenTask = {
+  kind: 'save-frozen';
+  requestId: number;
+  snapshot: FrozenSaveTaskSnapshot;
+};
 type StatsTask = { kind: 'stats'; requestId: number };
 type SeedCorpusTask = { kind: 'seed-corpus'; requestId: number; chunkCount: number };
 type MarkLegacyMigratedTask = { kind: 'mark-legacy-migrated'; requestId: number };
@@ -42,6 +48,7 @@ type Task =
   | SaveTask
   | SaveMetadataTask
   | SaveGameplayTask
+  | SaveFrozenTask
   | StatsTask
   | SeedCorpusTask
   | MarkLegacyMigratedTask
@@ -66,6 +73,7 @@ type WorldRecord = {
   corpusSummary?: CorpusSummary;
   legacyMigrated?: boolean;
   updatedAt: number;
+  commitSequence?: number;
 };
 
 type SuccessResponse = { requestId: number; ok: true; result: unknown };
@@ -305,6 +313,18 @@ const saveGameplay = async (task: SaveGameplayTask) => {
   return { saved: true };
 };
 
+const saveFrozen = async (task: SaveFrozenTask) => {
+  if (!config) throw new Error('Persistence worker is not initialized.');
+  const opened = await database();
+  return persistFrozenGameSnapshot({
+    database: opened,
+    config,
+    snapshot: task.snapshot,
+    proceduralChunk,
+    normalizeRecord,
+  });
+};
+
 const markLegacyMigrated = async () => {
   if (!config) throw new Error('Persistence worker is not initialized.');
   const opened = await database();
@@ -448,6 +468,7 @@ const handle = async (task: Task): Promise<unknown> => {
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
   if (task.kind === 'save') return save(task);
+  if (task.kind === 'save-frozen') return saveFrozen(task);
   if (task.kind === 'save-metadata') return saveMetadata(task);
   if (task.kind === 'save-gameplay') return saveGameplay(task);
   if (task.kind === 'stats') return stats();

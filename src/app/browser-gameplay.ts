@@ -4,7 +4,6 @@ import type { VoxelTarget } from '../client/voxel-target';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from './browser-world-limits';
 import { entityHitDistance } from '../client/entity-hit-volume';
 import type * as pc from 'playcanvas';
-import type { GameServer, WorldCommitResult } from '../server/game-server';
 import { getItemDefinition } from '../server/gameplay/item-registry';
 import { voxelNames } from '../world/voxel';
 import { GameplayEntityPresenter } from './gameplay-entity-presenter';
@@ -12,20 +11,30 @@ import { projectGameplayUi, type GameplayUiProjection } from './ui/gameplay-ui-p
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
 import type { GameplayPresentationEvent } from '../client/audio/gameplay-audio-events';
 import { VoxelBreakOverlay } from './voxel-break-overlay';
+import type {
+  AuthorityAction,
+  AuthorityActionResult,
+  AuthorityGameplayView,
+} from '../worker/authority-worker-protocol';
+
+export type BrowserGameplayAuthorityPort = Readonly<{
+  gameplay: AuthorityGameplayView;
+  performAction(action: AuthorityAction): Promise<AuthorityActionResult>;
+}>;
 
 type Options = {
   app: pc.Application;
   camera: pc.Entity;
-  server: GameServer;
+  authority: BrowserGameplayAuthorityPort;
   playerId: string;
   bridge: UiBridge;
   session: UiWorldSession;
   nextHudSequence: () => number;
   nextInteractionSequence: () => number;
-  consumeCommit: (commit: WorldCommitResult) => void;
+  getVoxel: (x: number, y: number, z: number) => number;
   queueSave: () => void;
   releaseInput: () => void;
-  movePlayer: (position: [number, number, number]) => void;
+  movePlayer: (position: [number, number, number]) => void | Promise<void>;
   onPresentation?: (event: GameplayPresentationEvent) => void;
 };
 
@@ -56,54 +65,26 @@ export class BrowserGameplay {
     this.aimTarget = target?.inRange ? target : null;
   }
 
-  updatePlayerPosition(position: [number, number, number]): void {
-    this.options.server.updateEntity(this.options.playerId, { position });
-  }
-
   advance(seconds: number): void {
     this.breakProjectionElapsedSeconds += seconds;
     this.outline.update(this.blocksInput ? null : this.aimTarget);
     this.gestureSeconds = Math.max(0, this.gestureSeconds - seconds);
-    const state = this.options.server.getPlayerState(this.options.playerId);
+    const state = this.options.authority.gameplay.player;
     this.viewmodel.setHeldItem(state.inventory[state.selectedSlot]?.itemId ?? null);
     this.viewmodel.setVisible(!this.blocksInput);
     if (!this.gestureSeconds) this.viewmodel.setAction(state.breakAction ? 'mine' : 'idle');
     this.viewmodel.update(seconds);
-    const playerBefore = this.options.server.getPlayerState(this.options.playerId);
-    const before = playerBefore.breakAction;
-    const result = this.options.server.advanceGameplay(seconds);
-    result.commits.forEach((commit) => this.options.consumeCommit(commit));
-    if (before && result.commits.length) {
-      this.feedback(`掉落 · ${voxelNames[before.voxel] ?? '资源'}`, 'success');
-      this.present({ kind: 'break', voxel: before.voxel, position: before.position });
-      this.options.queueSave();
-    }
-    for (const pickup of result.pickups) {
-      if (pickup.playerId !== this.options.playerId) continue;
-      this.feedback('拾取 · 物品已放入背包', 'success');
-      this.present({ kind: 'pickup', position: pickup.position });
-      this.options.queueSave();
-    }
-    const health = this.options.server.getPlayerState(this.options.playerId).health;
-    if (health < playerBefore.health) {
-      this.feedback(`受击 · 生命 -${playerBefore.health - health}`, 'error');
-      this.options.queueSave();
-    }
     this.refresh(false);
   }
 
   refresh(forceBreakProjection = true): void {
-    const player = this.options.server.getPlayerState(this.options.playerId);
+    const view = this.options.authority.gameplay;
+    const player = view.player;
     const becameDead = player.lifecycle === 'dead' && this.previousProjection?.shell.gameplay.lifecycle !== 'dead';
     if (becameDead) this.inventoryOpen = false;
-    const entities = this.options.server.queryEntities().filter((entity) => entity.type !== 'player');
-    const actorStates = new Map(
-      entities.flatMap((entity) => {
-        const actor = this.options.server.getActorState(entity.id);
-        return actor ? [[entity.id, actor] as const] : [];
-      }),
-    );
-    this.presenter.reconcile(entities, this.options.server.gameplayTime);
+    const entities = view.entities.filter((entity) => entity.type !== 'player');
+    const actorStates = new Map(view.actors.map((actor) => [actor.entityId, actor] as const));
+    this.presenter.reconcile(entities, view.gameplayTime);
     if (this.previousHealth !== null && player.health < this.previousHealth) this.present({ kind: 'damage' });
     this.previousHealth = player.health;
     const currentBreaking = player.breakAction
@@ -128,7 +109,7 @@ export class BrowserGameplay {
     if (breaking !== previousBreaking || forceBreakProjection) this.breakProjectionElapsedSeconds = 0;
     const projection = projectGameplayUi(
       {
-        revision: this.options.server.gameplayRevision,
+        revision: view.gameplayRevision,
         player: {
           lifecycle: player.lifecycle,
           health: player.health,
@@ -137,7 +118,7 @@ export class BrowserGameplay {
           inventory: player.inventory,
         },
         inventoryOpen: this.inventoryOpen,
-        craftableRecipeIds: this.options.server.listCraftableRecipes(this.options.playerId).map((recipe) => recipe.id),
+        craftableRecipeIds: view.craftableRecipeIds,
         target:
           this.aimTarget && !this.blocksInput
             ? {
@@ -178,13 +159,13 @@ export class BrowserGameplay {
   }
 
   selectHotbarSlot(slot: number): void {
-    const result = this.options.server.selectHotbarSlot(this.options.playerId, slot);
-    if (!result.success) return this.feedback('快捷栏槽位无效', 'error');
-    this.refresh();
+    void this.action({ type: 'select-hotbar', slot }, (result) => {
+      if (!result.success) this.feedback('快捷栏槽位无效', 'error');
+    });
   }
 
   toggleInventory(): void {
-    if (this.options.server.getPlayerState(this.options.playerId).lifecycle === 'dead') return;
+    if (this.options.authority.gameplay.player.lifecycle === 'dead') return;
     this.inventoryOpen = !this.inventoryOpen;
     if (this.inventoryOpen) this.options.releaseInput();
     this.refresh();
@@ -197,13 +178,13 @@ export class BrowserGameplay {
   }
 
   craftRecipe(recipeId: string): void {
-    const result = this.options.server.craft(this.options.playerId, recipeId);
-    this.feedback(result.success ? '合成完成' : `合成失败 · ${result.reason}`, result.success ? 'success' : 'error');
-    if (result.success) {
-      this.options.queueSave();
-      this.present({ kind: 'craft' });
-    }
-    this.refresh();
+    void this.action({ type: 'craft', recipeId }, (result) => {
+      this.feedback(result.success ? '合成完成' : `合成失败 · ${result.reason}`, result.success ? 'success' : 'error');
+      if (result.success) {
+        this.options.queueSave();
+        this.present({ kind: 'craft' });
+      }
+    });
   }
 
   attackTarget(
@@ -211,8 +192,7 @@ export class BrowserGameplay {
     direction: readonly [number, number, number],
     maxDistance: number,
   ): boolean {
-    const target = this.options.server
-      .queryEntities()
+    const target = this.options.authority.gameplay.entities
       .filter((entity) => entity.type === 'creature' || entity.type === 'npc')
       .map((entity) => ({
         entity,
@@ -221,71 +201,71 @@ export class BrowserGameplay {
       .filter((hit): hit is typeof hit & { distance: number } => hit.distance !== null)
       .sort((left, right) => left.distance - right.distance)[0]?.entity;
     if (!target) return false;
-    const result = this.options.server.attackEntity(this.options.playerId, target.id);
-    this.feedback(result.success ? '攻击命中' : `攻击失败 · ${result.reason}`, result.success ? 'success' : 'error');
-    if (result.success) this.present({ kind: 'attack', position: target.position });
-    if (result.success) this.options.queueSave();
-    this.refresh();
+    void this.action({ type: 'attack', targetId: target.id }, (result) => {
+      this.feedback(result.success ? '攻击命中' : `攻击失败 · ${result.reason}`, result.success ? 'success' : 'error');
+      if (result.success) this.present({ kind: 'attack', position: target.position });
+      if (result.success) this.options.queueSave();
+    });
     return true;
   }
 
   beginBreak(position: [number, number, number]): void {
     if (position[1] <= BROWSER_MIN_BUILD_Y) return this.feedback('已到达浏览器世界底层；保留基底石层', 'error');
     if (position[1] > BROWSER_MAX_BUILD_Y) return this.feedback(`采集高度限 1–${BROWSER_MAX_BUILD_Y} 层`, 'error');
-    const result = this.options.server.beginBreak(this.options.playerId, position);
-    if (!result.success) this.feedback(`无法采集 · ${result.reason}`, 'error');
-    this.refresh();
+    void this.action({ type: 'begin-break', position }, (result) => {
+      if (!result.success) this.feedback(`无法采集 · ${result.reason}`, 'error');
+    });
   }
 
   cancelBreak(): void {
-    this.options.server.cancelBreak(this.options.playerId);
-    this.refresh();
+    void this.action({ type: 'cancel-break' });
   }
 
   place(position: [number, number, number]): void {
     if (position[1] < BROWSER_MIN_BUILD_Y || position[1] > BROWSER_MAX_BUILD_Y)
       return this.feedback(`建造高度限 ${BROWSER_MIN_BUILD_Y}–${BROWSER_MAX_BUILD_Y} 层；物品已保留`, 'error');
-    const result = this.options.server.placeVoxel(this.options.playerId, position);
-    if (!result.success) return this.feedback(`无法放置 · ${result.reason}`, 'error');
-    this.options.consumeCommit(result.commit);
-    this.options.queueSave();
-    this.feedback('放置 · 方块', 'success');
-    this.present({ kind: 'place', voxel: this.options.server.getVoxel(...position), position });
-    this.refresh();
+    void this.action({ type: 'place', position }, (result) => {
+      if (!result.success) return this.feedback(`无法放置 · ${result.reason}`, 'error');
+      this.options.queueSave();
+      this.feedback('放置 · 方块', 'success');
+      this.present({ kind: 'place', voxel: this.options.getVoxel(...position), position });
+    });
   }
 
   respawn(): void {
-    const result = this.options.server.respawnPlayer(this.options.playerId);
-    if (!result.success) return;
-    const entity = this.options.server.getEntity(this.options.playerId);
-    if (entity) this.options.movePlayer(entity.position);
-    this.options.queueSave();
-    this.refresh();
+    void this.action({ type: 'respawn' }, (result) => {
+      if (!result.success) return;
+      const entity = this.options.authority.gameplay.entities.find(
+        (candidate) => candidate.id === this.options.playerId,
+      );
+      if (entity) void this.options.movePlayer([entity.position[0], entity.position[1] + 1.6, entity.position[2]]);
+      this.options.queueSave();
+    });
   }
 
   moveInventorySlot(source: number, target: number): void {
-    const result = this.options.server.moveInventorySlot(this.options.playerId, source, target);
-    this.feedback(
-      result.success ? '物品已移动' : '无法移动：请检查目标槽位是否已满',
-      result.success ? 'success' : 'error',
-    );
-    if (result.success) this.options.queueSave();
-    this.refresh();
+    void this.action({ type: 'move-inventory', source, target }, (result) => {
+      this.feedback(
+        result.success ? '物品已移动' : '无法移动：请检查目标槽位是否已满',
+        result.success ? 'success' : 'error',
+      );
+      if (result.success) this.options.queueSave();
+    });
   }
 
   useInventoryItem(slot: number): void {
-    const result = this.options.server.useInventoryItem(this.options.playerId, slot);
-    const reason = !result.success && result.reason === 'hunger-full' ? '你现在不饿' : '这个物品暂时无法使用';
-    this.feedback(result.success ? '食用 · 恢复饥饿' : reason, result.success ? 'success' : 'error');
-    if (result.success) {
-      this.present({ kind: 'eat' });
-      this.options.queueSave();
-    }
-    this.refresh();
+    void this.action({ type: 'use-inventory', slot }, (result) => {
+      const reason = !result.success && result.reason === 'hunger-full' ? '你现在不饿' : '这个物品暂时无法使用';
+      this.feedback(result.success ? '食用 · 恢复饥饿' : reason, result.success ? 'success' : 'error');
+      if (result.success) {
+        this.present({ kind: 'eat' });
+        this.options.queueSave();
+      }
+    });
   }
 
   useHeldItem(): boolean {
-    const player = this.options.server.getPlayerState(this.options.playerId);
+    const player = this.options.authority.gameplay.player;
     const stack = player.inventory[player.selectedSlot];
     if (!stack || getItemDefinition(stack.itemId).itemType !== 'food') return false;
     this.useInventoryItem(player.selectedSlot);
@@ -293,11 +273,11 @@ export class BrowserGameplay {
   }
 
   get blocksInput(): boolean {
-    return this.inventoryOpen || this.options.server.getPlayerState(this.options.playerId).lifecycle === 'dead';
+    return this.inventoryOpen || this.options.authority.gameplay.player.lifecycle === 'dead';
   }
 
   get presentedEntityCount(): number {
-    return this.options.server.queryEntities().filter((entity) => entity.type !== 'player').length;
+    return this.options.authority.gameplay.entities.filter((entity) => entity.type !== 'player').length;
   }
 
   get presentationSnapshot() {
@@ -326,5 +306,18 @@ export class BrowserGameplay {
   private feedback(message: string, tone: 'info' | 'success' | 'error'): void {
     if (tone === 'error') this.present({ kind: 'rejected' });
     this.options.session.publishFeedback(this.options.nextInteractionSequence(), { message, tone, durationMs: 1_400 });
+  }
+
+  private async action(
+    action: AuthorityAction,
+    consume: (result: { success: boolean; reason?: string }) => void = () => undefined,
+  ): Promise<void> {
+    try {
+      const response = await this.options.authority.performAction(action);
+      consume(response.result as { success: boolean; reason?: string });
+      this.refresh();
+    } catch (error) {
+      this.feedback(error instanceof Error ? error.message : String(error), 'error');
+    }
   }
 }

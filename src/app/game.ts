@@ -5,7 +5,6 @@ import {
   createSun,
   createCamera,
   selectPerformanceProfile,
-  requestedStreamingVariant,
 } from './scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
@@ -13,18 +12,17 @@ import { WaterExperience } from './water-experience';
 import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
 import type { WorldOpenMode } from '../client/world-version-policy';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
-import type { ServerCommandExecutor, CommandSource } from '../server/commands/server-command-executor';
-import { browserCommandContext } from './browser-command-context';
-import { executeSlashCommand, type SlashCommandExecution } from '../server/commands/slash-command-parser';
-import type { ServerCommand } from '../server/commands/command-contract';
-import { GameServer } from '../server/game-server';
-import { orientNewPlayer, preparePlayerEntry } from './world-entry';
+import {
+  executeSlashCommand,
+  type CommandExecutorPort,
+  type SlashCommandExecution,
+} from '../server/commands/slash-command-parser';
+import { ALL_COMMAND_CAPABILITIES, type CommandSource, type ServerCommand } from '../server/commands/command-contract';
 import type { LifecycleSnapshot, RestoredSession } from './app-contracts';
 import { BrowserGameplay } from './browser-gameplay';
 import { BrowserWorldStore } from './browser-world-store';
 import { createRuntimeHarnessApi, installHarness } from './game-harness';
-import { projectDebug, projectWorldClock } from './hud-projector';
-import { PlayerController } from './player-controller';
+import { PLAYER_FEET_OFFSET, PlayerController } from './player-controller';
 import { QUALITY_PROFILES, type QualityLevel } from './quality-profile';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
 import type { MapLayer } from './ui/ui-contracts';
@@ -33,6 +31,13 @@ import { WorldEnvironment } from './world-environment';
 import { World } from './world-runtime';
 import { AdvancedVisualEffects } from './advanced-visual-effects';
 import { LIGHTING_QUALITY_BUDGETS } from './advanced-lighting-budget';
+import { BrowserAuthorityClient } from '../client/browser-authority-client';
+import { BrowserComputeRuntime } from '../client/browser-compute-runtime';
+import { BrowserLogicClient } from '../client/browser-logic-client';
+import { startBrowserWorkerSession } from './browser-worker-session';
+import { createGamePlayerController, orientPlayerTowardCamp } from './game-player-controller';
+import { AuthorityPresentationSync } from './authority-presentation-sync';
+import { GameUiProjection } from './game-ui-projection';
 
 export class Game {
   private paused = false;
@@ -54,22 +59,25 @@ export class Game {
   private performanceProfile: PerformanceProfile = PERFORMANCE_PROFILES.balanced;
   private performanceTelemetry = createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
   private readonly store = new BrowserWorldStore();
-  private persistence: BrowserChunkPersistence | null = null;
+  private authority: BrowserAuthorityClient | null = null;
+  private computeRuntime: BrowserComputeRuntime | null = null;
+  private logicClient: BrowserLogicClient | null = null;
   private serverPlayerId: string | null = null;
   private seedText = '';
   private qualityLevel: QualityLevel = 'medium';
   private saveTimer: number | null = null;
   private saveInFlight: Promise<void> = Promise.resolve();
   private removeHarness: (() => void) | null = null;
-  private commandExecutor: ServerCommandExecutor | null = null;
+  private commandExecutor: CommandExecutorPort | null = null;
   private commandSource: CommandSource | null = null;
   private uiSession: UiWorldSession | null = null;
   private hudSequence = 0;
   private interactionSequence = 0;
   private debugSequence = 0;
-  private lastClockMinute = -1;
-  private lastClockPublishAt = -Infinity;
+  private readonly uiProjection = new GameUiProjection();
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
+  private sessionSequence = 0;
+  private readonly authoritySync = new AuthorityPresentationSync(() => this.controller);
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -80,13 +88,9 @@ export class Game {
     window.addEventListener('pagehide', () => void this.flushSave().catch(() => undefined));
   }
 
-  loadSavedSession() {
-    return this.store.load();
-  }
+  loadSavedSession = () => this.store.load();
 
-  async loadLatestWorldSeed() {
-    return (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
-  }
+  loadLatestWorldSeed = async () => (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
 
   async start(
     seedText: string,
@@ -101,40 +105,57 @@ export class Game {
     this.qualityLevel = qualityLevel;
     this.uiSession = this.uiBridge.beginWorldSession(seedText);
     this.hudSequence = this.interactionSequence = this.debugSequence = 0;
-    this.lastClockMinute = -1;
-    this.lastClockPublishAt = -Infinity;
+    this.uiProjection.reset();
     const quality = QUALITY_PROFILES[this.qualityLevel];
     const lightingBudget = LIGHTING_QUALITY_BUDGETS[this.qualityLevel];
     this.performanceProfile = selectPerformanceProfile(location.search);
     this.performanceTelemetry = createPerformanceTelemetry(this.performanceProfile);
     this.lastFrameTimestamp = performance.now();
-    this.persistence = await BrowserChunkPersistence.open(seedText, {
-      legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
-      openMode,
-    });
     this.app = createSceneApplication(this.canvas);
     const light = createSun(this.app, lightingBudget);
     this.camera = createCamera(this.app, quality.fogEnd + 18);
     this.visualResources = await createVoxelMaterials(this.app, quality);
     this.camera.camera!.layers = [...this.camera.camera!.layers, this.visualResources.waterLayer.id];
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
-    const server = new GameServer({
+    const parameters = new URLSearchParams(location.search);
+    const harnessEnabled = parameters.has('harness');
+    const generalWorkerCount = parameters.get('generalWorkers') === '2' ? 2 : 1;
+    this.performanceProfile = {
+      ...this.performanceProfile,
+      maxWorkerTasksInFlight: generalWorkerCount,
+    };
+    const session = await startBrowserWorkerSession({
+      epochSequence: ++this.sessionSequence,
       seedText,
-      generatorVersion: this.persistence.generatorVersion,
-      persistence: this.persistence,
+      openMode,
+      legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
+      initialWorldTime: this.environment.worldTime,
+      harnessEnabled,
+      generalWorkerCount,
+      onSnapshot: (snapshot) => this.authoritySync.receive(snapshot),
+      onGameplay: () => this.gameplayClient?.refresh(),
+      onCommit: (commit) => this.world?.consumeServerCommit(commit),
+      onUnknownChunk: (key) => this.requestAuthorityChunk(key),
+      onInputDecision: ({ decision, requiresResync }) => {
+        if (requiresResync || !['accepted', 'duplicate'].includes(decision)) this.controller?.resynchronizeInput();
+      },
+      onFatal: (error) => this.reportRuntimeFailure(error),
     });
-    if (this.audio) this.worldAudio = new WorldAudio(this.audio, server.seed);
-    server.setWorldTime(this.environment.worldTime);
-    await server.restore();
-    this.environment.setTime(server.worldTime);
+    const { authority, compute: computeRuntime, logic: logicClient, ready } = session;
+    this.authority = authority;
+    this.computeRuntime = computeRuntime;
+    this.logicClient = logicClient;
+    this.environment.setTime(ready.worldTime);
+    if (this.audio) this.worldAudio = new WorldAudio(this.audio, ready.seed);
     this.world = new World(
-      server,
+      authority,
+      this.computeRuntime.meshPort,
       this.app,
       this.visualResources.resolve,
       quality,
       this.performanceTelemetry,
       this.performanceProfile,
-      requestedStreamingVariant(location.search),
+      'worker-first',
       () => {
         this.lifecycle.staleVisibleCommits += 1;
       },
@@ -149,82 +170,75 @@ export class Game {
     );
     this.waterExperience = new WaterExperience(this.camera.camera ?? null, this.app.graphicsDevice);
     this.lifecycle.worldInstanceId += 1;
-    if (restore?.changes.length) this.world.restoreLegacyChanges(restore.changes);
-    const { position, restoredPlayer, isNew } = await preparePlayerEntry(
-      server,
-      this.persistence.restoredPlayer,
-      restore?.seed === seedText ? restore.player : null,
-    );
-    this.camera.setPosition(...position);
-    this.serverPlayerId = restoredPlayer?.id ?? server.spawnPlayer({ position }).id;
-    server.initializeStarterEcology(position);
+    if (restore?.changes.length) await this.world.restoreLegacyChanges(restore.changes);
+    const feet = ready.playerBodyPosition;
+    this.camera.setPosition(feet[0], feet[1] + PLAYER_FEET_OFFSET, feet[2]);
+    this.serverPlayerId = ready.playerId;
     this.world.updateStreaming(this.camera.getPosition());
     this.gameplayClient = new BrowserGameplay({
       app: this.app,
       camera: this.camera,
-      server,
+      authority,
       playerId: this.serverPlayerId,
       bridge: this.uiBridge,
       session: this.uiSession,
       nextHudSequence: () => ++this.hudSequence,
       nextInteractionSequence: () => ++this.interactionSequence,
-      consumeCommit: (commit) => this.world?.consumeServerCommit(commit),
+      getVoxel: (x, y, z) => this.world?.getVoxel(x, y, z) ?? 0,
       queueSave: () => this.queueSave(),
       releaseInput: () => this.controller?.releaseInput(),
       movePlayer: (target) => this.controller?.movePlayerTo(...target),
       onPresentation: (event) => this.worldAudio?.present(event),
     });
     this.controller = this.createController(this.camera);
-    orientNewPlayer(this.controller, server, position, isNew);
+    this.controller.applyAuthoritySnapshot(ready.snapshot);
+    orientPlayerTowardCamp(this.controller, ready);
     this.controller.install();
+    authority.requestLogicObservation();
     this.installUiAndHarness();
     this.app.on('update', (dt: number) => this.update(Math.min(dt, 0.05)));
   }
 
   private createController(camera: pc.Entity) {
-    return new PlayerController({
+    const authority = this.authority;
+    if (!authority) throw new Error('Authority client is not ready.');
+    return createGamePlayerController({
       camera,
       canvas: this.canvas,
       telemetry: this.performanceTelemetry,
+      authority,
       getWorld: () => this.world,
       getEnvironment: () => this.environment,
       isPaused: () => this.paused,
-      onToggleMap: () => this.toggleMap(),
-      onToggleDebug: () => this.toggleDebug(),
-      onToggleCommandShell: () => this.toggleCommandShell(),
-      onToggleInventory: () => this.toggleInventory(),
-      onSelectHotbarSlot: (slot) => this.selectHotbarSlot(slot),
-      onAttackTarget: (origin, direction, maxDistance) =>
-        this.gameplayClient?.attackTarget(origin, direction, maxDistance) ?? false,
-      onAimTarget: (target) => this.gameplayClient?.setAimTarget(target),
-      onBeginBreak: (position) => this.gameplayClient?.beginBreak(position),
-      onCancelBreak: () => this.gameplayClient?.cancelBreak(),
-      onPlace: (position) => this.gameplayClient?.place(position),
-      onUseHeldItem: () => this.gameplayClient?.useHeldItem() ?? false,
-      isUiBlockingInput: () =>
-        Boolean(
-          this.gameplayClient?.blocksInput ||
-          this.uiBridge.shell.get().commandOpen ||
-          this.uiBridge.shell.get().mapOpen,
-        ),
-      onCloseUi: () => {
-        this.closeInventory();
-        this.closeMap();
-        this.closeCommandShell();
+      uiBridge: this.uiBridge,
+      getGameplay: () => this.gameplayClient,
+      getUiSession: () => this.uiSession,
+      nextInteractionSequence: () => ++this.interactionSequence,
+      queueSave: () => this.queueSave(),
+      flushSave: () => void this.flushSave().catch(() => undefined),
+      actions: {
+        toggleMap: () => this.toggleMap(),
+        toggleDebug: () => this.toggleDebug(),
+        toggleCommandShell: () => this.toggleCommandShell(),
+        toggleInventory: () => this.toggleInventory(),
+        closeMap: () => this.closeMap(),
+        closeCommandShell: () => this.closeCommandShell(),
+        closeInventory: () => this.closeInventory(),
+        selectHotbarSlot: (slot) => this.selectHotbarSlot(slot),
       },
-      onFeedback: (message, tone) =>
-        this.uiSession?.publishFeedback(++this.interactionSequence, { message, tone, durationMs: 900 }),
-      onQueueSave: () => this.queueSave(),
-      onFlushSave: () => void this.flushSave().catch(() => undefined),
     });
   }
 
   private installUiAndHarness() {
-    const world = this.world;
-    if (world && this.serverPlayerId) {
-      const { executor, source } = browserCommandContext(world.server, this.serverPlayerId);
-      this.commandExecutor = executor;
-      this.commandSource = source;
+    const authority = this.authority;
+    if (authority && this.serverPlayerId) {
+      this.commandExecutor = { execute: (source, command) => authority.executeCommand(source, command) };
+      this.commandSource = {
+        actorId: 'browser-local-developer',
+        sourceType: 'local-developer',
+        entityId: this.serverPlayerId,
+        capabilities: ALL_COMMAND_CAPABILITIES,
+      };
     }
     const harnessEnabled = new URLSearchParams(location.search).has('harness');
     this.uiBridge.publishShell({ phase: 'playing', enterLabel: '进入世界', commandOpen: false, mapOpen: false });
@@ -246,12 +260,18 @@ export class Game {
         gameplay: () => this.gameplayClient,
         frameMs: () => this.frameMs,
         qualityLevel: () => this.qualityLevel,
-        serverPlayerId: () => this.serverPlayerId,
-        persistence: () => this.persistence,
+        authority: () => this.authority,
+        compute: () => this.computeRuntime,
+        logic: () => this.logicClient,
+        authorityTrajectory: () => this.authoritySync.snapshot(),
         ui: () => this.uiBridge.metrics(),
         visualEffects: () => this.visualEffects,
         underwaterVisual: () => this.waterExperience?.visual ?? null,
         setWorldTime: (hour) => this.setWorldTime(hour),
+        setTimePaused: (paused) => this.setWorldClockPaused(paused),
+        setTimeSpeed: (speed) => this.setWorldClockSpeed(speed),
+        blockLogicWorker: (ms) =>
+          this.logicClient?.blockForHarness(ms) ?? Promise.reject(new Error('Logic Worker不可用。')),
         executeGameplayCommand: async (command) => {
           if (!this.commandExecutor || !this.commandSource) throw new Error('Harness command runtime is unavailable.');
           const result = await this.commandExecutor.execute(this.commandSource, command);
@@ -271,12 +291,12 @@ export class Game {
     return execution;
   }
 
-  releaseInput() {
-    this.controller?.releaseInput();
-  }
+  releaseInput = () => this.controller?.releaseInput();
 
   setPaused(paused: boolean) {
     this.paused = paused;
+    if (paused) this.authority?.pause();
+    else this.authority?.resume();
     this.gameplayClient?.setSuspended(paused);
     this.controller?.releaseInput();
     this.worldAudio?.updateWorld(
@@ -295,36 +315,21 @@ export class Game {
     this.uiBridge.publishShell({ phase: 'menu', enterLabel: '进入世界' });
   }
 
-  abortStart() {
-    this.disposeRuntime();
-  }
+  abortStart = () => this.disposeRuntime();
 
-  selectHotbarSlot(slot: number) {
-    this.gameplayClient?.selectHotbarSlot(slot);
-  }
+  selectHotbarSlot = (slot: number) => this.gameplayClient?.selectHotbarSlot(slot);
 
-  toggleInventory() {
-    this.gameplayClient?.toggleInventory();
-  }
+  toggleInventory = () => this.gameplayClient?.toggleInventory();
 
-  closeInventory() {
-    this.gameplayClient?.closeInventory();
-  }
+  closeInventory = () => this.gameplayClient?.closeInventory();
 
-  craftRecipe(recipeId: string) {
-    this.gameplayClient?.craftRecipe(recipeId);
-  }
+  craftRecipe = (recipeId: string) => this.gameplayClient?.craftRecipe(recipeId);
 
-  moveInventorySlot(source: number, target: number) {
-    this.gameplayClient?.moveInventorySlot(source, target);
-  }
-  useInventoryItem(slot: number) {
-    this.gameplayClient?.useInventoryItem(slot);
-  }
+  moveInventorySlot = (source: number, target: number) => this.gameplayClient?.moveInventorySlot(source, target);
 
-  respawn() {
-    this.gameplayClient?.respawn();
-  }
+  useInventoryItem = (slot: number) => this.gameplayClient?.useInventoryItem(slot);
+
+  respawn = () => this.gameplayClient?.respawn();
 
   toggleCommandShell() {
     const open = !this.uiBridge.shell.get().commandOpen;
@@ -332,13 +337,9 @@ export class Game {
     this.uiBridge.publishShell({ commandOpen: open });
   }
 
-  closeCommandShell() {
-    this.uiBridge.publishShell({ commandOpen: false });
-  }
+  closeCommandShell = () => this.uiBridge.publishShell({ commandOpen: false });
 
-  closeMap() {
-    this.uiBridge.publishShell({ mapOpen: false });
-  }
+  closeMap = () => this.uiBridge.publishShell({ mapOpen: false });
 
   setMapLayer(layer: MapLayer) {
     const shell = this.uiBridge.shell.get();
@@ -355,11 +356,15 @@ export class Game {
       this.queueSave();
     }
     if (command.type === 'teleport' && this.serverPlayerId) {
-      const entity = this.world?.server.getEntity(this.serverPlayerId);
-      if (entity) this.controller?.movePlayerTo(...entity.position);
+      const entity = this.authority?.gameplay.entities.find((candidate) => candidate.id === this.serverPlayerId);
+      if (entity)
+        void this.controller?.movePlayerTo(
+          entity.position[0],
+          entity.position[1] + PLAYER_FEET_OFFSET,
+          entity.position[2],
+        );
     }
-    if (command.type === 'time-set' && this.world && this.environment)
-      this.environment.setTime(this.world.server.worldTime);
+    if (command.type === 'time-set' && this.world && this.environment) this.environment.setTime(this.world.worldTime);
     this.gameplayClient?.refresh();
   }
 
@@ -380,8 +385,7 @@ export class Game {
     this.world.beginFrame();
     if (this.environment) {
       this.waterExperience?.updateFlow(dt, this.camera, this.world, this.environment);
-      if (!this.environment.paused) this.world.server.advanceClock(dt * 0.04 * this.environment.speed);
-      this.environment.update(dt, this.world.server.worldTime);
+      this.environment.update(dt, this.world.worldTime);
     }
     this.frameMs = actualFrameMs;
     this.frames += 1;
@@ -393,46 +397,26 @@ export class Game {
     this.controller?.update(dt);
     this.waterExperience?.updateImmersion(dt, this.controller?.waterImmersion, this.environment);
     this.visualEffects?.update(dt);
-    this.world.advanceFluid(dt);
     this.world.updateStreaming(this.camera.getPosition());
     this.world.drainCommits();
-    if (this.serverPlayerId) {
-      const position = this.camera.getPosition();
-      this.gameplayClient?.updatePlayerPosition([position.x, position.y, position.z]);
-      this.gameplayClient?.advance(dt);
-    }
-    this.publishUiProjection();
+    this.gameplayClient?.advance(dt);
+    this.uiProjection.publish({
+      world: this.world,
+      camera: this.camera,
+      session: this.uiSession!,
+      environment: this.environment,
+      telemetry: this.performanceTelemetry,
+      performanceProfile: this.performanceProfile,
+      qualityLevel: this.qualityLevel,
+      deviceType: this.app?.graphicsDevice.deviceType ?? 'WebGL2',
+      seedText: this.seedText,
+      fps: this.fps,
+      frameMs: this.frameMs,
+      nextHudSequence: () => ++this.hudSequence,
+      nextDebugSequence: () => ++this.debugSequence,
+    });
     this.performanceTelemetry.endFrame(actualFrameMs);
     if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
-  }
-
-  private publishUiProjection() {
-    if (!this.world || !this.camera || !this.uiSession) return;
-    const worldTime = this.world.server.worldTime;
-    const displayMinute = Math.floor(worldTime * 60);
-    const now = performance.now();
-    if (displayMinute !== this.lastClockMinute && now - this.lastClockPublishAt >= 600) {
-      this.lastClockMinute = displayMinute;
-      this.lastClockPublishAt = now;
-      this.uiSession.publishHud(++this.hudSequence, {
-        worldClock: projectWorldClock(worldTime, this.environment?.phase ?? 'Day'),
-      });
-    }
-    this.uiSession.sampleDebug(++this.debugSequence, () =>
-      this.performanceTelemetry.withSpan('ui', 'DebugProjection', () =>
-        projectDebug({
-          world: this.world!,
-          environment: this.environment,
-          camera: this.camera!,
-          fps: this.fps,
-          frameMs: this.frameMs,
-          qualityLevel: this.qualityLevel,
-          performanceProfile: this.performanceProfile,
-          deviceType: this.app?.graphicsDevice.deviceType ?? 'WebGL2',
-          seedText: this.seedText,
-        }),
-      ),
-    );
   }
 
   private toggleDebug() {
@@ -457,10 +441,9 @@ export class Game {
     });
   }
 
-  private setWorldTime(hour: number) {
+  private async setWorldTime(hour: number) {
     if (!this.world || !this.environment) return;
-    this.world.server.setWorldTime(hour);
-    this.environment.setTime(this.world.server.worldTime);
+    this.environment.setTime(await this.world.setWorldTime(hour));
   }
 
   private queueSave() {
@@ -476,17 +459,12 @@ export class Game {
       window.clearTimeout(this.saveTimer);
       this.saveTimer = null;
     }
-    const world = this.world;
-    const persistence = this.persistence;
-    if (!world || !persistence || !this.camera || !this.serverPlayerId) return this.saveInFlight;
-    const current = this.camera.getPosition();
-    const player: [number, number, number] = [current.x, current.y, current.z];
+    const authority = this.authority;
+    if (!authority) return this.saveInFlight;
     const save = this.saveInFlight.then(async () => {
       const span = this.performanceTelemetry.beginSpan('persistence', 'FlushWorldSave');
       try {
-        world.server.updateEntity(this.serverPlayerId!, { position: player });
-        await world.server.save();
-        await persistence.saveMetadata(player);
+        await authority.save();
       } finally {
         this.performanceTelemetry.endSpan(span);
       }
@@ -514,6 +492,13 @@ export class Game {
       this.lifecycle.disposedWorlds += 1;
     }
     this.world = null;
+    this.logicClient?.dispose();
+    this.logicClient = null;
+    this.authority?.dispose();
+    this.authority = null;
+    this.computeRuntime?.dispose();
+    this.computeRuntime = null;
+    this.authoritySync.clear();
     this.visualEffects?.destroy();
     this.visualEffects = null;
     this.waterExperience?.destroy();
@@ -524,9 +509,27 @@ export class Game {
     this.visualResources = null;
     this.app?.destroy();
     this.app = null;
-    this.persistence?.dispose();
-    this.persistence = null;
     this.camera = null;
     this.serverPlayerId = null;
+  }
+
+  private requestAuthorityChunk(key: string): void {
+    const [cx, cy, cz] = key.split(',').map(Number);
+    if (![cx, cy, cz].every(Number.isInteger)) return;
+    this.world?.requestChunk(cx, cy, cz);
+  }
+
+  private setWorldClockPaused = (paused: boolean) => this.environment?.setPaused(paused);
+
+  private setWorldClockSpeed = (speed: number) => {
+    if (this.environment) this.environment.speed = Math.max(0, speed);
+  };
+
+  private reportRuntimeFailure(error: Error): void {
+    this.uiSession?.publishFeedback(++this.interactionSequence, {
+      message: `运行时故障：${error.message}`,
+      tone: 'error',
+      durationMs: 4_000,
+    });
   }
 }

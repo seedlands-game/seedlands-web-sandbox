@@ -35,7 +35,7 @@ export function projectDebug(context: DebugProjectionContext) {
     macro.hydrology.kind === 'dry'
       ? 'dry'
       : `${macro.hydrology.kind}${macro.hydrology.water ? ' water' : ' bank'} (${macro.hydrology.id})`;
-  const worldTime = world.server.worldTime;
+  const worldTime = world.worldTime;
   const performance = world.performanceSummary;
   return {
     fps: context.fps,

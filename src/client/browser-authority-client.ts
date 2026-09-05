@@ -1,4 +1,4 @@
-import type { AuthoritySnapshot, LogicIntent } from '../server/authority/authority-session';
+import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import type { CommandResult, CommandSource, ServerCommand } from '../server/commands/command-contract';
 import type { FluidCandidate, FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '../server/game-server-types';
@@ -22,6 +22,7 @@ import type {
   AuthorityRequest,
   AuthorityResponse,
 } from '../worker/authority-worker-protocol';
+import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-protocol';
 
 export type AuthorityWorkerPort = {
   onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null;
@@ -35,7 +36,7 @@ type ClientOptions = Readonly<{
   onGameplay?: (view: AuthorityGameplayView) => void;
   onCommit?: (commit: WorldCommitResult) => void;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
-  onLogicObservation?: (sequence: number, snapshot: AuthoritySnapshot) => void;
+  onLogicObservation?: (observation: LogicObservation) => void;
   onBootstrapGeneration?: (request: { seed: number; generatorVersion: number }) => Promise<[number, number, number]>;
   onUnknownChunk?: (key: string) => void;
   onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
@@ -52,6 +53,7 @@ type StartOptions = Readonly<{
 type CachedMesh = {
   canonical: Uint16Array;
   fluid: Uint8Array;
+  chunkRevision: number;
 };
 
 type CachedPreparation = {
@@ -76,6 +78,7 @@ export class BrowserAuthorityClient {
   private resolveReady: ((ready: AuthorityReady) => void) | null = null;
   private rejectReady: ((error: Error) => void) | null = null;
   private disposed = false;
+  private storageBytesValue = 0;
 
   constructor(
     private readonly worker: AuthorityWorkerPort,
@@ -116,6 +119,10 @@ export class BrowserAuthorityClient {
 
   get readyState(): AuthorityReady | null {
     return this.readyValue;
+  }
+
+  get isReady(): boolean {
+    return Boolean(this.readyValue) && !this.disposed;
   }
 
   get snapshot(): AuthoritySnapshot | null {
@@ -159,6 +166,10 @@ export class BrowserAuthorityClient {
     return this.snapshotValue?.commitSequence ?? 0;
   }
 
+  get storageBytes(): number {
+    return this.storageBytesValue;
+  }
+
   sendInput(command: InputCommand): void {
     this.post(command);
   }
@@ -195,6 +206,11 @@ export class BrowserAuthorityClient {
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
     const key = chunkKey(cx, cy, cz);
     this.meshCache.delete(key);
+    this.releasePreparation(cx, cy, cz);
+  }
+
+  releasePreparation(cx: number, cy: number, cz: number): void {
+    const key = chunkKey(cx, cy, cz);
     this.preparationCache.delete(key);
     this.post({ kind: 'release-mesh', protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, cx, cy, cz });
   }
@@ -249,6 +265,7 @@ export class BrowserAuthorityClient {
     this.meshCache.set(task.chunkKey, {
       canonical,
       fluid: prepared?.fluid?.slice() ?? legacyFluid(canonical),
+      chunkRevision: task.chunkRevision,
     });
     return true;
   }
@@ -269,6 +286,10 @@ export class BrowserAuthorityClient {
     const value = cached.fluid[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
     const level = value & 0x0f;
     return level ? { level, source: (value & 0x80) !== 0 } : null;
+  }
+
+  getChunkRevision(cx: number, cy: number, cz: number): number | null {
+    return this.meshCache.get(chunkKey(cx, cy, cz))?.chunkRevision ?? null;
   }
 
   setFluidActiveChunks(keys: readonly string[]): void {
@@ -304,11 +325,20 @@ export class BrowserAuthorityClient {
     this.post({ kind: 'advance-world-clock', protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, hours });
   }
 
-  save(): Promise<{ savedChunks: string[]; gameplaySaved: boolean }> {
-    return this.request({ kind: 'save-authority' }) as Promise<{
+  async save(): Promise<{
+    savedChunks: string[];
+    gameplaySaved: boolean;
+    commitSequence: number;
+    storageBytes: number;
+  }> {
+    const result = (await this.request({ kind: 'save-authority' })) as {
       savedChunks: string[];
       gameplaySaved: boolean;
-    }>;
+      commitSequence: number;
+      storageBytes: number;
+    };
+    this.storageBytesValue = result.storageBytes;
+    return result;
   }
 
   commitFluid(candidate: FluidCandidate): void {
@@ -319,13 +349,20 @@ export class BrowserAuthorityClient {
     this.post({ kind: 'fluid-failure', protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, workId, reason });
   }
 
-  sendLogicIntents(observationSequence: number, intents: readonly LogicIntent[]): void {
+  sendLogicIntents(batch: LogicIntentBatch): void {
     this.post({
       kind: 'logic-intents',
       protocolVersion: PROTOCOL_VERSION,
       epoch: this.epoch,
-      observationSequence,
-      intents,
+      batch,
+    });
+  }
+
+  requestLogicObservation(): void {
+    this.post({
+      kind: 'request-logic-observation',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: this.epoch,
     });
   }
 
@@ -440,7 +477,7 @@ export class BrowserAuthorityClient {
         this.options.onFluidWork?.(message.snapshot);
         break;
       case 'logic-observation':
-        this.options.onLogicObservation?.(message.observationSequence, message.snapshot);
+        this.options.onLogicObservation?.(message.observation);
         break;
       case 'authority-fatal':
         this.failAll(new Error(message.error));

@@ -138,14 +138,16 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     now: () => performance.now(),
     findInitialPlayerBodyPosition: requestBootstrap,
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
-    onLogicObservation: (observationSequence, snapshot) =>
-      post({
-        kind: 'logic-observation',
-        protocolVersion: PROTOCOL_VERSION,
-        epoch,
-        observationSequence,
-        snapshot,
-      }),
+    onLogicObservation: (observation) =>
+      post(
+        {
+          kind: 'logic-observation',
+          protocolVersion: PROTOCOL_VERSION,
+          epoch,
+          observation,
+        },
+        observation.decisionContext.terrainWindows.map((window) => window.occupancy.buffer),
+      ),
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
   });
   post({ kind: 'authority-ready', protocolVersion: PROTOCOL_VERSION, epoch, ready: runtime.ready() });
@@ -265,7 +267,10 @@ const handle = async (message: AuthorityRequest) => {
       current.abortFluidWork(message.workId, message.reason);
       break;
     case 'logic-intents':
-      current.receiveLogicIntents(message.epoch, message.intents);
+      current.receiveLogicIntentBatch(message.batch);
+      break;
+    case 'request-logic-observation':
+      current.requestLogicObservation();
       break;
     case 'dispose-authority':
       if (interval !== null) clearInterval(interval);

@@ -16,8 +16,12 @@ import type { VoxelEdit } from '../world-mutation';
 import { ServerCommandExecutor } from '../commands/server-command-executor';
 import type { CommandSource, ServerCommand } from '../commands/command-contract';
 import { AuthoritySession, type AuthoritySnapshot, type LogicIntent } from './authority-session';
+import { buildLogicObservation } from './logic-observation-builder';
+import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch, type LogicObservation } from '../logic/logic-protocol';
+import { CHUNK_SIZE } from '../../world/voxel';
 
-type AuthorityPersistence = ChunkPersistence & Partial<GameplayPersistence>;
+type AuthorityPersistence = ChunkPersistence &
+  Partial<GameplayPersistence> & { metrics?: () => Readonly<{ recordBytes: number }> };
 
 export type AuthorityRuntimeOptions = Readonly<{
   epoch: string;
@@ -31,7 +35,7 @@ export type AuthorityRuntimeOptions = Readonly<{
   now?: () => number;
   frequencies?: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
-  onLogicObservation?: (sequence: number, snapshot: AuthoritySnapshot) => void;
+  onLogicObservation?: (observation: LogicObservation) => void;
   onUnknownChunk?: (key: string) => void;
 }>;
 
@@ -56,6 +60,11 @@ export class AuthorityRuntime {
   private readonly initialBodyPosition: [number, number, number];
   private pendingCommits: WorldCommitResult[] = [];
   private logicObservationSequence = 0;
+  private identityRevisionSequence = 0;
+  private latestPhysicsTick = 0;
+  private readonly entityIdentities = new Map<string, { signature: string; revision: number }>();
+  private readonly logicObservations = new Map<number, LogicObservation>();
+  private logicObservationRequested = false;
   private readonly transactions: TransactionDeduplicator<Promise<AuthorityTransactionReceipt<unknown>>>;
 
   private constructor(
@@ -107,7 +116,15 @@ export class AuthorityRuntime {
       startTimeMs: options.startTimeMs,
       requestUnknownChunk: (key) => this.requestUnknownChunk(key),
       requestFluidWork: () => this.requestFluidWork(),
-      publishLogicObservation: (snapshot) => options.onLogicObservation?.(++this.logicObservationSequence, snapshot),
+      publishLogicObservation: (snapshot) => {
+        if (!this.logicObservationRequested) return;
+        this.logicObservationRequested = false;
+        const observation = this.buildLogicObservation(++this.logicObservationSequence, snapshot);
+        this.logicObservations.set(observation.observationSequence, observation);
+        while (this.logicObservations.size > 8)
+          this.logicObservations.delete(this.logicObservations.keys().next().value!);
+        options.onLogicObservation?.(observation);
+      },
     });
   }
 
@@ -153,7 +170,9 @@ export class AuthorityRuntime {
   }
 
   wake(nowMs: number): AuthoritySnapshot {
-    return this.session.wake(nowMs);
+    const snapshot = this.session.wake(nowMs);
+    this.latestPhysicsTick = snapshot.physicsTick;
+    return snapshot;
   }
 
   receiveInput(command: InputCommand): SequenceDecision {
@@ -166,6 +185,43 @@ export class AuthorityRuntime {
 
   receiveLogicIntents(epoch: string, intents: readonly LogicIntent[]): boolean {
     return this.session.receiveLogicIntents(epoch, intents);
+  }
+
+  receiveLogicIntentBatch(batch: LogicIntentBatch): boolean {
+    if (batch.protocolVersion !== LOGIC_PROTOCOL_VERSION || batch.epoch !== this.options.epoch) return false;
+    const observation = this.logicObservations.get(batch.observationSequence);
+    if (!observation || batch.expiresAtPhysicsTick < this.latestPhysicsTick) return false;
+    const observedById = new Map(observation.entities.map((entity) => [entity.id, entity] as const));
+    const currentById = new Map(this.server.queryEntities().map((entity) => [entity.id, entity] as const));
+    const maximumPoseStaleness = Math.ceil((this.options.frequencies?.physicsHz ?? 60) * 0.2);
+    const accepted: LogicIntent[] = [];
+    for (const intent of batch.intents) {
+      const observed = observedById.get(intent.entityId);
+      const current = currentById.get(intent.entityId);
+      if (
+        !observed ||
+        !current ||
+        observed.identityRevision !== intent.identityRevision ||
+        observed.poseRevision !== intent.observedPoseRevision ||
+        this.identityRevision(current) !== intent.identityRevision ||
+        this.latestPhysicsTick - intent.observedPoseRevision > maximumPoseStaleness ||
+        !this.currentChunkRevisions(intent.readChunkRevisions)
+      )
+        continue;
+      this.applyLogicAction(intent.entityId, intent.action);
+      accepted.push({
+        entityId: intent.entityId,
+        wish: { x: intent.wish.x, z: intent.wish.z },
+        jumpRequested: intent.jumpRequested,
+        verticalIntent: intent.verticalIntent,
+        expiresAtPhysicsTick: batch.expiresAtPhysicsTick,
+      });
+    }
+    return this.session.receiveLogicIntents(batch.epoch, accepted);
+  }
+
+  requestLogicObservation(): void {
+    this.logicObservationRequested = true;
   }
 
   async executeTransaction<T>(
@@ -304,7 +360,7 @@ export class AuthorityRuntime {
 
   async executeCommand(source: CommandSource, command: ServerCommand) {
     const before = this.serverStateVersion();
-    const result = await new ServerCommandExecutor(this.server).execute(source, command);
+    const result = await new ServerCommandExecutor(this.server, { save: () => this.save() }).execute(source, command);
     this.commitIfServerChanged(before);
     return result;
   }
@@ -328,7 +384,9 @@ export class AuthorityRuntime {
   }
 
   async save() {
-    return this.server.save();
+    const frozen = this.server.freezeSaveSnapshot(this.session.currentCommitSequence);
+    const result = await this.server.saveFrozen(frozen);
+    return { ...result, storageBytes: this.options.persistence?.metrics?.().recordBytes ?? 0 };
   }
 
   view(): AuthorityGameplayView {
@@ -354,6 +412,56 @@ export class AuthorityRuntime {
 
   private requestUnknownChunk(key: string): void {
     this.options.onUnknownChunk?.(key);
+  }
+
+  private buildLogicObservation(sequence: number, snapshot: AuthoritySnapshot): LogicObservation {
+    const entities = this.server.queryEntities();
+    return buildLogicObservation({
+      epoch: this.options.epoch,
+      observationSequence: sequence,
+      snapshot,
+      entities,
+      simulation: this.server.simulationSnapshot(),
+      identityRevision: (entity) => this.identityRevision(entity),
+      getLoadedVoxel: (x, y, z) => this.server.peekLoadedVoxel(x, y, z),
+    });
+  }
+
+  private identityRevision(entity: ReturnType<GameServer['queryEntities']>[number]): number {
+    const signature = `${entity.type}:${entity.archetype ?? ''}:${entity.stack?.itemId ?? ''}`;
+    const current = this.entityIdentities.get(entity.id);
+    if (current?.signature === signature) return current.revision;
+    const revision = ++this.identityRevisionSequence;
+    this.entityIdentities.set(entity.id, { signature, revision });
+    return revision;
+  }
+
+  private currentChunkRevisions(reads: readonly Readonly<{ key: string; revision: number }>[]): boolean {
+    return reads.every(({ key, revision }) => {
+      const parts = key.split(',').map(Number);
+      if (parts.length !== 3 || parts.some((value) => !Number.isInteger(value))) return false;
+      return (
+        this.server.peekLoadedVoxel(parts[0] * CHUNK_SIZE, parts[1] * CHUNK_SIZE, parts[2] * CHUNK_SIZE)?.revision ===
+        revision
+      );
+    });
+  }
+
+  private applyLogicAction(entityId: string, action: LogicIntentBatch['intents'][number]['action']): void {
+    if (!action) return;
+    if (action.type === 'start-existing-action') return;
+    if (action.type === 'move-to') {
+      this.server.startActorAction(entityId, { type: 'move-to', targetPosition: action.target });
+      return;
+    }
+    if (action.type === 'attack') {
+      this.server.startActorAction(entityId, { type: 'attack', targetEntityId: action.targetId });
+      const target = this.server.getEntity(action.targetId);
+      if (target?.type === 'player') this.server.applyDamage(entityId, action.targetId, 2, 'logic-worker-attack');
+      return;
+    }
+    this.server.startActorAction(entityId, { type: 'eat', targetEntityId: action.targetId });
+    this.server.despawnEntity(action.targetId);
   }
 
   private serverStateVersion() {

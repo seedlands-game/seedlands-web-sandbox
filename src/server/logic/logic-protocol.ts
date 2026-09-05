@@ -93,6 +93,7 @@ export type LogicWorkerRequest =
       kind: 'block-for-test';
       protocolVersion: typeof LOGIC_PROTOCOL_VERSION;
       epoch: string;
+      requestId: number;
       ms: number;
     }>
   | Readonly<{
@@ -117,4 +118,10 @@ export type LogicWorkerResponse =
       protocolVersion: typeof LOGIC_PROTOCOL_VERSION;
       epoch: string;
       error: string;
+    }>
+  | Readonly<{
+      kind: 'logic-block-started' | 'logic-block-finished';
+      protocolVersion: typeof LOGIC_PROTOCOL_VERSION;
+      epoch: string;
+      requestId: number;
     }>;

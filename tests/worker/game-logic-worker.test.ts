@@ -40,7 +40,7 @@ describe('Game Logic Worker 消息边界', () => {
     const productPosts: unknown[] = [];
     const product = createGameLogicWorkerHandler({ postMessage: (message) => productPosts.push(message) });
     product({ kind: 'init-logic', protocolVersion: 1, epoch: 'product', harnessEnabled: false, physicsHz: 60 });
-    product({ kind: 'block-for-test', protocolVersion: 1, epoch: 'product', ms: 500 });
+    product({ kind: 'block-for-test', protocolVersion: 1, epoch: 'product', requestId: 1, ms: 500 });
     expect(productPosts.at(-1)).toMatchObject({
       kind: 'logic-fatal',
       epoch: 'product',
@@ -55,9 +55,13 @@ describe('Game Logic Worker 消息边界', () => {
       nowMs,
     });
     harness({ kind: 'init-logic', protocolVersion: 1, epoch: 'harness', harnessEnabled: true, physicsHz: 120 });
-    harness({ kind: 'block-for-test', protocolVersion: 1, epoch: 'harness', ms: 50 });
+    harness({ kind: 'block-for-test', protocolVersion: 1, epoch: 'harness', requestId: 2, ms: 50 });
     expect(nowMs).toHaveBeenCalledTimes(6);
-    expect(harnessPosts).toEqual([{ kind: 'logic-ready', protocolVersion: 1, epoch: 'harness' }]);
+    expect(harnessPosts).toEqual([
+      { kind: 'logic-ready', protocolVersion: 1, epoch: 'harness' },
+      { kind: 'logic-block-started', protocolVersion: 1, epoch: 'harness', requestId: 2 },
+      { kind: 'logic-block-finished', protocolVersion: 1, epoch: 'harness', requestId: 2 },
+    ]);
   });
 
   it('dispose 后忽略消息，初始化顺序和协议错误会返回明确 fatal', () => {

@@ -59,10 +59,22 @@ export function createGameLogicWorkerHandler(options: HandlerOptions) {
           if (!harnessEnabled) throw new Error('block-for-test requires an explicitly enabled harness session.');
           if (!Number.isFinite(message.ms) || message.ms < 0 || message.ms > 5_000)
             throw new TypeError('Harness block duration must be between 0 and 5000 ms.');
+          options.postMessage({
+            kind: 'logic-block-started',
+            protocolVersion: LOGIC_PROTOCOL_VERSION,
+            epoch,
+            requestId: message.requestId,
+          });
           const startedAt = nowMs();
           while (nowMs() - startedAt < message.ms) {
             // Intentional harness-only busy loop used to prove Authority isolation.
           }
+          options.postMessage({
+            kind: 'logic-block-finished',
+            protocolVersion: LOGIC_PROTOCOL_VERSION,
+            epoch,
+            requestId: message.requestId,
+          });
           break;
         }
         case 'dispose-logic':

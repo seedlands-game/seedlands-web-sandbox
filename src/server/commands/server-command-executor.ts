@@ -25,6 +25,7 @@ type ExecutorOptions = {
   authorize?: (source: CommandSource, command: ServerCommand, category: CommandCategory) => boolean;
   observe?: (observation: CommandObservation) => void;
   now?: () => number;
+  save?: () => Promise<{ savedChunks: string[]; gameplaySaved: boolean; commitSequence: number }>;
 };
 
 type PreparedCommand = {
@@ -184,10 +185,10 @@ export class ServerCommandExecutor {
           },
         };
       case 'save': {
-        const { savedChunks, gameplaySaved } = await this.server.save();
+        const { savedChunks, gameplaySaved, commitSequence } = await (this.options.save?.() ?? this.server.save());
         return {
           message: `Saved ${savedChunks.length} dirty Chunk(s).`,
-          data: { savedChunks, gameplaySaved },
+          data: { savedChunks, gameplaySaved, commitSequence },
           affectedChunks: savedChunks,
         };
       }

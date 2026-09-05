@@ -3,6 +3,8 @@ import type { PerformanceTelemetry } from '../client/performance-telemetry';
 import type { VoxelTarget } from '../client/voxel-target';
 import type { WorldEnvironment } from './world-environment';
 import type { World } from './world-runtime';
+import type { AuthoritySnapshot } from '../server/authority/authority-session';
+import type { InputCommand, SessionEpoch } from '../runtime/session-protocol';
 
 export type PlayerControllerOptions = {
   camera: pc.Entity;
@@ -31,4 +33,11 @@ export type PlayerControllerOptions = {
   onQueueSave: () => void;
   onFlushSave: () => void;
   onAimTarget?: (target: VoxelTarget | null) => void;
+  authority: {
+    epoch: SessionEpoch;
+    snapshot: () => AuthoritySnapshot | null;
+    sendInput: (command: InputCommand) => void;
+    setPlayerPosition: (position: [number, number, number]) => Promise<unknown>;
+  };
+  physicsHz: 30 | 60 | 120;
 };

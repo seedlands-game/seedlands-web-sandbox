@@ -20,13 +20,11 @@ type Options = Readonly<{
   onPoolFailure?: (lane: ComputeLane, error: Error) => void;
 }>;
 
-const workerFactory = (lane: ComputeLane) =>
-  new Worker(
-    lane === 'fluid'
-      ? new URL('../worker/fluid-compute-worker.ts', import.meta.url)
-      : new URL('../worker/world-worker.ts', import.meta.url),
-    { type: 'module' },
-  );
+const workerFactory = (lane: ComputeLane) => {
+  if (lane === 'fluid')
+    return new Worker(new URL('../worker/fluid-compute-worker.ts', import.meta.url), { type: 'module' });
+  return new Worker(new URL('../worker/world-worker.ts', import.meta.url), { type: 'module' });
+};
 
 export class BrowserComputeRuntime {
   readonly meshPort: MeshWorkerPort;

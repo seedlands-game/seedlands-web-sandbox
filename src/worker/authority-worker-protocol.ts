@@ -1,4 +1,4 @@
-import type { AuthoritySnapshot, LogicIntent } from '../server/authority/authority-session';
+import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import type { GameplayEntity } from '../server/gameplay/entity-store';
 import type { PlayerSnapshot } from '../server/gameplay/player-state';
 import type { ActorState } from '../server/simulation/actor-state';
@@ -9,6 +9,7 @@ import type { VoxelEdit } from '../server/world-mutation';
 import type { InputCommand, SequenceDecision } from '../runtime/session-protocol';
 import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol';
 import type { WorldOpenMode } from '../client/world-version-policy';
+import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-protocol';
 
 export type AuthorityGameplayMetrics = Readonly<{
   entityCount: number;
@@ -227,8 +228,12 @@ export type AuthorityRequest =
       kind: 'logic-intents';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
-      observationSequence: number;
-      intents: readonly LogicIntent[];
+      batch: LogicIntentBatch;
+    }>
+  | Readonly<{
+      kind: 'request-logic-observation';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
     }>
   | Readonly<{ kind: 'dispose-authority'; protocolVersion: typeof PROTOCOL_VERSION; epoch: SessionEpoch }>;
 
@@ -305,8 +310,7 @@ export type AuthorityResponse =
       kind: 'logic-observation';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
-      observationSequence: number;
-      snapshot: AuthoritySnapshot;
+      observation: LogicObservation;
     }>
   | Readonly<{
       kind: 'authority-fatal';

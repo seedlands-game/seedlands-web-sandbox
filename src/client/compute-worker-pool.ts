@@ -51,6 +51,7 @@ type ComputeWorkerPoolOptions = Readonly<{
 
 export type ComputePoolDiagnostics = Readonly<{
   workerCount: number;
+  fluidWorkerCount: number;
   generalWorkerCount: number;
   running: number;
   queued: number;
@@ -147,7 +148,8 @@ export class ComputeWorkerPool {
   diagnostics(): ComputePoolDiagnostics {
     return {
       workerCount: this.slots.filter((slot) => slot.worker).length,
-      generalWorkerCount: this.options.generalWorkerCount,
+      fluidWorkerCount: this.slots.filter((slot) => slot.worker && slot.lane === 'fluid').length,
+      generalWorkerCount: this.slots.filter((slot) => slot.worker && slot.lane === 'general').length,
       running: this.slots.filter((slot) => slot.task).length,
       queued: this.queue.size,
       queuedBytes: this.queue.bytes,

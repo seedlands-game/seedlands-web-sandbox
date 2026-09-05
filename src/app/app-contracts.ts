@@ -83,7 +83,29 @@ export type HarnessSnapshot = {
   quality: 'low' | 'medium' | 'high';
   triangles: number;
   drawCalls: number;
-  runtime: 'integrated-server';
+  runtime: 'authority-worker';
+  workers: {
+    total: number;
+    authority: number;
+    logic: number;
+    persistence: number;
+    fluid: number;
+    general: number;
+  };
+  authority: {
+    physicsTick: number;
+    integratedPhysicsTimeMs: number;
+    acknowledgedInputSequence: number;
+    physicsDebtMs: number;
+    activeTimeMs: number;
+    commitSequence: number;
+  };
+  logic: { blockStartedCount: number; blockCompletedCount: number };
+  trajectory: readonly {
+    physicsTick: number;
+    activeTimeMs: number;
+    position: [number, number, number];
+  }[];
   generatorVersion: number;
   renderPipeline: typeof FINAL_RENDER_PIPELINE;
   serverRevision: number;

@@ -3,17 +3,14 @@ import { Voxel } from '../world/voxel';
 import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../client/voxel-target';
 import { DRY_WATER_IMMERSION, sampleWaterImmersion, type WaterImmersionSnapshot } from '../world/water-immersion';
-import { resolveWaterMovement } from './water-movement-policy';
 import type { PlayerControllerOptions } from './player-controller-types';
-import {
-  COLLISION_EPSILON,
-  PLAYER_FEET_OFFSET,
-  PLAYER_HEAD_OFFSET,
-  playerCeilingBottom,
-  playerCollisionOverlap,
-  playerGroundSupportTop,
-  playerHorizontalDepenetration,
-} from './player-collision-shapes';
+import { PLAYER_FEET_OFFSET, PLAYER_HEAD_OFFSET } from './player-collision-shapes';
+import { PlayerInputStream } from '../client/player-input-stream';
+import { PredictionBuffer } from '../client/prediction-buffer';
+import { bodyConfigFor, bodyWorldAabb, stepBody, type BodyState, type WorldAabb } from '../physics';
+import { VoxelCollisionWorld } from '../server/authority/voxel-collision-world';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '../world/voxel';
+import type { AuthoritySnapshot } from '../server/authority/authority-session';
 
 export { PLAYER_FEET_OFFSET } from './player-collision-shapes';
 
@@ -31,8 +28,15 @@ export class PlayerController {
   private attackBlocking = false;
   private publishedAimTarget: VoxelTarget | null = null;
   private immersion: WaterImmersionSnapshot = DRY_WATER_IMMERSION;
+  private readonly inputStream: PlayerInputStream;
+  private readonly prediction = new PredictionBuffer();
+  private predictedBody: BodyState | null = null;
+  private latestSnapshot: AuthoritySnapshot | null = null;
+  private predictionAccumulator = 0;
 
-  constructor(private readonly options: PlayerControllerOptions) {}
+  constructor(private readonly options: PlayerControllerOptions) {
+    this.inputStream = new PlayerInputStream(options.authority?.epoch ?? 'unit-test');
+  }
 
   get onGround() {
     return this.grounded;
@@ -51,7 +55,13 @@ export class PlayerController {
   }
 
   get isColliding() {
-    return this.collides(this.options.camera.getPosition());
+    const world = this.options.getWorld();
+    const body = this.predictedBody ?? this.latestSnapshot?.player.body;
+    if (!world || !body) return false;
+    const bounds = bodyWorldAabb(body, bodyConfigFor('player'));
+    return this.collisionWorld(world)
+      .querySolids(bounds)
+      .some((collider) => this.overlaps(bounds, collider.aabb));
   }
 
   get interactionBlocked() {
@@ -189,7 +199,7 @@ export class PlayerController {
       headOffset: PLAYER_HEAD_OFFSET,
       previousCameraSubmerged: this.immersion.cameraSubmerged,
       getVoxel: (x, y, z) => world.getVoxel(x, y, z),
-      getFluidLevel: (x, y, z) => world.server.getFluidCell(x, y, z)?.level ?? null,
+      getFluidLevel: (x, y, z) => world.getFluidCell(x, y, z)?.level ?? null,
     });
     const span = this.options.telemetry.beginSpan('player', 'PlayerMovement');
     if (!this.spectator) {
@@ -199,25 +209,54 @@ export class PlayerController {
       const right = new pc.Vec3().copy(camera.right);
       right.y = 0;
       right.normalize();
-      const wish = new pc.Vec3();
-      if (this.keys.has('KeyW')) wish.add(forward);
-      if (this.keys.has('KeyS')) wish.sub(forward);
-      if (this.keys.has('KeyD')) wish.add(right);
-      if (this.keys.has('KeyA')) wish.sub(right);
-      const verticalInput: -1 | 0 | 1 = this.keys.has('Space') ? 1 : this.keys.has('ShiftLeft') ? -1 : 0;
-      const movement = resolveWaterMovement(this.immersion, this.velocity.y, dt, verticalInput);
-      if (wish.lengthSq() > 0) wish.normalize().mulScalar(movement.horizontalSpeed);
-      this.velocity.x += (wish.x - this.velocity.x) * Math.min(1, dt * movement.horizontalResponse);
-      this.velocity.z += (wish.z - this.velocity.z) * Math.min(1, dt * movement.horizontalResponse);
-      this.velocity.y = movement.verticalVelocity;
-      if (this.keys.has('Space') && this.grounded && movement.jumpAllowed) {
-        this.velocity.y = 7.5;
-        this.grounded = false;
+      const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
+      if (snapshot) {
+        const stepSeconds = 1 / this.options.physicsHz;
+        this.predictionAccumulator = Math.min(stepSeconds * 4, this.predictionAccumulator + dt);
+        while (this.predictionAccumulator + Number.EPSILON >= stepSeconds) {
+          this.predictionAccumulator -= stepSeconds;
+          const command = this.inputStream.sample({
+            physicsTick: snapshot.physicsTick,
+            issuedAtMs: performance.now(),
+            forward: { x: forward.x, z: forward.z },
+            right: { x: right.x, z: right.z },
+            keys: {
+              forward: this.keys.has('KeyW'),
+              back: this.keys.has('KeyS'),
+              left: this.keys.has('KeyA'),
+              right: this.keys.has('KeyD'),
+              jump: this.keys.has('Space'),
+              crouch: this.keys.has('ShiftLeft'),
+            },
+          });
+          if (!command) continue;
+          this.options.authority.sendInput(command);
+          const collisionWorld = this.collisionWorld(world);
+          const result = stepBody({
+            state: this.predictedBody ?? snapshot.player.body,
+            config: bodyConfigFor('player'),
+            input: {
+              wish: { x: command.state.moveX, z: command.state.moveZ },
+              jumpPressed: command.state.jumpHeld || command.edges.jumpPressed,
+              verticalIntent: command.state.verticalIntent,
+            },
+            world: collisionWorld,
+            dt: stepSeconds,
+          });
+          this.predictedBody = result.state;
+          this.grounded = result.grounded;
+          this.velocity.set(result.state.velocity.x, result.state.velocity.y, result.state.velocity.z);
+          this.prediction.record({
+            sequence: command.sequence,
+            targetPhysicsTick: command.targetPhysicsTick,
+            input: command,
+            predictedBody: result.state,
+            collisionRevisionVector: collisionWorld.revisionVector(),
+          });
+        }
+        const body = this.predictedBody ?? snapshot.player.body;
+        camera.setPosition(body.position.x, body.position.y + PLAYER_FEET_OFFSET, body.position.z);
       }
-      this.moveAxis('x', this.velocity.x * dt);
-      this.moveAxis('z', this.velocity.z * dt);
-      this.grounded = false;
-      this.moveAxis('y', this.velocity.y * dt);
     }
     this.attackCooldownSeconds = Math.max(0, this.attackCooldownSeconds - dt);
     const target = this.aimTarget;
@@ -237,6 +276,45 @@ export class PlayerController {
     releasePointerLock();
   }
 
+  applyAuthoritySnapshot(snapshot: AuthoritySnapshot): void {
+    this.latestSnapshot = snapshot;
+    this.grounded = snapshot.player.grounded;
+    const world = this.options.getWorld();
+    if (!world) {
+      this.predictedBody = snapshot.player.body;
+      return;
+    }
+    const collisionWorld = this.collisionWorld(world);
+    const reconciled = this.prediction.reconcile({
+      acknowledgedInputSequence: snapshot.acknowledgedInputSequence,
+      authoritativeBody: snapshot.player.body,
+      collisionRevisionVector: snapshot.chunkRevisions,
+      replay: (body, command) =>
+        stepBody({
+          state: body,
+          config: bodyConfigFor('player'),
+          input: {
+            wish: { x: command.state.moveX, z: command.state.moveZ },
+            jumpPressed: command.state.jumpHeld || command.edges.jumpPressed,
+            verticalIntent: command.state.verticalIntent,
+          },
+          world: collisionWorld,
+          dt: 1 / this.options.physicsHz,
+        }).state,
+    });
+    this.predictedBody = reconciled.body;
+    this.velocity.set(reconciled.body.velocity.x, reconciled.body.velocity.y, reconciled.body.velocity.z);
+    if (snapshot.inputResyncRequired) this.resynchronizeInput();
+  }
+
+  resynchronizeInput(): void {
+    const tick = this.latestSnapshot?.physicsTick ?? 0;
+    this.inputStream.resynchronize(tick);
+    this.prediction.clear('authority-resync');
+    this.predictedBody = this.latestSnapshot?.player.body ?? null;
+    this.predictionAccumulator = 0;
+  }
+
   setView(yaw: number, pitch: number) {
     this.yaw = yaw;
     this.pitch = Math.max(-88, Math.min(88, pitch));
@@ -250,29 +328,31 @@ export class PlayerController {
     this.options.getWorld()?.updateStreaming(this.options.camera.getPosition());
   }
 
-  moveHarnessPlayer(x: number, z: number) {
+  moveHarnessPlayer(x: number, z: number): Promise<void> {
     const world = this.options.getWorld();
-    if (!world) return;
+    if (!world) return Promise.resolve();
     const position = this.options.camera.getPosition();
-    this.options.camera.setPosition(x, position.y, z);
-    world.updateStreaming(this.options.camera.getPosition());
+    return this.movePlayerTo(x, position.y, z);
   }
 
-  movePlayerTo(x: number, y: number, z: number) {
+  async movePlayerTo(x: number, y: number, z: number) {
     const world = this.options.getWorld();
     if (!world) return;
     this.options.camera.setPosition(x, y, z);
+    await this.options.authority.setPlayerPosition([x, y - PLAYER_FEET_OFFSET, z]);
+    this.prediction.clear('teleport');
+    this.predictedBody = null;
     world.updateStreaming(this.options.camera.getPosition());
   }
 
-  burstEdits() {
+  async burstEdits() {
     const world = this.options.getWorld();
     if (!world) return;
     const position = this.options.camera.getPosition();
     const y = Math.floor(position.y - 4),
       x = Math.floor(position.x) + 4,
       z = Math.floor(position.z) + 4;
-    world.editBatch({
+    await world.editBatch({
       actorId: 'harness-burst',
       edits: Array.from({ length: 6 }, (_, index) => ({
         x: x + index,
@@ -284,33 +364,33 @@ export class PlayerController {
     this.options.onQueueSave();
   }
 
-  removeVoxel(x: number, y: number, z: number) {
+  async removeVoxel(x: number, y: number, z: number) {
     const world = this.options.getWorld();
     if (!world) return;
-    world.edit(x, y, z, Voxel.Air);
+    await world.edit(x, y, z, Voxel.Air);
     this.options.onFlushSave();
   }
 
-  prepareFlatMovement() {
+  async prepareFlatMovement() {
     const world = this.options.getWorld();
     if (!world) return;
     const edits = [];
     for (let x = -2; x <= 2; x += 1) for (let z = -8; z <= 2; z += 1) edits.push({ x, y: 56, z, value: Voxel.Stone });
-    world.editBatch({ actorId: 'harness-flat-movement', edits });
-    this.resetFixture(true, 0.5, 58.6, 0.5);
+    await world.editBatch({ actorId: 'harness-flat-movement', edits });
+    await this.resetFixture(true, 0.5, 58.6, 0.5);
   }
 
-  prepareCenterExcavation() {
+  async prepareCenterExcavation() {
     const world = this.options.getWorld();
     if (!world) return;
     const edits = [];
     for (let x = -2; x <= 2; x += 1) for (let z = -2; z <= 2; z += 1) edits.push({ x, y: 56, z, value: Voxel.Stone });
     edits.push({ x: 0, y: 56, z: 0, value: Voxel.Air });
-    world.editBatch({ actorId: 'harness-center-excavation', edits });
-    this.resetFixture(false, 0, 58.6, 0);
+    await world.editBatch({ actorId: 'harness-center-excavation', edits });
+    await this.resetFixture(false, 0, 58.6, 0);
   }
 
-  prepareStepDown() {
+  async prepareStepDown() {
     const world = this.options.getWorld();
     if (!world) return;
     const edits = [];
@@ -319,85 +399,57 @@ export class PlayerController {
         edits.push({ x, y: 55, z, value: Voxel.Stone });
         edits.push({ x, y: 56, z, value: z >= 0 ? Voxel.Stone : Voxel.Air });
       }
-    world.editBatch({ actorId: 'harness-step-down', edits });
-    this.resetFixture(true, 0.5, 58.6, 0.5);
+    await world.editBatch({ actorId: 'harness-step-down', edits });
+    await this.resetFixture(true, 0.5, 58.6, 0.5);
   }
 
-  private shiftWorldTime(delta: number) {
+  private async shiftWorldTime(delta: number) {
     const world = this.options.getWorld();
     const environment = this.options.getEnvironment();
     if (!world || !environment) return;
-    world.server.setWorldTime(world.server.worldTime + delta);
-    environment.setTime(world.server.worldTime);
+    environment.setTime(await world.setWorldTime(world.worldTime + delta));
   }
 
-  private resetFixture(onGround: boolean, x: number, y: number, z: number) {
+  private async resetFixture(onGround: boolean, x: number, y: number, z: number) {
     this.keys.clear();
     this.velocity.set(0, 0, 0);
     this.grounded = onGround;
     this.options.camera.setPosition(x, y, z);
+    await this.options.authority.setPlayerPosition([x, y - PLAYER_FEET_OFFSET, z]);
+    this.prediction.clear('harness-fixture');
+    this.predictedBody = null;
     this.options.getWorld()?.updateStreaming(this.options.camera.getPosition());
   }
 
-  private moveAxis(axis: 'x' | 'y' | 'z', amount: number) {
-    const world = this.options.getWorld();
-    if (!world || amount === 0) return;
-    const position = this.options.camera.getPosition();
-    const previousOverlap = axis === 'y' ? 0 : playerCollisionOverlap(world, position);
-    (position as unknown as Record<string, number>)[axis] += amount;
-    if (axis === 'y') {
-      const collisionY =
-        amount < 0
-          ? Math.floor(position.y - PLAYER_FEET_OFFSET)
-          : Math.floor(position.y + PLAYER_HEAD_OFFSET - COLLISION_EPSILON);
-      const collisionBoundary =
-        amount < 0
-          ? playerGroundSupportTop(world, position, collisionY)
-          : playerCeilingBottom(world, position, collisionY);
-      if (collisionBoundary !== null) {
-        position.set(
-          position.x,
-          amount < 0 ? collisionBoundary + PLAYER_FEET_OFFSET : collisionBoundary - PLAYER_HEAD_OFFSET,
-          position.z,
-        );
-        if (amount < 0) this.grounded = true;
-        this.velocity.y = 0;
-        if (amount < 0) this.depenetrateHorizontally(position);
-      }
-    } else {
-      const nextOverlap = playerCollisionOverlap(world, position);
-      if (nextOverlap > 0 && nextOverlap >= previousOverlap) {
-        const climbedOut = this.tryWaterExitStep(position);
-        if (!climbedOut) (position as unknown as Record<string, number>)[axis] -= amount;
-      }
-    }
-    this.options.camera.setPosition(position);
+  private collisionWorld(world: NonNullable<ReturnType<PlayerControllerOptions['getWorld']>>) {
+    return new VoxelCollisionWorld({
+      getLoadedVoxel: (x, y, z) => {
+        const cx = floorDiv(x, CHUNK_SIZE);
+        const cy = floorDiv(y, CHUNK_SIZE);
+        const cz = floorDiv(z, CHUNK_SIZE);
+        const revision = world.getChunkRevision(cx, cy, cz);
+        if (revision === null) return null;
+        const fluid = world.getFluidCell(x, y, z);
+        return {
+          voxel: world.getVoxel(x, y, z),
+          chunkKey: chunkKey(cx, cy, cz),
+          revision,
+          ...(fluid ? { fluid: { level: fluid.level } } : {}),
+        };
+      },
+    });
   }
 
-  private tryWaterExitStep(position: pc.Vec3) {
-    if (!this.immersion.wading || !this.keys.has('Space')) return false;
-    const originalY = position.y;
-    for (let lift = 0.1; lift <= 1.3; lift += 0.1) {
-      position.y = originalY + lift;
-      if (!this.collides(position)) {
-        this.velocity.y = Math.max(0, this.velocity.y);
-        return true;
-      }
-    }
-    position.y = originalY;
-    return false;
-  }
-
-  private collides(position: pc.Vec3) {
-    const world = this.options.getWorld();
-    return !!world && playerCollisionOverlap(world, position) > 0;
-  }
-
-  private depenetrateHorizontally(position: pc.Vec3) {
-    const world = this.options.getWorld();
-    if (!world) return;
-    const resolved = playerHorizontalDepenetration(world, position);
-    if (resolved) position.set(position.x + resolved.x, position.y, position.z + resolved.z);
+  private overlaps(left: WorldAabb, right: WorldAabb) {
+    const epsilon = 1e-7;
+    return (
+      left.min.x < right.max.x - epsilon &&
+      left.max.x > right.min.x + epsilon &&
+      left.min.y < right.max.y - epsilon &&
+      left.max.y > right.min.y + epsilon &&
+      left.min.z < right.max.z - epsilon &&
+      left.max.z > right.min.z + epsilon
+    );
   }
 
   private interact(place: boolean) {

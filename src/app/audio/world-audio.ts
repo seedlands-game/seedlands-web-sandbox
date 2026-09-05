@@ -51,17 +51,20 @@ export class WorldAudio {
       world.getVoxel(Math.floor(x), Math.floor(y - 1.7), Math.floor(z)),
       () => {
         const proximity = this.actualWaterProximity(world, x, y, z);
-        const macro = macroAt(world.seed, x, z, world.server.generatorVersion);
+        const macro = macroAt(world.seed, x, z, world.generatorVersion);
         const nearby = this.paused
           ? []
-          : world.server
-              .queryNearbyEntities([x, y, z], 18, { type: 'creature' })
-              .filter((entity) => (entity.health ?? 0) > 0);
+          : world.gameplay.entities.filter(
+              (entity) =>
+                entity.type === 'creature' &&
+                (entity.health ?? 0) > 0 &&
+                Math.hypot(entity.position[0] - x, entity.position[1] - y, entity.position[2] - z) <= 18,
+            );
         const cue = this.creatures.sample(this.audio.graph!.context.currentTime, [x, y, z], nearby, this.paused);
         if (cue) this.play('creature', cue.position, 0, cue.id);
         return {
           biome: macro.biome,
-          worldTime: world.server.worldTime,
+          worldTime: world.worldTime,
           waterProximity: proximity,
           danger: 0,
         };

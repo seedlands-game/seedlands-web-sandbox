@@ -1,5 +1,6 @@
 import type { ChunkPersistence, ChunkSnapshot } from '../server/persistence/chunk-persistence';
-import type { GameplaySnapshotV1 } from '../server/gameplay/gameplay-runtime';
+import type { GameplaySnapshot } from '../server/gameplay/gameplay-runtime';
+import type { FrozenGameSaveSnapshot } from '../server/persistence/game-save-snapshot';
 import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
 import type { WorldOpenMode } from './world-version-policy';
 
@@ -188,10 +189,41 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     return structuredClone(this.gameplaySnapshotValue);
   }
 
-  async saveGameplaySnapshot(snapshot: GameplaySnapshotV1): Promise<void> {
+  async saveGameplaySnapshot(snapshot: GameplaySnapshot): Promise<void> {
     const copy = structuredClone(snapshot);
     await this.request({ kind: 'save-gameplay', snapshot: copy });
     this.gameplaySnapshotValue = copy;
+  }
+
+  async saveFrozenSnapshot(snapshot: FrozenGameSaveSnapshot): Promise<void> {
+    const copy = structuredClone(snapshot);
+    const transfers = copy.chunks.flatMap((chunk) => [
+      chunk.voxels.buffer as Transferable,
+      ...(chunk.fluid ? [chunk.fluid.buffer as Transferable] : []),
+    ]);
+    const result = (await this.request(
+      {
+        kind: 'save-frozen',
+        snapshot: {
+          ...copy,
+          chunks: copy.chunks.map((chunk) => ({
+            ...chunk,
+            voxels: chunk.voxels.buffer,
+            ...(chunk.fluid ? { fluid: chunk.fluid.buffer } : {}),
+          })),
+        },
+      },
+      transfers,
+    )) as SaveResult;
+    this.metricsValue.idbPutCount += result.saved.length + 1;
+    this.metricsValue.encodedChunkCount += result.saved.length;
+    this.metricsValue.recordBytes += result.recordBytes;
+    this.metricsValue.encodeMs += result.encodeMs;
+    Object.entries(result.codecs).forEach(([codec, count]) => {
+      this.metricsValue.codecs[codec] = (this.metricsValue.codecs[codec] ?? 0) + count;
+    });
+    snapshot.chunks.forEach((chunk) => this.missing.delete(chunk.key));
+    this.gameplaySnapshotValue = structuredClone(snapshot.gameplay);
   }
 
   loadLegacyPlayerPosition(): [number, number, number] | null {

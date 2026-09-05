@@ -7,7 +7,9 @@ import type {
   CommandSource,
   ServerCommand,
 } from './command-contract';
-import type { ServerCommandExecutor } from './server-command-executor';
+export type CommandExecutorPort = Readonly<{
+  execute(source: CommandSource, command: ServerCommand): Promise<CommandResult>;
+}>;
 
 const voxelByName: Readonly<Record<string, number>> = Object.freeze(
   Object.fromEntries(Object.entries(Voxel).map(([name, value]) => [name.toLowerCase(), value])),
@@ -247,7 +249,7 @@ export type SlashCommandExecution = {
 };
 
 export async function executeSlashCommand(
-  executor: ServerCommandExecutor,
+  executor: CommandExecutorPort,
   source: CommandSource,
   input: string,
 ): Promise<SlashCommandExecution> {

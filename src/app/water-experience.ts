@@ -29,11 +29,10 @@ export class WaterExperience {
       Math.floor(position.z),
       {
         getVoxel: (x, y, z) => world.getVoxel(x, y, z),
-        getFluidLevel: (x, y, z) => world.server.getFluidCell(x, y, z)?.level ?? null,
+        getFluidLevel: (x, y, z) => world.getFluidCell(x, y, z)?.level ?? null,
       },
     );
-    const macroDirection = macroAt(world.seed, position.x, position.z, world.server.generatorVersion).hydrology
-      .direction;
+    const macroDirection = macroAt(world.seed, position.x, position.z, world.generatorVersion).hydrology.direction;
     environment.setWaterFlowDirection(flow[0] || flow[1] ? flow : macroDirection);
   }
 
