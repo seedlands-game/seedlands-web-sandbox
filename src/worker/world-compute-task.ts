@@ -110,14 +110,11 @@ export async function runWorldComputeTask(
   await checkpoint(isCancelled, yieldTurn);
   if (task.kind === 'find-safe-spawn') {
     const spawnChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
-    const cameraPosition = findSafePlayerSpawn(proceduralVoxelReader(task.seed, task.generatorVersion, spawnChunks));
+    const playerBodyPosition = findSafePlayerSpawn(
+      proceduralVoxelReader(task.seed, task.generatorVersion, spawnChunks),
+    );
     await checkpoint(isCancelled, yieldTurn);
-    if (!cameraPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');
-    const playerBodyPosition: [number, number, number] = [
-      cameraPosition[0],
-      cameraPosition[1] - 1.6,
-      cameraPosition[2],
-    ];
+    if (!playerBodyPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');
     const starterChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
     const readStarterVoxel = proceduralVoxelReader(task.seed, task.generatorVersion, starterChunks);
     const starter = createStarterEcology(task.seed, playerBodyPosition, (x, z, _nearY) =>

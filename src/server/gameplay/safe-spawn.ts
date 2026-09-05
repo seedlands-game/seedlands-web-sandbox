@@ -1,9 +1,12 @@
 import { Voxel } from '../../world/voxel';
+import { bodyConfigFor } from '../../physics/body-registry';
 
 const ground = new Set<number>([Voxel.Grass, Voxel.Dirt, Voxel.Stone, Voxel.Sand, Voxel.Snow]);
 const MAX_HEIGHT = 128;
 const MAX_RADIUS = 64;
 const STEP = 4;
+const playerBody = bodyConfigFor('player').localAabb;
+const requiredHeadroom = Math.ceil(playerBody.max.y - playerBody.min.y);
 
 /** 只读取世界，固定遍历次序；失败显式返回 null，不能清空地形制造出生点。 */
 export function findSafePlayerSpawn(
@@ -17,7 +20,7 @@ export function findSafePlayerSpawn(
         headroom++;
         continue;
       }
-      if (ground.has(voxel) && headroom >= 2) return [x + 0.5, y + 2.6, z + 0.5];
+      if (ground.has(voxel) && headroom >= requiredHeadroom) return [x + 0.5, y + 1 - playerBody.min.y, z + 0.5];
       // 第一处非空气是水/树/顶壁时，该列不可作为可靠地面。
       return null;
     }

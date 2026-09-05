@@ -17,7 +17,7 @@ describe('确定性安全出生', () => {
     expect(server.worldRevision).toBe(0);
   });
   it('高于旧出生点的山地也站在地表上方', () => {
-    expect(findSafePlayerSpawn((_x, y) => (y <= 70 ? Voxel.Stone : Voxel.Air))).toEqual([0.5, 72.6, 0.5]);
+    expect(findSafePlayerSpawn((_x, y) => (y <= 70 ? Voxel.Stone : Voxel.Air))).toEqual([0.5, 71, 0.5]);
   });
   it('跳过水域、树冠和头部空间不足，固定顺序可重复', () => {
     const voxel = (x: number, y: number, z: number) => {
@@ -31,7 +31,7 @@ describe('确定性安全出生', () => {
     expect(findSafePlayerSpawn(voxel)).toEqual(first);
     const [x, y, z] = first!;
     expect(voxel(Math.floor(x), Math.floor(y), Math.floor(z))).toBe(Voxel.Air);
-    expect(voxel(Math.floor(x), Math.floor(y - 1.6) - 1, Math.floor(z))).toBe(Voxel.Grass);
+    expect(voxel(Math.floor(x), Math.floor(y) - 1, Math.floor(z))).toBe(Voxel.Grass);
   });
   it('全水、全实心、无地面都显式不可用', () => {
     for (const voxel of [Voxel.Water, Voxel.Stone, Voxel.Air]) expect(findSafePlayerSpawn(() => voxel)).toBeNull();

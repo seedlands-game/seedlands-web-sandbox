@@ -57,6 +57,14 @@ type AuthorityAdvanceResult = {
 - 项目级 test TypeScript 的其他共享 WIP 错误不属于本模块；Headless 文件没有 TypeScript 错误。
 - 构建：`pnpm build` 已执行，但被共享主线中与 Headless 无关的 test TypeScript 错误阻塞（`browser-authority-client.test.ts`、`snapshot-interpolator.test.ts`、Harness 类型、Logic observation fixture 与 compute worker fixture）；source TypeScript 和 Svelte 检查已通过。
 
+## A1/A2 收尾审计
+
+新世界安全出生仍先以旧相机眼睛坐标返回 `groundY + 2.6`，再由计算任务硬编码减 `1.6` 得到脚底；这与 V3 和身体注册表确定的脚底中心合同重复。测试先把平坦地面的预期改为直接返回 `groundY + 1`，旧实现预期 RED；实现应从玩家注册身体推导净空格数，计算任务不得再做眼高迁移。
+
+Logic 指标为零不等于 AI 停止：审计用固定 seed 的真实 Headless 会话推进 5 秒，要求产生 100 个 Logic batch，且至少一个 starter actor 的 Authority 脚底位置净移动超过 0.1 格。现实现预期已具备该行为；新增用例是缺失的端到端不变量证据，不以旧 `AutonomyRuntime` 的计数器替代活体位置验证。旧指标迁移另由主线定义新 Logic 诊断合同。
+
+安全出生 RED 实测 2 项失败：旧函数仍返回眼睛高度 `72.6`，地面断言也读到空气。实现后 `findSafePlayerSpawn()` 直接返回注册身体脚底原点，净空格数由玩家 `localAabb` 高度推导，计算任务删除 `-1.6` 二次转换。Headless 5 秒用例同时确认 100 个 Logic batch 与 starter actor 的真实 Authority 位移。安全出生、计算任务、Headless 共 3 个文件 21 项通过，受影响 ESLint、源码 TypeScript 与 `git diff --check` 通过；测试 TypeScript 暂被并行流体优先级测试对已变更接口的 4 项调用阻塞，本阶段文件没有诊断。
+
 ## Delivery Snapshot
 
 - 生产入口：`src/server/headless/headless-session.ts`、`scripts/server-headless.mjs`。

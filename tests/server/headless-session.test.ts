@@ -39,6 +39,32 @@ describe('HeadlessSession', () => {
     expect(advanced.snapshot.physicsDebtMs).toBeCloseTo(0, 6);
   });
 
+  it('turns Logic decisions into observable Authority actor movement', async () => {
+    const session = await HeadlessSession.create({ seedText: 'logic-live-audit', initialWorldTime: 9 });
+    const before = new Map(
+      session.runtime
+        .view()
+        .entities.filter((entity) => entity.type === 'creature' || entity.type === 'npc')
+        .map((entity) => [entity.id, entity.position] as const),
+    );
+
+    const advanced = await session.advanceSession(5_000);
+    const distances = session.runtime
+      .view()
+      .entities.filter((entity) => before.has(entity.id))
+      .map((entity) => {
+        const initial = before.get(entity.id)!;
+        return Math.hypot(
+          entity.position[0] - initial[0],
+          entity.position[1] - initial[1],
+          entity.position[2] - initial[2],
+        );
+      });
+
+    expect(advanced.lanes.logicBatches).toBe(100);
+    expect(Math.max(...distances)).toBeGreaterThan(0.1);
+  });
+
   it('computes and commits fluid work during session advancement', async () => {
     const session = await HeadlessSession.create({ seedText: 'headless-fluid' });
     expect((await session.executeLine('/setblock 2 30 2 water', 1)).result.success).toBe(true);
