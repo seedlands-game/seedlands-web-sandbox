@@ -227,62 +227,78 @@ test('mosslight-68自然河岸需Space上岸，角色与掉落物失去支撑后
     requestAnimationFrame(capture);
     return { actor: harness.authorityBody(actorId), item: harness.authorityBody(itemId) };
   }, fallingIds);
-  await page.evaluate(async () => {
-    const harness = window.__seedlandsHarness as unknown as HarnessApi;
-    await harness.setVoxelAt(27, 16, -30, 0);
-    await harness.setVoxelAt(29, 16, -30, 0);
-  });
-  await expect
-    .poll(
-      async () =>
-        (
-          await page.evaluate(
-            ({ actorId, itemId }) => ({
-              actor: window.__seedlandsHarness!.authorityBody(actorId),
-              item: window.__seedlandsHarness!.authorityBody(itemId),
-            }),
-            fallingIds,
-          )
-        ).actor?.velocity[1] ?? 0,
-    )
-    .toBeLessThan(-0.1);
-  await expect
-    .poll(
-      async () =>
-        (
-          await page.evaluate(
-            ({ actorId, itemId }) => ({
-              actor: window.__seedlandsHarness!.authorityBody(actorId),
-              item: window.__seedlandsHarness!.authorityBody(itemId),
-            }),
-            fallingIds,
-          )
-        ).item?.velocity[1] ?? 0,
-    )
-    .toBeLessThan(-0.1);
-  await testInfo.attach('natural-river-05-entity-midfall', { body: await page.screenshot(), contentType: 'image/png' });
-  await expect
-    .poll(
-      async () =>
-        (await page.evaluate((id) => window.__seedlandsHarness!.authorityBody(id), fallingIds.actorId))?.position[1],
-    )
-    .toBeLessThan(fallStart.actor!.position[1] - 1);
-  await expect
-    .poll(
-      async () =>
-        (await page.evaluate((id) => window.__seedlandsHarness!.authorityBody(id), fallingIds.itemId))?.position[1],
-    )
-    .toBeLessThan(fallStart.item!.position[1] - 1);
-  const fallEvidence = await page.evaluate(() => {
-    const target = window as unknown as NaturalEvidenceWindow;
-    target.__naturalFallSampling = false;
-    return target.__naturalFallFrames ?? [];
-  });
-  expect(fallEvidence.some(({ actor }) => (actor?.velocity[1] ?? 0) < 0)).toBe(true);
-  expect(fallEvidence.some(({ item }) => (item?.velocity[1] ?? 0) < 0)).toBe(true);
-  await testInfo.attach('natural-bank-entity-fall', {
-    body: JSON.stringify({ fallingIds, fallStart, fallEvidence }, null, 2),
-    contentType: 'application/json',
-  });
-  await testInfo.attach('natural-river-06-entity-landed', { body: await page.screenshot(), contentType: 'image/png' });
+  try {
+    await page.evaluate(async () => {
+      const harness = window.__seedlandsHarness as unknown as HarnessApi;
+      await harness.setVoxelAt(27, 16, -30, 0);
+      await harness.setVoxelAt(29, 16, -30, 0);
+    });
+    await expect
+      .poll(
+        async () =>
+          (
+            await page.evaluate(
+              ({ actorId, itemId }) => ({
+                actor: window.__seedlandsHarness!.authorityBody(actorId),
+                item: window.__seedlandsHarness!.authorityBody(itemId),
+              }),
+              fallingIds,
+            )
+          ).actor?.velocity[1] ?? 0,
+      )
+      .toBeLessThan(-0.1);
+    await expect
+      .poll(
+        async () =>
+          (
+            await page.evaluate(
+              ({ actorId, itemId }) => ({
+                actor: window.__seedlandsHarness!.authorityBody(actorId),
+                item: window.__seedlandsHarness!.authorityBody(itemId),
+              }),
+              fallingIds,
+            )
+          ).item?.velocity[1] ?? 0,
+      )
+      .toBeLessThan(-0.1);
+    await testInfo.attach('natural-river-05-entity-midfall', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate((id) => window.__seedlandsHarness!.authorityBody(id), fallingIds.actorId))?.position[1],
+      )
+      .toBeLessThan(fallStart.actor!.position[1] - 1);
+    await expect
+      .poll(
+        async () =>
+          (await page.evaluate((id) => window.__seedlandsHarness!.authorityBody(id), fallingIds.itemId))?.position[1],
+      )
+      .toBeLessThan(fallStart.item!.position[1] - 1);
+    const fallEvidence = await page.evaluate(() => {
+      const target = window as unknown as NaturalEvidenceWindow;
+      target.__naturalFallSampling = false;
+      return target.__naturalFallFrames ?? [];
+    });
+    expect(fallEvidence.some(({ actor }) => (actor?.velocity[1] ?? 0) < 0)).toBe(true);
+    expect(fallEvidence.some(({ item }) => (item?.velocity[1] ?? 0) < 0)).toBe(true);
+    await testInfo.attach('natural-bank-entity-fall', {
+      body: JSON.stringify({ fallingIds, fallStart, fallEvidence }, null, 2),
+      contentType: 'application/json',
+    });
+    await testInfo.attach('natural-river-06-entity-landed', {
+      body: await page.screenshot(),
+      contentType: 'image/png',
+    });
+  } finally {
+    await testInfo.attach('natural-bank-fall-final-state', {
+      body: JSON.stringify({
+        fallStart,
+        frames: await page.evaluate(() => (window as unknown as NaturalEvidenceWindow).__naturalFallFrames ?? []),
+      }),
+      contentType: 'application/json',
+    });
+  }
 });

@@ -180,6 +180,18 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
       body: JSON.stringify(await page.evaluate(() => window.__seedlandsHarness!.snapshot()), null, 2),
       contentType: 'application/json',
     });
+    await testInfo.attach('water-morph-performance-trace', {
+      body: JSON.stringify(await page.evaluate(() => window.__seedlandsHarness!.exportPerformanceTrace())),
+      contentType: 'application/json',
+    });
+    await testInfo.attach('water-morph-final-cells', {
+      body: JSON.stringify(
+        await page.evaluate(() =>
+          [0, 2, 4].map((x) => ({ x, voxel: window.__seedlandsHarness!.getVoxelAt!(x, 57, 0) })),
+        ),
+      ),
+      contentType: 'application/json',
+    });
     await testInfo.attach('water-morph-interrupted-identity', {
       body: JSON.stringify(interrupted, null, 2),
       contentType: 'application/json',
