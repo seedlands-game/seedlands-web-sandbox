@@ -214,7 +214,13 @@ export class ComputeWorkerPool {
 
   private receive(slot: WorkerSlot, value: unknown): void {
     const task = slot.task;
-    if (!task || !isWorkerResult(value) || value.taskId !== task.taskId) {
+    if (
+      !task ||
+      !isWorkerResult(value) ||
+      value.taskId !== task.taskId ||
+      value.epoch !== this.epoch ||
+      task.epoch !== this.epoch
+    ) {
       this.staleResults += 1;
       return;
     }

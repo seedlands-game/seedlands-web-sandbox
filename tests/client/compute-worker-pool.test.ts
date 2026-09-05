@@ -290,4 +290,30 @@ describe('ComputeWorkerPool', () => {
     expect(workers).toHaveLength(2);
     expect(pool.diagnostics()).toMatchObject({ workerCount: 0, queued: 0, queuedBytes: 0 });
   });
+  it('旧epoch但碰巧相同taskId的回执不能释放新会话任务槽', () => {
+    const workers: FakeWorker[] = [];
+    const results = vi.fn();
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 8,
+      maxBytes: 1024,
+      createWorker: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      onResult: results,
+    });
+    pool.switchEpoch('world:2');
+    pool.enqueue(task(1, 'general', { epoch: 'world:2' }));
+    pool.enqueue(task(2, 'general', { epoch: 'world:2' }));
+    workers[3].finish('world:1', 1);
+    expect(pool.diagnostics()).toMatchObject({ running: 1, queued: 1, staleResults: 1 });
+    expect(workers[3].posts).toHaveLength(1);
+    workers[3].finish('world:2', 1);
+    expect(results).toHaveBeenCalledTimes(1);
+    expect(workers[3].posts).toHaveLength(2);
+    pool.dispose();
+  });
 });
