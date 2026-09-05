@@ -1,26 +1,22 @@
+import { bodyConfigFor, bodyWorldAabb } from '../../physics';
+import { overlapDepth } from '../../physics/geometry';
 import { collisionBoxesForVoxel } from '../../world/voxel-model';
-
-export function playerOccupies(player: readonly number[], voxel: readonly number[]): boolean {
-  return (
-    voxel[0] + 1 > player[0] - 0.32 &&
-    voxel[0] < player[0] + 0.32 &&
-    voxel[2] + 1 > player[2] - 0.32 &&
-    voxel[2] < player[2] + 0.32 &&
-    voxel[1] + 1 > player[1] - 1.6 &&
-    voxel[1] < player[1] + 0.2
-  );
-}
 
 export function playerOccupiesVoxelShape(
   player: readonly number[],
   voxel: readonly number[],
   voxelId: number,
 ): boolean {
-  const playerMin = [player[0] - 0.32, player[1] - 1.6, player[2] - 0.32];
-  const playerMax = [player[0] + 0.32, player[1] + 0.2, player[2] + 0.32];
+  const body = bodyWorldAabb(
+    { position: { x: player[0], y: player[1], z: player[2] }, velocity: { x: 0, y: 0, z: 0 } },
+    bodyConfigFor('player'),
+  );
   return collisionBoxesForVoxel(voxelId).some((box) =>
-    box.min.every(
-      (minimum, axis) => voxel[axis] + box.max[axis] > playerMin[axis] && voxel[axis] + minimum < playerMax[axis],
+    Boolean(
+      overlapDepth(body, {
+        min: { x: voxel[0] + box.min[0], y: voxel[1] + box.min[1], z: voxel[2] + box.min[2] },
+        max: { x: voxel[0] + box.max[0], y: voxel[1] + box.max[1], z: voxel[2] + box.max[2] },
+      }),
     ),
   );
 }

@@ -71,6 +71,7 @@ test('暂停可靠冻结且恢复不粘键，权威Worker故障明确退出并�
   await startHarnessWorld(page, 'authority-pause-failure');
   await prepareFlatMovement(page);
   await lockPointer(page);
+  await page.evaluate(() => (window.__seedlandsHarness as unknown as HarnessApi).setView(0, 0));
   const before = await snapshot(page);
   await page.keyboard.down('KeyW');
   await expect
@@ -79,6 +80,7 @@ test('暂停可靠冻结且恢复不粘键，权威Worker故障明确退出并�
   await page.keyboard.press('Escape');
   await page.keyboard.up('KeyW');
   await expect(page.getByRole('dialog', { name: '暂停游戏' })).toBeVisible();
+  await expect.poll(async () => (await snapshot(page)).authority.paused).toBe(true);
   const paused = await snapshot(page);
   await page.evaluate(
     () =>
