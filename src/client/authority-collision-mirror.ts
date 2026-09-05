@@ -255,6 +255,7 @@ export function publishAuthorityCollisionCommits<Commit extends AuthorityCollisi
       for (const key of [...chunks.keys()]) {
         guard.release(key);
         chunks.delete(key);
+        requestedBaselines.add(key);
         callbacks.onUnknownChunk?.(key);
       }
     }

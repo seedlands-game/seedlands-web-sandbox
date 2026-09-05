@@ -104,11 +104,15 @@ describe('权威碰撞镜像', () => {
     const chunks = new Map([['0,0,0', chunk(4)]]);
     const onCommit = vi.fn();
     const onUnknownChunk = vi.fn();
-    const commits = Array.from({ length: 2_050 }, (_, index) => ({
-      committed: true,
-      worldRevision: (index + 1) * 2,
-      structuralChange: null,
-    }));
+    const commits = Array.from({ length: 2_050 }, (_, index) =>
+      index === 2_048
+        ? { ...commit(4, 5), worldRevision: (index + 1) * 2 }
+        : {
+            committed: true,
+            worldRevision: (index + 1) * 2,
+            structuralChange: null,
+          },
+    );
 
     publishAuthorityCollisionCommits(commits, chunks, { onCommit, onUnknownChunk }, guard);
 
