@@ -18,7 +18,7 @@ export type ComputeTask = Readonly<{
   payload: unknown;
 }>;
 
-type QueueResult =
+export type ComputeQueueResult =
   | Readonly<{ status: 'queued' }>
   | Readonly<{ status: 'merged'; replacedTaskId: number }>
   | Readonly<{ status: 'backpressure'; reason: 'task-limit' | 'byte-limit' | 'task-and-byte-limit' }>
@@ -52,7 +52,7 @@ export class ComputeTaskQueue {
     return this.queuedBytes;
   }
 
-  enqueue(task: ComputeTask): QueueResult {
+  enqueue(task: ComputeTask): ComputeQueueResult {
     if (task.epoch !== this.epoch) return { status: 'rejected', reason: 'wrong-epoch' };
     if (!this.validTask(task)) return { status: 'rejected', reason: 'invalid-task' };
     const mergeKey = this.mergeKey(task);

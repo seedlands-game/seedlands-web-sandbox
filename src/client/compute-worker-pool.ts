@@ -1,0 +1,221 @@
+import {
+  ComputeTaskQueue,
+  type ComputeLane,
+  type ComputeTask,
+  type ComputeQueueResult,
+} from '../runtime/compute-task-queue';
+import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol';
+
+export type ComputeWorkerPort = {
+  onmessage: ((event: MessageEvent<unknown>) => void) | null;
+  onerror: ((event: ErrorEvent) => void) | null;
+  postMessage(message: unknown, transfer?: Transferable[]): void;
+  terminate(): void;
+};
+
+export type ComputeWorkerResult = Readonly<{
+  kind: 'compute-result';
+  protocolVersion: typeof PROTOCOL_VERSION;
+  epoch: SessionEpoch;
+  taskId: number;
+  ok: boolean;
+  result?: unknown;
+  error?: string;
+}>;
+
+type WorkerSlot = {
+  lane: ComputeLane;
+  worker: ComputeWorkerPort;
+  task: ComputeTask | null;
+};
+
+type PendingTransfer = { transfer: Transferable[] };
+
+type ComputeWorkerPoolOptions = Readonly<{
+  epoch: SessionEpoch;
+  generalWorkerCount: 1 | 2;
+  maxTasks: number;
+  maxBytes: number;
+  createWorker: (lane: ComputeLane, index: number) => ComputeWorkerPort;
+  onResult?: (task: ComputeTask, result: unknown) => void;
+  onFailure?: (task: ComputeTask, error: Error) => void;
+  onDrop?: (taskId: number, reason: 'merged' | 'cancelled' | 'epoch-switch') => void;
+}>;
+
+export type ComputePoolDiagnostics = Readonly<{
+  workerCount: number;
+  generalWorkerCount: number;
+  running: number;
+  queued: number;
+  queuedBytes: number;
+  cancellationRequests: number;
+  staleResults: number;
+  failedTasks: number;
+}>;
+
+function isWorkerResult(value: unknown): value is ComputeWorkerResult {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<ComputeWorkerResult>;
+  return (
+    candidate.kind === 'compute-result' &&
+    candidate.protocolVersion === PROTOCOL_VERSION &&
+    typeof candidate.epoch === 'string' &&
+    Number.isSafeInteger(candidate.taskId) &&
+    typeof candidate.ok === 'boolean'
+  );
+}
+
+export class ComputeWorkerPool {
+  private epoch: SessionEpoch;
+  private queue: ComputeTaskQueue;
+  private slots: WorkerSlot[] = [];
+  private readonly transfers = new Map<number, PendingTransfer>();
+  private readonly cancelledRunning = new Set<number>();
+  private cancellationRequests = 0;
+  private staleResults = 0;
+  private failedTasks = 0;
+  private disposed = false;
+
+  constructor(private readonly options: ComputeWorkerPoolOptions) {
+    if (options.generalWorkerCount !== 1 && options.generalWorkerCount !== 2)
+      throw new RangeError('generalWorkerCount must be 1 or 2.');
+    this.epoch = options.epoch;
+    this.queue = this.createQueue(options.epoch);
+    this.createSlots();
+  }
+
+  enqueue(task: ComputeTask, transfer: readonly Transferable[] = []): ComputeQueueResult {
+    if (this.disposed) return { status: 'rejected', reason: 'invalid-task' };
+    const result = this.queue.enqueue(task);
+    if (result.status === 'queued' || result.status === 'merged') {
+      if (result.status === 'merged') {
+        this.transfers.delete(result.replacedTaskId);
+        this.options.onDrop?.(result.replacedTaskId, 'merged');
+      }
+      this.transfers.set(task.taskId, { transfer: [...transfer] });
+      this.pump();
+    }
+    return result;
+  }
+
+  cancel(taskId: number): boolean {
+    if (this.queue.cancel(taskId)) {
+      this.transfers.delete(taskId);
+      this.cancellationRequests += 1;
+      this.options.onDrop?.(taskId, 'cancelled');
+      return true;
+    }
+    const slot = this.slots.find((candidate) => candidate.task?.taskId === taskId);
+    if (!slot || this.cancelledRunning.has(taskId)) return false;
+    this.cancelledRunning.add(taskId);
+    this.cancellationRequests += 1;
+    slot.worker.postMessage({
+      kind: 'cancel-compute-task',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: this.epoch,
+      taskId,
+    });
+    return true;
+  }
+
+  switchEpoch(epoch: SessionEpoch): void {
+    if (!epoch || epoch === this.epoch) return;
+    for (const taskId of this.transfers.keys()) this.options.onDrop?.(taskId, 'epoch-switch');
+    this.terminateSlots();
+    this.epoch = epoch;
+    this.queue = this.createQueue(epoch);
+    this.transfers.clear();
+    this.cancelledRunning.clear();
+    this.createSlots();
+  }
+
+  diagnostics(): ComputePoolDiagnostics {
+    return {
+      workerCount: this.slots.length,
+      generalWorkerCount: this.options.generalWorkerCount,
+      running: this.slots.filter((slot) => slot.task).length,
+      queued: this.queue.size,
+      queuedBytes: this.queue.bytes,
+      cancellationRequests: this.cancellationRequests,
+      staleResults: this.staleResults,
+      failedTasks: this.failedTasks,
+    };
+  }
+
+  dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.terminateSlots();
+    this.transfers.clear();
+    this.cancelledRunning.clear();
+  }
+
+  private createQueue(epoch: SessionEpoch): ComputeTaskQueue {
+    return new ComputeTaskQueue({ epoch, maxTasks: this.options.maxTasks, maxBytes: this.options.maxBytes });
+  }
+
+  private createSlots(): void {
+    const lanes: ComputeLane[] = ['fluid', ...Array.from({ length: this.options.generalWorkerCount }, () => 'general')];
+    this.slots = lanes.map((lane, index) => {
+      const worker = this.options.createWorker(lane, index);
+      const slot: WorkerSlot = { lane, worker, task: null };
+      worker.onmessage = (event) => this.receive(slot, event.data);
+      worker.onerror = (event) => this.fail(slot, new Error(event.message || `${lane} compute worker failed.`));
+      return slot;
+    });
+  }
+
+  private terminateSlots(): void {
+    this.slots.forEach((slot) => {
+      if (slot.task) this.options.onDrop?.(slot.task.taskId, 'epoch-switch');
+      slot.worker.onmessage = null;
+      slot.worker.onerror = null;
+      slot.worker.terminate();
+    });
+    this.slots = [];
+  }
+
+  private pump(): void {
+    if (this.disposed) return;
+    for (const slot of this.slots) {
+      if (slot.task) continue;
+      const task = this.queue.take(slot.lane);
+      if (!task) continue;
+      slot.task = task;
+      const transfer = this.transfers.get(task.taskId)?.transfer ?? [];
+      this.transfers.delete(task.taskId);
+      slot.worker.postMessage({ kind: 'run-compute-task', task }, transfer);
+    }
+  }
+
+  private receive(slot: WorkerSlot, value: unknown): void {
+    const task = slot.task;
+    if (!task || !isWorkerResult(value) || value.taskId !== task.taskId) {
+      this.staleResults += 1;
+      return;
+    }
+    slot.task = null;
+    const cancelled = this.cancelledRunning.delete(task.taskId);
+    if (value.epoch !== this.epoch || task.epoch !== this.epoch || cancelled) {
+      this.staleResults += 1;
+      this.options.onDrop?.(task.taskId, cancelled ? 'cancelled' : 'epoch-switch');
+    } else if (!value.ok) this.failTask(task, new Error(value.error || 'Compute worker task failed.'));
+    else {
+      this.queue.complete(task.taskId);
+      this.options.onResult?.(task, value.result);
+    }
+    this.pump();
+  }
+
+  private fail(slot: WorkerSlot, error: Error): void {
+    const task = slot.task;
+    slot.task = null;
+    if (task) this.failTask(task, error);
+    this.pump();
+  }
+
+  private failTask(task: ComputeTask, error: Error): void {
+    this.failedTasks += 1;
+    this.options.onFailure?.(task, error);
+  }
+}
