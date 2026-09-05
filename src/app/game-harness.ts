@@ -55,6 +55,12 @@ export type HarnessApi = {
   sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
   flushSave: () => Promise<void>;
   blockLogicWorker: (ms: number) => Promise<void>;
+  authorityBody: (entityId: string) => {
+    physicsTick: number;
+    position: [number, number, number];
+    velocity: [number, number, number];
+    grounded: boolean;
+  } | null;
 };
 
 type RuntimeHarnessBindings = {
@@ -407,6 +413,18 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     },
     flushSave: bindings.flushSave,
     blockLogicWorker: bindings.blockLogicWorker,
+    authorityBody: (entityId) => {
+      const snapshot = bindings.authority()?.snapshot;
+      const entity = snapshot?.entities.find(({ id }) => id === entityId);
+      return snapshot && entity
+        ? {
+            physicsTick: snapshot.physicsTick,
+            position: [entity.body.position.x, entity.body.position.y, entity.body.position.z],
+            velocity: [entity.body.velocity.x, entity.body.velocity.y, entity.body.velocity.z],
+            grounded: entity.grounded,
+          }
+        : null;
+    },
   };
 }
 
