@@ -90,6 +90,18 @@ async function establishAuthorityLoad(page: Page) {
     await harness.fillWorld({ from: [-14, 48, -11], to: [14, 48, 3], voxel: 3 });
     // Harness 坐标是相机/眼睛位置；50.6 对应脚底 y=49，避免嵌入 y=48 的地板。
     await harness.movePlayerTo(0, 50.6, 0);
+    for (const [x, z] of targets) {
+      await harness.fillWorld({ from: [x - 1, 48, z - 1], to: [x + 1, 49, z + 1], voxel: 3 });
+      await harness.setVoxelAt(x, 49, z, 0);
+      await harness.setVoxelAt(x + 1, 49, z, 0);
+    }
+    await harness.fillWorld({ from: [15, 49, 15], to: [48, 52, 48], voxel: 0 });
+    await harness.fillWorld({ from: [15, 48, 15], to: [48, 48, 48], voxel: 3 });
+    await harness.fillWorld({ from: [15, 49, 15], to: [15, 49, 48], voxel: 3 });
+    await harness.fillWorld({ from: [48, 49, 15], to: [48, 49, 48], voxel: 3 });
+    await harness.fillWorld({ from: [16, 49, 15], to: [47, 49, 15], voxel: 3 });
+    await harness.fillWorld({ from: [16, 49, 48], to: [47, 49, 48], voxel: 3 });
+    // 静态几何先全部提交；实体最后生成，避免准备期的数十次远端编辑让自主角色走出近场。
     for (let index = 0; index < 16; index += 1) {
       const result = await harness.executeGameplayCommand({
         type: 'spawn-actor',
@@ -108,17 +120,6 @@ async function establishAuthorityLoad(page: Page) {
       });
       if (!result.success) throw new Error(result.error.message);
     }
-    for (const [x, z] of targets) {
-      await harness.fillWorld({ from: [x - 1, 48, z - 1], to: [x + 1, 49, z + 1], voxel: 3 });
-      await harness.setVoxelAt(x, 49, z, 0);
-      await harness.setVoxelAt(x + 1, 49, z, 0);
-    }
-    await harness.fillWorld({ from: [15, 49, 15], to: [48, 52, 48], voxel: 0 });
-    await harness.fillWorld({ from: [15, 48, 15], to: [48, 48, 48], voxel: 3 });
-    await harness.fillWorld({ from: [15, 49, 15], to: [15, 49, 48], voxel: 3 });
-    await harness.fillWorld({ from: [48, 49, 15], to: [48, 49, 48], voxel: 3 });
-    await harness.fillWorld({ from: [16, 49, 15], to: [47, 49, 15], voxel: 3 });
-    await harness.fillWorld({ from: [16, 49, 48], to: [47, 49, 48], voxel: 3 });
   }, TARGETS);
 }
 

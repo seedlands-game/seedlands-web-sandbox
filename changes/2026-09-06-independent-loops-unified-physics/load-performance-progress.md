@@ -40,5 +40,6 @@ A/B 使用相同 seed、坐标、命令顺序和编辑体积；每个配置在�
 - [x] 在不可变 `afe170f` 的生产预览上得到排除 streaming race 后的真实 RED：准备态为 `loadedChunks=50`、`renderedChunks=37`、所有 streaming/Mesh/上传队列为 0、`presentedEntities=84`、`triangles=4778`。第一个隔离目标首见总耗时 `915.7ms`，其中编辑到目标 `fluid-v2` 提交 `701.8ms`、提交到 Worker 开始 `175.3ms`、Worker `17.8ms`、挂接到可见 `20.8ms`。原始日志为 `/tmp/authority-load-ready-target0-debug.jsonlog`。
 - [x] 定位首段延迟为权威流体 FIFO：1024 水源形成的普通 frontier 排在单格玩家编辑前，单个 128 格 lease 无近场优先入口。先写 `tests/server/fluid-interactive-priority.test.ts`，确认普通/交互公平、队内提升、8192 hard cap、reject/abort 精确恢复、Gameplay 采集/放置和 Harness 单格编辑共 6 项预期 RED，hard cap 项保持 GREEN。
 - [x] 实现两条有界 frontier：每个无 cleanup 的 128 格 lease 先取至多 32 个交互格并保留 96 个普通格；普通格不足时才用交互格填满剩余预算。已排队格提升不增加 pending，未知格在 hard cap 下不增长，拒绝或中止按原 lane 和顺序恢复。只有 `player-edit` 或真实 `player` 实体发起的单 `edits` 提交进入交互 lane；多编辑与 mutation buffer 继续走普通 lane。
-- [x] 优先级定向 7 项、既有流体事务/运行时、Gameplay 与世界事务合计 5 文件 60 项及测试 TypeScript 通过。
+- [x] 优先级定向 7 项、既有流体事务/运行时、Gameplay 与世界事务合计 5 文件 61 项及测试 TypeScript 通过。
+- [x] `5904dc0` 不可变产物的首次复跑在流体采样前 fail closed：16 个角色、64 个物件、50 个已加载 Chunk 和空 Mesh 队列均满足，但 `nearPlayer=79`。原因是先生成实体、再执行数十次静态几何提交，给自主角色留下了离开近场的准备时间。夹具改为静态几何全部提交后才生成同样的 16+64 实体；没有减少实体、降低画质或放宽 `nearPlayer>=80`。
 - [ ] 在包含上述优先级修复的不可变生产产物上复跑 20 个样本和 2/3 槽位，确认目标首见 p95≤100ms；若首段已达标而 Mesh 阶段仍超标，再以新 trace 证据决定是否需要窄化 Mesh 调度，不能预先修改阈值。
