@@ -7,19 +7,25 @@ type DebugTimeOptions = Pick<
 
 export class PlayerDebugTimeKeys {
   private debugModifierHeld = false;
+  private collisionChordConsumed = false;
 
   constructor(private readonly options: DebugTimeOptions) {}
 
   handleKeyDown(event: KeyboardEvent): boolean {
     if (event.code === 'F3') {
       event.preventDefault();
-      this.debugModifierHeld = true;
-      if (!event.repeat) this.options.onToggleDebug();
+      if (!event.repeat) {
+        this.debugModifierHeld = true;
+        this.collisionChordConsumed = false;
+      }
       return true;
     }
     if (event.code === 'KeyB' && this.debugModifierHeld) {
       event.preventDefault();
-      if (!event.repeat) this.options.onToggleCollisionDebug();
+      if (!event.repeat) {
+        this.collisionChordConsumed = true;
+        this.options.onToggleCollisionDebug();
+      }
       return true;
     }
     const environment = this.options.getEnvironment();
@@ -35,10 +41,13 @@ export class PlayerDebugTimeKeys {
   }
 
   handleKeyUp(code: string): void {
-    if (code === 'F3') this.debugModifierHeld = false;
+    if (code !== 'F3' || !this.debugModifierHeld) return;
+    if (!this.collisionChordConsumed) this.options.onToggleDebug();
+    this.clear();
   }
 
   clear(): void {
     this.debugModifierHeld = false;
+    this.collisionChordConsumed = false;
   }
 }

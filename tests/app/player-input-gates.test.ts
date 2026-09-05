@@ -88,7 +88,36 @@ it('按住F3再按B切换真实碰撞箱', () => {
 
   windowStub.onkeydown!({ code: 'F3', target: {}, preventDefault: vi.fn(), repeat: false });
   windowStub.onkeydown!({ code: 'KeyB', target: {}, preventDefault: vi.fn(), repeat: false });
+  windowStub.onkeyup!({ code: 'F3' });
 
-  expect(toggleDebug).toHaveBeenCalledOnce();
+  expect(toggleDebug).not.toHaveBeenCalled();
   expect(toggleCollisionDebug).toHaveBeenCalledOnce();
+});
+
+it('单独短按F3只在松开时切换普通调试面板', () => {
+  const windowStub = {
+    onkeydown: null as null | ((event: object) => void),
+    onkeyup: null as null | ((event: object) => void),
+  };
+  vi.stubGlobal('window', windowStub);
+  vi.stubGlobal('document', {});
+  vi.stubGlobal('HTMLInputElement', class {});
+  vi.stubGlobal('HTMLTextAreaElement', class {});
+  const toggleDebug = vi.fn();
+  const options = {
+    canvas: {},
+    getEnvironment: () => null,
+    isPaused: () => false,
+    isUiBlockingInput: () => false,
+    onToggleDebug: toggleDebug,
+    onToggleCollisionDebug: vi.fn(),
+  } as unknown as ConstructorParameters<typeof PlayerController>[0];
+  const controller = new PlayerController(options);
+  controller.install();
+
+  windowStub.onkeydown!({ code: 'F3', target: {}, preventDefault: vi.fn(), repeat: false });
+  windowStub.onkeydown!({ code: 'F3', target: {}, preventDefault: vi.fn(), repeat: true });
+  expect(toggleDebug).not.toHaveBeenCalled();
+  windowStub.onkeyup!({ code: 'F3' });
+  expect(toggleDebug).toHaveBeenCalledOnce();
 });
