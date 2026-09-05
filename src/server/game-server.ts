@@ -35,6 +35,8 @@ import { peekLoadedVoxel } from './loaded-voxel-reader';
 import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
 import type { FrozenGameSaveSnapshot } from './persistence/game-save-snapshot';
 import { GameSaveRuntime } from './persistence/game-save-runtime';
+import { SINGLE_EDIT_METRICS, SINGLE_EDIT_NOOP_METRICS } from './world-edit-metrics';
+import { readGameSaveCheckpoint } from './persistence/game-save-checkpoint';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -45,32 +47,12 @@ import type {
   VoxelRegionChanged,
   WorkerCanonicalResult,
   WorkerMeshPreparation,
-  WorldCommitMetrics,
   WorldCommitResult,
   WorldEditBatch,
   WorldSemanticEvent,
 } from './game-server-types';
 
 const EMPTY_SEMANTIC_EVENTS: readonly WorldSemanticEvent[] = Object.freeze([]);
-const singleEditMetrics = (canonicalWriteCount: 0 | 1, meshInvalidationCount: number): WorldCommitMetrics => ({
-  timingStatus: 'not-collected-hot-path',
-  inputMutationCount: 1,
-  canonicalWriteCount,
-  dirtyChunkCount: canonicalWriteCount,
-  meshInvalidationCount,
-  structuralEventCount: canonicalWriteCount,
-  semanticEventCount: 0,
-  mutationPayloadBytes: 14,
-  mutationCapacityBytes: 14,
-  validationMs: 0,
-  resolveMs: 0,
-  applyMs: 0,
-  commitMs: 0,
-});
-const SINGLE_EDIT_NOOP_METRICS = Object.freeze(singleEditMetrics(0, 0));
-const SINGLE_EDIT_METRICS = Array.from({ length: 9 }, (_, meshInvalidationCount) =>
-  Object.freeze(singleEditMetrics(1, meshInvalidationCount)),
-);
 
 export class GameServer extends GameServerGameplayFacade {
   readonly seed: number;
@@ -80,6 +62,7 @@ export class GameServer extends GameServerGameplayFacade {
   private accessSequence = 0;
   private readonly persistence?: ChunkPersistence & Partial<GameplayPersistence>;
   private revision = 0;
+  private restoredSequence = 0;
   private appliedMutationCount = 0;
   private readonly fluidRuntime: FluidTransactionRuntime<WorldCommitResult>;
   private readonly fluidChunks: FluidChunkAccess;
@@ -115,6 +98,17 @@ export class GameServer extends GameServerGameplayFacade {
 
   get worldTime(): number {
     return this.clock;
+  }
+
+  override async restore(): Promise<void> {
+    const checkpoint = readGameSaveCheckpoint(await this.persistence?.loadGameCheckpoint?.());
+    await super.restore();
+    this.restoredSequence = checkpoint?.commitSequence ?? 0;
+    this.revision = checkpoint?.worldRevision ?? 0;
+  }
+
+  get restoredCommitSequence(): number {
+    return this.restoredSequence;
   }
 
   get materializedChunkCount(): number {

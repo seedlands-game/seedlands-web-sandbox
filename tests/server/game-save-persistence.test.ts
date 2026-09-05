@@ -160,7 +160,7 @@ describe('GameServer 一致冻结保存', () => {
     expect(server.getChunk(0, 0, 0)).toMatchObject({ revision: 1, persistedRevision: 0, dirty: true });
   });
 
-  it('commitSequence 只在当前权威会话内排序，新会话可从零开始', async () => {
+  it('持久检查点跨会话保持排序，不能用零序号覆盖旧保存', async () => {
     const persistence = new MemoryGamePersistence();
     const first = new GameServer({ seedText: 'new-session-sequence', persistence });
     spawnState(first);
@@ -169,6 +169,8 @@ describe('GameServer 一致冻结保存', () => {
     const second = new GameServer({ seedText: 'new-session-sequence', persistence });
     await second.restore();
     second.giveItem('player', { itemId: ItemIds.Berry, count: 1 });
-    await expect(second.save(0)).resolves.toMatchObject({ gameplaySaved: true, commitSequence: 0 });
+    expect(second.restoredCommitSequence).toBe(17);
+    await expect(second.save(0)).rejects.toThrow(/newer.*checkpoint/i);
+    await expect(second.save(18)).resolves.toMatchObject({ gameplaySaved: true, commitSequence: 18 });
   });
 });

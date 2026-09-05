@@ -74,6 +74,7 @@ type WorldRecord = {
   legacyMigrated?: boolean;
   updatedAt: number;
   commitSequence?: number;
+  worldRevision?: number;
 };
 
 type SuccessResponse = { requestId: number; ok: true; result: unknown };
@@ -179,6 +180,9 @@ const initialize = async (task: InitTask) => {
     generatorVersion,
     player: existing?.player ?? null,
     gameplaySnapshot: existing?.gameplaySnapshot ?? null,
+    checkpoint: existing
+      ? { commitSequence: existing.commitSequence ?? 0, worldRevision: existing.worldRevision ?? 0 }
+      : null,
     corpusSummary: existing?.corpusSummary ?? null,
     legacyMigrated: existing?.legacyMigrated ?? false,
   };

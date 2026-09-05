@@ -1,6 +1,7 @@
 import type { ChunkPersistence, ChunkSnapshot } from '../server/persistence/chunk-persistence';
 import type { GameplaySnapshot } from '../server/gameplay/gameplay-runtime';
 import type { FrozenGameSaveSnapshot } from '../server/persistence/game-save-snapshot';
+import { readGameSaveCheckpoint, type GameSaveCheckpoint } from '../server/persistence/game-save-checkpoint';
 import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
 import type { WorldOpenMode } from './world-version-policy';
 
@@ -29,6 +30,7 @@ type InitResult = {
   generatorVersion: number;
   player: [number, number, number] | null;
   gameplaySnapshot: unknown;
+  checkpoint?: unknown;
   corpusSummary: ChunkPersistenceCorpusSummary | null;
   legacyMigrated: boolean;
 };
@@ -134,6 +136,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     persistence.generatorVersion = initialized.generatorVersion;
     persistence.playerValue = initialized.player;
     persistence.gameplaySnapshotValue = initialized.gameplaySnapshot;
+    persistence.checkpointValue = readGameSaveCheckpoint(initialized.checkpoint);
     persistence.corpusSummaryValue = initialized.corpusSummary;
     if (options.legacySnapshots?.length && !initialized.legacyMigrated) {
       for (const snapshot of options.legacySnapshots)
@@ -180,6 +183,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
 
   private playerValue: [number, number, number] | null = null;
   private gameplaySnapshotValue: unknown = null;
+  private checkpointValue: GameSaveCheckpoint | null = null;
 
   get restoredPlayer(): [number, number, number] | null {
     return this.playerValue ? [...this.playerValue] : null;
@@ -187,6 +191,10 @@ export class BrowserChunkPersistence implements ChunkPersistence {
 
   loadGameplaySnapshot(): unknown {
     return structuredClone(this.gameplaySnapshotValue);
+  }
+
+  loadGameCheckpoint(): GameSaveCheckpoint | null {
+    return this.checkpointValue ? { ...this.checkpointValue } : null;
   }
 
   async saveGameplaySnapshot(snapshot: GameplaySnapshot): Promise<void> {
@@ -224,6 +232,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     });
     snapshot.chunks.forEach((chunk) => this.missing.delete(chunk.key));
     this.gameplaySnapshotValue = structuredClone(snapshot.gameplay);
+    this.checkpointValue = readGameSaveCheckpoint(snapshot);
   }
 
   loadLegacyPlayerPosition(): [number, number, number] | null {

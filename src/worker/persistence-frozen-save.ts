@@ -1,5 +1,6 @@
 import { createStoredChunkRecord, storedChunkRecordBytes, type StoredChunkRecord } from '../world/chunk-snapshot-codec';
 import type { FrozenGameSaveSnapshot } from '../server/persistence/game-save-snapshot';
+import { readGameSaveCheckpoint } from '../server/persistence/game-save-checkpoint';
 
 export type FrozenSaveTaskSnapshot = Omit<FrozenGameSaveSnapshot, 'chunks'> & {
   chunks: Array<
@@ -18,6 +19,7 @@ type WorldRecord = {
   player: [number, number, number] | null;
   gameplaySnapshot?: unknown;
   commitSequence?: number;
+  worldRevision?: number;
   updatedAt: number;
 };
 
@@ -42,6 +44,7 @@ export async function persistFrozenGameSnapshot(options: {
   normalizeRecord: (value: unknown) => StoredChunkRecord;
 }) {
   const { config, snapshot } = options;
+  const checkpoint = readGameSaveCheckpoint(snapshot)!;
   if (
     snapshot.seedText !== config.seedText ||
     snapshot.generatorVersion !== config.generatorVersion ||
@@ -91,6 +94,7 @@ export async function persistFrozenGameSnapshot(options: {
       ...existingWorld,
       gameplaySnapshot: snapshot.gameplay,
       commitSequence: snapshot.commitSequence,
+      worldRevision: checkpoint.worldRevision,
       updatedAt: Date.now(),
     } satisfies WorldRecord);
     await done;
