@@ -104,6 +104,92 @@ describe('runtime session protocol', () => {
     expect(buffer.requiresResync).toBe(true);
   });
 
+  it('限制未来输入窗口和待处理数量且违规后可用较新完整状态恢复', () => {
+    const buffer = new InputCommandBuffer('world:1', 'player-input', {
+      maxFutureTicks: 4,
+      maxPendingCommands: 2,
+    });
+    const command = (sequence: number, targetPhysicsTick: number, moveX = 1): InputCommand => ({
+      kind: 'input',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: 'world:1',
+      stream: 'player-input',
+      sequence,
+      targetPhysicsTick,
+      issuedAtMs: sequence,
+      state: { moveX, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+      edges: { jumpPressed: false },
+    });
+    buffer.consumeForTick(5);
+
+    expect(buffer.push(command(1, 10))).toBe('too-far-ahead');
+    expect(buffer.requiresResync).toBe(true);
+    expect(buffer.push(command(2, 6))).toBe('accepted');
+    expect(buffer.requiresResync).toBe(false);
+    expect(buffer.push(command(3, 7))).toBe('accepted');
+    expect(buffer.push(command(4, 8))).toBe('capacity');
+  });
+
+  it('拒绝 sequence 递增但目标 tick 倒退并保证 ack 永不回退', () => {
+    const buffer = new InputCommandBuffer('world:1', 'player-input');
+    const command = (sequence: number, targetPhysicsTick: number): InputCommand => ({
+      kind: 'input',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: 'world:1',
+      stream: 'player-input',
+      sequence,
+      targetPhysicsTick,
+      issuedAtMs: sequence,
+      state: { moveX: sequence, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+      edges: { jumpPressed: false },
+    });
+
+    expect(buffer.push(command(10, 100))).toBe('accepted');
+    expect(buffer.push(command(11, 90))).toBe('target-out-of-order');
+    expect(buffer.push(command(12, 2))).toBe('accepted');
+    expect(buffer.consumeForTick(2).acknowledgedSequence).toBe(12);
+    expect(buffer.consumeForTick(100).acknowledgedSequence).toBe(12);
+  });
+
+  it('迟到输入后接受未来 tick 的完整状态并恢复移动', () => {
+    const buffer = new InputCommandBuffer('world:1', 'player-input');
+    const late = {
+      kind: 'input' as const,
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: 'world:1',
+      stream: 'player-input',
+      issuedAtMs: 10,
+      state: { moveX: 1, moveZ: 0, verticalIntent: 0 as const, jumpHeld: false },
+      edges: { jumpPressed: false },
+    };
+    buffer.consumeForTick(5);
+
+    expect(buffer.push({ ...late, sequence: 1, targetPhysicsTick: 3 })).toBe('late');
+    expect(buffer.push({ ...late, sequence: 2, targetPhysicsTick: 7 })).toBe('accepted');
+    expect(buffer.requiresResync).toBe(false);
+    expect(buffer.consumeForTick(7)).toMatchObject({ state: { moveX: 1 }, acknowledgedSequence: 2 });
+  });
+
+  it('事务回执窗口有界且淘汰后的旧 sequence 明确过期而不再执行', () => {
+    const transactions = new TransactionDeduplicator<number>('epoch-a', {
+      maxStreams: 1,
+      maxReceiptsPerStream: 2,
+    });
+    let executions = 0;
+    const execute = () => ++executions;
+
+    expect(transactions.execute('epoch-a', 'player', 'edits', 1, execute).status).toBe('executed');
+    expect(transactions.execute('epoch-a', 'player', 'edits', 2, execute).status).toBe('executed');
+    expect(transactions.execute('epoch-a', 'player', 'edits', 3, execute).status).toBe('executed');
+    expect(transactions.execute('epoch-a', 'player', 'edits', 1, execute)).toEqual({ status: 'expired' });
+    expect(transactions.execute('epoch-a', 'player', 'edits', 2, execute)).toEqual({
+      status: 'duplicate',
+      receipt: 2,
+    });
+    expect(transactions.execute('epoch-a', 'other', 'edits', 1, execute)).toEqual({ status: 'capacity' });
+    expect(executions).toBe(3);
+  });
+
   it('创建非空且递增隔离的会话 epoch', () => {
     expect(createSessionEpoch('world', 1)).toBe('world:1');
     expect(createSessionEpoch('world', 2)).not.toBe(createSessionEpoch('world', 1));

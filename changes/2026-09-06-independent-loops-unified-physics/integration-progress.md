@@ -21,6 +21,8 @@
 - 身体注册表 GREEN：`pnpm exec vitest run tests/physics/body-registry.test.ts tests/client/entity-hit-volume.test.ts tests/physics/step-body.test.ts`，3 个文件、20 个测试全部通过。玩家、掉落物与三类角色使用脚底中心具名身体；战斗射线改为消费同一注册表，不再保留 client 硬编码碰撞尺寸。
 - 流体 Worker 端口 RED：`pnpm exec vitest run tests/server/authority-game-server-port.test.ts` 因 `GameServer.requestFluidWork()` 尚不存在而失败；证明用例没有落回同步 `advanceFluid()`。
 - 流体 Worker 端口 GREEN：`pnpm exec vitest run tests/server/authority-game-server-port.test.ts tests/server/fluid-transaction.test.ts tests/server/voxel-fluid-runtime.test.ts`，3 个文件、26 个测试全部通过。Authority 可租赁只读快照、接纳候选或归还租约；请求端口不执行候选计算。同步 `advanceFluid()` 仅保留旧路径兼容，最终生产调度不得调用。
+- 协议有界窗口 RED：`pnpm exec vitest run tests/runtime/session-protocol.test.ts`，新增 4 项均按预期失败：未来 tick 无上限、倒序目标 tick 被接纳、迟到后重同步标记不恢复、事务回执永久增长。
+- 协议有界窗口 GREEN：`pnpm exec vitest run tests/runtime/session-protocol.test.ts tests/server/authority-session.test.ts`，2 个文件、18 个测试全部通过。输入默认最多保留 256 条且不超过未来 240 tick；目标 tick 倒序或超限时清空未消费历史并要求完整状态重同步，随后较新合法状态可恢复。事务每流只保留有限回执，淘汰后的旧 sequence 明确返回 `expired`，不会再次执行；输入 ack 始终只在物理步消费后推进且不回退。
 
 ## 集成提交
 
