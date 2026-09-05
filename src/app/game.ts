@@ -1,11 +1,5 @@
 import * as pc from 'playcanvas';
-import {
-  createSceneApplication,
-  createPerformanceTelemetry,
-  createSun,
-  createCamera,
-  selectPerformanceProfile,
-} from './scene-bootstrap';
+import * as sceneBootstrap from './scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
 import { WaterExperience } from './water-experience';
@@ -40,6 +34,7 @@ import { AuthorityPresentationSync } from './authority-presentation-sync';
 import { GameUiProjection } from './game-ui-projection';
 import { CollisionDebugRuntime } from './collision-debug-runtime';
 import * as runtimeControls from './game-runtime-controls';
+import { applySessionWorkerBudget, readBrowserSessionConfig } from './browser-session-config';
 
 export class Game {
   private paused = false;
@@ -59,7 +54,7 @@ export class Game {
   private frameMs = 0;
   private lastFrameTimestamp = performance.now();
   private performanceProfile: PerformanceProfile = PERFORMANCE_PROFILES.balanced;
-  private performanceTelemetry = createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
+  private performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
   private readonly store = new BrowserWorldStore();
   private authority: BrowserAuthorityClient | null = null;
   private computeRuntime: BrowserComputeRuntime | null = null;
@@ -111,23 +106,19 @@ export class Game {
     this.uiProjection.reset();
     const quality = QUALITY_PROFILES[this.qualityLevel];
     const lightingBudget = LIGHTING_QUALITY_BUDGETS[this.qualityLevel];
-    this.performanceProfile = selectPerformanceProfile(location.search);
-    this.performanceTelemetry = createPerformanceTelemetry(this.performanceProfile);
+    this.performanceProfile = sceneBootstrap.selectPerformanceProfile(location.search);
+    this.performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(this.performanceProfile);
     this.lastFrameTimestamp = performance.now();
-    this.app = createSceneApplication(this.canvas);
+    this.app = sceneBootstrap.createSceneApplication(this.canvas);
     this.collisionDebug = new CollisionDebugRuntime(this.app);
-    const light = createSun(this.app, lightingBudget);
-    this.camera = createCamera(this.app, quality.fogEnd + 18);
+    const light = sceneBootstrap.createSun(this.app, lightingBudget);
+    this.camera = sceneBootstrap.createCamera(this.app, quality.fogEnd + 18);
     this.visualResources = await createVoxelMaterials(this.app, quality);
     this.camera.camera!.layers = [...this.camera.camera!.layers, this.visualResources.waterLayer.id];
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
-    const parameters = new URLSearchParams(location.search);
-    const harnessEnabled = parameters.has('harness');
-    const generalWorkerCount = parameters.get('generalWorkers') === '2' ? 2 : 1;
-    this.performanceProfile = {
-      ...this.performanceProfile,
-      maxWorkerTasksInFlight: generalWorkerCount,
-    };
+    const sessionConfig = readBrowserSessionConfig(location.search);
+    const { harnessEnabled, generalWorkerCount, physicsHz, authorityTransportFaults } = sessionConfig;
+    this.performanceProfile = applySessionWorkerBudget(this.performanceProfile, generalWorkerCount);
     const session = await startBrowserWorkerSession({
       epochSequence: ++this.sessionSequence,
       seedText,
@@ -136,8 +127,11 @@ export class Game {
       initialWorldTime: this.environment.worldTime,
       harnessEnabled,
       generalWorkerCount,
+      frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
+      authorityTransportFaults,
       onSnapshot: (snapshot) => this.authoritySync.receive(snapshot),
       onGameplay: () => this.gameplayClient?.refresh(),
+      onPlayerDeath: () => this.controller?.releaseInput(),
       onCommit: (commit) => this.world?.consumeServerCommit(commit),
       onUnknownChunk: (key) => runtimeControls.requestAuthorityChunk(this.world, key),
       onInputDecision: ({ decision, requiresResync }) => {
@@ -223,7 +217,7 @@ export class Game {
       actions: {
         toggleMap: () => this.toggleMap(),
         toggleDebug: () => this.toggleDebug(),
-        toggleCollisionDebug: () => this.collisionDebug?.toggle(),
+        toggleCollisionDebug: () => this.toggleCollisionDebug(),
         toggleCommandShell: () => this.toggleCommandShell(),
         toggleInventory: () => this.toggleInventory(),
         setWorldClockPaused: (paused) =>
@@ -270,6 +264,7 @@ export class Game {
         frameMs: () => this.frameMs,
         qualityLevel: () => this.qualityLevel,
         authority: () => this.authority,
+        collisionDebug: () => this.collisionDebug,
         compute: () => this.computeRuntime,
         logic: () => this.logicClient,
         authorityTrajectory: () => this.authoritySync.snapshot(),
@@ -304,10 +299,10 @@ export class Game {
 
   setPaused(paused: boolean) {
     this.paused = paused;
+    this.controller?.releaseInput();
     if (paused) this.authority?.pause();
     else this.authority?.resume();
     this.gameplayClient?.setSuspended(paused);
-    this.controller?.releaseInput();
     this.worldAudio?.updateWorld(
       this.camera,
       this.world,
@@ -329,6 +324,12 @@ export class Game {
   selectHotbarSlot = (slot: number) => this.gameplayClient?.selectHotbarSlot(slot);
 
   toggleInventory = () => this.gameplayClient?.toggleInventory();
+
+  toggleCollisionDebug = () => this.collisionDebug?.toggle();
+
+  setCollisionDebugContacts = (enabled: boolean) => this.collisionDebug?.setDetails({ contacts: enabled });
+
+  setCollisionDebugSensors = (enabled: boolean) => this.collisionDebug?.setDetails({ sensors: enabled });
 
   closeInventory = () => this.gameplayClient?.closeInventory();
 
@@ -360,10 +361,7 @@ export class Game {
     command: ServerCommand,
     result: Extract<SlashCommandExecution['result'], { success: true }>,
   ) {
-    if (result.commit) {
-      this.world?.consumeServerCommit(result.commit);
-      this.queueSave();
-    }
+    if (result.commit) this.queueSave();
     if (command.type === 'teleport' && this.serverPlayerId) {
       const entity = this.authority?.gameplay.entities.find((candidate) => candidate.id === this.serverPlayerId);
       if (entity)

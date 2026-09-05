@@ -19,11 +19,8 @@ import { AuthoritySession, type AuthoritySnapshot, type LogicIntent } from './au
 import { buildLogicObservation } from './logic-observation-builder';
 import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch, type LogicObservation } from '../logic/logic-protocol';
 import { CHUNK_SIZE } from '../../world/voxel';
-import type {
-  AuthorityAdvanceResult,
-  AuthorityFrequencies,
-  AuthorityInitialWorldBootstrap,
-} from './authority-runtime-types';
+import type * as R from './authority-runtime-types';
+import { createAuthorityAdvanceCommandPort } from './authority-command-advance';
 
 export type * from './authority-runtime-types';
 
@@ -38,9 +35,9 @@ export type AuthorityRuntimeOptions = Readonly<{
   initialWorldTime: number;
   startTimeMs: number;
   initialPlayerBodyPosition?: [number, number, number];
-  findInitialWorldBootstrap?: (seed: number, generatorVersion: number) => Promise<AuthorityInitialWorldBootstrap>;
+  findInitialWorldBootstrap?: (seed: number, generatorVersion: number) => Promise<R.AuthorityInitialWorldBootstrap>;
   now?: () => number;
-  frequencies?: AuthorityFrequencies;
+  frequencies?: R.AuthorityFrequencies;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (observation: LogicObservation) => void;
   onUnknownChunk?: (key: string) => void;
@@ -62,7 +59,7 @@ export type AuthorityTransactionReceipt<T> = Readonly<
 export class AuthorityRuntime {
   readonly server: GameServer;
   readonly playerId: string;
-  readonly frequencies: AuthorityFrequencies;
+  readonly frequencies: R.AuthorityFrequencies;
   private readonly session: AuthoritySession;
   private readonly newPlayer: boolean;
   private readonly initialBodyPosition: [number, number, number];
@@ -101,6 +98,9 @@ export class AuthorityRuntime {
       get worldTime() {
         return server.worldTime;
       },
+      get fluidDiagnostics() {
+        return server.fluidDiagnostics;
+      },
       getEntity: (id: string) => server.getEntity(id),
       queryEntities: () => server.queryEntities(),
       updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) => server.updateEntity(id, update),
@@ -126,6 +126,7 @@ export class AuthorityRuntime {
       frequencies: this.frequencies,
       startTimeMs: options.startTimeMs,
       initialCommitSequence: server.restoredCommitSequence,
+      measureNow: options.now,
       requestUnknownChunk: (key) => this.requestUnknownChunk(key),
       requestFluidWork: () => this.requestFluidWork(),
       publishLogicObservation: (snapshot) => {
@@ -184,6 +185,7 @@ export class AuthorityRuntime {
       seedText: this.options.seedText,
       generatorVersion: this.server.generatorVersion,
       worldTime: this.server.worldTime,
+      frequencies: this.frequencies,
       snapshot: this.session.wake(this.options.startTimeMs),
       gameplay: this.view(),
       ...(camp ? { campPosition: [...camp.position] as [number, number, number] } : {}),
@@ -197,7 +199,7 @@ export class AuthorityRuntime {
     return snapshot;
   }
 
-  advanceSession(elapsedMs: number): AuthorityAdvanceResult {
+  advanceSession(elapsedMs: number): R.AuthorityAdvanceResult {
     if (!Number.isFinite(elapsedMs) || elapsedMs < 0 || elapsedMs > 60_000)
       throw new RangeError('Authority session advance must be finite and within 0..60000ms.');
     const before = this.session.laneTotals;
@@ -275,9 +277,7 @@ export class AuthorityRuntime {
     return this.session.receiveLogicIntents(batch.epoch, accepted);
   }
 
-  requestLogicObservation(): void {
-    this.logicObservationRequested = true;
-  }
+  requestLogicObservation = () => void (this.logicObservationRequested = true);
 
   async executeTransaction<T>(
     identity: AuthorityTransactionIdentity,
@@ -417,8 +417,14 @@ export class AuthorityRuntime {
 
   async executeCommand(source: CommandSource, command: ServerCommand) {
     const before = this.serverStateVersion();
-    const result = await new ServerCommandExecutor(this.server, { save: () => this.save() }).execute(source, command);
-    this.commitIfServerChanged(before);
+    const result = await new ServerCommandExecutor(this.server, {
+      save: () => this.save(),
+      advanceSession: createAuthorityAdvanceCommandPort(
+        (elapsedMs) => this.advanceSession(elapsedMs),
+        (commits) => this.pendingCommits.push(...commits),
+      ),
+    }).execute(source, command);
+    if (command.type !== 'advance-gameplay') this.commitIfServerChanged(before);
     return result;
   }
 
@@ -429,9 +435,7 @@ export class AuthorityRuntime {
     return value;
   }
 
-  setWorldClockRate(rate: number): number {
-    return this.session.setWorldClockRate(rate);
-  }
+  setWorldClockRate = (rate: number) => this.session.setWorldClockRate(rate);
 
   abortFluidWork(workId: string, reason: string): boolean {
     return this.server.abortFluidWork(workId, reason);

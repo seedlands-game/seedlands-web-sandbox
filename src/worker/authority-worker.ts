@@ -142,6 +142,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     generatorVersion: persistence.generatorVersion,
     persistence,
     initialWorldTime: message.initialWorldTime,
+    frequencies: message.frequencies,
     startTimeMs: 0,
     now: () => performance.now(),
     findInitialWorldBootstrap: requestBootstrap,

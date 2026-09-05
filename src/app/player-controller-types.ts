@@ -43,4 +43,5 @@ export type PlayerControllerOptions = {
     setPlayerPosition: (position: [number, number, number]) => Promise<unknown>;
   };
   physicsHz: 30 | 60 | 120;
+  estimatedOneWayLatencyMs?: number;
 };

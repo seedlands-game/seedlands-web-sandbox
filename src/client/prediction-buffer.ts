@@ -13,6 +13,7 @@ export type PredictionReconciliation = Readonly<{
   acknowledgedInputSequence: number;
   authoritativeBody: BodyState;
   collisionRevisionVector: Readonly<Record<string, number>>;
+  availableCollisionRevisionVector?: Readonly<Record<string, number>>;
   replay: (body: BodyState, input: InputCommand) => BodyState;
 }>;
 
@@ -133,8 +134,15 @@ export class PredictionBuffer {
     assertFiniteBody(request.authoritativeBody);
     const authoritativeBody = cloneBody(request.authoritativeBody);
     const currentRevisions = cloneRevisionVector(request.collisionRevisionVector);
+    const availableRevisions = cloneRevisionVector(request.availableCollisionRevisionVector ?? currentRevisions);
     const retained = this.storedFrames.filter((frame) => frame.sequence > request.acknowledgedInputSequence);
-    if (retained.some((frame) => !sameRevisionVector(frame.collisionRevisionVector, currentRevisions))) {
+    if (
+      retained.some(
+        (frame) =>
+          !sameRevisionVector(frame.collisionRevisionVector, currentRevisions) ||
+          !sameRevisionVector(frame.collisionRevisionVector, availableRevisions),
+      )
+    ) {
       this.storedFrames = [];
       return {
         body: authoritativeBody,
@@ -144,7 +152,7 @@ export class PredictionBuffer {
       };
     }
 
-    const oldPredictedEnd = retained.at(-1)?.predictedBody;
+    const oldPredictedEnd = this.storedFrames.at(-1)?.predictedBody;
     let replayedBody = authoritativeBody;
     const replayedFrames: PredictionFrame[] = [];
     // The buffer is committed only after this complete replay. A throwing

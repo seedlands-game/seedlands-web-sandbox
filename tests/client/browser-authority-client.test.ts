@@ -6,10 +6,12 @@ class FakeAuthorityWorker implements AuthorityWorkerPort {
   onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
   posts: unknown[] = [];
+  transfers: Transferable[][] = [];
   terminated = false;
 
-  postMessage(message: unknown) {
+  postMessage(message: unknown, transfer: Transferable[] = []) {
     this.posts.push(message);
+    this.transfers.push(transfer);
   }
 
   terminate() {
@@ -77,6 +79,8 @@ const gameplay = {
   },
 };
 
+const frequencies = { physicsHz: 60, gameplayHz: 20, fluidHz: 30 } as const;
+
 const ready = (): AuthorityReady => ({
   playerId: 'player-1',
   playerBodyPosition: [0.5, 33, 0.5],
@@ -85,6 +89,7 @@ const ready = (): AuthorityReady => ({
   seedText: 'worker-client',
   generatorVersion: 3,
   worldTime: 9,
+  frequencies,
   snapshot: {
     kind: 'snapshot',
     protocolVersion: 1,
@@ -120,14 +125,41 @@ describe('BrowserAuthorityClient', () => {
       decision: 'late',
       requiresResync: true,
     });
+    worker.emit({
+      kind: 'input-decision',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      sequence: 4,
+      decision: 'accepted',
+      requiresResync: false,
+    });
+    worker.emit({
+      kind: 'input-decision',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      sequence: 3,
+      decision: 'accepted',
+      requiresResync: false,
+    });
     expect(decisions).toHaveBeenCalledWith({ sequence: 4, decision: 'late', requiresResync: true });
+    expect(decisions).toHaveBeenCalledTimes(1);
   });
 
   it('把新世界出生点生成握手交给通用计算池', async () => {
     const worker = new FakeAuthorityWorker();
-    const bootstrap = vi.fn(async () => [0.5, 33, 0.5] as [number, number, number]);
+    const canonical = new Uint16Array(32 ** 3).buffer;
+    const bootstrap = vi.fn(async () => ({
+      playerBodyPosition: [0.5, 33, 0.5] as [number, number, number],
+      starterChunks: [{ key: '0,1,0', cx: 0, cy: 1, cz: 0, chunkRevision: 0, generatorVersion: 3, canonical }],
+    }));
     const client = new BrowserAuthorityClient(worker, 'world:1', { onBootstrapGeneration: bootstrap });
-    void client.start({ seedText: 'worker-client', openMode: 'continue', legacySnapshots: [], initialWorldTime: 9 });
+    void client.start({
+      seedText: 'worker-client',
+      openMode: 'continue',
+      legacySnapshots: [],
+      initialWorldTime: 9,
+      frequencies,
+    });
     worker.emit({
       kind: 'authority-bootstrap-needed',
       protocolVersion: 1,
@@ -141,7 +173,9 @@ describe('BrowserAuthorityClient', () => {
       kind: 'authority-bootstrap-result',
       requestId: 9,
       playerBodyPosition: [0.5, 33, 0.5],
+      starterChunks: [expect.objectContaining({ key: '0,1,0' })],
     });
+    expect(worker.transfers.at(-1)).toEqual([canonical]);
   });
 
   it('等待真实Worker ready并忽略旧epoch快照', async () => {
@@ -153,8 +187,9 @@ describe('BrowserAuthorityClient', () => {
       openMode: 'continue',
       legacySnapshots: [],
       initialWorldTime: 9,
+      frequencies,
     });
-    expect(worker.posts[0]).toMatchObject({ kind: 'start-authority', epoch: 'world:1' });
+    expect(worker.posts[0]).toMatchObject({ kind: 'start-authority', epoch: 'world:1', frequencies });
     worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch: 'world:1', ready: ready() });
 
     await expect(starting).resolves.toMatchObject({ playerId: 'player-1' });
@@ -165,6 +200,70 @@ describe('BrowserAuthorityClient', () => {
       snapshot: { ...ready().snapshot, epoch: 'old', physicsTick: 9 },
     });
     expect(snapshots).not.toHaveBeenCalled();
+  });
+
+  it('只发布单调前进的同epoch快照，并拒绝重复与倒序版本', async () => {
+    const worker = new FakeAuthorityWorker();
+    const snapshots = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onSnapshot: snapshots });
+    const starting = client.start({
+      seedText: 'worker-client',
+      openMode: 'continue',
+      legacySnapshots: [],
+      initialWorldTime: 9,
+      frequencies,
+    });
+    worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch: 'world:1', ready: ready() });
+    await starting;
+    const publish = (physicsTick: number, commitSequence: number, acknowledgedInputSequence: number) =>
+      worker.emit({
+        kind: 'authority-snapshot',
+        protocolVersion: 1,
+        epoch: 'world:1',
+        snapshot: { ...ready().snapshot, physicsTick, commitSequence, acknowledgedInputSequence },
+      });
+
+    publish(2, 2, 1);
+    publish(2, 2, 1);
+    publish(1, 3, 2);
+    publish(2, 3, 2);
+
+    expect(snapshots.mock.calls.map(([value]) => [value.physicsTick, value.commitSequence])).toEqual([
+      [2, 2],
+      [2, 3],
+    ]);
+    expect(client.snapshot).toMatchObject({ physicsTick: 2, commitSequence: 3, acknowledgedInputSequence: 2 });
+    expect(client.snapshotRejections).toMatchObject({ duplicate: 1, 'physics-tick-regressed': 1 });
+  });
+
+  it('让无响应请求在有界时间失败，并忽略销毁后的迟到回执', async () => {
+    vi.useFakeTimers();
+    const worker = new FakeAuthorityWorker();
+    const fatal = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'world:1', {
+      onFatal: fatal,
+      requestTimeoutMs: 100,
+    });
+    const saving = client.save();
+    const timedOut = expect(saving).rejects.toThrow(/timed out/i);
+    const request = worker.posts.at(-1) as { requestId: number };
+    vi.advanceTimersByTime(100);
+    await timedOut;
+    client.dispose();
+    const postCount = worker.posts.length;
+    await expect(client.save()).rejects.toThrow(/disposed/i);
+    expect(worker.posts).toHaveLength(postCount);
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: request.requestId,
+      ok: true,
+      result: { savedChunks: [], gameplaySaved: true, commitSequence: 1, storageBytes: 99 },
+    });
+    expect(client.storageBytes).toBe(0);
+    expect(fatal).not.toHaveBeenCalled();
+    vi.useRealTimers();
   });
 
   it('异步准备Worker输入，并只在权威接纳计算结果后开放本地只读副本', async () => {
@@ -226,6 +325,23 @@ describe('BrowserAuthorityClient', () => {
     });
     await expect(accepting).resolves.toBe(true);
     expect(client.getVoxel(0, 0, 0)).toBe(4);
+
+    const editing = client.editWorld('player-1', [{ x: 0, y: 0, z: 0, value: 0 }]);
+    const editRequest = worker.posts.at(-1) as { requestId: number };
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: editRequest.requestId,
+      ok: true,
+      result: {
+        committed: true,
+        structuralChange: { chunkRevisions: [{ key: '0,0,0', revision: 5 }] },
+      },
+    });
+    await editing;
+    expect(client.getVoxel(0, 0, 0)).toBe(0);
+    expect(client.getChunkRevision(0, 0, 0)).toBe(5);
   });
 
   it('区分世界写入次数、全局提交序号与物理tick', async () => {
@@ -236,6 +352,7 @@ describe('BrowserAuthorityClient', () => {
       openMode: 'continue',
       legacySnapshots: [],
       initialWorldTime: 9,
+      frequencies,
     });
     const base = ready();
     const current = {

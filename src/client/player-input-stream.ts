@@ -75,5 +75,17 @@ export class PlayerInputStream {
     if (!Number.isSafeInteger(physicsTick) || physicsTick < 0)
       throw new RangeError('Authority physics tick must be a non-negative safe integer.');
     this.lastTargetPhysicsTick = physicsTick;
+    this.jumpWasHeld = false;
+  }
+
+  release(physicsTick: number, issuedAtMs: number): InputCommand {
+    this.jumpWasHeld = false;
+    return this.sample({
+      physicsTick,
+      issuedAtMs,
+      forward: { x: 0, z: -1 },
+      right: { x: 1, z: 0 },
+      keys: { forward: false, back: false, left: false, right: false, jump: false, crouch: false },
+    })!;
   }
 }

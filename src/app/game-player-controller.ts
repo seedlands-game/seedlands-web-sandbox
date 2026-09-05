@@ -80,7 +80,8 @@ export function createGamePlayerController(options: Options): PlayerController {
       sendInput: (command) => options.authority.sendInput(command),
       setPlayerPosition: (position) => options.authority.setPlayerPosition(position),
     },
-    physicsHz: 60,
+    physicsHz: options.authority.readyState?.frequencies.physicsHz ?? 60,
+    estimatedOneWayLatencyMs: options.authority.estimatedOneWayLatencyMs,
   });
 }
 

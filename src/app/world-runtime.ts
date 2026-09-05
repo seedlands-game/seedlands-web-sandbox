@@ -284,7 +284,7 @@ export class World {
       'legacy-storage-migration',
       changes.map(([x, y, z, value]) => ({ x, y, z, value })),
     );
-    this.consumeServerCommit(result);
+    return result;
   }
 
   dispose() {
@@ -350,17 +350,13 @@ export class World {
   }
 
   async edit(x: number, y: number, z: number, value: number) {
-    const result = await this.authority.editWorld('player-edit', [{ x, y, z, value }]);
-    this.consumeServerCommit(result);
-    return result;
+    return this.authority.editWorld('player-edit', [{ x, y, z, value }]);
   }
 
   async editBatch(batch: WorldEditBatch) {
     const edits = [...(batch.edits ?? [])];
     batch.buffers?.forEach((buffer) => buffer.forEach((x, y, z, value) => edits.push({ x, y, z, value })));
-    const result = await this.authority.editWorld(batch.actorId, edits);
-    this.consumeServerCommit(result);
-    return result;
+    return this.authority.editWorld(batch.actorId, edits);
   }
 
   async fill(actorId: string, command: FillCommand) {

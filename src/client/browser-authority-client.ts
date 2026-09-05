@@ -16,7 +16,6 @@ import type { WorldOpenMode } from './world-version-policy';
 import type {
   AuthorityAction,
   AuthorityActionResult,
-  AuthorityBootstrapGeneration,
   AuthorityGameplayView,
   AuthorityMeshPayload,
   AuthorityReady,
@@ -24,6 +23,12 @@ import type {
   AuthorityResponse,
 } from '../worker/authority-worker-protocol';
 import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-protocol';
+import { AuthoritySnapshotGate } from './authority-snapshot-gate';
+import { ClientRequestRegistry } from './client-request-registry';
+import { ClientReadyWait } from './client-ready-wait';
+import { createAuthorityTransport, type AuthorityTransportFaults } from './authority-transport';
+import { applyAcknowledgedWorldEdits } from './acknowledged-world-edit-cache';
+import { provideAuthorityBootstrap } from './authority-bootstrap-client';
 
 export type AuthorityWorkerPort = {
   onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null;
@@ -32,19 +37,18 @@ export type AuthorityWorkerPort = {
   terminate(): void;
 };
 
-type ClientOptions = Readonly<{
+export type ClientOptions = Readonly<{
   onSnapshot?: (snapshot: AuthoritySnapshot) => void;
   onGameplay?: (view: AuthorityGameplayView) => void;
   onCommit?: (commit: WorldCommitResult) => void;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (observation: LogicObservation) => void;
-  onBootstrapGeneration?: (request: {
-    seed: number;
-    generatorVersion: number;
-  }) => Promise<AuthorityBootstrapGeneration>;
+  onBootstrapGeneration?: Parameters<typeof provideAuthorityBootstrap>[1];
   onUnknownChunk?: (key: string) => void;
   onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
   onFatal?: (error: Error) => void;
+  requestTimeoutMs?: number;
+  transportFaults?: AuthorityTransportFaults;
 }>;
 
 type StartOptions = Readonly<{
@@ -52,6 +56,7 @@ type StartOptions = Readonly<{
   openMode: WorldOpenMode;
   legacySnapshots: readonly SerializedChunkSnapshot[];
   initialWorldTime: number;
+  frequencies: AuthorityReady['frequencies'];
 }>;
 
 type CachedMesh = {
@@ -67,35 +72,38 @@ type CachedPreparation = {
   overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
 };
 
-type PendingRequest = { resolve: (value: unknown) => void; reject: (error: Error) => void };
-
 export class BrowserAuthorityClient {
   private requestSequence = 0;
   private readonly transactionSequences = new Map<string, number>();
-  private readonly pending = new Map<number, PendingRequest>();
+  private readonly requests: ClientRequestRegistry;
+  private readonly snapshotGate: AuthoritySnapshotGate;
   private readonly meshLoads = new Map<string, Promise<void>>();
   private readonly meshCache = new Map<string, CachedMesh>();
   private readonly preparationCache = new Map<string, CachedPreparation>();
   private readyValue: AuthorityReady | null = null;
   private snapshotValue: AuthoritySnapshot | null = null;
   private gameplayValue: AuthorityGameplayView | null = null;
-  private resolveReady: ((ready: AuthorityReady) => void) | null = null;
-  private rejectReady: ((error: Error) => void) | null = null;
+  private readonly readyWait: ClientReadyWait<AuthorityReady>;
   private disposed = false;
   private storageBytesValue = 0;
+  private lastInputDecisionSequence = -1;
 
   constructor(
     private readonly worker: AuthorityWorkerPort,
     readonly epoch: SessionEpoch,
     private readonly options: ClientOptions = {},
   ) {
+    this.requests = new ClientRequestRegistry(options.requestTimeoutMs);
+    this.readyWait = new ClientReadyWait(options.requestTimeoutMs);
+    this.snapshotGate = new AuthoritySnapshotGate(epoch);
     worker.onmessage = (event) => this.receive(event.data);
     worker.onerror = (event) => this.failAll(new Error(event.message || 'Authority Worker failed.'));
   }
 
   static create(epoch: SessionEpoch, options: ClientOptions = {}) {
+    const raw = new Worker(new URL('../worker/authority-worker.ts', import.meta.url), { type: 'module' });
     return new BrowserAuthorityClient(
-      new Worker(new URL('../worker/authority-worker.ts', import.meta.url), { type: 'module' }),
+      createAuthorityTransport(raw, options.transportFaults ?? { harnessEnabled: false }),
       epoch,
       options,
     );
@@ -103,21 +111,24 @@ export class BrowserAuthorityClient {
 
   start(options: StartOptions): Promise<AuthorityReady> {
     if (this.disposed) return Promise.reject(new Error('Authority client is disposed.'));
-    if (this.resolveReady || this.readyValue) return Promise.reject(new Error('Authority client already started.'));
-    const ready = new Promise<AuthorityReady>((resolve, reject) => {
-      this.resolveReady = resolve;
-      this.rejectReady = reject;
-    });
-    this.post({
-      kind: 'start-authority',
-      protocolVersion: PROTOCOL_VERSION,
-      epoch: this.epoch,
-      seedText: options.seedText,
-      openMode: options.openMode,
-      legacySnapshots: options.legacySnapshots,
-      initialWorldTime: options.initialWorldTime,
-      sessionTimeOriginMs: performance.now(),
-    });
+    if (this.readyWait.pending || this.readyValue)
+      return Promise.reject(new Error('Authority client already started.'));
+    const ready = this.readyWait.start();
+    try {
+      this.post({
+        kind: 'start-authority',
+        protocolVersion: PROTOCOL_VERSION,
+        epoch: this.epoch,
+        seedText: options.seedText,
+        openMode: options.openMode,
+        legacySnapshots: options.legacySnapshots,
+        initialWorldTime: options.initialWorldTime,
+        sessionTimeOriginMs: performance.now(),
+        frequencies: options.frequencies,
+      });
+    } catch (error) {
+      this.readyWait.reject(error instanceof Error ? error : new Error(String(error)));
+    }
     return ready;
   }
 
@@ -174,6 +185,14 @@ export class BrowserAuthorityClient {
     return this.storageBytesValue;
   }
 
+  get estimatedOneWayLatencyMs(): number {
+    return this.options.transportFaults?.latencyMs ?? 0;
+  }
+
+  get snapshotRejections() {
+    return this.snapshotGate.rejected;
+  }
+
   sendInput(command: InputCommand): void {
     this.post(command);
   }
@@ -191,19 +210,24 @@ export class BrowserAuthorityClient {
     const inFlight = this.meshLoads.get(key);
     if (inFlight) return inFlight;
     const requestId = ++this.requestSequence;
-    const request = new Promise<void>((resolve, reject) =>
-      this.pending.set(requestId, { resolve: () => resolve(), reject }),
-    ).finally(() => this.meshLoads.delete(key));
+    const request = this.requests
+      .create(requestId)
+      .then(() => undefined)
+      .finally(() => this.meshLoads.delete(key));
     this.meshLoads.set(key, request);
-    this.post({
-      kind: 'prepare-mesh',
-      protocolVersion: PROTOCOL_VERSION,
-      epoch: this.epoch,
-      requestId,
-      cx,
-      cy,
-      cz,
-    });
+    try {
+      this.post({
+        kind: 'prepare-mesh',
+        protocolVersion: PROTOCOL_VERSION,
+        epoch: this.epoch,
+        requestId,
+        cx,
+        cy,
+        cz,
+      });
+    } catch (error) {
+      this.requests.reject(requestId, error instanceof Error ? error : new Error(String(error)));
+    }
     return request;
   }
 
@@ -305,8 +329,10 @@ export class BrowserAuthorityClient {
     });
   }
 
-  editWorld(actorId: string, edits: readonly VoxelEdit[]): Promise<WorldCommitResult> {
-    return this.request({ kind: 'world-edit', actorId, edits }, [], 'world-edit') as Promise<WorldCommitResult>;
+  async editWorld(actorId: string, edits: readonly VoxelEdit[]): Promise<WorldCommitResult> {
+    const result = (await this.request({ kind: 'world-edit', actorId, edits }, [], 'world-edit')) as WorldCommitResult;
+    applyAcknowledgedWorldEdits({ edits, result, getCachedChunk: (key) => this.meshCache.get(key) });
+    return result;
   }
 
   setPlayerPosition(position: [number, number, number]): Promise<unknown> {
@@ -377,7 +403,7 @@ export class BrowserAuthorityClient {
     this.worker.onmessage = null;
     this.worker.onerror = null;
     this.worker.terminate();
-    this.failAll(new Error('Authority client was disposed.'));
+    this.cancelAll(new Error('Authority client was disposed.'));
     this.meshCache.clear();
     this.preparationCache.clear();
   }
@@ -387,8 +413,9 @@ export class BrowserAuthorityClient {
     transfer: Transferable[] = [],
     transactionStream?: string,
   ): Promise<unknown> {
+    if (this.disposed) return Promise.reject(new Error('Authority client is disposed.'));
     const requestId = ++this.requestSequence;
-    const promise = new Promise((resolve, reject) => this.pending.set(requestId, { resolve, reject }));
+    const promise = this.requests.create(requestId);
     const transaction = transactionStream
       ? {
           issuer: `browser:${this.epoch}`,
@@ -397,16 +424,20 @@ export class BrowserAuthorityClient {
         }
       : undefined;
     if (transaction) this.transactionSequences.set(transactionStream!, transaction.sequence);
-    this.post(
-      {
-        ...payload,
-        protocolVersion: PROTOCOL_VERSION,
-        epoch: this.epoch,
-        requestId,
-        ...(transaction ? { transaction } : {}),
-      } as AuthorityRequest,
-      transfer,
-    );
+    try {
+      this.post(
+        {
+          ...payload,
+          protocolVersion: PROTOCOL_VERSION,
+          epoch: this.epoch,
+          requestId,
+          ...(transaction ? { transaction } : {}),
+        } as AuthorityRequest,
+        transfer,
+      );
+    } catch (error) {
+      this.requests.reject(requestId, error instanceof Error ? error : new Error(String(error)));
+    }
     return promise;
   }
 
@@ -419,12 +450,12 @@ export class BrowserAuthorityClient {
     if (this.disposed || message.protocolVersion !== PROTOCOL_VERSION || message.epoch !== this.epoch) return;
     switch (message.kind) {
       case 'authority-ready':
+        if (!this.readyWait.pending) return;
+        if (this.snapshotGate.accept(message.ready.snapshot)) return;
         this.readyValue = message.ready;
         this.snapshotValue = message.ready.snapshot;
         this.updateGameplay(message.ready.gameplay);
-        this.resolveReady?.(message.ready);
-        this.resolveReady = null;
-        this.rejectReady = null;
+        this.readyWait.resolve(message.ready);
         break;
       case 'authority-bootstrap-needed':
         void this.provideBootstrap(message);
@@ -433,12 +464,15 @@ export class BrowserAuthorityClient {
         this.options.onUnknownChunk?.(message.key);
         break;
       case 'authority-snapshot':
+        if (this.snapshotGate.accept(message.snapshot)) return;
         this.snapshotValue = message.snapshot;
         if (message.gameplay) this.updateGameplay(message.gameplay);
         message.commits?.forEach((commit) => this.options.onCommit?.(commit));
         this.options.onSnapshot?.(message.snapshot);
         break;
       case 'input-decision':
+        if (message.sequence <= this.lastInputDecisionSequence) return;
+        this.lastInputDecisionSequence = message.sequence;
         this.options.onInputDecision?.({
           sequence: message.sequence,
           decision: message.decision,
@@ -446,21 +480,17 @@ export class BrowserAuthorityClient {
         });
         break;
       case 'authority-response': {
-        const pending = this.pending.get(message.requestId);
-        if (!pending) return;
-        this.pending.delete(message.requestId);
-        if (!message.ok) pending.reject(new Error(message.error));
+        if (!this.requests.has(message.requestId)) return;
+        if (!message.ok) this.requests.reject(message.requestId, new Error(message.error));
         else {
           if (message.gameplay) this.updateGameplay(message.gameplay);
           message.commits?.forEach((commit) => this.options.onCommit?.(commit));
-          pending.resolve(message.result);
+          this.requests.resolve(message.requestId, message.result);
         }
         break;
       }
       case 'mesh-prepared': {
-        const pending = this.pending.get(message.requestId);
-        if (!pending) return;
-        this.pending.delete(message.requestId);
+        if (!this.requests.has(message.requestId)) return;
         const payload = message.payload;
         this.preparationCache.set(payload.key, {
           payload,
@@ -474,7 +504,7 @@ export class BrowserAuthorityClient {
             ...(overlay.fluid ? { fluid: new Uint8Array(overlay.fluid) } : {}),
           })),
         });
-        pending.resolve(undefined);
+        this.requests.resolve(message.requestId, undefined);
         break;
       }
       case 'fluid-work':
@@ -490,28 +520,15 @@ export class BrowserAuthorityClient {
   }
 
   private updateGameplay(view: AuthorityGameplayView): void {
+    if (this.gameplayValue && view.gameplayRevision <= this.gameplayValue.gameplayRevision) return;
     this.gameplayValue = view;
     this.options.onGameplay?.(view);
   }
 
   private async provideBootstrap(message: Extract<AuthorityResponse, { kind: 'authority-bootstrap-needed' }>) {
     try {
-      if (!this.options.onBootstrapGeneration)
-        throw new Error('Authority requested safe spawn generation without a compute provider.');
-      const bootstrap = await this.options.onBootstrapGeneration({
-        seed: message.seed,
-        generatorVersion: message.generatorVersion,
-      });
-      this.post(
-        {
-          kind: 'authority-bootstrap-result',
-          protocolVersion: PROTOCOL_VERSION,
-          epoch: this.epoch,
-          requestId: message.requestId,
-          playerBodyPosition: bootstrap.playerBodyPosition,
-          starterChunks: bootstrap.starterChunks,
-        },
-        bootstrap.starterChunks.map((chunk) => chunk.canonical),
+      await provideAuthorityBootstrap(message, this.options.onBootstrapGeneration, (request, transfer) =>
+        this.post(request, transfer),
       );
     } catch (error) {
       this.failAll(error instanceof Error ? error : new Error(String(error)));
@@ -524,11 +541,12 @@ export class BrowserAuthorityClient {
   }
 
   private failAll(error: Error): void {
-    this.rejectReady?.(error);
-    this.resolveReady = null;
-    this.rejectReady = null;
-    this.pending.forEach((pending) => pending.reject(error));
-    this.pending.clear();
+    this.cancelAll(error);
     this.options.onFatal?.(error);
+  }
+
+  private cancelAll(error: Error): void {
+    this.readyWait.reject(error);
+    this.requests.rejectAll(error);
   }
 }

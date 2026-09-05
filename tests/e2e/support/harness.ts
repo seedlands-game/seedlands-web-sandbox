@@ -25,7 +25,13 @@ export type HarnessSnapshot = {
   triangles: number;
   drawCalls: number;
   runtime: 'integrated-server' | 'authority-worker';
-  authority: { physicsTick: number; commitSequence: number };
+  authority: {
+    physicsHz: 30 | 60 | 120;
+    physicsTick: number;
+    commitSequence: number;
+    acknowledgedInputSequence: number;
+    snapshotRejections: Readonly<Record<string, number>>;
+  };
   generatorVersion: number;
   renderPipeline: {
     drawUnit: 'chunk-render-category';
@@ -37,6 +43,12 @@ export type HarnessSnapshot = {
   serverRevision: number;
   voxelAtOrigin: number;
   serverPlayerPosition: [number, number, number];
+  serverPlayerVelocity: [number, number, number];
+  prediction: {
+    pendingFrames: number;
+    lastResetReason: string | null;
+    presentationOffset: Readonly<{ x: number; y: number; z: number }>;
+  };
   serverWorldTime: number;
   performance: {
     scenarioId: string;

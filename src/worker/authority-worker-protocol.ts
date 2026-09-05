@@ -53,6 +53,7 @@ export type AuthorityReady = Readonly<{
   seedText: string;
   generatorVersion: number;
   worldTime: number;
+  frequencies: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
   snapshot: AuthoritySnapshot;
   gameplay: AuthorityGameplayView;
   campPosition?: [number, number, number];
@@ -125,6 +126,7 @@ export type AuthorityRequest =
       legacySnapshots: readonly unknown[];
       initialWorldTime: number;
       sessionTimeOriginMs: number;
+      frequencies: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
     }>
   | InputCommand
   | Readonly<{ kind: 'pause-authority'; protocolVersion: typeof PROTOCOL_VERSION; epoch: SessionEpoch }>
