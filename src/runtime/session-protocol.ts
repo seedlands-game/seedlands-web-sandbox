@@ -30,7 +30,7 @@ export type TransactionCommand<T = unknown> = Readonly<{
   transaction: T;
 }>;
 
-export type SequenceDecision = 'accepted' | 'duplicate' | 'out-of-order' | 'wrong-epoch' | 'wrong-stream';
+export type SequenceDecision = 'accepted' | 'duplicate' | 'out-of-order' | 'late' | 'wrong-epoch' | 'wrong-stream';
 
 export class EpochSequenceGate {
   private lastSequence = -1;
@@ -70,7 +70,10 @@ const idleInput = (epoch: SessionEpoch, stream: string): InputCommand => ({
 export class InputCommandBuffer {
   private readonly gate: EpochSequenceGate;
   private currentValue: InputCommand;
-  private jumpEdgePending = false;
+  private readonly pending: InputCommand[] = [];
+  private consumedSequence = -1;
+  private consumedPhysicsTick = -1;
+  private resyncRequired = false;
 
   constructor(epoch: SessionEpoch, stream: string) {
     this.gate = new EpochSequenceGate(epoch, stream);
@@ -78,35 +81,59 @@ export class InputCommandBuffer {
   }
 
   get acknowledgedSequence() {
-    return this.gate.acknowledgedSequence;
+    return this.consumedSequence;
   }
 
   get current() {
     return this.currentValue;
   }
 
+  get requiresResync() {
+    return this.resyncRequired;
+  }
+
   push(command: InputCommand): SequenceDecision {
     if (command.protocolVersion !== PROTOCOL_VERSION) return 'out-of-order';
     const decision = this.gate.accept(command.epoch, command.stream, command.sequence);
     if (decision !== 'accepted') return decision;
-    this.currentValue = command;
-    this.jumpEdgePending ||= command.edges.jumpPressed;
-    return decision;
+    if (command.targetPhysicsTick <= this.consumedPhysicsTick) {
+      this.resyncRequired = true;
+      return 'late';
+    }
+    this.pending.push(command);
+    this.pending.sort(
+      (left, right) => left.targetPhysicsTick - right.targetPhysicsTick || left.sequence - right.sequence,
+    );
+    return 'accepted';
   }
 
   clear() {
+    if (this.pending.length) this.resyncRequired = true;
+    this.consumedSequence = Math.max(this.consumedSequence, ...this.pending.map((command) => command.sequence));
+    this.pending.length = 0;
     this.currentValue = {
       ...this.currentValue,
       state: { moveX: 0, moveZ: 0, verticalIntent: 0, jumpHeld: false },
       edges: { jumpPressed: false },
     };
-    this.jumpEdgePending = false;
   }
 
-  consumeJumpRequest() {
-    const requested = this.jumpEdgePending || this.currentValue.state.jumpHeld;
-    this.jumpEdgePending = false;
-    return requested;
+  consumeForTick(physicsTick: number) {
+    if (!Number.isSafeInteger(physicsTick) || physicsTick < this.consumedPhysicsTick)
+      throw new RangeError('Physics tick must be an increasing integer.');
+    this.consumedPhysicsTick = physicsTick;
+    let jumpEdge = false;
+    while (this.pending[0] && this.pending[0].targetPhysicsTick <= physicsTick) {
+      const command = this.pending.shift()!;
+      this.currentValue = command;
+      this.consumedSequence = command.sequence;
+      jumpEdge ||= command.edges.jumpPressed;
+    }
+    return {
+      state: this.currentValue.state,
+      jumpRequested: jumpEdge || this.currentValue.state.jumpHeld,
+      acknowledgedSequence: this.consumedSequence,
+    };
   }
 }
 

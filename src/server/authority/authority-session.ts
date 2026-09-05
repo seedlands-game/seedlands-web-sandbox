@@ -117,6 +117,7 @@ export class AuthoritySession {
   wake(nowMs: number): AuthoritySnapshot {
     const clock = this.clock.sample(nowMs);
     this.activeTimeMs = clock.activeTimeMs;
+    if (clock.paused) return this.snapshot();
     const due = this.scheduler.advanceTo(clock.activeTimeMs);
     for (const step of due.physicsSteps) {
       this.physicsTick = step.tick;
@@ -143,12 +144,15 @@ export class AuthoritySession {
   }
 
   private stepPhysics(dt: number) {
+    const input = this.input.consumeForTick(this.physicsTick);
+    const seen = new Set<string>();
     for (const entity of this.options.server.queryEntities()) {
-      const input = this.physicsInput(entity);
+      seen.add(entity.id);
+      const physicsInput = this.physicsInput(entity, input);
       const result = stepBody({
         state: toBodyState(entity),
         config: this.options.bodyConfigFor(entity),
-        input,
+        input: physicsInput,
         world: this.collisionWorld,
         dt,
       });
@@ -165,16 +169,19 @@ export class AuthoritySession {
         contacts: result.contacts,
       });
     }
+    for (const id of this.bodies.keys()) if (!seen.has(id)) this.bodies.delete(id);
     this.commitSequence += 1;
   }
 
-  private physicsInput(entity: AuthorityEntity): PhysicsInput {
+  private physicsInput(
+    entity: AuthorityEntity,
+    playerInput: ReturnType<InputCommandBuffer['consumeForTick']>,
+  ): PhysicsInput {
     if (entity.id === this.options.playerId) {
-      const command = this.input.current;
       return {
-        wish: { x: command.state.moveX, z: command.state.moveZ },
-        jumpPressed: this.input.consumeJumpRequest(),
-        verticalIntent: command.state.verticalIntent,
+        wish: { x: playerInput.state.moveX, z: playerInput.state.moveZ },
+        jumpPressed: playerInput.jumpRequested,
+        verticalIntent: playerInput.state.verticalIntent,
       };
     }
     const intent = this.logicIntents.get(entity.id);

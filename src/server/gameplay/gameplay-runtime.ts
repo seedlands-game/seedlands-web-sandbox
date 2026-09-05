@@ -15,6 +15,8 @@ import { PlayerState, type PlayerSnapshot } from './player-state';
 import { craftRecipe, listCraftableRecipes, listRecipes } from './recipe-registry';
 import { getVoxelGameplayDefinition } from './voxel-gameplay';
 import { simulationSnapshotFor, validateGameplaySnapshot, type GameplaySnapshotV2 } from './gameplay-snapshot';
+import { advanceGameplayClock } from './gameplay-clock';
+import { attackTargetPoint, clonePosition, distanceSquared } from './gameplay-geometry';
 
 export type { GameplaySnapshot, GameplaySnapshotV1, GameplaySnapshotV2 } from './gameplay-snapshot';
 
@@ -28,14 +30,6 @@ type GameplayCallbacks = {
 type Failure = { success: false; reason: string };
 type Success<Data extends object = Record<never, never>> = { success: true } & Data;
 export type GameplayResult<Data extends object = Record<never, never>> = Success<Data> | Failure;
-
-const distanceSquared = (left: readonly number[], right: readonly number[]) =>
-  left.reduce((sum, value, index) => sum + (value - right[index]) ** 2, 0);
-const clonePosition = (position: readonly [number, number, number]): Position => [...position];
-const attackTargetPoint = (target: GameplayEntity): Position => {
-  const height = target.archetype === 'grazer' ? 1.9 : target.archetype === 'settler' ? 2.35 : 2.1;
-  return [target.position[0], target.position[1] + height / 2, target.position[2]];
-};
 
 export class GameplayRuntime {
   readonly entities = new EntityStore();
@@ -373,20 +367,25 @@ export class GameplayRuntime {
   }
 
   advance(seconds: number): { commits: WorldCommitResult[]; pickups: PickupEvent[] } {
-    if (!Number.isFinite(seconds) || seconds < 0)
-      throw new TypeError('Gameplay seconds must be non-negative and finite.');
     const commits: WorldCommitResult[] = [];
-    let remaining = seconds;
-    while (remaining > 0) {
-      const step = Math.min(1, remaining);
+    advanceGameplayClock(seconds, (step) => {
       this.time += step;
       this.players.forEach((player) => this.advancePlayer(player, step, commits));
       this.simulation.advance(step);
       this.physics.advance(step, () => this.autoPickup());
-      remaining -= step;
-    }
+    });
     if (seconds > 0) this.touch(false);
     return { commits, pickups: this.pickupEvents.splice(0) };
+  }
+
+  advanceRules(seconds: number): { commits: WorldCommitResult[] } {
+    const commits: WorldCommitResult[] = [];
+    advanceGameplayClock(seconds, (step) => {
+      this.time += step;
+      this.players.forEach((player) => this.advancePlayer(player, step, commits));
+    });
+    if (seconds > 0) this.touch(false);
+    return { commits };
   }
 
   createSnapshot(): GameplaySnapshotV2 {

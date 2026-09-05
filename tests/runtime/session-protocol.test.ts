@@ -55,9 +55,53 @@ describe('runtime session protocol', () => {
 
     expect(buffer.push(release)).toBe('accepted');
     expect(buffer.push({ ...release, sequence: 1, edges: { jumpPressed: true } })).toBe('out-of-order');
-    expect(buffer.acknowledgedSequence).toBe(2);
+    expect(buffer.acknowledgedSequence).toBe(-1);
+    expect(buffer.consumeForTick(4).acknowledgedSequence).toBe(2);
     expect(buffer.current.state.jumpHeld).toBe(false);
-    expect(buffer.consumeJumpRequest()).toBe(false);
+    expect(buffer.consumeForTick(5).jumpRequested).toBe(false);
+  });
+
+  it('按目标物理 tick 消费有序输入历史且只确认已经应用的 sequence', () => {
+    const buffer = new InputCommandBuffer('world:1', 'player-input');
+    const command = (sequence: number, targetPhysicsTick: number, moveX: number): InputCommand => ({
+      kind: 'input',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: 'world:1',
+      stream: 'player-input',
+      sequence,
+      targetPhysicsTick,
+      issuedAtMs: sequence,
+      state: { moveX, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+      edges: { jumpPressed: false },
+    });
+    buffer.push(command(1, 2, 1));
+    buffer.push(command(2, 4, 0));
+
+    expect(buffer.acknowledgedSequence).toBe(-1);
+    expect(buffer.consumeForTick(1).state.moveX).toBe(0);
+    expect(buffer.consumeForTick(2)).toMatchObject({ state: { moveX: 1 }, acknowledgedSequence: 1 });
+    expect(buffer.consumeForTick(3)).toMatchObject({ state: { moveX: 1 }, acknowledgedSequence: 1 });
+    expect(buffer.consumeForTick(4)).toMatchObject({ state: { moveX: 0 }, acknowledgedSequence: 2 });
+  });
+
+  it('迟到到已经积分 tick 的新输入进入明确重同步状态', () => {
+    const buffer = new InputCommandBuffer('world:1', 'player-input');
+    buffer.consumeForTick(5);
+
+    expect(
+      buffer.push({
+        kind: 'input',
+        protocolVersion: PROTOCOL_VERSION,
+        epoch: 'world:1',
+        stream: 'player-input',
+        sequence: 1,
+        targetPhysicsTick: 3,
+        issuedAtMs: 10,
+        state: { moveX: 1, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+        edges: { jumpPressed: false },
+      }),
+    ).toBe('late');
+    expect(buffer.requiresResync).toBe(true);
   });
 
   it('创建非空且递增隔离的会话 epoch', () => {

@@ -24,6 +24,7 @@ import { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
 import { hasAdjacentWater, legacyFluid } from './fluid/fluid-cell-state';
 import { findDryStarterSurface } from './starter-surface';
+import { peekLoadedVoxel } from './loaded-voxel-reader';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -181,6 +182,10 @@ export class GameServer extends GameServerGameplayFacade {
     const cz = floorDiv(z, CHUNK_SIZE);
     const chunk = this.getChunk(cx, cy, cz);
     return chunk.voxels[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
+  }
+
+  peekLoadedVoxel(x: number, y: number, z: number) {
+    return peekLoadedVoxel(this.chunks, x, y, z);
   }
 
   createDerivedMeshSnapshot(cx: number, cy: number, cz: number): DerivedMeshSnapshot {

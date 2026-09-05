@@ -109,14 +109,80 @@ describe('AuthoritySession', () => {
     });
     session.receiveInput(input(1, 1));
     session.wake(100);
+    const beforePause = server.getEntity('player-1')!;
     session.pause(100);
-    session.wake(5_000);
+    const duringPause = session.wake(5_000);
+
+    expect(server.getEntity('player-1')?.position).toEqual(beforePause.position);
+    expect(server.getEntity('player-1')?.physicsVelocity?.[0]).toBe(0);
+    expect(duringPause.physicsTick).toBe(4);
+    expect(duringPause.physicsDebtMs).toBeGreaterThan(30);
+
     session.resume(5_000);
+    session.wake(5_100);
     const snapshot = session.wake(5_100);
 
     expect(snapshot.activeTimeMs).toBeCloseTo(200, 7);
     expect(snapshot.player.body.velocity.x).toBe(0);
     expect(snapshot.paused).toBe(false);
+  });
+
+  it('按目标 tick 回放输入，消息逐步到达和预先批量到达结果一致', () => {
+    const create = () => {
+      const server = new MemoryAuthorityServer(player());
+      const session = new AuthoritySession({
+        epoch: 'test-world:1',
+        playerId: 'player-1',
+        server,
+        bodyConfigFor: () => bodyConfig,
+        voxelSource: {
+          getLoadedVoxel: (_x, y) => ({ voxel: y === -1 ? Voxel.Stone : Voxel.Air, chunkKey: 'loaded', revision: 0 }),
+        },
+        frequencies: { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
+        startTimeMs: 0,
+      });
+      return { server, session };
+    };
+    const move = { ...input(1, 1), targetPhysicsTick: 1 };
+    const stop = { ...input(2, 0), targetPhysicsTick: 2 };
+    const incremental = create();
+    incremental.session.receiveInput(move);
+    incremental.session.wake(1_000 / 60);
+    incremental.session.receiveInput(stop);
+    const incrementalSnapshot = incremental.session.wake(2_000 / 60);
+    const batched = create();
+    batched.session.receiveInput(move);
+    batched.session.receiveInput(stop);
+    expect(batched.session.wake(0).acknowledgedInputSequence).toBe(-1);
+    const batchedSnapshot = batched.session.wake(2_000 / 60);
+
+    expect(batchedSnapshot.player.body).toEqual(incrementalSnapshot.player.body);
+    expect(batchedSnapshot.acknowledgedInputSequence).toBe(2);
+  });
+
+  it('实体消失后从权威快照移除旧身体', () => {
+    const server = new MemoryAuthorityServer(player());
+    server.entities.set('item-1', {
+      id: 'item-1',
+      type: 'world-item',
+      position: [2, 2, 2],
+      physicsVelocity: [0, 0, 0],
+    });
+    const session = new AuthoritySession({
+      epoch: 'test-world:1',
+      playerId: 'player-1',
+      server,
+      bodyConfigFor: () => bodyConfig,
+      voxelSource: {
+        getLoadedVoxel: () => ({ voxel: Voxel.Air, chunkKey: 'loaded', revision: 0 }),
+      },
+      frequencies: { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
+      startTimeMs: 0,
+    });
+    expect(session.wake(0).entities.map((entity) => entity.id)).toContain('item-1');
+    server.entities.delete('item-1');
+
+    expect(session.wake(1_000 / 60).entities.map((entity) => entity.id)).not.toContain('item-1');
   });
 
   it('流体到期时只请求派生计算，不在 Authority 唤醒内同步推进旧流体', () => {

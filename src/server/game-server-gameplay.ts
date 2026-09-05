@@ -151,6 +151,9 @@ export abstract class GameServerGameplayFacade {
   advanceGameplay(seconds: number) {
     return this.gameplay.advance(seconds);
   }
+  advanceGameplayRules(seconds: number) {
+    return this.gameplay.advanceRules(seconds);
+  }
   get gameplayTime(): number {
     return this.gameplay.gameplayTime;
   }
