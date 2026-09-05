@@ -66,7 +66,8 @@ Inventory slots support two-click moves, merges, and swaps. The first eight slot
 | Click the scene | Capture the pointer and look around                 |
 | WASD            | Move                                                |
 | Mouse           | Look                                                |
-| Space           | Jump                                                |
+| Space           | Jump; rise in water                                 |
+| Shift in water  | Dive                                                |
 | Hold left click | Harvest the targeted voxel or attack a creature     |
 | Right click     | Use selected food, or place the selected block item |
 | 1–8             | Select a hotbar slot                                |
@@ -110,12 +111,18 @@ The first headless harness uses in-process memory persistence. `/save` exercises
 
 `GameServer.editBatch()` is the authoritative transaction boundary for batched world mutations. The browser runtime is split by responsibility across startup, player control, rendering adapters, world streaming, environment, HUD, and persistence modules. One Svelte 5 root owns the runtime UI. Game code publishes small, independently subscribed Shell, HUD, Interaction, and Debug projections through `UiBridge`; components send intents back through an action port and never own authoritative World or Server state.
 
+The browser runs an Authority Worker with fixed-step physics, a separate Logic Worker, one reserved fluid computation worker, one general computation worker, and one persistence worker. The optional second general worker raises the total from five to six. Rendering and local-player prediction stay on the main thread. Physics, gameplay, and fluid clocks have independent frequencies and bounded catch-up; expensive logic and mesh work do not advance the physics clock. Workers exchange versioned messages and transferable buffers without requiring shared memory.
+
+Players, creatures, and dropped items share registered collision shapes and swept collision resolution. Entity positions use the center of the feet. A one-block bank requires jumping: walking against it does not teleport the player upward. Water immersion uses body volume, while underwater visuals and sound use the camera's depth. F3+B displays the actual authoritative and predicted bodies; the debug panel also controls contact details and pickup sensors.
+
 ```text
 src/app/       Browser startup, PlayCanvas lifecycle, retained UI bridge, input, and styles
 src/client/    Browser persistence and client-side adapters
 src/server/    Authoritative world, entity, clock, and snapshot interfaces
+src/physics/   Shared body shapes, swept collision, contacts, gravity, and fluid response
+src/runtime/   Independent clocks, scheduling, worker budgets, and session protocols
 src/world/     Deterministic world, voxel, mesh, coordinate, and save logic
-src/worker/    Experimental worker entry point and transfer adapter
+src/worker/    Authority, logic, fluid, general computation, and persistence entry points
 tests/         Unit, architecture, and long-lived browser regression tests
 changes/       Change contracts and their delivery-specific evidence
 scripts/       Local harness and engineering scripts
