@@ -59,12 +59,7 @@ const cloneFrame = (value: PredictionFrame): PredictionFrame => ({
   collisionRevisionVector: cloneRevisionVector(value.collisionRevisionVector),
 });
 const sameRevisionVector = (left: Readonly<Record<string, number>>, right: Readonly<Record<string, number>>) => {
-  const leftKeys = Object.keys(left).sort();
-  const rightKeys = Object.keys(right).sort();
-  return (
-    leftKeys.length === rightKeys.length &&
-    leftKeys.every((key, index) => key === rightKeys[index] && left[key] === right[key])
-  );
+  return Object.entries(left).every(([key, revision]) => right[key] === revision);
 };
 const offsetBetween = (oldPosition: Vec3, newPosition: Vec3): Vec3 => ({
   x: oldPosition.x - newPosition.x,
@@ -72,6 +67,22 @@ const offsetBetween = (oldPosition: Vec3, newPosition: Vec3): Vec3 => ({
   z: oldPosition.z - newPosition.z,
 });
 const length = (value: Vec3) => Math.hypot(value.x, value.y, value.z);
+const finiteVec3 = (value: Vec3) => Number.isFinite(value.x) && Number.isFinite(value.y) && Number.isFinite(value.z);
+const assertFiniteBody = (value: BodyState) => {
+  if (!finiteVec3(value.position) || !finiteVec3(value.velocity))
+    throw new RangeError('Prediction body must be finite.');
+};
+const assertFrame = (frame: PredictionFrame) => {
+  if (!Number.isSafeInteger(frame.sequence) || frame.sequence < 0)
+    throw new RangeError('Prediction frame sequence must be a non-negative safe integer.');
+  if (!Number.isSafeInteger(frame.targetPhysicsTick) || frame.targetPhysicsTick < 0)
+    throw new RangeError('Prediction frame tick must be a non-negative safe integer.');
+  if (frame.sequence !== frame.input.sequence)
+    throw new RangeError('Prediction frame sequence must match input sequence.');
+  if (frame.targetPhysicsTick !== frame.input.targetPhysicsTick)
+    throw new RangeError('Prediction frame tick must match input tick.');
+  assertFiniteBody(frame.predictedBody);
+};
 
 /**
  * Local-player-only prediction history. Frames are copied at every ownership
@@ -102,6 +113,7 @@ export class PredictionBuffer {
    * prior history but retains the newest frame so prediction can resume.
    */
   record(frame: PredictionFrame): 'recorded' | 'replaced' | 'capacity-reset' {
+    assertFrame(frame);
     const stored = cloneFrame(frame);
     const existingIndex = this.storedFrames.findIndex((candidate) => candidate.sequence === stored.sequence);
     if (existingIndex >= 0) {
@@ -118,6 +130,7 @@ export class PredictionBuffer {
   }
 
   reconcile(request: PredictionReconciliation): PredictionReconciliationResult {
+    assertFiniteBody(request.authoritativeBody);
     const authoritativeBody = cloneBody(request.authoritativeBody);
     const currentRevisions = cloneRevisionVector(request.collisionRevisionVector);
     const retained = this.storedFrames.filter((frame) => frame.sequence > request.acknowledgedInputSequence);
@@ -138,6 +151,7 @@ export class PredictionBuffer {
     // callback therefore leaves the original input history untouched.
     for (const frame of retained) {
       replayedBody = cloneBody(request.replay(cloneBody(replayedBody), cloneInput(frame.input)));
+      assertFiniteBody(replayedBody);
       replayedFrames.push({ ...cloneFrame(frame), predictedBody: cloneBody(replayedBody) });
     }
 
@@ -146,6 +160,13 @@ export class PredictionBuffer {
       : cloneVec3(ZERO);
     const resetReason = oldPredictedEnd && length(presentationOffset) > this.maxSmoothError ? 'large-error' : null;
     this.storedFrames = resetReason === 'large-error' ? [] : replayedFrames;
+    if (resetReason === 'large-error')
+      return {
+        body: cloneBody(authoritativeBody),
+        replayed: 0,
+        presentationOffset: cloneVec3(ZERO),
+        resetReason,
+      };
     return {
       body: cloneBody(replayedBody),
       replayed: replayedFrames.length,

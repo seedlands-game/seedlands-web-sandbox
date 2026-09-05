@@ -109,6 +109,20 @@ describe('PredictionBuffer', () => {
     expect(buffer.frames.map((item) => item.sequence)).toEqual([2]);
   });
 
+  it('keeps prediction when the authority provides unrelated extra collision revisions', () => {
+    const buffer = new PredictionBuffer();
+    buffer.record(frame(1));
+
+    expect(
+      buffer.reconcile({
+        acknowledgedInputSequence: 0,
+        authoritativeBody: body(0),
+        collisionRevisionVector: { '0,1,0': 4, '1,1,0': 9 },
+        replay,
+      }),
+    ).toEqual({ body: body(1), replayed: 1, presentationOffset: { x: 0, y: 0, z: 0 }, resetReason: null });
+  });
+
   it('clears history before replay when its collision revisions are missing or different', () => {
     const buffer = new PredictionBuffer();
     buffer.record(frame(1));
@@ -146,12 +160,36 @@ describe('PredictionBuffer', () => {
     });
 
     expect(result).toEqual({
-      body: body(1),
-      replayed: 1,
+      body: body(0),
+      replayed: 0,
       presentationOffset: { x: 0, y: 0, z: 0 },
       resetReason: 'large-error',
     });
     expect(buffer.frames).toEqual([]);
+  });
+
+  it('rejects incoherent frame metadata and non-finite replay output', () => {
+    const buffer = new PredictionBuffer();
+    expect(() => buffer.record({ ...frame(1), targetPhysicsTick: 2 })).toThrow(
+      'Prediction frame tick must match input tick.',
+    );
+    expect(() => buffer.record({ ...frame(1), input: input(2) })).toThrow(
+      'Prediction frame sequence must match input sequence.',
+    );
+    expect(() => buffer.record({ ...frame(1), predictedBody: body(Number.NaN) })).toThrow(
+      'Prediction body must be finite.',
+    );
+
+    buffer.record(frame(1));
+    expect(() =>
+      buffer.reconcile({
+        acknowledgedInputSequence: 0,
+        authoritativeBody: body(0),
+        collisionRevisionVector: { '0,1,0': 4 },
+        replay: () => body(Number.NaN),
+      }),
+    ).toThrow('Prediction body must be finite.');
+    expect(buffer.frames.map((item) => item.sequence)).toEqual([1]);
   });
 
   it('resets bounded history on capacity and never partially commits a throwing replay', () => {
