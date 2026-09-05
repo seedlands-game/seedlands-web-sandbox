@@ -30,7 +30,16 @@ test('真实连续跳搭后按住左键下挖，落在薄平台且全程无身�
           surface + 1.6 + 0.025,
         y + 1,
       );
+      const placementState = await state(page);
       await page.mouse.click(640, 360, { button: 'right' });
+      await testInfo.attach(`placement-${y}`, {
+        body: JSON.stringify({
+          before: placementState,
+          after: await state(page),
+          feedback: await page.getByRole('status', { name: '交互反馈', exact: true }).textContent(),
+        }),
+        contentType: 'application/json',
+      });
       await expect
         .poll(() =>
           page.evaluate((height) => (window.__seedlandsHarness as unknown as HarnessApi).getVoxelAt!(0, height, 0), y),

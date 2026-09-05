@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import type { HarnessApi } from '../../../src/app/game-harness';
-import { startHarnessWorld } from '../../../tests/e2e/support/harness';
+import { lockPointer, prepareFlatMovement, startHarnessWorld } from '../../../tests/e2e/support/harness';
 
 const snapshot = (page: Page) => page.evaluate(() => (window.__seedlandsHarness as unknown as HarnessApi).snapshot());
 const workers = async (page: Page) => {
@@ -65,4 +65,61 @@ test('连续切换世界回收全部旧Worker且拒绝旧epoch可见提交', asy
   expect(after.worldInstanceId).toBe(lifecycle.worldInstanceId + 2);
   expect(after.disposedWorlds).toBe(lifecycle.disposedWorlds + 2);
   expect(after.staleVisibleCommits).toBe(0);
+});
+
+test('暂停可靠冻结且恢复不粘键，权威Worker故障明确退出并允许重试', async ({ page }, testInfo) => {
+  await startHarnessWorld(page, 'authority-pause-failure');
+  await prepareFlatMovement(page);
+  await lockPointer(page);
+  const before = await snapshot(page);
+  await page.keyboard.down('KeyW');
+  await expect
+    .poll(async () => (await snapshot(page)).serverPlayerPosition[2])
+    .toBeLessThan(before.serverPlayerPosition[2] - 0.5);
+  await page.keyboard.press('Escape');
+  await page.keyboard.up('KeyW');
+  await expect(page.getByRole('dialog', { name: '暂停游戏' })).toBeVisible();
+  const paused = await snapshot(page);
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        let frames = 0;
+        const sample = () => {
+          if (++frames >= 120) resolve();
+          else requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      }),
+  );
+  const frozen = await snapshot(page);
+  expect(frozen.authority.physicsTick).toBe(paused.authority.physicsTick);
+  expect(frozen.serverPlayerPosition).toEqual(paused.serverPlayerPosition);
+  await page.getByRole('button', { name: '继续游戏', exact: true }).click();
+  await expect
+    .poll(async () => (await snapshot(page)).authority.physicsTick)
+    .toBeGreaterThan(frozen.authority.physicsTick + 30);
+  const resumed = await snapshot(page);
+  expect(Math.hypot(resumed.serverPlayerVelocity[0], resumed.serverPlayerVelocity[2])).toBeLessThan(0.05);
+  expect(resumed.authority.physicsDebtMs).toBeLessThan(100);
+  await testInfo.attach('reliable-pause-resume', {
+    body: JSON.stringify({ paused: paused.authority, frozen: frozen.authority, resumed: resumed.authority }),
+    contentType: 'application/json',
+  });
+
+  const authorityWorker = page.workers().find((worker) => worker.url().includes('authority-worker'));
+  expect(authorityWorker).toBeDefined();
+  // 真实Worker事件循环的未捕获异常经过生产onerror路径，不修改诊断字段。
+  await authorityWorker!.evaluate(() => {
+    setTimeout(() => {
+      throw new Error('authority-e2e-failure');
+    }, 0);
+  });
+  await expect(page.locator('#start-card')).toBeVisible();
+  await expect(page.getByRole('alert')).toContainText('authority-e2e-failure');
+  await expect.poll(async () => (await workers(page)).length).toBe(0);
+  await testInfo.attach('authority-failure-visible', { body: await page.screenshot(), contentType: 'image/png' });
+  await page.getByRole('button', { name: '重新进入世界', exact: true }).click();
+  await expect(page.locator('#start-card')).toBeHidden();
+  await expect.poll(async () => (await workers(page)).length).toBe(5);
+  expect((await snapshot(page)).authority.physicsTick).toBeGreaterThan(0);
 });
