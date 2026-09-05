@@ -15,7 +15,7 @@ export class MusicPlayer {
   cue = '';
 
   constructor(private readonly mixer: AudioMixer) {
-    Tone.setContext(mixer.context, true);
+    Tone.setContext(new Tone.Context({ context: mixer.context, clockSource: 'timeout' }), true);
   }
 
   get sharedContext() {

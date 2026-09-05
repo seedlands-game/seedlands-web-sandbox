@@ -1,5 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
-vi.mock('tone', () => ({ setContext: vi.fn(), getContext: () => ({ rawContext: null }) }));
+const toneContexts = vi.hoisted(() => [] as unknown[]);
+vi.mock('tone', () => ({
+  Context: class {
+    rawContext: unknown;
+    constructor(options: { context: unknown }) {
+      toneContexts.push(options);
+      this.rawContext = options.context;
+    }
+  },
+  setContext: vi.fn(),
+  getContext: () => ({ rawContext: null }),
+}));
 const globalDecodes = vi.hoisted(() => [] as Array<(value: AudioBuffer) => void>);
 vi.mock('../../src/app/audio/audio-mixer', () => ({
   AudioMixer: class {
@@ -22,6 +33,13 @@ function fixture() {
 }
 
 describe('应用级参考曲异步隔离', () => {
+  it('使用主线程timeout时钟而不额外创建Tone Worker', () => {
+    toneContexts.length = 0;
+    const context = { decodeAudioData: vi.fn() };
+    new MusicPlayer({ context } as unknown as AudioMixer);
+    expect(toneContexts).toEqual([{ context, clockSource: 'timeout' }]);
+  });
+
   it('导入期间切世界只保留全局参考选择，不自动播放到新世界', async () => {
     globalDecodes.length = 0;
     const start = vi.spyOn(MusicPlayer.prototype, 'start').mockImplementation(() => undefined);
