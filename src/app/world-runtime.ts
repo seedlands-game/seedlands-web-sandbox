@@ -396,7 +396,7 @@ export class World {
     const change = result.structuralChange;
     if (!change) return;
     const fluidPriority = change.actorId === 'fluid-v2';
-    this.fluidFeedback.markFirstCommit(change.chunkRevisions, change.bounds ?? undefined);
+    if (fluidPriority) this.fluidFeedback.markFirstCommit(change.chunkRevisions, change.bounds ?? undefined);
     this.aggregateStructuralEventCount += 1;
     this.latestCommitMutationCount = change.mutationCount;
     this.latestCommitMeshChunkCount = change.meshChunks.length;
@@ -411,7 +411,7 @@ export class World {
       if (pending) {
         hasPresentationWork = true;
         const revision = revisions.get(key);
-        if (!fluidPriority && revision !== undefined) this.scheduler.protectVisibleRevision(key, revision);
+        if (fluidPriority && revision !== undefined) this.scheduler.protectVisibleRevision(key, revision);
         this.scheduler.request(pending.cx, pending.cy, pending.cz, {
           forceRemesh: true,
           priority: fluidPriority ? 'interactive-fluid' : 'interactive',
@@ -419,7 +419,7 @@ export class World {
       } else if (this.repository.chunks.has(key)) {
         hasPresentationWork = true;
         const revision = revisions.get(key);
-        if (!fluidPriority && revision !== undefined) this.scheduler.protectVisibleRevision(key, revision);
+        if (fluidPriority && revision !== undefined) this.scheduler.protectVisibleRevision(key, revision);
         this.dirtyChunks.add(key);
         if (fluidPriority) this.fluidDirtyChunks.add(key);
       }

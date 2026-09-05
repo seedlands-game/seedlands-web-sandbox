@@ -170,7 +170,7 @@ describe('MeshTaskScheduler', () => {
     expect(worker.posts.map((post) => post.chunkKey)).toContain('7,0,7');
   });
 
-  it('玩家编辑revision先真实可见，再派发连续流体合并后的唯一最新后继', () => {
+  it('首个derived-fluid revision先真实可见，再派发连续流体合并后的唯一最新后继', () => {
     const worker = new FakeWorker();
     const accepted: Array<{
       task: Parameters<MeshTaskScheduler['completeVisible']>[0];
@@ -200,8 +200,9 @@ describe('MeshTaskScheduler', () => {
     scheduler.request(0, 0, 0);
     scheduler.protectVisibleRevision('0,0,0', 2);
     revision = 2;
-    scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive' });
+    scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
     revision = 3;
+    scheduler.protectVisibleRevision('0,0,0', 3);
     scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
 
     worker.emit(resultFor(worker.posts[0]!));
@@ -209,6 +210,7 @@ describe('MeshTaskScheduler', () => {
     expect(worker.posts[1]?.chunkRevision).toBe(3);
 
     revision = 4;
+    scheduler.protectVisibleRevision('0,0,0', 4);
     scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
     worker.emit(resultFor(worker.posts[1]!));
     expect(accepted.map(({ task }) => task.chunkRevision)).toEqual([3]);
@@ -217,6 +219,7 @@ describe('MeshTaskScheduler', () => {
     scheduler.completeVisible(accepted[0]!.task);
     expect(worker.posts).toHaveLength(3);
     expect(worker.posts[2]?.chunkRevision).toBe(4);
+    expect(scheduler.latestTask('0,0,0')?.visibilityBarrierRevision).toBe(4);
   });
 
   it('取消首见屏障会丢弃延后后继并允许同key新代际重新请求', () => {
@@ -295,7 +298,7 @@ describe('MeshTaskScheduler', () => {
     expect(worker.posts).toHaveLength(2);
   });
 
-  it('屏障任务开始后的下一次玩家编辑保留一个后继屏障且完成后不残留', () => {
+  it('屏障任务开始后的下一次流体revision保留一个后继屏障且完成后不残留', () => {
     const worker = new FakeWorker();
     const accepted: Parameters<MeshTaskScheduler['completeVisible']>[0][] = [];
     let revision = 2;

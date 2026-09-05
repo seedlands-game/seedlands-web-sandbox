@@ -66,17 +66,18 @@ describe('权威流体结果到真实客户端提交入口', () => {
   it('fluid-v2 使用流体优先队列并为可见延迟绑定提交版本', () => {
     const subject = fixture();
     subject.consume('fluid-v2');
+    expect(subject.protectVisibleRevision).toHaveBeenCalledWith('0,0,0', 4);
     expect(subject.request).toHaveBeenCalledWith(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
     expect(subject.scheduleRemesh).toHaveBeenCalledWith(0);
     subject.visible();
     expect(subject.feedback.summary()).toMatchObject({ count: 1, pending: false, p95Ms: 12 });
   });
-  it('玩家编辑建立生产首见屏障并成为用户可见反馈的首次提交', () => {
+  it('普通编辑不会错误完成传播样本或建立derived-fluid首见屏障', () => {
     const subject = fixture();
     subject.consume('player-edit');
-    expect(subject.protectVisibleRevision).toHaveBeenCalledWith('0,0,0', 4);
+    expect(subject.protectVisibleRevision).not.toHaveBeenCalled();
     expect(subject.request).toHaveBeenCalledWith(0, 0, 0, { forceRemesh: true, priority: 'interactive' });
     subject.visible();
-    expect(subject.feedback.summary()).toMatchObject({ count: 1, pending: false, p95Ms: 12 });
+    expect(subject.feedback.summary()).toMatchObject({ count: 0, pending: true });
   });
 });
