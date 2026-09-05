@@ -20,6 +20,7 @@ scope.onmessage = (event: MessageEvent<ComputeWorkerRequest>) => {
     return;
   }
   const task = message.task;
+  const startedAt = performance.now();
   void runWorldComputeTask(task.payload as WorldComputePayload, () => cancelled.has(task.taskId), yieldTurn)
     .then((result) => {
       if (cancelled.delete(task.taskId)) return;
@@ -30,6 +31,7 @@ scope.onmessage = (event: MessageEvent<ComputeWorkerRequest>) => {
           epoch: task.epoch,
           taskId: task.taskId,
           ok: true,
+          workerDurationMs: performance.now() - startedAt,
           result,
         },
         worldComputeTransfers(result),
@@ -43,6 +45,7 @@ scope.onmessage = (event: MessageEvent<ComputeWorkerRequest>) => {
         epoch: task.epoch,
         taskId: task.taskId,
         ok: false,
+        workerDurationMs: performance.now() - startedAt,
         error: wasCancelled ? 'cancelled' : error instanceof Error ? error.message : String(error),
       });
     });

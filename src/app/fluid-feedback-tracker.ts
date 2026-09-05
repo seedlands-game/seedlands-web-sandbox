@@ -1,6 +1,17 @@
 import type { PerformanceTrace } from '../client/performance-telemetry';
 
 export type FluidSchedulingMetrics = { mergedRequests: number; supersededInFlight: number };
+export type FluidFeedbackTarget = Readonly<{
+  x: number;
+  y: number;
+  z: number;
+  radius: number;
+  chunkRevisions: readonly { key: string; revision: number }[];
+}>;
+export type FluidCommitBounds = Readonly<{
+  min: readonly [number, number, number];
+  max: readonly [number, number, number];
+}>;
 
 export type FluidFeedbackSample = {
   targetChunkKey: string;
@@ -31,6 +42,7 @@ type PendingSample = {
   editAcceptedAt: number;
   firstCommitAt: number | null;
   targetRevisions: Map<string, number>;
+  requestedTarget: FluidFeedbackTarget | null;
   schedulingAtStart: FluidSchedulingMetrics;
 };
 
@@ -43,7 +55,15 @@ const percentile = (values: number[], quantile: number) => {
 };
 
 const latestMarkAtOrAfter = (trace: PerformanceTrace | null, name: string, earliest: number) =>
-  trace?.marks.filter((mark) => mark.name === name && mark.timestampMs >= earliest).at(-1)?.timestampMs ?? earliest;
+  trace?.marks.filter((mark) => mark.name === name && mark.timestampMs >= earliest).at(-1)?.timestampMs;
+
+const overlapsTarget = (target: FluidFeedbackTarget, bounds: FluidCommitBounds) =>
+  bounds.max[0] >= target.x - target.radius &&
+  bounds.min[0] <= target.x + target.radius &&
+  bounds.max[1] >= target.y - target.radius &&
+  bounds.min[1] <= target.y + target.radius &&
+  bounds.max[2] >= target.z - target.radius &&
+  bounds.min[2] <= target.z + target.radius;
 
 export class FluidFeedbackTracker {
   private pending: PendingSample | null = null;
@@ -51,19 +71,36 @@ export class FluidFeedbackTracker {
 
   constructor(private readonly now: () => number = () => performance.now()) {}
 
-  begin(metrics: FluidSchedulingMetrics) {
+  begin(metrics: FluidSchedulingMetrics, target: FluidFeedbackTarget | null = null) {
+    if (
+      target &&
+      (![target.x, target.y, target.z, target.radius].every(Number.isFinite) ||
+        target.radius < 0 ||
+        target.chunkRevisions.some(({ key, revision }) => !key || !Number.isSafeInteger(revision) || revision < -1))
+    )
+      throw new TypeError('Fluid feedback target is invalid.');
     this.pending = {
       editAcceptedAt: this.now(),
       firstCommitAt: null,
       targetRevisions: new Map(),
+      requestedTarget: target
+        ? { ...target, chunkRevisions: target.chunkRevisions.map((entry) => ({ ...entry })) }
+        : null,
       schedulingAtStart: { ...metrics },
     };
   }
 
-  markFirstCommit(targetChunks: Iterable<{ key: string; revision: number }>) {
+  markFirstCommit(targetChunks: Iterable<{ key: string; revision: number }>, bounds?: FluidCommitBounds) {
     if (!this.pending || this.pending.firstCommitAt !== null) return;
+    const requested = this.pending.requestedTarget;
+    if (requested && (!bounds || !overlapsTarget(requested, bounds))) return;
+    const baselines = requested ? new Map(requested.chunkRevisions.map(({ key, revision }) => [key, revision])) : null;
+    const revisions = [...targetChunks].filter(
+      ({ key, revision }) => !baselines || (baselines.has(key) && revision > baselines.get(key)!),
+    );
+    if (!revisions.length) return;
     this.pending.firstCommitAt = this.now();
-    this.pending.targetRevisions = new Map([...targetChunks].map(({ key, revision }) => [key, revision]));
+    this.pending.targetRevisions = new Map(revisions.map(({ key, revision }) => [key, revision]));
   }
 
   completeVisible(visible: VisibleFluidMesh, trace: PerformanceTrace | null, metrics: FluidSchedulingMetrics) {
@@ -75,14 +112,18 @@ export class FluidFeedbackTracker {
       targetRevision === undefined ||
       visible.chunkRevision < targetRevision ||
       trace?.traceId !== visible.traceId ||
-      !trace.complete ||
-      !trace.marks.some((mark) => mark.name === 'visible-postrender')
+      !trace.complete
     )
       return;
-    const visibleAt = this.now();
     const workerStartAt = latestMarkAtOrAfter(trace, 'worker-start', pending.firstCommitAt);
+    if (workerStartAt === undefined) return;
     const workerCompleteAt = latestMarkAtOrAfter(trace, 'worker-complete', workerStartAt);
+    if (workerCompleteAt === undefined) return;
     const attachedAt = latestMarkAtOrAfter(trace, 'scene-attached', workerCompleteAt);
+    if (attachedAt === undefined) return;
+    const visibleMarkAt = latestMarkAtOrAfter(trace, 'visible-postrender', attachedAt);
+    if (visibleMarkAt === undefined) return;
+    const visibleAt = Math.max(this.now(), visibleMarkAt);
     this.samples.push({
       targetChunkKey: visible.chunkKey,
       targetRevision,

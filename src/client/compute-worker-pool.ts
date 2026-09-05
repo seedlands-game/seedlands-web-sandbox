@@ -5,6 +5,7 @@ import {
   type ComputeQueueResult,
 } from '../runtime/compute-task-queue';
 import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol';
+import { BoundedCostSamples, type CostSampleWindow } from '../runtime/bounded-cost-samples';
 
 export type ComputeWorkerPort = {
   onmessage: ((event: MessageEvent<unknown>) => void) | null;
@@ -19,6 +20,7 @@ export type ComputeWorkerResult = Readonly<{
   epoch: SessionEpoch;
   taskId: number;
   ok: boolean;
+  workerDurationMs?: number;
   result?: unknown;
   error?: string;
 }>;
@@ -59,6 +61,10 @@ export type ComputePoolDiagnostics = Readonly<{
   cancellationRequests: number;
   staleResults: number;
   failedTasks: number;
+  completedTasks: number;
+  maxQueued: number;
+  maxQueuedBytes: number;
+  workerTaskDuration: Readonly<Record<ComputeLane, CostSampleWindow>>;
 }>;
 
 function isWorkerResult(value: unknown): value is ComputeWorkerResult {
@@ -69,7 +75,9 @@ function isWorkerResult(value: unknown): value is ComputeWorkerResult {
     candidate.protocolVersion === PROTOCOL_VERSION &&
     typeof candidate.epoch === 'string' &&
     Number.isSafeInteger(candidate.taskId) &&
-    typeof candidate.ok === 'boolean'
+    typeof candidate.ok === 'boolean' &&
+    (candidate.workerDurationMs === undefined ||
+      (Number.isFinite(candidate.workerDurationMs) && candidate.workerDurationMs >= 0))
   );
 }
 
@@ -82,6 +90,13 @@ export class ComputeWorkerPool {
   private cancellationRequests = 0;
   private staleResults = 0;
   private failedTasks = 0;
+  private completedTasks = 0;
+  private maxQueued = 0;
+  private maxQueuedBytes = 0;
+  private readonly workerTaskDuration: Record<ComputeLane, BoundedCostSamples> = {
+    fluid: new BoundedCostSamples(),
+    general: new BoundedCostSamples(),
+  };
   private disposed = false;
   private readonly restartTimers = new Set<number>();
 
@@ -103,6 +118,8 @@ export class ComputeWorkerPool {
       }
       this.transfers.set(task.taskId, { transfer: [...transfer] });
       this.pump();
+      this.maxQueued = Math.max(this.maxQueued, this.queue.size);
+      this.maxQueuedBytes = Math.max(this.maxQueuedBytes, this.queue.bytes);
     }
     return result;
   }
@@ -156,6 +173,13 @@ export class ComputeWorkerPool {
       cancellationRequests: this.cancellationRequests,
       staleResults: this.staleResults,
       failedTasks: this.failedTasks,
+      completedTasks: this.completedTasks,
+      maxQueued: this.maxQueued,
+      maxQueuedBytes: this.maxQueuedBytes,
+      workerTaskDuration: {
+        fluid: this.workerTaskDuration.fluid.snapshot(),
+        general: this.workerTaskDuration.general.snapshot(),
+      },
     };
   }
 
@@ -236,6 +260,8 @@ export class ComputeWorkerPool {
     else {
       slot.restartAttempts = 0;
       this.queue.complete(task.taskId);
+      this.completedTasks += 1;
+      if (value.workerDurationMs !== undefined) this.workerTaskDuration[task.lane].record(value.workerDurationMs);
       this.options.onResult?.(task, value.result);
     }
     this.pump();

@@ -48,7 +48,12 @@ const fixture = () => {
         lane: 'main',
         startMs: 0,
         complete: true,
-        marks: [{ name: 'visible-postrender', lane: 'main', timestampMs: 12 }],
+        marks: [
+          { name: 'worker-start', lane: 'worker-derived', timestampMs: 3 },
+          { name: 'worker-complete', lane: 'worker-derived', timestampMs: 6 },
+          { name: 'scene-attached', lane: 'main', timestampMs: 9 },
+          { name: 'visible-postrender', lane: 'main', timestampMs: 12 },
+        ],
       },
       { mergedRequests: 0, supersededInFlight: 0 },
     );

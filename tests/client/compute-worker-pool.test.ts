@@ -21,9 +21,9 @@ class FakeWorker implements ComputeWorkerPort {
     this.terminated = true;
   }
 
-  finish(epoch: string, taskId: number, result: unknown = {}) {
+  finish(epoch: string, taskId: number, result: unknown = {}, workerDurationMs?: number) {
     this.onmessage?.({
-      data: { kind: 'compute-result', protocolVersion: 1, epoch, taskId, ok: true, result },
+      data: { kind: 'compute-result', protocolVersion: 1, epoch, taskId, ok: true, result, workerDurationMs },
     } as MessageEvent<unknown>);
   }
 }
@@ -124,6 +124,36 @@ describe('ComputeWorkerPool', () => {
     expect(pool.diagnostics()).toMatchObject({ running: 1, queued: 0, queuedBytes: 0, cancellationRequests: 1 });
     workers[1].finish('old-epoch', 1);
     expect(pool.diagnostics().staleResults).toBe(1);
+  });
+
+  it('记录排队峰值与Worker侧分lane任务耗时，诊断窗口保持有界', () => {
+    const workers: Array<{ lane: ComputeLane; worker: FakeWorker }> = [];
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 8,
+      maxBytes: 1_024,
+      createWorker: (lane) => {
+        const worker = new FakeWorker();
+        workers.push({ lane, worker });
+        return worker;
+      },
+    });
+    pool.enqueue(task(1, 'general', { estimatedBytes: 80 }));
+    pool.enqueue(task(2, 'general', { estimatedBytes: 160 }));
+    pool.enqueue(task(3, 'fluid', { estimatedBytes: 320 }));
+    workers.find(({ lane }) => lane === 'general')!.worker.finish('world:1', 1, {}, 7.5);
+    workers.find(({ lane }) => lane === 'fluid')!.worker.finish('world:1', 3, {}, 3.25);
+
+    expect(pool.diagnostics()).toMatchObject({
+      maxQueued: 1,
+      maxQueuedBytes: 160,
+      completedTasks: 2,
+      workerTaskDuration: {
+        fluid: { count: 1, capacity: 256, samplesMs: [3.25] },
+        general: { count: 1, capacity: 256, samplesMs: [7.5] },
+      },
+    });
   });
 
   it('仅允许一到两个通用槽，计算 Worker 总数硬上限为三个', () => {

@@ -17,7 +17,7 @@ import {
   type PlayCanvasChunkResource,
 } from './playcanvas-chunk-adapter';
 import type { QualityProfile } from './quality-profile';
-import { FluidFeedbackTracker } from './fluid-feedback-tracker';
+import { FluidFeedbackTracker, type FluidFeedbackTarget } from './fluid-feedback-tracker';
 import { WaterMeshTransitionTracker } from './water-mesh-transition';
 
 type WorldTelemetry = {
@@ -245,8 +245,22 @@ export class World {
     return this.waterTransitions.snapshot();
   }
 
-  beginFluidFeedbackSample() {
-    this.fluidFeedback.begin(this.scheduler.fluidSchedulingMetrics);
+  beginFluidFeedbackSample(target?: Omit<FluidFeedbackTarget, 'chunkRevisions'>) {
+    const chunkRevisions: { key: string; revision: number }[] = [];
+    if (target) {
+      if (![target.x, target.y, target.z, target.radius].every(Number.isFinite) || target.radius < 0)
+        throw new TypeError('Fluid feedback target is invalid.');
+      const min = [target.x - target.radius, target.y - target.radius, target.z - target.radius] as const;
+      const max = [target.x + target.radius, target.y + target.radius, target.z + target.radius] as const;
+      for (let cy = floorDiv(min[1], CHUNK_SIZE); cy <= floorDiv(max[1], CHUNK_SIZE); cy += 1)
+        for (let cz = floorDiv(min[2], CHUNK_SIZE); cz <= floorDiv(max[2], CHUNK_SIZE); cz += 1)
+          for (let cx = floorDiv(min[0], CHUNK_SIZE); cx <= floorDiv(max[0], CHUNK_SIZE); cx += 1)
+            chunkRevisions.push({
+              key: chunkKey(cx, cy, cz),
+              revision: this.authority.getChunkRevision(cx, cy, cz) ?? -1,
+            });
+    }
+    this.fluidFeedback.begin(this.scheduler.fluidSchedulingMetrics, target ? { ...target, chunkRevisions } : null);
   }
 
   setWaterTransitionHoldForHarness(held: boolean) {
@@ -367,7 +381,7 @@ export class World {
     const change = result.structuralChange;
     if (!change) return;
     const fluidPriority = change.actorId === 'fluid-v2';
-    if (fluidPriority) this.fluidFeedback.markFirstCommit(change.chunkRevisions);
+    if (fluidPriority) this.fluidFeedback.markFirstCommit(change.chunkRevisions, change.bounds ?? undefined);
     this.aggregateStructuralEventCount += 1;
     this.latestCommitMutationCount = change.mutationCount;
     this.latestCommitMeshChunkCount = change.meshChunks.length;

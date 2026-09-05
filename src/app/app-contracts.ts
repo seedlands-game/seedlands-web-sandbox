@@ -10,6 +10,8 @@ import type { FluidFeedbackSummary } from './fluid-feedback-tracker';
 import type { WaterMeshTransitionSnapshot } from './water-mesh-transition';
 import type { CostSampleWindow } from '../runtime/bounded-cost-samples';
 import type { CollisionDebugRendererDiagnostics } from './collision-debug-renderer';
+import type { ComputePoolDiagnostics } from '../client/compute-worker-pool';
+import type { FluidAuthorityDiagnostics } from '../server/fluid/fluid-transaction';
 
 export type MeshPart = MeshData;
 
@@ -104,6 +106,8 @@ export type HarnessSnapshot = {
     activeTimeMs: number;
     commitSequence: number;
     physicsCost: CostSampleWindow | null;
+    fluid: FluidAuthorityDiagnostics;
+    bodies: { total: number; actors: number; worldItems: number; nearPlayer: number };
     snapshotRejections: Readonly<Record<string, number>>;
   };
   logic: { blockStartedCount: number; blockCompletedCount: number };
@@ -125,6 +129,7 @@ export type HarnessSnapshot = {
   };
   serverWorldTime: number;
   performance: PerformanceSummary;
+  compute: ComputePoolDiagnostics;
   fluidFeedback: FluidFeedbackSummary;
   waterTransitions: WaterMeshTransitionSnapshot;
   ui: UiMetrics;

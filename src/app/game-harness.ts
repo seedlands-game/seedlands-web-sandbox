@@ -20,6 +20,8 @@ import type { BrowserGameplay } from './browser-gameplay';
 import type { UnderwaterVisualEffects } from './underwater-visual-effects';
 import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 import type { CollisionDebugRuntime } from './collision-debug-runtime';
+import type { FluidFeedbackTarget } from './fluid-feedback-tracker';
+import type { AuthorityBodySnapshot } from '../server/authority/authority-session-types';
 
 export type HarnessApi = {
   snapshot: () => HarnessSnapshot;
@@ -46,7 +48,7 @@ export type HarnessApi = {
   setVoxelAt: (x: number, y: number, z: number, voxel: number) => Promise<void>;
   getVoxelAt?: (x: number, y: number, z: number) => number | null;
   advanceFluid?: (seconds: number) => void;
-  beginFluidFeedbackSample?: () => void;
+  beginFluidFeedbackSample?: (target?: Omit<FluidFeedbackTarget, 'chunkRevisions'>) => void;
   setWaterTransitionHold?: (held: boolean) => void;
   getFluidCell?: (x: number, y: number, z: number) => { level: number; source: boolean } | null;
   getChunkRevision?: (cx: number, cy: number, cz: number) => number | null;
@@ -135,6 +137,25 @@ const unavailablePerformance = (): HarnessSnapshot['performance'] => ({
   estimatedMeshBytes: 0,
 });
 
+const unavailableCompute = (): HarnessSnapshot['compute'] => ({
+  workerCount: 0,
+  fluidWorkerCount: 0,
+  generalWorkerCount: 0,
+  running: 0,
+  queued: 0,
+  queuedBytes: 0,
+  cancellationRequests: 0,
+  staleResults: 0,
+  failedTasks: 0,
+  completedTasks: 0,
+  maxQueued: 0,
+  maxQueuedBytes: 0,
+  workerTaskDuration: {
+    fluid: { count: 0, capacity: 256, samplesMs: [] },
+    general: { count: 0, capacity: 256, samplesMs: [] },
+  },
+});
+
 export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot {
   const position = context.controller?.position;
   const player: [number, number, number] = position ? [position.x, position.y, position.z] : [0, 0, 0];
@@ -148,6 +169,22 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
   const computeWorkers = context.compute?.diagnostics;
   const fluidWorkers = computeWorkers?.fluidWorkerCount ?? 0;
   const generalWorkers = computeWorkers?.generalWorkerCount ?? 0;
+  const authorityEntities: readonly AuthorityBodySnapshot[] = authoritySnapshot?.entities ?? [];
+  const nonPlayerBodies = authorityEntities.filter((entity) => entity.type !== 'player');
+  const authorityBodies = {
+    total: nonPlayerBodies.length,
+    actors: nonPlayerBodies.filter((entity) => entity.type === 'creature' || entity.type === 'npc').length,
+    worldItems: nonPlayerBodies.filter((entity) => entity.type === 'world-item').length,
+    nearPlayer: authorityPlayer
+      ? nonPlayerBodies.filter(
+          ({ body }) =>
+            (body.position.x - authorityPlayer.x) ** 2 +
+              (body.position.y - authorityPlayer.y) ** 2 +
+              (body.position.z - authorityPlayer.z) ** 2 <=
+            32 ** 2,
+        ).length
+      : 0,
+  };
   return {
     frameMs: context.frameMs,
     player,
@@ -200,6 +237,14 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
       activeTimeMs: authoritySnapshot?.activeTimeMs ?? 0,
       commitSequence: authoritySnapshot?.commitSequence ?? 0,
       physicsCost: authoritySnapshot?.diagnostics?.physicsCost ?? null,
+      fluid: authoritySnapshot?.diagnostics?.fluid ?? {
+        pendingCellCount: 0,
+        inFlightLeaseCount: 0,
+        acceptedCandidateCount: 0,
+        rejectedCandidateCount: 0,
+        returnedLeaseCount: 0,
+      },
+      bodies: authorityBodies,
       snapshotRejections: context.authority?.snapshotRejections ?? {},
     },
     logic: context.logic?.diagnostics ?? { blockStartedCount: 0, blockCompletedCount: 0 },
@@ -225,6 +270,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     },
     serverWorldTime: context.world?.worldTime ?? 0,
     performance: context.world?.performanceSummary ?? unavailablePerformance(),
+    compute: computeWorkers ?? unavailableCompute(),
     fluidFeedback: context.world?.fluidFeedbackSummary ?? {
       count: 0,
       pending: false,
@@ -338,7 +384,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     setStreamingVariant: (variant) => bindings.world()?.setStreamingVariant(variant),
     exportPerformanceTrace: () => bindings.world()?.exportTrace() ?? { traceEvents: [] },
     executeGameplayCommand: bindings.executeGameplayCommand,
-    beginFluidFeedbackSample: () => bindings.world()?.beginFluidFeedbackSample(),
+    beginFluidFeedbackSample: (target) => bindings.world()?.beginFluidFeedbackSample(target),
     setWaterTransitionHold: (held) => bindings.world()?.setWaterTransitionHoldForHarness(held),
     getFluidCell: (x, y, z) => bindings.world()?.getFluidCell(x, y, z) ?? null,
     getChunkRevision: (cx, cy, cz) => bindings.world()?.getChunkRevision(cx, cy, cz) ?? null,

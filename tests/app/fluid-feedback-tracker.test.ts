@@ -5,9 +5,12 @@ describe('FluidFeedbackTracker', () => {
   it('reports edit, commit, worker, attach, and visible stages for warm samples', () => {
     let now = 10;
     const tracker = new FluidFeedbackTracker(() => now);
-    tracker.begin({ mergedRequests: 1, supersededInFlight: 2 });
+    tracker.begin(
+      { mergedRequests: 1, supersededInFlight: 2 },
+      { x: 1, y: 1, z: 1, radius: 1, chunkRevisions: [{ key: '0,0,0', revision: 3 }] },
+    );
     now = 18;
-    tracker.markFirstCommit([{ key: '0,0,0', revision: 4 }]);
+    tracker.markFirstCommit([{ key: '0,0,0', revision: 4 }], { min: [1, 1, 1], max: [2, 1, 1] });
     now = 42;
     tracker.completeVisible(
       { chunkKey: '0,0,0', chunkRevision: 4, traceId: 'trace-1' },
@@ -57,6 +60,67 @@ describe('FluidFeedbackTracker', () => {
       supersededInFlight: 0,
     });
 
+    expect(tracker.summary()).toMatchObject({ count: 0, pending: true });
+  });
+
+  it('ignores an unrelated fluid commit before the requested target region commits', () => {
+    let now = 0;
+    const tracker = new FluidFeedbackTracker(() => now);
+    tracker.begin(
+      { mergedRequests: 0, supersededInFlight: 0 },
+      { x: 33, y: 49, z: 1, radius: 1, chunkRevisions: [{ key: '1,1,0', revision: 7 }] },
+    );
+    now = 4;
+    tracker.markFirstCommit([{ key: '1,1,0', revision: 8 }], { min: [40, 49, 1], max: [41, 49, 1] });
+    expect(tracker.summary()).toMatchObject({ pending: true, count: 0 });
+
+    now = 9;
+    tracker.markFirstCommit(
+      [
+        { key: '0,1,0', revision: 99 },
+        { key: '1,1,0', revision: 8 },
+      ],
+      { min: [32, 48, 1], max: [34, 49, 2] },
+    );
+    now = 15;
+    tracker.completeVisible(
+      { chunkKey: '1,1,0', chunkRevision: 8, traceId: 'target-trace' },
+      {
+        traceId: 'target-trace',
+        category: 'chunk-request',
+        name: '1,1,0',
+        lane: 'main',
+        startMs: 0,
+        complete: true,
+        marks: [
+          { name: 'worker-start', lane: 'worker-derived', timestampMs: 10 },
+          { name: 'worker-complete', lane: 'worker-derived', timestampMs: 12 },
+          { name: 'scene-attached', lane: 'main', timestampMs: 14 },
+          { name: 'visible-postrender', lane: 'main', timestampMs: 15 },
+        ],
+      },
+      { mergedRequests: 0, supersededInFlight: 0 },
+    );
+    expect(tracker.summary().samples[0]).toMatchObject({ targetChunkKey: '1,1,0', targetRevision: 8, totalMs: 15 });
+  });
+
+  it('does not complete without the full worker-to-postrender trace chain', () => {
+    const tracker = new FluidFeedbackTracker(() => 20);
+    tracker.begin({ mergedRequests: 0, supersededInFlight: 0 });
+    tracker.markFirstCommit([{ key: '0,0,0', revision: 2 }]);
+    tracker.completeVisible(
+      { chunkKey: '0,0,0', chunkRevision: 2, traceId: 'partial' },
+      {
+        traceId: 'partial',
+        category: 'chunk-request',
+        name: '0,0,0',
+        lane: 'main',
+        startMs: 0,
+        complete: true,
+        marks: [{ name: 'visible-postrender', lane: 'main', timestampMs: 20 }],
+      },
+      { mergedRequests: 0, supersededInFlight: 0 },
+    );
     expect(tracker.summary()).toMatchObject({ count: 0, pending: true });
   });
 

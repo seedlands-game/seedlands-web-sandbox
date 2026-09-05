@@ -15,10 +15,15 @@ scope.onmessage = (event: MessageEvent<ComputeWorkerRequest>) => {
     return;
   }
   const task = message.task;
+  let computeStartedAt = 0;
+  let workerDurationMs = 0;
   void yieldTurn()
     .then(() => {
       if (cancelled.has(task.taskId)) throw new Error('cancelled');
-      return computeFluidCandidate(task.payload as FluidAuthoritySnapshot);
+      computeStartedAt = performance.now();
+      const result = computeFluidCandidate(task.payload as FluidAuthoritySnapshot);
+      workerDurationMs = performance.now() - computeStartedAt;
+      return result;
     })
     .then(async (result) => {
       await yieldTurn();
@@ -29,6 +34,7 @@ scope.onmessage = (event: MessageEvent<ComputeWorkerRequest>) => {
         epoch: task.epoch,
         taskId: task.taskId,
         ok: true,
+        workerDurationMs,
         result,
       });
     })
@@ -40,6 +46,7 @@ scope.onmessage = (event: MessageEvent<ComputeWorkerRequest>) => {
         epoch: task.epoch,
         taskId: task.taskId,
         ok: false,
+        ...(computeStartedAt ? { workerDurationMs: performance.now() - computeStartedAt } : {}),
         error: error instanceof Error ? error.message : String(error),
       });
     });
