@@ -60,6 +60,18 @@ const createAuthority = (chunks: Map<string, FluidChunkSnapshot>, maxQueue?: num
     apply: (candidate) => applyCandidate(chunks, candidate),
   });
 
+const createSourceFlowLease = () => {
+  const chunk = makeChunk(0, 1, 0);
+  const chunks = new Map([[chunk.key, chunk]]);
+  setCell(chunks, [0, 49, 0], { voxel: Voxel.Stone, fluid: 0 });
+  setCell(chunks, [0, 50, 0], { voxel: Voxel.Water, fluid: 0x88 });
+  const authority = createAuthority(chunks);
+  authority.activate([0, 50, 0]);
+  const lease = authority.requestFluidWork()!;
+  const candidate = computeFluidCandidate(lease);
+  return { authority, candidate, chunks, lease };
+};
+
 describe('fluid transactions', () => {
   it('reports real queue, lease, acceptance, rejection, and return counts', () => {
     const chunks = new Map([[chunkKey(0, 1, 0), makeChunk(0, 1, 0)]]);
@@ -249,6 +261,85 @@ describe('fluid transactions', () => {
 
     expect(authority.commitFluidCandidate(candidate)).toEqual({ accepted: false, reason: 'read-set' });
     expect(authority.requestFluidWork()?.frontier).toEqual(snapshot.frontier);
+  });
+
+  it('rejects a valid-byte write outside the leased local computation', () => {
+    const { authority, candidate, lease } = createSourceFlowLease();
+    const forged = {
+      ...candidate,
+      writes: [
+        {
+          position: [20, 50, 20] as FluidPosition,
+          expectedVoxel: Voxel.Air,
+          expectedFluid: 0,
+          voxel: Voxel.Water,
+          fluid: 7,
+        },
+      ],
+    };
+
+    expect(authority.commitFluidCandidate(forged)).toEqual({ accepted: false, reason: 'invalid-result' });
+    expect(authority.requestFluidWork()?.frontier).toEqual(lease.frontier);
+  });
+
+  it('rejects duplicate writes and invalid fluid bytes', () => {
+    const first = createSourceFlowLease();
+    const write = first.candidate.writes[0]!;
+    expect(first.authority.commitFluidCandidate({ ...first.candidate, writes: [write, { ...write }] })).toEqual({
+      accepted: false,
+      reason: 'invalid-result',
+    });
+
+    const second = createSourceFlowLease();
+    expect(
+      second.authority.commitFluidCandidate({
+        ...second.candidate,
+        writes: [{ ...second.candidate.writes[0]!, voxel: Voxel.Water, fluid: 255 }],
+      }),
+    ).toEqual({ accepted: false, reason: 'invalid-result' });
+  });
+
+  it('rejects a remote next frontier and non-finite coordinates', () => {
+    const first = createSourceFlowLease();
+    expect(first.authority.commitFluidCandidate({ ...first.candidate, nextFrontier: [[20, 50, 20]] })).toEqual({
+      accepted: false,
+      reason: 'invalid-result',
+    });
+
+    const second = createSourceFlowLease();
+    expect(
+      second.authority.commitFluidCandidate({
+        ...second.candidate,
+        nextCleanupFrontier: [[Number.POSITIVE_INFINITY, 50, 0]],
+      }),
+    ).toEqual({ accepted: false, reason: 'invalid-result' });
+
+    const third = createSourceFlowLease();
+    const repeated = third.candidate.nextFrontier[0] ?? third.lease.frontier[0]!;
+    expect(
+      third.authority.commitFluidCandidate({
+        ...third.candidate,
+        nextFrontier: [repeated],
+        nextCleanupFrontier: [repeated],
+      }),
+    ).toEqual({ accepted: false, reason: 'invalid-result' });
+
+    const fourth = createSourceFlowLease();
+    expect(
+      fourth.authority.commitFluidCandidate({
+        ...fourth.candidate,
+        nextFrontier: Array.from({ length: 1_000 }, (_, index) => [index, 50, 0] as FluidPosition),
+      }),
+    ).toEqual({ accepted: false, reason: 'invalid-result' });
+  });
+
+  it('accepts bounded propagation from a legal 0x88 source', () => {
+    const { authority, candidate } = createSourceFlowLease();
+
+    expect(candidate.writes).toContainEqual(
+      expect.objectContaining({ expectedVoxel: Voxel.Air, expectedFluid: 0, voxel: Voxel.Water }),
+    );
+    expect(authority.commitFluidCandidate(candidate)).toEqual(expect.objectContaining({ accepted: true }));
   });
 
   it('does not exceed queue capacity while a lease is in flight', () => {

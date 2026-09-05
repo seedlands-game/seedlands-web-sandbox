@@ -1,4 +1,5 @@
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex, Voxel } from '../../world/voxel';
+import { isFluidCandidateResultValid } from './fluid-candidate-validator';
 import { FluidPriorityFrontier } from './fluid-priority-frontier';
 
 export const FLUID_TRANSACTION_PROTOCOL_VERSION = 1 as const;
@@ -49,7 +50,7 @@ export type FluidCandidate = {
 };
 export type FluidCandidateCommit =
   | { accepted: true; commitSequence: number }
-  | { accepted: false; reason: 'epoch' | 'work-id' | 'read-set' | 'cell-conflict' };
+  | { accepted: false; reason: 'epoch' | 'work-id' | 'read-set' | 'invalid-result' | 'cell-conflict' };
 export type FluidAuthorityDiagnostics = Readonly<{
   pendingCellCount: number;
   inFlightLeaseCount: number;
@@ -379,6 +380,9 @@ export class FluidTransactionAuthority {
       })
     ) {
       return this.rejectCandidate(lease, 'read-set');
+    }
+    if (!isFluidCandidateResultValid(lease, candidate)) {
+      return this.rejectCandidate(lease, 'invalid-result');
     }
     if (
       candidate.writes.some((write) => {
