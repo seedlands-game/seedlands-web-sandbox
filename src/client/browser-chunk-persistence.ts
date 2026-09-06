@@ -67,6 +67,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   generatorVersion = GENERATOR_VERSION;
   private readonly snapshots = new Map<string, ChunkSnapshot>();
   private readonly missing = new Set<string>();
+  private readonly cacheIdentities = new Map<string, object>();
   private readonly loads = new Map<string, Promise<void>>();
   private readonly loadTokens = new Map<string, LoadToken>();
   private readonly pending = new Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>();
@@ -195,6 +196,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   async saveFrozenSnapshot(snapshot: FrozenGameSaveSnapshot): Promise<void> {
+    const cacheIdentities = new Map(snapshot.chunks.map((chunk) => [chunk.key, this.cacheIdentities.get(chunk.key)]));
     const copy = structuredClone(snapshot);
     const transfers = copy.chunks.flatMap((chunk) => [
       chunk.voxels.buffer as Transferable,
@@ -221,7 +223,9 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     Object.entries(result.codecs).forEach(([codec, count]) => {
       this.metricsValue.codecs[codec] = (this.metricsValue.codecs[codec] ?? 0) + count;
     });
-    snapshot.chunks.forEach((chunk) => this.invalidateSnapshot(chunk.key));
+    snapshot.chunks.forEach((chunk) => {
+      if (this.cacheIdentities.get(chunk.key) === cacheIdentities.get(chunk.key)) this.clearCachedSnapshot(chunk.key);
+    });
     this.gameplaySnapshotValue = structuredClone(snapshot.gameplay);
     this.checkpointValue = readGameSaveCheckpoint(snapshot);
   }
@@ -243,18 +247,18 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     const snapshot = this.snapshots.get(key);
     this.snapshots.delete(key);
     this.missing.delete(key);
+    this.cacheIdentities.delete(key);
     return snapshot ? cloneSnapshot(snapshot) : null;
   }
 
   evictSnapshot(key: string): void {
-    this.invalidateSnapshot(key);
+    this.clearCachedSnapshot(key);
   }
 
-  private invalidateSnapshot(key: string): void {
+  private clearCachedSnapshot(key: string): void {
     this.snapshots.delete(key);
     this.missing.delete(key);
-    this.loads.delete(key);
-    this.loadTokens.delete(key);
+    this.cacheIdentities.delete(key);
   }
 
   async ensureSnapshot(cx: number, cy: number, cz: number): Promise<void> {
@@ -283,6 +287,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   private commitLoadResult(result: PreparedBrowserLoadResult): void {
     if (result.status === 'missing') {
       this.missing.add(result.key);
+      this.cacheIdentities.set(result.key, {});
       return;
     }
     this.metricsValue.decodedChunkCount += 1;
@@ -290,6 +295,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     this.metricsValue.decodeSamplesMs.push(result.decodeMs);
     this.metricsValue.codecs[result.codec] = (this.metricsValue.codecs[result.codec] ?? 0) + 1;
     this.snapshots.set(result.key, result.snapshot);
+    this.cacheIdentities.set(result.key, {});
   }
 
   private async loadSnapshotBatchFromStore(
@@ -355,11 +361,14 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   releaseNeighborhood(cx: number, cy: number, cz: number): void {
     for (let y = cy - 1; y <= cy + 1; y += 1)
       for (let z = cz - 1; z <= cz + 1; z += 1)
-        for (let x = cx - 1; x <= cx + 1; x += 1) this.evictSnapshot(chunkKey(x, y, z));
+        for (let x = cx - 1; x <= cx + 1; x += 1) this.clearCachedSnapshot(chunkKey(x, y, z));
   }
 
   async saveSnapshots(snapshots: readonly ChunkSnapshot[]): Promise<void> {
     if (!snapshots.length) return;
+    const cacheIdentities = new Map(
+      snapshots.map((snapshot) => [snapshot.key, this.cacheIdentities.get(snapshot.key)]),
+    );
     const copies = snapshots.map((snapshot) => ({
       ...snapshot,
       voxels: snapshot.voxels.slice(),
@@ -391,7 +400,10 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     Object.entries(result.codecs).forEach(([codec, count]) => {
       this.metricsValue.codecs[codec] = (this.metricsValue.codecs[codec] ?? 0) + count;
     });
-    snapshots.forEach((snapshot) => this.invalidateSnapshot(snapshot.key));
+    snapshots.forEach((snapshot) => {
+      if (this.cacheIdentities.get(snapshot.key) === cacheIdentities.get(snapshot.key))
+        this.clearCachedSnapshot(snapshot.key);
+    });
   }
 
   async saveMetadata(player: [number, number, number]): Promise<void> {

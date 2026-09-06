@@ -1,10 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BrowserChunkPersistence } from '../../src/client/browser-chunk-persistence';
 import type { ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
+import type { FrozenGameSaveSnapshot } from '../../src/server/persistence/game-save-snapshot';
 import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey } from '../../src/world/voxel';
 
 type Coordinate = Readonly<{ cx: number; cy: number; cz: number }>;
 type DeferredBatch = Readonly<{ requestId: number; coordinates: readonly Coordinate[] }>;
+type DeferredSingle = Readonly<{ requestId: number; coordinate: Coordinate }>;
 
 const found = ({ cx, cy, cz }: Coordinate, revision = 1) => ({
   status: 'found' as const,
@@ -27,9 +29,13 @@ class FakePersistenceWorker {
   singleLoadCount = 0;
   readonly batchRequestSizes: number[] = [];
   readonly deferredBatches: DeferredBatch[] = [];
+  readonly deferredSingles: DeferredSingle[] = [];
   batchMode: 'missing' | 'found' | 'mismatch' | 'error' | 'deferred' = 'missing';
   singleLoadRevision = 0;
+  deferSingleLoad = false;
   failNextSave = false;
+  deferSave = false;
+  readonly deferredSaveRequestIds: number[] = [];
 
   private respond(requestId: number, result: unknown) {
     queueMicrotask(() => this.onmessage?.({ data: { requestId, ok: true, result } } as MessageEvent));
@@ -55,6 +61,10 @@ class FakePersistenceWorker {
     if (message.kind === 'load') {
       this.singleLoadCount += 1;
       const coordinate = message as unknown as Coordinate;
+      if (this.deferSingleLoad) {
+        this.deferredSingles.push({ requestId, coordinate });
+        return;
+      }
       this.respond(
         requestId,
         this.singleLoadRevision ? found(coordinate, this.singleLoadRevision) : { status: 'missing' },
@@ -85,6 +95,10 @@ class FakePersistenceWorker {
         this.failNextSave = false;
         this.reject(requestId, 'save failed');
       } else {
+        if (this.deferSave) {
+          this.deferredSaveRequestIds.push(requestId);
+          return;
+        }
         const snapshots =
           message.kind === 'save'
             ? (message.snapshots as Array<{ key: string; revision: number }>)
@@ -107,6 +121,20 @@ class FakePersistenceWorker {
       batch.requestId,
       batch.coordinates.map((coordinate) => (mode === 'found' ? found(coordinate) : { status: 'missing' })),
     );
+  }
+
+  resolveDeferredSingle(index: number, revision = 7) {
+    const load = this.deferredSingles[index]!;
+    this.respond(load.requestId, found(load.coordinate, revision));
+  }
+
+  resolveDeferredSave(index: number, revision = 2) {
+    this.respond(this.deferredSaveRequestIds[index]!, {
+      saved: [{ key: chunkKey(0, 0, 0), revision }],
+      recordBytes: 0,
+      encodeMs: 0,
+      codecs: {},
+    });
   }
 
   terminate() {}
@@ -134,6 +162,19 @@ const snapshot = (seedText: string, revision: number): ChunkSnapshot => ({
   revision,
   voxels: new Uint16Array(CHUNK_SIZE ** 3),
 });
+
+const frozenSnapshot = (seedText: string, revision: number) =>
+  ({
+    version: 1,
+    commitSequence: revision,
+    seedText,
+    generatorVersion: GENERATOR_VERSION,
+    worldRevision: revision,
+    physicsSchema: { version: 1, bodyRegistryVersion: 1 },
+    fluidSchema: { version: 1, encoding: 'chunk-level-source-byte' },
+    gameplay: { revision: 0 },
+    chunks: [snapshot(seedText, revision)],
+  }) as unknown as FrozenGameSaveSnapshot;
 
 describe('BrowserChunkPersistence neighborhood loads', () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -185,22 +226,35 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     persistence.dispose();
   });
 
-  it('does not let a released batch repopulate cache or delete a successor ownership', async () => {
+  it('preserves an exact durable read that shares an in-flight neighborhood batch across release', async () => {
     const worker = new FakePersistenceWorker();
     worker.batchMode = 'deferred';
-    const persistence = await open(worker, 'released-halo');
+    const persistence = await open(worker, 'batch-shared-exact');
 
-    const stale = persistence.ensureNeighborhood(0, 1, -2);
+    const neighborhood = persistence.ensureNeighborhood(0, 1, -2);
+    const exact = persistence.ensureSnapshot(0, 1, -2);
     persistence.releaseNeighborhood(0, 1, -2);
-    const successor = persistence.ensureNeighborhood(0, 1, -2);
-    expect(worker.batchRequestSizes).toEqual([27, 27]);
-
     worker.resolveDeferredBatch(0, 'found');
-    await stale;
-    expect(persistence.residentSnapshotCount).toBe(0);
-    worker.resolveDeferredBatch(1, 'found');
-    await successor;
-    expect(persistence.residentSnapshotCount).toBe(27);
+
+    await Promise.all([neighborhood, exact]);
+    expect(persistence.loadSnapshot(chunkKey(0, 1, -2))?.revision).toBe(1);
+    persistence.dispose();
+  });
+
+  it('preserves an exact load started before a neighborhood shares it and releases', async () => {
+    const worker = new FakePersistenceWorker();
+    worker.deferSingleLoad = true;
+    const persistence = await open(worker, 'exact-shared-batch');
+
+    const exact = persistence.ensureSnapshot(0, 1, -2);
+    const neighborhood = persistence.ensureNeighborhood(0, 1, -2);
+    expect(worker.singleLoadCount).toBe(1);
+    expect(worker.batchRequestSizes).toEqual([26]);
+    persistence.releaseNeighborhood(0, 1, -2);
+    worker.resolveDeferredSingle(0);
+
+    await Promise.all([exact, neighborhood]);
+    expect(persistence.loadSnapshot(chunkKey(0, 1, -2))?.revision).toBe(7);
     persistence.dispose();
   });
 
@@ -219,6 +273,29 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     expect(persistence.loadSnapshot(chunkKey(0, 0, 0))).toBeNull();
     worker.singleLoadRevision = 2;
     await persistence.ensureSnapshot(0, 0, 0);
+    expect(persistence.loadSnapshot(chunkKey(0, 0, 0))?.revision).toBe(2);
+    persistence.dispose();
+  });
+
+  it.each([
+    ['save', (persistence: BrowserChunkPersistence) => persistence.saveSnapshots([snapshot('save-generation', 2)])],
+    [
+      'save-frozen',
+      (persistence: BrowserChunkPersistence) => persistence.saveFrozenSnapshot(frozenSnapshot('save-generation', 2)),
+    ],
+  ])('does not invalidate a durable load dispatched after %s starts', async (_kind, save) => {
+    const worker = new FakePersistenceWorker();
+    worker.deferSave = true;
+    worker.deferSingleLoad = true;
+    const persistence = await open(worker, 'save-generation');
+
+    const saving = save(persistence);
+    const loading = persistence.ensureSnapshot(0, 0, 0);
+    worker.resolveDeferredSave(0);
+    await saving;
+    worker.resolveDeferredSingle(0, 2);
+    await loading;
+
     expect(persistence.loadSnapshot(chunkKey(0, 0, 0))?.revision).toBe(2);
     persistence.dispose();
   });
