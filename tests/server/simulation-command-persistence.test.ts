@@ -12,6 +12,14 @@ const developer = {
   capabilities: ALL_COMMAND_CAPABILITIES,
 };
 
+const starterEcologySeeds = [
+  'living-world-autonomy',
+  'ridge-start',
+  'river-start',
+  'coast-start',
+  'highland-start',
+] as const;
+
 describe('simulation commands and persistence', () => {
   it('enforces observer identity while exposing reusable observation, action and POI commands', async () => {
     const server = new GameServer({ seedText: 'simulation-command' });
@@ -149,21 +157,19 @@ describe('simulation commands and persistence', () => {
     expect(server.simulationMetrics()).toMatchObject({ retainedActorCount: 3, behaviorEvaluationCount: 0 });
   });
 
-  it('places starter actors on bounded dry surfaces across varied terrain seeds', () => {
-    for (const seedText of ['living-world-autonomy', 'ridge-start', 'river-start', 'coast-start', 'highland-start']) {
-      const server = new GameServer({ seedText });
-      expect(server.initializeStarterEcology([0, 34, 0]).initialized).toBe(true);
-      const actors = server.queryEntities().filter((entity) => entity.archetype);
-      expect(actors).toHaveLength(3);
-      for (const actor of actors) {
-        const [x, y, z] = actor.position.map(Math.floor);
-        expect(server.getVoxel(x, y, z), `${seedText}:${actor.id}:feet`).toBe(Voxel.Air);
-        expect(server.getVoxel(x, y + 1, z), `${seedText}:${actor.id}:head`).toBe(Voxel.Air);
-        expect(isSolid(server.getVoxel(x, y - 1, z)), `${seedText}:${actor.id}:ground`).toBe(true);
-        expect(Math.hypot(actor.position[0], actor.position[2]), `${seedText}:${actor.id}:radius`).toBeLessThanOrEqual(
-          24,
-        );
-      }
+  it.each(starterEcologySeeds)('places starter actors on bounded dry surfaces for seed %s', (seedText) => {
+    const server = new GameServer({ seedText });
+    expect(server.initializeStarterEcology([0, 34, 0]).initialized).toBe(true);
+    const actors = server.queryEntities().filter((entity) => entity.archetype);
+    expect(actors).toHaveLength(3);
+    for (const actor of actors) {
+      const [x, y, z] = actor.position.map(Math.floor);
+      expect(server.getVoxel(x, y, z), `${seedText}:${actor.id}:feet`).toBe(Voxel.Air);
+      expect(server.getVoxel(x, y + 1, z), `${seedText}:${actor.id}:head`).toBe(Voxel.Air);
+      expect(isSolid(server.getVoxel(x, y - 1, z)), `${seedText}:${actor.id}:ground`).toBe(true);
+      expect(Math.hypot(actor.position[0], actor.position[2]), `${seedText}:${actor.id}:radius`).toBeLessThanOrEqual(
+        24,
+      );
     }
   });
 });

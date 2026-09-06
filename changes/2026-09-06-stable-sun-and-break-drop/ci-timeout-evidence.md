@@ -35,3 +35,15 @@
 - `pnpm exec prettier --check changes/2026-09-06-stable-sun-and-break-drop/ci-timeout-evidence.md tests/server/headless-session.test.ts tests/server/server-headless-cli.test.ts tests/server/gameplay-command-persistence.test.ts`：退出码 0。
 - `pnpm exec eslint tests/server/headless-session.test.ts tests/server/server-headless-cli.test.ts tests/server/gameplay-command-persistence.test.ts`：退出码 0。
 - 未运行浏览器、完整静态检查或生产构建；完整 CI 等远端新提交后验证。
+
+## 最终 PR CI 的后续 RED
+
+GitHub Actions run `34027831088` 在 head SHA `89404aae380c1288b24cc50c6f92fef281c8dbc6` 上再次得到三项超时：
+
+- `fluid-interactive-priority.test.ts` 的 single/batch 合并场景在默认 5 秒预算内连续创建两套真实世界，约 5.1 秒。
+- `headless-session.test.ts` 的 `/tick 61` 场景真实执行 3660 个物理步、1220 个玩法周期和 1830 个流体周期，约 15.9 秒，超过已有 15 秒预算。
+- `simulation-command-persistence.test.ts` 的单一声明连续生成五个真实 seed 世界，约 5.1 秒。
+
+本轮没有业务断言失败。后续改为按独立行为拆分前两类多 fixture 计时，保留五个 seed 的全部断言；跨 60 秒 Authority 分片的批量仿真保持 61 秒与完整 lane 计数，只把该单项预算设为 30 秒。完整合同、RED 与远端准出边界见 [`changes/2026-09-06-ci-integration-workload/spec.md`](../2026-09-06-ci-integration-workload/spec.md)。
+
+本机定向实现结果：3 个文件、28 项测试全部通过，退出码 0，用时 11.98 秒；完整 TypeScript、受影响文件 Prettier/ESLint 和 diff check 通过。拆分后全仓预期为 753 个通过、4 个跳过；最终结论仍等待推送后的 Ubuntu coverage CI，不能用本机定向结果替代。

@@ -120,7 +120,7 @@ describe('HeadlessSession', () => {
         lanes: { physicsSteps: 3_660, gameplayPeriods: 1_220, fluidPeriods: 1_830 },
       },
     });
-  }, 15_000);
+  }, 30_000); // 61秒跨过Authority的60秒分片边界，保留全部真实lane计算。
 
   it('deduplicates commands by the headless transaction identity', async () => {
     const session = await HeadlessSession.create({ seedText: 'headless-deduplication' });

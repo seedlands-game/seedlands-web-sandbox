@@ -128,7 +128,7 @@ describe('interactive fluid frontier priority', () => {
     expect(lease.frontier.slice(0, 32).map(positionKey)).toContain(positionKey(target));
   });
 
-  it('prioritizes one player-edit mutation but leaves a multi-edit batch ordinary', () => {
+  it('prioritizes one player-edit mutation', () => {
     const single = createGameplayBacklog(Voxel.Air);
     single.server.editBatch({
       actorId: 'player-edit',
@@ -137,7 +137,9 @@ describe('interactive fluid frontier priority', () => {
     expect(single.server.requestFluidWork()!.frontier.slice(0, 32).map(positionKey)).toContain(
       positionKey(single.target),
     );
+  });
 
+  it('leaves a multi-edit player batch on the ordinary lane', () => {
     const batch = createGameplayBacklog(Voxel.Air);
     batch.server.editBatch({
       actorId: 'player-edit',
