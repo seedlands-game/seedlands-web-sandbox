@@ -6,6 +6,7 @@ import tseslint from 'typescript-eslint';
 const worldForbiddenImports = (source) =>
   source === 'playcanvas' || source.includes('/server/') || source.includes('/client/');
 const serverForbiddenImports = (source) => source === 'playcanvas' || source.includes('/client/');
+const clientForbiddenImports = (source) => source.includes('/app/');
 const pureRuntimeForbiddenImports = (source, filename) =>
   source === 'playcanvas' ||
   source.includes('/app/') ||
@@ -36,6 +37,8 @@ const purityRule = (forbiddenImport) => ({
     };
     return {
       ImportDeclaration: reportImport,
+      ExportNamedDeclaration: reportImport,
+      ExportAllDeclaration: reportImport,
       ImportExpression: reportImport,
       CallExpression(node) {
         if (node.callee.type !== 'Identifier' || node.callee.name !== 'require') return;
@@ -54,6 +57,50 @@ const purityRule = (forbiddenImport) => ({
         context.report({ node, messageId: 'forbidden', data: { dependency: node.name } });
       },
     };
+  },
+});
+
+const importBoundaryRule = (forbiddenImport) => ({
+  meta: {
+    type: 'problem',
+    schema: [],
+    messages: { forbidden: '此目录不能依赖 {{dependency}}。' },
+  },
+  create(context) {
+    const reportImport = (node) => {
+      const source = typeof node.source?.value === 'string' ? node.source.value : null;
+      if (source && forbiddenImport(source, context.filename))
+        context.report({ node, messageId: 'forbidden', data: { dependency: source } });
+    };
+    return {
+      ImportDeclaration: reportImport,
+      ExportNamedDeclaration: reportImport,
+      ExportAllDeclaration: reportImport,
+      ImportExpression: reportImport,
+      CallExpression(node) {
+        if (node.callee.type !== 'Identifier' || node.callee.name !== 'require') return;
+        const [argument] = node.arguments;
+        if (
+          argument?.type === 'Literal' &&
+          typeof argument.value === 'string' &&
+          forbiddenImport(argument.value, context.filename)
+        )
+          context.report({ node, messageId: 'forbidden', data: { dependency: argument.value } });
+      },
+    };
+  },
+});
+
+const topLevelOwnerRule = (allowed) => ({
+  meta: {
+    type: 'problem',
+    schema: [],
+    messages: { misplaced: '请将此文件放入已定义的职责目录，或把明确的组合入口加入 allowlist。' },
+  },
+  create(context) {
+    const normalized = context.filename.replaceAll('\\', '/');
+    const file = normalized.split('/').at(-1);
+    return allowed.has(file) ? {} : { Program: (node) => context.report({ node, messageId: 'misplaced' }) };
   },
 });
 
@@ -106,6 +153,36 @@ const seedlands = {
         };
       },
     },
+    'client-no-app-import': importBoundaryRule(clientForbiddenImports),
+    'app-top-level-owner': topLevelOwnerRule(
+      new Set([
+        'app-contracts.ts',
+        'application-shell.ts',
+        'authority-presentation-sync.ts',
+        'browser-session-config.ts',
+        'browser-worker-session.ts',
+        'command-history.ts',
+        'game-harness.ts',
+        'game-runtime-controls.ts',
+        'game-ui-projection.ts',
+        'game.ts',
+        'hud-projector.ts',
+        'macro-map-renderer.ts',
+        'main.ts',
+      ]),
+    ),
+    'client-top-level-owner': topLevelOwnerRule(
+      new Set([
+        'build-watermark.ts',
+        'client-ready-wait.ts',
+        'client-request-registry.ts',
+        'local-player-prediction.ts',
+        'player-input-stream.ts',
+        'prediction-buffer.ts',
+        'snapshot-interpolator.ts',
+        'world-version-policy.ts',
+      ]),
+    ),
     'ui-presentation-boundary': {
       meta: {
         type: 'problem',
@@ -209,9 +286,24 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/app/*.ts'],
+    ignores: ['src/app/player-view-offsets.ts'],
+    plugins: { seedlands },
+    rules: { 'seedlands/app-top-level-owner': 'error' },
+  },
+  {
+    files: ['src/client/*.ts'],
+    ignores: ['src/client/performance-telemetry.ts'],
+    plugins: { seedlands },
+    rules: { 'seedlands/client-top-level-owner': 'error' },
+  },
+  {
     files: ['src/client/**/*.ts'],
     plugins: { seedlands },
-    rules: { 'seedlands/authority-worker-owner': 'error' },
+    rules: {
+      'seedlands/authority-worker-owner': 'error',
+      'seedlands/client-no-app-import': 'error',
+    },
   },
   {
     files: ['src/world/**/*.ts'],

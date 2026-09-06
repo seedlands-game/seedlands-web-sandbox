@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { ApplicationShell } from '../application-shell';
-  import type { QualityLevel } from '../quality-profile';
+  import type { QualityLevel } from '../scene/quality-profile';
   import type { ShellState } from './ui-contracts';
   import GameButton from './primitives/game-button.svelte';
   import GamePanel from './primitives/game-panel.svelte';

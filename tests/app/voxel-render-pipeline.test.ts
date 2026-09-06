@@ -3,7 +3,7 @@ import {
   MATERIAL_LAYER_COUNT,
   shaderInventory,
   renderCategoryForFaceMaterial,
-} from '../../src/app/voxel-render-pipeline';
+} from '../../src/app/scene/voxel-render-pipeline';
 import { FaceMaterial } from '../../src/world/voxel';
 
 describe('voxel render pipeline policy', () => {

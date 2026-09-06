@@ -8,7 +8,7 @@ import {
   type BodyKind,
 } from '../../src/physics/body-registry';
 import { validateBodyConfig } from '../../src/physics';
-import { entityHitDistance } from '../../src/client/entity-hit-volume';
+import { entityHitDistance } from '../../src/client/presentation/entity-hit-volume';
 
 describe('统一身体注册表', () => {
   it.each([

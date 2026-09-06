@@ -1,0 +1,31 @@
+# 开发治理与证据基线
+
+本页保存跨 change 复用的准出规则；运行方式仍以 README 和 `package.json` 为准。
+
+## 轻量 SDD
+
+每个改变生产代码、产品行为、架构、配置或测试口径的需求，先建立 `changes/YYYY-MM-DD-kebab-name/spec.md`。它至少写清目标、范围/非目标、关键决定、Given/When/Then 行为、实施前测试设计、逐项证据、任务状态和 Delivery Snapshot。
+
+简单且已澄清的需求走 **Agile**：短 spec、RED、实现、GREEN 和本地准出连续完成。安全、权限、持久化格式、世界生成/Chunk、渲染管线、公开契约、跨模块重构或不可逆数据走 **Breaking**：先写 spec 与用例，用户审核精确 SHA-256 后实施。目标或方案不清楚时走 **Exploration**：仅在 `/tmp` 或独立非生产位置试验，不导入产品，方向稳定后以新 spec 和新审核正式实现。
+
+审核不自动授权 push、发布、外部写入、权限变更或删除。`Scope`、`Decisions`、`Behaviour`、`Test Design` 或 `Acceptance` 的实质变化会使原 hash 审核失效，必须重新审核。每次准出记录 docs baseline 是否更新：跨 change 的难重建规则更新 docs；只影响局部行为时写明不更新理由。
+
+## E2E 生命周期
+
+`tests/e2e/` 只放长期核心基线；`changes/<change>/e2e/` 和 `midscene/` 保存当次需求证据。`pnpm test:e2e`、`pnpm harness:e2e` 与 `pnpm harness` 只执行基线；当前需求由显式 change 路径运行。
+
+- **Active**：合同和需求用例由当前 change 维护、显式执行。
+- **Delivered**：用例随 spec 保留为当次证据，不承诺随未来 API 变化维护。
+- **Archived**：spec 和用例一起冻结在 ZIP 中；复用时由新 change 重新定义预期。
+
+需求用例进入长期基线前，必须有实施者之外的高智能模型独立评审，覆盖长期价值、重复度、确定性、成本与维护负担；当前项目路由为 Sol/xhigh，并在 spec 记录请求的模型/effort 与结论。缺少或不通过时 fail closed，继续保留在 change。基线提炼后的目标、旅程或成本发生实质变化时原评审失效；基线提炼后要去重，并在 Delivery Snapshot 区分当前保护和历史证据。
+
+## 证据边界
+
+Vitest 证明纯逻辑、数据、算法和确定性不变量；Playwright 证明真实浏览器的可观察行为和输入；Midscene 证明视觉/语义旅程；手工检查只补充不能稳定自动化的体验项。一个验收项可需要多种证据，不能以一种替代另一种；不适用时写 `N/A` 和理由。
+
+`?harness=1` 只能通过生产 `World.edit()`、Store 或 streaming 路径构造确定状态，不替代真实 Pointer Lock 输入。`src/world/**` 的 V8 行覆盖率不低于 80%；静态、构建、浏览器、Harness 和手工游玩要在 spec 中分别陈述真实结果。
+
+## 交付
+
+确认在明确功能分支后，只暂存本 change 的文件，使用语义化本地 commit；默认不 push。历史 evidence 不因目录/API 演进而静默改写。具体源码职责与可执行 ESLint 规则见[目录规范](repository-structure.md)。

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BrowserAuthorityClient, type AuthorityWorkerPort } from '../../src/client/browser-authority-client';
+import { BrowserAuthorityClient, type AuthorityWorkerPort } from '../../src/client/authority/browser-authority-client';
 import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
 import type { WorldCommitResult } from '../../src/server/game-server-types';
 import type { AuthorityResponse } from '../../src/worker/authority-worker-protocol';

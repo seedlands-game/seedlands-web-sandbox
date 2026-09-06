@@ -106,7 +106,7 @@ pnpm server:headless -- --seed my-debug-world
 
 ## 架构
 
-阅读源码先看[代码地图](docs/code-map.md)：包含推荐阅读顺序、运行链路和按功能查找的实现与测试入口。新增文件与后续目录整理见[仓库结构规范](docs/repository-structure.md)，项目目标和演进路线见[长期对齐](docs/living-world-alignment.md)。
+阅读源码先看[代码地图](docs/code-map.md)：包含推荐阅读顺序、运行链路和按功能查找的实现与测试入口。新增文件与当前目录归属见[仓库结构规范](docs/repository-structure.md)，证据规则见[开发治理](docs/development-governance.md)，项目目标和演进路线见[长期对齐](docs/living-world-alignment.md)；归档历史可由[归档索引](docs/change-archive.md)恢复。
 
 `GameServer.editBatch()` 是批量世界修改的权威事务边界。浏览器运行时按职责拆分为启动、玩家控制、渲染适配、世界 streaming、环境、HUD 与持久化模块。运行期 UI 由单个 Svelte 5 root 持有；Game 只通过 `UiBridge` 发布可独立订阅的 Shell、HUD、Interaction 与 Debug 小型投影，组件经 action port 回传意图，不持有权威 World 或 Server 状态。
 

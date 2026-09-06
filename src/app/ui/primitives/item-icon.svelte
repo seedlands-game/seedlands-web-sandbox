@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { publicAssetUrl } from '../../../client/public-asset-url';
+  import { publicAssetUrl } from '../../../client/presentation/public-asset-url';
   let { itemId }: { itemId: string | null } = $props();
   const assetAliases: Record<string, string> = { 'glowstone-block': 'lantern' };
 </script>

@@ -4,24 +4,25 @@
 
 ## 审计结论
 
-2026-09-06 核对的生产代码基线 `f245493` 有 272 个 `src` 文件。`app` 共 97 个，其中 60 个直接平铺；`client` 共 49 个，其中 42 个直接平铺。代码已经拆出很多职责，但目录仍让读者面对长文件列表。
+2026-09-06 的 context-engineering change 已将 81 个平铺 app/client 文件按既有职责移动，未改变模块所有权或算法。`app` 的场景、世界 streaming、玩家输入与 gameplay 表现，`client` 的 authority、compute、persistence 与 presentation 现在各自聚合；顶层只保留组合入口和明确的跨域小契约。
 
-同一基线的 `changes` 有 330 个文件，属于变更合同与历史证据；根目录的 26 个受跟踪文件主要是工具配置和社区入口。主要改进点是功能导航和源码职责聚合，根目录配置及历史证据不应仅为减少数量而搬迁或删除。
+迁移前基线 `f245493` 的 `changes` 有 330 个文件，属于变更合同与历史证据；根目录的 26 个受跟踪文件主要是工具配置和社区入口。主要改进点是功能导航和源码职责聚合，根目录配置及历史证据不应仅为减少数量而搬迁或删除。
 
 这些数字是固定基线的审计快照，不是持续增长的目录上限。
 
 ## 顶层归属
 
-| 位置                     | 应放什么                                 | 归属提醒                                              |
-| ------------------------ | ---------------------------------------- | ----------------------------------------------------- |
-| 根目录                   | 包管理、构建、检查配置及社区入口文档     | 保留工具常规入口；新领域实现不放这里                  |
-| `src/`                   | 实际产品代码与运行入口                   | 先确定状态所有者、执行环境和生命周期，再选子目录      |
-| `tests/`                 | 单元测试、架构门禁、长期浏览器基线       | 通常按被测模块归属组织；需求 E2E 遵守 change 生命周期 |
-| `changes/<日期>-<名称>/` | 单次变更的 spec、需求测试与交付证据      | 历史路径按交付时保留，不为追随当前目录而静默改写      |
-| `docs/`                  | 多次变更共用的目标、路线、代码导航和约定 | 不复制 README 的运行说明，不替代具体 spec             |
-| `scripts/`               | 工程任务、证据汇总和启动包装             | 产品规则留在所属源码模块                              |
-| `public/assets/`         | 通过静态 URL 加载的图片和首屏资源        | 资产来源与许可见 [ASSETS](../ASSETS.md)               |
-| `harness/baseline.json`  | 版本化基线                               | 与忽略的 `harness/results/` 运行产物区分              |
+| 位置                     | 应放什么                                  | 归属提醒                                              |
+| ------------------------ | ----------------------------------------- | ----------------------------------------------------- |
+| 根目录                   | 包管理、构建、检查配置及社区入口文档      | 保留工具常规入口；新领域实现不放这里                  |
+| `src/`                   | 实际产品代码与运行入口                    | 先确定状态所有者、执行环境和生命周期，再选子目录      |
+| `tests/`                 | 单元测试、架构门禁、长期浏览器基线        | 通常按被测模块归属组织；需求 E2E 遵守 change 生命周期 |
+| `changes/<日期>-<名称>/` | Active 或未归档的变更合同、需求测试与证据 | 历史路径按交付时保留，不为追随当前目录而静默改写      |
+| `archives/changes/`      | 明确 Delivered change 的可恢复 ZIP        | manifest 保存原路径和 SHA-256；恢复方式见归档索引     |
+| `docs/`                  | 多次变更共用的目标、路线、代码导航和约定  | 不复制 README 的运行说明，不替代具体 spec             |
+| `scripts/`               | 工程任务、证据汇总和启动包装              | 产品规则留在所属源码模块                              |
+| `public/assets/`         | 通过静态 URL 加载的图片和首屏资源         | 资产来源与许可见 [ASSETS](../ASSETS.md)               |
+| `harness/baseline.json`  | 版本化基线                                | 与忽略的 `harness/results/` 运行产物区分              |
 
 `node_modules/`、`dist/`、`coverage/`、`midscene_run/`、`playwright-report/`、`test-results/` 和 `harness/results/` 是依赖或运行产物；不作为源码组织的一部分，不因目录整理而提交它们。密钥规则继续以 AGENTS 为准。
 
@@ -30,7 +31,7 @@
 1. **先找已有功能所有者。** 在代码地图中定位同类行为及调用链。权威规则放服务端领域模块；客户端快照和碰撞镜像是派生数据，不另建一套真值。
 2. **再区分算法与平台适配。** 世界算法放 `world`，共享物理解算放 `physics`，通用时钟和调度放 `runtime`。浏览器装配、输入、PlayCanvas 和 Svelte 在 `app`；客户端协议适配、预测和表现计算在 `client`。Worker 入口与传输适配在 `worker`。
 3. **把同一职责的辅助文件放在一起。** 接口类型、策略和局部工具靠近实际所有者。不要因为文件短就平铺到上层，也不要为了满足行数规则拆成无语义的编号片段。
-4. **出现稳定文件簇时建立领域子目录。** 以生命周期、状态或功能为单位，能用一句话说明该目录负责什么。移动已有文件属于独立迁移工作；当前任务若不含迁移，先沿用现有归属并记录候选分组。
+4. **出现稳定文件簇时建立领域子目录。** 以生命周期、状态或功能为单位，能用一句话说明该目录负责什么。移动已有文件属于独立迁移工作；当前已有 app/client 的职责目录应优先复用。
 5. **确有跨模块复用时再提取。** 先指出至少两个实际调用方及稳定契约，不预建包罗万象的 `shared`、`common`、`core` 或 `utils`。涉及依赖方向、协议或公开接口的提取，按架构变更执行 SDD。
 
 现存 `worker/world-compute-task.ts` 等辅助实现是待梳理的历史现状，不应据此扩大 Worker 目录为通用算法仓库；移动它们也不能只改文件路径而跳过依赖评审。
@@ -53,31 +54,24 @@
 | 单文件规模                                | [ESLint](../eslint.config.mjs)、[测试](../tests/governance/module-size-eslint.test.ts)                                                                               | 受配置覆盖的代码最多 500 个有效行，忽略空行与注释；不能用原始行数或 CSS 行数直接判断违规 |
 | 世界纯逻辑、服务端及 runtime/physics 边界 | [ESLint](../eslint.config.mjs)、[世界边界测试](../tests/governance/world-purity-eslint.test.ts)、[运行时边界测试](../tests/governance/runtime-purity-eslint.test.ts) | 已配置的导入模式与全局对象限制；并非任意间接依赖的完整证明                               |
 | 权威所有权与 UI 表现边界                  | [所有权测试](../tests/governance/authority-ownership-eslint.test.ts)、[UI 测试](../tests/governance/ui-presentation-boundary-eslint.test.ts)                         | 浏览器权威实例和 UI 写入的已定义约束                                                     |
+| app/client 文件归属                       | [ESLint](../eslint.config.mjs)、[归属测试](../tests/governance/client-app-boundary-eslint.test.ts)                                                                   | client 不导入 app；app/client 顶层只允许显式组合入口，其他文件必须进入职责目录           |
 
-本页的职责聚合、局部类型归属与导航维护属于评审约定，**本次没有新增自动门禁**。若后续强化可执行架构边界，必须先补规则的正反例测试并遵守 SDD，不能把文档目标写成已经验证的能力。
+目录粒度仍是评审取舍，不等于完整依赖 DAG。后续强化边界必须先补规则的正反例测试并遵守 SDD，不能把文档目标写成已经验证的能力。
 
-## 后续迁移候选：尚未实施
+## 当前职责目录
 
-先做同一顶层模块内的职责聚合，减少一次改动同时涉及目录和语义的风险。以下是候选名称，不是当前目录，也不要求所有未来文件立即照此创建。
+| 目录                       | 负责什么                                                   |
+| -------------------------- | ---------------------------------------------------------- |
+| `src/app/scene/`           | PlayCanvas 场景、材质、昼夜、光照、反射和水面视觉资源      |
+| `src/app/world/`           | 浏览器 World、streaming、网格调度、Chunk GPU 资源与提交    |
+| `src/app/player/`          | Pointer Lock、玩家控制、碰撞调试、第一人称表现和输入门控   |
+| `src/app/gameplay/`        | 浏览器 gameplay 表现、实体资源、目标/破坏 overlay 与水体验 |
+| `src/client/authority/`    | Authority/Logic 客户端、epoch、快照、镜像和传输            |
+| `src/client/compute/`      | 浏览器计算运行时、池与网格快照                             |
+| `src/client/persistence/`  | 浏览器存档、加载、指标、基准与 persistence Worker 契约     |
+| `src/client/presentation/` | 客户端表现计算、性能遥测、模型定义、命中体和公开资产 URL   |
 
-| 现有文件簇                                                                    | 候选归属                               | 迁移时重点核对                                |
-| ----------------------------------------------------------------------------- | -------------------------------------- | --------------------------------------------- |
-| `app` 的 `game`、`browser-session-*`、`browser-worker-session`、`world-entry` | `app/session/`                         | 组合入口、创建/退出与清理顺序                 |
-| `app` 的 `player-controller*`、`pointer-lock`、输入辅助                       | `app/input/`                           | 键鼠、Pointer Lock、预测与相机之间的实际职责  |
-| `app` 的 `world-runtime`、`mesh-task-*`、可见性与 streaming 辅助              | `app/streaming/`                       | 世界端口、任务调度与资源释放的边界            |
-| `app` 的材质、环境、反射、Chunk GPU 适配与视觉反馈                            | `app/rendering/` 下按需要继续分组      | GPU 生命周期、shader 路径、画面语义与首屏行为 |
-| `app` 的 Harness 与碰撞调试渲染                                               | `app/debug/`                           | 测试观测入口不成为生产逻辑的替代路径          |
-| `client` 的 `authority-*` 与 Authority 客户端                                 | `client/authority/`                    | 协议、epoch、快照与镜像生命周期               |
-| `client` 的输入流、预测缓冲和插值                                             | `client/prediction/`                   | 区分本地玩家预测与其他实体的表现插值          |
-| `client` 的浏览器保存与加载辅助                                               | `client/persistence/`                  | Worker URL、IndexedDB、退出和恢复路径         |
-| `client` 的计算池及运行时、性能观测                                           | `client/compute/`、`client/telemetry/` | 队列、预算与观测各自的所有者                  |
-
-建议按以下顺序推进：
-
-1. 以当前代码地图为导航基线，在独立迁移 spec 中选定一组文件，列明原路径、目标路径、导入及测试影响。涉及跨模块重构时按现有 Breaking 流程审核精确 spec hash。
-2. 完成该组迁移后验证相应静态检查、构建和受影响的行为证据，再同步代码地图。逐组保持可验证，不夹带算法或玩法变更。
-3. 配合 Dedicated Server 工作，再审视 `worker/world-compute-task.ts`、跨端协议、浏览器存储适配等真正的所有权问题。拆模块时要明确纯计算与平台入口，而不仅仅改目录。
-4. 引擎与插件的公开契约通过具体 MVP 验证后再命名或拆包；当前不预造 `engine/`、`plugins/` 大框架。路线依据仍见[长期对齐](living-world-alignment.md)。
+`src/app/` 与 `src/client/` 顶层的 `.ts` 文件不作为短文件堆放处。仅明确的组合入口可保留；新增例外必须同时更新 ESLint allowlist、正反例测试和代码地图。不要为这套分组创建 `engine`、`plugins` 或全局 `shared`。
 
 ## 维护责任
 

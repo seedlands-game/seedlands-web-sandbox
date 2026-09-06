@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { actorModelDefinition, itemVisualKind, viewmodelPose } from '../../src/client/gameplay-model-definition';
+import {
+  actorModelDefinition,
+  itemVisualKind,
+  viewmodelPose,
+} from '../../src/client/presentation/gameplay-model-definition';
 
 describe('gameplay model definition', () => {
   it('gives every carryable item one shared physical visual definition', () => {

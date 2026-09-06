@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { orientNewPlayer } from '../../src/app/world-entry';
+import { orientNewPlayer } from '../../src/app/world/world-entry';
 
 it('新世界面向营地，恢复玩家保持原朝向', () => {
   const controller = { setView: vi.fn() };

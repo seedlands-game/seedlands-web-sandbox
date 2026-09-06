@@ -1,11 +1,11 @@
 import * as pc from 'playcanvas';
-import * as sceneBootstrap from './scene-bootstrap';
+import * as sceneBootstrap from './scene/scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
-import { WaterExperience } from './water-experience';
-import { BrowserChunkPersistence } from '../client/browser-chunk-persistence';
+import { WaterExperience } from './gameplay/water-experience';
+import { BrowserChunkPersistence } from '../client/persistence/browser-chunk-persistence';
 import type { WorldOpenMode } from '../client/world-version-policy';
-import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/performance-profile';
+import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/presentation/performance-profile';
 import {
   executeSlashCommand,
   type CommandExecutorPort,
@@ -13,26 +13,26 @@ import {
 } from '../server/commands/slash-command-parser';
 import { ALL_COMMAND_CAPABILITIES, type CommandSource, type ServerCommand } from '../server/commands/command-contract';
 import type { LifecycleSnapshot, RestoredSession } from './app-contracts';
-import { BrowserGameplay } from './browser-gameplay';
-import { BrowserWorldStore } from './browser-world-store';
+import { BrowserGameplay } from './gameplay/browser-gameplay';
+import { BrowserWorldStore } from './world/browser-world-store';
 import { createRuntimeHarnessApi, installHarness } from './game-harness';
-import { PLAYER_FEET_OFFSET, PlayerController } from './player-controller';
-import { QUALITY_PROFILES, type QualityLevel } from './quality-profile';
+import { PLAYER_FEET_OFFSET, PlayerController } from './player/player-controller';
+import { QUALITY_PROFILES, type QualityLevel } from './scene/quality-profile';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
 import type { MapLayer } from './ui/ui-contracts';
-import { createVoxelMaterials, type VoxelMaterials } from './voxel-materials';
-import { WorldEnvironment } from './world-environment';
-import { World } from './world-runtime';
-import { AdvancedVisualEffects } from './advanced-visual-effects';
-import { LIGHTING_QUALITY_BUDGETS } from './advanced-lighting-budget';
-import { BrowserAuthorityClient } from '../client/browser-authority-client';
-import { BrowserComputeRuntime } from '../client/browser-compute-runtime';
-import { BrowserLogicClient } from '../client/browser-logic-client';
+import { createVoxelMaterials, type VoxelMaterials } from './scene/voxel-materials';
+import { WorldEnvironment } from './scene/world-environment';
+import { World } from './world/world-runtime';
+import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
+import { LIGHTING_QUALITY_BUDGETS } from './scene/advanced-lighting-budget';
+import { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
+import { BrowserComputeRuntime } from '../client/compute/browser-compute-runtime';
+import { BrowserLogicClient } from '../client/authority/browser-logic-client';
 import { startBrowserWorkerSession } from './browser-worker-session';
-import * as gamePlayer from './game-player-controller';
+import * as gamePlayer from './player/game-player-controller';
 import { AuthorityPresentationSync } from './authority-presentation-sync';
 import { GameUiProjection } from './game-ui-projection';
-import { CollisionDebugRuntime } from './collision-debug-runtime';
+import { CollisionDebugRuntime } from './player/collision-debug-runtime';
 import * as runtimeControls from './game-runtime-controls';
 import { applySessionWorkerBudget, readBrowserSessionConfig } from './browser-session-config';
 
