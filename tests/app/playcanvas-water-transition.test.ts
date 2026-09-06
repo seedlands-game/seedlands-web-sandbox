@@ -89,7 +89,7 @@ describe('PlayCanvas 水面 GPU Morph 资源', () => {
   });
 
   it('上传单份起始几何和 Float32 位移，并对权重与销毁执行有界幂等处理', async () => {
-    const { createPlayCanvasWaterTransition } = await import('../../src/app/playcanvas-water-transition');
+    const { createPlayCanvasWaterTransition } = await import('../../src/app/scene/playcanvas-water-transition');
     const startPositions = new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0]);
     const deltaPositions = new Float32Array([0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0]);
     const normals = new Float32Array([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1]);
@@ -137,7 +137,7 @@ describe('PlayCanvas 水面 GPU Morph 资源', () => {
   });
 
   it('创建 Morph 失败时释放已经分配的临时 Mesh', async () => {
-    const { createPlayCanvasWaterTransition } = await import('../../src/app/playcanvas-water-transition');
+    const { createPlayCanvasWaterTransition } = await import('../../src/app/scene/playcanvas-water-transition');
     state.rejectMorph = true;
 
     expect(() =>

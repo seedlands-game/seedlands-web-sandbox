@@ -1,5 +1,5 @@
 import type { SlashCommandExecution } from '../../server/commands/slash-command-parser';
-import type { QualityLevel } from '../quality-profile';
+import type { QualityLevel } from '../scene/quality-profile';
 import type { GameplayItemPresentation } from './gameplay-ui-projector';
 import type { WorldOpenMode } from '../../client/world-version-policy';
 

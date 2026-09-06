@@ -1,11 +1,11 @@
 import type * as pc from 'playcanvas';
-import type { PerformanceProfile } from '../client/performance-profile';
-import type { PerformanceTelemetry } from '../client/performance-telemetry';
-import type { QualityLevel } from './quality-profile';
+import type { PerformanceProfile } from '../client/presentation/performance-profile';
+import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
+import type { QualityLevel } from './scene/quality-profile';
 import type { UiWorldSession } from './ui/ui-bridge';
 import type { CollisionDebugUiState } from './ui/ui-contracts';
-import type { WorldEnvironment } from './world-environment';
-import type { World } from './world-runtime';
+import type { WorldEnvironment } from './scene/world-environment';
+import type { World } from './world/world-runtime';
 import { projectDebug, projectWorldClock } from './hud-projector';
 
 type Options = Readonly<{

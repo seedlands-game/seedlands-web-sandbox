@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { movementPose, damageFlash } from '../../src/client/entity-presentation-motion';
+import { movementPose, damageFlash } from '../../src/client/presentation/entity-presentation-motion';
 
 it('模型正面 -Z 指向真实位移方向，静止不伪造行走', () => {
   expect(movementPose([0, 0, 0], [1, 0, 0], 1).yaw).toBe(-90);

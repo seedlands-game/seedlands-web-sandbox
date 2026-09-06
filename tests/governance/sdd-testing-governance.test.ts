@@ -13,41 +13,44 @@ const projectFiles = (path: string): string[] =>
 describe('SDD and testing governance', () => {
   it('defines the baseline and requirement E2E lifecycle', () => {
     const agents = readProjectFile('AGENTS.md');
+    const governance = readProjectFile('docs/development-governance.md');
 
-    expect(agents).toContain('### 基线 E2E 与需求 E2E');
-    expect(agents).toContain('Active');
-    expect(agents).toContain('Delivered');
-    expect(agents).toContain('Archived');
-    expect(agents).toContain('高智能模型独立评审');
-    expect(agents).toContain('Sol/xhigh');
-    expect(agents).toContain('fail closed');
+    expect(agents).toContain('docs/development-governance.md');
+    expect(governance).toContain('## E2E 生命周期');
+    expect(governance).toContain('Active');
+    expect(governance).toContain('Delivered');
+    expect(governance).toContain('Archived');
+    expect(governance).toContain('高智能模型独立评审');
+    expect(governance).toContain('Sol/xhigh');
+    expect(governance).toContain('fail closed');
   });
 
   it('defines non-substitutable Vitest, Playwright, and Midscene evidence', () => {
-    const agents = readProjectFile('AGENTS.md');
+    const governance = readProjectFile('docs/development-governance.md');
 
-    expect(agents).toContain('### Vitest、Playwright 与 Midscene 证据边界');
-    expect(agents).toContain('N/A');
+    expect(governance).toContain('## 证据边界');
+    expect(governance).toContain('N/A');
   });
 
   it('requires spec and test cases before implementation', () => {
     const agents = readProjectFile('AGENTS.md');
+    const governance = readProjectFile('docs/development-governance.md');
 
-    expect(agents).toContain('### Spec-first 与 TDD 门禁');
-    expect(agents).not.toContain('实现、测试和准出，再在同一交付中补齐短 spec');
-    expect(agents).not.toContain('实现后测试是必需门槛');
+    expect(agents).toContain('changes/YYYY-MM-DD-kebab-name/spec.md');
+    expect(governance).toContain('先建立');
+    expect(governance).not.toContain('实现、测试和准出，再在同一交付中补齐短 spec');
+    expect(governance).not.toContain('实现后测试是必需门槛');
   });
 
   it('defines Agile, Breaking, and isolated Exploration flows', () => {
-    const agents = readProjectFile('AGENTS.md');
+    const governance = readProjectFile('docs/development-governance.md');
 
-    expect(agents).toContain('### 三种 SDD 流程');
-    expect(agents).toContain('Agile flow');
-    expect(agents).toContain('Breaking flow');
-    expect(agents).toContain('Exploration flow');
-    expect(agents).toContain('SHA-256');
-    expect(agents).toContain('/tmp');
-    expect(agents).toContain('不自动授权');
+    expect(governance).toContain('Agile');
+    expect(governance).toContain('Breaking');
+    expect(governance).toContain('Exploration');
+    expect(governance).toContain('SHA-256');
+    expect(governance).toContain('/tmp');
+    expect(governance).toContain('不自动授权');
   });
 
   it('keeps the default E2E command bounded to the baseline directory', () => {

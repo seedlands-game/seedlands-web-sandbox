@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { World } from '../../src/app/world-runtime';
+import { World } from '../../src/app/world/world-runtime';
 import type { WorldCommitResult } from '../../src/server/game-server-types';
 
 describe('World 权威提交单一发布点', () => {
