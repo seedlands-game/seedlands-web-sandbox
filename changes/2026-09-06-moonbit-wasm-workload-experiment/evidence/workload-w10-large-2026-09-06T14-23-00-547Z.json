@@ -1,0 +1,24 @@
+{
+  "workload": "w10-large",
+  "runId": "2026-09-06T14-23-00-547Z",
+  "sourceSha": "faa719fb24670173ce5997897afa11ca19ab9901",
+  "binaryHash": "ffd26b6f168f997a378e106ec270004f5c15aab943d4fe14b182ca8cf6ad2225",
+  "browser": "152.0.7977.76",
+  "headless": true,
+  "initialization": {
+    "id": 1,
+    "initializationMs": 0.9000000357627869,
+    "memoryBytes": 16842752,
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 12,
+    "timeOrigin": 1788704603172
+  },
+  "pairs": 1,
+  "warmupMs": 0,
+  "eventCount": 2,
+  "fixtureSchema": 1,
+  "protocol": "one-existing-worker-equivalent; input clone + transfer + compute + output transfer",
+  "bodyBundleHash": "6a90b420c0ef7824d82c71401573bc07e808f876341c271b81f95e78a81af8bd",
+  "status": "completed",
+  "comparisons": null
+}

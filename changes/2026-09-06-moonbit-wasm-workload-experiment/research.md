@@ -1,5 +1,7 @@
 # MoonBit、Wasm 与线程选型调研
 
+> 版本提示：下文保留原 MoonBit 优先语言研究；选型与预算已经由本次修订 `spec.md` 覆盖。共享计算默认 Rust，浏览器 MoonBit 只作已有实现的公平对照。Node/NAPI是未来背景，本次不实现。
+
 调研日期：2026-09-06。结论来自本次读取的官方资料与最新源码；下面的性能判断均为待验证假设，不是 MoonBit 实测成绩。研究对象为 `f2454937a4217d88420e1f21ac8ffda4e94847ea`，其文件树与远端 `3938eed27793cd342558165d061792ab9f12dd2a` 完全一致。
 
 ## 选型结论
@@ -82,3 +84,12 @@ Zig 官方给出 freestanding Wasm 用法；TinyGo 有独立 WebAssembly/浏览�
 地图是另一个例外：目前在主线程分片采样。若迁移，应先建同拓扑 TS Worker 控制组，再比较 Wasm；地图工作复用 General 的低优先级、可分片任务，不增加常驻线程、不饿死近场网格或启动任务。
 
 只有未来证明“复制占大头、独立内存路线持续不能达标、共享内存原型仍有明确额外净收益、实际发布平台和资源全部支持隔离、工具链分配器并发安全”时，才值得提交新的共享内存方案审核。当前 MoonBit 文档的 `shared-memory` 开关不等于已经验证其完整多线程运行时。
+
+## 多产物修订的官方依据
+
+- [Node-API 官方文档](https://nodejs.org/api/n-api.html)：Node-API 提供跨 Node 版本的 ABI 稳定边界，但 Node/V8/libuv 私有 API 和外部依赖不自动继承该保证。它适合长期 adapter；OS/arch/libc 产物仍需分别构建和运行验证。
+- [Node worker_threads 官方文档](https://nodejs.org/api/worker_threads.html)：CPU 密集工作适用 worker pool，逐任务创建 Worker 的成本可能抵消收益；ArrayBuffer transfer 和 shared memory 是不同所有权方案。新实验固定 pool 和复制策略后比较语言。
+- [napi-rs TypedArray](https://napi.rs/docs/concepts/typed-array) 与 [AsyncTask](https://napi.rs/docs/concepts/async-task)：借用/拥有输入、异步计算和返回 JS 的生命周期属于 adapter 责任。当前计划优先受控 Node worker 内同步调用，不叠加多个线程池。
+- [Rust wasm32-unknown-unknown 目标文档](https://doc.rust-lang.org/rustc/platform-support/wasm32-unknown-unknown.html)：该目标不提供常规宿主 OS 能力保证。把纯算法与宿主适配分开，才能让相同 core 真正复用于 native 和 Wasm。
+
+上述资料证明机制和约束，不证明本项目 Node/Rust 比 Chrome/TS 更快。吞吐、RSS、GC、边界与多平台成本必须按新矩阵实测；共享资产价值属于架构判断，不能替代性能证据。

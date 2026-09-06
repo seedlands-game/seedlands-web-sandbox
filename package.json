@@ -18,7 +18,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "pnpm typecheck && vite build",
+    "build": "pnpm wasm:verify && pnpm typecheck && vite build",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint .",
     "lint:paths": "ls-lint",
@@ -41,7 +41,10 @@
     "preview": "vite preview",
     "midscene:verify-model": "midscene model verify",
     "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json",
-    "prepare": "husky"
+    "prepare": "husky",
+    "wasm:build": "node scripts/build-wasm.mjs --check --hash && node scripts/wasm-artifact.mjs --write",
+    "wasm:check": "node scripts/check-wasm.mjs --test",
+    "wasm:verify": "node scripts/wasm-artifact.mjs"
   },
   "dependencies": {
     "playcanvas": "^2.21.4",

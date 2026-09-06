@@ -13,6 +13,10 @@ ls:
   changes/*:
     .dir: regex:\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*
     .md: kebab-case
+  changes/*/experiments:
+    .dir: kebab-case
+    .rs: kebab-case
+    .sh: kebab-case
   changes/*/evidence:
     .dir: kebab-case
   changes/*/midscene:
@@ -20,6 +24,10 @@ ls:
   changes/*/e2e:
     .dir: kebab-case
     .spec.ts: kebab-case
+
+  wasm/seedlands-kernels:
+    .dir: kebab-case
+    .mbt: kebab-case
 
 ignore:
   - .git
@@ -30,3 +38,4 @@ ignore:
   - harness/results
   - midscene_run
   - node_modules
+  - wasm/seedlands-kernels/_build

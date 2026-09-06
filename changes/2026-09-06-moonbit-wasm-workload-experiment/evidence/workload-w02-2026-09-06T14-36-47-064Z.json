@@ -1,0 +1,112 @@
+{
+  "workload": "w02",
+  "runId": "2026-09-06T14-36-47-064Z",
+  "sourceSha": "faa719fb24670173ce5997897afa11ca19ab9901",
+  "binaryHash": "30f3277a3f25863e7b0e51aa5531893388153015f182ea75c961a9aea0cb0376",
+  "rustHash": "1bcc2540687ebc7d524cff81c242135f97460ca9e6820fd39c5df895703e46f6",
+  "browser": "152.0.7977.76",
+  "headless": true,
+  "initialization": {
+    "id": 1,
+    "initializationMs": 1.4000000357627869,
+    "memoryBytes": 16842752,
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 12,
+    "timeOrigin": 1788705407675.9
+  },
+  "pairs": 2,
+  "warmupMs": 0,
+  "eventCount": 5,
+  "fixtureSchema": 1,
+  "protocol": "one-existing-worker-equivalent; input clone + transfer + compute + output transfer",
+  "bodyBundleHash": "7c44eb8867dc0e8935faa50e4b6c3e5c7e0f24cd15bfbf1ba42f5e393124475c",
+  "status": "completed",
+  "comparisons": {
+    "originalVsWasm": {
+      "improvement": 94.97816591087576,
+      "ci95": [
+        94.9671772154904,
+        94.9891067252383
+      ],
+      "baseline": 45.79999998211861,
+      "candidate": 2.300000011920929,
+      "pairs": 2,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "stagedVsWasm": {
+      "improvement": 7.99999842643736,
+      "ci95": [
+        4.166665217942644,
+        11.538459863183038
+      ],
+      "baseline": 2.4999999701976776,
+      "candidate": 2.300000011920929,
+      "pairs": 2,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "originalVsStaged": {
+      "improvement": 94.54148477909665,
+      "ci95": [
+        94.33551205754307,
+        94.74835891294488
+      ],
+      "baseline": 45.79999998211861,
+      "candidate": 2.4999999701976776,
+      "pairs": 2,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "taskP95": {
+      "improvement": 97.53137640694564,
+      "ci95": [
+        97.49156826526358,
+        97.56994079823372
+      ],
+      "baseline": 96.41000004410743,
+      "candidate": 2.3800000071525576,
+      "pairs": 2,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "computeP50": {
+      "improvement": 95.07658636676315,
+      "ci95": [
+        94.9671772154904,
+        95.18599551803591
+      ],
+      "baseline": 45.69999998807907,
+      "candidate": 2.2500000298023224,
+      "pairs": 2,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    }
+  },
+  "language": {
+    "task": {
+      "improvement": -24.324325369256016,
+      "ci95": [
+        -27.777777593812836,
+        -21.052633725375046
+      ],
+      "baseline": 1.8499999940395355,
+      "candidate": 2.300000011920929,
+      "pairs": 2,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "kernel": {
+      "improvement": -129.62962292512924,
+      "ci95": [
+        -130.769218072384,
+        -128.5714273550072
+      ],
+      "baseline": 0.2700000047683716,
+      "candidate": 0.6199999928474427,
+      "pairs": 2,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    }
+  }
+}

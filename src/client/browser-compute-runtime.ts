@@ -4,6 +4,7 @@ import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol
 import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool';
 import type { GeneratedCanonicalChunk, InitialWorldBootstrap } from '../worker/world-compute-task';
 import { CHUNK_SIZE } from '../world/voxel';
+import { wasmExperimentWorkerName } from './wasm-experiment-selection';
 
 type MeshWorkerPort = {
   onerror?: ((failure: { taskId: number; error: Error }) => void) | null;
@@ -24,8 +25,14 @@ type Options = Readonly<{
 
 const workerFactory = (lane: ComputeLane) => {
   if (lane === 'fluid')
-    return new Worker(new URL('../worker/fluid-compute-worker.ts', import.meta.url), { type: 'module' });
-  return new Worker(new URL('../worker/world-worker.ts', import.meta.url), { type: 'module' });
+    return new Worker(new URL('../worker/fluid-compute-worker.ts', import.meta.url), {
+      type: 'module',
+      name: wasmExperimentWorkerName(),
+    });
+  return new Worker(new URL('../worker/world-worker.ts', import.meta.url), {
+    type: 'module',
+    name: wasmExperimentWorkerName(),
+  });
 };
 
 export class BrowserComputeRuntime {

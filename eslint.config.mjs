@@ -4,7 +4,12 @@ import svelte from 'eslint-plugin-svelte';
 import tseslint from 'typescript-eslint';
 
 const worldForbiddenImports = (source) =>
-  source === 'playcanvas' || source.includes('/server/') || source.includes('/client/');
+  source === 'playcanvas' ||
+  source.includes('/server/') ||
+  source.includes('/client/') ||
+  source.includes('/compute/') ||
+  source.includes('/worker/') ||
+  source.includes('/app/');
 const serverForbiddenImports = (source) => source === 'playcanvas' || source.includes('/client/');
 const pureRuntimeForbiddenImports = (source, filename) =>
   source === 'playcanvas' ||
@@ -22,7 +27,7 @@ const forbiddenRuntimeGlobals = new Set([
   'Worker',
 ]);
 
-const purityRule = (forbiddenImport) => ({
+const purityRule = (forbiddenImport, extraGlobals = []) => ({
   meta: {
     type: 'problem',
     schema: [],
@@ -48,7 +53,7 @@ const purityRule = (forbiddenImport) => ({
           context.report({ node, messageId: 'forbidden', data: { dependency: argument.value } });
       },
       Identifier(node) {
-        if (!forbiddenRuntimeGlobals.has(node.name)) return;
+        if (!forbiddenRuntimeGlobals.has(node.name) && !extraGlobals.includes(node.name)) return;
         if (node.parent.type === 'Property' && node.parent.key === node && !node.parent.computed) return;
         if (node.parent.type === 'MemberExpression' && node.parent.property === node && !node.parent.computed) return;
         context.report({ node, messageId: 'forbidden', data: { dependency: node.name } });
@@ -59,7 +64,8 @@ const purityRule = (forbiddenImport) => ({
 
 const seedlands = {
   rules: {
-    'world-purity': purityRule(worldForbiddenImports),
+    'world-purity': purityRule(worldForbiddenImports, ['fetch', 'WebAssembly']),
+    'compute-purity': purityRule(pureRuntimeForbiddenImports, ['fetch']),
     'server-purity': purityRule(serverForbiddenImports),
     'pure-runtime': purityRule(pureRuntimeForbiddenImports),
     'authority-worker-owner': {
@@ -166,6 +172,7 @@ export default tseslint.config(
       'node_modules/**',
       'playwright-report/**',
       'test-results/**',
+      'wasm/**/_build/**',
     ],
   },
   {
@@ -218,6 +225,11 @@ export default tseslint.config(
     plugins: { seedlands },
     languageOptions: { globals: globals.node },
     rules: { 'seedlands/world-purity': 'error' },
+  },
+  {
+    files: ['src/compute/**/*.ts'],
+    plugins: { seedlands },
+    rules: { 'seedlands/compute-purity': 'error' },
   },
   {
     files: ['src/runtime/**/*.ts', 'src/physics/**/*.ts'],
