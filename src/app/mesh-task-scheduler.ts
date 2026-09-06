@@ -63,6 +63,7 @@ export class MeshTaskScheduler {
   private readonly requested = new Set<string>();
   private readonly replacements = new Map<string, PendingMeshRequest>();
   private readonly preparingRequests = new Map<string, PendingMeshRequest>();
+  private readonly failedPreparations = new Map<string, PendingMeshRequest>();
   private readonly visibility = new MeshVisibilityBarriers<PendingMeshRequest>();
   private readonly inFlightKeys = new Set<string>();
   private readonly scenarioTraceIds = new Set<string>();
@@ -85,7 +86,7 @@ export class MeshTaskScheduler {
   }
 
   get generationQueueSize() {
-    return this.queued.size + this.preparingRequests.size;
+    return this.queued.size + this.preparingRequests.size + this.failedPreparations.size;
   }
 
   get meshingQueueSize() {
@@ -117,6 +118,7 @@ export class MeshTaskScheduler {
     this.requested.clear();
     this.replacements.clear();
     this.preparingRequests.clear();
+    this.failedPreparations.clear();
     this.visibility.reset();
     this.inFlightKeys.clear();
     this.scenarioTraceIds.clear();
@@ -126,9 +128,14 @@ export class MeshTaskScheduler {
   request(cx: number, cy: number, cz: number, options: boolean | MeshRequestOptions = false) {
     if (this.disposed || cy < 0 || cy > 1) return;
     const forceRemesh = typeof options === 'boolean' ? options : (options.forceRemesh ?? false);
-    const priority = typeof options === 'boolean' ? 'streaming' : (options.priority ?? 'streaming');
     const key = chunkKey(cx, cy, cz);
     if (!forceRemesh && this.requested.has(key)) return;
+    const failed = this.failedPreparations.get(key);
+    if (failed) {
+      this.failedPreparations.delete(key);
+      this.requested.delete(key);
+    }
+    const requestedPriority = typeof options === 'boolean' ? 'streaming' : (options.priority ?? 'streaming');
     const delayedUntilVisible = this.visibility.isDelaying(key);
     const existing = delayedUntilVisible
       ? this.visibility.existingDeferred(key)
@@ -144,8 +151,8 @@ export class MeshTaskScheduler {
       cy,
       cz,
       queuedAt: existing?.queuedAt ?? performance.now(),
-      priority: this.higherPriority(existing?.priority, priority),
-      enqueuedAtDispatch: existing?.enqueuedAtDispatch ?? this.dispatchCount,
+      priority: this.higherPriority(existing?.priority ?? failed?.priority, requestedPriority),
+      enqueuedAtDispatch: existing?.enqueuedAtDispatch ?? failed?.enqueuedAtDispatch ?? this.dispatchCount,
       ...(this.visibility.revisionForRequest(key) === undefined
         ? {}
         : { visibilityBarrierRevision: this.visibility.revisionForRequest(key)! }),
@@ -179,10 +186,21 @@ export class MeshTaskScheduler {
     return current && !this.replacements.has(task.chunkKey) ? isCurrentMeshTask(task, current) : false;
   }
 
+  retryFailedPreparations() {
+    const failed = [...this.failedPreparations.values()];
+    failed.forEach((request) => {
+      if (this.failedPreparations.get(request.chunkKey) !== request || request.epoch !== this.epoch) return;
+      this.failedPreparations.delete(request.chunkKey);
+      this.requested.delete(request.chunkKey);
+      this.request(request.cx, request.cy, request.cz, { forceRemesh: true, priority: request.priority });
+    });
+  }
+
   cancel(key: string) {
     const task = this.latestTasks.get(key);
     this.latestTasks.delete(key);
     this.replacements.delete(key);
+    this.failedPreparations.delete(key);
     this.requested.delete(key);
     this.queued.delete(key);
     this.preparingRequests.delete(key);
@@ -236,6 +254,7 @@ export class MeshTaskScheduler {
     this.requested.clear();
     this.replacements.clear();
     this.preparingRequests.clear();
+    this.failedPreparations.clear();
     this.visibility.reset();
     this.inFlightKeys.clear();
   }
@@ -276,8 +295,8 @@ export class MeshTaskScheduler {
               this.replacements.delete(key);
               this.queued.set(key, replacement);
             } else if (!this.queued.has(key)) {
-              this.requested.delete(key);
               this.latestTasks.delete(key);
+              this.failedPreparations.set(key, request);
             }
           }
           this.options.telemetry.completeTrace(request.traceId, 'persistence-load-error', 'persistence-worker');

@@ -22,11 +22,19 @@ export type ChunkPersistenceLoadDiagnostics = Readonly<{
   codecs: Readonly<Record<string, number>>;
 }>;
 
+export type ChunkPersistencePreparedStatus = 'found' | 'missing' | 'unknown';
+
 export interface ChunkPersistence {
   loadSnapshot(key: string): ChunkSnapshot | null;
   saveSnapshots(snapshots: readonly ChunkSnapshot[]): void | Promise<void>;
   ensureSnapshot?(cx: number, cy: number, cz: number): Promise<void>;
-  ensureNeighborhood?(cx: number, cy: number, cz: number): Promise<ChunkPersistenceLoadDiagnostics | void>;
+  ensureNeighborhood?(
+    cx: number,
+    cy: number,
+    cz: number,
+    residentKeys?: readonly string[],
+  ): Promise<ChunkPersistenceLoadDiagnostics | void>;
+  preparedSnapshotStatus?(key: string): ChunkPersistencePreparedStatus;
   releaseNeighborhood?(cx: number, cy: number, cz: number): void;
   evictSnapshot?(key: string): void;
 }

@@ -61,6 +61,20 @@ describe('Canonical Chunk residency', () => {
     expect(residency.planEvictions(chunks).map(({ key }) => key)).toEqual(['0,0,0']);
   });
 
+  it('外部mesh release不能解除独立的准备期读集pin', () => {
+    const residency = new CanonicalChunkResidency({ target: 0, hardLimit: 4, evictionBatch: 4 });
+    const chunks = new Map([['0,0,0', chunk('0,0,0', 0)]]);
+    residency.retainMesh('0,0,0');
+    residency.retainPreparation('0,0,0');
+
+    residency.releaseMesh('0,0,0');
+    residency.releaseMesh('0,0,0');
+    expect(residency.planEvictions(chunks)).toEqual([]);
+
+    residency.releasePreparation('0,0,0');
+    expect(residency.planEvictions(chunks).map(({ key }) => key)).toEqual(['0,0,0']);
+  });
+
   it('删除前二次核对对象、accessEpoch、revision、dirty与pin', () => {
     const residency = new CanonicalChunkResidency({ target: 0, hardLimit: 4, evictionBatch: 4 });
     const current = chunk('0,0,0', 1);

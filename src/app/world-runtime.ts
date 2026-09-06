@@ -19,7 +19,11 @@ import {
 import type { QualityProfile } from './quality-profile';
 import { FluidFeedbackTracker, type FluidFeedbackTarget } from './fluid-feedback-tracker';
 import { WaterMeshTransitionTracker } from './water-mesh-transition';
-import { acceptStreamingCanonical, StreamingAdmissionRetry } from './streaming-admission-retry';
+import {
+  acceptStreamingCanonical,
+  prepareStreamingNeighborhood,
+  StreamingAdmissionRetry,
+} from './streaming-admission-retry';
 
 type WorldTelemetry = {
   loadedChunks: number;
@@ -110,7 +114,11 @@ export class World {
       source: {
         seed: authority.seed,
         generatorVersion: authority.generatorVersion,
-        beforePrepare: (cx, cy, cz) => authority.ensureChunkNeighborhood(cx, cy, cz),
+        beforePrepare: (cx, cy, cz) =>
+          prepareStreamingNeighborhood(
+            () => authority.ensureChunkNeighborhood(cx, cy, cz),
+            this.streamingAdmissionRetry,
+          ),
         releasePrepared: (cx, cy, cz) => authority.releasePreparation(cx, cy, cz),
         prepareMainSnapshot: () => {
           throw new Error('生产浏览器会话只允许 worker-first 网格路径。');
@@ -346,7 +354,8 @@ export class World {
     const cz = floorDiv(position.z, CHUNK_SIZE);
     const center = `${cx},${cz}`;
     const centerChanged = center !== this.lastCenter;
-    if (!centerChanged && !this.streamingAdmissionRetry.consumeDueRetry()) return;
+    const retryDue = this.streamingAdmissionRetry.consumeDueRetry();
+    if (!centerChanged && !retryDue) return;
     if (centerChanged) this.streamingAdmissionRetry.reset();
     this.lastCenter = center;
     const span = this.telemetryRecorder.beginSpan('streaming', 'DetermineNeededChunks');
@@ -371,6 +380,7 @@ export class World {
       this.scheduler.cancel(key);
       this.dirtyChunks.delete(key);
     }
+    if (centerChanged || retryDue) this.scheduler.retryFailedPreparations();
     this.telemetryRecorder.endSpan(span);
   }
 

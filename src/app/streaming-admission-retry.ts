@@ -48,3 +48,15 @@ export async function acceptStreamingCanonical(
     throw error;
   }
 }
+
+export async function prepareStreamingNeighborhood(
+  prepare: () => Promise<void>,
+  retry: StreamingAdmissionRetry,
+): Promise<void> {
+  try {
+    await prepare();
+  } catch (error) {
+    retry.recordRetryableFailure();
+    throw error;
+  }
+}

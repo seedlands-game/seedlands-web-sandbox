@@ -15,6 +15,10 @@ export class MemoryChunkPersistence implements ChunkPersistence {
     return snapshot ? cloneSnapshot(snapshot) : null;
   }
 
+  preparedSnapshotStatus(key: string) {
+    return this.snapshots.has(key) ? ('found' as const) : ('missing' as const);
+  }
+
   saveSnapshots(snapshots: readonly ChunkSnapshot[]): void {
     this.commitSnapshots(snapshots);
   }

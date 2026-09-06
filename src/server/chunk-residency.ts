@@ -57,6 +57,7 @@ export class CanonicalChunkResidency {
     fluid: new Set(),
   };
   private readonly meshPins = new Map<string, number>();
+  private readonly preparationPins = new Map<string, number>();
   private evictionCount = 0;
   private rejectedAdmissionCount = 0;
 
@@ -86,8 +87,23 @@ export class CanonicalChunkResidency {
     else this.meshPins.set(key, count - 1);
   }
 
+  retainPreparation(key: string): void {
+    this.preparationPins.set(key, (this.preparationPins.get(key) ?? 0) + 1);
+  }
+
+  releasePreparation(key: string): void {
+    const count = this.preparationPins.get(key);
+    if (!count) return;
+    if (count === 1) this.preparationPins.delete(key);
+    else this.preparationPins.set(key, count - 1);
+  }
+
   isPinned(key: string): boolean {
-    return Boolean(this.meshPins.get(key)) || Object.values(this.pins).some((keys) => keys.has(key));
+    return (
+      Boolean(this.meshPins.get(key)) ||
+      Boolean(this.preparationPins.get(key)) ||
+      Object.values(this.pins).some((keys) => keys.has(key))
+    );
   }
 
   planEvictions<Chunk extends CanonicalResidencyChunk>(chunks: ReadonlyMap<string, Chunk>): CanonicalChunkEviction[] {

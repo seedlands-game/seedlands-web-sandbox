@@ -2,9 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
 import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
 import { PROTOCOL_VERSION } from '../../src/runtime/session-protocol';
-import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
+import { CHUNK_SIZE, Voxel, chunkKey, voxelIndex } from '../../src/world/voxel';
 import { bodyConfigFor, bodyWorldAabb } from '../../src/physics';
 import type { ChunkPersistenceLoadDiagnostics } from '../../src/server/persistence/chunk-persistence';
+import { CanonicalChunkResidencyPressureError } from '../../src/server/chunk-residency';
 
 describe('AuthorityRuntime', () => {
   it('把单次有界持久化加载分项附在对应Mesh准备回执上', async () => {
@@ -39,6 +40,98 @@ describe('AuthorityRuntime', () => {
       snapshotCopyMs: expect.any(Number),
       persistence: { requestedKeyCount: 27, foundCount: 0, missingCount: 27 },
     });
+  });
+
+  it('Mesh准备异常时释放完整读集pin且显式release后不残留中心pin', async () => {
+    const persistence = Object.assign(new MemoryGamePersistence(), {
+      ensureNeighborhood: async () => {
+        throw new Error('load failed');
+      },
+    });
+    const runtime = await AuthorityRuntime.create({
+      epoch: 'world:prepare-release-on-error',
+      seedText: 'authority-prepare-release-on-error',
+      persistence,
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+      canonicalResidency: { target: 0, hardLimit: 64, evictionBatch: 64 },
+    });
+    const key = chunkKey(0, 0, 0);
+    runtime.server.setFluidActiveChunks([key]);
+    expect(
+      runtime.acceptGeneratedChunk({
+        key,
+        cx: 0,
+        cy: 0,
+        cz: 0,
+        chunkRevision: 0,
+        generatorVersion: runtime.server.generatorVersion,
+        canonical: new Uint16Array(CHUNK_SIZE ** 3),
+      }),
+    ).toBe(true);
+    runtime.server.setFluidActiveChunks([]);
+
+    await expect(runtime.prepareMesh(0, 0, 0)).rejects.toThrow('load failed');
+    runtime.releaseMesh(0, 0, 0);
+
+    expect(runtime.server.canonicalResidencyDiagnostics).toMatchObject({ residentCount: 0, pinnedCount: 0 });
+  });
+
+  it('Mesh专用读取在持久overlay无法入驻时fail closed并可在压力解除后重试', async () => {
+    const seedText = 'authority-mesh-pressure';
+    const persistence = new MemoryGamePersistence();
+    const overlayKey = chunkKey(1, 2, 1);
+    persistence.saveSnapshots([
+      {
+        key: overlayKey,
+        cx: 1,
+        cy: 2,
+        cz: 1,
+        seedText,
+        generatorVersion: 3,
+        revision: 7,
+        voxels: new Uint16Array(CHUNK_SIZE ** 3).fill(Voxel.Stone),
+      },
+    ]);
+    const runtime = await AuthorityRuntime.create({
+      epoch: 'world:mesh-pressure',
+      seedText,
+      persistence,
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+      canonicalResidency: { target: 1, hardLimit: 2, evictionBatch: 2 },
+    });
+    const centerKey = chunkKey(0, 1, 0);
+    const pressureKey = chunkKey(4, 0, 0);
+    runtime.server.setFluidActiveChunks([centerKey, pressureKey]);
+    for (const [key, cx] of [
+      [centerKey, 0],
+      [pressureKey, 4],
+    ] as const)
+      expect(
+        runtime.acceptGeneratedChunk({
+          key,
+          cx,
+          cy: key === centerKey ? 1 : 0,
+          cz: 0,
+          chunkRevision: 0,
+          generatorVersion: runtime.server.generatorVersion,
+          canonical: new Uint16Array(CHUNK_SIZE ** 3),
+        }),
+      ).toBe(true);
+
+    await expect(runtime.prepareMesh(0, 1, 0)).rejects.toEqual(new CanonicalChunkResidencyPressureError(overlayKey));
+    runtime.releaseMesh(0, 1, 0);
+    runtime.server.setFluidActiveChunks([centerKey]);
+    runtime.server.maintainCanonicalResidency();
+
+    const retried = await runtime.prepareMesh(0, 1, 0);
+    expect(retried.overlays).toEqual(
+      expect.arrayContaining([expect.objectContaining({ cx: 1, cy: 2, cz: 1, voxels: expect.any(ArrayBuffer) })]),
+    );
+    runtime.releaseMesh(0, 1, 0);
   });
 
   it('在唯一GameServer内恢复/创建脚底中心玩家并驱动120Hz权威物理', async () => {

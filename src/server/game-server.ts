@@ -43,6 +43,13 @@ import type {
   WorldEditBatch,
 } from './game-server-types';
 
+const meshNeighborhoodKeys = (cx: number, cy: number, cz: number): string[] => {
+  const keys: string[] = [];
+  for (let y = cy - 1; y <= cy + 1; y += 1)
+    for (let z = cz - 1; z <= cz + 1; z += 1) for (let x = cx - 1; x <= cx + 1; x += 1) keys.push(chunkKey(x, y, z));
+  return keys;
+};
+
 export class GameServer extends GameServerGameplayFacade {
   readonly seed: number;
   readonly generatorVersion: number;
@@ -146,6 +153,18 @@ export class GameServer extends GameServerGameplayFacade {
     this.canonicalResidency.retainMesh(chunkKey(cx, cy, cz));
   }
 
+  retainMeshPreparationNeighborhood(cx: number, cy: number, cz: number): () => void {
+    const keys = meshNeighborhoodKeys(cx, cy, cz);
+    keys.forEach((key) => this.canonicalResidency.retainPreparation(key));
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      keys.forEach((key) => this.canonicalResidency.releasePreparation(key));
+      this.maintainCanonicalResidency();
+    };
+  }
+
   getChunk(cx: number, cy: number, cz: number): ServerChunk {
     const key = chunkKey(cx, cy, cz);
     const existing = this.chunks.get(key);
@@ -190,12 +209,10 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   async ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<ChunkPersistenceLoadDiagnostics | void> {
-    let alreadyResident = true;
-    for (let y = Math.max(0, cy - 1); y <= Math.min(1, cy + 1); y += 1)
-      for (let z = cz - 1; z <= cz + 1; z += 1)
-        for (let x = cx - 1; x <= cx + 1; x += 1) if (!this.chunks.has(chunkKey(x, y, z))) alreadyResident = false;
-    if (alreadyResident) return;
-    return await this.persistence?.ensureNeighborhood?.(cx, cy, cz);
+    const neighborhood = meshNeighborhoodKeys(cx, cy, cz);
+    const residentKeys = neighborhood.filter((key) => this.chunks.has(key));
+    if (residentKeys.length === neighborhood.length) return;
+    return await this.persistence?.ensureNeighborhood?.(cx, cy, cz, residentKeys);
   }
 
   async prepareCanonicalChunkForMutation(cx: number, cy: number, cz: number): Promise<boolean> {
@@ -470,14 +487,23 @@ export class GameServer extends GameServerGameplayFacade {
     });
   }
 
-  private readAuthoritativeChunk(cx: number, cy: number, cz: number): ServerChunk | undefined {
+  private readAuthoritativeChunk(
+    cx: number,
+    cy: number,
+    cz: number,
+    failOnResidencyPressure = false,
+  ): ServerChunk | undefined {
     const key = chunkKey(cx, cy, cz);
     const existing = this.chunks.get(key);
     if (existing) {
       existing.accessEpoch = ++this.accessSequence;
       return existing;
     }
-    if (!this.prepareCanonicalAdmission(key)) return undefined;
+    if (!this.prepareCanonicalAdmission(key)) {
+      if (failOnResidencyPressure && this.persistence?.preparedSnapshotStatus?.(key) !== 'missing')
+        throw new CanonicalChunkResidencyPressureError(key);
+      return undefined;
+    }
     const snapshot = this.persistence?.loadSnapshot(key);
     if (!snapshot) return undefined;
     if (!this.isValidSnapshot(snapshot, key, cx, cy, cz))
@@ -509,7 +535,7 @@ export class GameServer extends GameServerGameplayFacade {
       seed: this.seed,
       generatorVersion: this.generatorVersion,
       getChunk: (cx: number, cy: number, cz: number) => this.getChunk(cx, cy, cz),
-      readAuthoritativeChunk: (cx: number, cy: number, cz: number) => this.readAuthoritativeChunk(cx, cy, cz),
+      readAuthoritativeChunk: (cx: number, cy: number, cz: number) => this.readAuthoritativeChunk(cx, cy, cz, true),
     };
   }
 

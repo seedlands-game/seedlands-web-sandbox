@@ -214,6 +214,38 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     persistence.dispose();
   });
 
+  it('完整登记邻域lease但不重复读取Authority已驻留的坐标', async () => {
+    const worker = new FakePersistenceWorker();
+    const persistence = await open(worker, 'resident-halo');
+    const residentKeys = [chunkKey(-1, 0, -3), chunkKey(0, 1, -2), chunkKey(1, 2, -1)];
+
+    const diagnostics = await persistence.ensureNeighborhood(0, 1, -2, residentKeys);
+
+    expect(worker.batchRequestSizes).toEqual([24]);
+    expect(diagnostics).toMatchObject({ requestedKeyCount: 24, missingCount: 24 });
+    persistence.releaseNeighborhood(0, 1, -2);
+    persistence.dispose();
+  });
+
+  it('拒绝邻域之外或超过27个的Authority resident key且不发读取', async () => {
+    const worker = new FakePersistenceWorker();
+    const persistence = await open(worker, 'invalid-resident-halo');
+
+    await expect(persistence.ensureNeighborhood(0, 0, 0, [chunkKey(2, 0, 0)])).rejects.toThrow(
+      'outside the requested neighborhood',
+    );
+    await expect(
+      persistence.ensureNeighborhood(
+        0,
+        0,
+        0,
+        Array.from({ length: 28 }, (_, index) => chunkKey(0, 0, index)),
+      ),
+    ).rejects.toThrow('at most 27');
+    expect(worker.batchRequestSizes).toEqual([]);
+    persistence.dispose();
+  });
+
   it('coalesces concurrent overlapping neighborhood requests through per-key in-flight ownership', async () => {
     const worker = new FakePersistenceWorker();
     const persistence = await open(worker, 'overlapping-halo');
