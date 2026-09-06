@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0,
+    "partialFailed": 0,
+    "notExecuted": 0,
+    "totalDuration": 6672,
+    "generatedAt": "9/6/2026, 5:27:50 PM"
+  },
+  "results": [
+    {
+      "script": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/changes/2026-09-06-stable-sun-and-break-drop/midscene/drop-motion.yaml",
+      "success": true,
+      "resultType": "success",
+      "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/drop-motion-1788686864265.json",
+      "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/drop-motion-2026-09-06_17-27-44-e726d64d.html",
+      "attempts": [
+        {
+          "attempt": 1,
+          "success": true,
+          "resultType": "success",
+          "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/drop-motion-1788686864265.json",
+          "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/drop-motion-2026-09-06_17-27-44-e726d64d.html",
+          "duration": 6672
+        }
+      ],
+      "duration": 6672
+    }
+  ]
+}

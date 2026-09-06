@@ -27,7 +27,7 @@ export const QUALITY_PROFILES: Record<QualityLevel, QualityProfile> = {
     renderRadius: 2,
     fogStart: 48,
     fogEnd: 92,
-    shadowQuality: 'off',
+    shadowQuality: 'low',
     resolutionScale: 0.88,
     waterQuality: 0.78,
     vegetationDensity: 0.8,

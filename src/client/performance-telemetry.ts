@@ -25,6 +25,7 @@ export type PerformanceSpan = {
   startMs: number;
   endMs?: number;
   durationMs?: number;
+  attributes?: Readonly<Record<string, string | number>>;
 };
 
 export type TraceMark = { name: string; lane: string; timestampMs: number };
@@ -53,7 +54,16 @@ export type PerformanceIncident = {
   likelyCategory: string;
 };
 export type ChromeTrace = {
-  traceEvents: Array<{ name: string; cat: string; ph: 'X'; ts: number; dur: number; pid: string; tid: string }>;
+  traceEvents: Array<{
+    name: string;
+    cat: string;
+    ph: 'X';
+    ts: number;
+    dur: number;
+    pid: string;
+    tid: string;
+    args?: Readonly<Record<string, string | number>>;
+  }>;
 };
 
 export type PerformanceTelemetryOptions = {
@@ -69,6 +79,7 @@ export type CompletedSpanInput = {
   lane: string;
   durationMs: number;
   traceId?: string;
+  attributes?: Readonly<Record<string, string | number>>;
 };
 
 type CurrentFrame = { frameId: number; startMs: number; spans: PerformanceSpan[] };
@@ -187,6 +198,7 @@ export class PerformanceTelemetry {
       startMs: endMs - input.durationMs,
       endMs,
       durationMs: input.durationMs,
+      ...(input.attributes ? { attributes: input.attributes } : {}),
     };
     this.pushEvent(span);
     return span;
@@ -316,6 +328,9 @@ export class PerformanceTelemetry {
         dur: span.durationMs! * 1000,
         pid: 'seedlands-client',
         tid: span.lane,
+        ...(span.traceId || span.attributes
+          ? { args: { ...(span.traceId ? { traceId: span.traceId } : {}), ...span.attributes } }
+          : {}),
       }));
     const traces = [...this.traces.values()]
       .filter((trace) => trace.durationMs !== undefined)
@@ -328,7 +343,19 @@ export class PerformanceTelemetry {
         pid: 'seedlands-client',
         tid: trace.lane,
       }));
-    return { traceEvents: [...spans, ...traces] };
+    const marks = [...this.traces.values()].flatMap((trace) =>
+      trace.marks.map((mark) => ({
+        name: mark.name,
+        cat: trace.category,
+        ph: 'X' as const,
+        ts: mark.timestampMs * 1000,
+        dur: 0,
+        pid: 'seedlands-client',
+        tid: mark.lane,
+        args: { traceId: trace.traceId },
+      })),
+    );
+    return { traceEvents: [...spans, ...traces, ...marks] };
   }
 
   private pushFrame(frame: FrameSample) {

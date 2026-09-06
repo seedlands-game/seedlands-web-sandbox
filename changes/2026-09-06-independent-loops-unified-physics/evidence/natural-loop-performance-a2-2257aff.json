@@ -1,0 +1,3082 @@
+{
+  "configuration": {
+    "name": "A2",
+    "general": 1
+  },
+  "sourceSha": "2257affb830046e638a99b9502e77d0866eb1bf1",
+  "browser": "152.0.7977.76",
+  "environment": {
+    "viewport": [1920, 1080],
+    "dpr": 2,
+    "internal": [3379, 1900],
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 12
+  },
+  "frame": {
+    "count": 3232,
+    "p50Ms": 9,
+    "p95Ms": 10.800000011920929,
+    "p99Ms": 12.700000047683716,
+    "maxMs": 39.60000002384186
+  },
+  "physics": {
+    "count": 1800,
+    "p50Ms": 0.20000004768371582,
+    "p95Ms": 0.3999999761581421,
+    "p99Ms": 0.40000003576278687,
+    "maxMs": 0.7000000476837158,
+    "maxDebtMs": 16.63333334534036
+  },
+  "droppedCostSamples": 0,
+  "before": {
+    "frameMs": 8.900000035762787,
+    "player": [0.5, 19.600000381469727, 0.5],
+    "streamCenter": [0, 0],
+    "loadedChunks": 50,
+    "renderedChunks": 25,
+    "generationQueue": 0,
+    "meshingQueue": 0,
+    "deferredRemeshes": 0,
+    "onGround": true,
+    "colliding": false,
+    "interactionAttempts": 0,
+    "mutationCount": 25,
+    "worldRevision": 1,
+    "structuralEventCount": 0,
+    "remeshSchedulingCount": 0,
+    "lastCommitMutationCount": 0,
+    "lastCommitMeshChunkCount": 0,
+    "storageBytes": 633983,
+    "worldTime": 9.692000000000235,
+    "timePaused": false,
+    "quality": "medium",
+    "triangles": 39722,
+    "drawCalls": 50,
+    "collisionDebug": {
+      "enabled": false,
+      "entityCount": 0,
+      "meshCount": 0,
+      "materialCount": 0,
+      "visibleBatchCount": 0,
+      "vertexCapacity": 0,
+      "buildCount": 0,
+      "authorityRequestCount": 0
+    },
+    "runtime": "authority-worker",
+    "workers": {
+      "total": 5,
+      "authority": 1,
+      "logic": 1,
+      "persistence": 1,
+      "fluid": 1,
+      "general": 1
+    },
+    "authority": {
+      "physicsHz": 60,
+      "paused": false,
+      "physicsTick": 289,
+      "integratedPhysicsTimeMs": 4816.666666666665,
+      "acknowledgedInputSequence": 284,
+      "physicsDebtMs": 10.933333357176707,
+      "activeTimeMs": 4827.600000023842,
+      "commitSequence": 386,
+      "physicsCost": {
+        "count": 289,
+        "capacity": 256,
+        "samplesMs": [
+          0.19999998807907104, 0.3999999761581421, 0.30000001192092896, 0.20000004768371582, 0.30000001192092896,
+          0.19999998807907104, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.20000004768371582,
+          0.30000001192092896, 0.3999999761581421, 0.30000001192092896, 0.40000003576278687, 0.40000003576278687,
+          0.3999999761581421, 0.699999988079071, 0.5, 0.800000011920929, 0.3999999761581421, 0.30000001192092896,
+          0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104, 0.40000003576278687,
+          0.09999996423721313, 0.20000004768371582, 0.19999998807907104, 0.30000001192092896, 0.10000002384185791,
+          0.30000001192092896, 0.2999999523162842, 0.20000004768371582, 0.30000001192092896, 0.19999998807907104,
+          0.30000001192092896, 0.20000004768371582, 0.19999998807907104, 0.30000001192092896, 0.6000000238418579,
+          0.40000003576278687, 0.19999998807907104, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896,
+          0.2999999523162842, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896, 0.2999999523162842,
+          0.40000003576278687, 0.3999999761581421, 0.30000001192092896, 0.20000004768371582, 0.30000001192092896,
+          0.20000004768371582, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104,
+          0.30000001192092896, 0.2999999523162842, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896,
+          0.30000001192092896, 0.19999998807907104, 0.3999999761581421, 0.40000003576278687, 0.30000001192092896,
+          0.19999998807907104, 0.20000004768371582, 0.19999998807907104, 0.19999998807907104, 0.2999999523162842,
+          0.30000001192092896, 0.19999998807907104, 0.20000004768371582, 0.30000001192092896, 0.19999998807907104,
+          0.20000004768371582, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.20000004768371582,
+          0.20000004768371582, 0.2999999523162842, 0.19999998807907104, 0.2999999523162842, 0.19999998807907104,
+          0.10000002384185791, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896,
+          0.30000001192092896, 0.19999998807907104, 0.2999999523162842, 0.19999998807907104, 0.2999999523162842,
+          0.19999998807907104, 0.30000001192092896, 0.20000004768371582, 0.19999998807907104, 0.19999998807907104,
+          0.30000001192092896, 0.30000001192092896, 0.40000003576278687, 0.20000004768371582, 0.20000004768371582,
+          0.10000002384185791, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104, 0.19999998807907104,
+          0.30000001192092896, 0.19999998807907104, 0.2999999523162842, 0.09999996423721313, 0.40000003576278687,
+          0.19999998807907104, 0.2999999523162842, 0.20000004768371582, 0.30000001192092896, 0.10000002384185791,
+          0.19999998807907104, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104, 0.19999998807907104,
+          0.09999996423721313, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896, 0.30000001192092896,
+          0.3999999761581421, 0.09999996423721313, 0.19999998807907104, 0.09999996423721313, 0.30000001192092896,
+          0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.10000002384185791, 0.09999996423721313,
+          0.30000001192092896, 0.20000004768371582, 0.10000002384185791, 0.19999998807907104, 0.20000004768371582,
+          0.19999998807907104, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104,
+          0.19999998807907104, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.20000004768371582,
+          0.20000004768371582, 0.10000002384185791, 0.19999998807907104, 0.19999998807907104, 0.20000004768371582,
+          0.40000003576278687, 0.20000004768371582, 0.19999998807907104, 0.19999998807907104, 0.2999999523162842,
+          0.10000002384185791, 0.09999996423721313, 0.10000002384185791, 0.30000001192092896, 0.19999998807907104,
+          0.19999998807907104, 0.30000001192092896, 0.20000004768371582, 0.20000004768371582, 0.30000001192092896,
+          0.19999998807907104, 0.19999998807907104, 0.30000001192092896, 0.2999999523162842, 0.19999998807907104,
+          0.10000002384185791, 0.10000002384185791, 0.20000004768371582, 0.30000001192092896, 0.40000003576278687,
+          0.2999999523162842, 0.30000001192092896, 0.10000002384185791, 0.19999998807907104, 0.30000001192092896,
+          0.30000001192092896, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896,
+          0.30000001192092896, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896, 0.30000001192092896,
+          0.3999999761581421, 0.5, 0.2999999523162842, 0.30000001192092896, 0.30000001192092896, 0.40000003576278687,
+          0.20000004768371582, 0.10000002384185791, 0.30000001192092896, 0.19999998807907104, 0.40000003576278687,
+          0.2999999523162842, 0.30000001192092896, 0.19999998807907104, 0.20000004768371582, 0.6000000238418579,
+          0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.40000003576278687, 0.2999999523162842,
+          0.19999998807907104, 0.2999999523162842, 0.20000004768371582, 0.30000001192092896, 0.2999999523162842,
+          0.19999998807907104, 0.40000003576278687, 0.2999999523162842, 0.2999999523162842, 0.30000001192092896,
+          0.19999998807907104, 0.30000001192092896, 0.20000004768371582, 0.5, 0.19999998807907104, 0.5,
+          0.30000001192092896, 0.40000003576278687, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896,
+          0.2999999523162842, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896,
+          0.19999998807907104, 0.2999999523162842, 0.20000004768371582
+        ]
+      },
+      "fluid": {
+        "pendingCellCount": 0,
+        "inFlightLeaseCount": 0,
+        "acceptedCandidateCount": 0,
+        "rejectedCandidateCount": 0,
+        "returnedLeaseCount": 0
+      },
+      "residency": {
+        "residentCount": 50,
+        "target": 256,
+        "hardLimit": 2048,
+        "pinnedCount": 50,
+        "dirtyCount": 0,
+        "evictableCleanCount": 0,
+        "evictionCount": 0,
+        "rejectedAdmissionCount": 0,
+        "oversubscribed": false,
+        "autoSaveInFlight": false,
+        "autoSaveFailureCount": 0,
+        "nextRetryActiveTimeMs": 0,
+        "lastSaveError": null
+      },
+      "bodies": {
+        "total": 4,
+        "actors": 3,
+        "worldItems": 1,
+        "nearPlayer": 4
+      },
+      "snapshotRejections": {
+        "wrong-epoch": 0,
+        "duplicate": 1,
+        "physics-tick-regressed": 0,
+        "commit-regressed": 0,
+        "ack-regressed": 0
+      }
+    },
+    "logic": {
+      "blockStartedCount": 0,
+      "blockCompletedCount": 0
+    },
+    "trajectory": [
+      {
+        "physicsTick": 1,
+        "activeTimeMs": 26.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 3,
+        "activeTimeMs": 50.60000002384186,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 4,
+        "activeTimeMs": 74.10000002384186,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 5,
+        "activeTimeMs": 90.80000001192093,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 6,
+        "activeTimeMs": 109.89999997615814,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 7,
+        "activeTimeMs": 132.10000002384186,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 9,
+        "activeTimeMs": 156.80000001192093,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 10,
+        "activeTimeMs": 178.60000002384186,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 12,
+        "activeTimeMs": 203.69999998807907,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 13,
+        "activeTimeMs": 226.10000002384186,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 15,
+        "activeTimeMs": 250.80000001192093,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 16,
+        "activeTimeMs": 268.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 17,
+        "activeTimeMs": 289.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 18,
+        "activeTimeMs": 306.30000001192093,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 19,
+        "activeTimeMs": 332.89999997615814,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 21,
+        "activeTimeMs": 355.10000002384186,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 22,
+        "activeTimeMs": 380.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 24,
+        "activeTimeMs": 402.30000001192093,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 25,
+        "activeTimeMs": 419.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 26,
+        "activeTimeMs": 442.80000001192093,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 28,
+        "activeTimeMs": 469.89999997615814,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 29,
+        "activeTimeMs": 489,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 30,
+        "activeTimeMs": 506.69999998807907,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 31,
+        "activeTimeMs": 530.1000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 33,
+        "activeTimeMs": 553.3999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 34,
+        "activeTimeMs": 572.3999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 35,
+        "activeTimeMs": 589.1000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 36,
+        "activeTimeMs": 610.6000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 38,
+        "activeTimeMs": 635.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 39,
+        "activeTimeMs": 652.6000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 40,
+        "activeTimeMs": 674,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 42,
+        "activeTimeMs": 700.3000000119209,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 43,
+        "activeTimeMs": 722.3999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 44,
+        "activeTimeMs": 740.1999999880791,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 45,
+        "activeTimeMs": 762.8999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 47,
+        "activeTimeMs": 788.6999999880791,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 48,
+        "activeTimeMs": 809.8000000119209,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 50,
+        "activeTimeMs": 834.3000000119209,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 51,
+        "activeTimeMs": 860.1999999880791,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 53,
+        "activeTimeMs": 884.8000000119209,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 54,
+        "activeTimeMs": 909.3000000119209,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 55,
+        "activeTimeMs": 930.8000000119209,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 57,
+        "activeTimeMs": 954.1999999880791,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 58,
+        "activeTimeMs": 972.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 59,
+        "activeTimeMs": 996.8000000119209,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 61,
+        "activeTimeMs": 1018.3999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 62,
+        "activeTimeMs": 1035.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 63,
+        "activeTimeMs": 1053.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 64,
+        "activeTimeMs": 1074.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 65,
+        "activeTimeMs": 1091.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 66,
+        "activeTimeMs": 1108.6000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 67,
+        "activeTimeMs": 1133.1000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 69,
+        "activeTimeMs": 1155,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 70,
+        "activeTimeMs": 1180.1000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 72,
+        "activeTimeMs": 1201.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 73,
+        "activeTimeMs": 1227.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 75,
+        "activeTimeMs": 1250.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 76,
+        "activeTimeMs": 1273,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 77,
+        "activeTimeMs": 1290.8999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 78,
+        "activeTimeMs": 1314.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 80,
+        "activeTimeMs": 1338.1000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 81,
+        "activeTimeMs": 1361.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 83,
+        "activeTimeMs": 1389.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 84,
+        "activeTimeMs": 1410.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 86,
+        "activeTimeMs": 1433.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 87,
+        "activeTimeMs": 1450.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 88,
+        "activeTimeMs": 1468.8999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 89,
+        "activeTimeMs": 1490.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 90,
+        "activeTimeMs": 1513.3999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 92,
+        "activeTimeMs": 1538.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 93,
+        "activeTimeMs": 1562,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 94,
+        "activeTimeMs": 1578.8999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 96,
+        "activeTimeMs": 1602.6000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 97,
+        "activeTimeMs": 1620.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 98,
+        "activeTimeMs": 1645.3999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 100,
+        "activeTimeMs": 1667,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 101,
+        "activeTimeMs": 1690.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 102,
+        "activeTimeMs": 1708.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 103,
+        "activeTimeMs": 1731.1000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 104,
+        "activeTimeMs": 1748,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 106,
+        "activeTimeMs": 1770.8999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 107,
+        "activeTimeMs": 1796.8999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 109,
+        "activeTimeMs": 1818.6000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 110,
+        "activeTimeMs": 1836.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 111,
+        "activeTimeMs": 1858.6000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 112,
+        "activeTimeMs": 1883,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 114,
+        "activeTimeMs": 1905.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 115,
+        "activeTimeMs": 1922.3999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 116,
+        "activeTimeMs": 1946.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 118,
+        "activeTimeMs": 1970.6000000238419,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 119,
+        "activeTimeMs": 1988.3999999761581,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 120,
+        "activeTimeMs": 2010.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 122,
+        "activeTimeMs": 2037.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 123,
+        "activeTimeMs": 2059.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 124,
+        "activeTimeMs": 2077.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 126,
+        "activeTimeMs": 2101.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 127,
+        "activeTimeMs": 2122.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 128,
+        "activeTimeMs": 2140.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 129,
+        "activeTimeMs": 2157.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 130,
+        "activeTimeMs": 2178.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 132,
+        "activeTimeMs": 2205.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 133,
+        "activeTimeMs": 2226.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 135,
+        "activeTimeMs": 2253.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 136,
+        "activeTimeMs": 2276.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 137,
+        "activeTimeMs": 2299.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 139,
+        "activeTimeMs": 2321.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 140,
+        "activeTimeMs": 2340.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 141,
+        "activeTimeMs": 2363.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 142,
+        "activeTimeMs": 2380.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 144,
+        "activeTimeMs": 2402.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 145,
+        "activeTimeMs": 2426.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 146,
+        "activeTimeMs": 2443.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 147,
+        "activeTimeMs": 2466.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 149,
+        "activeTimeMs": 2489.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 150,
+        "activeTimeMs": 2508.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 151,
+        "activeTimeMs": 2530.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 153,
+        "activeTimeMs": 2553.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 154,
+        "activeTimeMs": 2570.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 155,
+        "activeTimeMs": 2588.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 156,
+        "activeTimeMs": 2610.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 157,
+        "activeTimeMs": 2627.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 158,
+        "activeTimeMs": 2649,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 160,
+        "activeTimeMs": 2667.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 161,
+        "activeTimeMs": 2684.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 162,
+        "activeTimeMs": 2706.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 163,
+        "activeTimeMs": 2730,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 165,
+        "activeTimeMs": 2755.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 166,
+        "activeTimeMs": 2778.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 168,
+        "activeTimeMs": 2803.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 169,
+        "activeTimeMs": 2821.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 170,
+        "activeTimeMs": 2843.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 172,
+        "activeTimeMs": 2867.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 173,
+        "activeTimeMs": 2890,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 174,
+        "activeTimeMs": 2908.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 175,
+        "activeTimeMs": 2930.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 177,
+        "activeTimeMs": 2956.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 178,
+        "activeTimeMs": 2980.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 180,
+        "activeTimeMs": 3003.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 181,
+        "activeTimeMs": 3028.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 183,
+        "activeTimeMs": 3050,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 184,
+        "activeTimeMs": 3068.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 185,
+        "activeTimeMs": 3092.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 186,
+        "activeTimeMs": 3115.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 188,
+        "activeTimeMs": 3138.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 189,
+        "activeTimeMs": 3155.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 190,
+        "activeTimeMs": 3173.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 191,
+        "activeTimeMs": 3195.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 193,
+        "activeTimeMs": 3220.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 194,
+        "activeTimeMs": 3237.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 195,
+        "activeTimeMs": 3259.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 197,
+        "activeTimeMs": 3284.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 198,
+        "activeTimeMs": 3306.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 199,
+        "activeTimeMs": 3330.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 200,
+        "activeTimeMs": 3347.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 202,
+        "activeTimeMs": 3370.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 203,
+        "activeTimeMs": 3388,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 204,
+        "activeTimeMs": 3412.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 206,
+        "activeTimeMs": 3433.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 207,
+        "activeTimeMs": 3461.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 208,
+        "activeTimeMs": 3482.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 210,
+        "activeTimeMs": 3508.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 211,
+        "activeTimeMs": 3533,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 213,
+        "activeTimeMs": 3554.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 214,
+        "activeTimeMs": 3580.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 215,
+        "activeTimeMs": 3597.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 217,
+        "activeTimeMs": 3618.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 218,
+        "activeTimeMs": 3642.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 220,
+        "activeTimeMs": 3667.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 221,
+        "activeTimeMs": 3690.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 222,
+        "activeTimeMs": 3708.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 223,
+        "activeTimeMs": 3730.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 225,
+        "activeTimeMs": 3755.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 226,
+        "activeTimeMs": 3778.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 228,
+        "activeTimeMs": 3804.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 229,
+        "activeTimeMs": 3826.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 231,
+        "activeTimeMs": 3850.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 232,
+        "activeTimeMs": 3867.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 233,
+        "activeTimeMs": 3892.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 234,
+        "activeTimeMs": 3915.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 236,
+        "activeTimeMs": 3939,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 237,
+        "activeTimeMs": 3962.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 239,
+        "activeTimeMs": 3988.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 240,
+        "activeTimeMs": 4010.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 241,
+        "activeTimeMs": 4027.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 243,
+        "activeTimeMs": 4050.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 244,
+        "activeTimeMs": 4074.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 246,
+        "activeTimeMs": 4100.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 247,
+        "activeTimeMs": 4125.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 248,
+        "activeTimeMs": 4146.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 250,
+        "activeTimeMs": 4169.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 251,
+        "activeTimeMs": 4187.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 252,
+        "activeTimeMs": 4204.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 253,
+        "activeTimeMs": 4225.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 254,
+        "activeTimeMs": 4243,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 255,
+        "activeTimeMs": 4265.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 257,
+        "activeTimeMs": 4283.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 258,
+        "activeTimeMs": 4301.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 259,
+        "activeTimeMs": 4323.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 260,
+        "activeTimeMs": 4346.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 261,
+        "activeTimeMs": 4363.699999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 263,
+        "activeTimeMs": 4386.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 264,
+        "activeTimeMs": 4403.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 265,
+        "activeTimeMs": 4428.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 267,
+        "activeTimeMs": 4450.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 268,
+        "activeTimeMs": 4467.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 269,
+        "activeTimeMs": 4489.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 270,
+        "activeTimeMs": 4508.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 271,
+        "activeTimeMs": 4530.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 273,
+        "activeTimeMs": 4554.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 274,
+        "activeTimeMs": 4571.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 275,
+        "activeTimeMs": 4589.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 276,
+        "activeTimeMs": 4611.199999988079,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 278,
+        "activeTimeMs": 4635.899999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 279,
+        "activeTimeMs": 4657.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 280,
+        "activeTimeMs": 4674.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 281,
+        "activeTimeMs": 4699.5,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 283,
+        "activeTimeMs": 4716.800000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 284,
+        "activeTimeMs": 4738.300000011921,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 285,
+        "activeTimeMs": 4763.399999976158,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 287,
+        "activeTimeMs": 4787.100000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 288,
+        "activeTimeMs": 4805.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      },
+      {
+        "physicsTick": 289,
+        "activeTimeMs": 4827.600000023842,
+        "position": [0.5, 19.6, 0.5]
+      }
+    ],
+    "generatorVersion": 3,
+    "renderPipeline": {
+      "drawUnit": "chunk-render-category",
+      "batchMode": "category",
+      "vertexLayout": "float16-uv-uint16-index",
+      "shaderMode": "voxel-array-chunks",
+      "backend": "webgl2"
+    },
+    "serverRevision": 0,
+    "voxelAtOrigin": 3,
+    "serverPlayerPosition": [0.5, 19.6, 0.5],
+    "serverPlayerVelocity": [0, 0, 0],
+    "prediction": {
+      "pendingFrames": 6,
+      "lastResetReason": null,
+      "resetCounts": {},
+      "presentationOffset": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "serverWorldTime": 9.692000000000235,
+    "performance": {
+      "scenarioId": "default",
+      "frame": {
+        "count": 512,
+        "p50Ms": 9.5,
+        "p95Ms": 10.400000035762787,
+        "p99Ms": 11.699999988079071,
+        "maxMs": 666.6999999880791,
+        "longFrameCount": 2,
+        "lastLongFrameMs": 39.5
+      },
+      "chunkVisible": {
+        "count": 50,
+        "p50Ms": 2409,
+        "p95Ms": 4542,
+        "p99Ms": 4816.100000023842,
+        "maxMs": 4816.100000023842
+      },
+      "completedChunkTraces": 50,
+      "traceEventCount": 500,
+      "maxMeshCommitsInFrame": 1,
+      "maxMeshPartsInFrame": 2,
+      "visibleAfterPostrender": true,
+      "incidents": 32,
+      "droppedEvents": 0,
+      "uploadQueueDepth": 0,
+      "estimatedMeshBytes": 2780540
+    },
+    "compute": {
+      "workerCount": 2,
+      "fluidWorkerCount": 1,
+      "generalWorkerCount": 1,
+      "running": 0,
+      "queued": 0,
+      "queuedBytes": 0,
+      "cancellationRequests": 0,
+      "staleResults": 0,
+      "failedTasks": 0,
+      "completedTasks": 52,
+      "submittedTasks": 52,
+      "submittedBytes": 3538944,
+      "maxQueued": 1,
+      "maxQueuedBytes": 196608,
+      "workerTaskDuration": {
+        "fluid": {
+          "count": 0,
+          "capacity": 256,
+          "samplesMs": []
+        },
+        "general": {
+          "count": 52,
+          "capacity": 256,
+          "samplesMs": [
+            513.8000000119209, 76, 45.19999998807907, 124.89999997615814, 72.5, 21.80000001192093, 64.40000003576279,
+            61.89999997615814, 114.09999996423721, 115.89999997615814, 119.5, 117.80000001192093, 61,
+            16.799999952316284, 61.60000002384186, 58.700000047683716, 64.30000001192093, 67.39999997615814,
+            67.10000002384186, 61.200000047683716, 118.69999998807907, 119.80000001192093, 120.30000001192093,
+            127.40000003576279, 114.90000003576279, 120.40000003576279, 104.29999995231628, 105.5, 60.80000001192093,
+            59.80000001192093, 60.59999996423721, 64.80000001192093, 65.39999997615814, 62.90000003576279,
+            64.40000003576279, 59.30000001192093, 123.5, 121.09999996423721, 120.80000001192093, 115.79999995231628,
+            112.40000003576279, 106.5, 113.90000003576279, 113, 64.80000001192093, 63.19999998807907, 63.89999997615814,
+            60, 127.09999996423721, 125.39999997615814, 151.89999997615814, 118.29999995231628
+          ]
+        }
+      }
+    },
+    "fluidFeedback": {
+      "count": 0,
+      "pending": false,
+      "pendingSample": null,
+      "p50Ms": 0,
+      "p95Ms": 0,
+      "p99Ms": 0,
+      "maxMs": 0,
+      "samples": []
+    },
+    "waterTransitions": {
+      "activeCount": 0,
+      "active": [],
+      "recent": []
+    },
+    "ui": {
+      "runtime": "svelte5",
+      "shellPublishCount": 4,
+      "hudPublishCount": 9,
+      "interactionPublishCount": 2,
+      "debugProjectionCount": 20,
+      "debugPublishCount": 21,
+      "staleUpdateCount": 0,
+      "coalescedUpdateCount": 1769,
+      "domCommitCount": 32,
+      "projectionDurationMs": 8.399999976158142,
+      "publishDurationMs": 0.9999999403953552,
+      "domCommitDurationMs": 49.99999976158142,
+      "debugProjectionRate": 4.139329842508712,
+      "totalPublishRate": 6.0020282716376325
+    },
+    "gameplay": {
+      "entityCount": 5,
+      "worldItemCount": 1,
+      "creatureCount": 2,
+      "npcCount": 1,
+      "nearbyVisitedBucketCount": 0,
+      "nearbyCandidateCount": 0,
+      "nearbyReturnedCount": 0,
+      "inventoryOperationCount": 0,
+      "gameplayEventCount": 5,
+      "snapshotBytes": 3090,
+      "retainedActorCount": 3,
+      "activeActorCount": 3,
+      "behaviorEvaluationCount": 0,
+      "navigationPlanCount": 0,
+      "navigationExpandedNodeCount": 0,
+      "pathRecomputeCount": 0,
+      "actionCompletionCount": 0,
+      "actionFailureCount": 0,
+      "actionInterruptionCount": 0,
+      "perceptionLineOfSightCheckCount": 0,
+      "simulationTime": 4.7,
+      "presentedEntityCount": 4
+    },
+    "breakingOverlay": null,
+    "viewmodel": {
+      "isolatedLayer": true
+    },
+    "visualEffects": {
+      "activeLocalLights": 0,
+      "shadowedLocalLights": 0,
+      "localLightLimit": 4,
+      "localShadowLimit": 1,
+      "sunShadows": true,
+      "sunShadowResolution": 512,
+      "reflectionEnabled": true,
+      "reflectionActive": false,
+      "reflectionResolution": 128,
+      "reflectionFrameInterval": 8,
+      "reflectionRenderCount": 0,
+      "waterPlaneY": null,
+      "postProcessing": true,
+      "shadowUpdateCount": 0,
+      "shadowStableFrameCount": 512
+    },
+    "water": {
+      "bodyFraction": 0,
+      "wading": false,
+      "swimming": false,
+      "cameraSubmerged": false,
+      "cameraDepth": null,
+      "waterSurfaceY": null,
+      "underwaterBlend": 0
+    }
+  },
+  "after": {
+    "frameMs": 7.300000011920929,
+    "player": [-23.322307586669922, 20.70316505432129, -32.36628341674805],
+    "streamCenter": [-1, -2],
+    "loadedChunks": 62,
+    "renderedChunks": 31,
+    "generationQueue": 7,
+    "meshingQueue": 1,
+    "deferredRemeshes": 0,
+    "onGround": false,
+    "colliding": false,
+    "interactionAttempts": 0,
+    "mutationCount": 25,
+    "worldRevision": 1,
+    "structuralEventCount": 0,
+    "remeshSchedulingCount": 0,
+    "lastCommitMutationCount": 0,
+    "lastCommitMeshChunkCount": 0,
+    "storageBytes": 633983,
+    "worldTime": 10.900000000001711,
+    "timePaused": false,
+    "quality": "medium",
+    "triangles": 51230,
+    "drawCalls": 62,
+    "collisionDebug": {
+      "enabled": false,
+      "entityCount": 0,
+      "meshCount": 0,
+      "materialCount": 0,
+      "visibleBatchCount": 0,
+      "vertexCapacity": 0,
+      "buildCount": 0,
+      "authorityRequestCount": 0
+    },
+    "runtime": "authority-worker",
+    "workers": {
+      "total": 5,
+      "authority": 1,
+      "logic": 1,
+      "persistence": 1,
+      "fluid": 1,
+      "general": 1
+    },
+    "authority": {
+      "physicsHz": 60,
+      "paused": false,
+      "physicsTick": 2103,
+      "integratedPhysicsTimeMs": 35050.000000000626,
+      "acknowledgedInputSequence": 2096,
+      "physicsDebtMs": 8.800000011295197,
+      "activeTimeMs": 35058.80000001192,
+      "commitSequence": 2848,
+      "physicsCost": {
+        "count": 2103,
+        "capacity": 256,
+        "samplesMs": [
+          0.19999998807907104, 0.19999998807907104, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104,
+          0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.20000004768371582, 0.19999998807907104,
+          0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.20000004768371582,
+          0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896, 0.30000001192092896,
+          0.19999998807907104, 0.10000002384185791, 0.19999998807907104, 0.19999998807907104, 0.2999999523162842,
+          0.3999999761581421, 0.10000002384185791, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896,
+          0.19999998807907104, 0.2999999523162842, 0.19999998807907104, 0.10000002384185791, 0.40000003576278687,
+          0.30000001192092896, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896,
+          0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.09999996423721313, 0.20000004768371582,
+          0.19999998807907104, 0.19999998807907104, 0.2999999523162842, 0.30000001192092896, 0.30000001192092896,
+          0.20000004768371582, 0.2999999523162842, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104,
+          0.30000001192092896, 0.09999996423721313, 0.30000001192092896, 0.20000004768371582, 0.19999998807907104,
+          0.19999998807907104, 0.20000004768371582, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104,
+          0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896,
+          0.30000001192092896, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104,
+          0.19999998807907104, 0.20000004768371582, 0.19999998807907104, 0.2999999523162842, 0.19999998807907104,
+          0.30000001192092896, 0.30000001192092896, 0.2999999523162842, 0.19999998807907104, 0.30000001192092896,
+          0.30000001192092896, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104,
+          0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.3999999761581421, 0.2999999523162842,
+          0.30000001192092896, 0.19999998807907104, 0.20000004768371582, 0.19999998807907104, 0.20000004768371582,
+          0.30000001192092896, 0.30000001192092896, 0.40000003576278687, 0.30000001192092896, 0.30000001192092896,
+          0.2999999523162842, 0.19999998807907104, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104,
+          0.19999998807907104, 0.19999998807907104, 0.30000001192092896, 0.10000002384185791, 0.2999999523162842,
+          0.20000004768371582, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896, 0.30000001192092896,
+          0.19999998807907104, 0.10000002384185791, 0.20000004768371582, 0.30000001192092896, 0.30000001192092896,
+          0.19999998807907104, 0.09999996423721313, 0.30000001192092896, 0.10000002384185791, 0.19999998807907104,
+          0.2999999523162842, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104, 0.19999998807907104,
+          0.20000004768371582, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104, 0.19999998807907104,
+          0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104,
+          0.19999998807907104, 0.19999998807907104, 0.09999996423721313, 0.10000002384185791, 0.30000001192092896,
+          0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104,
+          0.20000004768371582, 0.20000004768371582, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104,
+          0.3999999761581421, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104, 0.19999998807907104,
+          0.19999998807907104, 0.2999999523162842, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104,
+          0.19999998807907104, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896,
+          0.19999998807907104, 0.10000002384185791, 0.2999999523162842, 0.30000001192092896, 0.2999999523162842,
+          0.19999998807907104, 0.30000001192092896, 0.20000004768371582, 0.19999998807907104, 0.30000001192092896,
+          0.40000003576278687, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.30000001192092896,
+          0.19999998807907104, 0.2999999523162842, 0.30000001192092896, 0.40000003576278687, 0.30000001192092896,
+          0.40000003576278687, 0.19999998807907104, 0.19999998807907104, 0.20000004768371582, 0.19999998807907104,
+          0.30000001192092896, 0.19999998807907104, 0.19999998807907104, 0.3999999761581421, 0.20000004768371582,
+          0.30000001192092896, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896,
+          0.30000001192092896, 0.20000004768371582, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896,
+          0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.19999998807907104, 0.19999998807907104,
+          0.19999998807907104, 0.19999998807907104, 0.09999996423721313, 0.20000004768371582, 0.19999998807907104,
+          0.09999996423721313, 0, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104, 0.19999998807907104,
+          0.09999996423721313, 0.30000001192092896, 0.19999998807907104, 0.09999996423721313, 0.20000004768371582,
+          0.19999998807907104, 0.30000001192092896, 0.19999998807907104, 0.2999999523162842, 0.19999998807907104,
+          0.20000004768371582, 0.30000001192092896, 0.30000001192092896, 0.30000001192092896, 0.40000003576278687,
+          0.2999999523162842, 0.19999998807907104, 0.19999998807907104, 0.10000002384185791, 0.19999998807907104,
+          0.19999998807907104, 0.19999998807907104, 0.30000001192092896, 0.19999998807907104, 0.30000001192092896
+        ]
+      },
+      "fluid": {
+        "pendingCellCount": 0,
+        "inFlightLeaseCount": 0,
+        "acceptedCandidateCount": 0,
+        "rejectedCandidateCount": 0,
+        "returnedLeaseCount": 0
+      },
+      "residency": {
+        "residentCount": 84,
+        "target": 256,
+        "hardLimit": 2048,
+        "pinnedCount": 42,
+        "dirtyCount": 0,
+        "evictableCleanCount": 42,
+        "evictionCount": 0,
+        "rejectedAdmissionCount": 0,
+        "oversubscribed": false,
+        "autoSaveInFlight": false,
+        "autoSaveFailureCount": 0,
+        "nextRetryActiveTimeMs": 0,
+        "lastSaveError": null
+      },
+      "bodies": {
+        "total": 3,
+        "actors": 3,
+        "worldItems": 0,
+        "nearPlayer": 0
+      },
+      "snapshotRejections": {
+        "wrong-epoch": 0,
+        "duplicate": 1,
+        "physics-tick-regressed": 0,
+        "commit-regressed": 0,
+        "ack-regressed": 0
+      }
+    },
+    "logic": {
+      "blockStartedCount": 0,
+      "blockCompletedCount": 0
+    },
+    "trajectory": [
+      {
+        "physicsTick": 1767,
+        "activeTimeMs": 29451.80000001192,
+        "position": [-42.00213944915766, 19.73666755701022, -21.19210045346493]
+      },
+      {
+        "physicsTick": 1768,
+        "activeTimeMs": 29476.5,
+        "position": [-41.935057409832666, 19.635000890343555, -21.22564147312743]
+      },
+      {
+        "physicsTick": 1769,
+        "activeTimeMs": 29497.899999976158,
+        "position": [-41.867975884961396, 19.60000081802916, -21.259182235563063]
+      },
+      {
+        "physicsTick": 1771,
+        "activeTimeMs": 29524.899999976158,
+        "position": [-41.73381180631141, 19.801667484695823, -21.326264274888057]
+      },
+      {
+        "physicsTick": 1772,
+        "activeTimeMs": 29545.69999998808,
+        "position": [-41.666729766986414, 19.895000818029157, -21.359805294550554]
+      },
+      {
+        "physicsTick": 1774,
+        "activeTimeMs": 29572.100000023842,
+        "position": [-41.532565688336426, 20.066667484695824, -21.42688733387555]
+      },
+      {
+        "physicsTick": 1775,
+        "activeTimeMs": 29596.69999998808,
+        "position": [-41.46548364901143, 20.145000818029157, -21.460428353538045]
+      },
+      {
+        "physicsTick": 1777,
+        "activeTimeMs": 29617.69999998808,
+        "position": [-41.331319570361444, 20.286667484695826, -21.52751039286304]
+      },
+      {
+        "physicsTick": 1778,
+        "activeTimeMs": 29642.5,
+        "position": [-41.26423753103645, 20.35000081802916, -21.561051412525536]
+      },
+      {
+        "physicsTick": 1779,
+        "activeTimeMs": 29660,
+        "position": [-41.197155491711456, 20.408334151362492, -21.594592432188033]
+      },
+      {
+        "physicsTick": 1780,
+        "activeTimeMs": 29682.100000023842,
+        "position": [-41.13007345238646, 20.461667484695827, -21.62813345185053]
+      },
+      {
+        "physicsTick": 1782,
+        "activeTimeMs": 29706.899999976158,
+        "position": [-40.995909373736474, 20.553334151362492, -21.695215491175524]
+      },
+      {
+        "physicsTick": 1783,
+        "activeTimeMs": 29724.399999976158,
+        "position": [-40.92882733441148, 20.591667484695826, -21.72875651083802]
+      },
+      {
+        "physicsTick": 1784,
+        "activeTimeMs": 29746.80000001192,
+        "position": [-40.861745295086486, 20.62500081802916, -21.76229753050052]
+      },
+      {
+        "physicsTick": 1785,
+        "activeTimeMs": 29763.600000023842,
+        "position": [-40.79466325576149, 20.653334151362493, -21.795838550163015]
+      },
+      {
+        "physicsTick": 1787,
+        "activeTimeMs": 29787.600000023842,
+        "position": [-40.660499177111504, 20.69500081802916, -21.86292058948801]
+      },
+      {
+        "physicsTick": 1788,
+        "activeTimeMs": 29812.30000001192,
+        "position": [-40.59341713778651, 20.708334151362493, -21.896461609150506]
+      },
+      {
+        "physicsTick": 1790,
+        "activeTimeMs": 29834.5,
+        "position": [-40.45925305913652, 20.72000081802916, -21.9635436484755]
+      },
+      {
+        "physicsTick": 1791,
+        "activeTimeMs": 29859.600000023842,
+        "position": [-40.39217101981153, 20.718334151362495, -21.997084668137997]
+      },
+      {
+        "physicsTick": 1792,
+        "activeTimeMs": 29876.30000001192,
+        "position": [-40.325088980486534, 20.711667484695827, -22.030625687800494]
+      },
+      {
+        "physicsTick": 1794,
+        "activeTimeMs": 29900.69999998808,
+        "position": [-40.190924901836546, 20.683334151362494, -22.09770772712549]
+      },
+      {
+        "physicsTick": 1795,
+        "activeTimeMs": 29917.69999998808,
+        "position": [-40.12384286251155, 20.661667484695826, -22.131248746787985]
+      },
+      {
+        "physicsTick": 1796,
+        "activeTimeMs": 29939.600000023842,
+        "position": [-40.05676082318656, 20.63500081802916, -22.164789766450482]
+      },
+      {
+        "physicsTick": 1797,
+        "activeTimeMs": 29956.69999998808,
+        "position": [-39.989678783861564, 20.603334151362493, -22.19833078611298]
+      },
+      {
+        "physicsTick": 1798,
+        "activeTimeMs": 29980.69999998808,
+        "position": [-39.92259674453657, 20.566667484695827, -22.231871805775477]
+      },
+      {
+        "physicsTick": 1800,
+        "activeTimeMs": 30001.80000001192,
+        "position": [-39.78843266588658, 20.478334151362493, -22.29895384510047]
+      },
+      {
+        "physicsTick": 1801,
+        "activeTimeMs": 30021.100000023842,
+        "position": [-39.72135062656159, 20.426667484695827, -22.332494864762968]
+      },
+      {
+        "physicsTick": 1802,
+        "activeTimeMs": 30044.899999976158,
+        "position": [-39.654268587236594, 20.370000818029162, -22.366035884425465]
+      },
+      {
+        "physicsTick": 1803,
+        "activeTimeMs": 30065.600000023842,
+        "position": [-39.5871865479116, 20.308334151362494, -22.39957690408796]
+      },
+      {
+        "physicsTick": 1805,
+        "activeTimeMs": 30084,
+        "position": [-39.45302246926161, 20.170000818029163, -22.466658943412956]
+      },
+      {
+        "physicsTick": 1806,
+        "activeTimeMs": 30109.5,
+        "position": [-39.38594042993662, 20.093334151362495, -22.500199963075453]
+      },
+      {
+        "physicsTick": 1807,
+        "activeTimeMs": 30129.5,
+        "position": [-39.318858390611624, 20.011667484695828, -22.53374098273795]
+      },
+      {
+        "physicsTick": 1809,
+        "activeTimeMs": 30153.899999976158,
+        "position": [-39.184694311961636, 19.833334151362497, -22.600823022062944]
+      },
+      {
+        "physicsTick": 1810,
+        "activeTimeMs": 30178.30000001192,
+        "position": [-39.11761227263664, 19.73666748469583, -22.63436404172544]
+      },
+      {
+        "physicsTick": 1812,
+        "activeTimeMs": 30205.399999976158,
+        "position": [-38.98344870844038, 19.60000081802916, -22.701445823823573]
+      },
+      {
+        "physicsTick": 1813,
+        "activeTimeMs": 30226.100000023842,
+        "position": [-38.916366669115384, 19.70333415136249, -22.73498684348607]
+      },
+      {
+        "physicsTick": 1814,
+        "activeTimeMs": 30242.899999976158,
+        "position": [-38.84928462979039, 19.801667484695823, -22.768527863148567]
+      },
+      {
+        "physicsTick": 1815,
+        "activeTimeMs": 30266.19999998808,
+        "position": [-38.782202590465396, 19.895000818029157, -22.802068882811064]
+      },
+      {
+        "physicsTick": 1817,
+        "activeTimeMs": 30290.100000023842,
+        "position": [-38.64803851181541, 20.066667484695824, -22.869150922136058]
+      },
+      {
+        "physicsTick": 1818,
+        "activeTimeMs": 30307.5,
+        "position": [-38.58095647249041, 20.145000818029157, -22.902691941798555]
+      },
+      {
+        "physicsTick": 1819,
+        "activeTimeMs": 30331.69999998808,
+        "position": [-38.51387443316542, 20.21833415136249, -22.93623296146105]
+      },
+      {
+        "physicsTick": 1821,
+        "activeTimeMs": 30353.19999998808,
+        "position": [-38.37971035451543, 20.35000081802916, -23.003315000786046]
+      },
+      {
+        "physicsTick": 1822,
+        "activeTimeMs": 30370.30000001192,
+        "position": [-38.31262831519044, 20.408334151362492, -23.036856020448543]
+      },
+      {
+        "physicsTick": 1823,
+        "activeTimeMs": 30396.80000001192,
+        "position": [-38.24554627586544, 20.461667484695827, -23.07039704011104]
+      },
+      {
+        "physicsTick": 1825,
+        "activeTimeMs": 30421.30000001192,
+        "position": [-38.111382197215455, 20.553334151362492, -23.137479079436034]
+      },
+      {
+        "physicsTick": 1826,
+        "activeTimeMs": 30445.30000001192,
+        "position": [-38.04430015789046, 20.591667484695826, -23.17102009909853]
+      },
+      {
+        "physicsTick": 1827,
+        "activeTimeMs": 30465.69999998808,
+        "position": [-37.97721811856547, 20.62500081802916, -23.204561118761028]
+      },
+      {
+        "physicsTick": 1829,
+        "activeTimeMs": 30483.80000001192,
+        "position": [-37.84305403991548, 20.676667484695827, -23.27164315808602]
+      },
+      {
+        "physicsTick": 1830,
+        "activeTimeMs": 30506.19999998808,
+        "position": [-37.775972000590485, 20.69500081802916, -23.30518417774852]
+      },
+      {
+        "physicsTick": 1831,
+        "activeTimeMs": 30531.600000023842,
+        "position": [-37.70888996126549, 20.708334151362493, -23.338725197411016]
+      },
+      {
+        "physicsTick": 1833,
+        "activeTimeMs": 30556.69999998808,
+        "position": [-37.5747258826155, 20.72000081802916, -23.40580723673601]
+      },
+      {
+        "physicsTick": 1834,
+        "activeTimeMs": 30578.30000001192,
+        "position": [-37.50764384329051, 20.718334151362495, -23.439348256398507]
+      },
+      {
+        "physicsTick": 1835,
+        "activeTimeMs": 30595.19999998808,
+        "position": [-37.440561803965515, 20.711667484695827, -23.472889276061004]
+      },
+      {
+        "physicsTick": 1837,
+        "activeTimeMs": 30618.30000001192,
+        "position": [-37.32000087312825, 20.683334368292954, -23.539970878821872]
+      },
+      {
+        "physicsTick": 1838,
+        "activeTimeMs": 30642,
+        "position": [-37.320000137803284, 20.6616682390591, -23.57351106651308]
+      },
+      {
+        "physicsTick": 1839,
+        "activeTimeMs": 30658.80000001192,
+        "position": [-37.320000128575494, 20.635002189554815, -23.607051309916]
+      },
+      {
+        "physicsTick": 1840,
+        "activeTimeMs": 30682.19999998808,
+        "position": [-37.32000011957412, 20.60333620446062, -23.640591607663684]
+      },
+      {
+        "physicsTick": 1841,
+        "activeTimeMs": 30698.899999976158,
+        "position": [-37.32000011110426, 20.566670271082025, -23.674131956547193]
+      },
+      {
+        "physicsTick": 1842,
+        "activeTimeMs": 30716.100000023842,
+        "position": [-37.32000010330711, 20.525004379218668, -23.707672352505057]
+      },
+      {
+        "physicsTick": 1844,
+        "activeTimeMs": 30741.399999976158,
+        "position": [-37.32000008982438, 20.426672689505075, -23.77475326860518]
+      },
+      {
+        "physicsTick": 1845,
+        "activeTimeMs": 30762.399999976158,
+        "position": [-37.32000008406924, 20.37000688034467, -23.808293780709427]
+      },
+      {
+        "physicsTick": 1846,
+        "activeTimeMs": 30779.19999998808,
+        "position": [-37.32000007889439, 20.308341089405722, -23.841834324056236]
+      },
+      {
+        "physicsTick": 1847,
+        "activeTimeMs": 30795.899999976158,
+        "position": [-37.320000074237186, 20.241675313585315, -23.875374895520356]
+      },
+      {
+        "physicsTick": 1849,
+        "activeTimeMs": 30817.100000023842,
+        "position": [-37.3200000662426, 20.093343797890583, -23.942456112066857]
+      },
+      {
+        "physicsTick": 1850,
+        "activeTimeMs": 30836.899999976158,
+        "position": [-37.32000006280248, 20.011678054420294, -23.975996752566726]
+      },
+      {
+        "physicsTick": 1851,
+        "activeTimeMs": 30858.19999998808,
+        "position": [-37.32000005967518, 19.925012318686385, -24.009537411947292]
+      },
+      {
+        "physicsTick": 1852,
+        "activeTimeMs": 30882.80000001192,
+        "position": [-37.32000005682369, 19.833346589610528, -24.043078088543407]
+      },
+      {
+        "physicsTick": 1854,
+        "activeTimeMs": 30907.80000001192,
+        "position": [-37.31444449866032, 19.635014199633403, -24.110159800546377]
+      },
+      {
+        "physicsTick": 1855,
+        "activeTimeMs": 30929.5,
+        "position": [-37.30333348643197, 19.600000949274463, -24.14370052171231]
+      },
+      {
+        "physicsTick": 1856,
+        "activeTimeMs": 30946.80000001192,
+        "position": [-37.27833348643197, 19.703334282607795, -24.17724154137481]
+      },
+      {
+        "physicsTick": 1858,
+        "activeTimeMs": 30971.80000001192,
+        "position": [-37.21166710191306, 19.794999091997212, -24.244323270984488]
+      },
+      {
+        "physicsTick": 1859,
+        "activeTimeMs": 30996.5,
+        "position": [-37.17000043524639, 19.78499909199721, -24.277864290646985]
+      },
+      {
+        "physicsTick": 1861,
+        "activeTimeMs": 31019.600000023842,
+        "position": [-37.07000043524639, 19.74999909199721, -24.34494632997198]
+      },
+      {
+        "physicsTick": 1862,
+        "activeTimeMs": 31044.80000001192,
+        "position": [-37.01166710191306, 19.724999091997212, -24.378487349634476]
+      },
+      {
+        "physicsTick": 1863,
+        "activeTimeMs": 31066.5,
+        "position": [-36.94777821302417, 19.69499909199721, -24.412028369296973]
+      },
+      {
+        "physicsTick": 1865,
+        "activeTimeMs": 31083.600000023842,
+        "position": [-36.813614134374184, 19.61999909199721, -24.479110408621967]
+      },
+      {
+        "physicsTick": 1866,
+        "activeTimeMs": 31105.399999976158,
+        "position": [-36.74653286201418, 19.600000514495758, -24.51265104480197]
+      },
+      {
+        "physicsTick": 1867,
+        "activeTimeMs": 31125.19999998808,
+        "position": [-36.679450822689184, 19.70333384782909, -24.546192064464467]
+      },
+      {
+        "physicsTick": 1868,
+        "activeTimeMs": 31147.600000023842,
+        "position": [-36.61236878336419, 19.801667181162422, -24.579733084126964]
+      },
+      {
+        "physicsTick": 1870,
+        "activeTimeMs": 31173.30000001192,
+        "position": [-36.4782047047142, 19.98333384782909, -24.646815123451958]
+      },
+      {
+        "physicsTick": 1871,
+        "activeTimeMs": 31195.69999998808,
+        "position": [-36.41112266538921, 20.066667181162423, -24.680356143114455]
+      },
+      {
+        "physicsTick": 1873,
+        "activeTimeMs": 31218,
+        "position": [-36.32000063952141, 20.21833314871146, -24.747437862678744]
+      },
+      {
+        "physicsTick": 1874,
+        "activeTimeMs": 31243.100000023842,
+        "position": [-36.320000072789384, 20.286665586735406, -24.780978442883832]
+      },
+      {
+        "physicsTick": 1875,
+        "activeTimeMs": 31265.80000001192,
+        "position": [-36.320000072789384, 20.349998090269768, -24.814519023088902]
+      },
+      {
+        "physicsTick": 1877,
+        "activeTimeMs": 31292.19999998808,
+        "position": [-36.320000072789384, 20.46166329386983, -24.881600183499042]
+      },
+      {
+        "physicsTick": 1878,
+        "activeTimeMs": 31314.30000001192,
+        "position": [-36.320000072789384, 20.509995993935526, -24.915140763704112]
+      },
+      {
+        "physicsTick": 1880,
+        "activeTimeMs": 31341.5,
+        "position": [-36.320000072789384, 20.591661590598257, -24.982221924114253]
+      },
+      {
+        "physicsTick": 1881,
+        "activeTimeMs": 31362,
+        "position": [-36.320000072789384, 20.62499448719529, -25.015762504319323]
+      },
+      {
+        "physicsTick": 1882,
+        "activeTimeMs": 31380.100000023842,
+        "position": [-36.320000072789384, 20.65332744930277, -25.049303084524393]
+      },
+      {
+        "physicsTick": 1884,
+        "activeTimeMs": 31401.100000023842,
+        "position": [-36.320000072789384, 20.69499357004906, -25.116384244934533]
+      },
+      {
+        "physicsTick": 1885,
+        "activeTimeMs": 31418.30000001192,
+        "position": [-36.320000072789384, 20.708326728687872, -25.149924825139603]
+      },
+      {
+        "physicsTick": 1886,
+        "activeTimeMs": 31437,
+        "position": [-36.320000072789384, 20.71665995283713, -25.183465405344673]
+      },
+      {
+        "physicsTick": 1887,
+        "activeTimeMs": 31459,
+        "position": [-36.320000072789384, 20.719993242496834, -25.217005985549743]
+      },
+      {
+        "physicsTick": 1888,
+        "activeTimeMs": 31476.5,
+        "position": [-36.320000072789384, 20.718326597666984, -25.250546565754814]
+      },
+      {
+        "physicsTick": 1889,
+        "activeTimeMs": 31499.69999998808,
+        "position": [-36.320000072789384, 20.711660018347576, -25.284087145959884]
+      },
+      {
+        "physicsTick": 1891,
+        "activeTimeMs": 31522.100000023842,
+        "position": [-36.320000072789384, 20.6833270562401, -25.351168306370024]
+      },
+      {
+        "physicsTick": 1892,
+        "activeTimeMs": 31541.399999976158,
+        "position": [-36.31444451723383, 20.66166038957343, -25.38470932603252]
+      },
+      {
+        "physicsTick": 1893,
+        "activeTimeMs": 31562.100000023842,
+        "position": [-36.30333340612272, 20.634993722906763, -25.418250345695018]
+      },
+      {
+        "physicsTick": 1894,
+        "activeTimeMs": 31581.100000023842,
+        "position": [-36.28666673945605, 20.603327056240097, -25.451791365357515]
+      },
+      {
+        "physicsTick": 1896,
+        "activeTimeMs": 31603,
+        "position": [-36.23666673945605, 20.524993722906764, -25.51887340468251]
+      },
+      {
+        "physicsTick": 1897,
+        "activeTimeMs": 31626.19999998808,
+        "position": [-36.20333340612272, 20.478327056240097, -25.552414424345006]
+      },
+      {
+        "physicsTick": 1898,
+        "activeTimeMs": 31645.19999998808,
+        "position": [-36.164444517233825, 20.42666038957343, -25.585955444007503]
+      },
+      {
+        "physicsTick": 1900,
+        "activeTimeMs": 31668,
+        "position": [-36.070000072789384, 20.3083270562401, -25.653037483332497]
+      },
+      {
+        "physicsTick": 1901,
+        "activeTimeMs": 31689.19999998808,
+        "position": [-36.01444451723383, 20.241660389573433, -25.686578502994994]
+      },
+      {
+        "physicsTick": 1902,
+        "activeTimeMs": 31706.600000023842,
+        "position": [-35.95333340612272, 20.169993722906767, -25.72011952265749]
+      },
+      {
+        "physicsTick": 1903,
+        "activeTimeMs": 31723.80000001192,
+        "position": [-35.88666673945605, 20.0933270562401, -25.753660542319988]
+      },
+      {
+        "physicsTick": 1904,
+        "activeTimeMs": 31745,
+        "position": [-35.81958470013105, 20.011660389573432, -25.787201561982485]
+      },
+      {
+        "physicsTick": 1905,
+        "activeTimeMs": 31762.5,
+        "position": [-35.75250266080606, 19.924993722906766, -25.820742581644982]
+      },
+      {
+        "physicsTick": 1907,
+        "activeTimeMs": 31787.80000001192,
+        "position": [-35.61833858215607, 19.736660389573434, -25.887824620969976]
+      },
+      {
+        "physicsTick": 1908,
+        "activeTimeMs": 31809.399999976158,
+        "position": [-35.55125654283108, 19.634993722906767, -25.921365640632473]
+      },
+      {
+        "physicsTick": 1909,
+        "activeTimeMs": 31829.19999998808,
+        "position": [-35.48417501795981, 19.60000081802916, -25.954906403068108]
+      },
+      {
+        "physicsTick": 1911,
+        "activeTimeMs": 31852.100000023842,
+        "position": [-35.35001093930982, 19.801667484695823, -26.021988442393102]
+      },
+      {
+        "physicsTick": 1912,
+        "activeTimeMs": 31874.100000023842,
+        "position": [-35.282928899984825, 19.895000818029157, -26.0555294620556]
+      },
+      {
+        "physicsTick": 1914,
+        "activeTimeMs": 31900.600000023842,
+        "position": [-35.14876482133484, 20.066667484695824, -26.122611501380593]
+      },
+      {
+        "physicsTick": 1915,
+        "activeTimeMs": 31924.5,
+        "position": [-35.08168278200984, 20.145000818029157, -26.15615252104309]
+      },
+      {
+        "physicsTick": 1916,
+        "activeTimeMs": 31941.899999976158,
+        "position": [-35.01460074268485, 20.21833415136249, -26.189693540705587]
+      },
+      {
+        "physicsTick": 1917,
+        "activeTimeMs": 31961.600000023842,
+        "position": [-34.947518703359854, 20.286667484695826, -26.223234560368084]
+      },
+      {
+        "physicsTick": 1918,
+        "activeTimeMs": 31979.100000023842,
+        "position": [-34.88043666403486, 20.35000081802916, -26.25677558003058]
+      },
+      {
+        "physicsTick": 1920,
+        "activeTimeMs": 32004.100000023842,
+        "position": [-34.74627258538487, 20.461667484695827, -26.323857619355575]
+      },
+      {
+        "physicsTick": 1921,
+        "activeTimeMs": 32026.399999976158,
+        "position": [-34.67919054605988, 20.51000081802916, -26.357398639018072]
+      },
+      {
+        "physicsTick": 1922,
+        "activeTimeMs": 32044.899999976158,
+        "position": [-34.612108506734884, 20.553334151362492, -26.39093965868057]
+      },
+      {
+        "physicsTick": 1923,
+        "activeTimeMs": 32066.399999976158,
+        "position": [-34.54502646740989, 20.591667484695826, -26.424480678343066]
+      },
+      {
+        "physicsTick": 1925,
+        "activeTimeMs": 32084.19999998808,
+        "position": [-34.4108623887599, 20.653334151362493, -26.49156271766806]
+      },
+      {
+        "physicsTick": 1926,
+        "activeTimeMs": 32108.600000023842,
+        "position": [-34.34378034943491, 20.676667484695827, -26.525103737330557]
+      },
+      {
+        "physicsTick": 1927,
+        "activeTimeMs": 32130.100000023842,
+        "position": [-34.276698310109914, 20.69500081802916, -26.558644756993054]
+      },
+      {
+        "physicsTick": 1929,
+        "activeTimeMs": 32154.5,
+        "position": [-34.142534231459926, 20.716667484695826, -26.625726796318048]
+      },
+      {
+        "physicsTick": 1930,
+        "activeTimeMs": 32177,
+        "position": [-34.07545219213493, 20.72000081802916, -26.659267815980545]
+      },
+      {
+        "physicsTick": 1931,
+        "activeTimeMs": 32194.19999998808,
+        "position": [-34.00837015280994, 20.718334151362495, -26.692808835643042]
+      },
+      {
+        "physicsTick": 1933,
+        "activeTimeMs": 32219.69999998808,
+        "position": [-33.87420607415995, 20.70000081802916, -26.759890874968036]
+      },
+      {
+        "physicsTick": 1934,
+        "activeTimeMs": 32242,
+        "position": [-33.807124034834956, 20.683334151362494, -26.793431894630533]
+      },
+      {
+        "physicsTick": 1935,
+        "activeTimeMs": 32259.899999976158,
+        "position": [-33.74004199550996, 20.661667484695826, -26.82697291429303]
+      },
+      {
+        "physicsTick": 1937,
+        "activeTimeMs": 32285,
+        "position": [-33.605877916859974, 20.603334151362493, -26.894054953618024]
+      },
+      {
+        "physicsTick": 1938,
+        "activeTimeMs": 32306.100000023842,
+        "position": [-33.53879587753498, 20.566667484695827, -26.92759597328052]
+      },
+      {
+        "physicsTick": 1939,
+        "activeTimeMs": 32331.19999998808,
+        "position": [-33.471713838209986, 20.52500081802916, -26.96113699294302]
+      },
+      {
+        "physicsTick": 1941,
+        "activeTimeMs": 32354,
+        "position": [-33.33754975956, 20.426667484695827, -27.028219032268012]
+      },
+      {
+        "physicsTick": 1942,
+        "activeTimeMs": 32372.600000023842,
+        "position": [-33.270467720235004, 20.370000818029162, -27.06176005193051]
+      },
+      {
+        "physicsTick": 1943,
+        "activeTimeMs": 32396.899999976158,
+        "position": [-33.20338568091001, 20.308334151362494, -27.095301071593006]
+      },
+      {
+        "physicsTick": 1945,
+        "activeTimeMs": 32418.899999976158,
+        "position": [-33.06922160226002, 20.170000818029163, -27.162383110918]
+      },
+      {
+        "physicsTick": 1946,
+        "activeTimeMs": 32443,
+        "position": [-33.00213956293503, 20.093334151362495, -27.195924130580497]
+      },
+      {
+        "physicsTick": 1948,
+        "activeTimeMs": 32467.30000001192,
+        "position": [-32.86797548428504, 19.92500081802916, -27.26300616990549]
+      },
+      {
+        "physicsTick": 1949,
+        "activeTimeMs": 32489.80000001192,
+        "position": [-32.800893444960046, 19.833334151362497, -27.29654718956799]
+      },
+      {
+        "physicsTick": 1950,
+        "activeTimeMs": 32508.69999998808,
+        "position": [-32.73381140563505, 19.73666748469583, -27.330088209230485]
+      },
+      {
+        "physicsTick": 1951,
+        "activeTimeMs": 32531.5,
+        "position": [-32.66672936631006, 19.635000818029162, -27.363629228892982]
+      },
+      {
+        "physicsTick": 1953,
+        "activeTimeMs": 32556.600000023842,
+        "position": [-32.532565802113794, 19.70333415136249, -27.430711010991114]
+      },
+      {
+        "physicsTick": 1954,
+        "activeTimeMs": 32579.100000023842,
+        "position": [-32.4654837627888, 19.801667484695823, -27.46425203065361]
+      },
+      {
+        "physicsTick": 1956,
+        "activeTimeMs": 32601.80000001192,
+        "position": [-32.33131968413881, 19.98333415136249, -27.531334069978605]
+      },
+      {
+        "physicsTick": 1957,
+        "activeTimeMs": 32627.899999976158,
+        "position": [-32.26423764481382, 20.066667484695824, -27.564875089641102]
+      },
+      {
+        "physicsTick": 1959,
+        "activeTimeMs": 32651.30000001192,
+        "position": [-32.13007356616383, 20.21833415136249, -27.631957128966096]
+      },
+      {
+        "physicsTick": 1960,
+        "activeTimeMs": 32676.399999976158,
+        "position": [-32.062991526838836, 20.286667484695826, -27.665498148628593]
+      },
+      {
+        "physicsTick": 1961,
+        "activeTimeMs": 32699,
+        "position": [-31.995909487513842, 20.35000081802916, -27.69903916829109]
+      },
+      {
+        "physicsTick": 1963,
+        "activeTimeMs": 32722.399999976158,
+        "position": [-31.861745408863854, 20.461667484695827, -27.766121207616084]
+      },
+      {
+        "physicsTick": 1964,
+        "activeTimeMs": 32747.19999998808,
+        "position": [-31.79466336953886, 20.51000081802916, -27.79966222727858]
+      },
+      {
+        "physicsTick": 1966,
+        "activeTimeMs": 32770.19999998808,
+        "position": [-31.660499290888872, 20.591667484695826, -27.866744266603575]
+      },
+      {
+        "physicsTick": 1967,
+        "activeTimeMs": 32787.39999997616,
+        "position": [-31.593417251563878, 20.62500081802916, -27.900285286266072]
+      },
+      {
+        "physicsTick": 1968,
+        "activeTimeMs": 32809.80000001192,
+        "position": [-31.526335212238884, 20.653334151362493, -27.93382630592857]
+      },
+      {
+        "physicsTick": 1969,
+        "activeTimeMs": 32826.5,
+        "position": [-31.45925317291389, 20.676667484695827, -27.967367325591066]
+      },
+      {
+        "physicsTick": 1971,
+        "activeTimeMs": 32850,
+        "position": [-31.3250890942639, 20.708334151362493, -28.03444936491606]
+      },
+      {
+        "physicsTick": 1972,
+        "activeTimeMs": 32873.39999997616,
+        "position": [-31.258007054938908, 20.716667484695826, -28.067990384578557]
+      },
+      {
+        "physicsTick": 1973,
+        "activeTimeMs": 32898.10000002384,
+        "position": [-31.190925015613914, 20.72000081802916, -28.101531404241054]
+      },
+      {
+        "physicsTick": 1975,
+        "activeTimeMs": 32922.80000001192,
+        "position": [-31.056760936963926, 20.711667484695827, -28.16861344356605]
+      },
+      {
+        "physicsTick": 1976,
+        "activeTimeMs": 32949.89999997616,
+        "position": [-30.98967889763893, 20.70000081802916, -28.202154463228545]
+      },
+      {
+        "physicsTick": 1978,
+        "activeTimeMs": 32971.60000002384,
+        "position": [-30.855514818988944, 20.661667484695826, -28.26923650255354]
+      },
+      {
+        "physicsTick": 1979,
+        "activeTimeMs": 32993.19999998808,
+        "position": [-30.78843277966395, 20.63500081802916, -28.302777522216036]
+      },
+      {
+        "physicsTick": 1981,
+        "activeTimeMs": 33020.30000001192,
+        "position": [-30.65426870101396, 20.566667484695827, -28.36985956154103]
+      },
+      {
+        "physicsTick": 1982,
+        "activeTimeMs": 33042.69999998808,
+        "position": [-30.587186661688968, 20.52500081802916, -28.403400581203528]
+      },
+      {
+        "physicsTick": 1984,
+        "activeTimeMs": 33068,
+        "position": [-30.45302258303898, 20.426667484695827, -28.47048262052852]
+      },
+      {
+        "physicsTick": 1985,
+        "activeTimeMs": 33092.30000001192,
+        "position": [-30.385940543713986, 20.370000818029162, -28.50402364019102]
+      },
+      {
+        "physicsTick": 1986,
+        "activeTimeMs": 33114.19999998808,
+        "position": [-30.32000069087836, 20.308334786467896, -28.537564314414336]
+      },
+      {
+        "physicsTick": 1987,
+        "activeTimeMs": 33132.80000001192,
+        "position": [-30.32000007423719, 20.241669010647488, -28.571104885878455]
+      },
+      {
+        "physicsTick": 1989,
+        "activeTimeMs": 33154.5,
+        "position": [-30.3200000662426, 20.093337494952756, -28.638186102424957]
+      },
+      {
+        "physicsTick": 1990,
+        "activeTimeMs": 33180.60000002384,
+        "position": [-30.320000062802475, 20.011671751482467, -28.671726742924825]
+      },
+      {
+        "physicsTick": 1992,
+        "activeTimeMs": 33204.10000002384,
+        "position": [-30.320000056823687, 19.833340286672705, -28.738808078901506]
+      },
+      {
+        "physicsTick": 1993,
+        "activeTimeMs": 33226.10000002384,
+        "position": [-30.320000054215875, 19.736674563362246, -28.77234877124198]
+      },
+      {
+        "physicsTick": 1994,
+        "activeTimeMs": 33243,
+        "position": [-30.31444449866032, 19.63500789669558, -28.805889790904477]
+      },
+      {
+        "physicsTick": 1996,
+        "activeTimeMs": 33268.89999997616,
+        "position": [-30.278333486431965, 19.703334282607795, -28.872971531732908]
+      },
+      {
+        "physicsTick": 1997,
+        "activeTimeMs": 33289.5,
+        "position": [-30.24777821302417, 19.79999909199721, -28.90651224168009]
+      },
+      {
+        "physicsTick": 1998,
+        "activeTimeMs": 33307.19999998808,
+        "position": [-30.211667101913058, 19.794999091997212, -28.940053261342587]
+      },
+      {
+        "physicsTick": 1999,
+        "activeTimeMs": 33324.5,
+        "position": [-30.17000043524639, 19.78499909199721, -28.973594281005084]
+      },
+      {
+        "physicsTick": 2000,
+        "activeTimeMs": 33346.19999998808,
+        "position": [-30.12277821302417, 19.76999909199721, -29.00713530066758]
+      },
+      {
+        "physicsTick": 2001,
+        "activeTimeMs": 33364.60000002384,
+        "position": [-30.070000435246392, 19.74999909199721, -29.04067632033008]
+      },
+      {
+        "physicsTick": 2002,
+        "activeTimeMs": 33381.30000001192,
+        "position": [-30.01166710191306, 19.724999091997212, -29.074217339992575]
+      },
+      {
+        "physicsTick": 2004,
+        "activeTimeMs": 33403.89999997616,
+        "position": [-29.880696173699175, 19.65999909199721, -29.14129937931757]
+      },
+      {
+        "physicsTick": 2005,
+        "activeTimeMs": 33428.10000002384,
+        "position": [-29.81361413437418, 19.61999909199721, -29.174840398980066]
+      },
+      {
+        "physicsTick": 2007,
+        "activeTimeMs": 33450.19999998808,
+        "position": [-29.67945082268918, 19.70333384782909, -29.241922054822567]
+      },
+      {
+        "physicsTick": 2008,
+        "activeTimeMs": 33474,
+        "position": [-29.61236932578882, 19.799999204877746, -29.275462803272745]
+      },
+      {
+        "physicsTick": 2009,
+        "activeTimeMs": 33498.39999997616,
+        "position": [-29.545287286463825, 19.794999204877747, -29.309003822935242]
+      },
+      {
+        "physicsTick": 2011,
+        "activeTimeMs": 33522.10000002384,
+        "position": [-29.411123207813837, 19.769999204877745, -29.376085862260236]
+      },
+      {
+        "physicsTick": 2012,
+        "activeTimeMs": 33549.39999997616,
+        "position": [-29.344041168488843, 19.749999204877746, -29.409626881922733]
+      },
+      {
+        "physicsTick": 2014,
+        "activeTimeMs": 33572.60000002384,
+        "position": [-29.209877089838855, 19.694999204877746, -29.476708921247727]
+      },
+      {
+        "physicsTick": 2015,
+        "activeTimeMs": 33594.89999997616,
+        "position": [-29.14279505051386, 19.659999204877746, -29.510249940910224]
+      },
+      {
+        "physicsTick": 2017,
+        "activeTimeMs": 33619.69999998808,
+        "position": [-29.00863173882886, 19.600000514495758, -29.577331596752725]
+      },
+      {
+        "physicsTick": 2018,
+        "activeTimeMs": 33643.60000002384,
+        "position": [-28.941549699503867, 19.70333384782909, -29.61087261641522]
+      },
+      {
+        "physicsTick": 2020,
+        "activeTimeMs": 33666.89999997616,
+        "position": [-28.80738616327851, 19.794999204877747, -29.677954384527897]
+      },
+      {
+        "physicsTick": 2021,
+        "activeTimeMs": 33691.19999998808,
+        "position": [-28.740304123953518, 19.784999204877746, -29.711495404190394]
+      },
+      {
+        "physicsTick": 2022,
+        "activeTimeMs": 33715.5,
+        "position": [-28.673222084628524, 19.769999204877745, -29.74503642385289]
+      },
+      {
+        "physicsTick": 2024,
+        "activeTimeMs": 33739.89999997616,
+        "position": [-28.539058005978536, 19.724999204877747, -29.812118463177885]
+      },
+      {
+        "physicsTick": 2025,
+        "activeTimeMs": 33764.60000002384,
+        "position": [-28.47197596665354, 19.694999204877746, -29.845659482840382]
+      },
+      {
+        "physicsTick": 2027,
+        "activeTimeMs": 33785.60000002384,
+        "position": [-28.337811888003554, 19.619999204877747, -29.912741522165376]
+      },
+      {
+        "physicsTick": 2028,
+        "activeTimeMs": 33804,
+        "position": [-28.270730615643547, 19.600000514495758, -29.94628215834538]
+      },
+      {
+        "physicsTick": 2029,
+        "activeTimeMs": 33827.39999997616,
+        "position": [-28.203648576318553, 19.70333384782909, -29.979823178007877]
+      },
+      {
+        "physicsTick": 2031,
+        "activeTimeMs": 33853.89999997616,
+        "position": [-28.0694850400932, 19.794999204877747, -30.046904946120552]
+      },
+      {
+        "physicsTick": 2032,
+        "activeTimeMs": 33874.30000001192,
+        "position": [-28.002403000768204, 19.784999204877746, -30.08044596578305]
+      },
+      {
+        "physicsTick": 2033,
+        "activeTimeMs": 33891,
+        "position": [-27.93532096144321, 19.769999204877745, -30.113986985445546]
+      },
+      {
+        "physicsTick": 2034,
+        "activeTimeMs": 33914.30000001192,
+        "position": [-27.868238922118216, 19.749999204877746, -30.147528005108043]
+      },
+      {
+        "physicsTick": 2035,
+        "activeTimeMs": 33931.5,
+        "position": [-27.801156882793222, 19.724999204877747, -30.18106902477054]
+      },
+      {
+        "physicsTick": 2037,
+        "activeTimeMs": 33956.89999997616,
+        "position": [-27.666992804143234, 19.659999204877746, -30.248151064095534]
+      },
+      {
+        "physicsTick": 2038,
+        "activeTimeMs": 33980.19999998808,
+        "position": [-27.59991076481824, 19.619999204877747, -30.28169208375803]
+      },
+      {
+        "physicsTick": 2039,
+        "activeTimeMs": 33997,
+        "position": [-27.532829492458234, 19.600000514495758, -30.315232719938034]
+      },
+      {
+        "physicsTick": 2041,
+        "activeTimeMs": 34020.19999998808,
+        "position": [-27.398665413808246, 19.801667181162422, -30.38231475926303]
+      },
+      {
+        "physicsTick": 2042,
+        "activeTimeMs": 34043.30000001192,
+        "position": [-27.33158337448325, 19.895000514495756, -30.415855778925525]
+      },
+      {
+        "physicsTick": 2044,
+        "activeTimeMs": 34067,
+        "position": [-27.197419295833264, 20.066667181162423, -30.48293781825052]
+      },
+      {
+        "physicsTick": 2045,
+        "activeTimeMs": 34085.10000002384,
+        "position": [-27.13033725650827, 20.145000514495756, -30.516478837913017]
+      },
+      {
+        "physicsTick": 2046,
+        "activeTimeMs": 34108.39999997616,
+        "position": [-27.063255217183276, 20.21833384782909, -30.550019857575514]
+      },
+      {
+        "physicsTick": 2047,
+        "activeTimeMs": 34132.10000002384,
+        "position": [-26.99617317785828, 20.28666718116242, -30.58356087723801]
+      },
+      {
+        "physicsTick": 2049,
+        "activeTimeMs": 34156,
+        "position": [-26.862009099208294, 20.408333847829088, -30.650642916563005]
+      },
+      {
+        "physicsTick": 2050,
+        "activeTimeMs": 34178,
+        "position": [-26.7949270598833, 20.461667181162422, -30.6841839362255]
+      },
+      {
+        "physicsTick": 2052,
+        "activeTimeMs": 34205.39999997616,
+        "position": [-26.66076298123331, 20.553333847829087, -30.751265975550496]
+      },
+      {
+        "physicsTick": 2053,
+        "activeTimeMs": 34226,
+        "position": [-26.593680941908318, 20.59166718116242, -30.784806995212993]
+      },
+      {
+        "physicsTick": 2054,
+        "activeTimeMs": 34249.80000001192,
+        "position": [-26.526598902583324, 20.625000514495756, -30.81834801487549]
+      },
+      {
+        "physicsTick": 2056,
+        "activeTimeMs": 34273.10000002384,
+        "position": [-26.392434823933336, 20.676667181162422, -30.885430054200484]
+      },
+      {
+        "physicsTick": 2057,
+        "activeTimeMs": 34290.5,
+        "position": [-26.32535278460834, 20.695000514495757, -30.91897107386298]
+      },
+      {
+        "physicsTick": 2058,
+        "activeTimeMs": 34314.30000001192,
+        "position": [-26.258270745283347, 20.70833384782909, -30.952512093525478]
+      },
+      {
+        "physicsTick": 2060,
+        "activeTimeMs": 34338.69999998808,
+        "position": [-26.12410666663336, 20.720000514495755, -31.01959413285047]
+      },
+      {
+        "physicsTick": 2061,
+        "activeTimeMs": 34363.60000002384,
+        "position": [-26.057024627308365, 20.71833384782909, -31.05313515251297]
+      },
+      {
+        "physicsTick": 2062,
+        "activeTimeMs": 34380.5,
+        "position": [-25.98994258798337, 20.711667181162422, -31.086676172175466]
+      },
+      {
+        "physicsTick": 2064,
+        "activeTimeMs": 34404.80000001192,
+        "position": [-25.855778509333383, 20.68333384782909, -31.15375821150046]
+      },
+      {
+        "physicsTick": 2065,
+        "activeTimeMs": 34428.69999998808,
+        "position": [-25.78869647000839, 20.66166718116242, -31.187299231162957]
+      },
+      {
+        "physicsTick": 2067,
+        "activeTimeMs": 34452.10000002384,
+        "position": [-25.6545323913584, 20.603333847829088, -31.25438127048795]
+      },
+      {
+        "physicsTick": 2068,
+        "activeTimeMs": 34473.69999998808,
+        "position": [-25.587450352033407, 20.566667181162423, -31.287922290150448]
+      },
+      {
+        "physicsTick": 2069,
+        "activeTimeMs": 34490.89999997616,
+        "position": [-25.520368312708413, 20.525000514495755, -31.321463309812945]
+      },
+      {
+        "physicsTick": 2070,
+        "activeTimeMs": 34514.5,
+        "position": [-25.45328627338342, 20.478333847829088, -31.35500432947544]
+      },
+      {
+        "physicsTick": 2072,
+        "activeTimeMs": 34538.69999998808,
+        "position": [-25.31912219473343, 20.370000514495757, -31.422086368800436]
+      },
+      {
+        "physicsTick": 2073,
+        "activeTimeMs": 34562.80000001192,
+        "position": [-25.252040155408437, 20.30833384782909, -31.455627388462933]
+      },
+      {
+        "physicsTick": 2075,
+        "activeTimeMs": 34585.5,
+        "position": [-25.11787607675845, 20.170000514495758, -31.522709427787927]
+      },
+      {
+        "physicsTick": 2076,
+        "activeTimeMs": 34605.60000002384,
+        "position": [-25.050794037433455, 20.09333384782909, -31.556250447450424]
+      },
+      {
+        "physicsTick": 2077,
+        "activeTimeMs": 34626.19999998808,
+        "position": [-24.98371199810846, 20.011667181162423, -31.58979146711292]
+      },
+      {
+        "physicsTick": 2079,
+        "activeTimeMs": 34653.60000002384,
+        "position": [-24.849547919458473, 19.833333847829092, -31.656873506437915]
+      },
+      {
+        "physicsTick": 2080,
+        "activeTimeMs": 34675.89999997616,
+        "position": [-24.78246588013348, 19.736667181162424, -31.69041452610041]
+      },
+      {
+        "physicsTick": 2082,
+        "activeTimeMs": 34700.10000002384,
+        "position": [-24.64830231593722, 19.60000081802916, -31.75749630819854]
+      },
+      {
+        "physicsTick": 2083,
+        "activeTimeMs": 34716.89999997616,
+        "position": [-24.581220276612225, 19.70333415136249, -31.791037327861037]
+      },
+      {
+        "physicsTick": 2084,
+        "activeTimeMs": 34739.80000001192,
+        "position": [-24.51413823728723, 19.801667484695823, -31.824578347523534]
+      },
+      {
+        "physicsTick": 2085,
+        "activeTimeMs": 34764.30000001192,
+        "position": [-24.447056197962237, 19.895000818029157, -31.85811936718603]
+      },
+      {
+        "physicsTick": 2087,
+        "activeTimeMs": 34785.10000002384,
+        "position": [-24.31289211931225, 20.066667484695824, -31.925201406511025]
+      },
+      {
+        "physicsTick": 2088,
+        "activeTimeMs": 34803.30000001192,
+        "position": [-24.245810079987255, 20.145000818029157, -31.958742426173522]
+      },
+      {
+        "physicsTick": 2089,
+        "activeTimeMs": 34821.89999997616,
+        "position": [-24.17872804066226, 20.21833415136249, -31.99228344583602]
+      },
+      {
+        "physicsTick": 2090,
+        "activeTimeMs": 34844,
+        "position": [-24.111646001337267, 20.286667484695826, -32.025824465498516]
+      },
+      {
+        "physicsTick": 2092,
+        "activeTimeMs": 34867.69999998808,
+        "position": [-23.97748192268728, 20.408334151362492, -32.0929065048235]
+      },
+      {
+        "physicsTick": 2093,
+        "activeTimeMs": 34892.39999997616,
+        "position": [-23.910399883362285, 20.461667484695827, -32.126447524486]
+      },
+      {
+        "physicsTick": 2094,
+        "activeTimeMs": 34913.60000002384,
+        "position": [-23.84331784403729, 20.51000081802916, -32.15998854414849]
+      },
+      {
+        "physicsTick": 2095,
+        "activeTimeMs": 34932.30000001192,
+        "position": [-23.776235804712297, 20.553334151362492, -32.19352956381098]
+      },
+      {
+        "physicsTick": 2097,
+        "activeTimeMs": 34955.89999997616,
+        "position": [-23.64207172606231, 20.62500081802916, -32.26061160313597]
+      },
+      {
+        "physicsTick": 2098,
+        "activeTimeMs": 34973.60000002384,
+        "position": [-23.574989686737315, 20.653334151362493, -32.294152622798464]
+      },
+      {
+        "physicsTick": 2099,
+        "activeTimeMs": 34993.30000001192,
+        "position": [-23.513463202967877, 20.676667484695827, -32.322138086905404]
+      },
+      {
+        "physicsTick": 2100,
+        "activeTimeMs": 35010.60000002384,
+        "position": [-23.457492274753996, 20.69500081802916, -32.34456799545679]
+      },
+      {
+        "physicsTick": 2102,
+        "activeTimeMs": 35037,
+        "position": [-23.362217084992896, 20.716667484695826, -32.372761145892895]
+      },
+      {
+        "physicsTick": 2103,
+        "activeTimeMs": 35058.80000001192,
+        "position": [-23.32291282344568, 20.72000081802916, -32.37852438777762]
+      }
+    ],
+    "generatorVersion": 3,
+    "renderPipeline": {
+      "drawUnit": "chunk-render-category",
+      "batchMode": "category",
+      "vertexLayout": "float16-uv-uint16-index",
+      "shaderMode": "voxel-array-chunks",
+      "backend": "webgl2"
+    },
+    "serverRevision": 0,
+    "voxelAtOrigin": 3,
+    "serverPlayerPosition": [-23.32291282344568, 20.72000081802916, -32.37852438777762],
+    "serverPlayerVelocity": [2.358255692832954, 0.20000000000000245, -0.3457945130831443],
+    "prediction": {
+      "pendingFrames": 3,
+      "lastResetReason": "collision-history-missing",
+      "resetCounts": {
+        "collision-history-missing": 5,
+        "large-error": 1
+      },
+      "presentationOffset": {
+        "x": -0.022637594880549727,
+        "y": 0.011666666666666714,
+        "z": 0
+      }
+    },
+    "serverWorldTime": 10.902000000001713,
+    "performance": {
+      "scenarioId": "default",
+      "frame": {
+        "count": 1200,
+        "p50Ms": 9,
+        "p95Ms": 10.300000011920929,
+        "p99Ms": 11.599999964237213,
+        "maxMs": 48.89999997615814,
+        "longFrameCount": 1,
+        "lastLongFrameMs": 48.89999997615814
+      },
+      "chunkVisible": {
+        "count": 84,
+        "p50Ms": 978.8999999761581,
+        "p95Ms": 4282,
+        "p99Ms": 4816.100000023842,
+        "maxMs": 4816.100000023842
+      },
+      "completedChunkTraces": 84,
+      "traceEventCount": 859,
+      "maxMeshCommitsInFrame": 1,
+      "maxMeshPartsInFrame": 2,
+      "visibleAfterPostrender": true,
+      "incidents": 32,
+      "droppedEvents": 0,
+      "uploadQueueDepth": 0,
+      "estimatedMeshBytes": 3586100
+    },
+    "compute": {
+      "workerCount": 2,
+      "fluidWorkerCount": 1,
+      "generalWorkerCount": 1,
+      "running": 1,
+      "queued": 0,
+      "queuedBytes": 0,
+      "cancellationRequests": 0,
+      "staleResults": 0,
+      "failedTasks": 0,
+      "completedTasks": 86,
+      "submittedTasks": 87,
+      "submittedBytes": 3538944,
+      "maxQueued": 1,
+      "maxQueuedBytes": 196608,
+      "workerTaskDuration": {
+        "fluid": {
+          "count": 0,
+          "capacity": 256,
+          "samplesMs": []
+        },
+        "general": {
+          "count": 86,
+          "capacity": 256,
+          "samplesMs": [
+            513.8000000119209, 76, 45.19999998807907, 124.89999997615814, 72.5, 21.80000001192093, 64.40000003576279,
+            61.89999997615814, 114.09999996423721, 115.89999997615814, 119.5, 117.80000001192093, 61,
+            16.799999952316284, 61.60000002384186, 58.700000047683716, 64.30000001192093, 67.39999997615814,
+            67.10000002384186, 61.200000047683716, 118.69999998807907, 119.80000001192093, 120.30000001192093,
+            127.40000003576279, 114.90000003576279, 120.40000003576279, 104.29999995231628, 105.5, 60.80000001192093,
+            59.80000001192093, 60.59999996423721, 64.80000001192093, 65.39999997615814, 62.90000003576279,
+            64.40000003576279, 59.30000001192093, 123.5, 121.09999996423721, 120.80000001192093, 115.79999995231628,
+            112.40000003576279, 106.5, 113.90000003576279, 113, 64.80000001192093, 63.19999998807907, 63.89999997615814,
+            60, 127.09999996423721, 125.39999997615814, 151.89999997615814, 118.29999995231628, 66.10000002384186,
+            125.19999998807907, 60, 62.10000002384186, 124.40000003576279, 144.60000002384186, 59.39999997615814,
+            58.59999996423721, 120.79999995231628, 120.40000003576279, 69.19999998807907, 122.90000003576279, 61.5,
+            60.30000001192093, 122.5, 123, 60.30000001192093, 59.90000003576279, 123.30000001192093, 124.5,
+            73.19999998807907, 128.5999999642372, 61.10000002384186, 63.5, 126.69999998807907, 118.90000003576279, 58,
+            57.80000001192093, 118.89999997615814, 114.60000002384186, 67.5, 120.19999998807907, 66.30000001192093,
+            124.5
+          ]
+        }
+      }
+    },
+    "fluidFeedback": {
+      "count": 0,
+      "pending": false,
+      "pendingSample": null,
+      "p50Ms": 0,
+      "p95Ms": 0,
+      "p99Ms": 0,
+      "maxMs": 0,
+      "samples": []
+    },
+    "waterTransitions": {
+      "activeCount": 0,
+      "active": [],
+      "recent": []
+    },
+    "ui": {
+      "runtime": "svelte5",
+      "shellPublishCount": 5,
+      "hudPublishCount": 60,
+      "interactionPublishCount": 120,
+      "debugProjectionCount": 138,
+      "debugPublishCount": 139,
+      "staleUpdateCount": 0,
+      "coalescedUpdateCount": 12845,
+      "domCommitCount": 312,
+      "projectionDurationMs": 183.39999985694885,
+      "publishDurationMs": 9.99999988079071,
+      "domCommitDurationMs": 265.499999165535,
+      "debugProjectionRate": 3.937760555622382,
+      "totalPublishRate": 9.04543547921953
+    },
+    "gameplay": {
+      "entityCount": 4,
+      "worldItemCount": 0,
+      "creatureCount": 2,
+      "npcCount": 1,
+      "nearbyVisitedBucketCount": 0,
+      "nearbyCandidateCount": 0,
+      "nearbyReturnedCount": 0,
+      "inventoryOperationCount": 1,
+      "gameplayEventCount": 50,
+      "snapshotBytes": 17291,
+      "retainedActorCount": 3,
+      "activeActorCount": 3,
+      "behaviorEvaluationCount": 0,
+      "navigationPlanCount": 0,
+      "navigationExpandedNodeCount": 0,
+      "pathRecomputeCount": 0,
+      "actionCompletionCount": 1,
+      "actionFailureCount": 0,
+      "actionInterruptionCount": 42,
+      "perceptionLineOfSightCheckCount": 0,
+      "simulationTime": 35,
+      "presentedEntityCount": 3
+    },
+    "breakingOverlay": null,
+    "viewmodel": {
+      "isolatedLayer": true
+    },
+    "visualEffects": {
+      "activeLocalLights": 0,
+      "shadowedLocalLights": 0,
+      "localLightLimit": 4,
+      "localShadowLimit": 1,
+      "sunShadows": true,
+      "sunShadowResolution": 512,
+      "reflectionEnabled": true,
+      "reflectionActive": false,
+      "reflectionResolution": 128,
+      "reflectionFrameInterval": 8,
+      "reflectionRenderCount": 0,
+      "waterPlaneY": null,
+      "postProcessing": true,
+      "shadowUpdateCount": 0,
+      "shadowStableFrameCount": 3763
+    },
+    "water": {
+      "bodyFraction": 0,
+      "wading": false,
+      "swimming": false,
+      "cameraSubmerged": false,
+      "cameraDepth": null,
+      "waterSurfaceY": null,
+      "underwaterBlend": 0
+    }
+  }
+}

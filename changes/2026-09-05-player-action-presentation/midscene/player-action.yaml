@@ -1,0 +1,19 @@
+web:
+  url: http://127.0.0.1:4217/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+tasks:
+  - name: 第一人称手持物与 HUD 的统一表现
+    flow:
+      - aiInput: seedlands-player-action
+        locate: 世界 Seed 输入框
+      - aiTap: 进入世界
+      - aiWaitFor: 可以看到体素地面、游戏 HUD 和底部快捷栏。
+      - aiKeyboardPress: F4
+      - aiInput: /give wood-axe 1
+        locate: 命令输入框
+      - aiKeyboardPress: Enter
+      - aiWaitFor: 命令显示成功。
+      - aiKeyboardPress: Escape
+      - aiAssert: 画面右下方有手持木斧与皮革手套、深青色袖口，能辨认是玩家拿着工具；木斧图示与快捷栏第一格对应。
+      - aiAssert: 手部和工具不遮挡中央准星、生命饥饿读数或底部快捷栏；暖黄铜和深色面板语言一致，画面主体仍然是世界。

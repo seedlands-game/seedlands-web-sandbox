@@ -2,6 +2,7 @@ ls:
   src:
     .dir: kebab-case
     .ts: kebab-case
+    .svelte: kebab-case
   tests:
     .dir: kebab-case
     .test.ts: kebab-case
@@ -12,6 +13,8 @@ ls:
   changes/*:
     .dir: regex:\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*
     .md: kebab-case
+  changes/*/evidence:
+    .dir: kebab-case
   changes/*/midscene:
     .dir: kebab-case
   changes/*/e2e:

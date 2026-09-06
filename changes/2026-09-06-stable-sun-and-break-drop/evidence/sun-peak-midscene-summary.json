@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0,
+    "partialFailed": 0,
+    "notExecuted": 0,
+    "totalDuration": 7204,
+    "generatedAt": "9/6/2026, 6:21:07 PM"
+  },
+  "results": [
+    {
+      "script": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/changes/2026-09-06-stable-sun-and-break-drop/midscene/sun-shadow-peak.yaml",
+      "success": true,
+      "resultType": "success",
+      "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/sun-shadow-peak-1788690060529.json",
+      "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/sun-shadow-peak-2026-09-06_18-21-00-6a4fec9a.html",
+      "attempts": [
+        {
+          "attempt": 1,
+          "success": true,
+          "resultType": "success",
+          "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/sun-shadow-peak-1788690060529.json",
+          "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/sun-shadow-peak-2026-09-06_18-21-00-6a4fec9a.html",
+          "duration": 7204
+        }
+      ],
+      "duration": 7204
+    }
+  ]
+}

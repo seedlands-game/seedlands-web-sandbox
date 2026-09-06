@@ -4,62 +4,54 @@ import {
   decodeStoredChunkRecord,
   storedChunkRecordBytes,
   type StoredChunkRecord,
+  validateStoredFluid,
 } from '../world/chunk-snapshot-codec';
-import { GENERATOR_VERSION, Voxel, normalizeSeed } from '../world/voxel';
-
-type WorkerConfig = { databaseName: string; worldId: string; seedText: string };
-type InitTask = { kind: 'init'; requestId: number } & WorkerConfig;
-type LoadTask = { kind: 'load'; requestId: number; cx: number; cy: number; cz: number };
-type SaveTask = {
-  kind: 'save';
-  requestId: number;
-  snapshots: Array<{ key: string; cx: number; cy: number; cz: number; revision: number; voxels: ArrayBuffer }>;
-};
-type SaveMetadataTask = {
-  kind: 'save-metadata';
-  requestId: number;
-  player: [number, number, number];
-};
-type StatsTask = { kind: 'stats'; requestId: number };
-type SeedCorpusTask = { kind: 'seed-corpus'; requestId: number; chunkCount: number };
-type MarkLegacyMigratedTask = { kind: 'mark-legacy-migrated'; requestId: number };
-type LatestWorldTask = { kind: 'latest-world'; requestId: number; databaseName: string };
-type Task =
-  | InitTask
-  | LoadTask
-  | SaveTask
-  | SaveMetadataTask
-  | StatsTask
-  | SeedCorpusTask
-  | MarkLegacyMigratedTask
-  | LatestWorldTask;
-
-type CorpusSummary = {
-  storedChunkCount: number;
-  rawBytes: number;
-  legacyJsonBytes: number;
-  recordBytes: number;
-  payloadBytes: number;
-  metadataBytes: number;
-  codecs: Record<string, number>;
-};
-
-type WorldRecord = {
-  worldId: string;
-  seedText: string;
-  generatorVersion: number;
-  player: [number, number, number] | null;
-  corpusSummary?: CorpusSummary;
-  legacyMigrated?: boolean;
-  updatedAt: number;
-};
-
-type SuccessResponse = { requestId: number; ok: true; result: unknown };
-type ErrorResponse = { requestId: number; ok: false; error: string };
+import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, normalizeSeed } from '../world/voxel';
+import { selectWorldGeneratorVersion } from '../client/world-version-policy';
+import { persistFrozenGameSnapshot } from './persistence-frozen-save';
+import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
+import { loadPersistenceBatch } from './persistence-load-many';
+import { persistChunkSnapshots } from './persistence-save';
+import { ProceduralChunkBaseCache } from './procedural-chunk-base-cache';
+import type {
+  PersistenceCorpusSummary as CorpusSummary,
+  PersistenceInitTask as InitTask,
+  PersistenceLatestWorldTask as LatestWorldTask,
+  PersistenceLoadBatchTask as LoadBatchTask,
+  PersistenceLoadTask as LoadTask,
+  PersistenceSaveFrozenTask as SaveFrozenTask,
+  PersistenceSaveGameplayTask as SaveGameplayTask,
+  PersistenceSaveMetadataTask as SaveMetadataTask,
+  PersistenceSaveTask as SaveTask,
+  PersistenceSeedCorpusTask as SeedCorpusTask,
+  PersistenceWorkerConfig as WorkerConfig,
+  PersistenceWorkerError as ErrorResponse,
+  PersistenceWorkerSuccess as SuccessResponse,
+  PersistenceWorkerTask as Task,
+  PersistenceWorldRecord as WorldRecord,
+} from './persistence-worker-protocol';
+import { describePersistenceMailboxEncoding, type PersistenceWorkerEncoding } from './persistence-worker-timing';
 
 let config: WorkerConfig | null = null;
 let databasePromise: Promise<IDBDatabase> | null = null;
 let taskQueue = Promise.resolve();
+let lastCompletedEncoding: PersistenceWorkerEncoding | undefined;
+type ActivePersistenceWorkerTask = {
+  kind: string;
+  encoding?: PersistenceWorkerEncoding;
+};
+let activeTask: ActivePersistenceWorkerTask | undefined;
+const proceduralBaseCache = new ProceduralChunkBaseCache(({ seedText, generatorVersion, cx, cy, cz }) =>
+  makeChunk(normalizeSeed(seedText), cx, cy, cz, [], generatorVersion),
+);
+
+const recordEncoding = (task: ActivePersistenceWorkerTask, startedAtMs: number, completedAtMs: number) => {
+  task.encoding = {
+    kind: task.kind,
+    encodeStartedAtEpochMs: performance.timeOrigin + startedAtMs,
+    encodeCompletedAtEpochMs: performance.timeOrigin + completedAtMs,
+  };
+};
 
 const requestResult = <T>(request: IDBRequest<T>) =>
   new Promise<T>((resolve, reject) => {
@@ -94,7 +86,13 @@ const database = () => {
 
 const proceduralChunk = (cx: number, cy: number, cz: number) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  return makeChunk(normalizeSeed(config.seedText), cx, cy, cz, []);
+  return proceduralBaseCache.get({
+    seedText: config.seedText,
+    generatorVersion: config.generatorVersion,
+    cx,
+    cy,
+    cz,
+  });
 };
 
 const normalizeRecord = (value: unknown): StoredChunkRecord => {
@@ -108,42 +106,66 @@ const normalizeRecord = (value: unknown): StoredChunkRecord => {
         ? new Uint8Array(storedPayload)
         : null;
   if (!payload) throw new Error('Stored Chunk payload is corrupt.');
-  return { ...record, payload };
+  const storedFluid = (value as { fluid?: unknown }).fluid;
+  const fluid =
+    storedFluid instanceof Uint8Array
+      ? storedFluid
+      : storedFluid instanceof ArrayBuffer
+        ? new Uint8Array(storedFluid)
+        : undefined;
+  return { ...record, payload, ...(fluid ? { fluid } : {}) };
 };
 
 const initialize = async (task: InitTask) => {
-  config = { databaseName: task.databaseName, worldId: task.worldId, seedText: task.seedText };
+  proceduralBaseCache.clear();
   databasePromise = openDatabase(task.databaseName);
-  const opened = await database();
+  const opened = await databasePromise;
   const transaction = opened.transaction('worlds', 'readwrite');
   const done = transactionDone(transaction);
   const store = transaction.objectStore('worlds');
-  const existing = (await requestResult(store.get(task.worldId))) as WorldRecord | undefined;
-  if (existing && (existing.seedText !== task.seedText || existing.generatorVersion !== GENERATOR_VERSION))
+  const records = (await requestResult(store.getAll())) as WorldRecord[];
+  const supportedRecords = records.filter(
+    (record) => record.generatorVersion === GENERATOR_VERSION || record.generatorVersion === LEGACY_GENERATOR_VERSION,
+  );
+  const generatorVersion = selectWorldGeneratorVersion(
+    supportedRecords,
+    task.seedText,
+    GENERATOR_VERSION,
+    task.openMode,
+  );
+  if (generatorVersion !== GENERATOR_VERSION && generatorVersion !== LEGACY_GENERATOR_VERSION)
+    throw new Error(`Stored world uses unsupported generator version ${generatorVersion}.`);
+  const worldId = `seedlands:g${generatorVersion}:${task.seedText}`;
+  config = { databaseName: task.databaseName, worldId, seedText: task.seedText, generatorVersion };
+  const existing = records.find((record) => record.worldId === worldId);
+  if (task.openMode === 'continue-legacy' && generatorVersion === GENERATOR_VERSION)
+    throw new Error('这个 Seed 没有可继续的旧版 v2 世界。');
+  if (existing && (existing.seedText !== task.seedText || existing.generatorVersion !== generatorVersion))
     throw new Error('Stored world metadata is incompatible with the requested seed or generator.');
   if (!existing)
     store.put({
-      worldId: task.worldId,
+      worldId,
       seedText: task.seedText,
-      generatorVersion: GENERATOR_VERSION,
+      generatorVersion,
       player: null,
       updatedAt: Date.now(),
     } satisfies WorldRecord);
   await done;
   return {
+    worldId,
+    generatorVersion,
     player: existing?.player ?? null,
+    gameplaySnapshot: existing?.gameplaySnapshot ?? null,
+    checkpoint: existing
+      ? { commitSequence: existing.commitSequence ?? 0, worldRevision: existing.worldRevision ?? 0 }
+      : null,
     corpusSummary: existing?.corpusSummary ?? null,
     legacyMigrated: existing?.legacyMigrated ?? false,
   };
 };
 
-const load = async (task: LoadTask) => {
+const decodeLoadResult = (task: PersistenceLoadCoordinate, value: unknown) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  const opened = await database();
-  const transaction = opened.transaction('chunks', 'readonly');
-  const done = transactionDone(transaction);
-  const value = await requestResult(transaction.objectStore('chunks').get([config.worldId, task.cx, task.cy, task.cz]));
-  await done;
   if (value === undefined) return { status: 'missing' as const };
   const record = normalizeRecord(value);
   const startedAt = performance.now();
@@ -158,10 +180,11 @@ const load = async (task: LoadTask) => {
     revision: record.revision,
     formatVersion: 1,
     voxelSchemaVersion: 1,
-    generatorVersion: GENERATOR_VERSION,
+    generatorVersion: config.generatorVersion,
     proceduralVoxels,
   });
-  if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= Voxel.Water))
+  const fluid = validateStoredFluid(record);
+  if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= Voxel.Lantern))
     throw new Error('Stored Chunk contains a voxel outside the current schema.');
   return {
     status: 'found' as const,
@@ -174,61 +197,53 @@ const load = async (task: LoadTask) => {
     recordBytes: storedChunkRecordBytes(record),
     decodeMs: performance.now() - startedAt,
     voxels: voxels.buffer,
+    ...(fluid ? { fluidVersion: 1 as const, fluid: fluid.buffer } : {}),
   };
 };
 
-const save = async (task: SaveTask) => {
+const loadMany = async (coordinates: readonly PersistenceLoadCoordinate[], queueWaitMs: number, mailboxWaitMs = 0) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  const startedAt = performance.now();
-  const records = task.snapshots.map((snapshot) => {
-    const voxels = new Uint16Array(snapshot.voxels);
-    return createStoredChunkRecord({
-      worldId: config!.worldId,
-      seedText: config!.seedText,
-      cx: snapshot.cx,
-      cy: snapshot.cy,
-      cz: snapshot.cz,
-      revision: snapshot.revision,
-      formatVersion: 1,
-      voxelSchemaVersion: 1,
-      generatorVersion: GENERATOR_VERSION,
-      voxels,
-      proceduralVoxels: proceduralChunk(snapshot.cx, snapshot.cy, snapshot.cz),
-    });
+  return loadPersistenceBatch({
+    coordinates,
+    queueWaitMs,
+    mailboxWaitMs,
+    worldId: config.worldId,
+    database,
+    decode: decodeLoadResult,
   });
-  const encodeMs = performance.now() - startedAt;
-  const opened = await database();
-  const transaction = opened.transaction('chunks', 'readwrite', { durability: 'strict' });
-  const done = transactionDone(transaction);
-  const store = transaction.objectStore('chunks');
-  for (const record of records) {
-    const existingValue = await requestResult(store.get([record.worldId, record.cx, record.cy, record.cz]));
-    if (existingValue !== undefined) {
-      const existing = normalizeRecord(existingValue);
-      if (existing.revision > record.revision) {
-        transaction.abort();
-        await done.catch(() => undefined);
-        throw new Error(`Refusing to replace Chunk ${record.cx},${record.cy},${record.cz} with an older revision.`);
-      }
-      if (existing.revision === record.revision && existing.payloadChecksum !== record.payloadChecksum) {
-        transaction.abort();
-        await done.catch(() => undefined);
-        throw new Error(`Chunk ${record.cx},${record.cy},${record.cz} revision conflicts with stored content.`);
-      }
-    }
-    store.put(record);
-  }
-  await done;
-  const codecs = records.reduce<Record<string, number>>((counts, record) => {
-    counts[record.codec] = (counts[record.codec] ?? 0) + 1;
-    return counts;
-  }, {});
-  return {
-    saved: records.map((record) => ({ key: `${record.cx},${record.cy},${record.cz}`, revision: record.revision })),
-    recordBytes: records.reduce((sum, record) => sum + storedChunkRecordBytes(record), 0),
-    encodeMs,
-    codecs,
-  };
+};
+
+const load = async (task: LoadTask) => (await loadMany([task], 0)).entries[0];
+
+const loadBatch = async (
+  task: LoadBatchTask,
+  queueWaitMs: number,
+  receivedAtEpochMs: number,
+  mailboxEncodings: readonly PersistenceWorkerEncoding[],
+) => {
+  if (!Number.isFinite(task.requestSentAtEpochMs) || task.requestSentAtEpochMs < 0)
+    throw new TypeError('Persistence load batch request time is invalid.');
+  const result = await loadMany(
+    validatePersistenceLoadBatch(task.coordinates),
+    queueWaitMs,
+    Math.max(0, receivedAtEpochMs - task.requestSentAtEpochMs),
+  );
+  const encoding = mailboxEncodings
+    .map((candidate) => describePersistenceMailboxEncoding(task.requestSentAtEpochMs, receivedAtEpochMs, candidate))
+    .find((candidate) => candidate !== undefined);
+  return { ...result, diagnostics: { ...result.diagnostics, ...(encoding ?? {}) } };
+};
+
+const save = async (task: SaveTask, active: ActivePersistenceWorkerTask) => {
+  if (!config) throw new Error('Persistence worker is not initialized.');
+  return persistChunkSnapshots({
+    database,
+    config,
+    snapshots: task.snapshots,
+    proceduralChunk,
+    normalizeRecord,
+    onEncodeCompleted: ({ startedAtMs, completedAtMs }) => recordEncoding(active, startedAtMs, completedAtMs),
+  });
 };
 
 const saveMetadata = async (task: SaveMetadataTask) => {
@@ -242,12 +257,38 @@ const saveMetadata = async (task: SaveMetadataTask) => {
     ...existing,
     worldId: config.worldId,
     seedText: config.seedText,
-    generatorVersion: GENERATOR_VERSION,
+    generatorVersion: config.generatorVersion,
     player: task.player,
     updatedAt: Date.now(),
   } satisfies WorldRecord);
   await done;
   return { saved: true };
+};
+
+const saveGameplay = async (task: SaveGameplayTask) => {
+  if (!config) throw new Error('Persistence worker is not initialized.');
+  const opened = await database();
+  const transaction = opened.transaction('worlds', 'readwrite', { durability: 'strict' });
+  const done = transactionDone(transaction);
+  const store = transaction.objectStore('worlds');
+  const existing = (await requestResult(store.get(config.worldId))) as WorldRecord | undefined;
+  if (!existing) throw new Error('Stored world metadata is missing.');
+  store.put({ ...existing, gameplaySnapshot: task.snapshot, updatedAt: Date.now() } satisfies WorldRecord);
+  await done;
+  return { saved: true };
+};
+
+const saveFrozen = async (task: SaveFrozenTask, active: ActivePersistenceWorkerTask) => {
+  if (!config) throw new Error('Persistence worker is not initialized.');
+  const opened = await database();
+  return persistFrozenGameSnapshot({
+    database: opened,
+    config,
+    snapshot: task.snapshot,
+    proceduralChunk,
+    normalizeRecord,
+    onEncodeCompleted: ({ startedAtMs, completedAtMs }) => recordEncoding(active, startedAtMs, completedAtMs),
+  });
 };
 
 const markLegacyMigrated = async () => {
@@ -271,7 +312,9 @@ const latestWorld = async (task: LatestWorldTask) => {
     const worlds = (await requestResult(transaction.objectStore('worlds').getAll())) as WorldRecord[];
     await done;
     const latest = worlds
-      .filter((world) => world.generatorVersion === GENERATOR_VERSION)
+      .filter(
+        (world) => world.generatorVersion === GENERATOR_VERSION || world.generatorVersion === LEGACY_GENERATOR_VERSION,
+      )
       .sort((left, right) => right.updatedAt - left.updatedAt)[0];
     return latest ? { seedText: latest.seedText } : null;
   } finally {
@@ -353,7 +396,7 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
         revision: 1,
         formatVersion: 1,
         voxelSchemaVersion: 1,
-        generatorVersion: GENERATOR_VERSION,
+        generatorVersion: config.generatorVersion,
         voxels,
         proceduralVoxels: procedural,
       });
@@ -377,7 +420,7 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
   metadataTransaction.objectStore('worlds').put({
     worldId: config.worldId,
     seedText: config.seedText,
-    generatorVersion: GENERATOR_VERSION,
+    generatorVersion: config.generatorVersion,
     player: null,
     corpusSummary: summary,
     updatedAt: Date.now(),
@@ -386,30 +429,57 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
   return summary;
 };
 
-const handle = async (task: Task): Promise<unknown> => {
+const handle = async (
+  task: Task,
+  queueWaitMs = 0,
+  receivedAtEpochMs = 0,
+  mailboxEncodings: readonly PersistenceWorkerEncoding[] = [],
+  active?: ActivePersistenceWorkerTask,
+): Promise<unknown> => {
   if (task.kind === 'latest-world') return latestWorld(task);
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
-  if (task.kind === 'save') return save(task);
+  if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs, receivedAtEpochMs, mailboxEncodings);
+  if (task.kind === 'save') return save(task, active!);
+  if (task.kind === 'save-frozen') return saveFrozen(task, active!);
   if (task.kind === 'save-metadata') return saveMetadata(task);
+  if (task.kind === 'save-gameplay') return saveGameplay(task);
   if (task.kind === 'stats') return stats();
   if (task.kind === 'mark-legacy-migrated') return markLegacyMigrated();
   return seedCorpus(task);
 };
 
 self.onmessage = (event: MessageEvent<Task>) => {
+  const enqueuedAt = performance.now();
+  const receivedAtEpochMs = performance.timeOrigin + enqueuedAt;
+  const mailboxEncodings = [activeTask?.encoding, lastCompletedEncoding].filter(
+    (encoding): encoding is PersistenceWorkerEncoding => encoding !== undefined,
+  );
   taskQueue = taskQueue.then(async () => {
     const task = event.data;
+    const current: ActivePersistenceWorkerTask = { kind: task.kind };
+    activeTask = current;
     try {
-      const result = await handle(task);
-      const response: SuccessResponse = { requestId: task.requestId, ok: true, result };
+      const result = await handle(task, performance.now() - enqueuedAt, receivedAtEpochMs, mailboxEncodings, current);
+      const completedAtEpochMs = performance.timeOrigin + performance.now();
+      lastCompletedEncoding = current.encoding;
+      if (activeTask === current) activeTask = undefined;
+      const responseResult =
+        task.kind === 'load-batch' ? { ...(result as object), responsePostedAtEpochMs: completedAtEpochMs } : result;
+      const response: SuccessResponse = { requestId: task.requestId, ok: true, result: responseResult };
       const transfers: Transferable[] = [];
-      if (task.kind === 'load' && result && typeof result === 'object' && 'voxels' in result) {
-        const buffer = (result as { voxels: ArrayBuffer }).voxels;
-        transfers.push(buffer);
-      }
+      const loaded =
+        task.kind === 'load-batch' ? (responseResult as Awaited<ReturnType<typeof loadMany>>).entries : [result];
+      if (task.kind === 'load' || task.kind === 'load-batch')
+        loaded.forEach((entry) => {
+          if (!entry || typeof entry !== 'object' || !('voxels' in entry)) return;
+          transfers.push((entry as { voxels: ArrayBuffer }).voxels);
+          if ('fluid' in entry) transfers.push((entry as { fluid: ArrayBuffer }).fluid);
+        });
       self.postMessage(response, transfers);
     } catch (error) {
+      lastCompletedEncoding = current.encoding;
+      if (activeTask === current) activeTask = undefined;
       const response: ErrorResponse = {
         requestId: task.requestId,
         ok: false,

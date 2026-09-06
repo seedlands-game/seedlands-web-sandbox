@@ -1,0 +1,11 @@
+web:
+  url: http://127.0.0.1:4303/peak.html
+  viewportWidth: 1800
+  viewportHeight: 1400
+
+tasks:
+  - name: 检查两档太阳阴影最大相邻变化的原始画面
+    flow:
+      - aiAssert: 页面展示 Medium 和 High 各自最大相邻变化的前后两张原始游戏地面截图，草地与树影可以辨认。
+      - aiAssert: Medium 的前后原图中，没有大片地面突然由明变暗或由暗变明，没有树影整体位置突跳；可以存在细小边缘像素变化。
+      - aiAssert: High 的前后原图中，没有大片地面突然由明变暗或由暗变明，没有树影整体位置突跳；可以存在细小边缘像素变化。

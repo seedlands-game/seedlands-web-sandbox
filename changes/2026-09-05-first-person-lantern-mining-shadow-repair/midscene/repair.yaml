@@ -1,0 +1,89 @@
+web:
+  url: http://127.0.0.1:4173/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+
+tasks:
+  - name: 非整格灯笼与稳定洞穴光影
+    flow:
+      - aiInput: lantern-model-shadow-stability
+        locate: 世界 Seed 输入框
+      - ai: 把视觉质量选择为 High，然后点击进入世界。
+      - aiWaitFor: 世界、准星、生命饥饿和快捷栏已经显示。
+      - javascript: |
+          (async () => {
+            const h = window.__seedlandsHarness;
+            if (!h) throw new Error('Seedlands Harness unavailable');
+            h.fillWorld({ from: [-12, 48, -14], to: [12, 55, 4], voxel: 3 });
+            h.fillWorld({ from: [-11, 49, -13], to: [11, 54, 3], voxel: 0 });
+            h.setVoxelAt(0, 49, -5, 10);
+            h.setSpectatorPosition(0.5, 51.2, 1.5);
+            h.setView(0, -8);
+            h.setWorldTime(3);
+            h.setTimePaused(true);
+            for (let attempt = 0; attempt < 80; attempt += 1) {
+              const s = h.snapshot();
+              if (
+                s.generationQueue === 0 &&
+                s.meshingQueue === 0 &&
+                s.deferredRemeshes === 0 &&
+                s.visualEffects.activeLocalLights === 1 &&
+                s.visualEffects.shadowStableFrameCount >= 2
+              )
+                return s;
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+            throw new Error('Lantern fixture did not settle');
+          })()
+      - aiAssert: >-
+          准星前方的灯笼是格内清楚可辨的三维模型：有深色或黄铜色框架、明亮发光核心和顶部提手，四周能看见空隙，绝不是占满整格的发光立方体。灯笼附近石面有向外衰减的暖色局部照明，模型上没有吞掉主体的大块自遮挡，画面也没有错位阴影块。
+
+  - name: 方块表面十阶裂纹而非进度条
+    flow:
+      - javascript: |
+          (async () => {
+            const h = window.__seedlandsHarness;
+            if (!h) throw new Error('Seedlands Harness unavailable');
+            h.fillWorld({ from: [-1, 48, -5], to: [1, 48, 1], voxel: 3 });
+            h.fillWorld({ from: [-1, 49, -5], to: [1, 52, 1], voxel: 0 });
+            h.setVoxelAt(0, 50, -3, 3);
+            h.setSpectatorPosition(0.5, 50.5, 0.5);
+            h.setView(0, 0);
+            const started = await h.executeGameplayCommand({ type: 'break-voxel', position: [0, 50, -3] });
+            if (!started.success) throw new Error(started.error.message);
+            h.advanceGameplay(0.55);
+            for (let attempt = 0; attempt < 40; attempt += 1) {
+              const s = h.snapshot();
+              if (s.breakingOverlay && s.breakingOverlay.stage >= 2) return s;
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+            throw new Error('Breaking overlay did not appear');
+          })()
+      - aiAssert: >-
+          准星瞄准的石块六面位置上叠加了清楚的深色裂纹，裂纹像贴在方块表面而不是悬浮的矩形，也没有严重遮住原本石材纹理。顶部目标卡可显示“采集中”等状态，但不存在独立的横向采集进度条。
+
+  - name: 超宽贴墙第一人称模型不穿模
+    flow:
+      - javascript: |
+          (async () => {
+            const h = window.__seedlandsHarness;
+            if (!h) throw new Error('Seedlands Harness unavailable');
+            await h.executeGameplayCommand({ type: 'cancel-break' });
+            const held = await h.executeGameplayCommand({ type: 'give-item', itemId: 'stone-pickaxe', count: 1 });
+            if (!held.success) throw new Error(held.error.message);
+            h.fillWorld({ from: [-2, 48, -2], to: [2, 52, -1], voxel: 3 });
+            h.setSpectatorPosition(0.5, 50.4, 0.45);
+            h.setView(0, 0);
+            h.setWorldTime(10);
+            h.advanceGameplay(0.016);
+            await new Promise((resolve) => setTimeout(resolve, 250));
+            for (let attempt = 0; attempt < 80; attempt += 1) {
+              const s = h.snapshot();
+              if (s.generationQueue === 0 && s.meshingQueue === 0 && s.deferredRemeshes === 0) return s;
+              await new Promise((resolve) => setTimeout(resolve, 100));
+            }
+            throw new Error('Wall fixture did not settle');
+          })()
+      - sleep: 600
+      - aiAssert: >-
+          镜头紧贴石墙时，右下方手臂、手掌和工具仍是连续完整的立体模型，没有被墙面遮掉一截、没有近裁剪断口，也没有异常放大侵入画面中央；准星、顶部目标卡、生命饥饿和快捷栏均未被第一人称模型遮挡。
