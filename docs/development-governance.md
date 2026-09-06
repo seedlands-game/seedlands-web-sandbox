@@ -8,7 +8,7 @@
 
 简单且已澄清的需求走 **Agile**：短 spec、RED、实现、GREEN 和本地准出连续完成。安全、权限、持久化格式、世界生成/Chunk、渲染管线、公开契约、跨模块重构或不可逆数据走 **Breaking**：先写 spec 与用例，用户审核精确 SHA-256 后实施。目标或方案不清楚时走 **Exploration**：仅在 `/tmp` 或独立非生产位置试验，不导入产品，方向稳定后以新 spec 和新审核正式实现。
 
-审核不自动授权 push、发布、外部写入、权限变更或删除。`Scope`、`Decisions`、`Behaviour`、`Test Design` 或 `Acceptance` 的实质变化会使原 hash 审核失效，必须重新审核。每次准出记录 docs baseline 是否更新：跨 change 的难重建规则更新 docs；只影响局部行为时写明不更新理由。
+审核不自行授权超出合同的发布、其他外部写入、权限变更或删除。项目默认交接由本用户长期授权：验收后的 change 可推送至已配置 `origin` 和目标分支，并创建或更新 PR；用户指定 `local-only`、不发 PR 或其他范围时优先。不得自动合并或绕过分支保护。`Scope`、`Decisions`、`Behaviour`、`Test Design` 或 `Acceptance` 的实质变化会使原 hash 审核失效，必须重新审核。每次准出记录 docs baseline 是否更新：跨 change 的难重建规则更新 docs；只影响局部行为时写明不更新理由。
 
 ## E2E 生命周期
 
@@ -28,4 +28,4 @@ Vitest 证明纯逻辑、数据、算法和确定性不变量；Playwright 证�
 
 ## 交付
 
-确认在明确功能分支后，只暂存本 change 的文件，使用语义化本地 commit；默认不 push。历史 evidence 不因目录/API 演进而静默改写。具体源码职责与可执行 ESLint 规则见[目录规范](repository-structure.md)。
+确认在明确功能分支后，只暂存本 change 的文件，使用语义化本地 commit；按已授权的 PR 交接推送、创建或更新 PR，并持续跟进本 change 相关 CI 与合并冲突。最新 HEAD 的必要 CI 通过、无合并冲突且 PR 为 `ready for review` 时可交棒；人类审核仍待完成，单个 `MERGEABLE` 字段不代表所有门禁通过。CI 失败只修复本 change 相关原因后复验；状态无变化时不重复通知。历史 evidence 不因目录/API 演进而静默改写。具体源码职责与可执行 ESLint 规则见[目录规范](repository-structure.md)。
