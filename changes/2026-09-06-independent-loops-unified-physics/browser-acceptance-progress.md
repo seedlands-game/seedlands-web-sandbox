@@ -49,3 +49,11 @@
 `7be2f4b` 的六项前台取证五项通过，调试用例新增的 F3 隐藏动作因复选框仍持有表单焦点失败；夹具将先离开表单焦点，再观察真实快捷键，不改输入规则。原始开启截图还显示所有身体线框为白色，和权威橙/预测青图例不一致。所安装 PlayCanvas `MeshInstance` 构造时读取既有 `vertexBuffer.format.hasColor` 决定 shader defines；当前 renderer 先创建空 MeshInstance 再写颜色，永久缺少顶点色开关。
 
 在 `tests/app/collision-debug-renderer.test.ts` 先模拟真实构造时的颜色格式捕获，记录 RED 后修为先构造首次完整线框缓冲，再创建 MeshInstance。后续继续复用同一 Mesh/Material，不增加关闭成本。实际浏览器须在完整 streaming 后显示橙/青/蓝/紫等来源色，关闭后线框消失；数学形状仍来自统一注册表。
+
+## 最终非性能需求准出
+
+最终功能准出冻结在 `a60bf49`。先从该 SHA 创建独立源码归档并执行完整生产构建：Svelte 0 错误、0 警告，源码与测试 TypeScript 通过，Vite 生产构建完成。随后复用同一生产预览，以前台 Chrome、单 worker、零重试串行执行本 change 除两个性能文件外的全部 12 个 E2E 文件。文件内参数化场景展开后实际为 22 项，最终 **22/22 通过，用时 3.1 分钟**。
+
+这组同源证据覆盖：低顶水岸、终端速度薄平台、灯笼真实形状；完整入水、下潜、浮出与流体几何过渡；真实连续跳搭和按住左键下挖；自然河岸与实体失去支撑；主线程阻塞、世界切换、可靠暂停、Authority 故障与重试；长会话保存重启；30/60/120Hz 下的 0/50/150ms 重复乱序传输和墙体 revision 校正；通用池 1/2 槽真实 Worker 拓扑、Logic 阻塞和一格岸 W+Space；跨 300 个 Chunk 的驻留收敛与持久编辑重载；完整脚底支撑挖空；F3+B、面板等价控制和线框资源释放。
+
+本轮显式排除 `authority-load-performance.spec.ts` 与 `loop-performance.spec.ts`。两者由独立性能验收维护；运行时机器处于电池低电量状态，本轮功能旅程中的帧率和墙钟耗时不作为性能结论，也不覆盖独立 A9 结果。原始逐项日志保存在 `/tmp/seedlands-a60bf49-nonperf-e2e.log`，Playwright 进程与生产预览均已正常退出。
