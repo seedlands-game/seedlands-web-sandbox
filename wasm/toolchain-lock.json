@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "toolchain": {
+    "cacheKey": "9f617c9a",
+    "moonVersion": "0.1.20260827",
+    "mooncVersion": "0.10.11+6ff76a5f9",
+    "coreVersion": "0.10.11+6ff76a5f9",
+    "archiveUrl": "https://cli.moonbitlang.com/binaries/latest/moonbit-darwin-aarch64.tar.gz",
+    "archiveSha256": "9f617c9ae78b08e19354e70a4203c2157ff5373c78c340aebe722883441ae5b5",
+    "coreArchiveUrl": "https://cli.moonbitlang.com/cores/core-latest.tar.gz",
+    "coreArchiveSha256": "661425df9bb8ff7cb1497dd3cb28a873b5a476fb3b07c587a225453ffd0aa9b4",
+    "moonBinarySha256": "6a38e05cd85c8ad6c8f49d6a504fb245fce4ed13b9859275e3d653cec4207f33",
+    "mooncBinarySha256": "ea0798dd71f6b83708577fd1b046467ebff069ec3fbebf2dc34d7dc388f4ac7c",
+    "moonWasmOptVersion": "125",
+    "moonWasmOptBinarySha256": "394fdb64405f14799aa3b21b7ce775c4bc62dba7517a6aec93c31c06240ad718"
+  }
+}

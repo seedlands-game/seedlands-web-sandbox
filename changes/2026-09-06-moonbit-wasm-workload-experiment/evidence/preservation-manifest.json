@@ -1,0 +1,781 @@
+{
+  "schemaVersion": 1,
+  "scope": "Immutable review checkpoint of reusable experimental assets, not production acceptance",
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 168,
+      "sha256": "e319be1a6a3c3e0f7a21d21da90f0f3c43330854ff72ba95c7693443e4ae0990"
+    },
+    {
+      "path": ".ls-lint.yml",
+      "bytes": 758,
+      "sha256": "bca3ec69f7e38934f9ff6e88af2e75e0675d325e9b1840f11939c77c8acd1bda"
+    },
+    {
+      "path": ".prettierignore",
+      "bytes": 251,
+      "sha256": "27e7c867c53a1d1d1b94e4344fdaaed82115e80c24d604fc300caef4b684750b"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/ab-statistics.ts",
+      "bytes": 1766,
+      "sha256": "a19634dfbb182b291bba9f292e548d2520975804a5b4ee20321430ab2cadad87"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/combined-ab-cdp.ts",
+      "bytes": 2985,
+      "sha256": "399828bbfce9715af6b5afba15aa74e55269c441bc52e1db2224f4d4d249e4ef"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/combined-ab-support.ts",
+      "bytes": 11822,
+      "sha256": "9d4a6c7e34ce4be714ada7eec4236ef0e7c4d287398dd34c96fc97f61077ece4"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/combined-ab.spec.ts",
+      "bytes": 19662,
+      "sha256": "d85b82fe15e7fd0b029b9ceb4029c387ce88ffb30a3c2d2b1707910e968138cf"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/p0-aa.spec.ts",
+      "bytes": 19651,
+      "sha256": "0224ae2f7a3a2867b1829c91b402a6803b7dfc10f36047e01fc8841ac109cebd"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/p0-environment.ts",
+      "bytes": 1820,
+      "sha256": "d0abbb093ea33c10db6aea2628529b4d87c72fc219ac40d0dcfa848036c75298"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/p0-profiler.ts",
+      "bytes": 17761,
+      "sha256": "7cf2f9aded8f6b0916c89e9328018830c2f49228dc9d4ef72340d2c50e346cb3"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/p0-reanalyse.spec.ts",
+      "bytes": 1909,
+      "sha256": "674a6bf806579e16ad8a8b14a72573d6728639908794ce1ae14587e65d717b9f"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/workload-ab.spec.ts",
+      "bytes": 7901,
+      "sha256": "81c4ff4eba9dbca619bbc925a46c82c85fc055d89422d670e2073aa62dd71539"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/workload-corpus.ts",
+      "bytes": 12025,
+      "sha256": "8f5d782e03cfb81f8064388d6df4c40e7a2eb2bcb790ecd624013407122aabae"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/workload-entry.ts",
+      "bytes": 5159,
+      "sha256": "878bf07fcc2d633d2eefa020cd1c57c525ca5d758f59447301b3695dfb7e0c05"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/workload-worker.ts",
+      "bytes": 7141,
+      "sha256": "730be3f36914ee3382fd921898d0d677546f1eed372eb64a457a9463f8a63e16"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/moonbit-gc-probe.wasm",
+      "bytes": 277,
+      "sha256": "ce3fa587fec9fa00c8266ac5833c64e6317708ad35e37d4fcaf00da061a4c114"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-aa-summary.json",
+      "bytes": 2195566,
+      "sha256": "8e588c203e4593fe6ae6fce98ebc90e40f551e08b45b24c83b3c8ef7d1e00a16"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-ai-a1-raw.cpuprofile.json.gz",
+      "bytes": 219363,
+      "sha256": "2e8011aef1e2c948af9f2a9a59337dd3a41254c0c1cde1868c9841d99eeac338"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-ai-a1.json",
+      "bytes": 177168,
+      "sha256": "beb93c37f335e516ed630bf4eaf8e7396a4f259b224e022afc7cc8efcc587cac"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-ai-a2-raw.cpuprofile.json.gz",
+      "bytes": 223181,
+      "sha256": "968f1b4e1e744bbf0e7a164af025fb0ac85c470b580021fdf4b0f408fbf98844"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-ai-a2.json",
+      "bytes": 178393,
+      "sha256": "57fa72cd05fa8c9d7a829b53322a61f239c002a387bc24c21dc818a799d656c3"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-fluid-a1-raw.cpuprofile.json.gz",
+      "bytes": 50935,
+      "sha256": "fd14bf32d787fece9f84997ba1b79eeb1772a6f1c2ee174cdb4438c463647e07"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-fluid-a1.json",
+      "bytes": 228699,
+      "sha256": "e3aa8489421b6f6043b21373115dcf1f571169e90b799975ec7d8c5bdb7feff4"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-fluid-a2-raw.cpuprofile.json.gz",
+      "bytes": 54664,
+      "sha256": "18b6f7771796c7774fd528745bcb708243b1df143a4540507bb6d6e2a390327d"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-fluid-a2.json",
+      "bytes": 229350,
+      "sha256": "f1c26551313ff755a70eaf8c8f43500b04cc2e2cc2f39266b7552c7cb875f6a8"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-loading-a1-raw.cpuprofile.json.gz",
+      "bytes": 58373,
+      "sha256": "aa312be8bcd96efc34ee2183a494e80c6361cb54a3fc8d52a893ff003f33a312"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-loading-a1.json",
+      "bytes": 68171,
+      "sha256": "eb1be0a79a0f0a92c256443c27ece66c7bcd7306e5019a9ff82909433987b968"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-loading-a2-raw.cpuprofile.json.gz",
+      "bytes": 58269,
+      "sha256": "4f9d7e02257f31f90d63e40b096f7b4cb4615d12ce58cea9fb6223e93719d868"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-loading-a2.json",
+      "bytes": 68153,
+      "sha256": "1c429622b2784702c5d7faf1316aee34cd34f574f8e368789d844cc090a67cef"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-map-a1-raw.cpuprofile.json.gz",
+      "bytes": 24358,
+      "sha256": "b555813286c3f89832df903a8b395a54258935bdc0e5b21c520e8d359454da90"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-map-a1.json",
+      "bytes": 133356,
+      "sha256": "eaed8e3efcf9c227821e060fa3c27e5fada650412530784dbf29c4b6285edce9"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-map-a2-raw.cpuprofile.json.gz",
+      "bytes": 26831,
+      "sha256": "79a46a704121a0e4f658ef7e16ea43ae8255d86adedf806ee21c1de7d20f7bcb"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-map-a2.json",
+      "bytes": 133333,
+      "sha256": "49bc9829c0b99890b5e17b702297e66bbaf4253ceed0c2c01b27b494f59fa52b"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-natural-a1-raw.cpuprofile.json.gz",
+      "bytes": 220772,
+      "sha256": "0aeaa7a6f4e6adde8fe70212aa8f6793dfb05ab8870a07f2d7632d77ef7a5467"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-natural-a1.json",
+      "bytes": 196346,
+      "sha256": "8854a86d5b6454567466680164952908f68459b177e0318bda893b6c8357e79c"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-natural-a2-raw.cpuprofile.json.gz",
+      "bytes": 199721,
+      "sha256": "6560ca34c84fc4c68ad4942efd31e8983cdd8784946e4a123104b3fa45c1bf93"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-natural-a2.json",
+      "bytes": 195570,
+      "sha256": "3dc9048bc07443e084d32dec3f0a048cd6c114b0a388a9dc607336b2678f4c9c"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-save-a1-raw.cpuprofile.json.gz",
+      "bytes": 5641,
+      "sha256": "a385edd21b9e59def3046633ea3502aedefbfc931d2a4c1cdd5e614b740fa60e"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-save-a1.json",
+      "bytes": 125354,
+      "sha256": "c3e7c6d4e79c1db5d783a7f299a7e797e13397a57930985309699d99622855c7"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-save-a2-raw.cpuprofile.json.gz",
+      "bytes": 5640,
+      "sha256": "ae50ec57b1d6cbab3505925c294375c4ef65812a72bf90f082b484202387a895"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-profile-save-a2.json",
+      "bytes": 126418,
+      "sha256": "48eb64fb9ebcab57d38b2047529d4af8b455391260494c31bf1cc36d1d349108"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p0-raw-profile-manifest.json",
+      "bytes": 2343,
+      "sha256": "c30613bdac5f25f5791b8fb6ee9fdbefe8b89fe8ecc258f087ed6754bf12fc5f"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/p1-wasmgc-probe.json",
+      "bytes": 309,
+      "sha256": "a107cc047e767ecbe5497a8f8108f66d716968f5c6012c7a7b1beb276cbd9158"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/preservation-build.log",
+      "bytes": 1890,
+      "sha256": "e5311a64f18a823c70a6b6e1cf943883a105fa994cf8e3164915808052e811a0"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/preservation-static.log",
+      "bytes": 2401,
+      "sha256": "b024be97421d2e45cbe4cd5a137e2cf411c07bb32fec2166f53ceab1a3912503"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/rust-reference.wasm",
+      "bytes": 8211,
+      "sha256": "4260b0cc63e361ce11c85f91e0ca777fba1f7b7c36cc01a2cf5f49662d3d4c4f"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-23-00-547Z.json",
+      "bytes": 872,
+      "sha256": "bfc041e0a54586a385a2f4e197eec33e827845b97caf6981e25b1f65760c4230"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2222,
+      "sha256": "34366cd8c4efd1df9025e6f9f0b7feaa1a2bdf3fcf9c1c2cce0af3df4b43884d"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 803,
+      "sha256": "003c01306585bbbdd111ebf7d1da7d810f5b585a266825a588a447559d59d5f3"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-29-55-003Z.json",
+      "bytes": 3095,
+      "sha256": "3df2ac6821cc3d4fa1fabc62ac436d26e2cf7f9a002947be545ca5a9fe3764f1"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-29-55-003Z.json.raw.gz",
+      "bytes": 1349,
+      "sha256": "86c9f2ffe06ff74de697c9a1dca0b3dbd1184107ede78032f10d8eabbc80699f"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-36-47-064Z.json",
+      "bytes": 3108,
+      "sha256": "2ef5ed26c006e378434fe359e430e6c0f1d684a32f408ea3065dfa4b485ccb2f"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-36-47-064Z.json.raw.gz",
+      "bytes": 1325,
+      "sha256": "18d8d172fd57cd64e3e6d0ee46ed8e6e4b1bf222619fe57ab9147342820eb463"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-44-37-236Z.json",
+      "bytes": 3518,
+      "sha256": "7a35e65358a3f92b9391669707efb8293356b729a3f103f40da1c21f3667b559"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w02-2026-09-06T14-44-37-236Z.json.raw.gz",
+      "bytes": 1572,
+      "sha256": "90a26fb6ead2edacadd4f959d3fb0be11a7e56389e0bae824c8145638c109d26"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w03-2026-09-06T14-23-00-547Z.json",
+      "bytes": 870,
+      "sha256": "d0e34fccdcc8349de176b3799b0232622b739fafc9aeaac679c87c9c3b91672e"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w03-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2310,
+      "sha256": "16f0fb7c2f578997b2cea925014181c739a5186565e21481aeac11441c75e03c"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w03-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 808,
+      "sha256": "1e8f58491272b6dc0d5273000f8a01f0f8ae29e9dea29c9242430e369b0eedb9"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-23-00-547Z.json",
+      "bytes": 870,
+      "sha256": "764c3e3087c550cbaa160860ab95a0e0426f41afae3dcc9759ea5ce30b55a33e"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2329,
+      "sha256": "7542e840811ab91cbf4c5c19134bd395c9f9d52e96e5295c18b01e1a7bba08a7"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 840,
+      "sha256": "652db4c8ebac9d4731a5c17e4b9d8f00010e1d231a3086433b534b7ca33c1774"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-29-55-003Z.json",
+      "bytes": 3110,
+      "sha256": "02c64a1c3675e39af46a6821b04c6d2459e391cff31f63dc6aa1d7de3836feb8"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-29-55-003Z.json.raw.gz",
+      "bytes": 1532,
+      "sha256": "600703c79b452ff81e57d2ebe4131d2c9ac1bb1f1671001cf92130e336e7aa40"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-36-47-064Z.json",
+      "bytes": 3109,
+      "sha256": "26fba4631ce6cbfc96f83edceb988adcebd1460e1aa56fe4145b565ba55d1c46"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-36-47-064Z.json.raw.gz",
+      "bytes": 1379,
+      "sha256": "cdc300f32a8eb623768a686e3ce9d52bdcc9d51bf76922c6144676f12d179619"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-44-37-236Z.json",
+      "bytes": 3538,
+      "sha256": "35c268a9999d07fee7f5c70f8307c90e7f32316896da2840f99caaec8ebd3439"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w04-2026-09-06T14-44-37-236Z.json.raw.gz",
+      "bytes": 1551,
+      "sha256": "c91b203275186ed51ed2d6be4c0586d8b93896ac18c0fa5b1bb53342528304f9"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w05-2026-09-06T14-23-00-547Z.json",
+      "bytes": 886,
+      "sha256": "bb1eb673b510076ae381f4cbd49d567f84f796afc0c577c0372cc6f3af5f02dd"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w05-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2268,
+      "sha256": "8fff28cc1068e046d931ec1e3cac9d932eeceeda17b2db5675ee37d73398e4de"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w05-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 843,
+      "sha256": "82c68692a1b0ef434d0b185dc9a0048dd00bf264260ba2273abec15b624f0e31"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w06-2026-09-06T14-23-00-547Z.json",
+      "bytes": 887,
+      "sha256": "1eb5a9000cc405cffdec4f09c0cc856bfea38f4c3257e7333b47ff26b242b76d"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w06-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2179,
+      "sha256": "adfaa03bd6b85015f8879ea16c11f25d98f354ee417d3a95e1a776884661337e"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w06-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 765,
+      "sha256": "43eeebb76a5f1ed42147dacd923e4db5e776a4bc31ca4bb27edb4ae5f303db46"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-23-00-547Z.json",
+      "bytes": 887,
+      "sha256": "523c31682d2d8b8386c555d9e812a414b70b98b153f2e57d5af401257f7e7724"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2276,
+      "sha256": "4a44517baf3fe92ee3f81f7974ada46828b63e0991ab1483344562122db4c517"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 796,
+      "sha256": "556c7c1487c3bf697e04e53ece983ff217c435467abb28b256ccd83a3a3ab6c6"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-29-55-003Z.json",
+      "bytes": 3052,
+      "sha256": "ce70ffb3ff1872ae809cc65aaba727b23776092f739098ae957d7edda484e107"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-29-55-003Z.json.raw.gz",
+      "bytes": 1357,
+      "sha256": "3566b66cf1bfeedc82b917fbc1452355d855448d41db6cedac0515e7af7b6051"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-36-47-064Z.json",
+      "bytes": 3029,
+      "sha256": "e4d9d99f46d98784cf5f06ce54d5914490a98fa5eb05fd17251fcde0b4ea26ce"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-36-47-064Z.json.raw.gz",
+      "bytes": 1314,
+      "sha256": "11df8d040471c06669f1fcd8dab33b08ac12e6fee377b217b2d284f5201f1635"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-44-37-236Z.json",
+      "bytes": 3543,
+      "sha256": "a160b7c0c3e626f83f584e7f23bf41b90f559a3b229f3f5a5a7e94edcca40ef2"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w07-2026-09-06T14-44-37-236Z.json.raw.gz",
+      "bytes": 1499,
+      "sha256": "71ab162d04061f5e784ee0331621363a008433111ccc5198810bfbc1180de6e8"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-large-2026-09-06T14-23-00-547Z.json",
+      "bytes": 891,
+      "sha256": "dedc29bc36b3a67c6b75a5d0245036ae7132ce4251a83c50fb7ddb914fbb77a1"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-large-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2260,
+      "sha256": "86220a9968590d827cda30259f1381a1058d4faa8a0b959dd3e87ff33c190d38"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-large-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 768,
+      "sha256": "89922a30b9b13aa348ef2393ce69c9425844cf2668d070e660b323a3b15fc290"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-medium-2026-09-06T14-23-00-547Z.json",
+      "bytes": 894,
+      "sha256": "a95ab9fc7c17e739a0942af0e0489c21e7e3901721de88fa1b611e81320c0ed0"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-medium-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2171,
+      "sha256": "721ed8a25c0ff8c28ed81cded4a5091a795ef3a8ddb3b9b325ef0c20f8a8e67f"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-medium-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 759,
+      "sha256": "ef7352cb9e5ce9feebc48380f70360497530b459248f9d84dd28c4fc88df7d56"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-small-2026-09-06T14-23-00-547Z.json",
+      "bytes": 893,
+      "sha256": "ab4613678526ec80669dc09a1fe0fa9e31d9413f6f663a12c0d3aa73a7e4891e"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-small-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2047,
+      "sha256": "40794f99939083d3f1d4dbf34cc3cbc54c77c2655b01f5e6c3bf8ba954af8ddc"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w10-small-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 726,
+      "sha256": "70cc59602a26726bd4b184619b92a4c953f42c0db89df5a0e01b13b0a476e88c"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w14-2026-09-06T14-23-00-547Z.json",
+      "bytes": 870,
+      "sha256": "52a46a4a602d248500f2c3bfd5b2f88b7f8c7487bd05815dd74c1bef27fbd132"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w14-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2314,
+      "sha256": "6845ff547bb581ef364313f0672d9c79979a22ecac4352134c72e53b37e4d0ee"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w14-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 829,
+      "sha256": "e84a42c34d5cd16289da883436640d9f33f8d43ffc18b2fb8582070fdaeec7ef"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w15-2026-09-06T14-23-00-547Z.json",
+      "bytes": 886,
+      "sha256": "fa2037a9cf67565ddfffcb4e4827ddce9f33e1d317d03d837f2fe4791bf81c59"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w15-2026-09-06T14-23-00-547Z.json.partial",
+      "bytes": 2343,
+      "sha256": "0289710a46d78fe2cc4a365598b28aa0c3099c32b909bb50627208e57fe8c892"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/workload-w15-2026-09-06T14-23-00-547Z.json.raw.gz",
+      "bytes": 787,
+      "sha256": "73d987fef7c4dcf5cc48bb2af3f6f7358199f5d4f292574ffc17ca965af60dc0"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/experiments/build-rust-reference.sh",
+      "bytes": 1723,
+      "sha256": "bdea195cc70b9de420bed068c354574231071a794b322b670e76abc7f4823c77"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/experiments/check-rust-reference.mjs",
+      "bytes": 1245,
+      "sha256": "33cd3e4c5542e1c820ec76ef87611203bc255eae500ac0bc9752569f36418aea"
+    },
+    {
+      "path": "changes/2026-09-06-moonbit-wasm-workload-experiment/experiments/rust-reference.rs",
+      "bytes": 24552,
+      "sha256": "a732b60602f9d02830a64fdac3475e559b7eb21a25d76b4bbf16e60bf7458157"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "bytes": 9160,
+      "sha256": "776f489086f6a40e5d0845b463431e4df7959146141f93a9832ebb8d460fb188"
+    },
+    {
+      "path": "package.json",
+      "bytes": 3416,
+      "sha256": "7524cf63a507ea30b9eeeace7e1b80647bbf36b47d0b4c33fd6c1babe2981499"
+    },
+    {
+      "path": "scripts/build-wasm.mjs",
+      "bytes": 6969,
+      "sha256": "4afa6a846010918d77ab08cba084240a3696b673b0f03dc3b8764b92f0cdf765"
+    },
+    {
+      "path": "scripts/check-wasm.mjs",
+      "bytes": 2394,
+      "sha256": "0130ddf86d0cee11ec4ba1e93497b2f3313ff10b05fa5b7891e3993360262029"
+    },
+    {
+      "path": "scripts/moonbit-toolchain.mjs",
+      "bytes": 7463,
+      "sha256": "6266021ca31aecf025129026bb2103d3162c4be5f2b5a4dace5ca2f3550c57ed"
+    },
+    {
+      "path": "scripts/wasm-artifact.mjs",
+      "bytes": 2683,
+      "sha256": "fa28a8a84b24c5b8bd840f305c9fd3212d3c6ce289b8e61b031c7870a27acb18"
+    },
+    {
+      "path": "src/client/browser-compute-runtime.ts",
+      "bytes": 12545,
+      "sha256": "56075f15a6a4ca454c1790a4b5fa08f162abad22d44cfa44a7c625e945b456f0"
+    },
+    {
+      "path": "src/client/wasm-experiment-selection.ts",
+      "bytes": 334,
+      "sha256": "2fc8cb2a13d7d4f4e76f9e57da8be49fddd61553ea0f8e5a8edd396ba4ee464b"
+    },
+    {
+      "path": "src/compute/chunk-kernel.ts",
+      "bytes": 4350,
+      "sha256": "fedeee5b7c0a12d143ca1aa1f2c7cf993880a1949fcf86cdb136f4420b59aa49"
+    },
+    {
+      "path": "src/compute/codec-kernel-control.ts",
+      "bytes": 5488,
+      "sha256": "797550d75d26c503c4659b2269258f2cae3359b5362275406a542895e3be25ff"
+    },
+    {
+      "path": "src/compute/codec-kernel.ts",
+      "bytes": 5794,
+      "sha256": "c133a4c84a52f78216a12773638c7dca0b1f3a319109394a1982b6cee5676915"
+    },
+    {
+      "path": "src/compute/fluid-kernel-control.ts",
+      "bytes": 7870,
+      "sha256": "26782abbb5360e492d7f142b4cdf470044b4e0c857df9576e772398afd78c565"
+    },
+    {
+      "path": "src/compute/halo-kernel.ts",
+      "bytes": 4217,
+      "sha256": "e11ba20446f413187ca15e701b0205248468fe17b5cf35068589d3be9d4b61e0"
+    },
+    {
+      "path": "src/compute/kernel-memory.ts",
+      "bytes": 2513,
+      "sha256": "a0bb2bf66804eabef9cd584ae1500d2cb0a6b415ed9a774f404ecd846a670308"
+    },
+    {
+      "path": "src/compute/mesh-kernel-control.ts",
+      "bytes": 6967,
+      "sha256": "7af3159f08ed0fdfc7a226c6e030be9c6a91a18b3355ec8f823f5aeda4f9d791"
+    },
+    {
+      "path": "src/compute/mesh-kernel.ts",
+      "bytes": 12076,
+      "sha256": "f2105a091381a587c757afeae97921302beeb26066772d4dde2931cb130bb28b"
+    },
+    {
+      "path": "src/compute/mesh-pack-kernel-control.ts",
+      "bytes": 3053,
+      "sha256": "0ccdd2f6a034991b1a2e81960014a899cc231ce9bb61710b3ae02e60239a53ac"
+    },
+    {
+      "path": "src/compute/mesh-pack-kernel.ts",
+      "bytes": 4799,
+      "sha256": "c7abe42d9d189071532297677d1ba44c53a57c9a61d71b72848d9531ddeff12e"
+    },
+    {
+      "path": "src/compute/occupancy-kernel.ts",
+      "bytes": 1282,
+      "sha256": "9dcd6e2e86f87a2e79c0a4d8dce9d6ab398265091f93d81b2f4a6b37183d0677"
+    },
+    {
+      "path": "src/generated/wasm/manifest.json",
+      "bytes": 1817,
+      "sha256": "992e80b96e4c4bd6b63b988b946245102c3938339932804e6ea50972e95b37f3"
+    },
+    {
+      "path": "src/generated/wasm/seedlands-kernels.wasm",
+      "bytes": 9788,
+      "sha256": "e342dd87279fe651eba7e649a6b5c0db172bd7653dbbf6380c272f88a7f7b17a"
+    },
+    {
+      "path": "src/worker/fluid-compute-worker.ts",
+      "bytes": 1769,
+      "sha256": "9d1d1e2d68556885927c5ab0047eb26157e9cf40473e79479fc40ef3078dea1c"
+    },
+    {
+      "path": "src/worker/fluid-kernel.ts",
+      "bytes": 5025,
+      "sha256": "f2cc88a9998c18497ffd378cc586e2cf9239d0fb125844f18827f7a8dbd37ce6"
+    },
+    {
+      "path": "src/worker/wasm-kernel-loader.ts",
+      "bytes": 1767,
+      "sha256": "000a482155e5e77782d8808bbb0c7b433049a3e7b3e2eff5f309b35b07f6e39e"
+    },
+    {
+      "path": "src/worker/world-compute-task.ts",
+      "bytes": 9210,
+      "sha256": "9b0579d4468aafa125c9ec830e5ab965558d4f0abb6dc9198c7979582dc8357e"
+    },
+    {
+      "path": "src/worker/world-kernel-adapter.ts",
+      "bytes": 1643,
+      "sha256": "50a7dca6cab97f445064efc45fcd1d28726d6a38340249739ef3529e3d64ab3a"
+    },
+    {
+      "path": "src/worker/world-worker.ts",
+      "bytes": 1641,
+      "sha256": "b06c8f9a1275a0eaa7cde279e65204646cd3e7dd7673cc4b565ff8f7b40bd35f"
+    },
+    {
+      "path": "tests/governance/wasm-ab-statistics.test.ts",
+      "bytes": 700,
+      "sha256": "cccf20f86cfbca722e5e5a9842d6479a198b8b9942fa379bb0ebb487db498d6f"
+    },
+    {
+      "path": "tests/governance/wasm-artifact.test.ts",
+      "bytes": 2010,
+      "sha256": "5eb294cbb7914396d7613de7d9cd6939187d9f3aa20984e746450c3d3741ac2e"
+    },
+    {
+      "path": "tests/governance/wasm-boundary-eslint.test.ts",
+      "bytes": 2051,
+      "sha256": "a53efdd20ca91d8821b51f704e4f63adaa2f0b5a6234626085bdf952941429e7"
+    },
+    {
+      "path": "tests/governance/wasm-toolchain.test.ts",
+      "bytes": 12279,
+      "sha256": "a868f42e5a8ffdf8e445f40d2f25ce08720161526497010f6b1d6fc7dd256180"
+    },
+    {
+      "path": "tests/server/wasm-fluid-control-equivalence.test.ts",
+      "bytes": 4224,
+      "sha256": "43618d9c951207a334d76b91e6fbf4dbcd86e919f21b902ee448115d1f4afda8"
+    },
+    {
+      "path": "tests/server/wasm-fluid-logic-equivalence.test.ts",
+      "bytes": 2921,
+      "sha256": "584f4273669bd405dc16731f28807206e253561e9c32c1c0bcd952338cfa06aa"
+    },
+    {
+      "path": "tests/server/wasm-occupancy-equivalence.test.ts",
+      "bytes": 2595,
+      "sha256": "d1918a5228d2528f14d4b2a4b9ff2da60101316034a5be769d2d4fd1b13dcd2c"
+    },
+    {
+      "path": "tests/worker/wasm-kernel-lifecycle.test.ts",
+      "bytes": 2159,
+      "sha256": "80f30ad87dbb78fb2179a756e35bcfce338a99cd11295532d47122b2c66e0f94"
+    },
+    {
+      "path": "tests/worker/wasm-loader-fallback.test.ts",
+      "bytes": 1380,
+      "sha256": "b05dc0738d6e499e9082ccfbd9d594950bbadce0569c9b7e9ad411205132391c"
+    },
+    {
+      "path": "tests/worker/wasm-world-task-integration.test.ts",
+      "bytes": 1089,
+      "sha256": "292585a02227a8cde58a861acd510b7107ed7f746e8221e42b3ba37546868dba"
+    },
+    {
+      "path": "tests/world/rust-reference-equivalence.test.ts",
+      "bytes": 5764,
+      "sha256": "68a6d63ce6dbda6c7074c63f1e3f70f6955569eeadd3d5a17cc5bb150877a1de"
+    },
+    {
+      "path": "tests/world/wasm-codec-equivalence.test.ts",
+      "bytes": 5374,
+      "sha256": "aaeee2a13bb44057d09ace75450ce529460605a6e6b22d8f8210d7d58fe1c7f3"
+    },
+    {
+      "path": "tests/world/wasm-halo-equivalence.test.ts",
+      "bytes": 1912,
+      "sha256": "a55c1759e76bf733f92db198420613e5c60ba89bc6c7446e1eb7a649d475cb7f"
+    },
+    {
+      "path": "tests/world/wasm-mesh-equivalence.test.ts",
+      "bytes": 9750,
+      "sha256": "b5717af39f6f380bb9446fa401c330ff15240ef1c11aa566ba578534472e00b3"
+    },
+    {
+      "path": "tests/world/wasm-mesh-pack-equivalence.test.ts",
+      "bytes": 3941,
+      "sha256": "f30abf33fc2dcf7bb2617ec19734694cdc1b58dc5a8f77da996659561fb74d20"
+    },
+    {
+      "path": "tests/world/wasm-world-kernel-equivalence.test.ts",
+      "bytes": 1932,
+      "sha256": "cb9d303f954968c2ad3491166f72496c026aa2c28a841cfe1c9987d530f7226d"
+    },
+    {
+      "path": "wasm/seedlands-kernels/checksum.mbt",
+      "bytes": 973,
+      "sha256": "de67f95da7b3369eab872049ec8aade80c4b72cfb303c27a98130d63bdb83243"
+    },
+    {
+      "path": "wasm/seedlands-kernels/chunk.mbt",
+      "bytes": 1625,
+      "sha256": "00759f1395bee10e7978cbba9981abed8ae19999f89d77f1e37464518b3b7410"
+    },
+    {
+      "path": "wasm/seedlands-kernels/codec.mbt",
+      "bytes": 4195,
+      "sha256": "85548a63c34926ee727401d35d1b0aeb79f82e64ee63cfd51dfd6650dc488a37"
+    },
+    {
+      "path": "wasm/seedlands-kernels/fluid.mbt",
+      "bytes": 6422,
+      "sha256": "0f565f869ab4644b43a2b3fcc532dde704571a3d9154fa323cc22ec2a2501a1a"
+    },
+    {
+      "path": "wasm/seedlands-kernels/halo.mbt",
+      "bytes": 838,
+      "sha256": "1663276f229b106a58e0f35d0300c606108db898f951e74d22fca8700ff07ca3"
+    },
+    {
+      "path": "wasm/seedlands-kernels/memory.mbt",
+      "bytes": 1146,
+      "sha256": "842bc31dad6e1b16802d8c8466baf77f88e0b4e5c83a6ee44e71fced54c6d7b9"
+    },
+    {
+      "path": "wasm/seedlands-kernels/mesh-pack.mbt",
+      "bytes": 2369,
+      "sha256": "7680addfd46bac9a1327b090667e767786603a93a0bb25494c12970e57bea09b"
+    },
+    {
+      "path": "wasm/seedlands-kernels/mesh.mbt",
+      "bytes": 12118,
+      "sha256": "d3636eda160ce1244ea60886baf90919cfd2801ad9b57e2c3c10f88799b86566"
+    },
+    {
+      "path": "wasm/seedlands-kernels/moon.mod",
+      "bytes": 70,
+      "sha256": "f99e22cb922855df7fca51cc99bb4843eaa53d5390d08c8612d829fc60ecb059"
+    },
+    {
+      "path": "wasm/seedlands-kernels/moon.pkg",
+      "bytes": 559,
+      "sha256": "a14e2963e54caa06a4fec020b270a690632f3355403865dfbed9eaab6d283564"
+    },
+    {
+      "path": "wasm/seedlands-kernels/occupancy.mbt",
+      "bytes": 577,
+      "sha256": "ef00fff7f3e7e9f42035be51cabb56be97d329558d0dd874405caae93bb5dd3a"
+    },
+    {
+      "path": "wasm/toolchain-lock.json",
+      "bytes": 862,
+      "sha256": "ae30f1d1c23263805dfdc490b298d19d0ef894b71738b884dfa77f2eb8b014fe"
+    }
+  ]
+}

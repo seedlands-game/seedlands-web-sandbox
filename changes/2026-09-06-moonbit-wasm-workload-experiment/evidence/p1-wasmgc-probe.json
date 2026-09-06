@@ -1,0 +1,12 @@
+{
+  "headless": true,
+  "browser": "152.0.7977.76",
+  "sha256": "ce3fa587fec9fa00c8266ac5833c64e6317708ad35e37d4fcaf00da061a4c114",
+  "bytes": 277,
+  "result": {
+    "valid": true,
+    "sum": 4950,
+    "crossOriginIsolated": false
+  },
+  "scope": "isolated disposable WasmGC MVP; no production integration"
+}

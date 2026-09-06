@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "phase": "P0",
+  "status": "formal-headless",
+  "browserMode": "headless-new",
+  "sourceSha": "f2454937a4217d88420e1f21ac8ffda4e94847ea",
+  "compression": "gzip-9",
+  "files": [
+    {
+      "path": "p0-profile-natural-a1-raw.cpuprofile.json.gz",
+      "bytes": 220772,
+      "sha256": "0aeaa7a6f4e6adde8fe70212aa8f6793dfb05ab8870a07f2d7632d77ef7a5467"
+    },
+    {
+      "path": "p0-profile-natural-a2-raw.cpuprofile.json.gz",
+      "bytes": 199721,
+      "sha256": "6560ca34c84fc4c68ad4942efd31e8983cdd8784946e4a123104b3fa45c1bf93"
+    },
+    {
+      "path": "p0-profile-loading-a1-raw.cpuprofile.json.gz",
+      "bytes": 58373,
+      "sha256": "aa312be8bcd96efc34ee2183a494e80c6361cb54a3fc8d52a893ff003f33a312"
+    },
+    {
+      "path": "p0-profile-loading-a2-raw.cpuprofile.json.gz",
+      "bytes": 58269,
+      "sha256": "4f9d7e02257f31f90d63e40b096f7b4cb4615d12ce58cea9fb6223e93719d868"
+    },
+    {
+      "path": "p0-profile-fluid-a1-raw.cpuprofile.json.gz",
+      "bytes": 50935,
+      "sha256": "fd14bf32d787fece9f84997ba1b79eeb1772a6f1c2ee174cdb4438c463647e07"
+    },
+    {
+      "path": "p0-profile-fluid-a2-raw.cpuprofile.json.gz",
+      "bytes": 54664,
+      "sha256": "18b6f7771796c7774fd528745bcb708243b1df143a4540507bb6d6e2a390327d"
+    },
+    {
+      "path": "p0-profile-ai-a1-raw.cpuprofile.json.gz",
+      "bytes": 219363,
+      "sha256": "2e8011aef1e2c948af9f2a9a59337dd3a41254c0c1cde1868c9841d99eeac338"
+    },
+    {
+      "path": "p0-profile-ai-a2-raw.cpuprofile.json.gz",
+      "bytes": 223181,
+      "sha256": "968f1b4e1e744bbf0e7a164af025fb0ac85c470b580021fdf4b0f408fbf98844"
+    },
+    {
+      "path": "p0-profile-save-a1-raw.cpuprofile.json.gz",
+      "bytes": 5641,
+      "sha256": "a385edd21b9e59def3046633ea3502aedefbfc931d2a4c1cdd5e614b740fa60e"
+    },
+    {
+      "path": "p0-profile-save-a2-raw.cpuprofile.json.gz",
+      "bytes": 5640,
+      "sha256": "ae50ec57b1d6cbab3505925c294375c4ef65812a72bf90f082b484202387a895"
+    },
+    {
+      "path": "p0-profile-map-a1-raw.cpuprofile.json.gz",
+      "bytes": 24358,
+      "sha256": "b555813286c3f89832df903a8b395a54258935bdc0e5b21c520e8d359454da90"
+    },
+    {
+      "path": "p0-profile-map-a2-raw.cpuprofile.json.gz",
+      "bytes": 26831,
+      "sha256": "79a46a704121a0e4f658ef7e16ea43ae8255d86adedf806ee21c1de7d20f7bcb"
+    }
+  ]
+}
