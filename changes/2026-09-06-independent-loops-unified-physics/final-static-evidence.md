@@ -36,3 +36,30 @@
 ## 日志边界
 
 本轮命令通过 Codex 工具直接捕获标准输出，运行时没有使用 `tee`，因此不存在可声称为逐行原始 stdout 的文件。根据已捕获输出整理的本地摘要位于 `/tmp/seedlands-final-static-74a8ed2/final-static-captured-output.txt`；覆盖率 JSON、LCOV 和生产 `dist` 是命令直接生成的实际产物。本文件保留可提交的完整结果与精确源码身份，不把整理摘要描述成原始日志。
+
+## 最终候选复验：`c432753`
+
+在 A9 的受控 20×2 与自然 A/A/B 均于同一源码通过并释放 CPU/Chrome 后，建立 detached 临时工作树 `/tmp/seedlands-final-static-c4327530aac6`。实际固定源码为：
+
+```text
+c4327530aac6bd5027c7c10ea5265cea9d0c13a4
+└─ bbbc88f30c5c1ae691306c758664e373d0d0ff57
+   └─ 87776f6bd4806134901e33e3fbc52e0aa45b9afc
+```
+
+`pnpm verify:static` 通过，原始合并 stdout/stderr 与管道真实退出码保存在 `evidence/final-verify-static-c4327530aac6.log`，SHA-256 为 `34e2dc27d147501877469e97d6d758bad7de0aa36b8c9a5e70f72d7dcba9d826`。实际结果：
+
+- Prettier、ESLint、路径命名检查全部通过。
+- 146 个测试文件中 144 个通过、2 个跳过；732 项中 728 项通过、4 项跳过。
+- `src/world/**` 行覆盖率 96.37%（718/745），statement 94.65%（832/879），branch 87.25%（438/502），function 96.8%（91/94）。
+- Svelte 检查 0 error、0 warning；源码与测试 TypeScript 检查通过；`COMMAND_EXIT=0`。
+
+`pnpm build` 通过，原始合并 stdout/stderr 与管道真实退出码保存在 `evidence/final-build-c4327530aac6.log`，SHA-256 为 `e4213ecbf1ecb088375881f91a5e832461a9a9b45db9cfcc6cc08d005a435a22`。类型检查再次通过，Vite 转换 2438 个模块并产出五类生产 Worker bundle，`COMMAND_EXIT=0`；仅保留既有的主 bundle 大于 500 kB 警告。
+
+命令直接生成的产物位于：
+
+- `/tmp/seedlands-final-static-c4327530aac6/coverage/coverage-summary.json`
+- `/tmp/seedlands-final-static-c4327530aac6/coverage/lcov.info`
+- `/tmp/seedlands-final-static-c4327530aac6/dist/index.html`
+
+本次最终复验在运行时使用 `bash -o pipefail`，并通过 `tee` 将完整输出直接写入上述日志；日志末行由同一 shell 追加实际 `COMMAND_EXIT`。这两份日志是原始命令输出，不是事后整理摘要。前述 `74a8ed2` 历史证据继续保留，用于说明更早一次检查及其日志边界，不作为最终候选的替代。
