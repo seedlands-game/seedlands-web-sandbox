@@ -89,8 +89,8 @@ async function establishAuthorityLoad(page: Page) {
     const actorIds: string[] = [];
     const worldItemIds: string[] = [];
     harness.setTimePaused(true);
-    await harness.fillWorld({ from: [-14, 49, -11], to: [14, 56, 3], voxel: 0 });
-    await harness.fillWorld({ from: [-14, 48, -11], to: [14, 48, 3], voxel: 3 });
+    await harness.fillWorld({ from: [-14, 49, -11], to: [14, 56, 14], voxel: 0 });
+    await harness.fillWorld({ from: [-14, 48, -11], to: [14, 48, 14], voxel: 3 });
     // Harness 坐标是相机/眼睛位置；50.6 对应脚底 y=49，避免嵌入 y=48 的地板。
     await harness.movePlayerTo(0, 50.6, 0);
     for (const [x, z] of targets) {
@@ -111,7 +111,8 @@ async function establishAuthorityLoad(page: Page) {
         id: `load-actor-${index}`,
         // 固定负载角色只需要持续参加权威物理；统一 grazer，避免混合 night-stalker 触发持续逃跑。
         archetype: 'grazer',
-        position: [1 + (index % 8), 49, -2 - Math.floor(index / 8) * 3],
+        // 两排留在目标井与背景水池之间的连续平台内；即使持续 wander 也不从 z=-11 边缘跌落。
+        position: [1 + (index % 8), 49, 3 + Math.floor(index / 8) * 4],
       });
       if (!result.success) throw new Error(result.error.message);
       actorIds.push(`load-actor-${index}`);
