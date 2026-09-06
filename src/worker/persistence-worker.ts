@@ -9,10 +9,12 @@ import {
 import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, normalizeSeed } from '../world/voxel';
 import { selectWorldGeneratorVersion, type WorldOpenMode } from '../client/world-version-policy';
 import { persistFrozenGameSnapshot, type FrozenSaveTaskSnapshot } from './persistence-frozen-save';
+import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 
 type WorkerConfig = { databaseName: string; worldId: string; seedText: string; generatorVersion: number };
 type InitTask = { kind: 'init'; requestId: number; openMode: WorldOpenMode } & WorkerConfig;
 type LoadTask = { kind: 'load'; requestId: number; cx: number; cy: number; cz: number };
+type LoadBatchTask = { kind: 'load-batch'; requestId: number; coordinates: PersistenceLoadCoordinate[] };
 type SaveTask = {
   kind: 'save';
   requestId: number;
@@ -45,6 +47,7 @@ type LatestWorldTask = { kind: 'latest-world'; requestId: number; databaseName: 
 type Task =
   | InitTask
   | LoadTask
+  | LoadBatchTask
   | SaveTask
   | SaveMetadataTask
   | SaveGameplayTask
@@ -188,13 +191,8 @@ const initialize = async (task: InitTask) => {
   };
 };
 
-const load = async (task: LoadTask) => {
+const decodeLoadResult = (task: PersistenceLoadCoordinate, value: unknown) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  const opened = await database();
-  const transaction = opened.transaction('chunks', 'readonly');
-  const done = transactionDone(transaction);
-  const value = await requestResult(transaction.objectStore('chunks').get([config.worldId, task.cx, task.cy, task.cz]));
-  await done;
   if (value === undefined) return { status: 'missing' as const };
   const record = normalizeRecord(value);
   const startedAt = performance.now();
@@ -229,6 +227,29 @@ const load = async (task: LoadTask) => {
     ...(fluid ? { fluidVersion: 1 as const, fluid: fluid.buffer } : {}),
   };
 };
+
+const loadMany = async (coordinates: readonly PersistenceLoadCoordinate[]) => {
+  if (!config) throw new Error('Persistence worker is not initialized.');
+  const opened = await database();
+  const transaction = opened.transaction('chunks', 'readonly');
+  const done = transactionDone(transaction);
+  const store = transaction.objectStore('chunks');
+  let values: unknown[];
+  try {
+    values = await Promise.all(
+      coordinates.map(({ cx, cy, cz }) => requestResult(store.get([config!.worldId, cx, cy, cz]))),
+    );
+    await done;
+  } catch (error) {
+    await done.catch(() => undefined);
+    throw error;
+  }
+  return coordinates.map((coordinate, index) => decodeLoadResult(coordinate, values[index]));
+};
+
+const load = async (task: LoadTask) => (await loadMany([task]))[0];
+
+const loadBatch = async (task: LoadBatchTask) => loadMany(validatePersistenceLoadBatch(task.coordinates));
 
 const save = async (task: SaveTask) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
@@ -471,6 +492,7 @@ const handle = async (task: Task): Promise<unknown> => {
   if (task.kind === 'latest-world') return latestWorld(task);
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
+  if (task.kind === 'load-batch') return loadBatch(task);
   if (task.kind === 'save') return save(task);
   if (task.kind === 'save-frozen') return saveFrozen(task);
   if (task.kind === 'save-metadata') return saveMetadata(task);
@@ -487,10 +509,13 @@ self.onmessage = (event: MessageEvent<Task>) => {
       const result = await handle(task);
       const response: SuccessResponse = { requestId: task.requestId, ok: true, result };
       const transfers: Transferable[] = [];
-      if (task.kind === 'load' && result && typeof result === 'object' && 'voxels' in result) {
-        const buffer = (result as { voxels: ArrayBuffer }).voxels;
-        transfers.push(buffer);
-      }
+      const loaded = task.kind === 'load-batch' ? (result as unknown[]) : [result];
+      if (task.kind === 'load' || task.kind === 'load-batch')
+        loaded.forEach((entry) => {
+          if (!entry || typeof entry !== 'object' || !('voxels' in entry)) return;
+          transfers.push((entry as { voxels: ArrayBuffer }).voxels);
+          if ('fluid' in entry) transfers.push((entry as { fluid: ArrayBuffer }).fluid);
+        });
       self.postMessage(response, transfers);
     } catch (error) {
       const response: ErrorResponse = {

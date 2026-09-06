@@ -3,6 +3,7 @@ import type { GameplaySnapshot } from '../server/gameplay/gameplay-runtime';
 import type { FrozenGameSaveSnapshot } from '../server/persistence/game-save-snapshot';
 import { readGameSaveCheckpoint, type GameSaveCheckpoint } from '../server/persistence/game-save-checkpoint';
 import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
+import { prepareBrowserLoadResult, type PreparedBrowserLoadResult } from './browser-persistence-load';
 import type { WorldOpenMode } from './world-version-policy';
 
 export type SerializedChunkSnapshot = Omit<ChunkSnapshot, 'voxels' | 'fluid'> & { voxels: number[]; fluid?: number[] };
@@ -34,22 +35,8 @@ type InitResult = {
   corpusSummary: ChunkPersistenceCorpusSummary | null;
   legacyMigrated: boolean;
 };
-type LoadResult =
-  | { status: 'missing' }
-  | {
-      status: 'found';
-      key: string;
-      cx: number;
-      cy: number;
-      cz: number;
-      revision: number;
-      codec: string;
-      recordBytes: number;
-      decodeMs: number;
-      voxels: ArrayBuffer;
-      fluidVersion?: 1;
-      fluid?: ArrayBuffer;
-    };
+type LoadCoordinate = Readonly<{ cx: number; cy: number; cz: number }>;
+type LoadToken = Readonly<{ identity: symbol }>;
 type SaveResult = {
   saved: Array<{ key: string; revision: number }>;
   recordBytes: number;
@@ -59,6 +46,7 @@ type SaveResult = {
 
 export type BrowserPersistenceMetrics = {
   idbGetCount: number;
+  loadTransactionCount: number;
   idbPutCount: number;
   encodedChunkCount: number;
   decodedChunkCount: number;
@@ -80,12 +68,15 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   private readonly snapshots = new Map<string, ChunkSnapshot>();
   private readonly missing = new Set<string>();
   private readonly loads = new Map<string, Promise<void>>();
+  private readonly loadTokens = new Map<string, LoadToken>();
   private readonly pending = new Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>();
   private readonly worker = new Worker(new URL('../worker/persistence-worker.ts', import.meta.url), { type: 'module' });
   private requestSequence = 0;
+  private disposed = false;
   private corpusSummaryValue: ChunkPersistenceCorpusSummary | null = null;
   private metricsValue: BrowserPersistenceMetrics = {
     idbGetCount: 0,
+    loadTransactionCount: 0,
     idbPutCount: 0,
     encodedChunkCount: 0,
     decodedChunkCount: 0,
@@ -230,7 +221,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     Object.entries(result.codecs).forEach(([codec, count]) => {
       this.metricsValue.codecs[codec] = (this.metricsValue.codecs[codec] ?? 0) + count;
     });
-    snapshot.chunks.forEach((chunk) => this.missing.delete(chunk.key));
+    snapshot.chunks.forEach((chunk) => this.invalidateSnapshot(chunk.key));
     this.gameplaySnapshotValue = structuredClone(snapshot.gameplay);
     this.checkpointValue = readGameSaveCheckpoint(snapshot);
   }
@@ -240,6 +231,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   private request(message: Record<string, unknown>, transfers: Transferable[] = []): Promise<unknown> {
+    if (this.disposed) return Promise.reject(new Error('Chunk persistence was disposed.'));
     const requestId = ++this.requestSequence;
     return new Promise((resolve, reject) => {
       this.pending.set(requestId, { resolve, reject });
@@ -255,8 +247,14 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   evictSnapshot(key: string): void {
+    this.invalidateSnapshot(key);
+  }
+
+  private invalidateSnapshot(key: string): void {
     this.snapshots.delete(key);
     this.missing.delete(key);
+    this.loads.delete(key);
+    this.loadTokens.delete(key);
   }
 
   async ensureSnapshot(cx: number, cy: number, cz: number): Promise<void> {
@@ -264,41 +262,93 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     if (this.snapshots.has(key) || this.missing.has(key)) return;
     const existing = this.loads.get(key);
     if (existing) return existing;
-    const loading = this.loadSnapshotFromStore(cx, cy, cz).finally(() => this.loads.delete(key));
+    const token: LoadToken = { identity: Symbol(key) };
+    const loading = this.loadSnapshotFromStore(cx, cy, cz, token).finally(() => {
+      if (this.loads.get(key) === loading) this.loads.delete(key);
+      if (this.loadTokens.get(key) === token) this.loadTokens.delete(key);
+    });
+    this.loadTokens.set(key, token);
     this.loads.set(key, loading);
     return loading;
   }
 
-  private async loadSnapshotFromStore(cx: number, cy: number, cz: number): Promise<void> {
+  private async loadSnapshotFromStore(cx: number, cy: number, cz: number, token: LoadToken): Promise<void> {
     this.metricsValue.idbGetCount += 1;
-    const result = (await this.request({ kind: 'load', cx, cy, cz })) as LoadResult;
-    const key = chunkKey(cx, cy, cz);
+    this.metricsValue.loadTransactionCount += 1;
+    const result = await this.request({ kind: 'load', cx, cy, cz });
+    const prepared = prepareBrowserLoadResult(this.seedText, this.generatorVersion, cx, cy, cz, result);
+    if (this.loadTokens.get(prepared.key) === token) this.commitLoadResult(prepared);
+  }
+
+  private commitLoadResult(result: PreparedBrowserLoadResult): void {
     if (result.status === 'missing') {
-      this.missing.add(key);
+      this.missing.add(result.key);
       return;
     }
     this.metricsValue.decodedChunkCount += 1;
     this.metricsValue.recordBytes += result.recordBytes;
     this.metricsValue.decodeSamplesMs.push(result.decodeMs);
     this.metricsValue.codecs[result.codec] = (this.metricsValue.codecs[result.codec] ?? 0) + 1;
-    this.snapshots.set(key, {
-      key,
-      seedText: this.seedText,
-      cx,
-      cy,
-      cz,
-      generatorVersion: this.generatorVersion,
-      revision: result.revision,
-      voxels: new Uint16Array(result.voxels),
-      ...(result.fluid ? { fluidVersion: result.fluidVersion, fluid: new Uint8Array(result.fluid) } : {}),
+    this.snapshots.set(result.key, result.snapshot);
+  }
+
+  private async loadSnapshotBatchFromStore(
+    coordinates: readonly LoadCoordinate[],
+    tokens: ReadonlyMap<string, LoadToken>,
+  ): Promise<void> {
+    this.metricsValue.idbGetCount += coordinates.length;
+    this.metricsValue.loadTransactionCount += 1;
+    const results = await this.request({ kind: 'load-batch', coordinates });
+    if (!Array.isArray(results) || results.length !== coordinates.length)
+      throw new Error('Persistence load batch result length does not match its request.');
+    const prepared = results.map((result, index) => {
+      const coordinate = coordinates[index]!;
+      return prepareBrowserLoadResult(
+        this.seedText,
+        this.generatorVersion,
+        coordinate.cx,
+        coordinate.cy,
+        coordinate.cz,
+        result,
+      );
+    });
+    prepared.forEach((result) => {
+      if (this.loadTokens.get(result.key) === tokens.get(result.key)) this.commitLoadResult(result);
     });
   }
 
   async ensureNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
-    const loads: Promise<void>[] = [];
+    const loads = new Set<Promise<void>>();
+    const coordinates: LoadCoordinate[] = [];
     for (let y = cy - 1; y <= cy + 1; y += 1)
       for (let z = cz - 1; z <= cz + 1; z += 1)
-        for (let x = cx - 1; x <= cx + 1; x += 1) loads.push(this.ensureSnapshot(x, y, z));
+        for (let x = cx - 1; x <= cx + 1; x += 1) {
+          const key = chunkKey(x, y, z);
+          if (this.snapshots.has(key) || this.missing.has(key)) continue;
+          const existing = this.loads.get(key);
+          if (existing) loads.add(existing);
+          else coordinates.push({ cx: x, cy: y, cz: z });
+        }
+    if (coordinates.length) {
+      const tokens = new Map<string, LoadToken>();
+      coordinates.forEach(({ cx: batchX, cy: batchY, cz: batchZ }) => {
+        const key = chunkKey(batchX, batchY, batchZ);
+        const token: LoadToken = { identity: Symbol(key) };
+        tokens.set(key, token);
+        this.loadTokens.set(key, token);
+      });
+      const batch = this.loadSnapshotBatchFromStore(coordinates, tokens).finally(() => {
+        coordinates.forEach(({ cx: batchX, cy: batchY, cz: batchZ }) => {
+          const key = chunkKey(batchX, batchY, batchZ);
+          if (this.loads.get(key) === batch) this.loads.delete(key);
+          if (this.loadTokens.get(key) === tokens.get(key)) this.loadTokens.delete(key);
+        });
+      });
+      coordinates.forEach(({ cx: batchX, cy: batchY, cz: batchZ }) =>
+        this.loads.set(chunkKey(batchX, batchY, batchZ), batch),
+      );
+      loads.add(batch);
+    }
     await Promise.all(loads);
   }
 
@@ -341,7 +391,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     Object.entries(result.codecs).forEach(([codec, count]) => {
       this.metricsValue.codecs[codec] = (this.metricsValue.codecs[codec] ?? 0) + count;
     });
-    snapshots.forEach((snapshot) => this.missing.delete(snapshot.key));
+    snapshots.forEach((snapshot) => this.invalidateSnapshot(snapshot.key));
   }
 
   async saveMetadata(player: [number, number, number]): Promise<void> {
@@ -379,6 +429,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   resetMetrics(): void {
     this.metricsValue = {
       idbGetCount: 0,
+      loadTransactionCount: 0,
       idbPutCount: 0,
       encodedChunkCount: 0,
       decodedChunkCount: 0,
@@ -390,10 +441,14 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
     this.worker.terminate();
     const error = new Error('Chunk persistence was disposed.');
     this.pending.forEach((pending) => pending.reject(error));
     this.pending.clear();
+    this.loads.clear();
+    this.loadTokens.clear();
   }
 }
 
