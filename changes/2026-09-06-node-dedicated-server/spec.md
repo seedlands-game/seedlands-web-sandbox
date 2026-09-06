@@ -4,6 +4,8 @@
 
 阅读入口：[方案概述](overview.md)；性能合同：[实验与归因方案](experiments.md)；协议选型：[消息、编解码与传输](network-selection.md)；远端环境：[部署与网络验收](remote-environment.md)；审核版本：[绑定清单](review-binding.md)。以下数值均为拟议合同或实验预算，不是实测收益。
 
+2026-09-07 补充：[协同计算上移不退化门禁](performance-guardrails.md)与[双口径工作量/预算](estimates.md)参与同一审核。工作区估算规则按用户明确要求同步落地，规则变更记录见[治理合同](../2026-09-07-change-cost-estimation/spec.md)；Node 正式实施仍待本合同审核。
+
 ## 一、背景与目标
 
 推进 [Living World A 线](../../docs/living-world-alignment.md)：先让现有 TypeScript 权威世界脱离浏览器常驻，再为未来 Agent 接入提供稳定的世界生命周期、命令和观察入口。首版完成浏览器本地世界、浏览器连接 Node 世界两条可玩旅程，并可区分宿主迁移、网络传输、Node 分项优化和最终组合收益。
@@ -44,6 +46,8 @@
 4. 可复现的 TS 宿主比较、线程池扩展、多进程计算、可选共享缓冲区和 I/O 调度实验；逐项结论、消融和最终组合。
 5. 保存与 Wasm 线的集成边界，复用输入语料和纯计算结果合同；本轮 TS 开关关闭其他语言后端。
 6. 用户补充的 CT105 `mcs` 真实远端测试环境：独立 HTTPS/WSS 端口、完整离线产物、CI 经 SSH 推送、可恢复部署与公网网络波动验收。
+7. 原集成架构中客户端协同的 canonical/出生点、Fluid、Logic/NPC 等服务端职责全部上移，建立贯通观测、不退化准出与退化修复闭环；不以常驻能力抵消已确认的性能退化。
+8. 传统 PD、AI 活跃工时/24h 墙钟、分模型 credits/API 成本、额度占比与 20% 缓冲预算；大型变更估算成为工作区 SDD 规则。本轮不创建 goal。
 
 ### 首版产品范围假设
 
@@ -80,6 +84,7 @@ flowchart LR
 - 权威固定在一个执行上下文，所有消息经有界 mailbox 入站。异步计算/I/O 期间 tick 继续；候选回到 mailbox 后校验，提交段不可跨 `await`。准备 Chunk 可以异步，恢复操作时重新验证前置版本。
 - 使用当前 physics/gameplay/fluid 频率与现有 scheduler 的追赶/过载语义；不因 Node 更快提高模拟 Hz。宿主使用单调时间；进程离线时间首版不补算，重启恢复存档世界时间并从新单调时钟继续。
 - 服务端自行生成 canonical 数据、安全出生点和生态，自行运行 Fluid 和算法 NPC。远端客户端只消费数据、构建 halo/mesh、处理 GPU、预测及界面；不上传 canonical/Fluid/Logic 作为真值。
+- 上移不能只证明断开浏览器还能运行；按[性能门禁](performance-guardrails.md)逐条审计原客户端回送路径，贯通排队、计算、提交和客户端可见时间。世界进展、帧时、碰撞等待等核心指标已确认退化则定位修复并复验，未解决不准出。
 - canonical-only 路径复用现有 `generate-canonical` 与 `find-safe-spawn`，不要复制 Headless 的不必要 meshing。此类接线/负载变化单独列 A/A 控制，不能记为 Node 宿主收益。
 - 对已编辑 Chunk、流体和碰撞区域传完整版本化数值数据；首版不依赖客户端重新生成 canonical 来省带宽。订阅由服务端根据玩家位置、视距上限及模拟活动窗口决定，客户端只能提出兴趣请求。
 
@@ -202,6 +207,10 @@ Node/P2 GUI 本地闭环后，按 [远端附件](remote-environment.md) 在 CT10
 
 9. **传输语义**：Given 大 Chunk 与实时输入并发、丢包或跨流乱序，When 新位姿先于相关世界提交抵达，Then 应用因果屏障且不丢可靠动作；过期 pose 可丢，一次性输入不重复。T2 连接失败时允许可见 WSS fallback，权限/版本拒绝仍失败。
 
+10. **计算上移**：Given 同 seed/trace/频率/资源预算的完整服务端工作，When 所有权威候选改由 Node 计算并与 streaming/保存并发，Then 无需客户端协同，NPC/Fluid 有效进展、首可玩/碰撞/帧时和队列保持不退化；已确认退化进入修复与同条件复验，不能仅记录负收益后交付。
+
+11. **估算**：Given 本 change 的阶段、模型/计费及采样假设，When 准备实施或未来创建 goal，Then 同时展示 PD 与 AI 连续时间/credits/API 成本/当前额度占比，未知映射明确标注；预算按保守剩余估计 ×120%，不能把 credits 填成 token 或自动扩大预算。
+
 ## 五、测试设计
 
 以下是实施前的预注册用例，不是已运行测试。当前用户只要求设计，故**未添加可执行测试、未取得实际 RED**；实现阶段必须先添加对应失败用例，记录预期 RED，再改生产代码。不可自动化语义已写 Given/When/Then，并在 UI 阶段补相同 change 的 Midscene YAML。
@@ -226,27 +235,39 @@ Vitest 的 Node 测试允许启动受控临时子进程和磁盘目录，验证�
 
 网络选型新增消息语义、C0/C1/C2 等价/异常输入、T0/T1/T2 真实浏览器、跨流依赖及 fallback 用例，路径与 N0–N4 探针见[网络附件](network-selection.md)。这些是本次范围内的前置选型证据，不是后继优化承诺；仍未取得实际 RED 或性能数据。
 
+计算迁移补充 `e2e/compute-migration.spec.ts` 与生产 trace/有效进展采样，细节见[性能门禁](performance-guardrails.md)。估算的单位/公式/链接按 Static 校验；阶段实际费用、工时与额度的来源及缺口独立记录，不新增镜像数字的产品测试。
+
 ## 六、准出条件与证据
 
-| 准出                                                   | 证据类型                                                                   | 当前结果                                                 |
-| ------------------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------- |
-| D0 设计可追溯、独立 worktree/分支、附件 hash 可复核    | Static / Manual supplement                                                 | 已建立；最终文档校验见交付快照                           |
-| A1 同一 TS 权威在 Node 常驻，可退出/恢复且无需浏览器   | Vitest / Build / Playwright-change                                         | 未实施                                                   |
-| A2 网络正确性、权限、顺序、背压及碰撞/世界基线一致     | Vitest / Playwright-change                                                 | 未实施                                                   |
-| A3 冻结检查点原子发布，硬 kill 不产生混合存档          | Vitest / Playwright-change；Manual supplement（设备范围）                  | 未实施；断电硬件验证 N/A，未承诺                         |
-| A4 双模式 GUI、连接配置、失败恢复和可见暂停语义        | Vitest / Playwright-change / Midscene                                      | 未实施                                                   |
-| A5 每项 Node feature 都有有效实验或有证据的停止结论    | Vitest / Playwright-change（性能采样）/ Static（结果关联）                 | 未实施；允许无性能收益                                   |
-| A6 宿主、传输、单项及最终组合归因完整                  | Playwright-change（性能采样）/ Static（报告与统计）                        | 未采样，见实验合同                                       |
-| A7 原有本地旅程与架构边界无回归                        | Static / Build / Playwright-baseline                                       | 本轮设计未复跑产品检查                                   |
-| A8 macOS 本机与 Linux Node + 真实 LAN 客户端可玩       | Build / Playwright-change / Manual supplement                              | 未执行；仅 loopback 不满足 LAN 准出                      |
-| A9 文档与可恢复交付                                    | Static                                                                     | 实施后更新 README、代码地图、Node 运行边界文档、交付快照 |
-| A10 CI 完整包从可信 main 推送 CT105，成功与回滚可验    | Vitest / Static / Build / Manual supplement                                | 未实施；实际 runner 网络仍待验证                         |
-| A11 公网 IPv6 预测、重连、网络波动与 MC 共存           | Playwright-change / Midscene / Manual supplement                           | 未执行；本机 SSH 成功不替代 CI/WAN E2E                   |
-| A12 消息语义、codec/transport 对照与采用结论、降级一致 | Vitest / Playwright-change / Midscene / Static / Build / Manual supplement | N0–N4 未运行；正式协议未定案                             |
+| 准出                                                           | 证据类型                                                                   | 当前结果                                                 |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------- |
+| D0 设计可追溯、独立 worktree/分支、附件 hash 可复核            | Static / Manual supplement                                                 | 已建立；最终文档校验见交付快照                           |
+| A1 同一 TS 权威在 Node 常驻，可退出/恢复且无需浏览器           | Vitest / Build / Playwright-change                                         | 未实施                                                   |
+| A2 网络正确性、权限、顺序、背压及碰撞/世界基线一致             | Vitest / Playwright-change                                                 | 未实施                                                   |
+| A3 冻结检查点原子发布，硬 kill 不产生混合存档                  | Vitest / Playwright-change；Manual supplement（设备范围）                  | 未实施；断电硬件验证 N/A，未承诺                         |
+| A4 双模式 GUI、连接配置、失败恢复和可见暂停语义                | Vitest / Playwright-change / Midscene                                      | 未实施                                                   |
+| A5 每项 Node feature 都有有效实验或有证据的停止结论            | Vitest / Playwright-change（性能采样）/ Static（结果关联）                 | 未实施；允许无性能收益                                   |
+| A6 宿主、传输、单项及最终组合归因完整                          | Playwright-change（性能采样）/ Static（报告与统计）                        | 未采样，见实验合同                                       |
+| A7 原有本地旅程与架构边界无回归                                | Static / Build / Playwright-baseline                                       | 本轮设计未复跑产品检查                                   |
+| A8 macOS 本机与 Linux Node + 真实 LAN 客户端可玩               | Build / Playwright-change / Manual supplement                              | 未执行；仅 loopback 不满足 LAN 准出                      |
+| A9 文档与可恢复交付                                            | Static                                                                     | 实施后更新 README、代码地图、Node 运行边界文档、交付快照 |
+| A10 CI 完整包从可信 main 推送 CT105，成功与回滚可验            | Vitest / Static / Build / Manual supplement                                | 未实施；实际 runner 网络仍待验证                         |
+| A11 公网 IPv6 预测、重连、网络波动与 MC 共存                   | Playwright-change / Midscene / Manual supplement                           | 未执行；本机 SSH 成功不替代 CI/WAN E2E                   |
+| A12 消息语义、codec/transport 对照与采用结论、降级一致         | Vitest / Playwright-change / Midscene / Static / Build / Manual supplement | N0–N4 未运行；正式协议未定案                             |
+| A13 计算上移全覆盖、受控核心性能不退化、WAN SLO 与退化修复复验 | Vitest / Playwright-change / Static / Build / Midscene / Manual supplement | 未执行，不能以其他项更快抵消核心退化                     |
+| A14 双口径估算可复核、阶段重估与交付实际回填                   | Static / Manual supplement                                                 | 初版估算已给出；实际消费/工时与阶段回填待实施            |
 
 ## 七、任务与当前状态
 
-当前完成：进度恢复、源码盘点、新 worktree 与分支、TS 架构、GUI 行为、实验合同、CT105 只读拓扑/端口核验和远端部署设计；精确审核入口随新附件更新。以下是审核后的实施阶段，每阶段交付一条可验证闭环，不能以模块数量代替完成态。
+D0 设计校验通过不等于 A13/A14 产品交付完成。
+
+### 工作量与预算
+
+详见[估算附件](estimates.md)：传统 43–68 PD；单个活动 agent 连续路径 91–153 h，正常约 122 h；正常 Astra 情景约 3825 credits / API 等价 USD 153。保守采用更多返工和缓存失效后再加 20%：建议管理预算 13,860 credits，或文本 API USD 660，184 h 连续时间；工具/外部设施未知费项单列。这是偏低置信度的剩余实施规划，不是实测或账户扣款承诺。
+
+当前额度快照主窗口剩余 78%，本 change 占比因缺同量纲分母为 unknown。当前 goal 工具只支持 token 预算，创建前另校准单位，不把 credits 数直接传入；本轮没有创建 goal。前 8 个工作单元先验证成本假设，后续按已耗与剩余重估；A13 必要修复纳入工作量，不能为守预算放宽性能门槛。
+
+当前完成：进度恢复、源码盘点、新 worktree 与分支、TS 架构、GUI 行为、实验合同、CT105 只读拓扑/端口核验、远端/网络选型设计、计算上移不退化门禁及双口径估算；精确审核入口随新附件更新。以下是审核后的实施阶段，每阶段交付一条可验证闭环，不能以模块数量代替完成态。P0 加入职责清单/计量校准，P1–P4 持续执行 A13，所有阶段结束回填 A14；发现退化优先修复并重估，不能拖到最后仅写限制。
 
 | 阶段              | 可独立验证的完成态                                                                         | 依赖                                                 |
 | ----------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
@@ -263,8 +284,8 @@ P1 可先用 T0/C0 标注参考的受控入口验证接线，公共消息先明�
 
 ## 八、交付快照
 
-本次仅新增 `changes/2026-09-06-node-dedicated-server/` 下设计文档；生产、测试、依赖及原 worktree 未改动。文档中的拟议路径/命令不是已存在产品能力。
+本次更新 Node change 设计文档，并按用户要求更新 AGENTS/开发治理/协作路由，新增 `docs/change-estimation.md` 与独立治理合同；生产、测试、依赖及原 worktree 未改动。文档中的拟议路径/命令不是已存在产品能力。
 
-长期 docs baseline 本轮不改：治理已在来源分支沉淀，Node 尚处于待审核方案；实现后再以已验证事实更新代码地图、目录规范、README 与 Living World 状态，避免把设计当现状。Wasm 方案按 `36a0022` 只读参考，尚未集成。
+长期 docs baseline 本轮仅更新通用工作量/预算规则，因为用户明确要求用于未来大规模 change；Node 尚处于待审核方案，实现后再以已验证事实更新代码地图、目录规范、README 与 Living World 状态，避免把设计当现状。Wasm 方案按 `36a0022` 只读参考，尚未集成。
 
-文档格式、相对链接、附件 hash 与差异检查的实际结果记录在 `review-binding.md`。当前无实际 RED/GREEN、Node 性能、浏览器或设备验收结果，功能准出 A1–A12 保持未完成。2026-09-07 修订将 WS/JSON 降为参考，新增网络前置选型，旧审核 hash 失效。设计本地提交后，功能分支可供后续继续；已按用户要求同步 main，上轮追加远端环境只读核验；本轮不探测或修改远端，不 push、不建产品完成 PR、不合入 Wasm 实验分支。
+文档格式、相对链接、附件 hash 与差异检查的实际结果记录在 `review-binding.md`。当前无实际 RED/GREEN、Node 性能、浏览器或设备验收结果，A1–A14 保持未完成或部分完成并按上述区分。2026-09-07 新增不退化与预算合同，旧审核 hash 失效。设计本地提交后，功能分支可供后续继续；已按用户要求同步 main，上轮追加远端环境只读核验；本轮不探测或修改远端，不 push、不建产品完成 PR、不合入 Wasm 实验分支。
