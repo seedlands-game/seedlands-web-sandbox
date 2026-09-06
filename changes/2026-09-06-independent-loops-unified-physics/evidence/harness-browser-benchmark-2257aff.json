@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 2,
+  "runId": "826182ad-2c94-4118-a8e9-acb6f0a8aa8c",
+  "sourceSha": "2257affb830046e638a99b9502e77d0866eb1bf1",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "browser": "chromium"
+  },
+  "browserBenchmark": {
+    "status": "PASS",
+    "initialWorldReadyMs": 2593.86
+  }
+}

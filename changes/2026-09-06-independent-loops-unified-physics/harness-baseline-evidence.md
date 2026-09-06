@@ -23,3 +23,14 @@
 - `evidence/harness-browser-benchmark-643b01f.json`
 
 控制台原始日志位于 `/tmp/seedlands-harness-e2e-643b01f.log`，没有失败或重试。
+
+## A7 最终候选复验
+
+- 源码：`2257affb830046e638a99b9502e77d0866eb1bf1`。
+- 命令：`pnpm harness:e2e`，单 worker，零重试。
+- 结果：9 项全部通过，用时 24.3 秒；六个核心阶段全部为 `PASS`。
+- Run ID：`826182ad-2c94-4118-a8e9-acb6f0a8aa8c`。
+- Benchmark：`PASS`，`initialWorldReadyMs = 2593.86`。该数值仅为本机环境样本，不替代 A9 独立性能准出。
+- UI 诊断：`staleUpdateCount = 0`、`coalescedUpdateCount = 44`、`domCommitCount = 6`；受控世界有 5 个权威实体和 4 个已呈现实例。
+
+本轮结构化结果保存在 `evidence/harness-browser-e2e-2257aff.json` 与 `evidence/harness-browser-benchmark-2257aff.json`，控制台原始日志为 `/tmp/seedlands-2257aff-harness-e2e.log`，退出码为 0。生产代码自 `2257aff` 起未发生变化。
