@@ -259,6 +259,8 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     this.missing.delete(key);
     this.cacheTokens.delete(key);
     if (hasResult) this.loadRegistry.consumeExact(key);
+    else if (this.loadRegistry.consumeInvalidatedExact(key))
+      throw new Error(`Persistence load result was superseded by a save for ${key}.`);
     return snapshot ? cloneSnapshot(snapshot) : null;
   }
 
@@ -455,7 +457,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       const token = this.cacheTokens.get(key);
       if (token && token.generation <= saveFence) {
         this.clearCachedSnapshot(key);
-        this.loadRegistry.failExact(key);
+        this.loadRegistry.invalidateExact(key);
       }
     });
     this.loadRegistry.applySaveFence(keys, saveFence).forEach((key) => this.loads.delete(key));

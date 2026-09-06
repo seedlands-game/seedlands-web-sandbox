@@ -10,10 +10,12 @@ export class BrowserPersistenceLoadRegistry {
   private generation = 0;
   private readonly currentLoads = new Map<string, BrowserPersistenceLoadToken>();
   private readonly exactClaims = new Set<string>();
+  private readonly invalidatedExactClaims = new Set<string>();
   private readonly neighborhoods = new Map<string, BrowserPersistenceNeighborhoodLease>();
   private readonly neighborhoodCounts = new Map<string, number>();
 
   claimExact(key: string): void {
+    this.invalidatedExactClaims.delete(key);
     this.exactClaims.add(key);
   }
 
@@ -23,6 +25,16 @@ export class BrowserPersistenceLoadRegistry {
 
   failExact(key: string): void {
     this.exactClaims.delete(key);
+    this.invalidatedExactClaims.delete(key);
+  }
+
+  invalidateExact(key: string): void {
+    if (!this.exactClaims.delete(key)) return;
+    this.invalidatedExactClaims.add(key);
+  }
+
+  consumeInvalidatedExact(key: string): boolean {
+    return this.invalidatedExactClaims.delete(key);
   }
 
   beginNeighborhood(centerKey: string, keys: readonly string[]): BrowserPersistenceNeighborhoodLease {
@@ -94,6 +106,7 @@ export class BrowserPersistenceLoadRegistry {
   dispose(): void {
     this.currentLoads.clear();
     this.exactClaims.clear();
+    this.invalidatedExactClaims.clear();
     this.neighborhoods.clear();
     this.neighborhoodCounts.clear();
   }

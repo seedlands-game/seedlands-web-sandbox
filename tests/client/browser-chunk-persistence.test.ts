@@ -308,7 +308,7 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
 
     await persistence.ensureSnapshot(0, 0, 0);
     await persistence.saveSnapshots([snapshot('save-cache', 2)]);
-    expect(persistence.loadSnapshot(chunkKey(0, 0, 0))).toBeNull();
+    expect(() => persistence.loadSnapshot(chunkKey(0, 0, 0))).toThrow('superseded by a save');
     worker.singleLoadRevision = 2;
     await persistence.ensureSnapshot(0, 0, 0);
     expect(persistence.loadSnapshot(chunkKey(0, 0, 0))?.revision).toBe(2);
@@ -357,7 +357,33 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     worker.resolveDeferredSave(0, 2);
     await saving;
 
-    expect(persistence.loadSnapshot(chunkKey(0, 0, 0))).toBeNull();
+    expect(() => persistence.loadSnapshot(chunkKey(0, 0, 0))).toThrow('superseded by a save');
+    persistence.dispose();
+  });
+
+  it('clears a save-invalidated cache-hit claim before a released neighborhood completes late', async () => {
+    const worker = new FakePersistenceWorker();
+    worker.batchMode = 'found';
+    const persistence = await open(worker, 'save-invalidated-claim');
+    await persistence.ensureNeighborhood(0, 1, -2);
+    await persistence.ensureSnapshot(0, 1, -2);
+    await persistence.saveSnapshots([
+      {
+        ...snapshot('save-invalidated-claim', 2),
+        key: chunkKey(0, 1, -2),
+        cy: 1,
+        cz: -2,
+      },
+    ]);
+    expect(() => persistence.loadSnapshot(chunkKey(0, 1, -2))).toThrow('superseded by a save');
+    persistence.releaseNeighborhood(0, 1, -2);
+
+    worker.batchMode = 'deferred';
+    const late = persistence.ensureNeighborhood(0, 1, -2);
+    persistence.releaseNeighborhood(0, 1, -2);
+    worker.resolveDeferredBatch(0, 'found');
+    await expect(late).rejects.toThrow('canceled');
+    expect(persistence.residentSnapshotCount).toBe(0);
     persistence.dispose();
   });
 
