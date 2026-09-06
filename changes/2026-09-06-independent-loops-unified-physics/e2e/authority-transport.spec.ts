@@ -119,7 +119,6 @@ test('150ms延迟下碰撞revision变化会重同步预测且不穿墙', async (
       Math.hypot(current.serverPlayerVelocity[0], current.serverPlayerVelocity[2]) < 0.05,
   );
   const correctedResyncs = corrected.prediction.resetCounts['authority-resync'] ?? 0;
-  expect(corrected.prediction.pendingFrames).toBeGreaterThan(0);
   expect(corrected.prediction.pendingFrames).toBeLessThan(64);
   await page.keyboard.up('KeyW');
 
@@ -137,5 +136,6 @@ test('150ms延迟下碰撞revision变化会重同步预测且不穿墙', async (
   const stabilized = await snapshot(page);
   if (!stabilized) throw new Error('碰撞校正稳定期结束后没有 Harness 快照。');
   expect(stabilized.prediction.resetCounts['authority-resync'] ?? 0).toBe(correctedResyncs);
+  expect(stabilized.prediction.pendingFrames).toBeGreaterThan(0);
   expect(stabilized.prediction.pendingFrames).toBeLessThan(64);
 });
