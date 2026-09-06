@@ -339,6 +339,23 @@ describe('Authority 实体统一物理接线', () => {
     expect(ordinaryStep.diagnostics?.recoveryResults).toHaveLength(3);
   });
 
+  it('同一身体的短外部恢复不会覆盖更强且范围更大的旧档恢复', () => {
+    const server = new EntityPhysicsServer([entity('player', 'player', [0.5, 0, 0.5])]);
+    const session = createSession(server, {
+      voxelAt: (x, y, z) => (x >= -3 && x <= 3 && y >= -3 && y <= 3 && z >= -3 && z <= 3 ? Voxel.Stone : Voxel.Air),
+    });
+    expect(session.requestBodyRecovery('player', 'legacy-restore', 8)).toBe(true);
+    expect(session.requestBodyRecovery('player', 'external-geometry-change', 2)).toBe(true);
+
+    const recovered = session.wake(1_000 / 60);
+
+    expect(recovered.diagnostics?.recoveryResults.at(-1)).toMatchObject({
+      entityId: 'player',
+      reason: 'legacy-restore',
+      status: 'recovered',
+    });
+  });
+
   it('未知区域继续作为阻挡并仅发出异步加载请求', () => {
     const requests: string[] = [];
     const server = new EntityPhysicsServer([

@@ -69,6 +69,7 @@ const MAX_PICKUP_TARGET_CANDIDATES = 8;
 const MAX_TRACKED_PICKUP_CURSORS = 512;
 const PICKUP_CURSOR_WRAP = 0x80000000;
 const ITEM_PICKUP_RETRY_TICKS = 15;
+const RECOVERY_PRIORITY = { 'external-geometry-change': 0, initialization: 1, 'legacy-restore': 2 } as const;
 
 const distanceSquared = (left: readonly number[], right: readonly number[]): number =>
   left.reduce((sum, value, index) => sum + (value - right[index]) ** 2, 0);
@@ -128,8 +129,12 @@ export class AuthoritySession {
       throw new TypeError('身体恢复请求必须包含实体和受支持的原因。');
     if (!Number.isFinite(maxDistance) || maxDistance < 0 || maxDistance > MAX_RECOVERY_DISTANCE)
       throw new RangeError(`身体恢复距离必须位于 0..${MAX_RECOVERY_DISTANCE}。`);
-    if (!this.recoveryQueue.has(entityId) && this.recoveryQueue.size >= MAX_RECOVERY_QUEUE) return false;
-    this.recoveryQueue.set(entityId, { reason, maxDistance });
+    const existing = this.recoveryQueue.get(entityId);
+    if (!existing && this.recoveryQueue.size >= MAX_RECOVERY_QUEUE) return false;
+    this.recoveryQueue.set(entityId, {
+      reason: existing && RECOVERY_PRIORITY[existing.reason] >= RECOVERY_PRIORITY[reason] ? existing.reason : reason,
+      maxDistance: Math.max(existing?.maxDistance ?? 0, maxDistance),
+    });
     return true;
   }
 
