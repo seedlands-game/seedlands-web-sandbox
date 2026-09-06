@@ -2,6 +2,8 @@
 
 本附件扩展 [Node 正式方案](spec.md)：Node 可玩闭环完成后，在现有 MC 宿主上部署隔离的 Seedlands 测试服务，并由 GitHub CI 推送更新产物。**本轮仅完成现场只读核验与方案修订，没有安装服务、修改网络、配置 GitHub secrets 或执行部署。** 新附件纳入精确 hash 审核，原审核值失效。
 
+2026-09-07 修订：下列现场事实来自上一轮只读核验，本轮未重新探测。HTTPS/WSS 改为参考与兼容入口，正式游戏传输等待[网络选型 N0–N4](network-selection.md)，不能把部署方便当作已经选定 TCP 的依据。
+
 ## 一、来源、当前事实与待验证项
 
 已使用 `read_thread` 读取「Hermes Agent 开发机运维」（`019f3d40-8c34-7501-9808-8188a14998bb`），取得 PVE/SSH 跳板及权限边界背景；MC/DDNS 方案以用户本轮描述和下列现场结果为依据，不将历史拓扑视为当前状态。
@@ -20,13 +22,15 @@
 
 待落地前确认：实际 runner 的 IPv6 egress/SSH 认证、目标 SSH 主机公钥、有效 TLS 证书与续期路径、精确端口、最小部署账号和服务账号、服务资源预算、应用检查点/PBS 备份、真实客户端所在网络。服务器访问 GitHub 不可靠是用户提供的部署约束，本轮没有主动访问外站验证或改动其代理。
 
-## 二、同一台宿主，独立服务与一个公开端口
+## 二、同一台宿主，独立服务与候选公开端口
 
 拟使用 `https://mc.bieji.fun:8443/` 和同源 `wss://mc.bieji.fun:8443/session`，直接走 AAAA 到 CT105。域名和端口只是提案；首次实施核验后写入部署配置，冲突时选择另一空闲高端口并更新证据。
 
 沿用现有 DNS-only 直连思路，不改变 MC 记录、不切换 Cloudflare 代理状态、不改 DDNS 更新范围。DNS 更新本身不开放路由/防火墙，也不提供 HTTPS 证书。若未来使用 Cloudflare 代理，其端口和连接路径需重新验证并单独标记代理测试组；普通 DNS 代理不能被当作任意 SSH/FTP 中继。[Cloudflare 端口说明](https://developers.cloudflare.com/fundamentals/reference/network-ports/)、[代理限制](https://developers.cloudflare.com/dns/proxy-status/limitations/)
 
-首版在 Node HTTPS 入口终止 TLS 并挂载 WebSocket，证书由宿主既有或单独配置的证书流程提供，服务只读证书；不把 Cloudflare token 塞入游戏进程。没有有效证书时保留为待配置，不通过关闭浏览器校验或自动退回明文解决。证书覆盖 `mc.bieji.fun`，端口不改变证书域名匹配。
+T0 参考在 Node HTTPS 入口终止 TLS 并挂载 WebSocket，证书由宿主既有或单独配置的证书流程提供，服务只读证书；不把 Cloudflare token 塞入游戏进程。没有有效证书时保留为待配置，不通过关闭浏览器校验或自动退回明文解决。证书覆盖 `mc.bieji.fun`，端口不改变证书域名匹配。
+
+T2 WebTransport HTTP/3 入选时，同数字 8443 的 UDP 是另一条监听/防火墙规则，须独立核验公网 UDP、实际 datagram 和可靠流能力。Node HTTPS + `ws` 不提供这条路径；具体 HTTP/3 adapter/可能的 native 或 sidecar、资源限制、证书加载、离线依赖、启动/停止/回滚都要随采用结论补全，不预先安装。WSS 兼容入口保留；部署与外部 smoke 同时验真默认传输和 fallback，强制 T2 测试不能静默落到 WSS 后报告成功。
 
 同端口提供本次 release 配套的测试前端及静态资源，使用独立的 `/` base 构建，避免 GitHub Pages 的仓库路径 base 被直接挪用。只服务固定静态资源目录，拒绝路径穿越和目录浏览，不能访问 release 外的文件。现有 GitHub Pages 可继续连接该服务，但同源入口是版本配套的真实远端验收入口；握手仍校验规则版本，不能仅因同源而信任玩家。
 
@@ -134,5 +138,7 @@ CI runner 若仅能经跳板上传，公网 smoke/浏览器验收需要另一个
 | R06 实际 CI→远端闭环与 MC 共存                   | Build / Playwright-change / Manual supplement / Static（版本记录） | 未执行；必须成功与失败回滚各一次                                |
 
 落地顺序：Node/P2 GUI 本地闭环 → R01 网络/证书/容量与有限初始化 → 同一离线包手动受控部署并验回滚 → 接 CI 推送与短 smoke → WAN 浏览器/自然波动证据 → 维护长期测试环境。F1–F4 性能矩阵可在受控设备继续，不以等待全部优化完成阻塞首个远端验证。
+
+以上是正式 P2R 交付顺序。N4 所需最小可玩/WAN 选型探针可以先于正式 GUI/自动部署执行，避免循环依赖；探针仍需隔离与目标准备，不改变共享 MC 网卡。最终 R01/R04/R06 必须包含选定传输、UDP（若采用）与 WSS fallback 的真实证据，当前均未完成。
 
 实施完成后将稳定的目标、部署/恢复入口和网络限制写入 repo `docs/` 并在 AGENTS 按需暴露指针；不要复制含敏感信息的全局运维 skill 或把动态 IPv6 当长期基线。当前本附件只记录已核验的事实、决策与验收约定。

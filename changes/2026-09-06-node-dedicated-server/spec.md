@@ -2,7 +2,7 @@
 
 **状态：方案完成，待精确版本审核；Breaking flow。当前只交付设计与独立 baseline，不修改生产代码。**
 
-阅读入口：[方案概述](overview.md)；性能合同：[实验与归因方案](experiments.md)；远端环境：[部署与网络验收](remote-environment.md)；审核版本：[绑定清单](review-binding.md)。以下数值均为拟议合同或实验预算，不是实测收益。
+阅读入口：[方案概述](overview.md)；性能合同：[实验与归因方案](experiments.md)；协议选型：[消息、编解码与传输](network-selection.md)；远端环境：[部署与网络验收](remote-environment.md)；审核版本：[绑定清单](review-binding.md)。以下数值均为拟议合同或实验预算，不是实测收益。
 
 ## 一、背景与目标
 
@@ -61,7 +61,7 @@
 flowchart LR
   UI[浏览器 UI / 输入 / 预测 / Chunk Mesh] --> Port[客户端会话接口]
   Port --> Local[浏览器 Integrated 宿主]
-  Port --> WS[WebSocket 会话]
+  Port --> WS[网络会话：传输待对照选型]
   WS --> Node[Node 接入与生命周期]
   Local --> A[同一 AuthorityRuntime / GameServer]
   Node --> A
@@ -95,7 +95,7 @@ flowchart LR
 | `src/client/shell/`、`src/app/ui/`                                   | 连接状态、非秘密偏好，Svelte 连接表单与反馈                                                       |
 | `src/app/` 既有组合入口                                              | 根据运行选项装配浏览器宿主或远端连接；远端只启动客户端计算资源                                    |
 
-不新增泛化的 engine/shared/common。仅把两个真实消费者需要的 DTO 从 `worker/authority-worker-protocol.ts` 定向提取，Worker 内部消息继续留在 Worker 适配。传输接口不再强制 `MessageEvent`/`Transferable`：以 `send`、`subscribe`、`close`、状态/错误及可选 owned-buffer 语义表达；浏览器 adapter 内部使用 `postMessage`，网络 adapter 负责编解码。
+不新增泛化的 engine/shared/common。仅把两个真实消费者需要的 DTO 从 `worker/authority-worker-protocol.ts` 定向提取，Worker 内部消息继续留在 Worker 适配。传输接口不再强制 `MessageEvent`/`Transferable`：以消息类别、可靠性、期限、背压/取消和协商能力表达发送/订阅/关闭，不能预设全局可靠 FIFO；浏览器 adapter 内部使用 `postMessage`，网络 adapter 负责编解码。先盘点公共视图的消费者与因果依赖，再提取，不能原样发送整个 Worker 快照。
 
 客户端高层会话暴露连接、输入、游戏动作、世界订阅、回执和视图；宿主控制如暂停、停止、保存由能力和模式决定。不能让网络 `close()` 复用本地 `terminate()` 去关闭服务器。
 
@@ -103,7 +103,7 @@ flowchart LR
 
 ### 3.3 Node 产品入口与资源基线
 
-构建为 Node 22 系列已支持的 ESM JavaScript（具体补丁版本随 lock/验证记录冻结），不依赖 Vite dev server、浏览器、TypeScript 运行时加载或原生 addon。浏览器仍是独立静态产物。新增构建/启动命令只有实施时加入 `package.json` 后才可宣称可运行；本设计不提供虚假现有命令。
+构建为 Node 22 系列已支持的 ESM JavaScript（具体补丁版本随 lock/验证记录冻结），不依赖 Vite dev server、浏览器或 TypeScript 运行时加载。TS 宿主与 WSS 参考组不依赖原生 addon；WebTransport 候选如需要原生适配/sidecar，必须在选型中验证版本、分发与运维代价并更新采用合同，不能假设当前 Node 具有可用的内置 HTTP/3 服务端。浏览器仍是独立静态产物。新增构建/启动命令只有实施时加入 `package.json` 后才可宣称可运行；本设计不提供虚假现有命令。
 
 默认采用与浏览器相同职责的常驻执行 lane：一个 Authority、一个 Logic、一个 Fluid、一个 general、一个 persistence。Node 主上下文负责轻量网络和管理；计算不逐请求创建线程。客户端 mesh 执行资源另计。`inline` 保留为无并发参考，生产默认先使用等价 lane 数，不自动扩满核心。浏览器原版通用计算还混有 mesh，标准化后的角色成本见实验合同。
 
@@ -113,15 +113,17 @@ flowchart LR
 
 ### 3.4 网络与权限合同
 
-采用浏览器原生 WebSocket，Node 服务端使用 `ws`；锁定实际安装版本并验证 Node 最低版本。首版关闭 `permessage-deflate`，把压缩作为另一个后续变量，避免默认引入 CPU/内存开销。[ws 官方说明](https://github.com/websockets/ws)
+**尚未选定正式 transport 或 codec。** 浏览器 WebSocket + Node `ws` 只是 T0 参考；JSON 元数据 + 数值块只是 C0 参考。按[网络选型附件](network-selection.md)先定义消息可靠性/期限，再对照 C0/C1 专用二进制/C2 Protobuf，以及 T0/T1 分离大块流量/T2 WebTransport HTTP/3/QUIC。WebRTC DataChannel 先做架构成本审计，必要时补探针。N4 前不冻结 wire v1，不能把此项延后到 Node feature 全完成。参考组关闭 `permessage-deflate`；压缩作为独立变量测量 CPU、体积与完整应用成本。[ws 官方说明](https://github.com/websockets/ws)
+
+高频位姿、持续输入与可靠事务/库存/世界提交分开，跨流用 commit/Chunk revision 建立因果屏障；一次性跳跃边沿不允许被 latest-state 合并丢失。允许丢弃的消息必须独立可解或依赖已确认基线，datagram 缺基线时显式恢复；不能只把已有混合 snapshot 换成 UDP。频率、投影、delta、量化、压缩、codec 与 transport 分轴归因。
 
 **公开消息采用 allowlist，禁止照搬整个 AuthorityRequest。** 网络只接受握手、玩家输入、玩家 gameplay action、受限查询/兴趣、心跳、回执查询、检查点请求和断开。检查点请求只请求保存当前权威状态，限每 5 秒一次并合并重复请求，不能传入存档数据或路径。`start-authority`、暂停世界、任意 world-edit、上传生成数据、set-player-position、Fluid/Logic 结果、调时间、dispose、带自报 capabilities 的 server-command 均不得进入玩家网络入口。管理命令只经本机管理入口，复用现有 `ServerCommandExecutor`，不开放远程任意代码执行。
 
-服务启动配置 world id、seed、generatorVersion、监听地址、端口、允许的 Origin、口令文件路径、数据目录和资源上限；默认 loopback。LAN/远端监听必须显式配置来源及认证，GUI 不能重设世界 seed、覆盖存档或配置线程池。访问口令在握手首条受限消息中提供，不放 URL、日志或浏览器永久存储；5 秒内未认证即断开。接入层绑定 player/issuer/capabilities，忽略客户端自报权限。部署在非 loopback 时使用 WSS（可由已有 TLS 入口终止）；HTTPS 页面发现 `ws://` 时在连接前提示改用 `wss://`，不承诺浏览器会允许混合内容。
+服务启动配置 world id、seed、generatorVersion、监听地址、端口、允许的 Origin、口令文件路径、数据目录和资源上限；默认 loopback。LAN/远端监听必须显式配置来源及认证，GUI 不能重设世界 seed、覆盖存档或配置线程池。访问口令在握手首条受限可靠消息中提供，不放 URL、日志或浏览器永久存储；5 秒内未认证即断开，认证前不接受其他流/datagram 的游戏动作。接入层绑定 player/issuer/capabilities，忽略客户端自报权限。所有非 loopback 入口使用有效 TLS；T0 使用 WSS，T2 使用 HTTPS/HTTP3 的安全连接，Origin 和身份门禁一致。HTTPS 页面发现 `ws://` 时在连接前提示改用 `wss://`，不承诺浏览器会允许混合内容。
 
 握手协议包含 `wireVersion`、`gameProtocolVersion`、客户端 build id、world id；服务器返回持久 world id、每次进程启动随机 `serverEpoch`、连接 `sessionId`、`playerId`、seed/generator/content/physics/fluid 版本、频率、能力和大小限制。wire/游戏/世界规则版本不兼容明确拒绝；不同 build id 只在契约兼容时允许。客户端只在收到完整基线并校验成功后进入 playing。
 
-首版 frame 是有界二进制封套：固定 magic/version、metadata 长度、payload 长度；metadata 用 UTF-8 JSON，数值块明确类型、元素数、偏移、长度和 little-endian。优先复用已存在 Chunk codec 的经验证格式；原始 TypedArray 也必须有精确 schema，不能 `JSON.stringify(ArrayBuffer)` 或使用不可移植的 V8 序列化。metadata ≤64 KiB，单 frame ≤1 MiB，单次大型基线用 transfer id 和页序分块，总在途 ≤16 MiB；越界、溢出、重叠、NaN/Infinity、未知类型在分配大型内存和提交前拒绝。首次基线按批次可取消，不一次缓存整世界。
+C0 参考的应用消息采用有界二进制封套：固定 magic/version、metadata 长度、payload 长度；metadata 用 UTF-8 JSON，数值块明确类型、元素数、偏移、长度和 little-endian。优先复用已存在 Chunk codec 的经验证格式；原始 TypedArray 也必须有精确 schema，不能 `JSON.stringify(ArrayBuffer)` 或使用不可移植的 V8 序列化。参考预算 metadata ≤64 KiB，单条可靠消息 ≤1 MiB，单次大型基线用 transfer id 和页序分块，总在途 ≤16 MiB；这不是 IP packet/datagram 的大小承诺。T2 小消息遵守实际协商的 datagram 上限，大对象走可靠流。所有候选在大型分配和提交前拒绝越界、溢出、重叠、非法数值/类型，并限制解压后资源。首次基线按批次可取消，不一次缓存整世界。最终布局由 N2/N4 数据决定。
 
 入站控制默认 120 条/秒、突发 240 条，动作另限 20 条/秒，排队最多 256 条；单次 interest 请求最多 256 key，长期订阅由服务端按当前画质视距和 halo 计算，服从既有 canonical 驻留硬上限 2,048，而不是把目标驻留数 256 错当渲染范围上限。流体/物理活动范围由服务端规则决定，不能由任意客户端 key 列表扩大。限制可由运营配置向下收紧；增大属于成本变更，要记录并复验。
 
@@ -130,6 +132,7 @@ flowchart LR
 ### 3.5 顺序、重连、预测与故障
 
 - `serverEpoch` 识别权威启动代次，`sessionId` 识别当前连接；所有回复/分片携带这两个值、request id 及适用的 commit/Chunk revision。旧连接迟到消息全部作废。
+- 若 T2 入选，有界能力探测失败可退到 WSS；认证/版本拒绝不可借降级绕过。运行中换传输必须关闭旧写通道、切换连接代次并 resync；降级可见且不创建本地世界，强制 QUIC 的性能样本不得暗中采用 WSS。
 - 同一进程内，认证后的重连凭证可在 30 秒内恢复同一玩家租约与命令流。复用原 `issuer + stream + sequence` 去重及有界回执缓存，回执超出保留窗口返回 `OUTCOME_UNKNOWN`；不会重新执行未知结果的 craft/place 等动作。
 - 新进程恢复时生成新 epoch，不声称跨重启 exactly-once。客户端清空预测/碰撞/请求缓存，完整 resync；未确认动作显示结果未知并读取权威状态，不自动重发。
 - 已执行动作回执区分 `executedCommitSequence` 与 `durableCommitSequence`。执行成功不等于已落盘，避免把实时回执当作崩溃后不丢数据保证。
@@ -183,6 +186,8 @@ UI 使用现有 Svelte 组件、样式 token 和焦点管理；不把线程数�
 
 Node/P2 GUI 本地闭环后，按 [远端附件](remote-environment.md) 在 CT105 使用独立账号、目录和拟议 8443 端口，保留 MC/MCSManager/ddns-go。CI 从可信 main 的成功运行取同 SHA 离线产物，经已验证的 SSH 路径上传，目标不依赖 GitHub 出网。部署切换要有一致检查点、持久状态和失败恢复；外部 TLS/WSS/版本/基线验证通过才报告成功。当前只读已确认 MC 为 LXC CT105、AAAA 匹配且 SSH 从本机可达，CI IPv6/TLS/账号尚未验证。
 
+以上 HTTPS/WSS 是参考与兼容入口；T2 入选需额外验证 UDP/HTTP3、独立监听/防火墙和完整离线组件。SSH 可达不证明游戏 UDP 可达。N4 的 WAN 探针可以先于正式部署交付，最终 P2R 必须验证选定传输及 fallback。
+
 ## 四、可验证行为
 
 1. **常驻**：Given 一个已启动 Node 世界，When 浏览器进入、打开菜单、隐藏、断连，Then 世界 tick 与允许的 NPC/流体窗口继续推进，中性输入在超时内生效；本地模式仍遵守既有暂停行为。
@@ -194,6 +199,8 @@ Node/P2 GUI 本地闭环后，按 [远端附件](remote-environment.md) 在 CT10
 7. **界面**：Given 两种模式或一次连接失败，When 操作启动、取消、重连、退出与切换，Then 文案与存档归属明确，没有自动转成本地世界，没有泄漏口令或残留输入。
 
 8. **远端部署**：Given 同 SHA 的 CI 产物，When 上传中断、激活失败、runner 失联或旧 run 迟到，Then 旧服务不被残包替换，切换事务可恢复，未验真的发布不标成功；MC 服务与存档保持隔离。
+
+9. **传输语义**：Given 大 Chunk 与实时输入并发、丢包或跨流乱序，When 新位姿先于相关世界提交抵达，Then 应用因果屏障且不丢可靠动作；过期 pose 可丢，一次性输入不重复。T2 连接失败时允许可见 WSS fallback，权限/版本拒绝仍失败。
 
 ## 五、测试设计
 
@@ -217,38 +224,42 @@ Vitest 的 Node 测试允许启动受控临时子进程和磁盘目录，验证�
 
 远端新增用例 R01–R06、首次现场配置与 WAN 证据边界见 [远端附件](remote-environment.md)，同样先定义 RED，不提前修改 workflow 或服务器。
 
+网络选型新增消息语义、C0/C1/C2 等价/异常输入、T0/T1/T2 真实浏览器、跨流依赖及 fallback 用例，路径与 N0–N4 探针见[网络附件](network-selection.md)。这些是本次范围内的前置选型证据，不是后继优化承诺；仍未取得实际 RED 或性能数据。
+
 ## 六、准出条件与证据
 
-| 准出                                                 | 证据类型                                                   | 当前结果                                                 |
-| ---------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
-| D0 设计可追溯、独立 worktree/分支、附件 hash 可复核  | Static / Manual supplement                                 | 已建立；最终文档校验见交付快照                           |
-| A1 同一 TS 权威在 Node 常驻，可退出/恢复且无需浏览器 | Vitest / Build / Playwright-change                         | 未实施                                                   |
-| A2 网络正确性、权限、顺序、背压及碰撞/世界基线一致   | Vitest / Playwright-change                                 | 未实施                                                   |
-| A3 冻结检查点原子发布，硬 kill 不产生混合存档        | Vitest / Playwright-change；Manual supplement（设备范围）  | 未实施；断电硬件验证 N/A，未承诺                         |
-| A4 双模式 GUI、连接配置、失败恢复和可见暂停语义      | Vitest / Playwright-change / Midscene                      | 未实施                                                   |
-| A5 每项 Node feature 都有有效实验或有证据的停止结论  | Vitest / Playwright-change（性能采样）/ Static（结果关联） | 未实施；允许无性能收益                                   |
-| A6 宿主、传输、单项及最终组合归因完整                | Playwright-change（性能采样）/ Static（报告与统计）        | 未采样，见实验合同                                       |
-| A7 原有本地旅程与架构边界无回归                      | Static / Build / Playwright-baseline                       | 本轮设计未复跑产品检查                                   |
-| A8 macOS 本机与 Linux Node + 真实 LAN 客户端可玩     | Build / Playwright-change / Manual supplement              | 未执行；仅 loopback 不满足 LAN 准出                      |
-| A9 文档与可恢复交付                                  | Static                                                     | 实施后更新 README、代码地图、Node 运行边界文档、交付快照 |
-| A10 CI 完整包从可信 main 推送 CT105，成功与回滚可验  | Vitest / Static / Build / Manual supplement                | 未实施；实际 runner 网络仍待验证                         |
-| A11 公网 IPv6 预测、重连、网络波动与 MC 共存         | Playwright-change / Midscene / Manual supplement           | 未执行；本机 SSH 成功不替代 CI/WAN E2E                   |
+| 准出                                                   | 证据类型                                                                   | 当前结果                                                 |
+| ------------------------------------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------- |
+| D0 设计可追溯、独立 worktree/分支、附件 hash 可复核    | Static / Manual supplement                                                 | 已建立；最终文档校验见交付快照                           |
+| A1 同一 TS 权威在 Node 常驻，可退出/恢复且无需浏览器   | Vitest / Build / Playwright-change                                         | 未实施                                                   |
+| A2 网络正确性、权限、顺序、背压及碰撞/世界基线一致     | Vitest / Playwright-change                                                 | 未实施                                                   |
+| A3 冻结检查点原子发布，硬 kill 不产生混合存档          | Vitest / Playwright-change；Manual supplement（设备范围）                  | 未实施；断电硬件验证 N/A，未承诺                         |
+| A4 双模式 GUI、连接配置、失败恢复和可见暂停语义        | Vitest / Playwright-change / Midscene                                      | 未实施                                                   |
+| A5 每项 Node feature 都有有效实验或有证据的停止结论    | Vitest / Playwright-change（性能采样）/ Static（结果关联）                 | 未实施；允许无性能收益                                   |
+| A6 宿主、传输、单项及最终组合归因完整                  | Playwright-change（性能采样）/ Static（报告与统计）                        | 未采样，见实验合同                                       |
+| A7 原有本地旅程与架构边界无回归                        | Static / Build / Playwright-baseline                                       | 本轮设计未复跑产品检查                                   |
+| A8 macOS 本机与 Linux Node + 真实 LAN 客户端可玩       | Build / Playwright-change / Manual supplement                              | 未执行；仅 loopback 不满足 LAN 准出                      |
+| A9 文档与可恢复交付                                    | Static                                                                     | 实施后更新 README、代码地图、Node 运行边界文档、交付快照 |
+| A10 CI 完整包从可信 main 推送 CT105，成功与回滚可验    | Vitest / Static / Build / Manual supplement                                | 未实施；实际 runner 网络仍待验证                         |
+| A11 公网 IPv6 预测、重连、网络波动与 MC 共存           | Playwright-change / Midscene / Manual supplement                           | 未执行；本机 SSH 成功不替代 CI/WAN E2E                   |
+| A12 消息语义、codec/transport 对照与采用结论、降级一致 | Vitest / Playwright-change / Midscene / Static / Build / Manual supplement | N0–N4 未运行；正式协议未定案                             |
 
 ## 七、任务与当前状态
 
 当前完成：进度恢复、源码盘点、新 worktree 与分支、TS 架构、GUI 行为、实验合同、CT105 只读拓扑/端口核验和远端部署设计；精确审核入口随新附件更新。以下是审核后的实施阶段，每阶段交付一条可验证闭环，不能以模块数量代替完成态。
 
-| 阶段              | 可独立验证的完成态                                                                         | 依赖                                   |
-| ----------------- | ------------------------------------------------------------------------------------------ | -------------------------------------- |
-| P0 合同与基线     | 用户审核本 spec/附件；main 基点已同步；写 RED 与静态反例                                   | 当前待审核                             |
-| P1 Node 独立迁移  | 编译产物 + 完整 TS 调度 + 存储 + 受限网络 + 浏览器受控入口；能真实游玩、断连继续、重启恢复 | P0；此时不做优化采用结论               |
-| P2 正式双模式 GUI | 启动/失败/重连/存退/切换旅程，Playwright 与 Midscene 完整通过                              | P1；默认本地选项保留                   |
-| P2R 真实远端环境  | CT105 隔离部署、TLS/WSS、CI 推送、失败回滚与真实网络验收                                   | P2；不等 F1–F4 全完成，见远端附件      |
-| P3 宿主与分项实验 | 先宿主对照，再逐项线程扩展、多进程、共享缓冲和 I/O 调度，逐项通过正确性与统计门禁          | P2；固定 TS 和数据布局                 |
-| P4 最终组合与交付 | 全关/单项/正收益兼容集合/消融，产品 E2E、Linux 与 LAN 证据，最终默认建议                   | P3；不要求为了采用 Node 而捏造速度提升 |
-| 后继 Agent 线     | 玩家交流 → 有界观察 → 异步模型 → 正式 Action → 回执 → 记忆 → 可见行为                      | 本合同之外的新纵向 change              |
+| 阶段              | 可独立验证的完成态                                                                         | 依赖                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| P0 合同与基线     | 用户审核本 spec/附件；main 基点已同步；写 RED 与静态反例                                   | 当前待审核                                           |
+| P0N 网络前置选型  | N0–N4 消息/codec/传输探针、支持范围与正式采用结论                                          | P0；与 P1 无网络宿主/存储独立推进，早于 wire v1 冻结 |
+| P1 Node 独立迁移  | 编译产物 + 完整 TS 调度 + 存储 + 受限网络 + 浏览器受控入口；能真实游玩、断连继续、重启恢复 | P0；此时不做优化采用结论                             |
+| P2 正式双模式 GUI | 启动/失败/重连/存退/切换及传输降级旅程，Playwright 与 Midscene 完整通过                    | P1 + P0N；默认本地选项保留                           |
+| P2R 真实远端环境  | CT105 隔离部署、TLS/WSS、CI 推送、失败回滚与真实网络验收                                   | P2；不等 F1–F4 全完成，见远端附件                    |
+| P3 宿主与分项实验 | 先宿主对照，再逐项线程扩展、多进程、共享缓冲和 I/O 调度，逐项通过正确性与统计门禁          | P2；固定 TS 和数据布局                               |
+| P4 最终组合与交付 | 全关/单项/正收益兼容集合/消融，产品 E2E、Linux 与 LAN 证据，最终默认建议                   | P3；不要求为了采用 Node 而捏造速度提升               |
+| 后继 Agent 线     | 玩家交流 → 有界观察 → 异步模型 → 正式 Action → 回执 → 记忆 → 可见行为                      | 本合同之外的新纵向 change                            |
 
-P1 中公开协议与共享类型先冻结，Node 平台、存储和客户端适配才可按文件所有权并行；采样串行以避免资源干扰。Wasm 内核合并若发生在 P3 前，先做 TS 控制复验；若发生在采样中，结束该 source 批次并重建成对数据。本设计任务由主负责人完成，没有宣称独立模型审查或自动产品验收。
+P1 可先用 T0/C0 标注参考的受控入口验证接线，公共消息先明确语义；正式 wire 在 P0N/N4 后冻结，不能以参考组已跑通取代选型。P0N 的最小可玩/WAN 探针服务于选型，不依赖 P2 正式 GUI 完成，避免循环依赖。Node 无网络宿主/存储可独立推进；采样串行以避免资源干扰。Wasm 内核合并若发生在 P3 前，先做 TS 控制复验；若发生在采样中，结束该 source 批次并重建成对数据。本设计任务由主负责人完成，没有宣称独立模型审查或自动产品验收。
 
 ## 八、交付快照
 
@@ -256,4 +267,4 @@ P1 中公开协议与共享类型先冻结，Node 平台、存储和客户端适
 
 长期 docs baseline 本轮不改：治理已在来源分支沉淀，Node 尚处于待审核方案；实现后再以已验证事实更新代码地图、目录规范、README 与 Living World 状态，避免把设计当现状。Wasm 方案按 `36a0022` 只读参考，尚未集成。
 
-文档格式、相对链接、附件 hash 与差异检查的实际结果记录在 `review-binding.md`。当前无实际 RED/GREEN、Node 性能、浏览器或设备验收结果，功能准出 A1–A11 保持未完成。设计本地提交后，功能分支可供后续继续；已按用户要求同步 main，本轮追加远端环境只读核验；不 push、不建产品完成 PR、不合入 Wasm 实验分支。
+文档格式、相对链接、附件 hash 与差异检查的实际结果记录在 `review-binding.md`。当前无实际 RED/GREEN、Node 性能、浏览器或设备验收结果，功能准出 A1–A12 保持未完成。2026-09-07 修订将 WS/JSON 降为参考，新增网络前置选型，旧审核 hash 失效。设计本地提交后，功能分支可供后续继续；已按用户要求同步 main，上轮追加远端环境只读核验；本轮不探测或修改远端，不 push、不建产品完成 PR、不合入 Wasm 实验分支。
