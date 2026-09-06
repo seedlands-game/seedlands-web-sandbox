@@ -128,12 +128,14 @@ test('150ms延迟下碰撞revision变化会重同步预测且不穿墙', async (
   expect(corrected.serverPlayerPosition[2]).toBeGreaterThanOrEqual(-0.680_01);
   expect(Math.abs(corrected.player[2] - corrected.serverPlayerPosition[2])).toBeLessThan(0.35);
 
-  const stabilized = await waitForSnapshot(
-    page,
-    (current) =>
-      current.authority.physicsTick >= corrected.authority.physicsTick + 120 &&
-      current.authority.acknowledgedInputSequence > corrected.authority.acknowledgedInputSequence,
-  );
+  await expect
+    .poll(async () => (await snapshot(page))?.authority.physicsTick)
+    .toBeGreaterThanOrEqual(corrected.authority.physicsTick + 120);
+  await expect
+    .poll(async () => (await snapshot(page))?.authority.acknowledgedInputSequence)
+    .toBeGreaterThan(corrected.authority.acknowledgedInputSequence);
+  const stabilized = await snapshot(page);
+  if (!stabilized) throw new Error('碰撞校正稳定期结束后没有 Harness 快照。');
   expect(stabilized.prediction.resetCounts['authority-resync'] ?? 0).toBe(correctedResyncs);
   expect(stabilized.prediction.pendingFrames).toBeLessThan(64);
 });
