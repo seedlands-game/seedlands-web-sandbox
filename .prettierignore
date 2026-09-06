@@ -11,3 +11,5 @@ LICENSE
 wasm/**/_build/
 # Machine-generated experiment evidence keeps original byte hashes.
 changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/
+crates/target/
+changes/2026-09-06-data-plane-simd-policy/evidence/

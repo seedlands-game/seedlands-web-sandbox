@@ -11,3 +11,4 @@ test-results/
 wasm/**/_build/
 
 changes/*/experiments/*.wasm
+crates/target/
