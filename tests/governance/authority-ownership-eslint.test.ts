@@ -24,12 +24,11 @@ describe.each(['src/app/authority-owner-probe.ts', 'src/client/authority-owner-p
       ).toHaveLength(1);
     });
 
-    it('允许只导入GameServer协议类型与其他server纯DTO', async () => {
+    it('允许只导入明确的server协议DTO', async () => {
       const [result] = await lintSource(
         `
-          import type { GameServer } from '../server/game-server';
           import type { WorldCommitResult } from '../server/game-server-types';
-          export type Port = Pick<GameServer, 'worldRevision'> & { commit: WorldCommitResult };
+          export type Port = { worldRevision: number; commit: WorldCommitResult };
         `,
         filePath,
       );
@@ -37,6 +36,30 @@ describe.each(['src/app/authority-owner-probe.ts', 'src/client/authority-owner-p
       expect(result.messages.filter((message) => message.ruleId === 'seedlands/authority-worker-owner')).toHaveLength(
         0,
       );
+    });
+
+    it('拒绝借服务端命令执行器或具体GameServer参数重建浏览器权威路径', async () => {
+      const commandExecutor = await lintSource(
+        `
+          import { ServerCommandExecutor } from '../server/commands/server-command-executor';
+          export const execute = (server: unknown) => new ServerCommandExecutor(server);
+        `,
+        filePath,
+      );
+      const concreteParameter = await lintSource(
+        `
+          import type { GameServer } from '../server/game-server';
+          export const read = (server: GameServer) => server.worldRevision;
+        `,
+        filePath,
+      );
+
+      expect(
+        commandExecutor[0].messages.filter((message) => message.ruleId === 'seedlands/authority-worker-owner'),
+      ).toHaveLength(1);
+      expect(
+        concreteParameter[0].messages.filter((message) => message.ruleId === 'seedlands/authority-worker-owner'),
+      ).toHaveLength(1);
     });
   },
 );

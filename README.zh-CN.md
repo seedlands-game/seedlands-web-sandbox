@@ -18,7 +18,7 @@
 - 紧凑的 `32³` `Uint16Array` Chunk，以及按 Chunk 生成的 greedy mesh，而非每个体素一个 Entity 或 draw call。
 - Chunk mesh 按 opaque、cutout、transparent 三类批量提交；voxel-specific GLSL/WGSL chunk 从纹理数组采样，Float16 UV 与安全的 Uint16 index 用于缩减网格传输体积。
 - 以玩家为中心、会释放超出范围 CPU/GPU 资源的 Chunk streaming。
-- 同进程 `GameServer` 持有权威 Chunk、玩家状态、实体和世界时钟。
+- Authority Worker 内唯一的 `GameServer` 持有权威 Chunk、玩家状态、实体和世界时钟。
 - 第一人称移动、碰撞、跳跃、限时体素采集、掉落物、拾取和由背包物品驱动的放置。
 - 最小生存闭环：生命、饥饿、24 格背包、8 格快捷栏、食物、四条配方、工具、战斗、死亡掉落与复活。
 - 确定性的初始生态：被动林鹿、仅夜间主动的敌对生物、有日程的营地居民、附近 POI、有界体素地面导航与可查询的异步 Action。

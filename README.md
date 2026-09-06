@@ -18,7 +18,7 @@ The sandbox now contains a local single-player survival and exploration MVP. Its
 - Compact `32³` `Uint16Array` chunks and chunk-level greedy meshes rather than one entity or draw call per voxel.
 - Chunk meshes are submitted in opaque, cutout, and transparent render-category batches. Voxel-specific GLSL/WGSL chunks sample a texture array, while Float16 UVs and safe Uint16 indices reduce mesh transfer size.
 - Player-centred chunk streaming with bounded CPU/GPU retention.
-- An in-process authoritative `GameServer` for chunks, player state, entities, and world time.
+- A single `GameServer` inside the Authority Worker owns authoritative chunks, player state, entities, and world time.
 - First-person movement, collision, jumping, continuous hold-to-mine harvesting, textured 3D drops with gravity and nearby attraction, and inventory-backed placement.
 - A minimal survival loop with health, hunger, 24 inventory slots, an 8-slot hotbar, food, four recipes, tools, combat, death drops, and respawning.
 - A deterministic starter ecology with a passive grazer, a night-only hostile, a scheduled settler, nearby POIs, bounded voxel ground navigation, and inspectable asynchronous actions.

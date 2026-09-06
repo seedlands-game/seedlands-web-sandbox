@@ -66,26 +66,42 @@ const seedlands = {
       meta: {
         type: 'problem',
         schema: [],
-        messages: { forbidden: 'GameServer值只能由Authority Worker或headless工厂持有。' },
+        messages: { forbidden: 'GameServer与服务端命令执行器只能由Authority Worker或headless工厂持有。' },
       },
       create(context) {
         const isGameServer = (source) =>
           typeof source === 'string' && /(?:^|\/)game-server(?:\.[cm]?[jt]s)?$/.test(source);
+        const isServerCommandExecutor = (source) =>
+          typeof source === 'string' &&
+          /(?:^|\/)server\/commands\/server-command-executor(?:\.[cm]?[jt]s)?$/.test(source);
+        const isForbiddenValueSource = (source) => isGameServer(source) || isServerCommandExecutor(source);
+        const concreteGameServerTypes = new Set();
         const report = (node) => context.report({ node, messageId: 'forbidden' });
         return {
           ImportDeclaration(node) {
-            if (!isGameServer(node.source.value) || node.importKind === 'type') return;
+            if (isGameServer(node.source.value))
+              for (const specifier of node.specifiers)
+                if (
+                  specifier.type === 'ImportSpecifier' &&
+                  specifier.imported.type === 'Identifier' &&
+                  specifier.imported.name === 'GameServer'
+                )
+                  concreteGameServerTypes.add(specifier.local.name);
+            if (!isForbiddenValueSource(node.source.value) || node.importKind === 'type') return;
             if (node.specifiers.length > 0 && node.specifiers.every((specifier) => specifier.importKind === 'type'))
               return;
             report(node);
           },
           ImportExpression(node) {
-            if (node.source.type === 'Literal' && isGameServer(node.source.value)) report(node);
+            if (node.source.type === 'Literal' && isForbiddenValueSource(node.source.value)) report(node);
           },
           CallExpression(node) {
             if (node.callee.type !== 'Identifier' || node.callee.name !== 'require') return;
             const [argument] = node.arguments;
-            if (argument?.type === 'Literal' && isGameServer(argument.value)) report(node);
+            if (argument?.type === 'Literal' && isForbiddenValueSource(argument.value)) report(node);
+          },
+          TSTypeReference(node) {
+            if (node.typeName.type === 'Identifier' && concreteGameServerTypes.has(node.typeName.name)) report(node);
           },
         };
       },

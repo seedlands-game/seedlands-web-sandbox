@@ -21,7 +21,11 @@
 - 前台首次鼠标锁定失败时 Chrome 未置前。将 Chrome 置前并在测试中 `bringToFront()` 后真实 Pointer Lock 成功；未模拟或替换鼠标锁定。
 - 三个单元测试夹具修复 TypeScript 契约：补全 AuthoritySnapshot 字段、按真实结果联合类型收窄 Mesh 结果、显式运行时修改插值副本以验证隔离。原断言保留，三文件九项 GREEN，受影响 ESLint 通过。
 
-## 尚未准出
+## 当时尚未准出（历史阶段记录）
+
+以下清单只描述 `0927ed5` 阶段，不代表当前主线状态。各项后继结果分别记录在
+`browser-acceptance-progress.md`、`transport-progress.md`、`visual-acceptance-progress.md` 与
+`load-performance-progress.md`；本段不作为最终未完成清单。
 
 最终集成版本还需完整线程预算复验、A7 延迟和乱序传输、存档与故障、真实调试碰撞箱、生态与动作生命周期、Midscene、长期基线独立准入审查以及 A9 同机性能对照。模块测试和上述两项浏览器通过不能替代这些证据。
 
