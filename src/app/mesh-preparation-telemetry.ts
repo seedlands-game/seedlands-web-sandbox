@@ -56,3 +56,15 @@ export function recordMeshPreparationDiagnostics(
   if (persistence.roundTripMs !== undefined)
     record('PersistenceRoundTrip', persistence.roundTripMs, 'authority-worker');
 }
+
+export function recordMeshPreparationFailure(telemetry: PerformanceTelemetry, traceId: string, error: unknown): void {
+  const failure = error instanceof Error ? error : new Error(String(error));
+  telemetry.recordCompletedSpan({
+    category: 'persistence',
+    name: 'MeshPreparationFailure',
+    lane: 'main',
+    durationMs: 0,
+    traceId,
+    attributes: { errorName: failure.name, errorMessage: failure.message.slice(0, 240) },
+  });
+}

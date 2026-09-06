@@ -10,7 +10,7 @@ import {
   type MeshTaskDispatch,
   type WorkerInput,
 } from './mesh-task-dispatch';
-import { recordMeshPreparationDiagnostics } from './mesh-preparation-telemetry';
+import { recordMeshPreparationDiagnostics, recordMeshPreparationFailure } from './mesh-preparation-telemetry';
 import { MeshVisibilityBarriers } from './mesh-visibility-barriers';
 
 export type { WorkerResult } from './app-contracts';
@@ -285,7 +285,8 @@ export class MeshTaskScheduler {
         try {
           if (this.options.source.beforePrepare)
             await this.options.source.beforePrepare(request.cx, request.cy, request.cz);
-        } catch {
+        } catch (error) {
+          recordMeshPreparationFailure(this.options.telemetry, request.traceId, error);
           const ownsPreparation = this.preparingRequests.get(key) === request;
           if (ownsPreparation) this.preparingRequests.delete(key);
           this.options.source.releasePrepared?.(request.cx, request.cy, request.cz);
@@ -394,7 +395,6 @@ export class MeshTaskScheduler {
       const task = this.latestTasks.get(result.chunkKey);
       if (!task || !isCurrentMeshTask(result, task)) {
         this.incrementCounter('stale_worker_results');
-        void this.drain();
         return;
       }
       const replacement = this.replacements.get(result.chunkKey);
@@ -405,7 +405,6 @@ export class MeshTaskScheduler {
         this.queued.set(result.chunkKey, replacement);
         this.supersededInFlight += 1;
         this.options.telemetry.completeTrace(task.traceId, 'superseded-worker-result', 'main');
-        void this.drain();
         return;
       }
       if (presentsBarrier) {
@@ -416,19 +415,16 @@ export class MeshTaskScheduler {
         if (!result.canonical || result.generatorVersion !== task.generatorVersion) {
           this.releaseBarrierAttempt(task);
           this.discard(task, 'invalid-worker-canonical');
-          void this.drain();
           return;
         }
         if (!(await this.options.source.acceptWorkerCanonical(task, result))) {
           this.releaseBarrierAttempt(task);
           this.discard(task, 'stale-worker-canonical');
-          void this.drain();
           return;
         }
         if (!this.isCurrent(task)) {
           this.releaseBarrierAttempt(task);
           this.discard(task, 'stale-after-authority-accept');
-          void this.drain();
           return;
         }
         this.recordWorkerPreparation(task, result);

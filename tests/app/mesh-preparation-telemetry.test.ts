@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { MeshTaskScheduler, type MeshWorkerPort } from '../../src/app/mesh-task-scheduler';
 import { PERFORMANCE_PROFILES } from '../../src/client/performance-profile';
 import { PerformanceTelemetry } from '../../src/client/performance-telemetry';
@@ -101,5 +101,42 @@ describe('Mesh preparation telemetry', () => {
       encodingOverlapMs: 3,
       encodingDurationMs: 6,
     });
+  });
+
+  it('把异步准备失败的错误类名和有界消息写入同一trace', async () => {
+    const worker = new CapturingWorker();
+    const telemetry = new PerformanceTelemetry({ now: () => 25 });
+    const failure = new Error('x'.repeat(300));
+    failure.name = 'CanonicalChunkResidencyPressureError';
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry,
+      variant: 'worker-first',
+      source: {
+        beforePrepare: () => Promise.reject(failure),
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: 0,
+          haloRevision: 'unused',
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: 1, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: () => undefined,
+    });
+
+    scheduler.request(0, 1, -2);
+    await vi.waitFor(() =>
+      expect(
+        telemetry.exportChromeTrace().traceEvents.find(({ name }) => name === 'MeshPreparationFailure')?.args,
+      ).toMatchObject({
+        errorName: 'CanonicalChunkResidencyPressureError',
+        errorMessage: 'x'.repeat(240),
+      }),
+    );
   });
 });
