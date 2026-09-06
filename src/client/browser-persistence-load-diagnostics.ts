@@ -3,6 +3,7 @@ import type { ChunkPersistenceLoadDiagnostics } from '../server/persistence/chun
 export type BrowserPersistenceLoadBatchResult = Readonly<{
   entries: readonly unknown[];
   diagnostics: ChunkPersistenceLoadDiagnostics;
+  responsePostedAtEpochMs: number;
 }>;
 
 const isNonNegativeFinite = (value: unknown): value is number =>
@@ -15,7 +16,11 @@ export function parseBrowserPersistenceLoadBatchResult(
   expectedKeyCount: number,
 ): BrowserPersistenceLoadBatchResult {
   if (!value || typeof value !== 'object') throw new Error('Persistence load batch result is invalid.');
-  const { entries, diagnostics } = value as { entries?: unknown; diagnostics?: unknown };
+  const { entries, diagnostics, responsePostedAtEpochMs } = value as {
+    entries?: unknown;
+    diagnostics?: unknown;
+    responsePostedAtEpochMs?: unknown;
+  };
   if (!Array.isArray(entries) || entries.length !== expectedKeyCount)
     throw new Error('Persistence load batch result length does not match its request.');
   if (!diagnostics || typeof diagnostics !== 'object')
@@ -32,11 +37,33 @@ export function parseBrowserPersistenceLoadBatchResult(
     !isNonNegativeFinite(parsed.transactionReadMs) ||
     !isNonNegativeFinite(parsed.decodeMs) ||
     !isNonNegativeFinite(parsed.totalWorkerMs) ||
+    !isNonNegativeFinite(parsed.mailboxWaitMs) ||
+    (parsed.mailboxBlockerKind !== undefined && typeof parsed.mailboxBlockerKind !== 'string') ||
+    (parsed.mailboxBlockerOverlapMs !== undefined && !isNonNegativeFinite(parsed.mailboxBlockerOverlapMs)) ||
+    (parsed.mailboxBlockerEncodeMs !== undefined && !isNonNegativeFinite(parsed.mailboxBlockerEncodeMs)) ||
+    !isNonNegativeFinite(responsePostedAtEpochMs) ||
     !parsed.codecs ||
     typeof parsed.codecs !== 'object' ||
     Array.isArray(parsed.codecs) ||
     !Object.values(parsed.codecs).every(isNonNegativeInteger)
   )
     throw new Error('Persistence load batch diagnostics are invalid.');
-  return { entries, diagnostics: parsed as ChunkPersistenceLoadDiagnostics };
+  return {
+    entries,
+    diagnostics: parsed as ChunkPersistenceLoadDiagnostics,
+    responsePostedAtEpochMs: Number(responsePostedAtEpochMs),
+  };
+}
+
+export function withBrowserPersistenceRoundTrip(
+  diagnostics: ChunkPersistenceLoadDiagnostics,
+  requestSentAtEpochMs: number,
+  responsePostedAtEpochMs: number,
+  responseReceivedAtEpochMs: number,
+): ChunkPersistenceLoadDiagnostics {
+  return {
+    ...diagnostics,
+    replyDeliveryMs: Math.max(0, responseReceivedAtEpochMs - responsePostedAtEpochMs),
+    roundTripMs: Math.max(0, responseReceivedAtEpochMs - requestSentAtEpochMs),
+  };
 }

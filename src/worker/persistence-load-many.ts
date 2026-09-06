@@ -24,6 +24,7 @@ const transactionDone = (transaction: IDBTransaction) =>
 export async function loadPersistenceBatch<Entry extends LoadEntry>(options: {
   coordinates: readonly PersistenceLoadCoordinate[];
   queueWaitMs: number;
+  mailboxWaitMs: number;
   worldId: string;
   database: () => Promise<IDBDatabase>;
   decode: (coordinate: PersistenceLoadCoordinate, value: unknown) => Entry;
@@ -68,6 +69,7 @@ export async function loadPersistenceBatch<Entry extends LoadEntry>(options: {
       transactionReadMs,
       decodeMs,
       totalWorkerMs: options.queueWaitMs + performance.now() - executionStartedAt,
+      mailboxWaitMs: options.mailboxWaitMs,
       codecs,
     },
   };

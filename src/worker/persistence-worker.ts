@@ -7,86 +7,33 @@ import {
   validateStoredFluid,
 } from '../world/chunk-snapshot-codec';
 import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, normalizeSeed } from '../world/voxel';
-import { selectWorldGeneratorVersion, type WorldOpenMode } from '../client/world-version-policy';
-import { persistFrozenGameSnapshot, type FrozenSaveTaskSnapshot } from './persistence-frozen-save';
+import { selectWorldGeneratorVersion } from '../client/world-version-policy';
+import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 import { loadPersistenceBatch } from './persistence-load-many';
-
-type WorkerConfig = { databaseName: string; worldId: string; seedText: string; generatorVersion: number };
-type InitTask = { kind: 'init'; requestId: number; openMode: WorldOpenMode } & WorkerConfig;
-type LoadTask = { kind: 'load'; requestId: number; cx: number; cy: number; cz: number };
-type LoadBatchTask = { kind: 'load-batch'; requestId: number; coordinates: PersistenceLoadCoordinate[] };
-type SaveTask = {
-  kind: 'save';
-  requestId: number;
-  snapshots: Array<{
-    key: string;
-    cx: number;
-    cy: number;
-    cz: number;
-    revision: number;
-    voxels: ArrayBuffer;
-    fluidVersion?: 1;
-    fluid?: ArrayBuffer;
-  }>;
-};
-type SaveMetadataTask = {
-  kind: 'save-metadata';
-  requestId: number;
-  player: [number, number, number];
-};
-type SaveGameplayTask = { kind: 'save-gameplay'; requestId: number; snapshot: unknown };
-type SaveFrozenTask = {
-  kind: 'save-frozen';
-  requestId: number;
-  snapshot: FrozenSaveTaskSnapshot;
-};
-type StatsTask = { kind: 'stats'; requestId: number };
-type SeedCorpusTask = { kind: 'seed-corpus'; requestId: number; chunkCount: number };
-type MarkLegacyMigratedTask = { kind: 'mark-legacy-migrated'; requestId: number };
-type LatestWorldTask = { kind: 'latest-world'; requestId: number; databaseName: string };
-type Task =
-  | InitTask
-  | LoadTask
-  | LoadBatchTask
-  | SaveTask
-  | SaveMetadataTask
-  | SaveGameplayTask
-  | SaveFrozenTask
-  | StatsTask
-  | SeedCorpusTask
-  | MarkLegacyMigratedTask
-  | LatestWorldTask;
-
-type CorpusSummary = {
-  storedChunkCount: number;
-  rawBytes: number;
-  legacyJsonBytes: number;
-  recordBytes: number;
-  payloadBytes: number;
-  metadataBytes: number;
-  codecs: Record<string, number>;
-};
-
-type WorldRecord = {
-  worldId: string;
-  seedText: string;
-  generatorVersion: number;
-  player: [number, number, number] | null;
-  gameplaySnapshot?: unknown;
-  corpusSummary?: CorpusSummary;
-  legacyMigrated?: boolean;
-  updatedAt: number;
-  commitSequence?: number;
-  worldRevision?: number;
-};
-
-type SuccessResponse = { requestId: number; ok: true; result: unknown };
-type ErrorResponse = { requestId: number; ok: false; error: string };
+import type {
+  PersistenceCorpusSummary as CorpusSummary,
+  PersistenceInitTask as InitTask,
+  PersistenceLatestWorldTask as LatestWorldTask,
+  PersistenceLoadBatchTask as LoadBatchTask,
+  PersistenceLoadTask as LoadTask,
+  PersistenceSaveFrozenTask as SaveFrozenTask,
+  PersistenceSaveGameplayTask as SaveGameplayTask,
+  PersistenceSaveMetadataTask as SaveMetadataTask,
+  PersistenceSaveTask as SaveTask,
+  PersistenceSeedCorpusTask as SeedCorpusTask,
+  PersistenceWorkerConfig as WorkerConfig,
+  PersistenceWorkerError as ErrorResponse,
+  PersistenceWorkerSuccess as SuccessResponse,
+  PersistenceWorkerTask as Task,
+  PersistenceWorldRecord as WorldRecord,
+} from './persistence-worker-protocol';
+import { describePersistenceMailboxBlocker, type CompletedPersistenceWorkerTask } from './persistence-worker-timing';
 
 let config: WorkerConfig | null = null;
 let databasePromise: Promise<IDBDatabase> | null = null;
 let taskQueue = Promise.resolve();
+let lastCompletedTask: CompletedPersistenceWorkerTask | undefined;
 
 const requestResult = <T>(request: IDBRequest<T>) =>
   new Promise<T>((resolve, reject) => {
@@ -229,11 +176,12 @@ const decodeLoadResult = (task: PersistenceLoadCoordinate, value: unknown) => {
   };
 };
 
-const loadMany = async (coordinates: readonly PersistenceLoadCoordinate[], queueWaitMs: number) => {
+const loadMany = async (coordinates: readonly PersistenceLoadCoordinate[], queueWaitMs: number, mailboxWaitMs = 0) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
   return loadPersistenceBatch({
     coordinates,
     queueWaitMs,
+    mailboxWaitMs,
     worldId: config.worldId,
     database,
     decode: decodeLoadResult,
@@ -242,8 +190,22 @@ const loadMany = async (coordinates: readonly PersistenceLoadCoordinate[], queue
 
 const load = async (task: LoadTask) => (await loadMany([task], 0)).entries[0];
 
-const loadBatch = async (task: LoadBatchTask, queueWaitMs: number) =>
-  loadMany(validatePersistenceLoadBatch(task.coordinates), queueWaitMs);
+const loadBatch = async (
+  task: LoadBatchTask,
+  queueWaitMs: number,
+  receivedAtEpochMs: number,
+  previous: CompletedPersistenceWorkerTask | undefined,
+) => {
+  if (!Number.isFinite(task.requestSentAtEpochMs) || task.requestSentAtEpochMs < 0)
+    throw new TypeError('Persistence load batch request time is invalid.');
+  const result = await loadMany(
+    validatePersistenceLoadBatch(task.coordinates),
+    queueWaitMs,
+    Math.max(0, receivedAtEpochMs - task.requestSentAtEpochMs),
+  );
+  const blocker = describePersistenceMailboxBlocker(task.requestSentAtEpochMs, receivedAtEpochMs, previous);
+  return { ...result, diagnostics: { ...result.diagnostics, ...(blocker ?? {}) } };
+};
 
 const save = async (task: SaveTask) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
@@ -482,11 +444,16 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
   return summary;
 };
 
-const handle = async (task: Task, queueWaitMs = 0): Promise<unknown> => {
+const handle = async (
+  task: Task,
+  queueWaitMs = 0,
+  receivedAtEpochMs = 0,
+  previous?: CompletedPersistenceWorkerTask,
+): Promise<unknown> => {
   if (task.kind === 'latest-world') return latestWorld(task);
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
-  if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs);
+  if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs, receivedAtEpochMs, previous);
   if (task.kind === 'save') return save(task);
   if (task.kind === 'save-frozen') return saveFrozen(task);
   if (task.kind === 'save-metadata') return saveMetadata(task);
@@ -498,13 +465,30 @@ const handle = async (task: Task, queueWaitMs = 0): Promise<unknown> => {
 
 self.onmessage = (event: MessageEvent<Task>) => {
   const enqueuedAt = performance.now();
+  const receivedAtEpochMs = performance.timeOrigin + enqueuedAt;
   taskQueue = taskQueue.then(async () => {
     const task = event.data;
+    const previous = lastCompletedTask;
+    const startedAtEpochMs = performance.timeOrigin + performance.now();
     try {
-      const result = await handle(task, performance.now() - enqueuedAt);
-      const response: SuccessResponse = { requestId: task.requestId, ok: true, result };
+      const result = await handle(task, performance.now() - enqueuedAt, receivedAtEpochMs, previous);
+      const completedAtEpochMs = performance.timeOrigin + performance.now();
+      const encodeMs =
+        result && typeof result === 'object' && 'encodeMs' in result && Number.isFinite(result.encodeMs)
+          ? Number(result.encodeMs)
+          : undefined;
+      lastCompletedTask = {
+        kind: task.kind,
+        startedAtEpochMs,
+        completedAtEpochMs,
+        ...(encodeMs === undefined ? {} : { encodeMs }),
+      };
+      const responseResult =
+        task.kind === 'load-batch' ? { ...(result as object), responsePostedAtEpochMs: completedAtEpochMs } : result;
+      const response: SuccessResponse = { requestId: task.requestId, ok: true, result: responseResult };
       const transfers: Transferable[] = [];
-      const loaded = task.kind === 'load-batch' ? (result as Awaited<ReturnType<typeof loadMany>>).entries : [result];
+      const loaded =
+        task.kind === 'load-batch' ? (responseResult as Awaited<ReturnType<typeof loadMany>>).entries : [result];
       if (task.kind === 'load' || task.kind === 'load-batch')
         loaded.forEach((entry) => {
           if (!entry || typeof entry !== 'object' || !('voxels' in entry)) return;
@@ -513,6 +497,11 @@ self.onmessage = (event: MessageEvent<Task>) => {
         });
       self.postMessage(response, transfers);
     } catch (error) {
+      lastCompletedTask = {
+        kind: task.kind,
+        startedAtEpochMs,
+        completedAtEpochMs: performance.timeOrigin + performance.now(),
+      };
       const response: ErrorResponse = {
         requestId: task.requestId,
         ok: false,

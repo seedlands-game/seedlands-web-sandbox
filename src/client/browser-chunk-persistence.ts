@@ -8,7 +8,10 @@ import type { FrozenGameSaveSnapshot } from '../server/persistence/game-save-sna
 import { readGameSaveCheckpoint, type GameSaveCheckpoint } from '../server/persistence/game-save-checkpoint';
 import { GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
 import { prepareBrowserLoadResult, type PreparedBrowserLoadResult } from './browser-persistence-load';
-import { parseBrowserPersistenceLoadBatchResult } from './browser-persistence-load-diagnostics';
+import {
+  parseBrowserPersistenceLoadBatchResult,
+  withBrowserPersistenceRoundTrip,
+} from './browser-persistence-load-diagnostics';
 import {
   BrowserPersistenceLoadRegistry,
   type BrowserPersistenceLoadToken,
@@ -21,29 +24,15 @@ import {
   type BrowserPersistenceLoadCoordinate,
 } from './browser-persistence-neighborhood';
 import type { BrowserPersistenceMetrics, ChunkPersistenceCorpusSummary } from './browser-persistence-metrics';
+import type {
+  BrowserPersistenceInitResult as InitResult,
+  BrowserPersistenceSaveResult as SaveResult,
+  BrowserPersistenceWorkerResponse as WorkerResponse,
+} from './browser-persistence-worker-contract';
 
 export { decodeBrowserWorldSave } from './browser-world-save';
 export type { BrowserWorldSave, SerializedChunkSnapshot } from './browser-world-save';
 export type { BrowserPersistenceMetrics, ChunkPersistenceCorpusSummary } from './browser-persistence-metrics';
-
-type WorkerSuccess = { requestId: number; ok: true; result: unknown };
-type WorkerFailure = { requestId: number; ok: false; error: string };
-type WorkerResponse = WorkerSuccess | WorkerFailure;
-type InitResult = {
-  worldId: string;
-  generatorVersion: number;
-  player: [number, number, number] | null;
-  gameplaySnapshot: unknown;
-  checkpoint?: unknown;
-  corpusSummary: ChunkPersistenceCorpusSummary | null;
-  legacyMigrated: boolean;
-};
-type SaveResult = {
-  saved: Array<{ key: string; revision: number }>;
-  recordBytes: number;
-  encodeMs: number;
-  codecs: Record<string, number>;
-};
 
 const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
   ...snapshot,
@@ -316,10 +305,12 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   ): Promise<Readonly<{ published: ReadonlySet<string>; diagnostics: ChunkPersistenceLoadDiagnostics }>> {
     this.metricsValue.idbGetCount += coordinates.length;
     this.metricsValue.loadTransactionCount += 1;
+    const requestSentAtEpochMs = performance.timeOrigin + performance.now();
     const response = parseBrowserPersistenceLoadBatchResult(
-      await this.request({ kind: 'load-batch', coordinates }),
+      await this.request({ kind: 'load-batch', coordinates, requestSentAtEpochMs }),
       coordinates.length,
     );
+    const responseReceivedAtEpochMs = performance.timeOrigin + performance.now();
     const prepared = response.entries.map((result, index) => {
       const coordinate = coordinates[index]!;
       return prepareBrowserLoadResult(
@@ -338,7 +329,15 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       this.commitLoadResult(result, token);
       published.add(result.key);
     });
-    return { published, diagnostics: response.diagnostics };
+    return {
+      published,
+      diagnostics: withBrowserPersistenceRoundTrip(
+        response.diagnostics,
+        requestSentAtEpochMs,
+        response.responsePostedAtEpochMs,
+        responseReceivedAtEpochMs,
+      ),
+    };
   }
 
   async ensureNeighborhood(

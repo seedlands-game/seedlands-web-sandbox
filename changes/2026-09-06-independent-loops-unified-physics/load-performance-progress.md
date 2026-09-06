@@ -43,6 +43,8 @@ Authority 已经准备的 materialized canonical 可由客户端对 Worker 回�
 
 预期 RED：重叠邻域请求当前只证明 Worker 读取去重，返回诊断不能说明第二个请求等待了多少共享 key；Mesh 准备 trace 也没有该计数。用例先锁定首个邻域新建 27 key、相邻邻域复用 18 key 并只新建 9 key，以及 span 导出 `sharedDependencyCount=18`。实现只扩展有界诊断，不改变加载、发布、release、保存代际或 Mesh 调度语义。
 
+Persistence Worker 的 `queueWaitMs` 从其 `onmessage` 回调开始，无法观察 Worker 正被此前同步工作占用、新消息尚未被分发的 mailbox 等待。下一层只对当前 `load-batch` 携带一次请求时间，使用同源浏览器环境可比较的 `performance.timeOrigin + performance.now()` 计算请求发送至 Worker 收件、Worker 回帖至 Authority 收件和完整 round trip；回执消费后即丢弃。Worker 只保留最后一个已完成任务的种类、起止时间和已有 `encodeMs`，当它与本次请求发送后的 mailbox 等待相交时，把 blocker 种类、相交时长和编码时长附在本次回执，随后可被下一任务覆盖。预期 RED：现有诊断没有这些分段，无法区分此前 `save-frozen` 同步编码阻塞 Persistence Worker、Worker 内队列等待和 Authority 收件后的恢复延迟。测试要求跨 Worker 时间字段为非负有限值并进入同一 trace，并锁定只把确实覆盖请求发送时刻的前序任务归作 blocker；不采样 payload 内容，也不创建历史队列。
+
 ## RED 设计
 
 `e2e/authority-load-performance.spec.ts` 先声明以下缺失观测，作为生产接线前的类型 RED：
@@ -97,4 +99,5 @@ Authority 已经准备的 materialized canonical 可由客户端对 Worker 回�
 - [x] `ffd8dab620d0f5d6c406668a3289053162dd2340` 不可变产物的单边界目标完整 GREEN：总首见 `64.3ms`，编辑、提交到 Worker、Mesh Worker、挂接和真实非零水面首见依次为 `14.4/1.3/19.9/10.6/18.1ms`；Authority 准备/持久化等待/同步复制为 `0.7/0.5/0.2ms`，新读取 15 key、全部 missing、解码为 0。原始 `/tmp/seedlands-ffd8dab-a9-boundary.jsonlog`，真实退出码 `/tmp/seedlands-ffd8dab-a9-boundary.exit` 为 0，附件 `/tmp/seedlands-ffd8dab-a9-boundary-evidence/`。
 - [x] 同源 2/3 槽各 20 个样本仍为实质 RED：二槽 p50/p95/max=`88.0/187.0/470.5ms`，三槽=`70.1/187.1/534.3ms`；帧 p95=`18.4/18.3ms`、物理 p95=`1.8/1.7ms`。二槽第 2 个样本的 `WorkerQueueWait=326.5ms`、Authority 持久化等待 `69.8ms`，其本次新 Persistence Worker 批次仅 `3.1ms`；三槽首样本 Authority 持久化等待 `426.2ms`，本次新批次仅 `10.0ms`。两项新批次均请求 9 key、全部 missing、解码为 0，说明此前冗余 procedural decode 已消除；但旧诊断没有记录复用中的既有 load，尚不能把差值直接认定为 Authority 事件循环饥饿。原始 `/tmp/seedlands-ffd8dab-a9-full.jsonlog`，真实退出码 `/tmp/seedlands-ffd8dab-a9-full.exit` 为 1，附件 `/tmp/seedlands-ffd8dab-a9-full-evidence/`。
 - [x] 共享依赖计数先得到 2 项预期 RED：相邻邻域虽实际只新建 9 key，但诊断没有说明复用了首个邻域的 18 个在途 key；`AuthorityPersistenceWait` span 也没有该属性。实现后，每次邻域准备只返回本次复用的唯一 key 数，首邻域为 0、相邻邻域为 18，并附到同一 trace；没有增加缓存、队列或历史窗口，也没有改变持久化加载、release 或保存代际。相关 3 文件 24 项、测试 TypeScript、受影响 ESLint 与生产构建 GREEN。
+- [x] Persistence Worker mailbox/回帖分段先得到 3 项预期 RED：邻域回执缺少发送至 Worker 收件、Worker 回帖至 Authority 收件和总 round trip；trace 也没有对应 span；前序任务覆盖 mailbox 区间的纯归因模块尚不存在。实现后，只有当前最多 27-key 的 `load-batch` 携带跨 Worker 绝对时刻，回执消费后即丢弃；Worker 只保留一个最近完成任务槽，并仅在其执行区间与本次 mailbox 等待相交时附上种类、相交时长和已有编码时长。任务队列、保存、加载、lease 和流体语义未改变。相关持久化/准备 5 文件 27 项、测试 TypeScript、受影响 ESLint 和生产构建 GREEN。
 - [ ] 只有修复实测主段后，再以不可变产物重跑 2/3 槽各 20 个样本且两者完整 p95 均 `≤100ms`，才批准性能门禁。自然 A/A/B 也尚未在最终调度与持久化实现上复验。

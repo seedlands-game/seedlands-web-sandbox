@@ -41,4 +41,18 @@ export function recordMeshPreparationDiagnostics(
       .map(([codec, count]) => `${codec}:${count}`)
       .join(','),
   });
+  if (persistence.mailboxWaitMs !== undefined)
+    record('PersistenceMailboxWait', persistence.mailboxWaitMs, 'persistence-worker', {
+      ...(persistence.mailboxBlockerKind ? { blockerKind: persistence.mailboxBlockerKind } : {}),
+      ...(persistence.mailboxBlockerOverlapMs === undefined
+        ? {}
+        : { blockerOverlapMs: persistence.mailboxBlockerOverlapMs }),
+      ...(persistence.mailboxBlockerEncodeMs === undefined
+        ? {}
+        : { blockerEncodeMs: persistence.mailboxBlockerEncodeMs }),
+    });
+  if (persistence.replyDeliveryMs !== undefined)
+    record('PersistenceReplyDelivery', persistence.replyDeliveryMs, 'authority-worker');
+  if (persistence.roundTripMs !== undefined)
+    record('PersistenceRoundTrip', persistence.roundTripMs, 'authority-worker');
 }

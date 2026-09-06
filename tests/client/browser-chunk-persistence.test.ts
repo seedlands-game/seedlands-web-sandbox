@@ -32,12 +32,14 @@ const diagnosticsFor = (coordinates: readonly Coordinate[], foundCount: number):
   transactionReadMs: 4,
   decodeMs: foundCount ? 3 : 0,
   totalWorkerMs: 10,
+  mailboxWaitMs: 6,
   codecs: foundCount ? { 'raw-v1': foundCount } : {},
 });
 
 const batchResult = (coordinates: readonly Coordinate[], mode: 'missing' | 'found') => ({
   entries: coordinates.map((coordinate) => (mode === 'found' ? found(coordinate) : { status: 'missing' })),
   diagnostics: diagnosticsFor(coordinates, mode === 'found' ? coordinates.length : 0),
+  responsePostedAtEpochMs: performance.timeOrigin + performance.now(),
 });
 
 class FakePersistenceWorker {
@@ -204,7 +206,11 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
         0,
       ),
       sharedDependencyCount: 0,
+      replyDeliveryMs: expect.any(Number),
+      roundTripMs: expect.any(Number),
     });
+    expect(diagnostics?.replyDeliveryMs).toBeGreaterThanOrEqual(0);
+    expect(diagnostics?.roundTripMs).toBeGreaterThanOrEqual(0);
     expect(persistence.metrics()).toMatchObject({ idbGetCount: 27, loadTransactionCount: 1 });
     persistence.releaseNeighborhood(0, 1, -2);
     await persistence.ensureNeighborhood(0, 1, -2);

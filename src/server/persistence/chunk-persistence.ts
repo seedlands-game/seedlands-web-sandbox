@@ -20,6 +20,12 @@ export type ChunkPersistenceLoadDiagnostics = Readonly<{
   transactionReadMs: number;
   decodeMs: number;
   totalWorkerMs: number;
+  mailboxWaitMs?: number;
+  mailboxBlockerKind?: string;
+  mailboxBlockerOverlapMs?: number;
+  mailboxBlockerEncodeMs?: number;
+  replyDeliveryMs?: number;
+  roundTripMs?: number;
   codecs: Readonly<Record<string, number>>;
 }>;
 

@@ -51,6 +51,12 @@ describe('Mesh preparation telemetry', () => {
               decodeMs: 3,
               totalWorkerMs: 10,
               sharedDependencyCount: 18,
+              mailboxWaitMs: 6,
+              mailboxBlockerKind: 'save-frozen',
+              mailboxBlockerOverlapMs: 5,
+              mailboxBlockerEncodeMs: 4,
+              replyDeliveryMs: 7,
+              roundTripMs: 25,
               codecs: { 'raw-v1': 4 },
             },
           },
@@ -73,6 +79,9 @@ describe('Mesh preparation telemetry', () => {
         ['PersistenceTransactionRead', 4_000],
         ['PersistenceBatchDecode', 3_000],
         ['PersistenceWorkerLoad', 10_000],
+        ['PersistenceMailboxWait', 6_000],
+        ['PersistenceReplyDelivery', 7_000],
+        ['PersistenceRoundTrip', 25_000],
       ]),
     );
     expect(events.find(({ name }) => name === 'PersistenceWorkerLoad')?.args).toMatchObject({
@@ -85,6 +94,12 @@ describe('Mesh preparation telemetry', () => {
     expect(events.find(({ name }) => name === 'AuthorityPersistenceWait')?.args).toMatchObject({
       traceId,
       sharedDependencyCount: 18,
+    });
+    expect(events.find(({ name }) => name === 'PersistenceMailboxWait')?.args).toMatchObject({
+      traceId,
+      blockerKind: 'save-frozen',
+      blockerOverlapMs: 5,
+      blockerEncodeMs: 4,
     });
   });
 });
