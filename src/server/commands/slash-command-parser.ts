@@ -1,4 +1,5 @@
 import { Voxel } from '../../world/voxel';
+import { getItemDefinition } from '../gameplay/item-registry';
 import type {
   CommandParseFailure,
   CommandParseResult,
@@ -6,7 +7,9 @@ import type {
   CommandSource,
   ServerCommand,
 } from './command-contract';
-import type { ServerCommandExecutor } from './server-command-executor';
+export type CommandExecutorPort = Readonly<{
+  execute(source: CommandSource, command: ServerCommand): Promise<CommandResult>;
+}>;
 
 const voxelByName: Readonly<Record<string, number>> = Object.freeze(
   Object.fromEntries(Object.entries(Voxel).map(([name, value]) => [name.toLowerCase(), value])),
@@ -40,6 +43,20 @@ function voxel(token: string): number {
   const value = voxelByName[token.toLowerCase()];
   if (value === undefined) throw new ParseProblem(`Unsupported voxel: ${token}.`);
   return value;
+}
+
+function item(token: string): string {
+  try {
+    return getItemDefinition(token.toLowerCase()).id;
+  } catch {
+    throw new ParseProblem(`Unsupported item: ${token}.`);
+  }
+}
+
+function actorArchetype(token: string): 'grazer' | 'night-stalker' | 'settler' {
+  if (!['grazer', 'night-stalker', 'settler'].includes(token))
+    throw new ParseProblem(`Unsupported actor archetype: ${token}.`);
+  return token as 'grazer' | 'night-stalker' | 'settler';
 }
 
 function parseTokens(tokens: string[]): ServerCommand {
@@ -82,6 +99,118 @@ function parseTokens(tokens: string[]): ServerCommand {
     case '/save':
       exact(tokens, 1, '/save');
       return { type: 'save' };
+    case '/inventory':
+      exact(tokens, 1, '/inventory');
+      return { type: 'query-inventory' };
+    case '/health':
+    case '/hunger':
+      exact(tokens, 1, `${name}`);
+      return { type: 'query-player-state' };
+    case '/give':
+      exact(tokens, 3, '/give <item> <count>');
+      return { type: 'give-item', itemId: item(tokens[1]), count: integer(tokens[2], 'count') };
+    case '/damage':
+      exact(tokens, 2, '/damage <amount>');
+      return { type: 'apply-damage', amount: finite(tokens[1], 'amount') };
+    case '/heal':
+      exact(tokens, 2, '/heal <amount>');
+      return { type: 'heal', amount: finite(tokens[1], 'amount') };
+    case '/craft':
+      exact(tokens, 2, '/craft <recipe>');
+      return { type: 'craft-recipe', recipeId: tokens[1] };
+    case '/spawnitem':
+      exact(tokens, 6, '/spawnitem <item> <count> <x> <y> <z>');
+      return {
+        type: 'spawn-world-item',
+        itemId: item(tokens[1]),
+        count: integer(tokens[2], 'count'),
+        position: [finite(tokens[3], 'x'), finite(tokens[4], 'y'), finite(tokens[5], 'z')],
+      };
+    case '/spawn':
+      if (tokens[1]?.toLowerCase() !== 'creature') throw new ParseProblem('Usage: /spawn creature <x> <y> <z>');
+      exact(tokens, 5, '/spawn creature <x> <y> <z>');
+      return {
+        type: 'spawn-creature',
+        position: [finite(tokens[2], 'x'), finite(tokens[3], 'y'), finite(tokens[4], 'z')],
+      };
+    case '/summon':
+      exact(tokens, 5, '/summon <grazer|night-stalker|settler> <x> <y> <z>');
+      return {
+        type: 'spawn-actor',
+        archetype: actorArchetype(tokens[1].toLowerCase()),
+        position: [finite(tokens[2], 'x'), finite(tokens[3], 'y'), finite(tokens[4], 'z')],
+      };
+    case '/observe':
+      if (tokens.length > 2) throw new ParseProblem('Usage: /observe [entity-id]');
+      return { type: 'query-observation', ...(tokens[1] ? { entityId: tokens[1] } : {}) };
+    case '/entity':
+      if (tokens[1]?.toLowerCase() === 'action') {
+        exact(tokens, 3, '/entity action <entity-id>');
+        return { type: 'query-action', entityId: tokens[2] };
+      }
+      if (tokens[1]?.toLowerCase() === 'move') {
+        exact(tokens, 6, '/entity move <entity-id> <x> <y> <z>');
+        return {
+          type: 'start-action',
+          entityId: tokens[2],
+          action: 'move-to',
+          position: [finite(tokens[3], 'x'), finite(tokens[4], 'y'), finite(tokens[5], 'z')],
+        };
+      }
+      if (tokens[1]?.toLowerCase() === 'stop') {
+        exact(tokens, 3, '/entity stop <entity-id>');
+        return { type: 'interrupt-action', entityId: tokens[2] };
+      }
+      throw new ParseProblem(
+        'Usage: /entity action <entity-id> | /entity move <entity-id> <x> <y> <z> | /entity stop <entity-id>',
+      );
+    case '/path':
+      exact(tokens, 5, '/path <entity-id> <x> <y> <z>');
+      return {
+        type: 'query-path',
+        entityId: tokens[1],
+        position: [finite(tokens[2], 'x'), finite(tokens[3], 'y'), finite(tokens[4], 'z')],
+      };
+    case '/poi':
+      if (tokens[1]?.toLowerCase() !== 'nearby') throw new ParseProblem('Usage: /poi nearby <entity-id> <radius>');
+      exact(tokens, 4, '/poi nearby <entity-id> <radius>');
+      return { type: 'query-pois', entityId: tokens[2], radius: finite(tokens[3], 'radius') };
+    case '/break':
+      exact(tokens, 4, '/break <x> <y> <z>');
+      return {
+        type: 'break-voxel',
+        position: [integer(tokens[1], 'x'), integer(tokens[2], 'y'), integer(tokens[3], 'z')],
+      };
+    case '/cancelbreak':
+      exact(tokens, 1, '/cancelbreak');
+      return { type: 'cancel-break' };
+    case '/pickup':
+      exact(tokens, 2, '/pickup <entity-id>');
+      return { type: 'pickup-item', entityId: tokens[1] };
+    case '/drop':
+      exact(tokens, 3, '/drop <slot> <count>');
+      return { type: 'drop-item', slot: integer(tokens[1], 'slot'), count: integer(tokens[2], 'count') };
+    case '/place':
+      exact(tokens, 4, '/place <x> <y> <z>');
+      return {
+        type: 'place-voxel',
+        position: [integer(tokens[1], 'x'), integer(tokens[2], 'y'), integer(tokens[3], 'z')],
+      };
+    case '/use':
+      exact(tokens, 1, '/use');
+      return { type: 'use-item' };
+    case '/attack':
+      exact(tokens, 2, '/attack <entity-id>');
+      return { type: 'attack-entity', entityId: tokens[1] };
+    case '/respawn':
+      exact(tokens, 1, '/respawn');
+      return { type: 'respawn' };
+    case '/tick':
+      exact(tokens, 2, '/tick <seconds>');
+      return { type: 'advance-gameplay', seconds: finite(tokens[1], 'seconds') };
+    case '/nearby':
+      exact(tokens, 2, '/nearby <radius>');
+      return { type: 'query-nearby', radius: finite(tokens[1], 'radius') };
     case '/inspect':
       if (tokens[1]?.toLowerCase() === 'voxel') {
         exact(tokens, 5, '/inspect voxel <x> <y> <z>');
@@ -120,7 +249,7 @@ export type SlashCommandExecution = {
 };
 
 export async function executeSlashCommand(
-  executor: ServerCommandExecutor,
+  executor: CommandExecutorPort,
   source: CommandSource,
   input: string,
 ): Promise<SlashCommandExecution> {

@@ -12,15 +12,23 @@ The deployment target is [seedlands-game.github.io/seedlands-web-sandbox](https:
 
 ## Current status
 
-The sandbox is an early technical prototype. Its current capabilities include:
+The sandbox now contains a local single-player survival and exploration MVP. Its current capabilities include:
 
 - Deterministic macro geography, climate, biomes, rivers, lakes, trees, and terrain. The same `seed + generatorVersion` produces the same base world regardless of chunk load order.
 - Compact `32³` `Uint16Array` chunks and chunk-level greedy meshes rather than one entity or draw call per voxel.
+- Chunk meshes are submitted in opaque, cutout, and transparent render-category batches. Voxel-specific GLSL/WGSL chunks sample a texture array, while Float16 UVs and safe Uint16 indices reduce mesh transfer size.
 - Player-centred chunk streaming with bounded CPU/GPU retention.
-- An in-process authoritative `GameServer` for chunks, player state, entities, and world time.
-- First-person movement, collision, jumping, voxel raycast editing, and material selection.
-- Browser persistence for the seed, player position, and materialized chunk snapshots.
-- A day/night environment, transparent water, quality presets, a macro world map, and a performance/debug HUD.
+- A single `GameServer` inside the Authority Worker owns authoritative chunks, player state, entities, and world time.
+- First-person movement, collision, jumping, continuous hold-to-mine harvesting, textured 3D drops with gravity and nearby attraction, and inventory-backed placement.
+- A minimal survival loop with health, hunger, 24 inventory slots, an 8-slot hotbar, food, four recipes, tools, combat, death drops, and respawning.
+- A deterministic starter ecology with a passive grazer, a night-only hostile, a scheduled settler, nearby POIs, bounded voxel ground navigation, and inspectable asynchronous actions.
+- Browser persistence for the seed, world clock, player state, gameplay entities, actor needs/actions, POIs, inventory, and materialized chunk snapshots.
+- A complete start/continue/pause/save-and-exit shell, settings, an in-game guide, a macro map, and a retained Svelte 5 HUD with a shared dark-stone, brass, and arcane visual language.
+- Craftable non-full-cube 3D lantern blocks with compact collision, legacy full-cube glowstone, bounded artificial lights and stable local shadows, sun shadows with cutout foliage, real scene reflections on water, and quality-dependent color grading.
+- Original sparse electronic music, material-dependent effects, spatial creature calls, separate audio buses, and optional local reference-track import.
+- Real 3D first-person hands and tools, textured voxel creature models, movement animation, and damage feedback.
+- Reach-limited block outlines and a top target card; icon-based health and hunger above a compact hotbar.
+- Bounded voxel water flow with gravity, obstacles, source retraction, cross-chunk water levels, and persisted flow state. The sun moves through world space with the day/night light direction.
 
 Not yet implemented are the defining systems of the full Seedlands vision: essence and magic, autonomous NPC societies, persistent historical events, longevity and reincarnation, or the content of the six realms.
 
@@ -43,28 +51,53 @@ pnpm preview
 
 No private `.env` file is required to run or build the sandbox.
 
+## Your first journey
+
+Try **mosslight-68** for a wooded riverbank, or **living-world-autonomy** for a clearer starter camp in dry terrain. The menu's recommended-start button fills the seed without starting a world. Entering an existing seed continues its saved progress.
+
+Hold the left mouse button to harvest a nearby tree, then approach its falling drops to attract and collect them. Press **E** to turn logs into planks and make a wooden axe. Leaves provide berries. Dig a staircase for stone, leaving a route to jump back out; make a stone pickaxe and a lantern, then build a small lit shelter. Grazer and settler routines run locally, and night stalkers become dangerous after dark. Eat selected berries with right click, or select food in the inventory and use its Eat button. Save and exit through the pause menu, then continue from the main menu.
+
+Inventory slots support two-click moves, merges, and swaps. The first eight slots are the hotbar. Current recipes are one log → four planks; three planks → wooden axe; two planks + three stone → stone pickaxe; two planks + one stone → lantern.
+
 ## Controls
 
-| Input           | Action                                       |
-| --------------- | -------------------------------------------- |
-| Click the scene | Capture the pointer and look around          |
-| WASD            | Move                                         |
-| Mouse           | Look                                         |
-| Space           | Jump                                         |
-| Left click      | Remove the targeted voxel                    |
-| Right click     | Place the selected voxel                     |
-| 1–4             | Select Dirt, Stone, Wood, or Sand            |
-| M               | Toggle the macro world map                   |
-| F3              | Toggle the debug HUD                         |
-| F4              | Toggle the server debug command shell        |
-| P               | Pause or resume world time                   |
-| [ / ]           | Move world time backward or forward one hour |
-| T               | Cycle 1×, 20×, and 100× time speed           |
-| Esc             | Release the pointer                          |
+| Input           | Action                                              |
+| --------------- | --------------------------------------------------- |
+| Click the scene | Capture the pointer and look around                 |
+| WASD            | Move                                                |
+| Mouse           | Look                                                |
+| Space           | Jump; rise in water                                 |
+| Shift in water  | Dive                                                |
+| Hold left click | Harvest the targeted voxel or attack a creature     |
+| Right click     | Use selected food, or place the selected block item |
+| 1–8             | Select a hotbar slot                                |
+| E               | Toggle inventory and crafting                       |
+| M               | Toggle the macro world map                          |
+| F3              | Toggle the debug HUD                                |
+| F3 + B          | Toggle authoritative and predicted collision boxes  |
+| F4              | Toggle the server debug command shell               |
+| P               | Pause or resume world time                          |
+| [ / ]           | Move world time backward or forward one hour        |
+| T               | Cycle 1×, 20×, and 100× time speed                  |
+| Esc             | Close the current panel or pause the game           |
+
+## Sound and visual quality
+
+Settings are available from the main and pause menus. Volume changes apply immediately; quality changes apply on the next world entry. Browser audio starts after a user gesture. Built-in music consists of three original sparse cues separated by intentional silence, with wind/water ambience and gameplay effects continuing independently.
+
+A local reference track can be selected in Settings (up to 30 MiB and 10 minutes). It stays on the device and is never uploaded. Refreshing the page requires selecting the file again; removing it returns to built-in music.
+
+| Preset | Local lights / shadowed lights | Sun shadow | Water reflection       | Color grading |
+| ------ | ------------------------------ | ---------- | ---------------------- | ------------- |
+| Low    | 2 / 0                          | Off        | Off                    | Off           |
+| Medium | 4 / 1                          | 512 px     | 128 px, every 8 frames | On            |
+| High   | 6 / 2                          | 1024 px    | 256 px, every 4 frames | On            |
+
+Reflections use one nearby horizontal water plane. High favors visual detail; Medium is the desktop default. Lighting does not include global illumination. Water flow is simulated separately as bounded voxel levels.
 
 ## Server command debugging
 
-Press F4 after entering a world to open the compact debug shell. It accepts `/setblock`, `/fill`, `/tp`, `/time get`, `/time set`, `/seed`, `/save`, `/inspect voxel`, and `/inspect chunk`. The shell releases pointer lock while open; press Esc to close it. Its log text can be selected and copied with native browser controls, and the input accepts normal paste operations. Use Up and Down to browse the latest 20 submitted commands and return to an unfinished draft.
+Press F4 after entering a world to open the compact debug shell. World commands include `/setblock`, `/fill`, `/tp`, `/time get`, `/time set`, `/seed`, `/save`, `/inspect voxel`, and `/inspect chunk`. Gameplay commands include `/inventory`, `/give`, `/damage`, `/heal`, `/spawnitem`, `/spawn creature`, `/craft`, `/break`, `/cancelbreak`, `/pickup`, `/drop`, `/place`, `/use`, `/attack`, `/respawn`, `/tick`, and `/nearby`. Actor debugging adds `/summon`, `/observe`, `/entity action`, `/entity move`, `/entity stop`, `/path`, and `/poi nearby`; invalid arguments return usage details in the shell. The shell releases pointer lock while open; press Esc to close it. Its log text can be selected and copied with native browser controls, and the input accepts normal paste operations. Use Up and Down to browse the latest 20 submitted commands and return to an unfinished draft.
 
 The same structured command boundary is available without PlayCanvas, Canvas, or the DOM:
 
@@ -72,18 +105,24 @@ The same structured command boundary is available without PlayCanvas, Canvas, or
 pnpm server:headless -- --seed my-debug-world
 ```
 
-The first headless harness uses in-process memory persistence. `/save` exercises the server persistence boundary and supports reload tests within the process; it does not create a durable world file after the process exits.
+The first headless harness uses in-process memory persistence. `/save` exercises both chunk and gameplay snapshot persistence and supports reload tests within the process; it does not create a durable world file after the process exits.
 
 ## Architecture
 
-`GameServer.editBatch()` is the authoritative transaction boundary for batched world mutations. The browser runtime is split by responsibility across startup, player control, rendering adapters, world streaming, environment, HUD, and persistence modules.
+`GameServer.editBatch()` is the authoritative transaction boundary for batched world mutations. The browser runtime is split by responsibility across startup, player control, rendering adapters, world streaming, environment, HUD, and persistence modules. One Svelte 5 root owns the runtime UI. Game code publishes small, independently subscribed Shell, HUD, Interaction, and Debug projections through `UiBridge`; components send intents back through an action port and never own authoritative World or Server state.
+
+The browser runs an Authority Worker with fixed-step physics, a separate Logic Worker, one reserved fluid computation worker, one general computation worker, and one persistence worker. The optional second general worker raises the total from five to six. Rendering and local-player prediction stay on the main thread. Physics, gameplay, and fluid clocks have independent frequencies and bounded catch-up; expensive logic and mesh work do not advance the physics clock. Workers exchange versioned messages and transferable buffers without requiring shared memory.
+
+Players, creatures, and dropped items share registered collision shapes and swept collision resolution. Entity positions use the center of the feet. A one-block bank requires jumping: walking against it does not teleport the player upward. Water immersion uses body volume, while underwater visuals and sound use the camera's depth. F3+B displays the actual authoritative and predicted bodies; the debug panel also controls contact details and pickup sensors.
 
 ```text
-src/app/       Browser startup, PlayCanvas lifecycle, UI, input, and styles
+src/app/       Browser startup, PlayCanvas lifecycle, retained UI bridge, input, and styles
 src/client/    Browser persistence and client-side adapters
 src/server/    Authoritative world, entity, clock, and snapshot interfaces
+src/physics/   Shared body shapes, swept collision, contacts, gravity, and fluid response
+src/runtime/   Independent clocks, scheduling, worker budgets, and session protocols
 src/world/     Deterministic world, voxel, mesh, coordinate, and save logic
-src/worker/    Experimental worker entry point and transfer adapter
+src/worker/    Authority, logic, fluid, general computation, and persistence entry points
 tests/         Unit, architecture, and long-lived browser regression tests
 changes/       Change contracts and their delivery-specific evidence
 scripts/       Local harness and engineering scripts
@@ -114,10 +153,11 @@ This repository may remain useful independently as an open Web sandbox even if t
 
 ## Known limitations
 
-- Water is rendered but not simulated as pressure, flow, or waterfalls.
+- Water uses bounded voxel levels and one nearby planar reflection surface. Simulation pauses outside the active streaming window; pressure, buoyancy and ocean waves are not implemented.
 - There are no caves, propagated voxel lighting, mobile touch controls, floating origin, or distant-world LOD yet.
 - Browser persistence favours a simple prototype deployment rather than large-world storage.
-- The current vertical streaming range is sized for this prototype's terrain.
+- No AgentServer or LLM service is required or connected. Creature and settler behaviour is a bounded deterministic foundation; there is no dialogue, trading, reproduction, crowd avoidance, or full ecology simulation yet.
+- The browser MVP renders and permits normal building at y=0–63; the bottom layer is retained as a foundation and cannot be mined through normal controls. Attempts outside this range show a message and keep the selected item. Core world coordinates and stored data remain unrestricted by this presentation limit.
 - The main JavaScript bundle is large and has not yet been split into lazy-loaded runtime chunks.
 
 ## Contributing and security

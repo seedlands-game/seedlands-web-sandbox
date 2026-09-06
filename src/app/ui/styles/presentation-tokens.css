@@ -1,0 +1,30 @@
+:root {
+  --ui-color-content: #f1e8d4;
+  --ui-color-content-muted: #b9b1a1;
+  --ui-color-success: #e4c47e;
+  --ui-color-error: #ffab8c;
+  --ui-color-brass: #b08b48;
+  --ui-color-brass-light: #e4c47e;
+  --ui-color-arcane: #78d6d1;
+  --ui-color-violet: #b69bdb;
+  --ui-color-danger: #de765b;
+  --ui-surface: rgb(22 24 26 / 94%);
+  --ui-surface-strong: #111618;
+  --ui-surface-raised: #242728;
+  --ui-border: rgb(176 139 72 / 55%);
+  --ui-border-quiet: rgb(221 199 153 / 18%);
+  --ui-focus: #8cdfdb;
+  --ui-space-1: 4px;
+  --ui-space-2: 8px;
+  --ui-space-3: 12px;
+  --ui-size-control: 42px;
+  --ui-font-body: 'PingFang SC', 'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;
+  --ui-font-display: 'Palatino Linotype', Palatino, Georgia, 'Songti SC', serif;
+  --ui-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ui-radius: 2px;
+  --ui-motion-instant: 60ms;
+  --ui-motion-fast: 140ms;
+  --ui-motion-normal: 220ms;
+  --ui-motion-reveal: 400ms;
+  --ui-z-overlay: 20;
+}

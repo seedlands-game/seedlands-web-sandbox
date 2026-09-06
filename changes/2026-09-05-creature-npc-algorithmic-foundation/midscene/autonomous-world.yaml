@@ -1,0 +1,73 @@
+page:
+  url: ${VOXEL_SANDBOX_URL}
+
+agent:
+  testId: seedlands-creature-npc-algorithmic-foundation
+  groupName: Seedlands 生物与 NPC 算法底座
+  groupDescription: 检查无需调试生成的被动生物、夜间敌对生物、营地 NPC 与危险反馈。
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 18
+
+tasks:
+  - name: 检查自然营地与三类实体
+    flow:
+      - ai: 在“世界 Seed”字段输入“living-world-autonomy”，点击“进入世界”，等待世界完成加载。
+      - sleep: 7000
+      - javascript: |
+          (async () => {
+            const api = window.__seedlandsHarness;
+            if (!api) throw new Error('Seedlands Harness unavailable');
+            for (let attempt = 0; attempt < 40 && !api.snapshot().onGround; attempt += 1) {
+              await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+            if (!api.snapshot().onGround) throw new Error('Player did not reach stable ground');
+            const origin = api.snapshot().player;
+            window.__change9ViewOrigin = origin;
+            api.setSpectatorPosition(3, origin[1] + 3, 10);
+            api.setView(0, -16);
+          })()
+      - sleep: 800
+      - aiAssert: 右上角附近实体图例清楚列出温顺林鹿、夜行兽、营地居民和浆果掉落物；场景里能看到野生树以及绿色、紫色等不同于规则地形方块的实体形体，生存 HUD 仍清楚且无遮挡。
+      - javascript: |
+          (() => {
+            const nodes = [...document.querySelectorAll('[data-archetype]')];
+            return nodes.map((node) => ({
+              label: node.getAttribute('aria-label'),
+              archetype: node.getAttribute('data-archetype'),
+              behavior: node.getAttribute('data-behavior'),
+              position: node.getAttribute('data-position'),
+            }));
+          })()
+      - aiAssert: 绿色动物形体、紫色尖顶形体和蓝色直立形体在颜色与轮廓上可区分，附近实体图例能把它们分别对应到林鹿、夜行兽和居民；画面没有冒充生成式对话、任务或完整社会系统。
+
+  - name: 检查移动、日程与夜间危险
+    flow:
+      - javascript: |
+          (() => {
+            const api = window.__seedlandsHarness;
+            if (!api) throw new Error('Seedlands Harness unavailable');
+            const origin = window.__change9ViewOrigin;
+            if (!origin) throw new Error('Original player position unavailable');
+            api.setSpectatorPosition(origin[0], origin[1], origin[2]);
+            api.setView(90, -12);
+          })()
+      - sleep: 500
+      - javascript: |
+          (() => {
+            const api = window.__seedlandsHarness;
+            if (!api) throw new Error('Seedlands Harness unavailable');
+            api.advanceGameplay(5);
+            api.setWorldTime(22);
+            api.advanceGameplay(4);
+            return api.snapshot();
+          })()
+      - sleep: 800
+      - aiAssert: 夜间场景仍显示地形和附近实体图例，红紫色夜行兽语义清楚；生命值已低于满值或受击反馈明确表达真实威胁，玩家尚未进入死亡遮罩，画面没有因实体移动出现重影或重复模型。
+      - javascript: |
+          (() => [...document.querySelectorAll('[data-archetype]')].map((node) => ({
+            label: node.getAttribute('aria-label'),
+            behavior: node.getAttribute('data-behavior'),
+            position: node.getAttribute('data-position'),
+          })))()
+      - aiAssert: 附近实体图例中的林鹿、夜行兽和居民仍各自只有一份，画面没有重复模型、路径线或 Action 内部编号；左上角运行指标来自本次 harness 模式，“受击”是面向玩家的危险反馈，不属于算法内部状态泄漏。

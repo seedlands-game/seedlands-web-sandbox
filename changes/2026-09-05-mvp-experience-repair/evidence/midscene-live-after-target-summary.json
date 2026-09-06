@@ -1,0 +1,33 @@
+{
+  "summary": {
+    "total": 1,
+    "successful": 0,
+    "failed": 1,
+    "partialFailed": 0,
+    "notExecuted": 0,
+    "totalDuration": 28835,
+    "generatedAt": "9/5/2026, 3:09:12 PM"
+  },
+  "results": [
+    {
+      "script": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/changes/2026-09-05-mvp-experience-repair/midscene/experience-repair.yaml",
+      "success": false,
+      "resultType": "failed",
+      "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/experience-repair-1788592123559.json",
+      "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/experience-repair-2026-09-05_15-08-43-85ab2e24.html",
+      "attempts": [
+        {
+          "attempt": 1,
+          "success": false,
+          "resultType": "failed",
+          "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/experience-repair-1788592123559.json",
+          "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/experience-repair-2026-09-05_15-08-43-85ab2e24.html",
+          "error": "Assertion failed: 命中的可达方块有贴合单个方块边界的三维轮廓；没有把轮廓留在旧方块上，也没有对超距或被遮挡目标显示错误信息。\nReason: 截图显示玩家正在挖掘泥土方块，准星对准的方块上方显示了“泥土”和“SeedInvite”的提示信息。画面中并没有显示任何三维轮廓线，也没有显示关于方块边界的轮廓效果。因此，关于“命中的可达方块有贴合单个方块边界的三维轮廓”的描述与当前截图不符。",
+          "duration": 28835
+        }
+      ],
+      "error": "Assertion failed: 命中的可达方块有贴合单个方块边界的三维轮廓；没有把轮廓留在旧方块上，也没有对超距或被遮挡目标显示错误信息。\nReason: 截图显示玩家正在挖掘泥土方块，准星对准的方块上方显示了“泥土”和“SeedInvite”的提示信息。画面中并没有显示任何三维轮廓线，也没有显示关于方块边界的轮廓效果。因此，关于“命中的可达方块有贴合单个方块边界的三维轮廓”的描述与当前截图不符。",
+      "duration": 28835
+    }
+  ]
+}

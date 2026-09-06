@@ -9,7 +9,7 @@
   <body>
     <canvas id="game"></canvas>
     <main id="ui">
-      <section id="start-card" class="panel">
+      <section id="start-card" class="panel" data-ui-fallback aria-label="Seedlands 启动界面">
         <p class="eyebrow">PROCEDURAL FANTASY WORLD</p>
         <h1>Seedlands</h1>
         <p>走进一个由 Seed 苏醒、会随脚步延展的体素秘境。</p>
@@ -17,7 +17,7 @@
           <span>草原</span><span>森林</span><span>山脉</span><span>河湖</span>
         </div>
         <div class="start-fields">
-          <label>世界 Seed <input id="seed" maxlength="48" placeholder="留空创建随机世界" /></label>
+          <label>世界 Seed <input id="seed" maxlength="48" placeholder="需要 JavaScript 才能进入世界" /></label>
           <label
             >视觉质量
             <select id="quality">
@@ -27,59 +27,9 @@
             </select></label
           >
         </div>
-        <button id="enter">进入世界</button>
+        <button id="enter" disabled aria-disabled="true">进入世界</button>
         <small>同一 Seed + 生成器版本会得到同一基础世界</small>
-      </section>
-      <section id="hud" hidden>
-        <div id="crosshair" aria-label="准星"><span></span></div>
-        <div id="world-clock" class="hud-chip"></div>
-        <div id="interaction-feedback" role="status" aria-live="polite"></div>
-        <div id="debug" class="panel" hidden></div>
-        <section id="debug-command-shell" class="panel" role="dialog" aria-label="服务端调试命令" hidden>
-          <header>
-            <strong>Server Debug Shell</strong>
-            <span>F4 / Esc 关闭</span>
-          </header>
-          <div id="debug-command-log" role="log" aria-label="最近命令输出" tabindex="0"></div>
-          <form id="debug-command-form">
-            <label for="debug-command-input">命令</label>
-            <div class="command-line">
-              <span aria-hidden="true">›</span>
-              <input
-                id="debug-command-input"
-                name="command"
-                autocomplete="off"
-                autocapitalize="off"
-                spellcheck="false"
-                placeholder="/inspect voxel 0 0 0"
-              />
-            </div>
-          </form>
-          <div id="debug-command-status" role="status" aria-live="polite">输入 slash command，按 Enter 执行。</div>
-          <small>↑↓ 历史 · /seed · /inspect · /setblock · /fill · /tp · /time · /save</small>
-        </section>
-        <button id="map-toggle" class="panel" type="button">Macro 地图</button>
-        <section id="macro-map-panel" class="panel" hidden aria-label="Macro 世界地图总览">
-          <div class="map-header">
-            <strong>Macro 世界总览</strong><button id="map-close" type="button">关闭</button>
-          </div>
-          <label
-            >图层
-            <select id="map-layer">
-              <option value="elevation">Elevation</option>
-              <option value="biome">Biome</option>
-              <option value="temperature">Temperature</option>
-              <option value="humidity">Humidity</option>
-              <option value="hydrology">River / Lake</option>
-            </select></label
-          >
-          <canvas id="macro-map" width="96" height="96"></canvas>
-          <small>以世界原点为中心的 6.1 km Macro 采样；不生成 Chunk。</small>
-        </section>
-        <div id="help" class="panel">
-          WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–4 选材质 · M 地图 · F3 指标 · F4 命令 · P 暂停时间
-        </div>
-        <div id="hotbar"></div>
+        <section id="hud" hidden aria-hidden="true"></section>
       </section>
     </main>
     <script type="module" src="/src/app/main.ts"></script>

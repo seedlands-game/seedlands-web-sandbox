@@ -20,6 +20,14 @@ export type ChunkResourceAdapter<Task extends ChunkTask, Part, Resource extends 
   create: (task: Task) => Resource;
   commitPart: (resource: Resource, task: Task, part: Part) => void;
   attach: (resource: Resource, task: Task, onPostrender: () => void) => void;
+  prepareReplacement?: (previous: Resource, current: Resource, task: Task) => boolean;
+  transitionReplacement?: (
+    previous: Resource,
+    current: Resource,
+    task: Task,
+    onComplete: () => void,
+    onTransitionVisible?: () => void,
+  ) => boolean;
   destroy: (resource: Resource) => void;
 };
 
@@ -34,6 +42,8 @@ type CommitJob<Task extends ChunkTask, Part, Resource extends object> = {
   parts: Part[];
   nextPart: number;
   resource: Resource;
+  previous?: ChunkRecord<Task, Resource>;
+  transitionPrepared?: boolean;
 };
 
 type RepositoryOptions<Task extends ChunkTask, Part, Resource extends object> = {
@@ -42,7 +52,8 @@ type RepositoryOptions<Task extends ChunkTask, Part, Resource extends object> = 
   profile: CommitProfile;
   now: () => number;
   summarize: (parts: Part[]) => ChunkSummary;
-  onVisible: (task: Task) => void;
+  onVisible: (task: Task, state: { transitionPending: boolean }) => void;
+  onTransitionVisible: (task: Task) => void;
   onDiscard: (task: Task, reason: string) => void;
 };
 
@@ -117,6 +128,14 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       this.options.adapter.commitPart(job.resource, job.task, part);
       job.nextPart += 1;
       this.frameParts += 1;
+      if (
+        job.nextPart === job.parts.length &&
+        this.frameCommits < this.options.profile.maxMeshCommitsPerFrame &&
+        this.options.now() - startedAt < this.options.profile.maxCommitMs
+      ) {
+        this.commitQueue.shift();
+        this.attach(job);
+      }
     }
     this.maxFrameCommits = Math.max(this.maxFrameCommits, this.frameCommits);
     this.maxFrameParts = Math.max(this.maxFrameParts, this.frameParts);
@@ -149,6 +168,9 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       this.discard(job);
       return;
     }
+    job.previous = this.chunks.get(job.task.chunkKey);
+    if (job.previous)
+      job.transitionPrepared = this.options.adapter.prepareReplacement?.(job.previous.resource, job.resource, job.task);
     this.attaching.add(job);
     this.options.adapter.attach(job.resource, job.task, () => this.finishAttach(job));
     this.frameCommits += 1;
@@ -160,15 +182,32 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       this.discard(job);
       return;
     }
-    const previous = this.chunks.get(job.task.chunkKey);
-    if (previous) this.destroy(previous.resource);
+    const previous = job.previous;
     this.chunks.set(job.task.chunkKey, {
       task: job.task,
       resource: job.resource,
       ...this.options.summarize(job.parts),
     });
+    let transitionPending = false;
+    if (previous) {
+      if (job.transitionPrepared && this.options.adapter.transitionReplacement)
+        transitionPending = this.options.adapter.transitionReplacement(
+          previous.resource,
+          job.resource,
+          job.task,
+          () => this.destroy(previous.resource),
+          () => this.finishTransitionVisible(job),
+        );
+      else this.destroy(previous.resource);
+    }
     this.renderedAfterPostrender = true;
-    this.options.onVisible(job.task);
+    this.options.onVisible(job.task, { transitionPending });
+  }
+
+  private finishTransitionVisible(job: CommitJob<Task, Part, Resource>) {
+    const current = this.chunks.get(job.task.chunkKey);
+    if (this.disposed || current?.task !== job.task || current.resource !== job.resource) return;
+    this.options.onTransitionVisible(job.task);
   }
 
   private discard(job: CommitJob<Task, Part, Resource>) {

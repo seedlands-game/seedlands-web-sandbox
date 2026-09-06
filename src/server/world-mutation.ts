@@ -25,7 +25,7 @@ export function assertMutationCoordinate(value: number): void {
 }
 
 export function assertVoxelValue(value: number): void {
-  if (!Number.isInteger(value) || value < Voxel.Air || value > Voxel.Water)
+  if (!Number.isInteger(value) || value < Voxel.Air || value > Voxel.Lantern)
     throw new RangeError(`Mutation voxel must be a registered voxel id, received ${String(value)}.`);
 }
 

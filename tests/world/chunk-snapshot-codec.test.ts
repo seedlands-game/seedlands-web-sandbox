@@ -3,6 +3,7 @@ import {
   createStoredChunkRecord,
   decodeStoredChunkRecord,
   storedChunkRecordBytes,
+  validateStoredFluid,
 } from '../../src/world/chunk-snapshot-codec';
 import { CHUNK_SIZE } from '../../src/world/voxel';
 
@@ -73,6 +74,22 @@ describe('Chunk snapshot codec', () => {
     const second = createStoredChunkRecord({ ...identity(7), voxels: current, proceduralVoxels: procedural });
 
     expect(first).toEqual(second);
+  });
+
+  it('round-trips and validates the versioned fluid sidecar while accepting legacy records', () => {
+    const procedural = new Uint16Array(VOXEL_COUNT);
+    const voxels = procedural.slice();
+    const fluid = new Uint8Array(VOXEL_COUNT);
+    voxels[17] = 8;
+    fluid[17] = 0x88;
+    const record = createStoredChunkRecord({ ...identity(), voxels, proceduralVoxels: procedural, fluid });
+    expect(validateStoredFluid(record)).toEqual(fluid);
+    expect(
+      validateStoredFluid(createStoredChunkRecord({ ...identity(), voxels, proceduralVoxels: procedural })),
+    ).toBeUndefined();
+    const corrupt = { ...record, fluid: record.fluid!.slice() };
+    corrupt.fluid[17] = 3;
+    expect(() => validateStoredFluid(corrupt)).toThrow(/checksum|corrupt/i);
   });
 
   it('fails closed for corruption, truncation, identity drift and procedural base drift', () => {

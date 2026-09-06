@@ -26,22 +26,8 @@ const moduleRunner = await createServer({
 });
 
 try {
-  const [{ GameServer }, { MemoryChunkPersistence }, commandModule, parserModule] = await Promise.all([
-    moduleRunner.ssrLoadModule('/src/server/game-server.ts'),
-    moduleRunner.ssrLoadModule('/src/server/persistence/memory-chunk-persistence.ts'),
-    moduleRunner.ssrLoadModule('/src/server/commands/server-command-executor.ts'),
-    moduleRunner.ssrLoadModule('/src/server/commands/slash-command-parser.ts'),
-  ]);
-  const persistence = new MemoryChunkPersistence();
-  const gameServer = new GameServer({ seedText: options.seed, persistence });
-  gameServer.createEntity({ id: 'headless-player', kind: 'player', position: [0, 34, 0] });
-  const executor = new commandModule.ServerCommandExecutor(gameServer);
-  const source = {
-    actorId: 'headless-player',
-    sourceType: 'local-developer',
-    entityId: 'headless-player',
-    capabilities: commandModule.ALL_COMMAND_CAPABILITIES,
-  };
+  const { HeadlessSession } = await moduleRunner.ssrLoadModule('/src/server/headless/headless-session.ts');
+  const session = await HeadlessSession.create({ seedText: options.seed });
   const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY && !options.json);
   const lines = createInterface({
     input: process.stdin,
@@ -58,7 +44,7 @@ try {
       if (interactive) lines.prompt();
       continue;
     }
-    const execution = await parserModule.executeSlashCommand(executor, source, line);
+    const execution = await session.executeLine(line);
     if (interactive) {
       const result = execution.result;
       process.stdout.write(`${result.success ? 'OK' : 'ERROR'} · ${result.message ?? result.error.message}\n`);

@@ -18,11 +18,15 @@ export type StoredChunkRecord = StoredChunkIdentity & {
   payloadBytes: number;
   payloadChecksum: number;
   proceduralBaseSignature?: number;
+  fluidVersion?: 1;
+  fluid?: Uint8Array;
+  fluidChecksum?: number;
 };
 
 export type CreateStoredChunkRecordInput = StoredChunkIdentity & {
   voxels: Uint16Array;
   proceduralVoxels: Uint16Array;
+  fluid?: Uint8Array;
 };
 
 export type DecodeStoredChunkRecordInput = StoredChunkIdentity & {
@@ -186,8 +190,18 @@ export function createStoredChunkRecord(input: CreateStoredChunkRecordInput): St
     ...(selected.proceduralBaseSignature === undefined
       ? {}
       : { proceduralBaseSignature: selected.proceduralBaseSignature }),
+    ...(input.fluid ? { fluidVersion: 1 as const, fluid: input.fluid.slice(), fluidChecksum: crc32(input.fluid) } : {}),
   };
 }
+
+export const validateStoredFluid = (record: StoredChunkRecord): Uint8Array | undefined => {
+  if (record.fluid === undefined && record.fluidVersion === undefined && record.fluidChecksum === undefined)
+    return undefined;
+  if (record.fluidVersion !== 1 || !(record.fluid instanceof Uint8Array) || record.fluid.length !== RAW_VOXEL_COUNT)
+    throw new Error('Stored fluid sidecar is corrupt.');
+  if (record.fluidChecksum !== crc32(record.fluid)) throw new Error('Stored fluid sidecar checksum mismatch.');
+  return record.fluid.slice();
+};
 
 const assertIdentity = (record: StoredChunkRecord, expected: DecodeStoredChunkRecordInput) => {
   const fields = [

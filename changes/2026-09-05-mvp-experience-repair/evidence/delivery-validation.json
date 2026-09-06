@@ -1,0 +1,47 @@
+{
+  "productionInputSha256": "0008bf68283c749bccaca2674459d110fda5f7bae46a9bea9d5ecb5f78ac1496",
+  "testHead": "f67cea6bec480ccdc1d1e8e8f61d0165be297deb",
+  "worktreeDirtyDuringTests": true,
+  "static": {
+    "exitCode": 0,
+    "passed": 273,
+    "skipped": 4,
+    "worldLineCoverage": 95.69,
+    "svelteErrors": 0,
+    "svelteWarnings": 0
+  },
+  "build": {
+    "exitCode": 0,
+    "warnings": ["existing main bundle exceeds 500 kB"]
+  },
+  "baseline": {
+    "passed": 9
+  },
+  "repairFunctional": {
+    "distinctPassed": 18,
+    "note": "17 in suite, one floating-point assertion correction rerun; seven target/layout cases subsequently rerun"
+  },
+  "naturalJourney": {
+    "passed": 1,
+    "durationMinutes": 2.2,
+    "exitCode": 0,
+    "debugWorldMutations": false,
+    "readonlyDiagnostics": true
+  },
+  "midscene": {
+    "live": "PASS",
+    "pairedPrototype": "PASS",
+    "modelFrontBackSide": "PASS"
+  },
+  "performanceEvidence": "performance-profile.json",
+  "account": {
+    "iterationStartPercent": 51,
+    "deliveryPercent": 60,
+    "ceilingPercent": 71,
+    "resetUsed": false
+  },
+  "historicalSoak": {
+    "source": "48d2dd2a1b014c529cc1824a76210be6c277003c",
+    "rerunOnRepair": false
+  }
+}

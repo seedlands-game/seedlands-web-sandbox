@@ -9,10 +9,20 @@ export type MeshTaskSnapshot = MeshTaskIdentity & {
   chunkKey: string;
   canonical: Uint16Array;
   halo: Uint16Array;
+  fluid?: Uint8Array;
+  fluidHalo?: Uint8Array;
 };
 
 export function createMeshTaskSnapshot(input: MeshTaskSnapshot): MeshTaskSnapshot {
-  return { ...input, canonical: input.canonical.slice(), halo: input.halo.slice() };
+  const fluid = input.fluid ?? Uint8Array.from(input.canonical, (voxel) => (voxel === 8 ? 0x88 : 0));
+  const fluidHalo = input.fluidHalo ?? Uint8Array.from(input.halo, (voxel) => (voxel === 8 ? 0x88 : 0));
+  return {
+    ...input,
+    canonical: input.canonical.slice(),
+    halo: input.halo.slice(),
+    fluid: fluid.slice(),
+    fluidHalo: fluidHalo.slice(),
+  };
 }
 
 export function isCurrentMeshTask(task: MeshTaskIdentity, current: MeshTaskIdentity): boolean {

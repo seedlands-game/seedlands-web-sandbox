@@ -4,6 +4,8 @@ import { resolve, relative } from 'node:path';
 import { transformWithEsbuild } from 'vite';
 import { currentBrowserEvidence } from './harness-browser-evidence.mjs';
 import { collectDistMetrics } from './harness-file-metrics.mjs';
+import * as gameplayHarness from './harness-gameplay-modules.mjs';
+import { bytes, percentile, summarize } from './harness-summary.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const baselinePath = resolve(root, 'harness/baseline.json');
@@ -19,18 +21,6 @@ const sourceSha = (() => {
     return 'UNKNOWN';
   }
 })();
-const percentile = (values, q) => values[Math.min(values.length - 1, Math.max(0, Math.ceil(values.length * q) - 1))];
-const summarize = (values) => {
-  const sorted = [...values].sort((a, b) => a - b);
-  return {
-    count: sorted.length,
-    p50Ms: percentile(sorted, 0.5),
-    p95Ms: percentile(sorted, 0.95),
-    maxMs: sorted.at(-1),
-    totalMs: sorted.reduce((sum, value) => sum + value, 0),
-  };
-};
-const bytes = (value) => new TextEncoder().encode(value).byteLength;
 const compileModule = async (path, replacements = {}) => {
   let source = await readFile(path, 'utf8');
   for (const [from, to] of Object.entries(replacements)) source = source.replaceAll(from, to);
@@ -129,9 +119,13 @@ function compare(current, baseline) {
     "'../world/voxel'": `'${voxelUrl}'`,
     "'./world-mutation'": `'${worldMutationUrl}'`,
   });
+  const { gameServerGameplayUrl, gameplayCommandHandlerUrl, starterEcologyUrl } =
+    await gameplayHarness.compileGameplayModules(root, compileModule, voxelUrl);
   const gameServerUrl = await compileModule(resolve(root, 'src/server/game-server.ts'), {
     "'../world/mesh'": `'${meshUrl}'`,
     "'../world/voxel'": `'${voxelUrl}'`,
+    "'./game-server-gameplay'": `'${gameServerGameplayUrl}'`,
+    "'./simulation/starter-ecology'": `'${starterEcologyUrl}'`,
     "'./world-mutation'": `'${worldMutationUrl}'`,
     "'./world-transaction-commit'": `'${worldTransactionCommitUrl}'`,
   });
@@ -145,12 +139,15 @@ function compare(current, baseline) {
     "'../game-server'": `'${gameServerUrl}'`,
     "'../world-mutation'": `'${worldMutationUrl}'`,
     "'./fill-command'": `'${fillCommandUrl}'`,
+    "'./gameplay-command-handler'": `'${gameplayCommandHandlerUrl}'`,
     "'./command-contract'": `'${commandContractUrl}'`,
   });
   const { WorldMutationBuffer } = await import(worldMutationUrl);
   const { GameServer } = await import(gameServerUrl);
   const { resolveFillCommand } = await import(fillCommandUrl);
   const { ALL_COMMAND_CAPABILITIES, ServerCommandExecutor } = await import(commandExecutorUrl);
+  const gameplay = gameplayHarness.sampleGameplayMetrics(GameServer);
+  const autonomy = gameplayHarness.sampleAutonomyMetrics(GameServer);
   globalThis.gc?.();
   const heapBeforeMutation = process.memoryUsage().heapUsed;
   const mutationBaseline = JSON.parse(
@@ -408,6 +405,8 @@ function compare(current, baseline) {
     bundle,
     browserE2E,
     browserBenchmark,
+    gameplay,
+    autonomy,
     worldMutation,
     metrics,
     comparison: compare(metrics, baseline),
@@ -450,6 +449,8 @@ function compare(current, baseline) {
     `- Structured 100k command p50/p95: ${fillSamples[100000].medianP50Ms.toFixed(2)} / ${fillSamples[100000].medianP95Ms.toFixed(2)} ms; structural events: ${fillSamples[100000].metrics.structuralEventCount}; dirty chunks: ${fillSamples[100000].metrics.dirtyChunkCount}; mesh invalidations: ${fillSamples[100000].metrics.meshInvalidationCount}.`,
     `- Overwrite-heavy 100k input / 10k unique: ${overwriteResult.metrics.canonicalWriteCount} canonical writes (${overwriteStatus}).`,
     `- Mutation heap proxy delta: ${heapAfterMutation - heapBeforeMutation} bytes.`,
+    ...gameplayHarness.gameplaySummaryLines(gameplay),
+    ...gameplayHarness.autonomySummaryLines(autonomy),
     '',
     '## Baseline comparison',
     '',

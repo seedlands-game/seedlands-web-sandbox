@@ -1,0 +1,2753 @@
+{
+  "source": "48d2dd2a1b014c529cc1824a76210be6c277003c",
+  "stage": "completed",
+  "requestedSeconds": 3600,
+  "elapsedSeconds": 3600.378,
+  "recoveries": 1,
+  "sessions": 17,
+  "visitedCenters": [
+    "0,-3",
+    "0,-6",
+    "0,-8",
+    "2,-8",
+    "4,-8",
+    "4,-7",
+    "2,-7",
+    "0,-7",
+    "0,-10",
+    "0,-12",
+    "0,-15",
+    "2,-15",
+    "3,-15",
+    "6,-15",
+    "6,-14",
+    "6,-11",
+    "6,-10",
+    "4,-10",
+    "3,-10",
+    "3,-12",
+    "3,-11",
+    "2,-10",
+    "-2,-10",
+    "-2,-13",
+    "-2,-15",
+    "-2,-17",
+    "0,-17",
+    "2,-17",
+    "5,-17",
+    "5,-15",
+    "5,-20",
+    "6,-20",
+    "6,-19",
+    "4,-19",
+    "3,-19",
+    "1,-19",
+    "1,-22",
+    "1,-24",
+    "3,-24",
+    "3,-21",
+    "3,-16",
+    "0,-16",
+    "-3,-16",
+    "-3,-19",
+    "-3,-20",
+    "-3,-23",
+    "0,-23",
+    "2,-23",
+    "4,-23",
+    "4,-20",
+    "4,-18",
+    "4,-17",
+    "3,-17",
+    "-2,-20",
+    "-2,-23",
+    "0,-20",
+    "0,-22",
+    "3,-22",
+    "5,-22",
+    "5,-18",
+    "0,2",
+    "-3,2",
+    "-4,2",
+    "-4,4",
+    "-6,4",
+    "-6,2",
+    "-6,3",
+    "-6,6",
+    "-6,7",
+    "-7,7",
+    "-7,5",
+    "-7,2",
+    "-6,1",
+    "-6,0"
+  ],
+  "errors": [],
+  "records": [
+    {
+      "elapsedSeconds": 170.504,
+      "heap": 22691504,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1441,
+        "jsEventListeners": 76
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.007282111499704964,
+        "peak": 0.022094247862696648,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 234,
+        "cachedSounds": 14,
+        "dropped": 33,
+        "session": "world-2",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [1.1469370126724243, 22.600000381469727, -249.64578247070312],
+        "streamCenter": [0, -8],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 16.236395999992425,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 216.121,
+      "heap": 21875048,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1441,
+        "jsEventListeners": 75
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.007311020469463099,
+        "peak": 0.028808480128645897,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 315,
+        "cachedSounds": 15,
+        "dropped": 33,
+        "session": "world-2",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [149.64010620117188, 20.600000381469727, -249.64578247070312],
+        "streamCenter": [4, -8],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 18.060987999999398,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 261.734,
+      "heap": 18014692,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1423,
+        "jsEventListeners": 75
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00039320452327542285,
+        "peak": 0.0012763021513819695,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 337,
+        "cachedSounds": 15,
+        "dropped": 33,
+        "session": "world-2",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [149.64010620117188, 21.600000381469727, -210.32420349121094],
+        "streamCenter": [4, -7],
+        "loadedChunks": 72,
+        "renderedChunks": 36,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 19.885584000006077,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 307.354,
+      "heap": 22748324,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1441,
+        "jsEventListeners": 77
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0006546895535357713,
+        "peak": 0.001251334324479103,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 415,
+        "cachedSounds": 15,
+        "dropped": 33,
+        "session": "world-2",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [9.940373420715332, 24.733463287353516, -210.32420349121094],
+        "streamCenter": [0, -7],
+        "loadedChunks": 66,
+        "renderedChunks": 33,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 21.710176000008914,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 355.104,
+      "heap": 14724900,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1422,
+        "jsEventListeners": 75
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00011190232269083819,
+        "peak": 0.0002664033090695739,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 554,
+        "cachedSounds": 15,
+        "dropped": 35,
+        "session": "world-3",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [9.940373420715332, 19.600000381469727, -460.48773193359375],
+        "streamCenter": [0, -15],
+        "loadedChunks": 1,
+        "renderedChunks": 1,
+        "generationQueue": 48,
+        "meshingQueue": 0,
+        "worldTime": 23.606768000011655,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 400.718,
+      "heap": 23730700,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 80
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.007404162025561438,
+        "peak": 0.03610493242740631,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 663,
+        "cachedSounds": 15,
+        "dropped": 35,
+        "session": "world-3",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [203.06881713867188, 21.73271369934082, -460.48773193359375],
+        "streamCenter": [6, -15],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 1.4313560000128085,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 446.33,
+      "heap": 22810096,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 76
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004800026487829594,
+        "peak": 0.00946468859910965,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 757,
+        "cachedSounds": 15,
+        "dropped": 35,
+        "session": "world-3",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [203.3209991455078, 20.73346519470215, -289.3368225097656],
+        "streamCenter": [6, -10],
+        "loadedChunks": 62,
+        "renderedChunks": 31,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 3.255952000013572,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 491.943,
+      "heap": 24894176,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 76
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0004774004524787854,
+        "peak": 0.0010526363039389253,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 861,
+        "cachedSounds": 15,
+        "dropped": 35,
+        "session": "world-3",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [21.35823631286621, 22.79159927368164, -289.3368225097656],
+        "streamCenter": [0, -10],
+        "loadedChunks": 62,
+        "renderedChunks": 31,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 5.080544000014008,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 539.279,
+      "heap": 27386264,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1445,
+        "jsEventListeners": 77
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00770216733816218,
+        "peak": 0.025502488017082214,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 955,
+        "cachedSounds": 15,
+        "dropped": 35,
+        "session": "world-3",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [21.35823631286621, 19.600000381469727, -462.6790466308594],
+        "streamCenter": [0, -15],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 6.973804000014489,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 585.618,
+      "heap": 15346292,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1424,
+        "jsEventListeners": 76
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0002642240698572277,
+        "peak": 0.0005771615542471409,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 1006,
+        "cachedSounds": 15,
+        "dropped": 37,
+        "session": "world-4",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [117.61103820800781, 19.600000381469727, -462.6790466308594],
+        "streamCenter": [3, -15],
+        "loadedChunks": 4,
+        "renderedChunks": 3,
+        "generationQueue": 45,
+        "meshingQueue": 1,
+        "worldTime": 8.815068000015792,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 631.208,
+      "heap": 24366572,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1445,
+        "jsEventListeners": 77
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.007506272490971184,
+        "peak": 0.03642844036221504,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 1091,
+        "cachedSounds": 15,
+        "dropped": 37,
+        "session": "world-4",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [117.61103820800781, 20.600000381469727, -310.3222351074219],
+        "streamCenter": [3, -10],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 10.63833200001698,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 676.838,
+      "heap": 31185468,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1445,
+        "jsEventListeners": 77
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004585369192809096,
+        "peak": 0.009281475096940994,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 1178,
+        "cachedSounds": 15,
+        "dropped": 37,
+        "session": "world-4",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [-36.65802001953125, 22.791166305541992, -310.3222351074219],
+        "streamCenter": [-2, -10],
+        "loadedChunks": 62,
+        "renderedChunks": 31,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 12.463588000018362,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 724.176,
+      "heap": 19236504,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1447,
+        "jsEventListeners": 79
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.015565866069096613,
+        "peak": 0.05531300604343414,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 1306,
+        "cachedSounds": 15,
+        "dropped": 37,
+        "session": "world-4",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-36.65802001953125, 20.600000381469727, -540.4165649414062],
+        "streamCenter": [-2, -17],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 1,
+        "worldTime": 14.356848000019625,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 769.818,
+      "heap": 33918960,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1447,
+        "jsEventListeners": 82
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0009484459798756094,
+        "peak": 0.0018821093253791332,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 1424,
+        "cachedSounds": 15,
+        "dropped": 37,
+        "session": "world-4",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [175.53854370117188, 20.791166305541992, -540.4165649414062],
+        "streamCenter": [5, -17],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 16.182772000020954,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 815.83,
+      "heap": 15741896,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1426,
+        "jsEventListeners": 77
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 2.951305560221539e-5,
+        "peak": 8.201651507988572e-5,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 1476,
+        "cachedSounds": 15,
+        "dropped": 39,
+        "session": "world-5",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [175.53854370117188, 20.600000381469727, -450.3226013183594],
+        "streamCenter": [5, -15],
+        "loadedChunks": 0,
+        "renderedChunks": 0,
+        "generationQueue": 49,
+        "meshingQueue": 1,
+        "worldTime": 18.011368000022237,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 861.448,
+      "heap": 18269480,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1429,
+        "jsEventListeners": 78
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0012052117712735894,
+        "peak": 0.002316983649507165,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 1478,
+        "cachedSounds": 15,
+        "dropped": 39,
+        "session": "world-5",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-3900811839"
+      },
+      "state": {
+        "player": [172.33016967773438, 20.600000381469727, -450.3226013183594],
+        "streamCenter": [5, -15],
+        "loadedChunks": 50,
+        "renderedChunks": 25,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 19.835960000023427,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 908.784,
+      "heap": 29851060,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1449,
+        "jsEventListeners": 79
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.007724455738025979,
+        "peak": 0.024987708777189255,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 1578,
+        "cachedSounds": 15,
+        "dropped": 39,
+        "session": "world-5",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-3900811839"
+      },
+      "state": {
+        "player": [172.33016967773438, 19.600000381469727, -628.6790161132812],
+        "streamCenter": [5, -20],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 21.72922000002484,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 954.415,
+      "heap": 20598796,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1449,
+        "jsEventListeners": 78
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00036904573846278845,
+        "peak": 0.0008447827422060072,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 1604,
+        "cachedSounds": 15,
+        "dropped": 39,
+        "session": "world-5",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-3900811839"
+      },
+      "state": {
+        "player": [215.59288024902344, 19.600000381469727, -628.6790161132812],
+        "streamCenter": [6, -20],
+        "loadedChunks": 70,
+        "renderedChunks": 35,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 23.55447600002625,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1000.029,
+      "heap": 33389336,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1449,
+        "jsEventListeners": 78
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0005714757929471187,
+        "peak": 0.001419653999619186,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 1621,
+        "cachedSounds": 15,
+        "dropped": 39,
+        "session": "world-5",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [215.59288024902344, 19.600000381469727, -601.3615112304688],
+        "streamCenter": [6, -19],
+        "loadedChunks": 72,
+        "renderedChunks": 36,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 1.3790720000276053,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1046.457,
+      "heap": 16209988,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1428,
+        "jsEventListeners": 78
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00017367221423719964,
+        "peak": 0.000514125160407275,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 1725,
+        "cachedSounds": 15,
+        "dropped": 41,
+        "session": "world-6",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [33.92205047607422, 21.600000381469727, -601.3615112304688],
+        "streamCenter": [1, -19],
+        "loadedChunks": 4,
+        "renderedChunks": 3,
+        "generationQueue": 45,
+        "meshingQueue": 0,
+        "worldTime": 3.220332000029032,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1093.795,
+      "heap": 18936024,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1433,
+        "jsEventListeners": 80
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.008195802091303066,
+        "peak": 0.025705818086862564,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 1809,
+        "cachedSounds": 15,
+        "dropped": 41,
+        "session": "world-6",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [33.67900085449219, 20.600000381469727, -752.6790161132812],
+        "streamCenter": [1, -24],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 5.113588000028145,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1139.407,
+      "heap": 20735572,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1451,
+        "jsEventListeners": 79
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004568354232798867,
+        "peak": 0.011473297141492367,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 1860,
+        "cachedSounds": 15,
+        "dropped": 41,
+        "session": "world-6",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-3900811839"
+      },
+      "state": {
+        "player": [125.61751556396484, 23.73346710205078, -752.6790161132812],
+        "streamCenter": [3, -24],
+        "loadedChunks": 68,
+        "renderedChunks": 34,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 6.938184000027174,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1184.974,
+      "heap": 21212380,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1451,
+        "jsEventListeners": 79
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0049552523292803645,
+        "peak": 0.0115245645865798,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 1996,
+        "cachedSounds": 15,
+        "dropped": 41,
+        "session": "world-6",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-3900811839"
+      },
+      "state": {
+        "player": [125.61751556396484, 21.6690731048584, -502.78369140625],
+        "streamCenter": [3, -16],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 8.760776000025508,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1230.573,
+      "heap": 32061904,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1451,
+        "jsEventListeners": 82
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0005095801517396245,
+        "peak": 0.0014781756326556206,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 2104,
+        "cachedSounds": 15,
+        "dropped": 41,
+        "session": "world-6",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-69.35063171386719, 21.733070373535156, -502.78369140625],
+        "streamCenter": [-3, -16],
+        "loadedChunks": 59,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 1,
+        "worldTime": 10.584704000023066,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1278.363,
+      "heap": 16441144,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1432,
+        "jsEventListeners": 79
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 8.578568953484213e-5,
+        "peak": 0.00024246917746495456,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 2223,
+        "cachedSounds": 15,
+        "dropped": 43,
+        "session": "world-7",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-69.35063171386719, 21.600000381469727, -711.334716796875],
+        "streamCenter": [-3, -23],
+        "loadedChunks": 1,
+        "renderedChunks": 1,
+        "generationQueue": 48,
+        "meshingQueue": 0,
+        "worldTime": 12.479960000020526,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1323.968,
+      "heap": 20244200,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1453,
+        "jsEventListeners": 83
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0047908975967484385,
+        "peak": 0.009711459279060364,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 2345,
+        "cachedSounds": 15,
+        "dropped": 43,
+        "session": "world-7",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [148.07261657714844, 22.732717514038086, -711.334716796875],
+        "streamCenter": [4, -23],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 14.30455200001822,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1369.555,
+      "heap": 21255108,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1453,
+        "jsEventListeners": 80
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.005071174031209655,
+        "peak": 0.011958934366703033,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 2443,
+        "cachedSounds": 15,
+        "dropped": 43,
+        "session": "world-7",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [148.3209991455078, 20.733064651489258, -529.367431640625],
+        "streamCenter": [4, -17],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 16.12781600001579,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1415.183,
+      "heap": 19389380,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1435,
+        "jsEventListeners": 80
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0010531854164338276,
+        "peak": 0.002389028901234269,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 2558,
+        "cachedSounds": 15,
+        "dropped": 43,
+        "session": "world-7",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-60.57853698730469, 21.791913986206055, -529.367431640625],
+        "streamCenter": [-2, -17],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 17.953076000013525,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1462.469,
+      "heap": 21890960,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1455,
+        "jsEventListeners": 81
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.005057792069033168,
+        "peak": 0.015629621222615242,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 2660,
+        "cachedSounds": 15,
+        "dropped": 43,
+        "session": "world-7",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-60.57853698730469, 21.600000381469727, -710.3260498046875],
+        "streamCenter": [-2, -23],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 19.84433200001112,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1508.907,
+      "heap": 16847732,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1434,
+        "jsEventListeners": 80
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0002475059217752269,
+        "peak": 0.0005306959501467645,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 2780,
+        "cachedSounds": 15,
+        "dropped": 45,
+        "session": "world-8",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [153.0867462158203, 21.600000381469727, -710.3260498046875],
+        "streamCenter": [4, -23],
+        "loadedChunks": 4,
+        "renderedChunks": 3,
+        "generationQueue": 45,
+        "meshingQueue": 1,
+        "worldTime": 21.684924000008834,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1554.52,
+      "heap": 22640900,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1455,
+        "jsEventListeners": 81
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0070328696067091245,
+        "peak": 0.029913078993558884,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 2881,
+        "cachedSounds": 15,
+        "dropped": 45,
+        "session": "world-8",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [153.3209991455078, 20.73271369934082, -526.3428344726562],
+        "streamCenter": [4, -17],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 23.50951600000657,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1600.137,
+      "heap": 27348476,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1455,
+        "jsEventListeners": 83
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.006746373070856209,
+        "peak": 0.025442544370889664,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 2952,
+        "cachedSounds": 15,
+        "dropped": 45,
+        "session": "world-8",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [21.966840744018555, 21.73346710205078, -526.3428344726562],
+        "streamCenter": [0, -17],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 1.33344400000529,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1647.432,
+      "heap": 23987644,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1457,
+        "jsEventListeners": 82
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0071249123885193215,
+        "peak": 0.02203345112502575,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 3050,
+        "cachedSounds": 15,
+        "dropped": 45,
+        "session": "world-8",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [21.966840744018555, 20.600000381469727, -702.7179565429688],
+        "streamCenter": [0, -22],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 3.225368000004252,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1693.033,
+      "heap": 28935708,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1457,
+        "jsEventListeners": 81
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.005377831384915801,
+        "peak": 0.03130020946264267,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 3140,
+        "cachedSounds": 15,
+        "dropped": 45,
+        "session": "world-8",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [181.64096069335938, 21.600000381469727, -702.7179565429688],
+        "streamCenter": [5, -22],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 5.049296000003302,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1739.441,
+      "heap": 17576376,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1436,
+        "jsEventListeners": 81
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00011010437957792103,
+        "peak": 0.0003194274613633752,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 3237,
+        "cachedSounds": 15,
+        "dropped": 47,
+        "session": "world-9",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [181.64096069335938, 19.600000381469727, -525.3349609375],
+        "streamCenter": [5, -17],
+        "loadedChunks": 4,
+        "renderedChunks": 3,
+        "generationQueue": 45,
+        "meshingQueue": 1,
+        "worldTime": 6.890552000002376,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1785.029,
+      "heap": 21243348,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1457,
+        "jsEventListeners": 86
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.007411559468386328,
+        "peak": 0.034146979451179504,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 3326,
+        "cachedSounds": 15,
+        "dropped": 47,
+        "session": "world-9",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [22.057872772216797, 21.733814239501953, -525.3349609375],
+        "streamCenter": [0, -17],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 8.71382000000088,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1832.381,
+      "heap": 20502688,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1441,
+        "jsEventListeners": 83
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.007526417640877984,
+        "peak": 0.028135716915130615,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 3425,
+        "cachedSounds": 15,
+        "dropped": 47,
+        "session": "world-9",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [22.057872772216797, 20.600000381469727, -702.8092651367188],
+        "streamCenter": [0, -22],
+        "loadedChunks": 62,
+        "renderedChunks": 31,
+        "generationQueue": 1,
+        "meshingQueue": 1,
+        "worldTime": 10.607739999998728,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1878.01,
+      "heap": 21532796,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1459,
+        "jsEventListeners": 82
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00041916844098652294,
+        "peak": 0.0009918620344251394,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 3515,
+        "cachedSounds": 15,
+        "dropped": 47,
+        "session": "world-9",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [181.63966369628906, 21.600000381469727, -702.8092651367188],
+        "streamCenter": [5, -22],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 12.43299999999644,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1923.613,
+      "heap": 27553544,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1459,
+        "jsEventListeners": 82
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.005261491328535198,
+        "peak": 0.03013770654797554,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 3611,
+        "cachedSounds": 15,
+        "dropped": 47,
+        "session": "world-9",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [181.63966369628906, 20.73346519470215, -525.3344116210938],
+        "streamCenter": [5, -17],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 14.256927999994176,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 1969.967,
+      "heap": 17885488,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1438,
+        "jsEventListeners": 82
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.000160636752075361,
+        "peak": 0.00043113529682159424,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 3699,
+        "cachedSounds": 15,
+        "dropped": 49,
+        "session": "world-10",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [22.056734085083008, 20.600000381469727, -525.3344116210938],
+        "streamCenter": [0, -17],
+        "loadedChunks": 4,
+        "renderedChunks": 3,
+        "generationQueue": 45,
+        "meshingQueue": 1,
+        "worldTime": 16.097523999991942,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2017.298,
+      "heap": 25096188,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1470,
+        "jsEventListeners": 85
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.007479701975815818,
+        "peak": 0.037227652966976166,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 3800,
+        "cachedSounds": 15,
+        "dropped": 49,
+        "session": "world-10",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [22.056734085083008, 20.600000381469727, -702.8096313476562],
+        "streamCenter": [0, -22],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 1,
+        "meshingQueue": 0,
+        "worldTime": 17.990115999989385,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2062.923,
+      "heap": 25293672,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1461,
+        "jsEventListeners": 83
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004164494116565775,
+        "peak": 0.010152235627174377,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 3890,
+        "cachedSounds": 15,
+        "dropped": 49,
+        "session": "world-10",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [181.6395263671875, 21.600000381469727, -702.8096313476562],
+        "streamCenter": [5, -22],
+        "loadedChunks": 62,
+        "renderedChunks": 31,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 19.815375999987197,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2108.524,
+      "heap": 32242068,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1461,
+        "jsEventListeners": 83
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0009737266405308901,
+        "peak": 0.002054014476016164,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 3986,
+        "cachedSounds": 15,
+        "dropped": 49,
+        "session": "world-10",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-3900811839"
+      },
+      "state": {
+        "player": [181.6395263671875, 20.73346710205078, -525.334716796875],
+        "streamCenter": [5, -17],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 21.639303999984406,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2154.135,
+      "heap": 28825672,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1461,
+        "jsEventListeners": 85
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0010042354901583666,
+        "peak": 0.0018821093253791332,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 4073,
+        "cachedSounds": 15,
+        "dropped": 49,
+        "session": "world-10",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-3900811839"
+      },
+      "state": {
+        "player": [22.057071685791016, 21.732715606689453, -525.334716796875],
+        "streamCenter": [0, -17],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 23.46389599998014,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2201.975,
+      "heap": 17973680,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1440,
+        "jsEventListeners": 83
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00012696559480977418,
+        "peak": 0.00029273354448378086,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 4173,
+        "cachedSounds": 15,
+        "dropped": 51,
+        "session": "world-11",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [22.057071685791016, 20.600000381469727, -702.8091430664062],
+        "streamCenter": [0, -22],
+        "loadedChunks": 1,
+        "renderedChunks": 1,
+        "generationQueue": 48,
+        "meshingQueue": 0,
+        "worldTime": 1.3618119999803255,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2247.566,
+      "heap": 21005652,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1461,
+        "jsEventListeners": 84
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00489377154143109,
+        "peak": 0.010970721952617168,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 4263,
+        "cachedSounds": 15,
+        "dropped": 51,
+        "session": "world-11",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [181.6392364501953, 21.600000381469727, -702.8091430664062],
+        "streamCenter": [5, -22],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 3.1857399999823848,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2293.15,
+      "heap": 30266404,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1461,
+        "jsEventListeners": 84
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004568121427205807,
+        "peak": 0.010573743842542171,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 4359,
+        "cachedSounds": 15,
+        "dropped": 51,
+        "session": "world-11",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [181.6392364501953, 20.73346519470215, -525.3343505859375],
+        "streamCenter": [5, -17],
+        "loadedChunks": 62,
+        "renderedChunks": 31,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 5.008999999984212,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2338.779,
+      "heap": 21141532,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 84
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0007220337462640772,
+        "peak": 0.0015538603765890002,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 4446,
+        "cachedSounds": 15,
+        "dropped": 51,
+        "session": "world-11",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [21.964872360229492, 21.79191780090332, -525.3343505859375],
+        "streamCenter": [0, -17],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 6.834259999985697,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2386.103,
+      "heap": 24474120,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1457,
+        "jsEventListeners": 85
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.015584865149993247,
+        "peak": 0.0555877760052681,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 4545,
+        "cachedSounds": 15,
+        "dropped": 51,
+        "session": "world-11",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [21.964872360229492, 20.600000381469727, -702.8093872070312],
+        "streamCenter": [0, -22],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 1,
+        "meshingQueue": 1,
+        "worldTime": 8.726851999985016,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2432.227,
+      "heap": 18171308,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1433,
+        "jsEventListeners": 84
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 9.963516235257594e-5,
+        "peak": 0.00022718877880834043,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 4636,
+        "cachedSounds": 15,
+        "dropped": 53,
+        "session": "world-12",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [181.63844299316406, 21.600000381469727, -702.8093872070312],
+        "streamCenter": [5, -22],
+        "loadedChunks": 0,
+        "renderedChunks": 0,
+        "generationQueue": 49,
+        "meshingQueue": 1,
+        "worldTime": 10.556779999980748,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2477.864,
+      "heap": 22059676,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1448,
+        "jsEventListeners": 85
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.005149806273077464,
+        "peak": 0.010644141584634781,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 4732,
+        "cachedSounds": 15,
+        "dropped": 53,
+        "session": "world-12",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [181.63844299316406, 20.791915893554688, -525.3339233398438],
+        "streamCenter": [5, -17],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 12.38203999997647,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2523.393,
+      "heap": 21340808,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1448,
+        "jsEventListeners": 89
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0047315245681049745,
+        "peak": 0.0118202343583107,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 4819,
+        "cachedSounds": 15,
+        "dropped": 53,
+        "session": "world-12",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [21.965251922607422, 21.791166305541992, -525.3339233398438],
+        "streamCenter": [0, -17],
+        "loadedChunks": 62,
+        "renderedChunks": 31,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 14.207299999972193,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2570.718,
+      "heap": 26508388,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1450,
+        "jsEventListeners": 87
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.014965527385947239,
+        "peak": 0.07353541254997253,
+        "unlocked": true,
+        "error": "",
+        "voices": 3,
+        "playedCount": 4923,
+        "cachedSounds": 17,
+        "dropped": 54,
+        "session": "world-12",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [21.965251922607422, 20.600000381469727, -702.8088989257812],
+        "streamCenter": [0, -22],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 16.100559999967757,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2616.321,
+      "heap": 32249136,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1450,
+        "jsEventListeners": 87
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0052817710851187525,
+        "peak": 0.03042771853506565,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5019,
+        "cachedSounds": 17,
+        "dropped": 54,
+        "session": "world-12",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [181.639404296875, 21.600000381469727, -702.8088989257812],
+        "streamCenter": [5, -22],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 17.924483999963485,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2662.71,
+      "heap": 18665848,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1435,
+        "jsEventListeners": 85
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00013945935367928603,
+        "peak": 0.00043540276237763464,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 5122,
+        "cachedSounds": 17,
+        "dropped": 56,
+        "session": "world-13",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [181.639404296875, 19.600000381469727, -525.3335571289062],
+        "streamCenter": [5, -17],
+        "loadedChunks": 3,
+        "renderedChunks": 2,
+        "generationQueue": 46,
+        "meshingQueue": 1,
+        "worldTime": 19.765751999959164,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2708.347,
+      "heap": 22705676,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1450,
+        "jsEventListeners": 86
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.02673128623579417,
+        "peak": 0.07665179669857025,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5217,
+        "cachedSounds": 17,
+        "dropped": 56,
+        "session": "world-13",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [21.873716354370117, 21.844036102294922, -525.3335571289062],
+        "streamCenter": [0, -17],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 21.591011999954887,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2755.678,
+      "heap": 27656444,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1450,
+        "jsEventListeners": 87
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.012751416845324909,
+        "peak": 0.04085972532629967,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 5322,
+        "cachedSounds": 17,
+        "dropped": 56,
+        "session": "world-13",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [21.873716354370117, 20.600000381469727, -702.80859375],
+        "streamCenter": [0, -22],
+        "loadedChunks": 62,
+        "renderedChunks": 31,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 23.48426799995046,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2801.296,
+      "heap": 26188488,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1450,
+        "jsEventListeners": 86
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0003412833015081544,
+        "peak": 0.000867510971147567,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5418,
+        "cachedSounds": 17,
+        "dropped": 56,
+        "session": "world-13",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [181.6390380859375, 21.600000381469727, -702.80859375],
+        "streamCenter": [5, -22],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 1.30885999995062,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2846.841,
+      "heap": 37567740,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1428,
+        "jsEventListeners": 90
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0005095801517396245,
+        "peak": 0.0014781756326556206,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5543,
+        "cachedSounds": 17,
+        "dropped": 56,
+        "session": "world-13",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [0.5, 26.732715606689453, 81.45748138427734],
+        "streamCenter": [0, 2],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 3.1147879999526182,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2892.852,
+      "heap": 19250916,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1413,
+        "jsEventListeners": 86
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 3.165630252877228e-5,
+        "peak": 8.727582462597638e-5,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 5611,
+        "cachedSounds": 17,
+        "dropped": 58,
+        "session": "world-14",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-125.6282730102539, 23.600000381469727, 81.45748138427734],
+        "streamCenter": [-4, 2],
+        "loadedChunks": 1,
+        "renderedChunks": 1,
+        "generationQueue": 48,
+        "meshingQueue": 1,
+        "worldTime": 4.943383999954435,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2940.174,
+      "heap": 22939664,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1430,
+        "jsEventListeners": 89
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.011258932527895603,
+        "peak": 0.03212008252739906,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 5621,
+        "cachedSounds": 18,
+        "dropped": 58,
+        "session": "world-14",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-3900811839"
+      },
+      "state": {
+        "player": [-125.6282730102539, 23.600000381469727, 69.31765747070312],
+        "streamCenter": [-4, 2],
+        "loadedChunks": 50,
+        "renderedChunks": 25,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 6.8366399999560485,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 2985.79,
+      "heap": 22345620,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 87
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004670677132081638,
+        "peak": 0.009361318312585354,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5623,
+        "cachedSounds": 18,
+        "dropped": 58,
+        "session": "world-14",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-3900811839"
+      },
+      "state": {
+        "player": [-125.34835052490234, 23.600000381469727, 69.31765747070312],
+        "streamCenter": [-4, 2],
+        "loadedChunks": 50,
+        "renderedChunks": 25,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 8.661235999955565,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3031.4,
+      "heap": 22737660,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 87
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.0005850835984319286,
+        "peak": 0.0015762308612465858,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5664,
+        "cachedSounds": 18,
+        "dropped": 58,
+        "session": "world-14",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-125.34835052490234, 24.600000381469727, 139.6226806640625],
+        "streamCenter": [-4, 4],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 10.485831999951287,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3077.02,
+      "heap": 27279160,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 87
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.005317357799389843,
+        "peak": 0.029739435762166977,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5699,
+        "cachedSounds": 18,
+        "dropped": 58,
+        "session": "world-14",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-183.6419677734375, 24.600000381469727, 139.6226806640625],
+        "streamCenter": [-6, 4],
+        "loadedChunks": 68,
+        "renderedChunks": 34,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 12.310423999947005,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3124.813,
+      "heap": 19684968,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1415,
+        "jsEventListeners": 87
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 8.800379950902291e-5,
+        "peak": 0.00018414024088997394,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 5733,
+        "cachedSounds": 19,
+        "dropped": 60,
+        "session": "world-15",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-183.6419677734375, 23.600000381469727, 85.32054901123047],
+        "streamCenter": [-6, 2],
+        "loadedChunks": 1,
+        "renderedChunks": 1,
+        "generationQueue": 48,
+        "meshingQueue": 0,
+        "worldTime": 14.209011999942554,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3170.43,
+      "heap": 27314092,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 88
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004590230344371151,
+        "peak": 0.010963311418890953,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5735,
+        "cachedSounds": 19,
+        "dropped": 60,
+        "session": "world-15",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [-182.35198974609375, 23.600000381469727, 85.32054901123047],
+        "streamCenter": [-6, 2],
+        "loadedChunks": 50,
+        "renderedChunks": 25,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 16.034271999938284,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3216.041,
+      "heap": 34621504,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 88
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00495181626167142,
+        "peak": 0.009705341421067715,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5813,
+        "cachedSounds": 19,
+        "dropped": 60,
+        "session": "world-15",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [-182.35198974609375, 23.600000381469727, 228.67404174804688],
+        "streamCenter": [-6, 7],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 17.85886799993402,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3261.609,
+      "heap": 24595092,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1443,
+        "jsEventListeners": 88
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.005313641520670517,
+        "peak": 0.030349448323249817,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5821,
+        "cachedSounds": 19,
+        "dropped": 60,
+        "session": "world-15",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-195.64169311523438, 24.669071197509766, 228.67404174804688],
+        "streamCenter": [-7, 7],
+        "loadedChunks": 70,
+        "renderedChunks": 35,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 19.681459999929743,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3308.922,
+      "heap": 30004392,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1439,
+        "jsEventListeners": 89
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.010281841053862999,
+        "peak": 0.02860422059893608,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 5914,
+        "cachedSounds": 19,
+        "dropped": 60,
+        "session": "world-15",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-195.64169311523438, 23.600000381469727, 64.32093048095703],
+        "streamCenter": [-7, 2],
+        "loadedChunks": 64,
+        "renderedChunks": 32,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 21.574051999925302,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3355.054,
+      "heap": 20565588,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1415,
+        "jsEventListeners": 88
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 8.898289418779345e-5,
+        "peak": 0.0002213658153777942,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 5933,
+        "cachedSounds": 19,
+        "dropped": 62,
+        "session": "world-16",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-166.40374755859375, 23.600000381469727, 64.32093048095703],
+        "streamCenter": [-6, 2],
+        "loadedChunks": 1,
+        "renderedChunks": 1,
+        "generationQueue": 48,
+        "meshingQueue": 0,
+        "worldTime": 23.40331199992103,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3400.691,
+      "heap": 21763504,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1417,
+        "jsEventListeners": 89
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.015999696276944572,
+        "peak": 0.060793835669755936,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5961,
+        "cachedSounds": 19,
+        "dropped": 62,
+        "session": "world-16",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [-166.40374755859375, 23.600000381469727, 111.61970520019531],
+        "streamCenter": [-6, 3],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 1.2292359999209381,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3446.421,
+      "heap": 27836248,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1430,
+        "jsEventListeners": 89
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004682580816094505,
+        "peak": 0.011802244000136852,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 5972,
+        "cachedSounds": 19,
+        "dropped": 62,
+        "session": "world-16",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "night-472126244"
+      },
+      "state": {
+        "player": [-184.64303588867188, 23.600000381469727, 111.61970520019531],
+        "streamCenter": [-6, 3],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 3.0584959999230144,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3493.766,
+      "heap": 23933268,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1432,
+        "jsEventListeners": 90
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.011601111225485553,
+        "peak": 0.033323608338832855,
+        "unlocked": true,
+        "error": "",
+        "voices": 2,
+        "playedCount": 6021,
+        "cachedSounds": 19,
+        "dropped": 62,
+        "session": "world-16",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-184.64303588867188, 26.600000381469727, 24.998132705688477],
+        "streamCenter": [-6, 0],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 4.951087999924969,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3539.396,
+      "heap": 22700084,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1419,
+        "jsEventListeners": 89
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00042209484517624445,
+        "peak": 0.0011861022794619203,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 6030,
+        "cachedSounds": 19,
+        "dropped": 62,
+        "session": "world-16",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-170.34469604492188, 26.600000381469727, 24.998132705688477],
+        "streamCenter": [-6, 0],
+        "loadedChunks": 60,
+        "renderedChunks": 30,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 6.775679999926545,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3585.809,
+      "heap": 21048180,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1417,
+        "jsEventListeners": 89
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.00018920428128651312,
+        "peak": 0.00045313488226383924,
+        "unlocked": true,
+        "error": "",
+        "voices": 0,
+        "playedCount": 6040,
+        "cachedSounds": 19,
+        "dropped": 64,
+        "session": "world-17",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": ""
+      },
+      "state": {
+        "player": [-170.34469604492188, 25.600000381469727, 42.59730911254883],
+        "streamCenter": [-6, 1],
+        "loadedChunks": 1,
+        "renderedChunks": 1,
+        "generationQueue": 48,
+        "meshingQueue": 0,
+        "worldTime": 8.604947999926281,
+        "quality": "medium"
+      }
+    },
+    {
+      "elapsedSeconds": 3600.207,
+      "heap": 21754076,
+      "workers": 3,
+      "dom": {
+        "documents": 2,
+        "nodes": 1432,
+        "jsEventListeners": 90
+      },
+      "audio": {
+        "contextState": "running",
+        "rms": 0.004704194129863567,
+        "peak": 0.010674172081053257,
+        "unlocked": true,
+        "error": "",
+        "voices": 1,
+        "playedCount": 6053,
+        "cachedSounds": 19,
+        "dropped": 64,
+        "session": "world-17",
+        "sharedContext": true,
+        "referenceName": "",
+        "cue": "meadow-472126244"
+      },
+      "state": {
+        "player": [-191.61004638671875, 25.600000381469727, 42.59730911254883],
+        "streamCenter": [-6, 1],
+        "loadedChunks": 50,
+        "renderedChunks": 25,
+        "generationQueue": 0,
+        "meshingQueue": 0,
+        "worldTime": 9.181591999924933,
+        "quality": "medium"
+      }
+    }
+  ],
+  "interpretation": {
+    "functional": "3600秒固定生产混合运行通过；17次会话、74个stream center、1次自然死亡与GUI恢复，0未处理异常。",
+    "resourceAudit": "本源码仍有每次会话1个XR监听器泄漏；不能称无泄漏通过。修复在desktop-xr-lifecycle，独立20次GUI生命周期RED/GREEN证明。",
+    "laterChanges": "底层不可挖取保护、后台音频立即暂停、桌面XR关闭由各自专项证明，不冒称此source含这些后续修复。",
+    "rawReport": "/tmp/seedlands-final-mixed-soak.json"
+  }
+}

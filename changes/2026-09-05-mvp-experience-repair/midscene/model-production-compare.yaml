@@ -1,0 +1,11 @@
+# 准备：以静态 HTTP 服务暴露 /tmp/seedlands-experience-repair-gallery/models.html；三图来自
+# model-visual.spec.ts 的正式 Harness/生产 Presenter，不使用隔离 preview。
+web:
+  url: http://127.0.0.1:4290/models.html
+  viewportWidth: 1920
+  viewportHeight: 1080
+tasks:
+  - name: 三类生产实体与落地灯笼的正侧背同页比较
+    flow:
+      - aiAssert: 正面、侧面与背面三张真实生产场景中分别能辨认林鹿的耳和口鼻、夜行兽的深青灰身体与琥珀眼、营地居民的脸、衣物和背包；三者不是同一单色胶囊。灯笼落在平台上，有连接上沿的提把，不能悬浮或与背景混同。
+      - aiAssert: 这些图来自同一生产 Presenter 的正侧背取证，分别用于脸部、轮廓和体积；画面中的受控平台只服务于模型可辨性，不代表原型的完整世界构图。

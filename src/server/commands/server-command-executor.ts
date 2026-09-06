@@ -3,6 +3,11 @@ import type { GameServer, WorldCommitResult } from '../game-server';
 import { WorldMutationBuffer, assertMutationCoordinate, assertVoxelValue } from '../world-mutation';
 import { resolveFillCommand } from './fill-command';
 import {
+  executeGameplayCommand,
+  GameplayCommandPermissionError,
+  type GameplayCommand,
+} from './gameplay-command-handler';
+import {
   commandCategory,
   type CommandCategory,
   type CommandError,
@@ -16,10 +21,21 @@ import {
 
 export * from './command-contract';
 
+export type SessionAdvanceCommandResult = Readonly<{
+  physicsTick: number;
+  gameplayTime: number;
+  worldTime: number;
+  lanes: Readonly<{ physicsSteps: number; gameplayPeriods: number; fluidPeriods: number }>;
+  commits: readonly WorldCommitResult[];
+}>;
+
 type ExecutorOptions = {
   authorize?: (source: CommandSource, command: ServerCommand, category: CommandCategory) => boolean;
   observe?: (observation: CommandObservation) => void;
   now?: () => number;
+  save?: () => Promise<{ savedChunks: string[]; gameplaySaved: boolean; commitSequence: number }>;
+  advanceSession?: (seconds: number) => SessionAdvanceCommandResult | Promise<SessionAdvanceCommandResult>;
+  prepareWorld?: (source: CommandSource, command: ServerCommand, buffer?: WorldMutationBuffer) => Promise<boolean>;
 };
 
 type PreparedCommand = {
@@ -93,9 +109,17 @@ export class ServerCommandExecutor {
     }
 
     try {
+      if (this.options.prepareWorld && !(await this.options.prepareWorld(source, command, prepared.mutationBuffer)))
+        throw new Error('Authority Chunk is unavailable after asynchronous preparation.');
       const payload = await this.run(source, prepared);
       return this.success(source, command, category, startedAt, payload);
     } catch (error) {
+      if (error instanceof GameplayCommandPermissionError)
+        return this.failure(source, command.type, category, startedAt, {
+          kind: 'permission',
+          code: 'COMMAND_PERMISSION_DENIED',
+          message: error.message,
+        });
       return this.failure(source, command.type, category, startedAt, {
         kind: 'execution',
         code: 'COMMAND_EXECUTION_FAILED',
@@ -138,6 +162,8 @@ export class ServerCommandExecutor {
       case 'seed':
       case 'save':
         return { command };
+      default:
+        return { command };
     }
   }
 
@@ -171,11 +197,29 @@ export class ServerCommandExecutor {
           },
         };
       case 'save': {
-        const savedChunks = await this.server.flushDirtyChunks();
+        const { savedChunks, gameplaySaved, commitSequence } = await (this.options.save?.() ?? this.server.save());
         return {
           message: `Saved ${savedChunks.length} dirty Chunk(s).`,
-          data: { savedChunks },
+          data: { savedChunks, gameplaySaved, commitSequence },
           affectedChunks: savedChunks,
+        };
+      }
+      case 'advance-gameplay': {
+        if (!Number.isFinite(command.seconds) || command.seconds <= 0)
+          throw new TypeError('Gameplay seconds must be a positive number.');
+        if (!this.options.advanceSession) throw new Error('Authority session advance port is unavailable.');
+        const result = await this.options.advanceSession(command.seconds);
+        const affectedChunks = [...new Set(result.commits.flatMap((commit) => commit.structuralChange?.chunks ?? []))];
+        return {
+          message: `Advanced session by ${command.seconds} second(s).`,
+          data: {
+            seconds: command.seconds,
+            physicsTick: result.physicsTick,
+            gameplayTime: result.gameplayTime,
+            worldTime: result.worldTime,
+            lanes: result.lanes,
+          },
+          affectedChunks,
         };
       }
       case 'inspect-voxel': {
@@ -205,6 +249,8 @@ export class ServerCommandExecutor {
           affectedChunks: [chunkKey(...command.chunk)],
         };
       }
+      default:
+        return executeGameplayCommand(this.server, source, command as GameplayCommand);
     }
   }
 
