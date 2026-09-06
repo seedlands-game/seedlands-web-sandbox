@@ -3,8 +3,10 @@ import type { GameplayEntity } from '../server/gameplay/entity-store';
 import { damageFlash, movementPose } from '../client/entity-presentation-motion';
 import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from './gameplay-model-assets';
 
+const PRESENTATION_SETTLE_DISTANCE = 0.001;
+
 export class GameplayEntityPresenter {
-  private lastTime: number | null = null;
+  private presentationTime = 0;
   private readonly presented = new Map<string, pc.Entity>();
   private readonly previousPositions = new Map<string, [number, number, number]>();
   private readonly health = new Map<string, number>();
@@ -16,9 +18,9 @@ export class GameplayEntityPresenter {
     this.assetsLease = acquireGameplayModelAssets(app);
   }
 
-  reconcile(entities: readonly GameplayEntity[], time: number): void {
-    const dt = this.lastTime === null ? 0 : Math.max(0, Math.min(0.1, time - this.lastTime));
-    this.lastTime = time;
+  reconcile(entities: readonly GameplayEntity[], renderDeltaSeconds = 0): void {
+    const dt = Number.isFinite(renderDeltaSeconds) ? Math.max(0, Math.min(0.1, renderDeltaSeconds)) : 0;
+    this.presentationTime += dt;
     const current = new Set(entities.map((entity) => entity.id));
     this.presented.forEach((node, id) => {
       if (current.has(id)) return;
@@ -28,7 +30,7 @@ export class GameplayEntityPresenter {
       this.health.delete(id);
       this.hurtUntil.delete(id);
     });
-    entities.forEach((entity) => this.updateEntity(entity, time, dt));
+    entities.forEach((entity) => this.updateEntity(entity, this.presentationTime, dt));
   }
 
   dispose(): void {
@@ -38,18 +40,28 @@ export class GameplayEntityPresenter {
     this.health.clear();
     this.hurtUntil.clear();
     this.assetsLease.release();
-    this.lastTime = null;
+    this.presentationTime = 0;
+  }
+
+  presentedPosition(id: string): [number, number, number] | null {
+    const position = this.presented.get(id)?.getPosition();
+    return position ? [position.x, position.y, position.z] : null;
   }
 
   private updateEntity(entity: GameplayEntity, time: number, dt: number): void {
     const node = this.presented.get(entity.id) ?? this.create(entity);
     const previous = this.previousPositions.get(entity.id);
     const snap = !previous || Math.hypot(...entity.position.map((value, axis) => value - previous[axis])) > 4;
-    const position = snap
+    let position = snap
       ? ([...entity.position] as [number, number, number])
       : (entity.position.map(
           (value, axis) => previous[axis] + (value - previous[axis]) * (1 - Math.exp(-dt / 0.055)),
         ) as [number, number, number]);
+    if (
+      !snap &&
+      Math.hypot(...position.map((value, axis) => value - entity.position[axis])) <= PRESENTATION_SETTLE_DISTANCE
+    )
+      position = [...entity.position];
     const pose = movementPose(previous, position, time);
     if (pose.yaw !== null) node.setEulerAngles(0, pose.yaw, 0);
     const oldHealth = this.health.get(entity.id);

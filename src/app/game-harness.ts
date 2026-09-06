@@ -61,6 +61,7 @@ export type HarnessApi = {
     velocity: [number, number, number];
     grounded: boolean;
   } | null;
+  presentedEntityPosition: (entityId: string) => [number, number, number] | null;
 };
 
 type RuntimeHarnessBindings = {
@@ -429,6 +430,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
           }
         : null;
     },
+    presentedEntityPosition: (entityId) => bindings.gameplay()?.presentedEntityPosition(entityId) ?? null,
   };
 }
 

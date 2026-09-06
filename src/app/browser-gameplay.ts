@@ -75,17 +75,17 @@ export class BrowserGameplay {
     this.viewmodel.setVisible(!this.blocksInput);
     if (!this.gestureSeconds) this.viewmodel.setAction(state.breakAction ? 'mine' : 'idle');
     this.viewmodel.update(seconds);
-    this.refresh(false);
+    this.refresh(false, seconds);
   }
 
-  refresh(forceBreakProjection = true): void {
+  refresh(forceBreakProjection = true, renderDeltaSeconds = 0): void {
     const view = this.options.authority.gameplay;
     const player = view.player;
     const becameDead = player.lifecycle === 'dead' && this.previousProjection?.shell.gameplay.lifecycle !== 'dead';
     if (becameDead) this.inventoryOpen = false;
     const entities = view.entities.filter((entity) => entity.type !== 'player');
     const actorStates = new Map(view.actors.map((actor) => [actor.entityId, actor] as const));
-    this.presenter.reconcile(entities, view.gameplayTime);
+    this.presenter.reconcile(entities, renderDeltaSeconds);
     if (this.previousHealth !== null && player.health < this.previousHealth) this.present({ kind: 'damage' });
     this.previousHealth = player.health;
     const currentBreaking = player.breakAction
@@ -284,6 +284,10 @@ export class BrowserGameplay {
 
   get presentationSnapshot() {
     return { breakingOverlay: this.breakOverlay.snapshot, viewmodel: this.viewmodel.snapshot } as const;
+  }
+
+  presentedEntityPosition(id: string): [number, number, number] | null {
+    return this.presenter.presentedPosition(id);
   }
 
   dispose(): void {
