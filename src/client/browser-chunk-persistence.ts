@@ -2,17 +2,18 @@ import type { ChunkPersistence, ChunkSnapshot } from '../server/persistence/chun
 import type { GameplaySnapshot } from '../server/gameplay/gameplay-runtime';
 import type { FrozenGameSaveSnapshot } from '../server/persistence/game-save-snapshot';
 import { readGameSaveCheckpoint, type GameSaveCheckpoint } from '../server/persistence/game-save-checkpoint';
-import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
+import { GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
 import { prepareBrowserLoadResult, type PreparedBrowserLoadResult } from './browser-persistence-load';
+import {
+  BrowserPersistenceLoadRegistry,
+  type BrowserPersistenceLoadToken,
+  type BrowserPersistenceNeighborhoodLease,
+} from './browser-persistence-load-registry';
 import type { WorldOpenMode } from './world-version-policy';
+import type { SerializedChunkSnapshot } from './browser-world-save';
 
-export type SerializedChunkSnapshot = Omit<ChunkSnapshot, 'voxels' | 'fluid'> & { voxels: number[]; fluid?: number[] };
-export type BrowserWorldSave = {
-  seed: string;
-  generatorVersion: number;
-  player: [number, number, number];
-  snapshots: SerializedChunkSnapshot[];
-};
+export { decodeBrowserWorldSave } from './browser-world-save';
+export type { BrowserWorldSave, SerializedChunkSnapshot } from './browser-world-save';
 
 type WorkerSuccess = { requestId: number; ok: true; result: unknown };
 type WorkerFailure = { requestId: number; ok: false; error: string };
@@ -36,7 +37,6 @@ type InitResult = {
   legacyMigrated: boolean;
 };
 type LoadCoordinate = Readonly<{ cx: number; cy: number; cz: number }>;
-type LoadToken = Readonly<{ identity: symbol }>;
 type SaveResult = {
   saved: Array<{ key: string; revision: number }>;
   recordBytes: number;
@@ -62,14 +62,22 @@ const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
   ...(snapshot.fluid ? { fluid: snapshot.fluid.slice() } : {}),
 });
 
+const neighborhoodCoordinates = (cx: number, cy: number, cz: number): LoadCoordinate[] => {
+  const coordinates: LoadCoordinate[] = [];
+  for (let y = cy - 1; y <= cy + 1; y += 1)
+    for (let z = cz - 1; z <= cz + 1; z += 1)
+      for (let x = cx - 1; x <= cx + 1; x += 1) coordinates.push({ cx: x, cy: y, cz: z });
+  return coordinates;
+};
+
 export class BrowserChunkPersistence implements ChunkPersistence {
   worldId: string;
   generatorVersion = GENERATOR_VERSION;
   private readonly snapshots = new Map<string, ChunkSnapshot>();
   private readonly missing = new Set<string>();
-  private readonly cacheIdentities = new Map<string, object>();
+  private readonly cacheTokens = new Map<string, BrowserPersistenceLoadToken>();
   private readonly loads = new Map<string, Promise<void>>();
-  private readonly loadTokens = new Map<string, LoadToken>();
+  private readonly loadRegistry = new BrowserPersistenceLoadRegistry();
   private readonly pending = new Map<number, { resolve: (value: unknown) => void; reject: (error: Error) => void }>();
   private readonly worker = new Worker(new URL('../worker/persistence-worker.ts', import.meta.url), { type: 'module' });
   private requestSequence = 0;
@@ -196,7 +204,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   async saveFrozenSnapshot(snapshot: FrozenGameSaveSnapshot): Promise<void> {
-    const cacheIdentities = new Map(snapshot.chunks.map((chunk) => [chunk.key, this.cacheIdentities.get(chunk.key)]));
+    const saveFence = this.loadRegistry.captureSaveFence();
     const copy = structuredClone(snapshot);
     const transfers = copy.chunks.flatMap((chunk) => [
       chunk.voxels.buffer as Transferable,
@@ -223,9 +231,10 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     Object.entries(result.codecs).forEach(([codec, count]) => {
       this.metricsValue.codecs[codec] = (this.metricsValue.codecs[codec] ?? 0) + count;
     });
-    snapshot.chunks.forEach((chunk) => {
-      if (this.cacheIdentities.get(chunk.key) === cacheIdentities.get(chunk.key)) this.clearCachedSnapshot(chunk.key);
-    });
+    this.applySaveFence(
+      snapshot.chunks.map((chunk) => chunk.key),
+      saveFence,
+    );
     this.gameplaySnapshotValue = structuredClone(snapshot.gameplay);
     this.checkpointValue = readGameSaveCheckpoint(snapshot);
   }
@@ -244,10 +253,12 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   loadSnapshot(key: string): ChunkSnapshot | null {
+    const hasResult = this.snapshots.has(key) || this.missing.has(key);
     const snapshot = this.snapshots.get(key);
     this.snapshots.delete(key);
     this.missing.delete(key);
-    this.cacheIdentities.delete(key);
+    this.cacheTokens.delete(key);
+    if (hasResult) this.loadRegistry.consumeExact(key);
     return snapshot ? cloneSnapshot(snapshot) : null;
   }
 
@@ -258,36 +269,48 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   private clearCachedSnapshot(key: string): void {
     this.snapshots.delete(key);
     this.missing.delete(key);
-    this.cacheIdentities.delete(key);
+    this.cacheTokens.delete(key);
   }
 
   async ensureSnapshot(cx: number, cy: number, cz: number): Promise<void> {
     const key = chunkKey(cx, cy, cz);
-    if (this.snapshots.has(key) || this.missing.has(key)) return;
-    const existing = this.loads.get(key);
-    if (existing) return existing;
-    const token: LoadToken = { identity: Symbol(key) };
-    const loading = this.loadSnapshotFromStore(cx, cy, cz, token).finally(() => {
-      if (this.loads.get(key) === loading) this.loads.delete(key);
-      if (this.loadTokens.get(key) === token) this.loadTokens.delete(key);
-    });
-    this.loadTokens.set(key, token);
-    this.loads.set(key, loading);
-    return loading;
+    this.loadRegistry.claimExact(key);
+    try {
+      if (this.snapshots.has(key) || this.missing.has(key)) return;
+      const existing = this.loads.get(key);
+      if (existing) return await existing;
+      const token = this.loadRegistry.beginLoad(key);
+      const loading = this.loadSnapshotFromStore(cx, cy, cz, token).finally(() => {
+        if (this.loads.get(key) === loading) this.loads.delete(key);
+        this.loadRegistry.finishLoad(key, token);
+      });
+      this.loads.set(key, loading);
+      await loading;
+    } catch (error) {
+      this.loadRegistry.failExact(key);
+      throw error;
+    }
   }
 
-  private async loadSnapshotFromStore(cx: number, cy: number, cz: number, token: LoadToken): Promise<void> {
+  private async loadSnapshotFromStore(
+    cx: number,
+    cy: number,
+    cz: number,
+    token: BrowserPersistenceLoadToken,
+  ): Promise<void> {
     this.metricsValue.idbGetCount += 1;
     this.metricsValue.loadTransactionCount += 1;
     const result = await this.request({ kind: 'load', cx, cy, cz });
     const prepared = prepareBrowserLoadResult(this.seedText, this.generatorVersion, cx, cy, cz, result);
-    if (this.loadTokens.get(prepared.key) === token) this.commitLoadResult(prepared);
+    if (!this.loadRegistry.shouldPublish(prepared.key, token))
+      throw new Error(`Persistence load was canceled for ${prepared.key}.`);
+    this.commitLoadResult(prepared, token);
   }
 
-  private commitLoadResult(result: PreparedBrowserLoadResult): void {
+  private commitLoadResult(result: PreparedBrowserLoadResult, token: BrowserPersistenceLoadToken): void {
     if (result.status === 'missing') {
       this.missing.add(result.key);
-      this.cacheIdentities.set(result.key, {});
+      this.cacheTokens.set(result.key, token);
       return;
     }
     this.metricsValue.decodedChunkCount += 1;
@@ -295,13 +318,13 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     this.metricsValue.decodeSamplesMs.push(result.decodeMs);
     this.metricsValue.codecs[result.codec] = (this.metricsValue.codecs[result.codec] ?? 0) + 1;
     this.snapshots.set(result.key, result.snapshot);
-    this.cacheIdentities.set(result.key, {});
+    this.cacheTokens.set(result.key, token);
   }
 
   private async loadSnapshotBatchFromStore(
     coordinates: readonly LoadCoordinate[],
-    tokens: ReadonlyMap<string, LoadToken>,
-  ): Promise<void> {
+    tokens: ReadonlyMap<string, BrowserPersistenceLoadToken>,
+  ): Promise<ReadonlySet<string>> {
     this.metricsValue.idbGetCount += coordinates.length;
     this.metricsValue.loadTransactionCount += 1;
     const results = await this.request({ kind: 'load-batch', coordinates });
@@ -318,57 +341,78 @@ export class BrowserChunkPersistence implements ChunkPersistence {
         result,
       );
     });
+    const published = new Set<string>();
     prepared.forEach((result) => {
-      if (this.loadTokens.get(result.key) === tokens.get(result.key)) this.commitLoadResult(result);
+      const token = tokens.get(result.key)!;
+      if (!this.loadRegistry.shouldPublish(result.key, token)) return;
+      this.commitLoadResult(result, token);
+      published.add(result.key);
     });
+    return published;
   }
 
   async ensureNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
+    const centerKey = chunkKey(cx, cy, cz);
+    const neighborhood = neighborhoodCoordinates(cx, cy, cz);
+    const lease = this.loadRegistry.beginNeighborhood(
+      centerKey,
+      neighborhood.map(({ cx: x, cy: y, cz: z }) => chunkKey(x, y, z)),
+    );
     const loads = new Set<Promise<void>>();
     const coordinates: LoadCoordinate[] = [];
-    for (let y = cy - 1; y <= cy + 1; y += 1)
-      for (let z = cz - 1; z <= cz + 1; z += 1)
-        for (let x = cx - 1; x <= cx + 1; x += 1) {
-          const key = chunkKey(x, y, z);
-          if (this.snapshots.has(key) || this.missing.has(key)) continue;
-          const existing = this.loads.get(key);
-          if (existing) loads.add(existing);
-          else coordinates.push({ cx: x, cy: y, cz: z });
-        }
+    neighborhood.forEach((coordinate) => {
+      const key = chunkKey(coordinate.cx, coordinate.cy, coordinate.cz);
+      if (this.snapshots.has(key) || this.missing.has(key)) return;
+      const existing = this.loads.get(key);
+      if (existing) loads.add(existing);
+      else coordinates.push(coordinate);
+    });
     if (coordinates.length) {
-      const tokens = new Map<string, LoadToken>();
+      const tokens = new Map<string, BrowserPersistenceLoadToken>();
       coordinates.forEach(({ cx: batchX, cy: batchY, cz: batchZ }) => {
         const key = chunkKey(batchX, batchY, batchZ);
-        const token: LoadToken = { identity: Symbol(key) };
-        tokens.set(key, token);
-        this.loadTokens.set(key, token);
+        tokens.set(key, this.loadRegistry.beginLoad(key));
       });
-      const batch = this.loadSnapshotBatchFromStore(coordinates, tokens).finally(() => {
-        coordinates.forEach(({ cx: batchX, cy: batchY, cz: batchZ }) => {
-          const key = chunkKey(batchX, batchY, batchZ);
-          if (this.loads.get(key) === batch) this.loads.delete(key);
-          if (this.loadTokens.get(key) === tokens.get(key)) this.loadTokens.delete(key);
-        });
+      const batch = this.loadSnapshotBatchFromStore(coordinates, tokens);
+      coordinates.forEach(({ cx: batchX, cy: batchY, cz: batchZ }) => {
+        const key = chunkKey(batchX, batchY, batchZ);
+        const token = tokens.get(key)!;
+        const keyedLoad = batch
+          .then((published) => {
+            if (!published.has(key)) throw new Error(`Persistence neighborhood load was canceled for ${key}.`);
+          })
+          .finally(() => {
+            if (this.loads.get(key) === keyedLoad) this.loads.delete(key);
+            this.loadRegistry.finishLoad(key, token);
+          });
+        this.loads.set(key, keyedLoad);
+        loads.add(keyedLoad);
       });
-      coordinates.forEach(({ cx: batchX, cy: batchY, cz: batchZ }) =>
-        this.loads.set(chunkKey(batchX, batchY, batchZ), batch),
-      );
-      loads.add(batch);
     }
-    await Promise.all(loads);
+    try {
+      await Promise.all(loads);
+      if (!this.loadRegistry.isNeighborhoodCurrent(lease))
+        throw new Error(`Persistence neighborhood load was canceled for ${centerKey}.`);
+    } catch (error) {
+      this.releaseNeighborhoodLease(centerKey, lease);
+      throw error;
+    }
   }
 
   releaseNeighborhood(cx: number, cy: number, cz: number): void {
-    for (let y = cy - 1; y <= cy + 1; y += 1)
-      for (let z = cz - 1; z <= cz + 1; z += 1)
-        for (let x = cx - 1; x <= cx + 1; x += 1) this.clearCachedSnapshot(chunkKey(x, y, z));
+    this.releaseNeighborhoodLease(chunkKey(cx, cy, cz));
+  }
+
+  private releaseNeighborhoodLease(centerKey: string, lease?: BrowserPersistenceNeighborhoodLease): void {
+    this.loadRegistry.releaseNeighborhood(centerKey, lease).forEach((key) => {
+      this.clearCachedSnapshot(key);
+      this.loads.delete(key);
+    });
   }
 
   async saveSnapshots(snapshots: readonly ChunkSnapshot[]): Promise<void> {
     if (!snapshots.length) return;
-    const cacheIdentities = new Map(
-      snapshots.map((snapshot) => [snapshot.key, this.cacheIdentities.get(snapshot.key)]),
-    );
+    const saveFence = this.loadRegistry.captureSaveFence();
     const copies = snapshots.map((snapshot) => ({
       ...snapshot,
       voxels: snapshot.voxels.slice(),
@@ -400,10 +444,21 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     Object.entries(result.codecs).forEach(([codec, count]) => {
       this.metricsValue.codecs[codec] = (this.metricsValue.codecs[codec] ?? 0) + count;
     });
-    snapshots.forEach((snapshot) => {
-      if (this.cacheIdentities.get(snapshot.key) === cacheIdentities.get(snapshot.key))
-        this.clearCachedSnapshot(snapshot.key);
+    this.applySaveFence(
+      snapshots.map((snapshot) => snapshot.key),
+      saveFence,
+    );
+  }
+
+  private applySaveFence(keys: readonly string[], saveFence: number): void {
+    keys.forEach((key) => {
+      const token = this.cacheTokens.get(key);
+      if (token && token.generation <= saveFence) {
+        this.clearCachedSnapshot(key);
+        this.loadRegistry.failExact(key);
+      }
     });
+    this.loadRegistry.applySaveFence(keys, saveFence).forEach((key) => this.loads.delete(key));
   }
 
   async saveMetadata(player: [number, number, number]): Promise<void> {
@@ -460,31 +515,9 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     this.pending.forEach((pending) => pending.reject(error));
     this.pending.clear();
     this.loads.clear();
-    this.loadTokens.clear();
-  }
-}
-
-export function decodeBrowserWorldSave(raw: string | null): BrowserWorldSave | null {
-  try {
-    const value: unknown = JSON.parse(raw ?? 'null');
-    if (!value || typeof value !== 'object') return null;
-    const record = value as Record<string, unknown>;
-    if (
-      typeof record.seed !== 'string' ||
-      (record.generatorVersion !== GENERATOR_VERSION && record.generatorVersion !== LEGACY_GENERATOR_VERSION) ||
-      !Array.isArray(record.player) ||
-      record.player.length !== 3 ||
-      !record.player.every(Number.isFinite) ||
-      !Array.isArray(record.snapshots)
-    )
-      return null;
-    return {
-      seed: record.seed,
-      generatorVersion: record.generatorVersion,
-      player: [record.player[0] as number, record.player[1] as number, record.player[2] as number],
-      snapshots: record.snapshots as SerializedChunkSnapshot[],
-    };
-  } catch {
-    return null;
+    this.snapshots.clear();
+    this.missing.clear();
+    this.cacheTokens.clear();
+    this.loadRegistry.dispose();
   }
 }

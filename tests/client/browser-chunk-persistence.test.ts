@@ -236,8 +236,10 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     persistence.releaseNeighborhood(0, 1, -2);
     worker.resolveDeferredBatch(0, 'found');
 
-    await Promise.all([neighborhood, exact]);
+    await exact;
+    await expect(neighborhood).rejects.toThrow('canceled');
     expect(persistence.loadSnapshot(chunkKey(0, 1, -2))?.revision).toBe(1);
+    expect(persistence.residentSnapshotCount).toBe(0);
     persistence.dispose();
   });
 
@@ -247,14 +249,50 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     const persistence = await open(worker, 'exact-shared-batch');
 
     const exact = persistence.ensureSnapshot(0, 1, -2);
+    expect(persistence.loadSnapshot(chunkKey(0, 1, -2))).toBeNull();
     const neighborhood = persistence.ensureNeighborhood(0, 1, -2);
     expect(worker.singleLoadCount).toBe(1);
     expect(worker.batchRequestSizes).toEqual([26]);
     persistence.releaseNeighborhood(0, 1, -2);
     worker.resolveDeferredSingle(0);
 
-    await Promise.all([exact, neighborhood]);
+    await exact;
+    await expect(neighborhood).rejects.toThrow('canceled');
     expect(persistence.loadSnapshot(chunkKey(0, 1, -2))?.revision).toBe(7);
+    persistence.dispose();
+  });
+
+  it('does not retain a late neighborhood-only batch after its only lease is released', async () => {
+    const worker = new FakePersistenceWorker();
+    worker.batchMode = 'deferred';
+    const persistence = await open(worker, 'released-only');
+
+    const first = persistence.ensureNeighborhood(0, 1, -2);
+    persistence.releaseNeighborhood(0, 1, -2);
+    const successor = persistence.ensureNeighborhood(0, 1, -2);
+    worker.resolveDeferredBatch(0, 'found');
+    await expect(first).rejects.toThrow('canceled');
+    expect(persistence.residentSnapshotCount).toBe(0);
+
+    worker.resolveDeferredBatch(1, 'found');
+    await successor;
+    expect(persistence.residentSnapshotCount).toBe(27);
+    persistence.releaseNeighborhood(0, 1, -2);
+    expect(persistence.residentSnapshotCount).toBe(0);
+    persistence.dispose();
+  });
+
+  it('retains a cached exact result until it is consumed despite neighborhood release', async () => {
+    const worker = new FakePersistenceWorker();
+    worker.batchMode = 'found';
+    const persistence = await open(worker, 'cached-exact');
+    await persistence.ensureNeighborhood(0, 1, -2);
+
+    await persistence.ensureSnapshot(0, 1, -2);
+    persistence.releaseNeighborhood(0, 1, -2);
+
+    expect(persistence.loadSnapshot(chunkKey(0, 1, -2))?.revision).toBe(1);
+    expect(persistence.residentSnapshotCount).toBe(0);
     persistence.dispose();
   });
 
@@ -297,6 +335,29 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     await loading;
 
     expect(persistence.loadSnapshot(chunkKey(0, 0, 0))?.revision).toBe(2);
+    persistence.dispose();
+  });
+
+  it.each([
+    ['save', (persistence: BrowserChunkPersistence) => persistence.saveSnapshots([snapshot('save-fence', 2)])],
+    [
+      'save-frozen',
+      (persistence: BrowserChunkPersistence) => persistence.saveFrozenSnapshot(frozenSnapshot('save-fence', 2)),
+    ],
+  ])('invalidates a pre-%s in-flight result after it is durably replaced', async (_kind, save) => {
+    const worker = new FakePersistenceWorker();
+    worker.deferSingleLoad = true;
+    worker.deferSave = true;
+    const persistence = await open(worker, 'save-fence');
+
+    const loading = persistence.ensureSnapshot(0, 0, 0);
+    const saving = save(persistence);
+    worker.resolveDeferredSingle(0, 1);
+    await loading;
+    worker.resolveDeferredSave(0, 2);
+    await saving;
+
+    expect(persistence.loadSnapshot(chunkKey(0, 0, 0))).toBeNull();
     persistence.dispose();
   });
 
