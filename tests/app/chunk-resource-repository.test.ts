@@ -47,6 +47,51 @@ const createRepository = (
   });
 
 describe('ChunkResourceRepository', () => {
+  it('最后一个part提交后在同帧剩余提交预算内立即attach', () => {
+    const adapter = createAdapter();
+    const repository = new ChunkResourceRepository({
+      adapter,
+      isCurrent: () => true,
+      profile: { maxMeshCommitsPerFrame: 1, maxMeshPartsPerFrame: 1, maxCommitMs: 10 },
+      now: () => 0,
+      summarize: () => ({ triangles: 0, drawCalls: 0, meshBytes: 0 }),
+      onVisible: vi.fn(),
+      onTransitionVisible: vi.fn(),
+      onDiscard: vi.fn(),
+    });
+
+    const resource = repository.enqueue(task(1), ['only-part']);
+    repository.beginFrame();
+    repository.drain();
+
+    expect(resource.postrender).not.toBeNull();
+    expect(repository.maxMeshPartsInFrame).toBe(1);
+    expect(repository.maxMeshCommitsInFrame).toBe(1);
+  });
+
+  it('最后一个part耗尽本帧时间预算时仍延后attach', () => {
+    const adapter = createAdapter();
+    const now = vi.fn().mockReturnValueOnce(0).mockReturnValueOnce(0).mockReturnValue(10);
+    const repository = new ChunkResourceRepository({
+      adapter,
+      isCurrent: () => true,
+      profile: { maxMeshCommitsPerFrame: 1, maxMeshPartsPerFrame: 1, maxCommitMs: 10 },
+      now,
+      summarize: () => ({ triangles: 0, drawCalls: 0, meshBytes: 0 }),
+      onVisible: vi.fn(),
+      onTransitionVisible: vi.fn(),
+      onDiscard: vi.fn(),
+    });
+
+    const resource = repository.enqueue(task(1), ['only-part']);
+    repository.beginFrame();
+    repository.drain();
+
+    expect(resource.postrender).toBeNull();
+    expect(repository.maxMeshPartsInFrame).toBe(1);
+    expect(repository.maxMeshCommitsInFrame).toBe(0);
+  });
+
   it('does not attach after dispose wins a postrender race and destroys once', () => {
     const adapter = createAdapter();
     const repository = createRepository(adapter);

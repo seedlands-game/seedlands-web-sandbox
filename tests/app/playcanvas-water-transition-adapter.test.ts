@@ -67,14 +67,37 @@ const resource = (part: MeshPart): PlayCanvasChunkResource => {
 };
 
 describe('PlayCanvas water transition adapter', () => {
+  it('由PlayCanvas prerender推进非零Morph并在同帧postrender报告首见', () => {
+    let now = 0;
+    vi.stubGlobal('performance', { now: () => now });
+    const app = eventApp();
+    const visible = vi.fn();
+    const setProgress = vi.fn();
+    const adapter = createPlayCanvasChunkAdapter(
+      app,
+      () => ({}) as pc.StandardMaterial,
+      telemetry,
+      undefined,
+      undefined,
+      () => ({ instance: {} as pc.MeshInstance, setProgress, destroy: vi.fn() }),
+    );
+    const previous = resource(waterPart(8));
+    const current = resource(waterPart(4));
+
+    expect(adapter.prepareReplacement?.(previous, current, task)).toBe(true);
+    adapter.transitionReplacement?.(previous, current, task, vi.fn(), visible);
+    now = 16;
+    app.fire('prerender');
+    expect(setProgress.mock.lastCall?.[0]).toBeGreaterThan(0);
+    expect(visible).not.toHaveBeenCalled();
+    app.fire('postrender');
+    expect(visible).toHaveBeenCalledOnce();
+    vi.unstubAllGlobals();
+  });
+
   it('reports transition visibility only after positive progress is rendered', () => {
-    vi.stubGlobal('performance', { now: () => 0 });
-    let frame: FrameRequestCallback | undefined;
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      frame = callback;
-      return 1;
-    });
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    let now = 0;
+    vi.stubGlobal('performance', { now: () => now });
     const app = eventApp();
     const transitions = new WaterMeshTransitionTracker();
     const visible = vi.fn();
@@ -92,12 +115,14 @@ describe('PlayCanvas water transition adapter', () => {
     transitions.setHeldForHarness(true);
     expect(adapter.prepareReplacement?.(previous, current, task)).toBe(true);
     adapter.transitionReplacement?.(previous, current, task, vi.fn(), visible);
-    frame!(16);
+    now = 16;
+    app.fire('prerender');
     app.fire('postrender');
     expect(visible).not.toHaveBeenCalled();
 
     transitions.setHeldForHarness(false);
-    frame!(32);
+    now = 32;
+    app.fire('prerender');
     expect(visible).not.toHaveBeenCalled();
     app.fire('postrender');
     expect(visible).toHaveBeenCalledOnce();
@@ -106,46 +131,43 @@ describe('PlayCanvas water transition adapter', () => {
   });
 
   it('does not report a positive morph frame cancelled before postrender', () => {
-    vi.stubGlobal('performance', { now: () => 0 });
-    let frame: FrameRequestCallback | undefined;
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      frame = callback;
-      return 1;
-    });
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    let now = 0;
+    vi.stubGlobal('performance', { now: () => now });
     const app = eventApp();
     const visible = vi.fn();
+    const setProgress = vi.fn();
     const adapter = createPlayCanvasChunkAdapter(
       app,
       () => ({}) as pc.StandardMaterial,
       telemetry,
       undefined,
       undefined,
-      () => ({ instance: {} as pc.MeshInstance, setProgress: vi.fn(), destroy: vi.fn() }),
+      () => ({ instance: {} as pc.MeshInstance, setProgress, destroy: vi.fn() }),
     );
     const previous = resource(waterPart(8));
     const current = resource(waterPart(4));
 
     expect(adapter.prepareReplacement?.(previous, current, task)).toBe(true);
     adapter.transitionReplacement?.(previous, current, task, vi.fn(), visible);
-    frame!(16);
+    now = 16;
+    app.fire('prerender');
     current.transitionCancel?.();
     app.fire('postrender');
+    const callsAfterCancel = setProgress.mock.calls.length;
+    now = 32;
+    app.fire('prerender');
 
     expect(visible).not.toHaveBeenCalled();
+    expect(setProgress).toHaveBeenCalledTimes(callsAfterCancel);
     vi.unstubAllGlobals();
   });
   it('过渡完成不把RenderComponent已拥有的静态实例重新交给破坏性setter', () => {
-    vi.stubGlobal('performance', { now: () => 0 });
-    let frame: FrameRequestCallback | undefined;
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      frame = callback;
-      return 1;
-    });
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    let now = 0;
+    vi.stubGlobal('performance', { now: () => now });
     const destroy = vi.fn();
+    const app = eventApp();
     const adapter = createPlayCanvasChunkAdapter(
-      { graphicsDevice: {} } as pc.Application,
+      app,
       () => ({}) as pc.StandardMaterial,
       telemetry,
       undefined,
@@ -170,7 +192,8 @@ describe('PlayCanvas water transition adapter', () => {
       },
     });
     adapter.transitionReplacement?.(previous, current, task, vi.fn());
-    expect(() => frame!(200)).not.toThrow();
+    now = 200;
+    expect(() => app.fire('prerender')).not.toThrow();
     expect(current.waterInstances[0].visible).toBe(true);
     expect(destroy).toHaveBeenCalledOnce();
     expect(removeMeshInstances).toHaveBeenCalledWith([transitionInstance]);
@@ -178,13 +201,8 @@ describe('PlayCanvas water transition adapter', () => {
     vi.unstubAllGlobals();
   });
   it('shows one geometry morph without changing either water mesh opacity', () => {
-    vi.stubGlobal('performance', { now: () => 0 });
-    let frame: FrameRequestCallback | undefined;
-    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-      frame = callback;
-      return 1;
-    });
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    let now = 0;
+    vi.stubGlobal('performance', { now: () => now });
     const transitionInstance = { visible: true } as pc.MeshInstance;
     const setProgress = vi.fn();
     const destroy = vi.fn();
@@ -221,8 +239,8 @@ describe('PlayCanvas water transition adapter', () => {
     const complete = vi.fn();
     const visible = vi.fn();
     adapter.transitionReplacement?.(previous, current, task, complete, visible);
-    expect(frame).toBeDefined();
-    (frame as FrameRequestCallback)(200);
+    now = 200;
+    app.fire('prerender');
 
     expect(setProgress).toHaveBeenLastCalledWith(1);
     expect(current.waterInstances[0].visible).toBe(true);
@@ -236,8 +254,6 @@ describe('PlayCanvas water transition adapter', () => {
 
   it('skips an identical static surface and supersedes an active morph with one cleanup', () => {
     vi.stubGlobal('performance', { now: () => 0 });
-    vi.stubGlobal('requestAnimationFrame', () => 1);
-    vi.stubGlobal('cancelAnimationFrame', vi.fn());
     const firstDestroy = vi.fn();
     const secondDestroy = vi.fn();
     let created = 0;
@@ -247,7 +263,7 @@ describe('PlayCanvas water transition adapter', () => {
       destroy: created++ === 0 ? firstDestroy : secondDestroy,
     });
     const adapter = createPlayCanvasChunkAdapter(
-      { graphicsDevice: {} } as pc.Application,
+      eventApp(),
       () => ({}) as pc.StandardMaterial,
       telemetry,
       undefined,

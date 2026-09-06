@@ -200,7 +200,6 @@ export const createPlayCanvasChunkAdapter = (
     current.transitionCancel = null;
     let previousFrameAt = performance.now();
     let elapsed = 0;
-    let animationFrame = 0;
     let finished = false;
     let cancelled = false;
     let visiblePostrenderPending = false;
@@ -227,7 +226,7 @@ export const createPlayCanvasChunkAdapter = (
       if (finished) return;
       finished = true;
       if (cancelled) cancelPendingVisible();
-      cancelAnimationFrame(animationFrame);
+      app.off('prerender', update);
       previous.transitionCancel = null;
       current.transitionCancel = null;
       if (cancelled) transitions.cancel(task.traceId);
@@ -244,10 +243,10 @@ export const createPlayCanvasChunkAdapter = (
       }
       onComplete();
     };
-    const update = (now: number) => {
+    const update = () => {
+      const now = performance.now();
       if (transitions.held) {
         previousFrameAt = now;
-        animationFrame = requestAnimationFrame(update);
         return;
       }
       elapsed += Math.max(0, now - previousFrameAt);
@@ -257,7 +256,6 @@ export const createPlayCanvasChunkAdapter = (
       transitions.advance(task.traceId, progress);
       if (progress > 0) scheduleTransitionVisible();
       if (progress >= 1) finish(false);
-      else animationFrame = requestAnimationFrame(update);
     };
     const cancel = () => {
       cancelled = true;
@@ -265,7 +263,7 @@ export const createPlayCanvasChunkAdapter = (
     };
     previous.transitionCancel = cancel;
     current.transitionCancel = cancel;
-    animationFrame = requestAnimationFrame(update);
+    app.on('prerender', update);
     return true;
   },
   destroy: (resource) => {

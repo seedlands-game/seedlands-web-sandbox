@@ -128,6 +128,14 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       this.options.adapter.commitPart(job.resource, job.task, part);
       job.nextPart += 1;
       this.frameParts += 1;
+      if (
+        job.nextPart === job.parts.length &&
+        this.frameCommits < this.options.profile.maxMeshCommitsPerFrame &&
+        this.options.now() - startedAt < this.options.profile.maxCommitMs
+      ) {
+        this.commitQueue.shift();
+        this.attach(job);
+      }
     }
     this.maxFrameCommits = Math.max(this.maxFrameCommits, this.frameCommits);
     this.maxFrameParts = Math.max(this.maxFrameParts, this.frameParts);
