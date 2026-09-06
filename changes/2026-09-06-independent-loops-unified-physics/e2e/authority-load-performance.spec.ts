@@ -91,6 +91,11 @@ async function establishAuthorityLoad(page: Page) {
     harness.setTimePaused(true);
     await harness.fillWorld({ from: [-14, 49, -11], to: [14, 56, 14], voxel: 0 });
     await harness.fillWorld({ from: [-14, 48, -11], to: [14, 48, 14], voxel: 3 });
+    // 角色围栏位于玩家身后且高三格；角色仍真实移动和碰撞，但不会因 wander 离开受控负载。
+    await harness.fillWorld({ from: [0, 49, 1], to: [0, 51, 12], voxel: 3 });
+    await harness.fillWorld({ from: [10, 49, 1], to: [10, 51, 12], voxel: 3 });
+    await harness.fillWorld({ from: [1, 49, 1], to: [9, 51, 1], voxel: 3 });
+    await harness.fillWorld({ from: [1, 49, 12], to: [9, 51, 12], voxel: 3 });
     // Harness 坐标是相机/眼睛位置；50.6 对应脚底 y=49，避免嵌入 y=48 的地板。
     await harness.movePlayerTo(0, 50.6, 0);
     for (const [x, z] of targets) {
@@ -324,9 +329,31 @@ async function runConfiguration(
           32 ** 2;
       const actors = actorIds.map(inspect);
       const worldItems = worldItemIds.map(inspect);
+      const penBoundary = [];
+      for (let y = 49; y <= 51; y += 1) {
+        for (let z = 1; z <= 12; z += 1) {
+          penBoundary.push({ position: [0, y, z], voxel: harness.getVoxelAt?.(0, y, z) ?? null });
+          penBoundary.push({ position: [10, y, z], voxel: harness.getVoxelAt?.(10, y, z) ?? null });
+        }
+        for (let x = 1; x <= 9; x += 1) {
+          penBoundary.push({ position: [x, y, 1], voxel: harness.getVoxelAt?.(x, y, 1) ?? null });
+          penBoundary.push({ position: [x, y, 12], voxel: harness.getVoxelAt?.(x, y, 12) ?? null });
+        }
+      }
       return {
         actors,
         worldItems,
+        penBoundary,
+        insidePenActorIds: actors
+          .filter(
+            ({ body }) =>
+              body !== null &&
+              body.position[0] > 0 &&
+              body.position[0] < 10 &&
+              body.position[2] > 1 &&
+              body.position[2] < 12,
+          )
+          .map(({ id }) => id),
         nearActorIds: actors.filter(nearPlayer).map(({ id }) => id),
         nearWorldItemIds: worldItems.filter(nearPlayer).map(({ id }) => id),
       };
@@ -337,6 +364,9 @@ async function runConfiguration(
     });
     expect(spawnedBodies.actors).toHaveLength(SCENARIO_SOURCE.actorSpawns);
     expect(spawnedBodies.worldItems).toHaveLength(SCENARIO_SOURCE.worldItemSpawns);
+    expect(spawnedBodies.penBoundary).toHaveLength(126);
+    expect(spawnedBodies.penBoundary.every(({ voxel }) => voxel === 3)).toBe(true);
+    expect(spawnedBodies.insidePenActorIds).toHaveLength(SCENARIO_SOURCE.actorSpawns);
     expect(spawnedBodies.nearActorIds).toHaveLength(SCENARIO_SOURCE.actorSpawns);
     expect(spawnedBodies.nearWorldItemIds).toHaveLength(SCENARIO_SOURCE.worldItemSpawns);
     expect(prepared.renderedChunks).toBeGreaterThanOrEqual(25);
