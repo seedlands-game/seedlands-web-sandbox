@@ -8,7 +8,7 @@
 
 简单且已澄清的需求走 **Agile**：短 spec、RED、实现、GREEN 和本地准出连续完成。安全、权限、持久化格式、世界生成/Chunk、渲染管线、公开契约、跨模块重构或不可逆数据走 **Breaking**：先写 spec 与用例，用户审核精确 SHA-256 后实施。目标或方案不清楚时走 **Exploration**：仅在 `/tmp` 或独立非生产位置试验，不导入产品，方向稳定后以新 spec 和新审核正式实现。
 
-审核不自行授权超出合同的发布、其他外部写入、权限变更或删除。项目默认交接由本用户长期授权：验收后的 change 可将功能分支推送至已配置 `origin`，并以目标分支为 base 创建或更新 PR；用户指定 `local-only`、不发 PR 或其他范围时优先。不得自动合并或绕过分支保护。`Scope`、`Decisions`、`Behaviour`、`Test Design` 或 `Acceptance` 的实质变化会使原 hash 审核失效，必须重新审核。每次准出记录 docs baseline 是否更新：跨 change 的难重建规则更新 docs；只影响局部行为时写明不更新理由。
+审核本身不自动授权超出合同的发布、其他外部写入、权限变更或删除。项目默认交接由本用户长期授权：验收后的 change 可将功能分支推送至已配置 `origin`，并以目标分支为 base 创建或更新 PR；用户指定 `local-only`、不发 PR 或其他范围时优先。不得自动合并或绕过分支保护。`Scope`、`Decisions`、`Behaviour`、`Test Design` 或 `Acceptance` 的实质变化会使原 hash 审核失效，必须重新审核。每次准出记录 docs baseline 是否更新：跨 change 的难重建规则更新 docs；只影响局部行为时写明不更新理由。
 
 ## E2E 生命周期
 
