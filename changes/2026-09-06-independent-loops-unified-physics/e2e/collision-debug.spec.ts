@@ -17,7 +17,7 @@ test('F3+B完整消费，面板等价控制，关闭真实线框资源不残留'
     await h.setVoxelAt(0, 58, -3, 10);
     for (const command of [
       { type: 'spawn-actor', archetype: 'grazer', position: [3, 57, -3] },
-      { type: 'spawn-world-item', itemId: 'stone-block', count: 1, position: [-3, 57, -2] },
+      { type: 'spawn-world-item', itemId: 'stone-block', count: 1, position: [-1.5, 57, -5] },
     ] as const) {
       const result = await h.executeGameplayCommand(command);
       if (!result.success) throw new Error(result.error.message);

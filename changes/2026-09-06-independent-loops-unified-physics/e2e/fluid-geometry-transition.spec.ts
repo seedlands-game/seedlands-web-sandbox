@@ -32,15 +32,16 @@ test('已提交水边界使用单几何变形且静水重网格不启动过渡',
   await page.evaluate(async () => {
     const h = window.__seedlandsHarness!;
     h.setTimePaused(true);
-    await h.fillWorld({ from: [-3, 57, -3], to: [7, 62, 7], voxel: 0 });
+    await h.fillWorld({ from: [-3, 57, -3], to: [7, 65, 7], voxel: 0 });
     await h.fillWorld({ from: [-3, 56, -3], to: [7, 56, 7], voxel: 3 });
     // 三个独立封闭井，真实流体无需暂停也会稳定，日夜暂停只固定照明。
     await h.fillWorld({ from: [-1, 57, -1], to: [5, 57, 1], voxel: 3 });
     for (const x of [0, 2, 4]) await h.setVoxelAt(x, 57, 0, 0);
     await h.setVoxelAt(0, 57, 0, 8);
-    await h.fillWorld({ from: [1, 57, 4], to: [3, 58, 6], voxel: 3 });
-    await h.movePlayerTo(2.5, 60.6, 5.5);
-    h.setView(0, -30);
+    await h.fillWorld({ from: [2, 61, 4], to: [2, 62, 4], voxel: 3 });
+    // 固定俯视取证位避免井沿遮住合法的中间水位；只改变观察位置。
+    await h.movePlayerTo(2.5, 64.6, 4.5);
+    h.setView(0, -58);
   });
   await waitForSnapshot(
     page,
