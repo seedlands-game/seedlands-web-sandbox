@@ -109,7 +109,7 @@ async function establishAuthorityLoad(page: Page) {
       const result = await harness.executeGameplayCommand({
         type: 'spawn-actor',
         id: `load-actor-${index}`,
-        // 固定负载角色只需要持续参加权威物理；统一非敌对原型，避免准备期间相互攻击或拾取改变集合。
+        // 固定负载角色只需要持续参加权威物理；统一 grazer，避免混合 night-stalker 触发持续逃跑。
         archetype: 'grazer',
         position: [1 + (index % 8), 49, -2 - Math.floor(index / 8) * 3],
       });
