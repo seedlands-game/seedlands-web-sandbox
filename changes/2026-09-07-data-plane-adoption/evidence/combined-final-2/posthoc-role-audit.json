@@ -1,0 +1,9 @@
+{
+  "at": "2026-09-06T19:40:52.642840+00:00",
+  "runs": 30,
+  "blocks": 10,
+  "allRolesExact": true,
+  "simdSha256": "320402dd0e3b8df902a106ef1a584f56236bad6ad3075628e42bce8b341b14d4",
+  "unexpectedRoleInstances": 0,
+  "linearMemoryBytesPerB": 18874368
+}

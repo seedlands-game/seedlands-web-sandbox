@@ -1,0 +1,68 @@
+src/client/wasm-experiment-selection.ts 27ms (unchanged)
+tests/worker/data-plane-defaults.test.ts 3ms (unchanged)
+tests/server/fluid-transaction.test.ts 47ms (unchanged)
+changes/2026-09-07-data-plane-adoption/spec.md 30ms (unchanged)
+changes/2026-09-07-data-plane-adoption/adoption-plan.md 10ms (unchanged)
+changes/2026-09-07-data-plane-adoption/first-combination-results.md 19ms
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+
+
+ Test Files  2 passed (2)
+      Tests  23 passed (23)
+   Start at  03:16:54
+   Duration  246ms (transform 70ms, setup 0ms, import 88ms, tests 84ms, environment 0ms)
+
+$ pnpm wasm:verify && pnpm wasm:rust:verify && pnpm typecheck && vite build
+$ node scripts/wasm-artifact.mjs
+Wasm artifact verified: 9788 bytes, e342dd87279fe651eba7e649a6b5c0db172bd7653dbbf6380c272f88a7f7b17a
+$ node scripts/rust-kernel-artifact.mjs
+Rust source/artifact fingerprints verified.
+$ svelte-check --tsconfig ./tsconfig.json && tsc --noEmit && tsc -p tsconfig.test.json --noEmit
+Loading svelte-check in workspace: /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+3:17:03 AM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation - using default configuration.
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 2442 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                          1.66 kB │ gzip:   0.91 kB
+dist/assets/fluid-compute-worker-COffipU7.js             9.94 kB
+dist/assets/game-logic-worker-DljHbtPj.js               14.45 kB
+dist/assets/rust-kernels-scalar-Dqt-Jo_q.wasm           22.53 kB │ gzip:  10.27 kB
+dist/assets/rust-kernels-simd-Bc_m7tYA.wasm             24.09 kB │ gzip:  11.04 kB
+dist/assets/persistence-worker-DstYivrc.js              28.07 kB
+dist/assets/world-worker-CDGbaibV.js                    36.06 kB
+dist/assets/authority-worker-CxkANcJh.js               195.85 kB
+dist/assets/index-BxAFsvrm.css                          27.88 kB │ gzip:   7.05 kB
+dist/assets/chunk-persistence-benchmark-Viwf1j1h.js      1.73 kB │ gzip:   0.84 kB
+dist/assets/index-Cjql8ZzW.js                        2,513.82 kB │ gzip: 668.47 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 3.00s
+$ node scripts/freeze-adoption-builds.mjs
+{"root":"/Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation","sourceSha":"79e05c53e8c8d199c24b438165c7f62aa69efc70","productionSourceHash":"7fc44871d060d3973f062d7a52981d140dcca7ce6cec112b69c574d24a7f353a","stampedAt":"2026-09-06T19:17:06.862Z"}
+{"root":"/tmp/seedlands-adoption-baseline","sourceSha":"79e05c53e8c8d199c24b438165c7f62aa69efc70","productionSourceHash":"9167cf906f03e88d348b981195e939dc6d38a8131e717c070da5196e5adb20b5","stampedAt":"2026-09-06T19:17:06.914Z"}
+$ playwright test tests/e2e/regression
+
+Running 8 tests using 1 worker
+
+(node:32052) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/8] [chromium] › tests/e2e/regression/macro-map.spec.ts:4:1 › renders the deterministic Macro map and changes its visible data layer
+[2/8] [chromium] › tests/e2e/regression/world-play.spec.ts:34:3 › Seedlands deterministic browser regression › loads a deterministic world and exposes its HUD
+[3/8] [chromium] › tests/e2e/regression/world-play.spec.ts:40:3 › Seedlands deterministic browser regression › moves and jumps through the real pointer-lock input path
+[4/8] [chromium] › tests/e2e/regression/world-play.spec.ts:56:3 › Seedlands deterministic browser regression › moves across a flat voxel platform without overlapping its floor
+[5/8] [chromium] › tests/e2e/regression/world-play.spec.ts:78:3 › Seedlands deterministic browser regression › keeps real edge support and falls only after all supporting voxels are removed
+[6/8] [chromium] › tests/e2e/regression/world-play.spec.ts:114:3 › Seedlands deterministic browser regression › walks down a ledge and requires a real jump to return without overlap
+[7/8] [chromium] › tests/e2e/regression/world-play.spec.ts:158:3 › Seedlands deterministic browser regression › persists a controlled world edit through the production edit and Store paths
+[8/8] [chromium] › tests/e2e/regression/world-play.spec.ts:184:3 › Seedlands deterministic browser regression › updates the streaming center for a controlled chunk-crossing position
+  8 passed (14.7s)

@@ -98,10 +98,12 @@ const fluidForWater = (fluid: number) => fluid || 0x88;
  * no authority callbacks, so a compute worker cannot accidentally read live
  * GameServer state while producing its candidate.
  */
-export function computeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCandidate {
+function computeFluidCandidateFromChunks(
+  snapshot: FluidAuthoritySnapshot,
+  chunks: Map<string, FluidChunkSnapshot>,
+): FluidCandidate {
   if (snapshot.protocolVersion !== FLUID_TRANSACTION_PROTOCOL_VERSION)
     throw new TypeError('Unsupported fluid protocol.');
-  const chunks = new Map(snapshot.chunks.map((chunk) => [chunk.key, cloneChunk(chunk)]));
   const original = new Map<string, FluidCellValue>();
   const touched = new Set<string>();
   const next = new Set<string>();
@@ -253,6 +255,26 @@ export function computeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCa
     nextCleanupFrontier: [...nextCleanup].map(positionFromKey).sort(comparePositions),
     needsRescan,
   };
+}
+
+/**
+ * Computes a candidate without changing reusable caller-owned input. This is
+ * the public/reference contract used by Authority validation and tests.
+ */
+export function computeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCandidate {
+  return computeFluidCandidateFromChunks(
+    snapshot,
+    new Map(snapshot.chunks.map((chunk) => [chunk.key, cloneChunk(chunk)])),
+  );
+}
+
+/**
+ * Consumes task-owned Chunk arrays in place. The fluid Worker may use this
+ * only after transfer has made the task buffers exclusive; Authority retains
+ * its separate lease snapshot for validation.
+ */
+export function consumeFluidCandidate(snapshot: FluidAuthoritySnapshot): FluidCandidate {
+  return computeFluidCandidateFromChunks(snapshot, new Map(snapshot.chunks.map((chunk) => [chunk.key, chunk])));
 }
 
 type AuthorityOptions = {

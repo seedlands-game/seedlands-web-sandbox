@@ -62,7 +62,7 @@ export function createMeshPackKernel(memory: KernelMemory): MeshPackKernel {
 const categories: readonly RenderCategory[] = ['opaque', 'cutout', 'emissive', 'transparent'];
 
 /**
- * Keep batching and its bulk TypedArray copies in TypeScript. MoonBit owns
+ * Keep batching and its bulk TypedArray copies in TypeScript. The selected Wasm module owns
  * only compact UV conversion, alpha/material packing, and index offset scans.
  */
 const runMeshPackKernelUnsafe = (kernel: MeshPackKernel, parts: readonly MeshData[]): MeshData[] =>

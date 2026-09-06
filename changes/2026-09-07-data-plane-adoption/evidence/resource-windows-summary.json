@@ -1,0 +1,77 @@
+[
+  {
+    "evidence": "reservation-ts-fixes.json",
+    "startedAt": "2026-09-06T18:03:44.671Z",
+    "endedAt": "2026-09-06T18:05:07.242Z",
+    "exitCode": 0,
+    "sampleCount": 18,
+    "loadAverage1minRange": [
+      3.17041015625,
+      4.1142578125
+    ],
+    "freeMemoryBytesRange": [
+      201981952,
+      2408595456
+    ]
+  },
+  {
+    "evidence": "reservation-workloads-formal-1.json",
+    "startedAt": "2026-09-06T18:07:40.887Z",
+    "endedAt": "2026-09-06T18:24:36.872Z",
+    "exitCode": 0,
+    "sampleCount": 205,
+    "loadAverage1minRange": [
+      2.390625,
+      5.16796875
+    ],
+    "freeMemoryBytesRange": [
+      61652992,
+      2939617280
+    ]
+  },
+  {
+    "evidence": "combined-reservation-refinement.json",
+    "startedAt": "2026-09-06T18:34:34.010Z",
+    "endedAt": "2026-09-06T18:39:32.795Z",
+    "exitCode": 1,
+    "sampleCount": 61,
+    "loadAverage1minRange": [
+      2.064453125,
+      5.34716796875
+    ],
+    "freeMemoryBytesRange": [
+      71680000,
+      3595501568
+    ]
+  },
+  {
+    "evidence": "combined-reservation-final-1.json",
+    "startedAt": "2026-09-06T18:48:46.531Z",
+    "endedAt": "2026-09-06T19:10:11.508Z",
+    "exitCode": 0,
+    "sampleCount": 258,
+    "loadAverage1minRange": [
+      1.91650390625,
+      4.44189453125
+    ],
+    "freeMemoryBytesRange": [
+      73613312,
+      2570371072
+    ]
+  },
+  {
+    "evidence": "combined-reservation-final-2.json",
+    "startedAt": "2026-09-06T19:17:49.356Z",
+    "endedAt": "2026-09-06T19:39:13.275Z",
+    "exitCode": 0,
+    "sampleCount": 258,
+    "loadAverage1minRange": [
+      1.70654296875,
+      5.30615234375
+    ],
+    "freeMemoryBytesRange": [
+      67518464,
+      1578008576
+    ]
+  }
+]
