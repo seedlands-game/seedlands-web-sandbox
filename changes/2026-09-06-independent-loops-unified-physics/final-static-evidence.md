@@ -63,3 +63,34 @@ c4327530aac6bd5027c7c10ea5265cea9d0c13a4
 - `/tmp/seedlands-final-static-c4327530aac6/dist/index.html`
 
 本次最终复验在运行时使用 `bash -o pipefail`，并通过 `tee` 将完整输出直接写入上述日志；日志末行由同一 shell 追加实际 `COMMAND_EXIT`。这两份日志是原始命令输出，不是事后整理摘要。前述 `74a8ed2` 历史证据继续保留，用于说明更早一次检查及其日志边界，不作为最终候选的替代。
+
+## 最终统一生产候选：`2257aff`
+
+A7 最终真实浏览器与长期 Harness 在 `2257affb830046e638a99b9502e77d0866eb1bf1` 完成后，主任务明确释放重型窗口。本轮另建 detached 工作树 `/tmp/seedlands-final-static-2257affb8300`，没有复用或修改供后续 A9 使用的既有不可变 `dist`。固定源码父链为：
+
+```text
+2257affb830046e638a99b9502e77d0866eb1bf1
+└─ e4b2ad7b308855005f97217ee4cb369d52be2981
+   └─ 00210cb7eb949754da161b6f71f4af6a2059b89f
+      └─ 01d183e97bf34375a29dbe8ca07f92da19b4cc5a
+         └─ 3b35829906cbae02659538ebd920beb25630e16f
+```
+
+这条父链已经包含最终传输恢复 E2E 加固以及预测与 Authority 重同步分离的生产修复。后继仅证据文档的提交不改变本轮生产源码身份。
+
+`pnpm verify:static` 通过，原始合并 stdout/stderr 与管道真实退出码保存在 `evidence/final-verify-static-2257affb8300.log`，SHA-256 为 `67750dc84a472466a38e27c52c98fc98553c0002756d6487f3e412107503ceb0`。实际结果：
+
+- Prettier、ESLint 与路径命名检查全部通过。
+- 147 个测试文件中 145 个通过、2 个跳过；738 项中 734 项通过、4 项跳过。
+- `src/world/**` 行覆盖率 96.37%（718/745），statement 94.65%（832/879），branch 87.25%（438/502），function 96.8%（91/94）。
+- Svelte 检查 0 error、0 warning；源码与测试 TypeScript 检查通过；`COMMAND_EXIT=0`。
+
+`pnpm build` 通过，原始合并 stdout/stderr 与管道真实退出码保存在 `evidence/final-build-2257affb8300.log`，SHA-256 为 `d42b22c9253f85caae5ca675a72edcdc7b5c4953862f7c441bd4320007f2263b`。类型检查再次通过，Vite 转换 2438 个模块并产出 Authority、Logic、Persistence、Fluid 与 General Worker bundle，`COMMAND_EXIT=0`；仅保留既有的主 bundle 大于 500 kB 警告。
+
+命令直接生成的产物位于：
+
+- `/tmp/seedlands-final-static-2257affb8300/coverage/coverage-summary.json`
+- `/tmp/seedlands-final-static-2257affb8300/coverage/lcov.info`
+- `/tmp/seedlands-final-static-2257affb8300/dist/index.html`
+
+本轮同样使用 `bash -o pipefail` 与 `tee`，日志末行的 `COMMAND_EXIT` 来自对应命令管道的真实首段退出码。本节取代 `c432753` 作为最终统一生产候选的 Static 与 Build 证据；较早两轮继续作为实现过程历史保留。
