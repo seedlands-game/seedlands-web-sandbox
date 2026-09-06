@@ -222,6 +222,60 @@ describe('MeshTaskScheduler', () => {
     expect(scheduler.latestTask('0,0,0')?.visibilityBarrierRevision).toBe(4);
   });
 
+  it('异步准备期间的连续流体修订不能重启准备并饿死Worker', async () => {
+    const worker = new FakeWorker();
+    const accepted: Array<{
+      task: Parameters<MeshTaskScheduler['completeVisible']>[0];
+      result: WorkerResult;
+    }> = [];
+    const prepareResolvers: Array<() => void> = [];
+    const beforePrepare = vi.fn(() => new Promise<void>((resolve) => prepareResolvers.push(resolve)));
+    let revision = 1;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'main-snapshot',
+      source: {
+        beforePrepare,
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: revision,
+          haloRevision: `halo-${revision}`,
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: revision, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: (task, result) => accepted.push({ task, result }),
+    });
+
+    scheduler.protectVisibleRevision('0,0,0', revision);
+    scheduler.request(0, 0, 0, { priority: 'interactive-fluid' });
+    expect(beforePrepare).toHaveBeenCalledTimes(1);
+    expect(scheduler.generationQueueSize).toBe(1);
+    for (revision = 2; revision <= 121; revision += 1) {
+      scheduler.protectVisibleRevision('0,0,0', revision);
+      scheduler.request(0, 0, 0, { forceRemesh: true, priority: 'interactive-fluid' });
+    }
+    revision = 121;
+
+    prepareResolvers[0]!();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(beforePrepare).toHaveBeenCalledTimes(1);
+    expect(scheduler.generationQueueSize).toBe(0);
+    expect(worker.posts).toHaveLength(1);
+    expect(worker.posts[0]?.chunkRevision).toBe(121);
+    worker.emit(resultFor(worker.posts[0]!));
+    await vi.waitFor(() => expect(accepted).toHaveLength(1));
+    scheduler.completeVisible(accepted[0]!.task);
+    expect(beforePrepare).toHaveBeenCalledTimes(1);
+  });
+
   it('取消首见屏障会丢弃延后后继并允许同key新代际重新请求', () => {
     const worker = new FakeWorker();
     const accepted: Array<{ task: Parameters<MeshTaskScheduler['completeVisible']>[0]; result: WorkerResult }> = [];
@@ -296,6 +350,87 @@ describe('MeshTaskScheduler', () => {
     expect(scheduler.latestTask('0,0,0')?.visibilityBarrierRevision).toBeUndefined();
     scheduler.completeVisible(accepted[0]!);
     expect(worker.posts).toHaveLength(2);
+  });
+
+  it('取消异步准备中的请求后旧准备不会复活且新代际可继续', async () => {
+    const worker = new FakeWorker();
+    const prepareResolvers: Array<() => void> = [];
+    const releasePrepared = vi.fn();
+    let revision = 1;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'main-snapshot',
+      source: {
+        beforePrepare: () => new Promise<void>((resolve) => prepareResolvers.push(resolve)),
+        releasePrepared,
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: revision,
+          haloRevision: `halo-${revision}`,
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: revision, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: vi.fn(),
+    });
+
+    scheduler.request(0, 0, 0);
+    scheduler.cancel('0,0,0');
+    revision = 2;
+    scheduler.request(0, 0, 0);
+    prepareResolvers[0]!();
+    await vi.waitFor(() => expect(prepareResolvers).toHaveLength(2));
+    expect(worker.posts).toHaveLength(0);
+    expect(releasePrepared).toHaveBeenCalledTimes(1);
+
+    prepareResolvers[1]!();
+    await vi.waitFor(() => expect(worker.posts).toHaveLength(1));
+    expect(worker.posts[0]?.chunkRevision).toBe(2);
+  });
+
+  it.each(['cancel', 'scenario-reset'] as const)('%s后旧异步准备失败不会清掉同key新代际', async (action) => {
+    const worker = new FakeWorker();
+    const preparations: Array<{ resolve: () => void; reject: (error: Error) => void }> = [];
+    let revision = 1;
+    const scheduler = new MeshTaskScheduler({
+      worker,
+      profile: PERFORMANCE_PROFILES.benchmark,
+      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      variant: 'main-snapshot',
+      source: {
+        beforePrepare: () => new Promise<void>((resolve, reject) => preparations.push({ resolve, reject })),
+        releasePrepared: vi.fn(),
+        seed: 7,
+        generatorVersion: 3,
+        prepareMainSnapshot: () => ({
+          chunkRevision: revision,
+          haloRevision: `halo-${revision}`,
+          canonical: new Uint16Array(1),
+          halo: new Uint16Array(1),
+        }),
+        prepareWorkerInput: () => ({ chunkRevision: revision, generatorVersion: 3, overlays: [] }),
+        acceptWorkerCanonical: () => true,
+      },
+      onAcceptedResult: vi.fn(),
+    });
+
+    scheduler.request(0, 0, 0);
+    if (action === 'cancel') scheduler.cancel('0,0,0');
+    else scheduler.beginScenario();
+    revision = 2;
+    scheduler.request(0, 0, 0);
+    preparations[0]!.reject(new Error('old preparation failed'));
+    await vi.waitFor(() => expect(preparations).toHaveLength(2));
+    expect(worker.posts).toHaveLength(0);
+
+    preparations[1]!.resolve();
+    await vi.waitFor(() => expect(worker.posts).toHaveLength(1));
+    expect(worker.posts[0]?.chunkRevision).toBe(2);
   });
 
   it('屏障任务开始后的下一次流体revision保留一个后继屏障且完成后不残留', () => {

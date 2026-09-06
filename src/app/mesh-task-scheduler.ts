@@ -61,6 +61,7 @@ export class MeshTaskScheduler {
   private readonly latestTasks = new Map<string, PendingMeshTask>();
   private readonly requested = new Set<string>();
   private readonly replacements = new Map<string, PendingMeshRequest>();
+  private readonly preparingRequests = new Map<string, PendingMeshRequest>();
   private readonly visibility = new MeshVisibilityBarriers<PendingMeshRequest>();
   private readonly inFlightKeys = new Set<string>();
   private readonly scenarioTraceIds = new Set<string>();
@@ -83,7 +84,7 @@ export class MeshTaskScheduler {
   }
 
   get generationQueueSize() {
-    return this.queued.size;
+    return this.queued.size + this.preparingRequests.size;
   }
 
   get meshingQueueSize() {
@@ -114,6 +115,7 @@ export class MeshTaskScheduler {
     this.latestTasks.clear();
     this.requested.clear();
     this.replacements.clear();
+    this.preparingRequests.clear();
     this.visibility.reset();
     this.inFlightKeys.clear();
     this.scenarioTraceIds.clear();
@@ -152,7 +154,7 @@ export class MeshTaskScheduler {
       this.visibility.defer(key, request);
       return;
     }
-    if (this.inFlightKeys.has(key)) {
+    if (this.preparingRequests.has(key) || this.inFlightKeys.has(key)) {
       this.replacements.set(key, request);
       return;
     }
@@ -182,6 +184,7 @@ export class MeshTaskScheduler {
     this.replacements.delete(key);
     this.requested.delete(key);
     this.queued.delete(key);
+    this.preparingRequests.delete(key);
     this.visibility.cancel(key);
     if (task) {
       this.options.telemetry.markTrace(task.traceId, 'cancelled', 'main');
@@ -231,6 +234,7 @@ export class MeshTaskScheduler {
     this.latestTasks.clear();
     this.requested.clear();
     this.replacements.clear();
+    this.preparingRequests.clear();
     this.visibility.reset();
     this.inFlightKeys.clear();
   }
@@ -242,7 +246,8 @@ export class MeshTaskScheduler {
       while (!this.disposed && this.inFlight < this.options.profile.maxWorkerTasksInFlight) {
         const next = this.nextQueuedRequest();
         if (!next) return;
-        const [key, request] = next;
+        const [key, queuedRequest] = next;
+        let request = queuedRequest;
         this.queued.delete(key);
         if (!this.requested.has(key) || request.epoch !== this.epoch) {
           this.options.telemetry.markTrace(request.traceId, 'stale-request', 'main');
@@ -255,22 +260,43 @@ export class MeshTaskScheduler {
           durationMs: performance.now() - request.queuedAt,
           traceId: request.traceId,
         });
+        this.preparingRequests.set(key, request);
         try {
           if (this.options.source.beforePrepare)
             await this.options.source.beforePrepare(request.cx, request.cy, request.cz);
         } catch {
+          const ownsPreparation = this.preparingRequests.get(key) === request;
+          if (ownsPreparation) this.preparingRequests.delete(key);
           this.options.source.releasePrepared?.(request.cx, request.cy, request.cz);
-          if (!this.queued.has(key)) {
-            this.requested.delete(key);
-            this.latestTasks.delete(key);
+          if (ownsPreparation) {
+            const replacement = this.replacements.get(key);
+            if (replacement) {
+              this.replacements.delete(key);
+              this.queued.set(key, replacement);
+            } else if (!this.queued.has(key)) {
+              this.requested.delete(key);
+              this.latestTasks.delete(key);
+            }
           }
           this.options.telemetry.completeTrace(request.traceId, 'persistence-load-error', 'persistence-worker');
           continue;
         }
-        if (this.disposed || !this.requested.has(key) || request.epoch !== this.epoch || this.queued.has(key)) {
+        if (
+          this.disposed ||
+          !this.requested.has(key) ||
+          request.epoch !== this.epoch ||
+          this.preparingRequests.get(key) !== request
+        ) {
           this.options.source.releasePrepared?.(request.cx, request.cy, request.cz);
           this.options.telemetry.markTrace(request.traceId, 'stale-after-persistence-load', 'main');
           continue;
+        }
+        this.preparingRequests.delete(key);
+        const preparedReplacement = this.replacements.get(key);
+        if (preparedReplacement) {
+          this.replacements.delete(key);
+          this.options.telemetry.completeTrace(request.traceId, 'superseded-during-prepare', 'main');
+          request = preparedReplacement;
         }
         try {
           if (this.variant === 'main-snapshot') this.postMainSnapshot(request);
@@ -281,7 +307,11 @@ export class MeshTaskScheduler {
             this.fail(task.taskId, error instanceof Error ? error : new Error(String(error)));
           else {
             this.options.source.releasePrepared?.(request.cx, request.cy, request.cz);
-            this.requested.delete(key);
+            const replacement = this.replacements.get(key);
+            if (replacement) {
+              this.replacements.delete(key);
+              this.queued.set(key, replacement);
+            } else this.requested.delete(key);
             this.options.telemetry.completeTrace(request.traceId, 'mesh-prepare-error', 'main');
           }
         }

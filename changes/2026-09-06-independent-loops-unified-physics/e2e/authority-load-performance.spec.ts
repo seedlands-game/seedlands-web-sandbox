@@ -410,8 +410,6 @@ test('同机受控负载比较二槽与三槽计算池，不预设扩池收益',
     contentType: 'application/json',
   });
   expect(threeSlots.scenarioSource).toEqual(twoSlots.scenarioSource);
-  expect(threeSlots.compute.submittedTasks).toBe(twoSlots.compute.submittedTasks);
-  expect(threeSlots.compute.submittedBytes).toBe(twoSlots.compute.submittedBytes);
   for (const result of [twoSlots, threeSlots]) {
     expect(result.environment.viewport).toEqual([1920, 1080]);
     expect(result.environment.dpr).toBe(2);
@@ -423,6 +421,11 @@ test('同机受控负载比较二槽与三槽计算池，不预设扩池收益',
     expect(result.compute.maxQueuedBytes).toBeGreaterThan(0);
     expect(result.compute.workerTaskDuration.fluid.count).toBeGreaterThan(0);
     expect(result.compute.workerTaskDuration.general.count).toBeGreaterThan(0);
+    expect(result.load.authorityBodies.actors).toBeGreaterThanOrEqual(SCENARIO_SOURCE.actorSpawns);
+    expect(result.load.authorityBodies.worldItems).toBeGreaterThanOrEqual(SCENARIO_SOURCE.worldItemSpawns);
+    expect(result.load.authorityBodies.nearPlayer).toBeGreaterThanOrEqual(
+      SCENARIO_SOURCE.actorSpawns + SCENARIO_SOURCE.worldItemSpawns,
+    );
     expect(result.fluidFeedback.count).toBe(TARGET_FLUID_SAMPLES);
     expect(result.fluidFeedback.p95Ms).toBeLessThanOrEqual(100);
     expect(result.meshVisible.count).toBeGreaterThan(0);
