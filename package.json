@@ -44,7 +44,11 @@
     "prepare": "husky",
     "wasm:build": "node scripts/build-wasm.mjs --check --hash && node scripts/wasm-artifact.mjs --write",
     "wasm:check": "node scripts/check-wasm.mjs --test",
-    "wasm:verify": "node scripts/wasm-artifact.mjs"
+    "wasm:verify": "node scripts/wasm-artifact.mjs",
+    "wasm:simd:build": "node scripts/build-simd-experiment.mjs",
+    "rust:check": "node scripts/check-rust-kernel-boundary.mjs",
+    "wasm:simd:ab": "node scripts/run-simd-experiment.mjs",
+    "wasm:simd:report": "node scripts/summarize-simd-experiment.mjs"
   },
   "dependencies": {
     "playcanvas": "^2.21.4",

@@ -117,6 +117,7 @@ src/physics/   统一身体形状、扫掠碰撞、接触、重力与流体响�
 src/runtime/   独立时钟、调度、Worker 预算与会话协议
 src/worker/    Authority、Logic、流体、通用计算与持久化入口
 tests/         单元、架构与长期浏览器回归测试
+crates/        纯 Rust 计算内核与独立的实验 Wasm 适配层
 changes/       变更合同及所属的交付证据
 scripts/       本地 Harness 与工程脚本
 ```
@@ -135,6 +136,8 @@ pnpm verify:static
 pnpm build
 pnpm test:e2e:regression
 ```
+
+Rust 内核边界检查需要 Cargo。实验构建通过 `crates/rust-toolchain.toml` 固定 Rust 1.88.0 与 `wasm32-unknown-unknown`，首次构建时 rustup 会安装相应组件。`pnpm wasm:simd:build` 重建标量/SIMD 实验产物和源码哈希；`pnpm rust:check` 检查 core 依赖边界；`pnpm wasm:simd:ab` 以正式默认值运行无头对照（10 对、每 run 1,000 个任务、5 秒预热）；`pnpm wasm:simd:report` 校验并汇总最新一轮完整正式采样。这些实验产物尚未在游戏中启用，采用结论记录在[所属变更](changes/2026-09-06-data-plane-simd-policy/spec.md)。
 
 这些命令提供不同证据：单元测试覆盖确定性逻辑；静态验证覆盖格式、lint、路径规则、覆盖率和 TypeScript；生产构建证明 bundling；Playwright 覆盖确定性浏览器行为。视觉语义由 change 所属的 Midscene 流程独立评估。
 

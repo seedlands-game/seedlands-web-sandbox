@@ -124,6 +124,7 @@ src/runtime/   Independent clocks, scheduling, worker budgets, and session proto
 src/world/     Deterministic world, voxel, mesh, coordinate, and save logic
 src/worker/    Authority, logic, fluid, general computation, and persistence entry points
 tests/         Unit, architecture, and long-lived browser regression tests
+crates/        Pure Rust kernels and a separate experimental Wasm adapter
 changes/       Change contracts and their delivery-specific evidence
 scripts/       Local harness and engineering scripts
 ```
@@ -140,6 +141,8 @@ pnpm test:e2e:regression
 ```
 
 These commands provide different evidence. Unit tests cover deterministic logic; static verification covers formatting, linting, path rules, coverage, and TypeScript; the production build proves bundling; Playwright covers deterministic browser behaviour. Visual semantics are evaluated separately with change-scoped Midscene flows.
+
+Rust kernel governance checks require Cargo. The kernel build pins Rust 1.88.0 and `wasm32-unknown-unknown` in `crates/rust-toolchain.toml`; rustup installs them when first building the experiment. `pnpm wasm:simd:build` reproduces the scalar/SIMD experiment artifacts and source hashes; `pnpm rust:check` checks the core dependency boundary. `pnpm wasm:simd:ab` runs the change-scoped headless comparison with its formal defaults (10 pairs, 1,000 tasks, 5-second warmup); `pnpm wasm:simd:report` validates and summarizes the latest complete formal run. These artifacts are not enabled in the game by this experiment. The [SIMD change record](changes/2026-09-06-data-plane-simd-policy/spec.md) contains its headless comparison and adoption decision.
 
 The architecture lint also limits JavaScript and TypeScript modules to 500 effective lines, excluding blank lines and comments, so responsibilities continue to be split instead of accumulating in a new monolith.
 

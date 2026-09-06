@@ -1,0 +1,253 @@
+{
+  "name": "mesh-stress",
+  "runId": "2026-09-06T15-46-01-056Z",
+  "evidenceClass": "formal",
+  "pairs": 10,
+  "events": 1000,
+  "warmupMs": 5000,
+  "headless": true,
+  "browser": "152.0.7977.76",
+  "sourceSha": "36a0022657d2c14053f1575814f9fd148df0d0c6",
+  "prepared": {
+    "initialization": {
+      "id": 1,
+      "initialization": [
+        {
+          "mode": "scalar",
+          "initializationMs": 0.9000000357627869,
+          "bytes": 1794
+        },
+        {
+          "mode": "simd",
+          "initializationMs": 0.800000011920929,
+          "bytes": 3524
+        }
+      ]
+    },
+    "legacyFailures": [
+      "0: Error: RangeError: Maximum call stack size exceeded"
+    ],
+    "tsControl": "same-layout TS arena control; legacy results separately validated where executable",
+    "corpusCount": 1,
+    "inputBytes": [
+      3096576
+    ],
+    "crossOriginIsolated": false,
+    "hardwareConcurrency": 12
+  },
+  "bundleHashes": {
+    "assets/simd-worker-BbCba1MD.js": "d79e6bf58678dce77bec45e8b19c58ba226004d91d558438bb89f9a538003cb1",
+    "assets/simd-worker-BbCba1MD.js.map": "f7ecabc1ca766ca9f2fcecf41f3d5f67f1088c78f29a608c66f6d323d8d020cc",
+    "simd-entry.js": "3908b25c2a0d3702dc981ffe6ecf0ddfa46ea577f990b2ce07aaa5a498c2a9fa",
+    "simd-entry.js.map": "5f11315bf3bf210b09a548e300ab84f39a6ae9f5b5fc411bfac1d9b53f69ce53"
+  },
+  "status": "completed",
+  "metricsStatus": {
+    "rss": "NOT_COLLECTED: browser process RSS cannot isolate this co-resident Worker",
+    "gc": "NOT_COLLECTED",
+    "memoryGrowth": "fixed arena; no grow calls",
+    "boundary": "included in Worker compute with input/output copies; not independently subtracted below clock resolution"
+  },
+  "comparisons": {
+    "scalarVsSimd": {
+      "improvement": 0.7194246393597337,
+      "ci95": [
+        -1.4598535064871188,
+        2.877696854537204
+      ],
+      "baseline": 1.3899999856948853,
+      "candidate": 1.3799999833106995,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "p95": {
+      "improvement": 1.7523710679624105,
+      "ci95": [
+        0.0587909930666608,
+        3.417113606962141
+      ],
+      "baseline": 1.7405000090599057,
+      "candidate": 1.7099999904632568,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "p99": {
+      "improvement": 4.628627883000003,
+      "ci95": [
+        2.585359210378524,
+        6.651282124131947
+      ],
+      "baseline": 1.940100003659725,
+      "candidate": 1.8502999939322469,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "compute": {
+      "improvement": 20.000004768371582,
+      "ci95": [
+        20.000004768371582,
+        20.000004768371582
+      ],
+      "baseline": 0.5,
+      "candidate": 0.3999999761581421,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "meanEndToEnd": {
+      "improvement": 4.626025577820325,
+      "ci95": [
+        3.487593396764323,
+        5.545860235282233
+      ],
+      "baseline": 1.382180000126362,
+      "candidate": 1.3182399997889995,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "controlVsSimd": {
+      "improvement": 14.285716083902312,
+      "ci95": [
+        12.500002142041911,
+        16.666667893099675
+      ],
+      "baseline": 1.6100000143051147,
+      "candidate": 1.3799999833106995,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "stagedVsSimd": {
+      "improvement": 14.285716083902312,
+      "ci95": [
+        12.500002142041911,
+        16.666667893099675
+      ],
+      "baseline": 1.6100000143051147,
+      "candidate": 1.3799999833106995,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    }
+  },
+  "summaries": {
+    "staged": {
+      "prepareMs": {
+        "mean": 0.6334399992406369,
+        "p50": 0.6000000238418579,
+        "p95": 0.800000011920929,
+        "p99": 0.800000011920929
+      },
+      "roundtripMs": {
+        "mean": 1.00686000046134,
+        "p50": 1,
+        "p95": 1.2999999523162842,
+        "p99": 1.600000023841858
+      },
+      "endToEndMs": {
+        "mean": 1.6402999997019767,
+        "p50": 1.600000023841858,
+        "p95": 1.9000000357627869,
+        "p99": 2.299999952316284
+      },
+      "computeMs": {
+        "mean": 0.8821599999487401,
+        "p50": 0.8999999761581421,
+        "p95": 1.100000023841858,
+        "p99": 1.5
+      },
+      "memoryBytes": {
+        "mean": 16777216,
+        "p50": 16777216,
+        "p95": 16777216,
+        "p99": 16777216
+      },
+      "outputBytes": {
+        "mean": 2801664,
+        "p50": 2801664,
+        "p95": 2801664,
+        "p99": 2801664
+      }
+    },
+    "scalar": {
+      "prepareMs": {
+        "mean": 0.6339299999117851,
+        "p50": 0.6000000238418579,
+        "p95": 0.7999999523162842,
+        "p99": 0.800000011920929
+      },
+      "roundtripMs": {
+        "mean": 0.7482500002145768,
+        "p50": 0.7999999523162842,
+        "p95": 1.100000023841858,
+        "p99": 1.300000011920929
+      },
+      "endToEndMs": {
+        "mean": 1.3821800001263618,
+        "p50": 1.399999976158142,
+        "p95": 1.7999999523162842,
+        "p99": 1.9000000357627869
+      },
+      "computeMs": {
+        "mean": 0.5375600000619888,
+        "p50": 0.5,
+        "p95": 0.7999999523162842,
+        "p99": 1.100000023841858
+      },
+      "memoryBytes": {
+        "mean": 18874368,
+        "p50": 18874368,
+        "p95": 18874368,
+        "p99": 18874368
+      },
+      "outputBytes": {
+        "mean": 2801664,
+        "p50": 2801664,
+        "p95": 2801664,
+        "p99": 2801664
+      }
+    },
+    "simd": {
+      "prepareMs": {
+        "mean": 0.6279099999964237,
+        "p50": 0.6000000238418579,
+        "p95": 0.7999999523162842,
+        "p99": 0.800000011920929
+      },
+      "roundtripMs": {
+        "mean": 0.6903299997925758,
+        "p50": 0.7999999523162842,
+        "p95": 1.0999999642372131,
+        "p99": 1.199999988079071
+      },
+      "endToEndMs": {
+        "mean": 1.3182399997889995,
+        "p50": 1.399999976158142,
+        "p95": 1.699999988079071,
+        "p99": 1.899999976158142
+      },
+      "computeMs": {
+        "mean": 0.4159900004446507,
+        "p50": 0.3999999761581421,
+        "p95": 0.6000000238418579,
+        "p99": 1
+      },
+      "memoryBytes": {
+        "mean": 18874368,
+        "p50": 18874368,
+        "p95": 18874368,
+        "p99": 18874368
+      },
+      "outputBytes": {
+        "mean": 2801664,
+        "p50": 2801664,
+        "p95": 2801664,
+        "p99": 2801664
+      }
+    }
+  }
+}

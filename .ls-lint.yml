@@ -25,6 +25,9 @@ ls:
     .dir: kebab-case
     .spec.ts: kebab-case
 
+  crates:
+    .dir: kebab-case
+    .rs: kebab-case
   wasm/seedlands-kernels:
     .dir: kebab-case
     .mbt: kebab-case
@@ -39,3 +42,4 @@ ignore:
   - midscene_run
   - node_modules
   - wasm/seedlands-kernels/_build
+  - crates/target
