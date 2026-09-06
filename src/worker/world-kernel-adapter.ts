@@ -1,15 +1,16 @@
-import { createChunkKernel } from '../compute/chunk-kernel';
-import { createHaloKernel } from '../compute/halo-kernel';
+import { createChunkKernel, makeChunkStaged } from '../compute/chunk-kernel';
+import { createHaloKernel, createHaloStaged } from '../compute/halo-kernel';
 import { createMeshKernelInput, runMeshDescriptorKernel } from '../compute/mesh-kernel';
 import { createMeshPackKernel, runMeshPackKernel } from '../compute/mesh-pack-kernel';
-import { batchMeshData, compactMeshData, meshChunk } from '../world/mesh';
+import { meshChunk } from '../world/mesh';
+import { batchCompactMeshData } from '../world/mesh-batching';
 import type { WorldComputeKernels } from './world-compute-task';
 import type { WorkerKernelState } from './wasm-kernel-loader';
 
 export function worldKernelAdapter(state: WorkerKernelState): WorldComputeKernels {
   const { memory, selected } = state;
-  if (!memory) return {};
-  const kernels: WorldComputeKernels = {};
+  const kernels: WorldComputeKernels = { makeChunk: makeChunkStaged, prepareHalo: createHaloStaged };
+  if (!memory) return kernels;
   if (selected.includes('w02')) kernels.makeChunk = createChunkKernel(memory);
   if (selected.includes('w03')) kernels.prepareHalo = createHaloKernel(memory);
   if (selected.includes('w04') || selected.includes('w05'))
@@ -33,7 +34,7 @@ export function worldKernelAdapter(state: WorkerKernelState): WorldComputeKernel
         } catch {
           memory.failed = true;
         }
-      return batchMeshData(parts).map(compactMeshData);
+      return batchCompactMeshData(parts);
     };
   }
   return kernels;

@@ -16,6 +16,7 @@ import { makeChunk, type WorldChange } from './chunk-generation';
 import { modelBoxesForVoxel, voxelOccludesFullFace } from './voxel-model';
 import { renderCategoryForMaterial, type RenderCategory } from './mesh-render-category';
 import { forEachVoxelModelFace } from './voxel-model-mesh';
+import { float32ToFloat16 } from './mesh-batching';
 
 export type { RenderCategory } from './mesh-render-category';
 
@@ -408,45 +409,12 @@ export const meshDataByteLength = (mesh: MeshData) =>
   mesh.colors.byteLength +
   mesh.indices.byteLength;
 
-export function batchMeshData(parts: readonly MeshData[]): MeshData[] {
-  const categories: RenderCategory[] = ['opaque', 'cutout', 'emissive', 'transparent'];
-  return categories.flatMap((renderCategory) => {
-    const matching = parts.filter((part) => part.renderCategory === renderCategory);
-    if (!matching.length) return [];
-    const positions: number[] = [];
-    const normals: number[] = [];
-    const uvs: number[] = [];
-    const colors: number[] = [];
-    const indices: number[] = [];
-    for (const part of matching) {
-      if (part.layout !== 'float32' || part.material === null)
-        throw new Error('Render-category batching expects unbatched Float32 mesh parts.');
-      const vertexOffset = positions.length / 3;
-      positions.push(...part.positions);
-      normals.push(...part.normals);
-      uvs.push(...part.uvs);
-      for (let index = 0; index < part.colors.length; index += 4)
-        colors.push(part.colors[index], part.colors[index + 1], part.colors[index + 2], part.material - 1);
-      for (const index of part.indices) indices.push(index + vertexOffset);
-    }
-    return [
-      {
-        material: null,
-        renderCategory,
-        layout: 'float32' as const,
-        positions: new Float32Array(positions),
-        normals: new Float32Array(normals),
-        uvs: new Float32Array(uvs),
-        colors: new Uint8Array(colors),
-        indices: new Uint32Array(indices),
-      },
-    ];
-  });
-}
+export { batchMeshData } from './mesh-batching';
 
 export function compactMeshData(mesh: MeshData): MeshData {
   if (mesh.layout !== 'float32') return mesh;
-  const maxIndex = mesh.indices.length ? Math.max(...mesh.indices) : 0;
+  let maxIndex = 0;
+  for (let index = 0; index < mesh.indices.length; index += 1) maxIndex = Math.max(maxIndex, mesh.indices[index]!);
   return {
     ...mesh,
     layout: 'compact',
@@ -467,16 +435,6 @@ export function decodeCompactMeshData(mesh: MeshData): MeshData {
     uvs: Float32Array.from(mesh.uvs, float16ToFloat32),
     indices: new Uint32Array(mesh.indices),
   };
-}
-
-function float32ToFloat16(value: number) {
-  const bits = new Uint32Array(new Float32Array([value]).buffer)[0];
-  const sign = (bits >>> 16) & 0x8000;
-  const exponent = ((bits >>> 23) & 0xff) - 127 + 15;
-  const mantissa = bits & 0x7fffff;
-  if (exponent <= 0) return sign;
-  if (exponent >= 31) return sign | 0x7c00;
-  return sign | (exponent << 10) | (mantissa >>> 13);
 }
 
 function float16ToFloat32(value: number) {

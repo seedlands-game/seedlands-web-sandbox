@@ -105,9 +105,14 @@ export class EntityStore {
   }
 
   update(id: string, update: EntityUpdate): GameplayEntity {
+    this.updateWithoutSnapshot(id, update);
+    return clone(this.entities.get(id)!);
+  }
+
+  updateWithoutSnapshot(id: string, update: EntityUpdate): void {
     const entity = this.entities.get(id);
     if (!entity) throw new Error(`Unknown entity: ${id}`);
-    if (update.position) this.move(id, update.position);
+    if (update.position) this.moveEntity(entity, update.position);
     if (update.physicsVelocity) {
       this.assertPosition(update.physicsVelocity);
       entity.physicsVelocity = [...update.physicsVelocity];
@@ -122,16 +127,12 @@ export class EntityStore {
         throw new TypeError('Entity health update is invalid.');
       entity.health = update.health;
     }
-    return clone(this.entities.get(id)!);
   }
 
   move(id: string, position: readonly [number, number, number]): GameplayEntity {
     const entity = this.entities.get(id);
     if (!entity) throw new Error(`Unknown entity: ${id}`);
-    this.assertPosition(position);
-    this.removeFromBucket(entity);
-    entity.position = [...position];
-    this.addToBucket(entity);
+    this.moveEntity(entity, position);
     return clone(entity);
   }
 
@@ -224,6 +225,13 @@ export class EntityStore {
     const bucket = this.buckets.get(key);
     bucket?.delete(entity.id);
     if (bucket?.size === 0) this.buckets.delete(key);
+  }
+
+  private moveEntity(entity: GameplayEntity, position: readonly [number, number, number]): void {
+    this.assertPosition(position);
+    this.removeFromBucket(entity);
+    entity.position = [...position];
+    this.addToBucket(entity);
   }
 
   private assertPosition(position: readonly number[]): asserts position is Position {

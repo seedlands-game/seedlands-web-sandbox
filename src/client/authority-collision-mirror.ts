@@ -178,6 +178,45 @@ export async function acceptAuthorityCollisionBaseline(
   }
 }
 
+/**
+ * Consumes a Worker-transferred canonical buffer into the collision mirror.
+ * The callback does not receive the retained view. The trusted caller must
+ * not mutate or transfer a closed-over result; dispatch requires its own copy.
+ */
+export async function consumeTransferredAuthorityCollisionBaseline(
+  options: Readonly<{
+    key: string;
+    chunkRevision: number;
+    generatorVersion: number;
+    result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>;
+    preparedFluid?: Uint8Array;
+    chunks: Map<string, AuthorityCollisionCachedChunk>;
+    guard: AuthorityCollisionRevisionGuard;
+    accept(): Promise<boolean>;
+  }>,
+): Promise<boolean> {
+  if (!options.result.canonical || options.result.generatorVersion !== options.generatorVersion) return false;
+  const lease = options.guard.beginBaseline(options.key);
+  try {
+    const canonical = new Uint16Array(options.result.canonical);
+    if (!(await options.accept())) return false;
+    cacheAuthorityCollisionBaseline(
+      options.chunks,
+      options.key,
+      {
+        canonical,
+        fluid: options.preparedFluid?.slice() ?? legacyFluid(canonical),
+        chunkRevision: options.chunkRevision,
+      },
+      options.guard,
+      lease,
+    );
+    return true;
+  } finally {
+    options.guard.finishBaseline(lease);
+  }
+}
+
 export function installAuthorityCollisionBaseline(
   current: AuthorityCollisionCachedChunk | undefined,
   baseline: AuthorityCollisionCachedChunk,

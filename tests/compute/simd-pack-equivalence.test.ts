@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 
 import { describe, expect, it } from 'vitest';
 
-const evidence = 'changes/2026-09-06-data-plane-simd-policy/evidence';
+const evidence = 'changes/2026-09-07-data-plane-adoption/evidence';
 const INPUT = 68;
 const OUTPUT = 8 * 1024 * 1024 + 4;
 
@@ -98,7 +98,7 @@ describe('W06 Rust scalar/SIMD mesh pack ABI', () => {
 it('mesh wrapper preserves unsigned maximum without confusing it with ABI errors', async () => {
   for (const name of ['scalar', 'simd']) {
     const { instance } = await WebAssembly.instantiate(
-      await readFile(`changes/2026-09-06-data-plane-simd-policy/evidence/kernels-${name}.wasm`),
+      await readFile(`changes/2026-09-07-data-plane-adoption/evidence/kernels-${name}.wasm`),
     );
     const kernel = new MeshPackKernel(new KernelMemory(instance.exports));
     expect(kernel.offsetIndices(Uint32Array.of(0x7fffffff, 0xfffffffe), 1)).toEqual({

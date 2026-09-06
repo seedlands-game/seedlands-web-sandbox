@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import * as voxelModel from '../../src/world/voxel-model';
+import { describe, expect, it, vi } from 'vitest';
 import { buildLogicObservation } from '../../src/server/authority/logic-observation-builder';
 import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
 import type { GameplayEntity } from '../../src/server/gameplay/entity-store';
@@ -51,6 +52,7 @@ const grazer: GameplayEntity = {
 
 describe('buildLogicObservation', () => {
   it('构造有界真实地形窗口、决策状态与稳定身份版本', () => {
+    const boxes = vi.spyOn(voxelModel, 'collisionBoxesForVoxel');
     const observation = buildLogicObservation({
       epoch: 'epoch:logic',
       observationSequence: 3,
@@ -79,6 +81,8 @@ describe('buildLogicObservation', () => {
       getLoadedVoxel: (_x, y, _z) => ({ voxel: y < 5 ? 3 : 0, chunkKey: '0,0,0', revision: 4 }),
     });
 
+    expect(boxes).not.toHaveBeenCalled();
+    boxes.mockRestore();
     expect(observation).toMatchObject({
       epoch: 'epoch:logic',
       observationSequence: 3,

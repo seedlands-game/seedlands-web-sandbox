@@ -1,4 +1,5 @@
-import { batchMeshData, compactMeshData, createProceduralMeshInput, makeChunk, meshChunk } from '../world/mesh';
+import { createProceduralMeshInput, makeChunk, meshChunk } from '../world/mesh';
+import { batchCompactMeshData } from '../world/mesh-batching';
 import { findSafePlayerSpawn } from '../server/gameplay/safe-spawn';
 import { createStarterEcology } from '../server/simulation/starter-ecology';
 import { findDryStarterSurface } from '../server/starter-surface';
@@ -98,7 +99,7 @@ const resultIdentity = (task: MeshTaskPayload | GenerateMeshTaskPayload) => ({
   haloRevision: task.haloRevision,
 });
 
-const packMeshes = (meshes: ReturnType<typeof meshChunk>) => batchMeshData(Object.values(meshes)).map(compactMeshData);
+const packMeshes = (meshes: ReturnType<typeof meshChunk>) => batchCompactMeshData(Object.values(meshes));
 
 export type WorldComputeKernels = Partial<{
   makeChunk: typeof makeChunk;

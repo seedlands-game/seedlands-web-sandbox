@@ -1,0 +1,80 @@
+{
+  "ownerThread": "01a076cb-d2b7-7d63-8446-f42332d6c5a8",
+  "runId": "adoption-ablation-build",
+  "pid": 31857,
+  "startedAt": "2026-09-06T19:16:53.814Z",
+  "endedAt": "2026-09-06T19:17:22.252Z",
+  "exitCode": 0,
+  "samples": [
+    {
+      "at": "2026-09-06T19:16:53.814Z",
+      "loadAverage": [
+        3.72509765625,
+        3.62939453125,
+        3.37548828125
+      ],
+      "freeMemoryBytes": 1289977856,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-06T19:16:58.816Z",
+      "loadAverage": [
+        4.9482421875,
+        3.88427734375,
+        3.466796875
+      ],
+      "freeMemoryBytes": 359809024,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-06T19:17:03.818Z",
+      "loadAverage": [
+        4.7919921875,
+        3.869140625,
+        3.4638671875
+      ],
+      "freeMemoryBytes": 1099169792,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-06T19:17:08.821Z",
+      "loadAverage": [
+        4.568359375,
+        3.837890625,
+        3.455078125
+      ],
+      "freeMemoryBytes": 146063360,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-06T19:17:13.823Z",
+      "loadAverage": [
+        4.2822265625,
+        3.79052734375,
+        3.4404296875
+      ],
+      "freeMemoryBytes": 157564928,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-06T19:17:18.824Z",
+      "loadAverage": [
+        4.01904296875,
+        3.744140625,
+        3.42578125
+      ],
+      "freeMemoryBytes": 91979776,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-06T19:17:22.252Z",
+      "loadAverage": [
+        4.17724609375,
+        3.78125,
+        3.4404296875
+      ],
+      "freeMemoryBytes": 1955201024,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

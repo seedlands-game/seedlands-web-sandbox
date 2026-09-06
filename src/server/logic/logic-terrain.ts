@@ -13,7 +13,8 @@ const objectIds = new WeakMap<object, number>();
 let nextObjectId = 1;
 
 type CellSample = 'free' | 'solid' | 'unknown';
-type Node = Readonly<{ x: number; y: number; z: number; g: number; f: number; parent: string | null }>;
+export type NavigationPriority = Readonly<{ f: number; g: number; key: string }>;
+type Node = NavigationPriority & Readonly<{ x: number; y: number; z: number; parent: string | null }>;
 export type NavigationStep = Readonly<{ wish: { x: number; z: number }; jumpRequested: boolean }>;
 
 const cellKey = (x: number, y: number, z: number) => `${x},${y},${z}`;
@@ -40,11 +41,48 @@ const terrainSignature = (terrainWindows: readonly TerrainWindow[]) =>
     )
     .join('|');
 
+export const terrainWindowsOverlap = (left: TerrainWindow, right: TerrainWindow): boolean =>
+  left.origin[0] < right.origin[0] + right.size[0] &&
+  right.origin[0] < left.origin[0] + left.size[0] &&
+  left.origin[1] < right.origin[1] + right.size[1] &&
+  right.origin[1] < left.origin[1] + left.size[1] &&
+  left.origin[2] < right.origin[2] + right.size[2] &&
+  right.origin[2] < left.origin[2] + left.size[2];
+
+export type TerrainOverlapValidationMode = 'pairs' | 'cell-set';
+
+export function terrainOverlapValidationMode(windowCount: number, totalCells: number): TerrainOverlapValidationMode {
+  if (!Number.isSafeInteger(windowCount) || windowCount < 0 || !Number.isSafeInteger(totalCells) || totalCells < 0)
+    throw new TypeError('Terrain overlap validation counts must be non-negative safe integers.');
+  const pairCount = (windowCount * (windowCount - 1)) / 2;
+  return !Number.isSafeInteger(pairCount) || pairCount > totalCells ? 'cell-set' : 'pairs';
+}
+
+const addTerrainWindowCells = (terrainWindow: TerrainWindow, occupiedCells: Set<string>): boolean => {
+  for (let z = terrainWindow.origin[2]; z < terrainWindow.origin[2] + terrainWindow.size[2]; z += 1)
+    for (let y = terrainWindow.origin[1]; y < terrainWindow.origin[1] + terrainWindow.size[1]; y += 1)
+      for (let x = terrainWindow.origin[0]; x < terrainWindow.origin[0] + terrainWindow.size[0]; x += 1) {
+        const key = cellKey(x, y, z);
+        if (occupiedCells.has(key)) return false;
+        occupiedCells.add(key);
+      }
+  return true;
+};
+
+export const compareNavigationPriority = (left: NavigationPriority, right: NavigationPriority): number =>
+  left.f - right.f || left.g - right.g || left.key.localeCompare(right.key);
+
+export function selectNavigationOpenNode<T extends NavigationPriority>(nodes: Iterable<T>): T | undefined {
+  let selected: T | undefined;
+  for (const node of nodes) if (!selected || compareNavigationPriority(node, selected) < 0) selected = node;
+  return selected;
+}
+
 export function validateTerrainWindows(terrainWindows: readonly TerrainWindow[]): void {
   const keys = new Set<string>();
-  const occupiedCells = new Set<string>();
+  let occupiedCells: Set<string> | undefined;
   let totalCells = 0;
-  terrainWindows.forEach((terrainWindow) => {
+  terrainWindows.forEach((terrainWindow, index) => {
     if (!terrainWindow.key.trim() || keys.has(terrainWindow.key))
       throw new TypeError('Terrain window key must be unique and non-empty.');
     keys.add(terrainWindow.key);
@@ -63,13 +101,18 @@ export function validateTerrainWindows(terrainWindows: readonly TerrainWindow[])
     if (totalCells > MAX_LOGIC_TERRAIN_CELLS) throw new TypeError('Terrain windows exceed the total cell budget.');
     if (!(terrainWindow.occupancy instanceof Uint8Array) || terrainWindow.occupancy.length !== cells)
       throw new TypeError('Terrain window occupancy length does not match its size.');
-    for (let z = terrainWindow.origin[2]; z < terrainWindow.origin[2] + terrainWindow.size[2]; z += 1)
-      for (let y = terrainWindow.origin[1]; y < terrainWindow.origin[1] + terrainWindow.size[1]; y += 1)
-        for (let x = terrainWindow.origin[0]; x < terrainWindow.origin[0] + terrainWindow.size[0]; x += 1) {
-          const key = cellKey(x, y, z);
-          if (occupiedCells.has(key)) throw new TypeError('Terrain windows must not overlap.');
-          occupiedCells.add(key);
-        }
+    if (occupiedCells) {
+      if (!addTerrainWindowCells(terrainWindow, occupiedCells))
+        throw new TypeError('Terrain windows must not overlap.');
+    } else if (terrainOverlapValidationMode(index + 1, totalCells) === 'cell-set') {
+      occupiedCells = new Set<string>();
+      for (let populatedIndex = 0; populatedIndex <= index; populatedIndex += 1)
+        if (!addTerrainWindowCells(terrainWindows[populatedIndex], occupiedCells))
+          throw new TypeError('Terrain windows must not overlap.');
+    } else
+      for (let previousIndex = 0; previousIndex < index; previousIndex += 1)
+        if (terrainWindowsOverlap(terrainWindow, terrainWindows[previousIndex]))
+          throw new TypeError('Terrain windows must not overlap.');
   });
 }
 
@@ -151,6 +194,7 @@ export class LogicTerrain {
           ...resolvedStart,
           g: 0,
           f: this.heuristic(resolvedStart, resolvedTarget),
+          key: startKey,
           parent: null,
         },
       ],
@@ -158,13 +202,8 @@ export class LogicTerrain {
     const visited = new Map<string, Node>();
     let expanded = 0;
     while (open.size > 0 && expanded < MAX_NAVIGATION_NODES) {
-      const current = [...open.values()].sort(
-        (left, right) =>
-          left.f - right.f ||
-          left.g - right.g ||
-          cellKey(left.x, left.y, left.z).localeCompare(cellKey(right.x, right.y, right.z)),
-      )[0];
-      const currentKey = cellKey(current.x, current.y, current.z);
+      const current = selectNavigationOpenNode(open.values())!;
+      const currentKey = current.key;
       open.delete(currentKey);
       visited.set(currentKey, current);
       expanded += 1;
@@ -182,6 +221,7 @@ export class LogicTerrain {
           ...next,
           g,
           f: g + this.heuristic(next, resolvedTarget),
+          key: nextKey,
           parent: currentKey,
         });
       }

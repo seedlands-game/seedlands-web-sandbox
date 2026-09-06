@@ -1,0 +1,53 @@
+README.md 56ms (unchanged)
+README.zh-CN.md 18ms (unchanged)
+tests/server/data-plane-fluid-lease.test.ts 34ms (unchanged)
+tests/server/fluid-transaction.test.ts 34ms (unchanged)
+changes/2026-09-07-data-plane-adoption/spec.md 11ms (unchanged)
+changes/2026-09-07-data-plane-adoption/adoption-plan.md 8ms (unchanged)
+changes/2026-09-07-data-plane-adoption/results.md 18ms
+$ pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage && pnpm typecheck
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+$ ls-lint
+$ vitest run --coverage
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+      Coverage enabled with v8
+
+(node:37101) ExperimentalWarning: localStorage is not available because --localstorage-file was not provided.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  176 passed | 3 skipped (179)
+      Tests  845 passed | 5 skipped (850)
+   Start at  03:42:32
+   Duration  41.86s (transform 3.86s, setup 0ms, import 14.01s, tests 288.05s, environment 15ms)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   95.37 |    90.42 |   96.93 |   96.89 |                   
+ ...pshot-codec.ts |   89.51 |    78.65 |     100 |   92.67 | ...01-304,318,326 
+ macro-world.ts    |   97.32 |    86.25 |     100 |   98.11 | 205-207           
+ mesh-batching.ts  |   98.75 |    95.45 |     100 |   98.59 | 37                
+ mesh.ts           |   95.45 |    93.24 |   95.83 |   96.41 | 254,446-451,453   
+ storage.ts        |   94.73 |    95.45 |     100 |     100 | 19                
+ voxel.ts          |   97.33 |    98.59 |   86.66 |     100 | 140               
+ ...w-direction.ts |   92.85 |       60 |     100 |     100 | 21-27             
+ ...r-immersion.ts |     100 |    92.85 |     100 |     100 | 57                
+ ...mesh-height.ts |     100 |    95.45 |     100 |     100 | 38                
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 95.37% ( 907/951 )
+Branches     : 90.42% ( 463/512 )
+Functions    : 96.93% ( 95/98 )
+Lines        : 96.89% ( 780/805 )
+================================================================================
+$ svelte-check --tsconfig ./tsconfig.json && tsc --noEmit && tsc -p tsconfig.test.json --noEmit
+Loading svelte-check in workspace: /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings

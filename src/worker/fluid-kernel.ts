@@ -6,7 +6,10 @@ const WRITES = 4 * 1024 * 1024;
 const NEXT = 5 * 1024 * 1024;
 const compare = (a: FluidPosition, b: FluidPosition) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
 
-export function createFluidKernel(kernel: KernelMemory): typeof computeFluidCandidate {
+export function createFluidKernel(
+  kernel: KernelMemory,
+  fallback: typeof computeFluidCandidate = computeFluidCandidate,
+): typeof computeFluidCandidate {
   return (snapshot) => {
     const positions = [...(snapshot.cleanupFrontier ?? []), ...snapshot.frontier];
     if (
@@ -16,7 +19,7 @@ export function createFluidKernel(kernel: KernelMemory): typeof computeFluidCand
       positions.length > 192 ||
       positions.some((position) => position.some((value) => !Number.isInteger(value) || Math.abs(value) >= 2 ** 29))
     )
-      return computeFluidCandidate(snapshot);
+      return fallback(snapshot);
     const chunks = [...new Map(snapshot.chunks.map((chunk) => [chunk.key, chunk])).values()];
     if (
       chunks.some(
@@ -26,7 +29,7 @@ export function createFluidKernel(kernel: KernelMemory): typeof computeFluidCand
           chunk.fluid.length !== 32768,
       )
     )
-      return computeFluidCandidate(snapshot);
+      return fallback(snapshot);
     try {
       kernel.u32(64, 8).fill(0);
       kernel.u32(64, 1)[0] = chunks.length;
@@ -99,7 +102,7 @@ export function createFluidKernel(kernel: KernelMemory): typeof computeFluidCand
       };
     } catch {
       kernel.failed = true;
-      return computeFluidCandidate(snapshot);
+      return fallback(snapshot);
     }
   };
 }

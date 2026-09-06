@@ -9,3 +9,8 @@ pub fn occupancy(input: &[u16], output: &mut [u8]) {
         *target = u8::from(*source != 0 && *source != 8);
     }
 }
+
+pub mod generation;
+pub mod codec;
+pub mod fluid;
+pub mod mesh;

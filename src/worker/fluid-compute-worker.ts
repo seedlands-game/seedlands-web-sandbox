@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import { computeFluidCandidate, type FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
+import { consumeFluidCandidate, type FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
 import type { ComputeWorkerRequest } from './compute-worker-protocol';
 import { createComputeWorkerEntryLifecycle } from './compute-worker-entry-lifecycle';
 import { loadWorkerKernels, parseKernelSelection } from './wasm-kernel-loader';
@@ -10,7 +10,7 @@ const scope = self as DedicatedWorkerGlobalScope;
 const computePromise = loadWorkerKernels(parseKernelSelection(scope.name).filter((name) => name === 'w07')).then(
   (state) => {
     Object.assign(scope, { __seedlandsWasm: state });
-    return state.memory ? createFluidKernel(state.memory) : computeFluidCandidate;
+    return state.memory ? createFluidKernel(state.memory, consumeFluidCandidate) : consumeFluidCandidate;
   },
 );
 const yieldTurn = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
