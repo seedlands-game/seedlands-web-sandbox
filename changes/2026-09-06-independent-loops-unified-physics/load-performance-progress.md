@@ -45,6 +45,8 @@ Authority 已经准备的 materialized canonical 可由客户端对 Worker 回�
 
 Persistence Worker 的 `queueWaitMs` 从其 `onmessage` 回调开始，无法观察 Worker 正被此前同步工作占用、新消息尚未被分发的 mailbox 等待。下一层只对当前 `load-batch` 携带一次请求时间，使用同源浏览器环境可比较的 `performance.timeOrigin + performance.now()` 计算请求发送至 Worker 收件、Worker 回帖至 Authority 收件和完整 round trip；回执消费后即丢弃。Worker 只保留最后一个已完成任务的种类、起止时间和已有 `encodeMs`，当它与本次请求发送后的 mailbox 等待相交时，把 blocker 种类、相交时长和编码时长附在本次回执，随后可被下一任务覆盖。预期 RED：现有诊断没有这些分段，无法区分此前 `save-frozen` 同步编码阻塞 Persistence Worker、Worker 内队列等待和 Authority 收件后的恢复延迟。测试要求跨 Worker 时间字段为非负有限值并进入同一 trace，并锁定只把确实覆盖请求发送时刻的前序任务归作 blocker；不采样 payload 内容，也不创建历史队列。
 
+真实慢样本在第一配置的第二个目标与第二配置的首个目标出现，和约 2 秒自动存档相位接近。诊断入口保持默认单样本，并只允许显式环境变量把连续样本数提高到 3；本轮用两个目标捕获自然相位，不改变完整 20×2 门禁、目标几何、负载、画质或 100ms 断言。
+
 ## RED 设计
 
 `e2e/authority-load-performance.spec.ts` 先声明以下缺失观测，作为生产接线前的类型 RED：

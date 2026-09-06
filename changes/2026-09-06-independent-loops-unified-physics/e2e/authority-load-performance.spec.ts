@@ -27,6 +27,7 @@ const TARGETS = [
 const TARGET_FLUID_SAMPLES = TARGETS.length;
 const FIRST_SAMPLE_DIAGNOSTIC = process.env.SEEDLANDS_AUTHORITY_LOAD_FIRST_SAMPLE === '1';
 const DIAGNOSTIC_TARGET_INDEX = Number(process.env.SEEDLANDS_AUTHORITY_LOAD_TARGET_INDEX ?? 0);
+const DIAGNOSTIC_SAMPLE_COUNT = Number(process.env.SEEDLANDS_AUTHORITY_LOAD_DIAGNOSTIC_SAMPLES ?? 1);
 const EXPECTED_STREAMED_CHUNKS = 50;
 const SCENARIO_SOURCE = {
   seed: 'authority-controlled-load',
@@ -465,14 +466,18 @@ async function runConfiguration(
   }
 }
 
-test('单个近场流体反馈诊断保留完整提交与网格链', async ({ browser }, testInfo) => {
+test('有界近场流体反馈诊断保留完整提交与网格链', async ({ browser }, testInfo) => {
   test.skip(!FIRST_SAMPLE_DIAGNOSTIC, '仅在显式单样本诊断时运行。');
   test.setTimeout(120_000);
   expect(Number.isSafeInteger(DIAGNOSTIC_TARGET_INDEX)).toBe(true);
   expect(DIAGNOSTIC_TARGET_INDEX).toBeGreaterThanOrEqual(0);
   expect(DIAGNOSTIC_TARGET_INDEX).toBeLessThan(TARGETS.length);
-  const result = await runConfiguration(browser, testInfo, 1, 1, DIAGNOSTIC_TARGET_INDEX);
-  expect(result.fluidFeedback.count).toBe(1);
+  expect(Number.isSafeInteger(DIAGNOSTIC_SAMPLE_COUNT)).toBe(true);
+  expect(DIAGNOSTIC_SAMPLE_COUNT).toBeGreaterThanOrEqual(1);
+  expect(DIAGNOSTIC_SAMPLE_COUNT).toBeLessThanOrEqual(3);
+  expect(DIAGNOSTIC_TARGET_INDEX + DIAGNOSTIC_SAMPLE_COUNT).toBeLessThanOrEqual(TARGETS.length);
+  const result = await runConfiguration(browser, testInfo, 1, DIAGNOSTIC_SAMPLE_COUNT, DIAGNOSTIC_TARGET_INDEX);
+  expect(result.fluidFeedback.count).toBe(DIAGNOSTIC_SAMPLE_COUNT);
   expect(result.fluidFeedback.p95Ms).toBeLessThanOrEqual(100);
 });
 
