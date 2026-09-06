@@ -250,6 +250,9 @@ export class BrowserAuthorityClient {
     return {
       chunkRevision: cached.payload.chunkRevision,
       generatorVersion: cached.payload.generatorVersion,
+      ...(cached.payload.preparationDiagnostics
+        ? { preparationDiagnostics: cached.payload.preparationDiagnostics }
+        : {}),
       ...(cached.canonical ? { canonical: cached.canonical.slice() } : {}),
       ...(cached.fluid ? { fluid: cached.fluid.slice() } : {}),
       overlays: cached.overlays.map((overlay) => ({

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BrowserChunkPersistence } from '../../src/client/browser-chunk-persistence';
-import type { ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
+import type { ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
 import type { FrozenGameSaveSnapshot } from '../../src/server/persistence/game-save-snapshot';
 import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey } from '../../src/world/voxel';
 
@@ -21,6 +21,23 @@ const found = ({ cx, cy, cz }: Coordinate, revision = 1) => ({
   voxels: new Uint16Array(CHUNK_SIZE ** 3).buffer,
   fluidVersion: 1 as const,
   fluid: new Uint8Array(CHUNK_SIZE ** 3).buffer,
+});
+
+const diagnosticsFor = (coordinates: readonly Coordinate[], foundCount: number): ChunkPersistenceLoadDiagnostics => ({
+  requestedKeyCount: coordinates.length,
+  foundCount,
+  missingCount: coordinates.length - foundCount,
+  queueWaitMs: 2,
+  databaseMs: 1,
+  transactionReadMs: 4,
+  decodeMs: foundCount ? 3 : 0,
+  totalWorkerMs: 10,
+  codecs: foundCount ? { 'raw-v1': foundCount } : {},
+});
+
+const batchResult = (coordinates: readonly Coordinate[], mode: 'missing' | 'found') => ({
+  entries: coordinates.map((coordinate) => (mode === 'found' ? found(coordinate) : { status: 'missing' })),
+  diagnostics: diagnosticsFor(coordinates, mode === 'found' ? coordinates.length : 0),
 });
 
 class FakePersistenceWorker {
@@ -83,10 +100,8 @@ class FakePersistenceWorker {
         this.reject(requestId, 'batch read failed');
         return;
       }
-      const result = coordinates.map((coordinate) =>
-        this.batchMode === 'missing' ? { status: 'missing' } : found(coordinate),
-      );
-      if (this.batchMode === 'mismatch') result[result.length - 1] = found({ cx: 999, cy: 1, cz: -2 });
+      const result = batchResult(coordinates, this.batchMode === 'missing' ? 'missing' : 'found');
+      if (this.batchMode === 'mismatch') result.entries[result.entries.length - 1] = found({ cx: 999, cy: 1, cz: -2 });
       this.respond(requestId, result);
       return;
     }
@@ -117,10 +132,7 @@ class FakePersistenceWorker {
 
   resolveDeferredBatch(index: number, mode: 'missing' | 'found' = 'missing') {
     const batch = this.deferredBatches[index]!;
-    this.respond(
-      batch.requestId,
-      batch.coordinates.map((coordinate) => (mode === 'found' ? found(coordinate) : { status: 'missing' })),
-    );
+    this.respond(batch.requestId, batchResult(batch.coordinates, mode));
   }
 
   resolveDeferredSingle(index: number, revision = 7) {
@@ -183,9 +195,15 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     const worker = new FakePersistenceWorker();
     const persistence = await open(worker, 'missing-halo');
 
-    await persistence.ensureNeighborhood(0, 1, -2);
+    const diagnostics = await persistence.ensureNeighborhood(0, 1, -2);
     expect(worker.singleLoadCount).toBe(0);
     expect(worker.batchRequestSizes).toEqual([27]);
+    expect(diagnostics).toEqual(
+      diagnosticsFor(
+        Array.from({ length: 27 }, () => ({ cx: 0, cy: 0, cz: 0 })),
+        0,
+      ),
+    );
     expect(persistence.metrics()).toMatchObject({ idbGetCount: 27, loadTransactionCount: 1 });
     persistence.releaseNeighborhood(0, 1, -2);
     await persistence.ensureNeighborhood(0, 1, -2);

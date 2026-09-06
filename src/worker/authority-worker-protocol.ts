@@ -10,6 +10,7 @@ import type { InputCommand, SequenceDecision } from '../runtime/session-protocol
 import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol';
 import type { WorldOpenMode } from '../client/world-version-policy';
 import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-protocol';
+import type { ChunkPersistenceLoadDiagnostics } from '../server/persistence/chunk-persistence';
 
 export type AuthorityGameplayMetrics = Readonly<{
   entityCount: number;
@@ -66,6 +67,12 @@ export type AuthorityMeshPayload = Readonly<{
   cz: number;
   chunkRevision: number;
   generatorVersion: number;
+  preparationDiagnostics?: Readonly<{
+    authorityPrepareMs: number;
+    persistenceWaitMs: number;
+    snapshotCopyMs: number;
+    persistence?: ChunkPersistenceLoadDiagnostics;
+  }>;
   canonical?: ArrayBuffer;
   fluid?: ArrayBuffer;
   overlays: readonly Readonly<{

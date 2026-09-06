@@ -10,6 +10,7 @@ import {
   type MeshTaskDispatch,
   type WorkerInput,
 } from './mesh-task-dispatch';
+import { recordMeshPreparationDiagnostics } from './mesh-preparation-telemetry';
 import { MeshVisibilityBarriers } from './mesh-visibility-barriers';
 
 export type { WorkerResult } from './app-contracts';
@@ -345,6 +346,7 @@ export class MeshTaskScheduler {
     const span = this.options.telemetry.beginSpan('streaming', 'AuthorityOverlayCopy', 'main', request.traceId);
     const prepared = this.options.source.prepareWorkerInput(request.cx, request.cy, request.cz);
     this.options.telemetry.endSpan(span);
+    recordMeshPreparationDiagnostics(this.options.telemetry, request.traceId, prepared.preparationDiagnostics);
     this.postDispatch(
       request,
       createWorkerFirstDispatch(++this.taskSequence, request, this.options.source.seed, prepared),

@@ -1,9 +1,14 @@
-import type { ChunkPersistence, ChunkSnapshot } from '../server/persistence/chunk-persistence';
+import type {
+  ChunkPersistence,
+  ChunkPersistenceLoadDiagnostics,
+  ChunkSnapshot,
+} from '../server/persistence/chunk-persistence';
 import type { GameplaySnapshot } from '../server/gameplay/gameplay-runtime';
 import type { FrozenGameSaveSnapshot } from '../server/persistence/game-save-snapshot';
 import { readGameSaveCheckpoint, type GameSaveCheckpoint } from '../server/persistence/game-save-checkpoint';
 import { GENERATOR_VERSION, Voxel, chunkKey } from '../world/voxel';
 import { prepareBrowserLoadResult, type PreparedBrowserLoadResult } from './browser-persistence-load';
+import { parseBrowserPersistenceLoadBatchResult } from './browser-persistence-load-diagnostics';
 import {
   BrowserPersistenceLoadRegistry,
   type BrowserPersistenceLoadToken,
@@ -326,13 +331,14 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   private async loadSnapshotBatchFromStore(
     coordinates: readonly LoadCoordinate[],
     tokens: ReadonlyMap<string, BrowserPersistenceLoadToken>,
-  ): Promise<ReadonlySet<string>> {
+  ): Promise<Readonly<{ published: ReadonlySet<string>; diagnostics: ChunkPersistenceLoadDiagnostics }>> {
     this.metricsValue.idbGetCount += coordinates.length;
     this.metricsValue.loadTransactionCount += 1;
-    const results = await this.request({ kind: 'load-batch', coordinates });
-    if (!Array.isArray(results) || results.length !== coordinates.length)
-      throw new Error('Persistence load batch result length does not match its request.');
-    const prepared = results.map((result, index) => {
+    const response = parseBrowserPersistenceLoadBatchResult(
+      await this.request({ kind: 'load-batch', coordinates }),
+      coordinates.length,
+    );
+    const prepared = response.entries.map((result, index) => {
       const coordinate = coordinates[index]!;
       return prepareBrowserLoadResult(
         this.seedText,
@@ -350,10 +356,10 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       this.commitLoadResult(result, token);
       published.add(result.key);
     });
-    return published;
+    return { published, diagnostics: response.diagnostics };
   }
 
-  async ensureNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
+  async ensureNeighborhood(cx: number, cy: number, cz: number): Promise<ChunkPersistenceLoadDiagnostics | void> {
     const centerKey = chunkKey(cx, cy, cz);
     const neighborhood = neighborhoodCoordinates(cx, cy, cz);
     const lease = this.loadRegistry.beginNeighborhood(
@@ -362,6 +368,8 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     );
     const loads = new Set<Promise<void>>();
     const coordinates: LoadCoordinate[] = [];
+    let batchResult:
+      Promise<Readonly<{ published: ReadonlySet<string>; diagnostics: ChunkPersistenceLoadDiagnostics }>> | undefined;
     neighborhood.forEach((coordinate) => {
       const key = chunkKey(coordinate.cx, coordinate.cy, coordinate.cz);
       if (this.snapshots.has(key) || this.missing.has(key)) return;
@@ -376,11 +384,12 @@ export class BrowserChunkPersistence implements ChunkPersistence {
         tokens.set(key, this.loadRegistry.beginLoad(key));
       });
       const batch = this.loadSnapshotBatchFromStore(coordinates, tokens);
+      batchResult = batch;
       coordinates.forEach(({ cx: batchX, cy: batchY, cz: batchZ }) => {
         const key = chunkKey(batchX, batchY, batchZ);
         const token = tokens.get(key)!;
         const keyedLoad = batch
-          .then((published) => {
+          .then(({ published }) => {
             if (!published.has(key)) throw new Error(`Persistence neighborhood load was canceled for ${key}.`);
           })
           .finally(() => {
@@ -395,6 +404,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       await Promise.all(loads);
       if (!this.loadRegistry.isNeighborhoodCurrent(lease))
         throw new Error(`Persistence neighborhood load was canceled for ${centerKey}.`);
+      return (await batchResult)?.diagnostics;
     } catch (error) {
       this.releaseNeighborhoodLease(centerKey, lease);
       throw error;

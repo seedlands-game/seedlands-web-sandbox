@@ -257,7 +257,7 @@ describe('MeshTaskScheduler', () => {
     scheduler.protectVisibleRevision('0,0,0', revision);
     scheduler.request(0, 0, 0, { priority: 'interactive-fluid' });
     const preparationTraceId = telemetry.exportChromeTrace().traceEvents.find(({ name }) => name === 'prepare-start')
-      ?.args?.traceId;
+      ?.args?.traceId as string | undefined;
     expect(preparationTraceId).toBeDefined();
     expect(beforePrepare).toHaveBeenCalledTimes(1);
     expect(scheduler.generationQueueSize).toBe(1);

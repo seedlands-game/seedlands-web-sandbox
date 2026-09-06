@@ -1,4 +1,5 @@
 import { createMeshTaskSnapshot } from '../client/mesh-task-snapshot';
+import type { AuthorityMeshPayload } from '../worker/authority-worker-protocol';
 import type { PendingMeshTask } from './app-contracts';
 import type { MeshRequestPriority } from './mesh-task-scheduler';
 
@@ -36,6 +37,7 @@ export type WorkerInput = Readonly<{
   canonical?: Uint16Array;
   fluid?: Uint8Array;
   overlays: WorkerOverlay[];
+  preparationDiagnostics?: AuthorityMeshPayload['preparationDiagnostics'];
 }>;
 
 export type MeshTaskDispatch = Readonly<{

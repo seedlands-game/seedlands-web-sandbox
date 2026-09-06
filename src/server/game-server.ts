@@ -1,6 +1,6 @@
 import { makeChunk } from '../world/mesh';
 import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey, normalizeSeed, Voxel } from '../world/voxel';
-import type { ChunkPersistence, ChunkSnapshot } from './persistence/chunk-persistence';
+import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayFacade } from './game-server-gameplay';
 import { createStarterEcology } from './simulation/starter-ecology';
@@ -189,13 +189,13 @@ export class GameServer extends GameServerGameplayFacade {
     return chunk;
   }
 
-  async ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
+  async ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<ChunkPersistenceLoadDiagnostics | void> {
     let alreadyResident = true;
     for (let y = Math.max(0, cy - 1); y <= Math.min(1, cy + 1); y += 1)
       for (let z = cz - 1; z <= cz + 1; z += 1)
         for (let x = cx - 1; x <= cx + 1; x += 1) if (!this.chunks.has(chunkKey(x, y, z))) alreadyResident = false;
     if (alreadyResident) return;
-    await this.persistence?.ensureNeighborhood?.(cx, cy, cz);
+    return await this.persistence?.ensureNeighborhood?.(cx, cy, cz);
   }
 
   async prepareCanonicalChunkForMutation(cx: number, cy: number, cz: number): Promise<boolean> {

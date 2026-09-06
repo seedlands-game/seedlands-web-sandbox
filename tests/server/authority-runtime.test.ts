@@ -4,8 +4,43 @@ import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-
 import { PROTOCOL_VERSION } from '../../src/runtime/session-protocol';
 import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
 import { bodyConfigFor, bodyWorldAabb } from '../../src/physics';
+import type { ChunkPersistenceLoadDiagnostics } from '../../src/server/persistence/chunk-persistence';
 
 describe('AuthorityRuntime', () => {
+  it('把单次有界持久化加载分项附在对应Mesh准备回执上', async () => {
+    const persistence = Object.assign(new MemoryGamePersistence(), {
+      ensureNeighborhood: async (): Promise<ChunkPersistenceLoadDiagnostics> => ({
+        requestedKeyCount: 27,
+        foundCount: 0,
+        missingCount: 27,
+        queueWaitMs: 2,
+        databaseMs: 1,
+        transactionReadMs: 4,
+        decodeMs: 0,
+        totalWorkerMs: 8,
+        codecs: {},
+      }),
+    });
+    const runtime = await AuthorityRuntime.create({
+      epoch: 'world:prepare-diagnostics',
+      seedText: 'authority-prepare-diagnostics',
+      persistence,
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+      now: () => 1,
+    });
+
+    const prepared = await runtime.prepareMesh(0, 1, -2);
+
+    expect(prepared.preparationDiagnostics).toMatchObject({
+      authorityPrepareMs: expect.any(Number),
+      persistenceWaitMs: expect.any(Number),
+      snapshotCopyMs: expect.any(Number),
+      persistence: { requestedKeyCount: 27, foundCount: 0, missingCount: 27 },
+    });
+  });
+
   it('在唯一GameServer内恢复/创建脚底中心玩家并驱动120Hz权威物理', async () => {
     const runtime = await AuthorityRuntime.create({
       epoch: 'world:1',

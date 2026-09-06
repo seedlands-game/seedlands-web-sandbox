@@ -10,6 +10,7 @@ import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, normalizeSeed } fro
 import { selectWorldGeneratorVersion, type WorldOpenMode } from '../client/world-version-policy';
 import { persistFrozenGameSnapshot, type FrozenSaveTaskSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
+import { loadPersistenceBatch } from './persistence-load-many';
 
 type WorkerConfig = { databaseName: string; worldId: string; seedText: string; generatorVersion: number };
 type InitTask = { kind: 'init'; requestId: number; openMode: WorldOpenMode } & WorkerConfig;
@@ -228,28 +229,21 @@ const decodeLoadResult = (task: PersistenceLoadCoordinate, value: unknown) => {
   };
 };
 
-const loadMany = async (coordinates: readonly PersistenceLoadCoordinate[]) => {
+const loadMany = async (coordinates: readonly PersistenceLoadCoordinate[], queueWaitMs: number) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  const opened = await database();
-  const transaction = opened.transaction('chunks', 'readonly');
-  const done = transactionDone(transaction);
-  const store = transaction.objectStore('chunks');
-  let values: unknown[];
-  try {
-    values = await Promise.all(
-      coordinates.map(({ cx, cy, cz }) => requestResult(store.get([config!.worldId, cx, cy, cz]))),
-    );
-    await done;
-  } catch (error) {
-    await done.catch(() => undefined);
-    throw error;
-  }
-  return coordinates.map((coordinate, index) => decodeLoadResult(coordinate, values[index]));
+  return loadPersistenceBatch({
+    coordinates,
+    queueWaitMs,
+    worldId: config.worldId,
+    database,
+    decode: decodeLoadResult,
+  });
 };
 
-const load = async (task: LoadTask) => (await loadMany([task]))[0];
+const load = async (task: LoadTask) => (await loadMany([task], 0)).entries[0];
 
-const loadBatch = async (task: LoadBatchTask) => loadMany(validatePersistenceLoadBatch(task.coordinates));
+const loadBatch = async (task: LoadBatchTask, queueWaitMs: number) =>
+  loadMany(validatePersistenceLoadBatch(task.coordinates), queueWaitMs);
 
 const save = async (task: SaveTask) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
@@ -488,11 +482,11 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
   return summary;
 };
 
-const handle = async (task: Task): Promise<unknown> => {
+const handle = async (task: Task, queueWaitMs = 0): Promise<unknown> => {
   if (task.kind === 'latest-world') return latestWorld(task);
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
-  if (task.kind === 'load-batch') return loadBatch(task);
+  if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs);
   if (task.kind === 'save') return save(task);
   if (task.kind === 'save-frozen') return saveFrozen(task);
   if (task.kind === 'save-metadata') return saveMetadata(task);
@@ -503,13 +497,14 @@ const handle = async (task: Task): Promise<unknown> => {
 };
 
 self.onmessage = (event: MessageEvent<Task>) => {
+  const enqueuedAt = performance.now();
   taskQueue = taskQueue.then(async () => {
     const task = event.data;
     try {
-      const result = await handle(task);
+      const result = await handle(task, performance.now() - enqueuedAt);
       const response: SuccessResponse = { requestId: task.requestId, ok: true, result };
       const transfers: Transferable[] = [];
-      const loaded = task.kind === 'load-batch' ? (result as unknown[]) : [result];
+      const loaded = task.kind === 'load-batch' ? (result as Awaited<ReturnType<typeof loadMany>>).entries : [result];
       if (task.kind === 'load' || task.kind === 'load-batch')
         loaded.forEach((entry) => {
           if (!entry || typeof entry !== 'object' || !('voxels' in entry)) return;

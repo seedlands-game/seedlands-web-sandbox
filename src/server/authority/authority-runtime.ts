@@ -30,6 +30,7 @@ import { AuthorityMutationPreparation, unavailableWorldCommit } from './authorit
 import { applyAuthorityPlayerAction } from './authority-player-action';
 import { queueBodyRecoveriesAfterCommit } from './authority-geometry-recovery';
 import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from './authority-canonical-preparation';
+import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 
 export type * from './authority-runtime-types';
 
@@ -329,26 +330,7 @@ export class AuthorityRuntime {
   }
 
   async prepareMesh(cx: number, cy: number, cz: number): Promise<AuthorityMeshPayload> {
-    this.server.retainMeshChunk(cx, cy, cz);
-    await this.server.ensureChunkNeighborhood(cx, cy, cz);
-    const prepared = this.server.prepareWorkerMeshInput(cx, cy, cz);
-    return {
-      key: prepared.key,
-      cx,
-      cy,
-      cz,
-      chunkRevision: prepared.chunkRevision,
-      generatorVersion: this.server.generatorVersion,
-      ...(prepared.canonical ? { canonical: prepared.canonical.buffer as ArrayBuffer } : {}),
-      ...(prepared.fluid ? { fluid: prepared.fluid.buffer as ArrayBuffer } : {}),
-      overlays: prepared.overlays.map((overlay) => ({
-        cx: overlay.cx,
-        cy: overlay.cy,
-        cz: overlay.cz,
-        voxels: overlay.voxels.buffer as ArrayBuffer,
-        ...(overlay.fluid ? { fluid: overlay.fluid.buffer as ArrayBuffer } : {}),
-      })),
-    };
+    return prepareAuthorityMeshPayload(this.server, this.options.now ?? (() => performance.now()), cx, cy, cz);
   }
 
   acceptGeneratedChunk(result: WorkerCanonicalResult): boolean {

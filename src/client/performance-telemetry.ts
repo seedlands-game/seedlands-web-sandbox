@@ -25,6 +25,7 @@ export type PerformanceSpan = {
   startMs: number;
   endMs?: number;
   durationMs?: number;
+  attributes?: Readonly<Record<string, string | number>>;
 };
 
 export type TraceMark = { name: string; lane: string; timestampMs: number };
@@ -61,7 +62,7 @@ export type ChromeTrace = {
     dur: number;
     pid: string;
     tid: string;
-    args?: { traceId: string };
+    args?: Readonly<Record<string, string | number>>;
   }>;
 };
 
@@ -78,6 +79,7 @@ export type CompletedSpanInput = {
   lane: string;
   durationMs: number;
   traceId?: string;
+  attributes?: Readonly<Record<string, string | number>>;
 };
 
 type CurrentFrame = { frameId: number; startMs: number; spans: PerformanceSpan[] };
@@ -196,6 +198,7 @@ export class PerformanceTelemetry {
       startMs: endMs - input.durationMs,
       endMs,
       durationMs: input.durationMs,
+      ...(input.attributes ? { attributes: input.attributes } : {}),
     };
     this.pushEvent(span);
     return span;
@@ -325,7 +328,9 @@ export class PerformanceTelemetry {
         dur: span.durationMs! * 1000,
         pid: 'seedlands-client',
         tid: span.lane,
-        ...(span.traceId ? { args: { traceId: span.traceId } } : {}),
+        ...(span.traceId || span.attributes
+          ? { args: { ...(span.traceId ? { traceId: span.traceId } : {}), ...span.attributes } }
+          : {}),
       }));
     const traces = [...this.traces.values()]
       .filter((trace) => trace.durationMs !== undefined)
