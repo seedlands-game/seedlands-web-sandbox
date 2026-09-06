@@ -1,0 +1,75 @@
+# 执行示例：VOXEL_SANDBOX_URL=http://127.0.0.1:4195/?harness=1 \
+# pnpm exec midscene changes/2026-09-05-fluid-experience-repair/midscene/fluid-transition.yaml \
+# --dotenv-override --summary /tmp/seedlands-fluid-transition-midscene.json
+web:
+  url: http://127.0.0.1:4195/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+
+tasks:
+  - name: 缺口流体网格连续渐变
+    flow:
+      - aiInput: fluid-transition-v1
+        locate: 世界 Seed 输入框
+      - aiTap: 进入世界
+      - aiWaitFor: 体素世界、中央准星和底部快捷栏已经显示。
+      - javascript: |
+          (async () => {
+            var h = window.__seedlandsHarness;
+            h.setTimePaused(false);
+            h.movePlayerTo(0.5, 60.6, 5.5);
+            h.setView(0, -28);
+            for (var z = -2; z <= 8; z += 1)
+              for (var x = -3; x <= 4; x += 1) {
+                h.setVoxelAt(x, 56, z, 3);
+                for (var y = 57; y <= 63; y += 1) h.setVoxelAt(x, y, z, 0);
+              }
+            for (var wallZ = -1; wallZ <= 1; wallZ += 1)
+              for (var wallX = -1; wallX <= 1; wallX += 1)
+                if (wallX !== 0 || wallZ !== 0) h.setVoxelAt(wallX, 57, wallZ, 3);
+            h.setVoxelAt(0, 57, 0, 8);
+            h.setVoxelAt(2, 57, 0, 3);
+            for (var settle = 0; settle < 80; settle += 1) {
+              var state = h.snapshot();
+              if (
+                state.generationQueue === 0 &&
+                state.meshingQueue === 0 &&
+                state.deferredRemeshes === 0 &&
+                state.performance.uploadQueueDepth === 0
+              )
+                break;
+              await new Promise((resolve) => setTimeout(resolve, 50));
+            }
+            h.setVoxelAt(0, 57, 1, 0);
+            h.advanceFluid(10);
+            for (var attempt = 0; attempt < 80; attempt += 1) {
+              var fluidFront = h.getFluidCell(0, 57, 4);
+              var targetRevision = h.getChunkRevision(0, 1, 0);
+              var active = h.snapshot().waterTransitions.active.find(
+                (record) =>
+                  record.chunkKey === '0,1,0' &&
+                  record.targetRevision === targetRevision &&
+                  record.progress > 0.72 &&
+                  record.progress < 0.96,
+              );
+              if (fluidFront && active) {
+                h.setWaterTransitionHold(true);
+                return { active, fluidFront };
+              }
+              await new Promise((resolve) => requestAnimationFrame(resolve));
+            }
+            throw new Error('没有捕获到当前权威 revision 的流体网格渐变中间帧');
+          })()
+      - aiAssert: 当前暂停的真实渐变中间帧中，可以看到蓝色水面从中央上方的池内穿过正前方开口，并在池外形成连续可见的水流；水面纹理与石质地面能够区分，池内水面没有整块消失。
+      - javascript: |
+          (async () => {
+            var h = window.__seedlandsHarness;
+            h.setWaterTransitionHold(false);
+            for (var attempt = 0; attempt < 160; attempt += 1) {
+              var state = h.snapshot();
+              if (state.waterTransitions.activeCount === 0 && h.getFluidCell(0, 57, 4)) return state;
+              await new Promise((resolve) => setTimeout(resolve, 25));
+            }
+            throw new Error('流体网格渐变未在有界时间内完成');
+          })()
+      - aiAssert: 渐变完成后，池内、正前方开口和池外水流仍组成连续可辨认的蓝色路径；旧水面没有残影，岸边也没有高出一格的透明水墙。

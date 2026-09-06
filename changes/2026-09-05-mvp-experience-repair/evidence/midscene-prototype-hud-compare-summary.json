@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0,
+    "partialFailed": 0,
+    "notExecuted": 0,
+    "totalDuration": 5521,
+    "generatedAt": "9/5/2026, 2:58:44 PM"
+  },
+  "results": [
+    {
+      "script": "seedlands-experience-repair-gallery/compare.yaml",
+      "success": true,
+      "resultType": "success",
+      "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/compare-1788591519069.json",
+      "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/compare-2026-09-05_14-58-39-986e1426.html",
+      "attempts": [
+        {
+          "attempt": 1,
+          "success": true,
+          "resultType": "success",
+          "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/compare-1788591519069.json",
+          "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/compare-2026-09-05_14-58-39-986e1426.html",
+          "duration": 5521
+        }
+      ],
+      "duration": 5521
+    }
+  ]
+}

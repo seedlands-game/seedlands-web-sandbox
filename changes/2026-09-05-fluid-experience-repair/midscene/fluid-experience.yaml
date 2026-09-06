@@ -1,0 +1,40 @@
+# 执行示例：VOXEL_SANDBOX_URL=http://127.0.0.1:4195/?harness=1 \
+# pnpm exec midscene changes/2026-09-05-fluid-experience-repair/midscene/fluid-experience.yaml \
+# --dotenv-override --summary /tmp/seedlands-fluid-experience-midscene.json
+web:
+  url: http://127.0.0.1:4195/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+
+tasks:
+  - name: 新版自然河岸与水下旅程
+    flow:
+      - aiInput: mosslight-68
+        locate: 世界 Seed 输入框
+      - javascript: |
+          var select = document.querySelector('#world-version-mode');
+          select.value = 'new-current';
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+      - aiTap: 进入世界
+      - aiWaitFor: 体素世界、中央准星和底部快捷栏已经显示。
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          h.movePlayerTo(30.5, 13.6, -30.5);
+          h.setView(0, -12);
+          h.setWorldTime(10);
+          h.setTimePaused(true);
+      - aiWaitFor: 近处的自然河岸和河面已经完成渲染。
+      - aiAssert: 河面低于或齐于两侧完整岸顶，没有高出草岸近一整格的透明水墙；河床、紧邻岸和外侧地形形成连续过渡，不是一条整齐铺在地表上的蓝色方块带。
+      - aiAssert: 河面纹理沿河道方向平缓移动，近岸水边连续，没有大块瞬间闪入、黑色矩形或镜像陆地侧墙。
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          h.setTimePaused(false);
+          h.setSpectatorPosition(32.7, 10.0, -32.7);
+          h.setView(0, 0);
+      - sleep: 1800
+      - aiAssert: 水下画面呈蓝绿色吸收与缩短雾距，边缘有轻微深色过渡，但中央仍能辨认河床、岸坡与方块轮廓；效果不是整屏纯色遮罩，也没有在水面附近闪烁。
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          h.setSpectatorPosition(38.5, 13.6, -39.5);
+      - aiWaitFor: 镜头已经离开水面并站到对岸。
+      - aiAssert: 离水后世界颜色、雾距和清晰度恢复，水下蓝绿色吸收与边缘遮罩没有残留；陆地、树木和天空重新保持入水前的正常色彩层次。

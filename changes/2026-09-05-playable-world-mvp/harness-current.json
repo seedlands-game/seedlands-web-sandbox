@@ -1,0 +1,448 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-05T00:54:14.322Z",
+  "sourceSha": "025db21b6f61dee7267f3d9eb530c64ebb36b00c",
+  "browserRunId": "c781a344-00d3-4298-8178-bb43dc49b441",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "correctness": {
+    "status": "PASS",
+    "command": "pnpm test (run before this script)"
+  },
+  "performance": {
+    "macro": {
+      "count": 256,
+      "p50Ms": 0.007541999999972404,
+      "p95Ms": 0.033292000000002986,
+      "maxMs": 0.42720799999999315,
+      "totalMs": 3.5713369999999998,
+      "signature": "f3ef5cb5",
+      "throughputPerSecond": 71681.83792232434
+    },
+    "worldgen": {
+      "count": 35,
+      "p50Ms": 58.164625,
+      "p95Ms": 62.597541999999976,
+      "maxMs": 63.186916999999994,
+      "totalMs": 2048.569041999999,
+      "throughputChunksPerSecond": 17.08509661252609
+    },
+    "meshing": {
+      "count": 35,
+      "p50Ms": 19.096500000000106,
+      "p95Ms": 25.798249999999825,
+      "maxMs": 25.844333000000006,
+      "totalMs": 691.9123340000006,
+      "throughputChunksPerSecond": 50.584442970776664,
+      "vertices": 8672,
+      "triangles": 4336
+    }
+  },
+  "memoryProxy": {
+    "jsHeapAfterWork": 16643976,
+    "voxelDataBytes": 2293760,
+    "meshDataBytes": 364224,
+    "note": "Node heap and typed-array payload metrics; GPU memory requires browser tooling."
+  },
+  "storage": {
+    "bytesByMutationCount": {
+      "100": 1926,
+      "1000": 18374,
+      "10000": 182912,
+      "50000": 866976
+    }
+  },
+  "bundle": {
+    "fileCount": 9,
+    "totalBytes": 4691867,
+    "jsBytes": 2476885,
+    "gzipBytes": 661608
+  },
+  "browserE2E": {
+    "status": "PASS",
+    "stages": {
+      "load": "PASS",
+      "input": "PASS",
+      "player": "PASS",
+      "interaction": "PASS",
+      "streaming": "PASS",
+      "persistence": "PASS"
+    },
+    "metrics": {
+      "ui": {
+        "runtime": "svelte5",
+        "shellPublishCount": 4,
+        "hudPublishCount": 2,
+        "interactionPublishCount": 1,
+        "debugProjectionCount": 2,
+        "debugPublishCount": 3,
+        "staleUpdateCount": 0,
+        "coalescedUpdateCount": 36,
+        "domCommitCount": 6,
+        "projectionDurationMs": 6,
+        "publishDurationMs": 0.30000001192092896,
+        "domCommitDurationMs": 22.00000011920929,
+        "debugProjectionRate": 2,
+        "totalPublishRate": 3
+      },
+      "gameplay": {
+        "entityCount": 5,
+        "worldItemCount": 1,
+        "creatureCount": 2,
+        "npcCount": 1,
+        "nearbyVisitedBucketCount": 4,
+        "nearbyCandidateCount": 1,
+        "nearbyReturnedCount": 0,
+        "inventoryOperationCount": 0,
+        "gameplayEventCount": 5,
+        "snapshotBytes": 2832,
+        "retainedActorCount": 3,
+        "activeActorCount": 3,
+        "behaviorEvaluationCount": 0,
+        "navigationPlanCount": 0,
+        "navigationExpandedNodeCount": 0,
+        "pathRecomputeCount": 0,
+        "actionCompletionCount": 0,
+        "actionFailureCount": 0,
+        "actionInterruptionCount": 0,
+        "perceptionLineOfSightCheckCount": 0,
+        "simulationTime": 0.2,
+        "presentedEntityCount": 4
+      }
+    }
+  },
+  "browserBenchmark": {
+    "status": "PASS",
+    "initialWorldReadyMs": 1782.68
+  },
+  "gameplay": {
+    "entityCount": 3,
+    "worldItemCount": 1,
+    "creatureCount": 1,
+    "npcCount": 0,
+    "nearbyVisitedBucketCount": 8,
+    "nearbyCandidateCount": 3,
+    "nearbyReturnedCount": 3,
+    "inventoryOperationCount": 2,
+    "gameplayEventCount": 5,
+    "snapshotBytes": 1163,
+    "retainedActorCount": 0,
+    "activeActorCount": 0,
+    "behaviorEvaluationCount": 0,
+    "navigationPlanCount": 0,
+    "navigationExpandedNodeCount": 0,
+    "pathRecomputeCount": 0,
+    "actionCompletionCount": 0,
+    "actionFailureCount": 0,
+    "actionInterruptionCount": 0,
+    "perceptionLineOfSightCheckCount": 0,
+    "simulationTime": 0
+  },
+  "autonomy": {
+    "samples": {
+      "10": {
+        "durationMs": 133.49049999999988,
+        "retainedActorCount": 10,
+        "activeActorCount": 3,
+        "behaviorEvaluationCount": 3,
+        "navigationPlanCount": 2,
+        "navigationExpandedNodeCount": 0,
+        "pathRecomputeCount": 0,
+        "actionCompletionCount": 0,
+        "actionFailureCount": 2,
+        "actionInterruptionCount": 0,
+        "perceptionLineOfSightCheckCount": 20,
+        "simulationTime": 1.1
+      },
+      "100": {
+        "durationMs": 991.8286670000002,
+        "retainedActorCount": 100,
+        "activeActorCount": 60,
+        "behaviorEvaluationCount": 60,
+        "navigationPlanCount": 42,
+        "navigationExpandedNodeCount": 0,
+        "pathRecomputeCount": 0,
+        "actionCompletionCount": 0,
+        "actionFailureCount": 42,
+        "actionInterruptionCount": 0,
+        "perceptionLineOfSightCheckCount": 1958,
+        "simulationTime": 1.1
+      },
+      "500": {
+        "durationMs": 1384.328125,
+        "retainedActorCount": 500,
+        "activeActorCount": 427,
+        "behaviorEvaluationCount": 427,
+        "navigationPlanCount": 298,
+        "navigationExpandedNodeCount": 1196,
+        "pathRecomputeCount": 0,
+        "actionCompletionCount": 1,
+        "actionFailureCount": 1,
+        "actionInterruptionCount": 0,
+        "perceptionLineOfSightCheckCount": 17990,
+        "simulationTime": 1.1
+      }
+    },
+    "requestedActorCount": 1000,
+    "rejectedAt": 512,
+    "retainedActorLimit": 512
+  },
+  "worldMutation": {
+    "status": "PASS",
+    "environmentComparable": false,
+    "singleEdit": {
+      "status": "NOT_COMPARABLE",
+      "medianP50Ms": 2.643417000000227,
+      "medianP95Ms": 2.7270830000006754,
+      "p50LimitMs": 3.855327850000077,
+      "p95LimitMs": 4.730365000000063,
+      "runP50Ms": [2.627707999999984, 2.6639580000000933, 2.643417000000227],
+      "runP95Ms": [3.661167000000205, 2.7270830000006754, 2.712749999999687]
+    },
+    "batchComparison": {
+      "status": "PASS",
+      "sequentialMedianP50Ms": 30.890625,
+      "batchMedianP50Ms": 1.7969999999995707,
+      "speedup": 17.190108514194424,
+      "sequentialRunP50Ms": [30.80724999999984, 30.93724999999995, 30.890625],
+      "batchRunP50Ms": [1.992500000000291, 1.7929160000003321, 1.7969999999995707]
+    },
+    "overwriteHeavy": {
+      "status": "PASS",
+      "metrics": {
+        "timingStatus": "measured",
+        "inputMutationCount": 100000,
+        "canonicalWriteCount": 10000,
+        "dirtyChunkCount": 16,
+        "meshInvalidationCount": 25,
+        "structuralEventCount": 1,
+        "semanticEventCount": 0,
+        "mutationPayloadBytes": 1400000,
+        "mutationCapacityBytes": 1400000,
+        "validationMs": 0.00220900000022084,
+        "resolveMs": 111.83454100000017,
+        "applyMs": 0.8155419999993683,
+        "commitMs": 112.65229199999976
+      }
+    },
+    "memoryProxy": {
+      "heapBeforeMutation": 44121016,
+      "heapAfterMutation": 76026544,
+      "heapDeltaBytes": 31905528,
+      "note": "Process heap delta is an environment-local proxy and includes benchmark-retained objects."
+    },
+    "fillSamples": {
+      "1": {
+        "medianP50Ms": 0.012000000000625732,
+        "medianP95Ms": 0.02158300000064628,
+        "runP50Ms": [0.03391600000031758, 0.012000000000625732, 0.009999999999308784],
+        "runP95Ms": [0.07716700000037235, 0.019041999999899417, 0.02158300000064628],
+        "metrics": {
+          "timingStatus": "measured",
+          "inputMutationCount": 1,
+          "canonicalWriteCount": 1,
+          "dirtyChunkCount": 1,
+          "meshInvalidationCount": 4,
+          "structuralEventCount": 1,
+          "semanticEventCount": 0,
+          "mutationPayloadBytes": 14,
+          "mutationCapacityBytes": 14,
+          "validationMs": 0.0007919999998193816,
+          "resolveMs": 0.004333000000769971,
+          "applyMs": 0.00016699999923730502,
+          "commitMs": 0.005291999999826658
+        }
+      },
+      "1000": {
+        "medianP50Ms": 0.051666999999724794,
+        "medianP95Ms": 0.05812499999956344,
+        "runP50Ms": [0.14604200000030687, 0.04837500000030559, 0.051666999999724794],
+        "runP95Ms": [0.2522500000004584, 0.0527910000000702, 0.05812499999956344],
+        "metrics": {
+          "timingStatus": "measured",
+          "inputMutationCount": 1000,
+          "canonicalWriteCount": 1000,
+          "dirtyChunkCount": 1,
+          "meshInvalidationCount": 8,
+          "structuralEventCount": 1,
+          "semanticEventCount": 0,
+          "mutationPayloadBytes": 14000,
+          "mutationCapacityBytes": 14000,
+          "validationMs": 0.00045900000077381264,
+          "resolveMs": 0.022665999999844644,
+          "applyMs": 0.001209000000017113,
+          "commitMs": 0.02433400000063557
+        }
+      },
+      "10000": {
+        "medianP50Ms": 0.3650840000000244,
+        "medianP95Ms": 0.39883300000019517,
+        "runP50Ms": [0.36599999999998545, 0.3558339999999589, 0.3650840000000244],
+        "runP95Ms": [0.37779200000022684, 0.6546669999997903, 0.39883300000019517],
+        "metrics": {
+          "timingStatus": "measured",
+          "inputMutationCount": 10000,
+          "canonicalWriteCount": 10000,
+          "dirtyChunkCount": 4,
+          "meshInvalidationCount": 20,
+          "structuralEventCount": 1,
+          "semanticEventCount": 0,
+          "mutationPayloadBytes": 140000,
+          "mutationCapacityBytes": 140000,
+          "validationMs": 0.00045899999986431794,
+          "resolveMs": 0.18224999999983993,
+          "applyMs": 0.011583000000428001,
+          "commitMs": 0.19429200000013225
+        }
+      },
+      "100000": {
+        "medianP50Ms": 3.20575000000008,
+        "medianP95Ms": 3.3412500000004,
+        "runP50Ms": [3.219916000000012, 3.125292000000627, 3.20575000000008],
+        "runP95Ms": [3.888249999999971, 3.173124999999345, 3.3412500000004],
+        "metrics": {
+          "timingStatus": "measured",
+          "inputMutationCount": 100000,
+          "canonicalWriteCount": 100000,
+          "dirtyChunkCount": 16,
+          "meshInvalidationCount": 50,
+          "structuralEventCount": 1,
+          "semanticEventCount": 0,
+          "mutationPayloadBytes": 1400000,
+          "mutationCapacityBytes": 1400000,
+          "validationMs": 0.0005420000006779446,
+          "resolveMs": 1.8207079999992857,
+          "applyMs": 0.06883300000026793,
+          "commitMs": 1.8900830000002316
+        }
+      }
+    }
+  },
+  "metrics": {
+    "macroQueryP95Ms": 0.033292000000002986,
+    "macroQueryThroughputPerSecond": 71681.83792232434,
+    "worldgenP95Ms": 62.597541999999976,
+    "worldgenThroughputChunksPerSecond": 17.08509661252609,
+    "meshingP95Ms": 25.798249999999825,
+    "meshingThroughputChunksPerSecond": 50.584442970776664,
+    "meshVertices": 8672,
+    "meshTriangles": 4336,
+    "voxelDataBytes": 2293760,
+    "meshDataBytes": 364224,
+    "jsHeapAfterWork": 16643976,
+    "save10000Bytes": 182912,
+    "totalBuildBytes": 4691867,
+    "jsBundleBytes": 2476885,
+    "gzipJsBundleBytes": 661608
+  },
+  "comparison": {
+    "macroQueryP95Ms": {
+      "baseline": 0.03454099999999016,
+      "current": 0.033292000000002986,
+      "percent": -3.615992588481899,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "macroQueryThroughputPerSecond": {
+      "baseline": 71586.64528761382,
+      "current": 71681.83792232434,
+      "percent": 0.1329754094888265,
+      "direction": "higher-is-better",
+      "status": "OK"
+    },
+    "worldgenP95Ms": {
+      "baseline": 65.16233399999999,
+      "current": 62.597541999999976,
+      "percent": -3.936003888381303,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "worldgenThroughputChunksPerSecond": {
+      "baseline": 16.30465984765356,
+      "current": 17.08509661252609,
+      "percent": 4.7865872220869665,
+      "direction": "higher-is-better",
+      "status": "OK"
+    },
+    "meshingP95Ms": {
+      "baseline": 26.699208,
+      "current": 25.798249999999825,
+      "percent": -3.3744746286113556,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "meshingThroughputChunksPerSecond": {
+      "baseline": 46.712865503798525,
+      "current": 50.584442970776664,
+      "percent": 8.288032483606289,
+      "direction": "higher-is-better",
+      "status": "OK"
+    },
+    "meshVertices": {
+      "baseline": 8672,
+      "current": 8672,
+      "percent": 0,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "meshTriangles": {
+      "baseline": 4336,
+      "current": 4336,
+      "percent": 0,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "voxelDataBytes": {
+      "baseline": 2293760,
+      "current": 2293760,
+      "percent": 0,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "meshDataBytes": {
+      "baseline": 364224,
+      "current": 364224,
+      "percent": 0,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "jsHeapAfterWork": {
+      "baseline": 16238176,
+      "current": 16643976,
+      "percent": 2.49904915428925,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "save10000Bytes": {
+      "baseline": 182912,
+      "current": 182912,
+      "percent": 0,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "totalBuildBytes": {
+      "baseline": 4691682,
+      "current": 4691867,
+      "percent": 0.003943148747080471,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "jsBundleBytes": {
+      "baseline": 2476700,
+      "current": 2476885,
+      "percent": 0.007469616828844834,
+      "direction": "lower-is-better",
+      "status": "OK"
+    },
+    "gzipJsBundleBytes": {
+      "baseline": 661523,
+      "current": 661608,
+      "percent": 0.012849137520539724,
+      "direction": "lower-is-better",
+      "status": "OK"
+    }
+  }
+}

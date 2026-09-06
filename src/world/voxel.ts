@@ -1,7 +1,8 @@
-import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
+import { CURRENT_MACRO_GENERATOR_VERSION, macroAt, type MacroBiome, type MacroContext } from './macro-world';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 2;
+export const GENERATOR_VERSION = CURRENT_MACRO_GENERATOR_VERSION;
+export const LEGACY_GENERATOR_VERSION = 2;
 export type ChunkCoord = { cx: number; cy: number; cz: number };
 
 export const Voxel = {
@@ -14,6 +15,8 @@ export const Voxel = {
   Sand: 6,
   Snow: 7,
   Water: 8,
+  Glowstone: 9,
+  Lantern: 10,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
@@ -29,6 +32,9 @@ export const FaceMaterial = {
   Leaves: 8,
   Snow: 9,
   Water: 10,
+  Glowstone: 11,
+  LanternFrame: 12,
+  LanternGlow: 13,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -44,6 +50,9 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Leaves]: 'leaves',
   [FaceMaterial.Snow]: 'snow',
   [FaceMaterial.Water]: 'water',
+  [FaceMaterial.Glowstone]: 'glowstone',
+  [FaceMaterial.LanternFrame]: 'lantern-frame',
+  [FaceMaterial.LanternGlow]: 'lantern-glow',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -55,6 +64,8 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Sand]: '沙砾',
   [Voxel.Snow]: '雪',
   [Voxel.Water]: '水',
+  [Voxel.Glowstone]: '辉光石',
+  [Voxel.Lantern]: '灯笼',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -66,6 +77,8 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Sand]: [0.76, 0.67, 0.43],
   [Voxel.Snow]: [0.9, 0.95, 1],
   [Voxel.Water]: [0.12, 0.4, 0.72],
+  [Voxel.Glowstone]: [1, 0.58, 0.18],
+  [Voxel.Lantern]: [0.86, 0.58, 0.22],
 };
 
 export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
@@ -88,6 +101,8 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Sand]: FaceMaterial.Sand,
       [Voxel.Snow]: FaceMaterial.Snow,
       [Voxel.Water]: FaceMaterial.Water,
+      [Voxel.Glowstone]: FaceMaterial.Glowstone,
+      [Voxel.Lantern]: FaceMaterial.LanternFrame,
     } as Record<number, FaceMaterialId>
   )[id];
 }
@@ -119,9 +134,11 @@ export function normalizeSeed(raw: string): number {
   return h >>> 0;
 }
 
-export const terrainHeight = (seed: number, x: number, z: number): number => macroAt(seed, x, z).terrainHeight;
+export const terrainHeight = (seed: number, x: number, z: number, generatorVersion = GENERATOR_VERSION): number =>
+  macroAt(seed, x, z, generatorVersion).terrainHeight;
 
-export const biome = (seed: number, x: number, z: number): MacroBiome => macroAt(seed, x, z).biome;
+export const biome = (seed: number, x: number, z: number, generatorVersion = GENERATOR_VERSION): MacroBiome =>
+  macroAt(seed, x, z, generatorVersion).biome;
 
 function isTreeOrigin(seed: number, x: number, z: number, context: MacroContext): boolean {
   const threshold: Partial<Record<MacroBiome, number>> = { forest: 0.968, plains: 0.987, wet: 0.981, mountain: 0.995 };
@@ -137,8 +154,8 @@ export function baseVoxel(
   x: number,
   y: number,
   z: number,
-  context = macroAt(seed, x, z),
-  queryMacro = (qx: number, qz: number) => macroAt(seed, qx, qz),
+  context = macroAt(seed, x, z, GENERATOR_VERSION),
+  queryMacro = (qx: number, qz: number) => macroAt(seed, qx, qz, GENERATOR_VERSION),
 ): VoxelId {
   const h = context.terrainHeight;
   const kind = context.biome;

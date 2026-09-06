@@ -19,8 +19,18 @@
     "meshDataBytes": 364224,
     "jsHeapAfterWork": 16238176,
     "save10000Bytes": 182912,
-    "totalBuildBytes": 2040968,
-    "jsBundleBytes": 1964861,
-    "gzipJsBundleBytes": 509790
+    "totalBuildBytes": 4691682,
+    "jsBundleBytes": 2476700,
+    "gzipJsBundleBytes": 661523
+  },
+  "bundleBaseline": {
+    "updatedAt": "2026-09-05T00:26:52.251Z",
+    "sourceSha": "0ceb4767d78bf03bf3924969598a21d412095175",
+    "change": "changes/2026-09-05-mvp-bundle-baseline/spec.md",
+    "previous": {
+      "totalBuildBytes": 2040968,
+      "jsBundleBytes": 1964861,
+      "gzipJsBundleBytes": 509790
+    }
   }
 }

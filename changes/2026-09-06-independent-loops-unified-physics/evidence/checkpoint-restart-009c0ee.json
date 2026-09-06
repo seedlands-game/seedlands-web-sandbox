@@ -1,0 +1,52 @@
+{
+  "sourceSha": "009c0ee",
+  "evidence": "Playwright-change headed Chrome actual IndexedDB",
+  "receipts": {
+    "before": {
+      "success": true,
+      "message": "Saved 0 dirty Chunk(s).",
+      "affectedChunks": [],
+      "worldRevision": 0,
+      "observation": {
+        "commandType": "save",
+        "category": "administrative",
+        "actorId": "browser-local-developer",
+        "sourceType": "local-developer",
+        "durationMs": 1,
+        "success": true,
+        "affectedChunks": [],
+        "worldRevision": 0,
+        "mutationCount": 0,
+        "structuralEventCount": 0
+      },
+      "data": {
+        "savedChunks": [],
+        "gameplaySaved": true,
+        "commitSequence": 821
+      }
+    },
+    "after": {
+      "success": true,
+      "message": "Saved 0 dirty Chunk(s).",
+      "affectedChunks": [],
+      "worldRevision": 0,
+      "observation": {
+        "commandType": "save",
+        "category": "administrative",
+        "actorId": "browser-local-developer",
+        "sourceType": "local-developer",
+        "durationMs": 1.199999988079071,
+        "success": true,
+        "affectedChunks": [],
+        "worldRevision": 0,
+        "mutationCount": 0,
+        "structuralEventCount": 0
+      },
+      "data": {
+        "savedChunks": [],
+        "gameplaySaved": true,
+        "commitSequence": 825
+      }
+    }
+  }
+}

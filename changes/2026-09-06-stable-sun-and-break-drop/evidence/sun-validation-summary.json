@@ -1,0 +1,260 @@
+{
+  "productionBundle": "index-CiwZAdXy.js",
+  "productionBundleSha256": "f80bfdaa82d0155d0ccab8c79410f0696d851f655bfa7d4a6078a9b504b08ac8",
+  "sourceBinding": "HEAD f84ccd7 + 冻结生产修改；提交后按28文件构建哈希绑定",
+  "controlled": {
+    "medium": {
+      "sampleCount": 243,
+      "cumulativeDirectionAngleRadians": 0.05126223947669144,
+      "targetDirectionAngleRadians": 0.05098921508938521,
+      "reachedTarget": true,
+      "elapsedRafMs": 4050,
+      "elapsedWallMs": 4141.199999988079,
+      "directionProgressRatio": 0.9958677685950413,
+      "nearZeroCount": 1,
+      "normalizedDifferenceP95": 0.15413072591909724,
+      "normalizedDifferenceMax": 0.466113149340135,
+      "tailDirectionSupportRadians": 0.0004249101257448768,
+      "tailWindowCount": 241,
+      "tailNormalizedDifferenceMax": 0.26885557139892274,
+      "peakNormalizedJump": {
+        "fromRafAt": 9335.5,
+        "toRafAt": 9351.2,
+        "fromSunTime": 15.015751995533774,
+        "toSunTime": 15.016357789962063,
+        "directionAngleRadians": 0.00019447618726898278,
+        "rawDifference": 0.42666861826697894,
+        "changed": 0.012326752674034814,
+        "normalizedDifference": 0.466113149340135
+      },
+      "rawDifferenceP95": 0.15833384691236288,
+      "rawDifferenceMax": 0.42666861826697894,
+      "rafIntervalP95Ms": 17.599999999998545,
+      "rafIntervalMaxMs": 32.30000000000018,
+      "readbackAndScanP95Ms": 13.899999976158142,
+      "readbackAndScanMaxMs": 24.400000035762787
+    },
+    "high": {
+      "sampleCount": 199,
+      "cumulativeDirectionAngleRadians": 0.05137597459177508,
+      "targetDirectionAngleRadians": 0.05098921508938521,
+      "reachedTarget": true,
+      "elapsedRafMs": 4034.3999999999996,
+      "elapsedWallMs": 4165.100000023842,
+      "directionProgressRatio": 0.9949494949494949,
+      "nearZeroCount": 1,
+      "normalizedDifferenceP95": 0.20546835887717924,
+      "normalizedDifferenceMax": 0.3607928484555426,
+      "tailDirectionSupportRadians": 0.0004249101257448768,
+      "tailWindowCount": 198,
+      "tailNormalizedDifferenceMax": 0.31132543993829276,
+      "peakNormalizedJump": {
+        "fromRafAt": 15009.8,
+        "toRafAt": 15026.4,
+        "fromSunTime": 15.067071495005775,
+        "toSunTime": 15.067898834791775,
+        "directionAngleRadians": 0.0002668418168276479,
+        "rawDifference": 0.4531528591441671,
+        "changed": 0.014515277424010868,
+        "normalizedDifference": 0.3607928484555426
+      },
+      "rawDifferenceP95": 0.3183742995415181,
+      "rawDifferenceMax": 0.8262279249448123,
+      "rafIntervalP95Ms": 33.399999999999636,
+      "rafIntervalMaxMs": 34.400000000001455,
+      "readbackAndScanP95Ms": 20.19999998807907,
+      "readbackAndScanMaxMs": 30.600000023841858
+    }
+  },
+  "negative": {
+    "sampleCount": 214,
+    "cumulativeDirectionAngleRadians": 0.05134631264497492,
+    "targetDirectionAngleRadians": 0.05098921508938521,
+    "reachedTarget": true,
+    "elapsedRafMs": 4000.7999999999993,
+    "elapsedWallMs": 4122.600000023842,
+    "directionProgressRatio": 0.3755868544600939,
+    "nearZeroCount": 133,
+    "normalizedDifferenceP95": 1.702817732725155,
+    "normalizedDifferenceMax": 1.7902629406362742,
+    "tailDirectionSupportRadians": 0.0004249101257448768,
+    "tailWindowCount": 213,
+    "tailNormalizedDifferenceMax": 1.7902629406362742,
+    "peakNormalizedJump": {
+      "fromRafAt": 12502.1,
+      "toRafAt": 12535.5,
+      "fromSunTime": null,
+      "toSunTime": null,
+      "directionAngleRadians": 0.0006383719562885157,
+      "rawDifference": 5.37927239875191,
+      "changed": 0.12584705064527085,
+      "normalizedDifference": 1.7902629406362747
+    },
+    "rawDifferenceP95": 4.998061799541518,
+    "rawDifferenceMax": 5.37927239875191,
+    "rafIntervalP95Ms": 33.399999999999636,
+    "rafIntervalMaxMs": 34.30000000000109,
+    "readbackAndScanP95Ms": 18.399999976158142,
+    "readbackAndScanMaxMs": 28.80000001192093
+  },
+  "natural": {
+    "medium": {
+      "sourceSha": "UNSPECIFIED",
+      "quality": "medium",
+      "geometry": {
+        "playerGround": 1,
+        "playerFeet": 0,
+        "playerHead": 0,
+        "treeGround": 1,
+        "lowerTrunk": 4,
+        "upperTrunk": 4,
+        "canopy": 5,
+        "canopyTop": 5
+      },
+      "frameCost": {
+        "count": 239,
+        "p50Ms": 16.700000000000728,
+        "p95Ms": 17.69999999999709,
+        "maxMs": 17.700000000000728
+      },
+      "frozen": {
+        "frameCount": 90,
+        "presentedStart": 14.93,
+        "presentedEnd": 14.93
+      },
+      "running": {
+        "frameCount": 240,
+        "presentedStart": 14.930584975025788,
+        "presentedEnd": 15.088377388699612,
+        "maxDirectionStep": 0.00034576667898449814
+      },
+      "pointerMotion": {
+        "beforeTurn": {
+          "direction": [-0.25241409764364664, 0.5970652735521682, -0.7614461126230917],
+          "screen": [657.8458542059897, -348.9348809045712],
+          "facing": true,
+          "presentedWorldTime": 15.556000000000765,
+          "shadowCascades": 3,
+          "shadowResolution": 512
+        },
+        "afterTurn": {
+          "direction": [-0.25241409764364664, 0.5970652735521682, -0.7614461126230917],
+          "screen": [539.3858651811444, -387.6872844590788],
+          "facing": true,
+          "presentedWorldTime": 15.556000000000765,
+          "shadowCascades": 3,
+          "shadowResolution": 512
+        },
+        "beforeMove": [28.5, 19.6, -22.5],
+        "afterMove": [29.304778527607333, 19.6, -22.394023955504654]
+      },
+      "occluder": {
+        "beforeRevision": 1,
+        "afterRevision": 2,
+        "position": [28, 20, -25]
+      },
+      "render": {
+        "sunShadows": true,
+        "shadowCascades": 3,
+        "shadowResolution": 512,
+        "reflectionActive": true,
+        "reflectionFramesDuringFrozen": 11
+      },
+      "semanticBoundary": "Playwright证明天然几何、时钟连续、真实PointerLock输入、World.edit响应和不读取像素的帧成本；阴影是否自然稳定由同次视频、连续PNG与Midscene判断。"
+    },
+    "high": {
+      "sourceSha": "UNSPECIFIED",
+      "quality": "high",
+      "geometry": {
+        "playerGround": 1,
+        "playerFeet": 0,
+        "playerHead": 0,
+        "treeGround": 1,
+        "lowerTrunk": 4,
+        "upperTrunk": 4,
+        "canopy": 5,
+        "canopyTop": 5
+      },
+      "frameCost": {
+        "count": 239,
+        "p50Ms": 16.700000000000728,
+        "p95Ms": 17.599999999998545,
+        "maxMs": 17.700000000000728
+      },
+      "frozen": {
+        "frameCount": 90,
+        "presentedStart": 14.93,
+        "presentedEnd": 14.93
+      },
+      "running": {
+        "frameCount": 240,
+        "presentedStart": 14.93098473751948,
+        "presentedEnd": 15.089806515953734,
+        "maxDirectionStep": 0.0003444704871451624
+      },
+      "pointerMotion": {
+        "beforeTurn": {
+          "direction": [-0.2454723879215926, 0.6029295135475046, -0.7590911068254198],
+          "screen": [664.3712120777714, -360.327525528932],
+          "facing": true,
+          "presentedWorldTime": 15.52800000000073,
+          "shadowCascades": 3,
+          "shadowResolution": 1024
+        },
+        "afterTurn": {
+          "direction": [-0.2454723879215926, 0.6029295135475046, -0.7590911068254198],
+          "screen": [546.3129971963023, -398.91866629973856],
+          "facing": true,
+          "presentedWorldTime": 15.52800000000073,
+          "shadowCascades": 3,
+          "shadowResolution": 1024
+        },
+        "beforeMove": [28.5, 19.6, -22.5],
+        "afterMove": [29.304778527607333, 19.6, -22.394023955504654]
+      },
+      "occluder": {
+        "beforeRevision": 1,
+        "afterRevision": 2,
+        "position": [28, 20, -25]
+      },
+      "render": {
+        "sunShadows": true,
+        "shadowCascades": 3,
+        "shadowResolution": 1024,
+        "reflectionActive": true,
+        "reflectionFramesDuringFrozen": 22
+      },
+      "semanticBoundary": "Playwright证明天然几何、时钟连续、真实PointerLock输入、World.edit响应和不读取像素的帧成本；阴影是否自然稳定由同次视频、连续PNG与Midscene判断。"
+    }
+  },
+  "artifacts": [
+    {
+      "path": "/tmp/seedlands-sun-tail-final/medium-peak-before.png",
+      "sha256": "5a82407daa9ffd3b05db867fa90b1091983d1b14e4b97d80ba14d663eafcf21b"
+    },
+    {
+      "path": "/tmp/seedlands-sun-tail-final/medium-peak-after.png",
+      "sha256": "1a48c25e88985eb626904c0e582b429f40f50c7a114ee1b5663604d5bb764469"
+    },
+    {
+      "path": "/tmp/seedlands-sun-tail-final/high-peak-before.png",
+      "sha256": "7a1d1b1fbef6f17408b2715d86dc21ce68588b36f49561628f1f852d96fd62d7"
+    },
+    {
+      "path": "/tmp/seedlands-sun-tail-final/high-peak-after.png",
+      "sha256": "255af428732afb9d6da432d3fe7b208eaca2198e55a7673130d759b3a69a69b9"
+    },
+    {
+      "path": "/tmp/seedlands-sun-tail-final.jsonlog",
+      "sha256": "d69ce553abe41834e5c801ecb7b1ae49385b5cad87ba32662b378d8301f4609a"
+    },
+    {
+      "path": "/tmp/seedlands-sun-tail-negative-valid.jsonlog",
+      "sha256": "bc47b34fcce0d105d28e87abd5df928409a431083c16119279eadff6f52ae48a"
+    },
+    {
+      "path": "/tmp/seedlands-stable-sun-drop-final.jsonlog",
+      "sha256": "707c214d4a81ea1e7315e4a7ce5e1003d2f195a5816353867cc9f46da4ccee18"
+    }
+  ]
+}

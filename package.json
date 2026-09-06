@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "vite",
     "build": "pnpm typecheck && vite build",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint .",
     "lint:paths": "ls-lint",
     "format": "prettier --write .",
@@ -37,13 +37,16 @@
     "harness:e2e": "node scripts/run-playwright-harness.mjs",
     "harness:macro-map": "pnpm test:e2e:macro-map",
     "harness": "pnpm test && pnpm build && node scripts/run-playwright-harness.mjs --aggregate",
+    "server:headless": "node scripts/server-headless.mjs",
     "preview": "vite preview",
     "midscene:verify-model": "midscene model verify",
     "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json",
     "prepare": "husky"
   },
   "dependencies": {
-    "playcanvas": "^2.21.4"
+    "playcanvas": "^2.21.4",
+    "svelte": "^5.57.0",
+    "tone": "^15.1.22"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
@@ -51,20 +54,24 @@
     "@ls-lint/ls-lint": "2.3.1",
     "@midscene/cli": "^1.12.3",
     "@playwright/test": "1.62.1",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@types/node": "26.4.1",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^10.9.1",
+    "eslint-plugin-svelte": "^3.23.0",
     "globals": "^17.12.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.6",
+    "prettier-plugin-svelte": "^4.1.1",
+    "svelte-check": "^4.7.6",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.69.0",
     "vite": "^7.3.6",
     "vitest": "^4.1.11"
   },
   "lint-staged": {
-    "*.{ts,mts,cts,js,mjs,cjs}": [
+    "*.{ts,mts,cts,js,mjs,cjs,svelte}": [
       "prettier --check",
       "eslint"
     ],

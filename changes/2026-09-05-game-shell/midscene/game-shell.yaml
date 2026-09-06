@@ -1,0 +1,27 @@
+web:
+  url: http://127.0.0.1:4217/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+tasks:
+  - name: 主菜单与音频设置清晰且统一
+    flow:
+      - aiAssert: 主菜单有 Seedlands 标题、深色石质面板和暖黄铜边框；进入世界、设置和操作指南按钮可读。
+      - aiTap: 设置
+      - aiAssert: 设置面板显示总音量、音乐音量、音效音量和环境音量滑杆，以及视觉质量设置；标签与当前百分比清晰可读。
+      - aiAssert: 本地参考曲区域说明仅在本机播放、不上传，以及刷新后需要重新选择；有选择文件入口。
+      - aiTap: 返回
+      - aiWaitFor: 已返回 Seedlands 主菜单，可以看到设置和操作指南两个并排按钮。
+      - aiTap: 主菜单下方、设置右侧的“操作指南”按钮
+      - aiAssert: 操作指南明确说明 WASD 和空格移动跳跃、鼠标采集放置、地图和暂停，并有返回按钮；正文不与装饰边框重叠。
+      - aiTap: 返回
+  - name: 进入世界后暂停与保存返回
+    flow:
+      - aiInput: seedlands-shell-visual
+        locate: 世界 Seed 输入框
+      - aiTap: 进入世界
+      - aiWaitFor: 画面已经进入可游玩的体素世界，能看到 HUD 和暂停按钮。
+      - aiTap: 暂停
+      - aiAssert: 暂停面板标题为旅途暂歇，显示继续游戏、设置、操作指南和保存并返回主菜单，层级清楚且与主菜单材质一致。
+      - aiTap: 保存并返回主菜单
+      - aiWaitFor: 主菜单显示继续世界按钮。
+      - aiAssert: 继续世界按钮显示刚才进入的世界 Seed，玩家能理解如何恢复旅程。

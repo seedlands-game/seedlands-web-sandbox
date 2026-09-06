@@ -17,6 +17,7 @@ export type Hydrology = {
   water: boolean;
   waterLevel: number | null;
   direction: readonly [number, number] | null;
+  shoreDistance: number;
 };
 export type MacroContext = {
   region: readonly [number, number];
@@ -33,6 +34,8 @@ export type MacroContext = {
 
 const RIVER_CELL = 768;
 const LAKE_CELL = 1024;
+export const CURRENT_MACRO_GENERATOR_VERSION = 3;
+const riverDescriptorCache = new Map<string, RiverDescriptor | null>();
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const floorDiv = (value: number, divisor: number) => Math.floor(value / divisor);
 const smooth = (value: number) => value * value * (3 - 2 * value);
@@ -85,9 +88,14 @@ function distanceToSegment(x: number, z: number, ax: number, az: number, bx: num
   return { distance: Math.hypot(x - px, z - pz), tangent: [dx, dz] as const };
 }
 
-function riverDescriptor(seed: number, cellX: number, cellZ: number): RiverDescriptor | null {
+function riverDescriptor(seed: number, cellX: number, cellZ: number, generatorVersion: number): RiverDescriptor | null {
+  const cacheKey = `${seed}:${generatorVersion}:${cellX},${cellZ}`;
+  if (riverDescriptorCache.has(cacheKey)) return riverDescriptorCache.get(cacheKey) ?? null;
   const eligibility = hash(seed ^ 0x445a8d, cellX, cellZ);
-  if (eligibility < 0.76) return null;
+  if (eligibility < 0.76) {
+    riverDescriptorCache.set(cacheKey, null);
+    return null;
+  }
   const source: [number, number] = [
     Math.round((cellX + 0.12 + hash(seed ^ 0x1e35a7, cellX, cellZ) * 0.76) * RIVER_CELL),
     Math.round((cellZ + 0.12 + hash(seed ^ 0x0c5ea1, cellX, cellZ) * 0.76) * RIVER_CELL),
@@ -115,31 +123,63 @@ function riverDescriptor(seed: number, cellX: number, cellZ: number): RiverDescr
       Math.round(source[1] + direction[1] * forward + perpendicular[1] * offset),
     ]);
   }
+  const width = 4 + Math.floor(hash(seed ^ 0xa5ee1, cellX, cellZ) * 5);
   const endpoint = path.at(-1)!;
-  const waterLevel = clamp(
+  let waterLevel = clamp(
     Math.round(
       Math.min(rawGeography(seed, ...source).terrainHeight, rawGeography(seed, ...endpoint).terrainHeight) + 1,
     ),
     10,
     24,
   );
-  return {
+  if (generatorVersion >= 3) {
+    let lowestCorridor = Infinity;
+    for (let index = 1; index < path.length; index += 1) {
+      const previous = path[index - 1];
+      const current = path[index];
+      const dx = current[0] - previous[0];
+      const dz = current[1] - previous[1];
+      const length = Math.hypot(dx, dz) || 1;
+      const normal: readonly [number, number] = [-dz / length, dx / length];
+      const sampleCount = Math.max(8, Math.ceil(length / 14));
+      for (let sample = 0; sample <= sampleCount; sample += 1) {
+        const amount = sample / sampleCount;
+        const x = previous[0] + dx * amount;
+        const z = previous[1] + dz * amount;
+        for (const offset of [0, width + 1, -(width + 1), width + 4, -(width + 4)])
+          lowestCorridor = Math.min(
+            lowestCorridor,
+            rawGeography(seed, Math.round(x + normal[0] * offset), Math.round(z + normal[1] * offset)).terrainHeight,
+          );
+      }
+    }
+    waterLevel = clamp(Math.floor(lowestCorridor) - 1, 8, 24);
+  }
+  const descriptor = {
     id: `river:${cellX},${cellZ}`,
     source,
     path,
-    width: 4 + Math.floor(hash(seed ^ 0xa5ee1, cellX, cellZ) * 5),
+    width,
     waterLevel,
     direction,
-  };
+  } satisfies RiverDescriptor;
+  if (riverDescriptorCache.size >= 2_048) riverDescriptorCache.clear();
+  riverDescriptorCache.set(cacheKey, descriptor);
+  return descriptor;
 }
 
-export function riverDescriptorsNear(seed: number, x: number, z: number): RiverDescriptor[] {
+export function riverDescriptorsNear(
+  seed: number,
+  x: number,
+  z: number,
+  generatorVersion = CURRENT_MACRO_GENERATOR_VERSION,
+): RiverDescriptor[] {
   const cellX = floorDiv(x, RIVER_CELL),
     cellZ = floorDiv(z, RIVER_CELL);
   const descriptors: RiverDescriptor[] = [];
   for (let dz = -1; dz <= 1; dz += 1)
     for (let dx = -1; dx <= 1; dx += 1) {
-      const descriptor = riverDescriptor(seed, cellX + dx, cellZ + dz);
+      const descriptor = riverDescriptor(seed, cellX + dx, cellZ + dz, generatorVersion);
       if (descriptor) descriptors.push(descriptor);
     }
   return descriptors;
@@ -171,17 +211,18 @@ function lakeAt(seed: number, x: number, z: number): Hydrology | null {
           water: normalized <= 1,
           waterLevel: clamp(center.terrainHeight + 1, 10, 23),
           direction: null,
+          shoreDistance: (normalized - 1) * Math.max(radiusX, radiusZ),
         };
       }
     }
   return closest;
 }
 
-function hydrologyAt(seed: number, x: number, z: number): Hydrology {
+function hydrologyAt(seed: number, x: number, z: number, generatorVersion: number): Hydrology {
   const lake = lakeAt(seed, x, z);
   if (lake?.water) return lake;
   let best: Hydrology | null = lake;
-  for (const descriptor of riverDescriptorsNear(seed, x, z)) {
+  for (const descriptor of riverDescriptorsNear(seed, x, z, generatorVersion)) {
     let closestDistance = Infinity;
     let tangent: readonly [number, number] = descriptor.direction;
     for (let index = 1; index < descriptor.path.length; index += 1) {
@@ -205,19 +246,42 @@ function hydrologyAt(seed: number, x: number, z: number): Hydrology {
         water: closestDistance <= descriptor.width,
         waterLevel: descriptor.waterLevel,
         direction,
+        shoreDistance: closestDistance - descriptor.width,
       };
     }
   }
-  return best ?? { kind: 'dry', id: null, distance: Infinity, water: false, waterLevel: null, direction: null };
+  return (
+    best ?? {
+      kind: 'dry',
+      id: null,
+      distance: Infinity,
+      water: false,
+      waterLevel: null,
+      direction: null,
+      shoreDistance: Infinity,
+    }
+  );
 }
 
-export function macroAt(seed: number, x: number, z: number): MacroContext {
+export function macroAt(
+  seed: number,
+  x: number,
+  z: number,
+  generatorVersion = CURRENT_MACRO_GENERATOR_VERSION,
+): MacroContext {
   const geography = rawGeography(seed, x, z);
-  const hydrology = hydrologyAt(seed, x, z);
-  const terrainHeight =
-    hydrology.kind === 'dry' || hydrology.waterLevel === null
-      ? geography.terrainHeight
-      : Math.min(geography.terrainHeight, hydrology.waterLevel - (hydrology.water ? 2 : 1));
+  const hydrology = hydrologyAt(seed, x, z, generatorVersion);
+  let terrainHeight = geography.terrainHeight;
+  if (hydrology.kind !== 'dry' && hydrology.waterLevel !== null) {
+    if (generatorVersion < 3)
+      terrainHeight = Math.min(geography.terrainHeight, hydrology.waterLevel - (hydrology.water ? 2 : 1));
+    else if (hydrology.water) terrainHeight = Math.min(geography.terrainHeight, hydrology.waterLevel - 2);
+    else {
+      const shoreDistance = Math.max(0, hydrology.shoreDistance);
+      const transitionCap = hydrology.waterLevel + Math.floor(Math.min(3, shoreDistance) * 0.75);
+      terrainHeight = Math.max(hydrology.waterLevel, Math.min(geography.terrainHeight, transitionCap));
+    }
+  }
   const latitude = Math.sin((z + (seed & 0xffff) * 0.17) / 2600) * 0.18;
   const temperature = clamp(
     0.62 + latitude + (valueNoise(seed ^ 0x2cae9, x, z, 1300) * 2 - 1) * 0.24 - Math.max(0, terrainHeight - 18) * 0.018,
@@ -247,10 +311,14 @@ export function macroAt(seed: number, x: number, z: number): MacroContext {
   };
 }
 
-export function macroSignature(seed: number, samples: readonly (readonly [number, number])[]): string {
+export function macroSignature(
+  seed: number,
+  samples: readonly (readonly [number, number])[],
+  generatorVersion = CURRENT_MACRO_GENERATOR_VERSION,
+): string {
   let signature = 2166136261;
   for (const [x, z] of [...samples].sort(([ax, az], [bx, bz]) => ax - bx || az - bz)) {
-    const context = macroAt(seed, x, z);
+    const context = macroAt(seed, x, z, generatorVersion);
     const fields = [
       context.terrainHeight,
       Math.round(context.temperature * 1000),

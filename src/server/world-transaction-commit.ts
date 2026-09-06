@@ -1,5 +1,6 @@
 import {
   CHUNK_SIZE,
+  Voxel,
   chunkKey,
   floorDiv,
   mod,
@@ -9,6 +10,7 @@ import {
 } from '../world/voxel';
 import type {
   ServerChunk,
+  WorldCollisionChunkDelta,
   VoxelRegionChanged,
   WorldCommitResult,
   WorldEditBatch,
@@ -54,6 +56,7 @@ type CommitResultInput = {
   mutationCapacityBytes: number;
   structuralChange: VoxelRegionChanged | null;
   semanticEvents: WorldSemanticEvent[];
+  collisionDelta: readonly WorldCollisionChunkDelta[];
 };
 
 const compareChunkCoordinates = (left: ChunkCoord, right: ChunkCoord): number =>
@@ -94,6 +97,7 @@ const buildResult = (revision: number, input: CommitResultInput): WorldCommitRes
     worldRevision: revision,
     structuralChange: input.structuralChange,
     semanticEvents: input.semanticEvents,
+    ...(input.collisionDelta.length ? { collisionDelta: input.collisionDelta } : {}),
     metrics: {
       timingStatus: 'measured',
       inputMutationCount: input.inputMutationCount,
@@ -255,6 +259,16 @@ export function commitWorldEditBatch(state: TransactionState, batch: WorldEditBa
       }
     : null;
   const resolveFinishedAt = performance.now();
+  const collisionDelta = changedPlans.map((plan) => ({
+    key: plan.key,
+    previousRevision: plan.chunk!.revision,
+    revision: plan.chunk!.revision + 1,
+    cells: plan.changes!.map(({ index, value }) => ({
+      index,
+      voxel: value,
+      fluid: value === Voxel.Water ? 0x88 : 0,
+    })),
+  }));
 
   for (const plan of changedPlans) {
     for (const change of plan.changes!) plan.chunk!.voxels[change.index] = change.value;
@@ -275,6 +289,7 @@ export function commitWorldEditBatch(state: TransactionState, batch: WorldEditBa
     mutationCapacityBytes,
     structuralChange,
     semanticEvents,
+    collisionDelta,
   });
 }
 
@@ -366,6 +381,19 @@ function commitUniqueBuffer(
       }
     : null;
   const resolveFinishedAt = performance.now();
+  const collisionDelta = changedPlans.map((plan) => ({
+    key: plan.key,
+    previousRevision: plan.chunk!.revision,
+    revision: plan.chunk!.revision + 1,
+    cells: Array.from({ length: plan.changeCount }, (_, index) => {
+      const voxel = plan.changedValues![index];
+      return {
+        index: plan.changedIndices![index],
+        voxel,
+        fluid: voxel === Voxel.Water ? 0x88 : 0,
+      };
+    }),
+  }));
   for (const plan of changedPlans) {
     for (let index = 0; index < plan.changeCount; index += 1)
       plan.chunk!.voxels[plan.changedIndices![index]] = plan.changedValues![index];
@@ -386,5 +414,6 @@ function commitUniqueBuffer(
     mutationCapacityBytes: input.buffer.capacityBytes,
     structuralChange,
     semanticEvents: [],
+    collisionDelta,
   });
 }

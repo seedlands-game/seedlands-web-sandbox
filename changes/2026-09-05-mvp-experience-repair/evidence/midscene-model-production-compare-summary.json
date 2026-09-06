@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0,
+    "partialFailed": 0,
+    "notExecuted": 0,
+    "totalDuration": 5841,
+    "generatedAt": "9/5/2026, 3:04:18 PM"
+  },
+  "results": [
+    {
+      "script": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/changes/2026-09-05-mvp-experience-repair/midscene/model-production-compare.yaml",
+      "success": true,
+      "resultType": "success",
+      "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/model-production-compare-1788591852905.json",
+      "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/model-production-compare-2026-09-05_15-04-12-880e1949.html",
+      "attempts": [
+        {
+          "attempt": 1,
+          "success": true,
+          "resultType": "success",
+          "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/model-production-compare-1788591852905.json",
+          "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/model-production-compare-2026-09-05_15-04-12-880e1949.html",
+          "duration": 5841
+        }
+      ],
+      "duration": 5841
+    }
+  ]
+}

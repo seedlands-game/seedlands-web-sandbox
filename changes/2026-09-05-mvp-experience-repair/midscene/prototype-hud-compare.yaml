@@ -1,0 +1,11 @@
+# 准备：以静态 HTTP 服务暴露 /tmp/seedlands-experience-repair-gallery/index.html；它只并排
+# 用户 image3、冻结后的 evidence/world-1920.png 和同帧 HUD 放大图，不导入生产资源。
+web:
+  url: http://127.0.0.1:4290/index.html
+  viewportWidth: 1920
+  viewportHeight: 1080
+tasks:
+  - name: 用户原型与冻结后HUD同页比较
+    flow:
+      - aiAssert: 左侧用户原型与右侧冻结后的实际游戏HUD同页。实际画面有八个正方快捷槽、槽上方心形生命和肉类饥饿、深黑曜石底、黄铜角饰和选中槽青色强调；右侧手和工具不遮挡快捷栏。原型的插画和完整徽章仅作参照，不得称为已实现。
+      - aiAssert: 下方实际HUD放大图中的黄铜槽边、青色选中细节、八格间距和数字键可辨；不是普通白线矩形或九格栏。此页不覆盖目标、水、太阳或菜单。

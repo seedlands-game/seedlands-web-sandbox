@@ -1,0 +1,13 @@
+# 物理成本采样与性能准出准备
+
+本项执行已批准合同 A9，不改变其阈值与场景。
+
+先建立 `tests/runtime/bounded-cost-samples.test.ts` 和 `tests/server/authority-physics-cost.test.ts`：环形窗口有界、每个实际物理步独立计时、暂停不添加样本、不传入计时器明确为未采集，返回副本不得污染原始数据。预期 RED：指标模块与 Session 接口尚未存在。
+
+用注入的单调测量函数记录单个物理步执行成本，不能用一次 wake 的耗时平均代替单步分位数。统计窗口有明确容量与累计样本数，原始有界样本随只读诊断投影提供，浏览器验收以累计计数去重。计时仅影响诊断，不参与物理 dt、调度或玩法结果。实际 1920×1080 Medium 的 A/A 与 A/B 仍待执行；单元检查不能视为性能通过。
+
+实际 RED：新模块导入失败、Session 两项缺失指标断言失败。实现后定向三文件 14 项 GREEN，受影响 ESLint 与格式检查通过。AuthorityRuntime 计时函数接线由 A7 协作者随共享入口提交；默认无计时器的 headless 单元环境返回 null，不能当作零成本。
+
+## 流体提交与可见测量接线
+
+只读审计发现生产 `World.consumeServerCommit` 仍识别 `fluid-v1`，实际权威候选返回 `fluid-v2`；流体结果既未使用优先队列，也未标记首次提交。先以 `tests/app/world-fluid-commit.test.ts` 调用真实提交入口，断言新提交进入 interactive-fluid、零额外合并延时，且测量只绑定该次权威提交修订。预期 RED 是旧分类为普通编辑且无测量起点。后续真实浏览器验收必须等待带目标修订的 visible-postrender，不能拿Worker完成充当看得见。

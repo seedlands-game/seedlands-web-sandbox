@@ -1,0 +1,426 @@
+/* Living World reference composition: compact icon deck, brass trim, obsidian, turquoise. */
+#survival-deck {
+  --slot-size: clamp(42px, 7.1vw, 88px);
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%);
+  width: calc(8 * var(--slot-size) + 48px);
+  max-width: calc(100vw - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  filter: drop-shadow(0 3px 4px #0008);
+}
+#held-item-name {
+  height: 24px;
+  color: #fff0cb;
+  font:
+    16px/24px Georgia,
+    'Songti SC',
+    serif;
+  text-align: center;
+  text-shadow: 0 2px 3px #000;
+}
+#survival-vitals {
+  position: static;
+  width: 100%;
+  padding: 0 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.vital-row {
+  display: flex;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.vital-row:last-child {
+  justify-content: flex-end;
+}
+.vital-icon {
+  position: relative;
+  width: clamp(16px, 2.6vw, 32px);
+  height: clamp(18px, 2.8vw, 34px);
+  flex: 0 1 32px;
+}
+.vital-icon img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.vital-empty {
+  filter: grayscale(1) brightness(0.26);
+}
+#hotbar {
+  position: static;
+  transform: none;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 4px;
+  padding: 5px;
+  border-width: 5px;
+  border-image-width: 11px;
+  background: #101514ed;
+}
+#hotbar li {
+  display: block;
+  min-width: 0;
+}
+#ui #hotbar .game-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: var(--slot-size);
+  min-height: 38px;
+  min-width: 0;
+  padding: 4px 3px 9px;
+  border: 2px solid transparent;
+  border-radius: 0;
+  background:
+    linear-gradient(#02070770, #02070770),
+    url('/assets/ui/obsidian-hotbar-slot.png') center / 100% 100%;
+  box-shadow:
+    inset 0 0 0 1px #080b0a,
+    inset 0 0 16px #0009;
+}
+#ui #hotbar .game-slot.active {
+  border-color: #ffdd84;
+  background: url('/assets/ui/obsidian-hotbar-slot.png') center / 100% 100%;
+  box-shadow:
+    inset 0 0 0 1px #9c7335,
+    0 0 10px #eaba5480;
+}
+#hotbar .slot-swatch {
+  width: 100%;
+  height: 100%;
+  box-shadow: none;
+}
+#hotbar .item-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(1px 2px 1px #000);
+}
+#hotbar .slot-name {
+  display: none;
+}
+#hotbar .slot-key {
+  top: auto;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #151817;
+  padding: 1px 4px;
+  font:
+    11px Georgia,
+    serif;
+  color: #d1c7ad;
+}
+#hotbar .slot-count {
+  right: 3px;
+  bottom: 9px;
+  color: #fff3d4;
+  font-size: 15px;
+}
+#world-clock {
+  left: 20px;
+  top: 18px;
+  bottom: auto;
+  transform: none;
+  padding: 10px 14px;
+  font:
+    12px Georgia,
+    'Songti SC',
+    serif;
+  border-width: 6px;
+  border-color: transparent;
+  border-image-width: 12px;
+  color: #dfc692;
+}
+#target-card {
+  position: absolute;
+  left: 50%;
+  top: 22px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 240px;
+  padding: 6px 12px;
+  border-width: 7px;
+  border-image-width: 16px;
+  color: #f8edd5;
+}
+#target-card .item-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+#target-card .target-crest {
+  width: 34px;
+  height: 40px;
+  object-fit: contain;
+}
+.target-details {
+  display: grid;
+  gap: 4px;
+  min-width: 100px;
+}
+.target-details strong {
+  font:
+    16px Georgia,
+    'Songti SC',
+    serif;
+}
+#target-card small {
+  font-size: 10px;
+  color: #b4b6a5;
+  letter-spacing: 0.05em;
+}
+#target-card #break-progress {
+  position: static;
+  transform: none;
+  display: block;
+  width: 100%;
+  height: 6px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  accent-color: #64c2b6;
+}
+#help {
+  bottom: 9px;
+  padding: 0;
+  color: #e4dcc4;
+  opacity: 0.78;
+  font-size: 10px;
+  text-shadow: 0 1px 3px #000;
+}
+#interaction-feedback {
+  top: 108px;
+  text-align: center;
+  max-width: 300px;
+  font-size: 12px;
+}
+#debug {
+  top: 66px;
+}
+.collision-debug-controls {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--ui-border-quiet);
+  pointer-events: auto;
+}
+.collision-debug-controls .game-button {
+  min-height: 30px;
+  padding: 3px 9px;
+  font: 11px/1.2 var(--ui-font-body);
+}
+.collision-debug-controls label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.collision-debug-controls input {
+  min-height: auto;
+}
+#ui .game-button {
+  position: relative;
+  border: 5px solid transparent;
+  border-image: url('/assets/ui/obsidian-brass-panel.png') 140 / 9px / 0 stretch;
+  border-radius: 0;
+  background: #171c1c;
+  box-shadow:
+    inset 0 0 0 1px #54462f,
+    inset 0 0 16px #0007;
+  color: #eadbc0;
+  font-family: Georgia, 'Songti SC', serif;
+  letter-spacing: 0.045em;
+  text-shadow: 0 1px 2px #000;
+}
+#ui .game-button:hover:not(:disabled) {
+  background: #233b39;
+  color: #fff1cb;
+  box-shadow:
+    inset 0 0 0 1px #b49a5d,
+    0 0 10px #68b9ab40;
+}
+#ui .game-button:active:not(:disabled) {
+  background: #132b2a;
+}
+#ui .pause-actions .game-button:first-child,
+#ui #start-card .continue-world,
+#ui #start-card .game-button[aria-label='进入世界'] {
+  background: #164440;
+  box-shadow:
+    inset 0 0 0 1px #568c7e,
+    inset 0 0 18px #061e1f;
+}
+#ui .map-toggle {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  padding: 5px 12px;
+  min-height: 32px;
+}
+#ui #pause-toggle {
+  position: fixed;
+  top: 64px;
+  right: 20px;
+  width: auto;
+  padding: 5px 12px;
+  min-height: 32px;
+}
+.shell-scrim {
+  background: #03060780;
+  backdrop-filter: blur(2px);
+}
+.shell-dialog {
+  border-width: 14px;
+  border-image-width: 22px;
+  padding: 24px 28px;
+  background: #0d1415;
+}
+.shell-dialog[data-kind='pause'] {
+  width: min(380px, 100%);
+  text-align: center;
+  padding: 20px 28px 30px;
+}
+.menu-crest {
+  display: block;
+  width: 160px;
+  height: 62px;
+  object-fit: contain;
+  margin: -6px auto 10px;
+}
+#ui .shell-dialog h2 {
+  font:
+    24px Georgia,
+    'Songti SC',
+    serif;
+  letter-spacing: 0.12em;
+  color: #ead6aa;
+}
+#ui .shell-dialog .eyebrow {
+  text-align: center;
+  font:
+    9px Georgia,
+    serif;
+  letter-spacing: 0.15em;
+  color: #a38b5d;
+}
+.shell-dialog .pause-subtitle {
+  font-size: 12px;
+  color: #adb0a0;
+  margin: 0;
+}
+.pause-actions {
+  gap: 12px;
+  margin-top: 22px;
+}
+.pause-actions .game-button {
+  min-height: 44px;
+  font-size: 14px;
+  padding: 8px 12px;
+}
+#start-card {
+  text-align: center;
+  width: min(430px, calc(100vw - 32px));
+  padding: 24px 28px;
+}
+#start-card .seedlands-mark {
+  width: 160px;
+  height: 62px;
+  object-fit: contain;
+  margin: 0 auto 8px;
+}
+#ui #start-card h1 {
+  font:
+    48px/1 Georgia,
+    serif;
+  color: #e3c586;
+  letter-spacing: 0.035em;
+  margin: 10px 0 18px;
+  text-shadow:
+    0 2px 0 #6e512f,
+    0 5px 12px #000;
+}
+#start-card .world-tags {
+  justify-content: center;
+}
+#start-card .start-fields {
+  text-align: left;
+}
+#start-card > p:not(.eyebrow) {
+  font-size: 12px;
+}
+#ui #start-card small {
+  font-size: 10px;
+}
+#start-card .recommended-start {
+  margin: 10px 0;
+}
+#start-card .game-button {
+  font-size: 13px;
+}
+#start-card .game-button small {
+  display: block;
+}
+@media (max-width: 720px) {
+  #survival-deck {
+    bottom: 22px;
+    gap: 6px;
+  }
+  #held-item-name {
+    font-size: 12px;
+  }
+  #world-clock {
+    left: 10px;
+    top: 12px;
+    padding: 8px;
+    font-size: 10px;
+  }
+  #target-card {
+    top: 60px;
+    min-width: 160px;
+    padding: 3px 7px;
+  }
+  #ui .map-toggle,
+  #ui #pause-toggle {
+    right: 10px;
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  #ui .map-toggle {
+    top: 12px;
+  }
+  #ui #pause-toggle {
+    top: 52px;
+  }
+  .shell-dialog {
+    padding: 18px;
+  }
+}
+
+#ui:has(.shell-scrim) #hud {
+  visibility: hidden;
+}
+
+#hud {
+  position: absolute;
+  inset: 0;
+}

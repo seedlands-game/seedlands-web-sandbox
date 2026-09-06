@@ -1,0 +1,57 @@
+page:
+  url: http://127.0.0.1:4173/?harness=1&quality=high
+
+agent:
+  testId: seedlands-render-pipeline-parity
+  groupName: Seedlands 渲染管线视觉等价性
+  groupDescription: 验证合批、纹理数组与紧凑顶点布局没有破坏用户可见画面。
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 12
+
+tasks:
+  - name: 渲染管线视觉等价性
+    flow:
+      - ai: 在“世界 Seed”输入框填写“render-ab-p1”，把画面质量选择为 High，然后点击“进入世界”。
+      - sleep: 7000
+      - aiAssert: 世界已经完成加载，画面中能看到清晰的体素地形，调试面板显示非零 Loaded 和 Rendered 数量。
+      - name: 构造可丢弃的材质视觉 fixture
+        javascript: |
+          (() => {
+            const harness = globalThis.__seedlandsHarness;
+            if (!harness) throw new Error('Seedlands harness is unavailable.');
+            harness.fillWorld({ from: [-5, 15, -12], to: [5, 15, -3], voxel: 3 });
+            harness.fillWorld({ from: [-3, 16, -9], to: [-2, 19, -8], voxel: 4 });
+            harness.fillWorld({ from: [-5, 20, -11], to: [0, 23, -6], voxel: 5 });
+            harness.fillWorld({ from: [1, 16, -10], to: [5, 18, -4], voxel: 8 });
+            harness.setSpectatorPosition(0, 20, 5);
+            harness.setView(0, -25);
+            harness.setWorldTime(10);
+            harness.setTimePaused(true);
+            return harness.snapshot();
+          })()
+      - sleep: 3000
+      - aiAssert: 近处构造出的石台、木柱、树叶块和水面具有彼此不同且符合材质名称的外观，没有纯黑材质、材质跳层或明显纹理渗色。
+      - aiAssert: 新增水体使用蓝绿色水纹并保持半透明，没有把相邻石台错误变透明；树叶保留深绿色细节纹理，没有变成纯黑或被其他材质污染。
+      - aiAssert: 构造物的方块接缝没有裂缝、闪烁或缺面，角落仍有自然明暗层次。
+      - aiAssert: High 画质下构造物具有与太阳方向一致的可见阴影，阴影没有消失、反向或投射到明显错误的位置。
+      - name: 切换到日落时段
+        javascript: |
+          (() => {
+            const harness = globalThis.__seedlandsHarness;
+            if (!harness) throw new Error('Seedlands harness is unavailable.');
+            harness.setWorldTime(18);
+            return harness.snapshot();
+          })()
+      - sleep: 1500
+      - aiAssert: 画面已进入日落暖色环境，石头、原木、树叶和水体仍能清楚区分，没有出现纯黑材质或纹理跳层。
+      - name: 切换到夜间时段
+        javascript: |
+          (() => {
+            const harness = globalThis.__seedlandsHarness;
+            if (!harness) throw new Error('Seedlands harness is unavailable.');
+            harness.setWorldTime(0);
+            return harness.snapshot();
+          })()
+      - sleep: 1500
+      - aiAssert: 画面已进入夜间冷色环境且仍可读，构造物的材质分层、水体透明和方块轮廓没有因时间切换而失效。

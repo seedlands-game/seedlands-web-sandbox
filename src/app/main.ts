@@ -1,58 +1,61 @@
 import { formatBuildWatermark } from '../client/build-watermark';
 import { GENERATOR_VERSION } from '../world/voxel';
-import './styles/hud.css';
-import './styles/macro-map.css';
-import { appElements } from './app-elements';
 import { Game } from './game';
+import { GlobalAudio } from './audio/global-audio';
+import { installAudioHarness } from './audio/audio-harness';
+import { ApplicationShell } from './application-shell';
+import './ui/styles/shell.css';
 import { installPersistenceHarness } from './game-harness';
+import './ui/styles/theme.css';
+import './ui/styles/presentation.css';
+import './ui/styles/survival.css';
+import './ui/styles/experience.css';
+import { createUiBridge } from './ui/ui-bridge';
+import type { UiActionPort } from './ui/ui-contracts';
+import { mountUi } from './ui/mount-ui';
+
+const requiredElement = <ElementType extends Element>(selector: string) => {
+  const element = document.querySelector<ElementType>(selector);
+  if (!element) throw new Error(`缺少应用元素：${selector}`);
+  return element;
+};
+
+const canvas = requiredElement<HTMLCanvasElement>('#game');
+const uiRoot = requiredElement<HTMLElement>('#ui');
+const uiBridge = createUiBridge();
+const audio = new GlobalAudio();
+installAudioHarness(audio);
+const game = new Game(canvas, uiBridge, audio);
+const application = new ApplicationShell(game, uiBridge, audio);
+
+const actions: UiActionPort = {
+  startWorld: (seed, quality, openMode) => application.start(seed, quality, openMode),
+  selectHotbarSlot: (slot) => game.selectHotbarSlot(slot),
+  toggleInventory: () => game.toggleInventory(),
+  closeInventory: () => game.closeInventory(),
+  craftRecipe: (recipeId) => game.craftRecipe(recipeId),
+  moveInventorySlot: (source, target) => game.moveInventorySlot(source, target),
+  useInventoryItem: (slot) => game.useInventoryItem(slot),
+  respawn: () => game.respawn(),
+  toggleMap: () => game.toggleMap(),
+  toggleCollisionDebug: () => game.toggleCollisionDebug(),
+  setCollisionDebugContacts: (enabled) => game.setCollisionDebugContacts(enabled),
+  setCollisionDebugSensors: (enabled) => game.setCollisionDebugSensors(enabled),
+  closeMap: () => game.closeMap(),
+  setMapLayer: (layer) => game.setMapLayer(layer),
+  closeCommandShell: () => game.closeCommandShell(),
+  executeCommand: (input) => game.executeCommand(input),
+  releaseInput: () => game.releaseInput(),
+};
 
 const commitSha = import.meta.env.VITE_COMMIT_SHA?.trim();
-const buildWatermark = formatBuildWatermark(commitSha, GENERATOR_VERSION);
-if (buildWatermark && commitSha) {
-  const watermark = document.createElement('div');
-  watermark.id = 'build-watermark';
-  watermark.dataset.commit = commitSha;
-  watermark.textContent = buildWatermark;
-  watermark.title = `Seedlands Web Sandbox build ${commitSha}`;
-  watermark.setAttribute('aria-label', `Build ${buildWatermark}`);
-  document.querySelector<HTMLElement>('#ui')!.append(watermark);
-}
-
-const game = new Game();
+const buildWatermark = commitSha ? (formatBuildWatermark(commitSha, GENERATOR_VERSION) ?? '') : '';
+mountUi(uiRoot, { bridge: uiBridge, actions, application, buildWatermark, buildCommit: commitSha });
 void installPersistenceHarness();
-const saved = game.loadSavedSession();
 
-appElements.enterButton.disabled = true;
-if (saved) {
-  appElements.seedInput.value = saved.seed;
-  appElements.enterButton.disabled = false;
-} else {
-  void game
-    .loadLatestWorldSeed()
-    .then((seed) => {
-      if (seed && !appElements.seedInput.value) appElements.seedInput.value = seed;
-    })
-    .finally(() => {
-      appElements.enterButton.disabled = false;
-    });
-}
+void application.initialize();
 
-appElements.enterButton.onclick = async () => {
-  const seed = appElements.seedInput.value.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;
-  const restore = saved?.seed === seed ? saved : null;
-  appElements.enterButton.disabled = true;
-  appElements.enterButton.textContent = '正在唤醒世界…';
-  try {
-    await game.start(seed, restore);
-  } catch (error) {
-    appElements.startCard.hidden = false;
-    appElements.hud.hidden = true;
-    appElements.enterButton.disabled = false;
-    appElements.enterButton.textContent = '重试进入';
-    throw error;
-  }
-  appElements.startCard.hidden = true;
-  appElements.hud.hidden = false;
-  appElements.enterButton.disabled = false;
-  appElements.enterButton.textContent = '进入世界';
-};
+document.addEventListener('click', (event) => {
+  if ((event.target as Element)?.closest('button'))
+    void audio.unlock().then(() => audio.play('hover', { scope: 'ui' }));
+});
