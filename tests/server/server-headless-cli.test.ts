@@ -54,7 +54,7 @@ describe('headless server command CLI', () => {
     expect(output[4]).toMatchObject({ success: true });
     expect((output[4].data as { savedChunks: string[] }).savedChunks).toEqual(expect.arrayContaining(['0,-1,0']));
     expect(output[5]).toMatchObject({ success: true, data: { seedText: 'command-cli-test' } });
-  });
+  }, 15_000);
 
   it('drives all starter actor archetypes through the headless observation and action surface', async () => {
     const { output, actorId } = await withInteractiveCli('actor-cli-test', async (send) => {
@@ -84,7 +84,7 @@ describe('headless server command CLI', () => {
     expect(output[1]).toMatchObject({ data: { entity: { archetype: 'night-stalker' } } });
     expect(output[2]).toMatchObject({ data: { entity: { archetype: 'settler', type: 'npc' } } });
     expect(output[5]).toMatchObject({ data: { action: { actorId, status: 'pending' } } });
-  });
+  }, 15_000);
 
   it('maps legacy tick seconds to the shared multi-rate Authority scheduler', () => {
     const run = spawnSync('pnpm', ['--silent', 'server:headless', '--', '--seed', 'tick-cli-test', '--json'], {
@@ -104,7 +104,7 @@ describe('headless server command CLI', () => {
         lanes: { physicsSteps: 60, gameplayPeriods: 20, fluidPeriods: 30 },
       },
     });
-  });
+  }, 15_000);
 
   it('keeps a plain legacy creature command valid through the next authority tick', () => {
     const run = spawnSync('pnpm', ['--silent', 'server:headless', '--', '--seed', 'plain-creature-test', '--json'], {

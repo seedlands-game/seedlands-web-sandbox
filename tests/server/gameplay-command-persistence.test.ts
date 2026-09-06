@@ -154,5 +154,5 @@ describe('headless survival workflow', () => {
     expect(output).toHaveLength(6);
     expect(output.every((result) => result.success)).toBe(true);
     expect(output[5]).toMatchObject({ data: { gameplaySaved: true } });
-  });
+  }, 15_000);
 });

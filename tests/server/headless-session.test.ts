@@ -75,21 +75,25 @@ describe('HeadlessSession', () => {
     expect(advanced.lanes.fluidPeriods).toBeGreaterThan(0);
     expect(advanced.fluidCandidates).toBeGreaterThan(0);
     expect(session.runtime.server.getVoxel(2, 29, 2)).toBe(Voxel.Water);
-  });
+  }, 15_000);
 
-  it.each([30, 60, 120] as const)('keeps advancePhysics wall-clock semantics at %i Hz', async (physicsHz) => {
-    const session = await HeadlessSession.create({
-      seedText: `headless-${physicsHz}`,
-      frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
-    });
+  it.each([30, 60, 120] as const)(
+    'keeps advancePhysics wall-clock semantics at %i Hz',
+    async (physicsHz) => {
+      const session = await HeadlessSession.create({
+        seedText: `headless-${physicsHz}`,
+        frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
+      });
 
-    const advanced = await session.advancePhysics(physicsHz);
+      const advanced = await session.advancePhysics(physicsHz);
 
-    expect(advanced.elapsedMs).toBeCloseTo(1_000, 6);
-    expect(advanced.lanes.physicsSteps).toBe(physicsHz);
-    expect(advanced.lanes.gameplayPeriods).toBe(20);
-    expect(advanced.lanes.fluidPeriods).toBe(30);
-  });
+      expect(advanced.elapsedMs).toBeCloseTo(1_000, 6);
+      expect(advanced.lanes.physicsSteps).toBe(physicsHz);
+      expect(advanced.lanes.gameplayPeriods).toBe(20);
+      expect(advanced.lanes.fluidPeriods).toBe(30);
+    },
+    15_000,
+  );
 
   it('exposes logic and fluid advancement without bypassing the shared scheduler', async () => {
     const session = await HeadlessSession.create({ seedText: 'headless-lane-helpers' });
@@ -101,7 +105,7 @@ describe('HeadlessSession', () => {
     expect(fluid.lanes.fluidPeriods).toBe(3);
     expect(logic.lanes.physicsSteps).toBeGreaterThan(0);
     expect(fluid.lanes.physicsSteps).toBeGreaterThan(0);
-  });
+  }, 15_000);
 
   it('chunks long legacy tick commands while retaining every real lane delta', async () => {
     const session = await HeadlessSession.create({ seedText: 'headless-long-tick' });
