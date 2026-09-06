@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { lstat, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { join, normalize, relative, resolve, sep } from 'node:path';
 import { tmpdir } from 'node:os';
 
@@ -107,6 +107,26 @@ const manifestFor = async (root, sources) => ({
   ).sort((left, right) => left.path.localeCompare(right.path)),
 });
 
+const safeArchivePath = (entry) => {
+  if (entry === 'manifest.json') return true;
+  if (!entry.startsWith('changes/') || entry.startsWith('/') || entry.includes('\\')) return false;
+  return entry.split('/').every((segment) => segment && segment !== '.' && segment !== '..');
+};
+
+const readArchiveEntries = (archive) => {
+  const listed = execFileSync('unzip', ['-Z1', archive], { encoding: 'utf8', ...unzipOptions });
+  const entries = listed.trimEnd() ? listed.trimEnd().split('\n') : [];
+  if (entries.length === 0 || entries.some((entry) => !safeArchivePath(entry))) fail(`ZIP 含不安全路径：${archive}`);
+  if (new Set(entries).size !== entries.length) fail(`ZIP 含重复条目：${archive}`);
+
+  const types = execFileSync('zipinfo', ['-l', archive], { encoding: 'utf8', ...unzipOptions })
+    .split('\n')
+    .filter((line) => /^[-dlcbps]/.test(line))
+    .map((line) => line[0]);
+  if (types.length !== entries.length || types.some((type) => type !== '-')) fail(`ZIP 只接受常规文件：${archive}`);
+  return entries;
+};
+
 const readManifest = (archive) => {
   const text = execFileSync('unzip', ['-p', archive, 'manifest.json'], { encoding: 'utf8', ...unzipOptions });
   const manifest = JSON.parse(text);
@@ -116,22 +136,29 @@ const readManifest = (archive) => {
 
 const verify = (archive) => {
   if (!existsSync(archive)) fail(`找不到 ZIP：${archive}`);
+  const entries = readArchiveEntries(archive);
   const manifest = readManifest(archive);
-  const entries = new Set(
-    execFileSync('unzip', ['-Z1', archive], { encoding: 'utf8', ...unzipOptions })
-      .trim()
-      .split('\n'),
-  );
+  const manifestPaths = new Set();
   for (const entry of manifest.entries) {
-    if (typeof entry.path !== 'string' || !entry.path.startsWith('changes/') || entry.path.includes('../'))
-      fail(`ZIP manifest 含不安全路径：${entry.path}`);
-    if (!/^[a-f0-9]{64}$/.test(entry.sha256) || !entries.has(entry.path)) fail(`ZIP manifest 条目无效：${entry.path}`);
-    const content = execFileSync('unzip', ['-p', archive, entry.path], unzipOptions);
-    if (sha256(content) !== entry.sha256) fail(`ZIP 内容校验失败：${entry.path}`);
+    const path = entry?.path;
+    if (
+      !entry ||
+      typeof entry !== 'object' ||
+      typeof path !== 'string' ||
+      !safeArchivePath(path) ||
+      path === 'manifest.json'
+    )
+      fail(`ZIP manifest 含不安全路径：${path}`);
+    if (manifestPaths.has(path) || !/^[a-f0-9]{64}$/.test(entry.sha256) || !entries.includes(path))
+      fail(`ZIP manifest 条目无效：${path}`);
+    manifestPaths.add(path);
+    const content = execFileSync('unzip', ['-p', archive, path], unzipOptions);
+    if (sha256(content) !== entry.sha256) fail(`ZIP 内容校验失败：${path}`);
   }
   if (
-    entries.size !== manifest.entries.length + 1 ||
-    [...entries].some((entry) => entry !== 'manifest.json' && !entry.startsWith('changes/'))
+    entries.filter((entry) => entry === 'manifest.json').length !== 1 ||
+    entries.length !== manifestPaths.size + 1 ||
+    entries.some((entry) => entry !== 'manifest.json' && !manifestPaths.has(entry))
   )
     fail(`ZIP 含不在 manifest 中的文件：${archive}`);
   return manifest;
@@ -144,8 +171,14 @@ const extract = async (root, archive, destination) => {
   await mkdir(destination.absolute, { recursive: true });
   try {
     execFileSync('unzip', ['-q', archive, '-d', destination.absolute]);
-    for (const entry of manifest.entries) {
-      const content = await readFile(join(destination.absolute, entry.path));
+    const restoredRoot = await realpath(destination.absolute);
+    for (const entry of [{ path: 'manifest.json' }, ...manifest.entries]) {
+      const restored = join(destination.absolute, entry.path);
+      const status = await lstat(restored);
+      if (status.isSymbolicLink() || !status.isFile()) fail(`恢复只接受常规文件：${entry.path}`);
+      if (!(await realpath(restored)).startsWith(`${restoredRoot}${sep}`)) fail(`恢复路径越界：${entry.path}`);
+      if (entry.path === 'manifest.json') continue;
+      const content = await readFile(restored);
       if (sha256(content) !== entry.sha256) fail(`恢复内容校验失败：${entry.path}`);
     }
     return destination.path;

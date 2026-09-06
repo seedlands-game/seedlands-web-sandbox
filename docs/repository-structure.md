@@ -71,7 +71,7 @@
 | `src/client/persistence/`  | 浏览器存档、加载、指标、基准与 persistence Worker 契约     |
 | `src/client/presentation/` | 客户端表现计算、性能遥测、模型定义、命中体和公开资产 URL   |
 
-`src/app/` 与 `src/client/` 顶层的 `.ts` 文件不作为短文件堆放处。仅明确的组合入口可保留；新增例外必须同时更新 ESLint allowlist、正反例测试和代码地图。不要为这套分组创建 `engine`、`plugins` 或全局 `shared`。
+`src/app/` 顶层的 `.ts`、`.svelte` 文件以及 `src/client/` 顶层的 `.ts` 文件不作为短文件堆放处。仅明确的组合入口可保留；新增例外必须同时更新 ESLint allowlist、正反例测试和代码地图。不要为这套分组创建 `engine`、`plugins` 或全局 `shared`。
 
 ## 维护责任
 

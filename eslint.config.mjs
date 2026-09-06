@@ -286,7 +286,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/app/*.ts'],
+    files: ['src/app/*.{ts,svelte}'],
     ignores: ['src/app/player-view-offsets.ts'],
     plugins: { seedlands },
     rules: { 'seedlands/app-top-level-owner': 'error' },

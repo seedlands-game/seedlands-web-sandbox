@@ -40,13 +40,27 @@ describe('app/client directory ownership boundary', () => {
 
   it('keeps app and client top levels limited to reviewed composition entries', async () => {
     const [appExtra] = await lintSource('export const extra = true;', 'src/app/unowned-probe.ts');
+    const [appSvelteExtra] = await lintSource(
+      '<script lang="ts">export const extra = true;</script>',
+      'src/app/foo.svelte',
+    );
     const [clientExtra] = await lintSource('export const extra = true;', 'src/client/unowned-probe.ts');
     const [appEntry] = await lintSource('export const entry = true;', 'src/app/main.ts');
+    const [uiComponent] = await lintSource(
+      '<script lang="ts">let label = \'ready\';</script><span>{label}</span>',
+      'src/app/ui/primitives/game-button.svelte',
+    );
 
     expect(appExtra.messages.filter((message) => message.ruleId === 'seedlands/app-top-level-owner')).toHaveLength(1);
+    expect(
+      appSvelteExtra.messages.filter((message) => message.ruleId === 'seedlands/app-top-level-owner'),
+    ).toHaveLength(1);
     expect(
       clientExtra.messages.filter((message) => message.ruleId === 'seedlands/client-top-level-owner'),
     ).toHaveLength(1);
     expect(appEntry.messages.filter((message) => message.ruleId === 'seedlands/app-top-level-owner')).toHaveLength(0);
+    expect(uiComponent.messages.filter((message) => message.ruleId === 'seedlands/app-top-level-owner')).toHaveLength(
+      0,
+    );
   });
 });
