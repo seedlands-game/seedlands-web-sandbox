@@ -118,10 +118,22 @@ test('150ms延迟下碰撞revision变化会重同步预测且不穿墙', async (
       (current.prediction.resetCounts['collision-history-missing'] ?? 0) > 0 &&
       Math.hypot(current.serverPlayerVelocity[0], current.serverPlayerVelocity[2]) < 0.05,
   );
+  const correctedResyncs = corrected.prediction.resetCounts['authority-resync'] ?? 0;
+  expect(corrected.prediction.pendingFrames).toBeGreaterThan(0);
+  expect(corrected.prediction.pendingFrames).toBeLessThan(64);
   await page.keyboard.up('KeyW');
 
   expect(corrected.colliding).toBe(false);
   expect(corrected.player[2]).toBeGreaterThanOrEqual(-0.680_01);
   expect(corrected.serverPlayerPosition[2]).toBeGreaterThanOrEqual(-0.680_01);
   expect(Math.abs(corrected.player[2] - corrected.serverPlayerPosition[2])).toBeLessThan(0.35);
+
+  const stabilized = await waitForSnapshot(
+    page,
+    (current) =>
+      current.authority.physicsTick >= corrected.authority.physicsTick + 120 &&
+      current.authority.acknowledgedInputSequence > corrected.authority.acknowledgedInputSequence,
+  );
+  expect(stabilized.prediction.resetCounts['authority-resync'] ?? 0).toBe(correctedResyncs);
+  expect(stabilized.prediction.pendingFrames).toBeLessThan(64);
 });
