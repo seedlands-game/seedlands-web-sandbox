@@ -50,6 +50,7 @@ describe('Mesh preparation telemetry', () => {
               transactionReadMs: 4,
               decodeMs: 3,
               totalWorkerMs: 10,
+              sharedDependencyCount: 18,
               codecs: { 'raw-v1': 4 },
             },
           },
@@ -80,6 +81,10 @@ describe('Mesh preparation telemetry', () => {
       foundCount: 4,
       missingCount: 23,
       codecs: 'raw-v1:4',
+    });
+    expect(events.find(({ name }) => name === 'AuthorityPersistenceWait')?.args).toMatchObject({
+      traceId,
+      sharedDependencyCount: 18,
     });
   });
 });

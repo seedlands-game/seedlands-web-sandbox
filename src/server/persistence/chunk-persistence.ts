@@ -12,6 +12,7 @@ export type ChunkSnapshot = ChunkCoord & {
 
 export type ChunkPersistenceLoadDiagnostics = Readonly<{
   requestedKeyCount: number;
+  sharedDependencyCount?: number;
   foundCount: number;
   missingCount: number;
   queueWaitMs: number;

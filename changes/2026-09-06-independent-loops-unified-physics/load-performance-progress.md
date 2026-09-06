@@ -37,6 +37,12 @@ Authority 已经准备的 materialized canonical 可由客户端对 Worker 回�
 
 预期 RED：性能 telemetry 的已完成 span 当前丢失 `traceId` 导出字段；调度器在 `beforePrepare` 前后没有 mark；单样本固定采第 0 个目标，不能直达已知慢边界。若真实证据把约 400ms 定位到 `beforePrepare`，再补 Authority/Persistence Worker 内部数据库、事务读取、批次解码和 codec 的有界分项；若不在该段，则不扩展持久化协议。
 
+### 共享持久化依赖归因 TDD
+
+`ensureNeighborhood()` 会同时等待本次新建的批量读取和按 key 复用的既有在途读取；现有请求级分项只描述新批次。因此不能用 `AuthorityPersistenceWait - PersistenceWorkerLoad` 直接推断 Authority 线程恢复延迟。先为一次邻域准备返回 `sharedDependencyCount`，它只统计本次复用的唯一在途 key，不增加缓存、事件或长期样本。客户端 trace 把该计数附在同一 `AuthorityPersistenceWait` span 上；若它为零，既有 Worker 批次分项才覆盖本次等待的全部异步持久化依赖。
+
+预期 RED：重叠邻域请求当前只证明 Worker 读取去重，返回诊断不能说明第二个请求等待了多少共享 key；Mesh 准备 trace 也没有该计数。用例先锁定首个邻域新建 27 key、相邻邻域复用 18 key 并只新建 9 key，以及 span 导出 `sharedDependencyCount=18`。实现只扩展有界诊断，不改变加载、发布、release、保存代际或 Mesh 调度语义。
+
 ## RED 设计
 
 `e2e/authority-load-performance.spec.ts` 先声明以下缺失观测，作为生产接线前的类型 RED：
@@ -88,4 +94,7 @@ Authority 已经准备的 materialized canonical 可由客户端对 Worker 回�
 - [x] 第二层诊断只为一次 `beforePrepare` 返回有界请求级汇总：Authority 总准备、持久化等待、同步快照复制，以及 Persistence Worker 的任务入队至实际开始、数据库就绪、单事务读取、整批解码、总经过时间、found/missing 与 codec 数量。单批仍最多 27 个 key，回执被当前 Mesh preparation 消费后即丢弃，不复用已有累积 `decodeSamplesMs`，不增加长期事件或缓存。实现前 client/runtime/scheduler 的 3 文件 34 项中有 10 项按预期 RED；实现后相关 5 文件 41 项、测试 TypeScript、受影响 ESLint、完整生产构建和 diff check 均 GREEN。本层没有改 ComputePool、调度策略或 100ms 门槛。跨 Worker 已完成 span 在客户端接收时按 duration 反推起点，只能读取各自时长，不能把图中的绝对位置当作同一时钟时间线；`authorityPrepareMs` 包含 `persistenceWaitMs`，`totalWorkerMs` 包含 queue/read/decode，禁止相加双计。`ensureNeighborhood` 只返回本次新建批次的细分；若本次全为 cache hit 或只等待共享在途 load，则仍有真实 `AuthorityPersistenceWait`，但没有伪造批次分项。
 - [x] 源码 `5da10a384941652fd8e6fe04d30ce239b8bd0492` 的第 15 个单边界样本再次实际 RED：JSON 为 `unexpected=1`，首见 `470.7ms`。请求级分项为 `WorkerQueueWait=1.1ms`、Authority 总准备与持久化等待均 `409.9ms`、Persistence Worker queue/database 均约 `0ms`、单事务读取 `0.8ms`、整批解码 `408.8ms`；27 key 中 5 found、22 missing，5 条全部为 `procedural-diff-v1`。同步快照复制约 `0ms`，Mesh 生成与 halo 合计约 `25.5ms`。因此主因是已持久化 diff 的同步基础 Chunk 重建，不是 IDB 事务或任务队列。原始 `/tmp/seedlands-5da10a3-a9-boundary.jsonlog`，解码附件 `/tmp/seedlands-5da10a3-a9-boundary-evidence/`。运行包装脚本在 Playwright 完成后误用 zsh 只读变量 `status`，所以没有生成独立 exit 文件；这不改变 JSON 的明确失败结果，后续脚本改用非保留变量。
 - [x] 最小修复消除无用持久化解码，没有新增 procedural base LRU。GameServer 枚举完整 27 格读集，Authority Mesh 准备仅在 `ensureNeighborhood` 至同步复制完成期间用独立 `preparationPins` pin 全读集；外部中心 `meshPins` release 无法误减它，重叠/同中心准备由各自一次性闭包在 `finally` 精确释放。Browser persistence 仍为完整邻域登记原 lease，只请求 Authority 未驻留的坐标，并拒绝邻域外、重复或超过 27 个的 resident key。Mesh 专用读取对已知 missing 保持省略，对 found/unknown 因 hard limit 无法入驻时抛 `CanonicalChunkResidencyPressureError`，禁止生成缺失持久 overlay 的坏 payload；上层保留失败请求的原优先级与首见屏障，并经既有 `100ms..2s` 退避重试。正式 RED 的 4 文件 46 项中 5 项失败，覆盖独立读集 pin、旧中心重复 release、异常释放、resident 子集验证和 y=2 持久 overlay 压力；补充真实 scheduler/World 重试反例后，相关 7 文件 66 项已 GREEN。实现与独立只读审查确认完整 cy±1 读集、异常/取消、同 key 新旧代际和有界失败队列均闭合。
+- [x] `ffd8dab620d0f5d6c406668a3289053162dd2340` 不可变产物的单边界目标完整 GREEN：总首见 `64.3ms`，编辑、提交到 Worker、Mesh Worker、挂接和真实非零水面首见依次为 `14.4/1.3/19.9/10.6/18.1ms`；Authority 准备/持久化等待/同步复制为 `0.7/0.5/0.2ms`，新读取 15 key、全部 missing、解码为 0。原始 `/tmp/seedlands-ffd8dab-a9-boundary.jsonlog`，真实退出码 `/tmp/seedlands-ffd8dab-a9-boundary.exit` 为 0，附件 `/tmp/seedlands-ffd8dab-a9-boundary-evidence/`。
+- [x] 同源 2/3 槽各 20 个样本仍为实质 RED：二槽 p50/p95/max=`88.0/187.0/470.5ms`，三槽=`70.1/187.1/534.3ms`；帧 p95=`18.4/18.3ms`、物理 p95=`1.8/1.7ms`。二槽第 2 个样本的 `WorkerQueueWait=326.5ms`、Authority 持久化等待 `69.8ms`，其本次新 Persistence Worker 批次仅 `3.1ms`；三槽首样本 Authority 持久化等待 `426.2ms`，本次新批次仅 `10.0ms`。两项新批次均请求 9 key、全部 missing、解码为 0，说明此前冗余 procedural decode 已消除；但旧诊断没有记录复用中的既有 load，尚不能把差值直接认定为 Authority 事件循环饥饿。原始 `/tmp/seedlands-ffd8dab-a9-full.jsonlog`，真实退出码 `/tmp/seedlands-ffd8dab-a9-full.exit` 为 1，附件 `/tmp/seedlands-ffd8dab-a9-full-evidence/`。
+- [x] 共享依赖计数先得到 2 项预期 RED：相邻邻域虽实际只新建 9 key，但诊断没有说明复用了首个邻域的 18 个在途 key；`AuthorityPersistenceWait` span 也没有该属性。实现后，每次邻域准备只返回本次复用的唯一 key 数，首邻域为 0、相邻邻域为 18，并附到同一 trace；没有增加缓存、队列或历史窗口，也没有改变持久化加载、release 或保存代际。相关 3 文件 24 项、测试 TypeScript、受影响 ESLint 与生产构建 GREEN。
 - [ ] 只有修复实测主段后，再以不可变产物重跑 2/3 槽各 20 个样本且两者完整 p95 均 `≤100ms`，才批准性能门禁。自然 A/A/B 也尚未在最终调度与持久化实现上复验。

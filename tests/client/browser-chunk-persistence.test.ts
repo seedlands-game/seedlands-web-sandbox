@@ -198,12 +198,13 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     const diagnostics = await persistence.ensureNeighborhood(0, 1, -2);
     expect(worker.singleLoadCount).toBe(0);
     expect(worker.batchRequestSizes).toEqual([27]);
-    expect(diagnostics).toEqual(
-      diagnosticsFor(
+    expect(diagnostics).toEqual({
+      ...diagnosticsFor(
         Array.from({ length: 27 }, () => ({ cx: 0, cy: 0, cz: 0 })),
         0,
       ),
-    );
+      sharedDependencyCount: 0,
+    });
     expect(persistence.metrics()).toMatchObject({ idbGetCount: 27, loadTransactionCount: 1 });
     persistence.releaseNeighborhood(0, 1, -2);
     await persistence.ensureNeighborhood(0, 1, -2);
@@ -250,10 +251,15 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     const worker = new FakePersistenceWorker();
     const persistence = await open(worker, 'overlapping-halo');
 
-    await Promise.all([persistence.ensureNeighborhood(0, 1, -2), persistence.ensureNeighborhood(1, 1, -2)]);
+    const [first, second] = await Promise.all([
+      persistence.ensureNeighborhood(0, 1, -2),
+      persistence.ensureNeighborhood(1, 1, -2),
+    ]);
 
     expect(worker.singleLoadCount).toBe(0);
     expect(worker.batchRequestSizes).toEqual([27, 9]);
+    expect(first).toMatchObject({ requestedKeyCount: 27, sharedDependencyCount: 0 });
+    expect(second).toMatchObject({ requestedKeyCount: 9, sharedDependencyCount: 18 });
     expect(persistence.metrics()).toMatchObject({ idbGetCount: 36, loadTransactionCount: 2 });
     persistence.dispose();
   });

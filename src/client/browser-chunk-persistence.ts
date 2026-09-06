@@ -360,14 +360,17 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     );
     const loads = new Set<Promise<void>>();
     const coordinates: BrowserPersistenceLoadCoordinate[] = [];
+    let sharedDependencyCount = 0;
     let batchResult:
       Promise<Readonly<{ published: ReadonlySet<string>; diagnostics: ChunkPersistenceLoadDiagnostics }>> | undefined;
     neighborhood.forEach((coordinate) => {
       const key = chunkKey(coordinate.cx, coordinate.cy, coordinate.cz);
       if (resident.has(key) || this.snapshots.has(key) || this.missing.has(key)) return;
       const existing = this.loads.get(key);
-      if (existing) loads.add(existing);
-      else coordinates.push(coordinate);
+      if (existing) {
+        loads.add(existing);
+        sharedDependencyCount += 1;
+      } else coordinates.push(coordinate);
     });
     if (coordinates.length) {
       const tokens = new Map<string, BrowserPersistenceLoadToken>();
@@ -396,7 +399,8 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       await Promise.all(loads);
       if (!this.loadRegistry.isNeighborhoodCurrent(lease))
         throw new Error(`Persistence neighborhood load was canceled for ${centerKey}.`);
-      return (await batchResult)?.diagnostics;
+      const completedBatch = await batchResult;
+      return completedBatch ? { ...completedBatch.diagnostics, sharedDependencyCount } : undefined;
     } catch (error) {
       this.releaseNeighborhoodLease(centerKey, lease);
       throw error;

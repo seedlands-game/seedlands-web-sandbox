@@ -22,7 +22,9 @@ export function recordMeshPreparationDiagnostics(
       ...(attributes ? { attributes } : {}),
     });
   record('AuthorityPrepare', diagnostics.authorityPrepareMs, 'authority-worker');
-  record('AuthorityPersistenceWait', diagnostics.persistenceWaitMs, 'authority-worker');
+  record('AuthorityPersistenceWait', diagnostics.persistenceWaitMs, 'authority-worker', {
+    sharedDependencyCount: diagnostics.persistence?.sharedDependencyCount ?? 0,
+  });
   record('AuthoritySnapshotCopy', diagnostics.snapshotCopyMs, 'authority-worker');
   if (!diagnostics.persistence) return;
   const persistence = diagnostics.persistence;
