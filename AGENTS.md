@@ -7,7 +7,7 @@
 
 ## 项目边界
 
-- 这是 TypeScript / Vite / PlayCanvas 的 Web 3D voxel sandbox。`src/world/` 是坐标、体素注册、确定性基础世界、Chunk 网格与存档编解码的纯逻辑源头；`src/worker/world-worker.ts` 负责后台 Chunk 生成与网格传输；`src/app/main.ts` 负责 streaming、编辑、渲染和玩家。
+- 这是 TypeScript / Vite / PlayCanvas 的 Web 3D voxel sandbox。`src/app/main.ts` 是浏览器组合入口；`src/app/` 负责输入、UI、streaming 与渲染，`src/client/` 负责客户端适配、预测与镜像，`src/server/` 持有权威世界与规则；`src/world/`、`src/physics/`、`src/runtime/` 分别提供纯世界算法、统一物理与调度基础，`src/worker/` 接入后台执行。具体入口和现存依赖见[代码地图](docs/code-map.md)。
 - 维持核心不变量：同一 `seed + generatorVersion` 的基础世界与加载顺序无关；体素数据是紧凑数值；世界编辑只经 `World.edit()`；渲染单位是优化后的 Chunk Mesh，不是逐体素 Entity。
 - `README.md` 是运行方式、操作和当前能力的唯一说明；`package.json` 是可执行命令的唯一来源。不要在此重复它们。
 - `.env`、`node_modules/`、`dist/`、`midscene_run/` 不得纳入版本控制或交付证据。不得读取、输出或提交密钥。
@@ -15,6 +15,7 @@
 
 ## 代码组织与静态质量
 
+- 新增文件前按[仓库结构规范](docs/repository-structure.md)确定职责归属。移动入口或改变运行链路时同步[代码地图](docs/code-map.md)；其中的迁移候选不代表已实施，也不替代具体 change 的审核与验证。
 - `src/world/` 只能包含无 DOM、PlayCanvas 与 Worker global 依赖的纯逻辑；新 world 行为应在 `tests/world/` 以 Vitest 覆盖，并保持 `test:coverage` 的 `src/world/**` 行覆盖率不低于 80%。
 - `src/world/` 的纯逻辑边界必须由自定义 ESLint 规则强制执行：禁止导入 `src/server/`、`src/client/` 或 `playcanvas`，并禁止使用 DOM 与 Worker 全局对象。架构决策不得只保留为文档说明；新增或调整边界时必须先补充规则的反例和正例测试。
 - `src/app/` 保存浏览器启动、UI、输入、PlayCanvas 生命周期和样式；`src/worker/` 仅保存 Worker 入口与传输适配。app/worker 可依赖 world，world 不得反向依赖 app/worker。
@@ -86,4 +87,4 @@
 
 进行阶段规划、架构选型或跨 change 决策前，先读 `docs/living-world-alignment.md` 和其中的来源状态，再回到当前源码与相关 spec。该文档负责长期价值与路线对齐，SDD 负责具体变更的可溯源和可验证；长期路线不替代具体 spec 或扩大执行授权。来源中标为待核对的细节不能作为已确认决策；仅在当前任务依赖它们时查证，不以补读全部历史作为开工前置条件。
 
-恢复时先读 `AGENTS.md`、`README.md`、最近相关的 `changes/*/spec.md`、当前 Git 状态和实际源码；spec 是需求意图与进度的权威记录，代码与测试输出是实现和验证的权威记录。
+恢复时先读 `AGENTS.md`、`README.md`，通过 `docs/code-map.md` 定位当前模块，再读最近相关的 `changes/*/spec.md`、当前 Git 状态和实际源码；spec 是需求意图与进度的权威记录，代码与测试输出是实现和验证的权威记录。
