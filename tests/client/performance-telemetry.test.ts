@@ -88,7 +88,13 @@ describe('客户端性能 telemetry', () => {
 
     expect(frame?.topSpans).toEqual([]);
     expect(telemetry.exportChromeTrace().traceEvents).toContainEqual(
-      expect.objectContaining({ cat: 'meshing', name: 'WorkerMesh', tid: 'worker-derived', dur: 27_000 }),
+      expect.objectContaining({
+        cat: 'meshing',
+        name: 'WorkerMesh',
+        tid: 'worker-derived',
+        dur: 27_000,
+        args: { traceId: 'trace-worker' },
+      }),
     );
   });
 

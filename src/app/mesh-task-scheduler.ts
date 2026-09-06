@@ -261,6 +261,7 @@ export class MeshTaskScheduler {
           traceId: request.traceId,
         });
         this.preparingRequests.set(key, request);
+        this.options.telemetry.markTrace(request.traceId, 'prepare-start', 'main');
         try {
           if (this.options.source.beforePrepare)
             await this.options.source.beforePrepare(request.cx, request.cy, request.cz);
@@ -281,6 +282,7 @@ export class MeshTaskScheduler {
           this.options.telemetry.completeTrace(request.traceId, 'persistence-load-error', 'persistence-worker');
           continue;
         }
+        this.options.telemetry.markTrace(request.traceId, 'prepare-end', 'main');
         if (
           this.disposed ||
           !this.requested.has(key) ||

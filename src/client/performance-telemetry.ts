@@ -325,6 +325,7 @@ export class PerformanceTelemetry {
         dur: span.durationMs! * 1000,
         pid: 'seedlands-client',
         tid: span.lane,
+        ...(span.traceId ? { args: { traceId: span.traceId } } : {}),
       }));
     const traces = [...this.traces.values()]
       .filter((trace) => trace.durationMs !== undefined)

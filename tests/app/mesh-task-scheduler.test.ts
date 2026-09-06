@@ -231,10 +231,12 @@ describe('MeshTaskScheduler', () => {
     const prepareResolvers: Array<() => void> = [];
     const beforePrepare = vi.fn(() => new Promise<void>((resolve) => prepareResolvers.push(resolve)));
     let revision = 1;
+    let now = 10;
+    const telemetry = new PerformanceTelemetry({ now: () => now });
     const scheduler = new MeshTaskScheduler({
       worker,
       profile: PERFORMANCE_PROFILES.benchmark,
-      telemetry: new PerformanceTelemetry({ now: () => 1 }),
+      telemetry,
       variant: 'main-snapshot',
       source: {
         beforePrepare,
@@ -254,6 +256,9 @@ describe('MeshTaskScheduler', () => {
 
     scheduler.protectVisibleRevision('0,0,0', revision);
     scheduler.request(0, 0, 0, { priority: 'interactive-fluid' });
+    const preparationTraceId = telemetry.exportChromeTrace().traceEvents.find(({ name }) => name === 'prepare-start')
+      ?.args?.traceId;
+    expect(preparationTraceId).toBeDefined();
     expect(beforePrepare).toHaveBeenCalledTimes(1);
     expect(scheduler.generationQueueSize).toBe(1);
     for (revision = 2; revision <= 121; revision += 1) {
@@ -262,6 +267,7 @@ describe('MeshTaskScheduler', () => {
     }
     revision = 121;
 
+    now = 25;
     prepareResolvers[0]!();
     await Promise.resolve();
     await Promise.resolve();
@@ -270,6 +276,12 @@ describe('MeshTaskScheduler', () => {
     expect(scheduler.generationQueueSize).toBe(0);
     expect(worker.posts).toHaveLength(1);
     expect(worker.posts[0]?.chunkRevision).toBe(121);
+    expect(telemetry.trace(preparationTraceId!)?.marks.map(({ name, timestampMs }) => [name, timestampMs])).toEqual(
+      expect.arrayContaining([
+        ['prepare-start', 10],
+        ['prepare-end', 25],
+      ]),
+    );
     worker.emit(resultFor(worker.posts[0]!));
     await vi.waitFor(() => expect(accepted).toHaveLength(1));
     scheduler.completeVisible(accepted[0]!.task);

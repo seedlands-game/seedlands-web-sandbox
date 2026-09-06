@@ -31,6 +31,12 @@ A/B 使用相同 seed、坐标、命令顺序和编辑体积；每个配置在�
 
 Authority 已经准备的 materialized canonical 可由客户端对 Worker 回传进行逐值复核，用于显示该已接纳历史 revision；它不重新写 Authority，也不降低客户端碰撞镜像 revision。Worker 自行生成的 procedural canonical 仍必须由 Authority 接纳。取消、卸载、场景 epoch 和销毁必须同时清除屏障、下一屏障及延后 replacement；普通 streaming 继续使用原合并与老化规则。
 
+### 边界准备分段诊断 TDD
+
+`commitToWorkerStart` 从流体提交时刻量到 Mesh 调度器向计算池提交任务前，是一个复合区间。第一层诊断只补现有客户端 trace：每个 Chunk 请求记录 `prepare-start` 与 `prepare-end`，`WorkerQueueWait` 和同步 `AuthorityOverlayCopy` span 导出时携带同一 `traceId`。这样单个真实边界目标可分别量出调度等待、异步 `beforePrepare` 和同步 Worker 输入复制；不改任务优先级、预算、流体归因或性能阈值。单样本 E2E 允许用显式环境变量选择原 20 个目标中的一个，仍建立并核验完整 16 个角色、64 个物件、1024 个背景流体格和全部目标井。
+
+预期 RED：性能 telemetry 的已完成 span 当前丢失 `traceId` 导出字段；调度器在 `beforePrepare` 前后没有 mark；单样本固定采第 0 个目标，不能直达已知慢边界。若真实证据把约 400ms 定位到 `beforePrepare`，再补 Authority/Persistence Worker 内部数据库、事务读取、批次解码和 codec 的有界分项；若不在该段，则不扩展持久化协议。
+
 ## RED 设计
 
 `e2e/authority-load-performance.spec.ts` 先声明以下缺失观测，作为生产接线前的类型 RED：
@@ -77,4 +83,5 @@ Authority 已经准备的 materialized canonical 可由客户端对 Worker 回�
 - [x] 在 `git rev-parse` 为 `1935444d6ac409620113e5cd006df44e7f7e76c7` 的 detached 不可变构建上完成 2/3 槽各 20 个样本，结果仍为 RED：二槽 p50/p95/max=`81.7/482.0/484.7ms`，三槽=`87.3/497.3/498.0ms`；帧 p95=`18.3/16.8ms`，物理 p95=`1.8/2.1ms`。两配置最后 5 个 `cz=-2` 样本的 `commitToWorkerStart` 分别为 `400.2/403.5/405.1/403.9/404.8ms` 与 `399.1/394.9/401.6/399.7/396.0ms`，全部 `merged=0`，Worker 本身为 `17.4–18.7ms`。因此本轮产物虽然在实现上把最多 27 个消息/事务合成了一个批次，仍没有消除边界预派发阶段的约 400ms 等待；“27 次独立事务”不是完整根因。
 - [x] 本轮原始日志为 `/tmp/seedlands-a9-1935444-full.jsonlog`，解码附件为 `/tmp/seedlands-a9-1935444-evidence/`。附件 `sourceSha` 因启动命令漏传环境变量而记录为 `UNSPECIFIED`，原始文件保持不改；同源关系以 detached worktree 的直接 `git rev-parse`、该目录的生产构建和 bundle 清单核验，故此元数据缺口需随证据陈述。运行期间电池从 6% 降至 4%，但一次性 Playwright 临时 profile 使用 SHA-256 `043f712ee6c0beb485e8087b29618c593a5d75abd7e41ac053844e4d5408acc9` 的包装脚本仅在临时 `--user-data-dir` 禁用 Chrome Energy Saver；帧分位也证明本轮保持约 60Hz。没有修改用户 Chrome、系统电源、画质、分辨率或负载。
 - [ ] 浏览器附件当前没有投影 persistence 的 `idbGetCount`、`loadTransactionCount` 或 `decodeSamplesMs`，所以本轮只能把长段定位在 `requested/queued → worker-start` 这个复合预派发区间。当前 `WorkerQueueWait` span 在取出请求时结束，随后才等待 `beforePrepare`；附件按 `event.args.traceId` 过滤，但 span 导出没有携带该字段，无法从已归档附件分出两段。名为 `worker-start` 的 mark 实际写在向计算池提交 Mesh 任务之前，后续池内排队则包含在现有 `workerMs`，同样没有独立分段。下一轮应先增加有界观测：`prepare-start/end`、计算池实际 slot dispatch、Persistence Worker 的数据库/事务 get/整批 decode 时长及各 codec 数量；在此之前不能断言是 IndexedDB request 回调逐帧，也不能断言是 `procedural-diff-v1` 的同步 `makeChunk` 解码。电量恢复前不重复浏览器性能采样。
+- [x] 第一层分段诊断取得预期 RED：性能 telemetry 导出的 span 没有 `traceId`，scheduler trace 没有 `prepare-start/end`，单样本入口也不能选择第 15 个边界目标；两项 Vitest 失败，测试 TypeScript 另有一处参数数量错误。实现后，span 导出携带所属 trace，异步准备前后各写一个 mark，单样本可用显式索引选择原固定目标且默认完整 20 样本路径不变；相关 2 文件 21 项与测试 TypeScript 已 GREEN。真实边界单样本尚未运行。
 - [ ] 只有修复实测主段后，再以不可变产物重跑 2/3 槽各 20 个样本且两者完整 p95 均 `≤100ms`，才批准性能门禁。自然 A/A/B 也尚未在最终调度与持久化实现上复验。

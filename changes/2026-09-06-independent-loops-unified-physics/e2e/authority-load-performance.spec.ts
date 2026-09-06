@@ -26,6 +26,7 @@ const TARGETS = [
 ] as const;
 const TARGET_FLUID_SAMPLES = TARGETS.length;
 const FIRST_SAMPLE_DIAGNOSTIC = process.env.SEEDLANDS_AUTHORITY_LOAD_FIRST_SAMPLE === '1';
+const DIAGNOSTIC_TARGET_INDEX = Number(process.env.SEEDLANDS_AUTHORITY_LOAD_TARGET_INDEX ?? 0);
 const EXPECTED_STREAMED_CHUNKS = 50;
 const SCENARIO_SOURCE = {
   seed: 'authority-controlled-load',
@@ -283,6 +284,7 @@ async function runConfiguration(
   testInfo: TestInfo,
   generalWorkers: 1 | 2,
   targetFluidSamples: number = TARGET_FLUID_SAMPLES,
+  targetFluidStartIndex = 0,
 ) {
   const context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2 });
   const page = await context.newPage();
@@ -386,7 +388,7 @@ async function runConfiguration(
       body: JSON.stringify(loaded, null, 2),
       contentType: 'application/json',
     });
-    for (let index = 0; index < targetFluidSamples; index += 1)
+    for (let index = targetFluidStartIndex; index < targetFluidStartIndex + targetFluidSamples; index += 1)
       await sampleTargetFluid(page, testInfo, generalWorkers, index);
     await expect
       .poll(async () => (await snapshot(page)).performance.completedChunkTraces, { timeout: 15_000 })
@@ -466,7 +468,10 @@ async function runConfiguration(
 test('单个近场流体反馈诊断保留完整提交与网格链', async ({ browser }, testInfo) => {
   test.skip(!FIRST_SAMPLE_DIAGNOSTIC, '仅在显式单样本诊断时运行。');
   test.setTimeout(120_000);
-  const result = await runConfiguration(browser, testInfo, 1, 1);
+  expect(Number.isSafeInteger(DIAGNOSTIC_TARGET_INDEX)).toBe(true);
+  expect(DIAGNOSTIC_TARGET_INDEX).toBeGreaterThanOrEqual(0);
+  expect(DIAGNOSTIC_TARGET_INDEX).toBeLessThan(TARGETS.length);
+  const result = await runConfiguration(browser, testInfo, 1, 1, DIAGNOSTIC_TARGET_INDEX);
   expect(result.fluidFeedback.count).toBe(1);
   expect(result.fluidFeedback.p95Ms).toBeLessThanOrEqual(100);
 });
