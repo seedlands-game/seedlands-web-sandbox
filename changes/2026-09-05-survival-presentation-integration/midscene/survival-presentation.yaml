@@ -1,0 +1,26 @@
+web:
+  url: http://127.0.0.1:4217/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+tasks:
+  - name: 背包图示和实际移动食用入口
+    flow:
+      - aiInput: seedlands-inventory-visual
+        locate: 世界 Seed 输入框
+      - aiTap: 进入世界
+      - aiWaitFor: 体素世界已经显示，能看到快捷栏和游戏 HUD。
+      - aiKeyboardPress: F4
+      - aiInput: /give berry 70
+        locate: 命令输入框
+      - aiKeyboardPress: Enter
+      - aiWaitFor: 调试命令显示执行成功。
+      - aiKeyboardPress: Escape
+      - aiKeyboardPress: E
+      - aiWaitFor: 背包与合成面板已经打开。
+      - aiAssert: 背包面板沿用深色石质、暖黄铜的风格；浆果格有可辨认的果实图示、名称和数量，格子边界清楚。
+      - aiTap: 背包第二格，数量为 6 的浆果
+      - aiAssert: 操作提示明确说明已选择浆果，可以点击目标格移动、合并或交换；食用和放入快捷栏入口可见且可读。
+      - aiTap: 背包第十格，空格
+      - aiAssert: 第十格现在是 6 个浆果，第二格为空；第一格仍为 64 个浆果。合成区的配方材料、结果与缺材料按钮清楚，不被装饰遮挡。
+      - aiTap: 关闭背包
+      - aiAssert: 快捷栏可见，第一格浆果有图示和数量，游戏画面没有被暂停菜单遮挡。

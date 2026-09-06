@@ -6,6 +6,90 @@ import { Voxel, chunkKey } from '../../src/world/voxel';
 import { createProceduralMeshInput, meshChunk, meshHaloIndex } from '../../src/world/mesh';
 
 describe('GameServer headless authority', () => {
+  it('准备Mesh时pin完整27格并只让持久层读取未驻留坐标', async () => {
+    const residentCoordinates = [
+      [-1, 0, -3],
+      [0, 1, -2],
+      [1, 2, -1],
+    ] as const;
+    let requestedResidentKeys: readonly string[] | undefined;
+    const holder: { server?: GameServer } = {};
+    const persistence: ChunkPersistence = {
+      loadSnapshot: () => null,
+      saveSnapshots: () => undefined,
+      ensureNeighborhood: async (_cx, _cy, _cz, residentKeys) => {
+        requestedResidentKeys = residentKeys;
+        holder.server!.maintainCanonicalResidency();
+      },
+    };
+    const server = new GameServer({
+      seedText: 'mesh-neighborhood-residency',
+      persistence,
+      canonicalResidency: { target: 0, hardLimit: 64, evictionBatch: 32 },
+    });
+    holder.server = server;
+    const residentKeys = residentCoordinates.map(([cx, cy, cz]) => chunkKey(cx, cy, cz));
+    server.setFluidActiveChunks(residentKeys);
+    residentCoordinates.forEach(([cx, cy, cz]) => {
+      expect(
+        server.acceptWorkerCanonical({
+          key: chunkKey(cx, cy, cz),
+          cx,
+          cy,
+          cz,
+          chunkRevision: 0,
+          generatorVersion: server.generatorVersion,
+          canonical: new Uint16Array(32 ** 3),
+        }),
+      ).toBe(true);
+    });
+    server.retainMeshChunk(0, 1, -2);
+    const releasePreparation = server.retainMeshPreparationNeighborhood(0, 1, -2);
+    server.setFluidActiveChunks([]);
+    await server.ensureChunkNeighborhood(0, 1, -2);
+
+    expect(requestedResidentKeys).toEqual(residentKeys);
+    residentCoordinates.forEach(([cx, cy, cz]) =>
+      expect(server.peekLoadedVoxel(cx * 32, cy * 32, cz * 32)).not.toBeNull(),
+    );
+    releasePreparation();
+    server.releaseChunkNeighborhood(0, 1, -2);
+    expect(server.canonicalResidencyDiagnostics.residentCount).toBe(0);
+  });
+
+  it('重复旧center release不能撤掉相邻准备期读集且准备闭包只释放自身代际', () => {
+    const server = new GameServer({
+      seedText: 'mesh-neighborhood-overlap',
+      canonicalResidency: { target: 0, hardLimit: 8, evictionBatch: 8 },
+    });
+    const key = chunkKey(0, 0, 0);
+    server.setFluidActiveChunks([key]);
+    expect(
+      server.acceptWorkerCanonical({
+        key,
+        cx: 0,
+        cy: 0,
+        cz: 0,
+        chunkRevision: 0,
+        generatorVersion: server.generatorVersion,
+        canonical: new Uint16Array(32 ** 3),
+      }),
+    ).toBe(true);
+    server.retainMeshChunk(0, 0, 0);
+    const releaseA = server.retainMeshPreparationNeighborhood(1, 0, 0);
+    const releaseB = server.retainMeshPreparationNeighborhood(1, 0, 0);
+    server.setFluidActiveChunks([]);
+
+    server.releaseChunkNeighborhood(0, 0, 0);
+    server.releaseChunkNeighborhood(0, 0, 0);
+    releaseA();
+    releaseA();
+
+    expect(server.peekLoadedVoxel(0, 0, 0)).not.toBeNull();
+    releaseB();
+    expect(server.canonicalResidencyDiagnostics.residentCount).toBe(0);
+  });
+
   it('deterministically generates canonical data and runs without a browser client', () => {
     const server = new GameServer({ seedText: 'headless-authority' });
 

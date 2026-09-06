@@ -1,0 +1,73 @@
+# 最终执行：VOXEL_SANDBOX_URL=http://127.0.0.1:4260/?harness=1 \
+# pnpm exec midscene changes/2026-09-05-mvp-experience-repair/midscene/experience-repair.yaml \
+# --dotenv-override --summary /tmp/seedlands-experience-repair-midscene.json
+web:
+  url: http://127.0.0.1:4260/?harness=1
+  viewportWidth: 1920
+  viewportHeight: 1080
+
+tasks:
+  - name: 原型语言下的紧凑生存HUD与持握
+    flow:
+      - aiInput: mosslight-68
+        locate: 世界 Seed 输入框
+      - aiTap: 进入世界
+      - aiWaitFor: 世界、顶部时钟、生命饥饿状态和底部快捷栏已经显示。
+      - aiKeyboardPress: F3
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          h.setTimePaused(true);
+          h.setWorldTime(10);
+          h.executeGameplayCommand({ type: 'give-item', itemId: 'wood-axe', count: 1 });
+          h.executeGameplayCommand({ type: 'give-item', itemId: 'wood-block', count: 12 });
+          h.setSpectatorPosition(25, 29, -18);
+          h.setView(-35, -23);
+      - aiAssert: 画面底部中央是紧凑的一行八格快捷栏；每格有物品缩略图、数量或数字键，选中格为黄铜强调。快捷栏上方同宽区域有心形生命和肉类饥饿图标，两个状态组不与快捷栏、时钟、准星或右下持握重叠，也没有被画面边缘裁切。
+      - aiAssert: HUD使用深黑曜石底、细黄铜边和青宝石强调，层级接近原型的奇幻生存界面；不是扁平白色网页控件或无装饰的矩形面板。
+      - aiAssert: 右下可见有体积的第一人称手、深色袖口和木斧，手掌与斧柄呈握持关系；木斧有可辨的木材纹理和体积，不是平面SVG贴图，也不遮挡中央准星或底部状态。
+      - aiAssert: 正常游玩画面没有右侧实体调试名称列表；林地、河岸与方块世界保持主视觉，HUD没有遮住准星或水面。
+
+  - name: 顶部目标信息与采集反馈
+    flow:
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          h.setSpectatorPosition(0.5, 58.5, 0.5);
+          h.setVoxelAt(0, 58, -3, 2);
+          h.setView(0, 0);
+      - aiWaitFor: 准星前方的独立泥土方块已完成网格并清楚可见。
+      - aiWaitFor: 顶部中央出现目标信息框。
+      - aiAssert: 顶部居中的目标信息框显示方块贴图、方块名称和采集进度位置，采用黑曜石、黄铜和青宝石语言；它与左上时钟和准星保持分离，未遮挡世界主体。
+      - aiAssert: 命中的可达方块有贴合单个方块边界的三维轮廓；没有把轮廓留在旧方块上，也没有对超距或被遮挡目标显示错误信息。
+
+  - name: 暂停菜单与世界水面太阳语义
+    flow:
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          h.setSpectatorPosition(25, 29, -18);
+          h.setView(-35, -23);
+          h.setWorldTime(10);
+      - aiAssert: 河岸水面有蓝绿色半透明上表面与自然流向；岸边方块保持正常正向材质，水侧面没有镜像的陆地或天空墙，也没有整片黑色矩形。
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          h.setTimePaused(true);
+          h.setWorldTime(9);
+      - aiWaitFor: 世界时钟显示 09:00。
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          var sun = h.sunSnapshot();
+          var dx = sun.direction[0];
+          var dy = sun.direction[1];
+          var dz = sun.direction[2];
+          var horizontal = Math.hypot(dx, dz);
+          var yaw = Math.atan2(-dx, -dz) * 180 / Math.PI;
+          var pitch = Math.atan2(dy, horizontal) * 180 / Math.PI;
+          h.setView(yaw, pitch);
+          window.__midsceneSunView = { yaw, pitch };
+      - aiAssert: 在固定世界时间的这个朝向，太阳作为世界空间的发光体出现在天空中，日照方向与地表明暗关系协调。
+      - javascript: |
+          var h = window.__seedlandsHarness;
+          var visible = window.__midsceneSunView;
+          h.setView(visible.yaw + 180, visible.pitch);
+      - aiAssert: 保持同一世界时间转向相反方向后，刚才可见的太阳不再停在屏幕原位置；天空和地表仍保持与世界时间一致的明暗。
+      - aiTap: 暂停
+      - aiAssert: 暂停面板尺寸贴合内容而不是巨大平板，具有细金属边框、宝石纹章、青色主按钮与暗纹次级按钮；文本清楚、按钮未重叠，背后的手持HUD已隐藏而世界背景仍可辨。

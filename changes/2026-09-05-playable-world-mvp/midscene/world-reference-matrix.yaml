@@ -1,0 +1,63 @@
+web:
+  url: http://127.0.0.1:4241/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+tasks:
+  - name: 首次引导与林间河岸昼夜
+    flow:
+      - aiTap: 推荐起点：林间河岸
+      - aiAssert: 世界 Seed 字段显示 mosslight-68，仍停在主菜单；推荐按钮、进入世界、设置和操作指南都能辨认，没有文字重叠或截断。
+      - aiTap: 操作指南
+      - aiAssert: 指南说明木材到工具、阶梯取石、跳回地面、灯笼照明、浆果和保存退出；文字可读，返回按钮可见。
+      - aiTap: 返回
+      - ai: 把视觉质量选择为 High，然后点击进入世界。
+      - aiWaitFor: 世界、生命饥饿读数和快捷栏已经显示。
+      - javascript: |
+          window.__seedlandsHarness.setWorldTime(10);
+          window.__seedlandsHarness.setTimePaused(true);
+          window.dispatchEvent(new KeyboardEvent('keydown', { code: 'F3', key: 'F3' }));
+          window.dispatchEvent(new KeyboardEvent('keyup', { code: 'F3', key: 'F3' }));
+      - aiWaitFor: 世界时钟显示 10:00。
+      - aiAssert: 白天林地有清楚的绿色树冠、棕色树干和地表，树叶有不规则透明空隙；生命、饥饿数字、快捷栏和帮助文字在明亮背景前可读，地图与暂停不重叠。
+      - javascript: window.__seedlandsHarness.setWorldTime(17.5);
+      - aiWaitFor: 世界时钟显示 17:30。
+      - aiAssert: 黄昏林下树木和地面仍有层次，HUD保持可读。密集树冠遮住直射光与大部分天空，林下允许偏冷；叶片间的浅色孔洞是天空，不应误判为星点。
+      - javascript: window.__seedlandsHarness.setWorldTime(23);
+      - aiWaitFor: 世界时钟显示 23:00。
+      - aiAssert: 夜间明显比白天暗，但近处树木、地面和准星仍可辨认，没有整屏纯黑或错误材质。
+      - javascript: |
+          window.__seedlandsHarness.setSpectatorPosition(25, 23, -22);
+          window.__seedlandsHarness.setView(-35, -23);
+          window.__seedlandsHarness.setWorldTime(10);
+      - aiWaitFor: 世界时钟显示 10:00。
+      - aiAssert: 河岸场景可见蓝绿色水面与树木、地形倒影；相邻陆地保持正常材质，不显示倒置水面内容，河水没有整片黑屏或明显透明排序错误。
+      - javascript: window.__seedlandsHarness.setWorldTime(17.5);
+      - aiWaitFor: 世界时钟显示 17:30。
+      - aiAssert: 黄昏河岸的水与岸边仍可区分，色彩随天空变化，近处方块边缘保持清楚。
+      - javascript: window.__seedlandsHarness.setWorldTime(23);
+      - aiWaitFor: 世界时钟显示 23:00。
+      - aiAssert: 夜间能分辨水面和岸边的轮廓；HUD与准星清楚，水面没有不合理的整片白光或黑色矩形。
+      - aiTap: 暂停
+      - aiTap: 保存并返回主菜单
+  - name: 营地人工光源昼暮夜
+    flow:
+      - aiInput: living-world-autonomy
+        locate: 世界 Seed 输入框
+      - aiTap: 进入世界
+      - aiWaitFor: 世界、生命饥饿读数和快捷栏已经显示。
+      - javascript: |
+          const h = window.__seedlandsHarness;
+          const y = Math.floor(h.snapshot().player[1] - 1.6);
+          h.setVoxelAt(6, y, 4, 9);
+          h.setSpectatorPosition(3, y + 2.7, 9);
+          h.setView(-45, -14);
+          h.setWorldTime(10);
+          h.setTimePaused(true);
+      - aiWaitFor: 世界时钟显示 10:00。
+      - aiAssert: 营地有木柱、灰石地面和暖色灯笼，各自材质清楚；附近实体能与方块区分。
+      - javascript: window.__seedlandsHarness.setWorldTime(17.5);
+      - aiWaitFor: 世界时钟显示 17:30。
+      - aiAssert: 黄昏灯笼周围有暖色局部亮区，木柱和石面保留体积，没有整屏统一提亮。
+      - javascript: window.__seedlandsHarness.setWorldTime(23);
+      - aiWaitFor: 世界时钟显示 23:00。
+      - aiAssert: 夜间营地的灯笼、附近石面和木柱可读，灯光向周围衰减；有与光源方向一致的局部阴影，没有浮空黑块，HUD清楚。

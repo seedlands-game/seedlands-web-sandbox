@@ -1,0 +1,398 @@
+{
+  "scope": "a36b0aa 的自然场景同机性能；不包含后续水面Morph与A8修改，也不替代受控负载。",
+  "runs": [
+    {
+      "configuration": {
+        "name": "A1",
+        "general": 1
+      },
+      "sourceSha": "a36b0aa",
+      "browser": "152.0.7977.76",
+      "environment": {
+        "viewport": [1920, 1080],
+        "dpr": 2,
+        "internal": [3379, 1900],
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 12
+      },
+      "frame": {
+        "count": 3451,
+        "p50Ms": 8.699999988079071,
+        "p95Ms": 10.400000035762787,
+        "p99Ms": 11.699999988079071,
+        "maxMs": 38.09999996423721
+      },
+      "physics": {
+        "count": 1800,
+        "p50Ms": 0.19999998807907104,
+        "p95Ms": 0.30000001192092896,
+        "p99Ms": 0.5,
+        "maxMs": 0.800000011920929,
+        "maxDebtMs": 16.633333345320352
+      },
+      "droppedCostSamples": 0,
+      "counts": {
+        "before": {
+          "loadedChunks": 50,
+          "renderedChunks": 25,
+          "triangles": 39722,
+          "drawCalls": 50
+        },
+        "after": {
+          "loadedChunks": 63,
+          "renderedChunks": 32,
+          "triangles": 53264,
+          "drawCalls": 64
+        }
+      },
+      "entities": {
+        "before": {
+          "entityCount": 5,
+          "worldItemCount": 1,
+          "creatureCount": 2,
+          "npcCount": 1,
+          "nearbyVisitedBucketCount": 0,
+          "nearbyCandidateCount": 0,
+          "nearbyReturnedCount": 0,
+          "inventoryOperationCount": 0,
+          "gameplayEventCount": 5,
+          "snapshotBytes": 3088,
+          "retainedActorCount": 3,
+          "activeActorCount": 3,
+          "behaviorEvaluationCount": 0,
+          "navigationPlanCount": 0,
+          "navigationExpandedNodeCount": 0,
+          "pathRecomputeCount": 0,
+          "actionCompletionCount": 0,
+          "actionFailureCount": 0,
+          "actionInterruptionCount": 0,
+          "perceptionLineOfSightCheckCount": 0,
+          "simulationTime": 6.1,
+          "presentedEntityCount": 4
+        },
+        "after": {
+          "entityCount": 4,
+          "worldItemCount": 0,
+          "creatureCount": 2,
+          "npcCount": 1,
+          "nearbyVisitedBucketCount": 0,
+          "nearbyCandidateCount": 0,
+          "nearbyReturnedCount": 0,
+          "inventoryOperationCount": 1,
+          "gameplayEventCount": 49,
+          "snapshotBytes": 16951,
+          "retainedActorCount": 3,
+          "activeActorCount": 3,
+          "behaviorEvaluationCount": 0,
+          "navigationPlanCount": 0,
+          "navigationExpandedNodeCount": 0,
+          "pathRecomputeCount": 0,
+          "actionCompletionCount": 1,
+          "actionFailureCount": 0,
+          "actionInterruptionCount": 41,
+          "perceptionLineOfSightCheckCount": 0,
+          "simulationTime": 36.4,
+          "presentedEntityCount": 3
+        }
+      },
+      "effects": {
+        "before": {
+          "activeLocalLights": 0,
+          "shadowedLocalLights": 0,
+          "localLightLimit": 4,
+          "localShadowLimit": 1,
+          "sunShadows": true,
+          "sunShadowResolution": 512,
+          "reflectionEnabled": true,
+          "reflectionActive": false,
+          "reflectionResolution": 128,
+          "reflectionFrameInterval": 8,
+          "reflectionRenderCount": 0,
+          "waterPlaneY": null,
+          "postProcessing": true,
+          "shadowUpdateCount": 0,
+          "shadowStableFrameCount": 713
+        },
+        "after": {
+          "activeLocalLights": 0,
+          "shadowedLocalLights": 0,
+          "localLightLimit": 4,
+          "localShadowLimit": 1,
+          "sunShadows": true,
+          "sunShadowResolution": 512,
+          "reflectionEnabled": true,
+          "reflectionActive": false,
+          "reflectionResolution": 128,
+          "reflectionFrameInterval": 8,
+          "reflectionRenderCount": 0,
+          "waterPlaneY": null,
+          "postProcessing": true,
+          "shadowUpdateCount": 0,
+          "shadowStableFrameCount": 4192
+        }
+      }
+    },
+    {
+      "configuration": {
+        "name": "A2",
+        "general": 1
+      },
+      "sourceSha": "a36b0aa",
+      "browser": "152.0.7977.76",
+      "environment": {
+        "viewport": [1920, 1080],
+        "dpr": 2,
+        "internal": [3379, 1900],
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 12
+      },
+      "frame": {
+        "count": 3549,
+        "p50Ms": 8.5,
+        "p95Ms": 10.100000023841858,
+        "p99Ms": 11.5,
+        "maxMs": 35.40000003576279
+      },
+      "physics": {
+        "count": 1800,
+        "p50Ms": 0.19999998807907104,
+        "p95Ms": 0.30000001192092896,
+        "p99Ms": 0.3999999761581421,
+        "maxMs": 0.800000011920929,
+        "maxDebtMs": 16.599999964215385
+      },
+      "droppedCostSamples": 0,
+      "counts": {
+        "before": {
+          "loadedChunks": 49,
+          "renderedChunks": 25,
+          "triangles": 39722,
+          "drawCalls": 50
+        },
+        "after": {
+          "loadedChunks": 66,
+          "renderedChunks": 33,
+          "triangles": 55026,
+          "drawCalls": 66
+        }
+      },
+      "entities": {
+        "before": {
+          "entityCount": 5,
+          "worldItemCount": 1,
+          "creatureCount": 2,
+          "npcCount": 1,
+          "nearbyVisitedBucketCount": 0,
+          "nearbyCandidateCount": 0,
+          "nearbyReturnedCount": 0,
+          "inventoryOperationCount": 0,
+          "gameplayEventCount": 5,
+          "snapshotBytes": 3087,
+          "retainedActorCount": 3,
+          "activeActorCount": 3,
+          "behaviorEvaluationCount": 0,
+          "navigationPlanCount": 0,
+          "navigationExpandedNodeCount": 0,
+          "pathRecomputeCount": 0,
+          "actionCompletionCount": 0,
+          "actionFailureCount": 0,
+          "actionInterruptionCount": 0,
+          "perceptionLineOfSightCheckCount": 0,
+          "simulationTime": 5.6,
+          "presentedEntityCount": 4
+        },
+        "after": {
+          "entityCount": 4,
+          "worldItemCount": 0,
+          "creatureCount": 2,
+          "npcCount": 1,
+          "nearbyVisitedBucketCount": 0,
+          "nearbyCandidateCount": 0,
+          "nearbyReturnedCount": 0,
+          "inventoryOperationCount": 1,
+          "gameplayEventCount": 49,
+          "snapshotBytes": 16954,
+          "retainedActorCount": 3,
+          "activeActorCount": 3,
+          "behaviorEvaluationCount": 0,
+          "navigationPlanCount": 0,
+          "navigationExpandedNodeCount": 0,
+          "pathRecomputeCount": 0,
+          "actionCompletionCount": 1,
+          "actionFailureCount": 0,
+          "actionInterruptionCount": 41,
+          "perceptionLineOfSightCheckCount": 0,
+          "simulationTime": 35.8,
+          "presentedEntityCount": 3
+        }
+      },
+      "effects": {
+        "before": {
+          "activeLocalLights": 0,
+          "shadowedLocalLights": 0,
+          "localLightLimit": 4,
+          "localShadowLimit": 1,
+          "sunShadows": true,
+          "sunShadowResolution": 512,
+          "reflectionEnabled": true,
+          "reflectionActive": false,
+          "reflectionResolution": 128,
+          "reflectionFrameInterval": 8,
+          "reflectionRenderCount": 0,
+          "waterPlaneY": null,
+          "postProcessing": true,
+          "shadowUpdateCount": 0,
+          "shadowStableFrameCount": 660
+        },
+        "after": {
+          "activeLocalLights": 0,
+          "shadowedLocalLights": 0,
+          "localLightLimit": 4,
+          "localShadowLimit": 1,
+          "sunShadows": true,
+          "sunShadowResolution": 512,
+          "reflectionEnabled": true,
+          "reflectionActive": false,
+          "reflectionResolution": 128,
+          "reflectionFrameInterval": 8,
+          "reflectionRenderCount": 0,
+          "waterPlaneY": null,
+          "postProcessing": true,
+          "shadowUpdateCount": 0,
+          "shadowStableFrameCount": 4237
+        }
+      }
+    },
+    {
+      "configuration": {
+        "name": "B",
+        "general": 2
+      },
+      "sourceSha": "a36b0aa",
+      "browser": "152.0.7977.76",
+      "environment": {
+        "viewport": [1920, 1080],
+        "dpr": 2,
+        "internal": [3379, 1900],
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 12
+      },
+      "frame": {
+        "count": 3536,
+        "p50Ms": 8.5,
+        "p95Ms": 10.199999988079071,
+        "p99Ms": 11.399999976158142,
+        "maxMs": 36.19999998807907
+      },
+      "physics": {
+        "count": 1801,
+        "p50Ms": 0.19999998807907104,
+        "p95Ms": 0.30000001192092896,
+        "p99Ms": 0.40000003576278687,
+        "maxMs": 0.800000011920929,
+        "maxDebtMs": 16.63333328583758
+      },
+      "droppedCostSamples": 0,
+      "counts": {
+        "before": {
+          "loadedChunks": 50,
+          "renderedChunks": 25,
+          "triangles": 39722,
+          "drawCalls": 50
+        },
+        "after": {
+          "loadedChunks": 61,
+          "renderedChunks": 31,
+          "triangles": 51230,
+          "drawCalls": 62
+        }
+      },
+      "entities": {
+        "before": {
+          "entityCount": 5,
+          "worldItemCount": 1,
+          "creatureCount": 2,
+          "npcCount": 1,
+          "nearbyVisitedBucketCount": 0,
+          "nearbyCandidateCount": 0,
+          "nearbyReturnedCount": 0,
+          "inventoryOperationCount": 0,
+          "gameplayEventCount": 5,
+          "snapshotBytes": 3091,
+          "retainedActorCount": 3,
+          "activeActorCount": 3,
+          "behaviorEvaluationCount": 0,
+          "navigationPlanCount": 0,
+          "navigationExpandedNodeCount": 0,
+          "pathRecomputeCount": 0,
+          "actionCompletionCount": 0,
+          "actionFailureCount": 0,
+          "actionInterruptionCount": 0,
+          "perceptionLineOfSightCheckCount": 0,
+          "simulationTime": 2.9,
+          "presentedEntityCount": 4
+        },
+        "after": {
+          "entityCount": 4,
+          "worldItemCount": 0,
+          "creatureCount": 2,
+          "npcCount": 1,
+          "nearbyVisitedBucketCount": 0,
+          "nearbyCandidateCount": 0,
+          "nearbyReturnedCount": 0,
+          "inventoryOperationCount": 1,
+          "gameplayEventCount": 49,
+          "snapshotBytes": 16971,
+          "retainedActorCount": 3,
+          "activeActorCount": 3,
+          "behaviorEvaluationCount": 0,
+          "navigationPlanCount": 0,
+          "navigationExpandedNodeCount": 0,
+          "pathRecomputeCount": 0,
+          "actionCompletionCount": 1,
+          "actionFailureCount": 0,
+          "actionInterruptionCount": 41,
+          "perceptionLineOfSightCheckCount": 0,
+          "simulationTime": 33.2,
+          "presentedEntityCount": 3
+        }
+      },
+      "effects": {
+        "before": {
+          "activeLocalLights": 0,
+          "shadowedLocalLights": 0,
+          "localLightLimit": 4,
+          "localShadowLimit": 1,
+          "sunShadows": true,
+          "sunShadowResolution": 512,
+          "reflectionEnabled": true,
+          "reflectionActive": false,
+          "reflectionResolution": 128,
+          "reflectionFrameInterval": 8,
+          "reflectionRenderCount": 0,
+          "waterPlaneY": null,
+          "postProcessing": true,
+          "shadowUpdateCount": 0,
+          "shadowStableFrameCount": 340
+        },
+        "after": {
+          "activeLocalLights": 0,
+          "shadowedLocalLights": 0,
+          "localLightLimit": 4,
+          "localShadowLimit": 1,
+          "sunShadows": true,
+          "sunShadowResolution": 512,
+          "reflectionEnabled": true,
+          "reflectionActive": false,
+          "reflectionResolution": 128,
+          "reflectionFrameInterval": 8,
+          "reflectionRenderCount": 0,
+          "waterPlaneY": null,
+          "postProcessing": true,
+          "shadowUpdateCount": 0,
+          "shadowStableFrameCount": 3902
+        }
+      }
+    }
+  ]
+}

@@ -42,9 +42,12 @@ async function writeResult(name: string, result: object): Promise<void> {
   await writeFile(output, `${JSON.stringify({ schemaVersion: 2, ...metadata(), ...result }, null, 2)}\n`);
 }
 
-export async function writeBrowserE2EResult(stages: Record<string, 'PASS' | 'FAIL'>): Promise<void> {
+export async function writeBrowserE2EResult(
+  stages: Record<string, 'PASS' | 'FAIL'>,
+  metrics?: Readonly<{ ui: object; gameplay: object }>,
+): Promise<void> {
   const status = Object.values(stages).every((stage) => stage === 'PASS') ? 'PASS' : 'FAIL';
-  await writeResult('browser-e2e.json', { browserE2E: { status, stages } });
+  await writeResult('browser-e2e.json', { browserE2E: { status, stages, ...(metrics ? { metrics } : {}) } });
 }
 
 export async function writeBrowserBenchmarkResult(initialWorldReadyMs: number): Promise<void> {

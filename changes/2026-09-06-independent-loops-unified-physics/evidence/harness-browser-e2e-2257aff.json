@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 2,
+  "runId": "826182ad-2c94-4118-a8e9-acb6f0a8aa8c",
+  "sourceSha": "2257affb830046e638a99b9502e77d0866eb1bf1",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "browser": "chromium"
+  },
+  "browserE2E": {
+    "status": "PASS",
+    "stages": {
+      "load": "PASS",
+      "input": "PASS",
+      "player": "PASS",
+      "interaction": "PASS",
+      "streaming": "PASS",
+      "persistence": "PASS"
+    },
+    "metrics": {
+      "ui": {
+        "runtime": "svelte5",
+        "shellPublishCount": 4,
+        "hudPublishCount": 2,
+        "interactionPublishCount": 2,
+        "debugProjectionCount": 1,
+        "debugPublishCount": 2,
+        "staleUpdateCount": 0,
+        "coalescedUpdateCount": 44,
+        "domCommitCount": 6,
+        "projectionDurationMs": 2.399999976158142,
+        "publishDurationMs": 0.10000002384185791,
+        "domCommitDurationMs": 32.30000001192093,
+        "debugProjectionRate": 1,
+        "totalPublishRate": 3
+      },
+      "gameplay": {
+        "entityCount": 5,
+        "worldItemCount": 1,
+        "creatureCount": 2,
+        "npcCount": 1,
+        "nearbyVisitedBucketCount": 0,
+        "nearbyCandidateCount": 0,
+        "nearbyReturnedCount": 0,
+        "inventoryOperationCount": 0,
+        "gameplayEventCount": 5,
+        "snapshotBytes": 3056,
+        "retainedActorCount": 3,
+        "activeActorCount": 3,
+        "behaviorEvaluationCount": 0,
+        "navigationPlanCount": 0,
+        "navigationExpandedNodeCount": 0,
+        "pathRecomputeCount": 0,
+        "actionCompletionCount": 0,
+        "actionFailureCount": 0,
+        "actionInterruptionCount": 0,
+        "perceptionLineOfSightCheckCount": 0,
+        "simulationTime": 0.2,
+        "presentedEntityCount": 4
+      }
+    }
+  }
+}

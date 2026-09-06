@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0,
+    "partialFailed": 0,
+    "notExecuted": 0,
+    "totalDuration": 44283,
+    "generatedAt": "9/5/2026, 3:16:45 PM"
+  },
+  "results": [
+    {
+      "script": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/changes/2026-09-05-mvp-experience-repair/midscene/experience-repair.yaml",
+      "success": true,
+      "resultType": "success",
+      "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/experience-repair-1788592561075.json",
+      "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/experience-repair-2026-09-05_15-16-01-cdebe0d3.html",
+      "attempts": [
+        {
+          "attempt": 1,
+          "success": true,
+          "resultType": "success",
+          "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/experience-repair-1788592561075.json",
+          "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/experience-repair-2026-09-05_15-16-01-cdebe0d3.html",
+          "duration": 44283
+        }
+      ],
+      "duration": 44283
+    }
+  ]
+}

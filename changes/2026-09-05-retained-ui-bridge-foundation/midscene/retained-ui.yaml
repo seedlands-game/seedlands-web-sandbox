@@ -1,0 +1,39 @@
+page:
+  url: ${VOXEL_SANDBOX_URL}
+
+agent:
+  testId: seedlands-retained-ui-foundation
+  groupName: Seedlands Retained UI 底座
+  groupDescription: 检查 Svelte retained UI 接管后的首屏、HUD、Hotbar、地图和 Debug Shell 可见语义。
+  generateReport: true
+  autoPrintReportMsg: true
+  replanningCycleLimit: 16
+
+tasks:
+  - name: 检查首屏与进入世界状态
+    flow:
+      - aiAssert: Seedlands 首屏完整、稳定且可读；标题、世界 Seed、视觉质量与“进入世界”按钮处于一个清晰面板中，没有未样式化闪烁、重复面板、重叠或裁切。
+      - ai: 在“世界 Seed”输入“retained-ui-visual”，选择 Medium 视觉质量并点击“进入世界”。
+      - aiAssert: 加载状态有明确反馈，随后只显示一个运行中的游戏 UI。准星、世界时间、材质快捷栏和简短帮助层级清楚，不遮挡主要视野。
+
+  - name: 检查 retained HUD 与材质选择
+    flow:
+      - ai: 按 2 选择石头，再按 F3 打开运行指标。
+      - aiAssert: 四格材质快捷栏中石头具有同时依靠形状或边框和颜色表达的选中状态；运行指标清楚可读但不抢占画面，HUD 没有因为指标刷新而闪烁、跳动或反复重排。
+      - ai: 等待 3 秒。
+      - aiAssert: 世界继续渲染，准星、快捷栏和静态帮助保持稳定；调试数值可以低频更新，但没有每帧视觉抖动或大面积布局变化。
+
+  - name: 检查 Macro Map 与 Debug Shell
+    flow:
+      - ai: 按 M 打开 Macro 世界地图，将图层改为 Biome。
+      - aiAssert: Macro 地图面板、图层选择、地图画布和说明清晰可用；它与运行指标和快捷栏有明确层级，没有整屏遮挡或文字截断。
+      - ai: 点击 Macro 世界总览面板中的“关闭”。
+      - ai: 按 F4 打开服务端调试命令 Shell。
+      - ai: 在“命令”输入框输入“/seed”并按 Enter。
+      - ai: 在“命令”输入框输入“/unknown”并按 Enter。
+      - aiAssert: Debug Shell 仍保持 Change 7 的紧凑层级、命令输入、最近输出、成功和错误语义；成功与失败不只依赖颜色区分，普通文本可以选择，输入框仍可继续使用。
+      - ai: 在命令输入框输入“未执行草稿”。
+      - ai: 按上方向键，再按下方向键。
+      - aiAssert: 历史导航后输入框恢复“未执行草稿”，Shell 仍然打开且输入框可继续使用。
+      - ai: 按 Esc 关闭 Shell。
+      - aiAssert: Shell 已关闭，正常 HUD 完整恢复，没有残留 overlay 或焦点边框。

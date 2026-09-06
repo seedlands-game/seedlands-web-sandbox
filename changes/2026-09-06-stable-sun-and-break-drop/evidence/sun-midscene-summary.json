@@ -1,0 +1,31 @@
+{
+  "summary": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0,
+    "partialFailed": 0,
+    "notExecuted": 0,
+    "totalDuration": 19411,
+    "generatedAt": "9/6/2026, 6:00:49 PM"
+  },
+  "results": [
+    {
+      "script": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/changes/2026-09-06-stable-sun-and-break-drop/midscene/sun-shadow-stability.yaml",
+      "success": true,
+      "resultType": "success",
+      "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/sun-shadow-stability-1788688829898.json",
+      "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/sun-shadow-stability-2026-09-06_18-00-29-4dfb041b.html",
+      "attempts": [
+        {
+          "attempt": 1,
+          "success": true,
+          "resultType": "success",
+          "output": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/output/sun-shadow-stability-1788688829898.json",
+          "report": "../Users/chlorinec/.codex/worktrees/87fc/voxel-sandbox-foundation/midscene_run/report/sun-shadow-stability-2026-09-06_18-00-29-4dfb041b.html",
+          "duration": 19411
+        }
+      ],
+      "duration": 19411
+    }
+  ]
+}

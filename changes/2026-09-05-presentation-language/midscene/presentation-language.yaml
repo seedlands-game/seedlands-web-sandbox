@@ -1,0 +1,17 @@
+web:
+  url: http://127.0.0.1:4217/?harness=1
+  viewportWidth: 1280
+  viewportHeight: 720
+
+tasks:
+  - name: 检查统一首屏材质与进入世界
+    flow:
+      - aiAssert: 首屏标题与中文说明清晰可读，界面采用深色石质面板和克制的暖黄铜边框，不是大圆角绿色玻璃卡片。
+      - ai: 在世界 Seed 输入框中输入 seedlands-presentation，然后点击进入世界。
+      - aiAssert: 游戏画面出现，HUD 的文字与选中快捷槽可辨认，边框采用与首屏一致的暖金属语义，中心世界视野保持清楚。
+  - name: 检查地图与命令面板
+    flow:
+      - ai: 按 M 打开地图。
+      - aiAssert: 地图面板文字和地图清晰，深色面板与黄铜结构和 HUD 属于同一视觉语言。
+      - ai: 按 M 关闭地图，再按 F4 打开命令面板。
+      - aiAssert: 命令面板文本清晰可读，输入区与记录区的层级明确，没有大面积炫光、遮字装饰或内容截断。
