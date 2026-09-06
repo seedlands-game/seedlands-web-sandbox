@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { entityHitDistance } from '../../src/client/entity-hit-volume';
+import { entityHitDistance } from '../../src/client/presentation/entity-hit-volume';
 
 describe('脚底锚点的生物命中体积', () => {
   it('躯干和头部可命中，取模型前表面距离', () => {

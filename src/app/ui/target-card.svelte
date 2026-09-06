@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { publicAssetUrl } from '../../client/public-asset-url';
+  import { publicAssetUrl } from '../../client/presentation/public-asset-url';
   import type { InteractionState } from './ui-contracts';
   import ItemIcon from './primitives/item-icon.svelte';
   let { interaction }: { interaction: InteractionState } = $props();

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatBuildWatermark } from '../../src/client/build-watermark';
-import { publicAssetUrl } from '../../src/client/public-asset-url';
+import { publicAssetUrl } from '../../src/client/presentation/public-asset-url';
 
 describe('release build metadata', () => {
   it('shows a short commit hash together with the generator version', () => {

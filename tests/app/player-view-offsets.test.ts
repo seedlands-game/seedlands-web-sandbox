@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PLAYER_FEET_OFFSET, PLAYER_HEAD_OFFSET } from '../../src/app/player-view-offsets';
+import { PLAYER_FEET_OFFSET, PLAYER_HEAD_OFFSET } from '../../src/app/player/player-view-offsets';
 import { bodyConfigFor } from '../../src/physics/body-registry';
 
 describe('玩家视角与身体注册表', () => {

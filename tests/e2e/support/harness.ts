@@ -230,26 +230,29 @@ export async function waitForSnapshot(
   predicate: (snapshot: HarnessSnapshot) => boolean,
 ): Promise<HarnessSnapshot> {
   try {
-    await page.waitForFunction(
+    const matchingSnapshot = await page.waitForFunction(
       (predicateSource) => {
         const harness = (window as HarnessWindow).__seedlandsHarness;
         if (!harness) return false;
+        const current = harness.snapshot();
         const matches = new Function('snapshot', `return (${predicateSource})(snapshot);`) as (
           snapshot: HarnessSnapshot,
         ) => boolean;
-        return matches(harness.snapshot());
+        return matches(current) ? structuredClone(current) : false;
       },
       predicate.toString(),
       { timeout: 15_000 },
     );
+    try {
+      return (await matchingSnapshot.jsonValue()) as HarnessSnapshot;
+    } finally {
+      await matchingSnapshot.dispose();
+    }
   } catch (error) {
     throw new Error(`Harness state did not satisfy the expected condition: ${JSON.stringify(await snapshot(page))}`, {
       cause: error,
     });
   }
-  const current = await snapshot(page);
-  if (!current) throw new Error('Seedlands harness snapshot is unavailable after the wait completed.');
-  return current;
 }
 
 export async function waitForPlayerMovement(
@@ -264,7 +267,7 @@ export async function waitForPlayerMovement(
   },
 ): Promise<HarnessSnapshot> {
   try {
-    await page.waitForFunction(
+    const matchingSnapshot = await page.waitForFunction(
       (expected) => {
         const current = (window as HarnessWindow).__seedlandsHarness?.snapshot();
         if (!current) return false;
@@ -275,19 +278,21 @@ export async function waitForPlayerMovement(
         const atExpectedHeight =
           expected.yTarget === undefined ||
           Math.abs(current.player[1] - expected.yTarget) < (expected.yTolerance ?? 0.05);
-        return moved && atExpectedHeight;
+        return moved && atExpectedHeight ? structuredClone(current) : false;
       },
       expectation,
       { timeout: 15_000 },
     );
+    try {
+      return (await matchingSnapshot.jsonValue()) as HarnessSnapshot;
+    } finally {
+      await matchingSnapshot.dispose();
+    }
   } catch (error) {
     throw new Error(`Player movement did not satisfy the expected condition: ${JSON.stringify(await snapshot(page))}`, {
       cause: error,
     });
   }
-  const current = await snapshot(page);
-  if (!current) throw new Error('Seedlands harness snapshot is unavailable after player movement.');
-  return current;
 }
 
 export async function lockPointer(page: Page): Promise<Locator> {

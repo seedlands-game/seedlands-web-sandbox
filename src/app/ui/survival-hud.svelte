@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { HudState } from './ui-contracts';
-  import { publicAssetUrl } from '../../client/public-asset-url';
+  import { publicAssetUrl } from '../../client/presentation/public-asset-url';
   let { hud }: { hud: HudState } = $props();
   const rows = $derived([
     { name: '生命', state: hud.health, icon: 'health-heart' },

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { World } from '../../src/app/world-runtime';
+import { World } from '../../src/app/world/world-runtime';
 import type { WorldCommitResult } from '../../src/server/game-server-types';
-import { FluidFeedbackTracker } from '../../src/app/fluid-feedback-tracker';
+import { FluidFeedbackTracker } from '../../src/app/gameplay/fluid-feedback-tracker';
 
 const commit = (actorId: string) =>
   ({

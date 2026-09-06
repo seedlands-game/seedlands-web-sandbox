@@ -1,15 +1,15 @@
-import { BrowserAuthorityClient } from '../client/browser-authority-client';
-import { BrowserComputeRuntime } from '../client/browser-compute-runtime';
-import { BrowserLogicClient } from '../client/browser-logic-client';
+import { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
+import { BrowserComputeRuntime } from '../client/compute/browser-compute-runtime';
+import { BrowserLogicClient } from '../client/authority/browser-logic-client';
 import { createSessionEpoch, type SequenceDecision } from '../runtime/session-protocol';
 import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import type { FluidAuthoritySnapshot } from '../server/fluid/fluid-transaction';
 import type { LogicObservation } from '../server/logic/logic-protocol';
 import type { WorldCommitResult } from '../server/game-server-types';
-import type { SerializedChunkSnapshot } from '../client/browser-chunk-persistence';
+import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { WorldOpenMode } from '../client/world-version-policy';
 import type { AuthorityGameplayView } from '../worker/authority-worker-protocol';
-import type { AuthorityTransportFaults } from '../client/authority-transport';
+import type { AuthorityTransportFaults } from '../client/authority/authority-transport';
 
 export type BrowserWorkerSession = Readonly<{
   authority: BrowserAuthorityClient;

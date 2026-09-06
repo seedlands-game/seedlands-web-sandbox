@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { Voxel } from '../../../src/world/voxel';
 import {
   clickCanvasCenter,
   fillHarnessWorld,
@@ -87,6 +88,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     expect(stillSupported.onGround).toBe(true);
     expect(stillSupported.colliding).toBe(false);
 
+    await lockPointer(page);
     await fillHarnessWorld(page, [-1, 56, -1], [0, 56, 0], 0);
     const falling = await waitForPlayerMovement(page, {
       axis: 1,
@@ -95,7 +97,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
       direction: -1,
     });
     expect(falling.onGround).toBe(false);
-    await lockPointer(page);
+    expect(falling.colliding).toBe(false);
     await page.keyboard.down('Space');
     try {
       const afterSpace = await waitForPlayerMovement(page, {
@@ -114,6 +116,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
   test('walks down a ledge and requires a real jump to return without overlap', async ({ page }) => {
     await startHarnessWorld(page, 'seedlands-player-collision');
     await prepareStepDown(page);
+    await fillHarnessWorld(page, [-2, 55, 3], [2, 56, 32], Voxel.Stone);
     const before = await waitForSnapshot(page, (current) => current.onGround && !current.colliding);
     await lockPointer(page);
     await setHarnessView(page, 0, 0);
@@ -132,11 +135,10 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     await waitForSnapshot(page, (current) => current.onGround && !current.colliding);
     await page.keyboard.down('KeyS');
     try {
-      await waitForSnapshot(
+      const blocked = await waitForSnapshot(
         page,
         (current) => current.player[2] > -0.4 && current.player[2] < -0.3 && current.onGround,
       );
-      const blocked = (await snapshot(page))!;
       expect(blocked.player[1]).toBeCloseTo(before.player[1] - 1, 2);
       expect(blocked.colliding).toBe(false);
       await page.keyboard.down('Space');
@@ -145,10 +147,24 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
         start: blocked.player[2],
         minimumDelta: 0.8,
         direction: 1,
-        yTarget: before.player[1],
-        yTolerance: 0.15,
       });
+      expect(returned.player[2]).toBeGreaterThan(blocked.player[2] + 0.8);
       expect(returned.colliding).toBe(false);
+      await page.keyboard.up('Space');
+      await page.keyboard.up('KeyS');
+      const landed = await waitForSnapshot(
+        page,
+        (current) =>
+          Math.abs(current.player[1] - 58.6) < 0.15 && current.player[2] >= 0 && current.onGround && !current.colliding,
+      );
+      await expect
+        .poll(async () => (await snapshot(page))!.authority.physicsTick)
+        .toBeGreaterThan(landed.authority.physicsTick + 15);
+      const stable = (await snapshot(page))!;
+      expect(stable.player[1]).toBeCloseTo(before.player[1], 1);
+      expect(stable.player[2]).toBeGreaterThanOrEqual(0);
+      expect(stable.onGround).toBe(true);
+      expect(stable.colliding).toBe(false);
     } finally {
       await page.keyboard.up('Space');
       await page.keyboard.up('KeyS');

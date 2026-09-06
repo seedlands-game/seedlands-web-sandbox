@@ -1,7 +1,7 @@
 import type * as pc from 'playcanvas';
 import { CreatureAmbience } from '../../client/audio/creature-ambience';
 import { macroAt } from '../../world/macro-world';
-import type { World } from '../world-runtime';
+import type { World } from '../world/world-runtime';
 import { FootstepTracker, MusicCueScheduler } from '../../client/audio/audio-policy';
 import { audioRandom, type MusicContext, type SfxKey } from '../../client/audio/audio-types';
 import {
@@ -13,7 +13,7 @@ import type { GlobalAudio } from './global-audio';
 import { WaterAudioPolicy } from '../../client/audio/water-audio-policy';
 import type { WaterImmersionSnapshot } from '../../world/water-immersion';
 import { Voxel } from '../../world/voxel';
-import { PLAYER_FEET_OFFSET } from '../player-view-offsets';
+import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
 
 export class WorldAudio {
   private readonly session: string;

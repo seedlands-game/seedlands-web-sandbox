@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { MeshTaskScheduler, type MeshWorkerPort, type WorkerResult } from '../../src/app/mesh-task-scheduler';
-import { PERFORMANCE_PROFILES } from '../../src/client/performance-profile';
-import { PerformanceTelemetry } from '../../src/client/performance-telemetry';
+import { MeshTaskScheduler, type MeshWorkerPort, type WorkerResult } from '../../src/app/world/mesh-task-scheduler';
+import { PERFORMANCE_PROFILES } from '../../src/client/presentation/performance-profile';
+import { PerformanceTelemetry } from '../../src/client/presentation/performance-telemetry';
 
 class SupersessionWorker implements MeshWorkerPort {
   onmessage: ((event: MessageEvent<WorkerResult>) => void) | null = null;

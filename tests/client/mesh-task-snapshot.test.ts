@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createMeshTaskSnapshot, isCurrentMeshTask } from '../../src/client/mesh-task-snapshot';
+import { createMeshTaskSnapshot, isCurrentMeshTask } from '../../src/client/compute/mesh-task-snapshot';
 
 describe('派生 Worker mesh task snapshot', () => {
   it('复制 canonical 数据与一格 halo，并保留 task、epoch 和 revision 身份', () => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { publicAssetUrl } from '../../client/public-asset-url';
+  import { publicAssetUrl } from '../../client/presentation/public-asset-url';
   import { onMount } from 'svelte';
   import type { ApplicationShell } from '../application-shell';
   import type { AudioSettings } from '../../client/audio/audio-types';

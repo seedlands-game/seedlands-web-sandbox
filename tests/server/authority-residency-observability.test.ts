@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { BrowserAuthorityClient } from '../../src/client/browser-authority-client';
+import type { BrowserAuthorityClient } from '../../src/client/authority/browser-authority-client';
 import { createHarnessSnapshot } from '../../src/app/game-harness';
 import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
 import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';

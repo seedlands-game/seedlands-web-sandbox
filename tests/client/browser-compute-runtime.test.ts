@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BrowserComputeRuntime } from '../../src/client/browser-compute-runtime';
-import type { ComputeWorkerPort } from '../../src/client/compute-worker-pool';
+import { BrowserComputeRuntime } from '../../src/client/compute/browser-compute-runtime';
+import type { ComputeWorkerPort } from '../../src/client/compute/compute-worker-pool';
 import type { ComputeLane } from '../../src/runtime/compute-task-queue';
 import { CHUNK_SIZE } from '../../src/world/voxel';
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ComputeWorkerPool, type ComputeWorkerPort } from '../../src/client/compute-worker-pool';
+import { ComputeWorkerPool, type ComputeWorkerPort } from '../../src/client/compute/compute-worker-pool';
 import type { ComputeLane, ComputeTask } from '../../src/runtime/compute-task-queue';
 
 class FakeWorker implements ComputeWorkerPort {

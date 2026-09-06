@@ -1,26 +1,26 @@
-import type { ChunkPersistenceCorpusSummary } from '../client/browser-chunk-persistence';
-import type { BrowserAuthorityClient } from '../client/browser-authority-client';
-import type { BrowserComputeRuntime } from '../client/browser-compute-runtime';
-import type { BrowserLogicClient } from '../client/browser-logic-client';
+import type { ChunkPersistenceCorpusSummary } from '../client/persistence/browser-chunk-persistence';
+import type { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
+import type { BrowserComputeRuntime } from '../client/compute/browser-compute-runtime';
+import type { BrowserLogicClient } from '../client/authority/browser-logic-client';
 import type * as pc from 'playcanvas';
-import type { ChunkPersistenceLoadScenario } from '../client/chunk-persistence-benchmark';
-import type { PerformanceTelemetry } from '../client/performance-telemetry';
+import type { ChunkPersistenceLoadScenario } from '../client/persistence/chunk-persistence-benchmark';
+import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
 import type { FillCommand } from '../server/commands/fill-command';
 import type { CommandResult, ServerCommand } from '../server/commands/command-contract';
 import { Voxel } from '../world/voxel';
 import type { HarnessSnapshot, LifecycleSnapshot, StreamingVariant } from './app-contracts';
-import type { PlayerController } from './player-controller';
-import type { QualityLevel } from './quality-profile';
-import { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
-import type { WorldEnvironment } from './world-environment';
-import type { World } from './world-runtime';
+import type { PlayerController } from './player/player-controller';
+import type { QualityLevel } from './scene/quality-profile';
+import { FINAL_RENDER_PIPELINE } from './scene/voxel-render-pipeline';
+import type { WorldEnvironment } from './scene/world-environment';
+import type { World } from './world/world-runtime';
 import type { UiMetrics } from './ui/ui-contracts';
-import type { AdvancedVisualEffects } from './advanced-visual-effects';
-import type { BrowserGameplay } from './browser-gameplay';
-import type { UnderwaterVisualEffects } from './underwater-visual-effects';
-import { PLAYER_FEET_OFFSET } from './player-view-offsets';
-import type { CollisionDebugRuntime } from './collision-debug-runtime';
-import type { FluidFeedbackTarget } from './fluid-feedback-tracker';
+import type { AdvancedVisualEffects } from './scene/advanced-visual-effects';
+import type { BrowserGameplay } from './gameplay/browser-gameplay';
+import type { UnderwaterVisualEffects } from './scene/underwater-visual-effects';
+import { PLAYER_FEET_OFFSET } from './player/player-view-offsets';
+import type { CollisionDebugRuntime } from './player/collision-debug-runtime';
+import type { FluidFeedbackTarget } from './gameplay/fluid-feedback-tracker';
 import type { AuthorityBodySnapshot } from '../server/authority/authority-session-types';
 
 export type HarnessApi = {
@@ -447,7 +447,7 @@ export async function installPersistenceHarness() {
     seedBrowserChunkPersistenceCorpus,
     runBrowserChunkPersistenceLoadScenario,
     saveOneBrowserChunkPersistenceChange,
-  } = await import('../client/chunk-persistence-benchmark');
+  } = await import('../client/persistence/chunk-persistence-benchmark');
   window.__seedlandsPersistenceHarness = {
     seedCorpus: seedBrowserChunkPersistenceCorpus,
     loadScenario: runBrowserChunkPersistenceLoadScenario,

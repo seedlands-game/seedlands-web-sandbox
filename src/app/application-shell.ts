@@ -2,7 +2,7 @@ import { ShellController, sanitizeQuality, type ShellQuality } from '../client/s
 import type { GlobalAudio } from './audio/global-audio';
 import type { Game } from './game';
 import type { UiBridge } from './ui/ui-bridge';
-import { isUserPointerUnlock } from './pointer-lock';
+import { isUserPointerUnlock } from './player/pointer-lock';
 import type { WorldOpenMode } from '../client/world-version-policy';
 
 const QUALITY_KEY = 'seedlands.quality.v1';

@@ -1,5 +1,2 @@
-import { bodyConfigFor } from '../physics/body-registry';
-
-const PLAYER_BODY_HEIGHT = bodyConfigFor('player').localAabb.max.y - bodyConfigFor('player').localAabb.min.y;
-export const PLAYER_HEAD_OFFSET = 0.2;
-export const PLAYER_FEET_OFFSET = PLAYER_BODY_HEIGHT - PLAYER_HEAD_OFFSET;
+// 兼容已交付 change 的冻结源码路径；新代码使用 src/app/player/player-view-offsets.ts。
+export * from './player/player-view-offsets';

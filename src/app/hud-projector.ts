@@ -1,11 +1,11 @@
 import type * as pc from 'playcanvas';
 import { macroAt } from '../world/macro-world';
 import { GENERATOR_VERSION, floorDiv } from '../world/voxel';
-import type { PerformanceProfile } from '../client/performance-profile';
-import { PLAYER_FEET_OFFSET } from './player-controller';
-import { QUALITY_PROFILES, type QualityLevel } from './quality-profile';
-import type { WorldEnvironment } from './world-environment';
-import type { World } from './world-runtime';
+import type { PerformanceProfile } from '../client/presentation/performance-profile';
+import { PLAYER_FEET_OFFSET } from './player/player-controller';
+import { QUALITY_PROFILES, type QualityLevel } from './scene/quality-profile';
+import type { WorldEnvironment } from './scene/world-environment';
+import type { World } from './world/world-runtime';
 
 type DebugProjectionContext = {
   world: World;

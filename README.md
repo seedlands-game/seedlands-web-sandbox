@@ -109,6 +109,8 @@ The first headless harness uses in-process memory persistence. `/save` exercises
 
 ## Architecture
 
+For a guided source reading route and feature-to-test lookup, start with the [code map](docs/code-map.md). See [repository structure conventions](docs/repository-structure.md) for current file placement, [development governance](docs/development-governance.md) for evidence rules, and [long-term alignment](docs/living-world-alignment.md) for goals and roadmap. Historical changes may be restored from the [archive index](docs/change-archive.md). These internal documents are maintained in Simplified Chinese.
+
 `GameServer.editBatch()` is the authoritative transaction boundary for batched world mutations. The browser runtime is split by responsibility across startup, player control, rendering adapters, world streaming, environment, HUD, and persistence modules. One Svelte 5 root owns the runtime UI. Game code publishes small, independently subscribed Shell, HUD, Interaction, and Debug projections through `UiBridge`; components send intents back through an action port and never own authoritative World or Server state.
 
 The browser runs an Authority Worker with fixed-step physics, a separate Logic Worker, one reserved fluid computation worker, one general computation worker, and one persistence worker. The optional second general worker raises the total from five to six. Rendering and local-player prediction stay on the main thread. Physics, gameplay, and fluid clocks have independent frequencies and bounded catch-up; expensive logic and mesh work do not advance the physics clock. Workers exchange versioned messages and transferable buffers without requiring shared memory.

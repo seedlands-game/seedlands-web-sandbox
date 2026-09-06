@@ -1,5 +1,5 @@
-import type { AuthorityTransportFaults } from '../client/authority-transport';
-import type { PerformanceProfile } from '../client/performance-profile';
+import type { AuthorityTransportFaults } from '../client/authority/authority-transport';
+import type { PerformanceProfile } from '../client/presentation/performance-profile';
 
 export type BrowserSessionConfig = Readonly<{
   harnessEnabled: boolean;

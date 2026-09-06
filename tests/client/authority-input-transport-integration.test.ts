@@ -4,8 +4,8 @@ import { PROTOCOL_VERSION, InputCommandBuffer, type InputCommand } from '../../s
 import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
 import type { WorldCommitResult } from '../../src/server/game-server-types';
 import type { AuthorityReady, AuthorityResponse } from '../../src/worker/authority-worker-protocol';
-import { BrowserAuthorityClient } from '../../src/client/browser-authority-client';
-import { createAuthorityTransport, type AuthorityTransportPort } from '../../src/client/authority-transport';
+import { BrowserAuthorityClient } from '../../src/client/authority/browser-authority-client';
+import { createAuthorityTransport, type AuthorityTransportPort } from '../../src/client/authority/authority-transport';
 import { LocalPlayerPrediction } from '../../src/client/local-player-prediction';
 
 const PHYSICS_HZ = 120;

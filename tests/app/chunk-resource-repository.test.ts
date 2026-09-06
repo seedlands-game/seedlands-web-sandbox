@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ChunkResourceRepository, type ChunkResourceAdapter } from '../../src/app/chunk-resource-repository';
+import { ChunkResourceRepository, type ChunkResourceAdapter } from '../../src/app/world/chunk-resource-repository';
 
 type Task = {
   taskId: number;

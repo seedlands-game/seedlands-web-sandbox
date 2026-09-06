@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildWaterSurfaceTransition,
   type WaterSurfaceTransitionGeometry,
-} from '../../src/app/water-surface-transition';
+} from '../../src/app/scene/water-surface-transition';
 import { batchMeshData, compactMeshData, meshChunk, type MeshData } from '../../src/world/mesh';
 import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../src/world/voxel';
 

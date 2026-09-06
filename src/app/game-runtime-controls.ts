@@ -1,7 +1,7 @@
-import type { BrowserAuthorityClient } from '../client/browser-authority-client';
+import type { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
 import type { UiWorldSession } from './ui/ui-bridge';
-import type { WorldEnvironment } from './world-environment';
-import type { World } from './world-runtime';
+import type { WorldEnvironment } from './scene/world-environment';
+import type { World } from './world/world-runtime';
 
 export async function setAuthorityWorldClockPaused(
   environment: WorldEnvironment | null,
