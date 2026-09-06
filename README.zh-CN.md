@@ -104,6 +104,17 @@ pnpm server:headless -- --seed my-debug-world
 
 首版无头 Harness 使用进程内存持久化。`/save` 会真实经过 Chunk 与 gameplay snapshot 的 persistence boundary，并可在同一进程的重载测试中恢复；进程退出后不会生成持久世界文件。
 
+## 实验性 Node 世界宿主
+
+独立 TypeScript 世界宿主可以脱离浏览器常驻运行，并将检查点保存到独立目录。目前仍在实施：网络连接与服务器选择界面尚不可用。
+
+```bash
+pnpm build:server
+pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world
+```
+
+`dist/node-server/` 内的五个 ESM 入口及清单可由 Node 22.12 或更高版本直接运行，不需要源码、Vite 或在服务器安装运行依赖。默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。`--compute child-process` 可选择实验性进程执行器；这不是已测得更快的默认建议。按 Ctrl+C 会排空工作并保存最终检查点。请使用独立目录，不会自动导入浏览器存档；同一目录的第二个写者会被拒绝。
+
 ## 架构
 
 阅读源码先看[代码地图](docs/code-map.md)：包含推荐阅读顺序、运行链路和按功能查找的实现与测试入口。新增文件与当前目录归属见[仓库结构规范](docs/repository-structure.md)，证据规则见[开发治理](docs/development-governance.md)，项目目标和演进路线见[长期对齐](docs/living-world-alignment.md)；归档历史可由[归档索引](docs/change-archive.md)恢复。

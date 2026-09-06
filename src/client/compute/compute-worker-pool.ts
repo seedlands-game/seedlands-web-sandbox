@@ -25,11 +25,14 @@ export type ComputeWorkerResult = Readonly<{
   error?: string;
 }>;
 
+export type BrowserComputeLane = Exclude<ComputeLane, 'logic'>;
+type BrowserComputeTask = ComputeTask & Readonly<{ lane: BrowserComputeLane }>;
+
 type WorkerSlot = {
-  lane: ComputeLane;
+  lane: BrowserComputeLane;
   index: number;
   worker: ComputeWorkerPort | null;
-  task: ComputeTask | null;
+  task: BrowserComputeTask | null;
   restartAttempts: number;
 };
 
@@ -40,11 +43,11 @@ type ComputeWorkerPoolOptions = Readonly<{
   generalWorkerCount: 1 | 2;
   maxTasks: number;
   maxBytes: number;
-  createWorker: (lane: ComputeLane, index: number) => ComputeWorkerPort;
+  createWorker: (lane: BrowserComputeLane, index: number) => ComputeWorkerPort;
   onResult?: (task: ComputeTask, result: unknown) => void;
   onFailure?: (task: ComputeTask, error: Error) => void;
   onDrop?: (taskId: number, reason: 'merged' | 'cancelled' | 'epoch-switch') => void;
-  onPoolFailure?: (lane: ComputeLane, error: Error) => void;
+  onPoolFailure?: (lane: BrowserComputeLane, error: Error) => void;
   maxWorkerRestarts?: number;
   restartDelayMs?: number;
   setTimer?: (callback: () => void, delayMs: number) => number;
@@ -66,8 +69,10 @@ export type ComputePoolDiagnostics = Readonly<{
   submittedBytes: number;
   maxQueued: number;
   maxQueuedBytes: number;
-  workerTaskDuration: Readonly<Record<ComputeLane, CostSampleWindow>>;
+  workerTaskDuration: Readonly<Record<BrowserComputeLane, CostSampleWindow>>;
 }>;
+
+const isBrowserComputeTask = (task: ComputeTask): task is BrowserComputeTask => task.lane !== 'logic';
 
 function isWorkerResult(value: unknown): value is ComputeWorkerResult {
   if (!value || typeof value !== 'object') return false;
@@ -97,7 +102,7 @@ export class ComputeWorkerPool {
   private submittedBytes = 0;
   private maxQueued = 0;
   private maxQueuedBytes = 0;
-  private readonly workerTaskDuration: Record<ComputeLane, BoundedCostSamples> = {
+  private readonly workerTaskDuration: Record<BrowserComputeLane, BoundedCostSamples> = {
     fluid: new BoundedCostSamples(),
     general: new BoundedCostSamples(),
   };
@@ -113,6 +118,7 @@ export class ComputeWorkerPool {
   }
 
   enqueue(task: ComputeTask, transfer: readonly Transferable[] = []): ComputeQueueResult {
+    if (!isBrowserComputeTask(task)) return { status: 'rejected', reason: 'invalid-task' };
     if (this.disposed) return { status: 'rejected', reason: 'invalid-task' };
     const result = this.queue.enqueue(task);
     if (result.status === 'queued' || result.status === 'merged') {
@@ -207,7 +213,7 @@ export class ComputeWorkerPool {
   }
 
   private createSlots(): void {
-    const lanes: ComputeLane[] = ['fluid'];
+    const lanes: BrowserComputeLane[] = ['fluid'];
     for (let index = 0; index < this.options.generalWorkerCount; index += 1) lanes.push('general');
     this.slots = lanes.map((lane, index) => ({ lane, index, worker: null, task: null, restartAttempts: 0 }));
     try {
@@ -233,7 +239,7 @@ export class ComputeWorkerPool {
     if (this.disposed) return;
     for (const slot of this.slots) {
       if (slot.task || !slot.worker) continue;
-      const task = this.queue.take(slot.lane);
+      const task = this.queue.take(slot.lane) as BrowserComputeTask | null;
       if (!task) continue;
       slot.task = task;
       const transfer = this.transfers.get(task.taskId)?.transfer ?? [];

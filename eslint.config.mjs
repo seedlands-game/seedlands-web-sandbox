@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 import svelte from 'eslint-plugin-svelte';
 import tseslint from 'typescript-eslint';
+import { isBuiltin } from 'node:module';
 
 const worldForbiddenImports = (source) =>
   source === 'playcanvas' || source.includes('/server/') || source.includes('/client/');
@@ -106,6 +107,30 @@ const topLevelOwnerRule = (allowed) => ({
 
 const seedlands = {
   rules: {
+    'node-platform-boundary': {
+      meta: {
+        type: 'problem',
+        schema: [],
+        messages: { forbidden: '平台依赖 {{dependency}} 不属于当前目录；请经注入端口使用。' },
+      },
+      create(context) {
+        const nodeAdapter = context.filename.replaceAll('\\', '/').includes('/src/node/');
+        const forbiddenImport = (source) =>
+          nodeAdapter
+            ? source === 'playcanvas' || /(?:^|\/)(?:app|client)(?:\/|$)/.test(source)
+            : source.startsWith('node:') || isBuiltin(source) || /(?:^|\/)node(?:\/|$)/.test(source);
+        const imports = importBoundaryRule(forbiddenImport).create(context);
+        return {
+          ...imports,
+          Identifier(node) {
+            if (!nodeAdapter || !forbiddenRuntimeGlobals.has(node.name)) return;
+            const reference = context.sourceCode.getScope(node).references.find((entry) => entry.identifier === node);
+            if (reference && !reference.resolved?.defs.length)
+              context.report({ node, messageId: 'forbidden', data: { dependency: node.name } });
+          },
+        };
+      },
+    },
     'world-purity': purityRule(worldForbiddenImports),
     'server-purity': purityRule(serverForbiddenImports),
     'pure-runtime': purityRule(pureRuntimeForbiddenImports),
@@ -322,5 +347,19 @@ export default tseslint.config(
     plugins: { seedlands },
     languageOptions: { globals: globals.node },
     rules: { 'seedlands/server-purity': 'error' },
+  },
+  {
+    files: ['src/**/*.ts'],
+    plugins: { seedlands },
+    rules: { 'seedlands/node-platform-boundary': 'error' },
+  },
+  {
+    files: ['src/node/**/*.ts'],
+    languageOptions: {
+      globals: {
+        ...Object.fromEntries(Object.keys({ ...globals.browser, ...globals.worker }).map((name) => [name, 'off'])),
+        ...globals.node,
+      },
+    },
   },
 );

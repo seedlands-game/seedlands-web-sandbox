@@ -36,6 +36,8 @@
 
 现存 `worker/world-compute-task.ts` 等辅助实现是待梳理的历史现状，不应据此扩大 Worker 目录为通用算法仓库；移动它们也不能只改文件路径而跳过依赖评审。
 
+`src/node/` 是 Node 平台适配边界：`server` 管 CLI、产品生命周期及 Authority Worker 入口，`runtime` 管有界 RPC 和 Authority façade，`compute` 管 Node Worker/child，`persistence` 管存储 Worker、缓存 proxy、磁盘与锁。`server/dedicated`、`server/compute` 和 `server/protocol` 保持平台无关；浏览器、纯逻辑与服务器核心不得直接导入 Node builtin 或 `src/node`。Node 适配不得反向引入 app/client/PlayCanvas 或浏览器环境对象；由 [Node 边界规则及反例](../tests/governance/node-runtime-boundary-eslint.test.ts)执行，并由独立产物测试检查真实依赖图。
+
 ## 文件名、导出与测试
 
 - 新文件和目录使用有语义的 kebab-case。文件名应指出对象或职责，例如 `authority-snapshot-gate.ts`，不要使用 `helper2.ts`。

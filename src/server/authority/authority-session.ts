@@ -1,3 +1,4 @@
+import { clearAuthorityHorizontalVelocity } from './authority-input-neutralization';
 import {
   bodyWorldAabb,
   isBodyPositionReachable,
@@ -114,6 +115,15 @@ export class AuthoritySession {
 
   receiveInput(command: InputCommand): SequenceDecision {
     return this.input.push(command);
+  }
+
+  get currentSnapshot(): AuthoritySnapshot {
+    return this.snapshot();
+  }
+
+  clearPlayerInput(): void {
+    this.input.clear();
+    this.stopPlayerHorizontalVelocity();
   }
 
   receiveLogicIntents(epoch: string, intents: readonly LogicIntent[]) {
@@ -485,11 +495,7 @@ export class AuthoritySession {
   }
 
   private stopPlayerHorizontalVelocity() {
-    const entity = this.options.server.getEntity(this.options.playerId);
-    if (!entity) return;
-    const velocity: [number, number, number] = [0, entity.physicsVelocity?.[1] ?? 0, 0];
-    this.options.server.updateEntity(entity.id, { position: [...entity.position], physicsVelocity: velocity });
-    this.refreshBodies();
+    if (clearAuthorityHorizontalVelocity(this.options.server, this.options.playerId)) this.refreshBodies();
   }
 
   private assertWorldClockRate(rate: number): void {

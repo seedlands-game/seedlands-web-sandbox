@@ -27,7 +27,7 @@ import { AuthorityResidencyRuntime, type AuthorityResidencyDiagnostics } from '.
 import { advanceAuthoritySession } from './authority-session-advance';
 import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnostics';
 import { AuthorityMutationPreparation, unavailableWorldCommit } from './authority-mutation-preparation';
-import { applyAuthorityPlayerAction } from './authority-player-action';
+import { applyAuthorityPlayerAction, unavailableAuthorityPlayerAction } from './authority-player-action';
 import { queueBodyRecoveriesAfterCommit } from './authority-geometry-recovery';
 import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from './authority-canonical-preparation';
 import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
@@ -240,6 +240,23 @@ export class AuthorityRuntime {
     return this.session.receiveInput(command);
   }
 
+  snapshot(): AuthoritySnapshot {
+    return this.session.currentSnapshot;
+  }
+
+  clearPlayerInput(): void {
+    const before = this.serverStateVersion();
+    this.session.clearPlayerInput();
+    this.server.cancelBreak(this.playerId);
+    this.commitIfServerChanged(before);
+  }
+
+  /** 新宿主发布恢复后的实体标准化状态，使用新的检查点序号。 */
+  commitHostActivation(): AuthoritySnapshot {
+    this.session.commitExternalState(false);
+    return this.snapshot();
+  }
+
   get inputResyncRequired(): boolean {
     return this.session.inputResyncRequired;
   }
@@ -320,8 +337,10 @@ export class AuthorityRuntime {
   }
 
   pause(nowMs: number): void {
+    const before = this.serverStateVersion();
     this.session.pause(nowMs);
     this.currentTimeMs = nowMs;
+    this.commitIfServerChanged(before);
   }
 
   resume(nowMs: number): void {
@@ -370,14 +389,15 @@ export class AuthorityRuntime {
   }
 
   async performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
-    if (!(await this.mutationPreparation.prepareAction(action, this.playerId)))
-      return { result: { success: false, reason: 'chunk-unavailable' }, gameplay: this.view(), commits: [] };
+    const submittedAction = structuredClone(action);
+    if (!(await this.mutationPreparation.prepareAction(submittedAction, this.playerId)))
+      return unavailableAuthorityPlayerAction(submittedAction, this.view());
     const before = this.serverStateVersion();
-    const result = applyAuthorityPlayerAction(this.server, this.playerId, action, (commit) =>
+    const result = applyAuthorityPlayerAction(this.server, this.playerId, submittedAction, (commit) =>
       this.recordWorldCommit(commit),
     );
     this.commitIfServerChanged(before);
-    return { result, gameplay: this.view(), commits: this.takeCommits() };
+    return { submittedAction, result, gameplay: this.view(), commits: this.takeCommits() };
   }
 
   commitFluidCandidate(candidate: FluidCandidate) {

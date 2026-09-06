@@ -41,7 +41,9 @@
     "preview": "vite preview",
     "midscene:verify-model": "midscene model verify",
     "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:server": "pnpm typecheck && node scripts/build-node-server.mjs",
+    "server:dedicated": "node dist/node-server/node-server.js"
   },
   "dependencies": {
     "playcanvas": "^2.21.4",
@@ -57,6 +59,7 @@
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@types/node": "26.4.1",
     "@vitest/coverage-v8": "^4.1.11",
+    "esbuild": "0.28.2",
     "eslint": "^10.9.1",
     "eslint-plugin-svelte": "^3.23.0",
     "globals": "^17.12.0",

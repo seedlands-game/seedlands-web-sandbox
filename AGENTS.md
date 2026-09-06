@@ -12,6 +12,7 @@
 - `server` 拥有权威世界、规则和存档；`client` 是协议适配、预测和派生镜像；`app` 是浏览器组合、输入、PlayCanvas 与 Svelte；`worker` 只放执行入口和传输适配。
 - `world`、`physics`、`runtime` 保持纯逻辑。`world` 不依赖 DOM、Worker、PlayCanvas、`server` 或 `client`；不得把 app 行为反向搬进这些目录。
 - 新 app/client 文件先按[目录规范](docs/repository-structure.md)选择既有职责目录。顶层仅保留已审阅的组合入口；ESLint 负责拒绝 client→app 反向依赖和未归属的顶层文件。`src/app/player-view-offsets.ts`、`src/client/performance-telemetry.ts` 仅为两个 Delivered change 的冻结路径兼容入口；新代码不得使用，待对应历史 change 归档后删除。
+- Node builtin、文件 I/O、线程/子进程和网络适配只进入 `src/node/`；`server/dedicated`、`server/compute`、`server/protocol` 维持平台无关。浏览器产物不得导入 Node 适配，Node 不得引入 app/client/PlayCanvas。
 - 移动入口或职责时更新代码地图；不要预建 `engine`、`plugins`、`shared` 等抽象。
 
 ## 轻量交付门禁

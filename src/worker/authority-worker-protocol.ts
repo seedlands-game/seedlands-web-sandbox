@@ -111,6 +111,8 @@ export type AuthorityAction =
   | Readonly<{ type: 'use-inventory'; slot: number }>;
 
 export type AuthorityActionResult = Readonly<{
+  /** 当前 Authority 总会提供；可选仅兼容历史本地 fixture。网络投影必须验证存在。 */
+  submittedAction?: AuthorityAction;
   result: unknown;
   gameplay: AuthorityGameplayView;
   commits: readonly WorldCommitResult[];

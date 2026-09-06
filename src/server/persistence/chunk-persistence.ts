@@ -26,10 +26,16 @@ export type ChunkPersistenceLoadDiagnostics = Readonly<{
   mailboxEncodingDurationMs?: number;
   replyDeliveryMs?: number;
   roundTripMs?: number;
+  measurementStatus?: Readonly<Partial<Record<ChunkPersistenceMeasurementField, ChunkPersistenceMeasurementStatus>>>;
   codecs: Readonly<Record<string, number>>;
 }>;
 
 export type ChunkPersistencePreparedStatus = 'found' | 'missing' | 'unknown';
+
+export type ChunkPersistenceMeasurementStatus = 'measured' | 'not-collected' | 'unsupported';
+
+export type ChunkPersistenceMeasurementField =
+  'queueWaitMs' | 'databaseMs' | 'transactionReadMs' | 'decodeMs' | 'totalWorkerMs' | 'roundTripMs';
 
 export interface ChunkPersistence {
   loadSnapshot(key: string): ChunkSnapshot | null;

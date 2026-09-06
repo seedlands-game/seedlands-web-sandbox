@@ -107,6 +107,17 @@ pnpm server:headless -- --seed my-debug-world
 
 The first headless harness uses in-process memory persistence. `/save` exercises both chunk and gameplay snapshot persistence and supports reload tests within the process; it does not create a durable world file after the process exits.
 
+## Experimental Node world host
+
+The standalone TypeScript world host can run without a browser and persist checkpoints to its own directory. It is under active development: network connections and the server selection UI are not available yet.
+
+```bash
+pnpm build:server
+pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world
+```
+
+The output in `dist/node-server/` runs with Node 22.12 or later and includes five ESM entry files plus its manifest. It needs no source checkout, Vite, or runtime dependency install. The default uses a dedicated authority lane, logic/fluid/general computation lanes, and a persistence lane. `--compute child-process` selects the experimental process executor; this is not a measured performance recommendation. Stop with Ctrl+C to drain work and save the final checkpoint. Use a dedicated directory; browser saves are not imported automatically. A second writer to the same directory is rejected.
+
 ## Architecture
 
 For a guided source reading route and feature-to-test lookup, start with the [code map](docs/code-map.md). See [repository structure conventions](docs/repository-structure.md) for current file placement, [development governance](docs/development-governance.md) for evidence rules, and [long-term alignment](docs/living-world-alignment.md) for goals and roadmap. Historical changes may be restored from the [archive index](docs/change-archive.md). These internal documents are maintained in Simplified Chinese.

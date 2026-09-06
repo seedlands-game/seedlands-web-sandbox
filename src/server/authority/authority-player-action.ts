@@ -1,6 +1,17 @@
-import type { AuthorityAction } from '../../worker/authority-worker-protocol';
+import type {
+  AuthorityAction,
+  AuthorityActionResult,
+  AuthorityGameplayView,
+} from '../../worker/authority-worker-protocol';
 import type { GameServer } from '../game-server';
 import type { WorldCommitResult } from '../game-server-types';
+
+export function unavailableAuthorityPlayerAction(
+  submittedAction: AuthorityAction,
+  gameplay: AuthorityGameplayView,
+): AuthorityActionResult {
+  return { submittedAction, result: { success: false, reason: 'chunk-unavailable' }, gameplay, commits: [] };
+}
 
 export function applyAuthorityPlayerAction(
   server: GameServer,

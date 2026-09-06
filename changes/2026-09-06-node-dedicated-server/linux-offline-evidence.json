@@ -1,0 +1,76 @@
+{
+  "kind": "linux-offline-functional",
+  "node": "v22.23.2",
+  "platform": "linux",
+  "arch": "arm64",
+  "network": "none",
+  "sourceSha": "485de57d542315d2556c09ca9a1ed40f152d94f2",
+  "sourceDirty": true,
+  "sourceInputsSha256": "2a7c31939bd2f0ce8b881af2121b09a4e8284ce015fc6fe91581185988654436",
+  "results": [
+    {
+      "mode": "worker-thread",
+      "first": [
+        {
+          "kind": "ready",
+          "epoch": "node-5f62bd02-9dcb-46ec-a293-6c6bab919af5",
+          "computeMode": "worker-thread",
+          "authorityThreadId": 2,
+          "persistenceThreadId": 1,
+          "durableCommitSequence": 0
+        },
+        {
+          "kind": "stopped",
+          "durableCommitSequence": 2
+        }
+      ],
+      "second": [
+        {
+          "kind": "ready",
+          "epoch": "node-27727f8e-c957-4e69-bebc-d0346ea2e273",
+          "computeMode": "worker-thread",
+          "authorityThreadId": 2,
+          "persistenceThreadId": 1,
+          "durableCommitSequence": 2
+        },
+        {
+          "kind": "stopped",
+          "durableCommitSequence": 3
+        }
+      ]
+    },
+    {
+      "mode": "child-process",
+      "first": [
+        {
+          "kind": "ready",
+          "epoch": "node-f55d9182-94fc-48a1-8b41-171a2ab70ac4",
+          "computeMode": "child-process",
+          "authorityThreadId": 2,
+          "persistenceThreadId": 1,
+          "durableCommitSequence": 0
+        },
+        {
+          "kind": "stopped",
+          "durableCommitSequence": 2
+        }
+      ],
+      "second": [
+        {
+          "kind": "ready",
+          "epoch": "node-ccb32546-f98d-46a2-88da-3ead12a361a3",
+          "computeMode": "child-process",
+          "authorityThreadId": 2,
+          "persistenceThreadId": 1,
+          "durableCommitSequence": 2
+        },
+        {
+          "kind": "stopped",
+          "durableCommitSequence": 3
+        }
+      ]
+    }
+  ],
+  "scope": "五入口产物、禁网启动、SIGTERM关停、同目录恢复；非性能、非目标x64、非设备断电或网络E2E",
+  "containerImage": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm@sha256:ecbb6f654bec924e1728b4ba5751ab587fefa639bfb8eaedac80fc357eede369"
+}

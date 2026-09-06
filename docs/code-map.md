@@ -2,7 +2,7 @@
 
 本页回答“从哪里开始读、某项行为由谁负责”。目录归属见[仓库结构规范](repository-structure.md)，宏观取舍见[长期目标与路线图](living-world-alignment.md)，运行方式与当前能力见 [README](../README.zh-CN.md)。
 
-核对日期：2026-09-06；context-engineering 目录基线。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
+核对日期：2026-09-07；context-engineering 目录基线与 Node 宿主实施接缝。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
 
 ## 第一次阅读的顺序
 
@@ -49,6 +49,14 @@ src/
     persistence/       权威存档契约、协调与内存实现
     simulation/        自主行为、感知、导航和初始生态
     headless/          无浏览器运行入口
+    dedicated/         平台无关的常驻宿主、候选 mailbox 与活动窗口
+    compute/           服务端只读候选任务合同、字节预算与算法调用
+    protocol/          网络消息投影及尚未冻结的 C0 参考 codec
+  node/                Node 平台适配；当前迁移实施中
+    server/            CLI、产品生命周期与 Authority Worker 入口
+    runtime/           有界 Node RPC、Authority façade 与进程内参考组合
+    compute/           常驻线程/子进程池、资源回收与进程内参考执行器
+    persistence/       独立存储 Worker、缓存 proxy、磁盘锁与 durable 指针
   world/               体素、坐标、确定性生成、网格与编解码纯逻辑
   physics/             身体形状、碰撞、恢复与物理求解纯逻辑
   runtime/             时钟、调度、任务队列与会话协议
@@ -87,6 +95,10 @@ flowchart TD
   Mesh --> GPU[Chunk 资源仓库 / PlayCanvas]
   AR --> Save[持久化端口 / 浏览器适配 / Persistence Worker]
 ```
+
+Node 产品接线为 [命令行入口](../src/node/server/node-server.ts) → [产品生命周期](../src/node/server/node-server-runtime.ts) → [Authority lane](../src/node/runtime/node-authority-lane.ts) → 独立 Worker 内的 [常驻宿主](../src/server/dedicated/dedicated-server-host.ts) → 同一 AuthorityRuntime。主上下文仅持异步 façade；默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。Persistence Worker 独占文件锁，Authority 通过有界 RPC 和同步缓存 proxy 读写冻结检查点；计算候选经有界 scheduler/mailbox 校验提交。关停依次等待权威排空和最终 durable ACK、存储释放锁、Worker 退出。
+
+[build-node-server.mjs](../scripts/build-node-server.mjs) 将 CLI、Authority、Persistence、compute Worker 和 compute child 打成五个独立 ESM 入口；无需 Vite 或源码运行。旧 [node-dedicated-runtime.ts](../src/node/runtime/node-dedicated-runtime.ts) 保留为进程内组合参考，不是 CLI 产品入口。网络、GUI 和完整性能准出继续按 [当前实施记录](../changes/2026-09-06-node-dedicated-server/execution.md)推进；离线宿主可运行不代表已经可远端游玩。
 
 最容易混淆的几个名称：
 
