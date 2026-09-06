@@ -4,7 +4,7 @@
 
 ## 当前恢复到哪里
 
-- 目录/代码/上下文治理的 PR #8 已通过三项必要 CI、无合并冲突，等待人类审核与合并。本分支从其 `1e3619d` 建立，直接采用整理后的 app/client 目录，降低后续路径冲突；正式实施前核对最终合入差异。
+- 目录/代码/上下文治理的 PR #8 已合并。本分支已 fetch 并同步最新 `origin/main`：`c777ba8`；其文件树与原治理基点 `1e3619d` 完全一致，合并无冲突，直接采用整理后的 app/client 目录。
 - 新分支：`codex/node-dedicated-server`。
 - 新 worktree：`/Users/chlorinec/.codex/worktrees/node-dedicated-20260906/voxel-sandbox-foundation`。
 - Wasm 线按 `36a0022` 只读参考：当前是 Rust-first 浏览器 Wasm，尚无正式 Node/NAPI。这里先做 TS，保留批量内核接口和独立版本，后续复用 Rust core 时不重写网络/权威状态机。

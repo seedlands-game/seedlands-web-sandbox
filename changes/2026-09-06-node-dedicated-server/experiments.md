@@ -18,7 +18,7 @@ Node 与 Chromium 的 V8 版本可能不同，无法完全消除引擎实现差�
 
 ### 2.1 基线登记
 
-- **B0**：本设计起点 `1e3619d` 的可玩浏览器 Integrated TS。冻结 source/tree、lock、浏览器、环境、画质、视口与当前线程角色；历史成绩不代替本轮重新采样。
+- **B0**：本设计同步后的 main 基点 `c777ba8`（文件树与原 `1e3619d` 一致） 的可玩浏览器 Integrated TS。冻结 source/tree、lock、浏览器、环境、画质、视口与当前线程角色；历史成绩不代替本轮重新采样。
 - **B1**：完成迁移所需接口/职责拆分后的浏览器 Integrated TS；Wasm 全关。与 Node 共用权威/任务合同和 canonical-only 路径，客户端 mesh 负载独立记录。
 - **N-inline**：相同 TS authority 与候选任务在一个 Node JS 执行上下文运行的正确性/单线程参照，异步 I/O 不伪称 JS 并发计算。它不是替代现有五 Worker 浏览器的公平性能基线。
 - **N-eq**：Node 等价职责基线：Authority、Logic、Fluid、general、persistence 各一条常驻 lane。其 Worker 适配只是对应已有浏览器并行能力，扩池等 Node 优化全关。
