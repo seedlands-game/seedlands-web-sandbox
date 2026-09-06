@@ -1,4 +1,5 @@
 import * as pc from 'playcanvas';
+import { EnvironmentPresentationClock } from '../client/environment-presentation-clock';
 import { cssRgb, sampleEnvironment, type Rgb } from './environment-palette';
 import type { QualityProfile } from './quality-profile';
 import { celestialDirection, SkySun } from './sky-sun';
@@ -11,6 +12,8 @@ export class WorldEnvironment {
   paused = false;
   speed = 1;
   private elapsed = 0;
+  private readonly presentationClock = new EnvironmentPresentationClock(this.worldTime);
+  private presentedWorldTime = this.worldTime;
   private readonly skySun: SkySun;
   private underwaterBlend = 0;
   private waterFlow: readonly [number, number] = [0.92, 0.39];
@@ -30,6 +33,7 @@ export class WorldEnvironment {
   update(dt: number, worldTime = this.worldTime) {
     this.elapsed += dt;
     this.worldTime = ((worldTime % 24) + 24) % 24;
+    this.presentedWorldTime = this.presentationClock.advance(this.worldTime, dt, this.paused);
     const waterOffset = (this.elapsed * 0.026 * this.quality.waterQuality) % 1;
     this.water.forEach((material) =>
       material.diffuseMapOffset.set(waterOffset * this.waterFlow[0], waterOffset * this.waterFlow[1]),
@@ -39,6 +43,7 @@ export class WorldEnvironment {
 
   setTime(hour: number) {
     this.worldTime = ((hour % 24) + 24) % 24;
+    this.presentedWorldTime = this.presentationClock.reset(this.worldTime);
     this.apply();
   }
 
@@ -65,11 +70,16 @@ export class WorldEnvironment {
   }
 
   sunSnapshot(camera: pc.Entity) {
-    return this.skySun.snapshot(camera);
+    return {
+      ...this.skySun.snapshot(camera),
+      presentedWorldTime: this.presentedWorldTime,
+      shadowCascades: this.sun.light?.numCascades ?? 0,
+      shadowResolution: this.sun.light?.shadowResolution ?? 0,
+    };
   }
 
   get phase() {
-    const hour = this.worldTime;
+    const hour = this.presentedWorldTime;
     if (hour < 5.5 || hour >= 20) return 'Night';
     if (hour < 8) return 'Dawn';
     if (hour < 17.5) return 'Day';
@@ -77,10 +87,10 @@ export class WorldEnvironment {
   }
 
   private apply() {
-    const state = sampleEnvironment(this.worldTime);
-    const sunAngle = ((this.worldTime - 6) / 24) * Math.PI * 2;
+    const state = sampleEnvironment(this.presentedWorldTime);
+    const sunAngle = ((this.presentedWorldTime - 6) / 24) * Math.PI * 2;
     const elevation = Math.sin(sunAngle);
-    const azimuth = (this.worldTime / 24) * 360 - 35;
+    const azimuth = (this.presentedWorldTime / 24) * 360 - 35;
     this.sun.setEulerAngles(90 - (Math.asin(Math.max(-1, Math.min(1, elevation))) * 180) / Math.PI, azimuth, 0);
     if (this.sun.light) {
       this.sun.light.intensity = state.intensity;
@@ -95,6 +105,6 @@ export class WorldEnvironment {
     document.documentElement.style.setProperty('--sky-glow', cssRgb(state.sun));
     const camera = this.app.root.findByName('Player');
     if (camera instanceof pc.Entity)
-      this.skySun.update(camera, celestialDirection(this.worldTime), normalizedColor(state.sun));
+      this.skySun.update(camera, celestialDirection(this.presentedWorldTime), normalizedColor(state.sun));
   }
 }

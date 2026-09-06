@@ -3,6 +3,7 @@ import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/perform
 import type { StreamingVariant } from './app-contracts';
 import * as pc from 'playcanvas';
 import type { LightingQualityBudget } from './advanced-lighting-budget';
+import { sunShadowOptions } from './sun-shadow-policy';
 
 class DesktopApplication extends pc.Application {
   override init(options: pc.AppOptions) {
@@ -30,11 +31,9 @@ export function createSun(app: pc.Application, budget: LightingQualityBudget) {
     type: 'directional',
     color: new pc.Color(1, 0.9, 0.72),
     intensity: 1,
-    castShadows: budget.sunShadowResolution > 0,
-    shadowResolution: budget.sunShadowResolution || 512,
-    shadowType: pc.SHADOW_PCF3_32F,
+    ...sunShadowOptions(budget.sunShadowResolution),
+    shadowType: budget.sunShadowResolution === 1024 ? pc.SHADOW_PCF5_32F : pc.SHADOW_PCF3_32F,
     shadowUpdateMode: pc.SHADOWUPDATE_REALTIME,
-    shadowDistance: 58,
     shadowBias: 0.18,
     normalOffsetBias: 0.06,
   });

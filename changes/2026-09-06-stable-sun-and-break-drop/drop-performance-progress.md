@@ -44,3 +44,18 @@
 最终视频在 `8.76s`、`8.86s`、`8.96s`、`9.06s` 提取四张未经修改的原始帧，组成 `/tmp/seedlands-break-drop-gallery-1mm/drop-presentation.html`。`midscene/drop-motion.yaml` 对早期、中期、近地和落地帧完成视觉检查，结果 `1/1` GREEN（`6.67s`）；摘要 `/tmp/seedlands-drop-motion-midscene.json`，报告 `midscene_run/report/drop-motion-2026-09-06_17-27-44-e726d64d.html`。画面中同一泥土物件连续下降并落到固定地面，没有复制、穿地、悬浮或表现残留。
 
 独立 Sol 最终复核未发现 P1：Authority view 仍是唯一目标，只有 rAF 推进表现时钟，快照回调不移动节点；`1mm` 收敛不会触发 `2cm/50ms` 慢速目标阶跃。当前未改 Authority、物理、世界格式、Chunk remesh 或素材画质；首轮逐帧证据不支持额外缓存、批处理或物理特例，因此没有加入未经证实的优化。
+
+## 最终统一构建证据
+
+最终统一验收使用生产 bundle `index-CiwZAdXy.js`，SHA-256 为 `f80bfdaa82d0155d0ccab8c79410f0696d851f655bfa7d4a6078a9b504b08ac8`。六项同源运行的原始报告为 `/tmp/seedlands-stable-sun-drop-final.jsonlog`，解码附件位于 `/tmp/seedlands-stable-sun-drop-final`。本模块两项均为 `PASS`，耗时分别为 `11.430s` 和 `10.269s`；统一运行总体为 `5 PASS / 1 FAIL`，唯一失败是 High 阴影指标，不能把整轮写成全绿，也不改变掉落两项的通过结果。
+
+真实连续破坏用例采集 `221` 个渲染帧，从首次方块变为空气开始的事件窗口包含 `202` 帧：p50 `16.70ms`、p95 `17.50ms`、最大 `21.10ms`，没有越过 `33.34ms` 的事件相关长帧。两个掉落 `world-item-3` 与 `world-item-4` 均在 Authority `physicsTick=541` 接地，脚底分别为 `[0.5,49.000001,-2.5]` 与 `[0.5,49.000001,-3.5]`，速度归零且没有提前拾取。Chunk 管线同场景记录的上限为每帧 `1` 次 mesh commit、`2` 个 mesh part，结束时上传队列为 `0`，估算 mesh 字节数 `139580`；这些是已有 Chunk/Worker 上传诊断，不冒充未采集的整帧 GPU 时间。
+
+真实表现节点用例采集 `59` 帧，其中下落 `36` 帧、相邻下落区间 `35` 个，`35/35` 都发生向下位移，最大向上增量仍为负值 `-0.000526m`，没有反向跳动。落地后采集 `23` 帧：表现节点相对最终视觉目标的误差从 `0.699514m` 收敛到第十二帧 `0.024968m`，并在 `366.8ms` 后收敛到 `0.00000129m`。该用例从泥土库存 `0` 开始且整体断言通过，因而拾取后库存精确为 `1`，Authority body 与表现节点均已移除；最终清理画面为 `/tmp/seedlands-stable-sun-drop-final/break-drop-picked-up.png`。
+
+两段原始 Playwright 视频已复制到不会被后续 `test-results` 清理的长期临时目录：
+
+- `/tmp/seedlands-stable-sun-drop-final-artifacts/changes-2026-09-06-stable--e1777-nce-真实连续采集生成掉落并落地时不产生事件相关长帧-chromium/video.webm`，`625819` 字节，SHA-256 `1d1d4d63db1d41d773b95df9101bcf4f369fef4e0f99a058f991ef4b61072f1e`。
+- `/tmp/seedlands-stable-sun-drop-final-artifacts/changes-2026-09-06-stable--b957d-mance-真实掉落节点按渲染帧连续落地且拾取后不残留-chromium/video.webm`，`850043` 字节，SHA-256 `fae61ca2b856f0c9e0d2cc4415578657582937015f7e6e4de89988805778b285`。
+
+原始 Midscene 汇总已复制到 `evidence/drop-midscene-summary.json`，记录 `1/1` 成功、耗时 `6.672s`。此前 `test-results` 下的视频可能已被后续 Playwright 运行清理，因此最终证据以本节的统一 bundle、解码附件、永久临时视频和仓库内 Midscene 汇总为准。
