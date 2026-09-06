@@ -4,45 +4,48 @@
 
 ## 一、当前覆盖边界
 
-用户要求读取 [Living World Project](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/project) 的所有上下文。当前实际取得：
+用户要求读取 [Living World Project](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/project) 的所有上下文。目前已建立页面列出的 18 篇会话清单与完整链接；仍未证实是否存在更多项目来源或隐藏条目。
 
-- Project 页面呈现的 18 篇会话标题与末条预览，其中 16 篇取得了完整 URL；未证实是否还有分页、归档会话或更多项目来源。
-- 《无职转生游戏设计》可见的后段正文：MVP 技术方案总结、开发 Harness 讨论、CLI/MCP 比较；更早对话、折叠用户消息与生成文件正文尚未完整读取。
-- 本机已保存的 C/S 架构、Agent Runtime、Agent Authorization 文件；这些是历史设计输入，不代表当前实现与本轮批准。
-- 远端 main 提交、README、关键源码与相关 change。未复跑历史产品测试。
+本轮重试有实质进展：用户明确允许 AppleScript 后，使用 Chrome 原生“选择全文 / 复制 / 保存完整网页”取得多篇正文，不需要打开“允许 Apple 事件中的 JavaScript”。另从本机此前任务的工具回执恢复 HUD、音频、渲染讨论中的原始消息与摘要。已补齐：
 
-尚未完成 Project 全量阅读。浏览器连接多次超时，原生 UI 后续动作返回 `noWindowsAvailable`；公开网页仅返回登录页。本记录不据此推断原对话不存在。
+- 最初选择 Minecraft 的三项理由、三项产品核心、2D 与 3D 体素重新比较、自建世界模型的用户原话。
+- PlayCanvas 完整问答中的回顾性解释；与当前实现交叉核对。
+- 插件与统一控制面的后段讨论、用户对模拟岛及 WASM 的最终收敛、Agent change 必须形成独立可验证产物的纠偏。
+- HUD 的历史用户消息，以及两篇早期 Minecraft 生态讨论的当前正文。
+- 本机历史 C/S、Agent Runtime、Agent Authorization 文件和主分支实现证据。
+
+**仍未完成 Project 全量阅读。**页面会只加载部分消息；展开早期提问后还会有中段缺失，个别正文中的代码区也没有完整保存。若读取结果只有项目页或首页，不记为会话正文。Project“来源”页与世界观附件仍缺失。本索引逐篇记录实际覆盖，不能以会话标题、已取得 URL 或成功保存网页替代全文读取。
 
 ## 二、来源目录
 
-| 编号 | 来源                                                                                                                                                     | 已读取范围与用途                                                                                                                                        |
-| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| S0   | 本次用户消息，2026-09-06                                                                                                                                 | 完整；长期方向、两路并行、异世界首个 MVP、长期对齐与 SDD 分工的直接依据                                                                                 |
-| S1   | 仓库 main `3938eed27793cd342558165d061792ab9f12dd2a`                                                                                                     | 远端指针已核实；README、关键源码与交付记录用于当前进度；不是新一轮产品验收                                                                              |
-| S2   | [浏览器体素竞品比较](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9cf124-5a00-83ee-8181-7390523922ad)                                  | 仅项目预览；明确提到本地网络 Node Dedicated、效率验证、packet/编解码/协议成本；完整后续路线待正文                                                       |
-| S3   | [无职转生游戏设计](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a7d65b8-383c-83ee-bce3-81eb8c1d7bf8)          | 已读后段正文；原世界观、前段设计过程、折叠消息和生成文件待补齐                                                                                          |
-| S4   | 本机保存的 `Architecture Decision — Integrated Server to MMO.md`、`Change 10 — Agent Runtime & Game Integration Foundation.md`                           | C/S 与 Agent 文件已分段读完；两份 Agent 下载副本内容相同，SHA-256 为 `91329df789c0ee0fdc0ec56f7b37f4e74f53ba67207b7f13e3d889d7d4486406`；不是已实施状态 |
-| S5   | [体素项目阶段规划](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9bef26-0334-83ee-8eaa-6eff00a330c5)                                    | 仅预览；用户强调人、AI、API 统一写入与世界记忆，完整控制面/插件关系待核对                                                                               |
-| S6   | 本机保存的 `Change 11 — Agent Authorization Foundation.md`                                                                                               | 全文已读；Principal、Role、Capability、Resource Scope 同时约束观察与行为；历史方案                                                                      |
-| S7   | [调研 Minecraft AI开发环境](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a96940f-3bb0-83ee-ba6b-a41295b684f8) | 仅预览；用户提出摆脱完整本机 MC 客户端、类似 FaaS sandbox 的开发诉求                                                                                    |
-| S8   | [分析EaglerPorts实现](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a96991e-b094-83ee-8163-5dd58196335a)       | 仅预览；Java/JVM 到 WASM/Web 的平台边界讨论，未读完整论证                                                                                               |
-| S9   | [设计2D网页游戏方案](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a993983-d1c4-83e8-a394-64b18756f0f7)        | 仅标题及末条预览；不得据标题断定最终选择 2D，需补从此对话到 3D 体素的决定                                                                               |
-| S10  | [Voxel Shader 实现](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a9a5d8e-9924-83e8-aec1-3610b1d05418)         | 仅预览；仓库 MVP spec 另有当时读取与实现总结，本轮未读全文                                                                                              |
-| S11  | [选择PlayCanvas原因](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9cf875-75e0-83e8-8698-11e0c582d2bc)                                  | 仅用户问题预览；Three.js / Babylon.js / PlayCanvas 等实际比较结论未读                                                                                   |
-| S12  | [Godot Web与生产架构](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a9a41b5-6570-83e8-b073-5cd0e81b8a32)       | 仅用户末条预览；workload 按模拟计算划分、模拟岛与 worker 分离的方向可确认，完整约束未读                                                                 |
-| S13  | [WASM迁移可行性分析](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a99760f-a60c-83e8-8b4b-938cb0bb9575)        | 仅用户末条预览；先 TypedArray/SoA，WASM 独立 A/B 后决定默认选项                                                                                         |
-| S14  | [HUD框架选型比较](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9a996f-0334-83ee-a15b-8dead826f85a)                                     | 仅预览与仓库 MVP spec 的既有摘要；当前 Svelte/UiBridge 实现由仓库确认，完整选型过程待补                                                                 |
-| S15  | [设计电子音乐系统](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a9a3cf4-7194-83e8-a462-0059b955e626)          | 仅预览与仓库已有交付记录；完整音乐价值与风格讨论待补                                                                                                    |
-| S16  | [体素世界引擎架构](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a99952a-73c0-83e8-961b-1c04cc8b87c1)          | 仅标题与末条预览；需核对历史 Change 4–11 顺序及其论证                                                                                                   |
-| S17  | [Voxel GitHub Sync](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9a6024-9838-83ee-a18f-ca435041ae43)                                   | 仅预览；用户说将 MVP 合入 main，实际合入已通过 S1 验证                                                                                                  |
-| S18a | [Rustcraft图形技术栈解析](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a7bf009-131c-83ee-92ce-517a9a80e21e)   | 仅预览；Pumpkin/MC 客户端网络栈探索，不能推断已实施                                                                                                     |
-| S18b | [Minecraft 渲染优化调研](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a70a374-fb34-83ec-98d4-f6cdba2d69dd)    | 仅预览；Distant Horizons、Voxy、Sodium、Iris 等角色比较的请求，未取得研究结论                                                                           |
-| S18c | Minecraft 渲染优化研究                                                                                                                                   | 仅项目中标题及预览，完整 URL 未取得；不假定与 S18b 完全重复                                                                                             |
-| S18d | 推荐村民AI机制Mod                                                                                                                                        | 仅项目中标题及简短预览，完整 URL 未取得                                                                                                                 |
+| 编号 | 来源                                                                                                                                                     | 已读取范围与用途                                                                                                                                                    |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S0   | 本次用户消息，2026-09-06                                                                                                                                 | 完整；长期方向、两路并行、异世界首个 MVP、长期对齐与 SDD 分工的直接依据                                                                                             |
+| S1   | 仓库 main `3938eed27793cd342558165d061792ab9f12dd2a`                                                                                                     | 远端指针已核实；README、关键源码与交付记录用于当前进度；不是新一轮产品验收                                                                                          |
+| S2   | [浏览器体素竞品比较](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9cf124-5a00-83ee-8181-7390523922ad)                                  | 项目预览已读；多种地址导航返回项目页/首页，未取得完整正文。明确的 LAN Dedicated、包与编解码成本来自预览；两路方向以 S0 为直接依据                                   |
+| S3   | [无职转生游戏设计](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a7d65b8-383c-83ee-bce3-81eb8c1d7bf8)          | 已保存后段正文，补齐此前折叠的自主开发 Harness 用户消息；早期世界观与三份生成附件仍缺失                                                                             |
+| S4   | 本机保存的 `Architecture Decision — Integrated Server to MMO.md`、`Change 10 — Agent Runtime & Game Integration Foundation.md`                           | C/S 与 Agent 文件已分段读完；两份 Agent 下载副本内容相同，SHA-256 为 `91329df789c0ee0fdc0ec56f7b37f4e74f53ba67207b7f13e3d889d7d4486406`；不是已实施状态             |
+| S5   | [体素项目阶段规划](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9bef26-0334-83ee-8eaa-6eff00a330c5)                                    | 已读后段 5 条消息：Simulation LOD / Agent 原生 / 单一事实的助手归纳、插件建议、用户对统一写入/语义化/权限的明确要求及回复；前段未补齐                               |
+| S6   | 本机保存的 `Change 11 — Agent Authorization Foundation.md`                                                                                               | 全文已读；Principal、Role、Capability、Resource Scope 同时约束观察与行为；历史方案                                                                                  |
+| S7   | [调研 Minecraft AI开发环境](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a96940f-3bb0-83ee-ba6b-a41295b684f8) | 已读当前页面 2 组问答：Web 式快速开发环境、FaaS/容器/WASM sandbox 诉求及当时调研回复；外部工具现状未重新核验                                                        |
+| S8   | [分析EaglerPorts实现](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a96991e-b094-83ee-8163-5dd58196335a)       | 仅项目预览；多种地址导航未取得正文，不能将 Java/WASM 平台探索当作已采用路线                                                                                         |
+| S9   | [设计2D网页游戏方案](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a993983-d1c4-83e8-a394-64b18756f0f7)        | 已取得开头的 2D 提案、用户 Minecraft 动机与三项产品核心、自建世界模型理由，以及最后 3 个 change 讨论；页面目录为 14 个提问，中段仍缺失                              |
+| S10  | [Voxel Shader 实现](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a9a5d8e-9924-83e8-aec1-3610b1d05418)         | 从历史 MVP 工具回执恢复部分用户消息与助手片段；本轮直接导航未取得正文。只用于确认曾讨论的渲染边界与线程取舍                                                         |
+| S11  | [选择PlayCanvas原因](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9cf875-75e0-83e8-8698-11e0c582d2bc)                                  | 当前问答完整取得；这是回顾性选型解释，区分于最初决策原文和本轮第三方技术评测                                                                                        |
+| S12  | [Godot Web与生产架构](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a9a41b5-6570-83e8-b073-5cd0e81b8a32)       | 已取得末段 5 条消息，含用户完整的模拟岛/Worker/写权限/拆合条件与前期单岛设定；页面目录 11 个提问，前段与最终技术方案附件待补                                        |
+| S13  | [WASM迁移可行性分析](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a99760f-a60c-83e8-8b4b-938cb0bb9575)        | 已取得末段 5 条消息，包含用户从提前考虑 WASM 到最后要求数据布局先行、独立 A/B 的纠偏；前段未核完                                                                    |
+| S14  | [HUD框架选型比较](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9a996f-0334-83ee-a15b-8dead826f85a)                                     | 历史任务回执恢复 10 轮用户消息及截断的助手回复；本轮另取得末段正文。可确认 Svelte/CSS/素材、不同频率 Store、放弃 GPU UI 叠层与暂缓 Godot 抽象；完整助手比较仍有缺口 |
+| S15  | [设计电子音乐系统](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a9a3cf4-7194-83e8-a462-0059b955e626)          | 历史任务回执恢复音频风格、电子合成、世界实例生命周期与独立音频 change 的部分讨论；本轮直接导航未取得完整正文                                                        |
+| S16  | [体素世界引擎架构](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a99952a-73c0-83e8-961b-1c04cc8b87c1)          | 取得末段 5 条消息；用户明确要求 Runtime/Context/Bridge 合成一个可独立验证的 Change 10，权限另作 Change 11。部分代码区缺失，早期 4–9 论证未完整读取                  |
+| S17  | [Voxel GitHub Sync](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a9a6024-9838-83ee-a18f-ca435041ae43)                                   | 仅预览；用户表示 MVP 合入 main，合入事实由 S1 验证；本轮未取得正文                                                                                                  |
+| S18a | [Rustcraft图形技术栈解析](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a7bf009-131c-83ee-92ce-517a9a80e21e)   | 仅预览；Pumpkin/客户端网络栈探索，不能推断已实施；本轮未取得正文                                                                                                    |
+| S18b | [Minecraft 渲染优化调研](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a70a374-fb34-83ec-98d4-f6cdba2d69dd)    | 仅预览；未取得本篇正文，不将另一篇相似研究自动视为同一来源                                                                                                          |
+| S18c | [Minecraft 渲染优化研究](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a70a355-95f8-83ec-826b-9ca1a88a2b4b)                              | 已取得当前一组问答；用于理解用户希望厘清 LOD、渲染后端与优化职责的背景，助手的技术判断未重新验证                                                                    |
+| S18d | [推荐村民AI机制Mod](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a839a3b-944c-83ee-ab58-6f75ee73fffd)                                   | 已取得当前一组问答；历史建议围绕个体、聚落、生产物流、环境反馈与行动执行分层；不代表采用任何 Mod，亦不将旧版本/功能描述当作当前事实                                 |
 
 ## 三、待补齐的项目来源与附件
 
-Project 的“来源”标签尚未打开核对，不将会话目录当作全部上下文。在 S3 已看到但尚未读取正文的文件包括：
+Project 的“来源”标签尚未成功打开核对，不将会话目录当作全部上下文。在 S3 已看到但尚未读取正文的文件包括：
 
 - `world-design-foundation.md`：世界观与核心玩法基础方案。
 - `mvp-technical-design.md`：早期 Minecraft MVP 技术方案。
@@ -53,9 +56,9 @@ Project 的“来源”标签尚未打开核对，不将会话目录当作全部
 ## 四、恢复阅读次序
 
 1. 项目来源、S3 完整历史与世界观附件：恢复最终游戏体验、体素载体动机、自由度与世界规律。
-2. S7 → S8 → S9 → S11：补齐 Minecraft → Web 自建与 PlayCanvas 的真实比较过程。
+2. S9 的其余历史提问、S8 与原始 Foundation 附件：已读原话解释了 Minecraft 与体素选择，继续补齐 Web 技术落地与最初比较的细节。
 3. S16、S4、S12、S13：复核逻辑 C/S、数据布局、模拟岛及规模化的演进条件。
-4. S5、S2：读取当前引擎/插件与 Dedicated/Agent 两路的完整结论，修正建议里程碑。
+4. S2 完整后续路线、S5 前段：复核建议里程碑；S5 后段已读，统一控制面动机已补齐。
 5. S14、S10、S15、S17、S18：补齐表现、工程和早期生态背景，识别已过期建议。
 6. 遍历每篇会话历史分页、折叠消息及附件，核对是否有新增条目；完成后更新此索引和主文状态。
 
@@ -64,3 +67,11 @@ Project 的“来源”标签尚未打开核对，不将会话目录当作全部
 用户原话、助手建议、下载方案和已合并实现是不同证据。历史文件的 Accepted 标记不能替代新 change 的批准；标题和摘要不等于正文；代码证明采用了什么，不自动证明为何选择。
 
 补全资料时优先找出用户纠偏、最后确认和前提变化。若两条资料冲突，保留时间与作用范围，不能仅取更符合当前设想的那条。
+
+## 六、本轮替代读取的可恢复记录
+
+- 浏览器 JavaScript 读取被 Chrome 设置拒绝；没有开启该设置。原生网页保存与复制可以读取已加载内容。
+- 同一任务建立的 Chrome 阅读标签页为 `1263506518`；原始用户标签页为 `1263506398`。这些仅是当次会话标识，不是长期自动化接口。
+- 本地临时阅读材料位于 `/private/tmp/living-world-context-recovery/`。它们未纳入仓库，不作为永久唯一来源；正文归纳仍引用原会话。
+- 历史工具回执取自 2026-09-05 的 MVP 任务 `01a06e0e-a50c-76d3-b9c5-efeb302f3a58`；其中第 104 行保存 HUD 的 10 轮摘要，第 46、57、64 行保存音频/渲染的部分原始文本，第 94 行补齐两个早期会话 URL。摘要截断处没有被补写成原文。
+- 本轮读到的原始消息、历史助手建议、下载方案与主分支代码继续分别标注；旧研究中的外部软件能力与性能数字不进入本文作为当前事实。
