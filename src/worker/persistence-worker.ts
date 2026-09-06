@@ -12,6 +12,7 @@ import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 import { loadPersistenceBatch } from './persistence-load-many';
 import { persistChunkSnapshots } from './persistence-save';
+import { ProceduralChunkBaseCache } from './procedural-chunk-base-cache';
 import type {
   PersistenceCorpusSummary as CorpusSummary,
   PersistenceInitTask as InitTask,
@@ -40,6 +41,9 @@ type ActivePersistenceWorkerTask = {
   encoding?: PersistenceWorkerEncoding;
 };
 let activeTask: ActivePersistenceWorkerTask | undefined;
+const proceduralBaseCache = new ProceduralChunkBaseCache(({ seedText, generatorVersion, cx, cy, cz }) =>
+  makeChunk(normalizeSeed(seedText), cx, cy, cz, [], generatorVersion),
+);
 
 const recordEncoding = (task: ActivePersistenceWorkerTask, startedAtMs: number, completedAtMs: number) => {
   task.encoding = {
@@ -82,7 +86,13 @@ const database = () => {
 
 const proceduralChunk = (cx: number, cy: number, cz: number) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  return makeChunk(normalizeSeed(config.seedText), cx, cy, cz, [], config.generatorVersion);
+  return proceduralBaseCache.get({
+    seedText: config.seedText,
+    generatorVersion: config.generatorVersion,
+    cx,
+    cy,
+    cz,
+  });
 };
 
 const normalizeRecord = (value: unknown): StoredChunkRecord => {
@@ -107,6 +117,7 @@ const normalizeRecord = (value: unknown): StoredChunkRecord => {
 };
 
 const initialize = async (task: InitTask) => {
+  proceduralBaseCache.clear();
   databasePromise = openDatabase(task.databaseName);
   const opened = await databasePromise;
   const transaction = opened.transaction('worlds', 'readwrite');
