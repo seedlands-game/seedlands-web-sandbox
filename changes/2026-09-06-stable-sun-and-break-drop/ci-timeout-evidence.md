@@ -32,6 +32,6 @@
 ## 定向 GREEN
 
 - `pnpm exec vitest run tests/server/headless-session.test.ts tests/server/server-headless-cli.test.ts tests/server/gameplay-command-persistence.test.ts`：退出码 0；3 个文件、20 项测试全部通过，用时 12.80 秒。
-- `pnpm exec prettier --check changes/2026-09-06-independent-loops-unified-physics/ci-timeout-evidence.md tests/server/headless-session.test.ts tests/server/server-headless-cli.test.ts tests/server/gameplay-command-persistence.test.ts`：退出码 0。
+- `pnpm exec prettier --check changes/2026-09-06-stable-sun-and-break-drop/ci-timeout-evidence.md tests/server/headless-session.test.ts tests/server/server-headless-cli.test.ts tests/server/gameplay-command-persistence.test.ts`：退出码 0。
 - `pnpm exec eslint tests/server/headless-session.test.ts tests/server/server-headless-cli.test.ts tests/server/gameplay-command-persistence.test.ts`：退出码 0。
 - 未运行浏览器、完整静态检查或生产构建；完整 CI 等远端新提交后验证。
