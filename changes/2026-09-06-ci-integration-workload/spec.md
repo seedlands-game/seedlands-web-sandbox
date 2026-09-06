@@ -56,15 +56,17 @@ PR #7 的 GitHub Actions run `34027831088` 在 Ubuntu 24.04、Node.js 22.12.0 �
 | C4   | 不改生产、全局 timeout、全局并发、coverage 或产品性能门槛             | Static、Git diff  |
 | C5   | 本机定向检查通过；最终 Ubuntu coverage 完整静态检查不再发生这三项超时 | Static、GitHub CI |
 
+C5 实际结果：提交 `68da9964a63c755776ec2c9d8f01872f0af720b7` 的 GitHub Actions run `34028250840` 中，`Static verification` job `101472989790` 为 SUCCESS；三项原超时均未复现。
+
 ## 任务与当前状态
 
 - [x] 读取远端失败日志并定位三个同步工作量边界。
 - [x] 在生产修改前记录真实 CI RED 与最小方案。
 - [x] 拆分流体和多 seed 测试声明，调整 long tick 单项预算。
 - [x] 执行定向测试与静态检查。
-- [ ] 推送后由 GitHub Actions 验证完整 coverage。
+- [x] 推送后由 GitHub Actions 验证完整 coverage。
 
-当前阶段：本机定向 GREEN，等待远端完整 coverage。
+当前阶段：本机定向与 Ubuntu 完整静态检查均 GREEN；本 change 完成。
 
 ## 交付快照
 
@@ -78,6 +80,10 @@ PR #7 的 GitHub Actions run `34027831088` 在 Ubuntu 24.04、Node.js 22.12.0 �
 
 定向 `pnpm exec vitest run` 结果为 3 个文件、28 项全部通过，退出码 0，用时 11.98 秒；日志 `/tmp/seedlands-ci-integration-workload-targeted.log`，SHA-256 为 `461eb891b6aec13c04eec2459e7db0e220b7f44f68a413d846bb7d383a98f977`。受影响文件的 Prettier、ESLint、完整 `pnpm typecheck` 和 diff check 均通过。
 
-拆分后完整仓库预期测试计数为 753 个通过、4 个跳过，但本轮按范围没有重复执行本机全量 coverage。最终 C5 保持待完成，必须以推送后的 Ubuntu GitHub Actions 为准。本轮没有修改生产代码、全局配置或性能门槛。
+远端 GitHub Actions run `34028250840` 的 `Static verification` job `101472989790` 在 Ubuntu 24.04、Node.js 22.12.0 上完成完整 `pnpm verify:static`：147 个文件通过、2 个跳过；753 项测试通过、4 项跳过；Vitest 用时 101.14 秒；Svelte 0 error、0 warning，TypeScript、格式、ESLint 与 ls-lint 均通过。公开 job：<https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34028250840/job/101472989790>。
+
+远端原始日志保存在 `/tmp/seedlands-ci-workload-static-green.log`，SHA-256 为 `bbc6986f242bfb2e740c1c31c406b2c2abededc8bd93ee5482e19f5c6a1d13fe`。该日志仅证明 static job；随后同一 workflow 的 Production build 与 Chromium regression 也实际 SUCCESS，整个run成功，Pages部署按PR策略跳过。生产构建用时51秒，Chromium回归job用时3分22秒。
+
+本轮没有修改生产代码、全局配置或性能门槛；生产源码与本 change 前一致。
 
 原始失败日志保存在 `/tmp/seedlands-final-pr-ci-failure.log`；公开 run 为 <https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34027831088>。
