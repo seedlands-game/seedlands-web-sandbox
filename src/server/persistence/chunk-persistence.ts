@@ -21,9 +21,9 @@ export type ChunkPersistenceLoadDiagnostics = Readonly<{
   decodeMs: number;
   totalWorkerMs: number;
   mailboxWaitMs?: number;
-  mailboxBlockerKind?: string;
-  mailboxBlockerOverlapMs?: number;
-  mailboxBlockerEncodeMs?: number;
+  mailboxEncodingTaskKind?: string;
+  mailboxEncodingOverlapMs?: number;
+  mailboxEncodingDurationMs?: number;
   replyDeliveryMs?: number;
   roundTripMs?: number;
   codecs: Readonly<Record<string, number>>;

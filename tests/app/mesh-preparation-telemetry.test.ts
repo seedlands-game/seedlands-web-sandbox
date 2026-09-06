@@ -52,9 +52,9 @@ describe('Mesh preparation telemetry', () => {
               totalWorkerMs: 10,
               sharedDependencyCount: 18,
               mailboxWaitMs: 6,
-              mailboxBlockerKind: 'save-frozen',
-              mailboxBlockerOverlapMs: 5,
-              mailboxBlockerEncodeMs: 4,
+              mailboxEncodingTaskKind: 'save-frozen',
+              mailboxEncodingOverlapMs: 3,
+              mailboxEncodingDurationMs: 6,
               replyDeliveryMs: 7,
               roundTripMs: 25,
               codecs: { 'raw-v1': 4 },
@@ -97,9 +97,9 @@ describe('Mesh preparation telemetry', () => {
     });
     expect(events.find(({ name }) => name === 'PersistenceMailboxWait')?.args).toMatchObject({
       traceId,
-      blockerKind: 'save-frozen',
-      blockerOverlapMs: 5,
-      blockerEncodeMs: 4,
+      encodingTaskKind: 'save-frozen',
+      encodingOverlapMs: 3,
+      encodingDurationMs: 6,
     });
   });
 });

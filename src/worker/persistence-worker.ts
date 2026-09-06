@@ -11,6 +11,7 @@ import { selectWorldGeneratorVersion } from '../client/world-version-policy';
 import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 import { loadPersistenceBatch } from './persistence-load-many';
+import { persistChunkSnapshots } from './persistence-save';
 import type {
   PersistenceCorpusSummary as CorpusSummary,
   PersistenceInitTask as InitTask,
@@ -28,12 +29,25 @@ import type {
   PersistenceWorkerTask as Task,
   PersistenceWorldRecord as WorldRecord,
 } from './persistence-worker-protocol';
-import { describePersistenceMailboxBlocker, type CompletedPersistenceWorkerTask } from './persistence-worker-timing';
+import { describePersistenceMailboxEncoding, type PersistenceWorkerEncoding } from './persistence-worker-timing';
 
 let config: WorkerConfig | null = null;
 let databasePromise: Promise<IDBDatabase> | null = null;
 let taskQueue = Promise.resolve();
-let lastCompletedTask: CompletedPersistenceWorkerTask | undefined;
+let lastCompletedEncoding: PersistenceWorkerEncoding | undefined;
+type ActivePersistenceWorkerTask = {
+  kind: string;
+  encoding?: PersistenceWorkerEncoding;
+};
+let activeTask: ActivePersistenceWorkerTask | undefined;
+
+const recordEncoding = (task: ActivePersistenceWorkerTask, startedAtMs: number, completedAtMs: number) => {
+  task.encoding = {
+    kind: task.kind,
+    encodeStartedAtEpochMs: performance.timeOrigin + startedAtMs,
+    encodeCompletedAtEpochMs: performance.timeOrigin + completedAtMs,
+  };
+};
 
 const requestResult = <T>(request: IDBRequest<T>) =>
   new Promise<T>((resolve, reject) => {
@@ -194,7 +208,7 @@ const loadBatch = async (
   task: LoadBatchTask,
   queueWaitMs: number,
   receivedAtEpochMs: number,
-  previous: CompletedPersistenceWorkerTask | undefined,
+  mailboxEncodings: readonly PersistenceWorkerEncoding[],
 ) => {
   if (!Number.isFinite(task.requestSentAtEpochMs) || task.requestSentAtEpochMs < 0)
     throw new TypeError('Persistence load batch request time is invalid.');
@@ -203,63 +217,22 @@ const loadBatch = async (
     queueWaitMs,
     Math.max(0, receivedAtEpochMs - task.requestSentAtEpochMs),
   );
-  const blocker = describePersistenceMailboxBlocker(task.requestSentAtEpochMs, receivedAtEpochMs, previous);
-  return { ...result, diagnostics: { ...result.diagnostics, ...(blocker ?? {}) } };
+  const encoding = mailboxEncodings
+    .map((candidate) => describePersistenceMailboxEncoding(task.requestSentAtEpochMs, receivedAtEpochMs, candidate))
+    .find((candidate) => candidate !== undefined);
+  return { ...result, diagnostics: { ...result.diagnostics, ...(encoding ?? {}) } };
 };
 
-const save = async (task: SaveTask) => {
+const save = async (task: SaveTask, active: ActivePersistenceWorkerTask) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  const startedAt = performance.now();
-  const records = task.snapshots.map((snapshot) => {
-    const voxels = new Uint16Array(snapshot.voxels);
-    return createStoredChunkRecord({
-      worldId: config!.worldId,
-      seedText: config!.seedText,
-      cx: snapshot.cx,
-      cy: snapshot.cy,
-      cz: snapshot.cz,
-      revision: snapshot.revision,
-      formatVersion: 1,
-      voxelSchemaVersion: 1,
-      generatorVersion: config!.generatorVersion,
-      voxels,
-      proceduralVoxels: proceduralChunk(snapshot.cx, snapshot.cy, snapshot.cz),
-      ...(snapshot.fluid ? { fluid: new Uint8Array(snapshot.fluid) } : {}),
-    });
+  return persistChunkSnapshots({
+    database,
+    config,
+    snapshots: task.snapshots,
+    proceduralChunk,
+    normalizeRecord,
+    onEncodeCompleted: ({ startedAtMs, completedAtMs }) => recordEncoding(active, startedAtMs, completedAtMs),
   });
-  const encodeMs = performance.now() - startedAt;
-  const opened = await database();
-  const transaction = opened.transaction('chunks', 'readwrite', { durability: 'strict' });
-  const done = transactionDone(transaction);
-  const store = transaction.objectStore('chunks');
-  for (const record of records) {
-    const existingValue = await requestResult(store.get([record.worldId, record.cx, record.cy, record.cz]));
-    if (existingValue !== undefined) {
-      const existing = normalizeRecord(existingValue);
-      if (existing.revision > record.revision) {
-        transaction.abort();
-        await done.catch(() => undefined);
-        throw new Error(`Refusing to replace Chunk ${record.cx},${record.cy},${record.cz} with an older revision.`);
-      }
-      if (existing.revision === record.revision && existing.payloadChecksum !== record.payloadChecksum) {
-        transaction.abort();
-        await done.catch(() => undefined);
-        throw new Error(`Chunk ${record.cx},${record.cy},${record.cz} revision conflicts with stored content.`);
-      }
-    }
-    store.put(record);
-  }
-  await done;
-  const codecs = records.reduce<Record<string, number>>((counts, record) => {
-    counts[record.codec] = (counts[record.codec] ?? 0) + 1;
-    return counts;
-  }, {});
-  return {
-    saved: records.map((record) => ({ key: `${record.cx},${record.cy},${record.cz}`, revision: record.revision })),
-    recordBytes: records.reduce((sum, record) => sum + storedChunkRecordBytes(record), 0),
-    encodeMs,
-    codecs,
-  };
 };
 
 const saveMetadata = async (task: SaveMetadataTask) => {
@@ -294,7 +267,7 @@ const saveGameplay = async (task: SaveGameplayTask) => {
   return { saved: true };
 };
 
-const saveFrozen = async (task: SaveFrozenTask) => {
+const saveFrozen = async (task: SaveFrozenTask, active: ActivePersistenceWorkerTask) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
   const opened = await database();
   return persistFrozenGameSnapshot({
@@ -303,6 +276,7 @@ const saveFrozen = async (task: SaveFrozenTask) => {
     snapshot: task.snapshot,
     proceduralChunk,
     normalizeRecord,
+    onEncodeCompleted: ({ startedAtMs, completedAtMs }) => recordEncoding(active, startedAtMs, completedAtMs),
   });
 };
 
@@ -448,14 +422,15 @@ const handle = async (
   task: Task,
   queueWaitMs = 0,
   receivedAtEpochMs = 0,
-  previous?: CompletedPersistenceWorkerTask,
+  mailboxEncodings: readonly PersistenceWorkerEncoding[] = [],
+  active?: ActivePersistenceWorkerTask,
 ): Promise<unknown> => {
   if (task.kind === 'latest-world') return latestWorld(task);
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
-  if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs, receivedAtEpochMs, previous);
-  if (task.kind === 'save') return save(task);
-  if (task.kind === 'save-frozen') return saveFrozen(task);
+  if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs, receivedAtEpochMs, mailboxEncodings);
+  if (task.kind === 'save') return save(task, active!);
+  if (task.kind === 'save-frozen') return saveFrozen(task, active!);
   if (task.kind === 'save-metadata') return saveMetadata(task);
   if (task.kind === 'save-gameplay') return saveGameplay(task);
   if (task.kind === 'stats') return stats();
@@ -466,23 +441,18 @@ const handle = async (
 self.onmessage = (event: MessageEvent<Task>) => {
   const enqueuedAt = performance.now();
   const receivedAtEpochMs = performance.timeOrigin + enqueuedAt;
+  const mailboxEncodings = [activeTask?.encoding, lastCompletedEncoding].filter(
+    (encoding): encoding is PersistenceWorkerEncoding => encoding !== undefined,
+  );
   taskQueue = taskQueue.then(async () => {
     const task = event.data;
-    const previous = lastCompletedTask;
-    const startedAtEpochMs = performance.timeOrigin + performance.now();
+    const current: ActivePersistenceWorkerTask = { kind: task.kind };
+    activeTask = current;
     try {
-      const result = await handle(task, performance.now() - enqueuedAt, receivedAtEpochMs, previous);
+      const result = await handle(task, performance.now() - enqueuedAt, receivedAtEpochMs, mailboxEncodings, current);
       const completedAtEpochMs = performance.timeOrigin + performance.now();
-      const encodeMs =
-        result && typeof result === 'object' && 'encodeMs' in result && Number.isFinite(result.encodeMs)
-          ? Number(result.encodeMs)
-          : undefined;
-      lastCompletedTask = {
-        kind: task.kind,
-        startedAtEpochMs,
-        completedAtEpochMs,
-        ...(encodeMs === undefined ? {} : { encodeMs }),
-      };
+      lastCompletedEncoding = current.encoding;
+      if (activeTask === current) activeTask = undefined;
       const responseResult =
         task.kind === 'load-batch' ? { ...(result as object), responsePostedAtEpochMs: completedAtEpochMs } : result;
       const response: SuccessResponse = { requestId: task.requestId, ok: true, result: responseResult };
@@ -497,11 +467,8 @@ self.onmessage = (event: MessageEvent<Task>) => {
         });
       self.postMessage(response, transfers);
     } catch (error) {
-      lastCompletedTask = {
-        kind: task.kind,
-        startedAtEpochMs,
-        completedAtEpochMs: performance.timeOrigin + performance.now(),
-      };
+      lastCompletedEncoding = current.encoding;
+      if (activeTask === current) activeTask = undefined;
       const response: ErrorResponse = {
         requestId: task.requestId,
         ok: false,

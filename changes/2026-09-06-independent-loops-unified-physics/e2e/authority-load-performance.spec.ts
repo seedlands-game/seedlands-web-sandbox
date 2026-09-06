@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type Page, type TestInfo } from '@playwright/test';
 import type { HarnessApi } from '../../../src/app/game-harness';
 import { startHarnessWorld } from '../../../tests/e2e/support/harness';
+import { selectAuthorityLoadTrace } from './authority-load-trace';
 
 const TARGETS = [
   [-24, -12],
@@ -199,7 +200,7 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
       .poll(async () => (await snapshot(page)).fluidFeedback.count, { timeout: 15_000 })
       .toBe(before.fluidFeedback.count + 1);
   } finally {
-    const evidence = await page.evaluate(
+    const rawEvidence = await page.evaluate(
       ({ x, z, feedbackIndex }) => {
         const harness = window.__seedlandsHarness as unknown as HarnessApi;
         const current = harness.snapshot();
@@ -207,6 +208,8 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
         const targetTraceId = current.fluidFeedback.samples[feedbackIndex]?.traceId;
         return {
           target: { x, y: 49, z, targetChunkKey },
+          targetTraceId,
+          traceEvents: harness.exportPerformanceTrace().traceEvents,
           targetCells: [-1, 0, 1].flatMap((offsetZ) =>
             [-1, 0, 1].map((offsetX) => ({
               x: x + offsetX,
@@ -250,14 +253,12 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
             fluidFeedback: current.fluidFeedback,
             compute: current.compute,
           },
-          targetChunkTrace: harness
-            .exportPerformanceTrace()
-            .traceEvents.filter((event) => event.name === targetChunkKey || event.args?.traceId === targetTraceId)
-            .slice(-64),
         };
       },
       { x, z, feedbackIndex: before.fluidFeedback.count },
     );
+    const { traceEvents, targetTraceId, ...evidence } = rawEvidence;
+    const traces = selectAuthorityLoadTrace(traceEvents, evidence.target.targetChunkKey, targetTraceId);
     await testInfo.attach(`authority-fluid-target-${generalWorkers}-${index}`, {
       body: JSON.stringify(
         {
@@ -270,7 +271,7 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
             structuralEventCount: before.structuralEventCount,
             remeshSchedulingCount: before.remeshSchedulingCount,
           },
-          after: evidence,
+          after: { ...evidence, ...traces },
         },
         null,
         2,

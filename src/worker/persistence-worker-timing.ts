@@ -1,32 +1,27 @@
-export type CompletedPersistenceWorkerTask = Readonly<{
+export type PersistenceWorkerEncoding = Readonly<{
   kind: string;
-  startedAtEpochMs: number;
-  completedAtEpochMs: number;
-  encodeMs?: number;
+  encodeStartedAtEpochMs: number;
+  encodeCompletedAtEpochMs: number;
 }>;
 
-export type PersistenceMailboxBlocker = Readonly<{
-  mailboxBlockerKind: string;
-  mailboxBlockerOverlapMs: number;
-  mailboxBlockerEncodeMs?: number;
+export type PersistenceMailboxEncoding = Readonly<{
+  mailboxEncodingTaskKind: string;
+  mailboxEncodingOverlapMs: number;
+  mailboxEncodingDurationMs: number;
 }>;
 
-export function describePersistenceMailboxBlocker(
+export function describePersistenceMailboxEncoding(
   requestSentAtEpochMs: number,
   requestReceivedAtEpochMs: number,
-  previous: CompletedPersistenceWorkerTask | undefined,
-): PersistenceMailboxBlocker | undefined {
-  if (
-    !previous ||
-    previous.completedAtEpochMs <= requestSentAtEpochMs ||
-    previous.completedAtEpochMs > requestReceivedAtEpochMs
-  )
-    return undefined;
-  const overlapStartedAtEpochMs = Math.max(previous.startedAtEpochMs, requestSentAtEpochMs);
-  if (previous.completedAtEpochMs <= overlapStartedAtEpochMs) return undefined;
+  encoding: PersistenceWorkerEncoding | undefined,
+): PersistenceMailboxEncoding | undefined {
+  if (!encoding) return undefined;
+  const overlapStartedAtEpochMs = Math.max(encoding.encodeStartedAtEpochMs, requestSentAtEpochMs);
+  const overlapCompletedAtEpochMs = Math.min(encoding.encodeCompletedAtEpochMs, requestReceivedAtEpochMs);
+  if (overlapCompletedAtEpochMs <= overlapStartedAtEpochMs) return undefined;
   return {
-    mailboxBlockerKind: previous.kind,
-    mailboxBlockerOverlapMs: previous.completedAtEpochMs - overlapStartedAtEpochMs,
-    ...(previous.encodeMs === undefined ? {} : { mailboxBlockerEncodeMs: previous.encodeMs }),
+    mailboxEncodingTaskKind: encoding.kind,
+    mailboxEncodingOverlapMs: overlapCompletedAtEpochMs - overlapStartedAtEpochMs,
+    mailboxEncodingDurationMs: encoding.encodeCompletedAtEpochMs - encoding.encodeStartedAtEpochMs,
   };
 }

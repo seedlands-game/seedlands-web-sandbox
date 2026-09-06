@@ -42,6 +42,7 @@ export async function persistFrozenGameSnapshot(options: {
   snapshot: FrozenSaveTaskSnapshot;
   proceduralChunk: (cx: number, cy: number, cz: number) => Uint16Array;
   normalizeRecord: (value: unknown) => StoredChunkRecord;
+  onEncodeCompleted?: (timing: Readonly<{ startedAtMs: number; completedAtMs: number }>) => void;
 }) {
   const { config, snapshot } = options;
   const checkpoint = readGameSaveCheckpoint(snapshot)!;
@@ -69,7 +70,9 @@ export async function persistFrozenGameSnapshot(options: {
       ...(chunk.fluid ? { fluid: new Uint8Array(chunk.fluid) } : {}),
     }),
   );
-  const encodeMs = performance.now() - startedAt;
+  const encodeCompletedAt = performance.now();
+  const encodeMs = encodeCompletedAt - startedAt;
+  options.onEncodeCompleted?.({ startedAtMs: startedAt, completedAtMs: encodeCompletedAt });
   const transaction = options.database.transaction(['worlds', 'chunks'], 'readwrite', { durability: 'strict' });
   const done = transactionDone(transaction);
   try {

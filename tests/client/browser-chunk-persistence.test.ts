@@ -33,6 +33,9 @@ const diagnosticsFor = (coordinates: readonly Coordinate[], foundCount: number):
   decodeMs: foundCount ? 3 : 0,
   totalWorkerMs: 10,
   mailboxWaitMs: 6,
+  mailboxEncodingTaskKind: 'save-frozen',
+  mailboxEncodingOverlapMs: 4,
+  mailboxEncodingDurationMs: 5,
   codecs: foundCount ? { 'raw-v1': foundCount } : {},
 });
 

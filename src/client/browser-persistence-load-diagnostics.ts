@@ -38,9 +38,9 @@ export function parseBrowserPersistenceLoadBatchResult(
     !isNonNegativeFinite(parsed.decodeMs) ||
     !isNonNegativeFinite(parsed.totalWorkerMs) ||
     !isNonNegativeFinite(parsed.mailboxWaitMs) ||
-    (parsed.mailboxBlockerKind !== undefined && typeof parsed.mailboxBlockerKind !== 'string') ||
-    (parsed.mailboxBlockerOverlapMs !== undefined && !isNonNegativeFinite(parsed.mailboxBlockerOverlapMs)) ||
-    (parsed.mailboxBlockerEncodeMs !== undefined && !isNonNegativeFinite(parsed.mailboxBlockerEncodeMs)) ||
+    (parsed.mailboxEncodingTaskKind !== undefined && typeof parsed.mailboxEncodingTaskKind !== 'string') ||
+    (parsed.mailboxEncodingOverlapMs !== undefined && !isNonNegativeFinite(parsed.mailboxEncodingOverlapMs)) ||
+    (parsed.mailboxEncodingDurationMs !== undefined && !isNonNegativeFinite(parsed.mailboxEncodingDurationMs)) ||
     !isNonNegativeFinite(responsePostedAtEpochMs) ||
     !parsed.codecs ||
     typeof parsed.codecs !== 'object' ||

@@ -43,13 +43,13 @@ export function recordMeshPreparationDiagnostics(
   });
   if (persistence.mailboxWaitMs !== undefined)
     record('PersistenceMailboxWait', persistence.mailboxWaitMs, 'persistence-worker', {
-      ...(persistence.mailboxBlockerKind ? { blockerKind: persistence.mailboxBlockerKind } : {}),
-      ...(persistence.mailboxBlockerOverlapMs === undefined
+      ...(persistence.mailboxEncodingTaskKind ? { encodingTaskKind: persistence.mailboxEncodingTaskKind } : {}),
+      ...(persistence.mailboxEncodingOverlapMs === undefined
         ? {}
-        : { blockerOverlapMs: persistence.mailboxBlockerOverlapMs }),
-      ...(persistence.mailboxBlockerEncodeMs === undefined
+        : { encodingOverlapMs: persistence.mailboxEncodingOverlapMs }),
+      ...(persistence.mailboxEncodingDurationMs === undefined
         ? {}
-        : { blockerEncodeMs: persistence.mailboxBlockerEncodeMs }),
+        : { encodingDurationMs: persistence.mailboxEncodingDurationMs }),
     });
   if (persistence.replyDeliveryMs !== undefined)
     record('PersistenceReplyDelivery', persistence.replyDeliveryMs, 'authority-worker');
