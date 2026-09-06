@@ -6,6 +6,8 @@
 
 每个改变生产代码、产品行为、架构、配置或测试口径的需求，先建立 `changes/YYYY-MM-DD-kebab-name/spec.md`。它至少写清目标、范围/非目标、关键决定、Given/When/Then 行为、实施前测试设计、逐项证据、任务状态和 Delivery Snapshot。
 
+大规模 change 还必须在实施前加入「工作量与预算」或链接本 change 的 `estimates.md`，遵守[双口径估算规范](change-estimation.md)：传统 PD 与 Agent 工时/24h 连续完成时间分别估算；分模型列 credits、API 等价费用、当前额度占比、置信度和保守值 ×120% 预算。范围/模型变化与阶段结束重估，Delivery Snapshot 回填实际和缺失证据；未知不能写 0，也不自动授权创建 goal 或支出。
+
 简单且已澄清的需求走 **Agile**：短 spec、RED、实现、GREEN 和本地准出连续完成。安全、权限、持久化格式、世界生成/Chunk、渲染管线、公开契约、跨模块重构或不可逆数据走 **Breaking**：先写 spec 与用例，用户审核精确 SHA-256 后实施。目标或方案不清楚时走 **Exploration**：仅在 `/tmp` 或独立非生产位置试验，不导入产品，方向稳定后以新 spec 和新审核正式实现。
 
 审核本身不自动授权超出合同的发布、其他外部写入、权限变更或删除。项目默认交接由本用户长期授权：验收后的 change 可将功能分支推送至已配置 `origin`，并以目标分支为 base 创建或更新 PR；用户指定 `local-only`、不发 PR 或其他范围时优先。不得自动合并或绕过分支保护。`Scope`、`Decisions`、`Behaviour`、`Test Design` 或 `Acceptance` 的实质变化会使原 hash 审核失效，必须重新审核。每次准出记录 docs baseline 是否更新：跨 change 的难重建规则更新 docs；只影响局部行为时写明不更新理由。

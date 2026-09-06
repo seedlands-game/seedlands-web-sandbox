@@ -24,6 +24,8 @@ Breaking / Exploration 的用户 hash 审核只授权其合同中的实现，不
 
 默认按任务复杂度选择模型和分工，具体路由见[协作与模型路由](docs/collaboration-routing.md)；这不要求每个任务使用多个 agent。
 
+每个大规模 change 实施前必须按[工作量与预算规范](docs/change-estimation.md)登记传统 PD、AI 工时/24h 连续墙钟、分模型 credits 与 API 等价费用、当前额度及预测占比，并给出保守估计 ×120% 的预算建议。credits 不等于 token；未知费率或额度分母明确标注，不能伪造换算。范围变化与阶段准出时重估，交付回填实际值；预算讨论不自动创建 goal。
+
 ## 按需上下文
 
 - [目录规范](docs/repository-structure.md)：文件职责、当前布局、静态边界和归档位置。

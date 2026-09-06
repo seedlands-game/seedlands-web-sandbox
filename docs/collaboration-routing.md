@@ -18,3 +18,5 @@
 实现中根据实际证据升级或降级，不把近期样本当成受控的模型优劣或成本比较。现有[独立循环执行记录](../changes/2026-09-06-independent-loops-unified-physics/execution.md)和[稳定太阳/掉落合同](../changes/2026-09-06-stable-sun-and-break-drop/spec.md)只说明 Astra 曾承担主线/复杂视觉，Sol 曾承担集成审查，Terra 曾承担纯模块；它们不能证明某一模型必然更省或更好。
 
 任务成本记录应包含协调、worker、返工和验收；记录规模、完成情况、墙钟、各模型输入/缓存/输出 token，以及实际额度（若可得）。未知写 `unknown`。若需要 API 估算，使用当时的[官方模型比较页](https://developers.openai.com/api/docs/models/compare)中的每百万 token 公开单价和 `(未缓存输入×输入价 + 缓存输入×缓存价 + 输出×输出价) / 1,000,000`；API 估算不等于订阅额度或实际账单。
+
+大规模任务在分派或实现前按[工作量与预算规范](change-estimation.md)估算 PD、单 agent/拟议协作的关键路径、各模型 credits 与 API 成本、额度占比及 20% 缓冲。模型分工应比较包含协调与返工的总成本；价格、倍率和额度必须带当前来源。不要只比单价，也不要把多 agent 总工时当成墙钟节省。
