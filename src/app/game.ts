@@ -29,7 +29,7 @@ import { BrowserAuthorityClient } from '../client/browser-authority-client';
 import { BrowserComputeRuntime } from '../client/browser-compute-runtime';
 import { BrowserLogicClient } from '../client/browser-logic-client';
 import { startBrowserWorkerSession } from './browser-worker-session';
-import { createGamePlayerController, orientPlayerTowardCamp } from './game-player-controller';
+import * as gamePlayer from './game-player-controller';
 import { AuthorityPresentationSync } from './authority-presentation-sync';
 import { GameUiProjection } from './game-ui-projection';
 import { CollisionDebugRuntime } from './collision-debug-runtime';
@@ -135,9 +135,7 @@ export class Game {
       onPlayerDeath: () => this.controller?.releaseInput(),
       onCommit: (commit) => this.world?.consumeServerCommit(commit),
       onUnknownChunk: (key) => runtimeControls.requestAuthorityChunk(this.world, key),
-      onInputDecision: ({ decision, requiresResync }) => {
-        if (requiresResync || !['accepted', 'duplicate'].includes(decision)) this.controller?.resynchronizeInput();
-      },
+      onInputDecision: (decision) => gamePlayer.applyAuthorityInputDecision(this.controller, decision),
       onFatal: (error) => {
         runtimeControls.reportRuntimeFailure(this.uiSession, ++this.interactionSequence, error);
         this.onRuntimeFailure?.(error);
@@ -194,7 +192,7 @@ export class Game {
     });
     this.controller = this.createController(this.camera);
     this.controller.applyAuthoritySnapshot(authority.snapshot ?? ready.snapshot);
-    orientPlayerTowardCamp(this.controller, ready);
+    gamePlayer.orientPlayerTowardCamp(this.controller, ready);
     this.controller.install();
     authority.requestLogicObservation();
     this.installUiAndHarness();
@@ -204,7 +202,7 @@ export class Game {
   private createController(camera: pc.Entity) {
     const authority = this.authority;
     if (!authority) throw new Error('Authority client is not ready.');
-    return createGamePlayerController({
+    return gamePlayer.createGamePlayerController({
       camera,
       canvas: this.canvas,
       telemetry: this.performanceTelemetry,

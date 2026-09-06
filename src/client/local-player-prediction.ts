@@ -146,9 +146,12 @@ export class LocalPlayerPrediction {
     this.bodyValue = cloneBody(result.body);
     this.offsetValue = cloneVector(result.presentationOffset);
     this.groundedValue = snapshot.player.grounded;
-    if (snapshot.inputResyncRequired || result.resetReason) {
-      this.recordReset(result.resetReason ?? 'authority-resync');
+    if (result.resetReason) this.recordReset(result.resetReason);
+    if (snapshot.inputResyncRequired) {
+      if (!result.resetReason) this.recordReset('authority-resync');
       this.inputStream.resynchronize(snapshot.physicsTick);
+    }
+    if (snapshot.inputResyncRequired || result.resetReason) {
       this.accumulator = 0;
     }
     return result;

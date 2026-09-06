@@ -230,11 +230,7 @@ describe('Authority 输入故障传输接线', () => {
       onInputDecision: (decision) => {
         decisions.push(decision);
         const activePrediction = prediction;
-        if (
-          activePrediction &&
-          latestSnapshot &&
-          (decision.requiresResync || !['accepted', 'duplicate'].includes(decision.decision))
-        )
+        if (activePrediction && latestSnapshot && decision.requiresResync)
           activePrediction.resynchronize(latestSnapshot);
       },
       onSnapshot: (snapshot) => {
@@ -242,16 +238,16 @@ describe('Authority 输入故障传输接线', () => {
         const activePrediction = prediction;
         if (!activePrediction) return;
         activePrediction.applyAuthoritySnapshot(snapshot, world);
-        const command = activePrediction.advance({
-          elapsedSeconds: 1 / PHYSICS_HZ,
+        const commands = activePrediction.advance({
+          elapsedSeconds: 1 / 60,
           snapshot,
           world,
           issuedAtMs: Date.now(),
           forward: { x: 0, z: -1 },
           right: { x: 1, z: 0 },
           keys: { forward: true, back: false, left: false, right: false, jump: false, crouch: false },
-        }).commands[0];
-        if (command) client.sendInput(command);
+        }).commands;
+        commands.forEach((command) => client.sendInput(command));
       },
       onCommit: (commit) => {
         world.revision = commit.worldRevision;
@@ -303,7 +299,12 @@ describe('Authority 输入故障传输接线', () => {
     await expect(starting).resolves.toStrictEqual(ready);
 
     expect(initialPredictionTick).toBeGreaterThan(ready.snapshot.physicsTick);
-    expect(raw.decisions.every((decision) => decision === 'accepted' || decision === 'duplicate')).toBe(true);
+    expect(
+      raw.decisions.filter((decision) =>
+        ['invalid', 'late', 'target-out-of-order', 'too-far-ahead', 'capacity'].includes(decision),
+      ),
+    ).toEqual([]);
+    expect(raw.decisions).toContain('out-of-order');
     expect(raw.decisions.filter((decision) => decision === 'accepted').length).toBeGreaterThan(20);
     expect(raw.input.requiresResync).toBe(false);
     expect(

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { LocalPlayerPrediction } from '../../src/client/local-player-prediction';
 import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
 import type { Collider, PhysicsWorld, WorldAabb } from '../../src/physics';
-import { InputCommandBuffer } from '../../src/runtime/session-protocol';
+import { InputCommandBuffer, type InputCommand } from '../../src/runtime/session-protocol';
 
 const body = (x = 0) => ({
   id: 'player-1',
@@ -111,7 +111,18 @@ describe('生产本地玩家预测运行时', () => {
   it('碰撞历史重置后仍保留传输预算并把下一输入投递到未来tick', () => {
     const runtime = new LocalPlayerPrediction('world:1', 120, { estimatedInputTransitMs: 334 });
     const world = new RevisionWorld();
-    runtime.advance({ elapsedSeconds: 1 / 120, snapshot: snapshot(100), world, issuedAtMs: 1, ...controls });
+    const authority = new InputCommandBuffer('world:1', 'player-input');
+    authority.consumeForTick(140);
+    for (let frame = 0; frame < 3; frame += 1) {
+      const command = runtime.advance({
+        elapsedSeconds: 1 / 120,
+        snapshot: snapshot(100),
+        world,
+        issuedAtMs: frame,
+        ...controls,
+      }).commands[0];
+      expect(authority.push(command)).toBe('accepted');
+    }
     world.revision = 2;
     expect(runtime.applyAuthoritySnapshot(snapshot(101), world).resetReason).toBe('collision-history-missing');
 
@@ -122,12 +133,43 @@ describe('生产本地玩家预测运行时', () => {
       issuedAtMs: 2,
       ...controls,
     }).commands[0];
-    const authority = new InputCommandBuffer('world:1', 'player-input');
-    authority.consumeForTick(141);
 
-    expect(next.targetPhysicsTick).toBe(144);
+    expect(next.targetPhysicsTick).toBe(146);
     expect(authority.push(next)).toBe('accepted');
     expect(authority.requiresResync).toBe(false);
+  });
+
+  it('Authority明确要求输入重同步时允许从当前权威tick重建目标时间线', () => {
+    const runtime = new LocalPlayerPrediction('world:1', 120, { estimatedInputTransitMs: 334 });
+    const world = new RevisionWorld();
+    let tooFarCommand: InputCommand | undefined;
+    for (let frame = 0; frame < 199; frame += 1)
+      tooFarCommand = runtime.advance({
+        elapsedSeconds: 1 / 120,
+        snapshot: snapshot(100),
+        world,
+        issuedAtMs: frame,
+        ...controls,
+        keys: { forward: false, back: false, left: false, right: false, jump: false, crouch: false },
+      }).commands[0];
+    const authority = new InputCommandBuffer('world:1', 'player-input');
+    authority.consumeForTick(100);
+    expect(authority.push(tooFarCommand!)).toBe('too-far-ahead');
+    expect(authority.requiresResync).toBe(true);
+
+    runtime.applyAuthoritySnapshot({ ...snapshot(100), inputResyncRequired: true }, world);
+    const next = runtime.advance({
+      elapsedSeconds: 1 / 120,
+      snapshot: snapshot(100),
+      world,
+      issuedAtMs: 200,
+      ...controls,
+    }).commands[0];
+
+    expect(next.targetPhysicsTick).toBe(143);
+    expect(authority.push(next)).toBe('accepted');
+    expect(authority.requiresResync).toBe(false);
+    expect(runtime.resetCounts['authority-resync']).toBe(1);
   });
 
   it('全新碰撞查询实例可按已加载chunk核对revision而不误清历史', () => {

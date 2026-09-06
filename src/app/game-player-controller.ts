@@ -37,6 +37,13 @@ type Options = Readonly<{
   }>;
 }>;
 
+export function applyAuthorityInputDecision(
+  controller: Pick<PlayerController, 'resynchronizeInput'> | null,
+  decision: Readonly<{ requiresResync: boolean }>,
+): void {
+  if (decision.requiresResync) controller?.resynchronizeInput();
+}
+
 export function createGamePlayerController(options: Options): PlayerController {
   const gameplay = () => options.getGameplay();
   return new PlayerController({

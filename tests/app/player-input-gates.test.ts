@@ -1,7 +1,19 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { PlayerController } from '../../src/app/player-controller';
+import { applyAuthorityInputDecision } from '../../src/app/game-player-controller';
 
 afterEach(() => vi.unstubAllGlobals());
+
+it('只在Authority明确作废输入队列时重同步预测', () => {
+  const resynchronizeInput = vi.fn();
+  const controller = { resynchronizeInput } as Pick<PlayerController, 'resynchronizeInput'>;
+
+  applyAuthorityInputDecision(controller, { requiresResync: false });
+  expect(resynchronizeInput).not.toHaveBeenCalled();
+
+  applyAuthorityInputDecision(controller, { requiresResync: true });
+  expect(resynchronizeInput).toHaveBeenCalledOnce();
+});
 
 it('昼夜时钟暂停仍能操作，游戏暂停和界面阻挡才阻止世界交互', () => {
   const options = {
