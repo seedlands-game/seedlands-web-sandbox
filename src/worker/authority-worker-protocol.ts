@@ -118,6 +118,12 @@ export type AuthorityActionResult = Readonly<{
 
 export type AuthorityPlayerPositionResult = Readonly<{ moved: true; snapshot: AuthoritySnapshot }>;
 export type AuthoritySessionControlResult = Readonly<{ paused: boolean; snapshot: AuthoritySnapshot }>;
+export type AuthorityCommitMessage = Readonly<{
+  kind: 'authority-commits';
+  protocolVersion: typeof PROTOCOL_VERSION;
+  epoch: SessionEpoch;
+  commits: readonly WorldCommitResult[];
+}>;
 
 export type AuthorityTransactionKey = Readonly<{
   issuer: string;
@@ -309,6 +315,7 @@ export type AuthorityResponse =
       gameplay?: AuthorityGameplayView;
       commits?: readonly WorldCommitResult[];
     }>
+  | AuthorityCommitMessage
   | Readonly<{
       kind: 'input-decision';
       protocolVersion: typeof PROTOCOL_VERSION;

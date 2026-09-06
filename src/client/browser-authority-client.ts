@@ -41,8 +41,7 @@ import type {
 } from './browser-authority-client-contract';
 export type AuthorityWorkerPort = import('./browser-authority-client-contract').AuthorityWorkerPort;
 
-const failedClientError = (failure: Error) =>
-  new Error(`Authority client failed: ${failure.message}`, { cause: failure });
+const failedClientError = (error: Error) => new Error(`Authority client failed: ${error.message}`, { cause: error });
 
 export class BrowserAuthorityClient {
   private requestSequence = 0;
@@ -460,6 +459,8 @@ export class BrowserAuthorityClient {
       case 'authority-snapshot':
         this.acceptSnapshot(message.snapshot, message.gameplay, message.commits);
         break;
+      case 'authority-commits':
+        return publishAuthorityCollisionCommits(message.commits, this.meshCache, this.options, this.collisionRevisions);
       case 'input-decision':
         if (message.sequence <= this.lastInputDecisionSequence) return;
         this.lastInputDecisionSequence = message.sequence;

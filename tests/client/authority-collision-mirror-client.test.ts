@@ -409,33 +409,35 @@ describe('生产BrowserAuthorityClient碰撞镜像接线', () => {
     expect(client.getVoxel(0, 0, 0)).toBe(Voxel.Stone);
   });
 
-  it('旧运动快照迟到时仍消费其唯一提交，并让重复投递保持一次性', async () => {
+  it('即时结构提交先到时不让迟到姿态快照回滚碰撞，且两条通道各自继续推进', async () => {
     const worker = new FakeAuthorityWorker();
     const onCommit = vi.fn();
     const client = new BrowserAuthorityClient(worker, 'world:1', { onCommit });
     await installBaseline(client, worker);
     const changed = commit(4, 5, Voxel.Stone, 0);
 
+    const immediate = {
+      kind: 'authority-commits',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      commits: [changed],
+    } as const;
+    worker.emit(immediate);
+    worker.emit(immediate);
+    worker.emit({ ...immediate, epoch: 'old' });
+    const continued = commit(5, 6, Voxel.Water, 0x07);
+    worker.emit({ ...immediate, commits: [continued] });
     worker.emit({
       kind: 'authority-snapshot',
       protocolVersion: 1,
       epoch: 'world:1',
-      snapshot: { ...snapshot(2, 6), chunkRevisions: { '0,0,0': 5 } },
+      snapshot: { ...snapshot(2, 4), chunkRevisions: { '0,0,0': 4 } },
     });
-    const delayed = {
-      kind: 'authority-snapshot',
-      protocolVersion: 1,
-      epoch: 'world:1',
-      snapshot: { ...snapshot(1, 5), chunkRevisions: { '0,0,0': 5 } },
-      commits: [changed],
-    } as const;
-    worker.emit(delayed);
-    worker.emit(delayed);
 
-    expect(client.getVoxel(1, 2, 3)).toBe(Voxel.Stone);
-    expect(client.getChunkRevision(0, 0, 0)).toBe(5);
+    expect(client.getVoxel(1, 2, 3)).toBe(Voxel.Water);
+    expect(client.getChunkRevision(0, 0, 0)).toBe(6);
     expect(client.snapshot?.physicsTick).toBe(2);
-    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(onCommit).toHaveBeenCalledTimes(2);
   });
 
   it('权威运动快照发现缺失物理Chunk时绕过网格队列只请求一次碰撞基线', async () => {

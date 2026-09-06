@@ -4,6 +4,7 @@ import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client
 import { AuthorityRuntime, type AuthorityInitialWorldBootstrap } from '../server/authority/authority-runtime';
 import { PROTOCOL_VERSION } from '../runtime/session-protocol';
 import type { AuthorityRequest, AuthorityResponse } from './authority-worker-protocol';
+import { commitFluidCandidateAndPublish } from './authority-commit-publisher';
 
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
@@ -308,7 +309,7 @@ const handle = async (message: AuthorityRequest) => {
       respond(message.requestId, await current.save(), { gameplay: true });
       break;
     case 'fluid-candidate':
-      current.commitFluidCandidate(message.candidate);
+      commitFluidCandidateAndPublish(epoch, current, message.candidate, post);
       break;
     case 'fluid-failure':
       current.abortFluidWork(message.workId, message.reason);
