@@ -94,7 +94,7 @@ async function establishAuthorityLoad(page: Page) {
     // Harness 坐标是相机/眼睛位置；50.6 对应脚底 y=49，避免嵌入 y=48 的地板。
     await harness.movePlayerTo(0, 50.6, 0);
     for (const [x, z] of targets) {
-      await harness.fillWorld({ from: [x - 1, 48, z - 1], to: [x + 1, 49, z + 1], voxel: 3 });
+      await harness.fillWorld({ from: [x - 2, 48, z - 2], to: [x + 2, 49, z + 2], voxel: 3 });
       await harness.setVoxelAt(x, 49, z, 0);
       await harness.setVoxelAt(x + 1, 49, z, 0);
     }
@@ -150,12 +150,31 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
         voxel: harness.getVoxelAt?.(x, 49, z) ?? null,
         fluid: harness.getFluidCell?.(x, 49, z) ?? null,
         chunkRevision: harness.getChunkRevision?.(Math.floor(x / 32), 1, Math.floor(z / 32)) ?? null,
+        containment: [
+          [x - 2, z],
+          [x + 2, z],
+          [x, z - 2],
+          [x, z + 2],
+        ].map(([wallX, wallZ]) => ({
+          x: wallX,
+          y: 49,
+          z: wallZ,
+          voxel: harness.getVoxelAt?.(wallX, 49, wallZ) ?? null,
+        })),
+        bottom: [x, x + 1].map((bottomX) => ({
+          x: bottomX,
+          y: 48,
+          z,
+          voxel: harness.getVoxelAt?.(bottomX, 48, z) ?? null,
+        })),
       };
     },
     { x, z },
   );
   expect(targetBefore.voxel).toBe(0);
   expect(targetBefore.fluid).toBeNull();
+  expect(targetBefore.containment.map(({ voxel }) => voxel)).toEqual([3, 3, 3, 3]);
+  expect(targetBefore.bottom.map(({ voxel }) => voxel)).toEqual([3, 3]);
   await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
   const before = await snapshot(page);
   try {
@@ -172,10 +191,11 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
       .toBe(before.fluidFeedback.count + 1);
   } finally {
     const evidence = await page.evaluate(
-      ({ x, z }) => {
+      ({ x, z, feedbackIndex }) => {
         const harness = window.__seedlandsHarness as unknown as HarnessApi;
         const current = harness.snapshot();
         const targetChunkKey = `${Math.floor(x / 32)},${Math.floor(49 / 32)},${Math.floor(z / 32)}`;
+        const targetTraceId = current.fluidFeedback.samples[feedbackIndex]?.traceId;
         return {
           target: { x, y: 49, z, targetChunkKey },
           targetCells: [-1, 0, 1].flatMap((offsetZ) =>
@@ -187,6 +207,25 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
               fluid: harness.getFluidCell?.(x + offsetX, 49, z + offsetZ) ?? null,
             })),
           ),
+          containment: [
+            [x - 2, z],
+            [x + 2, z],
+            [x, z - 2],
+            [x, z + 2],
+          ].map(([wallX, wallZ]) => ({
+            x: wallX,
+            y: 49,
+            z: wallZ,
+            voxel: harness.getVoxelAt?.(wallX, 49, wallZ) ?? null,
+            fluid: harness.getFluidCell?.(wallX, 49, wallZ) ?? null,
+          })),
+          bottom: [x, x + 1].map((bottomX) => ({
+            x: bottomX,
+            y: 48,
+            z,
+            voxel: harness.getVoxelAt?.(bottomX, 48, z) ?? null,
+            fluid: harness.getFluidCell?.(bottomX, 48, z) ?? null,
+          })),
           snapshot: {
             loadedChunks: current.loadedChunks,
             renderedChunks: current.renderedChunks,
@@ -204,11 +243,11 @@ async function sampleTargetFluid(page: Page, testInfo: TestInfo, generalWorkers:
           },
           targetChunkTrace: harness
             .exportPerformanceTrace()
-            .traceEvents.filter((event) => event.name === targetChunkKey)
-            .slice(-16),
+            .traceEvents.filter((event) => event.name === targetChunkKey || event.args?.traceId === targetTraceId)
+            .slice(-64),
         };
       },
-      { x, z },
+      { x, z, feedbackIndex: before.fluidFeedback.count },
     );
     await testInfo.attach(`authority-fluid-target-${generalWorkers}-${index}`, {
       body: JSON.stringify(
