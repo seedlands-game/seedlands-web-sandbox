@@ -47,14 +47,14 @@ Astra 负责太阳阴影，Sol 负责掉落阶段的分段定位和实现。共�
 - [x] 建立 change、范围和可观察预期。
 - [x] 连续帧与性能基准复现，补全根因和 RED。
 - [x] 分工实现并独立复核。
-- [ ] GREEN、视觉、性能及回归准出。
-- [ ] 记录交付、本地提交并更新 PR。
+- [x] GREEN、视觉、性能及回归准出。
+- [x] 记录交付、本地提交并更新 PR。
 
-当前阶段：生产、需求浏览器和视觉准出通过，最终静态复核与提交后长期基线待完成。
+当前阶段：本地准出全部完成，生产提交bf61525已推送，PR #7说明已更新；本次补充交付证据提交。
 
 ## 交付快照
 
-待完成，失败和环境限制如实记录。原 PR：https://github.com/seedlands-game/seedlands-web-sandbox/pull/7。
+生产提交：`bf61525ce3cf2d2cb33fe84c066197a50921d199`（太阳），`c0b22ec`（掉落），`362b2b5`及`f84ccd7`（CI定向超时与证据归属）。功能分支`codex/playable-world-mvp`汇总整体MVP及本次修复；PR：https://github.com/seedlands-game/seedlands-web-sandbox/pull/7，目标main，未合并。最终本地准出结果见下表及交付闭环记录。
 
 ## 实施前根因与具体决策
 
@@ -129,3 +129,11 @@ PR首次CI另暴露Ubuntu/Node22下8个Headless集成用例超过Vitest默认5�
 天然连续原图gallery每行分别来自对应的一次真实流程；High受控移除遮挡的原图行来自更早的同产物单项通过运行 `/tmp/seedlands-sun-angle-pcf5`，其余天然行来自最终全六项运行。峰值gallery完全来自最新正式两档重采。Midscene是对保存原图的视觉语义验收，不能替代实际键鼠交互；后者由对应Playwright真实PointerLock、转向和平移独立证明。掉落Midscene原图来自同Medium行为的较早1mm候选，最新同产物掉落两项与视频另有独立记录。
 
 数值、原图路径及SHA-256保存在[太阳验证摘要](evidence/sun-validation-summary.json)。只读像素采样的帧间隔不作为正式性能证据。准出只覆盖记录的本机Chrome和Medium/High测试场景；不承诺所有机器或所有几何下绝无阴影栅格变化。
+
+## 交付闭环
+
+提交后 `pnpm harness:e2e` 真实退出0，长期基线9/9通过（22.0s），run id为 `11ae8820-1770-4945-aae2-26456097354c`，source SHA为 `bf61525ce3cf2d2cb33fe84c066197a50921d199`。两份Harness结果拥有相同run id与source SHA；原始日志 `/tmp/seedlands-sun-drop-final-baseline.log`。浏览器沿用同一冻结dist预览，提交后再次核验28文件哈希完全一致。该基线为常规headless回归与基线采样，不能冒充前台1920×1080画质性能验收。
+
+R1最终静态采用真实组合证据：全量格式/ESLint/ls-lint、覆盖率748通过4跳过、world行96.37%通过；末尾test TypeScript曾因新测试元数据nullable失败，修复后独立完整typecheck与受影响格式/lint通过。原EXIT2及后续GREEN均保留于[静态证据](static-evidence.md)，不称最后一次全量命令退出0。生产构建通过，28文件与所有最终产品验收的构建相同。S1、S2、D1、D2、R1现均完成；后续文档提交不改变生产或测试口径。
+
+已知边界：保留世界时间与实际遮挡变化，太阳阴影会随昼夜正常移动；有限分辨率阴影不承诺逐像素永远相同。掉落平滑只作用于表现位置，权威碰撞箱和拾取判定不跟着插值。受控阴影指标是定向回归门禁，不能替代用户实际场景的观感；本次连续原图、峰值原图、天然森林真实输入和独立视觉语义共同验收。未改存档、地形版本、纹理采样与反射算法，未引入新的物理特例。

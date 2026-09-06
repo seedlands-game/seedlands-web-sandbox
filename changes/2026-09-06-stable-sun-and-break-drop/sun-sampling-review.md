@@ -139,3 +139,20 @@ tailNormalizedMax 取全部完整 tail 区间的最大 score，阈值严格小�
 最大 pair 的 Medium/High 前后 PNG 尺寸分别为 `2196×532` 和 `2496×604`，图像中地面、阴影与右下手持模型方向正常，证明 WebGL 行序翻转正确。独立逐对观察未看到大范围明暗翻转或阴影整体位置突跳；可见变化局限于影子边缘的细小采样移动。此原图审查是峰值定点证据，仍由同一四张附件的 Midscene 结果完成最终视觉语义准出。
 
 数学门禁和负控制由此准入。该结论仅批准 `abba093c…` spec 与 `d1cc4089…` scope 定义的尾项修订，不授权之后改阈值、参考角、ROI、窗口、High 生产参数或省略峰值 Midscene。
+
+## 最终交付身份与结论
+
+- 最终 spec SHA-256：`3dffe179eedd7cfc6dbff1a437bda612a9962a0473fd6f7d786f450e9e3f5c97`。
+- 太阳生产提交：`bf61525ce3cf2d2cb33fe84c066197a50921d199`。
+- 尾项 scope SHA-256：`d1cc40895dbf11c6f4aba753a65172c9d638931749c5ab93869cf9e64cfe944d`。
+- 长期基线：9/9 GREEN，真实退出0，run id `11ae8820-1770-4945-aae2-26456097354c`，source SHA 为 `bf61525ce3cf2d2cb33fe84c066197a50921d199`。
+- 峰值视觉：`evidence/sun-peak-midscene-summary.json` 记录 1/1 GREEN，7.204s，无重试选择证据。
+- 静态组合证据：格式、ESLint、路径规则与覆盖率运行中748项通过、4项跳过，world 行覆盖率96.37%；后续修正测试元数据可空类型后，完整 typecheck 与受影响格式/lint GREEN。原 EXIT2 保留，不将该组合证据写成末次全量 `verify:static` 退出0。
+
+独立比对 `bf61525` 中的 spec 与最终 spec，差异仅为 Tasks 状态、Delivery Snapshot 和交付证据补录；Scope、Decisions、Behaviour、Test Design、Acceptance、全部门禁数字和最终生产策略都未改变。因此 `abba093c…` 的实质合同审查对最终 `3dffe179…` 继续有效，并以本节绑定当前完整文件身份。
+
+最终准入。数学门禁、已知坏负控制、Medium/High 峰值原图、峰值 Midscene、天然场景无 readback 帧成本、持久化单元反例、生产构建、长期基线和静态组合证据共同满足 `3dffe179…` 的本地交付合同。该准入不改变 spec 已记录的设备/场景边界，也不将本地通过扩大为 PR 已合并或所有硬件下逐像素永远不变。
+
+## 推送后最终文档身份
+
+生产提交 `bf61525ce3cf2d2cb33fe84c066197a50921d199` 真实推送且 PR #7 说明更新成功后，spec 仅将“记录交付、本地提交并更新 PR”勾选完成，并把当前阶段改为已推送。最终 spec SHA-256 为 `c18990c6af869ae3ebb6789ebcbdaf2bbe70335e9be6e72af1e9c6cd7a885048`。Scope、Decisions、Behaviour、Test Design、Acceptance、尾项 scope hash、所有门禁数字与生产实现均未改变，因此无需重复实质评审。本节只把已准入合同绑定到交付后的最终文件身份，原准入结论保持。

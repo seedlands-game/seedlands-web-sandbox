@@ -1,0 +1,90 @@
+{
+  "runId": "11ae8820-1770-4945-aae2-26456097354c",
+  "sourceSha": "bf61525ce3cf2d2cb33fe84c066197a50921d199",
+  "result": "9/9 PASS",
+  "durationSeconds": 22.0,
+  "mode": "headless baseline",
+  "log": "/tmp/seedlands-sun-drop-final-baseline.log",
+  "logSha256": "56cab4e91e8d723ea584273ee9b10f416ccfdefc31c7b76670d87a0f448b53f0",
+  "distFiles": 28,
+  "distHashMatch": true,
+  "browserE2E": {
+    "schemaVersion": 2,
+    "runId": "11ae8820-1770-4945-aae2-26456097354c",
+    "sourceSha": "bf61525ce3cf2d2cb33fe84c066197a50921d199",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "browser": "chromium"
+    },
+    "browserE2E": {
+      "status": "PASS",
+      "stages": {
+        "load": "PASS",
+        "input": "PASS",
+        "player": "PASS",
+        "interaction": "PASS",
+        "streaming": "PASS",
+        "persistence": "PASS"
+      },
+      "metrics": {
+        "ui": {
+          "runtime": "svelte5",
+          "shellPublishCount": 4,
+          "hudPublishCount": 2,
+          "interactionPublishCount": 2,
+          "debugProjectionCount": 1,
+          "debugPublishCount": 2,
+          "staleUpdateCount": 0,
+          "coalescedUpdateCount": 44,
+          "domCommitCount": 6,
+          "projectionDurationMs": 2.5,
+          "publishDurationMs": 0.09999996423721313,
+          "domCommitDurationMs": 33.699999928474426,
+          "debugProjectionRate": 1,
+          "totalPublishRate": 3
+        },
+        "gameplay": {
+          "entityCount": 5,
+          "worldItemCount": 1,
+          "creatureCount": 2,
+          "npcCount": 1,
+          "nearbyVisitedBucketCount": 0,
+          "nearbyCandidateCount": 0,
+          "nearbyReturnedCount": 0,
+          "inventoryOperationCount": 0,
+          "gameplayEventCount": 5,
+          "snapshotBytes": 3092,
+          "retainedActorCount": 3,
+          "activeActorCount": 3,
+          "behaviorEvaluationCount": 0,
+          "navigationPlanCount": 0,
+          "navigationExpandedNodeCount": 0,
+          "pathRecomputeCount": 0,
+          "actionCompletionCount": 0,
+          "actionFailureCount": 0,
+          "actionInterruptionCount": 0,
+          "perceptionLineOfSightCheckCount": 0,
+          "simulationTime": 0.1,
+          "presentedEntityCount": 4
+        }
+      }
+    }
+  },
+  "browserBenchmark": {
+    "schemaVersion": 2,
+    "runId": "11ae8820-1770-4945-aae2-26456097354c",
+    "sourceSha": "bf61525ce3cf2d2cb33fe84c066197a50921d199",
+    "environment": {
+      "node": "v24.14.0",
+      "platform": "darwin",
+      "arch": "arm64",
+      "browser": "chromium"
+    },
+    "browserBenchmark": {
+      "status": "PASS",
+      "initialWorldReadyMs": 1690.53
+    }
+  }
+}
