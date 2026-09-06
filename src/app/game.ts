@@ -193,7 +193,7 @@ export class Game {
       onPresentation: (event) => this.worldAudio?.present(event),
     });
     this.controller = this.createController(this.camera);
-    this.controller.applyAuthoritySnapshot(ready.snapshot);
+    this.controller.applyAuthoritySnapshot(authority.snapshot ?? ready.snapshot);
     orientPlayerTowardCamp(this.controller, ready);
     this.controller.install();
     authority.requestLogicObservation();

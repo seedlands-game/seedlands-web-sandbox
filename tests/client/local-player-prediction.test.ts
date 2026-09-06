@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { LocalPlayerPrediction } from '../../src/client/local-player-prediction';
 import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
 import type { Collider, PhysicsWorld, WorldAabb } from '../../src/physics';
+import { InputCommandBuffer } from '../../src/runtime/session-protocol';
 
 const body = (x = 0) => ({
   id: 'player-1',
@@ -107,6 +108,28 @@ describe('生产本地玩家预测运行时', () => {
     expect(runtime.resetCounts).toMatchObject({ 'collision-history-missing': 1, 'authority-resync': 1 });
   });
 
+  it('碰撞历史重置后仍保留传输预算并把下一输入投递到未来tick', () => {
+    const runtime = new LocalPlayerPrediction('world:1', 120, { estimatedInputTransitMs: 334 });
+    const world = new RevisionWorld();
+    runtime.advance({ elapsedSeconds: 1 / 120, snapshot: snapshot(100), world, issuedAtMs: 1, ...controls });
+    world.revision = 2;
+    expect(runtime.applyAuthoritySnapshot(snapshot(101), world).resetReason).toBe('collision-history-missing');
+
+    const next = runtime.advance({
+      elapsedSeconds: 1 / 120,
+      snapshot: snapshot(101),
+      world,
+      issuedAtMs: 2,
+      ...controls,
+    }).commands[0];
+    const authority = new InputCommandBuffer('world:1', 'player-input');
+    authority.consumeForTick(141);
+
+    expect(next.targetPhysicsTick).toBe(144);
+    expect(authority.push(next)).toBe('accepted');
+    expect(authority.requiresResync).toBe(false);
+  });
+
   it('全新碰撞查询实例可按已加载chunk核对revision而不误清历史', () => {
     const runtime = new LocalPlayerPrediction('world:1', 60);
     runtime.advance({
@@ -166,17 +189,26 @@ describe('生产本地玩家预测运行时', () => {
     expect(runtime.pendingFrames).toEqual([]);
   });
 
-  it('按受控双向传输时间把目标tick投递到预计抵达时刻之后', () => {
-    const runtime = new LocalPlayerPrediction('world:1', 120, { estimatedOneWayLatencyMs: 150 });
-    const command = runtime.advance({
-      elapsedSeconds: 1 / 120,
-      snapshot: snapshot(100),
-      world: new RevisionWorld(),
-      issuedAtMs: 1,
-      ...controls,
-    }).commands[0];
+  it('按双向延迟与多轮入站乱序预算投递目标tick且不触发持续重同步', () => {
+    const runtime = new LocalPlayerPrediction('world:1', 120, { estimatedInputTransitMs: 334 });
+    const authority = new InputCommandBuffer('world:1', 'player-input');
+    const decisions: string[] = [];
+    for (let cycle = 0; cycle < 8; cycle += 1) {
+      const observedTick = 100 + cycle * 2;
+      authority.consumeForTick(observedTick + 40);
+      const command = runtime.advance({
+        elapsedSeconds: 1 / 120,
+        snapshot: snapshot(observedTick),
+        world: new RevisionWorld(),
+        issuedAtMs: cycle,
+        ...controls,
+      }).commands[0];
+      decisions.push(authority.push(command));
+      if (cycle === 0) expect(command.targetPhysicsTick).toBe(143);
+    }
 
-    expect(command.targetPhysicsTick).toBe(138);
+    expect(decisions).toEqual(Array(8).fill('accepted'));
+    expect(authority.requiresResync).toBe(false);
   });
 
   it('表现偏移两端均为空但路径穿过薄墙时也立即校正', () => {

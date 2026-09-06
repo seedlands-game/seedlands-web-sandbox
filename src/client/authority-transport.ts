@@ -20,6 +20,9 @@ const hasFault = (options: AuthorityTransportFaults) =>
   (options.latencyMs ?? 0) > 0 ||
   Boolean(options.duplicateOutbound || options.duplicateInbound || options.reorderInbound);
 
+export const authorityInputTransitBudgetMs = (options: AuthorityTransportFaults): number =>
+  (options.latencyMs ?? 0) * 2 + (options.reorderInbound ? REORDER_HOLD_MS : 0);
+
 const isRepeatableOutbound = (message: unknown) => {
   if (!message || typeof message !== 'object' || !('kind' in message)) return false;
   const kind = (message as { kind: unknown }).kind;

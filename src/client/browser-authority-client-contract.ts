@@ -44,6 +44,13 @@ export type AuthorityStartOptions = Readonly<{
   frequencies: AuthorityReady['frequencies'];
 }>;
 
+export type AuthoritySaveResult = Readonly<{
+  savedChunks: string[];
+  gameplaySaved: boolean;
+  commitSequence: number;
+  storageBytes: number;
+}>;
+
 export type AuthorityCachedMesh = {
   canonical: Uint16Array;
   fluid: Uint8Array;

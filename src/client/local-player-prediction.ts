@@ -45,12 +45,12 @@ export class LocalPlayerPrediction {
   constructor(
     epoch: SessionEpoch,
     readonly physicsHz: 30 | 60 | 120,
-    options: Readonly<{ estimatedOneWayLatencyMs?: number; maxSmoothError?: number }> = {},
+    options: Readonly<{ estimatedInputTransitMs?: number; maxSmoothError?: number }> = {},
   ) {
-    const estimatedOneWayLatencyMs = options.estimatedOneWayLatencyMs ?? 0;
-    if (!Number.isFinite(estimatedOneWayLatencyMs) || estimatedOneWayLatencyMs < 0)
-      throw new RangeError('Estimated input latency must be non-negative and finite.');
-    const transitLeadTicks = Math.ceil((estimatedOneWayLatencyMs * 2 * physicsHz) / 1_000);
+    const estimatedInputTransitMs = options.estimatedInputTransitMs ?? 0;
+    if (!Number.isFinite(estimatedInputTransitMs) || estimatedInputTransitMs < 0)
+      throw new RangeError('Estimated input transit time must be non-negative and finite.');
+    const transitLeadTicks = Math.ceil((estimatedInputTransitMs * physicsHz) / 1_000);
     this.inputStream = new PlayerInputStream(epoch, transitLeadTicks + 2);
     this.prediction = new PredictionBuffer({ maxSmoothError: options.maxSmoothError });
   }

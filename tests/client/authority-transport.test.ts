@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createAuthorityTransport, type AuthorityTransportPort } from '../../src/client/authority-transport';
+import {
+  authorityInputTransitBudgetMs,
+  createAuthorityTransport,
+  type AuthorityTransportPort,
+} from '../../src/client/authority-transport';
 
 class RawPort implements AuthorityTransportPort {
   onmessage: ((event: MessageEvent<unknown>) => void) | null = null;
@@ -24,6 +28,12 @@ class ThrowingPort extends RawPort {
 }
 
 describe('Authority 受控传输', () => {
+  it('输入目标预算覆盖双向基础延迟与入站乱序的最大保留时间', () => {
+    expect(authorityInputTransitBudgetMs({ harnessEnabled: true, latencyMs: 0 })).toBe(0);
+    expect(authorityInputTransitBudgetMs({ harnessEnabled: true, latencyMs: 50 })).toBe(100);
+    expect(authorityInputTransitBudgetMs({ harnessEnabled: true, latencyMs: 150, reorderInbound: true })).toBe(334);
+  });
+
   it.each([0, 50, 150] as const)('只在 Harness 中按 %ims 延迟双向消息', (latencyMs) => {
     vi.useFakeTimers();
     const raw = new RawPort();

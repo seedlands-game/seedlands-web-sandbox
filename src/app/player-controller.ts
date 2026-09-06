@@ -35,7 +35,7 @@ export class PlayerController {
 
   constructor(private readonly options: PlayerControllerOptions) {
     this.prediction = new LocalPlayerPrediction(options.authority?.epoch ?? 'unit-test', options.physicsHz, {
-      estimatedOneWayLatencyMs: options.estimatedOneWayLatencyMs,
+      estimatedInputTransitMs: options.estimatedInputTransitMs,
     });
     this.debugTimeKeys = new PlayerDebugTimeKeys(options);
   }

@@ -20,7 +20,7 @@ import type { LogicIntentBatch } from '../server/logic/logic-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from './client-request-registry';
 import { ClientReadyWait } from './client-ready-wait';
-import { createAuthorityTransport } from './authority-transport';
+import { authorityInputTransitBudgetMs, createAuthorityTransport } from './authority-transport';
 import { acceptAuthorityMeshPreparation } from './authority-mesh-preparation';
 import {
   AuthorityCollisionBaselineClient,
@@ -37,6 +37,7 @@ import type {
   AuthorityClientOptions,
   AuthorityCachedMesh,
   AuthorityCachedPreparation,
+  AuthoritySaveResult,
   AuthorityStartOptions,
 } from './browser-authority-client-contract';
 export type AuthorityWorkerPort = import('./browser-authority-client-contract').AuthorityWorkerPort;
@@ -170,8 +171,8 @@ export class BrowserAuthorityClient {
     return this.storageBytesValue;
   }
 
-  get estimatedOneWayLatencyMs(): number {
-    return this.options.transportFaults?.latencyMs ?? 0;
+  get estimatedInputTransitMs(): number {
+    return authorityInputTransitBudgetMs(this.options.transportFaults ?? { harnessEnabled: false });
   }
 
   get snapshotRejections() {
@@ -339,18 +340,8 @@ export class BrowserAuthorityClient {
     return this.request({ kind: 'set-world-clock-rate', rate }, [], 'world-clock-rate') as Promise<{ rate: number }>;
   }
 
-  async save(): Promise<{
-    savedChunks: string[];
-    gameplaySaved: boolean;
-    commitSequence: number;
-    storageBytes: number;
-  }> {
-    const result = (await this.request({ kind: 'save-authority' })) as {
-      savedChunks: string[];
-      gameplaySaved: boolean;
-      commitSequence: number;
-      storageBytes: number;
-    };
+  async save(): Promise<AuthoritySaveResult> {
+    const result = (await this.request({ kind: 'save-authority' })) as AuthoritySaveResult;
     this.storageBytesValue = result.storageBytes;
     return result;
   }
@@ -441,15 +432,18 @@ export class BrowserAuthorityClient {
     )
       return;
     switch (message.kind) {
-      case 'authority-ready':
+      case 'authority-ready': {
         if (!this.readyWait.pending) return;
-        if (this.snapshotGate.accept(message.ready.snapshot)) return;
+        const readySnapshotRejection = this.snapshotGate.accept(message.ready.snapshot);
+        if (readySnapshotRejection === 'wrong-epoch')
+          return this.failAll(new Error('Authority ready snapshot epoch does not match the active session.'));
         this.readyValue = message.ready;
-        this.snapshotValue = message.ready.snapshot;
+        if (!readySnapshotRejection) this.snapshotValue = message.ready.snapshot;
         this.collisionRevisions.initializeCommitDelivery(message.ready.snapshot.worldRevision);
         this.updateGameplay(message.ready.gameplay);
         this.readyWait.resolve(message.ready);
         break;
+      }
       case 'authority-bootstrap-needed':
         this.bootstrap.receive(message);
         break;
