@@ -169,3 +169,7 @@ T0/T1 的 Node/浏览器及 IPv6 loopback 小包功能通过，尚未验证 WSS�
 WebTransport 候选在 Firefox 153.0 完成可靠流与 datagram；Playwright WebKit 26.5 仅 session 成功，可靠流创建超时且 datagrams API 缺失，不能计入数据路径通过。Linux x64 静态 artifact 交叉构建成功但无 x64 运行证据；Safari/移动端保持 NOT_COLLECTED。见 [浏览器矩阵](network-webtransport-browser-matrix-progress.md)。当前不采用 T2 为唯一传输，不以这些功能结果宣称性能提升。
 
 此前动作检查点 0b2ae3e 已成功推送 origin/codex/node-dedicated-server；第一次推送因 HTTPS 瞬时连接失败，未改变远端或认证设置，重试成功。
+
+## Gameplay v2 三候选验证检查点
+
+新代 9 条真实语料通过 C0/C1/C2、Chrome 双向各 9/9 和当前源码绑定的 decoded oracle 4/4；原型在独立 /tmp 目录，旧代保持冻结。真实角色行为为 idle，其余枚举与浮点负零单列 synthetic。见 [v2 codec 记录](network-gameplay-codec-progress.md)。07caff1 已推送，当前整个 change 仍 Active，尚无正式性能或网络采用结论。
