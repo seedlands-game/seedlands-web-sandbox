@@ -14,3 +14,7 @@ changes/2026-09-06-moonbit-wasm-workload-experiment/evidence/
 crates/target/
 changes/2026-09-06-data-plane-simd-policy/evidence/
 changes/2026-09-07-data-plane-adoption/evidence/
+
+# Frozen dispatched contracts and machine evidence preserve original byte hashes.
+changes/2026-09-07-agent-routing-contracts/contracts/
+changes/2026-09-07-agent-routing-contracts/verification/

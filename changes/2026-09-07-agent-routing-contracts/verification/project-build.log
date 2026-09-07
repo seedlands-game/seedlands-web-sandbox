@@ -1,0 +1,18 @@
+$ pnpm wasm:rust:verify && pnpm typecheck && vite build
+$ node scripts/rust-kernel-artifact.mjs
+Rust source/artifact fingerprints verified.
+$ svelte-check --tsconfig ./tsconfig.json && tsc --noEmit && tsc -p tsconfig.test.json --noEmit
+Loading svelte-check in workspace: /Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+changes/2026-09-07-data-plane-adoption/e2e/copy-cases.ts(1,1): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/copy-cases.ts(6,3): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/copy-cases.ts(8,1): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/data-plane-worker.ts(3,1): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/data-plane-worker.ts(9,3): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/workload-worker.ts(10,3): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/workload-worker.ts(12,1): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/workload-worker.ts(22,1): error TS2578: Unused '@ts-expect-error' directive.
+[ELIFECYCLE] Command failed with exit code 2.
+[ELIFECYCLE] Command failed with exit code 2.

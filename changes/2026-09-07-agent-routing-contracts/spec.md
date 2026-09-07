@@ -30,18 +30,18 @@
 3. 批量本地 fixture 完成 prepare→write→read→verify；并发有界、临时失败有限重试、失败项可续跑、成功项不重写；输入/adapter 漂移拒绝恢复。
 4. 写入超时/异常不能假装未执行；非幂等不盲重试；验证失败与写入失败分离；状态/取消/期限结束可恢复、审计不泄露 fixture 密钥和 payload。
 5. 资源窗口第二调用阻塞等待，前者释放才启动；超时退出、取消等待不删除他人锁；子进程失败/中断/派生子孙清理后释放自有锁，未知持有者不自动抢占。
-6. fresh agent 仅读 skill 与样本需求，能正确选择脚本/Sol/Terra/Luna/Spark，产生通过校验的闭环合同；不得向作者透露预期答案作为测试提示。
+6. 独立验收 agent 仅读 skill 与样本需求，能正确选择脚本/Sol/Terra/Luna/Spark，产生通过校验的闭环合同；不得向作者透露预期答案作为测试提示。平台槽位限制下复用独立验收 agent，记录未进行新会话盲测的限制。
 
 ## 准出与证据
 
-| 项目                                      | 证据                       | 状态                                    |
-| ----------------------------------------- | -------------------------- | --------------------------------------- |
-| 全局 skill 渐进披露、全局指针与可恢复安装 | Static / Manual supplement | 全局已安装；见 global-installation.json |
-| 合同校验/渲染与父子边界                   | Node 原生测试 / Static     | 15/15 原生测试通过，独立验收通过        |
-| 批处理/恢复/幂等/审计边界                 | Node 原生测试（本地 HTTP） | 15/15 原生测试通过，独立验收通过        |
-| 项目阻塞窗口与清理                        | Node 原生测试 / Static     | 待 RED                                  |
-| 独立行为演练与源 hash                     | Manual supplement / Static | 通过，见 verification/global-final.md   |
-| 受影响静态与构建                          | Static / Build             | 待执行；无游戏行为变更，无新增视觉验收  |
+| 项目                                      | 证据                       | 状态                                                      |
+| ----------------------------------------- | -------------------------- | --------------------------------------------------------- |
+| 全局 skill 渐进披露、全局指针与可恢复安装 | Static / Manual supplement | 全局已安装；见 global-installation.json                   |
+| 合同校验/渲染与父子边界                   | Node 原生测试 / Static     | 15/15 原生测试通过，独立验收通过                          |
+| 批处理/恢复/幂等/审计边界                 | Node 原生测试（本地 HTTP） | 15/15 原生测试通过，独立验收通过                          |
+| 项目阻塞窗口与清理                        | Node 原生测试 / Static     | 6/6 原生测试与独立验收通过                                |
+| 独立行为演练与源 hash                     | Manual supplement / Static | 通过，见 verification/global-final.md                     |
+| 受影响静态与构建                          | Static / Build             | 定向通过；全量静态/构建受基线 TS2578 阻断，见 delivery.md |
 
 ## 工作量与预算
 
@@ -53,4 +53,4 @@ root 完成合同与接口边界，原拟两个 Sol/high 并行；平台第二�
 
 ## 交付快照
 
-全局 skill/runtime 已完成 15/15 原生测试、独立验收、官方 skill 校验、定向 Prettier/ESLint，并已安装本机。20 个源文件与安装文件逐项 hash 一致，备份/恢复入口见 global-installation.json。项目阻塞窗口仍在收尾，未完成项不得按全局验收宣称通过。提交前发现命名门禁缺少本次目录布局，追加 project-layout-integration 合同由 Sol 做精确规则集成，不绕过 hook。其他设备未自动安装；本次未操作真实线上 API，未执行 WASM→Node 合并。长期 docs baseline 随项目包更新。最终项目证据与提交状态在交付记录中补充。
+全局 skill/runtime 已完成 15/15 原生测试、独立验收、官方 skill 校验、定向 Prettier/ESLint，并已安装本机。20 个源文件与安装文件逐项 hash 一致，备份/恢复入口见 global-installation.json。项目窗口已通过 6/6 原生进程测试与独立复核；全量静态/构建的基线环境阻断已在干净 origin/main checkout 同依赖复现，见 delivery.md。提交前发现命名门禁缺少本次目录布局，追加 project-layout-integration 合同由 Sol 做精确规则集成，不绕过 hook。其他设备未自动安装；本次未操作真实线上 API，未执行 WASM→Node 合并。长期 docs baseline 随项目包更新。完整交付状态见 [交付记录](delivery.md)。
