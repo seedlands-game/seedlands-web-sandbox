@@ -1,6 +1,25 @@
 # Node Dedicated Server 当前状态与阶段证据
 
-## 恢复入口：2026-09-07 完整基线采集检查点
+## 恢复入口：完整基线的公开参考接线
+
+整个 change 仍 **Active**。已推送检查点为 `80109458d8b45de6d02f7f4d47e6fb64f4d88044`，包含真实基线语料和真实 Node 控制端口中断测试。本批已完成公开参考投影、分页发布与有界重组，并通过统一静态检查和两端构建；下面的 1030 项计数属于此前完整验证，当前为 **195 文件/1074 项通过**（另 2 文件/4 项跳过）。
+
+- [真实基线语料](network-baseline-corpus-progress.md)：Node 22 下实际 Host 采集 27/27/1 项，110 个显式 LE/raw sidecar。编辑使 main revision 0→1、Authority commit 2→3；旧 owned bytes 不变。完整数据调用真实网格输入算法，两个生成回退计数均为零，但尚未接浏览器 Remote adapter。
+- [采集中断回归](network-capture-failure-progress.md)：真实 Authority/Persistence/compute Worker，控制端口失效后请求立即失败，stop 等待已接纳计算请求物理结算后才完成失败清理。2/2 聚焦通过；fixture 负对照不计为生产缺陷。
+- [公开基线合同](network-baseline-reference-plan.md)：显式 LE 转换、独立块与发送账本、描述 FIFO、按需分页、有界重组。仍为 `not-adopted`，不含认证 owner、真实 socket 背压或浏览器安装。
+- [真实来源的派生验证](network-baseline-reference-corpus-progress.md)：冻结的 projected r2 只读取原始 r2，三条记录生成 162/162/6 页，共 330 个实际 sidecar；乱序重组与原始块字节/hash 全等。生产七个源码与五个派生程序文件绑定精确 hash，默认只读复核通过。16 KiB 和 JSON metadata 加 raw bytes 是候选配置及参考计量，不是 codec 采用。
+- [客户端下一接线](network-client-baseline-consumption-plan.md)：完整版本向量贯通、shared owner 回收、worker transfer 副本、受限 World 能力和不可读碰撞门禁已补入草案，尚未实施。
+
+本批统一验证使用官方 Node 22.23.2：
+
+- `pnpm verify:static` 完整通过：Prettier、ESLint、路径规范、V8 coverage、Svelte 与生产/测试 TypeScript；world 行覆盖率 96.37%。日志为 `/tmp/seedlands-baseline-reference-static.log`。
+- `pnpm build` 与 Node 五入口构建通过；浏览器保留既有大 bundle 提示。Node artifact manifest 记录 `sourceSha=8010945`、`sourceDirty=true`、`sourceInputsSha256=1c02da36f90682d94be3e63c5aaae71ce07d5e14503ce4f4c73c893a97e811ab`。新参考模块尚未连接网络启动入口，不能把构建通过解释为包含可玩远端服务器。
+- 参考层聚焦 42 项、真实 Node 中断 2 项纳入本次完整单元检查。原始与派生 corpus 使用显式 change runner，分别为独立证据；没有把它们加入默认长期浏览器基线。
+- 两个独立 Terra 子任务验证并发和发送预算，另对 Sol 实现的生产模块做独立审查；修复重复交付、关联畸形页清理、checkpoint 别名与队列引用等问题，准入 high-water 仅在成功接纳描述后推进。具体真实 RED、源码 hash 与范围见 [实现记录](network-baseline-reference-progress.md)。
+
+本批没有新的 UI/输入/渲染行为，未重复浏览器回归或 Midscene，也没有用单元/构建代替后续远端旅程。未运行正式 benchmark、未修改远端。网络/codec 选择、实际远端游玩与迁移不退化仍按原 N2–N4/A13 证据门推进，不能由功能结果推导收益。
+
+## 上一完整验证：2026-09-07 完整基线采集检查点
 
 整个 change 仍 **Active**。本页随当前功能分支源码提交；上一已推送检查点为 `c4e2f16`。本批完整静态 **189 文件/1030 项通过**（另 2 文件/4 项跳过），world 行覆盖 96.37%；浏览器与 Node 五入口构建通过。以下较早计数及“尚未 push”等表述仅属于各自历史阶段。
 

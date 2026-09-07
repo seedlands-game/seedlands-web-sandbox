@@ -179,3 +179,9 @@ WebTransport 候选在 Firefox 153.0 完成可靠流与 datagram；Playwright We
 本批完成 Authority 内 27 块/单块 owned capture、共享 admission/retention、取消和停止结算、Node transfer/回复绑定及兴趣控制参考 DTO。整合修复了不同回复预算导致 captureId 派发倒序的问题。详细 RED/GREEN、独立评审、实际 DTO 字节和未采集边界集中在 [本批记录](network-baseline-capture-progress.md)，统一静态/构建结果见 [恢复入口](validation-summary.md)。
 
 长期 docs baseline 只更新代码地图中的真实内部采集入口和边界；没有把参考 DTO、WS 探针或内部 RPC 写成远端可玩能力。当前功能分支作为恢复检查点继续推送；整个 change 尚未 Delivered。
+
+## 2026-09-07 公开基线投影与重组检查点
+
+新增 codec/transport 无关的基线投影、发布 FIFO、惰性 page、双账本和有界重组。原始真实 27/27/1 capture 与派生 330 页分别冻结来源，并把副本/LE/hash/取消/并发终态门串联验证；详见 [实现进度](network-baseline-reference-progress.md) 和 [派生记录](network-baseline-reference-corpus-progress.md)。原始语料与 Node 控制端口故障回归已先推送为 8010945。
+
+本批最终 `verify:static` 195 文件/1074 项通过，world 行覆盖 96.37%，浏览器与五入口 Node 构建通过。客户端下一接线草案经独立只读审查补齐完整 halo 版本身份、transfer 副本、共享 owner 与 World 能力拆分；当前未实施 GUI 或正式网络。整个 change 仍 Active，协议参考、功能探针与构建不替代 N2–N4/A13 的网络采用和性能验收。冻结 spec hash 未变，按用户授权提交推送稳定结果。
