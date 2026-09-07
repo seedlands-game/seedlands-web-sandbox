@@ -1,6 +1,6 @@
 # 稳定低配 GitHub Runner 的静态与浏览器门禁
 
-**状态：** Agile flow；第四轮远端 RED 已修复，目标 Mesh 用例 GREEN，等待 PR 最新 head 的 GitHub Actions 与 mergeability 读回
+**状态：** Agile flow；远端 required checks 已 GREEN，等待 PR 整体 mergeability 收口
 
 ## Context & Goal
 
@@ -50,7 +50,7 @@ GitHub PR #9 的首个最新 revision run `34098525614` 在 Production build 通
 - [x] **Vitest：** Mesh 预算落点修正后，目标文件 6/6 通过、用时 14.93 秒；源码行号读回前一用例为 30 秒、目标用例为 90 秒。
 - [x] **Playwright-baseline：** `pnpm test:e2e:regression` 为 8/8 通过；Macro 仍按 `ready` 判断，存档仍验证生产 Store 路径并通过公共 helper 确认低核心警告。
 - [x] **Build：** `pnpm build` 通过，Rust artifact 指纹、Svelte / TypeScript 和 Vite 生产构建均通过。
-- [ ] **GitHub Actions：** 最新 PR head 的 Static verification、Production build、Chromium regression 全绿。
+- [x] **GitHub Actions：** PR head `bb325244b932dcd72c525c3fa97fb550ebffd017` 的 run `34102781466` 全绿：Static verification 8 分 47 秒、Production build 1 分 1 秒、Chromium regression 1 分 49 秒。
 - [ ] **Mergeability：** PR 无冲突、无未解决 review thread，GitHub 读回可合入。
 
 ## Tasks & Current State
@@ -59,7 +59,7 @@ GitHub PR #9 的首个最新 revision run `34098525614` 在 Production build 通
 2. [已完成] 新增 CI 专用 Vitest 并发入口，修复 Macro 与存档回归的确定性等待/确认路径。
 3. [已完成] 根据第二轮远端 RED 将 CI coverage 收敛为单 Worker，并完成本地静态复验。
 4. [已完成] 根据第三轮远端实测为 4 个重型用例设置有限时间预算；第四轮发现并修正 Mesh 预算落点错误，目标文件精确复验 6/6 通过。
-5. [进行中] 提交、推送并只跟踪新 head SHA 的 required checks 与 mergeability。
+5. [进行中] CI 修复已在 head `bb32524` 全绿；PR 仍有独立 review thread，等待整体 mergeability 收口。
 
 ## Delivery Snapshot
 
@@ -68,4 +68,5 @@ GitHub PR #9 的首个最新 revision run `34098525614` 在 Production build 通
 - 本地 GREEN：单 Worker `pnpm verify:static:ci` 用时 190.35 秒，`pnpm test:e2e:regression` 与 `pnpm build` 也已全部通过。
 - 精确 GREEN：4 个调整时间预算的测试文件单 Worker 13/13 通过、用时 44.69 秒；Prettier 与 `tsc -p tsconfig.test.json --noEmit` 通过。
 - 修正 GREEN：Mesh 预算移动到目标用例后，目标文件 6/6 通过、用时 14.93 秒；Prettier 与测试 TypeScript 校验通过。
+- 远端 GREEN：GitHub Actions run `34102781466` 对应 head `bb325244b932dcd72c525c3fa97fb550ebffd017`，三个 required checks 全部通过。
 - 未改变必需检查、规则集、retry、业务算法、Worker 数或产品低核心警告；远端最终 run、head SHA 与 mergeability 待推送后补充。

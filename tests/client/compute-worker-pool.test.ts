@@ -429,4 +429,88 @@ describe('ComputeWorkerPool', () => {
     expect(pool.diagnostics().workerKernelStates).toEqual([]);
     pool.dispose();
   });
+
+  it('ready 握手重试耗尽会失败该 lane 的排队任务并拒绝后续入队', () => {
+    const workers: FakeWorker[] = [];
+    const timers: Array<() => void> = [];
+    const failures = vi.fn();
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 8,
+      maxBytes: 1024,
+      requireReadyHandshake: true,
+      readyTimeoutMs: 10,
+      maxWorkerRestarts: 0,
+      createWorker: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      onFailure: failures,
+      setTimer: (callback) => {
+        timers.push(callback);
+        return timers.length;
+      },
+      clearTimer: vi.fn(),
+    });
+
+    expect(pool.enqueue(task(1, 'general')).status).toBe('queued');
+    timers[1]();
+
+    expect(workers[1].terminated).toBe(true);
+    expect(failures).toHaveBeenCalledWith(
+      expect.objectContaining({ taskId: 1 }),
+      expect.objectContaining({ message: 'general compute worker ready timeout.' }),
+    );
+    expect(pool.diagnostics()).toMatchObject({ queued: 0, queuedBytes: 0, failedTasks: 1 });
+    expect(pool.enqueue(task(2, 'general'))).toMatchObject({ status: 'rejected' });
+    pool.dispose();
+  });
+
+  it('ready 后首任务连续崩溃会累计重试并在上限后停止重建', () => {
+    const workers: FakeWorker[] = [];
+    const timers: Array<{ callback: () => void; delayMs: number }> = [];
+    const failures = vi.fn();
+    const poolFailures = vi.fn();
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 8,
+      maxBytes: 1024,
+      requireReadyHandshake: true,
+      readyTimeoutMs: 10,
+      maxWorkerRestarts: 1,
+      restartDelayMs: 25,
+      createWorker: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      onFailure: failures,
+      onPoolFailure: poolFailures,
+      setTimer: (callback, delayMs) => {
+        timers.push({ callback, delayMs });
+        return timers.length;
+      },
+      clearTimer: vi.fn(),
+    });
+    const general = workers[1];
+    general.ready();
+    pool.enqueue(task(1, 'general'));
+    general.onerror?.({ message: 'first crash' } as ErrorEvent);
+
+    timers.find(({ delayMs }) => delayMs === 25)!.callback();
+    const restarted = workers[2];
+    restarted.ready();
+    pool.enqueue(task(2, 'general'));
+    restarted.onerror?.({ message: 'second crash' } as ErrorEvent);
+
+    expect(failures.mock.calls.map(([failed]) => failed.taskId)).toEqual([1, 2]);
+    expect(poolFailures).toHaveBeenCalledTimes(1);
+    expect(poolFailures).toHaveBeenCalledWith('general', expect.objectContaining({ message: 'second crash' }));
+    expect(workers).toHaveLength(3);
+    expect(pool.diagnostics()).toMatchObject({ generalWorkerCount: 0, running: 0, queued: 0 });
+    pool.dispose();
+  });
 });

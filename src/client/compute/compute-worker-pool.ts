@@ -151,7 +151,7 @@ export class ComputeWorkerPool {
   }
 
   enqueue(task: ComputeTask, transfer: readonly Transferable[] = []): ComputeQueueResult {
-    if (this.disposed) return { status: 'rejected', reason: 'invalid-task' };
+    if (this.disposed || !this.canServiceLane(task.lane)) return { status: 'rejected', reason: 'invalid-task' };
     const result = this.queue.enqueue(task);
     if (result.status === 'queued' || result.status === 'merged') {
       this.submittedTasks += 1;
@@ -298,7 +298,6 @@ export class ComputeWorkerPool {
   private receive(slot: WorkerSlot, value: unknown): void {
     if (this.options.requireReadyHandshake && isWorkerReady(value)) {
       slot.ready = true;
-      slot.restartAttempts = 0;
       slot.kernelState = {
         epoch: this.epoch,
         lane: slot.lane,
@@ -402,11 +401,27 @@ export class ComputeWorkerPool {
     slot.restartAttempts += 1;
     if (slot.restartAttempts > (this.options.maxWorkerRestarts ?? 3)) {
       this.options.onPoolFailure?.(slot.lane, error);
+      if (!this.canServiceLane(slot.lane)) this.failQueuedLane(slot.lane, error);
       this.pump();
       return;
     }
     this.scheduleRestart(slot);
     this.pump();
+  }
+
+  private canServiceLane(lane: ComputeLane): boolean {
+    const maxRestarts = this.options.maxWorkerRestarts ?? 3;
+    return this.slots.some(
+      (slot) => slot.lane === lane && (slot.worker !== null || slot.restartAttempts <= maxRestarts),
+    );
+  }
+
+  private failQueuedLane(lane: ComputeLane, error: Error): void {
+    for (const task of this.queue.failLane(lane)) {
+      this.transfers.delete(task.taskId);
+      this.failedTasks += 1;
+      this.options.onFailure?.(task, error);
+    }
   }
 
   private scheduleRestart(slot: WorkerSlot): void {
