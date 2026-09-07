@@ -137,3 +137,11 @@ WASM 任务最终明确交还全部资源，并报告本地提交 `1580dcd`；�
 真实九条语料已具有 JSON metadata、规范 LE raw sidecar、逐记录内容 hash 与 manifest/source/config 绑定；C0/C1/C2 的九条解码和应用曾通过，当前计数域修订后继续复验。C0 的早期 base64 JSON 探针被排除为错误参考组，新的 C0 保留 raw binary；详见 [C0 校正](network-c0-reference-notes.md)与 [应用证据](network-codec-application-evidence.md)。所有这些均无 timing，不能代替完整 N2/N3/N4 或 GUI/远端准出。
 
 T0/T1 的 Node/浏览器及 IPv6 loopback 小包功能通过，尚未验证 WSS、公网、真实背压和完整业务旅程。T2/T3 依赖/协议审计另见 [传输审计](network-t2-t3-audit.md)，不能把一次握手失败解释为浏览器不支持。后续性能采样仍使用共享互斥并暂停本任务内部的测试/构建/探针；用户确认另一侧暂停不意味着本机其他活动自动成为零干扰。
+
+## 共同编解码链路与浏览器互操作检查点
+
+另一侧已由用户明确暂停，本批只运行短功能验证，没有借此开始正式性能采样。root 负责共同校验/集成与 Chrome，Terra 负责 Reader、pipeline/JSON 预检、gameplay 编码与独立反例审计，Sol 负责独立复审及完整 receipt 的固定 schema 实现；发现缺口后先补实际 wire 反例再修正。
+
+三候选同一 receive 链路的 9 条真实 Host + 50 条结构化合成样本均 GREEN，Chrome 与 Node 双向各 59/59；原 source corpus 保持冻结，新增 synthetic 独立标记。详见 [本批记录](network-shared-validation-progress.md)。这不是完整 N2/N3/N4、GUI 或远端交付；输入方向、业务消费者与其他 parser 域继续按门槛收齐。生产源码仍为此前推送的 `8dc8233`，本批为可丢弃探索和证据更新。
+
+账户额度在本批读取时已用 10%、剩余 90%；这是共享账户窗口快照，不能归因成本任务，亦不能折算为 credits。未购买额度、未兑换 reset、未创建 goal。

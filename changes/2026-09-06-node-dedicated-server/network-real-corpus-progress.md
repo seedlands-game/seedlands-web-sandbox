@@ -123,3 +123,23 @@ Node 22 验证仍为 C1/C2 真实 corpus 9/9 强等价。structured synthetic �
 ## 跨消息计数 actual-parser mutation 回归
 
 除 correction 的超界 tick/-2 ack 外，现已对已编码 wire 逐字段改写并调用 C1/C2 decode：correction commit/world revision、baseline chunk revision、welcome checkpoint commit、receipt sequence/executed commit/gameplay revision/committed world revision。每项都分别注入 `MAX_SAFE_INTEGER + 1` 与非法负数；C1 改写相应 f64 field，C2 改写对应 uint64 field 后重编码。两 codec 的真实 parser 全部拒绝，且正常高值 synthetic 与真实九条 roundtrip 仍通过。receipt world revision 的正反例使用仅为该字段存在性而构造的 structured synthetic receipt，不计作真实 corpus。
+
+## Inventory/recipes 固定字段 GREEN（无计时）
+
+C1/C2 inventory 与 recipes 的共享限制已统一为 inventory 128、recipes 512、UTF-8 string 4,096 bytes。真实九条、非空 structured synthetic（null、多 item、中文 UTF-8 itemId、多 recipe、u32 最大 count）及两 codec 参考 validator/ownership/hash 独立阶段均通过。C1 实际 frame mutation 拒绝 inventory count=129、recipe count=513、以及直接 splice 为 4,097-byte itemId/recipe 的帧；C2 direct Protobuf wire 的 inventory=129、recipes=513、4,097-byte itemId/recipe 都由 preflight 在 object decoder 前拒绝（spy=0）。adapter 已由同一 runner 刷新，仍为两 codec 九条 `DECODED`。entities 仍为空、breakAction 仍为 null，未在本步扩展。
+
+## gameplay entities/breakAction 与完整 receipt 扩展 RED
+
+开始新 `/tmp` 原型前已记录现有 RED：codec 仅接受空 entities、`breakAction: null` 及 select-hotbar executed receipt；非空 gameplay 和其余 AuthorityAction 在 encode 被明确拒绝。共享 reference validator 已有这些字段/枚举，此 RED 不是生产 DTO 缺失。后续只使用 structured synthetic 矩阵，不修改原九条真实 Host corpus，也不会把 synthetic 标为真实流量。
+
+## 六类出站消息的共同链路扩展 GREEN（2026-09-07）
+
+上述非空 gameplay/完整 receipt 的 RED 已在可丢弃参考实现中解除。C1/C2 现支持 world-item、grazer、night-stalker、settler，entity optional 的缺省/显式值、null/非空 breakAction。实际 wire 的 entity count 513 在 C1 decoder、C2 preflight 拒绝；C2 object decoder spy 为 0。
+
+独立审计随后发现 C2 `has_* = false` 却携带字段的 wire 会被归一化并丢失隐含值。修复为在 raw protobuf message 转换 defaults 之前检查实际字段 presence；false+payload、true+missing 均不得交付，显式 health/maxHealth=0 保留。此修复针对 optional 分支，不能据此外推所有 protobuf scalar wire 域已经核验。
+
+完整 receipt 参考覆盖九种 action 的成功与 31 种合法失败、三种非执行状态、六组 MAX_SAFE 边界。slot/source/target 和 position 保留生产参考的安全整数域，未收窄为 u32。强等价采用结构比较，不以 JSON 对象键顺序为业务语义。
+
+Node 22.23.2 三候选同一 pipeline 已通过 **9 条 real Host + 50 条 structured synthetic，各 59/59**。Chrome 152.0.7977.76 headless 的 Node→browser 与 browser→Node 各 59/59 也通过；该浏览器运行 UTC 为 2026-09-07T02:56:21.074Z。所有 synthetic 单独带 provenance，不改写原真实 corpus 的 hash、source 或顺序。
+
+这仍只覆盖六类已定义出站参考，输入/edge、动作请求、独立 pose 与实际 HUD/实体消费尚未完整接入。HTTP loopback 运送 fixture 不证明游戏 transport；没有 N2 性能数值、正式 wire 或 GUI 采用结论。共同 validator/资源预检、源 hash 与更新后的复验见[本批共同链路记录](network-shared-validation-progress.md)。
