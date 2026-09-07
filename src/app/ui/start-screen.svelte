@@ -9,6 +9,7 @@
   import SeedlandsMark from './primitives/seedlands-mark.svelte';
   import type { WorldOpenMode } from '../../client/world-version-policy';
   import type { WorkerSupport } from '../client-capability-preflight';
+  import WorldLoading from './world-loading.svelte';
 
   let {
     shell,
@@ -47,62 +48,64 @@
 </script>
 
 <GamePanel id="start-card" class="start-card" role="region" hidden={shell.phase === 'playing'}>
-  <SeedlandsMark />
-  <p class="eyebrow">PROCEDURAL FANTASY WORLD</p>
-  <h1>Seedlands</h1>
-  <p>走进一个由 Seed 苏醒、会随脚步延展的体素秘境。</p>
-  <div class="world-tags" aria-hidden="true"><span>草原</span><span>森林</span><span>山脉</span><span>河湖</span></div>
-  {#if latestSeed && shell.phase !== 'loading'}
-    <GameButton
-      class="continue-world"
-      label="继续世界"
-      disabled={workerSupport !== 'supported'}
-      onclick={() => void application.continueWorld()}>继续世界 <small>{latestSeed}</small></GameButton
-    >
-  {/if}
-  <div class="start-fields">
-    <GameTextField id="seed" label="世界 Seed" bind:value={seed} maxlength={48} placeholder="留空创建随机世界" />
-    <label for="quality">
-      视觉质量
-      <select id="quality" bind:value={quality} disabled={shell.phase === 'boot' || shell.phase === 'loading'}>
-        <option value="low">Low · 省电</option>
-        <option value="medium">Medium · 均衡</option>
-        <option value="high">High · 精致</option>
+  {#if shell.phase === 'loading'}
+    <WorldLoading />
+  {:else}
+    <SeedlandsMark />
+    <p class="eyebrow">PROCEDURAL FANTASY WORLD</p>
+    <h1>Seedlands</h1>
+    <p>走进一个由 Seed 苏醒、会随脚步延展的体素秘境。</p>
+    <div class="world-tags" aria-hidden="true">
+      <span>草原</span><span>森林</span><span>山脉</span><span>河湖</span>
+    </div>
+    {#if latestSeed}
+      <GameButton
+        class="continue-world"
+        label="继续世界"
+        disabled={workerSupport !== 'supported'}
+        onclick={() => void application.continueWorld()}>继续世界 <small>{latestSeed}</small></GameButton
+      >
+    {/if}
+    <div class="start-fields">
+      <GameTextField id="seed" label="世界 Seed" bind:value={seed} maxlength={48} placeholder="留空创建随机世界" />
+      <label for="quality">
+        视觉质量
+        <select id="quality" bind:value={quality} disabled={shell.phase === 'boot'}>
+          <option value="low">Low · 省电</option>
+          <option value="medium">Medium · 均衡</option>
+          <option value="high">High · 精致</option>
+        </select>
+      </label>
+    </div>
+    <label class="world-version-choice" for="world-version-mode">
+      世界版本
+      <select id="world-version-mode" bind:value={openMode}>
+        <option value="continue">默认继续（优先已有新版）</option>
+        <option value="continue-legacy">明确继续旧版 v2</option>
+        <option value="new-current">新建或进入新版 v3（保留旧档）</option>
       </select>
     </label>
-  </div>
-  <label class="world-version-choice" for="world-version-mode">
-    世界版本
-    <select id="world-version-mode" bind:value={openMode} disabled={shell.phase === 'loading'}>
-      <option value="continue">默认继续（优先已有新版）</option>
-      <option value="continue-legacy">明确继续旧版 v2</option>
-      <option value="new-current">新建或进入新版 v3（保留旧档）</option>
-    </select>
-  </label>
-  <GameButton
-    class="recommended-start"
-    label="推荐起点：林间河岸"
-    disabled={shell.phase === 'boot' || shell.phase === 'loading' || workerSupport !== 'supported'}
-    onclick={() => (seed = 'mosslight-68')}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
-  >
-  <GameButton
-    label={shell.enterLabel}
-    disabled={shell.phase === 'boot' || shell.phase === 'loading' || workerSupport !== 'supported'}
-    onclick={() => onstart(seed, quality, openMode)}
-  >
-    {shell.enterLabel}
-  </GameButton>
-  <div class="menu-secondary">
-    <GameButton label="设置" disabled={shell.phase === 'loading'} onclick={() => application.openPanel('settings')}
-      >设置</GameButton
+    <GameButton
+      class="recommended-start"
+      label="推荐起点：林间河岸"
+      disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
+      onclick={() => (seed = 'mosslight-68')}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
     >
-    <GameButton label="操作指南" disabled={shell.phase === 'loading'} onclick={() => application.openPanel('guide')}
-      >操作指南</GameButton
+    <GameButton
+      label={shell.enterLabel}
+      disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
+      onclick={() => onstart(seed, quality, openMode)}
     >
-  </div>
-  {#if error}<p class="start-error" role="alert">{error}</p>{/if}
-  {#if workerSupport === 'unsupported'}
-    <p class="start-error" role="alert">当前浏览器不支持运行游戏所需的 Web Worker，无法进入世界。</p>
+      {shell.enterLabel}
+    </GameButton>
+    <div class="menu-secondary">
+      <GameButton label="设置" onclick={() => application.openPanel('settings')}>设置</GameButton>
+      <GameButton label="操作指南" onclick={() => application.openPanel('guide')}>操作指南</GameButton>
+    </div>
+    {#if error}<p class="start-error" role="alert">{error}</p>{/if}
+    {#if workerSupport === 'unsupported'}
+      <p class="start-error" role="alert">当前浏览器不支持运行游戏所需的 Web Worker，无法进入世界。</p>
+    {/if}
+    <small>旧版河岸不会自动改变；版本选择可继续 v2，也可为同名 Seed 保留旧档并进入 v3。</small>
   {/if}
-  <small>旧版河岸不会自动改变；版本选择可继续 v2，也可为同名 Seed 保留旧档并进入 v3。</small>
 </GamePanel>

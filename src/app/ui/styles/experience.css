@@ -380,6 +380,106 @@
 #start-card .game-button small {
   display: block;
 }
+
+.world-loading {
+  display: grid;
+  min-height: 430px;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.world-loading h2 {
+  margin: 8px 0 16px;
+  font: 500 clamp(30px, 6vw, 46px) / 1.1 var(--ui-font-display);
+  color: var(--ui-color-content);
+}
+
+.world-loading .loading-message {
+  min-height: 3em;
+  max-width: 390px;
+  margin: 0;
+  color: var(--ui-color-content-muted);
+}
+
+.loading-orbit {
+  position: relative;
+  width: 82px;
+  height: 82px;
+  margin-bottom: 24px;
+  border: 1px solid rgb(207 180 111 / 30%);
+  border-radius: 50%;
+  animation: loading-turn 5s linear infinite;
+}
+
+.loading-orbit::after {
+  content: '';
+  position: absolute;
+  inset: 24px;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #91b96f, #476948);
+  box-shadow: 0 0 24px rgb(150 202 116 / 35%);
+  transform: rotate(45deg);
+}
+
+.loading-orbit i {
+  position: absolute;
+  top: -4px;
+  left: 36px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d7b76e;
+  box-shadow: 0 0 10px #d7b76e;
+}
+
+.loading-orbit i:nth-child(2) {
+  transform: rotate(120deg);
+  transform-origin: 5px 45px;
+}
+.loading-orbit i:nth-child(3) {
+  transform: rotate(240deg);
+  transform-origin: 5px 45px;
+}
+
+.loading-track {
+  width: min(340px, 72vw);
+  height: 3px;
+  margin: 22px 0 12px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 9%);
+}
+
+.loading-track span {
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, #d7b76e, #91b96f, transparent);
+  animation: loading-scan 1.5s ease-in-out infinite;
+}
+
+@keyframes loading-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes loading-scan {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(270%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-orbit,
+  .loading-track span {
+    animation: none;
+  }
+}
 @media (max-width: 720px) {
   #survival-deck {
     bottom: 22px;

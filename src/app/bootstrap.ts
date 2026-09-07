@@ -23,6 +23,9 @@ import './ui/styles/experience.css';
 
 export type SeedlandsInitializationOptions = Readonly<{
   experiments?: Partial<ExperimentalClientOptions>;
+  resourceReady?: Promise<unknown>;
+  fallbackSeed?: string;
+  fallbackQuality?: string;
 }>;
 
 type BootstrapState = 'idle' | 'starting' | 'ready';
@@ -48,6 +51,11 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
     });
     const sessionConfig = readBrowserSessionConfig(location.search);
     const uiBridge = createUiBridge();
+    uiBridge.publishShell({
+      seed: options.fallbackSeed ?? '',
+      quality:
+        options.fallbackQuality === 'low' || options.fallbackQuality === 'high' ? options.fallbackQuality : 'medium',
+    });
     const audio = new GlobalAudio();
     const removeAudioHarness = installAudioHarness(audio);
     cleanup.push(removeAudioHarness);
@@ -87,7 +95,7 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
       buildCommit: commitSha,
     });
     cleanup.push(unmount);
-    await application.initialize();
+    await Promise.all([application.initialize(), options.resourceReady]);
     const removePersistenceHarness = await installPersistenceHarness();
     cleanup.push(removePersistenceHarness);
     const onButtonClick = (event: MouseEvent) => {

@@ -173,6 +173,37 @@ small {
   color: #859890;
 }
 
+.boot-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0 !important;
+  color: #aabca9 !important;
+  font-size: 12px;
+}
+
+.boot-status span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--moss);
+  box-shadow: 0 0 12px var(--moss);
+  animation: boot-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes boot-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.75);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .boot-status span {
+    animation: none;
+  }
+}
+
 @media (max-width: 720px) {
   #start-card {
     padding: 28px 22px;

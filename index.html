@@ -3,21 +3,43 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Seedlands 是一个由 Seed 唯一生成、可探索与建造的浏览器体素世界。无需安装，即刻创建或继续你的世界。"
+    />
+    <meta name="theme-color" content="#07101a" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:title" content="Seedlands · 会生长的浏览器体素世界" />
+    <meta property="og:description" content="探索由 Seed 唤醒的草原、森林、山脉与河湖。" />
+    <link rel="canonical" href="https://seedlands-game.github.io/seedlands-web-sandbox/" />
     <link rel="stylesheet" href="/assets/styles/start-screen.css" />
-    <title>Seedlands · Voxel Sandbox</title>
+    <title>Seedlands · 会生长的浏览器体素世界</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "Seedlands",
+        "description": "由 Seed 唯一生成、可探索与建造的浏览器体素世界。",
+        "genre": ["Sandbox", "Adventure"],
+        "gamePlatform": "Web Browser",
+        "inLanguage": "zh-CN",
+        "url": "https://seedlands-game.github.io/seedlands-web-sandbox/"
+      }
+    </script>
   </head>
   <body>
     <canvas id="game"></canvas>
     <main id="ui">
       <section id="start-card" class="panel" data-ui-fallback aria-label="Seedlands 启动界面">
-        <p class="eyebrow">PROCEDURAL FANTASY WORLD</p>
+        <p class="eyebrow">PROCEDURAL FANTASY WORLD · 正在装载冒险</p>
         <h1>Seedlands</h1>
         <p>走进一个由 Seed 苏醒、会随脚步延展的体素秘境。</p>
         <div class="world-tags" aria-hidden="true">
           <span>草原</span><span>森林</span><span>山脉</span><span>河湖</span>
         </div>
         <div class="start-fields">
-          <label>世界 Seed <input id="seed" maxlength="48" placeholder="需要 JavaScript 才能进入世界" /></label>
+          <label>世界 Seed <input id="seed" maxlength="48" placeholder="留空创建随机世界" /></label>
           <label
             >视觉质量
             <select id="quality">
@@ -27,7 +49,8 @@
             </select></label
           >
         </div>
-        <button id="enter" disabled aria-disabled="true">进入世界</button>
+        <button id="enter" disabled aria-disabled="true">正在准备游戏资源…</button>
+        <p class="boot-status" role="status"><span></span> 界面已经就绪，世界引擎正在靠岸</p>
         <small>同一 Seed + 生成器版本会得到同一基础世界</small>
         <section id="hud" hidden aria-hidden="true"></section>
       </section>
