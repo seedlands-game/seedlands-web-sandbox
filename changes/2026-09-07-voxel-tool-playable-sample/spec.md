@@ -2,7 +2,7 @@
 
 ## 状态与目标
 
-- 状态：Active（本地实现和浏览器证据完成，待 PR 交接）；类型：Agile。
+- 状态：Delivered；类型：Agile。人类审核与合并待完成。
 - 用户授权：参照已对齐路线自主推进，明天停在能看到效果的可交付小边界；额度上限包含 buffer，不以耗尽为目标。
 - 基线：`4197bda`；对应路线 WP05 的第一组工具样板，给 WP06/08 提供现有玩法消费者；不宣称完成这些工作包。
 - 玩家结果：现有木斧、石镐具备清楚的像素立体轮廓，手持和掉落一致，采集/单次动作能自然挥动并回到原握姿；现有制作、丢弃、拾取循环仍可玩。
@@ -28,7 +28,7 @@
 - [x] 记录可执行 RED；受影响 Vitest GREEN。
 - [x] `pnpm verify:static` 与 `pnpm build` 分别通过。
 - [x] 当前 change 的真实浏览器交互、连续动作帧、手持/掉落截图与存退验证通过；不提升为长期 E2E 基线。
-- [ ] 本 change 的语义化 commit、PR ready、最新 HEAD 必要 CI 通过且无合并冲突；留给人类审核，不自动合并。
+- [x] 代码提交 `c626ce4` 的语义化 commit、PR ready、必要 CI 通过且无合并冲突；留给人类审核，不自动合并。后续文档交付提交的最新 HEAD 门禁在任务最终读回中核对。
 - 额度读取起点：周窗口已用 11%，剩余 89%。保守总增量上限 26.7 个百分点（剩余的 30%）；已用 30% 即停止扩展、预留约 7 个百分点收尾，35% 仅整理结果并停工。整数显示/后台消耗有误差，目标远低于这些阈值。
 - 阶段性读取共享账户额度，其他任务消耗计入保守停止阈值；不购买额度、不使用重置。
 - 完成此切片后即停止；最迟 2026-09-08 08:00 Asia/Shanghai 停止新增实施，留下实际状态与未完成证据。
@@ -37,7 +37,7 @@
 
 - [x] 路线/源码/基线/额度核查。
 - [x] 独立方案复核、RED、实现、确定性/浏览器验证。
-- [ ] GitHub PR 与 CI 交接。
+- [x] GitHub PR 与代码 CI 交接。
 
 ## Delivery Snapshot
 
@@ -52,3 +52,5 @@
 长期 docs baseline：已在玩法路线详细基线增加先行切片入口与未完成边界；没有改变目录、owner 或运行链路，所以代码地图和目录规范不更新。明日体验与下一步接点见 [try-it](try-it.md)。独立复核与测试问题归因见 [review](review.md)。
 
 预算：账户周窗口起点 11%，本地准出阶段读数 12%；整数精度且与其他任务共享，不能归为本任务精确成本。无额度重置、购买或外部模型服务。小边界完成后停止扩展；剩余工作仅 Git/PR/CI 收尾。
+
+远端代码准出：[PR #12](https://github.com/seedlands-game/seedlands-web-sandbox/pull/12)，base `main`、代码 HEAD `c626ce40deef08ed766f4656bcc5c7841b735453`，非草稿、`MERGEABLE`、`CLEAN`；[CI run 34132172932](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34132172932) 的 Static verification、Production build、Chromium regression 全部成功，Deploy GitHub Pages 按 PR 规则跳过。后续本 change 的文档交付提交不改变源码或浏览器证据哈希；其最新 HEAD 必要门禁仍须再次实时读回后交棒。
