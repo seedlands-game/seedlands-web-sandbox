@@ -5,3 +5,5 @@
 脚本合同使用 `form=script` 与空模型字段。写入脚本必须显式区分：未发送、已确认成功、已确认失败、结果不明。只有服务端或 adapter 合同真实支持的稳定幂等键才允许安全重试；函数名或本地 key 本身不构成远端幂等保证。
 
 批量外部写入使用 [batch-runtime.md](batch-runtime.md) 的 prepare→write→read→verify 流程。一次性本地转换可用更小的专用脚本，不必套入 runtime。
+
+对于只需等待状态变化的长异步工作，优先复用平台终态事件或已有原生 `wait`/`watch`，而不是新增调度器或让主模型轮询。监控合同、终态回报和停用规则见 [async-monitoring.md](async-monitoring.md)。

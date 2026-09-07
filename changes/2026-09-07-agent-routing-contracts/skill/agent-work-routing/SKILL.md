@@ -14,6 +14,7 @@ agent 主动派发前，先写版本化 JSON 合同，用 `scripts/validate-cont
 - 模型选择或嵌套派发：[references/routing.md](references/routing.md)。
 - 合同字段、父预算、交接和报告：[references/handoff.md](references/handoff.md)。
 - 重复或批量工作：[references/script-first.md](references/script-first.md)；写入、读回、验证任务再读 [references/batch-runtime.md](references/batch-runtime.md)。
+- 长时间 CI、构建或其他异步等待：[references/async-monitoring.md](references/async-monitoring.md)。主任务交出监控后结束当前轮次或转做独立工作；不能自行忙轮询。
 - 既有有界任务的路由依据：[references/learning-samples.md](references/learning-samples.md)。
 - 安装版本化源与全局指针：`scripts/install-global.mjs --help` 和 [references/global-agents-snippet.md](references/global-agents-snippet.md)。
 
