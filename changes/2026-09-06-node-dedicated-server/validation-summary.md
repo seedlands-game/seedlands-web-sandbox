@@ -1,3 +1,21 @@
+# Node Dedicated Server 当前状态与阶段证据
+
+## 恢复入口：2026-09-07 网络准备阶段
+
+整个 change 仍 **Active**。最新生产检查点为 `07caff1`，完整静态 180 文件/960 项通过，world 行覆盖 96.37%，浏览器与 Node 五入口构建通过。动作请求检查点 `0b2ae3e` 与该生产检查点均已推送功能分支。以下较早的计数和“尚未 push”等表述仅属于对应历史阶段，不能作为当前状态。
+
+| 门禁                 | 当前事实与仍需完成                                                                                                                                                                                       | 详细证据                                                                                                          |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| N0 公共语义          | 输入、动作、correction、完整块与 Gameplay v2 的参考投影/真实语料已有证据；首帧位置/camp、commit 重网格与流体优先级、可关联和取消的 interest/mesh block 合同仍需补齐。真实客户端合并、删除/重生尚未接线。 | [动作](network-action-request-progress.md)、[Gameplay v2](network-gameplay-consumer-progress.md)                  |
+| N1 能力              | Chrome/Firefox 与现代 Go 候选的 loopback 可靠流/datagram 通过；Playwright WebKit 会话通过但数据路径失败。Linux x64 仅交叉构建，真实 x64/公开证书/移动端/WAN 未采集。T0/T1 仍为局部参考探针。             | [Chrome 探针](network-webtransport-loopback-progress.md)、[矩阵](network-webtransport-browser-matrix-progress.md) |
+| N2 编解码            | 三候选对已采集参考强等价；Gameplay v2 的 9 条三候选及 Chrome 双向通过，当前源码绑定的 decoded oracle 4/4。代表负载、分配/GC/完整阶段成本仍未采样；C0 大 metadata 表示限制保留。                          | [v2 编解码](network-gameplay-codec-progress.md)、[输入/实体](network-input-pose-progress.md)                      |
+| N3/N4 网络选择与采用 | 正式对照未完成，wire 和最终传输未采用；不能从功能探针默认选择 JSON/WSS 或 QUIC。                                                                                                                         | [冻结选型合同](network-selection.md)                                                                              |
+| 产品与性能           | 常驻 Node 权威、持久化 lane 和线程/进程执行器已运行；远端可玩客户端/双模式 GUI、目标远端/CI、迁移加 feature 收益与计算上移不退化 A/B 仍待完成。                                                          | [合同剩余状态](#合同剩余状态)、[滚动估算](stage-estimate.md)                                                      |
+
+以下保留各阶段原始证据。恢复先读上表及当前切片，只有追溯失败或环境时才展开历史。
+
+---
+
 # 无网络宿主阶段验证快照
 
 2026-09-07，本阶段已形成可运行的 TS Node 世界宿主；整个 Node Dedicated Server change 仍 **Active**，不标为 Delivered。批准的 spec 与附件 hash 保持冻结，实施状态以本页、[实施记录](execution.md)和源码为准。

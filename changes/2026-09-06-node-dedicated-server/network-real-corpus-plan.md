@@ -52,3 +52,43 @@
 - 每个 codec 有独立 wire-level 畸形 mutation（frame/version/length/discriminator/计数/非有限或等价表示/oversize/trailing），与共享 DTO validator 证据分列。
 - C1 改为有界单 buffer 与复用 `DataView` 后重新验证/登记 source 与 bundle hash；未满足时不比较其 CPU/分配。
 - 以上只使 N2 能开始可比实验；仍需 N3 transport 与 N4 真实旅程/WAN 证据才允许冻结 wire 或 GUI/部署。
+
+## 2026-09-07：已注册 actor 密度语料（计划待实施）
+
+### 目标、代次与不变量
+
+在现有小规模真实实体语料之外，新增一个**独立 generation** 的密度来源，只验证当前公开 `Gameplay v2`、`EntityPose` 与 `PlayerCorrection` 在真实 Host 的 32 和 128 个已注册 actor 档可被完整投影。它不重写 `/tmp/seedlands-network-real-corpus-v1`、`/tmp/seedlands-network-entity-corpus-v1` 或 `/tmp/seedlands-network-gameplay-consumer-corpus-v2`，也不把小样本替换成密度样本。
+
+每个档位使用一个全新、固定 seed 的 `DedicatedServerHost` 和独立持久化实例；同一档位的 C0/C1/C2 必须读取同一份已写盘的 canonical records、实际字段、seed、Host config 与 source hash，禁止由候选 codec 触发不同生成、不同命令或不同投影。目录暂定为不覆盖旧代的 `/tmp/seedlands-network-gameplay-density-corpus-v1/actors-32` 与 `/tmp/seedlands-network-gameplay-density-corpus-v1/actors-128`。最终目录名、generation、manifest format 在 RED 用例和 recorder 一起冻结，不借用历史 manifest 的 content hash。
+
+本阶段不提高 `MAX_RETAINED_ACTORS = 512`，也不改变 `EntityPose` 的 256 项上限。32、128 指**实际已注册 autonomous actors**，不是手写 snapshot 的数组长度、保留上限或性能目标。记录时同时保存并断言实际：
+
+| 字段                                               | 含义与要求                                                                                               |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `registeredActorCount`                             | 从真实 `GameplayView.actors` / consumer `actorBehaviors` 可交叉核对的已注册 actor 数；必须恰为目标档位。 |
+| `totalEntityCount`                                 | 同次真实视图中包含 player、world item 与所有实体的实际数量；不预设为 `目标 + 1`。                        |
+| `poseEntityCount`                                  | 同次 `EntityPose` 投影的实际项数；必须等于该次可投影实体数且不超过 256。                                 |
+| `gameplayEntityCount`                              | 同次 Gameplay v2 的非玩家实体数；当前投影明确排除 player，不能与 pose 总数混称。                         |
+| `gameplayRevision`、`physicsTick`、`worldRevision` | 每帧真实因果上下文，用来证明推进后的 publication 不是同一静态 view 的重复序列化。                        |
+
+本 fixture 只有一名 player：每次捕获都断言 `poseEntityCount = totalEntityCount`、`gameplayEntityCount = totalEntityCount - 1`，并单独断言 `registeredActorCount` 为目标档位。现有 starter ecology 和世界物品保持存在，因而总实体数以实测为准；若它们使 pose 超过 256，则该档明确 RED/拒绝，不裁剪、不开大预算，也不伪造只含 actor 的视图。
+
+### 真实来源与采集旅程
+
+1. 各档先走 `DedicatedServerHost.create` 的正常 safe-spawn、starter ecology 和加载流程，不设置 `initialPlayerBodyPosition`，不直接写 `EntityStore`、`GameplayRuntime`、actor map 或 snapshot。
+2. 用现有 `AuthorityRuntime.executeCommand` 的 `local-developer` fixture identity 和既有 `spawn-actor` 命令补足到目标数。命令明确记录来源为 fixture 管理操作、actor id、archetype、位置、命令序号及 capability；它不是入站玩家 action，也不扩大任何网络权限。位置采用固定、互不重叠的确定性格点，archetype 的分配规则也写入 config，避免某次随机分布改变消息字段。
+3. 最后一条命令成功后，经一个有界、真实 Host 的 simulation/wake 推进取得新的 correction、pose、Gameplay v2 publication；记录推进前后实际 tick/revision 与 actor/entity 计数。此处只确认状态确实来自推进后的 Host，**不**采集耗时、吞吐、CPU、内存或 tick p95。
+4. 每档至少写一组相同 publication 顺序的 `player-correction`、`entity-pose`、`gameplay-consumer` records。correction 是玩家权威状态；pose 与 Gameplay v2 分别保留其既有完整允许字段。不得为密度而缩减 actor behavior、实体、库存或其他当前公开字段。
+5. 写盘后重读，逐条重算 content hash，复核 index、manifest payload hash、corpus hash、provenance、source/config hashes，并与内存记录 `deepStrictEqual`。manifest 必须包含目标 actor 数、实际五项计数、seed、生成/投影版本、命令来源和有界推进说明；候选 codec 的 decode/application 验证在后续包中读取该 manifest，不在本采集包内实现。
+
+### RED / GREEN 与保存恢复取舍
+
+最小 RED 先让 change-local 用例要求每档的目标 `registeredActorCount`、完整三类别 publication、实际计数关系、推进后 tick/revision 变化以及 provenance/hash 绑定；在尚无 collector 或只产生 starter ecology 时，应因缺 records、计数不足或未推进而失败。GREEN 仅在上述真实路径满足后写入两个新目录，并显式验证 32/128 的 `poseEntityCount <= 256`。
+
+本包**不机械重复**保存恢复：`network-entity-corpus` 与 gameplay-consumer v2 的三阶段小规模旅程已经验证 starter ecology 不重复、同一 `MemoryGamePersistence` 恢复和新 Host publication。密度包的首要未知量是当前公开投影的数量与字段完整性；除非 RED 暴露命令扩容后保存边界会改变 actor registration 或 publication 字段，否则不把保存/恢复加入 32/128 旅程。若需要该问题，另建以 32 或 128 真实登记为输入的恢复子包，不能在本包临时扩大。
+
+### 非目标、后续门槛与范围归属
+
+这不是 startup、world commit、interest/visibility、baseline、传输背压或完整 N2 合同：不证明 join burst、可靠重传、乱序、GUI 表现、客户端 actor lifecycle、WAN、codec 性能或正式网络采用。现有 256 pose 预算只作为接收前的明确 gate；512 actor 上限只作为产品既有上限，二者均不成为扩容授权。
+
+实现预计只新增 change-local density collector、Vitest config、定向采集用例和进度/证据摘要；不修改生产 API、投影 DTO、原型 codec 或旧语料。它属于原 N0/N2 估算的实体代表性补齐，不申请新的性能实验或额外范围；将来的 timing 采样必须基于本 generation 的固定 records 另行合同、单独执行与报告。
