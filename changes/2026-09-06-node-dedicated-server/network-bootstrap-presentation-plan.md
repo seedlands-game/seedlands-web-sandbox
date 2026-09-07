@@ -122,12 +122,15 @@ type WorldCommitPresentationReferenceV2 = Readonly<{
 
 结构校验不得用一个集合替代另一个集合：
 
-- `chunks`、`meshChunks`、`chunkRevisions.key` 分别要求合法、唯一、确定排序及各自的 512 项参考预算。
+- `chunks`、`meshChunks`、`chunkRevisions.key` 分别要求合法、唯一、按生产 `compareChunkKeys` 的数值坐标顺序排序及各自的 512 项参考预算；保持同优先级 mesh 排队顺序。
 - `chunkRevisions` 的 key 集合必须与 `chunks` 一致；`meshChunks` 可包含相邻 key，不要求是 `chunks` 的子集。
 - `mutationCount` 必须是非负安全整数；有结构变化时与当前生产结果一致地大于零。
 - `bounds` 坐标必须是有符号安全整数，逐轴满足 `min <= max`。`fluid` 结构变化必须有 bounds，避免把无边界提交宽松绑定到任意待处理的流体交互；若未来生产允许无 bounds 的 fluid commit，应先修改合同与反馈消费者，不在投影中静默放宽。
 - `structuralChange.worldRevision` 必须等于顶层 `worldRevision`；投影可以不重复输出该字段。
 - 所有数组和元组深复制。重复 key、非法 revision、非有限数、超过预算或不一致集合均 fail closed，不排序去重后掩盖上游错误。
+- 存在 collision delta 时，必须有 committed structural change；每个 delta 的 key 属于 `chunks`，revision 匹配对应 `chunkRevisions`，并满足 `previousRevision + 1 = revision`、cells 非空。cells index 不重复且在 Chunk 范围内，voxel/fluid 分别不超过 Uint16/Uint8 的域；结构变化不强制携带 delta，以保留独立基线重取的后续适配路径。
+
+2026-09-07 独立审阅确认：512 是当前参考表示预算，不是生产 WorldCommit 的最大范围。Authority 的 mutation preparation 可涉及 2,048 个 Chunk，mesh 失效集合还可能扩展至邻接块；大提交可超出此参考格式。当前投影必须显式拒绝，不能裁剪、改世界规则或静默丢弃。正式接线前必须完成 commit 分帧/原子应用或明确 baseline resync 合同，并将大提交加入真实语料；目前这项保持未完成。因此本切片的正确性仅覆盖明确预算内的参考消息，不能作为全部生产提交都可表示的证明。
 
 完整 `metrics`、semantic event 的 unknown data、碰撞 baseline bytes、mesh payload、trace id 与客户端 scheduler 诊断不进入该 DTO。`mutationCount` 是本次明确保留的有效工作量，不代表其他 metrics 已成为公共协议。
 

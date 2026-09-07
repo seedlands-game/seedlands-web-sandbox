@@ -2,15 +2,24 @@
 
 ## 恢复入口：2026-09-07 网络准备阶段
 
-整个 change 仍 **Active**。最新生产检查点为 `07caff1`，完整静态 180 文件/960 项通过，world 行覆盖 96.37%，浏览器与 Node 五入口构建通过。动作请求检查点 `0b2ae3e` 与该生产检查点均已推送功能分支。以下较早的计数和“尚未 push”等表述仅属于对应历史阶段，不能作为当前状态。
+整个 change 仍 **Active**。本页随当前功能分支源码提交；上一已推送检查点为 `6de696b`。本批完整静态 **182 文件/984 项通过**（另 2 文件/4 项跳过），world 行覆盖 96.37%；浏览器构建和 Node 五入口构建通过。以下较早的计数及“尚未 push”等表述仅属于对应历史阶段。
 
-| 门禁                 | 当前事实与仍需完成                                                                                                                                                                                       | 详细证据                                                                                                          |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| N0 公共语义          | 输入、动作、correction、完整块与 Gameplay v2 的参考投影/真实语料已有证据；首帧位置/camp、commit 重网格与流体优先级、可关联和取消的 interest/mesh block 合同仍需补齐。真实客户端合并、删除/重生尚未接线。 | [动作](network-action-request-progress.md)、[Gameplay v2](network-gameplay-consumer-progress.md)                  |
-| N1 能力              | Chrome/Firefox 与现代 Go 候选的 loopback 可靠流/datagram 通过；Playwright WebKit 会话通过但数据路径失败。Linux x64 仅交叉构建，真实 x64/公开证书/移动端/WAN 未采集。T0/T1 仍为局部参考探针。             | [Chrome 探针](network-webtransport-loopback-progress.md)、[矩阵](network-webtransport-browser-matrix-progress.md) |
-| N2 编解码            | 三候选对已采集参考强等价；Gameplay v2 的 9 条三候选及 Chrome 双向通过，当前源码绑定的 decoded oracle 4/4。代表负载、分配/GC/完整阶段成本仍未采样；C0 大 metadata 表示限制保留。                          | [v2 编解码](network-gameplay-codec-progress.md)、[输入/实体](network-input-pose-progress.md)                      |
-| N3/N4 网络选择与采用 | 正式对照未完成，wire 和最终传输未采用；不能从功能探针默认选择 JSON/WSS 或 QUIC。                                                                                                                         | [冻结选型合同](network-selection.md)                                                                              |
-| 产品与性能           | 常驻 Node 权威、持久化 lane 和线程/进程执行器已运行；远端可玩客户端/双模式 GUI、目标远端/CI、迁移加 feature 收益与计算上移不退化 A/B 仍待完成。                                                          | [合同剩余状态](#合同剩余状态)、[滚动估算](stage-estimate.md)                                                      |
+| 门禁                 | 当前事实与仍需完成                                                                                                                                                                                                                                 | 详细证据                                                                                                                                                        |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| N0 公共语义          | 输入、动作、correction、单块、Gameplay v2 已有参考证据；本批补齐 Welcome 当前 body/camp/启动事实、WorldCommit 邻接 mesh/流体优先级/bounds/有效写入数。真实客户端适配、interest/bundle/cancel、共享保留、完整邻域采集及大提交分帧/resync 仍未完成。 | [Welcome](network-bootstrap-presentation-progress.md)、[WorldCommit](world-commit-presentation-progress.md)、[interest 计划](network-interest-baseline-plan.md) |
+| N1 能力              | Chrome/Firefox 与现代 Go 候选的 loopback 可靠流/datagram 通过；Playwright WebKit 会话通过但数据路径失败。Linux x64 仅交叉构建，真实 x64/公开证书/移动端/WAN 未采集。                                                                               | [Chrome 探针](network-webtransport-loopback-progress.md)、[矩阵](network-webtransport-browser-matrix-progress.md)                                               |
+| N2 编解码            | 三候选通过已采集参考强等价；本批 32/128 actor 各 3 条、Welcome 3 条与 commit 2 条均通过 Node 22/Chrome 双向。正式阶段成本、分配/GC、频率/负载与代表性场景未采样；C0 大 metadata 和超过 512 项 commit 的表示限制保留。                              | [密度](network-density-codec-progress.md)、[呈现编解码](network-presentation-codec-evidence.json)、[Gameplay v2](network-gameplay-codec-progress.md)            |
+| N3/N4 网络选择与采用 | 正式对照未完成，wire 和最终传输未采用；不能从功能探针默认选择 JSON/WSS 或 QUIC。                                                                                                                                                                   | [冻结选型合同](network-selection.md)                                                                                                                            |
+| 产品与性能           | 常驻 Node 权威、持久化 lane 和线程/进程执行器已运行；远端可玩客户端/双模式 GUI、目标远端/CI、迁移加 feature 收益与计算上移不退化 A/B 仍待完成。                                                                                                    | [合同剩余状态](#合同剩余状态)、[滚动估算](stage-estimate.md)                                                                                                    |
+
+## 本批验证：呈现字段与来源锚点
+
+- `pnpm verify:static` 最终通过：Prettier、ESLint、路径规范、V8 coverage、Svelte 和两份 TypeScript 检查。先前一次运行的 983 项单元通过，但类型检查失败；修复可空闭包、字面量推断和测试故意构造非法值的类型后，再完整执行至上述 984 项通过。
+- `pnpm build` 通过；现有 500 kB bundle 提示保留。完整类型检查后使用官方 Node 22 执行 `scripts/build-node-server.mjs`，生成 5 个 ESM 入口；产物记录基线 `6de696b` 与未提交源码状态，不伪称已在未来提交 SHA 构建。
+- 最终 WorldCommit corpus 为 `/tmp/seedlands-network-world-commit-presentation-corpus-v2-r5`，官方 Node 22.23.2 直接执行独立 config，1/1 通过；实际 Authority C 为 2→3→4→5。早期直接 server 调用导致 C 不推进的记录、Node 26 的 r3、类型修正前的 r4 均保留历史，未进入最终 codec 输入。
+- Welcome 最终 corpus 为 `/tmp/seedlands-network-bootstrap-welcome-corpus-v2-source-bound`，Node 22 1/1 通过；新建、同 epoch 当前状态和持久化恢复的 body/worldTime/checkpoint 绑定同一 snapshot。首次 attach/reconnect 和相机表现继续为未采集。
+- 两组 presentation corpus 的当前显式 source hash、manifest、逐条内容、输入/输出绑定和三候选严格深相等均通过；真实 Chrome 152 与 Node 22 的两个方向分别通过。C2 的矛盾 presence 帧修复前取得真实 RED，修复后 5 类帧均在 consumer 前拒绝；旧 59 条参考回归仍通过。
+- 本批没有新增 UI 或网络入口，未把上述结果当作 Playwright 产品旅程、Midscene 视觉语义、WAN 或性能 A/B；没有运行正式 benchmark。
 
 以下保留各阶段原始证据。恢复先读上表及当前切片，只有追溯失败或环境时才展开历史。
 
