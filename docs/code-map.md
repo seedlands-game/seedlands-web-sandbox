@@ -132,3 +132,11 @@ flowchart TD
 - 独立循环与统一物理：[原始合同](../changes/2026-09-06-independent-loops-unified-physics/spec.md)与[执行记录](../changes/2026-09-06-independent-loops-unified-physics/execution.md)配合阅读；不要只用合同早期状态判断当前完成度。
 - 早期拆分的背景：[应用模块边界](../changes/2026-09-04-app-module-boundaries/spec.md)。其中历史路径不保证与当前一致。
 - 下一阶段的目标与决策：[长期对齐](living-world-alignment.md)。Node Dedicated、AgentServer 和插件体系是演进路线，不能当作当前已存在的源码模块。
+
+## 资产工坊独立入口
+
+- [asset-workbench.html](../asset-workbench.html) → [asset-workbench/main.ts](../src/app/asset-workbench/main.ts) → Svelte 工坊；不经过游戏 bootstrap。
+- [asset-catalog.ts](../src/client/presentation/asset-catalog.ts)、[asset-package.ts](../src/client/presentation/asset-package.ts)：统一资源/用途、原生数据校验与依赖。
+- [pixel-model-resource.ts](../src/app/gameplay/pixel-model-resource.ts)：游戏与工坊共享的像素 GPU 资源；[preview-scene.ts](../src/app/asset-workbench/preview-scene.ts) 只组合检视场景。
+- [asset-workbench-store.ts](../src/client/persistence/asset-workbench-store.ts)：独立浏览器资产库、冲突检查和事务保存。
+- 适配范围与来源规则见[资产工坊](asset-workbench.md)。
