@@ -30,3 +30,7 @@ SEEDLANDS_E2E_PORT=4183 pnpm exec playwright test \
 排障记录：生产 smoke 第一次误用默认 Playwright 缓存浏览器，改用项目已配置的系统 Chrome；随后 preview 未带构建使用的 base，子路径命中游戏 fallback。补齐 preview 环境后重新验证。没有安装浏览器或更改系统配置。一次 smoke 菜单选择器误写“新建世界”，按源码改为“进入世界”。这些是验收运行配置错误，未归因为产品通过或失败。
 
 长期基线更新 `docs/asset-workbench.md`、`docs/code-map.md` 与 `ASSETS.md`，保存来源、所有权、格式和试用入口；本次 E2E 保留在 change，不晋升长期基线。未运行 Midscene：本轮验收由确定性 Playwright 输入/资源读回和人工截图检查覆盖，不声称 Midscene 通过。
+
+## PR 准出
+
+生产代码 SHA `a91cf05ec2ec3d94e2371000f976fb2241b6c061` 已推送；[PR #16](https://github.com/seedlands-game/seedlands-web-sandbox/pull/16) 为非 Draft、无冲突。[首次 CI](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34156350333) 的 Static verification、Production build、Chromium regression 全部 SUCCESS，Pages deploy 按 PR 事件正常跳过。此后只有交付文档更新；最终门禁以 PR 最新 HEAD 检查页为准。未自动合并或发布。

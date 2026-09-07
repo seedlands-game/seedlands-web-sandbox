@@ -1,6 +1,6 @@
 # 统一视觉资产系统
 
-状态：Active。类型：Breaking（新二进制资产存储、纹理编译与共享表现）。
+状态：Delivered。类型：Breaking（新二进制资产存储、纹理编译与共享表现）。
 
 ## 授权与目标
 
@@ -43,8 +43,10 @@
 - [x] 静态 GLB 导入持久化与预览
 - [x] UI 集成与运行证据
 - [x] static / build / 原路径回归
-- [ ] 语义 commit / PR / CI
+- [x] 语义 commit / PR / CI
 
 ## Delivery Snapshot
 
-本地实现与验收完成，PR / CI 待交接。详见 [验收记录](evidence/acceptance.md) 和 [三分钟体验](try-it.md)。108 项内置资产、33 个用途入口；891 个确定性测试与 5 条浏览器旅程通过，默认及 Pages 子路径构建通过。长期 docs 已更新资产所有权、格式与使用路径，以及代码地图和资产来源；开发治理不变。方案已由一次只读 Sol/xhigh 复核，采纳目录与替换能力分离、逻辑 ID 稳定、GLB 限制及有界验收。主任务建议 Astra/high，实际运行遥测 unknown；明确实现单元可用 Terra/high，父级负责集成和最终验收。
+实现与验收完成，交接 [PR #16](https://github.com/seedlands-game/seedlands-web-sandbox/pull/16)，base 为 `codex/voxel-tool-playable-sample`（#12 尚未合并）；未自动合并。生产代码提交 `a91cf05ec2ec3d94e2371000f976fb2241b6c061` 的静态、构建与 Chromium CI 均通过（[run 34156350333](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34156350333)）。后续交付记录提交仍按 PR 最新 HEAD 门禁读回；人类审核待完成。详见 [验收记录](evidence/acceptance.md) 和 [三分钟体验](try-it.md)。108 项内置资产、33 个用途入口；891 个确定性测试与 5 条浏览器旅程通过，默认及 Pages 子路径构建通过。长期 docs 已更新资产所有权、格式与使用路径，以及代码地图和资产来源；开发治理不变。方案已由一次只读 Sol/xhigh 复核，采纳目录与替换能力分离、逻辑 ID 稳定、GLB 限制及有界验收。主任务建议 Astra/high，实际运行遥测 unknown；明确实现单元可用 Terra/high，父级负责集成和最终验收。
+
+本轮功能约 45 分钟完成本地准出，剩余时间用于 CI 和交接，无需用满三小时。账户周用量从 17% 到 18%（共享取整指标，不是精确任务计费）；低于包含缓冲的预算上限。原生子任务请求 Terra/high，负责有界静态 GLB 与同源角色单元，父级集成、独立检查与最终验收；未使用外部 worker。
