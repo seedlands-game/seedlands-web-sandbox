@@ -36,19 +36,19 @@
 
 ## 验收与证据
 
-- [ ] Static：格式、ESLint、路径与类型检查通过；完整 `pnpm verify:static` 中无关 Wasm/mesh 高负载测试超时，未宣称通过。
+- [x] Static：`pnpm verify:static:ci` 通过，182 个测试文件通过、2 个跳过；867 个测试通过、4 个跳过。
 - [x] Build：`pnpm build` 通过，manifest 与 gzip 资源指标已记录。
-- [ ] Browser：用例已实现；容器缺少 Playwright 浏览器，备用 Chrome 又缺 `libatk-1.0.so.0`，依赖源被 403 拒绝，未能执行。
+- [x] Browser：change 的资源 gate、输入保留、失败重试与初始区块 ready 用例 4/4 通过；合并到 Chromium regression 后共 12/12 通过。
 - [ ] Performance：同一浏览器环境限制使 Lighthouse、Navigation Timing/LCP/CLS 无法采样，不伪造分数。
-- [ ] Visual：截图步骤已写入用例；同一浏览器环境限制使本地原始截图未生成，需 CI 补跑。
-- [ ] Harness：依赖真实浏览器，受同一环境限制未运行。
+- [x] Visual：真实 Chromium 原始截图已生成并人工检查，见 `evidence/world-loading.png`。
+- [ ] Harness：change E2E 已通过真实 Harness snapshot 确认 loading 消失时 `loadedChunks` 与 `renderedChunks` 均大于 0；完整聚合 `pnpm harness` 未运行。
 
 ## 任务状态
 
 - [x] 合同、RED 设计与观察预期
-- [x] 实现与静态/构建 GREEN
+- [x] 实现与静态/构建/浏览器 GREEN
 - [x] 记录浏览器环境阻塞与 Delivery Snapshot
 
 ## Delivery Snapshot
 
-2026-09-07：生产构建成功。独立首屏 HTML 2,914 B、首屏 CSS 3,695 B、轻量入口 1,762 B（gzip 981 B）；入口只同步依赖 1,113 B preload helper，业务 bootstrap 为异步入口，Svelte、Tone、PlayCanvas 与 common vendor 均为独立稳定 chunk，详见 `evidence/bundle-report.json`。格式、ESLint、路径与类型检查通过。完整 static 的覆盖率阶段暴露 4 个不涉及本 change 的高负载/Wasm 失败并因执行持续超时中止；浏览器下载、系统依赖安装均被环境网络 403 阻断，因此 Playwright、Harness、Lighthouse 与实际截图未冒充为已通过，交由 PR CI 补齐。长期 docs baseline 不更新：本 change 是局部加载编排与 UI 行为，规则完整保存在本 change。
+2026-09-07：生产构建成功。独立首屏 HTML 2,914 B、首屏 CSS 3,695 B、轻量入口 1,580 B（gzip 886 B）；入口只同步依赖 1,110 B preload helper，业务 bootstrap 为异步入口，Svelte、Tone、PlayCanvas 与 common vendor 均为独立稳定 chunk，详见 `evidence/bundle-report.json`。修复后的资源 Promise 与 capability preflight 共同控制 menu ready；动态 bootstrap 接管时保留原生 seed/质量输入；失败时由 Svelte 保留可读重试入口；world-loading 直到首个区块 postrender 可见后才退出，并有 30 秒失败边界。`pnpm verify:static:ci`、`pnpm build`、change E2E 4/4 与完整 Chromium regression 12/12 通过，原始 loading 截图已人工检查。Lighthouse、Navigation Timing/LCP/CLS 与完整聚合 Harness 仍未运行，不冒充性能准出。长期 docs baseline 不更新：本 change 是局部加载编排与 UI 行为，规则完整保存在本 change。

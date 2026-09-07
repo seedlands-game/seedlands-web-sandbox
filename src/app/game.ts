@@ -22,7 +22,7 @@ import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
 import type { MapLayer } from './ui/ui-contracts';
 import { createVoxelMaterials, type VoxelMaterials } from './scene/voxel-materials';
 import { WorldEnvironment } from './scene/world-environment';
-import { World } from './world/world-runtime';
+import { World, waitForInitialWorldReady } from './world/world-runtime';
 import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
 import { LIGHTING_QUALITY_BUDGETS } from './scene/advanced-lighting-budget';
 import { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
@@ -245,8 +245,10 @@ export class Game {
     gamePlayer.orientPlayerTowardCamp(this.controller, ready);
     this.controller.install();
     authority.requestLogicObservation();
-    this.installUiAndHarness();
     this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
+    await waitForInitialWorldReady(this.world.waitForInitialVisibleChunk());
+    if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
+    this.installUiAndHarness();
   }
 
   private createController(camera: pc.Entity) {

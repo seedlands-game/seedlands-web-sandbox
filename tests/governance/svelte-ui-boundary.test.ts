@@ -34,7 +34,9 @@ describe('Svelte retained UI integration', () => {
     ];
     expected.forEach((path) => expect(existsSync(join(root, path)), path).toBe(true));
     expect(read('src/app/bootstrap.ts')).toContain("from './ui/mount-ui'");
-    expect(read('src/app/main.ts')).toContain("from './bootstrap'");
+    const main = read('src/app/main.ts');
+    expect(main).toMatch(/import\(['"]\.\/bootstrap['"]\)/);
+    expect(main.match(/\.\/bootstrap/g)).toHaveLength(1);
   });
 
   it('keeps Svelte components on presentation contracts rather than game runtime internals', () => {

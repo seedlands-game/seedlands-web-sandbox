@@ -141,11 +141,21 @@ export class ApplicationShell {
     });
   }
 
-  async initialize() {
-    this.capabilities = await this.preflight(this.generalWorkerCount);
-    await this.refresh();
-    this.bridge.publishShell({ phase: 'menu', seed: this.latestSeed, quality: this.quality, enterLabel: '进入世界' });
+  async initialize(resourceReady: Promise<unknown> = Promise.resolve()) {
+    const [capabilities] = await Promise.all([this.preflight(this.generalWorkerCount), this.refresh(), resourceReady]);
+    this.capabilities = capabilities;
+    this.bridge.publishShell({
+      phase: 'menu',
+      seed: this.latestSeed,
+      quality: this.quality,
+      enterLabel: '进入世界',
+      initializationError: '',
+    });
     this.publish();
+  }
+
+  reloadAfterInitializationFailure() {
+    location.reload();
   }
 
   async start(seedInput: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {

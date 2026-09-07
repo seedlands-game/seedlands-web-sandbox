@@ -1,11 +1,11 @@
 {
   "htmlBytes": 2914,
   "firstPaintCssBytes": 3695,
-  "entryFile": "assets/index-ht0xpfT0.js",
-  "entryBytes": 1762,
-  "entryGzipBytes": 981,
+  "entryFile": "assets/index-DhhpL9Pt.js",
+  "entryBytes": 1580,
+  "entryGzipBytes": 886,
   "initialImports": ["_preload-helper-BXl3LOEh.js"],
-  "asyncImports": ["_bootstrap-BkyioYke.js"],
+  "asyncImports": ["_bootstrap-9FPpfFuO.js"],
   "vendorChunks": [
     {
       "name": "vendor-common",

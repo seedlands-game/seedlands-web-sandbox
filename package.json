@@ -29,7 +29,7 @@
     "test:coverage": "vitest run --coverage",
     "test:coverage:ci": "vitest run --coverage --maxWorkers=1",
     "test:e2e": "playwright test tests/e2e",
-    "test:e2e:regression": "playwright test tests/e2e/regression",
+    "test:e2e:regression": "playwright test tests/e2e/regression changes/2026-09-07-loading-performance/e2e/loading-performance.spec.ts",
     "test:e2e:benchmark": "playwright test tests/e2e/benchmark",
     "test:e2e:macro-map": "playwright test tests/e2e/regression/macro-map.spec.ts",
     "verify:static": "pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage && pnpm typecheck",

@@ -1,5 +1,3 @@
-const fallbackSeed = document.querySelector<HTMLInputElement>('#seed')?.value ?? '';
-const fallbackQuality = document.querySelector<HTMLSelectElement>('#quality')?.value;
 const atlasReady = fetch(`${import.meta.env.BASE_URL}assets/voxel-atlas.webp`, {
   cache: 'force-cache',
   priority: 'high',
@@ -13,8 +11,6 @@ void import('./bootstrap')
     initializeSeedlands({
       ...window.__SEEDLANDS_INITIAL_OPTIONS__,
       resourceReady: atlasReady,
-      fallbackSeed,
-      fallbackQuality,
     }),
   )
   .catch((error: unknown) => console.error('Seedlands runtime failed to initialize.', error));

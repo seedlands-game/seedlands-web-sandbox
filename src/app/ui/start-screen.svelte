@@ -26,7 +26,6 @@
   onMount(() =>
     application.subscribe(() => {
       latestSeed = application.latestSeed;
-      quality = application.quality;
       error = application.controller.state.error;
       workerSupport = application.capabilities.workerSupport;
     }),
@@ -36,12 +35,19 @@
   let openMode = $state<WorldOpenMode>('continue');
   let initialized = false;
   let previousPhase: ShellState['phase'] = 'boot';
+  let seedTouched = $state(false);
+  let qualityTouched = $state(false);
 
   $effect(() => {
-    if (!initialized || shell.phase === 'error' || (previousPhase === 'boot' && !seed)) {
+    if (!initialized) {
       seed = shell.seed;
       quality = shell.quality;
+      seedTouched = Boolean(shell.seed);
+      qualityTouched = shell.quality !== 'medium';
       initialized = true;
+    } else if (previousPhase === 'boot' && shell.phase !== 'error') {
+      if (!seedTouched) seed = shell.seed;
+      if (!qualityTouched) quality = shell.quality;
     }
     previousPhase = shell.phase;
   });
@@ -58,7 +64,7 @@
     <div class="world-tags" aria-hidden="true">
       <span>草原</span><span>森林</span><span>山脉</span><span>河湖</span>
     </div>
-    {#if latestSeed}
+    {#if latestSeed && !shell.initializationError}
       <GameButton
         class="continue-world"
         label="继续世界"
@@ -67,10 +73,22 @@
       >
     {/if}
     <div class="start-fields">
-      <GameTextField id="seed" label="世界 Seed" bind:value={seed} maxlength={48} placeholder="留空创建随机世界" />
+      <GameTextField
+        id="seed"
+        label="世界 Seed"
+        bind:value={seed}
+        maxlength={48}
+        placeholder="留空创建随机世界"
+        oninput={() => (seedTouched = true)}
+      />
       <label for="quality">
         视觉质量
-        <select id="quality" bind:value={quality} disabled={shell.phase === 'boot'}>
+        <select
+          id="quality"
+          bind:value={quality}
+          disabled={shell.phase === 'boot'}
+          onchange={() => (qualityTouched = true)}
+        >
           <option value="low">Low · 省电</option>
           <option value="medium">Medium · 均衡</option>
           <option value="high">High · 精致</option>
@@ -85,24 +103,37 @@
         <option value="new-current">新建或进入新版 v3（保留旧档）</option>
       </select>
     </label>
-    <GameButton
-      class="recommended-start"
-      label="推荐起点：林间河岸"
-      disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
-      onclick={() => (seed = 'mosslight-68')}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
-    >
-    <GameButton
-      label={shell.enterLabel}
-      disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
-      onclick={() => onstart(seed, quality, openMode)}
-    >
-      {shell.enterLabel}
-    </GameButton>
+    {#if shell.initializationError}
+      <GameButton label={shell.enterLabel} onclick={() => application.reloadAfterInitializationFailure()}>
+        {shell.enterLabel}
+      </GameButton>
+    {:else}
+      <GameButton
+        class="recommended-start"
+        label="推荐起点：林间河岸"
+        disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
+        onclick={() => {
+          seedTouched = true;
+          seed = 'mosslight-68';
+        }}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
+      >
+      <GameButton
+        label={shell.enterLabel}
+        disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
+        onclick={() => onstart(seed, quality, openMode)}
+      >
+        {shell.enterLabel}
+      </GameButton>
+    {/if}
     <div class="menu-secondary">
       <GameButton label="设置" onclick={() => application.openPanel('settings')}>设置</GameButton>
       <GameButton label="操作指南" onclick={() => application.openPanel('guide')}>操作指南</GameButton>
     </div>
-    {#if error}<p class="start-error" role="alert">{error}</p>{/if}
+    {#if shell.initializationError}
+      <p class="start-error" role="alert">{shell.initializationError}</p>
+    {:else if error}
+      <p class="start-error" role="alert">{error}</p>
+    {/if}
     {#if workerSupport === 'unsupported'}
       <p class="start-error" role="alert">当前浏览器不支持运行游戏所需的 Web Worker，无法进入世界。</p>
     {/if}

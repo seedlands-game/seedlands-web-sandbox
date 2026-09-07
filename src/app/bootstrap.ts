@@ -24,8 +24,6 @@ import './ui/styles/experience.css';
 export type SeedlandsInitializationOptions = Readonly<{
   experiments?: Partial<ExperimentalClientOptions>;
   resourceReady?: Promise<unknown>;
-  fallbackSeed?: string;
-  fallbackQuality?: string;
 }>;
 
 type BootstrapState = 'idle' | 'starting' | 'ready';
@@ -40,10 +38,12 @@ const requiredElement = <ElementType extends Element>(selector: string) => {
 export async function initializeSeedlands(options: SeedlandsInitializationOptions = {}): Promise<void> {
   if (bootstrapState !== 'idle') throw new Error(`Seedlands initialization is already ${bootstrapState}.`);
   bootstrapState = 'starting';
-  const cleanup: Array<() => void | Promise<void>> = [];
+  let publishInitializationFailure: (() => void) | null = null;
   try {
     const canvas = requiredElement<HTMLCanvasElement>('#game');
     const uiRoot = requiredElement<HTMLElement>('#ui');
+    const fallbackSeed = uiRoot.querySelector<HTMLInputElement>('#seed');
+    const fallbackQuality = uiRoot.querySelector<HTMLSelectElement>('#quality');
     const experiments = resolveExperimentalClientOptions({
       search: location.search,
       stored: readStoredExperimentalClientOptions(localStorage),
@@ -51,21 +51,25 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
     });
     const sessionConfig = readBrowserSessionConfig(location.search);
     const uiBridge = createUiBridge();
+    const seed = fallbackSeed?.value.trim() ?? '';
+    const quality = fallbackQuality?.value;
     uiBridge.publishShell({
-      seed: options.fallbackSeed ?? '',
-      quality:
-        options.fallbackQuality === 'low' || options.fallbackQuality === 'high' ? options.fallbackQuality : 'medium',
+      seed,
+      quality: quality === 'low' || quality === 'high' ? quality : 'medium',
     });
+    publishInitializationFailure = () =>
+      uiBridge.publishShell({
+        phase: 'error',
+        enterLabel: '重新加载游戏资源',
+        initializationError: '游戏资源加载失败，请检查网络后重试。',
+      });
     const audio = new GlobalAudio();
-    const removeAudioHarness = installAudioHarness(audio);
-    cleanup.push(removeAudioHarness);
+    installAudioHarness(audio);
     const game = new Game(canvas, uiBridge, audio, experiments);
-    cleanup.push(() => game.dispose());
     const application = new ApplicationShell(game, uiBridge, audio, {
       experiments,
       generalWorkerCount: sessionConfig.generalWorkerCount,
     });
-    cleanup.push(() => application.dispose());
     const actions: UiActionPort = {
       startWorld: (seed, quality, openMode) => application.start(seed, quality, openMode),
       selectHotbarSlot: (slot) => game.selectHotbarSlot(slot),
@@ -87,28 +91,25 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
     };
     const commitSha = import.meta.env.VITE_COMMIT_SHA?.trim();
     const buildWatermark = commitSha ? (formatBuildWatermark(commitSha, GENERATOR_VERSION) ?? '') : '';
-    const unmount = mountUi(uiRoot, {
+    mountUi(uiRoot, {
       bridge: uiBridge,
       actions,
       application,
       buildWatermark,
       buildCommit: commitSha,
     });
-    cleanup.push(unmount);
-    await Promise.all([application.initialize(), options.resourceReady]);
-    const removePersistenceHarness = await installPersistenceHarness();
-    cleanup.push(removePersistenceHarness);
+    await application.initialize(options.resourceReady ?? Promise.resolve());
+    await installPersistenceHarness();
     const onButtonClick = (event: MouseEvent) => {
       if ((event.target as Element)?.closest('button'))
         void audio.unlock().then(() => audio.play('hover', { scope: 'ui' }));
     };
     document.addEventListener('click', onButtonClick);
-    cleanup.push(() => document.removeEventListener('click', onButtonClick));
     persistExperimentalClientOptions(localStorage, experiments.options);
     bootstrapState = 'ready';
   } catch (error) {
-    for (const dispose of cleanup.reverse()) await dispose();
-    bootstrapState = 'idle';
+    publishInitializationFailure?.();
+    bootstrapState = 'ready';
     throw error;
   }
 }
