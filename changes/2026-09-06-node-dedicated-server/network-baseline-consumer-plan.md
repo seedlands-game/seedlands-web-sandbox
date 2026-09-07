@@ -114,6 +114,10 @@ type NetworkBaselineConsumer = Readonly<{
     }>,
   ): boolean;
   observeChunkRevisions(revisions: readonly Readonly<{ key: string; revision: number }>[]): readonly number[];
+  consumeCollisionCommits<Commit extends AuthorityCollisionCommit>(
+    commits: readonly Commit[] | undefined,
+    callbacks?: Readonly<{ onCommit?(commit: Commit): void; onUnknownChunk?(key: string): void }>,
+  ): void;
   releaseOwner(owner: NetworkBaselineOwnerHandle): void;
   close(): Promise<void>;
   whenIdle(): Promise<void>;
@@ -124,7 +128,14 @@ type NetworkBaselineConsumer = Readonly<{
 `ownerId` 与 `ownerGeneration` 是可信 adapter 的本地生命周期标识，不是公开 bundle 字段。一次 consumer 实例内，
 owner generation 注册必须严格递增；active handle 以 consumer 内部不可伪造 token 与 id/generation 共同匹配。
 owner 释放后，迟到 bundle、迟到 worker snapshot 请求和旧 handle 都拒绝。只保存 active owner 与一个标量 generation
-高水位，不为所有历史 owner 保留永久 tombstone。
+高水位，不为所有历史 owner 保留永久 tombstone。consumer 在首次成功注册时锁定完整 `InterestSessionRef`；后续
+不同 epoch/serverEpoch/sessionId/worldId 的 owner 必须在改变 Map、guard、generation high-water 前拒绝。即使全部
+owner 已释放也不允许换 ref；重连或新 world 必须新建 consumer，防止共享 block/cache 跨 session 混用。
+
+新 owner 登记的任一 `minimumRevision` 高于现有 owner 已接纳版本时，立即推进该 owned key 的水位并使旧
+preparation stale。另一个 owner 成功接纳更高 revision 时也执行同一规则；新 preparation 先取得共享引用，再失效
+其它旧 owner，避免原子切换时把新 block 一并释放。共享 key 尚有其它 owner 时，`releaseOwner()` 不调用
+`collisionGuard.release()`，也不降低已推进的水位；最后一个 owner 离开才释放 guard 并回收水位。
 
 `ref`、`requestId`、`interestId`、`purpose`、main `key` 与 `generatorVersion` 必须同时匹配 descriptor 和 owner。
 mesh 的 `interestId` 必须非空；collision-resync 是否允许空 interest 已在上游可信授权完成，本层只要求与 owner
@@ -202,13 +213,25 @@ scheduler 重新请求。已经复制给活跃 worker 的 buffer 仍由 worker t
 最后一个 owner 释放后可回收该 key 的水位；新 owner 的最低 revision 必须由可信 adapter 从当前 snapshot/commit
 重新建立。本层只保证活跃 owner 生命周期内不回退，不承诺保存全历史 revision map。它不自行修改 World、GPU 或发包。
 
-失效必须遍历全部 `chunkRevisions`，不只遍历 `meshChunks`。碰撞 delta 的实际修改仍由现有
-`publishAuthorityCollisionCommits()` / `applyAuthorityCollisionCommit()` 路径完成；consumer 不重写第二套碰撞
-reducer。`collisionGuard.satisfy()` 清空自身 minimum 后，不清除仍有活跃 owner 的 `acceptedRevisionByKey` 或 mesh
-依赖水位。
+失效必须遍历全部 `chunkRevisions`，不只遍历 `meshChunks`。碰撞 delta 的实际修改由 consumer 的
+`consumeCollisionCommits()` bridge 调用现有 `publishAuthorityCollisionCommits()` /
+`applyAuthorityCollisionCommit()` 完成；consumer 不重写第二套碰撞 reducer。bridge 先观察全部结构 revision，再
+把 commit 适配成仅含当前 owned keys 的内部碰撞视图交给现有逻辑；原始 `worldRevision` 仍驱动全局重排窗口，
+adapter 的 `onCommit` 仍收到未经裁剪的原 commit。未拥有 key 不进入 guard、cache 或 `onUnknownChunk`。bridge 在向
+adapter 回调前核对专有 collision Map 的实际删除、收回对应字节账、使依赖被删除 key 的 owner stale。链断或现有
+重排窗口溢出造成的删除因此不会让 `sharedCollisionBytes` 漂移；owned key 水位保留到最后 owner 释放，后续重同步
+按实际重新分配的 cache 收费。close 后 bridge 与直接 observe 均不再推进 guard 或触发 callback。adapter 不得绕过
+bridge 直接把同一个专有 Map 交给
+`publishAuthorityCollisionCommits()`。`collisionGuard.satisfy()` 清空自身 minimum 后，不清除仍有活跃 owner 的
+`acceptedRevisionByKey` 或 mesh 依赖水位。
 
-同一次 commit 接线的顺序由未来 adapter 固定为：先调用 consumer 的 `observeChunkRevisions()` 阻止旧
-preparation 发起新任务，再交给现有碰撞 commit 应用，最后通知 scheduler。这个顺序尚未接入生产 World。
+bridge 不能在现有 reducer 正执行时调用外部 callback。每个 commit 先让 reducer 完整结算并在有界数组中收集 owned
+unknown key，完成 Map/账本核对后才依次调用 `onUnknownChunk`，最后以原始 commit 对象调用 `onCommit`。每个外部
+callback 前和下一 commit 前重新检查 closed；任一 callback 重入 `close()` 后，当前剩余 callback 与同批后续 commit
+均停止。这样 close 不会在现有 reducer 的循环中途破坏状态，也不会在 close 之后继续推进 guard。
+
+同一次 commit 接线只调用 `consumeCollisionCommits()`：它先阻止旧 preparation 发起新任务，再交给现有碰撞 commit
+应用、对账，最后通知 adapter callback/scheduler。这个顺序尚未接入生产 World。
 
 ## authority-complete worker snapshot 接缝
 
@@ -220,21 +243,24 @@ preparation 发起新任务，再交给现有碰撞 commit 应用，最后通知
 ```ts
 type AuthorityCompleteMeshInputReference = Readonly<{
   inputStrategy: 'authority-complete';
-  key: string;
   chunkRevision: number;
   generatorVersion: number;
   haloRevision: string;
   canonical: Uint16Array;
   fluid: Uint8Array;
   overlays: readonly Readonly<{
-    key: string;
-    chunkRevision: number;
-    generatorVersion: number;
-    canonical: Uint16Array;
+    cx: number;
+    cy: number;
+    cz: number;
+    voxels: Uint16Array;
     fluid: Uint8Array;
   }>[];
 }>;
 ```
+
+这是当前已实现 worker seam 的准确输入形状。逐项 key/revision/generatorVersion 只保存在 consumer 的不可变
+preparation 与 `haloRevision` 中，不把 worker 当作第二 Authority；app adapter 只把坐标与 54 个完整 buffer 交给
+worker。
 
 `haloRevision` 由 consumer 对可信 ref、owner generation、main key 和规范顺序的 27 项
 `(key, chunkRevision, generatorVersion)` 生成确定性、长度前缀明确的版本身份。它不使用异步 hash，也不只使用
@@ -326,3 +352,21 @@ consumer 本身 GREEN 后，按以下依赖顺序推进，不能用纯单元替�
 
 即使这些用例全部通过，也只能证明 reference bundle 在单进程内被安全消费并形成完整 worker 输入。它不能证明
 session 授权、真实网络采用、浏览器 scheduler/GPU 接线、远端取消、传输背压、Linux 设备行为或 N2 性能达标。
+
+## 当前实现证据
+
+2026-09-07 已按本计划完成 consumer 的平台无关实现和定向单元闭环：
+
+- RED：Node 22 定向收集 `tests/client/network-baseline-consumer.test.ts` 时因缺少
+  `src/client/authority/network-baseline-consumer` 失败，1 suite failed、0 tests。
+- GREEN：Node 22 定向执行四个 `network-baseline-*` 测试文件，4 files、19 tests 全部通过。
+- Static：Node 22 `tsc -p tsconfig.test.json --noEmit` 通过；目标源码/测试 ESLint、Prettier 与
+  `git diff --check` 通过。
+- 已覆盖新 owner minimum 与成功新 revision 对旧 preparation/result 的失效、共享 owner 非最后释放不调用 guard
+  release、collision commit 链断后的实际 Map 对账、只向现有 reducer 暴露 owned keys、close 后停止推进、单
+  consumer 单 session ref、共享 preparation 冲突与三类预算。
+- 独立评审发现 callback 重入 close 后仍处理同批后续 commit 的 P1；新增两项真实 RED 后，改为 reducer 先结算、
+  callback 后派发，并验证 `onCommit`/`onUnknownChunk` 两种关闭入口均抑制剩余 callback 和后续 commit。
+
+真实 source-bound corpus → reassembler → consumer → scheduler → worker 的接线用例由主线独立执行；在该证据完成前，
+本切片不称为生产远端消费链路已接通。

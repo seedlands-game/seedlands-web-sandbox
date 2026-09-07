@@ -1,15 +1,25 @@
 # Node Dedicated Server 当前状态与阶段证据
 
-## 恢复入口：完整基线编解码与客户端接缝
+## 恢复入口：真实客户端基线消费组合
 
-整个 change 仍 **Active**。上一已推送检查点为 `eeb54c3755b428ef62a44987f3096737bd92f34c`；本批先保存已验证的 codec/worker/调度结果，真实 consumer 与镜像提交组合继续实施。
+整个 change 仍 **Active**。上一已推送检查点为 `234e4c80bbf8a787fbd2605c02f0e2d1ded69801`；本批完成 consumer、实际碰撞提交桥及真实 r2 到调度器/网格算法的组合，并重跑全仓静态、构建和本地浏览器核心旅程。
 
-- [基线 codec](network-baseline-codec-progress.md)：三候选各 333 条真实消息强等价、生产重组及单列 32 KiB 合法分页通过；原始 block 5,406,720 B，C0/C1/C2 完整应用字节 5,609,513 / 5,490,424 / 5,475,097 B。没有耗时、压缩或传输采用结论。
-- [完整 worker](network-complete-baseline-worker-plan.md) 20 项与 [调度/结算](network-baseline-scheduler-progress.md) 10 项通过，既有相关 35 项回归通过；目标静态/TypeScript、浏览器和 Node 构建通过。完整 source 不调用 Authority canonical 上行，pool 先终止再通知失败；实际 app 仍使用本地会话。
-- [成本采样口径](network-codec-measurement-plan.md) 经独立审阅，明确 elapsed/CPU 区别、实际 pipeline 分项、gzip 独立轴、筛选排他与正式配对门；尚未采样。
-- [consumer 合同](network-baseline-consumer-plan.md) 与真实缓存/碰撞/调度组合仍在进行，未准出。共享版本失效与 commit 删除缓存的账本同步须由实际生产消费方法验证，不用测试 reducer 替代。
+- [consumer 与独立审查](network-baseline-consumer-progress.md)：单连接 owner、共享缓存、完整邻域版本失效、worker 副本物理结算；修复提交删除缓存的账本、未拥有 key 的 guard 残留，以及回调重入关闭后继续处理的问题。4 文件/19 项定向通过，已纳入最终全仓检查。
+- [真实组合](network-baseline-client-integration-plan.md)：C0 解码 artifact → 生产重组器 → consumer → 真实调度器 → 54 buffer transfer → 真实网格算法，最终 1/1 通过；缓存独立、生成回退为零、提交缺口后旧结果拒绝。此项为 Vitest，尚未证明 Web Worker、GPU 或网络旅程。
+- [基线 codec](network-baseline-codec-progress.md)：v2 修正 C0 的完整 1 MiB frame 边界，v1 保留；三候选 333 条真实消息和 32 KiB 合法分页继续通过，生产重组只读 oracle 1/1。C0/C1/C2 应用字节仍为 5,609,513 / 5,490,424 / 5,475,097 B；没有耗时、压缩或采用结论。
+- [完整 worker](network-complete-baseline-worker-plan.md) 与 [调度/结算](network-baseline-scheduler-progress.md) 的 20/10 项为前一检查点的定向证据；本批真实组合使用同一实现。实际 app 仍使用本地会话。
 
-本检查点没有重新运行全仓 static；下节 1074 项属于前一完整验证。GUI/远端可玩、WAN/CI、N2–N4 采用和 A13 不退化均未完成。冻结 spec 未改，不把功能接缝或包体结果当成最终迁移收益。
+最终统一验证使用官方 Node 22.23.2：
+
+| 证据                 | 结果与范围                                                                                                                                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm verify:static` | **199 文件/1093 项通过**，另 2 文件/4 项跳过；Prettier、ESLint、路径、V8 coverage、Svelte/TypeScript 全通过，world 行覆盖 96.37%。最终日志 `/tmp/seedlands-baseline-client-final-static.log`。1091 项是重入关闭修复前的一次检查，不当作最终结果。 |
+| 显式 change runner   | 最终客户端组合 1/1、codec v2 只读重组 1/1；日志 `/tmp/seedlands-baseline-client-final-integration.log`、`/tmp/seedlands-baseline-codec-v2.log`。                                                                                                  |
+| 本地 Playwright 基线 | headless Chromium 8/8，独立端口 4197、不复用其他开发服务；日志 `/tmp/seedlands-baseline-client-browser.log`。功能耗时不作为性能采样。                                                                                                             |
+| 浏览器构建           | `pnpm build` 通过，保留既有大 bundle 提示；日志 `/tmp/seedlands-baseline-client-build.log`。                                                                                                                                                      |
+| Node 五入口构建      | 通过；manifest 记录 `sourceSha=234e4c8`、`sourceDirty=true`、`sourceInputsSha256=8897157545cfd4104a2855b0775618c2ed2d8f605eb9578983133a240be2d3fb`。未冒称构建未来提交。日志 `/tmp/seedlands-baseline-client-node-build.log`。                    |
+
+本批没有新增远端 UI、Midscene、Linux x64/WAN 或正式 benchmark 证据。[采样口径](network-codec-measurement-plan.md) 已明确计时边界和排他门，筛选 runner 的准备也不等于实际测量。GUI/远端可玩、WAN/CI、N2–N4 采用和 A13 不退化仍未完成；冻结 spec hash 保持不变。
 
 ## 上一完整验证：完整基线的公开参考接线
 

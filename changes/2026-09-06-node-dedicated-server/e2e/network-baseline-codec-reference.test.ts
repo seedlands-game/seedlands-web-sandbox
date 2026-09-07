@@ -9,7 +9,7 @@ import type {
   ReassembledBaselineReference,
 } from '../../../src/server/protocol/network-reference-baseline-types';
 
-const prototype = '/tmp/seedlands-network-probe-codec-baseline-reference-v1';
+const prototype = '/tmp/seedlands-network-probe-codec-baseline-reference-v2';
 const artifactPath = `${prototype}/baseline-codec-decoded-artifact.json`;
 const validationPath = `${prototype}/baseline-codec-validation.json`;
 const framesPath = '/tmp/seedlands-network-baseline-reference-projected-v1-r2/frames.jsonl';

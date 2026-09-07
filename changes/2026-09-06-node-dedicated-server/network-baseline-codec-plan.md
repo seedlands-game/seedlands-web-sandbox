@@ -2,9 +2,9 @@
 
 ## 输入锁定与隔离范围
 
-本轮只读取冻结派生语料 `/tmp/seedlands-network-baseline-reference-projected-v1-r2`：其 `manifest.json` SHA-256 为 `9d590ded6a1b050f9b7c42cdf3638ca957509f888a2e89de909ee264b6f85dfb`，`frames.jsonl` SHA-256 为 `4320c31fd0c46b58c4bf158f4d94cd59991f9f810abd8a09dc3ada3fbb0b766d`。它绑定原始 r2 的 manifest `0d2959e728f73a30efec8c9bac0f58269b9d0b51f3c73c23b0640fbbb1b7b0ad`、frames `2d3a0a9fd1670c087367fbb1c9330eda9e2484d9e7facd665892c6128e5f3b91`，包含 3 个真实 descriptor（两组 mesh 各 27 entries、一组 collision-resync 1 entry）与按既有乱序抵达顺序记录的 330 个 16 KiB 上限实际 page。
+本轮只读取冻结派生语料 `/tmp/seedlands-network-baseline-reference-projected-v1-r2`：其 `manifest.json` SHA-256 为 `9d590ded6a1b050f9b7c42cdf3638ca957509f888a2e89de909ee264b6f85dfb`，`frames.jsonl` SHA-256 为 `4320c31fd0c46b58c4bf158f4d94cd59991f9f810abd8a09dc3ada3fbb0b766d`。它绑定原始 r2 的 manifest `0d2959e728f73a30efec8c9bac0f58269b9d0b51f3c73c23b0640fbbb1b7b0ad`、frames `2d3a0a9fd1670c087367fbb1c9330eda9e2484d9e7facd665892c6128e5f3b91`，包含 3 个真实 descriptor（两组 mesh 各 27 entries、一组 collision-resync 1 entry）与按既有乱序抵达顺序记录的 330 个实际 page；16 KiB 是本冻结 descriptor 的分页参数。
 
-实现只能新建 `/tmp/seedlands-network-probe-codec-baseline-reference-v1`；若该精确路径已存在，立即失败且不覆盖。该目录将从冻结的 `/tmp/seedlands-network-probe-codec-presentation-v2` 复制后扩展；不修改后者、原始/派生 corpus、生产 `src/`、包配置或既有候选原型。本计划不冻结正式 wire，所有结果均为 `not-adopted` 探索证据。
+实现只能新建 `/tmp/seedlands-network-probe-codec-baseline-reference-v2`；若该精确路径已存在，立即失败且不覆盖。该目录将从冻结的 `/tmp/seedlands-network-probe-codec-presentation-v2` 复制后扩展；不修改后者、原始/派生 corpus、生产 `src/`、包配置或既有候选原型。本计划不冻结正式 wire，所有结果均为 `not-adopted` 探索证据。
 
 ## 候选投影与不变量
 

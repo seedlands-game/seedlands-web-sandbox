@@ -104,6 +104,8 @@ Node 产品接线为 [命令行入口](../src/node/server/node-server.ts) → [�
 
 网格调度的 [source 合同](../src/app/world/mesh-task-source.ts) 保留本地 canonical 接纳，并为完整 Authority 输入提供独立的派生结果核对和 task 副本结算。[worker 完整输入门禁](../src/worker/authority-complete-mesh-input.ts) 在网格算法前要求主块及 26 邻接块的 canonical/fluid 全部存在；该 opt-in 接缝尚未由生产 app 的远端会话启用。
 
+[基线消费者](../src/client/authority/network-baseline-consumer.ts) 接收已验证的重组结果与可信 owner，分别管理共享碰撞缓存、完整网格准备和 worker transfer 副本。它按完整邻域版本使旧任务失效，并通过现有碰撞提交方法更新缓存及回收账本；上游认证、interest 调度和实际浏览器远端装配仍待接入。真实语料到调度器/网格算法的组合验证属于 Vitest 功能证据，不代表 GPU 或网络旅程已验收。
+
 [build-node-server.mjs](../scripts/build-node-server.mjs) 将 CLI、Authority、Persistence、compute Worker 和 compute child 打成五个独立 ESM 入口；无需 Vite 或源码运行。旧 [node-dedicated-runtime.ts](../src/node/runtime/node-dedicated-runtime.ts) 保留为进程内组合参考，不是 CLI 产品入口。网络、GUI 和完整性能准出继续按 [当前实施记录](../changes/2026-09-06-node-dedicated-server/execution.md)推进；离线宿主可运行不代表已经可远端游玩。
 
 最容易混淆的几个名称：

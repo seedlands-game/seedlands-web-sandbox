@@ -191,3 +191,9 @@ WebTransport 候选在 Firefox 153.0 完成可靠流与 datagram；Playwright We
 公开参考已推送为 eeb54c3。本批 C0/C1/C2 对真实 333 条基线消息完成强等价与生产重组，实际应用字节分别为 5,609,513 / 5,490,424 / 5,475,097 B；原始 block 为 5,406,720 B。C2 对 C0 总体约省 2.4%，只属于当前语料包体结果，未测耗时或 gzip，也未选择协议。分页 16 KiB 仅为此语料参数，额外 synthetic 32 KiB 合法页单列验证，未缩窄通用合同。详见 [codec 记录](network-baseline-codec-progress.md)。
 
 完整权威输入与 taskId 级副本结算已进入真实 worker/调度器；修复 pool 在 terminate 前触发失败/丢弃回调和 epoch 切换再入。定向验证与 build 详见 [调度记录](network-baseline-scheduler-progress.md)，未把此前完整 static 计数当作本批重跑。客户端 consumer 与真实组合用例继续推进；本检查点先保存可恢复结果，整个 change 不标 Delivered。长期 docs baseline 仅更新实际 source/worker 入口。
+
+## 2026-09-07 客户端真实消费组合检查点
+
+前一批已推送为 `234e4c8`。本批完成完整基线 consumer、共享 owner/版本失效/预算、实际碰撞提交桥和 worker 副本结算；真实 r2 数据经 C0 artifact、生产重组器和消费者进入调度器与网格算法。独立 Terra 审查发现关闭回调再入的 P1，Sol 先取得两项 RED 再修复，复审通过；详见 [消费记录](network-baseline-consumer-progress.md)。C0 v2 同时修复封套导致完整 frame 超限的边界，旧 v1 不覆盖。
+
+最终静态 199 文件/1093 项通过、world 行覆盖 96.37%，实际组合与 codec 只读 oracle 各 1/1，本地浏览器核心回归 8/8，浏览器及 Node 五入口构建通过。整个 change 继续 Active，当前 app 尚未启用远端模式；上游认证/interest、受限会话、GUI、真实远端/CI 与正式 N2–N4/A13 仍未准出。按用户持续授权把可恢复源码和证据推送到原功能分支，不合并主分支，不将测试运行耗时解释为性能收益。

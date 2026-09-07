@@ -5,7 +5,8 @@
   "execution": {
     "node": "/tmp/seedlands-node-22/node-v22.23.2-darwin-arm64/bin/node",
     "version": "v22.23.2",
-    "captureMode": "explicit /tmp generator invocation; recheck test is read-only"
+    "captureMode": "explicit /tmp generator invocation; recheck test is read-only",
+    "generation": "v2: v1 preserved; C0 reliable-envelope boundary repaired"
   },
   "inputPins": {
     "derivedDirectory": "/tmp/seedlands-network-baseline-reference-projected-v1-r2",
@@ -23,11 +24,11 @@
     "reliableFrameBytesMax": 1048576
   },
   "prototype": {
-    "directory": "/tmp/seedlands-network-probe-codec-baseline-reference-v1",
+    "directory": "/tmp/seedlands-network-probe-codec-baseline-reference-v2",
     "sourceSha256": {
       "baseline-reference-codecs.mjs": "7d7c009abf0beb28d452ca7e15851f5feff1693b663af866af52768a9186dca0",
       "reference-fixed-codecs.mjs": "eeca4d0064eb9696f4c4ef169f63d0b2ba1dd8c3c30a3913d810134290ef46b6",
-      "c0-raw-reference.mjs": "50515f8159f28e41e9629595d75e9cf4eb489ca5a308b9796d5d101d1c72a360",
+      "c0-raw-reference.mjs": "9aff0dfefc997c415b9ed21d1392a2c982849f5c10607c75fc88551400c49de4",
       "json-wire-preflight.mjs": "1dfca396cd1310e88c149508fc9e7629dfa881ec80cf44774d9bfc11c4ffa338",
       "json-preserving-negative-zero.mjs": "9e41c9c3f371b6b075df51a0474f2e920c8d7a9dbfcd2770b2f70982d786ab10",
       "reference-schema-validation.mjs": "bf8b05076bfe670ab94f8182bc94a53369aaf514aed04de52556bed8f62e8b9f",
@@ -40,10 +41,11 @@
       "gameplay-consumer-codecs.mjs": "c7419ce324d0d9aec75d01dd9cba842baa2c713617978d46bbcfad3ec7cdd9fa",
       "presentation-codecs.mjs": "0eb96ce1ffff028850ee9701c5223fc44731bc150a1c9be7efd33a7f1985526c",
       "package.json": "a140b77dd3e9348991c7337cf8d0b9122ef66854888348b26aaf5c4a8dfb1fb5",
-      "baseline-codec-validate.mjs": "a2d68b217fd5658370a3ad58d91b2f2a9a58a5f25649096dacdfc4013a1f70c5"
+      "baseline-codec-validate.mjs": "313932bcc481a80915de1252d5f3d2f42580e3aeccede32a0b7a81e68847c627"
     },
-    "validationJsonSha256": "20bc51f53073311f6d2a7b129d7b0d571202e9218a9ffd5728a1f1fc77f4f863",
-    "decodedArtifactSha256": "e20c353c84f5f710c563fb396163ea5efbd92b3a913345739b4ebc36032eafd2"
+    "validationJsonSha256": "7830c8ab260244672260a4c6f13bab700320468ed1f1ad4d6a461f49d42a3ed3",
+    "decodedArtifactSha256": "e20c353c84f5f710c563fb396163ea5efbd92b3a913345739b4ebc36032eafd2",
+    "dependencyLock": "NOT_CAPTURED: v2 copied existing local prototype metadata, adds no dependency, and has no separate /tmp lockfile; module closure hashes below are not a claim about npm dependency source locking."
   },
   "entrypoints": {
     "C0": "c0-raw-reference.mjs encode/decode then codec-application-pipeline validation",
@@ -192,9 +194,11 @@
       "truncated": "truncated: payload length",
       "unknownKind": "unknown kind: metadata envelope",
       "duplicateCategory": "duplicate category: Duplicate JSON object member at offset 507.",
-      "pageBytes": {
-        "rejection": "page bytes: Invalid reference page binary length",
-        "consumerCalls": 0
+      "reliableFrameLimit": {
+        "encoder": "raw 1 MiB payload frame: frame budget",
+        "decoder": "raw 1 MiB payload frame: frame length",
+        "payloadBytes": 1048576,
+        "wireBytes": 1049093
       },
       "nestedEntries": {
         "rejection": "nested entries: Invalid reference metadata.entries",
@@ -204,7 +208,7 @@
     "C1": {
       "truncated": "truncated: corrupt frame length",
       "unknownKind": "unknown kind: unknown enum",
-      "pageBytes": "page bytes: page bytes",
+      "pageBytes": "page bytes: frame size",
       "trailingBytes": "trailing bytes: trailing",
       "nestedEntries": "nested entries: baseline entry count"
     },
@@ -223,7 +227,7 @@
         "objectDecoderCalls": 0
       },
       "pageBytes": {
-        "rejection": "page bytes: Bytes field BaselinePage.bytes exceeds its byte limit.",
+        "rejection": "page bytes: Protobuf frame exceeds its byte limit.",
         "objectDecoderCalls": 0
       }
     }
@@ -243,13 +247,16 @@
       "mesh": 27,
       "collisionResync": 1
     },
-    "notes": "16 KiB 仅冻结语料的 descriptor 分页配置；不是公开 reference DTO 或候选 wire 的硬上限。C1 继续使用单有界 buffer/复用 DataView；C2 direct schema 在对象物化前限制 27 entries 与 1 MiB page bytes。",
+    "notes": "16 KiB 仅冻结语料的 descriptor 分页配置；不是公开 reference DTO 或候选 wire 的硬上限。C0/C1/C2 的完整可靠 frame 都受 1 MiB 限制；C1 继续使用单有界 buffer/复用 DataView；C2 direct schema 在对象物化前限制 27 entries 与 1 MiB page bytes。",
     "corpusReferencePagePayloadBytes": 16384,
-    "codecPagePayloadBytesMax": 1048576
+    "codecPagePayloadBytesMax": 1048576,
+    "c0EnvelopeMaxBytes": 1048576
   },
   "boundaries": [
     "No timing, benchmark, Chrome, client remote, UI, WAN, transport fragmentation, or wire adoption evidence.",
     "arrivalIndex, naturalIndex, and locator remain corpus audit fields only; encoded page DTO uses production reference identity plus pageIndex.",
-    "This sub-experiment does not close broader N2 corpus gaps, including the existing C0 long-ID and large world-commit/halo cases."
+    "This sub-experiment does not close broader N2 corpus gaps, including the existing C0 long-ID and large world-commit/halo cases.",
+    "v1 RED preserved: C0 MAX=4 MiB accepted a raw 1 MiB page payload wrapped into a 1,049,093 B reliable frame.",
+    "v2 GREEN: C0 encoder and actual decoder reject that 1,049,093 B raw wire; this is a full-envelope limit, not only a page payload check."
   ]
 }
