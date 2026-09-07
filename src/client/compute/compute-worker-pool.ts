@@ -107,6 +107,7 @@ export class ComputeWorkerPool {
     general: new BoundedCostSamples(),
   };
   private disposed = false;
+  private transitioning = false;
   private readonly restartTimers = new Set<number>();
 
   constructor(private readonly options: ComputeWorkerPoolOptions) {
@@ -119,7 +120,7 @@ export class ComputeWorkerPool {
 
   enqueue(task: ComputeTask, transfer: readonly Transferable[] = []): ComputeQueueResult {
     if (!isBrowserComputeTask(task)) return { status: 'rejected', reason: 'invalid-task' };
-    if (this.disposed) return { status: 'rejected', reason: 'invalid-task' };
+    if (this.disposed || this.transitioning) return { status: 'rejected', reason: 'invalid-task' };
     const result = this.queue.enqueue(task);
     if (result.status === 'queued' || result.status === 'merged') {
       this.submittedTasks += 1;
@@ -137,6 +138,7 @@ export class ComputeWorkerPool {
   }
 
   cancel(taskId: number): boolean {
+    if (this.disposed || this.transitioning) return false;
     if (this.queue.hasQueued(taskId)) {
       const removed = this.queue.fail(taskId);
       for (const task of removed) if (task.taskId !== taskId) this.reportDependencyFailure(task);
@@ -163,15 +165,21 @@ export class ComputeWorkerPool {
   }
 
   switchEpoch(epoch: SessionEpoch): void {
-    if (this.disposed || !epoch || epoch === this.epoch) return;
-    for (const taskId of this.transfers.keys()) this.options.onDrop?.(taskId, 'epoch-switch');
-    this.clearRestartTimers();
-    this.terminateSlots();
-    this.epoch = epoch;
-    this.queue = this.createQueue(epoch);
-    this.transfers.clear();
-    this.cancelledRunning.clear();
-    this.createSlots();
+    if (this.disposed || this.transitioning || !epoch || epoch === this.epoch) return;
+    this.transitioning = true;
+    try {
+      const queued = [...this.transfers.keys()];
+      this.transfers.clear();
+      this.clearRestartTimers();
+      this.terminateSlots();
+      for (const taskId of queued) this.options.onDrop?.(taskId, 'epoch-switch');
+      this.epoch = epoch;
+      this.queue = this.createQueue(epoch);
+      this.cancelledRunning.clear();
+      if (!this.disposed) this.createSlots();
+    } finally {
+      this.transitioning = false;
+    }
   }
 
   diagnostics(): ComputePoolDiagnostics {
@@ -225,14 +233,19 @@ export class ComputeWorkerPool {
   }
 
   private terminateSlots(): void {
-    this.slots.forEach((slot) => {
-      if (slot.task) this.options.onDrop?.(slot.task.taskId, 'epoch-switch');
-      if (!slot.worker) return;
-      slot.worker.onmessage = null;
-      slot.worker.onerror = null;
-      slot.worker.terminate();
-    });
+    const slots = this.slots;
     this.slots = [];
+    const dropped = slots.flatMap((slot) => (slot.task ? [slot.task.taskId] : []));
+    for (const slot of slots) {
+      const worker = slot.worker;
+      slot.worker = null;
+      slot.task = null;
+      if (!worker) continue;
+      worker.onmessage = null;
+      worker.onerror = null;
+      worker.terminate();
+    }
+    for (const taskId of dropped) this.options.onDrop?.(taskId, 'epoch-switch');
   }
 
   private pump(): void {
@@ -312,13 +325,15 @@ export class ComputeWorkerPool {
   private recoverSlot(slot: WorkerSlot, error: Error): void {
     const task = slot.task;
     slot.task = null;
-    if (task) this.failTask(task, error);
-    if (slot.worker) {
-      slot.worker.onmessage = null;
-      slot.worker.onerror = null;
-      slot.worker.terminate();
-      slot.worker = null;
+    const worker = slot.worker;
+    slot.worker = null;
+    if (worker) {
+      worker.onmessage = null;
+      worker.onerror = null;
+      worker.terminate();
     }
+    if (task) this.failTask(task, error);
+    if (this.disposed || !this.slots.includes(slot)) return;
     slot.restartAttempts += 1;
     if (slot.restartAttempts > (this.options.maxWorkerRestarts ?? 3)) {
       this.options.onPoolFailure?.(slot.lane, error);

@@ -3,6 +3,7 @@ import { findSafePlayerSpawn } from '../server/gameplay/safe-spawn';
 import { createStarterEcology } from '../server/simulation/starter-ecology';
 import { findDryStarterSurface } from '../server/starter-surface';
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
+import { validateAuthorityCompleteMeshInput } from './authority-complete-mesh-input';
 
 export type MeshTaskPayload = Readonly<{
   kind: 'mesh';
@@ -33,6 +34,7 @@ export type GenerateMeshTaskPayload = Readonly<{
   chunkRevision: number;
   haloRevision: string;
   generatorVersion: number;
+  inputStrategy?: 'authority-complete';
   canonical?: ArrayBuffer;
   fluid?: ArrayBuffer;
   overlays: readonly { cx: number; cy: number; cz: number; voxels: ArrayBuffer; fluid?: ArrayBuffer }[];
@@ -195,10 +197,16 @@ export async function runWorldComputeTask(
     return { kind: 'mesh-result' as const, ...resultIdentity(task), workerMeshingMs, meshes: packMeshes(meshes) };
   }
 
+  const declaredStrategy = (task as Readonly<{ inputStrategy?: unknown }>).inputStrategy;
+  if (declaredStrategy !== undefined && declaredStrategy !== 'authority-complete')
+    throw new TypeError('Unknown worker mesh input strategy.');
+  const complete = declaredStrategy === 'authority-complete' ? validateAuthorityCompleteMeshInput(task) : undefined;
   const generationStartedAt = performance.now();
-  const canonical = task.canonical
-    ? new Uint16Array(task.canonical)
-    : makeChunk(task.seed, task.cx, task.cy, task.cz, [], task.generatorVersion);
+  const canonical = complete
+    ? new Uint16Array(complete.canonical)
+    : task.canonical
+      ? new Uint16Array(task.canonical)
+      : makeChunk(task.seed, task.cx, task.cy, task.cz, [], task.generatorVersion);
   const workerGenerationMs = performance.now() - generationStartedAt;
   await checkpoint(isCancelled, yieldTurn);
   const haloStartedAt = performance.now();
@@ -209,8 +217,8 @@ export async function runWorldComputeTask(
     cy: task.cy,
     cz: task.cz,
     canonical,
-    ...(task.fluid ? { fluid: new Uint8Array(task.fluid) } : {}),
-    overlays: task.overlays.map(({ voxels, fluid, ...overlay }) => ({
+    ...(complete ? { fluid: new Uint8Array(complete.fluid) } : task.fluid ? { fluid: new Uint8Array(task.fluid) } : {}),
+    overlays: (complete ?? task).overlays.map(({ voxels, fluid, ...overlay }) => ({
       ...overlay,
       voxels: new Uint16Array(voxels),
       ...(fluid ? { fluid: new Uint8Array(fluid) } : {}),
@@ -240,6 +248,13 @@ export async function runWorldComputeTask(
     workerHaloMs,
     workerMeshingMs,
     computedHaloRevision: generated.haloRevision,
+    ...(complete
+      ? {
+          authorityComplete: true as const,
+          proceduralVoxelSamples: generated.proceduralVoxelSamples,
+          macroContextCount: generated.macroContextCount,
+        }
+      : {}),
     canonical: generated.canonical.buffer,
     meshes: packMeshes(meshes),
   };

@@ -102,6 +102,8 @@ Node 产品接线为 [命令行入口](../src/node/server/node-server.ts) → [�
 
 公开基线参考从 [投影入口](../src/server/protocol/network-reference-baseline.ts) 将 owned capture 转为显式 LE/raw 块，经 [发布队列](../src/server/protocol/network-reference-baseline-publication.ts) 按准备完成顺序分配身份、按需物化页，再由 [重组器](../src/server/protocol/network-reference-baseline-reassembly.ts) 校验完整块并交付；[字节账本](../src/server/protocol/network-reference-baseline-budget.ts) 分别约束块与发送队列。它们是 codec/transport 无关的 `not-adopted` 参考组件，尚未建立认证会话、实际网络发送或浏览器安装入口。
 
+网格调度的 [source 合同](../src/app/world/mesh-task-source.ts) 保留本地 canonical 接纳，并为完整 Authority 输入提供独立的派生结果核对和 task 副本结算。[worker 完整输入门禁](../src/worker/authority-complete-mesh-input.ts) 在网格算法前要求主块及 26 邻接块的 canonical/fluid 全部存在；该 opt-in 接缝尚未由生产 app 的远端会话启用。
+
 [build-node-server.mjs](../scripts/build-node-server.mjs) 将 CLI、Authority、Persistence、compute Worker 和 compute child 打成五个独立 ESM 入口；无需 Vite 或源码运行。旧 [node-dedicated-runtime.ts](../src/node/runtime/node-dedicated-runtime.ts) 保留为进程内组合参考，不是 CLI 产品入口。网络、GUI 和完整性能准出继续按 [当前实施记录](../changes/2026-09-06-node-dedicated-server/execution.md)推进；离线宿主可运行不代表已经可远端游玩。
 
 最容易混淆的几个名称：

@@ -185,3 +185,9 @@ WebTransport 候选在 Firefox 153.0 完成可靠流与 datagram；Playwright We
 新增 codec/transport 无关的基线投影、发布 FIFO、惰性 page、双账本和有界重组。原始真实 27/27/1 capture 与派生 330 页分别冻结来源，并把副本/LE/hash/取消/并发终态门串联验证；详见 [实现进度](network-baseline-reference-progress.md) 和 [派生记录](network-baseline-reference-corpus-progress.md)。原始语料与 Node 控制端口故障回归已先推送为 8010945。
 
 本批最终 `verify:static` 195 文件/1074 项通过，world 行覆盖 96.37%，浏览器与五入口 Node 构建通过。客户端下一接线草案经独立只读审查补齐完整 halo 版本身份、transfer 副本、共享 owner 与 World 能力拆分；当前未实施 GUI 或正式网络。整个 change 仍 Active，协议参考、功能探针与构建不替代 N2–N4/A13 的网络采用和性能验收。冻结 spec hash 未变，按用户授权提交推送稳定结果。
+
+## 2026-09-07 基线编解码与完整 worker 调度检查点
+
+公开参考已推送为 eeb54c3。本批 C0/C1/C2 对真实 333 条基线消息完成强等价与生产重组，实际应用字节分别为 5,609,513 / 5,490,424 / 5,475,097 B；原始 block 为 5,406,720 B。C2 对 C0 总体约省 2.4%，只属于当前语料包体结果，未测耗时或 gzip，也未选择协议。分页 16 KiB 仅为此语料参数，额外 synthetic 32 KiB 合法页单列验证，未缩窄通用合同。详见 [codec 记录](network-baseline-codec-progress.md)。
+
+完整权威输入与 taskId 级副本结算已进入真实 worker/调度器；修复 pool 在 terminate 前触发失败/丢弃回调和 epoch 切换再入。定向验证与 build 详见 [调度记录](network-baseline-scheduler-progress.md)，未把此前完整 static 计数当作本批重跑。客户端 consumer 与真实组合用例继续推进；本检查点先保存可恢复结果，整个 change 不标 Delivered。长期 docs baseline 仅更新实际 source/worker 入口。

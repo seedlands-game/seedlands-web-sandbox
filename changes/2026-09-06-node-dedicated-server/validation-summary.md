@@ -1,6 +1,17 @@
 # Node Dedicated Server 当前状态与阶段证据
 
-## 恢复入口：完整基线的公开参考接线
+## 恢复入口：完整基线编解码与客户端接缝
+
+整个 change 仍 **Active**。上一已推送检查点为 `eeb54c3755b428ef62a44987f3096737bd92f34c`；本批先保存已验证的 codec/worker/调度结果，真实 consumer 与镜像提交组合继续实施。
+
+- [基线 codec](network-baseline-codec-progress.md)：三候选各 333 条真实消息强等价、生产重组及单列 32 KiB 合法分页通过；原始 block 5,406,720 B，C0/C1/C2 完整应用字节 5,609,513 / 5,490,424 / 5,475,097 B。没有耗时、压缩或传输采用结论。
+- [完整 worker](network-complete-baseline-worker-plan.md) 20 项与 [调度/结算](network-baseline-scheduler-progress.md) 10 项通过，既有相关 35 项回归通过；目标静态/TypeScript、浏览器和 Node 构建通过。完整 source 不调用 Authority canonical 上行，pool 先终止再通知失败；实际 app 仍使用本地会话。
+- [成本采样口径](network-codec-measurement-plan.md) 经独立审阅，明确 elapsed/CPU 区别、实际 pipeline 分项、gzip 独立轴、筛选排他与正式配对门；尚未采样。
+- [consumer 合同](network-baseline-consumer-plan.md) 与真实缓存/碰撞/调度组合仍在进行，未准出。共享版本失效与 commit 删除缓存的账本同步须由实际生产消费方法验证，不用测试 reducer 替代。
+
+本检查点没有重新运行全仓 static；下节 1074 项属于前一完整验证。GUI/远端可玩、WAN/CI、N2–N4 采用和 A13 不退化均未完成。冻结 spec 未改，不把功能接缝或包体结果当成最终迁移收益。
+
+## 上一完整验证：完整基线的公开参考接线
 
 整个 change 仍 **Active**。已推送检查点为 `80109458d8b45de6d02f7f4d47e6fb64f4d88044`，包含真实基线语料和真实 Node 控制端口中断测试。本批已完成公开参考投影、分页发布与有界重组，并通过统一静态检查和两端构建；下面的 1030 项计数属于此前完整验证，当前为 **195 文件/1074 项通过**（另 2 文件/4 项跳过）。
 

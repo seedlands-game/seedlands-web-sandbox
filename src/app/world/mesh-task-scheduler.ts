@@ -1,19 +1,18 @@
 import { isCurrentMeshTask } from '../../client/compute/mesh-task-snapshot';
-import type { PerformanceProfile } from '../../client/presentation/performance-profile';
-import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
 import { chunkKey } from '../../world/voxel';
 import type { PendingMeshTask, StreamingVariant, WorkerResult } from '../app-contracts';
+import { createMainSnapshotDispatch, type MeshTaskDispatch } from './mesh-task-dispatch';
 import {
-  createMainSnapshotDispatch,
-  createWorkerFirstDispatch,
-  type MainSnapshot,
-  type MeshTaskDispatch,
-  type WorkerInput,
-} from './mesh-task-dispatch';
-import { recordMeshPreparationDiagnostics, recordMeshPreparationFailure } from './mesh-preparation-telemetry';
+  acceptSourceMeshResult,
+  assertMeshSourceVariant,
+  prepareSourceWorkerDispatch,
+  type MeshTaskSchedulerOptions,
+} from './mesh-task-source';
+import { recordMeshPreparationFailure } from './mesh-preparation-telemetry';
 import { MeshVisibilityBarriers } from './mesh-visibility-barriers';
 
 export type { WorkerResult } from '../app-contracts';
+export type { MeshTaskSource, MeshWorkerPort } from './mesh-task-source';
 
 type PendingMeshRequest = {
   traceId: string;
@@ -31,32 +30,6 @@ type PendingMeshRequest = {
 export type MeshRequestPriority = 'streaming' | 'interactive' | 'interactive-fluid';
 export type MeshRequestOptions = { forceRemesh?: boolean; priority?: MeshRequestPriority };
 
-export type MeshTaskSource = {
-  seed: number;
-  generatorVersion: number;
-  beforePrepare?: (cx: number, cy: number, cz: number) => Promise<void>;
-  releasePrepared?: (cx: number, cy: number, cz: number) => void;
-  prepareMainSnapshot: (cx: number, cy: number, cz: number) => MainSnapshot;
-  prepareWorkerInput: (cx: number, cy: number, cz: number) => WorkerInput;
-  acceptWorkerCanonical: (task: PendingMeshTask, result: WorkerResult) => boolean | Promise<boolean>;
-};
-
-export type MeshWorkerPort = {
-  onerror?: ((failure: { taskId: number; error: Error }) => void) | null;
-  onmessage: ((event: MessageEvent<WorkerResult>) => void) | null;
-  postMessage: (message: Record<string, unknown>, transfer: Transferable[]) => void;
-  terminate: () => void;
-};
-
-type SchedulerOptions = {
-  worker: MeshWorkerPort;
-  source: MeshTaskSource;
-  telemetry: PerformanceTelemetry;
-  profile: PerformanceProfile;
-  variant: StreamingVariant;
-  onAcceptedResult: (task: PendingMeshTask, result: WorkerResult) => void;
-};
-
 export class MeshTaskScheduler {
   private readonly queued = new Map<string, PendingMeshRequest>();
   private readonly latestTasks = new Map<string, PendingMeshTask>();
@@ -72,6 +45,7 @@ export class MeshTaskScheduler {
   private dispatchCount = 0;
   private readonly activeTasks = new Map<number, PendingMeshTask>();
   private readonly receivingTasks = new Set<number>();
+  private readonly inputSettlements = new Map<number, () => void>();
   private epoch = 0;
   private disposed = false;
   private draining = false;
@@ -79,7 +53,8 @@ export class MeshTaskScheduler {
   private mergedRequests = 0;
   private supersededInFlight = 0;
 
-  constructor(private readonly options: SchedulerOptions) {
+  constructor(private readonly options: MeshTaskSchedulerOptions) {
+    assertMeshSourceVariant(options.source, options.variant);
     this.variant = options.variant;
     options.worker.onmessage = (event) => void this.receive(event.data);
     options.worker.onerror = ({ taskId, error }) => this.fail(taskId, error);
@@ -106,6 +81,7 @@ export class MeshTaskScheduler {
   }
 
   setVariant(variant: StreamingVariant) {
+    assertMeshSourceVariant(this.options.source, variant);
     if (this.variant === variant) return false;
     this.variant = variant;
     return true;
@@ -246,6 +222,7 @@ export class MeshTaskScheduler {
     this.options.worker.onmessage = null;
     this.options.worker.onerror = null;
     this.options.worker.terminate();
+    for (const taskId of [...this.inputSettlements.keys()]) this.settleInput(taskId);
     for (const task of this.activeTasks.values()) this.options.source.releasePrepared?.(task.cx, task.cy, task.cz);
     this.activeTasks.clear();
     this.inFlight = 0;
@@ -347,6 +324,7 @@ export class MeshTaskScheduler {
   }
 
   private postMainSnapshot(request: PendingMeshRequest) {
+    if (this.options.source.kind === 'authority-complete') throw new TypeError('Complete input cannot use snapshots.');
     const span = this.options.telemetry.beginSpan('streaming', 'HaloSnapshot', 'main', request.traceId);
     const snapshot = this.options.source.prepareMainSnapshot(request.cx, request.cy, request.cz);
     this.options.telemetry.endSpan(span);
@@ -363,14 +341,20 @@ export class MeshTaskScheduler {
   }
 
   private postWorkerFirst(request: PendingMeshRequest) {
-    const span = this.options.telemetry.beginSpan('streaming', 'AuthorityOverlayCopy', 'main', request.traceId);
-    const prepared = this.options.source.prepareWorkerInput(request.cx, request.cy, request.cz);
-    this.options.telemetry.endSpan(span);
-    recordMeshPreparationDiagnostics(this.options.telemetry, request.traceId, prepared.preparationDiagnostics);
-    this.postDispatch(
+    const prepared = prepareSourceWorkerDispatch(
+      this.options.source,
       request,
-      createWorkerFirstDispatch(++this.taskSequence, request, this.options.source.seed, prepared),
+      ++this.taskSequence,
+      this.options.telemetry,
     );
+    const taskId = prepared.dispatch.task.taskId;
+    if (prepared.settle) this.inputSettlements.set(taskId, prepared.settle);
+    try {
+      this.postDispatch(request, prepared.dispatch);
+    } catch (error) {
+      this.settleInput(taskId);
+      throw error;
+    }
   }
 
   private postDispatch(request: PendingMeshRequest, dispatch: MeshTaskDispatch) {
@@ -417,7 +401,7 @@ export class MeshTaskScheduler {
           this.discard(task, 'invalid-worker-canonical');
           return;
         }
-        if (!(await this.options.source.acceptWorkerCanonical(task, result))) {
+        if (!(await acceptSourceMeshResult(this.options.source, task, result))) {
           this.releaseBarrierAttempt(task);
           this.discard(task, 'stale-worker-canonical');
           return;
@@ -495,6 +479,7 @@ export class MeshTaskScheduler {
 
   private finishTask(task: PendingMeshTask) {
     if (!this.activeTasks.delete(task.taskId)) return;
+    this.settleInput(task.taskId);
     this.receivingTasks.delete(task.taskId);
     this.inFlight = this.activeTasks.size;
     if (![...this.activeTasks.values()].some((other) => other.chunkKey === task.chunkKey))
@@ -505,6 +490,12 @@ export class MeshTaskScheduler {
       this.replacements.delete(task.chunkKey);
       this.queued.set(task.chunkKey, replacement);
     }
+  }
+
+  private settleInput(taskId: number) {
+    const settle = this.inputSettlements.get(taskId);
+    this.inputSettlements.delete(taskId);
+    settle?.();
   }
 
   private higherPriority(current: MeshRequestPriority | undefined, next: MeshRequestPriority): MeshRequestPriority {
