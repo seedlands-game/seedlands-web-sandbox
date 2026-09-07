@@ -1,0 +1,260 @@
+{
+  "name": "colors-262144",
+  "runId": "2026-09-06T15-46-01-056Z",
+  "evidenceClass": "formal",
+  "pairs": 10,
+  "events": 1000,
+  "warmupMs": 5000,
+  "headless": true,
+  "browser": "152.0.7977.76",
+  "sourceSha": "36a0022657d2c14053f1575814f9fd148df0d0c6",
+  "prepared": {
+    "initialization": {
+      "id": 1,
+      "initialization": [
+        {
+          "mode": "scalar",
+          "initializationMs": 1.199999988079071,
+          "bytes": 1794
+        },
+        {
+          "mode": "simd",
+          "initializationMs": 0.699999988079071,
+          "bytes": 3524
+        }
+      ]
+    },
+    "legacyFailures": [],
+    "tsControl": "numeric TS loop",
+    "corpusCount": 10,
+    "inputBytes": [
+      1048576,
+      1048576,
+      1048576,
+      1048576,
+      1048576,
+      1048576,
+      1048576,
+      1048576,
+      1048576,
+      1048576
+    ],
+    "crossOriginIsolated": false,
+    "hardwareConcurrency": 12
+  },
+  "bundleHashes": {
+    "assets/simd-worker-BbCba1MD.js": "d79e6bf58678dce77bec45e8b19c58ba226004d91d558438bb89f9a538003cb1",
+    "assets/simd-worker-BbCba1MD.js.map": "f7ecabc1ca766ca9f2fcecf41f3d5f67f1088c78f29a608c66f6d323d8d020cc",
+    "simd-entry.js": "3908b25c2a0d3702dc981ffe6ecf0ddfa46ea577f990b2ce07aaa5a498c2a9fa",
+    "simd-entry.js.map": "5f11315bf3bf210b09a548e300ab84f39a6ae9f5b5fc411bfac1d9b53f69ce53"
+  },
+  "status": "completed",
+  "metricsStatus": {
+    "rss": "NOT_COLLECTED: browser process RSS cannot isolate this co-resident Worker",
+    "gc": "NOT_COLLECTED",
+    "memoryGrowth": "fixed arena; no grow calls",
+    "boundary": "included in Worker compute with input/output copies; not independently subtracted below clock resolution"
+  },
+  "comparisons": {
+    "scalarVsSimd": {
+      "improvement": 21.56862923843226,
+      "ci95": [
+        20.0000011920929,
+        24.528301483628244
+      ],
+      "baseline": 0.5099999964237213,
+      "candidate": 0.39999998807907106,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "p95": {
+      "improvement": -28.683180290045286,
+      "ci95": [
+        -33.243363277215956,
+        -24.317514276872295
+      ],
+      "baseline": 1.150500000119209,
+      "candidate": 1.4804999893903728,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "p99": {
+      "improvement": -18.790685773095372,
+      "ci95": [
+        -23.553777630883772,
+        -13.822206175427812
+      ],
+      "baseline": 1.4900999917387963,
+      "candidate": 1.7700999988913537,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "compute": {
+      "improvement": 49.99999254942007,
+      "ci95": [
+        49.999988079071045,
+        49.999997019768294
+      ],
+      "baseline": 0.20000001788139343,
+      "candidate": 0.10000002384185791,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "meanEndToEnd": {
+      "improvement": 21.53431159174044,
+      "ci95": [
+        20.517998023330577,
+        22.942345138936062
+      ],
+      "baseline": 0.6153900000631809,
+      "candidate": 0.48286999994516383,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "controlVsSimd": {
+      "improvement": 20.000002384185787,
+      "ci95": [
+        19.999998807907104,
+        20.000004768371582
+      ],
+      "baseline": 0.5,
+      "candidate": 0.39999998807907106,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "core": {
+      "improvement": 79.36716625208975,
+      "ci95": [
+        79.09744043553094,
+        79.72963373933284
+      ],
+      "baseline": 0.11409000002145768,
+      "candidate": 0.023540000027418136,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    }
+  },
+  "summaries": {
+    "ts": {
+      "prepareMs": {
+        "mean": 0.19158999965190887,
+        "p50": 0.19999998807907104,
+        "p95": 0.30000001192092896,
+        "p99": 0.30000001192092896
+      },
+      "roundtripMs": {
+        "mean": 0.4241600005030632,
+        "p50": 0.30000001192092896,
+        "p95": 0.9000000357627869,
+        "p99": 1.300000011920929
+      },
+      "endToEndMs": {
+        "mean": 0.615750000154972,
+        "p50": 0.5,
+        "p95": 1.100000023841858,
+        "p99": 1.5
+      },
+      "computeMs": {
+        "mean": 0.2404699999332428,
+        "p50": 0.20000004768371582,
+        "p95": 0.30000001192092896,
+        "p99": 0.40000003576278687
+      },
+      "memoryBytes": {
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0
+      },
+      "outputBytes": {
+        "mean": 1048576,
+        "p50": 1048576,
+        "p95": 1048576,
+        "p99": 1048576
+      }
+    },
+    "scalar": {
+      "prepareMs": {
+        "mean": 0.19103999989628792,
+        "p50": 0.19999998807907104,
+        "p95": 0.30000001192092896,
+        "p99": 0.30000001192092896
+      },
+      "roundtripMs": {
+        "mean": 0.424350000166893,
+        "p50": 0.30000001192092896,
+        "p95": 1,
+        "p99": 1.300000011920929
+      },
+      "endToEndMs": {
+        "mean": 0.6153900000631809,
+        "p50": 0.5,
+        "p95": 1.199999988079071,
+        "p99": 1.5
+      },
+      "computeMs": {
+        "mean": 0.23898000005483627,
+        "p50": 0.20000004768371582,
+        "p95": 0.30000001192092896,
+        "p99": 0.40000003576278687
+      },
+      "memoryBytes": {
+        "mean": 18874368,
+        "p50": 18874368,
+        "p95": 18874368,
+        "p99": 18874368
+      },
+      "outputBytes": {
+        "mean": 1048576,
+        "p50": 1048576,
+        "p95": 1048576,
+        "p99": 1048576
+      }
+    },
+    "simd": {
+      "prepareMs": {
+        "mean": 0.18214000015854837,
+        "p50": 0.19999998807907104,
+        "p95": 0.30000001192092896,
+        "p99": 0.30000001192092896
+      },
+      "roundtripMs": {
+        "mean": 0.30072999978661535,
+        "p50": 0.19999998807907104,
+        "p95": 1.300000011920929,
+        "p99": 1.600000023841858
+      },
+      "endToEndMs": {
+        "mean": 0.4828699999451637,
+        "p50": 0.3999999761581421,
+        "p95": 1.5,
+        "p99": 1.800000011920929
+      },
+      "computeMs": {
+        "mean": 0.1418100000143051,
+        "p50": 0.10000002384185791,
+        "p95": 0.20000004768371582,
+        "p99": 0.30000001192092896
+      },
+      "memoryBytes": {
+        "mean": 18874368,
+        "p50": 18874368,
+        "p95": 18874368,
+        "p99": 18874368
+      },
+      "outputBytes": {
+        "mean": 1048576,
+        "p50": 1048576,
+        "p95": 1048576,
+        "p99": 1048576
+      }
+    }
+  }
+}

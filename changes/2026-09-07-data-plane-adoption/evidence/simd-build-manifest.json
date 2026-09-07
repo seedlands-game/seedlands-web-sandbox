@@ -1,0 +1,36 @@
+{
+  "toolchain": "rustc 1.88.0 (6b00bc388 2025-06-23)",
+  "sources": {
+    "crates/Cargo.lock": "762ffb3a89f03d670e76fdd41a7727668fd49555eb87bc592ee3d810fe0441cd",
+    "crates/Cargo.toml": "f937dc74d103e314e703d83f0363633d373f6368ff4defa346463b10766e9517",
+    "crates/rust-toolchain.toml": "7d9611a374ad9a48a535a61752e593d787918f1af0bbfe233f7f286a0bc42eeb",
+    "crates/world-kernels-wasm/Cargo.toml": "ab0d38571a75a054dadb60ca15b39363388bcbeecd7243475b6f34e3e473c145",
+    "crates/world-kernels-wasm/src/backend.rs": "cc9ad974d53c00a53a48fae9024d3d613601e1cbc59acde6ba50a111a160e9e6",
+    "crates/world-kernels-wasm/src/data.rs": "d3778bb96f602778f7528ae3bd0ead2da5b1408549bb5398a79fbc613f984e55",
+    "crates/world-kernels-wasm/src/fluid.rs": "d0f08542ee7790f076319bfb1f7d3a0bf94158e95f5bd32d44f6a8cba66ecfbc",
+    "crates/world-kernels-wasm/src/lib.rs": "ca14ea112e58beae8c17c119674c0a38efa08df347153adabae36dfe5bc752d3",
+    "crates/world-kernels-wasm/src/mesh.rs": "bde520ea09a49c84a6ce9b32ae7bac9c30a0fd17bfb2738da4901a84b952f8d7",
+    "crates/world-kernels-wasm/src/pack.rs": "f64e50b149f261ce1d13641078e0ef106d0d86e8abe18974058dc5174a67e820",
+    "crates/world-kernels/Cargo.toml": "2046dc427bc326a3e8ac5acca4a0d6e94677191efab58c1646f856046c2ffcd7",
+    "crates/world-kernels/src/codec.rs": "c921ad41a9638dfd40f815099f76cdc9824dbe7cef9d05c2c807b2fddbcdeec4",
+    "crates/world-kernels/src/fluid.rs": "9739cd93a4b4791c29ac8b480bc71cf3d878b499ce1d26a5697a2d34a38c313b",
+    "crates/world-kernels/src/generation.rs": "384c55bf872591ce4baaaaacb57299656af7cdcb62da5827c437e90321bb2e69",
+    "crates/world-kernels/src/lib.rs": "ff32bf9a94f91f0d6121121b5771cd66eb8078a1a60f57f0915b19e3efb2eb0e",
+    "crates/world-kernels/src/mesh.rs": "a55f5784fefb5b3c4ced7b274e7451a0b7086cbc9c1aa791cd6894558bf7f006",
+    "crates/world-kernels/src/pack.rs": "92b4a7da0b2dfaf71d6d3a3d260966a0323267c79ab3e23518ce965ef469b460",
+    "crates/world-kernels/tests/data-plane.rs": "d9462b041fcc6ac1796df66301c3603cfdbaad464586e97aecaa60abfb4977b9",
+    "crates/world-kernels/tests/fluid-mesh.rs": "c46e87c7ccf4ea577928b81ae460db4296a639f98f4d8d21db76609d2ed2ea71",
+    "scripts/build-simd-experiment.mjs": "582d66a3571b5588205754efb35d650d1cf224790ca4a1f7aef4f17526022d33",
+    "scripts/link-wasm-kernels.mjs": "8b4a17970e5bc1220f28643508a55a40c653554490a7a4836e0be530737e460e"
+  },
+  "scalar": {
+    "bytes": 22527,
+    "sha256": "5bb21e950fd600939413043c9d28eb20044884cfe357cd2d700187b80a78f461",
+    "flags": "-C linker=/Users/bytedance/.codex/worktrees/720b/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=-simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
+  },
+  "simd": {
+    "bytes": 24089,
+    "sha256": "320402dd0e3b8df902a106ef1a584f56236bad6ad3075628e42bce8b341b14d4",
+    "flags": "-C linker=/Users/bytedance/.codex/worktrees/720b/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=+simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
+  }
+}

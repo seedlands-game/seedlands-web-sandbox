@@ -89,6 +89,7 @@ type RuntimeHarnessBindings = {
   blockLogicWorker: (ms: number) => Promise<void>;
   queueSave: () => void;
   flushSave: () => Promise<void>;
+  experiments: () => HarnessSnapshot['experiments'];
 };
 
 declare global {
@@ -127,6 +128,7 @@ type SnapshotContext = {
   };
   visualEffects: AdvancedVisualEffects | null;
   underwaterVisual: UnderwaterVisualEffects | null;
+  experiments?: HarnessSnapshot['experiments'];
 };
 
 const unavailablePerformance = (): HarnessSnapshot['performance'] => ({
@@ -163,9 +165,16 @@ const unavailableCompute = (): HarnessSnapshot['compute'] => ({
     fluid: { count: 0, capacity: 256, samplesMs: [] },
     general: { count: 0, capacity: 256, samplesMs: [] },
   },
+  workerKernelStates: [],
 });
 
 export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot {
+  const experiments = context.experiments ?? {
+    requested: { renderer: 'webgl2', wasm: false, simd: false },
+    kernels: [],
+    renderer: null,
+    workers: [],
+  };
   const position = context.controller?.position;
   const player: [number, number, number] = position ? [position.x, position.y, position.z] : [0, 0, 0];
   const telemetry = context.world?.telemetry;
@@ -261,7 +270,11 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     logic: context.logic?.diagnostics ?? { blockStartedCount: 0, blockCompletedCount: 0 },
     trajectory: context.authorityTrajectory,
     generatorVersion: context.world?.generatorVersion ?? 0,
-    renderPipeline: FINAL_RENDER_PIPELINE,
+    renderPipeline: {
+      ...FINAL_RENDER_PIPELINE,
+      backend: experiments.renderer?.effectiveRenderer ?? 'webgl2',
+    },
+    experiments,
     serverRevision: context.world?.getChunkRevision(0, 0, 0) ?? 0,
     voxelAtOrigin: context.world?.getVoxel(0, 0, 0) ?? Voxel.Air,
     serverPlayerPosition: authorityPlayer
@@ -377,6 +390,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
         presentation: bindings.gameplay()?.presentationSnapshot,
         visualEffects: bindings.visualEffects(),
         underwaterVisual: bindings.underwaterVisual(),
+        experiments: bindings.experiments(),
       }),
     lifecycleSnapshot: bindings.lifecycleSnapshot,
     restartWorld: bindings.restartWorld,
@@ -442,15 +456,19 @@ export function installHarness(api: HarnessApi) {
 }
 
 export async function installPersistenceHarness() {
-  if (!new URLSearchParams(location.search).has('harness')) return;
+  if (!new URLSearchParams(location.search).has('harness')) return () => undefined;
   const {
     seedBrowserChunkPersistenceCorpus,
     runBrowserChunkPersistenceLoadScenario,
     saveOneBrowserChunkPersistenceChange,
   } = await import('../client/persistence/chunk-persistence-benchmark');
-  window.__seedlandsPersistenceHarness = {
+  const harness = {
     seedCorpus: seedBrowserChunkPersistenceCorpus,
     loadScenario: runBrowserChunkPersistenceLoadScenario,
     saveOneChangedChunk: saveOneBrowserChunkPersistenceChange,
+  };
+  window.__seedlandsPersistenceHarness = harness;
+  return () => {
+    if (window.__seedlandsPersistenceHarness === harness) delete window.__seedlandsPersistenceHarness;
   };
 }

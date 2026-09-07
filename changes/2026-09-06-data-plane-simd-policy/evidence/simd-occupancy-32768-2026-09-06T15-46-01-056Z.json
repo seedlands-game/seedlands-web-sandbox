@@ -1,0 +1,239 @@
+{
+  "name": "occupancy-32768",
+  "runId": "2026-09-06T15-46-01-056Z",
+  "evidenceClass": "formal",
+  "pairs": 10,
+  "events": 1000,
+  "warmupMs": 5000,
+  "headless": true,
+  "browser": "152.0.7977.76",
+  "sourceSha": "36a0022657d2c14053f1575814f9fd148df0d0c6",
+  "prepared": {
+    "initialization": {
+      "id": 1,
+      "initialization": [
+        {
+          "mode": "scalar",
+          "initializationMs": 1.100000023841858,
+          "bytes": 1794
+        },
+        {
+          "mode": "simd",
+          "initializationMs": 1,
+          "bytes": 3524
+        }
+      ]
+    },
+    "legacyFailures": [],
+    "tsControl": "numeric TS loop",
+    "corpusCount": 10,
+    "inputBytes": [
+      65536,
+      65536,
+      65536,
+      65536,
+      65536,
+      65536,
+      65536,
+      65536,
+      65536,
+      65536
+    ],
+    "crossOriginIsolated": false,
+    "hardwareConcurrency": 12
+  },
+  "bundleHashes": {
+    "assets/simd-worker-BbCba1MD.js": "d79e6bf58678dce77bec45e8b19c58ba226004d91d558438bb89f9a538003cb1",
+    "assets/simd-worker-BbCba1MD.js.map": "f7ecabc1ca766ca9f2fcecf41f3d5f67f1088c78f29a608c66f6d323d8d020cc",
+    "simd-entry.js": "3908b25c2a0d3702dc981ffe6ecf0ddfa46ea577f990b2ce07aaa5a498c2a9fa",
+    "simd-entry.js.map": "5f11315bf3bf210b09a548e300ab84f39a6ae9f5b5fc411bfac1d9b53f69ce53"
+  },
+  "status": "completed",
+  "metricsStatus": {
+    "rss": "NOT_COLLECTED: browser process RSS cannot isolate this co-resident Worker",
+    "gc": "NOT_COLLECTED",
+    "memoryGrowth": "fixed arena; no grow calls",
+    "boundary": "included in Worker compute with input/output copies; not independently subtracted below clock resolution"
+  },
+  "comparisons": {
+    "scalarVsSimd": {
+      "status": "BELOW_TIMER_RESOLUTION",
+      "baseline": 0,
+      "candidate": 0
+    },
+    "p95": {
+      "improvement": 0.49751214274535993,
+      "ci95": [
+        0,
+        1.477831644474914
+      ],
+      "baseline": 0.10050002366304352,
+      "candidate": 0.10000002384185791,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "p99": {
+      "improvement": 5.0449591345834826,
+      "ci95": [
+        -5.0972100200857255,
+        13.998080629270156
+      ],
+      "baseline": 0.40040000599622694,
+      "candidate": 0.38019998931884746,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "compute": {
+      "status": "BELOW_TIMER_RESOLUTION",
+      "baseline": 0,
+      "candidate": 0
+    },
+    "meanEndToEnd": {
+      "improvement": 17.847484862256014,
+      "ci95": [
+        15.28028422666093,
+        20.018170019410523
+      ],
+      "baseline": 0.055469999754428866,
+      "candidate": 0.045569999945163725,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "controlVsSimd": {
+      "status": "BELOW_TIMER_RESOLUTION",
+      "baseline": 0.09999996423721313,
+      "candidate": 0
+    },
+    "core": {
+      "improvement": 80.52773027429012,
+      "ci95": [
+        80.19370193331625,
+        80.94422695165053
+      ],
+      "baseline": 0.007994140631053599,
+      "candidate": 0.0015566406259313226,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    }
+  },
+  "summaries": {
+    "ts": {
+      "prepareMs": {
+        "mean": 0.01090000001192093,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.10000002384185791
+      },
+      "roundtripMs": {
+        "mean": 0.065119999563694,
+        "p50": 0.09999996423721313,
+        "p95": 0.19999998807907104,
+        "p99": 0.3999999761581421
+      },
+      "endToEndMs": {
+        "mean": 0.07601999957561494,
+        "p50": 0.09999996423721313,
+        "p95": 0.19999998807907104,
+        "p99": 0.3999999761581421
+      },
+      "computeMs": {
+        "mean": 0.03840999966859818,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.10000002384185791
+      },
+      "memoryBytes": {
+        "mean": 0,
+        "p50": 0,
+        "p95": 0,
+        "p99": 0
+      },
+      "outputBytes": {
+        "mean": 32768,
+        "p50": 32768,
+        "p95": 32768,
+        "p99": 32768
+      }
+    },
+    "scalar": {
+      "prepareMs": {
+        "mean": 0.011679999899864197,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.10000002384185791
+      },
+      "roundtripMs": {
+        "mean": 0.043789999854564665,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.3999999761581421
+      },
+      "endToEndMs": {
+        "mean": 0.055469999754428866,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.3999999761581421
+      },
+      "computeMs": {
+        "mean": 0.014929999822378158,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.10000002384185791
+      },
+      "memoryBytes": {
+        "mean": 18874368,
+        "p50": 18874368,
+        "p95": 18874368,
+        "p99": 18874368
+      },
+      "outputBytes": {
+        "mean": 32768,
+        "p50": 32768,
+        "p95": 32768,
+        "p99": 32768
+      }
+    },
+    "simd": {
+      "prepareMs": {
+        "mean": 0.01127999991774559,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.10000002384185791
+      },
+      "roundtripMs": {
+        "mean": 0.03429000002741814,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.3999999761581421
+      },
+      "endToEndMs": {
+        "mean": 0.045569999945163725,
+        "p50": 0,
+        "p95": 0.10000002384185791,
+        "p99": 0.3999999761581421
+      },
+      "computeMs": {
+        "mean": 0.007090000087022781,
+        "p50": 0,
+        "p95": 0.09999996423721313,
+        "p99": 0.10000002384185791
+      },
+      "memoryBytes": {
+        "mean": 18874368,
+        "p50": 18874368,
+        "p95": 18874368,
+        "p99": 18874368
+      },
+      "outputBytes": {
+        "mean": 32768,
+        "p50": 32768,
+        "p95": 32768,
+        "p99": 32768
+      }
+    }
+  }
+}

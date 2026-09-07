@@ -1,0 +1,98 @@
+   Compiling world-kernels v0.1.0 (/Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation/crates/world-kernels)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+     Running unittests src/lib.rs (crates/target/debug/deps/world_kernels-8d489c9046429cdd)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/data-plane.rs (crates/target/debug/deps/data_plane-c0d1dd4d7b3c0b6b)
+
+running 3 tests
+test known_answers_and_bounds ... ok
+test flat_column_chunk ... ok
+test generation_uses_number_semantics_for_extreme_i32_inputs ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/fluid-mesh.rs (crates/target/debug/deps/fluid_mesh-64c4175992313bfb)
+
+running 4 tests
+test malformed_fluid_inputs_are_rejected_before_access ... ok
+test fluid_rejects_aliased_ranges_and_duplicate_chunk_coordinates ... ok
+test fluid_source_spreads_with_reference_order_and_caller_scratch ... ok
+test mesh_descriptor_matches_single_cube_record_shape_and_capacity_rule ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+   Doc-tests world_kernels
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+$ node scripts/rust-kernel-artifact.mjs --build
+   Compiling world-kernels v0.1.0 (/Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation/crates/world-kernels)
+   Compiling world-kernels-wasm v0.1.0 (/Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation/crates/world-kernels-wasm)
+    Finished `release` profile [optimized] target(s) in 0.75s
+   Compiling world-kernels v0.1.0 (/Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation/crates/world-kernels)
+   Compiling world-kernels-wasm v0.1.0 (/Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation/crates/world-kernels-wasm)
+    Finished `release` profile [optimized] target(s) in 0.44s
+Rust source/artifact fingerprints verified.
+changes/2026-09-07-data-plane-adoption/e2e/workload-worker.ts 49ms
+$ svelte-check --tsconfig ./tsconfig.json && tsc --noEmit && tsc -p tsconfig.test.json --noEmit
+Loading svelte-check in workspace: /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+
+
+ Test Files  4 passed (4)
+      Tests  9 passed (9)
+   Start at  02:06:44
+   Duration  18.21s (transform 105ms, setup 0ms, import 152ms, tests 17.65s, environment 0ms)
+
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  02:07:03
+   Duration  1.40s (transform 75ms, setup 0ms, import 91ms, tests 1.20s, environment 0ms)
+
+$ pnpm wasm:verify && pnpm wasm:rust:verify && pnpm typecheck && vite build
+$ node scripts/wasm-artifact.mjs
+Wasm artifact verified: 9788 bytes, e342dd87279fe651eba7e649a6b5c0db172bd7653dbbf6380c272f88a7f7b17a
+$ node scripts/rust-kernel-artifact.mjs
+Rust source/artifact fingerprints verified.
+$ svelte-check --tsconfig ./tsconfig.json && tsc --noEmit && tsc -p tsconfig.test.json --noEmit
+Loading svelte-check in workspace: /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+2:07:12 AM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation - using default configuration.
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 2442 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                          1.66 kB │ gzip:   0.91 kB
+dist/assets/fluid-compute-worker-Dm2dAuIg.js             9.79 kB
+dist/assets/game-logic-worker-DljHbtPj.js               14.45 kB
+dist/assets/rust-kernels-scalar-Dqt-Jo_q.wasm           22.53 kB │ gzip:  10.27 kB
+dist/assets/rust-kernels-simd-Bc_m7tYA.wasm             24.09 kB │ gzip:  11.04 kB
+dist/assets/persistence-worker-8ZIwoA_t.js              27.91 kB
+dist/assets/world-worker-bGj7b21t.js                    36.34 kB
+dist/assets/authority-worker-1UdOU2nF.js               195.85 kB
+dist/assets/index-BxAFsvrm.css                          27.88 kB │ gzip:   7.05 kB
+dist/assets/chunk-persistence-benchmark-CIV0XIMb.js      1.73 kB │ gzip:   0.84 kB
+dist/assets/index-DlGqhOtD.js                        2,513.77 kB │ gzip: 668.44 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.91s

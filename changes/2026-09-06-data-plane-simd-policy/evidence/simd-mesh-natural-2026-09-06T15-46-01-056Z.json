@@ -1,0 +1,276 @@
+{
+  "name": "mesh-natural",
+  "runId": "2026-09-06T15-46-01-056Z",
+  "evidenceClass": "formal",
+  "pairs": 10,
+  "events": 1000,
+  "warmupMs": 5000,
+  "headless": true,
+  "browser": "152.0.7977.76",
+  "sourceSha": "36a0022657d2c14053f1575814f9fd148df0d0c6",
+  "prepared": {
+    "initialization": {
+      "id": 1,
+      "initialization": [
+        {
+          "mode": "scalar",
+          "initializationMs": 1.0999999642372131,
+          "bytes": 1794
+        },
+        {
+          "mode": "simd",
+          "initializationMs": 0.7999999523162842,
+          "bytes": 3524
+        }
+      ]
+    },
+    "legacyFailures": [
+      "2: Error: RangeError: Maximum call stack size exceeded",
+      "17: Error: RangeError: Maximum call stack size exceeded"
+    ],
+    "tsControl": "same-layout TS arena control; legacy results separately validated where executable",
+    "corpusCount": 30,
+    "inputBytes": [
+      311136,
+      3192,
+      16515072,
+      193536,
+      139272,
+      180600,
+      0,
+      266616,
+      228648,
+      0,
+      166488,
+      6552,
+      0,
+      277872,
+      122640,
+      310128,
+      34104,
+      16515072,
+      193536,
+      307272,
+      215208,
+      0,
+      22344,
+      253008,
+      0,
+      191520,
+      279216,
+      0,
+      167832,
+      312816
+    ],
+    "crossOriginIsolated": false,
+    "hardwareConcurrency": 12
+  },
+  "bundleHashes": {
+    "assets/simd-worker-BbCba1MD.js": "d79e6bf58678dce77bec45e8b19c58ba226004d91d558438bb89f9a538003cb1",
+    "assets/simd-worker-BbCba1MD.js.map": "f7ecabc1ca766ca9f2fcecf41f3d5f67f1088c78f29a608c66f6d323d8d020cc",
+    "simd-entry.js": "3908b25c2a0d3702dc981ffe6ecf0ddfa46ea577f990b2ce07aaa5a498c2a9fa",
+    "simd-entry.js.map": "5f11315bf3bf210b09a548e300ab84f39a6ae9f5b5fc411bfac1d9b53f69ce53"
+  },
+  "status": "completed",
+  "metricsStatus": {
+    "rss": "NOT_COLLECTED: browser process RSS cannot isolate this co-resident Worker",
+    "gc": "NOT_COLLECTED",
+    "memoryGrowth": "fixed arena; no grow calls",
+    "boundary": "included in Worker compute with input/output copies; not independently subtracted below clock resolution"
+  },
+  "comparisons": {
+    "scalarVsSimd": {
+      "improvement": 4.999998509883796,
+      "ci95": [
+        0,
+        14.999995529651377
+      ],
+      "baseline": 0.19999998807907104,
+      "candidate": 0.18999999165534973,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "p95": {
+      "improvement": 10.990001596743094,
+      "ci95": [
+        8.600976920375729,
+        13.69307805737493
+      ],
+      "baseline": 6.101000005602836,
+      "candidate": 5.430500007569789,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "p99": {
+      "improvement": 8.836851605345208,
+      "ci95": [
+        5.2364585663469185,
+        12.756377617214861
+      ],
+      "baseline": 7.020600010633468,
+      "candidate": 6.400200005888939,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "compute": {
+      "status": "BELOW_TIMER_RESOLUTION",
+      "baseline": 0,
+      "candidate": 0
+    },
+    "meanEndToEnd": {
+      "improvement": 7.668706946592907,
+      "ci95": [
+        5.304052221647304,
+        10.351507890701583
+      ],
+      "baseline": 0.6486100001096726,
+      "candidate": 0.5988699999749659,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "controlVsSimd": {
+      "improvement": 4.999998509883796,
+      "ci95": [
+        0,
+        14.999995529651377
+      ],
+      "baseline": 0.19999998807907104,
+      "candidate": 0.18999999165534973,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    },
+    "stagedVsSimd": {
+      "improvement": 4.999998509883796,
+      "ci95": [
+        0,
+        14.999995529651377
+      ],
+      "baseline": 0.19999998807907104,
+      "candidate": 0.18999999165534973,
+      "pairs": 10,
+      "bootstrapSeed": "0x05072026",
+      "iterations": 10000
+    }
+  },
+  "summaries": {
+    "staged": {
+      "prepareMs": {
+        "mean": 0.26028999978303907,
+        "p50": 0,
+        "p95": 3.099999964237213,
+        "p99": 3.699999988079071
+      },
+      "roundtripMs": {
+        "mean": 0.5167399998545646,
+        "p50": 0.10000002384185791,
+        "p95": 4.699999988079071,
+        "p99": 5.300000011920929
+      },
+      "endToEndMs": {
+        "mean": 0.7770299996376038,
+        "p50": 0.19999998807907104,
+        "p95": 7.800000011920929,
+        "p99": 8.800000011920929
+      },
+      "computeMs": {
+        "mean": 0.37845999999046326,
+        "p50": 0.09999996423721313,
+        "p95": 4.599999964237213,
+        "p99": 5.199999988079071
+      },
+      "memoryBytes": {
+        "mean": 16777216,
+        "p50": 16777216,
+        "p95": 16777216,
+        "p99": 16777216
+      },
+      "outputBytes": {
+        "mean": 1117225.8,
+        "p50": 155050,
+        "p95": 14940636,
+        "p99": 14942208
+      }
+    },
+    "scalar": {
+      "prepareMs": {
+        "mean": 0.2635499999642372,
+        "p50": 0,
+        "p95": 3.099999964237213,
+        "p99": 3.800000011920929
+      },
+      "roundtripMs": {
+        "mean": 0.38506000014543534,
+        "p50": 0.10000002384185791,
+        "p95": 2.899999976158142,
+        "p99": 3.5
+      },
+      "endToEndMs": {
+        "mean": 0.6486100001096725,
+        "p50": 0.19999998807907104,
+        "p95": 6,
+        "p99": 7.100000023841858
+      },
+      "computeMs": {
+        "mean": 0.24354999995231627,
+        "p50": 0,
+        "p95": 2.800000011920929,
+        "p99": 3.400000035762787
+      },
+      "memoryBytes": {
+        "mean": 18874368,
+        "p50": 18874368,
+        "p95": 18874368,
+        "p99": 18874368
+      },
+      "outputBytes": {
+        "mean": 1117225.8,
+        "p50": 155050,
+        "p95": 14940636,
+        "p99": 14942208
+      }
+    },
+    "simd": {
+      "prepareMs": {
+        "mean": 0.260940000218153,
+        "p50": 0,
+        "p95": 3.099999967217445,
+        "p99": 3.700000047683716
+      },
+      "roundtripMs": {
+        "mean": 0.33792999975681304,
+        "p50": 0.10000002384185791,
+        "p95": 2.300000011920929,
+        "p99": 2.899999976158142
+      },
+      "endToEndMs": {
+        "mean": 0.598869999974966,
+        "p50": 0.19999998807907104,
+        "p95": 5.400000035762787,
+        "p99": 6.5
+      },
+      "computeMs": {
+        "mean": 0.19617999990582466,
+        "p50": 0,
+        "p95": 2.199999988079071,
+        "p99": 2.800000011920929
+      },
+      "memoryBytes": {
+        "mean": 18874368,
+        "p50": 18874368,
+        "p95": 18874368,
+        "p99": 18874368
+      },
+      "outputBytes": {
+        "mean": 1117225.8,
+        "p50": 155050,
+        "p95": 14940636,
+        "p99": 14942208
+      }
+    }
+  }
+}

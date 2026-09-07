@@ -8,6 +8,7 @@
   import GameTextField from './primitives/game-text-field.svelte';
   import SeedlandsMark from './primitives/seedlands-mark.svelte';
   import type { WorldOpenMode } from '../../client/world-version-policy';
+  import type { WorkerSupport } from '../client-capability-preflight';
 
   let {
     shell,
@@ -20,11 +21,13 @@
   } = $props();
   let latestSeed = $state('');
   let error = $state('');
+  let workerSupport = $state<WorkerSupport>('checking');
   onMount(() =>
     application.subscribe(() => {
       latestSeed = application.latestSeed;
       quality = application.quality;
       error = application.controller.state.error;
+      workerSupport = application.capabilities.workerSupport;
     }),
   );
   let seed = $state('');
@@ -50,8 +53,11 @@
   <p>走进一个由 Seed 苏醒、会随脚步延展的体素秘境。</p>
   <div class="world-tags" aria-hidden="true"><span>草原</span><span>森林</span><span>山脉</span><span>河湖</span></div>
   {#if latestSeed && shell.phase !== 'loading'}
-    <GameButton class="continue-world" label="继续世界" onclick={() => void application.continueWorld()}
-      >继续世界 <small>{latestSeed}</small></GameButton
+    <GameButton
+      class="continue-world"
+      label="继续世界"
+      disabled={workerSupport !== 'supported'}
+      onclick={() => void application.continueWorld()}>继续世界 <small>{latestSeed}</small></GameButton
     >
   {/if}
   <div class="start-fields">
@@ -76,12 +82,12 @@
   <GameButton
     class="recommended-start"
     label="推荐起点：林间河岸"
-    disabled={shell.phase === 'boot' || shell.phase === 'loading'}
+    disabled={shell.phase === 'boot' || shell.phase === 'loading' || workerSupport !== 'supported'}
     onclick={() => (seed = 'mosslight-68')}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
   >
   <GameButton
     label={shell.enterLabel}
-    disabled={shell.phase === 'boot' || shell.phase === 'loading'}
+    disabled={shell.phase === 'boot' || shell.phase === 'loading' || workerSupport !== 'supported'}
     onclick={() => onstart(seed, quality, openMode)}
   >
     {shell.enterLabel}
@@ -95,5 +101,8 @@
     >
   </div>
   {#if error}<p class="start-error" role="alert">{error}</p>{/if}
+  {#if workerSupport === 'unsupported'}
+    <p class="start-error" role="alert">当前浏览器不支持运行游戏所需的 Web Worker，无法进入世界。</p>
+  {/if}
   <small>旧版河岸不会自动改变；版本选择可继续 v2，也可为同名 Seed 保留旧档并进入 v3。</small>
 </GamePanel>

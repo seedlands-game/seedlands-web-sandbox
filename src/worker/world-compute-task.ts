@@ -1,4 +1,5 @@
-import { batchMeshData, compactMeshData, createProceduralMeshInput, makeChunk, meshChunk } from '../world/mesh';
+import { createProceduralMeshInput, makeChunk, meshChunk } from '../world/mesh';
+import { batchCompactMeshData } from '../world/mesh-batching';
 import { findSafePlayerSpawn } from '../server/gameplay/safe-spawn';
 import { createStarterEcology } from '../server/simulation/starter-ecology';
 import { findDryStarterSurface } from '../server/starter-surface';
@@ -98,7 +99,14 @@ const resultIdentity = (task: MeshTaskPayload | GenerateMeshTaskPayload) => ({
   haloRevision: task.haloRevision,
 });
 
-const packMeshes = (meshes: ReturnType<typeof meshChunk>) => batchMeshData(Object.values(meshes)).map(compactMeshData);
+const packMeshes = (meshes: ReturnType<typeof meshChunk>) => batchCompactMeshData(Object.values(meshes));
+
+export type WorldComputeKernels = Partial<{
+  makeChunk: typeof makeChunk;
+  prepareHalo: typeof createProceduralMeshInput;
+  meshChunk: typeof meshChunk;
+  packMeshes: typeof packMeshes;
+}>;
 
 const checkpoint = async (isCancelled: () => boolean, yieldTurn: () => Promise<void>) => {
   await yieldTurn();
@@ -109,6 +117,7 @@ function proceduralVoxelReader(
   seed: number,
   generatorVersion: number,
   chunks: Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>,
+  generate = makeChunk,
 ) {
   return (x: number, y: number, z: number) => {
     const cx = floorDiv(x, CHUNK_SIZE);
@@ -117,7 +126,7 @@ function proceduralVoxelReader(
     const key = chunkKey(cx, cy, cz);
     let chunk = chunks.get(key);
     if (!chunk) {
-      chunk = { cx, cy, cz, voxels: makeChunk(seed, cx, cy, cz, [], generatorVersion) };
+      chunk = { cx, cy, cz, voxels: generate(seed, cx, cy, cz, [], generatorVersion) };
       chunks.set(key, chunk);
     }
     return chunk.voxels[voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE))];
@@ -128,17 +137,22 @@ export async function runWorldComputeTask(
   task: WorldComputePayload,
   isCancelled: () => boolean = () => false,
   yieldTurn: () => Promise<void> = () => Promise.resolve(),
+  kernels: WorldComputeKernels = {},
 ) {
+  const generate = kernels.makeChunk ?? makeChunk;
+  const prepareHalo = kernels.prepareHalo ?? createProceduralMeshInput;
+  const mesh = kernels.meshChunk ?? meshChunk;
+  const pack = kernels.packMeshes ?? packMeshes;
   await checkpoint(isCancelled, yieldTurn);
   if (task.kind === 'find-safe-spawn') {
     const spawnChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
     const playerBodyPosition = findSafePlayerSpawn(
-      proceduralVoxelReader(task.seed, task.generatorVersion, spawnChunks),
+      proceduralVoxelReader(task.seed, task.generatorVersion, spawnChunks, generate),
     );
     await checkpoint(isCancelled, yieldTurn);
     if (!playerBodyPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');
     const starterChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
-    const readStarterVoxel = proceduralVoxelReader(task.seed, task.generatorVersion, starterChunks);
+    const readStarterVoxel = proceduralVoxelReader(task.seed, task.generatorVersion, starterChunks, generate);
     const starter = createStarterEcology(task.seed, playerBodyPosition, (x, z, _nearY) =>
       findDryStarterSurface(task.seed, task.generatorVersion, x, z, readStarterVoxel),
     );
@@ -164,7 +178,7 @@ export async function runWorldComputeTask(
   if (task.kind === 'generate-canonical') {
     if (task.key !== chunkKey(task.cx, task.cy, task.cz))
       throw new TypeError(`Canonical generation Chunk key is invalid: ${task.key}.`);
-    const canonical = makeChunk(task.seed, task.cx, task.cy, task.cz, [], task.generatorVersion);
+    const canonical = generate(task.seed, task.cx, task.cy, task.cz, [], task.generatorVersion);
     await checkpoint(isCancelled, yieldTurn);
     return {
       kind: 'canonical-result' as const,
@@ -179,7 +193,7 @@ export async function runWorldComputeTask(
   }
   if (task.kind === 'mesh') {
     const meshingStartedAt = performance.now();
-    const meshes = meshChunk({
+    const meshes = mesh({
       seed: task.seed,
       cx: task.cx,
       cy: task.cy,
@@ -192,17 +206,17 @@ export async function runWorldComputeTask(
     });
     const workerMeshingMs = performance.now() - meshingStartedAt;
     await checkpoint(isCancelled, yieldTurn);
-    return { kind: 'mesh-result' as const, ...resultIdentity(task), workerMeshingMs, meshes: packMeshes(meshes) };
+    return { kind: 'mesh-result' as const, ...resultIdentity(task), workerMeshingMs, meshes: pack(meshes) };
   }
 
   const generationStartedAt = performance.now();
   const canonical = task.canonical
     ? new Uint16Array(task.canonical)
-    : makeChunk(task.seed, task.cx, task.cy, task.cz, [], task.generatorVersion);
+    : generate(task.seed, task.cx, task.cy, task.cz, [], task.generatorVersion);
   const workerGenerationMs = performance.now() - generationStartedAt;
   await checkpoint(isCancelled, yieldTurn);
   const haloStartedAt = performance.now();
-  const generated = createProceduralMeshInput({
+  const generated = prepareHalo({
     seed: task.seed,
     generatorVersion: task.generatorVersion,
     cx: task.cx,
@@ -219,7 +233,7 @@ export async function runWorldComputeTask(
   const workerHaloMs = performance.now() - haloStartedAt;
   await checkpoint(isCancelled, yieldTurn);
   const meshingStartedAt = performance.now();
-  const meshes = meshChunk({
+  const meshes = mesh({
     seed: task.seed,
     cx: task.cx,
     cy: task.cy,
@@ -241,7 +255,7 @@ export async function runWorldComputeTask(
     workerMeshingMs,
     computedHaloRevision: generated.haloRevision,
     canonical: generated.canonical.buffer,
-    meshes: packMeshes(meshes),
+    meshes: pack(meshes),
   };
 }
 

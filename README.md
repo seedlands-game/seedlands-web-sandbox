@@ -95,6 +95,22 @@ A local reference track can be selected in Settings (up to 30 MiB and 10 minutes
 
 Reflections use one nearby horizontal water plane. High favors visual detail; Medium is the desktop default. Lighting does not include global illumination. Water flow is simulated separately as bounded voxel levels.
 
+## Experimental performance settings
+
+The optimized TypeScript data path is always enabled and is the fallback baseline. The measured default is WebGL2 plus Rust WebAssembly kernels `w02`–`w06` and standard SIMD128 preference; only the `w06` packing kernel currently contains explicit SIMD instructions. `w07`, `w10`, `w14`, and `w15` remain on optimized TypeScript. WebGPU is available as an experiment but is not the default because the prior paired browser measurement did not show an end-to-end benefit.
+
+Settings can select WebGL2/WebGPU, Rust Wasm, and SIMD independently. Changes are persisted immediately but require a page refresh; leaving and re-entering a world does not hot-reload a graphics device or Worker. Unsupported WebGPU falls back only to WebGL2, unsupported Wasm falls back only to optimized TypeScript, and unsupported SIMD falls back only to scalar Rust. Requested and effective states remain visible to the debug Harness.
+
+The same fields can be set through `?renderer=webgl2|webgpu&wasm=on|off&simd=on|off`. A kernel list such as `?wasm=w04,w06` is reserved for performance diagnosis. Host pages can set options before the entry module runs:
+
+```js
+window.__SEEDLANDS_INITIAL_OPTIONS__ = {
+  experiments: { renderer: 'webgl2', wasm: true, simd: false },
+};
+```
+
+Explicit initialization arguments override URL values, which override persisted settings, which override defaults. A host that provides the same explicit field on every load remains authoritative for that field. Dedicated module Worker support is required to enter the game. The default topology uses five long-lived Workers; when the browser reports fewer estimated cores, the menu shows a non-blocking performance warning before entry.
+
 ## Server command debugging
 
 Press F4 after entering a world to open the compact debug shell. World commands include `/setblock`, `/fill`, `/tp`, `/time get`, `/time set`, `/seed`, `/save`, `/inspect voxel`, and `/inspect chunk`. Gameplay commands include `/inventory`, `/give`, `/damage`, `/heal`, `/spawnitem`, `/spawn creature`, `/craft`, `/break`, `/cancelbreak`, `/pickup`, `/drop`, `/place`, `/use`, `/attack`, `/respawn`, `/tick`, and `/nearby`. Actor debugging adds `/summon`, `/observe`, `/entity action`, `/entity move`, `/entity stop`, `/path`, and `/poi nearby`; invalid arguments return usage details in the shell. The shell releases pointer lock while open; press Esc to close it. Its log text can be selected and copied with native browser controls, and the input accepts normal paste operations. Use Up and Down to browse the latest 20 submitted commands and return to an unfinished draft.
@@ -126,6 +142,7 @@ src/runtime/   Independent clocks, scheduling, worker budgets, and session proto
 src/world/     Deterministic world, voxel, mesh, coordinate, and save logic
 src/worker/    Authority, logic, fluid, general computation, and persistence entry points
 tests/         Unit, architecture, and long-lived browser regression tests
+crates/        Pure Rust kernels and an independent Wasm adapter
 changes/       Change contracts and their delivery-specific evidence
 scripts/       Local harness and engineering scripts
 ```
@@ -142,6 +159,8 @@ pnpm test:e2e:regression
 ```
 
 These commands provide different evidence. Unit tests cover deterministic logic; static verification covers formatting, linting, path rules, coverage, and TypeScript; the production build proves bundling; Playwright covers deterministic browser behaviour. Visual semantics are evaluated separately with change-scoped Midscene flows.
+
+The general computation Worker enables measured Rust kernels for chunk filling, halo, mesh descriptors, and mesh packing. Packing uses standard SIMD128 when supported, with scalar and optimized TypeScript fallbacks. Fluid, authority, logic, and persistence remain TypeScript by default. Each enabled Worker owns its own Wasm instance; shared memory and cross-origin isolation are not required. Rust 1.88.0 and the Wasm target are pinned in `crates/rust-toolchain.toml`; `pnpm wasm:rust:build` rebuilds the two production artifacts, and the normal production build verifies their source and binary hashes. `pnpm rust:check` enforces the pure-core boundary. The superseded MoonBit implementation and toolchain have been removed; its frozen measurements remain available in the [result snapshot](changes/2026-09-07-remove-moonbit-toolchain/moonbit-results.md). See the [adoption decision and measurements](changes/2026-09-07-data-plane-adoption/adoption-plan.md).
 
 The architecture lint also limits JavaScript and TypeScript modules to 500 effective lines, excluding blank lines and comments, so responsibilities continue to be split instead of accumulating in a new monolith.
 

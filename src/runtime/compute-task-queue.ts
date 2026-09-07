@@ -150,6 +150,24 @@ export class ComputeTaskQueue {
     return removed;
   }
 
+  failLane(lane: ComputeLane): ComputeTask[] {
+    const failed = new Set([...this.tasks.values()].filter((task) => task.lane === lane).map((task) => task.taskId));
+    const removed: ComputeTask[] = [];
+    let changed = failed.size > 0;
+    while (changed) {
+      changed = false;
+      for (const task of this.tasks.values()) {
+        if (failed.has(task.taskId) || task.dependencies.some((id) => failed.has(id))) {
+          this.remove(task);
+          failed.add(task.taskId);
+          removed.push(task);
+          changed = true;
+        }
+      }
+    }
+    return removed;
+  }
+
   cancel(taskId: number) {
     if (!this.tasks.has(taskId)) return false;
     this.fail(taskId);

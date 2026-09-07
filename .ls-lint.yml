@@ -13,6 +13,10 @@ ls:
   changes/*:
     .dir: regex:\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*
     .md: kebab-case
+  changes/*/experiments:
+    .dir: kebab-case
+    .rs: kebab-case
+    .sh: kebab-case
   changes/*/evidence:
     .dir: kebab-case
   changes/*/midscene:
@@ -21,6 +25,9 @@ ls:
     .dir: kebab-case
     .spec.ts: kebab-case
 
+  crates:
+    .dir: kebab-case
+    .rs: kebab-case
 ignore:
   - .git
   - .husky
@@ -30,3 +37,4 @@ ignore:
   - harness/results
   - midscene_run
   - node_modules
+  - crates/target

@@ -1,0 +1,40 @@
+{
+  "scalar": {
+    "sha256": "0bb790285430fef5eee2e7eda7f75ef2af1bd581d26ca37516c1879d31d0acea",
+    "simdInstructionCount": 0,
+    "instructions": [],
+    "relaxedInstructionCount": 0,
+    "dataEnd": 16777216,
+    "stackTop": 17825792,
+    "heapBase": 17825792,
+    "linearMemoryBytes": 18874368
+  },
+  "simd": {
+    "sha256": "f5e628ebd24b36fecaa367adf82087faa146449325ba80d05c85a94237ac5375",
+    "simdInstructionCount": 91,
+    "instructions": [
+      "i16x8.narrow_i32x4_u",
+      "i16x8.ne",
+      "i32x4.add",
+      "i32x4.extract_lane",
+      "i32x4.gt_u",
+      "i32x4.lt_u",
+      "i32x4.max_u",
+      "i32x4.shl",
+      "i32x4.shr_u",
+      "i32x4.splat",
+      "i8x16.narrow_i16x8_u",
+      "v128.and",
+      "v128.bitselect",
+      "v128.const",
+      "v128.load",
+      "v128.or",
+      "v128.store"
+    ],
+    "relaxedInstructionCount": 0,
+    "dataEnd": 16777316,
+    "stackTop": 17825904,
+    "heapBase": 17825904,
+    "linearMemoryBytes": 18874368
+  }
+}
