@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "id": "node-monorepo-validation",
+  "initiatedBy": "agent",
+  "role": "三包迁移独立验收负责人",
+  "workType": "validation",
+  "goal": "在 root 明确交付冻结 HEAD 后，独立核对三包边界、现行测试覆盖、core/Node 隔离构建与实际 Node/浏览器运行证据；不修改生产代码，失败返回 root/实施者。",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-node-monorepo/spec.md",
+      "purpose": "已批准范围的可执行合同"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-node-monorepo/architecture-review.md",
+      "purpose": "具体架构准出边界"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/pre-migration-inventory.json",
+      "purpose": "迁移前测试清单与执行配置"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/tmp/seedlands-monorepo"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills",
+      "/tmp"
+    ],
+    "nonGoals": [
+      "不修改游戏规则、存档、wire 格式或增加远端可玩",
+      "不合并 PR，不部署远端，不购买或重置额度",
+      "不读取 .env 或密钥；不修改其他 worktree",
+      "不修改生产代码、测试期望或历史证据，不暂存/commit，不重放无关 benchmark",
+      "不重复已有冻结 HEAD 的完整测试，除非来源不匹配、发现缺口或出现新失败"
+    ]
+  },
+  "outputs": [
+    "/tmp/seedlands-monorepo/independent-validation.md",
+    "必要定向验证原始日志与准确限制"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "boundary",
+      "check": "实读三包 manifests、exports、types、依赖和静态规则，验证非法跨包/平台依赖反例；核对平台端口语义",
+      "evidence": "独立源码审阅与针对性负向检查"
+    },
+    {
+      "id": "isolation",
+      "check": "独立 core/Node 检查及 Node 构建不借 Web 源码/资产和根完整依赖；读取隔离脚本并实际复核",
+      "evidence": "临时目录构建日志、产物输入图和真实 Node smoke"
+    },
+    {
+      "id": "coverage",
+      "check": "与冻结迁移前清单比较，用例均有明确迁移或冻结解释，当前回归未静默删除；记录实际执行集合",
+      "evidence": "测试路径对应和 Vitest/Playwright 配置"
+    },
+    {
+      "id": "behavior",
+      "check": "核对最新HEAD的Static、Web/Node Build、真实Node恢复、完整baseline链路、浏览器default/wasm=off证据；缺口做有界定向复验",
+      "evidence": "HEAD/source binding、日志和退出状态"
+    },
+    {
+      "id": "report",
+      "check": "按严重度给出可复现缺陷或明确通过范围，报告落盘/tmp/seedlands-monorepo/independent-validation.md",
+      "evidence": "独立验收报告"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 3
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-node-monorepo/contracts/root.json",
+    "sha256": "d6bdadc46b3b5e162df9c130597e011e7c895685e06d8b029adfdec29bbbb914"
+  },
+  "resources": {
+    "exclusiveGroup": "seedlands-monorepo-validation"
+  },
+  "escalation": [
+    "范围或平台契约需改变",
+    "同原因失败 5 次或预计超出规划时间"
+  ],
+  "reportFields": [
+    "完成状态",
+    "提交和推送",
+    "变更",
+    "验证结果",
+    "限制",
+    "剩余工作"
+  ]
+}
