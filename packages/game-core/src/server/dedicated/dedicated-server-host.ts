@@ -124,6 +124,7 @@ export class DedicatedServerHost {
       ...options,
       initialWorldTime: options.initialWorldTime ?? 9,
       startTimeMs: options.now(),
+      startClock: options.now,
       findInitialWorldBootstrap: async (seed, generatorVersion) => {
         const task: DedicatedComputeTask = {
           kind: 'find-safe-spawn',

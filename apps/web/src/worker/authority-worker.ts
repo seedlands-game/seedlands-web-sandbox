@@ -151,6 +151,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     initialWorldTime: message.initialWorldTime,
     frequencies: message.frequencies,
     startTimeMs: 0,
+    startClock: browserCorePlatform.now,
     platform: browserCorePlatform,
     findInitialWorldBootstrap: requestBootstrap,
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),

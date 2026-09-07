@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it, vi } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import type { WorkerResult } from '../../../apps/web/src/app/app-contracts';
 import { MeshTaskScheduler, type MeshWorkerPort } from '../../../apps/web/src/app/world/mesh-task-scheduler';
 import type { CompleteWorkerInputLease } from '../../../apps/web/src/app/world/mesh-task-source';
@@ -22,7 +23,10 @@ import {
 import {
   runWorldComputeTask,
   type GenerateMeshTaskPayload,
-} from '../../../packages/game-core/src/worker/world-compute-task';
+} from '../../../packages/game-core/src/compute/world-compute-task';
+
+const runMeshTask = (task: Parameters<typeof runWorldComputeTask>[0]) =>
+  runWorldComputeTask(task, () => false, undefined, { now: testCorePlatform.now });
 
 const projected = '/tmp/seedlands-network-baseline-reference-projected-v1-r2';
 const evidencePath = 'changes/2026-09-06-node-dedicated-server/network-baseline-codec-evidence.json';
@@ -95,7 +99,7 @@ class TransferMeshWorker implements MeshWorkerPort {
 
   async finish(index: number): Promise<WorkerResult> {
     const task = this.tasks[index]!;
-    const result = await runWorldComputeTask(task);
+    const result = await runMeshTask(task);
     const canonical = 'canonical' in result ? result.canonical : undefined;
     if (
       result.kind !== 'mesh-result' ||

@@ -23,7 +23,7 @@ import {
 import type {
   AuthorityGameplayView,
   AuthorityReady,
-} from '../../../../packages/game-core/src/worker/authority-worker-protocol';
+} from '../../../../packages/game-core/src/compute/authority-worker-protocol';
 
 /**
  * Change-local evidence helper. It records only reference projections from a

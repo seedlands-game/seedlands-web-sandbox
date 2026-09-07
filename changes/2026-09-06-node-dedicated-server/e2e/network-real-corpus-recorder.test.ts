@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import type {
   DedicatedComputeExecutor,
   DedicatedComputeResult,
@@ -185,10 +186,11 @@ describe('network real corpus recorder', () => {
     let now = 0;
     const compute = executor();
     const host = await DedicatedServerHost.create({
+      platform: testCorePlatform,
       epoch: 'host:real-corpus',
       seedText: 'network-real-corpus-fixture',
       initialPlayerBodyPosition: [0.5, 33, 0.5],
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       executors: { general: compute, fluid: compute, logic: compute },
       now: () => now,
     });

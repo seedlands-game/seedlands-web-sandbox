@@ -2,6 +2,7 @@ import { deepStrictEqual } from 'node:assert';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import { ALL_COMMAND_CAPABILITIES } from '../../../packages/game-core/src/server/commands/command-contract';
 import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
 import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
@@ -160,10 +161,11 @@ describe('真实 Host Gameplay 消费者 v2 参考语料', () => {
   it('在生态、受控扩容和保存恢复三阶段记录 consumer、pose 与 correction', async () => {
     const priorHashes = await existingHashes(historicalCorpusPaths);
     let now = 0;
-    const persistence = new MemoryGamePersistence();
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const seedText = 'network-gameplay-consumer-corpus-fixture';
     const records: GameplayConsumerCorpusRecord[] = [];
     const first = await DedicatedServerHost.create({
+      platform: testCorePlatform,
       epoch: 'host:gameplay-consumer:initial',
       seedText,
       persistence,
@@ -198,6 +200,7 @@ describe('真实 Host Gameplay 消费者 v2 参考语料', () => {
       firstStopped = true;
 
       second = await DedicatedServerHost.create({
+        platform: testCorePlatform,
         epoch: 'host:gameplay-consumer:restored',
         seedText,
         persistence,

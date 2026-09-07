@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { isDeepStrictEqual } from 'node:util';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
 import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
 import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
@@ -15,7 +16,7 @@ import {
   projectGameplayViewReference,
   projectPlayerCorrectionReference,
 } from '../../../packages/game-core/src/server/protocol/network-reference-projection';
-import type { AuthorityAction } from '../../../packages/game-core/src/worker/authority-worker-protocol';
+import type { AuthorityAction } from '../../../packages/game-core/src/compute/authority-worker-protocol';
 
 const decodedFixturePath = process.env.SEEDLANDS_ACTION_DECODED_FIXTURE;
 const sourceCorpusPath = process.env.SEEDLANDS_ACTION_SOURCE_CORPUS;
@@ -393,9 +394,10 @@ const executor = (): DedicatedComputeExecutor => ({
 async function replay(corpus: Corpus, decoded: readonly DecodedFrame[]) {
   const compute = executor();
   const host = await DedicatedServerHost.create({
+    platform: testCorePlatform,
     ...corpus.config,
     now: () => 0,
-    persistence: new MemoryGamePersistence(),
+    persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
     executors: { general: compute, fluid: compute, logic: compute },
   });
   const observed: Array<{ category: string; metadata: object }> = [];

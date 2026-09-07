@@ -17,6 +17,7 @@ export type AuthorityRuntimeOptions = Readonly<{
   generatorVersion?: number;
   initialWorldTime: number;
   startTimeMs: number;
+  startClock?: () => number;
   initialPlayerBodyPosition?: [number, number, number];
   findInitialWorldBootstrap?: (seed: number, generatorVersion: number) => Promise<AuthorityInitialWorldBootstrap>;
   frequencies?: AuthorityFrequencies;

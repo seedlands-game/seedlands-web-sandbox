@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
 import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
 import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
@@ -150,9 +151,10 @@ describe('真实 Host 双向参考语料', () => {
       initialPlayerBodyPosition: [0.5, 33, 0.5] as [number, number, number],
     };
     const host = await DedicatedServerHost.create({
+      platform: testCorePlatform,
       ...config,
       now: () => now,
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       executors: { general: compute, fluid: compute, logic: compute },
     });
     const records: RecordedFrame[] = [];

@@ -164,7 +164,9 @@ export class AuthorityRuntime {
       }
       player = server.spawnPlayer({ position: bodyPosition });
     }
-    const runtime = new AuthorityRuntime(options, server, player.id, isNew);
+    const startTimeMs = options.startClock?.() ?? options.startTimeMs;
+    if (!Number.isFinite(startTimeMs)) throw new TypeError('Authority startup clock returned a non-finite value.');
+    const runtime = new AuthorityRuntime({ ...options, startTimeMs }, server, player.id, isNew);
     unknownChunks.bind((key) => runtime.requestUnknownChunk(key));
     if (isNew) runtime.session.commitExternalState(false);
     return runtime;

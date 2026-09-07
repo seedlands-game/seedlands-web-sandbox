@@ -4,7 +4,7 @@ import {
   type WelcomePresentationReferenceV2,
 } from '../../../../packages/game-core/src/server/protocol/network-reference-bootstrap-presentation';
 import type { ReferenceBootstrapContext } from '../../../../packages/game-core/src/server/protocol/network-reference-bootstrap-types';
-import type { AuthorityReady } from '../../../../packages/game-core/src/worker/authority-worker-protocol';
+import type { AuthorityReady } from '../../../../packages/game-core/src/compute/authority-worker-protocol';
 
 export type BootstrapWelcomeCaptureLabel =
   'new-world-authority-start' | 'same-epoch-current-body' | 'restored-authority-start';

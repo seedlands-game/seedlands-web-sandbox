@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import { AuthorityRuntime } from '../../../packages/game-core/src/server/authority/authority-runtime';
 import { MemoryGamePersistence } from '../../../packages/game-core/src/server/persistence/memory-game-persistence';
 import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
@@ -25,9 +26,10 @@ const controls = {
 
 async function fixture() {
   const runtime = await AuthorityRuntime.create({
+    platform: testCorePlatform,
     epoch,
     seedText: 'network-real-corpus-fixture',
-    persistence: new MemoryGamePersistence(),
+    persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
     initialPlayerBodyPosition: [8.5, 45, 8.5],
     startTimeMs: 0,
     initialWorldTime: 9,

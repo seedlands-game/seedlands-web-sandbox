@@ -2,6 +2,7 @@ import { deepStrictEqual } from 'node:assert';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import type { WorldCommitResult } from '../../../packages/game-core/src/server/game-server-types';
 import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
 import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
@@ -145,9 +146,10 @@ describe('真实 Host WorldCommit 呈现 v2 语料', () => {
     const priorHashes = await existingHashes(historicalCorpusPaths);
     const now = 0;
     const host = await DedicatedServerHost.create({
+      platform: testCorePlatform,
       epoch: 'host:world-commit-presentation',
       seedText: 'network-world-commit-presentation-corpus',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       executors: { general: executor(), fluid: executor(), logic: executor() },
       now: () => now,
     });

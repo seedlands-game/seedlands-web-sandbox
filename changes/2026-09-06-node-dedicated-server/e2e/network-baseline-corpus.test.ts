@@ -2,6 +2,7 @@ import { deepStrictEqual } from 'node:assert';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import type {
   DedicatedComputeExecutor,
   DedicatedComputeResult,
@@ -182,9 +183,10 @@ describe('Authority 完整基线真实语料', () => {
     }
     const main = { key: '80,0,80', cx: 80, cy: 0, cz: 80 } as const;
     const host = await DedicatedServerHost.create({
+      platform: testCorePlatform,
       epoch: 'baseline-corpus:authority',
       seedText: 'baseline-corpus:fixed-seed',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       executors: { general: executor(), fluid: executor(), logic: executor() },
       now: () => 0,
     });

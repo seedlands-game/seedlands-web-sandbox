@@ -144,7 +144,7 @@ export class HeadlessSession {
         const result = await runWorldComputeTask(
           { kind: 'find-safe-spawn', seed, generatorVersion },
           () => false,
-          options.platform.yieldTurn,
+          undefined,
           { now: options.platform.now },
         );
         if (result.kind !== 'safe-spawn-result') throw new Error('安全出生点计算返回了错误的结果类型。');
@@ -388,7 +388,7 @@ export class HeadlessSession {
         overlays: prepared.overlays,
       },
       () => false,
-      this.platform.yieldTurn,
+      undefined,
       { now: this.platform.now },
     );
     if (result.kind !== 'mesh-result' || !('canonical' in result))

@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { isDeepStrictEqual } from 'node:util';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
 import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
 import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
@@ -13,7 +14,7 @@ import {
   projectGameplayViewReference,
   projectPlayerCorrectionReference,
 } from '../../../packages/game-core/src/server/protocol/network-reference-projection';
-import type { AuthorityAction } from '../../../packages/game-core/src/worker/authority-worker-protocol';
+import type { AuthorityAction } from '../../../packages/game-core/src/compute/authority-worker-protocol';
 
 const outputDir = '/tmp/seedlands-network-action-corpus-v1-source-bound';
 const sha256 = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex');
@@ -185,9 +186,10 @@ describe('真实 Host 动作请求与回执参考语料', () => {
       initialPlayerBodyPosition: [0.5, 33, 0.5] as [number, number, number],
     };
     const host = await DedicatedServerHost.create({
+      platform: testCorePlatform,
       ...config,
       now: () => now,
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       executors: { general: compute, fluid: compute, logic: compute },
     });
     const records: RecordedFrame[] = [];

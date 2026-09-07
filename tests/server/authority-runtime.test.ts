@@ -9,6 +9,30 @@ import type { ChunkPersistenceLoadDiagnostics } from '../../packages/game-core/s
 import { CanonicalChunkResidencyPressureError } from '../../packages/game-core/src/server/chunk-residency';
 
 describe('AuthorityRuntime', () => {
+  it('bootstrap 完成后重锚启动时钟，首次 wake 不补算加载耗时', async () => {
+    let nowMs = 100;
+    const persistence = Object.assign(new MemoryGamePersistence({ clone: testCorePlatform.clone }), {
+      loadGameCheckpoint: async () => {
+        nowMs = 5_100;
+        return null;
+      },
+    });
+    const runtime = await AuthorityRuntime.create({
+      platform: { ...testCorePlatform, now: () => nowMs },
+      epoch: 'world:bootstrap-clock',
+      seedText: 'authority-bootstrap-clock',
+      persistence,
+      initialWorldTime: 9,
+      startTimeMs: 0,
+      startClock: () => nowMs,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+    });
+
+    expect(runtime.ready().snapshot.physicsTick).toBe(0);
+    nowMs += 20;
+    expect(runtime.wake(nowMs).physicsTick).toBe(1);
+  });
+
   it('把单次有界持久化加载分项附在对应Mesh准备回执上', async () => {
     const persistence = Object.assign(new MemoryGamePersistence({ clone: testCorePlatform.clone }), {
       ensureNeighborhood: async (): Promise<ChunkPersistenceLoadDiagnostics> => ({

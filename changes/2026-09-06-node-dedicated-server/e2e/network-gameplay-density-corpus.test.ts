@@ -2,6 +2,7 @@ import { deepStrictEqual } from 'node:assert';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import { ALL_COMMAND_CAPABILITIES } from '../../../packages/game-core/src/server/commands/command-contract';
 import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
 import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
@@ -123,9 +124,10 @@ async function captureTarget(actorTarget: ActorTarget): Promise<void> {
   const priorHashes = await existingHashes(historicalCorpusPaths);
   let now = 0;
   const host = await DedicatedServerHost.create({
+    platform: testCorePlatform,
     epoch: `host:gameplay-density:${actorTarget}`,
     seedText: `network-gameplay-density-actors-${actorTarget}`,
-    persistence: new MemoryGamePersistence(),
+    persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
     executors: { general: executor(), fluid: executor(), logic: executor() },
     now: () => now,
   });

@@ -30,3 +30,11 @@
 - 三包类型检查和构建通过；Web production build 保留 Rust 指纹、预渲染和默认/TS 回退代码路径，Node 构建生成五个独立 ESM 入口。日志：`/tmp/seedlands-monorepo/m1-typecheck.log`、`m1-build-core.log`、`m1-build-web.log`、`m1-build-node.log`。
 - 包级测试按职责通过：core 90 个文件、595 项通过且 4 项既有 skip；Web 107 个文件、409 项通过；Node 21 个文件、124 项通过。引用浏览器 Wasm wrapper 的 world/server 等价测试归 Web，根级完整回归入口未缩减。日志：`/tmp/seedlands-monorepo/m1-core-test.log`、`m1-web-test.log`、`m1-node-test.log`。
 - 包边界及 world/runtime/Node 静态定向检查 4 个文件、22 项通过；ESLint 与路径 lint 通过。全仓 coverage、临时目录隔离安装、浏览器回归和真实 Node 产物恢复将在 M2 冻结验收，不以本检查点替代。
+
+## M2：审阅修复与隔离检查点
+
+- 独立审阅指出 M1 只有 manifest 正向断言，未普遍拒绝跨包文件路径和未声明依赖。新增 `seedlands/package-boundary` 规则：按 importer 的真实绝对路径解析 workspace 所有权，拒绝跨包相对/file 路径、core 反向依赖、Web/Node 互依、未声明 workspace/外部产品依赖和未导出的 core subpath。9 项 manifest/正反例通过，规则纳入根 ESLint。
+- 修复异步 restore/bootstrap 期间的 Authority 启动时钟漂移：独立可选 `startClock` 只在 Web 与 Dedicated 显式传入，bootstrap 完成后重锚；Headless 保持从 0 开始的虚拟时钟。延迟 restore 5 秒的测试先得到 `physicsTick=4` 的 RED，修复后首次增加 20ms 只推进 1 tick；日志 `/tmp/seedlands-monorepo/m2-bootstrap-clock-red.log`、`m2-bootstrap-clock-green.log`。同时恢复 Headless 纯计算 checkpoint 的微任务 yield，仅等待在途事务时保留平台宏任务 yield。
+- Active Node 的 20 个测试源码由 `tsconfig.active-node-tests.json` 全部类型检查；外部 `/tmp` 语料用例仍保持原 fail-closed 合同，不宣称本轮执行。4 个无需外部冻结语料的关键链路组成 `test:active-node:critical`，覆盖完整 Authority baseline 零生成回退、调度失效与资源结算、reference 消费和 worker input settlement，35/35 通过；日志 `/tmp/seedlands-monorepo/m2-active-node-typecheck.log`、`m2-active-node-critical.log`。
+- `verify:node-isolation` 在 `/tmp/seedlands-monorepo/node-isolation` 只复制 core、Node manifests/源码和基础配置，以 Node `v22.23.2` 重新安装、类型检查并生成五入口产物，再把 `dist` 单独复制后运行 CLI。隔离目录没有 Web 源码、没有复用根 `node_modules`，且未安装 PlayCanvas/Svelte/Tone；Vitest 的 Vite 传递依赖单独记为共享测试工具。日志 `/tmp/seedlands-monorepo/m2-node-isolation.log`，结构化报告 `/tmp/seedlands-monorepo/node-isolation-report.json`。
+- CI 已分别构建 core、Web、Node，上传路径改为 `apps/web/dist`，并加入 Node 隔离检查与 portable Active Node 关键链路。此检查点的全量类型、格式、ESLint/路径 lint 和 5 个定向文件 39 项通过；全仓 coverage、浏览器 regression 与 Node 产物恢复仍待本地冻结验收。

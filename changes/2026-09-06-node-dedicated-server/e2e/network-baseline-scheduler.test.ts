@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import { MeshTaskScheduler, type MeshWorkerPort } from '../../../apps/web/src/app/world/mesh-task-scheduler';
 import type { WorkerResult } from '../../../apps/web/src/app/app-contracts';
 import { PERFORMANCE_PROFILES } from '../../../apps/web/src/client/presentation/performance-profile';
@@ -6,7 +7,7 @@ import { PerformanceTelemetry } from '../../../apps/web/src/client/presentation/
 import {
   runWorldComputeTask,
   type GenerateMeshTaskPayload,
-} from '../../../packages/game-core/src/worker/world-compute-task';
+} from '../../../packages/game-core/src/compute/world-compute-task';
 
 class HeldMeshWorker implements MeshWorkerPort {
   onmessage: MeshWorkerPort['onmessage'] = null;
@@ -30,8 +31,11 @@ class HeldMeshWorker implements MeshWorkerPort {
   }
 
   async finish(index: number) {
+    const runMeshTask = (task: Parameters<typeof runWorldComputeTask>[0]) =>
+      runWorldComputeTask(task, () => false, undefined, { now: testCorePlatform.now });
+
     const task = this.tasks[index]!;
-    const result = await runWorldComputeTask(task);
+    const result = await runMeshTask(task);
     if (result.kind !== 'mesh-result') throw new Error('Expected actual mesh result.');
     if (!('canonical' in result) || !(result.canonical instanceof ArrayBuffer))
       throw new Error('Complete worker result must own an ArrayBuffer canonical.');

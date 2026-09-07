@@ -3,6 +3,11 @@ import globals from 'globals';
 import svelte from 'eslint-plugin-svelte';
 import tseslint from 'typescript-eslint';
 import { isBuiltin } from 'node:module';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createPackageBoundaryRule } from './scripts/eslint/package-boundary-rule.mjs';
+
+const workspaceRoot = dirname(fileURLToPath(import.meta.url));
 
 const worldForbiddenImports = (source) =>
   source === 'playcanvas' ||
@@ -117,6 +122,7 @@ const topLevelOwnerRule = (allowed) => ({
 
 const seedlands = {
   rules: {
+    'package-boundary': createPackageBoundaryRule(workspaceRoot),
     'node-platform-boundary': {
       meta: {
         type: 'problem',
@@ -376,9 +382,9 @@ export default tseslint.config(
     rules: { 'seedlands/server-purity': 'error' },
   },
   {
-    files: ['apps/*/src/**/*.ts', 'packages/*/src/**/*.ts'],
+    files: ['apps/*/src/**/*.{ts,svelte}', 'packages/*/src/**/*.ts'],
     plugins: { seedlands },
-    rules: { 'seedlands/node-platform-boundary': 'error' },
+    rules: { 'seedlands/node-platform-boundary': 'error', 'seedlands/package-boundary': 'error' },
   },
   {
     files: ['apps/node-server/src/node/**/*.ts'],

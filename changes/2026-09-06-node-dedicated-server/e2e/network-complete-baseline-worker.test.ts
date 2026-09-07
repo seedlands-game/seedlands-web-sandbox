@@ -1,4 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
+
+const runMeshTask = (task: Parameters<typeof runWorldComputeTask>[0]) =>
+  runWorldComputeTask(task, () => false, undefined, { now: testCorePlatform.now });
 
 const meshCalls = vi.hoisted(() => ({ makeChunk: 0, createProceduralMeshInput: 0 }));
 
@@ -24,11 +28,11 @@ import {
   type WorkerInput,
 } from '../../../apps/web/src/app/world/mesh-task-dispatch';
 import { CHUNK_SIZE, Voxel, chunkKey } from '../../../packages/game-core/src/world/voxel';
-import { validateAuthorityCompleteMeshInput } from '../../../packages/game-core/src/worker/authority-complete-mesh-input';
+import { validateAuthorityCompleteMeshInput } from '../../../packages/game-core/src/compute/authority-complete-mesh-input';
 import {
   runWorldComputeTask,
   type GenerateMeshTaskPayload,
-} from '../../../packages/game-core/src/worker/world-compute-task';
+} from '../../../packages/game-core/src/compute/world-compute-task';
 
 const canonicalBytes = CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT;
 const fluidBytes = CHUNK_SIZE ** 3;
@@ -106,7 +110,7 @@ describe('authority-complete worker mesh input', () => {
     expect(new Set(dispatch.transfers)).toHaveLength(54);
 
     resetMeshCalls();
-    const result = await runWorldComputeTask(dispatch.message as unknown as GenerateMeshTaskPayload);
+    const result = await runMeshTask(dispatch.message as unknown as GenerateMeshTaskPayload);
     expect(result).toMatchObject({
       kind: 'mesh-result',
       haloRevision: input.haloRevision,
@@ -188,7 +192,7 @@ describe('authority-complete worker mesh input', () => {
   ])('在%s时于生产入口拒绝而不调用生成或 halo 构建', async (_name, mutate) => {
     const task = mutateTask(taskFor(completeInput()), mutate);
     resetMeshCalls();
-    await expect(runWorldComputeTask(task)).rejects.toThrow();
+    await expect(runMeshTask(task)).rejects.toThrow();
     expect(meshCalls.makeChunk).toBe(0);
     expect(meshCalls.createProceduralMeshInput).toBe(0);
   });
@@ -204,7 +208,7 @@ describe('authority-complete worker mesh input', () => {
   });
 
   it('继续接受未声明策略的旧 local 输入', async () => {
-    const result = await runWorldComputeTask({
+    const result = await runMeshTask({
       kind: 'generate-mesh',
       traceId: 'legacy',
       epoch: 0,

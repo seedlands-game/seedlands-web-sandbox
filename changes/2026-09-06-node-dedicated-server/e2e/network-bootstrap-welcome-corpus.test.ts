@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { lstat, mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import type {
   DedicatedComputeExecutor,
   DedicatedComputeResult,
@@ -180,10 +181,11 @@ const writeCorpus = async (captures: readonly CapturedBootstrapWelcomeReference[
 describe('bootstrap Welcome v2 真实语料', () => {
   it('采集新建、同 epoch 当前 body 和持久化恢复三条独立来源记录', async () => {
     expect(process.version).toMatch(/^v22\./);
-    const persistence = new MemoryGamePersistence();
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     let now = 0;
     const compute = executor();
     const first = await DedicatedServerHost.create({
+      platform: testCorePlatform,
       epoch: 'epoch:bootstrap-welcome:first',
       ...hostConfig,
       persistence,
@@ -232,6 +234,7 @@ describe('bootstrap Welcome v2 真实语料', () => {
       const restoredCompute = executor();
       now = 0;
       const restored = await DedicatedServerHost.create({
+        platform: testCorePlatform,
         epoch: 'epoch:bootstrap-welcome:restored',
         ...hostConfig,
         persistence,

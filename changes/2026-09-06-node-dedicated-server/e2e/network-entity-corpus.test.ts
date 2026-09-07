@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
+import { testCorePlatform } from '../../../tests/support/core-platform';
 import { ALL_COMMAND_CAPABILITIES } from '../../../packages/game-core/src/server/commands/command-contract';
 import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
 import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
@@ -228,9 +229,10 @@ async function verifyWrittenCorpus() {
 describe('真实 Host 实体规模参考语料', () => {
   it('记录生态、受控命令扩容和保存恢复后的 pose 与 Gameplay', async () => {
     let now = 0;
-    const persistence = new MemoryGamePersistence();
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const seedText = 'network-entity-corpus-fixture';
     const first = await DedicatedServerHost.create({
+      platform: testCorePlatform,
       epoch: 'host:entity-corpus:initial',
       seedText,
       persistence,
@@ -266,6 +268,7 @@ describe('真实 Host 实体规模参考语料', () => {
       firstStopped = true;
 
       second = await DedicatedServerHost.create({
+        platform: testCorePlatform,
         epoch: 'host:entity-corpus:restored',
         seedText,
         persistence,
