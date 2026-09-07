@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "id": "routing-verification",
+  "initiatedBy": "agent",
+  "role": "独立验收与行为演练",
+  "workType": "validation",
+  "goal": "独立验收路由skill、批处理runtime和项目窗口，形成可追溯缺陷或通过结论",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/spec.md",
+      "purpose": "批准范围、规则和验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/verification"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/.system/skill-creator"
+    ],
+    "nonGoals": [
+      "不修改被验收源码",
+      "不连接线上服务",
+      "不启动benchmark或其他agent"
+    ]
+  },
+  "outputs": [
+    "verification/独立验收记录与隔离演练产物"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "independent",
+      "check": "按skill完成真实样本合同生成并验证；原生测试/反例/CLI/安装dry-run/窗口清理核对",
+      "evidence": "验证记录、日志和失败复现"
+    },
+    {
+      "id": "project",
+      "check": "受影响静态检查与构建，证据类型分开",
+      "evidence": "定向检查及构建日志"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 2,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/contracts/routing-root.json",
+    "sha256": "686d661f40e78b63c604055e80dcfa4a2b61ccf53e8bbcf02d8bc293b9040e8c"
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围/公开接口/授权变化",
+    "两次同因失败",
+    "预计超过预算"
+  ],
+  "reportFields": [
+    "完成状态",
+    "改动文件",
+    "验证结果",
+    "限制",
+    "下一步"
+  ]
+}

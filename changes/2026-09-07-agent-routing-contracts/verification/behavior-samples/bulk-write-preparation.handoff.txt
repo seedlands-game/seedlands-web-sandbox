@@ -1,0 +1,28 @@
+固定合同：/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/verification/behavior-samples/bulk-write-preparation-contract.json
+
+SHA-256：3e795767f907589a5e1ec3bfc9db919bf2c7423c130702416f62e234a19847c4
+
+角色：批处理写入准备
+
+目标：为一百条已整理行生成本地批处理准备、读回校验计划和审计边界；未给目标账号/adapter 前不执行外部写入。
+
+执行：script；null/null
+
+权限：localWrite=true，externalWrite=false，delegate=false
+
+写入范围：
+- /Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/verification/behavior-samples
+
+非目标：
+- 不连接线上表格
+- 不写入真实账号
+- 不记录行 payload 或凭据
+
+准出：
+- [prepare] 稳定 item id、幂等键、有限并发、write/read/verify 与对账边界完整（本地 fixture 和审计）
+
+升级条件：
+- 目标表/账号授权或 adapter 未提供
+- 写入结果不明需要人工对账
+
+先读取并执行完整合同。不得扩大范围或权限；完成后按 reportFields 回报。

@@ -1,0 +1,10 @@
+{
+  "applied": true,
+  "source": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/skill/agent-work-routing/",
+  "target": "/Users/chlorinec/.codex/skills/agent-work-routing",
+  "agentsPath": "/Users/chlorinec/.codex/AGENTS.md",
+  "backupDir": "/Users/chlorinec/.codex/backups/agent-work-routing/2026-09-07T17-16-45.172Z-93001e88",
+  "restoreCommand": "node \"/Users/chlorinec/.codex/skills/agent-work-routing/scripts/install-global.mjs\" --restore \"/Users/chlorinec/.codex/backups/agent-work-routing/2026-09-07T17-16-45.172Z-93001e88\"",
+  "filesVerified": 21,
+  "sourceMatchesInstalled": true
+}

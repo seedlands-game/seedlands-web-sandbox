@@ -12,6 +12,8 @@
 
 审核本身不自动授权超出合同的发布、其他外部写入、权限变更或删除。项目默认交接由本用户长期授权：验收后的 change 可将功能分支推送至已配置 `origin`，并以目标分支为 base 创建或更新 PR；用户指定 `local-only`、不发 PR 或其他范围时优先。不得自动合并或绕过分支保护。`Scope`、`Decisions`、`Behaviour`、`Test Design` 或 `Acceptance` 的实质变化会使原 hash 审核失效，必须重新审核。每次准出记录 docs baseline 是否更新：跨 change 的难重建规则更新 docs；只影响局部行为时写明不更新理由。
 
+大规模 change 在派发前必须给出双口径估算：传统 PD，以及分模型 agent 工时、按 24 小时连续执行的关键路径、credits/API 等价和当前额度占比。估算包含上下文、协调、验收与返工，20% buffer 只计一次；无法取得的数字写 `unknown`，credits、token、API 价格和订阅额度不得混作同一单位。只有用户明确要求时才创建 goal。格式可参考[本次估算](../changes/2026-09-07-agent-routing-contracts/estimates.md)，但费率与额度必须按当时状态核对。
+
 ## E2E 生命周期
 
 `tests/e2e/` 只放长期核心基线；`changes/<change>/e2e/` 和 `midscene/` 保存当次需求证据。`pnpm test:e2e`、`pnpm harness:e2e` 与 `pnpm harness` 只执行基线；当前需求由显式 change 路径运行。
@@ -25,6 +27,10 @@
 ## 证据边界
 
 Vitest 证明纯逻辑、数据、算法和确定性不变量；Playwright 证明真实浏览器的可观察行为和输入；Midscene 证明视觉/语义旅程；手工检查只补充不能稳定自动化的体验项。一个验收项可需要多种证据，不能以一种替代另一种；不适用时写 `N/A` 和理由。
+
+可程序化的 UI 行为优先 Playwright，视觉语义使用 Midscene；Midscene 在用户预算规划中可按近零增量成本估算，但真实运行仍可能依赖模型、密钥或服务，不能宣称免费。只有明确的单步诊断才直接使用 CDP/UI 调试，不把临时诊断代替可重复准出。
+
+性能证据由 `seedlands-performance-validator`（默认 `Terra/high`）按[性能执行窗口](performance-execution.md)协调。采样命令必须持有机器级阻塞窗口；普通功能测试、等待时的负载、并发采样和未关联的历史结果都不构成当前性能证据。
 
 `?harness=1` 只能通过生产 `World.edit()`、Store 或 streaming 路径构造确定状态，不替代真实 Pointer Lock 输入。`src/world/**` 的 V8 行覆盖率不低于 80%；静态、构建、浏览器、Harness 和手工游玩要在 spec 中分别陈述真实结果。
 

@@ -4,6 +4,7 @@ import type { StreamingVariant } from '../app-contracts';
 import * as pc from 'playcanvas';
 import type { LightingQualityBudget } from './advanced-lighting-budget';
 import { sunShadowOptions } from './sun-shadow-policy';
+import type { ExperimentalRenderer } from '../../client/experimental-client-options';
 
 class DesktopApplication extends pc.Application {
   override init(options: pc.AppOptions) {
@@ -13,16 +14,55 @@ class DesktopApplication extends pc.Application {
   }
 }
 
-export function createSceneApplication(canvas: HTMLCanvasElement) {
-  const app = new DesktopApplication(canvas, {
-    mouse: new pc.Mouse(canvas),
-    keyboard: new pc.Keyboard(window),
-    graphicsDeviceOptions: { alpha: true },
+export type SceneApplicationResult = Readonly<{
+  application: pc.Application;
+  requestedRenderer: ExperimentalRenderer;
+  effectiveRenderer: ExperimentalRenderer;
+  rendererStatus: 'matched' | 'fallback';
+}>;
+
+export async function createGraphicsDeviceForRenderer(
+  canvas: HTMLCanvasElement,
+  renderer: ExperimentalRenderer,
+  create: typeof pc.createGraphicsDevice = pc.createGraphicsDevice,
+): Promise<pc.GraphicsDevice> {
+  const device = await create(canvas, {
+    deviceTypes: renderer === 'webgpu' ? [pc.DEVICETYPE_WEBGPU, pc.DEVICETYPE_WEBGL2] : [pc.DEVICETYPE_WEBGL2],
   });
-  app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
-  app.setCanvasResolution(pc.RESOLUTION_AUTO);
-  app.start();
-  return app;
+  if (device.deviceType !== pc.DEVICETYPE_WEBGL2 && device.deviceType !== pc.DEVICETYPE_WEBGPU) {
+    device.destroy?.();
+    throw new Error(`No playable graphics device is available (${String(device.deviceType)}).`);
+  }
+  return device as pc.GraphicsDevice;
+}
+
+export async function createSceneApplication(
+  canvas: HTMLCanvasElement,
+  requestedRenderer: ExperimentalRenderer = 'webgl2',
+): Promise<SceneApplicationResult> {
+  const graphicsDevice = await createGraphicsDeviceForRenderer(canvas, requestedRenderer);
+  let app: pc.Application | null = null;
+  try {
+    app = new DesktopApplication(canvas, {
+      mouse: new pc.Mouse(canvas),
+      keyboard: new pc.Keyboard(window),
+      graphicsDevice,
+    });
+    app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
+    app.setCanvasResolution(pc.RESOLUTION_AUTO);
+    app.start();
+    const effectiveRenderer = app.graphicsDevice.deviceType as ExperimentalRenderer;
+    return {
+      application: app,
+      requestedRenderer,
+      effectiveRenderer,
+      rendererStatus: requestedRenderer === effectiveRenderer ? 'matched' : 'fallback',
+    };
+  } catch (error) {
+    if (app) app.destroy();
+    else graphicsDevice.destroy();
+    throw error;
+  }
 }
 
 export function createSun(app: pc.Application, budget: LightingQualityBudget) {

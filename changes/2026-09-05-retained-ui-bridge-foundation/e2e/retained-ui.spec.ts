@@ -123,14 +123,14 @@ test('preserves Hotbar, Macro Map and Debug Shell behavior through retained acti
   expect(await page.evaluate(() => document.pointerLockElement)).toBeNull();
 });
 
-test('keeps the static fallback when application JavaScript is unavailable', async ({ page }) => {
+test('keeps the prerendered Svelte start screen when application JavaScript is unavailable', async ({ page }) => {
   await page.route('**/src/app/main.ts*', (route) => route.abort());
   await page.goto('./', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('[data-ui-fallback]')).toBeVisible();
+  await expect(page.locator('[data-ui-prerendered="svelte5"]')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Seedlands' })).toBeVisible();
   await expect(page.getByLabel('世界 Seed')).toBeVisible();
   await expect(page.getByLabel('视觉质量')).toBeVisible();
-  await expect(page.getByRole('button', { name: '进入世界' })).toBeVisible();
+  await expect(page.locator('#enter')).toBeVisible();
 });
 
 test('keeps the command surface usable on a narrow reduced-motion viewport', async ({ page }) => {

@@ -40,13 +40,32 @@ const createRepository = (
     isCurrent,
     profile: { maxMeshCommitsPerFrame: 2, maxMeshPartsPerFrame: 8, maxCommitMs: 10 },
     now: () => 0,
-    summarize: () => ({ triangles: 0, drawCalls: 0, meshBytes: 0 }),
+    summarize: () => ({ triangles: 1, drawCalls: 1, meshBytes: 1 }),
     onVisible,
     onTransitionVisible,
     onDiscard: vi.fn(),
   });
 
 describe('ChunkResourceRepository', () => {
+  it('首个区块 postrender 可见后才解除世界进入 gate', async () => {
+    const adapter = createAdapter();
+    const repository = createRepository(adapter);
+    const resource = repository.enqueue(task(1), ['mesh']);
+    let ready = false;
+    void repository.waitForFirstVisible().then(() => {
+      ready = true;
+    });
+
+    repository.beginFrame();
+    repository.drain();
+    await Promise.resolve();
+    expect(ready).toBe(false);
+
+    resource.postrender?.();
+    await repository.waitForFirstVisible();
+    expect(ready).toBe(true);
+  });
+
   it('最后一个part提交后在同帧剩余提交预算内立即attach', () => {
     const adapter = createAdapter();
     const repository = new ChunkResourceRepository({

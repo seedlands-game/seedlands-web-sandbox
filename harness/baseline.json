@@ -1,28 +1,4 @@
 {
-  "schemaVersion": 1,
-  "createdAt": "2026-09-04T07:18:04.182Z",
-  "environment": {
-    "node": "v24.20.0",
-    "platform": "darwin",
-    "arch": "arm64"
-  },
-  "metrics": {
-    "macroQueryP95Ms": 0.03454099999999016,
-    "macroQueryThroughputPerSecond": 71586.64528761382,
-    "worldgenP95Ms": 65.16233399999999,
-    "worldgenThroughputChunksPerSecond": 16.30465984765356,
-    "meshingP95Ms": 26.699208,
-    "meshingThroughputChunksPerSecond": 46.712865503798525,
-    "meshVertices": 8672,
-    "meshTriangles": 4336,
-    "voxelDataBytes": 2293760,
-    "meshDataBytes": 364224,
-    "jsHeapAfterWork": 16238176,
-    "save10000Bytes": 182912,
-    "totalBuildBytes": 4691682,
-    "jsBundleBytes": 2476700,
-    "gzipJsBundleBytes": 661523
-  },
   "bundleBaseline": {
     "updatedAt": "2026-09-05T00:26:52.251Z",
     "sourceSha": "0ceb4767d78bf03bf3924969598a21d412095175",
@@ -31,6 +7,327 @@
       "totalBuildBytes": 2040968,
       "jsBundleBytes": 1964861,
       "gzipJsBundleBytes": 509790
+    }
+  },
+  "schemaVersion": 2,
+  "createdAt": "2026-09-07T07:02:10.430Z",
+  "sourceSha": "044d2920a8db3038b18e77c4e952bc2876f0172f",
+  "environment": {
+    "node": "v24.20.0",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "metrics": {
+    "macroQueryP95Ms": 0.058457999999973254,
+    "macroQueryThroughputPerSecond": 70143.57787594962,
+    "worldgenP95Ms": 65.06762500000002,
+    "worldgenThroughputChunksPerSecond": 16.68359655282746,
+    "meshingP95Ms": 28.7824999999998,
+    "meshingThroughputChunksPerSecond": 47.83270028189482,
+    "meshVertices": 20172,
+    "meshTriangles": 10086,
+    "voxelDataBytes": 2293760,
+    "meshDataBytes": 847224,
+    "jsHeapAfterWork": 26768552,
+    "save10000Bytes": 182912,
+    "totalBuildBytes": 10459396,
+    "jsBundleBytes": 2891347,
+    "gzipJsBundleBytes": 791096
+  },
+  "browserProfiles": {
+    "typescriptFallback": {
+      "status": "PASS",
+      "requested": {
+        "renderer": "webgl2",
+        "wasm": false,
+        "simd": false
+      },
+      "metrics": {
+        "initialWorldReadyMedianMs": 1139.726749999987,
+        "frameP95MedianMs": 17.299999952316284,
+        "frameP99MedianMs": 17.600000023841858,
+        "nonIdleTaskDurationMedianMs": 5217.94,
+        "editP95MedianMs": 39.64049999999406,
+        "editP99MedianMs": 39.64049999999406
+      },
+      "samples": [
+        {
+          "initialWorldReadyMs": 1613.9229590000002,
+          "frameP95Ms": 17.399999976158142,
+          "frameP99Ms": 17.600000023841858,
+          "nonIdleTaskDurationMs": 3725.9809999999998,
+          "editP95Ms": 39.64049999999406,
+          "editP99Ms": 39.64049999999406,
+          "experiments": {
+            "requested": {
+              "renderer": "webgl2",
+              "wasm": false,
+              "simd": false
+            },
+            "kernels": [],
+            "renderer": {
+              "requestedRenderer": "webgl2",
+              "effectiveRenderer": "webgl2",
+              "rendererStatus": "matched"
+            },
+            "workers": [
+              {
+                "epoch": "seedlands:seedlands-typescriptFallback-0:1",
+                "lane": "fluid",
+                "index": 0,
+                "status": "off",
+                "requestedArtifact": "off",
+                "effectiveArtifact": "off",
+                "selected": []
+              },
+              {
+                "epoch": "seedlands:seedlands-typescriptFallback-0:1",
+                "lane": "general",
+                "index": 1,
+                "status": "off",
+                "requestedArtifact": "off",
+                "effectiveArtifact": "off",
+                "selected": []
+              }
+            ]
+          },
+          "hardwareConcurrency": 12
+        },
+        {
+          "initialWorldReadyMs": 1110.5103329999984,
+          "frameP95Ms": 17.299999952316284,
+          "frameP99Ms": 17.699999928474426,
+          "nonIdleTaskDurationMs": 5217.94,
+          "editP95Ms": 37.57325000000128,
+          "editP99Ms": 37.57325000000128,
+          "experiments": {
+            "requested": {
+              "renderer": "webgl2",
+              "wasm": false,
+              "simd": false
+            },
+            "kernels": [],
+            "renderer": {
+              "requestedRenderer": "webgl2",
+              "effectiveRenderer": "webgl2",
+              "rendererStatus": "matched"
+            },
+            "workers": [
+              {
+                "epoch": "seedlands:seedlands-typescriptFallback-1:1",
+                "lane": "fluid",
+                "index": 0,
+                "status": "off",
+                "requestedArtifact": "off",
+                "effectiveArtifact": "off",
+                "selected": []
+              },
+              {
+                "epoch": "seedlands:seedlands-typescriptFallback-1:1",
+                "lane": "general",
+                "index": 1,
+                "status": "off",
+                "requestedArtifact": "off",
+                "effectiveArtifact": "off",
+                "selected": []
+              }
+            ]
+          },
+          "hardwareConcurrency": 12
+        },
+        {
+          "initialWorldReadyMs": 1139.726749999987,
+          "frameP95Ms": 17.199999928474426,
+          "frameP99Ms": 17.300000071525574,
+          "nonIdleTaskDurationMs": 5233.273999999999,
+          "editP95Ms": 44.2826250000071,
+          "editP99Ms": 44.2826250000071,
+          "experiments": {
+            "requested": {
+              "renderer": "webgl2",
+              "wasm": false,
+              "simd": false
+            },
+            "kernels": [],
+            "renderer": {
+              "requestedRenderer": "webgl2",
+              "effectiveRenderer": "webgl2",
+              "rendererStatus": "matched"
+            },
+            "workers": [
+              {
+                "epoch": "seedlands:seedlands-typescriptFallback-2:1",
+                "lane": "fluid",
+                "index": 0,
+                "status": "off",
+                "requestedArtifact": "off",
+                "effectiveArtifact": "off",
+                "selected": []
+              },
+              {
+                "epoch": "seedlands:seedlands-typescriptFallback-2:1",
+                "lane": "general",
+                "index": 1,
+                "status": "off",
+                "requestedArtifact": "off",
+                "effectiveArtifact": "off",
+                "selected": []
+              }
+            ]
+          },
+          "hardwareConcurrency": 12
+        }
+      ]
+    },
+    "defaultOptimized": {
+      "status": "PASS",
+      "requested": {
+        "renderer": "webgl2",
+        "wasm": true,
+        "simd": true
+      },
+      "metrics": {
+        "initialWorldReadyMedianMs": 1181.3612079999875,
+        "frameP95MedianMs": 17.40000009536743,
+        "frameP99MedianMs": 17.699999928474426,
+        "nonIdleTaskDurationMedianMs": 5244.7,
+        "editP95MedianMs": 38.49129199999152,
+        "editP99MedianMs": 38.49129199999152
+      },
+      "samples": [
+        {
+          "initialWorldReadyMs": 1428.1165000000037,
+          "frameP95Ms": 17.09999990463257,
+          "frameP99Ms": 17.299999952316284,
+          "nonIdleTaskDurationMs": 5244.7,
+          "editP95Ms": 38.49129199999152,
+          "editP99Ms": 38.49129199999152,
+          "experiments": {
+            "requested": {
+              "renderer": "webgl2",
+              "wasm": true,
+              "simd": true
+            },
+            "kernels": ["w02", "w03", "w04", "w05", "w06"],
+            "renderer": {
+              "requestedRenderer": "webgl2",
+              "effectiveRenderer": "webgl2",
+              "rendererStatus": "matched"
+            },
+            "workers": [
+              {
+                "epoch": "seedlands:seedlands-defaultOptimized-0:1",
+                "lane": "fluid",
+                "index": 0,
+                "status": "off",
+                "requestedArtifact": "simd",
+                "effectiveArtifact": "off",
+                "selected": [],
+                "reason": "no-selected-kernel"
+              },
+              {
+                "epoch": "seedlands:seedlands-defaultOptimized-0:1",
+                "lane": "general",
+                "index": 1,
+                "status": "matched",
+                "requestedArtifact": "simd",
+                "effectiveArtifact": "simd",
+                "selected": ["w02", "w03", "w04", "w05", "w06"],
+                "artifactSha256": "320402dd0e3b8df902a106ef1a584f56236bad6ad3075628e42bce8b341b14d4"
+              }
+            ]
+          },
+          "hardwareConcurrency": 12
+        },
+        {
+          "initialWorldReadyMs": 1120.420708000005,
+          "frameP95Ms": 17.40000009536743,
+          "frameP99Ms": 17.699999928474426,
+          "nonIdleTaskDurationMs": 4957.613,
+          "editP95Ms": 35.22187500001746,
+          "editP99Ms": 35.22187500001746,
+          "experiments": {
+            "requested": {
+              "renderer": "webgl2",
+              "wasm": true,
+              "simd": true
+            },
+            "kernels": ["w02", "w03", "w04", "w05", "w06"],
+            "renderer": {
+              "requestedRenderer": "webgl2",
+              "effectiveRenderer": "webgl2",
+              "rendererStatus": "matched"
+            },
+            "workers": [
+              {
+                "epoch": "seedlands:seedlands-defaultOptimized-1:1",
+                "lane": "fluid",
+                "index": 0,
+                "status": "off",
+                "requestedArtifact": "simd",
+                "effectiveArtifact": "off",
+                "selected": [],
+                "reason": "no-selected-kernel"
+              },
+              {
+                "epoch": "seedlands:seedlands-defaultOptimized-1:1",
+                "lane": "general",
+                "index": 1,
+                "status": "matched",
+                "requestedArtifact": "simd",
+                "effectiveArtifact": "simd",
+                "selected": ["w02", "w03", "w04", "w05", "w06"],
+                "artifactSha256": "320402dd0e3b8df902a106ef1a584f56236bad6ad3075628e42bce8b341b14d4"
+              }
+            ]
+          },
+          "hardwareConcurrency": 12
+        },
+        {
+          "initialWorldReadyMs": 1181.3612079999875,
+          "frameP95Ms": 17.5,
+          "frameP99Ms": 17.800000071525574,
+          "nonIdleTaskDurationMs": 5707.150000000001,
+          "editP95Ms": 49.04716699998244,
+          "editP99Ms": 49.04716699998244,
+          "experiments": {
+            "requested": {
+              "renderer": "webgl2",
+              "wasm": true,
+              "simd": true
+            },
+            "kernels": ["w02", "w03", "w04", "w05", "w06"],
+            "renderer": {
+              "requestedRenderer": "webgl2",
+              "effectiveRenderer": "webgl2",
+              "rendererStatus": "matched"
+            },
+            "workers": [
+              {
+                "epoch": "seedlands:seedlands-defaultOptimized-2:1",
+                "lane": "fluid",
+                "index": 0,
+                "status": "off",
+                "requestedArtifact": "simd",
+                "effectiveArtifact": "off",
+                "selected": [],
+                "reason": "no-selected-kernel"
+              },
+              {
+                "epoch": "seedlands:seedlands-defaultOptimized-2:1",
+                "lane": "general",
+                "index": 1,
+                "status": "matched",
+                "requestedArtifact": "simd",
+                "effectiveArtifact": "simd",
+                "selected": ["w02", "w03", "w04", "w05", "w06"],
+                "artifactSha256": "320402dd0e3b8df902a106ef1a584f56236bad6ad3075628e42bce8b341b14d4"
+              }
+            ]
+          },
+          "hardwareConcurrency": 12
+        }
+      ]
     }
   }
 }

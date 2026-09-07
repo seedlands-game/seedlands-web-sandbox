@@ -1,0 +1,31 @@
+{
+  "htmlBytes": 2914,
+  "firstPaintCssBytes": 3695,
+  "entryFile": "assets/index-DhhpL9Pt.js",
+  "entryBytes": 1580,
+  "entryGzipBytes": 886,
+  "initialImports": ["_preload-helper-BXl3LOEh.js"],
+  "asyncImports": ["_bootstrap-9FPpfFuO.js"],
+  "vendorChunks": [
+    {
+      "name": "vendor-common",
+      "file": "assets/vendor-common-D_znAYOB.js",
+      "bytes": 103564
+    },
+    {
+      "name": "vendor-playcanvas",
+      "file": "assets/vendor-playcanvas-BNHOt3Ry.js",
+      "bytes": 1999275
+    },
+    {
+      "name": "vendor-svelte",
+      "file": "assets/vendor-svelte-BwcfQVPv.js",
+      "bytes": 42335
+    },
+    {
+      "name": "vendor-tone",
+      "file": "assets/vendor-tone-9Dr1Se1e.js",
+      "bytes": 131702
+    }
+  ]
+}

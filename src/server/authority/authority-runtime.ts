@@ -115,7 +115,8 @@ export class AuthorityRuntime {
       },
       getEntity: (id: string) => server.getEntity(id),
       queryEntities: () => server.queryEntities(),
-      updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) => server.updateEntity(id, update),
+      updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) =>
+        server.updateEntityWithoutSnapshot(id, update),
       advanceGameplayRules: (seconds: number) => {
         const result = server.advanceGameplayRules(seconds);
         result.commits.forEach((commit) => this.recordWorldCommit(commit));

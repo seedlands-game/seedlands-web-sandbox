@@ -106,6 +106,67 @@
   margin: 10px 0;
   font-size: 12px;
 }
+.experimental-settings {
+  display: grid;
+  gap: 0;
+}
+.experimental-settings > p {
+  margin: 0 0 12px;
+}
+.experimental-renderer {
+  display: grid;
+  gap: 7px;
+  padding-bottom: 14px;
+}
+.experimental-renderer select {
+  width: 100%;
+}
+.experimental-toggle-list {
+  border-top: 1px solid var(--ui-border-quiet);
+}
+.experimental-settings .experimental-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--ui-border-quiet);
+  cursor: pointer;
+}
+.experimental-toggle-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+.experimental-toggle-copy strong {
+  color: var(--ui-color-content);
+  font-size: 13px;
+  font-weight: 600;
+}
+.experimental-toggle-copy small {
+  color: var(--ui-color-content-muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+#ui .experimental-toggle input[type='checkbox'] {
+  display: block;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--ui-color-brass-light);
+  cursor: pointer;
+}
+.experimental-toggle.disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+.experimental-toggle.disabled input {
+  cursor: not-allowed;
+}
 .reference-name {
   overflow-wrap: anywhere;
 }
@@ -123,32 +184,6 @@
   margin: 0;
   color: #d9d3c6;
 }
-.menu-secondary {
-  display: flex;
-  gap: 10px;
-  margin: 12px 0 10px;
-}
-.menu-secondary button {
-  flex: 1;
-}
-#start-card {
-  max-height: calc(100dvh - 32px);
-  overflow-y: auto;
-}
-#start-card .continue-world {
-  display: grid;
-  width: 100%;
-  gap: 3px;
-  margin: 8px 0 14px;
-  border-color: #d4b071;
-  background: #4b3d29;
-}
-#start-card .continue-world small {
-  font-size: 10px;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 @media (max-width: 720px) {
   .shell-scrim {
     padding: 12px;
@@ -163,8 +198,5 @@
   }
   .control-guide dd {
     margin-bottom: 10px;
-  }
-  #start-card {
-    padding: 26px;
   }
 }

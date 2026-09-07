@@ -4,8 +4,7 @@ import type { AuthoritySnapshot } from './authority-session';
 import type { GameplayEntity } from '../gameplay/entity-store';
 import type { ActorState, SimulationSnapshot } from '../simulation/actor-state';
 import { getItemDefinition } from '../gameplay/item-registry';
-import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
-import { collisionBoxesForVoxel } from '../../world/voxel-model';
+import { CHUNK_SIZE, chunkKey, floorDiv, isSolid } from '../../world/voxel';
 
 type LoadedVoxel = Readonly<{ voxel: number; chunkKey: string; revision: number }>;
 
@@ -87,9 +86,7 @@ const createTerrainWindow = (
         const localX = x - bounds.minX;
         const localY = y - bounds.minY;
         const localZ = z - bounds.minZ;
-        occupancy[localX + size[0] * (localZ + size[2] * localY)] = Number(
-          collisionBoxesForVoxel(loaded.voxel).length > 0,
-        );
+        occupancy[localX + size[0] * (localZ + size[2] * localY)] = Number(isSolid(loaded.voxel));
       }
   return {
     key,

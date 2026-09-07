@@ -6,6 +6,7 @@ import {
 } from '../../runtime/compute-task-queue';
 import { PROTOCOL_VERSION, type SessionEpoch } from '../../runtime/session-protocol';
 import { BoundedCostSamples, type CostSampleWindow } from '../../runtime/bounded-cost-samples';
+import type { KernelName, WasmArtifactPreference } from '../../compute/wasm-kernel-contract';
 
 export type ComputeWorkerPort = {
   onmessage: ((event: MessageEvent<unknown>) => void) | null;
@@ -28,12 +29,33 @@ export type ComputeWorkerResult = Readonly<{
 export type BrowserComputeLane = Exclude<ComputeLane, 'logic'>;
 type BrowserComputeTask = ComputeTask & Readonly<{ lane: BrowserComputeLane }>;
 
+export type ComputeWorkerReady = Readonly<{
+  kind: 'compute-worker-ready';
+  protocolVersion: typeof PROTOCOL_VERSION;
+  status: 'off' | 'matched' | 'scalar-fallback' | 'typescript-fallback';
+  requestedArtifact: WasmArtifactPreference;
+  effectiveArtifact: 'simd' | 'scalar' | 'typescript' | 'off';
+  selected: readonly KernelName[];
+  reason?: string;
+  artifactSha256?: string;
+}>;
+
+export type ComputeWorkerKernelDiagnostics = Omit<ComputeWorkerReady, 'kind' | 'protocolVersion'> &
+  Readonly<{
+    epoch: SessionEpoch;
+    lane: BrowserComputeLane;
+    index: number;
+  }>;
+
 type WorkerSlot = {
   lane: BrowserComputeLane;
   index: number;
   worker: ComputeWorkerPort | null;
   task: BrowserComputeTask | null;
   restartAttempts: number;
+  ready: boolean;
+  readyTimer: number | null;
+  kernelState: ComputeWorkerKernelDiagnostics | null;
 };
 
 type PendingTransfer = { transfer: Transferable[] };
@@ -52,6 +74,8 @@ type ComputeWorkerPoolOptions = Readonly<{
   restartDelayMs?: number;
   setTimer?: (callback: () => void, delayMs: number) => number;
   clearTimer?: (handle: number) => void;
+  requireReadyHandshake?: boolean;
+  readyTimeoutMs?: number;
 }>;
 
 export type ComputePoolDiagnostics = Readonly<{
@@ -70,6 +94,7 @@ export type ComputePoolDiagnostics = Readonly<{
   maxQueued: number;
   maxQueuedBytes: number;
   workerTaskDuration: Readonly<Record<BrowserComputeLane, CostSampleWindow>>;
+  workerKernelStates: readonly ComputeWorkerKernelDiagnostics[];
 }>;
 
 const isBrowserComputeTask = (task: ComputeTask): task is BrowserComputeTask => task.lane !== 'logic';
@@ -85,6 +110,19 @@ function isWorkerResult(value: unknown): value is ComputeWorkerResult {
     typeof candidate.ok === 'boolean' &&
     (candidate.workerDurationMs === undefined ||
       (Number.isFinite(candidate.workerDurationMs) && candidate.workerDurationMs >= 0))
+  );
+}
+
+function isWorkerReady(value: unknown): value is ComputeWorkerReady {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<ComputeWorkerReady>;
+  return (
+    candidate.kind === 'compute-worker-ready' &&
+    candidate.protocolVersion === PROTOCOL_VERSION &&
+    ['off', 'matched', 'scalar-fallback', 'typescript-fallback'].includes(candidate.status ?? '') &&
+    ['simd', 'scalar', 'off'].includes(candidate.requestedArtifact ?? '') &&
+    ['simd', 'scalar', 'typescript', 'off'].includes(candidate.effectiveArtifact ?? '') &&
+    Array.isArray(candidate.selected)
   );
 }
 
@@ -120,7 +158,8 @@ export class ComputeWorkerPool {
 
   enqueue(task: ComputeTask, transfer: readonly Transferable[] = []): ComputeQueueResult {
     if (!isBrowserComputeTask(task)) return { status: 'rejected', reason: 'invalid-task' };
-    if (this.disposed || this.transitioning) return { status: 'rejected', reason: 'invalid-task' };
+    if (this.disposed || this.transitioning || !this.canServiceLane(task.lane))
+      return { status: 'rejected', reason: 'invalid-task' };
     const result = this.queue.enqueue(task);
     if (result.status === 'queued' || result.status === 'merged') {
       this.submittedTasks += 1;
@@ -202,6 +241,7 @@ export class ComputeWorkerPool {
         fluid: this.workerTaskDuration.fluid.snapshot(),
         general: this.workerTaskDuration.general.snapshot(),
       },
+      workerKernelStates: this.slots.flatMap((slot) => (slot.kernelState ? [slot.kernelState] : [])),
     };
   }
 
@@ -223,7 +263,16 @@ export class ComputeWorkerPool {
   private createSlots(): void {
     const lanes: BrowserComputeLane[] = ['fluid'];
     for (let index = 0; index < this.options.generalWorkerCount; index += 1) lanes.push('general');
-    this.slots = lanes.map((lane, index) => ({ lane, index, worker: null, task: null, restartAttempts: 0 }));
+    this.slots = lanes.map((lane, index) => ({
+      lane,
+      index,
+      worker: null,
+      task: null,
+      restartAttempts: 0,
+      ready: !this.options.requireReadyHandshake,
+      readyTimer: null,
+      kernelState: null,
+    }));
     try {
       this.slots.forEach((slot) => this.attachWorker(slot));
     } catch (error) {
@@ -237,6 +286,7 @@ export class ComputeWorkerPool {
     this.slots = [];
     const dropped = slots.flatMap((slot) => (slot.task ? [slot.task.taskId] : []));
     for (const slot of slots) {
+      this.clearReadyTimer(slot);
       const worker = slot.worker;
       slot.worker = null;
       slot.task = null;
@@ -251,7 +301,7 @@ export class ComputeWorkerPool {
   private pump(): void {
     if (this.disposed) return;
     for (const slot of this.slots) {
-      if (slot.task || !slot.worker) continue;
+      if (slot.task || !slot.worker || !slot.ready) continue;
       const task = this.queue.take(slot.lane) as BrowserComputeTask | null;
       if (!task) continue;
       slot.task = task;
@@ -266,6 +316,23 @@ export class ComputeWorkerPool {
   }
 
   private receive(slot: WorkerSlot, value: unknown): void {
+    if (this.options.requireReadyHandshake && isWorkerReady(value)) {
+      slot.ready = true;
+      slot.kernelState = {
+        epoch: this.epoch,
+        lane: slot.lane,
+        index: slot.index,
+        status: value.status,
+        requestedArtifact: value.requestedArtifact,
+        effectiveArtifact: value.effectiveArtifact,
+        selected: value.selected,
+        ...(value.reason ? { reason: value.reason } : {}),
+        ...(value.artifactSha256 ? { artifactSha256: value.artifactSha256 } : {}),
+      };
+      this.clearReadyTimer(slot);
+      this.pump();
+      return;
+    }
     const task = slot.task;
     if (
       !task ||
@@ -318,11 +385,28 @@ export class ComputeWorkerPool {
   private attachWorker(slot: WorkerSlot): void {
     const worker = this.options.createWorker(slot.lane, slot.index);
     slot.worker = worker;
-    worker.onmessage = (event) => this.receive(slot, event.data);
-    worker.onerror = (event) => this.fail(slot, new Error(event.message || `${slot.lane} compute worker failed.`));
+    slot.ready = !this.options.requireReadyHandshake;
+    slot.kernelState = null;
+    worker.onmessage = (event) => {
+      if (slot.worker === worker) this.receive(slot, event.data);
+    };
+    worker.onerror = (event) => {
+      if (slot.worker === worker) this.fail(slot, new Error(event.message || `${slot.lane} compute worker failed.`));
+    };
+    if (this.options.requireReadyHandshake) {
+      const setTimer =
+        this.options.setTimer ??
+        ((callback: () => void, delayMs: number) => globalThis.setTimeout(callback, delayMs) as unknown as number);
+      slot.readyTimer = setTimer(() => {
+        slot.readyTimer = null;
+        if (!this.disposed && slot.worker === worker && !slot.ready)
+          this.recoverSlot(slot, new Error(`${slot.lane} compute worker ready timeout.`));
+      }, this.options.readyTimeoutMs ?? 10_000);
+    }
   }
 
   private recoverSlot(slot: WorkerSlot, error: Error): void {
+    this.clearReadyTimer(slot);
     const task = slot.task;
     slot.task = null;
     const worker = slot.worker;
@@ -332,16 +416,34 @@ export class ComputeWorkerPool {
       worker.onerror = null;
       worker.terminate();
     }
+    slot.ready = false;
+    slot.kernelState = null;
     if (task) this.failTask(task, error);
     if (this.disposed || !this.slots.includes(slot)) return;
     slot.restartAttempts += 1;
     if (slot.restartAttempts > (this.options.maxWorkerRestarts ?? 3)) {
       this.options.onPoolFailure?.(slot.lane, error);
+      if (!this.canServiceLane(slot.lane)) this.failQueuedLane(slot.lane, error);
       this.pump();
       return;
     }
     this.scheduleRestart(slot);
     this.pump();
+  }
+
+  private canServiceLane(lane: BrowserComputeLane): boolean {
+    const maxRestarts = this.options.maxWorkerRestarts ?? 3;
+    return this.slots.some(
+      (slot) => slot.lane === lane && (slot.worker !== null || slot.restartAttempts <= maxRestarts),
+    );
+  }
+
+  private failQueuedLane(lane: ComputeLane, error: Error): void {
+    for (const task of this.queue.failLane(lane)) {
+      this.transfers.delete(task.taskId);
+      this.failedTasks += 1;
+      this.options.onFailure?.(task, error);
+    }
   }
 
   private scheduleRestart(slot: WorkerSlot): void {
@@ -371,5 +473,14 @@ export class ComputeWorkerPool {
       ((handle: number) => globalThis.clearTimeout(handle as unknown as ReturnType<typeof setTimeout>));
     this.restartTimers.forEach(clearTimer);
     this.restartTimers.clear();
+  }
+
+  private clearReadyTimer(slot: WorkerSlot): void {
+    if (slot.readyTimer === null) return;
+    const clearTimer =
+      this.options.clearTimer ??
+      ((handle: number) => globalThis.clearTimeout(handle as unknown as ReturnType<typeof setTimeout>));
+    clearTimer(slot.readyTimer);
+    slot.readyTimer = null;
   }
 }

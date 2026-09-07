@@ -1,0 +1,30 @@
+{
+  "ownerThread": "01a076cb-d2b7-7d63-8446-f42332d6c5a8",
+  "runId": "adoption-ablation-red",
+  "pid": 31801,
+  "startedAt": "2026-09-06T19:16:37.497Z",
+  "endedAt": "2026-09-06T19:16:38.281Z",
+  "exitCode": 1,
+  "samples": [
+    {
+      "at": "2026-09-06T19:16:37.498Z",
+      "loadAverage": [
+        2.73828125,
+        3.44091796875,
+        3.30615234375
+      ],
+      "freeMemoryBytes": 1308278784,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-06T19:16:38.281Z",
+      "loadAverage": [
+        2.73828125,
+        3.44091796875,
+        3.30615234375
+      ],
+      "freeMemoryBytes": 1313587200,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

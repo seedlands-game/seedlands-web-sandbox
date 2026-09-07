@@ -22,7 +22,7 @@ import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
 import type { MapLayer } from './ui/ui-contracts';
 import { createVoxelMaterials, type VoxelMaterials } from './scene/voxel-materials';
 import { WorldEnvironment } from './scene/world-environment';
-import { World } from './world/world-runtime';
+import { World, waitForInitialWorldReady } from './world/world-runtime';
 import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
 import { LIGHTING_QUALITY_BUDGETS } from './scene/advanced-lighting-budget';
 import { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
@@ -35,6 +35,12 @@ import { GameUiProjection } from './game-ui-projection';
 import { CollisionDebugRuntime } from './player/collision-debug-runtime';
 import * as runtimeControls from './game-runtime-controls';
 import { applySessionWorkerBudget, readBrowserSessionConfig } from './browser-session-config';
+import {
+  resolveExperimentalClientOptions,
+  type ResolvedExperimentalClientOptions,
+} from '../client/experimental-client-options';
+import { GameExperimentState } from './experimental/game-experiment-state';
+import { GameFrameLoop } from './game-frame-loop';
 
 export class Game {
   private paused = false;
@@ -48,11 +54,6 @@ export class Game {
   private controller: PlayerController | null = null;
   private gameplayClient: BrowserGameplay | null = null;
   private camera: pc.Entity | null = null;
-  private lastFpsSample = performance.now();
-  private frames = 0;
-  private fps = 0;
-  private frameMs = 0;
-  private lastFrameTimestamp = performance.now();
   private performanceProfile: PerformanceProfile = PERFORMANCE_PROFILES.balanced;
   private performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
   private readonly store = new BrowserWorldStore();
@@ -74,17 +75,47 @@ export class Game {
   private readonly uiProjection = new GameUiProjection();
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
   private sessionSequence = 0;
+  private startGeneration = 0;
+  private readonly experimentState: GameExperimentState;
   private readonly authoritySync = new AuthorityPresentationSync(() => this.controller);
   private collisionDebug: CollisionDebugRuntime | null = null;
+  private readonly frameLoop: GameFrameLoop;
   onRuntimeFailure: ((error: Error) => void) | null = null;
+  private readonly onResize = () => this.app?.resizeCanvas();
+  private readonly onPageHide = () => void this.flushSave().catch(() => undefined);
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly uiBridge: UiBridge,
     private readonly audio?: GlobalAudio,
+    experiments: ResolvedExperimentalClientOptions = resolveExperimentalClientOptions(),
   ) {
-    window.addEventListener('resize', () => this.app?.resizeCanvas());
-    window.addEventListener('pagehide', () => void this.flushSave().catch(() => undefined));
+    this.experimentState = new GameExperimentState(experiments);
+    this.frameLoop = new GameFrameLoop({
+      app: () => this.app,
+      authority: () => this.authority,
+      camera: () => this.camera,
+      collisionDebug: () => this.collisionDebug,
+      controller: () => this.controller,
+      environment: () => this.environment,
+      gameplay: () => this.gameplayClient,
+      paused: () => this.paused,
+      performanceProfile: () => this.performanceProfile,
+      performanceTelemetry: () => this.performanceTelemetry,
+      qualityLevel: () => this.qualityLevel,
+      queueSave: () => this.queueSave(),
+      seedText: () => this.seedText,
+      session: () => this.uiSession,
+      uiProjection: this.uiProjection,
+      visualEffects: () => this.visualEffects,
+      waterExperience: () => this.waterExperience,
+      world: () => this.world,
+      worldAudio: () => this.worldAudio,
+      nextHudSequence: () => ++this.hudSequence,
+      nextDebugSequence: () => ++this.debugSequence,
+    });
+    window.addEventListener('resize', this.onResize);
+    window.addEventListener('pagehide', this.onPageHide);
   }
 
   loadSavedSession = () => this.store.load();
@@ -99,6 +130,7 @@ export class Game {
   ) {
     await this.flushSave();
     this.disposeRuntime();
+    const startGeneration = ++this.startGeneration;
     this.paused = false;
     this.seedText = seedText;
     this.qualityLevel = qualityLevel;
@@ -109,12 +141,23 @@ export class Game {
     const lightingBudget = LIGHTING_QUALITY_BUDGETS[this.qualityLevel];
     this.performanceProfile = sceneBootstrap.selectPerformanceProfile(location.search);
     this.performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(this.performanceProfile);
-    this.lastFrameTimestamp = performance.now();
-    this.app = sceneBootstrap.createSceneApplication(this.canvas);
+    this.frameLoop.reset();
+    const scene = await sceneBootstrap.createSceneApplication(this.canvas, this.experimentState.rendererRequest);
+    if (startGeneration !== this.startGeneration) {
+      scene.application.destroy();
+      throw new Error('World start was superseded.');
+    }
+    this.app = scene.application;
+    this.experimentState.acceptRenderer(scene);
     this.collisionDebug = new CollisionDebugRuntime(this.app);
     const light = sceneBootstrap.createSun(this.app, lightingBudget);
     this.camera = sceneBootstrap.createCamera(this.app, quality.fogEnd + 18);
     this.visualResources = await createVoxelMaterials(this.app, quality);
+    if (startGeneration !== this.startGeneration) {
+      this.visualResources.destroy();
+      this.visualResources = null;
+      throw new Error('World start was superseded.');
+    }
     this.camera.camera!.layers = [...this.camera.camera!.layers, this.visualResources.waterLayer.id];
     this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
     const sessionConfig = readBrowserSessionConfig(location.search);
@@ -128,6 +171,7 @@ export class Game {
       initialWorldTime: this.environment.worldTime,
       harnessEnabled,
       generalWorkerCount,
+      wasm: this.experimentState.workerSelection,
       frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
       authorityTransportFaults,
       onSnapshot: (snapshot) => this.authoritySync.receive(snapshot),
@@ -142,6 +186,12 @@ export class Game {
       },
     });
     const { authority, compute: computeRuntime, logic: logicClient, ready } = session;
+    if (startGeneration !== this.startGeneration) {
+      logicClient.dispose();
+      authority.dispose();
+      computeRuntime.dispose();
+      throw new Error('World start was superseded.');
+    }
     this.authority = authority;
     this.computeRuntime = computeRuntime;
     this.logicClient = logicClient;
@@ -195,8 +245,10 @@ export class Game {
     gamePlayer.orientPlayerTowardCamp(this.controller, ready);
     this.controller.install();
     authority.requestLogicObservation();
+    this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
+    await waitForInitialWorldReady(this.world.waitForInitialVisibleChunk());
+    if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
-    this.app.on('update', (dt: number) => this.update(Math.min(dt, 0.05)));
   }
 
   private createController(camera: pc.Entity) {
@@ -218,7 +270,7 @@ export class Game {
       flushSave: () => void this.flushSave().catch(() => undefined),
       actions: {
         toggleMap: () => this.toggleMap(),
-        toggleDebug: () => this.toggleDebug(),
+        toggleDebug: () => this.publishDebugVisibility(!this.uiBridge.debug.get().visible),
         toggleCollisionDebug: () => this.toggleCollisionDebug(),
         toggleCommandShell: () => this.toggleCommandShell(),
         toggleInventory: () => this.toggleInventory(),
@@ -263,7 +315,7 @@ export class Game {
         camera: () => this.camera,
         environment: () => this.environment,
         gameplay: () => this.gameplayClient,
-        frameMs: () => this.frameMs,
+        frameMs: () => this.frameLoop.frameMs,
         qualityLevel: () => this.qualityLevel,
         authority: () => this.authority,
         collisionDebug: () => this.collisionDebug,
@@ -286,6 +338,7 @@ export class Game {
         },
         queueSave: () => this.queueSave(),
         flushSave: () => this.flushSave(),
+        experiments: () => this.experimentState.diagnostics(this.computeRuntime?.diagnostics.workerKernelStates ?? []),
       }),
     );
   }
@@ -321,7 +374,15 @@ export class Game {
     this.uiBridge.publishShell({ phase: 'menu', enterLabel: '进入世界' });
   }
 
-  abortStart = () => this.disposeRuntime();
+  abortStart = () => {
+    this.disposeRuntime();
+  };
+
+  dispose() {
+    this.abortStart();
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('pagehide', this.onPageHide);
+  }
 
   selectHotbarSlot = (slot: number) => this.gameplayClient?.selectHotbarSlot(slot);
 
@@ -377,67 +438,6 @@ export class Game {
     this.gameplayClient?.refresh();
   }
 
-  private update(dt: number) {
-    if (!this.world || !this.camera) return;
-    const now = performance.now();
-    const actualFrameMs = now - this.lastFrameTimestamp;
-    this.lastFrameTimestamp = now;
-    this.worldAudio?.updateWorld(
-      this.camera,
-      this.world,
-      this.controller?.onGround ?? false,
-      this.paused,
-      this.controller?.waterImmersion,
-    );
-    if (this.paused) return;
-    this.performanceTelemetry.beginFrame();
-    this.world.beginFrame();
-    if (this.environment) {
-      this.waterExperience?.updateFlow(dt, this.camera, this.world, this.environment);
-      this.environment.update(dt, this.world.worldTime);
-    }
-    this.frameMs = actualFrameMs;
-    this.frames += 1;
-    if (now - this.lastFpsSample > 500) {
-      this.fps = (this.frames * 1000) / (now - this.lastFpsSample);
-      this.frames = 0;
-      this.lastFpsSample = now;
-    }
-    this.controller?.update(dt);
-    this.collisionDebug?.update(
-      this.authority?.snapshot ?? null,
-      this.controller?.predictedPhysicsState ?? null,
-      this.controller?.aimTarget ?? null,
-    );
-    this.waterExperience?.updateImmersion(dt, this.controller?.waterImmersion, this.environment);
-    this.visualEffects?.update(dt);
-    this.world.updateStreaming(this.camera.getPosition());
-    this.world.drainCommits();
-    this.gameplayClient?.advance(dt);
-    this.uiProjection.publish({
-      world: this.world,
-      camera: this.camera,
-      session: this.uiSession!,
-      environment: this.environment,
-      telemetry: this.performanceTelemetry,
-      performanceProfile: this.performanceProfile,
-      qualityLevel: this.qualityLevel,
-      deviceType: this.app?.graphicsDevice.deviceType ?? 'WebGL2',
-      seedText: this.seedText,
-      fps: this.fps,
-      frameMs: this.frameMs,
-      nextHudSequence: () => ++this.hudSequence,
-      nextDebugSequence: () => ++this.debugSequence,
-      collisionDebug: this.collisionDebug?.status ?? null,
-    });
-    this.performanceTelemetry.endFrame(actualFrameMs);
-    if (Math.floor(now / 2000) !== Math.floor((now - dt * 1000) / 2000)) this.queueSave();
-  }
-
-  private toggleDebug() {
-    this.publishDebugVisibility(!this.uiBridge.debug.get().visible);
-  }
-
   private publishDebugVisibility(visible: boolean) {
     this.uiBridge.publishDebug({ visible });
   }
@@ -489,6 +489,7 @@ export class Game {
   }
 
   private disposeRuntime() {
+    this.startGeneration += 1;
     this.worldAudio?.dispose();
     this.worldAudio = null;
     this.uiSession?.dispose();
@@ -526,6 +527,7 @@ export class Game {
     this.visualResources = null;
     this.app?.destroy();
     this.app = null;
+    this.experimentState.clearRenderer();
     this.camera = null;
     this.serverPlayerId = null;
   }

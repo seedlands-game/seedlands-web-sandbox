@@ -28,7 +28,7 @@ import {
 } from './authority-collision-baseline-client';
 import {
   AuthorityCollisionRevisionGuard,
-  acceptAuthorityCollisionBaseline,
+  consumeTransferredAuthorityCollisionBaseline,
   publishAuthorityCollisionCommits,
 } from './authority-collision-mirror';
 import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
@@ -57,6 +57,7 @@ export class BrowserAuthorityClient {
     this.meshCache,
     this.collisionRevisions,
     (request) => this.request(request) as Promise<AuthorityCollisionBaselinePayload>,
+    { consumeTransferredBuffers: true },
   );
   private readonly preparationCache = new Map<string, AuthorityCachedPreparation>();
   private readyValue: AuthorityReady | null = null;
@@ -270,7 +271,7 @@ export class BrowserAuthorityClient {
     result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>,
   ): Promise<boolean> {
     const prepared = this.preparationCache.get(task.chunkKey);
-    return acceptAuthorityCollisionBaseline({
+    return consumeTransferredAuthorityCollisionBaseline({
       key: task.chunkKey,
       chunkRevision: task.chunkRevision,
       generatorVersion: task.generatorVersion,
@@ -278,11 +279,19 @@ export class BrowserAuthorityClient {
       preparedFluid: this.preparationCache.get(task.chunkKey)?.fluid,
       chunks: this.meshCache,
       guard: this.collisionRevisions,
-      accept: async (canonical) => {
+      accept: async () => {
+        const canonical = new Uint16Array(result.canonical!);
         if (matchesPreparedVisibilityCanonical(task, prepared, canonical)) return true;
+        // A fake/relay transport may hand back the same buffer that backs a
+        // retained preparation. Keep that preparation immutable while collision
+        // commits update the generated canonical mirror below.
+        if (prepared?.canonical?.buffer === canonical.buffer) prepared.canonical = prepared.canonical.slice();
+        // The collision mirror keeps `canonical`; Authority receives a distinct
+        // transfer-owned copy only on the slow admission path.
+        const forAuthority = canonical.slice();
         const response = (await this.request(
-          { kind: 'accept-generated-chunk', ...task, key: task.chunkKey, canonical: canonical.buffer },
-          [canonical.buffer],
+          { kind: 'accept-generated-chunk', ...task, key: task.chunkKey, canonical: forAuthority.buffer },
+          [forAuthority.buffer],
         )) as { accepted: boolean };
         return response.accepted;
       },

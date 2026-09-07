@@ -8,3 +8,7 @@ harness/results/
 playwright-report/
 test-results/
 .DS_Store
+wasm/**/_build/
+
+changes/*/experiments/*.wasm
+crates/target/

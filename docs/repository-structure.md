@@ -21,7 +21,7 @@
 | `archives/changes/`      | 明确 Delivered change 的可恢复 ZIP        | manifest 保存原路径和 SHA-256；恢复方式见归档索引     |
 | `docs/`                  | 多次变更共用的目标、路线、代码导航和约定  | 不复制 README 的运行说明，不替代具体 spec             |
 | `scripts/`               | 工程任务、证据汇总和启动包装              | 产品规则留在所属源码模块                              |
-| `public/assets/`         | 通过静态 URL 加载的图片和首屏资源         | 资产来源与许可见 [ASSETS](../ASSETS.md)               |
+| `public/assets/`         | 通过静态 URL 加载的图片等公开资源         | 资产来源与许可见 [ASSETS](../ASSETS.md)               |
 | `harness/baseline.json`  | 版本化基线                                | 与忽略的 `harness/results/` 运行产物区分              |
 
 `node_modules/`、`dist/`、`coverage/`、`midscene_run/`、`playwright-report/`、`test-results/` 和 `harness/results/` 是依赖或运行产物；不作为源码组织的一部分，不因目录整理而提交它们。密钥规则继续以 AGENTS 为准。
@@ -45,7 +45,8 @@
 - 不为每层目录自动添加 `index.ts` 重导出。只有需要明确公共入口时才使用；现有 `physics/index.ts` 是入口示例，目录分组本身不要求增加公共 API。
 - 新单元测试按实现所有者归入 `tests/<领域>/`。测试位置变化应跟随正式迁移，现存跨目录测试不因规范发布被判为错误。
 - `tests/e2e/` 只承载已准入的长期基线；单次需求的 Playwright / Midscene 留在所属 `changes/<change-id>/e2e/` 与 `midscene/`。本规范不改变准入评审和证据要求。
-- `public/assets/styles/start-screen.css` 承担 JavaScript 启动前的首屏样式；`src/app/ui/styles/` 是运行期 UI 样式。不能为统一样式目录而破坏首屏加载路径。
+- `src/app/ui/styles/start-screen.css` 是启动页与运行期共享的首屏样式单一来源，由 `index.html` 在 module script 前直接加载；不要在运行期 CSS 中再维护一套启动页几何。
+- `src/app/ui/generated/prerendered-start-screen.html` 是 `AppRoot` 的确定性 SSR 生成物，不手工编辑；修改首屏组件后运行 `pnpm ssg:update`，`pnpm ssg:check` 会拒绝陈旧生成物。
 
 ## 哪些已有自动检查
 

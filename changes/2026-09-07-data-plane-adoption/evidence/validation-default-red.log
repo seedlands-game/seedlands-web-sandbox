@@ -1,0 +1,30 @@
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation
+
+ ❯ tests/worker/data-plane-defaults.test.ts (1 test | 1 failed) 4ms
+   × uses the measured shared kernels by default and preserves explicit TS control 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/worker/data-plane-defaults.test.ts > uses the measured shared kernels by default and preserves explicit TS control
+AssertionError: expected 'seedlands-wasm:w02,w03,w04,w05,w06,w07' to be 'seedlands-wasm:w02,w03,w04,w05,w06' // Object.is equality
+
+Expected: "seedlands-wasm:w02,w03,w04,w05,w06"
+Received: "seedlands-wasm:w02,w03,w04,w05,w06,w07"
+
+ ❯ tests/worker/data-plane-defaults.test.ts:4:40
+      2| import { wasmExperimentWorkerName } from '../../src/client/wasm-experi…
+      3| it('uses the measured shared kernels by default and preserves explicit…
+      4|   expect(wasmExperimentWorkerName('')).toBe('seedlands-wasm:w02,w03,w0…
+       |                                        ^
+      5|   expect(wasmExperimentWorkerName('?wasm=off')).toBe('');
+      6|   expect(wasmExperimentWorkerName('?wasm=')).toBe('');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 22 passed (23)
+   Start at  03:16:38
+   Duration  255ms (transform 73ms, setup 0ms, import 91ms, tests 86ms, environment 0ms)
+

@@ -82,6 +82,9 @@ export abstract class GameServerGameplayFacade {
     const entity = this.gameplay.updateEntity(id, update);
     return this.legacyEntityIds.has(id) ? this.legacyEntity(entity) : entity;
   }
+  updateEntityWithoutSnapshot(id: string, update: EntityUpdate): void {
+    this.gameplay.updateEntityWithoutSnapshot(id, update);
+  }
   despawnEntity(id: string): boolean {
     return this.gameplay.despawnEntity(id);
   }
