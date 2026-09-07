@@ -184,7 +184,7 @@ initializeSeedlands(options?: SeedlandsInitializationOptions): Promise<void>;
 5. [已完成] 用户批准新版精确 spec hash 后，新增 Vitest、Playwright-change、Midscene 与 Harness 双 profile 合同。
 6. [已完成] 实现配置、设置 UI、bootstrap、capability probe、renderer、Worker 配置注入、Wasm / SIMD 状态和 Harness 双基线。
 7. [已完成] 限制并发的 Vitest、build、Playwright change / baseline、Midscene 与同源 Harness 双 profile 已运行；默认并发静态入口的两个未触及长用例超时、CI 供应链检查和既有 World Mutation 性能门禁均按证据边界保留。
-8. [进行中] README、Acceptance 和 Delivery Snapshot 已更新；用户已检查 GUI 并授权创建 GitHub PR，当前进入提交、推送与远端 readiness 跟踪。
+8. [进行中] README、Acceptance 和 Delivery Snapshot 已更新；用户已检查 GUI，GitHub PR #9 已创建，当前跟踪最终 head SHA 的 Actions、review 与 mergeability。
 
 ## Delivery Snapshot
 
@@ -213,4 +213,4 @@ initializeSeedlands(options?: SeedlandsInitializationOptions): Promise<void>;
 - `pnpm harness:baseline` 的浏览器阶段与两个 profile 均 PASS，`harness/baseline.json` 已更新；最终进程因上文独立 World Mutation 门禁返回 1。当前 diff 未修改 `src/server/game-server.ts`、`world-mutation.ts` 或 `world-transaction-commit.ts`，因此该回归保留为显式阻塞，不在本 change 扩张修复范围。
 - `CI=true pnpm verify:static`：在脚本执行前被 pnpm registry / minimumReleaseAge 检查阻断；普通本地确定性入口已通过。
 - `pnpm midscene:verify-model`：交互式 zsh 下 PASS；Midscene YAML：1/1 PASS。修复前后截图与联合对照保存在本 change 的 `evidence/`，根目录 `design-qa.md` 结论为 `passed`。
-- 尚未发布或合并；用户已授权创建 GitHub PR 并持续处理到可合入，远端 source SHA、Actions、review 与 mergeability 将在推送后回填。
+- GitHub PR：`https://github.com/seedlands-game/seedlands-web-sandbox/pull/9`。核心语义提交为 `2821fde`（客户端实验配置与双基线）、`5caf469`（移除 MoonBit 工具链）和 `1433907`（默认值、回退与交付说明）；未发布或合并，Actions、review 与 mergeability 继续按 PR 最终 head SHA 跟踪。

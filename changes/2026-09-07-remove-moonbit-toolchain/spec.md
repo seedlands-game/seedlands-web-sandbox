@@ -1,6 +1,6 @@
 # 移除 MoonBit 实验代码与工具链
 
-**状态：** Agile flow；已完成本地实现与确定性准出，正在与当前分支其余 change 一并交付到 GitHub PR
+**状态：** Agile flow；已完成本地实现与确定性准出，正在通过 GitHub PR #9 与当前分支其余 change 一并交付
 
 ## Context & Goal
 
