@@ -7,7 +7,7 @@
 - [consumer 与独立审查](network-baseline-consumer-progress.md)：单连接 owner、共享缓存、完整邻域版本失效、worker 副本物理结算；修复提交删除缓存的账本、未拥有 key 的 guard 残留，以及回调重入关闭后继续处理的问题。4 文件/19 项定向通过，已纳入最终全仓检查。
 - [真实组合](network-baseline-client-integration-plan.md)：C0 解码 artifact → 生产重组器 → consumer → 真实调度器 → 54 buffer transfer → 真实网格算法，最终 1/1 通过；缓存独立、生成回退为零、提交缺口后旧结果拒绝。此项为 Vitest，尚未证明 Web Worker、GPU 或网络旅程。
 - [基线 codec](network-baseline-codec-progress.md)：v2 修正 C0 的完整 1 MiB frame 边界，v1 保留；三候选 333 条真实消息和 32 KiB 合法分页继续通过，生产重组只读 oracle 1/1。C0/C1/C2 应用字节仍为 5,609,513 / 5,490,424 / 5,475,097 B；没有耗时、压缩或采用结论。
-- [完整 worker](network-complete-baseline-worker-plan.md) 与 [调度/结算](network-baseline-scheduler-progress.md) 的 20/10 项为前一检查点的定向证据；本批真实组合使用同一实现。实际 app 仍使用本地会话。
+- [完整 worker](network-complete-baseline-worker-plan.md) 在清理已确认属于本任务的早期遗留测试后，经 45 秒外层监督再次 20/20 通过并正常退出；日志 `/tmp/seedlands-complete-worker-clean-recheck.log`。[调度/结算](network-baseline-scheduler-progress.md) 的 10 项保留为前一检查点定向证据。本批真实组合使用同一实现，实际 app 仍使用本地会话。
 
 最终统一验证使用官方 Node 22.23.2：
 
@@ -19,7 +19,9 @@
 | 浏览器构建           | `pnpm build` 通过，保留既有大 bundle 提示；日志 `/tmp/seedlands-baseline-client-build.log`。                                                                                                                                                      |
 | Node 五入口构建      | 通过；manifest 记录 `sourceSha=234e4c8`、`sourceDirty=true`、`sourceInputsSha256=8897157545cfd4104a2855b0775618c2ed2d8f605eb9578983133a240be2d3fb`。未冒称构建未来提交。日志 `/tmp/seedlands-baseline-client-node-build.log`。                    |
 
-本批没有新增远端 UI、Midscene、Linux x64/WAN 或正式 benchmark 证据。[采样口径](network-codec-measurement-plan.md) 已明确计时边界和排他门，筛选 runner 的准备也不等于实际测量。GUI/远端可玩、WAN/CI、N2–N4 采用和 A13 不退化仍未完成；冻结 spec hash 保持不变。
+本批没有新增远端 UI、Midscene、Linux x64/WAN 或正式 benchmark 证据。[采样口径](network-codec-measurement-plan.md) 已明确计时边界和排他门，[筛选实际记录](network-baseline-codec-screening-progress.md) 中，v1 的 120 个原始 batch 正确性通过但整组环境未验证；v2 因 20 次持续高负载快照拒绝启动。没有可采用的性能组。GUI/远端可玩、WAN/CI、N2–N4 采用和 A13 不退化仍未完成；冻结 spec hash 保持不变。
+
+上述客户端源码与统一证据已保存为 `0378b970ee688529718dc8f79f64586fc71857ef` 并推送到 `origin/codex/node-dedicated-server`。后续仅记录采样准备、独立审查与环境清理时，不改变该源码检查点的验证范围。
 
 ## 上一完整验证：完整基线的公开参考接线
 
