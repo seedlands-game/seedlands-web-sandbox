@@ -1,0 +1,27 @@
+{
+  "toolchain": "rustc 1.88.0 (6b00bc388 2025-06-23)",
+  "sources": {
+    "crates/Cargo.lock": "762ffb3a89f03d670e76fdd41a7727668fd49555eb87bc592ee3d810fe0441cd",
+    "crates/Cargo.toml": "f937dc74d103e314e703d83f0363633d373f6368ff4defa346463b10766e9517",
+    "crates/rust-toolchain.toml": "7d9611a374ad9a48a535a61752e593d787918f1af0bbfe233f7f286a0bc42eeb",
+    "crates/world-kernels-wasm/Cargo.toml": "ab0d38571a75a054dadb60ca15b39363388bcbeecd7243475b6f34e3e473c145",
+    "crates/world-kernels-wasm/src/backend.rs": "cc9ad974d53c00a53a48fae9024d3d613601e1cbc59acde6ba50a111a160e9e6",
+    "crates/world-kernels-wasm/src/lib.rs": "d2fb5a96f0c54d457381e474f7ab1b265322ae6cfd5e9149b689e05044c325b9",
+    "crates/world-kernels-wasm/src/pack.rs": "f64e50b149f261ce1d13641078e0ef106d0d86e8abe18974058dc5174a67e820",
+    "crates/world-kernels/Cargo.toml": "2046dc427bc326a3e8ac5acca4a0d6e94677191efab58c1646f856046c2ffcd7",
+    "crates/world-kernels/src/lib.rs": "25b7770b5ab4796f091c493501ffb22fb47e5ba6631f48aedadf21bd2152f2e8",
+    "crates/world-kernels/src/pack.rs": "39a5441f9da3bdffadd4b9efb584809c71a7f182b376a5e41ee790d93e34c2ac",
+    "scripts/build-simd-experiment.mjs": "dd559f1e8b0cc86f5ebc91ec7167cbb7b16901901e0b365d712efa54e7b35bb7",
+    "scripts/link-wasm-kernels.mjs": "8b4a17970e5bc1220f28643508a55a40c653554490a7a4836e0be530737e460e"
+  },
+  "scalar": {
+    "bytes": 1794,
+    "sha256": "0bb790285430fef5eee2e7eda7f75ef2af1bd581d26ca37516c1879d31d0acea",
+    "flags": "-C linker=/Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=-simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
+  },
+  "simd": {
+    "bytes": 3524,
+    "sha256": "f5e628ebd24b36fecaa367adf82087faa146449325ba80d05c85a94237ac5375",
+    "flags": "-C linker=/Users/chlorinec/.codex/worktrees/moonbit-wasm-20260906/voxel-sandbox-foundation/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=+simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
+  }
+}

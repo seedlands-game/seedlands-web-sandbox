@@ -12,6 +12,10 @@ export const FINAL_RENDER_PIPELINE = {
   backend: 'webgl2',
 } as const;
 
+export type RenderPipelineSnapshot = Omit<typeof FINAL_RENDER_PIPELINE, 'backend'> & {
+  backend: 'webgl2' | 'webgpu';
+};
+
 export function renderCategoryForFaceMaterial(material: FaceMaterialId): RenderCategory {
   if (material === FaceMaterial.Leaves) return 'cutout';
   if (material === FaceMaterial.Water) return 'transparent';

@@ -33,7 +33,8 @@ describe('Svelte retained UI integration', () => {
       'src/app/ui/primitives/game-text-field.svelte',
     ];
     expected.forEach((path) => expect(existsSync(join(root, path)), path).toBe(true));
-    expect(read('src/app/main.ts')).toContain("from './ui/mount-ui'");
+    expect(read('src/app/bootstrap.ts')).toContain("from './ui/mount-ui'");
+    expect(read('src/app/main.ts')).toContain("from './bootstrap'");
   });
 
   it('keeps Svelte components on presentation contracts rather than game runtime internals', () => {

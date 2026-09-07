@@ -50,9 +50,9 @@ export async function writeBrowserE2EResult(
   await writeResult('browser-e2e.json', { browserE2E: { status, stages, ...(metrics ? { metrics } : {}) } });
 }
 
-export async function writeBrowserBenchmarkResult(initialWorldReadyMs: number): Promise<void> {
+export async function writeBrowserBenchmarkResult(browserBenchmark: object): Promise<void> {
   await writeResult('browser-benchmark.json', {
-    browserBenchmark: { status: 'PASS', initialWorldReadyMs: Math.round(initialWorldReadyMs * 100) / 100 },
+    browserBenchmark,
   });
 }
 

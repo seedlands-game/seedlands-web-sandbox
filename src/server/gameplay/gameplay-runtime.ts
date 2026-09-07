@@ -96,6 +96,11 @@ export class GameplayRuntime {
     return entity;
   }
 
+  updateEntityWithoutSnapshot(id: string, update: EntityUpdate): void {
+    this.entities.updateWithoutSnapshot(id, update);
+    this.touch(false);
+  }
+
   despawnEntity(id: string): boolean {
     this.simulation.unregisterActor(id);
     const removed = this.entities.despawn(id);
@@ -304,7 +309,7 @@ export class GameplayRuntime {
       return { success: false, reason: visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
     const damage = 4;
     const health = Math.max(0, target.health - damage);
-    this.entities.update(targetId, { health });
+    this.entities.updateWithoutSnapshot(targetId, { health });
     this.simulation.recordAttacked(targetId, playerId);
     if (health === 0) {
       const drop = this.simulation.unregisterActor(targetId, 'killed');

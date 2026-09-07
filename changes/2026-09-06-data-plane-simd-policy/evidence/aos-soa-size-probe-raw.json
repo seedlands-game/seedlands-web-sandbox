@@ -1,0 +1,67 @@
+[
+  {
+    "actorsN": 3,
+    "extrasN": 1,
+    "poisN": 5,
+    "spread": false,
+    "entities": 5,
+    "terrainWindows": 1,
+    "typedBytes": 1386,
+    "v8SerializedObservation": 3645,
+    "v8SerializedWithoutTerrain": 2105,
+    "v8SerializedIntentsProxy": 757,
+    "entityCloneProxy": 864
+  },
+  {
+    "actorsN": 16,
+    "extrasN": 16,
+    "poisN": 8,
+    "spread": false,
+    "entities": 33,
+    "terrainWindows": 1,
+    "typedBytes": 3360,
+    "v8SerializedObservation": 14517,
+    "v8SerializedWithoutTerrain": 10532,
+    "v8SerializedIntentsProxy": 3584,
+    "entityCloneProxy": 6030
+  },
+  {
+    "actorsN": 64,
+    "extrasN": 64,
+    "poisN": 16,
+    "spread": false,
+    "entities": 129,
+    "terrainWindows": 1,
+    "typedBytes": 7168,
+    "v8SerializedObservation": 49411,
+    "v8SerializedWithoutTerrain": 40100,
+    "v8SerializedIntentsProxy": 14048,
+    "entityCloneProxy": 23854
+  },
+  {
+    "actorsN": 64,
+    "extrasN": 64,
+    "poisN": 16,
+    "spread": true,
+    "entities": 129,
+    "terrainWindows": 19,
+    "typedBytes": 31948,
+    "v8SerializedObservation": 75701,
+    "v8SerializedWithoutTerrain": 40548,
+    "v8SerializedIntentsProxy": 14048,
+    "entityCloneProxy": 23854
+  },
+  {
+    "actorsN": 512,
+    "extrasN": 0,
+    "poisN": 64,
+    "spread": false,
+    "entities": 513,
+    "terrainWindows": 1,
+    "typedBytes": 7168,
+    "v8SerializedObservation": 221575,
+    "v8SerializedWithoutTerrain": 205481,
+    "v8SerializedIntentsProxy": 112126,
+    "entityCloneProxy": 100017
+  }
+]

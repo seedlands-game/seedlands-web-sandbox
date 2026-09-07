@@ -50,15 +50,17 @@ const crcTable = (() => {
   return table;
 })();
 
-const crc32 = (bytes: Uint8Array) => {
+export const crc32Bytes = (bytes: Uint8Array) => {
   let value = 0xffffffff;
-  for (const byte of bytes) value = crcTable[(value ^ byte) & 0xff] ^ (value >>> 8);
+  for (let index = 0; index < bytes.length; index += 1)
+    value = crcTable[(value ^ bytes[index]!) & 0xff] ^ (value >>> 8);
   return (value ^ 0xffffffff) >>> 0;
 };
 
 const crc32Voxels = (voxels: Uint16Array) => {
   let value = 0xffffffff;
-  for (const voxel of voxels) {
+  for (let index = 0; index < voxels.length; index += 1) {
+    const voxel = voxels[index]!;
     value = crcTable[(value ^ (voxel & 0xff)) & 0xff] ^ (value >>> 8);
     value = crcTable[(value ^ (voxel >>> 8)) & 0xff] ^ (value >>> 8);
   }
@@ -74,13 +76,24 @@ const voxelBytes = (voxels: Uint16Array) => {
   return bytes;
 };
 
-const pushVarUint = (target: number[], input: number) => {
+const varUintBytes = (input: number) => {
+  let value = input >>> 0;
+  let count = 1;
+  while (value >= 0x80) {
+    value >>>= 7;
+    count += 1;
+  }
+  return count;
+};
+
+const writeVarUint = (target: Uint8Array, offset: number, input: number) => {
   let value = input >>> 0;
   do {
     const byte = value & 0x7f;
     value >>>= 7;
-    target.push(value ? byte | 0x80 : byte);
+    target[offset++] = value ? byte | 0x80 : byte;
   } while (value);
+  return offset;
 };
 
 const readVarUint = (source: Uint8Array, offset: { value: number }) => {
@@ -97,53 +110,59 @@ const readVarUint = (source: Uint8Array, offset: { value: number }) => {
 };
 
 const encodeProceduralDiff = (voxels: Uint16Array, procedural: Uint16Array) => {
-  const values: number[] = [0, 0, 0, 0];
   let count = 0;
   let previousIndex = 0;
+  let byteLength = 4;
   for (let index = 0; index < voxels.length; index += 1) {
     if (voxels[index] === procedural[index]) continue;
-    pushVarUint(values, index - previousIndex);
-    values.push(voxels[index] & 0xff, voxels[index] >>> 8);
+    byteLength += varUintBytes(index - previousIndex) + 2;
     previousIndex = index;
     count += 1;
   }
-  values[0] = count & 0xff;
-  values[1] = (count >>> 8) & 0xff;
-  values[2] = (count >>> 16) & 0xff;
-  values[3] = count >>> 24;
-  return Uint8Array.from(values);
+  const payload = new Uint8Array(byteLength);
+  new DataView(payload.buffer).setUint32(0, count, true);
+  previousIndex = 0;
+  let offset = 4;
+  for (let index = 0; index < voxels.length; index += 1) {
+    if (voxels[index] === procedural[index]) continue;
+    offset = writeVarUint(payload, offset, index - previousIndex);
+    const voxel = voxels[index]!;
+    payload[offset++] = voxel & 0xff;
+    payload[offset++] = voxel >>> 8;
+    previousIndex = index;
+  }
+  return payload;
 };
 
 const encodePalette = (voxels: Uint16Array) => {
-  const palette: number[] = [];
-  const paletteIndexes = new Map<number, number>();
-  const indexes = new Uint16Array(voxels.length);
+  const paletteIndexes = new Int32Array(1 << 16).fill(-1);
+  const palette = new Uint16Array(voxels.length);
+  let paletteLength = 0;
   for (let index = 0; index < voxels.length; index += 1) {
-    const voxel = voxels[index];
-    let paletteIndex = paletteIndexes.get(voxel);
-    if (paletteIndex === undefined) {
-      paletteIndex = palette.length;
-      palette.push(voxel);
-      paletteIndexes.set(voxel, paletteIndex);
+    const voxel = voxels[index]!;
+    if (paletteIndexes[voxel] < 0) {
+      paletteIndexes[voxel] = paletteLength;
+      palette[paletteLength++] = voxel;
     }
-    indexes[index] = paletteIndex;
   }
-  const bits = palette.length <= 1 ? 0 : Math.ceil(Math.log2(palette.length));
+  let bits = 0;
+  for (let width = 1; width < paletteLength; width <<= 1) bits += 1;
   const packedBytes = Math.ceil((voxels.length * bits) / 8);
-  const payload = new Uint8Array(5 + palette.length * 2 + packedBytes);
+  const payload = new Uint8Array(5 + paletteLength * 2 + packedBytes);
   const view = new DataView(payload.buffer);
-  view.setUint32(0, palette.length, true);
+  view.setUint32(0, paletteLength, true);
   payload[4] = bits;
-  palette.forEach((voxel, index) => view.setUint16(5 + index * 2, voxel, true));
-  let byteOffset = 5 + palette.length * 2;
+  for (let index = 0; index < paletteLength; index += 1) view.setUint16(5 + index * 2, palette[index]!, true);
+  let byteOffset = 5 + paletteLength * 2;
   let accumulator = 0;
   let accumulatorBits = 0;
-  for (const paletteIndex of indexes) {
-    accumulator += paletteIndex * 2 ** accumulatorBits;
+  for (let index = 0; index < voxels.length; index += 1) {
+    const paletteIndex = paletteIndexes[voxels[index]!]!;
+    accumulator |= paletteIndex << accumulatorBits;
     accumulatorBits += bits;
     while (accumulatorBits >= 8) {
       payload[byteOffset++] = accumulator & 0xff;
-      accumulator = Math.floor(accumulator / 256);
+      accumulator >>>= 8;
       accumulatorBits -= 8;
     }
   }
@@ -186,11 +205,13 @@ export function createStoredChunkRecord(input: CreateStoredChunkRecordInput): St
     codec: selected.codec,
     payload: selected.payload,
     payloadBytes: selected.payload.byteLength,
-    payloadChecksum: crc32(selected.payload),
+    payloadChecksum: crc32Bytes(selected.payload),
     ...(selected.proceduralBaseSignature === undefined
       ? {}
       : { proceduralBaseSignature: selected.proceduralBaseSignature }),
-    ...(input.fluid ? { fluidVersion: 1 as const, fluid: input.fluid.slice(), fluidChecksum: crc32(input.fluid) } : {}),
+    ...(input.fluid
+      ? { fluidVersion: 1 as const, fluid: input.fluid.slice(), fluidChecksum: crc32Bytes(input.fluid) }
+      : {}),
   };
 }
 
@@ -199,7 +220,7 @@ export const validateStoredFluid = (record: StoredChunkRecord): Uint8Array | und
     return undefined;
   if (record.fluidVersion !== 1 || !(record.fluid instanceof Uint8Array) || record.fluid.length !== RAW_VOXEL_COUNT)
     throw new Error('Stored fluid sidecar is corrupt.');
-  if (record.fluidChecksum !== crc32(record.fluid)) throw new Error('Stored fluid sidecar checksum mismatch.');
+  if (record.fluidChecksum !== crc32Bytes(record.fluid)) throw new Error('Stored fluid sidecar checksum mismatch.');
   return record.fluid.slice();
 };
 
@@ -289,7 +310,7 @@ export function decodeStoredChunkRecord(
 ): Uint16Array {
   assertIdentity(record, expected);
   if (record.payloadBytes !== record.payload.byteLength) throw new Error('Chunk snapshot payload length is corrupt.');
-  if (crc32(record.payload) !== record.payloadChecksum)
+  if (crc32Bytes(record.payload) !== record.payloadChecksum)
     throw new Error('Chunk snapshot checksum indicates corruption.');
   if (record.codec === 'procedural-diff-v1') {
     const proceduralVoxels = expected.proceduralVoxels;

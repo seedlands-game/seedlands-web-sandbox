@@ -1,0 +1,12 @@
+{
+  "platform": "darwin",
+  "arch": "arm64",
+  "osRelease": "25.6.0",
+  "cpuModel": "Apple M3 Pro",
+  "logicalCpus": 12,
+  "totalMemoryBytes": 38654705664,
+  "node": "v26.0.0",
+  "recordedAt": "2026-09-06T15:59:54.528Z",
+  "browserIsolation": "headless, one Worker, no cross-origin isolation",
+  "parallelBuildOrTest": false
+}

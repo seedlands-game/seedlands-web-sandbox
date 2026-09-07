@@ -92,6 +92,22 @@ pnpm preview
 
 反射使用附近的一处水平水面。High优先细节，Medium是桌面默认档；这是有界的表现功能，不包含全局光照或水体物理。
 
+## 实验性性能设置
+
+优化后的 TypeScript 数据路径始终启用，并作为不可关闭的兜底基线。当前实测默认组合是 WebGL2、Rust WebAssembly `w02–w06` 和标准 SIMD128 优先；其中只有 `w06` 打包核包含显式 SIMD 指令，`w07/w10/w14/w15` 继续使用优化 TypeScript。WebGPU 保留为实验选项，但历史配对浏览器样本没有端到端收益，因此不是默认后端。
+
+设置界面可独立选择 WebGL2/WebGPU、Rust Wasm 和 SIMD。修改会立即持久化，但必须刷新页面才生效；退出世界再进入不会热重载 graphics device 或 Worker。WebGPU 不可用时只回退 WebGL2，Wasm 不可用时只回退优化 TypeScript，SIMD 不可用时只回退标量 Rust。Debug Harness 会同时暴露请求值与实际生效值。
+
+URL 也支持 `?renderer=webgl2|webgpu&wasm=on|off&simd=on|off`；`?wasm=w04,w06` 形式只用于性能消融。宿主页面还可在入口模块执行前指定：
+
+```js
+window.__SEEDLANDS_INITIAL_OPTIONS__ = {
+  experiments: { renderer: 'webgl2', wasm: true, simd: false },
+};
+```
+
+优先级为“显式初始化 > URL > 持久化 > 默认值”。宿主每次加载都提供的显式字段继续由宿主控制。进入游戏必须支持同源 module Worker；默认长期运行五个 Worker。当浏览器估算可用核心数少于五个时，进入前会显示可继续的性能警告。
+
 ## 服务端命令调试
 
 进入世界后按 F4 可打开简易 Debug Shell。世界命令包括 `/setblock`、`/fill`、`/tp`、`/time get`、`/time set`、`/seed`、`/save`、`/inspect voxel` 和 `/inspect chunk`。玩法命令包括 `/inventory`、`/give`、`/damage`、`/heal`、`/spawnitem`、`/spawn creature`、`/craft`、`/break`、`/cancelbreak`、`/pickup`、`/drop`、`/place`、`/use`、`/attack`、`/respawn`、`/tick` 和 `/nearby`。Actor 调试另有 `/summon`、`/observe`、`/entity action`、`/entity move`、`/entity stop`、`/path` 与 `/poi nearby`；参数无效时 Shell 会显示用法。Shell 打开时会释放鼠标锁定；按 Esc 关闭。日志文本可以用浏览器原生方式选择和复制，输入框支持正常粘贴；上下方向键可浏览最近 20 条已提交命令，并在回到末尾时恢复未执行草稿。
@@ -119,6 +135,7 @@ src/physics/   统一身体形状、扫掠碰撞、接触、重力与流体响�
 src/runtime/   独立时钟、调度、Worker 预算与会话协议
 src/worker/    Authority、Logic、流体、通用计算与持久化入口
 tests/         单元、架构与长期浏览器回归测试
+crates/        纯 Rust 计算内核与独立的 Wasm 适配层
 changes/       变更合同及所属的交付证据
 scripts/       本地 Harness 与工程脚本
 ```
@@ -137,6 +154,8 @@ pnpm verify:static
 pnpm build
 pnpm test:e2e:regression
 ```
+
+General 计算 Worker 默认启用实测采纳的 Rust Chunk填充、halo、mesh描述符和网格打包；打包在能力可用时使用标准SIMD128，保留标量与优化 TypeScript 回退。Fluid、Authority、Logic、Persistence 默认仍用 TypeScript。每个启用 Worker 独立持有 Wasm 实例，不要求共享内存或跨源隔离。`crates/rust-toolchain.toml` 固定 Rust 1.88.0 与 Wasm 目标；`pnpm wasm:rust:build` 重建两种生产产物，常规生产构建校验源码与二进制 hash；`pnpm rust:check` 约束纯 core 边界。已淘汰的 MoonBit 实现和工具链不再保留，冻结测量仍可在[结果快照](changes/2026-09-07-remove-moonbit-toolchain/moonbit-results.md)中审阅。采纳原因和实际收益见[本轮方案](changes/2026-09-07-data-plane-adoption/adoption-plan.md)。
 
 这些命令提供不同证据：单元测试覆盖确定性逻辑；静态验证覆盖格式、lint、路径规则、覆盖率和 TypeScript；生产构建证明 bundling；Playwright 覆盖确定性浏览器行为。视觉语义由 change 所属的 Midscene 流程独立评估。
 

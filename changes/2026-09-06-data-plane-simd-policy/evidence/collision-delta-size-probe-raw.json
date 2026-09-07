@@ -1,0 +1,32 @@
+[
+  {
+    "n": 1,
+    "v8SerializedBytes": 233,
+    "soaPayloadBytes": 7
+  },
+  {
+    "n": 8,
+    "v8SerializedBytes": 443,
+    "soaPayloadBytes": 56
+  },
+  {
+    "n": 64,
+    "v8SerializedBytes": 2123,
+    "soaPayloadBytes": 448
+  },
+  {
+    "n": 192,
+    "v8SerializedBytes": 6221,
+    "soaPayloadBytes": 1344
+  },
+  {
+    "n": 1024,
+    "v8SerializedBytes": 32653,
+    "soaPayloadBytes": 7168
+  },
+  {
+    "n": 32768,
+    "v8SerializedBytes": 1065103,
+    "soaPayloadBytes": 229376
+  }
+]

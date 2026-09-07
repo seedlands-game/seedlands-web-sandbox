@@ -10,6 +10,7 @@ import type { SerializedChunkSnapshot } from '../client/persistence/browser-chun
 import type { WorldOpenMode } from '../client/world-version-policy';
 import type { AuthorityGameplayView } from '../worker/authority-worker-protocol';
 import type { AuthorityTransportFaults } from '../client/authority/authority-transport';
+import type { WasmWorkerSelection } from '../compute/wasm-kernel-contract';
 
 export type BrowserWorkerSession = Readonly<{
   authority: BrowserAuthorityClient;
@@ -26,6 +27,7 @@ type Options = Readonly<{
   initialWorldTime: number;
   harnessEnabled: boolean;
   generalWorkerCount: 1 | 2;
+  wasm: WasmWorkerSelection;
   frequencies: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
   authorityTransportFaults?: AuthorityTransportFaults;
   onSnapshot: (snapshot: AuthoritySnapshot) => void;
@@ -45,6 +47,7 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
   const compute = new BrowserComputeRuntime({
     epoch,
     generalWorkerCount: options.generalWorkerCount,
+    wasm: options.wasm,
     onFluidCandidate: (candidate) => authority.commitFluid(candidate),
     onFluidFailure: (workId, error) => authority.failFluid(workId, error.message),
   });

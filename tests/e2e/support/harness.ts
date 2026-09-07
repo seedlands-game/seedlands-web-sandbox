@@ -54,7 +54,27 @@ export type HarnessSnapshot = {
     batchMode: 'category';
     vertexLayout: 'float16-uv-uint16-index';
     shaderMode: 'voxel-array-chunks';
-    backend: 'webgl2';
+    backend: 'webgl2' | 'webgpu';
+  };
+  experiments: {
+    requested: { renderer: 'webgl2' | 'webgpu'; wasm: boolean; simd: boolean };
+    kernels: readonly string[];
+    renderer: {
+      requestedRenderer: 'webgl2' | 'webgpu';
+      effectiveRenderer: 'webgl2' | 'webgpu';
+      rendererStatus: 'matched' | 'fallback';
+    } | null;
+    workers: readonly {
+      epoch: string;
+      lane: 'fluid' | 'general';
+      index: number;
+      status: 'off' | 'matched' | 'scalar-fallback' | 'typescript-fallback';
+      requestedArtifact: 'simd' | 'scalar' | 'off';
+      effectiveArtifact: 'simd' | 'scalar' | 'typescript' | 'off';
+      selected: readonly string[];
+      reason?: string;
+      artifactSha256?: string;
+    }[];
   };
   serverRevision: number;
   voxelAtOrigin: number;
@@ -216,6 +236,8 @@ export async function startHarnessWorld(page: Page, seed: string, query = ''): P
   await page.goto(`./?harness=1${query}`, { waitUntil: 'networkidle' });
   await page.locator('#seed').fill(seed);
   await page.getByRole('button', { name: '进入世界' }).click();
+  const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });
+  if (await continueDespiteWarning.isVisible()) await continueDespiteWarning.click();
   await page.locator('#start-card').waitFor({ state: 'hidden' });
   await page.locator('#debug').waitFor({ state: 'visible', timeout: 15_000 });
   await waitForSnapshot(page, (snapshot) => snapshot.loadedChunks > 0);

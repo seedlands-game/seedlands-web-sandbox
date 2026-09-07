@@ -1,11 +1,17 @@
 import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve, relative } from 'node:path';
-import { transformWithEsbuild } from 'vite';
+import { build } from 'vite';
 import { currentBrowserEvidence } from './harness-browser-evidence.mjs';
 import { collectDistMetrics } from './harness-file-metrics.mjs';
 import * as gameplayHarness from './harness-gameplay-modules.mjs';
 import { bytes, percentile, summarize } from './harness-summary.mjs';
+import {
+  browserProfileSummaryLines,
+  compareBrowserProfiles,
+  compareNodeMetrics,
+  updateBrowserProfileBaseline,
+} from './harness-browser-profiles.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const baselinePath = resolve(root, 'harness/baseline.json');
@@ -21,44 +27,34 @@ const sourceSha = (() => {
     return 'UNKNOWN';
   }
 })();
-const compileModule = async (path, replacements = {}) => {
-  let source = await readFile(path, 'utf8');
-  for (const [from, to] of Object.entries(replacements)) source = source.replaceAll(from, to);
-  const { code } = await transformWithEsbuild(source, path, { loader: 'ts', target: 'es2022', format: 'esm' });
-  return `data:text/javascript;base64,${Buffer.from(code).toString('base64')}`;
-};
-
-function compare(current, baseline) {
-  const verdicts = {};
-  for (const [key, value] of Object.entries(current)) {
-    const previous = baseline?.metrics?.[key];
-    if (typeof value !== 'number' || typeof previous !== 'number' || previous === 0) continue;
-    const percent = ((value - previous) / previous) * 100;
-    const higherIsBetter = key.includes('Throughput');
-    const regressionPercent = higherIsBetter ? -percent : percent;
-    verdicts[key] = {
-      baseline: previous,
-      current: value,
-      percent,
-      direction: higherIsBetter ? 'higher-is-better' : 'lower-is-better',
-      status: regressionPercent > 15 ? 'REGRESSION' : regressionPercent > 5 ? 'WARNING' : 'OK',
-    };
-  }
-  return verdicts;
-}
-
 {
-  const macroUrl = await compileModule(resolve(root, 'src/world/macro-world.ts'));
-  const voxelUrl = await compileModule(resolve(root, 'src/world/voxel.ts'), { "'./macro-world'": `'${macroUrl}'` });
-  const macro = await import(macroUrl);
-  const voxel = await import(voxelUrl);
-  const meshUrl = await compileModule(resolve(root, 'src/world/mesh.ts'), {
-    "'./voxel'": `'${voxelUrl}'`,
-    "'./macro-world'": `'${macroUrl}'`,
+  const buildResult = await build({
+    root,
+    configFile: false,
+    logLevel: 'silent',
+    build: {
+      ssr: 'scripts/harness-runtime-entry.ts',
+      target: 'es2022',
+      write: false,
+      rollupOptions: { output: { format: 'es', inlineDynamicImports: true } },
+    },
   });
-  const storageUrl = await compileModule(resolve(root, 'src/world/storage.ts'), { "'./voxel'": `'${voxelUrl}'` });
-  const { makeChunk, meshChunk } = await import(meshUrl);
-  const { encodeWorldSave } = await import(storageUrl);
+  const output = Array.isArray(buildResult) ? buildResult[0]?.output : buildResult.output;
+  const chunk = output?.find((entry) => entry.type === 'chunk');
+  if (!chunk) throw new Error('Harness runtime bundle was not generated.');
+  const runtime = await import(`data:text/javascript;base64,${Buffer.from(chunk.code).toString('base64')}`);
+  const {
+    macro,
+    voxel,
+    makeChunk,
+    meshChunk,
+    encodeWorldSave,
+    WorldMutationBuffer,
+    GameServer,
+    resolveFillCommand,
+    ALL_COMMAND_CAPABILITIES,
+    ServerCommandExecutor,
+  } = runtime;
   const coordinates = [-3, -2, -1, 0, 1, 2, 3].flatMap((x) => [-2, -1, 0, 1, 2].map((z) => [x, 0, z]));
   const seed = voxel.normalizeSeed('seedlands-harness-benchmark-v1');
   const macroCoordinates = Array.from({ length: 256 }, (_, index) => [
@@ -112,40 +108,6 @@ function compare(current, baseline) {
   }
   globalThis.gc?.();
   const heapAfterWork = process.memoryUsage().heapUsed;
-  const worldMutationUrl = await compileModule(resolve(root, 'src/server/world-mutation.ts'), {
-    "'../world/voxel'": `'${voxelUrl}'`,
-  });
-  const worldTransactionCommitUrl = await compileModule(resolve(root, 'src/server/world-transaction-commit.ts'), {
-    "'../world/voxel'": `'${voxelUrl}'`,
-    "'./world-mutation'": `'${worldMutationUrl}'`,
-  });
-  const { gameServerGameplayUrl, gameplayCommandHandlerUrl, starterEcologyUrl } =
-    await gameplayHarness.compileGameplayModules(root, compileModule, voxelUrl);
-  const gameServerUrl = await compileModule(resolve(root, 'src/server/game-server.ts'), {
-    "'../world/mesh'": `'${meshUrl}'`,
-    "'../world/voxel'": `'${voxelUrl}'`,
-    "'./game-server-gameplay'": `'${gameServerGameplayUrl}'`,
-    "'./simulation/starter-ecology'": `'${starterEcologyUrl}'`,
-    "'./world-mutation'": `'${worldMutationUrl}'`,
-    "'./world-transaction-commit'": `'${worldTransactionCommitUrl}'`,
-  });
-  const fillCommandUrl = await compileModule(resolve(root, 'src/server/commands/fill-command.ts'), {
-    "'../../world/voxel'": `'${voxelUrl}'`,
-    "'../world-mutation'": `'${worldMutationUrl}'`,
-  });
-  const commandContractUrl = await compileModule(resolve(root, 'src/server/commands/command-contract.ts'));
-  const commandExecutorUrl = await compileModule(resolve(root, 'src/server/commands/server-command-executor.ts'), {
-    "'../../world/voxel'": `'${voxelUrl}'`,
-    "'../game-server'": `'${gameServerUrl}'`,
-    "'../world-mutation'": `'${worldMutationUrl}'`,
-    "'./fill-command'": `'${fillCommandUrl}'`,
-    "'./gameplay-command-handler'": `'${gameplayCommandHandlerUrl}'`,
-    "'./command-contract'": `'${commandContractUrl}'`,
-  });
-  const { WorldMutationBuffer } = await import(worldMutationUrl);
-  const { GameServer } = await import(gameServerUrl);
-  const { resolveFillCommand } = await import(fillCommandUrl);
-  const { ALL_COMMAND_CAPABILITIES, ServerCommandExecutor } = await import(commandExecutorUrl);
   const gameplay = gameplayHarness.sampleGameplayMetrics(GameServer);
   const autonomy = gameplayHarness.sampleAutonomyMetrics(GameServer);
   globalThis.gc?.();
@@ -368,7 +330,8 @@ function compare(current, baseline) {
     gzipJsBundleBytes: bundle.gzipBytes,
   };
   const isBaseline = process.argv.includes('--baseline');
-  const baseline = isBaseline ? null : JSON.parse(await readFile(baselinePath, 'utf8'));
+  const storedBaseline = JSON.parse(await readFile(baselinePath, 'utf8'));
+  const baseline = isBaseline ? null : storedBaseline;
   const browserE2E = await currentBrowserEvidence(
     browserResultPath,
     'browserE2E',
@@ -383,8 +346,18 @@ function compare(current, baseline) {
     expectedBrowserRunId,
     sourceSha,
   );
+  const browserBaselineEnvironmentComparable =
+    !baseline ||
+    (baseline.environment?.node === process.version &&
+      baseline.environment?.platform === process.platform &&
+      baseline.environment?.arch === process.arch);
+  const browserProfileComparison = compareBrowserProfiles(
+    browserBenchmark,
+    baseline,
+    browserBaselineEnvironmentComparable,
+  );
   const result = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     generatedAt: now,
     sourceSha,
     browserRunId: expectedBrowserRunId ?? null,
@@ -405,18 +378,24 @@ function compare(current, baseline) {
     bundle,
     browserE2E,
     browserBenchmark,
+    browserProfileComparison,
     gameplay,
     autonomy,
     worldMutation,
     metrics,
-    comparison: compare(metrics, baseline),
+    comparison: compareNodeMetrics(metrics, baseline),
   };
   await mkdir(resultsDir, { recursive: true });
-  if (isBaseline)
-    await writeFile(
-      baselinePath,
-      `${JSON.stringify({ schemaVersion: 1, createdAt: now, environment: result.environment, metrics }, null, 2)}\n`,
-    );
+  const validBrowserBaseline = isBaseline
+    ? await updateBrowserProfileBaseline(baselinePath, {
+        browserBenchmark,
+        createdAt: now,
+        sourceSha,
+        environment: result.environment,
+        metrics,
+        preserved: storedBaseline,
+      })
+    : true;
   await writeFile(resolve(resultsDir, 'latest.json'), `${JSON.stringify(result, null, 2)}\n`);
   const lines = [
     '# Seedlands Harness Result',
@@ -470,22 +449,19 @@ function compare(current, baseline) {
     '',
     '## Browser benchmark sample',
     '',
-    `- ${browserBenchmark.status}${
-      typeof browserBenchmark.initialWorldReadyMs === 'number'
-        ? ` — initial world ready: ${browserBenchmark.initialWorldReadyMs.toFixed(2)} ms.`
-        : ` — ${browserBenchmark.note}`
-    }`,
+    ...browserProfileSummaryLines(browserBenchmark, browserProfileComparison),
     '',
     'Browser E2E is intentionally not a cross-machine timing baseline.',
     '',
   ];
   await writeFile(resolve(resultsDir, 'latest.md'), lines.join('\n'));
   const existingRegression = Object.values(result.comparison).some((value) => value.status === 'REGRESSION');
-  if (worldMutation.status === 'REGRESSION' || existingRegression) process.exitCode = 1;
+  if (worldMutation.status === 'REGRESSION' || existingRegression || (isBaseline && !validBrowserBaseline))
+    process.exitCode = 1;
   console.log(
     JSON.stringify(
       {
-        harness: isBaseline ? 'baseline updated' : 'benchmark complete',
+        harness: isBaseline ? (validBrowserBaseline ? 'baseline updated' : 'baseline rejected') : 'benchmark complete',
         result: relative(root, resolve(resultsDir, 'latest.json')),
         browserE2E: browserE2E.status,
         browserBenchmark: browserBenchmark.status,

@@ -13,6 +13,11 @@
     state: application.controller.state,
     panel: application.panel,
     quality: application.quality,
+    experiments: application.pendingExperiments,
+    appliedExperiments: application.appliedExperiments,
+    experimentsRequireRefresh: application.experimentsRequireRefresh,
+    capabilities: application.capabilities,
+    performanceWarningOpen: application.performanceWarningOpen,
   });
   let view = $state(initial());
   const readAudio = () => application.audio.snapshot();
@@ -52,19 +57,43 @@
   >
 {/if}
 
-{#if view.panel || view.state.phase === 'paused' || view.state.phase === 'saving'}
+{#if view.panel || view.state.phase === 'paused' || view.state.phase === 'saving' || view.performanceWarningOpen}
   <div
     class="shell-scrim"
-    use:modalFocus={() => (view.panel ? application.closePanel() : application.controller.resume())}
+    use:modalFocus={() =>
+      view.performanceWarningOpen
+        ? application.cancelPerformanceWarning()
+        : view.panel
+          ? application.closePanel()
+          : application.controller.resume()}
   >
     <GamePanel
       class="shell-dialog"
-      kind={view.panel ?? 'pause'}
+      kind={view.performanceWarningOpen ? 'warning' : (view.panel ?? 'pause')}
       role="dialog"
-      label={view.panel === 'settings' ? '设置' : view.panel === 'guide' ? '操作指南' : '暂停游戏'}
+      label={view.performanceWarningOpen
+        ? '性能提示'
+        : view.panel === 'settings'
+          ? '设置'
+          : view.panel === 'guide'
+            ? '操作指南'
+            : '暂停游戏'}
     >
       <img class="menu-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/arcane-crest.png')} alt="" />
-      {#if view.panel === 'settings'}
+      {#if view.performanceWarningOpen}
+        <p class="eyebrow">PERFORMANCE NOTICE</p>
+        <h2>性能提示</h2>
+        <p role="alert">
+          当前浏览器估算可用 {view.capabilities.estimatedCores} 个核心，低于游戏需要的 {view.capabilities
+            .requiredWorkerCount}
+          个 Worker，加载或游玩时可能出现卡顿。
+        </p>
+        <div class="menu-secondary">
+          <GameButton label="取消进入" onclick={() => application.cancelPerformanceWarning()}>取消</GameButton>
+          <GameButton label="仍然进入" onclick={() => void application.confirmPerformanceWarning()}>仍然进入</GameButton
+          >
+        </div>
+      {:else if view.panel === 'settings'}
         <p class="eyebrow">YOUR WORLD, YOUR PACE</p>
         <h2>设置</h2>
         <p class="muted">声音即时生效，视觉质量将在下次进入世界时应用。</p>
@@ -95,6 +124,61 @@
               >
             </select>
           </label>
+        </div>
+        <div class="reference-music experimental-settings" aria-label="实验性性能">
+          <h3>实验性性能</h3>
+          <p>TypeScript 优化始终启用。以下选项默认采用实测最优组合，修改会保存并在刷新页面后生效。</p>
+          <label class="experimental-renderer" for="settings-renderer"
+            ><span>渲染后端</span>
+            <select
+              id="settings-renderer"
+              value={view.experiments.renderer}
+              onchange={(event) =>
+                application.setExperiment('renderer', event.currentTarget.value as 'webgl2' | 'webgpu')}
+            >
+              <option value="webgl2">WebGL2 · 推荐</option>
+              <option value="webgpu">WebGPU · 实验性</option>
+            </select>
+          </label>
+          <div class="experimental-toggle-list">
+            <label class="experimental-toggle" for="settings-wasm">
+              <span class="experimental-toggle-copy">
+                <strong>Rust WebAssembly</strong>
+                <small>w02–w06 · General Worker</small>
+              </span>
+              <input
+                id="settings-wasm"
+                type="checkbox"
+                checked={view.experiments.wasm}
+                onchange={(event) => application.setExperiment('wasm', event.currentTarget.checked)}
+              />
+            </label>
+            <label class:disabled={!view.experiments.wasm} class="experimental-toggle" for="settings-simd">
+              <span class="experimental-toggle-copy">
+                <strong>标准 SIMD128 · 仅 w06</strong>
+                <small>{view.experiments.wasm ? '其他 Rust 内核保持标量' : '需要先启用 Rust WebAssembly'}</small>
+              </span>
+              <input
+                id="settings-simd"
+                type="checkbox"
+                checked={view.experiments.simd}
+                disabled={!view.experiments.wasm}
+                onchange={(event) => application.setExperiment('simd', event.currentTarget.checked)}
+              />
+            </label>
+          </div>
+          {#if !view.experiments.wasm}<p class="muted">SIMD 仅在 Wasm 开启时生效，偏好会保留。</p>{/if}
+          {#if view.appliedExperiments.initializationOverrides.length}
+            <p class="muted">
+              宿主初始化参数会在每次加载时优先覆盖：{view.appliedExperiments.initializationOverrides.join('、')}
+            </p>
+          {/if}
+          {#if view.experimentsRequireRefresh}
+            <p role="status">配置已保存，刷新页面后生效。</p>
+            <GameButton label="立即刷新应用实验配置" onclick={() => application.reloadForExperiments()}
+              >立即刷新</GameButton
+            >
+          {/if}
         </div>
         <div class="reference-music">
           <h3>本地参考曲</h3>

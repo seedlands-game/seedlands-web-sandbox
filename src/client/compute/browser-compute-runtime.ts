@@ -1,9 +1,11 @@
 import type { FluidAuthoritySnapshot, FluidCandidate } from '../../server/fluid/fluid-transaction';
 import type { ComputeLane, ComputeTask } from '../../runtime/compute-task-queue';
 import { PROTOCOL_VERSION, type SessionEpoch } from '../../runtime/session-protocol';
-import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool';
 import type { GeneratedCanonicalChunk, InitialWorldBootstrap } from '../../worker/world-compute-task';
 import { CHUNK_SIZE } from '../../world/voxel';
+import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool';
+import { wasmExperimentWorkerName } from './wasm-experiment-selection';
+import type { WasmWorkerSelection } from '../../compute/wasm-kernel-contract';
 
 type MeshWorkerPort = {
   onerror?: ((failure: { taskId: number; error: Error }) => void) | null;
@@ -15,6 +17,7 @@ type MeshWorkerPort = {
 type Options = Readonly<{
   epoch: SessionEpoch;
   generalWorkerCount: 1 | 2;
+  wasm?: WasmWorkerSelection;
   createWorker?: (lane: ComputeLane, index: number) => ComputeWorkerPort;
   onFluidCandidate: (candidate: FluidCandidate) => void;
   onFluidFailure?: (workId: string, error: Error) => void;
@@ -22,10 +25,16 @@ type Options = Readonly<{
   onPoolFailure?: (lane: ComputeLane, error: Error) => void;
 }>;
 
-const workerFactory = (lane: ComputeLane) => {
+const workerFactory = (lane: ComputeLane, selection: WasmWorkerSelection) => {
   if (lane === 'fluid')
-    return new Worker(new URL('../../worker/fluid-compute-worker.ts', import.meta.url), { type: 'module' });
-  return new Worker(new URL('../../worker/world-worker.ts', import.meta.url), { type: 'module' });
+    return new Worker(new URL('../../worker/fluid-compute-worker.ts', import.meta.url), {
+      type: 'module',
+      name: wasmExperimentWorkerName(selection),
+    });
+  return new Worker(new URL('../../worker/world-worker.ts', import.meta.url), {
+    type: 'module',
+    name: wasmExperimentWorkerName(selection),
+  });
 };
 
 export class BrowserComputeRuntime {
@@ -56,7 +65,9 @@ export class BrowserComputeRuntime {
       generalWorkerCount: options.generalWorkerCount,
       maxTasks: 96,
       maxBytes: 96 * 1024 * 1024,
-      createWorker: options.createWorker ?? workerFactory,
+      createWorker:
+        options.createWorker ?? ((lane) => workerFactory(lane, options.wasm ?? { artifact: 'off', kernels: [] })),
+      requireReadyHandshake: options.createWorker === undefined,
       onResult: (task, result) => this.receive(task, result),
       onFailure: (task, error) => this.fail(task, error),
       onDrop: (taskId, reason) => {

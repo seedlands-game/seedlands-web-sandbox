@@ -1,0 +1,16 @@
+web:
+  url: http://127.0.0.1:4173/
+tasks:
+  - name: 实验性性能设置语义
+    flow:
+      - ai: 点击“设置”进入设置面板
+      - aiAssert: 设置面板中存在“实验性性能”分组，清楚说明 TypeScript 优化始终启用；渲染后端当前显示 WebGL2 推荐；Rust WebAssembly 标注 w02 到 w06；标准 SIMD128 的名称明确标注仅 w06，说明其他 Rust 内核保持标量
+      - aiAssert: Rust WebAssembly 与标准 SIMD128 各自显示为紧凑设置行，名称和说明在左、原生勾选框在右且垂直居中，没有异常放大的蓝色方块、独立居中的勾选框或文字与控件脱行
+      - ai: 展开“渲染后端”下拉选择框
+      - aiAssert: 下拉选项同时包含“WebGL2 · 推荐”和“WebGPU · 实验性”
+      - ai: 保持选择“WebGL2 · 推荐”并关闭下拉选择框
+      - ai: 关闭 Rust WebAssembly
+      - ai: 向下滚动设置面板，查看实验配置变更后的提示和操作
+      - aiAssert: SIMD 行显示“需要先启用 Rust WebAssembly”的依赖提示，界面出现“配置已保存，刷新页面后生效”以及立即刷新入口
+      - ai: 返回主菜单
+      - aiAssert: 主菜单仍可正常填写 Seed 和进入世界，没有出现实验配置已经热切换的误导提示

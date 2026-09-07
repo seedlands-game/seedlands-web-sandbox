@@ -32,7 +32,7 @@ jobs:
           cache: true
           require-lockfile: true
       - name: Verify static baseline
-        run: pnpm verify:static
+        run: pnpm verify:static:ci
 
   build:
     name: Production build

@@ -3,7 +3,8 @@ import type { WorldChange } from '../world/storage';
 import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { MeshTaskIdentity } from '../client/compute/mesh-task-snapshot';
 import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
-import type { FINAL_RENDER_PIPELINE } from './scene/voxel-render-pipeline';
+import type { RenderPipelineSnapshot } from './scene/voxel-render-pipeline';
+import type { ExperimentalClientOptions } from '../client/experimental-client-options';
 import type { UiMetrics } from './ui/ui-contracts';
 import type { VisualEffectsSnapshot } from './scene/advanced-visual-effects';
 import type { FluidFeedbackSummary } from './gameplay/fluid-feedback-tracker';
@@ -121,7 +122,17 @@ export type HarnessSnapshot = {
     position: [number, number, number];
   }[];
   generatorVersion: number;
-  renderPipeline: typeof FINAL_RENDER_PIPELINE;
+  renderPipeline: RenderPipelineSnapshot;
+  experiments: {
+    requested: ExperimentalClientOptions;
+    kernels: readonly string[];
+    renderer: Readonly<{
+      requestedRenderer: ExperimentalClientOptions['renderer'];
+      effectiveRenderer: ExperimentalClientOptions['renderer'];
+      rendererStatus: 'matched' | 'fallback';
+    }> | null;
+    workers: ComputePoolDiagnostics['workerKernelStates'];
+  };
   serverRevision: number;
   voxelAtOrigin: number;
   serverPlayerPosition: [number, number, number];

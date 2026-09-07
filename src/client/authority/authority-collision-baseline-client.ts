@@ -21,6 +21,11 @@ type AuthorityCollisionBaselineRequest = Readonly<{
   minimumRevision: number;
 }>;
 
+type AuthorityCollisionBaselineClientOptions = Readonly<{
+  /** Only BrowserAuthorityClient may opt into this after a Worker transfer. */
+  consumeTransferredBuffers?: boolean;
+}>;
+
 export class AuthorityCollisionBaselineClient {
   constructor(
     private readonly chunks: Map<string, AuthorityCollisionCachedChunk>,
@@ -28,6 +33,7 @@ export class AuthorityCollisionBaselineClient {
     private readonly request: (
       request: AuthorityCollisionBaselineRequest,
     ) => Promise<AuthorityCollisionBaselinePayload>,
+    private readonly options: AuthorityCollisionBaselineClientOptions = {},
   ) {}
 
   getVoxel(x: number, y: number, z: number): number {
@@ -74,8 +80,14 @@ export class AuthorityCollisionBaselineClient {
             this.chunks,
             key,
             {
-              canonical: new Uint16Array(payload.canonical).slice(),
-              fluid: new Uint8Array(payload.fluid).slice(),
+              // Public request callbacks retain the old copy contract. The browser
+              // Worker path opts in only after transfer establishes exclusivity.
+              canonical: this.options.consumeTransferredBuffers
+                ? new Uint16Array(payload.canonical)
+                : new Uint16Array(payload.canonical).slice(),
+              fluid: this.options.consumeTransferredBuffers
+                ? new Uint8Array(payload.fluid)
+                : new Uint8Array(payload.fluid).slice(),
               chunkRevision: payload.chunkRevision,
             },
             this.guard,

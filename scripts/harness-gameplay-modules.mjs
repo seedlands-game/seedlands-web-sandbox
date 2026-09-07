@@ -98,7 +98,7 @@ export function sampleAutonomyMetrics(GameServer) {
       });
     }
     const startedAt = performance.now();
-    server.advanceGameplay(1.1);
+    server.advanceGameplayRules(1.1);
     samples[count] = { durationMs: performance.now() - startedAt, ...server.simulationMetrics() };
   }
   const bounded = new GameServer({ seedText: 'harness-autonomy-boundary' });

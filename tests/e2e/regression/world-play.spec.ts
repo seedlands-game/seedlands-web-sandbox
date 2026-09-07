@@ -181,9 +181,7 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     expect(changed.storageBytes).toBeGreaterThan(0);
     stages.interaction = 'PASS';
 
-    await page.reload({ waitUntil: 'networkidle' });
-    await page.getByRole('button', { name: '进入世界' }).click();
-    await page.locator('#debug').waitFor({ state: 'visible', timeout: 15_000 });
+    await startHarnessWorld(page, 'seedlands-playwright-regression');
     await expect
       .poll(async () => {
         const current = await snapshot(page);
