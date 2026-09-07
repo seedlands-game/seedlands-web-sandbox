@@ -1,76 +1,50 @@
 import * as pc from 'playcanvas';
 import { itemVisualKind } from '../../client/presentation/gameplay-model-definition';
+import {
+  builtinModelTextures,
+  modelMaterialDefinitions,
+  type ModelMaterialId,
+} from '../../client/presentation/model-material-definitions';
+import type { PixelTexture } from '../../client/presentation/asset-types';
 import { toolModelDefinition } from '../../client/presentation/voxel-tool-model';
 
 import { createPixelMaterial, createPixelMesh, addPixelNode } from './pixel-model-resource';
 import { getItemDefinition } from '../../server/gameplay/item-registry';
 import { acceptsPixelItem } from '../../client/presentation/asset-adapters';
 
-type MaterialName =
-  | 'dirt'
-  | 'stone'
-  | 'wood'
-  | 'wood-end'
-  | 'sand'
-  | 'leaf'
-  | 'brass'
-  | 'glow'
-  | 'berry'
-  | 'cream'
-  | 'umber'
-  | 'fur'
-  | 'charcoal'
-  | 'teal'
-  | 'skin'
-  | 'cloth'
-  | 'boot'
-  | 'eye'
-  | 'glow-eye'
-  | 'hurt';
+export { builtinModelTextures, modelMaterialDefinitions } from '../../client/presentation/model-material-definitions';
+
+type MaterialName = ModelMaterialId;
 
 type PartOptions = Readonly<{ castShadows?: boolean }>;
 
-const swatches: Record<MaterialName, readonly [string, string, string]> = {
-  dirt: ['#70462d', '#9d6740', '#4f2f21'],
-  stone: ['#606b6a', '#929c95', '#3d474a'],
-  wood: ['#6e3d20', '#b37239', '#3f2116'],
-  'wood-end': ['#a96632', '#e2a458', '#623719'],
-  sand: ['#c6a35d', '#e3c978', '#97733f'],
-  leaf: ['#2d6b48', '#5f9c56', '#183d32'],
-  brass: ['#8b5929', '#d09a44', '#55341f'],
-  glow: ['#f7d66c', '#fff6bd', '#bd6024'],
-  berry: ['#6c2646', '#bd4d69', '#3c1932'],
-  cream: ['#d6bd78', '#fff0b4', '#8f7144'],
-  umber: ['#6a402b', '#805038', '#4d3025'],
-  fur: ['#8d7653', '#a68b62', '#6c583f'],
-  charcoal: ['#1d3235', '#365b59', '#101d24'],
-  teal: ['#1c6f78', '#43a1a0', '#113e4a'],
-  skin: ['#b36d4b', '#e0a16a', '#70422f'],
-  cloth: ['#17555d', '#3e8b8a', '#103640'],
-  boot: ['#252a30', '#485057', '#12161d'],
-  eye: ['#151823', '#f6f0d2', '#090b11'],
-  'glow-eye': ['#4c2415', '#ffc257', '#170d10'],
-  hurt: ['#8a1f1b', '#f06542', '#4d1114'],
-};
-
-function texture(device: pc.GraphicsDevice, name: string, colors: readonly [string, string, string]) {
+function pixelTextureCanvas(asset: PixelTexture): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 24;
-  const context = canvas.getContext('2d')!;
-  context.fillStyle = colors[0];
-  context.fillRect(0, 0, 24, 24);
-  for (let y = 0; y < 24; y += 4)
-    for (let x = 0; x < 24; x += 4) {
-      const pick = (x * 7 + y * 11 + x * y) % (name === 'fur' || name === 'skin' || name === 'cloth' ? 11 : 5);
-      context.fillStyle = pick === 0 ? colors[1] : pick === 1 ? colors[2] : colors[0];
-      context.fillRect(x, y, name === 'fur' ? 4 : 3, name === 'fur' ? 2 : 3);
-    }
-  if (name === 'wood') {
-    context.fillStyle = colors[2];
-    for (const x of [4, 12, 20]) context.fillRect(x, 0, 2, 24);
-  }
-  const result = new pc.Texture(device, { name: `model-${name}`, width: 24, height: 24, mipmaps: true, srgb: true });
-  result.setSource(canvas);
+  canvas.width = asset.payload.width;
+  canvas.height = asset.payload.height;
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('浏览器无法创建模型像素画布');
+  const data = context.createImageData(canvas.width, canvas.height);
+  asset.payload.pixels.forEach((index, pixel) => {
+    const color = asset.payload.palette[index];
+    if (!color || index === 0) return;
+    data.data.set([color[0], color[1], color[2], 255], pixel * 4);
+  });
+  context.putImageData(data, 0, 0);
+  return canvas;
+}
+
+function texture(device: pc.GraphicsDevice, source: PixelTexture) {
+  const result = new pc.Texture(device, {
+    name: source.id,
+    width: source.payload.width,
+    height: source.payload.height,
+    mipmaps: true,
+    srgb: true,
+    minFilter: pc.FILTER_NEAREST_MIPMAP_NEAREST,
+    magFilter: pc.FILTER_NEAREST,
+  });
+  result.setSource(pixelTextureCanvas(source));
   return result;
 }
 
@@ -83,21 +57,21 @@ export class GameplayModelAssets {
   constructor(private readonly app: pc.Application) {
     this.textures = [];
     this.materials = Object.fromEntries(
-      (Object.entries(swatches) as [MaterialName, readonly [string, string, string]][]).map(([name, colors]) => {
-        const diffuseMap = texture(app.graphicsDevice, name, colors);
+      modelMaterialDefinitions.map((definition) => {
+        const source = builtinModelTextures.find((candidate) => candidate.id === definition.textureId);
+        if (!source) throw new Error(`缺少模型材质纹理：${definition.textureId}`);
+        const diffuseMap = texture(app.graphicsDevice, source);
         this.textures.push(diffuseMap);
         const material = new pc.StandardMaterial();
-        material.name = `model-${name}`;
+        material.name = definition.textureId;
         material.diffuseMap = diffuseMap;
         material.diffuse = pc.Color.WHITE;
-        material.gloss = name === 'brass' ? 0.5 : 0.08;
-        material.metalness = name === 'brass' ? 0.35 : 0;
-        if (name === 'glow' || name === 'glow-eye') {
-          material.emissive = new pc.Color(1, 0.46, 0.1);
-          material.emissiveIntensity = name === 'glow-eye' ? 1.5 : 0.55;
-        }
+        material.gloss = 1 - definition.roughness;
+        material.metalness = definition.metalness;
+        material.emissive = new pc.Color(...definition.emissive);
+        material.emissiveIntensity = definition.emissiveIntensity;
         material.update();
-        return [name, material];
+        return [definition.id, material];
       }),
     ) as Record<MaterialName, pc.StandardMaterial>;
   }

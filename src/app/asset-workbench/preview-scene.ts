@@ -7,6 +7,11 @@ import { acquireGameplayModelAssets } from '../gameplay/gameplay-model-assets';
 import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
 import { pixelCanvas } from '../gameplay/asset-image';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
+import { addBuiltinActorModel, addPlayerArm } from '../gameplay/builtin-actor-models';
+import { addVoxelPreview } from './voxel-preview-resource';
+import { addGlbModel } from '../gameplay/glb-model-resource';
+import { terrainMaterials } from '../../client/presentation/terrain-assets';
+import { modelMaterialDefinitions } from '../../client/presentation/model-material-definitions';
 
 export class PreviewScene {
   readonly app: pc.Application;
@@ -18,6 +23,7 @@ export class PreviewScene {
   private release: (() => void) | null = null;
   private generation = 0;
   private disposed = false;
+  private abort: AbortController | null = null;
   private yaw = 25;
   private pitch = 12;
   private distance = 2.4;
@@ -74,6 +80,8 @@ export class PreviewScene {
   }
   async show(asset: Asset, all: Asset[], mode: 'model' | 'held', filtering: 'nearest' | 'linear', repeat: number) {
     const generation = ++this.generation;
+    this.abort?.abort();
+    this.abort = new AbortController();
     const stage = new pc.Entity('Asset preview staging', this.app);
     stage.enabled = false;
     let release: (() => void) | null = null;
@@ -91,6 +99,32 @@ export class PreviewScene {
       } else if (asset.type === 'builtin-item-model') {
         distance = 1.5;
         this.assets.assets.addItem(stage, asset.payload.itemId);
+      } else if (asset.type === 'glb-model') {
+        distance = 3;
+        release = (await addGlbModel(this.app, stage, asset.payload.modelId, this.abort.signal)).release;
+      } else if (asset.type === 'builtin-voxel-model') {
+        distance = 2.6;
+        release = await addVoxelPreview(this.app, stage, asset.payload.voxelId);
+      } else if (asset.type === 'builtin-actor-model') {
+        distance = 4;
+        const actor = new pc.Entity('Actor preview', this.app);
+        stage.addChild(actor);
+        addBuiltinActorModel(this.assets.assets, actor, asset.payload.kind);
+        actor.setLocalPosition(0, -0.9, 0);
+      } else if (asset.type === 'builtin-arm-model') {
+        distance = 2.4;
+        addPlayerArm(this.assets.assets, stage);
+      } else if (asset.type === 'material') {
+        distance = 2.6;
+        const terrain = terrainMaterials.find((m) => m.id === asset.id);
+        if (terrain) release = await addVoxelPreview(this.app, stage, 2, terrain.faceMaterial);
+        else {
+          const definition = modelMaterialDefinitions.find((m) => `seedlands:material/model/${m.id}` === asset.id);
+          if (!definition) throw new Error('找不到材质适配器');
+          const cube = new pc.Entity('Shared model material', this.app);
+          cube.addComponent('render', { type: 'box', material: this.assets.assets.materials[definition.id] });
+          stage.addChild(cube);
+        }
       } else {
         distance = 2.4;
         let source: HTMLCanvasElement | HTMLImageElement;
@@ -139,6 +173,12 @@ export class PreviewScene {
       release?.();
       stage.destroy();
       throw error;
+    }
+    if (this.disposed || generation !== this.generation) {
+      viewmodel?.dispose();
+      release?.();
+      stage.destroy();
+      return;
     }
     this.clear();
     this.mode = mode;
@@ -192,6 +232,7 @@ export class PreviewScene {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.abort?.abort();
     this.generation++;
     this.observer.disconnect();
     this.clear();

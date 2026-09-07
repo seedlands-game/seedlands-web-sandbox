@@ -140,3 +140,10 @@ flowchart TD
 - [pixel-model-resource.ts](../src/app/gameplay/pixel-model-resource.ts)：游戏与工坊共享的像素 GPU 资源；[preview-scene.ts](../src/app/asset-workbench/preview-scene.ts) 只组合检视场景。
 - [asset-workbench-store.ts](../src/client/persistence/asset-workbench-store.ts)：独立浏览器资产库、冲突检查和事务保存。
 - 适配范围与来源规则见[资产工坊](asset-workbench.md)。
+
+统一视觉资产补充入口：
+
+- [visual-asset-catalog.ts](../src/client/presentation/visual-asset-catalog.ts)：地形、角色、材质及 UI 引用；[terrain-assets.ts](../src/client/presentation/terrain-assets.ts) 与 [model-material-definitions.ts](../src/client/presentation/model-material-definitions.ts) 为独立像素源。
+- [texture-pack.ts](../src/client/presentation/texture-pack.ts)、[terrain-pack-store.ts](../src/client/persistence/terrain-pack-store.ts)：确定性图集与显式地形快照；世界存档不参与。
+- [actor-model-definitions.ts](../src/client/presentation/actor-model-definitions.ts)、[builtin-actor-models.ts](../src/app/gameplay/builtin-actor-models.ts)：游戏和工坊共享构件与人形比例。
+- [glb-model.ts](../src/client/presentation/glb-model.ts)、[glb-model-store.ts](../src/client/persistence/glb-model-store.ts)、[glb-model-resource.ts](../src/app/gameplay/glb-model-resource.ts)：外部静态模型的校验、二进制持久化与 PlayCanvas 资源生命周期。

@@ -42,13 +42,14 @@ describe('第一人称手与物件的独立生命周期', () => {
     expect(pivot.getLocalEulerAngles().length()).toBeCloseTo(0);
     model.dispose();
   });
-  it('切换工具或空手不能销毁手掌/袖口，也不残留旧工具', () => {
+  it('切换工具或空手不能销毁共享手臂构件，也不残留旧工具', () => {
     const camera = new pc.Entity();
     const model = new FirstPersonViewmodel({} as pc.Application, camera);
     expect(camera.findByName('hand')).not.toBeNull();
     model.setHeldItem('wood-axe');
     expect(camera.findByName('hand')).not.toBeNull();
-    expect(camera.findByName('sleeve-cuff')).not.toBeNull();
+    expect(camera.findByName('sleeve')).not.toBeNull();
+    expect(camera.findByName('sleeve-cuff')).toBeNull();
     model.setHeldItem('stone-pickaxe');
     expect(camera.findByName('hand')).not.toBeNull();
     expect(camera.findByName('wood-axe')).toBeNull();
