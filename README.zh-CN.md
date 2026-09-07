@@ -129,7 +129,7 @@ pnpm build:server
 pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world
 ```
 
-`dist/node-server/` 内的五个 ESM 入口及清单可由 Node 22.12 或更高版本直接运行，不需要源码、Vite 或在服务器安装运行依赖。默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。`--compute child-process` 可选择实验性进程执行器；这不是已测得更快的默认建议。按 Ctrl+C 会排空工作并保存最终检查点。请使用独立目录，不会自动导入浏览器存档；同一目录的第二个写者会被拒绝。
+`apps/node-server/dist/` 内的五个 ESM 入口及清单可由 Node 22.12 或更高版本直接运行，不需要源码、Vite 或在服务器安装运行依赖。默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。`--compute child-process` 可选择实验性进程执行器；这不是已测得更快的默认建议。按 Ctrl+C 会排空工作并保存最终检查点。请使用独立目录，不会自动导入浏览器存档；同一目录的第二个写者会被拒绝。
 
 ## 架构
 
@@ -138,20 +138,16 @@ pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-wor
 `GameServer.editBatch()` 是批量世界修改的权威事务边界。浏览器运行时按职责拆分为启动、玩家控制、渲染适配、世界 streaming、环境、HUD 与持久化模块。运行期 UI 由单个 Svelte 5 root 持有；Game 只通过 `UiBridge` 发布可独立订阅的 Shell、HUD、Interaction 与 Debug 小型投影，组件经 action port 回传意图，不持有权威 World 或 Server 状态。
 
 ```text
-src/app/       浏览器启动、PlayCanvas 生命周期、retained UI bridge、输入与样式
-src/client/    浏览器持久化与客户端适配
-src/server/    权威世界、实体、时钟与快照接口
-src/world/     确定性世界、体素、网格、坐标与存档逻辑
-src/physics/   统一身体形状、扫掠碰撞、接触、重力与流体响应
-src/runtime/   独立时钟、调度、Worker 预算与会话协议
-src/worker/    Authority、Logic、流体、通用计算与持久化入口
-tests/         单元、架构与长期浏览器回归测试
-crates/        纯 Rust 计算内核与独立的 Wasm 适配层
-changes/       变更合同及所属的交付证据
-scripts/       本地 Harness 与工程脚本
+apps/web/          浏览器产品、Vite/SSG、PlayCanvas、Svelte 与浏览器 Worker
+apps/node-server/  Node CLI、线程/进程、持久化适配与五入口构建
+packages/game-core/ Web/Node 共享的世界、物理、运行时、服务端与纯计算
+tests/             单元、架构与长期浏览器回归测试
+crates/            纯 Rust 计算内核与浏览器 Wasm 适配层
+changes/           变更合同及所属的交付证据
+scripts/           workspace Harness 与工程脚本
 ```
 
-`src/world/` 刻意保持不依赖 DOM、PlayCanvas 或 Worker global。世界编辑会经过权威世界路径，渲染单位是优化后的 Chunk mesh。
+workspace 使用一个 lockfile。Web 与 Node 仅经 `@seedlands/game-core` 声明的 subpath exports 共享逻辑，彼此不依赖。`packages/game-core/` 不获得 DOM、WebWorker、Node ambient types，也不依赖两个 app 包；平台能力经窄实例端口注入。产品依赖由所属 package 声明；根 devDependencies 中重复的 PlayCanvas、Svelte 与 Tone 只供根级整合测试解析，Node 的类型检查、构建和隔离运行不消费它们。
 
 浏览器默认运行五个后台 Worker：权威状态与固定步长物理、游戏逻辑、流体计算、通用计算和持久化各一个。可选第二个通用计算 Worker，此时总数为六个。渲染与本地玩家预测留在主线程。物理、玩法与流体分别使用独立频率和有界追赶，耗时逻辑与网格计算不驱动物理时钟；通信使用带版本的消息与可转移缓冲，不要求共享内存。
 
@@ -163,6 +159,8 @@ scripts/       本地 Harness 与工程脚本
 pnpm test
 pnpm verify:static
 pnpm build
+pnpm build:server
+pnpm verify:node-isolation
 pnpm test:e2e:regression
 ```
 

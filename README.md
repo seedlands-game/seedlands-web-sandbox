@@ -132,7 +132,7 @@ pnpm build:server
 pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world
 ```
 
-The output in `dist/node-server/` runs with Node 22.12 or later and includes five ESM entry files plus its manifest. It needs no source checkout, Vite, or runtime dependency install. The default uses a dedicated authority lane, logic/fluid/general computation lanes, and a persistence lane. `--compute child-process` selects the experimental process executor; this is not a measured performance recommendation. Stop with Ctrl+C to drain work and save the final checkpoint. Use a dedicated directory; browser saves are not imported automatically. A second writer to the same directory is rejected.
+The output in `apps/node-server/dist/` runs with Node 22.12 or later and includes five ESM entry files plus its manifest. It needs no source checkout, Vite, or runtime dependency install. The default uses a dedicated authority lane, logic/fluid/general computation lanes, and a persistence lane. `--compute child-process` selects the experimental process executor; this is not a measured performance recommendation. Stop with Ctrl+C to drain work and save the final checkpoint. Use a dedicated directory; browser saves are not imported automatically. A second writer to the same directory is rejected.
 
 ## Architecture
 
@@ -145,20 +145,16 @@ The browser runs an Authority Worker with fixed-step physics, a separate Logic W
 Players, creatures, and dropped items share registered collision shapes and swept collision resolution. Entity positions use the center of the feet. A one-block bank requires jumping: walking against it does not teleport the player upward. Water immersion uses body volume, while underwater visuals and sound use the camera's depth. F3+B displays the actual authoritative and predicted bodies; the debug panel also controls contact details and pickup sensors.
 
 ```text
-src/app/       Browser startup, PlayCanvas lifecycle, retained UI bridge, input, and styles
-src/client/    Browser persistence and client-side adapters
-src/server/    Authoritative world, entity, clock, and snapshot interfaces
-src/physics/   Shared body shapes, swept collision, contacts, gravity, and fluid response
-src/runtime/   Independent clocks, scheduling, worker budgets, and session protocols
-src/world/     Deterministic world, voxel, mesh, coordinate, and save logic
-src/worker/    Authority, logic, fluid, general computation, and persistence entry points
-tests/         Unit, architecture, and long-lived browser regression tests
-crates/        Pure Rust kernels and an independent Wasm adapter
-changes/       Change contracts and their delivery-specific evidence
-scripts/       Local harness and engineering scripts
+apps/web/          Browser product, Vite/SSG, PlayCanvas, Svelte, and browser Workers
+apps/node-server/  Node CLI, thread/process, persistence adapters, and five-entry build
+packages/game-core/ Browser/Node-shared world, physics, runtime, server, and pure compute
+tests/             Unit, architecture, and long-lived browser regression tests
+crates/            Pure Rust kernels and browser Wasm adapters
+changes/           Change contracts and their delivery-specific evidence
+scripts/           Workspace harness and engineering scripts
 ```
 
-`src/world/` is deliberately independent of the DOM, PlayCanvas, and worker globals. World edits pass through the authoritative world path, and rendering operates on optimized chunk meshes.
+The workspace uses one lockfile. Web and Node depend on `@seedlands/game-core` through declared subpath exports and do not depend on each other. `packages/game-core/` is deliberately independent of DOM, WebWorker, Node ambient types, and both application packages; platform capabilities are injected through narrow instance ports. Each package declares its product dependencies. PlayCanvas, Svelte, and Tone are also present in the root development dependencies only so root-owned integration tests can resolve them; Node typecheck, build, and runtime isolation do not consume them.
 
 ## Verification
 
@@ -166,6 +162,8 @@ scripts/       Local harness and engineering scripts
 pnpm test
 pnpm verify:static
 pnpm build
+pnpm build:server
+pnpm verify:node-isolation
 pnpm test:e2e:regression
 ```
 

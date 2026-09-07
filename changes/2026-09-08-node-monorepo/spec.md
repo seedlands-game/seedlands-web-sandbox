@@ -1,6 +1,6 @@
 # Web、Node 与游戏核心三包迁移
 
-状态：Active。类型：Breaking；本会话用户在确认三包边界后明确要求“现在请你开始落地完成”，该直接实施授权适用于本合同，不再次索取相同范围许可。原 Dedicated 大合同不因本次结构交付被宣称完成。
+状态：本地实施与准出完成，等待独立冻结验收及 draft PR 最新 CI。类型：Breaking；本会话用户在确认三包边界后明确要求“现在请你开始落地完成”，该直接实施授权适用于本合同，不再次索取相同范围许可。原 Dedicated 大合同不因本次结构交付被宣称完成。
 
 ## 目标与范围
 
@@ -33,8 +33,8 @@
 
 - [x] M0：合同、RED、main 合入，相关语义检查及兼容构建；独立 commit/push。
 - [x] M1：源码和依赖三包迁移、清晰 exports/平台类型边界，独立 commit/push。
-- [ ] M2：测试、产物、浏览器、隔离构建与 CI 收口，独立复核与修复。
-- [ ] M3：更新 README、代码地图、目录规则、AGENTS 路径和交付记录；PR 最新提交必要 CI 通过、无冲突、ready for review；不自动合并。
+- [x] M2：测试、产物、浏览器、隔离构建与 CI 收口，独立复核与修复。
+- [ ] M3：README、代码地图、目录规则、AGENTS 路径和交付记录已更新；等待 root 对冻结 HEAD 完成独立验收、最新 CI 与 PR ready for review 收口，不自动合并。
 
 基础证据分别执行 verify:static、Web build、Node build；命令以迁移后 package.json 为准。浏览器使用项目现行 regression 和本 change 必要用例，Node 使用真实五入口/进程恢复用例；完整基线链路保留实消费证据。独立验证冻结源码后进行，失败返回实施者闭环，不堆叠重复全量检查。无性能改动，本次不进行正式 benchmark。
 
@@ -44,4 +44,6 @@
 
 ## Delivery Snapshot
 
-待回填。长期 docs baseline 将更新：三包职责、依赖方向、构建/验证入口已形成跨 change 的规则。历史 Node 大合同仍 Active，网络与性能准出独立记录。
+三包结构、声明 exports、平台端口、跨包反例、Active Node 类型入口、隔离构建及 Web 默认/TS 回退已落地。迁移前清单中的 239 个 `tests/` 测试文件与 101 个 change-local 测试文件均未删除；本 change 新增 1 个显式 TS fallback Playwright 用例。依赖 `/tmp` 冻结语料的历史用例仍 fail closed，本轮不宣称全部执行。
+
+长期 docs baseline 已更新：README、代码地图、目录规范、AGENTS 和治理文档现在记录三包职责、依赖方向、产物路径与验证入口。根级 PlayCanvas/Svelte/Tone 仅供根整合测试解析；包内产品依赖和 Node 隔离证据单独成立。历史 Node 大合同仍 Active，远端网络、GUI 与性能准出没有随本次结构迁移扩张。

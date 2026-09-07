@@ -32,7 +32,7 @@ Vitest 证明纯逻辑、数据、算法和确定性不变量；Playwright 证�
 
 性能证据由 `seedlands-performance-validator`（默认 `Terra/high`）按[性能执行窗口](performance-execution.md)协调。采样命令必须持有机器级阻塞窗口；普通功能测试、等待时的负载、并发采样和未关联的历史结果都不构成当前性能证据。
 
-`?harness=1` 只能通过生产 `World.edit()`、Store 或 streaming 路径构造确定状态，不替代真实 Pointer Lock 输入。`src/world/**` 的 V8 行覆盖率不低于 80%；静态、构建、浏览器、Harness 和手工游玩要在 spec 中分别陈述真实结果。
+`?harness=1` 只能通过生产 `World.edit()`、Store 或 streaming 路径构造确定状态，不替代真实 Pointer Lock 输入。`packages/game-core/src/world/**` 的 V8 行覆盖率不低于 80%；静态、构建、浏览器、Harness 和手工游玩要在 spec 中分别陈述真实结果。
 
 ## 交付
 

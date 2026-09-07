@@ -40,3 +40,19 @@
 - CI 已分别构建 core、Web、Node，上传路径改为 `apps/web/dist`，并加入 Node 隔离检查与 portable Active Node 关键链路。此检查点的全量类型、格式、ESLint/路径 lint 和 5 个定向文件 39 项通过；全仓 coverage、浏览器 regression 与 Node 产物恢复仍待本地冻结验收。
 - Node 22 下 `verify:static:ci` 全量通过：236 个 Vitest 文件中 234 通过、2 个既有 skip，1211 项通过、4 项 skip；core world 覆盖率 lines 96.89%，Active Node 全量类型检查、Svelte、格式、ESLint 与路径 lint 均通过。日志 `/tmp/seedlands-monorepo/m2-verify-static.log`。
 - 迁移后首次真实浏览器 regression 得到可执行 RED：静态加载与预渲染通过，进入世界后首批 mesh 全部因 Web Worker kernel adapter 未注入 core 要求的显式单调时钟而失败，loading 不结束。补入真实 `performance.now` 端口并加 adapter 回归断言后，原失败用例 1/1 通过，完整 14/14 Chromium regression 通过（20.1 秒）；日志 `/tmp/seedlands-monorepo/m2-browser-regression.log`、`m2-browser-clock-port-green.log`、`m2-browser-regression-green.log`。当次截图已复制到 `/tmp/seedlands-monorepo/m2-world-loading.png`，历史 Delivered 图片恢复且未提交。
+
+## M2：冻结行为与产物验收
+
+- Web adapter 回归升级为经真实 `worldKernelAdapter` 运行最小 `generate-mesh`，直接证明显式时钟端口可完成此前被拒绝的 mesh；1/1 通过，日志 `/tmp/seedlands-monorepo/m3-web-clock-adapter.log`。
+- 新增本 change Playwright 用例显式以 `wasm=off&simd=off` 进入世界，断言 general Worker 的 `status=off/effectiveArtifact=off` 以及首块加载、渲染；定向 1/1 通过。最终 regression 同时覆盖默认 Wasm、TS fallback、预加载/预渲染和长期游戏旅程，15/15 通过（22.3 秒）。日志 `/tmp/seedlands-monorepo/m3-browser-ts-fallback.log`、`m3-browser-regression.log`；截图另存 `/tmp/seedlands-monorepo/m3-world-loading.png` 后恢复历史 Delivered 图片。
+- Node 22 重新构建五个 ESM 入口；无源码/依赖目录的产物校验、worker-thread 与 child-process 两种启停恢复、真实 SIGKILL 后只恢复最后 durable 检查点共 4/4 通过。日志 `/tmp/seedlands-monorepo/m3-node-build.log`、`m3-node-artifact-recovery.log`。
+- portable Active Node 完整 Authority baseline、调度失效、零生成回退、reference 接收与 Worker 输入结算 4 文件 35/35 通过，日志 `/tmp/seedlands-monorepo/m3-complete-baseline.log`。迁移前冻结清单的 20 个 Active Node 测试源码仍全部受专用 TypeScript 配置检查；依赖外部 `/tmp` 语料的其余用例保持 fail closed，未宣称执行。
+- 最终 `verify:static:ci` 在 Node 22 通过：236 文件中 234 通过、2 个既有 skip，1211 项通过、4 项 skip；world lines 96.89%，其后全部 package/root 类型检查通过。日志 `/tmp/seedlands-monorepo/m3-verify-static.log`。
+- 最终 `verify:node-isolation` 在 `/tmp/seedlands-monorepo/node-isolation` 全新安装并再次通过 core typecheck、Node 五入口 build 与独立 runtime `--help`。目录无 Web 源码、未复用根 `node_modules`、无 PlayCanvas/Svelte/Tone；Vitest→Vite 仅作为共享测试工具传递依赖单列。日志 `/tmp/seedlands-monorepo/m3-node-isolation.log`，报告 `/tmp/seedlands-monorepo/node-isolation-report.json`。
+
+## M3：路径、文档与交接
+
+- README 中英文版、代码地图、目录规范、AGENTS 与治理文档更新为三包实际路径、依赖方向、运行产物和验证入口。根级 PlayCanvas/Svelte/Tone 只为根整合测试解析而保留；Web 包声明其产品依赖，Node 隔离构建不消费它们。
+- 性能冻结工具同时识别当前 monorepo 的 `apps/web/dist` 和旧冻结对照的 `dist`；源码 hash 覆盖 Web/core/workspace 构建输入。对应 build identity 读取相同布局并跳过 `.vite` 等目录。当前与旧对照均成功写入 stamp；当前 identity 校验 39 个文件并包含 stamp。日志 `/tmp/seedlands-monorepo/m3-adoption-freeze.log`、`m3-adoption-identity-check.log`。Harness bundle 统计也同时验证两种布局，日志 `/tmp/seedlands-monorepo/m3-harness-dist-path.log`。
+- 迁移前清单 `/tmp/seedlands-monorepo/pre-migration-inventory.json` 绑定 `0380926`：239 个 `tests/` 文件、101 个 change-local 测试文件。最终路径盘点为 239 与 102，本 change 仅新增 1 个 TS fallback Playwright 文件，没有删除冻结清单中的测试。
+- 逐项命令、退出码、日志 SHA-256 与源码/工作树绑定见 `evidence/validation-manifest.json`。draft PR 为 #15；不主动合并或部署，冻结 HEAD 与最新 CI/独立验收状态由 root 最终回填。

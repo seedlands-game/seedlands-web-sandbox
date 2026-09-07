@@ -9,10 +9,10 @@
 ## 不变量与源码归属
 
 - 基础世界由 `seed + generatorVersion` 唯一确定；体素保持紧凑数值；编辑只经 `World.edit()`；渲染是 Chunk Mesh，不是逐体素 Entity。
-- `server` 拥有权威世界、规则和存档；`client` 是协议适配、预测和派生镜像；`app` 是浏览器组合、输入、PlayCanvas 与 Svelte；`worker` 只放执行入口和传输适配。
-- `world`、`physics`、`runtime` 保持纯逻辑。`world` 不依赖 DOM、Worker、PlayCanvas、`server` 或 `client`；不得把 app 行为反向搬进这些目录。
-- 新 app/client 文件先按[目录规范](docs/repository-structure.md)选择既有职责目录。顶层仅保留已审阅的组合入口；ESLint 负责拒绝 client→app 反向依赖和未归属的顶层文件。`src/app/player-view-offsets.ts`、`src/client/performance-telemetry.ts` 仅为两个 Delivered change 的冻结路径兼容入口；新代码不得使用，待对应历史 change 归档后删除。
-- Node builtin、文件 I/O、线程/子进程和网络适配只进入 `src/node/`；`server/dedicated`、`server/compute`、`server/protocol` 维持平台无关。浏览器产物不得导入 Node 适配，Node 不得引入 app/client/PlayCanvas。
+- `packages/game-core` 拥有权威世界、规则、存档、协议、世界/物理/运行时和纯计算任务；`apps/web` 拥有客户端适配、预测、派生镜像、浏览器组合、Worker 入口、PlayCanvas 与 Svelte；`apps/node-server` 拥有 Node 产品适配。
+- core 保持纯逻辑，不依赖 DOM、WebWorker、PlayCanvas、Node builtin/ambient types 或两个 app 包。平台 clone、UTF-8、取消、计时与调度能力通过只读实例端口注入，不使用可重配全局。
+- 新 app/client 文件先按[目录规范](docs/repository-structure.md)选择 `apps/web/src` 的既有职责目录。顶层仅保留已审阅的组合入口；ESLint 负责拒绝 client→app 反向依赖和未归属的顶层文件。`apps/web/src/app/player-view-offsets.ts`、`apps/web/src/client/performance-telemetry.ts` 仅为两个 Delivered change 的冻结路径兼容入口；新代码不得使用，待对应历史 change 归档后删除。
+- Node builtin、文件 I/O、线程/子进程和网络适配只进入 `apps/node-server/src/node/`；core 的 `server/dedicated`、`server/compute`、`server/protocol` 维持平台无关。Web 与 Node 只经 `@seedlands/game-core` 声明 exports 共享逻辑，禁止跨包相对路径、core 反向依赖、Web/Node 互依和未声明依赖。
 - 移动入口或职责时更新代码地图；不要预建 `engine`、`plugins`、`shared` 等抽象。
 
 ## 控制平面、数据平面与性能边界
