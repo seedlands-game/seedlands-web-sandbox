@@ -15,6 +15,9 @@ ls:
     .md: kebab-case
   changes/*/evidence:
     .dir: kebab-case
+  changes/2026-09-08-node-monorepo/contracts:
+    .dir: kebab-case
+    .json: kebab-case
   changes/*/midscene:
     .dir: kebab-case
   changes/*/e2e:
