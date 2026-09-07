@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
 const evidence = resolve(root, 'changes/2026-09-07-data-plane-adoption/evidence');
-const output = resolve(root, 'src/generated/wasm');
+const output = resolve(root, 'apps/web/src/generated/wasm');
 const hash = (path) =>
   createHash('sha256')
     .update(readFileSync(resolve(root, path)))
@@ -25,6 +25,6 @@ const manifest = JSON.parse(readFileSync(resolve(output, 'rust-kernel-manifest.j
 for (const [path, expected] of Object.entries(manifest.sources))
   if (hash(path) !== expected) throw new Error(`Stale Rust kernel source: ${path}`);
 for (const mode of ['scalar', 'simd'])
-  if (hash(`src/generated/wasm/rust-kernels-${mode}.wasm`) !== manifest[mode].sha256)
+  if (hash(`apps/web/src/generated/wasm/rust-kernels-${mode}.wasm`) !== manifest[mode].sha256)
     throw new Error(`Rust ${mode} artifact mismatch`);
 process.stdout.write('Rust source/artifact fingerprints verified.\n');

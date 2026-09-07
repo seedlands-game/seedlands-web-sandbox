@@ -1,15 +1,16 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { PROTOCOL_VERSION } from '../../src/runtime/session-protocol';
-import { CHUNK_SIZE, Voxel, chunkKey, voxelIndex } from '../../src/world/voxel';
-import { bodyConfigFor, bodyWorldAabb } from '../../src/physics';
-import type { ChunkPersistenceLoadDiagnostics } from '../../src/server/persistence/chunk-persistence';
-import { CanonicalChunkResidencyPressureError } from '../../src/server/chunk-residency';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { PROTOCOL_VERSION } from '../../packages/game-core/src/runtime/session-protocol';
+import { CHUNK_SIZE, Voxel, chunkKey, voxelIndex } from '../../packages/game-core/src/world/voxel';
+import { bodyConfigFor, bodyWorldAabb } from '../../packages/game-core/src/physics';
+import type { ChunkPersistenceLoadDiagnostics } from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import { CanonicalChunkResidencyPressureError } from '../../packages/game-core/src/server/chunk-residency';
 
 describe('AuthorityRuntime', () => {
   it('把单次有界持久化加载分项附在对应Mesh准备回执上', async () => {
-    const persistence = Object.assign(new MemoryGamePersistence(), {
+    const persistence = Object.assign(new MemoryGamePersistence({ clone: testCorePlatform.clone }), {
       ensureNeighborhood: async (): Promise<ChunkPersistenceLoadDiagnostics> => ({
         requestedKeyCount: 27,
         foundCount: 0,
@@ -23,13 +24,13 @@ describe('AuthorityRuntime', () => {
       }),
     });
     const runtime = await AuthorityRuntime.create({
+      platform: { ...testCorePlatform, now: () => 1 },
       epoch: 'world:prepare-diagnostics',
       seedText: 'authority-prepare-diagnostics',
       persistence,
       initialWorldTime: 9,
       startTimeMs: 0,
       initialPlayerBodyPosition: [0.5, 33, 0.5],
-      now: () => 1,
     });
 
     const prepared = await runtime.prepareMesh(0, 1, -2);
@@ -43,12 +44,13 @@ describe('AuthorityRuntime', () => {
   });
 
   it('Mesh准备异常时释放完整读集pin且显式release后不残留中心pin', async () => {
-    const persistence = Object.assign(new MemoryGamePersistence(), {
+    const persistence = Object.assign(new MemoryGamePersistence({ clone: testCorePlatform.clone }), {
       ensureNeighborhood: async () => {
         throw new Error('load failed');
       },
     });
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'world:prepare-release-on-error',
       seedText: 'authority-prepare-release-on-error',
       persistence,
@@ -80,7 +82,7 @@ describe('AuthorityRuntime', () => {
 
   it('Mesh专用读取在持久overlay无法入驻时fail closed并可在压力解除后重试', async () => {
     const seedText = 'authority-mesh-pressure';
-    const persistence = new MemoryGamePersistence();
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const overlayKey = chunkKey(1, 2, 1);
     persistence.saveSnapshots([
       {
@@ -95,6 +97,7 @@ describe('AuthorityRuntime', () => {
       },
     ]);
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'world:mesh-pressure',
       seedText,
       persistence,
@@ -136,9 +139,10 @@ describe('AuthorityRuntime', () => {
 
   it('在唯一GameServer内恢复/创建脚底中心玩家并驱动120Hz权威物理', async () => {
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'world:1',
       seedText: 'authority-runtime',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       initialWorldTime: 9,
       startTimeMs: 0,
       initialPlayerBodyPosition: [0.5, 33, 0.5],
@@ -175,9 +179,10 @@ describe('AuthorityRuntime', () => {
 
   it('只返回Worker生成输入并在显式接纳后建立权威碰撞副本', async () => {
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'world:2',
       seedText: 'authority-mesh',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       initialWorldTime: 9,
       startTimeMs: 0,
       initialPlayerBodyPosition: [0.5, 33, 0.5],
@@ -199,9 +204,10 @@ describe('AuthorityRuntime', () => {
 
   it('按epoch+issuer+stream+sequence复用事务回执并拒绝过期提交视图', async () => {
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'world:3',
       seedText: 'authority-transactions',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       initialWorldTime: 9,
       startTimeMs: 0,
       initialPlayerBodyPosition: [0.5, 33, 0.5],
@@ -223,9 +229,10 @@ describe('AuthorityRuntime', () => {
 
   it('结构提交包围身体时在下一权威物理步经统一恢复队列移出固体', async () => {
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'world:geometry-recovery',
       seedText: 'authority-geometry-recovery',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       initialWorldTime: 9,
       startTimeMs: 0,
       initialPlayerBodyPosition: [16.5, 1, 16.5],

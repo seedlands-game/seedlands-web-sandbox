@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ComputeTaskQueue, type ComputeTask } from '../../src/runtime/compute-task-queue';
+import { ComputeTaskQueue, type ComputeTask } from '../../packages/game-core/src/runtime/compute-task-queue';
 
 const task = (overrides: Partial<ComputeTask> = {}): ComputeTask => ({
   protocolVersion: 1,

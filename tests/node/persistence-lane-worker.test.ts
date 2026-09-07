@@ -1,15 +1,16 @@
+import { testCorePlatform } from '../support/core-platform';
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import type { NodeRpcPort } from '../../src/node/runtime/node-rpc-contract';
+import type { NodeRpcPort } from '../../apps/node-server/src/node/runtime/node-rpc-contract';
 import { build as viteBuild } from 'vite';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
-import { FileGamePersistence } from '../../src/node/persistence/file-game-persistence';
-import { createNodePersistenceLane } from '../../src/node/persistence/node-persistence-lane';
-import { createNodePersistenceLaneProxy } from '../../src/node/persistence/persistence-lane-proxy';
-import { GameServer } from '../../src/server/game-server';
-import { GENERATOR_VERSION, Voxel } from '../../src/world/voxel';
+import { FileGamePersistence } from '../../apps/node-server/src/node/persistence/file-game-persistence';
+import { createNodePersistenceLane } from '../../apps/node-server/src/node/persistence/node-persistence-lane';
+import { createNodePersistenceLaneProxy } from '../../apps/node-server/src/node/persistence/persistence-lane-proxy';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { GENERATOR_VERSION, Voxel } from '../../packages/game-core/src/world/voxel';
 
 let outputDirectory = '';
 let workerEntry: URL;
@@ -23,7 +24,7 @@ beforeAll(async () => {
     configFile: false,
     logLevel: 'silent',
     build: {
-      ssr: 'src/node/persistence/node-persistence-worker.ts',
+      ssr: 'apps/node-server/src/node/persistence/node-persistence-worker.ts',
       outDir: outputDirectory,
       emptyOutDir: true,
       target: 'node22',
@@ -90,7 +91,7 @@ describe('Node Persistence Worker lane', () => {
       epoch: 'persistence-worker-e2e',
       bootstrap: lane.proxy,
     });
-    const server = new GameServer({ seedText: 'worker-world', persistence: proxy });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'worker-world', persistence: proxy });
     server.spawnPlayer({ id: 'player', position: [0.5, 34, 0.5] });
     server.edit(0, 20, 0, Voxel.Wood);
     await server.save(1);

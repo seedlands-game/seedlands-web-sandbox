@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { synthesizeSfx } from '../src/client/audio/audio-composition';
-import type { SfxKey } from '../src/client/audio/audio-types';
+import { synthesizeSfx } from '../apps/web/src/client/audio/audio-composition';
+import type { SfxKey } from '../apps/web/src/client/audio/audio-types';
 
 const SAMPLE_RATE = 48_000;
 const DURATION_SECONDS = 6;

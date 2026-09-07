@@ -3,10 +3,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createNodeDedicatedRuntime, type NodeDedicatedRuntime } from '../../src/node/runtime/node-dedicated-runtime';
-import { FileGamePersistence } from '../../src/node/persistence/file-game-persistence';
-import { PROTOCOL_VERSION } from '../../src/runtime/session-protocol';
-import { GENERATOR_VERSION, Voxel } from '../../src/world/voxel';
+import {
+  createNodeDedicatedRuntime,
+  type NodeDedicatedRuntime,
+} from '../../apps/node-server/src/node/runtime/node-dedicated-runtime';
+import { FileGamePersistence } from '../../apps/node-server/src/node/persistence/file-game-persistence';
+import { PROTOCOL_VERSION } from '../../packages/game-core/src/runtime/session-protocol';
+import { GENERATOR_VERSION, Voxel } from '../../packages/game-core/src/world/voxel';
 
 const directories: string[] = [];
 

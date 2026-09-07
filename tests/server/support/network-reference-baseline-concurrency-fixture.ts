@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { authorityBaselineCaptureKeys } from '../../../src/server/authority/authority-baseline-capture';
-import { createBaselineReferenceInFlightLedger } from '../../../src/server/protocol/network-reference-baseline-budget';
+import { authorityBaselineCaptureKeys } from '../../../packages/game-core/src/server/authority/authority-baseline-capture';
+import { createBaselineReferenceInFlightLedger } from '../../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
 import {
   NETWORK_REFERENCE_BASELINE_CELL_COUNT,
   type BaselineBlockDescriptorReference,
@@ -8,8 +8,8 @@ import {
   type BaselinePageReference,
   type BaselineReferenceInFlightLedger,
   type BaselineReferenceReassemblerOptions,
-} from '../../../src/server/protocol/network-reference-baseline-types';
-import type { InterestSessionRef } from '../../../src/server/protocol/network-reference-interest-control';
+} from '../../../packages/game-core/src/server/protocol/network-reference-baseline-types';
+import type { InterestSessionRef } from '../../../packages/game-core/src/server/protocol/network-reference-interest-control';
 
 const CANONICAL_BYTES = NETWORK_REFERENCE_BASELINE_CELL_COUNT * Uint16Array.BYTES_PER_ELEMENT;
 const FLUID_BYTES = NETWORK_REFERENCE_BASELINE_CELL_COUNT;

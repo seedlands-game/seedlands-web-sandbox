@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { MessageChannel, type MessagePort } from 'node:worker_threads';
-import { measureNodeRpcBytes } from '../../src/node/runtime/node-rpc-bytes';
-import { attachNodeRpcServer, type NodeRpcResponse } from '../../src/node/runtime/node-rpc-contract';
+import { measureNodeRpcBytes } from '../../apps/node-server/src/node/runtime/node-rpc-bytes';
+import { attachNodeRpcServer, type NodeRpcResponse } from '../../apps/node-server/src/node/runtime/node-rpc-contract';
 import {
   authorityCaptureDispatchOrderKey,
   reserveAuthorityResponseBytes,
-} from '../../src/node/runtime/node-authority-baseline-protocol';
+} from '../../apps/node-server/src/node/runtime/node-authority-baseline-protocol';
 
 const EPOCH = 'capture-dispatch-order';
 const GENERATION = 0;

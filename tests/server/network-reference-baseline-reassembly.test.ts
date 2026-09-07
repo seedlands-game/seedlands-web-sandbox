@@ -6,12 +6,12 @@ import {
   type BaselineBundleDescriptorReference,
   type BaselinePageReference,
   type PublishedBaselineBundleReference,
-} from '../../src/server/protocol/network-reference-baseline';
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline';
 import {
   createBaselineReferenceInFlightLedger,
   createBaselineReferenceSendQueue,
-} from '../../src/server/protocol/network-reference-baseline-budget';
-import { createBaselineReferenceReassembler } from '../../src/server/protocol/network-reference-baseline-reassembly';
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
+import { createBaselineReferenceReassembler } from '../../packages/game-core/src/server/protocol/network-reference-baseline-reassembly';
 import {
   BASELINE_QUEUE_BYTES,
   baselineRef,

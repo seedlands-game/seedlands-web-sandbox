@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   createBaselineReferenceInFlightLedger,
   createBaselineReferenceSendQueue,
-} from '../../src/server/protocol/network-reference-baseline-budget';
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
 import {
   createBaselineReferencePublicationQueue,
   prepareAuthorityBaselineReference,
-} from '../../src/server/protocol/network-reference-baseline';
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline';
 import {
   BASELINE_QUEUE_BYTES,
   DeferredDigest,

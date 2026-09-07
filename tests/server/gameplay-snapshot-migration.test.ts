@@ -1,12 +1,13 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { GameplayRuntime } from '../../src/server/gameplay/gameplay-runtime';
+import { GameplayRuntime } from '../../packages/game-core/src/server/gameplay/gameplay-runtime';
 import type {
   GameplaySnapshotV1,
   GameplaySnapshotV2,
   GameplaySnapshotV3,
-} from '../../src/server/gameplay/gameplay-snapshot';
-import { legacyPlayerPositionToFeet } from '../../src/server/gameplay/gameplay-snapshot';
-import { ItemIds } from '../../src/server/gameplay/item-registry';
+} from '../../packages/game-core/src/server/gameplay/gameplay-snapshot';
+import { legacyPlayerPositionToFeet } from '../../packages/game-core/src/server/gameplay/gameplay-snapshot';
+import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
 
 const callbacks = {
   getVoxel: () => 0,
@@ -15,7 +16,7 @@ const callbacks = {
 };
 
 const createCurrentRuntime = () => {
-  const runtime = new GameplayRuntime(callbacks);
+  const runtime = new GameplayRuntime({ ...callbacks, platform: testCorePlatform });
   runtime.spawnPlayer({ id: 'player', position: [1, 38.4, -2] });
   runtime.spawnWorldItem([4, 39.8, -2], { itemId: ItemIds.StoneBlock, count: 2 });
   runtime.spawnAutonomous(
@@ -94,7 +95,7 @@ describe('GameplaySnapshot V3 坐标与物理迁移', () => {
     const current = createCurrentRuntime().createSnapshot();
     const raw = legacy(current);
     const untouched = structuredClone(raw);
-    const restored = new GameplayRuntime(callbacks);
+    const restored = new GameplayRuntime({ ...callbacks, platform: testCorePlatform });
 
     expect(restored.restoreSnapshot(raw)).toMatchObject({ version });
 
@@ -105,7 +106,7 @@ describe('GameplaySnapshot V3 坐标与物理迁移', () => {
     expect(raw).toEqual(untouched);
 
     const migrated = restored.createSnapshot();
-    const roundTrip = new GameplayRuntime(callbacks);
+    const roundTrip = new GameplayRuntime({ ...callbacks, platform: testCorePlatform });
     expect(roundTrip.restoreSnapshot(migrated)).toEqual({ version: 3, worldTime: 9 });
     expect(roundTrip.getEntity('player')?.position).toEqual([1, 38.4, -2]);
     expect(roundTrip.getEntity('world-item-1')?.position).toEqual([4, 39.8, -2]);
@@ -124,7 +125,7 @@ describe('GameplaySnapshot V3 坐标与物理迁移', () => {
       health: 12,
       maxHealth: 12,
     });
-    const restored = new GameplayRuntime(callbacks);
+    const restored = new GameplayRuntime({ ...callbacks, platform: testCorePlatform });
 
     expect(restored.restoreSnapshot(legacy)).toMatchObject({ version });
     expect(restored.getEntity('legacy-creature')).toMatchObject({ archetype: 'grazer' });
@@ -139,7 +140,7 @@ describe('GameplaySnapshot V3 坐标与物理迁移', () => {
     source.giveItem('player', { itemId: ItemIds.Berry, count: 3 });
     source.setHungerForDebug('player', 12);
     const snapshot = source.createSnapshot();
-    const restored = new GameplayRuntime(callbacks);
+    const restored = new GameplayRuntime({ ...callbacks, platform: testCorePlatform });
 
     expect(restored.restoreSnapshot(snapshot)).toEqual({ version: 3, worldTime: 9 });
     expect(restored.createSnapshot()).toEqual(snapshot);

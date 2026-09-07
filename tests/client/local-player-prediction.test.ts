@@ -1,9 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { LocalPlayerPrediction, type PredictionAuthorityState } from '../../src/client/local-player-prediction';
-import { AuthoritySnapshotGate, type AuthoritySnapshotOrder } from '../../src/client/authority/authority-snapshot-gate';
-import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
-import type { Collider, PhysicsWorld, WorldAabb } from '../../src/physics';
-import { InputCommandBuffer, type InputCommand } from '../../src/runtime/session-protocol';
+import {
+  LocalPlayerPrediction,
+  type PredictionAuthorityState,
+} from '../../apps/web/src/client/local-player-prediction';
+import {
+  AuthoritySnapshotGate,
+  type AuthoritySnapshotOrder,
+} from '../../apps/web/src/client/authority/authority-snapshot-gate';
+import type { AuthoritySnapshot } from '../../packages/game-core/src/server/authority/authority-session';
+import type { Collider, PhysicsWorld, WorldAabb } from '../../packages/game-core/src/physics';
+import { InputCommandBuffer, type InputCommand } from '../../packages/game-core/src/runtime/session-protocol';
 
 const body = (x = 0) => ({
   id: 'player-1',

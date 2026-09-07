@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import type * as pc from 'playcanvas';
-import { World } from '../../src/app/world/world-runtime';
+import { World } from '../../apps/web/src/app/world/world-runtime';
 import {
   acceptStreamingCanonical,
   prepareStreamingNeighborhood,
   StreamingAdmissionRetry,
-} from '../../src/app/world/streaming-admission-retry';
+} from '../../apps/web/src/app/world/streaming-admission-retry';
 
 describe('World streaming admission backpressure', () => {
   it('同一streaming中心在Authority解除背压后重新请求缺失Chunk且退避有界', () => {

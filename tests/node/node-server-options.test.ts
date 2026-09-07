@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseNodeServerOptions } from '../../src/node/server/node-server-options';
+import { parseNodeServerOptions } from '../../apps/node-server/src/node/server/node-server-options';
 
 describe('Node 启动配置', () => {
   it('启动必须有显式存档目录，help 不创建世界', () => {

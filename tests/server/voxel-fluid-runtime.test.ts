@@ -1,9 +1,10 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { GameServer, type WorldCommitResult } from '../../src/server/game-server';
-import { computeFluidCandidate } from '../../src/server/fluid/fluid-transaction';
-import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
-import { WorldMutationBuffer } from '../../src/server/world-mutation';
-import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
+import { GameServer, type WorldCommitResult } from '../../packages/game-core/src/server/game-server';
+import { computeFluidCandidate } from '../../packages/game-core/src/server/fluid/fluid-transaction';
+import { MemoryChunkPersistence } from '../../packages/game-core/src/server/persistence/memory-chunk-persistence';
+import { WorldMutationBuffer } from '../../packages/game-core/src/server/world-mutation';
+import { CHUNK_SIZE, Voxel, voxelIndex } from '../../packages/game-core/src/world/voxel';
 
 const clearBox = (server: GameServer, minX: number, maxX: number, minY: number, maxY: number) => {
   const edits = [];
@@ -40,7 +41,7 @@ const runFluidCandidates = (server: GameServer, maxCandidates: number) => {
 
 describe('bounded voxel fluid runtime', () => {
   it('falls before spreading, then attenuates across supported ground', () => {
-    const server = new GameServer({ seedText: 'fluid-fall' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-fall' });
     clearBox(server, -4, 4, 50, 55);
     for (let x = -4; x <= 4; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(0, 54, 0, Voxel.Water, 'fixture');
@@ -54,7 +55,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('runs one bounded worker lease without leaving authority work in flight', () => {
-    const server = new GameServer({ seedText: 'fluid-30hz' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-30hz' });
     clearBox(server, -1, 1, 50, 51);
     server.edit(0, 49, 0, Voxel.Stone, 'fixture');
     server.edit(0, 50, 0, Voxel.Water, 'fixture');
@@ -65,7 +66,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('respects obstacles and retracts unsupported flow after source removal', () => {
-    const server = new GameServer({ seedText: 'fluid-retract' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-retract' });
     clearBox(server, -4, 4, 50, 52);
     for (let x = -4; x <= 4; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(1, 50, 0, Voxel.Stone, 'fixture');
@@ -83,7 +84,7 @@ describe('bounded voxel fluid runtime', () => {
 
   it('crosses a Chunk boundary and restores versioned fluid sidecars', async () => {
     const persistence = new MemoryChunkPersistence();
-    const first = new GameServer({ seedText: 'fluid-persist', persistence });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'fluid-persist', persistence });
     clearBox(first, 29, 35, 50, 52);
     for (let x = 29; x <= 35; x += 1) first.edit(x, 49, 0, Voxel.Stone, 'fixture');
     first.edit(31, 50, 0, Voxel.Water, 'fixture');
@@ -92,14 +93,14 @@ describe('bounded voxel fluid runtime', () => {
     const before = first.getFluidCell(32, 50, 0);
     await first.flushDirtyChunks();
 
-    const restored = new GameServer({ seedText: 'fluid-persist', persistence });
+    const restored = new GameServer({ platform: testCorePlatform, seedText: 'fluid-persist', persistence });
     expect(restored.getVoxel(32, 50, 0)).toBe(Voxel.Water);
     expect(restored.getFluidCell(32, 50, 0)).toEqual(before);
   });
 
   it('limits work per call and remains deterministic across time slicing', () => {
     const make = () => {
-      const server = new GameServer({ seedText: 'fluid-deterministic' });
+      const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-deterministic' });
       clearBox(server, -10, 10, 50, 54);
       for (let x = -10; x <= 10; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
       server.edit(0, 52, 0, Voxel.Water, 'fixture');
@@ -116,7 +117,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('commits sidecar-only level changes so remesh and persistence cannot miss them', () => {
-    const server = new GameServer({ seedText: 'fluid-level-commit' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-level-commit' });
     clearBox(server, -2, 2, 50, 52);
     for (let x = -2; x <= 2; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(0, 50, 0, Voxel.Water, 'fixture');
@@ -131,12 +132,12 @@ describe('bounded voxel fluid runtime', () => {
 
   it('reactivates persisted non-source water and resumes convergence after reload', async () => {
     const persistence = new MemoryChunkPersistence();
-    const first = new GameServer({ seedText: 'fluid-resume', persistence });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'fluid-resume', persistence });
     clearBox(first, -2, 2, 50, 54);
     first.edit(0, 54, 0, Voxel.Water, 'fixture');
     runFluidCandidates(first, 6);
     await first.flushDirtyChunks();
-    const restored = new GameServer({ seedText: 'fluid-resume', persistence });
+    const restored = new GameServer({ platform: testCorePlatform, seedText: 'fluid-resume', persistence });
     restored.setFluidActiveChunks(['0,1,0']);
     expect(restored.getVoxel(0, 53, 0)).toBe(Voxel.Water);
     let processed = 0;
@@ -146,7 +147,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('pauses at unloaded Chunk boundaries instead of materializing an unbounded flow path', () => {
-    const server = new GameServer({ seedText: 'fluid-loaded-window' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-loaded-window' });
     clearBox(server, 28, 31, 50, 52);
     for (let x = 28; x <= 31; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.getChunk(1, 1, 0);
@@ -160,7 +161,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('reactivates a paused boundary when worker-first canonical data arrives', () => {
-    const server = new GameServer({ seedText: 'fluid-worker-boundary' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-worker-boundary' });
     server.setFluidActiveChunks(['0,1,0', '1,1,0']);
     clearBox(server, 28, 31, 50, 52);
     for (let x = 28; x <= 31; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
@@ -186,7 +187,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('initializes worker canonical Water with a legacy full-source sidecar', () => {
-    const server = new GameServer({ seedText: 'fluid-natural-sidecar' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-natural-sidecar' });
     const canonical = new Uint16Array(CHUNK_SIZE ** 3);
     canonical[voxelIndex(1, 1, 1)] = Voxel.Water;
     expect(
@@ -223,7 +224,7 @@ describe('bounded voxel fluid runtime', () => {
         fluid: targetFluid,
       },
     ]);
-    const server = new GameServer({ seedText: 'fluid-fairness', persistence });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-fairness', persistence });
     const saturated = new Uint16Array(CHUNK_SIZE ** 3);
     saturated.fill(Voxel.Water);
     expect(
@@ -247,7 +248,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('keeps batch and mutation-buffer water sidecars consistent through source removal', () => {
-    const server = new GameServer({ seedText: 'fluid-buffer-source-removal' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-buffer-source-removal' });
     clearBox(server, -2, 2, 50, 52);
     for (let x = -2; x <= 2; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.editBatch({ actorId: 'fixture', edits: [{ x: 0, y: 50, z: 0, value: Voxel.Water }] });
@@ -264,7 +265,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('accepts one cross-chunk candidate as one revision per changed chunk', () => {
-    const server = new GameServer({ seedText: 'fluid-cross-chunk-atomic' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-cross-chunk-atomic' });
     server.setFluidActiveChunks(['0,1,0', '1,1,0']);
     clearBox(server, 30, 33, 50, 51);
     for (let x = 30; x <= 33; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
@@ -280,7 +281,7 @@ describe('bounded voxel fluid runtime', () => {
   });
 
   it('keeps a flow supplied by a second source when the first source is removed', () => {
-    const server = new GameServer({ seedText: 'fluid-two-source-cleanup' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fluid-two-source-cleanup' });
     clearBox(server, -3, 3, 50, 51);
     for (let x = -3; x <= 3; x += 1) server.edit(x, 49, 0, Voxel.Stone, 'fixture');
     server.edit(-2, 50, 0, Voxel.Water, 'fixture');

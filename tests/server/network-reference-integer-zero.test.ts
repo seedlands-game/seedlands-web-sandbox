@@ -1,22 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import type { AuthoritySnapshot } from '../../src/server/authority/authority-session-types';
+import type { AuthoritySnapshot } from '../../packages/game-core/src/server/authority/authority-session-types';
 import {
   projectChunkBaselineReference,
   projectWelcomeReference,
-} from '../../src/server/protocol/network-reference-bootstrap';
-import { projectActionRequestReference } from '../../src/server/protocol/network-action-request-reference';
+} from '../../packages/game-core/src/server/protocol/network-reference-bootstrap';
+import { projectActionRequestReference } from '../../packages/game-core/src/server/protocol/network-action-request-reference';
 import {
   projectGameplayViewReference,
   projectPlayerCorrectionReference,
   projectWorldCommitReference,
-} from '../../src/server/protocol/network-reference-projection';
+} from '../../packages/game-core/src/server/protocol/network-reference-projection';
 import {
   projectInputDecisionReference,
   projectPlayerInputReference,
-} from '../../src/server/protocol/network-reference-input';
-import { projectEntityPoseReference } from '../../src/server/protocol/network-reference-pose';
-import type { AuthorityGameplayView, AuthorityReady } from '../../src/worker/authority-worker-protocol';
-import type { InputCommand } from '../../src/runtime/session-protocol';
+} from '../../packages/game-core/src/server/protocol/network-reference-input';
+import { projectEntityPoseReference } from '../../packages/game-core/src/server/protocol/network-reference-pose';
+import type {
+  AuthorityGameplayView,
+  AuthorityReady,
+} from '../../packages/game-core/src/compute/authority-worker-protocol';
+import type { InputCommand } from '../../packages/game-core/src/runtime/session-protocol';
 
 const expectPositiveZero = (value: number) => {
   expect(value).toBe(0);

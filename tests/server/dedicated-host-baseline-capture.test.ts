@@ -1,13 +1,14 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it, vi } from 'vitest';
 import type {
   DedicatedComputeExecutor,
   DedicatedComputeTask,
-} from '../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedBaselineCaptureCoordinator } from '../../src/server/dedicated/dedicated-baseline-capture';
-import { DedicatedServerHost } from '../../src/server/dedicated/dedicated-server-host';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { CHUNK_SIZE } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedBaselineCaptureCoordinator } from '../../packages/game-core/src/server/dedicated/dedicated-baseline-capture';
+import { DedicatedServerHost } from '../../packages/game-core/src/server/dedicated/dedicated-server-host';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { CHUNK_SIZE } from '../../packages/game-core/src/world/voxel';
 
 const compute = (): DedicatedComputeExecutor => ({
   execute: vi.fn(async (task: DedicatedComputeTask) => {
@@ -53,9 +54,10 @@ const create = async (
   executor = compute(),
   limits: { pendingChunks?: number } = {},
   hardLimit = 128,
-  persistence = new MemoryGamePersistence(),
+  persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone }),
 ) => {
   const host = await DedicatedServerHost.create({
+    platform: testCorePlatform,
     epoch: 'baseline-capture-test',
     seedText: 'baseline-capture-test',
     initialPlayerBodyPosition: [0.5, 33, 0.5],
@@ -159,6 +161,10 @@ describe('DedicatedServerHost baseline capture', () => {
 
   it('准备或生成失败使bundle整体不可用，记录诊断并在全部工作结算后释放预算', async () => {
     class RejectingPersistence extends MemoryGamePersistence {
+      constructor() {
+        super({ clone: testCorePlatform.clone });
+      }
+
       async ensureSnapshot(cx: number): Promise<void> {
         if (cx === 160) throw new Error('controlled preparation failure');
       }

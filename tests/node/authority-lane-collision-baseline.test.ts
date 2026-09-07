@@ -5,10 +5,13 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { MessageChannel } from 'node:worker_threads';
 import { build as viteBuild } from 'vite';
-import { createNodeAuthorityLane, type NodeAuthorityLane } from '../../src/node/runtime/node-authority-lane';
-import { createNodePersistenceLane } from '../../src/node/persistence/node-persistence-lane';
-import { GENERATOR_VERSION, CHUNK_SIZE } from '../../src/world/voxel';
-import type { AuthorityCollisionBaselineResult } from '../../src/server/game-server-types';
+import {
+  createNodeAuthorityLane,
+  type NodeAuthorityLane,
+} from '../../apps/node-server/src/node/runtime/node-authority-lane';
+import { createNodePersistenceLane } from '../../apps/node-server/src/node/persistence/node-persistence-lane';
+import { GENERATOR_VERSION, CHUNK_SIZE } from '../../packages/game-core/src/world/voxel';
+import type { AuthorityCollisionBaselineResult } from '../../packages/game-core/src/server/game-server-types';
 
 type CollisionBaselineLane = NodeAuthorityLane &
   Readonly<{
@@ -26,7 +29,7 @@ beforeAll(async () => {
     configFile: false,
     logLevel: 'silent',
     build: {
-      ssr: 'src/node/server/node-authority-worker.ts',
+      ssr: 'apps/node-server/src/node/server/node-authority-worker.ts',
       outDir: join(buildDirectory, 'authority'),
       emptyOutDir: true,
       target: 'node22',
@@ -37,7 +40,7 @@ beforeAll(async () => {
     configFile: false,
     logLevel: 'silent',
     build: {
-      ssr: 'src/node/persistence/node-persistence-worker.ts',
+      ssr: 'apps/node-server/src/node/persistence/node-persistence-worker.ts',
       outDir: join(buildDirectory, 'persistence'),
       emptyOutDir: true,
       target: 'node22',

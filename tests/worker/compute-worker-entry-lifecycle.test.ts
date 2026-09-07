@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createComputeWorkerEntryLifecycle } from '../../src/worker/compute-worker-entry-lifecycle';
-import type { ComputeTask } from '../../src/runtime/compute-task-queue';
+import { createComputeWorkerEntryLifecycle } from '../../apps/web/src/worker/compute-worker-entry-lifecycle';
+import type { ComputeTask } from '../../packages/game-core/src/runtime/compute-task-queue';
 
 const deferred = <Value>() => {
   let resolve!: (value: Value) => void;

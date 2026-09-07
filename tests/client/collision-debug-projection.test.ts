@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createCollisionDebugBatch } from '../../src/client/presentation/collision-debug-projection';
+import { createCollisionDebugBatch } from '../../apps/web/src/client/presentation/collision-debug-projection';
 
 describe('碰撞调试投影', () => {
   it('从同一身体注册表投影权威和预测箱，且来源和颜色可区分', () => {

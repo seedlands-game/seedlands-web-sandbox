@@ -1,9 +1,10 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import {
   createStoredChunkRecord,
   decodeStoredChunkRecord,
   storedChunkRecordBytes,
-} from '../../src/world/chunk-snapshot-codec';
+} from '../../packages/game-core/src/world/chunk-snapshot-codec';
 
 const VOXEL_COUNT = 32 ** 3;
 const enabled = process.env.SEEDLANDS_PERFORMANCE_GATE === '1';
@@ -50,7 +51,10 @@ const buildRecord = (index: number) => {
 describe.runIf(enabled)('Chunk snapshot codec performance gate', () => {
   it('measures the 1,024-Chunk corpus size and active-working-set decode runtime', () => {
     const corpus = Array.from({ length: 1_024 }, (_, index) => buildRecord(index));
-    const encodedBytes = corpus.reduce((total, fixture) => total + storedChunkRecordBytes(fixture.record), 0);
+    const encodedBytes = corpus.reduce(
+      (total, fixture) => total + storedChunkRecordBytes(fixture.record, testCorePlatform.utf8),
+      0,
+    );
     const rawBytes = corpus.length * VOXEL_COUNT * Uint16Array.BYTES_PER_ELEMENT;
     const legacyJsonBytes = corpus.reduce(
       (total, fixture) => total + new TextEncoder().encode(JSON.stringify([...fixture.current])).byteLength,

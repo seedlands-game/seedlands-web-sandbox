@@ -1,9 +1,13 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { GameServer } from '../../src/server/game-server';
-import type { ChunkPersistence, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
-import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
-import { Voxel, chunkKey } from '../../src/world/voxel';
-import { createProceduralMeshInput, meshChunk, meshHaloIndex } from '../../src/world/mesh';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import type {
+  ChunkPersistence,
+  ChunkSnapshot,
+} from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import { MemoryChunkPersistence } from '../../packages/game-core/src/server/persistence/memory-chunk-persistence';
+import { Voxel, chunkKey } from '../../packages/game-core/src/world/voxel';
+import { createProceduralMeshInput, meshChunk, meshHaloIndex } from '../../packages/game-core/src/world/mesh';
 
 describe('GameServer headless authority', () => {
   it('准备Mesh时pin完整27格并只让持久层读取未驻留坐标', async () => {
@@ -23,6 +27,7 @@ describe('GameServer headless authority', () => {
       },
     };
     const server = new GameServer({
+      platform: testCorePlatform,
       seedText: 'mesh-neighborhood-residency',
       persistence,
       canonicalResidency: { target: 0, hardLimit: 64, evictionBatch: 32 },
@@ -59,6 +64,7 @@ describe('GameServer headless authority', () => {
 
   it('重复旧center release不能撤掉相邻准备期读集且准备闭包只释放自身代际', () => {
     const server = new GameServer({
+      platform: testCorePlatform,
       seedText: 'mesh-neighborhood-overlap',
       canonicalResidency: { target: 0, hardLimit: 8, evictionBatch: 8 },
     });
@@ -91,7 +97,7 @@ describe('GameServer headless authority', () => {
   });
 
   it('deterministically generates canonical data and runs without a browser client', () => {
-    const server = new GameServer({ seedText: 'headless-authority' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'headless-authority' });
 
     expect(server.getVoxel(3, 20, -4)).toBe(server.getVoxel(3, 20, -4));
     expect(server.getChunk(0, 0, 0).voxels).toBeInstanceOf(Uint16Array);
@@ -99,7 +105,7 @@ describe('GameServer headless authority', () => {
   });
 
   it('commits a cross-chunk edit batch as one aggregate structural change', () => {
-    const server = new GameServer({ seedText: 'batch-authority' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'batch-authority' });
     const result = server.editBatch({
       actorId: 'harness',
       edits: [
@@ -133,7 +139,7 @@ describe('GameServer headless authority', () => {
 
   it('persists only dirty materialized snapshots and reloads them exactly', async () => {
     const persistence = new MemoryChunkPersistence();
-    const first = new GameServer({ seedText: 'snapshot-authority', persistence });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'snapshot-authority', persistence });
     first.getChunk(2, 0, 0);
     first.edit(64, 20, 0, Voxel.Wood);
 
@@ -141,18 +147,18 @@ describe('GameServer headless authority', () => {
     expect(persistence.writes).toEqual([chunkKey(2, 0, 0)]);
     await expect(first.flushDirtyChunks()).resolves.toEqual([]);
 
-    const reloaded = new GameServer({ seedText: 'snapshot-authority', persistence });
+    const reloaded = new GameServer({ platform: testCorePlatform, seedText: 'snapshot-authority', persistence });
     expect(reloaded.getVoxel(64, 20, 0)).toBe(Voxel.Wood);
     expect(reloaded.getChunk(2, 0, 0)).toMatchObject({ revision: 1, dirty: false, materialized: true });
   });
 
   it('does not apply a materialized snapshot to a different seed', async () => {
     const persistence = new MemoryChunkPersistence();
-    const first = new GameServer({ seedText: 'snapshot-seed-a', persistence });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'snapshot-seed-a', persistence });
     first.edit(0, 20, 0, Voxel.Wood);
     await first.flushDirtyChunks();
 
-    const otherSeed = new GameServer({ seedText: 'snapshot-seed-b', persistence });
+    const otherSeed = new GameServer({ platform: testCorePlatform, seedText: 'snapshot-seed-b', persistence });
     expect(otherSeed.getChunk(0, 0, 0)).toMatchObject({ revision: 0, dirty: false, materialized: false });
   });
 
@@ -170,7 +176,7 @@ describe('GameServer headless authority', () => {
         }) as ChunkSnapshot,
       saveSnapshots: () => undefined,
     };
-    const server = new GameServer({ seedText: 'snapshot-validation', persistence });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'snapshot-validation', persistence });
 
     expect(server.getChunk(0, 0, 0)).toMatchObject({ revision: 0, dirty: false, materialized: false });
     expect(server.getChunk(0, 0, 0).voxels).toHaveLength(32 ** 3);
@@ -183,7 +189,7 @@ describe('GameServer headless authority', () => {
         throw new Error('simulated persistence failure');
       },
     };
-    const server = new GameServer({ seedText: 'dirty-retry', persistence });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'dirty-retry', persistence });
     server.edit(0, 20, 0, Voxel.Wood);
 
     await expect(server.flushDirtyChunks()).rejects.toThrow('simulated persistence failure');
@@ -203,7 +209,7 @@ describe('GameServer headless authority', () => {
         if (snapshots[0].revision === 1) await firstWrite;
       },
     };
-    const server = new GameServer({ seedText: 'edit-during-save', persistence });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'edit-during-save', persistence });
     server.edit(0, 20, 0, Voxel.Wood);
     const firstFlush = server.flushDirtyChunks();
     server.edit(0, 20, 0, Voxel.Sand);
@@ -225,7 +231,7 @@ describe('GameServer headless authority', () => {
           releases.set(snapshots[0].revision, resolve);
         }),
     };
-    const server = new GameServer({ seedText: 'stale-save-ack', persistence });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'stale-save-ack', persistence });
     server.edit(0, 20, 0, Voxel.Wood);
     const firstFlush = server.flushDirtyChunks();
     server.edit(0, 20, 0, Voxel.Sand);
@@ -240,7 +246,7 @@ describe('GameServer headless authority', () => {
 
   it('retains both sides of a materialized Chunk boundary after save and reload', async () => {
     const persistence = new MemoryChunkPersistence();
-    const first = new GameServer({ seedText: 'boundary-reload', persistence });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'boundary-reload', persistence });
     first.editBatch({
       actorId: 'boundary-test',
       edits: [
@@ -250,13 +256,13 @@ describe('GameServer headless authority', () => {
     });
     await first.flushDirtyChunks();
 
-    const reloaded = new GameServer({ seedText: 'boundary-reload', persistence });
+    const reloaded = new GameServer({ platform: testCorePlatform, seedText: 'boundary-reload', persistence });
     expect(reloaded.getVoxel(31, 20, 0)).toBe(Voxel.Wood);
     expect(reloaded.getVoxel(32, 20, 0)).toBe(Voxel.Sand);
   });
 
   it('derives a one-voxel mesh halo without materializing procedural neighbours', () => {
-    const server = new GameServer({ seedText: 'derived-mesh-halo' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'derived-mesh-halo' });
     const chunks = (server as unknown as { chunks: Map<string, unknown> }).chunks;
 
     const initial = server.createDerivedMeshSnapshot(0, 0, 0);
@@ -274,7 +280,7 @@ describe('GameServer headless authority', () => {
   });
 
   it('prepares only copied authority overlays and accepts a current Worker canonical result once', () => {
-    const server = new GameServer({ seedText: 'worker-canonical' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'worker-canonical' });
     server.edit(32, 20, 0, Voxel.Wood);
     const prepared = server.prepareWorkerMeshInput(0, 0, 0);
     const neighbour = prepared.overlays.find((overlay) => overlay.cx === 1 && overlay.cy === 0 && overlay.cz === 0);
@@ -294,7 +300,7 @@ describe('GameServer headless authority', () => {
   });
 
   it('keeps Worker-first canonical, halo and mesh byte-equivalent to the synchronous path', () => {
-    const server = new GameServer({ seedText: 'worker-equivalence' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'worker-equivalence' });
     const synchronous = server.createDerivedMeshSnapshot(0, 0, 0);
     const prepared = server.prepareWorkerMeshInput(0, 0, 0);
     const workerInput = createProceduralMeshInput({
@@ -333,7 +339,7 @@ describe('GameServer headless authority', () => {
   });
 
   it('owns minimal entity state and the simulation clock independently of presentation', () => {
-    const server = new GameServer({ seedText: 'entity-clock' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'entity-clock' });
     const player = server.createEntity({ kind: 'player', position: [1, 40, -2] });
 
     server.updateEntity(player.id, { position: [2, 41, -3] });

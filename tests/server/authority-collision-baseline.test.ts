@@ -1,11 +1,13 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it, vi } from 'vitest';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { CHUNK_SIZE, Voxel } from '../../src/world/voxel';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { CHUNK_SIZE, Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('Authority collision baseline read port', () => {
   it('只复制已驻留且达到最低revision的canonical，不触发加载、生成或pin', async () => {
     const unknown = vi.fn();
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'collision-baseline:1',
       seedText: 'collision-baseline',
       initialWorldTime: 9,

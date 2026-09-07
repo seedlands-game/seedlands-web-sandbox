@@ -6,8 +6,8 @@ import {
   type FluidCellValue,
   type FluidChunkSnapshot,
   type FluidPosition,
-} from '../../src/server/fluid/fluid-transaction';
-import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex, Voxel } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/fluid/fluid-transaction';
+import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex, Voxel } from '../../packages/game-core/src/world/voxel';
 
 const keyFor = ([x, y, z]: FluidPosition) =>
   chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));

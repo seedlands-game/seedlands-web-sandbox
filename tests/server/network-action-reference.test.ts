@@ -1,10 +1,12 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { projectActionReceiptReference } from '../../src/server/protocol/network-action-reference';
-import type { AuthorityAction } from '../../src/worker/authority-worker-protocol';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { projectActionReceiptReference } from '../../packages/game-core/src/server/protocol/network-action-reference';
+import type { AuthorityAction } from '../../packages/game-core/src/compute/authority-worker-protocol';
 
 const makeRuntime = () =>
   AuthorityRuntime.create({
+    platform: testCorePlatform,
     epoch: 'action-reference-test',
     seedText: 'action-reference-world',
     initialWorldTime: 8,

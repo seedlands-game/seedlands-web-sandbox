@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { bodyConfigFor, type PhysicsWorld, type WorldAabb } from '../../src/physics';
-import { COLLISION_EPSILON } from '../../src/physics/geometry';
-import { bodyOverlapsWorld } from '../../src/app/player/player-collision-query';
+import { bodyConfigFor, type PhysicsWorld, type WorldAabb } from '../../packages/game-core/src/physics';
+import { COLLISION_EPSILON } from '../../packages/game-core/src/physics/geometry';
+import { bodyOverlapsWorld } from '../../apps/web/src/app/player/player-collision-query';
 
 const ground = { min: { x: 0, y: 0, z: 0 }, max: { x: 1, y: 1, z: 1 } };
 const world: PhysicsWorld = {

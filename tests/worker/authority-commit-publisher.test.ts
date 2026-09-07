@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { FluidCandidate } from '../../src/server/fluid/fluid-transaction';
-import type { WorldCommitResult } from '../../src/server/game-server-types';
+import type { FluidCandidate } from '../../packages/game-core/src/server/fluid/fluid-transaction';
+import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
 import {
   commitFluidCandidateAndPublish,
   publishPendingAuthorityCommits,
-} from '../../src/worker/authority-commit-publisher';
+} from '../../apps/web/src/worker/authority-commit-publisher';
 
 const commit = (worldRevision: number) =>
   ({ committed: true, worldRevision, structuralChange: null }) as WorldCommitResult;

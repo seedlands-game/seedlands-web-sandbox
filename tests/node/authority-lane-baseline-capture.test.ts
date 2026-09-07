@@ -9,15 +9,15 @@ import {
   createNodeAuthorityLane,
   type NodeAuthorityLane,
   type NodeAuthorityLaneOptions,
-} from '../../src/node/runtime/node-authority-lane';
-import { createNodePersistenceLane } from '../../src/node/persistence/node-persistence-lane';
+} from '../../apps/node-server/src/node/runtime/node-authority-lane';
+import { createNodePersistenceLane } from '../../apps/node-server/src/node/persistence/node-persistence-lane';
 import type {
   AuthorityBaselineCaptureCancellation,
   AuthorityBaselineCaptureRequest,
   AuthorityBaselineCaptureResult,
-} from '../../src/server/authority/authority-baseline-capture-types';
-import { GENERATOR_VERSION, CHUNK_SIZE, chunkKey } from '../../src/world/voxel';
-import { measureNodeRpcBytes } from '../../src/node/runtime/node-rpc-bytes';
+} from '../../packages/game-core/src/server/authority/authority-baseline-capture-types';
+import { GENERATOR_VERSION, CHUNK_SIZE, chunkKey } from '../../packages/game-core/src/world/voxel';
+import { measureNodeRpcBytes } from '../../apps/node-server/src/node/runtime/node-rpc-bytes';
 
 type BaselineLane = NodeAuthorityLane &
   Readonly<{
@@ -58,7 +58,7 @@ beforeAll(async () => {
     configFile: false,
     logLevel: 'silent',
     build: {
-      ssr: 'src/node/server/node-authority-worker.ts',
+      ssr: 'apps/node-server/src/node/server/node-authority-worker.ts',
       outDir: join(buildDirectory, 'authority'),
       emptyOutDir: true,
       target: 'node22',
@@ -69,7 +69,7 @@ beforeAll(async () => {
     configFile: false,
     logLevel: 'silent',
     build: {
-      ssr: 'src/node/persistence/node-persistence-worker.ts',
+      ssr: 'apps/node-server/src/node/persistence/node-persistence-worker.ts',
       outDir: join(buildDirectory, 'persistence'),
       emptyOutDir: true,
       target: 'node22',

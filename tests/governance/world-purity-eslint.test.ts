@@ -15,7 +15,7 @@ describe('src/world ESLint purity boundary', () => {
       import * as pc from 'playcanvas';
       export const runtime = [GameServer, GameClient, pc];
     `,
-      'src/world/world-purity-probe.ts',
+      'packages/game-core/src/world/world-purity-probe.ts',
     );
 
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/world-purity')).toHaveLength(3);
@@ -30,7 +30,7 @@ describe('src/world ESLint purity boundary', () => {
       const worker = new Worker('world-worker.ts');
       export { worker };
     `,
-      'src/world/world-purity-probe.ts',
+      'packages/game-core/src/world/world-purity-probe.ts',
     );
 
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/world-purity')).toHaveLength(4);
@@ -42,7 +42,7 @@ describe('src/world ESLint purity boundary', () => {
       import { CHUNK_SIZE } from './voxel';
       export const chunkVolume = CHUNK_SIZE ** 3;
     `,
-      'src/world/world-purity-probe.ts',
+      'packages/game-core/src/world/world-purity-probe.ts',
     );
 
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/world-purity')).toHaveLength(0);
@@ -56,7 +56,7 @@ describe('src/world ESLint purity boundary', () => {
       document.createElement('canvas');
       export const runtime = [pc, worker];
     `,
-      'src/server/server-purity-probe.ts',
+      'packages/game-core/src/server/server-purity-probe.ts',
     );
 
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/server-purity')).toHaveLength(3);

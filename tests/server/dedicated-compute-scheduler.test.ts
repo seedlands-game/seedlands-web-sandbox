@@ -1,15 +1,16 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import {
   DedicatedComputeScheduler,
   type DedicatedComputeWork,
-} from '../../src/server/compute/dedicated-compute-scheduler';
-import { measureDedicatedComputeBytes } from '../../src/server/compute/dedicated-compute-bytes';
+} from '../../packages/game-core/src/server/compute/dedicated-compute-scheduler';
+import { measureDedicatedComputeBytes } from '../../packages/game-core/src/server/compute/dedicated-compute-bytes';
 import type {
   DedicatedComputeDiagnostics,
   DedicatedComputeExecutor,
   DedicatedComputeResult,
   DedicatedComputeTask,
-} from '../../src/server/compute/dedicated-compute-contract';
+} from '../../packages/game-core/src/server/compute/dedicated-compute-contract';
 
 type CanonicalWork = Extract<DedicatedComputeWork, { kind: 'generate-canonical' }>;
 
@@ -98,6 +99,8 @@ class ControlledExecutor implements DedicatedComputeExecutor {
 const schedulerFor = (executor = new ControlledExecutor(), maxBytes = 16 * 1024) => ({
   executor,
   scheduler: new DedicatedComputeScheduler({
+    createAbortController: testCorePlatform.createAbortController,
+    utf8: testCorePlatform.utf8,
     epoch: 'scheduler:1',
     executors: { general: executor, fluid: executor, logic: executor },
     maxTasks: 8,
@@ -178,7 +181,7 @@ describe('DedicatedComputeScheduler', () => {
   });
 
   it('keeps an unacknowledged result charged after its dispatch reservation becomes actual bytes', async () => {
-    const inputBytes = measureDedicatedComputeBytes({ ...work(), taskId: 0, estimatedBytes: 0 });
+    const inputBytes = measureDedicatedComputeBytes({ ...work(), taskId: 0, estimatedBytes: 0 }, testCorePlatform.utf8);
     const { executor, scheduler } = schedulerFor(undefined, inputBytes + 1024);
     const first = scheduler.schedule(work(), { priority: 'streaming', key: 'first', revision: 'r1' });
 
@@ -193,7 +196,7 @@ describe('DedicatedComputeScheduler', () => {
   });
 
   it('keeps the worst-case reservation through acknowledge so later jobs cannot strand the queue', async () => {
-    const inputBytes = measureDedicatedComputeBytes({ ...work(), taskId: 0, estimatedBytes: 0 });
+    const inputBytes = measureDedicatedComputeBytes({ ...work(), taskId: 0, estimatedBytes: 0 }, testCorePlatform.utf8);
     const { executor, scheduler } = schedulerFor(undefined, inputBytes * 3 + 1024);
     const first = scheduler.schedule(work(), { priority: 'streaming', key: 'first', revision: 'r1' });
     executor.resolve(executor.calls[0].taskId);
@@ -221,7 +224,7 @@ describe('DedicatedComputeScheduler', () => {
   });
 
   it('rejects a job whose input plus required result reservation can never fit', async () => {
-    const inputBytes = measureDedicatedComputeBytes({ ...work(), taskId: 0, estimatedBytes: 0 });
+    const inputBytes = measureDedicatedComputeBytes({ ...work(), taskId: 0, estimatedBytes: 0 }, testCorePlatform.utf8);
     const { executor, scheduler } = schedulerFor(undefined, inputBytes + 1023);
     const job = scheduler.schedule(work(), { priority: 'streaming', key: 'too-large', revision: 'r1' });
     await expect(job.candidate).rejects.toThrow(/reservation/i);
@@ -231,6 +234,8 @@ describe('DedicatedComputeScheduler', () => {
   it('counts delivered mailbox candidates against the scheduler task limit', async () => {
     const executor = new ControlledExecutor();
     const scheduler = new DedicatedComputeScheduler({
+      createAbortController: testCorePlatform.createAbortController,
+      utf8: testCorePlatform.utf8,
       epoch: 'scheduler:1',
       executors: { general: executor, fluid: executor, logic: executor },
       maxTasks: 1,
@@ -252,8 +257,10 @@ describe('DedicatedComputeScheduler', () => {
 
   it('allows a merge to replace a queued job even when running and queued jobs fill the total limit', async () => {
     const executor = new ControlledExecutor();
-    const inputBytes = measureDedicatedComputeBytes({ ...work(), taskId: 0, estimatedBytes: 0 });
+    const inputBytes = measureDedicatedComputeBytes({ ...work(), taskId: 0, estimatedBytes: 0 }, testCorePlatform.utf8);
     const scheduler = new DedicatedComputeScheduler({
+      createAbortController: testCorePlatform.createAbortController,
+      utf8: testCorePlatform.utf8,
       epoch: 'scheduler:1',
       executors: { general: executor, fluid: executor, logic: executor },
       maxTasks: 2,

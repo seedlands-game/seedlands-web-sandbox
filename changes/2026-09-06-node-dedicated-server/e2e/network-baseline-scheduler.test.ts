@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { MeshTaskScheduler, type MeshWorkerPort } from '../../../src/app/world/mesh-task-scheduler';
-import type { WorkerResult } from '../../../src/app/app-contracts';
-import { PERFORMANCE_PROFILES } from '../../../src/client/presentation/performance-profile';
-import { PerformanceTelemetry } from '../../../src/client/presentation/performance-telemetry';
-import { runWorldComputeTask, type GenerateMeshTaskPayload } from '../../../src/worker/world-compute-task';
+import { MeshTaskScheduler, type MeshWorkerPort } from '../../../apps/web/src/app/world/mesh-task-scheduler';
+import type { WorkerResult } from '../../../apps/web/src/app/app-contracts';
+import { PERFORMANCE_PROFILES } from '../../../apps/web/src/client/presentation/performance-profile';
+import { PerformanceTelemetry } from '../../../apps/web/src/client/presentation/performance-telemetry';
+import {
+  runWorldComputeTask,
+  type GenerateMeshTaskPayload,
+} from '../../../packages/game-core/src/worker/world-compute-task';
 
 class HeldMeshWorker implements MeshWorkerPort {
   onmessage: MeshWorkerPort['onmessage'] = null;

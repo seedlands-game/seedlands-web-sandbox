@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { createNodeServerRuntime } from '../../src/node/server/node-server-runtime';
+import { createNodeServerRuntime } from '../../apps/node-server/src/node/server/node-server-runtime';
 
 const factories = vi.hoisted(() => ({ persistence: vi.fn(), authority: vi.fn() }));
-vi.mock('../../src/node/persistence/node-persistence-lane', () => ({
+vi.mock('../../apps/node-server/src/node/persistence/node-persistence-lane', () => ({
   createNodePersistenceLane: factories.persistence,
 }));
-vi.mock('../../src/node/runtime/node-authority-lane', () => ({
+vi.mock('../../apps/node-server/src/node/runtime/node-authority-lane', () => ({
   createNodeAuthorityLane: factories.authority,
 }));
 

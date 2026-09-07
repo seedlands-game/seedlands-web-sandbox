@@ -1,5 +1,5 @@
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
-import { NodeRpcClosedError } from '../../src/node/runtime/node-rpc-contract';
+import { NodeRpcClosedError } from '../../apps/node-server/src/node/runtime/node-rpc-contract';
 import {
   createAuthorityCaptureFailureFixture,
   disposeAuthorityCaptureFailureArtifacts,

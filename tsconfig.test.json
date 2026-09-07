@@ -1,4 +1,8 @@
 {
-  "extends": "./tsconfig.json",
-  "include": ["src", "tests", "changes/*/e2e"]
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "WebWorker"],
+    "types": ["node", "vite/client"]
+  },
+  "include": ["tests", "changes/2026-09-08-node-monorepo/e2e"]
 }

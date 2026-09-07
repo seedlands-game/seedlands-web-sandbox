@@ -1,13 +1,14 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import {
   measureAuthorityPublicationBytes,
   validateAuthorityPublicationMessage,
   validateAuthorityRequestPayload,
   validateAuthorityResponsePayload,
-} from '../../src/node/runtime/node-authority-lane-protocol';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { CHUNK_SIZE } from '../../src/world/voxel';
+} from '../../apps/node-server/src/node/runtime/node-authority-lane-protocol';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { CHUNK_SIZE } from '../../packages/game-core/src/world/voxel';
 
 describe('Authority lane 入出站合同', () => {
   it('逐 kind 拒绝不能由调用方安全消费的回复', () => {
@@ -119,9 +120,10 @@ describe('Authority lane 入出站合同', () => {
 
   it('接受 AuthorityRuntime 的真实快照别名，并对别名只计固定引用成本', async () => {
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'publication-runtime',
       seedText: 'publication-runtime',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       initialWorldTime: 9,
       startTimeMs: 0,
       initialPlayerBodyPosition: [0.5, 33, 0.5],

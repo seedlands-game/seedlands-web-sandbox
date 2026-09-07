@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ComputeWorkerPool, type ComputeWorkerPort } from '../../../src/client/compute/compute-worker-pool';
-import type { ComputeTask } from '../../../src/runtime/compute-task-queue';
+import { ComputeWorkerPool, type ComputeWorkerPort } from '../../../apps/web/src/client/compute/compute-worker-pool';
+import type { ComputeTask } from '../../../packages/game-core/src/runtime/compute-task-queue';
 
 class SettlementWorker implements ComputeWorkerPort {
   onmessage: ComputeWorkerPort['onmessage'] = null;

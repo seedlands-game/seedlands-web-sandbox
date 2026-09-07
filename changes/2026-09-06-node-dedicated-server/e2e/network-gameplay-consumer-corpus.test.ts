@@ -2,17 +2,17 @@ import { deepStrictEqual } from 'node:assert';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import { ALL_COMMAND_CAPABILITIES } from '../../../src/server/commands/command-contract';
-import type { DedicatedComputeExecutor } from '../../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedServerHost } from '../../../src/server/dedicated/dedicated-server-host';
-import { MemoryGamePersistence } from '../../../src/server/persistence/memory-game-persistence';
+import { ALL_COMMAND_CAPABILITIES } from '../../../packages/game-core/src/server/commands/command-contract';
+import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
+import { MemoryGamePersistence } from '../../../packages/game-core/src/server/persistence/memory-game-persistence';
 import {
   projectGameplayConsumerReference,
   type GameplayConsumerReference,
-} from '../../../src/server/protocol/network-gameplay-consumer-reference';
-import { projectEntityPoseReference } from '../../../src/server/protocol/network-reference-pose';
-import { projectPlayerCorrectionReference } from '../../../src/server/protocol/network-reference-projection';
+} from '../../../packages/game-core/src/server/protocol/network-gameplay-consumer-reference';
+import { projectEntityPoseReference } from '../../../packages/game-core/src/server/protocol/network-reference-pose';
+import { projectPlayerCorrectionReference } from '../../../packages/game-core/src/server/protocol/network-reference-projection';
 import {
   gameplayConsumerCorpusOutputDir,
   readGameplayConsumerCorpus,

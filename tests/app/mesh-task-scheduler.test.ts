@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
-import { PERFORMANCE_PROFILES } from '../../src/client/presentation/performance-profile';
-import { PerformanceTelemetry } from '../../src/client/presentation/performance-telemetry';
-import { MeshTaskScheduler, type MeshWorkerPort, type WorkerResult } from '../../src/app/world/mesh-task-scheduler';
+import { PERFORMANCE_PROFILES } from '../../apps/web/src/client/presentation/performance-profile';
+import { PerformanceTelemetry } from '../../apps/web/src/client/presentation/performance-telemetry';
+import {
+  MeshTaskScheduler,
+  type MeshWorkerPort,
+  type WorkerResult,
+} from '../../apps/web/src/app/world/mesh-task-scheduler';
 
 class FakeWorker implements MeshWorkerPort {
   onmessage: ((event: MessageEvent<WorkerResult>) => void) | null = null;

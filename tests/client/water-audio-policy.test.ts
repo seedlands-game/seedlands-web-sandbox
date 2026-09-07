@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WaterAudioPolicy } from '../../src/client/audio/water-audio-policy';
+import { WaterAudioPolicy } from '../../apps/web/src/client/audio/water-audio-policy';
 
 describe('水体音频事件策略', () => {
   it('入水与出水各只产生一次边沿事件', () => {

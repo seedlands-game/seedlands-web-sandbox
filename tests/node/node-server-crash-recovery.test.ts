@@ -22,7 +22,7 @@ beforeAll(async () => {
   ]);
   // 仅测试临时入口；实际五个运行产物仍来自正式构建，不依赖 TS loader。
   await build({
-    entryPoints: [resolve('src/node/server/node-server-runtime.ts')],
+    entryPoints: [resolve('apps/node-server/src/node/server/node-server-runtime.ts')],
     outfile: resolve(artifact, 'runtime-module.js'),
     bundle: true,
     platform: 'node',

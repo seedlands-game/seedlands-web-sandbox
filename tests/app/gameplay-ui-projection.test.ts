@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { projectGameplayUi } from '../../src/app/ui/gameplay-ui-projector';
+import { projectGameplayUi } from '../../apps/web/src/app/ui/gameplay-ui-projector';
 
 const snapshot = () => ({
   revision: 7,

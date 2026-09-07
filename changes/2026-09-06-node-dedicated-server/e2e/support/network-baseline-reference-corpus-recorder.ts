@@ -5,16 +5,16 @@ import { join } from 'node:path';
 import {
   createBaselineReferenceInFlightLedger,
   createBaselineReferenceSendQueue,
-} from '../../../../src/server/protocol/network-reference-baseline-budget';
-import { createBaselineReferencePublicationQueue } from '../../../../src/server/protocol/network-reference-baseline-publication';
-import { createBaselineReferenceReassembler } from '../../../../src/server/protocol/network-reference-baseline-reassembly';
-import { prepareAuthorityBaselineReference } from '../../../../src/server/protocol/network-reference-baseline';
+} from '../../../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
+import { createBaselineReferencePublicationQueue } from '../../../../packages/game-core/src/server/protocol/network-reference-baseline-publication';
+import { createBaselineReferenceReassembler } from '../../../../packages/game-core/src/server/protocol/network-reference-baseline-reassembly';
+import { prepareAuthorityBaselineReference } from '../../../../packages/game-core/src/server/protocol/network-reference-baseline';
 import type {
   BaselineBundleDescriptorReference,
   BaselinePageLocator,
   BaselineReferenceLimits,
   ReassembledBaselineReference,
-} from '../../../../src/server/protocol/network-reference-baseline-types';
+} from '../../../../packages/game-core/src/server/protocol/network-reference-baseline-types';
 import { networkBaselineCorpusOutputDirectory, readNetworkBaselineCorpus } from './network-baseline-corpus-recorder';
 import {
   assertDerivedFrameBindsSourceBoundRaw,

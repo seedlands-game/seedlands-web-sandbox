@@ -1,25 +1,25 @@
-import { AuthoritySnapshotGate } from '../../../../src/client/authority/authority-snapshot-gate';
+import { AuthoritySnapshotGate } from '../../../../apps/web/src/client/authority/authority-snapshot-gate';
 import {
   AuthorityCollisionRevisionGuard,
   cacheAuthorityCollisionBaseline,
   publishAuthorityCollisionCommits,
   type AuthorityCollisionCachedChunk,
-} from '../../../../src/client/authority/authority-collision-mirror';
+} from '../../../../apps/web/src/client/authority/authority-collision-mirror';
 import {
   LocalPlayerPrediction,
   type LocalPredictionAdvance,
   type PredictionAuthorityState,
-} from '../../../../src/client/local-player-prediction';
-import { VoxelCollisionWorld } from '../../../../src/server/authority/voxel-collision-world';
+} from '../../../../apps/web/src/client/local-player-prediction';
+import { VoxelCollisionWorld } from '../../../../packages/game-core/src/server/authority/voxel-collision-world';
 import type {
   ChunkBaselineReference,
   ReferenceBinaryBlock,
-} from '../../../../src/server/protocol/network-reference-bootstrap';
+} from '../../../../packages/game-core/src/server/protocol/network-reference-bootstrap';
 import type {
   PlayerCorrectionReference,
   WorldCommitReference,
-} from '../../../../src/server/protocol/network-reference-projection';
-import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../../../../src/world/voxel';
+} from '../../../../packages/game-core/src/server/protocol/network-reference-projection';
+import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../../../../packages/game-core/src/world/voxel';
 
 type ReceiverBlock<Kind extends string> = Omit<ReferenceBinaryBlock, 'elementType'> & { elementType: Kind };
 export type ReceiverBaseline = Omit<ChunkBaselineReference, 'canonical' | 'fluid'> & {

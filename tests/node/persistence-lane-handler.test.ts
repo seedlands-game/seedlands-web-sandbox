@@ -1,13 +1,14 @@
+import { testCorePlatform } from '../support/core-platform';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { FileGamePersistence } from '../../src/node/persistence/file-game-persistence';
-import { createPersistenceLaneRequestHandler } from '../../src/node/persistence/persistence-lane-handler';
-import { PERSISTENCE_LANE_PROTOCOL_VERSION } from '../../src/node/persistence/persistence-lane-protocol';
-import { GameServer } from '../../src/server/game-server';
-import type { ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
-import { GENERATOR_VERSION, Voxel } from '../../src/world/voxel';
+import { FileGamePersistence } from '../../apps/node-server/src/node/persistence/file-game-persistence';
+import { createPersistenceLaneRequestHandler } from '../../apps/node-server/src/node/persistence/persistence-lane-handler';
+import { PERSISTENCE_LANE_PROTOCOL_VERSION } from '../../apps/node-server/src/node/persistence/persistence-lane-protocol';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import type { ChunkSnapshot } from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import { GENERATOR_VERSION, Voxel } from '../../packages/game-core/src/world/voxel';
 
 const directories: string[] = [];
 
@@ -47,7 +48,7 @@ describe('Persistence lane Worker 业务处理器', () => {
       FileGamePersistence.open({ directory, seedText: 'handler-world', generatorVersion: GENERATOR_VERSION }),
     ).rejects.toThrow(/锁|lock|writer/i);
 
-    const server = new GameServer({ seedText: 'handler-world' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'handler-world' });
     server.edit(0, 20, 0, Voxel.Wood);
     const frozen = server.freezeSaveSnapshot(1);
     await expect(

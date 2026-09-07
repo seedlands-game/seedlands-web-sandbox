@@ -2,20 +2,20 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { isDeepStrictEqual } from 'node:util';
 import { describe, expect, it } from 'vitest';
-import type { DedicatedComputeExecutor } from '../../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedServerHost } from '../../../src/server/dedicated/dedicated-server-host';
-import { MemoryGamePersistence } from '../../../src/server/persistence/memory-game-persistence';
-import { projectActionReceiptReference } from '../../../src/server/protocol/network-action-reference';
+import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
+import { MemoryGamePersistence } from '../../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { projectActionReceiptReference } from '../../../packages/game-core/src/server/protocol/network-action-reference';
 import {
   projectActionRequestReference,
   type ActionRequestReference,
-} from '../../../src/server/protocol/network-action-request-reference';
+} from '../../../packages/game-core/src/server/protocol/network-action-request-reference';
 import {
   projectGameplayViewReference,
   projectPlayerCorrectionReference,
-} from '../../../src/server/protocol/network-reference-projection';
-import type { AuthorityAction } from '../../../src/worker/authority-worker-protocol';
+} from '../../../packages/game-core/src/server/protocol/network-reference-projection';
+import type { AuthorityAction } from '../../../packages/game-core/src/worker/authority-worker-protocol';
 
 const decodedFixturePath = process.env.SEEDLANDS_ACTION_DECODED_FIXTURE;
 const sourceCorpusPath = process.env.SEEDLANDS_ACTION_SOURCE_CORPUS;

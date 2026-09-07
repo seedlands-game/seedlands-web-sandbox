@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { WorldCommitResult } from '../../src/server/game-server-types';
-import { projectWorldCommitPresentationReference } from '../../src/server/protocol/network-reference-world-commit-presentation';
+import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
+import { projectWorldCommitPresentationReference } from '../../packages/game-core/src/server/protocol/network-reference-world-commit-presentation';
 
 const metrics = {
   timingStatus: 'not-collected-hot-path' as const,

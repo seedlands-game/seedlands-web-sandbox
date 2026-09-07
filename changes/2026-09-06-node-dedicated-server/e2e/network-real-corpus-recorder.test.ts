@@ -7,13 +7,13 @@ import type {
   DedicatedComputeExecutor,
   DedicatedComputeResult,
   DedicatedComputeTask,
-} from '../../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedServerHost } from '../../../src/server/dedicated/dedicated-server-host';
-import { MemoryGamePersistence } from '../../../src/server/persistence/memory-game-persistence';
-import { projectActionReceiptReference } from '../../../src/server/protocol/network-action-reference';
-import { PROTOCOL_VERSION } from '../../../src/runtime/session-protocol';
-import { CHUNK_SIZE, Voxel } from '../../../src/world/voxel';
+} from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
+import { MemoryGamePersistence } from '../../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { projectActionReceiptReference } from '../../../packages/game-core/src/server/protocol/network-action-reference';
+import { PROTOCOL_VERSION } from '../../../packages/game-core/src/runtime/session-protocol';
+import { CHUNK_SIZE, Voxel } from '../../../packages/game-core/src/world/voxel';
 import { captureNetworkRealCorpusReference } from './support/network-real-corpus-recorder';
 
 const executor = (): DedicatedComputeExecutor => ({

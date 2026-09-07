@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { soundForGameplayEvent } from '../../src/client/audio/gameplay-audio-events';
-import { Voxel } from '../../src/world/voxel';
+import { soundForGameplayEvent } from '../../apps/web/src/client/audio/gameplay-audio-events';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('权威玩法结果的音频语义', () => {
   it('材质与世界位置保留，水和雪不能对调', () => {

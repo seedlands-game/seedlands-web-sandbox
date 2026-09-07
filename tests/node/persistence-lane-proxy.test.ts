@@ -1,12 +1,13 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it, vi } from 'vitest';
-import { GameServer } from '../../src/server/game-server';
-import type { ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
-import type { FrozenGameSaveSnapshot } from '../../src/server/persistence/game-save-snapshot';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import type { ChunkSnapshot } from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import type { FrozenGameSaveSnapshot } from '../../packages/game-core/src/server/persistence/game-save-snapshot';
 import {
   openNodePersistenceLaneProxy,
   type PersistenceLaneRpc,
-} from '../../src/node/persistence/persistence-lane-proxy';
-import { GENERATOR_VERSION, Voxel } from '../../src/world/voxel';
+} from '../../apps/node-server/src/node/persistence/persistence-lane-proxy';
+import { GENERATOR_VERSION, Voxel } from '../../packages/game-core/src/world/voxel';
 
 type Deferred<Value> = Readonly<{
   promise: Promise<Value>;
@@ -201,7 +202,7 @@ describe('Persistence lane Authority 侧同步缓存', () => {
       return Promise.reject(new Error(`unexpected ${kind}`));
     });
     const proxy = await openProxy(rpc);
-    const server = new GameServer({ seedText: identity.seedText });
+    const server = new GameServer({ platform: testCorePlatform, seedText: identity.seedText });
     server.spawnPlayer({ id: 'player', position: [0.5, 34, 0.5] });
     server.edit(0, 20, 0, Voxel.Wood);
     const frozen = server.freezeSaveSnapshot(1);
@@ -236,7 +237,7 @@ describe('Persistence lane Authority 侧同步缓存', () => {
     });
     const proxy = await openProxy(rpc);
     await proxy.ensureSnapshot(0, 0, 0);
-    const server = new GameServer({ seedText: identity.seedText });
+    const server = new GameServer({ platform: testCorePlatform, seedText: identity.seedText });
     server.edit(0, 20, 0, Voxel.Lantern);
     const firstSave = proxy.saveFrozenSnapshot(server.freezeSaveSnapshot(1));
 
@@ -264,7 +265,7 @@ describe('Persistence lane Authority 侧同步缓存', () => {
       identity,
       limits: { maxCachedChunks: 1, maxCachedBytes: 1, maxRetainedSaveBytes: 1 },
     });
-    const server = new GameServer({ seedText: identity.seedText });
+    const server = new GameServer({ platform: testCorePlatform, seedText: identity.seedText });
     server.edit(0, 20, 0, Voxel.Wood);
     const frozen = server.freezeSaveSnapshot(1);
     const clone = vi.spyOn(globalThis, 'structuredClone');

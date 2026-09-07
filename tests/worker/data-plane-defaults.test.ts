@@ -1,5 +1,8 @@
 import { expect, it } from 'vitest';
-import { parseWasmWorkerName, wasmExperimentWorkerName } from '../../src/client/compute/wasm-experiment-selection';
+import {
+  parseWasmWorkerName,
+  wasmExperimentWorkerName,
+} from '../../apps/web/src/client/compute/wasm-experiment-selection';
 it('uses the measured shared kernels by default and preserves explicit TS control', () => {
   expect(wasmExperimentWorkerName('')).toBe('seedlands-wasm:v2:simd:w02,w03,w04,w05,w06');
   expect(wasmExperimentWorkerName('?wasm=off')).toBe('');

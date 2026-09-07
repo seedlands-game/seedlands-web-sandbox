@@ -1,6 +1,9 @@
-import type { AuthoritySnapshot } from '../../../../src/server/authority/authority-session-types';
-import type { AuthorityCollisionBaselineResult, WorldCommitResult } from '../../../../src/server/game-server-types';
-import type { ActionReceiptReference } from '../../../../src/server/protocol/network-action-reference';
+import type { AuthoritySnapshot } from '../../../../packages/game-core/src/server/authority/authority-session-types';
+import type {
+  AuthorityCollisionBaselineResult,
+  WorldCommitResult,
+} from '../../../../packages/game-core/src/server/game-server-types';
+import type { ActionReceiptReference } from '../../../../packages/game-core/src/server/protocol/network-action-reference';
 import {
   projectChunkBaselineReference,
   projectWelcomeReference,
@@ -8,7 +11,7 @@ import {
   type ReferenceBootstrapContext,
   type ReferenceSha256DigestPort,
   type WelcomeReference,
-} from '../../../../src/server/protocol/network-reference-bootstrap';
+} from '../../../../packages/game-core/src/server/protocol/network-reference-bootstrap';
 import {
   projectGameplayViewReference,
   projectPlayerCorrectionReference,
@@ -16,8 +19,11 @@ import {
   type GameplayViewReference,
   type PlayerCorrectionReference,
   type WorldCommitReference,
-} from '../../../../src/server/protocol/network-reference-projection';
-import type { AuthorityGameplayView, AuthorityReady } from '../../../../src/worker/authority-worker-protocol';
+} from '../../../../packages/game-core/src/server/protocol/network-reference-projection';
+import type {
+  AuthorityGameplayView,
+  AuthorityReady,
+} from '../../../../packages/game-core/src/worker/authority-worker-protocol';
 
 /**
  * Change-local evidence helper. It records only reference projections from a

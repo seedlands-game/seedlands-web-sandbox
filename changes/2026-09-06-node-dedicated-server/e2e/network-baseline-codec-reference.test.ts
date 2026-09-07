@@ -1,13 +1,13 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import { createBaselineReferenceInFlightLedger } from '../../../src/server/protocol/network-reference-baseline-budget';
-import { createBaselineReferenceReassembler } from '../../../src/server/protocol/network-reference-baseline-reassembly';
+import { createBaselineReferenceInFlightLedger } from '../../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
+import { createBaselineReferenceReassembler } from '../../../packages/game-core/src/server/protocol/network-reference-baseline-reassembly';
 import type {
   BaselineBundleDescriptorReference,
   BaselinePageReference,
   ReassembledBaselineReference,
-} from '../../../src/server/protocol/network-reference-baseline-types';
+} from '../../../packages/game-core/src/server/protocol/network-reference-baseline-types';
 
 const prototype = '/tmp/seedlands-network-probe-codec-baseline-reference-v2';
 const artifactPath = `${prototype}/baseline-codec-decoded-artifact.json`;

@@ -21,3 +21,12 @@
 - 浏览器回归：当前 14 项 Chromium regression 全部通过，覆盖预加载/预渲染和 8 项长期游戏旅程；日志 `/tmp/seedlands-monorepo/m0-browser-regression.log`。
 - Node 产物：五入口真实启动/关停/恢复与 SIGKILL durable 恢复 4/4 通过；日志 `/tmp/seedlands-monorepo/m0-node-artifact.log`。
 - `pnpm typecheck` 的生产检查通过，但历史 Delivered 数据平面对照源码中的绝对 `/tmp/seedlands-adoption-baseline` 在本机仍存在，使 8 个 `@ts-expect-error` 变为 unused；原始日志 `/tmp/seedlands-monorepo/m0-typecheck.log`。这不是合入行为错误；M1 以包级类型入口排除冻结实验的临时绝对路径依赖。
+
+## M1：三包源码、依赖与平台边界
+
+- 建立 `apps/web`、`apps/node-server`、`packages/game-core` 三个 workspace 包。浏览器源码、Vite 入口与资产归 Web；Node CLI、线程、子进程、文件与锁适配归 Node；世界、物理、运行时、权威规则和纯计算任务归 core。Web 与 Node 仅经 `@seedlands/game-core` 的分域 subpath exports 消费共享逻辑。
+- core 的 TypeScript 环境仅含 `ES2022`，不含 DOM、WebWorker 或 Node ambient types。需要克隆、UTF-8 fatal 解码、取消、单调计时、timeout 与 yield 的纯逻辑通过只读实例端口获得能力；浏览器、Node、测试入口分别注入真实 `structuredClone`、复用的 `TextEncoder`/fatal `TextDecoder`、`AbortController` 与 `performance.now`，没有可重配共享全局或算法降级。
+- Web 源码类型检查使用 `vite/client`，Vite/SSG 工具配置由独立 `tsconfig.tools.json` 获得 Node 类型。Node 构建的 metafile 明确拒绝 `apps/web`、PlayCanvas、Svelte、Tone 与 Vite 产品依赖。
+- 三包类型检查和构建通过；Web production build 保留 Rust 指纹、预渲染和默认/TS 回退代码路径，Node 构建生成五个独立 ESM 入口。日志：`/tmp/seedlands-monorepo/m1-typecheck.log`、`m1-build-core.log`、`m1-build-web.log`、`m1-build-node.log`。
+- 包级测试按职责通过：core 90 个文件、595 项通过且 4 项既有 skip；Web 107 个文件、409 项通过；Node 21 个文件、124 项通过。引用浏览器 Wasm wrapper 的 world/server 等价测试归 Web，根级完整回归入口未缩减。日志：`/tmp/seedlands-monorepo/m1-core-test.log`、`m1-web-test.log`、`m1-node-test.log`。
+- 包边界及 world/runtime/Node 静态定向检查 4 个文件、22 项通过；ESLint 与路径 lint 通过。全仓 coverage、临时目录隔离安装、浏览器回归和真实 Node 产物恢复将在 M2 冻结验收，不以本检查点替代。

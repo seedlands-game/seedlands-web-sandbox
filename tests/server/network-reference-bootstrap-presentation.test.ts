@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import type { AuthoritySnapshot } from '../../src/server/authority/authority-session-types';
-import type { ReferenceBootstrapContext } from '../../src/server/protocol/network-reference-bootstrap-types';
-import { projectWelcomePresentationReference } from '../../src/server/protocol/network-reference-bootstrap-presentation';
-import type { AuthorityReady } from '../../src/worker/authority-worker-protocol';
+import type { AuthoritySnapshot } from '../../packages/game-core/src/server/authority/authority-session-types';
+import type { ReferenceBootstrapContext } from '../../packages/game-core/src/server/protocol/network-reference-bootstrap-types';
+import { projectWelcomePresentationReference } from '../../packages/game-core/src/server/protocol/network-reference-bootstrap-presentation';
+import type { AuthorityReady } from '../../packages/game-core/src/compute/authority-worker-protocol';
 
 const body = (position = { x: 1, y: 2, z: 3 }) => ({
   id: 'player:bootstrap',

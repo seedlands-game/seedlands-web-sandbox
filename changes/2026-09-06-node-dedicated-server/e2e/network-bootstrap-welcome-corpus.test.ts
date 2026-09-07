@@ -7,11 +7,11 @@ import type {
   DedicatedComputeExecutor,
   DedicatedComputeResult,
   DedicatedComputeTask,
-} from '../../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedServerHost } from '../../../src/server/dedicated/dedicated-server-host';
-import { MemoryGamePersistence } from '../../../src/server/persistence/memory-game-persistence';
-import type { ReferenceBootstrapContext } from '../../../src/server/protocol/network-reference-bootstrap-types';
+} from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
+import { MemoryGamePersistence } from '../../../packages/game-core/src/server/persistence/memory-game-persistence';
+import type { ReferenceBootstrapContext } from '../../../packages/game-core/src/server/protocol/network-reference-bootstrap-types';
 import {
   captureBootstrapWelcomeReference,
   type CapturedBootstrapWelcomeReference,

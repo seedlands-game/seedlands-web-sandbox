@@ -1,10 +1,15 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import {
   C0CodecError,
   C0_HEADER_BYTES,
-  decodeC0Envelope,
-  encodeC0Envelope,
-} from '../../src/server/protocol/network-c0-codec';
+  decodeC0Envelope as decodeC0EnvelopeWithPort,
+  encodeC0Envelope as encodeC0EnvelopeWithPort,
+} from '../../packages/game-core/src/server/protocol/network-c0-codec';
+
+const encodeC0Envelope = (input: Parameters<typeof encodeC0EnvelopeWithPort>[0]) =>
+  encodeC0EnvelopeWithPort(input, testCorePlatform.utf8);
+const decodeC0Envelope = (input: Uint8Array) => decodeC0EnvelopeWithPort(input, testCorePlatform.utf8);
 
 describe('C0 JSON metadata and binary-block envelope', () => {
   const ref = { protocolVersion: 1 as const, sessionEpoch: 'session:2', worldId: 'world-a', playerId: 'player-a' };

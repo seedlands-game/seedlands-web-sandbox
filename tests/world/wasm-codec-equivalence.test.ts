@@ -7,13 +7,17 @@ import {
   runCRC,
   runCrc32Bytes,
   runCrc32U16,
-} from '../../src/compute/codec-kernel';
-import { createCodecControlMemory, runCodecControl } from '../../src/compute/codec-kernel-control';
-import { createKernelMemory } from '../../src/compute/kernel-memory';
-import { createStoredChunkRecord, type CreateStoredChunkRecordInput } from '../../src/world/chunk-snapshot-codec';
+} from '../../apps/web/src/compute/codec-kernel';
+import { createCodecControlMemory, runCodecControl } from '../../apps/web/src/compute/codec-kernel-control';
+import { createKernelMemory } from '../../apps/web/src/compute/kernel-memory';
+import {
+  createStoredChunkRecord,
+  type CreateStoredChunkRecordInput,
+} from '../../packages/game-core/src/world/chunk-snapshot-codec';
 
 const VOXEL_COUNT = 32 ** 3;
-const moduleBytes = () => readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
+const moduleBytes = () =>
+  readFile(new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
 
 const identity = {
   worldId: 'wasm-codec-test',

@@ -1,6 +1,6 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { PlayerController } from '../../src/app/player/player-controller';
-import { applyAuthorityInputDecision } from '../../src/app/player/game-player-controller';
+import { PlayerController } from '../../apps/web/src/app/player/player-controller';
+import { applyAuthorityInputDecision } from '../../apps/web/src/app/player/game-player-controller';
 
 afterEach(() => vi.unstubAllGlobals());
 

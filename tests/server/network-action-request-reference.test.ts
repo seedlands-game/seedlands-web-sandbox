@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { projectActionRequestReference } from '../../src/server/protocol/network-action-request-reference';
-import type { AuthorityAction } from '../../src/worker/authority-worker-protocol';
+import { projectActionRequestReference } from '../../packages/game-core/src/server/protocol/network-action-request-reference';
+import type { AuthorityAction } from '../../packages/game-core/src/compute/authority-worker-protocol';
 
 const actions: readonly AuthorityAction[] = [
   { type: 'select-hotbar', slot: Number.MAX_SAFE_INTEGER },

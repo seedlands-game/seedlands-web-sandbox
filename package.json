@@ -1,5 +1,5 @@
 {
-  "name": "seedlands-web-sandbox",
+  "name": "seedlands-workspace",
   "description": "A playable browser voxel sandbox and technical foundation for the Seedlands world project.",
   "private": true,
   "version": "0.1.0",
@@ -17,9 +17,10 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "pnpm wasm:rust:verify && pnpm ssg:check && pnpm typecheck && vite build",
-    "typecheck": "svelte-check --tsconfig ./tsconfig.json && tsc --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "dev": "pnpm --filter @seedlands/web dev",
+    "build": "pnpm build:web",
+    "build:web": "pnpm --filter @seedlands/web build",
+    "typecheck": "pnpm --filter @seedlands/game-core typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/node-server typecheck && tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint .",
     "lint:paths": "ls-lint",
     "format": "prettier --write .",
@@ -34,20 +35,20 @@
     "test:e2e:macro-map": "playwright test tests/e2e/regression/macro-map.spec.ts",
     "verify:static": "pnpm ssg:check && pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage && pnpm typecheck",
     "verify:static:ci": "pnpm ssg:check && pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage:ci && pnpm typecheck",
-    "ssg:update": "node scripts/render-prerendered-start-screen.mjs --write",
-    "ssg:check": "node scripts/render-prerendered-start-screen.mjs --check",
+    "ssg:update": "pnpm --filter @seedlands/web ssg:update",
+    "ssg:check": "pnpm --filter @seedlands/web ssg:check",
     "harness:benchmark": "node --expose-gc scripts/run-harness.mjs",
     "harness:baseline": "pnpm test && pnpm build && node scripts/run-playwright-harness.mjs --aggregate --baseline",
     "harness:e2e": "node scripts/run-playwright-harness.mjs",
     "harness:macro-map": "pnpm test:e2e:macro-map",
     "harness": "pnpm test && pnpm build && node scripts/run-playwright-harness.mjs --aggregate",
     "server:headless": "node scripts/server-headless.mjs",
-    "preview": "vite preview",
+    "preview": "pnpm --filter @seedlands/web preview",
     "midscene:verify-model": "midscene model verify",
     "midscene:smoke": "midscene ./changes/2026-09-03-foundation-hardening/midscene/voxel-sandbox.smoke.yaml --dotenv-override --summary ./midscene_run/summary.json",
     "prepare": "husky",
-    "build:server": "pnpm typecheck && node scripts/build-node-server.mjs",
-    "server:dedicated": "node dist/node-server/node-server.js",
+    "build:server": "pnpm --filter @seedlands/node-server build",
+    "server:dedicated": "pnpm --filter @seedlands/node-server start",
     "wasm:simd:build": "node scripts/build-simd-experiment.mjs",
     "rust:check": "node scripts/check-rust-kernel-boundary.mjs",
     "wasm:simd:ab": "node scripts/run-simd-experiment.mjs",
@@ -57,11 +58,7 @@
     "perf:adoption:freeze": "node scripts/freeze-adoption-builds.mjs",
     "perf:adoption:summary": "node scripts/summarize-adoption-experiment.mjs"
   },
-  "dependencies": {
-    "playcanvas": "^2.21.4",
-    "svelte": "^5.57.0",
-    "tone": "^15.1.22"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
     "@eslint/js": "^10.0.1",
@@ -83,7 +80,10 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.69.0",
     "vite": "^7.3.6",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "playcanvas": "^2.21.4",
+    "svelte": "^5.57.0",
+    "tone": "^15.1.22"
   },
   "lint-staged": {
     "*.{ts,mts,cts,js,mjs,cjs,svelte}": [

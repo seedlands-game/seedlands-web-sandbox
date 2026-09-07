@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { AuthoritySnapshot } from '../../src/server/authority/authority-session-types';
-import { projectEntityPoseReference } from '../../src/server/protocol/network-reference-pose';
+import type { AuthoritySnapshot } from '../../packages/game-core/src/server/authority/authority-session-types';
+import { projectEntityPoseReference } from '../../packages/game-core/src/server/protocol/network-reference-pose';
 
 const entity = (
   id: string,

@@ -1,14 +1,15 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { executeFillCommand } from '../../src/server/commands/fill-command';
-import { GameServer } from '../../src/server/game-server';
-import { WorldMutationBuffer } from '../../src/server/world-mutation';
-import type { ChunkPersistence } from '../../src/server/persistence/chunk-persistence';
-import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
-import { Voxel, chunkKey } from '../../src/world/voxel';
+import { executeFillCommand } from '../../packages/game-core/src/server/commands/fill-command';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { WorldMutationBuffer } from '../../packages/game-core/src/server/world-mutation';
+import type { ChunkPersistence } from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import { MemoryChunkPersistence } from '../../packages/game-core/src/server/persistence/memory-chunk-persistence';
+import { Voxel, chunkKey } from '../../packages/game-core/src/world/voxel';
 
 describe('world mutation transaction', () => {
   it('commits cross-Chunk writes with one world revision and one revision per changed Chunk', () => {
-    const server = new GameServer({ seedText: 'transaction-revision' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-revision' });
     const result = server.editBatch({
       actorId: 'player-1',
       edits: [
@@ -39,7 +40,7 @@ describe('world mutation transaction', () => {
   });
 
   it('coalesces repeated writes and drops a final state equal to the pre-commit value', () => {
-    const server = new GameServer({ seedText: 'transaction-coalesce' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-coalesce' });
     const original = server.getVoxel(4, 20, 4);
     const other = original === Voxel.Wood ? Voxel.Stone : Voxel.Wood;
 
@@ -67,7 +68,7 @@ describe('world mutation transaction', () => {
 
   it('merges buffers by explicit priority and source id instead of caller array order', () => {
     const run = (reverse: boolean) => {
-      const server = new GameServer({ seedText: 'transaction-buffer-order' });
+      const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-buffer-order' });
       const player = new WorldMutationBuffer({ sourceId: 'player', priority: 10 });
       const simulation = new WorldMutationBuffer({ sourceId: 'simulation', priority: 20 });
       player.write(3, 20, 3, Voxel.Wood);
@@ -100,7 +101,7 @@ describe('world mutation transaction', () => {
   });
 
   it('rejects mixing object edits and mutation buffers because their relative priority is undefined', () => {
-    const server = new GameServer({ seedText: 'transaction-mixed-inputs' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-mixed-inputs' });
     const buffer = new WorldMutationBuffer({ sourceId: 'simulation', priority: 0 });
     buffer.write(0, 20, 0, Voxel.Wood);
 
@@ -115,7 +116,7 @@ describe('world mutation transaction', () => {
   });
 
   it('rejects an invalid batch atomically before changing canonical state or revisions', () => {
-    const server = new GameServer({ seedText: 'transaction-atomic-validation' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-atomic-validation' });
     const before = server.getVoxel(0, 20, 0);
     const replacement = before === Voxel.Wood ? Voxel.Stone : Voxel.Wood;
 
@@ -142,7 +143,7 @@ describe('world mutation transaction', () => {
       },
       saveSnapshots: () => undefined,
     };
-    const server = new GameServer({ seedText: 'transaction-load-failure', persistence });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-load-failure', persistence });
     const before = server.getVoxel(0, 20, 0);
     const value = before === Voxel.Wood ? Voxel.Stone : Voxel.Wood;
 
@@ -162,7 +163,7 @@ describe('world mutation transaction', () => {
   });
 
   it('orders negative and multi-digit Chunk coordinates numerically', () => {
-    const server = new GameServer({ seedText: 'transaction-numeric-order' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-numeric-order' });
     const result = server.editBatch({
       actorId: 'order',
       edits: [
@@ -177,7 +178,7 @@ describe('world mutation transaction', () => {
   });
 
   it('preserves explicit semantic causality when state coalesces to a no-op', () => {
-    const server = new GameServer({ seedText: 'transaction-semantics' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-semantics' });
     const original = server.getVoxel(0, 20, 0);
     const temporary = original === Voxel.Air ? Voxel.Stone : Voxel.Air;
     const result = server.editBatch({
@@ -202,7 +203,7 @@ describe('world mutation transaction', () => {
   });
 
   it('resolves an inclusive reversed FillCommand and commits 100k writes once', () => {
-    const server = new GameServer({ seedText: 'transaction-fill-100k' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-fill-100k' });
     const result = executeFillCommand(server, 'harness', {
       from: [99, -1, 99],
       to: [0, -10, 0],
@@ -225,7 +226,7 @@ describe('world mutation transaction', () => {
   });
 
   it('rejects an oversized FillCommand before allocating or committing', () => {
-    const server = new GameServer({ seedText: 'transaction-fill-limit' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-fill-limit' });
 
     expect(() =>
       executeFillCommand(server, 'harness', {
@@ -239,8 +240,8 @@ describe('world mutation transaction', () => {
   });
 
   it('keeps FillCommand fast-path mesh invalidation equivalent to the generic transaction path', () => {
-    const generic = new GameServer({ seedText: 'transaction-fill-mesh-equivalence' });
-    const filled = new GameServer({ seedText: 'transaction-fill-mesh-equivalence' });
+    const generic = new GameServer({ platform: testCorePlatform, seedText: 'transaction-fill-mesh-equivalence' });
+    const filled = new GameServer({ platform: testCorePlatform, seedText: 'transaction-fill-mesh-equivalence' });
     const edits = [];
     for (let y = -33; y <= -32; y += 1)
       for (let z = -33; z <= -32; z += 1)
@@ -262,7 +263,7 @@ describe('world mutation transaction', () => {
   });
 
   it('keeps edit as a one-element editBatch convenience API', () => {
-    const server = new GameServer({ seedText: 'transaction-edit-convenience' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-edit-convenience' });
     const current = server.getVoxel(-1, 20, -1);
     const value = current === Voxel.Sand ? Voxel.Wood : Voxel.Sand;
 
@@ -274,11 +275,15 @@ describe('world mutation transaction', () => {
 
   it('keeps world revision and mutation count process-local while restoring Chunk revision', () => {
     const persistence = new MemoryChunkPersistence();
-    const first = new GameServer({ seedText: 'transaction-process-counters', persistence });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'transaction-process-counters', persistence });
     first.edit(0, -20, 0, Voxel.Wood);
     first.flushDirtyChunks();
 
-    const reloaded = new GameServer({ seedText: 'transaction-process-counters', persistence });
+    const reloaded = new GameServer({
+      platform: testCorePlatform,
+      seedText: 'transaction-process-counters',
+      persistence,
+    });
     expect(reloaded.worldRevision).toBe(0);
     expect(reloaded.mutationCount).toBe(0);
     expect(reloaded.getChunk(0, -1, 0).revision).toBe(1);

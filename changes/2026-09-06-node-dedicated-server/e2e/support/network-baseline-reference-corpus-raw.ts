@@ -1,7 +1,7 @@
 import { deepStrictEqual } from 'node:assert';
 import { createHash } from 'node:crypto';
-import type { AuthorityBaselineCaptureResult } from '../../../../src/server/authority/authority-baseline-capture-types';
-import type { ReassembledBaselineReference } from '../../../../src/server/protocol/network-reference-baseline-types';
+import type { AuthorityBaselineCaptureResult } from '../../../../packages/game-core/src/server/authority/authority-baseline-capture-types';
+import type { ReassembledBaselineReference } from '../../../../packages/game-core/src/server/protocol/network-reference-baseline-types';
 import { readNetworkBaselineCorpus } from './network-baseline-corpus-recorder';
 import type { DerivedFrame } from './network-baseline-reference-corpus-types';
 

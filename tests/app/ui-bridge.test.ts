@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createUiBridge } from '../../src/app/ui/ui-bridge';
+import { createUiBridge } from '../../apps/web/src/app/ui/ui-bridge';
 
 type Timer = { callback: () => void; delay: number };
 

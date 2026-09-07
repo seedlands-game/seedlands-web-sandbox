@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import type {
   AuthorityBaselineCaptureRequest,
   AuthorityBaselineCaptureResult,
-} from '../../../../src/server/authority/authority-baseline-capture-types';
+} from '../../../../packages/game-core/src/server/authority/authority-baseline-capture-types';
 
 export const networkBaselineCorpusOutputDirectory = '/tmp/seedlands-network-baseline-corpus-v1-r2';
 

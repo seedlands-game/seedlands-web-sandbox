@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { applyAcknowledgedWorldEdits } from '../../src/client/authority/acknowledged-world-edit-cache';
-import { CHUNK_SIZE, voxelIndex } from '../../src/world/voxel';
-import type { WorldCommitResult } from '../../src/server/game-server-types';
+import { applyAcknowledgedWorldEdits } from '../../apps/web/src/client/authority/acknowledged-world-edit-cache';
+import { CHUNK_SIZE, voxelIndex } from '../../packages/game-core/src/world/voxel';
+import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
 
 const commit = (key: string, revision: number): WorldCommitResult => ({
   committed: true,

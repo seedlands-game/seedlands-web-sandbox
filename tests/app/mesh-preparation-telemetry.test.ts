@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { MeshTaskScheduler, type MeshWorkerPort } from '../../src/app/world/mesh-task-scheduler';
-import { PERFORMANCE_PROFILES } from '../../src/client/presentation/performance-profile';
-import { PerformanceTelemetry } from '../../src/client/presentation/performance-telemetry';
+import { MeshTaskScheduler, type MeshWorkerPort } from '../../apps/web/src/app/world/mesh-task-scheduler';
+import { PERFORMANCE_PROFILES } from '../../apps/web/src/client/presentation/performance-profile';
+import { PerformanceTelemetry } from '../../apps/web/src/client/presentation/performance-telemetry';
 
 class CapturingWorker implements MeshWorkerPort {
   onmessage: MeshWorkerPort['onmessage'] = null;

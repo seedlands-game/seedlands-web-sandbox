@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { projectGameplayConsumerReference } from '../../src/server/protocol/network-gameplay-consumer-reference';
-import type { AuthorityGameplayView } from '../../src/worker/authority-worker-protocol';
-import type { ActorBehavior, ActorState } from '../../src/server/simulation/actor-state';
+import { projectGameplayConsumerReference } from '../../packages/game-core/src/server/protocol/network-gameplay-consumer-reference';
+import type { AuthorityGameplayView } from '../../packages/game-core/src/compute/authority-worker-protocol';
+import type { ActorBehavior, ActorState } from '../../packages/game-core/src/server/simulation/actor-state';
 
 const behaviors = [
   'idle',

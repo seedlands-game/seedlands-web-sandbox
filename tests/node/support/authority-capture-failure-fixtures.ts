@@ -4,9 +4,12 @@ import { join, basename, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import { build as viteBuild } from 'vite';
-import { createNodeAuthorityLane, type NodeAuthorityLane } from '../../../src/node/runtime/node-authority-lane';
-import { createNodePersistenceLane } from '../../../src/node/persistence/node-persistence-lane';
-import { GENERATOR_VERSION } from '../../../src/world/voxel';
+import {
+  createNodeAuthorityLane,
+  type NodeAuthorityLane,
+} from '../../../apps/node-server/src/node/runtime/node-authority-lane';
+import { createNodePersistenceLane } from '../../../apps/node-server/src/node/persistence/node-persistence-lane';
+import { GENERATOR_VERSION } from '../../../packages/game-core/src/world/voxel';
 
 type Mode = 'normal' | 'early-cleanup-negative-control';
 type Artifacts = Readonly<{ authority: URL; persistence: URL; compute: URL; child: URL; directory: string }>;
@@ -75,10 +78,10 @@ async function buildArtifacts(): Promise<Artifacts> {
     return pathToFileURL(join(directory, name, `${name}.mjs`));
   };
   const [authority, persistence, compute, child] = await Promise.all([
-    build('src/node/server/node-authority-worker.ts', 'authority'),
-    build('src/node/persistence/node-persistence-worker.ts', 'persistence'),
-    build('src/node/compute/node-compute-worker.ts', 'compute'),
-    build('src/node/compute/node-compute-child.ts', 'child'),
+    build('apps/node-server/src/node/server/node-authority-worker.ts', 'authority'),
+    build('apps/node-server/src/node/persistence/node-persistence-worker.ts', 'persistence'),
+    build('apps/node-server/src/node/compute/node-compute-worker.ts', 'compute'),
+    build('apps/node-server/src/node/compute/node-compute-child.ts', 'child'),
   ]);
   return { authority, persistence, compute, child, directory };
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createBaselineReferenceInFlightLedger,
   createBaselineReferenceSendQueue,
-} from '../../src/server/protocol/network-reference-baseline-budget';
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
 
 describe('baseline reference byte ledgers', () => {
   it('预留不足拒绝，且每份 lease 只结算一次', () => {

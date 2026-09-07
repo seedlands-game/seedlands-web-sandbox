@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PerformanceTelemetry } from '../../src/client/presentation/performance-telemetry';
+import { PerformanceTelemetry } from '../../apps/web/src/client/presentation/performance-telemetry';
 
 describe('客户端性能 telemetry', () => {
   it('导出尚未完成的跨Worker链路标记及所属trace身份', () => {

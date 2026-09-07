@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { AuthorityCollisionRevisionGuard } from '../../src/client/authority/authority-collision-mirror';
-import { createNetworkBaselineConsumer } from '../../src/client/authority/network-baseline-consumer';
+import { AuthorityCollisionRevisionGuard } from '../../apps/web/src/client/authority/authority-collision-mirror';
+import { createNetworkBaselineConsumer } from '../../apps/web/src/client/authority/network-baseline-consumer';
 import {
   BASELINE_BYTES_PER_CHUNK,
   makeBaselineOwner,

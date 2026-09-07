@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   validateAuthorityRequestPayload,
   validateAuthorityResponsePayload,
-} from '../../src/node/runtime/node-authority-lane-protocol';
+} from '../../apps/node-server/src/node/runtime/node-authority-lane-protocol';
 
 const meshKind = 'authority-capture-mesh-baseline';
 const collisionKind = 'authority-capture-collision-baseline';

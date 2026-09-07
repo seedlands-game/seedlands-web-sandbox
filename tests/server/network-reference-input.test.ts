@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { AuthoritySnapshot } from '../../src/server/authority/authority-session-types';
+import type { AuthoritySnapshot } from '../../packages/game-core/src/server/authority/authority-session-types';
 import {
   projectInputDecisionReference,
   projectPlayerInputReference,
-} from '../../src/server/protocol/network-reference-input';
-import { PROTOCOL_VERSION, type InputCommand } from '../../src/runtime/session-protocol';
+} from '../../packages/game-core/src/server/protocol/network-reference-input';
+import { PROTOCOL_VERSION, type InputCommand } from '../../packages/game-core/src/runtime/session-protocol';
 
 const input = (overrides: Partial<InputCommand> = {}): InputCommand => ({
   kind: 'input',

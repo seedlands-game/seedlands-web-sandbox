@@ -1,24 +1,25 @@
+import { testCorePlatform } from '../support/core-platform';
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type {
   DedicatedComputeExecutor,
   DedicatedComputeResult,
   DedicatedComputeTask,
-} from '../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedServerHost } from '../../src/server/dedicated/dedicated-server-host';
+} from '../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedServerHost } from '../../packages/game-core/src/server/dedicated/dedicated-server-host';
 import {
   projectGameplayViewReference,
   projectPlayerCorrectionReference,
   projectWorldCommitReference,
-} from '../../src/server/protocol/network-reference-projection';
+} from '../../packages/game-core/src/server/protocol/network-reference-projection';
 import {
   projectChunkBaselineReference,
   projectWelcomeReference,
-} from '../../src/server/protocol/network-reference-bootstrap';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { PROTOCOL_VERSION } from '../../src/runtime/session-protocol';
-import { CHUNK_SIZE, Voxel } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/protocol/network-reference-bootstrap';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { PROTOCOL_VERSION } from '../../packages/game-core/src/runtime/session-protocol';
+import { CHUNK_SIZE, Voxel } from '../../packages/game-core/src/world/voxel';
 
 const executor = (): DedicatedComputeExecutor => ({
   execute: (task: DedicatedComputeTask): Promise<DedicatedComputeResult> => runDedicatedComputeTask(task),
@@ -51,10 +52,11 @@ const createHost = async () => {
   let now = 0;
   const compute = executor();
   const host = await DedicatedServerHost.create({
+    platform: testCorePlatform,
     epoch: 'host:reference-corpus',
     seedText: 'network-reference-fixture',
     initialPlayerBodyPosition: [0.5, 33, 0.5],
-    persistence: new MemoryGamePersistence(),
+    persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
     executors: { general: compute, fluid: compute, logic: compute },
     now: () => now,
   });

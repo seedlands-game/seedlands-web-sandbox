@@ -1,15 +1,16 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import {
   ALL_COMMAND_CAPABILITIES,
   type CommandObservation,
   type CommandSource,
   ServerCommandExecutor,
-} from '../../src/server/commands/server-command-executor';
-import { parseSlashCommand } from '../../src/server/commands/slash-command-parser';
-import { GameServer } from '../../src/server/game-server';
-import type { ChunkPersistence } from '../../src/server/persistence/chunk-persistence';
-import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
-import { Voxel } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/commands/server-command-executor';
+import { parseSlashCommand } from '../../packages/game-core/src/server/commands/slash-command-parser';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import type { ChunkPersistence } from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import { MemoryChunkPersistence } from '../../packages/game-core/src/server/persistence/memory-chunk-persistence';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 const admin: CommandSource = {
   actorId: 'local-developer',
@@ -20,8 +21,8 @@ const admin: CommandSource = {
 
 describe('server command boundary', () => {
   it('executes setblock and fill through one authoritative transaction each', async () => {
-    const server = new GameServer({ seedText: 'command-mutation' });
-    const executor = new ServerCommandExecutor(server);
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'command-mutation' });
+    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
 
     const setBlock = await executor.execute(admin, { type: 'set-block', position: [1, -20, 1], voxel: Voxel.Wood });
     expect(setBlock).toMatchObject({ success: true, worldRevision: 1, affectedChunks: ['0,-1,0'] });
@@ -51,9 +52,9 @@ describe('server command boundary', () => {
   });
 
   it('executes teleport, time, seed and inspect commands without bypassing server APIs', async () => {
-    const server = new GameServer({ seedText: 'command-query' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'command-query' });
     server.createEntity({ id: 'headless-player', kind: 'player', position: [0, 34, 0] });
-    const executor = new ServerCommandExecutor(server);
+    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
 
     expect(
       await executor.execute(admin, { type: 'teleport', entityId: 'headless-player', position: [2.5, 40, -3.25] }),
@@ -86,16 +87,16 @@ describe('server command boundary', () => {
 
   it('saves through the persistence port and reloads the exact authoritative voxel', async () => {
     const persistence = new MemoryChunkPersistence();
-    const first = new GameServer({ seedText: 'command-save', persistence });
-    const executor = new ServerCommandExecutor(first);
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'command-save', persistence });
+    const executor = new ServerCommandExecutor(first, { now: testCorePlatform.now });
     await executor.execute(admin, { type: 'set-block', position: [33, -20, 1], voxel: Voxel.Wood });
 
     const saved = await executor.execute(admin, { type: 'save' });
     expect(saved).toMatchObject({ success: true, data: { savedChunks: ['1,-1,0'] } });
     expect(persistence.writes).toEqual(['1,-1,0']);
 
-    const reloaded = new GameServer({ seedText: 'command-save', persistence });
-    const inspected = await new ServerCommandExecutor(reloaded).execute(admin, {
+    const reloaded = new GameServer({ platform: testCorePlatform, seedText: 'command-save', persistence });
+    const inspected = await new ServerCommandExecutor(reloaded, { now: testCorePlatform.now }).execute(admin, {
       type: 'inspect-voxel',
       position: [33, -20, 1],
     });
@@ -103,8 +104,8 @@ describe('server command boundary', () => {
   });
 
   it('enforces capabilities before reading or mutating server state', async () => {
-    const server = new GameServer({ seedText: 'command-permission' });
-    const executor = new ServerCommandExecutor(server);
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'command-permission' });
+    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
     const queryOnly: CommandSource = {
       actorId: 'observer',
       sourceType: 'agent',
@@ -123,8 +124,9 @@ describe('server command boundary', () => {
   });
 
   it('fails closed when the injected permission hook fails', async () => {
-    const server = new GameServer({ seedText: 'command-permission-hook' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'command-permission-hook' });
     const executor = new ServerCommandExecutor(server, {
+      now: testCorePlatform.now,
       authorize: () => {
         throw new Error('permission backend unavailable');
       },
@@ -145,8 +147,8 @@ describe('server command boundary', () => {
         throw new Error('simulated store failure');
       },
     };
-    const server = new GameServer({ seedText: 'command-errors', persistence });
-    const executor = new ServerCommandExecutor(server);
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'command-errors', persistence });
+    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
 
     expect(
       await executor.execute(admin, {
@@ -211,8 +213,9 @@ describe('server command boundary', () => {
 
   it('isolates an observation sink failure from an already committed command', async () => {
     const records: CommandObservation[] = [];
-    const server = new GameServer({ seedText: 'command-observation' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'command-observation' });
     const executor = new ServerCommandExecutor(server, {
+      now: testCorePlatform.now,
       observe: (record) => {
         records.push(record);
         throw new Error('sink unavailable');

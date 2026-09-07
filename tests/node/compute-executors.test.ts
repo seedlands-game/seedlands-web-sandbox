@@ -8,9 +8,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   createNodeComputeExecutor,
   type NodeComputeExecutorEntryPoints,
-} from '../../src/node/compute/node-compute-executor';
-import type { DedicatedComputeTask } from '../../src/server/compute/dedicated-compute-contract';
-import { chunkKey, Voxel } from '../../src/world/voxel';
+} from '../../apps/node-server/src/node/compute/node-compute-executor';
+import type { DedicatedComputeTask } from '../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { chunkKey, Voxel } from '../../packages/game-core/src/world/voxel';
 
 let outputDirectory = '';
 let entries: NodeComputeExecutorEntryPoints;
@@ -115,8 +115,8 @@ beforeAll(async () => {
       },
     });
   };
-  await buildEntry('src/node/compute/node-compute-worker.ts', 'node-compute-worker.mjs');
-  await buildEntry('src/node/compute/node-compute-child.ts', 'node-compute-child.mjs');
+  await buildEntry('apps/node-server/src/node/compute/node-compute-worker.ts', 'node-compute-worker.mjs');
+  await buildEntry('apps/node-server/src/node/compute/node-compute-child.ts', 'node-compute-child.mjs');
   await writeFile(
     join(outputDirectory, 'malformed-compute-child.mjs'),
     "process.on('message', (message) => process.send?.({ kind: 'dedicated-compute-result', epoch: message.task.epoch, taskId: message.task.taskId, generation: message.task.generation, resourceGeneration: message.resourceGeneration, ok: true, result: { kind: 'canonical-result', key: 'missing-voxels' } }));\n",

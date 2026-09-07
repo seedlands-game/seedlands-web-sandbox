@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createBaselineReferenceReassembler } from '../../src/server/protocol/network-reference-baseline-reassembly';
+import { createBaselineReferenceReassembler } from '../../packages/game-core/src/server/protocol/network-reference-baseline-reassembly';
 import {
   createBarrierDigest,
   createBaselineDescriptor,

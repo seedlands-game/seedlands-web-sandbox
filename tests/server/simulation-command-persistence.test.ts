@@ -1,9 +1,13 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { ALL_COMMAND_CAPABILITIES, ServerCommandExecutor } from '../../src/server/commands/server-command-executor';
-import { parseSlashCommand } from '../../src/server/commands/slash-command-parser';
-import { GameServer } from '../../src/server/game-server';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { isSolid, Voxel } from '../../src/world/voxel';
+import {
+  ALL_COMMAND_CAPABILITIES,
+  ServerCommandExecutor,
+} from '../../packages/game-core/src/server/commands/server-command-executor';
+import { parseSlashCommand } from '../../packages/game-core/src/server/commands/slash-command-parser';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { isSolid, Voxel } from '../../packages/game-core/src/world/voxel';
 
 const developer = {
   actorId: 'developer',
@@ -22,11 +26,11 @@ const starterEcologySeeds = [
 
 describe('simulation commands and persistence', () => {
   it('enforces observer identity while exposing reusable observation, action and POI commands', async () => {
-    const server = new GameServer({ seedText: 'simulation-command' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'simulation-command' });
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
     server.spawnAutonomousActor({ id: 'settler', archetype: 'settler', position: [2.5, 1, 0.5] });
     server.registerPoi({ id: 'work', kind: 'work', position: [4.5, 1, 0.5], label: '工作地' });
-    const executor = new ServerCommandExecutor(server);
+    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
     const agent = {
       actorId: 'settler',
       sourceType: 'agent' as const,
@@ -80,8 +84,8 @@ describe('simulation commands and persistence', () => {
   });
 
   it('roundtrips V2 actor, POI, action and world time without duplicate starter content', async () => {
-    const persistence = new MemoryGamePersistence();
-    const server = new GameServer({ seedText: 'simulation-save', persistence });
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'simulation-save', persistence });
     server.setWorldTime(22.5);
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
     server.spawnAutonomousActor({ id: 'settler', archetype: 'settler', position: [2.5, 1, 0.5] });
@@ -89,7 +93,7 @@ describe('simulation commands and persistence', () => {
     server.startActorAction('settler', { type: 'go-to-poi', poiId: 'home' });
     await server.save();
 
-    const restored = new GameServer({ seedText: 'simulation-save', persistence });
+    const restored = new GameServer({ platform: testCorePlatform, seedText: 'simulation-save', persistence });
     restored.setWorldTime(9.5);
     await restored.restore();
     expect(restored.worldTime).toBe(22.5);
@@ -127,8 +131,9 @@ describe('simulation commands and persistence', () => {
       ],
     };
     const migrated = new GameServer({
+      platform: testCorePlatform,
       seedText: 'v1',
-      persistence: new MemoryGamePersistence({ rawGameplaySnapshot: v1 }),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone, rawGameplaySnapshot: v1 }),
     });
     migrated.setWorldTime(9.5);
     await migrated.restore();
@@ -136,16 +141,20 @@ describe('simulation commands and persistence', () => {
     expect(migrated.simulationSnapshot()).toMatchObject({ actors: [], starterEcologyVersion: 0 });
 
     const malformed = new GameServer({
+      platform: testCorePlatform,
       seedText: 'bad-v2',
-      persistence: new MemoryGamePersistence({ rawGameplaySnapshot: { ...v1, version: 2, worldTime: 99 } }),
+      persistence: new MemoryGamePersistence({
+        clone: testCorePlatform.clone,
+        rawGameplaySnapshot: { ...v1, version: 2, worldTime: 99 },
+      }),
     });
     await expect(malformed.restore()).rejects.toThrow(/Invalid gameplay snapshot/);
   });
 
   it('spawns the three actor types through the same command executor without a second simulation clock', async () => {
-    const server = new GameServer({ seedText: 'headless-autonomy' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'headless-autonomy' });
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
-    const executor = new ServerCommandExecutor(server);
+    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
     for (const archetype of ['grazer', 'night-stalker', 'settler'] as const) {
       const result = await executor.execute(developer, {
         type: 'spawn-actor',
@@ -158,7 +167,7 @@ describe('simulation commands and persistence', () => {
   });
 
   it.each(starterEcologySeeds)('places starter actors on bounded dry surfaces for seed %s', (seedText) => {
-    const server = new GameServer({ seedText });
+    const server = new GameServer({ platform: testCorePlatform, seedText });
     expect(server.initializeStarterEcology([0, 34, 0]).initialized).toBe(true);
     const actors = server.queryEntities().filter((entity) => entity.archetype);
     expect(actors).toHaveLength(3);

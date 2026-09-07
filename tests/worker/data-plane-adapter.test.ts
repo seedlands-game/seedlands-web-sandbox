@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
-import { worldKernelAdapter } from '../../src/worker/world-kernel-adapter';
-import { makeChunkStaged } from '../../src/compute/chunk-kernel';
-import { createHaloStaged } from '../../src/compute/halo-kernel';
+import { worldKernelAdapter } from '../../apps/web/src/worker/world-kernel-adapter';
+import { makeChunkStaged } from '../../apps/web/src/compute/chunk-kernel';
+import { createHaloStaged } from '../../apps/web/src/compute/halo-kernel';
 it('uses equivalent TS staged data-plane even when Wasm is off', () => {
   const adapter = worldKernelAdapter({
     memory: null,

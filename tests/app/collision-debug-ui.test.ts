@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { projectCollisionDebugDetails } from '../../src/app/game-ui-projection';
+import { projectCollisionDebugDetails } from '../../apps/web/src/app/game-ui-projection';
 
 describe('碰撞调试面板', () => {
   it('用明确颜色图例区分权威、预测、接触与真实球形传感器', () => {
@@ -25,7 +25,7 @@ describe('碰撞调试面板', () => {
   });
 
   it('在普通调试面板提供碰撞箱、接触和传感器的等价控件', () => {
-    const source = readFileSync(new URL('../../src/app/ui/app-root.svelte', import.meta.url), 'utf8');
+    const source = readFileSync(new URL('../../apps/web/src/app/ui/app-root.svelte', import.meta.url), 'utf8');
 
     expect(source).toContain('id="collision-debug-toggle"');
     expect(source).toContain('id="collision-debug-contacts"');

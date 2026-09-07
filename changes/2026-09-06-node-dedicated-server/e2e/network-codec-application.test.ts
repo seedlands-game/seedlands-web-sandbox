@@ -3,11 +3,11 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { WelcomeReference } from '../../../src/server/protocol/network-reference-bootstrap-types';
+import type { WelcomeReference } from '../../../packages/game-core/src/server/protocol/network-reference-bootstrap-types';
 import type {
   PlayerCorrectionReference,
   WorldCommitReference,
-} from '../../../src/server/protocol/network-reference-projection-types';
+} from '../../../packages/game-core/src/server/protocol/network-reference-projection-types';
 import { NetworkReferenceReceiver, type ReceiverBaseline } from './support/network-reference-receiver';
 
 const decodedFixturePath = process.env.SEEDLANDS_REFERENCE_DECODED_FIXTURE;

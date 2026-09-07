@@ -3,8 +3,11 @@ import { MessageChannel, type MessagePort } from 'node:worker_threads';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { createNodeAuthorityLane, type NodeAuthorityLaneOptions } from '../../src/node/runtime/node-authority-lane';
-import { DEFAULT_PERSISTENCE_LANE_CACHE_LIMITS } from '../../src/node/persistence/persistence-lane-protocol';
+import {
+  createNodeAuthorityLane,
+  type NodeAuthorityLaneOptions,
+} from '../../apps/node-server/src/node/runtime/node-authority-lane';
+import { DEFAULT_PERSISTENCE_LANE_CACHE_LIMITS } from '../../apps/node-server/src/node/persistence/persistence-lane-protocol';
 
 const rpcLimits = {
   maxRequests: 4,

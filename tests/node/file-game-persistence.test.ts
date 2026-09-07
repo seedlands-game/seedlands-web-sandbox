@@ -1,16 +1,17 @@
+import { testCorePlatform } from '../support/core-platform';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, rename, rm, symlink, writeFile } from 'node:fs/promises';
 import { hostname, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { GameServer } from '../../src/server/game-server';
-import type { FrozenGameSaveSnapshot } from '../../src/server/persistence/game-save-snapshot';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import type { FrozenGameSaveSnapshot } from '../../packages/game-core/src/server/persistence/game-save-snapshot';
 import {
   FileGamePersistence,
   type FileGamePersistenceFaultStage,
-} from '../../src/node/persistence/file-game-persistence';
-import { FileStoreLock } from '../../src/node/persistence/file-store-lock';
-import { GENERATOR_VERSION, Voxel } from '../../src/world/voxel';
+} from '../../apps/node-server/src/node/persistence/file-game-persistence';
+import { FileStoreLock } from '../../apps/node-server/src/node/persistence/file-store-lock';
+import { GENERATOR_VERSION, Voxel } from '../../packages/game-core/src/world/voxel';
 
 const directories: string[] = [];
 
@@ -42,7 +43,7 @@ describe('Node 文件游戏持久化', () => {
   it('close 启动后立即拒绝新保存，等待已接纳写入完成才释放锁', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory, 'close-race');
-    const server = new GameServer({ seedText: 'close-race' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'close-race' });
     server.edit(0, 20, 0, Voxel.Wood);
     const firstSnapshot = server.freezeSaveSnapshot(1);
     let release!: () => void;
@@ -80,7 +81,7 @@ describe('Node 文件游戏持久化', () => {
   it('重启后异步准备 Chunk，并同步读取同一检查点的 Gameplay 与 checkpoint', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory);
-    const server = new GameServer({ seedText: 'file-persistence', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'file-persistence', persistence: store });
     server.spawnPlayer({ id: 'player', position: [0.5, 34, 0.5] });
     server.edit(0, 20, 0, Voxel.Water);
     await save(server, 11);
@@ -95,7 +96,11 @@ describe('Node 文件游戏持久化', () => {
     expect(reopened.loadGameplaySnapshot()).toMatchObject({ version: 3, revision: 1 });
     expect(reopened.loadGameCheckpoint()).toEqual({ commitSequence: 11, worldRevision: 1 });
 
-    const restored = new GameServer({ seedText: 'file-persistence', persistence: reopened });
+    const restored = new GameServer({
+      platform: testCorePlatform,
+      seedText: 'file-persistence',
+      persistence: reopened,
+    });
     await restored.restore();
     await reopened.ensureSnapshot(0, 0, 0);
     expect(restored.getVoxel(0, 20, 0)).toBe(Voxel.Water);
@@ -106,7 +111,7 @@ describe('Node 文件游戏持久化', () => {
   it('neighborhood 诊断区分实测文件读取/解码与不适用阶段', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory, 'file-timing');
-    const server = new GameServer({ seedText: 'file-timing', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'file-timing', persistence: store });
     server.edit(0, 20, 0, Voxel.Wood);
     await save(server, 1);
     await store.close();
@@ -129,7 +134,7 @@ describe('Node 文件游戏持久化', () => {
   it('第二次增量保存复制完整索引，保留未再次冻结的旧 Chunk', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory, 'incremental-index');
-    const server = new GameServer({ seedText: 'incremental-index', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'incremental-index', persistence: store });
     server.edit(0, 20, 0, Voxel.Wood);
     await save(server, 1);
     server.edit(33, 20, 0, Voxel.Lantern);
@@ -148,7 +153,7 @@ describe('Node 文件游戏持久化', () => {
   it('同一 commitSequence 只接受完全相同的幂等重试', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory, 'checkpoint-identity');
-    const server = new GameServer({ seedText: 'checkpoint-identity', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'checkpoint-identity', persistence: store });
     server.edit(0, 20, 0, Voxel.Wood);
     await save(server, 7);
     await expect(save(server, 7)).resolves.toMatchObject({ commitSequence: 7, worldRevision: 1 });
@@ -195,7 +200,7 @@ describe('Node 文件游戏持久化', () => {
     const store = await openStore(directory, 'fault-world', (stage) => {
       if (stage === injected) throw new Error(`injected ${stage}`);
     });
-    const server = new GameServer({ seedText: 'fault-world', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'fault-world', persistence: store });
     server.edit(0, 20, 0, Voxel.Wood);
     await save(server, 1);
     server.edit(33, 20, 0, Voxel.Lantern);
@@ -216,7 +221,7 @@ describe('Node 文件游戏持久化', () => {
   it('排队前复制冻结体，调用方随后修改 token 不会改变落盘内容', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory, 'frozen-copy');
-    const server = new GameServer({ seedText: 'frozen-copy' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'frozen-copy' });
     server.spawnPlayer({ id: 'player', position: [0.5, 34, 0.5] });
     server.edit(0, 20, 0, Voxel.Wood);
     const frozen = server.freezeSaveSnapshot(1);
@@ -318,7 +323,7 @@ describe('Node 文件游戏持久化', () => {
       generatorVersion: GENERATOR_VERSION,
       limits: { maxGameplayBytes: 16 },
     });
-    const server = new GameServer({ seedText: 'bounded-store', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'bounded-store', persistence: store });
     server.edit(0, 20, 0, Voxel.Wood);
     await expect(save(server, 1)).rejects.toThrow(/Gameplay.*上限/i);
     await store.close();
@@ -328,7 +333,7 @@ describe('Node 文件游戏持久化', () => {
   it('CURRENT 引用损坏时 fail closed，保留文件且不静默回滚', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory, 'corrupt-world');
-    const server = new GameServer({ seedText: 'corrupt-world', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'corrupt-world', persistence: store });
     server.edit(0, 20, 0, Voxel.Wood);
     await save(server, 1);
     server.edit(33, 20, 0, Voxel.Lantern);
@@ -355,7 +360,7 @@ describe('Node 文件游戏持久化', () => {
     const directory = await temporaryWorld();
     const outsideDirectory = await temporaryWorld();
     const store = await openStore(directory, 'symlink-swap');
-    const server = new GameServer({ seedText: 'symlink-swap', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'symlink-swap', persistence: store });
     server.edit(0, 20, 0, Voxel.Wood);
     await save(server, 1);
     await store.close();
@@ -379,7 +384,7 @@ describe('Node 文件游戏持久化', () => {
   it('内容 hash 损坏、世界身份不匹配和越界 manifest 都拒绝启动', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory, 'validation-world');
-    const server = new GameServer({ seedText: 'validation-world', persistence: store });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'validation-world', persistence: store });
     server.edit(0, 20, 0, Voxel.Wood);
     await save(server, 1);
     await store.close();

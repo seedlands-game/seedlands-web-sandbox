@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { macroAt, riverDescriptorsNear } from '../../src/world/macro-world';
-import { waterSurfaceHeight } from '../../src/world/water-mesh-height';
+import { macroAt, riverDescriptorsNear } from '../../packages/game-core/src/world/macro-world';
+import { waterSurfaceHeight } from '../../packages/game-core/src/world/water-mesh-height';
 
 const surfaceTop = (terrainHeight: number) => terrainHeight + 1;
 

@@ -1,15 +1,15 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { authorityBaselineCaptureKeys } from '../../src/server/authority/authority-baseline-capture';
-import type { AuthorityBaselineCaptureResult } from '../../src/server/authority/authority-baseline-capture-types';
+import { authorityBaselineCaptureKeys } from '../../packages/game-core/src/server/authority/authority-baseline-capture';
+import type { AuthorityBaselineCaptureResult } from '../../packages/game-core/src/server/authority/authority-baseline-capture-types';
 import {
   createBaselineReferencePublicationQueue,
   prepareAuthorityBaselineReference,
-} from '../../src/server/protocol/network-reference-baseline';
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline';
 import {
   createBaselineReferenceInFlightLedger,
   createBaselineReferenceSendQueue,
-} from '../../src/server/protocol/network-reference-baseline-budget';
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
 import {
   BASELINE_QUEUE_BYTES,
   DeferredDigest,

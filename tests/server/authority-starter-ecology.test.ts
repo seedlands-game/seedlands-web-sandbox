@@ -1,9 +1,10 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { GameServer } from '../../src/server/game-server';
-import type { WorkerCanonicalResult } from '../../src/server/game-server-types';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { runWorldComputeTask } from '../../src/worker/world-compute-task';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import type { WorkerCanonicalResult } from '../../packages/game-core/src/server/game-server-types';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { runWorldComputeTask } from '../../packages/game-core/src/compute/world-compute-task';
 
 type StarterBootstrap = Readonly<{
   kind: 'safe-spawn-result';
@@ -15,9 +16,10 @@ describe('Authority新世界生态bootstrap', () => {
   it('由General计算完整近场后在ready前恢复营地、三类角色和食物', async () => {
     let computed: StarterBootstrap | null = null;
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'starter:1',
       seedText: 'starter-authority',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       initialWorldTime: 9,
       startTimeMs: 0,
       findInitialWorldBootstrap: async (seed: number, generatorVersion: number) => {
@@ -52,7 +54,7 @@ describe('Authority新世界生态bootstrap', () => {
   });
 
   it('loaded-only初始化在近场不完整时失败且不生成未知Chunk', () => {
-    const server = new GameServer({ seedText: 'starter-loaded-only' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'starter-loaded-only' });
     const initialize = (
       server as unknown as {
         initializeStarterEcologyFromLoadedWorld: (center: [number, number, number]) => unknown;

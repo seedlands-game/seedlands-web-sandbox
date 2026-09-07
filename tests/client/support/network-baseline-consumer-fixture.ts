@@ -1,11 +1,11 @@
-import { authorityBaselineCaptureKeys } from '../../../src/server/authority/authority-baseline-capture';
+import { authorityBaselineCaptureKeys } from '../../../packages/game-core/src/server/authority/authority-baseline-capture';
 import {
   NETWORK_REFERENCE_BASELINE_CELL_COUNT,
   type BaselineBlockDescriptorReference,
   type ReassembledBaselineReference,
-} from '../../../src/server/protocol/network-reference-baseline-types';
-import type { InterestSessionRef } from '../../../src/server/protocol/network-reference-interest-control';
-import type { NetworkBaselineOwnerRef } from '../../../src/client/authority/network-baseline-consumer-types';
+} from '../../../packages/game-core/src/server/protocol/network-reference-baseline-types';
+import type { InterestSessionRef } from '../../../packages/game-core/src/server/protocol/network-reference-interest-control';
+import type { NetworkBaselineOwnerRef } from '../../../apps/web/src/client/authority/network-baseline-consumer-types';
 
 export const BASELINE_BYTES_PER_CHUNK = NETWORK_REFERENCE_BASELINE_CELL_COUNT * 3;
 export const TEST_BASELINE_REF: InterestSessionRef = Object.freeze({

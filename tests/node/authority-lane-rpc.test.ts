@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { MessageChannel } from 'node:worker_threads';
-import { measureNodeRpcBytes } from '../../src/node/runtime/node-rpc-bytes';
+import { measureNodeRpcBytes } from '../../apps/node-server/src/node/runtime/node-rpc-bytes';
 import {
   attachNodeRpcServer,
   createNodeRpcClient,
   type NodeRpcPort,
   type NodeRpcRequest,
   type NodeRpcWireMessage,
-} from '../../src/node/runtime/node-rpc-contract';
+} from '../../apps/node-server/src/node/runtime/node-rpc-contract';
 
 type PortEvent = 'message' | 'close' | 'messageerror';
 type Listener = (value?: unknown) => void;

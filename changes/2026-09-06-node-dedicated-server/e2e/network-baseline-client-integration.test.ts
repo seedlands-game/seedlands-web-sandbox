@@ -1,25 +1,28 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it, vi } from 'vitest';
-import type { WorkerResult } from '../../../src/app/app-contracts';
-import { MeshTaskScheduler, type MeshWorkerPort } from '../../../src/app/world/mesh-task-scheduler';
-import type { CompleteWorkerInputLease } from '../../../src/app/world/mesh-task-source';
-import { AuthorityCollisionRevisionGuard } from '../../../src/client/authority/authority-collision-mirror';
+import type { WorkerResult } from '../../../apps/web/src/app/app-contracts';
+import { MeshTaskScheduler, type MeshWorkerPort } from '../../../apps/web/src/app/world/mesh-task-scheduler';
+import type { CompleteWorkerInputLease } from '../../../apps/web/src/app/world/mesh-task-source';
+import { AuthorityCollisionRevisionGuard } from '../../../apps/web/src/client/authority/authority-collision-mirror';
 import {
   createNetworkBaselineConsumer,
   type NetworkBaselineOwnerRef,
-} from '../../../src/client/authority/network-baseline-consumer';
-import { PERFORMANCE_PROFILES } from '../../../src/client/presentation/performance-profile';
-import { PerformanceTelemetry } from '../../../src/client/presentation/performance-telemetry';
-import { createBaselineReferenceInFlightLedger } from '../../../src/server/protocol/network-reference-baseline-budget';
-import { createBaselineReferenceReassembler } from '../../../src/server/protocol/network-reference-baseline-reassembly';
+} from '../../../apps/web/src/client/authority/network-baseline-consumer';
+import { PERFORMANCE_PROFILES } from '../../../apps/web/src/client/presentation/performance-profile';
+import { PerformanceTelemetry } from '../../../apps/web/src/client/presentation/performance-telemetry';
+import { createBaselineReferenceInFlightLedger } from '../../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
+import { createBaselineReferenceReassembler } from '../../../packages/game-core/src/server/protocol/network-reference-baseline-reassembly';
 import {
   NETWORK_REFERENCE_BASELINE_CELL_COUNT,
   type BaselineBundleDescriptorReference,
   type BaselinePageReference,
   type ReassembledBaselineReference,
-} from '../../../src/server/protocol/network-reference-baseline-types';
-import { runWorldComputeTask, type GenerateMeshTaskPayload } from '../../../src/worker/world-compute-task';
+} from '../../../packages/game-core/src/server/protocol/network-reference-baseline-types';
+import {
+  runWorldComputeTask,
+  type GenerateMeshTaskPayload,
+} from '../../../packages/game-core/src/worker/world-compute-task';
 
 const projected = '/tmp/seedlands-network-baseline-reference-projected-v1-r2';
 const evidencePath = 'changes/2026-09-06-node-dedicated-server/network-baseline-codec-evidence.json';

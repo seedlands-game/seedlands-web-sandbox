@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { describe, expect, it, vi } from 'vitest';
-import { runNodeServerLifecycle } from '../../src/node/server/node-server-lifecycle';
+import { runNodeServerLifecycle } from '../../apps/node-server/src/node/server/node-server-lifecycle';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;

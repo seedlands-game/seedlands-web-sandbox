@@ -3,7 +3,7 @@ import {
   actorModelDefinition,
   itemVisualKind,
   viewmodelPose,
-} from '../../src/client/presentation/gameplay-model-definition';
+} from '../../apps/web/src/client/presentation/gameplay-model-definition';
 
 describe('gameplay model definition', () => {
   it('gives every carryable item one shared physical visual definition', () => {

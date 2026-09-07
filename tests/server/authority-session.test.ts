@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import type { BodyConfig } from '../../src/physics';
-import { AuthoritySession, type AuthorityServerPort } from '../../src/server/authority/authority-session';
-import { VoxelCollisionWorld } from '../../src/server/authority/voxel-collision-world';
-import { Voxel } from '../../src/world/voxel';
-import { PROTOCOL_VERSION, type InputCommand } from '../../src/runtime/session-protocol';
+import type { BodyConfig } from '../../packages/game-core/src/physics';
+import {
+  AuthoritySession,
+  type AuthorityServerPort,
+} from '../../packages/game-core/src/server/authority/authority-session';
+import { VoxelCollisionWorld } from '../../packages/game-core/src/server/authority/voxel-collision-world';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
+import { PROTOCOL_VERSION, type InputCommand } from '../../packages/game-core/src/runtime/session-protocol';
 
 type Entity = ReturnType<AuthorityServerPort['queryEntities']>[number];
 

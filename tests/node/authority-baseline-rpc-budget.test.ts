@@ -3,13 +3,13 @@ import { MessageChannel, type MessagePort } from 'node:worker_threads';
 import {
   authorityBaselineCaptureTransfer,
   reserveAuthorityResponseBytes,
-} from '../../src/node/runtime/node-authority-baseline-protocol';
+} from '../../apps/node-server/src/node/runtime/node-authority-baseline-protocol';
 import {
   validateAuthorityRequestPayload,
   validateAuthorityResponsePayload,
-} from '../../src/node/runtime/node-authority-lane-protocol';
-import { attachNodeRpcServer, type NodeRpcResponse } from '../../src/node/runtime/node-rpc-contract';
-import { CHUNK_SIZE, chunkKey } from '../../src/world/voxel';
+} from '../../apps/node-server/src/node/runtime/node-authority-lane-protocol';
+import { attachNodeRpcServer, type NodeRpcResponse } from '../../apps/node-server/src/node/runtime/node-rpc-contract';
+import { CHUNK_SIZE, chunkKey } from '../../packages/game-core/src/world/voxel';
 
 const EPOCH = 'baseline-rpc-budget';
 const GENERATION = 0;

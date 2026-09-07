@@ -6,13 +6,13 @@ import type {
   DedicatedComputeExecutor,
   DedicatedComputeResult,
   DedicatedComputeTask,
-} from '../../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedServerHost } from '../../../src/server/dedicated/dedicated-server-host';
-import type { AuthorityBaselineCaptureResult } from '../../../src/server/authority/authority-baseline-capture-types';
-import { MemoryGamePersistence } from '../../../src/server/persistence/memory-game-persistence';
-import { createProceduralMeshInput, meshHaloIndex } from '../../../src/world/mesh';
-import { CHUNK_SIZE, Voxel, voxelIndex } from '../../../src/world/voxel';
+} from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
+import type { AuthorityBaselineCaptureResult } from '../../../packages/game-core/src/server/authority/authority-baseline-capture-types';
+import { MemoryGamePersistence } from '../../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { createProceduralMeshInput, meshHaloIndex } from '../../../packages/game-core/src/world/mesh';
+import { CHUNK_SIZE, Voxel, voxelIndex } from '../../../packages/game-core/src/world/voxel';
 import {
   networkBaselineCorpusExists,
   networkBaselineCorpusOutputDirectory,

@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   authorityBaselineCaptureKeys,
   copyAuthorityBaselineCapture,
-} from '../../src/server/authority/authority-baseline-capture';
-import type { AuthorityBaselineCaptureRequest } from '../../src/server/authority/authority-baseline-capture-types';
-import type { AuthorityCollisionBaselineResult } from '../../src/server/game-server-types';
-import { CHUNK_SIZE } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/authority/authority-baseline-capture';
+import type { AuthorityBaselineCaptureRequest } from '../../packages/game-core/src/server/authority/authority-baseline-capture-types';
+import type { AuthorityCollisionBaselineResult } from '../../packages/game-core/src/server/game-server-types';
+import { CHUNK_SIZE } from '../../packages/game-core/src/world/voxel';
 
 const request = (overrides: Partial<AuthorityBaselineCaptureRequest> = {}): AuthorityBaselineCaptureRequest => ({
   captureId: 0,

@@ -1,14 +1,14 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { AuthorityRuntime } from '../../../src/server/authority/authority-runtime';
-import { MemoryGamePersistence } from '../../../src/server/persistence/memory-game-persistence';
-import { runDedicatedComputeTask } from '../../../src/server/compute/run-dedicated-compute-task';
-import { projectChunkBaselineReference } from '../../../src/server/protocol/network-reference-bootstrap';
+import { AuthorityRuntime } from '../../../packages/game-core/src/server/authority/authority-runtime';
+import { MemoryGamePersistence } from '../../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { projectChunkBaselineReference } from '../../../packages/game-core/src/server/protocol/network-reference-bootstrap';
 import {
   projectPlayerCorrectionReference,
   projectWorldCommitReference,
-} from '../../../src/server/protocol/network-reference-projection';
-import { CHUNK_SIZE, Voxel } from '../../../src/world/voxel';
+} from '../../../packages/game-core/src/server/protocol/network-reference-projection';
+import { CHUNK_SIZE, Voxel } from '../../../packages/game-core/src/world/voxel';
 import { NetworkReferenceReceiver, type ReceiverBaseline } from './support/network-reference-receiver';
 
 const digest = async (bytes: Uint8Array) => createHash('sha256').update(bytes).digest('hex');

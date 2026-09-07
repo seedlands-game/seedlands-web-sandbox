@@ -3,8 +3,8 @@ import {
   MATERIAL_LAYER_COUNT,
   shaderInventory,
   renderCategoryForFaceMaterial,
-} from '../../src/app/scene/voxel-render-pipeline';
-import { FaceMaterial } from '../../src/world/voxel';
+} from '../../apps/web/src/app/scene/voxel-render-pipeline';
+import { FaceMaterial } from '../../packages/game-core/src/world/voxel';
 
 describe('voxel render pipeline policy', () => {
   it('maps face materials to four stable render categories', () => {

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { reflectionPlaneAboveCamera, waterReflectionSurfaceY } from '../../src/app/scene/water-reflection-plane';
+import {
+  reflectionPlaneAboveCamera,
+  waterReflectionSurfaceY,
+} from '../../apps/web/src/app/scene/water-reflection-plane';
 
 describe('水面反射平面选择', () => {
   it('将暴露满水单元对齐到网格的七八码顶面', () => {

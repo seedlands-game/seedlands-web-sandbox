@@ -20,6 +20,11 @@ const pureRuntimeForbiddenImports = (source, filename) =>
   source.includes('/server/') ||
   source.includes('/worker/') ||
   (filename.replaceAll('\\', '/').includes('/src/physics/') && source.includes('/runtime/'));
+const computeForbiddenImports = (source) =>
+  source === 'playcanvas' ||
+  source.startsWith('node:') ||
+  isBuiltin(source) ||
+  /(?:^|\/)(?:app|client|node)(?:\/|$)/.test(source);
 const forbiddenRuntimeGlobals = new Set([
   'window',
   'document',
@@ -138,6 +143,7 @@ const seedlands = {
     },
     'world-purity': purityRule(worldForbiddenImports, ['fetch', 'WebAssembly']),
     'compute-purity': purityRule(pureRuntimeForbiddenImports, ['fetch']),
+    'core-compute-purity': purityRule(computeForbiddenImports, ['fetch']),
     'server-purity': purityRule(serverForbiddenImports),
     'pure-runtime': purityRule(pureRuntimeForbiddenImports),
     'authority-worker-owner': {
@@ -272,7 +278,7 @@ export default tseslint.config(
   {
     ignores: [
       'coverage/**',
-      'dist/**',
+      '**/dist/**',
       'harness/results/**',
       'midscene_run/**',
       'node_modules/**',
@@ -313,8 +319,8 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/app/**/*.ts'],
-    ignores: ['src/app/ui/mount-ui.ts'],
+    files: ['apps/web/src/app/**/*.ts'],
+    ignores: ['apps/web/src/app/ui/mount-ui.ts'],
     plugins: { seedlands },
     rules: {
       'seedlands/ui-presentation-boundary': 'error',
@@ -322,19 +328,19 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/app/*.{ts,svelte}'],
-    ignores: ['src/app/player-view-offsets.ts'],
+    files: ['apps/web/src/app/*.{ts,svelte}'],
+    ignores: ['apps/web/src/app/player-view-offsets.ts'],
     plugins: { seedlands },
     rules: { 'seedlands/app-top-level-owner': 'error' },
   },
   {
-    files: ['src/client/*.ts'],
-    ignores: ['src/client/performance-telemetry.ts'],
+    files: ['apps/web/src/client/*.ts'],
+    ignores: ['apps/web/src/client/performance-telemetry.ts'],
     plugins: { seedlands },
     rules: { 'seedlands/client-top-level-owner': 'error' },
   },
   {
-    files: ['src/client/**/*.ts'],
+    files: ['apps/web/src/client/**/*.ts'],
     plugins: { seedlands },
     rules: {
       'seedlands/authority-worker-owner': 'error',
@@ -342,35 +348,40 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/world/**/*.ts'],
+    files: ['packages/game-core/src/world/**/*.ts'],
     plugins: { seedlands },
     languageOptions: { globals: globals.node },
     rules: { 'seedlands/world-purity': 'error' },
   },
   {
-    files: ['src/compute/**/*.ts'],
+    files: ['apps/web/src/compute/**/*.ts'],
     plugins: { seedlands },
     rules: { 'seedlands/compute-purity': 'error' },
   },
   {
-    files: ['src/runtime/**/*.ts', 'src/physics/**/*.ts'],
+    files: ['packages/game-core/src/compute/**/*.ts'],
+    plugins: { seedlands },
+    rules: { 'seedlands/core-compute-purity': 'error' },
+  },
+  {
+    files: ['packages/game-core/src/runtime/**/*.ts', 'packages/game-core/src/physics/**/*.ts'],
     plugins: { seedlands },
     languageOptions: { globals: globals.node },
     rules: { 'seedlands/pure-runtime': 'error' },
   },
   {
-    files: ['src/server/**/*.ts'],
+    files: ['packages/game-core/src/server/**/*.ts'],
     plugins: { seedlands },
     languageOptions: { globals: globals.node },
     rules: { 'seedlands/server-purity': 'error' },
   },
   {
-    files: ['src/**/*.ts'],
+    files: ['apps/*/src/**/*.ts', 'packages/*/src/**/*.ts'],
     plugins: { seedlands },
     rules: { 'seedlands/node-platform-boundary': 'error' },
   },
   {
-    files: ['src/node/**/*.ts'],
+    files: ['apps/node-server/src/node/**/*.ts'],
     languageOptions: {
       globals: {
         ...Object.fromEntries(Object.keys({ ...globals.browser, ...globals.worker }).map((name) => [name, 'off'])),

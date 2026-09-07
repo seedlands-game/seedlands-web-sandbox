@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { FaceMaterial, Voxel, voxelNames } from '../../src/world/voxel';
-import { collisionBoxesForVoxel, modelBoxesForVoxel, voxelOccludesFullFace } from '../../src/world/voxel-model';
+import { FaceMaterial, Voxel, voxelNames } from '../../packages/game-core/src/world/voxel';
+import {
+  collisionBoxesForVoxel,
+  modelBoxesForVoxel,
+  voxelOccludesFullFace,
+} from '../../packages/game-core/src/world/voxel-model';
 
 describe('模型方块注册与形状', () => {
   it('保留旧数值 9 为辉光石并新增数值 10 灯笼', () => {

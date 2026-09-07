@@ -1,5 +1,8 @@
-import type { FluidAuthoritySnapshot, FluidPosition } from '../../../src/server/fluid/fluid-transaction';
-import type { CreateStoredChunkRecordInput } from '../../../src/world/chunk-snapshot-codec';
+import type {
+  FluidAuthoritySnapshot,
+  FluidPosition,
+} from '../../../packages/game-core/src/server/fluid/fluid-transaction';
+import type { CreateStoredChunkRecordInput } from '../../../packages/game-core/src/world/chunk-snapshot-codec';
 import {
   createProceduralMeshInput,
   makeChunk,
@@ -8,8 +11,8 @@ import {
   type MeshOptions,
   type ProceduralMeshInput,
   type WorldChange,
-} from '../../../src/world/mesh';
-import { CHUNK_SIZE, Voxel, chunkKey, voxelIndex } from '../../../src/world/voxel';
+} from '../../../packages/game-core/src/world/mesh';
+import { CHUNK_SIZE, Voxel, chunkKey, voxelIndex } from '../../../packages/game-core/src/world/voxel';
 
 export const WORKLOAD_CORPUS_SCHEMA = 2;
 const CELL_COUNT = CHUNK_SIZE ** 3;

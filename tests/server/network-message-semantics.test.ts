@@ -4,7 +4,7 @@ import {
   type PublicInboundMessage,
   isPublicInboundMessage,
   isPublicOutboundMessage,
-} from '../../src/server/protocol/network-message-semantics';
+} from '../../packages/game-core/src/server/protocol/network-message-semantics';
 
 const ref = { protocolVersion: 1 as const, sessionEpoch: 'session:2', worldId: 'world-a', playerId: 'player-a' };
 

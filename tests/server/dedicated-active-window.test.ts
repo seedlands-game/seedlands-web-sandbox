@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { dedicatedActiveWindow } from '../../src/server/dedicated/dedicated-active-window';
+import { dedicatedActiveWindow } from '../../packages/game-core/src/server/dedicated/dedicated-active-window';
 
 describe('服务端自行决定活动窗口', () => {
   it('默认与 medium 客户端原活动范围一致，并按离玩家远近有序加载', () => {

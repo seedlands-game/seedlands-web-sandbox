@@ -2,7 +2,7 @@ import type {
   BaselineBundleDescriptorReference,
   BaselinePageLocator,
   BaselineReferenceLimits,
-} from '../../../../src/server/protocol/network-reference-baseline-types';
+} from '../../../../packages/game-core/src/server/protocol/network-reference-baseline-types';
 
 export type DerivedPage = Readonly<{
   arrivalIndex: number;

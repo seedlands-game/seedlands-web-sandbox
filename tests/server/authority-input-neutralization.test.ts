@@ -1,5 +1,5 @@
 import { expect, it, vi } from 'vitest';
-import { clearAuthorityHorizontalVelocity } from '../../src/server/authority/authority-input-neutralization';
+import { clearAuthorityHorizontalVelocity } from '../../packages/game-core/src/server/authority/authority-input-neutralization';
 
 it('清输入只消除水平速度，不改变垂直速度，已静止时不制造重复写入', () => {
   const updateEntity = vi.fn();

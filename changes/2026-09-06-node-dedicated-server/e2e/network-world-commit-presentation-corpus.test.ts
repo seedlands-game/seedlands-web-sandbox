@@ -2,17 +2,17 @@ import { deepStrictEqual } from 'node:assert';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import type { WorldCommitResult } from '../../../src/server/game-server-types';
-import type { DedicatedComputeExecutor } from '../../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedServerHost } from '../../../src/server/dedicated/dedicated-server-host';
-import { computeFluidCandidate } from '../../../src/server/fluid/fluid-transaction';
-import { MemoryGamePersistence } from '../../../src/server/persistence/memory-game-persistence';
+import type { WorldCommitResult } from '../../../packages/game-core/src/server/game-server-types';
+import type { DedicatedComputeExecutor } from '../../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedServerHost } from '../../../packages/game-core/src/server/dedicated/dedicated-server-host';
+import { computeFluidCandidate } from '../../../packages/game-core/src/server/fluid/fluid-transaction';
+import { MemoryGamePersistence } from '../../../packages/game-core/src/server/persistence/memory-game-persistence';
 import {
   projectWorldCommitPresentationReference,
   type WorldCommitPresentationReference,
-} from '../../../src/server/protocol/network-reference-world-commit-presentation';
-import { Voxel } from '../../../src/world/voxel';
+} from '../../../packages/game-core/src/server/protocol/network-reference-world-commit-presentation';
+import { Voxel } from '../../../packages/game-core/src/world/voxel';
 import {
   readWorldCommitPresentationCorpus,
   worldCommitPresentationCorpusOutputDirectory,

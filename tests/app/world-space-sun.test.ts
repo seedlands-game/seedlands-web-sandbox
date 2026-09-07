@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { celestialDirection } from '../../src/app/scene/sky-sun';
+import { celestialDirection } from '../../apps/web/src/app/scene/sky-sun';
 
 describe('world-space sun direction', () => {
   it('is deterministic for fixed time and crosses the horizon', () => {

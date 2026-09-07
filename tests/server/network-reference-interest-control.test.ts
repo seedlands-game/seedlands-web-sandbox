@@ -3,7 +3,7 @@ import {
   projectInterestControlReference,
   validateInterestControlReference,
   type InterestControlTrustedContext,
-} from '../../src/server/protocol/network-reference-interest-control';
+} from '../../packages/game-core/src/server/protocol/network-reference-interest-control';
 
 const context: InterestControlTrustedContext = {
   ref: { epoch: 'client:1', serverEpoch: 'server:9', sessionId: 'session:4', worldId: 'world:seed' },

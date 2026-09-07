@@ -1,10 +1,10 @@
-import type { AuthoritySnapshot } from '../../../../src/server/authority/authority-session-types';
+import type { AuthoritySnapshot } from '../../../../packages/game-core/src/server/authority/authority-session-types';
 import {
   projectWelcomePresentationReference,
   type WelcomePresentationReferenceV2,
-} from '../../../../src/server/protocol/network-reference-bootstrap-presentation';
-import type { ReferenceBootstrapContext } from '../../../../src/server/protocol/network-reference-bootstrap-types';
-import type { AuthorityReady } from '../../../../src/worker/authority-worker-protocol';
+} from '../../../../packages/game-core/src/server/protocol/network-reference-bootstrap-presentation';
+import type { ReferenceBootstrapContext } from '../../../../packages/game-core/src/server/protocol/network-reference-bootstrap-types';
+import type { AuthorityReady } from '../../../../packages/game-core/src/worker/authority-worker-protocol';
 
 export type BootstrapWelcomeCaptureLabel =
   'new-world-authority-start' | 'same-epoch-current-body' | 'restored-authority-start';

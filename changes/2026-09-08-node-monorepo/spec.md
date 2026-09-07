@@ -31,8 +31,8 @@
 
 ## 阶段与准出
 
-- [ ] M0：合同、RED、main 合入，相关语义检查及兼容构建；独立 commit/push。
-- [ ] M1：源码和依赖三包迁移、清晰 exports/平台类型边界，独立 commit/push。
+- [x] M0：合同、RED、main 合入，相关语义检查及兼容构建；独立 commit/push。
+- [x] M1：源码和依赖三包迁移、清晰 exports/平台类型边界，独立 commit/push。
 - [ ] M2：测试、产物、浏览器、隔离构建与 CI 收口，独立复核与修复。
 - [ ] M3：更新 README、代码地图、目录规则、AGENTS 路径和交付记录；PR 最新提交必要 CI 通过、无冲突、ready for review；不自动合并。
 

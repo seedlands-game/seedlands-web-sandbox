@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 
 const meshCalls = vi.hoisted(() => ({ makeChunk: 0, createProceduralMeshInput: 0 }));
 
-vi.mock('../../../src/world/mesh', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../src/world/mesh')>();
+vi.mock('../../../packages/game-core/src/world/mesh', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../packages/game-core/src/world/mesh')>();
   return {
     ...actual,
     makeChunk: (...args: Parameters<typeof actual.makeChunk>) => {
@@ -22,10 +22,13 @@ import {
   type AuthorityCompleteWorkerInput,
   type MeshDispatchRequest,
   type WorkerInput,
-} from '../../../src/app/world/mesh-task-dispatch';
-import { CHUNK_SIZE, Voxel, chunkKey } from '../../../src/world/voxel';
-import { validateAuthorityCompleteMeshInput } from '../../../src/worker/authority-complete-mesh-input';
-import { runWorldComputeTask, type GenerateMeshTaskPayload } from '../../../src/worker/world-compute-task';
+} from '../../../apps/web/src/app/world/mesh-task-dispatch';
+import { CHUNK_SIZE, Voxel, chunkKey } from '../../../packages/game-core/src/world/voxel';
+import { validateAuthorityCompleteMeshInput } from '../../../packages/game-core/src/worker/authority-complete-mesh-input';
+import {
+  runWorldComputeTask,
+  type GenerateMeshTaskPayload,
+} from '../../../packages/game-core/src/worker/world-compute-task';
 
 const canonicalBytes = CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT;
 const fluidBytes = CHUNK_SIZE ** 3;

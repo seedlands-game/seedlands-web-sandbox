@@ -1,10 +1,10 @@
-import type { AuthorityBaselineCaptureResult } from '../../../src/server/authority/authority-baseline-capture-types';
-import { createBaselineReferenceInFlightLedger } from '../../../src/server/protocol/network-reference-baseline-budget';
-import { prepareAuthorityBaselineReference } from '../../../src/server/protocol/network-reference-baseline';
+import type { AuthorityBaselineCaptureResult } from '../../../packages/game-core/src/server/authority/authority-baseline-capture-types';
+import { createBaselineReferenceInFlightLedger } from '../../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
+import { prepareAuthorityBaselineReference } from '../../../packages/game-core/src/server/protocol/network-reference-baseline';
 import type {
   BaselineReferenceProjectionContext,
   PreparedBaselineBundleReference,
-} from '../../../src/server/protocol/network-reference-baseline-types';
+} from '../../../packages/game-core/src/server/protocol/network-reference-baseline-types';
 
 export const BASELINE_QUEUE_BYTES = 4 * 1024 * 1024;
 export const baselineRef = Object.freeze({

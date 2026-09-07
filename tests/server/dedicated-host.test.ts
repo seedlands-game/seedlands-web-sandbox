@@ -1,14 +1,15 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it, vi } from 'vitest';
 import type {
   DedicatedComputeExecutor,
   DedicatedComputeTask,
-} from '../../src/server/compute/dedicated-compute-contract';
-import { runDedicatedComputeTask } from '../../src/server/compute/run-dedicated-compute-task';
-import { DedicatedServerHost } from '../../src/server/dedicated/dedicated-server-host';
-import { dedicatedLimits } from '../../src/server/dedicated/dedicated-host-types';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { PROTOCOL_VERSION } from '../../src/runtime/session-protocol';
-import { CHUNK_SIZE } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/compute/dedicated-compute-contract';
+import { runDedicatedComputeTask } from '../../packages/game-core/src/server/compute/run-dedicated-compute-task';
+import { DedicatedServerHost } from '../../packages/game-core/src/server/dedicated/dedicated-server-host';
+import { dedicatedLimits } from '../../packages/game-core/src/server/dedicated/dedicated-host-types';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { PROTOCOL_VERSION } from '../../packages/game-core/src/runtime/session-protocol';
+import { CHUNK_SIZE } from '../../packages/game-core/src/world/voxel';
 
 const executor = () => ({
   execute: vi.fn(async (task: DedicatedComputeTask) => {
@@ -50,9 +51,13 @@ const executor = () => ({
   }),
 });
 
-const create = async (compute: DedicatedComputeExecutor = executor(), persistence = new MemoryGamePersistence()) => {
+const create = async (
+  compute: DedicatedComputeExecutor = executor(),
+  persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone }),
+) => {
   let time = 0;
   const host = await DedicatedServerHost.create({
+    platform: testCorePlatform,
     epoch: 'dedicated-test',
     seedText: 'dedicated-test',
     initialPlayerBodyPosition: [0.5, 33, 0.5],
@@ -143,7 +148,7 @@ describe('DedicatedServerHost', () => {
 
   it('远端 Chunk 请求先恢复已有存档，不用基础生成覆盖编辑', async () => {
     const compute = executor();
-    const persistence = new MemoryGamePersistence();
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const { host } = await create(compute, persistence);
     const voxels = new Uint16Array(CHUNK_SIZE ** 3);
     voxels[0] = 1;
