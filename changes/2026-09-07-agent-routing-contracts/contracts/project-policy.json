@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "id": "project-policy",
+  "initiatedBy": "agent",
+  "role": "Seedlands项目资源与规则实施负责人",
+  "workType": "implementation",
+  "goal": "端到端实现项目阻塞式性能窗口、兼容旧调用、资源清理与路由规则；不修改游戏生产代码",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/spec.md",
+      "purpose": "批准范围、规则和验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/AGENTS.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/docs/collaboration-routing.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/docs/development-governance.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/docs/performance-execution.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/scripts/with-benchmark-reservation.mjs",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/scripts/benchmark-window.mjs",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/project-tests",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/project-progress.md"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/.system/skill-creator"
+    ],
+    "nonGoals": [
+      "不写真实线上服务",
+      "不执行WASM到Node合并",
+      "不创建自动任务或购买额度"
+    ]
+  },
+  "outputs": [
+    "短项目规则与全文策略",
+    "可阻塞等待的机器资源脚本",
+    "隔离原生进程测试"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "window",
+      "check": "并发调用串行、等待超时/取消不抢锁、失败/信号/子孙清理后释放、旧锁兼容",
+      "evidence": "node --test"
+    },
+    {
+      "id": "policy",
+      "check": "固定Terra/high职责、单步CDP例外、Midscene/Playwright分层、人类选型保留",
+      "evidence": "文档和定向检查"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 2,
+    "maxAgentHours": 6
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/contracts/routing-root.json",
+    "sha256": "686d661f40e78b63c604055e80dcfa4a2b61ccf53e8bbcf02d8bc293b9040e8c"
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围/公开接口/授权变化",
+    "两次同因失败",
+    "预计超过预算"
+  ],
+  "reportFields": [
+    "完成状态",
+    "改动文件",
+    "验证结果",
+    "限制",
+    "下一步"
+  ]
+}

@@ -1,0 +1,88 @@
+TAP version 13
+# Subtest: 固定合同校验、hash 与完整交接渲染稳定
+ok 1 - 固定合同校验、hash 与完整交接渲染稳定
+  ---
+  duration_ms: 5.586875
+  type: 'test'
+  ...
+# Subtest: 缺验收、错误路由与 Luna 开发均拒绝；人类模型选择保留
+ok 2 - 缺验收、错误路由与 Luna 开发均拒绝；人类模型选择保留
+  ---
+  duration_ms: 3.266042
+  type: 'test'
+  ...
+# Subtest: 父 hash、权限、路径和预算的任一扩大均拒绝
+ok 3 - 父 hash、权限、路径和预算的任一扩大均拒绝
+  ---
+  duration_ms: 2.684667
+  type: 'test'
+  ...
+# Subtest: 原始合同字节变化会触发 expected hash 拒绝
+ok 4 - 原始合同字节变化会触发 expected hash 拒绝
+  ---
+  duration_ms: 1.290375
+  type: 'test'
+  ...
+# Subtest: 确定性 script 允许无模型执行
+ok 5 - 确定性 script 允许无模型执行
+  ---
+  duration_ms: 1.074208
+  type: 'test'
+  ...
+# Subtest: 只读合同允许空 writePaths，但 localWrite=true 时仍拒绝
+ok 6 - 只读合同允许空 writePaths，但 localWrite=true 时仍拒绝
+  ---
+  duration_ms: 1.832542
+  type: 'test'
+  ...
+# Subtest: 有明确理由可升档；无理由或 Luna/Spark 开发仍拒绝
+ok 7 - 有明确理由可升档；无理由或 Luna/Spark 开发仍拒绝
+  ---
+  duration_ms: 1.466459
+  type: 'test'
+  ...
+# Subtest: 安装器默认 dry-run；apply 备份、幂等注入、hash 清单与恢复说明完整
+ok 8 - 安装器默认 dry-run；apply 备份、幂等注入、hash 清单与恢复说明完整
+  ---
+  duration_ms: 44.980458
+  type: 'test'
+  ...
+# Subtest: 100 项有限并发完成 prepare→write→read→verify，临时失败有限重试
+ok 9 - 100 项有限并发完成 prepare→write→read→verify，临时失败有限重试
+  ---
+  duration_ms: 283.52425
+  type: 'test'
+  ...
+# Subtest: 续跑只处理失败项，成功项不重写；输入、配置和 adapter 漂移拒绝
+ok 10 - 续跑只处理失败项，成功项不重写；输入、配置和 adapter 漂移拒绝
+  ---
+  duration_ms: 31.875875
+  type: 'test'
+  ...
+# Subtest: 非幂等写入结果不明进入对账，不盲目重写；审计不含 payload、响应和密钥
+ok 11 - 非幂等写入结果不明进入对账，不盲目重写；审计不含 payload、响应和密钥
+  ---
+  duration_ms: 9.655958
+  type: 'test'
+  ...
+# Subtest: 验证失败续跑只读回验证，不重复写入
+ok 12 - 验证失败续跑只读回验证，不重复写入
+  ---
+  duration_ms: 24.188958
+  type: 'test'
+  ...
+# Subtest: 状态、有界等待和停止可恢复，停止不会伪装成远端撤销
+ok 13 - 状态、有界等待和停止可恢复，停止不会伪装成远端撤销
+  ---
+  duration_ms: 800.788791
+  type: 'test'
+  ...
+1..13
+# tests 13
+# suites 0
+# pass 13
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1212.36975

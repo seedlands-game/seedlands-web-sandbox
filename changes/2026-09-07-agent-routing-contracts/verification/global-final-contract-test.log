@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: 固定合同校验、hash 与完整交接渲染稳定
+ok 1 - 固定合同校验、hash 与完整交接渲染稳定
+  ---
+  duration_ms: 5.022584
+  type: 'test'
+  ...
+# Subtest: 缺验收、错误路由与 Luna 开发均拒绝；人类模型选择保留
+ok 2 - 缺验收、错误路由与 Luna 开发均拒绝；人类模型选择保留
+  ---
+  duration_ms: 4.38175
+  type: 'test'
+  ...
+# Subtest: 父 hash、权限、路径和预算的任一扩大均拒绝
+ok 3 - 父 hash、权限、路径和预算的任一扩大均拒绝
+  ---
+  duration_ms: 2.603708
+  type: 'test'
+  ...
+# Subtest: 原始合同字节变化会触发 expected hash 拒绝
+ok 4 - 原始合同字节变化会触发 expected hash 拒绝
+  ---
+  duration_ms: 1.641041
+  type: 'test'
+  ...
+# Subtest: 确定性 script 允许无模型执行
+ok 5 - 确定性 script 允许无模型执行
+  ---
+  duration_ms: 1.0735
+  type: 'test'
+  ...
+# Subtest: 只读合同允许空 writePaths，但 localWrite=true 时仍拒绝
+ok 6 - 只读合同允许空 writePaths，但 localWrite=true 时仍拒绝
+  ---
+  duration_ms: 1.526792
+  type: 'test'
+  ...
+# Subtest: 有明确理由可升档；无理由或 Luna/Spark 开发仍拒绝
+ok 7 - 有明确理由可升档；无理由或 Luna/Spark 开发仍拒绝
+  ---
+  duration_ms: 1.25025
+  type: 'test'
+  ...
+# Subtest: 默认路由可按任务成本与能力有理由调整
+ok 8 - 默认路由可按任务成本与能力有理由调整
+  ---
+  duration_ms: 0.765708
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 72.217208

@@ -1,0 +1,11 @@
+3:description: 将 agent 主动发起的工作路由到确定性脚本、有界批处理或合适的 Codex 模型，并在派发前校验父子交接合同。用于子 agent 规划、重复批量写入、模型选择、交接校验或可复用职责；人类模型选择始终优先。
+6:# Agent 工作路由
+8:从成本最低且可靠的执行形式开始：确定性本地脚本、有界批处理 runtime、当前 agent、子 agent；只有用户已授权且工具允许时才创建独立任务。不得重路由人类选择的模型。
+10:agent 主动派发前，先写版本化 JSON 合同，用 `scripts/validate-contract.mjs` 校验父合同绑定与边界，再把 `scripts/render-handoff.mjs` 的完整输出用于派发。脚本只校验交接产物，不能拦截平台工具、形成 OS sandbox、计量真实消费或授予权限。
+12:只读取当前模式所需的 reference：
+14:- 模型选择或嵌套派发：[references/routing.md](references/routing.md)。
+15:- 合同字段、父预算、交接和报告：[references/handoff.md](references/handoff.md)。
+16:- 重复或批量工作：[references/script-first.md](references/script-first.md)；写入、读回、验证任务再读 [references/batch-runtime.md](references/batch-runtime.md)。
+17:- 既有有界任务的路由依据：[references/learning-samples.md](references/learning-samples.md)。
+18:- 安装版本化源与全局指针：`scripts/install-global.mjs --help` 和 [references/global-agents-snippet.md](references/global-agents-snippet.md)。
+20:不得把凭据写入合同、配置、payload 示例或审计字段。外部写入仍需用户和目标工具授权。不能假定用户提供的 adapter 幂等，也不能因为使用本 runtime 就宣称支持远端自动回滚。

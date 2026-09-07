@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: 固定合同校验、hash 与完整交接渲染稳定
+ok 1 - 固定合同校验、hash 与完整交接渲染稳定
+  ---
+  duration_ms: 5.290584
+  type: 'test'
+  ...
+# Subtest: 缺验收、错误路由与 Luna 开发均拒绝；人类模型选择保留
+ok 2 - 缺验收、错误路由与 Luna 开发均拒绝；人类模型选择保留
+  ---
+  duration_ms: 3.476875
+  type: 'test'
+  ...
+# Subtest: 父 hash、权限、路径和预算的任一扩大均拒绝
+ok 3 - 父 hash、权限、路径和预算的任一扩大均拒绝
+  ---
+  duration_ms: 3.143042
+  type: 'test'
+  ...
+# Subtest: 原始合同字节变化会触发 expected hash 拒绝
+ok 4 - 原始合同字节变化会触发 expected hash 拒绝
+  ---
+  duration_ms: 1.497125
+  type: 'test'
+  ...
+# Subtest: 确定性 script 允许无模型执行
+ok 5 - 确定性 script 允许无模型执行
+  ---
+  duration_ms: 1.020583
+  type: 'test'
+  ...
+# Subtest: 只读合同允许空 writePaths，但 localWrite=true 时仍拒绝
+ok 6 - 只读合同允许空 writePaths，但 localWrite=true 时仍拒绝
+  ---
+  duration_ms: 1.291708
+  type: 'test'
+  ...
+# Subtest: 有明确理由可升档；无理由或 Luna/Spark 开发仍拒绝
+ok 7 - 有明确理由可升档；无理由或 Luna/Spark 开发仍拒绝
+  ---
+  duration_ms: 1.8445
+  type: 'test'
+  ...
+# Subtest: 默认路由可按任务成本与能力有理由调整
+ok 8 - 默认路由可按任务成本与能力有理由调整
+  ---
+  duration_ms: 0.795833
+  type: 'test'
+  ...
+# Subtest: 安装器默认 dry-run；apply 备份、幂等注入、hash 清单与恢复说明完整
+ok 9 - 安装器默认 dry-run；apply 备份、幂等注入、hash 清单与恢复说明完整
+  ---
+  duration_ms: 42.830125
+  type: 'test'
+  ...
+# Subtest: 100 项有限并发完成 prepare→write→read→verify，临时失败有限重试
+ok 10 - 100 项有限并发完成 prepare→write→read→verify，临时失败有限重试
+  ---
+  duration_ms: 284.024833
+  type: 'test'
+  ...
+# Subtest: 续跑只处理失败项，成功项不重写；输入、配置和 adapter 漂移拒绝
+ok 11 - 续跑只处理失败项，成功项不重写；输入、配置和 adapter 漂移拒绝
+  ---
+  duration_ms: 31.648834
+  type: 'test'
+  ...
+# Subtest: 非幂等写入结果不明进入对账，不盲目重写；审计不含 payload、响应和密钥
+ok 12 - 非幂等写入结果不明进入对账，不盲目重写；审计不含 payload、响应和密钥
+  ---
+  duration_ms: 9.292917
+  type: 'test'
+  ...
+# Subtest: 验证失败续跑只读回验证，不重复写入
+ok 13 - 验证失败续跑只读回验证，不重复写入
+  ---
+  duration_ms: 22.729
+  type: 'test'
+  ...
+# Subtest: 状态、有界等待和停止可恢复，停止不会伪装成远端撤销
+ok 14 - 状态、有界等待和停止可恢复，停止不会伪装成远端撤销
+  ---
+  duration_ms: 750.971958
+  type: 'test'
+  ...
+# Subtest: CLI 失败只输出固定错误码，不泄露 adapter 异常秘密
+ok 15 - CLI 失败只输出固定错误码，不泄露 adapter 异常秘密
+  ---
+  duration_ms: 51.878042
+  type: 'test'
+  ...
+1..15
+# tests 15
+# suites 0
+# pass 15
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1212.769666
