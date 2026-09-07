@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import { createKernelMemory, WASM_ARENA_BYTES } from '../../src/compute/kernel-memory';
+import { createKernelMemory, KernelMemory, WASM_ARENA_BYTES } from '../../src/compute/kernel-memory';
 
-const moduleBytes = () => readFile(new URL('../../src/generated/wasm/seedlands-kernels.wasm', import.meta.url));
+const moduleBytes = () => readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
 
 describe('Wasm 内存与批量 ABI', () => {
   it('隔离实例、校验ABI并读取标准CRC已知答案', async () => {
@@ -33,8 +33,15 @@ describe('Wasm 内存与批量 ABI', () => {
   });
 
   it('trap之后停用实例，禁止再次调用', async () => {
-    const kernel = await createKernelMemory(await moduleBytes());
-    expect(() => kernel.invoke('crc32_bytes', -1, 4)).toThrow();
+    const kernel = new KernelMemory({
+      memory: new WebAssembly.Memory({ initial: 256, maximum: 256 }),
+      abi_version: () => 1,
+      arena_bytes: () => WASM_ARENA_BYTES,
+      crc32_bytes: () => {
+        throw new WebAssembly.RuntimeError('synthetic trap');
+      },
+    } as WebAssembly.Exports);
+    expect(() => kernel.invoke('crc32_bytes', 64, 4)).toThrow(/synthetic trap/);
     expect(kernel.failed).toBe(true);
     expect(() => kernel.invoke('crc32_bytes', 64, 0)).toThrow(/disabled/);
   });

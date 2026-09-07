@@ -26,6 +26,20 @@ class FakeWorker implements ComputeWorkerPort {
       data: { kind: 'compute-result', protocolVersion: 1, epoch, taskId, ok: true, result, workerDurationMs },
     } as MessageEvent<unknown>);
   }
+
+  ready(overrides: Record<string, unknown> = {}) {
+    this.onmessage?.({
+      data: {
+        kind: 'compute-worker-ready',
+        protocolVersion: 1,
+        status: 'matched',
+        requestedArtifact: 'simd',
+        effectiveArtifact: 'simd',
+        selected: ['w04'],
+        ...overrides,
+      },
+    } as MessageEvent<unknown>);
+  }
 }
 
 const task = (taskId: number, lane: ComputeLane, overrides: Partial<ComputeTask> = {}): ComputeTask => ({
@@ -351,6 +365,68 @@ describe('ComputeWorkerPool', () => {
     workers[3].finish('world:2', 1);
     expect(results).toHaveBeenCalledTimes(1);
     expect(workers[3].posts).toHaveLength(2);
+    pool.dispose();
+  });
+
+  it('ready 握手前不派发任务，并按 epoch、lane、index 暴露实际 artifact', () => {
+    const workers: Array<{ lane: ComputeLane; worker: FakeWorker }> = [];
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 8,
+      maxBytes: 1024,
+      requireReadyHandshake: true,
+      createWorker: (lane) => {
+        const worker = new FakeWorker();
+        workers.push({ lane, worker });
+        return worker;
+      },
+    });
+    pool.enqueue(task(1, 'general'));
+    const general = workers.find(({ lane }) => lane === 'general')!.worker;
+    expect(general.posts).toHaveLength(0);
+    general.ready({ status: 'scalar-fallback', effectiveArtifact: 'scalar', reason: 'SIMD unavailable' });
+    expect(general.posts).toHaveLength(1);
+    expect(pool.diagnostics().workerKernelStates).toContainEqual({
+      epoch: 'world:1',
+      lane: 'general',
+      index: 1,
+      status: 'scalar-fallback',
+      requestedArtifact: 'simd',
+      effectiveArtifact: 'scalar',
+      selected: ['w04'],
+      reason: 'SIMD unavailable',
+    });
+    pool.dispose();
+  });
+
+  it('ready 超时会终止旧 slot 并忽略它的迟到消息', () => {
+    const workers: FakeWorker[] = [];
+    const timers: Array<() => void> = [];
+    const pool = new ComputeWorkerPool({
+      epoch: 'world:1',
+      generalWorkerCount: 1,
+      maxTasks: 8,
+      maxBytes: 1024,
+      requireReadyHandshake: true,
+      readyTimeoutMs: 10,
+      maxWorkerRestarts: 0,
+      createWorker: () => {
+        const worker = new FakeWorker();
+        workers.push(worker);
+        return worker;
+      },
+      setTimer: (callback) => {
+        timers.push(callback);
+        return timers.length;
+      },
+      clearTimer: vi.fn(),
+    });
+    const oldGeneral = workers[1];
+    timers[1]();
+    expect(oldGeneral.terminated).toBe(true);
+    oldGeneral.ready();
+    expect(pool.diagnostics().workerKernelStates).toEqual([]);
     pool.dispose();
   });
 });

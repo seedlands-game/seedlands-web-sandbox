@@ -23,7 +23,9 @@ const exitCode = await new Promise((resolve) => playwright.once('exit', (code) =
 if (exitCode !== 0) process.exit(exitCode);
 
 if (process.argv.includes('--aggregate')) {
-  const harness = spawn(process.execPath, ['--expose-gc', 'scripts/run-harness.mjs'], {
+  const harnessArguments = ['--expose-gc', 'scripts/run-harness.mjs'];
+  if (process.argv.includes('--baseline')) harnessArguments.push('--baseline');
+  const harness = spawn(process.execPath, harnessArguments, {
     stdio: 'inherit',
     env: { ...sharedEnvironment, SEEDLANDS_HARNESS_RUN_ID: runId },
   });
