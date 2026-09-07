@@ -145,3 +145,13 @@ T0/T1 的 Node/浏览器及 IPv6 loopback 小包功能通过，尚未验证 WSS�
 三候选同一 receive 链路的 9 条真实 Host + 50 条结构化合成样本均 GREEN，Chrome 与 Node 双向各 59/59；原 source corpus 保持冻结，新增 synthetic 独立标记。详见 [本批记录](network-shared-validation-progress.md)。这不是完整 N2/N3/N4、GUI 或远端交付；输入方向、业务消费者与其他 parser 域继续按门槛收齐。生产源码仍为此前推送的 `8dc8233`，本批为可丢弃探索和证据更新。
 
 账户额度在本批读取时已用 10%、剩余 90%；这是共享账户窗口快照，不能归因成本任务，亦不能折算为 credits。未购买额度、未兑换 reset、未创建 goal。
+
+## 输入、实体语料与真实 Host 应用检查点
+
+新增输入/即时决定/独立 pose 的平台无关参考投影，accepted 与消费 ack 明确分开；同步补充单元与 change-local 采集/应用 oracle。输入关系由 Sol 独立审阅，pose/provenance 与真实非玩家路径由 Terra 审阅及采集，root 负责共同语义、跨候选/Chrome 集成与统一准出。详见 [切片合同](network-input-pose-plan.md)、[实体采集](network-entity-corpus-plan.md)、[最新证据](network-input-pose-progress.md)。
+
+统一 `verify:static` 通过：177 文件通过/2 跳过，936 项通过/4 跳过，world 行覆盖 96.37%；浏览器与 5 入口 Node 构建通过。新增 21 条真实双向小语料，三候选解码 input 各自在新 Host 中重放、即时决定与后续 correction/pose 一致；另采集初始生态/受控命令增实体/保存恢复的 6 条 pose/Gameplay。Chrome/Node 复验四组独立 fixture，保留真实与 synthetic、不同世界/epoch 的范围区别。
+
+本轮 C2 在对象解码前增加 raw 数值域验证；C0 用合法 JSON `-0` 保留 f64 负零，不扩大 wire 字段或收窄值域。大体量合法 pose 暴露 C0 64 KiB metadata 表示上限，记录为选型限制而非过滤样本。所有探索仍无 timing、未采用 wire/transport；GUI、真实远端与正式 A/B 均未完成。原冻结合同 hash 不变，本批只有本地参考投影、验证与证据，不将临时原型代码提交生产。
+
+2026-09-07 本批读取的账户共享周额度已用 18%、剩余 82%；它不是当前任务消耗，也没有同量纲 credits 分母。未兑换 reset、未购买额度。继续按用户授权把验证通过的源码与记录提交并推送 `origin/codex/node-dedicated-server`，不等额度临近耗尽再保存。

@@ -1,0 +1,293 @@
+{
+  "status": "PASS_WITH_OPEN_SELECTION_GATES",
+  "wireStatus": "not-adopted",
+  "timing": "NOT_COLLECTED",
+  "sourceGitSha": "7f1164d6498fbbef4c0f3b943a98e9ffe3d6e97a",
+  "sourceState": "uncommitted input/pose slice with explicit corpus input hashes",
+  "environment": {
+    "node": "22.23.2",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "validation": {
+    "static": {
+      "status": "PASS",
+      "testFilesPassed": 177,
+      "testFilesSkipped": 2,
+      "testsPassed": 936,
+      "testsSkipped": 4,
+      "worldLineCoveragePercent": 96.37
+    },
+    "browserBuild": "PASS",
+    "nodeFiveEntryBuild": "PASS",
+    "directionalCaptureTests": 1,
+    "entityCaptureTests": 1,
+    "directionalApplicationTests": 2,
+    "previousCollisionPredictionApplicationTests": 1
+  },
+  "corpora": {
+    "directional": {
+      "source": {
+        "gitSha": "7f1164d6498fbbef4c0f3b943a98e9ffe3d6e97a",
+        "trackedSourceDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "explicitInputSha256": {
+          "src/server/protocol/network-reference-input-types.ts": "b558e0e2bebeb96bb34b8f510810c1bcc9aa950de47224c2ecc74d587df82747",
+          "src/server/protocol/network-reference-input.ts": "a6df5c1b9b10c9096c71897135eaa6dcca43647ee05656df9ce766c6024f9714",
+          "src/server/protocol/network-reference-pose.ts": "89667634f2348a55bec9339540902c04a60937322fac81a54cd10e71e6cd399b",
+          "changes/2026-09-06-node-dedicated-server/e2e/network-directional-corpus.test.ts": "79fd968445d872cc75bb14f74a379cd999121d7afeb7128fcdc779d73d246a13"
+        }
+      },
+      "manifestPayloadSha256": "29aa3713e09bc75f84459d6275ea3e64f4fcaaa56f13848dc3f20f910df93640",
+      "corpusSha256": "42021105e2b83b08288a98c06d4bfb74f9ff26f2f670d46ac50a97f3c0a1efbc",
+      "recordCount": 21,
+      "categories": {
+        "entity-pose": 5,
+        "input-decision": 6,
+        "player-correction": 5,
+        "player-input": 5
+      },
+      "limitations": [
+        "reference projections; wire not adopted",
+        "publicationSequence is a dedicated-host-subscribe callback index scoped per recorder subscription, not a snapshot or transport field",
+        "pose reflects actual player-only snapshot bodies; no fabricated entity count, non-player entity, or density coverage",
+        "duplicate input records prove decision and acknowledged-sequence behavior only, not duplicate-edge motion behavior",
+        "actions and transport not included"
+      ]
+    },
+    "entity": {
+      "source": {
+        "gitSha": "7f1164d6498fbbef4c0f3b943a98e9ffe3d6e97a",
+        "trackedSourceDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "explicitInputSha256": {
+          "src/server/protocol/network-reference-pose.ts": "89667634f2348a55bec9339540902c04a60937322fac81a54cd10e71e6cd399b",
+          "src/server/protocol/network-reference-projection.ts": "df72e58f88f8cba5458a3b3155db2419c8b45026d15dbc57c88589ef3f847873",
+          "changes/2026-09-06-node-dedicated-server/e2e/network-entity-corpus.test.ts": "7b6cd36156bfd23f50706feb59e0c3728701172d3b181eb16159fc6493159adf"
+        },
+        "fixtureAdmin": {
+          "sourceType": "local-developer",
+          "actorId": "network-entity-corpus-fixture",
+          "commandTypes": ["spawn-world-item", "spawn-creature", "spawn-actor"]
+        }
+      },
+      "manifestPayloadSha256": "e7164728a3c37fdd09afa60aaea88dabe0e60d98cb694d49665432a3b5f6bba9",
+      "corpusSha256": "9987ddb7105c3dd6e261a83518f7ed74cd591d9e9874db482f815e154bd5774e",
+      "recordCount": 6,
+      "categories": {
+        "entity-pose": 3,
+        "gameplay-view": 3
+      },
+      "limitations": [
+        "reference projections; wire not adopted",
+        "each publicationSequence is a dedicated-host-subscribe callback index scoped per recorder subscription",
+        "fixture-admin-expanded uses a local-developer command source, not a player network action",
+        "three small entity counts are correctness evidence, not a density or performance curve"
+      ],
+      "entityCounts": [
+        {
+          "stage": "starter-ecology",
+          "category": "entity-pose",
+          "count": 5
+        },
+        {
+          "stage": "starter-ecology",
+          "category": "gameplay-view",
+          "count": 4
+        },
+        {
+          "stage": "fixture-admin-expanded",
+          "category": "entity-pose",
+          "count": 8
+        },
+        {
+          "stage": "fixture-admin-expanded",
+          "category": "gameplay-view",
+          "count": 7
+        },
+        {
+          "stage": "restored",
+          "category": "entity-pose",
+          "count": 8
+        },
+        {
+          "stage": "restored",
+          "category": "gameplay-view",
+          "count": 7
+        }
+      ]
+    }
+  },
+  "browserInteroperability": {
+    "reference": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:37:07.912Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 9,
+      "syntheticRecords": 50,
+      "sourceCorpusSha256": "c3dc8a05e19dfe6b2dc90893752acd87ed2e97b1c977e131b19ba295f5b8830a",
+      "sourceManifestPayloadSha256": "5077d888a0465f381543732c8dd6af0b0bbb13a63bf529d2ab9b5228c2180e98",
+      "fixtureSha256": "a77f14613d34636d66e73efe447ec93e2f50f9732d8cb202204b8874950df70c",
+      "bundleSha256": "542eaecdf10cee353185745130d8649965ca936dd9fb377fd12beb58fff17dbb",
+      "bundleBytes": 422664,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 59,
+          "browserToNode": 59,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 59,
+          "browserToNode": 59,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 59,
+          "browserToNode": 59,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    "directional": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:36:02.989Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 21,
+      "syntheticRecords": 0,
+      "sourceCorpusSha256": "42021105e2b83b08288a98c06d4bfb74f9ff26f2f670d46ac50a97f3c0a1efbc",
+      "sourceManifestPayloadSha256": "29aa3713e09bc75f84459d6275ea3e64f4fcaaa56f13848dc3f20f910df93640",
+      "fixtureSha256": "40895e2d4f32910bfa875b29c51c9ae1d7688498c1a1591aedadfd4a69a76257",
+      "bundleSha256": "542eaecdf10cee353185745130d8649965ca936dd9fb377fd12beb58fff17dbb",
+      "bundleBytes": 422664,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 21,
+          "browserToNode": 21,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 21,
+          "browserToNode": 21,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 21,
+          "browserToNode": 21,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    "entity": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:36:03.749Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 6,
+      "syntheticRecords": 0,
+      "sourceCorpusSha256": "9987ddb7105c3dd6e261a83518f7ed74cd591d9e9874db482f815e154bd5774e",
+      "sourceManifestPayloadSha256": "e7164728a3c37fdd09afa60aaea88dabe0e60d98cb694d49665432a3b5f6bba9",
+      "fixtureSha256": "425ddf4b35ed45b7e8b2f99a5e44d4f526526704026d2a8186e3b9cdca177f8f",
+      "bundleSha256": "542eaecdf10cee353185745130d8649965ca936dd9fb377fd12beb58fff17dbb",
+      "bundleBytes": 422664,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 6,
+          "browserToNode": 6,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 6,
+          "browserToNode": 6,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 6,
+          "browserToNode": 6,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    "negative-zero": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:36:04.492Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 0,
+      "syntheticRecords": 3,
+      "sourceCorpusSha256": "42021105e2b83b08288a98c06d4bfb74f9ff26f2f670d46ac50a97f3c0a1efbc",
+      "sourceManifestPayloadSha256": "29aa3713e09bc75f84459d6275ea3e64f4fcaaa56f13848dc3f20f910df93640",
+      "fixtureSha256": "c322cd1822ac90c810ccf502828bdddcc856dbe7e3fd61b2c73e855ce9146d35",
+      "bundleSha256": "542eaecdf10cee353185745130d8649965ca936dd9fb377fd12beb58fff17dbb",
+      "bundleBytes": 422664,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    }
+  },
+  "prototypeSha256": {
+    "c0-raw-reference.mjs": "f0cd93f02a0435f2680f96b8c8d70806ae211b517043b54b3de2abd767b7d11c",
+    "json-preserving-negative-zero.mjs": "9e41c9c3f371b6b075df51a0474f2e920c8d7a9dbfcd2770b2f70982d786ab10",
+    "reference-fixed-codecs.mjs": "dee66fe4520c71598dd271d51e677276ec4be5e901e35890a22c8282610dda70",
+    "reference-directional-codecs.mjs": "cdae1cd56e77761297206563aad9a62eb3f0f011ce51cc0a9aaf855af2613c4f",
+    "fixed-schema-reader.mjs": "12dc626a8f106b19b55978b5ae64b13db820cdcc804523af7c0ae42271b051b9",
+    "reference-schema-validation.mjs": "ed7a6061ab2c3a47d263d2677eb72fae990cf6b5d0f4883b4c5b794a32487c5d",
+    "protobuf-wire-preflight.mjs": "a97f92c58bee71adb82a59c7aee7be2c4ae1b0b9f63414232d7c390dd4d0a49a",
+    "json-wire-preflight.mjs": "1dfca396cd1310e88c149508fc9e7629dfa881ec80cf44774d9bfc11c4ffa338",
+    "codec-application-pipeline.mjs": "48e588f37a2f1534af18051eb3298190dae3d6703247054e336117952b8d041e",
+    "directional-wire-boundary-audit.mjs": "e5a9eff195aa10c7e146edf4db80d7747ba51127a841b545d60aa7000724d5de",
+    "directional-negative-zero-audit.mjs": "0bb6d622e73b97d8b0286ca6b6c8348a394c7818bae028336ecdc562aa4d0e87",
+    "entity-representation-limit-audit.mjs": "493526242900db913005ade120d4711db93bac6ad515ce3bfe8509d5936b6038",
+    "browser-reference-runner.mjs": "fc7d16a0ebdfd4566f9bc2a1c85f38a21b6eded33229eeaa3b18e99ec01cc07f",
+    "browser-reference-validation.mjs": "06e53e5b201c91667d35ace0399e787553edbf7d74d32a5b89ee741e9205d068",
+    "directional-pipeline-validation.mjs": "e41828fdd6a37a88796ef443ab0ccff1eec2be67305cc8a46313e0316babc509",
+    "entity-pipeline-validation.mjs": "b5dce51b3545b2e4244ba9983dedc72a6fb2ae6625bbdc78205fe8dc9f2f3d82"
+  },
+  "representationLimit": {
+    "status": "REPRESENTATION_LIMIT",
+    "provenance": "structured-synthetic from actual entity-pose fields, not real traffic",
+    "entityCount": 256,
+    "uniqueIdUtf8Bytes": 256,
+    "c0MetadataUtf8Bytes": 97771,
+    "c0MetadataLimitBytes": 65536,
+    "C0": "REJECTED_METADATA_BUDGET",
+    "C1WireBytes": 79692,
+    "C2WireBytes": 75048,
+    "productMessageAndFragmentation": "NOT_EVALUATED"
+  },
+  "limits": [
+    "Four distinct browser fixture groups, not one world/epoch sequence",
+    "Browser bundle includes all codecs and oracle, not per-codec product bundle cost",
+    "Real Host incoming replay covers player-only directional inputs; entity samples do not prove presentation or interpolation",
+    "No formal codec/transport performance result, adopted wire, GUI, WAN or deployment"
+  ]
+}
