@@ -15,6 +15,8 @@ export class FirstPersonViewmodel {
   private action: HeldAction = 'idle';
   private actionSeconds = 0;
   private heldItem: string | null = null;
+  private pose = { shoulder: 0, elbow: 0, wrist: 0 };
+  private releasePose = { shoulder: 0, elbow: 0, wrist: 0 };
 
   constructor(
     private readonly app: pc.Application,
@@ -78,6 +80,7 @@ export class FirstPersonViewmodel {
   setHeldItem(itemId: string | null): void {
     if (itemId === this.heldItem) return;
     this.heldItem = itemId;
+    this.setAction('idle');
     while (this.item.children.length) this.item.children[0].destroy();
     if (itemId) {
       this.assets.addItem(this.item, itemId, 0.55);
@@ -85,8 +88,9 @@ export class FirstPersonViewmodel {
     }
   }
 
-  setAction(action: HeldAction): void {
-    if (action === this.action) return;
+  setAction(action: HeldAction, restart = false): void {
+    if (action === this.action && !restart) return;
+    this.releasePose = { ...this.pose };
     this.action = action;
     this.actionSeconds = 0;
   }
@@ -96,7 +100,7 @@ export class FirstPersonViewmodel {
   }
 
   update(seconds: number): void {
-    this.actionSeconds += Math.max(0, seconds);
+    this.actionSeconds += Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
     const fov = this.camera.camera?.fov ?? 72;
     const layout = resolveViewmodelLayout({
       width: this.app.graphicsDevice.width,
@@ -107,7 +111,15 @@ export class FirstPersonViewmodel {
     this.root.setLocalScale(layout.scale, layout.scale, layout.scale);
     if (this.viewmodelCamera?.camera) this.viewmodelCamera.camera.fov = fov;
     const pose = viewmodelPose(this.action, this.actionSeconds);
-    this.handPivot.setLocalEulerAngles(pose.shoulder * 0.32, pose.wrist * 0.08, pose.elbow * 0.2);
+    if (this.action === 'idle') {
+      const progress = Math.min(1, this.actionSeconds / 0.16);
+      const remaining = 1 - progress * progress * (3 - 2 * progress);
+      pose.shoulder = this.releasePose.shoulder * remaining;
+      pose.elbow = this.releasePose.elbow * remaining;
+      pose.wrist = this.releasePose.wrist * remaining;
+    }
+    this.pose = pose;
+    this.handPivot.setLocalEulerAngles(pose.shoulder * 0.6, pose.wrist * 0.35, pose.elbow * 0.5);
   }
 
   dispose(): void {
@@ -129,6 +141,9 @@ export class FirstPersonViewmodel {
 
   private applyLayer(root: pc.Entity): void {
     if (!this.layer) return;
-    for (const component of root.findComponents('render')) (component as pc.RenderComponent).layers = [this.layer.id];
+    for (const component of root.findComponents('render')) {
+      (component as pc.RenderComponent).layers = [this.layer.id];
+      (component as pc.RenderComponent).castShadows = false;
+    }
   }
 }

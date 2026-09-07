@@ -1,5 +1,6 @@
 import * as pc from 'playcanvas';
 import { itemVisualKind } from '../../client/presentation/gameplay-model-definition';
+import { buildToolMesh, toolModelDefinition } from '../../client/presentation/voxel-tool-model';
 
 type MaterialName =
   | 'dirt'
@@ -72,8 +73,15 @@ function texture(device: pc.GraphicsDevice, name: string, colors: readonly [stri
 export class GameplayModelAssets {
   readonly materials: Record<MaterialName, pc.StandardMaterial>;
   private readonly textures: pc.Texture[];
+  private readonly toolMeshes = new Map<string, pc.Mesh>();
+  private readonly toolMaterial = new pc.StandardMaterial();
 
-  constructor(app: pc.Application) {
+  constructor(private readonly app: pc.Application) {
+    this.toolMaterial.name = 'pixel-tool-palette';
+    this.toolMaterial.diffuse = pc.Color.WHITE;
+    this.toolMaterial.diffuseVertexColor = true;
+    this.toolMaterial.gloss = 0.12;
+    this.toolMaterial.update();
     this.textures = [];
     this.materials = Object.fromEntries(
       (Object.entries(swatches) as [MaterialName, readonly [string, string, string]][]).map(([name, colors]) => {
@@ -116,6 +124,27 @@ export class GameplayModelAssets {
   }
 
   addItem(parent: pc.Entity, itemId: string, scale = 1): void {
+    const definition = toolModelDefinition(itemId);
+    if (definition) {
+      let mesh = this.toolMeshes.get(itemId);
+      if (!mesh) {
+        const data = buildToolMesh(definition);
+        mesh = new pc.Mesh(this.app.graphicsDevice);
+        mesh.setPositions(data.positions);
+        mesh.setNormals(data.normals);
+        mesh.setColors(data.colors);
+        mesh.setIndices(data.indices);
+        mesh.update(pc.PRIMITIVE_TRIANGLES);
+        // Keep the cached mesh alive between the last displayed instance and its next use.
+        mesh.incRefCount();
+        this.toolMeshes.set(itemId, mesh);
+      }
+      const node = new pc.Entity(`pixel-tool:${itemId}`);
+      node.setLocalScale(scale, scale, scale);
+      node.addComponent('render', { meshInstances: [new pc.MeshInstance(mesh, this.toolMaterial)] });
+      parent.addChild(node);
+      return;
+    }
     const visual = itemVisualKind(itemId);
     if (visual.kind === 'voxel-block') return this.addBlock(parent, itemId, scale);
     if (visual.kind === 'berry-cluster') {
@@ -167,43 +196,16 @@ export class GameplayModelAssets {
         );
       return;
     }
-    if (visual.kind === 'wood-axe' || visual.kind === 'stone-pickaxe') {
-      this.addBox(
-        parent,
-        'tool-handle',
-        'wood',
-        { x: 0, y: 0, z: 0 },
-        { x: 0.12 * scale, y: 0.88 * scale, z: 0.12 * scale },
-      );
-      this.addBox(
-        parent,
-        'tool-head',
-        visual.kind === 'stone-pickaxe' ? 'stone' : 'wood',
-        { x: 0, y: 0.38 * scale, z: 0 },
-        { x: (visual.kind === 'stone-pickaxe' ? 0.6 : 0.4) * scale, y: 0.2 * scale, z: 0.18 * scale },
-      );
-      if (visual.kind === 'wood-axe')
-        this.addBox(
-          parent,
-          'axe-wedge',
-          'wood',
-          { x: 0.2 * scale, y: 0.29 * scale, z: 0 },
-          { x: 0.28 * scale, y: 0.12 * scale, z: 0.18 * scale },
-        );
-      if (visual.kind === 'stone-pickaxe')
-        this.addBox(
-          parent,
-          'pick-point',
-          'stone',
-          { x: 0.36 * scale, y: 0.31 * scale, z: 0 },
-          { x: 0.3 * scale, y: 0.1 * scale, z: 0.14 * scale },
-        );
-      return;
-    }
     this.addBox(parent, 'plank', 'wood', { x: 0, y: 0, z: 0 }, { x: 0.68 * scale, y: 0.12 * scale, z: 0.34 * scale });
   }
 
   dispose(): void {
+    this.toolMeshes.forEach((mesh) => {
+      mesh.decRefCount();
+      mesh.destroy();
+    });
+    this.toolMeshes.clear();
+    this.toolMaterial.destroy();
     Object.values(this.materials).forEach((material) => material.destroy());
     this.textures.forEach((texture) => texture.destroy());
   }

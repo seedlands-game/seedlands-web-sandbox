@@ -19,6 +19,29 @@ vi.mock('../../src/app/gameplay/gameplay-model-assets', () => ({
 }));
 
 describe('第一人称手与物件的独立生命周期', () => {
+  it('显式重播相同事件，持续采集不重启，停止时平滑收手', () => {
+    const camera = new pc.Entity();
+    const model = new FirstPersonViewmodel({ graphicsDevice: { width: 1280, height: 720 } } as pc.Application, camera);
+    const pivot = camera.findByName('viewmodel hand pivot')!;
+    model.setAction('attack', true);
+    model.update(0.1);
+    expect(pivot.getLocalEulerAngles().length()).toBeGreaterThan(1);
+    model.setAction('attack', true);
+    model.update(0);
+    expect(pivot.getLocalEulerAngles().length()).toBeCloseTo(0);
+    model.setAction('mine');
+    model.update(0.2);
+    const before = pivot.getLocalRotation().clone();
+    model.setAction('mine');
+    model.update(0);
+    expect(pivot.getLocalRotation().equals(before)).toBe(true);
+    model.setAction('idle');
+    model.update(0);
+    expect(pivot.getLocalRotation().equals(before)).toBe(true);
+    model.update(0.16);
+    expect(pivot.getLocalEulerAngles().length()).toBeCloseTo(0);
+    model.dispose();
+  });
   it('切换工具或空手不能销毁手掌/袖口，也不残留旧工具', () => {
     const camera = new pc.Entity();
     const model = new FirstPersonViewmodel({} as pc.Application, camera);

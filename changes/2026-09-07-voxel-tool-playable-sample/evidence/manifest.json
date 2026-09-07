@@ -1,0 +1,44 @@
+{
+  "baseHead": "4197bda",
+  "browser": "local Chromium / WebGL2",
+  "seed": "mosslight-68",
+  "browserResult": "1 passed (10.4s)",
+  "sourceSha256": {
+    "src/client/presentation/voxel-tool-model.ts": "9bc42b359af2110dcf3b8a788c325c5a78077ec911d21ef7b5f105db41716a79",
+    "src/client/presentation/gameplay-model-definition.ts": "772057921e217b149b18faf46a6dd82db7df81afca24cd77f1f4b33eb66345bb",
+    "src/app/gameplay/gameplay-model-assets.ts": "52cb6887391c6c002eb719b8ee8cb055838cd1c0089dacbd901331b9a7138146",
+    "src/app/player/first-person-viewmodel.ts": "11be2aebb7acf33d8e0a154b0c980b6aea1a548f246d1c551b3f1948eddf5042",
+    "src/app/gameplay/browser-gameplay.ts": "de6be25ca37c3a2607489af3b5fd3a3d8571115f258e87998a3b953a623ffb02"
+  },
+  "imageSha256": {
+    "attack-early.jpg": "308274cd18224a69573a181fb884f2fac5c3e1840c7ee7a3f309f974690a082e",
+    "attack-middle.jpg": "cafc4eebb4e4cfc0b96d36d279f9d267819bfc7971e2f3b7783b304eb8b05f45",
+    "attack-rest.jpg": "8f6a32e0bbc32c7648db157de6f749d45029dc00fb041b3f5c4f4598cdf436df",
+    "held-stone-pickaxe.jpg": "b252ca0ba3748a98f11e02e2ad662376cf63870ae8b774048a0aeae23debb89b",
+    "held-wood-axe.jpg": "e33f5407ab7985af8e69774bd6010a21d578fc369e13b7ed3fa763d21a9284c1",
+    "low-quality-reloaded.jpg": "d8b4e084b9ba4b03fc6dec57edac9812cb418d5ea56fde50d305bd986ced2311",
+    "mining-early.jpg": "e313b7eb739380bc074372dc560b46ca80e6a576e0c4214ee0320346bdbbae85",
+    "mining-late.jpg": "7125ee17e8bd671f56812eca57a2cd5dac88eb2951acc39ef5f79e4ec78dd498",
+    "mining-middle.jpg": "eaa65b60eb72008c2b5a4dc51fc0468c38e7f331a3b0b0616101f42c02f305dd",
+    "mining-rest.jpg": "72356db516d15bb7da863c2b5544e23303f4f25f2d89d012553bf346d8572faf",
+    "viewport-700.jpg": "e41b4ebe6fe9565aca617a87dead028e4602ffd8a4066bbdbd5a7c93cb8629f3",
+    "world-tool-and-held.jpg": "b645669eaa37c0d573af2ff2048d8218081e47a850f314ea847e027a2e156cc2"
+  },
+  "resources": {
+    "sameMeshHeldAndWorld": true,
+    "cacheReusedAfterNoInstances": true,
+    "destroyCallsBeforeLastLease": 0,
+    "destroyCallsAfterLastLease": 1
+  },
+  "geometry": {
+    "wood-axe": {
+      "vertices": 808,
+      "triangles": 404
+    },
+    "stone-pickaxe": {
+      "vertices": 976,
+      "triangles": 488
+    }
+  },
+  "capture": "Browser-native JPEG quality 85; no post-capture image editing"
+}
