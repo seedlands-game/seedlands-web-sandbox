@@ -58,6 +58,8 @@ test('世界初始化期间显示专用 loading 菜单', async ({ page }) => {
   await expect(enter).toBeEnabled({ timeout: 15_000 });
   await page.getByRole('textbox', { name: '世界 Seed' }).fill('loading-evidence');
   await enter.click();
+  const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });
+  if (await continueDespiteWarning.isVisible()) await continueDespiteWarning.click();
   const loading = page.locator('[data-world-loading]');
   await expect(loading).toBeVisible();
   await expect(loading).toContainText(/区块|地形|世界|光照|生灵/);
