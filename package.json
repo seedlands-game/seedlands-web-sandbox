@@ -27,7 +27,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:coverage:ci": "vitest run --coverage --maxWorkers=2",
+    "test:coverage:ci": "vitest run --coverage --maxWorkers=1",
     "test:e2e": "playwright test tests/e2e",
     "test:e2e:regression": "playwright test tests/e2e/regression",
     "test:e2e:benchmark": "playwright test tests/e2e/benchmark",
