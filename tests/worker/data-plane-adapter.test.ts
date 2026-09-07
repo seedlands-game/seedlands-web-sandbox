@@ -12,4 +12,5 @@ it('uses equivalent TS staged data-plane even when Wasm is off', () => {
   });
   expect(adapter.makeChunk).toBe(makeChunkStaged);
   expect(adapter.prepareHalo).toBe(createHaloStaged);
+  expect(adapter.now?.()).toEqual(expect.any(Number));
 });

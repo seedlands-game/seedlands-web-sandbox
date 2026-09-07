@@ -9,7 +9,11 @@ import type { WorkerKernelState } from './wasm-kernel-loader';
 
 export function worldKernelAdapter(state: WorkerKernelState): WorldComputeKernels {
   const { memory, selected } = state;
-  const kernels: WorldComputeKernels = { makeChunk: makeChunkStaged, prepareHalo: createHaloStaged };
+  const kernels: WorldComputeKernels = {
+    makeChunk: makeChunkStaged,
+    prepareHalo: createHaloStaged,
+    now: () => performance.now(),
+  };
   if (!memory) return kernels;
   if (selected.includes('w02')) kernels.makeChunk = createChunkKernel(memory);
   if (selected.includes('w03')) kernels.prepareHalo = createHaloKernel(memory);
