@@ -161,3 +161,11 @@ T0/T1 的 Node/浏览器及 IPv6 loopback 小包功能通过，尚未验证 WSS�
 九动作请求参考投影与 receipt 共用明确字段副本；整数零在投影阶段统一，f64 负零仍保真。40 条真实 Host 记录经三候选解码后在新 Host 应用，包含成功/失败与选栏重试，不扩大到未测的非幂等动作。完整静态 179 文件/942 项通过、world 行覆盖 96.37%，浏览器与 Node 构建通过，Chrome/Node 五组独立互操作通过。见 [动作切片记录](network-action-request-progress.md) 与 [机器证据](network-action-request-evidence.json)。
 
 网络采用仍未决定。审计发现 Gameplay 参考遗漏 UI 消费的 actor behavior，下一切片补最小公共字段；旧语料保留历史身份。WebTransport loopback 能力独立记录，不扩张成远端或性能准出。整个 change 继续 Active，按用户授权推送稳定检查点。
+
+## Gameplay v2 与浏览器传输矩阵检查点
+
+最小 actorBehaviors 公开投影通过 18 项单元与独立审阅，真实 Host 三阶段产生 9 条新代语料，旧语料未覆盖。完整静态 180 文件/960 项通过、world 行覆盖 96.37%，浏览器与 Node 构建通过；见 [v2 进度](network-gameplay-consumer-progress.md)。
+
+WebTransport 候选在 Firefox 153.0 完成可靠流与 datagram；Playwright WebKit 26.5 仅 session 成功，可靠流创建超时且 datagrams API 缺失，不能计入数据路径通过。Linux x64 静态 artifact 交叉构建成功但无 x64 运行证据；Safari/移动端保持 NOT_COLLECTED。见 [浏览器矩阵](network-webtransport-browser-matrix-progress.md)。当前不采用 T2 为唯一传输，不以这些功能结果宣称性能提升。
+
+此前动作检查点 0b2ae3e 已成功推送 origin/codex/node-dedicated-server；第一次推送因 HTTPS 瞬时连接失败，未改变远端或认证设置，重试成功。
