@@ -6,7 +6,7 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { resolve, join, extname } from 'node:path';
 import { gzipSync } from 'node:zlib';
-import { pairedBootstrap, percentile } from '../../2026-09-06-moonbit-wasm-workload-experiment/e2e/ab-statistics';
+import { pairedBootstrap, percentile } from '../../2026-09-07-data-plane-adoption/e2e/ab-statistics';
 import type { Mode } from './simd-worker';
 const enabled = process.env.SEEDLANDS_SIMD_AB === '1';
 const change = resolve('changes/2026-09-06-data-plane-simd-policy');

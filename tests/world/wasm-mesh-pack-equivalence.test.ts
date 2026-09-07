@@ -6,7 +6,7 @@ import { createMeshPackControlMemory, runMeshPackControl } from '../../src/compu
 import { createKernelMemory } from '../../src/compute/kernel-memory';
 import { batchMeshData, compactMeshData, type MeshData, type RenderCategory } from '../../src/world/mesh';
 
-const wasmPath = new URL('../../src/generated/wasm/seedlands-kernels.wasm', import.meta.url);
+const wasmPath = new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url);
 
 const part = (renderCategory: RenderCategory, material: number, vertexCount: number, indices: number[]): MeshData => {
   const positions = new Float32Array(vertexCount * 3);
@@ -34,7 +34,7 @@ const part = (renderCategory: RenderCategory, material: number, vertexCount: num
   };
 };
 
-describe('W06 MoonBit mesh packing equivalence', () => {
+describe('W06 Rust Wasm mesh packing equivalence', () => {
   it('keeps TS batching as the control and matches compact UV/color/index bytes', async () => {
     const parts = [
       part('transparent', 10, 4, [0, 1, 2, 0, 2, 3]),

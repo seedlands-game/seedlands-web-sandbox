@@ -1,5 +1,5 @@
 import type { Input, Mode } from './simd-worker';
-import { makeWorkloadCorpus } from '../../2026-09-06-moonbit-wasm-workload-experiment/e2e/workload-corpus';
+import { makeWorkloadCorpus } from '../../2026-09-07-data-plane-adoption/e2e/workload-corpus';
 import { meshChunk } from '../../../src/world/mesh';
 const worker = new Worker(new URL('./simd-worker.ts', import.meta.url), { type: 'module' });
 let id = 0;

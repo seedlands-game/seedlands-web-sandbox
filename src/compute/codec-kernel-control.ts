@@ -41,7 +41,7 @@ const pushVarUint = (target: number[], input: number) => {
   } while (value);
 };
 
-/** Same MoonBit ABI as W14, with the numeric work implemented in JavaScript. */
+/** Same stable Wasm ABI as W14, with the numeric work implemented in JavaScript. */
 export function createCodecControlMemory(): KernelMemory {
   const memory = new WebAssembly.Memory({ initial: 256, maximum: 512 });
   const bytes = () => new Uint8Array(memory.buffer);

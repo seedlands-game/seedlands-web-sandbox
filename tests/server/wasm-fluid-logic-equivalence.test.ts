@@ -12,7 +12,7 @@ import { voxelIndex } from '../../src/world/voxel';
 describe('W07 有序流体候选对等', () => {
   it('跨块源水、退水、未知邻块及连续事务逐字段相同', async () => {
     const memory = await createKernelMemory(
-      await readFile(new URL('../../src/generated/wasm/seedlands-kernels.wasm', import.meta.url)),
+      await readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url)),
     );
     const compute = createFluidKernel(memory);
     let random = 0x12345678;

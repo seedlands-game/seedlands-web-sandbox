@@ -38,9 +38,8 @@ import { runOccupancyKernel } from '../../../src/compute/occupancy-kernel';
 import { createFluidKernel } from '../../../src/worker/fluid-kernel';
 import type { WorkloadInput } from './workload-corpus';
 
-export type WorkloadMode = 'ts' | 'fixed' | 'staged' | 'moonbit' | 'rust' | 'simd';
+export type WorkloadMode = 'ts' | 'fixed' | 'staged' | 'rust' | 'simd';
 const scope = self as DedicatedWorkerGlobalScope;
-let memory: KernelMemory;
 let coreMemory: KernelMemory;
 let simdMemory: KernelMemory;
 let kernelMs = 0;
@@ -82,8 +81,8 @@ const crcTable = Uint32Array.from({ length: 256 }, (_, index) => {
 });
 
 function run(input: WorkloadInput, mode: WorkloadMode): unknown {
-  const wasm = mode === 'moonbit' || mode === 'rust' || mode === 'simd';
-  const wasmMemory = mode === 'simd' ? simdMemory : mode === 'rust' ? coreMemory : memory;
+  const wasm = mode === 'rust' || mode === 'simd';
+  const wasmMemory = mode === 'simd' ? simdMemory : coreMemory;
   if (mode === 'ts') {
     if (input.kind === 'w02') return oldChunk(...input.args);
     if (input.kind === 'w03') return oldHalo(input.options);
@@ -181,8 +180,6 @@ scope.onmessage = async (event: MessageEvent<{ id: number; input?: WorkloadInput
   try {
     if (!input) {
       const start = performance.now();
-      const response = await fetch(new URL('../../../src/generated/wasm/seedlands-kernels.wasm', import.meta.url));
-      memory = timed(await createKernelMemory(new Uint8Array(await response.arrayBuffer())));
       coreMemory = timed(
         await createKernelMemory(
           new Uint8Array(
@@ -198,8 +195,7 @@ scope.onmessage = async (event: MessageEvent<{ id: number; input?: WorkloadInput
       scope.postMessage({
         id,
         initializationMs: performance.now() - start,
-        memoryBytes:
-          mode === 'rust' || mode === 'simd' ? coreMemory.memory.buffer.byteLength : memory.memory.buffer.byteLength,
+        memoryBytes: coreMemory.memory.buffer.byteLength,
       });
       return;
     }
@@ -214,10 +210,9 @@ scope.onmessage = async (event: MessageEvent<{ id: number; input?: WorkloadInput
         result,
         computeMs,
         kernelMs,
-        failed: memory.failed || coreMemory.failed || simdMemory.failed,
+        failed: coreMemory.failed || simdMemory.failed,
         outputBytes: transfers.reduce((sum, buffer) => sum + buffer.byteLength, 0),
-        memoryBytes:
-          mode === 'rust' || mode === 'simd' ? coreMemory.memory.buffer.byteLength : memory.memory.buffer.byteLength,
+        memoryBytes: (mode === 'simd' ? simdMemory : coreMemory).memory.buffer.byteLength,
       },
       transfers,
     );
@@ -225,7 +220,7 @@ scope.onmessage = async (event: MessageEvent<{ id: number; input?: WorkloadInput
     scope.postMessage({
       id,
       error: error instanceof Error ? error.message : String(error),
-      failed: memory?.failed ?? false,
+      failed: coreMemory?.failed ?? false,
     });
   }
 };

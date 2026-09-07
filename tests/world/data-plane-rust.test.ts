@@ -5,7 +5,7 @@ import { createHaloKernel, createHaloStaged } from '../../src/compute/halo-kerne
 import { createChunkKernel, makeChunkStaged } from '../../src/compute/chunk-kernel';
 import { createCodecKernel, encodeStoredChunkRecord } from '../../src/compute/codec-kernel';
 import { createStoredChunkRecord } from '../../src/world/chunk-snapshot-codec';
-import { makeWorkloadCorpus } from '../../changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/workload-corpus';
+import { makeWorkloadCorpus } from '../../changes/2026-09-07-data-plane-adoption/e2e/workload-corpus';
 const path = process.env.SEEDLANDS_ADOPTION_RUST ?? 'src/generated/wasm/rust-kernels-scalar.wasm';
 it('Rust core artifact matches exact chunk and codec production outputs with no fallback', async () => {
   const memory = await createKernelMemory(await readFile(path!));

@@ -24,8 +24,8 @@ const putU32 = (views: RawViews, offset: number, value: number) => {
 const fluidChunkCoord = (value: number) => Math.trunc(value < 0 ? (value - 31) / 32 : value / 32);
 
 /**
- * 逐句镜像 `fluid.mbt` 的线性查找、unknown 计数、原值表和 arena 行布局。
- * 这不是优化实现，供 W07 区分布局/算法变化与 MoonBit 执行贡献。
+ * 镜像 W07 标量参考算法的线性查找、unknown 计数、原值表和 arena 行布局。
+ * 这不是优化实现，供 W07 区分布局/算法变化与 Wasm 执行贡献。
  */
 function fluidCandidate(views: RawViews, count: number): number {
   const fluidAddress = (x: number, y: number, z: number): readonly [number, number] => {

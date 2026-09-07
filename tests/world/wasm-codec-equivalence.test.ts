@@ -13,7 +13,7 @@ import { createKernelMemory } from '../../src/compute/kernel-memory';
 import { createStoredChunkRecord, type CreateStoredChunkRecordInput } from '../../src/world/chunk-snapshot-codec';
 
 const VOXEL_COUNT = 32 ** 3;
-const moduleBytes = () => readFile(new URL('../../src/generated/wasm/seedlands-kernels.wasm', import.meta.url));
+const moduleBytes = () => readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
 
 const identity = {
   worldId: 'wasm-codec-test',
@@ -75,7 +75,7 @@ const fixtures = (): Array<{ name: string; input: CreateStoredChunkRecordInput; 
   ];
 };
 
-describe('W14/W15 MoonBit codec and CRC equivalence', () => {
+describe('W14/W15 Rust Wasm codec and CRC equivalence', () => {
   it('exposes independent W15 CRC measurement entrypoints', async () => {
     const kernel = createCodecKernel(await createKernelMemory(await moduleBytes()));
     expect(runCrc32Bytes(kernel, new TextEncoder().encode('123456789'))).toBe(0xcbf43926);

@@ -28,10 +28,6 @@ ls:
   crates:
     .dir: kebab-case
     .rs: kebab-case
-  wasm/seedlands-kernels:
-    .dir: kebab-case
-    .mbt: kebab-case
-
 ignore:
   - .git
   - .husky
@@ -41,5 +37,4 @@ ignore:
   - harness/results
   - midscene_run
   - node_modules
-  - wasm/seedlands-kernels/_build
   - crates/target

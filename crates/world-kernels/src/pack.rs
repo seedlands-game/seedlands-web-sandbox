@@ -1,7 +1,7 @@
 /// Convert f32 bit patterns to the historical compact-UV representation.
 ///
 /// This intentionally truncates rather than rounds and maps every NaN to
-/// signed infinity, matching the existing TypeScript and MoonBit contracts.
+/// signed infinity, matching the existing TypeScript numeric contract.
 pub fn compact_uvs(input: &[u32], output: &mut [u16]) {
     assert_eq!(input.len(), output.len());
     for (bits, target) in input.iter().zip(output.iter_mut()) {

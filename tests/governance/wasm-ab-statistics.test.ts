@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pairedBootstrap } from '../../changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/ab-statistics';
+import { pairedBootstrap } from '../../changes/2026-09-07-data-plane-adoption/e2e/ab-statistics';
 
 describe('成对 bootstrap 保留运行间变异', () => {
   it('两次运行效果不同时，重采样必须能选到重复的同一运行', () => {

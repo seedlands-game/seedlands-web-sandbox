@@ -5,11 +5,11 @@ import { createKernelMemory, WASM_ARENA_BYTES } from '../../src/compute/kernel-m
 import { Voxel } from '../../src/world/voxel';
 import { collisionBoxesForVoxel } from '../../src/world/voxel-model';
 
-const moduleBytes = () => readFile(new URL('../../src/generated/wasm/seedlands-kernels.wasm', import.meta.url));
+const moduleBytes = () => readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
 const expectedOccupancy = (voxels: Uint16Array) =>
   Uint8Array.from(voxels, (voxel) => Number(collisionBoxesForVoxel(voxel).length > 0));
 
-describe('W10 MoonBit occupancy kernel', () => {
+describe('W10 Rust Wasm occupancy kernel', () => {
   it('matches collision-box occupancy for every registered voxel and representative unknown ids', async () => {
     const voxels = Uint16Array.from([
       Voxel.Air,
@@ -51,9 +51,9 @@ describe('W10 MoonBit occupancy kernel', () => {
   it('rejects ABI offsets and counts without trapping, while the adapter rejects an oversized W10 window', async () => {
     const kernel = await createKernelMemory(await moduleBytes());
 
-    expect(kernel.invoke('occupancy', 63, 64, 0)).toBe(1);
-    expect(kernel.invoke('occupancy', 64, WASM_ARENA_BYTES, 1)).toBe(1);
-    expect(kernel.invoke('occupancy', WASM_ARENA_BYTES - 2, 64, 2)).toBe(1);
+    expect(kernel.invoke('occupancy', 63, 64, 0)).toBe(-1);
+    expect(kernel.invoke('occupancy', 64, WASM_ARENA_BYTES, 1)).toBe(-1);
+    expect(kernel.invoke('occupancy', WASM_ARENA_BYTES - 2, 64, 2)).toBe(-1);
     expect(() => runOccupancyKernel(kernel, new Uint16Array(MAX_OCCUPANCY_CELLS + 1))).toThrow(/at most/);
     expect(kernel.failed).toBe(false);
   });

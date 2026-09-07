@@ -90,7 +90,7 @@ const candidate = (kernel: CodecKernel, codec: ChunkRecordCodec, encode: () => n
   try {
     const length = encode();
     if (!Number.isInteger(length) || length < 0 || length > CODEC_OUTPUT_CAPACITY)
-      throw new Error(`MoonBit ${codec} encoder returned invalid length ${length}.`);
+      throw new Error(`Wasm ${codec} encoder returned invalid length ${length}.`);
     return {
       codec,
       payload: kernel.memory.bytes(CODEC_OUTPUT_OFFSET, length).slice(),
@@ -106,7 +106,7 @@ const selectCandidate = (candidates: readonly Candidate[]): Candidate =>
   candidates.reduce((smallest, next) => (next.payload.length < smallest.payload.length ? next : smallest));
 
 /**
- * Encode the existing W14 record candidates through MoonBit. Decoding remains
+ * Encode the existing W14 record candidates through the Wasm kernel. Decoding remains
  * in the TypeScript codec so the persisted schema and recovery checks stay in
  * their existing owner; this adapter only produces candidate bytes and CRCs.
  */

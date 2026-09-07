@@ -7,7 +7,7 @@ import { createProceduralMeshInput, makeChunk } from '../../src/world/mesh';
 describe('W03 halo 与修订哈希对等', () => {
   it('已知、未知和混合邻块，两版生成器和负坐标逐字节相同', async () => {
     const memory = await createKernelMemory(
-      await readFile(new URL('../../src/generated/wasm/seedlands-kernels.wasm', import.meta.url)),
+      await readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url)),
     );
     const prepare = createHaloKernel(memory);
     for (const version of [2, 3])

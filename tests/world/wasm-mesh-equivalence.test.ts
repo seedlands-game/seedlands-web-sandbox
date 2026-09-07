@@ -6,7 +6,7 @@ import { runMeshDescriptorControl } from '../../src/compute/mesh-kernel-control'
 import { MESH_HALO_SIZE, meshChunk, meshHaloIndex, type MeshData } from '../../src/world/mesh';
 import { FaceMaterial, Voxel, voxelIndex } from '../../src/world/voxel';
 
-const wasmPath = new URL('../../src/generated/wasm/seedlands-kernels.wasm', import.meta.url);
+const wasmPath = new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url);
 const CELL_COUNT = 32 ** 3;
 const MAX_DESCRIPTOR_BYTES = (3 * 33 * 32 * 32 + 32 ** 3) * 16;
 

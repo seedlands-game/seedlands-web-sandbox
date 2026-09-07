@@ -96,14 +96,10 @@ for (const workload of selected ?? WORKLOADS)
     const rustHash = createHash('sha256')
       .update(await readFile(join(change, 'evidence/kernels-scalar.wasm')))
       .digest('hex');
-    const binaryHash = createHash('sha256')
-      .update(await readFile('src/generated/wasm/seedlands-kernels.wasm'))
-      .digest('hex');
     const meta = {
       workload,
       runId,
       sourceSha,
-      binaryHash,
       rustHash,
       browser: browser.version(),
       headless: true,
@@ -121,8 +117,7 @@ for (const workload of selected ?? WORKLOADS)
     await mkdir(join(change, 'evidence'), { recursive: true });
     try {
       for (let pair = 0; pair < pairs; pair += 1) {
-        const modes: WorkloadMode[] =
-          workload === 'w06' ? ['fixed', 'staged', 'moonbit'] : ['ts', 'fixed', 'staged', 'moonbit'];
+        const modes: WorkloadMode[] = workload === 'w06' ? ['fixed', 'staged'] : ['ts', 'fixed', 'staged'];
         modes.push('rust');
         if (workload === 'w06' || workload.startsWith('w10')) modes.push('simd');
         const order = pair % 2 ? [...modes].reverse() : modes;
@@ -156,25 +151,20 @@ for (const workload of selected ?? WORKLOADS)
       const baselineMode = workload === 'w06' ? 'fixed' : 'ts';
       const baseline = metric(baselineMode, 0.5);
       const staged = metric('staged', 0.5);
-      const moonbit = metric('moonbit', 0.5);
-      const language =
-        pairs >= 2
-          ? {
-              task: pairedBootstrap(metric('rust', 0.5), moonbit),
-              kernel: pairedBootstrap(metric('rust', -1, 'kernelMs'), metric('moonbit', -1, 'kernelMs')),
-            }
-          : null;
       const comparisons =
         pairs >= 2
           ? {
-              originalVsWasm: pairedBootstrap(baseline, moonbit),
-              stagedVsWasm: pairedBootstrap(staged, moonbit),
+              originalVsRust: pairedBootstrap(baseline, metric('rust', 0.5)),
+              stagedVsRust: pairedBootstrap(staged, metric('rust', 0.5)),
               originalVsStaged: pairedBootstrap(baseline, staged),
-              taskP95: pairedBootstrap(metric(baselineMode, 0.95), metric('moonbit', 0.95)),
-              computeP50: pairedBootstrap(metric(baselineMode, 0.5, 'computeMs'), metric('moonbit', 0.5, 'computeMs')),
+              taskP95: pairedBootstrap(metric(baselineMode, 0.95), metric('rust', 0.95)),
+              computeP50: pairedBootstrap(metric(baselineMode, 0.5, 'computeMs'), metric('rust', 0.5, 'computeMs')),
+              ...(workload === 'w06' || workload.startsWith('w10')
+                ? { rustVsSimd: pairedBootstrap(metric('rust', 0.5), metric('simd', 0.5)) }
+                : {}),
             }
           : null;
-      await writeFile(file, JSON.stringify({ ...meta, status: 'completed', comparisons, language, runs }, null, 2));
+      await writeFile(file, JSON.stringify({ ...meta, status: 'completed', comparisons, runs }, null, 2));
       await writeFile(`${file}.raw.gz`, gzipSync(JSON.stringify({ ...meta, runs })));
       await rm(`${file}.partial`, { force: true });
     } catch (error) {

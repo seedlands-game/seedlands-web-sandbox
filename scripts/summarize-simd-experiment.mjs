@@ -11,7 +11,7 @@ const server = await createServer({
 let pairedBootstrap;
 try {
   ({ pairedBootstrap } = await server.ssrLoadModule(
-    resolve(import.meta.dirname, '../changes/2026-09-06-moonbit-wasm-workload-experiment/e2e/ab-statistics.ts'),
+    resolve(import.meta.dirname, '../changes/2026-09-07-data-plane-adoption/e2e/ab-statistics.ts'),
   ));
 } finally {
   await server.close();
