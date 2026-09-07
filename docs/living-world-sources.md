@@ -2,6 +2,8 @@
 
 更新日期：2026-09-06。此索引用于区分实际读取范围与研究目标，配合[长期对齐文档](living-world-alignment.md)。
 
+2026-09-07 补充 S19：玩法路线讨论与世界观原稿补读结果已纳入[详细路线](playbook-roadmap.md)。下文 2026-09-06 的读取记录保留当时口径；已补齐的原稿范围在第三节单独注明。
+
 ## 一、当前覆盖边界
 
 用户要求读取 [Living World Project](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/project) 的所有上下文。目前已建立页面列出的 18 篇会话清单与完整链接；仍未证实是否存在更多项目来源或隐藏条目。
@@ -44,12 +46,13 @@
 | S18b | [Minecraft 渲染优化调研](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089-project-living-world-game/c/6a70a374-fb34-83ec-98d4-f6cdba2d69dd)    | 仅预览；未取得本篇正文，不将另一篇相似研究自动视为同一来源                                                                                                          |
 | S18c | [Minecraft 渲染优化研究](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a70a355-95f8-83ec-826b-9ca1a88a2b4b)                              | 已取得当前一组问答；用于理解用户希望厘清 LOD、渲染后端与优化职责的背景，助手的技术判断未重新验证                                                                    |
 | S18d | [推荐村民AI机制Mod](https://chatgpt.com/g/g-p-6a9693083c3c819188b16440a6c60089/c/6a839a3b-944c-83ee-ab58-6f75ee73fffd)                                   | 已取得当前一组问答；历史建议围绕个体、聚落、生产物流、环境反馈与行动执行分层；不代表采用任何 Mod，亦不将旧版本/功能描述当作当前事实                                 |
+| S19  | 2026-09-07 玩法讨论：[路线基线](playbook-roadmap.md)、[ECS 研究](ecs-animation-research.md)                                                              | 完整；玩法路线逐轮确认、官方资料研究与历史世界观补读；具体决策和证据见来源链接，均不代表功能已实施或依赖已准入。                                                    |
 
-## 三、尚未读取的项目来源与附件
+## 三、项目来源与附件的补读状态
 
-Project 的“来源”标签尚未成功打开核对，不将会话目录当作全部上下文。在 S3 已看到但尚未读取正文的文件包括：
+Project 的“来源”标签尚未成功打开核对，不将会话目录当作全部上下文。S3 中附件的覆盖状态如下：
 
-- `world-design-foundation.md`：世界观与核心玩法基础方案。
+- `world-design-foundation.md`：2026-09-07 已补读本机原稿；世界公理、六界、身份/转生、自由探索及历史完整 MVP 的摘要见[详细路线第 15 节](playbook-roadmap.md#demos)。原稿未整份发布，Minecraft 实现映射不成为当前 Web 合同。
 - `mvp-technical-design.md`：早期 Minecraft MVP 技术方案。
 - `minecraft-agent-harness-plugin-design.md`：自主开发 Harness 方案。
 
