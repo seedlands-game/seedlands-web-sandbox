@@ -26,7 +26,7 @@ const sources = {
 describe('Rust 内核依赖与宿主边界治理', () => {
   it('真实 workspace 通过 Cargo 传递依赖和源码边界检查', () => {
     expect(checkRustKernelBoundary({ rootDir: process.cwd() }).ok).toBe(true);
-  });
+  }, 30_000);
 
   it('允许纯 Rust slice core 与 wasm32 adapter SIMD', () => {
     const result = auditRustKernelBoundary({

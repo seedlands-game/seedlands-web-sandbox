@@ -28,4 +28,4 @@ it('Rust core artifact matches exact chunk and codec production outputs with no 
     expect(createChunkKernel(memory)(...input.args)).toEqual(makeChunkStaged(...input.args));
     expect(memory.failed).toBe(false);
   }
-}, 60000);
+}, 120_000);

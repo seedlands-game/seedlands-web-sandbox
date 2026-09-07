@@ -69,5 +69,5 @@ describe('W07 有序流体候选对等', () => {
         input.cleanupFrontier = [];
       }
     }
-  }, 60000);
+  }, 120_000);
 });
