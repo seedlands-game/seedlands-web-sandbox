@@ -21,12 +21,14 @@
     bridge,
     actions,
     application,
+    assetBase = import.meta.env.BASE_URL,
     buildWatermark = '',
     buildCommit = '',
   }: {
     bridge: UiBridge;
     actions: UiActionPort | null;
     application: ApplicationShell | null;
+    assetBase?: string;
     buildWatermark?: string;
     buildCommit?: string;
   } = $props();
@@ -72,6 +74,7 @@
 <StartScreen
   {shell}
   {application}
+  {assetBase}
   onstart={(seed, quality, openMode) => void actions?.startWorld(seed, quality, openMode)}
 />
 

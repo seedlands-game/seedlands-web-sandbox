@@ -26,7 +26,9 @@ try {
     },
   });
   const renderer = await import(pathToFileURL(join(temporaryDirectory, 'entry.mjs')).href);
-  const fragment = `${validatePrerenderedStartScreen(renderer.renderPrerenderedStartScreen())}\n`;
+  const fragment = `${validatePrerenderedStartScreen(
+    renderer.renderPrerenderedStartScreen(PRERENDER_BASE_PLACEHOLDER),
+  )}\n`;
   if (mode === '--write') {
     await writeFile(outputPath, fragment);
   } else {

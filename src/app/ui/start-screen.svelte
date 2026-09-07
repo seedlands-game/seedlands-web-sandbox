@@ -14,10 +14,12 @@
   let {
     shell,
     application,
+    assetBase,
     onstart,
   }: {
     shell: ShellState;
     application: ApplicationShell | null;
+    assetBase: string;
     onstart: (seed: string, quality: QualityLevel, openMode: WorldOpenMode) => void;
   } = $props();
   let latestSeed = $state('');
@@ -50,7 +52,7 @@
   {#if shell.phase === 'loading'}
     <WorldLoading />
   {:else}
-    <SeedlandsMark />
+    <SeedlandsMark {assetBase} />
     <p class="eyebrow">PROCEDURAL FANTASY WORLD</p>
     <h1>Seedlands</h1>
     <p>走进一个由 Seed 苏醒、会随脚步延展的体素秘境。</p>

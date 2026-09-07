@@ -24,9 +24,9 @@ export default defineConfig({
           const fragment = developmentServer
             ? (
                 (await developmentServer.ssrLoadModule('/src/app/ui/prerender-entry.ts')) as {
-                  renderPrerenderedStartScreen: () => string;
+                  renderPrerenderedStartScreen: (assetBase: string) => string;
                 }
-              ).renderPrerenderedStartScreen()
+              ).renderPrerenderedStartScreen('/')
             : await readFile('src/app/ui/generated/prerendered-start-screen.html', 'utf8');
           return injectPrerenderedStartScreen(html, applyPrerenderedBasePath(fragment.trimEnd(), base));
         },

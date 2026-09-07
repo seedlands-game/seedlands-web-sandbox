@@ -2,7 +2,7 @@ import { render } from 'svelte/server';
 import AppRoot from './app-root.svelte';
 import { createUiBridge } from './ui-bridge';
 
-export function renderPrerenderedStartScreen(): string {
+export function renderPrerenderedStartScreen(assetBase: string): string {
   const bridge = createUiBridge({
     now: () => 0,
     setTimer: () => 0,
@@ -13,6 +13,7 @@ export function renderPrerenderedStartScreen(): string {
       bridge,
       actions: null,
       application: null,
+      assetBase,
     },
   }).body;
 }

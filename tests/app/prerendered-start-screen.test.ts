@@ -11,8 +11,8 @@ import {
 
 describe('prerendered start screen', () => {
   it('renders the deterministic Svelte boot tree with hydration markers', () => {
-    const first = renderPrerenderedStartScreen();
-    const second = renderPrerenderedStartScreen();
+    const first = renderPrerenderedStartScreen(PRERENDER_BASE_PLACEHOLDER);
+    const second = renderPrerenderedStartScreen(PRERENDER_BASE_PLACEHOLDER);
     expect(first).toBe(second);
     expect(first).toContain('<!--[-->');
     expect(first).toContain('id="start-card"');
