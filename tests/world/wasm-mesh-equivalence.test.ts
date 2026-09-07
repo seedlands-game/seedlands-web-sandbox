@@ -143,7 +143,7 @@ describe('W04/W05 Wasm mesh descriptors', () => {
     expectMeshesEqual(actual, expected);
     expectMeshesEqual(runMeshDescriptorControl(input.input.window, input.input.fluidWindow), expected);
     expect(kernel.failed).toBe(false);
-  }, 90_000);
+  }, 30_000);
 
   it('keeps empty, solid, checkerboard, water stair and lantern material ordering exact', async () => {
     const kernel = await createKernelMemory(await readFile(wasmPath));
@@ -180,7 +180,7 @@ describe('W04/W05 Wasm mesh descriptors', () => {
     }
     expect(kernel.failed).toBe(false);
     expect(FaceMaterial.LanternGlow).toBe(13);
-  }, 30_000);
+  }, 90_000);
 
   it('samples only the reachable upper-water second ring and first-ring AO boundary exactly', async () => {
     const kernel = await createKernelMemory(await readFile(wasmPath));

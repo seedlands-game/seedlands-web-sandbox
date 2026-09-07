@@ -1,6 +1,6 @@
 # 稳定低配 GitHub Runner 的静态与浏览器门禁
 
-**状态：** Agile flow；第三轮远端 RED 已修复，精确本地用例 GREEN，等待 PR 最新 head 的 GitHub Actions 与 mergeability 读回
+**状态：** Agile flow；第四轮远端 RED 已修复，目标 Mesh 用例 GREEN，等待 PR 最新 head 的 GitHub Actions 与 mergeability 读回
 
 ## Context & Goal
 
@@ -27,6 +27,7 @@ GitHub PR #9 的首个最新 revision run `34098525614` 在 Production build 通
 - 受控并发只用于 `verify:static:ci`，避免为了 GitHub runner 降低本地开发者的默认并行度。
 - 选择 1 个 Vitest worker：GitHub 首轮默认并发导致 6 个重型用例超时；第二轮限制为 2 workers 后仍有 4 个用例分别运行约 9.6、50、64、66 秒并触发单例超时。失败数量收敛但证明双 Worker 仍在相互争用，故 CI coverage 串行执行，为每个原始用例保留完整 runner CPU；本地默认并行度不变。
 - 第三轮单 Worker run `34100901468` 仍由相同 4 个用例触发时间预算，证明 runner 的单核速度本身不足以满足原 5/30/60 秒门限。按远端实际耗时增加有限余量：Cargo 边界检查 30 秒、Mesh 等价性 90 秒、流体与综合 Rust data-plane 等价性各 120 秒；不增加 retry，不减少输入或断言。
+- 第四轮 run `34101989780` 中其他 862 个用例通过，唯一失败仍报告目标 Mesh 用例使用 30 秒预算；源码行读回确认 90 秒误加在前一用例。将前一用例恢复 30 秒并把 90 秒移动到 `keeps empty, solid, checkerboard, water stair and lantern material ordering exact`，不改变测试逻辑。
 - Macro 地图仍以可观察 `ready` 为完成条件，单次测试上限改为 90 秒、每层等待 45 秒，不使用固定 sleep。
 - 存档刷新测试不伪造核心数，而是继续允许生产警告出现并由公共 helper 明确点击“仍然进入”。
 
@@ -39,13 +40,14 @@ GitHub PR #9 的首个最新 revision run `34098525614` 在 Production build 通
 
 ## Test Design
 
-- 预期 RED：GitHub Actions run `34098525614` 的 Static verification 有 6 个不同重型用例超时；Chromium regression 的 Macro 地图在 `sampling` 超时，存档回归刷新后 `#debug` 隐藏且低核心提示未处理。第二轮 run `34099901052` 的 Production build 与 Chromium regression 已通过，但 2-worker Static verification 仍有 4 个 CPU 密集用例触发单例超时。第三轮单 Worker run `34100901468` 仍有相同 4 个用例触发原 5/30/60 秒预算，其他 859 个用例通过。
+- 预期 RED：GitHub Actions run `34098525614` 的 Static verification 有 6 个不同重型用例超时；Chromium regression 的 Macro 地图在 `sampling` 超时，存档回归刷新后 `#debug` 隐藏且低核心提示未处理。第二轮 run `34099901052` 的 Production build 与 Chromium regression 已通过，但 2-worker Static verification 仍有 4 个 CPU 密集用例触发单例超时。第三轮单 Worker run `34100901468` 仍有相同 4 个用例触发原 5/30/60 秒预算，其他 859 个用例通过。第四轮 run `34101989780` 为 862 个用例通过、1 个 Mesh 用例仍按 30 秒超时，确认是预算修改落点错误。
 - GREEN：本地执行 `pnpm verify:static:ci`、`pnpm test:e2e:regression` 和 `pnpm build`；推送后只接受新 head SHA 对应的三个 required checks。
 
 ## Acceptance & Evidence
 
 - [x] **Static：** 单 Worker `pnpm verify:static:ci` 在 190.35 秒内全部通过：182 个文件通过、2 个跳过，863 个用例通过、4 个跳过；coverage statements 95.37%、branches 90.42%、functions 96.93%、lines 96.89%，Svelte / TypeScript 0 error。
 - [x] **Vitest：** 4 个调整时间预算的测试文件以单 Worker 精确复验，13/13 通过、用时 44.69 秒；受影响文件 Prettier 与测试 TypeScript 校验通过。
+- [x] **Vitest：** Mesh 预算落点修正后，目标文件 6/6 通过、用时 14.93 秒；源码行号读回前一用例为 30 秒、目标用例为 90 秒。
 - [x] **Playwright-baseline：** `pnpm test:e2e:regression` 为 8/8 通过；Macro 仍按 `ready` 判断，存档仍验证生产 Store 路径并通过公共 helper 确认低核心警告。
 - [x] **Build：** `pnpm build` 通过，Rust artifact 指纹、Svelte / TypeScript 和 Vite 生产构建均通过。
 - [ ] **GitHub Actions：** 最新 PR head 的 Static verification、Production build、Chromium regression 全绿。
@@ -56,13 +58,14 @@ GitHub PR #9 的首个最新 revision run `34098525614` 在 Production build 通
 1. [已完成] 读取 run `34098525614` 的 job 日志并区分资源超时、产品行为与依赖失败。
 2. [已完成] 新增 CI 专用 Vitest 并发入口，修复 Macro 与存档回归的确定性等待/确认路径。
 3. [已完成] 根据第二轮远端 RED 将 CI coverage 收敛为单 Worker，并完成本地静态复验。
-4. [已完成] 根据第三轮远端实测为 4 个重型用例设置有限时间预算，精确复验 13/13 通过。
+4. [已完成] 根据第三轮远端实测为 4 个重型用例设置有限时间预算；第四轮发现并修正 Mesh 预算落点错误，目标文件精确复验 6/6 通过。
 5. [进行中] 提交、推送并只跟踪新 head SHA 的 required checks 与 mergeability。
 
 ## Delivery Snapshot
 
-- RED：GitHub Actions run `34098525614` 中 Production build 通过；Static verification 因 6 个重型测试超时失败，Chromium regression 因 Macro 采样超时和刷新后的低核心提示未确认失败。第二轮 run `34099901052` 已修复浏览器回归，但 2-worker coverage 仍有 4 个单例超时；第三轮 run `34100901468` 使用单 Worker 后仍有相同 4 个用例受原时间预算限制，其余 859 个用例通过。
+- RED：GitHub Actions run `34098525614` 中 Production build 通过；Static verification 因 6 个重型测试超时失败，Chromium regression 因 Macro 采样超时和刷新后的低核心提示未确认失败。第二轮 run `34099901052` 已修复浏览器回归，但 2-worker coverage 仍有 4 个单例超时；第三轮 run `34100901468` 使用单 Worker 后仍有相同 4 个用例受原时间预算限制，其余 859 个用例通过；第四轮 run `34101989780` 因 Mesh 预算落在前一测试而仅剩目标 Mesh 用例按原 30 秒超时，其余 862 个用例通过。
 - 实现：`package.json` 新增 `test:coverage:ci` / `verify:static:ci`，`.github/workflows/ci.yml` 保持 `Static verification` job/context 名不变并切换到 CI 入口；Macro 只扩展可观察状态等待；存档测试复用 `startHarnessWorld()`。
 - 本地 GREEN：单 Worker `pnpm verify:static:ci` 用时 190.35 秒，`pnpm test:e2e:regression` 与 `pnpm build` 也已全部通过。
 - 精确 GREEN：4 个调整时间预算的测试文件单 Worker 13/13 通过、用时 44.69 秒；Prettier 与 `tsc -p tsconfig.test.json --noEmit` 通过。
+- 修正 GREEN：Mesh 预算移动到目标用例后，目标文件 6/6 通过、用时 14.93 秒；Prettier 与测试 TypeScript 校验通过。
 - 未改变必需检查、规则集、retry、业务算法、Worker 数或产品低核心警告；远端最终 run、head SHA 与 mergeability 待推送后补充。
