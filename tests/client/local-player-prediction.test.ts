@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { LocalPlayerPrediction } from '../../src/client/local-player-prediction';
+import { LocalPlayerPrediction, type PredictionAuthorityState } from '../../src/client/local-player-prediction';
+import { AuthoritySnapshotGate, type AuthoritySnapshotOrder } from '../../src/client/authority/authority-snapshot-gate';
 import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
 import type { Collider, PhysicsWorld, WorldAabb } from '../../src/physics';
 import { InputCommandBuffer, type InputCommand } from '../../src/runtime/session-protocol';
@@ -66,6 +67,24 @@ const controls = {
 };
 
 describe('生产本地玩家预测运行时', () => {
+  it('公开校正的最小字段可直接用于排序与预测，无需内部快照诊断', () => {
+    const state: PredictionAuthorityState & AuthoritySnapshotOrder = {
+      epoch: 'world:1',
+      physicsTick: 1,
+      commitSequence: 1,
+      paused: false,
+      acknowledgedInputSequence: -1,
+      inputResyncRequired: false,
+      player: { body: body().body, grounded: false },
+      chunkRevisions: { '0,0,0': 1 },
+    };
+    const gate = new AuthoritySnapshotGate('world:1');
+    const runtime = new LocalPlayerPrediction('world:1', 60);
+    expect(gate.accept(state)).toBeNull();
+    expect(runtime.applyAuthoritySnapshot(state, new RevisionWorld()).body).toEqual(state.player.body);
+    expect(gate.accept({ ...state, epoch: 'old:1', physicsTick: 2 })).toBe('wrong-epoch');
+    expect(gate.accept(state)).toBe('duplicate');
+  });
   it.each([30, 60, 120] as const)('%iHz 下不受 30/60/120fps 渲染分片影响', (physicsHz) => {
     const outcomes = ([30, 60, 120] as const).map((renderHz) => {
       const runtime = new LocalPlayerPrediction('world:1', physicsHz);

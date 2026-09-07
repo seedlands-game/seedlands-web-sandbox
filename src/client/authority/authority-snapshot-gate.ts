@@ -1,15 +1,21 @@
-import type { AuthoritySnapshot } from '../../server/authority/authority-session';
+export type AuthoritySnapshotOrder = Readonly<{
+  epoch: string;
+  physicsTick: number;
+  commitSequence: number;
+  acknowledgedInputSequence: number;
+  paused: boolean;
+}>;
 
 export type SnapshotRejectionReason =
   'wrong-epoch' | 'duplicate' | 'physics-tick-regressed' | 'commit-regressed' | 'ack-regressed';
 
 export class AuthoritySnapshotGate {
-  private latest: AuthoritySnapshot | null = null;
+  private latest: AuthoritySnapshotOrder | null = null;
   private rejectionCounts = new Map<SnapshotRejectionReason, number>();
 
   constructor(private readonly epoch: string) {}
 
-  accept(snapshot: AuthoritySnapshot): SnapshotRejectionReason | null {
+  accept(snapshot: AuthoritySnapshotOrder): SnapshotRejectionReason | null {
     let reason: SnapshotRejectionReason | null = null;
     if (snapshot.epoch !== this.epoch) reason = 'wrong-epoch';
     else if (this.latest) {

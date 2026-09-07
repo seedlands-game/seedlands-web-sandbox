@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest';
 import {
   measureAuthorityPublicationBytes,
   validateAuthorityPublicationMessage,
+  validateAuthorityRequestPayload,
   validateAuthorityResponsePayload,
 } from '../../src/node/runtime/node-authority-lane-protocol';
 import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
 import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
+import { CHUNK_SIZE } from '../../src/world/voxel';
 
 describe('Authority lane 入出站合同', () => {
   it('逐 kind 拒绝不能由调用方安全消费的回复', () => {
@@ -39,6 +41,44 @@ describe('Authority lane 入出站合同', () => {
         durableCommitSequence: 4,
       }).value,
     ).toMatchObject({ status: 'stopped' });
+  });
+
+  it('只接纳严格的 collision baseline 读取参数和结果外形', () => {
+    expect(
+      validateAuthorityRequestPayload('authority-read-collision-baseline', {
+        key: '0,0,0',
+        minimumRevision: 0,
+      }).value,
+    ).toMatchObject({ key: '0,0,0', minimumRevision: 0 });
+    expect(() =>
+      validateAuthorityRequestPayload('authority-read-collision-baseline', {
+        key: '0,0',
+        minimumRevision: 0,
+      }),
+    ).toThrow(/baseline|Chunk/i);
+    expect(() =>
+      validateAuthorityRequestPayload('authority-read-collision-baseline', {
+        key: '0,0,0',
+        minimumRevision: -1,
+      }),
+    ).toThrow(/revision/i);
+    const available = {
+      status: 'available',
+      key: '0,0,0',
+      chunkRevision: 3,
+      canonical: new ArrayBuffer(CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT),
+      fluid: new ArrayBuffer(CHUNK_SIZE ** 3 * Uint8Array.BYTES_PER_ELEMENT),
+    };
+    expect(validateAuthorityResponsePayload('authority-read-collision-baseline', available).value).toBe(available);
+    expect(() =>
+      validateAuthorityResponsePayload('authority-read-collision-baseline', {
+        ...available,
+        canonical: new ArrayBuffer(1),
+      }),
+    ).toThrow(/baseline/i);
+    expect(
+      validateAuthorityResponsePayload('authority-read-collision-baseline', { status: 'unavailable', key: '0,0,0' }),
+    ).toMatchObject({ value: { status: 'unavailable', key: '0,0,0' } });
   });
 
   it('publication 必须绑定 epoch、序号和可消费外层 shape', () => {

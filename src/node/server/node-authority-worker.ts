@@ -239,6 +239,11 @@ async function start(bootstrap: NodeAuthorityWorkerBootstrap): Promise<Authority
         if (typeof request.key !== 'string') throw new TypeError('Authority Chunk key 无效。');
         return { payload: await host.requestChunk(request.key) };
       }
+      if (kind === 'authority-read-collision-baseline') {
+        if (typeof request.key !== 'string' || !Number.isSafeInteger(request.minimumRevision))
+          throw new TypeError('Authority collision baseline 请求无效。');
+        return { payload: host.runtime.readCollisionBaseline(request.key, request.minimumRevision as number) };
+      }
       if (kind === 'authority-set-interest-radius') {
         if (request.radius !== 1 && request.radius !== 2 && request.radius !== 3)
           throw new TypeError('Authority 半径无效。');

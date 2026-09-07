@@ -42,3 +42,29 @@ change corpus 显式命令为 `pnpm exec vitest run --config changes/2026-09-06-
 后续依赖仍为：真实代表性corpus与N2/N3选型 → 有证据的N4采用 → 受限网络和完整客户端镜像/预测 → 双模式GUI → 真实远端/CI → 宿主与feature分项及组合A/B。T0/C0受控最小可玩探针可提前用于选型，不等正式GUI，也不代表正式wire已采纳。任务恢复从本页进入，避免把冻结spec的“设计时尚未实现”或早期失败记录当成最新状态。
 
 本阶段没有push、PR发布、远端部署、Wasm合并、goal创建或reset兑换。长期docs baseline只更新已实际验证的Node所有权与入口；未把网络/GUI/性能建议写成现有能力。
+
+# 网络准备批次的补充检查点
+
+本节补充于 2026-09-07，整个 change 仍 Active。已通过的无网络宿主基线为 `ed9aec5`，用户恢复额度后授权推送，现已保存到 `origin/codex/node-dedicated-server`；本节随新的网络准备检查点交付，相关提交 SHA 以该功能分支的 Git 历史为准。
+
+## 变更与独立复审
+
+Authority lane 增加 readonly collision baseline RPC，使用现有权威读取，不自动请求未知 Chunk；固定数据长度与控制通道预算继续生效。回复除既有消息 identity 外还绑定请求 key/最低 revision，错误回复进入失败及有序清理。客户端预测/排序门禁的参数改为实际使用的字段集，完整 Worker 快照仍兼容。
+
+change 专用接收路径复用现有 collision mirror、统一物理与预测，实现完整 LE baseline 的双块 hash/副本/版本门，并覆盖丢失提交、迟到旧基线、旧 epoch 和重同步。实际 C0/C1/C2 解码的九条真实语料与原始语料得到同样的镜像/预测状态；gameplay/action 仅验证 DTO 等价，没有宣称 UI 或完整重连回执状态机通过。Sol/high 与 Terra/high 的独立评审/修复记录见各附属文档。
+
+## 当前可复核证据
+
+环境为 macOS arm64、官方校验的 Node 22.23.2；以下均为功能/静态证据，运行耗时不用于性能收益。
+
+- `pnpm verify:static`：重跑通过，175 文件通过/2 跳过、916 项通过/4 跳过；world 行覆盖 96.37%。首次完整运行暴露只读测试将后台 active-window 生成误归因于 RPC；已改为指定 key 的读取/显式生成对照，没有放宽阈值或全套改为串行，默认配置复验通过。
+- `pnpm build`、`pnpm build:server`：通过，浏览器保留既有大 bundle 提示。当前生产源码在这两次构建后未改动；后续只调整测试与文档。
+- Node 实际五入口 artifact 与 baseline RPC/protocol 聚焦：3 文件 12 项通过。产物测试实际运行 thread/process 两模式并关停、重启恢复，不以 mock 代替。
+- 客户端预测/门禁/镜像：3 文件 19 项通过；reference receiver：5/5；真实 corpus recorder：1/1；三 codec 应用 oracle：1/1。独立配置和显式 fixture 环境变量见 [应用证据](network-codec-application-evidence.md)。
+- 当前批次没有新跑 Linux、Playwright、Midscene、WAN、压力或正式性能组。上一检查点的证据保留为其历史结果，不声称验证了新增 RPC 的目标 Linux x64 部署。
+
+## 尚未放行的网络选型
+
+九条通过只覆盖当前受控 subset，不能宣布完整 N2。C1/C2 仍有非空 gameplay/其他动作域缺口；独立复审要求统一 parser/语义校验/资源预检/输出所有权/hash 阶段，避免比较时额外复制或少校验带来偏差。T0/T1 已通过小型 loopback 功能探针，T2/T3 仍有能力与依赖门。所有候选继续 `not-adopted`，没有公开 listener/GUI 或远端部署。
+
+---

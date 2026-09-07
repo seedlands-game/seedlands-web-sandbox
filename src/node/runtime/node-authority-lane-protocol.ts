@@ -2,6 +2,7 @@ import type { NodeRpcPayload } from './node-rpc-contract';
 import type { NodeAuthorityPublication } from './node-authority-lane';
 import { measureNodeRpcBytes } from './node-rpc-bytes';
 import { Buffer } from 'node:buffer';
+import { CHUNK_SIZE, chunkKey } from '../../world/voxel';
 
 const U32_BYTES = 4;
 const NUMBER_BYTES = 8;
@@ -12,6 +13,7 @@ export const AUTHORITY_OPERATION_KINDS = [
   'authority-receive-input',
   'authority-perform-action',
   'authority-request-chunk',
+  'authority-read-collision-baseline',
   'authority-set-interest-radius',
   'authority-request-checkpoint',
   'authority-wait-for-idle',
@@ -46,6 +48,9 @@ const SEQUENCE_DECISIONS = new Set([
   'wrong-epoch',
   'wrong-stream',
 ]);
+const MAX_COLLISION_BASELINE_KEY_BYTES = 96;
+const COLLISION_CANONICAL_BYTES = CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT;
+const COLLISION_FLUID_BYTES = CHUNK_SIZE ** 3 * Uint8Array.BYTES_PER_ELEMENT;
 
 function measured(value: unknown): NodeRpcPayload {
   return { value, bytes: measureNodeRpcBytes(value) };
@@ -187,6 +192,44 @@ function input(value: unknown): void {
     throw new TypeError('Authority input 不能携带额外字段。');
 }
 
+function collisionBaselineKey(value: unknown): value is string {
+  if (typeof value !== 'string' || !value || Buffer.byteLength(value, 'utf8') > MAX_COLLISION_BASELINE_KEY_BYTES)
+    return false;
+  const coordinates = value.split(',').map(Number);
+  return (
+    coordinates.length === 3 &&
+    coordinates.every(Number.isSafeInteger) &&
+    chunkKey(...(coordinates as [number, number, number])) === value
+  );
+}
+
+function collisionBaselineRequest(value: Record<string, unknown>): void {
+  if (!only(value, ['key', 'minimumRevision'])) throw new TypeError('Authority collision baseline 请求无效。');
+  if (!collisionBaselineKey(value.key)) throw new TypeError('Authority collision baseline Chunk key 无效。');
+  if (!nonNegativeInteger(value.minimumRevision))
+    throw new RangeError('Authority collision baseline minimumRevision 无效。');
+}
+
+function collisionBaseline(value: unknown): void {
+  const candidate = record(value, 'Authority collision baseline');
+  if (candidate.status === 'unavailable') {
+    if (!collisionBaselineKey(candidate.key) || !only(candidate, ['status', 'key']))
+      throw new TypeError('Authority collision baseline unavailable 回复无效。');
+    return;
+  }
+  if (
+    candidate.status !== 'available' ||
+    !collisionBaselineKey(candidate.key) ||
+    !nonNegativeInteger(candidate.chunkRevision) ||
+    !(candidate.canonical instanceof ArrayBuffer) ||
+    candidate.canonical.byteLength !== COLLISION_CANONICAL_BYTES ||
+    !(candidate.fluid instanceof ArrayBuffer) ||
+    candidate.fluid.byteLength !== COLLISION_FLUID_BYTES ||
+    !only(candidate, ['status', 'key', 'chunkRevision', 'canonical', 'fluid'])
+  )
+    throw new TypeError('Authority collision baseline available 回复无效。');
+}
+
 function receipt(value: unknown): void {
   const candidate = record(value, 'Authority action receipt');
   if (!nonNegativeInteger(candidate.commitSequence))
@@ -263,6 +306,8 @@ export function validateAuthorityRequestPayload(kind: string, value: unknown): N
   } else if (kind === 'authority-request-chunk') {
     if (!only(request, ['key'])) throw new TypeError('Authority Chunk 请求无效。');
     if (typeof request.key !== 'string' || !request.key) throw new TypeError('Authority Chunk key 无效。');
+  } else if (kind === 'authority-read-collision-baseline') {
+    collisionBaselineRequest(request);
   } else if (kind === 'authority-set-interest-radius') {
     if (!only(request, ['radius']) || (request.radius !== 1 && request.radius !== 2 && request.radius !== 3))
       throw new TypeError('Authority 半径无效。');
@@ -278,6 +323,8 @@ export function validateAuthorityResponsePayload(kind: string, value: unknown): 
   } else if (kind === 'authority-perform-action') receipt(value);
   else if (kind === 'authority-request-chunk') {
     if (typeof value !== 'boolean') throw new TypeError('Authority Chunk 回复无效。');
+  } else if (kind === 'authority-read-collision-baseline') {
+    collisionBaseline(value);
   } else if (kind === 'authority-set-interest-radius' || kind === 'authority-wait-for-idle') {
     if (!only(record(value, 'Authority empty response'), [])) throw new TypeError('Authority 空回复无效。');
   } else if (kind === 'authority-request-checkpoint') checkpoint(value);

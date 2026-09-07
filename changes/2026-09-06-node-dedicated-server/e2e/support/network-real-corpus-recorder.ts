@@ -101,6 +101,7 @@ export async function captureNetworkRealCorpusReference(
     baselines: readonly Extract<AuthorityCollisionBaselineResult, { status: 'available' }>[];
     baselineDigest: ReferenceSha256DigestPort;
     actionReceipt?: ActionReceiptReference;
+    actionReceipts?: readonly ActionReceiptReference[];
   }>,
 ): Promise<NetworkRealCorpusReference> {
   const { snapshot } = options;
@@ -125,7 +126,8 @@ export async function captureNetworkRealCorpusReference(
       ),
     ),
   );
-  if (options.actionReceipt && options.actionReceipt.transaction.epoch !== snapshot.epoch)
+  const actionReceipts = [...(options.actionReceipts ?? []), ...(options.actionReceipt ? [options.actionReceipt] : [])];
+  if (actionReceipts.some((receipt) => receipt.transaction.epoch !== snapshot.epoch))
     throw new TypeError('Action receipt must belong to the captured publication epoch.');
   return {
     format: NETWORK_REAL_CORPUS_REFERENCE_FORMAT,
@@ -143,8 +145,8 @@ export async function captureNetworkRealCorpusReference(
         ),
       ),
       ...baselineFrames,
-      ...(options.actionReceipt
-        ? [encodeCaptured('action-receipt', options.actionReceipt)]
+      ...(actionReceipts.length
+        ? actionReceipts.map((receipt) => encodeCaptured('action-receipt', receipt))
         : [
             {
               status: 'NOT_COLLECTED' as const,

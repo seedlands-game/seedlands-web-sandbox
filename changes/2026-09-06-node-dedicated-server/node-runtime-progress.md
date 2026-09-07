@@ -76,3 +76,18 @@
 - 父线程收到迟到 `stopped` 成功回执时，已有 failure 保持 `failed`；已在途 `stop()` 在清理完成后拒绝该失败，不能覆盖为 stopped 或向 Runtime 暗示 writer 已安全释放。
 - RED/GREEN：`tests/node/authority-lane-failure.test.ts` 的 control-close 屏障 fixture 先关闭 control port，再收到 parent `fail`，发送 `fatal` 和刻意迟到的 `stopped`，最后由 persistence-port barrier 放行 `cleanup-complete`。旧实现会让已在途 stop 立即结算并留下未处理 rejection；修复后确认 failure 即时可见、state 始终为 failed、stop/whenExited 均不早于 barrier。畸形 publication fixture 也改为模拟 Worker 收到 fail 后有序清理，避免测试错误依赖 façade 自动 terminate。
 - 定向验证：`pnpm exec vitest run tests/node/authority-lane-failure.test.ts tests/node/authority-lane-protocol.test.ts`，`2` 文件 `7/7` 通过；`pnpm exec tsc --noEmit --pretty false` 通过；Authority lane/Worker 与两份测试的 ESLint 定向检查通过。未运行全仓 coverage、完整 static 或 build，等待主线最终复验。
+
+### Collision baseline 只读 façade（2026-09-07）
+
+- `NodeAuthorityLane` 新增 `readCollisionBaseline(key, minimumRevision)`。它只经控制 RPC 调用既有 `AuthorityRuntime.readCollisionBaseline()`，不持有或导出 Host/GameServer，也不请求 Chunk、生成 canonical 数据或写入持久化层。
+- 新 RPC kind 为 `authority-read-collision-baseline`。请求要求规范三整数 Chunk key、非负安全整数 `minimumRevision` 和无额外字段；available 回复严格只含 `status`、`key`、`chunkRevision`、固定大小 canonical/fluid `ArrayBuffer`，unavailable 回复只含既有 typed 结果 `{ status: 'unavailable', key }`。minimumRevision 高于已加载 revision 沿用 unavailable，不创造新状态。
+- canonical/fluid 的真实固定体积远低于控制 RPC 既有 `4 MiB` `maxResponseBytes`；协议 validator 同时固定两块 Buffer 的实际 Chunk 大小，不能以伪造大块或短块绕过总回复预算。façade 为每次 available 返回再 slice 两个 Buffer，调用方修改返回值不会影响下一次读取或权威世界。
+- RED：Node 22 下 `tests/node/authority-lane-protocol.test.ts` 因 operation 未进 allowlist 失败，真实 `tests/node/authority-lane-collision-baseline.test.ts` 因 façade 方法不存在失败。
+- GREEN：Node 22 命令 `pnpm exec vitest run tests/node/authority-lane-rpc.test.ts tests/node/authority-lane-protocol.test.ts tests/node/authority-lane-failure.test.ts tests/node/authority-lane-collision-baseline.test.ts`，`4` 文件 `18/18` 通过。真实 Worker lane 回归证明缺失远端 Chunk 返回 unavailable 且读取前后 pending/accepted/durable 诊断不变；显式生成后返回 canonical/fluid、修改首个 Buffer 不影响二次读取、较高 revision 返回 unavailable。另以真实 worker_threads port 模拟错误 epoch 回复，确认 accepted Promise 拒绝并进入既有 failure/cleanup 路径。`pnpm exec tsc --noEmit --pretty false`、相关 ESLint 与 `git diff --check` 通过；未运行 benchmark、全仓 coverage 或完整 build。
+
+### Collision baseline 请求—回复关联补强（2026-09-07）
+
+- 通用 Node RPC 已绑定 epoch、generation、requestId、kind 和 payload schema；`readCollisionBaseline()` 现额外绑定本次读取语义：回复 key 必须等于请求 key，available 的 `chunkRevision` 必须不小于请求的 `minimumRevision`。unavailable 仍可表示不存在或请求 revision 尚不可用。
+- 两种关联违例都会显式关闭 control RPC 并记录 Authority failure，再经 parent `fail` 请求 Worker 进入既有 `host.stop()`/handler 排空/`cleanup-complete` 路径；不能仅抛出一次局部错误后继续将 lane 视为健康。
+- RED：同 epoch/generation/requestId/kind 的真实 worker_threads control fixture 分别回复错误 key 的 unavailable 和过旧 revision 的 available；旧 façade 都会错误 resolve。
+- GREEN：修复后 `PATH=/tmp/seedlands-node-22/node-v22.23.2-darwin-arm64/bin:$PATH pnpm exec vitest run tests/node/authority-lane-collision-baseline.test.ts` 为 `1` 文件 `4/4` 通过，两个 fixture 都确认调用拒绝、`whenFailed()` 可见、`stop()` 在 cleanup 后拒绝且 lane 保持 failed。相关 Prettier、ESLint 与 `git diff --check` 通过。`tsconfig.test` 本轮未能作为全体测试证据：并行的 network corpus 写盘文件报 `network-real-corpus-recorder.test.ts:132` 的 `record.binary` 类型错误，非本子任务文件；此前本子任务 receiver limits 修正后的 test TypeScript 检查已通过。

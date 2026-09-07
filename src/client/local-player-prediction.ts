@@ -7,7 +7,6 @@ import {
   type Vec3,
 } from '../physics';
 import type { InputCommand, SessionEpoch } from '../runtime/session-protocol';
-import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import { PlayerInputStream, type PlayerInputKeys } from './player-input-stream';
 import { PredictionBuffer, type PredictionReconciliationResult } from './prediction-buffer';
 
@@ -15,9 +14,18 @@ export type RevisionedPredictionWorld = PhysicsWorld & {
   revisionVector(keys?: Iterable<string>): Readonly<Record<string, number>>;
 };
 
+/** Validated authority state consumed by prediction, independent of the transport snapshot. */
+export type PredictionAuthorityState = Readonly<{
+  physicsTick: number;
+  acknowledgedInputSequence: number;
+  inputResyncRequired: boolean;
+  player: Readonly<{ body: BodyState; grounded: boolean }>;
+  chunkRevisions: Readonly<Record<string, number>>;
+}>;
+
 export type LocalPredictionAdvance = Readonly<{
   elapsedSeconds: number;
-  snapshot: AuthoritySnapshot;
+  snapshot: PredictionAuthorityState;
   world: RevisionedPredictionWorld;
   issuedAtMs: number;
   forward: Readonly<{ x: number; z: number }>;
@@ -122,7 +130,7 @@ export class LocalPlayerPrediction {
   }
 
   applyAuthoritySnapshot(
-    snapshot: AuthoritySnapshot,
+    snapshot: PredictionAuthorityState,
     world: RevisionedPredictionWorld,
   ): PredictionReconciliationResult {
     const result = this.prediction.reconcile({
@@ -183,7 +191,7 @@ export class LocalPlayerPrediction {
     return candidate;
   }
 
-  interrupt(snapshot: AuthoritySnapshot, issuedAtMs: number): InputCommand {
+  interrupt(snapshot: PredictionAuthorityState, issuedAtMs: number): InputCommand {
     this.recordReset('input-interrupted');
     this.prediction.clear('input-interrupted');
     this.accumulator = 0;
@@ -199,7 +207,7 @@ export class LocalPlayerPrediction {
     this.accumulator = 0;
   }
 
-  resynchronize(snapshot: AuthoritySnapshot): void {
+  resynchronize(snapshot: PredictionAuthorityState): void {
     this.recordReset('authority-resync');
     this.inputStream.resynchronize(snapshot.physicsTick);
     this.prediction.clear('authority-resync');

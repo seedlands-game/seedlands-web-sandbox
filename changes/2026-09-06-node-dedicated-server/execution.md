@@ -125,3 +125,15 @@ WASM 任务最终明确交还全部资源，并报告本地提交 `1580dcd`；�
 ### 阶段检查点
 
 最终完整 `verify:static` 通过：174文件通过/2跳过、910项通过/4跳过，world行覆盖96.37%；浏览器/Node构建、headless基线8/8、change corpus1/1、最新Linux离线两模式复验均通过。Authority的跨port故障现在通过parentPort请求cleanup，不再抢先terminate；已在途stop和迟到stopped也不能覆盖failed。全部源码冻结后的统一证据与A1–A14剩余状态见 [阶段验证快照](validation-summary.md)。保存本地语义检查点，整个change继续Active，不push、不自动采用codec/transport。
+
+### 恢复执行与远端检查点
+
+用户在额度恢复后明确指令「继续」，并要求「在额度耗尽前先把代码 push 到远端分支」，同时确认另一侧工作暂停。自该指令起，本任务当前功能分支的稳定检查点允许推送到既有 origin；不再沿用此前本轮的 no-push 限制，也不需要重复申请同一推送许可。没有获得合并主分支或远端环境配置写入的新授权。
+
+已把此前验证通过的 `ed9aec5` 推送到 `origin/codex/node-dedicated-server` 并建立 tracking，未改写历史。GitHub 接受旧 origin 地址的仓库重定向，实际分支位于 `seedlands-game/seedlands-web-sandbox`。后续阶段验收后更新同一功能分支。当前整个 change 仍 Active。
+
+网络准备批次新增真实 Authority lane 碰撞读取，强制回复绑定请求 key/最低 revision，错误回复进入 failure/cleanup；客户端预测/快照门禁只收窄到实际消费的状态字段。change 接收 oracle 通过真实镜像/统一物理检查异步 hash、版本缺口、旧 epoch、丢失提交后的 correction 补齐，以及高版本先到后的旧基线迟到。细节见 [接收应用计划](network-receiver-plan.md)。
+
+真实九条语料已具有 JSON metadata、规范 LE raw sidecar、逐记录内容 hash 与 manifest/source/config 绑定；C0/C1/C2 的九条解码和应用曾通过，当前计数域修订后继续复验。C0 的早期 base64 JSON 探针被排除为错误参考组，新的 C0 保留 raw binary；详见 [C0 校正](network-c0-reference-notes.md)与 [应用证据](network-codec-application-evidence.md)。所有这些均无 timing，不能代替完整 N2/N3/N4 或 GUI/远端准出。
+
+T0/T1 的 Node/浏览器及 IPv6 loopback 小包功能通过，尚未验证 WSS、公网、真实背压和完整业务旅程。T2/T3 依赖/协议审计另见 [传输审计](network-t2-t3-audit.md)，不能把一次握手失败解释为浏览器不支持。后续性能采样仍使用共享互斥并暂停本任务内部的测试/构建/探针；用户确认另一侧暂停不意味着本机其他活动自动成为零干扰。

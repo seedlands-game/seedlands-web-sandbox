@@ -3,6 +3,7 @@ import type { AuthorityAction } from '../../worker/authority-worker-protocol';
 import type { AuthoritySnapshot } from '../../server/authority/authority-session';
 import type { AuthorityTransactionReceipt } from '../../server/authority/authority-runtime-types';
 import type { DedicatedHostOptions, DedicatedPublication } from '../../server/dedicated/dedicated-host-types';
+import type { AuthorityCollisionBaselineResult } from '../../server/game-server-types';
 import type { InputCommand, SequenceDecision } from '../../runtime/session-protocol';
 import type { NodeComputeExecutorEntryPoints } from '../compute/node-compute-executor';
 import type { NodeDedicatedComputeLimits, NodeDedicatedStopResult } from './node-dedicated-runtime-types';
@@ -64,6 +65,7 @@ export type NodeAuthorityLane = Readonly<{
   receiveInput(input: InputCommand): Promise<SequenceDecision>;
   performAction(action: AuthorityAction, sequence: number): Promise<AuthorityTransactionReceipt<unknown>>;
   requestChunk(key: string): Promise<boolean>;
+  readCollisionBaseline(key: string, minimumRevision: number): Promise<AuthorityCollisionBaselineResult>;
   setInterestRadius(radius: 1 | 2 | 3): Promise<void>;
   requestCheckpoint(): Promise<unknown>;
   waitForIdle(): Promise<void>;
@@ -324,6 +326,12 @@ export async function createNodeAuthorityLane(options: NodeAuthorityLaneOptions)
       return waitForFailureCleanup();
     });
   };
+  const collisionBaselineFailure = (message: string): never => {
+    const error = new Error(message);
+    rpc.close(error);
+    markFailed(error, true);
+    throw error;
+  };
   return {
     get threadId() {
       return worker.threadId;
@@ -333,6 +341,24 @@ export async function createNodeAuthorityLane(options: NodeAuthorityLaneOptions)
     receiveInput: (input) => request('authority-receive-input', { input }),
     performAction: (action, sequence) => request('authority-perform-action', { action, sequence }),
     requestChunk: (key) => request('authority-request-chunk', { key }),
+    readCollisionBaseline: async (key, minimumRevision) => {
+      const result = await request<AuthorityCollisionBaselineResult>('authority-read-collision-baseline', {
+        key,
+        minimumRevision,
+      });
+      if (result.key !== key)
+        return collisionBaselineFailure('Authority collision baseline response key does not match request.');
+      if (result.status === 'unavailable') return { status: 'unavailable', key: result.key };
+      if (result.chunkRevision < minimumRevision)
+        return collisionBaselineFailure('Authority collision baseline response revision is older than requested.');
+      return {
+        status: 'available',
+        key: result.key,
+        chunkRevision: result.chunkRevision,
+        canonical: result.canonical.slice(0),
+        fluid: result.fluid.slice(0),
+      };
+    },
     setInterestRadius: async (radius) => {
       await request('authority-set-interest-radius', { radius });
     },
