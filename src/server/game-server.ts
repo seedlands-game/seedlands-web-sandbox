@@ -30,6 +30,11 @@ import { createServerDerivedMeshSnapshot, prepareServerWorkerMeshInput } from '.
 import { createLoadedGameplayVoxelReader, readCanonicalVoxel } from './server-voxel-access';
 import { commitSingleWorldEdit } from './single-world-edit';
 import { readLoadedCollisionBaseline } from './loaded-collision-baseline';
+import {
+  canonicalChunkNeighborhoodKeys,
+  hasLoadedCanonicalChunk,
+  retainCanonicalPreparation,
+} from './canonical-chunk-observation';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -42,13 +47,6 @@ import type {
   WorldCommitResult,
   WorldEditBatch,
 } from './game-server-types';
-
-const meshNeighborhoodKeys = (cx: number, cy: number, cz: number): string[] => {
-  const keys: string[] = [];
-  for (let y = cy - 1; y <= cy + 1; y += 1)
-    for (let z = cz - 1; z <= cz + 1; z += 1) for (let x = cx - 1; x <= cx + 1; x += 1) keys.push(chunkKey(x, y, z));
-  return keys;
-};
 
 export class GameServer extends GameServerGameplayFacade {
   readonly seed: number;
@@ -154,15 +152,18 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   retainMeshPreparationNeighborhood(cx: number, cy: number, cz: number): () => void {
-    const keys = meshNeighborhoodKeys(cx, cy, cz);
-    keys.forEach((key) => this.canonicalResidency.retainPreparation(key));
-    let released = false;
-    return () => {
-      if (released) return;
-      released = true;
-      keys.forEach((key) => this.canonicalResidency.releasePreparation(key));
-      this.maintainCanonicalResidency();
-    };
+    return retainCanonicalPreparation(this.canonicalResidency, canonicalChunkNeighborhoodKeys(cx, cy, cz), () =>
+      this.maintainCanonicalResidency(),
+    );
+  }
+
+  hasLoadedCanonicalChunk(key: string): boolean {
+    return hasLoadedCanonicalChunk(this.chunks, key);
+  }
+
+  retainCollisionBaseline(key: string): () => void {
+    this.hasLoadedCanonicalChunk(key);
+    return retainCanonicalPreparation(this.canonicalResidency, [key], () => this.maintainCanonicalResidency());
   }
 
   getChunk(cx: number, cy: number, cz: number): ServerChunk {
@@ -209,7 +210,7 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   async ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<ChunkPersistenceLoadDiagnostics | void> {
-    const neighborhood = meshNeighborhoodKeys(cx, cy, cz);
+    const neighborhood = canonicalChunkNeighborhoodKeys(cx, cy, cz);
     const residentKeys = neighborhood.filter((key) => this.chunks.has(key));
     if (residentKeys.length === neighborhood.length) return;
     return await this.persistence?.ensureNeighborhood?.(cx, cy, cz, residentKeys);

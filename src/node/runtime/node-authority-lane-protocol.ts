@@ -3,6 +3,11 @@ import type { NodeAuthorityPublication } from './node-authority-lane';
 import { measureNodeRpcBytes } from './node-rpc-bytes';
 import { Buffer } from 'node:buffer';
 import { CHUNK_SIZE, chunkKey } from '../../world/voxel';
+import {
+  AUTHORITY_BASELINE_KINDS,
+  validateAuthorityBaselineRequest,
+  validateAuthorityBaselineResponse,
+} from './node-authority-baseline-protocol';
 
 const U32_BYTES = 4;
 const NUMBER_BYTES = 8;
@@ -10,6 +15,7 @@ const REFERENCE_BYTES = 1 + U32_BYTES;
 export const MAX_AUTHORITY_PUBLICATION_BYTES = 16 * 1_024 * 1_024;
 
 export const AUTHORITY_OPERATION_KINDS = [
+  ...AUTHORITY_BASELINE_KINDS,
   'authority-receive-input',
   'authority-perform-action',
   'authority-request-chunk',
@@ -296,7 +302,9 @@ export function validateAuthorityRequestPayload(kind: string, value: unknown): N
   if (!(AUTHORITY_OPERATION_KINDS as readonly string[]).includes(kind))
     throw new TypeError(`Authority lane 不支持 RPC：${kind}`);
   const request = record(value);
-  if (kind === 'authority-receive-input') {
+  if ((AUTHORITY_BASELINE_KINDS as readonly string[]).includes(kind)) {
+    validateAuthorityBaselineRequest(kind, value);
+  } else if (kind === 'authority-receive-input') {
     if (!only(request, ['input'])) throw new TypeError('Authority input 请求无效。');
     input(request.input);
   } else if (kind === 'authority-perform-action') {
@@ -318,7 +326,9 @@ export function validateAuthorityRequestPayload(kind: string, value: unknown): N
 export function validateAuthorityResponsePayload(kind: string, value: unknown): NodeRpcPayload {
   if (!(AUTHORITY_OPERATION_KINDS as readonly string[]).includes(kind))
     throw new TypeError(`Authority lane 不支持 RPC：${kind}`);
-  if (kind === 'authority-receive-input') {
+  if ((AUTHORITY_BASELINE_KINDS as readonly string[]).includes(kind)) {
+    validateAuthorityBaselineResponse(kind, value);
+  } else if (kind === 'authority-receive-input') {
     if (typeof value !== 'string' || !SEQUENCE_DECISIONS.has(value)) throw new TypeError('Authority input 回复无效。');
   } else if (kind === 'authority-perform-action') receipt(value);
   else if (kind === 'authority-request-chunk') {

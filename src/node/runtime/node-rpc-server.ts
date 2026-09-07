@@ -14,7 +14,7 @@ import {
   type NodeRpcServerOptions,
 } from './node-rpc-contract';
 
-type QueuedRequest = Readonly<{ request: NodeRpcRequest; payload: unknown; reserveBytes: number }>;
+type QueuedRequest = Readonly<{ request: NodeRpcRequest; payload: unknown; reserveBytes: number; orderKey?: string }>;
 type InFlightRequest = QueuedRequest & Readonly<{ controller: AbortController }>;
 type RetainedResponse = Readonly<{ request: NodeRpcRequest; reserveBytes: number; payloadBytes: number }>;
 
@@ -129,7 +129,10 @@ export function attachNodeRpcServer(options: NodeRpcServerOptions): NodeRpcServe
         throw new RangeError('Node RPC request count limit reached.');
       if (queuedBytes + payload.bytes > options.limits.maxQueuedBytes)
         throw new RangeError('Node RPC queued byte limit reached.');
-      queue.push({ request, payload: payload.value, reserveBytes });
+      const orderKey = options.dispatchOrderKey?.(request.kind);
+      if (orderKey !== undefined && (typeof orderKey !== 'string' || !orderKey.trim()))
+        throw new TypeError('Node RPC dispatch order key is invalid.');
+      queue.push({ request, payload: payload.value, reserveBytes, ...(orderKey === undefined ? {} : { orderKey }) });
       queuedBytes += payload.bytes;
       accepted += 1;
       pump();
@@ -170,11 +173,18 @@ export function attachNodeRpcServer(options: NodeRpcServerOptions): NodeRpcServe
   }
 
   function nextDispatchable(): number {
-    return queue.findIndex(
-      (entry) =>
+    const blockedGroups = new Set<string>();
+    for (let index = 0; index < queue.length; index += 1) {
+      const entry = queue[index]!;
+      if (entry.orderKey !== undefined && blockedGroups.has(entry.orderKey)) continue;
+      if (
         entry.request.payloadBytes + inFlightBytes <= options.limits.maxInFlightBytes &&
-        entry.reserveBytes + responseBytes <= options.limits.maxReservedResponseBytes,
-    );
+        entry.reserveBytes + responseBytes <= options.limits.maxReservedResponseBytes
+      )
+        return index;
+      if (entry.orderKey !== undefined) blockedGroups.add(entry.orderKey);
+    }
+    return -1;
   }
 
   function pump(): void {

@@ -2,6 +2,12 @@ import { parentPort } from 'node:worker_threads';
 import { performance } from 'node:perf_hooks';
 import { DedicatedServerHost } from '../../server/dedicated/dedicated-server-host';
 import type { DedicatedPublication } from '../../server/dedicated/dedicated-host-types';
+import type { AuthorityBaselineCaptureRequest } from '../../server/authority/authority-baseline-capture-types';
+import {
+  authorityBaselineCaptureTransfer,
+  authorityCaptureDispatchOrderKey,
+  reserveAuthorityResponseBytes,
+} from '../runtime/node-authority-baseline-protocol';
 import { createNodeComputeExecutor, type NodeComputeExecutorEntryPoints } from '../compute/node-compute-executor';
 import { createNodePersistenceLaneProxy, type NodePersistenceLaneProxy } from '../persistence/persistence-lane-proxy';
 import { attachNodeRpcServer, type NodeRpcServer } from '../runtime/node-rpc-contract';
@@ -228,7 +234,9 @@ async function start(bootstrap: NodeAuthorityWorkerBootstrap): Promise<Authority
     limits: options.controlRpcLimits,
     validateRequest: validateAuthorityRequestPayload,
     validateResponse: validateAuthorityResponsePayload,
-    handle: async ({ kind, payload }) => {
+    reserveResponseBytes: (kind) => reserveAuthorityResponseBytes(kind, options.controlRpcLimits.maxResponseBytes),
+    dispatchOrderKey: authorityCaptureDispatchOrderKey,
+    handle: async ({ kind, payload, signal }) => {
       const request = object(payload, 'Authority RPC 请求');
       if (kind === 'authority-receive-input') return { payload: host.receiveInput(request.input as never) };
       if (kind === 'authority-perform-action') {
@@ -244,6 +252,12 @@ async function start(bootstrap: NodeAuthorityWorkerBootstrap): Promise<Authority
           throw new TypeError('Authority collision baseline 请求无效。');
         return { payload: host.runtime.readCollisionBaseline(request.key, request.minimumRevision as number) };
       }
+      if (kind === 'authority-capture-mesh-baseline' || kind === 'authority-capture-collision-baseline') {
+        const result = await host.captureBaseline(payload as AuthorityBaselineCaptureRequest, signal);
+        return { payload: result, transfer: authorityBaselineCaptureTransfer(result) };
+      }
+      if (kind === 'authority-cancel-baseline-capture')
+        return { payload: await host.cancelBaselineCapture(request.captureId as number) };
       if (kind === 'authority-set-interest-radius') {
         if (request.radius !== 1 && request.radius !== 2 && request.radius !== 3)
           throw new TypeError('Authority 半径无效。');

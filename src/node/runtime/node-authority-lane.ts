@@ -4,6 +4,11 @@ import type { AuthoritySnapshot } from '../../server/authority/authority-session
 import type { AuthorityTransactionReceipt } from '../../server/authority/authority-runtime-types';
 import type { DedicatedHostOptions, DedicatedPublication } from '../../server/dedicated/dedicated-host-types';
 import type { AuthorityCollisionBaselineResult } from '../../server/game-server-types';
+import type {
+  AuthorityBaselineCaptureRequest,
+  AuthorityBaselineCaptureResult,
+  AuthorityBaselineCaptureCancellation,
+} from '../../server/authority/authority-baseline-capture-types';
 import type { InputCommand, SequenceDecision } from '../../runtime/session-protocol';
 import type { NodeComputeExecutorEntryPoints } from '../compute/node-compute-executor';
 import type { NodeDedicatedComputeLimits, NodeDedicatedStopResult } from './node-dedicated-runtime-types';
@@ -66,6 +71,8 @@ export type NodeAuthorityLane = Readonly<{
   performAction(action: AuthorityAction, sequence: number): Promise<AuthorityTransactionReceipt<unknown>>;
   requestChunk(key: string): Promise<boolean>;
   readCollisionBaseline(key: string, minimumRevision: number): Promise<AuthorityCollisionBaselineResult>;
+  captureBaseline(request: AuthorityBaselineCaptureRequest): Promise<AuthorityBaselineCaptureResult>;
+  cancelBaselineCapture(captureId: number): Promise<AuthorityBaselineCaptureCancellation>;
   setInterestRadius(radius: 1 | 2 | 3): Promise<void>;
   requestCheckpoint(): Promise<unknown>;
   waitForIdle(): Promise<void>;
@@ -341,6 +348,38 @@ export async function createNodeAuthorityLane(options: NodeAuthorityLaneOptions)
     receiveInput: (input) => request('authority-receive-input', { input }),
     performAction: (action, sequence) => request('authority-perform-action', { action, sequence }),
     requestChunk: (key) => request('authority-request-chunk', { key }),
+    captureBaseline: async (capture) => {
+      const kind =
+        capture.purpose === 'mesh' ? 'authority-capture-mesh-baseline' : 'authority-capture-collision-baseline';
+      validateAuthorityRequestPayload(kind, capture);
+      const bound = {
+        captureId: capture.captureId,
+        purpose: capture.purpose,
+        key: capture.key,
+        minimumRevision: capture.minimumRevision,
+      };
+      const result = await request<AuthorityBaselineCaptureResult>(kind, bound);
+      if (result.captureId !== bound.captureId || result.purpose !== bound.purpose || result.key !== bound.key)
+        return collisionBaselineFailure('Authority capture response captureId/purpose/key does not match request.');
+      if (result.status === 'available') {
+        if (result.checkpoint.epoch !== options.epoch)
+          return collisionBaselineFailure('Authority capture checkpoint epoch does not match lane.');
+        if (result.entries[0]!.chunkRevision < bound.minimumRevision)
+          return collisionBaselineFailure('Authority capture response revision is older than requested.');
+        if (result.entries.some((entry) => entry.generatorVersion !== options.generatorVersion))
+          return collisionBaselineFailure('Authority capture generatorVersion does not match lane.');
+      }
+      // RPC transfers the Authority-owned copy; the façade must not duplicate all 27 blocks again.
+      return result;
+    },
+    cancelBaselineCapture: async (captureId) => {
+      const result = await request<AuthorityBaselineCaptureCancellation>('authority-cancel-baseline-capture', {
+        captureId,
+      });
+      if (result.captureId !== captureId)
+        return collisionBaselineFailure('Authority capture cancellation response captureId does not match request.');
+      return result;
+    },
     readCollisionBaseline: async (key, minimumRevision) => {
       const result = await request<AuthorityCollisionBaselineResult>('authority-read-collision-baseline', {
         key,

@@ -173,3 +173,9 @@ WebTransport 候选在 Firefox 153.0 完成可靠流与 datagram；Playwright We
 ## Gameplay v2 三候选验证检查点
 
 新代 9 条真实语料通过 C0/C1/C2、Chrome 双向各 9/9 和当前源码绑定的 decoded oracle 4/4；原型在独立 /tmp 目录，旧代保持冻结。真实角色行为为 idle，其余枚举与浮点负零单列 synthetic。见 [v2 codec 记录](network-gameplay-codec-progress.md)。07caff1 已推送，当前整个 change 仍 Active，尚无正式性能或网络采用结论。
+
+## 2026-09-07 完整基线采集与兴趣控制检查点
+
+本批完成 Authority 内 27 块/单块 owned capture、共享 admission/retention、取消和停止结算、Node transfer/回复绑定及兴趣控制参考 DTO。整合修复了不同回复预算导致 captureId 派发倒序的问题。详细 RED/GREEN、独立评审、实际 DTO 字节和未采集边界集中在 [本批记录](network-baseline-capture-progress.md)，统一静态/构建结果见 [恢复入口](validation-summary.md)。
+
+长期 docs baseline 只更新代码地图中的真实内部采集入口和边界；没有把参考 DTO、WS 探针或内部 RPC 写成远端可玩能力。当前功能分支作为恢复检查点继续推送；整个 change 尚未 Delivered。

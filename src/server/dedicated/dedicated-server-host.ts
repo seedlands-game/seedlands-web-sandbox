@@ -2,8 +2,12 @@ import { dedicatedActiveWindow, DedicatedActiveWindowController } from './dedica
 import type { InputCommand, SequenceDecision } from '../../runtime/session-protocol';
 import { BoundedCostSamples } from '../../runtime/bounded-cost-samples';
 import type { AuthorityAction } from '../../worker/authority-worker-protocol';
-import { CHUNK_SIZE, chunkKey } from '../../world/voxel';
 import { AuthorityRuntime } from '../authority/authority-runtime';
+import type {
+  AuthorityBaselineCaptureCancellation,
+  AuthorityBaselineCaptureRequest,
+  AuthorityBaselineCaptureResult,
+} from '../authority/authority-baseline-capture-types';
 import type { AuthoritySnapshot } from '../authority/authority-session';
 import type {
   DedicatedComputeExecutor,
@@ -14,6 +18,11 @@ import type { FluidAuthoritySnapshot } from '../fluid/fluid-transaction';
 import type { LogicObservation } from '../logic/logic-protocol';
 import { DedicatedComputeScheduler, type DedicatedComputeWork } from '../compute/dedicated-compute-scheduler';
 import { dedicatedComputePolicy } from './dedicated-compute-policy';
+import {
+  createDedicatedBaselineCaptureCoordinator,
+  DedicatedBaselineCaptureCoordinator,
+} from './dedicated-baseline-capture';
+import { acceptDedicatedCanonicalResult, DedicatedChunkRequestCoordinator } from './dedicated-chunk-requests';
 import {
   dedicatedLimits,
   estimateComputeBytes,
@@ -35,7 +44,8 @@ export class DedicatedServerHost {
   private mailboxBytes = 0;
   private readonly work = new Set<Promise<void>>();
   private readonly progressWaiters = new Set<() => void>();
-  private readonly chunks = new Map<string, Promise<boolean>>();
+  private readonly chunkRequests: DedicatedChunkRequestCoordinator;
+  private readonly baselineCaptures: DedicatedBaselineCaptureCoordinator;
   private readonly listeners = new Set<(publication: DedicatedPublication) => void>();
   private readonly tickCosts = new BoundedCostSamples();
   private readonly candidateCosts = new BoundedCostSamples();
@@ -64,16 +74,30 @@ export class DedicatedServerHost {
     private readonly options: DedicatedHostOptions,
   ) {
     this.runtime = runtime;
+    this.limits = dedicatedLimits(options.limits);
+    this.chunkRequests = new DedicatedChunkRequestCoordinator({
+      server: runtime.server,
+      state: () => this.currentState,
+      pendingLimit: this.limits.pendingChunks,
+      generate: (request, finish) => this.generateCanonical(request, finish),
+      onPreparationFailure: (error) => this.recordJobFailure(error),
+      notifyProgress: () => this.notifyProgress(),
+    });
+    this.baselineCaptures = createDedicatedBaselineCaptureCoordinator({
+      runtime,
+      isRunning: () => this.currentState === 'running',
+      reserve: (keys) => this.chunkRequests.reserve(keys),
+      requestChunk: (key, lease) => this.chunkRequests.requestReserved(key, false, lease),
+    });
     this.activity = new DedicatedActiveWindowController(
       {
         isRunning: () => this.currentState === 'running',
-        isAvailable: (key) => runtime.readCollisionBaseline(key, 0).status === 'available',
+        isAvailable: (key) => runtime.server.hasLoadedCanonicalChunk(key),
         requestChunk: (key) => this.requestChunk(key),
         setFluidActiveChunks: (keys) => runtime.setFluidActiveChunks(keys),
       },
       options.activeRadius ?? 2,
     );
-    this.limits = dedicatedLimits(options.limits);
     this.scheduler = new DedicatedComputeScheduler({
       epoch: options.epoch,
       executors: options.executors,
@@ -223,72 +247,38 @@ export class DedicatedServerHost {
   }
 
   requestChunk(key: string, internal = false): Promise<boolean> {
-    const existing = this.chunks.get(key);
-    if (existing) return existing;
-    const coordinates = key.split(',').map(Number);
-    if (
-      (this.currentState !== 'running' && !(internal && this.currentState === 'draining')) ||
-      coordinates.length !== 3 ||
-      !coordinates.every(Number.isSafeInteger) ||
-      chunkKey(coordinates[0], coordinates[1], coordinates[2]) !== key ||
-      this.chunks.size >= this.limits.pendingChunks
-    )
-      return Promise.resolve(false);
-    const [cx, cy, cz] = coordinates;
-    let resolve!: (accepted: boolean) => void;
-    const completion = new Promise<boolean>((accept) => {
-      resolve = accept;
-    });
-    this.chunks.set(key, completion);
-    const finish = (accepted: boolean) => {
-      this.chunks.delete(key);
-      resolve(accepted);
-    };
+    return this.chunkRequests.request(key, internal);
+  }
+
+  captureBaseline(
+    request: AuthorityBaselineCaptureRequest,
+    signal?: AbortSignal,
+  ): Promise<AuthorityBaselineCaptureResult> {
+    return this.baselineCaptures.capture(request, signal);
+  }
+
+  cancelBaselineCapture(captureId: number): Promise<AuthorityBaselineCaptureCancellation> {
+    return this.baselineCaptures.cancel(captureId);
+  }
+
+  private generateCanonical(
+    request: Readonly<{ key: string; cx: number; cy: number; cz: number }>,
+    finish: (accepted: boolean) => void,
+  ): void {
     const executor = this.options.executors.general;
-    const preparation = this.runtime.server
-      .prepareCanonicalChunkForMutation(cx, cy, cz)
-      .then((available) => {
-        if (available) {
-          finish(true);
-          return;
-        }
-        this.dispatch(
-          {
-            ...this.identity(executor),
-            kind: 'generate-canonical',
-            seed: this.runtime.server.seed,
-            generatorVersion: this.runtime.server.generatorVersion,
-            key,
-            cx,
-            cy,
-            cz,
-          },
-          (result) => {
-            if (
-              result.kind !== 'canonical-result' ||
-              result.key !== key ||
-              result.cx !== cx ||
-              result.cy !== cy ||
-              result.cz !== cz ||
-              result.voxels.byteLength !== CHUNK_SIZE ** 3 * 2
-            )
-              throw new Error('Dedicated canonical candidate does not match its request.');
-            finish(this.runtime.acceptGeneratedChunk({ ...result, canonical: new Uint16Array(result.voxels) }));
-          },
-          () => finish(false),
-        );
-      })
-      .catch((error: unknown) => {
-        this.failedJobs += 1;
-        this.failureMessage = error instanceof Error ? error.message : String(error);
+    this.dispatch(
+      {
+        ...this.identity(executor),
+        kind: 'generate-canonical',
+        seed: this.runtime.server.seed,
+        generatorVersion: this.runtime.server.generatorVersion,
+        ...request,
+      },
+      (result) => finish(acceptDedicatedCanonicalResult(this.runtime, request, result)),
+      () => {
         finish(false);
-      })
-      .finally(() => {
-        this.work.delete(preparation);
-        this.notifyProgress();
-      });
-    this.work.add(preparation);
-    return completion;
+      },
+    );
   }
 
   /** 受控测试/关停使用；正常运行由 wake 收回结果，不等待后台任务阻塞 tick。 */
@@ -327,7 +317,8 @@ export class DedicatedServerHost {
       mailboxBytes: this.mailboxBytes,
       pendingCompute: this.work.size,
       computeScheduler: this.scheduler.diagnostics(),
-      pendingChunks: this.chunks.size,
+      ...this.chunkRequests.diagnostics(),
+      ...this.baselineCaptures.diagnostics(),
       ...this.activity.diagnostics(),
       pendingActions: this.pendingActions,
       acceptedJobs: this.acceptedJobs,
@@ -392,8 +383,7 @@ export class DedicatedServerHost {
   private dispatch(task: DedicatedComputeWork, accept: (result: DedicatedComputeResult) => void, reject: () => void) {
     const generation = this.lifecycleGeneration;
     const failed = (error: unknown) => {
-      this.failedJobs += 1;
-      this.failureMessage = error instanceof Error ? error.message : String(error);
+      this.recordJobFailure(error);
       reject();
     };
     const pending = Promise.resolve()
@@ -435,6 +425,11 @@ export class DedicatedServerHost {
         this.notifyProgress();
       });
     this.work.add(pending);
+  }
+
+  private recordJobFailure(error: unknown): void {
+    this.failedJobs += 1;
+    this.failureMessage = error instanceof Error ? error.message : String(error);
   }
 
   private flushMailbox() {
@@ -483,7 +478,12 @@ export class DedicatedServerHost {
       });
       this.progressWaiters.add(wake);
       this.flushMailbox();
-      if ((!includeActions || !this.pendingActions) && !this.work.size && !this.mailbox.length) {
+      if (
+        (!includeActions || !this.pendingActions) &&
+        !this.work.size &&
+        !this.mailbox.length &&
+        !this.chunkRequests.diagnostics().pendingChunks
+      ) {
         this.progressWaiters.delete(wake);
         return;
       }
@@ -494,9 +494,11 @@ export class DedicatedServerHost {
   private async drain() {
     const wasFailed = this.currentState === 'failed';
     this.currentState = 'draining';
+    this.baselineCaptures.beginClose();
     this.clearInput();
     try {
       await this.drainAcceptedWork();
+      await this.baselineCaptures.whenIdle();
       await this.scheduler.drain();
       this.runtime.pause(this.options.now());
       this.currentSnapshot = this.runtime.snapshot();

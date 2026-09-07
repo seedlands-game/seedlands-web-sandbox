@@ -98,6 +98,8 @@ flowchart TD
 
 Node 产品接线为 [命令行入口](../src/node/server/node-server.ts) → [产品生命周期](../src/node/server/node-server-runtime.ts) → [Authority lane](../src/node/runtime/node-authority-lane.ts) → 独立 Worker 内的 [常驻宿主](../src/server/dedicated/dedicated-server-host.ts) → 同一 AuthorityRuntime。主上下文仅持异步 façade；默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。Persistence Worker 独占文件锁，Authority 通过有界 RPC 和同步缓存 proxy 读写冻结检查点；计算候选经有界 scheduler/mailbox 校验提交。关停依次等待权威排空和最终 durable ACK、存储释放锁、Worker 退出。
 
+内部基线采集从 Authority lane 的 `captureBaseline()` 进入 [采集协调器](../src/server/dedicated/dedicated-baseline-capture.ts)，在 Authority 内预留生成容量、保留完整邻域并复制，再经 [基线 RPC 门禁](../src/node/runtime/node-authority-baseline-protocol.ts) 转移 buffer。mesh 固定为主块及 26 邻接块，collision-resync 为单块；这条内部链路尚未连接公开网络或浏览器 interest。
+
 [build-node-server.mjs](../scripts/build-node-server.mjs) 将 CLI、Authority、Persistence、compute Worker 和 compute child 打成五个独立 ESM 入口；无需 Vite 或源码运行。旧 [node-dedicated-runtime.ts](../src/node/runtime/node-dedicated-runtime.ts) 保留为进程内组合参考，不是 CLI 产品入口。网络、GUI 和完整性能准出继续按 [当前实施记录](../changes/2026-09-06-node-dedicated-server/execution.md)推进；离线宿主可运行不代表已经可远端游玩。
 
 最容易混淆的几个名称：
@@ -143,4 +145,4 @@ Node 产品接线为 [命令行入口](../src/node/server/node-server.ts) → [�
 - 当前可玩 MVP 的意图和交付记录：[可玩世界 MVP](../changes/2026-09-05-playable-world-mvp/spec.md)。
 - 独立循环与统一物理：[原始合同](../changes/2026-09-06-independent-loops-unified-physics/spec.md)与[执行记录](../changes/2026-09-06-independent-loops-unified-physics/execution.md)配合阅读；不要只用合同早期状态判断当前完成度。
 - 早期拆分的背景：[应用模块边界](../changes/2026-09-04-app-module-boundaries/spec.md)。其中历史路径不保证与当前一致。
-- 下一阶段的目标与决策：[长期对齐](living-world-alignment.md)。Node Dedicated、AgentServer 和插件体系是演进路线，不能当作当前已存在的源码模块。
+- 下一阶段的目标与决策：[长期对齐](living-world-alignment.md)。Node Dedicated 已有上述内部宿主；远端可玩会话、AgentServer 和插件体系仍按路线与具体 change 推进，不能当作当前已完成的产品能力。

@@ -155,6 +155,8 @@ export type NodeRpcServerOptions = Readonly<{
   validateRequest: NodeRpcPayloadValidator;
   validateResponse: NodeRpcPayloadValidator;
   reserveResponseBytes?: (kind: string, payloadBytes: number) => number;
+  /** 同组请求不能越过仍在队列中的前项；已派发请求可并发完成。 */
+  dispatchOrderKey?: (kind: string) => string | undefined;
   handle(request: NodeRpcHandlerRequest): Promise<NodeRpcHandlerResult> | NodeRpcHandlerResult;
 }>;
 

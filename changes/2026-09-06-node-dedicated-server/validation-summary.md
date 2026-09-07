@@ -1,18 +1,25 @@
 # Node Dedicated Server 当前状态与阶段证据
 
-## 恢复入口：2026-09-07 网络准备阶段
+## 恢复入口：2026-09-07 完整基线采集检查点
 
-整个 change 仍 **Active**。本页随当前功能分支源码提交；上一已推送检查点为 `6de696b`。本批完整静态 **182 文件/984 项通过**（另 2 文件/4 项跳过），world 行覆盖 96.37%；浏览器构建和 Node 五入口构建通过。以下较早的计数及“尚未 push”等表述仅属于对应历史阶段。
+整个 change 仍 **Active**。本页随当前功能分支源码提交；上一已推送检查点为 `c4e2f16`。本批完整静态 **189 文件/1030 项通过**（另 2 文件/4 项跳过），world 行覆盖 96.37%；浏览器与 Node 五入口构建通过。以下较早计数及“尚未 push”等表述仅属于各自历史阶段。
 
-| 门禁                 | 当前事实与仍需完成                                                                                                                                                                                                                                 | 详细证据                                                                                                                                                        |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| N0 公共语义          | 输入、动作、correction、单块、Gameplay v2 已有参考证据；本批补齐 Welcome 当前 body/camp/启动事实、WorldCommit 邻接 mesh/流体优先级/bounds/有效写入数。真实客户端适配、interest/bundle/cancel、共享保留、完整邻域采集及大提交分帧/resync 仍未完成。 | [Welcome](network-bootstrap-presentation-progress.md)、[WorldCommit](world-commit-presentation-progress.md)、[interest 计划](network-interest-baseline-plan.md) |
-| N1 能力              | Chrome/Firefox 与现代 Go 候选的 loopback 可靠流/datagram 通过；Playwright WebKit 会话通过但数据路径失败。Linux x64 仅交叉构建，真实 x64/公开证书/移动端/WAN 未采集。                                                                               | [Chrome 探针](network-webtransport-loopback-progress.md)、[矩阵](network-webtransport-browser-matrix-progress.md)                                               |
-| N2 编解码            | 三候选通过已采集参考强等价；本批 32/128 actor 各 3 条、Welcome 3 条与 commit 2 条均通过 Node 22/Chrome 双向。正式阶段成本、分配/GC、频率/负载与代表性场景未采样；C0 大 metadata 和超过 512 项 commit 的表示限制保留。                              | [密度](network-density-codec-progress.md)、[呈现编解码](network-presentation-codec-evidence.json)、[Gameplay v2](network-gameplay-codec-progress.md)            |
-| N3/N4 网络选择与采用 | 正式对照未完成，wire 和最终传输未采用；不能从功能探针默认选择 JSON/WSS 或 QUIC。                                                                                                                                                                   | [冻结选型合同](network-selection.md)                                                                                                                            |
-| 产品与性能           | 常驻 Node 权威、持久化 lane 和线程/进程执行器已运行；远端可玩客户端/双模式 GUI、目标远端/CI、迁移加 feature 收益与计算上移不退化 A/B 仍待完成。                                                                                                    | [合同剩余状态](#合同剩余状态)、[滚动估算](stage-estimate.md)                                                                                                    |
+| 门禁                 | 当前事实与仍需完成                                                                                                                                                                                                                      | 详细证据                                                                                                                |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| N0 公共语义          | 已有输入/动作/correction/Gameplay/Welcome/WorldCommit 参考；新增兴趣控制纯 DTO，以及真实 Node Authority 内完整 27 块/单块采集、共享生成预算、取消/stop 和 owned transfer。公开 interest 会话、分页/安装门与大提交分帧/resync 仍未完成。 | [本批采集](network-baseline-capture-progress.md)、[兴趣计划](network-interest-baseline-plan.md)                         |
+| N1 能力              | 普通 WS loopback 的单连接及双连接回显在 Chrome/Firefox/Playwright WebKit 通过；现代 Go WebTransport 在 Chrome/Firefox 的可靠流/datagram 通过，WebKit 数据路径失败。WSS 可信证书、真实 x64/移动端/IPv6/WAN 未采集。                      | [WS 探针](network-websocket-loopback-progress.md)、[WebTransport 矩阵](network-webtransport-browser-matrix-progress.md) |
+| N2 编解码            | 此前已采集的参考包通过三候选强等价与 Node/Chrome 双向；本批内部 capture 不冒充公开 codec/page 证据。正式阶段成本、分配/GC、代表性负载未采样；C0 大 metadata 和超过 512 项 commit 的表示限制保留。                                       | [密度](network-density-codec-progress.md)、[呈现编解码](network-presentation-codec-evidence.json)                       |
+| N3/N4 网络选择与采用 | 正式对照未完成，wire 和最终传输未采用；功能探针不能默认选择 JSON/WSS 或 QUIC。                                                                                                                                                          | [冻结选型合同](network-selection.md)                                                                                    |
+| 产品与性能           | 常驻 Node 权威、持久化 lane 和线程/进程执行器已运行；远端可玩客户端/双模式 GUI、目标远端/CI、迁移加 feature 收益与计算上移不退化 A/B 仍待完成。                                                                                         | [剩余合同](#合同剩余状态)、[滚动估算](stage-estimate.md)                                                                |
 
-## 本批验证：呈现字段与来源锚点
+## 本批统一验证
+
+- `pnpm verify:static` 一次完整通过：Prettier、ESLint、路径规范、V8 coverage、Svelte 和生产/测试 TypeScript。新增共享生成/取消/预算、异步请求副本、真实 Worker 错误回复和 RPC 派发顺序回归均在本批内。
+- `pnpm build` 通过，保留已有 500 kB bundle 提示；随后官方 Node 22 执行 `scripts/build-node-server.mjs` 生成 5 个 ESM 入口。产物记录 `sourceSha=c4e2f16`、`sourceDirty=true`，source inputs SHA-256 为 `1c02da36f90682d94be3e63c5aaae71ce07d5e14503ce4f4c73c893a97e811ab`；不冒称构建了未来的提交 SHA。
+- 共享 Host 核心和 Node 接线均经独立 Terra 审阅；没有发现新增 P1/P2 阻断。真实控制端口在 capture 执行中断开的组合故障注入仍未单独采集，普通 stop 和机制测试不能替代。
+- 本批没有执行正式 benchmark，没有远端写入、部署或网络采用。常规浏览器回归使用独立端口 4197、CI 模式禁止复用其他工作树的开发服务，Chromium 8/8 通过；它不代表远端 GUI 或 WAN 已验收。
+
+## 上一批验证：呈现字段与来源锚点
 
 - `pnpm verify:static` 最终通过：Prettier、ESLint、路径规范、V8 coverage、Svelte 和两份 TypeScript 检查。先前一次运行的 983 项单元通过，但类型检查失败；修复可空闭包、字面量推断和测试故意构造非法值的类型后，再完整执行至上述 984 项通过。
 - `pnpm build` 通过；现有 500 kB bundle 提示保留。完整类型检查后使用官方 Node 22 执行 `scripts/build-node-server.mjs`，生成 5 个 ESM 入口；产物记录基线 `6de696b` 与未提交源码状态，不伪称已在未来提交 SHA 构建。
