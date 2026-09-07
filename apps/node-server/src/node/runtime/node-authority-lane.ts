@@ -274,7 +274,10 @@ export async function createNodeAuthorityLane(options: NodeAuthorityLaneOptions)
         stopped = raw.result;
         if (!failure) currentState = 'stopped';
       } else if (raw.type === 'fatal') {
-        const failureError = new Error(raw.error);
+        const failureError =
+          raw.error === 'Authority control port closed.' || raw.error === 'Authority control port failed.'
+            ? new NodeRpcClosedError(raw.error)
+            : new Error(raw.error);
         rpc.close(failureError);
         markFailed(failureError);
       } else if (raw.type === 'cleanup-complete') {
