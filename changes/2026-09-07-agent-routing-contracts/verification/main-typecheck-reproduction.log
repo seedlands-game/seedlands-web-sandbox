@@ -1,0 +1,8 @@
+changes/2026-09-07-data-plane-adoption/e2e/copy-cases.ts(1,1): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/copy-cases.ts(6,3): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/copy-cases.ts(8,1): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/data-plane-worker.ts(3,1): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/data-plane-worker.ts(9,3): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/workload-worker.ts(10,3): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/workload-worker.ts(12,1): error TS2578: Unused '@ts-expect-error' directive.
+changes/2026-09-07-data-plane-adoption/e2e/workload-worker.ts(22,1): error TS2578: Unused '@ts-expect-error' directive.

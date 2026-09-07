@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "id": "global-runtime",
+  "initiatedBy": "agent",
+  "role": "全局skill及runtime实施负责人",
+  "workType": "implementation",
+  "goal": "端到端实现并验证可移植skill、交接校验器、批处理异步runtime；仅写指定交付源，不安装全局",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/spec.md",
+      "purpose": "批准范围、规则和验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/skill",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/global-progress.md"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/.system/skill-creator"
+    ],
+    "nonGoals": [
+      "不写真实线上服务",
+      "不执行WASM到Node合并",
+      "不创建自动任务或购买额度"
+    ]
+  },
+  "outputs": [
+    "完整skill源",
+    "全局AGENTS注入片段",
+    "原生测试与真实RED/GREEN记录"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "contract",
+      "check": "固定合同校验/渲染、父子权限范围预算与hash拒绝用例通过",
+      "evidence": "node --test"
+    },
+    {
+      "id": "runtime",
+      "check": "本地HTTP批量100项、失败重试/续跑/幂等/读回/取消/审计保护通过",
+      "evidence": "node --test与local fixture"
+    },
+    {
+      "id": "skill",
+      "check": "skill-creator quick_validate与脚本帮助可运行",
+      "evidence": "校验输出"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 2,
+    "maxAgentHours": 6
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/contracts/routing-root.json",
+    "sha256": "686d661f40e78b63c604055e80dcfa4a2b61ccf53e8bbcf02d8bc293b9040e8c"
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围/公开接口/授权变化",
+    "两次同因失败",
+    "预计超过预算"
+  ],
+  "reportFields": [
+    "完成状态",
+    "改动文件",
+    "验证结果",
+    "限制",
+    "下一步"
+  ]
+}

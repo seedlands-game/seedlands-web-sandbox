@@ -1,0 +1,4 @@
+用法:
+  batch-runtime.mjs prepare --config <json> --input <json> --run-dir <dir>
+  batch-runtime.mjs run|start|status|stop|audit --run-dir <dir>
+  batch-runtime.mjs wait --run-dir <dir> [--timeout-ms <n>]

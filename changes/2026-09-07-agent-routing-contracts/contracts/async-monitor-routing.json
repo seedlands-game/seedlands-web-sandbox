@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "id": "async-monitor-routing",
+  "initiatedBy": "agent",
+  "role": "异步监控路由文档维护者",
+  "workType": "implementation",
+  "goal": "按新spec补齐长异步监控归属与终态回报规则，复用现有工具，不实现新调度器",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-08-async-monitor-routing/spec.md",
+      "purpose": "本次范围与准出"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/skill/agent-work-routing/SKILL.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/skill/agent-work-routing/references/async-monitoring.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/skill/agent-work-routing/references/script-first.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/skill/agent-work-routing/references/global-agents-snippet.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/skill/agent-work-routing/references/learning-samples.md",
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/docs/collaboration-routing.md"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/.system/skill-creator"
+    ],
+    "nonGoals": [
+      "不写真实线上服务",
+      "不执行WASM到Node合并",
+      "不创建自动任务或购买额度"
+    ]
+  },
+  "outputs": [
+    "按需披露的异步监控规范和简短指针"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high",
+    "routeReason": "规则已澄清的简单文档维护与定向检查，不涉及开发"
+  },
+  "acceptance": [
+    {
+      "id": "monitor",
+      "check": "CI长等待、失败、HEAD变化/截止三类场景闭环；主任务交接后退出轮询；pending静默，终态停用",
+      "evidence": "文档场景核对与定向Prettier"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 2,
+    "maxAgentHours": 0.4
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/contracts/routing-root.json",
+    "sha256": "686d661f40e78b63c604055e80dcfa4a2b61ccf53e8bbcf02d8bc293b9040e8c"
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围/公开接口/授权变化",
+    "两次同因失败",
+    "预计超过预算"
+  ],
+  "reportFields": [
+    "完成状态",
+    "改动文件",
+    "验证结果",
+    "限制",
+    "下一步"
+  ]
+}

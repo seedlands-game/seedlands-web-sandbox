@@ -1,0 +1,46 @@
+{
+  "applied": true,
+  "source": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/skill/agent-work-routing/",
+  "target": "/Users/chlorinec/.codex/skills/agent-work-routing",
+  "agentsPath": "/Users/chlorinec/.codex/AGENTS.md",
+  "backupDir": "/Users/chlorinec/.codex/backups/agent-work-routing/2026-09-07T15-54-22.152Z-e1cdbd7e",
+  "restoreCommand": "node \"/Users/chlorinec/.codex/skills/agent-work-routing/scripts/install-global.mjs\" --restore \"/Users/chlorinec/.codex/backups/agent-work-routing/2026-09-07T15-54-22.152Z-e1cdbd7e\"",
+  "files": 20,
+  "sourceMatchesInstalled": true,
+  "previousInstallations": [
+    {
+      "installed": true,
+      "files": 19,
+      "sourceMatchesInstalled": true,
+      "globalAgentsSha256": "c07d8e31705a7def0c131f5d16194ae9d393d4d2d291872ddccdab37f3179970",
+      "backupDir": "/Users/chlorinec/.codex/backups/agent-work-routing/2026-09-07T15-44-34.315Z-e272203d",
+      "otherMachines": "NOT_INSTALLED_BY_THIS_TASK"
+    },
+    {
+      "backupDir": "/Users/chlorinec/.codex/backups/agent-work-routing/2026-09-07T15-46-36.633Z-22d45879"
+    }
+  ],
+  "sourceFilesSha256": {
+    "SKILL.md": "716968c2d1d9e45e75df6a017f02aaa31ba8fa3db9e6855ec214e2db56652998",
+    "agents/openai.yaml": "53329301f5c299ed38454b7ef8b2cd3b104d0b44557c13c9d2d3cab231c46766",
+    "references/batch-runtime.md": "f1ce20241d054c2bf5b7ba3ea545d1f371c79beeb42bddbfcd07ac382797cef1",
+    "references/global-agents-snippet.md": "c523251306f210ffaa43c186500c5af974016a449414e78d54406990e2c0e9de",
+    "references/handoff.md": "ec90d115aba0e5b5c3fc4170acf5996196392992ec8374550b8da3f8701de0f4",
+    "references/learning-samples.md": "91bebaaea9106b276b2a332c96346de6a0fcab68912176b3eab8461b142f9e4a",
+    "references/routing.md": "ba5f5bb273593abe6fc8ba93287d6e796a2719635a5e4716f08d286115520a37",
+    "references/script-first.md": "acb26d0a10cef38e983293ce76c95a98e858db0eb5e5e76ecdae9b557a61ec9a",
+    "scripts/batch-runtime.mjs": "71331397d36f8fbdb8933b7faad1b665153dd15ef6bd6261a3b78d3a07ae64a8",
+    "scripts/install-global.mjs": "b714a27372e40f4198b97731d548a9b028ccb76ce9b7c48a8bc92b591daf303f",
+    "scripts/lib/batch-runtime.mjs": "943ba52f93846a756ceba83b3daa9c3fd52dc506ab5bd75d52b7014b5313bb0b",
+    "scripts/lib/contract.mjs": "a9a3775e7f84510ac654189cdf470464a39a72a080d7365b787d33566abfd45c",
+    "scripts/lib/install-global.mjs": "3f7ef1377e05cb4c3e00c9a1ba89c083c2e1fb9db0fb15b4b18b4f306ec36327",
+    "scripts/lib/safe-cli.mjs": "2a13e77c6168ff797698e83243e6bcb860349626e61169bc36cad429f21856d4",
+    "scripts/render-handoff.mjs": "750fdf15eca770f53403072280706330791a3dba99842d78d17976e372eb13ff",
+    "scripts/validate-contract.mjs": "a5c660769856ada577ad85096438cd05176b8fd989a119025e1b9581a024e6d1",
+    "tests/contract.test.mjs": "a6db5cc350a779615470dd28c22ff4d38bb40d9728c1afe080cb9197f3928edc",
+    "tests/install.test.mjs": "a7cac4c1922702dfbe991198e6c6d4cdf2bb8c759984ea089b8902d85ca48c93",
+    "tests/runtime.test.mjs": "429a35a2f68841a8e343152fc095fcaed33725da0a12f8f88f9df756cb5ee041",
+    "tests/support/http-adapter.mjs": "e2b1c0444c99342571b5b8b74540f2b380e48720c90922f3a252f47ea7094aff"
+  },
+  "otherMachines": "NOT_INSTALLED_BY_THIS_TASK"
+}

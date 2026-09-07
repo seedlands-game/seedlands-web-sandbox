@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "id": "rehearsal-bulk-write-preparation",
+  "initiatedBy": "human",
+  "role": "批处理写入准备",
+  "workType": "deterministic-script",
+  "goal": "为一百条已整理行生成本地批处理准备、读回校验计划和审计边界；未给目标账号/adapter 前不执行外部写入。",
+  "context": [{"path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/verification/behavior-samples", "purpose": "隔离样例输入与验证记录"}],
+  "scope": {"writePaths": ["/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/verification/behavior-samples"], "readPaths": ["/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/verification"], "nonGoals": ["不连接线上表格", "不写入真实账号", "不记录行 payload 或凭据"]},
+  "outputs": ["已校验的本地 batch runtime 配置和可审计交接"],
+  "execution": {"form": "script", "model": null, "effort": null},
+  "acceptance": [{"id": "prepare", "check": "稳定 item id、幂等键、有限并发、write/read/verify 与对账边界完整", "evidence": "本地 fixture 和审计"}],
+  "budget": {"maxAttempts": 2, "maxAgentHours": 1},
+  "permissions": {"localWrite": true, "externalWrite": false, "delegate": false},
+  "parent": null,
+  "resources": {"exclusiveGroup": null},
+  "escalation": ["目标表/账号授权或 adapter 未提供", "写入结果不明需要人工对账"],
+  "reportFields": ["完成状态", "改动文件", "验证结果", "限制", "下一步"]
+}

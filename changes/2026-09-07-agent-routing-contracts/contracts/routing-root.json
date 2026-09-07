@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "id": "routing-root",
+  "initiatedBy": "human",
+  "role": "统筹与分层契约验收",
+  "workType": "design",
+  "goal": "安装跨项目路由skill、交接校验与批处理runtime，并交付项目阻塞性能窗口策略",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/spec.md",
+      "purpose": "批准范围、规则和验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/Users/chlorinec/.codex/AGENTS.md"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/.system/skill-creator"
+    ],
+    "nonGoals": [
+      "不写真实线上服务",
+      "不执行WASM到Node合并",
+      "不创建自动任务或购买额度"
+    ]
+  },
+  "outputs": [
+    "已安装skill与全局指针",
+    "项目规则与资源脚本",
+    "验证记录与可恢复提交"
+  ],
+  "execution": {
+    "form": "current-task",
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "global",
+      "check": "合同拒绝非法派发、批处理恢复安全、skill校验与独立演练通过",
+      "evidence": "原生测试与交付记录"
+    },
+    {
+      "id": "project",
+      "check": "资源阻塞调度与清理通过，定向静态及构建",
+      "evidence": "测试与构建记录"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 2,
+    "maxAgentHours": 12
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": true
+  },
+  "parent": null,
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围/公开接口/授权变化",
+    "两次同因失败",
+    "预计超过预算"
+  ],
+  "reportFields": [
+    "完成状态",
+    "改动文件",
+    "验证结果",
+    "限制",
+    "下一步"
+  ]
+}

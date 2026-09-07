@@ -1,0 +1,30 @@
+固定合同：/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/contracts/routing-verification.json
+
+SHA-256：7af2e949ddfd458a8865d272021bf683f49aee9bd7568e5117a23d68660c838e
+
+角色：独立验收与行为演练
+
+目标：独立验收路由skill、批处理runtime和项目窗口，形成可追溯缺陷或通过结论
+
+执行：subagent；gpt-5.6-terra/high
+
+权限：localWrite=true，externalWrite=false，delegate=false
+
+写入范围：
+- /Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/verification
+
+非目标：
+- 不修改被验收源码
+- 不连接线上服务
+- 不启动benchmark或其他agent
+
+准出：
+- [independent] 按skill完成真实样本合同生成并验证；原生测试/反例/CLI/安装dry-run/窗口清理核对（验证记录、日志和失败复现）
+- [project] 受影响静态检查与构建，证据类型分开（定向检查及构建日志）
+
+升级条件：
+- 范围/公开接口/授权变化
+- 两次同因失败
+- 预计超过预算
+
+先读取并执行完整合同。不得扩大范围或权限；完成后按 reportFields 回报。

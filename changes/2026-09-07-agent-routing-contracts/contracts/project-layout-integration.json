@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "id": "project-layout-integration",
+  "initiatedBy": "agent",
+  "role": "仓库命名规则集成负责人",
+  "workType": "implementation",
+  "goal": "为本次契约目录和可安装skill补充精确的命名规则，使现有提交门禁通过，保留原有约束",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/spec.md",
+      "purpose": "批准范围、规则和验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/.ls-lint.yml"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/.system/skill-creator"
+    ],
+    "nonGoals": [
+      "不写真实线上服务",
+      "不执行WASM到Node合并",
+      "不创建自动任务或购买额度"
+    ]
+  },
+  "outputs": [
+    "精确路径的ls-lint规则"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "layout",
+      "check": "ls-lint通过；新增目录保持kebab-case，仅skill入口允许标准SKILL.md，不使用整目录ignore或禁用hook",
+      "evidence": "现有ls-lint命令输出"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 2,
+    "maxAgentHours": 0.3
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/agent-routing-20260907/voxel-sandbox-foundation/changes/2026-09-07-agent-routing-contracts/contracts/routing-root.json",
+    "sha256": "686d661f40e78b63c604055e80dcfa4a2b61ccf53e8bbcf02d8bc293b9040e8c"
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围/公开接口/授权变化",
+    "两次同因失败",
+    "预计超过预算"
+  ],
+  "reportFields": [
+    "完成状态",
+    "改动文件",
+    "验证结果",
+    "限制",
+    "下一步"
+  ]
+}

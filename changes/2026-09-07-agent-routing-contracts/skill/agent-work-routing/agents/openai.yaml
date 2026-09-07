@@ -1,0 +1,4 @@
+interface:
+  display_name: 'Agent 工作路由'
+  short_description: '校验派发合同并选择脚本、批处理或合适模型'
+  default_prompt: '请按固定合同路由并验证这项 agent 工作。'
