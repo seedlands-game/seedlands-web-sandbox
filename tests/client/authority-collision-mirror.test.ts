@@ -6,7 +6,7 @@ import {
   publishAuthorityCollisionCommits,
   type AuthorityCollisionCachedChunk,
   type AuthorityCollisionCommit,
-} from '../../src/client/authority-collision-mirror';
+} from '../../src/client/authority/authority-collision-mirror';
 import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
 
 const chunk = (revision: number): AuthorityCollisionCachedChunk => ({

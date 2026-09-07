@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/browser-chunk-persistence';
+import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import { AuthorityRuntime, type AuthorityInitialWorldBootstrap } from '../server/authority/authority-runtime';
 import { PROTOCOL_VERSION } from '../runtime/session-protocol';
 import type { AuthorityRequest, AuthorityResponse } from './authority-worker-protocol';

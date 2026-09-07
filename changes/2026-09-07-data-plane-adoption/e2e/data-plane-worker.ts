@@ -1,10 +1,12 @@
 import { createCollisionBaselineCopyCase, createGeneratedCanonicalCopyCase } from './copy-cases';
 /// <reference lib="webworker" />
+// @ts-expect-error -- The frozen A checkout exists only while this historical comparison runner is prepared.
 import { EntityStore as OldEntityStore } from '/tmp/seedlands-adoption-baseline/src/server/gameplay/entity-store';
 import { EntityStore } from '../../../src/server/gameplay/entity-store';
 import {
   LogicTerrain as OldTerrain,
   validateTerrainWindows as oldValidate,
+  // @ts-expect-error -- The frozen A checkout exists only while this historical comparison runner is prepared.
 } from '/tmp/seedlands-adoption-baseline/src/server/logic/logic-terrain';
 import { LogicTerrain, validateTerrainWindows } from '../../../src/server/logic/logic-terrain';
 import type { TerrainWindow } from '../../../src/server/logic/logic-protocol';

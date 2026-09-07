@@ -65,6 +65,7 @@
 | 回退、真实输入与既有核心行为                | Playwright-baseline / Vitest | 8项生产headless回归通过，涵盖真实输入/移动/支撑/跳跃/存档/streaming/地图；标量与TS回退单测通过                     |
 | 静态组合、host核心及生产构建                | Static / Build               | 最终verify:static通过：176文件、845测试通过，3文件/5测试既有跳过；world行覆盖96.89%；host7项通过；最终生产构建通过 |
 | 视觉语义及设备验证                          | Midscene / Manual supplement | Midscene N/A：无视觉设计变化，mesh字节等价；没有实体设备/有头FPS验收，不以headless代替                             |
+| 同步最新主干后的路径与行为兼容              | Static / Build / Playwright  | 通过：合入 `origin/main@c777ba8` 后，`verify:static`、生产构建及8项浏览器回归均通过                                |
 
 ## 任务与当前状态
 
@@ -74,10 +75,12 @@
 - [x] 形成采纳总方案并冻结，保留不采纳数据。
 - [x] 两轮统一实验，执行W07消融，最终默认General W02–W06。
 - [x] 生产headless回归、最终静态检查、交付记录；完成后创建本地语义提交，不push。
+- [x] 在独立收尾分支合入 `origin/main@c777ba8`，保留主干目录重组与WASM数据平面行为。
+- [x] 重新执行WASM产物门禁、静态检查、生产构建与浏览器回归，回填真实结果并创建本地语义提交，不push。
 
 ## 交付快照
 
-本轮已完成。工作分支 `codex/moonbit-wasm-workload-experiment`，冻结空白A为 `79e05c53e8c8d199c24b438165c7f62aa69efc70`。最终生产源码指纹为 `7fc44871d060d3973f062d7a52981d140dcca7ce6cec112b69c574d24a7f353a`；第二批实测SIMD产物为 `320402dd0e3b8df902a106ef1a584f56236bad6ad3075628e42bce8b341b14d4`。最终docs和测试文件拆分不改变生产源码指纹；精确交付提交由本文件所在Git提交记录确定。
+本轮已完成。收尾分支 `codex/data-plane-adoption-main-sync` 合入 `origin/main@c777ba811cf4a77500f43e3e1af8c814b725443c`；原工作分支 `codex/moonbit-wasm-workload-experiment`，冻结空白A为 `79e05c53e8c8d199c24b438165c7f62aa69efc70`。原最终生产源码指纹为 `7fc44871d060d3973f062d7a52981d140dcca7ce6cec112b69c574d24a7f353a`；第二批实测SIMD产物为 `320402dd0e3b8df902a106ef1a584f56236bad6ad3075628e42bce8b341b14d4`。主干同步改变源码路径与指纹，但未改变已采纳算法、W02–W06默认集合或W06标准SIMD选择；没有重跑A/A′/B性能采样，不能把旧性能数字重新归因于同步后提交。
 
 变更包含：server/entity与导航热点；client碰撞buffer显式消费；fluid Worker独占输入；world mesh融合与codec布局；纯Rust core、Wasm adapter及产物；默认选择与回退；确定性测试；本change的分项/组合runner及证据；README运行说明。AoS控制平面/SoA数据平面、SIMD和WebGL2规范已在父提交AGENTS.md中落地，本轮遵守并补上实际修复。
 
@@ -87,5 +90,9 @@
 - 分项执行入口 `changes/2026-09-07-data-plane-adoption/e2e/{data-plane-ab,workload-ab}.spec.ts`；正式环境变量与样本数记录在raw和reservation中。统一入口 `combined-adoption.spec.ts`，显式10 block、固定production三个origin；两个完整汇总各自保留，不混池。所有需求用例留在本change，未提炼进长期基线。
 - 流体失败组合用例因文件长度限制移至 `tests/server/data-plane-fluid-lease.test.ts` 后重新通过全量静态/coverage，原测试文件恢复，未改生产实现。
 - 实际结论、增量收益、尾分位数口径、copy字节、维护代价和不采纳理由见 `adoption-plan.md`、`results.md`、`evidence/allocation-ledger.md`。
+- 主干同步保留新目录结构，并将 `wasm-experiment-selection.ts` 移入 `src/client/compute/`；数据平面测试与当前实现import同步更新。历史A对照runner仍只在显式准备冻结checkout时运行，但日常TypeScript检查不再依赖遗留 `/tmp/seedlands-adoption-baseline`。详见 `evidence/main-sync-validation.md`。
+- 同步后 `pnpm wasm:verify`、`pnpm wasm:rust:verify`、`pnpm rust:check` 通过；WASM产物为9788 bytes、SHA-256 `e342dd87279fe651eba7e649a6b5c0db172bd7653dbbf6380c272f88a7f7b17a`。
+- 同步后 `pnpm verify:static` 通过：178文件/854测试通过，3文件/5测试既有跳过，world行覆盖96.89%，Svelte 0错误0警告，TypeScript三段检查通过。`pnpm build` 通过，2442模块完成生产构建；`SEEDLANDS_E2E_PORT=4281 pnpm test:e2e:regression` 8/8通过。
+- 长期文档基线无需新增页面：主干代码地图已把计算运行时归入 `src/client/compute/`；仅在主干精简后的 `AGENTS.md` 中保留本change既有的数据平面/Wasm约束。
 
 限制：RSS/GC/多并发扩展效率未采集；native本轮只有host正确性，不声称native性能上限。没有完整物理/导航语言迁移、packed PhysicsFrame、Node/NAPI、独立Rust server或GPU变更。首轮W07相关尾延迟是组合警讯，两批不是随机交错的W07单因素因果试验。第二批不显著回归也不等于所有设备绝无回归。默认保留TS开关和失败回退；无push、发布或主分支合并。

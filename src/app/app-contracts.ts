@@ -1,16 +1,16 @@
 import type { MeshData } from '../world/mesh';
 import type { WorldChange } from '../world/storage';
-import type { SerializedChunkSnapshot } from '../client/browser-chunk-persistence';
-import type { MeshTaskIdentity } from '../client/mesh-task-snapshot';
-import type { PerformanceTelemetry } from '../client/performance-telemetry';
-import type { FINAL_RENDER_PIPELINE } from './voxel-render-pipeline';
+import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
+import type { MeshTaskIdentity } from '../client/compute/mesh-task-snapshot';
+import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
+import type { FINAL_RENDER_PIPELINE } from './scene/voxel-render-pipeline';
 import type { UiMetrics } from './ui/ui-contracts';
-import type { VisualEffectsSnapshot } from './advanced-visual-effects';
-import type { FluidFeedbackSummary } from './fluid-feedback-tracker';
-import type { WaterMeshTransitionSnapshot } from './water-mesh-transition';
+import type { VisualEffectsSnapshot } from './scene/advanced-visual-effects';
+import type { FluidFeedbackSummary } from './gameplay/fluid-feedback-tracker';
+import type { WaterMeshTransitionSnapshot } from './scene/water-mesh-transition';
 import type { CostSampleWindow } from '../runtime/bounded-cost-samples';
-import type { CollisionDebugRendererDiagnostics } from './collision-debug-renderer';
-import type { ComputePoolDiagnostics } from '../client/compute-worker-pool';
+import type { CollisionDebugRendererDiagnostics } from './player/collision-debug-renderer';
+import type { ComputePoolDiagnostics } from '../client/compute/compute-worker-pool';
 import type { FluidAuthorityDiagnostics } from '../server/fluid/fluid-transaction';
 import type { AuthorityResidencyDiagnostics } from '../server/authority/authority-residency-runtime';
 

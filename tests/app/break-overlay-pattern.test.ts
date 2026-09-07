@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { crackSegmentsForStage } from '../../src/app/break-overlay-pattern';
+import { crackSegmentsForStage } from '../../src/app/gameplay/break-overlay-pattern';
 
 describe('方块破坏裂纹固定拓扑', () => {
   it('十个阶段严格增长，且已经出现的线段永远保持为下一阶段的前缀', () => {

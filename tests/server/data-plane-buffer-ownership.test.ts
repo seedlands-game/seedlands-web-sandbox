@@ -2,13 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   AuthorityCollisionBaselineClient,
   type AuthorityCollisionBaselinePayload,
-} from '../../src/client/authority-collision-baseline-client';
+} from '../../src/client/authority/authority-collision-baseline-client';
 import {
   AuthorityCollisionRevisionGuard,
   acceptAuthorityCollisionBaseline,
   consumeTransferredAuthorityCollisionBaseline,
   type AuthorityCollisionCachedChunk,
-} from '../../src/client/authority-collision-mirror';
+} from '../../src/client/authority/authority-collision-mirror';
 import {
   computeFluidCandidate,
   consumeFluidCandidate,

@@ -65,7 +65,7 @@ describe('碰撞调试渲染资源', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('关闭后释放唯一批次资源且不会在后台继续重建', async () => {
-    const { CollisionDebugRenderer } = await import('../../src/app/collision-debug-renderer');
+    const { CollisionDebugRenderer } = await import('../../src/app/player/collision-debug-renderer');
     const renderer = new CollisionDebugRenderer({
       graphicsDevice: {},
       root: { addChild: vi.fn() },

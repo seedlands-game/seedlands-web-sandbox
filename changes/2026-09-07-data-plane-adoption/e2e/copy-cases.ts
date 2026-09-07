@@ -1,15 +1,18 @@
+// @ts-expect-error -- The frozen A checkout exists only while this historical comparison runner is prepared.
 import { AuthorityCollisionBaselineClient as FrozenCollisionBaselineClient } from '/tmp/seedlands-adoption-baseline/src/client/authority-collision-baseline-client';
 import {
   AuthorityCollisionRevisionGuard as FrozenCollisionRevisionGuard,
   acceptAuthorityCollisionBaseline as acceptFrozenGeneratedCanonical,
+  // @ts-expect-error -- The frozen A checkout exists only while this historical comparison runner is prepared.
 } from '/tmp/seedlands-adoption-baseline/src/client/authority-collision-mirror';
+// @ts-expect-error -- The frozen A checkout exists only while this historical comparison runner is prepared.
 import { computeFluidCandidate as computeFrozenFluid } from '/tmp/seedlands-adoption-baseline/src/server/fluid/fluid-transaction';
-import { AuthorityCollisionBaselineClient } from '../../../src/client/authority-collision-baseline-client';
+import { AuthorityCollisionBaselineClient } from '../../../src/client/authority/authority-collision-baseline-client';
 import {
   AuthorityCollisionRevisionGuard,
   consumeTransferredAuthorityCollisionBaseline,
   type AuthorityCollisionCachedChunk,
-} from '../../../src/client/authority-collision-mirror';
+} from '../../../src/client/authority/authority-collision-mirror';
 import { consumeFluidCandidate, type FluidAuthoritySnapshot } from '../../../src/server/fluid/fluid-transaction';
 import { CHUNK_SIZE } from '../../../src/world/voxel';
 import { makeWorkloadCorpus } from './workload-corpus';

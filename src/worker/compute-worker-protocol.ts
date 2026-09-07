@@ -1,4 +1,4 @@
-import type { ComputeWorkerResult } from '../client/compute-worker-pool';
+import type { ComputeWorkerResult } from '../client/compute/compute-worker-pool';
 import type { ComputeTask } from '../runtime/compute-task-queue';
 
 export type RunComputeTask = Readonly<{ kind: 'run-compute-task'; task: ComputeTask }>;

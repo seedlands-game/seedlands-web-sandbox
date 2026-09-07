@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BrowserChunkPersistence } from '../../src/client/browser-chunk-persistence';
+import { BrowserChunkPersistence } from '../../src/client/persistence/browser-chunk-persistence';
 import type { ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
 import type { FrozenGameSaveSnapshot } from '../../src/server/persistence/game-save-snapshot';
 import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey } from '../../src/world/voxel';

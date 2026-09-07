@@ -4,7 +4,7 @@ import {
   localShadowNeedsUpdate,
   reconcileLocalLightSlots,
   selectNearestLanterns,
-} from '../../src/app/advanced-lighting-budget';
+} from '../../src/app/scene/advanced-lighting-budget';
 
 describe('高级光影预算', () => {
   it('为每个画质档位提供严格递增且有界的 GPU 预算', () => {

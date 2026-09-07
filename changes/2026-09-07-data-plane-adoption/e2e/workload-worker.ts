@@ -7,7 +7,9 @@ import {
   meshChunk as oldMesh,
   batchMeshData as oldBatch,
   compactMeshData as oldCompact,
+  // @ts-expect-error -- The frozen A checkout exists only while this historical comparison runner is prepared.
 } from '/tmp/seedlands-adoption-baseline/src/world/mesh';
+// @ts-expect-error -- The frozen A checkout exists only while this historical comparison runner is prepared.
 import { computeFluidCandidate as oldFluid } from '/tmp/seedlands-adoption-baseline/src/server/fluid/fluid-transaction';
 /// <reference lib="webworker" />
 import {
@@ -17,6 +19,7 @@ import {
   batchMeshData,
   compactMeshData,
 } from '../../../src/world/mesh';
+// @ts-expect-error -- The frozen A checkout exists only while this historical comparison runner is prepared.
 import { createStoredChunkRecord as oldStoredRecord } from '/tmp/seedlands-adoption-baseline/src/world/chunk-snapshot-codec';
 import { createStoredChunkRecord, crc32Bytes } from '../../../src/world/chunk-snapshot-codec';
 import { collisionBoxesForVoxel } from '../../../src/world/voxel-model';

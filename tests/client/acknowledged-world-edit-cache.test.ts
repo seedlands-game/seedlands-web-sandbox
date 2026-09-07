@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyAcknowledgedWorldEdits } from '../../src/client/acknowledged-world-edit-cache';
+import { applyAcknowledgedWorldEdits } from '../../src/client/authority/acknowledged-world-edit-cache';
 import { CHUNK_SIZE, voxelIndex } from '../../src/world/voxel';
 import type { WorldCommitResult } from '../../src/server/game-server-types';
 

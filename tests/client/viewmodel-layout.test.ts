@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveViewmodelLayout } from '../../src/client/viewmodel-layout';
+import { resolveViewmodelLayout } from '../../src/client/presentation/viewmodel-layout';
 
 describe('第一人称模型安全布局', () => {
   it.each([

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BrowserLogicClient, type LogicWorkerPort } from '../../src/client/browser-logic-client';
+import { BrowserLogicClient, type LogicWorkerPort } from '../../src/client/authority/browser-logic-client';
 import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch } from '../../src/server/logic/logic-protocol';
 import type { LogicObservation, LogicWorkerResponse } from '../../src/server/logic/logic-protocol';
 
