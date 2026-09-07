@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import type { ApplicationShell } from '../application-shell';
   import type { QualityLevel } from '../scene/quality-profile';
   import type { ShellState } from './ui-contracts';
@@ -17,35 +17,28 @@
     onstart,
   }: {
     shell: ShellState;
-    application: ApplicationShell;
+    application: ApplicationShell | null;
     onstart: (seed: string, quality: QualityLevel, openMode: WorldOpenMode) => void;
   } = $props();
   let latestSeed = $state('');
   let error = $state('');
   let workerSupport = $state<WorkerSupport>('checking');
   onMount(() =>
-    application.subscribe(() => {
+    application?.subscribe(() => {
       latestSeed = application.latestSeed;
       error = application.controller.state.error;
       workerSupport = application.capabilities.workerSupport;
     }),
   );
-  let seed = $state('');
-  let quality = $state<QualityLevel>('medium');
+  let seed = $state(untrack(() => shell.seed));
+  let quality = $state<QualityLevel>(untrack(() => shell.quality));
   let openMode = $state<WorldOpenMode>('continue');
-  let initialized = false;
-  let previousPhase: ShellState['phase'] = 'boot';
-  let seedTouched = $state(false);
-  let qualityTouched = $state(false);
+  let previousPhase: ShellState['phase'] = untrack(() => shell.phase);
+  let seedTouched = $state(untrack(() => Boolean(shell.seed)));
+  let qualityTouched = $state(untrack(() => shell.quality !== 'medium'));
 
   $effect(() => {
-    if (!initialized) {
-      seed = shell.seed;
-      quality = shell.quality;
-      seedTouched = Boolean(shell.seed);
-      qualityTouched = shell.quality !== 'medium';
-      initialized = true;
-    } else if (previousPhase === 'boot' && shell.phase !== 'error') {
+    if (previousPhase === 'boot' && shell.phase !== 'boot' && shell.phase !== 'error') {
       if (!seedTouched) seed = shell.seed;
       if (!qualityTouched) quality = shell.quality;
     }
@@ -69,7 +62,7 @@
         class="continue-world"
         label="继续世界"
         disabled={workerSupport !== 'supported'}
-        onclick={() => void application.continueWorld()}>继续世界 <small>{latestSeed}</small></GameButton
+        onclick={() => void application?.continueWorld()}>继续世界 <small>{latestSeed}</small></GameButton
       >
     {/if}
     <div class="start-fields">
@@ -83,12 +76,7 @@
       />
       <label for="quality">
         视觉质量
-        <select
-          id="quality"
-          bind:value={quality}
-          disabled={shell.phase === 'boot'}
-          onchange={() => (qualityTouched = true)}
-        >
+        <select id="quality" bind:value={quality} onchange={() => (qualityTouched = true)}>
           <option value="low">Low · 省电</option>
           <option value="medium">Medium · 均衡</option>
           <option value="high">High · 精致</option>
@@ -104,7 +92,7 @@
       </select>
     </label>
     {#if shell.initializationError}
-      <GameButton label={shell.enterLabel} onclick={() => application.reloadAfterInitializationFailure()}>
+      <GameButton id="enter" label={shell.enterLabel} onclick={() => application?.reloadAfterInitializationFailure()}>
         {shell.enterLabel}
       </GameButton>
     {:else}
@@ -118,6 +106,7 @@
         }}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
       >
       <GameButton
+        id="enter"
         label={shell.enterLabel}
         disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
         onclick={() => onstart(seed, quality, openMode)}
@@ -126,8 +115,8 @@
       </GameButton>
     {/if}
     <div class="menu-secondary">
-      <GameButton label="设置" onclick={() => application.openPanel('settings')}>设置</GameButton>
-      <GameButton label="操作指南" onclick={() => application.openPanel('guide')}>操作指南</GameButton>
+      <GameButton label="设置" onclick={() => application?.openPanel('settings')}>设置</GameButton>
+      <GameButton label="操作指南" onclick={() => application?.openPanel('guide')}>操作指南</GameButton>
     </div>
     {#if shell.initializationError}
       <p class="start-error" role="alert">{shell.initializationError}</p>

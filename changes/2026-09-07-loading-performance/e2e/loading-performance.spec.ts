@@ -10,7 +10,7 @@ test('HTML 骨架在运行时之前可交互但禁止进入，并提供 SEO/GEO'
     await route.continue();
   });
   await page.goto('/');
-  await expect(page.locator('[data-ui-fallback]')).toBeVisible();
+  await expect(page.locator('[data-ui-prerendered="svelte5"]')).toBeVisible();
   await page.locator('#seed').fill('early-input');
   await page.locator('#quality').selectOption('high');
   await expect(page.locator('#seed')).toHaveValue('early-input');

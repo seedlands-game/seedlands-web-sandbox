@@ -238,33 +238,7 @@
 .collision-debug-controls input {
   min-height: auto;
 }
-#ui .game-button {
-  position: relative;
-  border: 5px solid transparent;
-  border-image: url('/assets/ui/obsidian-brass-panel.png') 140 / 9px / 0 stretch;
-  border-radius: 0;
-  background: #171c1c;
-  box-shadow:
-    inset 0 0 0 1px #54462f,
-    inset 0 0 16px #0007;
-  color: #eadbc0;
-  font-family: Georgia, 'Songti SC', serif;
-  letter-spacing: 0.045em;
-  text-shadow: 0 1px 2px #000;
-}
-#ui .game-button:hover:not(:disabled) {
-  background: #233b39;
-  color: #fff1cb;
-  box-shadow:
-    inset 0 0 0 1px #b49a5d,
-    0 0 10px #68b9ab40;
-}
-#ui .game-button:active:not(:disabled) {
-  background: #132b2a;
-}
-#ui .pause-actions .game-button:first-child,
-#ui #start-card .continue-world,
-#ui #start-card .game-button[aria-label='进入世界'] {
+#ui .pause-actions .game-button:first-child {
   background: #164440;
   box-shadow:
     inset 0 0 0 1px #568c7e,
@@ -337,50 +311,6 @@
   font-size: 14px;
   padding: 8px 12px;
 }
-#start-card {
-  text-align: center;
-  width: min(430px, calc(100vw - 32px));
-  padding: 24px 28px;
-}
-#start-card .seedlands-mark {
-  width: 160px;
-  height: 62px;
-  object-fit: contain;
-  margin: 0 auto 8px;
-}
-#ui #start-card h1 {
-  font:
-    48px/1 Georgia,
-    serif;
-  color: #e3c586;
-  letter-spacing: 0.035em;
-  margin: 10px 0 18px;
-  text-shadow:
-    0 2px 0 #6e512f,
-    0 5px 12px #000;
-}
-#start-card .world-tags {
-  justify-content: center;
-}
-#start-card .start-fields {
-  text-align: left;
-}
-#start-card > p:not(.eyebrow) {
-  font-size: 12px;
-}
-#ui #start-card small {
-  font-size: 10px;
-}
-#start-card .recommended-start {
-  margin: 10px 0;
-}
-#start-card .game-button {
-  font-size: 13px;
-}
-#start-card .game-button small {
-  display: block;
-}
-
 .world-loading {
   display: grid;
   min-height: 430px;

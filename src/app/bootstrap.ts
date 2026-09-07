@@ -42,8 +42,8 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
   try {
     const canvas = requiredElement<HTMLCanvasElement>('#game');
     const uiRoot = requiredElement<HTMLElement>('#ui');
-    const fallbackSeed = uiRoot.querySelector<HTMLInputElement>('#seed');
-    const fallbackQuality = uiRoot.querySelector<HTMLSelectElement>('#quality');
+    const prerenderedSeed = uiRoot.querySelector<HTMLInputElement>('#seed');
+    const prerenderedQuality = uiRoot.querySelector<HTMLSelectElement>('#quality');
     const experiments = resolveExperimentalClientOptions({
       search: location.search,
       stored: readStoredExperimentalClientOptions(localStorage),
@@ -51,8 +51,8 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
     });
     const sessionConfig = readBrowserSessionConfig(location.search);
     const uiBridge = createUiBridge();
-    const seed = fallbackSeed?.value.trim() ?? '';
-    const quality = fallbackQuality?.value;
+    const seed = prerenderedSeed?.value.trim() ?? '';
+    const quality = prerenderedQuality?.value;
     uiBridge.publishShell({
       seed,
       quality: quality === 'low' || quality === 'high' ? quality : 'medium',

@@ -51,10 +51,14 @@ describe('Svelte retained UI integration', () => {
     });
   });
 
-  it('keeps a static first-paint fallback but no second manual runtime HUD tree', () => {
+  it('injects a generated Svelte first paint without a second manual runtime HUD tree', () => {
     const html = read('index.html');
-    expect(html).toContain('data-ui-fallback');
-    expect(html).toContain('id="ui"');
+    expect(html).toContain('data-ui-prerendered="svelte5"');
+    expect(html).toContain('<!--seedlands-prerender-outlet-->');
+    expect(html).not.toContain('data-ui-fallback');
+    const generated = read('src/app/ui/generated/prerendered-start-screen.html');
+    expect(generated).toContain('<!--[-->');
+    expect(generated).toContain('id="start-card"');
     expect(html).not.toContain('id="debug-command-shell"');
     expect(html).not.toContain('id="hotbar"');
     expect(html).not.toContain('id="macro-map-panel"');
