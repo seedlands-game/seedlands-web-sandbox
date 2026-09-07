@@ -1,24 +1,3 @@
-:root {
-  --ui-color-content: #eef5e7;
-  --ui-color-content-muted: #aabca9;
-  --ui-color-success: #cceba5;
-  --ui-color-error: #ffb7a9;
-  --ui-surface: rgba(13, 24, 27, 0.7);
-  --ui-surface-strong: rgba(3, 10, 11, 0.88);
-  --ui-border: rgba(226, 239, 215, 0.2);
-  --ui-focus: #9fc66e;
-  --ui-space-1: 4px;
-  --ui-space-2: 8px;
-  --ui-space-3: 12px;
-  --ui-size-control: 40px;
-  --ui-font-body: Inter, ui-sans-serif, system-ui, sans-serif;
-  --ui-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-  --ui-radius: 14px;
-  --ui-motion-fast: 140ms;
-  --ui-z-overlay: 20;
-}
-
-.game-panel,
 .hud-chip {
   border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius);

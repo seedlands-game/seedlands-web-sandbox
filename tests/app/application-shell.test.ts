@@ -112,4 +112,24 @@ describe('ApplicationShell experiment and capability gates', () => {
     expect(warnedGame.start).toHaveBeenCalledOnce();
     warned.dispose();
   });
+
+  it('资源与能力均 ready 后才发布可进入菜单', async () => {
+    let releaseResource!: () => void;
+    const resourceReady = new Promise<void>((resolve) => {
+      releaseResource = resolve;
+    });
+    const bridge = createUiBridge();
+    const application = new ApplicationShell(createGame(), bridge, createAudio(), {
+      preflight: async () => capability(),
+    });
+
+    const initializing = application.initialize(resourceReady);
+    await Promise.resolve();
+    expect(bridge.shell.get().phase).toBe('boot');
+
+    releaseResource();
+    await initializing;
+    expect(bridge.shell.get().phase).toBe('menu');
+    application.dispose();
+  });
 });

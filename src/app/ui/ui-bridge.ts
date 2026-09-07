@@ -51,6 +51,7 @@ const initialShell = (): ShellState => ({
   seed: '',
   quality: 'medium',
   enterLabel: '正在读取世界…',
+  initializationError: '',
   mapOpen: false,
   mapLayer: 'elevation',
   mapSeed: 0,

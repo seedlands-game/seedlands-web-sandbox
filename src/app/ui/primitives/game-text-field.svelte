@@ -6,6 +6,7 @@
     placeholder = '',
     disabled = false,
     maxlength,
+    oninput,
   }: {
     id: string;
     label: string;
@@ -13,10 +14,11 @@
     placeholder?: string;
     disabled?: boolean;
     maxlength?: number;
+    oninput?: (event: Event) => void;
   } = $props();
 </script>
 
 <label for={id}>
   {label}
-  <input {id} bind:value {placeholder} {disabled} {maxlength} />
+  <input {id} bind:value {placeholder} {disabled} {maxlength} {oninput} />
 </label>

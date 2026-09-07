@@ -184,32 +184,6 @@
   margin: 0;
   color: #d9d3c6;
 }
-.menu-secondary {
-  display: flex;
-  gap: 10px;
-  margin: 12px 0 10px;
-}
-.menu-secondary button {
-  flex: 1;
-}
-#start-card {
-  max-height: calc(100dvh - 32px);
-  overflow-y: auto;
-}
-#start-card .continue-world {
-  display: grid;
-  width: 100%;
-  gap: 3px;
-  margin: 8px 0 14px;
-  border-color: #d4b071;
-  background: #4b3d29;
-}
-#start-card .continue-world small {
-  font-size: 10px;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 @media (max-width: 720px) {
   .shell-scrim {
     padding: 12px;
@@ -224,8 +198,5 @@
   }
   .control-guide dd {
     margin-bottom: 10px;
-  }
-  #start-card {
-    padding: 26px;
   }
 }
