@@ -90,4 +90,20 @@ describe('公开动作回执参考投影', () => {
       projectActionReceiptReference({ type: 'attack', targetId: 'fixture' }, attack, identity(runtime, 0)),
     ).toThrow(/damage/);
   });
+
+  it('复用请求的 canonical 动作复制，保留最大槽位并拒绝稀疏坐标', async () => {
+    const runtime = await makeRuntime();
+    const action: AuthorityAction = { type: 'select-hotbar', slot: Number.MAX_SAFE_INTEGER };
+    const receipt = await runtime.executeTransaction(identity(runtime, 0), () => runtime.performAction(action));
+    expect(projectActionReceiptReference(action, receipt, identity(runtime, 0))).toMatchObject({
+      action: { type: 'select-hotbar', slot: Number.MAX_SAFE_INTEGER },
+    });
+    expect(() =>
+      projectActionReceiptReference(
+        { type: 'place', position: Array(3) } as unknown as AuthorityAction,
+        receipt,
+        identity(runtime, 0),
+      ),
+    ).toThrow(/position/);
+  });
 });

@@ -9,6 +9,7 @@ import {
   type ReferenceSessionLimits,
   type WelcomeReference,
 } from './network-reference-bootstrap-types';
+import { canonicalReferenceInteger } from './network-reference-integer';
 
 export type * from './network-reference-bootstrap-types';
 
@@ -24,7 +25,7 @@ const assertText = (value: string, field: string) => {
 const assertSafeInteger = (value: number, field: string, minimum = 0) => {
   if (!Number.isSafeInteger(value) || value < minimum)
     throw new TypeError(`${field} must be a safe integer at least ${minimum}.`);
-  return value;
+  return canonicalReferenceInteger(value);
 };
 const assertFinite = (value: number, field: string) => {
   if (!Number.isFinite(value)) throw new TypeError(`${field} must be finite.`);
@@ -128,7 +129,7 @@ export async function projectChunkBaselineReference(
 ): Promise<ChunkBaselineReference> {
   assertText(context.epoch, 'baseline context epoch');
   assertText(context.worldId, 'baseline context worldId');
-  assertSafeInteger(context.generatorVersion, 'baseline context generatorVersion', 1);
+  const generatorVersion = assertSafeInteger(context.generatorVersion, 'baseline context generatorVersion', 1);
   if (context.digest.algorithm !== 'sha-256')
     throw new TypeError('Only sha-256 is supported for reference baseline hashes.');
   if (baseline.canonical.byteLength !== CELL_COUNT * Uint16Array.BYTES_PER_ELEMENT)
@@ -147,7 +148,7 @@ export async function projectChunkBaselineReference(
     worldId: context.worldId,
     key: assertText(baseline.key, 'baseline.key'),
     chunkRevision: assertSafeInteger(baseline.chunkRevision, 'baseline.chunkRevision'),
-    generatorVersion: context.generatorVersion,
+    generatorVersion,
     canonical,
     fluid,
   };

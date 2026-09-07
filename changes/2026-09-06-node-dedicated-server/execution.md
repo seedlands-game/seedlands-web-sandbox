@@ -155,3 +155,9 @@ T0/T1 的 Node/浏览器及 IPv6 loopback 小包功能通过，尚未验证 WSS�
 本轮 C2 在对象解码前增加 raw 数值域验证；C0 用合法 JSON `-0` 保留 f64 负零，不扩大 wire 字段或收窄值域。大体量合法 pose 暴露 C0 64 KiB metadata 表示上限，记录为选型限制而非过滤样本。所有探索仍无 timing、未采用 wire/transport；GUI、真实远端与正式 A/B 均未完成。原冻结合同 hash 不变，本批只有本地参考投影、验证与证据，不将临时原型代码提交生产。
 
 2026-09-07 本批读取的账户共享周额度已用 18%、剩余 82%；它不是当前任务消耗，也没有同量纲 credits 分母。未兑换 reset、未购买额度。继续按用户授权把验证通过的源码与记录提交并推送 `origin/codex/node-dedicated-server`，不等额度临近耗尽再保存。
+
+## 动作请求与整数表示检查点
+
+九动作请求参考投影与 receipt 共用明确字段副本；整数零在投影阶段统一，f64 负零仍保真。40 条真实 Host 记录经三候选解码后在新 Host 应用，包含成功/失败与选栏重试，不扩大到未测的非幂等动作。完整静态 179 文件/942 项通过、world 行覆盖 96.37%，浏览器与 Node 构建通过，Chrome/Node 五组独立互操作通过。见 [动作切片记录](network-action-request-progress.md) 与 [机器证据](network-action-request-evidence.json)。
+
+网络采用仍未决定。审计发现 Gameplay 参考遗漏 UI 消费的 actor behavior，下一切片补最小公共字段；旧语料保留历史身份。WebTransport loopback 能力独立记录，不扩张成远端或性能准出。整个 change 继续 Active，按用户授权推送稳定检查点。

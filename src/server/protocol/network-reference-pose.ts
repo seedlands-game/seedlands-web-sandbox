@@ -1,5 +1,6 @@
 import type { AuthoritySnapshot } from '../authority/authority-session-types';
 import { NETWORK_REFERENCE_PROJECTION_VERSION, type ReferenceVector3 } from './network-reference-projection-types';
+import { canonicalReferenceInteger } from './network-reference-integer';
 
 const MAX_ENTITY_POSES = 256;
 const ENTITY_TYPES = new Set(['player', 'world-item', 'creature', 'npc']);
@@ -37,7 +38,7 @@ const nonEmptyText = (value: unknown, field: string): string => {
 const nonNegativeSafeInteger = (value: unknown, field: string): number => {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0)
     throw new TypeError(`${field} must be a non-negative safe integer.`);
-  return value;
+  return canonicalReferenceInteger(value);
 };
 
 const finite = (value: unknown, field: string): number => {

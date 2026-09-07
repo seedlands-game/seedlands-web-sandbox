@@ -1,6 +1,8 @@
 import type { AuthorityTransactionReceipt } from '../authority/authority-runtime-types';
 import type { AuthorityAction } from '../../worker/authority-worker-protocol';
 import { NETWORK_REFERENCE_PROJECTION_VERSION } from './network-reference-projection-types';
+import { copyAuthorityActionReference } from './network-action-reference-copy';
+import { canonicalReferenceInteger } from './network-reference-integer';
 
 const reasonsByAction = {
   'select-hotbar': ['invalid-slot'],
@@ -58,7 +60,7 @@ const text = (value: unknown, field: string): string => {
 const number = (value: unknown, field: string, integer = true): number => {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || (integer && !Number.isSafeInteger(value)))
     throw new TypeError(`Invalid ${field}.`);
-  return value;
+  return integer ? canonicalReferenceInteger(value) : value;
 };
 
 function outcome(action: AuthorityAction, value: unknown): ActionOutcomeReference {
@@ -101,40 +103,6 @@ export function projectActionReceiptReference(
   receipt: AuthorityTransactionReceipt<unknown>,
   identity: ReceiptIdentity,
 ): ActionReceiptReference {
-  const canonicalAction = (value: unknown): AuthorityAction => {
-    const candidate = record(value, 'submitted action');
-    if (typeof candidate.type !== 'string' || !Object.hasOwn(reasonsByAction, candidate.type))
-      throw new TypeError('Unsupported public action.');
-    const request = value as AuthorityAction;
-    switch (request.type) {
-      case 'cancel-break':
-      case 'respawn':
-        return { type: request.type };
-      case 'select-hotbar':
-      case 'use-inventory':
-        return { type: request.type, slot: number(request.slot, 'slot') };
-      case 'craft':
-        return { type: request.type, recipeId: text(request.recipeId, 'recipeId') };
-      case 'attack':
-        return { type: request.type, targetId: text(request.targetId, 'targetId') };
-      case 'move-inventory':
-        return {
-          type: request.type,
-          source: number(request.source, 'source'),
-          target: number(request.target, 'target'),
-        };
-      case 'begin-break':
-      case 'place': {
-        if (
-          !Array.isArray(request.position) ||
-          request.position.length !== 3 ||
-          !request.position.every(Number.isSafeInteger)
-        )
-          throw new TypeError('Invalid action position.');
-        return { type: request.type, position: [...request.position] };
-      }
-    }
-  };
   const base: ReceiptBase = {
     kind: 'action-receipt-reference',
     projectionVersion: NETWORK_REFERENCE_PROJECTION_VERSION,
@@ -155,9 +123,9 @@ export function projectActionReceiptReference(
       observedCommitSequence: number(receipt.commitSequence, 'commitSequence'),
     };
   }
-  const publicAction = canonicalAction(action);
+  const publicAction = copyAuthorityActionReference(action);
   const result = record(receipt.result, 'authority action result');
-  const submittedAction = canonicalAction(result.submittedAction);
+  const submittedAction = copyAuthorityActionReference(result.submittedAction);
   if (JSON.stringify(submittedAction) !== JSON.stringify(publicAction))
     throw new TypeError('Transaction action does not match its original receipt.');
   const gameplay = record(result.gameplay, 'gameplay');

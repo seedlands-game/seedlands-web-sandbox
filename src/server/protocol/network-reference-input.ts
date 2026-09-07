@@ -2,6 +2,7 @@ import type { AuthoritySnapshot } from '../authority/authority-session-types';
 import { PROTOCOL_VERSION, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type { InputDecisionReference, PlayerInputReference } from './network-reference-input-types';
 import { NETWORK_REFERENCE_PROJECTION_VERSION } from './network-reference-projection-types';
+import { canonicalReferenceInteger } from './network-reference-integer';
 
 const decisions = new Set<SequenceDecision>([
   'accepted',
@@ -23,12 +24,12 @@ const inputText = (value: unknown, field: string): string => {
 const nonNegativeSafeInteger = (value: unknown, field: string): number => {
   if (!Number.isSafeInteger(value) || (value as number) < 0)
     throw new TypeError(`${field} must be a non-negative safe integer.`);
-  return value as number;
+  return canonicalReferenceInteger(value as number);
 };
 const acknowledgement = (value: unknown, field: string): number => {
   if (!Number.isSafeInteger(value) || (value as number) < -1)
     throw new TypeError(`${field} must be a safe integer greater than or equal to -1.`);
-  return value as number;
+  return canonicalReferenceInteger(value as number);
 };
 
 function copyValidatedInput(command: InputCommand): InputCommand {
@@ -60,7 +61,7 @@ function copyValidatedInput(command: InputCommand): InputCommand {
     state: {
       moveX: state.moveX,
       moveZ: state.moveZ,
-      verticalIntent: state.verticalIntent,
+      verticalIntent: canonicalReferenceInteger(state.verticalIntent) as -1 | 0 | 1,
       jumpHeld: state.jumpHeld,
     },
     edges: { jumpPressed: edges.jumpPressed },

@@ -13,6 +13,7 @@ import {
   type ReferenceVector3,
   type WorldCommitReference,
 } from './network-reference-projection-types';
+import { canonicalReferenceInteger } from './network-reference-integer';
 
 export { NETWORK_REFERENCE_PROJECTION_VERSION } from './network-reference-projection-types';
 export type * from './network-reference-projection-types';
@@ -28,7 +29,7 @@ const assertFinite = (value: number, field: string) => {
 };
 const assertNonNegativeInteger = (value: number, field: string) => {
   if (!Number.isSafeInteger(value) || value < 0) throw new TypeError(`${field} must be a non-negative safe integer.`);
-  return value;
+  return canonicalReferenceInteger(value);
 };
 const assertText = (value: string, field: string) => {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError(`${field} must be a non-empty string.`);
@@ -49,11 +50,12 @@ const tuple = (value: readonly number[], field: string): [number, number, number
 };
 export function projectPlayerCorrectionReference(snapshot: AuthoritySnapshot): PlayerCorrectionReference {
   assertText(snapshot.epoch, 'snapshot.epoch');
-  assertNonNegativeInteger(snapshot.physicsTick, 'snapshot.physicsTick');
-  assertNonNegativeInteger(snapshot.commitSequence, 'snapshot.commitSequence');
-  assertNonNegativeInteger(snapshot.worldRevision, 'snapshot.worldRevision');
+  const physicsTick = assertNonNegativeInteger(snapshot.physicsTick, 'snapshot.physicsTick');
+  const commitSequence = assertNonNegativeInteger(snapshot.commitSequence, 'snapshot.commitSequence');
+  const worldRevision = assertNonNegativeInteger(snapshot.worldRevision, 'snapshot.worldRevision');
   if (!Number.isSafeInteger(snapshot.acknowledgedInputSequence) || snapshot.acknowledgedInputSequence < -1)
     throw new TypeError('snapshot.acknowledgedInputSequence must be a safe integer greater than or equal to -1.');
+  const acknowledgedInputSequence = canonicalReferenceInteger(snapshot.acknowledgedInputSequence);
   const collisionRevisions = Object.entries(snapshot.chunkRevisions)
     .map(([key, revision]) => ({
       key: assertText(key, 'snapshot.chunkRevisions key'),
@@ -64,11 +66,11 @@ export function projectPlayerCorrectionReference(snapshot: AuthoritySnapshot): P
     kind: 'player-correction-reference',
     projectionVersion: NETWORK_REFERENCE_PROJECTION_VERSION,
     epoch: snapshot.epoch,
-    physicsTick: snapshot.physicsTick,
-    commitSequence: snapshot.commitSequence,
-    worldRevision: snapshot.worldRevision,
+    physicsTick,
+    commitSequence,
+    worldRevision,
     worldTime: assertFinite(snapshot.worldTime, 'snapshot.worldTime'),
-    acknowledgedInputSequence: snapshot.acknowledgedInputSequence,
+    acknowledgedInputSequence,
     inputResyncRequired: snapshot.inputResyncRequired,
     paused: snapshot.paused,
     player: {
@@ -85,7 +87,7 @@ const projectInventory = (inventory: AuthorityGameplayView['player']['inventory'
   inventory.map((slot, index) => {
     if (slot === null) return null;
     return {
-      slot: index,
+      slot: canonicalReferenceInteger(index),
       itemId: assertText(slot.itemId, `inventory[${index}].itemId`),
       count: assertNonNegativeInteger(slot.count, `inventory[${index}].count`),
     };
@@ -148,10 +150,19 @@ export function projectGameplayViewReference(
   }>,
 ): GameplayViewReference {
   assertText(context.epoch, 'gameplay context epoch');
-  assertNonNegativeInteger(context.snapshotPhysicsTick, 'gameplay context snapshotPhysicsTick');
-  assertNonNegativeInteger(context.snapshotCommitSequence, 'gameplay context snapshotCommitSequence');
-  assertNonNegativeInteger(context.snapshotWorldRevision, 'gameplay context snapshotWorldRevision');
-  assertNonNegativeInteger(view.gameplayRevision, 'gameplayRevision');
+  const snapshotPhysicsTick = assertNonNegativeInteger(
+    context.snapshotPhysicsTick,
+    'gameplay context snapshotPhysicsTick',
+  );
+  const snapshotCommitSequence = assertNonNegativeInteger(
+    context.snapshotCommitSequence,
+    'gameplay context snapshotCommitSequence',
+  );
+  const snapshotWorldRevision = assertNonNegativeInteger(
+    context.snapshotWorldRevision,
+    'gameplay context snapshotWorldRevision',
+  );
+  const gameplayRevision = assertNonNegativeInteger(view.gameplayRevision, 'gameplayRevision');
   assertFinite(view.gameplayTime, 'gameplayTime');
   const entities = view.entities
     .filter((entity) => entity.type !== 'player')
@@ -164,10 +175,10 @@ export function projectGameplayViewReference(
     kind: 'gameplay-view-reference',
     projectionVersion: NETWORK_REFERENCE_PROJECTION_VERSION,
     epoch: context.epoch,
-    snapshotPhysicsTick: context.snapshotPhysicsTick,
-    snapshotCommitSequence: context.snapshotCommitSequence,
-    snapshotWorldRevision: context.snapshotWorldRevision,
-    gameplayRevision: view.gameplayRevision,
+    snapshotPhysicsTick,
+    snapshotCommitSequence,
+    snapshotWorldRevision,
+    gameplayRevision,
     gameplayTime: view.gameplayTime,
     player: projectPlayer(view.player),
     craftableRecipeIds: [...craftableRecipeIds],
@@ -180,11 +191,11 @@ export function projectWorldCommitReference(
   context: Readonly<{ epoch: string; publicationCommitSequenceUpperBound: number }>,
 ): WorldCommitReference {
   assertText(context.epoch, 'commit context epoch');
-  assertNonNegativeInteger(
+  const publicationCommitSequenceUpperBound = assertNonNegativeInteger(
     context.publicationCommitSequenceUpperBound,
     'commit context publicationCommitSequenceUpperBound',
   );
-  assertNonNegativeInteger(commit.worldRevision, 'commit.worldRevision');
+  const worldRevision = assertNonNegativeInteger(commit.worldRevision, 'commit.worldRevision');
   const structuralChange = commit.structuralChange
     ? {
         chunks: [...commit.structuralChange.chunks].map((key) => assertText(key, 'structural chunk key')).sort(),
@@ -205,7 +216,7 @@ export function projectWorldCommitReference(
         if (!Number.isSafeInteger(cell.index) || cell.index < 0 || cell.index >= MAX_COLLISION_CELL_INDEX)
           throw new TypeError('collision delta cell index is invalid.');
         return {
-          index: cell.index,
+          index: canonicalReferenceInteger(cell.index),
           voxel: assertNonNegativeInteger(cell.voxel, 'collision delta voxel'),
           fluid: assertNonNegativeInteger(cell.fluid, 'collision delta fluid'),
         };
@@ -216,10 +227,10 @@ export function projectWorldCommitReference(
     kind: 'world-commit-reference',
     projectionVersion: NETWORK_REFERENCE_PROJECTION_VERSION,
     epoch: context.epoch,
-    publicationCommitSequenceUpperBound: context.publicationCommitSequenceUpperBound,
+    publicationCommitSequenceUpperBound,
     causalCommitSequence: null,
     committed: commit.committed,
-    worldRevision: commit.worldRevision,
+    worldRevision,
     structuralChange,
     collisionDeltas,
   };
