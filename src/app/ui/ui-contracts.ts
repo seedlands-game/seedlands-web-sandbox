@@ -18,6 +18,7 @@ export type ShellState = Readonly<{
   seed: string;
   quality: QualityLevel;
   enterLabel: string;
+  initializationError: string;
   mapOpen: boolean;
   mapLayer: MapLayer;
   mapSeed: number;

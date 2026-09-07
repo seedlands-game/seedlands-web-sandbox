@@ -4,6 +4,8 @@
 
 核对日期：2026-09-06；context-engineering 目录基线。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
 
+首屏由 [prerender-entry.ts](../src/app/ui/prerender-entry.ts) 在开发请求或构建前调用同一个 `AppRoot` 生成，浏览器入口随后对该 DOM 做严格 hydration；生成与注入脚本位于 `scripts/prerendered-start-screen.*`。
+
 ## 第一次阅读的顺序
 
 不必先遍历全部文件或历史 change。先沿下面的链路建立概念，再按问题进入局部。
@@ -32,7 +34,7 @@ src/
     gameplay/          浏览器 gameplay、实体资源、目标/破坏与水体验
     audio/             音频播放与生命周期
     shaders/           着色器代码
-    ui/                Svelte 界面、桥接、组件与运行期样式
+    ui/                Svelte 界面、SSR 首屏、桥接、组件与共享样式
   client/              客户端协议适配、预测、镜像、持久化与表现计算
     authority/         Authority/Logic 客户端、协议、镜像与传输
     compute/           计算运行时、Worker 池与网格快照
@@ -56,8 +58,8 @@ src/
 tests/                 按模块组织的单元测试、架构门禁与长期 E2E
 changes/               每次变更的合同、需求 E2E 与交付证据
 docs/                  跨变更的长期目标、来源、代码地图和目录规范
-scripts/               工程、Harness 与无浏览器启动脚本
-public/assets/         静态图片与首屏样式
+scripts/               工程、SSG、Harness 与无浏览器启动脚本
+public/assets/         静态图片等公开资源
 harness/baseline.json  受版本控制的 Harness 基线
 ```
 
@@ -67,6 +69,7 @@ harness/baseline.json  受版本控制的 Harness 基线
 
 ```mermaid
 flowchart TD
+  HTML[index.html / Svelte SSR 首屏] --> UI
   Main[main / Game 浏览器装配] --> UI[Svelte / UiBridge]
   UI -->|用户意图| Main
   Main --> World[World 浏览器世界入口]

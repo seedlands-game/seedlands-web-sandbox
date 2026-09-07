@@ -68,6 +68,10 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
   private maxFrameCommits = 0;
   private maxFrameParts = 0;
   private renderedAfterPostrender = false;
+  private firstVisibleResolve: (() => void) | null = null;
+  private readonly firstVisible = new Promise<void>((resolve) => {
+    this.firstVisibleResolve = resolve;
+  });
 
   constructor(private readonly options: RepositoryOptions<Task, Part, Resource>) {}
 
@@ -85,6 +89,10 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
 
   get visibleAfterPostrender() {
     return this.renderedAfterPostrender;
+  }
+
+  waitForFirstVisible() {
+    return [...this.chunks.values()].some((chunk) => chunk.triangles > 0) ? Promise.resolve() : this.firstVisible;
   }
 
   beginFrame() {
@@ -160,6 +168,8 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.firstVisibleResolve?.();
+    this.firstVisibleResolve = null;
     this.clear();
   }
 
@@ -183,10 +193,11 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       return;
     }
     const previous = job.previous;
+    const summary = this.options.summarize(job.parts);
     this.chunks.set(job.task.chunkKey, {
       task: job.task,
       resource: job.resource,
-      ...this.options.summarize(job.parts),
+      ...summary,
     });
     let transitionPending = false;
     if (previous) {
@@ -201,6 +212,10 @@ export class ChunkResourceRepository<Task extends ChunkTask, Part, Resource exte
       else this.destroy(previous.resource);
     }
     this.renderedAfterPostrender = true;
+    if (summary.triangles > 0) {
+      this.firstVisibleResolve?.();
+      this.firstVisibleResolve = null;
+    }
     this.options.onVisible(job.task, { transitionPending });
   }
 
