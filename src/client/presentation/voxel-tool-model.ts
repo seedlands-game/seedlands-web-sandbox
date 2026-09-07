@@ -1,71 +1,13 @@
-/** First-party pixel silhouettes, authored upright around the hand grip; not a resource-pack ABI. */
-type ToolModel = Readonly<{
-  pixels: readonly string[];
-  palette: Readonly<Record<string, readonly [number, number, number]>>;
-  grip: readonly [number, number];
-}>;
+import type { ToolModel } from './asset-types';
+import { nativeToolAssets } from './asset-tool-sources';
+import { resolvePixelModel } from './asset-package';
 
-const palette = {
-  o: [57, 37, 28],
-  h: [125, 77, 40],
-  l: [191, 132, 67],
-  w: [155, 99, 46],
-  e: [225, 169, 86],
-  d: [46, 60, 66],
-  s: [105, 129, 135],
-  b: [170, 193, 187],
-  t: [57, 103, 103],
-} as const;
-
-const models: Readonly<Record<string, ToolModel>> = {
-  'wood-axe': {
-    palette,
-    grip: [7.5, 11.5],
-    pixels: [
-      '................',
-      '.......oooo.....',
-      '......oleeeo....',
-      '......olwweeo...',
-      '......ohlwweeo..',
-      '......ohwwweeo..',
-      '......otwwweeo..',
-      '......otoweeo...',
-      '......oh.ooo....',
-      '......ohlo......',
-      '......ohlo......',
-      '......ohlo......',
-      '......ohlo......',
-      '......ohlo......',
-      '......oooo......',
-      '................',
-    ],
-  },
-  'stone-pickaxe': {
-    palette,
-    grip: [7.5, 11.5],
-    pixels: [
-      '................',
-      '....ddddddd.....',
-      '...dbbbbbbdd....',
-      '..dbsssssssbd...',
-      '.dbsddttddssbd..',
-      '.dsd..tt..dssd..',
-      '.dd...oh...dsd..',
-      '......oh....dd..',
-      '......hl........',
-      '......hl........',
-      '......hl........',
-      '......hl........',
-      '......hl........',
-      '......hl........',
-      '......oo........',
-      '................',
-    ],
-  },
-};
-
-export const toolModelDefinition = (itemId: string): ToolModel | null =>
-  Object.hasOwn(models, itemId) ? models[itemId] : null;
+const definitions = new Map(
+  nativeToolAssets
+    .filter((a) => a.type === 'extruded-pixel-model')
+    .map((a) => [a.id.replace('builtin:model:', ''), resolvePixelModel(a, nativeToolAssets)]),
+);
+export const toolModelDefinition = (itemId: string): ToolModel | null => definitions.get(itemId) ?? null;
 
 /** One mesh per definition. Adjacent cells omit internal faces; front/back retain the pixel palette. */
 export function buildToolMesh(definition: ToolModel) {
@@ -101,8 +43,8 @@ export function buildToolMesh(definition: ToolModel) {
       const right = left + unit;
       const top = (definition.grip[1] - y) * unit;
       const bottom = top - unit;
-      const front = unit,
-        back = -unit;
+      const front = ((definition.thicknessPixels ?? 2) * unit) / 2,
+        back = -front;
       face(
         [
           [left, bottom, front],

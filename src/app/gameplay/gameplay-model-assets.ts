@@ -1,6 +1,10 @@
 import * as pc from 'playcanvas';
 import { itemVisualKind } from '../../client/presentation/gameplay-model-definition';
-import { buildToolMesh, toolModelDefinition } from '../../client/presentation/voxel-tool-model';
+import { toolModelDefinition } from '../../client/presentation/voxel-tool-model';
+
+import { createPixelMaterial, createPixelMesh, addPixelNode } from './pixel-model-resource';
+import { getItemDefinition } from '../../server/gameplay/item-registry';
+import { acceptsPixelItem } from '../../client/presentation/asset-adapters';
 
 type MaterialName =
   | 'dirt'
@@ -74,14 +78,9 @@ export class GameplayModelAssets {
   readonly materials: Record<MaterialName, pc.StandardMaterial>;
   private readonly textures: pc.Texture[];
   private readonly toolMeshes = new Map<string, pc.Mesh>();
-  private readonly toolMaterial = new pc.StandardMaterial();
+  private readonly toolMaterial = createPixelMaterial();
 
   constructor(private readonly app: pc.Application) {
-    this.toolMaterial.name = 'pixel-tool-palette';
-    this.toolMaterial.diffuse = pc.Color.WHITE;
-    this.toolMaterial.diffuseVertexColor = true;
-    this.toolMaterial.gloss = 0.12;
-    this.toolMaterial.update();
     this.textures = [];
     this.materials = Object.fromEntries(
       (Object.entries(swatches) as [MaterialName, readonly [string, string, string]][]).map(([name, colors]) => {
@@ -126,23 +125,15 @@ export class GameplayModelAssets {
   addItem(parent: pc.Entity, itemId: string, scale = 1): void {
     const definition = toolModelDefinition(itemId);
     if (definition) {
+      if (!acceptsPixelItem(getItemDefinition(itemId))) throw new Error('该物品不能使用像素挤出表现');
       let mesh = this.toolMeshes.get(itemId);
       if (!mesh) {
-        const data = buildToolMesh(definition);
-        mesh = new pc.Mesh(this.app.graphicsDevice);
-        mesh.setPositions(data.positions);
-        mesh.setNormals(data.normals);
-        mesh.setColors(data.colors);
-        mesh.setIndices(data.indices);
-        mesh.update(pc.PRIMITIVE_TRIANGLES);
+        mesh = createPixelMesh(this.app.graphicsDevice, definition);
         // Keep the cached mesh alive between the last displayed instance and its next use.
         mesh.incRefCount();
         this.toolMeshes.set(itemId, mesh);
       }
-      const node = new pc.Entity(`pixel-tool:${itemId}`);
-      node.setLocalScale(scale, scale, scale);
-      node.addComponent('render', { meshInstances: [new pc.MeshInstance(mesh, this.toolMaterial)] });
-      parent.addChild(node);
+      addPixelNode(parent, `pixel-tool:${itemId}`, mesh, this.toolMaterial, scale);
       return;
     }
     const visual = itemVisualKind(itemId);

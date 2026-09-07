@@ -3,7 +3,11 @@ import { type HeldAction, viewmodelPose } from '../../client/presentation/gamepl
 import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from '../gameplay/gameplay-model-assets';
 import { resolveViewmodelLayout } from '../../client/presentation/viewmodel-layout';
 
+import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
+import type { ToolModel } from '../../client/presentation/asset-types';
+
 export class FirstPersonViewmodel {
+  private releaseDraft: (() => void) | null = null;
   private readonly root = new pc.Entity('First person viewmodel');
   private readonly handPivot = new pc.Entity('viewmodel hand pivot');
   private readonly forearm = new pc.Entity('viewmodel forearm');
@@ -78,7 +82,9 @@ export class FirstPersonViewmodel {
   }
 
   setHeldItem(itemId: string | null): void {
-    if (itemId === this.heldItem) return;
+    if (itemId === this.heldItem && !this.releaseDraft) return;
+    this.releaseDraft?.();
+    this.releaseDraft = null;
     this.heldItem = itemId;
     this.setAction('idle');
     while (this.item.children.length) this.item.children[0].destroy();
@@ -86,6 +92,12 @@ export class FirstPersonViewmodel {
       this.assets.addItem(this.item, itemId, 0.55);
       this.applyLayer(this.item);
     }
+  }
+
+  setHeldDefinition(definition: ToolModel): void {
+    this.setHeldItem(null);
+    this.releaseDraft = createDraftPixelResource(this.app, this.item, definition, 0.55);
+    this.applyLayer(this.item);
   }
 
   setAction(action: HeldAction, restart = false): void {
@@ -123,6 +135,7 @@ export class FirstPersonViewmodel {
   }
 
   dispose(): void {
+    this.releaseDraft?.();
     this.root.destroy();
     this.viewmodelCamera?.destroy();
     if (this.layer) this.app.scene.layers.remove(this.layer);
