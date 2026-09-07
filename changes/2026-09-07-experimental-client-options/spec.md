@@ -170,7 +170,7 @@ initializeSeedlands(options?: SeedlandsInitializationOptions): Promise<void>;
 - [x] **Midscene：** 交互式 zsh 读取用户全局配置后，`pnpm midscene:verify-model` 通过；指定系统 Chrome 执行 `experimental-settings.yaml` 为 1/1 通过，耗时 65.91 秒，覆盖设置入口、推荐默认、下拉选项、紧凑开关、变更提示与返回主菜单。报告位于忽略目录 `midscene_run/report/experimental-settings-2026-09-07_15-41-59-d3717d06.html`。
 - [x] **Playwright-baseline：** 关联运行 9/9 通过；TS profile 真实命中 WebGL2 + Wasm off，默认 profile 真实命中 WebGL2 + SIMD artifact + `w02–w06`，Fluid lane 均按合同报告 `off / no-selected-kernel`。
 - [x] **Harness：** run `eac329ff-efb8-4221-97f8-cccdecb48cf2`、source `044d2920a8db3038b18e77c4e952bc2876f0172f`、Node `v24.20.0` / darwin arm64 / Chromium / 12 核估算下，两个本 change profile 均为 PASS 且已写入 schema v2 基线。聚合命令同时报告了本 change 未修改的 World Mutation 独立门禁失败：10k single edit p50/p95 为 `8.60/9.47 ms`，上限 `3.86/4.73 ms`，100k batch speedup `0.98x`，要求 `>=2x`；该项保留为跨 change 已知风险，不冒充本 change profile 失败。
-- [x] **Static：** 格式、ESLint、路径检查与类型检查通过；coverage 限制为 4 workers 后为 182 个文件通过、2 个跳过，863 个用例通过、4 个跳过，coverage 为 statements 95.37%、branches 90.42%、functions 96.93%、lines 96.89%。默认并发的两次重复运行分别让未触及的 Wasm mesh 与 headless CLI 长用例越过各自 30 秒 / 15 秒超时，对应 Wasm 文件单跑 6/6 通过；该机器负载敏感性保留在证据中，并由 GitHub Actions 当前 PR revision 再确认。`CI=true` 本地入口还在执行脚本前被 pnpm 供应链检查阻断，错误为 `devalue@5.9.2` 无法从当前 registry manifest 验证 minimumReleaseAge，未改 lockfile、registry 或策略规避。
+- [x] **Static：** 干净提交快照关闭本地 Vite 预览后，`pnpm verify:static` 完整通过：182 个文件通过、2 个跳过，863 个用例通过、4 个跳过，coverage 为 statements 95.37%、branches 90.42%、functions 96.93%、lines 96.89%，Svelte / TypeScript 0 error。此前预览进程同时监听 coverage 与 Midscene 报告时，两次重复运行分别让未触及的 Wasm mesh 与 headless CLI 长用例越过各自 30 秒 / 15 秒超时；对应 Wasm 文件单跑 6/6 通过，停止预览后默认并发入口恢复通过。`CI=true` 本地入口还在执行脚本前被 pnpm 供应链检查阻断，错误为 `devalue@5.9.2` 无法从当前 registry manifest 验证 minimumReleaseAge，未改 lockfile、registry 或策略规避。
 - [x] **Build：** `pnpm build` 通过，Wasm 源码 / artifact 指纹、TypeScript / Svelte 和 Vite 生产构建均通过；产物包含 WebGL2 / WebGPU 路径、scalar / SIMD Wasm 和 `capability-probe-worker`。`CI=true` 与 Static 共用的 pnpm 前置检查仍受上一项环境阻塞。
 - [x] **Documentation：** README 与中文镜像记录默认组合、TS 不可关闭、配置入口与优先级、刷新生效、持久化、定向回退、Worker 门禁和警告。
 - [x] **Delivery Snapshot：** 已写回实现路径、验证命令、浏览器环境、双基线数据、真实 requested / effective 状态与限制；因仍有两项未准出，不创建 Delivered 本地提交。
@@ -209,7 +209,7 @@ initializeSeedlands(options?: SeedlandsInitializationOptions): Promise<void>;
 
 ### 已执行命令与限制
 
-- `pnpm exec vitest run --coverage --maxWorkers=4`：182 个文件通过、2 个跳过，863 个用例通过、4 个跳过；`pnpm build`：PASS；`pnpm exec playwright test changes/2026-09-07-experimental-client-options/e2e`：5/5 PASS；关联长期 Playwright：9/9 PASS。
+- `pnpm verify:static`：PASS，182 个文件通过、2 个跳过，863 个用例通过、4 个跳过；`pnpm build`：PASS；`pnpm exec playwright test changes/2026-09-07-experimental-client-options/e2e`：5/5 PASS；关联长期 Playwright：9/9 PASS。
 - `pnpm harness:baseline` 的浏览器阶段与两个 profile 均 PASS，`harness/baseline.json` 已更新；最终进程因上文独立 World Mutation 门禁返回 1。当前 diff 未修改 `src/server/game-server.ts`、`world-mutation.ts` 或 `world-transaction-commit.ts`，因此该回归保留为显式阻塞，不在本 change 扩张修复范围。
 - `CI=true pnpm verify:static`：在脚本执行前被 pnpm registry / minimumReleaseAge 检查阻断；普通本地确定性入口已通过。
 - `pnpm midscene:verify-model`：交互式 zsh 下 PASS；Midscene YAML：1/1 PASS。修复前后截图与联合对照保存在本 change 的 `evidence/`，根目录 `design-qa.md` 结论为 `passed`。
