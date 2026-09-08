@@ -31,6 +31,10 @@ import {
   playableNetworkLimits,
 } from './node-playable-network-limits';
 import { createPlayableNetworkRateLimit } from './node-playable-network-rate-limit';
+import {
+  NodePlayableInputDiagnostics,
+  type NodePlayableInputDiagnosticSummary,
+} from './node-playable-input-diagnostics';
 
 const MAX_PENDING_REQUESTS = 32;
 const MAX_PENDING_CHECKPOINT_REQUESTS = 1;
@@ -41,6 +45,7 @@ const MAX_DIAGNOSTIC_EVENTS = 96;
 
 export type NodePlayableSessionDiagnosticEvent =
   | NodePlayableBaselineDiagnosticEvent
+  | NodePlayableInputDiagnosticSummary
   | Readonly<{
       kind: 'node-playable-baseline-diagnostic';
       requestOrdinal: number;
@@ -126,6 +131,7 @@ export function createSession(
   let baselineTail = Promise.resolve();
   let baselineOrdinal = 0;
   let diagnosticEvents = 0;
+  const inputDiagnostics = diagnostic ? new NodePlayableInputDiagnostics() : null;
   let closed = false;
   let resolveClosed!: () => void;
   const closedSignal = new Promise<void>((resolve) => {
@@ -190,6 +196,13 @@ export function createSession(
     for (const captureId of pendingCaptures.values())
       void authority.cancelBaselineCapture(captureId).catch(() => undefined);
     pendingCaptures.clear();
+    if (diagnostic)
+      try {
+        const latest = authority.latestSnapshot() ?? ready.snapshot;
+        diagnostic(inputDiagnostics!.summary(latest));
+      } catch {
+        /* Test-only diagnostics cannot affect session cleanup. */
+      }
     socket.close(code, reason.slice(0, 120));
     onTerminal();
   };
@@ -288,11 +301,12 @@ export function createSession(
     if (!sameRef(message.ref, ref)) throw new Error('Session reference does not match the active connection.');
     lastInboundAt = performance.now();
     if (message.kind === 'input-state') {
+      const currentTick = authority.latestSnapshot()?.physicsTick ?? ready.snapshot.physicsTick;
+      const inputSample = inputDiagnostics?.admit(message, currentTick) ?? null;
       let decision: SequenceDecision;
       if (message.inputSequence <= lastClientInputSequence) decision = 'out-of-order';
       else if (message.targetPhysicsTick > message.expiresAfterPhysicsTick) decision = 'invalid';
       else {
-        const currentTick = authority.latestSnapshot()?.physicsTick ?? ready.snapshot.physicsTick;
         if (message.expiresAfterPhysicsTick <= currentTick || message.targetPhysicsTick <= currentTick)
           decision = 'late';
         else if (message.targetPhysicsTick > currentTick + 120) decision = 'too-far-ahead';
@@ -331,12 +345,14 @@ export function createSession(
           if (decision === 'accepted') inputMappings.set(serverSequence, message.inputSequence);
         }
       }
+      inputDiagnostics?.decide(inputSample, decision);
+      const requiresResync = decision !== 'accepted' && decision !== 'duplicate';
       await enqueue('input-decision', {
         kind: 'input-decision',
         ref,
         inputSequence: message.inputSequence,
         decision,
-        requiresResync: decision !== 'accepted' && decision !== 'duplicate',
+        requiresResync,
       });
       return;
     }

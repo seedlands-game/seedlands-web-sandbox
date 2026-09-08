@@ -93,7 +93,7 @@ const interest = (requestId: number) =>
     utf8,
   );
 
-const input = (inputSequence: number) =>
+const input = (inputSequence: number, targetPhysicsTick = 20) =>
   encodeC0Envelope(
     {
       messageClass: 'input-state',
@@ -101,7 +101,7 @@ const input = (inputSequence: number) =>
         kind: 'input-state',
         ref,
         inputSequence,
-        targetPhysicsTick: 20,
+        targetPhysicsTick,
         expiresAfterPhysicsTick: 40,
         moveX: 0,
         moveZ: 1,
@@ -213,6 +213,66 @@ describe('playable session asynchronous request budget', () => {
     expect(receiveInput).toHaveBeenCalledTimes(32);
   });
 
+  it('emits one bounded input summary when the session ends', async () => {
+    const socket = new FakeSocket();
+    const diagnostics: NodePlayableSessionDiagnosticEvent[] = [];
+    const authority = {
+      receiveInput: vi.fn(async () => 'accepted' as const),
+      latestSnapshot: () => ready.snapshot,
+      subscribePublication: () => () => undefined,
+      clearInput: async () => undefined,
+      cancelBaselineCapture: async () => ({ status: 'cancelled' }),
+    } as unknown as NodeAuthorityLane;
+    let serverInputSequence = 0;
+    createSession(
+      socket as never,
+      authority,
+      ref,
+      ready,
+      'node-checkpoint',
+      () => undefined,
+      () => serverInputSequence++,
+      () => 1,
+      () => 1,
+      (event) => diagnostics.push(event),
+    );
+
+    socket.emit('message', input(0), true);
+    socket.emit('message', input(1, 1), true);
+    for (let sequence = 2; sequence < 20; sequence += 1) socket.emit('message', input(sequence), true);
+    await vi.waitFor(() => expect(socket.sent).toBe(20));
+    socket.emit('close');
+
+    const summaries = diagnostics.filter((event) => event.kind === 'node-playable-input-summary');
+    expect(summaries).toHaveLength(1);
+    expect(summaries[0]).toMatchObject({ received: 20, accepted: 19, late: 1, resync: 1 });
+    expect(summaries[0]?.samples).toHaveLength(16);
+    expect(summaries[0]?.samples.slice(0, 2)).toEqual([
+      {
+        ordinal: 1,
+        inputSequence: 0,
+        targetPhysicsTick: 20,
+        currentTickAtAdmission: 1,
+        expiresAfterPhysicsTick: 40,
+        moveX: 0,
+        moveZ: 1,
+        decision: 'accepted',
+      },
+      {
+        ordinal: 2,
+        inputSequence: 1,
+        targetPhysicsTick: 1,
+        currentTickAtAdmission: 1,
+        expiresAfterPhysicsTick: 40,
+        moveX: 0,
+        moveZ: 1,
+        decision: 'late',
+      },
+    ]);
+    expect(summaries[0]?.latestAuthorityPosition).toEqual([0.5, 40, 0.5]);
+    expect(JSON.stringify(summaries[0])).not.toContain('checkpoint-session');
+  });
+
   it('reports bounded anonymous baseline stages without exposing the requested key', async () => {
     const socket = new FakeSocket();
     const diagnostics: NodePlayableSessionDiagnosticEvent[] = [];
@@ -249,9 +309,10 @@ describe('playable session asynchronous request budget', () => {
     await vi.waitFor(() => expect(captureBaseline).toHaveBeenCalledTimes(20));
     await session.whenDrained();
 
-    expect(diagnostics.length).toBeLessThanOrEqual(96);
-    expect(Math.max(...diagnostics.map((event) => event.requestOrdinal))).toBe(12);
-    expect(diagnostics.filter((event) => event.requestOrdinal === 1).map((event) => event.stage)).toEqual([
+    const baselineDiagnostics = diagnostics.filter((event) => event.kind === 'node-playable-baseline-diagnostic');
+    expect(baselineDiagnostics.length).toBeLessThanOrEqual(96);
+    expect(Math.max(...baselineDiagnostics.map((event) => event.requestOrdinal))).toBe(12);
+    expect(baselineDiagnostics.filter((event) => event.requestOrdinal === 1).map((event) => event.stage)).toEqual([
       'tail-queued',
       'tail-start',
       'capture-start',
@@ -260,7 +321,7 @@ describe('playable session asynchronous request budget', () => {
       'send-complete',
     ]);
     expect(JSON.stringify(diagnostics)).not.toContain('0,1,0');
-    expect(Object.keys(diagnostics[0]!).sort()).toEqual(
+    expect(Object.keys(baselineDiagnostics[0]!).sort()).toEqual(
       ['elapsedMs', 'kind', 'queueDepth', 'requestOrdinal', 'stage'].sort(),
     );
     session.close();

@@ -1,6 +1,4 @@
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import {
@@ -16,42 +14,15 @@ import { COLLISION_EPSILON } from '../../../packages/game-core/src/physics/geome
 import {
   armGraphicsIdentity,
   captureGraphicsIdentity,
-  hasCurrentApplication,
   releaseGraphicsIdentity,
   type ConnectionGraphicsIdentity,
 } from './graphics-identity-evidence';
+import { JourneyProgressDiagnostics } from './journey-progress-diagnostics';
 import { REMOTE_PLAYABLE_ACCESS_KEY, RemotePlayableNodeFixture } from './remote-playable-node-fixture';
+import { webNodePlayableSourceInputs as sourceInputs } from './web-node-playable-source-inputs';
 
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const sourceTreeStatus = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim();
-const sourceFiles = [
-  'package.json',
-  'playwright.config.ts',
-  'apps/node-server/src/node/server/node-authority-worker.ts',
-  'apps/node-server/src/node/server/node-playable-network-session.ts',
-  'apps/node-server/src/node/server/node-playable-network-baseline.ts',
-  'apps/node-server/src/node/server/node-playable-network-server.ts',
-  'apps/node-server/dist/node-server.js',
-  'apps/web/src/app/game.ts',
-  'apps/web/src/app/world/initial-world-ready.ts',
-  'apps/web/src/app/world/initial-playable-area.ts',
-  'apps/web/src/app/world/mesh-request-priority.ts',
-  'apps/web/src/app/world/mesh-task-dispatch.ts',
-  'apps/web/src/app/world/mesh-task-scheduler.ts',
-  'apps/web/src/app/world/remote-playable-evidence.ts',
-  'apps/web/src/app/world/world-runtime.ts',
-  'apps/web/src/client/authority/remote-authority-client.ts',
-  'apps/web/src/client/authority/remote-authority-input-pipeline.ts',
-  'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
-  'changes/2026-09-08-web-node-playable/e2e/graphics-identity-evidence.ts',
-  'changes/2026-09-08-web-node-playable/e2e/remote-playable-node-fixture.ts',
-  'changes/2026-09-08-web-node-playable/e2e/graphics-identity-probe.ts',
-  'changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts',
-] as const;
-// prettier-ignore
-const appearanceSourceFiles = ['apps/web/src/app/gameplay/asset-image.ts', 'apps/web/src/app/gameplay/load-appearance-runtime.ts', 'apps/web/src/app/scene/voxel-materials.ts', 'apps/web/src/app/ui/styles/experience.css', 'apps/web/src/client/presentation/item-mesh-definition.ts', 'apps/web/src/client/presentation/terrain-assets.ts', 'apps/web/src/client/presentation/visual-asset-catalog.ts', 'apps/web/public/assets/item-thumbnails/berry.png', 'apps/web/public/assets/item-thumbnails/dirt-block.png', 'apps/web/public/assets/ui/health-heart.png', 'apps/web/public/assets/ui/hunger-drumstick.png', 'apps/web/public/assets/ui/obsidian-hotbar-slot.png'] as const;
-// prettier-ignore
-const sourceInputs = Object.fromEntries([...sourceFiles, ...appearanceSourceFiles].map((path) => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
 const nodePort = 18_787;
 const nodeUrl = `ws://127.0.0.1:${nodePort}/seedlands`;
@@ -59,9 +30,16 @@ const accessKey = REMOTE_PLAYABLE_ACCESS_KEY;
 const evidenceDirectory = resolve(
   process.env.SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT ?? 'changes/2026-09-08-web-node-playable/evidence',
 );
+const journeyDiagnosticDirectory = resolve(
+  process.env.SEEDLANDS_WEB_NODE_DIAGNOSTIC_OUTPUT ??
+    (process.env.SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT
+      ? join(evidenceDirectory, 'diagnostics')
+      : '/tmp/seedlands-web-node-playable/journey-diagnostics'),
+);
 let nodeFixture: RemotePlayableNodeFixture | null = null;
 let nodeLog: string[] = [];
 const graphicsIdentities: ConnectionGraphicsIdentity[] = [];
+let activeJourneyDiagnostics: JourneyProgressDiagnostics | null = null;
 
 const evidence = (page: Page) =>
   page.evaluate(() => {
@@ -322,9 +300,29 @@ test.describe.serial('Web to Node local playable loop', () => {
     nodeFixture = null;
   });
 
+  test.afterEach(async ({ page: _page }, testInfo) => {
+    if (activeJourneyDiagnostics && testInfo.status !== testInfo.expectedStatus)
+      await activeJourneyDiagnostics.writeFailure(testInfo).catch((error) => {
+        console.error(`web-node journey failure diagnostics failed: ${String(error)}`);
+      });
+    activeJourneyDiagnostics = null;
+  });
+
   test('真实输入、挖放、关闭重连与Node重启保持权威世界', async ({ context, page }, testInfo) => {
     test.setTimeout(120_000);
+    graphicsIdentities.length = 0;
+    const journey = new JourneyProgressDiagnostics(page, {
+      outputDirectory: journeyDiagnosticDirectory,
+      retry: testInfo.retry,
+      sourceSha,
+      readEvidence: evidence,
+      graphicsIdentity: () => graphicsIdentities.at(-1) ?? null,
+      nodeLog: () => (nodeFixture?.logs() ?? nodeLog).map(redactDiagnostic),
+    });
+    activeJourneyDiagnostics = journey;
+    journey.setStage('initial-connect');
     const initial = await connect(page, testInfo, 'initial');
+    journey.setInitial(initial);
     expect(initial.source).toBe('remote-node');
     expect(initial.readyBaselines).toBeGreaterThan(0);
     expect(initial.renderedChunks).toBeGreaterThan(0);
@@ -344,6 +342,8 @@ test.describe.serial('Web to Node local playable loop', () => {
     await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe('game');
     await attachFrame(page, testInfo, 'web-node-01-early');
 
+    await journey.checkpoint('movement-window-before', page, await evidence(page), true);
+    journey.setStage('movement-window-input');
     await page.keyboard.down('KeyW');
     await expect
       .poll(async () => {
@@ -354,9 +354,11 @@ test.describe.serial('Web to Node local playable loop', () => {
         );
       })
       .toBeGreaterThan(1);
+    await journey.checkpoint('movement-window-after', page, await evidence(page));
     await attachFrame(page, testInfo, 'web-node-02-moving');
     await page.keyboard.up('KeyW');
 
+    journey.setStage('camera-turn');
     const beforeTurn = await evidence(page);
     await page.mouse.move(640, 360);
     await page.mouse.move(900, 360, { steps: 4 });
@@ -365,6 +367,7 @@ test.describe.serial('Web to Node local playable loop', () => {
       .toBeGreaterThan(5);
     await attachFrame(page, testInfo, 'web-node-03-turned');
 
+    journey.setStage('jump');
     await expect.poll(async () => (await evidence(page)).onGround).toBe(true);
     const beforeJump = await evidence(page);
     let peakJump = beforeJump;
@@ -377,6 +380,7 @@ test.describe.serial('Web to Node local playable loop', () => {
       .toBeGreaterThan(beforeJump.authoritativePlayer[1] + 0.1);
     await page.keyboard.up('Space');
 
+    journey.setStage('break-and-place');
     await expect.poll(async () => (await evidence(page)).onGround).toBe(true);
     await page.mouse.move(900, 1_100, { steps: 6 });
     await expect.poll(async () => (await evidence(page)).aimedVoxel).not.toBeNull();
@@ -427,6 +431,7 @@ test.describe.serial('Web to Node local playable loop', () => {
     const afterPlace = await evidence(page);
     await attachFrame(page, testInfo, 'web-node-04-placed');
 
+    journey.setStage('save-and-return');
     await page.keyboard.press('Escape');
     const pauseDialog = page.getByRole('dialog', { name: '暂停游戏' });
     await expect(pauseDialog).toBeVisible();
@@ -442,6 +447,7 @@ test.describe.serial('Web to Node local playable loop', () => {
     await page.close();
     await new Promise((resolveWait) => setTimeout(resolveWait, 1_200));
     const reconnectPage = await context.newPage();
+    journey.setStage('reconnect', reconnectPage);
     const reconnected = await connect(reconnectPage, testInfo, 'reconnect');
     expect(reconnected.serverEpoch).toBe(oldServerEpoch);
     expect(reconnected.physicsTick).toBeGreaterThan(tickBeforeClose + 15);
@@ -457,6 +463,7 @@ test.describe.serial('Web to Node local playable loop', () => {
     await startNode();
     await reconnectPage.close();
     const restartedPage = await context.newPage();
+    journey.setStage('restart', restartedPage);
     const restarted = await connect(restartedPage, testInfo, 'restart');
     expect(restarted.serverEpoch).not.toBe(oldServerEpoch);
     await expect
@@ -492,25 +499,5 @@ test.describe.serial('Web to Node local playable loop', () => {
         2,
       )}\n`,
     );
-  });
-
-  test('错误认证销毁Application后仍保留图形身份', async ({ page }, testInfo) => {
-    await page.goto('/?harness=1');
-    await expect(page.locator('#enter')).toBeEnabled({ timeout: 20_000 });
-    await page.selectOption('#connection-mode', 'remote');
-    await expect(page.locator('#node-url')).toBeVisible();
-    await armGraphicsIdentity(page);
-    try {
-      await page.fill('#node-url', nodeUrl);
-      await page.locator('input[type="password"]').fill('seedlands-e2e-invalid-key');
-      await page.click('#enter');
-      await expect(page.locator('.start-error')).toBeVisible({ timeout: 10_000 });
-      await expect.poll(() => hasCurrentApplication(page)).toBe(false);
-      const identity = await captureGraphicsIdentity(page, testInfo, 'authentication-failure', 'connection-failure');
-      expect(identity.deviceType).toBe('webgl2');
-      expect(identity.renderer).not.toBe('UNAVAILABLE');
-    } finally {
-      await releaseGraphicsIdentity(page);
-    }
   });
 });

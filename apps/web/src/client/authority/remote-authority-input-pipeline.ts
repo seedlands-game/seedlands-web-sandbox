@@ -1,8 +1,13 @@
 import type { InputCommand } from '@seedlands/game-core/runtime/session-protocol';
+import type { SequenceDecision } from '@seedlands/game-core/runtime/session-protocol';
 import type {
   PublicInboundMessage,
   PublicSessionRef,
 } from '@seedlands/game-core/server/protocol/network-message-semantics';
+import {
+  RemoteAuthorityInputDiagnostics,
+  type RemoteInputDiagnosticSummary,
+} from './remote-authority-input-diagnostics';
 
 export type PendingRemoteInput = Readonly<{ command: InputCommand; jumpExpiresAtMs: number | null }>;
 export type RemoteInputDecisionResult =
@@ -12,6 +17,7 @@ export class RemoteAuthorityInputPipeline {
   private inFlightSequence: number | null = null;
   private lastSentSequence = -1;
   private queued: PendingRemoteInput | null = null;
+  private diagnostics: RemoteAuthorityInputDiagnostics | null = null;
 
   submit(command: InputCommand, now: number, jumpLeaseMs: number): PendingRemoteInput | null {
     const latestSequence = this.queued?.command.sequence ?? this.lastSentSequence;
@@ -32,8 +38,16 @@ export class RemoteAuthorityInputPipeline {
     return pending;
   }
 
-  acceptDecision(inputSequence: number, requiresResync: boolean): RemoteInputDecisionResult {
-    if (inputSequence !== this.inFlightSequence) return { matched: false };
+  acceptDecision(
+    input: Readonly<{ inputSequence: number; decision: SequenceDecision; requiresResync: boolean }>,
+    now: number,
+  ): RemoteInputDecisionResult {
+    const { inputSequence, decision, requiresResync } = input;
+    if (inputSequence !== this.inFlightSequence) {
+      this.diagnostics?.ignoredDecision();
+      return { matched: false };
+    }
+    this.diagnostics?.matchedDecision(inputSequence, decision, requiresResync, now);
     this.inFlightSequence = null;
     if (requiresResync) this.queued = null;
     if (!this.queued) return { matched: true, next: null };
@@ -46,6 +60,21 @@ export class RemoteAuthorityInputPipeline {
   clear(): void {
     this.inFlightSequence = null;
     this.queued = null;
+  }
+
+  recordSent(
+    projected: ReturnType<typeof projectRemoteInput>,
+    snapshotPhysicsTick: number,
+    snapshotReceivedAtMs: number,
+    now: number,
+    diagnosticsEnabled: boolean,
+  ): void {
+    if (diagnosticsEnabled) this.diagnostics ??= new RemoteAuthorityInputDiagnostics();
+    this.diagnostics?.sent(projected, snapshotPhysicsTick, snapshotReceivedAtMs, now);
+  }
+
+  diagnosticSummary(): RemoteInputDiagnosticSummary | null {
+    return this.diagnostics?.snapshot() ?? null;
   }
 
   private markInFlight(input: PendingRemoteInput): void {

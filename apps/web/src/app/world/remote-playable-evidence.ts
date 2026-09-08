@@ -1,4 +1,5 @@
 import type { RemoteAuthorityClient } from '../../client/authority/remote-authority-client';
+import type { RemoteInputDiagnosticSummary } from '../../client/authority/remote-authority-input-diagnostics';
 import type { PlayerController } from '../player/player-controller';
 import type { World } from './world-runtime';
 import { CHUNK_SIZE, floorDiv } from '@seedlands/game-core/world/voxel';
@@ -14,6 +15,7 @@ export type RemotePlayableEvidence = Readonly<{
   authoritativePlayer: [number, number, number];
   presentedPlayer: [number, number, number];
   onGround: boolean;
+  interactionBlocked: boolean;
   viewAngles: readonly [number, number];
   aimedVoxel: readonly [number, number, number] | null;
   aimedAdjacent: readonly [number, number, number] | null;
@@ -26,6 +28,7 @@ export type RemotePlayableEvidence = Readonly<{
   loadedChunks: number;
   renderedChunks: number;
   readyBaselines: number;
+  inputDiagnostics: RemoteInputDiagnosticSummary | null;
 }>;
 
 declare global {
@@ -64,6 +67,7 @@ export function installRemotePlayableEvidence(
         ] as [number, number, number],
         presentedPlayer: [presented.x, presented.y, presented.z] as [number, number, number],
         onGround: controller.onGround,
+        interactionBlocked: controller.interactionBlocked,
         viewAngles: controller.viewAngles,
         aimedVoxel: controller.aimedVoxel,
         aimedAdjacent: controller.aimTarget?.adjacent ?? null,
@@ -80,6 +84,7 @@ export function installRemotePlayableEvidence(
         loadedChunks: worldState.loadedChunks,
         renderedChunks: worldState.renderedChunks,
         readyBaselines: authority.readyBaselines,
+        inputDiagnostics: authorityState.inputDiagnostics,
       });
     },
     voxelAt: (x: number, y: number, z: number) => world.getVoxel(x, y, z),

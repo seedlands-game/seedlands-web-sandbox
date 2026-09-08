@@ -114,6 +114,7 @@ type ClientInternals = {
 const createClient = (
   options: Readonly<{
     onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
+    initialSyncDiagnostics?: boolean;
   }> = {},
 ) => {
   vi.stubGlobal('WebSocket', { OPEN: 1 });
@@ -212,6 +213,34 @@ describe('RemoteAuthorityClient boundary', () => {
     expect(inputStates(socket)[1]).toMatchObject({ inputSequence: 64, moveZ: 0.64 });
     await deliverDecision(internals, 64);
     expect(inputStates(socket)).toHaveLength(2);
+  });
+
+  it('reports bounded non-neutral input timing with accepted and late decisions', async () => {
+    const clock = vi.spyOn(performance, 'now').mockReturnValue(100);
+    const { client, internals } = createClient({ initialSyncDiagnostics: true });
+    for (let sequence = 0; sequence < 20; sequence += 1) {
+      clock.mockReturnValue(110 + sequence * 10);
+      client.sendInput(command(sequence, 0.5));
+      clock.mockReturnValue(115 + sequence * 10);
+      await deliverDecision(internals, sequence, sequence === 1);
+    }
+
+    const diagnostics = client.evidenceSnapshot().inputDiagnostics;
+    expect(diagnostics).toMatchObject({ sent: 20, matchedDecisions: 20, accepted: 19, late: 1, resync: 1 });
+    expect(diagnostics?.samples).toHaveLength(16);
+    expect(diagnostics?.samples[0]).toMatchObject({
+      ordinal: 1,
+      inputSequence: 0,
+      targetPhysicsTick: 10,
+      snapshotPhysicsTick: 1,
+      snapshotElapsedMs: 10,
+      decisionLatencyMs: 5,
+      decision: 'accepted',
+      moveX: 0,
+      moveZ: 0.5,
+    });
+    expect(diagnostics?.samples[1]).toMatchObject({ decision: 'late', decisionLatencyMs: 5 });
+    expect(JSON.stringify(diagnostics)).not.toContain('remote-session-test');
   });
 
   it('retains one coalesced jump in the latest state tick window but never revives it after its original lease', async () => {

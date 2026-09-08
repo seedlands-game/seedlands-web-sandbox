@@ -53,6 +53,14 @@ CI `34219596804` 的正式 `AAABBA` 中 A/B 全部在约 8–11 秒 ready，A �
 
 下一步只做图形环境正确性兼容对照：同一 Linux/base/seed、完整 Pointer Lock 键鼠、挖放、保存、关闭重连及 Node 重启旅程和 30 秒门槛保持不变，分别记录默认启动与显式 SwiftShader 的真实 WebGL2 renderer、vendor、version 和 browserVersion。Playwright 只在测试环境变量明确开启时增加与停止实验完全相同的 3 个 Chromium 参数；默认启动不变。identity probe 在点击前 arm，以临时 rAF 等待 PlayCanvas 创建真实 `Application.graphicsDevice`，首次读取后立即停止并缓存；成功或 Application 已销毁的失败路径均读取该缓存，连接结算时清除未完成 rAF。它不提前调用 `canvas.getContext`、不改变 render 状态或逐帧采样，并将身份放入成功 JSON 或失败诊断。显式 SwiftShader 对照若任一原断言失败、不是 WebGL2、未回读 SwiftShader 或不能完成原始最终帧，即判兼容失败；通过只说明该图形环境可完成原旅程，不代表性能改善。RED 为当前旅程 JSON/失败诊断没有图形身份，且没有独立测试开关可复现实验启动参数。
 
+### movement-window 输入对账诊断
+
+CI `34222361251` 中默认与显式对照实际都回读为 SwiftShader；显式对照通过首屏与 Pointer Lock 后，按住 W 5 秒仅产生约 0.01964 的水平权威位移。现有失败证据无法分清浏览器是否发送了非中性输入、Node 是否按 late/resync 拒绝或输入在接纳后才因碰撞停止，因此先补对账，不改变 target tick、500ms lease、Node late 规则、30 秒门槛、移动距离、seed、质量或 CPU/图形参数。
+
+诊断只在远端 Harness 的既有 `initialSyncDiagnostics` 与 Node E2E 的 `SEEDLANDS_E2E_PLAYABLE_DIAGNOSTICS=1` 下启用，生命周期随单个连接创建和释放。Web 记录 sent/匹配与忽略 decision/accepted/late/resync 累计值，以及最多 16 个非中性输入的 target tick、发送时 snapshot tick、snapshot 接收后 elapsed、moveX/Z、发送到匹配 decision 的耗时和结果；neutral idle 不占 16 项窗口。Node 只在会话结束输出一份累计 input summary，包含 accepted/late/resync 等 decision 计数、最多 16 个非中性输入的 target/current-at-admission/expiry/move/decision 和最近权威位置，不逐输入写 stdout。两端均不记录 URL、口令、ref、frame 或内部写入口；诊断回调失败不得影响会话。
+
+完整旅程从 initial connect 起维护当前 stage，并在 W 前后写独立 `/tmp` progress；任一后续失败写 failure JSON，包含 initial/current 权威与呈现位置、physics tick、ground/view/aim、`interactionBlocked`、Pointer Lock/focus/visibility、已缓存 graphics identity 和 Node 日志。RED 为现有 W 失败只能看到位移断言，Web/Node 都没有可对账 input summary，且最终 JSON 之前不会保留进度。GREEN 用确定性 accepted/late/resync 时钟夹具核对计数和延迟，以超过 16 个非中性输入证明有界，并用真实错误/正常浏览器流程证明失败前已保存阶段证据。CI 观察以同一完整旅程原断言为准：若 W 失败，必须能判断非中性输入是否发出、其 target 与 admission tick、decision 及失败时两侧位置；取得这些证据前不修改 lead 或放宽 late。
+
 ## 阶段与保存
 
 - [x] M0：合同、预算、接口接缝审阅与可执行 RED；提交并推送。

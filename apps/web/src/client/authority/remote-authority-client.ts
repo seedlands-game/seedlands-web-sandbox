@@ -202,7 +202,8 @@ export class RemoteAuthorityClient {
   evidenceSnapshot() {
     const snapshot = this.snapshotValue;
     if (!snapshot) throw new Error('Node authority evidence 尚未 ready。');
-    return Object.freeze({ clientEpoch: this.epoch, serverEpoch: this.serverEpoch, snapshot });
+    // prettier-ignore
+    return Object.freeze({ clientEpoch: this.epoch, serverEpoch: this.serverEpoch, snapshot, inputDiagnostics: this.inputPipeline.diagnosticSummary() });
   }
 
   sendInput(command: InputCommand): void {
@@ -224,8 +225,7 @@ export class RemoteAuthorityClient {
   }
 
   private sendProjectedInput(input: Parameters<typeof projectRemoteInput>[0]): void {
-    const frequencies = this.requireReady().frequencies;
-    const now = performance.now();
+    const [frequencies, now] = [this.requireReady().frequencies, performance.now()] as const;
     const projected = projectRemoteInput(input, this.requireRef(), {
       now,
       snapshotReceivedAtMs: this.snapshotReceivedAtMs,
@@ -233,6 +233,8 @@ export class RemoteAuthorityClient {
       physicsHz: frequencies.physicsHz,
     });
     if (projected.edge) this.send('input-edge', { ...projected.edge, edgeId: ++this.edgeSequence });
+    // prettier-ignore
+    this.inputPipeline.recordSent(projected, this.snapshotValue?.physicsTick ?? 0, this.snapshotReceivedAtMs, now, Boolean(this.options.initialSyncDiagnostics));
     this.send('input-state', projected.state);
   }
 
@@ -361,7 +363,8 @@ export class RemoteAuthorityClient {
         );
       case 'input-decision': {
         const decision = message as unknown as Extract<PlayablePublicOutboundMessage, { kind: 'input-decision' }>;
-        const inputDecision = this.inputPipeline.acceptDecision(decision.inputSequence, decision.requiresResync);
+        // prettier-ignore
+        const inputDecision = this.inputPipeline.acceptDecision({ ...decision, decision: decision.decision as SequenceDecision }, performance.now());
         if (!inputDecision.matched) return null;
         this.options.onInputDecision?.({
           sequence: decision.inputSequence,
