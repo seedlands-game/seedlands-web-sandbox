@@ -155,6 +155,7 @@ jobs:
         env:
           SEEDLANDS_E2E_SWIFTSHADER: '1'
           SEEDLANDS_E2E_FULL_CHROMIUM: '1'
+          SEEDLANDS_WEB_NODE_QUALITY: low
         run: pnpm test:pr17:integration
       - name: Preserve Web to Node playable evidence
         if: ${{ !cancelled() }}

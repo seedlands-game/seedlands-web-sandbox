@@ -47,3 +47,5 @@
 CI `34260122925` 的真实失败证据：Linux 4 核显示“性能提示”，两个体验场用例未点击“仍然进入”；按已有 startHarnessWorld 的真实 UI 前置补齐。取消分页用例一轮观察到 descriptor→cancel 为 13,255 ms，因为 15 秒生产计时从请求开始，服务端准备耗去其余时间；改为有界记录同 requestId 的 interest-update→cancel，并独立保留 descriptor 后实际扣留时长，不修改生产 timeout，也不降低 14 秒验证线。main 已有连击用例一轮未观察到 7 点伤害、重试通过，保留 CI 原始结果，不以自动重跑掩盖失败。
 
 最终本地准出：20 项浏览器回归、3 项原远端闭环、268 米旧存档往返、35 项 portable Active Node，以及修正 CI 准备后的 3 项完整 Chromium 用例通过。详情见 [交付快照](delivery.md)。PR 首轮失败及测试准备修正已保留；最终 HEAD CI 以 PR17 实时检查为准，不自动合并。
+
+最终 CI `34261578158`：Static verification（含完整组合门禁与 Active Node）、Production build（含隔离安装）、20 项浏览器回归、原远端闭环及新远端木剑均通过。仅本地体验场连击观察失败；页面快照明确显示完整 Chromium/SwiftShader **Medium、约 2 FPS / 543 ms 帧时长**。新增 CI 步骤漏设已有软件验收的 Low 质量配置，导致离散输入/战斗阶段无法按原可玩前提采样。体验场复用已有 selectJourneyQuality，CI 显式使用 Low，与原远端步骤及通过的新远端木剑一致；本机默认仍 Medium。保留失败截图，不修改生产预算、默认画质、伤害/连击规则或断言，也不把该修正宣称为性能优化。软件 Medium 的可玩性不在本期准出范围。

@@ -47,3 +47,7 @@
 CI 首轮保留记录：`34260122925` 的 Production build 成功；浏览器 job 因 Linux 4 核性能提示未被点击而失败。已对两个体验场用例补真实“仍然进入”前置。取消分页用例曾以 descriptor→cancel 误判 13,255ms；现按生产计时起点记录同 requestId 的 request→cancel，另存 descriptor 后实际扣留时长，仍要求大于 14 秒。main 已有连击用例一轮未观察到 7 点伤害、自动重试通过，这不是本轮新的性能或产品正确性结论。
 
 上述 CI 准备修正后的本机完整 Chromium / SwiftShader：3 项一次通过（44.8 秒），包括本地体验场、本地切远端木剑持久化及迟到分页恢复；最新完整类型检查通过。最终提交包含交付记录与测试准备修正，不再修改生产实现。
+
+最终 CI `34261578158`：Static verification（含完整组合门禁与 Active Node）、Production build（含隔离安装）、20 项浏览器回归、原远端闭环及新远端木剑均通过。仅本地体验场连击观察失败；页面快照明确显示完整 Chromium/SwiftShader **Medium、约 2 FPS / 543 ms 帧时长**。新增 CI 步骤漏设已有软件验收的 Low 质量配置，导致离散输入/战斗阶段无法按原可玩前提采样。体验场复用已有 selectJourneyQuality，CI 显式使用 Low，与原远端步骤及通过的新远端木剑一致；本机默认仍 Medium。保留失败截图，不修改生产预算、默认画质、伤害/连击规则或断言，也不把该修正宣称为性能优化。软件 Medium 的可玩性不在本期准出范围。
+
+配置对齐后的 `pnpm test:pr17:integration` 在完整 Chromium / SwiftShader / Low 下 2 项一次通过（21.1 秒）。生产源码与已通过 CI Static/Build 的 `03c2ab6` 相同，本次差异仅为 CI 测试配置、测试选择画质与记录。
