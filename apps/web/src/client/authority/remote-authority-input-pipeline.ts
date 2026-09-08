@@ -5,6 +5,8 @@ import type {
 } from '@seedlands/game-core/server/protocol/network-message-semantics';
 
 export type PendingRemoteInput = Readonly<{ command: InputCommand; jumpExpiresAtMs: number | null }>;
+export type RemoteInputDecisionResult =
+  Readonly<{ matched: false }> | Readonly<{ matched: true; next: PendingRemoteInput | null }>;
 
 export class RemoteAuthorityInputPipeline {
   private inFlightSequence: number | null = null;
@@ -30,15 +32,15 @@ export class RemoteAuthorityInputPipeline {
     return pending;
   }
 
-  acceptDecision(inputSequence: number, requiresResync: boolean): PendingRemoteInput | null {
-    if (requiresResync) this.queued = null;
-    if (inputSequence !== this.inFlightSequence) return null;
+  acceptDecision(inputSequence: number, requiresResync: boolean): RemoteInputDecisionResult {
+    if (inputSequence !== this.inFlightSequence) return { matched: false };
     this.inFlightSequence = null;
-    if (requiresResync || !this.queued) return null;
+    if (requiresResync) this.queued = null;
+    if (!this.queued) return { matched: true, next: null };
     const pending = this.queued;
     this.queued = null;
     this.markInFlight(pending);
-    return pending;
+    return { matched: true, next: pending };
   }
 
   clear(): void {

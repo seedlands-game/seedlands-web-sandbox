@@ -245,18 +245,25 @@ describe('RemoteAuthorityClient boundary', () => {
     const active = createClient({ onInputDecision: decisions });
     active.client.sendInput(command(0));
     active.client.sendInput(command(1));
-    await deliverDecision(active.internals, 9);
+    await deliverDecision(active.internals, 9, true);
     expect(inputStates(active.socket)).toHaveLength(1);
-    await deliverDecision(active.internals, 0, true);
-    expect(inputStates(active.socket)).toHaveLength(1);
-    expect(decisions).toHaveBeenLastCalledWith({ sequence: 0, decision: 'late', requiresResync: true });
+    expect(decisions).not.toHaveBeenCalled();
+    await deliverDecision(active.internals, 0);
+    expect(inputStates(active.socket).at(-1)).toMatchObject({ inputSequence: 1 });
+    expect(decisions).toHaveBeenLastCalledWith({ sequence: 0, decision: 'accepted', requiresResync: false });
 
     active.client.sendInput(command(2));
-    active.client.sendInput(command(3));
-    await deliverDecision(active.internals, 0);
     expect(inputStates(active.socket)).toHaveLength(2);
-    await deliverDecision(active.internals, 2);
-    expect(inputStates(active.socket).at(-1)).toMatchObject({ inputSequence: 3 });
+    await deliverDecision(active.internals, 1, true);
+    expect(inputStates(active.socket)).toHaveLength(2);
+    expect(decisions).toHaveBeenLastCalledWith({ sequence: 1, decision: 'late', requiresResync: true });
+
+    active.client.sendInput(command(3));
+    active.client.sendInput(command(4));
+    await deliverDecision(active.internals, 1);
+    expect(inputStates(active.socket)).toHaveLength(3);
+    await deliverDecision(active.internals, 3);
+    expect(inputStates(active.socket).at(-1)).toMatchObject({ inputSequence: 4 });
 
     const closed = createClient();
     closed.client.sendInput(command(0));

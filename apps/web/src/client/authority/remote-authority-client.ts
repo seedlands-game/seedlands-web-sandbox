@@ -23,7 +23,6 @@ import type { ActionReceiptReference } from '@seedlands/game-core/server/protoco
 import { RemoteAuthorityMeshMirror } from './remote-authority-mesh-mirror';
 import type { AuthorityClientOptions, AuthoritySaveResult } from './browser-authority-client-contract';
 import { projectRemoteInput, RemoteAuthorityInputPipeline } from './remote-authority-input-pipeline';
-import type { PendingRemoteInput } from './remote-authority-input-pipeline';
 import {
   commitFromReference,
   gameplayFromReference,
@@ -220,7 +219,7 @@ export class RemoteAuthorityClient {
     if (pending) this.sendProjectedInput(pending);
   }
 
-  private sendProjectedInput(input: PendingRemoteInput): void {
+  private sendProjectedInput(input: Parameters<typeof projectRemoteInput>[0]): void {
     const frequencies = this.requireReady().frequencies;
     const now = performance.now();
     const projected = projectRemoteInput(input, this.requireRef(), {
@@ -358,14 +357,15 @@ export class RemoteAuthorityClient {
         );
       case 'input-decision': {
         const decision = message as unknown as Extract<PlayablePublicOutboundMessage, { kind: 'input-decision' }>;
-        const nextInput = this.inputPipeline.acceptDecision(decision.inputSequence, decision.requiresResync);
+        const inputDecision = this.inputPipeline.acceptDecision(decision.inputSequence, decision.requiresResync);
+        if (!inputDecision.matched) return null;
         this.options.onInputDecision?.({
           sequence: decision.inputSequence,
           decision: decision.decision as SequenceDecision,
           requiresResync: decision.requiresResync,
         });
-        if (nextInput && !this.disposed && !this.failed && this.socket.readyState === WebSocket.OPEN)
-          this.sendProjectedInput(nextInput);
+        if (inputDecision.next && !this.disposed && !this.failed && this.socket.readyState === WebSocket.OPEN)
+          this.sendProjectedInput(inputDecision.next);
         return null;
       }
       case 'baseline-descriptor':
