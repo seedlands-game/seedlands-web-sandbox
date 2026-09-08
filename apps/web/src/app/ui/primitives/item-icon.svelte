@@ -1,14 +1,8 @@
 <script lang="ts">
-  import { publicAssetUrl } from '../../../client/presentation/public-asset-url';
+  import { itemIconUrl } from '../../gameplay/asset-image';
   let { itemId }: { itemId: string | null } = $props();
-  const assetAliases: Record<string, string> = { 'glowstone-block': 'lantern' };
 </script>
 
 {#if itemId}
-  <img
-    class="item-icon"
-    src={publicAssetUrl(import.meta.env.BASE_URL, `assets/items/${assetAliases[itemId] ?? itemId}.png`)}
-    alt=""
-    aria-hidden="true"
-  />
+  <img class="item-icon" src={itemIconUrl(itemId, import.meta.env.BASE_URL)} alt="" aria-hidden="true" />
 {/if}

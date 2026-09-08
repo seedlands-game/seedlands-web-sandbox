@@ -1,9 +1,18 @@
 import * as pc from 'playcanvas';
 import { type HeldAction, viewmodelPose } from '../../client/presentation/gameplay-model-definition';
-import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from '../gameplay/gameplay-model-assets';
+import { addPlayerArm } from '../gameplay/builtin-actor-models';
+import {
+  acquireGameplayModelAssets,
+  type GameplayModelAssetsLease,
+  type GameplayModelAssets,
+} from '../gameplay/gameplay-model-assets';
 import { resolveViewmodelLayout } from '../../client/presentation/viewmodel-layout';
 
+import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
+import type { ToolModel } from '../../client/presentation/asset-types';
+
 export class FirstPersonViewmodel {
+  private releaseDraft: (() => void) | null = null;
   private readonly root = new pc.Entity('First person viewmodel');
   private readonly handPivot = new pc.Entity('viewmodel hand pivot');
   private readonly forearm = new pc.Entity('viewmodel forearm');
@@ -15,12 +24,15 @@ export class FirstPersonViewmodel {
   private action: HeldAction = 'idle';
   private actionSeconds = 0;
   private heldItem: string | null = null;
+  private pose = { shoulder: 0, elbow: 0, wrist: 0 };
+  private releasePose = { shoulder: 0, elbow: 0, wrist: 0 };
 
   constructor(
     private readonly app: pc.Application,
     private readonly camera: pc.Entity,
+    assets?: GameplayModelAssets,
   ) {
-    this.assetsLease = acquireGameplayModelAssets(app);
+    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app);
     if (app.root && app.scene?.layers) {
       this.layer = new pc.Layer({ name: 'First Person Viewmodel' });
       app.scene.layers.push(this.layer);
@@ -42,42 +54,28 @@ export class FirstPersonViewmodel {
     // Screen anchor: hand at the lower-right; the tool extends left and upward from its grip.
     this.root.setLocalEulerAngles(-4, -10, 0);
     (this.viewmodelCamera ?? camera).addChild(this.root);
-    this.forearm.setLocalPosition(0.035, -0.5, -0.1);
+    // Point the canonical downward arm toward the grip; the sleeve extends out of the lower screen.
+    this.forearm.setLocalPosition(0, -0.3375, -0.14);
     this.held.setLocalEulerAngles(0, 0, 24);
     this.root.addChild(this.handPivot);
     this.handPivot.addChild(this.held);
     this.held.addChild(this.forearm);
     this.held.addChild(this.item);
-    this.assets.addBox(
-      this.forearm,
-      'sleeve',
-      'cloth',
-      { x: 0.02, y: 0, z: 0 },
-      { x: 0.16, y: 0.6, z: 0.17 },
-      { castShadows: false },
-    );
-    this.assets.addBox(
-      this.forearm,
-      'sleeve-cuff',
-      'brass',
-      { x: 0.02, y: 0.27, z: 0 },
-      { x: 0.175, y: 0.045, z: 0.18 },
-      { castShadows: false },
-    );
-    this.assets.addBox(
-      this.held,
-      'hand',
-      'skin',
-      { x: 0, y: -0.15, z: -0.14 },
-      { x: 0.18, y: 0.14, z: 0.15 },
-      { castShadows: false },
-    );
+    const arm = new pc.Entity('viewmodel arm orientation');
+    arm.setLocalEulerAngles(0, 0, 180);
+    this.forearm.addChild(arm);
+    addPlayerArm(this.assets, arm);
     this.applyLayer(this.root);
   }
 
   setHeldItem(itemId: string | null): void {
-    if (itemId === this.heldItem) return;
+    if (itemId === this.heldItem && !this.releaseDraft) return;
+    this.releaseDraft?.();
+    this.releaseDraft = null;
     this.heldItem = itemId;
+    // Inventory may empty before a successful place/eat gesture is presented.
+    // Only the continuous mining action belongs to the previous held item.
+    if (this.action === 'mine') this.setAction('idle');
     while (this.item.children.length) this.item.children[0].destroy();
     if (itemId) {
       this.assets.addItem(this.item, itemId, 0.55);
@@ -85,8 +83,15 @@ export class FirstPersonViewmodel {
     }
   }
 
-  setAction(action: HeldAction): void {
-    if (action === this.action) return;
+  setHeldDefinition(definition: ToolModel): void {
+    this.setHeldItem(null);
+    this.releaseDraft = createDraftPixelResource(this.app, this.item, definition, 0.55);
+    this.applyLayer(this.item);
+  }
+
+  setAction(action: HeldAction, restart = false): void {
+    if (action === this.action && !restart) return;
+    this.releasePose = { ...this.pose };
     this.action = action;
     this.actionSeconds = 0;
   }
@@ -96,7 +101,7 @@ export class FirstPersonViewmodel {
   }
 
   update(seconds: number): void {
-    this.actionSeconds += Math.max(0, seconds);
+    this.actionSeconds += Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
     const fov = this.camera.camera?.fov ?? 72;
     const layout = resolveViewmodelLayout({
       width: this.app.graphicsDevice.width,
@@ -107,10 +112,19 @@ export class FirstPersonViewmodel {
     this.root.setLocalScale(layout.scale, layout.scale, layout.scale);
     if (this.viewmodelCamera?.camera) this.viewmodelCamera.camera.fov = fov;
     const pose = viewmodelPose(this.action, this.actionSeconds);
-    this.handPivot.setLocalEulerAngles(pose.shoulder * 0.32, pose.wrist * 0.08, pose.elbow * 0.2);
+    if (this.action === 'idle') {
+      const progress = Math.min(1, this.actionSeconds / 0.16);
+      const remaining = 1 - progress * progress * (3 - 2 * progress);
+      pose.shoulder = this.releasePose.shoulder * remaining;
+      pose.elbow = this.releasePose.elbow * remaining;
+      pose.wrist = this.releasePose.wrist * remaining;
+    }
+    this.pose = pose;
+    this.handPivot.setLocalEulerAngles(pose.shoulder * 0.6, pose.wrist * 0.35, pose.elbow * 0.5);
   }
 
   dispose(): void {
+    this.releaseDraft?.();
     this.root.destroy();
     this.viewmodelCamera?.destroy();
     if (this.layer) this.app.scene.layers.remove(this.layer);
@@ -129,6 +143,9 @@ export class FirstPersonViewmodel {
 
   private applyLayer(root: pc.Entity): void {
     if (!this.layer) return;
-    for (const component of root.findComponents('render')) (component as pc.RenderComponent).layers = [this.layer.id];
+    for (const component of root.findComponents('render')) {
+      (component as pc.RenderComponent).layers = [this.layer.id];
+      (component as pc.RenderComponent).castShadows = false;
+    }
   }
 }

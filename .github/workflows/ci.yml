@@ -79,6 +79,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Run deterministic browser regression
         run: pnpm test:e2e:regression
+      - name: Run PR15 asset integration
+        run: pnpm test:pr15:integration
 
   deploy:
     name: Deploy GitHub Pages
