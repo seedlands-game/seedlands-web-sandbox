@@ -15,6 +15,7 @@ export type NetworkMessageClass =
   | 'input-edge'
   | 'player-action'
   | 'interest-update'
+  | 'interest-cancel'
   | 'checkpoint-request'
   | 'resync-request'
   | 'heartbeat'
@@ -51,6 +52,7 @@ export const NETWORK_MESSAGE_CLASSES: Readonly<Record<NetworkMessageClass, Netwo
   'input-edge': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   'player-action': { direction: 'inbound', reliability: 'reliable', stream: 'events' },
   'interest-update': { direction: 'inbound', reliability: 'latest', stream: 'world' },
+  'interest-cancel': { direction: 'inbound', reliability: 'reliable', stream: 'world' },
   'checkpoint-request': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   'resync-request': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   heartbeat: { direction: 'inbound', reliability: 'reliable', stream: 'control' },
@@ -115,6 +117,7 @@ export type PublicInboundMessage =
       action: AuthorityAction;
     }>
   | Readonly<{ kind: 'interest-update'; ref: PublicSessionRef; requestId: number; keys: readonly string[] }>
+  | Readonly<{ kind: 'interest-cancel'; ref: PublicSessionRef; requestId: number; targetRequestId: number }>
   | Readonly<{ kind: 'checkpoint-request'; ref: PublicSessionRef; requestId: number }>
   | Readonly<{
       kind: 'resync-request';
@@ -258,6 +261,7 @@ const inboundKeys = {
   'input-edge': ['edgeId', 'targetPhysicsTick', 'expiresAfterPhysicsTick', 'type'],
   'player-action': ['requestId', 'expectedCommitSequence', 'action'],
   'interest-update': ['requestId', 'keys'],
+  'interest-cancel': ['requestId', 'targetRequestId'],
   'checkpoint-request': ['requestId'],
   'resync-request': ['requestId', 'reason'],
   heartbeat: ['nonce'],
@@ -316,6 +320,12 @@ export function isPublicInboundMessage(value: unknown): value is PublicInboundMe
         const coordinates = key.split(',').map(Number);
         return coordinates.length === 3 && coordinates.every(Number.isSafeInteger) && coordinates.join(',') === key;
       })
+    );
+  if (value.kind === 'interest-cancel')
+    return (
+      isSafeInteger(value.requestId) &&
+      isSafeInteger(value.targetRequestId) &&
+      value.requestId !== value.targetRequestId
     );
   if (value.kind === 'checkpoint-request') return isSafeInteger(value.requestId);
   if (value.kind === 'resync-request')

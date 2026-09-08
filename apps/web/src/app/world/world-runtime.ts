@@ -11,6 +11,7 @@ import type { MeshPart, PendingMeshTask, PerformanceSummary, StreamingVariant } 
 import { ChunkResourceRepository } from './chunk-resource-repository';
 import { MeshTaskScheduler } from './mesh-task-scheduler';
 import type { MeshRequestOptions, MeshWorkerPort } from './mesh-task-scheduler';
+import type { CompleteWorkerInputLease, MeshTaskSource } from './mesh-task-source';
 import {
   createPlayCanvasChunkAdapter,
   summarizeMeshParts,
@@ -76,6 +77,12 @@ export type WorldAuthorityPort = Readonly<{
     edits: readonly { x: number; y: number; z: number; value: number }[],
   ): Promise<WorldCommitResult>;
   setWorldTime(hours: number): Promise<{ worldTime: number }>;
+  meshInputMode?: 'authority-complete';
+  prepareCompleteWorkerInput?(cx: number, cy: number, cz: number): CompleteWorkerInputLease;
+  acceptDerivedMesh?(
+    task: PendingMeshTask,
+    result: import('../app-contracts').WorkerResult,
+  ): boolean | Promise<boolean>;
 }>;
 
 export class World {
@@ -108,27 +115,46 @@ export class World {
     onStaleVisibleCommit: () => void = () => undefined,
     waterLayerId?: number,
   ) {
+    const source: MeshTaskSource =
+      authority.meshInputMode === 'authority-complete'
+        ? {
+            kind: 'authority-complete',
+            seed: authority.seed,
+            generatorVersion: authority.generatorVersion,
+            beforePrepare: (cx, cy, cz) =>
+              prepareStreamingNeighborhood(
+                () => authority.ensureChunkNeighborhood(cx, cy, cz),
+                this.streamingAdmissionRetry,
+              ),
+            prepareCompleteWorkerInput: (cx, cy, cz) => authority.prepareCompleteWorkerInput!(cx, cy, cz),
+            acceptDerivedMesh: (task, result) =>
+              acceptStreamingCanonical(() => authority.acceptDerivedMesh!(task, result), this.streamingAdmissionRetry),
+          }
+        : {
+            seed: authority.seed,
+            generatorVersion: authority.generatorVersion,
+            beforePrepare: (cx, cy, cz) =>
+              prepareStreamingNeighborhood(
+                () => authority.ensureChunkNeighborhood(cx, cy, cz),
+                this.streamingAdmissionRetry,
+              ),
+            releasePrepared: (cx, cy, cz) => authority.releasePreparation(cx, cy, cz),
+            prepareMainSnapshot: () => {
+              throw new Error('生产浏览器会话只允许 worker-first 网格路径。');
+            },
+            prepareWorkerInput: (cx, cy, cz) => authority.prepareWorkerInput(cx, cy, cz),
+            acceptWorkerCanonical: (task, result) =>
+              acceptStreamingCanonical(
+                () => authority.acceptWorkerCanonical(task, result),
+                this.streamingAdmissionRetry,
+              ),
+          };
     this.scheduler = new MeshTaskScheduler({
       worker: meshWorker,
       profile,
       telemetry: telemetryRecorder,
       variant,
-      source: {
-        seed: authority.seed,
-        generatorVersion: authority.generatorVersion,
-        beforePrepare: (cx, cy, cz) =>
-          prepareStreamingNeighborhood(
-            () => authority.ensureChunkNeighborhood(cx, cy, cz),
-            this.streamingAdmissionRetry,
-          ),
-        releasePrepared: (cx, cy, cz) => authority.releasePreparation(cx, cy, cz),
-        prepareMainSnapshot: () => {
-          throw new Error('生产浏览器会话只允许 worker-first 网格路径。');
-        },
-        prepareWorkerInput: (cx, cy, cz) => authority.prepareWorkerInput(cx, cy, cz),
-        acceptWorkerCanonical: (task, result) =>
-          acceptStreamingCanonical(() => authority.acceptWorkerCanonical(task, result), this.streamingAdmissionRetry),
-      },
+      source,
       onAcceptedResult: (task, result) => this.repository.enqueue(task, result.meshes),
     });
     this.repository = new ChunkResourceRepository({

@@ -49,6 +49,7 @@ export class ApplicationShell {
   private readonly preflight: (generalWorkerCount: 1 | 2) => Promise<ClientCapabilityState>;
   private pendingStart: PendingStart | null = null;
   private performanceWarningAccepted = false;
+  private startGeneration = 0;
 
   constructor(
     private readonly game: Game,
@@ -80,25 +81,49 @@ export class ApplicationShell {
     }
     this.controller = new ShellController({
       start: async (seed, quality, openMode) => {
+        const generation = ++this.startGeneration;
         await audio.unlock();
+        if (generation !== this.startGeneration) return;
         const restore = game.loadSavedSession();
         bridge.publishShell({ phase: 'loading', seed, quality, enterLabel: '正在唤醒世界…' });
         try {
           await game.start(seed, restore?.seed === seed ? restore : null, quality, openMode);
         } catch (error) {
-          game.abortStart();
-          bridge.publishShell({ phase: 'error', enterLabel: '重试进入' });
+          if (generation === this.startGeneration) {
+            game.abortStart();
+            bridge.publishShell({ phase: 'error', enterLabel: '重试进入' });
+          }
           throw error;
         }
-        this.latestSeed = seed;
+        if (generation === this.startGeneration) this.latestSeed = seed;
+      },
+      startRemote: async (url, accessKey, quality) => {
+        const generation = ++this.startGeneration;
+        await audio.unlock();
+        if (generation !== this.startGeneration) return;
+        bridge.publishShell({ phase: 'loading', quality, enterLabel: '正在连接 Node…' });
+        try {
+          await game.startRemote(url, accessKey, quality);
+        } catch (error) {
+          if (generation === this.startGeneration) {
+            game.abortStart();
+            bridge.publishShell({ phase: 'error', enterLabel: '重新连接 Node' });
+          }
+          throw error;
+        }
       },
       leave: async () => {
         await game.leaveWorld();
         await this.refresh();
       },
       pause: (paused) => game.setPaused(paused),
+      abortStart: () => {
+        this.startGeneration += 1;
+        game.abortStart();
+      },
     });
     game.onRuntimeFailure = (error) => {
+      this.startGeneration += 1;
       game.releaseInput();
       this.controller.fail(error);
       bridge.publishShell({ phase: 'error', enterLabel: '重新进入世界' });
@@ -169,6 +194,13 @@ export class ApplicationShell {
       return;
     }
     await this.controller.start(seed, quality, openMode);
+  }
+
+  async connectRemote(url: string, accessKey: string, quality: ShellQuality) {
+    this.setQuality(quality);
+    if (this.capabilities.workerSupport !== 'supported') throw new Error('当前浏览器不支持运行游戏所需的 Web Worker。');
+    if (!accessKey) throw new Error('请输入 Node 访问口令。');
+    await this.controller.connectRemote(url, accessKey, quality);
   }
 
   async confirmPerformanceWarning() {

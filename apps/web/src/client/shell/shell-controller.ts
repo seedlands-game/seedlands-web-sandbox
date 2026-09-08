@@ -5,11 +5,14 @@ export type ApplicationShellState = Readonly<{
   seed: string;
   quality: ShellQuality;
   error: string;
+  mode: 'local' | 'remote';
 }>;
 type GamePort = {
   start: (seed: string, quality: ShellQuality, openMode: WorldOpenMode) => Promise<void>;
+  startRemote: (url: string, accessKey: string, quality: ShellQuality) => Promise<void>;
   leave: () => Promise<void>;
   pause: (paused: boolean) => void;
+  abortStart: () => void;
 };
 
 export function sanitizeQuality(value: unknown): ShellQuality {
@@ -17,7 +20,7 @@ export function sanitizeQuality(value: unknown): ShellQuality {
 }
 
 export class ShellController {
-  private value: ApplicationShellState = { phase: 'menu', seed: '', quality: 'medium', error: '' };
+  private value: ApplicationShellState = { phase: 'menu', seed: '', quality: 'medium', error: '', mode: 'local' };
   private transitionSequence = 0;
   private readonly subscribers = new Set<(value: ApplicationShellState) => void>();
   constructor(private readonly game: GamePort) {}
@@ -36,13 +39,26 @@ export class ShellController {
   async start(seed: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {
     if (this.value.phase !== 'menu') return;
     const transition = ++this.transitionSequence;
-    this.publish({ phase: 'loading', seed, quality, error: '' });
+    this.publish({ phase: 'loading', seed, quality, error: '', mode: 'local' });
     try {
       await this.game.start(seed, quality, openMode);
       if (transition === this.transitionSequence) this.publish({ phase: 'playing' });
     } catch (error) {
       if (transition === this.transitionSequence)
         this.publish({ phase: 'menu', error: this.message(error, '世界未能启动，请重试。') });
+    }
+  }
+
+  async connectRemote(url: string, accessKey: string, quality: ShellQuality) {
+    if (this.value.phase !== 'menu') return;
+    const transition = ++this.transitionSequence;
+    this.publish({ phase: 'loading', quality, error: '', mode: 'remote' });
+    try {
+      await this.game.startRemote(url, accessKey, quality);
+      if (transition === this.transitionSequence) this.publish({ phase: 'playing' });
+    } catch (error) {
+      if (transition === this.transitionSequence)
+        this.publish({ phase: 'menu', error: this.message(error, '未能连接 Node，请检查地址和口令。') });
     }
   }
 
@@ -60,13 +76,22 @@ export class ShellController {
 
   async leave() {
     if (this.value.phase !== 'paused') return;
+    const transition = ++this.transitionSequence;
     this.publish({ phase: 'saving', error: '' });
     try {
       await this.game.leave();
-      this.publish({ phase: 'menu' });
+      if (transition === this.transitionSequence) this.publish({ phase: 'menu' });
     } catch (error) {
-      this.publish({ phase: 'paused', error: this.message(error, '保存失败，世界已保留，请重试。') });
+      if (transition === this.transitionSequence)
+        this.publish({ phase: 'paused', error: this.message(error, '保存失败，世界已保留，请重试。') });
     }
+  }
+
+  cancelStart() {
+    if (this.value.phase !== 'loading') return;
+    this.transitionSequence += 1;
+    this.game.abortStart();
+    this.publish({ phase: 'menu', error: '已取消连接。' });
   }
 
   fail(error: unknown) {

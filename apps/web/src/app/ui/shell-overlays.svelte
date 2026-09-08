@@ -219,7 +219,9 @@
       {:else}
         <p class="eyebrow">A MOMENT OF STILLNESS</p>
         <h2>旅途暂歇</h2>
-        <p class="pause-subtitle">世界正在等待你</p>
+        <p class="pause-subtitle">
+          {view.state.mode === 'remote' ? '菜单期间 Node 世界仍在继续' : '世界正在等待你'}
+        </p>
         <div class="pause-actions">
           <GameButton
             label="继续游戏"
@@ -237,10 +239,14 @@
             onclick={() => application.openPanel('guide')}>操作指南</GameButton
           >
           <GameButton
-            label="保存并返回主菜单"
+            label={view.state.mode === 'remote' ? '保存到 Node 并返回主菜单' : '保存并返回主菜单'}
             disabled={view.state.phase === 'saving'}
             onclick={() => void application.controller.leave()}
-            >{view.state.phase === 'saving' ? '正在保存旅程…' : '保存并返回主菜单'}</GameButton
+            >{view.state.phase === 'saving'
+              ? '正在保存旅程…'
+              : view.state.mode === 'remote'
+                ? '保存到 Node 并返回主菜单'
+                : '保存并返回主菜单'}</GameButton
           >
         </div>
         {#if view.state.error}<p role="alert" class="start-error">{view.state.error}</p>{/if}

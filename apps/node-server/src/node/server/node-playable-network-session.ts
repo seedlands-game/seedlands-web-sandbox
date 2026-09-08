@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import { Buffer } from 'node:buffer';
 import { WebSocket, type RawData } from 'ws';
@@ -20,35 +19,18 @@ import { projectPlayerCorrectionReference } from '@seedlands/game-core/server/pr
 import { projectGameplayConsumerReference } from '@seedlands/game-core/server/protocol/network-gameplay-consumer-reference';
 import { projectWorldCommitPresentationReference } from '@seedlands/game-core/server/protocol/network-reference-world-commit-presentation';
 import { projectActionReceiptReference } from '@seedlands/game-core/server/protocol/network-action-reference';
-import {
-  createBaselineReferencePublicationQueue,
-  prepareAuthorityBaselineReference,
-} from '@seedlands/game-core/server/protocol/network-reference-baseline';
-import {
-  createBaselineReferenceInFlightLedger,
-  createBaselineReferenceSendQueue,
-} from '@seedlands/game-core/server/protocol/network-reference-baseline-budget';
-import type { BaselinePageReference } from '@seedlands/game-core/server/protocol/network-reference-baseline-types';
 import type { NodeAuthorityLane, NodeAuthorityPublication } from '../runtime/node-authority-lane';
 import { nodeCorePlatform } from '../runtime/node-core-platform';
+import { createPlayableBaselineSender } from './node-playable-network-baseline';
+import {
+  MAX_PLAYABLE_FRAME_BYTES,
+  MAX_PLAYABLE_SEND_QUEUE_BYTES,
+  playableNetworkLimits,
+} from './node-playable-network-limits';
+import { createPlayableNetworkRateLimit } from './node-playable-network-rate-limit';
 
-export const MAX_FRAME_BYTES = 1024 * 1024;
-const MAX_SEND_QUEUE_BYTES = 4 * 1024 * 1024;
 const MAX_PENDING_REQUESTS = 32;
 const IDLE_TIMEOUT_MS = 15_000;
-const BASELINE_PAGE_BYTES = 64 * 1024;
-export const playableNetworkLimits = Object.freeze({
-  metadataBytesMax: 64 * 1024,
-  reliableMessageBytesMax: MAX_FRAME_BYTES,
-  baselineTransferBytesMax: MAX_FRAME_BYTES,
-  baselineInFlightBytesMax: 16 * 1024 * 1024,
-  inboundMessagesPerSecond: 120,
-  inboundBurst: 180,
-  actionMessagesPerSecond: 30,
-  interestKeysMax: 1,
-  canonicalResidencyMax: 512,
-  sendQueueBytesMax: MAX_SEND_QUEUE_BYTES,
-});
 
 const bytes = (raw: RawData): Uint8Array | null => {
   if (raw instanceof ArrayBuffer) return new Uint8Array(raw);
@@ -62,17 +44,6 @@ const sameRef = (left: PublicSessionRef, right: PublicSessionRef) =>
   left.sessionEpoch === right.sessionEpoch &&
   left.worldId === right.worldId &&
   left.playerId === right.playerId;
-
-const sizer = Object.freeze({
-  measureMetadataBytes: (value: unknown) => Buffer.byteLength(JSON.stringify(value), 'utf8'),
-  measureReliableMessageBytes: (metadata: unknown, payload: Uint8Array) =>
-    Buffer.byteLength(JSON.stringify(metadata), 'utf8') + payload.byteLength + 16,
-});
-
-const digest = Object.freeze({
-  algorithm: 'sha-256' as const,
-  digest: async (value: Uint8Array) => createHash('sha256').update(value).digest('hex'),
-});
 
 export const projectGameplay = (publication: Pick<NodeAuthorityPublication, 'snapshot' | 'gameplay'>) =>
   publication.gameplay
@@ -108,9 +79,6 @@ export function createSession(
     sessionId: ref.sessionEpoch,
     worldId: ref.worldId,
   });
-  const publicationQueue = createBaselineReferencePublicationQueue();
-  const projectionLedger = createBaselineReferenceInFlightLedger(playableNetworkLimits.baselineInFlightBytesMax);
-  const sendLedger = createBaselineReferenceSendQueue(playableNetworkLimits.sendQueueBytesMax);
   const inputMappings = new Map<number, number>();
   const actions = new Map<
     number,
@@ -118,21 +86,25 @@ export function createSession(
   >();
   const pendingCaptures = new Map<number, number>();
   const baselineRequests = new Set<number>();
+  const cancelledBaselineRequests = new Set<number>();
   let lastClientInputSequence = -1;
   let clientAcknowledgedInputSequence = -1;
   let lastClientEdgeId = -1;
   let pendingJumpEdge: { edgeId: number; targetPhysicsTick: number; expiresAfterPhysicsTick: number } | null = null;
   let actionRequestHighWatermark = -1;
   let interestRequestHighWatermark = -1;
+  let interestCancelHighWatermark = -1;
   let publicationSequence = -1;
   let queuedBytes = 0;
   let outbound = Promise.resolve();
   let baselineTail = Promise.resolve();
   let closed = false;
+  let resolveClosed!: () => void;
+  const closedSignal = new Promise<void>((resolve) => {
+    resolveClosed = resolve;
+  });
   let lastInboundAt = performance.now();
-  let messageTokens: number = playableNetworkLimits.inboundBurst;
-  let actionTokens: number = playableNetworkLimits.actionMessagesPerSecond;
-  let tokenTimestamp = performance.now();
+  const consumeRate = createPlayableNetworkRateLimit(playableNetworkLimits);
   const idle = setInterval(() => {
     if (performance.now() - lastInboundAt > IDLE_TIMEOUT_MS) close(4000, 'idle');
   }, 1_000);
@@ -144,7 +116,10 @@ export function createSession(
   ): Promise<void> => {
     if (closed) return Promise.reject(new Error('Network session is closed.'));
     const encoded = encodeC0Envelope({ messageClass, message, blocks }, nodeCorePlatform.utf8);
-    if (queuedBytes + encoded.byteLength > MAX_SEND_QUEUE_BYTES || socket.bufferedAmount > MAX_SEND_QUEUE_BYTES) {
+    if (
+      queuedBytes + encoded.byteLength > MAX_PLAYABLE_SEND_QUEUE_BYTES ||
+      socket.bufferedAmount > MAX_PLAYABLE_SEND_QUEUE_BYTES
+    ) {
       close(4001, 'backpressure');
       return Promise.reject(new Error('Network send queue exceeded its budget.'));
     }
@@ -164,11 +139,26 @@ export function createSession(
     return sending;
   };
 
+  const baselines = createPlayableBaselineSender({
+    authority,
+    transportRef: ref,
+    interestRef,
+    generatorVersion: ready.generatorVersion,
+    allocateCaptureId,
+    setCapture: (requestId, captureId) => {
+      if (captureId === null) pendingCaptures.delete(requestId);
+      else pendingCaptures.set(requestId, captureId);
+    },
+    isCancelled: (requestId) => closed || cancelledBaselineRequests.has(requestId),
+    enqueue,
+  });
+
   const close = (code = 1000, reason = 'closed') => {
     if (closed) return;
     closed = true;
+    resolveClosed();
     clearInterval(idle);
-    publicationQueue.close();
+    baselines.close();
     for (const captureId of pendingCaptures.values())
       void authority.cancelBaselineCapture(captureId).catch(() => undefined);
     pendingCaptures.clear();
@@ -183,24 +173,6 @@ export function createSession(
       inputMappings.delete(server);
     }
     return clientAcknowledgedInputSequence;
-  };
-
-  const consumeRate = (action: boolean): boolean => {
-    const now = performance.now();
-    const elapsed = Math.max(0, now - tokenTimestamp) / 1000;
-    tokenTimestamp = now;
-    messageTokens = Math.min(
-      playableNetworkLimits.inboundBurst,
-      messageTokens + elapsed * playableNetworkLimits.inboundMessagesPerSecond,
-    );
-    actionTokens = Math.min(
-      playableNetworkLimits.actionMessagesPerSecond,
-      actionTokens + elapsed * playableNetworkLimits.actionMessagesPerSecond,
-    );
-    if (messageTokens < 1 || (action && actionTokens < 1)) return false;
-    messageTokens -= 1;
-    if (action) actionTokens -= 1;
-    return true;
   };
 
   const publish = (publication: Readonly<NodeAuthorityPublication>) => {
@@ -225,92 +197,6 @@ export function createSession(
       ...(publication.gameplay ? { gameplay: projectGameplay(publication) } : {}),
       commits: projectCommits(publication.snapshot, publication.commits),
     }).catch(() => close(4001, 'send-failed'));
-  };
-
-  const sendBaseline = async (message: Extract<PublicInboundMessage, { kind: 'interest-update' }>) => {
-    if (closed) return;
-    const [cx, cy, cz] = message.keys[0]!.split(',').map(Number) as [number, number, number];
-    const snapshot = authority.latestSnapshot() ?? ready.snapshot;
-    const playerCx = Math.floor(snapshot.player.body.position.x / 32);
-    const playerCz = Math.floor(snapshot.player.body.position.z / 32);
-    if (cy < 0 || cy > 1 || Math.abs(cx - playerCx) > 8 || Math.abs(cz - playerCz) > 8)
-      throw new Error('Interest request is outside the playable spatial budget.');
-    const captureId = allocateCaptureId();
-    pendingCaptures.set(message.requestId, captureId);
-    let bundle: ReturnType<ReturnType<typeof createBaselineReferencePublicationQueue>['publish']> | null = null;
-    try {
-      const capture = await authority.captureBaseline({
-        captureId,
-        purpose: 'mesh',
-        key: message.keys[0]!,
-        minimumRevision: 0,
-      });
-      if (closed) return;
-      const projected = await prepareAuthorityBaselineReference(capture, {
-        ref: interestRef,
-        requestId: message.requestId,
-        interestId: message.requestId,
-        expectedCapture: {
-          captureId,
-          captureGeneration: capture.captureGeneration,
-          purpose: 'mesh',
-          key: message.keys[0]!,
-          generatorVersion: ready.generatorVersion,
-        },
-        minimumRevision: 0,
-        referencePagePayloadBytes: BASELINE_PAGE_BYTES,
-        pagesPerBundleMax: 128,
-        limits: playableNetworkLimits,
-        digest,
-        sizer,
-        inFlight: projectionLedger,
-      });
-      if (closed) {
-        if ('cancel' in projected) await projected.cancel();
-        return;
-      }
-      if (!('publish' in projected)) {
-        await enqueue('baseline-unavailable', {
-          kind: 'baseline-unavailable',
-          ref,
-          requestId: message.requestId,
-          reason: projected.reason,
-        });
-        return;
-      }
-      bundle = publicationQueue.publish(projected);
-      const descriptorLease = publicationQueue.takeDescriptor(sendLedger);
-      if (!descriptorLease) throw new Error('Baseline descriptor send queue is full.');
-      try {
-        await enqueue('baseline-descriptor', {
-          kind: 'baseline-descriptor',
-          ref,
-          requestId: message.requestId,
-          descriptor: descriptorLease.descriptor,
-        });
-      } finally {
-        descriptorLease.settle();
-      }
-      for (const entry of bundle.descriptor.entries)
-        for (const block of entry.blocks)
-          for (let pageIndex = 0; pageIndex < block.pageCount; pageIndex += 1) {
-            const lease = bundle.materializePage({ entryId: entry.entryId, block: block.name, pageIndex }, sendLedger);
-            if (!lease) throw new Error('Baseline page send queue is full.');
-            const { bytes: payload, ...page } = lease.page as BaselinePageReference;
-            try {
-              await enqueue(
-                'baseline-page',
-                { kind: 'baseline-page', ref, requestId: message.requestId, page, payloadBlock: 'payload' },
-                [{ name: 'payload', bytes: payload }],
-              );
-            } finally {
-              lease.settle();
-            }
-          }
-    } finally {
-      bundle?.close();
-      pendingCaptures.delete(message.requestId);
-    }
   };
 
   const handleAction = async (message: Extract<PublicInboundMessage, { kind: 'player-action' }>) => {
@@ -444,16 +330,28 @@ export function createSession(
       if (baselineRequests.size >= MAX_PENDING_REQUESTS) throw new Error('Too many pending baseline requests.');
       interestRequestHighWatermark = message.requestId;
       baselineRequests.add(message.requestId);
-      const next = baselineTail.then(() => sendBaseline(message));
+      const next = baselineTail.then(() => Promise.race([baselines.send(message), closedSignal]));
       baselineTail = next.then(
         () => {
           baselineRequests.delete(message.requestId);
+          cancelledBaselineRequests.delete(message.requestId);
         },
         () => {
           baselineRequests.delete(message.requestId);
+          cancelledBaselineRequests.delete(message.requestId);
         },
       );
       return next;
+    }
+    if (message.kind === 'interest-cancel') {
+      if (message.requestId <= interestCancelHighWatermark)
+        throw new Error('Interest cancellation requestId must be strictly increasing.');
+      interestCancelHighWatermark = message.requestId;
+      if (!baselineRequests.has(message.targetRequestId)) return;
+      cancelledBaselineRequests.add(message.targetRequestId);
+      const captureId = pendingCaptures.get(message.targetRequestId);
+      if (captureId !== undefined) await authority.cancelBaselineCapture(captureId);
+      return;
     }
     if (message.kind === 'checkpoint-request') {
       const result = (await authority.requestCheckpoint()) as { commitSequence: number };
@@ -488,7 +386,7 @@ export function createSession(
   socket.on('message', (raw, isBinary) => {
     if (!isBinary) return close(4003, 'binary-required');
     const value = bytes(raw);
-    if (!value || value.byteLength > MAX_FRAME_BYTES) return close(4003, 'frame-limit');
+    if (!value || value.byteLength > MAX_PLAYABLE_FRAME_BYTES) return close(4003, 'frame-limit');
     let decoded;
     try {
       decoded = decodeC0Envelope(value, nodeCorePlatform.utf8);
@@ -497,7 +395,9 @@ export function createSession(
     }
     const message = decoded.message as PublicInboundMessage;
     if (!consumeRate(message.kind === 'player-action')) return close(4003, 'rate-limit');
-    void handle(message).catch(() => close(4003, 'protocol'));
+    void handle(message).catch((error) =>
+      close(4003, `protocol:${error instanceof Error ? error.message : 'unknown'}`),
+    );
   });
 
   return {

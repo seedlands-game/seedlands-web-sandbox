@@ -8,11 +8,8 @@ import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-p
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/presentation/performance-profile';
 // prettier-ignore
 import { executeSlashCommand, type CommandExecutorPort, type SlashCommandExecution } from '@seedlands/game-core/server/commands/slash-command-parser';
-import {
-  ALL_COMMAND_CAPABILITIES,
-  type CommandSource,
-  type ServerCommand,
-} from '@seedlands/game-core/server/commands/command-contract';
+// prettier-ignore
+import { ALL_COMMAND_CAPABILITIES, type CommandSource, type ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
 import type { LifecycleSnapshot, RestoredSession } from './app-contracts';
 import { BrowserGameplay } from './gameplay/browser-gameplay';
 import { BrowserWorldStore } from './world/browser-world-store';
@@ -27,21 +24,21 @@ import { World, waitForInitialWorldReady } from './world/world-runtime';
 import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
 import { LIGHTING_QUALITY_BUDGETS } from './scene/advanced-lighting-budget';
 import { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
-import { BrowserComputeRuntime } from '../client/compute/browser-compute-runtime';
+import { RemoteAuthorityClient } from '../client/authority/remote-authority-client';
+import type { BrowserComputeRuntime } from '../client/compute/browser-compute-runtime';
 import { BrowserLogicClient } from '../client/authority/browser-logic-client';
-import { startBrowserWorkerSession } from './browser-worker-session';
 import * as gamePlayer from './player/game-player-controller';
 import { AuthorityPresentationSync } from './authority-presentation-sync';
 import { GameUiProjection } from './game-ui-projection';
 import { CollisionDebugRuntime } from './player/collision-debug-runtime';
 import * as runtimeControls from './game-runtime-controls';
 import { applySessionWorkerBudget, readBrowserSessionConfig } from './browser-session-config';
-import {
-  resolveExperimentalClientOptions,
-  type ResolvedExperimentalClientOptions,
-} from '../client/experimental-client-options';
+// prettier-ignore
+import { resolveExperimentalClientOptions, type ResolvedExperimentalClientOptions } from '../client/experimental-client-options';
 import { GameExperimentState } from './experimental/game-experiment-state';
 import { GameFrameLoop } from './game-frame-loop';
+import { GameSaveQueue } from './world/game-save-queue';
+import { startPlayableWorkerSession } from './world/playable-worker-session';
 
 export class Game {
   private paused = false;
@@ -58,14 +55,12 @@ export class Game {
   private performanceProfile: PerformanceProfile = PERFORMANCE_PROFILES.balanced;
   private performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
   private readonly store = new BrowserWorldStore();
-  private authority: BrowserAuthorityClient | null = null;
+  private authority: BrowserAuthorityClient | RemoteAuthorityClient | null = null;
   private computeRuntime: BrowserComputeRuntime | null = null;
   private logicClient: BrowserLogicClient | null = null;
   private serverPlayerId: string | null = null;
   private seedText = '';
   private qualityLevel: QualityLevel = 'medium';
-  private saveTimer: number | null = null;
-  private saveInFlight: Promise<void> = Promise.resolve();
   private removeHarness: (() => void) | null = null;
   private commandExecutor: CommandExecutorPort | null = null;
   private commandSource: CommandSource | null = null;
@@ -77,13 +72,16 @@ export class Game {
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
   private sessionSequence = 0;
   private startGeneration = 0;
+  private pendingStartAbort: AbortController | null = null;
   private readonly experimentState: GameExperimentState;
   private readonly authoritySync = new AuthorityPresentationSync(() => this.controller);
   private collisionDebug: CollisionDebugRuntime | null = null;
   private readonly frameLoop: GameFrameLoop;
+  // prettier-ignore
+  private readonly saveQueue = new GameSaveQueue(() => this.authority, () => this.performanceTelemetry);
   onRuntimeFailure: ((error: Error) => void) | null = null;
   private readonly onResize = () => this.app?.resizeCanvas();
-  private readonly onPageHide = () => void this.flushSave().catch(() => undefined);
+  private readonly onPageHide = () => void this.saveQueue.flush().catch(() => undefined);
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -104,7 +102,7 @@ export class Game {
       performanceProfile: () => this.performanceProfile,
       performanceTelemetry: () => this.performanceTelemetry,
       qualityLevel: () => this.qualityLevel,
-      queueSave: () => this.queueSave(),
+      queueSave: () => this.saveQueue.queue(),
       seedText: () => this.seedText,
       session: () => this.uiSession,
       uiProjection: this.uiProjection,
@@ -123,14 +121,21 @@ export class Game {
 
   loadLatestWorldSeed = async () => (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
 
-  async start(
-    seedText: string,
-    restore: RestoredSession | null,
-    qualityLevel: QualityLevel,
-    openMode: WorldOpenMode = 'continue',
-  ) {
-    await this.flushSave();
+  // prettier-ignore
+  async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode = 'continue') {
+    return this.startSession(seedText, restore, qualityLevel, openMode, null);
+  }
+
+  async startRemote(url: string, accessKey: string, qualityLevel: QualityLevel) {
+    return this.startSession('', null, qualityLevel, 'continue', { url, accessKey });
+  }
+
+  // prettier-ignore
+  private async startSession(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode, remote: Readonly<{ url: string; accessKey: string }> | null) {
+    await this.saveQueue.flush();
     this.disposeRuntime();
+    const startAbort = new AbortController();
+    this.pendingStartAbort = startAbort;
     const startGeneration = ++this.startGeneration;
     this.paused = false;
     this.seedText = seedText;
@@ -164,31 +169,50 @@ export class Game {
     const sessionConfig = readBrowserSessionConfig(location.search);
     const { harnessEnabled, generalWorkerCount, physicsHz, authorityTransportFaults } = sessionConfig;
     this.performanceProfile = applySessionWorkerBudget(this.performanceProfile, generalWorkerCount);
-    const session = await startBrowserWorkerSession({
-      epochSequence: ++this.sessionSequence,
-      seedText,
-      openMode,
-      legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
-      initialWorldTime: this.environment.worldTime,
-      harnessEnabled,
-      generalWorkerCount,
-      wasm: this.experimentState.workerSelection,
-      frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
-      authorityTransportFaults,
-      onSnapshot: (snapshot) => this.authoritySync.receive(snapshot),
-      onGameplay: () => this.gameplayClient?.refresh(),
-      onPlayerDeath: () => this.controller?.releaseInput(),
-      onCommit: (commit) => this.world?.consumeServerCommit(commit),
-      onUnknownChunk: (key) => runtimeControls.requestAuthorityChunk(this.world, key),
-      onInputDecision: (decision) => gamePlayer.applyAuthorityInputDecision(this.controller, decision),
-      onFatal: (error) => {
+    const clientOptions = {
+      onSnapshot: (snapshot: import('@seedlands/game-core/server/authority/authority-session').AuthoritySnapshot) =>
+        this.authoritySync.receive(snapshot),
+      onGameplay: (view: import('@seedlands/game-core/compute/authority-worker-protocol').AuthorityGameplayView) => {
+        this.gameplayClient?.refresh();
+        if (view.player.lifecycle === 'dead') this.controller?.releaseInput();
+      },
+      onCommit: (commit: import('@seedlands/game-core/server/game-server-types').WorldCommitResult) =>
+        this.world?.consumeServerCommit(commit),
+      onUnknownChunk: (key: string) => runtimeControls.requestAuthorityChunk(this.world, key),
+      // prettier-ignore
+      onInputDecision: (decision: { sequence: number; decision: import('@seedlands/game-core/runtime/session-protocol').SequenceDecision; requiresResync: boolean }) =>
+        gamePlayer.applyAuthorityInputDecision(this.controller, decision),
+      onFatal: (error: Error) => {
         runtimeControls.reportRuntimeFailure(this.uiSession, ++this.interactionSequence, error);
         this.onRuntimeFailure?.(error);
       },
+    };
+    const session = await startPlayableWorkerSession({
+      remote,
+      client: clientOptions,
+      generalWorkerCount,
+      wasm: this.experimentState.workerSelection,
+      signal: startAbort.signal,
+      local: {
+        epochSequence: ++this.sessionSequence,
+        seedText,
+        openMode,
+        legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
+        initialWorldTime: this.environment.worldTime,
+        harnessEnabled,
+        generalWorkerCount,
+        wasm: this.experimentState.workerSelection,
+        frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
+        authorityTransportFaults,
+        ...clientOptions,
+        onPlayerDeath: () => this.controller?.releaseInput(),
+      },
     });
     const { authority, compute: computeRuntime, logic: logicClient, ready } = session;
+    if (this.pendingStartAbort === startAbort) this.pendingStartAbort = null;
+    if (remote) this.seedText = ready.seedText;
     if (startGeneration !== this.startGeneration) {
-      logicClient.dispose();
+      logicClient?.dispose();
       authority.dispose();
       computeRuntime.dispose();
       throw new Error('World start was superseded.');
@@ -207,9 +231,7 @@ export class Game {
       this.performanceTelemetry,
       this.performanceProfile,
       'worker-first',
-      () => {
-        this.lifecycle.staleVisibleCommits += 1;
-      },
+      () => (this.lifecycle.staleVisibleCommits += 1),
       this.visualResources.waterLayer.id,
     );
     this.visualEffects = new AdvancedVisualEffects(
@@ -221,7 +243,7 @@ export class Game {
     );
     this.waterExperience = new WaterExperience(this.camera.camera ?? null, this.app.graphicsDevice);
     this.lifecycle.worldInstanceId += 1;
-    if (restore?.changes.length) await this.world.restoreLegacyChanges(restore.changes);
+    if (!remote && restore?.changes.length) await this.world.restoreLegacyChanges(restore.changes);
     const feet = ready.playerBodyPosition;
     this.camera.setPosition(feet[0], feet[1] + PLAYER_FEET_OFFSET, feet[2]);
     this.serverPlayerId = ready.playerId;
@@ -236,7 +258,7 @@ export class Game {
       nextHudSequence: () => ++this.hudSequence,
       nextInteractionSequence: () => ++this.interactionSequence,
       getVoxel: (x, y, z) => this.world?.getVoxel(x, y, z) ?? 0,
-      queueSave: () => this.queueSave(),
+      queueSave: () => this.saveQueue.queue(),
       releaseInput: () => this.controller?.releaseInput(),
       movePlayer: (target) => this.controller?.movePlayerTo(...target),
       onPresentation: (event) => this.worldAudio?.present(event),
@@ -245,7 +267,7 @@ export class Game {
     this.controller.applyAuthoritySnapshot(authority.snapshot ?? ready.snapshot);
     gamePlayer.orientPlayerTowardCamp(this.controller, ready);
     this.controller.install();
-    authority.requestLogicObservation();
+    if (authority.mode === 'local') authority.requestLogicObservation();
     this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
     await waitForInitialWorldReady(this.world.waitForInitialVisibleChunk());
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
@@ -267,18 +289,22 @@ export class Game {
       getGameplay: () => this.gameplayClient,
       getUiSession: () => this.uiSession,
       nextInteractionSequence: () => ++this.interactionSequence,
-      queueSave: () => this.queueSave(),
-      flushSave: () => void this.flushSave().catch(() => undefined),
+      queueSave: () => this.saveQueue.queue(),
+      flushSave: () => void this.saveQueue.flush().catch(() => undefined),
       actions: {
         toggleMap: () => this.toggleMap(),
         toggleDebug: () => this.publishDebugVisibility(!this.uiBridge.debug.get().visible),
         toggleCollisionDebug: () => this.toggleCollisionDebug(),
         toggleCommandShell: () => this.toggleCommandShell(),
         toggleInventory: () => this.toggleInventory(),
-        setWorldClockPaused: (paused) =>
-          void runtimeControls.setAuthorityWorldClockPaused(this.environment, authority, paused),
-        setWorldClockSpeed: (speed) =>
-          void runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed),
+        setWorldClockPaused: (paused) => {
+          if (authority instanceof BrowserAuthorityClient)
+            void runtimeControls.setAuthorityWorldClockPaused(this.environment, authority, paused);
+        },
+        setWorldClockSpeed: (speed) => {
+          if (authority instanceof BrowserAuthorityClient)
+            void runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed);
+        },
         closeMap: () => this.closeMap(),
         closeCommandShell: () => this.closeCommandShell(),
         closeInventory: () => this.closeInventory(),
@@ -289,8 +315,9 @@ export class Game {
 
   private installUiAndHarness() {
     const authority = this.authority;
-    if (authority && this.serverPlayerId) {
-      this.commandExecutor = { execute: (source, command) => authority.executeCommand(source, command) };
+    const localAuthority = authority instanceof BrowserAuthorityClient ? authority : null;
+    if (localAuthority && this.serverPlayerId) {
+      this.commandExecutor = { execute: (source, command) => localAuthority.executeCommand(source, command) };
       this.commandSource = {
         actorId: 'browser-local-developer',
         sourceType: 'local-developer',
@@ -304,7 +331,7 @@ export class Game {
     this.gameplayClient?.refresh();
     this.publishDebugVisibility(harnessEnabled);
     this.uiBridge.beginMeasurementWindow();
-    if (!harnessEnabled || !this.controller) return;
+    if (!harnessEnabled || !this.controller || !localAuthority) return;
     this.removeHarness = installHarness(
       createRuntimeHarnessApi({
         lifecycleSnapshot: () => ({ ...this.lifecycle }),
@@ -318,7 +345,7 @@ export class Game {
         gameplay: () => this.gameplayClient,
         frameMs: () => this.frameLoop.frameMs,
         qualityLevel: () => this.qualityLevel,
-        authority: () => this.authority,
+        authority: () => localAuthority,
         collisionDebug: () => this.collisionDebug,
         compute: () => this.computeRuntime,
         logic: () => this.logicClient,
@@ -327,8 +354,9 @@ export class Game {
         visualEffects: () => this.visualEffects,
         underwaterVisual: () => this.waterExperience?.visual ?? null,
         setWorldTime: (hour) => this.setWorldTime(hour),
-        setTimePaused: (paused) => runtimeControls.setAuthorityWorldClockPaused(this.environment, authority, paused),
-        setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed),
+        setTimePaused: (paused) =>
+          runtimeControls.setAuthorityWorldClockPaused(this.environment, localAuthority, paused),
+        setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, localAuthority, speed),
         blockLogicWorker: (ms) =>
           this.logicClient?.blockForHarness(ms) ?? Promise.reject(new Error('Logic Worker不可用。')),
         executeGameplayCommand: async (command) => {
@@ -337,8 +365,8 @@ export class Game {
           if (result.success) this.consumeBrowserCommand(command, result);
           return result;
         },
-        queueSave: () => this.queueSave(),
-        flushSave: () => this.flushSave(),
+        queueSave: () => this.saveQueue.queue(),
+        flushSave: () => this.saveQueue.flush(),
         experiments: () => this.experimentState.diagnostics(this.computeRuntime?.diagnostics.workerKernelStates ?? []),
       }),
     );
@@ -356,7 +384,8 @@ export class Game {
   setPaused(paused: boolean) {
     this.paused = paused;
     this.controller?.releaseInput();
-    const control = paused ? this.authority?.pause() : this.authority?.resume();
+    const control =
+      this.authority?.mode === 'local' ? (paused ? this.authority.pause() : this.authority.resume()) : undefined;
     void control?.catch(() => undefined);
     this.gameplayClient?.setSuspended(paused);
     this.worldAudio?.updateWorld(
@@ -369,13 +398,15 @@ export class Game {
   }
 
   async leaveWorld() {
-    await this.flushSave();
+    await this.saveQueue.flush();
     this.uiSession?.publishHud(++this.hudSequence, { visible: false });
     this.disposeRuntime();
     this.uiBridge.publishShell({ phase: 'menu', enterLabel: '进入世界' });
   }
 
   abortStart = () => {
+    this.pendingStartAbort?.abort();
+    this.pendingStartAbort = null;
     this.disposeRuntime();
   };
 
@@ -425,7 +456,7 @@ export class Game {
     command: ServerCommand,
     result: Extract<SlashCommandExecution['result'], { success: true }>,
   ) {
-    if (result.commit) this.queueSave();
+    if (result.commit) this.saveQueue.queue();
     if (command.type === 'teleport' && this.serverPlayerId) {
       const entity = this.authority?.gameplay.entities.find((candidate) => candidate.id === this.serverPlayerId);
       if (entity)
@@ -460,33 +491,6 @@ export class Game {
   private async setWorldTime(hour: number) {
     if (!this.world || !this.environment) return;
     this.environment.setTime(await this.world.setWorldTime(hour));
-  }
-
-  private queueSave() {
-    if (this.saveTimer !== null) return;
-    this.saveTimer = window.setTimeout(() => {
-      this.saveTimer = null;
-      void this.flushSave().catch(() => undefined);
-    }, 48);
-  }
-
-  private flushSave(): Promise<void> {
-    if (this.saveTimer !== null) {
-      window.clearTimeout(this.saveTimer);
-      this.saveTimer = null;
-    }
-    const authority = this.authority;
-    if (!authority) return this.saveInFlight;
-    const save = this.saveInFlight.then(async () => {
-      const span = this.performanceTelemetry.beginSpan('persistence', 'FlushWorldSave');
-      try {
-        await authority.save();
-      } finally {
-        this.performanceTelemetry.endSpan(span);
-      }
-    });
-    this.saveInFlight = save.catch(() => undefined);
-    return save;
   }
 
   private disposeRuntime() {

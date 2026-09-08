@@ -1,7 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ShellController, sanitizeQuality } from '../../apps/web/src/client/shell/shell-controller';
 
-const port = () => ({ start: vi.fn(async () => {}), leave: vi.fn(async () => {}), pause: vi.fn() });
+const port = () => ({
+  start: vi.fn(async () => {}),
+  startRemote: vi.fn(async () => {}),
+  leave: vi.fn(async () => {}),
+  pause: vi.fn(),
+  abortStart: vi.fn(),
+});
 
 describe('游戏外壳异步状态', () => {
   it('进入期间不创建第二个世界，成功后才能游玩', async () => {
@@ -89,5 +95,28 @@ describe('游戏外壳异步状态', () => {
     resolve();
     await starting;
     expect(shell.state).toMatchObject({ phase: 'menu', error: 'Authority启动失联' });
+  });
+
+  it('断线会使迟到的保存失败失效，取消连接会终止实际启动', async () => {
+    const game = port();
+    const shell = new ShellController(game);
+    await shell.connectRemote('ws://127.0.0.1:8787/seedlands', 'key', 'medium');
+    shell.pause();
+    let reject!: (error: Error) => void;
+    game.leave.mockImplementationOnce(() => new Promise<void>((_resolve, fail) => (reject = fail)));
+    const leaving = shell.leave();
+    shell.fail(new Error('Node 已断开'));
+    reject(new Error('旧保存失败'));
+    await leaving;
+    expect(shell.state).toMatchObject({ phase: 'menu', error: 'Node 已断开' });
+
+    let resolve!: () => void;
+    game.startRemote.mockImplementationOnce(() => new Promise<void>((done) => (resolve = done)));
+    const connecting = shell.connectRemote('ws://127.0.0.1:8787/seedlands', 'key', 'medium');
+    shell.cancelStart();
+    expect(game.abortStart).toHaveBeenCalledOnce();
+    resolve();
+    await connecting;
+    expect(shell.state.phase).toBe('menu');
   });
 });

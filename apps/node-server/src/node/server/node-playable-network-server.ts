@@ -12,12 +12,8 @@ import {
 import { projectWelcomePresentationReference } from '@seedlands/game-core/server/protocol/network-reference-bootstrap-presentation';
 import type { NodeAuthorityLane, NodeAuthorityPublication } from '../runtime/node-authority-lane';
 import { nodeCorePlatform } from '../runtime/node-core-platform';
-import {
-  createSession,
-  MAX_FRAME_BYTES,
-  playableNetworkLimits,
-  projectGameplay,
-} from './node-playable-network-session';
+import { createSession, projectGameplay } from './node-playable-network-session';
+import { MAX_PLAYABLE_FRAME_BYTES, playableNetworkLimits } from './node-playable-network-limits';
 
 const HELLO_TIMEOUT_MS = 3_000;
 type Session = ReturnType<typeof createSession>;
@@ -57,7 +53,11 @@ export async function createNodePlayableNetworkServer(
   const http = createServer((_request, response) => {
     response.writeHead(404).end();
   });
-  const sockets = new WebSocketServer({ noServer: true, perMessageDeflate: false, maxPayload: MAX_FRAME_BYTES });
+  const sockets = new WebSocketServer({
+    noServer: true,
+    perMessageDeflate: false,
+    maxPayload: MAX_PLAYABLE_FRAME_BYTES,
+  });
   let active: Session | null = null;
   let attaching = false;
   let unauthenticated = 0;
@@ -93,7 +93,7 @@ export async function createNodePlayableNetworkServer(
       finishUnauthenticated();
       if (!isBinary) return socket.close(4003, 'binary-required');
       const value = bytes(raw);
-      if (!value || value.byteLength > MAX_FRAME_BYTES) return socket.close(4003, 'frame-limit');
+      if (!value || value.byteLength > MAX_PLAYABLE_FRAME_BYTES) return socket.close(4003, 'frame-limit');
       let decoded;
       try {
         decoded = decodeC0Envelope(value, nodeCorePlatform.utf8);
@@ -135,7 +135,7 @@ export async function createNodePlayableNetworkServer(
           );
           active = session;
           attaching = false;
-          const snapshot = authority.latestSnapshot() ?? ready.snapshot;
+          const snapshot = ready.snapshot;
           const presentation = projectWelcomePresentationReference(ready, snapshot, {
             serverEpoch: authority.epoch,
             sessionId: ref.sessionEpoch,

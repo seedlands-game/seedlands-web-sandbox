@@ -1,5 +1,6 @@
 import type * as pc from 'playcanvas';
 import type { BrowserAuthorityClient } from '../../client/authority/browser-authority-client';
+import type { RemoteAuthorityClient } from '../../client/authority/remote-authority-client';
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
 import type { UiBridge, UiWorldSession } from '../ui/ui-bridge';
 import type { WorldEnvironment } from '../scene/world-environment';
@@ -12,7 +13,7 @@ type Options = Readonly<{
   camera: pc.Entity;
   canvas: HTMLCanvasElement;
   telemetry: PerformanceTelemetry;
-  authority: BrowserAuthorityClient;
+  authority: BrowserAuthorityClient | RemoteAuthorityClient;
   getWorld: () => World | null;
   getEnvironment: () => WorldEnvironment | null;
   isPaused: () => boolean;

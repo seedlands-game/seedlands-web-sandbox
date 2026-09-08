@@ -43,6 +43,7 @@ const createGame = () =>
     loadLatestWorldSeed: vi.fn(async () => null),
     loadSavedSession: vi.fn(() => null),
     start: vi.fn(async () => undefined),
+    startRemote: vi.fn(async () => undefined),
     abortStart: vi.fn(),
     leaveWorld: vi.fn(async () => undefined),
     setPaused: vi.fn(),
@@ -130,6 +131,38 @@ describe('ApplicationShell experiment and capability gates', () => {
     releaseResource();
     await initializing;
     expect(bridge.shell.get().phase).toBe('menu');
+    application.dispose();
+  });
+
+  it('连接取消后的迟到失败不会中止新远端会话', async () => {
+    let rejectFirst!: (error: Error) => void;
+    let resolveSecond!: () => void;
+    const first = new Promise<void>((_resolve, reject) => (rejectFirst = reject));
+    const second = new Promise<void>((resolve) => (resolveSecond = resolve));
+    const game = createGame();
+    vi.mocked(game.startRemote)
+      .mockImplementationOnce(() => first)
+      .mockImplementationOnce(() => second);
+    const bridge = createUiBridge();
+    const application = new ApplicationShell(game, bridge, createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+
+    const oldConnection = application.connectRemote('ws://127.0.0.1:8787/seedlands', 'old', 'medium');
+    await Promise.resolve();
+    application.controller.cancelStart();
+    const newConnection = application.connectRemote('ws://127.0.0.1:8787/seedlands', 'new', 'medium');
+    await Promise.resolve();
+    rejectFirst(new Error('old connection failed late'));
+    await oldConnection;
+
+    expect(game.abortStart).toHaveBeenCalledOnce();
+    expect(application.controller.state.phase).toBe('loading');
+    resolveSecond();
+    await newConnection;
+    expect(application.controller.state.phase).toBe('playing');
+    expect(bridge.shell.get().phase).not.toBe('error');
     application.dispose();
   });
 });
