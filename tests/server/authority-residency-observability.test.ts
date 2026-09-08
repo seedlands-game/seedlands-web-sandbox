@@ -1,14 +1,16 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it, vi } from 'vitest';
-import type { BrowserAuthorityClient } from '../../src/client/authority/browser-authority-client';
-import { createHarnessSnapshot } from '../../src/app/game-harness';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { Voxel } from '../../src/world/voxel';
+import type { BrowserAuthorityClient } from '../../apps/web/src/client/authority/browser-authority-client';
+import { createHarnessSnapshot } from '../../apps/web/src/app/game-harness';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('Authority canonical residency observability', () => {
   it('把真实驻留压力与异步保存失败投影到Authority快照和Harness', async () => {
-    const persistence = new MemoryGamePersistence();
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'residency-observability:1',
       seedText: 'residency-observability',
       persistence,

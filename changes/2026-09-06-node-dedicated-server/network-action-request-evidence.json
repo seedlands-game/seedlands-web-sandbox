@@ -1,0 +1,326 @@
+{
+  "status": "PASS_WITH_OPEN_SELECTION_GATES",
+  "wireStatus": "not-adopted",
+  "timing": "NOT_COLLECTED",
+  "source": {
+    "gitSha": "51f7681f3f92dc97a012c597a5dd8ab73205193f",
+    "trackedSourceDiffSha256": "b99d5861cc0b363775afd10c99b97db7c8856c60fa4e58c64be52c84171a9372",
+    "explicitInputSha256": {
+      "src/server/protocol/network-action-reference-copy.ts": "d96647a19eddd74e4af19c45cc01aef306215cf175f545eb55f1161b08782246",
+      "src/server/protocol/network-action-request-reference.ts": "7a5f8bda77b2c9d87bb3fc503cdfa124ebd304b0b98a6ba9229bb7fadeaba453",
+      "src/server/protocol/network-action-reference.ts": "c7605b270951dd1cad2eb6314165d5fe80660839e317c92c821045632cb612ff",
+      "src/server/protocol/network-reference-integer.ts": "6f1be29f0d05e6365c176add72dd81bf1eba89fffebef51d5bc0fb2884909d21",
+      "src/server/protocol/network-reference-projection.ts": "8175dd39124b40b0f1ddcb3ddb6f5eb52930802e556372ab60fa11df0f0560d3",
+      "changes/2026-09-06-node-dedicated-server/e2e/network-action-corpus.test.ts": "e36bb4e8b8d9d945e71bbb23b6235b343eb776a01fe1d8a201055c6919709935"
+    }
+  },
+  "captureEnvironment": {
+    "node": "v22.23.2",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "validation": {
+    "static": {
+      "status": "PASS",
+      "testFilesPassed": 179,
+      "testFilesSkipped": 2,
+      "testsPassed": 942,
+      "testsSkipped": 4,
+      "worldLineCoveragePercent": 96.37,
+      "scope": "Production source checkpoint; subsequent application-source-binding test addition separately checked by focused Vitest, ESLint, Prettier and full typecheck"
+    },
+    "browserBuild": "PASS_WITH_EXISTING_CHUNK_SIZE_WARNING",
+    "nodeFiveEntryBuild": "PASS",
+    "actionCaptureTests": 1,
+    "actionApplicationTests": 3,
+    "referenceUnitTests": 36,
+    "finalSourceBinding": "PASS: current explicit file hashes match; stale/missing/extra paths rejected before Host construction",
+    "finalTypecheck": "PASS",
+    "finalActionBrowser": "PASS"
+  },
+  "corpus": {
+    "format": "seedlands-network-action-corpus/v1",
+    "config": {
+      "epoch": "host:action-reference",
+      "seedText": "network-action-fixture",
+      "initialPlayerBodyPosition": [0.5, 33, 0.5]
+    },
+    "recordCount": 40,
+    "corpusSha256": "59c16b0146a697db36110aaea8040bc4890d706e39952e9788891a1440eeb373",
+    "manifestPayloadSha256": "1329df475dbb97e0e90df9109a61c8f6d5efbe7a12c10df624646e979234aeb6",
+    "path": "/tmp/seedlands-network-action-corpus-v1-source-bound"
+  },
+  "browserInteroperability": {
+    "reference": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:59:10.330Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 9,
+      "syntheticRecords": 50,
+      "sourceCorpusSha256": "c3dc8a05e19dfe6b2dc90893752acd87ed2e97b1c977e131b19ba295f5b8830a",
+      "sourceManifestPayloadSha256": "5077d888a0465f381543732c8dd6af0b0bbb13a63bf529d2ab9b5228c2180e98",
+      "fixtureSha256": "a77f14613d34636d66e73efe447ec93e2f50f9732d8cb202204b8874950df70c",
+      "bundleSha256": "077f029cb977dc1ea78c27b3c9e204e04ace361f1b677f5de65e4e710974cb0c",
+      "bundleBytes": 426744,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 59,
+          "browserToNode": 59,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 59,
+          "browserToNode": 59,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 59,
+          "browserToNode": 59,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    "directional": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:59:11.097Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 21,
+      "syntheticRecords": 0,
+      "sourceCorpusSha256": "42021105e2b83b08288a98c06d4bfb74f9ff26f2f670d46ac50a97f3c0a1efbc",
+      "sourceManifestPayloadSha256": "29aa3713e09bc75f84459d6275ea3e64f4fcaaa56f13848dc3f20f910df93640",
+      "fixtureSha256": "40895e2d4f32910bfa875b29c51c9ae1d7688498c1a1591aedadfd4a69a76257",
+      "bundleSha256": "077f029cb977dc1ea78c27b3c9e204e04ace361f1b677f5de65e4e710974cb0c",
+      "bundleBytes": 426744,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 21,
+          "browserToNode": 21,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 21,
+          "browserToNode": 21,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 21,
+          "browserToNode": 21,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    "entity": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:59:11.851Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 6,
+      "syntheticRecords": 0,
+      "sourceCorpusSha256": "9987ddb7105c3dd6e261a83518f7ed74cd591d9e9874db482f815e154bd5774e",
+      "sourceManifestPayloadSha256": "e7164728a3c37fdd09afa60aaea88dabe0e60d98cb694d49665432a3b5f6bba9",
+      "fixtureSha256": "425ddf4b35ed45b7e8b2f99a5e44d4f526526704026d2a8186e3b9cdca177f8f",
+      "bundleSha256": "077f029cb977dc1ea78c27b3c9e204e04ace361f1b677f5de65e4e710974cb0c",
+      "bundleBytes": 426744,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 6,
+          "browserToNode": 6,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 6,
+          "browserToNode": 6,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 6,
+          "browserToNode": 6,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    "negative-zero": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:59:12.587Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 0,
+      "syntheticRecords": 3,
+      "sourceCorpusSha256": "42021105e2b83b08288a98c06d4bfb74f9ff26f2f670d46ac50a97f3c0a1efbc",
+      "sourceManifestPayloadSha256": "29aa3713e09bc75f84459d6275ea3e64f4fcaaa56f13848dc3f20f910df93640",
+      "fixtureSha256": "c322cd1822ac90c810ccf502828bdddcc856dbe7e3fd61b2c73e855ce9146d35",
+      "bundleSha256": "077f029cb977dc1ea78c27b3c9e204e04ace361f1b677f5de65e4e710974cb0c",
+      "bundleBytes": 426744,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    "action": {
+      "status": "PASS",
+      "utc": "2026-09-07T03:58:56.179Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 40,
+      "syntheticRecords": 0,
+      "sourceCorpusSha256": "fcfeeedd749ff2a99e691a1ab09226303b88ed4f7a58ba3ced08087153015d7d",
+      "sourceManifestPayloadSha256": "52e1691c6b38e8b98fe0272760191d38230fa5b22667ef5fb879d36b4426ceda",
+      "fixtureSha256": "a2b60b8d1b192caf1ff6326a8ec87d578ea9bb5469b2b1afadfd5d961b3a8e10",
+      "bundleSha256": "077f029cb977dc1ea78c27b3c9e204e04ace361f1b677f5de65e4e710974cb0c",
+      "bundleBytes": 426744,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 40,
+          "browserToNode": 40,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 40,
+          "browserToNode": 40,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 40,
+          "browserToNode": 40,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    "action-source-bound": {
+      "status": "PASS",
+      "utc": "2026-09-07T04:15:10.696Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 40,
+      "syntheticRecords": 0,
+      "sourceCorpusSha256": "59c16b0146a697db36110aaea8040bc4890d706e39952e9788891a1440eeb373",
+      "sourceManifestPayloadSha256": "1329df475dbb97e0e90df9109a61c8f6d5efbe7a12c10df624646e979234aeb6",
+      "fixtureSha256": "605c2e89579276f7737fd9835b56cf53a43024c6ff1e407c2d75dc6e34d7ed95",
+      "bundleSha256": "c366f39f3d6498030a01c453acb1cab36684de9f354efb5ef399001ab58f389f",
+      "bundleBytes": 427380,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 40,
+          "browserToNode": 40,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 40,
+          "browserToNode": 40,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 40,
+          "browserToNode": 40,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    }
+  },
+  "prototypeSha256": {
+    "action-request-reference.mjs": "2e3d79f65e06612bc8dd00e643d50be0817a782f8d465610a0724fa82f4351b9",
+    "fixed-schema-receipt.mjs": "c5ecbd168ba8006a3ef17d1ddb8cd684f4fda52d2cec5e5509798af17c00adb9",
+    "reference-fixed-codecs.mjs": "1cc3905b7b8b978d39f8e2adc941c077c5e7864d6c8b59f840b00acb9d7dd0f1",
+    "c0-raw-reference.mjs": "0101a82f53001463c7afe202bec38725b9f2948e94ee571876565badefab4e27",
+    "reference-schema-validation.mjs": "855f34737ff2643d82c4da21613a7086f12a840d51716225ea9a4e70673b4e61",
+    "reference-integer-zero-smoke.mjs": "fb05b5d8a19d7557a997d51b534c0595f2878e9f4f5aee7737736fa89d907336",
+    "action-request-codecs-smoke.mjs": "6405d1756b0b26e55a59cd8732a2eed731a4aab96c0daa42949a03a69ec8a536",
+    "action-request-schema-smoke.mjs": "999fa3f801136d4d76bf0abc454d8d4ba6f1281bb41c80cac8403b00607be416",
+    "action-pipeline-validation.mjs": "e4b30fbbdc274f69fa72cc0e86b00db1c09b4ae2ac66066697765c465a4e3ad5",
+    "codec-application-pipeline.mjs": "48e588f37a2f1534af18051eb3298190dae3d6703247054e336117952b8d041e",
+    "json-preserving-negative-zero.mjs": "9e41c9c3f371b6b075df51a0474f2e920c8d7a9dbfcd2770b2f70982d786ab10",
+    "protobuf-wire-preflight.mjs": "a97f92c58bee71adb82a59c7aee7be2c4ae1b0b9f63414232d7c390dd4d0a49a",
+    "browser-reference-runner.mjs": "fc7d16a0ebdfd4566f9bc2a1c85f38a21b6eded33229eeaa3b18e99ec01cc07f",
+    "browser-reference-validation.mjs": "06e53e5b201c91667d35ace0399e787553edbf7d74d32a5b89ee741e9205d068",
+    "directional-negative-zero-audit.mjs": "0bb6d622e73b97d8b0286ca6b6c8348a394c7818bae028336ecdc562aa4d0e87",
+    "action-pipeline-validation-source-bound.mjs": "02b7a0bcb42badd16eb3368e15e9d77e067abb46dc3996cb7d62aa056edbc1dd",
+    "browser-action-fixture-source-bound.mjs": "3734a0590ca34b4aede5262e8c306ce2ba609e18ea54eb173cefcaef2acc4dfb"
+  },
+  "validationLogSha256": {
+    "seedlands-action-static.log": "d054379dfb9e0631f4332b5d767c81c3003fa668c1dd5b1c02d6a9550c0007cb",
+    "seedlands-action-build.log": "a5c2f165d4644ab9d516751f870e22322b0e82752f6335a89cfe9c712bc03a18",
+    "seedlands-action-server-build.log": "c77555366bc664766d7c0d2ebfb032d671d7ce3b5b997be89f4d63c3a70d0b0f",
+    "seedlands-action-application-final.log": "9509ccb9f94fd33378720e920c40d513c0452a7ae7ec4ba3c41f9d79df00ff21",
+    "seedlands-action-prior-pipeline-final.log": "0836c183b0ec43bf397597d2db0983b48882fbd4723a6267bbcf27fde8a29727",
+    "seedlands-action-negative-zero-final.log": "65076c9001233b37e92041c1bf1fce4ec967c05790ec144f294b412aa250fbf5",
+    "seedlands-action-application-source-bound.log": "d23adb909892d35800e5e5f1652bb8bfb1920b0fc9387c7ce0b5ff4742b776ee"
+  },
+  "limits": [
+    "请求只有 action/sequence；身份来自 Host，本切片没有公网身份认证。",
+    "固定时钟 0 的 10 次调用共 40 条；重试只覆盖 select-hotbar，不证明库存消费或编辑幂等。",
+    "五组 fixture 独立；bundle 包含全部候选和 oracle，不是产品包体积。",
+    "C0 合法大 pose 仍有 64 KiB metadata 表示限制；正式网络/GUI/WAN/性能门禁尚未完成。",
+    "旧捕获 Node26 曾在格式化后失去当前源码绑定；保留历史记录，最终 source-bound 捕获与应用使用 Node22.23.2。",
+    "历史五组 browser bundle 426744 B；最终 source-bound action 组 bundle 427380 B，分别绑定 hash，不混称同一 bundle。"
+  ],
+  "previousCapture": {
+    "source": {
+      "gitSha": "51f7681f3f92dc97a012c597a5dd8ab73205193f",
+      "trackedSourceDiffSha256": "6969ad736871a62522fadeee149ebc7f087ce8ea811a9a8e010d29cd19d2c5ac",
+      "explicitInputSha256": {
+        "src/server/protocol/network-action-reference-copy.ts": "d96647a19eddd74e4af19c45cc01aef306215cf175f545eb55f1161b08782246",
+        "src/server/protocol/network-action-request-reference.ts": "7a5f8bda77b2c9d87bb3fc503cdfa124ebd304b0b98a6ba9229bb7fadeaba453",
+        "src/server/protocol/network-action-reference.ts": "c7605b270951dd1cad2eb6314165d5fe80660839e317c92c821045632cb612ff",
+        "src/server/protocol/network-reference-integer.ts": "6f1be29f0d05e6365c176add72dd81bf1eba89fffebef51d5bc0fb2884909d21",
+        "src/server/protocol/network-reference-projection.ts": "8175dd39124b40b0f1ddcb3ddb6f5eb52930802e556372ab60fa11df0f0560d3",
+        "changes/2026-09-06-node-dedicated-server/e2e/network-action-corpus.test.ts": "024f9ecde857f9b7f353a08f684897f3829905c405ecfc4736e1ff70e200bcf9"
+      }
+    },
+    "environment": {
+      "node": "v26.0.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "corpus": {
+      "format": "seedlands-network-action-corpus/v1",
+      "config": {
+        "epoch": "host:action-reference",
+        "seedText": "network-action-fixture",
+        "initialPlayerBodyPosition": [0.5, 33, 0.5]
+      },
+      "recordCount": 40,
+      "corpusSha256": "fcfeeedd749ff2a99e691a1ab09226303b88ed4f7a58ba3ced08087153015d7d",
+      "manifestPayloadSha256": "52e1691c6b38e8b98fe0272760191d38230fa5b22667ef5fb879d36b4426ceda"
+    },
+    "status": "HISTORICAL_SOURCE_BINDING_STALE_AFTER_FORMATTING"
+  }
+}

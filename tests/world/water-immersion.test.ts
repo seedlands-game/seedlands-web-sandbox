@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { sampleWaterImmersion } from '../../src/world/water-immersion';
-import { Voxel } from '../../src/world/voxel';
+import { sampleWaterImmersion } from '../../packages/game-core/src/world/water-immersion';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 const sample = (cameraY: number, levels: Record<number, number>, previousCameraSubmerged = false) =>
   sampleWaterImmersion({

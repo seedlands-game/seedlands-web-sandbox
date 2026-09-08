@@ -1,8 +1,13 @@
 import { gzipSync } from 'node:zlib';
-import { readFile, readdir } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 export async function collectDistMetrics(root) {
+  const webDist = resolve(root, 'apps/web/dist');
+  const dist = await access(webDist).then(
+    () => webDist,
+    () => resolve(root, 'dist'),
+  );
   const files = [];
   async function walk(dir) {
     for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -11,7 +16,7 @@ export async function collectDistMetrics(root) {
       else files.push(full);
     }
   }
-  await walk(resolve(root, 'dist'));
+  await walk(dist);
   let totalBytes = 0;
   let jsBytes = 0;
   let gzipBytes = 0;

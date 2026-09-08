@@ -1,0 +1,119 @@
+{
+  "format": "seedlands-network-baseline-corpus-evidence/v1",
+  "status": "PASS",
+  "capturedAtLocal": "2026-09-07T14:21:42+08:00",
+  "worktree": "/Users/chlorinec/.codex/worktrees/node-dedicated-20260906/voxel-sandbox-foundation",
+  "outputDirectory": "/tmp/seedlands-network-baseline-corpus-v1-r2",
+  "runtime": {
+    "node": "v22.23.2",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "command": "/tmp/seedlands-node-22/node-v22.23.2-darwin-arm64/bin/node node_modules/vitest/vitest.mjs run --config changes/2026-09-06-node-dedicated-server/e2e/vitest.baseline-corpus.config.ts --testTimeout 30000",
+  "result": {
+    "testFiles": 1,
+    "tests": 1,
+    "durationMs": 4400,
+    "executor": "runDedicatedComputeTask",
+    "captureSource": "DedicatedServerHost.captureBaseline"
+  },
+  "provenance": {
+    "gitSha": "46d1729f472dd510179b7fe3bd9340be8f94eccf",
+    "trackedSourceDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "manifestPayloadSha256": "71feaf539ea6053cff66c3567f0601dbf14997d18c9938f3aa5edfb9580b5f6d",
+    "manifestFileSha256": "0d2959e728f73a30efec8c9bac0f58269b9d0b51f3c73c23b0640fbbb1b7b0ad",
+    "corpusSha256": "2d3a0a9fd1670c087367fbb1c9330eda9e2484d9e7facd665892c6128e5f3b91",
+    "sourceFiles": [
+      {
+        "path": "src/server/authority/authority-baseline-capture.ts",
+        "sha256": "db20508d69c214a61cb73515c38341da850bf22ac900fe3319f087c7bba8ddc8"
+      },
+      {
+        "path": "src/server/canonical-chunk-observation.ts",
+        "sha256": "d6c69db7419060181e3d61fd38c5fe1948c2772dff14e93239802382e5221a7e"
+      },
+      {
+        "path": "src/server/dedicated/dedicated-baseline-capture.ts",
+        "sha256": "b6c09f26e6565813e5b44179b99f4b5cb876fc3630b465a322b4cd05a7c435aa"
+      },
+      {
+        "path": "src/server/dedicated/dedicated-canonical-admission.ts",
+        "sha256": "7518d952c298b46cb6cef150477549f971c6911d086423fe33443df99b076eb1"
+      },
+      {
+        "path": "src/server/dedicated/dedicated-chunk-requests.ts",
+        "sha256": "93a46aaf450ef35fa141cd9ac8490431e5671ba22a25bab30aaf40692a424a3f"
+      },
+      {
+        "path": "src/server/dedicated/dedicated-server-host.ts",
+        "sha256": "31d01e90302e936a6a936a8326e84b4b6254f8f681609fa6d3f29b7889ee62ee"
+      },
+      {
+        "path": "src/server/server-mesh-snapshots.ts",
+        "sha256": "e17578bc8f7dc71c8f48cb467163d73433479362f16695d793ae179f5a943275"
+      },
+      { "path": "src/world/mesh.ts", "sha256": "5bf155e40e3a7924794e0403ab43cf52afd54f0281f3ab92d14425af8e6abf5b" },
+      { "path": "src/world/voxel.ts", "sha256": "1fdcf286b05c6da5def8aa2bb1283be50927b4b4be5e5a28a1fdd0f3fc2d3222" },
+      {
+        "path": "changes/2026-09-06-node-dedicated-server/e2e/support/network-baseline-corpus-recorder.ts",
+        "sha256": "3feef4966cca495d3e5daadd501dda0f0fed362a0d60988ac74ce6a687720ebd"
+      },
+      {
+        "path": "changes/2026-09-06-node-dedicated-server/e2e/network-baseline-corpus.test.ts",
+        "sha256": "58afac28164707928f259bf92a68ab6c794376f69498c37c4e04215ad26178dc"
+      },
+      {
+        "path": "changes/2026-09-06-node-dedicated-server/e2e/vitest.baseline-corpus.config.ts",
+        "sha256": "2e98ac5859cf9bccd8450dff2fe40e573e316bca3137d5211e58b93831d6c77e"
+      }
+    ]
+  },
+  "frames": [
+    {
+      "frameId": "000-unmodified-mesh",
+      "scenario": "unmodified-mesh",
+      "request": { "captureId": 0, "purpose": "mesh", "key": "80,0,80", "minimumRevision": 0 },
+      "checkpoint": { "epoch": "baseline-corpus:authority", "physicsTick": 0, "commitSequence": 2, "worldRevision": 1 },
+      "captureGeneration": 0,
+      "entryCount": 27,
+      "producerInputSha256": "0846a5cb50cc89fb4c3901a59f7cd7d195fa8f2eb4571c4a4cd5cae2f708c507",
+      "producerOutputSha256": "22da0f9d417e8b0cedddf3033d903f0512267130ec497b4ced3e4b47c6ee445f",
+      "contentSha256": "e99208e28590780374117b0f8c520592b9ce540e073be2d4083e90ff7a5ec06d"
+    },
+    {
+      "frameId": "001-edited-main-mesh",
+      "scenario": "edited-main-mesh",
+      "request": { "captureId": 1, "purpose": "mesh", "key": "80,0,80", "minimumRevision": 1 },
+      "checkpoint": { "epoch": "baseline-corpus:authority", "physicsTick": 0, "commitSequence": 3, "worldRevision": 2 },
+      "captureGeneration": 1,
+      "entryCount": 27,
+      "producerInputSha256": "020df14323d11083a1af0c9aabaa3774ea2a8606241a4e75d94b4dfb4d23189d",
+      "producerOutputSha256": "e9b1d0bad1e021d4e66f90e7f38f908cc1ca9d8852fe76d4d845da242943afdb",
+      "contentSha256": "bedfc90651c0c322d8fd9f5bf0a4e165a759d55a6784d5f7326f434a59d41cb7"
+    },
+    {
+      "frameId": "002-collision-resync",
+      "scenario": "collision-resync",
+      "request": { "captureId": 2, "purpose": "collision-resync", "key": "80,0,80", "minimumRevision": 1 },
+      "checkpoint": { "epoch": "baseline-corpus:authority", "physicsTick": 0, "commitSequence": 3, "worldRevision": 2 },
+      "captureGeneration": 2,
+      "entryCount": 1,
+      "producerInputSha256": "08ed4890c8e2d3a80762599d95efedbf89349af252776abc1f8fd8f57208047b",
+      "producerOutputSha256": "f58f7a2e76f821a098a879c7ce9d322a6ca07d5beba5ca0b778b02d5757a1be9",
+      "contentSha256": "6159ed19d2e3ae3e00c0fd2f21cbb01a77114f248a18eabc66d22531b0c05f5a"
+    }
+  ],
+  "blocks": {
+    "fileCount": 110,
+    "meshRawBytesPerCapture": 2654208,
+    "collisionRawBytes": 98304,
+    "canonical": { "elementType": "uint16-le", "byteOrder": "little-endian", "byteLength": 65536 },
+    "fluid": { "elementType": "uint8", "byteOrder": "not-applicable", "byteLength": 32768 }
+  },
+  "notCollected": [
+    "public interest/session owner and cancellation state machine",
+    "baseline descriptor/page framing, reliable transport, and queue backpressure",
+    "browser Remote adapter installation and gameplay E2E",
+    "capture cancellation, superseded copy, and transport failure corpus scenarios"
+  ]
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CHUNK_SIZE, FaceMaterial, Voxel, normalizeSeed, voxelIndex } from '../../src/world/voxel';
+import { CHUNK_SIZE, FaceMaterial, Voxel, normalizeSeed, voxelIndex } from '../../packages/game-core/src/world/voxel';
 import {
   batchMeshData,
   compactMeshData,
@@ -8,7 +8,7 @@ import {
   makeChunk,
   meshChunk,
   meshDataByteLength,
-} from '../../src/world/mesh';
+} from '../../packages/game-core/src/world/mesh';
 
 const seed = normalizeSeed('vitest-world-mesh');
 

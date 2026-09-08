@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { playerOccupiesVoxelShape } from '../../src/server/gameplay/player-occupancy';
-import { Voxel } from '../../src/world/voxel';
+import { playerOccupiesVoxelShape } from '../../packages/game-core/src/server/gameplay/player-occupancy';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('模型方块放置占用', () => {
   it('保留完整方块占用并允许玩家经过灯笼格边空隙', () => {

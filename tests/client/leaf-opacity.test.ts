@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { leafOpacity } from '../../src/client/presentation/leaf-opacity';
+import { leafOpacity } from '../../apps/web/src/client/presentation/leaf-opacity';
 
 it('叶片轮廓周期连续，保留有界镂空而不成为棋盘格或实心方块', () => {
   let gaps = 0;

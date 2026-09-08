@@ -1,14 +1,16 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it, vi } from 'vitest';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { applyActorAuthorityAction } from '../../src/server/gameplay/actor-authority-gameplay';
-import { GameplayRuntime } from '../../src/server/gameplay/gameplay-runtime';
-import { ItemIds } from '../../src/server/gameplay/item-registry';
-import { Voxel, chunkKey } from '../../src/world/voxel';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { applyActorAuthorityAction } from '../../packages/game-core/src/server/gameplay/actor-authority-gameplay';
+import { GameplayRuntime } from '../../packages/game-core/src/server/gameplay/gameplay-runtime';
+import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
+import { Voxel, chunkKey } from '../../packages/game-core/src/world/voxel';
 
 describe('玩法事务只读取已加载权威Chunk', () => {
   it('未知目标等待General异步准备，不同步生成、不提前扣库存，并在等待期间继续物理步', async () => {
     const requested: string[] = [];
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'unknown-gameplay:1',
       seedText: 'unknown-gameplay',
       initialWorldTime: 9,
@@ -55,6 +57,7 @@ describe('玩法事务只读取已加载权威Chunk', () => {
 
   it('破坏与攻击在目标或LOS未知时保守失败且不改变玩法状态', () => {
     const gameplay = new GameplayRuntime({
+      platform: testCorePlatform,
       getVoxel: () => undefined,
       editVoxel: () => {
         throw new Error('未知Chunk不应进入editVoxel。');
@@ -79,6 +82,7 @@ describe('玩法事务只读取已加载权威Chunk', () => {
 
   it('Actor权威攻击遇到未知LOS时返回chunk-unavailable且不伤害玩家', () => {
     const gameplay = new GameplayRuntime({
+      platform: testCorePlatform,
       getVoxel: () => undefined,
       editVoxel: () => {
         throw new Error('Actor LOS不得同步写世界。');

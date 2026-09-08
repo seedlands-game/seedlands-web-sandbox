@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EditorState } from '../../src/app/asset-workbench/editor-state';
+import { EditorState } from '../../apps/web/src/app/asset-workbench/editor-state';
 
 describe('资产草稿的关系与历史', () => {
   it('复制隔离内置源、阻止依赖删除、支持整体撤销与恢复', () => {

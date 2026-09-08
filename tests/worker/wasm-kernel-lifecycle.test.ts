@@ -1,8 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import { createKernelMemory, KernelMemory, WASM_ARENA_BYTES } from '../../src/compute/kernel-memory';
+import { createKernelMemory, KernelMemory, WASM_ARENA_BYTES } from '../../apps/web/src/compute/kernel-memory';
 
-const moduleBytes = () => readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
+const moduleBytes = () =>
+  readFile(new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
 
 describe('Wasm 内存与批量 ABI', () => {
   it('隔离实例、校验ABI并读取标准CRC已知答案', async () => {

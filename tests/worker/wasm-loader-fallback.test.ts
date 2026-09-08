@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it, vi } from 'vitest';
-import { loadWorkerKernels, parseKernelSelection } from '../../src/worker/wasm-kernel-loader';
+import { loadWorkerKernels, parseKernelSelection } from '../../apps/web/src/worker/wasm-kernel-loader';
 
 describe('Worker Wasm 选择与加载失败回退', () => {
   it('默认关闭，开启项白名单解析；全关不下载模块', async () => {
@@ -12,7 +12,9 @@ describe('Worker Wasm 选择与加载失败回退', () => {
     expect(fetchBytes).not.toHaveBeenCalled();
   });
   it('已知答案验证后才启用，请求失败与坏模块回退', async () => {
-    const bytes = await readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
+    const bytes = await readFile(
+      new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url),
+    );
     const valid = await loadWorkerKernels({ artifact: 'simd', kernels: ['w02'] }, async () => bytes);
     expect(valid.memory?.failed).toBe(false);
     expect(valid.status).toBe('matched');
@@ -31,7 +33,7 @@ describe('Worker Wasm 选择与加载失败回退', () => {
 
   it('SIMD 关闭不请求 SIMD；SIMD 失败后回退 scalar', async () => {
     const scalar = new Uint8Array(
-      await readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url)),
+      await readFile(new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url)),
     );
     const scalarOnly = vi.fn(async () => scalar);
     const matched = await loadWorkerKernels({ artifact: 'scalar', kernels: ['w06'] }, scalarOnly);

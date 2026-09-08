@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { Inventory } from '../../src/server/gameplay/inventory';
-import { ItemIds, getItemDefinition } from '../../src/server/gameplay/item-registry';
-import { craftRecipe, getRecipe, listCraftableRecipes } from '../../src/server/gameplay/recipe-registry';
-import { getVoxelGameplayDefinition } from '../../src/server/gameplay/voxel-gameplay';
-import { Voxel } from '../../src/world/voxel';
+import { Inventory } from '../../packages/game-core/src/server/gameplay/inventory';
+import { ItemIds, getItemDefinition } from '../../packages/game-core/src/server/gameplay/item-registry';
+import {
+  craftRecipe,
+  getRecipe,
+  listCraftableRecipes,
+} from '../../packages/game-core/src/server/gameplay/recipe-registry';
+import { getVoxelGameplayDefinition } from '../../packages/game-core/src/server/gameplay/voxel-gameplay';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('item and voxel gameplay registries', () => {
   it('keeps ItemId independent from VoxelId and exposes explicit block mappings', () => {

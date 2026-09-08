@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BrowserLogicClient, type LogicWorkerPort } from '../../src/client/authority/browser-logic-client';
-import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch } from '../../src/server/logic/logic-protocol';
-import type { LogicObservation, LogicWorkerResponse } from '../../src/server/logic/logic-protocol';
+import { BrowserLogicClient, type LogicWorkerPort } from '../../apps/web/src/client/authority/browser-logic-client';
+import {
+  LOGIC_PROTOCOL_VERSION,
+  type LogicIntentBatch,
+} from '../../packages/game-core/src/server/logic/logic-protocol';
+import type { LogicObservation, LogicWorkerResponse } from '../../packages/game-core/src/server/logic/logic-protocol';
 
 class FakeWorker implements LogicWorkerPort {
   onmessage: ((event: MessageEvent<LogicWorkerResponse>) => void) | null = null;

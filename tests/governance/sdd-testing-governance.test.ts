@@ -72,7 +72,8 @@ describe('SDD and testing governance', () => {
     const testTypeScript = JSON.parse(readProjectFile('tsconfig.test.json')) as { include?: string[] };
 
     expect(harnessRunner).toContain("['exec', 'playwright', 'test', 'tests/e2e']");
-    expect(testTypeScript.include).toContain('changes/*/e2e');
+    expect(testTypeScript.include).toContain('changes/2026-09-08-node-monorepo/e2e');
+    expect(testTypeScript.include).toContain('tests');
   });
 
   it('allows kebab-case Playwright files under a change e2e directory', () => {

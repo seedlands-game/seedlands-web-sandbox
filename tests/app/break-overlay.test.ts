@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BreakOverlayState, breakOverlayStage } from '../../src/app/gameplay/break-overlay-state';
+import { BreakOverlayState, breakOverlayStage } from '../../apps/web/src/app/gameplay/break-overlay-state';
 
 describe('方块破坏覆盖层状态', () => {
   it('把权威进度单调量化为 0–9 阶', () => {

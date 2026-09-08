@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { PredictionBuffer, type PredictionFrame } from '../../src/client/prediction-buffer';
-import type { BodyState } from '../../src/physics';
-import { PROTOCOL_VERSION, type InputCommand } from '../../src/runtime/session-protocol';
+import { PredictionBuffer, type PredictionFrame } from '../../apps/web/src/client/prediction-buffer';
+import type { BodyState } from '../../packages/game-core/src/physics';
+import { PROTOCOL_VERSION, type InputCommand } from '../../packages/game-core/src/runtime/session-protocol';
 
 const body = (x: number, velocity = 0): BodyState => ({
   position: { x, y: 2, z: 0 },

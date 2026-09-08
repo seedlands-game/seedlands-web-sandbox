@@ -10,7 +10,7 @@ describe('app/client directory ownership boundary', () => {
   it('rejects client imports from browser composition code', async () => {
     const [result] = await lintSource(
       `import { Game } from '../../app/game'; export const start = () => new Game();`,
-      'src/client/presentation/client-app-boundary-probe.ts',
+      'apps/web/src/client/presentation/client-app-boundary-probe.ts',
     );
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/client-no-app-import')).toHaveLength(1);
   });
@@ -18,7 +18,7 @@ describe('app/client directory ownership boundary', () => {
   it('rejects an app re-export disguised as a client contract', async () => {
     const [result] = await lintSource(
       `export * from '../../app/game';`,
-      'src/client/presentation/client-app-re-export-probe.ts',
+      'apps/web/src/client/presentation/client-app-re-export-probe.ts',
     );
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/client-no-app-import')).toHaveLength(1);
   });
@@ -26,11 +26,11 @@ describe('app/client directory ownership boundary', () => {
   it('allows app adapters to consume client contracts and client code to consume DTOs', async () => {
     const [appResult] = await lintSource(
       `import type { PerformanceProfile } from '../../client/presentation/performance-profile'; export type View = PerformanceProfile;`,
-      'src/app/scene/app-client-boundary-probe.ts',
+      'apps/web/src/app/scene/app-client-boundary-probe.ts',
     );
     const [clientResult] = await lintSource(
       `import type { AuthoritySnapshot } from '../../server/authority/authority-session'; export type View = AuthoritySnapshot;`,
-      'src/client/authority/client-server-dto-probe.ts',
+      'apps/web/src/client/authority/client-server-dto-probe.ts',
     );
     expect(appResult.messages.filter((message) => message.ruleId === 'seedlands/client-no-app-import')).toHaveLength(0);
     expect(clientResult.messages.filter((message) => message.ruleId === 'seedlands/client-no-app-import')).toHaveLength(
@@ -39,16 +39,16 @@ describe('app/client directory ownership boundary', () => {
   });
 
   it('keeps app and client top levels limited to reviewed composition entries', async () => {
-    const [appExtra] = await lintSource('export const extra = true;', 'src/app/unowned-probe.ts');
+    const [appExtra] = await lintSource('export const extra = true;', 'apps/web/src/app/unowned-probe.ts');
     const [appSvelteExtra] = await lintSource(
       '<script lang="ts">export const extra = true;</script>',
-      'src/app/foo.svelte',
+      'apps/web/src/app/foo.svelte',
     );
-    const [clientExtra] = await lintSource('export const extra = true;', 'src/client/unowned-probe.ts');
-    const [appEntry] = await lintSource('export const entry = true;', 'src/app/main.ts');
+    const [clientExtra] = await lintSource('export const extra = true;', 'apps/web/src/client/unowned-probe.ts');
+    const [appEntry] = await lintSource('export const entry = true;', 'apps/web/src/app/main.ts');
     const [uiComponent] = await lintSource(
       '<script lang="ts">let label = \'ready\';</script><span>{label}</span>',
-      'src/app/ui/primitives/game-button.svelte',
+      'apps/web/src/app/ui/primitives/game-button.svelte',
     );
 
     expect(appExtra.messages.filter((message) => message.ruleId === 'seedlands/app-top-level-owner')).toHaveLength(1);

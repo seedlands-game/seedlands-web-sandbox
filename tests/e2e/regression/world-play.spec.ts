@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { Voxel } from '../../../src/world/voxel';
+import { Voxel } from '../../../packages/game-core/src/world/voxel';
 import {
   clickCanvasCenter,
   fillHarnessWorld,

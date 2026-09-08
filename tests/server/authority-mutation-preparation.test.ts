@@ -1,7 +1,11 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it, vi } from 'vitest';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import type { ChunkPersistence, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
-import { Voxel, chunkKey } from '../../src/world/voxel';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import type {
+  ChunkPersistence,
+  ChunkSnapshot,
+} from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import { Voxel, chunkKey } from '../../packages/game-core/src/world/voxel';
 
 const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
   ...snapshot,
@@ -71,6 +75,7 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
   it('远端World edit先请求General生成且等待接纳，Authority物理在准备期间继续推进', async () => {
     const requests: string[] = [];
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'mutation-preparation:1',
       seedText: 'mutation-preparation',
       initialWorldTime: 9,
@@ -94,6 +99,7 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
     const persistence = new AsyncCachePersistence();
     const unknown = vi.fn();
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'mutation-preparation:2',
       seedText: 'mutation-preparation-saved',
       persistence,
@@ -122,6 +128,7 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
     const persistence = new AsyncCachePersistence();
     const unknown: string[] = [];
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'mutation-preparation:physics-restore',
       seedText: 'mutation-preparation-physics-restore',
       persistence,
@@ -154,6 +161,7 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
     const persistence = new BlockedAsyncCachePersistence();
     const unknown: string[] = [];
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'mutation-preparation:blocked-durable-preflight',
       seedText: 'mutation-preparation-blocked-durable-preflight',
       persistence,
@@ -192,6 +200,7 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
 
   it('没有General端口时在确认durable miss后使用本地确定性canonical', async () => {
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'mutation-preparation:local-fallback',
       seedText: 'mutation-preparation-local-fallback',
       initialWorldTime: 9,
@@ -213,6 +222,7 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
   it('远端set-block命令复用同一准备门，不在Authority热路径同步生成', async () => {
     const requests: string[] = [];
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'mutation-preparation:3',
       seedText: 'mutation-preparation-command',
       initialWorldTime: 9,
@@ -235,6 +245,7 @@ describe('Authority mutation asynchronous Chunk preparation', () => {
   it('拒绝的错配生成结果不能借已加载坐标释放另一个key的待提交事务', async () => {
     const requests: string[] = [];
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'mutation-preparation:4',
       seedText: 'mutation-preparation-mismatch',
       initialWorldTime: 9,

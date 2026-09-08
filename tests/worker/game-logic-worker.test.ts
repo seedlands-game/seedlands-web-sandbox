@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createGameLogicWorkerHandler } from '../../src/worker/game-logic-worker';
-import type { LogicObservation } from '../../src/server/logic/logic-protocol';
+import { createGameLogicWorkerHandler } from '../../apps/web/src/worker/game-logic-worker';
+import type { LogicObservation } from '../../packages/game-core/src/server/logic/logic-protocol';
 
 const emptyObservation = (epoch: string): LogicObservation => ({
   protocolVersion: 1,

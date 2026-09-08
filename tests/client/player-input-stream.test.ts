@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PlayerInputStream } from '../../src/client/player-input-stream';
+import { PlayerInputStream } from '../../apps/web/src/client/player-input-stream';
 
 describe('PlayerInputStream', () => {
   it('把视角相对按键转换成世界坐标输入，并为每个预测步分配唯一目标 tick', () => {

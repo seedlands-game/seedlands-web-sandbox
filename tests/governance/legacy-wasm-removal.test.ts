@@ -13,8 +13,8 @@ describe('旧实验 Wasm 实现清理门禁', () => {
       'scripts/check-wasm.mjs',
       'scripts/moonbit-toolchain.mjs',
       'scripts/wasm-artifact.mjs',
-      'src/generated/wasm/seedlands-kernels.wasm',
-      'src/generated/wasm/manifest.json',
+      'apps/web/src/generated/wasm/seedlands-kernels.wasm',
+      'apps/web/src/generated/wasm/manifest.json',
     ])
       expect(existsSync(resolve(root, path)), path).toBe(false);
 
@@ -30,9 +30,9 @@ describe('旧实验 Wasm 实现清理门禁', () => {
     for (const path of [
       'crates/world-kernels',
       'scripts/rust-kernel-artifact.mjs',
-      'src/generated/wasm/rust-kernels-scalar.wasm',
-      'src/generated/wasm/rust-kernels-simd.wasm',
-      'src/generated/wasm/rust-kernel-manifest.json',
+      'apps/web/src/generated/wasm/rust-kernels-scalar.wasm',
+      'apps/web/src/generated/wasm/rust-kernels-simd.wasm',
+      'apps/web/src/generated/wasm/rust-kernel-manifest.json',
     ])
       expect(existsSync(resolve(root, path)), path).toBe(true);
 

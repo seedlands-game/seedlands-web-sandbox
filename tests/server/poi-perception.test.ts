@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { EntityStore } from '../../src/server/gameplay/entity-store';
-import { PerceptionRuntime } from '../../src/server/simulation/perception-runtime';
-import { PoiRegistry } from '../../src/server/simulation/poi-registry';
-import { Voxel } from '../../src/world/voxel';
+import { EntityStore } from '../../packages/game-core/src/server/gameplay/entity-store';
+import { PerceptionRuntime } from '../../packages/game-core/src/server/simulation/perception-runtime';
+import { PoiRegistry } from '../../packages/game-core/src/server/simulation/poi-registry';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('POI and observer-scoped perception', () => {
   it('registers, clones, queries and restores nearby POIs', () => {

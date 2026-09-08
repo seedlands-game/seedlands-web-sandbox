@@ -1,12 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Collider, PhysicsWorld, WorldAabb } from '../../src/physics';
-import { PROTOCOL_VERSION, InputCommandBuffer, type InputCommand } from '../../src/runtime/session-protocol';
-import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
-import type { WorldCommitResult } from '../../src/server/game-server-types';
-import type { AuthorityReady, AuthorityResponse } from '../../src/worker/authority-worker-protocol';
-import { BrowserAuthorityClient } from '../../src/client/authority/browser-authority-client';
-import { createAuthorityTransport, type AuthorityTransportPort } from '../../src/client/authority/authority-transport';
-import { LocalPlayerPrediction } from '../../src/client/local-player-prediction';
+import type { Collider, PhysicsWorld, WorldAabb } from '../../packages/game-core/src/physics';
+import {
+  PROTOCOL_VERSION,
+  InputCommandBuffer,
+  type InputCommand,
+} from '../../packages/game-core/src/runtime/session-protocol';
+import type { AuthoritySnapshot } from '../../packages/game-core/src/server/authority/authority-session';
+import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
+import type { AuthorityReady, AuthorityResponse } from '../../packages/game-core/src/compute/authority-worker-protocol';
+import { BrowserAuthorityClient } from '../../apps/web/src/client/authority/browser-authority-client';
+import {
+  createAuthorityTransport,
+  type AuthorityTransportPort,
+} from '../../apps/web/src/client/authority/authority-transport';
+import { LocalPlayerPrediction } from '../../apps/web/src/client/local-player-prediction';
 
 const PHYSICS_HZ = 120;
 const START_TICK = 100;

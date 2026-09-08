@@ -3,11 +3,11 @@ import {
   actorModelDefinitions,
   playerArmModelDefinition,
   playerModelDefinition,
-} from '../../src/client/presentation/actor-model-definitions';
+} from '../../apps/web/src/client/presentation/actor-model-definitions';
 import {
   builtinModelTextures,
   modelMaterialDefinitions,
-} from '../../src/client/presentation/model-material-definitions';
+} from '../../apps/web/src/client/presentation/model-material-definitions';
 
 describe('内置角色模型定义', () => {
   it('将现有生物、完整人物和第一人称手臂声明为可复用构件', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { GENERATOR_VERSION, Voxel } from '../../src/world/voxel';
-import { decodeWorldSave, encodeWorldSave, type WorldChange } from '../../src/world/storage';
+import { GENERATOR_VERSION, Voxel } from '../../packages/game-core/src/world/voxel';
+import { decodeWorldSave, encodeWorldSave, type WorldChange } from '../../packages/game-core/src/world/storage';
 
 describe('world storage codec', () => {
   it('round-trips seed, version, player, and mutations', () => {

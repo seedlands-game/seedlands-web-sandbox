@@ -172,7 +172,7 @@ EaglerPorts 与 Java/WASM 讨论属于同期平台边界探索，不能把“曾
 - [可玩 MVP 父合同](../changes/2026-09-05-playable-world-mvp/spec.md)：总体范围、阶段修订与历史证据。
 - [算法生物与 NPC](../changes/2026-09-05-creature-npc-algorithmic-foundation/spec.md)：模型接入前的确定性底座。
 - [独立循环与统一物理合同](../changes/2026-09-06-independent-loops-unified-physics/spec.md)、[执行记录](../changes/2026-09-06-independent-loops-unified-physics/execution.md)：联合阅读，避免只读旧阶段文字。
-- [Headless 实现](../src/server/headless/headless-session.ts)、[权威运行时](../src/server/authority/authority-runtime.ts)：本次核对的实际实现边界。
+- [Headless 实现](../packages/game-core/src/server/headless/headless-session.ts)、[权威运行时](../packages/game-core/src/server/authority/authority-runtime.ts)：本次核对的实际实现边界。
 
 ## 五、两条并行路线
 

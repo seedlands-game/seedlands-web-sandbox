@@ -1,0 +1,98 @@
+{
+  "format": "seedlands-network-baseline-reference-evidence/v1",
+  "capturedAtUtc": "2026-09-07T06:58:31.039311Z",
+  "status": "PASS",
+  "runtime": {
+    "node": "v22.23.2",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "source": {
+    "gitSha": "80109458d8b45de6d02f7f4d47e6fb64f4d88044",
+    "trackedSourceDiffSha256": "d38ce6a83c01ac27eb7b65987bbaaa1ecc013c8d7cb9614749b4c0a1492e8f45",
+    "rawDirectory": "/tmp/seedlands-network-baseline-corpus-v1-r2",
+    "rawManifestSha256": "0d2959e728f73a30efec8c9bac0f58269b9d0b51f3c73c23b0640fbbb1b7b0ad",
+    "rawFramesSha256": "2d3a0a9fd1670c087367fbb1c9330eda9e2484d9e7facd665892c6128e5f3b91",
+    "rawManifestPayloadSha256": "71feaf539ea6053cff66c3567f0601dbf14997d18c9938f3aa5edfb9580b5f6d",
+    "rawSidecarCount": 110,
+    "productionReferenceSourceSha256": {
+      "network-reference-baseline.ts": "168c1edc72a288b2ec53a2a73abfff0e10f08dc07054824a11abe7644153f7ce",
+      "network-reference-baseline-types.ts": "46ca686323539fd8eb3573c00565cf072438431ad8e0abb11031b70865bac7a2",
+      "network-reference-baseline-validation.ts": "9872ecd8899ac1489183c1f2c09ceaabde21ef25e1d84dcc6a8c47ffd202b51b",
+      "network-reference-baseline-budget.ts": "033e9ccb5ad901fc951415d3c143e5666902f4516dc2e6fd12e402bba9dc1acb",
+      "network-reference-baseline-owned.ts": "2bbdde806a7145ac1a2036863018d9d25286bcb543d2beb002f7f6866319ec4a",
+      "network-reference-baseline-publication.ts": "835e0881684de079b7b1053f0bf4f55bbd1d530422c0d5ebc3b9f96ac87a605e",
+      "network-reference-baseline-reassembly.ts": "6852c282d5d168623f1a249f4fbfd9295afaacaa6982644071b7818e0e85aa6d"
+    }
+  },
+  "artifact": {
+    "directory": "/tmp/seedlands-network-baseline-reference-projected-v1-r2",
+    "manifestFileSha256": "9d590ded6a1b050f9b7c42cdf3638ca957509f888a2e89de909ee264b6f85dfb",
+    "framesFileSha256": "4320c31fd0c46b58c4bf158f4d94cd59991f9f810abd8a09dc3ada3fbb0b766d",
+    "manifestPayloadSha256": "2d5a9a76ef786d508326815431bfaedd9be2126a7eb1f1789e83cd06df8aa6b1",
+    "pageSidecarCount": 330,
+    "publishClaimCleared": true,
+    "supersededGeneration": "/tmp/seedlands-network-baseline-reference-projected-v1-r1 (writer shared-page-set defect; preserved, not used)"
+  },
+  "candidate": {
+    "referencePagePayloadBytes": 16384,
+    "expectedPageCounts": [162, 162, 6],
+    "digest": "node:crypto/sha-256",
+    "sizer": "json-utf8-metadata-plus-raw-payload/v1",
+    "arrivalOrder": "coprime-step-37/v1",
+    "wireStatus": "not-adopted"
+  },
+  "frames": [
+    {
+      "frameId": "reference-000-unmodified-mesh",
+      "sourceFrameId": "000-unmodified-mesh",
+      "captureGeneration": 0,
+      "purpose": "mesh",
+      "bundleId": 0,
+      "entryCount": 27,
+      "pageCount": 162,
+      "contentSha256": "a785d048928b64fbee050fe0f710f846f0bc977797684da2ca482f72a94077d5"
+    },
+    {
+      "frameId": "reference-001-edited-main-mesh",
+      "sourceFrameId": "001-edited-main-mesh",
+      "captureGeneration": 1,
+      "purpose": "mesh",
+      "bundleId": 1,
+      "entryCount": 27,
+      "pageCount": 162,
+      "contentSha256": "3739871761af0574b7e25600a468f4297a22a39888fbd4a1b03ed8defd263020"
+    },
+    {
+      "frameId": "reference-002-collision-resync",
+      "sourceFrameId": "002-collision-resync",
+      "captureGeneration": 2,
+      "purpose": "collision-resync",
+      "bundleId": 2,
+      "entryCount": 1,
+      "pageCount": 6,
+      "contentSha256": "630baf0d16b71753881b332f7e0b5d2ddbb2566014cf2eff38c4282c0517da28"
+    }
+  ],
+  "checks": {
+    "initialMissingRecorderRed": "PASS: dedicated Vitest could not resolve the missing recorder before implementation.",
+    "rawManifestAndFramesPinned": true,
+    "rawSidecarsVerified": 110,
+    "canonicalReadAsLittleEndianValuesThenRebuilt": true,
+    "projectorPublicationLazyPagesDeterministicOutOfOrderReassembly": true,
+    "reassembledBytesAndSha256EqualRawSidecars": true,
+    "sourceFilesStillMatchArtifactManifest": true,
+    "defaultRecheckReadWithoutWrite": true,
+    "targetedVitest": "PASS 1/1",
+    "testsTypeScript": "PASS",
+    "targetedPrettier": "PASS",
+    "targetedESLint": "PASS",
+    "perDerivationPageOwnership": true,
+    "readbackCrossBindsRawFrameInputOutputDescriptorAndReassembledHashes": true
+  },
+  "limits": [
+    "这不是正式 wire、codec 采用或性能测试。",
+    "未验证认证 interest/session、可靠传输、socket backpressure、浏览器 Remote adapter 或 mesh/collision 游戏端安装。"
+  ],
+  "timestampSource": "derived artifact manifest mtime, converted to UTC"
+}

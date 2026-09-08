@@ -3,7 +3,7 @@ import {
   actorModelDefinition,
   itemVisualKind,
   viewmodelPose,
-} from '../../src/client/presentation/gameplay-model-definition';
+} from '../../apps/web/src/client/presentation/gameplay-model-definition';
 
 describe('gameplay model definition', () => {
   it('一次性动作在起止回到握姿，途中有可见动作且非法时间安全', () => {

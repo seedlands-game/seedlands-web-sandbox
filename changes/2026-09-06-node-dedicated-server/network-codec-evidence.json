@@ -1,0 +1,5668 @@
+{
+  "schemaVersion": 1,
+  "scope": "合成探索候选 DTO 的 codec/计时管线实验；不是 Host 采集的真实旅程 trace，不能推导 E2E、N2 冻结或采用结论。",
+  "generatedAt": "2026-09-06T17:40:38.056Z",
+  "node": {
+    "version": "v22.23.2",
+    "platform": "darwin",
+    "arch": "arm64",
+    "cpus": [
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      },
+      {
+        "model": "Apple M3 Pro",
+        "speed": 2400
+      }
+    ],
+    "loadAverage": [3.41943359375, 3.4814453125, 3.6982421875],
+    "memory": 38654705664
+  },
+  "browser": {
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 12,
+    "deviceMemory": 32,
+    "performanceMemoryAvailable": true
+  },
+  "libraries": {
+    "C0": "in-prototype JSON metadata + binary blocks",
+    "C1": "@msgpack/msgpack@3.1.3 ISC",
+    "C2": "protobufjs@8.8.0 BSD-3-Clause + long@5.3.2"
+  },
+  "corpus": {
+    "count": 28,
+    "manifest": [
+      {
+        "id": 0,
+        "kind": "input-state",
+        "canonicalBytes": 258,
+        "hash": "30e7d6086c84686a0aaf46b9a313f7a1fc5f0e72e4b5ca6cc7a652ee3acbcc18"
+      },
+      {
+        "id": 1,
+        "kind": "input-state",
+        "canonicalBytes": 255,
+        "hash": "9c754cd7eb272286e3eaa194e07c23c2669e4f963219745edc27e129ee1fecc8"
+      },
+      {
+        "id": 2,
+        "kind": "input-state",
+        "canonicalBytes": 258,
+        "hash": "89642baa75d92eaeba7becab6945e10d6df1eb9f41e7169af5a39f371c91a5b8"
+      },
+      {
+        "id": 3,
+        "kind": "input-state",
+        "canonicalBytes": 250,
+        "hash": "2b73fa57bc5e0bbad8e4c5c6329e1c7b87de9392227fcf2a4d35e53e381bf7e9"
+      },
+      {
+        "id": 4,
+        "kind": "input-state",
+        "canonicalBytes": 256,
+        "hash": "e16545b1c2a220bbfe4935c8b27682294afb8fb6806cffb8e404da0bad3712a8"
+      },
+      {
+        "id": 5,
+        "kind": "input-state",
+        "canonicalBytes": 257,
+        "hash": "66a493acfe3a795cacbb6a99cd2aa9630cdf3ba6e29f64dd13e24c69e9b2812b"
+      },
+      {
+        "id": 6,
+        "kind": "input-edge",
+        "canonicalBytes": 213,
+        "hash": "8889d923a313ef71f6bc55cb48d6934aac82122a35f20eef7a472c92bd47fc76"
+      },
+      {
+        "id": 7,
+        "kind": "input-edge",
+        "canonicalBytes": 216,
+        "hash": "420f2a78f33f5141405f039b399b8e679fd2310eef214e874a1ca5e5c2092dfe"
+      },
+      {
+        "id": 8,
+        "kind": "input-edge",
+        "canonicalBytes": 219,
+        "hash": "246fa6eefd8ac0d1773d5bad0739ddfc6945a096d17538301ac03deb25f0ef31"
+      },
+      {
+        "id": 9,
+        "kind": "input-edge",
+        "canonicalBytes": 214,
+        "hash": "96791207dda12e8bc07ab833bc2405019e011cc7447bb1a23893c9c5554224dc"
+      },
+      {
+        "id": 10,
+        "kind": "input-edge",
+        "canonicalBytes": 218,
+        "hash": "bbf78bd025b49e64f063c170c1bdbf933ed269b53b5396cd0c6bf91d82eb4573"
+      },
+      {
+        "id": 11,
+        "kind": "player-correction",
+        "canonicalBytes": 449,
+        "hash": "c6257412b4279af57dc113edae8500f666e485c0707822f0eddaaaad0580cb12"
+      },
+      {
+        "id": 12,
+        "kind": "player-correction",
+        "canonicalBytes": 428,
+        "hash": "acfafc7d810d8eb9fbe689428afb4f7d436600f5f010766567dd799a2d2deb35"
+      },
+      {
+        "id": 13,
+        "kind": "player-correction",
+        "canonicalBytes": 419,
+        "hash": "8b4816dcfdddb8fd8dd02c188dec814cc6754146aec416913d88f64210b3806f"
+      },
+      {
+        "id": 14,
+        "kind": "player-correction",
+        "canonicalBytes": 429,
+        "hash": "49ffa466ab6992c06155a17cdc628e90efe05e735d15956d8353b4d98df73582"
+      },
+      {
+        "id": 15,
+        "kind": "entity-pose",
+        "canonicalBytes": 175,
+        "hash": "8eec5ab20d7a74628b5fd37a9240f488b2feb685ee145102f041bbee95b98058"
+      },
+      {
+        "id": 16,
+        "kind": "entity-pose",
+        "canonicalBytes": 291,
+        "hash": "20fb185c39f1ce8c834004bd1484351a25c9797c635a6d0cb8c05fc7c6ae587c"
+      },
+      {
+        "id": 17,
+        "kind": "entity-pose",
+        "canonicalBytes": 2473,
+        "hash": "573c49f6b5556286c6e43036a7801fd6ff4b54d257b6457dedb1db3fff37c7d8"
+      },
+      {
+        "id": 18,
+        "kind": "entity-pose",
+        "canonicalBytes": 9364,
+        "hash": "669f1883ed2ccf371370137043de0cb059033c1958ad130a64f4acb6582668af"
+      },
+      {
+        "id": 19,
+        "kind": "entity-pose",
+        "canonicalBytes": 37113,
+        "hash": "eb3d73788ba4b9d1d7508c9e3b34e7a7fef627a70c8a357788eacf9f99d63bb0"
+      },
+      {
+        "id": 20,
+        "kind": "chunk-delta",
+        "canonicalBytes": 217,
+        "hash": "b2a084c4a8ec6dfe461229e0b57bb063444525f1f26667e4956ce410c846ef48"
+      },
+      {
+        "id": 21,
+        "kind": "chunk-delta",
+        "canonicalBytes": 286,
+        "hash": "4d849131f80ea2f2e8bb3f2bf7d8e392a985808fb1dd44833e39c3fce0895d11"
+      },
+      {
+        "id": 22,
+        "kind": "chunk-delta",
+        "canonicalBytes": 742,
+        "hash": "a688e020e472816217b887a34140fd391e9a7f4c045e47a41811a08653f5c56b"
+      },
+      {
+        "id": 23,
+        "kind": "chunk-delta",
+        "canonicalBytes": 2551,
+        "hash": "15cae2f41c2b787581dddaebdf7e91190fae197eaccc2609414807307e7ca15e"
+      },
+      {
+        "id": 24,
+        "kind": "chunk-baseline",
+        "canonicalBytes": 131341,
+        "hash": "21f0be3ffb28c160df1bb555d8df566c1261f6b0aff0d88bc7314f27c97a6ffd"
+      },
+      {
+        "id": 25,
+        "kind": "chunk-baseline",
+        "canonicalBytes": 131342,
+        "hash": "219403a863738696ad99647737850509dc190c4d5bce8d836f5e0dc50a71afa7"
+      },
+      {
+        "id": 26,
+        "kind": "chunk-baseline",
+        "canonicalBytes": 131342,
+        "hash": "fc7809f00b4925bf2b7c3a5a6c539e2d2ead141bbdcee32039cbe5b6c8cb196f"
+      },
+      {
+        "id": 27,
+        "kind": "join-burst",
+        "canonicalBytes": 431770,
+        "hash": "c69716ce5c150b343f1c19d133eea6e9a94f7a9dd9ca52559dac6754bd2c5b43"
+      }
+    ],
+    "groups": {
+      "small": "0-23: input/edge/correction/entity/delta",
+      "large": "24-27: 3 full 32^3 canonical+fluid chunks + join burst"
+    },
+    "source": "按当前公开消息语义构造的非随机候选，不导入 production src"
+  },
+  "roundtrip": {
+    "node": {
+      "C0": true,
+      "C1": true,
+      "C2": true
+    },
+    "browserCorpusManifestMatches": true
+  },
+  "measurement": {
+    "batches": 5,
+    "codecOrderRotation": [
+      ["C0", "C1", "C2"],
+      ["C1", "C2", "C0"],
+      ["C2", "C0", "C1"],
+      ["C0", "C2", "C1"],
+      ["C1", "C0", "C2"]
+    ],
+    "warmup": {
+      "smallRounds": 100,
+      "largeRounds": 5
+    },
+    "measurementRounds": {
+      "small": 2000,
+      "large": 50
+    },
+    "directions": ["Node encode -> browser decode", "browser encode -> Node decode"],
+    "timing": "每个完整 corpus pass 的 encode/decode performance.now()；p50/p95/p99，除以该组消息数才是每消息均值，避免浏览器单条计时分辨率不足",
+    "allocation": "Node RSS/heap delta per codec-group; browser performance.memory availability recorded, cross-process attribution unavailable",
+    "rerunRequired": false
+  },
+  "batches": [
+    {
+      "index": 1,
+      "order": ["C0", "C1", "C2"],
+      "groups": {
+        "small": {
+          "C0": {
+            "encodedBytesPerCorpus": 57935,
+            "nodeEncode": {
+              "p50Ms": 0.3643329999999878,
+              "p95Ms": 0.3947089999999207,
+              "p99Ms": 0.4287920000001577
+            },
+            "browserDecode": {
+              "p50Ms": 1.100000023841858,
+              "p95Ms": 1.300000011920929,
+              "p99Ms": 1.300000011920929
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.40000003576278687
+            },
+            "nodeDecode": {
+              "p50Ms": 2.4989999999997963,
+              "p95Ms": 2.686874999999418,
+              "p99Ms": 2.778542000000016
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 5472256,
+              "heapUsed": 538848
+            },
+            "browserBytesPerCorpus": 57935
+          },
+          "C1": {
+            "encodedBytesPerCorpus": 50386,
+            "nodeEncode": {
+              "p50Ms": 0.21445800000037707,
+              "p95Ms": 0.23654100000021572,
+              "p99Ms": 0.36599999999998545
+            },
+            "browserDecode": {
+              "p50Ms": 0.699999988079071,
+              "p95Ms": 0.800000011920929,
+              "p99Ms": 0.8999999761581421
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 0.30000001192092896
+            },
+            "nodeDecode": {
+              "p50Ms": 1.1775419999994483,
+              "p95Ms": 1.3543750000008004,
+              "p99Ms": 1.4217089999983727
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 819200,
+              "heapUsed": 4431680
+            },
+            "browserBytesPerCorpus": 50386
+          },
+          "C2": {
+            "encodedBytesPerCorpus": 33643,
+            "nodeEncode": {
+              "p50Ms": 0.38637500000004366,
+              "p95Ms": 0.4220839999998134,
+              "p99Ms": 0.5598329999993439
+            },
+            "browserDecode": {
+              "p50Ms": 1.0999999642372131,
+              "p95Ms": 1.199999988079071,
+              "p99Ms": 1.300000011920929
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.5
+            },
+            "nodeDecode": {
+              "p50Ms": 1.6597919999985606,
+              "p95Ms": 1.8650000000016007,
+              "p99Ms": 1.943250000000262
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 1490944,
+              "heapUsed": -431264
+            },
+            "browserBytesPerCorpus": 33643
+          }
+        },
+        "large": {
+          "C0": {
+            "encodedBytesPerCorpus": 629383,
+            "nodeEncode": {
+              "p50Ms": 0.28979099999924074,
+              "p95Ms": 0.332750000001397,
+              "p99Ms": 0.6084159999991243
+            },
+            "browserDecode": {
+              "p50Ms": 18.69999998807907,
+              "p95Ms": 18.900000035762787,
+              "p99Ms": 19
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.3999999761581421,
+              "p99Ms": 9.700000047683716
+            },
+            "nodeDecode": {
+              "p50Ms": 24.251916000001074,
+              "p95Ms": 24.71112500000163,
+              "p99Ms": 24.796290999998746
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 78462976,
+              "heapUsed": 61824624
+            },
+            "browserBytesPerCorpus": 629383
+          },
+          "C1": {
+            "encodedBytesPerCorpus": 624754,
+            "nodeEncode": {
+              "p50Ms": 0.18008299999928568,
+              "p95Ms": 0.24583300000085728,
+              "p99Ms": 0.37729200000103447
+            },
+            "browserDecode": {
+              "p50Ms": 18.200000047683716,
+              "p95Ms": 18.5,
+              "p99Ms": 19.19999998807907
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 10
+            },
+            "nodeDecode": {
+              "p50Ms": 23.77708299999722,
+              "p95Ms": 25.231500000001688,
+              "p99Ms": 25.80083299999751
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": -10616832,
+              "heapUsed": -4255112
+            },
+            "browserBytesPerCorpus": 624754
+          },
+          "C2": {
+            "encodedBytesPerCorpus": 614156,
+            "nodeEncode": {
+              "p50Ms": 0.6667080000006536,
+              "p95Ms": 0.8491250000006403,
+              "p99Ms": 1.0345830000005662
+            },
+            "browserDecode": {
+              "p50Ms": 19.200000047683716,
+              "p95Ms": 20.69999998807907,
+              "p99Ms": 21.19999998807907
+            },
+            "browserEncode": {
+              "p50Ms": 0.699999988079071,
+              "p95Ms": 1,
+              "p99Ms": 9.800000011920929
+            },
+            "nodeDecode": {
+              "p50Ms": 24.31970800000272,
+              "p95Ms": 25.716499999998632,
+              "p99Ms": 29.950999999997293
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 18022400,
+              "heapUsed": -56548232
+            },
+            "browserBytesPerCorpus": 614156
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "order": ["C1", "C2", "C0"],
+      "groups": {
+        "small": {
+          "C1": {
+            "encodedBytesPerCorpus": 50386,
+            "nodeEncode": {
+              "p50Ms": 0.219042000000627,
+              "p95Ms": 0.23295799999687006,
+              "p99Ms": 0.40987500000119326
+            },
+            "browserDecode": {
+              "p50Ms": 0.699999988079071,
+              "p95Ms": 0.800000011920929,
+              "p99Ms": 0.9000000357627869
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 0.30000001192092896
+            },
+            "nodeDecode": {
+              "p50Ms": 1.1953340000000026,
+              "p95Ms": 1.3794589999997697,
+              "p99Ms": 1.4697499999965657
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 163840,
+              "heapUsed": 1031432
+            },
+            "browserBytesPerCorpus": 50386
+          },
+          "C2": {
+            "encodedBytesPerCorpus": 33643,
+            "nodeEncode": {
+              "p50Ms": 0.39245800000207964,
+              "p95Ms": 0.4166250000052969,
+              "p99Ms": 0.5798330000034184
+            },
+            "browserDecode": {
+              "p50Ms": 1.0999999642372131,
+              "p95Ms": 1.199999988079071,
+              "p99Ms": 1.300000011920929
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.40000003576278687
+            },
+            "nodeDecode": {
+              "p50Ms": 1.6690419999940787,
+              "p95Ms": 1.8692079999964335,
+              "p99Ms": 1.9480830000029528
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 0,
+              "heapUsed": -5953752
+            },
+            "browserBytesPerCorpus": 33643
+          },
+          "C0": {
+            "encodedBytesPerCorpus": 57935,
+            "nodeEncode": {
+              "p50Ms": 0.3662079999994603,
+              "p95Ms": 0.3860419999982696,
+              "p99Ms": 0.4109580000003916
+            },
+            "browserDecode": {
+              "p50Ms": 1.199999988079071,
+              "p95Ms": 1.300000011920929,
+              "p99Ms": 1.399999976158142
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.40000003576278687
+            },
+            "nodeDecode": {
+              "p50Ms": 2.538666000000376,
+              "p95Ms": 2.7533330000005662,
+              "p99Ms": 2.90625
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 16384,
+              "heapUsed": -1077680
+            },
+            "browserBytesPerCorpus": 57935
+          }
+        },
+        "large": {
+          "C1": {
+            "encodedBytesPerCorpus": 624754,
+            "nodeEncode": {
+              "p50Ms": 0.17799999999988358,
+              "p95Ms": 0.2145410000011907,
+              "p99Ms": 0.5322919999962323
+            },
+            "browserDecode": {
+              "p50Ms": 18.599999964237213,
+              "p95Ms": 18.899999976158142,
+              "p99Ms": 19.19999998807907
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 13.799999952316284
+            },
+            "nodeDecode": {
+              "p50Ms": 23.884541999999783,
+              "p95Ms": 24.159583000000566,
+              "p99Ms": 24.381750000000466
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 41320448,
+              "heapUsed": 57663200
+            },
+            "browserBytesPerCorpus": 624754
+          },
+          "C2": {
+            "encodedBytesPerCorpus": 614156,
+            "nodeEncode": {
+              "p50Ms": 0.6728750000038417,
+              "p95Ms": 0.8361660000009579,
+              "p99Ms": 0.9536669999943115
+            },
+            "browserDecode": {
+              "p50Ms": 19.399999976158142,
+              "p95Ms": 20.099999964237213,
+              "p99Ms": 20.5
+            },
+            "browserEncode": {
+              "p50Ms": 0.800000011920929,
+              "p95Ms": 0.9000000357627869,
+              "p99Ms": 10.399999976158142
+            },
+            "nodeDecode": {
+              "p50Ms": 24.89654100000189,
+              "p95Ms": 25.70491700000275,
+              "p99Ms": 30.556540999998106
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": -34537472,
+              "heapUsed": -48246224
+            },
+            "browserBytesPerCorpus": 614156
+          },
+          "C0": {
+            "encodedBytesPerCorpus": 629383,
+            "nodeEncode": {
+              "p50Ms": 0.28666700000030687,
+              "p95Ms": 0.3461249999963911,
+              "p99Ms": 0.4239999999990687
+            },
+            "browserDecode": {
+              "p50Ms": 18.900000035762787,
+              "p95Ms": 19.19999998807907,
+              "p99Ms": 19.30000001192093
+            },
+            "browserEncode": {
+              "p50Ms": 0.20000004768371582,
+              "p95Ms": 0.3999999761581421,
+              "p99Ms": 9.800000011920929
+            },
+            "nodeDecode": {
+              "p50Ms": 24.79291600000579,
+              "p95Ms": 25.508458000003884,
+              "p99Ms": 25.628124999995634
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 53411840,
+              "heapUsed": 65404832
+            },
+            "browserBytesPerCorpus": 629383
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "order": ["C2", "C0", "C1"],
+      "groups": {
+        "small": {
+          "C2": {
+            "encodedBytesPerCorpus": 33643,
+            "nodeEncode": {
+              "p50Ms": 0.39391699999396224,
+              "p95Ms": 0.45170900000084657,
+              "p99Ms": 0.7246249999952852
+            },
+            "browserDecode": {
+              "p50Ms": 1.0999999642372131,
+              "p95Ms": 1.199999988079071,
+              "p99Ms": 1.300000011920929
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.40000003576278687
+            },
+            "nodeDecode": {
+              "p50Ms": 1.664875000002212,
+              "p95Ms": 1.9257079999952111,
+              "p99Ms": 2.0275000000037835
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 32768,
+              "heapUsed": 9479088
+            },
+            "browserBytesPerCorpus": 33643
+          },
+          "C0": {
+            "encodedBytesPerCorpus": 57935,
+            "nodeEncode": {
+              "p50Ms": 0.359375,
+              "p95Ms": 0.3907919999983278,
+              "p99Ms": 0.45554100000299513
+            },
+            "browserDecode": {
+              "p50Ms": 1.100000023841858,
+              "p95Ms": 1.2999999523162842,
+              "p99Ms": 1.300000011920929
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.40000003576278687
+            },
+            "nodeDecode": {
+              "p50Ms": 2.5113750000018626,
+              "p95Ms": 2.8922079999902053,
+              "p99Ms": 3.573000000003958
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 49152,
+              "heapUsed": -1532200
+            },
+            "browserBytesPerCorpus": 57935
+          },
+          "C1": {
+            "encodedBytesPerCorpus": 50386,
+            "nodeEncode": {
+              "p50Ms": 0.21391700000094716,
+              "p95Ms": 0.2313339999964228,
+              "p99Ms": 0.44474999999511056
+            },
+            "browserDecode": {
+              "p50Ms": 0.699999988079071,
+              "p95Ms": 0.800000011920929,
+              "p99Ms": 0.8999999761581421
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 0.30000001192092896
+            },
+            "nodeDecode": {
+              "p50Ms": 1.17333299999882,
+              "p95Ms": 1.4125409999978729,
+              "p99Ms": 1.484333999993396
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 0,
+              "heapUsed": 2121232
+            },
+            "browserBytesPerCorpus": 50386
+          }
+        },
+        "large": {
+          "C2": {
+            "encodedBytesPerCorpus": 614156,
+            "nodeEncode": {
+              "p50Ms": 0.6651250000140863,
+              "p95Ms": 0.8602910000045085,
+              "p99Ms": 1.1230840000062017
+            },
+            "browserDecode": {
+              "p50Ms": 19.099999964237213,
+              "p95Ms": 19.69999998807907,
+              "p99Ms": 20.400000035762787
+            },
+            "browserEncode": {
+              "p50Ms": 0.699999988079071,
+              "p95Ms": 1.199999988079071,
+              "p99Ms": 10.5
+            },
+            "nodeDecode": {
+              "p50Ms": 24.47958300000755,
+              "p95Ms": 25.59029200000805,
+              "p99Ms": 29.010083000001032
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": -30375936,
+              "heapUsed": -48357176
+            },
+            "browserBytesPerCorpus": 614156
+          },
+          "C0": {
+            "encodedBytesPerCorpus": 629383,
+            "nodeEncode": {
+              "p50Ms": 0.29799999999522697,
+              "p95Ms": 0.5515829999931157,
+              "p99Ms": 0.7467920000053709
+            },
+            "browserDecode": {
+              "p50Ms": 18.69999998807907,
+              "p95Ms": 19.200000047683716,
+              "p99Ms": 19.5
+            },
+            "browserEncode": {
+              "p50Ms": 0.20000004768371582,
+              "p95Ms": 0.3999999761581421,
+              "p99Ms": 9.599999964237213
+            },
+            "nodeDecode": {
+              "p50Ms": 24.571249999993597,
+              "p95Ms": 25.570833000005223,
+              "p99Ms": 25.979541999986395
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 24133632,
+              "heapUsed": 7382768
+            },
+            "browserBytesPerCorpus": 629383
+          },
+          "C1": {
+            "encodedBytesPerCorpus": 624754,
+            "nodeEncode": {
+              "p50Ms": 0.1758750000008149,
+              "p95Ms": 0.22616700000071432,
+              "p99Ms": 0.3842080000031274
+            },
+            "browserDecode": {
+              "p50Ms": 18.400000035762787,
+              "p95Ms": 19,
+              "p99Ms": 19.400000035762787
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 10
+            },
+            "nodeDecode": {
+              "p50Ms": 23.787083000002895,
+              "p95Ms": 24.31349999998929,
+              "p99Ms": 24.605374999999185
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 48005120,
+              "heapUsed": 71751632
+            },
+            "browserBytesPerCorpus": 624754
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "order": ["C0", "C2", "C1"],
+      "groups": {
+        "small": {
+          "C0": {
+            "encodedBytesPerCorpus": 57935,
+            "nodeEncode": {
+              "p50Ms": 0.360541000001831,
+              "p95Ms": 0.3910420000029262,
+              "p99Ms": 0.4178749999991851
+            },
+            "browserDecode": {
+              "p50Ms": 1.199999988079071,
+              "p95Ms": 1.300000011920929,
+              "p99Ms": 1.399999976158142
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.5
+            },
+            "nodeDecode": {
+              "p50Ms": 2.4952079999929992,
+              "p95Ms": 2.7515839999978198,
+              "p99Ms": 3.5929999999934807
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 65536,
+              "heapUsed": -661456
+            },
+            "browserBytesPerCorpus": 57935
+          },
+          "C2": {
+            "encodedBytesPerCorpus": 33643,
+            "nodeEncode": {
+              "p50Ms": 0.38712499999383,
+              "p95Ms": 0.42975000001024455,
+              "p99Ms": 0.570584000000963
+            },
+            "browserDecode": {
+              "p50Ms": 1.0999999642372131,
+              "p95Ms": 1.199999988079071,
+              "p99Ms": 1.2999999523162842
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.40000003576278687
+            },
+            "nodeDecode": {
+              "p50Ms": 1.6610840000066673,
+              "p95Ms": 1.8505420000001322,
+              "p99Ms": 1.9809999999997672
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 0,
+              "heapUsed": -5848296
+            },
+            "browserBytesPerCorpus": 33643
+          },
+          "C1": {
+            "encodedBytesPerCorpus": 50386,
+            "nodeEncode": {
+              "p50Ms": 0.22300000001268927,
+              "p95Ms": 0.41262500001175795,
+              "p99Ms": 0.730042000010144
+            },
+            "browserDecode": {
+              "p50Ms": 0.699999988079071,
+              "p95Ms": 0.800000011920929,
+              "p99Ms": 0.8999999761581421
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 0.30000001192092896
+            },
+            "nodeDecode": {
+              "p50Ms": 1.178874999997788,
+              "p95Ms": 1.3432499999908032,
+              "p99Ms": 1.4070839999913005
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 2703360,
+              "heapUsed": 1967520
+            },
+            "browserBytesPerCorpus": 50386
+          }
+        },
+        "large": {
+          "C0": {
+            "encodedBytesPerCorpus": 629383,
+            "nodeEncode": {
+              "p50Ms": 0.2715420000022277,
+              "p95Ms": 0.2994580000085989,
+              "p99Ms": 0.5953750000044238
+            },
+            "browserDecode": {
+              "p50Ms": 18.799999952316284,
+              "p95Ms": 19.099999964237213,
+              "p99Ms": 19.400000035762787
+            },
+            "browserEncode": {
+              "p50Ms": 0.20000004768371582,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 9.5
+            },
+            "nodeDecode": {
+              "p50Ms": 24.430832999991253,
+              "p95Ms": 25.203208999999333,
+              "p99Ms": 25.640082999991137
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 41254912,
+              "heapUsed": 63134088
+            },
+            "browserBytesPerCorpus": 629383
+          },
+          "C2": {
+            "encodedBytesPerCorpus": 614156,
+            "nodeEncode": {
+              "p50Ms": 0.6773340000072494,
+              "p95Ms": 0.9524170000076992,
+              "p99Ms": 3.6929999999993015
+            },
+            "browserDecode": {
+              "p50Ms": 19.100000023841858,
+              "p95Ms": 20.5,
+              "p99Ms": 21.400000035762787
+            },
+            "browserEncode": {
+              "p50Ms": 0.699999988079071,
+              "p95Ms": 1.100000023841858,
+              "p99Ms": 9.800000011920929
+            },
+            "nodeDecode": {
+              "p50Ms": 24.52391699999862,
+              "p95Ms": 25.17070899999817,
+              "p99Ms": 25.369166999997105
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 917504,
+              "heapUsed": 5539216
+            },
+            "browserBytesPerCorpus": 614156
+          },
+          "C1": {
+            "encodedBytesPerCorpus": 624754,
+            "nodeEncode": {
+              "p50Ms": 0.47308300000440795,
+              "p95Ms": 0.8028339999873424,
+              "p99Ms": 10.527791000000434
+            },
+            "browserDecode": {
+              "p50Ms": 18.400000035762787,
+              "p95Ms": 18.700000047683716,
+              "p99Ms": 19
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 10.300000011920929
+            },
+            "nodeDecode": {
+              "p50Ms": 23.56866699999955,
+              "p95Ms": 24.57445899999584,
+              "p99Ms": 24.825582999998005
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 13008896,
+              "heapUsed": -17213328
+            },
+            "browserBytesPerCorpus": 624754
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "order": ["C1", "C0", "C2"],
+      "groups": {
+        "small": {
+          "C1": {
+            "encodedBytesPerCorpus": 50386,
+            "nodeEncode": {
+              "p50Ms": 0.21433400000387337,
+              "p95Ms": 0.2318329999980051,
+              "p99Ms": 0.37270799999532755
+            },
+            "browserDecode": {
+              "p50Ms": 0.699999988079071,
+              "p95Ms": 0.800000011920929,
+              "p99Ms": 0.9000000357627869
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 0.30000001192092896
+            },
+            "nodeDecode": {
+              "p50Ms": 1.1713329999911366,
+              "p95Ms": 1.3505420000001322,
+              "p99Ms": 1.409749999991618
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 196608,
+              "heapUsed": 1898408
+            },
+            "browserBytesPerCorpus": 50386
+          },
+          "C0": {
+            "encodedBytesPerCorpus": 57935,
+            "nodeEncode": {
+              "p50Ms": 0.3634170000004815,
+              "p95Ms": 0.402209000007133,
+              "p99Ms": 0.4799579999962589
+            },
+            "browserDecode": {
+              "p50Ms": 1.199999988079071,
+              "p95Ms": 1.300000011920929,
+              "p99Ms": 1.4000000357627869
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.40000003576278687
+            },
+            "nodeDecode": {
+              "p50Ms": 2.6073749999923166,
+              "p95Ms": 2.9683749999967404,
+              "p99Ms": 3.1815000000060536
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 2818048,
+              "heapUsed": 14662976
+            },
+            "browserBytesPerCorpus": 57935
+          },
+          "C2": {
+            "encodedBytesPerCorpus": 33643,
+            "nodeEncode": {
+              "p50Ms": 0.431416999999783,
+              "p95Ms": 0.4597500000090804,
+              "p99Ms": 0.6401249999908032
+            },
+            "browserDecode": {
+              "p50Ms": 1.100000023841858,
+              "p95Ms": 1.300000011920929,
+              "p99Ms": 1.4000000357627869
+            },
+            "browserEncode": {
+              "p50Ms": 0.30000001192092896,
+              "p95Ms": 0.40000003576278687,
+              "p99Ms": 0.5
+            },
+            "nodeDecode": {
+              "p50Ms": 1.8779579999973066,
+              "p95Ms": 2.127542000001995,
+              "p99Ms": 2.197790999984136
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 0,
+              "heapUsed": -6781240
+            },
+            "browserBytesPerCorpus": 33643
+          }
+        },
+        "large": {
+          "C1": {
+            "encodedBytesPerCorpus": 624754,
+            "nodeEncode": {
+              "p50Ms": 0.20033400002284907,
+              "p95Ms": 0.24012500001117587,
+              "p99Ms": 0.5202080000017304
+            },
+            "browserDecode": {
+              "p50Ms": 20.30000001192093,
+              "p95Ms": 21,
+              "p99Ms": 21.400000035762787
+            },
+            "browserEncode": {
+              "p50Ms": 0.19999998807907104,
+              "p95Ms": 0.30000001192092896,
+              "p99Ms": 11.099999964237213
+            },
+            "nodeDecode": {
+              "p50Ms": 25.369542000000365,
+              "p95Ms": 27.308167000010144,
+              "p99Ms": 29.396666999993613
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": -17334272,
+              "heapUsed": -37103344
+            },
+            "browserBytesPerCorpus": 624754
+          },
+          "C0": {
+            "encodedBytesPerCorpus": 629383,
+            "nodeEncode": {
+              "p50Ms": 0.29512500000419095,
+              "p95Ms": 0.3607090000004973,
+              "p99Ms": 0.44016599998576567
+            },
+            "browserDecode": {
+              "p50Ms": 19.599999964237213,
+              "p95Ms": 22,
+              "p99Ms": 22.69999998807907
+            },
+            "browserEncode": {
+              "p50Ms": 0.2999999523162842,
+              "p95Ms": 0.3999999761581421,
+              "p99Ms": 10.200000047683716
+            },
+            "nodeDecode": {
+              "p50Ms": 25.58858300000429,
+              "p95Ms": 26.399457999999868,
+              "p99Ms": 28.347042000008514
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": 47087616,
+              "heapUsed": 68047424
+            },
+            "browserBytesPerCorpus": 629383
+          },
+          "C2": {
+            "encodedBytesPerCorpus": 614156,
+            "nodeEncode": {
+              "p50Ms": 0.6929999999993015,
+              "p95Ms": 0.9503329999861307,
+              "p99Ms": 1.0299159999995027
+            },
+            "browserDecode": {
+              "p50Ms": 19.80000001192093,
+              "p95Ms": 20.599999964237213,
+              "p99Ms": 20.69999998807907
+            },
+            "browserEncode": {
+              "p50Ms": 0.7000000476837158,
+              "p95Ms": 1.100000023841858,
+              "p99Ms": 10.100000023841858
+            },
+            "nodeDecode": {
+              "p50Ms": 25.23658300001989,
+              "p95Ms": 25.750291000003926,
+              "p99Ms": 31.65354099997785
+            },
+            "nodeMemoryDeltaBytes": {
+              "rss": -42205184,
+              "heapUsed": -46467744
+            },
+            "browserBytesPerCorpus": 614156
+          }
+        }
+      }
+    }
+  ],
+  "timingStatus": "ISOLATED_FINAL_MP_PROBE_ONLY",
+  "timingInvalidReason": "The prior run includes deep-equality in decode. The corrected final run is statistically controlled but its C1 field is MessagePack, whereas the approved C1 contract is a dedicated schema binary. It cannot complete C1 selection or N2 adoption.",
+  "run": {
+    "runId": "N2-isolated-2026-09-06T17:38Z",
+    "startedUTCApprox": "2026-09-06T17:38:31Z",
+    "startedUTCPrecision": "estimated from 127-second measured runner duration; owner record was verified then released before it was copied to evidence",
+    "finishedUTC": "2026-09-06T17:40:38.056Z",
+    "coordination": "WASM root confirmed its agents paused tests/builds from 17:36 UTC; root granted approximately three minutes Node codec exclusive window",
+    "reservation": {
+      "path": "/tmp/seedlands-benchmark-reservation",
+      "acquisition": "atomic mkdir",
+      "owner": "01a07751-c72c-7ea3-82bb-03c9ce46b982",
+      "label": "N2-isolated",
+      "pid": "exclusive-run.mjs process (released)",
+      "filesObserved": ["owner.json"],
+      "release": "owner.json contents verified, then owner.json unlinked and reservation directory removed"
+    }
+  },
+  "discardedTimingEvidence": "network-codec-evidence-contended.json",
+  "timingInterpretation": {
+    "isolation": "ISOLATED",
+    "encode": "per-corpus encode timing, but not an E2E result",
+    "browserDecode": "DECODE_PLUS_DEEP_EQUALITY_TEST_ORACLE; not a runtime decode comparison",
+    "nodeDecode": "DECODE_PLUS_DEEP_EQUALITY_TEST_ORACLE; not a runtime decode comparison",
+    "nextRun": "roundtrip and malformed-input oracle outside timing; time only production decode, schema validation, and normalization separately"
+  },
+  "correctedIsolatedSmoke": {
+    "status": "ISOLATED_ORACLE_EXTERNAL_SMOKE_ONLY",
+    "run": {
+      "owner": "01a07751-c72c-7ea3-82bb-03c9ce46b982",
+      "label": "N2-isolated-corrected",
+      "startUTC": "2026-09-06T18:30:38Z",
+      "endUTC": "2026-09-06T18:30:40Z",
+      "exitCode": 0,
+      "coordination": "WASM root released an approximately three-minute N2 exclusive window"
+    },
+    "environment": {
+      "node": "v22.23.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "chrome": "152.0.7977.76"
+    },
+    "timingUnit": "whole 28-item corpus pass",
+    "warning": "p50/p95/p99 are per-pass only; do not represent per-packet tail latency.",
+    "semantic": {
+      "nodeRoundtripCountByCodec": {
+        "C0": 28,
+        "C1": 28,
+        "C2": 28
+      },
+      "browserRoundtripCountByCodec": {
+        "C0": 28,
+        "C1": 28,
+        "C2": 28
+      },
+      "sharedValidatorChecksByCodec": {
+        "C0": 7,
+        "C1": 7,
+        "C2": 7
+      }
+    },
+    "corpus": {
+      "manifest": {
+        "count": 28,
+        "kinds": {
+          "input-state": 6,
+          "input-edge": 5,
+          "player-correction": 4,
+          "entity-pose": 5,
+          "chunk-delta": 4,
+          "chunk-baseline": 3,
+          "welcome": 0,
+          "world-index": 0,
+          "join-burst": 1
+        },
+        "chunkCellCount": 32768,
+        "corpus": [
+          {
+            "index": 0,
+            "kind": "input-state"
+          },
+          {
+            "index": 1,
+            "kind": "input-state"
+          },
+          {
+            "index": 2,
+            "kind": "input-state"
+          },
+          {
+            "index": 3,
+            "kind": "input-state"
+          },
+          {
+            "index": 4,
+            "kind": "input-state"
+          },
+          {
+            "index": 5,
+            "kind": "input-state"
+          },
+          {
+            "index": 6,
+            "kind": "input-edge"
+          },
+          {
+            "index": 7,
+            "kind": "input-edge"
+          },
+          {
+            "index": 8,
+            "kind": "input-edge"
+          },
+          {
+            "index": 9,
+            "kind": "input-edge"
+          },
+          {
+            "index": 10,
+            "kind": "input-edge"
+          },
+          {
+            "index": 11,
+            "kind": "player-correction"
+          },
+          {
+            "index": 12,
+            "kind": "player-correction"
+          },
+          {
+            "index": 13,
+            "kind": "player-correction"
+          },
+          {
+            "index": 14,
+            "kind": "player-correction"
+          },
+          {
+            "index": 15,
+            "kind": "entity-pose",
+            "entityCount": 0
+          },
+          {
+            "index": 16,
+            "kind": "entity-pose",
+            "entityCount": 1
+          },
+          {
+            "index": 17,
+            "kind": "entity-pose",
+            "entityCount": 16
+          },
+          {
+            "index": 18,
+            "kind": "entity-pose",
+            "entityCount": 64
+          },
+          {
+            "index": 19,
+            "kind": "entity-pose",
+            "entityCount": 256
+          },
+          {
+            "index": 20,
+            "kind": "chunk-delta",
+            "cellCount": 1
+          },
+          {
+            "index": 21,
+            "kind": "chunk-delta",
+            "cellCount": 3
+          },
+          {
+            "index": 22,
+            "kind": "chunk-delta",
+            "cellCount": 16
+          },
+          {
+            "index": 23,
+            "kind": "chunk-delta",
+            "cellCount": 64
+          },
+          {
+            "index": 24,
+            "kind": "chunk-baseline",
+            "binaryBytes": 98304
+          },
+          {
+            "index": 25,
+            "kind": "chunk-baseline",
+            "binaryBytes": 98304
+          },
+          {
+            "index": 26,
+            "kind": "chunk-baseline",
+            "binaryBytes": 98304
+          },
+          {
+            "index": 27,
+            "kind": "join-burst",
+            "nestedMessages": 6
+          }
+        ]
+      },
+      "normalizedSha256BySample": [
+        {
+          "index": 0,
+          "kind": "input-state",
+          "normalizedSha256": "c449a3ec074850f9776c35498cfdb080f33e5845a445b1f7615e73f0c97d1ad5"
+        },
+        {
+          "index": 1,
+          "kind": "input-state",
+          "normalizedSha256": "e5ab1a1e1468ac637864be664b76c7d9bd2d4d1ed334399f3c6a1e7462be91e5"
+        },
+        {
+          "index": 2,
+          "kind": "input-state",
+          "normalizedSha256": "7717dd9bb1af83c17bdcdee9f79399e401f18abd36bc5e9ff501a85f70c6c3a4"
+        },
+        {
+          "index": 3,
+          "kind": "input-state",
+          "normalizedSha256": "e6a3a3ea97d4aedfc8e56c415a4b48e6810b91d98c4741f8ddefab998a1d613e"
+        },
+        {
+          "index": 4,
+          "kind": "input-state",
+          "normalizedSha256": "cfb5c11cb50a2647fa748c16ee89b7a961d84d6dadd11af64ca6b8ce8ee3d47b"
+        },
+        {
+          "index": 5,
+          "kind": "input-state",
+          "normalizedSha256": "ce21d760ca558b8cbd6f5cf7d4a3d52ab764504c4f1a970a4fd1df04819db781"
+        },
+        {
+          "index": 6,
+          "kind": "input-edge",
+          "normalizedSha256": "363ab48b2730ec34a5bd4afd79ccfa5eee045a3bc2ad1ad4dc8f54d613a7e190"
+        },
+        {
+          "index": 7,
+          "kind": "input-edge",
+          "normalizedSha256": "2c36ab25e2082235a5094b7bc661dc838a3a94085374563642915943635e89f5"
+        },
+        {
+          "index": 8,
+          "kind": "input-edge",
+          "normalizedSha256": "38f98833031fe629d7909c01a44cb9c2be3f66203c4350162807c55564ff8405"
+        },
+        {
+          "index": 9,
+          "kind": "input-edge",
+          "normalizedSha256": "b3de6c9893cdd490758ef21e9865f513c9cc93940824b69d34914dc1d5102899"
+        },
+        {
+          "index": 10,
+          "kind": "input-edge",
+          "normalizedSha256": "727f88ac6bc36497e469df3c74c0bebfbe76e6f9282efa6a7ac70ca09a2339ae"
+        },
+        {
+          "index": 11,
+          "kind": "player-correction",
+          "normalizedSha256": "63a1f2dd99a6df36e0b647f6d95331d9a6080d14645c24a75745b319b173b87d"
+        },
+        {
+          "index": 12,
+          "kind": "player-correction",
+          "normalizedSha256": "3974895189f371257695770d81ab42c928fb17024ce57dca004750587663a10a"
+        },
+        {
+          "index": 13,
+          "kind": "player-correction",
+          "normalizedSha256": "7551f248b86d739cb2db03c47d69a43ee02ab7b72e70a140aa2b350ca2044519"
+        },
+        {
+          "index": 14,
+          "kind": "player-correction",
+          "normalizedSha256": "b7e08a887193fcbd350ed84d13fa73a53eae2fef496cc46e27a8f35e3b0250a3"
+        },
+        {
+          "index": 15,
+          "kind": "entity-pose",
+          "normalizedSha256": "7544de6249898a10d42fbc55d0bd3e9e2aa4b5e46bd70580fb7a62e644ee7a04"
+        },
+        {
+          "index": 16,
+          "kind": "entity-pose",
+          "normalizedSha256": "f1afd3b712b6186cc91e75cf821ea451753dd91895e715abf937fc1bf83b2fb2"
+        },
+        {
+          "index": 17,
+          "kind": "entity-pose",
+          "normalizedSha256": "17157a97d75144dc7bd20879913e516190591b2099ac8bc9ba663af07ca44cab"
+        },
+        {
+          "index": 18,
+          "kind": "entity-pose",
+          "normalizedSha256": "b889aecca0d562eb2e946d6f2a37795554700e00d8d38f2da69bf58b36bd5106"
+        },
+        {
+          "index": 19,
+          "kind": "entity-pose",
+          "normalizedSha256": "232016f1b892c1588da095601c7a81129e86664eecd7f6ace769c6a1193996a2"
+        },
+        {
+          "index": 20,
+          "kind": "chunk-delta",
+          "normalizedSha256": "1f126fd9e5372745dd58d63dcf3d8d7bb496bb5f02b7178b02b782c80dcb0046"
+        },
+        {
+          "index": 21,
+          "kind": "chunk-delta",
+          "normalizedSha256": "145001905d7be6a4e4840dae707251611cd3cdd6e53a51b1a4312bf07cb53ce3"
+        },
+        {
+          "index": 22,
+          "kind": "chunk-delta",
+          "normalizedSha256": "54b082bf43cfbacfae7a67a245854dc1fe2f0f8a95379c00fab7e32bf26e74b8"
+        },
+        {
+          "index": 23,
+          "kind": "chunk-delta",
+          "normalizedSha256": "b3a660cd9ff43c95a9ea09317efdee03a2a9c0ff1df37720be4b31506d857158"
+        },
+        {
+          "index": 24,
+          "kind": "chunk-baseline",
+          "normalizedSha256": "28b9cf4dc9cd146628184ba6b9574c653dba212d0a9fe65760bccf026ba490a4"
+        },
+        {
+          "index": 25,
+          "kind": "chunk-baseline",
+          "normalizedSha256": "c215ec5ae9a013852fc45a468b8f5548af11b52fb5d53b64b2092ca29dc72bdc"
+        },
+        {
+          "index": 26,
+          "kind": "chunk-baseline",
+          "normalizedSha256": "92566bcfc84602a24028686995fe9f84c80617ba2fbc6bd036de2793bffc562d"
+        },
+        {
+          "index": 27,
+          "kind": "join-burst",
+          "normalizedSha256": "1fb3ee5ac1362bfb97c06c4c34ae13b04b2914eb3f692bf5cb3047d84cabab04"
+        }
+      ]
+    },
+    "stages": {
+      "node": {
+        "C0": [
+          {
+            "pass": 0,
+            "encodeMs": 1.3072920000001886,
+            "decodeMs": 0.7049999999999272,
+            "schemaValidationMs": 0.09024999999996908,
+            "normalizationMs": 10.561208999999963,
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encodeMs": 1.2769590000000335,
+            "decodeMs": 0.9820420000000922,
+            "schemaValidationMs": 0.07625000000007276,
+            "normalizationMs": 10.293458999999984,
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encodeMs": 1.1859999999999218,
+            "decodeMs": 0.6204159999999774,
+            "schemaValidationMs": 0.0755420000000413,
+            "normalizationMs": 10.306290999999874,
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encodeMs": 1.3138340000000426,
+            "decodeMs": 0.699833000000126,
+            "schemaValidationMs": 0.0861250000000382,
+            "normalizationMs": 10.39449999999988,
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encodeMs": 1.0892079999998714,
+            "decodeMs": 0.5933330000000296,
+            "schemaValidationMs": 0.07216700000003584,
+            "normalizationMs": 10.243458999999802,
+            "corpusCount": 28
+          }
+        ],
+        "C1": [
+          {
+            "pass": 0,
+            "encodeMs": 0.43220799999994597,
+            "decodeMs": 0.3302080000000842,
+            "schemaValidationMs": 0.05724999999983993,
+            "normalizationMs": 10.616209000000026,
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encodeMs": 0.45491599999991195,
+            "decodeMs": 0.3964170000001559,
+            "schemaValidationMs": 0.0628750000000764,
+            "normalizationMs": 10.260209000000032,
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encodeMs": 0.4810420000001159,
+            "decodeMs": 0.36466700000005403,
+            "schemaValidationMs": 0.06833399999982248,
+            "normalizationMs": 10.218375000000151,
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encodeMs": 0.4398750000000291,
+            "decodeMs": 0.33095800000000963,
+            "schemaValidationMs": 0.057583000000022366,
+            "normalizationMs": 10.145915999999943,
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encodeMs": 0.3984170000001086,
+            "decodeMs": 0.32245899999998073,
+            "schemaValidationMs": 0.055540999999948326,
+            "normalizationMs": 9.881541999999854,
+            "corpusCount": 28
+          }
+        ],
+        "C2": [
+          {
+            "pass": 0,
+            "encodeMs": 1.7504579999999805,
+            "decodeMs": 2.3047919999999067,
+            "schemaValidationMs": 0.06154200000014498,
+            "normalizationMs": 10.583624999999984,
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encodeMs": 1.7272080000000187,
+            "decodeMs": 1.8557089999999334,
+            "schemaValidationMs": 0.05700000000001637,
+            "normalizationMs": 10.263832999999977,
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encodeMs": 1.5109580000000733,
+            "decodeMs": 2.101709000000028,
+            "schemaValidationMs": 0.0648750000000291,
+            "normalizationMs": 10.589750000000095,
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encodeMs": 1.691958999999997,
+            "decodeMs": 1.916082999999844,
+            "schemaValidationMs": 0.05491699999993216,
+            "normalizationMs": 9.953458000000182,
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encodeMs": 1.3377920000000358,
+            "decodeMs": 1.8241249999998672,
+            "schemaValidationMs": 0.057999999999992724,
+            "normalizationMs": 10.046082999999953,
+            "corpusCount": 28
+          }
+        ]
+      },
+      "browser": {
+        "C0": [
+          {
+            "pass": 0,
+            "encodeMs": 1.0999999642372131,
+            "decodeMs": 0.6000000238418579,
+            "schemaValidationMs": 0.09999996423721313,
+            "normalizationMs": 9.600000023841858,
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encodeMs": 1.100000023841858,
+            "decodeMs": 0.5,
+            "schemaValidationMs": 0,
+            "normalizationMs": 9.599999964237213,
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encodeMs": 0.7999999523162842,
+            "decodeMs": 0.40000003576278687,
+            "schemaValidationMs": 0.09999996423721313,
+            "normalizationMs": 9.200000047683716,
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encodeMs": 0.9000000357627869,
+            "decodeMs": 0.5,
+            "schemaValidationMs": 0.09999996423721313,
+            "normalizationMs": 9.5,
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encodeMs": 0.9000000357627869,
+            "decodeMs": 0.5,
+            "schemaValidationMs": 0.09999996423721313,
+            "normalizationMs": 9,
+            "corpusCount": 28
+          }
+        ],
+        "C1": [
+          {
+            "pass": 0,
+            "encodeMs": 0.5,
+            "decodeMs": 0.5,
+            "schemaValidationMs": 0,
+            "normalizationMs": 9.699999988079071,
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encodeMs": 0.3999999761581421,
+            "decodeMs": 0.30000001192092896,
+            "schemaValidationMs": 0.10000002384185791,
+            "normalizationMs": 9.599999964237213,
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encodeMs": 0.3999999761581421,
+            "decodeMs": 0.30000001192092896,
+            "schemaValidationMs": 0.09999996423721313,
+            "normalizationMs": 9.400000035762787,
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encodeMs": 0.5,
+            "decodeMs": 0.20000004768371582,
+            "schemaValidationMs": 0,
+            "normalizationMs": 9.199999988079071,
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encodeMs": 0.40000003576278687,
+            "decodeMs": 0.30000001192092896,
+            "schemaValidationMs": 0,
+            "normalizationMs": 9.399999976158142,
+            "corpusCount": 28
+          }
+        ],
+        "C2": [
+          {
+            "pass": 0,
+            "encodeMs": 1.300000011920929,
+            "decodeMs": 1.5999999642372131,
+            "schemaValidationMs": 0.30000001192092896,
+            "normalizationMs": 9.5,
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encodeMs": 1.300000011920929,
+            "decodeMs": 1.600000023841858,
+            "schemaValidationMs": 0.19999998807907104,
+            "normalizationMs": 9.5,
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encodeMs": 1.199999988079071,
+            "decodeMs": 1.600000023841858,
+            "schemaValidationMs": 0,
+            "normalizationMs": 9.600000023841858,
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encodeMs": 1.0999999642372131,
+            "decodeMs": 1.600000023841858,
+            "schemaValidationMs": 0.10000002384185791,
+            "normalizationMs": 9.299999952316284,
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encodeMs": 1.199999988079071,
+            "decodeMs": 1.600000023841858,
+            "schemaValidationMs": 0,
+            "normalizationMs": 9.899999976158142,
+            "corpusCount": 28
+          }
+        ]
+      }
+    },
+    "interpretation": "encode/decode are corrected smoke timings only. schemaValidation is separately measured. oracleNormalizationDiagnostic in the retained runner is a test/audit projection (stable-key ordering and base64 bytes), not a product normalization cost and must not enter runtime-cost conclusions.",
+    "limitations": [
+      "five independent batches per codec",
+      "one warmup per codec",
+      "browser timer quantization, including some 0 ms validation readings",
+      "no p95/p99 or stable performance ranking",
+      "candidate corpus is not a real gameplay trace"
+    ],
+    "nextPlan": {
+      "fixedWarmupsPerCodec": 5,
+      "independentBatchesPerCodec": 30,
+      "minimumStageMilliseconds": 100,
+      "codecOrder": "rotated each batch",
+      "statisticsUnit": "per-batch; never per-packet"
+    },
+    "malformedEvidenceBoundary": "runMalformed 的截断项进入每个 codec 的 decode；其余多数项直接调用共享 assertValid，证明共享 DTO 语义边界而非各 codec 的 wire parser。仅 C1 header/payload 截断、version、kind、flags、payload-length 有独立实际 frame parser smoke。"
+  },
+  "finalIsolatedMpProbe": {
+    "status": "ISOLATED_REPRODUCIBLE_MP_OPTIONAL_PROBE",
+    "codecAliases": {
+      "C0": "C0 JSON metadata + raw blocks",
+      "C1": "MP @msgpack/msgpack@3.1.3 optional probe; not approved schema-binary C1",
+      "C2": "C2 protobuf fixed oneof schema"
+    },
+    "run": {
+      "owner": "01a07751-c72c-7ea3-82bb-03c9ce46b982",
+      "label": "N2-final-isolated",
+      "startUTC": "2026-09-06T19:47:41Z",
+      "endUTC": "2026-09-06T19:48:57Z",
+      "exitCode": 0,
+      "coordination": "WASM workload finished; root confirmed unrestricted N2 window"
+    },
+    "environment": {
+      "node": "v22.23.2",
+      "platform": "darwin",
+      "arch": "arm64",
+      "chrome": "152.0.7977.76"
+    },
+    "sourceArtifacts": {
+      "generatedAt": "2026-09-06T19:47:42.393Z",
+      "files": {
+        "codec-core.mjs": "b70218c4f79b25fb212f4f0fee8202b6f8d931dcca110810fcdf0112161d09cd",
+        "browser-entry.mjs": "d05f3719eabc501a6560856edf0d2decda1e49c04804e154de38a83ca6a8f784",
+        "validate-runner.mjs": "45f224bad97fd3e70a3cb6d9cc65c027aed2e5d10ccff3ba61258cd5ab124de0",
+        "benchmark-runner.mjs": "2b749a2dd27bbe94b1062923ed8299d6a2f425102ec7e0a15a5cda867dc5df7c",
+        "browser-validation.bundle.mjs": "efdf15b28f80b1e500e79eda16b0862c0c6364e1baa59af2a805b46abe151b39",
+        "package.json": "a140b77dd3e9348991c7337cf8d0b9122ef66854888348b26aaf5c4a8dfb1fb5",
+        "pnpm-lock.yaml": "2d107a0fe09d8b73cd4c7d80798712c78e9bdb8b33cf06a7a0d972723604401b"
+      }
+    },
+    "timingUnit": "independent batch with per-stage accumulated whole-28-item corpus passes",
+    "warning": "p50/p95/p99 are per-batch only; do not represent per-packet tail latency. oracleNormalizationDiagnostic is not a production runtime cost.",
+    "samplingPlan": {
+      "fixedWarmupsPerCodec": 5,
+      "independentBatchesPerCodec": 30,
+      "minimumStageMilliseconds": 100,
+      "codecOrder": "rotated each batch"
+    },
+    "semanticPreflight": {
+      "nodeRoundtripByCodec": {
+        "C0": 28,
+        "C1": 28,
+        "C2": 28
+      },
+      "browserLocalRoundtripByCodec": {
+        "C0": 28,
+        "C1": 28,
+        "C2": 28
+      },
+      "sharedValidatorCasesByCodec": {
+        "C0": 7,
+        "C1": 7,
+        "C2": 7
+      }
+    },
+    "rawBatches": {
+      "node": {
+        "C0": [
+          {
+            "pass": 0,
+            "encode": {
+              "milliseconds": 100.42545999999902,
+              "corpusPasses": 88
+            },
+            "decode": {
+              "milliseconds": 100.11683100000005,
+              "corpusPasses": 178
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00357500000086,
+              "corpusPasses": 1781
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 104.18170899999996,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encode": {
+              "milliseconds": 100.93387600000142,
+              "corpusPasses": 93
+            },
+            "decode": {
+              "milliseconds": 100.5230839999972,
+              "corpusPasses": 184
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00936499999489,
+              "corpusPasses": 1827
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.21174899999914,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encode": {
+              "milliseconds": 100.7837929999996,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.50853600000028,
+              "corpusPasses": 182
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01531100000193,
+              "corpusPasses": 1765
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.51441400000022,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encode": {
+              "milliseconds": 100.54499899999792,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.01779299999725,
+              "corpusPasses": 187
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0501149999809,
+              "corpusPasses": 1840
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.33579400000053,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encode": {
+              "milliseconds": 100.98862000000008,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.04130200000054,
+              "corpusPasses": 187
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00190700000257,
+              "corpusPasses": 1835
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.87916899999982,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 5,
+            "encode": {
+              "milliseconds": 100.46329100000185,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.19925099998909,
+              "corpusPasses": 189
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01957000000039,
+              "corpusPasses": 1819
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.55874999999833,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 6,
+            "encode": {
+              "milliseconds": 100.93479000000116,
+              "corpusPasses": 89
+            },
+            "decode": {
+              "milliseconds": 100.16482800000085,
+              "corpusPasses": 183
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02277000001413,
+              "corpusPasses": 1829
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.7962510000034,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 7,
+            "encode": {
+              "milliseconds": 100.17286899998908,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.08553899999606,
+              "corpusPasses": 187
+            },
+            "schemaValidation": {
+              "milliseconds": 100.13898599997628,
+              "corpusPasses": 1783
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 106.49474999999802,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 8,
+            "encode": {
+              "milliseconds": 100.9903339999928,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.63513400000011,
+              "corpusPasses": 187
+            },
+            "schemaValidation": {
+              "milliseconds": 100.04008999996404,
+              "corpusPasses": 1830
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.85833400000047,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 9,
+            "encode": {
+              "milliseconds": 100.27741400000559,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.05054100000052,
+              "corpusPasses": 184
+            },
+            "schemaValidation": {
+              "milliseconds": 100.04542000001311,
+              "corpusPasses": 1827
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.10383300000103,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 10,
+            "encode": {
+              "milliseconds": 100.63070699999662,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.01191600000675,
+              "corpusPasses": 180
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02300100000502,
+              "corpusPasses": 1836
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.07629100000486,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 11,
+            "encode": {
+              "milliseconds": 100.51587699999982,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.18382799999563,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02874000002339,
+              "corpusPasses": 1840
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.6737919999996,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 12,
+            "encode": {
+              "milliseconds": 100.12108199999784,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.26017000000138,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00504600004206,
+              "corpusPasses": 1838
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.80937500000437,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 13,
+            "encode": {
+              "milliseconds": 100.32899500000349,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.03513400001611,
+              "corpusPasses": 187
+            },
+            "schemaValidation": {
+              "milliseconds": 100.04087499996967,
+              "corpusPasses": 1837
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.98441699998875,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 14,
+            "encode": {
+              "milliseconds": 100.8001230000009,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.40651099999377,
+              "corpusPasses": 187
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00753500006613,
+              "corpusPasses": 1846
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.23437300000296,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 15,
+            "encode": {
+              "milliseconds": 100.31546100000196,
+              "corpusPasses": 90
+            },
+            "decode": {
+              "milliseconds": 100.62975499999447,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03857000000062,
+              "corpusPasses": 1845
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.1964160000025,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 16,
+            "encode": {
+              "milliseconds": 100.2013759999827,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.4101630000223,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.05088499998965,
+              "corpusPasses": 1840
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.49587400000019,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 17,
+            "encode": {
+              "milliseconds": 101.04050099998858,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.34183600001779,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01266799996665,
+              "corpusPasses": 1822
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.80149999999776,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 18,
+            "encode": {
+              "milliseconds": 100.87725300000238,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.07282699999996,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.05252600007225,
+              "corpusPasses": 1837
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.95383300000321,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 19,
+            "encode": {
+              "milliseconds": 100.90808599998854,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.46587600000203,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.05162099995141,
+              "corpusPasses": 1828
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.11091700000179,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 20,
+            "encode": {
+              "milliseconds": 100.26170699998693,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.01490799998646,
+              "corpusPasses": 186
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02216799999587,
+              "corpusPasses": 1830
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 104.09162399999332,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 21,
+            "encode": {
+              "milliseconds": 100.99624899997798,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.10008200001539,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.04085500003566,
+              "corpusPasses": 1831
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.22116599999572,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 22,
+            "encode": {
+              "milliseconds": 100.83979500001078,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.11850499999491,
+              "corpusPasses": 187
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01602900007856,
+              "corpusPasses": 1839
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.55854199999885,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 23,
+            "encode": {
+              "milliseconds": 101.0497079999841,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.48929599999246,
+              "corpusPasses": 188
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03824099999474,
+              "corpusPasses": 1849
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.65579100000468,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 24,
+            "encode": {
+              "milliseconds": 100.16687400000592,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.31012799999007,
+              "corpusPasses": 177
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03730300001916,
+              "corpusPasses": 1772
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.89816500000597,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 25,
+            "encode": {
+              "milliseconds": 100.21799800000736,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.19721800000116,
+              "corpusPasses": 182
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01943199995003,
+              "corpusPasses": 1854
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.29941500000132,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 26,
+            "encode": {
+              "milliseconds": 101.3952500000014,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.33574699999008,
+              "corpusPasses": 164
+            },
+            "schemaValidation": {
+              "milliseconds": 100.04366299995309,
+              "corpusPasses": 1782
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.53279200000543,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 27,
+            "encode": {
+              "milliseconds": 100.96387700001651,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.50303500000882,
+              "corpusPasses": 186
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0012459999707,
+              "corpusPasses": 1826
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.30758200000128,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 28,
+            "encode": {
+              "milliseconds": 100.74007800000982,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.48861499999475,
+              "corpusPasses": 186
+            },
+            "schemaValidation": {
+              "milliseconds": 100.04313599994202,
+              "corpusPasses": 1826
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.57049899999402,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 29,
+            "encode": {
+              "milliseconds": 100.50416199999017,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.27400200003467,
+              "corpusPasses": 187
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03991900000256,
+              "corpusPasses": 1773
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 109.4635000000053,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          }
+        ],
+        "C1": [
+          {
+            "pass": 0,
+            "encode": {
+              "milliseconds": 100.21082100000126,
+              "corpusPasses": 250
+            },
+            "decode": {
+              "milliseconds": 100.16455399999813,
+              "corpusPasses": 297
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02654700000767,
+              "corpusPasses": 2594
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 103.72254200000043,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encode": {
+              "milliseconds": 100.01425299999391,
+              "corpusPasses": 251
+            },
+            "decode": {
+              "milliseconds": 100.24016399999937,
+              "corpusPasses": 305
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0857469999828,
+              "corpusPasses": 2605
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 104.5506220000002,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encode": {
+              "milliseconds": 100.07296199999928,
+              "corpusPasses": 262
+            },
+            "decode": {
+              "milliseconds": 100.14366199999222,
+              "corpusPasses": 307
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00881599999502,
+              "corpusPasses": 2652
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.49791900000127,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encode": {
+              "milliseconds": 100.16904499999873,
+              "corpusPasses": 262
+            },
+            "decode": {
+              "milliseconds": 100.15250500000275,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00986400000693,
+              "corpusPasses": 2610
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.9695010000014,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encode": {
+              "milliseconds": 100.0440120000003,
+              "corpusPasses": 264
+            },
+            "decode": {
+              "milliseconds": 100.26246300000003,
+              "corpusPasses": 310
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00831799999742,
+              "corpusPasses": 2622
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.6006669999997,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 5,
+            "encode": {
+              "milliseconds": 100.26482600001145,
+              "corpusPasses": 266
+            },
+            "decode": {
+              "milliseconds": 100.03659200001493,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02971899997283,
+              "corpusPasses": 2672
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.1433739999975,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 6,
+            "encode": {
+              "milliseconds": 100.08971099999144,
+              "corpusPasses": 265
+            },
+            "decode": {
+              "milliseconds": 100.13074400000733,
+              "corpusPasses": 310
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09516600002826,
+              "corpusPasses": 2656
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.43233399999917,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 7,
+            "encode": {
+              "milliseconds": 100.05345200001284,
+              "corpusPasses": 263
+            },
+            "decode": {
+              "milliseconds": 100.12141100000918,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00109499998871,
+              "corpusPasses": 2648
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.45524999999907,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 8,
+            "encode": {
+              "milliseconds": 100.13446200000362,
+              "corpusPasses": 264
+            },
+            "decode": {
+              "milliseconds": 100.18834099999913,
+              "corpusPasses": 307
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03027399998791,
+              "corpusPasses": 2624
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.71979000000101,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 9,
+            "encode": {
+              "milliseconds": 100.0069110000004,
+              "corpusPasses": 258
+            },
+            "decode": {
+              "milliseconds": 100.24107799998637,
+              "corpusPasses": 310
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01344000002064,
+              "corpusPasses": 2664
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.72362599999906,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 10,
+            "encode": {
+              "milliseconds": 100.2439989999857,
+              "corpusPasses": 264
+            },
+            "decode": {
+              "milliseconds": 100.12971100000686,
+              "corpusPasses": 311
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01887399996667,
+              "corpusPasses": 2670
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 109.83479300000181,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 11,
+            "encode": {
+              "milliseconds": 100.37288199998693,
+              "corpusPasses": 264
+            },
+            "decode": {
+              "milliseconds": 100.07416199998625,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00383299998975,
+              "corpusPasses": 2658
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.96470899999804,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 12,
+            "encode": {
+              "milliseconds": 100.17579100000512,
+              "corpusPasses": 262
+            },
+            "decode": {
+              "milliseconds": 100.28278899997895,
+              "corpusPasses": 311
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01575400000365,
+              "corpusPasses": 2633
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.82142000000022,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 13,
+            "encode": {
+              "milliseconds": 100.24253900000986,
+              "corpusPasses": 262
+            },
+            "decode": {
+              "milliseconds": 100.03208400000949,
+              "corpusPasses": 308
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03420400001414,
+              "corpusPasses": 2634
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.28874900000301,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 14,
+            "encode": {
+              "milliseconds": 100.17320800000743,
+              "corpusPasses": 265
+            },
+            "decode": {
+              "milliseconds": 100.05375799999092,
+              "corpusPasses": 310
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02730200004225,
+              "corpusPasses": 2668
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.38512499999706,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 15,
+            "encode": {
+              "milliseconds": 100.00253600000724,
+              "corpusPasses": 264
+            },
+            "decode": {
+              "milliseconds": 100.2325789999959,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01308799994877,
+              "corpusPasses": 2655
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.55004100000588,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 16,
+            "encode": {
+              "milliseconds": 100.13845200001379,
+              "corpusPasses": 264
+            },
+            "decode": {
+              "milliseconds": 100.24432900002284,
+              "corpusPasses": 308
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02239699997881,
+              "corpusPasses": 2642
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.02966999999626,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 17,
+            "encode": {
+              "milliseconds": 100.29157499999565,
+              "corpusPasses": 258
+            },
+            "decode": {
+              "milliseconds": 100.09266899998693,
+              "corpusPasses": 308
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02354599998216,
+              "corpusPasses": 2661
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.34495999999854,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 18,
+            "encode": {
+              "milliseconds": 100.04590799999642,
+              "corpusPasses": 265
+            },
+            "decode": {
+              "milliseconds": 100.09796100002131,
+              "corpusPasses": 310
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00414400007867,
+              "corpusPasses": 2655
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.0694590000021,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 19,
+            "encode": {
+              "milliseconds": 100.2949979999903,
+              "corpusPasses": 263
+            },
+            "decode": {
+              "milliseconds": 100.30616700001701,
+              "corpusPasses": 310
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03004699994926,
+              "corpusPasses": 2651
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.84179199999926,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 20,
+            "encode": {
+              "milliseconds": 100.49929600000905,
+              "corpusPasses": 261
+            },
+            "decode": {
+              "milliseconds": 100.21953300001041,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01535699995657,
+              "corpusPasses": 2643
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.74983599998814,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 21,
+            "encode": {
+              "milliseconds": 100.03062200000932,
+              "corpusPasses": 258
+            },
+            "decode": {
+              "milliseconds": 100.13071000000491,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0308969999387,
+              "corpusPasses": 2662
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.57033400000364,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 22,
+            "encode": {
+              "milliseconds": 100.36379000001762,
+              "corpusPasses": 264
+            },
+            "decode": {
+              "milliseconds": 100.12686899998516,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01134099999399,
+              "corpusPasses": 2636
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.52978900000016,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 23,
+            "encode": {
+              "milliseconds": 100.04053699999349,
+              "corpusPasses": 265
+            },
+            "decode": {
+              "milliseconds": 100.0839959999903,
+              "corpusPasses": 310
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0105940000467,
+              "corpusPasses": 2638
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.5816240000022,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 24,
+            "encode": {
+              "milliseconds": 100.35974299998998,
+              "corpusPasses": 265
+            },
+            "decode": {
+              "milliseconds": 100.1454539999977,
+              "corpusPasses": 308
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02313899999353,
+              "corpusPasses": 2652
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.99016600000687,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 25,
+            "encode": {
+              "milliseconds": 100.20233999998891,
+              "corpusPasses": 258
+            },
+            "decode": {
+              "milliseconds": 100.15129399998114,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0280840000778,
+              "corpusPasses": 2631
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 103.1882509999923,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 26,
+            "encode": {
+              "milliseconds": 100.2557070000039,
+              "corpusPasses": 265
+            },
+            "decode": {
+              "milliseconds": 100.21425599997019,
+              "corpusPasses": 302
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03089699984412,
+              "corpusPasses": 2632
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 103.79571100000612,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 27,
+            "encode": {
+              "milliseconds": 100.05775700003142,
+              "corpusPasses": 262
+            },
+            "decode": {
+              "milliseconds": 100.16759300002741,
+              "corpusPasses": 309
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00588800009427,
+              "corpusPasses": 2654
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.70516600000701,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 28,
+            "encode": {
+              "milliseconds": 100.14325099998678,
+              "corpusPasses": 263
+            },
+            "decode": {
+              "milliseconds": 100.00295900002675,
+              "corpusPasses": 308
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01911399998062,
+              "corpusPasses": 2659
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.86979299999803,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 29,
+            "encode": {
+              "milliseconds": 100.17365499997686,
+              "corpusPasses": 259
+            },
+            "decode": {
+              "milliseconds": 100.04587299997365,
+              "corpusPasses": 308
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02555800002301,
+              "corpusPasses": 2637
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.69195900000341,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          }
+        ],
+        "C2": [
+          {
+            "pass": 0,
+            "encode": {
+              "milliseconds": 100.22199700000283,
+              "corpusPasses": 88
+            },
+            "decode": {
+              "milliseconds": 100.6233700000007,
+              "corpusPasses": 65
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02731300001051,
+              "corpusPasses": 2619
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 106.79125000000022,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encode": {
+              "milliseconds": 100.436006000004,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.01141799999914,
+              "corpusPasses": 68
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01793800000223,
+              "corpusPasses": 2639
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.90291799999977,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encode": {
+              "milliseconds": 100.60754200000065,
+              "corpusPasses": 94
+            },
+            "decode": {
+              "milliseconds": 100.56433099999958,
+              "corpusPasses": 69
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00094599998465,
+              "corpusPasses": 2679
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.86049900000125,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encode": {
+              "milliseconds": 100.94861899999705,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 101.40037499999744,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02998599998955,
+              "corpusPasses": 2701
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.19583400000101,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encode": {
+              "milliseconds": 100.37596100000246,
+              "corpusPasses": 93
+            },
+            "decode": {
+              "milliseconds": 100.9945009999974,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00902000001861,
+              "corpusPasses": 2678
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.20791599999757,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 5,
+            "encode": {
+              "milliseconds": 100.43700800000079,
+              "corpusPasses": 91
+            },
+            "decode": {
+              "milliseconds": 100.71187599999757,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01819400002933,
+              "corpusPasses": 2700
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.92895900000167,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 6,
+            "encode": {
+              "milliseconds": 100.6402169999983,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.83891500000209,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01317300000665,
+              "corpusPasses": 2712
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.28487499999756,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 7,
+            "encode": {
+              "milliseconds": 100.20445600000312,
+              "corpusPasses": 94
+            },
+            "decode": {
+              "milliseconds": 100.25712700000076,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03735000000961,
+              "corpusPasses": 2712
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.41425099999651,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 8,
+            "encode": {
+              "milliseconds": 100.49358400000892,
+              "corpusPasses": 94
+            },
+            "decode": {
+              "milliseconds": 100.06645599999138,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01410399994711,
+              "corpusPasses": 2689
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.14029100000153,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 9,
+            "encode": {
+              "milliseconds": 100.10437900000943,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.18312799999694,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0178990000204,
+              "corpusPasses": 2678
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.92504199999894,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 10,
+            "encode": {
+              "milliseconds": 100.82354400000258,
+              "corpusPasses": 96
+            },
+            "decode": {
+              "milliseconds": 100.86041699999623,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01618099999723,
+              "corpusPasses": 2680
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.35408200000165,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 11,
+            "encode": {
+              "milliseconds": 100.0764609999951,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 101.02482999999484,
+              "corpusPasses": 71
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02293699998881,
+              "corpusPasses": 2698
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.25324999999793,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 12,
+            "encode": {
+              "milliseconds": 100.34058099999675,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.7191690000036,
+              "corpusPasses": 71
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01304799991703,
+              "corpusPasses": 2694
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.0437929999971,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 13,
+            "encode": {
+              "milliseconds": 100.92566700001407,
+              "corpusPasses": 90
+            },
+            "decode": {
+              "milliseconds": 100.96991899999921,
+              "corpusPasses": 68
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03459000002476,
+              "corpusPasses": 2629
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.35654400000203,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 14,
+            "encode": {
+              "milliseconds": 101.16533300001174,
+              "corpusPasses": 96
+            },
+            "decode": {
+              "milliseconds": 101.04037400000016,
+              "corpusPasses": 71
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0119169999889,
+              "corpusPasses": 2719
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.76903999999922,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 15,
+            "encode": {
+              "milliseconds": 100.47837800000707,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.15791500000705,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0860049999792,
+              "corpusPasses": 2705
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.4985819999929,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 16,
+            "encode": {
+              "milliseconds": 100.54262399999789,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 101.25508300001457,
+              "corpusPasses": 71
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00903600003585,
+              "corpusPasses": 2682
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.07108500000322,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 17,
+            "encode": {
+              "milliseconds": 100.29199900000458,
+              "corpusPasses": 94
+            },
+            "decode": {
+              "milliseconds": 100.65233699998498,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01838999993197,
+              "corpusPasses": 2648
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.18500000000495,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 18,
+            "encode": {
+              "milliseconds": 100.31770600001619,
+              "corpusPasses": 94
+            },
+            "decode": {
+              "milliseconds": 100.56787600000098,
+              "corpusPasses": 68
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01585799998793,
+              "corpusPasses": 2578
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.97246100000848,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 19,
+            "encode": {
+              "milliseconds": 100.65162300001248,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.3882080000003,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.01745199998186,
+              "corpusPasses": 2686
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.26754100000107,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 20,
+            "encode": {
+              "milliseconds": 100.0813349999953,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 101.35945100000754,
+              "corpusPasses": 71
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02218400004494,
+              "corpusPasses": 2698
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.47524800000247,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 21,
+            "encode": {
+              "milliseconds": 100.69750499999645,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.07453800000803,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0253459999949,
+              "corpusPasses": 2599
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.42349999999351,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 22,
+            "encode": {
+              "milliseconds": 100.81375299998399,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.36024900001212,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00684899999032,
+              "corpusPasses": 2686
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 103.15875000000597,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 23,
+            "encode": {
+              "milliseconds": 100.70609399999739,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 101.23429699998815,
+              "corpusPasses": 71
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02171000007002,
+              "corpusPasses": 2707
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.09308200000305,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 24,
+            "encode": {
+              "milliseconds": 100.75974999999016,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.10544700001265,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.02867599997262,
+              "corpusPasses": 2704
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.28558200000043,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 25,
+            "encode": {
+              "milliseconds": 100.24470700000165,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.19866600000387,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03196000009848,
+              "corpusPasses": 2575
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.68666599999779,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 26,
+            "encode": {
+              "milliseconds": 100.23404200001096,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 101.36187499998778,
+              "corpusPasses": 71
+            },
+            "schemaValidation": {
+              "milliseconds": 100.08505799999693,
+              "corpusPasses": 2700
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.69079200000124,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 27,
+            "encode": {
+              "milliseconds": 101.00170300000173,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 100.50491900000634,
+              "corpusPasses": 69
+            },
+            "schemaValidation": {
+              "milliseconds": 100.03367100008472,
+              "corpusPasses": 2614
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.92491799999698,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 28,
+            "encode": {
+              "milliseconds": 100.60982500002137,
+              "corpusPasses": 95
+            },
+            "decode": {
+              "milliseconds": 101.06662299997697,
+              "corpusPasses": 71
+            },
+            "schemaValidation": {
+              "milliseconds": 100.06424200000765,
+              "corpusPasses": 2669
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.25933300000906,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 29,
+            "encode": {
+              "milliseconds": 100.70545599998877,
+              "corpusPasses": 92
+            },
+            "decode": {
+              "milliseconds": 100.72924799998873,
+              "corpusPasses": 70
+            },
+            "schemaValidation": {
+              "milliseconds": 100.0337420000069,
+              "corpusPasses": 2648
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.14504300000408,
+              "corpusPasses": 10
+            },
+            "corpusCount": 28
+          }
+        ]
+      },
+      "browser": {
+        "C0": [
+          {
+            "pass": 0,
+            "encode": {
+              "milliseconds": 100.5,
+              "corpusPasses": 120
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 251
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000011920929,
+              "corpusPasses": 1769
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.5,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encode": {
+              "milliseconds": 100.40000003576279,
+              "corpusPasses": 119
+            },
+            "decode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 248
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 1819
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.80000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 239
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1815
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 109,
+              "corpusPasses": 12
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encode": {
+              "milliseconds": 100.60000002384186,
+              "corpusPasses": 124
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 246
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 1821
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.90000003576279,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encode": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 118
+            },
+            "decode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 236
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 1783
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 5,
+            "encode": {
+              "milliseconds": 100.60000002384186,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 249
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 1800
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 6,
+            "encode": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 251
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1815
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 109.10000002384186,
+              "corpusPasses": 12
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 7,
+            "encode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 248
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1814
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 8,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 120
+            },
+            "decode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 249
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 1822
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 9,
+            "encode": {
+              "milliseconds": 100.70000004768372,
+              "corpusPasses": 124
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 244
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1823
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 10,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 121
+            },
+            "decode": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 246
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 1813
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 11,
+            "encode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 120
+            },
+            "decode": {
+              "milliseconds": 100.5,
+              "corpusPasses": 248
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 1807
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 12,
+            "encode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 124
+            },
+            "decode": {
+              "milliseconds": 100.40000003576279,
+              "corpusPasses": 246
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 1815
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 13,
+            "encode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 121
+            },
+            "decode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 250
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1809
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 14,
+            "encode": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 249
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1812
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 15,
+            "encode": {
+              "milliseconds": 100.79999995231628,
+              "corpusPasses": 125
+            },
+            "decode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 243
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1825
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 16,
+            "encode": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 120
+            },
+            "decode": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 247
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 1815
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 17,
+            "encode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 121
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 250
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1815
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 18,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 248
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 1817
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 19,
+            "encode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 248
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1791
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 20,
+            "encode": {
+              "milliseconds": 100.60000002384186,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 246
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1833
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 21,
+            "encode": {
+              "milliseconds": 100.5,
+              "corpusPasses": 119
+            },
+            "decode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 236
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1822
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 22,
+            "encode": {
+              "milliseconds": 100.60000002384186,
+              "corpusPasses": 123
+            },
+            "decode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 248
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1812
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 23,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 120
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 250
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1826
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 24,
+            "encode": {
+              "milliseconds": 100.59999996423721,
+              "corpusPasses": 124
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 246
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 1825
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 25,
+            "encode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 121
+            },
+            "decode": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 248
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1817
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 26,
+            "encode": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 120
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 243
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 1779
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 104,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 27,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 125
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 243
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 1811
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 28,
+            "encode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 121
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 249
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 1820
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 108.89999997615814,
+              "corpusPasses": 12
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 29,
+            "encode": {
+              "milliseconds": 100.59999996423721,
+              "corpusPasses": 122
+            },
+            "decode": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 250
+            },
+            "schemaValidation": {
+              "milliseconds": 100.19999992847443,
+              "corpusPasses": 1828
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          }
+        ],
+        "C1": [
+          {
+            "pass": 0,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 285
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 396
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2771
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 292
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 402
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2761
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 303
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 403
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2751
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 287
+            },
+            "decode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 402
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2786
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 279
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 384
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2716
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 5,
+            "encode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 284
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 390
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2769
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 6,
+            "encode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 304
+            },
+            "decode": {
+              "milliseconds": 100.1000000834465,
+              "corpusPasses": 391
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2775
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 109,
+              "corpusPasses": 12
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 7,
+            "encode": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 296
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 393
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2804
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 8,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 300
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 391
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2725
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 9,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 302
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 395
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2763
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 10,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 295
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 382
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 2697
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 11,
+            "encode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 301
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 394
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2753
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 12,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 302
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 394
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2757
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 13,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 303
+            },
+            "decode": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 394
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2797
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 14,
+            "encode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 302
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 394
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000011920929,
+              "corpusPasses": 2750
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 15,
+            "encode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 303
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 385
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 2668
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.69999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 16,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 301
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 393
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 2786
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 109.10000002384186,
+              "corpusPasses": 12
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 17,
+            "encode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 290
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 392
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2739
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 18,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 300
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 393
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2789
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 109.10000002384186,
+              "corpusPasses": 12
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 19,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 301
+            },
+            "decode": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 393
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2781
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 20,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 303
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 392
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2778
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.60000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 21,
+            "encode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 304
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 386
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2704
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.90000003576279,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 22,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 294
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 393
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2770
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 23,
+            "encode": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 302
+            },
+            "decode": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 391
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2756
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 24,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 278
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 393
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2760
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.70000004768372,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 25,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 287
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 392
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000011920929,
+              "corpusPasses": 2727
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 26,
+            "encode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 301
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 393
+            },
+            "schemaValidation": {
+              "milliseconds": 100.19999992847443,
+              "corpusPasses": 2762
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 27,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 302
+            },
+            "decode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 394
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2765
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.40000003576279,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 28,
+            "encode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 291
+            },
+            "decode": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 391
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2782
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 29,
+            "encode": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 301
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 394
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2775
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          }
+        ],
+        "C2": [
+          {
+            "pass": 0,
+            "encode": {
+              "milliseconds": 100.60000002384186,
+              "corpusPasses": 99
+            },
+            "decode": {
+              "milliseconds": 100.89999997615814,
+              "corpusPasses": 75
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2841
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.40000003576279,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 1,
+            "encode": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 105
+            },
+            "decode": {
+              "milliseconds": 101.10000002384186,
+              "corpusPasses": 79
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2821
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.5,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 2,
+            "encode": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 102
+            },
+            "decode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 79
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2836
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 3,
+            "encode": {
+              "milliseconds": 100.59999996423721,
+              "corpusPasses": 102
+            },
+            "decode": {
+              "milliseconds": 101.10000002384186,
+              "corpusPasses": 77
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2804
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 4,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 109
+            },
+            "decode": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 80
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2813
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.40000003576279,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 5,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 106
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 76
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2815
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 103.30000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 6,
+            "encode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 105
+            },
+            "decode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 80
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 2814
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 7,
+            "encode": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 104
+            },
+            "decode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 80
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2862
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 8,
+            "encode": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 109
+            },
+            "decode": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 79
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2815
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 101.59999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 9,
+            "encode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 102
+            },
+            "decode": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 77
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2841
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 10,
+            "encode": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 104
+            },
+            "decode": {
+              "milliseconds": 100.5,
+              "corpusPasses": 80
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2853
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 11,
+            "encode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 103
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 79
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2817
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 12,
+            "encode": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 110
+            },
+            "decode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 77
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2834
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 13,
+            "encode": {
+              "milliseconds": 100.40000003576279,
+              "corpusPasses": 105
+            },
+            "decode": {
+              "milliseconds": 100.79999995231628,
+              "corpusPasses": 81
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000011920929,
+              "corpusPasses": 2831
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 14,
+            "encode": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 104
+            },
+            "decode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 80
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2816
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.20000004768372,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 15,
+            "encode": {
+              "milliseconds": 100.40000003576279,
+              "corpusPasses": 108
+            },
+            "decode": {
+              "milliseconds": 100.89999997615814,
+              "corpusPasses": 77
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2806
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 16,
+            "encode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 104
+            },
+            "decode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 78
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 2859
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 17,
+            "encode": {
+              "milliseconds": 100.80000001192093,
+              "corpusPasses": 106
+            },
+            "decode": {
+              "milliseconds": 100.69999998807907,
+              "corpusPasses": 78
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2801
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 18,
+            "encode": {
+              "milliseconds": 100.60000002384186,
+              "corpusPasses": 102
+            },
+            "decode": {
+              "milliseconds": 100.5,
+              "corpusPasses": 80
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 2793
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 19,
+            "encode": {
+              "milliseconds": 100.79999995231628,
+              "corpusPasses": 106
+            },
+            "decode": {
+              "milliseconds": 101,
+              "corpusPasses": 81
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2799
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 20,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 104
+            },
+            "decode": {
+              "milliseconds": 100.79999995231628,
+              "corpusPasses": 81
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2858
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 21,
+            "encode": {
+              "milliseconds": 100.30000001192093,
+              "corpusPasses": 103
+            },
+            "decode": {
+              "milliseconds": 100.90000003576279,
+              "corpusPasses": 79
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2815
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 22,
+            "encode": {
+              "milliseconds": 100,
+              "corpusPasses": 98
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 78
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2858
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 23,
+            "encode": {
+              "milliseconds": 100.39999997615814,
+              "corpusPasses": 103
+            },
+            "decode": {
+              "milliseconds": 101.10000002384186,
+              "corpusPasses": 80
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2830
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.59999996423721,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 24,
+            "encode": {
+              "milliseconds": 100.59999996423721,
+              "corpusPasses": 105
+            },
+            "decode": {
+              "milliseconds": 100.60000002384186,
+              "corpusPasses": 79
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999984502792,
+              "corpusPasses": 2796
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.70000004768372,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 25,
+            "encode": {
+              "milliseconds": 100.40000003576279,
+              "corpusPasses": 107
+            },
+            "decode": {
+              "milliseconds": 101,
+              "corpusPasses": 79
+            },
+            "schemaValidation": {
+              "milliseconds": 100.00000005960464,
+              "corpusPasses": 2760
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 102.30000001192093,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 26,
+            "encode": {
+              "milliseconds": 100.5,
+              "corpusPasses": 105
+            },
+            "decode": {
+              "milliseconds": 100,
+              "corpusPasses": 54
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 2847
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.89999997615814,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 27,
+            "encode": {
+              "milliseconds": 100.59999996423721,
+              "corpusPasses": 96
+            },
+            "decode": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 77
+            },
+            "schemaValidation": {
+              "milliseconds": 100,
+              "corpusPasses": 2816
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.89999997615814,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 28,
+            "encode": {
+              "milliseconds": 100.60000002384186,
+              "corpusPasses": 107
+            },
+            "decode": {
+              "milliseconds": 100.19999998807907,
+              "corpusPasses": 80
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999996423721,
+              "corpusPasses": 2799
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.29999995231628,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          },
+          {
+            "pass": 29,
+            "encode": {
+              "milliseconds": 100.5,
+              "corpusPasses": 104
+            },
+            "decode": {
+              "milliseconds": 100.89999997615814,
+              "corpusPasses": 81
+            },
+            "schemaValidation": {
+              "milliseconds": 100.09999990463257,
+              "corpusPasses": 2841
+            },
+            "oracleNormalizationDiagnostic": {
+              "milliseconds": 100.10000002384186,
+              "corpusPasses": 11
+            },
+            "corpusCount": 28
+          }
+        ]
+      }
+    },
+    "stageCoverage": {
+      "node": {
+        "C0": {
+          "encode": {
+            "batches": 30,
+            "minMilliseconds": 100.12108199999784,
+            "maxMilliseconds": 101.3952500000014,
+            "minCorpusPasses": 88,
+            "maxCorpusPasses": 93
+          },
+          "decode": {
+            "batches": 30,
+            "minMilliseconds": 100.01191600000675,
+            "maxMilliseconds": 100.63513400000011,
+            "minCorpusPasses": 164,
+            "maxCorpusPasses": 189
+          },
+          "schemaValidation": {
+            "batches": 30,
+            "minMilliseconds": 100.0012459999707,
+            "maxMilliseconds": 100.13898599997628,
+            "minCorpusPasses": 1765,
+            "maxCorpusPasses": 1854
+          },
+          "oracleNormalizationDiagnostic": {
+            "batches": 30,
+            "minMilliseconds": 100.21174899999914,
+            "maxMilliseconds": 109.4635000000053,
+            "minCorpusPasses": 10,
+            "maxCorpusPasses": 10
+          }
+        },
+        "C1": {
+          "encode": {
+            "batches": 30,
+            "minMilliseconds": 100.00253600000724,
+            "maxMilliseconds": 100.49929600000905,
+            "minCorpusPasses": 250,
+            "maxCorpusPasses": 266
+          },
+          "decode": {
+            "batches": 30,
+            "minMilliseconds": 100.00295900002675,
+            "maxMilliseconds": 100.30616700001701,
+            "minCorpusPasses": 297,
+            "maxCorpusPasses": 311
+          },
+          "schemaValidation": {
+            "batches": 30,
+            "minMilliseconds": 100.00109499998871,
+            "maxMilliseconds": 100.09516600002826,
+            "minCorpusPasses": 2594,
+            "maxCorpusPasses": 2672
+          },
+          "oracleNormalizationDiagnostic": {
+            "batches": 30,
+            "minMilliseconds": 100.1433739999975,
+            "maxMilliseconds": 109.83479300000181,
+            "minCorpusPasses": 10,
+            "maxCorpusPasses": 11
+          }
+        },
+        "C2": {
+          "encode": {
+            "batches": 30,
+            "minMilliseconds": 100.0764609999951,
+            "maxMilliseconds": 101.16533300001174,
+            "minCorpusPasses": 88,
+            "maxCorpusPasses": 96
+          },
+          "decode": {
+            "batches": 30,
+            "minMilliseconds": 100.01141799999914,
+            "maxMilliseconds": 101.40037499999744,
+            "minCorpusPasses": 65,
+            "maxCorpusPasses": 71
+          },
+          "schemaValidation": {
+            "batches": 30,
+            "minMilliseconds": 100.00094599998465,
+            "maxMilliseconds": 100.0860049999792,
+            "minCorpusPasses": 2575,
+            "maxCorpusPasses": 2719
+          },
+          "oracleNormalizationDiagnostic": {
+            "batches": 30,
+            "minMilliseconds": 100.28487499999756,
+            "maxMilliseconds": 106.79125000000022,
+            "minCorpusPasses": 10,
+            "maxCorpusPasses": 10
+          }
+        }
+      },
+      "browser": {
+        "C0": {
+          "encode": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 100.80000001192093,
+            "minCorpusPasses": 118,
+            "maxCorpusPasses": 125
+          },
+          "decode": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 100.5,
+            "minCorpusPasses": 236,
+            "maxCorpusPasses": 251
+          },
+          "schemaValidation": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 100.19999992847443,
+            "minCorpusPasses": 1769,
+            "maxCorpusPasses": 1833
+          },
+          "oracleNormalizationDiagnostic": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 109.10000002384186,
+            "minCorpusPasses": 11,
+            "maxCorpusPasses": 12
+          }
+        },
+        "C1": {
+          "encode": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 100.39999997615814,
+            "minCorpusPasses": 278,
+            "maxCorpusPasses": 304
+          },
+          "decode": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 100.20000004768372,
+            "minCorpusPasses": 382,
+            "maxCorpusPasses": 403
+          },
+          "schemaValidation": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 100.19999992847443,
+            "minCorpusPasses": 2668,
+            "maxCorpusPasses": 2804
+          },
+          "oracleNormalizationDiagnostic": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 109.10000002384186,
+            "minCorpusPasses": 11,
+            "maxCorpusPasses": 12
+          }
+        },
+        "C2": {
+          "encode": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 100.80000001192093,
+            "minCorpusPasses": 96,
+            "maxCorpusPasses": 110
+          },
+          "decode": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 101.10000002384186,
+            "minCorpusPasses": 54,
+            "maxCorpusPasses": 81
+          },
+          "schemaValidation": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 100.09999996423721,
+            "minCorpusPasses": 2760,
+            "maxCorpusPasses": 2862
+          },
+          "oracleNormalizationDiagnostic": {
+            "batches": 30,
+            "minMilliseconds": 100,
+            "maxMilliseconds": 103.30000001192093,
+            "minCorpusPasses": 11,
+            "maxCorpusPasses": 11
+          }
+        }
+      }
+    },
+    "statisticsPolicy": "Use only per-batch statistics. Thirty batches can support descriptive p50/p95 of a meaningful derived throughput metric in a later report; do not report p99. The minimum-100ms stage walls themselves are control values, not performance rankings. oracleNormalizationDiagnostic is excluded from all production runtime comparisons.",
+    "limitations": [
+      "MP is not the approved schema-binary C1",
+      "candidate corpus is not a gameplay trace",
+      "no transport/TLS/queue/GC-long-horizon measure",
+      "browser preflight here is local; separately recorded validation-result.json holds prior Node↔Chrome 28/28 directional checks"
+    ],
+    "nextRequired": "Implement true lossless schema-binary C1, then rerun C0/C1/C2/MP with the same corpus and controlled plan before any N2 codec selection.",
+    "malformedEvidenceBoundary": "runMalformed 的截断项进入每个 codec 的 decode；其余多数项直接调用共享 assertValid，证明共享 DTO 语义边界而非各 codec 的 wire parser。仅 C1 header/payload 截断、version、kind、flags、payload-length 有独立实际 frame parser smoke。"
+  },
+  "wireMalformedEvidenceCorrection": "runMalformed 的截断项进入每个 codec 的 decode；其余多数项直接调用共享 assertValid，证明共享 DTO 语义边界而非各 codec 的 wire parser。仅 C1 header/payload 截断、version、kind、flags、payload-length 有独立实际 frame parser smoke。"
+}

@@ -1,0 +1,242 @@
+{
+  "status": "REFERENCE_PRESENTATION_CODEC_PASS",
+  "sourceGitSha": "6de696b16f214ec7d36f18b17fe118b5da4b8923",
+  "sourceState": "uncommitted presentation projection and corpus inputs bound by current explicit source hashes",
+  "wireStatus": "not-adopted",
+  "timing": "NOT_COLLECTED",
+  "prototypeDirectory": "/tmp/seedlands-network-probe-codec-presentation-v2",
+  "sourceSha256": {
+    "reference-schema-validation.mjs": "6f7a3b248e305230009fed18a4b9bdb733cb482871906705f2941e70fd43041d",
+    "c0-raw-reference.mjs": "b490a1bb434c7993896e79ce5988a080c534df86cc700c3c9a5794a913070257",
+    "reference-fixed-codecs.mjs": "386a84291ae4297b803810855c37becd6bab8449b3c5e5f3afdd856502cffb7b",
+    "presentation-codecs.mjs": "0eb96ce1ffff028850ee9701c5223fc44731bc150a1c9be7efd33a7f1985526c",
+    "presentation-codecs-smoke.mjs": "80a1a82ac36c9ac1beb022d60e4e6bf9b06657e50e5e6d0ddb8e87d9518f00ea",
+    "presentation-schema-smoke.mjs": "c5bb934af8f1087d3ca25a94e846d44693ece9521cab9feb730565c418391bdc",
+    "presentation-corpus-reader.mjs": "45a8627e7791808d80f15a64779c564cadac4c11c8e2acf9e93fc7a05d586325",
+    "presentation-pipeline-validation.mjs": "ef301c9be3de56027c51396487704aad7ac70c8be237a22bfd2b1d57d06c8088",
+    "world-commit-presentation-pipeline.mjs": "551783fe1daa0ba629c2de0f8d62f63494d67b54a5adcf537d5094aba6ac34eb",
+    "browser-reference-runner.mjs": "4b4a5011883c73fe4e36f300903c0938f570f1577119798a559f6364936af295",
+    "browser-reference-validation.mjs": "06e53e5b201c91667d35ace0399e787553edbf7d74d32a5b89ee741e9205d068",
+    "codec-application-pipeline.mjs": "48e588f37a2f1534af18051eb3298190dae3d6703247054e336117952b8d041e",
+    "protobuf-wire-preflight.mjs": "a97f92c58bee71adb82a59c7aee7be2c4ae1b0b9f63414232d7c390dd4d0a49a"
+  },
+  "groups": [
+    {
+      "name": "welcome-presentation",
+      "nodePipeline": {
+        "status": "PASS",
+        "utc": "2026-09-07T05:09:11.880Z",
+        "node": "v22.23.2",
+        "root": "/tmp/seedlands-network-bootstrap-welcome-corpus-v2-source-bound",
+        "sourceCorpusSha256": "f5ed1371e5da251e905856d7398c5f26fabdf8ba75bf021cdf5b3b7fcf6d2190",
+        "sourceManifestPayloadSha256": "451d09196c4bee9b58c02330568994896123e67222102877d2a7ec7f52ac1a8c",
+        "records": 3,
+        "wireStatus": "not-adopted",
+        "timing": "NOT_COLLECTED",
+        "codecs": {
+          "C0": [
+            {
+              "frameId": "000-new-world-authority-start",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 1308
+            },
+            {
+              "frameId": "001-same-epoch-current-body",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 1308
+            },
+            {
+              "frameId": "002-restored-authority-start",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 1315
+            }
+          ],
+          "C1": [
+            {
+              "frameId": "000-new-world-authority-start",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 406
+            },
+            {
+              "frameId": "001-same-epoch-current-body",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 406
+            },
+            {
+              "frameId": "002-restored-authority-start",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 412
+            }
+          ],
+          "C2": [
+            {
+              "frameId": "000-new-world-authority-start",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 365
+            },
+            {
+              "frameId": "001-same-epoch-current-body",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 365
+            },
+            {
+              "frameId": "002-restored-authority-start",
+              "category": "welcome-presentation",
+              "status": "DECODED",
+              "wireBytes": 371
+            }
+          ]
+        }
+      },
+      "browser": {
+        "status": "PASS",
+        "utc": "2026-09-07T05:09:12.698Z",
+        "node": "v22.23.2",
+        "browser": "152.0.7977.76",
+        "headless": true,
+        "wireStatus": "not-adopted",
+        "timing": "NOT_COLLECTED",
+        "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+        "realRecords": 3,
+        "syntheticRecords": 0,
+        "sourceCorpusSha256": "f5ed1371e5da251e905856d7398c5f26fabdf8ba75bf021cdf5b3b7fcf6d2190",
+        "sourceManifestPayloadSha256": "451d09196c4bee9b58c02330568994896123e67222102877d2a7ec7f52ac1a8c",
+        "fixtureSha256": "5c04898293266298423a67af8fe01184e16d458c36583c776c166078792c52a7",
+        "bundleSha256": "27cbc5c42b18d299c69a1b0fa2509d5a08853810231c205fa5f8f4b084bfa151",
+        "bundleBytes": 468399,
+        "codecs": {
+          "C0": {
+            "nodeToBrowser": 3,
+            "browserToNode": 3,
+            "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+          },
+          "C1": {
+            "nodeToBrowser": 3,
+            "browserToNode": 3,
+            "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+          },
+          "C2": {
+            "nodeToBrowser": 3,
+            "browserToNode": 3,
+            "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+          }
+        }
+      }
+    },
+    {
+      "name": "world-commit-presentation",
+      "nodePipeline": {
+        "status": "PASS",
+        "utc": "2026-09-07T05:13:56.252Z",
+        "node": "v22.23.2",
+        "root": "/tmp/seedlands-network-world-commit-presentation-corpus-v2-r5",
+        "sourceCorpusSha256": "38cddd331425344ab656ba252d5fcb72f8c499b0de15e24c45061f2308b092fd",
+        "sourceManifestPayloadSha256": "e2ebb8df882d11a5f2cc9e8080673ee23923a396a84014aac5402c2402a54f04",
+        "records": 2,
+        "wireStatus": "not-adopted",
+        "timing": "NOT_COLLECTED",
+        "codecs": {
+          "C0": [
+            {
+              "frameId": "000-world-commit-presentation",
+              "category": "world-commit-presentation",
+              "status": "DECODED",
+              "wireBytes": 639
+            },
+            {
+              "frameId": "001-world-commit-presentation",
+              "category": "world-commit-presentation",
+              "status": "DECODED",
+              "wireBytes": 646
+            }
+          ],
+          "C1": [
+            {
+              "frameId": "000-world-commit-presentation",
+              "category": "world-commit-presentation",
+              "status": "DECODED",
+              "wireBytes": 242
+            },
+            {
+              "frameId": "001-world-commit-presentation",
+              "category": "world-commit-presentation",
+              "status": "DECODED",
+              "wireBytes": 225
+            }
+          ],
+          "C2": [
+            {
+              "frameId": "000-world-commit-presentation",
+              "category": "world-commit-presentation",
+              "status": "DECODED",
+              "wireBytes": 133
+            },
+            {
+              "frameId": "001-world-commit-presentation",
+              "category": "world-commit-presentation",
+              "status": "DECODED",
+              "wireBytes": 126
+            }
+          ]
+        }
+      },
+      "browser": {
+        "status": "PASS",
+        "utc": "2026-09-07T05:13:56.929Z",
+        "node": "v22.23.2",
+        "browser": "152.0.7977.76",
+        "headless": true,
+        "wireStatus": "not-adopted",
+        "timing": "NOT_COLLECTED",
+        "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+        "realRecords": 2,
+        "syntheticRecords": 0,
+        "sourceCorpusSha256": "38cddd331425344ab656ba252d5fcb72f8c499b0de15e24c45061f2308b092fd",
+        "sourceManifestPayloadSha256": "e2ebb8df882d11a5f2cc9e8080673ee23923a396a84014aac5402c2402a54f04",
+        "fixtureSha256": "09fdacdab4d47b3dfcea6b51e0612e0e387375eaec260f894184ac76b853c253",
+        "bundleSha256": "27cbc5c42b18d299c69a1b0fa2509d5a08853810231c205fa5f8f4b084bfa151",
+        "bundleBytes": 468399,
+        "codecs": {
+          "C0": {
+            "nodeToBrowser": 2,
+            "browserToNode": 2,
+            "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+          },
+          "C1": {
+            "nodeToBrowser": 2,
+            "browserToNode": 2,
+            "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+          },
+          "C2": {
+            "nodeToBrowser": 2,
+            "browserToNode": 2,
+            "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+          }
+        }
+      }
+    }
+  ],
+  "syntheticChecks": {
+    "schemaValid": 2,
+    "schemaRejected": 21,
+    "c0RepresentableInvalidConsumerZero": 20,
+    "c1c2RoundTrips": 4,
+    "actualWireRejections": 6,
+    "c2ContradictoryPresenceConsumerZero": 5,
+    "oldReferenceRegressionPerCodec": 59
+  },
+  "limitations": [
+    "No production session adapter, first attach, reconnect, camera or mesh application evidence",
+    "Authority lifecycle source anchor is checked by real corpus tests, not fabricated client reducers",
+    "512 commit reference limit does not cover all legal Authority mutations; segmentation or resync contract remains open",
+    "No timing, runtime migration gain, pool gain, WAN or protocol adoption conclusion"
+  ]
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { WaterMeshTransitionTracker } from '../../src/app/scene/water-mesh-transition';
+import { WaterMeshTransitionTracker } from '../../apps/web/src/app/scene/water-mesh-transition';
 
 describe('WaterMeshTransitionTracker', () => {
   it('records a revision-bound monotonic transition across multiple rendered frames', () => {

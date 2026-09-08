@@ -1,11 +1,12 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { HeadlessSession } from '../../src/server/headless/headless-session';
-import { runWorldComputeTask } from '../../src/worker/world-compute-task';
-import { Voxel } from '../../src/world/voxel';
+import { HeadlessSession } from '../../packages/game-core/src/server/headless/headless-session';
+import { runWorldComputeTask } from '../../packages/game-core/src/compute/world-compute-task';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('HeadlessSession', () => {
   it('uses the shared deterministic compute path for the new-world feet spawn', async () => {
-    const session = await HeadlessSession.create({ seedText: 'headless-safe-spawn' });
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'headless-safe-spawn' });
     const expected = await runWorldComputeTask({
       kind: 'find-safe-spawn',
       seed: session.runtime.server.seed,
@@ -21,7 +22,7 @@ describe('HeadlessSession', () => {
   }, 15_000);
 
   it('advances every lane through Authority and performs real entity physics', async () => {
-    const session = await HeadlessSession.create({ seedText: 'headless-multi-rate' });
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'headless-multi-rate' });
     const spawn = await session.executeLine('/spawnitem wood-block 1 1 60 1', 1);
     expect(spawn.result.success).toBe(true);
     const item = session.runtime.server.queryEntities({ type: 'world-item' })[0];
@@ -40,7 +41,11 @@ describe('HeadlessSession', () => {
   }, 15_000);
 
   it('turns Logic decisions into observable Authority actor movement', async () => {
-    const session = await HeadlessSession.create({ seedText: 'logic-live-audit', initialWorldTime: 9 });
+    const session = await HeadlessSession.create({
+      platform: testCorePlatform,
+      seedText: 'logic-live-audit',
+      initialWorldTime: 9,
+    });
     const before = new Map(
       session.runtime
         .view()
@@ -66,7 +71,7 @@ describe('HeadlessSession', () => {
   }, 15_000);
 
   it('computes and commits fluid work during session advancement', async () => {
-    const session = await HeadlessSession.create({ seedText: 'headless-fluid' });
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'headless-fluid' });
     expect((await session.executeLine('/setblock 2 30 2 water', 1)).result.success).toBe(true);
     expect((await session.executeLine('/setblock 2 29 2 air', 2)).result.success).toBe(true);
 
@@ -81,6 +86,7 @@ describe('HeadlessSession', () => {
     'keeps advancePhysics wall-clock semantics at %i Hz',
     async (physicsHz) => {
       const session = await HeadlessSession.create({
+        platform: testCorePlatform,
         seedText: `headless-${physicsHz}`,
         frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
       });
@@ -96,7 +102,7 @@ describe('HeadlessSession', () => {
   );
 
   it('exposes logic and fluid advancement without bypassing the shared scheduler', async () => {
-    const session = await HeadlessSession.create({ seedText: 'headless-lane-helpers' });
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'headless-lane-helpers' });
 
     const logic = await session.advanceLogic(2);
     const fluid = await session.advanceFluid(3);
@@ -108,7 +114,7 @@ describe('HeadlessSession', () => {
   }, 15_000);
 
   it('chunks long legacy tick commands while retaining every real lane delta', async () => {
-    const session = await HeadlessSession.create({ seedText: 'headless-long-tick' });
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'headless-long-tick' });
 
     const execution = await session.executeLine('/tick 61', 1);
 
@@ -123,7 +129,7 @@ describe('HeadlessSession', () => {
   }, 30_000); // 61秒跨过Authority的60秒分片边界，保留全部真实lane计算。
 
   it('deduplicates commands by the headless transaction identity', async () => {
-    const session = await HeadlessSession.create({ seedText: 'headless-deduplication' });
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'headless-deduplication' });
     const initialWorldRevision = session.runtime.server.worldRevision;
     const first = await session.executeLine('/setblock 1 30 1 wood', 7);
     const replay = await session.executeLine('/setblock 1 30 1 wood', 7);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { sampleWaterFlowDirection } from '../../src/world/water-flow-direction';
-import { Voxel } from '../../src/world/voxel';
+import { sampleWaterFlowDirection } from '../../packages/game-core/src/world/water-flow-direction';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('水面流向采样', () => {
   it('朝向更低水位的相邻单元并归一化', () => {

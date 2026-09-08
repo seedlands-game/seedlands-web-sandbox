@@ -6,7 +6,7 @@ Source code and repository documentation are licensed under the [Apache License 
 
 The following file is separately offered under the [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/):
 
-- `public/assets/voxel-atlas.webp`
+- `apps/web/public/assets/voxel-atlas.webp`
 
 Attribution: **Seedlands Project contributors**.
 
@@ -16,14 +16,14 @@ When redistributing the atlas or an adaptation, retain the attribution, identify
 
 ## Original presentation assets
 
-- `public/assets/ui/obsidian-brass-panel.png`: original obsidian and brass UI panel, generated with OpenAI's built-in image generation tool; used as a CSS nine-slice asset without image modifications. Offered under CC BY 4.0 with attribution to **Seedlands Project contributors**, to the extent that contributors hold licensable rights. The generation prompt and verification record are in `changes/2026-09-05-presentation-language/asset-record.md`.
+- `apps/web/public/assets/ui/obsidian-brass-panel.png`: original obsidian and brass UI panel, generated with OpenAI's built-in image generation tool; used as a CSS nine-slice asset without image modifications. Offered under CC BY 4.0 with attribution to **Seedlands Project contributors**, to the extent that contributors hold licensable rights. The generation prompt and verification record are in `changes/2026-09-05-presentation-language/asset-record.md`.
 - Repository-authored SVG components and icons are source code covered by Apache-2.0 unless explicitly marked otherwise.
 
 ## MVP experience repair assets
 
-The original generated HUD images `public/assets/ui/health-heart.png`, `hunger-drumstick.png`, `arcane-crest.png`, and `obsidian-hotbar-slot.png` are offered under CC BY 4.0 with attribution to **Seedlands Project contributors**, to the extent contributors hold licensable rights. Their provenance is in `changes/2026-09-05-mvp-experience-repair/evidence/ui-asset-provenance.md`.
+The original generated HUD images `apps/web/public/assets/ui/health-heart.png`, `hunger-drumstick.png`, `arcane-crest.png`, and `obsidian-hotbar-slot.png` are offered under CC BY 4.0 with attribution to **Seedlands Project contributors**, to the extent contributors hold licensable rights. Their provenance is in `changes/2026-09-05-mvp-experience-repair/evidence/ui-asset-provenance.md`.
 
-The PNGs under `public/assets/items/` are original renders of repository-authored 3D geometry and procedural textures. The PNGs under `public/assets/voxels/` render the project's CC BY 4.0 voxel atlas. Both sets are offered under CC BY 4.0 with the same attribution. Generation records are in that change's `evidence/item-icon-generation.md` and `evidence/voxel-icon-generation.md`. These files are inventory and target thumbnails; gameplay uses live 3D meshes.
+The PNGs under `apps/web/public/assets/items/` are original renders of repository-authored 3D geometry and procedural textures. The PNGs under `apps/web/public/assets/voxels/` render the project's CC BY 4.0 voxel atlas. Both sets are offered under CC BY 4.0 with the same attribution. Generation records are in that change's `evidence/item-icon-generation.md` and `evidence/voxel-icon-generation.md`. These files are inventory and target thumbnails; gameplay uses live 3D meshes.
 
 ## Third-party files
 
@@ -33,10 +33,10 @@ The Seedlands name and brand identity are governed separately by [TRADEMARKS.md]
 
 ## Unified pixel sources and static model sample
 
-The deterministic pixel sources in `src/client/presentation/terrain-assets.ts` and `model-material-definitions.ts`, and the actor geometry in `actor-model-definitions.ts`, are original repository-authored code covered by Apache-2.0. They replace the legacy large atlas as the source for live terrain textures. Existing generated PNG thumbnails retain their original license and provenance above.
+The deterministic pixel sources in `apps/web/src/client/presentation/terrain-assets.ts` and `model-material-definitions.ts`, and the actor geometry in `actor-model-definitions.ts`, are original repository-authored code covered by Apache-2.0. They replace the legacy large atlas as the source for live terrain textures. Existing generated PNG thumbnails retain their original license and provenance above.
 
-`public/assets/samples/static-crate.glb` is an original static cube-and-band mesh produced by the repository's `changes/2026-09-08-unified-visual-assets/e2e/model-fixture.ts`, without external media or Blender. It is offered under Apache-2.0. Exported user GLB files retain their own original provenance and licensing; importing a file does not relicense it.
+`apps/web/public/assets/samples/static-crate.glb` is an original static cube-and-band mesh produced by the repository's `changes/2026-09-08-unified-visual-assets/e2e/model-fixture.ts`, without external media or Blender. It is offered under Apache-2.0. Exported user GLB files retain their own original provenance and licensing; importing a file does not relicense it.
 
 ## Appearance center generated assets
 
-`public/assets/item-thumbnails/*.png` are 512×512 PlayCanvas renders of repository-authored model and pixel sources, generated with `scripts/assets/render-item-thumbnails.mjs`. `public/assets/samples/brass-trail-lantern.glb` is generated by `scripts/assets/generate-brass-trail-lantern.py` using Blender, with embedded original procedural textures. Both are offered under Apache-2.0 and contain no third-party media. The Blender recipe and reproduction contract are in [Blender asset production](docs/blender-asset-production.md). Legacy media listed above retain their existing licenses.
+`apps/web/public/assets/item-thumbnails/*.png` are 512×512 PlayCanvas renders of repository-authored model and pixel sources, generated with `scripts/assets/render-item-thumbnails.mjs`. `apps/web/public/assets/samples/brass-trail-lantern.glb` is generated by `scripts/assets/generate-brass-trail-lantern.py` using Blender, with embedded original procedural textures. Both are offered under Apache-2.0 and contain no third-party media. The Blender recipe and reproduction contract are in [Blender asset production](docs/blender-asset-production.md). Legacy media listed above retain their existing licenses.

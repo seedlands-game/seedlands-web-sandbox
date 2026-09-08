@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "id": "node-monorepo-baseline-review",
+  "initiatedBy": "agent",
+  "role": "常规浏览器回归独立评审者",
+  "workType": "validation",
+  "goal": "独立评审新增TS fallback需求用例进入常规Chromium回归的长期价值、重复度、确定性、成本与维护负担；仅给结论不改源码。",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/docs/development-governance.md",
+      "purpose": "Sol/xhigh基线评审规则"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-node-monorepo/e2e/web-package-runtime.spec.ts",
+      "purpose": "唯一新增浏览器用例"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/package.json",
+      "purpose": "常规回归执行入口"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/tmp/seedlands-monorepo"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills",
+      "/tmp"
+    ],
+    "nonGoals": [
+      "不修改游戏规则、存档、wire 格式或增加远端可玩",
+      "不合并 PR，不部署远端，不购买或重置额度",
+      "不读取 .env 或密钥；不修改其他 worktree",
+      "不修改生产代码、测试期望或历史证据，不暂存/commit，不重放无关 benchmark",
+      "不重复已有冻结 HEAD 的完整测试，除非来源不匹配、发现缺口或出现新失败"
+    ]
+  },
+  "outputs": [
+    "/tmp/seedlands-monorepo/baseline-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "xhigh",
+    "routeReason": "docs/development-governance.md要求基线提炼由实施者之外的Sol/xhigh独立评审。"
+  },
+  "acceptance": [
+    {
+      "id": "review",
+      "check": "冻结47f3ad7，实读新用例、harness入口与已有default覆盖，评价价值/重复/确定性/成本/维护，明确通过或可执行阻塞项。",
+      "evidence": "独立评审报告"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 1,
+    "maxAgentHours": 0.25
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-node-monorepo/contracts/root.json",
+    "sha256": "d6bdadc46b3b5e162df9c130597e011e7c895685e06d8b029adfdec29bbbb914"
+  },
+  "resources": {
+    "exclusiveGroup": "seedlands-monorepo-baseline-readonly"
+  },
+  "escalation": [
+    "范围或平台契约需改变",
+    "同原因失败 5 次或预计超出规划时间"
+  ],
+  "reportFields": [
+    "完成状态",
+    "提交和推送",
+    "变更",
+    "验证结果",
+    "限制",
+    "剩余工作"
+  ]
+}

@@ -1,12 +1,16 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { GameServer, type ServerChunk } from '../../src/server/game-server';
-import { commitFluidCandidate } from '../../src/server/fluid/fluid-candidate-commit';
-import { FLUID_TRANSACTION_PROTOCOL_VERSION, type FluidCandidate } from '../../src/server/fluid/fluid-transaction';
-import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
+import { GameServer, type ServerChunk } from '../../packages/game-core/src/server/game-server';
+import { commitFluidCandidate } from '../../packages/game-core/src/server/fluid/fluid-candidate-commit';
+import {
+  FLUID_TRANSACTION_PROTOCOL_VERSION,
+  type FluidCandidate,
+} from '../../packages/game-core/src/server/fluid/fluid-transaction';
+import { CHUNK_SIZE, Voxel, voxelIndex } from '../../packages/game-core/src/world/voxel';
 
 describe('权威世界提交碰撞增量', () => {
   it('单格放水携带连续revision与最终voxel/fluid字节', () => {
-    const server = new GameServer({ seedText: 'collision-delta-single' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'collision-delta-single' });
     const index = voxelIndex(1, 20, 1);
     server.getChunk(0, 0, 0);
 
@@ -23,7 +27,7 @@ describe('权威世界提交碰撞增量', () => {
   });
 
   it('批量事务只发送真正改变的最终格并保持每Chunk revision边界', () => {
-    const server = new GameServer({ seedText: 'collision-delta-batch' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'collision-delta-batch' });
     server.getChunk(0, 3, 0);
     server.getChunk(1, 3, 0);
     const unchanged = server.getVoxel(2, 100, 2);

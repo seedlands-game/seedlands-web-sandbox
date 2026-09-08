@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { traceVoxelTarget } from '../../src/client/presentation/voxel-target';
+import { traceVoxelTarget } from '../../apps/web/src/client/presentation/voxel-target';
 
 describe('体素目标统一射线', () => {
   it('命中首个障碍并返回进入面外邻格', () => {

@@ -6,12 +6,12 @@ const lintSource = async (source: string, filePath: string) => {
   return eslint.lintText(source, { filePath });
 };
 
-describe.each(['src/app/authority-owner-probe.ts', 'src/client/authority-owner-probe.ts'])(
+describe.each(['apps/web/src/app/authority-owner-probe.ts', 'apps/web/src/client/authority-owner-probe.ts'])(
   '%s Authority所有权边界',
   (filePath) => {
     it('拒绝在浏览器主线程值导入或动态加载GameServer', async () => {
       const direct = await lintSource(
-        `import { GameServer } from '../server/game-server'; export const server = new GameServer({seedText:'x'});`,
+        `import { GameServer } from '../server/game-server'; export const server = new GameServer({ platform: testCorePlatform,seedText:'x'});`,
         filePath,
       );
       const dynamic = await lintSource(`export const server = import('../server/game-server');`, filePath);
@@ -42,7 +42,7 @@ describe.each(['src/app/authority-owner-probe.ts', 'src/client/authority-owner-p
       const commandExecutor = await lintSource(
         `
           import { ServerCommandExecutor } from '../server/commands/server-command-executor';
-          export const execute = (server: unknown) => new ServerCommandExecutor(server);
+          export const execute = (server: unknown) => new ServerCommandExecutor(server, { now: testCorePlatform.now });
         `,
         filePath,
       );

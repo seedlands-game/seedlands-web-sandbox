@@ -15,7 +15,7 @@ if (options.has('--help')) {
 const url = new URL(options.get('--url') ?? 'http://127.0.0.1:5173/');
 if (!['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname))
   throw new Error('Thumbnail generation requires a local Vite server.');
-const output = path.resolve(root, options.get('--output') ?? 'public/assets/item-thumbnails');
+const output = path.resolve(root, options.get('--output') ?? 'apps/web/public/assets/item-thumbnails');
 const systemChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const executablePath = process.env.SEEDLANDS_CHROME_PATH ?? (existsSync(systemChrome) ? systemChrome : undefined);
 const browser = await chromium.launch(executablePath ? { executablePath } : {});

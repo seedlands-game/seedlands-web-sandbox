@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { EntityStore } from '../../src/server/gameplay/entity-store';
-import { createPlayerState } from '../../src/server/gameplay/player-state';
-import { ItemIds } from '../../src/server/gameplay/item-registry';
+import { EntityStore } from '../../packages/game-core/src/server/gameplay/entity-store';
+import { createPlayerState } from '../../packages/game-core/src/server/gameplay/player-state';
+import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
 
 describe('entity runtime', () => {
   it('owns stable identity, lifecycle, defensive clones and spatial queries', () => {

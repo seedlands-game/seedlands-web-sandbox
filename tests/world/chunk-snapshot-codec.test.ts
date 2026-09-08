@@ -1,11 +1,12 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import {
   createStoredChunkRecord,
   decodeStoredChunkRecord,
   storedChunkRecordBytes,
   validateStoredFluid,
-} from '../../src/world/chunk-snapshot-codec';
-import { CHUNK_SIZE } from '../../src/world/voxel';
+} from '../../packages/game-core/src/world/chunk-snapshot-codec';
+import { CHUNK_SIZE } from '../../packages/game-core/src/world/voxel';
 
 const VOXEL_COUNT = CHUNK_SIZE ** 3;
 
@@ -37,7 +38,7 @@ describe('Chunk snapshot codec', () => {
     const record = createStoredChunkRecord({ ...identity(), voxels: current, proceduralVoxels: procedural });
 
     expect(record.codec).toBe('procedural-diff-v1');
-    expect(storedChunkRecordBytes(record)).toBeLessThan(512);
+    expect(storedChunkRecordBytes(record, testCorePlatform.utf8)).toBeLessThan(512);
     expect(decodeStoredChunkRecord(record, { ...identity(), proceduralVoxels: procedural })).toEqual(current);
     expect(procedural).toEqual(proceduralBefore);
     expect(current).toEqual(currentBefore);
@@ -132,7 +133,7 @@ describe('Chunk snapshot codec', () => {
         voxels: current,
         proceduralVoxels: procedural,
       });
-      recordBytes += storedChunkRecordBytes(record);
+      recordBytes += storedChunkRecordBytes(record, testCorePlatform.utf8);
       legacyJsonBytes += legacyBytes(current);
     });
 

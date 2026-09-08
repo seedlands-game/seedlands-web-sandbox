@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "node-monorepo-root",
+  "initiatedBy": "human",
+  "role": "三包迁移协调与验收负责人",
+  "workType": "design",
+  "goal": "完成已批准的 main 集成与三包 monorepo 迁移，及时保存变更并交付可审核 PR",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-node-monorepo/spec.md",
+      "purpose": "已批准范围的可执行合同"
+    }
+  ],
+  "scope": {
+    "writePaths": ["/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation", "/tmp/seedlands-monorepo"],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills",
+      "/tmp"
+    ],
+    "nonGoals": [
+      "不修改游戏规则、存档、wire 格式或增加远端可玩",
+      "不合并 PR，不部署远端，不购买或重置额度",
+      "不读取 .env 或密钥；不修改其他 worktree"
+    ]
+  },
+  "outputs": ["三包实现、验证证据、持续提交与 PR"],
+  "execution": {
+    "form": "current-agent",
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "done",
+      "check": "spec 各阶段通过且 PR 最新必要 CI 通过",
+      "evidence": "delivery.md 与 CI"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 5,
+    "maxAgentHours": 20
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": true,
+    "delegate": true
+  },
+  "parent": null,
+  "resources": {
+    "exclusiveGroup": "seedlands-monorepo-validation"
+  },
+  "escalation": ["范围或平台契约需改变", "同原因失败 5 次或预计超出规划时间"],
+  "reportFields": ["完成状态", "提交和推送", "变更", "验证结果", "限制", "剩余工作"]
+}

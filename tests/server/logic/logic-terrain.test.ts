@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { LogicTerrain, terrainOccupancyIndex, validateTerrainWindows } from '../../../src/server/logic/logic-terrain';
-import type { LogicPosition, TerrainWindow } from '../../../src/server/logic/logic-protocol';
+import {
+  LogicTerrain,
+  terrainOccupancyIndex,
+  validateTerrainWindows,
+} from '../../../packages/game-core/src/server/logic/logic-terrain';
+import type { LogicPosition, TerrainWindow } from '../../../packages/game-core/src/server/logic/logic-protocol';
 
 const window = (key: string, origin: LogicPosition, size: LogicPosition): TerrainWindow => ({
   key,

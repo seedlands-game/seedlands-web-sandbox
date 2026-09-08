@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BrowserAuthorityClient, type AuthorityWorkerPort } from '../../src/client/authority/browser-authority-client';
-import type { AuthorityReady, AuthorityResponse } from '../../src/worker/authority-worker-protocol';
+import {
+  BrowserAuthorityClient,
+  type AuthorityWorkerPort,
+} from '../../apps/web/src/client/authority/browser-authority-client';
+import type { AuthorityReady, AuthorityResponse } from '../../packages/game-core/src/compute/authority-worker-protocol';
 
 class FakeAuthorityWorker implements AuthorityWorkerPort {
   onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null = null;

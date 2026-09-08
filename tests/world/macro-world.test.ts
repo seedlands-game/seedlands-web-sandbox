@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { CHUNK_SIZE, floorDiv, normalizeSeed } from '../../src/world/voxel';
-import { macroAt, macroSignature, riverDescriptorsNear } from '../../src/world/macro-world';
+import { CHUNK_SIZE, floorDiv, normalizeSeed } from '../../packages/game-core/src/world/voxel';
+import { macroAt, macroSignature, riverDescriptorsNear } from '../../packages/game-core/src/world/macro-world';
 
 const seed = normalizeSeed('macro-world-vitest');
 

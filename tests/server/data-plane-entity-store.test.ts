@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { EntityStore } from '../../src/server/gameplay/entity-store';
+import { EntityStore } from '../../packages/game-core/src/server/gameplay/entity-store';
 
 describe('EntityStore 数据平面写入', () => {
   it('公开 update 复用内部写入而不经过会返回副本的 move', () => {

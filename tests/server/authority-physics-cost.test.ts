@@ -1,7 +1,10 @@
 import { expect, it } from 'vitest';
-import { bodyConfigFor } from '../../src/physics/body-registry';
-import { AuthoritySession, type AuthorityEntity } from '../../src/server/authority/authority-session';
-import { Voxel } from '../../src/world/voxel';
+import { bodyConfigFor } from '../../packages/game-core/src/physics/body-registry';
+import {
+  AuthoritySession,
+  type AuthorityEntity,
+} from '../../packages/game-core/src/server/authority/authority-session';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 const create = (measureNow?: () => number) => {
   let player: AuthorityEntity = { id: 'player', type: 'player', position: [0.5, 0, 0.5] };

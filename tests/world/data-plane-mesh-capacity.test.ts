@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { batchMeshData, compactMeshData, type MeshData } from '../../src/world/mesh';
-import { batchCompactMeshData } from '../../src/world/mesh-batching';
+import { batchMeshData, compactMeshData, type MeshData } from '../../packages/game-core/src/world/mesh';
+import { batchCompactMeshData } from '../../packages/game-core/src/world/mesh-batching';
 
 const oversizedPart = (vertexCount: number, indexCount: number): MeshData => ({
   material: 1,

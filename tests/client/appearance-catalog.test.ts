@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { builtinAssets } from '../../src/client/presentation/asset-catalog';
-import { appearanceObjects, assetCategory, materialSlots } from '../../src/client/presentation/appearance-catalog';
+import { builtinAssets } from '../../apps/web/src/client/presentation/asset-catalog';
+import {
+  appearanceObjects,
+  assetCategory,
+  materialSlots,
+} from '../../apps/web/src/client/presentation/appearance-catalog';
 
 describe('appearance navigation', () => {
   it('projects every source into semantic resource categories without changing identities', () => {

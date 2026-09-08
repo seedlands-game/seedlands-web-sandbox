@@ -1,27 +1,20 @@
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 // Run after both production builds. The runner checks this stamp and all served bytes.
 for (const root of [resolve('.'), '/tmp/seedlands-adoption-baseline']) {
+  const monorepo = existsSync(resolve(root, 'apps/web/package.json'));
   const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+  const sourcePaths = monorepo
+    ? ['apps/web', 'packages/game-core', 'crates', 'package.json', 'pnpm-workspace.yaml', 'tsconfig.base.json']
+    : ['src', 'crates', 'vite.config.ts', 'package.json'];
   const files = [
     ...new Set(
-      execFileSync(
-        'git',
-        [
-          'ls-files',
-          '-co',
-          '--exclude-standard',
-          '--',
-          'src',
-          'crates',
-          'vite.config.ts',
-          'package.json',
-          'pnpm-lock.yaml',
-        ],
-        { cwd: root, encoding: 'utf8' },
-      )
+      execFileSync('git', ['ls-files', '-co', '--exclude-standard', '--', ...sourcePaths, 'pnpm-lock.yaml'], {
+        cwd: root,
+        encoding: 'utf8',
+      })
         .trim()
         .split('\n'),
     ),
@@ -38,6 +31,7 @@ for (const root of [resolve('.'), '/tmp/seedlands-adoption-baseline']) {
       )
       .update('\0');
   const record = { sourceSha, productionSourceHash: hash.digest('hex'), stampedAt: new Date().toISOString() };
-  writeFileSync(resolve(root, 'dist/adoption-source.json'), JSON.stringify(record, null, 2) + '\n');
-  process.stdout.write(JSON.stringify({ root, ...record }) + '\n');
+  const dist = resolve(root, monorepo ? 'apps/web/dist' : 'dist');
+  writeFileSync(resolve(dist, 'adoption-source.json'), JSON.stringify(record, null, 2) + '\n');
+  process.stdout.write(JSON.stringify({ root, dist, ...record }) + '\n');
 }

@@ -1,8 +1,8 @@
 import * as pc from 'playcanvas';
 import { describe, expect, it, vi } from 'vitest';
-import { FirstPersonViewmodel } from '../../src/app/player/first-person-viewmodel';
+import { FirstPersonViewmodel } from '../../apps/web/src/app/player/first-person-viewmodel';
 
-vi.mock('../../src/app/gameplay/gameplay-model-assets', () => ({
+vi.mock('../../apps/web/src/app/gameplay/gameplay-model-assets', () => ({
   acquireGameplayModelAssets: () => ({
     release: vi.fn(),
     assets: {

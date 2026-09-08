@@ -1,0 +1,468 @@
+{
+  "status": "PASS",
+  "scope": {
+    "transport": "plain ws:// only",
+    "host": "127.0.0.1 only",
+    "purpose": "loopback function probe; no timing or head-of-line conclusion",
+    "dependencyInstall": "NOT_PERFORMED",
+    "tls": "NOT_USED",
+    "wssTrustedCertificate": "NOT_COLLECTED",
+    "publicNetwork": "NOT_COLLECTED",
+    "systemTrustChanged": false,
+    "ignoreCertificateErrors": false
+  },
+  "startedAt": "2026-09-07T05:26:21.870Z",
+  "runtime": {
+    "node": "v22.23.2",
+    "nodePath": "/private/tmp/seedlands-node-22/node-v22.23.2-darwin-arm64/bin/node",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "dependencies": {
+    "probe": {
+      "path": "/private/tmp/seedlands-websocket-loopback-N1-20260907T052456Z/ws-loopback-probe.mjs",
+      "sha256": "ac6f7229494b43ad181741ec6a3425427a07a9d9336cbf4a13bc13f9bc385454"
+    },
+    "wsPackage": {
+      "path": "/Users/chlorinec/.codex/worktrees/node-dedicated-20260906/voxel-sandbox-foundation/node_modules/.pnpm/ws@8.21.3/node_modules/ws/package.json",
+      "sha256": "a56a3fd55945a3ce177e3ca165dafae6f7eb03b7aefd58c092ac723d5741a6fb"
+    },
+    "playwrightPackage": {
+      "path": "/Users/chlorinec/.codex/worktrees/node-dedicated-20260906/voxel-sandbox-foundation/node_modules/.pnpm/playwright@1.62.1/node_modules/playwright/package.json",
+      "sha256": "ca170ec143a88ed3043ac953eb3b2377b2b97304104f4e1e23316684ce2c35af"
+    },
+    "ws": {
+      "version": "8.21.3",
+      "moduleEntry": "/Users/chlorinec/.codex/worktrees/node-dedicated-20260906/voxel-sandbox-foundation/node_modules/.pnpm/ws@8.21.3/node_modules/ws/index.js"
+    },
+    "playwright": {
+      "version": "1.62.1",
+      "moduleEntry": "/Users/chlorinec/.codex/worktrees/node-dedicated-20260906/voxel-sandbox-foundation/node_modules/.pnpm/playwright@1.62.1/node_modules/playwright/index.js"
+    }
+  },
+  "payloads": {
+    "binary8192": {
+      "bytes": 8192,
+      "sha256": "1f5a16c4456f34c5459e4e66d8650d4dbb6b298810d0c21cef6571db21d69c81"
+    },
+    "controls": [
+      {
+        "bytes": 7,
+        "sha256": "d1aad541b498e11b8414b08bdaf63c2bcb8a77047288e5002cd28aa2d7f08ce1"
+      },
+      {
+        "bytes": 9,
+        "sha256": "f95a1db21b9c407886a7ac5a29c709208fd1903699d17d98130983781fc7a147"
+      }
+    ]
+  },
+  "engines": [
+    {
+      "engine": "Chrome",
+      "browserVersion": "152.0.7977.76",
+      "status": "PASS",
+      "t0": {
+        "closeCode": 1000,
+        "clientFrames": 3,
+        "serverFrames": 3
+      },
+      "t1": {
+        "realtime": {
+          "closeCode": 1000,
+          "frames": 2
+        },
+        "bulk": {
+          "closeCode": 1000,
+          "frames": 1
+        },
+        "distinctConnections": true,
+        "note": "功能回显与关闭验证；未测量或证明 TCP 队头阻塞收益。"
+      },
+      "connections": [
+        {
+          "id": 1,
+          "path": "/t0",
+          "openedAt": "2026-09-07T05:26:22.311Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "1f5a16c4456f34c5459e4e66d8650d4dbb6b298810d0c21cef6571db21d69c81"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 1,
+              "bytes": 7,
+              "sha256": "d1aad541b498e11b8414b08bdaf63c2bcb8a77047288e5002cd28aa2d7f08ce1"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 2,
+              "bytes": 9,
+              "sha256": "f95a1db21b9c407886a7ac5a29c709208fd1903699d17d98130983781fc7a147"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "9dcc12cc7515847cb77a99a66f1db4a51184fed36d32ad334314df947c803844"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 1,
+              "bytes": 8,
+              "sha256": "526085344fec09e2debed32f88b7e62075da22b8ce1a930a8ab0cd2fc4a8e59d"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 2,
+              "bytes": 10,
+              "sha256": "83640e75f77e0f6071911ce47a5a8dc8ffac57991c2ea64b8960d2fc0ae8d5fe"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "t0 complete",
+            "at": "2026-09-07T05:26:22.316Z"
+          },
+          "t0Phase": "complete",
+          "clientIndex": 3,
+          "serverIndex": 3
+        },
+        {
+          "id": 2,
+          "path": "/realtime",
+          "openedAt": "2026-09-07T05:26:22.322Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 7,
+              "sha256": "d1aad541b498e11b8414b08bdaf63c2bcb8a77047288e5002cd28aa2d7f08ce1"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 1,
+              "bytes": 9,
+              "sha256": "f95a1db21b9c407886a7ac5a29c709208fd1903699d17d98130983781fc7a147"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "realtime complete",
+            "at": "2026-09-07T05:26:22.322Z"
+          },
+          "t0Phase": null,
+          "clientIndex": 0,
+          "serverIndex": 0
+        },
+        {
+          "id": 3,
+          "path": "/bulk",
+          "openedAt": "2026-09-07T05:26:22.337Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "1f5a16c4456f34c5459e4e66d8650d4dbb6b298810d0c21cef6571db21d69c81"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "bulk complete",
+            "at": "2026-09-07T05:26:22.339Z"
+          },
+          "t0Phase": null,
+          "clientIndex": 0,
+          "serverIndex": 0
+        }
+      ]
+    },
+    {
+      "engine": "Firefox",
+      "browserVersion": "153.0",
+      "status": "PASS",
+      "t0": {
+        "closeCode": 1000,
+        "clientFrames": 3,
+        "serverFrames": 3
+      },
+      "t1": {
+        "realtime": {
+          "closeCode": 1000,
+          "frames": 2
+        },
+        "bulk": {
+          "closeCode": 1000,
+          "frames": 1
+        },
+        "distinctConnections": true,
+        "note": "功能回显与关闭验证；未测量或证明 TCP 队头阻塞收益。"
+      },
+      "connections": [
+        {
+          "id": 4,
+          "path": "/t0",
+          "openedAt": "2026-09-07T05:26:23.480Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "1f5a16c4456f34c5459e4e66d8650d4dbb6b298810d0c21cef6571db21d69c81"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 1,
+              "bytes": 7,
+              "sha256": "d1aad541b498e11b8414b08bdaf63c2bcb8a77047288e5002cd28aa2d7f08ce1"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 2,
+              "bytes": 9,
+              "sha256": "f95a1db21b9c407886a7ac5a29c709208fd1903699d17d98130983781fc7a147"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "9dcc12cc7515847cb77a99a66f1db4a51184fed36d32ad334314df947c803844"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 1,
+              "bytes": 8,
+              "sha256": "526085344fec09e2debed32f88b7e62075da22b8ce1a930a8ab0cd2fc4a8e59d"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 2,
+              "bytes": 10,
+              "sha256": "83640e75f77e0f6071911ce47a5a8dc8ffac57991c2ea64b8960d2fc0ae8d5fe"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "t0 complete",
+            "at": "2026-09-07T05:26:23.511Z"
+          },
+          "t0Phase": "complete",
+          "clientIndex": 3,
+          "serverIndex": 3
+        },
+        {
+          "id": 5,
+          "path": "/realtime",
+          "openedAt": "2026-09-07T05:26:23.579Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 7,
+              "sha256": "d1aad541b498e11b8414b08bdaf63c2bcb8a77047288e5002cd28aa2d7f08ce1"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 1,
+              "bytes": 9,
+              "sha256": "f95a1db21b9c407886a7ac5a29c709208fd1903699d17d98130983781fc7a147"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "realtime complete",
+            "at": "2026-09-07T05:26:23.586Z"
+          },
+          "t0Phase": null,
+          "clientIndex": 0,
+          "serverIndex": 0
+        },
+        {
+          "id": 6,
+          "path": "/bulk",
+          "openedAt": "2026-09-07T05:26:23.584Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "1f5a16c4456f34c5459e4e66d8650d4dbb6b298810d0c21cef6571db21d69c81"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "bulk complete",
+            "at": "2026-09-07T05:26:23.591Z"
+          },
+          "t0Phase": null,
+          "clientIndex": 0,
+          "serverIndex": 0
+        }
+      ]
+    },
+    {
+      "engine": "Playwright WebKit",
+      "browserVersion": "26.5",
+      "status": "PASS",
+      "t0": {
+        "closeCode": 1000,
+        "clientFrames": 3,
+        "serverFrames": 3
+      },
+      "t1": {
+        "realtime": {
+          "closeCode": 1000,
+          "frames": 2
+        },
+        "bulk": {
+          "closeCode": 1000,
+          "frames": 1
+        },
+        "distinctConnections": true,
+        "note": "功能回显与关闭验证；未测量或证明 TCP 队头阻塞收益。"
+      },
+      "connections": [
+        {
+          "id": 7,
+          "path": "/t0",
+          "openedAt": "2026-09-07T05:26:24.515Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "1f5a16c4456f34c5459e4e66d8650d4dbb6b298810d0c21cef6571db21d69c81"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 1,
+              "bytes": 7,
+              "sha256": "d1aad541b498e11b8414b08bdaf63c2bcb8a77047288e5002cd28aa2d7f08ce1"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 2,
+              "bytes": 9,
+              "sha256": "f95a1db21b9c407886a7ac5a29c709208fd1903699d17d98130983781fc7a147"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "9dcc12cc7515847cb77a99a66f1db4a51184fed36d32ad334314df947c803844"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 1,
+              "bytes": 8,
+              "sha256": "526085344fec09e2debed32f88b7e62075da22b8ce1a930a8ab0cd2fc4a8e59d"
+            },
+            {
+              "direction": "server-to-client-to-server",
+              "index": 2,
+              "bytes": 10,
+              "sha256": "83640e75f77e0f6071911ce47a5a8dc8ffac57991c2ea64b8960d2fc0ae8d5fe"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "t0 complete",
+            "at": "2026-09-07T05:26:24.525Z"
+          },
+          "t0Phase": "complete",
+          "clientIndex": 3,
+          "serverIndex": 3
+        },
+        {
+          "id": 8,
+          "path": "/realtime",
+          "openedAt": "2026-09-07T05:26:24.529Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 7,
+              "sha256": "d1aad541b498e11b8414b08bdaf63c2bcb8a77047288e5002cd28aa2d7f08ce1"
+            },
+            {
+              "direction": "client-to-server",
+              "index": 1,
+              "bytes": 9,
+              "sha256": "f95a1db21b9c407886a7ac5a29c709208fd1903699d17d98130983781fc7a147"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "realtime complete",
+            "at": "2026-09-07T05:26:24.530Z"
+          },
+          "t0Phase": null,
+          "clientIndex": 0,
+          "serverIndex": 0
+        },
+        {
+          "id": 9,
+          "path": "/bulk",
+          "openedAt": "2026-09-07T05:26:24.529Z",
+          "received": [
+            {
+              "direction": "client-to-server",
+              "index": 0,
+              "bytes": 8192,
+              "sha256": "1f5a16c4456f34c5459e4e66d8650d4dbb6b298810d0c21cef6571db21d69c81"
+            }
+          ],
+          "closed": {
+            "code": 1000,
+            "reason": "bulk complete",
+            "at": "2026-09-07T05:26:24.531Z"
+          },
+          "t0Phase": null,
+          "clientIndex": 0,
+          "serverIndex": 0
+        }
+      ]
+    }
+  ],
+  "listener": {
+    "host": "127.0.0.1",
+    "perMessageDeflate": false,
+    "port": 63858
+  },
+  "cleanup": {
+    "browsersClosed": ["Chrome", "Firefox", "Playwright WebKit"],
+    "listenerClosed": true,
+    "remainingClients": 0
+  },
+  "finishedAt": "2026-09-07T05:26:24.541Z",
+  "evidenceVersion": 1,
+  "source": {
+    "worktreeHead": "c4e2f16eb9123852843220b609c0a619f98b0d1b",
+    "probeSourceSha256": "ac6f7229494b43ad181741ec6a3425427a07a9d9336cbf4a13bc13f9bc385454",
+    "probeDirectory": "/tmp/seedlands-websocket-loopback-N1-20260907T052456Z",
+    "command": "/tmp/seedlands-node-22/node-v22.23.2-darwin-arm64/bin/node /tmp/seedlands-websocket-loopback-N1-20260907T052456Z/ws-loopback-probe.mjs"
+  },
+  "attemptHistory": [
+    {
+      "stage": "initial local harness import",
+      "result": "CORRECTED_BEFORE_NETWORK_ACTIVITY",
+      "error": "TypeError: WebSocketServer is not a constructor",
+      "cause": "错误地将 ws/package.json 当作模块入口加载；随后改为以 package.json 为解析基准 require('ws')。",
+      "listenerCreated": false,
+      "browserLaunched": false
+    }
+  ],
+  "assertions": {
+    "t0": "每个引擎各开一条 /t0：客户端发送 8192 字节二进制和两个控制二进制帧，服务端逐字节回显；随后服务端发送不同的三帧，浏览器逐字节回显给服务端。",
+    "t1": "每个引擎并行开启 /realtime（两个控制帧）与 /bulk（8192 字节）两条独立 WebSocket；各自逐字节回显并以 1000 关闭。",
+    "cleanup": "每个浏览器 finally 关闭；最终 WebSocketServer 与 HTTP listener 关闭，remainingClients 为 0。"
+  },
+  "limitations": [
+    "仅验证普通 ws://127.0.0.1 短时功能；没有 TLS、WSS、可信证书、Origin/认证或公网/LAN/代理路径。",
+    "T1 仅证明两条独立连接可同时建立、回显和关闭；没有注入丢包、拥塞或大块竞争，不能推断 TCP 队头阻塞缓解、时延或吞吐收益。",
+    "Playwright WebKit 26.5 是 WebKit 测试引擎，不等同 Safari 应用或 iOS 设备。"
+  ]
+}

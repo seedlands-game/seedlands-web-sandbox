@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createStoredChunkRecord, crc32Bytes } from '../../src/world/chunk-snapshot-codec';
+import { createStoredChunkRecord, crc32Bytes } from '../../packages/game-core/src/world/chunk-snapshot-codec';
 
 const voxelCount = 32 ** 3;
 const identity = {

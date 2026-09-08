@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BrowserComputeRuntime } from '../../src/client/compute/browser-compute-runtime';
-import type { ComputeWorkerPort } from '../../src/client/compute/compute-worker-pool';
-import type { ComputeLane } from '../../src/runtime/compute-task-queue';
-import { CHUNK_SIZE } from '../../src/world/voxel';
+import { BrowserComputeRuntime } from '../../apps/web/src/client/compute/browser-compute-runtime';
+import type { ComputeWorkerPort } from '../../apps/web/src/client/compute/compute-worker-pool';
+import type { ComputeLane } from '../../packages/game-core/src/runtime/compute-task-queue';
+import { CHUNK_SIZE } from '../../packages/game-core/src/world/voxel';
 
 class FakeWorker implements ComputeWorkerPort {
   onmessage: ((event: MessageEvent<unknown>) => void) | null = null;

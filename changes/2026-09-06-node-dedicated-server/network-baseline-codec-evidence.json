@@ -1,0 +1,262 @@
+{
+  "status": "BASELINE_REFERENCE_CODEC_FUNCTIONAL_PASS",
+  "wireStatus": "not-adopted",
+  "timing": "NOT_COLLECTED",
+  "execution": {
+    "node": "/tmp/seedlands-node-22/node-v22.23.2-darwin-arm64/bin/node",
+    "version": "v22.23.2",
+    "captureMode": "explicit /tmp generator invocation; recheck test is read-only",
+    "generation": "v2: v1 preserved; C0 reliable-envelope boundary repaired"
+  },
+  "inputPins": {
+    "derivedDirectory": "/tmp/seedlands-network-baseline-reference-projected-v1-r2",
+    "derivedManifestSha256": "9d590ded6a1b050f9b7c42cdf3638ca957509f888a2e89de909ee264b6f85dfb",
+    "derivedFramesSha256": "4320c31fd0c46b58c4bf158f4d94cd59991f9f810abd8a09dc3ada3fbb0b766d",
+    "rawManifestSha256": "0d2959e728f73a30efec8c9bac0f58269b9d0b51f3c73c23b0640fbbb1b7b0ad",
+    "rawFramesSha256": "2d3a0a9fd1670c087367fbb1c9330eda9e2484d9e7facd665892c6128e5f3b91",
+    "descriptors": 3,
+    "pages": 330,
+    "entryCounts": [27, 27, 1],
+    "pageArrivalCounts": [162, 162, 6],
+    "rawPageBytes": 5406720,
+    "corpusReferencePagePayloadBytes": 16384,
+    "codecPagePayloadBytesMax": 1048576,
+    "reliableFrameBytesMax": 1048576
+  },
+  "prototype": {
+    "directory": "/tmp/seedlands-network-probe-codec-baseline-reference-v2",
+    "sourceSha256": {
+      "baseline-reference-codecs.mjs": "7d7c009abf0beb28d452ca7e15851f5feff1693b663af866af52768a9186dca0",
+      "reference-fixed-codecs.mjs": "eeca4d0064eb9696f4c4ef169f63d0b2ba1dd8c3c30a3913d810134290ef46b6",
+      "c0-raw-reference.mjs": "9aff0dfefc997c415b9ed21d1392a2c982849f5c10607c75fc88551400c49de4",
+      "json-wire-preflight.mjs": "1dfca396cd1310e88c149508fc9e7629dfa881ec80cf44774d9bfc11c4ffa338",
+      "json-preserving-negative-zero.mjs": "9e41c9c3f371b6b075df51a0474f2e920c8d7a9dbfcd2770b2f70982d786ab10",
+      "reference-schema-validation.mjs": "bf8b05076bfe670ab94f8182bc94a53369aaf514aed04de52556bed8f62e8b9f",
+      "codec-application-pipeline.mjs": "48e588f37a2f1534af18051eb3298190dae3d6703247054e336117952b8d041e",
+      "protobuf-wire-preflight.mjs": "a97f92c58bee71adb82a59c7aee7be2c4ae1b0b9f63414232d7c390dd4d0a49a",
+      "fixed-schema-reader.mjs": "12dc626a8f106b19b55978b5ae64b13db820cdcc804523af7c0ae42271b051b9",
+      "fixed-schema-receipt.mjs": "c5ecbd168ba8006a3ef17d1ddb8cd684f4fda52d2cec5e5509798af17c00adb9",
+      "action-request-reference.mjs": "2e3d79f65e06612bc8dd00e643d50be0817a782f8d465610a0724fa82f4351b9",
+      "reference-directional-codecs.mjs": "cdae1cd56e77761297206563aad9a62eb3f0f011ce51cc0a9aaf855af2613c4f",
+      "gameplay-consumer-codecs.mjs": "c7419ce324d0d9aec75d01dd9cba842baa2c713617978d46bbcfad3ec7cdd9fa",
+      "presentation-codecs.mjs": "0eb96ce1ffff028850ee9701c5223fc44731bc150a1c9be7efd33a7f1985526c",
+      "package.json": "a140b77dd3e9348991c7337cf8d0b9122ef66854888348b26aaf5c4a8dfb1fb5",
+      "baseline-codec-validate.mjs": "313932bcc481a80915de1252d5f3d2f42580e3aeccede32a0b7a81e68847c627"
+    },
+    "validationJsonSha256": "7830c8ab260244672260a4c6f13bab700320468ed1f1ad4d6a461f49d42a3ed3",
+    "decodedArtifactSha256": "e20c353c84f5f710c563fb396163ea5efbd92b3a913345739b4ebc36032eafd2",
+    "dependencyLock": "NOT_CAPTURED: v2 copied existing local prototype metadata, adds no dependency, and has no separate /tmp lockfile; module closure hashes below are not a claim about npm dependency source locking."
+  },
+  "entrypoints": {
+    "C0": "c0-raw-reference.mjs encode/decode then codec-application-pipeline validation",
+    "C1": "reference-fixed-codecs.mjs c1 with baseline-reference-codecs.mjs",
+    "C2": "reference-fixed-codecs.mjs c2 with direct Proto messages and protobuf-wire-preflight.mjs",
+    "pipeline": "codec-application-pipeline.mjs"
+  },
+  "equality": {
+    "perCodecRecords": 333,
+    "descriptorRecords": 3,
+    "pageRecords": 330,
+    "record": "metadata structural equality plus Uint8Array byte equality; decoded record is independently owned",
+    "semanticShape": "mesh exactly 27 entries; collision-resync exactly 1; C1/C2 actual 28-entry frames reject before consumer; C0 parses then shared pipeline validation rejects before consumer",
+    "pageDigest": "individual page has no public digest; descriptor transfer digest is verified after complete reassembly",
+    "synthetic32KiB": {
+      "status": "每候选四条（descriptor + 3 pages）强等价；同一 32 KiB descriptor 由生产 reference reassembler 完整重组",
+      "recordsPerCodec": 4,
+      "pagePayloadBytes": 32768
+    }
+  },
+  "bytes": {
+    "rawPageBytes": 5406720,
+    "descriptorPageBundle": {
+      "C0": {
+        "descriptorWireBytes": 31629,
+        "pageWireBytes": 5577884,
+        "pageWireOverheadBytes": 171164,
+        "descriptorMetadataUtf8Bytes": 31374,
+        "pageMetadataUtf8Bytes": 143774,
+        "bundles": {
+          "0": {
+            "descriptorWireBytes": 15239,
+            "pageWireBytes": 2738088,
+            "pageWireOverheadBytes": 83880,
+            "descriptorMetadataUtf8Bytes": 15154,
+            "pageMetadataUtf8Bytes": 70434,
+            "rawPageBytes": 2654208,
+            "bundleWireBytes": 2753327,
+            "bundleWireOverheadBytes": 99119
+          },
+          "1": {
+            "descriptorWireBytes": 15258,
+            "pageWireBytes": 2738304,
+            "pageWireOverheadBytes": 84096,
+            "descriptorMetadataUtf8Bytes": 15173,
+            "pageMetadataUtf8Bytes": 70650,
+            "rawPageBytes": 2654208,
+            "bundleWireBytes": 2753562,
+            "bundleWireOverheadBytes": 99354
+          },
+          "2": {
+            "descriptorWireBytes": 1132,
+            "pageWireBytes": 101492,
+            "pageWireOverheadBytes": 3188,
+            "descriptorMetadataUtf8Bytes": 1047,
+            "pageMetadataUtf8Bytes": 2690,
+            "rawPageBytes": 98304,
+            "bundleWireBytes": 102624,
+            "bundleWireOverheadBytes": 4320
+          }
+        }
+      },
+      "C1": {
+        "descriptorWireBytes": 12634,
+        "pageWireBytes": 5477790,
+        "pageWireOverheadBytes": 71070,
+        "descriptorMetadataUtf8Bytes": 31374,
+        "pageMetadataUtf8Bytes": 143774,
+        "bundles": {
+          "0": {
+            "descriptorWireBytes": 6097,
+            "pageWireBytes": 2689038,
+            "pageWireOverheadBytes": 34830,
+            "descriptorMetadataUtf8Bytes": 15154,
+            "pageMetadataUtf8Bytes": 70434,
+            "rawPageBytes": 2654208,
+            "bundleWireBytes": 2695135,
+            "bundleWireOverheadBytes": 40927
+          },
+          "1": {
+            "descriptorWireBytes": 6098,
+            "pageWireBytes": 2689200,
+            "pageWireOverheadBytes": 34992,
+            "descriptorMetadataUtf8Bytes": 15173,
+            "pageMetadataUtf8Bytes": 70650,
+            "rawPageBytes": 2654208,
+            "bundleWireBytes": 2695298,
+            "bundleWireOverheadBytes": 41090
+          },
+          "2": {
+            "descriptorWireBytes": 439,
+            "pageWireBytes": 99552,
+            "pageWireOverheadBytes": 1248,
+            "descriptorMetadataUtf8Bytes": 1047,
+            "pageMetadataUtf8Bytes": 2690,
+            "rawPageBytes": 98304,
+            "bundleWireBytes": 99991,
+            "bundleWireOverheadBytes": 1687
+          }
+        }
+      },
+      "C2": {
+        "descriptorWireBytes": 11187,
+        "pageWireBytes": 5463910,
+        "pageWireOverheadBytes": 57190,
+        "descriptorMetadataUtf8Bytes": 31374,
+        "pageMetadataUtf8Bytes": 143774,
+        "bundles": {
+          "0": {
+            "descriptorWireBytes": 5409,
+            "pageWireBytes": 2682052,
+            "pageWireOverheadBytes": 27844,
+            "descriptorMetadataUtf8Bytes": 15154,
+            "pageMetadataUtf8Bytes": 70434,
+            "rawPageBytes": 2654208,
+            "bundleWireBytes": 2687461,
+            "bundleWireOverheadBytes": 33253
+          },
+          "1": {
+            "descriptorWireBytes": 5418,
+            "pageWireBytes": 2682546,
+            "pageWireOverheadBytes": 28338,
+            "descriptorMetadataUtf8Bytes": 15173,
+            "pageMetadataUtf8Bytes": 70650,
+            "rawPageBytes": 2654208,
+            "bundleWireBytes": 2687964,
+            "bundleWireOverheadBytes": 33756
+          },
+          "2": {
+            "descriptorWireBytes": 360,
+            "pageWireBytes": 99312,
+            "pageWireOverheadBytes": 1008,
+            "descriptorMetadataUtf8Bytes": 1047,
+            "pageMetadataUtf8Bytes": 2690,
+            "rawPageBytes": 98304,
+            "bundleWireBytes": 99672,
+            "bundleWireOverheadBytes": 1368
+          }
+        }
+      }
+    },
+    "metadataAudit": "descriptor/page canonical JSON UTF-8 audit bytes are listed per codec only as a common comparison column; they are not candidate network bytes. pageWireOverhead excludes raw page bytes; bundleWireOverhead includes descriptor plus page framing."
+  },
+  "malformed": {
+    "C0": {
+      "truncated": "truncated: payload length",
+      "unknownKind": "unknown kind: metadata envelope",
+      "duplicateCategory": "duplicate category: Duplicate JSON object member at offset 507.",
+      "reliableFrameLimit": {
+        "encoder": "raw 1 MiB payload frame: frame budget",
+        "decoder": "raw 1 MiB payload frame: frame length",
+        "payloadBytes": 1048576,
+        "wireBytes": 1049093
+      },
+      "nestedEntries": {
+        "rejection": "nested entries: Invalid reference metadata.entries",
+        "consumerCalls": 0
+      }
+    },
+    "C1": {
+      "truncated": "truncated: corrupt frame length",
+      "unknownKind": "unknown kind: unknown enum",
+      "pageBytes": "page bytes: frame size",
+      "trailingBytes": "trailing bytes: trailing",
+      "nestedEntries": "nested entries: baseline entry count"
+    },
+    "C2": {
+      "truncated": "truncated: Length-delimited value is truncated at Frame.baselinePage.",
+      "unknownOneof": {
+        "rejection": "unknown oneof: Unknown protobuf field 30 in Frame.",
+        "objectDecoderCalls": 0
+      },
+      "duplicateVersion": {
+        "rejection": "duplicate version: Duplicate singular protobuf field Frame.version.",
+        "objectDecoderCalls": 0
+      },
+      "nestedEntries": {
+        "rejection": "nested entries: Repeated field BaselineBundleDescriptor.entries exceeds its element limit.",
+        "objectDecoderCalls": 0
+      },
+      "pageBytes": {
+        "rejection": "page bytes: Protobuf frame exceeds its byte limit.",
+        "objectDecoderCalls": 0
+      }
+    }
+  },
+  "reassemblerOracle": {
+    "test": "changes/2026-09-06-node-dedicated-server/e2e/network-baseline-codec-reference.test.ts",
+    "config": "changes/2026-09-06-node-dedicated-server/e2e/vitest.baseline-codec.config.ts",
+    "mode": "read-only recheck",
+    "result": "PASS: C0/C1/C2 temporary decoded artifacts, actual arrival order, exactly one terminal reassembly per bundle, canonical/fluid raw SHA-256 equality"
+  },
+  "limits": {
+    "metadataBytesMax": 65536,
+    "reliableMessageBytesMax": 1048576,
+    "baselineTransferBytesMax": 1048576,
+    "baselineInFlightBytesMax": 16777216,
+    "descriptorEntries": {
+      "mesh": 27,
+      "collisionResync": 1
+    },
+    "notes": "16 KiB 仅冻结语料的 descriptor 分页配置；不是公开 reference DTO 或候选 wire 的硬上限。C0/C1/C2 的完整可靠 frame 都受 1 MiB 限制；C1 继续使用单有界 buffer/复用 DataView；C2 direct schema 在对象物化前限制 27 entries 与 1 MiB page bytes。",
+    "corpusReferencePagePayloadBytes": 16384,
+    "codecPagePayloadBytesMax": 1048576,
+    "c0EnvelopeMaxBytes": 1048576
+  },
+  "boundaries": [
+    "No timing, benchmark, Chrome, client remote, UI, WAN, transport fragmentation, or wire adoption evidence.",
+    "arrivalIndex, naturalIndex, and locator remain corpus audit fields only; encoded page DTO uses production reference identity plus pageIndex.",
+    "This sub-experiment does not close broader N2 corpus gaps, including the existing C0 long-ID and large world-commit/halo cases.",
+    "v1 RED preserved: C0 MAX=4 MiB accepted a raw 1 MiB page payload wrapped into a 1,049,093 B reliable frame.",
+    "v2 GREEN: C0 encoder and actual decoder reject that 1,049,093 B raw wire; this is a full-envelope limit, not only a page payload check."
+  ]
+}

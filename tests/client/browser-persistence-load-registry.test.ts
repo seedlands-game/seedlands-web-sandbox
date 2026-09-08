@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BrowserPersistenceLoadRegistry } from '../../src/client/persistence/browser-persistence-load-registry';
+import { BrowserPersistenceLoadRegistry } from '../../apps/web/src/client/persistence/browser-persistence-load-registry';
 
 describe('BrowserPersistenceLoadRegistry', () => {
   it('releases only the addressed neighborhood generation and preserves overlapping owners', () => {

@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { resolveExperimentalClientOptions } from '../../src/client/experimental-client-options';
-import { ApplicationShell } from '../../src/app/application-shell';
-import type { GlobalAudio } from '../../src/app/audio/global-audio';
-import type { Game } from '../../src/app/game';
-import type { ClientCapabilityState } from '../../src/app/client-capability-preflight';
-import { createUiBridge } from '../../src/app/ui/ui-bridge';
+import { resolveExperimentalClientOptions } from '../../apps/web/src/client/experimental-client-options';
+import { ApplicationShell } from '../../apps/web/src/app/application-shell';
+import type { GlobalAudio } from '../../apps/web/src/app/audio/global-audio';
+import type { Game } from '../../apps/web/src/app/game';
+import type { ClientCapabilityState } from '../../apps/web/src/app/client-capability-preflight';
+import { createUiBridge } from '../../apps/web/src/app/ui/ui-bridge';
 
 class MemoryStorage implements Storage {
   private readonly values = new Map<string, string>();

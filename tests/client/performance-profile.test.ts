@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PERFORMANCE_PROFILES } from '../../src/client/presentation/performance-profile';
+import { PERFORMANCE_PROFILES } from '../../apps/web/src/client/presentation/performance-profile';
 
 describe('客户端性能 profile', () => {
   it('为 balanced、diagnostic 与 benchmark 提供有界预算和诊断阈值', () => {

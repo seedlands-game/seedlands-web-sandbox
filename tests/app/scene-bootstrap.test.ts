@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as pc from 'playcanvas';
-import { createGraphicsDeviceForRenderer } from '../../src/app/scene/scene-bootstrap';
+import { createGraphicsDeviceForRenderer } from '../../apps/web/src/app/scene/scene-bootstrap';
 
 describe('scene graphics backend', () => {
   const canvas = {} as HTMLCanvasElement;

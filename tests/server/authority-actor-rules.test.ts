@@ -1,14 +1,15 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { GameServer } from '../../src/server/game-server';
-import type { LogicObservation } from '../../src/server/logic/logic-protocol';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { voxelIndex, Voxel } from '../../src/world/voxel';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import type { LogicObservation } from '../../packages/game-core/src/server/logic/logic-protocol';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { voxelIndex, Voxel } from '../../packages/game-core/src/world/voxel';
 
 const clearCell = (server: GameServer, x: number, y: number, z: number) => server.edit(x, y, z, Voxel.Air, 'test');
 
 function combatServer() {
-  const server = new GameServer({ seedText: 'authority-actor-combat' });
+  const server = new GameServer({ platform: testCorePlatform, seedText: 'authority-actor-combat' });
   server.spawnPlayer({ id: 'player', position: [2.5, 1, 0.5] });
   server.spawnAutonomousActor({ id: 'hostile', archetype: 'night-stalker', position: [0.9, 1, 0.5] });
   for (let x = 0; x <= 2; x += 1) {
@@ -76,7 +77,7 @@ describe('Authority actor rules', () => {
   });
 
   it('consumes one edible unit, satisfies hunger, and completes the action', () => {
-    const server = new GameServer({ seedText: 'authority-actor-consume' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'authority-actor-consume' });
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
     server.spawnAutonomousActor({
       id: 'grazer',
@@ -108,7 +109,7 @@ describe('Authority actor rules', () => {
   });
 
   it('completes movement from authoritative positions without moving the actor in the rules lane', () => {
-    const server = new GameServer({ seedText: 'authority-actor-movement' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'authority-actor-movement' });
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
     server.spawnAutonomousActor({ id: 'settler', archetype: 'settler', position: [1.5, 1, 0.5] });
     const target: [number, number, number] = [4.5, 1, 0.5];
@@ -126,7 +127,7 @@ describe('Authority actor rules', () => {
   });
 
   it('advances actor needs without invoking the retired navigation and perception loop', () => {
-    const server = new GameServer({ seedText: 'authority-actor-needs' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'authority-actor-needs' });
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
     server.spawnAutonomousActor({ id: 'settler', archetype: 'settler', position: [1.5, 1, 0.5] });
 
@@ -143,9 +144,10 @@ describe('Authority actor rules', () => {
   it('rejects replay of the same observed intent batch before it can consume twice', async () => {
     const observations: LogicObservation[] = [];
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'actor-replay',
       seedText: 'authority-actor-replay',
-      persistence: new MemoryGamePersistence(),
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
       initialWorldTime: 9,
       startTimeMs: 0,
       initialPlayerBodyPosition: [0.5, 1, 0.5],

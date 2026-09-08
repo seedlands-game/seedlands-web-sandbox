@@ -1,11 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
-import { MAX_OCCUPANCY_CELLS, runOccupancyKernel } from '../../src/compute/occupancy-kernel';
-import { createKernelMemory, WASM_ARENA_BYTES } from '../../src/compute/kernel-memory';
-import { Voxel } from '../../src/world/voxel';
-import { collisionBoxesForVoxel } from '../../src/world/voxel-model';
+import { MAX_OCCUPANCY_CELLS, runOccupancyKernel } from '../../apps/web/src/compute/occupancy-kernel';
+import { createKernelMemory, WASM_ARENA_BYTES } from '../../apps/web/src/compute/kernel-memory';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
+import { collisionBoxesForVoxel } from '../../packages/game-core/src/world/voxel-model';
 
-const moduleBytes = () => readFile(new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
+const moduleBytes = () =>
+  readFile(new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url));
 const expectedOccupancy = (voxels: Uint16Array) =>
   Uint8Array.from(voxels, (voxel) => Number(collisionBoxesForVoxel(voxel).length > 0));
 

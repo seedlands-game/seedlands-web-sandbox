@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { addBuiltinActorModel, addPlayerArm } from '../../src/app/gameplay/builtin-actor-models';
+import { addBuiltinActorModel, addPlayerArm } from '../../apps/web/src/app/gameplay/builtin-actor-models';
 
 const addBox = vi.fn();
 const parent = { addChild: vi.fn() };

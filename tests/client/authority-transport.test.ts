@@ -3,7 +3,7 @@ import {
   authorityInputTransitBudgetMs,
   createAuthorityTransport,
   type AuthorityTransportPort,
-} from '../../src/client/authority/authority-transport';
+} from '../../apps/web/src/client/authority/authority-transport';
 
 class RawPort implements AuthorityTransportPort {
   onmessage: ((event: MessageEvent<unknown>) => void) | null = null;

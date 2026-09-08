@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { builtinAssets } from '../../src/client/presentation/asset-catalog';
+import { builtinAssets } from '../../apps/web/src/client/presentation/asset-catalog';
 import {
   createEmptyAppearanceProject,
   resolveAppearanceAssets,
   validateAppearanceProject,
-} from '../../src/client/presentation/appearance-project';
+} from '../../apps/web/src/client/presentation/appearance-project';
 import {
   decodeAppearancePackage,
   encodeAppearancePackage,
-} from '../../src/client/persistence/appearance-project-store';
+} from '../../apps/web/src/client/persistence/appearance-project-store';
 
 function staticTriangleGlb(): Blob {
   const binary = new Uint8Array(42);

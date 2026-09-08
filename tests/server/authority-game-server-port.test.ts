@@ -1,11 +1,12 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { GameServer } from '../../src/server/game-server';
-import { computeFluidCandidate } from '../../src/server/fluid/fluid-transaction';
-import { Voxel } from '../../src/world/voxel';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { computeFluidCandidate } from '../../packages/game-core/src/server/fluid/fluid-transaction';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('GameServer Authority port', () => {
   it('只读已装载体素不会同步生成未知 Chunk', () => {
-    const server = new GameServer({ seedText: 'authority-loaded-collision' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'authority-loaded-collision' });
 
     expect(server.peekLoadedVoxel(2_000, 20, 2_000)).toBeNull();
     expect(server.materializedChunkCount).toBe(0);
@@ -14,7 +15,7 @@ describe('GameServer Authority port', () => {
   });
 
   it('物理热路径只读取已装载流体且不会为未知坐标生成 Chunk', () => {
-    const server = new GameServer({ seedText: 'authority-loaded-fluid' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'authority-loaded-fluid' });
 
     expect(server.peekLoadedVoxel(2_000, 20, 2_000)).toBeNull();
     expect(server.materializedChunkCount).toBe(0);
@@ -23,7 +24,7 @@ describe('GameServer Authority port', () => {
   });
 
   it('规则时钟推进饥饿等可靠玩法截止时间但不调用旧实体重力或导航位移', () => {
-    const server = new GameServer({ seedText: 'authority-rules-only' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'authority-rules-only' });
     server.spawnPlayer({ id: 'player-1', position: [0, 34, 0] });
     server.spawnWorldItem([4, 44, 0], { itemId: 'berry', count: 1 });
 
@@ -35,7 +36,7 @@ describe('GameServer Authority port', () => {
   });
 
   it('公开租赁/接纳/归还接口供保留流体 Worker 使用且不在请求时同步计算', () => {
-    const server = new GameServer({ seedText: 'authority-fluid-port' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'authority-fluid-port' });
     server.setFluidActiveChunks(['0,0,0']);
     server.edit(0, 5, 0, Voxel.Water, 'test');
     const work = server.requestFluidWork();

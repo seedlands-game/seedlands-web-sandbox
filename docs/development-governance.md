@@ -6,6 +6,8 @@
 
 每个改变生产代码、产品行为、架构、配置或测试口径的需求，先建立 `changes/YYYY-MM-DD-kebab-name/spec.md`。它至少写清目标、范围/非目标、关键决定、Given/When/Then 行为、实施前测试设计、逐项证据、任务状态和 Delivery Snapshot。
 
+大规模 change 还必须在实施前加入「工作量与预算」或链接本 change 的 `estimates.md`，遵守[双口径估算规范](change-estimation.md)：传统 PD 与 Agent 工时/24h 连续完成时间分别估算；分模型列 credits、API 等价费用、当前额度占比、置信度和保守值 ×120% 预算。范围/模型变化与阶段结束重估，Delivery Snapshot 回填实际和缺失证据；未知不能写 0，也不自动授权创建 goal 或支出。
+
 简单且已澄清的需求走 **Agile**：短 spec、RED、实现、GREEN 和本地准出连续完成。安全、权限、持久化格式、世界生成/Chunk、渲染管线、公开契约、跨模块重构或不可逆数据走 **Breaking**：先写 spec 与用例，用户审核精确 SHA-256 后实施。目标或方案不清楚时走 **Exploration**：仅在 `/tmp` 或独立非生产位置试验，不导入产品，方向稳定后以新 spec 和新审核正式实现。
 
 ### 模糊需求澄清模式
@@ -94,7 +96,7 @@ Vitest 证明纯逻辑、数据、算法和确定性不变量；Playwright 证�
 
 性能证据由 `seedlands-performance-validator`（默认 `Terra/high`）按[性能执行窗口](performance-execution.md)协调。采样命令必须持有机器级阻塞窗口；普通功能测试、等待时的负载、并发采样和未关联的历史结果都不构成当前性能证据。
 
-`?harness=1` 只能通过生产 `World.edit()`、Store 或 streaming 路径构造确定状态，不替代真实 Pointer Lock 输入。`src/world/**` 的 V8 行覆盖率不低于 80%；静态、构建、浏览器、Harness 和手工游玩要在 spec 中分别陈述真实结果。
+`?harness=1` 只能通过生产 `World.edit()`、Store 或 streaming 路径构造确定状态，不替代真实 Pointer Lock 输入。`packages/game-core/src/world/**` 的 V8 行覆盖率不低于 80%；静态、构建、浏览器、Harness 和手工游玩要在 spec 中分别陈述真实结果。
 
 ## 交付
 

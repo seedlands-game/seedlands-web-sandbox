@@ -1,13 +1,14 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import {
   FLUID_FRONTIER_BATCH_SIZE,
   FLUID_TRANSACTION_PROTOCOL_VERSION,
   FluidTransactionAuthority,
   type FluidPosition,
-} from '../../src/server/fluid/fluid-transaction';
-import { GameServer } from '../../src/server/game-server';
-import { ItemIds } from '../../src/server/gameplay/item-registry';
-import { Voxel } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/fluid/fluid-transaction';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 const positionKey = (position: FluidPosition) => position.join(',');
 
@@ -25,7 +26,7 @@ const seedOrdinaryBacklog = (authority: FluidTransactionAuthority, count = 80) =
 };
 
 const createGameplayBacklog = (targetVoxel: number) => {
-  const server = new GameServer({ seedText: 'interactive-fluid-gameplay' });
+  const server = new GameServer({ platform: testCorePlatform, seedText: 'interactive-fluid-gameplay' });
   const target: [number, number, number] = [200, 50, 0];
   server.spawnPlayer({ id: 'player-1', position: [200.5, 51.6, 2.5] });
   server.editBatch({

@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "id": "node-monorepo-implementation",
+  "initiatedBy": "agent",
+  "role": "main 集成与 monorepo 端到端实施负责人",
+  "workType": "implementation",
+  "goal": "在当前工作树顺序完成 main merge 和三包迁移、自测修复、每阶段 commit/push。首个合同 commit 后开始；root 仅维护 estimates.md、architecture-review.md 和 contracts/，请勿编辑或暂存这些 root 所有文件。",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-node-monorepo/spec.md",
+      "purpose": "已批准范围的可执行合同"
+    }
+  ],
+  "scope": {
+    "writePaths": ["/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation", "/tmp/seedlands-monorepo"],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills",
+      "/tmp"
+    ],
+    "nonGoals": [
+      "不修改游戏规则、存档、wire 格式或增加远端可玩",
+      "不合并 PR，不部署远端，不购买或重置额度",
+      "不读取 .env 或密钥；不修改其他 worktree"
+    ]
+  },
+  "outputs": ["三包实现、验证证据、持续提交与 PR"],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "merge",
+      "check": "先普通 merge origin/main、正确整合 5 个冲突及语义重叠，验证后 commit/push",
+      "evidence": "execution.md 与提交 SHA"
+    },
+    {
+      "id": "packages",
+      "check": "spec 三包边界实现且真实 Node 隔离构建/运行可用，Web 默认/TS 回退保留",
+      "evidence": "package manifests、exports、类型检查/构建/隔离检查"
+    },
+    {
+      "id": "validation",
+      "check": "静态、两端构建、当前浏览器 regression 与 Node/完整基线定向通过；修复自身问题，不扩张功能",
+      "evidence": "execution.md 与日志路径"
+    },
+    {
+      "id": "handoff",
+      "check": "持续推送、更新 docs/spec 状态；报告冻结 HEAD 供独立验收；不主动创建 PR，root 负责最终 PR",
+      "evidence": "干净状态、提交 SHA、未完成项"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 4,
+    "maxAgentHours": 14
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": true,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-node-monorepo/contracts/root.json",
+    "sha256": "d6bdadc46b3b5e162df9c130597e011e7c895685e06d8b029adfdec29bbbb914"
+  },
+  "resources": {
+    "exclusiveGroup": "seedlands-monorepo-validation"
+  },
+  "escalation": ["范围或平台契约需改变", "同原因失败 5 次或预计超出规划时间"],
+  "reportFields": ["完成状态", "提交和推送", "变更", "验证结果", "限制", "剩余工作"]
+}

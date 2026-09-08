@@ -1,0 +1,95 @@
+{
+  "status": "REFERENCE_CODEC_PASS",
+  "wireStatus": "not-adopted",
+  "timing": "NOT_COLLECTED",
+  "sourceGitSha": "07caff1ceececbcaca56181699cd4ff9df8312c3",
+  "sourceState": "production committed; change-local decoded oracle uncommitted at verification",
+  "environment": {
+    "node": "22.23.2",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "validation": {
+    "realRecordCount": 9,
+    "codecs": ["C0", "C1", "C2"],
+    "decodedOracleTests": 4,
+    "sourceHashMissingExtraStaleNegativeCases": 3,
+    "typecheck": "PASS",
+    "targetPrettier": "PASS",
+    "targetEslint": "PASS",
+    "prior59RecordRegression": "PASS_ALL_THREE_CODECS",
+    "newSchemaCases": {
+      "realShape": 1,
+      "eightBehaviors": 8,
+      "emptyActorSet": 1,
+      "rejected": 9
+    },
+    "floatingNegativeZero": {
+      "structuredSyntheticRecords": 1,
+      "codecsPassed": 3
+    },
+    "rawWire": {
+      "C1": ["enum", "count", "duplicate actor"],
+      "C2PreObjectDecoder": ["undeclared enum 255", "repeated actor count 513"],
+      "C2PostObjectDecoder": ["omitted default enum zero", "duplicate actor association"]
+    }
+  },
+  "browserInteroperability": {
+    "status": "PASS",
+    "utc": "2026-09-07T04:28:32.943Z",
+    "node": "v22.23.2",
+    "browser": "152.0.7977.76",
+    "headless": true,
+    "wireStatus": "not-adopted",
+    "timing": "NOT_COLLECTED",
+    "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+    "realRecords": 9,
+    "syntheticRecords": 0,
+    "sourceCorpusSha256": "3d59fde50a506db571a393d21b21dcbd2a931d2ff64ab032be2fd7bcc6ed6965",
+    "sourceManifestPayloadSha256": "978209efa1e0afadfed69bd2f99cd050557397cfc60572c33aeea1c1f8484f10",
+    "fixtureSha256": "fa4353940b001479dbf8ae05cf3d535e2de4334a398d26c0fd2a3b9872ddc636",
+    "bundleSha256": "f42d92d1400f7a5e4dbaab1a4cae51200711698b4305b0dca7971174eb3dca0e",
+    "bundleBytes": 435221,
+    "codecs": {
+      "C0": {
+        "nodeToBrowser": 9,
+        "browserToNode": 9,
+        "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+      },
+      "C1": {
+        "nodeToBrowser": 9,
+        "browserToNode": 9,
+        "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+      },
+      "C2": {
+        "nodeToBrowser": 9,
+        "browserToNode": 9,
+        "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+      }
+    }
+  },
+  "prototypeSha256": {
+    "c0-raw-reference.mjs": "cb097471835def97ee66167541ae4c43584f82c2905d192ce3a840d62a4ec862",
+    "reference-schema-validation.mjs": "d65e77ef8604f6bc9d333958f03fa17ffe97178ef7e7df11009c747b4830ed02",
+    "reference-fixed-codecs.mjs": "7c6732006a33c5fd25edb94de69b62f3a39d696ecee2d0d72e405a4ba5c3f1e0",
+    "gameplay-consumer-codecs.mjs": "c7419ce324d0d9aec75d01dd9cba842baa2c713617978d46bbcfad3ec7cdd9fa",
+    "gameplay-consumer-codecs-smoke.mjs": "ad39ed3dad2591a71443d8d9822b58edfee1e6181296ee313e18a0dc3c4c17b2",
+    "gameplay-consumer-schema-smoke.mjs": "d857ca880b53e279d69ba5835b4cdbec8332c9cbefcc74387ab5e1d07d7d3717",
+    "gameplay-consumer-floating-zero-smoke.mjs": "408a1613d3b09c6153b4ccb328c96923c7d1ccca1dcca0d73d82ee6e607797db",
+    "gameplay-consumer-pipeline-validation.mjs": "c1497c598b736eb4e3b04f6d86e336e85f727e1cf34e22e70a0b26c3b975913e",
+    "browser-reference-runner.mjs": "9193db99d62da3abe5cb6e24941b7466948b861104d2b6e49cb3b66f520b0ee6",
+    "browser-reference-validation.mjs": "06e53e5b201c91667d35ace0399e787553edbf7d74d32a5b89ee741e9205d068",
+    "codec-application-pipeline.mjs": "48e588f37a2f1534af18051eb3298190dae3d6703247054e336117952b8d041e",
+    "protobuf-wire-preflight.mjs": "a97f92c58bee71adb82a59c7aee7be2c4ae1b0b9f63414232d7c390dd4d0a49a"
+  },
+  "logs": {
+    "seedlands-gameplay-consumer-decoded.log": "0b0353deae51f6696bdf059653483698ff6daf70c6692d829b32b794a8df192e"
+  },
+  "limits": [
+    "接收后参考字段等价和关联验证，不是实际客户端模型/GUI/预测/重生应用。",
+    "9 条真实记录来自三组小规模状态，所有行为在真实语料中为 idle；其余行为来自单独 synthetic 覆盖。",
+    "435221 B browser bundle 包含所有候选及 oracle，不代表任一候选产品成本。",
+    "C0 64 KiB metadata 及大消息表示限制仍在，未作 codec 或 transport 采用决定。",
+    "原型仅在新 /tmp 目录；旧原型和历史语料未覆盖。"
+  ]
+}

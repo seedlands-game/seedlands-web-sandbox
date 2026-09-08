@@ -1,0 +1,160 @@
+{
+  "formatVersion": 1,
+  "baseCommit": "01bc758d9773085fe801d1f793eda1dff9a34e78",
+  "validatedWorktreeContentSha256": "e0fab7f26dda9996bdf6cba5ec5c7c79aa863b51d343b9adcee656958968b31a",
+  "validatedPaths": [
+    "AGENTS.md",
+    "README.md",
+    "README.zh-CN.md",
+    "changes/2026-09-07-data-plane-adoption/e2e/build-identity.ts",
+    "changes/2026-09-08-node-monorepo/e2e/web-package-runtime.spec.ts",
+    "docs/code-map.md",
+    "docs/development-governance.md",
+    "docs/living-world-alignment.md",
+    "docs/repository-structure.md",
+    "package.json",
+    "scripts/freeze-adoption-builds.mjs",
+    "scripts/harness-file-metrics.mjs",
+    "tests/worker/data-plane-adapter.test.ts"
+  ],
+  "environment": {
+    "platform": "macOS arm64",
+    "node": "v22.23.2",
+    "pnpm": "11.25.0"
+  },
+  "checks": [
+    {
+      "command": "CI=true pnpm verify:static:ci",
+      "exitCode": 0,
+      "log": "/tmp/seedlands-monorepo/m3-verify-static.log"
+    },
+    {
+      "command": "pnpm build:web",
+      "exitCode": 0,
+      "log": "/tmp/seedlands-monorepo/m3-web-build.log"
+    },
+    {
+      "command": "pnpm build:server",
+      "exitCode": 0,
+      "log": "/tmp/seedlands-monorepo/m3-node-build.log"
+    },
+    {
+      "command": "pnpm verify:node-isolation",
+      "exitCode": 0,
+      "log": "/tmp/seedlands-monorepo/m3-node-isolation.log"
+    },
+    {
+      "command": "pnpm exec vitest run tests/node/node-server-artifact.test.ts tests/node/node-server-crash-recovery.test.ts --no-file-parallelism --maxWorkers=1",
+      "exitCode": 0,
+      "log": "/tmp/seedlands-monorepo/m3-node-artifact-recovery.log"
+    },
+    {
+      "command": "pnpm test:active-node:critical",
+      "exitCode": 0,
+      "log": "/tmp/seedlands-monorepo/m3-complete-baseline.log"
+    },
+    {
+      "command": "CI=true pnpm test:e2e:regression",
+      "exitCode": 0,
+      "log": "/tmp/seedlands-monorepo/m3-browser-regression.log"
+    },
+    {
+      "command": "pnpm perf:adoption:freeze",
+      "exitCode": 0,
+      "log": "/tmp/seedlands-monorepo/m3-adoption-freeze.log"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/tmp/seedlands-monorepo/m2-bootstrap-clock-red.log",
+      "sha256": "dc29826256d7c517cc3583d5f338a8fea586cb3416afb3c9101d8a2048cc7273"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m2-bootstrap-clock-green.log",
+      "sha256": "75489e4e2adc275fa34a64620045c1708f5dc21b2cbdefa9b9f0f6b94c4097c6"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m2-browser-regression.log",
+      "sha256": "81a94d1c66527cf799db9b12e2a41433e66d36fb451dcccd65bc7d6e8a4d86d7"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m2-browser-clock-port-green.log",
+      "sha256": "d31d5083ab3211bb94cf1c8b170e72a54c23a2df1262dbd09abf0d18f3ba297f"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m2-browser-regression-green.log",
+      "sha256": "593e294064594fce0eb6c94ee0e748b9057b5d08482c53fe8e0c00cfa0b92ae9"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m2-active-node-critical.log",
+      "sha256": "9a189407011a250bc59e95d9ad5129f09d61c8909875f76797d83e1adc2284f7"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-web-clock-adapter.log",
+      "sha256": "258a4297fc21971913390cfe2d00aa16e3797bd3b56381f9c6c199dcd1712f6c"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-browser-ts-fallback.log",
+      "sha256": "c68d88d4fcdec7759f5b9e599a01ea798961a3ebca077ef8b6f1fe4606df8b70"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-browser-regression.log",
+      "sha256": "3ce8a2de8ca593a7c4acaf5bffe3d7bfb6a774acd92eae3cbb3933c8895bff94"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-node-build.log",
+      "sha256": "d5a2e19e9bd1873c601a5ef6bc12463d7a6fc0d8170a211f69dc10c5bbb60b9d"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-node-artifact-recovery.log",
+      "sha256": "1cf0f1ceb9246b51dce4f8abbabdf9d136091c99e93c858e6b297a5c508930c2"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-complete-baseline.log",
+      "sha256": "155e04b843936396aad169d7ec8b3b64acd974ffcf8f670d008bff2a9b52473e"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-verify-static.log",
+      "sha256": "dbba92e1b3164aed8f090f9db44da36a6e353dd94c962e70216bbcd0448f579b"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-node-isolation.log",
+      "sha256": "e5c3e600b7e64c59838d00041b955cb7d0076007e06a0dea955c875cd025faf3"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-web-build.log",
+      "sha256": "be6360d5d7050769b1a80300a4c000d8fa6baced3d7f3302fb6b559245aba3fa"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-adoption-freeze.log",
+      "sha256": "e18ed82e7682ae0ed1c0aab7db6a9f547d203a3131a82477f897d321c3418f22"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-adoption-identity-check.log",
+      "sha256": "ff471a69e5714d1bf367624fe4465bb9fd416ab316a63856796d83ef0bb2806f"
+    },
+    {
+      "path": "/tmp/seedlands-monorepo/m3-harness-dist-path.log",
+      "sha256": "9a186b412f47c4223e369fd5d7aff330a6320d7bdd2c26af3a8437482858f056"
+    }
+  ],
+  "nodeIsolationReport": {
+    "path": "/tmp/seedlands-monorepo/node-isolation-report.json",
+    "sha256": "e90ba9d041f1550a0619d2aebacb47aeab77610a9f17ccdbf32645868be055d5"
+  },
+  "preMigrationInventory": {
+    "path": "/tmp/seedlands-monorepo/pre-migration-inventory.json",
+    "sourceSha": "0380926",
+    "tests": 239,
+    "changeTests": 101
+  },
+  "currentInventory": {
+    "tests": 239,
+    "changeTests": 102,
+    "added": ["changes/2026-09-08-node-monorepo/e2e/web-package-runtime.spec.ts"]
+  },
+  "limits": [
+    "External /tmp corpus-dependent Active Node cases were typechecked but not claimed executed.",
+    "No performance benchmark or remote-play acceptance was claimed."
+  ]
+}

@@ -12,7 +12,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       all: true,
-      include: ['src/world/**/*.ts'],
+      include: ['packages/game-core/src/world/**/*.ts'],
       reporter: ['text', 'json-summary', 'lcov'],
       thresholds: {
         lines: 80,

@@ -3,11 +3,11 @@ import {
   computeFluidCandidate,
   type FluidAuthoritySnapshot,
   type FluidPosition,
-} from '../../src/server/fluid/fluid-transaction';
-import { KernelMemory, WASM_ARENA_BYTES } from '../../src/compute/kernel-memory';
-import { createFluidControlMemory } from '../../src/compute/fluid-kernel-control';
-import { createFluidKernel } from '../../src/worker/fluid-kernel';
-import { voxelIndex } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/fluid/fluid-transaction';
+import { KernelMemory, WASM_ARENA_BYTES } from '../../apps/web/src/compute/kernel-memory';
+import { createFluidControlMemory } from '../../apps/web/src/compute/fluid-kernel-control';
+import { createFluidKernel } from '../../apps/web/src/worker/fluid-kernel';
+import { voxelIndex } from '../../packages/game-core/src/world/voxel';
 
 const applyWrites = (snapshot: FluidAuthoritySnapshot) => {
   const expected = computeFluidCandidate(snapshot);

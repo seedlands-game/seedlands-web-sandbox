@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { bodyConfigFor, bodyKindForEntity } from '../../src/physics/body-registry';
-import type { GameplayEntity } from '../../src/server/gameplay/entity-store';
-import { attackTargetPoint } from '../../src/server/gameplay/gameplay-geometry';
+import { bodyConfigFor, bodyKindForEntity } from '../../packages/game-core/src/physics/body-registry';
+import type { GameplayEntity } from '../../packages/game-core/src/server/gameplay/entity-store';
+import { attackTargetPoint } from '../../packages/game-core/src/server/gameplay/gameplay-geometry';
 
 const entity = (type: GameplayEntity['type'], archetype?: GameplayEntity['archetype']): GameplayEntity => ({
   id: `${type}:${String(archetype)}`,

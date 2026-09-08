@@ -5,7 +5,7 @@ import {
   MusicCueScheduler,
   sanitizeAudioSettings,
   SoundBudget,
-} from '../../src/client/audio/audio-policy';
+} from '../../apps/web/src/client/audio/audio-policy';
 
 const plains = { biome: 'plains', worldTime: 10, waterProximity: 0, danger: 0 };
 

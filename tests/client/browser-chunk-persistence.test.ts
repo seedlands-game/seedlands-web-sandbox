@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { BrowserChunkPersistence } from '../../src/client/persistence/browser-chunk-persistence';
-import type { ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
-import type { FrozenGameSaveSnapshot } from '../../src/server/persistence/game-save-snapshot';
-import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey } from '../../src/world/voxel';
+import { BrowserChunkPersistence } from '../../apps/web/src/client/persistence/browser-chunk-persistence';
+import type {
+  ChunkPersistenceLoadDiagnostics,
+  ChunkSnapshot,
+} from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import type { FrozenGameSaveSnapshot } from '../../packages/game-core/src/server/persistence/game-save-snapshot';
+import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey } from '../../packages/game-core/src/world/voxel';
 
 type Coordinate = Readonly<{ cx: number; cy: number; cz: number }>;
 type DeferredBatch = Readonly<{ requestId: number; coordinates: readonly Coordinate[] }>;

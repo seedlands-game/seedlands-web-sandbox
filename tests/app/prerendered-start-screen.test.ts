@@ -1,13 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { renderPrerenderedStartScreen } from '../../src/app/ui/prerender-entry';
+import { renderPrerenderedStartScreen } from '../../apps/web/src/app/ui/prerender-entry';
 import {
   applyPrerenderedBasePath,
   ensureCriticalStylesheetBeforeModule,
   injectPrerenderedStartScreen,
   PRERENDER_BASE_PLACEHOLDER,
   PRERENDER_OUTLET,
-} from '../../scripts/prerendered-start-screen.mjs';
+} from '../../apps/web/scripts/prerendered-start-screen.mjs';
 
 describe('prerendered start screen', () => {
   it('renders the deterministic Svelte boot tree with hydration markers', () => {
@@ -21,7 +21,7 @@ describe('prerendered start screen', () => {
   });
 
   it('injects only one non-empty outlet and resolves the production base path', () => {
-    const fragment = readFileSync('src/app/ui/generated/prerendered-start-screen.html', 'utf8').trimEnd();
+    const fragment = readFileSync('apps/web/src/app/ui/generated/prerendered-start-screen.html', 'utf8').trimEnd();
     const based = applyPrerenderedBasePath(fragment, '/seedlands/');
     expect(based).not.toContain(PRERENDER_BASE_PLACEHOLDER);
     expect(based).toContain('/seedlands/assets/ui/arcane-crest.png');

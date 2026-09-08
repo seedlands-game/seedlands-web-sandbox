@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_PERSISTENCE_LOAD_BATCH, validatePersistenceLoadBatch } from '../../src/worker/persistence-load-batch';
+import {
+  MAX_PERSISTENCE_LOAD_BATCH,
+  validatePersistenceLoadBatch,
+} from '../../apps/web/src/worker/persistence-load-batch';
 
 describe('persistence load batch', () => {
   it('accepts one bounded unique mesh neighborhood', () => {

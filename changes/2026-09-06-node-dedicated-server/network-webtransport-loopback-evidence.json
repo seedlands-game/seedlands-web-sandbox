@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "kind": "local-webtransport-loopback-capability-evidence",
+  "status": "PASSED_WITH_SCOPE_LIMITS",
+  "executedAt": {
+    "startUTC": "2026-09-07T04:00:56Z",
+    "endUTC": "2026-09-07T04:00:58Z"
+  },
+  "scope": {
+    "network": "loopback only",
+    "udpListener": "127.0.0.1:0",
+    "httpPageListener": "127.0.0.1:0",
+    "benchmark": false,
+    "repositorySourceChanged": false,
+    "repositoryPackageChanged": false,
+    "remoteWrite": false,
+    "productionAdoption": false
+  },
+  "environment": {
+    "node": "v22.23.2",
+    "nodeExecutable": "/tmp/seedlands-node-22/node-v22.23.2-darwin-arm64/bin/node",
+    "go": "go version go1.26.3 darwin/arm64",
+    "chrome": "Google Chrome 152.0.7977.76",
+    "browserDriver": "Playwright 1.62.1"
+  },
+  "candidate": {
+    "module": "github.com/quic-go/webtransport-go",
+    "version": "v0.13.0",
+    "protocolDraft": "draft-16",
+    "license": "MIT",
+    "upstream": {
+      "repository": "https://github.com/quic-go/webtransport-go",
+      "release": "https://github.com/quic-go/webtransport-go/releases/tag/v0.13.0"
+    },
+    "goVersion": "1.26.0",
+    "moduleSum": "h1:RJLrTUHlTj8jJaQlQJUy0z0Mf7u1fVM0I6L1b9pe2M0=",
+    "quicGo": {
+      "version": "v0.62.0",
+      "moduleSum": "h1:ZHDjCk5OacATwGvs8PWE97CTvX7AqZiVoW7++ZOXTf8="
+    }
+  },
+  "certificate": {
+    "algorithm": "ECDSA P-256",
+    "validity": "24 hours",
+    "subject": "localhost",
+    "subjectAlternativeNames": ["localhost", "127.0.0.1", "::1"],
+    "privateKeyPersisted": false,
+    "certificateHashAlgorithm": "sha-256",
+    "certificateSha256Base64": "yyI1OecOqgWK6QjG6p1VKLbPhEuQx8nCZp/b5ASATGU=",
+    "serverCertificateHashesPinned": true,
+    "certificateErrorsIgnored": false,
+    "systemTrustChanged": false
+  },
+  "actualEndpoints": {
+    "webTransportURL": "https://127.0.0.1:60650/echo",
+    "udpAddress": "127.0.0.1:60650",
+    "httpPageURL": "http://127.0.0.1:59959/"
+  },
+  "checks": [
+    {
+      "name": "secure-context-and-api",
+      "passed": true,
+      "actual": { "isSecureContext": true, "webTransportType": "function" }
+    },
+    {
+      "name": "webtransport-ready",
+      "passed": true,
+      "actual": { "ready": true, "serverSessionEstablished": true }
+    },
+    {
+      "name": "reliable-bidirectional-stream",
+      "passed": true,
+      "actual": { "sent": "reliable-loopback-v013", "echo": "reliable-loopback-v013", "serverEchoBytes": 22 }
+    },
+    {
+      "name": "datagram",
+      "passed": true,
+      "actual": { "sent": "datagram-loopback-v013", "echo": "datagram-loopback-v013", "serverEchoBytes": 22 }
+    },
+    {
+      "name": "cleanup",
+      "passed": true,
+      "actual": { "serverShutdownSignal": "terminated", "serverFinalStage": "closed", "remainingProbeProcesses": 0 }
+    }
+  ],
+  "artifacts": {
+    "temporaryDirectory": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy",
+    "run": {
+      "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/run-20260907T040056Z.json",
+      "sha256": "870b4e3c313948c1b0456c48192fd12953e452d4edd20feb82fa6471a87daa85"
+    },
+    "browserResult": {
+      "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/browser-result-20260907T040056Z.json",
+      "sha256": "e652cd70b617defacda08458e2bf7aa12d64b19afec2afa9585bfa0f07485ce0"
+    },
+    "serverEvents": {
+      "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/server-events-20260907T040056Z.jsonl",
+      "sha256": "3497945eb19b9922e5c94d764651d98051c213c98a15a069c471907f8b096357"
+    },
+    "readiness": {
+      "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/ready-20260907T040056Z.json",
+      "sha256": "29e083eaf034d39672969f7c46dbbd14c5de1a6c3d12402a4efcb9cd26efbf48"
+    },
+    "inputLock": {
+      "goModSha256": "43f3cd7471020299911202c728dbb30bc29a2eaaff349750c0465143d02f1df5",
+      "goSumSha256": "c07dc55f5b68455a49f1ff3768696af9202b3c508bb8a250b80e6c815711a687",
+      "modulesJsonSha256": "e2928696816c551925d3dbf9ecfdcc7594d9c61917eaa7344d9366bb63e4a2b4"
+    },
+    "temporaryImplementation": {
+      "goSourceSha256": "da68811f0d87427f03ba1d3288e5674272b541c28107d2ee4de386c619c83d1a",
+      "browserHarnessSha256": "87c25b9d2def602944fe55b825976e10e13a0825e67b1ff07dd45e37a7204892",
+      "serverBinarySha256": "78128239b3cadeb38b7617d508a249282c74c2d4a54203bdaae6eacaed855eb7",
+      "sourceIncludedInRepository": false
+    }
+  },
+  "initialToolIssues": [
+    {
+      "stage": "module-listing",
+      "actual": "proxy.golang.org returned EOF while resolving golang.org/x/term@v0.45.0 after go get",
+      "effect": "initial complete module listing did not finish; no transport listener or browser conclusion",
+      "resolution": "later cached go list -m -json all completed and its hash is recorded"
+    },
+    {
+      "stage": "browser-driver-import",
+      "actual": "Cannot find module 'playwright' from the pnpm root resolver",
+      "effect": "server had reached ready, but Chrome was not launched and no WebTransport request was sent",
+      "resolution": "used the already installed Playwright 1.62.1 package path; the subsequent clean run is the evidence run"
+    },
+    {
+      "stage": "first-successful-run-cleanup-classification",
+      "actual": "temporary Go runner recorded expected context canceled from server.Close as serve-error",
+      "effect": "first transmission result is not used as clean shutdown evidence",
+      "resolution": "accepted context.Canceled during explicit shutdown, rebuilt, then reran to final stage closed"
+    }
+  ],
+  "strictLimits": [
+    "Does not identify one root cause for the historical quiche Chrome Opening handshake failed result.",
+    "Does not validate Node 22 built-in WebTransport support; Node 22 has no public HTTP/3/WebTransport server API and this uses a temporary Go sidecar.",
+    "Does not validate Linux x64 offline artifacts, IPv6, LAN, WAN, NAT, firewall, public TLS, reverse proxy, authentication, resources, backpressure, game DTOs, wire adoption, or WSS fallback.",
+    "Contains no performance sample and makes no transport ranking claim."
+  ]
+}

@@ -11,7 +11,7 @@ import {
   normalizeSeed,
   remeshChunkKeysForEdit,
   voxelIndex,
-} from '../../src/world/voxel';
+} from '../../packages/game-core/src/world/voxel';
 
 describe('voxel coordinates and registry', () => {
   it('keeps the chunk size and occupancy contract stable', () => {

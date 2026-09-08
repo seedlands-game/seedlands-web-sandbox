@@ -10,7 +10,7 @@ import {
   type BodyState,
   type Collider,
   type PhysicsWorld,
-} from '../../src/physics';
+} from '../../packages/game-core/src/physics';
 
 const body: BodyConfig = {
   localAabb: { min: { x: -0.3, y: 0, z: -0.3 }, max: { x: 0.3, y: 1.8, z: 0.3 } },

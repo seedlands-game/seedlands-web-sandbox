@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test';
-import type { ChunkPersistenceCorpusSummary } from '../../../src/client/persistence/browser-chunk-persistence';
-import type { ChunkPersistenceLoadScenario } from '../../../src/client/persistence/chunk-persistence-benchmark';
+import type { ChunkPersistenceCorpusSummary } from '../../../apps/web/src/client/persistence/browser-chunk-persistence';
+import type { ChunkPersistenceLoadScenario } from '../../../apps/web/src/client/persistence/chunk-persistence-benchmark';
 
 type PersistenceHarnessWindow = Window & {
   __seedlandsPersistenceHarness?: {

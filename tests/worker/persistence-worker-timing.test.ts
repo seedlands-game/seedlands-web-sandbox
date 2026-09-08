@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describePersistenceMailboxEncoding } from '../../src/worker/persistence-worker-timing';
+import { describePersistenceMailboxEncoding } from '../../apps/web/src/worker/persistence-worker-timing';
 
 describe('persistence worker timing', () => {
   it('只归因与消息投递区间相交的同步编码而不包含后续异步保存', () => {

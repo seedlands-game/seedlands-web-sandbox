@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { makeChunk, meshChunk } from '../../src/world/mesh';
-import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../src/world/voxel';
+import { makeChunk, meshChunk } from '../../packages/game-core/src/world/mesh';
+import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../packages/game-core/src/world/voxel';
 
 describe('water surface mesh', () => {
   it('lowers exposed water tops and avoids a full-height hanging wall', () => {

@@ -3,6 +3,25 @@ ls:
     .dir: kebab-case
     .ts: kebab-case
     .svelte: kebab-case
+  apps:
+    .dir: kebab-case
+  apps/*:
+    .dir: kebab-case
+    .json: kebab-case
+    .ts: kebab-case
+  apps/*/src:
+    .dir: kebab-case
+    .ts: kebab-case
+    .svelte: kebab-case
+  packages:
+    .dir: kebab-case
+  packages/*:
+    .dir: kebab-case
+    .json: kebab-case
+    .ts: kebab-case
+  packages/*/src:
+    .dir: kebab-case
+    .ts: kebab-case
   tests:
     .dir: kebab-case
     .test.ts: kebab-case
@@ -24,6 +43,9 @@ ls:
     .sh: kebab-case
   changes/*/evidence:
     .dir: kebab-case
+  changes/2026-09-08-node-monorepo/contracts:
+    .dir: kebab-case
+    .json: kebab-case
   changes/*/midscene:
     .dir: kebab-case
   changes/*/e2e:
@@ -39,7 +61,11 @@ ignore:
   - .pnpm-store
   - coverage
   - dist
+  - apps/*/dist
   - harness/results
   - midscene_run
   - node_modules
+  - apps/node-server/node_modules
+  - apps/web/node_modules
+  - packages/game-core/node_modules
   - crates/target

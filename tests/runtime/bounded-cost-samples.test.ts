@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BoundedCostSamples } from '../../src/runtime/bounded-cost-samples';
+import { BoundedCostSamples } from '../../packages/game-core/src/runtime/bounded-cost-samples';
 
 describe('有界执行成本采样', () => {
   it('仅保留最新窗口，累计计数可用于跨快照去重', () => {

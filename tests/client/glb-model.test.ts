@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validateStaticGlb } from '../../src/client/presentation/glb-model';
+import { validateStaticGlb } from '../../apps/web/src/client/presentation/glb-model';
 
 const jsonBytes = (value: unknown) => new TextEncoder().encode(JSON.stringify(value));
 

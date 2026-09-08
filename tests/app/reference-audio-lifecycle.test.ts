@@ -12,7 +12,7 @@ vi.mock('tone', () => ({
   getContext: () => ({ rawContext: null }),
 }));
 const globalDecodes = vi.hoisted(() => [] as Array<(value: AudioBuffer) => void>);
-vi.mock('../../src/app/audio/audio-mixer', () => ({
+vi.mock('../../apps/web/src/app/audio/audio-mixer', () => ({
   AudioMixer: class {
     context = { decodeAudioData: () => new Promise<AudioBuffer>((resolve) => globalDecodes.push(resolve)) };
     unlock = async () => true;
@@ -20,9 +20,9 @@ vi.mock('../../src/app/audio/audio-mixer', () => ({
     snapshot = () => ({});
   },
 }));
-import { GlobalAudio } from '../../src/app/audio/global-audio';
-import { MusicPlayer } from '../../src/app/audio/music-player';
-import type { AudioMixer } from '../../src/app/audio/audio-mixer';
+import { GlobalAudio } from '../../apps/web/src/app/audio/global-audio';
+import { MusicPlayer } from '../../apps/web/src/app/audio/music-player';
+import type { AudioMixer } from '../../apps/web/src/app/audio/audio-mixer';
 
 function fixture() {
   const pending: Array<(value: AudioBuffer) => void> = [];

@@ -4,7 +4,7 @@ import {
   clipReflectionProjection,
   reflectionTextureMatrix,
   setReflectedCameraPose,
-} from '../../src/app/scene/reflection-projection';
+} from '../../apps/web/src/app/scene/reflection-projection';
 
 function uv(matrix: pc.Mat4, point: pc.Vec3) {
   const clip = matrix.transformVec4(new pc.Vec4(point.x, point.y, point.z, 1));

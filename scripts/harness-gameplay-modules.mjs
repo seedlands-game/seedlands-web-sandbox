@@ -1,74 +1,109 @@
 import { resolve } from 'node:path';
 
 export async function compileGameplayModules(root, compileModule, voxelUrl) {
-  const itemRegistryUrl = await compileModule(resolve(root, 'src/server/gameplay/item-registry.ts'), {
-    "'../../world/voxel'": `'${voxelUrl}'`,
-  });
-  const voxelGameplayUrl = await compileModule(resolve(root, 'src/server/gameplay/voxel-gameplay.ts'), {
-    "'../../world/voxel'": `'${voxelUrl}'`,
+  const itemRegistryUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/gameplay/item-registry.ts'),
+    {
+      "'../../world/voxel'": `'${voxelUrl}'`,
+    },
+  );
+  const voxelGameplayUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/gameplay/voxel-gameplay.ts'),
+    {
+      "'../../world/voxel'": `'${voxelUrl}'`,
+      "'./item-registry'": `'${itemRegistryUrl}'`,
+    },
+  );
+  const inventoryUrl = await compileModule(resolve(root, 'packages/game-core/src/server/gameplay/inventory.ts'), {
     "'./item-registry'": `'${itemRegistryUrl}'`,
   });
-  const inventoryUrl = await compileModule(resolve(root, 'src/server/gameplay/inventory.ts'), {
-    "'./item-registry'": `'${itemRegistryUrl}'`,
-  });
-  const playerStateUrl = await compileModule(resolve(root, 'src/server/gameplay/player-state.ts'), {
+  const playerStateUrl = await compileModule(resolve(root, 'packages/game-core/src/server/gameplay/player-state.ts'), {
     "'./inventory'": `'${inventoryUrl}'`,
   });
-  const recipeRegistryUrl = await compileModule(resolve(root, 'src/server/gameplay/recipe-registry.ts'), {
-    "'./inventory'": `'${inventoryUrl}'`,
+  const recipeRegistryUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/gameplay/recipe-registry.ts'),
+    {
+      "'./inventory'": `'${inventoryUrl}'`,
+      "'./item-registry'": `'${itemRegistryUrl}'`,
+    },
+  );
+  const entityStoreUrl = await compileModule(resolve(root, 'packages/game-core/src/server/gameplay/entity-store.ts'), {
     "'./item-registry'": `'${itemRegistryUrl}'`,
   });
-  const entityStoreUrl = await compileModule(resolve(root, 'src/server/gameplay/entity-store.ts'), {
-    "'./item-registry'": `'${itemRegistryUrl}'`,
-  });
-  const poiRegistryUrl = await compileModule(resolve(root, 'src/server/simulation/poi-registry.ts'));
-  const groundNavigatorUrl = await compileModule(resolve(root, 'src/server/simulation/ground-navigator.ts'), {
-    "'../../world/voxel'": `'${voxelUrl}'`,
-  });
-  const actionRuntimeUrl = await compileModule(resolve(root, 'src/server/simulation/action-runtime.ts'), {
-    "'./ground-navigator'": `'${groundNavigatorUrl}'`,
-  });
-  const actorStateUrl = await compileModule(resolve(root, 'src/server/simulation/actor-state.ts'));
-  const perceptionRuntimeUrl = await compileModule(resolve(root, 'src/server/simulation/perception-runtime.ts'), {
-    "'../../world/voxel'": `'${voxelUrl}'`,
-  });
-  const autonomyRuntimeUrl = await compileModule(resolve(root, 'src/server/simulation/autonomy-runtime.ts'), {
-    "'./action-runtime'": `'${actionRuntimeUrl}'`,
-    "'./actor-state'": `'${actorStateUrl}'`,
-    "'./ground-navigator'": `'${groundNavigatorUrl}'`,
-    "'./perception-runtime'": `'${perceptionRuntimeUrl}'`,
-    "'./poi-registry'": `'${poiRegistryUrl}'`,
-  });
-  const gameplaySnapshotUrl = await compileModule(resolve(root, 'src/server/gameplay/gameplay-snapshot.ts'), {
-    "'../simulation/autonomy-runtime'": `'${autonomyRuntimeUrl}'`,
-    "'./entity-store'": `'${entityStoreUrl}'`,
-    "'./player-state'": `'${playerStateUrl}'`,
-  });
-  const playerOccupancyUrl = await compileModule(resolve(root, 'src/server/gameplay/player-occupancy.ts'));
-  const gameplayRuntimeUrl = await compileModule(resolve(root, 'src/server/gameplay/gameplay-runtime.ts'), {
-    "'../../world/voxel'": `'${voxelUrl}'`,
-    "'../simulation/autonomy-runtime'": `'${autonomyRuntimeUrl}'`,
-    "'./entity-store'": `'${entityStoreUrl}'`,
-    "'./gameplay-snapshot'": `'${gameplaySnapshotUrl}'`,
-    "'./item-registry'": `'${itemRegistryUrl}'`,
-    "'./player-state'": `'${playerStateUrl}'`,
-    "'./player-occupancy'": `'${playerOccupancyUrl}'`,
-    "'./recipe-registry'": `'${recipeRegistryUrl}'`,
-    "'./voxel-gameplay'": `'${voxelGameplayUrl}'`,
-  });
-  const gameServerGameplayUrl = await compileModule(resolve(root, 'src/server/game-server-gameplay.ts'), {
-    "'./gameplay/gameplay-runtime'": `'${gameplayRuntimeUrl}'`,
-  });
+  const poiRegistryUrl = await compileModule(resolve(root, 'packages/game-core/src/server/simulation/poi-registry.ts'));
+  const groundNavigatorUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/simulation/ground-navigator.ts'),
+    {
+      "'../../world/voxel'": `'${voxelUrl}'`,
+    },
+  );
+  const actionRuntimeUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/simulation/action-runtime.ts'),
+    {
+      "'./ground-navigator'": `'${groundNavigatorUrl}'`,
+    },
+  );
+  const actorStateUrl = await compileModule(resolve(root, 'packages/game-core/src/server/simulation/actor-state.ts'));
+  const perceptionRuntimeUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/simulation/perception-runtime.ts'),
+    {
+      "'../../world/voxel'": `'${voxelUrl}'`,
+    },
+  );
+  const autonomyRuntimeUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/simulation/autonomy-runtime.ts'),
+    {
+      "'./action-runtime'": `'${actionRuntimeUrl}'`,
+      "'./actor-state'": `'${actorStateUrl}'`,
+      "'./ground-navigator'": `'${groundNavigatorUrl}'`,
+      "'./perception-runtime'": `'${perceptionRuntimeUrl}'`,
+      "'./poi-registry'": `'${poiRegistryUrl}'`,
+    },
+  );
+  const gameplaySnapshotUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/gameplay/gameplay-snapshot.ts'),
+    {
+      "'../simulation/autonomy-runtime'": `'${autonomyRuntimeUrl}'`,
+      "'./entity-store'": `'${entityStoreUrl}'`,
+      "'./player-state'": `'${playerStateUrl}'`,
+    },
+  );
+  const playerOccupancyUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/gameplay/player-occupancy.ts'),
+  );
+  const gameplayRuntimeUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/gameplay/gameplay-runtime.ts'),
+    {
+      "'../../world/voxel'": `'${voxelUrl}'`,
+      "'../simulation/autonomy-runtime'": `'${autonomyRuntimeUrl}'`,
+      "'./entity-store'": `'${entityStoreUrl}'`,
+      "'./gameplay-snapshot'": `'${gameplaySnapshotUrl}'`,
+      "'./item-registry'": `'${itemRegistryUrl}'`,
+      "'./player-state'": `'${playerStateUrl}'`,
+      "'./player-occupancy'": `'${playerOccupancyUrl}'`,
+      "'./recipe-registry'": `'${recipeRegistryUrl}'`,
+      "'./voxel-gameplay'": `'${voxelGameplayUrl}'`,
+    },
+  );
+  const gameServerGameplayUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/game-server-gameplay.ts'),
+    {
+      "'./gameplay/gameplay-runtime'": `'${gameplayRuntimeUrl}'`,
+    },
+  );
   const gameplayCommandHandlerUrl = await compileModule(
-    resolve(root, 'src/server/commands/gameplay-command-handler.ts'),
+    resolve(root, 'packages/game-core/src/server/commands/gameplay-command-handler.ts'),
     {
       "'../gameplay/item-registry'": `'${itemRegistryUrl}'`,
       "'../gameplay/voxel-gameplay'": `'${voxelGameplayUrl}'`,
     },
   );
-  const starterEcologyUrl = await compileModule(resolve(root, 'src/server/simulation/starter-ecology.ts'), {
-    "'../../world/voxel'": `'${voxelUrl}'`,
-  });
+  const starterEcologyUrl = await compileModule(
+    resolve(root, 'packages/game-core/src/server/simulation/starter-ecology.ts'),
+    {
+      "'../../world/voxel'": `'${voxelUrl}'`,
+    },
+  );
   return { gameServerGameplayUrl, gameplayCommandHandlerUrl, starterEcologyUrl };
 }
 

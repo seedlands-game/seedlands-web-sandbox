@@ -1,11 +1,15 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { GameServer } from '../../src/server/game-server';
-import type { GameplayPersistence } from '../../src/server/persistence/gameplay-persistence';
-import type { ChunkPersistence, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
-import type { FrozenGameSaveSnapshot } from '../../src/server/persistence/game-save-snapshot';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { ItemIds } from '../../src/server/gameplay/item-registry';
-import { Voxel, voxelIndex } from '../../src/world/voxel';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import type { GameplayPersistence } from '../../packages/game-core/src/server/persistence/gameplay-persistence';
+import type {
+  ChunkPersistence,
+  ChunkSnapshot,
+} from '../../packages/game-core/src/server/persistence/chunk-persistence';
+import type { FrozenGameSaveSnapshot } from '../../packages/game-core/src/server/persistence/game-save-snapshot';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
+import { Voxel, voxelIndex } from '../../packages/game-core/src/world/voxel';
 
 const deferred = () => {
   let resolve!: () => void;
@@ -16,6 +20,10 @@ const deferred = () => {
 };
 
 class ControlledGamePersistence extends MemoryGamePersistence {
+  constructor() {
+    super({ clone: testCorePlatform.clone });
+  }
+
   readonly started = deferred();
   readonly release = deferred();
 
@@ -35,7 +43,7 @@ const spawnState = (server: GameServer) => {
 describe('GameServer 一致冻结保存', () => {
   it('在异步落盘期间继续推进时，重载只读取同一冻结时刻并保留后续 dirty', async () => {
     const persistence = new ControlledGamePersistence();
-    const server = new GameServer({ seedText: 'frozen-consistency', persistence });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'frozen-consistency', persistence });
     spawnState(server);
     const frozenGameplayRevision = server.gameplayRevision;
     const frozen = server.freezeSaveSnapshot(17);
@@ -63,7 +71,7 @@ describe('GameServer 一致冻结保存', () => {
     expect(server.persistedGameplayRevision).toBe(frozenGameplayRevision);
     expect(server.gameplayRevision).toBeGreaterThan(frozenGameplayRevision);
 
-    const reloaded = new GameServer({ seedText: 'frozen-consistency', persistence });
+    const reloaded = new GameServer({ platform: testCorePlatform, seedText: 'frozen-consistency', persistence });
     await reloaded.restore();
     expect(reloaded.getVoxel(0, 20, 0)).toBe(Voxel.Water);
     expect(reloaded.getEntity('player')?.position).toEqual([0.5, 34, 0.5]);
@@ -71,7 +79,11 @@ describe('GameServer 一致冻结保存', () => {
   });
 
   it('冻结数据与之后的权威 voxel、fluid 和 Gameplay 修改不共享引用', () => {
-    const server = new GameServer({ seedText: 'frozen-isolation', persistence: new MemoryGamePersistence() });
+    const server = new GameServer({
+      platform: testCorePlatform,
+      seedText: 'frozen-isolation',
+      persistence: new MemoryGamePersistence({ clone: testCorePlatform.clone }),
+    });
     spawnState(server);
     const frozen = server.freezeSaveSnapshot(3);
     const chunk = frozen.chunks[0];
@@ -87,8 +99,8 @@ describe('GameServer 一致冻结保存', () => {
   });
 
   it('调用方修改公开 token 也不能改变内部冻结 checkpoint', async () => {
-    const persistence = new MemoryGamePersistence();
-    const server = new GameServer({ seedText: 'frozen-token-isolation', persistence });
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'frozen-token-isolation', persistence });
     spawnState(server);
     const frozen = server.freezeSaveSnapshot(4);
     const mutable = frozen as unknown as {
@@ -99,15 +111,15 @@ describe('GameServer 一致冻结保存', () => {
     mutable.chunks[0].voxels[voxelIndex(0, 20, 0)] = Voxel.Sand;
 
     await server.saveFrozen(frozen);
-    const reloaded = new GameServer({ seedText: 'frozen-token-isolation', persistence });
+    const reloaded = new GameServer({ platform: testCorePlatform, seedText: 'frozen-token-isolation', persistence });
     await reloaded.restore();
     expect(reloaded.getEntity('player')?.position).toEqual([0.5, 34, 0.5]);
     expect(reloaded.getVoxel(0, 20, 0)).toBe(Voxel.Water);
   });
 
   it('失败不推进 ACK 或覆盖旧 checkpoint，重试后整体更新', async () => {
-    const persistence = new MemoryGamePersistence();
-    const server = new GameServer({ seedText: 'frozen-failure', persistence });
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'frozen-failure', persistence });
     spawnState(server);
     await server.save(1);
     const persistedGameplayRevision = server.persistedGameplayRevision;
@@ -119,13 +131,13 @@ describe('GameServer 一致冻结保存', () => {
     expect(server.getChunk(0, 0, 0)).toMatchObject({ revision: 2, persistedRevision: 1, dirty: true });
     expect(server.persistedGameplayRevision).toBe(persistedGameplayRevision);
 
-    const oldCheckpoint = new GameServer({ seedText: 'frozen-failure', persistence });
+    const oldCheckpoint = new GameServer({ platform: testCorePlatform, seedText: 'frozen-failure', persistence });
     await oldCheckpoint.restore();
     expect(oldCheckpoint.getVoxel(0, 20, 0)).toBe(Voxel.Water);
     expect(oldCheckpoint.getInventory('player').slots[0]?.count).toBe(1);
 
     await expect(server.save(3)).resolves.toMatchObject({ gameplaySaved: true, commitSequence: 3 });
-    const newCheckpoint = new GameServer({ seedText: 'frozen-failure', persistence });
+    const newCheckpoint = new GameServer({ platform: testCorePlatform, seedText: 'frozen-failure', persistence });
     await newCheckpoint.restore();
     expect(newCheckpoint.getVoxel(0, 20, 0)).toBe(Voxel.Sand);
     expect(newCheckpoint.getInventory('player').slots[0]?.count).toBe(2);
@@ -144,7 +156,7 @@ describe('GameServer 一致冻结保存', () => {
         gameplayWrites += 1;
       },
     };
-    const server = new GameServer({ seedText: 'atomic-port-required', persistence });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'atomic-port-required', persistence });
     spawnState(server);
 
     await expect(server.save(1)).rejects.toThrow(/atomic|frozen/i);
@@ -153,7 +165,7 @@ describe('GameServer 一致冻结保存', () => {
   });
 
   it('未配置持久化时不产生虚假 ACK', async () => {
-    const server = new GameServer({ seedText: 'no-persistence-ack' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'no-persistence-ack' });
     server.edit(0, 20, 0, Voxel.Wood);
 
     await expect(server.save(1)).resolves.toEqual({ savedChunks: [], gameplaySaved: false, commitSequence: 1 });
@@ -161,12 +173,12 @@ describe('GameServer 一致冻结保存', () => {
   });
 
   it('持久检查点跨会话保持排序，不能用零序号覆盖旧保存', async () => {
-    const persistence = new MemoryGamePersistence();
-    const first = new GameServer({ seedText: 'new-session-sequence', persistence });
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'new-session-sequence', persistence });
     spawnState(first);
     await first.save(17);
 
-    const second = new GameServer({ seedText: 'new-session-sequence', persistence });
+    const second = new GameServer({ platform: testCorePlatform, seedText: 'new-session-sequence', persistence });
     await second.restore();
     second.giveItem('player', { itemId: ItemIds.Berry, count: 1 });
     expect(second.restoredCommitSequence).toBe(17);

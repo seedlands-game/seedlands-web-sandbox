@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../src/world/voxel';
-import { meshChunk } from '../../src/world/mesh';
-import { modelBoxesForVoxel } from '../../src/world/voxel-model';
-import { itemMeshDefinition } from '../../src/client/presentation/item-mesh-definition';
+import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../packages/game-core/src/world/voxel';
+import { meshChunk } from '../../packages/game-core/src/world/mesh';
+import { modelBoxesForVoxel } from '../../packages/game-core/src/world/voxel-model';
+import { itemMeshDefinition } from '../../apps/web/src/client/presentation/item-mesh-definition';
 
 describe('物品静态网格定义', () => {
   it('灯笼只从权威体素盒子生成，并按两个兼容材质分组', () => {

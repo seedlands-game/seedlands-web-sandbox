@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { AppearanceEditor } from '../../src/app/asset-workbench/appearance-editor';
-import { builtinAssets } from '../../src/client/presentation/asset-catalog';
-import { resolveAppearanceAssets, validateAppearanceProject } from '../../src/client/presentation/appearance-project';
+import { AppearanceEditor } from '../../apps/web/src/app/asset-workbench/appearance-editor';
+import { builtinAssets } from '../../apps/web/src/client/presentation/asset-catalog';
+import {
+  resolveAppearanceAssets,
+  validateAppearanceProject,
+} from '../../apps/web/src/client/presentation/appearance-project';
 
 describe('外观编辑历史和引用', () => {
   it('专用材质同时复制像素源，撤销/重做不会修改共享来源', () => {

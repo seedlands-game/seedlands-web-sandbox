@@ -1,0 +1,58 @@
+{
+  "status": "REFERENCE_PROJECTION_PASS",
+  "wireStatus": "not-adopted",
+  "timing": "NOT_COLLECTED",
+  "source": {
+    "gitSha": "0b2ae3e31e95f5de65334d99e674bbd83ac459ae",
+    "trackedSourceDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "explicitInputSha256": {
+      "src/server/protocol/network-gameplay-consumer-reference.ts": "ab562454df40fc5bfd26141e19fd178948b128612a0bcfdb9708c79363ef62ee",
+      "src/server/protocol/network-reference-pose.ts": "ee982b1380a16e030e5d2388728a21ee3d90406adef17ed5e140b76026bd7f98",
+      "src/server/protocol/network-reference-projection.ts": "8175dd39124b40b0f1ddcb3ddb6f5eb52930802e556372ab60fa11df0f0560d3",
+      "changes/2026-09-06-node-dedicated-server/e2e/support/network-gameplay-consumer-corpus-recorder.ts": "133afa23c6a27045577fc5b112e13af57959ee22f51a89f31a4bdc43ecabe4e3",
+      "changes/2026-09-06-node-dedicated-server/e2e/network-gameplay-consumer-corpus.test.ts": "df315fe2b280c8787dfc52ae16b24ec3158e7b692573098b6fc11a8cb3086611"
+    }
+  },
+  "environment": {
+    "node": "v22.23.2",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "corpus": {
+    "format": "seedlands-network-gameplay-consumer-corpus/v2",
+    "referenceGeneration": 2,
+    "config": {
+      "seedText": "network-gameplay-consumer-corpus-fixture",
+      "stages": ["starter-ecology", "fixture-admin-expanded", "restored"]
+    },
+    "recordCount": 9,
+    "manifestPayloadSha256": "978209efa1e0afadfed69bd2f99cd050557397cfc60572c33aeea1c1f8484f10",
+    "corpusSha256": "3d59fde50a506db571a393d21b21dcbd2a931d2ff64ab032be2fd7bcc6ed6965"
+  },
+  "validation": {
+    "referenceUnitTests": 18,
+    "realHostCaptureTests": 1,
+    "currentExplicitSourceHashes": "PASS",
+    "static": {
+      "status": "PASS",
+      "testFilesPassed": 180,
+      "testFilesSkipped": 2,
+      "testsPassed": 960,
+      "testsSkipped": 4,
+      "worldLineCoveragePercent": 96.37
+    },
+    "browserBuild": "PASS_WITH_EXISTING_CHUNK_WARNING",
+    "nodeFiveEntryBuild": "PASS_AFTER_FULL_TYPECHECK"
+  },
+  "logSha256": {
+    "seedlands-gameplay-consumer-static-final.log": "a7a705ad3e795701271453bf6aa03023d4d79e9f55be2afd1ffd2a116d54933f",
+    "seedlands-gameplay-consumer-build.log": "1f417e10f8a3a894bd05fa48567fae0abd4bf68f569cd5bf9db998eca919b756",
+    "seedlands-gameplay-consumer-node-build.log": "ea781263d436a48b6756cd66960586d66b8e523aa3445561af734485f59670bc"
+  },
+  "limits": [
+    "九条来自三个小规模阶段，非密度或性能曲线。",
+    "可靠Gameplay、pose与correction的真实客户端合并、删除、重生和GUI尚未实现或验证。",
+    "v2仅增加当前公开actor behavior，旧v1语料保持历史身份；codec v2另行验证。",
+    "source gitSha加显式新文件hash绑定采集时的未提交源码，不能将空tracked diff视为没有未提交文件。"
+  ]
+}

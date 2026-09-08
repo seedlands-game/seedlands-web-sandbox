@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ActiveMonotonicClock, createClockHandshake, toSessionTime } from '../../src/runtime/active-monotonic-clock';
+import {
+  ActiveMonotonicClock,
+  createClockHandshake,
+  toSessionTime,
+} from '../../packages/game-core/src/runtime/active-monotonic-clock';
 
 describe('ActiveMonotonicClock', () => {
   it('暂停期间冻结活跃时间且恢复后不补算睡眠区间', () => {

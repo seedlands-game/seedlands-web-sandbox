@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   buildWaterSurfaceTransition,
   type WaterSurfaceTransitionGeometry,
-} from '../../src/app/scene/water-surface-transition';
-import { batchMeshData, compactMeshData, meshChunk, type MeshData } from '../../src/world/mesh';
-import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../src/world/voxel';
+} from '../../apps/web/src/app/scene/water-surface-transition';
+import { batchMeshData, compactMeshData, meshChunk, type MeshData } from '../../packages/game-core/src/world/mesh';
+import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../packages/game-core/src/world/voxel';
 
 type WaterCell = { x: number; y: number; z: number; level: number };
 

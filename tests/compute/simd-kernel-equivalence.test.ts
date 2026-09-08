@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { collisionBoxesForVoxel } from '../../src/world/voxel-model';
+import { collisionBoxesForVoxel } from '../../packages/game-core/src/world/voxel-model';
 import { expect, it } from 'vitest';
 const root = 'changes/2026-09-07-data-plane-adoption/evidence/';
 it('scalar and SIMD classify all voxel ids and unaligned vector tails identically', async () => {
