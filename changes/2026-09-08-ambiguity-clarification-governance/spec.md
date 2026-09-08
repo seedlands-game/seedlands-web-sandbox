@@ -75,7 +75,7 @@
 - [x] 规范覆盖 A/A 噪声、预注册样本/估计量/判定式、单变量/不可分割单元、artifact/config 身份、失败样本、组合端到端 A/B、有界消融和负结果处置。
 - [x] 规范允许不可安全运行的旧 control 由硬约束淘汰，但不将其冒充为运行时收益。
 - [x] 历史回顾以基线 commit、主线 75 个 change 的纳入/排除 manifest 和 15 个深读 change 支撑，并纳入 Node 网络选型的过早收敛与争用样本教训。
-- [ ] 新增规则通过格式、静态、构建、独立复核和远端 CI。
+- [x] 新增规则通过格式、静态、构建、独立复核和远端 CI。
 
 ## Tasks
 
@@ -87,11 +87,11 @@
 - [x] 以基线 commit 全量索引 75 个主线 change，深读 15 个 change/12 条相关证据链并生成纳入/排除 manifest；live fetch Node 独立服务端网络选型分支。
 - [x] 起草优化实验基础规范和历史回顾。
 - [x] 完成新增规则的独立复核与本地确定性检查。
-- [ ] 更新 PR 并读回远端 CI。
+- [x] 更新 PR 并读回远端 CI。
 
 ## Delivery Snapshot
 
-- 状态：本地准出完成，待远端 CI。
+- 状态：Delivered，待人类审核。
 - 分支：`codex/sdd-ambiguity-clarification`。
 - 生产代码/依赖：无变化。
 - 长期 docs baseline：继续更新 `docs/development-governance.md`，因为模糊澄清与优化实验都是后续 change 跨任务复用的基础规则；`AGENTS.md` 只保留开工摘要和入口；`docs/performance-execution.md` 仅补充资源窗口与采纳合同的边界。
@@ -99,4 +99,5 @@
 - 复验说明：首次全量 coverage 中 3 项 headless 测试触发 15 秒超时；两个相关测试文件定向复验 10/10 通过，随后无并行 reviewer 负载的完整 `pnpm verify:static` 通过。没有修改无关测试或生产代码。
 - 独立复核：两轮扩展各请求一次 `gpt-5.6-sol/xhigh`，运行时均未暴露 effective telemetry。本轮首次结论为不通过；指出的 3 项 P1 和 1 项 P2 已逐项处置，详见 `review.md`。
 - 新增审计范围：以 `4aefa4729583113bbfde646efd043e152b1be05f` 为基线，对主线 75 个 change 目录完成名称/spec/关键词全量索引；深入阅读 15 个 change/12 条性能、效率、测量或技术选型证据链；额外核对 `origin/codex/node-dedicated-server@8144135` 的网络选型与 codec 实验。详见 `optimization-audit-manifest.md` 与 `optimization-retrospective.md`。
-- 未验证：远端 CI 尚未读回；治理合同的长期执行效果仍需后续真实 change 走查。
+- 远端 CI：implementation commit `12920d4` 的 GitHub Actions run `34201231386` 已读回；Production build、Chromium regression 和 Static verification 全部通过。
+- 未验证：治理合同的长期执行效果仍需后续真实 change 走查；若规则造成过度实验或遗漏技术候选，按重开条件修订。
