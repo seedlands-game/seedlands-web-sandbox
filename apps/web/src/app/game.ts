@@ -39,6 +39,7 @@ import { GameExperimentState } from './experimental/game-experiment-state';
 import { GameFrameLoop } from './game-frame-loop';
 import { GameSaveQueue } from './world/game-save-queue';
 import { startPlayableWorkerSession } from './world/playable-worker-session';
+import { installRemotePlayableEvidence } from './world/remote-playable-evidence';
 
 export class Game {
   private paused = false;
@@ -269,9 +270,11 @@ export class Game {
     this.controller.install();
     if (authority.mode === 'local') authority.requestLogicObservation();
     this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
-    await waitForInitialWorldReady(this.world.waitForInitialVisibleChunk());
+    // prettier-ignore
+    await waitForInitialWorldReady(remote ? this.world.waitForInitialPlayableArea() : this.world.waitForInitialVisibleChunk());
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
+    return { seed: ready.seedText };
   }
 
   private createController(camera: pc.Entity) {
@@ -331,7 +334,12 @@ export class Game {
     this.gameplayClient?.refresh();
     this.publishDebugVisibility(harnessEnabled);
     this.uiBridge.beginMeasurementWindow();
-    if (!harnessEnabled || !this.controller || !localAuthority) return;
+    if (!harnessEnabled || !this.controller) return;
+    if (authority instanceof RemoteAuthorityClient) {
+      if (this.world) this.removeHarness = installRemotePlayableEvidence(authority, this.controller, this.world);
+      return;
+    }
+    if (!localAuthority) return;
     this.removeHarness = installHarness(
       createRuntimeHarnessApi({
         lifecycleSnapshot: () => ({ ...this.lifecycle }),
@@ -388,13 +396,8 @@ export class Game {
       this.authority?.mode === 'local' ? (paused ? this.authority.pause() : this.authority.resume()) : undefined;
     void control?.catch(() => undefined);
     this.gameplayClient?.setSuspended(paused);
-    this.worldAudio?.updateWorld(
-      this.camera,
-      this.world,
-      this.controller?.onGround ?? false,
-      paused,
-      this.controller?.waterImmersion,
-    );
+    // prettier-ignore
+    this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, paused, this.controller?.waterImmersion);
   }
 
   async leaveWorld() {

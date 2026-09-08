@@ -253,12 +253,16 @@ async function start(bootstrap: NodeAuthorityWorkerBootstrap): Promise<Authority
       }
       if (kind === 'authority-perform-action') {
         if (!Number.isSafeInteger(request.sequence)) throw new TypeError('Authority action sequence 无效。');
+        const receipt = await host.performAction(
+          request.action as never,
+          request.sequence as number,
+          request.expectedCommitSequence as number | undefined,
+        );
+        // Successful placement intentionally aliases result.commit with the
+        // entry in commits inside core. The strict cross-isolate RPC DTO has no
+        // reference semantics, so materialize the JSON value graph here.
         return {
-          payload: await host.performAction(
-            request.action as never,
-            request.sequence as number,
-            request.expectedCommitSequence as number | undefined,
-          ),
+          payload: JSON.parse(JSON.stringify(receipt)) as typeof receipt,
         };
       }
       if (kind === 'authority-request-chunk') {

@@ -222,6 +222,11 @@
         <p class="pause-subtitle">
           {view.state.mode === 'remote' ? '菜单期间 Node 世界仍在继续' : '世界正在等待你'}
         </p>
+        {#if view.state.mode === 'remote'}
+          <p class="muted" data-remote-server-info>
+            {view.state.remoteUrl} · 服务器 Seed：{view.state.serverSeed}
+          </p>
+        {/if}
         <div class="pause-actions">
           <GameButton
             label="继续游戏"

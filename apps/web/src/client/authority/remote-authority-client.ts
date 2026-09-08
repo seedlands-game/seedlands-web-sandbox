@@ -54,8 +54,10 @@ export class RemoteAuthorityClient {
   private snapshotValue: AuthoritySnapshot | null = null;
   private gameplayValue: AuthorityGameplayView | null = null;
   private publicationSequence = -1;
+  private consumedCommitWorldRevision = 0;
   private requestSequence = 0;
   private edgeSequence = 0;
+  private snapshotReceivedAtMs = 0;
   private storageBytesValue = 0;
   private disposed = false;
   private failed = false;
@@ -188,6 +190,14 @@ export class RemoteAuthorityClient {
   get estimatedInputTransitMs() { return 16; }
   // prettier-ignore
   get snapshotRejections() { return { wrongEpoch: 0, stale: 0 }; }
+  // prettier-ignore
+  get readyBaselines() { return this.mesh.readyOwnerCount; }
+
+  evidenceSnapshot() {
+    const snapshot = this.snapshotValue;
+    if (!snapshot) throw new Error('Node authority evidence 尚未 ready。');
+    return Object.freeze({ clientEpoch: this.epoch, serverEpoch: this.serverEpoch, snapshot });
+  }
 
   sendInput(command: InputCommand): void {
     if (
@@ -198,14 +208,19 @@ export class RemoteAuthorityClient {
       this.socket.readyState !== WebSocket.OPEN
     )
       return;
-    const expiresAfterPhysicsTick =
-      command.targetPhysicsTick + Math.max(2, Math.ceil(this.requireReady().frequencies.physicsHz / 2));
+    const frequencies = this.requireReady().frequencies;
+    const elapsedTicks = Math.ceil(((performance.now() - this.snapshotReceivedAtMs) * frequencies.physicsHz) / 1_000);
+    const targetPhysicsTick = Math.max(
+      command.targetPhysicsTick,
+      (this.snapshotValue?.physicsTick ?? 0) + elapsedTicks + 2,
+    );
+    const expiresAfterPhysicsTick = targetPhysicsTick + Math.max(2, Math.ceil(frequencies.physicsHz / 2));
     if (command.edges.jumpPressed)
       this.send('input-edge', {
         kind: 'input-edge',
         ref: this.ref,
         edgeId: ++this.edgeSequence,
-        targetPhysicsTick: command.targetPhysicsTick,
+        targetPhysicsTick,
         expiresAfterPhysicsTick,
         type: 'jump-pressed',
       });
@@ -213,7 +228,7 @@ export class RemoteAuthorityClient {
       kind: 'input-state',
       ref: this.ref,
       inputSequence: command.sequence,
-      targetPhysicsTick: command.targetPhysicsTick,
+      targetPhysicsTick,
       expiresAfterPhysicsTick,
       moveX: command.state.moveX,
       moveZ: command.state.moveZ,
@@ -395,12 +410,14 @@ export class RemoteAuthorityClient {
     this.serverEpoch = projected.welcome.serverEpoch;
     this.gameplayValue = projected.gameplay;
     this.snapshotValue = projected.snapshot;
+    this.snapshotReceivedAtMs = performance.now();
     this.readyValue = projected.ready;
     this.mesh.initialize(
       projected.interestRef,
       projected.welcome.presentation.limits,
       projected.snapshot.worldRevision,
     );
+    this.consumedCommitWorldRevision = projected.snapshot.worldRevision;
     return projected.ready;
   }
 
@@ -411,12 +428,13 @@ export class RemoteAuthorityClient {
     const correction = message.correction as PlayerCorrectionReference;
     if (correction.epoch !== this.serverEpoch) throw new Error('Node correction epoch 不匹配。');
     const commits = message.commits.map((commit) => commitFromReference(commit as WorldCommitPresentationReference));
-    this.mesh.consumeCommits(commits);
+    this.consumeCommits(commits);
     if (message.gameplay) {
       this.gameplayValue = gameplayFromReference(message.gameplay as GameplayConsumerReference);
       this.options.onGameplay?.(this.gameplayValue);
     }
     this.snapshotValue = snapshotFromCorrection(this.epoch, correction);
+    this.snapshotReceivedAtMs = performance.now();
     this.options.onSnapshot?.(this.snapshotValue);
     return null;
   }
@@ -435,7 +453,7 @@ export class RemoteAuthorityClient {
     const commits = Array.isArray(message.commits)
       ? message.commits.map((commit) => commitFromReference(commit as WorldCommitPresentationReference))
       : [];
-    this.mesh.consumeCommits(commits);
+    this.consumeCommits(commits);
     const outcome = receipt.outcome;
     const result =
       outcome.success && receipt.action.type === 'place'
@@ -459,6 +477,12 @@ export class RemoteAuthorityClient {
       throw error;
     }
     this.socket.send(encoded);
+  }
+
+  private consumeCommits(commits: readonly WorldCommitResult[]): void {
+    // prettier-ignore
+    const fresh = commits.filter((commit) => { if (!commit.committed || commit.worldRevision <= this.consumedCommitWorldRevision) return false; this.consumedCommitWorldRevision = commit.worldRevision; return true; });
+    if (fresh.length) this.mesh.consumeCommits(fresh);
   }
 
   private makePending<T>(

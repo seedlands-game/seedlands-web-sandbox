@@ -100,10 +100,11 @@ export class ApplicationShell {
       startRemote: async (url, accessKey, quality) => {
         const generation = ++this.startGeneration;
         await audio.unlock();
-        if (generation !== this.startGeneration) return;
+        if (generation !== this.startGeneration) throw new Error('Remote start was superseded.');
         bridge.publishShell({ phase: 'loading', quality, enterLabel: '正在连接 Node…' });
         try {
-          await game.startRemote(url, accessKey, quality);
+          const remote = await game.startRemote(url, accessKey, quality);
+          return remote;
         } catch (error) {
           if (generation === this.startGeneration) {
             game.abortStart();

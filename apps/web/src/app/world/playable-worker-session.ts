@@ -28,16 +28,17 @@ export const startPlayableWorkerSession = async (options: {
     ...options.client,
     signal: options.signal,
   });
-  return {
-    authority: connected.authority,
-    compute: new BrowserComputeRuntime({
+  try {
+    const compute = new BrowserComputeRuntime({
       epoch: connected.authority.epoch,
       generalWorkerCount: options.generalWorkerCount,
       fluidWorkerEnabled: false,
       wasm: options.wasm,
       onFluidCandidate: () => undefined,
-    }),
-    logic: null,
-    ready: connected.ready,
-  };
+    });
+    return { authority: connected.authority, compute, logic: null, ready: connected.ready };
+  } catch (error) {
+    connected.authority.dispose();
+    throw error;
+  }
 };

@@ -298,6 +298,17 @@ export class World {
     return this.repository.waitForFirstVisible();
   }
 
+  async waitForInitialPlayableArea(minimumRenderedChunks = 9): Promise<void> {
+    await this.repository.waitForFirstVisible();
+    while (!this.disposed && this.telemetry.renderedChunks < minimumRenderedChunks)
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 16));
+    if (this.disposed) throw new Error('初始可玩区域加载已取消。');
+  }
+
+  getRenderedChunkRevision(cx: number, cy: number, cz: number): number | null {
+    return this.repository.chunks.get(chunkKey(cx, cy, cz))?.task.chunkRevision ?? null;
+  }
+
   beginFluidFeedbackSample(target?: Omit<FluidFeedbackTarget, 'chunkRevisions'>) {
     const chunkRevisions: { key: string; revision: number }[] = [];
     if (target) {

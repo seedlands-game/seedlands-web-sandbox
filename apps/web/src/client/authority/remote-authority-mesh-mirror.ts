@@ -17,6 +17,7 @@ import { digest, sizer } from './remote-authority-projections';
 
 const BASELINE_IN_FLIGHT_BYTES = 16 * 1024 * 1024;
 const MAX_REVISION_WATERMARKS = 4_096;
+const MAX_IGNORED_BUNDLES = 128;
 
 type OwnerState = {
   handle: NetworkBaselineOwnerHandle;
@@ -56,6 +57,7 @@ export class RemoteAuthorityMeshMirror {
   private readonly baselineRequestIds = new Map<string, number>();
   private readonly revisionWatermarks = new Map<string, number>();
   private readonly owners = new Map<string, OwnerState>();
+  private readonly ignoredBundles = new Set<number>();
   private readonly collisionChunks = new Map<
     string,
     { canonical: Uint16Array; fluid: Uint8Array; chunkRevision: number }
@@ -172,9 +174,20 @@ export class RemoteAuthorityMeshMirror {
     return this.collisionChunks.get(chunkKey(cx, cy, cz))?.chunkRevision ?? null;
   }
 
+  get readyOwnerCount(): number {
+    let count = 0;
+    for (const owner of this.owners.values()) if (owner.ready) count += 1;
+    return count;
+  }
+
   acceptDescriptor(message: Record<string, unknown>): void {
     const descriptor = message.descriptor as BaselineBundleDescriptorReference;
     this.requireReassembler().acceptDescriptor(descriptor);
+    if (this.baselineRequestIds.get(descriptor.key) !== descriptor.requestId) {
+      this.ignoreBundle(descriptor.bundleId);
+      void this.reassembler?.cancel(descriptor.bundleId).catch(() => undefined);
+      return;
+    }
     const staleAtDescriptor = descriptor.entries.some(
       (entry) => entry.chunkRevision < (this.revisionWatermarks.get(entry.key) ?? 0),
     );
@@ -201,17 +214,25 @@ export class RemoteAuthorityMeshMirror {
     const block = blocks.find((candidate) => candidate.name === message.payloadBlock);
     if (!block) throw new Error('Node baseline page 缺少 payload。');
     const page = { ...(message.page as BaselinePageReference), bytes: block.bytes };
+    if (this.ignoredBundles.has(page.bundleId)) return;
     const bundle = await this.requireReassembler().acceptPage(page);
     if (!bundle) return;
     const owner = this.owners.get(bundle.descriptor.key);
-    if (!owner || owner.descriptor.bundleId !== bundle.descriptor.bundleId)
-      throw new Error('Node baseline owner 已失效。');
+    if (!owner || owner.descriptor.bundleId !== bundle.descriptor.bundleId) {
+      this.options.rejectPending(bundle.descriptor.requestId, new Error('区块基线请求已被更新。'));
+      return;
+    }
     if (owner.staleAtDescriptor) {
       this.releaseOwner(bundle.descriptor.key, owner);
       this.options.rejectPending(bundle.descriptor.requestId, new Error('区块基线捕获期间已过期。'));
       return;
     }
     const accepted = this.consumer.accept(owner.handle, bundle);
+    if (accepted.status === 'rejected' && accepted.reason === 'superseded') {
+      this.releaseOwner(bundle.descriptor.key, owner);
+      this.options.rejectPending(bundle.descriptor.requestId, new Error('区块基线捕获期间已过期。'));
+      return;
+    }
     if (accepted.status === 'rejected') throw new Error(`Node baseline 被拒绝：${accepted.reason}。`);
     owner.ready = true;
     this.options.resolvePending(bundle.descriptor.requestId);
@@ -228,8 +249,10 @@ export class RemoteAuthorityMeshMirror {
             owner.descriptor.entries.some(
               (candidate) => candidate.key === entry.key && candidate.chunkRevision < entry.revision,
             )
-          )
+          ) {
             owner.ready = false;
+            owner.staleAtDescriptor = true;
+          }
       }
     this.consumer.consumeCollisionCommits(commits, {
       onCommit: (commit) => this.options.onCommit?.(commit),
@@ -259,6 +282,12 @@ export class RemoteAuthorityMeshMirror {
   private releaseOwner(key: string, owner: OwnerState): void {
     this.consumer.releaseOwner(owner.handle);
     this.owners.delete(key);
+  }
+
+  private ignoreBundle(bundleId: number): void {
+    this.ignoredBundles.add(bundleId);
+    while (this.ignoredBundles.size > MAX_IGNORED_BUNDLES)
+      this.ignoredBundles.delete(this.ignoredBundles.values().next().value!);
   }
 
   private readCell(x: number, y: number, z: number): { canonical: number; fluid: number } | null {

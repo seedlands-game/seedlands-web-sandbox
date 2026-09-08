@@ -6,10 +6,12 @@ export type ApplicationShellState = Readonly<{
   quality: ShellQuality;
   error: string;
   mode: 'local' | 'remote';
+  remoteUrl: string;
+  serverSeed: string;
 }>;
 type GamePort = {
   start: (seed: string, quality: ShellQuality, openMode: WorldOpenMode) => Promise<void>;
-  startRemote: (url: string, accessKey: string, quality: ShellQuality) => Promise<void>;
+  startRemote: (url: string, accessKey: string, quality: ShellQuality) => Promise<void | { seed: string }>;
   leave: () => Promise<void>;
   pause: (paused: boolean) => void;
   abortStart: () => void;
@@ -20,7 +22,15 @@ export function sanitizeQuality(value: unknown): ShellQuality {
 }
 
 export class ShellController {
-  private value: ApplicationShellState = { phase: 'menu', seed: '', quality: 'medium', error: '', mode: 'local' };
+  private value: ApplicationShellState = {
+    phase: 'menu',
+    seed: '',
+    quality: 'medium',
+    error: '',
+    mode: 'local',
+    remoteUrl: '',
+    serverSeed: '',
+  };
   private transitionSequence = 0;
   private readonly subscribers = new Set<(value: ApplicationShellState) => void>();
   constructor(private readonly game: GamePort) {}
@@ -39,7 +49,7 @@ export class ShellController {
   async start(seed: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {
     if (this.value.phase !== 'menu') return;
     const transition = ++this.transitionSequence;
-    this.publish({ phase: 'loading', seed, quality, error: '', mode: 'local' });
+    this.publish({ phase: 'loading', seed, quality, error: '', mode: 'local', remoteUrl: '', serverSeed: '' });
     try {
       await this.game.start(seed, quality, openMode);
       if (transition === this.transitionSequence) this.publish({ phase: 'playing' });
@@ -52,10 +62,11 @@ export class ShellController {
   async connectRemote(url: string, accessKey: string, quality: ShellQuality) {
     if (this.value.phase !== 'menu') return;
     const transition = ++this.transitionSequence;
-    this.publish({ phase: 'loading', quality, error: '', mode: 'remote' });
+    this.publish({ phase: 'loading', quality, error: '', mode: 'remote', remoteUrl: url, serverSeed: '' });
     try {
-      await this.game.startRemote(url, accessKey, quality);
-      if (transition === this.transitionSequence) this.publish({ phase: 'playing' });
+      const remote = await this.game.startRemote(url, accessKey, quality);
+      const serverSeed = remote?.seed ?? '';
+      if (transition === this.transitionSequence) this.publish({ phase: 'playing', seed: serverSeed, serverSeed });
     } catch (error) {
       if (transition === this.transitionSequence)
         this.publish({ phase: 'menu', error: this.message(error, '未能连接 Node，请检查地址和口令。') });

@@ -25,11 +25,13 @@
   let latestSeed = $state('');
   let error = $state('');
   let workerSupport = $state<WorkerSupport>('checking');
+  let controllerState = $state(untrack(() => application?.controller.state));
   onMount(() =>
     application?.subscribe(() => {
       latestSeed = application.latestSeed;
       error = application.controller.state.error;
       workerSupport = application.capabilities.workerSupport;
+      controllerState = application.controller.state;
     }),
   );
   let seed = $state(untrack(() => shell.seed));
@@ -120,7 +122,14 @@
           <option value="continue-legacy">明确继续旧版 v2</option>
           <option value="new-current">新建或进入新版 v3（保留旧档）</option>
         </select>
-      </label>{:else}<p class="muted">只允许本机 ws 地址；世界权威、持续 tick 与存档都由 Node 持有。</p>{/if}
+      </label>{:else}<p class="muted">只允许本机 ws 地址；关闭网页后世界仍会继续，存档保存在 Node 服务端。</p>{/if}
+    {#if controllerState?.mode === 'remote' && controllerState.remoteUrl}
+      <p class="muted" data-remote-server-info>
+        上次连接：{controllerState.remoteUrl}{controllerState.serverSeed
+          ? ` · 服务器 Seed：${controllerState.serverSeed}`
+          : ''}
+      </p>
+    {/if}
     {#if shell.initializationError}
       <GameButton id="enter" label={shell.enterLabel} onclick={() => application?.reloadAfterInitializationFailure()}>
         {shell.enterLabel}

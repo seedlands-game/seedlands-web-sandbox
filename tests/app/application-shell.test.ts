@@ -136,9 +136,9 @@ describe('ApplicationShell experiment and capability gates', () => {
 
   it('连接取消后的迟到失败不会中止新远端会话', async () => {
     let rejectFirst!: (error: Error) => void;
-    let resolveSecond!: () => void;
-    const first = new Promise<void>((_resolve, reject) => (rejectFirst = reject));
-    const second = new Promise<void>((resolve) => (resolveSecond = resolve));
+    let resolveSecond!: (value: { seed: string }) => void;
+    const first = new Promise<{ seed: string }>((_resolve, reject) => (rejectFirst = reject));
+    const second = new Promise<{ seed: string }>((resolve) => (resolveSecond = resolve));
     const game = createGame();
     vi.mocked(game.startRemote)
       .mockImplementationOnce(() => first)
@@ -159,7 +159,7 @@ describe('ApplicationShell experiment and capability gates', () => {
 
     expect(game.abortStart).toHaveBeenCalledOnce();
     expect(application.controller.state.phase).toBe('loading');
-    resolveSecond();
+    resolveSecond({ seed: 'mosslight-68' });
     await newConnection;
     expect(application.controller.state.phase).toBe('playing');
     expect(bridge.shell.get().phase).not.toBe('error');

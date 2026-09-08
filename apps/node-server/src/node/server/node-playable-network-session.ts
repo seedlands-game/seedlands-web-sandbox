@@ -308,14 +308,11 @@ export function createSession(
     }
     if (message.kind === 'input-edge') {
       const currentTick = authority.latestSnapshot()?.physicsTick ?? ready.snapshot.physicsTick;
-      if (
-        message.edgeId <= lastClientEdgeId ||
-        message.targetPhysicsTick <= currentTick ||
-        message.targetPhysicsTick > currentTick + 120 ||
-        message.expiresAfterPhysicsTick < message.targetPhysicsTick
-      )
-        throw new Error('Input edge is stale or invalid.');
+      if (message.edgeId <= lastClientEdgeId) return;
       lastClientEdgeId = message.edgeId;
+      if (message.targetPhysicsTick <= currentTick || message.expiresAfterPhysicsTick <= currentTick) return;
+      if (message.targetPhysicsTick > currentTick + 120 || message.expiresAfterPhysicsTick < message.targetPhysicsTick)
+        throw new Error('Input edge is stale or invalid.');
       pendingJumpEdge = {
         edgeId: message.edgeId,
         targetPhysicsTick: message.targetPhysicsTick,
