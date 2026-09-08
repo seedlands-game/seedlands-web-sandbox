@@ -8,8 +8,14 @@ vi.mock('../../src/app/gameplay/gameplay-model-assets', () => ({
     release: vi.fn(),
     assets: {
       materials: {},
-      addBox(parent: pc.Entity, name: string) {
+      addBox(
+        parent: pc.Entity,
+        name: string,
+        _material: unknown,
+        position?: Readonly<{ x: number; y: number; z: number }>,
+      ) {
         const child = new pc.Entity(name);
+        if (position) child.setLocalPosition(position.x, position.y, position.z);
         parent.addChild(child);
         return child;
       },
@@ -28,6 +34,15 @@ const item = (y: number): GameplayEntity => ({
   position: [0, y, 0],
   physicsVelocity: [0, -1, 0],
   stack: { itemId: 'dirt-block', count: 1 },
+});
+
+const settler = (x: number): GameplayEntity => ({
+  id: 'settler',
+  type: 'npc',
+  kind: 'npc',
+  lifecycle: 'active',
+  archetype: 'settler',
+  position: [x, 0, 0],
 });
 
 const reconcileFrame = (
@@ -103,5 +118,22 @@ describe('玩法实体的独立表现时钟', () => {
     const recovered = root.findByName('gameplay:drop')!.getPosition().y;
     expect(Number.isFinite(recovered)).toBe(true);
     expect(recovered).toBeLessThan(before);
+  });
+
+  it('居民双段手臂通过同侧肩部 pivot 摆动，手掌不会脱离袖子', () => {
+    const root = new pc.Entity('root');
+    const presenter = new GameplayEntityPresenter({ root } as pc.Application);
+    reconcileFrame(presenter, [settler(0)], 0);
+    reconcileFrame(presenter, [settler(1)], 0.1);
+
+    const leftPivot = root.findByName('arm-left-pivot')!;
+    const leftSleeve = root.findByName('arm-left-sleeve')!;
+    const leftHand = root.findByName('arm-left-hand')!;
+    expect(leftPivot).not.toBeNull();
+    expect(leftSleeve.parent).toBe(leftPivot);
+    expect(leftHand.parent).toBe(leftPivot);
+    expect(leftPivot.getLocalEulerAngles().x).not.toBe(0);
+    expect(leftSleeve.getLocalEulerAngles().length()).toBeCloseTo(0);
+    expect(leftHand.getLocalEulerAngles().length()).toBeCloseTo(0);
   });
 });

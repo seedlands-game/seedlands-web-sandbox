@@ -1,0 +1,39 @@
+{
+  "sourceSha256": {
+    "asset-workbench.html": "200aebc8668ae65779ea3ff35bc87045b477db532d94c014309377e7185a554e",
+    "src/app/asset-workbench/asset-preview.svelte": "8d5d63d2902330faa976eae1dec23a61c8f7ed35b2ba46b73f951cf91ce1cf22",
+    "src/app/asset-workbench/asset-thumbnail.svelte": "f0015c397556a0fdffc0424724bb8635327c2f258fa50e53cda520574598c48c",
+    "src/app/asset-workbench/editor-state.ts": "d03722549fe6cd32ff02f78c4c8cee11a8acbb9826d4b72e6e6e284ca904e338",
+    "src/app/asset-workbench/main.ts": "f1fbc96f194d0158d7c5627012b4d0924e0f526e46bdebd1fd45572d2fcc5810",
+    "src/app/asset-workbench/new-asset-dialog.svelte": "d444a8e9c47bb53dc4e616f04525cc04d476105e2959f2424c7fe3bbfdf32ef3",
+    "src/app/asset-workbench/pixel-editor.svelte": "43f031837b6ff7bce75dfa12c1ba0d5f33584f740e4cf7d00a498216ee76b690",
+    "src/app/asset-workbench/preview-scene.ts": "2ce01293eb337b32a605f669bdb589bf2dc3855c009265ba70c364facf63e59a",
+    "src/app/asset-workbench/workbench-status.svelte": "9057b431438c5d0d440f09b134d690844800acd90ac26046018fad133447ac94",
+    "src/app/asset-workbench/workbench.css": "8615ab988e2b4ebc13c0c5cca3f82107a7299d321ab5b822b15e37450b68d3d8",
+    "src/app/asset-workbench/workbench.svelte": "fa02c35ab16213d2f8a815979cafddb71695362bf4f4c7e37dfaa2413a9eeb34",
+    "src/app/gameplay/asset-image.ts": "3d8722a9c83f9e4b7f27d5e773cd154d040c7a2a3450164cf931c77e5ffdb4cc",
+    "src/app/gameplay/gameplay-model-assets.ts": "44619dabb60e9cd4ed513ea10bd81e7497d0ee1b0c060fac7a43d95c79922dd1",
+    "src/app/gameplay/pixel-model-resource.ts": "9cffd70e0971f41e8fabf28e117259889cedb2b56963ec6f6f08a56b9118a0aa",
+    "src/app/player/first-person-viewmodel.ts": "23fdd20a6a0ffeda3c8e23ace96c216f775301c0753a9f1bc2c5e4cfc0e56e5d",
+    "src/app/ui/primitives/item-icon.svelte": "42379327ebb8cd7321e01f17221fb5c1c0251d9c61ed78a921f1408bd9ae10b5",
+    "src/client/persistence/asset-workbench-store.ts": "48d076d6cb53783f9824729bbc4a196eacce5d8f8b3b87f7519753a12f1782b4",
+    "src/client/presentation/asset-adapters.ts": "e894b3456ece43621d336e06c3351a074744dd0cd97de47467a9093767f02330",
+    "src/client/presentation/asset-catalog.ts": "3399f42c58495c903a8f9b3b8b93dd4599f235d1479dbb4fe8ce150f062db408",
+    "src/client/presentation/asset-package.ts": "b2d0f0d51b69eaad1cb11b3c5a361867bd97c2e3435181402099e8957168ea06",
+    "src/client/presentation/asset-tool-sources.ts": "3027a5a4527b2a40e711319a43a26e70b27726305cf06ec5e2f49d3cad211377",
+    "src/client/presentation/asset-types.ts": "f5028e56c24c49617cdecc2d231c025b43387c8f4f92ffcd183b39ced4e94699",
+    "src/client/presentation/voxel-tool-model.ts": "5dc9e92e6da2c18cdb4deb20c28fbc6681af643786355f2dc08df9a6e0e59f25",
+    "vite.config.ts": "9a4a221c35c6c2ccbb0ac32e85587c9f1d1716b3f752bb91c99c1e59866864fe"
+  },
+  "imageSha256": {
+    "changes/2026-09-07-asset-workbench/evidence/image-adapter.png": "959cac7b2b681ee4c4a96e265f3a08435d0eb197d32efaad907af36620cd5a88",
+    "changes/2026-09-07-asset-workbench/evidence/production-workbench.png": "51af597352dcc1f04bf955134bea40767245f60e642143ecaf464e814104c6b3",
+    "changes/2026-09-07-asset-workbench/evidence/held-rest.png": "3476f9b48fd617efbc90ac9c7ee341857bb0e5d7cca39b67a3eb80569b749539",
+    "changes/2026-09-07-asset-workbench/evidence/held-early.png": "3727f77375742c6e2d3833b14fae9e48845efd39da06ea4a2a42c14d204d738a",
+    "changes/2026-09-07-asset-workbench/evidence/workbench-700.png": "859036c8c577343c0c3253744a6e9a43c1e7c264e79bd6f0ffc7b0fecf2e7ab1",
+    "changes/2026-09-07-asset-workbench/evidence/game-tool-and-icon.png": "a62a066a36ee86c3b2f351cc14fc411b3a8b03fa63485c78d4c4f3bcfb0a6f85",
+    "changes/2026-09-07-asset-workbench/evidence/held-middle.png": "46200ea57e64c7f79b5c3f8a92465e8d5735851aa584ce66ffc5f96c53c6117e"
+  },
+  "renderer": "Chromium WebGL2",
+  "evidence": "current change 7 tests + existing tool consumer regression 1 test; production base-path entry readback"
+}
