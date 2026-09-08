@@ -1,0 +1,10 @@
+{
+  "sha256": {
+    "src/client/presentation/voxel-tool-model.ts": "3f19b0add14373322f17422639d8fdace82fcc1e5b233e514879ef7f2e28847b",
+    "changes/2026-09-07-pickaxe-handle-shape/evidence/held-pickaxe.png": "cc9ab9727410c82d0d81195637de0d2beb95ea47cd16222cbcdffa6b691989de",
+    "changes/2026-09-07-pickaxe-handle-shape/evidence/held-and-world-pickaxe.png": "0a90e699a894678f5a1afbf949feaeb5901071a3e8cce2b3e1a30dd00f2110e0"
+  },
+  "browser": "Chromium WebGL2",
+  "result": "1 Playwright test passed",
+  "visualObservation": "柄下段已收窄；手部握持几何仍独立保留；图标仍是旧 PNG，待工坊 change 同源化。"
+}

@@ -1,0 +1,28 @@
+{
+  "receipt_type": "SOL_INTENT_RECEIPT",
+  "schema_version": 1,
+  "decision": "fixed_intent_review",
+  "route_id": "local_sol_reasoning",
+  "user_intent": "architecture_design",
+  "requested_model": "gpt-5.6-sol",
+  "requested_reasoning_effort": "xhigh",
+  "fork_turns": "none",
+  "objective": "只读复核资产工坊首版合同，关注真实共享游戏表现、源数据持久化、范围可交付性及必要缺口。父级同时修正石镐柄，不实施工坊直到hash审核。不得转派。",
+  "evidence": [
+    "用户希望浏览器内管理创建编辑模型和贴图，3D与游戏共用代码，暂不引入Blender/服务器。",
+    "现有工具为16x16字符像素挤出；GameplayModelAssets持有每Application GPU缓存；旧图标独立PNG。",
+    "拟保存版本化纯源数据到独立IndexedDB，首版只做像素贴图与挤出模型，不自动发布草稿到游戏。",
+    "项目新持久化/跨模块提取需Breaking精确hash审核，合同待审核，当前仅修正石镐资产形状。"
+  ],
+  "necessary_paths": [
+    "changes/2026-09-07-asset-workbench/spec.md",
+    "src/client/presentation/voxel-tool-model.ts",
+    "src/app/gameplay/gameplay-model-assets.ts",
+    "src/app/player/first-person-viewmodel.ts",
+    "src/app/ui/primitives/item-icon.svelte"
+  ],
+  "output_limit": {
+    "max_characters": 1600
+  },
+  "boundaries": ["read_only", "no_external_write", "no_credentials", "no_delegation"]
+}

@@ -42,9 +42,13 @@ export function actorModelDefinition(archetype: keyof typeof actors) {
 }
 
 export function viewmodelPose(action: HeldAction, seconds: number) {
-  if (action === 'idle') return { shoulder: 0, elbow: 0, wrist: 0 };
-  const cycle = action === 'mine' ? Math.sin(seconds * Math.PI * 3.2) : Math.sin(Math.min(1, seconds * 4) * Math.PI);
-  if (action === 'eat') return { shoulder: -22 + cycle * 13, elbow: 42 - cycle * 16, wrist: -12 + cycle * 9 };
-  if (action === 'place') return { shoulder: -14 + cycle * 32, elbow: 21 - cycle * 27, wrist: cycle * 12 };
-  return { shoulder: -15 + cycle * 48, elbow: 25 - cycle * 42, wrist: -8 + cycle * 21 };
+  if (action === 'idle' || !Number.isFinite(seconds) || seconds <= 0) return { shoulder: 0, elbow: 0, wrist: 0 };
+  if (action !== 'mine' && seconds >= 0.42) return { shoulder: 0, elbow: 0, wrist: 0 };
+  const phase = action === 'mine' ? (seconds % 0.625) / 0.625 : seconds / 0.42;
+  const envelope = Math.sin(phase * Math.PI) ** 2;
+  if (action === 'eat') return { shoulder: -30 * envelope, elbow: 48 * envelope, wrist: -14 * envelope };
+  if (action === 'place') return { shoulder: 24 * envelope, elbow: -28 * envelope, wrist: 12 * envelope };
+  // Wind up, strike and recover, all in presentation time; no gameplay checkpoints live here.
+  const sweep = Math.sin(phase * Math.PI * 2) * envelope;
+  return { shoulder: sweep * 48, elbow: envelope * -38, wrist: sweep * 30 };
 }

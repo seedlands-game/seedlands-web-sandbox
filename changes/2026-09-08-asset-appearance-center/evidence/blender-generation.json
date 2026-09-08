@@ -1,0 +1,31 @@
+{
+  "blender": "5.2.1 LTS",
+  "worldUnitsPerGrid": 0.0625,
+  "recipeBoxes": 14,
+  "meshObjects": 1,
+  "triangles": 168,
+  "atlas": {
+    "width": 36,
+    "height": 36,
+    "tile": 16,
+    "padding": 1
+  },
+  "files": {
+    "lantern.recipe.json": {
+      "bytes": 2521,
+      "sha256": "77ef98a118c774394d72d69dcd933a6da6cad20fe0586045c474a137f1aef8c3"
+    },
+    "lantern-atlas.png": {
+      "bytes": 608,
+      "sha256": "94ee3bc2d7a23790fd983d497e37d3cd036257f8676a36f2f31d2dc2a3c653b2"
+    },
+    "lantern-emission.png": {
+      "bytes": 391,
+      "sha256": "01a71387a5ae5f328cdf414e48336cd588fba664350352877c6ab4bee5d8f358"
+    },
+    "brass-trail-lantern.glb": {
+      "bytes": 14452,
+      "sha256": "c480f979f19a72066da28015e0d96cb6103c411dacdc7a1557e4fef22110ac65"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "visibility": [
+    {
+      "mode": "baseline",
+      "foregroundPixels": 4309
+    },
+    {
+      "mode": "instanced",
+      "foregroundPixels": 4309
+    }
+  ],
+  "candidateHasVisibleGeometry": true,
+  "adopted": false,
+  "note": "采集成功不等于候选视觉正确或性能验收通过；生产仍使用 Chunk 合批。"
+}

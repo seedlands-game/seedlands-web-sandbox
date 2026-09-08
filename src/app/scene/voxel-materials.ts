@@ -1,6 +1,13 @@
 import * as pc from 'playcanvas';
-import { leafOpacity } from '../../client/presentation/leaf-opacity';
-import { publicAssetUrl } from '../../client/presentation/public-asset-url';
+import { loadTerrainPack, resolveTerrainTextures } from '../../client/persistence/terrain-pack-store';
+import { terrainMaterials } from '../../client/presentation/terrain-assets';
+import { pixelCanvas } from '../gameplay/asset-image';
+import type { Asset, PixelTexture } from '../../client/presentation/asset-types';
+import {
+  voxelAppearanceGlossGlsl,
+  voxelAppearanceMetalnessGlsl,
+  voxelAppearanceEmissionGlsl,
+} from '../shaders/voxel-appearance-chunks';
 import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '../../world/voxel';
 import type { MeshPart } from '../app-contracts';
 import type { QualityProfile } from './quality-profile';
@@ -8,7 +15,6 @@ import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeli
 import {
   voxelArrayDiffuseGlsl,
   voxelArrayDiffuseWgsl,
-  voxelArrayLanternEmissionGlsl,
   voxelArrayLanternEmissionWgsl,
   voxelArrayOpacityGlsl,
   voxelArrayOpacityWgsl,
@@ -17,143 +23,14 @@ import {
 
 const mix = (a: number, b: number, amount: number) => a + (b - a) * amount;
 
-function loadAtlas(): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.decoding = 'async';
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error('Voxel texture atlas could not be loaded.'));
-    image.src = publicAssetUrl(import.meta.env.BASE_URL, 'assets/voxel-atlas.webp');
-  });
-}
-
-function drawMirroredTile(image: HTMLImageElement, column: number, row: number, leaves: boolean) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const context = canvas.getContext('2d')!;
-  const sourceSize = image.naturalWidth / 3;
-  for (let y = 0; y < 2; y += 1)
-    for (let x = 0; x < 2; x += 1) {
-      context.save();
-      context.translate(x * 64 + (x ? 64 : 0), y * 64 + (y ? 64 : 0));
-      context.scale(x ? -1 : 1, y ? -1 : 1);
-      context.drawImage(image, column * sourceSize, row * sourceSize, sourceSize, sourceSize, 0, 0, 64, 64);
-      context.restore();
-    }
-  if (leaves) {
-    const pixels = context.getImageData(0, 0, 128, 128);
-    for (let index = 0; index < pixels.data.length; index += 4) {
-      const pixel = index / 4;
-      const x = pixel % 128;
-      const y = Math.floor(pixel / 128);
-      const brightness = (pixels.data[index] + pixels.data[index + 1] * 1.5 + pixels.data[index + 2]) / 3.5;
-      pixels.data[index + 3] = leafOpacity(x, y, brightness);
-    }
-    context.putImageData(pixels, 0, 0);
-  }
-  return canvas;
-}
-
-function waterCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const context = canvas.getContext('2d')!;
-  const gradient = context.createLinearGradient(0, 0, 128, 128);
-  gradient.addColorStop(0, '#2d9ab2');
-  gradient.addColorStop(0.5, '#176f96');
-  gradient.addColorStop(1, '#2d9ab2');
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, 128, 128);
-  context.globalAlpha = 0.44;
-  context.strokeStyle = '#d2fff7';
-  context.lineWidth = 3;
-  for (let band = -1; band <= 4; band += 1) {
-    context.beginPath();
-    for (let x = 0; x <= 128; x += 4) {
-      const y = band * 36 + Math.sin((x / 128) * Math.PI * 4) * 6;
-      if (x === 0) context.moveTo(x, y);
-      else context.lineTo(x, y);
-    }
-    context.stroke();
-  }
-  return canvas;
-}
-
-function glowstoneCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const context = canvas.getContext('2d')!;
-  context.fillStyle = '#352012';
-  context.fillRect(0, 0, 128, 128);
-  const glow = context.createRadialGradient(64, 58, 8, 64, 58, 58);
-  glow.addColorStop(0, '#fff5b8');
-  glow.addColorStop(0.38, '#ffbd43');
-  glow.addColorStop(1, '#9b3f16');
-  context.fillStyle = glow;
-  context.fillRect(18, 14, 92, 100);
-  context.strokeStyle = '#50301c';
-  context.lineWidth = 10;
-  context.strokeRect(10, 8, 108, 112);
-  context.lineWidth = 5;
-  for (const x of [42, 86]) {
-    context.beginPath();
-    context.moveTo(x, 12);
-    context.lineTo(x, 116);
-    context.stroke();
-  }
-  return canvas;
-}
-
-function lanternFrameCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const context = canvas.getContext('2d')!;
-  const gradient = context.createLinearGradient(0, 0, 128, 128);
-  gradient.addColorStop(0, '#4a2917');
-  gradient.addColorStop(0.45, '#b77a34');
-  gradient.addColorStop(0.7, '#6e3d1d');
-  gradient.addColorStop(1, '#2b1a12');
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, 128, 128);
-  context.strokeStyle = '#d09a44';
-  context.globalAlpha = 0.35;
-  context.lineWidth = 3;
-  for (let offset = -128; offset < 256; offset += 24) {
-    context.beginPath();
-    context.moveTo(offset, 0);
-    context.lineTo(offset + 128, 128);
-    context.stroke();
-  }
-  return canvas;
-}
-
-function lanternGlowCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const context = canvas.getContext('2d')!;
-  const glow = context.createRadialGradient(64, 58, 6, 64, 64, 82);
-  glow.addColorStop(0, '#fffbd2');
-  glow.addColorStop(0.35, '#ffd467');
-  glow.addColorStop(0.72, '#e77b24');
-  glow.addColorStop(1, '#713218');
-  context.fillStyle = glow;
-  context.fillRect(0, 0, 128, 128);
-  return canvas;
-}
-
 function textureFromCanvas(device: pc.GraphicsDevice, name: string, canvas: HTMLCanvasElement) {
   const texture = new pc.Texture(device, {
     name,
     width: canvas.width,
     height: canvas.height,
     mipmaps: true,
-    minFilter: pc.FILTER_LINEAR_MIPMAP_LINEAR,
-    magFilter: pc.FILTER_LINEAR,
+    minFilter: pc.FILTER_NEAREST_MIPMAP_LINEAR,
+    magFilter: pc.FILTER_NEAREST,
     addressU: pc.ADDRESS_REPEAT,
     addressV: pc.ADDRESS_REPEAT,
     anisotropy: 4,
@@ -171,40 +48,49 @@ export type VoxelMaterials = {
   destroy: () => void;
 };
 
-export async function createVoxelMaterials(app: pc.Application, quality: QualityProfile): Promise<VoxelMaterials> {
-  const image = await loadAtlas();
+export async function createVoxelMaterials(
+  app: pc.Application,
+  quality: QualityProfile,
+  sources?: PixelTexture[],
+  assets?: readonly Asset[],
+): Promise<VoxelMaterials> {
+  const textures = sources ?? resolveTerrainTextures(await loadTerrainPack());
+  const surface: number[] = [];
+  const emission: number[] = [];
   const tiles = new Map<FaceMaterialId, pc.Texture>();
   const tileCanvases = new Map<FaceMaterialId, HTMLCanvasElement>();
-  const atlasPositions: Record<number, readonly [number, number]> = {
-    [FaceMaterial.GrassTop]: [0, 0],
-    [FaceMaterial.GrassSide]: [1, 0],
-    [FaceMaterial.Dirt]: [2, 0],
-    [FaceMaterial.Stone]: [0, 1],
-    [FaceMaterial.Sand]: [1, 1],
-    [FaceMaterial.WoodSide]: [2, 1],
-    [FaceMaterial.WoodEnd]: [0, 2],
-    [FaceMaterial.Leaves]: [1, 2],
-    [FaceMaterial.Snow]: [2, 2],
-  };
-  for (const [rawMaterial, [column, row]] of Object.entries(atlasPositions)) {
-    const material = Number(rawMaterial) as FaceMaterialId;
-    const canvas = drawMirroredTile(image, column, row, material === FaceMaterial.Leaves);
-    tileCanvases.set(material, canvas);
-    if (material === FaceMaterial.Stone || material === FaceMaterial.Leaves)
-      tiles.set(material, textureFromCanvas(app.graphicsDevice, faceMaterialNames[material], canvas));
+  for (const definition of terrainMaterials) {
+    const material = assets?.find((asset) => asset.id === definition.id && asset.type === 'material');
+    const parameters = material?.type === 'material' ? material.payload : undefined;
+    const source = textures.find((texture) => texture.id === (parameters?.textureId ?? definition.textureId));
+    if (!source) throw new Error(`缺少地形贴图：${definition.textureId}`);
+    const canvas = pixelCanvas(source);
+    surface.push(
+      1 - (parameters?.roughness ?? (definition.renderMode === 'transparent' ? 0.18 : 0.92)),
+      parameters?.metalness ?? 0,
+    );
+    const linearEmission = new pc.Color(...(parameters?.emissive ?? ([1, 0.48, 0.1] as const))).linear();
+    emission.push(
+      linearEmission.r,
+      linearEmission.g,
+      linearEmission.b,
+      parameters?.emissiveIntensity ?? definition.emissiveIntensity,
+    );
+    tileCanvases.set(definition.faceMaterial, canvas);
+    if (
+      [
+        FaceMaterial.Stone,
+        FaceMaterial.Leaves,
+        FaceMaterial.Water,
+        FaceMaterial.Glowstone,
+        FaceMaterial.LanternGlow,
+      ].some((id) => id === definition.faceMaterial)
+    )
+      tiles.set(
+        definition.faceMaterial,
+        textureFromCanvas(app.graphicsDevice, faceMaterialNames[definition.faceMaterial], canvas),
+      );
   }
-  const water = waterCanvas();
-  tileCanvases.set(FaceMaterial.Water, water);
-  tiles.set(FaceMaterial.Water, textureFromCanvas(app.graphicsDevice, 'water', water));
-  const glowstone = glowstoneCanvas();
-  tileCanvases.set(FaceMaterial.Glowstone, glowstone);
-  tiles.set(FaceMaterial.Glowstone, textureFromCanvas(app.graphicsDevice, 'glowstone', glowstone));
-  const lanternFrame = lanternFrameCanvas();
-  tileCanvases.set(FaceMaterial.LanternFrame, lanternFrame);
-  tiles.set(FaceMaterial.LanternFrame, textureFromCanvas(app.graphicsDevice, 'lantern-frame', lanternFrame));
-  const lanternGlow = lanternGlowCanvas();
-  tileCanvases.set(FaceMaterial.LanternGlow, lanternGlow);
-  tiles.set(FaceMaterial.LanternGlow, textureFromCanvas(app.graphicsDevice, 'lantern-glow', lanternGlow));
 
   const reflectionFallbackCanvas = document.createElement('canvas');
   reflectionFallbackCanvas.width = 2;
@@ -220,19 +106,26 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
   if (uiIndex >= 0) app.scene.layers.insertTransparent(waterLayer, uiIndex);
   else app.scene.layers.pushTransparent(waterLayer);
 
+  const resolution = Math.max(...Array.from(tileCanvases.values(), (canvas) => Math.max(canvas.width, canvas.height)));
   const arrayLayers = Array.from({ length: MATERIAL_LAYER_COUNT }, (_unused, layer) => {
     const canvas = tileCanvases.get((layer + 1) as FaceMaterialId);
     if (!canvas) throw new Error(`Missing voxel texture array layer ${layer}.`);
-    return canvas;
+    if (canvas.width === resolution && canvas.height === resolution) return canvas;
+    const normalized = document.createElement('canvas');
+    normalized.width = normalized.height = resolution;
+    const context = normalized.getContext('2d')!;
+    context.imageSmoothingEnabled = false;
+    context.drawImage(canvas, 0, 0, resolution, resolution);
+    return normalized;
   });
   const textureArray = new pc.Texture(app.graphicsDevice, {
     name: 'voxel-material-array',
-    width: 128,
-    height: 128,
+    width: resolution,
+    height: resolution,
     arrayLength: MATERIAL_LAYER_COUNT,
     mipmaps: true,
-    minFilter: pc.FILTER_LINEAR_MIPMAP_LINEAR,
-    magFilter: pc.FILTER_LINEAR,
+    minFilter: pc.FILTER_NEAREST_MIPMAP_LINEAR,
+    magFilter: pc.FILTER_NEAREST,
     addressU: pc.ADDRESS_REPEAT,
     addressV: pc.ADDRESS_REPEAT,
     anisotropy: 4,
@@ -258,14 +151,19 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
     material.diffuseMap = tiles.get(sampleId)!;
     material.diffuseVertexColor = true;
     material.gloss = category === 'transparent' ? 0.82 : 0.08;
+    material.useMetalness = true;
     material.shaderChunksVersion = '2.8';
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('diffusePS', voxelArrayDiffuseGlsl);
     material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('diffusePS', voxelArrayDiffuseWgsl);
     material.setParameter('texture_voxelArray', textureArray);
-    if (category === 'opaque' || category === 'emissive') {
+    material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('glossPS', voxelAppearanceGlossGlsl);
+    material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('metalnessPS', voxelAppearanceMetalnessGlsl);
+    material.setParameter('uVoxelSurface[0]', new Float32Array(surface));
+    if (category !== 'transparent') {
       material.emissive = new pc.Color(1, 0.48, 0.1);
       material.emissiveIntensity = category === 'emissive' ? 1.4 : 1.15;
-      material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelArrayLanternEmissionGlsl);
+      material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelAppearanceEmissionGlsl);
+      material.setParameter('uVoxelEmission[0]', new Float32Array(emission));
       material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('emissivePS', voxelArrayLanternEmissionWgsl);
     }
     if (category === 'cutout' || category === 'transparent') {
@@ -284,6 +182,13 @@ export async function createVoxelMaterials(app: pc.Application, quality: Quality
     }
     if (category === 'transparent') {
       material.emissive = new pc.Color(0.02, 0.11, 0.15);
+      const waterSource = assets?.find(
+        (asset) => asset.id === terrainMaterials.find((entry) => entry.faceMaterial === FaceMaterial.Water)?.id,
+      );
+      if (waterSource?.type === 'material' && waterSource.source === 'user') {
+        material.emissive = new pc.Color(...waterSource.payload.emissive);
+        material.emissiveIntensity = waterSource.payload.emissiveIntensity;
+      }
       material.opacity = mix(0.56, 0.72, quality.waterQuality);
       material.blendType = pc.BLEND_NORMAL;
       material.depthWrite = false;

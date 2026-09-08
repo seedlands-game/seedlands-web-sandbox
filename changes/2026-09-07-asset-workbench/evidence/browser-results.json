@@ -1,0 +1,73 @@
+{
+  "stats": {
+    "startTime": "2026-09-07T16:19:19.469Z",
+    "duration": 15149.36,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "test": "游戏手持网格与工坊同源，快捷栏已使用新像素图标",
+      "status": "passed",
+      "durationMs": 1858
+    },
+    {
+      "test": "真实 IndexedDB 并发拒绝覆盖，写入失败保留原库",
+      "status": "passed",
+      "durationMs": 305
+    },
+    {
+      "test": "50 次真实编辑与切换释放 GPU 资源，不积累旧草稿网格",
+      "status": "passed",
+      "durationMs": 1790,
+      "gpu-lifecycle": {
+        "generated": 50,
+        "destroyed": 50,
+        "live": 1,
+        "repeated": 0,
+        "texturesDestroyed": 0
+      },
+      "gpu-page-exit": {
+        "generated": 1,
+        "destroyed": 3,
+        "live": 0,
+        "repeated": 0,
+        "texturesDestroyed": 25
+      }
+    },
+    {
+      "test": "新建、删除引用保护、非法导入、保存失败和窄屏控件可达",
+      "status": "passed",
+      "durationMs": 694
+    },
+    {
+      "test": "WebGL2 不可用时保留目录与 2D 编辑，不能显示预览成功",
+      "status": "passed",
+      "durationMs": 376
+    },
+    {
+      "test": "晚到的图片预览不能覆盖新选中的模型",
+      "status": "passed",
+      "durationMs": 495
+    },
+    {
+      "test": "统一目录、三类预览、像素编辑、保存刷新与包往返",
+      "status": "passed",
+      "durationMs": 1883
+    },
+    {
+      "test": "制作、手持采集、共享掉落模型、存退和资源释放",
+      "status": "passed",
+      "durationMs": 6954,
+      "gpu-lifecycle": {
+        "same": true,
+        "sameAfterEmpty": true,
+        "afterNodes": 0,
+        "afterFirstLease": 0,
+        "destroyed": 1
+      }
+    }
+  ]
+}

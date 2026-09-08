@@ -20,7 +20,6 @@ import { PLAYER_FEET_OFFSET, PlayerController } from './player/player-controller
 import { QUALITY_PROFILES, type QualityLevel } from './scene/quality-profile';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
 import type { MapLayer } from './ui/ui-contracts';
-import { createVoxelMaterials, type VoxelMaterials } from './scene/voxel-materials';
 import { WorldEnvironment } from './scene/world-environment';
 import { World, waitForInitialWorldReady } from './world/world-runtime';
 import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
@@ -41,6 +40,7 @@ import {
 } from '../client/experimental-client-options';
 import { GameExperimentState } from './experimental/game-experiment-state';
 import { GameFrameLoop } from './game-frame-loop';
+import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
 
 export class Game {
   private paused = false;
@@ -50,7 +50,7 @@ export class Game {
   private world: World | null = null;
   private environment: WorldEnvironment | null = null;
   private visualEffects: AdvancedVisualEffects | null = null;
-  private visualResources: VoxelMaterials | null = null;
+  private visualResources: Awaited<ReturnType<typeof createAppearanceMaterials>> | null = null;
   private controller: PlayerController | null = null;
   private gameplayClient: BrowserGameplay | null = null;
   private camera: pc.Entity | null = null;
@@ -152,7 +152,7 @@ export class Game {
     this.collisionDebug = new CollisionDebugRuntime(this.app);
     const light = sceneBootstrap.createSun(this.app, lightingBudget);
     this.camera = sceneBootstrap.createCamera(this.app, quality.fogEnd + 18);
-    this.visualResources = await createVoxelMaterials(this.app, quality);
+    this.visualResources = await createAppearanceMaterials(this.app, quality);
     if (startGeneration !== this.startGeneration) {
       this.visualResources.destroy();
       this.visualResources = null;

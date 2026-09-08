@@ -300,7 +300,7 @@ export class BrowserGameplay {
     this.options.onPresentation?.(event);
     const kind = event.kind;
     if (kind === 'attack' || kind === 'place' || kind === 'eat') {
-      this.viewmodel.setAction(kind);
+      this.viewmodel.setAction(kind, true);
       this.gestureSeconds = 0.42;
     }
     if (kind === 'attack' || kind === 'place' || kind === 'eat' || kind === 'damage') {
