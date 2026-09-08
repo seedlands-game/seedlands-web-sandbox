@@ -26,9 +26,19 @@ export type RemoteBaselineDiagnosticSnapshot = Readonly<{
   elapsedMs: number;
   descriptorElapsedMs?: number;
   readyElapsedMs?: number;
+  firstPageArrivalElapsedMs?: number;
+  lastPageArrivalElapsedMs?: number;
+  lastVerificationElapsedMs?: number;
   expectedPages: number;
-  receivedPages: number;
-  receivedBytes: number;
+  arrivalPages: number;
+  arrivalBytes: number;
+  verifiedPages: number;
+  verifiedBytes: number;
+}>;
+
+export type RemoteInitialBaselineDiagnostics = Readonly<{
+  requests: readonly RemoteBaselineDiagnosticSnapshot[];
+  reassembler: Readonly<{ activeBundles: number; digestingTransfers: number; reservedBlockBytes: number }>;
 }>;
 
 type MutableBaselineDiagnostic = {
@@ -37,9 +47,14 @@ type MutableBaselineDiagnostic = {
   state: RemoteBaselineDiagnosticSnapshot['state'];
   descriptorAt?: number;
   readyAt?: number;
+  firstPageArrivalAt?: number;
+  lastPageArrivalAt?: number;
+  lastVerificationAt?: number;
   expectedPages: number;
-  receivedPages: number;
-  receivedBytes: number;
+  arrivalPages: number;
+  arrivalBytes: number;
+  verifiedPages: number;
+  verifiedBytes: number;
 };
 
 type OwnerState = {
@@ -138,8 +153,10 @@ export class RemoteAuthorityMeshMirror {
         requestedAt: this.now(),
         state: 'requested',
         expectedPages: 0,
-        receivedPages: 0,
-        receivedBytes: 0,
+        arrivalPages: 0,
+        arrivalBytes: 0,
+        verifiedPages: 0,
+        verifiedBytes: 0,
       });
     }
     this.baselineRequestIds.set(key, requestId);
@@ -218,18 +235,37 @@ export class RemoteAuthorityMeshMirror {
     return count;
   }
 
-  initialDiagnostics(): readonly RemoteBaselineDiagnosticSnapshot[] {
+  initialDiagnostics(): RemoteInitialBaselineDiagnostics {
     const now = this.now();
-    return [...this.diagnosticsByRequest.values()].map((entry) => ({
-      requestOrdinal: entry.requestOrdinal,
-      state: entry.state,
-      elapsedMs: Math.max(0, now - entry.requestedAt),
-      ...(entry.descriptorAt === undefined ? {} : { descriptorElapsedMs: entry.descriptorAt - entry.requestedAt }),
-      ...(entry.readyAt === undefined ? {} : { readyElapsedMs: entry.readyAt - entry.requestedAt }),
-      expectedPages: entry.expectedPages,
-      receivedPages: entry.receivedPages,
-      receivedBytes: entry.receivedBytes,
-    }));
+    const reassembler = this.reassembler?.diagnostics();
+    return {
+      requests: [...this.diagnosticsByRequest.values()].map((entry) => ({
+        requestOrdinal: entry.requestOrdinal,
+        state: entry.state,
+        elapsedMs: Math.max(0, now - entry.requestedAt),
+        ...(entry.descriptorAt === undefined ? {} : { descriptorElapsedMs: entry.descriptorAt - entry.requestedAt }),
+        ...(entry.readyAt === undefined ? {} : { readyElapsedMs: entry.readyAt - entry.requestedAt }),
+        ...(entry.firstPageArrivalAt === undefined
+          ? {}
+          : { firstPageArrivalElapsedMs: entry.firstPageArrivalAt - entry.requestedAt }),
+        ...(entry.lastPageArrivalAt === undefined
+          ? {}
+          : { lastPageArrivalElapsedMs: entry.lastPageArrivalAt - entry.requestedAt }),
+        ...(entry.lastVerificationAt === undefined
+          ? {}
+          : { lastVerificationElapsedMs: entry.lastVerificationAt - entry.requestedAt }),
+        expectedPages: entry.expectedPages,
+        arrivalPages: entry.arrivalPages,
+        arrivalBytes: entry.arrivalBytes,
+        verifiedPages: entry.verifiedPages,
+        verifiedBytes: entry.verifiedBytes,
+      })),
+      reassembler: {
+        activeBundles: reassembler?.activeBundles ?? 0,
+        digestingTransfers: reassembler?.digestingTransfers ?? 0,
+        reservedBlockBytes: reassembler?.reservedBlockBytes ?? 0,
+      },
+    };
   }
 
   rejectUnavailable(requestId: number): void {
@@ -281,12 +317,20 @@ export class RemoteAuthorityMeshMirror {
     if (!block) throw new Error('Node baseline page 缺少 payload。');
     const page = { ...(message.page as BaselinePageReference), bytes: block.bytes };
     if (this.ignoredBundles.has(page.bundleId)) return;
-    const bundle = await this.requireReassembler().acceptPage(page);
     const diagnostic = this.diagnosticsByRequest.get(page.requestId);
     if (diagnostic) {
       diagnostic.state = 'pages';
-      diagnostic.receivedPages += 1;
-      diagnostic.receivedBytes += block.bytes.byteLength;
+      const arrivedAt = this.now();
+      diagnostic.firstPageArrivalAt ??= arrivedAt;
+      diagnostic.lastPageArrivalAt = arrivedAt;
+      diagnostic.arrivalPages += 1;
+      diagnostic.arrivalBytes += block.bytes.byteLength;
+    }
+    const bundle = await this.requireReassembler().acceptPage(page);
+    if (diagnostic) {
+      diagnostic.verifiedPages += 1;
+      diagnostic.verifiedBytes += block.bytes.byteLength;
+      diagnostic.lastVerificationAt = this.now();
     }
     if (!bundle) return;
     const owner = this.owners.get(bundle.descriptor.key);

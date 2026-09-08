@@ -2,7 +2,7 @@
 
 ## 完成状态
 
-合并新 base 后，本地完整闭环已重新以 `04a8076` source-bound 真实旅程验证：浏览器完成认证连接、脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复；29 项输入同时绑定合并后的 appearance 装载、地形、物品和 UI 资源，五张原始帧已重建并视检。GitHub CI 仍在初始同步 30 秒门槛失败，当前状态不是 Delivered；最新诊断已把问题收窄到浏览器 descriptor 后的 page 消费/重组，仍需最后一层 arrival/verification 诊断后据证据修复。
+合并新 base 后，本地完整闭环已重新以 `04a8076` source-bound 真实旅程验证：浏览器完成认证连接、脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复；29 项输入同时绑定合并后的 appearance 装载、地形、物品和 UI 资源，五张原始帧已重建并视检。GitHub CI 仍在初始同步 30 秒门槛失败，当前状态不是 Delivered；最新诊断已把问题收窄到浏览器 descriptor 后的 page 消费/重组，并补齐到达与校验计数及 reassembler 汇总，等待下一轮 CI 实证后据证据修复。
 
 ## 提交和推送
 

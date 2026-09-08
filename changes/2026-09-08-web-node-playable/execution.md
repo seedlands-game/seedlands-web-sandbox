@@ -79,6 +79,7 @@ JSON 经 Prettier 格式化后内容未变，表中为最终提交文件 hash。
 - 本地可玩闭环和 `4cf859d` source-bound 旅程已通过；GitHub CI 的初始同步超时仍是 Active 产品问题。本 checkpoint 用下一轮一次失败还原第 8 个请求停在 capture、projection、发送或浏览器重组中的哪一段，再据证据做有界修复；没有改并发、baselineTail、协议、Node 预算或 30 秒门槛。
 - 定向验证：`pnpm exec vitest run tests/node/node-playable-network-session.test.ts tests/client/remote-authority-mesh-mirror.test.ts tests/app/world-initial-playable-area.test.ts --maxWorkers=1`，3 文件 14 项通过；Node/Web typecheck、受影响文件 ESLint/Prettier、`pnpm build:server` 与 `pnpm build:web` 均退出 0。Node 测试连续排入 20 个 unavailable baseline，确认只记录前 12 个且总数不超过 96；Web 测试完成真实 descriptor/分页重组后再排请求，确认只保留前 9 个匿名状态且字段不含 key/requestId。
 - 合并后的诊断 CI `34211532822` 将方向进一步收窄到浏览器收到 descriptor 后的 page 消费/重组：Node 后续请求 capture 为 13–68ms、projection 为 4–15ms、send 为 4–18ms 且均已发送 54 页；Web 前几个 descriptor→ready 约 1 秒，第 7 个增至约 5–10 秒，第 8 个在超时前只处理 12/26 页。该证据不支持把问题归因于 Node capture/tail，也不支持未经测量改并发或串行 hash；下一步只补 Web arrival/verification 和 reassembler 汇总诊断。
+- 最后一层 Harness 诊断在 `acceptPage` 的 await 前记录 arrivalPages/arrivalBytes 与 first/last arrival elapsed，在 reassembler 返回后记录 verifiedPages/verifiedBytes 与 last verification elapsed；timeout 同时汇总 activeBundles、digestingTransfers 和 reservedBlockBytes。记录仍限于首 9 个匿名请求，不输出 key、requestId、bundle identity 或 frame。受控 RED/GREEN 在首个真实 page Promise 未结算时观察到 arrival=1、verified=0、activeBundles=1，再完成全部真实分页并观察 ready 与账本归零；2 文件 10 项、Web typecheck、受影响 ESLint/Prettier 通过。
 
 ## 剩余边界
 

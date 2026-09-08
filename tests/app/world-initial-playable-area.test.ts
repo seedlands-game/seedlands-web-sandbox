@@ -106,7 +106,12 @@ describe('remote initial playable area barrier', () => {
     const chunks = new Map([['0,0,0', { task: { chunkRevision: 1 }, triangles: 0 }]]);
     const diagnostics = World.prototype.initialPlayableAreaDiagnostics as unknown as (
       this: Readonly<{
-        authority: { initialBaselineDiagnostics(): readonly Readonly<Record<string, number | string>>[] };
+        authority: {
+          initialBaselineDiagnostics(): {
+            requests: readonly Readonly<Record<string, number | string>>[];
+            reassembler: Readonly<Record<string, number>>;
+          };
+        };
         repository: { chunks: typeof chunks; queueSize: number };
         scheduler: {
           schedulingDiagnostics: { queuedRequests: number; preparingRequests: number; failedPreparations: number };
@@ -115,12 +120,13 @@ describe('remote initial playable area barrier', () => {
       }>,
       position: Readonly<{ x: number; y: number; z: number }>,
       radius: number,
-    ) => Record<string, number>;
+    ) => Record<string, unknown>;
     const world = {
       authority: {
-        initialBaselineDiagnostics: () => [
-          { requestOrdinal: 1, state: 'pages', expectedPages: 81, receivedPages: 18, receivedBytes: 786_432 },
-        ],
+        initialBaselineDiagnostics: () => ({
+          requests: [{ requestOrdinal: 1, state: 'pages', expectedPages: 81, arrivalPages: 18, verifiedPages: 12 }],
+          reassembler: { activeBundles: 1, digestingTransfers: 2, reservedBlockBytes: 786_432 },
+        }),
       },
       repository: { chunks, queueSize: 2 },
       scheduler: {
@@ -137,9 +143,8 @@ describe('remote initial playable area barrier', () => {
       failedPreparations: 3,
       meshingRequests: 1,
       uploadQueue: 2,
-      baselineRequests: [
-        { requestOrdinal: 1, state: 'pages', expectedPages: 81, receivedPages: 18, receivedBytes: 786_432 },
-      ],
+      baselineRequests: [{ requestOrdinal: 1, state: 'pages', expectedPages: 81, arrivalPages: 18, verifiedPages: 12 }],
+      baselineReassembler: { activeBundles: 1, digestingTransfers: 2, reservedBlockBytes: 786_432 },
     });
   });
 });

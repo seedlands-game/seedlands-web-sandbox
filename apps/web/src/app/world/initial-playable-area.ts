@@ -18,6 +18,7 @@ export type InitialPlayableAreaDiagnostics = Readonly<{
   meshingRequests: number;
   uploadQueue: number;
   baselineRequests?: readonly Readonly<Record<string, number | string>>[];
+  baselineReassembler?: Readonly<Record<string, number>>;
 }>;
 
 const initialPlayableChunks = (position: Position, horizontalRadius: number): InitialChunk[] => {
@@ -45,7 +46,10 @@ export function initialPlayableAreaDiagnostics(
   repository: InitialRepository,
   position: Position,
   horizontalRadius: number,
-  baselineRequests?: readonly Readonly<Record<string, number | string>>[],
+  baselineDiagnostics?: Readonly<{
+    requests: readonly Readonly<Record<string, number | string>>[];
+    reassembler: Readonly<Record<string, number>>;
+  }>,
 ): InitialPlayableAreaDiagnostics {
   const required = initialPlayableChunks(position, horizontalRadius);
   return {
@@ -54,7 +58,12 @@ export function initialPlayableAreaDiagnostics(
     ...scheduler.schedulingDiagnostics,
     meshingRequests: scheduler.meshingQueueSize,
     uploadQueue: repository.queueSize,
-    ...(baselineRequests ? { baselineRequests } : {}),
+    ...(baselineDiagnostics
+      ? {
+          baselineRequests: baselineDiagnostics.requests,
+          baselineReassembler: baselineDiagnostics.reassembler,
+        }
+      : {}),
   };
 }
 

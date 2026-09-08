@@ -89,7 +89,10 @@ export type WorldAuthorityPort = Readonly<{
     task: PendingMeshTask,
     result: import('../app-contracts').WorkerResult,
   ): boolean | Promise<boolean>;
-  initialBaselineDiagnostics?(): readonly Readonly<Record<string, number | string>>[];
+  initialBaselineDiagnostics?(): Readonly<{
+    requests: readonly Readonly<Record<string, number | string>>[];
+    reassembler: Readonly<Record<string, number>>;
+  }>;
 }>;
 
 export class World {

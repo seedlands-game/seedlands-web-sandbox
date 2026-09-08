@@ -144,26 +144,38 @@ describe('remote Authority baseline causal barrier', () => {
     advance(5);
     mirror.acceptDescriptor({ descriptor: bundle.descriptor });
     advance(7);
-    for (const page of bundle.pages) await acceptPage(mirror, page);
+    const firstPage = acceptPage(mirror, bundle.pages[0]!);
+    const duringFirstPage = mirror.initialDiagnostics();
+    expect(duringFirstPage.requests[0]).toMatchObject({ arrivalPages: 1, verifiedPages: 0 });
+    expect(duringFirstPage.reassembler.activeBundles).toBe(1);
+    expect(duringFirstPage.reassembler.reservedBlockBytes).toBeGreaterThan(0);
+    await firstPage;
+    for (const page of bundle.pages.slice(1)) await acceptPage(mirror, page);
     await load;
     for (let cx = 1; cx <= 9; cx += 1) void mirror.ensure(cx, 0, 0);
 
     const diagnostics = mirror.initialDiagnostics();
-    expect(diagnostics).toHaveLength(9);
-    expect(diagnostics[0]).toEqual({
+    expect(diagnostics.requests).toHaveLength(9);
+    expect(diagnostics.requests[0]).toEqual({
       requestOrdinal: 1,
       state: 'ready',
       elapsedMs: 12,
       descriptorElapsedMs: 5,
       readyElapsedMs: 12,
+      firstPageArrivalElapsedMs: 12,
+      lastPageArrivalElapsedMs: 12,
+      lastVerificationElapsedMs: 12,
       expectedPages: bundle.pages.length,
-      receivedPages: bundle.pages.length,
-      receivedBytes: bundle.pages.reduce((total, page) => total + page.bytes.byteLength, 0),
+      arrivalPages: bundle.pages.length,
+      arrivalBytes: bundle.pages.reduce((total, page) => total + page.bytes.byteLength, 0),
+      verifiedPages: bundle.pages.length,
+      verifiedBytes: bundle.pages.reduce((total, page) => total + page.bytes.byteLength, 0),
     });
+    expect(diagnostics.reassembler).toEqual({ activeBundles: 0, digestingTransfers: 0, reservedBlockBytes: 0 });
     expect(JSON.stringify(diagnostics)).not.toContain('0,0,0');
-    expect(diagnostics.every((entry) => Object.keys(entry).every((key) => key !== 'key' && key !== 'requestId'))).toBe(
-      true,
-    );
+    expect(
+      diagnostics.requests.every((entry) => Object.keys(entry).every((key) => key !== 'key' && key !== 'requestId')),
+    ).toBe(true);
     bundle.close();
     mirror.dispose();
   });
