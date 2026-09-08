@@ -22,6 +22,8 @@ import type { WorldCommitPresentationReference } from '@seedlands/game-core/serv
 import type { ActionReceiptReference } from '@seedlands/game-core/server/protocol/network-action-reference';
 import { RemoteAuthorityMeshMirror } from './remote-authority-mesh-mirror';
 import type { AuthorityClientOptions, AuthoritySaveResult } from './browser-authority-client-contract';
+import { projectRemoteInput, RemoteAuthorityInputPipeline } from './remote-authority-input-pipeline';
+import type { PendingRemoteInput } from './remote-authority-input-pipeline';
 import {
   commitFromReference,
   gameplayFromReference,
@@ -59,6 +61,7 @@ export class RemoteAuthorityClient {
   private edgeSequence = 0;
   private snapshotReceivedAtMs = 0;
   private storageBytesValue = 0;
+  private readonly inputPipeline = new RemoteAuthorityInputPipeline();
   private disposed = false;
   private failed = false;
   private readonly pendingActions = new Map<number, Pending<AuthorityActionResult>>();
@@ -209,32 +212,25 @@ export class RemoteAuthorityClient {
     )
       return;
     const frequencies = this.requireReady().frequencies;
-    const elapsedTicks = Math.ceil(((performance.now() - this.snapshotReceivedAtMs) * frequencies.physicsHz) / 1_000);
-    const targetPhysicsTick = Math.max(
-      command.targetPhysicsTick,
-      (this.snapshotValue?.physicsTick ?? 0) + elapsedTicks + 2,
+    const pending = this.inputPipeline.submit(
+      command,
+      performance.now(),
+      (Math.max(2, Math.ceil(frequencies.physicsHz / 2)) / frequencies.physicsHz) * 1_000,
     );
-    const expiresAfterPhysicsTick = targetPhysicsTick + Math.max(2, Math.ceil(frequencies.physicsHz / 2));
-    if (command.edges.jumpPressed)
-      this.send('input-edge', {
-        kind: 'input-edge',
-        ref: this.ref,
-        edgeId: ++this.edgeSequence,
-        targetPhysicsTick,
-        expiresAfterPhysicsTick,
-        type: 'jump-pressed',
-      });
-    this.send('input-state', {
-      kind: 'input-state',
-      ref: this.ref,
-      inputSequence: command.sequence,
-      targetPhysicsTick,
-      expiresAfterPhysicsTick,
-      moveX: command.state.moveX,
-      moveZ: command.state.moveZ,
-      verticalIntent: command.state.verticalIntent,
-      jumpHeld: command.state.jumpHeld,
+    if (pending) this.sendProjectedInput(pending);
+  }
+
+  private sendProjectedInput(input: PendingRemoteInput): void {
+    const frequencies = this.requireReady().frequencies;
+    const now = performance.now();
+    const projected = projectRemoteInput(input, this.requireRef(), {
+      now,
+      snapshotReceivedAtMs: this.snapshotReceivedAtMs,
+      snapshotPhysicsTick: this.snapshotValue?.physicsTick ?? 0,
+      physicsHz: frequencies.physicsHz,
     });
+    if (projected.edge) this.send('input-edge', { ...projected.edge, edgeId: ++this.edgeSequence });
+    this.send('input-state', projected.state);
   }
 
   ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
@@ -329,6 +325,7 @@ export class RemoteAuthorityClient {
         /* Socket close below remains the terminal cleanup path. */
       }
     this.disposed = true;
+    this.inputPipeline.clear();
     if (this.heartbeat !== null) clearInterval(this.heartbeat);
     this.rejectPending(new Error('远端会话已关闭。'));
     this.mesh.dispose();
@@ -361,11 +358,14 @@ export class RemoteAuthorityClient {
         );
       case 'input-decision': {
         const decision = message as unknown as Extract<PlayablePublicOutboundMessage, { kind: 'input-decision' }>;
+        const nextInput = this.inputPipeline.acceptDecision(decision.inputSequence, decision.requiresResync);
         this.options.onInputDecision?.({
           sequence: decision.inputSequence,
           decision: decision.decision as SequenceDecision,
           requiresResync: decision.requiresResync,
         });
+        if (nextInput && !this.disposed && !this.failed && this.socket.readyState === WebSocket.OPEN)
+          this.sendProjectedInput(nextInput);
         return null;
       }
       case 'baseline-descriptor':
@@ -535,6 +535,7 @@ export class RemoteAuthorityClient {
   private fail(error: Error): void {
     if (this.failed || this.disposed) return;
     this.failed = true;
+    this.inputPipeline.clear();
     this.rejectPending(error);
     this.options.onFatal?.(error);
     this.dispose();

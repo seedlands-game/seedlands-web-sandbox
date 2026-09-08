@@ -24,6 +24,7 @@ const sourceFiles = [
   'apps/web/src/app/game.ts',
   'apps/web/src/app/world/remote-playable-evidence.ts',
   'apps/web/src/client/authority/remote-authority-client.ts',
+  'apps/web/src/client/authority/remote-authority-input-pipeline.ts',
   'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
   'changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts',
 ] as const;
