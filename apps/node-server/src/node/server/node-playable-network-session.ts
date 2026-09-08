@@ -30,6 +30,7 @@ import {
 import { createPlayableNetworkRateLimit } from './node-playable-network-rate-limit';
 
 const MAX_PENDING_REQUESTS = 32;
+const MAX_PENDING_CHECKPOINT_REQUESTS = 1;
 const IDLE_TIMEOUT_MS = 15_000;
 
 const bytes = (raw: RawData): Uint8Array | null => {
@@ -94,6 +95,8 @@ export function createSession(
   let actionRequestHighWatermark = -1;
   let interestRequestHighWatermark = -1;
   let interestCancelHighWatermark = -1;
+  let checkpointRequestHighWatermark = -1;
+  let pendingCheckpointRequests = 0;
   let publicationSequence = -1;
   let queuedBytes = 0;
   let outbound = Promise.resolve();
@@ -351,13 +354,23 @@ export function createSession(
       return;
     }
     if (message.kind === 'checkpoint-request') {
-      const result = (await authority.requestCheckpoint()) as { commitSequence: number };
-      await enqueue('checkpoint-receipt', {
-        kind: 'checkpoint-receipt',
-        ref,
-        requestId: message.requestId,
-        durableCommitSequence: result.commitSequence,
-      });
+      if (message.requestId <= checkpointRequestHighWatermark)
+        throw new Error('Checkpoint requestId must be strictly increasing.');
+      if (pendingCheckpointRequests >= MAX_PENDING_CHECKPOINT_REQUESTS)
+        throw new Error('A checkpoint request is already pending.');
+      checkpointRequestHighWatermark = message.requestId;
+      pendingCheckpointRequests += 1;
+      try {
+        const result = (await authority.requestCheckpoint()) as { commitSequence: number };
+        await enqueue('checkpoint-receipt', {
+          kind: 'checkpoint-receipt',
+          ref,
+          requestId: message.requestId,
+          durableCommitSequence: result.commitSequence,
+        });
+      } finally {
+        pendingCheckpointRequests -= 1;
+      }
       return;
     }
     if (message.kind === 'heartbeat') {
