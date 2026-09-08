@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "id": "web-node-playable-implementation",
+  "initiatedBy": "agent",
+  "role": "Web/Node完整闭环端到端实施者",
+  "workType": "implementation",
+  "goal": "顺序完成本合同的Node接入、Web远端会话、真实单人游玩与保存/重连，自测修复后按阶段commit/push；root独占estimates.md、architecture-review.md和contracts，勿编辑或暂存。",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-web-node-playable/spec.md",
+      "purpose": "用户已授权的完整闭环合同"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-web-node-playable/architecture-review.md",
+      "purpose": "root架构准出边界"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/docs/code-map.md",
+      "purpose": "实际三包接缝导航"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/tmp/seedlands-web-node-playable"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills",
+      "/tmp"
+    ],
+    "nonGoals": [
+      "不改世界算法或存档payload，不增加多人、公网部署或正式网络性能采用",
+      "不自动合并PR，不购买或重置额度",
+      "不读取.env或真实密钥，不输出凭据；不修改其他worktree或用户存档",
+      "不创建或合并PR，root负责最终PR；不修改或暂存root拥有的文档/合同",
+      "不在首次连接或首帧节点结束任务，不放宽测试或伪装远端模式",
+      "不重写Delivered历史证据，不泄漏测试凭据到生产配置"
+    ]
+  },
+  "outputs": [
+    "可手动复现的完整本机单人闭环、验证与持续提交、可审核PR"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "red",
+      "check": "先取得可执行RED，明确受限协议与双模式接缝；既有loopback/单玩家/权威边界保留",
+      "evidence": "execution.md中的RED日志及接线说明"
+    },
+    {
+      "id": "connect",
+      "check": "真实浏览器经认证网络获得Node完整基线并渲染；Node唯一权威，无本地canonical回退",
+      "evidence": "M1端到端与检查点commit/push"
+    },
+    {
+      "id": "play",
+      "check": "真实移动/跳跃/挖放、durable保存、关闭浏览器后Node继续、手动重连及Node重启恢复",
+      "evidence": "真实Node进程与浏览器生产操作、权威与镜像对应证据"
+    },
+    {
+      "id": "regress",
+      "check": "负向协议、队列/租约/取消与失效、本地模式回归、两端构建和隔离通过",
+      "evidence": "源码绑定的命令/退出状态/原始日志与独立验收冻结"
+    },
+    {
+      "id": "handoff",
+      "check": "每稳定阶段commit/push，更新当前spec/执行记录和长期docs；提供冻结HEAD、剩余限制与完整证据清单给root",
+      "evidence": "干净实现状态、提交SHA和delivery"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 5,
+    "maxAgentHours": 12
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": true,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-web-node-playable/contracts/root.json",
+    "sha256": "51c98d5c16d86948c9344ad3c1842204c762d22798ff758a55d4121e3794c7e0"
+  },
+  "resources": {
+    "exclusiveGroup": "seedlands-web-node-playable"
+  },
+  "escalation": [
+    "范围或平台契约需改变",
+    "同原因失败 5 次或预计超出规划时间"
+  ],
+  "reportFields": [
+    "完成状态",
+    "提交和推送",
+    "变更",
+    "验证结果",
+    "限制",
+    "剩余工作"
+  ]
+}
