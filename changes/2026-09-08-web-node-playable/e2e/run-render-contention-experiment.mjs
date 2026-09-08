@@ -1,7 +1,7 @@
 import { execFileSync, spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { createWriteStream, existsSync, readFileSync } from 'node:fs';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import process from 'node:process';
 
@@ -20,12 +20,13 @@ const files = [
   'changes/2026-09-08-web-node-playable/e2e/render-contention.spec.ts',
   'changes/2026-09-08-web-node-playable/e2e/run-render-contention-experiment.mjs',
   'changes/2026-09-08-web-node-playable/render-contention-experiment.json',
+  'changes/2026-09-08-web-node-playable/contracts/validation.json',
 ];
 
 await mkdir(outputDirectory, { recursive: true });
 for (const file of files) if (!existsSync(file)) throw new Error(`Missing frozen experiment input: ${file}`);
-if (!selfTest && existsSync(invocationPath))
-  throw new Error(`Formal render-contention output already exists: ${invocationPath}`);
+if (!selfTest && (await readdir(outputDirectory)).length > 0)
+  throw new Error(`Formal render-contention output directory must be empty: ${outputDirectory}`);
 const treeStatus = sourceTreeStatus();
 if (!selfTest && treeStatus) throw new Error('Formal render-contention sampling requires a clean source tree.');
 const sourceInputs = Object.fromEntries(

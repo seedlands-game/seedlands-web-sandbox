@@ -13,7 +13,10 @@ import {
 import type { RenderContentionProbeSnapshot, RenderContentionVariant } from './render-contention-probe';
 
 const FORMAL_SEQUENCE = ['A', 'A', 'A', 'B', 'B', 'A'] as const;
-const SELF_TEST_SEQUENCE = ['B'] as const;
+const SELF_TEST_CASES = [
+  { variant: 'B', forceAuthenticationFailure: false },
+  { variant: 'B', forceAuthenticationFailure: true },
+] as const;
 const PRODUCT_DEADLINE_MS = 30_000;
 const READY_POLL_DEADLINE_MS = 31_500;
 const probePath = `/@fs${resolve('changes/2026-09-08-web-node-playable/e2e/render-contention-probe.ts')}`;
@@ -22,7 +25,11 @@ const outputDirectory = resolve(
 );
 const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
 const nodePort = Number(process.env.SEEDLANDS_RENDER_CONTENTION_NODE_PORT ?? '18789');
-const sequence = process.env.SEEDLANDS_RENDER_CONTENTION_SELF_TEST === '1' ? SELF_TEST_SEQUENCE : FORMAL_SEQUENCE;
+const selfTest = process.env.SEEDLANDS_RENDER_CONTENTION_SELF_TEST === '1';
+const trialCases = selfTest
+  ? SELF_TEST_CASES
+  : FORMAL_SEQUENCE.map((variant) => ({ variant, forceAuthenticationFailure: false }) as const);
+const sequence = trialCases.map(({ variant }) => variant);
 const sourceFiles = [
   'package.json',
   'playwright.config.ts',
@@ -37,6 +44,7 @@ const sourceFiles = [
   'changes/2026-09-08-web-node-playable/e2e/render-contention.spec.ts',
   'changes/2026-09-08-web-node-playable/e2e/run-render-contention-experiment.mjs',
   'changes/2026-09-08-web-node-playable/render-contention-experiment.json',
+  'changes/2026-09-08-web-node-playable/contracts/validation.json',
 ] as const;
 
 type TrialResult = Readonly<{
@@ -79,13 +87,15 @@ async function releaseProbe(page: Page): Promise<void> {
     .catch(() => undefined);
 }
 
-async function connectForm(page: Page, nodeUrl: string): Promise<void> {
+async function connectForm(page: Page, nodeUrl: string, forceAuthenticationFailure: boolean): Promise<void> {
   await page.goto('/?harness=1');
   await expect(page.locator('#enter')).toBeEnabled({ timeout: 20_000 });
   await page.selectOption('#connection-mode', 'remote');
   await expect(page.locator('#node-url')).toBeVisible();
   await page.fill('#node-url', nodeUrl);
-  await page.locator('input[type="password"]').fill(REMOTE_PLAYABLE_ACCESS_KEY);
+  await page
+    .locator('input[type="password"]')
+    .fill(forceAuthenticationFailure ? 'seedlands-e2e-invalid-key' : REMOTE_PLAYABLE_ACCESS_KEY);
 }
 
 async function renderedRequiredChunkCount(page: Page, current: RemotePlayableEvidence): Promise<number> {
@@ -104,7 +114,12 @@ async function renderedRequiredChunkCount(page: Page, current: RemotePlayableEvi
   return rendered;
 }
 
-async function runTrial(browser: Browser, ordinal: number, variant: RenderContentionVariant): Promise<TrialResult> {
+async function runTrial(
+  browser: Browser,
+  ordinal: number,
+  variant: RenderContentionVariant,
+  forceAuthenticationFailure: boolean,
+): Promise<TrialResult> {
   const fixture = await RemotePlayableNodeFixture.create(nodePort);
   const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const page = await context.newPage();
@@ -116,13 +131,14 @@ async function runTrial(browser: Browser, ordinal: number, variant: RenderConten
   let error: string | null = null;
   try {
     await fixture.start(origin);
-    await connectForm(page, fixture.url);
+    await connectForm(page, fixture.url, forceAuthenticationFailure);
     await armProbe(page, variant);
     await page.click('#enter');
     await expect
       .poll(() => readProbe(page).then(({ terminal }) => terminal), { timeout: READY_POLL_DEADLINE_MS })
-      .toBe('ready');
+      .not.toBe('pending');
     probe = await readProbe(page);
+    if (probe.terminal !== 'ready') throw new Error(`Remote loading ended with ${probe.terminal}.`);
     evidence = await page.evaluate(() => window.__seedlandsRemoteEvidence!.snapshot());
     requiredRenderedChunks = await renderedRequiredChunkCount(page, evidence);
     const framePath = join(outputDirectory, `trial-${String(ordinal).padStart(2, '0')}-${variant}.png`);
@@ -132,6 +148,8 @@ async function runTrial(browser: Browser, ordinal: number, variant: RenderConten
   } catch (caught) {
     probe = await readProbe(page).catch(() => null);
     error = caught instanceof Error ? (caught.stack ?? caught.message) : String(caught);
+    const timeoutError = page.locator('.start-error').filter({ hasText: '初始区块加载超时' });
+    await timeoutError.waitFor({ state: 'visible', timeout: 1_000 }).catch(() => undefined);
     const productError = await page
       .locator('.start-error')
       .allTextContents()
@@ -175,6 +193,7 @@ function summarize(results: readonly TrialResult[]) {
       probe.finalPostrenderAtMs !== null &&
       finalFrame !== null,
   );
+  const candidateCleanupVerified = candidates.every(({ probe }) => probe?.autoRenderRestored === true);
   const controlUnmodified = results
     .filter(({ variant }) => variant === 'A')
     .every(({ probe }) => probe?.renderRequests === 0 && probe?.previousAutoRender === true);
@@ -189,6 +208,7 @@ function summarize(results: readonly TrialResult[]) {
     conservativeCandidateMarginMs:
       PRODUCT_DEADLINE_MS - Math.max(...candidates.map((item) => item.cappedClickToReadyMs)),
     candidateCorrect,
+    candidateCleanupVerified,
     controlUnmodified,
     rendererConfirmed,
     candidateWithinMargin,
@@ -196,6 +216,7 @@ function summarize(results: readonly TrialResult[]) {
       initialAaBothCensored &&
       balancedControlsBothCensored &&
       candidateCorrect &&
+      candidateCleanupVerified &&
       controlUnmodified &&
       rendererConfirmed &&
       candidateWithinMargin
@@ -207,10 +228,11 @@ function summarize(results: readonly TrialResult[]) {
 test.describe.configure({ mode: 'serial', retries: 0 });
 
 test('non-production remote loading render-contention experiment', async ({ browser }) => {
-  test.setTimeout(sequence.length * 45_000 + 30_000);
+  test.setTimeout(trialCases.length * 45_000 + 30_000);
   await mkdir(outputDirectory, { recursive: true });
   const results: TrialResult[] = [];
-  for (const [index, variant] of sequence.entries()) results.push(await runTrial(browser, index + 1, variant));
+  for (const [index, trial] of trialCases.entries())
+    results.push(await runTrial(browser, index + 1, trial.variant, trial.forceAuthenticationFailure));
   const sourceInputs = Object.fromEntries(
     await Promise.all(
       sourceFiles.map(
@@ -224,7 +246,7 @@ test('non-production remote loading render-contention experiment', async ({ brow
       ),
     ),
   );
-  const summary = sequence.length === FORMAL_SEQUENCE.length ? summarize(results) : null;
+  const summary = selfTest ? null : summarize(results);
   const record = {
     kind: 'seedlands-render-contention-non-production-experiment',
     sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
@@ -269,10 +291,24 @@ test('non-production remote loading render-contention experiment', async ({ brow
     }),
   );
   expect(results.every(({ probe }) => /swiftshader/iu.test(probe?.renderer ?? ''))).toBe(true);
-  if (sequence === SELF_TEST_SEQUENCE)
+  expect(
+    results.filter(({ variant }) => variant === 'B').every(({ probe }) => probe?.autoRenderRestored === true),
+  ).toBe(true);
+  if (selfTest) {
     expect(results[0]).toMatchObject({
       outcome: 'ready',
       requiredRenderedChunks: 9,
       probe: { previousAutoRender: true, autoRenderRestored: true },
     });
+    expect(results[1]).toMatchObject({
+      outcome: 'failure',
+      probe: {
+        previousAutoRender: true,
+        autoRenderRestored: true,
+        terminal: 'failed',
+        finalPostrenderAtMs: null,
+        finalPostrenderUnavailableReason: 'application-destroyed',
+      },
+    });
+  }
 });

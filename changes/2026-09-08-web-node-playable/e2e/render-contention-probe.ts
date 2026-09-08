@@ -8,13 +8,16 @@ export type RenderContentionProbeSnapshot = Readonly<{
   connectionClickedAtMs: number | null;
   applicationObservedAtMs: number | null;
   readyObservedAtMs: number | null;
+  failureObservedAtMs: number | null;
+  failureSource: 'application-destroy' | 'product-error' | null;
   finalPostrenderAtMs: number | null;
+  finalPostrenderUnavailableReason: 'application-destroyed' | 'failure-ended-session' | 'probe-released' | null;
   clickToReadyMs: number | null;
   pacedPostrenders: number;
   renderRequests: number;
   previousAutoRender: boolean | null;
   autoRenderRestored: boolean;
-  terminal: 'pending' | 'ready' | 'released';
+  terminal: 'pending' | 'ready' | 'failed' | 'released';
   renderer: string | null;
   vendor: string | null;
 }>;
@@ -43,7 +46,10 @@ export function arm(variant: RenderContentionVariant): void {
     connectionClickedAtMs: null,
     applicationObservedAtMs: null,
     readyObservedAtMs: null,
+    failureObservedAtMs: null,
+    failureSource: null,
     finalPostrenderAtMs: null,
+    finalPostrenderUnavailableReason: null,
     clickToReadyMs: null,
     pacedPostrenders: 0,
     renderRequests: 0,
@@ -57,30 +63,52 @@ export function arm(variant: RenderContentionVariant): void {
   let cadence: number | undefined;
   let animationFrame: number | undefined;
   let postrenderListener: (() => void) | undefined;
+  let destroyListener: (() => void) | undefined;
   const enterButton = document.querySelector('#enter');
   const markConnectionClick = () => {
     if (snapshot?.terminal === 'pending') snapshot = { ...snapshot, connectionClickedAtMs: performance.now() };
   };
   enterButton?.addEventListener('click', markConnectionClick, { once: true });
   let released = false;
+  const unavailableReason = (terminal: 'failed' | 'released') =>
+    terminal === 'released'
+      ? ('probe-released' as const)
+      : snapshot?.failureSource === 'application-destroy'
+        ? ('application-destroyed' as const)
+        : ('failure-ended-session' as const);
 
-  const restore = (terminal: 'ready' | 'released') => {
+  const restore = (terminal: 'ready' | 'failed' | 'released') => {
     if (released) return;
     released = true;
     if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
     if (cadence !== undefined) window.clearInterval(cadence);
     enterButton?.removeEventListener('click', markConnectionClick);
     if (!app) {
-      snapshot = { ...snapshot!, terminal, autoRenderRestored: true };
+      snapshot = {
+        ...snapshot!,
+        terminal,
+        autoRenderRestored: true,
+        finalPostrenderUnavailableReason: unavailableReason(terminal === 'ready' ? 'released' : terminal),
+      };
       return;
     }
     if (postrenderListener) app.off('postrender', postrenderListener);
+    if (destroyListener) app.off('destroy', destroyListener);
     app.autoRender = snapshot!.previousAutoRender ?? true;
+    if (terminal !== 'ready') {
+      snapshot = {
+        ...snapshot!,
+        autoRenderRestored: app.autoRender,
+        terminal,
+        finalPostrenderUnavailableReason: unavailableReason(terminal),
+      };
+      return;
+    }
     app.renderNextFrame = true;
     snapshot = {
       ...snapshot!,
       autoRenderRestored: app.autoRender,
-      terminal: terminal === 'released' ? 'released' : 'pending',
+      terminal: 'pending',
     };
     app.once('postrender', () => {
       snapshot = {
@@ -107,6 +135,15 @@ export function arm(variant: RenderContentionVariant): void {
         snapshot = { ...snapshot, pacedPostrenders: snapshot.pacedPostrenders + 1 };
       };
       app.on('postrender', postrenderListener);
+      destroyListener = () => {
+        snapshot = {
+          ...snapshot!,
+          failureObservedAtMs: performance.now(),
+          failureSource: 'application-destroy',
+        };
+        restore('failed');
+      };
+      app.on('destroy', destroyListener);
       if (variant === 'B') {
         app.autoRender = false;
         cadence = window.setInterval(() => {
@@ -125,6 +162,16 @@ export function arm(variant: RenderContentionVariant): void {
           snapshot!.connectionClickedAtMs === null ? null : readyObservedAtMs - snapshot!.connectionClickedAtMs,
       };
       restore('ready');
+      return;
+    }
+    const productError = document.querySelector('.start-error')?.textContent?.trim();
+    if (app && productError) {
+      snapshot = {
+        ...snapshot!,
+        failureObservedAtMs: performance.now(),
+        failureSource: 'product-error',
+      };
+      restore('failed');
       return;
     }
     animationFrame = requestAnimationFrame(observe);

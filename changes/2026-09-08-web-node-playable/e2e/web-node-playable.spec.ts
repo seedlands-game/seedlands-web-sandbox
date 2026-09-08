@@ -45,7 +45,9 @@ const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
 const nodePort = 18_787;
 const nodeUrl = `ws://127.0.0.1:${nodePort}/seedlands`;
 const accessKey = REMOTE_PLAYABLE_ACCESS_KEY;
-const evidenceDirectory = resolve('changes/2026-09-08-web-node-playable/evidence');
+const evidenceDirectory = resolve(
+  process.env.SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT ?? 'changes/2026-09-08-web-node-playable/evidence',
+);
 let nodeFixture: RemotePlayableNodeFixture | null = null;
 let nodeLog: string[] = [];
 
