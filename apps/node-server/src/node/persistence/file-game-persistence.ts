@@ -1,4 +1,4 @@
-import { mkdir } from 'node:fs/promises';
+import { lstat, mkdir, readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import type {
   ChunkPersistence,
@@ -13,7 +13,13 @@ import { cloneFrozenGameSaveSnapshot } from '@seedlands/game-core/server/persist
 import { decodeChunkBlob, encodeChunkBlob } from './file-chunk-blob';
 import { readBoundedFile, replaceDurableFile, syncDirectory, writeImmutableFile } from './durable-files';
 import { FileStoreLock } from './file-store-lock';
-import { encodePointer, loadManifestFromPointer, pointerExists, sha256 } from './file-store-manifest';
+import {
+  encodePointer,
+  loadManifestFromPointer,
+  pointerExists,
+  sha256,
+  validateChunkBlobReference,
+} from './file-store-manifest';
 import { nodeCorePlatform } from '../runtime/node-core-platform';
 import {
   DEFAULT_FILE_STORE_LIMITS,
@@ -49,6 +55,9 @@ const cloneChunk = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
   ...(snapshot.fluid ? { fluid: snapshot.fluid.slice() } : {}),
 });
 
+const knownBlobName = /^(?:chunk|gameplay)-[a-f0-9]{64}\.json$/;
+const knownManifestName = /^manifest-[0-9]+-[a-f0-9]{64}\.json$/;
+
 function validatedOptions(options: FileGamePersistenceOptions) {
   const worldId = options.worldId ?? 'default';
   const limits = { ...DEFAULT_FILE_STORE_LIMITS, ...options.limits };
@@ -66,6 +75,7 @@ function validatedOptions(options: FileGamePersistenceOptions) {
 export class FileGamePersistence implements ChunkPersistence, GameplayPersistence {
   private readonly snapshots = new Map<string, ChunkSnapshot>();
   private readonly missing = new Set<string>();
+  private readonly activeChunkLoads = new Set<Promise<void>>();
   private saveTail: Promise<void> = Promise.resolve();
   private failure: Error | null = null;
   private closing = false;
@@ -90,15 +100,33 @@ export class FileGamePersistence implements ChunkPersistence, GameplayPersistenc
     await syncDirectory(options.directory);
     const lock = await FileStoreLock.acquire(options.directory);
     try {
-      if (!(await pointerExists(options.directory, 'CURRENT')))
-        return new FileGamePersistence(options, worldId, limits, lock, null, null, null);
-      const loaded = await loadManifestFromPointer(
-        options.directory,
-        'CURRENT',
-        { worldId, seedText: options.seedText, generatorVersion: options.generatorVersion },
+      const identity = { worldId, seedText: options.seedText, generatorVersion: options.generatorVersion };
+      const loaded = (await pointerExists(options.directory, 'CURRENT'))
+        ? await loadManifestFromPointer(options.directory, 'CURRENT', identity, limits, {
+            validateChunkContents: false,
+          })
+        : null;
+      let canCollectGarbage = true;
+      if (await pointerExists(options.directory, 'PREVIOUS')) {
+        try {
+          await loadManifestFromPointer(options.directory, 'PREVIOUS', identity, limits, {
+            validateChunkContents: false,
+          });
+        } catch {
+          canCollectGarbage = false;
+        }
+      }
+      const store = new FileGamePersistence(
+        options,
+        worldId,
         limits,
+        lock,
+        loaded?.pointer ?? null,
+        loaded?.manifest ?? null,
+        loaded?.gameplay ?? null,
       );
-      return new FileGamePersistence(options, worldId, limits, lock, loaded.pointer, loaded.manifest, loaded.gameplay);
+      if (canCollectGarbage) await store.collectGarbage();
+      return store;
     } catch (error) {
       await lock.release();
       throw error;
@@ -144,6 +172,7 @@ export class FileGamePersistence implements ChunkPersistence, GameplayPersistenc
 
   async ensureSnapshotMeasured(cx: number, cy: number, cz: number): Promise<FileSnapshotLoadTiming> {
     this.assertReadable();
+    if (this.closing) throw new Error('文件持久化实例正在关闭，不能开始新的 Chunk 读取。');
     const key = chunkKey(cx, cy, cz);
     if (this.snapshots.has(key)) return { status: 'found', transactionReadMs: 0, decodeMs: 0 };
     if (this.missing.has(key)) return { status: 'missing', transactionReadMs: 0, decodeMs: 0 };
@@ -152,11 +181,21 @@ export class FileGamePersistence implements ChunkPersistence, GameplayPersistenc
       this.missing.add(key);
       return { status: 'missing', transactionReadMs: 0, decodeMs: 0 };
     }
+    let completeLoad!: () => void;
+    const activeLoad = new Promise<void>((resolve) => {
+      completeLoad = resolve;
+    });
+    this.activeChunkLoads.add(activeLoad);
     try {
       const readStarted = performance.now();
       const data = await readBoundedFile(join(this.options.directory, reference.path), this.limits.maxBlobBytes);
       if (data.byteLength !== reference.bytes || sha256(data) !== reference.sha256)
         throw new Error(`Chunk ${key} 在启动后发生损坏。`);
+      validateChunkBlobReference(data, key, reference, {
+        worldId: this.worldId,
+        seedText: this.options.seedText,
+        generatorVersion: this.options.generatorVersion,
+      });
       const transactionReadMs = performance.now() - readStarted;
       const decodeStarted = performance.now();
       const snapshot = decodeChunkBlob(data, {
@@ -169,10 +208,17 @@ export class FileGamePersistence implements ChunkPersistence, GameplayPersistenc
         cz,
       });
       const decodeMs = performance.now() - decodeStarted;
+      if (this.currentManifest?.chunks[key] !== reference) {
+        if (this.snapshots.has(key)) return { status: 'found', transactionReadMs, decodeMs };
+        throw new Error(`Chunk ${key} 读取期间检查点已改变且新快照未就绪。`);
+      }
       this.snapshots.set(key, snapshot);
       return { status: 'found', transactionReadMs, decodeMs };
     } catch (error) {
       throw this.markFailed(error instanceof Error ? error : new Error(String(error)));
+    } finally {
+      this.activeChunkLoads.delete(activeLoad);
+      completeLoad();
     }
   }
 
@@ -251,6 +297,7 @@ export class FileGamePersistence implements ChunkPersistence, GameplayPersistenc
     const accepted = this.saveTail;
     this.closePromise = (async () => {
       await accepted;
+      await Promise.all([...this.activeChunkLoads]);
       await this.lock.release();
       this.closed = true;
     })();
@@ -373,9 +420,54 @@ export class FileGamePersistence implements ChunkPersistence, GameplayPersistenc
         this.snapshots.set(key, saved);
         this.missing.delete(key);
       }
+      await this.collectGarbage();
     } catch (error) {
       throw this.markFailed(error instanceof Error ? error : new Error(String(error)));
     }
+  }
+
+  private async collectGarbage(): Promise<void> {
+    await Promise.all([...this.activeChunkLoads]);
+    const reachable = new Set<string>();
+    for (const pointerName of ['CURRENT', 'PREVIOUS'] as const) {
+      if (!(await pointerExists(this.options.directory, pointerName))) continue;
+      const loaded = await loadManifestFromPointer(
+        this.options.directory,
+        pointerName,
+        { worldId: this.worldId, seedText: this.options.seedText, generatorVersion: this.options.generatorVersion },
+        this.limits,
+        { validateChunkContents: false },
+      );
+      reachable.add(loaded.pointer.manifest);
+      reachable.add(loaded.manifest.gameplay.path);
+      for (const reference of Object.values(loaded.manifest.chunks)) reachable.add(reference.path);
+    }
+    await this.removeUnreachableKnownFiles('blobs', knownBlobName, reachable);
+    await this.removeUnreachableKnownFiles('manifests', knownManifestName, reachable);
+  }
+
+  private async removeUnreachableKnownFiles(
+    directoryName: 'blobs' | 'manifests',
+    pattern: RegExp,
+    reachable: ReadonlySet<string>,
+  ): Promise<void> {
+    const directory = join(this.options.directory, directoryName);
+    const metadata = await lstat(directory);
+    if (!metadata.isDirectory() || metadata.isSymbolicLink())
+      throw new Error(`持久化子目录类型无效，拒绝回收：${directoryName}`);
+    let removed = false;
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      if (!entry.isFile() || !pattern.test(entry.name)) continue;
+      const relativePath = `${directoryName}/${entry.name}`;
+      if (reachable.has(relativePath)) continue;
+      try {
+        await unlink(join(directory, entry.name));
+        removed = true;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      }
+    }
+    if (removed) await syncDirectory(directory);
   }
 
   private inject(stage: FileGamePersistenceFaultStage): void {

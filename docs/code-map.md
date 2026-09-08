@@ -82,11 +82,13 @@ flowchart TD
 
 Node 产品接线为 [命令行入口](../apps/node-server/src/node/server/node-server.ts) → [本机网络入口](../apps/node-server/src/node/server/node-playable-network-server.ts) / [产品生命周期](../apps/node-server/src/node/server/node-server-runtime.ts) → [Authority lane](../apps/node-server/src/node/runtime/node-authority-lane.ts) → 独立 Worker 内的 [常驻宿主](../packages/game-core/src/server/dedicated/dedicated-server-host.ts) → 同一 AuthorityRuntime。主上下文仅持异步 façade；默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。Persistence Worker 独占文件锁，Authority 通过有界 RPC 和同步缓存 proxy 读写冻结检查点；实验网络仅接受精确 Origin、口令和单个 loopback 玩家。关停依次等待网络资源释放、权威排空和最终 durable ACK、存储释放锁、Worker 退出。
 
+Node 文件存储由 `file-game-persistence.ts` 持有 CURRENT/PREVIOUS 检查点与按需 Chunk 缓存。启动先校验指针、manifest 引用元数据和 Gameplay；Chunk 内容的长度、hash、身份与版本在首次加载时校验，损坏仍拒绝使用。持锁回收仅删除两个检查点均不可达的已知文件，并保护在途读取；启动也清理可证明的崩溃孤儿。
+
 远端基线从 Authority lane 的 `captureBaseline()` 进入 [采集协调器](../packages/game-core/src/server/dedicated/dedicated-baseline-capture.ts)，在 Authority 内预留生成容量、保留完整邻域并复制，再经 [基线 RPC 门禁](../apps/node-server/src/node/runtime/node-authority-baseline-protocol.ts) 转移 buffer。mesh 固定为主块及 26 邻接块，collision-resync 为单块；[网络会话](../apps/node-server/src/node/server/node-playable-network-session.ts) 对单主块 interest 做空间、在途、取消和发送预算约束。
 
-公开基线参考从 [投影入口](../packages/game-core/src/server/protocol/network-reference-baseline.ts) 将 owned capture 转为显式 LE/raw 块，经 [发布队列](../packages/game-core/src/server/protocol/network-reference-baseline-publication.ts) 按准备完成顺序分配身份、按需物化页，再由 [重组器](../packages/game-core/src/server/protocol/network-reference-baseline-reassembly.ts) 校验完整块并交付；[字节账本](../packages/game-core/src/server/protocol/network-reference-baseline-budget.ts) 分别约束块与发送队列。它们是 codec/transport 无关的 `not-adopted` 参考组件，尚未建立认证会话、实际网络发送或浏览器安装入口。
+公开基线参考从 [投影入口](../packages/game-core/src/server/protocol/network-reference-baseline.ts) 将 owned capture 转为显式 LE/raw 块，经 [发布队列](../packages/game-core/src/server/protocol/network-reference-baseline-publication.ts) 按准备完成顺序分配身份、按需物化页，再由 [重组器](../packages/game-core/src/server/protocol/network-reference-baseline-reassembly.ts) 校验完整块并交付；[字节账本](../packages/game-core/src/server/protocol/network-reference-baseline-budget.ts) 分别约束块与发送队列。它们是 codec/transport 无关的 `not-adopted` 参考组件；本轮实验性本机接口将它们接入认证、实际发送和浏览器消费，但不代表正式 wire 采用。
 
-网格调度的 [source 合同](../apps/web/src/app/world/mesh-task-source.ts) 保留本地 canonical 接纳，并为完整 Authority 输入提供独立的派生结果核对和 task 副本结算。[worker 完整输入门禁](../packages/game-core/src/compute/authority-complete-mesh-input.ts) 在网格算法前要求主块及 26 邻接块的 canonical/fluid 全部存在；该 opt-in 接缝尚未由生产 app 的远端会话启用。
+网格调度的 [source 合同](../apps/web/src/app/world/mesh-task-source.ts) 保留本地 canonical 接纳，并为完整 Authority 输入提供独立的派生结果核对和 task 副本结算。[worker 完整输入门禁](../packages/game-core/src/compute/authority-complete-mesh-input.ts) 在网格算法前要求主块及 26 邻接块的 canonical/fluid 全部存在；本轮远端会话启用该 opt-in 接缝。
 
 [远端 Authority 客户端](../apps/web/src/client/authority/remote-authority-client.ts) 经认证会话接收权威快照、玩法与提交，并由[基线镜像](../apps/web/src/client/authority/remote-authority-mesh-mirror.ts)把重组结果交给[基线消费者](../apps/web/src/client/authority/network-baseline-consumer.ts)。消费者分别管理共享碰撞缓存、完整网格准备和 task 专属 Worker 副本；捕获期间的新 revision 会使旧 owner 失效并重抓，远端缺块不会回退为浏览器生成 canonical。
 
@@ -136,3 +138,20 @@ Node 产品接线为 [命令行入口](../apps/node-server/src/node/server/node-
 - 独立循环与统一物理：[原始合同](../changes/2026-09-06-independent-loops-unified-physics/spec.md)与[执行记录](../changes/2026-09-06-independent-loops-unified-physics/execution.md)配合阅读；不要只用合同早期状态判断当前完成度。
 - 早期拆分的背景：[应用模块边界](../changes/2026-09-04-app-module-boundaries/spec.md)。其中历史路径不保证与当前一致。
 - 下一阶段的目标与决策：[长期对齐](living-world-alignment.md)。Node Dedicated 已有实验性本机单玩家可玩会话；AgentServer、公网/多人网络和插件体系仍按路线与具体 change 推进，不能当作当前已完成的产品能力。
+
+## 资产工坊独立入口
+
+- [asset-workbench.html](../apps/web/asset-workbench.html) → [asset-workbench/main.ts](../apps/web/src/app/asset-workbench/main.ts) → Svelte 工坊；不经过游戏 bootstrap。
+- [asset-catalog.ts](../apps/web/src/client/presentation/asset-catalog.ts)、[asset-package.ts](../apps/web/src/client/presentation/asset-package.ts)：统一资源/用途、原生数据校验与依赖。
+- [pixel-model-resource.ts](../apps/web/src/app/gameplay/pixel-model-resource.ts)：游戏与工坊共享的像素 GPU 资源；[preview-scene.ts](../apps/web/src/app/asset-workbench/preview-scene.ts) 只组合检视场景。
+- [asset-workbench-store.ts](../apps/web/src/client/persistence/asset-workbench-store.ts)：旧版原生资产库兼容读取；当前项目快照由下述 appearance-project-store 持有。
+- 适配范围与来源规则见[资产工坊](asset-workbench.md)。
+
+统一视觉资产补充入口：
+
+- [visual-asset-catalog.ts](../apps/web/src/client/presentation/visual-asset-catalog.ts)：地形、角色、材质及 UI 引用；[terrain-assets.ts](../apps/web/src/client/presentation/terrain-assets.ts) 与 [model-material-definitions.ts](../apps/web/src/client/presentation/model-material-definitions.ts) 为独立像素源。
+- [texture-pack.ts](../apps/web/src/client/presentation/texture-pack.ts)、[terrain-pack-store.ts](../apps/web/src/client/persistence/terrain-pack-store.ts)：确定性图集与显式地形快照；世界存档不参与。
+- [actor-model-definitions.ts](../apps/web/src/client/presentation/actor-model-definitions.ts)、[builtin-actor-models.ts](../apps/web/src/app/gameplay/builtin-actor-models.ts)：游戏和工坊共享构件与人形比例。
+- [glb-model.ts](../apps/web/src/client/presentation/glb-model.ts)、[glb-model-store.ts](../apps/web/src/client/persistence/glb-model-store.ts)、[glb-model-resource.ts](../apps/web/src/app/gameplay/glb-model-resource.ts)：外部静态模型的校验、二进制持久化与 PlayCanvas 资源生命周期。
+
+对象外观入口以 `appearance-center.svelte` 组合对象导航、材质与像素编辑、完整项目导入导出。`appearance-project.ts`校验引用与覆盖，`appearance-project-store.ts`拥有draft/applied/previous及项目模型事务；旧库保留迁移/读取兼容。游戏经 `load-appearance-runtime.ts` 在创建GPU资源前装载应用快照，`item-mesh-definition.ts`从既有体素描述编译物品网格，`appearance-thumbnails.ts`生成同引擎高清图标。可复现生产脚本位于 `scripts/assets/`。

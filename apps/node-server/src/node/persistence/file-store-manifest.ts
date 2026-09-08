@@ -99,14 +99,9 @@ function validateManifestHeader(
   return { ...(manifest as FileStoreManifest), checkpoint };
 }
 
-async function validateChunkReference(
-  root: string,
-  key: string,
-  reference: ChunkFileReference,
-  manifest: FileStoreManifest,
-  limits: FileStoreLimits,
-): Promise<void> {
+function validateChunkReference(key: string, reference: ChunkFileReference, limits: FileStoreLimits): void {
   assertReference(reference, blobPathPattern, `Chunk ${key}`);
+  if (reference.bytes > limits.maxBlobBytes) throw new Error(`Chunk ${key} 长度超过配置上限。`);
   if (
     reference.key !== key ||
     key !== chunkKey(reference.cx, reference.cy, reference.cz) ||
@@ -118,7 +113,14 @@ async function validateChunkReference(
     !['procedural-diff-v1', 'palette-bitpack-v1', 'raw-u16-v1'].includes(reference.codec)
   )
     throw new Error(`Chunk ${key} manifest 元数据无效。`);
-  const data = await readReferencedFile(root, reference, limits.maxBlobBytes, `Chunk ${key}`);
+}
+
+export function validateChunkBlobReference(
+  data: Uint8Array,
+  key: string,
+  reference: ChunkFileReference,
+  manifest: Pick<FileStoreManifest, 'worldId' | 'seedText' | 'generatorVersion'>,
+): void {
   const metadata = inspectChunkBlob(data);
   if (
     metadata.worldId !== manifest.worldId ||
@@ -139,6 +141,7 @@ export async function loadManifestFromPointer(
   pointerName: 'CURRENT' | 'PREVIOUS',
   identity: { worldId: string; seedText: string; generatorVersion: number },
   limits: FileStoreLimits,
+  options: Readonly<{ validateChunkContents?: boolean }> = {},
 ): Promise<{ pointer: FileStorePointer; manifest: FileStoreManifest; gameplay: unknown }> {
   const pointer = parsePointer(await readBoundedFile(join(root, pointerName), 64 * 1_024));
   const manifestData = await readReferencedFile(
@@ -157,8 +160,12 @@ export async function loadManifestFromPointer(
   const gameplay = parseJson(gameplayData, 'Gameplay blob');
   if ((gameplay as { version?: unknown })?.version !== manifest.gameplaySchemaVersion)
     throw new Error('Gameplay blob schema 与 manifest 不一致。');
-  for (const [key, reference] of Object.entries(manifest.chunks))
-    await validateChunkReference(root, key, reference, manifest, limits);
+  for (const [key, reference] of Object.entries(manifest.chunks)) {
+    validateChunkReference(key, reference, limits);
+    if (options.validateChunkContents === false) continue;
+    const data = await readReferencedFile(root, reference, limits.maxBlobBytes, `Chunk ${key}`);
+    validateChunkBlobReference(data, key, reference, manifest);
+  }
   return { pointer, manifest, gameplay };
 }
 

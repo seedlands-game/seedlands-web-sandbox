@@ -60,7 +60,8 @@
     "wasm:rust:build": "node scripts/rust-kernel-artifact.mjs --build",
     "wasm:rust:verify": "node scripts/rust-kernel-artifact.mjs",
     "perf:adoption:freeze": "node scripts/freeze-adoption-builds.mjs",
-    "perf:adoption:summary": "node scripts/summarize-adoption-experiment.mjs"
+    "perf:adoption:summary": "node scripts/summarize-adoption-experiment.mjs",
+    "test:pr15:integration": "playwright test changes/2026-09-08-pr15-main-sync/e2e/asset-package-integration.spec.ts"
   },
   "dependencies": {},
   "devDependencies": {

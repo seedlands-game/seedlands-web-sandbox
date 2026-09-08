@@ -356,6 +356,32 @@ describe('Node 文件游戏持久化', () => {
     expect(previous).toMatchObject({ checkpoint: { commitSequence: 1 } });
   });
 
+  it('PREVIOUS 的显式检查仍读取并验证其 Chunk 内容', async () => {
+    const directory = await temporaryWorld();
+    const store = await openStore(directory, 'previous-validation');
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'previous-validation', persistence: store });
+    server.edit(0, 20, 0, Voxel.Wood);
+    await save(server, 1);
+    server.edit(0, 20, 0, Voxel.Lantern);
+    await save(server, 2);
+    await store.close();
+
+    const previousPointer = JSON.parse(await readFile(join(directory, 'PREVIOUS'), 'utf8')) as { manifest: string };
+    const previousManifest = JSON.parse(await readFile(join(directory, previousPointer.manifest), 'utf8')) as {
+      chunks: Record<string, { path: string }>;
+    };
+    const previousChunkPath = join(directory, previousManifest.chunks['0,0,0'].path);
+    const previousChunk = await readFile(previousChunkPath);
+    previousChunk[previousChunk.length - 1] ^= 0xff;
+    await writeFile(previousChunkPath, previousChunk);
+
+    const reopened = await openStore(directory, 'previous-validation');
+    await expect(reopened.inspectPreviousCheckpoint()).rejects.toThrow(/hash|损坏/i);
+    await reopened.ensureSnapshot(0, 0, 0);
+    expect(reopened.loadSnapshot('0,0,0')?.voxels).toContain(Voxel.Lantern);
+    await reopened.close();
+  });
+
   it('启动校验后 Chunk 被换成目录外符号链接时也拒绝跟随', async () => {
     const directory = await temporaryWorld();
     const outsideDirectory = await temporaryWorld();
@@ -381,7 +407,7 @@ describe('Node 文件游戏持久化', () => {
     await reopened.close();
   });
 
-  it('内容 hash 损坏、世界身份不匹配和越界 manifest 都拒绝启动', async () => {
+  it('启动只校验 manifest 与 Gameplay，Chunk 内容延迟到 ensure 时 fail closed', async () => {
     const directory = await temporaryWorld();
     const store = await openStore(directory, 'validation-world');
     const server = new GameServer({ platform: testCorePlatform, seedText: 'validation-world', persistence: store });
@@ -398,12 +424,55 @@ describe('Node 文件游戏持久化', () => {
     const chunk = await readFile(chunkPath);
     chunk[chunk.length - 1] ^= 0xff;
     await writeFile(chunkPath, chunk);
-    await expect(openStore(directory, 'validation-world')).rejects.toThrow(/hash|损坏/i);
+    const reopened = await openStore(directory, 'validation-world');
+    await expect(reopened.ensureSnapshot(0, 0, 0)).rejects.toThrow(/hash|损坏/i);
+    await reopened.close();
 
     expect(
       createHash('sha256')
         .update(await readFile(join(directory, pointer.manifest)))
         .digest('hex'),
     ).toHaveLength(64);
+  });
+
+  it('open 拒绝越界 Chunk 引用，ensure 核对 blob 与 manifest 的原元数据', async () => {
+    const directory = await temporaryWorld();
+    const store = await openStore(directory, 'chunk-metadata');
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'chunk-metadata', persistence: store });
+    server.edit(0, 20, 0, Voxel.Wood);
+    await save(server, 1);
+    await store.close();
+
+    const pointerPath = join(directory, 'CURRENT');
+    const pointer = JSON.parse(await readFile(pointerPath, 'utf8')) as {
+      bytes: number;
+      sha256: string;
+      manifest: string;
+    };
+    const manifestPath = join(directory, pointer.manifest);
+    const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as {
+      chunks: Record<string, { bytes: number; revision: number }>;
+    };
+    const originalBytes = manifest.chunks['0,0,0'].bytes;
+    manifest.chunks['0,0,0'].bytes = 2 * 1_024 * 1_024 + 1;
+    let manifestData = Buffer.from(JSON.stringify(manifest));
+    await writeFile(manifestPath, manifestData);
+    pointer.bytes = manifestData.byteLength;
+    pointer.sha256 = createHash('sha256').update(manifestData).digest('hex');
+    await writeFile(pointerPath, JSON.stringify(pointer));
+    await expect(openStore(directory, 'chunk-metadata')).rejects.toThrow(/Chunk.*长度.*上限/i);
+
+    manifest.chunks['0,0,0'].bytes = originalBytes;
+    manifest.chunks['0,0,0'].revision += 1;
+    manifestData = Buffer.from(JSON.stringify(manifest));
+    await writeFile(manifestPath, manifestData);
+    pointer.bytes = manifestData.byteLength;
+    pointer.sha256 = createHash('sha256').update(manifestData).digest('hex');
+    await writeFile(pointerPath, JSON.stringify(pointer));
+
+    const reopened = await openStore(directory, 'chunk-metadata');
+    await expect(reopened.ensureSnapshot(0, 0, 0)).rejects.toThrow(/blob 身份.*manifest|元数据/i);
+    expect(reopened.preparedSnapshotStatus('0,0,0')).toBe('unknown');
+    await reopened.close();
   });
 });
