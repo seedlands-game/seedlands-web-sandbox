@@ -33,12 +33,15 @@ Breaking / Exploration 的用户 hash 审核只授权其合同中的实现，不
 
 实施后运行受影响的确定性检查和构建；`pnpm verify:static` 与 `pnpm build` 是分别的基础证据。UI、输入和视觉按当前 spec 选择 Playwright、Midscene 或手工补充，不能互相替代。完成的 change 在明确功能分支创建只含该 change 的语义化本地 commit，并按已授权的 PR 交接规则推进。
 
-默认按任务复杂度选择模型和分工，具体路由见[协作与模型路由](docs/collaboration-routing.md)；这不要求每个任务使用多个 agent。
+默认按任务复杂度选择执行形式、模型和分工，具体路由见[协作与模型路由](docs/collaboration-routing.md)；优先使用已安装的全局 `agent-work-routing` skill，未安装时使用本 change 的版本化源。这不要求每个任务使用多个 agent，人类直接选择的模型不受重路由。
+
+有效性能采样必须经[性能执行窗口](docs/performance-execution.md)串行取得；普通功能测试、并发 agent 的机器负载或历史结果不能冒充当前性能证据。
 
 ## 按需上下文
 
 - [目录规范](docs/repository-structure.md)：文件职责、当前布局、静态边界和归档位置。
 - [开发治理](docs/development-governance.md)：SDD、E2E 生命周期、证据边界和准出记录。
 - [协作与模型路由](docs/collaboration-routing.md)：初始模型选择、分工、独立评审和成本观测。
+- [性能执行窗口](docs/performance-execution.md)：机器级阻塞锁、固定验收职责、取消和进程清理。
 - [上下文沉淀](docs/context-engineering.md)：哪些决策应写 docs 或晋升为 skill。
 - [归档索引](docs/change-archive.md)：显式 ZIP 工具、恢复命令和受保护的历史 change。

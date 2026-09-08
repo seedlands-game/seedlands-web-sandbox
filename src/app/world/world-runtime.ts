@@ -25,6 +25,8 @@ import {
   StreamingAdmissionRetry,
 } from './streaming-admission-retry';
 
+export { waitForInitialWorldReady } from './initial-world-ready';
+
 type WorldTelemetry = {
   loadedChunks: number;
   renderedChunks: number;
@@ -264,6 +266,10 @@ export class World {
 
   get waterTransitionSnapshot() {
     return this.waterTransitions.snapshot();
+  }
+
+  waitForInitialVisibleChunk() {
+    return this.repository.waitForFirstVisible();
   }
 
   beginFluidFeedbackSample(target?: Omit<FluidFeedbackTarget, 'chunkRevisions'>) {

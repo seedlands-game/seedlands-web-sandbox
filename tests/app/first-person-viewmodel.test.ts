@@ -19,6 +19,37 @@ vi.mock('../../src/app/gameplay/gameplay-model-assets', () => ({
 }));
 
 describe('第一人称手与物件的独立生命周期', () => {
+  it.each(['place', 'eat'] as const)('消耗最后一个物品后保留 %s 动作并完成回位', (action) => {
+    const camera = new pc.Entity();
+    const model = new FirstPersonViewmodel({ graphicsDevice: { width: 1280, height: 720 } } as pc.Application, camera);
+    const pivot = camera.findByName('viewmodel hand pivot')!;
+    model.setHeldItem(action === 'place' ? 'lantern' : 'berry');
+    model.setAction(action, true);
+    // Authority has already consumed the selected stack before the next frame.
+    model.setHeldItem(null);
+    model.update(0.1);
+    expect(pivot.getLocalEulerAngles().length()).toBeGreaterThan(1);
+    model.update(0.5);
+    expect(pivot.getLocalEulerAngles().length()).toBeCloseTo(0);
+    model.dispose();
+  });
+
+  it('采集期间切换工具会停止原动作并平滑收手', () => {
+    const camera = new pc.Entity();
+    const model = new FirstPersonViewmodel({ graphicsDevice: { width: 1280, height: 720 } } as pc.Application, camera);
+    const pivot = camera.findByName('viewmodel hand pivot')!;
+    model.setHeldItem('wood-axe');
+    model.setAction('mine');
+    model.update(0.2);
+    const before = pivot.getLocalRotation().clone();
+    model.setHeldItem('stone-pickaxe');
+    model.update(0);
+    expect(pivot.getLocalRotation().equals(before)).toBe(true);
+    model.update(0.16);
+    expect(pivot.getLocalEulerAngles().length()).toBeCloseTo(0);
+    model.dispose();
+  });
+
   it('显式重播相同事件，持续采集不重启，停止时平滑收手', () => {
     const camera = new pc.Entity();
     const model = new FirstPersonViewmodel({ graphicsDevice: { width: 1280, height: 720 } } as pc.Application, camera);

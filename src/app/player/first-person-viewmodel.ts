@@ -73,7 +73,9 @@ export class FirstPersonViewmodel {
     this.releaseDraft?.();
     this.releaseDraft = null;
     this.heldItem = itemId;
-    this.setAction('idle');
+    // Inventory may empty before a successful place/eat gesture is presented.
+    // Only the continuous mining action belongs to the previous held item.
+    if (this.action === 'mine') this.setAction('idle');
     while (this.item.children.length) this.item.children[0].destroy();
     if (itemId) {
       this.assets.addItem(this.item, itemId, 0.55);

@@ -1,0 +1,46 @@
+TAP version 13
+# Subtest: 并发调用阻塞串行，旧 wrapper 仍可调用
+ok 1 - 并发调用阻塞串行，旧 wrapper 仍可调用
+  ---
+  duration_ms: 307.474041
+  type: 'test'
+  ...
+# Subtest: 等待超时不抢占或删除旧格式/他人锁
+ok 2 - 等待超时不抢占或删除旧格式/他人锁
+  ---
+  duration_ms: 87.5115
+  type: 'test'
+  ...
+# Subtest: 取消等待不删除他人锁
+ok 3 - 取消等待不删除他人锁
+  ---
+  duration_ms: 314.289875
+  type: 'test'
+  ...
+# Subtest: 子进程失败时清理派生子孙并释放自有锁
+ok 4 - 子进程失败时清理派生子孙并释放自有锁
+  ---
+  duration_ms: 204.067958
+  type: 'test'
+  ...
+# Subtest: 持有者收到信号时清理进程组并释放自有锁
+ok 5 - 持有者收到信号时清理进程组并释放自有锁
+  ---
+  duration_ms: 149.416375
+  type: 'test'
+  ...
+# Subtest: owner 提交异常不递归删除后来出现的他人内容
+ok 6 - owner 提交异常不递归删除后来出现的他人内容
+  ---
+  duration_ms: 1.465375
+  type: 'test'
+  ...
+1..6
+# tests 6
+# suites 0
+# pass 6
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1113.533
