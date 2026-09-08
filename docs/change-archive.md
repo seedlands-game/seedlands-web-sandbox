@@ -19,3 +19,16 @@ node scripts/change-archive.mjs extract archives/changes/<batch>.zip restored/<b
 | `archives/changes/2026-09-03-foundation-delivered.zip` | `0cc93587de3d894152986d046ceeb28e4124a3c06510d808d6f7f47056cdb461` | `2026-09-03-{auto-commit-push,establish-lightweight-sdd,local-commit-only,pnpm-corepack-worktree-setup,record-first-lightweight-sdd,scope-midscene-yaml-to-changes,static-quality-baseline,vitest-test-environment}` | 已逐文件 manifest 验证；用 `extract` 命令恢复到不存在的目录 |
 
 仍被 `midscene:smoke`、Harness、治理测试或 active change 直接引用的历史目录保留在 `changes/`。
+
+## Node Dedicated Server 研究归档
+
+归档 tag：`archive/node-dedicated-mvp-2026-09-09`，指向已合并的 `ec77fdd667458ec93ea426dbf81a142ac6028f91`（PR #17）。该 Git tree 保存当时完整 Node/Web/core、锁文件、专项测试、E2E、历史 change 和证据。它是研究快照，不是继续更新的兼容分支。
+
+恢复时从 tag 建立独立 worktree，在该历史目录按其 README 安装和运行；不要把旧目录复制回当前 workspace 或将恢复作为主线必需门禁。例如：
+
+```sh
+git fetch origin tag archive/node-dedicated-mvp-2026-09-09
+git worktree add --detach ../seedlands-node-research archive/node-dedicated-mvp-2026-09-09
+```
+
+主线保留历史文字合同与交付证据；Node 专项源码、测试、Web↔Node E2E 和构建/CI 入口从活跃树移除。撤销退役需新的需求与基于当时主线的独立合同，不保证该快照随平台或依赖变化持续编译运行。详见[退役记录](../changes/2026-09-09-browser-living-world-baseline/spec.md)。

@@ -120,26 +120,11 @@ pnpm server:headless -- --seed my-debug-world
 
 首版无头 Harness 使用进程内存持久化。`/save` 会真实经过 Chunk 与 gameplay snapshot 的 persistence boundary，并可在同一进程的重载测试中恢复；进程退出后不会生成持久世界文件。
 
-## 实验性 Node 世界宿主
+## Node 研究归档
 
-独立 TypeScript 世界宿主可以脱离浏览器常驻运行、将检查点保存到独立目录，并接入一个实验性的本机浏览器会话。先创建独立口令文件，再用将要连接的精确 Web Origin 启动 loopback 监听：
+Node Dedicated Server 已在完成 MVP 研究后从活跃产品和强制门禁退出。历史版本固定为 `archive/node-dedicated-mvp-2026-09-09`，恢复方式见[归档索引](docs/change-archive.md#node-dedicated-server-研究归档)。后续不承诺兼容或持续编译运行。
 
-```bash
-pnpm build:server
-pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world \
-  --listen 127.0.0.1:8787 --origin http://127.0.0.1:4173 \
-  --access-key-file /absolute/path/to/access-key
-```
-
-在 Web 启动页选择“连接 Node”，填写 `ws://127.0.0.1:8787/seedlands` 和口令文件中的内容后连接。口令只在有界首条握手中发送，浏览器不会持久保存。监听只接受 loopback、校验精确 Origin，并只授予一个玩家会话；离开或关闭网页后需手动重连。Node Authority 会在网页关闭后继续 tick，“保存到 Node 并返回主菜单”会等待 durable 检查点；使用同一数据目录重启 Node 后可恢复该检查点。
-
-在第二个终端用与上方一致的 Origin 启动 Web：
-
-```bash
-pnpm --filter @seedlands/web dev --host 127.0.0.1 --port 4173
-```
-
-`apps/node-server/dist/` 内的五个 ESM 入口及清单可由 Node 22.12 或更高版本直接运行，不需要源码、Vite 或在服务器安装运行依赖。默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。`--compute child-process` 可选择实验性进程执行器；这不是已测得更快的默认建议。按 Ctrl+C 会排空工作并保存最终检查点。请使用独立目录，不会自动导入浏览器存档；同一目录的第二个写者会被拒绝。本机 WebSocket 合同仍是实验接口，不代表公网部署或网络性能建议。
+当前产品以浏览器单人世界为中心，下一步是共享世界 Harness 和一个持久 NPC Agent。详细边界见[产品定位](docs/product-positioning.md)。Headless 命令循环继续作为开发工具保留；增强 REPL 与 Agent 尚未实现。
 
 ## 架构
 
@@ -149,15 +134,14 @@ pnpm --filter @seedlands/web dev --host 127.0.0.1 --port 4173
 
 ```text
 apps/web/          浏览器产品、Vite/SSG、PlayCanvas、Svelte 与浏览器 Worker
-apps/node-server/  Node CLI、线程/进程、持久化适配与五入口构建
-packages/game-core/ Web/Node 共享的世界、物理、运行时、服务端与纯计算
+packages/game-core/ 平台无关的世界、物理、运行时、服务端与纯计算
 tests/             单元、架构与长期浏览器回归测试
 crates/            纯 Rust 计算内核与浏览器 Wasm 适配层
 changes/           变更合同及所属的交付证据
 scripts/           workspace Harness 与工程脚本
 ```
 
-workspace 使用一个 lockfile。Web 与 Node 仅经 `@seedlands/game-core` 声明的 subpath exports 共享逻辑，彼此不依赖。`packages/game-core/` 不获得 DOM、WebWorker、Node ambient types，也不依赖两个 app 包；平台能力经窄实例端口注入。产品依赖由所属 package 声明；根 devDependencies 中重复的 PlayCanvas、Svelte 与 Tone 只供根级整合测试解析，Node 的类型检查、构建和隔离运行不消费它们。
+workspace 使用一个 lockfile。Web 经 `@seedlands/game-core` 声明的 exports 消费逻辑；core 不获得 DOM、WebWorker 或 Node ambient types，也不依赖产品适配。平台能力通过窄实例端口注入。包边界继续拒绝 Web/Node 互依和 core 反向依赖；产品依赖由所属包声明，根开发依赖支持工程和整合测试。
 
 浏览器默认运行五个后台 Worker：权威状态与固定步长物理、游戏逻辑、流体计算、通用计算和持久化各一个。可选第二个通用计算 Worker，此时总数为六个。渲染与本地玩家预测留在主线程。物理、玩法与流体分别使用独立频率和有界追赶，耗时逻辑与网格计算不驱动物理时钟；通信使用带版本的消息与可转移缓冲，不要求共享内存。
 
@@ -169,17 +153,12 @@ workspace 使用一个 lockfile。Web 与 Node 仅经 `@seedlands/game-core` 声
 pnpm test
 pnpm verify:static
 pnpm build
-pnpm build:server
-pnpm verify:node-isolation
 pnpm test:e2e:regression
-pnpm test:web-node-playable
 ```
 
 General 计算 Worker 默认启用实测采纳的 Rust Chunk填充、halo、mesh描述符和网格打包；打包在能力可用时使用标准SIMD128，保留标量与优化 TypeScript 回退。Fluid、Authority、Logic、Persistence 默认仍用 TypeScript。每个启用 Worker 独立持有 Wasm 实例，不要求共享内存或跨源隔离。`crates/rust-toolchain.toml` 固定 Rust 1.88.0 与 Wasm 目标；`pnpm wasm:rust:build` 重建两种生产产物，常规生产构建校验源码与二进制 hash；`pnpm rust:check` 约束纯 core 边界。已淘汰的 MoonBit 实现和工具链不再保留，冻结测量仍可在[结果快照](changes/2026-09-07-remove-moonbit-toolchain/moonbit-results.md)中审阅。采纳原因和实际收益见[本轮方案](changes/2026-09-07-data-plane-adoption/adoption-plan.md)。
 
 这些命令提供不同证据：单元测试覆盖确定性逻辑；静态验证覆盖格式、lint、路径规则、覆盖率和 TypeScript；生产构建证明 bundling；Playwright 覆盖确定性浏览器行为。视觉语义由 change 所属的 Midscene 流程独立评估。
-
-Web连接Node的旅程在本机GPU上默认使用Medium画质。Linux CI使用managed完整Chromium、SwiftShader和已有Low画质；可执行 `SEEDLANDS_E2E_FULL_CHROMIUM=1 SEEDLANDS_E2E_SWIFTSHADER=1 SEEDLANDS_WEB_NODE_QUALITY=low pnpm test:web-node-playable` 复现该功能环境。它验证软件图形下完整游玩、保存与重连，不代表Medium图形性能通过。缺少managed浏览器时先执行 `pnpm exec playwright install chromium`。
 
 架构 lint 还将 JavaScript 与 TypeScript 模块限制为不超过 500 行有效代码（不计空行与注释），避免职责重新堆积为单体文件。
 
@@ -189,7 +168,7 @@ Web连接Node的旅程在本机GPU上默认使用Medium画质。Linux CI使用ma
 
 Seedlands 的目标是一个由统一自然规律、自主居民、持久后果以及跨转生的生命共同构成的剑与魔法开放世界。体素是这个愿景中的一种物质与交互语言，而不是项目本身的定义。
 
-即使未来的完整游戏转向独立客户端与服务端，本仓库仍可作为独立的开源 Web 沙盒继续存在。
+浏览器是正式产品载体；开源引擎支撑上层创作与游玩平台，独立服务端不属于当前产品路线。
 
 ## 已知限制
 

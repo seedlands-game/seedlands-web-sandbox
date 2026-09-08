@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "id": "node-retirement-implementation",
+  "role": "Node 归档实现者",
+  "workType": "implementation",
+  "goal": "按 spec 完成 Node 产品退役代码和配置变更、自测；主任务并行编写 docs。移除 apps/node-server 与 Node 专属 tests、构建脚本、CI 门禁和 Web↔Node 可玩 E2E；保留历史 spec/证据。评估移除浏览器 remote 产品入口及无通用消费者的专属代码，保持默认单人路径与通用合同。Headless CLI 平台适配搬到 scripts 下合理位置，不损失现有行为。包边界规则继续拒绝退役 Node 导入。使用现有测试/新增有意义退役合同测试取得 RED/GREEN；完成 pnpm verify:static、pnpm build、Headless 冒烟和必要浏览器回归。不要提交，不运行 Git 写入；报告 docs 应更新清单。",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-browser-living-world-baseline/spec.md",
+      "purpose": "授权范围与验收"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/scripts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/package.json",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/pnpm-lock.yaml",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/pnpm-workspace.yaml",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/eslint.config.mjs",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/vitest.config.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/vitest.active-node.config.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tsconfig.test.json",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tsconfig.active-node-tests.json",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/playwright.config.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/.github",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/.ls-lint.yml",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/.prettierignore",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tsconfig.json"
+    ],
+    "nonGoals": [
+      "不修改 docs、AGENTS.md、README、CONTRIBUTING（交主任务）",
+      "不修改本 change 的 spec.md 或 contracts；可写 implementation-report.md",
+      "不实现 Agent MVP 或新 Harness 功能",
+      "不改写历史文字合同/证据",
+      "不提交/推送/合并，不读取 .env 或密钥"
+    ]
+  },
+  "outputs": [
+    "代码与配置退役变更",
+    "changes/2026-09-09-browser-living-world-baseline/implementation-report.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "retire",
+      "check": "Node 退出 workspace/全部活跃门禁，Headless 和浏览器单人保留，包边界仍有效",
+      "evidence": "RED/GREEN 与引用清单"
+    },
+    {
+      "id": "verify",
+      "check": "执行受影响检查、verify:static/build、Headless 与浏览器测试；失败保留日志并修复范围内原因",
+      "evidence": "implementation-report.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 3
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-browser-living-world-baseline/contracts/parent.json",
+    "sha256": "6c1b94feff03abccdd6b22eba8b759db7ff7eb562d053193a4e4465e38e4ef40"
+  }
+}

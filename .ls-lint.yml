@@ -29,6 +29,7 @@ ls:
   scripts:
     .dir: kebab-case
     .mjs: kebab-case
+    .ts: kebab-case
   changes/*:
     .dir: regex:\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*
     .md: kebab-case
@@ -52,6 +53,9 @@ ls:
   changes/2026-09-08-web-node-playable/contracts:
     .dir: kebab-case
     .json: kebab-case
+  changes/2026-09-09-browser-living-world-baseline/contracts:
+    .dir: kebab-case
+    .json: kebab-case
   changes/*/midscene:
     .dir: kebab-case
   changes/*/e2e:
@@ -71,7 +75,7 @@ ignore:
   - harness/results
   - midscene_run
   - node_modules
-  - apps/node-server/node_modules
+  - apps/*/node_modules
   - apps/web/node_modules
   - packages/game-core/node_modules
   - crates/target

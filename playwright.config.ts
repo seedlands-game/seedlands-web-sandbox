@@ -10,16 +10,12 @@ const e2ePort = process.env.SEEDLANDS_E2E_PORT ?? '4173';
 const serverOrigin = `http://127.0.0.1:${e2ePort}`;
 const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
 const baseURL = new URL(basePath, `${serverOrigin}/`).href;
-const renderContentionExperiment = process.env.SEEDLANDS_RENDER_CONTENTION_EXPERIMENT === '1';
 const forceSwiftShader = process.env.SEEDLANDS_E2E_SWIFTSHADER === '1';
-const useSwiftShader = renderContentionExperiment || forceSwiftShader;
-const experimentOutput =
-  process.env.SEEDLANDS_RENDER_CONTENTION_OUTPUT ?? '/tmp/seedlands-web-node-playable/render-contention';
 
 export default defineConfig({
   testDir: '.',
   testMatch: ['tests/e2e/**/*.spec.ts', 'changes/*/e2e/**/*.spec.ts'],
-  outputDir: renderContentionExperiment ? `${experimentOutput}/playwright` : 'test-results',
+  outputDir: 'test-results',
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
@@ -31,11 +27,11 @@ export default defineConfig({
     headless: true,
     ...(fullChromium ? { channel: 'chromium' as const } : {}),
     trace: 'on-first-retry',
-    ...(executablePath || useSwiftShader
+    ...(executablePath || forceSwiftShader
       ? {
           launchOptions: {
             ...(executablePath ? { executablePath } : {}),
-            ...(useSwiftShader
+            ...(forceSwiftShader
               ? { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] }
               : {}),
           },

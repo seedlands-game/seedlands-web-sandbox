@@ -103,22 +103,6 @@ export class ApplicationShell {
         }
         if (generation === this.startGeneration) this.latestSeed = seed;
       },
-      startRemote: async (url, accessKey, quality) => {
-        const generation = ++this.startGeneration;
-        await audio.unlock();
-        if (generation !== this.startGeneration) throw new Error('Remote start was superseded.');
-        bridge.publishShell({ phase: 'loading', quality, enterLabel: '正在连接 Node…', experience: null });
-        try {
-          const remote = await game.startRemote(url, accessKey, quality);
-          return remote;
-        } catch (error) {
-          if (generation === this.startGeneration) {
-            game.abortStart();
-            bridge.publishShell({ phase: 'error', enterLabel: '重新连接 Node' });
-          }
-          throw error;
-        }
-      },
       leave: async () => {
         await game.leaveWorld();
         await this.refresh();
@@ -215,13 +199,6 @@ export class ApplicationShell {
     }
     this.startingExperience = experience;
     await this.controller.start(seed, quality, openMode);
-  }
-
-  async connectRemote(url: string, accessKey: string, quality: ShellQuality) {
-    this.setQuality(quality);
-    if (this.capabilities.workerSupport !== 'supported') throw new Error('当前浏览器不支持运行游戏所需的 Web Worker。');
-    if (!accessKey) throw new Error('请输入 Node 访问口令。');
-    await this.controller.connectRemote(url, accessKey, quality);
   }
 
   async confirmPerformanceWarning() {

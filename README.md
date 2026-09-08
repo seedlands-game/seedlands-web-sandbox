@@ -123,26 +123,11 @@ pnpm server:headless -- --seed my-debug-world
 
 The first headless harness uses in-process memory persistence. `/save` exercises both chunk and gameplay snapshot persistence and supports reload tests within the process; it does not create a durable world file after the process exits.
 
-## Experimental Node world host
+## Archived Node research
 
-The standalone TypeScript world host can run without a browser, persist checkpoints to its own directory, and accept one experimental local browser session. Create a separate access-key file and start the loopback listener with the exact Web origin that will connect:
+The Node Dedicated Server MVP has been retired from active product code and required checks. Its complete snapshot is tagged `archive/node-dedicated-mvp-2026-09-09`; see the [recovery instructions](docs/change-archive.md#node-dedicated-server-研究归档). Future changes do not promise compatibility or continued builds.
 
-```bash
-pnpm build:server
-pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world \
-  --listen 127.0.0.1:8787 --origin http://127.0.0.1:4173 \
-  --access-key-file /absolute/path/to/access-key
-```
-
-In the Web start screen, choose **Connect to Node**, enter `ws://127.0.0.1:8787/seedlands` and the file's access key, then connect. The key is sent only in the bounded opening handshake and is not stored by the browser. The listener accepts loopback only, checks the exact Origin, and grants one player session; reconnect manually after leaving or closing the page. The Node Authority keeps ticking while the page is closed, and **Save to Node and return to menu** waits for a durable checkpoint. Restarting Node with the same data directory restores that checkpoint.
-
-Start the Web app in a second terminal with the same Origin used above:
-
-```bash
-pnpm --filter @seedlands/web dev --host 127.0.0.1 --port 4173
-```
-
-The output in `apps/node-server/dist/` runs with Node 22.12 or later and includes five ESM entry files plus its manifest. It needs no source checkout, Vite, or runtime dependency install. The default uses a dedicated authority lane, logic/fluid/general computation lanes, and a persistence lane. `--compute child-process` selects the experimental process executor; this is not a measured performance recommendation. Stop with Ctrl+C to drain work and save the final checkpoint. Use a dedicated directory; browser saves are not imported automatically. A second writer to the same directory is rejected. The local WebSocket contract remains experimental and is not a public-network deployment or a networking performance recommendation.
+The product now centers on browser single-player worlds. Shared world harness capabilities and one persistent NPC agent are next; see the [product baseline](docs/product-positioning.md). The existing headless command loop remains a developer tool. The enhanced REPL and agent are not implemented yet.
 
 ## Architecture
 
@@ -156,15 +141,14 @@ Players, creatures, and dropped items share registered collision shapes and swep
 
 ```text
 apps/web/          Browser product, Vite/SSG, PlayCanvas, Svelte, and browser Workers
-apps/node-server/  Node CLI, thread/process, persistence adapters, and five-entry build
-packages/game-core/ Browser/Node-shared world, physics, runtime, server, and pure compute
+packages/game-core/ Platform-independent world, physics, runtime, server, and pure compute
 tests/             Unit, architecture, and long-lived browser regression tests
 crates/            Pure Rust kernels and browser Wasm adapters
 changes/           Change contracts and their delivery-specific evidence
 scripts/           Workspace harness and engineering scripts
 ```
 
-The workspace uses one lockfile. Web and Node depend on `@seedlands/game-core` through declared subpath exports and do not depend on each other. `packages/game-core/` is deliberately independent of DOM, WebWorker, Node ambient types, and both application packages; platform capabilities are injected through narrow instance ports. Each package declares its product dependencies. PlayCanvas, Svelte, and Tone are also present in the root development dependencies only so root-owned integration tests can resolve them; Node typecheck, build, and runtime isolation do not consume them.
+The workspace uses one lockfile. Web consumes declared `@seedlands/game-core` exports. Core has no DOM, WebWorker, or Node ambient types and does not depend on product adapters; platform capabilities use narrow instance ports. Package boundaries still reject Web/Node cross-dependencies and reverse core dependencies. Product dependencies belong to their package; root development dependencies support engineering and integration tests.
 
 ## Verification
 
@@ -172,15 +156,10 @@ The workspace uses one lockfile. Web and Node depend on `@seedlands/game-core` t
 pnpm test
 pnpm verify:static
 pnpm build
-pnpm build:server
-pnpm verify:node-isolation
 pnpm test:e2e:regression
-pnpm test:web-node-playable
 ```
 
 These commands provide different evidence. Unit tests cover deterministic logic; static verification covers formatting, linting, path rules, coverage, and TypeScript; the production build proves bundling; Playwright covers deterministic browser behaviour. Visual semantics are evaluated separately with change-scoped Midscene flows.
-
-The Web-to-Node journey defaults to Medium quality on a local GPU. Linux CI uses managed full Chromium, SwiftShader, and the existing Low quality profile; reproduce that functional environment with `SEEDLANDS_E2E_FULL_CHROMIUM=1 SEEDLANDS_E2E_SWIFTSHADER=1 SEEDLANDS_WEB_NODE_QUALITY=low pnpm test:web-node-playable`. This validates the complete gameplay/save/reconnect journey on software graphics, not Medium graphics performance. Run `pnpm exec playwright install chromium` first if the managed browser is missing.
 
 The general computation Worker enables measured Rust kernels for chunk filling, halo, mesh descriptors, and mesh packing. Packing uses standard SIMD128 when supported, with scalar and optimized TypeScript fallbacks. Fluid, authority, logic, and persistence remain TypeScript by default. Each enabled Worker owns its own Wasm instance; shared memory and cross-origin isolation are not required. Rust 1.88.0 and the Wasm target are pinned in `crates/rust-toolchain.toml`; `pnpm wasm:rust:build` rebuilds the two production artifacts, and the normal production build verifies their source and binary hashes. `pnpm rust:check` enforces the pure-core boundary. The superseded MoonBit implementation and toolchain have been removed; its frozen measurements remain available in the [result snapshot](changes/2026-09-07-remove-moonbit-toolchain/moonbit-results.md). See the [adoption decision and measurements](changes/2026-09-07-data-plane-adoption/adoption-plan.md).
 
@@ -192,7 +171,7 @@ For the complete development workflow, testing layers, and pull request expectat
 
 Seedlands is intended as a living sword-and-magic open world governed by unified natural laws, autonomous inhabitants, persistent consequences, and lives that can continue through reincarnation. Voxels are one material and interaction language inside that vision, not its product definition.
 
-This repository may remain useful independently as an open Web sandbox even if the wider game later moves to dedicated clients and servers.
+The browser is a product platform in its own right. The open engine supports future creation and play experiences; a dedicated game server is outside the current product roadmap.
 
 ## Known limitations
 

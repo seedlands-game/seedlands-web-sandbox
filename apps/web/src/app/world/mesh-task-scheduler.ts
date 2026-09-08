@@ -2,12 +2,7 @@ import { isCurrentMeshTask } from '../../client/compute/mesh-task-snapshot';
 import { chunkKey } from '@seedlands/game-core/world/voxel';
 import type { PendingMeshTask, StreamingVariant, WorkerResult } from '../app-contracts';
 import { createMainSnapshotDispatch, type MeshTaskDispatch } from './mesh-task-dispatch';
-import {
-  acceptSourceMeshResult,
-  assertMeshSourceVariant,
-  prepareSourceWorkerDispatch,
-  type MeshTaskSchedulerOptions,
-} from './mesh-task-source';
+import { acceptSourceMeshResult, prepareSourceWorkerDispatch, type MeshTaskSchedulerOptions } from './mesh-task-source';
 import { recordMeshPreparationFailure } from './mesh-preparation-telemetry';
 import { higherMeshRequestPriority, promoteMeshRequestPriority, selectMeshRequest } from './mesh-request-priority';
 import type { MeshRequestPriority } from './mesh-request-priority';
@@ -56,7 +51,6 @@ export class MeshTaskScheduler {
   private supersededInFlight = 0;
 
   constructor(private readonly options: MeshTaskSchedulerOptions) {
-    assertMeshSourceVariant(options.source, options.variant);
     this.variant = options.variant;
     options.worker.onmessage = (event) => void this.receive(event.data);
     options.worker.onerror = ({ taskId, error }) => this.fail(taskId, error);
@@ -88,7 +82,6 @@ export class MeshTaskScheduler {
   }
 
   setVariant(variant: StreamingVariant) {
-    assertMeshSourceVariant(this.options.source, variant);
     if (this.variant === variant) return false;
     this.variant = variant;
     return true;
@@ -340,7 +333,6 @@ export class MeshTaskScheduler {
   }
 
   private postMainSnapshot(request: PendingMeshRequest) {
-    if (this.options.source.kind === 'authority-complete') throw new TypeError('Complete input cannot use snapshots.');
     const span = this.options.telemetry.beginSpan('streaming', 'HaloSnapshot', 'main', request.traceId);
     const snapshot = this.options.source.prepareMainSnapshot(request.cx, request.cy, request.cz);
     this.options.telemetry.endSpan(span);
