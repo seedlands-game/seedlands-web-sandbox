@@ -11,6 +11,7 @@ import {
 } from '@playwright/test';
 import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
 import { COLLISION_EPSILON } from '../../../packages/game-core/src/physics/geometry';
+import { alignWithAimedColumn } from './aimed-column-alignment';
 import {
   armGraphicsIdentity,
   captureGraphicsIdentity,
@@ -40,6 +41,7 @@ const journeyDiagnosticDirectory = resolve(
 let nodeFixture: RemotePlayableNodeFixture | null = null;
 let nodeLog: string[] = [];
 const graphicsIdentities: ConnectionGraphicsIdentity[] = [];
+const playableSockets = new WeakMap<Page, PlaywrightWebSocket>();
 let activeJourneyDiagnostics: JourneyProgressDiagnostics | null = null;
 
 const evidence = (page: Page) =>
@@ -80,6 +82,7 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
     appendDiagnostic(consoleMessages, `${message.type()}: ${message.text()}`);
   const onPageError = (error: Error) => appendDiagnostic(pageErrors, error.stack ?? error.message);
   const onWebSocket = (socket: PlaywrightWebSocket) => {
+    if (socket.url() === nodeUrl) playableSockets.set(page, socket);
     const onClose = () => appendDiagnostic(webSocketEvents, `close ${socket.url()}`);
     webSocketCloseListeners.set(socket, onClose);
     socket.on('close', onClose);
@@ -239,25 +242,6 @@ async function attachFrame(page: Page, testInfo: TestInfo, name: string): Promis
   await testInfo.attach(name, { body, contentType: 'image/png' });
 }
 
-async function alignWithAimedColumn(page: Page): Promise<void> {
-  for (let attempt = 0; attempt < 24; attempt += 1) {
-    const current = await evidence(page);
-    if (!current.aimedVoxel) throw new Error('脚下目标在移动对齐期间丢失。');
-    const dx = current.aimedVoxel[0] + 0.5 - current.authoritativePlayer[0];
-    const dz = current.aimedVoxel[2] + 0.5 - current.authoritativePlayer[2];
-    if (Math.hypot(dx, dz) < 0.25) return;
-    const yaw = (current.viewAngles[0] * Math.PI) / 180;
-    const forward = dx * -Math.sin(yaw) + dz * -Math.cos(yaw);
-    const right = dx * Math.cos(yaw) + dz * -Math.sin(yaw);
-    const keys = [forward >= 0 ? 'KeyW' : 'KeyS', right >= 0 ? 'KeyD' : 'KeyA'];
-    await Promise.all(keys.map((key) => page.keyboard.down(key)));
-    await page.waitForTimeout(35);
-    await Promise.all(keys.map((key) => page.keyboard.up(key)));
-    await page.waitForTimeout(70);
-  }
-  throw new Error('真实 WASD 未能将玩家对齐到脚下目标格。');
-}
-
 async function placeSelectedBlock(
   page: Page,
 ): Promise<Readonly<{ position: readonly [number, number, number]; voxel: number }>> {
@@ -386,7 +370,9 @@ test.describe.serial('Web to Node local playable loop', () => {
     await expect.poll(async () => (await evidence(page)).onGround).toBe(true);
     await page.mouse.move(900, 1_100, { steps: 6 });
     await expect.poll(async () => (await evidence(page)).aimedVoxel).not.toBeNull();
-    await alignWithAimedColumn(page);
+    const playableSocket = playableSockets.get(page);
+    if (!playableSocket || playableSocket.isClosed()) throw new Error('站位准备缺少活动的 Node WebSocket。');
+    await alignWithAimedColumn({ page, socket: playableSocket, nodeUrl, evidence });
     const beforeBreak = await evidence(page);
     const minedVoxel = beforeBreak.aimedVoxel!;
     expect(beforeBreak.aimedVoxelType).toBeGreaterThan(0);

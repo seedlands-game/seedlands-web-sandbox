@@ -25,15 +25,19 @@ const sourceFiles = [
   'apps/web/src/client/authority/remote-authority-input-pipeline.ts',
   'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
   'apps/web/src/client/presentation/performance-telemetry.ts',
+  'apps/web/src/client/player-input-stream.ts',
+  'changes/2026-09-08-web-node-playable/e2e/aimed-column-alignment.ts',
   'changes/2026-09-08-web-node-playable/e2e/graphics-identity-evidence.ts',
   'changes/2026-09-08-web-node-playable/e2e/graphics-identity-failure.spec.ts',
   'changes/2026-09-08-web-node-playable/e2e/remote-playable-node-fixture.ts',
   'changes/2026-09-08-web-node-playable/e2e/graphics-identity-probe.ts',
   'changes/2026-09-08-web-node-playable/e2e/journey-progress-diagnostics.ts',
   'changes/2026-09-08-web-node-playable/e2e/journey-quality.ts',
+  'changes/2026-09-08-web-node-playable/e2e/settled-keyboard-pulse.ts',
   'changes/2026-09-08-web-node-playable/e2e/web-node-playable-source-inputs.ts',
   'changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts',
   'changes/2026-09-08-web-node-playable/contracts/validation.json',
+  'tests/e2e/settled-keyboard-pulse.test.ts',
 ] as const;
 
 // prettier-ignore
