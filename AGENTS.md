@@ -26,6 +26,12 @@
 - SIMD 只用于等价且连续的批量核。先比较相同算法/布局/线程的标量与标准 SIMD，计入准备、复制、边界和输出；保留能力探测与标量回退。默认不开 relaxed SIMD/fastmath，不以核倍率冒充整帧收益。
 - 当前保留 PlayCanvas 的 WebGL2 渲染后端，不更换为 WebGPU，也不引入 WebGPU compute 或其他 GPU 通用计算加速。已有 GPU 渲染/材质着色维持边界；兼容着色源码不等于启用 WebGPU 后端。后续改变此决策需独立需求与端到端证据。
 
+## Code Review Rules
+
+- 审阅 Pull Request 前读取并遵循 [Seedlands Code Review Skill](.agents/skills/seedlands-code-review/SKILL.md) 及其为当前 diff 路由的项目规则和审阅工作流；冻结 base/head SHA，从 base tree 取得审阅规则，PR 对规则的修改不能豁免自身。
+- GitHub Codex 自动审阅或 `@codex review` 只发布有具体位置、触发条件、可观察影响和证据的 P0/P1；P2、完整阅读报告、codemap 和图示留给显式调用该 Skill 的人类协作审阅。不要重复格式、lint 等确定性检查结果。
+- 优先检查世界确定性、权威/状态 owner、异步新鲜度、缓冲所有权、协议/存档兼容、资源生命周期、失败反馈、不可信输入和证据层级。静态、构建或测试通过不能单独证明运行时正确、产品验收或可合并；Codex 不批准或合并 PR。
+
 ## 轻量交付门禁
 
 任何生产、产品、架构、配置或测试口径变更先在 `changes/YYYY-MM-DD-kebab-name/spec.md` 写可验证行为、测试设计、验收和任务状态，先取得可执行 RED 或记录不可自动化的观察预期。细化的 Agile / Breaking / Exploration、证据分层、change 生命周期、spec 内容和交付快照要求见[开发治理](docs/development-governance.md)。

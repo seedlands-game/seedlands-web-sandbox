@@ -12,6 +12,7 @@
 6. **严重度必须显式。** Google 建议区分 required、optional、nit/FYI，避免作者把所有评论都理解为强制。由此采用用户指定的 P0/P1/P2，并规定 P2 不阻塞。
 7. **保持可审阅的变更单元。** Google 建议自包含的小变更，并指出大型变更更难被彻底审阅、也更易遗漏问题。Skill 不用固定行数拒绝大 diff，而是按逻辑切片分批、保留覆盖账本，未覆盖时明确声明。
 8. **规则基线不能由待审变更自我定义。** GitHub Copilot review 使用 PR base 分支的自定义指令。Seedlands 同样以 frozen base 的已接受合同为审阅基线，把 head 对规则的修改作为待审提案。
+9. **Codex GitHub 定制通过 `AGENTS.md` 接入。** OpenAI 官方说明自动 review 与 `@codex review` 会读取适用的 `AGENTS.md`，仓库级规则放在根文件的 `## Code Review Rules`，标准 GitHub review 只标记 P0/P1。由此用根规则显式路由到本 Skill，而不假设集成会自动发现 `.agents/skills`；完整报告与 P2 保留给显式人类协作模式。
 
 ## 一手与权威来源
 
@@ -22,6 +23,7 @@
 - Manushree Vijayvergiya 等，[AI-Assisted Assessment of Coding Practices in Modern Code Review](https://doi.org/10.1145/3664646.3665664)，AIware / ACM，2024。Google AutoCommenter 的工业部署研究；支持 AI 补充静态分析、真实反馈校准和抑制低价值评论。其语言与组织环境不同，不能把具体比例外推为本项目效果。
 - GitHub Docs，[About GitHub Copilot code review](https://docs.github.com/en/copilot/concepts/agents/code-review)。支持全仓上下文能改善 review，以及 AI 可能漏报/出错、必须由人类验证。产品能力和费用会变化，本 skill 只采用其责任边界。
 - GitHub Docs，[Using GitHub Copilot code review](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/request-a-code-review/use-code-review)。支持 review 使用 base 分支的仓库指令；本项目只借鉴其避免规则自我豁免的边界，不依赖 Copilot 产品。
+- OpenAI Docs，[Review GitHub pull requests with Codex](https://developers.openai.com/codex/integrations/github)。支持自动 review、`@codex review`、`AGENTS.md` 的 `## Code Review Rules` 定制入口，以及 GitHub 标准 review 只发布 P0/P1。自动审阅是否已为本仓库启用仍需 Codex Settings 真实读回。
 - Luca Pascarella 等，[Code Review Automation: Strengths and Weaknesses of the State of the Art](https://arxiv.org/abs/2401.05136)，2024。支持自动 review 对不同变更类型表现不一，通用模型不能被假定等同人类 reviewer；该研究的工具和数据集限制不外推到当前模型。
 
 ## 未采用的做法
@@ -29,4 +31,4 @@
 - 不用 AI finding 数量、评论接受率或“覆盖每条规则”当质量目标；这些指标会奖励噪音。
 - 不让生成代码的作者说明成为正确性证据；说明只帮助定位，裁决仍回到源码、合同和可复验证据。
 - 不以静态/单测绿色取代 UI、并发、持久化、真实浏览器、网络或性能证据。
-- 不自动把 AI 评论发布到 PR，也不自动修复；这两者是独立的外部写入和实现授权。
+- 普通 Skill 调用不自动把评论发布到 PR，也不自动修复；已启用的 GitHub Code Review 集成只按其明确平台职责发布标准 review，修改代码、批准和合并仍是独立授权。
