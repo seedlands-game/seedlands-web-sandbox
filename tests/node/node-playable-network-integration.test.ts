@@ -2,6 +2,7 @@ import { createRequire } from 'node:module';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { performance } from 'node:perf_hooks';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { decodeC0Envelope, encodeC0Envelope } from '../../packages/game-core/src/server/protocol/network-c0-codec';
 import type { PublicSessionRef } from '../../packages/game-core/src/server/protocol/network-message-semantics';
@@ -235,13 +236,19 @@ describe('real Node playable WebSocket transport', () => {
     malformed.client.send(bytes, { binary: true });
     await expect(malformedClose).resolves.toEqual({ code: 4003, reason: 'protocol' });
 
-    const burst = await connect();
-    await nextAuthorityTick(burst.client);
-    const burstClose = waitForClose(burst.client);
-    for (let nonce = 0; nonce < 181; nonce += 1)
-      burst.client.send(encode('heartbeat', { kind: 'heartbeat', ref: burst.ref, nonce }), { binary: true });
-    await expect(burstClose).resolves.toEqual({ code: 4003, reason: 'rate-limit' });
-    expect(runtime.state).toBe('running');
+    // Freeze the monotonic clock so this checks the 180-message burst boundary, not refill timing or throughput.
+    const performanceNow = vi.spyOn(performance, 'now').mockReturnValue(0);
+    try {
+      const burst = await connect();
+      await nextAuthorityTick(burst.client);
+      const burstClose = waitForClose(burst.client);
+      for (let nonce = 0; nonce < 181; nonce += 1)
+        burst.client.send(encode('heartbeat', { kind: 'heartbeat', ref: burst.ref, nonce }), { binary: true });
+      await expect(burstClose).resolves.toEqual({ code: 4003, reason: 'rate-limit' });
+      expect(runtime.state).toBe('running');
+    } finally {
+      performanceNow.mockRestore();
+    }
   });
 
   it('closes the real listener promptly while a baseline capture is blocked and ignores its late completion', async () => {

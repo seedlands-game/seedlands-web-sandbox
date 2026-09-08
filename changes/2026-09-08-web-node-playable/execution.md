@@ -25,7 +25,7 @@
 
 ## 冻结源码与真实旅程
 
-- 生产/测试冻结提交：`ae8a49fd9f43c1e29b59a518e35473205eff3b08`。最终旅程开始时 `git status --porcelain` 为空；JSON 中 `sourceTreeStatus` 为 `""`，并记录 8 个关键源码/测试输入及实际 `apps/node-server/dist/node-server.js` 的 SHA-256。
+- 生产源码与真实旅程冻结提交：`ae8a49fd9f43c1e29b59a518e35473205eff3b08`。最终旅程开始时 `git status --porcelain` 为空；JSON 中 `sourceTreeStatus` 为 `""`，并记录 8 个关键源码/测试输入及实际 `apps/node-server/dist/node-server.js` 的 SHA-256。
 - 命令：`pnpm test:web-node-playable`，退出码 0。Node 先从冻结源码重建 5 个 ESM 入口；Vitest 10 个文件、23 项通过；真实 Chromium 1 项通过，23.7 秒。该耗时只表示功能测试完成，不是性能样本。
 - 同一 Pointer Lock 流程中，初始 Authority tick 397，脚下层 3×3 均已有 rendered revision，初始 loaded/rendered/ready baseline 为 17/12/17；WASD 移动后转向，跳跃从 y=18 到 y=18.91 且峰值 `onGround=false`。
 - 左键挖掘使 world revision 从 1 到 2；真实拾取并切换 hotbar 后右键在 `[0,19,-1]` 放置 voxel 2，world revision 为 3，collision chunk revision 与 rendered revision 均为 2 后才截图。
@@ -54,6 +54,14 @@ JSON 经 Prettier 格式化后内容未变，表中为最终提交文件 hash。
 - `pnpm test:e2e:regression`：退出码 0；既有 Chromium 15 项通过。该命令改写的 Delivered loading 截图已用 Git 恢复，未提交历史证据变化。
 - 删除现成 `apps/node-server/dist` 后单独运行真实 WS 与 offline runtime 两个测试文件：5 项通过，证明默认 static/coverage 不依赖工作区遗留 dist；临时 source artifact 在测试 teardown 删除。
 - 独立 Terra/high 对 `ae8a49f` 的 source binding、五张原帧、WASD/jump/挖放/durable/reconnect/restart 与 5 个关键测试文件 13 项复核通过（7.80 秒）；root 持有独立报告，最终 CI 终态由 root 收口。
+
+## CI 定时确定性修复
+
+- `ae8a49f` 的 GitHub CI 在真实 WebSocket burst 用例偶发无法于第 181 条 heartbeat 关闭。产品 token bucket 的 burst 为 180、补充速率为 120/s；coverage instrumentation 处理消息超过约 8.34ms 时会合法补回一个 token，因此原测试把执行吞吐误当成纯 burst 边界。
+- 本次只在 malformed 分支完成后、burst 连接建立前 mock `node:perf_hooks` 的 `performance.now()` 为 0，并以 `try/finally` 恢复。真实 listener/client、181 条消息、3 秒 deadline 和产品限额均未改变；该断言只验证零时间流逝下的 burst 计数，不作性能测试。
+- 定向普通模式：`pnpm exec vitest run tests/node/node-playable-network-integration.test.ts --maxWorkers=1`，1 文件 4 项通过，3.87 秒。
+- 单文件 coverage instrumentation 下同样 4 项通过；该窄命令因只加载一个文件而不满足仓库全局 80% coverage 阈值。随后运行 package.json 登记的 `pnpm test:coverage:ci`，244 文件通过、2 skipped，1236 项通过、4 skipped，line coverage 96.89%，退出码 0。
+- 这是测试时钟确定性修复；生产源码仍为 `ae8a49f`，真实旅程和 evidence source binding 无需重跑或改写。
 
 ## 剩余边界
 
