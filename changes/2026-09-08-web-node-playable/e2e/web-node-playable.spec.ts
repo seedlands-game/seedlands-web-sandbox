@@ -4,7 +4,14 @@ import { readFileSync } from 'node:fs';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { expect, test, type Page, type TestInfo } from '@playwright/test';
+import {
+  expect,
+  test,
+  type ConsoleMessage,
+  type Page,
+  type TestInfo,
+  type WebSocket as PlaywrightWebSocket,
+} from '@playwright/test';
 import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
 import { COLLISION_EPSILON } from '../../../packages/game-core/src/physics/geometry';
 
@@ -38,6 +45,17 @@ const evidence = (page: Page) =>
     if (!window.__seedlandsRemoteEvidence) throw new Error('Remote evidence is unavailable.');
     return window.__seedlandsRemoteEvidence.snapshot();
   });
+
+const redactDiagnostic = (value: string): string => {
+  let redacted = value.replaceAll(accessKey, '[REDACTED_ACCESS_KEY]');
+  if (keyFile) redacted = redacted.replaceAll(keyFile, '[REDACTED_KEY_FILE]');
+  return redacted;
+};
+
+const appendDiagnostic = (entries: string[], value: string): void => {
+  entries.push(redactDiagnostic(value));
+  if (entries.length > 100) entries.shift();
+};
 
 async function waitForOutput(process: ChildProcessWithoutNullStreams, value: string): Promise<void> {
   await new Promise<void>((resolveReady, reject) => {
@@ -101,20 +119,147 @@ async function stopNode(): Promise<readonly string[]> {
   return nodeLog;
 }
 
-async function connect(page: Page): Promise<RemotePlayableEvidence> {
-  await page.goto('/?harness=1');
-  await expect(page.locator('#enter')).toBeEnabled({ timeout: 20_000 });
-  await expect
-    .poll(async () => {
-      await page.selectOption('#connection-mode', 'remote');
-      return page.locator('#node-url').isVisible();
-    })
-    .toBe(true);
-  await page.fill('#node-url', nodeUrl);
-  await page.locator('input[type="password"]').fill(accessKey);
-  await page.click('#enter');
-  await page.waitForFunction(() => Boolean(window.__seedlandsRemoteEvidence), null, { timeout: 30_000 });
-  return evidence(page);
+async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise<RemotePlayableEvidence> {
+  const consoleMessages: string[] = [];
+  const pageErrors: string[] = [];
+  const webSocketEvents: string[] = [];
+  const webSocketCloseListeners = new Map<PlaywrightWebSocket, () => void>();
+  const onConsole = (message: ConsoleMessage) =>
+    appendDiagnostic(consoleMessages, `${message.type()}: ${message.text()}`);
+  const onPageError = (error: Error) => appendDiagnostic(pageErrors, error.stack ?? error.message);
+  const onWebSocket = (socket: PlaywrightWebSocket) => {
+    const onClose = () => appendDiagnostic(webSocketEvents, `close ${socket.url()}`);
+    webSocketCloseListeners.set(socket, onClose);
+    socket.on('close', onClose);
+  };
+  page.on('console', onConsole);
+  page.on('pageerror', onPageError);
+  page.on('websocket', onWebSocket);
+  try {
+    await page.goto('/?harness=1');
+    await expect(page.locator('#enter')).toBeEnabled({ timeout: 20_000 });
+    await expect
+      .poll(async () => {
+        await page.selectOption('#connection-mode', 'remote');
+        return page.locator('#node-url').isVisible();
+      })
+      .toBe(true);
+    await page.fill('#node-url', nodeUrl);
+    await page.locator('input[type="password"]').fill(accessKey);
+    await page.click('#enter');
+    try {
+      await page.waitForFunction(() => Boolean(window.__seedlandsRemoteEvidence), null, { timeout: 30_000 });
+    } catch (error) {
+      try {
+        const currentUrl = new URL(page.url());
+        let screenshotAttached = false;
+        let screenshotError: string | null = null;
+        try {
+          const body = await page.screenshot({ fullPage: true });
+          await testInfo.attach(`${attempt}-connect-failure`, { body, contentType: 'image/png' });
+          screenshotAttached = true;
+        } catch (captureError) {
+          screenshotError = redactDiagnostic(
+            captureError instanceof Error ? captureError.message : String(captureError),
+          );
+        }
+        const diagnostics = {
+          kind: 'web-node-connect-failure',
+          attempt,
+          failure: redactDiagnostic(error instanceof Error ? (error.stack ?? error.message) : String(error)),
+          url: redactDiagnostic(currentUrl.href),
+          pathname: currentUrl.pathname,
+          search: currentUrl.search,
+          evidencePresent: await page.evaluate(() => Boolean(window.__seedlandsRemoteEvidence)).catch(() => false),
+          startCard: {
+            count: await page.locator('#start-card').count(),
+            visible: await page
+              .locator('#start-card')
+              .isVisible()
+              .catch(() => false),
+          },
+          errors: {
+            count: await page.locator('.start-error').count(),
+            visible: await page.locator('.start-error:visible').count(),
+            text: (await page.locator('.start-error').allTextContents()).map(redactDiagnostic),
+          },
+          enterButton: {
+            count: await page.locator('#enter').count(),
+            visible: await page
+              .locator('#enter')
+              .isVisible()
+              .catch(() => false),
+            enabled: await page
+              .locator('#enter')
+              .isEnabled()
+              .catch(() => false),
+            text: redactDiagnostic(
+              (await page
+                .locator('#enter')
+                .textContent()
+                .catch(() => null)) ?? '',
+            ),
+          },
+          connectionMode: await page
+            .locator('#connection-mode')
+            .inputValue()
+            .catch(() => null),
+          nodeUrl: redactDiagnostic(
+            (await page
+              .locator('#node-url')
+              .inputValue()
+              .catch(() => '')) || '',
+          ),
+          password: {
+            count: await page.locator('input[type="password"]').count(),
+            visible: await page
+              .locator('input[type="password"]')
+              .isVisible()
+              .catch(() => false),
+            filled:
+              (
+                await page
+                  .locator('input[type="password"]')
+                  .inputValue()
+                  .catch(() => '')
+              ).length > 0,
+          },
+          consoleMessages,
+          pageErrors,
+          webSocketEvents,
+          nodeLog: nodeLog.map(redactDiagnostic),
+          screenshotAttached,
+          screenshotError,
+        };
+        console.error(redactDiagnostic(JSON.stringify(diagnostics)));
+      } catch (diagnosticError) {
+        console.error(
+          redactDiagnostic(
+            JSON.stringify({
+              kind: 'web-node-connect-failure',
+              attempt,
+              failure: error instanceof Error ? (error.stack ?? error.message) : String(error),
+              diagnosticFailure:
+                diagnosticError instanceof Error
+                  ? (diagnosticError.stack ?? diagnosticError.message)
+                  : String(diagnosticError),
+              consoleMessages,
+              pageErrors,
+              webSocketEvents,
+              nodeLog,
+            }),
+          ),
+        );
+      }
+      throw error;
+    }
+    return evidence(page);
+  } finally {
+    page.off('console', onConsole);
+    page.off('pageerror', onPageError);
+    page.off('websocket', onWebSocket);
+    for (const [socket, listener] of webSocketCloseListeners) socket.off('close', listener);
+  }
 }
 
 async function attachFrame(page: Page, testInfo: TestInfo, name: string): Promise<void> {
@@ -190,7 +335,7 @@ test.describe.serial('Web to Node local playable loop', () => {
 
   test('真实输入、挖放、关闭重连与Node重启保持权威世界', async ({ context, page }, testInfo) => {
     test.setTimeout(120_000);
-    const initial = await connect(page);
+    const initial = await connect(page, testInfo, 'initial');
     expect(initial.source).toBe('remote-node');
     expect(initial.readyBaselines).toBeGreaterThan(0);
     expect(initial.renderedChunks).toBeGreaterThan(0);
@@ -308,7 +453,7 @@ test.describe.serial('Web to Node local playable loop', () => {
     await page.close();
     await new Promise((resolveWait) => setTimeout(resolveWait, 1_200));
     const reconnectPage = await context.newPage();
-    const reconnected = await connect(reconnectPage);
+    const reconnected = await connect(reconnectPage, testInfo, 'reconnect');
     expect(reconnected.serverEpoch).toBe(oldServerEpoch);
     expect(reconnected.physicsTick).toBeGreaterThan(tickBeforeClose + 15);
     await expect
@@ -323,7 +468,7 @@ test.describe.serial('Web to Node local playable loop', () => {
     await startNode();
     await reconnectPage.close();
     const restartedPage = await context.newPage();
-    const restarted = await connect(restartedPage);
+    const restarted = await connect(restartedPage, testInfo, 'restart');
     expect(restarted.serverEpoch).not.toBe(oldServerEpoch);
     await expect
       .poll(() =>
