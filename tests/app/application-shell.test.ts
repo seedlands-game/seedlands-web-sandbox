@@ -200,4 +200,15 @@ describe('ApplicationShell experiment and capability gates', () => {
     expect(application.controller.state.phase).toBe('playing');
     application.dispose();
   });
+  it('从本地体验场连接远端会清除体验场管理面板状态', async () => {
+    const bridge = createUiBridge();
+    const application = new ApplicationShell(createGame(), bridge, createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+    bridge.publishShell({ experience: 'melee-showcase' });
+    await application.connectRemote('ws://127.0.0.1:8787/seedlands', 'synthetic', 'low');
+    expect(bridge.shell.get().experience).toBeNull();
+    application.dispose();
+  });
 });

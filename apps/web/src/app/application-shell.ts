@@ -107,7 +107,7 @@ export class ApplicationShell {
         const generation = ++this.startGeneration;
         await audio.unlock();
         if (generation !== this.startGeneration) throw new Error('Remote start was superseded.');
-        bridge.publishShell({ phase: 'loading', quality, enterLabel: '正在连接 Node…' });
+        bridge.publishShell({ phase: 'loading', quality, enterLabel: '正在连接 Node…', experience: null });
         try {
           const remote = await game.startRemote(url, accessKey, quality);
           return remote;

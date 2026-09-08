@@ -57,6 +57,12 @@ test('远端木剑真实输入完成前摇、命中与连击，保存结果由 N
     await fixture.start(`http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`);
     await page.goto('/?harness=1');
     await expect(page.locator('#enter')).toBeEnabled();
+    await page.selectOption('#quality', 'low');
+    await page.getByRole('button', { name: '木剑动作体验场', exact: true }).click();
+    await expect(page.locator('#melee-showcase-guide')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: '保存并返回主菜单', exact: true }).click();
+    await expect(page.locator('#connection-mode')).toBeVisible();
     await page.selectOption('#connection-mode', 'remote');
     await expect(page.getByRole('button', { name: '木剑动作体验场', exact: true })).toHaveCount(0);
     await page.selectOption('#quality', 'low');
@@ -64,6 +70,7 @@ test('远端木剑真实输入完成前摇、命中与连击，保存结果由 N
     await page.locator('input[type="password"]').fill(REMOTE_PLAYABLE_ACCESS_KEY);
     await page.click('#enter');
     await page.waitForFunction(() => Boolean(window.__seedlandsRemoteEvidence), null, { timeout: 30_000 });
+    await expect(page.locator('#melee-showcase-guide')).toHaveCount(0);
     await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
     await page.locator('#game').click();
     await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe('game');

@@ -152,6 +152,9 @@ jobs:
           SEEDLANDS_RESERVATION_RUN: web-node-playable-${{ github.run_id }}
         run: node scripts/benchmark-window.mjs --owner-thread seedlands-performance-validator --wait-timeout-ms 600000 -- pnpm test:web-node-playable
       - name: Run PR17 main gameplay integration
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
         run: pnpm test:pr17:integration
       - name: Preserve Web to Node playable evidence
         if: ${{ !cancelled() }}
