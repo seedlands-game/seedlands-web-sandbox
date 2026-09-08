@@ -7,7 +7,6 @@ type InitialChunk = Readonly<{ key: string; cx: number; cy: number; cz: number }
 type InitialRepository = Readonly<{
   chunks: ReadonlyMap<string, unknown>;
   queueSize: number;
-  waitForFirstVisible(): Promise<void>;
 }>;
 
 export type InitialPlayableAreaDiagnostics = Readonly<{
@@ -64,7 +63,6 @@ export async function waitForInitialPlayableArea(
   horizontalRadius: number,
 ): Promise<void> {
   prioritizeInitialPlayableArea(scheduler, position, horizontalRadius);
-  await repository.waitForFirstVisible();
   const required = initialPlayableChunks(position, horizontalRadius);
   while (!isDisposed() && required.some(({ key }) => !repository.chunks.has(key)))
     await new Promise<void>((resolve) => window.setTimeout(resolve, 16));

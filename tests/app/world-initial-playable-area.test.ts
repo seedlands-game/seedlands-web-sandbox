@@ -43,15 +43,18 @@ describe('remote initial playable area barrier', () => {
     ) => Promise<void>;
 
     await expect(
-      wait.call(
-        Object.assign(Object.create(World.prototype) as object, {
-          repository: { waitForFirstVisible: async () => undefined, chunks },
-          scheduler: { request },
-          disposed: false,
-        }),
-        { x: 0.5, y: 18, z: 0.5 },
-        1,
-      ),
+      Promise.race([
+        wait.call(
+          Object.assign(Object.create(World.prototype) as object, {
+            repository: { waitForFirstVisible: () => new Promise<void>(() => undefined), chunks },
+            scheduler: { request },
+            disposed: false,
+          }),
+          { x: 0.5, y: 18, z: 0.5 },
+          1,
+        ),
+        new Promise<void>((_, reject) => setTimeout(() => reject(new Error('empty initial area stalled')), 25)),
+      ]),
     ).resolves.toBeUndefined();
     expect(request).toHaveBeenCalledTimes(9);
     expect(request.mock.calls.every((call) => call[3]?.priority === 'interactive')).toBe(true);
