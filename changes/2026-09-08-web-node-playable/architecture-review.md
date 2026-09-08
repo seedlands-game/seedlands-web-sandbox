@@ -67,3 +67,9 @@ ae8a49f 通过第一轮源码冻结，f1d9116 修正真实 WebSocket burst 测�
 PR #15 仍 OPEN，base 分支保持 3c727f7；本 PR #17 对该 base 可合并。本次保留已验收的独立试玩节点，不把 189 文件资产迁移混入 Node 接线。下一步在 monorepo 底座 #15 统一同步 main：把新增 app/client/public/入口迁入各自 Web 职责、合并 Vite 多入口和 game 的 appearance 创建，再验收工坊、原本地世界及 Node 远端三条路径。底座完成后 #17 跟进其提交；若 #15 先合入 main，先核对 ancestry 再 retarget。不要直接把旧 src 目录复活，也不要在两个 PR 重复迁移。
 
 后续用户明确调整职责：PR #15 的冲突解决与 main 整合由用户在另一台设备负责。本任务只维护 PR #17，保留 `codex/node-monorepo` base；上段整合方案仅为当时的接缝分析，不再作为本任务执行计划。不修改、整合或监控 #15。
+
+## PR17 新目标与 CI 诊断边界
+
+目标分支先推进至21d6e37，PR17以b0a5a1d接入已完成的底座更新，三处冲突同时保留远端接线、appearance加载和双方CI。目标随后变main@ddffbcb；对照21d6e37，新增仅CI必需context名称恢复及上游交付记录，25b59fe应用这两项差异并补齐squash后的合并父关系。此过程只写PR17，不管理PR15。
+
+CI34213458251 /25b59fe中，Static verification与Production build成功，旧回归与资产接缝成功，远端initial仍失败。首屏最后在途bundle中arrivalPages=verifiedPages且digestingTransfers=0，已到达页的校验完成只晚约0.2–0.5ms；此前Node已发送完整54页。可以排除摘要积压，不能把mirror入口的arrival当作底层网络到达，也不能从截图触发的ReadPixels警告断言GPU根因。当前选择非生产、单轴的loading按需绘制AA/AB对照，保持真实postrender，结果未出前不采用生产改动、不宣称性能收益。
