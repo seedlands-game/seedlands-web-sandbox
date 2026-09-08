@@ -1,10 +1,25 @@
 import * as pc from 'playcanvas';
-import type { GameplayEntity } from '@seedlands/game-core/server/gameplay/entity-store';
+import type { GameplayEntityView } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { damageFlash, movementPose } from '../../client/presentation/entity-presentation-motion';
+import type { AppearanceAnimationBinding, AppearanceProject } from '../../client/presentation/appearance-project';
 import { addBuiltinActorModel } from './builtin-actor-models';
+import { getAppearanceAnimationBindings, getAppearanceModelBlob } from './appearance-runtime';
 import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from './gameplay-model-assets';
+import { addGlbModel, type GlbModelLease } from './glb-model-resource';
+import {
+  createModelAnimationController,
+  type ModelAnimationClips,
+  type ModelAnimationController,
+} from './model-animation';
 
 const PRESENTATION_SETTLE_DISTANCE = 0.001;
+
+type AnimatedEntity = {
+  abort: AbortController;
+  lease: GlbModelLease | null;
+  controller: ModelAnimationController | null;
+  hurtSequence: number;
+};
 
 export class GameplayEntityPresenter {
   private presentationTime = 0;
@@ -13,13 +28,16 @@ export class GameplayEntityPresenter {
   private readonly health = new Map<string, number>();
   private readonly hurtUntil = new Map<string, number>();
   private readonly originalMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
+  private readonly animated = new Map<string, AnimatedEntity>();
   private readonly assetsLease: GameplayModelAssetsLease;
+  private readonly bindings: NonNullable<AppearanceProject['animationBindings']>;
 
   constructor(private readonly app: pc.Application) {
     this.assetsLease = acquireGameplayModelAssets(app);
+    this.bindings = getAppearanceAnimationBindings(app);
   }
 
-  reconcile(entities: readonly GameplayEntity[], renderDeltaSeconds = 0): void {
+  reconcile(entities: readonly GameplayEntityView[], renderDeltaSeconds = 0): void {
     const dt = Number.isFinite(renderDeltaSeconds) ? Math.max(0, Math.min(0.1, renderDeltaSeconds)) : 0;
     this.presentationTime += dt;
     const current = new Set(entities.map((entity) => entity.id));
@@ -30,6 +48,7 @@ export class GameplayEntityPresenter {
       this.previousPositions.delete(id);
       this.health.delete(id);
       this.hurtUntil.delete(id);
+      this.releaseAnimated(id);
     });
     entities.forEach((entity) => this.updateEntity(entity, this.presentationTime, dt));
   }
@@ -40,6 +59,7 @@ export class GameplayEntityPresenter {
     this.previousPositions.clear();
     this.health.clear();
     this.hurtUntil.clear();
+    for (const id of this.animated.keys()) this.releaseAnimated(id);
     this.assetsLease.release();
     this.presentationTime = 0;
   }
@@ -49,7 +69,7 @@ export class GameplayEntityPresenter {
     return position ? [position.x, position.y, position.z] : null;
   }
 
-  private updateEntity(entity: GameplayEntity, time: number, dt: number): void {
+  private updateEntity(entity: GameplayEntityView, time: number, dt: number): void {
     const node = this.presented.get(entity.id) ?? this.create(entity);
     const previous = this.previousPositions.get(entity.id);
     const snap = !previous || Math.hypot(...entity.position.map((value, axis) => value - previous[axis])) > 4;
@@ -67,7 +87,11 @@ export class GameplayEntityPresenter {
     if (pose.yaw !== null) node.setEulerAngles(0, pose.yaw, 0);
     const oldHealth = this.health.get(entity.id);
     if (entity.health !== undefined) {
-      if (oldHealth !== undefined && entity.health < oldHealth) this.hurtUntil.set(entity.id, time + 0.25);
+      if (oldHealth !== undefined && entity.health < oldHealth) {
+        this.hurtUntil.set(entity.id, time + 0.25);
+        const animated = this.animated.get(entity.id);
+        if (animated) animated.hurtSequence += 1;
+      }
       this.health.set(entity.id, entity.health);
     }
     const flash = damageFlash(time, this.hurtUntil.get(entity.id) ?? 0);
@@ -84,9 +108,15 @@ export class GameplayEntityPresenter {
         part.setLocalEulerAngles(pose.stride * (part.name.includes('left') ? 1 : -1), 0, 0);
     });
     this.previousPositions.set(entity.id, position);
+    this.animated.get(entity.id)?.controller?.update({
+      moving: previous !== undefined && Math.hypot(...position.map((value, axis) => value - previous[axis])) > 0.001,
+      activeAction: entity.combat?.active ?? null,
+      hurtSequence:
+        time < (this.hurtUntil.get(entity.id) ?? 0) ? (this.animated.get(entity.id)?.hurtSequence ?? null) : null,
+    });
   }
 
-  private create(entity: GameplayEntity): pc.Entity {
+  private create(entity: GameplayEntityView): pc.Entity {
     const node = new pc.Entity(`gameplay:${entity.id}`);
     const visual = new pc.Entity(`${node.name}:visual`);
     // movementPose's yaw defines local -Z as forward. Keep authored facial layout independent of that shared contract.
@@ -102,7 +132,63 @@ export class GameplayEntityPresenter {
     });
     this.app.root.addChild(node);
     this.presented.set(entity.id, node);
+    if (entity.archetype) {
+      const animated: AnimatedEntity = {
+        abort: new AbortController(),
+        lease: null,
+        controller: null,
+        hurtSequence: 0,
+      };
+      this.animated.set(entity.id, animated);
+      void this.attachAnimatedModel(entity.id, entity.archetype, visual, animated);
+    }
     return node;
+  }
+
+  private async attachAnimatedModel(
+    entityId: string,
+    target: NonNullable<GameplayEntityView['archetype']>,
+    visual: pc.Entity,
+    state: AnimatedEntity,
+  ): Promise<void> {
+    try {
+      const binding = this.bindings[target];
+      if (!binding || state.abort.signal.aborted) return;
+      const blob = getAppearanceModelBlob(this.app, binding.modelId);
+      if (!blob) return;
+      const lease = await addGlbModel(this.app, visual, binding.modelId, state.abort.signal, blob, 'feet');
+      if (state.abort.signal.aborted || this.animated.get(entityId) !== state) {
+        lease.release();
+        return;
+      }
+      const clips = this.availableClips(binding, lease.animationClips);
+      if (!lease.playback || !Object.keys(clips).length) {
+        lease.release();
+        return;
+      }
+      for (const child of [...visual.children]) if (child !== lease.entity) (child as pc.Entity).destroy();
+      state.lease = lease;
+      state.controller = createModelAnimationController(clips, lease.playback);
+    } catch {
+      // A missing or newly replaced local model keeps the existing built-in actor presentation.
+    }
+  }
+
+  private availableClips(binding: AppearanceAnimationBinding, available: readonly string[]): ModelAnimationClips {
+    const names = new Set(available);
+    return Object.fromEntries(
+      Object.entries(binding.clips).filter((entry): entry is [keyof ModelAnimationClips, string] =>
+        names.has(entry[1]),
+      ),
+    );
+  }
+
+  private releaseAnimated(id: string): void {
+    const animated = this.animated.get(id);
+    if (!animated) return;
+    animated.abort.abort();
+    animated.lease?.release();
+    this.animated.delete(id);
   }
 
   private forEachRender(node: pc.Entity, callback: (part: pc.Entity) => void): void {

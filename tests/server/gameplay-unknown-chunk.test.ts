@@ -101,8 +101,6 @@ describe('玩法事务只读取已加载权威Chunk', () => {
       },
       { archetype: 'night-stalker' },
     );
-    const damagePlayer = vi.fn(() => true);
-
     expect(
       applyActorAuthorityAction(
         {
@@ -110,13 +108,11 @@ describe('玩法事务只读取已加载权威Chunk', () => {
           simulation: gameplay.simulation,
           getVoxel: () => undefined,
           isPlayerAlive: () => true,
-          damagePlayer,
           touch: vi.fn(),
         },
         'hostile',
         { type: 'attack', targetId: 'player' },
       ),
     ).toMatchObject({ accepted: false, reason: 'chunk-unavailable' });
-    expect(damagePlayer).not.toHaveBeenCalled();
   });
 });

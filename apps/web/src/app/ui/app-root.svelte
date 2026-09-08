@@ -15,6 +15,7 @@
   import PlayerActionPresentation from './player-action-presentation.svelte';
   import TargetCard from './target-card.svelte';
   import SurvivalHud from './survival-hud.svelte';
+  import CombatStatus from './combat-status.svelte';
   import PresentedEntities from './presented-entities.svelte';
 
   let {
@@ -87,6 +88,7 @@
     <TargetCard {interaction} />
     {#if !shell.gameplay.inventoryOpen && !shell.mapOpen && !shell.commandOpen && shell.gameplay.lifecycle === 'alive'}
       <PlayerActionPresentation {hud} {interaction} />
+      <CombatStatus combat={hud.combat} />
     {/if}
     <div
       id="interaction-feedback"

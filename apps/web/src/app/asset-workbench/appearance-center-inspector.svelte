@@ -1,6 +1,13 @@
 <script lang="ts">
   import type { Asset, PixelModel, PixelTexture, Rgb } from '../../client/presentation/asset-types';
-  import type { StoredGlb } from '../../client/presentation/glb-model';
+  import {
+    appearanceAnimationTargets,
+    modelAnimationRoles,
+    type AppearanceAnimationBinding,
+    type AppearanceAnimationTarget,
+    type ModelAnimationRole,
+  } from '../../client/presentation/appearance-project';
+  import type { GlbModelStats, StoredGlb } from '../../client/presentation/glb-model';
   import { publicAssetUrl } from '../../client/presentation/public-asset-url';
   import AppearanceCenterAtlasExport from './appearance-center-atlas-export.svelte';
   import ModelImport from './model-import.svelte';
@@ -26,6 +33,12 @@
     onreimport,
     onexportglb,
     ondeleteglb,
+    glbStats,
+    animationBindings,
+    previewAnimationClip,
+    onpreviewanimation,
+    onbindanimation,
+    onclearanimation,
     onexport,
     onimport,
     onlegacyimport,
@@ -50,6 +63,12 @@
     onreimport: (file: File) => Promise<void>;
     onexportglb: () => Promise<void>;
     ondeleteglb: () => Promise<void>;
+    glbStats?: GlbModelStats;
+    animationBindings: Partial<Record<AppearanceAnimationTarget, AppearanceAnimationBinding>>;
+    previewAnimationClip: string;
+    onpreviewanimation: (clip: string) => void;
+    onbindanimation: (target: AppearanceAnimationTarget, role: ModelAnimationRole, clip: string) => void;
+    onclearanimation: (target: AppearanceAnimationTarget, role: ModelAnimationRole) => void;
     onexport: () => Promise<void>;
     onimport: (file: File) => Promise<void>;
     onlegacyimport: (model: StoredGlb) => Promise<void>;
@@ -61,6 +80,7 @@
   let packageInput = $state<HTMLInputElement>(undefined!);
   let imageInput = $state<HTMLInputElement>(undefined!);
   let reimportInput = $state<HTMLInputElement>(undefined!);
+  let animationTarget = $state<AppearanceAnimationTarget>('settler');
   const hex = (rgb: Rgb) => `#${rgb.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
   const isNative = (value: Asset | undefined): value is PixelTexture | PixelModel =>
     value?.type === 'pixel-texture' || value?.type === 'extruded-pixel-model';
@@ -69,6 +89,11 @@
     input.value = '';
     if (file) await action(file);
   }
+  const boundClip = (role: ModelAnimationRole): string => {
+    if (asset?.type !== 'glb-model') return '';
+    const binding = animationBindings[animationTarget];
+    return binding?.modelId === asset.payload.modelId ? (binding.clips[role] ?? '') : '';
+  };
 </script>
 
 <aside class="inspector">
@@ -88,7 +113,47 @@
     </div>
   {/if}
   {#if asset?.type === 'glb-model'}
-    <p>静态 GLB 模型保留稳定标识；重导入后会递增 revision。</p>
+    <p>GLB 模型保留稳定标识；重导入后会递增 revision。旧静态模型仍可直接预览。</p>
+    {#if glbStats?.animationClips.length}
+      <div class="animation-binding">
+        <h3>骨骼动画</h3>
+        <p>{glbStats.skinCount} 套 skin · {glbStats.animationClips.length} 个片段</p>
+        <label
+          >预览片段<select
+            aria-label="预览动画片段"
+            value={previewAnimationClip}
+            onchange={(event) => onpreviewanimation(event.currentTarget.value)}
+            >{#each glbStats.animationClips as clip (clip.name)}<option value={clip.name}
+                >{clip.name} · {clip.durationSeconds.toFixed(2)}s</option
+              >{/each}</select
+          ></label
+        >
+        <label
+          >应用对象<select bind:value={animationTarget} aria-label="动画应用对象"
+            >{#each appearanceAnimationTargets as target (target)}<option value={target}>{target}</option
+              >{/each}</select
+          ></label
+        >
+        {#each modelAnimationRoles as role (role)}
+          <label
+            >{role}<select
+              aria-label={`${role} 动画片段`}
+              value={boundClip(role)}
+              onchange={(event) => {
+                const clip = event.currentTarget.value;
+                if (clip) onbindanimation(animationTarget, role, clip);
+                else onclearanimation(animationTarget, role);
+              }}
+              ><option value="">未绑定</option>{#each glbStats.animationClips as clip (clip.name)}<option
+                  value={clip.name}>{clip.name}</option
+                >{/each}</select
+            ></label
+          >
+        {/each}
+      </div>
+    {:else if glbStats}
+      <p>此模型没有动画片段，继续按旧静态 GLB 路径使用。</p>
+    {/if}
     <div class="asset-actions">
       <button onclick={() => reimportInput.click()}>重导入 GLB</button><button onclick={onexportglb}
         >导出原始 GLB</button
@@ -168,6 +233,7 @@
     /><ModelImport onimport={onlegacyimport} {onerror} /><button disabled={saving} onclick={() => onrestore('previous')}
       >恢复上一个应用版本</button
     ><button class="danger" disabled={saving} onclick={() => onrestore('default')}>恢复默认外观</button>
+    <p>恢复上一版会同时还原草稿与模型库。</p>
   </section>
   <AppearanceCenterAtlasExport
     textures={assets.filter((candidate): candidate is PixelTexture => candidate.type === 'pixel-texture')}
@@ -241,6 +307,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    color: #b8c4b7;
+    font-size: 11px;
+  }
+  .animation-binding label {
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    margin: 7px 0;
     color: #b8c4b7;
     font-size: 11px;
   }

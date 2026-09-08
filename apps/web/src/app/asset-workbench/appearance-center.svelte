@@ -7,14 +7,17 @@
     PixelModel,
     PixelTexture,
   } from '../../client/presentation/asset-types';
-  import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
   import {
     appearanceObjects,
     materialSlots,
     type AppearanceContext,
   } from '../../client/presentation/appearance-catalog';
-  import { resolveAppearanceAssets } from '../../client/presentation/appearance-project';
-  import type { StoredGlb } from '../../client/presentation/glb-model';
+  import {
+    resolveAppearanceAssets,
+    type AppearanceAnimationTarget,
+    type ModelAnimationRole,
+  } from '../../client/presentation/appearance-project';
+  import type { GlbModelStats, StoredGlb } from '../../client/presentation/glb-model';
   import {
     decodeAppearancePackage,
     encodeAppearancePackage,
@@ -45,6 +48,16 @@
   import AppearanceMaterialEditor from './appearance-material-editor.svelte';
   import AssetPreview from './asset-preview.svelte';
   import AppearanceCenterInspector from './appearance-center-inspector.svelte';
+  import { removeAnimationBinding, setAnimationBinding } from './appearance-animation-bindings';
+  import {
+    appearanceResourceCategory,
+    canMakeMaterialsPrivate,
+    errorMessage,
+    focusedPixelTexture,
+    glbModelAssets,
+    inspectGlbModel,
+    sharedMaterialNote as appearanceSharedMaterialNote,
+  } from './appearance-resource-selection';
   import NewAssetDialog from './new-asset-dialog.svelte';
   import './appearance-center.css';
   import './workbench.css';
@@ -61,24 +74,12 @@
   let resourceId = $state('builtin:model:lantern');
   let resourceCategory = $state<'model' | 'material' | 'image'>('model');
   let allModels = $state<StoredGlb[]>([]);
+  let modelStats = $state<Record<string, GlbModelStats>>({});
   let projectModelIds = $state<string[]>([]);
+  let previewAnimationClip = $state('');
   let showNew = $state(false);
 
-  const modelAssets = $derived.by(() =>
-    allModels.map((model): Asset => ({
-      id: model.id,
-      name: model.name,
-      revision: model.revision,
-      source: 'user',
-      type: 'glb-model',
-      payload: {
-        modelId: model.id,
-        byteLength: model.byteLength,
-        nodeCount: model.nodeCount,
-        triangleCount: model.triangleCount,
-      },
-    })),
-  );
+  const modelAssets = $derived(glbModelAssets(allModels));
   const resolved = $derived.by(() => {
     revision;
     return resolveAppearanceAssets(editor.project, context?.assetId);
@@ -94,32 +95,17 @@
     all.find((asset) => asset.id === selectedContext?.assetId) ?? all.find((asset) => asset.id === resourceId),
   );
   const focusAsset = $derived(all.find((asset) => asset.id === resourceId) ?? previewAsset);
+  const focusModelStats = $derived(
+    focusAsset?.type === 'glb-model' ? modelStats[focusAsset.payload.modelId] : undefined,
+  );
   const slots = $derived(previewAsset ? materialSlots(previewAsset, all) : []);
   const focusedMaterial = $derived.by(() => {
     if (focusAsset?.type !== 'material' || !previewAsset) return undefined;
     return editor.materialSource(previewAsset.id, focusAsset);
   });
-  const focusTexture = $derived.by((): PixelTexture | undefined => {
-    if (focusAsset?.type === 'pixel-texture') return focusAsset;
-    const material = focusedMaterial ?? (focusAsset?.type === 'material' ? focusAsset : undefined);
-    if (!material) return undefined;
-    return all.find(
-      (asset): asset is PixelTexture => asset.id === material.payload.textureId && asset.type === 'pixel-texture',
-    );
-  });
-  const canPrivateMaterials = $derived.by(() => {
-    if (!previewAsset || previewAsset.id === 'builtin:model:lantern') return false;
-    if (previewAsset.type === 'builtin-actor-model' || previewAsset.type === 'builtin-arm-model') return true;
-    return (
-      previewAsset.type === 'builtin-item-model' &&
-      getItemDefinition(previewAsset.payload.itemId).placesVoxel === undefined
-    );
-  });
-  const sharedMaterialNote = $derived(
-    previewAsset?.id === 'builtin:model:lantern'
-      ? '灯笼材质在模型、放置、手持和掉落表现中共享，编辑会同步这四种上下文。'
-      : '此方块材质与放置表现共享，编辑会同步全部引用。',
-  );
+  const focusTexture = $derived(focusedPixelTexture(all, focusAsset, focusedMaterial));
+  const canPrivateMaterials = $derived(canMakeMaterialsPrivate(previewAsset));
+  const sharedMaterialNote = $derived(appearanceSharedMaterialNote(previewAsset));
   const previewAssets = $derived.by(() => {
     revision;
     return [...resolveAppearanceAssets(editor.project, selectedContext?.assetId), ...modelAssets];
@@ -135,11 +121,9 @@
 
   const notify = (message: string, error = false) => ((status = message), (failed = error));
   const refresh = () => (revision += 1);
-  const errorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
   const download = (blob: Blob, name: string) => {
     const url = URL.createObjectURL(blob);
-    const anchor = Object.assign(document.createElement('a'), { href: url, download: name });
-    anchor.click();
+    Object.assign(document.createElement('a'), { href: url, download: name }).click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
@@ -152,33 +136,46 @@
     ([context, resourceId, resourceCategory] = [next, next.assetId, 'model']);
   function selectResource(asset: Asset, preserveObject = false) {
     resourceId = asset.id;
-    resourceCategory =
-      asset.type === 'material'
-        ? 'material'
-        : asset.type === 'pixel-texture' || asset.type === 'image-texture'
-          ? 'image'
-          : 'model';
-    if (resourceCategory !== 'model' && !preserveObject) {
-      objectId = '';
-      context = undefined;
-    } else if (resourceCategory === 'model') {
+    resourceCategory = appearanceResourceCategory(asset);
+    if (resourceCategory === 'model') {
       const object = objects.find((entry) => entry.id === asset.id);
       if (object) selectObject(object.id);
-      else {
-        objectId = '';
-        context = undefined;
-      }
-    }
+      else [objectId, context] = ['', undefined];
+    } else if (!preserveObject) [objectId, context] = ['', undefined];
   }
-  const selectLantern = () => {
-    const lantern = objects.find((entry) => entry.id === 'builtin:model:lantern') ?? objects[0];
-    if (lantern) selectObject(lantern.id);
-  };
+  const selectLantern = () =>
+    selectObject((objects.find((entry) => entry.id === 'builtin:model:lantern') ?? objects[0])?.id ?? '');
   const refreshModels = async () => {
     const [models, projectModels] = await Promise.all([listGlbModels(), loadAppearanceModelBlobs()]);
     allModels = models;
     projectModelIds = projectModels.map((model) => model.id);
+    modelStats = {};
   };
+  async function ensureModelStats(modelId: string) {
+    if (modelStats[modelId]) return;
+    const stats = await inspectGlbModel(modelId);
+    if (typeof stats === 'string') return notify(`读取 GLB 动画片段失败：${stats}`, true);
+    modelStats = { ...modelStats, [modelId]: stats };
+    if (focusAsset?.type === 'glb-model' && focusAsset.payload.modelId === modelId && !previewAnimationClip)
+      previewAnimationClip = stats.animationClips[0]?.name ?? '';
+  }
+  $effect(() => {
+    if (focusAsset?.type === 'glb-model') void ensureModelStats(focusAsset.payload.modelId);
+  });
+  function bindAnimation(target: AppearanceAnimationTarget, role: ModelAnimationRole, clip: string) {
+    if (focusAsset?.type !== 'glb-model' || !focusModelStats?.animationClips.some((entry) => entry.name === clip))
+      return;
+    editor.checkpoint();
+    setAnimationBinding(editor.project, target, role, focusAsset.payload.modelId, clip);
+    previewAnimationClip = clip;
+    refresh();
+    notify(`已将 ${clip} 绑定为 ${target} 的 ${role} 片段；保存并应用后进入游戏生效。`);
+  }
+  function clearAnimationBinding(target: AppearanceAnimationTarget, role: ModelAnimationRole) {
+    editor.checkpoint();
+    if (!removeAnimationBinding(editor.project, target, role)) return;
+    refresh();
+  }
   const packageModels = () => collectAppearanceModels(allModels);
   async function loadProject() {
     try {
@@ -442,6 +439,7 @@
             assets={previewAssets}
             {revision}
             contextMode={selectedContext?.mode ?? 'model'}
+            animationClip={previewAsset.type === 'glb-model' ? previewAnimationClip : undefined}
           />
         </section>
         {#if slots.length}
@@ -479,6 +477,12 @@
       onreimport={glbActions.reimport}
       onexportglb={glbActions.export}
       ondeleteglb={glbActions.delete}
+      glbStats={focusModelStats}
+      animationBindings={editor.project.animationBindings ?? {}}
+      {previewAnimationClip}
+      onpreviewanimation={(clip) => (previewAnimationClip = clip)}
+      onbindanimation={bindAnimation}
+      onclearanimation={clearAnimationBinding}
       onexport={exportProject}
       onimport={importProject}
       onlegacyimport={async (model) => {

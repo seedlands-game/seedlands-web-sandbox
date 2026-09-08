@@ -4,7 +4,7 @@ import type { VoxelTarget } from '../../client/presentation/voxel-target';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
 import { entityHitDistance } from '../../client/presentation/entity-hit-volume';
 import type * as pc from 'playcanvas';
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { getItemCapability, getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 import { voxelNames } from '@seedlands/game-core/world/voxel';
 import { GameplayEntityPresenter } from './gameplay-entity-presenter';
 import { projectGameplayUi, type GameplayUiProjection } from '../ui/gameplay-ui-projector';
@@ -49,6 +49,7 @@ export class BrowserGameplay {
   private inventoryOpen = false;
   private previousProjection: GameplayUiProjection | undefined;
   private previousHealth: number | null = null;
+  private lastCombatResultSequence: number | null = null;
   private breakProjectionElapsedSeconds = Number.POSITIVE_INFINITY;
 
   constructor(private readonly options: Options) {
@@ -72,6 +73,7 @@ export class BrowserGameplay {
     this.gestureSeconds = Math.max(0, this.gestureSeconds - seconds);
     const state = this.options.authority.gameplay.player;
     this.viewmodel.setHeldItem(state.inventory[state.selectedSlot]?.itemId ?? null);
+    this.viewmodel.setCombatAction(state.combat?.active ?? null);
     this.viewmodel.setVisible(!this.blocksInput);
     if (!this.gestureSeconds) this.viewmodel.setAction(state.breakAction ? 'mine' : 'idle');
     this.viewmodel.update(seconds);
@@ -81,6 +83,7 @@ export class BrowserGameplay {
   refresh(forceBreakProjection = true, renderDeltaSeconds = 0): void {
     const view = this.options.authority.gameplay;
     const player = view.player;
+    this.consumeCombatResult();
     const becameDead = player.lifecycle === 'dead' && this.previousProjection?.shell.gameplay.lifecycle !== 'dead';
     if (becameDead) this.inventoryOpen = false;
     const entities = view.entities.filter((entity) => entity.type !== 'player');
@@ -112,6 +115,7 @@ export class BrowserGameplay {
       {
         revision: view.gameplayRevision,
         player: {
+          combat: player.combat,
           lifecycle: player.lifecycle,
           health: player.health,
           hunger: player.hunger,
@@ -203,9 +207,20 @@ export class BrowserGameplay {
       .sort((left, right) => left.distance - right.distance)[0]?.entity;
     if (!target) return false;
     void this.action({ type: 'attack', targetId: target.id }, (result) => {
-      this.feedback(result.success ? '攻击命中' : `攻击失败 · ${result.reason}`, result.success ? 'success' : 'error');
-      if (result.success) this.present({ kind: 'attack', position: target.position });
-      if (result.success) this.options.queueSave();
+      if (!result.success) {
+        if (result.reason === 'cooldown' || result.reason === 'attack-cooldown' || result.reason === 'buffer-full')
+          return;
+        if (result.reason === 'combo-window-closed') return this.feedback('等待衔接窗口', 'info');
+        const reason =
+          result.reason === 'out-of-range'
+            ? '目标超出攻击距离'
+            : result.reason === 'blocked'
+              ? '目标被方块遮挡'
+              : result.reason === 'invalid-target'
+                ? '目标已离开或倒下'
+                : '当前无法攻击';
+        this.feedback(reason, 'error');
+      } else if (result.buffered) this.feedback('已衔接下一击', 'info');
     });
     return true;
   }
@@ -269,7 +284,7 @@ export class BrowserGameplay {
   useHeldItem(): boolean {
     const player = this.options.authority.gameplay.player;
     const stack = player.inventory[player.selectedSlot];
-    if (!stack || getItemDefinition(stack.itemId).itemType !== 'food') return false;
+    if (!stack || !getItemCapability(stack.itemId, 'consume')) return false;
     this.useInventoryItem(player.selectedSlot);
     return true;
   }
@@ -296,6 +311,23 @@ export class BrowserGameplay {
     this.viewmodel.dispose();
   }
 
+  private consumeCombatResult(): void {
+    const result = this.options.authority.gameplay.player.combat?.lastResult;
+    const sequence = result?.sequence ?? 0;
+    if (this.lastCombatResultSequence === null) {
+      this.lastCombatResultSequence = sequence;
+      return;
+    }
+    if (!result || sequence <= this.lastCombatResultSequence) return;
+    this.lastCombatResultSequence = sequence;
+    if (result.outcome === 'hit') {
+      this.feedback(`命中 · ${result.damage} 点伤害`, 'success');
+      this.present({ kind: 'attack' });
+      this.options.queueSave();
+    } else if (result.outcome === 'miss') this.feedback('挥空 · 目标离开范围或被遮挡', 'info');
+    else this.feedback('攻击已取消', 'info');
+  }
+
   private present(event: GameplayPresentationEvent): void {
     this.options.onPresentation?.(event);
     const kind = event.kind;
@@ -316,11 +348,11 @@ export class BrowserGameplay {
 
   private async action(
     action: AuthorityAction,
-    consume: (result: { success: boolean; reason?: string }) => void = () => undefined,
+    consume: (result: { success: boolean; reason?: string; buffered?: boolean }) => void = () => undefined,
   ): Promise<void> {
     try {
       const response = await this.options.authority.performAction(action);
-      consume(response.result as { success: boolean; reason?: string });
+      consume(response.result as { success: boolean; reason?: string; buffered?: boolean });
       this.refresh();
     } catch (error) {
       this.feedback(error instanceof Error ? error.message : String(error), 'error');

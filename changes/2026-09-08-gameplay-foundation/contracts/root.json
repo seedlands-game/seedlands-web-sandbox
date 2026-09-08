@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "id": "gameplay-root",
+  "initiatedBy": "human",
+  "role": "玩法基础统筹与整体验收",
+  "workType": "design",
+  "goal": "完成本 change spec 的玩法首版并验收交接",
+  "context": [
+    {
+      "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/spec.md",
+      "purpose": "范围与验收"
+    }
+  ],
+  "scope": {
+    "writePaths": ["/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox"],
+    "readPaths": ["/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox"],
+    "nonGoals": ["不合并不发布不改权限不读凭据"]
+  },
+  "outputs": ["玩法首版和测试证据"],
+  "execution": {
+    "form": "current-task",
+    "model": "human-selected-uninspected",
+    "effort": "human-selected-uninspected"
+  },
+  "acceptance": [
+    {
+      "id": "delivery",
+      "check": "本 spec 领域、资产、浏览器与 PR 证据",
+      "evidence": "测试与交付快照"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 78
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": true
+  },
+  "parent": null,
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": ["范围/公开接口/授权变化", "两次同因失败", "预计超过预算"],
+  "reportFields": ["完成状态", "改动文件", "验证结果", "限制", "下一步"]
+}

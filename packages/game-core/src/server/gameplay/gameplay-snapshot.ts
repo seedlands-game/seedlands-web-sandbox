@@ -45,6 +45,7 @@ export type ValidatedGameplaySnapshot = {
   sourceVersion: 1 | 2 | 3;
   entities: EntityStore;
   players: Map<string, PlayerState>;
+  legacyCombatLockouts: Map<string, number>;
 };
 
 const LEGACY_PLAYER_EYE_TO_FEET = 1.6;
@@ -174,12 +175,15 @@ export function validateGameplaySnapshot(
   const entities = new EntityStore();
   entities.restore(migratedEntities, source.entitySequence);
   const players = new Map<string, PlayerState>();
+  const legacyCombatLockouts = new Map<string, number>();
   migratedPlayers.forEach((player) => {
     validatePlayerSnapshot(player);
     const entity = entities.get(player.entityId);
     if (!entity || entity.type !== 'player') throw new TypeError('player entity is missing');
     if (players.has(player.entityId)) throw new TypeError('player state is duplicated');
     players.set(player.entityId, new PlayerState(player.entityId, [...player.spawnPosition] as Position, player));
+    if ((source.version === 1 || !source.simulation.combat) && player.attackCooldownSeconds > 0)
+      legacyCombatLockouts.set(player.entityId, player.attackCooldownSeconds);
   });
   if (entities.query({ type: 'player' }).length !== players.size) throw new TypeError('player state is missing');
 
@@ -203,5 +207,5 @@ export function validateGameplaySnapshot(
     coordinateSchema: { ...GAMEPLAY_COORDINATE_SCHEMA },
     physicsSchema: { ...GAMEPLAY_PHYSICS_SCHEMA },
   };
-  return { snapshot, sourceVersion, entities, players };
+  return { snapshot, sourceVersion, entities, players, legacyCombatLockouts };
 }

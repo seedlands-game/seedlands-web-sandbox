@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "id": "core",
+  "initiatedBy": "agent",
+  "role": "core 实施负责人",
+  "workType": "implementation",
+  "goal": "实现新物品合同及完整权威近战/连段和NPC接入，保持恢复与双宿主兼容",
+  "context": [
+    {
+      "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/spec.md",
+      "purpose": "范围与验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/packages/game-core/src/server/gameplay",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/packages/game-core/src/server/simulation",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/packages/game-core/src/server/authority",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/packages/game-core/src/server/protocol",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/packages/game-core/src/compute",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/tests/server",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/core-tests",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/packages/game-core/src/server/game-server-gameplay.ts"
+    ],
+    "readPaths": ["/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox"],
+    "nonGoals": ["不合并不发布不改权限不读凭据"]
+  },
+  "outputs": ["玩法首版和测试证据"],
+  "execution": { "form": "subagent", "model": "gpt-5.6-sol", "effort": "high" },
+  "acceptance": [
+    {
+      "id": "core",
+      "check": "实现前 RED，相关功能及边界用例 GREEN，无 any；返回具体接口和未验证项",
+      "evidence": "定向测试与实现路径"
+    }
+  ],
+  "budget": { "maxAttempts": 3, "maxAgentHours": 12 },
+  "permissions": { "localWrite": true, "externalWrite": false, "delegate": false },
+  "parent": {
+    "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/contracts/root.json",
+    "sha256": "55dd481bd0e5c07704b373c94c68e479ea3956400e39f04b5ce9e057bba67156"
+  },
+  "resources": { "exclusiveGroup": null },
+  "escalation": ["范围/公开接口/授权变化", "两次同因失败", "预计超过预算"],
+  "reportFields": ["完成状态", "改动文件", "验证结果", "限制", "下一步"]
+}

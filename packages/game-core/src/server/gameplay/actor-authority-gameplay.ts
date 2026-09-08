@@ -6,7 +6,6 @@ import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
 import {
   ACTOR_ATTACK_DISTANCE,
   ACTOR_CONSUME_DISTANCE,
-  executeAuthorityAttack,
   executeAuthorityConsume,
   retainAuthorityAction,
   startAuthorityMovement,
@@ -21,7 +20,6 @@ export type ActorAuthorityGameplayContext = Readonly<{
   simulation: AutonomyRuntime;
   getVoxel: (position: Position) => number | undefined;
   isPlayerAlive: (id: string) => boolean;
-  damagePlayer: (actorId: string, targetId: string, amount: number) => boolean;
   touch: () => void;
 }>;
 
@@ -37,20 +35,19 @@ function attack(
 ): ActorAuthorityActionResult {
   const actor = context.entities.get(actorId);
   const target = context.entities.get(targetId);
-  if (!actor || target?.type !== 'player' || !context.isPlayerAlive(targetId)) return reject('invalid-target');
+  const actorState = context.simulation.getActor(actorId);
+  if (!actor || actorState?.archetype !== 'night-stalker') return reject('invalid-attacker');
+  if (target?.type !== 'player' || !context.isPlayerAlive(targetId)) return reject('invalid-target');
   if (!inRange(actor.position, target.position, ACTOR_ATTACK_DISTANCE)) return reject('out-of-range');
   const from = attackTargetPoint(actor);
   const to = attackTargetPoint(target);
   const visibility = traceVoxelRay(from, to, (x, y, z) => context.getVoxel([x, y, z]));
   if (visibility !== 'clear') return reject(visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked');
-  return executeAuthorityAttack(
-    context.simulation.authorityRulesContext(),
-    actorId,
-    targetId,
-    () => context.damagePlayer(actorId, targetId, 2),
-    () => context.simulation.startAction(actorId, { type: 'attack', targetEntityId: targetId }),
-    existingActionId,
-  );
+  const result = context.simulation.requestActorCombat(actorId, targetId, 'night-stalker-claw', existingActionId);
+  if (!result.success) return reject(result.reason);
+  if (!existingActionId) context.touch();
+  const action = context.simulation.actions.get(result.actionId);
+  return { accepted: true, changed: existingActionId === undefined, ...(action ? { action } : {}) };
 }
 
 function consume(

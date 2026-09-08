@@ -1,3 +1,4 @@
+import type { CombatUiProjection } from './combat-ui-projector';
 import type { SlashCommandExecution } from '@seedlands/game-core/server/commands/slash-command-parser';
 import type { QualityLevel } from '../scene/quality-profile';
 import type { GameplayItemPresentation } from './gameplay-ui-projector';
@@ -46,6 +47,7 @@ export type ShellState = Readonly<{
 }>;
 
 export type HudState = Readonly<{
+  combat?: CombatUiProjection;
   visible: boolean;
   worldClock: string;
   health: Readonly<{ value: number; max: number }>;
