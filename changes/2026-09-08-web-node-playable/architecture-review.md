@@ -44,3 +44,12 @@ Terra/high 按 `contracts/node-review.json` 审阅冻结 `b6ab3e0`，原始报�
 - 基线与 publication 可交错，Node 节点尚无完整消费者侧因果保证。root 判定不必强制禁止网络 frame 交错，但最终 Web 消费者必须以 checkpoint/revision 水位证明旧 capture 不覆盖新提交，并覆盖 capture 后、descriptor 前和分页途中提交的确定性用例。此项在 Web 准出前仍待验证。
 - session drain 等待 baselineTail，而现有 core capture 取消只置标记，仍等待所有 chunk preparation 完成；卡住的 capture 可能阻塞网络关闭并耗尽 runtime 30s stop deadline。实施者需要有界、可观测的取消/关闭结算及迟到结果清理测试。此项待修复复验。
 - 已有 131 个 Node 测试与 dist-only hello 是基础证据，尚不能替代真实 WS 的错误认证、第二连接、超限/背压、清输入、动作幂等、取消及 durable checkpoint 测试。
+
+## M2 首轮冻结审阅（51e97fa）
+
+Terra/high 最终合同的首轮静态检查已完成，原始报告为 `/tmp/seedlands-web-node-playable/independent-validation.md`。此阶段不占用实施者的浏览器，也不把修改中的工作区当作冻结证据。
+
+- 公开 C0 解码的版本与字段 allowlist、认证/单玩家边界经源码复核；远端组合只启用完整权威数据的派生网格路径，未发现新增的可复现阻断缺陷。
+- Web per-chunk revision watermark 与 owner 失效处理已覆盖旧基线的拒绝路径；closedSignal 参与 baseline race 后，网络 drain 不再必须等待被阻塞的 capture 完成。旧 P1 的具体调用链已有针对性实现，最终仍需交错提交和阻塞 capture 的确定性实证。
+- 首轮真实键鼠、保存、重连和重启旅程已通过实施者测试，但当时 JSON 指向 8cd0868 且缺少逐文件绑定，不能作为 51e97fa 的准出证据。ef71bfb 补入源文件绑定机制；最终必须重跑并核对源文件、原始帧、跳跃峰值、durable ACK 与停止日志。
+- 51e97fa 的 CI 34194141726：Chromium regression 成功；Static verification 和 Package builds 同因预渲染启动页未更新失败。日志保存在 `/tmp/seedlands-web-node-playable/ci-34194141726-failed.log`，已交 Terra 归因。不能以此前 M1 的绿色 CI 替代本阶段准出。
