@@ -136,6 +136,12 @@ pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-wor
 
 In the Web start screen, choose **Connect to Node**, enter `ws://127.0.0.1:8787/seedlands` and the file's access key, then connect. The key is sent only in the bounded opening handshake and is not stored by the browser. The listener accepts loopback only, checks the exact Origin, and grants one player session; reconnect manually after leaving or closing the page. The Node Authority keeps ticking while the page is closed, and **Save to Node and return to menu** waits for a durable checkpoint. Restarting Node with the same data directory restores that checkpoint.
 
+Start the Web app in a second terminal with the same Origin used above:
+
+```bash
+pnpm --filter @seedlands/web dev --host 127.0.0.1 --port 4173
+```
+
 The output in `apps/node-server/dist/` runs with Node 22.12 or later and includes five ESM entry files plus its manifest. It needs no source checkout, Vite, or runtime dependency install. The default uses a dedicated authority lane, logic/fluid/general computation lanes, and a persistence lane. `--compute child-process` selects the experimental process executor; this is not a measured performance recommendation. Stop with Ctrl+C to drain work and save the final checkpoint. Use a dedicated directory; browser saves are not imported automatically. A second writer to the same directory is rejected. The local WebSocket contract remains experimental and is not a public-network deployment or a networking performance recommendation.
 
 ## Architecture

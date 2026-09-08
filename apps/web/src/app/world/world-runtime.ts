@@ -1,5 +1,6 @@
 import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
+import { COLLISION_EPSILON } from '@seedlands/game-core/physics/geometry';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/game-core/world/voxel';
 import type { WorldChange } from '@seedlands/game-core/world/storage';
 import type { WorldCommitResult, WorldEditBatch } from '@seedlands/game-core/server/game-server-types';
@@ -304,7 +305,7 @@ export class World {
   ): Promise<void> {
     await this.repository.waitForFirstVisible();
     const centerX = floorDiv(position.x, CHUNK_SIZE);
-    const centerY = floorDiv(position.y - Number.EPSILON, CHUNK_SIZE);
+    const centerY = floorDiv(position.y - COLLISION_EPSILON, CHUNK_SIZE);
     const centerZ = floorDiv(position.z, CHUNK_SIZE);
     const required = new Set<string>();
     for (let z = centerZ - horizontalRadius; z <= centerZ + horizontalRadius; z += 1)

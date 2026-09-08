@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
 import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
+import { COLLISION_EPSILON } from '../../../packages/game-core/src/physics/geometry';
 
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const sourceTreeStatus = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim();
@@ -194,7 +195,7 @@ test.describe.serial('Web to Node local playable loop', () => {
     expect(initial.readyBaselines).toBeGreaterThan(0);
     expect(initial.renderedChunks).toBeGreaterThan(0);
     const initialChunkX = Math.floor(initial.authoritativePlayer[0] / 32);
-    const initialChunkY = Math.floor((initial.authoritativePlayer[1] - Number.EPSILON) / 32);
+    const initialChunkY = Math.floor((initial.authoritativePlayer[1] - COLLISION_EPSILON) / 32);
     const initialChunkZ = Math.floor(initial.authoritativePlayer[2] / 32);
     for (let cz = initialChunkZ - 1; cz <= initialChunkZ + 1; cz += 1)
       for (let cx = initialChunkX - 1; cx <= initialChunkX + 1; cx += 1)

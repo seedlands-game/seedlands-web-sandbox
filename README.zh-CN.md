@@ -133,6 +133,12 @@ pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-wor
 
 在 Web 启动页选择“连接 Node”，填写 `ws://127.0.0.1:8787/seedlands` 和口令文件中的内容后连接。口令只在有界首条握手中发送，浏览器不会持久保存。监听只接受 loopback、校验精确 Origin，并只授予一个玩家会话；离开或关闭网页后需手动重连。Node Authority 会在网页关闭后继续 tick，“保存到 Node 并返回主菜单”会等待 durable 检查点；使用同一数据目录重启 Node 后可恢复该检查点。
 
+在第二个终端用与上方一致的 Origin 启动 Web：
+
+```bash
+pnpm --filter @seedlands/web dev --host 127.0.0.1 --port 4173
+```
+
 `apps/node-server/dist/` 内的五个 ESM 入口及清单可由 Node 22.12 或更高版本直接运行，不需要源码、Vite 或在服务器安装运行依赖。默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。`--compute child-process` 可选择实验性进程执行器；这不是已测得更快的默认建议。按 Ctrl+C 会排空工作并保存最终检查点。请使用独立目录，不会自动导入浏览器存档；同一目录的第二个写者会被拒绝。本机 WebSocket 合同仍是实验接口，不代表公网部署或网络性能建议。
 
 ## 架构
