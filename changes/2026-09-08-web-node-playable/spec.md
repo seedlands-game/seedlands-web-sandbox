@@ -4,7 +4,7 @@
 
 ## 起点与交付目标
 
-从 codex/node-monorepo@3c727f7 新建 codex/web-node-playable。上游 PR #15 尚未合并时，以 codex/node-monorepo 为堆叠 PR base；若其先合入 main，核对 ancestry 后改为 main，不重放或丢弃上游提交。原工作区与原分支保留，不自动合并任何 PR。
+从 codex/node-monorepo@3c727f7 新建 codex/web-node-playable，并继续以 codex/node-monorepo 为 PR #17 的堆叠 base。PR #15 的冲突与 main 整合由用户在另一台设备处理；本任务不改动 #15、不切换 #17 的 base，也不自动合并任何 PR。
 
 交付真实浏览器连接本机 Node 世界，能移动/跳跃、挖块/放块，关闭浏览器后世界继续运行，手动重新连接与 Node 重启后恢复已保存修改。原本地世界可继续游玩。连接成功或静态首帧不能替代完整闭环验收。
 
@@ -18,6 +18,7 @@
 - 首次基线与后续提交通过订阅/序号屏障连续衔接，不能丢掉捕获期间的提交。输入、快照、动作回执、基线和异步结果均绑定 serverEpoch/sessionId 及相应 revision/sequence；过期结果拒绝。权威持有的 buffer 不因网络/Worker transfer detach。
 - 玩家输入/预测保持当前序号与服务器 tick 校正；远端客户端只允许一个 `input-state` 在途，并以单一 latest 槽覆盖其后的常规采样，收到匹配回执才发送最新状态。目标 tick、租期与 jump edge 只在真正发送时投影；合并期间的短按 jump 在原租期内保留一次，过期、resync、断线或失败后不得复活。未知或旧回执不能释放新在途输入。500ms 输入租期失效清零移动/跳跃和连续破坏；菜单、失焦和离开主动发中性输入。远端菜单不会暂停 Node 世界。断线必须可见且停止操作，不自动创建本地世界。
 - 远端启动先把玩家脚下层的 3×3 可玩区提升为首屏优先级；同 key 已进入普通 streaming 队列时只升级原请求，不复制工作。单 Worker 下这 9 个完整网格必须先于其余未开始的 streaming 请求派发，同时其它高度层继续有界流送，避免合法空网格让“首个可见网格”永久等待。首屏完成仍以每个必需 key 已 postrender 为准，不要求非空三角形；精确 chunk 高度边界按玩家脚下层计算。
+- Harness 首屏超时时必须用有界匿名诊断区分 Node baseline tail/capture/projection/send 与 Web descriptor/page/ready 进度；只记录前 12 个 Node 请求、最多 96 条事件及前 9 个 Web 请求，不记录 chunk key、请求 ID、口令、口令文件或消息帧。诊断失败不得改变会话与原超时结算。
 - 手动重连使用新连接代次和完整同步，清理旧 socket、预测、碰撞、缓存 owner 与 pending。未知结果动作不自动重发；同连接重复事务保持既有幂等语义。跨 Node 重启新 epoch，不承诺跨重启 exactly-once。保存确认必须区分已执行与已 durable；关闭浏览器本身不承诺最后一个未确认动作已落盘。
 - UI 保留 Svelte 单 root/UiBridge：启动页选择本地/连接 Node，远端地址与口令、连接/取消、阶段与错误、手动重连/返回、服务端世界信息。服务器 seed 不可编辑。禁止前端表面标记远端但仍写本地世界。
 - 不做多人、账户系统、自动重试租约恢复、局域网/公网/WSS部署、存档导入导出、Rust/Node-API/WebGPU、最终 codec 采用或性能收益宣称。保持原世界算法、存档 payload、WebGL2 与 Wasm 默认/TS 控制路径。

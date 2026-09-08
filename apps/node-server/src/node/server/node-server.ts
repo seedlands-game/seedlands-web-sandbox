@@ -28,7 +28,10 @@ async function main() {
       });
       if (options.network) {
         try {
-          const network = await createNodePlayableNetworkServer(runtime.authority, options.network);
+          const network = await createNodePlayableNetworkServer(runtime.authority, {
+            ...options.network,
+            ...(process.env.SEEDLANDS_E2E_PLAYABLE_DIAGNOSTICS === '1' ? { diagnostic: emit } : {}),
+          });
           runtime.attachNetwork(() => network.close());
           emit({ kind: 'network-ready', url: network.url, transport: 'experimental-local-c0-v1' });
         } catch (error) {

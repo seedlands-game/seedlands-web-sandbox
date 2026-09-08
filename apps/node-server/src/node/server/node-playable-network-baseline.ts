@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { Buffer } from 'node:buffer';
+import { performance } from 'node:perf_hooks';
 import type { C0BinaryBlock } from '@seedlands/game-core/server/protocol/network-c0-codec';
 import type {
   NetworkMessageClass,
@@ -18,6 +19,16 @@ import type { BaselinePageReference } from '@seedlands/game-core/server/protocol
 import type { InterestSessionRef } from '@seedlands/game-core/server/protocol/network-reference-interest-control';
 import type { NodeAuthorityLane } from '../runtime/node-authority-lane';
 import { playableBaselineLimits, playableNetworkLimits } from './node-playable-network-limits';
+
+export type NodePlayableBaselineDiagnosticEvent = Readonly<{
+  kind: 'node-playable-baseline-diagnostic';
+  requestOrdinal: number;
+  stage: 'capture-start' | 'capture-complete' | 'projection-complete' | 'send-complete';
+  elapsedMs: number;
+  resultReason?: string;
+  pageCount?: number;
+  bytes?: number;
+}>;
 
 const BASELINE_PAGE_BYTES = 64 * 1024;
 const digest = Object.freeze({
@@ -53,9 +64,17 @@ export function createPlayableBaselineSender(
   const projectionLedger = createBaselineReferenceInFlightLedger(playableNetworkLimits.baselineInFlightBytesMax);
   const sendLedger = createBaselineReferenceSendQueue(playableNetworkLimits.sendQueueBytesMax);
 
-  const send = async (message: BaselineMessage) => {
+  const send = async (
+    message: BaselineMessage,
+    diagnose: (event: Omit<NodePlayableBaselineDiagnosticEvent, 'kind' | 'requestOrdinal'>) => void = () => undefined,
+  ) => {
+    const startedAt = performance.now();
+    let sendStartedAt: number | null = null;
     const cancelled = () => options.isCancelled(message.requestId);
-    if (cancelled()) return;
+    if (cancelled()) {
+      diagnose({ stage: 'send-complete', elapsedMs: 0, resultReason: 'cancelled', pageCount: 0, bytes: 0 });
+      return;
+    }
     const [cx, cy, cz] = message.keys[0]!.split(',').map(Number) as [number, number, number];
     const snapshot = options.authority.latestSnapshot();
     if (!snapshot) throw new Error('Authority snapshot is unavailable.');
@@ -67,13 +86,30 @@ export function createPlayableBaselineSender(
     options.setCapture(message.requestId, captureId);
     let bundle: ReturnType<ReturnType<typeof createBaselineReferencePublicationQueue>['publish']> | null = null;
     try {
+      const captureStartedAt = performance.now();
+      diagnose({ stage: 'capture-start', elapsedMs: 0 });
       const capture = await options.authority.captureBaseline({
         captureId,
         purpose: 'mesh',
         key: message.keys[0]!,
         minimumRevision: 0,
       });
-      if (cancelled()) return;
+      diagnose({
+        stage: 'capture-complete',
+        elapsedMs: performance.now() - captureStartedAt,
+        resultReason: capture.status === 'available' ? 'available' : capture.reason,
+      });
+      if (cancelled()) {
+        diagnose({
+          stage: 'send-complete',
+          elapsedMs: performance.now() - startedAt,
+          resultReason: 'cancelled',
+          pageCount: 0,
+          bytes: 0,
+        });
+        return;
+      }
+      const projectionStartedAt = performance.now();
       const projected = await prepareAuthorityBaselineReference(capture, {
         ref: options.interestRef,
         requestId: message.requestId,
@@ -93,21 +129,53 @@ export function createPlayableBaselineSender(
         sizer,
         inFlight: projectionLedger,
       });
+      diagnose({
+        stage: 'projection-complete',
+        elapsedMs: performance.now() - projectionStartedAt,
+        resultReason: 'publish' in projected ? 'available' : projected.reason,
+      });
       if (cancelled()) {
         if ('cancel' in projected) await projected.cancel();
+        diagnose({
+          stage: 'send-complete',
+          elapsedMs: performance.now() - startedAt,
+          resultReason: 'cancelled',
+          pageCount: 0,
+          bytes: 0,
+        });
         return;
       }
       if (!('publish' in projected)) {
+        sendStartedAt = performance.now();
         await options.enqueue('baseline-unavailable', {
           kind: 'baseline-unavailable',
           ref: options.transportRef,
           requestId: message.requestId,
           reason: projected.reason,
         });
+        diagnose({
+          stage: 'send-complete',
+          elapsedMs: performance.now() - sendStartedAt,
+          resultReason: projected.reason,
+          pageCount: 0,
+          bytes: 0,
+        });
         return;
       }
+      sendStartedAt = performance.now();
       bundle = publicationQueue.publish(projected);
-      if (cancelled()) return;
+      if (cancelled()) {
+        diagnose({
+          stage: 'send-complete',
+          elapsedMs: performance.now() - sendStartedAt,
+          resultReason: 'cancelled',
+          pageCount: 0,
+          bytes: 0,
+        });
+        return;
+      }
+      let pageCount = 0;
+      let sentBytes = 0;
       const descriptorLease = publicationQueue.takeDescriptor(sendLedger);
       if (!descriptorLease) throw new Error('Baseline descriptor send queue is full.');
       try {
@@ -139,10 +207,26 @@ export function createPlayableBaselineSender(
                 },
                 [{ name: 'payload', bytes }],
               );
+              pageCount += 1;
+              sentBytes += bytes.byteLength;
             } finally {
               lease.settle();
             }
           }
+      diagnose({
+        stage: 'send-complete',
+        elapsedMs: performance.now() - sendStartedAt,
+        resultReason: 'available',
+        pageCount,
+        bytes: sentBytes,
+      });
+    } catch (error) {
+      diagnose({
+        stage: 'send-complete',
+        elapsedMs: performance.now() - (sendStartedAt ?? startedAt),
+        resultReason: error instanceof Error && error.name === 'AbortError' ? 'cancelled' : 'failed',
+      });
+      throw error;
     } finally {
       bundle?.close();
       options.setCapture(message.requestId, null);

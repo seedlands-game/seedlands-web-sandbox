@@ -44,7 +44,7 @@ const PLAYABLE_REJECTION = '远端模式不开放浏览器管理权威世界。'
 
 type Pending<T> = { resolve(value: T): void; reject(error: Error): void; timer: number };
 export type RemoteAuthorityConnectOptions = AuthorityClientOptions &
-  Readonly<{ url: string; accessKey: string; signal?: AbortSignal }>;
+  Readonly<{ url: string; accessKey: string; signal?: AbortSignal; initialSyncDiagnostics?: boolean }>;
 
 export class RemoteAuthorityClient {
   readonly mode = 'remote' as const;
@@ -72,7 +72,7 @@ export class RemoteAuthorityClient {
   private constructor(
     private readonly socket: WebSocket,
     readonly epoch: SessionEpoch,
-    private readonly options: AuthorityClientOptions,
+    private readonly options: AuthorityClientOptions & Readonly<{ initialSyncDiagnostics?: boolean }>,
   ) {
     this.mesh = new RemoteAuthorityMeshMirror({
       nextRequestId: () => ++this.requestSequence,
@@ -93,6 +93,7 @@ export class RemoteAuthorityClient {
       },
       onCommit: options.onCommit,
       onUnknownChunk: options.onUnknownChunk,
+      diagnosticsEnabled: options.initialSyncDiagnostics,
     });
   }
 
@@ -194,6 +195,9 @@ export class RemoteAuthorityClient {
   get snapshotRejections() { return { wrongEpoch: 0, stale: 0 }; }
   // prettier-ignore
   get readyBaselines() { return this.mesh.readyOwnerCount; }
+
+  // prettier-ignore
+  initialBaselineDiagnostics() { return this.mesh.initialDiagnostics(); }
 
   evidenceSnapshot() {
     const snapshot = this.snapshotValue;
@@ -375,11 +379,9 @@ export class RemoteAuthorityClient {
         await this.mesh.acceptPage(message, decoded.blocks);
         return null;
       case 'baseline-unavailable': {
-        this.rejectOne(
-          this.pendingBaselines,
-          integer(message.requestId, 'requestId'),
-          new Error(`Node 无法提供区块：${String(message.reason)}`),
-        );
+        const requestId = integer(message.requestId, 'requestId');
+        this.mesh.rejectUnavailable(requestId);
+        this.rejectOne(this.pendingBaselines, requestId, new Error(`Node 无法提供区块：${String(message.reason)}`));
         return null;
       }
       case 'action-receipt':

@@ -53,8 +53,9 @@ const commit = (key: string, revision: number): WorldCommitResult =>
     metrics: {},
   }) as unknown as WorldCommitResult;
 
-function fixture() {
+function fixture(diagnosticsEnabled = false) {
   let nextRequestId = 10;
+  let now = 0;
   const requests: Array<Readonly<{ requestId: number; key: string }>> = [];
   const pending = new Map<number, Readonly<{ resolve(): void; reject(error: Error): void }>>();
   const mirror = new RemoteAuthorityMeshMirror({
@@ -64,9 +65,11 @@ function fixture() {
     rejectPending: (requestId, error) => pending.get(requestId)?.reject(error),
     requestBaseline: (requestId, key) => requests.push({ requestId, key }),
     cancelBaseline: () => undefined,
+    diagnosticsEnabled,
+    now: () => now,
   });
   mirror.initialize(TEST_BASELINE_REF, limits, 0);
-  return { mirror, requests };
+  return { mirror, requests, advance: (elapsedMs: number) => (now += elapsedMs) };
 }
 
 async function pagedBundle(requestId = 11) {
@@ -134,6 +137,37 @@ const acceptPage = (mirror: RemoteAuthorityMeshMirror, reference: BaselinePageRe
 };
 
 describe('remote Authority baseline causal barrier', () => {
+  it('keeps bounded anonymous descriptor and page progress for initial-sync failure diagnostics', async () => {
+    const { mirror, advance } = fixture(true);
+    const load = mirror.ensure(0, 0, 0);
+    const bundle = await pagedBundle();
+    advance(5);
+    mirror.acceptDescriptor({ descriptor: bundle.descriptor });
+    advance(7);
+    for (const page of bundle.pages) await acceptPage(mirror, page);
+    await load;
+    for (let cx = 1; cx <= 9; cx += 1) void mirror.ensure(cx, 0, 0);
+
+    const diagnostics = mirror.initialDiagnostics();
+    expect(diagnostics).toHaveLength(9);
+    expect(diagnostics[0]).toEqual({
+      requestOrdinal: 1,
+      state: 'ready',
+      elapsedMs: 12,
+      descriptorElapsedMs: 5,
+      readyElapsedMs: 12,
+      expectedPages: bundle.pages.length,
+      receivedPages: bundle.pages.length,
+      receivedBytes: bundle.pages.reduce((total, page) => total + page.bytes.byteLength, 0),
+    });
+    expect(JSON.stringify(diagnostics)).not.toContain('0,0,0');
+    expect(diagnostics.every((entry) => Object.keys(entry).every((key) => key !== 'key' && key !== 'requestId'))).toBe(
+      true,
+    );
+    bundle.close();
+    mirror.dispose();
+  });
+
   it('rejects a capture made stale by a commit before its descriptor and immediately permits a fresh request', async () => {
     const { mirror, requests } = fixture();
     const load = mirror.ensure(0, 0, 0);

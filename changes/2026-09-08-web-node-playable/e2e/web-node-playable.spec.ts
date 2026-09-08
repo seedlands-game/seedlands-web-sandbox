@@ -20,6 +20,8 @@ const sourceTreeStatus = execFileSync('git', ['status', '--porcelain'], { encodi
 const sourceFiles = [
   'apps/node-server/src/node/server/node-authority-worker.ts',
   'apps/node-server/src/node/server/node-playable-network-session.ts',
+  'apps/node-server/src/node/server/node-playable-network-baseline.ts',
+  'apps/node-server/src/node/server/node-playable-network-server.ts',
   'apps/node-server/dist/node-server.js',
   'apps/web/src/app/game.ts',
   'apps/web/src/app/world/initial-world-ready.ts',
@@ -100,7 +102,11 @@ async function startNode(): Promise<void> {
       '--access-key-file',
       keyFile,
     ],
-    { cwd: process.cwd(), stdio: 'pipe' },
+    {
+      cwd: process.cwd(),
+      stdio: 'pipe',
+      env: { ...process.env, SEEDLANDS_E2E_PLAYABLE_DIAGNOSTICS: '1' },
+    },
   );
   nodeProcess.stdout.on('data', (chunk: Buffer) =>
     nodeLog.push(...chunk.toString('utf8').split(/\r?\n/u).filter(Boolean)),

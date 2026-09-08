@@ -18,6 +18,29 @@ import { digest, sizer } from './remote-authority-projections';
 const BASELINE_IN_FLIGHT_BYTES = 16 * 1024 * 1024;
 const MAX_REVISION_WATERMARKS = 4_096;
 const MAX_IGNORED_BUNDLES = 128;
+const MAX_INITIAL_DIAGNOSTIC_REQUESTS = 9;
+
+export type RemoteBaselineDiagnosticSnapshot = Readonly<{
+  requestOrdinal: number;
+  state: 'requested' | 'descriptor' | 'pages' | 'ready' | 'unavailable' | 'cancelled';
+  elapsedMs: number;
+  descriptorElapsedMs?: number;
+  readyElapsedMs?: number;
+  expectedPages: number;
+  receivedPages: number;
+  receivedBytes: number;
+}>;
+
+type MutableBaselineDiagnostic = {
+  requestOrdinal: number;
+  requestedAt: number;
+  state: RemoteBaselineDiagnosticSnapshot['state'];
+  descriptorAt?: number;
+  readyAt?: number;
+  expectedPages: number;
+  receivedPages: number;
+  receivedBytes: number;
+};
 
 type OwnerState = {
   handle: NetworkBaselineOwnerHandle;
@@ -49,6 +72,8 @@ type MirrorOptions = Readonly<{
   cancelBaseline(requestId: number): void;
   onCommit?(commit: WorldCommitResult): void;
   onUnknownChunk?(key: string): void;
+  diagnosticsEnabled?: boolean;
+  now?(): number;
 }>;
 
 export class RemoteAuthorityMeshMirror {
@@ -58,6 +83,8 @@ export class RemoteAuthorityMeshMirror {
   private readonly revisionWatermarks = new Map<string, number>();
   private readonly owners = new Map<string, OwnerState>();
   private readonly ignoredBundles = new Set<number>();
+  private readonly diagnosticsByRequest = new Map<number, MutableBaselineDiagnostic>();
+  private diagnosticRequestSequence = 0;
   private readonly collisionChunks = new Map<
     string,
     { canonical: Uint16Array; fluid: Uint8Array; chunkRevision: number }
@@ -104,6 +131,17 @@ export class RemoteAuthorityMeshMirror {
     if (current) return current;
     if (owner) this.releaseOwner(key, owner);
     const requestId = this.options.nextRequestId();
+    if (this.options.diagnosticsEnabled && this.diagnosticRequestSequence < MAX_INITIAL_DIAGNOSTIC_REQUESTS) {
+      this.diagnosticRequestSequence += 1;
+      this.diagnosticsByRequest.set(requestId, {
+        requestOrdinal: this.diagnosticRequestSequence,
+        requestedAt: this.now(),
+        state: 'requested',
+        expectedPages: 0,
+        receivedPages: 0,
+        receivedBytes: 0,
+      });
+    }
     this.baselineRequestIds.set(key, requestId);
     const pending = this.options.createPending(requestId, `远端区块 ${key} 同步超时。`, () =>
       this.cancelRequest(key, requestId),
@@ -180,6 +218,25 @@ export class RemoteAuthorityMeshMirror {
     return count;
   }
 
+  initialDiagnostics(): readonly RemoteBaselineDiagnosticSnapshot[] {
+    const now = this.now();
+    return [...this.diagnosticsByRequest.values()].map((entry) => ({
+      requestOrdinal: entry.requestOrdinal,
+      state: entry.state,
+      elapsedMs: Math.max(0, now - entry.requestedAt),
+      ...(entry.descriptorAt === undefined ? {} : { descriptorElapsedMs: entry.descriptorAt - entry.requestedAt }),
+      ...(entry.readyAt === undefined ? {} : { readyElapsedMs: entry.readyAt - entry.requestedAt }),
+      expectedPages: entry.expectedPages,
+      receivedPages: entry.receivedPages,
+      receivedBytes: entry.receivedBytes,
+    }));
+  }
+
+  rejectUnavailable(requestId: number): void {
+    const diagnostic = this.diagnosticsByRequest.get(requestId);
+    if (diagnostic) diagnostic.state = 'unavailable';
+  }
+
   acceptDescriptor(message: Record<string, unknown>): void {
     const descriptor = message.descriptor as BaselineBundleDescriptorReference;
     this.requireReassembler().acceptDescriptor(descriptor);
@@ -187,6 +244,15 @@ export class RemoteAuthorityMeshMirror {
       this.ignoreBundle(descriptor.bundleId);
       void this.reassembler?.cancel(descriptor.bundleId).catch(() => undefined);
       return;
+    }
+    const diagnostic = this.diagnosticsByRequest.get(descriptor.requestId);
+    if (diagnostic) {
+      diagnostic.state = 'descriptor';
+      diagnostic.descriptorAt = this.now();
+      diagnostic.expectedPages = descriptor.entries.reduce(
+        (total, entry) => total + entry.blocks.reduce((entryTotal, block) => entryTotal + block.pageCount, 0),
+        0,
+      );
     }
     const staleAtDescriptor = descriptor.entries.some(
       (entry) => entry.chunkRevision < (this.revisionWatermarks.get(entry.key) ?? 0),
@@ -216,6 +282,12 @@ export class RemoteAuthorityMeshMirror {
     const page = { ...(message.page as BaselinePageReference), bytes: block.bytes };
     if (this.ignoredBundles.has(page.bundleId)) return;
     const bundle = await this.requireReassembler().acceptPage(page);
+    const diagnostic = this.diagnosticsByRequest.get(page.requestId);
+    if (diagnostic) {
+      diagnostic.state = 'pages';
+      diagnostic.receivedPages += 1;
+      diagnostic.receivedBytes += block.bytes.byteLength;
+    }
     if (!bundle) return;
     const owner = this.owners.get(bundle.descriptor.key);
     if (!owner || owner.descriptor.bundleId !== bundle.descriptor.bundleId) {
@@ -235,6 +307,10 @@ export class RemoteAuthorityMeshMirror {
     }
     if (accepted.status === 'rejected') throw new Error(`Node baseline 被拒绝：${accepted.reason}。`);
     owner.ready = true;
+    if (diagnostic) {
+      diagnostic.state = 'ready';
+      diagnostic.readyAt = this.now();
+    }
     this.options.resolvePending(bundle.descriptor.requestId);
   }
 
@@ -276,7 +352,13 @@ export class RemoteAuthorityMeshMirror {
       this.releaseOwner(key, owner);
     }
     this.baselineRequestIds.delete(key);
+    const diagnostic = this.diagnosticsByRequest.get(requestId);
+    if (diagnostic) diagnostic.state = 'cancelled';
     this.options.cancelBaseline(requestId);
+  }
+
+  private now(): number {
+    return this.options.now?.() ?? performance.now();
   }
 
   private releaseOwner(key: string, owner: OwnerState): void {

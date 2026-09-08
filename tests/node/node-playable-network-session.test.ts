@@ -3,7 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 import type { AuthorityReady } from '../../packages/game-core/src/compute/authority-worker-protocol';
 import { encodeC0Envelope } from '../../packages/game-core/src/server/protocol/network-c0-codec';
 import type { PublicSessionRef } from '../../packages/game-core/src/server/protocol/network-message-semantics';
-import { createSession } from '../../apps/node-server/src/node/server/node-playable-network-session';
+import {
+  createSession,
+  type NodePlayableSessionDiagnosticEvent,
+} from '../../apps/node-server/src/node/server/node-playable-network-session';
 import type { NodeAuthorityLane } from '../../apps/node-server/src/node/runtime/node-authority-lane';
 
 class FakeSocket extends EventEmitter {
@@ -208,5 +211,58 @@ describe('playable session asynchronous request budget', () => {
     await vi.waitFor(() => expect(socket.closed).toMatchObject({ code: 4003 }));
     expect(socket.closed?.reason).toContain('Too many pending input requests');
     expect(receiveInput).toHaveBeenCalledTimes(32);
+  });
+
+  it('reports bounded anonymous baseline stages without exposing the requested key', async () => {
+    const socket = new FakeSocket();
+    const diagnostics: NodePlayableSessionDiagnosticEvent[] = [];
+    const captureBaseline = vi.fn(async (request: { captureId: number; purpose: 'mesh'; key: string }) => ({
+      status: 'unavailable' as const,
+      captureId: request.captureId,
+      captureGeneration: request.captureId,
+      purpose: request.purpose,
+      key: request.key,
+      reason: 'not-available' as const,
+    }));
+    const authority = {
+      captureBaseline,
+      latestSnapshot: () => ready.snapshot,
+      subscribePublication: () => () => undefined,
+      clearInput: async () => undefined,
+      cancelBaselineCapture: async () => ({ status: 'cancelled' }),
+    } as unknown as NodeAuthorityLane;
+    let captureId = 0;
+    const session = createSession(
+      socket as never,
+      authority,
+      ref,
+      ready,
+      'node-checkpoint',
+      () => undefined,
+      () => 1,
+      () => 1,
+      () => ++captureId,
+      (event) => diagnostics.push(event),
+    );
+
+    for (let requestId = 1; requestId <= 20; requestId += 1) socket.emit('message', interest(requestId), true);
+    await vi.waitFor(() => expect(captureBaseline).toHaveBeenCalledTimes(20));
+    await session.whenDrained();
+
+    expect(diagnostics.length).toBeLessThanOrEqual(96);
+    expect(Math.max(...diagnostics.map((event) => event.requestOrdinal))).toBe(12);
+    expect(diagnostics.filter((event) => event.requestOrdinal === 1).map((event) => event.stage)).toEqual([
+      'tail-queued',
+      'tail-start',
+      'capture-start',
+      'capture-complete',
+      'projection-complete',
+      'send-complete',
+    ]);
+    expect(JSON.stringify(diagnostics)).not.toContain('0,1,0');
+    expect(Object.keys(diagnostics[0]!).sort()).toEqual(
+      ['elapsedMs', 'kind', 'queueDepth', 'requestOrdinal', 'stage'].sort(),
+    );
+    session.close();
   });
 });

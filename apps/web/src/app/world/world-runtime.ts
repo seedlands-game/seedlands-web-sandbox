@@ -89,6 +89,7 @@ export type WorldAuthorityPort = Readonly<{
     task: PendingMeshTask,
     result: import('../app-contracts').WorkerResult,
   ): boolean | Promise<boolean>;
+  initialBaselineDiagnostics?(): readonly Readonly<Record<string, number | string>>[];
 }>;
 
 export class World {
@@ -312,7 +313,13 @@ export class World {
     position: Readonly<{ x: number; y: number; z: number }>,
     horizontalRadius = 1,
   ): InitialPlayableAreaDiagnostics {
-    return initialPlayableAreaDiagnostics(this.scheduler, this.repository, position, horizontalRadius);
+    return initialPlayableAreaDiagnostics(
+      this.scheduler,
+      this.repository,
+      position,
+      horizontalRadius,
+      this.authority?.initialBaselineDiagnostics?.(),
+    );
   }
 
   async waitForInitialPlayableArea(

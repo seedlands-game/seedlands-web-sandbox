@@ -2,7 +2,7 @@
 
 ## 完成状态
 
-实现工作完成，最终产品源码为 `21d210b`，完整真实旅程 source binding 为其直接父提交 `4cf859db1f1edf882a0f2f672852f7bd57ea93e7`。真实浏览器已完成认证连接、完整脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复。最后一个提交只让 9 个已 postrender 合法空网格无需等待非空 first-visible，定向 RED/GREEN、typecheck 和 ESLint 已通过。正常 60Hz 输入经单一在途/latest 背压发送，首屏必需 key 在单 Worker 下优先于其余未开始的 streaming 请求。M3 只剩 root 将最终独立报告与 CI 终态写入并把草稿 PR 转交人类审核。
+本地完整闭环已实现并有 source-bound 真实旅程：浏览器完成认证连接、脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复。正常 60Hz 输入已有单一在途/latest 背压，首屏必需 key 在单 Worker 下优先于其余未开始的 streaming 请求，合法空网格也可结算。GitHub CI 仍在初始同步 30 秒门槛失败，当前状态不是 Delivered；已加入只面向 Harness 的有界匿名诊断，以区分 Node capture/projection/send 和 Web descriptor/page/ready 阶段，待下一轮 CI 实证后继续修复。
 
 ## 提交和推送
 
@@ -43,4 +43,4 @@
 
 ## 剩余工作
 
-root 需提交其最终独立验收报告和 CI 终态，确认 draft PR #17 可转为 ready-for-review。PR #15 的冲突与 main 整合由用户在另一台设备处理；本任务不修改 #15，#17 保持现有 base。不得自动合并。
+先依据下一轮 CI 的有界诊断定位并修复初始同步超时，再由 root 提交最终独立验收报告和 CI 终态，确认 draft PR #17 可转为 ready-for-review。PR #15 的冲突与 main 整合由用户在另一台设备处理；本任务不修改 #15，#17 保持现有 base。不得自动合并。

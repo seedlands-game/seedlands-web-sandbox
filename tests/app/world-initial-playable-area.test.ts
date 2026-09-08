@@ -106,6 +106,7 @@ describe('remote initial playable area barrier', () => {
     const chunks = new Map([['0,0,0', { task: { chunkRevision: 1 }, triangles: 0 }]]);
     const diagnostics = World.prototype.initialPlayableAreaDiagnostics as unknown as (
       this: Readonly<{
+        authority: { initialBaselineDiagnostics(): readonly Readonly<Record<string, number | string>>[] };
         repository: { chunks: typeof chunks; queueSize: number };
         scheduler: {
           schedulingDiagnostics: { queuedRequests: number; preparingRequests: number; failedPreparations: number };
@@ -116,6 +117,11 @@ describe('remote initial playable area barrier', () => {
       radius: number,
     ) => Record<string, number>;
     const world = {
+      authority: {
+        initialBaselineDiagnostics: () => [
+          { requestOrdinal: 1, state: 'pages', expectedPages: 81, receivedPages: 18, receivedBytes: 786_432 },
+        ],
+      },
       repository: { chunks, queueSize: 2 },
       scheduler: {
         schedulingDiagnostics: { queuedRequests: 5, preparingRequests: 1, failedPreparations: 3 },
@@ -131,6 +137,9 @@ describe('remote initial playable area barrier', () => {
       failedPreparations: 3,
       meshingRequests: 1,
       uploadQueue: 2,
+      baselineRequests: [
+        { requestOrdinal: 1, state: 'pages', expectedPages: 81, receivedPages: 18, receivedBytes: 786_432 },
+      ],
     });
   });
 });

@@ -189,7 +189,7 @@ export class Game {
       },
     };
     const session = await startPlayableWorkerSession({
-      remote,
+      remote: remote && harnessEnabled ? { ...remote, initialSyncDiagnostics: true } : remote,
       client: clientOptions,
       generalWorkerCount,
       wasm: this.experimentState.workerSelection,

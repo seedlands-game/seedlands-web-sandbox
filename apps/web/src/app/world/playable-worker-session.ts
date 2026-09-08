@@ -10,7 +10,7 @@ import { startBrowserWorkerSession } from '../browser-worker-session';
 type LocalOptions = Parameters<typeof startBrowserWorkerSession>[0];
 
 export const startPlayableWorkerSession = async (options: {
-  remote: Readonly<{ url: string; accessKey: string }> | null;
+  remote: Readonly<{ url: string; accessKey: string; initialSyncDiagnostics?: boolean }> | null;
   client: AuthorityClientOptions;
   local: LocalOptions;
   wasm: WasmWorkerSelection;

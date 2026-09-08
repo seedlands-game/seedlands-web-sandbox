@@ -72,9 +72,16 @@ JSON 经 Prettier 格式化后内容未变，表中为最终提交文件 hash。
 - Terra 复核指出旧合法空 mesh 测试预先 resolve 了 `waitForFirstVisible`，会掩盖“9 个必需块全空且其它块也无三角形”时的死锁。新增 RED 在永不 resolve 的 first-visible 下 25ms 内失败；`21d210b` 移除远端专用路径的该前置等待后，3 个相关文件 22 项、完整 typecheck 与 ESLint 通过。本地入口仍调用独立的 `waitForInitialVisibleChunk`，普通 mosslight 完整旅程不受此分支改动，按独立审阅约定未机械重跑。
 - Harness 模式的 30 秒失败现在输出只读 JSON：必需/已完成数、queued/preparing/failed/meshing 和 upload 计数；不包含 key、口令、frame 或内部管理入口。诊断自身失败也由 `finally` 保证原超时错误结算。
 
+## CI 首屏超时定位
+
+- `4cf859d` 的 CI `34207971935` 三次都在远端首屏 30 秒门槛失败；超时聚合均为总请求 50、已完成 7、preparing 1、queued 42，failed/meshing/upload 均为 0。该证据说明脚下 3×3 的优先顺序已生效，但第 8 个 baseline 的准备没有在预算内结束；此前 2 秒故障夹具只验证顺序，不证明真实 CI 吞吐。
+- 当前诊断 checkpoint 只为 Harness/E2E 打开：Node 对前 12 个 baseline 请求、最多 96 条事件记录匿名 ordinal、tail 等待、capture、projection、send 的耗时与结果，以及实际 page count/bytes；Web 只保留首 9 个匿名请求的 descriptor 到达、期望/已收页数、字节数与 ready 耗时。字段不含 chunk key、requestId、口令、口令文件或 frame，回调异常不影响网络会话。
+- 本地可玩闭环和 `4cf859d` source-bound 旅程已通过；GitHub CI 的初始同步超时仍是 Active 产品问题。本 checkpoint 用下一轮一次失败还原第 8 个请求停在 capture、projection、发送或浏览器重组中的哪一段，再据证据做有界修复；没有改并发、baselineTail、协议、Node 预算或 30 秒门槛。
+- 定向验证：`pnpm exec vitest run tests/node/node-playable-network-session.test.ts tests/client/remote-authority-mesh-mirror.test.ts tests/app/world-initial-playable-area.test.ts --maxWorkers=1`，3 文件 14 项通过；Node/Web typecheck、受影响文件 ESLint/Prettier、`pnpm build:server` 与 `pnpm build:web` 均退出 0。Node 测试连续排入 20 个 unavailable baseline，确认只记录前 12 个且总数不超过 96；Web 测试完成真实 descriptor/分页重组后再排请求，确认只保留前 9 个匿名状态且字段不含 key/requestId。
+
 ## 剩余边界
 
 - 当前只支持本机 loopback、一个 Node 世界和一个玩家控制租约；需要手动重连。没有账户、多玩家、局域网/公网、TLS/WSS 或自动重试。
 - `experimental-local-c0-v1` 仍是实验合同，不是 N2–N4 正式 wire/codec 采用结论，也没有网络性能收益声明。
 - 保存只承诺已收到 checkpoint receipt 的 durable 状态；关闭页面本身不保证最后一个未知结果动作已经落盘。浏览器旧存档不会自动导入 Node 数据目录。
-- M3 的最终独立报告入库、最新 `21d210b` GitHub CI 终态与 PR #17 ready-for-review 由 root 完成；PR 不自动合并。PR #15 的冲突和 main 整合由用户在另一台设备处理，本任务不改动 #15，#17 保持现有 base。
+- M3 仍需先定位并修复 GitHub CI 的初始同步 30 秒超时，再由 root 完成最终独立报告、最新 CI 终态与 PR #17 ready-for-review。PR 不自动合并；PR #15 的冲突和 main 整合由用户在另一台设备处理，本任务不改动 #15，#17 保持现有 base。

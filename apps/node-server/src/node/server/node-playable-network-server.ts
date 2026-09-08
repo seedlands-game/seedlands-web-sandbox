@@ -12,7 +12,11 @@ import {
 import { projectWelcomePresentationReference } from '@seedlands/game-core/server/protocol/network-reference-bootstrap-presentation';
 import type { NodeAuthorityLane, NodeAuthorityPublication } from '../runtime/node-authority-lane';
 import { nodeCorePlatform } from '../runtime/node-core-platform';
-import { createSession, projectGameplay } from './node-playable-network-session';
+import {
+  createSession,
+  projectGameplay,
+  type NodePlayableSessionDiagnosticEvent,
+} from './node-playable-network-session';
 import { MAX_PLAYABLE_FRAME_BYTES, playableNetworkLimits } from './node-playable-network-limits';
 
 const HELLO_TIMEOUT_MS = 3_000;
@@ -24,6 +28,7 @@ export type NodePlayableNetworkOptions = Readonly<{
   origin: string;
   accessKeyFile: string;
   worldId?: string;
+  diagnostic?: (event: NodePlayableSessionDiagnosticEvent) => void;
 }>;
 
 export type NodePlayableNetworkServer = Readonly<{
@@ -132,6 +137,7 @@ export async function createNodePlayableNetworkServer(
             () => inputSequence++,
             () => actionSequence++,
             () => captureSequence++,
+            options.diagnostic,
           );
           active = session;
           attaching = false;

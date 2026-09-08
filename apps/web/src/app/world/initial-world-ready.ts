@@ -1,6 +1,6 @@
 const INITIAL_WORLD_READY_TIMEOUT_MS = 30_000;
 
-type InitialWorldReadyDiagnostics = () => Readonly<Record<string, number>>;
+type InitialWorldReadyDiagnostics = () => Readonly<Record<string, unknown>>;
 
 export async function waitForInitialWorldReady(
   ready: Promise<void>,

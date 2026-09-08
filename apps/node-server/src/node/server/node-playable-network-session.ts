@@ -21,7 +21,10 @@ import { projectWorldCommitPresentationReference } from '@seedlands/game-core/se
 import { projectActionReceiptReference } from '@seedlands/game-core/server/protocol/network-action-reference';
 import type { NodeAuthorityLane, NodeAuthorityPublication } from '../runtime/node-authority-lane';
 import { nodeCorePlatform } from '../runtime/node-core-platform';
-import { createPlayableBaselineSender } from './node-playable-network-baseline';
+import {
+  createPlayableBaselineSender,
+  type NodePlayableBaselineDiagnosticEvent,
+} from './node-playable-network-baseline';
 import {
   MAX_PLAYABLE_FRAME_BYTES,
   MAX_PLAYABLE_SEND_QUEUE_BYTES,
@@ -33,6 +36,23 @@ const MAX_PENDING_REQUESTS = 32;
 const MAX_PENDING_CHECKPOINT_REQUESTS = 1;
 const MAX_PENDING_INPUT_REQUESTS = 32;
 const IDLE_TIMEOUT_MS = 15_000;
+const MAX_DIAGNOSTIC_BASELINE_REQUESTS = 12;
+const MAX_DIAGNOSTIC_EVENTS = 96;
+
+export type NodePlayableSessionDiagnosticEvent =
+  | NodePlayableBaselineDiagnosticEvent
+  | Readonly<{
+      kind: 'node-playable-baseline-diagnostic';
+      requestOrdinal: number;
+      stage: 'tail-queued' | 'tail-start';
+      elapsedMs: number;
+      queueDepth: number;
+    }>;
+type NodePlayableSessionDiagnosticPayload = NodePlayableSessionDiagnosticEvent extends infer Event
+  ? Event extends NodePlayableSessionDiagnosticEvent
+    ? Omit<Event, 'kind' | 'requestOrdinal'>
+    : never
+  : never;
 
 const bytes = (raw: RawData): Uint8Array | null => {
   if (raw instanceof ArrayBuffer) return new Uint8Array(raw);
@@ -74,6 +94,7 @@ export function createSession(
   allocateInputSequence: () => number,
   allocateActionSequence: () => number,
   allocateCaptureId: () => number,
+  diagnostic?: (event: NodePlayableSessionDiagnosticEvent) => void,
 ) {
   const interestRef = Object.freeze({
     epoch: serverEpoch,
@@ -103,6 +124,8 @@ export function createSession(
   let queuedBytes = 0;
   let outbound = Promise.resolve();
   let baselineTail = Promise.resolve();
+  let baselineOrdinal = 0;
+  let diagnosticEvents = 0;
   let closed = false;
   let resolveClosed!: () => void;
   const closedSignal = new Promise<void>((resolve) => {
@@ -338,7 +361,35 @@ export function createSession(
       if (baselineRequests.size >= MAX_PENDING_REQUESTS) throw new Error('Too many pending baseline requests.');
       interestRequestHighWatermark = message.requestId;
       baselineRequests.add(message.requestId);
-      const next = baselineTail.then(() => Promise.race([baselines.send(message), closedSignal]));
+      const requestOrdinal = ++baselineOrdinal;
+      const queuedAt = performance.now();
+      const diagnose = (event: NodePlayableSessionDiagnosticPayload) => {
+        if (
+          !diagnostic ||
+          requestOrdinal > MAX_DIAGNOSTIC_BASELINE_REQUESTS ||
+          diagnosticEvents >= MAX_DIAGNOSTIC_EVENTS
+        )
+          return;
+        diagnosticEvents += 1;
+        try {
+          diagnostic({
+            kind: 'node-playable-baseline-diagnostic',
+            requestOrdinal,
+            ...event,
+          } as NodePlayableSessionDiagnosticEvent);
+        } catch {
+          /* Test-only diagnostics cannot affect the session. */
+        }
+      };
+      diagnose({ stage: 'tail-queued', elapsedMs: 0, queueDepth: baselineRequests.size });
+      const next = baselineTail.then(() => {
+        diagnose({
+          stage: 'tail-start',
+          elapsedMs: performance.now() - queuedAt,
+          queueDepth: baselineRequests.size,
+        });
+        return Promise.race([baselines.send(message, (event) => diagnose(event)), closedSignal]);
+      });
       baselineTail = next.then(
         () => {
           baselineRequests.delete(message.requestId);
