@@ -125,14 +125,18 @@ The first headless harness uses in-process memory persistence. `/save` exercises
 
 ## Experimental Node world host
 
-The standalone TypeScript world host can run without a browser and persist checkpoints to its own directory. It is under active development: network connections and the server selection UI are not available yet.
+The standalone TypeScript world host can run without a browser, persist checkpoints to its own directory, and accept one experimental local browser session. Create a separate access-key file and start the loopback listener with the exact Web origin that will connect:
 
 ```bash
 pnpm build:server
-pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world
+pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world \
+  --listen 127.0.0.1:8787 --origin http://127.0.0.1:4173 \
+  --access-key-file /absolute/path/to/access-key
 ```
 
-The output in `apps/node-server/dist/` runs with Node 22.12 or later and includes five ESM entry files plus its manifest. It needs no source checkout, Vite, or runtime dependency install. The default uses a dedicated authority lane, logic/fluid/general computation lanes, and a persistence lane. `--compute child-process` selects the experimental process executor; this is not a measured performance recommendation. Stop with Ctrl+C to drain work and save the final checkpoint. Use a dedicated directory; browser saves are not imported automatically. A second writer to the same directory is rejected.
+In the Web start screen, choose **Connect to Node**, enter `ws://127.0.0.1:8787/seedlands` and the file's access key, then connect. The key is sent only in the bounded opening handshake and is not stored by the browser. The listener accepts loopback only, checks the exact Origin, and grants one player session; reconnect manually after leaving or closing the page. The Node Authority keeps ticking while the page is closed, and **Save to Node and return to menu** waits for a durable checkpoint. Restarting Node with the same data directory restores that checkpoint.
+
+The output in `apps/node-server/dist/` runs with Node 22.12 or later and includes five ESM entry files plus its manifest. It needs no source checkout, Vite, or runtime dependency install. The default uses a dedicated authority lane, logic/fluid/general computation lanes, and a persistence lane. `--compute child-process` selects the experimental process executor; this is not a measured performance recommendation. Stop with Ctrl+C to drain work and save the final checkpoint. Use a dedicated directory; browser saves are not imported automatically. A second writer to the same directory is rejected. The local WebSocket contract remains experimental and is not a public-network deployment or a networking performance recommendation.
 
 ## Architecture
 
@@ -165,6 +169,7 @@ pnpm build
 pnpm build:server
 pnpm verify:node-isolation
 pnpm test:e2e:regression
+pnpm test:web-node-playable
 ```
 
 These commands provide different evidence. Unit tests cover deterministic logic; static verification covers formatting, linting, path rules, coverage, and TypeScript; the production build proves bundling; Playwright covers deterministic browser behaviour. Visual semantics are evaluated separately with change-scoped Midscene flows.

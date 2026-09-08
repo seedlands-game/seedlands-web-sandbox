@@ -31,6 +31,7 @@ import { createPlayableNetworkRateLimit } from './node-playable-network-rate-lim
 
 const MAX_PENDING_REQUESTS = 32;
 const MAX_PENDING_CHECKPOINT_REQUESTS = 1;
+const MAX_PENDING_INPUT_REQUESTS = 32;
 const IDLE_TIMEOUT_MS = 15_000;
 
 const bytes = (raw: RawData): Uint8Array | null => {
@@ -97,6 +98,7 @@ export function createSession(
   let interestCancelHighWatermark = -1;
   let checkpointRequestHighWatermark = -1;
   let pendingCheckpointRequests = 0;
+  let pendingInputRequests = 0;
   let publicationSequence = -1;
   let queuedBytes = 0;
   let outbound = Promise.resolve();
@@ -296,7 +298,13 @@ export function createSession(
             },
             edges: { jumpPressed },
           };
-          decision = await authority.receiveInput(input);
+          if (pendingInputRequests >= MAX_PENDING_INPUT_REQUESTS) throw new Error('Too many pending input requests.');
+          pendingInputRequests += 1;
+          try {
+            decision = await authority.receiveInput(input);
+          } finally {
+            pendingInputRequests -= 1;
+          }
           if (decision === 'accepted') inputMappings.set(serverSequence, message.inputSequence);
         }
       }

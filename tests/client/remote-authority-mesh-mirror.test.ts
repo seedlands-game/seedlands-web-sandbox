@@ -1,12 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { RemoteAuthorityMeshMirror } from '../../apps/web/src/client/authority/remote-authority-mesh-mirror';
+import { digest, sizer } from '../../apps/web/src/client/authority/remote-authority-projections';
+import { authorityBaselineCaptureKeys } from '../../packages/game-core/src/server/authority/authority-baseline-capture';
+import type { AuthorityBaselineCaptureResult } from '../../packages/game-core/src/server/authority/authority-baseline-capture-types';
 import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
-import type { BaselineReferenceReassembler } from '../../packages/game-core/src/server/protocol/network-reference-baseline-types';
 import {
-  makeBaselineOwner,
-  makeReassembledBaseline,
-  TEST_BASELINE_REF,
-} from './support/network-baseline-consumer-fixture';
+  createBaselineReferencePublicationQueue,
+  prepareAuthorityBaselineReference,
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline';
+import {
+  createBaselineReferenceInFlightLedger,
+  createBaselineReferenceSendQueue,
+} from '../../packages/game-core/src/server/protocol/network-reference-baseline-budget';
+import type { BaselinePageReference } from '../../packages/game-core/src/server/protocol/network-reference-baseline-types';
+import { TEST_BASELINE_REF } from './support/network-baseline-consumer-fixture';
 
 const limits = {
   metadataBytesMax: 64 * 1024,
@@ -19,6 +26,13 @@ const limits = {
   interestKeysMax: 1,
   canonicalResidencyMax: 512,
   sendQueueBytesMax: 4 * 1024 * 1024,
+};
+const baselineLimits = {
+  metadataBytesMax: limits.metadataBytesMax,
+  reliableMessageBytesMax: limits.reliableMessageBytesMax,
+  baselineTransferBytesMax: limits.baselineTransferBytesMax,
+  baselineInFlightBytesMax: limits.baselineInFlightBytesMax,
+  sendQueueBytesMax: limits.sendQueueBytesMax,
 };
 
 const commit = (key: string, revision: number): WorldCommitResult =>
@@ -45,10 +59,7 @@ function fixture() {
   const pending = new Map<number, Readonly<{ resolve(): void; reject(error: Error): void }>>();
   const mirror = new RemoteAuthorityMeshMirror({
     nextRequestId: () => ++nextRequestId,
-    createPending: (requestId) =>
-      new Promise<void>((resolve, reject) => {
-        pending.set(requestId, { resolve, reject });
-      }),
+    createPending: (requestId) => new Promise<void>((resolve, reject) => pending.set(requestId, { resolve, reject })),
     resolvePending: (requestId) => pending.get(requestId)?.resolve(),
     rejectPending: (requestId, error) => pending.get(requestId)?.reject(error),
     requestBaseline: (requestId, key) => requests.push({ requestId, key }),
@@ -58,64 +69,119 @@ function fixture() {
   return { mirror, requests };
 }
 
-function installBundle(mirror: RemoteAuthorityMeshMirror, requestId = 11) {
-  const owner = makeBaselineOwner({ requestId, ownerId: requestId, ownerGeneration: requestId });
-  const bundle = makeReassembledBaseline(owner);
-  const reassembler = {
-    acceptDescriptor: () => undefined,
-    acceptPage: async () => bundle,
-    cancel: async () => 'cancelled' as const,
-    close: async () => undefined,
-  } as unknown as BaselineReferenceReassembler;
-  (mirror as unknown as { reassembler: BaselineReferenceReassembler }).reassembler = reassembler;
-  return bundle;
+async function pagedBundle(requestId = 11) {
+  const key = '0,0,0';
+  const keys = authorityBaselineCaptureKeys({ captureId: requestId, purpose: 'mesh', key, minimumRevision: 2 });
+  const orderedKeys = [key, ...keys.filter((candidate) => candidate !== key)];
+  const capture = {
+    status: 'available',
+    captureId: requestId,
+    captureGeneration: requestId,
+    purpose: 'mesh',
+    key,
+    checkpoint: { epoch: TEST_BASELINE_REF.epoch, physicsTick: 4, commitSequence: 5, worldRevision: 2 },
+    entries: orderedKeys.map((entryKey, index) => {
+      const canonical = new Uint16Array(32 ** 3);
+      canonical[0] = 0x1234 + index;
+      const fluid = new Uint8Array(32 ** 3);
+      fluid[0] = index;
+      return {
+        role: index === 0 ? ('main' as const) : ('overlay' as const),
+        key: entryKey,
+        chunkRevision: 2,
+        generatorVersion: 3,
+        canonical: canonical.buffer,
+        fluid: fluid.buffer,
+      };
+    }),
+  } satisfies AuthorityBaselineCaptureResult;
+  const prepared = await prepareAuthorityBaselineReference(capture, {
+    ref: TEST_BASELINE_REF,
+    requestId,
+    interestId: requestId,
+    expectedCapture: { captureId: requestId, captureGeneration: requestId, purpose: 'mesh', key, generatorVersion: 3 },
+    minimumRevision: 2,
+    referencePagePayloadBytes: 64 * 1024,
+    pagesPerBundleMax: 128,
+    limits: baselineLimits,
+    digest,
+    sizer,
+    inFlight: createBaselineReferenceInFlightLedger(limits.baselineInFlightBytesMax),
+  });
+  if (!('publish' in prepared)) throw new Error(`Expected a baseline bundle, received ${prepared.reason}.`);
+  const publication = createBaselineReferencePublicationQueue();
+  const published = prepared.publish(publication);
+  const send = createBaselineReferenceSendQueue(limits.sendQueueBytesMax);
+  const descriptorLease = publication.takeDescriptor(send);
+  if (!descriptorLease) throw new Error('Expected a baseline descriptor lease.');
+  const descriptor = descriptorLease.descriptor;
+  descriptorLease.settle();
+  const pages: BaselinePageReference[] = [];
+  for (const entry of descriptor.entries)
+    for (const block of entry.blocks)
+      for (let pageIndex = 0; pageIndex < block.pageCount; pageIndex += 1) {
+        const lease = published.materializePage({ entryId: entry.entryId, block: block.name, pageIndex }, send);
+        if (!lease) throw new Error('Expected a baseline page lease.');
+        pages.push(lease.page);
+        lease.settle();
+      }
+  return { descriptor, pages, close: () => published.close() };
 }
 
-const acceptSyntheticPage = (mirror: RemoteAuthorityMeshMirror, bundleId: number) =>
-  mirror.acceptPage({ payloadBlock: 'payload', page: { bundleId } }, [{ name: 'payload', bytes: new Uint8Array([1]) }]);
+const acceptPage = (mirror: RemoteAuthorityMeshMirror, reference: BaselinePageReference) => {
+  const { bytes, ...page } = reference;
+  return mirror.acceptPage({ payloadBlock: 'payload', page }, [{ name: 'payload', bytes }]);
+};
 
 describe('remote Authority baseline causal barrier', () => {
   it('rejects a capture made stale by a commit before its descriptor and immediately permits a fresh request', async () => {
     const { mirror, requests } = fixture();
     const load = mirror.ensure(0, 0, 0);
-    const rejected = expect(load).rejects.toThrow(/捕获期间已过期/);
-    const bundle = installBundle(mirror);
-
+    const rejected = load.then(
+      () => null,
+      (error: Error) => error,
+    );
+    const bundle = await pagedBundle();
     mirror.consumeCommits([commit(bundle.descriptor.key, 3)]);
     mirror.acceptDescriptor({ descriptor: bundle.descriptor });
-    await acceptSyntheticPage(mirror, bundle.descriptor.bundleId);
-    await rejected;
-
+    for (const page of bundle.pages) await acceptPage(mirror, page);
+    expect((await rejected)?.message).toMatch(/捕获期间已过期/);
     void mirror.ensure(0, 0, 0);
     expect(requests).toEqual([
       { requestId: 11, key: '0,0,0' },
       { requestId: 12, key: '0,0,0' },
     ]);
+    bundle.close();
     mirror.dispose();
   });
 
-  it('rejects an in-progress paged bundle when a newer commit arrives after the descriptor', async () => {
+  it('rejects a genuinely paged bundle when a newer commit arrives between its first and last page', async () => {
     const { mirror } = fixture();
     const load = mirror.ensure(0, 0, 0);
-    const rejected = expect(load).rejects.toThrow(/捕获期间已过期/);
-    const bundle = installBundle(mirror);
-
+    const rejected = load.then(
+      () => null,
+      (error: Error) => error,
+    );
+    const bundle = await pagedBundle();
+    expect(bundle.pages.length).toBeGreaterThan(2);
     mirror.acceptDescriptor({ descriptor: bundle.descriptor });
-    mirror.consumeCommits([commit(bundle.descriptor.key, 3)]);
-    await acceptSyntheticPage(mirror, bundle.descriptor.bundleId);
-    await rejected;
+    await acceptPage(mirror, bundle.pages[0]!);
     expect(mirror.readyOwnerCount).toBe(0);
+    mirror.consumeCommits([commit(bundle.descriptor.key, 3)]);
+    for (const page of bundle.pages.slice(1)) await acceptPage(mirror, page);
+    expect((await rejected)?.message).toMatch(/捕获期间已过期/);
+    expect(mirror.readyOwnerCount).toBe(0);
+    bundle.close();
     mirror.dispose();
   });
 
-  it('accepts only the task-specific authority-complete Worker result identity', async () => {
+  it('rejects an old task result after the correct authority-complete Worker lease is invalidated', async () => {
     const { mirror } = fixture();
     const load = mirror.ensure(0, 0, 0);
-    const bundle = installBundle(mirror);
+    const bundle = await pagedBundle();
     mirror.acceptDescriptor({ descriptor: bundle.descriptor });
-    await acceptSyntheticPage(mirror, bundle.descriptor.bundleId);
+    for (const page of bundle.pages) await acceptPage(mirror, page);
     await load;
-
     const lease = mirror.prepareComplete(0, 0, 0);
     const task = {
       chunkKey: bundle.descriptor.key,
@@ -132,9 +198,11 @@ describe('remote Authority baseline causal barrier', () => {
       chunkRevision: lease.input.chunkRevision,
       generatorVersion: lease.input.generatorVersion,
     };
-    expect(mirror.acceptMesh(task, { ...result, haloRevision: 'stale-task' })).toBe(false);
     expect(mirror.acceptMesh(task, result)).toBe(true);
+    mirror.consumeCommits([commit(bundle.descriptor.key, 3)]);
+    expect(mirror.acceptMesh(task, result)).toBe(false);
     lease.settle();
+    bundle.close();
     mirror.dispose();
   });
 });

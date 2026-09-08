@@ -1,9 +1,8 @@
 import { createRequire } from 'node:module';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { join } from 'node:path';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { decodeC0Envelope, encodeC0Envelope } from '../../packages/game-core/src/server/protocol/network-c0-codec';
 import type { PublicSessionRef } from '../../packages/game-core/src/server/protocol/network-message-semantics';
 import { createNodePlayableNetworkServer } from '../../apps/node-server/src/node/server/node-playable-network-server';
@@ -11,6 +10,8 @@ import {
   createNodeServerRuntime,
   type NodeServerRuntime,
 } from '../../apps/node-server/src/node/server/node-server-runtime';
+import { buildNodeServerArtifactFixture } from './support/node-server-artifact-fixture';
+import type { NodeAuthorityLane } from '../../apps/node-server/src/node/runtime/node-authority-lane';
 
 type Client = {
   once(event: string, listener: (...args: never[]) => void): void;
@@ -28,8 +29,8 @@ const utf8 = {
 };
 const origin = 'http://127.0.0.1:4173';
 const accessKey = 'network-integration-synthetic-key';
-const runtimeEntry = (name: string) => pathToFileURL(resolve(`apps/node-server/dist/${name}.js`));
 let dataDirectory = '';
+let artifact: Awaited<ReturnType<typeof buildNodeServerArtifactFixture>>;
 let runtime: NodeServerRuntime;
 let network: Awaited<ReturnType<typeof createNodePlayableNetworkServer>>;
 const clients = new Set<Client>();
@@ -123,6 +124,7 @@ async function nextAuthorityTick(client: Client): Promise<number> {
 
 describe('real Node playable WebSocket transport', () => {
   beforeAll(async () => {
+    artifact = await buildNodeServerArtifactFixture('seedlands-network-artifact-');
     dataDirectory = await mkdtemp(join(tmpdir(), 'seedlands-network-integration-'));
     const keyFile = join(dataDirectory, 'access-key');
     await writeFile(keyFile, `${accessKey}\n`, { mode: 0o600 });
@@ -131,10 +133,10 @@ describe('real Node playable WebSocket transport', () => {
       seedText: 'network-integration',
       computeMode: 'inline',
       entries: {
-        authority: runtimeEntry('node-authority-worker'),
-        persistence: runtimeEntry('node-persistence-worker'),
-        worker: runtimeEntry('node-compute-worker'),
-        child: runtimeEntry('node-compute-child'),
+        authority: artifact.entry('node-authority-worker'),
+        persistence: artifact.entry('node-persistence-worker'),
+        worker: artifact.entry('node-compute-worker'),
+        child: artifact.entry('node-compute-child'),
       },
     });
     network = await createNodePlayableNetworkServer(runtime.authority, {
@@ -148,8 +150,9 @@ describe('real Node playable WebSocket transport', () => {
 
   afterAll(async () => {
     for (const client of clients) client.terminate();
-    await runtime.stop();
-    await rm(dataDirectory, { recursive: true, force: true });
+    if (typeof runtime !== 'undefined') await runtime.stop();
+    if (dataDirectory) await rm(dataDirectory, { recursive: true, force: true });
+    if (typeof artifact !== 'undefined') await artifact.close();
   });
 
   it('rejects a foreign Origin and an invalid access key before occupying the single-player slot', async () => {
@@ -239,5 +242,60 @@ describe('real Node playable WebSocket transport', () => {
       burst.client.send(encode('heartbeat', { kind: 'heartbeat', ref: burst.ref, nonce }), { binary: true });
     await expect(burstClose).resolves.toEqual({ code: 4003, reason: 'rate-limit' });
     expect(runtime.state).toBe('running');
+  });
+
+  it('closes the real listener promptly while a baseline capture is blocked and ignores its late completion', async () => {
+    const keyFile = join(dataDirectory, 'blocked-capture-key');
+    await writeFile(keyFile, `${accessKey}\n`, { mode: 0o600 });
+    const ready = await runtime.authority.readReady();
+    const diagnostics = await runtime.authority.readDiagnostics();
+    let finishCapture!: (value: unknown) => void;
+    const captureBaseline = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          finishCapture = resolve;
+        }),
+    );
+    const cancelBaselineCapture = vi.fn(async () => ({ status: 'cancelled' }));
+    const authority = {
+      ...runtime.authority,
+      readReady: async () => ready,
+      readDiagnostics: async () => diagnostics,
+      latestSnapshot: () => ready.snapshot,
+      subscribePublication: () => () => undefined,
+      captureBaseline,
+      cancelBaselineCapture,
+      clearInput: async () => undefined,
+    } as unknown as NodeAuthorityLane;
+    const blockedNetwork = await createNodePlayableNetworkServer(authority, {
+      hostname: '127.0.0.1',
+      port: 0,
+      origin,
+      accessKeyFile: keyFile,
+    });
+    const client = new WebSocketClient(blockedNetwork.url, { origin });
+    clients.add(client);
+    await waitForOpen(client);
+    const welcome = nextMessage(client);
+    sendHello(client);
+    const welcomeEnvelope = await welcome;
+    expect(welcomeEnvelope.messageClass).toBe('welcome');
+    const blockedRef = welcomeEnvelope.message.ref as PublicSessionRef;
+    client.send(
+      encode('interest-update', {
+        kind: 'interest-update',
+        ref: blockedRef,
+        requestId: 1,
+        keys: ['0,1,0'],
+      }),
+      { binary: true },
+    );
+    await vi.waitFor(() => expect(captureBaseline).toHaveBeenCalledTimes(1));
+    const closed = waitForClose(client);
+    await expect(blockedNetwork.close()).resolves.toBeUndefined();
+    await expect(closed).resolves.toMatchObject({ code: 1001 });
+    expect(cancelBaselineCapture).toHaveBeenCalledTimes(1);
+    finishCapture({ status: 'unavailable' });
+    await Promise.resolve();
   });
 });

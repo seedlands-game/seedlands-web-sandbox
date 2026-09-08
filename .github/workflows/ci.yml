@@ -79,6 +79,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Run deterministic browser regression
         run: pnpm test:e2e:regression
+      - name: Run Active Web to Node playable change
+        run: pnpm test:web-node-playable
 
   deploy:
     name: Deploy GitHub Pages

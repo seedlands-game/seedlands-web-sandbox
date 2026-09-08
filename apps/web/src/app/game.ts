@@ -271,7 +271,9 @@ export class Game {
     if (authority.mode === 'local') authority.requestLogicObservation();
     this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
     // prettier-ignore
-    await waitForInitialWorldReady(remote ? this.world.waitForInitialPlayableArea() : this.world.waitForInitialVisibleChunk());
+    // prettier-ignore
+    const initialWorldReady = remote ? this.world.waitForInitialPlayableArea({ x: feet[0], y: feet[1], z: feet[2] }) : this.world.waitForInitialVisibleChunk();
+    await waitForInitialWorldReady(initialWorldReady);
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
     return { seed: ready.seedText };

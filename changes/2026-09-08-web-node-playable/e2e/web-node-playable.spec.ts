@@ -193,6 +193,17 @@ test.describe.serial('Web to Node local playable loop', () => {
     expect(initial.source).toBe('remote-node');
     expect(initial.readyBaselines).toBeGreaterThan(0);
     expect(initial.renderedChunks).toBeGreaterThan(0);
+    const initialChunkX = Math.floor(initial.authoritativePlayer[0] / 32);
+    const initialChunkY = Math.floor((initial.authoritativePlayer[1] - Number.EPSILON) / 32);
+    const initialChunkZ = Math.floor(initial.authoritativePlayer[2] / 32);
+    for (let cz = initialChunkZ - 1; cz <= initialChunkZ + 1; cz += 1)
+      for (let cx = initialChunkX - 1; cx <= initialChunkX + 1; cx += 1)
+        expect(
+          await page.evaluate(
+            ([x, y, z]) => window.__seedlandsRemoteEvidence!.renderedRevisionAt(x, y, z),
+            [cx * 32, initialChunkY * 32, cz * 32],
+          ),
+        ).not.toBeNull();
     await page.bringToFront();
     await page.locator('#game').click();
     await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe('game');

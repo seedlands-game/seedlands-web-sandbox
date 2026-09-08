@@ -90,6 +90,26 @@ const interest = (requestId: number) =>
     utf8,
   );
 
+const input = (inputSequence: number) =>
+  encodeC0Envelope(
+    {
+      messageClass: 'input-state',
+      message: {
+        kind: 'input-state',
+        ref,
+        inputSequence,
+        targetPhysicsTick: 20,
+        expiresAfterPhysicsTick: 40,
+        moveX: 0,
+        moveZ: 1,
+        verticalIntent: 0,
+        jumpHeld: false,
+      },
+      blocks: [],
+    },
+    utf8,
+  );
+
 describe('playable session asynchronous request budget', () => {
   it('closes a client that queues another checkpoint while the first durable write is blocked', async () => {
     const socket = new FakeSocket();
@@ -159,5 +179,34 @@ describe('playable session asynchronous request budget', () => {
     finishCapture({ status: 'unavailable' });
     await Promise.resolve();
     expect(socket.sent).toBe(0);
+  });
+
+  it('closes before blocked input RPC requests can exhaust the Authority lane budget', async () => {
+    const socket = new FakeSocket();
+    const receiveInput = vi.fn(() => new Promise<never>(() => {}));
+    const authority = {
+      receiveInput,
+      latestSnapshot: () => ready.snapshot,
+      subscribePublication: () => () => undefined,
+      clearInput: async () => undefined,
+      cancelBaselineCapture: async () => ({ status: 'cancelled' }),
+    } as unknown as NodeAuthorityLane;
+    let serverInputSequence = 0;
+    createSession(
+      socket as never,
+      authority,
+      ref,
+      ready,
+      'node-checkpoint',
+      () => undefined,
+      () => serverInputSequence++,
+      () => 1,
+      () => 1,
+    );
+
+    for (let sequence = 0; sequence < 33; sequence += 1) socket.emit('message', input(sequence), true);
+    await vi.waitFor(() => expect(socket.closed).toMatchObject({ code: 4003 }));
+    expect(socket.closed?.reason).toContain('Too many pending input requests');
+    expect(receiveInput).toHaveBeenCalledTimes(32);
   });
 });

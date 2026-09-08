@@ -298,9 +298,19 @@ export class World {
     return this.repository.waitForFirstVisible();
   }
 
-  async waitForInitialPlayableArea(minimumRenderedChunks = 9): Promise<void> {
+  async waitForInitialPlayableArea(
+    position: Readonly<{ x: number; y: number; z: number }>,
+    horizontalRadius = 1,
+  ): Promise<void> {
     await this.repository.waitForFirstVisible();
-    while (!this.disposed && this.telemetry.renderedChunks < minimumRenderedChunks)
+    const centerX = floorDiv(position.x, CHUNK_SIZE);
+    const centerY = floorDiv(position.y - Number.EPSILON, CHUNK_SIZE);
+    const centerZ = floorDiv(position.z, CHUNK_SIZE);
+    const required = new Set<string>();
+    for (let z = centerZ - horizontalRadius; z <= centerZ + horizontalRadius; z += 1)
+      for (let x = centerX - horizontalRadius; x <= centerX + horizontalRadius; x += 1)
+        required.add(chunkKey(x, centerY, z));
+    while (!this.disposed && [...required].some((key) => !this.repository.chunks.has(key)))
       await new Promise<void>((resolve) => window.setTimeout(resolve, 16));
     if (this.disposed) throw new Error('初始可玩区域加载已取消。');
   }
