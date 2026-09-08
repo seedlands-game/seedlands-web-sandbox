@@ -248,6 +248,8 @@ export class Game {
     const feet = ready.playerBodyPosition;
     this.camera.setPosition(feet[0], feet[1] + PLAYER_FEET_OFFSET, feet[2]);
     this.serverPlayerId = ready.playerId;
+    // prettier-ignore
+    const initialWorldReady = waitForInitialWorldReady(remote ? this.world.waitForInitialPlayableArea({ x: feet[0], y: feet[1], z: feet[2] }) : this.world.waitForInitialVisibleChunk(), remote && harnessEnabled ? () => this.world!.initialPlayableAreaDiagnostics({ x: feet[0], y: feet[1], z: feet[2] }) : undefined);
     this.world.updateStreaming(this.camera.getPosition());
     this.gameplayClient = new BrowserGameplay({
       app: this.app,
@@ -270,10 +272,7 @@ export class Game {
     this.controller.install();
     if (authority.mode === 'local') authority.requestLogicObservation();
     this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
-    // prettier-ignore
-    // prettier-ignore
-    const initialWorldReady = remote ? this.world.waitForInitialPlayableArea({ x: feet[0], y: feet[1], z: feet[2] }) : this.world.waitForInitialVisibleChunk();
-    await waitForInitialWorldReady(initialWorldReady);
+    await initialWorldReady;
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
     return { seed: ready.seedText };

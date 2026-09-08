@@ -1,6 +1,5 @@
 import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
-import { COLLISION_EPSILON } from '@seedlands/game-core/physics/geometry';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/game-core/world/voxel';
 import type { WorldChange } from '@seedlands/game-core/world/storage';
 import type { WorldCommitResult, WorldEditBatch } from '@seedlands/game-core/server/game-server-types';
@@ -21,6 +20,12 @@ import {
 import type { QualityProfile } from '../scene/quality-profile';
 import { FluidFeedbackTracker, type FluidFeedbackTarget } from '../gameplay/fluid-feedback-tracker';
 import { WaterMeshTransitionTracker } from '../scene/water-mesh-transition';
+import {
+  initialPlayableAreaDiagnostics,
+  prioritizeInitialPlayableArea,
+  waitForInitialPlayableArea,
+  type InitialPlayableAreaDiagnostics,
+} from './initial-playable-area';
 import {
   acceptStreamingCanonical,
   prepareStreamingNeighborhood,
@@ -299,21 +304,22 @@ export class World {
     return this.repository.waitForFirstVisible();
   }
 
+  prioritizeInitialPlayableArea(position: Readonly<{ x: number; y: number; z: number }>, horizontalRadius = 1): void {
+    prioritizeInitialPlayableArea(this.scheduler, position, horizontalRadius);
+  }
+
+  initialPlayableAreaDiagnostics(
+    position: Readonly<{ x: number; y: number; z: number }>,
+    horizontalRadius = 1,
+  ): InitialPlayableAreaDiagnostics {
+    return initialPlayableAreaDiagnostics(this.scheduler, this.repository, position, horizontalRadius);
+  }
+
   async waitForInitialPlayableArea(
     position: Readonly<{ x: number; y: number; z: number }>,
     horizontalRadius = 1,
   ): Promise<void> {
-    await this.repository.waitForFirstVisible();
-    const centerX = floorDiv(position.x, CHUNK_SIZE);
-    const centerY = floorDiv(position.y - COLLISION_EPSILON, CHUNK_SIZE);
-    const centerZ = floorDiv(position.z, CHUNK_SIZE);
-    const required = new Set<string>();
-    for (let z = centerZ - horizontalRadius; z <= centerZ + horizontalRadius; z += 1)
-      for (let x = centerX - horizontalRadius; x <= centerX + horizontalRadius; x += 1)
-        required.add(chunkKey(x, centerY, z));
-    while (!this.disposed && [...required].some((key) => !this.repository.chunks.has(key)))
-      await new Promise<void>((resolve) => window.setTimeout(resolve, 16));
-    if (this.disposed) throw new Error('初始可玩区域加载已取消。');
+    return waitForInitialPlayableArea(this.scheduler, this.repository, () => this.disposed, position, horizontalRadius);
   }
 
   getRenderedChunkRevision(cx: number, cy: number, cz: number): number | null {
