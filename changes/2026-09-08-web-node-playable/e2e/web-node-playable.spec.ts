@@ -1,4 +1,6 @@
 import { execFileSync, spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -6,6 +8,20 @@ import { expect, test, type Page, type TestInfo } from '@playwright/test';
 import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
 
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+const sourceTreeStatus = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim();
+const sourceFiles = [
+  'apps/node-server/src/node/server/node-authority-worker.ts',
+  'apps/node-server/src/node/server/node-playable-network-session.ts',
+  'apps/node-server/dist/node-server.js',
+  'apps/web/src/app/game.ts',
+  'apps/web/src/app/world/remote-playable-evidence.ts',
+  'apps/web/src/client/authority/remote-authority-client.ts',
+  'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
+  'changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts',
+] as const;
+const sourceInputs = Object.fromEntries(
+  sourceFiles.map((path) => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]),
+);
 const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
 const nodePort = 18_787;
 const nodeUrl = `ws://127.0.0.1:${nodePort}/seedlands`;
@@ -205,9 +221,13 @@ test.describe.serial('Web to Node local playable loop', () => {
 
     await expect.poll(async () => (await evidence(page)).onGround).toBe(true);
     const beforeJump = await evidence(page);
+    let peakJump = beforeJump;
     await page.keyboard.down('Space');
     await expect
-      .poll(async () => (await evidence(page)).authoritativePlayer[1])
+      .poll(async () => {
+        peakJump = await evidence(page);
+        return peakJump.authoritativePlayer[1];
+      })
       .toBeGreaterThan(beforeJump.authoritativePlayer[1] + 0.1);
     await page.keyboard.up('Space');
 
@@ -287,6 +307,7 @@ test.describe.serial('Web to Node local playable loop', () => {
 
     const stoppedLog = await stopNode();
     expect(stoppedLog.some((line) => line.includes('"kind":"stopped"'))).toBe(true);
+    const durableStop = stoppedLog.find((line) => line.includes('"kind":"stopped"'))!;
     await startNode();
     await reconnectPage.close();
     const restartedPage = await context.newPage();
@@ -304,15 +325,21 @@ test.describe.serial('Web to Node local playable loop', () => {
       `${JSON.stringify(
         {
           sourceSha,
+          sourceTreeStatus,
+          sourceInputs,
           initial,
+          beforeJump,
+          peakJump,
           beforeBreak,
           afterBreak,
           placedVoxel,
           placedVoxelType,
+          placedChunkRevision,
           afterPlace,
           reconnected,
           restarted,
-          nodeLog,
+          durableStop: JSON.parse(durableStop),
+          nodeRuns: { beforeRestart: stoppedLog, afterRestart: nodeLog },
         },
         null,
         2,
