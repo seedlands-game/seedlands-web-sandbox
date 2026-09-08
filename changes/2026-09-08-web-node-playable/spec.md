@@ -4,7 +4,7 @@
 
 ## 起点与交付目标
 
-从 codex/node-monorepo@3c727f7 新建 codex/web-node-playable，并继续以 codex/node-monorepo 为 PR #17 的堆叠 base。PR #15 的冲突与 main 整合由用户在另一台设备处理；本任务不改动 #15、不切换 #17 的 base，也不自动合并任何 PR。
+工作分支为 codex/web-node-playable，PR #17 当前以 main 为 base。本任务只维护 #17，并将 main 中已经合入的更新接入该分支；PR #15 由用户在另一台设备处理，不改动其分支或 PR，也不自动合并任何 PR。
 
 交付真实浏览器连接本机 Node 世界，能移动/跳跃、挖块/放块，关闭浏览器后世界继续运行，手动重新连接与 Node 重启后恢复已保存修改。原本地世界可继续游玩。连接成功或静态首帧不能替代完整闭环验收。
 
@@ -90,7 +90,7 @@ CI34230070975 中 target回退为0，但放置后权威revision2、render revisi
 
 ## 预算与交付快照
 
-见 estimates.md。正常关键路径 6–10h，保守 12h×120% 向上取整预留 15h；时间与费用不是平台硬上限，不自动创建 goal/购买/reset。阶段重估与实际缺失字段据实记录。
+见 estimates.md。初始正常关键路径 6–10h；20:57 阶段重估为已耗约9.53h + 保守剩余5h×120%，向上取整建议总预留16h；时间与费用不是平台硬上限，不自动创建 goal/购买/reset。阶段重估与实际缺失字段据实记录。
 
 交付时更新长期 README、代码地图、会话/协议与目录规则的实际接线，原因是双模式产品入口已形成跨 change 的稳定边界。原 Dedicated 大合同中的公网和正式性能部分仍 Active；最终证据及限制回填 execution.md/delivery.md。
 

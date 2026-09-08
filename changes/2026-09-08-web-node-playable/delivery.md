@@ -2,32 +2,17 @@
 
 ## 完成状态
 
-最新 `8a5b40a` 干净源码已取得真实本机旅程：认证连接、脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复。34 项 source input 全部匹配，五张原始帧已更新；停止与重启读取 durableCommitSequence 均为1074，三个连接均回读实际 WebGL2/ANGLE Metal 图形身份。证据保存于 `bee9a47`。
+状态：Active，尚未 Delivered；PR #17 保持 Draft，base 为 main。本机完整闭环已经通过，Linux 完整旅程仍需准出。
 
-状态仍为 Active，尚未 Delivered。Linux 默认图形配置下的首次同步超时仍未准出；固定 AAABBA 实验中四个连续绘制 A 均在约8–11秒完成，按预注册停止线不采用 `autoRender` 候选。CI34222361251 的默认配置三次均在首屏失败；显式 SwiftShader 配置通过首屏和 Pointer Lock，但 W 移动5秒权威位移仅0.01964。两者实际 renderer 均为 SwiftShader，因此启动配置尚不能采用为修复。当前补齐受限的 client/Node input decision 和移动窗口对账，产品渲染、输入时序与验收门槛保持不变。
+干净 `7274b27` 在原生 GPU 和 managed full Chromium / SwiftShader 上均完成认证连接、脚下3×3首屏、真实移动/转向/跳跃、挖块/拾取/放块、durable保存、关闭页面后Node继续、手动重连及Node重启恢复。两份40项sourceInputs均由root和独立验收核对，原始连续帧已审看；证据保存为 `5a99e78`。原生执行11文件37项Vitest及2项Chromium通过，软件配置2项通过；durable stop分别为707和1839。
+
+最新诊断冻结 `26850f6` 的软件配置原旅程2项也通过，41项源码与实际Node产物hash一致，采集时工作树干净。放置目标的57条关联trace包含prepare/worker/commit/visible-postrender；该读取不改变世界、输入、调度或绘制，只沿用已有telemetry快照的gauge刷新。受限输出丢弃任意errorMessage与其它attributes，定向RED/GREEN和7项测试通过。
+
+Linux CI34230070975的Static verification、Production build及既有回归通过；默认headless shell仍首屏超时，完整Chromium软件对照已通过首屏、移动、转向、跳跃、挖掘和放置，卡在显示revision的5秒等待。当前CI34232573762绑定26850f6，通过新增目标chunk trace定位实际停点，尚无Linux准出结论。固定AAABBA绘制实验已按预注册停止线结束，不采用autoRender候选，不作性能收益声明。
 
 ## 提交和推送
 
-稳定阶段均已推送到 `origin/codex/web-node-playable`：
-
-- `6b9b949`：可执行 RED 与公开边界。
-- `b6ab3e0`：有界本机 Node transport。
-- `4719842`：Web 远端 Authority 与真实首帧。
-- `51e97fa`：完整远端游玩、保存与重连。
-- `ef71bfb`：证据 source binding。
-- `7191c06`：真实 WS 负向和无连接 tick。
-- `e1d7ab3`：异步 session 工作有界。
-- `331fea0`：真实分页/cancel/input 与完整脚下区域。
-- `ae8a49f`：精确层边界和可照抄启动说明。
-- `f1d9116`：冻结真实 WebSocket burst 测试时钟。
-- `f33f541`：补充不含口令的浏览器连接失败诊断。
-- `7da861a`：正常远端输入单一在途/latest 背压。
-- `9ef0982`：旧输入回执不解锁新代际。
-- `4cf859d`：脚下 3×3 首屏请求优先及只读队列诊断。
-- `21d210b`：全空远端首屏按必需网格 postrender 结算。
-- `dae0ea6`：有界匿名 baseline 分段诊断。
-- `b0a5a1d`：普通合并新 base，保留远端会话与 appearance 接缝。
-- `04a8076`：将合并后的 appearance 源码与实际 UI/物品资源加入真实旅程 source binding。
+功能分支 `origin/codex/web-node-playable` 已推送至 `26850f6`。完整早期接线和修复记录见execution.md及Git历史；最近稳定检查点包括 `d7f86ec` 输入target单调保护、`4e63fb7` 交互网格公平调度、`5a99e78` 双配置完整旅程证据、`ce146cc` 目标chunk诊断与 `26850f6` 诊断字段白名单。main已合入的底座、CI及审阅规则已同步到本分支；本任务不修改PR #15。
 
 ## 变更
 
@@ -40,7 +25,7 @@
 
 ## 验证结果
 
-`8a5b40a` 的 source-bound `pnpm test:web-node-playable` 为 11 文件 34 项 Vitest + 2 项真实 Chromium 全绿（包含真实认证失败后图形身份缓存）；合并后的 `pnpm verify:static:ci`（260 文件、1302 项通过）、`pnpm build:web`、`pnpm build:server`、`pnpm verify:node-isolation`、`pnpm verify:web-node-playable-dist`、既有 15 项 Chromium regression 与资产集成 2 项均退出 0。GitHub CI 的初始同步超时仍在定位，完整数值、日志摘要、source/hash 绑定和原始帧清单见 `execution.md` 与 `evidence/`。
+两份7274冻结旅程、本机26850软件旅程、真实WS负向、分页交错、迟到结果、capture关闭与单Authority离线运行均有明确证据。26850的 `pnpm build` 退出0；受影响测试和typecheck通过。最新完整静态与Linux浏览器结论以CI34232573762终态为准，不能把旧HEAD静态成功当作最新准出。原始日志、source/hash绑定、帧清单和未闭合的观察见execution.md、diagnosis.md及evidence/。
 
 ## 限制
 
@@ -48,4 +33,4 @@
 
 ## 剩余工作
 
-先用 CI 移动窗口对账定位并修复实际失败，再由 root 提交最终独立验收报告和最新 CI 终态，确认 draft PR #17 可转为 ready-for-review。PR #15 的冲突与 main 整合由用户在另一台设备处理；本任务不修改 #15，#17 保持现有 base。不得自动合并。
+取得Linux目标区块trace，修复已证实的实际失败并完成原始完整旅程，再更新独立报告、最新CI终态及交付快照。确认#17无冲突且必要CI全部通过后，转为ready-for-review交人类审核；不自动合并。PR #15由用户在另一台设备处理。
