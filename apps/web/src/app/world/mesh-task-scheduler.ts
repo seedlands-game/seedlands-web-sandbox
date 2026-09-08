@@ -9,7 +9,7 @@ import {
   type MeshTaskSchedulerOptions,
 } from './mesh-task-source';
 import { recordMeshPreparationFailure } from './mesh-preparation-telemetry';
-import { higherMeshRequestPriority, promoteMeshRequestPriority } from './mesh-request-priority';
+import { higherMeshRequestPriority, promoteMeshRequestPriority, selectMeshRequest } from './mesh-request-priority';
 import type { MeshRequestPriority } from './mesh-request-priority';
 import { MeshVisibilityBarriers } from './mesh-visibility-barriers';
 
@@ -44,6 +44,7 @@ export class MeshTaskScheduler {
   private taskSequence = 0;
   private inFlight = 0;
   private dispatchCount = 0;
+  private priorityBypasses = 0;
   private readonly activeTasks = new Map<number, PendingMeshTask>();
   private readonly receivingTasks = new Set<number>();
   private readonly inputSettlements = new Map<number, () => void>();
@@ -61,13 +62,10 @@ export class MeshTaskScheduler {
     options.worker.onerror = ({ taskId, error }) => this.fail(taskId, error);
   }
 
-  get generationQueueSize() {
-    return this.queued.size + this.preparingRequests.size + this.failedPreparations.size;
-  }
-
-  get meshingQueueSize() {
-    return this.inFlight;
-  }
+  // prettier-ignore
+  get generationQueueSize() { return this.queued.size + this.preparingRequests.size + this.failedPreparations.size; }
+  // prettier-ignore
+  get meshingQueueSize() { return this.inFlight; }
 
   get schedulingDiagnostics() {
     return {
@@ -107,6 +105,7 @@ export class MeshTaskScheduler {
     this.visibility.reset();
     this.inFlightKeys.clear();
     this.scenarioTraceIds.clear();
+    this.priorityBypasses = 0;
     this.options.telemetry.counter('scenario_epoch', this.epoch);
   }
 
@@ -468,12 +467,9 @@ export class MeshTaskScheduler {
   }
 
   private nextQueuedRequest(): [string, PendingMeshRequest] | undefined {
-    const rank: Record<MeshRequestPriority, number> = { streaming: 0, interactive: 1, 'interactive-fluid': 2 };
-    const priority = (request: PendingMeshRequest) =>
-      rank[request.priority] + Math.floor((this.dispatchCount - request.enqueuedAtDispatch) / 8);
-    return [...this.queued.entries()].sort(
-      (left, right) => priority(right[1]) - priority(left[1]) || left[1].queuedAt - right[1].queuedAt,
-    )[0];
+    const selection = selectMeshRequest([...this.queued.entries()], this.priorityBypasses);
+    this.priorityBypasses = selection.priorityBypasses;
+    return selection.next;
   }
 
   fail(taskId: number, _error: Error): void {

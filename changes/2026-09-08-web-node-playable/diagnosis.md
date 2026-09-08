@@ -35,3 +35,9 @@
 - 修复边界是连接内已发送 target 的非递减高水位与既有 `current + 120` future gate。它不推测传输时延、不增加 lead、不调整 500ms lease 或 Node 接纳规则；若 jump 原 lease 已过期，后续 coalesced state 不携带 edge。
 - RED/GREEN 用例还固定单 inflight/latest、旧 decision 不 flush、匹配 decision 只发送最新 state。Node baseline 诊断同时为 terminal input summary 预留一项，使两类事件合计仍不超过既有 96 项总预算。
 - RED 在受控时钟下复现 `1935→1914`；GREEN 后第二条保持 `1935`，任意过大 command target 被限制到 snapshot `2000 + 120`。`pnpm exec vitest run tests/client/remote-authority-client.test.ts tests/node/node-playable-network-session.test.ts --maxWorkers=1` 为 2 文件 13 用例通过；受影响 ESLint、`pnpm typecheck` 与 `git diff --check` 通过。本轮没有运行浏览器旅程，也不据此声明 CI movement 已恢复。
+
+## 编辑网格公平调度
+
+- CI `34227894490` 在权威/镜像已完成放置后，5 秒内 rendered revision 仍为 `1`、目标为 `4`。当前调度 aging 会让同批旧 streaming 同时升到 interactive 等级，可能整批越过刚到达的编辑请求。
+- 本轮仅用单 Worker 确定性队列验证和修复“整批越过”问题；固定优先级 burst 后只放行一个最老请求，并保留持续 fluid 下 streaming 不饿死。不据此宣称浏览器旅程或 CI 已恢复，也不改 5 秒断言。
+- RED 在 5 条旧 streaming、17 条受控 fluid dispatch 后插入 interactive，旧实现下一项仍选择 `100,0,0` streaming。GREEN 后下一项直接选择 `200,0,0` interactive；持续 fluid 用例同时证明旧 streaming 最迟在第 9 个派发出现。调度与 world commit 相关 9 文件 30 用例、受影响 ESLint、`pnpm typecheck`、Prettier 和 `git diff --check` 通过；完整浏览器旅程留给冻结 checkpoint 后的独立验证。

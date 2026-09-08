@@ -69,6 +69,12 @@ CI34226402889 的 forced 旅程已取得真实移动，但 camera-turn 的 yaw �
 
 下一有界对照只给原forced兼容旅程增加 channel=chromium，1280×720、既有Medium配置、真实键鼠、截图、30秒首屏与全部状态断言不变；原default gate保持，尚不采用为CI最终配置。不修改产品行为或降低画质。图形身份新增configured channel、executable source及实际browser user agent，失败继续保留input/阶段对账。GREEN必须完成完整旅程及认证失败缓存用例，不能以仅首屏或仅转向通过准出；失败则记录实际失败阶段再决定，禁止盲目重跑。
 
+### 近场编辑网格调度公平性
+
+CI `34227894490` 的完整 Chromium 旅程已通过 W、转向、跳跃、挖掘与放置的权威/镜像更新，但放置 chunk 的 rendered revision 在 5 秒内仍为 `1`，未达到权威 revision `4`。调度器当前把 `floor((dispatchCount-enqueuedAtDispatch)/8)` 直接叠加到每条请求的优先级；同批旧 streaming 积压老化两个等级后，会一起排在新 interactive 编辑前。RED 以单 Worker、多个旧 streaming 和受控 dispatch 推进复现：插入 interactive 后不能先清空整批旧 streaming 才派发编辑。
+
+GREEN 采用有界公平选择：平时按 `interactive-fluid > interactive > streaming` 派发；连续绕过最老请求达到固定 burst 上限时，只允许一个最老请求让行，随后恢复基础优先级。这样新 interactive 最多受一次已到期公平让行影响，不会被整批同龄 streaming 压住；现有“持续 interactive-fluid 时旧 streaming 最终被调度”仍必须通过。不取消准备、不改网络、渲染画质、lease、5 秒门槛或请求身份；这是正确调度边界，不作为吞吐或性能收益声明。
+
 ## 阶段与保存
 
 - [x] M0：合同、预算、接口接缝审阅与可执行 RED；提交并推送。
