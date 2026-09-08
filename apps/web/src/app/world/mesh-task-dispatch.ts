@@ -1,7 +1,7 @@
 import { createMeshTaskSnapshot } from '../../client/compute/mesh-task-snapshot';
 import type { AuthorityMeshPayload } from '@seedlands/game-core/compute/authority-worker-protocol';
 import type { PendingMeshTask } from '../app-contracts';
-import type { MeshRequestPriority } from './mesh-task-scheduler';
+import type { MeshRequestPriority } from './mesh-request-priority';
 
 export type MeshDispatchRequest = Readonly<{
   traceId: string;

@@ -137,7 +137,13 @@ export class LocalPlayerPrediction {
       acknowledgedInputSequence: snapshot.acknowledgedInputSequence,
       authoritativeBody: snapshot.player.body,
       collisionRevisionVector: snapshot.chunkRevisions,
-      availableCollisionRevisionVector: world.revisionVector(Object.keys(snapshot.chunkRevisions)),
+      // The authority reports its contact window; prediction can already touch the next chunk.
+      availableCollisionRevisionVector: world.revisionVector(
+        new Set([
+          ...Object.keys(snapshot.chunkRevisions),
+          ...this.prediction.collisionChunkKeys(snapshot.acknowledgedInputSequence),
+        ]),
+      ),
       replay: (body, command) =>
         stepBody({
           state: body,

@@ -9,11 +9,8 @@ import type {
   AuthorityBaselineCaptureResult,
 } from '../authority/authority-baseline-capture-types';
 import type { AuthoritySnapshot } from '../authority/authority-session';
-import type {
-  DedicatedComputeExecutor,
-  DedicatedComputeResult,
-  DedicatedComputeTask,
-} from '../compute/dedicated-compute-contract';
+import type { AuthorityReady } from '../../compute/authority-worker-protocol';
+import type { DedicatedComputeResult, DedicatedComputeTask } from '../compute/dedicated-compute-contract';
 import type { FluidAuthoritySnapshot } from '../fluid/fluid-transaction';
 import type { LogicObservation } from '../logic/logic-protocol';
 import { DedicatedComputeScheduler, type DedicatedComputeWork } from '../compute/dedicated-compute-scheduler';
@@ -31,6 +28,11 @@ import {
   type DedicatedPublication,
 } from './dedicated-host-types';
 import type { CoreAbortSignal } from '../../runtime/platform-ports';
+import {
+  projectDedicatedComputeIdentity,
+  projectDedicatedPlayerActionIdentity,
+  projectDedicatedReady,
+} from './dedicated-ready-view';
 
 type SaveResult = Awaited<ReturnType<AuthorityRuntime['save']>>;
 type Mail = { apply: () => void; bytes: number };
@@ -40,6 +42,7 @@ export class DedicatedServerHost {
   readonly runtime: AuthorityRuntime;
   private currentState: DedicatedHostState = 'running';
   private currentSnapshot: AuthoritySnapshot;
+  private readonly initialReady: AuthorityReady;
   private readonly limits;
   private readonly mailbox: Mail[] = [];
   private mailboxBytes = 0;
@@ -108,6 +111,7 @@ export class DedicatedServerHost {
       createAbortController: options.platform.createAbortController,
       utf8: options.platform.utf8,
     });
+    this.initialReady = runtime.ready();
     this.currentSnapshot = runtime.commitHostActivation();
     this.lastWakeMs = this.lastSaveMs = this.lastPublishMs = this.lastGameplayMs = options.now();
     this.durableSequence = runtime.server.restoredCommitSequence;
@@ -167,6 +171,10 @@ export class DedicatedServerHost {
   }
   get snapshot(): AuthoritySnapshot {
     return this.currentSnapshot;
+  }
+
+  ready(): AuthorityReady {
+    return projectDedicatedReady(this.initialReady, this.currentSnapshot, this.runtime.view());
   }
 
   subscribe(listener: (publication: DedicatedPublication) => void): () => void {
@@ -233,14 +241,19 @@ export class DedicatedServerHost {
     this.inputExpired = true;
   }
 
-  performAction(action: AuthorityAction, sequence: number) {
+  performAction(action: AuthorityAction, sequence: number, expectedCommitSequence?: number) {
     if (this.currentState !== 'running' || !this.storageHealthy || this.pendingActions >= this.limits.mailboxCount)
       return Promise.reject(new Error('Dedicated server is not accepting player writes.'));
     const copy = this.options.platform.clone(action);
     this.pendingActions += 1;
     const result = this.actionTail.then(() =>
       this.runtime.executeTransaction(
-        { epoch: this.options.epoch, issuer: this.runtime.playerId, stream: 'player-actions', sequence },
+        projectDedicatedPlayerActionIdentity(
+          this.options.epoch,
+          this.runtime.playerId,
+          sequence,
+          expectedCommitSequence,
+        ),
         () => this.runtime.performAction(copy),
       ),
     );
@@ -275,7 +288,7 @@ export class DedicatedServerHost {
     const executor = this.options.executors.general;
     this.dispatch(
       {
-        ...this.identity(executor),
+        ...projectDedicatedComputeIdentity(this.options.epoch, executor),
         kind: 'generate-canonical',
         seed: this.runtime.server.seed,
         generatorVersion: this.runtime.server.generatorVersion,
@@ -339,13 +352,6 @@ export class DedicatedServerHost {
     };
   }
 
-  private identity(executor: DedicatedComputeExecutor) {
-    return {
-      epoch: this.options.epoch,
-      generation: executor.diagnostics().generation,
-    };
-  }
-
   private requestFluid(snapshot: FluidAuthoritySnapshot) {
     if (this.currentState !== 'running') {
       this.runtime.abortFluidWork(snapshot.workId, 'server-draining');
@@ -353,7 +359,7 @@ export class DedicatedServerHost {
     }
     const executor = this.options.executors.fluid;
     this.dispatch(
-      { ...this.identity(executor), kind: 'fluid', snapshot },
+      { ...projectDedicatedComputeIdentity(this.options.epoch, executor), kind: 'fluid', snapshot },
       (result) => {
         if (result.kind !== 'fluid-candidate' || result.candidate.workId !== snapshot.workId)
           throw new Error('Invalid fluid candidate identity.');
@@ -371,7 +377,7 @@ export class DedicatedServerHost {
     const executor = this.options.executors.logic;
     this.dispatch(
       {
-        ...this.identity(executor),
+        ...projectDedicatedComputeIdentity(this.options.epoch, executor),
         kind: 'logic',
         observation,
         physicsHz: this.runtime.frequencies.physicsHz,

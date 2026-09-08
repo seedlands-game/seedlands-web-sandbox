@@ -122,14 +122,24 @@ pnpm server:headless -- --seed my-debug-world
 
 ## 实验性 Node 世界宿主
 
-独立 TypeScript 世界宿主可以脱离浏览器常驻运行，并将检查点保存到独立目录。目前仍在实施：网络连接与服务器选择界面尚不可用。
+独立 TypeScript 世界宿主可以脱离浏览器常驻运行、将检查点保存到独立目录，并接入一个实验性的本机浏览器会话。先创建独立口令文件，再用将要连接的精确 Web Origin 启动 loopback 监听：
 
 ```bash
 pnpm build:server
-pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world
+pnpm server:dedicated --data-directory /absolute/path/to/new-world --seed my-world \
+  --listen 127.0.0.1:8787 --origin http://127.0.0.1:4173 \
+  --access-key-file /absolute/path/to/access-key
 ```
 
-`apps/node-server/dist/` 内的五个 ESM 入口及清单可由 Node 22.12 或更高版本直接运行，不需要源码、Vite 或在服务器安装运行依赖。默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。`--compute child-process` 可选择实验性进程执行器；这不是已测得更快的默认建议。按 Ctrl+C 会排空工作并保存最终检查点。请使用独立目录，不会自动导入浏览器存档；同一目录的第二个写者会被拒绝。
+在 Web 启动页选择“连接 Node”，填写 `ws://127.0.0.1:8787/seedlands` 和口令文件中的内容后连接。口令只在有界首条握手中发送，浏览器不会持久保存。监听只接受 loopback、校验精确 Origin，并只授予一个玩家会话；离开或关闭网页后需手动重连。Node Authority 会在网页关闭后继续 tick，“保存到 Node 并返回主菜单”会等待 durable 检查点；使用同一数据目录重启 Node 后可恢复该检查点。
+
+在第二个终端用与上方一致的 Origin 启动 Web：
+
+```bash
+pnpm --filter @seedlands/web dev --host 127.0.0.1 --port 4173
+```
+
+`apps/node-server/dist/` 内的五个 ESM 入口及清单可由 Node 22.12 或更高版本直接运行，不需要源码、Vite 或在服务器安装运行依赖。默认 Authority、Logic、Fluid、general、persistence 各一条执行 lane。`--compute child-process` 可选择实验性进程执行器；这不是已测得更快的默认建议。按 Ctrl+C 会排空工作并保存最终检查点。请使用独立目录，不会自动导入浏览器存档；同一目录的第二个写者会被拒绝。本机 WebSocket 合同仍是实验接口，不代表公网部署或网络性能建议。
 
 ## 架构
 
@@ -162,11 +172,14 @@ pnpm build
 pnpm build:server
 pnpm verify:node-isolation
 pnpm test:e2e:regression
+pnpm test:web-node-playable
 ```
 
 General 计算 Worker 默认启用实测采纳的 Rust Chunk填充、halo、mesh描述符和网格打包；打包在能力可用时使用标准SIMD128，保留标量与优化 TypeScript 回退。Fluid、Authority、Logic、Persistence 默认仍用 TypeScript。每个启用 Worker 独立持有 Wasm 实例，不要求共享内存或跨源隔离。`crates/rust-toolchain.toml` 固定 Rust 1.88.0 与 Wasm 目标；`pnpm wasm:rust:build` 重建两种生产产物，常规生产构建校验源码与二进制 hash；`pnpm rust:check` 约束纯 core 边界。已淘汰的 MoonBit 实现和工具链不再保留，冻结测量仍可在[结果快照](changes/2026-09-07-remove-moonbit-toolchain/moonbit-results.md)中审阅。采纳原因和实际收益见[本轮方案](changes/2026-09-07-data-plane-adoption/adoption-plan.md)。
 
 这些命令提供不同证据：单元测试覆盖确定性逻辑；静态验证覆盖格式、lint、路径规则、覆盖率和 TypeScript；生产构建证明 bundling；Playwright 覆盖确定性浏览器行为。视觉语义由 change 所属的 Midscene 流程独立评估。
+
+Web连接Node的旅程在本机GPU上默认使用Medium画质。Linux CI使用managed完整Chromium、SwiftShader和已有Low画质；可执行 `SEEDLANDS_E2E_FULL_CHROMIUM=1 SEEDLANDS_E2E_SWIFTSHADER=1 SEEDLANDS_WEB_NODE_QUALITY=low pnpm test:web-node-playable` 复现该功能环境。它验证软件图形下完整游玩、保存与重连，不代表Medium图形性能通过。缺少managed浏览器时先执行 `pnpm exec playwright install chromium`。
 
 架构 lint 还将 JavaScript 与 TypeScript 模块限制为不超过 500 行有效代码（不计空行与注释），避免职责重新堆积为单体文件。
 

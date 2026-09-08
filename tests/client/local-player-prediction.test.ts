@@ -73,6 +73,15 @@ const controls = {
 };
 
 describe('生产本地玩家预测运行时', () => {
+  it('asks for retained prediction chunk revisions beyond the authority contact window', () => {
+    const runtime = new LocalPlayerPrediction('world:1', 60);
+    const world = new LazyRevisionWorld();
+    world.revisionVector = (keys?: Iterable<string>) =>
+      keys ? Object.fromEntries([...keys].map((key) => [key, 1])) : { '0,0,0': 1, '1,0,0': 1 };
+    runtime.advance({ ...controls, elapsedSeconds: 1 / 60, snapshot: snapshot(), world, issuedAtMs: 1 });
+    expect(runtime.applyAuthoritySnapshot(snapshot(), world).resetReason).toBeNull();
+    expect(runtime.pendingFrames).toHaveLength(1);
+  });
   it('公开校正的最小字段可直接用于排序与预测，无需内部快照诊断', () => {
     const state: PredictionAuthorityState & AuthoritySnapshotOrder = {
       epoch: 'world:1',

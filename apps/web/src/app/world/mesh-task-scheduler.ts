@@ -9,6 +9,8 @@ import {
   type MeshTaskSchedulerOptions,
 } from './mesh-task-source';
 import { recordMeshPreparationFailure } from './mesh-preparation-telemetry';
+import { higherMeshRequestPriority, promoteMeshRequestPriority, selectMeshRequest } from './mesh-request-priority';
+import type { MeshRequestPriority } from './mesh-request-priority';
 import { MeshVisibilityBarriers } from './mesh-visibility-barriers';
 
 export type { WorkerResult } from '../app-contracts';
@@ -27,7 +29,6 @@ type PendingMeshRequest = {
   visibilityBarrierRevision?: number;
 };
 
-export type MeshRequestPriority = 'streaming' | 'interactive' | 'interactive-fluid';
 export type MeshRequestOptions = { forceRemesh?: boolean; priority?: MeshRequestPriority };
 
 export class MeshTaskScheduler {
@@ -43,6 +44,7 @@ export class MeshTaskScheduler {
   private taskSequence = 0;
   private inFlight = 0;
   private dispatchCount = 0;
+  private priorityBypasses = 0;
   private readonly activeTasks = new Map<number, PendingMeshTask>();
   private readonly receivingTasks = new Set<number>();
   private readonly inputSettlements = new Map<number, () => void>();
@@ -60,12 +62,17 @@ export class MeshTaskScheduler {
     options.worker.onerror = ({ taskId, error }) => this.fail(taskId, error);
   }
 
-  get generationQueueSize() {
-    return this.queued.size + this.preparingRequests.size + this.failedPreparations.size;
-  }
+  // prettier-ignore
+  get generationQueueSize() { return this.queued.size + this.preparingRequests.size + this.failedPreparations.size; }
+  // prettier-ignore
+  get meshingQueueSize() { return this.inFlight; }
 
-  get meshingQueueSize() {
-    return this.inFlight;
+  get schedulingDiagnostics() {
+    return {
+      queuedRequests: this.queued.size,
+      preparingRequests: this.preparingRequests.size,
+      failedPreparations: this.failedPreparations.size,
+    };
   }
 
   get requestedKeys(): ReadonlySet<string> {
@@ -98,6 +105,7 @@ export class MeshTaskScheduler {
     this.visibility.reset();
     this.inFlightKeys.clear();
     this.scenarioTraceIds.clear();
+    this.priorityBypasses = 0;
     this.options.telemetry.counter('scenario_epoch', this.epoch);
   }
 
@@ -105,13 +113,21 @@ export class MeshTaskScheduler {
     if (this.disposed || cy < 0 || cy > 1) return;
     const forceRemesh = typeof options === 'boolean' ? options : (options.forceRemesh ?? false);
     const key = chunkKey(cx, cy, cz);
-    if (!forceRemesh && this.requested.has(key)) return;
+    const requestedPriority = typeof options === 'boolean' ? 'streaming' : (options.priority ?? 'streaming');
+    if (!forceRemesh && this.requested.has(key)) {
+      promoteMeshRequestPriority(
+        requestedPriority,
+        this.queued.get(key),
+        this.replacements.get(key),
+        this.visibility.existingDeferred(key),
+      );
+      return;
+    }
     const failed = this.failedPreparations.get(key);
     if (failed) {
       this.failedPreparations.delete(key);
       this.requested.delete(key);
     }
-    const requestedPriority = typeof options === 'boolean' ? 'streaming' : (options.priority ?? 'streaming');
     const delayedUntilVisible = this.visibility.isDelaying(key);
     const existing = delayedUntilVisible
       ? this.visibility.existingDeferred(key)
@@ -127,7 +143,7 @@ export class MeshTaskScheduler {
       cy,
       cz,
       queuedAt: existing?.queuedAt ?? performance.now(),
-      priority: this.higherPriority(existing?.priority ?? failed?.priority, requestedPriority),
+      priority: higherMeshRequestPriority(existing?.priority ?? failed?.priority, requestedPriority),
       enqueuedAtDispatch: existing?.enqueuedAtDispatch ?? failed?.enqueuedAtDispatch ?? this.dispatchCount,
       ...(this.visibility.revisionForRequest(key) === undefined
         ? {}
@@ -451,12 +467,9 @@ export class MeshTaskScheduler {
   }
 
   private nextQueuedRequest(): [string, PendingMeshRequest] | undefined {
-    const rank: Record<MeshRequestPriority, number> = { streaming: 0, interactive: 1, 'interactive-fluid': 2 };
-    const priority = (request: PendingMeshRequest) =>
-      rank[request.priority] + Math.floor((this.dispatchCount - request.enqueuedAtDispatch) / 8);
-    return [...this.queued.entries()].sort(
-      (left, right) => priority(right[1]) - priority(left[1]) || left[1].queuedAt - right[1].queuedAt,
-    )[0];
+    const selection = selectMeshRequest([...this.queued.entries()], this.priorityBypasses);
+    this.priorityBypasses = selection.priorityBypasses;
+    return selection.next;
   }
 
   fail(taskId: number, _error: Error): void {
@@ -496,12 +509,6 @@ export class MeshTaskScheduler {
     const settle = this.inputSettlements.get(taskId);
     this.inputSettlements.delete(taskId);
     settle?.();
-  }
-
-  private higherPriority(current: MeshRequestPriority | undefined, next: MeshRequestPriority): MeshRequestPriority {
-    if (current === 'interactive-fluid' || next === 'interactive-fluid') return 'interactive-fluid';
-    if (current === 'interactive' || next === 'interactive') return 'interactive';
-    return 'streaming';
   }
 
   private releaseBarrierAttempt(task: PendingMeshTask) {

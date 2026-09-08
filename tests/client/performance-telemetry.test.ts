@@ -11,7 +11,7 @@ describe('客户端性能 telemetry', () => {
         name: 'water-transition-skipped-renderer',
         ts: 5000,
         dur: 0,
-        args: { traceId },
+        args: { traceId, traceName: '0,1,0' },
       }),
     );
   });

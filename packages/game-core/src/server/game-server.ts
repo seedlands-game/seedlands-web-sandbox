@@ -135,13 +135,8 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   maintainCanonicalResidency(): number {
-    return maintainCanonicalChunks(this.canonicalResidency, this.chunks, (candidate) =>
-      this.saves.evictChunkIfCurrent(
-        candidate.key,
-        candidate.chunk as ServerChunk,
-        candidate.accessEpoch,
-        candidate.revision,
-      ),
+    return maintainCanonicalChunks(this.canonicalResidency, this.chunks, ({ key, chunk, accessEpoch, revision }) =>
+      this.saves.evictChunkIfCurrent(key, chunk as ServerChunk, accessEpoch, revision),
     );
   }
 
@@ -207,6 +202,7 @@ export class GameServer extends GameServerGameplayFacade {
         };
     if (!restored) chunk.fluid = legacyFluid(chunk.voxels);
     this.chunks.set(key, chunk);
+    this.persistence?.evictSnapshot?.(key);
     if (this.fluidWindow.allowsKey(key)) this.fluidChunkActivations.schedule(chunk);
     return chunk;
   }
@@ -283,6 +279,7 @@ export class GameServer extends GameServerGameplayFacade {
       fluid: legacyFluid(result.canonical),
     };
     this.chunks.set(result.key, accepted);
+    this.persistence?.evictSnapshot?.(result.key);
     if (this.fluidWindow.allowsKey(result.key)) this.fluidChunkActivations.schedule(accepted);
     this.maintainCanonicalResidency();
     return true;
@@ -526,6 +523,7 @@ export class GameServer extends GameServerGameplayFacade {
       fluid: snapshot.fluid?.slice() ?? legacyFluid(snapshot.voxels),
     };
     this.chunks.set(key, restored);
+    this.persistence?.evictSnapshot?.(key);
     this.fluidChunkActivations.schedule(restored);
     return restored;
   }

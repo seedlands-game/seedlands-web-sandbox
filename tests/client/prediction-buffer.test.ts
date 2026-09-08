@@ -35,6 +35,38 @@ const frame = (
 const replay = (state: BodyState, command: InputCommand): BodyState => body(state.position.x + command.state.moveX);
 
 describe('PredictionBuffer', () => {
+  it('replays a loaded neighboring chunk that prediction reaches before the authority does', () => {
+    const buffer = new PredictionBuffer();
+    buffer.record(frame(1, 1, { '0,1,0': 4, '1,1,0': 9 }));
+    const result = buffer.reconcile({
+      acknowledgedInputSequence: 0,
+      authoritativeBody: body(0),
+      collisionRevisionVector: { '0,1,0': 4 },
+      availableCollisionRevisionVector: { '0,1,0': 4, '1,1,0': 9 },
+      replay,
+    });
+    expect(result.resetReason).toBeNull();
+    expect(result.replayed).toBe(1);
+    expect(result.body.position.x).toBe(1);
+  });
+
+  it.each<{ authority: Record<string, number>; available: Record<string, number> }>([
+    { authority: { '0,1,0': 5 }, available: { '0,1,0': 4, '1,1,0': 9 } },
+    { authority: { '0,1,0': 4 }, available: { '0,1,0': 4, '1,1,0': 10 } },
+    { authority: { '0,1,0': 4 }, available: { '0,1,0': 4 } },
+  ])('still rejects missing or changed neighboring collision history: %j', ({ authority, available }) => {
+    const buffer = new PredictionBuffer();
+    buffer.record(frame(1, 1, { '0,1,0': 4, '1,1,0': 9 }));
+    expect(
+      buffer.reconcile({
+        acknowledgedInputSequence: 0,
+        authoritativeBody: body(0),
+        collisionRevisionVector: authority,
+        availableCollisionRevisionVector: available,
+        replay,
+      }).resetReason,
+    ).toBe('collision-history-missing');
+  });
   it('copies frames defensively, replaces duplicate sequences, and replays novel out-of-order frames in sequence order', () => {
     const buffer = new PredictionBuffer({ maxSmoothError: 2 });
     const first = frame(2, 2);

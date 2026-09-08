@@ -86,10 +86,16 @@ importers:
       '@seedlands/game-core':
         specifier: workspace:*
         version: link:../../packages/game-core
+      ws:
+        specifier: ^8.21.3
+        version: 8.21.3
     devDependencies:
       '@types/node':
         specifier: 26.4.1
         version: 26.4.1
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       esbuild:
         specifier: 0.28.2
         version: 0.28.2

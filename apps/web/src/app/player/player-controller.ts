@@ -50,6 +50,12 @@ export class PlayerController {
   get onGround() {
     return this.grounded;
   }
+  get viewAngles(): readonly [number, number] {
+    return [this.yaw, this.pitch];
+  }
+  get aimedVoxel(): readonly [number, number, number] | null {
+    return this.aimTarget?.position ?? null;
+  }
 
   get interactionAttempts() {
     return this.attempts;

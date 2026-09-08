@@ -139,8 +139,9 @@ export class PredictionBuffer {
     if (
       retained.some(
         (frame) =>
-          !sameRevisionVector(frame.collisionRevisionVector, currentRevisions) ||
-          !sameRevisionVector(frame.collisionRevisionVector, availableRevisions),
+          Object.entries(frame.collisionRevisionVector).some(
+            ([key, revision]) => currentRevisions[key] !== undefined && currentRevisions[key] !== revision,
+          ) || !sameRevisionVector(frame.collisionRevisionVector, availableRevisions),
       )
     ) {
       this.storedFrames = [];
@@ -185,5 +186,13 @@ export class PredictionBuffer {
 
   clear(_reason?: string): void {
     this.storedFrames = [];
+  }
+
+  collisionChunkKeys(acknowledgedInputSequence: number): readonly string[] {
+    const keys = new Set<string>();
+    for (const frame of this.storedFrames)
+      if (frame.sequence > acknowledgedInputSequence)
+        for (const key of Object.keys(frame.collisionRevisionVector)) keys.add(key);
+    return [...keys];
   }
 }

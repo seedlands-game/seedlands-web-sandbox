@@ -27,6 +27,7 @@ export class NodeServerRuntime {
   private readonly failureEvent: Promise<Error>;
   private resolveFailure!: (error: Error) => void;
   private firstFailure: Error | undefined;
+  private networkClose: (() => Promise<void>) | null = null;
 
   private constructor(
     readonly epoch: string,
@@ -101,6 +102,12 @@ export class NodeServerRuntime {
     return this.persistence.threadId;
   }
 
+  attachNetwork(close: () => Promise<void>): void {
+    if (this.networkClose) throw new Error('Node network server is already attached.');
+    if (this.currentState !== 'running') throw new Error('Node network server cannot attach after shutdown starts.');
+    this.networkClose = close;
+  }
+
   stop(): Promise<NodeDedicatedStopResult> {
     this.beginShutdown();
     if (!this.stopRequest) this.stopRequest = this.withDeadline(this.shutdown!);
@@ -137,6 +144,14 @@ export class NodeServerRuntime {
   private async finishShutdown(trigger?: unknown): Promise<NodeDedicatedStopResult> {
     const failures: unknown[] = trigger === undefined ? [] : [trigger];
     let stopped: NodeDedicatedStopResult | undefined;
+    if (this.networkClose) {
+      try {
+        await this.networkClose();
+      } catch (error) {
+        failures.push(error);
+      }
+      this.networkClose = null;
+    }
     try {
       stopped = await this.authority.stop();
     } catch (error) {

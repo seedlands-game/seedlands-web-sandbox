@@ -1,5 +1,8 @@
 import { expect, test } from '@playwright/test';
 
+const evidenceDirectory =
+  process.env.SEEDLANDS_LOADING_EVIDENCE_OUTPUT ?? 'changes/2026-09-07-loading-performance/evidence';
+
 test('HTML 骨架在运行时之前可交互但禁止进入，并提供 SEO/GEO', async ({ page }) => {
   let releaseBootstrap!: () => void;
   const bootstrapGate = new Promise<void>((resolve) => {
@@ -63,7 +66,7 @@ test('世界初始化期间显示专用 loading 菜单', async ({ page }) => {
   const loading = page.locator('[data-world-loading]');
   await expect(loading).toBeVisible();
   await expect(loading).toContainText(/区块|地形|世界|光照|生灵/);
-  await page.screenshot({ path: 'changes/2026-09-07-loading-performance/evidence/world-loading.png' });
+  await page.screenshot({ path: `${evidenceDirectory}/world-loading.png` });
   await expect(page.locator('#hud')).toBeVisible({ timeout: 30_000 });
   const loadedChunks = await page.evaluate(() => {
     const harness = (
