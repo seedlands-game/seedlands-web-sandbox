@@ -16,11 +16,13 @@
     application,
     assetBase,
     onstart,
+    onstartshowcase,
   }: {
     shell: ShellState;
     application: ApplicationShell | null;
     assetBase: string;
     onstart: (seed: string, quality: QualityLevel, openMode: WorldOpenMode) => void;
+    onstartshowcase: (quality: QualityLevel) => void;
   } = $props();
   let latestSeed = $state('');
   let error = $state('');
@@ -115,6 +117,13 @@
       >
         {shell.enterLabel}
       </GameButton>
+      <GameButton
+        class="melee-showcase-start"
+        label="木剑动作体验场"
+        disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
+        onclick={() => onstartshowcase(quality)}
+        >木剑动作体验场 <small>木剑已装备 · 两段斜劈 · 玩家受击反馈</small></GameButton
+      >
     {/if}
     <div class="menu-secondary">
       <GameButton label="设置" onclick={() => application?.openPanel('settings')}>设置</GameButton>

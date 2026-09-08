@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "id": "animation",
+  "initiatedBy": "agent",
+  "role": "animation 实施负责人",
+  "workType": "implementation",
+  "goal": "实现真实骨骼GLB准入、PlayCanvas动画、工坊片段绑定与游戏资源链",
+  "context": [
+    {
+      "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/spec.md",
+      "purpose": "范围与验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/client/presentation/glb-model.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/client/presentation/appearance-project.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/client/persistence/glb-model-store.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/app/gameplay/glb-model-resource.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/app/gameplay/gameplay-entity-presenter.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/app/gameplay/model-animation.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/app/asset-workbench",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/public/models",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/animation",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/tests/client/glb-model.test.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/tests/app/glb-model-resource.test.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/tests/app/gameplay-entity-presenter.test.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/client/presentation/glb-model-contract.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/client/presentation/glb-model-document.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/client/presentation/glb-model-animation-validation.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/apps/web/src/client/presentation/glb-model-texture-validation.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/e2e/animated-model.spec.ts"
+    ],
+    "readPaths": ["/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox"],
+    "nonGoals": ["不合并不发布不改权限不读凭据"]
+  },
+  "outputs": ["玩法首版和测试证据"],
+  "execution": { "form": "subagent", "model": "gpt-5.6-sol", "effort": "high" },
+  "acceptance": [
+    {
+      "id": "animation",
+      "check": "实现前 RED，相关功能及边界用例 GREEN，无 any；返回具体接口和未验证项",
+      "evidence": "定向测试与实现路径"
+    }
+  ],
+  "budget": { "maxAttempts": 3, "maxAgentHours": 12 },
+  "permissions": { "localWrite": true, "externalWrite": false, "delegate": false },
+  "parent": {
+    "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/contracts/root.json",
+    "sha256": "55dd481bd0e5c07704b373c94c68e479ea3956400e39f04b5ce9e057bba67156"
+  },
+  "resources": { "exclusiveGroup": null },
+  "escalation": ["范围/公开接口/授权变化", "两次同因失败", "预计超过预算"],
+  "reportFields": ["完成状态", "改动文件", "验证结果", "限制", "下一步"]
+}

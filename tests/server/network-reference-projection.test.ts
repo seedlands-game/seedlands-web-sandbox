@@ -152,6 +152,88 @@ describe('network reference projection', () => {
     await host.stop();
   });
 
+  it('完整复制 combat 阶段和结果，并拒绝畸形阶段枚举', async () => {
+    const { host } = await createHost();
+    const snapshot = host.snapshot;
+    const view = host.runtime.view();
+    const combat = {
+      active: {
+        actionId: 'combat-7',
+        definitionId: 'wood-sword',
+        targetId: 'target',
+        comboStep: 1,
+        comboLength: 2,
+        phase: 'recovery' as const,
+        phaseElapsedSeconds: 0.04,
+        phaseDurationSeconds: 0.38,
+        canBuffer: false,
+        buffered: false,
+      },
+      cooldownRemainingSeconds: 0.34,
+      lastResult: {
+        sequence: 9,
+        actionId: 'combat-7',
+        definitionId: 'wood-sword',
+        targetId: 'target',
+        comboStep: 1,
+        outcome: 'hit' as const,
+        damage: 7,
+      },
+    };
+    const reference = projectGameplayViewReference(
+      {
+        ...view,
+        player: { ...view.player, combat },
+        entities: [
+          ...view.entities,
+          {
+            id: 'hostile',
+            type: 'creature',
+            kind: 'creature',
+            lifecycle: 'active',
+            archetype: 'night-stalker',
+            position: [1.5, 33, 0.5],
+            physicsVelocity: [0, 0, 0],
+            health: 12,
+            maxHealth: 12,
+            combat,
+          },
+        ],
+      },
+      {
+        epoch: snapshot.epoch,
+        snapshotPhysicsTick: snapshot.physicsTick,
+        snapshotCommitSequence: snapshot.commitSequence,
+        snapshotWorldRevision: snapshot.worldRevision,
+      },
+    );
+    expect(reference.player.combat).toEqual(combat);
+    expect(reference.entities.find((entity) => entity.id === 'hostile')?.combat).toEqual(combat);
+    if (!reference.player.combat?.active || !reference.player.combat.lastResult)
+      throw new Error('Expected projected combat state.');
+    reference.player.combat.active.phaseElapsedSeconds = 0.2;
+    reference.player.combat.lastResult.damage = 99;
+    expect(combat.active.phaseElapsedSeconds).toBe(0.04);
+    expect(combat.lastResult.damage).toBe(7);
+
+    const malformed = {
+      ...combat,
+      active: { ...combat.active, phase: 'teleport' as never },
+    };
+    expect(() =>
+      projectGameplayViewReference(
+        { ...view, player: { ...view.player, combat: malformed } },
+        {
+          epoch: snapshot.epoch,
+          snapshotPhysicsTick: snapshot.physicsTick,
+          snapshotCommitSequence: snapshot.commitSequence,
+          snapshotWorldRevision: snapshot.worldRevision,
+        },
+      ),
+    ).toThrow(/combat phase/i);
+    await host.stop();
+  });
+
   it('通过真实 World.edit 路径投影 commit，并显式保留 publication 上界不是精确因果序号', async () => {
     const { host, tick } = await createHost();
     const result = host.runtime.server.edit(0, 33, 0, Voxel.Dirt, host.runtime.playerId);

@@ -4,6 +4,8 @@ import {
   MAX_GLB_MODELS,
   MAX_GLB_NODES,
   MAX_GLB_TRIANGLES,
+  validateStaticGlb,
+  type GlbModelStats,
   type StoredGlb,
 } from '../presentation/glb-model';
 import {
@@ -189,6 +191,11 @@ export async function loadGlbBlob(id: string): Promise<Blob> {
   } finally {
     database.close();
   }
+}
+
+/** Re-inspects the authoritative blob so project-model records created by older builds gain clip metadata safely. */
+export async function inspectStoredGlb(id: string): Promise<GlbModelStats> {
+  return validateStaticGlb(await (await loadGlbBlob(id)).arrayBuffer());
 }
 
 export async function reimportGlbModel(id: string, file: File, expectedRevision: number): Promise<StoredGlb> {

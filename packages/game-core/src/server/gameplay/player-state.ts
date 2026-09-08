@@ -1,4 +1,5 @@
 import { Inventory, type InventorySlot } from './inventory';
+import type { CombatSnapshot } from './combat-runtime';
 
 export type PlayerLifecycle = 'alive' | 'dead';
 export type BreakAction = {
@@ -24,6 +25,8 @@ export type PlayerSnapshot = {
   healingAccumulator: number;
   starvationAccumulator: number;
   breakAction: BreakAction | null;
+  /** Optional in the type only so legacy snapshots and fixtures remain readable. Runtime views always provide it. */
+  combat?: CombatSnapshot;
 };
 
 export class PlayerState {
@@ -35,7 +38,6 @@ export class PlayerState {
   hunger = 20;
   lifecycle: PlayerLifecycle = 'alive';
   selectedSlot = 0;
-  attackCooldownSeconds = 0;
   hungerAccumulator = 0;
   healingAccumulator = 0;
   starvationAccumulator = 0;
@@ -58,7 +60,7 @@ export class PlayerState {
     return true;
   }
 
-  snapshot(): PlayerSnapshot {
+  snapshot(combat?: CombatSnapshot): PlayerSnapshot {
     return {
       entityId: this.entityId,
       spawnPosition: [...this.spawnPosition],
@@ -70,11 +72,12 @@ export class PlayerState {
       inventory: this.inventory.snapshot(),
       selectedSlot: this.selectedSlot,
       hotbarSize: this.hotbarSize,
-      attackCooldownSeconds: this.attackCooldownSeconds,
+      attackCooldownSeconds: combat?.cooldownRemainingSeconds ?? 0,
       hungerAccumulator: this.hungerAccumulator,
       healingAccumulator: this.healingAccumulator,
       starvationAccumulator: this.starvationAccumulator,
       breakAction: this.breakAction ? { ...this.breakAction, position: [...this.breakAction.position] } : null,
+      ...(combat ? { combat } : {}),
     };
   }
 
@@ -83,7 +86,6 @@ export class PlayerState {
     this.hunger = this.maxHunger;
     this.lifecycle = 'alive';
     this.breakAction = null;
-    this.attackCooldownSeconds = 0;
     this.hungerAccumulator = this.healingAccumulator = this.starvationAccumulator = 0;
   }
 
@@ -104,7 +106,6 @@ export class PlayerState {
     this.health = snapshot.health ?? this.health;
     this.hunger = snapshot.hunger ?? this.hunger;
     this.lifecycle = snapshot.lifecycle ?? this.lifecycle;
-    this.attackCooldownSeconds = snapshot.attackCooldownSeconds ?? 0;
     this.hungerAccumulator = snapshot.hungerAccumulator ?? 0;
     this.healingAccumulator = snapshot.healingAccumulator ?? 0;
     this.starvationAccumulator = snapshot.starvationAccumulator ?? 0;

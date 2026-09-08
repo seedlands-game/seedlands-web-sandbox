@@ -12,6 +12,7 @@ import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { addBuiltinActorModel, addPlayerArm } from '../gameplay/builtin-actor-models';
 import { addVoxelPreview } from './voxel-preview-resource';
 import { addGlbModel } from '../gameplay/glb-model-resource';
+import type { ModelAnimationPlayback } from '../gameplay/model-animation';
 import { terrainMaterials } from '../../client/presentation/terrain-assets';
 import { modelMaterialDefinitions } from '../../client/presentation/model-material-definitions';
 
@@ -22,6 +23,7 @@ export class PreviewScene {
   private light: pc.Entity;
   private viewmodel: FirstPersonViewmodel | null = null;
   private release: (() => void) | null = null;
+  private glbPlayback: ModelAnimationPlayback | null = null;
   private generation = 0;
   private disposed = false;
   private abort: AbortController | null = null;
@@ -82,6 +84,7 @@ export class PreviewScene {
     this.viewmodel = null;
     this.release?.();
     this.release = null;
+    this.glbPlayback = null;
     while (this.pivot.children.length) this.pivot.children[0].destroy();
   }
   async show(asset: Asset, all: Asset[], mode: 'model' | 'held', filtering: 'nearest' | 'linear', repeat: number) {
@@ -92,6 +95,7 @@ export class PreviewScene {
     const stage = new pc.Entity('Asset preview staging', this.app);
     stage.enabled = false;
     let release: (() => void) | null = null;
+    let glbPlayback: ModelAnimationPlayback | null = null;
     let viewmodel: FirstPersonViewmodel | null = null;
     let distance: number;
     try {
@@ -112,7 +116,9 @@ export class PreviewScene {
         } else sceneAssets.addItem(stage, asset.payload.itemId);
       } else if (asset.type === 'glb-model') {
         distance = 3;
-        release = (await addGlbModel(this.app, stage, asset.payload.modelId, this.abort.signal)).release;
+        const lease = await addGlbModel(this.app, stage, asset.payload.modelId, this.abort.signal);
+        release = lease.release;
+        glbPlayback = lease.playback;
       } else if (asset.type === 'builtin-voxel-model') {
         distance = 2.6;
         release = await addVoxelPreview(this.app, stage, asset.payload.voxelId, undefined, all);
@@ -214,6 +220,7 @@ export class PreviewScene {
     this.pivot.addChild(stage);
     stage.enabled = true;
     this.viewmodel = viewmodel;
+    this.glbPlayback = glbPlayback;
     this.viewmodel?.setVisible(true);
     this.light.light!.layers = this.app.scene.layers.layerList.map((layer) => layer.id);
     this.release = () => {
@@ -244,6 +251,9 @@ export class PreviewScene {
   }
   action(action: HeldAction) {
     this.viewmodel?.setAction(action, true);
+  }
+  playClip(name: string) {
+    this.glbPlayback?.play(name, { loop: true, blendSeconds: 0.12 });
   }
   orbit(dx: number, dy: number) {
     if (this.mode === 'held') return;

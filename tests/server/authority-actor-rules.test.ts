@@ -26,33 +26,68 @@ describe('Authority actor rules', () => {
     expect(server.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
       accepted: true,
     });
+    expect(server.getPlayerState('player').health).toBe(20);
+    expect(server.getActorAction('hostile')).toMatchObject({ type: 'attack', status: 'running' });
+
+    expect(server.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
+      accepted: false,
+      reason: 'cooldown',
+    });
+    expect(server.getPlayerState('player').health).toBe(20);
+
+    server.advanceGameplayRules(0.25);
+    expect(server.getActorState('hostile')?.attackCooldownSeconds).toBeCloseTo(0.75, 6);
+    expect(server.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
+      accepted: false,
+      reason: 'cooldown',
+    });
+    server.advanceGameplayRules(0.1);
     expect(server.getPlayerState('player').health).toBe(18);
+    server.advanceGameplayRules(0.65);
+    expect(server.getActorState('hostile')?.attackCooldownSeconds).toBe(0);
     expect(server.getActorAction('hostile')).toBeNull();
     expect(server.simulationSnapshot().actions.actions.at(-1)).toMatchObject({
       type: 'attack',
       status: 'succeeded',
-      result: { damage: 2 },
+      result: { outcome: 'hit', damage: 2 },
     });
-
-    expect(server.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
-      accepted: false,
-      reason: 'cooldown',
-    });
-    expect(server.getPlayerState('player').health).toBe(18);
-
-    server.advanceGameplayRules(0.25);
-    // Actor rules advance in bounded 100 ms quanta; the unconsumed 50 ms remains in the accumulator.
-    expect(server.getActorState('hostile')?.attackCooldownSeconds).toBeCloseTo(0.8, 6);
-    expect(server.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
-      accepted: false,
-      reason: 'cooldown',
-    });
-    server.advanceGameplayRules(0.75);
-    expect(server.getActorState('hostile')?.attackCooldownSeconds).toBe(0);
     expect(server.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
       accepted: true,
     });
-    expect(server.getPlayerState('player').health).toBe(16);
+    expect(server.getPlayerState('player').health).toBe(18);
+  });
+
+  it('cancels authoritative combat when an attack action is explicitly interrupted or replaced', () => {
+    const interrupted = combatServer();
+    const accepted = interrupted.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' });
+    expect(accepted).toMatchObject({ accepted: true, action: { id: 'action-1', status: 'running' } });
+    expect(interrupted.interruptActorAction('hostile', 'manual-stop')).toBe(true);
+    expect(interrupted.getAction('action-1')).toMatchObject({ status: 'interrupted', reason: 'manual-stop' });
+    interrupted.advanceGameplayRules(0.35);
+    expect(interrupted.getPlayerState('player').health).toBe(20);
+    expect(interrupted.getCombatState('hostile')).toMatchObject({
+      active: null,
+      lastResult: { outcome: 'cancelled', reason: 'manual-stop' },
+    });
+    expect(interrupted.getActorState('hostile')).toMatchObject({ behavior: 'idle' });
+
+    const replaced = combatServer();
+    expect(replaced.applyActorAuthorityAction('hostile', { type: 'attack', targetId: 'player' })).toMatchObject({
+      accepted: true,
+      action: { id: 'action-1', status: 'running' },
+    });
+    expect(replaced.startActorAction('hostile', { type: 'idle' })).toMatchObject({
+      id: 'action-2',
+      status: 'pending',
+    });
+    expect(replaced.getAction('action-1')).toMatchObject({ status: 'interrupted', reason: 'replaced' });
+    replaced.advanceGameplayRules(0.35);
+    expect(replaced.getPlayerState('player').health).toBe(20);
+    expect(replaced.getCombatState('hostile')).toMatchObject({
+      active: null,
+      lastResult: { outcome: 'cancelled', reason: 'replaced' },
+    });
+    expect(replaced.getActorAction('hostile')).toMatchObject({ id: 'action-2', status: 'pending' });
   });
 
   it('rejects distant and blocked attacks without canonical side effects', () => {

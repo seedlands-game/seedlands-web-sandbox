@@ -43,6 +43,9 @@ ls:
     .sh: kebab-case
   changes/*/evidence:
     .dir: kebab-case
+  changes/2026-09-08-gameplay-foundation:
+    .dir: kebab-case
+    .md: kebab-case
   changes/2026-09-08-node-monorepo/contracts:
     .dir: kebab-case
     .json: kebab-case

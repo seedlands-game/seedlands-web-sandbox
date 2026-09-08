@@ -1,4 +1,3 @@
-import { validateStaticGlb, MAX_GLB_MODELS, type StoredGlb } from '../presentation/glb-model';
 import {
   createEmptyAppearanceProject,
   validateAppearanceProject,
@@ -6,119 +5,34 @@ import {
 } from '../presentation/appearance-project';
 import { loadTerrainPack, resolveTerrainTextures } from './terrain-pack-store';
 
-export const MAX_APPEARANCE_PACKAGE_BYTES = 96 * 1024 * 1024;
+import {
+  base64,
+  fromBase64,
+  MAX_APPEARANCE_PACKAGE_BYTES,
+  validateModel,
+  validateModels,
+  validateAnimationReferences,
+  withoutAnimationModel,
+} from './appearance-model-validation';
+export { MAX_APPEARANCE_PACKAGE_BYTES } from './appearance-model-validation';
 
-export type AppearanceProjectState = Readonly<{
-  revision: number;
-  draft: AppearanceProject;
-  applied: AppearanceProject;
-  previous: AppearanceProject | null;
-}>;
-export type AppearanceModelBlob = StoredGlb & Readonly<{ blob: Blob }>;
-export type AppearanceModelInput = Readonly<{ id: string; name: string; revision: number; blob: Blob }>;
+import {
+  empty,
+  fail,
+  object,
+  id,
+  revision,
+  decodeState,
+  decodeModels,
+  type AppearanceProjectState,
+  type AppearanceModelBlob,
+  type AppearanceModelInput,
+} from './appearance-project-state';
+export type { AppearanceProjectState, AppearanceModelBlob, AppearanceModelInput } from './appearance-project-state';
 
 const databaseName = 'seedlands-appearance-project';
 const projectStoreName = 'project';
 const modelsStoreName = 'models';
-const empty = (): AppearanceProjectState => ({
-  revision: 0,
-  draft: createEmptyAppearanceProject(),
-  applied: createEmptyAppearanceProject(),
-  previous: null,
-});
-const fail = (message: string): never => {
-  throw new Error(message);
-};
-const object = (value: unknown, label: string): Record<string, unknown> =>
-  value && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : fail(`${label}格式无效`);
-const id = (value: unknown, label: string): string =>
-  typeof value === 'string' && value.trim() && value.length <= 120 ? value : fail(`${label}无效`);
-const revision = (value: unknown, label: string): number =>
-  Number.isSafeInteger(value) && (value as number) >= 1 ? (value as number) : fail(`${label}无效`);
-
-function decodeState(value: unknown): AppearanceProjectState {
-  if (value === undefined) return empty();
-  const record = object(value, '外观项目库记录');
-  if (!Number.isSafeInteger(record.revision) || (record.revision as number) < 0)
-    fail('外观项目库版本损坏，请保留已有数据');
-  const previous = record.previous === null ? null : validateAppearanceProject(record.previous);
-  return {
-    revision: record.revision as number,
-    draft: validateAppearanceProject(record.draft),
-    applied: validateAppearanceProject(record.applied),
-    previous,
-  };
-}
-
-function decodeStoredModel(value: unknown): AppearanceModelBlob {
-  const model = object(value, '外观项目模型');
-  const blob = model.blob;
-  const byteLength = model.byteLength;
-  const nodeCount = model.nodeCount;
-  const triangleCount = model.triangleCount;
-  if (
-    !(blob instanceof Blob) ||
-    !Number.isSafeInteger(byteLength) ||
-    (byteLength as number) <= 0 ||
-    blob.size !== byteLength ||
-    !Number.isSafeInteger(nodeCount) ||
-    (nodeCount as number) < 0 ||
-    !Number.isSafeInteger(triangleCount) ||
-    (triangleCount as number) < 0
-  )
-    fail('外观项目模型损坏，请保留已有数据');
-  const checkedBlob = blob as Blob;
-  return {
-    id: id(model.id, '模型标识'),
-    name: id(model.name, '模型名称'),
-    revision: revision(model.revision, '模型版本'),
-    byteLength: byteLength as number,
-    nodeCount: nodeCount as number,
-    triangleCount: triangleCount as number,
-    blob: checkedBlob,
-  };
-}
-
-function decodeModels(value: unknown): AppearanceModelBlob[] {
-  if (value === undefined) return [];
-  if (!Array.isArray(value)) fail('外观项目模型数量超限');
-  const entries = value as unknown[];
-  if (entries.length > MAX_GLB_MODELS) fail('外观项目模型数量超限');
-  const models = entries.map(decodeStoredModel);
-  if (new Set(models.map((model) => model.id)).size !== models.length) fail('外观项目模型标识重复');
-  if (models.reduce((total, model) => total + model.byteLength, 0) > MAX_APPEARANCE_PACKAGE_BYTES)
-    fail(`外观项目模型超过 ${MAX_APPEARANCE_PACKAGE_BYTES / 1024 / 1024} MiB`);
-  return models;
-}
-
-async function validateModel(input: AppearanceModelInput): Promise<AppearanceModelBlob> {
-  const model = object(input, '导入模型');
-  const blob = model.blob;
-  if (!(blob instanceof Blob) || !blob.size) fail('GLB 模型内容无效');
-  const checkedBlob = blob as Blob;
-  const stats = validateStaticGlb(await checkedBlob.arrayBuffer());
-  return {
-    id: id(model.id, '模型标识'),
-    name: id(model.name, '模型名称'),
-    revision: revision(model.revision, '模型版本'),
-    byteLength: checkedBlob.size,
-    nodeCount: stats.nodeCount,
-    triangleCount: stats.triangleCount,
-    blob: checkedBlob.slice(0, checkedBlob.size, 'model/gltf-binary'),
-  };
-}
-
-async function validateModels(inputs: readonly AppearanceModelInput[]): Promise<AppearanceModelBlob[]> {
-  if (inputs.length > MAX_GLB_MODELS) fail(`外观项目最多保存 ${MAX_GLB_MODELS} 个 GLB 模型`);
-  const models = await Promise.all(inputs.map(validateModel));
-  if (new Set(models.map((model) => model.id)).size !== models.length) fail('外观项目模型标识重复');
-  if (models.reduce((total, model) => total + model.byteLength, 0) > MAX_APPEARANCE_PACKAGE_BYTES)
-    fail(`外观项目模型最多保存 ${MAX_APPEARANCE_PACKAGE_BYTES / 1024 / 1024} MiB`);
-  return models;
-}
-
 async function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(databaseName, 1);
@@ -196,6 +110,44 @@ export async function loadAppearanceProject(): Promise<AppearanceProjectState> {
   return current.found ? current.state : migrateLegacyTerrain(current.state);
 }
 
+export async function loadAppearanceProjectSnapshot(): Promise<{
+  state: AppearanceProjectState;
+  models: AppearanceModelBlob[];
+}> {
+  await loadAppearanceProject();
+  const snapshot = await readAppearanceProjectSnapshot();
+  return { state: snapshot.state, models: [...snapshot.state.appliedModels] };
+}
+
+async function readAppearanceProjectSnapshot(): Promise<{
+  state: AppearanceProjectState;
+  models: AppearanceModelBlob[];
+}> {
+  const database = await openDatabase();
+  try {
+    const snapshot = await new Promise<{ state: AppearanceProjectState; models: AppearanceModelBlob[] }>(
+      (resolve, reject) => {
+        const transaction = database.transaction([projectStoreName, modelsStoreName], 'readonly');
+        const projectRequest = transaction.objectStore(projectStoreName).get('current');
+        const modelsRequest = transaction.objectStore(modelsStoreName).get('current');
+        transaction.oncomplete = () => {
+          try {
+            resolve({ state: decodeState(projectRequest.result), models: decodeModels(modelsRequest.result) });
+          } catch (error) {
+            reject(error);
+          }
+        };
+        transaction.onerror = transaction.onabort = () =>
+          reject(transaction.error ?? new Error('读取外观模型快照失败'));
+      },
+    );
+    await validateAnimationReferences([snapshot.state.applied], snapshot.state.appliedModels);
+    return snapshot;
+  } finally {
+    database.close();
+  }
+}
+
 export async function loadAppearanceModelBlobs(): Promise<AppearanceModelBlob[]> {
   const database = await openDatabase();
   try {
@@ -235,6 +187,19 @@ export async function saveAppearanceProject(
   const draft = validateAppearanceProject(project);
   if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) fail('外观项目版本无效');
   const checkedModels = models === undefined ? undefined : await validateModels(models);
+  const snapshot = await readAppearanceProjectSnapshot();
+  if (snapshot.state.revision !== expectedRevision) fail('另一个页面已保存新外观项目，请重新加载后再应用。');
+  const candidate: AppearanceProjectState = {
+    revision: expectedRevision + 1,
+    draft,
+    applied: apply ? draft : snapshot.state.applied,
+    previous: apply ? snapshot.state.applied : snapshot.state.previous,
+    appliedModels: apply ? (checkedModels ?? snapshot.models) : snapshot.state.appliedModels,
+    previousModels: apply ? snapshot.state.appliedModels : snapshot.state.previousModels,
+  };
+  await validateAnimationReferences([draft], checkedModels ?? snapshot.models);
+  await validateAnimationReferences([candidate.applied], candidate.appliedModels);
+  if (candidate.previous) await validateAnimationReferences([candidate.previous], candidate.previousModels);
   const database = await openDatabase();
   try {
     return await new Promise((resolve, reject) => {
@@ -249,12 +214,7 @@ export async function saveAppearanceProject(
           const current = decodeState(request.result);
           if (current.revision !== expectedRevision)
             fail('另一个页面已保存新外观项目。草稿未覆盖，请重新加载后再应用。');
-          result = {
-            revision: current.revision + 1,
-            draft,
-            applied: apply ? draft : current.applied,
-            previous: apply ? current.applied : current.previous,
-          };
+          result = candidate;
           projects.put(result, 'current');
           if (checkedModels !== undefined) storedModels.put(checkedModels, 'current');
         } catch (error) {
@@ -276,10 +236,14 @@ export async function restoreAppearanceProject(
   mode: 'default' | 'previous',
 ): Promise<AppearanceProjectState> {
   if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) fail('外观项目版本无效');
+  const snapshot = await readAppearanceProjectSnapshot();
+  if (snapshot.state.revision !== expectedRevision) fail('另一个页面已更新外观项目，请重新加载后恢复。');
+  if (mode === 'previous' && snapshot.state.previous)
+    await validateAnimationReferences([snapshot.state.previous], snapshot.state.previousModels);
   const database = await openDatabase();
   try {
     return await new Promise((resolve, reject) => {
-      const transaction = database.transaction(projectStoreName, 'readwrite');
+      const transaction = database.transaction([projectStoreName, modelsStoreName], 'readwrite');
       const store = transaction.objectStore(projectStoreName);
       const request = store.get('current');
       let result: AppearanceProjectState;
@@ -292,7 +256,16 @@ export async function restoreAppearanceProject(
             mode === 'default'
               ? createEmptyAppearanceProject()
               : (current.previous ?? fail('没有可恢复的上一个已应用外观'));
-          result = { revision: current.revision + 1, draft: target, applied: target, previous: current.applied };
+          const targetModels = mode === 'default' ? [] : current.previousModels;
+          result = {
+            revision: current.revision + 1,
+            draft: target,
+            applied: target,
+            previous: current.applied,
+            appliedModels: targetModels,
+            previousModels: current.appliedModels,
+          };
+          if (mode === 'previous') transaction.objectStore(modelsStoreName).put(targetModels, 'current');
           store.put(result, 'current');
         } catch (error) {
           problem = error;
@@ -316,6 +289,9 @@ export async function reimportAppearanceModel(
   const modelId = id(idValue, '模型标识');
   if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 1) fail('模型版本无效');
   const next = await validateModel({ id: modelId, name: file.name, revision: expectedRevision + 1, blob: file });
+  const snapshot = await readAppearanceProjectSnapshot();
+  const nextModels = snapshot.models.map((model) => (model.id === modelId ? next : model));
+  await validateAnimationReferences([snapshot.state.draft], nextModels);
   const database = await openDatabase();
   try {
     return await new Promise((resolve, reject) => {
@@ -335,6 +311,7 @@ export async function reimportAppearanceModel(
           const models = decodeModels(modelsRequest.result);
           const index = models.findIndex((model) => model.id === modelId);
           if (index < 0) return;
+          if (current.revision !== snapshot.state.revision) fail('外观项目已由另一页面更新，请重新加载后再导入。');
           if (models[index].revision !== expectedRevision) fail('模型已被另一页面重导入，请重新加载后再试。');
           const total =
             models.reduce((sum, model) => sum + model.byteLength, 0) - models[index].byteLength + next.byteLength;
@@ -391,7 +368,17 @@ export async function deleteAppearanceModel(idValue: string, expectedRevision?: 
             fail('模型已被另一页面更新，请重新加载后再删除。');
           models.splice(index, 1);
           modelsStore.put(models, 'current');
-          projects.put({ ...current, revision: current.revision + 1 }, 'current');
+          projects.put(
+            {
+              revision: current.revision + 1,
+              draft: withoutAnimationModel(current.draft, modelId),
+              applied: withoutAnimationModel(current.applied, modelId),
+              previous: current.previous ? withoutAnimationModel(current.previous, modelId) : null,
+              appliedModels: current.appliedModels.filter((model) => model.id !== modelId),
+              previousModels: current.previousModels.filter((model) => model.id !== modelId),
+            },
+            'current',
+          );
           removed = true;
         } catch (error) {
           problem = error;
@@ -415,31 +402,13 @@ export async function deleteAppearanceModel(idValue: string, expectedRevision?: 
   }
 }
 
-const base64 = (bytes: Uint8Array): string => {
-  let binary = '';
-  for (let offset = 0; offset < bytes.length; offset += 0x8000)
-    binary += String.fromCharCode(...bytes.subarray(offset, Math.min(offset + 0x8000, bytes.length)));
-  return btoa(binary);
-};
-const fromBase64 = (value: unknown): Uint8Array => {
-  if (typeof value !== 'string') fail('外观包模型 base64 无效');
-  const input = value as string;
-  if (!/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(input)) fail('外观包模型 base64 无效');
-  let binary: string;
-  try {
-    binary = atob(input);
-  } catch {
-    return fail('外观包模型 base64 无效');
-  }
-  return Uint8Array.from(binary, (character) => character.charCodeAt(0));
-};
-
 export async function encodeAppearancePackage(
   project: AppearanceProject,
   models: readonly AppearanceModelInput[],
 ): Promise<Blob> {
   const checkedProject = validateAppearanceProject(project);
   const checkedModels = await validateModels(models);
+  await validateAnimationReferences([checkedProject], checkedModels);
   const text = JSON.stringify({
     schemaVersion: 1,
     project: checkedProject,
@@ -491,5 +460,6 @@ export async function decodeAppearancePackage(
       };
     }),
   );
+  await validateAnimationReferences([project], models);
   return { project, models };
 }

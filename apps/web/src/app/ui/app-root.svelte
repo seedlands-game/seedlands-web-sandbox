@@ -15,7 +15,9 @@
   import PlayerActionPresentation from './player-action-presentation.svelte';
   import TargetCard from './target-card.svelte';
   import SurvivalHud from './survival-hud.svelte';
+  import CombatStatus from './combat-status.svelte';
   import PresentedEntities from './presented-entities.svelte';
+  import MeleeShowcaseGuide from './melee-showcase-guide.svelte';
 
   let {
     bridge,
@@ -76,6 +78,7 @@
   {application}
   {assetBase}
   onstart={(seed, quality, openMode) => void actions?.startWorld(seed, quality, openMode)}
+  onstartshowcase={(quality) => void actions?.startMeleeShowcase(quality)}
 />
 
 {#if clientReady && application && actions}
@@ -85,8 +88,12 @@
     <div id="crosshair" aria-label="准星"><span></span></div>
     <div id="world-clock" class="game-panel">{hud.worldClock}</div>
     <TargetCard {interaction} />
+    {#if shell.experience === 'melee-showcase'}
+      <MeleeShowcaseGuide {actions} />
+    {/if}
     {#if !shell.gameplay.inventoryOpen && !shell.mapOpen && !shell.commandOpen && shell.gameplay.lifecycle === 'alive'}
       <PlayerActionPresentation {hud} {interaction} />
+      <CombatStatus combat={hud.combat} />
     {/if}
     <div
       id="interaction-feedback"
@@ -146,7 +153,7 @@
       <div id="held-item-name">
         {hud.hotbar[hud.selectedHotbarSlot]?.itemId ? hud.hotbar[hud.selectedHotbarSlot].name : ''}
       </div>
-      <SurvivalHud {hud} />
+      <SurvivalHud {hud} damage={interaction.gesture?.kind === 'damage' ? interaction.gesture : null} />
       <Hotbar slots={hud.hotbar} selected={hud.selectedHotbarSlot} onselect={actions.selectHotbarSlot} />
     </div>
   </section>

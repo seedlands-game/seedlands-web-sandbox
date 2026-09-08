@@ -11,6 +11,9 @@ import { PROTOCOL_VERSION, type SessionEpoch } from '../runtime/session-protocol
 import type { WorldOpenMode } from '../runtime/world-version-policy';
 import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-protocol';
 import type { ChunkPersistenceLoadDiagnostics } from '../server/persistence/chunk-persistence';
+import type { CombatSnapshot } from '../server/gameplay/combat-runtime';
+
+export type GameplayEntityView = GameplayEntity & Readonly<{ combat?: CombatSnapshot }>;
 
 export type AuthorityGameplayMetrics = Readonly<{
   entityCount: number;
@@ -40,7 +43,7 @@ export type AuthorityGameplayView = Readonly<{
   gameplayRevision: number;
   gameplayTime: number;
   player: PlayerSnapshot;
-  entities: readonly GameplayEntity[];
+  entities: readonly GameplayEntityView[];
   actors: readonly ActorState[];
   craftableRecipeIds: readonly string[];
   metrics: AuthorityGameplayMetrics;

@@ -3,10 +3,20 @@ import type { Asset, ImageTexture, MaterialAsset, NativeAsset } from './asset-ty
 import { validateNativeAssets } from './asset-package';
 import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 
+export const appearanceAnimationTargets = ['grazer', 'night-stalker', 'settler'] as const;
+export const modelAnimationRoles = ['idle', 'move', 'attack', 'hurt'] as const;
+export type AppearanceAnimationTarget = (typeof appearanceAnimationTargets)[number];
+export type ModelAnimationRole = (typeof modelAnimationRoles)[number];
+export type AppearanceAnimationBinding = Readonly<{
+  modelId: string;
+  clips: Partial<Record<ModelAnimationRole, string>>;
+}>;
+
 export type AppearanceProject = {
   schemaVersion: 1;
   assets: Asset[];
   materialBindings: Record<string, Record<string, string>>;
+  animationBindings?: Partial<Record<AppearanceAnimationTarget, AppearanceAnimationBinding>>;
   thumbnails: Record<string, string>;
 };
 
@@ -145,12 +155,12 @@ function validateReferences(assets: readonly Asset[]): void {
 }
 
 export function createEmptyAppearanceProject(): AppearanceProject {
-  return { schemaVersion: 1, assets: [], materialBindings: {}, thumbnails: {} };
+  return { schemaVersion: 1, assets: [], materialBindings: {}, animationBindings: {}, thumbnails: {} };
 }
 
 export function validateAppearanceProject(value: unknown): AppearanceProject {
   const project = object(value);
-  exactKeys(project, ['schemaVersion', 'assets', 'materialBindings', 'thumbnails'], '外观项目');
+  exactKeys(project, ['schemaVersion', 'assets', 'materialBindings', 'animationBindings', 'thumbnails'], '外观项目');
   if (project.schemaVersion !== 1 || !Array.isArray(project.assets) || project.assets.length > MAX_PROJECT_ASSETS)
     throw new Error('外观项目版本或资产数量无效');
   const preliminary = project.assets.map(preliminaryAsset);
@@ -199,6 +209,25 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
     }
   }
 
+  const rawAnimationBindings =
+    project.animationBindings === undefined ? {} : object(project.animationBindings, '动画绑定');
+  const animationBindings: Partial<Record<AppearanceAnimationTarget, AppearanceAnimationBinding>> = {};
+  for (const [target, value] of Object.entries(rawAnimationBindings)) {
+    if (!appearanceAnimationTargets.includes(target as AppearanceAnimationTarget)) throw new Error('动画绑定目标无效');
+    const binding = object(value, '动画绑定');
+    exactKeys(binding, ['modelId', 'clips'], '动画绑定');
+    const clips = object(binding.clips, '动画绑定片段');
+    exactKeys(clips, modelAnimationRoles, '动画绑定片段');
+    const checkedClips: Partial<Record<ModelAnimationRole, string>> = {};
+    for (const [role, clip] of Object.entries(clips))
+      checkedClips[role as ModelAnimationRole] = id(clip, '动画片段名称');
+    if (!Object.keys(checkedClips).length) throw new Error('动画绑定至少需要一个片段');
+    animationBindings[target as AppearanceAnimationTarget] = {
+      modelId: id(binding.modelId, '动画绑定模型标识'),
+      clips: checkedClips,
+    };
+  }
+
   const rawThumbnails = object(project.thumbnails, '缩略图');
   const thumbnails: Record<string, string> = {};
   if (Object.keys(rawThumbnails).length > MAX_PROJECT_ASSETS) throw new Error('缩略图数量超限');
@@ -206,7 +235,7 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
     if (!byId.has(id(assetId))) throw new Error('缩略图引用不存在的资产');
     thumbnails[assetId] = dataUrl(thumbnail, '缩略图');
   }
-  return { schemaVersion: 1, assets, materialBindings, thumbnails };
+  return { schemaVersion: 1, assets, materialBindings, animationBindings, thumbnails };
 }
 
 export function resolveAppearanceAssets(project: AppearanceProject, modelId?: string): Asset[] {

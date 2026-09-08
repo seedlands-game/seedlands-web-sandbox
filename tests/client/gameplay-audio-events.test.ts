@@ -15,7 +15,7 @@ describe('权威玩法结果的音频语义', () => {
     expect(soundForGameplayEvent({ kind: 'rejected' }).key).toBe('cancel');
     expect(soundForGameplayEvent({ kind: 'eat' }).key).toBe('eat');
     expect(soundForGameplayEvent({ kind: 'pickup' }).key).toBe('pickup');
-    expect(soundForGameplayEvent({ kind: 'damage' }).priority).toBeGreaterThan(
+    expect(soundForGameplayEvent({ kind: 'damage', amount: 2 }).priority).toBeGreaterThan(
       soundForGameplayEvent({ kind: 'craft' }).priority,
     );
   });
