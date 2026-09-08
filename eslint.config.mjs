@@ -386,13 +386,4 @@ export default tseslint.config(
     plugins: { seedlands },
     rules: { 'seedlands/node-platform-boundary': 'error', 'seedlands/package-boundary': 'error' },
   },
-  {
-    files: ['apps/node-server/src/node/**/*.ts'],
-    languageOptions: {
-      globals: {
-        ...Object.fromEntries(Object.keys({ ...globals.browser, ...globals.worker }).map((name) => [name, 'off'])),
-        ...globals.node,
-      },
-    },
-  },
 );

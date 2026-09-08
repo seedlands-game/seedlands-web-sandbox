@@ -23,7 +23,6 @@ import { World, waitForInitialWorldReady } from './world/world-runtime';
 import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
 import { LIGHTING_QUALITY_BUDGETS } from './scene/advanced-lighting-budget';
 import { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
-import { RemoteAuthorityClient } from '../client/authority/remote-authority-client';
 import type { BrowserComputeRuntime } from '../client/compute/browser-compute-runtime';
 import { BrowserLogicClient } from '../client/authority/browser-logic-client';
 import * as gamePlayer from './player/game-player-controller';
@@ -37,8 +36,7 @@ import { resolveExperimentalClientOptions, type ResolvedExperimentalClientOption
 import { GameExperimentState } from './experimental/game-experiment-state';
 import { GameFrameLoop } from './game-frame-loop';
 import { GameSaveQueue } from './world/game-save-queue';
-import { startPlayableWorkerSession } from './world/playable-worker-session';
-import { installRemotePlayableEvidence } from './world/remote-playable-evidence';
+import { startBrowserWorkerSession } from './browser-worker-session';
 import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
 
 export class Game {
@@ -56,7 +54,7 @@ export class Game {
   private performanceProfile: PerformanceProfile = PERFORMANCE_PROFILES.balanced;
   private performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
   private readonly store = new BrowserWorldStore();
-  private authority: BrowserAuthorityClient | RemoteAuthorityClient | null = null;
+  private authority: BrowserAuthorityClient | null = null;
   private computeRuntime: BrowserComputeRuntime | null = null;
   private logicClient: BrowserLogicClient | null = null;
   private serverPlayerId: string | null = null;
@@ -124,15 +122,11 @@ export class Game {
 
   // prettier-ignore
   async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode = 'continue') {
-    return this.startSession(seedText, restore, qualityLevel, openMode, null);
-  }
-
-  async startRemote(url: string, accessKey: string, qualityLevel: QualityLevel) {
-    return this.startSession('', null, qualityLevel, 'continue', { url, accessKey });
+    return this.startSession(seedText, restore, qualityLevel, openMode);
   }
 
   // prettier-ignore
-  private async startSession(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode, remote: Readonly<{ url: string; accessKey: string }> | null) {
+  private async startSession(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode) {
     await this.saveQueue.flush();
     this.disposeRuntime();
     const startAbort = new AbortController();
@@ -188,30 +182,22 @@ export class Game {
         this.onRuntimeFailure?.(error);
       },
     };
-    const session = await startPlayableWorkerSession({
-      remote: remote && harnessEnabled ? { ...remote, initialSyncDiagnostics: true } : remote,
-      client: clientOptions,
+    const session = await startBrowserWorkerSession({
+      epochSequence: ++this.sessionSequence,
+      seedText,
+      openMode,
+      legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
+      initialWorldTime: this.environment.worldTime,
+      harnessEnabled,
       generalWorkerCount,
       wasm: this.experimentState.workerSelection,
-      signal: startAbort.signal,
-      local: {
-        epochSequence: ++this.sessionSequence,
-        seedText,
-        openMode,
-        legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
-        initialWorldTime: this.environment.worldTime,
-        harnessEnabled,
-        generalWorkerCount,
-        wasm: this.experimentState.workerSelection,
-        frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
-        authorityTransportFaults,
-        ...clientOptions,
-        onPlayerDeath: () => this.controller?.releaseInput(),
-      },
+      frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
+      authorityTransportFaults,
+      ...clientOptions,
+      onPlayerDeath: () => this.controller?.releaseInput(),
     });
     const { authority, compute: computeRuntime, logic: logicClient, ready } = session;
     if (this.pendingStartAbort === startAbort) this.pendingStartAbort = null;
-    if (remote) this.seedText = ready.seedText;
     if (startGeneration !== this.startGeneration) {
       logicClient?.dispose();
       authority.dispose();
@@ -244,12 +230,12 @@ export class Game {
     );
     this.waterExperience = new WaterExperience(this.camera.camera ?? null, this.app.graphicsDevice);
     this.lifecycle.worldInstanceId += 1;
-    if (!remote && restore?.changes.length) await this.world.restoreLegacyChanges(restore.changes);
+    if (restore?.changes.length) await this.world.restoreLegacyChanges(restore.changes);
     const feet = ready.playerBodyPosition;
     this.camera.setPosition(feet[0], feet[1] + PLAYER_FEET_OFFSET, feet[2]);
     this.serverPlayerId = ready.playerId;
     // prettier-ignore
-    const initialWorldReady = waitForInitialWorldReady(remote ? this.world.waitForInitialPlayableArea({ x: feet[0], y: feet[1], z: feet[2] }) : this.world.waitForInitialVisibleChunk(), remote && harnessEnabled ? () => this.world!.initialPlayableAreaDiagnostics({ x: feet[0], y: feet[1], z: feet[2] }) : undefined);
+    const initialWorldReady = waitForInitialWorldReady(this.world.waitForInitialVisibleChunk());
     this.world.updateStreaming(this.camera.getPosition());
     this.gameplayClient = new BrowserGameplay({
       app: this.app,
@@ -273,7 +259,7 @@ export class Game {
     this.controller.applyAuthoritySnapshot(authority.snapshot ?? ready.snapshot);
     gamePlayer.orientPlayerTowardCamp(this.controller, ready);
     this.controller.install();
-    if (authority.mode === 'local') authority.requestLogicObservation();
+    authority.requestLogicObservation();
     this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
     await initialWorldReady;
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
@@ -322,9 +308,8 @@ export class Game {
 
   private installUiAndHarness() {
     const authority = this.authority;
-    const localAuthority = authority instanceof BrowserAuthorityClient ? authority : null;
-    if (localAuthority && this.serverPlayerId) {
-      this.commandExecutor = { execute: (source, command) => localAuthority.executeCommand(source, command) };
+    if (authority && this.serverPlayerId) {
+      this.commandExecutor = { execute: (source, command) => authority.executeCommand(source, command) };
       this.commandSource = {
         actorId: 'browser-local-developer',
         sourceType: 'local-developer',
@@ -345,11 +330,7 @@ export class Game {
     this.publishDebugVisibility(harnessEnabled);
     this.uiBridge.beginMeasurementWindow();
     if (!harnessEnabled || !this.controller) return;
-    if (authority instanceof RemoteAuthorityClient) {
-      if (this.world) this.removeHarness = installRemotePlayableEvidence(authority, this.controller, this.world);
-      return;
-    }
-    if (!localAuthority) return;
+    if (!authority) return;
     this.removeHarness = installHarness(
       createRuntimeHarnessApi({
         lifecycleSnapshot: () => ({ ...this.lifecycle }),
@@ -363,7 +344,7 @@ export class Game {
         gameplay: () => this.gameplayClient,
         frameMs: () => this.frameLoop.frameMs,
         qualityLevel: () => this.qualityLevel,
-        authority: () => localAuthority,
+        authority: () => authority,
         collisionDebug: () => this.collisionDebug,
         compute: () => this.computeRuntime,
         logic: () => this.logicClient,
@@ -372,9 +353,8 @@ export class Game {
         visualEffects: () => this.visualEffects,
         underwaterVisual: () => this.waterExperience?.visual ?? null,
         setWorldTime: (hour) => this.setWorldTime(hour),
-        setTimePaused: (paused) =>
-          runtimeControls.setAuthorityWorldClockPaused(this.environment, localAuthority, paused),
-        setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, localAuthority, speed),
+        setTimePaused: (paused) => runtimeControls.setAuthorityWorldClockPaused(this.environment, authority, paused),
+        setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed),
         blockLogicWorker: (ms) =>
           this.logicClient?.blockForHarness(ms) ?? Promise.reject(new Error('Logic Worker不可用。')),
         executeGameplayCommand: (command) => this.executeGameplayCommand(command),

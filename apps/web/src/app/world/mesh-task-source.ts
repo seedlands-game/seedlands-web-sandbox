@@ -1,5 +1,5 @@
 import type { PendingMeshTask, StreamingVariant, WorkerResult } from '../app-contracts';
-import type { AuthorityCompleteWorkerInput, MainSnapshot, WorkerInput } from './mesh-task-dispatch';
+import type { MainSnapshot, WorkerInput } from './mesh-task-dispatch';
 import { createWorkerFirstDispatch, type MeshDispatchRequest, type MeshTaskDispatch } from './mesh-task-dispatch';
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
 import type { PerformanceProfile } from '../../client/presentation/performance-profile';
@@ -28,53 +28,19 @@ export type MeshTaskSchedulerOptions = {
   onAcceptedResult: (task: PendingMeshTask, result: WorkerResult) => void;
 };
 
-export type CompleteWorkerInputLease = Readonly<{
-  input: AuthorityCompleteWorkerInput;
-  settle(): void;
-}>;
-
-export type MeshTaskSource = CommonMeshTaskSource &
-  (
-    | {
-        kind?: 'integrated';
-        prepareMainSnapshot: (cx: number, cy: number, cz: number) => MainSnapshot;
-        prepareWorkerInput: (cx: number, cy: number, cz: number) => WorkerInput;
-        acceptWorkerCanonical: (task: PendingMeshTask, result: WorkerResult) => boolean | Promise<boolean>;
-        prepareCompleteWorkerInput?: never;
-        acceptDerivedMesh?: never;
-      }
-    | {
-        kind: 'authority-complete';
-        prepareCompleteWorkerInput: (cx: number, cy: number, cz: number) => CompleteWorkerInputLease;
-        acceptDerivedMesh: (task: PendingMeshTask, result: WorkerResult) => boolean | Promise<boolean>;
-        prepareMainSnapshot?: never;
-        prepareWorkerInput?: never;
-        acceptWorkerCanonical?: never;
-        releasePrepared?: never;
-      }
-  );
-
-export function assertMeshSourceVariant(source: MeshTaskSource, variant: StreamingVariant): void {
-  if (source.kind === 'authority-complete' && variant !== 'worker-first')
-    throw new TypeError('Complete Authority input requires the worker-first mesh path.');
-}
+export type MeshTaskSource = CommonMeshTaskSource & {
+  prepareMainSnapshot: (cx: number, cy: number, cz: number) => MainSnapshot;
+  prepareWorkerInput: (cx: number, cy: number, cz: number) => WorkerInput;
+  acceptWorkerCanonical: (task: PendingMeshTask, result: WorkerResult) => boolean | Promise<boolean>;
+};
 
 function prepareSourceWorkerInput(
   source: MeshTaskSource,
   cx: number,
   cy: number,
   cz: number,
-): Readonly<{ input: WorkerInput; settle?: () => void }> {
-  if (source.kind !== 'authority-complete') return { input: source.prepareWorkerInput(cx, cy, cz) };
-  const lease = source.prepareCompleteWorkerInput(cx, cy, cz);
-  try {
-    if (!lease || lease.input?.inputStrategy !== 'authority-complete' || typeof lease.settle !== 'function')
-      throw new TypeError('Complete mesh source did not provide complete input and a settlement lease.');
-    return { input: lease.input, settle: () => lease.settle() };
-  } catch (error) {
-    lease?.settle?.();
-    throw error;
-  }
+): Readonly<{ input: WorkerInput }> {
+  return { input: source.prepareWorkerInput(cx, cy, cz) };
 }
 
 export function prepareSourceWorkerDispatch(
@@ -90,16 +56,8 @@ export function prepareSourceWorkerDispatch(
   } finally {
     telemetry.endSpan(span);
   }
-  try {
-    recordMeshPreparationDiagnostics(telemetry, request.traceId, prepared.input.preparationDiagnostics);
-    return {
-      dispatch: createWorkerFirstDispatch(sequence, request, source.seed, prepared.input),
-      ...(prepared.settle ? { settle: prepared.settle } : {}),
-    };
-  } catch (error) {
-    prepared.settle?.();
-    throw error;
-  }
+  recordMeshPreparationDiagnostics(telemetry, request.traceId, prepared.input.preparationDiagnostics);
+  return { dispatch: createWorkerFirstDispatch(sequence, request, source.seed, prepared.input) };
 }
 
 export function acceptSourceMeshResult(
@@ -107,8 +65,5 @@ export function acceptSourceMeshResult(
   task: PendingMeshTask,
   result: WorkerResult,
 ): boolean | Promise<boolean> {
-  if (source.kind !== 'authority-complete') return source.acceptWorkerCanonical(task, result);
-  if (result.authorityComplete !== true || result.proceduralVoxelSamples !== 0 || result.macroContextCount !== 0)
-    return false;
-  return source.acceptDerivedMesh(task, result);
+  return source.acceptWorkerCanonical(task, result);
 }

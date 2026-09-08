@@ -4,7 +4,7 @@
 
 ## 审计结论
 
-2026-09-08 的 monorepo change 将产品拆成 `@seedlands/web`、`@seedlands/node-server` 与 `@seedlands/game-core` 三个 workspace 包。Web 和 Node 只经 core 的声明 subpath exports 共享逻辑；core 不依赖两端，也不获得 DOM、WebWorker 或 Node ambient types。此前 app/client 的职责目录保持在 Web 包内。
+2026-09-08 的 monorepo 分离成果继续保留；2026-09-09 Node Dedicated MVP 归档退出，当前活跃 workspace 为 `@seedlands/web` 与 `@seedlands/game-core`。Web 经 core 的声明 subpath exports 消费逻辑；core 不依赖产品适配，也不获得 DOM、WebWorker 或 Node ambient types。退役 Node 路径仍是禁止 Web/core 反向导入的边界；Headless 工程宿主位于 scripts。
 
 迁移前基线 `f245493` 的 `changes` 有 330 个文件，属于变更合同与历史证据；根目录的 26 个受跟踪文件主要是工具配置和社区入口。主要改进点是功能导航和源码职责聚合，根目录配置及历史证据不应仅为减少数量而搬迁或删除。
 
@@ -16,7 +16,6 @@
 | ------------------------- | ------------------------------------------ | ----------------------------------------------------- |
 | 根目录                    | workspace 编排、共享检查配置及社区入口文档 | 产品运行依赖归所属包；根 devDependencies 是共享工具   |
 | `apps/web/`               | 浏览器产品、Vite/SSG、公开资产与 Web 入口  | 可依赖 game-core；不得依赖 node-server                |
-| `apps/node-server/`       | Node CLI、线程/子进程、磁盘与锁适配        | 可依赖 game-core；构建不得读取 Web 源码或资产         |
 | `packages/game-core/`     | 跨端权威规则、协议、世界、物理与纯计算     | 不依赖 apps 或平台 ambient；能力通过窄实例端口注入    |
 | `tests/`                  | 单元测试、架构门禁、长期浏览器基线         | 通常按被测模块归属组织；需求 E2E 遵守 change 生命周期 |
 | `changes/<日期>-<名称>/`  | Active 或未归档的变更合同、需求测试与证据  | 历史路径按交付时保留，不为追随当前目录而静默改写      |
@@ -31,14 +30,14 @@
 ## 新增源码的归属顺序
 
 1. **先找已有功能所有者。** 在代码地图中定位同类行为及调用链。权威规则放服务端领域模块；客户端快照和碰撞镜像是派生数据，不另建一套真值。
-2. **再区分算法与平台适配。** 世界算法放 `packages/game-core/src/world`，共享物理解算放 core 的 `physics`，通用时钟和调度放 core 的 `runtime`。浏览器装配、输入、PlayCanvas、Svelte、客户端适配和浏览器 Worker 在 `apps/web/src`；Node builtin、I/O、线程与子进程在 `apps/node-server/src/node`。
+2. **再区分算法与平台适配。** 世界算法放 `packages/game-core/src/world`，共享物理解算放 core 的 `physics`，通用时钟和调度放 core 的 `runtime`。浏览器装配、输入、PlayCanvas、Svelte、客户端适配和浏览器 Worker 在 `apps/web/src`；Headless 开发宿主的 Node builtin/I/O 位于 `scripts/`，不进入 core/Web。未来 Agent Server 单独经审阅选择应用目录，不复用退役产品目录。
 3. **把同一职责的辅助文件放在一起。** 接口类型、策略和局部工具靠近实际所有者。不要因为文件短就平铺到上层，也不要为了满足行数规则拆成无语义的编号片段。
 4. **出现稳定文件簇时建立领域子目录。** 以生命周期、状态或功能为单位，能用一句话说明该目录负责什么。移动已有文件属于独立迁移工作；当前已有 app/client 的职责目录应优先复用。
-5. **确有跨端复用时进入 core。** 先指出 Web 与 Node 的实际调用方及稳定契约，经 `@seedlands/game-core` 的声明 subpath export 使用；不要通过相对文件路径绕过包边界，也不预建包罗万象的 `shared`、`common` 或 `utils`。
+5. **确有跨端复用时进入 core。** 先指出 Web 与 Headless 的实际调用方及稳定契约，经 `@seedlands/game-core` 的声明 subpath export 使用；不要通过相对文件路径绕过包边界，也不预建包罗万象的 `shared`、`common` 或 `utils`。
 
 纯 `world-compute-task.ts` 与完整 Authority 输入门禁位于 `packages/game-core/src/compute`；浏览器 Worker 启动、消息与 Wasm adapter 位于 `apps/web/src/worker` 和 `apps/web/src/compute`。
 
-`apps/node-server/src/node/` 是 Node 平台适配边界：`server` 管 CLI、产品生命周期及 Authority Worker 入口，`runtime` 管有界 RPC 和 Authority façade，`compute` 管 Node Worker/child，`persistence` 管存储 Worker、缓存 proxy、磁盘与锁。core 的 `server/dedicated`、`server/compute` 和 `server/protocol` 保持平台无关。包边界由 ESLint 的 package-boundary 规则与正反例执行，Node 隔离脚本另在没有 Web 源码/资产的临时安装中检查真实构建和产物启动。
+Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟；Node 专属 Dedicated Worker、文件存储、世界 WebSocket 与生命周期仅在[归档 tag](change-archive.md#node-dedicated-server-研究归档)保留。当前不存在 Node 隔离构建门禁。Node 工程运行时的存在不等于 Node 世界产品重新进入 workspace。
 
 ## 文件名、导出与测试
 
@@ -61,7 +60,6 @@
 | 权威所有权与 UI 表现边界                  | [所有权测试](../tests/governance/authority-ownership-eslint.test.ts)、[UI 测试](../tests/governance/ui-presentation-boundary-eslint.test.ts)                         | 浏览器权威实例和 UI 写入的已定义约束                                                     |
 | app/client 文件归属                       | [ESLint](../eslint.config.mjs)、[归属测试](../tests/governance/client-app-boundary-eslint.test.ts)                                                                   | client 不导入 app；app/client 顶层只允许显式组合入口，其他文件必须进入职责目录           |
 | workspace 包边界                          | [ESLint](../eslint.config.mjs)、[包边界测试](../tests/governance/monorepo-package-boundaries.test.ts)                                                                | 拒绝跨包相对路径、反向/互相依赖、未声明依赖和未导出的 core subpath                       |
-| Node 隔离构建                             | [隔离脚本](../scripts/verify-node-package-isolation.mjs)                                                                                                             | 临时安装仅含 core/Node 构建输入；构建与运行不读取 Web 源码、资产或完整根 node_modules    |
 
 目录粒度仍是评审取舍，不等于完整依赖 DAG。后续强化边界必须先补规则的正反例测试并遵守 SDD，不能把文档目标写成已经验证的能力。
 

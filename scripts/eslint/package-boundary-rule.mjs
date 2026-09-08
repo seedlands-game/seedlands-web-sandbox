@@ -21,9 +21,9 @@ const exportAllows = (exports, source, packageName) => {
 };
 
 export function createPackageBoundaryRule(workspaceRoot) {
+  const retiredNodeRoot = normalize(resolve(workspaceRoot, 'apps/node-server'));
   const packageDefinitions = [
     ['@seedlands/web', 'apps/web'],
-    ['@seedlands/node-server', 'apps/node-server'],
     ['@seedlands/game-core', 'packages/game-core'],
   ].map(([name, relativeRoot]) => {
     const root = normalize(resolve(workspaceRoot, relativeRoot));
@@ -55,6 +55,14 @@ export function createPackageBoundaryRule(workspaceRoot) {
           try {
             targetPath = source.startsWith('file:') ? fileURLToPath(source) : resolve(context.filename, '..', source);
           } catch {
+            return;
+          }
+          if (within(normalize(targetPath), retiredNodeRoot)) {
+            context.report({
+              node,
+              messageId: 'forbiddenDirection',
+              data: { owner: owner.name, dependency: '@seedlands/node-server' },
+            });
             return;
           }
           const target = ownerOf(targetPath);

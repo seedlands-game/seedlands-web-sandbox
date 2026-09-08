@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "id": "living-world-baseline-parent",
+  "role": "路线与交付负责者",
+  "workType": "design",
+  "goal": "完成用户授权的 Node 归档 PR 与 Agent MVP 设计，不实现 Agent MVP",
+  "initiatedBy": "human",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-browser-living-world-baseline/spec.md",
+      "purpose": "授权范围与验收"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "不实现 Agent MVP",
+      "不合并 PR、不修改密钥"
+    ]
+  },
+  "outputs": [
+    "归档 PR",
+    "Agent MVP 设计"
+  ],
+  "execution": {
+    "form": "current-agent",
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "delivery",
+      "check": "退役验收并完成设计",
+      "evidence": "spec 和验证记录"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 6
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": true,
+    "delegate": true
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": null
+}

@@ -1,4 +1,4 @@
 {
   "files": [],
-  "references": [{ "path": "packages/game-core" }, { "path": "apps/web" }, { "path": "apps/node-server" }]
+  "references": [{ "path": "packages/game-core" }, { "path": "apps/web" }]
 }
