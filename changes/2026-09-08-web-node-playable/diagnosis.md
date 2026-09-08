@@ -103,3 +103,5 @@ CI34230070975 中 target回退为0，但放置后权威revision2、render revisi
 目标随后切换为 main@ddffbcb（底座 squash 合入）。已核对其树与本分支已包含的 21d6e37，仅 CI context 名称恢复为 Production build 及上游交付记录不同。以 21d6e37 为内容参照应用这两项精确差异并记录 main 合并父提交，保留全部 PR17 增量；不用旧目录历史重放整个迁移。PR17 后续以 main 为 base 验收。此步没有产品源码变化。
 
 修正后的原生 GPU 诊断旅程两项通过（19.2秒，仅功能执行记录）。放置目标[-1,20,-2]映射chunk -1,0,-1，取得57条相关事件，包含 prepare/worker/commit/visible-postrender；队列与transaction标量均可读。原始记录 /tmp/seedlands-web-node-playable/trace-name-native/，运行时工作树有诊断改动，只证明诊断接线有效，不替代7274冻结交付记录。
+
+独立审阅确认 queue 读取沿用既有 snapshot 的 gauge 刷新语义，无产品行为写入；同时指出原 Chrome span args 可含任意 errorMessage。已把新 meshTraceAt 的事件输出改为字段白名单，丢弃其它 attributes。可执行 RED 证实合成错误文本会泄漏到结果，GREEN 两文件7项通过，并检查负坐标映射、目标trace关联、71条总计只保留最近64条；受影响ESLint和测试typecheck通过。该收紧在新诊断的正式Linux取证前提交，不移除原始失败阶段信息。

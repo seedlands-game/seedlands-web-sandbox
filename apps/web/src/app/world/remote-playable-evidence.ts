@@ -101,7 +101,12 @@ export function installRemotePlayableEvidence(
   };
 }
 
-function captureRemoteMeshTrace(world: World, x: number, y: number, z: number) {
+export function captureRemoteMeshTrace(
+  world: Pick<World, 'exportTrace' | 'telemetry' | 'transactionDiagnostics'>,
+  x: number,
+  y: number,
+  z: number,
+) {
   const key = [x, y, z].map((value) => floorDiv(value, CHUNK_SIZE)).join(',');
   const events = world.exportTrace().traceEvents;
   const ids = new Set(events.filter((event) => event.args?.traceName === key).map((event) => event.args?.traceId));
@@ -111,7 +116,15 @@ function captureRemoteMeshTrace(world: World, x: number, y: number, z: number) {
   return {
     key,
     eventCount: selected.length,
-    events: selected.slice(-64),
+    events: selected.slice(-64).map((event) => ({
+      name: event.name,
+      cat: event.cat,
+      ph: event.ph,
+      ts: event.ts,
+      dur: event.dur,
+      tid: event.tid,
+      args: { traceId: event.args?.traceId, traceName: key },
+    })),
     queues: world.telemetry,
     transactions: world.transactionDiagnostics,
   };
