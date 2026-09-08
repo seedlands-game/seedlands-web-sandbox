@@ -1,6 +1,6 @@
 # AI 与人类协作代码审阅 Skill
 
-状态：Agile follow-up；仓库侧 GitHub Codex 接入完成，自动审阅开关等待登录 Codex Settings。
+状态：Agile follow-up；仓库侧 GitHub Codex 接入已提交 PR #23，自动审阅开关等待登录 Codex Settings。
 
 ## 目标与范围
 
@@ -50,7 +50,8 @@
 - [x] Delivery Snapshot 与语义化交付
 - [x] 补充 GitHub Codex `AGENTS.md` 自定义入口与 skill 的 GitHub 模式
 - [x] 复验 Skill 结构、格式、静态基线和生产构建
-- [ ] 推送更新并读回 PR head；登录 Codex Settings 后确认/启用本仓库 Automatic reviews
+- [x] 推送更新并读回 PR #23 的 branch/head/mergeability
+- [ ] 登录 Codex Settings 后确认/启用本仓库 Automatic reviews
 
 ## Delivery Snapshot
 
@@ -65,3 +66,5 @@
 GitHub Codex follow-up 已按 OpenAI 官方入口接入：根 `AGENTS.md` 新增唯一 `## Code Review Rules`，用三条简洁规则显式要求读取本 Skill，并将自动 review 收敛到可证实的 P0/P1；Skill 新增 GitHub 模式，保留 frozen base 规则、exact-SHA 证据边界和不批准/不合并约束。完整阅读报告、codemap、图示和 P2 仍由显式人类协作调用产生，避免在 GitHub 自动 review 中刷低价值评论。
 
 Follow-up RED 已确认根规则和 GitHub 模式原先均不存在。更新后 `quick_validate.py` 通过；Prettier、`ls-lint`、`git diff --check`、`pnpm verify:static`（249 个测试文件通过、2 跳过；1266 个测试通过、4 跳过；Svelte/TypeScript 零错误）与 `pnpm build` 再次通过。Codex Settings 的只读检查停在登录页，因此尚未取得本仓库 Automatic reviews 开关的真实状态；仓库配置完成不等于外部开关已启用。
+
+仓库侧 follow-up 已作为 PR #23 提交；首次读回 source 为 `codex/github-codex-code-review`、target 为 `main`，远端 head 与本地一致为 `de3e685254ffcec170a2a725e1818fb8453169d2`，当时 mergeability 为 `MERGEABLE`。该状态仍可能随新提交、review 和保护规则变化，最终准出以 GitHub live state 为准。
