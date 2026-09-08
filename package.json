@@ -32,8 +32,8 @@
     "test:coverage:ci": "vitest run --coverage --maxWorkers=1",
     "test:e2e": "playwright test tests/e2e",
     "test:e2e:regression": "playwright test tests/e2e/regression changes/2026-09-07-loading-performance/e2e/loading-performance.spec.ts changes/2026-09-07-prerendered-start-screen/e2e/prerendered-start-screen.spec.ts changes/2026-09-08-node-monorepo/e2e/web-package-runtime.spec.ts",
-    "test:web-node-playable": "pnpm build:server && vitest run tests/server/network-playable-protocol.test.ts tests/node/node-network-options.test.ts tests/node/node-authority-publication-listener.test.ts tests/node/node-playable-offline-runtime.test.ts tests/node/node-playable-network-integration.test.ts tests/node/node-playable-network-session.test.ts tests/client/remote-authority-client.test.ts tests/client/remote-authority-mesh-mirror.test.ts tests/app/playable-worker-session.test.ts tests/app/initial-playable-area-priority.test.ts tests/app/world-initial-playable-area.test.ts && playwright test changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts changes/2026-09-08-web-node-playable/e2e/graphics-identity-failure.spec.ts",
-    "test:web-node-playable:browser": "playwright test changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts changes/2026-09-08-web-node-playable/e2e/graphics-identity-failure.spec.ts",
+    "test:web-node-playable": "pnpm build:server && vitest run tests/server/network-playable-protocol.test.ts tests/node/node-network-options.test.ts tests/node/node-authority-publication-listener.test.ts tests/node/node-playable-offline-runtime.test.ts tests/node/node-playable-network-integration.test.ts tests/node/node-playable-network-session.test.ts tests/client/remote-authority-client.test.ts tests/client/remote-authority-mesh-mirror.test.ts tests/app/playable-worker-session.test.ts tests/app/initial-playable-area-priority.test.ts tests/app/world-initial-playable-area.test.ts && playwright test changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts changes/2026-09-08-web-node-playable/e2e/graphics-identity-failure.spec.ts changes/2026-09-09-remote-traversal-recovery/e2e/cancelled-baseline.spec.ts",
+    "test:web-node-playable:browser": "playwright test changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts changes/2026-09-08-web-node-playable/e2e/graphics-identity-failure.spec.ts changes/2026-09-09-remote-traversal-recovery/e2e/cancelled-baseline.spec.ts",
     "test:e2e:benchmark": "playwright test tests/e2e/benchmark",
     "test:e2e:macro-map": "playwright test tests/e2e/regression/macro-map.spec.ts",
     "verify:static": "pnpm ssg:check && pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage && pnpm typecheck",
@@ -63,7 +63,8 @@
     "perf:adoption:freeze": "node scripts/freeze-adoption-builds.mjs",
     "perf:adoption:summary": "node scripts/summarize-adoption-experiment.mjs",
     "test:pr15:integration": "playwright test changes/2026-09-08-pr15-main-sync/e2e/asset-package-integration.spec.ts",
-    "experiment:web-node-render-contention": "node changes/2026-09-08-web-node-playable/e2e/run-render-contention-experiment.mjs"
+    "experiment:web-node-render-contention": "node changes/2026-09-08-web-node-playable/e2e/run-render-contention-experiment.mjs",
+    "test:remote-traversal": "pnpm build:server && playwright test changes/2026-09-09-remote-traversal-recovery/e2e"
   },
   "dependencies": {},
   "devDependencies": {

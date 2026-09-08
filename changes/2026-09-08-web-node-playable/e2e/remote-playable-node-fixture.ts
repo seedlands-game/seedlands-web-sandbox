@@ -15,15 +15,24 @@ export class RemotePlayableNodeFixture {
   private process: ChildProcessWithoutNullStreams | null = null;
   private readonly output: string[] = [];
 
-  private constructor(dataDirectory: string, port: number) {
+  private constructor(
+    dataDirectory: string,
+    port: number,
+    private readonly seed: string,
+    private readonly compute: string,
+  ) {
     this.dataDirectory = dataDirectory;
     this.keyFile = join(dataDirectory, 'access-key');
     this.url = `ws://127.0.0.1:${port}/seedlands`;
   }
 
-  static async create(port: number): Promise<RemotePlayableNodeFixture> {
+  static async create(
+    port: number,
+    seed = REMOTE_PLAYABLE_SEED,
+    compute = 'inline',
+  ): Promise<RemotePlayableNodeFixture> {
     const dataDirectory = await mkdtemp(join(tmpdir(), 'seedlands-web-node-playable-'));
-    const fixture = new RemotePlayableNodeFixture(dataDirectory, port);
+    const fixture = new RemotePlayableNodeFixture(dataDirectory, port, seed, compute);
     await writeFile(fixture.keyFile, `${REMOTE_PLAYABLE_ACCESS_KEY}\n`, { mode: 0o600 });
     return fixture;
   }
@@ -42,9 +51,9 @@ export class RemotePlayableNodeFixture {
         '--data-directory',
         this.dataDirectory,
         '--seed',
-        REMOTE_PLAYABLE_SEED,
+        this.seed,
         '--compute',
-        'inline',
+        this.compute,
         '--listen',
         new URL(this.url).host,
         '--origin',

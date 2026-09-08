@@ -184,6 +184,18 @@ describe('Persistence lane Authority 侧同步缓存', () => {
               cx,
               cy: 0,
               cz: 0,
+              chunkRevision: 1,
+              generatorVersion: GENERATOR_VERSION,
+              canonical: new Uint16Array(32 ** 3),
+            }),
+          ).toBe(false);
+          expect(proxy.preparedSnapshotStatus(`${cx},0,0`)).toBe('missing');
+          expect(
+            server.acceptWorkerCanonical({
+              key: `${cx},0,0`,
+              cx,
+              cy: 0,
+              cz: 0,
               chunkRevision: 0,
               generatorVersion: GENERATOR_VERSION,
               canonical: new Uint16Array(32 ** 3),

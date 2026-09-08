@@ -35,6 +35,7 @@ declare global {
   interface Window {
     __seedlandsRemoteEvidence?: {
       snapshot(): RemotePlayableEvidence;
+      prediction(): PlayerController['predictionDiagnostics'];
       meshTraceAt(x: number, y: number, z: number): ReturnType<typeof captureRemoteMeshTrace>;
       voxelAt(x: number, y: number, z: number): number;
       chunkRevisionAt(x: number, y: number, z: number): number | null;
@@ -49,6 +50,7 @@ export function installRemotePlayableEvidence(
   world: World,
 ): () => void {
   const api = Object.freeze({
+    prediction: () => controller.predictionDiagnostics,
     snapshot: (): RemotePlayableEvidence => {
       const authorityState = authority.evidenceSnapshot();
       const presented = controller.position;
