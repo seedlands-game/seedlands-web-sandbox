@@ -105,3 +105,11 @@ CI34230070975 中 target回退为0，但放置后权威revision2、render revisi
 修正后的原生 GPU 诊断旅程两项通过（19.2秒，仅功能执行记录）。放置目标[-1,20,-2]映射chunk -1,0,-1，取得57条相关事件，包含 prepare/worker/commit/visible-postrender；队列与transaction标量均可读。原始记录 /tmp/seedlands-web-node-playable/trace-name-native/，运行时工作树有诊断改动，只证明诊断接线有效，不替代7274冻结交付记录。
 
 独立审阅确认 queue 读取沿用既有 snapshot 的 gauge 刷新语义，无产品行为写入；同时指出原 Chrome span args 可含任意 errorMessage。已把新 meshTraceAt 的事件输出改为字段白名单，丢弃其它 attributes。可执行 RED 证实合成错误文本会泄漏到结果，GREEN 两文件7项通过，并检查负坐标映射、目标trace关联、71条总计只保留最近64条；受影响ESLint和测试typecheck通过。该收紧在新诊断的正式Linux取证前提交，不移除原始失败阶段信息。
+
+## CI34232573762 的 jump 失败与下一软件兼容边界
+
+测试source9029108ee143d4f31782f37ce4a509ef92dab125经API核验parents840f4fb+26850f6、tree ebfeb21ab6aed9e5b8ac4a9f6055e606bf548de2。Production build、既有Chromium回归、资产集成通过；默认shell仍首屏失败，完整Chromium软件对照在jump 5秒poll失败，尚无挖放目标trace。Web current y=18.000001，Node关闭汇总y=18.103334；Web61accepted/20late，target回退0。turned原图的HUD为单帧2457ms、最近帧1058ms，不能据此认定jump edge丢失或mesh阶段根因。
+
+为建立可重复的软件CI功能环境，下一对照只通过现有启动页将产品画质设为Low。该组合减少半径、阴影/后处理和渲染分辨率，不是单一算法或Medium性能修复；其余浏览器、viewport、seed、真实输入、首屏/状态/输入租约门槛保持。默认本机Medium保留。运行JSON、失败进度和每次图形身份记录requested quality；把helper和既有质量配置纳入sourceInputs。
+
+本机Low软件兼容自检两项通过（29.0秒，功能执行记录），完整原断言保持，日志/tmp/seedlands-web-node-playable/low-quality-local.log。这是未提交测试配置的接线验证；Linux Low结果尚待，不能据该Mac自检准出Linux或声称性能收益。

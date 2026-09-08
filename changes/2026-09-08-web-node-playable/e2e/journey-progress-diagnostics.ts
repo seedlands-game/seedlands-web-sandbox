@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import type { Page, TestInfo } from '@playwright/test';
 import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
 import type { ConnectionGraphicsIdentity } from './graphics-identity-evidence';
+import { journeyQuality } from './journey-quality';
 
 export class JourneyProgressDiagnostics {
   private stage = 'created';
@@ -115,6 +116,7 @@ export class JourneyProgressDiagnostics {
     return {
       kind: `web-node-journey-${kind}`,
       sourceSha: this.options.sourceSha,
+      quality: journeyQuality,
       retry: this.options.retry,
       stage: this.stage,
       initial: this.initial,

@@ -18,6 +18,7 @@ import {
   type ConnectionGraphicsIdentity,
 } from './graphics-identity-evidence';
 import { JourneyProgressDiagnostics } from './journey-progress-diagnostics';
+import { journeyQuality, selectJourneyQuality } from './journey-quality';
 import { REMOTE_PLAYABLE_ACCESS_KEY, RemotePlayableNodeFixture } from './remote-playable-node-fixture';
 import { webNodePlayableSourceInputs as sourceInputs } from './web-node-playable-source-inputs';
 
@@ -95,6 +96,7 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
         return page.locator('#node-url').isVisible();
       })
       .toBe(true);
+    await selectJourneyQuality(page);
     await armGraphicsIdentity(page);
     await page.fill('#node-url', nodeUrl);
     await page.locator('input[type="password"]').fill(accessKey);
@@ -482,6 +484,7 @@ test.describe.serial('Web to Node local playable loop', () => {
           sourceSha,
           sourceTreeStatus,
           sourceInputs,
+          quality: journeyQuality,
           graphicsIdentities,
           initial,
           beforeJump,

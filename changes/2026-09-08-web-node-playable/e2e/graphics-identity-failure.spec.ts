@@ -5,6 +5,7 @@ import {
   hasCurrentApplication,
   releaseGraphicsIdentity,
 } from './graphics-identity-evidence';
+import { selectJourneyQuality } from './journey-quality';
 import { RemotePlayableNodeFixture } from './remote-playable-node-fixture';
 
 const port = 18_787;
@@ -18,6 +19,7 @@ test('错误认证销毁Application后仍保留图形身份', async ({ page }, t
     await expect(page.locator('#enter')).toBeEnabled({ timeout: 20_000 });
     await page.selectOption('#connection-mode', 'remote');
     await expect(page.locator('#node-url')).toBeVisible();
+    await selectJourneyQuality(page);
     await armGraphicsIdentity(page);
     try {
       await page.fill('#node-url', node.url);

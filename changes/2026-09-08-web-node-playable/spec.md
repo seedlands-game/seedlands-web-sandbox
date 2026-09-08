@@ -79,6 +79,14 @@ GREEN 采用有界公平选择：平时按 `interactive-fluid > interactive > st
 
 CI34230070975 中 target回退为0，但放置后权威revision2、render revision1的5秒等待仍失败。公平调度RED/GREEN不证明整个显示链已闭合。下一诊断复用已有World的Chrome trace导出，经远端专用只读evidence API返回：为trace mark附上既有trace名称，使未完成的chunk trace也能关联到放置chunk；旅程记录挖掘或放置坐标/预期revision、等待前和失败时的该chunk最近64条事件、计数以及已存在的队列快照。只读指不修改世界、输入、调度或渲染；队列读取沿用既有 remote evidence.snapshot 的 world.telemetry，会刷新同一组已有 gauges，不承诺观测状态完全不变。不新增逐帧观察器、网络日志、写RPC、时序或产品调参。RED为现有failure只有最终revision、没有该chunk在queued/prepare/worker/upload/postrender的确切停点；GREEN以已有telemetry测试验证未完成trace仍有chunk名称，并用真实旅程验证字段。导出事件仅允许名称、分类、阶段、时间、lane和trace身份；定向RED/GREEN确认任意errorMessage/其它attributes被丢弃，相关事件保留最近64条。保留5秒及全部原断言，不把诊断时间当性能采样。
 
+### 软件渲染 CI 的产品画质兼容边界
+
+CI34232573762的完整Chromium/SwiftShader旅程在jump的5秒轮询失败，尚未进入挖放trace采集；原始turned帧HUD记录单帧2457ms、最近帧1058ms。Web为61accepted/20late，target回退和too-far-ahead均0；关闭时Node位置y=18.103334，失败时Web latest y=18.000001。不能把该信息直接当成jump edge丢失或已修复，也没有本次放置停点证据。
+
+下一兼容对照只改变产品现有的启动页画质选择为Low：仍使用managed fullChromium/SwiftShader、1280×720、相同seed/真实键鼠/完整旅程、30秒首屏、5秒状态等待和500ms输入lease。本机默认Medium与既有原生GPU Medium证据保留。Low是产品既有组合配置，包含较短流送半径、无阴影/后处理与较小渲染分辨率；不把它归因为单一底层优化或Medium性能修复。
+
+测试记录requested quality并通过真实启动页select设置，成功/失败输出都可辨别档位。若Linux Low完成全部原旅程和错误认证图形身份测试，可将其采用为软件CI功能档位；该准出只证明Low功能兼容，Medium网络/渲染覆盖由本机真实GPU旅程承担。若仍失败，先按失败阶段/trace分析，不继续降画质、放宽租约或盲目重跑。
+
 ## 阶段与保存
 
 - [x] M0：合同、预算、接口接缝审阅与可执行 RED；提交并推送。

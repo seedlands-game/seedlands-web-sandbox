@@ -1,6 +1,7 @@
 import { basename, resolve } from 'node:path';
 import type { Page, TestInfo } from '@playwright/test';
 import type { GraphicsIdentitySnapshot } from './graphics-identity-probe';
+import { journeyQuality } from './journey-quality';
 
 const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
 const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
@@ -14,6 +15,7 @@ export type ConnectionGraphicsIdentity = Readonly<
     attempt: string;
     outcome: 'connected' | 'connection-failure';
     browserVersion: string;
+    requestedQuality: string;
     browserUserAgent: string;
     configuredChannel: string;
     executableSource: string;
@@ -33,6 +35,7 @@ export async function captureGraphicsIdentity(
   if (!graphics) throw new Error('PlayCanvas WebGL2 graphics identity is unavailable.');
   const identity = {
     ...graphics,
+    requestedQuality: journeyQuality,
     attempt,
     outcome,
     browserVersion: page.context().browser()?.version() ?? 'UNAVAILABLE',
