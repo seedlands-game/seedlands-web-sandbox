@@ -185,7 +185,12 @@ describe('ApplicationShell experiment and capability gates', () => {
   it('取消的本地体验场迟到完成不能向新的远端会话发送造景命令', async () => {
     let resolveLocal!: () => void;
     const game = createGame();
-    vi.mocked(game.start).mockImplementationOnce(() => new Promise<void>((resolve) => (resolveLocal = resolve)));
+    vi.mocked(game.start).mockImplementationOnce(
+      () =>
+        new Promise<{ seed: string }>((resolve) => {
+          resolveLocal = () => resolve({ seed: 'wood-sword-action-stage-v1' });
+        }),
+    );
     const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
       preflight: async () => capability(),
     });
