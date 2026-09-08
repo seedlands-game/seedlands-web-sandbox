@@ -28,7 +28,7 @@ Node 产品从 workspace、根 typecheck/build/test、Lint/依赖扫描、CI 和
 - [x] RED 扫描、移除活跃依赖、保留 Headless 平台适配。
 - [x] 更新长期产品基线、路线、代码地图、目录规则及入口。
 - [x] 受影响确定性测试、pnpm verify:static、pnpm build、浏览器回归、Headless 多命令冒烟。
-- [ ] 语义 commit、推送 tag/分支并发 PR；人类审核与合并不自动执行。
+- [x] 语义 commit、推送 tag/分支并发 [PR #24](https://github.com/seedlands-game/seedlands-web-sandbox/pull/24)；人类审核与合并不自动执行。
 
 ## 工作量与预算
 
