@@ -22,6 +22,9 @@
 
 - `pnpm test:remote-traversal`：构建 Node 并运行完整往返和迟到分页两项 change 测试。
 - `pnpm test:web-node-playable`：原有协议/适配、挖放/重连、本地隔离及迟到分页回归。
-- 全量 static、独立 Web/Node build 和最终 PR CI 的结果在准出后回填。
+- `CI=true pnpm verify:static:ci`：通过，264 个文件 / 1332 项测试通过，既有 2 个文件 / 4 项 skip 未扩大；世界逻辑行覆盖率 96.89%，类型、格式、lint、路径和 SSG 检查通过。
+- `CI=true pnpm build`：Web 生产构建通过；`pnpm test:web-node-playable` 的 Node 构建和 11 文件 / 40 项定向 Vitest 通过。
+- 原有浏览器旅程首次与覆盖率测试有重叠时挖掘失败（记录了 41 次迟到输入/重同步），保留 `/tmp/seedlands-remote-traversal/playable-regression` 和对应日志，不能用该次结果宣称整条命令通过。覆盖率任务结束后，同提交、同 Medium / 原生 GPU 配置执行 `pnpm test:web-node-playable:browser`：3 项全通过（52.6 秒），涵盖挖放、durable 保存、关页重连、Node 重启、本地隔离和超时迟到页恢复。该对照提示输入负载敏感性，不单独证明唯一失败根因。
+- 必要 CI：Static verification、Production build、Chromium regression；以 PR17 当前 HEAD 检查为准，历史 CI 不冒充当前准出。
 
-长期 docs baseline 不更新：没有改变架构、持久格式、协议、资源预算或所有权规则；只是让当前实现符合既有生命周期合同。`ChunkPersistence.evictSnapshot` 源码注释明确只释放读取缓存。PR17 交给人类审核，不自动合并。用户原试玩 Node 进程需要重启才能加载新构建。
+长期 docs baseline 不更新：没有改变架构、持久格式、协议、资源预算或所有权规则；只是让当前实现符合既有生命周期合同。`ChunkPersistence.evictSnapshot` 源码注释明确只释放读取缓存。PR17 交给人类审核，不自动合并。用户原试玩 Node 已优雅重启并恢复 durable checkpoint `543248`（worldRevision `97`），存档备份位于 `/tmp/seedlands-remote-traversal/trial-before-restart-20260909`，不包含凭据。因另一工作树同时使用 5173，新增独立入口 `http://localhost:5187/`，Node 仍为 `ws://127.0.0.1:8788/seedlands`、worker-thread；仅把精确 Origin 改为 `http://localhost:5187`，原凭据和存档保持。已验证 HTTP 页面、Node 监听和 checkpoint 恢复；没有读取凭据重新登入原世界。
