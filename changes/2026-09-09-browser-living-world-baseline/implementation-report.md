@@ -66,3 +66,13 @@ Terra/high 独立只读诊断沿 `AuthoritySession.wake → advanceGameplayRules
 新增 `tests/server/gameplay-foundation.test.ts` 的合并步进用例，直接验证第一击已在 recovery 而结果为 5、第二击 active 已 null 而结果为 7，以及 health 20→15→8 与单调 result sequence。`CI=true pnpm exec vitest run tests/server/gameplay-foundation.test.ts` 12/12 通过。`SEEDLANDS_BROWSER_E2E_QUALITY=low CI=true pnpm test:pr17:integration --repeat-each=2 --retries=0` 连续 2/2 通过（11.8s，功能测试耗时不是性能结论）。同次输入的两张原始截图已检查：第一张在收招/衔接阶段仍有目标，第二张显示 7 点命中且中央目标消失；不声称截图证明所有 tick 合并时均显示中间挥剑相位。
 
 本轮定向复验启动时 pnpm 的自动依赖检查在 sandbox 内重建 node_modules，因 registry EPERM 失败；随后通过已批准的网络环境按原 lockfile 恢复，再运行上述测试成功。未新增依赖或改变锁文件。
+
+### 第二次 CI 与软件渲染复现
+
+[run 34272866705](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34272866705) 固定 `d33da14ce2a6c4f4774137e59b1e0deec645546c`：静态、构建、基础浏览器/资产再次通过，近战仍失败，其中一次 attempt 在受击提示短窗口失败。因此此前的相位/回执耦合修订只解决了一个不成立的断言，不能称为全部失败的根因修复。
+
+本地原默认使用系统 Chrome；为接近 CI 软件渲染，固定项目已有 `SEEDLANDS_E2E_FULL_CHROMIUM=1 SEEDLANDS_E2E_SWIFTSHADER=1`、Low 和零重试。加入失败时 DOM 历史/Harness 记录后直接复现真实 `5 + 5 + 2`：第一次连击未接续，重新起手后目标剩 2HP，故第二段实际回执为 2 而非预期 7。只移除中间截图的单变量对照仍 1/2 失败，未采用该删除。
+
+保留截图，改为在场景创建与重新布置后先确认生成/网格/计算队列为空，再确认连续 8 帧间隔小于 100ms（15s 有界失败），之后才进行短窗口输入验收。同一软件渲染环境、`--repeat-each=2 --retries=0` 2/2 通过（25.8s）。这定义的是稳定可玩场景的测试前置条件，不是性能改善声明，也不能据此宣称冷启动掉帧时按住连击或所有短暂 HUD 反馈已得到无条件保证。没有延长原命中谓词超时、增加 retry 或改产品规则。
+
+提取的真实反馈序列、失败/通过结果、原日志 hash 与测试变体见[软件渲染诊断证据](evidence/melee-software-rendering.json)。截图删除候选被否决并恢复；失败日志不覆盖。失败时测试输出诊断 JSON，后续 CI 即使未上传 artifacts 也能从日志获取状态。

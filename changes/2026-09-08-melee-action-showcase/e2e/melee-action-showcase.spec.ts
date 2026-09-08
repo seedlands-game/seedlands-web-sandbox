@@ -14,6 +14,46 @@ async function selectJourneyQuality(page: Page): Promise<void> {
   await expect(page.locator('#quality')).toHaveValue(browserQuality);
 }
 
+async function waitForPlayableScene(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const state = window.__seedlandsHarness!.snapshot();
+        return state.generationQueue + state.meshingQueue + state.compute.running + state.compute.queued;
+      }),
+    )
+    .toBe(0);
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const deadline = performance.now() + 15_000;
+        let previous = performance.now();
+        let stable = 0;
+        const frame = (now: number) => {
+          stable = now - previous < 100 ? stable + 1 : 0;
+          previous = now;
+          if (stable >= 8) return resolve();
+          if (now > deadline) return reject(new Error('Scene did not settle before timing-sensitive melee input.'));
+          requestAnimationFrame(frame);
+        };
+        requestAnimationFrame(frame);
+      }),
+  );
+}
+
+test.afterEach(async ({ page }, info) => {
+  if (info.status === info.expectedStatus || page.isClosed()) return;
+  const evidence = await page.evaluate(() => ({
+    combat: document.querySelector('#combat-status')?.textContent,
+    feedback: document.querySelector('[aria-label="交互反馈"]')?.textContent,
+    damage: document.querySelector('#player-damage-feedback')?.outerHTML,
+    history: (window as Window & { __showcaseCombatEvidence?: string[] }).__showcaseCombatEvidence,
+    snapshot: window.__seedlandsHarness?.snapshot(),
+  }));
+  console.log('MELEE_FAILURE_EVIDENCE', JSON.stringify(evidence));
+  await info.attach('melee-failure-evidence', { body: JSON.stringify(evidence), contentType: 'application/json' });
+});
+
 test('开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈', async ({ page }, info) => {
   test.setTimeout(90_000);
   const capture = async (name: string) => {
@@ -31,6 +71,7 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   await expect(page.locator('#debug')).toContainText(`Seed ${MELEE_SHOWCASE_SEED}`);
   for (const id of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID])
     await expect(page.locator(`[data-entity-id="${id}"]`)).toBeAttached();
+  await waitForPlayableScene(page);
   await capture('showcase-ready');
 
   await page.getByRole('button', { name: '立即触发玩家受击反馈', exact: true }).click();
@@ -56,6 +97,7 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   for (const id of MELEE_SHOWCASE_DUMMY_IDS) await expect(page.locator(`[data-entity-id="${id}"]`)).toBeAttached();
 
   await lockPointer(page);
+  await waitForPlayableScene(page);
   await page.evaluate(() => {
     const target = window as Window & {
       __showcaseCombatEvidence?: string[];
