@@ -1,9 +1,3 @@
-# 独立验收当前状态
-
-最新审阅源码为25b59fe，PR17仍未准出。CI34213458251的Static verification和Production build通过；Chromium初始同步仍未完成9个必需区块。已到达和已校验的分页数量一致，digestingTransfers为0。加载时渲染竞争是待预注册对照验证的假设，尚不能称为已定位的根因或已采用的优化。
-
-以下保留各个源码检查点的审阅及其证据限制；早期未验项目只以明确记录的后续检查结论覆盖。
-
 # Web/Node 可玩闭环独立验收（首轮源码与测试设计）
 
 审阅对象：`51e97facf8ec1e736ee5f9b1c9bac87642eb6550`（功能冻结）。
@@ -355,3 +349,290 @@ PlayCanvas 明确保证 `autoRender=false` 只跳过 render，应用 update 仍�
 若对照成立，产品修复边界才是 remote loading 的按 attach 请求 render（替代定时器）、barrier finally 恢复连续渲染，并新增 attach/postrender、cancel/timeout、local 模式不变的 RED/GREEN。它是为满足既有 30 秒首屏合同的正确性收口；任何“更快”的结论仍需同源、串行的 A/B 端到端测量，不能由该诊断或一次 CI 成功宣称。
 
 本轮仅阅读 CI/source，未运行 browser、CI 或全套，未修改源码、index 或 evidence。CI `34213458251` 仍失败，PR17 不准出。
+
+## `4008f2f5a4553f10272f09432bbd5d7033a36300`：render-contention AAABBA 正式采样准备审阅（未执行样本，当前阻断）
+
+已重新计算固定验收合同 SHA-256，仍为 `1ae93e3714a6f09ecc4a6686b4c606ab0e28fde5068bb50d0592c2f8f665262b`。本轮只读审阅实验定义、runner、probe、真实 Node fixture、Playwright 配置及 root 尚未提交的 CI 接线；没有运行 browser、正式样本、CI 或全套，也没有改动工作树源码、测试、证据或 index。
+
+实验设计的有效部分如下：序列是固定 `A,A,A,B,B,A`；每个 trial 都新建空数据目录和独立 Node Authority 进程，Browser 保持同一进程但每次新建并关闭 context；固定 seed、viewport、inline compute 和 SwiftShader launch 参数，并以 GL renderer readback 作为环境核验。A 保持 `autoRender=true`；B 只在远端 loading 期以 100ms cadence 请求真实 `renderNextFrame`，不会停掉 update、rAF、网络、worker、attach 或 `postrender`。两侧都以真实 UI 点击到 9 个 required chunk 的 rendered revision 为计时和正确性门槛；30秒写作右删失而不是虚构 ready 时间，B 两次均须不晚于24秒，且 A 的首两个和后置平衡 control 都必须在30秒 timeout。每个 B 成功还要求9块、恢复 `autoRender`、恢复后真实 postrender、最终 PNG；任一样本 renderer 非 SwiftShader、B 失败或完整性缺失均会给出 `stop-without-product-adoption`。这满足单轴、失败止线和不以倍率声称性能收益的治理边界。
+
+但 `4008f2f` 在正式执行前有下列必须修正的可执行性缺口，已交 root/Sol：
+
+- runner 仅拒绝已有 `invocation.json`，却先用 recursive mkdir 建目录，因此正式目标不是“新空目录”；遗留 PNG/log/test artifact 可以混入。正式模式须要求输出目录此前不存在，或以排他的新 run directory 创建；`benchmark-window` 的 `window.json` 在批次结束才写入，不与此冲突。
+- probe 仅在测试 finally 调用 `release()`。产品 remote start 失败会经 `application-shell.ts` 的 `game.abortStart()` 销毁 application；此时不存在可观察的 postrender，不能把 `autoRenderRestored` 或 `finalPostrenderAtMs` 伪造为成功。最小实现应立即观察 startup failure/close：app 尚存则清 cadence、恢复并等待一次真实 postrender；app 已 dispose 则记录诸如 `failure-after-app-disposed` / `restoration-not-observable-after-dispose` 的失败终态。任何 B failure 仍是整体 veto。
+- `render-contention-experiment.json` 明定正式身份绑定“本合同输入哈希”，但 runner 和 raw result 的 `sourceInputs` 都没有 `changes/2026-09-08-web-node-playable/contracts/validation.json`。应将其加入两处哈希清单；完整 clean Git SHA 仍保留为总身份锚点。
+- CI 在 experiment 前运行 `pnpm test:e2e:regression`，其中 `changes/2026-09-07-loading-performance/e2e/loading-performance.spec.ts:66` 硬写已跟踪的 `changes/2026-09-07-loading-performance/evidence/world-loading.png`；随后 active journey 的 `web-node-playable.spec.ts:48` 也硬写该 change 的已跟踪 PNG/JSON。当前 CI patch 已设置 `SEEDLANDS_LOADING_EVIDENCE_OUTPUT` 和 `SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT`，但两份源码尚未读取它们，所以环境变量目前无效，formal runner 的 clean preflight 必然会拒绝。最小正确修复是两处测试都用 `resolve(process.env.<VAR> ?? historicalDefault)`，CI 指向 `/tmp`，默认继续写历史本地 evidence。PR15 integration 的所有 screenshot 使用 `testInfo.outputPath()`，不污染跟踪树。不要用 CI `git restore` 来遮蔽未知污点。
+
+CI patch 的位置和条件其余可执行：原 required job 名 `Chromium regression` 及原门禁保持；仅 PR17 分支、在所有既有门禁之后以 `!cancelled()` 执行 `build:server` 和完整 benchmark window，15分钟外层上限覆盖六次受限 trial；即使先前门禁失败，步骤会收集诊断但 job 仍保留失败。SHA-pinned `upload-artifact` 对同一条件上传完整 `/tmp` 正式目录、保留7天，能留住失败样本。该 native CI 批次由 root 触发并持锁执行；Terra 仅负责独立审阅与验收，不能称为直接操作 CI。
+
+结论：AAABBA 的统计与正确性门槛设计通过静态审阅；`4008f2f` 尚不能开始正式采样，须先合入上述目录新鲜度、失败恢复语义、合同 hash 和两条上游 evidence 输出隔离的最小修复。本段不构成产品性能结论或 PR17 准出。
+
+## `59c078d` 与 `21777c603ce11a07b58596389d7c61548749d164`：render-contention 冻结 delta 定向复核
+
+本轮按固定合同 SHA-256 `1ae93e3714a6f09ecc4a6686b4c606ab0e28fde5068bb50d0592c2f8f665262b`，只读比对 `4008f2f..21777c6`。HEAD 为 `21777c6` 且工作树干净；`git diff --check` 无输出。未运行浏览器、CI、正式样本或全套，未改源码、测试、证据或 Git 状态。
+
+此前的四项执行阻断均由代码闭合：
+
+- runner 在正式模式创建目录后以 `readdir` 拒绝任何非空输出；整批 native benchmark window 互斥、每次 CI runner 新建的前提下，这足以阻止残留 artifact 混入，不必增加通用跨进程目录锁。
+- runner 和 raw result 的 `sourceInputs` 都新增 validation contract；正式记录同时保存 clean tree status、完整 HEAD 和 Node dist hash。自检来自含未提交工作树的 `4008f2f`，因此只证明 probe 行为，不能代替冻结正式身份。
+- loading regression 与 web-node journey 都改为读取 CI-only evidence output env，默认路径仍为各自历史 evidence。CI 先将两者定向到 `/tmp`，PR15 integration 仍只写 Playwright output；因此正式 runner 的 clean-source preflight 不再因既有门禁改写已跟踪 PNG/JSON 而失效。
+- probe 把 terminal 扩为 `failed`，监听 application destroy 和仍存活时的 product error。ready 路径才恢复 autoRender、请求一帧并以真实 postrender 结束；失败路径清 timer、恢复属性并把 `finalPostrenderUnavailableReason` 记录为 `application-destroyed` 或 session-ended，未调用 renderNextFrame。自检 raw result 的成功 B 有 required=9、SwiftShader、恢复后 postrender 和 PNG；错误口令 B 有 `terminal=failed`、`autoRenderRestored=true`、`finalPostrenderAtMs=null`、`application-destroyed`，证明不会伪造失败后 postrender。每个 formal trial 的 fresh Node/data/context、30秒右删失、AAABBA、B≤24秒、9块/PNG/SwiftShader及所有 veto 仍未变。
+
+CI 接线仍保留 `Chromium regression` 名称和全部原门禁；仅目标 PR17 分支在已有门禁之后、`!cancelled()` 下 build Node dist 并由 native CI 持有完整 benchmark window，上传完整 `/tmp` artifact 7天。该批次尚未触发或执行，不能从自检推导性能结论、正式采样结果或 PR17 准出。
+
+剩余唯一最小一致性项已交 root：`render-contention-experiment.json` 和 spec 还写 failure/close 也“强制一帧”，但当前已接受的正确语义是 application destroy 后不得渲染，只能恢复可恢复的属性并记录 postrender 不可观察。应改为 ready 强制一帧并验证 postrender；failure/close 在 app 存活时恢复，destroy 时明确记录 unavailable。此项是说明文字与实际清理语义的校正，不改变采样轴、阈值、CI或生产逻辑。完成该文案修正后，本独立审阅认为正式 AAABBA 批次可执行，等待 root 授权 push 触发原生 CI 后再核验原始结果。
+
+### 最终实验冻结身份：`a35b64b7b750ee9cf46ae28d4bd75cb47b01546a`
+
+已只读复核 `21777c6..a35b64b`，工作树仍干净、固定合同 SHA-256 未变。delta 仅把 experiment JSON/spec 对齐已验证的清理语义：ready 才强制一帧并验证 postrender；failure/close 仅恢复可恢复状态，application 已销毁时记录不可观察，不调用 render 或伪造 postrender。它不改变实验代码、AAABBA 顺序、100ms cadence、30秒右删失、24秒 B 门槛、Node/Browser 隔离或 CI 原门禁。
+
+至此，所有此前列出的正式采样阻断已关闭。本独立审阅确认 `a35b64b` 的一次原生 CI 固定 AAABBA 批次可执行。该结论只说明冻结输入和执行条件合格；尚未取得该批次原始 artifact/CI终态，不能宣称性能候选成立、产品变更或 PR17 准出。root 已授权并负责 push/触发原生 CI；待其交付原始结果后再按 invocation/raw-results/PNG/window 与 CI 状态复核。
+
+## 原生 CI `34218178776` / merge source `91f7a7b765fa42a95be80bdd0646d8f1bb39cfa9`：render-contention 批次无效的 base-path 归因
+
+只读检查 `/tmp/seedlands-web-node-playable/ci-render-contention-34218178776/`、对应 Chromium log 与冻结源码。六个 trial 都在 `armProbe()` 的动态 import 处抛出同一错误：`http://127.0.0.1:4173/@fs/home/runner/.../render-contention-probe.ts` 无法 fetch。失败发生在 `page.click('#enter')` 之前；每条 raw result 都是 `outcome=failure`、`probe=null`、renderer/evidence/required chunks/final frame 均为空。每个临时 Node 仅打印 ready 后被 finally 停止，没有真实远端连接、baseline、mesh、postrender 或 B rendering cadence。因此 raw summary 中的 `stop-without-product-adoption` 是脚本安装失败的机械结果，六个样本全部无效，既不能作为 A 对照失败，也不能作为 B 候选反证、性能数据或产品结论。本次 artifact 必须保留，但从正式 AAABBA 统计中排除。
+
+根因确定为 base-path：Playwright 当前 base URL 是 `/seedlands-web-sandbox/`，而 spec 把绝对文件系统 Vite URL 固定为根路径 `/@fs...`。Vite base middleware 对不以 raw base 开头的非 HTML 请求返回 404；游戏页面仍可经 base redirect 正常加载，故两种现象可同时成立。最小修复只应让 `probePath` 按 `SEEDLANDS_BASE_PATH` 构造，例如以 `new URL('@fs' + resolve(probeFile), new URL(basePath, origin)).pathname` 生成 `/seedlands-web-sandbox/@fs/...`；根路径继续得到 `/@fs/...`。不得变动 experiment axis、AAABBA、100ms cadence、30秒右删失、24秒阈值、Node fixture、生产逻辑或 timeout。
+
+身份和前置条件有效但不救活样本：`invocation.json` 与 `raw-results.json` 一致记录 `sourceSha=91f7a7b`、空 `sourceTreeStatus`、固定 validation contract hash 和相同 Node dist hash。root 另核对该 CI merge commit parents 为 main `ddffbcb` 与 `a35b64b`，其 tree 等同本地 `a35b64b^{tree}`，所以 artifact 确实执行了冻结内容。benchmark window 也完整记录本次独占失败（exit 1）。原 Active journey 同 job 仍是首屏 7/9 timeout，可作为既有产品故障持续的独立门禁记录，不能挪作本批 A 样本。
+
+下一步只需在同一非根 base 下运行非计时 selftest 的成功 B 与错误口令 B，确认 probe 可以安装、前者完成9块/真实恢复后 postrender、后者记录 destroy/unavailable cleanup；然后以新的 clean freeze 重做一次原生正式批次。本轮未运行 CI、browser、正式样本或全套，也未改源码、测试、证据或 index。未发现其他正式批次阻断。
+
+## 原生 CI `34219596804` / merge source `2c07500f9ba1089541b24a28d6876a1407670ce4`：有效 AAABBA 结果与 active-gate 差异
+
+本轮只读复核正式 artifact `/tmp/seedlands-web-node-playable/ci-render-contention-34219596804/`、window、raw result、六张 PNG、冻结测试源码和 CI step 状态；未重跑样本、CI、browser 或全套，未改源码、测试、证据或 index。`invocation.json` 与 `raw-results.json` 记录同一 merge source、空 `sourceTreeStatus`、固定 validation contract hash `1ae…262b`、一致 Node dist hash及逐文件输入 hash。root 已验证 merge commit 的树与提交冻结内容一致。`window.json` 表明 `seedlands-performance-validator` 独占窗口、exit 0；experiment step 和 artifact upload 都成功。
+
+六个正式 trial 全部经真实 Node Authority、完整 9 个 required rendered revision、恢复后 postrender 和最终 PNG。原始 click-to-ready 为：A1 8341.8ms、A2 10612.2ms、A3 10195.9ms、B4 10153.7ms、B5 10049.9ms、A6 10939.7ms。B 的 98/95 次 paced render requests、97/94 次 paced postrender、恢复状态和 ANGLE SwiftShader renderer 都被记录；六个 PNG 都有独立 SHA-256。本人实际查看 A1、B4、A6 原帧：三者均为完整的可玩森林场景、HUD/调试状态显示 loaded/rendered 9，没有 loading/error/空白画面。
+
+这不是渲染调度候选成立的结果。尽管 B 的正确性和24秒余量条件均满足，首两个 A 及后置 A 都没有在30秒 right-censor，而是同样完成；summary 的 `CONTROL_NOT_REPRODUCED`、`initialAaBothCensored=false`、`balancedControlsBothCensored=false` 与 `stop-without-product-adoption` 正确。候选应按既定 stop line 关闭，不应产品化 autoRender 调度，也不得把该数据报告为加速收益。
+
+同一 CI 中 Active Web-to-Node journey 仍在 30 秒于7/9首屏失败，但它不能替代这批 A 样本：experiment 启动时已有 clean/fresh identity、固定 six-trial sequence和SwiftShader readback；active gate 是另一个测试语义。两者共用 seed、inline fresh Node fixture、viewport、base-path、真实 remote form、30秒 product deadline 和九块门槛。实验 A 还增加了 probe 的 rAF/postrender observer，所以没有证据说 probe 自身降低了负载。
+
+独立源码比较得到的可证实差异与最小后续检验如下：
+
+- experiment 专门使用 `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`，并回读确认 SwiftShader；active gate 使用默认 headless launch，当前失败 artifact 没有 renderer identity。因此 graphics backend 是首要、尚未证实的运行环境差异。
+- experiment 通过 `browser.newContext()` 建立其 page，active 使用 Playwright fixture context；experiment serial/retries=0，active 在 CI 有重试且 retry 才启用 trace。首次 active 失败先于 retry trace，故 trace 不是已证实的主因，但 context/trace 仍是控制变量，不能和 graphics 混为产品问题。
+- active 的 diagnostic listener 只订阅每个 Playwright WebSocket 的 `close`，没有注册 `framereceived`/`framesent` consumer。更关键地，已核验 Playwright 1.62.1 dispatcher 本身无条件创建 WebSocket dispatcher并转发 frame events，所以“删 page.on('websocket') 会解除逐帧序列化”没有源码依据，不能作为修复方向。失败后的全页 screenshot 在30秒后才执行，也不能解释启动期慢。
+
+最小可检验下一步是测试层而非产品改动：为 active connect 在 application 仍存活时记录一次匿名 WebGL renderer identity，并提供只供该测试的 opt-in launch args，精确复用 experiment 的三项 SwiftShader args。在相同 Linux、`/seedlands-web-sandbox/` base、同 seed、fresh Node、30秒合同下，对 active test 单独比较默认与 forced-SwiftShader；保持 WebSocket diagnostics、输入/网络源码和所有产品调度不变。若两侧结果相同，则排除 graphics 后再以同样单变量方法审 context；若仅 forced 通过，应先把 CI graphics 后端作为门禁环境问题处理，不把实验候选或内核优化错误地归为产品修复。
+
+PR17 仍不准出，因为 active journey 当前 CI 失败；本有效 experiment 只支持停止 render-contention 候选。
+
+## 图形启动兼容诊断：CI 草案预审（源码 delta 待冻结）
+
+本轮只读审阅 root 未提交的 CI diff 与当前源码，没有运行 browser、CI、正式样本或全套，未改源码、测试、证据或 index。草案正确停止 AAABBA experiment，保留原默认 `pnpm test:web-node-playable` 门禁，随后仅对 PR17、在 `!cancelled()` 和单一 benchmark window 内运行一条 forced-SwiftShader 完整 journey，明确 `--retries=0`、新的 `/tmp` evidence 目录、同一30秒产品合同，并上传默认、forced、window和 Playwright failure artifact。它不计算倍率、不重启 render 候选，符合“测试环境兼容诊断”的单变量范围。
+
+正式冻结时需满足以下最小条件：
+
+- 当前 package 尚不存在 CI 草案引用的 `test:web-node-playable:browser`。Sol 必须新增该 browser-only script，仍先 build Node dist、再仅运行本 change 的完整 Playwright journey，且确保 CI 的 `--retries=0` 真正传递给 Playwright；默认完整 gate 的现有 Vitest+journey 命令不变。
+- `SEEDLANDS_E2E_SWIFTSHADER=1` 只能增加 experiment 已采用的三项 Chromium flags：`--use-gl=angle`、`--use-angle=swiftshader`、`--enable-unsafe-swiftshader`；默认 launch options 必须字节语义不变。
+- renderer identity 必须从已创建的 PlayCanvas `Application.graphicsDevice` 读一次，成功 journey JSON 和 timeout diagnostic 都记录匿名 renderer/vendor。不得让测试在启动前调用 `canvas.getContext()`、新建 graphics device、关闭渲染或添加节流；test-only accessor/probe 可以读取已有 application。
+- `/tmp/.../journey` 与 `/tmp/.../graphics-forced` 是两条可独立归属的证据；job-level `test-results/` 可留作 failure attachment，但会混合该 job 前序测试，不能替代两个明确目录的身份或结果。
+
+根因判定的停止线充分：若 default 仍失败、forced 完整 journey 成功，首先归因 CI Chromium graphics launch，并由人决定是否固定 CI renderer；若两者一致，关闭 graphics 假设。保持 WebSocket diagnostic listeners、协议、产品调度、timeout和输入不变。待 Sol 冻结源码 delta 后再作一次只读核对。
+
+补正上一段的脚本边界：forced CI step 已在同一 benchmark window 内、调用 browser-only script 前紧邻执行 `pnpm build:server`，因此 `test:web-node-playable:browser` 不应重复构建；它只需启动该 change 的完整 Playwright journey并接收 `--retries=0`。执行的 dist 身份仍由紧邻 build 和两条 journey 各自记录的 source inputs 归属；`test-results` 仅作辅助失败附件，不作任何旅程身份依据。
+
+## `8a5b40a37e1add93866c097a94bd90cb09b2aaa0`：图形启动兼容对照冻结 delta
+
+按固定 validation contract（SHA-256 `1ae93e3714a6f09ecc4a6686b4c606ab0e28fde5068bb50d0592c2f8f665262b`）只读比对 `ba894ac..8a5b40a`。工作树 clean，`git diff --check` 无输出。未运行 browser、CI、全套或构建，未改源码、测试、证据或 index。
+
+此前 identity 时机阻断已关闭。新的 test-only probe 在点击连接前 arm，只以 rAF 查询已经由游戏启动创建的 `pc.Application`；一旦从既有 `graphicsDevice.gl` 取得 device type、renderer、vendor/version 即缓存并停止 rAF。它没有调用 `canvas.getContext()`、新建 graphics device、写入应用状态、暂停或节流 render。连接成功、超时诊断、手动重连和 Node 重启都读同一缓存；finally 必定 release。新增错误认证测试明确等待真实 Application destroy 后读取缓存，验证无法再访问 live app 时 identity 仍可用；本地同 base 的成功与错误认证自检已由实施者记录通过。
+
+默认 Playwright launch 路径保持；仅 `SEEDLANDS_E2E_SWIFTSHADER=1` 才添加与已停止 AAABBA 实验相同的 `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader` 三项 flags。新增 `test:web-node-playable:browser` 只执行原完整 Playwright journey；CI 在 benchmark window 外紧邻完成 Node dist build，window 内以 `--retries=0` 运行 forced journey。默认完整 gate、30秒首屏合同、全部真实键鼠挖放/durable/reconnect/restart 断言及两个独立 `/tmp` evidence 目录均保留。AAABBA step 已从 CI 移除；本对照不收集或宣称性能倍率。main journey 的三次 successful connection identity 写入其 source-bound JSON；错误认证的 identity 以单独 Playwright attachment 随 `test-results` 上传，且 timeout failure JSON 也会直接记录 identity。
+
+结论：`8a5b40a` 的一次默认与一次 forced-SwiftShader 完整旅程对照可执行，无剩余源码/CI接线阻断。待 root 提供本机默认原日志/五帧和原生 CI 原始对照后，才能判定 graphics 假设或 PR17 准出。
+
+## 本机默认图形完整旅程：`8a5b40a37e1add93866c097a94bd90cb09b2aaa0` 的最终 source-bound 证据（Linux 对照待到）
+
+root 在 clean `8a5b40a` 上执行了未强制 SwiftShader 的 `pnpm test:web-node-playable`；本人只读复核原始日志 `/tmp/seedlands-web-node-playable/final-local-8a5b40a.log`、更新后的 JSON、逐项 hash 与五张原帧，没有重跑 browser、构建、CI 或全套。命令先重建 Node dist，随后 11 个 Vitest 文件的 34 个测试均通过，两个 Chromium 旅程测试通过，合计 20.5 秒。该结果是本机功能证据，不是性能采样或 default/forced 的比较结论。
+
+JSON 的 `sourceSha` 为 `8a5b40a…`，`sourceTreeStatus` 为空；34 个 `sourceInputs`（含 Node dist、完整 journey spec 和新增 graphics identity test-only files）均与实际文件 SHA-256 相符。root 随后只把这六个证据文件提交为 `bee9a47`，生产、测试与 config 内容仍是 `8a5b40a`；因此 evidence 的 source SHA 与当前仅证据提交的 HEAD 不同是预期的，且不破坏这次运行身份。Node dist 的记录 hash 同样与实际 dist 内容匹配。
+
+真实旅程证据满足已知的端到端链条：初始远端 `loadedChunks=renderedChunks=readyBaselines=9`；移动后跳跃的权威 y 从 18 上升到 18.9916667；放置为 `[-1,20,-2]` 的 type 2、chunk revision 2；放置后 tick 736 到手动重连 tick 872，Node 关闭的 durable commit 为 1074，重启后 Authority 恢复相同 durable commit 且场景 ready。三次连接（initial/reconnect/restart）都有已创建 WebGL2 Application 的缓存 identity，均为 ANGLE Metal / Apple M3 Pro，而非 forced SwiftShader。
+
+本人查看五张原始 PNG：early、moving 和 turned 三帧均显示已进入同一真实森林与 HUD；placed 帧在瞄准线处清楚显示悬空的泥土方块；restarted 帧恢复为可玩的森林地面与 HUD。画面没有 start-error、空白或加载遮罩。它们支持真实 Pointer Lock 后的移动、转头及稳定放置视觉状态，但不替代 Linux CI 的完整同源复核。
+
+结论：本机默认 GPU 的最终旅程可作为 `8a5b40a` 的有效 source-bound 功能与视觉证据；它不证明原生 CI 的 default gate 已通过，也不证明 SwiftShader 是或不是 Linux 失败根因。等待 root 提供 `34222361251` 的 default 与 forced 原始结果后，按两个独立 `/tmp` 目录、renderer identity、30秒门槛及完整旅程断言做最终对照准出。
+
+## CI `34222361251` / `8a5b40a`：默认与 forced 图形对照的失败归因（尚无产品修复结论）
+
+本轮只读检查 job `102048239272` 的完整日志、下载 artifact、forced early PNG 和输入/Pointer Lock/Authority 源码；没有重跑 CI、browser、正式采样或构建，也没有改源码、测试、证据或 Git 状态。
+
+默认 Active gate 的三次 initial 连接均在既定 30 秒首屏门槛失败，且 failure diagnostics 三次都已经读到 `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero)), SwiftShader driver)`。所以它不是“默认 GPU 与 forced SwiftShader”这个单变量的干净对照：默认 headless 已落在 SwiftShader，forced 的 flags 不能据此被认定为唯一环境修复。默认诊断仍是已知的 required 9 中 7/8 完成、无 preparation failure、远端 baseline 已持续到达的首屏问题，保持为未解决的产品门禁失败。
+
+forced 旅程确实越过了首屏并取得 Pointer Lock，且写出 `/tmp/.../graphics-forced/web-node-01-early.png`；该 PNG 显示完整 HUD 与 loaded/rendered 9，不是 start-error 或空白。但随后 KeyW 的 5 秒权威距离只达到 `0.019641855...`，未达到 >1；旅程在移动断言处停止，没有 moving/turned/placed/reconnect/restart 帧、没有成功 `web-node-playable-run.json`。window 正确记录 exit 1。因此 forced 不能作为完整闭环通过、CI renderer 固化依据或最终准出证据。
+
+early 图的视线确实朝天空，且软件渲染约 9 FPS / 277.5ms frame；但现有 `PlayerController` 每 tick 把 `camera.forward.y=0` 后再 normalize，故单独的 pitch 不能解释 W 的水平 wish 变小。现有 artifact 没有 initial/current snapshot、velocity、view angle、按键注册、input decision 或 ACK/lease 数据，无法区分碰撞卡住、Pointer Lock/keyup 导致客户端不送 W、权威 input 被 late/resync 拒绝，或低帧率下的投影时序问题。
+
+源码给出一个需验证、但尚未证实的输入候选。`projectRemoteInput()` 以 Web 收到 snapshot 的时刻和该 snapshot 的 physics tick 计算 `target = max(command target, snapshotTick + elapsedTicks + 2)`；它不知道该 snapshot 已在 Node→Web/主线程队列中停留多久。Node session 则在 `targetPhysicsTick <= currentTick` 时把 input-state 判为 `late`，即使 expiry 还没到。慢 SwiftShader / message dispatch 时，额外 2 tick（约 33ms at 60Hz）可能不够；这与 Mac GPU 本机通过相容，但当前 CI 没有 decision 计数，不能据此提前调整 target lead、expiry、30秒、移动距离或 seed。
+
+最小下一步应是一轮 test-only、失败时才输出的 movement-window 诊断，保持现有完整 journey、阈值、seed、协议和产品行为不变：
+
+- KeyW down 前记录一次现有 `RemotePlayableEvidence`；失败或达到 >1 时记录 final，并在窗口内以有界 200–250ms cadence 留不超过约 24 个 sample。每个 sample 至少包含 authority/presented position 与 velocity、physicsTick、viewAngles、onGround、aimed voxel、pointer-lock 是否仍为 `#game`、以及 controller 是否仍持有 `KeyW`。这能先分开 collision/presentation 与按键/视角问题。
+- 仅在 `SEEDLANDS_E2E_PLAYABLE_DIAGNOSTICS=1` 的既有 fixture 诊断路径，给 client pipeline 添加只读快照：last-sent/in-flight/queued sequence、最后一个 projected input 的 `moveX/moveZ,targetPhysicsTick,expiresAfterPhysicsTick` 与发送时刻；并有界记录匹配 decision 的 sequence、accepted/late/resync 计数与本地 receive 时刻。Authority snapshot 已含 `acknowledgedInputSequence` 和 `inputResyncRequired`，应直接带入 evidence，而不是改变传输语义。
+- Node 对同一诊断开关为每条 input decision 或最多最近 32 条写入脱敏结构化记录：client sequence、decision、target/expiry tick、receive 时 `currentTick`、pending-input count。按 sequence 与 client 记录关联，即可确定是否是 `target <= currentTick`，无需同步两侧 wall clock 或记录任何 payload/credential。
+
+判定保持窄：W 在 client 已注册、持锁且本地 predicted/presented 已移动而 authority ACK/decision 多为 late/resync，才进入可复现的 target-age/lease RED；W 未注册或 lock 丢失则修测试交互/事件证据；accepted ACK 却 authority/presentation 零移动则再查 collision/physics。未取得这些数据前，不应修改 lead、租期、render、timeout、distance、seed 或 CI renderer，也不能把本次 forced 首屏成功解释为 PR17 通过。
+
+## `2c3d2778f21a26ab5228f79aa49bb049a185054b`：movement-window 诊断冻结审阅（一个事件上限阻断）
+
+本轮依据固定 validation contract（SHA-256 `1ae93e3714a6f09ecc4a6686b4c606ab0e28fde5068bb50d0592c2f8f665262b`）只读比较 `bee9a47..2c3d277`，审阅定向测试、诊断设计及本机 WIP 失败 JSON；没有运行 browser、性能批次、构建或 CI，也没有改源码、index 或 CI。当前工作树的 delivery/estimate/execution 三个改动由 root 同步整理，未计入该 checkpoint 生产/test delta。
+
+生产 input 投影、jump lease、Node late 判定、30秒首屏、W 的 >1 门槛和 seed 均未修改。`projectRemoteInput()` 仍按原公式投影 target/expiry；`createSession()` 的 admission/decision 路径只在原 decision 计算的前后读取并记录副本。client 输入 pipeline 仍只保留一个 in-flight 与 latest queue；未知/旧 decision 的匹配 guard、resync 清理和已有 32 pending server 保护未变。package 的默认完整 gate 与 browser-only 完整旅程都仍包含原 web-node journey 和 graphics identity failure 测试，CI default/forced 两门禁未被此 checkpoint 改写。
+
+诊断启用范围正确：浏览器侧仅在既有 `initialSyncDiagnostics` 时创建输入窗口；Node 仅在现有 E2E diagnostic callback 存在时创建汇总器。Web 和 Node 都最多保留16条非中性 sample，neutral state 不占 sample 预算；client sample 以 inputSequence 记录 projected target、当时 snapshot tick/elapsed、move X/Z、matched decision 与本地 decision latency。Node sample 以相同 client inputSequence 记录 admission currentTick、target/expiry、move X/Z 和最终 decision；close 时只发一条匿名 summary。runtime evidence 还带入 `interactionBlocked`、input summary，journey progress/failure JSON 另记录 Pointer Lock/focus/visibility、initial/W 前/current、graphics identity 和已脱敏 Node log。afterEach 捕获诊断写入错误而保留原 Playwright 失败，因此诊断失败不会覆盖原异常；page close 后再等待 terminal Node summary 的路径也有界。
+
+给出的本机 WIP failure JSON 已实际证明字段可关联：client sequence 217 的 projected target 244，在 Node admission currentTick 237 时后续 decision 为 late；JSON 同时有 client late/resync 累计、Node terminal decision summary、initial/current state、Pointer Lock 与原 mesh revision failure。它是未冻结源码的行为自检，不能充作 source-bound 准出或 CI 重现；但足以证明下一次 CI 能定向区分非中性输入是否发送、是否被 late/resync 拒绝，以及 accepted 后的权威位置是否仍不移动。
+
+**阻断：现有全局 Node 事件上限没有闭合。** 原合同/规格要求前12个 Node request、最多96条事件。baseline 路径仍可用满 `MAX_DIAGNOSTIC_EVENTS=96`；session close 不受该计数约束再发一条 `node-playable-input-summary`，故最坏可输出97条 Node diagnostic event。现有测试只分别断言 baseline ≤96、input summary=1，未覆盖同一 session 的总数。
+
+最小修复不改变任何产品行为或诊断字段：为 terminal input summary 预留一格，令 baseline event cap 为95（或以一个共同总计数确保 baseline + terminal summary ≤96），并添加同一 session 同时产生满额 baseline 与 input 的联合上限测试。完成后，该诊断可用于下一轮 CI 定位；在修复前不应把 `2c3d277` 称为合同内可执行冻结。
+
+## CI `34226402889` / merge source `a1f6dd30f24add8d2a7542eeb2ad1a6583a08fa6`：输入对账后的 forced camera-turn 失败
+
+本轮只读检查 `/tmp/seedlands-web-node-playable/ci-input-34226402889/`、forced failure JSON、两张原帧、CI job log 与现有 Pointer Lock/input 源码；未运行测试、CI、browser 或构建，未修改工作树。
+
+默认 gate 的三次 initial 仍在30秒首屏失败。forced journey 这次已经通过 initial 9块、Pointer Lock 和 W 移动：从 `[-3.5,18,-3.5]` 到 `[4.22849,18,-15.08026]`，故先前的 W 零位移不再是本次 forced 的终止原因。early/moving 两帧显示同一真实运行中的 HUD 与远端场景；moving 帧的 FPS 约2、frame 1024ms，说明图形环境依旧很慢，但这不是对性能的采样结论。
+
+forced 随后在 camera-turn 失败。failure JSON 同时表明页面仍 `pointerLock=game`、focused、visible、`interactionBlocked=false`；movementStart 与 failure current 的 view angles 完全同为 `[-33.365051...,54.441405...]`。因此在 W 已使权威位置移动约15m之后，两个 `page.mouse.move()` 没有令 controller yaw 发生可观察变化。该事实排除“W 未输入”作为这一断言的直接原因，但尚不能从现有数据区分 Playwright/Chromium Pointer Lock 下没有派发相对 mousemove、事件派发后没有被 controller 消费，或低帧率期间自动化 mouse 时序与截图/readback 的交互。
+
+输入对账已成功收集且显示另一个独立问题信号，不能拿来解释 yaw：client 最终 `sent=103`、`accepted=69`、`late=28`、`resync=33`，Node summary 一致；多条非中性 row 有 inputSequence 对应的 target、admission tick 和 decision。特别是 sequence 478 的 target 1934 被 accepted，而后 sequence 480 的 target 1913 被判 `target-out-of-order`，随后仍有 accepted 与 late。该 target 回退是真实远端输入稳健性候选，适合另立受控 RED（乱序/陈旧 snapshot 后 projected target 不得对同一 session 向后退，并保持旧 decision/resync/jump 语义）；它不是相机转向的因果证据，也不能在本轮直接调整 lead、lease 或 Node late 规则。
+
+camera-turn 的最小下一步应保持 test-only、单变量和有界：在原两次真实 `page.mouse.move()` 前后以 capture-phase 的被动 `mousemove` observer 记录最多16条 `{movementX,movementY,pointerLockElement}` 与计数/非零计数，并在每个 call 前后读取已有 viewAngles；另只记录两次 screenshot 的外层耗时。这不替换为 `dispatchEvent`、不注入 yaw、不改变 product pointer-lock handler/render/input/timeout。若 observer 没有 nonzero relative event，问题收敛为 CI Playwright pointer-lock mouse 兼容性，需要修测试驱动方式后再重跑完整旅程；若有非zero event而 yaw仍不变，才检查 controller handler/生命周期；若只有 screenshot 前后发生长阻塞，再以该单项确定是否影响自动化时序。不能由当前 late/resync、frame time 或天空视角直接推出任何一种。
+
+这轮仍无成功 forced run JSON、转头/跳跃/挖放/durable/reconnect/restart 证据，PR17 不准出。此前 `2c3` 的最多96条 Node diagnostic event 静态上限阻断也仍适用，除非后续冻结显式以共同预算闭合并覆盖联合测试。
+
+### CI 无 GPU 功能环境的 Low/viewport 提议：技术审阅意见（未实施）
+
+不建议把固定 Low 质量或更小 viewport 作为当前 camera-turn 的直接修复：本次的硬证据是 W 已完成而 yaw 始终为零；只有被动 `mousemove` 的真实 relative delta 才能分开“CI 根本未派发相对鼠标事件”和“事件已派发但 controller 未消费”。前一类不会因画质或像素面改变而解决，后两类也不应靠降低负载猜测。
+
+若后续单变量观察显示 relative event 已到达、controller 路径正确、软件 SwiftShader 的 frame/readback 负载才使完整功能旅程失去可执行性，可以通过单独 spec 修订定义受支持的“CI 功能兼容 profile”：固定产品已有的 Low 质量和明确 viewport，保留远端 Authority、真实 Pointer Lock/键鼠、9个 required postrender、30秒首屏、完整挖放/durable/reconnect/restart断言。profile、viewport、renderer 与独立 `/tmp` evidence 必须一起身份绑定。先在1280 viewport下只切 Low，必要时再以单独决定讨论 viewport，避免两变量同时改变掩盖原因。
+
+该 profile 只能证明该明确兼容配置下的功能闭环，不能取代本机 native 1280 source-bound 五帧，也不能把当前默认 Linux gate 的失败改写为通过或静默放宽既有合同。是否把它提升为 CI required renderer/profile 是范围与产品契约决策，须在 mouse 观察结果后由人明确批准；本轮不实施也不作性能结论。
+
+## 完整 Chromium new-headless 候选：测试环境兼容性审阅（未执行）
+
+本轮按固定 validation contract（SHA-256 `1ae93e3714a6f09ecc4a6686b4c606ab0e28fde5068bb50d0592c2f8f665262b`）只读审阅当前未提交的 `playwright.config.ts`、图形身份采集、PR17 CI step 与 spec；没有运行浏览器、CI、构建或性能样本，也没有修改生产代码、测试、证据、index 或 CI。当前 working tree 含 root/Sol 的未提交 WIP，以下结论只针对已见 delta，不能当作已冻结结果。
+
+该候选有明确依据。当前本机默认会选择显式 `/Applications/Google Chrome.app/...`，而 Linux CI 的默认 headless 未设 `channel`；Playwright 1.62.1 官方文档说明，未设 channel 的 headless 使用独立 Chromium headless shell，`channel: 'chromium'` 则选择完整 Chromium 的 new headless，并把它定位为更适合高准确 E2E 的模式。因此相同 SwiftShader renderer 或 version 字符串不能证明两个实际可执行产品、Pointer Lock 行为或调度语义相同。它比降低 viewport 或把产品切到 Low 更窄，且无需改变产品。
+
+`SEEDLANDS_E2E_FULL_CHROMIUM=1` 的 config 实现本身正确：它禁用本机 system Chrome 路径，并仅设置 `channel: 'chromium'`；1280×720、headless、Medium、base path、30 秒首屏、真实 Pointer Lock 键鼠、挖放、保存、重连、重启和原有断言均不变。source-bound 输入已包含 `playwright.config.ts`；每次 connection 的 identity 会记录 `configuredChannel`、managed/system executable 来源、实际 browser version、user agent 和 WebGL identity。成功 JSON 与失败诊断都会继承这些字段，不含口令。
+
+本次 CI 接线没有阻断。正确对照基线是已失败、已启用三个 SwiftShader flags 的 forced journey；本轮只在该基线增加 `SEEDLANDS_E2E_FULL_CHROMIUM=1`，所以相对 forced 基线只有 browser channel 这一变量。原 default headless-shell gate 保留、不改 required 名称，且不会因 full Chromium journey 通过而重写 default 的失败。
+
+因 default 与 forced 之间原本已有三个 GL flags，结果仍不能单独归因于 channel 相对 default gate，也不能证实或否证 SwiftShader flags 的影响。它只能回答：在相同 explicit-SwiftShader 兼容配置中，managed full Chromium new headless 是否能完成原完整 journey（含错误认证身份缓存）。成功才构成该明确测试环境可工作的证据；是否把它提升为 CI required 环境，仍是后续测试契约决定，而不是产品修复或性能收益结论。失败则记录实际 stage，关闭该兼容候选后再使用既定的被动真实 `mousemove` 观察定位 yaw，而不继续调图形参数。
+
+## d7f86ec：输入单调与 Node 诊断总上限定向审阅
+
+按固定 validation contract（SHA-256 1ae93e3714a6f09ecc4a6686b4c606ab0e28fde5068bb50d0592c2f8f665262b）及 seedlands-code-review，本轮只读审阅该普通提交相对父提交的7个文件、相邻 client/session/core gate、现有 scheduler 和 CI 34227894490 failure artifact；未运行 Vitest、browser、构建或 CI，未改源码、index、证据或工作树。当前 HEAD 为 d7f86ec，tree 为 4200069793b77383a51f2b7944329778459117e6；git diff --check 无输出。实施者记录的两文件13项定向测试、typecheck 和 lint 为已有证据，本人未复跑。
+
+结论：未发现可证实的 P0/P1/P2 阻断。修复把已真正发送的 input-state target 保存在远端 connection pipeline 内，后续 snapshot 接收时刻重置造成的 elapsed 投影回落，不能再低于已发送 target。新 target 同时受既有 Node current+120 边界限制；pipeline 只在 fail/dispose 清除时重置高水位，未改变500ms jump lease、单 in-flight/latest coalescing、Node late 判定或 pending=32预算。受控 RED/GREEN 覆盖了1935→1914、旧 decision 不 flush、matching decision 仅 flush latest、edge/state 同 target，以及极端 target 的120 tick cap。
+
+此前 total-96 缺口已闭合：baseline diagnostic emitter 最多95条，close 是幂等并至多调用一次 terminal input summary，故同一 diagnostic callback 下总数静态至多96。更新后的 Node test 在 close 后检查总数≤96、baseline≤95、summary恰一条。它只影响 test-only diagnostic 输出，callback 失败仍隔离，未触碰网络协议、capture、取消或 cleanup。测试的 unavailable baseline 实际不会产生95条 stage event，所以上限主要由常量和幂等 close 证明；如需更强单测，可注入 stage emitter 命中第95条并断言 summary为第96条，但不是当前阻断。
+
+## CI34227894490：完整 Chromium 已跨过输入/转头，当前失败为 placed mesh revision
+
+只读复核 forced failure JSON、early/moving/turned三张原帧及 journey 断言。artifact source 是 PR merge bb45eebb0c2cfb3f907dab913bec5b09705cbc3d，不是后出的 d7f86ec，故不能验证本次 target 修复；按 root 提供的身份，该 tree 与本地当时 f4aaded 一致。环境回读为 managed Chromium channel=chromium、HeadlessChrome151、WebGL2 ANGLE Vulkan SwiftShader。
+
+该 forced run 已通过 initial9、Pointer Lock、W、yaw、jump、break及placement前置交互。本人查看 early、moving、turned：三帧均为同一森林 HUD 的真实运行，moving/turned 显示视角和手持物变化；软件环境约1 FPS，不能作为性能结论。失败发生在生成 placed 稳定帧之前，故挖放可视化、保存、重连和重启均未获 CI 通过。
+
+实际失败是 break-and-place 后5秒内 renderedRevisionAt(placedVoxel)仍为1，而 Authority chunk revision已为4。failure JSON 同时为 worldRevision4、loaded46、rendered25、readyBaselines43，没有输入 zero-distance 或 yaw=0 故障。它支持“权威 mutation 已推进而 presentation mesh revision 未及时结算”的新问题分类；不支持调 timeout、target lead、lease、画质或 seed。
+
+下一轮 scheduler RED 合理，范围应限制在 queued 选择而不抢占 preparing/in-flight。当前 nextQueuedRequest 的 rank 为 base priority + floor((dispatchCount-enqueuedAtDispatch)/8)；老 streaming backlog每8次 dispatch 增一分，能压过后到 interactive/interative-fluid，与失败假设一致。最小 RED：建立老 streaming backlog、释放一个 slot后插入 interactive，证明旧排序先取 streaming。GREEN 仅改变 queued selection，使 interactive 在有界 dispatch 数内被选，同时在持续 interactive 到达时保证每固定N次仍派发 streaming，避免反向饥饿；并保留已有 priority promotion、failed/replacement/visibility barrier 语义。该确定性修复通过后仍需完整 Chromium 旅程拿到 placed、durable、reconnect、restart 的 source-bound JSON及原帧，才能准出。
+
+### 独立审阅 Findings
+
+未发现可证实的 P0/P1/P2 问题。覆盖限于 d7f86ec 输入/diagnostic delta 和 CI failure 归因；尚不存在的 scheduler 公平性实现未作准出。
+
+## 4e63fb7：queued mesh 公平调度 delta 审阅
+
+按固定 validation contract 对 d7f86ec..4e63fb7 的6文件只读审阅；未运行测试、browser、构建或 CI，未改源码、index 或工作树。实施者报告的9文件30项测试、typecheck、lint、Prettier 和 diffcheck 为已有结果，本人未复跑。
+
+结论：无新增阻断。改动只把 nextQueuedRequest 对 queued Map 的选取移至纯 selectMeshRequest；prepare、active/inFlight、replacement、failed preparation、visibility barrier、worker settlement 和 cancel 路径没有改变，因此不会抢占或取消已 preparing/in-flight 的任务。priorityBypasses 随 beginScenario 清零；空队列和 oldest=preferred 均归零，避免跨场景或无竞争队列累积债务。
+
+旧实现把每条 request 的 dispatch 老化直接叠加 rank，5条同龄 streaming 在17项 fluid 后均能高于后到 interactive。新选择固定基础顺序 interactive-fluid > interactive > streaming；当首条 oldest 被优先级请求连续绕过8次，第9次只选择一条 oldest，并重置 burst。RED/GREEN 精确覆盖“新interactive下一个派发”及“持续fluid时旧streaming最迟第9项派发”。这既避免整批 streaming 压过编辑，又保证 streaming 不会饿死；它不改变 request priority promotion、force remesh、failed/replacement 或 barrier 身份。
+
+限制：这个确定性队列修复只解释 CI34227894490 中 Authority revision4、render revision1 的一个可检验调度路径，不证明完整 Chromium 旅程、5秒 rendered revision、placed稳定帧、durable、reconnect 或 restart 已恢复。root 的干净完整旅程仍是下一步所需证据。
+
+### 独立审阅 Findings
+
+未发现可证实的 P0/P1/P2 问题。
+
+## 7274b27：native 与 managed full Chromium 软件图形的最终本地证据复核
+
+本轮按固定 validation contract 只读复核 5a99e78 保存的两套 evidence、7274b27 Git tree、当前真实 Node dist hash 与10张原始 PNG；没有运行 browser、构建、Vitest 或 CI，也没有改源码、index 或证据。5a99e78 只保存12个 evidence 文件，运行 source 是其父 7274b27，故 evidence commit tree 不同属于预期，不破坏运行身份。
+
+两份 JSON 均记录 sourceSha=7274b273fabee2fdb5bb5d43d043db23d6778d82、sourceTreeStatus为空、40个 sourceInputs。本人逐项以该 Git tree 重新计算39个版本化文件 hash，并对实际 apps/node-server/dist/node-server.js 计算 hash；native 与 software 两套均为40/40匹配，没有 source 或 dist 漂移。native identity 为本机 Google Chrome152/ANGLE Metal M3 Pro；software identity 为 playwright-managed channel=chromium/HeadlessChrome151/ANGLE Vulkan SwiftShader，且 initial、reconnect、restart三次连接身份一致。
+
+两套真实完整 journey 的 JSON 均满足远端 Authority 链条。native initial/reconnect/restart 都是 loaded=rendered=readyBaselines=9；software 三阶段 rendered均为9，initial/reconnect多出已加载/ready的额外 streaming chunk，不改变必需3x3已 rendered 的结论。两套从初始位置均真实移动超过1，yaw分别由 -150.365 改至 -116.565 和 -198.465；jump权威 y 分别从18升至18.77及18.169999。break后 worldRevision 1→2，place后到3；placed voxel/type/revision 分别为[-1,20,-2]/2/2与[1,18,3]/2/3。两套手动重连保持旧 Node epoch、tick从420→569和1126→1495继续；重启后均获得新epoch并恢复放置 voxel。stop durable commit 分别为707与1839。
+
+本人逐张查看 native 与 software 的 early、moving、turned、placed 四帧。两套 early/moving/turned 都是同一真实森林 HUD/Pointer Lock 场景，镜头方向在移动/转头后可见变化；native placed 显示瞄准处的放置泥土表面，software placed 清楚显示独立泥土方块及放置 HUD。没有加载遮罩、start-error或空场景。软件帧的低 FPS/高 frame time 只作为环境观察，不作性能结论。第五 restarted 原帧与 JSON 已保留，但本轮重点视觉复核覆盖 early/mid/turn/stable place。
+
+结论：7274b27 具备两套有效、source-bound 的本地完整功能与视觉证据；其中 managed full Chromium+SwiftShader 也完成原完整 journey。根据 root 已报告，本机 native完整门禁为37 Vitest+2 Chromium通过（19.0秒），software browser两项通过（38.3秒）；本人未复跑。当前 CI34230070975/Linux终态仍待 root 核验，所以本地结果不能宣布 Linux CI、required gate 或PR17最终准出。
+
+### 独立审阅 Findings
+
+未发现本地 source binding、真实远端旅程或原始帧的阻断。
+
+## 放置 revision trace WIP 与 CI34230070975：只读审阅
+
+本轮只读审查未冻结 WIP 的8文件、现有 remote harness 安装边界和 CI34230070975 artifact；未运行 browser、构建或测试，未改源码、index 或 CI。CI Static/Build 已成功；managed full Chromium 的 source 477eae658ae5cb1b1135606f464bd4d28bed3293 在 break-and-place 仍以 expected chunk revision2、rendered revision1 超过既有5秒失败。该 source 早于本 WIP，failure JSON 的 renderTarget/renderTrace 为空，不能用它判断新诊断或提出具体产品修复。
+
+诊断链路的行为范围正确：remote evidence 仅在 ?harness 且 RemoteAuthorityClient 的既有安装分支暴露；meshTraceAt 不发网络消息、不请求 Authority、不运行本地 Authority/Logic/Fluid、不改变 request priority、worker、render 或 input。setMeshTarget 只在挖掘/放置的现有等待前和失败结算时各读取一次，非逐帧；目标坐标只换算 chunk key，筛选该 key 对应 traceId，输出 events.slice(-64)。traceName 加在 exportChromeTrace 的已有 marks 上，因此未完成 trace 也可定位到目标；已有 traceId 链可带出 queue、prepare、worker、commit 和 scene/postrender marks。复用 world.telemetry 会刷新既有 gauge 值，但 snapshot 已有同一观察语义；按 root 澄清，这不改变世界、输入、调度或渲染产品行为，不构成阻断。
+
+**P1：trace artifact 未对任意 span attributes 做输出 allowlist。** meshTraceAt 当前直接返回 Chrome trace 原始 event。MeshPreparationFailure 会把任意 Error.message 的前240字符放进 event.args.errorMessage；JourneyProgressDiagnostics 将 renderTrace 原样写进 /tmp failure JSON，未经过现有 journey 的凭据 redaction。当前样本不必然含凭据，但该新入口把未来/异常路径的任意内部错误文本带入可上传 artifact，违反本合同“不输出凭据”的边界。最小修复是在 meshTraceAt 将所选 event 映射为诊断所需 allowlist：name、cat、ph、ts、dur、tid，及仅 traceId/traceName；丢弃所有其它 args/attributes，尤其 errorMessage。这样仍能判定 queued/prepare/worker/upload/postrender，且不需要扩大 telemetry 或协议。
+
+建议同时补一个小的确定性 coverage：目标 trace 超过64条时输出严格≤64，并证明含 attributes.errorMessage 的原 event 不出现在返回值。当前 telemetry test 仅断言 mark 有 traceName；root报告的 native 诊断57条及 postrender 可证明真实入口可读，但未覆盖64边界和净化。software 诊断在挖掘前失败且 mutation仍为0，只说明下一次 trace 必须覆盖挖掘等待前的目标，不能归因于显示结算。
+
+### 独立审阅 Findings
+
+[P1] trace failure artifact can include arbitrary internal error text. File: apps/web/src/app/world/remote-playable-evidence.ts. Trigger: target chunk trace contains MeshPreparationFailure or another attributed span. Impact: unredacted errorMessage reaches /tmp/CI artifact through journey diagnostics. Fix: map selected events to an allowlisted diagnostic schema before return; add the two bounded/sanitization tests above. Confidence: high.
+
+## 2026-09-08 CI34232573762：软件图形兼容对照取舍（只读）
+
+**完成状态：** 已审阅 source `9029108ee143d4f31782f37ce4a509ef92dab125` 的 CI 原始工件及本地未提交的 Low 对照接线；未运行浏览器、构建、CI 或性能采样，未修改版本库文件。
+
+**已证实：** managed full Chromium + SwiftShader 已完成首个 3×3 rendered、真实 W 移动和真实 yaw 转头；在 jump 阶段的既有 5 秒断言失败，因而尚未到挖放目标、`renderTarget` 与 `renderTrace` 均为 null，不能用本次失败解释放置显示。失败轮询末次 Web y 为 `18.000001`，随后关闭前的同一权威状态为 y `18.103334`；输入汇总为 Web/Node 一致的 accepted 61、late 20、resync 20，`target-out-of-order` 为 0。指针锁、焦点和可见性均正常。原始 turned 帧 HUD 记录单帧 2457 ms、最近长帧约 1059 ms。这证明该 Linux 软件图形组合不能稳定在当前 5 秒交互窗口观察完整旅程；它不证明 jump edge、500 ms lease 或目标投影存在产品缺陷，也不是性能采样结论。默认 headless-shell 的首屏失败仍是独立、未解决的覆盖缺口。
+
+**Low 对照结论：可执行，无新增阻断。** 仅在现有 forced full-Chromium/SwiftShader CI 步骤设置 `SEEDLANDS_WEB_NODE_QUALITY=low` 是受控的单变量兼容试验：viewport 1280×720、seed、真实键鼠、30 秒首屏、各 5 秒状态门槛、500 ms lease、Node fixture 和完整保存/重连/重启断言均保持。`journey-quality.ts` 通过实际启动页 `#quality` select 设置并断言 value；默认仍为 medium。成功 JSON、失败 progress 和各 connection graphics identity 都记录 requested quality，且 sourceInputs 已纳入 helper 与两份既有质量配置。Low 是既有产品配置（半径 1、关闭阴影、较小分辨率等），不是隐藏测试开关；首屏仍逐项要求 9 个 required chunks 已 rendered。建议使用新的、独立的 `/tmp` 输出目录，保留本轮 Medium/SwiftShader 失败工件。
+
+若 Linux Low 完整通过（含错误认证图形身份），结论只能是“managed full Chromium + SwiftShader + Low 软件 CI 功能档位通过”；不得写为 Medium 修复、性能收益或默认 shell 通过。本机原生 Medium 的完整证据仍单独成立。若 Low 仍失败，应以失败阶段和已有 trace 继续定位，停止继续降画质、放宽时间、租约或输入投影。
+
+**26850f6 P1：已闭合。** `captureRemoteMeshTrace` 只导出 name/cat/ph/ts/dur/tid 及 `{traceId, traceName}`，不再透传原始 span attributes。定向测试构造 70 个含 `errorMessage` 与任意 `other` 字段的事件，验证目标 trace 共 71 条时仅保留最近 64 条，且 JSON 不含两种敏感合成值。现有 `meshTraceAt` 仍仅由 harness 条件暴露；其 telemetry 读取沿用既有 snapshot 的 gauge 语义，没有输入、调度、渲染或世界 mutation。
+
+**限制与剩余工作：** CI34232573762 未准出；本结论不替代下一次 Linux Low 的完整原始 JSON、5 帧、source-input hash、Node durable/reconnect/restart 记录及 CI 终态审阅。
+
+## 2026-09-08 CI34235218286：Low 站位辅助失败的最小测试驱动修复（只读）
+
+**完成状态：** 已审阅 `afe5e0cfca86ae954ef35de581e3b1c4061fce9e`（API 已核验 parents `840f4fb` + `aeaa9ce`）的 Low 工件和输入通路；未运行 CI、浏览器或测试，未修改版本库文件。
+
+**可证实的失败范围：** Low 的 managed full Chromium/SwiftShader 已通过首屏、W、yaw 与 jump，在 `alignWithAimedColumn` 的第 24 次纠正后失败，尚未设置 mesh target。最后权威位置 `[2.233591,18.000000,0.427669]` 相对 aim `[2,17,0]` 的水平中心距离约 `0.276`，只超过现有 `0.25` 门槛；Web 在失败快照为 accepted 99/late 15，Node 关闭汇总 accepted 101/late 15，且没有 target-out-of-order。现有 helper 对每次真实两键只保持 35ms、release 后固定 sleep 70ms，完全未确认该次非中性 `input-state` 已发出、neutral 已发出、或对应 authority correction 已被 Web 消费。该 fixture 时序缺口是确定的；现有记录不能证明碰撞、目标投影、lease 或产品移动逻辑错误。
+
+**最小可接受修复边界：** 只在 `alignWithAimedColumn` 的测试驱动中，以现有 Playwright WebSocket `framesent`/`framereceived` 和现有 C0 decoder 创建短生命周期观察器。每个纠正必须：
+
+1. `keydown` 仍至少 35ms，并等待与该方向匹配的非中性 `input-state` 实际发出，记录其 client inputSequence；
+2. 仅在该 sequence 的 `input-decision: accepted` 后 release；accepted 只说明 Node `receiveInput` 接受，不能当作 authority 已发布或 Web 已应用；
+3. 等待后续 neutral `input-state` 发出及其 accepted decision，再等待 inbound `authority-state.correction.acknowledgedInputSequence >= neutralSequence`，且 correction 的水平 velocity 为零；随后以 remote evidence 的权威位置确认该 correction 已在客户端可观察，才开始下一次纠正。
+
+Node 的 decision 与 authority-state 是不同消息：session 在 `await authority.receiveInput()` 后立即 enqueue input-decision，而 authority-state 由后续 publication enqueue；因此第 2 步单独不足。ack 比较应使用 Node 投影出的 **client** acknowledged sequence，不能假设 server sequence 等于 client sequence。若 observer 与 page 消费顺序不可由 Playwright 保证，最后一项需以 `expect.poll(evidence)` 读取对应 correction 的位置完成客户端可观察确认；不能把 frame-received 回调本身标为“已应用”。
+
+观察器仅允许保存 `input-state` 的 sequence/是否非中性、input-decision 的 sequence/decision，以及 authority-state correction 的 acknowledged client sequence、位置和水平 velocity。不得保存或输出 handshake、access key、原始 frame、错误文本或其它 message payload；只在对齐期间 attach，成功、超时、异常和 page close 的 `finally` 都应 off 所有 socket/page listeners 并清空状态。observer 不发送帧、不调用产品 API、不影响 websocket 回调、世界、输入、调度或渲染。
+
+保持 24 次上限、0.25 距离、Low 配置、500ms lease、后续断言和完整旅程不变。屏障必须有明确的、按 protocol/测试总时限受限的等待失败诊断，输出仅 allowlisted sequence/decision/ack/velocity；不要用无限 poll 或更大 lease/timeouts 掩盖未结算。RED 至少应复现“固定 35+70ms 后下一纠正先于 neutral correction”以及“accepted 不等于 applied”；GREEN 应要求同一 sequence 的 neutral accepted + correction ack + zero velocity，不能只断言 accepted。
+
+**限制：** 这是一项 fixture 驱动的确定性修复建议，不证明下一次 Linux 完整旅程必过，也不构成产品移动、画质或性能结论。
+
+## 2026-09-08 `2dabe70` 测试驱动 delta（静态只读）
+
+**完成状态：** 通过静态复核；本段仅覆盖 `2dabe70` 的五个测试驱动文件，不构成全 PR 或 Linux 旅程准出。未运行浏览器、全套测试或 CI，未修改版本库文件。CI34235218286 的 static/build 成功、Chromium 失败状态保持不变。
+
+**符合已确认的最小范围：**
+
+- `alignWithAimedColumn` 仍保留最多 24 次、world-space 的 forward/right 基向量、实际 Playwright WASD、`0.25` 目标中心门槛和其后的所有挖放/保存/重连/重启断言。每次现在选择朝目标投影较大的单一真实轴键，`player-input-stream` 的同一 forward/right 公式证明 `expectedMovement` 与实际发送的 world-space `moveX/moveZ` 一致；没有伪造 DOM 输入。
+- pulse 在 keydown 后观察同方向非中性 C0 `input-state` 的实际 `framesent` 与同 sequence 的 `input-decision: accepted`，且至少保持 35ms；release 后只接受该 movement sequence 之后的 neutral input，要求 neutral accepted、authority-state 的 client acknowledged sequence 覆盖 neutral sequence、水平 correction velocity ≤ `1e-6`，最后以 remote evidence 同 physics tick/同 authoritative position 确认 Web 客户端可见。它没有把 accepted 当作 applied。
+- 整个 pulse 的 deadline 固定为 2s，不改变 500ms protocol lease、距离门槛、画质或后续测试等待；超时、socket close、page abort、evidence 失败都走 `finally` key-up 和 observer listener 清理。测试覆盖慢 sampling、错误 decision、旧 ack、非零 velocity、未反映到客户端、socket close、abort、timeout 与 allowlist failure。
+- observer 只解码 ≤16KiB 二进制 C0 control frame，只保留 sequence、neutral/方向匹配、decision、correction 的 tick/client ack/position/velocity；不保留 handshake、raw frame、access key 或 decode/error text。它只附着当前 exact Node URL socket，并在成功、失败和 close 时 `off`，不会发送帧或触碰产品 world/input/scheduler/render。
+- 新 helper、alignment 与其定向测试均在 journey `sourceInputs` 中，因而后续 JSON 可绑定该测试行为。
+
+**结论：** 未发现阻断该测试驱动 delta 的静态缺陷。2 秒屏障是有界 fixture 结算条件，不能据此宣称下一次 Linux 完整旅程已通过；仍需冻结 source 的完整原始 CI/浏览器证据复核。

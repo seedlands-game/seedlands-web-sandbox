@@ -132,3 +132,11 @@ d7f86ec修复同连接target tick回退，确定性RED/GREEN及独立审阅通�
 ## aeaa9ce 原生 Medium 冻结验证
 
 干净aeaa9ceb65c7947ef0cfdf292de9229dbcb3a0d8执行pnpm test:web-node-playable，11文件37项Vitest及2项Chromium通过（浏览器20.3秒，仅功能执行记录）。新增真实画质select在三次连接均选择Medium，graphics identity均为原生ANGLE Metal；44项sourceInputs逐一匹配，sourceTreeStatus为空。placed[-1,20,-2]、chunk revision2，durable stop797；afterPlace tick495→重连648，Node重启后的新epoch及修改恢复通过。root审看early/moving/turned/placed连续原始帧，放置方块实际可见。六份原生证据随后保存到evidence/；Linux Low对照由CI34235218286单独验收。
+
+## 77caf7a 键盘结算屏障后的双配置验证
+
+2dabe70仅修复测试驱动，真实旧旅程RED为CI34235218286的24次站位失败；新定向测试没有实际运行旧helper，不将“旧行为会违反新断言”伪称独立历史RED。5项GREEN覆盖非零yaw世界方向、实际发送/accepted、neutral应用和客户端可见、socket关闭/超时/page abort清理、错误白名单；完整typecheck及受影响ESLint/Prettier通过。Terra对冻结delta独立复核无阻断，报告已保存。
+
+干净77caf7ae59cbd8fe87c7feff34875c0aa4be5085串行执行原生Medium与managed fullChromium/SwiftShader/Low。原生11文件37项Vitest及2项Chromium通过（19.5秒）；软件Low两项Chromium通过（28.9秒）。两份48项sourceInputs均与Git源码/实际Node dist逐项匹配，sourceTreeStatus为空。原生放置[-1,20,-2]、revision2、durable stop732、afterPlace tick432→重连584；软件Low放置[1,19,0]、revision2、durable stop1261、tick727→重连991；两份重启均新epoch且恢复修改。root逐张审看early/moving/turned/placed原始帧，真实场景和放置方块可见。
+
+最新原生六份证据保存至evidence/，最新Mac软件Low六份保存至evidence/software/；此前软件Medium记录保留于Git历史f4d61c4，不将新Low文件标为Medium或Linux。运行原始输出分别为/tmp/seedlands-web-node-playable/pulse-77caf7a-native与pulse-77caf7a-low。以上均为功能执行记录，不是性能采样；Linux完整旅程仍待下一CI。
