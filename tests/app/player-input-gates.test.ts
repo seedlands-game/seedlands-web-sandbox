@@ -1,8 +1,50 @@
 import { afterEach, expect, it, vi } from 'vitest';
+import * as pc from 'playcanvas';
 import { PlayerController } from '../../apps/web/src/app/player/player-controller';
 import { applyAuthorityInputDecision } from '../../apps/web/src/app/player/game-player-controller';
 
 afterEach(() => vi.unstubAllGlobals());
+
+it('低帧率下攻击重复使用真实经过时间，长帧不补发积压且界面阻挡立即停止', () => {
+  const canvas = {};
+  const documentStub = {
+    pointerLockElement: canvas,
+    onmousedown: null as null | ((event: { button: number }) => void),
+  };
+  vi.stubGlobal('window', {});
+  vi.stubGlobal('document', documentStub);
+  const attack = vi.fn(() => true);
+  let blocked = false;
+  const options = {
+    canvas,
+    camera: new pc.Entity(),
+    physicsHz: 60,
+    authority: { epoch: 'test', snapshot: () => null },
+    getWorld: () => ({ getVoxel: () => 0, getFluidCell: () => null }),
+    telemetry: {
+      beginSpan: vi.fn(),
+      endSpan: vi.fn(),
+      withSpan: (_category: string, _name: string, callback: () => void) => callback(),
+    },
+    isUiBlockingInput: () => blocked,
+    onAttackTarget: attack,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0];
+  const controller = new PlayerController(options);
+  controller.install();
+  documentStub.onmousedown?.({ button: 0 });
+  expect(attack).toHaveBeenCalledTimes(1);
+  controller.update(0.05, 0.19);
+  expect(attack).toHaveBeenCalledTimes(1);
+  controller.update(0.05, 0.06);
+  expect(attack).toHaveBeenCalledTimes(2);
+  controller.update(0.05, 2);
+  expect(attack).toHaveBeenCalledTimes(3);
+  blocked = true;
+  controller.update(0.05, 0.25);
+  blocked = false;
+  controller.update(0.05, 0.25);
+  expect(attack).toHaveBeenCalledTimes(3);
+});
 
 it('只在Authority明确作废输入队列时重同步预测', () => {
   const resynchronizeInput = vi.fn();

@@ -148,9 +148,9 @@ describe('Authority lane 故障可见性与物理清理', () => {
       import { parentPort } from 'node:worker_threads';
       parentPort.once('message', (bootstrap) => {
         parentPort.postMessage({ type: 'ready', diagnostics: {} });
-        setTimeout(() => bootstrap.publicationPort.postMessage({
+        bootstrap.persistencePort.once('message', () => bootstrap.publicationPort.postMessage({
           type: 'publication', epoch: bootstrap.options.epoch, sequence: 0, publication: { commits: [] },
-        }), 0);
+        }));
         let failed = false;
         parentPort.on('message', (request) => {
           if (failed || request?.type !== 'fail') return;
@@ -161,12 +161,16 @@ describe('Authority lane 故障可见性与物理清理', () => {
         setInterval(() => {}, 1_000);
       });
     `);
-    const lane = await createNodeAuthorityLane(laneOptions(worker).options);
+    const fixture = laneOptions(worker);
+    const lane = await createNodeAuthorityLane(fixture.options);
+    // 两个 MessagePort 不保证跨端口顺序；启动完成后才投递本用例的故障。
+    fixture.cleanupPort.postMessage({ type: 'publish-malformed' });
     await expect(lane.whenFailed()).resolves.toMatchObject({ message: expect.stringMatching(/publication/i) });
     expect(lane.latestPublication()).toBeNull();
     await expect(lane.stop()).rejects.toThrow(/publication/i);
     const exited = lane.whenExited();
     await expect(lane.close()).rejects.toThrow(/publication|exited/i);
     await expect(exited).rejects.toThrow(/publication|exited/i);
+    fixture.cleanupPort.close();
   });
 });

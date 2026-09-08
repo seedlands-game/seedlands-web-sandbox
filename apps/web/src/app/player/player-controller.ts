@@ -197,7 +197,7 @@ export class PlayerController {
     this.publishAimTarget(null);
   }
 
-  update(dt: number) {
+  update(dt: number, elapsedSeconds = dt) {
     const world = this.options.getWorld();
     if (!world) {
       this.immersion = DRY_WATER_IMMERSION;
@@ -254,7 +254,8 @@ export class PlayerController {
         camera.setPosition(presented.position.x, presented.position.y + PLAYER_FEET_OFFSET, presented.position.z);
       }
     }
-    this.attackCooldownSeconds = Math.max(0, this.attackCooldownSeconds - dt);
+    // 输入重复跟随真实时间；预测用的截断 dt 不能拖慢权威连招窗口。
+    this.attackCooldownSeconds = Math.max(0, this.attackCooldownSeconds - elapsedSeconds);
     const target = this.aimTarget;
     this.publishAimTarget(target);
     if (this.miningHeld) {
