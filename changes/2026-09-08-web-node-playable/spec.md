@@ -75,6 +75,10 @@ CI `34227894490` 的完整 Chromium 旅程已通过 W、转向、跳跃、挖掘
 
 GREEN 采用有界公平选择：平时按 `interactive-fluid > interactive > streaming` 派发；连续绕过最老请求达到固定 burst 上限时，只允许一个最老请求让行，随后恢复基础优先级。这样新 interactive 最多受一次已到期公平让行影响，不会被整批同龄 streaming 压住；现有“持续 interactive-fluid 时旧 streaming 最终被调度”仍必须通过。不取消准备、不改网络、渲染画质、lease、5 秒门槛或请求身份；这是正确调度边界，不作为吞吐或性能收益声明。
 
+### 放置显示结算的已有 trace 对账
+
+CI34230070975 中 target回退为0，但放置后权威revision2、render revision1的5秒等待仍失败。公平调度RED/GREEN不证明整个显示链已闭合。下一诊断复用已有World的Chrome trace导出，经远端专用只读evidence API返回：为trace mark附上既有trace名称，使未完成的chunk trace也能关联到放置chunk；旅程记录挖掘或放置坐标/预期revision、等待前和失败时的该chunk最近64条事件、计数以及已存在的队列快照。不新增逐帧观察器、网络日志、写RPC、时序或产品调参。RED为现有failure只有最终revision、没有该chunk在queued/prepare/worker/upload/postrender的确切停点；GREEN以已有telemetry测试验证未完成trace仍有chunk名称，并用真实旅程验证字段。保留5秒及全部原断言，不把诊断时间当性能采样。
+
 ## 阶段与保存
 
 - [x] M0：合同、预算、接口接缝审阅与可执行 RED；提交并推送。

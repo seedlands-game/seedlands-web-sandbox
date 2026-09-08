@@ -22,6 +22,7 @@ const sourceFiles = [
   'apps/web/src/client/authority/remote-authority-input-diagnostics.ts',
   'apps/web/src/client/authority/remote-authority-input-pipeline.ts',
   'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
+  'apps/web/src/client/presentation/performance-telemetry.ts',
   'changes/2026-09-08-web-node-playable/e2e/graphics-identity-evidence.ts',
   'changes/2026-09-08-web-node-playable/e2e/graphics-identity-failure.spec.ts',
   'changes/2026-09-08-web-node-playable/e2e/remote-playable-node-fixture.ts',

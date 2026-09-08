@@ -35,6 +35,7 @@ declare global {
   interface Window {
     __seedlandsRemoteEvidence?: {
       snapshot(): RemotePlayableEvidence;
+      meshTraceAt(x: number, y: number, z: number): ReturnType<typeof captureRemoteMeshTrace>;
       voxelAt(x: number, y: number, z: number): number;
       chunkRevisionAt(x: number, y: number, z: number): number | null;
       renderedRevisionAt(x: number, y: number, z: number): number | null;
@@ -87,6 +88,7 @@ export function installRemotePlayableEvidence(
         inputDiagnostics: authorityState.inputDiagnostics,
       });
     },
+    meshTraceAt: (x: number, y: number, z: number) => captureRemoteMeshTrace(world, x, y, z),
     voxelAt: (x: number, y: number, z: number) => world.getVoxel(x, y, z),
     chunkRevisionAt: (x: number, y: number, z: number) =>
       world.getChunkRevision(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)),
@@ -96,5 +98,21 @@ export function installRemotePlayableEvidence(
   window.__seedlandsRemoteEvidence = api;
   return () => {
     if (window.__seedlandsRemoteEvidence === api) delete window.__seedlandsRemoteEvidence;
+  };
+}
+
+function captureRemoteMeshTrace(world: World, x: number, y: number, z: number) {
+  const key = [x, y, z].map((value) => floorDiv(value, CHUNK_SIZE)).join(',');
+  const events = world.exportTrace().traceEvents;
+  const ids = new Set(events.filter((event) => event.args?.traceName === key).map((event) => event.args?.traceId));
+  const selected = events
+    .filter((event) => event.args?.traceId && ids.has(event.args.traceId))
+    .sort((a, b) => a.ts - b.ts);
+  return {
+    key,
+    eventCount: selected.length,
+    events: selected.slice(-64),
+    queues: world.telemetry,
+    transactions: world.transactionDiagnostics,
   };
 }

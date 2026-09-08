@@ -10,6 +10,8 @@ export class JourneyProgressDiagnostics {
   private initial: RemotePlayableEvidence | null = null;
   private movementStart: RemotePlayableEvidence | null = null;
   private current: RemotePlayableEvidence | null = null;
+  private renderTarget: { position: readonly [number, number, number]; revision: number | null } | null = null;
+  private renderTrace: unknown = null;
 
   constructor(
     page: Page,
@@ -35,6 +37,22 @@ export class JourneyProgressDiagnostics {
     this.current = initial;
   }
 
+  async setMeshTarget(position: readonly [number, number, number], revision: number | null): Promise<void> {
+    this.renderTarget = { position, revision };
+    this.setStage(revision === null ? 'mining-wait' : 'placed-render-wait');
+    this.renderTrace = await this.readRenderTrace();
+    await this.write('progress', null);
+  }
+
+  private async readRenderTrace(): Promise<unknown> {
+    if (!this.renderTarget || this.page.isClosed()) return null;
+    return this.page
+      .evaluate(({ position }) => {
+        return window.__seedlandsRemoteEvidence?.meshTraceAt(...position) ?? { unavailable: 'remote-evidence' };
+      }, this.renderTarget)
+      .catch((error) => ({ unavailable: String(error) }));
+  }
+
   async checkpoint(stage: string, page: Page, current: RemotePlayableEvidence, movementStart = false): Promise<void> {
     this.setStage(stage, page);
     this.current = current;
@@ -45,6 +63,7 @@ export class JourneyProgressDiagnostics {
   async writeFailure(testInfo: TestInfo): Promise<void> {
     if (!this.page.isClosed()) this.current = await this.options.readEvidence(this.page).catch(() => this.current);
     const browser = await this.browserState();
+    this.renderTrace = await this.readRenderTrace();
     const summaryCount = this.options
       .nodeLog()
       .filter((line) => line.includes('"kind":"node-playable-input-summary"')).length;
@@ -101,6 +120,8 @@ export class JourneyProgressDiagnostics {
       initial: this.initial,
       movementStart: this.movementStart,
       current: this.current,
+      renderTarget: this.renderTarget,
+      renderTrace: this.renderTrace,
       browser,
       graphicsIdentity: this.options.graphicsIdentity(),
       nodeLog: this.options.nodeLog(),

@@ -395,6 +395,7 @@ test.describe.serial('Web to Node local playable loop', () => {
         minedVoxel[2] + 0.5 - beforeBreak.authoritativePlayer[2],
       ),
     ).toBeLessThan(2.5);
+    await journey.setMeshTarget(minedVoxel, null);
     await page.mouse.down({ button: 'left' });
     try {
       await expect.poll(async () => (await evidence(page)).breakActionPosition).toEqual(minedVoxel);
@@ -423,6 +424,7 @@ test.describe.serial('Web to Node local playable loop', () => {
       placedVoxel,
     );
     expect(placedChunkRevision).not.toBeNull();
+    await journey.setMeshTarget(placedVoxel, placedChunkRevision);
     await expect
       .poll(() =>
         page.evaluate(([x, y, z]) => window.__seedlandsRemoteEvidence!.renderedRevisionAt(x, y, z), placedVoxel),
