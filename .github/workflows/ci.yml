@@ -87,21 +87,27 @@ jobs:
         env:
           SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT: /tmp/seedlands-web-node-playable/journey
         run: pnpm test:web-node-playable
-      - name: Run frozen PR17 render contention experiment
+      - name: Check PR17 journey with explicit software graphics
         if: ${{ !cancelled() && github.event_name == 'pull_request' && github.head_ref == 'codex/web-node-playable' }}
         timeout-minutes: 15
         env:
-          SEEDLANDS_RESERVATION_EVIDENCE: /tmp/seedlands-web-node-playable/render-contention/window.json
-          SEEDLANDS_RESERVATION_RUN: pr17-render-contention-${{ github.run_id }}
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT: /tmp/seedlands-web-node-playable/graphics-forced
+          SEEDLANDS_RESERVATION_EVIDENCE: /tmp/seedlands-web-node-playable/graphics-window.json
+          SEEDLANDS_RESERVATION_RUN: pr17-graphics-${{ github.run_id }}
         run: |
           pnpm build:server
-          node scripts/benchmark-window.mjs --owner-thread seedlands-performance-validator --wait-timeout-ms 600000 -- pnpm experiment:web-node-render-contention
-      - name: Preserve PR17 render contention evidence
+          node scripts/benchmark-window.mjs --owner-thread seedlands-performance-validator --wait-timeout-ms 600000 -- pnpm test:web-node-playable:browser --retries=0
+      - name: Preserve PR17 graphics comparison evidence
         if: ${{ !cancelled() && github.event_name == 'pull_request' && github.head_ref == 'codex/web-node-playable' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: pr17-render-contention-${{ github.run_id }}
-          path: /tmp/seedlands-web-node-playable/render-contention/
+          name: pr17-graphics-${{ github.run_id }}
+          path: |
+            /tmp/seedlands-web-node-playable/journey/
+            /tmp/seedlands-web-node-playable/graphics-forced/
+            /tmp/seedlands-web-node-playable/graphics-window.json
+            test-results/
           if-no-files-found: error
           retention-days: 7
 
