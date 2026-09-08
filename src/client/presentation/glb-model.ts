@@ -9,7 +9,7 @@ export const MAX_GLB_TEXTURE_PIXELS = 16 * 1024 * 1024;
 export type StoredGlb = Readonly<{
   id: string;
   name: string;
-  revision: 1;
+  revision: number;
   byteLength: number;
   nodeCount: number;
   triangleCount: number;

@@ -1,7 +1,7 @@
 """Generate the Seedlands brass-trail lantern sample.
 
 Run from Blender, for example:
-  Blender --background --factory-startup --python generate_brass_trail_lantern.py -- \
+  Blender --background --factory-startup --python generate-brass-trail-lantern.py -- \
     --output-dir /tmp/seedlands-lantern
 
 Only files owned by this recipe are written below --output-dir.  No .blend

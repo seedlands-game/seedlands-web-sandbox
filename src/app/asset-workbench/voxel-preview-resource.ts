@@ -1,4 +1,5 @@
 import * as pc from 'playcanvas';
+import type { Asset, PixelTexture } from '../../client/presentation/asset-types';
 import { meshChunk } from '../../world/mesh';
 import { batchMeshData } from '../../world/mesh-batching';
 import { CHUNK_SIZE, voxelIndex, type FaceMaterialId } from '../../world/voxel';
@@ -12,8 +13,14 @@ export async function addVoxelPreview(
   parent: pc.Entity,
   voxelId: number,
   materialOverride?: FaceMaterialId,
+  assets?: readonly Asset[],
 ) {
-  const materials = await createVoxelMaterials(app, QUALITY_PROFILES.high);
+  const materials = await createVoxelMaterials(
+    app,
+    QUALITY_PROFILES.high,
+    assets?.filter((asset): asset is PixelTexture => asset.type === 'pixel-texture'),
+    assets,
+  );
   const data = new Uint16Array(CHUNK_SIZE ** 3);
   data[voxelIndex(0, 0, 0)] = voxelId;
   const parts = batchMeshData(

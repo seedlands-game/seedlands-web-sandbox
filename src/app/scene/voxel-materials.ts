@@ -2,7 +2,12 @@ import * as pc from 'playcanvas';
 import { loadTerrainPack, resolveTerrainTextures } from '../../client/persistence/terrain-pack-store';
 import { terrainMaterials } from '../../client/presentation/terrain-assets';
 import { pixelCanvas } from '../gameplay/asset-image';
-import type { PixelTexture } from '../../client/presentation/asset-types';
+import type { Asset, PixelTexture } from '../../client/presentation/asset-types';
+import {
+  voxelAppearanceGlossGlsl,
+  voxelAppearanceMetalnessGlsl,
+  voxelAppearanceEmissionGlsl,
+} from '../shaders/voxel-appearance-chunks';
 import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '../../world/voxel';
 import type { MeshPart } from '../app-contracts';
 import type { QualityProfile } from './quality-profile';
@@ -10,7 +15,6 @@ import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeli
 import {
   voxelArrayDiffuseGlsl,
   voxelArrayDiffuseWgsl,
-  voxelArrayLanternEmissionGlsl,
   voxelArrayLanternEmissionWgsl,
   voxelArrayOpacityGlsl,
   voxelArrayOpacityWgsl,
@@ -48,14 +52,30 @@ export async function createVoxelMaterials(
   app: pc.Application,
   quality: QualityProfile,
   sources?: PixelTexture[],
+  assets?: readonly Asset[],
 ): Promise<VoxelMaterials> {
   const textures = sources ?? resolveTerrainTextures(await loadTerrainPack());
+  const surface: number[] = [];
+  const emission: number[] = [];
   const tiles = new Map<FaceMaterialId, pc.Texture>();
   const tileCanvases = new Map<FaceMaterialId, HTMLCanvasElement>();
   for (const definition of terrainMaterials) {
-    const source = textures.find((texture) => texture.id === definition.textureId);
+    const material = assets?.find((asset) => asset.id === definition.id && asset.type === 'material');
+    const parameters = material?.type === 'material' ? material.payload : undefined;
+    const source = textures.find((texture) => texture.id === (parameters?.textureId ?? definition.textureId));
     if (!source) throw new Error(`缺少地形贴图：${definition.textureId}`);
     const canvas = pixelCanvas(source);
+    surface.push(
+      1 - (parameters?.roughness ?? (definition.renderMode === 'transparent' ? 0.18 : 0.92)),
+      parameters?.metalness ?? 0,
+    );
+    const linearEmission = new pc.Color(...(parameters?.emissive ?? ([1, 0.48, 0.1] as const))).linear();
+    emission.push(
+      linearEmission.r,
+      linearEmission.g,
+      linearEmission.b,
+      parameters?.emissiveIntensity ?? definition.emissiveIntensity,
+    );
     tileCanvases.set(definition.faceMaterial, canvas);
     if (
       [
@@ -86,15 +106,22 @@ export async function createVoxelMaterials(
   if (uiIndex >= 0) app.scene.layers.insertTransparent(waterLayer, uiIndex);
   else app.scene.layers.pushTransparent(waterLayer);
 
+  const resolution = Math.max(...Array.from(tileCanvases.values(), (canvas) => Math.max(canvas.width, canvas.height)));
   const arrayLayers = Array.from({ length: MATERIAL_LAYER_COUNT }, (_unused, layer) => {
     const canvas = tileCanvases.get((layer + 1) as FaceMaterialId);
     if (!canvas) throw new Error(`Missing voxel texture array layer ${layer}.`);
-    return canvas;
+    if (canvas.width === resolution && canvas.height === resolution) return canvas;
+    const normalized = document.createElement('canvas');
+    normalized.width = normalized.height = resolution;
+    const context = normalized.getContext('2d')!;
+    context.imageSmoothingEnabled = false;
+    context.drawImage(canvas, 0, 0, resolution, resolution);
+    return normalized;
   });
   const textureArray = new pc.Texture(app.graphicsDevice, {
     name: 'voxel-material-array',
-    width: 16,
-    height: 16,
+    width: resolution,
+    height: resolution,
     arrayLength: MATERIAL_LAYER_COUNT,
     mipmaps: true,
     minFilter: pc.FILTER_NEAREST_MIPMAP_LINEAR,
@@ -124,14 +151,19 @@ export async function createVoxelMaterials(
     material.diffuseMap = tiles.get(sampleId)!;
     material.diffuseVertexColor = true;
     material.gloss = category === 'transparent' ? 0.82 : 0.08;
+    material.useMetalness = true;
     material.shaderChunksVersion = '2.8';
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('diffusePS', voxelArrayDiffuseGlsl);
     material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('diffusePS', voxelArrayDiffuseWgsl);
     material.setParameter('texture_voxelArray', textureArray);
-    if (category === 'opaque' || category === 'emissive') {
+    material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('glossPS', voxelAppearanceGlossGlsl);
+    material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('metalnessPS', voxelAppearanceMetalnessGlsl);
+    material.setParameter('uVoxelSurface[0]', new Float32Array(surface));
+    if (category !== 'transparent') {
       material.emissive = new pc.Color(1, 0.48, 0.1);
       material.emissiveIntensity = category === 'emissive' ? 1.4 : 1.15;
-      material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelArrayLanternEmissionGlsl);
+      material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelAppearanceEmissionGlsl);
+      material.setParameter('uVoxelEmission[0]', new Float32Array(emission));
       material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('emissivePS', voxelArrayLanternEmissionWgsl);
     }
     if (category === 'cutout' || category === 'transparent') {
@@ -150,6 +182,13 @@ export async function createVoxelMaterials(
     }
     if (category === 'transparent') {
       material.emissive = new pc.Color(0.02, 0.11, 0.15);
+      const waterSource = assets?.find(
+        (asset) => asset.id === terrainMaterials.find((entry) => entry.faceMaterial === FaceMaterial.Water)?.id,
+      );
+      if (waterSource?.type === 'material' && waterSource.source === 'user') {
+        material.emissive = new pc.Color(...waterSource.payload.emissive);
+        material.emissiveIntensity = waterSource.payload.emissiveIntensity;
+      }
       material.opacity = mix(0.56, 0.72, quality.waterQuality);
       material.blendType = pc.BLEND_NORMAL;
       material.depthWrite = false;
