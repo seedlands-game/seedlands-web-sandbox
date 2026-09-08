@@ -114,3 +114,11 @@ root 在干净 `8a5b40a37e1add93866c097a94bd90cb09b2aaa0` 执行 `pnpm test:web-
 Web/Node 两端诊断按 inputSequence 对账，非中性样本各至多16条，Node会话结束只输出一次；关闭前后summary数量区别避免重连时误取旧汇总。真实失败不再丢失live状态。定向Vitest 2文件12项、affected ESLint/Prettier、typecheck与diff check通过。两个playable脚本均保留完整旅程和认证失败图形身份测试，拆文件没有减少门禁。
 
 本机未提交诊断草稿的W阶段通过，后续放置位置读取失败，已留下完整failure JSON；该运行只验证诊断字段及失败生命周期，不替代8a5冻结旅程，不宣称当前完整旅程通过。具体失败与计数见diagnosis.md。下一步使用同样原断言采集Linux默认及显式软件图形对照，按真实接纳/late证据决定修复。
+
+## 完整 Chromium 与确定性修复阶段
+
+CI34227894490绑定bb45eebb（parents=637a8d2+f4aaded），tree d704faeb与本地f4aaded相同。Static verification、Production build及既有浏览器回归通过；完整Chromium/SwiftShader兼容旅程已通过首屏、移动、转向、跳跃、挖掘和放置，卡在5秒renderedRevision等待（权威revision4，显示revision1）。尚未取得最终放置帧与保存/重连/重启闭环；默认headless-shell旅程仍首屏失败，不能准出。
+
+d7f86ec修复同连接target tick回退，确定性RED/GREEN及独立审阅通过；Node诊断联合上限闭合为96。root在Mac managed fullChromium/SwiftShader运行该提交，原旅程在挖掘15秒等待失败；输入对账仍有late43，但target-out-of-order与too-far-ahead均0。该软件配置运行不是通过证据，不替代native GPU闭环；没有据此放宽lease或输入接纳。
+
+为区分挖掘取消原因，root仅在独立detached d7工作目录的生成Node产物临时包裹clearInput读日志，未改主分支生产源码。第一次在精确对齐准备处结束，第二次诊断性跳过对齐后真实挖掘成功、拾取失败，均没有观测到带active break的clearInput，因此没有证实lease取消根因。临时目录已删除；原始日志、manifest和唯一测试patch保留于 `/tmp/seedlands-web-node-playable/mining-probe-manifest.json` 等文件。修改过准备步骤的诊断不算原旅程或交付证据。本轮不据该假设修改采集逻辑，继续处理已证实的输入回退及可执行RED支持的显示调度问题。
