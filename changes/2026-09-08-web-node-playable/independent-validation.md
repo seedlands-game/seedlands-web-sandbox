@@ -1,3 +1,9 @@
+# 独立验收当前状态
+
+最新审阅源码为25b59fe，PR17仍未准出。CI34213458251的Static verification和Production build通过；Chromium初始同步仍未完成9个必需区块。已到达和已校验的分页数量一致，digestingTransfers为0。加载时渲染竞争是待预注册对照验证的假设，尚不能称为已定位的根因或已采用的优化。
+
+以下保留各个源码检查点的审阅及其证据限制；早期未验项目只以明确记录的后续检查结论覆盖。
+
 # Web/Node 可玩闭环独立验收（首轮源码与测试设计）
 
 审阅对象：`51e97facf8ec1e736ee5f9b1c9bac87642eb6550`（功能冻结）。
@@ -171,3 +177,181 @@ CI 终态：`f1d9116` 的 Static verification、Package builds 和专项 Vitest�
 RED/验收测试：RemoteAuthorityClient 的可控 fake socket 在不投递 input-decision 时连续发送至少 64 个 prediction command，只观察一条 wire input-state；投递首条 accepted decision 后只发最后一个 sequence/state，第二次 decision 后无额外发送；测试 merged jump edge 与 flush state 使用同一重新计算的有效 target window；requiresResync 不会 flush 已缓存旧 state。保留 Node 现有 33 条 raw input-state 阻塞用例（仍为 4003、仅 32 次 Authority receiveInput）。再加一个受控慢 Authority transport/integration 场景：first receiveInput unresolved 时客户端产生超过 32 条预测输入，断言连接不关闭且 Authority 一次在途；resolve 后只最新 state 继续。这是运行时背压验证，不能仅修改首屏 E2E 或增加等待。
 
 本阶段未写源码或测试，也未重跑浏览器/CI。
+
+## `7da861a` 背压修复复核补充：旧 resync decision 缺口
+
+定向验证已执行：
+
+`CI=true corepack pnpm exec vitest run tests/client/remote-authority-client.test.ts tests/client/remote-authority-mesh-mirror.test.ts tests/app/playable-worker-session.test.ts tests/node/node-playable-network-session.test.ts tests/node/node-playable-network-integration.test.ts --no-file-parallelism --maxWorkers=1`
+
+结果为 5 files / 17 tests 通过。静态审阅确认单在途/latest、jump 有效期、close/fail clear、真实 `createSession` 慢 Authority 夹具和保留的 Node 32 项 raw-client 防护均实际接线；其中 slow fixture 证明 65 条正常 client sample 只有一条 Authority RPC 在途，settle 后发送最后状态。
+
+但发现需在最终准出前修复的真实旧结果缺口：`RemoteAuthorityInputPipeline.acceptDecision()` 当前在比较 `inputSequence !== inFlightSequence` 前执行 `if (requiresResync) this.queued = null`。因而一个旧/未知且 `requiresResync=true` 的 input decision 能丢弃当前新在途输入的 latest 槽。`RemoteAuthorityClient.receive()` 随后无条件调用 `onInputDecision`，还会令 PlayerController 对旧 decision 做 resynchronize。现有测试仅以 `requiresResync=false` 覆盖旧 decision，未捕获此分支。
+
+最小修复：pipeline 应先匹配 in-flight sequence，未匹配返回明确 ignored 结果且不改状态；仅匹配时清 in-flight，匹配且 requiresResync 才清 queued。返回值需区分 ignored 与 matched-no-next，客户端只对 matched decision 调用 callback/可能 flush。新增 RED：发送 sequence 0/1，投递旧 sequence 9 的 `requiresResync=true`，断言 wire 仍仅 0、callback 未调用；随后匹配 sequence 0 accepted，断言 sequence 1 flush 且 callback 只收到 0。该修复不改变产品预算、jump 规则、Node 32 gate、E2E timeout 或 compute 默认。
+
+因此 `7da861a` 的慢 Authority 背压主路径通过，但最终准出暂阻于此一个 old-resync decision 状态完整性缺口；未运行浏览器/全套/CI。
+
+## CI 34204391543 / 599bf78：初始 3×3 远端可玩区超时（只读归因）
+
+CI 的三次 Chromium 尝试均在首个远端连接 30 秒后停在产品错误“初始区块加载超时，请重试。”；页面仍在 /seedlands-web-sandbox/?harness=1，无 pageerror，Node inline Authority 已 ready，WebSocket 随启动失败关闭。故这不是 base path/query、输入 32 项 gate 或 Node 启动失败；输入积压错误已消失。专项 Vitest 在同一 job 为 10 files / 27 tests 通过，但不能替代这一真实 Chromium 首屏失败。
+
+源码显示一个足以造成慢机超时的启动排序缺口：
+
+- 三个浏览器性能档均设 maxWorkerTasksInFlight: 1。每个网格任务在派发 worker 前，scheduler 都 await beforePrepare 到 RemoteAuthorityMeshMirror.ensure；一个 baseline 未完整到达/准备前，后续 mesh task 不会开始。
+- Node session 对每条 interest-update 用 baselineTail 串行执行完整 sender：capture、27-entry authority-complete projection、descriptor 和所有 page 发送完成之后，才发送下一 request。每个 mesh baseline 含 27 chunks；canonical+fluid 共 2,654,208 bytes（约 2.53 MiB），按 64 KiB pages 约 42 页。
+- Medium 的首轮 updateStreaming 一次排入 2 × 5 × 5 = 50 个 mesh keys。初始可玩区方法没有请求或提升 9 个脚下层 key：它先等任一有三角形块 visible，随后只轮询 repository 的 3×3 是否已提交。scheduler 已有 key 时在早期 return，无法将 streaming 请求升级。
+- Manhattan 排序并非随机：同距离的稳定顺序保留构造时的 y=0 在 y=1 之前。但仍不等于 3×3 bootstrap。最后一个脚下层角落在约第 17 个完整串行 baseline 后：y0 中心、y1 中心、四个 y0 cardinal、四个 y1 cardinal，再加 y0 distance-2 组中位于该角落之前的项。这里有八个非必要 bundle 在完整 3×3 前，慢 Linux/软件 WebGL 下可线性放大到 30 秒。
+
+因此有“完整半径的常规 streaming 未给首屏 3×3 确定优先权”的真实产品缺口；目前日志没有每阶段计数，尚不能把本次三连失败归因成某一个瓶颈，更不能据此增加 timeout。
+
+### revision/halo starvation 假设
+
+该假设在源码层面可发生：mirror 接到 structural commit 时会遍历 owner 的 27-entry descriptor；任一 halo revision 高于 descriptor 时，会置 ready=false、staleAtDescriptor=true，而整 bundle 页到齐后拒绝并使 prepare 失败。随后 streaming retry 可以重新请求。
+
+但本次没有 commit/retry 计数，不能声称它已经发生。远端 RemoteAuthorityClient.setFluidActiveChunks 目前为 no-op，所以 Web 的首轮 50 key 不会直接启动 Node Fluid active window；其他 Authority 初始 mutation 仍需用实际 commit telemetry 判定。该假设应作为待诊断分支，而非既定根因。
+
+### 最小诊断与 RED 边界
+
+不改变 timeout、compute fixture 或协议预算。将启动失败的 E2E 诊断增加一个脱敏、只读 initialPlayableProgress：
+
+- required：center/9 个 key 的 repositoryReady、missing、firstVisible；分别列出/计数 queued、preparing、inFlight、commitQueue/attaching。World 已有 aggregate generation/meshing/upload queue gauge，但缺少 required-key 状态。
+- remote：baseline request sent、descriptor received、page count/completed bundle、ready owner、pending owner，以及按 reason 的 unavailable/rejected/timeout/cancelled/retried。单列 required owner 的上述计数，才可区分“第 17 个 bundle 尚在等”“bundle 已齐但 worker/commit 未推进”“反复 stale”。
+- revision：descriptors marked stale-at-arrival、commits invalidating active owners、page-complete superseded/rejected 的计数；可安全只输出计数和 chunk-key，不输出 access key/outerHTML。
+- scheduler/commit：streaming priority 队列、preparing、worker in-flight、accepted-but-not-attached、repository attached；现有 telemetry queue depth 不能判断 required 9 个的位置。
+- Node 若本测试已经持有 runtime，可从既有 readDiagnostics 读取 host 的 pendingBaselineCaptures、chunk request/compute diagnostics；不要给公开协议新加调试 RPC，也不打印 access key。E2E 失败日志可附 synthetic Node ready/stop 及该结构。
+
+明确判定：required pending 而 descriptor/pages/ready owner 持续增加是正常慢进展；required descriptor/page 或 accepted-owner 重复但 stale/retry 持续增加才支持 revision starvation；ready owners 已足而 required repository/attach 无增量则转查 worker/WebGL commit budget。
+
+最小行为修复应先有受控 RED：以可控慢 capture 或 baseline sender/mesh worker 断言 remote 初始 3×3 的九个脚下层 key 都在任何非必要 key 前进入 capture/prepare，且其 empty mesh 仍可通过 ready。然后以相同慢条件验证旧排序会把 required 最后角落推到该队列之后，而新排序在既有 30 秒契约内完成。
+
+实现可选其一：
+
+1. 在远端 start 前先只请求脚下 3×3，ready 后释放完整 radius；或
+2. 更小的常规行为变更是添加明确 bootstrap priority，允许已排入的 streaming request 被 required 3×3 原地提升（当前 requested.has 的 early return 必须处理），而中心若已 preparing 保留、不抢占。完整 radius 的其余请求仍随后执行，local 模式和合法 empty mesh 语义不变。
+
+这不是“把 Manhattan sort 调一下”即可验收：现有稳定排序确实使 y0 在同距 y1 前，但 y1 中心和 y1 cardinal 仍会排在 required corners 前。待上述诊断或 RED 证明具体分支后再选择实现；本阶段未改源码、未运行浏览器/CI/全套，也未增大 timeout。
+
+## PR17 checkpoint `4cf859db1f1edf882a0f2f672852f7bd57ea93e7`：bootstrap/old-decision 定向复核（待空网格修复）
+
+`9ef0982` 已正确完成此前 old decision guard：pipeline 先比对 in-flight sequence，未匹配回执返回 ignored、不改 queued；RemoteAuthorityClient 仅对 matched decision 通知 controller 或 flush。现有 RED/GREEN 覆盖 old `requiresResync=true` 不清掉新的 latest，也覆盖匹配 resync 清队列、close/fail 清理与之后正常 seq 继续。没有改变 Node 32 pending gate、jump expiry 投影或协议字段。
+
+`4cf859d` 的核心优先级因果也成立：Game 在完整 radius streaming 前创建 remote initial barrier；async barrier 在首次 await 前同步将脚下 3×3 用 interactive 入 scheduler。若这些 key 已被 streaming 请求占用，scheduler 现在原地提升 queued/replacement/deferred 的同一 request，而不再 early return；单 Worker / Node baseline 串行下，required 九项会在未开始的 streaming 前派发。完整 radius 仍由随后 `updateStreaming()` 排入，local 仍使用原有 `waitForInitialVisibleChunk()`，未增加本地首帧门槛。测试以每 bundle 2 秒的 slow prepare 证明旧顺序最后 required 为 34 秒、priority 后九项为 18 秒并继续派下一 nonrequired 项，具备受控慢条件的有效 RED/GREEN。
+
+但本 checkpoint 尚不能准出。`waitForInitialPlayableArea()` 仍在 required-key completed 检查之前 await `repository.waitForFirstVisible()`；repository 只有某 attach 的 `summary.triangles > 0` 时 resolve firstVisible。因而 9 个 required mesh 均为合法 empty，且尚无任一 nonempty chunk attach 时，会挂到 30 秒 timeout。这与新 spec 中“完成以每个必需 key 已 postrender 为准，不要求非空三角形”和“避免合法空网格让首个可见网格永久等待”冲突。
+
+现有 `world-initial-playable-area.test.ts` 没有抓住该路径：empty cases 将 `waitForFirstVisible()` stub 为立即 resolve。最小修复为 remote initial barrier 删除这一个 firstVisible await，直接等待九个 required `repository.chunks`（该 map 在 attach/postrender 写入）；local 的 `waitForInitialVisibleChunk()` 保持不变。RED 应构造一个永不 resolve 的 firstVisible promise 和已 postrender 的九个空 required records，断言 remote barrier 仍 resolve。无需加 timeout、改变 compute fixture 或放宽任何队列限制。
+
+已按范围运行：
+
+`CI=true corepack pnpm exec vitest run tests/client/remote-authority-client.test.ts tests/app/initial-playable-area-priority.test.ts tests/app/world-initial-playable-area.test.ts --no-file-parallelism --maxWorkers=1`
+
+结果：3 files / 13 tests passed，1.33 秒。该通过不消除上述遗漏的真实 empty-firstVisible 分支。未运行浏览器、CI 或全套，未触碰 evidence；CI `34207971935` 仍由 root 监控。
+
+## CI 34207971935 / `4cf859d`：首屏排序修复后的真实 Chromium 吞吐诊断
+
+三次失败诊断完全一致：`requiredChunks=9`、`completedChunks=7`、`queuedRequests=42`、`preparingRequests=1`、`failedPreparations=0`、`meshingRequests=0`、`uploadQueue=0`。页面/base path/harness 正确、无 pageerror，Node ready，仍在 30 秒首屏 timeout 后才断开。
+
+这证明 `4cf` 的优先级实际生效，但还不能证明吞吐足够：总首轮为 50 个 request，7 个已完成、1 个正在 prepare、42 个排队，恰为 50；第八个 required 正在 prepare、第九个还在高优先队列。没有 failed preparation、worker in-flight 或 upload backlog，因此当前证据不支持 revision retry、worker mesh 或 PlayCanvas attach 为主阻塞，也不能以此前受控 RED 中每 bundle 2 秒的假定推导真实 CI 时长。三次同一水位说明持续的 capture/projection/transport/reassembly prepare 路径在该环境的完成率不足以在 30 秒内完成九项。
+
+最小修复前先补每个 required key 和 aggregate 的分段、脱敏诊断：
+
+- client/mirror：interest sent、descriptor received、pages received/total、bundle complete、owner ready、unavailable/rejected/stale invalidated/retry；
+- scheduler：prepare start/end、worker start/end、accepted result、repository attach；
+- Node：baselineTail queued/active，capture start/end/result/reason，projection start/end，descriptor/page count 与 send completion，以及 pending capture。
+
+在同一 30 秒 timeout 时输出这些阶段和持续时间。判定规则：第八个没有 descriptor 是 Authority capture 或 tail；descriptor/page 缓慢是 projection/send；page 完而 owner 未 ready 是 reassembly；owner ready 后才检查 worker/attach。仅若证据显示 Node 已能在 worker/commit 期间继续准备下一 baseline，才考虑 9-key 有界 prefetch 以重叠阶段；若 capture/send 本身已占满 30 秒，则必须审查传输去重/协议边界，不能仅调整 scheduler、timeout 或 E2E fixture。
+
+`21d210b` 已独立补掉前节发现的合法空 3×3 首屏卡住：remote barrier 不再 await firstVisible，只等待 required repository records；local path 不变。该修复不是本次 7/9 吞吐失败的解释。
+
+本次未运行浏览器、CI 或全套，未修改源码、测试、evidence 或 Git 状态。CI 仍失败，PR17 尚不能准出。
+
+## `dae0ea6ccc3f91d506f6c8b0d9a33ccd3817f336`：初始 baseline 分段诊断复核
+
+诊断路径在正常产品会话默认关闭。浏览器端只有 remote 且 harness query 存在时才传入 `initialSyncDiagnostics`；Node 只有 E2E 子进程显式设置 `SEEDLANDS_E2E_PLAYABLE_DIAGNOSTICS=1` 时才向 network server 注入 diagnostic callback。未设置二者时，mirror 不创建诊断 entries，Node sender 使用 no-op callback，公开 C0 协议、输入/interest budget、session lifecycle 和普通 Node 输出均未改变。
+
+诊断本身足以区分本次待判定的分段：Node 对 anonymous ordinal 输出 tail queued/start、capture start/complete（含安全的状态 reason）、projection complete、send complete（pages/bytes）；browser timeout 输出 9 个请求的 requested/descriptor/pages/ready 与 elapsed、descriptor/ready elapsed、expected/received pages/bytes，再合并现有 scheduler/repository counters。没有 key、requestId、session ref、URL password 或 access key；tests 明确检查序列化结果不含 chunk key。发送页的计数只在成功 enqueue 后增加，mirror ready 只在 reassembly/consumer accept 后标记，因而能够区分 capture/tail、projection/send、page reassembly 与 worker/attach 后段。
+
+协议和清理边界保持：session 的 diagnostic callback 受 `try/catch` 包裹，抛错不会传播进 baseline tail 或 socket handler；sender 原有 bundle close、capture unset 和 cancellation finally 仍在。客户端 timeout 的 diagnostics callback 已有异常时仍按原 timeout reject 的定向测试。默认 no-op 与诊断回调均不写入 socket/C0 payload，不更改取消、pending 或 session close 行为。
+
+已运行：
+
+`CI=true corepack pnpm exec vitest run tests/app/world-initial-playable-area.test.ts tests/client/remote-authority-mesh-mirror.test.ts tests/node/node-playable-network-session.test.ts --no-file-parallelism --maxWorkers=1`
+
+结果：3 files / 14 tests passed，1.07 秒。未运行浏览器、CI 或全套。
+
+唯一需确认/修正的范围差异：Web mirror 严格记录前 9 个 request，但 Node session 的 `MAX_DIAGNOSTIC_BASELINE_REQUESTS` 是 12，且测试也以 ordinal 12 为期望；96 event 上限有效。若合同的“first9”是严格输出上限，Node 应改为 9 并更新测试，避免第 10–12 个非 required streaming request 被 E2E Node log 输出。若 12 是有意为了诊断尾部，应在 spec/执行记录说明这个例外。除这一项外，本诊断 delta 的默认关闭、事件有界、匿名化、失败隔离与阶段可区分性通过静态和定向复核；尚待新 CI 日志，PR17 仍不准出。
+
+补记：root 已确认 Node 前 12（最多 96 events）是有意的最小诊断范围：browser 仅追踪首个 required 9，Node 多出三项用来观察首屏完成后普通 streaming 是否启动。该分层限制现已接受，不构成修复缺口；后续 spec/执行记录应保留此理由。`dae0ea6` 的诊断 delta 在该约定下通过本独立复核，CI 结果仍待新基线整合后产生。
+
+## CI `34211532822` / `b0a5a1d`：首屏优先级后的浏览器基线消费瓶颈（只读归因）
+
+三次 Chromium 失败都保留了正确的首屏调度状态：required 9 中已完成 7 或 8、另一个在 preparing，`failedPreparations=0`、`meshingRequests=0`、`uploadQueue=0`；Node inline ready，且其余 42/41 个普通请求仍排队。结合这次 Node 前 12 条分段记录，优先级、Node capture、projection 与 server send 都不是第 2–9 个 required bundle 的主耗时：Node 对这些 bundle 的 capture 约 13–68 ms、projection 约 4–15 ms、全部 54 个 page 的 send completion 约 4–18 ms。首次 bundle 的 capture 为约 4.7–7.3 s，确实消耗首屏预算，但不能解释随后 browser 每 bundle 越来越慢的尾部。
+
+相反，Web 端的 `descriptor → ready` 先约 1.1 s，随后扩至约 2.8–3.8 s、4.9–10.5 s；第 8 个 bundle 在 Node 已报告 54 pages 全部 send complete 后，浏览器 timeout snapshot 仍只完成 12/54 或 26/54 page。当前 `receivedPages` 只在 reassembler 的 `acceptPage()` await 成功后递增，因此这确定为“浏览器已进入 descriptor 后，到 page 验证/reassembly/consumer-ready 的消费区间”积压，不能据此断言网络未投递，也不能归咎 Node capture/tail、worker mesh 或 upload。
+
+根因层面的重要反证：客户端不是把 54 个 page 显式排为一条 `receiveTail`。WebSocket listener 对每个 message 直接 `void authority.receive(event.data)`；`receive()` 中单个 baseline-page await mirror，但彼此可并发。core 的并发契约测试也明确构造 54 个并发 `acceptPage()`，期望同时 `digestingTransfers=54`。所以“每个 page await”不等于已证明 54 个 hash 串行，不能把约 1 秒误写成 `54 × frame` 或单一 crypto 瓶颈。
+
+不过该区间存在有根据的高成本候选：每个 27-entry bundle 有 canonical/fluid 两个 transfer，即 54 个全块 page；每个完整 transfer 都在 Web 侧 `bytes.slice()` 后调用 `crypto.subtle.digest`，并以 hex 字符串比较。因此一个约 2.53 MiB bundle 会触发 54 次 copy/digest/JS completion；与此同时场景 application 在开始连接前已经 `app.start()`，首个 chunk attach 后会持续 frame/render。软件 WebGL 与 main-thread message decode/reassembly 可能共同放大后面 bundle 的完成时间，但现有日志没有 message-arrival、digest-start/settled 或 frame/long-task 相关性，尚不能在这些候选中定案。
+
+### 最小下一步：先补有界观察，不改 30 秒或协议
+
+仅在既有 harness diagnostics 开关下、限于前 9 个 Web request，补以下匿名聚合字段：
+
+- `baseline-page` 到达/完成计数及首末到达时刻；现有 `receivedPages` 保留为 verify/accept 后计数，二者分离。
+- C0 decode、mirror/reassembler accept 的累计/最大耗时，以及 timeout snapshot 的 `activeBundles`、`digestingTransfers`。不输出帧、chunk key、requestId、session ref、口令或 payload。
+- 同一 request 的 descriptor、54th-page-arrival、all-digest-settled、consumer-ready 的时间点。由此才能区分“浏览器 JS 尚未收到 page”“收到但 C0/复制阻塞”“digest in flight”“digest 已完成但 consumer/attach 未完成”。Node 现有 capture/projection/send 分段无需扩大。
+
+这只是诊断，必须保持 callback 失败隔离、96 event/12 Node 与 9 Web 的既有界限、timeout/cancel/close 原语不变；不能进入公开协议或改变会话行为。
+
+### 修复决策边界
+
+当前 30 秒是 spec 明定的产品合同，失败时仍必须报错；三次数据只显示进展，不足以证明任一尝试必将在稍后健康完成。因此不能以“正在推进”为由直接加大等待。若新分段表明 page 已快速到达而 digest/reassembly 完成慢，修复是 Web reassembly/协议传输的性能工作：例如减少每 bundle page/digest/copy 数量，或把可安全 transfer 的 reassembly 移到已有 worker。这会涉及 C0 reference、revision/cancel/ownership和 A/B 端到端测量，不能以本诊断推断收益或保证 30 秒，剩余成本高。
+
+若 page-arrival 明显被渲染长帧延后，loading 期间减少重复 3D render 可以作为更窄的候选，但不能直接关闭 render：当前 required 完成以每个 chunk postrender 为准，直接停 render 会使 visibility barrier 永远不结算。它必须以受控 browser RED/GREEN 证明：9 个 authority-complete mesh 仍 attach、各自 postrender 后 barrier 完成，最后画面完整，再以同源/同机器 A/B 证明对慢机路径有效；否则只是隐藏视觉门槛。它属于渲染调度性能优化，不是已证实正确性缺陷。
+
+另一条成本较低但需要产品授权的路线是把“固定 30 秒内全 9 postrender”改为有绝对上限的进度门禁：只在 required request 的安全阶段持续前进时延续 loading，仍对无 descriptor/page/digest/attach 进展、失败、cancel 和 close 及时失败，并向玩家显示可取消的进度。这是用户可见首屏合同变化，不能伪装为 test timeout；需修订 spec、明确总上限及 RED（停滞仍在原 deadline 失败、持续进展有界完成、disconnect/cancel 不延长），再做真实浏览器验收。它可解决已证实的“健康但慢”环境，却不替代后续吞吐 A/B 优化。
+
+本轮未运行 browser、CI 或全套，未改源码、测试、证据或 Git 状态。工作树中的 evidence 修改由实施者持有，未触碰。CI `34211532822` 仍失败，PR17 不能准出。
+
+## `bb880542ec00258c3e8123be9772ad1e77750d7c`：Web page arrival / verification 最后一层诊断复核
+
+通过本层定向复核。此提交只扩展 Harness 失败快照，未改 C0 message、baseline reference/reassembly 的校验、reservation、取消、revision owner 或 scheduler 行为。`acceptPage()` 仍以原有 `requireReassembler().acceptPage(page)` 作为唯一重组调用；诊断仅在调用前记录页面进入 mirror 的匿名计数/字节/时刻，在该 promise 正常返回后记录 verification 完成。若重组抛错，原异常与 clear/cancel 路径保持，verified 不会被伪增；若 diagnostics 未启用，新增分支不写诊断状态。
+
+Web 仍严格只在 `diagnosticsEnabled` 且 request ordinal 小于 9 时创建 entry；snapshot 只枚举该 map。输出没有 chunk key、requestId、bundle identity、session ref、口令或页面 payload。新增 reassembler 汇总只有 `activeBundles`、`digestingTransfers`、`reservedBlockBytes`，足以和 `arrivalPages/Bytes`、`verifiedPages/Bytes`、first/last arrival、last verification 对照：
+
+- arrival 增长而 verification 不增长且 digesting 大于零，指向已进入 mirror 的重组/验证等待；
+- arrival 未到 expectedPages，不能把 server send completion误判为浏览器已消费；
+- verification 已齐但 owner 未 ready，才继续检查 consumer/owner；
+- active/reserved 为零则排除 timeout 时仍有本地 reassembler bundle。
+
+术语边界应保留：这里的 arrival 是 **C0 已 decode、payload block 已解析并进入 `RemoteAuthorityMeshMirror.acceptPage()`**，不是浏览器网络栈收到 WebSocket frame 的原始时刻。因此它足以将原先“page 消费”再切成 mirror-entry 与 verify/reassembly，但若 arrival 本身迟滞，仍不能单独区分 WebSocket delivery、主线程调度和 C0 decode；只有需要继续追该分支时才应增加更早的、同样有界的观察点。
+
+受控测试真实保持 pending 的首个 page promise 时确认 `arrival=1`、`verified=0`、`activeBundles=1`、reservation 非零；全部真实分页完成后确认 ready 和 reassembler 账本归零，并验证匿名化。本人额外运行：
+
+`CI=true corepack pnpm exec vitest run tests/client/remote-authority-mesh-mirror.test.ts tests/app/world-initial-playable-area.test.ts --no-file-parallelism --maxWorkers=1`
+
+结果：2 files / 10 tests 通过（0.63 s）。未重跑 browser、全套或 CI。实施者报告的 260 files / 1302 tests、build/isolation/dist、原15回归、资产2、真实远端 34 Vitest + 20.2 s Chromium，以及 source `04a8076` evidence，均为其本地记录，仍待 root 以新 CI 终态收口。`25b59fe` 仅处理 main squash ancestry/文档上下文，未作为本层生产行为变化计入。
+
+## CI `34213458251` / `25b59fe`：arrival/verification 诊断定案与最小 renderer 对照
+
+新分段排除了本地 reassembly/crypto 为当前主阻塞。三次失败中，每个已到达页面都满足 `arrivalPages === verifiedPages`、bytes 相等，`lastVerificationElapsedMs` 只比 `lastPageArrivalElapsedMs` 晚约 0.2–0.5 ms；timeout 的 `digestingTransfers=0`，仅当前未完成 bundle 保持 `activeBundles=1` 与其 2,654,208-byte reservation。换言之，页面一旦已 C0 decode 并进入 mirror，就很快通过 reassembly/verify；此前的 54 次 WebCrypto 候选不成立为这次 CI 的尾部解释。
+
+真正变慢的是进入 mirror 前的 page task 到达节奏。三次中第 2–5 bundle 的 descriptor 后完整 54 page 约需 0.93–1.05 s；后续第 6 约 2.8–3.1 s，第 7 约 4.4–9.5 s，最后的第 8/9 在 timeout 时只有 12–35/54。相应 Node bundle 已在数毫秒内完成 54 page send；capture/projection/tail 不构成该段瓶颈。`arrival` 位于 C0 decode 后，因此该证据仍把“浏览器 WebSocket message task 未开始”与“同步 C0 decode 很慢”合并为 pre-mirror 区间，不能只凭日志选择二者之一。
+
+日志中的 `GPU stall due to ReadPixels` 不能当作 renderer 因果证据：connect 失败处理会在 `waitForFunction` 抛错后调用 `page.screenshot()`，该截图本身可产生 ReadPixels 警告；console 事件的到达顺序不足以证明该警告发生于首屏 page 消费期间。
+
+### 最小、可证伪的 renderer 竞争对照
+
+不扩大 telemetry、协议或 30 秒。仅为 E2E Harness 增加一个远端 loading 诊断开关，并在相同 Chromium/Node/seed/base-path 下做 A/B：
+
+1. baseline 保持当前连续 `autoRender=true`；
+2. experiment 从 remote scene 开始至 initial barrier settle 的 `try/finally` 内设 `app.autoRender=false`，保留 PlayCanvas rAF/update、网络、worker、commit 与 Svelte loading UI；定期（例如 100 ms）设 `app.renderNextFrame=true`，使每个已 attach chunk 仍在真实 postrender 上结算；finally 无论 success、timeout、cancel 或 disconnect 都清 timer、恢复 `autoRender=true` 并请求一帧。
+
+PlayCanvas 明确保证 `autoRender=false` 只跳过 render，应用 update 仍每帧运行，`renderNextFrame` 会执行一次真实 render；但 `playcanvas-chunk-adapter.attach()` 依赖 `postrender` 完成 repository/initial barrier，所以实验不能完全关闭 render。A/B 两侧必须继续断言 9 个 required key 都经过 postrender、合法空 mesh 正常完成、30 秒合同不变，且成功侧继续完成同一真实移动/跳跃/挖放/保存/重连/重启旅程。只在该对照使三次同环境稳定通过、而 baseline 保持该 arrival 拖慢形态时，才能把 renderer/main-thread 竞争认定为可操作原因。
+
+若对照失败或 arrival 分布无改善，不应产品化 render 改动；下一步最小观测仅在现有首 9 request 内把 WebSocket message-listener entry 与 `decodeC0Envelope` 前后时间接到已有 arrival 字段，以分开 event dispatch 与 C0 decode。不是通用 telemetry，也不记录 payload/identity。
+
+若对照成立，产品修复边界才是 remote loading 的按 attach 请求 render（替代定时器）、barrier finally 恢复连续渲染，并新增 attach/postrender、cancel/timeout、local 模式不变的 RED/GREEN。它是为满足既有 30 秒首屏合同的正确性收口；任何“更快”的结论仍需同源、串行的 A/B 端到端测量，不能由该诊断或一次 CI 成功宣称。
+
+本轮仅阅读 CI/source，未运行 browser、CI 或全套，未修改源码、index 或 evidence。CI `34213458251` 仍失败，PR17 不准出。
