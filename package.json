@@ -32,6 +32,7 @@
     "test:coverage:ci": "vitest run --coverage --maxWorkers=1",
     "test:e2e": "playwright test tests/e2e",
     "test:e2e:regression": "playwright test tests/e2e/regression changes/2026-09-07-loading-performance/e2e/loading-performance.spec.ts changes/2026-09-07-prerendered-start-screen/e2e/prerendered-start-screen.spec.ts changes/2026-09-08-node-monorepo/e2e/web-package-runtime.spec.ts",
+    "test:web-node-playable": "vitest run tests/server/network-playable-protocol.test.ts tests/node/node-network-options.test.ts tests/node/node-authority-publication-listener.test.ts tests/client/remote-authority-client.test.ts && playwright test changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts",
     "test:e2e:benchmark": "playwright test tests/e2e/benchmark",
     "test:e2e:macro-map": "playwright test tests/e2e/regression/macro-map.spec.ts",
     "verify:static": "pnpm ssg:check && pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage && pnpm typecheck",

@@ -27,6 +27,10 @@ import {
   validateAuthorityResponsePayload,
 } from './node-authority-lane-protocol';
 import type { NodePersistenceProxyBootstrap } from '../persistence/persistence-lane-proxy';
+import {
+  notifyAuthorityPublicationListeners,
+  type AuthorityPublicationListener,
+} from './node-authority-publication-listeners';
 
 export type NodeAuthorityLaneOptions = Readonly<{
   entry: URL;
@@ -84,7 +88,7 @@ export type NodeAuthorityLane = Readonly<{
   readDiagnostics(): Promise<NodeAuthorityDiagnostics>;
   latestSnapshot(): Readonly<AuthoritySnapshot> | null;
   latestPublication(): Readonly<NodeAuthorityPublication> | null;
-  subscribePublication(listener: (publication: Readonly<NodeAuthorityPublication>) => void): () => void;
+  subscribePublication(listener: AuthorityPublicationListener): () => void;
   diagnostics(): NodeAuthorityLaneDiagnostics;
   stop(): Promise<NodeDedicatedStopResult>;
   /** 首个逻辑或协议失败立即可见；物理清理仍由 whenExited 跟踪。 */
@@ -172,7 +176,7 @@ export async function createNodeAuthorityLane(options: NodeAuthorityLaneOptions)
   let failure: string | null = null;
   let publicationSequence = -1;
   let latest: NodeAuthorityPublication | null = null;
-  const listeners = new Set<(value: Readonly<NodeAuthorityPublication>) => void>();
+  const listeners = new Set<AuthorityPublicationListener>();
   let stopped: NodeDedicatedStopResult | null = null;
   let stopRequest: Promise<NodeDedicatedStopResult> | null = null;
   let closeRequest: Promise<void> | null = null;
@@ -239,7 +243,7 @@ export async function createNodeAuthorityLane(options: NodeAuthorityLaneOptions)
       publicationSequence = message.sequence;
       latest = structuredClone(message.publication);
       publication.port1.postMessage({ type: 'publication-ack', epoch: options.epoch, sequence: publicationSequence });
-      for (const listener of listeners) listener(structuredClone(latest));
+      notifyAuthorityPublicationListeners(listeners, latest);
     } catch (error) {
       const failureError = asError(error, 'Authority publication 无效。');
       rpc.close(failureError);

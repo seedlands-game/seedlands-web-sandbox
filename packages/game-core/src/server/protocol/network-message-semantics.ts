@@ -3,6 +3,7 @@ import type { AuthorityAction } from '../../compute/authority-worker-protocol';
 export const NETWORK_DRAFT_PROTOCOL_VERSION = 1 as const;
 
 export type NetworkMessageClass =
+  | 'session-hello'
   | 'welcome'
   | 'session-rejected'
   | 'input-state'
@@ -31,6 +32,7 @@ export type NetworkMessageClassSpec = Readonly<{
 }>;
 
 export const NETWORK_MESSAGE_CLASSES: Readonly<Record<NetworkMessageClass, NetworkMessageClassSpec>> = {
+  'session-hello': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   welcome: { direction: 'outbound', reliability: 'reliable', stream: 'control' },
   'session-rejected': { direction: 'outbound', reliability: 'reliable', stream: 'control' },
   'input-state': { direction: 'inbound', reliability: 'latest', stream: 'input' },
@@ -61,6 +63,11 @@ export type PublicSessionRef = Readonly<{
 }>;
 
 export type PublicInboundMessage =
+  | Readonly<{
+      kind: 'session-hello';
+      protocolVersion: typeof NETWORK_DRAFT_PROTOCOL_VERSION;
+      accessKey: string;
+    }>
   | Readonly<{
       kind: 'input-state';
       ref: PublicSessionRef;
@@ -211,6 +218,7 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
 };
 
 const inboundKeys = {
+  'session-hello': ['protocolVersion', 'accessKey'],
   'input-state': [
     'inputSequence',
     'targetPhysicsTick',
@@ -230,8 +238,16 @@ const inboundKeys = {
 } as const;
 
 export function isPublicInboundMessage(value: unknown): value is PublicInboundMessage {
-  if (!isRecord(value) || !hasNoCapabilities(value) || !isPublicSessionRef(value.ref) || typeof value.kind !== 'string')
-    return false;
+  if (!isRecord(value) || !hasNoCapabilities(value) || typeof value.kind !== 'string') return false;
+  if (value.kind === 'session-hello')
+    return (
+      hasOnlyKeys(value, ['kind', ...inboundKeys['session-hello']]) &&
+      value.protocolVersion === NETWORK_DRAFT_PROTOCOL_VERSION &&
+      typeof value.accessKey === 'string' &&
+      value.accessKey.length > 0 &&
+      value.accessKey.length <= 256
+    );
+  if (!isPublicSessionRef(value.ref)) return false;
   if (
     !Object.hasOwn(inboundKeys, value.kind) ||
     !hasOnlyKeys(value, ['kind', 'ref', ...inboundKeys[value.kind as keyof typeof inboundKeys]])
@@ -266,8 +282,12 @@ export function isPublicInboundMessage(value: unknown): value is PublicInboundMe
     return (
       isSafeInteger(value.requestId) &&
       Array.isArray(value.keys) &&
-      value.keys.length <= 256 &&
-      value.keys.every(isNonEmptyString)
+      value.keys.length === 1 &&
+      value.keys.every((key) => {
+        if (!isNonEmptyString(key)) return false;
+        const coordinates = key.split(',').map(Number);
+        return coordinates.length === 3 && coordinates.every(Number.isSafeInteger) && coordinates.join(',') === key;
+      })
     );
   if (value.kind === 'checkpoint-request') return isSafeInteger(value.requestId);
   if (value.kind === 'resync-request')
