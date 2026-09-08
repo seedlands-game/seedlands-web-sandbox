@@ -30,6 +30,12 @@ Node 产品从 workspace、根 typecheck/build/test、Lint/依赖扫描、CI 和
 - [x] 受影响确定性测试、pnpm verify:static、pnpm build、浏览器回归、Headless 多命令冒烟。
 - [x] 语义 commit、推送 tag/分支并发 [PR #24](https://github.com/seedlands-game/seedlands-web-sandbox/pull/24)；人类审核与合并不自动执行。
 
+## CI 准出修订
+
+首次远端 run `34269805082` 固定了近战 E2E 的可执行 RED：三次既有 attempt 在累计 DOM 谓词上失败。只读诊断确认当前用例把持续的命中结果与瞬时 phase/combo 绑定为同帧要求；合并 tick 可以跳过中间相位投影，该要求不是现有结果合同。
+
+修订验收：保留真实按住左键、5/7 点命中反馈、两次截图和目标权威终态；不要求当前 HUD phase 与结果同帧。新增确定性对照用例，以较大推进步长验证 phase 已离开 hit/active 已结束时，5/7 结果和目标扣血仍可检查。先跑该定向测试，再按 CI low 画质连续两次运行近战 E2E。不开新重试、不延长谓词超时、不改变攻击规则；截图不证明每次合并 tick 均显示了中间相位。
+
 ## 工作量与预算
 
 当前归档与路线文档估计 1–2 PD，Agent 工作 2–5 小时，外部 CI 等待另计；非大规模实现。主任务负责路线与后续设计，Sol/high 有界完成退役实现（最多 3 Agent 小时），共享总规划 6 小时，保守预算建议 6×120%=7.2 小时，取整 8 小时。实际 token/credits/API 账单 unknown，不以 token 换算 credits；不是付费或 goal 授权。后续大规模 MVP 估算另列。

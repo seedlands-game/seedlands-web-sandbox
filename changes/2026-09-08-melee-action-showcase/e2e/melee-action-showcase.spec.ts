@@ -71,12 +71,13 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   });
   await page.mouse.down();
   try {
+    // 命中回执持久存在；当前 phase/combo 可能在同一 Authority wake 内已推进，不能要求两者同帧出现。
     await expect
       .poll(
         () =>
           page.evaluate(() =>
             ((window as Window & { __showcaseCombatEvidence?: string[] }).__showcaseCombatEvidence ?? []).some(
-              (text) => text.includes('hit') && text.includes('5 点伤害'),
+              (text) => text.includes('命中') && text.includes('5 点伤害'),
             ),
           ),
         { intervals: [16, 16, 32] },
@@ -88,7 +89,7 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
         () =>
           page.evaluate(() =>
             ((window as Window & { __showcaseCombatEvidence?: string[] }).__showcaseCombatEvidence ?? []).some(
-              (text) => text.includes('第 2 击') && text.includes('7 点伤害'),
+              (text) => text.includes('命中') && text.includes('7 点伤害'),
             ),
           ),
         { intervals: [16, 16, 32] },

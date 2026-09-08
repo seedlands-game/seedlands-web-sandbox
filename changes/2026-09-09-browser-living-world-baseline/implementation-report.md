@@ -52,3 +52,17 @@
 - Agent 墙钟约 0.7 小时，低于合同 3 小时上限；包含依赖恢复、RED/GREEN、产品与无消费者代码清理、两轮完整静态门禁、构建、Headless 和 23 项 Chromium 验收。
 - 未增加第三方依赖。模型 credits、token 和 API 等价费用未由当前运行环境提供，因此不伪造数值。
 - 外部写入为 0；未提交、推送或合并，未读取 `.env` 或密钥。
+
+## 首次远端 CI 证据
+
+[run 34269805082](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34269805082) 固定 head `4601a732e9eea80bec9df10268ebf89b5450b6c9`：静态检查、生产构建、Chromium 基础回归和 PR15 资产集成通过；近战集成失败。三次既有 Playwright attempt 分别在累计 DOM evidence 的第一击、第二击、第一击断言上超过 5 秒（`melee-action-showcase.spec.ts:84/96`）。不是编译失败，也不能仅凭该日志认定攻击未执行或只是测试抖动。
+
+该 run 的 artifacts API 返回空数组，没有可下载截图/trace，不能声称检查过 CI 画面。保留失败记录，由独立诊断确定最小修复范围后才提交修正；不直接重跑碰运气。后续终态以修正提交的新 run 为准。
+
+### 修订与定向复验
+
+Terra/high 独立只读诊断沿 `AuthoritySession.wake → advanceGameplayRules → CombatRuntime.advanceActor → worker gameplay view → BrowserGameplay.consumeCombatResult` 核对：合并推进可跨过 80ms hit 相位，命中 lastResult 与当前 active phase/combo 不具有同帧保证。修订只解除近战 E2E 的同帧耦合，仍要求真实按住输入产生 5/7 点命中反馈，最后 Authority 查询中央目标为 null；攻击与产品源码不变。
+
+新增 `tests/server/gameplay-foundation.test.ts` 的合并步进用例，直接验证第一击已在 recovery 而结果为 5、第二击 active 已 null 而结果为 7，以及 health 20→15→8 与单调 result sequence。`CI=true pnpm exec vitest run tests/server/gameplay-foundation.test.ts` 12/12 通过。`SEEDLANDS_BROWSER_E2E_QUALITY=low CI=true pnpm test:pr17:integration --repeat-each=2 --retries=0` 连续 2/2 通过（11.8s，功能测试耗时不是性能结论）。同次输入的两张原始截图已检查：第一张在收招/衔接阶段仍有目标，第二张显示 7 点命中且中央目标消失；不声称截图证明所有 tick 合并时均显示中间挥剑相位。
+
+本轮定向复验启动时 pnpm 的自动依赖检查在 sandbox 内重建 node_modules，因 registry EPERM 失败；随后通过已批准的网络环境按原 lockfile 恢复，再运行上述测试成功。未新增依赖或改变锁文件。
