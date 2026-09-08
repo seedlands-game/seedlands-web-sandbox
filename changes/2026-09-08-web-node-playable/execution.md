@@ -122,3 +122,9 @@ CI34227894490绑定bb45eebb（parents=637a8d2+f4aaded），tree d704faeb与本�
 d7f86ec修复同连接target tick回退，确定性RED/GREEN及独立审阅通过；Node诊断联合上限闭合为96。root在Mac managed fullChromium/SwiftShader运行该提交，原旅程在挖掘15秒等待失败；输入对账仍有late43，但target-out-of-order与too-far-ahead均0。该软件配置运行不是通过证据，不替代native GPU闭环；没有据此放宽lease或输入接纳。
 
 为区分挖掘取消原因，root仅在独立detached d7工作目录的生成Node产物临时包裹clearInput读日志，未改主分支生产源码。第一次在精确对齐准备处结束，第二次诊断性跳过对齐后真实挖掘成功、拾取失败，均没有观测到带active break的clearInput，因此没有证实lease取消根因。临时目录已删除；原始日志、manifest和唯一测试patch保留于 `/tmp/seedlands-web-node-playable/mining-probe-manifest.json` 等文件。修改过准备步骤的诊断不算原旅程或交付证据。本轮不据该假设修改采集逻辑，继续处理已证实的输入回退及可执行RED支持的显示调度问题。
+
+## 26850f6 诊断冻结验证
+
+干净26850f64392e32a198f126e58b3ac2e1a9c14fe2执行 managed fullChromium/SwiftShader 的原浏览器脚本，两项通过（36.0秒，只是功能执行时间）；41项sourceInputs与Git源码/实际Node dist逐一匹配，sourceTreeStatus为空。完整挖放、保存、重连及重启的原断言保持。放置[2,18,2]的chunk0,0,0记录57条关联trace，包含visible-postrender；root审看放置帧中完整方块及重启后的真实世界帧。对应六份软件证据随后单独保存到evidence/software，7274原生证据仍保留。
+
+新诊断allowlist的RED证实原event args中合成errorMessage会进入输出；GREEN两文件7项、受影响ESLint、测试typecheck及pnpm build退出0。完整最新静态以CI34232573762终态为准；该CI仍待采集Linux故障目标chunk的阶段证据。
