@@ -96,3 +96,21 @@ JSON 经 Prettier 格式化后内容未变，表中为最终提交文件 hash。
 - `experimental-local-c0-v1` 仍是实验合同，不是 N2–N4 正式 wire/codec 采用结论，也没有网络性能收益声明。
 - 保存只承诺已收到 checkpoint receipt 的 durable 状态；关闭页面本身不保证最后一个未知结果动作已经落盘。浏览器旧存档不会自动导入 Node 数据目录。
 - M3 仍需先定位并修复 GitHub CI 的初始同步 30 秒超时，再由 root 完成最终独立报告、最新 CI 终态与 PR #17 ready-for-review。PR 不自动合并；PR #15 的冲突和 main 整合由用户在另一台设备处理，本任务不改动 #15，#17 保持现有 base。
+
+## 最终本机源码绑定旅程（8a5b40a）
+
+root 在干净 `8a5b40a37e1add93866c097a94bd90cb09b2aaa0` 执行 `pnpm test:web-node-playable`：11文件34项Vitest与2项Chromium通过，浏览器两项20.5秒；原日志 `/tmp/seedlands-web-node-playable/final-local-8a5b40a.log`。五帧及JSON随后保存为 `bee9a47`，仅格式化JSON、未改变记录值。34个sourceInputs逐一对照该Git源码及真实Node dist均匹配，采集时sourceTreeStatus为空。
+
+真实键鼠使权威玩家从y=18跳至18.9916667；在[-1,20,-2]放置voxel2、chunk revision2；关页前tick736至重连tick872，世界持续运行。停止durableCommitSequence=1074、重启ready读取1074；新serverEpoch和方块恢复断言通过。initial/reconnect/restart均回读WebGL2、ANGLE Metal/Apple M3 Pro、Chrome152.0.7977.76。root视检放置原始帧可见完整泥土方块。本机功能耗时不作为性能结论，Linux图形环境对照另列。
+
+## CI34222361251 图形对照终态
+
+源码8a5b40a；Static verification、Production build、既有Chromium regression及资产集成通过。原Active旅程默认配置三次首屏超时；显式软件图形配置通过首屏9块和Pointer Lock，但W移动5秒仅0.019641855，完整旅程失败。默认三次实际图形身份亦为WebGL2/ANGLE Vulkan SwiftShader Subzero，浏览器151.0.7922.34，不能将forced flags视为唯一变量或修复结论。
+
+工件保存在 `/tmp/seedlands-web-node-playable/ci-graphics-34222361251/`，包含原始early帧与原生窗口记录；缺少后续失败的完整进度JSON，因此下一轮先增加受限的移动窗口、客户端发送/决策与Node接纳/late对账。仰角本身不会削弱归一化的水平wish；现有证据不足以归因为碰撞或输入过期，不修改输入租期、接纳条件或测试门槛。
+
+## movement-window 诊断 checkpoint（2c3d277）
+
+Web/Node 两端诊断按 inputSequence 对账，非中性样本各至多16条，Node会话结束只输出一次；关闭前后summary数量区别避免重连时误取旧汇总。真实失败不再丢失live状态。定向Vitest 2文件12项、affected ESLint/Prettier、typecheck与diff check通过。两个playable脚本均保留完整旅程和认证失败图形身份测试，拆文件没有减少门禁。
+
+本机未提交诊断草稿的W阶段通过，后续放置位置读取失败，已留下完整failure JSON；该运行只验证诊断字段及失败生命周期，不替代8a5冻结旅程，不宣称当前完整旅程通过。具体失败与计数见diagnosis.md。下一步使用同样原断言采集Linux默认及显式软件图形对照，按真实接纳/late证据决定修复。

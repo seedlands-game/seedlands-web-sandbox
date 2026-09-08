@@ -2,7 +2,9 @@
 
 ## 完成状态
 
-合并新 base 后，本地完整闭环已重新以 `04a8076` source-bound 真实旅程验证：浏览器完成认证连接、脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复；29 项输入同时绑定合并后的 appearance 装载、地形、物品和 UI 资源，五张原始帧已重建并视检。GitHub CI 仍在初始同步 30 秒门槛失败，当前状态不是 Delivered；最新诊断已把问题收窄到浏览器 descriptor 后的 page 消费/重组，并补齐到达与校验计数及 reassembler 汇总，等待下一轮 CI 实证后据证据修复。
+最新 `8a5b40a` 干净源码已取得真实本机旅程：认证连接、脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复。34 项 source input 全部匹配，五张原始帧已更新；停止与重启读取 durableCommitSequence 均为1074，三个连接均回读实际 WebGL2/ANGLE Metal 图形身份。证据保存于 `bee9a47`。
+
+状态仍为 Active，尚未 Delivered。Linux 默认图形配置下的首次同步超时仍未准出；固定 AAABBA 实验中四个连续绘制 A 均在约8–11秒完成，按预注册停止线不采用 `autoRender` 候选。CI34222361251 的默认配置三次均在首屏失败；显式 SwiftShader 配置通过首屏和 Pointer Lock，但 W 移动5秒权威位移仅0.01964。两者实际 renderer 均为 SwiftShader，因此启动配置尚不能采用为修复。当前补齐受限的 client/Node input decision 和移动窗口对账，产品渲染、输入时序与验收门槛保持不变。
 
 ## 提交和推送
 
@@ -38,7 +40,7 @@
 
 ## 验证结果
 
-`04a8076` 的 source-bound `pnpm test:web-node-playable` 为 11 文件 34 项 Vitest + 1 项真实 Chromium 全绿；合并后的 `pnpm verify:static:ci`（260 文件、1302 项通过）、`pnpm build:web`、`pnpm build:server`、`pnpm verify:node-isolation`、`pnpm verify:web-node-playable-dist`、既有 15 项 Chromium regression 与资产集成 2 项均退出 0。GitHub CI 的初始同步超时仍在定位，完整数值、日志摘要、source/hash 绑定和原始帧清单见 `execution.md` 与 `evidence/`。
+`8a5b40a` 的 source-bound `pnpm test:web-node-playable` 为 11 文件 34 项 Vitest + 2 项真实 Chromium 全绿（包含真实认证失败后图形身份缓存）；合并后的 `pnpm verify:static:ci`（260 文件、1302 项通过）、`pnpm build:web`、`pnpm build:server`、`pnpm verify:node-isolation`、`pnpm verify:web-node-playable-dist`、既有 15 项 Chromium regression 与资产集成 2 项均退出 0。GitHub CI 的初始同步超时仍在定位，完整数值、日志摘要、source/hash 绑定和原始帧清单见 `execution.md` 与 `evidence/`。
 
 ## 限制
 
@@ -46,4 +48,4 @@
 
 ## 剩余工作
 
-先依据下一轮 CI 的有界诊断定位并修复初始同步超时，再由 root 提交最终独立验收报告和 CI 终态，确认 draft PR #17 可转为 ready-for-review。PR #15 的冲突与 main 整合由用户在另一台设备处理；本任务不修改 #15，#17 保持现有 base。不得自动合并。
+先用 CI 移动窗口对账定位并修复实际失败，再由 root 提交最终独立验收报告和最新 CI 终态，确认 draft PR #17 可转为 ready-for-review。PR #15 的冲突与 main 整合由用户在另一台设备处理；本任务不修改 #15，#17 保持现有 base。不得自动合并。
