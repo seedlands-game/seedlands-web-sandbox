@@ -27,3 +27,5 @@ node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- <command> [args...
 - `SEEDLANDS_RESERVATION_EVIDENCE` 继续写入 owner、等待时间、退出状态和机器采样，不能把它当成应用指标本身。
 
 窗口只保证这些命令不在同一锁下并发，不能消除操作系统和其他进程噪声。普通功能测试、历史浏览器结果或一次“机器看起来空闲”不能冒充有效性能证据；spec 仍需分别记录 benchmark、静态、构建和功能结果。
+
+窗口也不决定候选是否值得采用。优化与技术选型必须先按[开发治理](development-governance.md#优化与技术选型实验)固定独立分项、A/A 噪声、A/B identity、主指标、否决项和组合端到端门禁；预约记录只证明资源串行，不能替代这些实验合同或用户可感知收益。
