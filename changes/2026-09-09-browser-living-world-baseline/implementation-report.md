@@ -90,3 +90,11 @@ Terra/high 独立只读诊断沿 `AuthoritySession.wake → advanceGameplayRules
 本条展示夹具进一步明确在 Pointer Lock 获取、场景稳定后，用现有 Harness `setView(0,-15)` 固定训练射线；攻击仍由真实鼠标按住触发，未直接提交攻击命令或修改目标。受击提示、vitals 高亮和视角冲击在页面 MutationObserver 内分别记录实际出现，再验证累计证据和已有音频记录，避免把跨进程读取时提示仍未消退当作合同。受击后截图命名为 after-player-damage，不称为某一瞬间的画面保证；两次攻击截图与中央目标 null 断言保留。
 
 相同完整 Chromium + SwiftShader + Low + 0.5 像素密度，零重试连续 2/2 通过（27.5s）。此修订是明确夹具视角与观察时机，不声称已在 CI 直接测得鼠标位移的具体来源，也不新增产品行为。
+
+## 最终通用浏览器配置修复
+
+进一步对照归档基线 `ec77fdd`：其 [run 34264904944](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34264904944) 与 [run 34264775875](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34264775875) 均通过；原 CI 的近战步骤明确保留 `SEEDLANDS_E2E_FULL_CHROMIUM=1` 和 `SEEDLANDS_E2E_SWIFTSHADER=1`。本次退役清理误删除了这两项通用配置，因此此前本地带这两个开关的复验与远端默认 headless shell 并非同一浏览器配置。这是已由源码 diff 确认的本次配置回归，不能称为原主线已知失败。
+
+最终恢复两项浏览器开关；Node步骤不恢复。近战夹具像素密度恢复默认1，保留既有1280×720 CSS视口与Low。完整Chromium/SwiftShader/Low/原像素密度，`--retries=0 --repeat-each=2` 2/2通过（27.5s）。0.5像素密度候选已撤销；第二轮移除中间截图也仍1/2失败，已撤销。保留场景就绪、固定瞄准、页面内短暂反馈观察和完整5/7/目标终态断言。
+
+最近失败 [run 34277022413](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34277022413) 的三次记录均证明受击text/vitals/camera出现、Pointer Lock存在、首击5成立而第二击未出现；这些都是恢复通用浏览器开关之前的配置，不能代替最终配置的CI验收。最终PR以恢复配置的新SHA检查为准。

@@ -136,6 +136,8 @@ jobs:
         run: pnpm test:pr15:integration
       - name: Run melee gameplay integration
         env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
           SEEDLANDS_BROWSER_E2E_QUALITY: low
         run: pnpm test:pr17:integration
 

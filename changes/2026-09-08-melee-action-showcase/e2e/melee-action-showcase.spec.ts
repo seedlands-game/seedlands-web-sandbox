@@ -6,9 +6,6 @@ import {
   MELEE_SHOWCASE_SEED,
 } from '../../../apps/web/src/app/gameplay/melee-action-showcase';
 
-// 固定功能验收的像素密度，降低软件栅格对短窗口输入的干扰；CSS 视口保持不变。
-test.use({ deviceScaleFactor: 0.5 });
-
 const browserQuality = process.env.SEEDLANDS_BROWSER_E2E_QUALITY ?? 'medium';
 if (!['low', 'medium', 'high'].includes(browserQuality)) throw new Error('Unknown browser E2E quality.');
 
