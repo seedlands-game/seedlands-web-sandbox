@@ -23,3 +23,24 @@
 - `NetworkBaselineConsumer` 已有完整 halo、共享 preparation、collision、task-copy 租约及 revision 失效。远端调度必须把 worker 完成/失败/取消/退出都关联到 settle；释放 owner 后的结果不能被新 owner 接收。
 
 待验收矩阵：协议越权与认证前预算；第二连接拒绝；重连序号与旧回调；捕获期间真实提交；publication 缺口；发送失败不杀世界；关闭时释放 capture/page/task-copy；真实浏览器动作和 durable 重启恢复。
+
+## M1 草稿审阅待办
+
+已在实施期间交给实施者，以下需要以最终源码与用例重新核对，不能将草稿问题视为最终缺陷或已修复。
+
+1. 输入确认映射清理后仍保留单调的客户端 ACK 水位，不能在没有新确认的 publication 回到 -1；过期输入不得通过 clamp 变成新输入，jump edge 必须保留。
+2. 动作结果缓存有界淘汰后，旧 requestId 只能返回旧结果或过期拒绝，不得重新分配 Authority sequence 再执行；在途动作不能被结果缓存淘汰。重复 interest ID 不得绕过 pending 计数。
+3. 认证中连接占位与 unauthenticated 计数只结算一次；并发异步 readReady/readDiagnostics 不能绕过单玩家或前置预算。
+4. close/cancel 收回每个 capture、projection/bundle、page 与发送任务；descriptor 入队失败也要覆盖 bundle 最外层 finally；迟到完成不得重新发布。
+5. 公布的消息速率、动作速率、空间 interest、pending/队列/在途上限必须实际实施，不能只是 welcome 中的声明。
+6. 第一轮 listener 隔离的 onFailure 自身抛错也要收敛；仅 dist 的真实 listen/hello 验证应覆盖 ws 与 ESM bundle 的运行时加载。
+
+Web 接线追加检查：完整输入必须经 `authority-complete` source 的每任务租约接入，结果比较实际 task/result 的 halo、chunk、generator 身份；不能用当前 owner 的身份替旧结果背书。owner 需区分 pending/ready/stale，捕获到 descriptor 期间的提交必须被版本水位或因果屏障覆盖。运行期 receive 失败不能被握手已经 settled 的 catch 吞掉。WebSocket URL 必须解析后校验真实 hostname，禁止 userinfo/query/hash，不能以字符串前缀判定 loopback。客户端 pending、bufferedAmount 和 revision 水位同样需要可验证的上限与取消清理。
+
+## Node 检查点独立审阅
+
+Terra/high 按 `contracts/node-review.json` 审阅冻结 `b6ab3e0`，原始报告保存在 `/tmp/seedlands-web-node-playable/node-checkpoint-review.md`；未把后续工作区当作该 SHA 的证据，也未重复运行受草稿污染的测试。
+
+- 基线与 publication 可交错，Node 节点尚无完整消费者侧因果保证。root 判定不必强制禁止网络 frame 交错，但最终 Web 消费者必须以 checkpoint/revision 水位证明旧 capture 不覆盖新提交，并覆盖 capture 后、descriptor 前和分页途中提交的确定性用例。此项在 Web 准出前仍待验证。
+- session drain 等待 baselineTail，而现有 core capture 取消只置标记，仍等待所有 chunk preparation 完成；卡住的 capture 可能阻塞网络关闭并耗尽 runtime 30s stop deadline。实施者需要有界、可观测的取消/关闭结算及迟到结果清理测试。此项待修复复验。
+- 已有 131 个 Node 测试与 dist-only hello 是基础证据，尚不能替代真实 WS 的错误认证、第二连接、超限/背压、清输入、动作幂等、取消及 durable checkpoint 测试。

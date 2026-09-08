@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "id": "web-node-playable-validation",
+  "id": "web-node-playable-node-review",
   "initiatedBy": "agent",
-  "role": "Web Node可玩闭环独立验收负责人",
+  "role": "Node网络检查点独立审阅者",
   "workType": "validation",
-  "goal": "在root指定冻结HEAD后，独立核验公开协议、唯一Authority、完整基线及真实浏览器游玩保存重连重启的证据；不修改生产代码或测试期望，缺陷给出最小复现交回修复。",
+  "goal": "独立审阅已push的b6ab3e0 Node公开网络检查点，优先找可导致重复动作、越权、泄漏、世界停服或永久失步的真实缺陷；只报告最小复现和源码证据，后续Web完整闭环由另一次冻结验收负责。",
   "context": [
     {
       "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-web-node-playable/spec.md",
@@ -34,12 +34,12 @@
       "不自动合并PR，不购买或重置额度",
       "不读取.env或真实密钥，不输出凭据；不修改其他worktree或用户存档",
       "不修改生产源码、测试期望、合同或历史证据；不暂存、commit、push或创建PR",
-      "不重复已有同源码的全套验证，除非来源不匹配或发现缺口；不把功能测试当性能证据"
+      "不重复已有同源码的全套验证，除非来源不匹配或发现缺口；不把功能测试当性能证据",
+      "不等待Web实现，不做全套回归或性能采样；不因后续工作区更新漂移冻结审阅对象"
     ]
   },
   "outputs": [
-    "/tmp/seedlands-web-node-playable/independent-validation.md",
-    "必要定向验证的原始日志和源码绑定清单"
+    "/tmp/seedlands-web-node-playable/node-checkpoint-review.md"
   ],
   "execution": {
     "form": "subagent",
@@ -48,34 +48,24 @@
   },
   "acceptance": [
     {
-      "id": "protocol",
-      "check": "实读公开网络入口的所有允许动作、Origin/token/version和session代次、序号幂等、预算与取消；恶意或失败连接不能杀死Node世界",
-      "evidence": "逐项源码与负向用例审阅，缺口定向复验"
+      "id": "read",
+      "check": "以git show b6ab3e0:<path>读取冻结Node网络session/server、公开协议、Authority接线及构建验证；区分后续工作区改动",
+      "evidence": "冻结源码路径/行号与实际调用链"
     },
     {
-      "id": "authority",
-      "check": "远端Web不启动本地Authority/Logic/Fluid/canonical生成；完整主块与26halo、revision失效及worker settlement实际接线",
-      "evidence": "入口依赖图、真实浏览器worker种类与远端mesh数据来源"
-    },
-    {
-      "id": "journey",
-      "check": "确认浏览器真实Pointer Lock移动跳跃挖放对应Node权威提交，保存durable ACK，关页后Node tick持续，手动重连和Node重启恢复",
-      "evidence": "读取可重现当前change E2E、原始结果、产物/源码绑定；必要有界复验"
-    },
-    {
-      "id": "regression",
-      "check": "最新冻结源码静态验证、两端构建与隔离dist实际listen通过，本地模式回归保留，CI实际执行新增需求测试",
-      "evidence": "命令、配置、退出状态和明确覆盖缺口"
+      "id": "boundary",
+      "check": "独立检查认证占位与Origin/token、公开allowlist、序号/动作缓存、入站与排队预算、取消/关闭/异常、capture发布因果；仅报告有具体触发条件的缺陷",
+      "evidence": "静态可复现触发步骤，必要临时有界测试但禁止编辑生产源码"
     },
     {
       "id": "report",
-      "check": "报告可复现缺陷或明确通过范围、证据限制；未执行不能标通过",
-      "evidence": "/tmp/seedlands-web-node-playable/independent-validation.md"
+      "check": "报告最高优先级问题及已有证据缺口，注明当前checkpoint尚未完成Web，禁止提前声称全功能验收",
+      "evidence": "/tmp/seedlands-web-node-playable/node-checkpoint-review.md"
     }
   ],
   "budget": {
     "maxAttempts": 3,
-    "maxAgentHours": 2
+    "maxAgentHours": 1
   },
   "permissions": {
     "localWrite": true,
