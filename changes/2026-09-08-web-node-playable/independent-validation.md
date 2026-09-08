@@ -636,3 +636,27 @@ Node 的 decision 与 authority-state 是不同消息：session 在 `await autho
 - 新 helper、alignment 与其定向测试均在 journey `sourceInputs` 中，因而后续 JSON 可绑定该测试行为。
 
 **结论：** 未发现阻断该测试驱动 delta 的静态缺陷。2 秒屏障是有界 fixture 结算条件，不能据此宣称下一次 Linux 完整旅程已通过；仍需冻结 source 的完整原始 CI/浏览器证据复核。
+
+## 2026-09-08 `77caf7a` 本地冻结旅程证据复核（只读）
+
+**完成状态：** 本地证据通过复核，仅覆盖冻结 `77caf7ae59cbd8fe87c7feff34875c0aa4be5085`；未运行浏览器、构建、测试或 CI，未修改版本库文件。证据随后由 `fd0c283` 保存；该保存提交不改变本段 source 的生产/测试/config 绑定。CI34240608181 尚未由本审阅监控或判定。
+
+**来源与执行：** 两份 JSON 的 `sourceSha` 都为 `77caf7a`、`sourceTreeStatus` 为空、各含 48 项 sourceInputs。我逐项复算版本库输入，并对三项二进制 UI 资源和运行时生成的 `apps/node-server/dist/node-server.js` 复算实际 SHA-256，48/48 匹配。原始日志显示 native 路径完成 Node build、11 files/37 Vitest 和 2 Chromium（19.5s）；Low 路径完成 2 Chromium（28.9s）。这些是已读取的本地执行记录，未由本审阅重跑。
+
+**native Medium：** 三次连接都为 Google Chrome/ANGLE Metal M3 Pro、requested quality=medium。初始 tick 210 已有 9 rendered/9 ready；真实移动后位置变化，jump 从 y=18 到 18.9916667；挖掘使 world revision 1→2，放置 `[-1,20,-2]`、voxel type 2、chunk revision 2 后 world revision 3。关闭前 tick 432，手动 reconnect 同 server epoch 且 tick 584；Node stop durable commit 732，restart 后新 server epoch 的 ready 同样报告 durable 732，restart state 保持 world revision 3 和放置体素。原帧 early/moving/turned 来自同一森林/Pointer Lock 流程，placed 帧清楚显示放置的泥土方块。
+
+**managed full Chromium + SwiftShader Low：** 三次连接均为 Playwright managed Chromium channel、Vulkan SwiftShader（LLVM）且 requested quality=low；不是 Linux CI renderer 身份。初始 tick 253 已有 9 rendered/9 ready；真实移动、转头和 jump（y=18→18.184999）均记录；挖掘 revision 1→2，放置 `[1,19,0]`、type 2、chunk revision 2 后 revision 3。关闭前 tick 727，reconnect 同 server epoch 且 tick 991；Node stop durable 1261，restart 新 epoch 的 ready 也为 durable 1261，并保留 revision 3/放置体素。Low 的 early/moving/turned 帧仍是同一真实场景和 HUD，placed 帧可见前景泥土块，restarted 帧显示恢复后的森林场景。
+
+**限制与剩余工作：** 这两套结果证明本机 native Medium 与本机 managed Chromium/SwiftShader Low 的完整权威闭环；不能代替 Linux CI，不能把 Low 当作 Medium 性能修复或默认 shell 覆盖。仍需 CI34240608181 的冻结 Linux Low 原始 JSON、帧、hash、durable/reconnect/restart 和终态独立复核，之后才能决定软件 CI 档位是否可采用。
+
+## 2026-09-08 CI34240608181 Linux Low 证据与 CI 采用 delta（只读）
+
+**完成状态：** Linux managed full Chromium/SwiftShader/Low 的完整 Web↔Node 旅程通过复核；候选 CI 接线可采用，无新增阻断。未运行 CI、浏览器、测试或构建，未修改版本库文件。CI34240608181 的默认 headless-shell 步骤仍失败，static 的最终状态仍由 root 收集；本结论不把该 run 标为 required CI 全绿。
+
+**Linux 原始证据：** 工件 JSON/diagnostics/5 原帧绑定 merge source `4148bf9fd72f821babaccf973d7e98fc1d182420`，其父为 `840f4fb` + `fd0c283`、tree 为 `4570d377…`；`sourceTreeStatus` 为空。48 项 sourceInputs 与该 tree 逐项一致，运行时 Node dist 和三项二进制 UI 输入的实际 SHA-256 也匹配。三次连接均为 Playwright managed full Chromium channel、Linux HeadlessChrome 151、ANGLE Vulkan SwiftShader **Subzero**、requested quality=low。
+
+初始 tick 769 已是 9 ready/9 rendered；真实 W、真实转头和 jump（y 18→18.169999）均完成。挖掘/放置后目标 `[1,19,0]` 为 type 2，目标 chunk revision 2，world revision 到 4、afterPlace tick 2392；reconnect 保持同 server epoch 并推进至 tick 3013。stop durable commit 为 3687；restart 使用新 server epoch，ready 同样报告 durable 3687，并恢复 world revision 4 和目标体素。已查看 early/moving/turned/placed/restarted 原帧：它们是同一 Linux Low 森林与真实 HUD/键鼠流程，placed 帧可见前景泥土块，restarted 帧保留其后的场景。此为功能证据，HUD 的低 FPS/长帧读数不构成性能采样或性能采用结论。
+
+**CI 采用 delta：** `/tmp/seedlands-web-node-playable/adopt-low-ci.yml` 的 Active Web-to-Node step 保留 `pnpm test:web-node-playable`，因此继续覆盖 Node build、37 项定向 Vitest、错误认证图形身份和完整 Playwright journey；仅将浏览器环境固定为已验证的 `SEEDLANDS_E2E_FULL_CHROMIUM=1`、`SEEDLANDS_E2E_SWIFTSHADER=1`、`SEEDLANDS_WEB_NODE_QUALITY=low`，保持 15 分钟 step deadline、benchmark-window 互斥、原有 e2e regression/资产集成/CI context 和 artifact 保存。重复的临时对照步骤被移除，Active step 的 `/tmp/.../journey` 和 window/test-results 仍完整上传。
+
+这正式覆盖的是“managed full Chromium + SwiftShader Subzero + Low 软件 CI 功能档位”；不表示 Medium 性能改进，也不继续覆盖已失败的默认 headless-shell 组合。若项目要求默认 shell 兼容，仍须作为独立未解决范围。最终 Ready 仍依赖采用 delta 后的 required CI 全部成功及其 source-bound 工件，不由本次历史 Linux Low 工件替代。

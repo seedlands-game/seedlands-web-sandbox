@@ -179,6 +179,8 @@ General 计算 Worker 默认启用实测采纳的 Rust Chunk填充、halo、mesh
 
 这些命令提供不同证据：单元测试覆盖确定性逻辑；静态验证覆盖格式、lint、路径规则、覆盖率和 TypeScript；生产构建证明 bundling；Playwright 覆盖确定性浏览器行为。视觉语义由 change 所属的 Midscene 流程独立评估。
 
+Web连接Node的旅程在本机GPU上默认使用Medium画质。Linux CI使用managed完整Chromium、SwiftShader和已有Low画质；可执行 `SEEDLANDS_E2E_FULL_CHROMIUM=1 SEEDLANDS_E2E_SWIFTSHADER=1 SEEDLANDS_WEB_NODE_QUALITY=low pnpm test:web-node-playable` 复现该功能环境。它验证软件图形下完整游玩、保存与重连，不代表Medium图形性能通过。缺少managed浏览器时先执行 `pnpm exec playwright install chromium`。
+
 架构 lint 还将 JavaScript 与 TypeScript 模块限制为不超过 500 行有效代码（不计空行与注释），避免职责重新堆积为单体文件。
 
 完整开发流程、测试分层和 Pull Request 要求见 [CONTRIBUTING.md](CONTRIBUTING.md)。

@@ -140,3 +140,9 @@ d7f86ec修复同连接target tick回退，确定性RED/GREEN及独立审阅通�
 干净77caf7ae59cbd8fe87c7feff34875c0aa4be5085串行执行原生Medium与managed fullChromium/SwiftShader/Low。原生11文件37项Vitest及2项Chromium通过（19.5秒）；软件Low两项Chromium通过（28.9秒）。两份48项sourceInputs均与Git源码/实际Node dist逐项匹配，sourceTreeStatus为空。原生放置[-1,20,-2]、revision2、durable stop732、afterPlace tick432→重连584；软件Low放置[1,19,0]、revision2、durable stop1261、tick727→重连991；两份重启均新epoch且恢复修改。root逐张审看early/moving/turned/placed原始帧，真实场景和放置方块可见。
 
 最新原生六份证据保存至evidence/，最新Mac软件Low六份保存至evidence/software/；此前软件Medium记录保留于Git历史f4d61c4，不将新Low文件标为Medium或Linux。运行原始输出分别为/tmp/seedlands-web-node-playable/pulse-77caf7a-native与pulse-77caf7a-low。以上均为功能执行记录，不是性能采样；Linux完整旅程仍待下一CI。
+
+## Linux Low 完整闭环与CI环境采用
+
+CI34240608181绑定fd0c283；完整Chromium/SwiftShader/Low两项测试首次完整通过，旧默认shell步骤失败导致Chromium job仍红，Production build成功。source4148bf9fd72f821babaccf973d7e98fc1d182420已fetch核对parents840f4fb+fd0c283、tree4570d377f058e37221f2108dd224222130057afc，treeStatus为空，48项hash与该Git源码及本机同源Node产物一致。图形身份为Linux/Subzero/managed Chromium151，三次连接均Low。placed[1,19,0]、chunk revision2，durable stop3687；afterPlace tick2392→重连3013、同Node epoch，重启新epoch且恢复修改。root审看完整5帧，包含真实放置方块与重启世界；保存至evidence/linux-low。
+
+依据预先定义的采用条件，正式Active步骤保留pnpm test:web-node-playable（37项定向Vitest及完整2项浏览器），指定完整Chromium/SwiftShader/Low，并移除重复临时比较。其它回归、context、产品输入/画质默认、原超时和状态断言不变；artifact保存改为通用旅程名称。原生Medium与软件环境结论分开，最新必要CI绿色仍待配置采用后的提交验证。

@@ -96,3 +96,9 @@
 - 已耗约10h50m墙钟。aeaa9ce原生Medium完整旅程与认证失败用例通过，44项来源绑定、原图及durable停止/重启797已保存；Linux Low对照在精确站位准备失败，尚不能准出。下一范围限于测试驱动的实际发送及neutral应用屏障，不放宽原玩法断言。
 - 正常剩余约2–3h，保守剩余4h；10.83h + 1.2 × 4h = 15.63h，保守总墙钟建议仍为16h。上轮CI排队约11分钟单列为外部等待，不当作模型活跃工时。现有实现及独立审阅合同继续使用，未增加agent；实际分模型活跃工时与费用仍unknown。
 - 22:15共享账户周窗口used72%、remaining28%，reset1789442224；Spark两桶used0%，credits余额/reset credit均0。账户读数不能归因本change或换算tokens/credits；未购买或兑换额度。
+
+## M3 Linux闭环完成后的准出重估（2026-09-08 22:58 +08）
+
+- 已耗约11h33m墙钟。Linux完整Chromium/SwiftShader/Low在CI34240608181完成原完整旅程，48项来源绑定与5张原始帧已复核；本机原生Medium和Mac软件Low也具备独立复核的冻结证据。剩余为采用已验证CI环境、最终门禁与PR人类交接，不新增产品范围。
+- 正常剩余约0.5–1.5h、保守2h；11.55h + 1.2 × 2h = 13.95h，当前保守总建议收敛为14h。实际工具/CI等待并非模型活跃工时，分模型实际消费仍unknown。
+- 22:58共享账户周窗口used77%、remaining23%，reset1789442224；Spark两桶used0%，credits余额/reset credit均0。没有购买或兑换；账户共享读数不能归因本任务或换算tokens/credits。

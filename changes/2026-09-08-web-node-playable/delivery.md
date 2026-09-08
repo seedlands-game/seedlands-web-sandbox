@@ -2,17 +2,17 @@
 
 ## 完成状态
 
-状态：Active，尚未 Delivered；PR #17 保持 Draft，base 为 main。本机完整闭环已经通过，Linux 完整旅程仍需准出。
+状态：Active，尚未 Delivered；PR #17 保持 Draft，base 为 main。本机与Linux完整闭环已经通过，等待正式CI环境采用后的必要门禁全绿。
 
-干净 `aeaa9ce` 在本机原生 GPU / Medium 完成认证连接、脚下3×3首屏、真实移动/转向/跳跃、挖块/拾取/放块、durable保存、关闭页面后Node继续、手动重连及Node重启恢复。44项sourceInputs由root逐项核对源码与实际Node产物，原始连续帧已审看；证据保存为 `b3f3256`。11文件37项Vitest及2项Chromium通过，durable stop与重启读取均为797。
+干净 `77caf7a` 在本机原生 GPU / Medium 和managed完整Chromium/SwiftShader/Low完成认证连接、脚下3×3首屏、真实移动/转向/跳跃、挖块/拾取/放块、durable保存、关闭页面后Node继续、手动重连及Node重启恢复。两份48项sourceInputs由root与独立验收核对，原始连续帧已审看；证据保存为 `fd0c283`。原生11文件37项Vitest及2项Chromium通过，软件Low两项Chromium通过，durable stop与重启读取分别为732和1261。
 
-最新诊断冻结 `26850f6` 的软件配置原旅程2项也通过，41项源码与实际Node产物hash一致，采集时工作树干净。放置目标的57条关联trace包含prepare/worker/commit/visible-postrender；该读取不改变世界、输入、调度或绘制，只沿用已有telemetry快照的gauge刷新。受限输出丢弃任意errorMessage与其它attributes，定向RED/GREEN和7项测试通过。
+Linux CI34240608181在merge `4148bf9`（main840f4fb+fd0c283）完成相同Low完整旅程及错误认证用例。48项来源绑定一致、工作树干净，durable3687，重连tick2392→3013，重启新epoch且恢复修改。root与独立验收审看全部5张原图，保存于evidence/linux-low；这是软件环境功能兼容证据，不是Medium或性能结论。
 
-Linux CI34235218286绑定aeaa9ce，Static verification与Production build通过，Chromium regression失败。默认headless shell仍首屏超时；完整Chromium/SwiftShader/Low对照通过首屏、移动、转向与跳跃，失败于挖掘前精确站位准备。固定35ms按键、70ms等待未确认浏览器采样或neutral应用，正在修复测试驱动的确定时序缺口；未到meshTarget，没有新的挖放网格停点证据。固定AAABBA绘制实验已按预注册停止线结束，不采用autoRender候选，不作性能收益声明。
+CI342406的旧默认headless shell步骤仍首屏失败，故整项Chromium job未绿。按预先定义的准出条件，已将验证通过的fullChromium/SwiftShader/Low用于正式Active步骤，原脚本、完整断言和其它回归保留，移除重复临时对照。等待该配置的新HEAD CI；不以旧失败环境标记成功。固定AAABBA绘制实验已按停止线结束，没有采用autoRender候选。
 
 ## 提交和推送
 
-功能分支 `origin/codex/web-node-playable` 已推送至 `aeaa9ce`；后续原生Medium证据与测试驱动合同已本地commit，待驱动验证后一起push。完整早期接线和修复记录见execution.md及Git历史；最近稳定产品检查点包括 `d7f86ec` 输入target单调保护、`4e63fb7` 交互网格公平调度、`ce146cc` 目标chunk诊断与 `26850f6` 诊断字段白名单。main已合入的底座、CI及审阅规则已同步到本分支；本任务不修改PR #15。
+功能分支 `origin/codex/web-node-playable` 已推送至 `fd0c283`；CI环境采用与Linux证据将作为下一独立检查点保存。关键检查点包括 `d7f86ec` 输入target单调保护、`4e63fb7` 交互网格公平调度、`26850f6` 诊断字段白名单和 `2dabe70` 真实键盘测试结算屏障。main已合入的底座、CI及审阅规则已同步到本分支；本任务不修改PR #15。
 
 ## 变更
 
@@ -25,7 +25,7 @@ Linux CI34235218286绑定aeaa9ce，Static verification与Production build通过�
 
 ## 验证结果
 
-aeaa9ce原生Medium旅程、本机26850软件Medium旅程、真实WS负向、分页交错、迟到结果、capture关闭与单Authority离线运行均有明确证据。最新已完成CI34235218286的静态与构建成功，但浏览器失败，不能据本机通过宣告Linux准出。原始日志、source/hash绑定、帧清单和未闭合的观察见execution.md、diagnosis.md及evidence/。
+本机77caf7a双配置及Linux4148bf9的原完整旅程已独立复核；真实WS负向、分页交错、迟到结果、capture关闭与单Authority离线运行均有明确证据。2dabe70的5项驱动测试与完整typecheck通过，LinuxCI的Production build成功；最新完整静态与必要门禁以正式环境采用后的CI终态为准。原始日志、source/hash绑定与帧清单见execution.md、independent-validation.md及evidence/。
 
 ## 限制
 
@@ -33,4 +33,4 @@ aeaa9ce原生Medium旅程、本机26850软件Medium旅程、真实WS负向、分
 
 ## 剩余工作
 
-完成真实键盘驱动的发送与应用屏障并复验Linux原始完整旅程；若再到挖放显示失败，使用已有目标区块trace定位。随后更新独立报告、最新CI终态及交付快照。确认#17无冲突且必要CI全部通过后，转为ready-for-review交人类审核；不自动合并。PR #15由用户在另一台设备处理。
+取得正式CI环境采用后的必要门禁全绿，更新交付快照，确认#17无冲突后转为ready-for-review交人类审核；不自动合并。PR #15由用户在另一台设备处理。

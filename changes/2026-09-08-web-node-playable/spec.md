@@ -97,6 +97,8 @@ RED以可控慢采样夹具证明固定35ms释放会在实际输入采样前结�
 
 ## 阶段与保存
 
+CI34240608181的完整Chromium/SwiftShader/Low两项原旅程通过，source4148bf9fd72f821babaccf973d7e98fc1d182420（parents840f4fb+fd0c283）工作树干净、48项来源绑定一致。真实挖放、durable3687、关闭重连tick2392→3013及新epoch重启恢复均完成，5张原始帧已保存至evidence/linux-low。按上述软件环境合同，将该配置用于正式Active步骤并移除重复临时对照；原脚本、单元测试、实际键鼠、完整断言、context名称及其它回归保留。README增加复现命令。本机原生Medium及Mac软件Low证据独立保留，不把本次采用表述为Medium或默认shell修复。最终仍需采用后HEAD的所有必要CI通过才能M3准出。
+
 - [x] M0：合同、预算、接口接缝审阅与可执行 RED；提交并推送。
 - [x] M1：Node 接入/有界协议与 Web 远端同步、真实首块；提交并推送，并更新余量。
 - [x] M2：输入/挖放/保存/断线与手动重连、Node 重启恢复完整闭环；提交并推送。
