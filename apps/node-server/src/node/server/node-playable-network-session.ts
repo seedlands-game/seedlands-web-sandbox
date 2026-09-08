@@ -42,6 +42,7 @@ const MAX_PENDING_INPUT_REQUESTS = 32;
 const IDLE_TIMEOUT_MS = 15_000;
 const MAX_DIAGNOSTIC_BASELINE_REQUESTS = 12;
 const MAX_DIAGNOSTIC_EVENTS = 96;
+const MAX_BASELINE_DIAGNOSTIC_EVENTS = MAX_DIAGNOSTIC_EVENTS - 1;
 
 export type NodePlayableSessionDiagnosticEvent =
   | NodePlayableBaselineDiagnosticEvent
@@ -383,7 +384,7 @@ export function createSession(
         if (
           !diagnostic ||
           requestOrdinal > MAX_DIAGNOSTIC_BASELINE_REQUESTS ||
-          diagnosticEvents >= MAX_DIAGNOSTIC_EVENTS
+          diagnosticEvents >= MAX_BASELINE_DIAGNOSTIC_EVENTS
         )
           return;
         diagnosticEvents += 1;

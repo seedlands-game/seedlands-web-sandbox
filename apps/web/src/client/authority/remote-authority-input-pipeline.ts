@@ -12,10 +12,13 @@ import {
 export type PendingRemoteInput = Readonly<{ command: InputCommand; jumpExpiresAtMs: number | null }>;
 export type RemoteInputDecisionResult =
   Readonly<{ matched: false }> | Readonly<{ matched: true; next: PendingRemoteInput | null }>;
+// Node accepts an equal target, rejects regression, and caps targets at its current tick + 120.
+const MAX_REMOTE_INPUT_FUTURE_TICKS = 120;
 
 export class RemoteAuthorityInputPipeline {
   private inFlightSequence: number | null = null;
   private lastSentSequence = -1;
+  private lastSentTargetPhysicsTick = -1;
   private queued: PendingRemoteInput | null = null;
   private diagnostics: RemoteAuthorityInputDiagnostics | null = null;
 
@@ -60,6 +63,23 @@ export class RemoteAuthorityInputPipeline {
   clear(): void {
     this.inFlightSequence = null;
     this.queued = null;
+    this.lastSentTargetPhysicsTick = -1;
+  }
+
+  project(
+    input: PendingRemoteInput,
+    ref: PublicSessionRef,
+    timing: Readonly<{
+      now: number;
+      snapshotReceivedAtMs: number;
+      snapshotPhysicsTick: number;
+      physicsHz: number;
+    }>,
+  ): ReturnType<typeof projectRemoteInput> {
+    return projectRemoteInput(input, ref, {
+      ...timing,
+      minimumTargetPhysicsTick: this.lastSentTargetPhysicsTick,
+    });
   }
 
   recordSent(
@@ -69,6 +89,7 @@ export class RemoteAuthorityInputPipeline {
     now: number,
     diagnosticsEnabled: boolean,
   ): void {
+    this.lastSentTargetPhysicsTick = projected.state.targetPhysicsTick;
     if (diagnosticsEnabled) this.diagnostics ??= new RemoteAuthorityInputDiagnostics();
     this.diagnostics?.sent(projected, snapshotPhysicsTick, snapshotReceivedAtMs, now);
   }
@@ -91,13 +112,21 @@ export function projectRemoteInput(
     snapshotReceivedAtMs: number;
     snapshotPhysicsTick: number;
     physicsHz: number;
+    minimumTargetPhysicsTick?: number;
   }>,
 ): Readonly<{
   edge: Omit<Extract<PublicInboundMessage, { kind: 'input-edge' }>, 'edgeId'> | null;
   state: Extract<PublicInboundMessage, { kind: 'input-state' }>;
 }> {
   const elapsedTicks = Math.ceil(((timing.now - timing.snapshotReceivedAtMs) * timing.physicsHz) / 1_000);
-  const targetPhysicsTick = Math.max(input.command.targetPhysicsTick, timing.snapshotPhysicsTick + elapsedTicks + 2);
+  const targetPhysicsTick = Math.min(
+    timing.snapshotPhysicsTick + MAX_REMOTE_INPUT_FUTURE_TICKS,
+    Math.max(
+      input.command.targetPhysicsTick,
+      timing.snapshotPhysicsTick + elapsedTicks + 2,
+      timing.minimumTargetPhysicsTick ?? -1,
+    ),
+  );
   const expiresAfterPhysicsTick = targetPhysicsTick + Math.max(2, Math.ceil(timing.physicsHz / 2));
   return {
     edge:

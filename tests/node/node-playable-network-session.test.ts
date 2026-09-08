@@ -308,9 +308,12 @@ describe('playable session asynchronous request budget', () => {
     for (let requestId = 1; requestId <= 20; requestId += 1) socket.emit('message', interest(requestId), true);
     await vi.waitFor(() => expect(captureBaseline).toHaveBeenCalledTimes(20));
     await session.whenDrained();
+    session.close();
 
     const baselineDiagnostics = diagnostics.filter((event) => event.kind === 'node-playable-baseline-diagnostic');
-    expect(baselineDiagnostics.length).toBeLessThanOrEqual(96);
+    expect(diagnostics.length).toBeLessThanOrEqual(96);
+    expect(baselineDiagnostics.length).toBeLessThanOrEqual(95);
+    expect(diagnostics.filter((event) => event.kind === 'node-playable-input-summary')).toHaveLength(1);
     expect(Math.max(...baselineDiagnostics.map((event) => event.requestOrdinal))).toBe(12);
     expect(baselineDiagnostics.filter((event) => event.requestOrdinal === 1).map((event) => event.stage)).toEqual([
       'tail-queued',
@@ -324,6 +327,5 @@ describe('playable session asynchronous request budget', () => {
     expect(Object.keys(baselineDiagnostics[0]!).sort()).toEqual(
       ['elapsedMs', 'kind', 'queueDepth', 'requestOrdinal', 'stage'].sort(),
     );
-    session.close();
   });
 });

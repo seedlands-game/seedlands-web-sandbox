@@ -226,16 +226,16 @@ export class RemoteAuthorityClient {
 
   private sendProjectedInput(input: Parameters<typeof projectRemoteInput>[0]): void {
     const [frequencies, now] = [this.requireReady().frequencies, performance.now()] as const;
-    const projected = projectRemoteInput(input, this.requireRef(), {
+    const projected = this.inputPipeline.project(input, this.requireRef(), {
       now,
       snapshotReceivedAtMs: this.snapshotReceivedAtMs,
       snapshotPhysicsTick: this.snapshotValue?.physicsTick ?? 0,
       physicsHz: frequencies.physicsHz,
     });
     if (projected.edge) this.send('input-edge', { ...projected.edge, edgeId: ++this.edgeSequence });
+    this.send('input-state', projected.state);
     // prettier-ignore
     this.inputPipeline.recordSent(projected, this.snapshotValue?.physicsTick ?? 0, this.snapshotReceivedAtMs, now, Boolean(this.options.initialSyncDiagnostics));
-    this.send('input-state', projected.state);
   }
 
   ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {

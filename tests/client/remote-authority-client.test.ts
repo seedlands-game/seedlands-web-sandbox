@@ -215,6 +215,41 @@ describe('RemoteAuthorityClient boundary', () => {
     expect(inputStates(socket)).toHaveLength(2);
   });
 
+  it('does not regress a sent target when a newer snapshot resets elapsed projection time', async () => {
+    const clock = vi.spyOn(performance, 'now').mockReturnValue(0);
+    const decisions = vi.fn();
+    const { client, internals, socket } = createClient({ onInputDecision: decisions });
+    internals.snapshotValue = { ...snapshot, physicsTick: 1_900 };
+    internals.snapshotReceivedAtMs = 0;
+
+    clock.mockReturnValue(534);
+    client.sendInput(command(0, 0.5, false, 534));
+    client.sendInput(command(1, 0.75, true, 534));
+    const firstTarget = inputStates(socket)[0]?.targetPhysicsTick as number;
+    expect(firstTarget).toBe(1_935);
+
+    internals.snapshotValue = { ...snapshot, physicsTick: 1_911 };
+    internals.snapshotReceivedAtMs = 534;
+    await deliverDecision(internals, 9, true);
+    expect(inputStates(socket)).toHaveLength(1);
+    expect(decisions).not.toHaveBeenCalled();
+
+    clock.mockReturnValue(535);
+    await deliverDecision(internals, 0);
+    const latest = inputStates(socket).at(-1);
+    expect(latest).toMatchObject({ inputSequence: 1, moveZ: 0.75, targetPhysicsTick: firstTarget });
+    expect(messages(socket).find((message) => message.kind === 'input-edge')).toMatchObject({
+      targetPhysicsTick: firstTarget,
+    });
+    expect(decisions).toHaveBeenCalledTimes(1);
+
+    const bounded = createClient();
+    bounded.internals.snapshotValue = { ...snapshot, physicsTick: 2_000 };
+    bounded.internals.snapshotReceivedAtMs = 535;
+    bounded.client.sendInput({ ...command(0), targetPhysicsTick: 99_999 });
+    expect(inputStates(bounded.socket)[0]?.targetPhysicsTick).toBe(2_120);
+  });
+
   it('reports bounded non-neutral input timing with accepted and late decisions', async () => {
     const clock = vi.spyOn(performance, 'now').mockReturnValue(100);
     const { client, internals } = createClient({ initialSyncDiagnostics: true });

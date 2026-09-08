@@ -28,3 +28,10 @@
 - CI源码为merge a1f6dd30，parents=637a8d2+b7e695a、tree=af0dfab3。随后本地正常合并origin/main的CI路径选择和review指南，80e781b的tree与该CI完全相同，生产行为没有新增差异。
 - 独立审阅允许保持原forced配置，仅新增完整Chromium channel兼容对照；参考对象是前一forced旅程，不是default gate。不能给channel或GL flags单独做根因归因。
 - 本机候选语法/ESLint/typecheck通过。实际managed Chromium151/SwiftShader、channel=chromium正确回读；认证失败、首屏、W、转向、跳跃通过，随后挖掘15秒等待失败，完整兼容候选尚未通过。该记录在 `/tmp/seedlands-web-node-playable/full-chromium-local/`，不是交付证据。Linux继续用原完整断言评估，保留default gate，不采用或放宽产品合同。
+
+## 输入 target 回退修复
+
+- CI `34226402889` 的两组同连接样本明确显示 `1934→1913` 与 `1927→1904`，对应 Node `target-out-of-order`。原因是投影使用“最新 snapshot tick + snapshot 接收后 elapsed + 2”；新 snapshot 到达时 elapsed 清零，即使 snapshot tick 前进，结果仍可能低于已发送 target。
+- 修复边界是连接内已发送 target 的非递减高水位与既有 `current + 120` future gate。它不推测传输时延、不增加 lead、不调整 500ms lease 或 Node 接纳规则；若 jump 原 lease 已过期，后续 coalesced state 不携带 edge。
+- RED/GREEN 用例还固定单 inflight/latest、旧 decision 不 flush、匹配 decision 只发送最新 state。Node baseline 诊断同时为 terminal input summary 预留一项，使两类事件合计仍不超过既有 96 项总预算。
+- RED 在受控时钟下复现 `1935→1914`；GREEN 后第二条保持 `1935`，任意过大 command target 被限制到 snapshot `2000 + 120`。`pnpm exec vitest run tests/client/remote-authority-client.test.ts tests/node/node-playable-network-session.test.ts --maxWorkers=1` 为 2 文件 13 用例通过；受影响 ESLint、`pnpm typecheck` 与 `git diff --check` 通过。本轮没有运行浏览器旅程，也不据此声明 CI movement 已恢复。

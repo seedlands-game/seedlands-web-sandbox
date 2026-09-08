@@ -61,6 +61,8 @@ CI `34222361251` 中默认与显式对照实际都回读为 SwiftShader；显式
 
 完整旅程从 initial connect 起维护当前 stage，并在 W 前后写独立 `/tmp` progress；任一后续失败写 failure JSON，包含 initial/current 权威与呈现位置、physics tick、ground/view/aim、`interactionBlocked`、Pointer Lock/focus/visibility、已缓存 graphics identity 和 Node 日志。RED 为现有 W 失败只能看到位移断言，Web/Node 都没有可对账 input summary，且最终 JSON 之前不会保留进度。GREEN 用确定性 accepted/late/resync 时钟夹具核对计数和延迟，以超过 16 个非中性输入证明有界，并用真实错误/正常浏览器流程证明失败前已保存阶段证据。CI 观察以同一完整旅程原断言为准：若 W 失败，必须能判断非中性输入是否发出、其 target 与 admission tick、decision 及失败时两侧位置；取得这些证据前不修改 lead 或放宽 late。
 
+CI `34226402889` 已记录同一连接的投影 target tick 从 `1934` 回退到 `1913`，随后又从 `1927` 回退到 `1904`，Node 均判定 `target-out-of-order`。RED 用受控时钟先让旧 snapshot 的 elapsed 投影较高 target，再模拟更新 snapshot 重置 elapsed；匹配 decision 刷出的 latest state 会得到更低 target。修复只在每个远端连接内保留已真正发送的 target 高水位，使后续投影不低于它，同时把生成值限制在 Node 公开会话现有的 `current + 120` future gate 内；不增加 RTT lead、不放宽 late、不改变单 inflight/latest coalescing，也不让旧 decision 推进高水位。jump edge 仍只在原 500ms lease 内随对应 state 同 target 发送，过期后不能因单调保护复活。GREEN 需证明 snapshot elapsed 重置后 target 不回退、极端 command target 不越过 120 tick 边界、旧 ack 不 flush、匹配 ack 只 flush latest，并保留既有 jump 到期用例。
+
 ### 完整 Chromium headless 兼容对照
 
 CI34226402889 的 forced 旅程已取得真实移动，但 camera-turn 的 yaw 差为0；Linux实际运行的是 Playwright 默认的 chromium-headless-shell，本机则显式使用完整系统Chrome。已核对安装版 Playwright 1.62.1 的 getExecutableName 分支及[官方浏览器文档](https://playwright.dev/docs/browsers#chromium-new-headless-mode)：channel=chromium 选择完整Chromium的新headless，未指定channel的headless使用独立shell。相同renderer/version字符串不能证明这两个可执行产品相同。
