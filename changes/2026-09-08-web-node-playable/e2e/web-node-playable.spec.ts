@@ -13,11 +13,14 @@ import {
 } from '@playwright/test';
 import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
 import { COLLISION_EPSILON } from '../../../packages/game-core/src/physics/geometry';
+import type { GraphicsIdentitySnapshot } from './graphics-identity-probe';
 import { REMOTE_PLAYABLE_ACCESS_KEY, RemotePlayableNodeFixture } from './remote-playable-node-fixture';
 
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const sourceTreeStatus = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim();
 const sourceFiles = [
+  'package.json',
+  'playwright.config.ts',
   'apps/node-server/src/node/server/node-authority-worker.ts',
   'apps/node-server/src/node/server/node-playable-network-session.ts',
   'apps/node-server/src/node/server/node-playable-network-baseline.ts',
@@ -35,6 +38,7 @@ const sourceFiles = [
   'apps/web/src/client/authority/remote-authority-input-pipeline.ts',
   'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
   'changes/2026-09-08-web-node-playable/e2e/remote-playable-node-fixture.ts',
+  'changes/2026-09-08-web-node-playable/e2e/graphics-identity-probe.ts',
   'changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts',
 ] as const;
 // prettier-ignore
@@ -42,6 +46,11 @@ const appearanceSourceFiles = ['apps/web/src/app/gameplay/asset-image.ts', 'apps
 // prettier-ignore
 const sourceInputs = Object.fromEntries([...sourceFiles, ...appearanceSourceFiles].map((path) => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
+const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
+const graphicsIdentityProbePath = new URL(
+  `@fs${resolve('changes/2026-09-08-web-node-playable/e2e/graphics-identity-probe.ts')}`,
+  new URL(basePath, `${origin}/`),
+).pathname;
 const nodePort = 18_787;
 const nodeUrl = `ws://127.0.0.1:${nodePort}/seedlands`;
 const accessKey = REMOTE_PLAYABLE_ACCESS_KEY;
@@ -50,6 +59,15 @@ const evidenceDirectory = resolve(
 );
 let nodeFixture: RemotePlayableNodeFixture | null = null;
 let nodeLog: string[] = [];
+const graphicsIdentities: ConnectionGraphicsIdentity[] = [];
+
+type ConnectionGraphicsIdentity = Readonly<
+  GraphicsIdentitySnapshot & {
+    attempt: string;
+    outcome: 'connected' | 'connection-failure';
+    browserVersion: string;
+  }
+>;
 
 const evidence = (page: Page) =>
   page.evaluate(() => {
@@ -67,6 +85,31 @@ const appendDiagnostic = (entries: string[], value: string): void => {
   entries.push(redactDiagnostic(value));
   if (entries.length > 100) entries.shift();
 };
+
+async function captureGraphicsIdentity(
+  page: Page,
+  testInfo: TestInfo,
+  attempt: string,
+  outcome: ConnectionGraphicsIdentity['outcome'],
+): Promise<ConnectionGraphicsIdentity> {
+  const graphics = await page.evaluate(
+    async (path) => ((await import(path)) as typeof import('./graphics-identity-probe')).readGraphicsIdentity(),
+    graphicsIdentityProbePath,
+  );
+  if (!graphics) throw new Error('PlayCanvas WebGL2 graphics identity is unavailable.');
+  const identity = {
+    ...graphics,
+    attempt,
+    outcome,
+    browserVersion: page.context().browser()?.version() ?? 'UNAVAILABLE',
+  } as const;
+  graphicsIdentities.push(identity);
+  await testInfo.attach(`${attempt}-graphics-identity`, {
+    body: Buffer.from(`${JSON.stringify(identity, null, 2)}\n`),
+    contentType: 'application/json',
+  });
+  return identity;
+}
 
 async function startNode(): Promise<void> {
   nodeFixture ??= await RemotePlayableNodeFixture.create(nodePort);
@@ -113,6 +156,15 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
     } catch (error) {
       try {
         const currentUrl = new URL(page.url());
+        let graphicsIdentity: ConnectionGraphicsIdentity | null = null;
+        let graphicsIdentityError: string | null = null;
+        try {
+          graphicsIdentity = await captureGraphicsIdentity(page, testInfo, attempt, 'connection-failure');
+        } catch (identityError) {
+          graphicsIdentityError = redactDiagnostic(
+            identityError instanceof Error ? identityError.message : String(identityError),
+          );
+        }
         let screenshotAttached = false;
         let screenshotError: string | null = null;
         try {
@@ -188,6 +240,8 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
           consoleMessages,
           pageErrors,
           webSocketEvents,
+          graphicsIdentity,
+          graphicsIdentityError,
           nodeLog: (nodeFixture?.logs() ?? nodeLog).map(redactDiagnostic),
           screenshotAttached,
           screenshotError,
@@ -214,7 +268,10 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
       }
       throw error;
     }
-    return evidence(page);
+    const connectedEvidence = await evidence(page);
+    const graphicsIdentity = await captureGraphicsIdentity(page, testInfo, attempt, 'connected');
+    expect(graphicsIdentity.deviceType).toBe('webgl2');
+    return connectedEvidence;
   } finally {
     page.off('console', onConsole);
     page.off('pageerror', onPageError);
@@ -443,6 +500,7 @@ test.describe.serial('Web to Node local playable loop', () => {
           sourceSha,
           sourceTreeStatus,
           sourceInputs,
+          graphicsIdentities,
           initial,
           beforeJump,
           peakJump,

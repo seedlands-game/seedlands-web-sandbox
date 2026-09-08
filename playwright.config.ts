@@ -8,6 +8,8 @@ const serverOrigin = `http://127.0.0.1:${e2ePort}`;
 const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
 const baseURL = new URL(basePath, `${serverOrigin}/`).href;
 const renderContentionExperiment = process.env.SEEDLANDS_RENDER_CONTENTION_EXPERIMENT === '1';
+const forceSwiftShader = process.env.SEEDLANDS_E2E_SWIFTSHADER === '1';
+const useSwiftShader = renderContentionExperiment || forceSwiftShader;
 const experimentOutput =
   process.env.SEEDLANDS_RENDER_CONTENTION_OUTPUT ?? '/tmp/seedlands-web-node-playable/render-contention';
 
@@ -25,11 +27,11 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
     headless: true,
     trace: 'on-first-retry',
-    ...(executablePath || renderContentionExperiment
+    ...(executablePath || useSwiftShader
       ? {
           launchOptions: {
             ...(executablePath ? { executablePath } : {}),
-            ...(renderContentionExperiment
+            ...(useSwiftShader
               ? { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] }
               : {}),
           },

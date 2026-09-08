@@ -49,6 +49,10 @@ CI 已证明 Node 完整发送 baseline，而页面进入 mirror 前逐步变慢
 
 正式批次固定为 `AAABBA`：首两个 A 只验证同一 30 秒失败模式，timeout 是右删失，不能当真实 ready 时间或用于速度倍率；第 3/6 个 A 是顺序稳定性对照。两个 B 必须均在 24 秒内完成脚下 9 个 rendered revision、恢复连续绘制并产出真实原始帧，才得到相对失败截止至少 6 秒的保守余量。任一正确性/画面/SwiftShader 身份失败，A 未复现，或 B 未过固定余量，都停止且不产品化。正式批次由现有 Chromium CI job 在全部原门禁之后独占 benchmark window 执行，Terra 担任 `seedlands-performance-validator` 审阅冻结输入、原始结果与准出，root 通过已授权 push 触发；实现者只做非计时功能自检。CI 接线仅限当前功能分支的一次诊断批次，原失败门禁保留失败状态，完成后移除临时步骤；失败结果与原始帧一并保留。
 
+CI `34219596804` 的正式 `AAABBA` 中 A/B 全部在约 8–11 秒 ready，A 未复现既有 30 秒失败，按固定停止线终止 `autoRender` 候选，不改产品绘制调度，也不从该批次计算或宣称性能倍数。同一 run 的原 Active 完整旅程仍按默认图形启动在 30 秒失败；实验唯一显式环境差异是 Chromium 使用 `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`，原 gate 没有回读 renderer identity。
+
+下一步只做图形环境正确性兼容对照：同一 Linux/base/seed、完整 Pointer Lock 键鼠、挖放、保存、关闭重连及 Node 重启旅程和 30 秒门槛保持不变，分别记录默认启动与显式 SwiftShader 的真实 WebGL2 renderer、vendor、version 和 browserVersion。Playwright 只在测试环境变量明确开启时增加与停止实验完全相同的 3 个 Chromium 参数；默认启动不变。identity 必须从 PlayCanvas 已创建的 `Application.graphicsDevice` 只读取得，不提前调用 `canvas.getContext`，并进入成功 JSON 或失败诊断。显式 SwiftShader 对照若任一原断言失败、不是 WebGL2、未回读 SwiftShader 或不能完成原始最终帧，即判兼容失败；通过只说明该图形环境可完成原旅程，不代表性能改善。RED 为当前旅程 JSON/失败诊断没有图形身份，且没有独立测试开关可复现实验启动参数。
+
 ## 阶段与保存
 
 - [x] M0：合同、预算、接口接缝审阅与可执行 RED；提交并推送。
