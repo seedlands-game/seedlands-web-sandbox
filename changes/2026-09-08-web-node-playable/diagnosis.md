@@ -113,3 +113,9 @@ CI34230070975 中 target回退为0，但放置后权威revision2、render revisi
 为建立可重复的软件CI功能环境，下一对照只通过现有启动页将产品画质设为Low。该组合减少半径、阴影/后处理和渲染分辨率，不是单一算法或Medium性能修复；其余浏览器、viewport、seed、真实输入、首屏/状态/输入租约门槛保持。默认本机Medium保留。运行JSON、失败进度和每次图形身份记录requested quality；把helper和既有质量配置纳入sourceInputs。
 
 本机Low软件兼容自检两项通过（29.0秒，功能执行记录），完整原断言保持，日志/tmp/seedlands-web-node-playable/low-quality-local.log。这是未提交测试配置的接线验证；Linux Low结果尚待，不能据该Mac自检准出Linux或声称性能收益。
+
+## CI34235218286 的精确站位准备失败
+
+Low 软件对照已通过首屏、真实 W 移动、转向与跳跃；失败发生于挖掘前 alignWithAimedColumn 的第24次纠正，最终位置 [2.2335910914337176,18.00000006651901,0.4276693675720511] 与目标列中心的水平距离约0.276，超过原0.25标准。尚未设置meshTarget，因此该次结果没有挖放网格停点证据。测试source afe5e0cfca86ae954ef35de581e3b1c4061fce9e 经API核验parents840f4fb+aeaa9ce、tree 2f58b37c9df3fdca8587c8366e1c3f1a18d50db8。Web99accepted/15late、target回退0；turned原图单帧约360ms、最近长帧约512ms。
+
+现有helper固定按住35ms、释放后70ms即读取位置，未确认非中性输入被浏览器采样发送，也未确认neutral被Node应用；accepted只是入队决定，不等于authority-state的applied acknowledgement。这是测试驱动的确定时序缺口，现有证据不能认定产品碰撞、输入租约或网格错误。Terra独立审阅确认最小范围为真实键盘加公开WebSocket/C0观察器，等待发送、接纳、neutral应用与客户端位置可见的顺序屏障。保留24次、0.25、Low、既有超时及500ms lease；只保存有界sequence/decision/位置/水平速度白名单，不记录握手、raw frame、key或任意错误文本。RED/GREEN及实现合同见spec，完成后重新取得完整旅程证据。

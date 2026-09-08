@@ -73,3 +73,11 @@ PR #15 仍 OPEN，base 分支保持 3c727f7；本 PR #17 对该 base 可合并�
 目标分支先推进至21d6e37，PR17以b0a5a1d接入已完成的底座更新，三处冲突同时保留远端接线、appearance加载和双方CI。目标随后变main@ddffbcb；对照21d6e37，新增仅CI必需context名称恢复及上游交付记录，25b59fe应用这两项差异并补齐squash后的合并父关系。此过程只写PR17，不管理PR15。
 
 CI34213458251 /25b59fe中，Static verification与Production build成功，旧回归与资产接缝成功，远端initial仍失败。首屏最后在途bundle中arrivalPages=verifiedPages且digestingTransfers=0，已到达页的校验完成只晚约0.2–0.5ms；此前Node已发送完整54页。可以排除摘要积压，不能把mirror入口的arrival当作底层网络到达，也不能从截图触发的ReadPixels警告断言GPU根因。当前选择非生产、单轴的loading按需绘制AA/AB对照，保持真实postrender，结果未出前不采用生产改动、不宣称性能收益。
+
+## 后续准出边界更新
+
+main已经推进至840f4fb，本分支以b034a10接入；637a8d2至840f4fb仅新增审阅skill、文档与AGENTS规则，没有运行时变更。PR17以main为base且可合并；不再执行上文历史节点中针对另一PR的整合计划。
+
+AAABBA未复现control失败，已按预注册停止线终止autoRender候选。后续真实输入target回退与旧streaming批量老化问题分别有可执行RED/GREEN，落为d7f86ec及4e63fb7。26850f6关闭trace输出的任意错误属性泄漏，只保留目标chunk最近64条白名单事件；独立审阅确认该项P1闭合。这些证据不证明Linux完整旅程已通过。
+
+aeaa9ce本机原生Medium闭环通过并绑定44项源码/产物，最新Linux Low对照通过首屏、移动、转向和跳跃后停在精确站位准备。Terra已确认固定时间键盘helper缺少实际发送及neutral应用屏障，修复范围仅限测试驱动。最终独立报告仍需补充该冻结驱动、Linux完整结果与最新CI；不能把分段审阅累加为未经核验的全PR通过声明。
