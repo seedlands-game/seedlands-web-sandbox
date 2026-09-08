@@ -5,6 +5,7 @@ import { CHUNK_SIZE } from '../../world/voxel';
 import {
   NETWORK_REFERENCE_PROJECTION_VERSION,
   type GameplayBreakActionReference,
+  type GameplayCombatReference,
   type GameplayEntityReference,
   type GameplayInventorySlotReference,
   type GameplayPlayerReference,
@@ -101,18 +102,77 @@ const projectBreakAction = (value: AuthorityGameplayView['player']['breakAction'
     requiredSeconds: assertFinite(value.requiredSeconds, 'breakAction.requiredSeconds'),
   };
 };
-const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerReference => ({
-  entityId: assertText(value.entityId, 'gameplay.player.entityId'),
-  health: assertFinite(value.health, 'gameplay.player.health'),
-  maxHealth: assertFinite(value.maxHealth, 'gameplay.player.maxHealth'),
-  hunger: assertFinite(value.hunger, 'gameplay.player.hunger'),
-  maxHunger: assertFinite(value.maxHunger, 'gameplay.player.maxHunger'),
-  lifecycle: value.lifecycle,
-  inventory: projectInventory(value.inventory),
-  selectedSlot: assertNonNegativeInteger(value.selectedSlot, 'gameplay.player.selectedSlot'),
-  hotbarSize: assertNonNegativeInteger(value.hotbarSize, 'gameplay.player.hotbarSize'),
-  breakAction: projectBreakAction(value.breakAction),
-});
+export const projectCombatReference = (
+  value: AuthorityGameplayView['player']['combat'],
+): GameplayCombatReference | undefined => {
+  if (!value) return undefined;
+  const active = value.active
+    ? {
+        actionId: assertText(value.active.actionId, 'combat.active.actionId'),
+        definitionId: assertText(value.active.definitionId, 'combat.active.definitionId'),
+        targetId: assertText(value.active.targetId, 'combat.active.targetId'),
+        comboStep: assertNonNegativeInteger(value.active.comboStep, 'combat.active.comboStep'),
+        comboLength: assertNonNegativeInteger(value.active.comboLength, 'combat.active.comboLength'),
+        phase: value.active.phase,
+        phaseElapsedSeconds: assertFinite(value.active.phaseElapsedSeconds, 'combat.active.phaseElapsedSeconds'),
+        phaseDurationSeconds: assertFinite(value.active.phaseDurationSeconds, 'combat.active.phaseDurationSeconds'),
+        canBuffer: value.active.canBuffer,
+        buffered: value.active.buffered,
+      }
+    : null;
+  if (active && !['windup', 'hit', 'recovery'].includes(active.phase)) throw new TypeError('combat phase is invalid.');
+  if (active && (active.comboLength === 0 || active.comboStep >= active.comboLength))
+    throw new TypeError('combat combo step is invalid.');
+  if (
+    active &&
+    (active.phaseElapsedSeconds < 0 ||
+      active.phaseDurationSeconds < 0 ||
+      active.phaseElapsedSeconds > active.phaseDurationSeconds)
+  )
+    throw new TypeError('combat phase timing is invalid.');
+  if (active && (typeof active.canBuffer !== 'boolean' || typeof active.buffered !== 'boolean'))
+    throw new TypeError('combat buffer flags are invalid.');
+  const lastResult = value.lastResult
+    ? {
+        sequence: assertNonNegativeInteger(value.lastResult.sequence, 'combat.lastResult.sequence'),
+        actionId: assertText(value.lastResult.actionId, 'combat.lastResult.actionId'),
+        definitionId: assertText(value.lastResult.definitionId, 'combat.lastResult.definitionId'),
+        targetId: assertText(value.lastResult.targetId, 'combat.lastResult.targetId'),
+        comboStep: assertNonNegativeInteger(value.lastResult.comboStep, 'combat.lastResult.comboStep'),
+        outcome: value.lastResult.outcome,
+        damage: assertFinite(value.lastResult.damage, 'combat.lastResult.damage'),
+        ...(value.lastResult.reason === undefined
+          ? {}
+          : { reason: assertText(value.lastResult.reason, 'combat.lastResult.reason') }),
+      }
+    : null;
+  if (lastResult && !['hit', 'miss', 'cancelled'].includes(lastResult.outcome))
+    throw new TypeError('combat outcome is invalid.');
+  if (lastResult && lastResult.damage < 0) throw new TypeError('combat damage is invalid.');
+  const cooldownRemainingSeconds = assertFinite(value.cooldownRemainingSeconds, 'combat.cooldownRemainingSeconds');
+  if (cooldownRemainingSeconds < 0) throw new TypeError('combat cooldown is invalid.');
+  return {
+    active,
+    cooldownRemainingSeconds,
+    lastResult,
+  };
+};
+const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerReference => {
+  const combat = projectCombatReference(value.combat);
+  return {
+    entityId: assertText(value.entityId, 'gameplay.player.entityId'),
+    health: assertFinite(value.health, 'gameplay.player.health'),
+    maxHealth: assertFinite(value.maxHealth, 'gameplay.player.maxHealth'),
+    hunger: assertFinite(value.hunger, 'gameplay.player.hunger'),
+    maxHunger: assertFinite(value.maxHunger, 'gameplay.player.maxHunger'),
+    lifecycle: value.lifecycle,
+    inventory: projectInventory(value.inventory),
+    selectedSlot: assertNonNegativeInteger(value.selectedSlot, 'gameplay.player.selectedSlot'),
+    hotbarSize: assertNonNegativeInteger(value.hotbarSize, 'gameplay.player.hotbarSize'),
+    breakAction: projectBreakAction(value.breakAction),
+    ...(combat ? { combat } : {}),
+  };
+};
 const projectEntity = (value: AuthorityGameplayView['entities'][number]): GameplayEntityReference => {
   if (!isPresentationEntityType(value.type))
     throw new TypeError(`Entity type ${value.type} is not a presentation entity.`);
@@ -122,6 +182,7 @@ const projectEntity = (value: AuthorityGameplayView['entities'][number]): Gamepl
     throw new TypeError('NPC presentation archetype must be settler.');
   if (value.type === 'creature' && value.archetype === 'settler')
     throw new TypeError('Creature presentation archetype cannot be settler.');
+  const combat = projectCombatReference(value.combat);
   const projected: GameplayEntityReference = {
     id: assertText(value.id, 'entity.id'),
     type: value.type,
@@ -129,6 +190,7 @@ const projectEntity = (value: AuthorityGameplayView['entities'][number]): Gamepl
     ...(value.archetype ? { archetype: value.archetype } : {}),
     ...(value.health === undefined ? {} : { health: assertFinite(value.health, 'entity.health') }),
     ...(value.maxHealth === undefined ? {} : { maxHealth: assertFinite(value.maxHealth, 'entity.maxHealth') }),
+    ...(combat ? { combat } : {}),
   };
   if (value.stack) {
     if (value.type !== 'world-item') throw new TypeError('Only world-item presentation entities may contain a stack.');

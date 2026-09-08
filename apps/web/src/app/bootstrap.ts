@@ -72,6 +72,9 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
     });
     const actions: UiActionPort = {
       startWorld: (seed, quality, openMode) => application.start(seed, quality, openMode),
+      startMeleeShowcase: (quality) => application.startMeleeShowcase(quality),
+      resetMeleeShowcase: () => game.prepareMeleeShowcase(),
+      triggerMeleeShowcaseDamage: () => game.triggerMeleeShowcaseDamage(),
       selectHotbarSlot: (slot) => game.selectHotbarSlot(slot),
       toggleInventory: () => game.toggleInventory(),
       closeInventory: () => game.closeInventory(),

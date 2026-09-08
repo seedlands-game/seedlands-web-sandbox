@@ -1,3 +1,5 @@
+import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
+import { combatViewmodelPose } from '../../client/presentation/combat-viewmodel-pose';
 import * as pc from 'playcanvas';
 import { type HeldAction, viewmodelPose } from '../../client/presentation/gameplay-model-definition';
 import { addPlayerArm } from '../gameplay/builtin-actor-models';
@@ -24,6 +26,7 @@ export class FirstPersonViewmodel {
   private action: HeldAction = 'idle';
   private actionSeconds = 0;
   private heldItem: string | null = null;
+  private combat: CombatSnapshot['active'] = null;
   private pose = { shoulder: 0, elbow: 0, wrist: 0 };
   private releasePose = { shoulder: 0, elbow: 0, wrist: 0 };
 
@@ -96,6 +99,10 @@ export class FirstPersonViewmodel {
     this.actionSeconds = 0;
   }
 
+  setCombatAction(active: CombatSnapshot['active']): void {
+    this.combat = active;
+  }
+
   setVisible(visible: boolean): void {
     this.root.enabled = visible;
   }
@@ -111,8 +118,9 @@ export class FirstPersonViewmodel {
     this.root.setLocalPosition(layout.position.x, layout.position.y, layout.position.z);
     this.root.setLocalScale(layout.scale, layout.scale, layout.scale);
     if (this.viewmodelCamera?.camera) this.viewmodelCamera.camera.fov = fov;
-    const pose = viewmodelPose(this.action, this.actionSeconds);
-    if (this.action === 'idle') {
+    const authoritativePose = combatViewmodelPose(this.combat);
+    const pose = { ...(authoritativePose ?? viewmodelPose(this.action, this.actionSeconds)) };
+    if (!authoritativePose && this.action === 'idle') {
       const progress = Math.min(1, this.actionSeconds / 0.16);
       const remaining = 1 - progress * progress * (3 - 2 * progress);
       pose.shoulder = this.releasePose.shoulder * remaining;

@@ -21,8 +21,21 @@
 ## 任务与记录
 
 - [x] 冻结、备份分支并读取 main feature 与 spec。
-- [ ] 合并与逐处解决文本/语义冲突。
+- [x] 合并与逐处解决文本/语义冲突。
 - [ ] 定向 RED/GREEN、受影响浏览器闭环与完整门禁。
 - [ ] push、更新 PR17、最新 CI 与人类审核交接。
 
 不改历史 Delivered change 的结论；本集成证据归本目录。长期 docs baseline 按最终职责变化决定是否更新。
+
+## 实际 RED
+
+6 处文本冲突：ApplicationShell、Game、两端独立提取的 GameSaveQueue、生成的开始页 HTML、package scripts、Shell 测试。生成 HTML 由合并后的 Svelte 重新生成。
+
+合并后新增的 4 项网络/玩法接缝测试全部 RED：木剑前摇返回无 damage 导致回执投影报 `Invalid damage`；`buffer-full`/`combo-window-closed` 被旧原因白名单拒绝；Web 丢弃 player.combat。修复保留旧同步 damage 回执，新增动作 ID/缓冲白名单字段，不伪造尚未发生的伤害；core 复用 combat 白名单复制供 Web 读取，HUD/实体表现继续只消费权威事实。本地体验场按钮在远端模式隐藏，公开管理命令仍拒绝。
+
+## 集成检查点
+
+- 本地体验场浏览器通过；远端 worker-thread 木剑真实 Pointer Lock 输入显示前摇、5 点首击及 7 点连击，连接不中断，durable 保存后文件恢复保留木剑及目标受损状态（9.7 秒）。
+- 新测试造景先因字段名错误失败，修正后发现平台 y=80 超出当前 Web scheduler 的 cy=0..1 范围；将合成场景改为 main 体验场同样的 y=57 后通过。未扩大生产世界高度范围，也未延长加载超时。
+- Shell 迟到本地启动不得给新远端造景的回归通过。地图 UI 控制移交给既有 game-runtime-controls，满足两分支合并后的 500 有效行门禁；代码地图同步该职责。
+- 新增 `pnpm test:pr17:integration` 并纳入 Chromium CI。完整 static、build、原远端连续旅程与最终 CI 仍待准出，当前记录不代表这些门禁已经通过。

@@ -30,6 +30,31 @@ export type GameplayBreakActionReference = {
   elapsedSeconds: number;
   requiredSeconds: number;
 } | null;
+export type GameplayCombatReference = {
+  active: {
+    actionId: string;
+    definitionId: string;
+    targetId: string;
+    comboStep: number;
+    comboLength: number;
+    phase: 'windup' | 'hit' | 'recovery';
+    phaseElapsedSeconds: number;
+    phaseDurationSeconds: number;
+    canBuffer: boolean;
+    buffered: boolean;
+  } | null;
+  cooldownRemainingSeconds: number;
+  lastResult: {
+    sequence: number;
+    actionId: string;
+    definitionId: string;
+    targetId: string;
+    comboStep: number;
+    outcome: 'hit' | 'miss' | 'cancelled';
+    damage: number;
+    reason?: string;
+  } | null;
+};
 export type GameplayPlayerReference = {
   entityId: string;
   health: number;
@@ -41,6 +66,7 @@ export type GameplayPlayerReference = {
   selectedSlot: number;
   hotbarSize: number;
   breakAction: GameplayBreakActionReference;
+  combat?: GameplayCombatReference;
 };
 export type GameplayEntityReference = {
   id: string;
@@ -50,6 +76,7 @@ export type GameplayEntityReference = {
   stack?: { itemId: string; count: number };
   health?: number;
   maxHealth?: number;
+  combat?: GameplayCombatReference;
 };
 export type GameplayViewReference = {
   kind: 'gameplay-view-reference';

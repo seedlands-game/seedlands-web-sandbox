@@ -264,6 +264,9 @@ export class Game {
       queueSave: () => this.saveQueue.queue(),
       releaseInput: () => this.controller?.releaseInput(),
       movePlayer: (target) => this.controller?.movePlayerTo(...target),
+      orientPlayer: (yaw, pitch) => this.controller?.setView(yaw, pitch),
+      executeCommand: (command) => this.executeGameplayCommand(command),
+      onPlayerDamage: (amount) => this.controller?.presentDamage(amount),
       onPresentation: (event) => this.worldAudio?.present(event),
     });
     this.controller = this.createController(this.camera);
@@ -330,7 +333,13 @@ export class Game {
       };
     }
     const harnessEnabled = new URLSearchParams(location.search).has('harness');
-    this.uiBridge.publishShell({ phase: 'playing', enterLabel: '进入世界', commandOpen: false, mapOpen: false });
+    this.uiBridge.publishShell({
+      phase: 'playing',
+      enterLabel: '进入世界',
+      commandOpen: false,
+      mapOpen: false,
+      experience: null,
+    });
     this.uiSession?.publishHud(++this.hudSequence, { visible: true });
     this.gameplayClient?.refresh();
     this.publishDebugVisibility(harnessEnabled);
@@ -368,12 +377,7 @@ export class Game {
         setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, localAuthority, speed),
         blockLogicWorker: (ms) =>
           this.logicClient?.blockForHarness(ms) ?? Promise.reject(new Error('Logic Worker不可用。')),
-        executeGameplayCommand: async (command) => {
-          if (!this.commandExecutor || !this.commandSource) throw new Error('Harness command runtime is unavailable.');
-          const result = await this.commandExecutor.execute(this.commandSource, command);
-          if (result.success) this.consumeBrowserCommand(command, result);
-          return result;
-        },
+        executeGameplayCommand: (command) => this.executeGameplayCommand(command),
         queueSave: () => this.saveQueue.queue(),
         flushSave: () => this.saveQueue.flush(),
         experiments: () => this.experimentState.diagnostics(this.computeRuntime?.diagnostics.workerKernelStates ?? []),
@@ -387,6 +391,10 @@ export class Game {
     if (execution.command && execution.result.success) this.consumeBrowserCommand(execution.command, execution.result);
     return execution;
   }
+
+  prepareMeleeShowcase = async () => void (await this.gameplayClient?.prepareMeleeShowcase());
+
+  triggerMeleeShowcaseDamage = async () => void (await this.gameplayClient?.triggerMeleeShowcaseDamage());
 
   releaseInput = () => this.controller?.releaseInput();
 
@@ -450,11 +458,7 @@ export class Game {
 
   closeMap = () => this.uiBridge.publishShell({ mapOpen: false });
 
-  setMapLayer(layer: MapLayer) {
-    const shell = this.uiBridge.shell.get();
-    if (shell.mapLayer === layer) return;
-    this.uiBridge.publishShell({ mapLayer: layer, mapRevision: shell.mapRevision + 1 });
-  }
+  setMapLayer = (layer: MapLayer) => runtimeControls.setMapLayer(this.uiBridge, layer);
 
   private consumeBrowserCommand(
     command: ServerCommand,
@@ -474,23 +478,18 @@ export class Game {
     this.gameplayClient?.refresh();
   }
 
+  private async executeGameplayCommand(command: ServerCommand) {
+    if (!this.commandExecutor || !this.commandSource) throw new Error('Gameplay command runtime is unavailable.');
+    const result = await this.commandExecutor.execute(this.commandSource, command);
+    if (result.success) this.consumeBrowserCommand(command, result);
+    return result;
+  }
+
   private publishDebugVisibility(visible: boolean) {
     this.uiBridge.publishDebug({ visible });
   }
 
-  toggleMap() {
-    if (!this.world || !this.camera) return;
-    if (this.uiBridge.shell.get().mapOpen) return this.closeMap();
-    const position = this.camera.getPosition();
-    this.controller?.releaseInput();
-    const shell = this.uiBridge.shell.get();
-    this.uiBridge.publishShell({
-      mapOpen: true,
-      mapSeed: this.world.seed,
-      mapCenter: [position.x, position.z],
-      mapRevision: shell.mapRevision + 1,
-    });
-  }
+  toggleMap = () => runtimeControls.toggleMap(this.uiBridge, this.world, this.camera, this.controller);
 
   private async setWorldTime(hour: number) {
     if (!this.world || !this.environment) return;

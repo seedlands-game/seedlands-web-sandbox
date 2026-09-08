@@ -211,6 +211,45 @@
   max-width: 300px;
   font-size: 12px;
 }
+#melee-showcase-guide {
+  position: absolute;
+  top: 64px;
+  left: 18px;
+  z-index: 12;
+  width: min(280px, calc(100vw - 36px));
+  padding: 14px 16px;
+  color: var(--ui-color-content);
+  font-size: 11px;
+  line-height: 1.5;
+  pointer-events: auto;
+}
+#melee-showcase-guide strong {
+  color: #f0c07a;
+  font-size: 14px;
+}
+#melee-showcase-guide ol {
+  margin: 9px 0 10px;
+  padding-left: 18px;
+}
+#melee-showcase-guide li + li {
+  margin-top: 5px;
+}
+#melee-showcase-guide .game-button {
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  #melee-showcase-guide {
+    top: 54px;
+    left: 10px;
+    width: min(240px, calc(100vw - 20px));
+  }
+  #melee-showcase-guide li:nth-child(2) {
+    display: none;
+  }
+}
 #debug {
   top: 66px;
 }

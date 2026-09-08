@@ -84,7 +84,7 @@ export class GameFrameLoop {
       this.frames = 0;
       this.lastFpsSample = now;
     }
-    controller?.update(dt);
+    controller?.update(dt, actualFrameMs / 1000);
     const collisionDebug = this.bindings.collisionDebug();
     collisionDebug?.update(
       this.bindings.authority()?.snapshot ?? null,

@@ -7,7 +7,7 @@ import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/au
 import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
 import type { SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
 import { assertItemStack, type ItemStack } from '@seedlands/game-core/server/gameplay/item-registry';
-import type { GameplayEntity } from '@seedlands/game-core/server/gameplay/entity-store';
+import { projectCombatReference } from '@seedlands/game-core/server/protocol/network-reference-projection';
 import type { PublicSessionRef } from '@seedlands/game-core/server/protocol/network-message-semantics';
 import type { GameplayConsumerReference } from '@seedlands/game-core/server/protocol/network-gameplay-consumer-reference';
 import type { PlayerCorrectionReference } from '@seedlands/game-core/server/protocol/network-reference-projection';
@@ -102,11 +102,13 @@ const zeroMetrics = (): AuthorityGameplayMetrics => ({
 
 export const gameplayFromReference = (value: GameplayConsumerReference): AuthorityGameplayView => {
   const actorBehaviors = new Map(value.actorBehaviors.map((actor) => [actor.entityId, actor.behavior]));
-  const entities = value.entities.map((entity): GameplayEntity => {
-    const { stack: sourceStack, ...source } = entity;
+  const entities = value.entities.map((entity): AuthorityGameplayView['entities'][number] => {
+    const { stack: sourceStack, combat: sourceCombat, ...source } = entity;
+    const combat = projectCombatReference(sourceCombat);
     const stack = sourceStack ? { ...sourceStack } : undefined;
     if (stack) assertItemStack(stack);
-    const projected: GameplayEntity = {
+    const projected: AuthorityGameplayView['entities'][number] = {
+      ...(combat ? { combat } : {}),
       ...source,
       kind: entity.type,
       lifecycle: 'active' as const,
@@ -130,7 +132,7 @@ export const gameplayFromReference = (value: GameplayConsumerReference): Authori
         workPoiId: null,
         foodPoiId: null,
         active: true,
-        attackCooldownSeconds: 0,
+        attackCooldownSeconds: entity.combat?.cooldownRemainingSeconds ?? 0,
         wanderIndex: 0,
       },
     ];
@@ -141,10 +143,12 @@ export const gameplayFromReference = (value: GameplayConsumerReference): Authori
     assertItemStack(stack);
     return stack;
   });
+  const combat = projectCombatReference(value.player.combat);
   return {
     gameplayRevision: integer(value.gameplayRevision, 'gameplayRevision'),
     gameplayTime: finite(value.gameplayTime, 'gameplayTime'),
     player: {
+      ...(combat ? { combat } : {}),
       entityId: value.player.entityId,
       spawnPosition: [0, 0, 0],
       health: finite(value.player.health, 'player.health'),
@@ -155,7 +159,7 @@ export const gameplayFromReference = (value: GameplayConsumerReference): Authori
       inventory,
       selectedSlot: integer(value.player.selectedSlot, 'player.selectedSlot'),
       hotbarSize: 8,
-      attackCooldownSeconds: 0,
+      attackCooldownSeconds: combat?.cooldownRemainingSeconds ?? 0,
       hungerAccumulator: 0,
       healingAccumulator: 0,
       starvationAccumulator: 0,

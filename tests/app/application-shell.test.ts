@@ -44,6 +44,7 @@ const createGame = () =>
     loadSavedSession: vi.fn(() => null),
     start: vi.fn(async () => undefined),
     startRemote: vi.fn(async () => undefined),
+    prepareMeleeShowcase: vi.fn(async () => undefined),
     abortStart: vi.fn(),
     leaveWorld: vi.fn(async () => undefined),
     setPaused: vi.fn(),
@@ -163,6 +164,40 @@ describe('ApplicationShell experiment and capability gates', () => {
     await newConnection;
     expect(application.controller.state.phase).toBe('playing');
     expect(bridge.shell.get().phase).not.toBe('error');
+    application.dispose();
+  });
+
+  it('木剑体验场跨过低核心确认后仍以固定新世界启动并完成布置', async () => {
+    const game = createGame();
+    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
+      preflight: async () => capability({ estimatedCores: 4, lowCoreWarning: true }),
+    });
+    await application.initialize();
+
+    await application.startMeleeShowcase('high');
+    expect(game.start).not.toHaveBeenCalled();
+    await application.confirmPerformanceWarning();
+
+    expect(game.start).toHaveBeenCalledWith('wood-sword-action-stage-v1', null, 'high', 'new-current');
+    expect(game.prepareMeleeShowcase).toHaveBeenCalledOnce();
+    application.dispose();
+  });
+  it('取消的本地体验场迟到完成不能向新的远端会话发送造景命令', async () => {
+    let resolveLocal!: () => void;
+    const game = createGame();
+    vi.mocked(game.start).mockImplementationOnce(() => new Promise<void>((resolve) => (resolveLocal = resolve)));
+    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+    const oldStart = application.startMeleeShowcase('low');
+    await Promise.resolve();
+    application.controller.cancelStart();
+    await application.connectRemote('ws://127.0.0.1:8787/seedlands', 'synthetic', 'low');
+    resolveLocal();
+    await oldStart;
+    expect(game.prepareMeleeShowcase).not.toHaveBeenCalled();
+    expect(application.controller.state.phase).toBe('playing');
     application.dispose();
   });
 });

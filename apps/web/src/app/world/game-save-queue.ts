@@ -1,8 +1,6 @@
-import type { BrowserAuthorityClient } from '../../client/authority/browser-authority-client';
-import type { RemoteAuthorityClient } from '../../client/authority/remote-authority-client';
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
 
-type SaveAuthority = BrowserAuthorityClient | RemoteAuthorityClient;
+type SaveAuthority = Readonly<{ save: () => Promise<unknown> }>;
 
 export class GameSaveQueue {
   private timer: number | null = null;

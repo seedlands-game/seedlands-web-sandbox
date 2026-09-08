@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "review",
+  "initiatedBy": "agent",
+  "role": "独立风险评审",
+  "workType": "validation",
+  "goal": "先独立审查 GLB 骨骼校验与根路径战斗 UI 反馈，发现可复现的正确性或安全边界缺陷；随后待核心完成再复核集成",
+  "context": [
+    {
+      "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/spec.md",
+      "purpose": "范围与验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [],
+    "readPaths": ["/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox"],
+    "nonGoals": ["不修改文件不运行性能实验不委派不对外写入；不要复查施工中的核心战斗代码"]
+  },
+  "outputs": ["有路径和行号及复现依据的可操作问题，或明确无发现和未验证项"],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "xhigh",
+    "routeReason": "GLB不可信输入与跨层权威责任风险复核，采用全局允许的一次只读Sol/xhigh评审"
+  },
+  "acceptance": [
+    {
+      "id": "review",
+      "check": "检查恶意或畸形GLB有限校验、资源生命周期、动画/权威责任边界和UI结果去重，不要求修复",
+      "evidence": "具体路径和可复现输入或控制流"
+    }
+  ],
+  "budget": { "maxAttempts": 2, "maxAgentHours": 3 },
+  "permissions": { "localWrite": false, "externalWrite": false, "delegate": false },
+  "parent": {
+    "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/contracts/root.json",
+    "sha256": "55dd481bd0e5c07704b373c94c68e479ea3956400e39f04b5ce9e057bba67156"
+  },
+  "resources": { "exclusiveGroup": null },
+  "escalation": ["范围/公开接口/授权变化", "两次同因失败", "预计超过预算"],
+  "reportFields": ["完成状态", "改动文件", "验证结果", "限制", "下一步"]
+}

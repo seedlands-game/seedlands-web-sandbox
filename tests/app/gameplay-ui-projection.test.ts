@@ -46,6 +46,7 @@ describe('gameplay retained UI projection', () => {
       expect.objectContaining({ id: 'planks', name: '木板', craftable: true }),
       expect.objectContaining({ id: 'wood-axe', name: '木斧', craftable: false }),
       expect.objectContaining({ id: 'stone-pickaxe', name: '石镐', craftable: false }),
+      expect.objectContaining({ id: 'wood-sword', name: '木剑', craftable: false }),
       expect.objectContaining({ id: 'lantern', name: '灯笼', craftable: false }),
     ]);
   });

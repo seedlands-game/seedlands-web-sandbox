@@ -151,6 +151,8 @@ jobs:
           SEEDLANDS_RESERVATION_EVIDENCE: /tmp/seedlands-web-node-playable/graphics-window.json
           SEEDLANDS_RESERVATION_RUN: web-node-playable-${{ github.run_id }}
         run: node scripts/benchmark-window.mjs --owner-thread seedlands-performance-validator --wait-timeout-ms 600000 -- pnpm test:web-node-playable
+      - name: Run PR17 main gameplay integration
+        run: pnpm test:pr17:integration
       - name: Preserve Web to Node playable evidence
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
