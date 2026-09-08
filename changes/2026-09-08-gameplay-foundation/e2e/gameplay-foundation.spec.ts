@@ -28,6 +28,7 @@ test.beforeEach(async ({ page }) => {
       window.addEventListener(
         type,
         (event) => {
+          if (type === 'mousemove' && event instanceof MouseEvent && !event.movementX && !event.movementY) return;
           target.__inputEvidence?.push({
             type,
             time: Math.round(performance.now()),
@@ -98,7 +99,16 @@ async function inventory(page: Page) {
 
 async function closeInventory(page: Page) {
   await page.getByRole('button', { name: '关闭背包', exact: true }).click();
+  await lockGameplayPointer(page);
+}
+
+async function lockGameplayPointer(page: Page) {
   await lockPointer(page);
+  // Linux Headless 将锁定指针置于原点；同步自动化坐标，避免按键时从画布中心产生虚假视角位移。
+  await page.mouse.move(0, 0);
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  );
 }
 
 test('木剑通过真实采集合成与输入战斗，拾取后保存重进', async ({ page }, info) => {
@@ -154,11 +164,11 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
       (Math.atan2(-dx, -dz) * 180) / Math.PI,
       (Math.atan2(dy, Math.hypot(dx, dz)) * 180) / Math.PI,
     );
-    await page.mouse.click(640, 360);
+    await page.mouse.click(0, 0);
     if (attempt === 0) {
       await page.screenshot({ path: info.outputPath('wood-sword-windup.png') });
       await page.waitForTimeout(220);
-      await page.mouse.click(640, 360); // 在权威窗口提交一次第二段输入。
+      await page.mouse.click(0, 0); // 在权威窗口提交一次第二段输入。
       await page.screenshot({ path: info.outputPath('wood-sword-followup.png') });
     }
     await page.waitForTimeout(650); // 真实动作恢复；终态用权威实体和库存读回断言。
@@ -190,7 +200,7 @@ test('真实连续攻击输入进入第二段连招，HUD仅按权威结果显�
   await startHarnessWorld(page, 'wood-sword-combo');
   await prepareFlatMovement(page);
   await command(page, { type: 'give-item', itemId: 'wood-sword', count: 1 });
-  await lockPointer(page);
+  await lockGameplayPointer(page);
   await setHarnessView(page, 0, -8);
   // 主动靠近玩家的目标避免在慢速 CI 的工具往返期间自行游荡出准星。
   const created = await command(page, { type: 'spawn-actor', archetype: 'night-stalker', position: [0.5, 57, -2] });
