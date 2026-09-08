@@ -1,6 +1,6 @@
-import { compactMeshData } from '../../src/world/mesh';
-import { KernelMemory } from '../../src/compute/kernel-memory';
-import { MeshPackKernel } from '../../src/compute/mesh-pack-kernel';
+import { compactMeshData } from '../../packages/game-core/src/world/mesh';
+import { KernelMemory } from '../../apps/web/src/compute/kernel-memory';
+import { MeshPackKernel } from '../../apps/web/src/compute/mesh-pack-kernel';
 import { readFile } from 'node:fs/promises';
 
 import { describe, expect, it } from 'vitest';

@@ -1,6 +1,7 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { ComputeTaskCancelled, runWorldComputeTask } from '../../src/worker/world-compute-task';
-import { CHUNK_SIZE, Voxel } from '../../src/world/voxel';
+import { ComputeTaskCancelled, runWorldComputeTask } from '../../packages/game-core/src/compute/world-compute-task';
+import { CHUNK_SIZE, Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('general compute worker task', () => {
   it('在通用计算Worker内搜索脚底中心安全出生点', async () => {
@@ -63,6 +64,7 @@ describe('general compute worker task', () => {
         async () => {
           checkpoints += 1;
         },
+        { now: testCorePlatform.now },
       ),
     ).rejects.toBeInstanceOf(ComputeTaskCancelled);
     expect(checkpoints).toBe(2);
@@ -72,22 +74,27 @@ describe('general compute worker task', () => {
     const canonical = new Uint16Array(CHUNK_SIZE ** 3);
     canonical.fill(Voxel.Air);
     canonical[0] = Voxel.Stone;
-    const result = await runWorldComputeTask({
-      kind: 'generate-mesh',
-      traceId: 'mesh',
-      epoch: 0,
-      chunkKey: '0,0,0',
-      seed: 1,
-      cx: 0,
-      cy: 0,
-      cz: 0,
-      chunkRevision: 4,
-      haloRevision: 'pending',
-      generatorVersion: 3,
-      canonical: canonical.buffer,
-      fluid: new Uint8Array(CHUNK_SIZE ** 3).buffer,
-      overlays: [],
-    });
+    const result = await runWorldComputeTask(
+      {
+        kind: 'generate-mesh',
+        traceId: 'mesh',
+        epoch: 0,
+        chunkKey: '0,0,0',
+        seed: 1,
+        cx: 0,
+        cy: 0,
+        cz: 0,
+        chunkRevision: 4,
+        haloRevision: 'pending',
+        generatorVersion: 3,
+        canonical: canonical.buffer,
+        fluid: new Uint8Array(CHUNK_SIZE ** 3).buffer,
+        overlays: [],
+      },
+      () => false,
+      testCorePlatform.yieldTurn,
+      { now: testCorePlatform.now },
+    );
 
     if (!('canonical' in result)) throw new Error('生成网格任务未返回 canonical 结果。');
     expect(new Uint16Array(result.canonical)[0]).toBe(Voxel.Stone);

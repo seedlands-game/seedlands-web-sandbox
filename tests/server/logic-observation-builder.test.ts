@@ -1,8 +1,9 @@
-import * as voxelModel from '../../src/world/voxel-model';
+import { testCorePlatform } from '../support/core-platform';
+import * as voxelModel from '../../packages/game-core/src/world/voxel-model';
 import { describe, expect, it, vi } from 'vitest';
-import { buildLogicObservation } from '../../src/server/authority/logic-observation-builder';
-import type { AuthoritySnapshot } from '../../src/server/authority/authority-session';
-import type { GameplayEntity } from '../../src/server/gameplay/entity-store';
+import { buildLogicObservation } from '../../packages/game-core/src/server/authority/logic-observation-builder';
+import type { AuthoritySnapshot } from '../../packages/game-core/src/server/authority/authority-session';
+import type { GameplayEntity } from '../../packages/game-core/src/server/gameplay/entity-store';
 
 const snapshot = (): AuthoritySnapshot => ({
   kind: 'snapshot',
@@ -54,6 +55,7 @@ describe('buildLogicObservation', () => {
   it('构造有界真实地形窗口、决策状态与稳定身份版本', () => {
     const boxes = vi.spyOn(voxelModel, 'collisionBoxesForVoxel');
     const observation = buildLogicObservation({
+      clone: testCorePlatform.clone,
       epoch: 'epoch:logic',
       observationSequence: 3,
       snapshot: snapshot(),
@@ -108,6 +110,7 @@ describe('buildLogicObservation', () => {
 
   it('任一格尚未加载时省略整个窗口，Logic据此保守hold', () => {
     const observation = buildLogicObservation({
+      clone: testCorePlatform.clone,
       epoch: 'epoch:logic',
       observationSequence: 1,
       snapshot: snapshot(),

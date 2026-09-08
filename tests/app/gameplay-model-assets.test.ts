@@ -118,7 +118,7 @@ vi.mock('playcanvas', () => {
 
 describe('玩法物品共享网格资源', () => {
   it('灯笼每个实例只挂两个材质组，并复用缓存的两份 Mesh', async () => {
-    const { GameplayModelAssets } = await import('../../src/app/gameplay/gameplay-model-assets');
+    const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
     const pc = await import('playcanvas');
     const assets = new GameplayModelAssets({ graphicsDevice: {} } as never);
     const first = new pc.Entity('first');
@@ -138,7 +138,7 @@ describe('玩法物品共享网格资源', () => {
   });
 
   it('普通方块也由同一静态网格入口按面材质分组', async () => {
-    const { GameplayModelAssets } = await import('../../src/app/gameplay/gameplay-model-assets');
+    const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
     const pc = await import('playcanvas');
     const assets = new GameplayModelAssets({ graphicsDevice: {} } as never);
     const parent = new pc.Entity('wood');
@@ -151,7 +151,7 @@ describe('玩法物品共享网格资源', () => {
   });
 
   it('构造器按资源 ID 优先使用传入的模型材质与像素贴图', async () => {
-    const { GameplayModelAssets } = await import('../../src/app/gameplay/gameplay-model-assets');
+    const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
     const texture = {
       id: 'custom:brass',
       name: '定制黄铜',
@@ -192,7 +192,7 @@ describe('玩法物品共享网格资源', () => {
   });
 
   it('透明材质保留 terrain 的采样、金属和混合语义', async () => {
-    const { GameplayModelAssets } = await import('../../src/app/gameplay/gameplay-model-assets');
+    const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
     const texture = {
       id: 'custom:water',
       name: '定制水面',
@@ -245,7 +245,7 @@ describe('玩法物品共享网格资源', () => {
   });
 
   it('镂空材质使用 alpha test 和双面光照', async () => {
-    const { GameplayModelAssets } = await import('../../src/app/gameplay/gameplay-model-assets');
+    const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
     const texture = {
       id: 'custom:leaf',
       name: '定制叶片',
@@ -295,7 +295,7 @@ describe('玩法物品共享网格资源', () => {
   });
 
   it('工具从当前像素模型和贴图构建，并以 revision 区分缓存 Mesh', async () => {
-    const { GameplayModelAssets } = await import('../../src/app/gameplay/gameplay-model-assets');
+    const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
     const pc = await import('playcanvas');
     const texture = {
       id: 'custom:axe-pixels',
@@ -341,8 +341,8 @@ describe('玩法物品共享网格资源', () => {
   });
 
   it('addBox 按模型私有绑定读取当前 runtime 材质', async () => {
-    const { GameplayModelAssets } = await import('../../src/app/gameplay/gameplay-model-assets');
-    const { setAppearanceResources } = await import('../../src/app/gameplay/appearance-runtime');
+    const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
+    const { setAppearanceResources } = await import('../../apps/web/src/app/gameplay/appearance-runtime');
     const pc = await import('playcanvas');
     const app = { graphicsDevice: {} } as never;
     const texture = {

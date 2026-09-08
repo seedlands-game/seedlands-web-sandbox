@@ -1,26 +1,30 @@
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { readFile, readdir } from 'node:fs/promises';
+import { access, readFile, readdir, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
+async function buildLayout(root: string) {
+  const webPackage = resolve(root, 'apps/web/package.json');
+  const monorepo = await access(webPackage).then(
+    () => true,
+    () => false,
+  );
+  return {
+    dist: resolve(root, monorepo ? 'apps/web/dist' : 'dist'),
+    sourcePaths: monorepo
+      ? ['apps/web', 'packages/game-core', 'crates', 'package.json', 'pnpm-workspace.yaml', 'tsconfig.base.json']
+      : ['src', 'crates', 'vite.config.ts', 'package.json'],
+  };
+}
+
 export async function productionSourceHash(root: string): Promise<string> {
+  const { sourcePaths } = await buildLayout(root);
   const files = [
     ...new Set(
-      execFileSync(
-        'git',
-        [
-          'ls-files',
-          '-co',
-          '--exclude-standard',
-          '--',
-          'src',
-          'crates',
-          'vite.config.ts',
-          'package.json',
-          'pnpm-lock.yaml',
-        ],
-        { cwd: root, encoding: 'utf8' },
-      )
+      execFileSync('git', ['ls-files', '-co', '--exclude-standard', '--', ...sourcePaths, 'pnpm-lock.yaml'], {
+        cwd: root,
+        encoding: 'utf8',
+      })
         .trim()
         .split('\n'),
     ),
@@ -39,17 +43,19 @@ export async function productionSourceHash(root: string): Promise<string> {
   return hash.digest('hex');
 }
 export async function expectedBuild(root: string, sourceSha: string) {
-  const stamp = JSON.parse(await readFile(resolve(root, 'dist/adoption-source.json'), 'utf8')) as {
+  const { dist } = await buildLayout(root);
+  const stamp = JSON.parse(await readFile(resolve(dist, 'adoption-source.json'), 'utf8')) as {
     sourceSha: string;
     productionSourceHash: string;
   };
   if (stamp.sourceSha !== sourceSha || stamp.productionSourceHash !== (await productionSourceHash(root)))
     throw new Error(`Build/source binding mismatch: ${root}`);
   const files: Record<string, string> = {};
-  for (const file of (await readdir(resolve(root, 'dist'), { recursive: true })).sort()) {
+  for (const file of (await readdir(dist, { recursive: true })).sort()) {
     if (!/\.[a-z0-9]+$/i.test(file)) continue;
+    if (!(await stat(resolve(dist, file))).isFile()) continue;
     files['/' + file] = createHash('sha256')
-      .update(await readFile(resolve(root, 'dist', file)))
+      .update(await readFile(resolve(dist, file)))
       .digest('hex');
   }
   return { ...stamp, files };

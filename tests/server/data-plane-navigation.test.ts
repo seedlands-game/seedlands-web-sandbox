@@ -7,8 +7,8 @@ import {
   terrainWindowsOverlap,
   validateTerrainWindows,
   type NavigationPriority,
-} from '../../src/server/logic/logic-terrain';
-import type { LogicPosition, TerrainWindow } from '../../src/server/logic/logic-protocol';
+} from '../../packages/game-core/src/server/logic/logic-terrain';
+import type { LogicPosition, TerrainWindow } from '../../packages/game-core/src/server/logic/logic-protocol';
 
 const window = (key: string, origin: LogicPosition, size: LogicPosition, chunkRevision = 1): TerrainWindow => ({
   key,

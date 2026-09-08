@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readBrowserSessionConfig } from '../../src/app/browser-session-config';
+import { readBrowserSessionConfig } from '../../apps/web/src/app/browser-session-config';
 
 describe('浏览器会话频率与受控传输配置', () => {
   it('普通产品会话忽略频率和故障注入参数', () => {

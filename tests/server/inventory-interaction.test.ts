@@ -1,27 +1,28 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { Inventory } from '../../src/server/gameplay/inventory';
-import { GameServer } from '../../src/server/game-server';
-import { ItemIds } from '../../src/server/gameplay/item-registry';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { Inventory } from '../../packages/game-core/src/server/gameplay/inventory';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
 
 describe('玩家背包可用交互', () => {
   it('移动、指定槽食用和快捷栏选择通过正式存档恢复', async () => {
-    const persistence = new MemoryGamePersistence();
-    const first = new GameServer({ seedText: 'inventory-save', persistence });
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'inventory-save', persistence });
     const player = first.spawnPlayer({ position: [0, 34, 0] });
     first.giveItem(player.id, { itemId: ItemIds.Berry, count: 70 });
     first.moveInventorySlot(player.id, 1, 9);
     first.setHungerForDebug(player.id, 10);
     first.useInventoryItem(player.id, 9);
     await first.save();
-    const second = new GameServer({ seedText: 'inventory-save', persistence });
+    const second = new GameServer({ platform: testCorePlatform, seedText: 'inventory-save', persistence });
     await second.restore();
     expect(second.getInventory(player.id)).toEqual(first.getInventory(player.id));
     expect(second.getPlayerState(player.id).hunger).toBe(14);
   });
   it('拾取只成功一次且恢复不会重复增加物品', async () => {
-    const persistence = new MemoryGamePersistence();
-    const server = new GameServer({ seedText: 'pickup-event', persistence });
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'pickup-event', persistence });
     const player = server.spawnPlayer({ position: [0, 34, 0] });
     const item = server.spawnWorldItem([0, 34, 0], { itemId: ItemIds.Berry, count: 1 });
     expect(server.pickupItem(player.id, item.id).success).toBe(true);
@@ -70,7 +71,7 @@ describe('玩家背包可用交互', () => {
     expect(inventory.slot(1)?.count).toBe(2);
   });
   it('任何背包槽食用只扣那一格，满饥饿与死亡不消耗', () => {
-    const server = new GameServer({ seedText: 'inventory-use' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'inventory-use' });
     const player = server.spawnPlayer({ position: [0, 34, 0] });
     server.giveItem(player.id, { itemId: ItemIds.Berry, count: 70 });
     expect(server.moveInventorySlot(player.id, 1, 9).success).toBe(true);
@@ -85,7 +86,7 @@ describe('玩家背包可用交互', () => {
     expect(server.moveInventorySlot(player.id, 9, 0).success).toBe(false);
   });
   it('丢出指定槽也不能从另一格同物品扣除', () => {
-    const server = new GameServer({ seedText: 'inventory-drop' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'inventory-drop' });
     const player = server.spawnPlayer({ position: [0, 34, 0] });
     server.giveItem(player.id, { itemId: ItemIds.Berry, count: 70 });
     expect(server.dropItem(player.id, 1, 2).success).toBe(true);

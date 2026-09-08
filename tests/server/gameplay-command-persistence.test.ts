@@ -1,10 +1,14 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import { spawnSync } from 'node:child_process';
-import { ALL_COMMAND_CAPABILITIES, ServerCommandExecutor } from '../../src/server/commands/server-command-executor';
-import { parseSlashCommand } from '../../src/server/commands/slash-command-parser';
-import { GameServer } from '../../src/server/game-server';
-import { ItemIds } from '../../src/server/gameplay/item-registry';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
+import {
+  ALL_COMMAND_CAPABILITIES,
+  ServerCommandExecutor,
+} from '../../packages/game-core/src/server/commands/server-command-executor';
+import { parseSlashCommand } from '../../packages/game-core/src/server/commands/slash-command-parser';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
 
 const admin = {
   actorId: 'headless-admin',
@@ -15,10 +19,10 @@ const admin = {
 
 describe('gameplay command boundary', () => {
   it('routes query, player mutation and administrative commands through capabilities and source binding', async () => {
-    const server = new GameServer({ seedText: 'gameplay-command' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'gameplay-command' });
     server.spawnPlayer({ id: 'player-1', position: [0, 34, 0] });
     server.spawnPlayer({ id: 'player-2', position: [2, 34, 0] });
-    const executor = new ServerCommandExecutor(server);
+    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
 
     expect(
       await executor.execute(admin, { type: 'give-item', entityId: 'player-1', itemId: ItemIds.WoodBlock, count: 2 }),
@@ -87,8 +91,8 @@ describe('gameplay command boundary', () => {
 
 describe('gameplay persistence', () => {
   it('roundtrips canonical players, entities, inventory, lifecycle and gameplay clock', async () => {
-    const persistence = new MemoryGamePersistence();
-    const first = new GameServer({ seedText: 'gameplay-save', persistence });
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const first = new GameServer({ platform: testCorePlatform, seedText: 'gameplay-save', persistence });
     first.spawnPlayer({ id: 'player-1', position: [1, 40, -2] });
     first.giveItem('player-1', { itemId: ItemIds.Berry, count: 3 });
     first.setHungerForDebug('player-1', 11);
@@ -97,7 +101,7 @@ describe('gameplay persistence', () => {
     first.advanceGameplayRules(7.5);
     await first.save();
 
-    const second = new GameServer({ seedText: 'gameplay-save', persistence });
+    const second = new GameServer({ platform: testCorePlatform, seedText: 'gameplay-save', persistence });
     await second.restore();
     expect(second.getEntity('player-1')?.position).toEqual([1, 40, -2]);
     expect(second.getPlayerState('player-1')).toMatchObject({ health: 15, hunger: 11 });
@@ -109,22 +113,25 @@ describe('gameplay persistence', () => {
   });
 
   it('migrates legacy position metadata and fails closed on malformed snapshots', async () => {
-    const legacy = new MemoryGamePersistence({ legacyPlayerPosition: [4, 42, 8] });
-    const migrated = new GameServer({ seedText: 'legacy-gameplay', persistence: legacy });
+    const legacy = new MemoryGamePersistence({ clone: testCorePlatform.clone, legacyPlayerPosition: [4, 42, 8] });
+    const migrated = new GameServer({ platform: testCorePlatform, seedText: 'legacy-gameplay', persistence: legacy });
     await migrated.restore();
     expect(migrated.queryEntities({ type: 'player' })).toEqual([expect.objectContaining({ position: [4, 40.4, 8] })]);
     const playerId = migrated.queryEntities({ type: 'player' })[0].id;
     expect(migrated.getPlayerState(playerId)).toMatchObject({ health: 20, hunger: 20, lifecycle: 'alive' });
 
-    const malformed = new MemoryGamePersistence({ rawGameplaySnapshot: { version: 1, players: [{ health: 999 }] } });
-    const rejected = new GameServer({ seedText: 'bad-gameplay', persistence: malformed });
+    const malformed = new MemoryGamePersistence({
+      clone: testCorePlatform.clone,
+      rawGameplaySnapshot: { version: 1, players: [{ health: 999 }] },
+    });
+    const rejected = new GameServer({ platform: testCorePlatform, seedText: 'bad-gameplay', persistence: malformed });
     await expect(rejected.restore()).rejects.toThrow(/gameplay snapshot/i);
     expect(rejected.queryEntities()).toHaveLength(0);
   });
 
   it('keeps failed saves retryable and does not report a false checkpoint', async () => {
-    const persistence = new MemoryGamePersistence();
-    const server = new GameServer({ seedText: 'retry-gameplay-save', persistence });
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'retry-gameplay-save', persistence });
     server.spawnPlayer({ id: 'player-1', position: [0, 34, 0] });
     server.giveItem('player-1', { itemId: ItemIds.WoodBlock, count: 1 });
     persistence.failNextGameplaySave(new Error('simulated gameplay store failure'));

@@ -1,7 +1,8 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { findSafePlayerSpawn } from '../../src/server/gameplay/safe-spawn';
-import { GameServer } from '../../src/server/game-server';
-import { Voxel } from '../../src/world/voxel';
+import { findSafePlayerSpawn } from '../../packages/game-core/src/server/gameplay/safe-spawn';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 describe('确定性安全出生', () => {
   it.each([
@@ -11,7 +12,7 @@ describe('确定性安全出生', () => {
     'seedlands-mvp-river',
     'seedlands-mvp-highland',
   ])('实际种子 %s 可找到不改地形的干燥落点', (seedText) => {
-    const server = new GameServer({ seedText });
+    const server = new GameServer({ platform: testCorePlatform, seedText });
     const position = findSafePlayerSpawn((x, y, z) => server.getVoxel(x, y, z));
     expect(position).not.toBeNull();
     expect(server.worldRevision).toBe(0);

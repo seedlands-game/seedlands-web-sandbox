@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { PLAYER_FEET_OFFSET, PLAYER_HEAD_OFFSET } from '../../src/app/player/player-view-offsets';
-import { bodyConfigFor } from '../../src/physics/body-registry';
+import { PLAYER_FEET_OFFSET, PLAYER_HEAD_OFFSET } from '../../apps/web/src/app/player/player-view-offsets';
+import { bodyConfigFor } from '../../packages/game-core/src/physics/body-registry';
 
 describe('玩家视角与身体注册表', () => {
   it('脚底到视角的偏移由真实玩家身体高度派生', () => {

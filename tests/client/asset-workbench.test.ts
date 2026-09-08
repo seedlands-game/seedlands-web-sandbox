@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { parseAssetPackage, copyAssetBundle, resolvePixelModel } from '../../src/client/presentation/asset-package';
-import { builtinAssets, builtinItemBindings } from '../../src/client/presentation/asset-catalog';
-import { listItemDefinitions } from '../../src/server/gameplay/item-registry';
-import { assetAdapter, acceptsPixelItem } from '../../src/client/presentation/asset-adapters';
+import {
+  parseAssetPackage,
+  copyAssetBundle,
+  resolvePixelModel,
+} from '../../apps/web/src/client/presentation/asset-package';
+import { builtinAssets, builtinItemBindings } from '../../apps/web/src/client/presentation/asset-catalog';
+import { listItemDefinitions } from '../../packages/game-core/src/server/gameplay/item-registry';
+import { assetAdapter, acceptsPixelItem } from '../../apps/web/src/client/presentation/asset-adapters';
 
 describe('统一资产目录与有界适配', () => {
   it('完整覆盖真实物品，引用可解析，三类表现不混为一个编辑器', () => {
@@ -62,7 +66,7 @@ describe('统一资产目录与有界适配', () => {
 });
 
 it('总厚度与共享原生源解释一致，编辑副本不会改变内置图标源', async () => {
-  const { buildToolMesh } = await import('../../src/client/presentation/voxel-tool-model');
+  const { buildToolMesh } = await import('../../apps/web/src/client/presentation/voxel-tool-model');
   const binding = builtinItemBindings.find((b) => b.itemId === 'stone-pickaxe')!;
   const model = builtinAssets.find((a) => a.id === binding.modelId)!;
   const definition = resolvePixelModel(model, builtinAssets);

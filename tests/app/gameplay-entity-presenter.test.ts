@@ -1,9 +1,9 @@
 import * as pc from 'playcanvas';
 import { describe, expect, it, vi } from 'vitest';
-import { GameplayEntityPresenter } from '../../src/app/gameplay/gameplay-entity-presenter';
-import type { GameplayEntity } from '../../src/server/gameplay/entity-store';
+import { GameplayEntityPresenter } from '../../apps/web/src/app/gameplay/gameplay-entity-presenter';
+import type { GameplayEntity } from '../../packages/game-core/src/server/gameplay/entity-store';
 
-vi.mock('../../src/app/gameplay/gameplay-model-assets', () => ({
+vi.mock('../../apps/web/src/app/gameplay/gameplay-model-assets', () => ({
   acquireGameplayModelAssets: () => ({
     release: vi.fn(),
     assets: {

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ChunkSaveCoordinator, type PendingChunkSave } from '../../src/server/persistence/chunk-save-coordinator';
+import {
+  ChunkSaveCoordinator,
+  type PendingChunkSave,
+} from '../../packages/game-core/src/server/persistence/chunk-save-coordinator';
 
 type Deferred = { promise: Promise<void>; resolve: () => void; reject: (error: Error) => void };
 

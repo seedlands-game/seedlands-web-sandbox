@@ -1,0 +1,103 @@
+{
+  "kind": "linux-offline-functional",
+  "node": "v22.23.2",
+  "platform": "linux",
+  "arch": "arm64",
+  "network": "none",
+  "sourceSha": "485de57d542315d2556c09ca9a1ed40f152d94f2",
+  "sourceDirty": true,
+  "sourceInputsSha256": "caba7a665a46b5fdc85a781543cbbf5ffec96aa6d7923a3123a0fd2d18cb3f70",
+  "files": [
+    {
+      "name": "node-server.js",
+      "bytes": 53320,
+      "sha256": "d99e5793d690c824da0683294f1d44a0a97200ea597f98504afe47553c5c859c"
+    },
+    {
+      "name": "node-authority-worker.js",
+      "bytes": 486176,
+      "sha256": "dbe628174e5edfdaeb8c18e8498d7af856b3c6028c8fdb0e8c5d4ca9abcb179c"
+    },
+    {
+      "name": "node-persistence-worker.js",
+      "bytes": 92087,
+      "sha256": "c70e867bebcf80b280f23746ed88bd3e0eede0d90f2175d3bfb4cd51c8b27c57"
+    },
+    {
+      "name": "node-compute-worker.js",
+      "bytes": 78723,
+      "sha256": "5432572cdeaec7504c1ff2a145906c2dae6f787af2f1f41c461dc6b7c9a577c6"
+    },
+    {
+      "name": "node-compute-child.js",
+      "bytes": 78546,
+      "sha256": "4cf9969b387cc78e2e6175b33fe990191270a1e303b4ff26e778fa31fc5f6cb2"
+    }
+  ],
+  "results": [
+    {
+      "mode": "worker-thread",
+      "first": [
+        {
+          "kind": "ready",
+          "epoch": "node-e9e2c906-ceab-4436-9fca-ad17921b0474",
+          "computeMode": "worker-thread",
+          "authorityThreadId": 2,
+          "persistenceThreadId": 1,
+          "durableCommitSequence": 0
+        },
+        {
+          "kind": "stopped",
+          "durableCommitSequence": 2
+        }
+      ],
+      "second": [
+        {
+          "kind": "ready",
+          "epoch": "node-b941d451-6553-4a6c-8a82-b901c34cd1ec",
+          "computeMode": "worker-thread",
+          "authorityThreadId": 2,
+          "persistenceThreadId": 1,
+          "durableCommitSequence": 2
+        },
+        {
+          "kind": "stopped",
+          "durableCommitSequence": 3
+        }
+      ]
+    },
+    {
+      "mode": "child-process",
+      "first": [
+        {
+          "kind": "ready",
+          "epoch": "node-e9773bd2-4906-4c81-b113-0d5f0f9555d1",
+          "computeMode": "child-process",
+          "authorityThreadId": 2,
+          "persistenceThreadId": 1,
+          "durableCommitSequence": 0
+        },
+        {
+          "kind": "stopped",
+          "durableCommitSequence": 2
+        }
+      ],
+      "second": [
+        {
+          "kind": "ready",
+          "epoch": "node-3b7cd0db-f393-4014-a046-f2bf2ff656b2",
+          "computeMode": "child-process",
+          "authorityThreadId": 2,
+          "persistenceThreadId": 1,
+          "durableCommitSequence": 2
+        },
+        {
+          "kind": "stopped",
+          "durableCommitSequence": 3
+        }
+      ]
+    }
+  ],
+  "scope": "最终功能复验：五入口hash、禁网非root启动、SIGTERM关停和同目录恢复；非性能、非目标x64、非LAN/WAN",
+  "containerImage": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm@sha256:ecbb6f654bec924e1728b4ba5751ab587fefa639bfb8eaedac80fc357eede369"
+}

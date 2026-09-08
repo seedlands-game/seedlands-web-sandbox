@@ -1,0 +1,283 @@
+{
+  "status": "REFERENCE_DENSITY_CODEC_PASS",
+  "sourceGitSha": "482fe23c430884f22a77cc17c10d49ed1615ba69",
+  "sourceState": "density collector and tests uncommitted at capture; exact current source hashes verified before codecs",
+  "wireStatus": "not-adopted",
+  "timing": "NOT_COLLECTED",
+  "nodePipeline": {
+    "utc": "2026-09-07T04:49:20.251Z",
+    "node": "v22.23.2",
+    "reports": [
+      {
+        "format": "seedlands-gameplay-density-decoded-reference/v1",
+        "status": "PASS",
+        "actorTarget": 32,
+        "actual": {
+          "registeredActorCount": 32,
+          "totalEntityCount": 34,
+          "poseEntityCount": 34,
+          "gameplayEntityCount": 33,
+          "gameplayRevision": 139,
+          "physicsTick": 3,
+          "worldRevision": 1
+        },
+        "sourceCorpusSha256": "f42c90a33d07a9a794d8f6dab1190c36a59ab612ae63dc0fd8bd00f4337a59cc",
+        "sourceManifestPayloadSha256": "7435236b456386550828435cd4dc948faff68768c4131df38ffd8617fab09ae7",
+        "records": 3,
+        "wireStatus": "not-adopted",
+        "timing": "NOT_COLLECTED",
+        "codecs": {
+          "C0": [
+            {
+              "frameId": "000-player-correction",
+              "category": "player-correction",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 551
+            },
+            {
+              "frameId": "001-entity-pose",
+              "category": "entity-pose",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 5159
+            },
+            {
+              "frameId": "002-gameplay-consumer",
+              "category": "gameplay-consumer",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 5906
+            }
+          ],
+          "C1": [
+            {
+              "frameId": "000-player-correction",
+              "category": "player-correction",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 198
+            },
+            {
+              "frameId": "001-entity-pose",
+              "category": "entity-pose",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 2396
+            },
+            {
+              "frameId": "002-gameplay-consumer",
+              "category": "gameplay-consumer",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 2755
+            }
+          ],
+          "C2": [
+            {
+              "frameId": "000-player-correction",
+              "category": "player-correction",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 145
+            },
+            {
+              "frameId": "001-entity-pose",
+              "category": "entity-pose",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 1743
+            },
+            {
+              "frameId": "002-gameplay-consumer",
+              "category": "gameplay-consumer",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 3135
+            }
+          ]
+        }
+      },
+      {
+        "format": "seedlands-gameplay-density-decoded-reference/v1",
+        "status": "PASS",
+        "actorTarget": 128,
+        "actual": {
+          "registeredActorCount": 128,
+          "totalEntityCount": 130,
+          "poseEntityCount": 130,
+          "gameplayEntityCount": 129,
+          "gameplayRevision": 524,
+          "physicsTick": 3,
+          "worldRevision": 1
+        },
+        "sourceCorpusSha256": "cc303124a2cd14e98e0b6cb35b2107d5bddf1de514ae6e96ab8fd42027556852",
+        "sourceManifestPayloadSha256": "8f4ebd0eef84821a7d01eaf5370081adfed0063b6f4bf08ad3247ae385ef1b78",
+        "records": 3,
+        "wireStatus": "not-adopted",
+        "timing": "NOT_COLLECTED",
+        "codecs": {
+          "C0": [
+            {
+              "frameId": "000-player-correction",
+              "category": "player-correction",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 523
+            },
+            {
+              "frameId": "001-entity-pose",
+              "category": "entity-pose",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 19094
+            },
+            {
+              "frameId": "002-gameplay-consumer",
+              "category": "gameplay-consumer",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 21431
+            }
+          ],
+          "C1": [
+            {
+              "frameId": "000-player-correction",
+              "category": "player-correction",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 181
+            },
+            {
+              "frameId": "001-entity-pose",
+              "category": "entity-pose",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 9075
+            },
+            {
+              "frameId": "002-gameplay-consumer",
+              "category": "gameplay-consumer",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 10544
+            }
+          ],
+          "C2": [
+            {
+              "frameId": "000-player-correction",
+              "category": "player-correction",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 137
+            },
+            {
+              "frameId": "001-entity-pose",
+              "category": "entity-pose",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 6695
+            },
+            {
+              "frameId": "002-gameplay-consumer",
+              "category": "gameplay-consumer",
+              "direction": "server-to-client",
+              "status": "DECODED",
+              "wireBytes": 12270
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "browserInteroperability": [
+    {
+      "status": "PASS",
+      "utc": "2026-09-07T04:49:27.723Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 3,
+      "syntheticRecords": 0,
+      "sourceCorpusSha256": "f42c90a33d07a9a794d8f6dab1190c36a59ab612ae63dc0fd8bd00f4337a59cc",
+      "sourceManifestPayloadSha256": "7435236b456386550828435cd4dc948faff68768c4131df38ffd8617fab09ae7",
+      "fixtureSha256": "6bfe601978308fa3fb621e6c6201c1be1aea8dc7a458a85fba1d06ed1f511688",
+      "bundleSha256": "abb5f7dbafbcc080e0d8c36db6bb6c6c9c1351d6c76a82688f91f45bf7e40035",
+      "bundleBytes": 434579,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    },
+    {
+      "status": "PASS",
+      "utc": "2026-09-07T04:49:28.513Z",
+      "node": "v22.23.2",
+      "browser": "152.0.7977.76",
+      "headless": true,
+      "wireStatus": "not-adopted",
+      "timing": "NOT_COLLECTED",
+      "scope": "Browser codec interoperability over loopback HTTP fixture delivery; no game transport or UI evidence",
+      "realRecords": 3,
+      "syntheticRecords": 0,
+      "sourceCorpusSha256": "cc303124a2cd14e98e0b6cb35b2107d5bddf1de514ae6e96ab8fd42027556852",
+      "sourceManifestPayloadSha256": "8f4ebd0eef84821a7d01eaf5370081adfed0063b6f4bf08ad3247ae385ef1b78",
+      "fixtureSha256": "0875f50e26950d8942df748fa8da49cbe027e27fbe729c9fe80fcab72c3d0e58",
+      "bundleSha256": "abb5f7dbafbcc080e0d8c36db6bb6c6c9c1351d6c76a82688f91f45bf7e40035",
+      "bundleBytes": 434579,
+      "codecs": {
+        "C0": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C1": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        },
+        "C2": {
+          "nodeToBrowser": 3,
+          "browserToNode": 3,
+          "pipeline": ["parse", "schema", "own", "hash", "consumer"]
+        }
+      }
+    }
+  ],
+  "prototypeDirectory": "/tmp/seedlands-network-probe-codec-consumer-v2",
+  "sourceAndArtifactSha256": {
+    "density-pipeline-validation.mjs": "41919ff922e4ead3e928249e827bf5f208ec950c1ed21cc406d7b761fad62e7b",
+    "reference-fixed-codecs.mjs": "7c6732006a33c5fd25edb94de69b62f3a39d696ecee2d0d72e405a4ba5c3f1e0",
+    "gameplay-consumer-codecs.mjs": "c7419ce324d0d9aec75d01dd9cba842baa2c713617978d46bbcfad3ec7cdd9fa",
+    "reference-schema-validation.mjs": "d65e77ef8604f6bc9d333958f03fa17ffe97178ef7e7df11009c747b4830ed02",
+    "codec-application-pipeline.mjs": "48e588f37a2f1534af18051eb3298190dae3d6703247054e336117952b8d041e",
+    "c0-raw-reference.mjs": "cb097471835def97ee66167541ae4c43584f82c2905d192ce3a840d62a4ec862",
+    "browser-reference-runner.mjs": "9193db99d62da3abe5cb6e24941b7466948b861104d2b6e49cb3b66f520b0ee6",
+    "browser-reference-validation.mjs": "06e53e5b201c91667d35ace0399e787553edbf7d74d32a5b89ee741e9205d068",
+    "density-32-decoded-fixture.json": "ebd8c10bcf9f1545b026c41c1064bd942ec46509c9b86b15fc6d4b19f5f47d50",
+    "density-128-decoded-fixture.json": "75c066288d27f09562b305b11bd991d29dd1ed29a9285c8b43ce964db0237bb6"
+  },
+  "limits": [
+    "No production client adapter or transport adopted",
+    "Byte counts are for each current fixture and include its reference metadata",
+    "Previous C0 long-identifier metadata representation limit remains unresolved",
+    "Browser bundle contains all candidate codecs and oracle; not per-codec product size",
+    "No benchmark, tick, CPU, memory, A/B or WAN result"
+  ]
+}

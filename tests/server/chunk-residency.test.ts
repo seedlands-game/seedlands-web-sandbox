@@ -1,10 +1,14 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it, vi } from 'vitest';
-import { AuthorityRuntime } from '../../src/server/authority/authority-runtime';
-import { canonicalResidencyRetryDelayMs } from '../../src/server/authority/authority-residency-runtime';
-import { CanonicalChunkResidency, type CanonicalResidencyChunk } from '../../src/server/chunk-residency';
-import { GameServer } from '../../src/server/game-server';
-import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-persistence';
-import { Voxel } from '../../src/world/voxel';
+import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import { canonicalResidencyRetryDelayMs } from '../../packages/game-core/src/server/authority/authority-residency-runtime';
+import {
+  CanonicalChunkResidency,
+  type CanonicalResidencyChunk,
+} from '../../packages/game-core/src/server/chunk-residency';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 const chunk = (key: string, accessEpoch: number, revision = 0): CanonicalResidencyChunk => ({
   key,
@@ -113,8 +117,9 @@ describe('Canonical Chunk residency', () => {
 
 describe('GameServer canonical residency integration', () => {
   it('只驱逐已ACK的clean Chunk，dirty在原子保存失败时完整保留并可重试', async () => {
-    const persistence = new MemoryGamePersistence();
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
       epoch: 'residency:1',
       seedText: 'canonical-residency',
       persistence,
@@ -143,7 +148,7 @@ describe('GameServer canonical residency integration', () => {
   });
 
   it('GameServer在默认配置下让超过256个已释放clean Chunk收敛且不误删邻居pin', () => {
-    const server = new GameServer({ seedText: 'canonical-long-traverse' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'canonical-long-traverse' });
     server.setFluidActiveChunks(['0,0,0']);
     for (let cx = 0; cx < 300; cx += 1) {
       const canonical = new Uint16Array(32 ** 3);

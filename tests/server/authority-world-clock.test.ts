@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { BodyConfig } from '../../src/physics';
-import { AuthoritySession, type AuthorityServerPort } from '../../src/server/authority/authority-session';
-import { Voxel } from '../../src/world/voxel';
+import type { BodyConfig } from '../../packages/game-core/src/physics';
+import {
+  AuthoritySession,
+  type AuthorityServerPort,
+} from '../../packages/game-core/src/server/authority/authority-session';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 type Entity = ReturnType<AuthorityServerPort['queryEntities']>[number];
 

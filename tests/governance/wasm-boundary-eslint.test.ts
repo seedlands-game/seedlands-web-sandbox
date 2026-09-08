@@ -12,12 +12,16 @@ describe('Wasm 加载与纯内核边界', () => {
     expect(
       await violations(
         "import { KernelMemory } from '../compute/kernel-memory'; export { KernelMemory };",
-        'src/world/probe.ts',
+        'packages/game-core/src/world/probe.ts',
         'world-purity',
       ),
     ).toHaveLength(1);
     expect(
-      await violations("export const bytes = fetch('/kernel.wasm');", 'src/world/probe.ts', 'world-purity'),
+      await violations(
+        "export const bytes = fetch('/kernel.wasm');",
+        'packages/game-core/src/world/probe.ts',
+        'world-purity',
+      ),
     ).toHaveLength(1);
   });
 
@@ -28,26 +32,26 @@ describe('Wasm 加载与纯内核边界', () => {
       "export const worker = new Worker('kernel');",
       "export const bytes = fetch('/kernel.wasm');",
     ])
-      expect(await violations(source, 'src/compute/probe.ts', 'compute-purity')).toHaveLength(1);
+      expect(await violations(source, 'apps/web/src/compute/probe.ts', 'compute-purity')).toHaveLength(1);
   });
 
   it('允许纯 ABI 操作和 world 逻辑，加载留在 Worker 适配层', async () => {
     expect(
       await violations(
         "import { Voxel } from '../world/voxel'; export const classify = (v: number) => v !== Voxel.Air;",
-        'src/compute/probe.ts',
+        'apps/web/src/compute/probe.ts',
         'compute-purity',
       ),
     ).toHaveLength(0);
     expect(
       await violations(
         'export const memory = new WebAssembly.Memory({ initial: 1 });',
-        'src/compute/probe.ts',
+        'apps/web/src/compute/probe.ts',
         'compute-purity',
       ),
     ).toHaveLength(0);
     expect(
-      await violations("export const bytes = fetch('/kernel.wasm');", 'src/worker/probe.ts', 'compute-purity'),
+      await violations("export const bytes = fetch('/kernel.wasm');", 'apps/web/src/worker/probe.ts', 'compute-purity'),
     ).toHaveLength(0);
   });
 });

@@ -1,10 +1,10 @@
 import { expect, it } from 'vitest';
-import { builtinAssets, builtinItemBindings } from '../../src/client/presentation/asset-catalog';
-import { assetDependencies } from '../../src/client/presentation/asset-adapters';
-import { Voxel, FaceMaterial } from '../../src/world/voxel';
-import { terrainMaterials } from '../../src/client/presentation/terrain-assets';
-import { actorModelDefinitions } from '../../src/client/presentation/actor-model-definitions';
-import { listItemDefinitions } from '../../src/server/gameplay/item-registry';
+import { builtinAssets, builtinItemBindings } from '../../apps/web/src/client/presentation/asset-catalog';
+import { assetDependencies } from '../../apps/web/src/client/presentation/asset-adapters';
+import { Voxel, FaceMaterial } from '../../packages/game-core/src/world/voxel';
+import { terrainMaterials } from '../../apps/web/src/client/presentation/terrain-assets';
+import { actorModelDefinitions } from '../../apps/web/src/client/presentation/actor-model-definitions';
+import { listItemDefinitions } from '../../packages/game-core/src/server/gameplay/item-registry';
 
 it('当前视觉目录覆盖全部方块、面、物品、角色和手臂，引用能解析', () => {
   const ids = new Set(builtinAssets.map((a) => a.id));

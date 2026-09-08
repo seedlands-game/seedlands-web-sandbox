@@ -5,11 +5,11 @@ const state = vi.hoisted(() => ({
   loadGlbBlob: vi.fn(),
 }));
 
-vi.mock('../../src/client/persistence/glb-model-store', () => ({ loadGlbBlob: state.loadGlbBlob }));
+vi.mock('../../apps/web/src/client/persistence/glb-model-store', () => ({ loadGlbBlob: state.loadGlbBlob }));
 
 describe('GLB 预览归一化', () => {
   it('在 wrapper 空间中缩放并抵消中心，不修改 GLB 原始根节点', async () => {
-    const { normalizeGlbBounds } = await import('../../src/app/gameplay/glb-model-resource');
+    const { normalizeGlbBounds } = await import('../../apps/web/src/app/gameplay/glb-model-resource');
     const transform = normalizeGlbBounds([10, -4, 2], [12, -2, 4]);
     expect(transform.scale).toBe(0.75);
     expect(transform.position).toEqual([-8.25, 2.25, -2.25]);
@@ -21,7 +21,7 @@ describe('GLB 预览归一化', () => {
   });
 
   it('取消后仍释放迟到完成时才出现的容器资源', async () => {
-    const { addGlbModel } = await import('../../src/app/gameplay/glb-model-resource');
+    const { addGlbModel } = await import('../../apps/web/src/app/gameplay/glb-model-resource');
     const resourceDestroy = vi.fn();
     const asset = {
       loaded: false,

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { World } from '../../src/app/world/world-runtime';
-import type { WorldCommitResult } from '../../src/server/game-server-types';
+import { World } from '../../apps/web/src/app/world/world-runtime';
+import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
 
 describe('World 权威提交单一发布点', () => {
   it('编辑Promise只返回结果，不再次消费已由Authority消息发布的提交', async () => {

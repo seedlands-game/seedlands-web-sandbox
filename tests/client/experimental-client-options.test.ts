@@ -7,7 +7,7 @@ import {
   resolveExperimentalClientOptions,
   urlWithoutExperimentalOverride,
   workerSelectionFor,
-} from '../../src/client/experimental-client-options';
+} from '../../apps/web/src/client/experimental-client-options';
 
 describe('客户端实验配置', () => {
   it('默认使用 WebGL2、部分 Rust Wasm 和 SIMD artifact', () => {

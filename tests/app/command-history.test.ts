@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CommandHistory } from '../../src/app/command-history';
+import { CommandHistory } from '../../apps/web/src/app/command-history';
 
 describe('CommandHistory', () => {
   it('没有历史时保持当前草稿不变', () => {

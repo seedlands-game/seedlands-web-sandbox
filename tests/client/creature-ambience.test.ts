@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CreatureAmbience } from '../../src/client/audio/creature-ambience';
+import { CreatureAmbience } from '../../apps/web/src/client/audio/creature-ambience';
 
 describe('附近生物空间短鸣', () => {
   it('最近声源、启动缓冲与12秒预算，远方和暂停不发声', () => {

@@ -18,7 +18,7 @@ describe('retained UI presentation boundary', () => {
       document.body.append(panel);
       export { panel };
     `,
-      'src/app/manual-ui-probe.ts',
+      'apps/web/src/app/manual-ui-probe.ts',
     );
 
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/ui-presentation-boundary')).toHaveLength(
@@ -36,7 +36,7 @@ describe('retained UI presentation boundary', () => {
         canvas.requestPointerLock();
       };
     `,
-      'src/app/ui-safe-probe.ts',
+      'apps/web/src/app/ui-safe-probe.ts',
     );
 
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/ui-presentation-boundary')).toHaveLength(
@@ -52,7 +52,7 @@ describe('retained UI presentation boundary', () => {
         mount(target);
       };
     `,
-      'src/app/ui/mount-ui.ts',
+      'apps/web/src/app/ui/mount-ui.ts',
     );
 
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/ui-presentation-boundary')).toHaveLength(

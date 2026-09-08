@@ -1,12 +1,17 @@
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
-import { createMeshPackKernel, runMeshPackKernel } from '../../src/compute/mesh-pack-kernel';
-import { createMeshPackControlMemory, runMeshPackControl } from '../../src/compute/mesh-pack-kernel-control';
-import { createKernelMemory } from '../../src/compute/kernel-memory';
-import { batchMeshData, compactMeshData, type MeshData, type RenderCategory } from '../../src/world/mesh';
+import { createMeshPackKernel, runMeshPackKernel } from '../../apps/web/src/compute/mesh-pack-kernel';
+import { createMeshPackControlMemory, runMeshPackControl } from '../../apps/web/src/compute/mesh-pack-kernel-control';
+import { createKernelMemory } from '../../apps/web/src/compute/kernel-memory';
+import {
+  batchMeshData,
+  compactMeshData,
+  type MeshData,
+  type RenderCategory,
+} from '../../packages/game-core/src/world/mesh';
 
-const wasmPath = new URL('../../src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url);
+const wasmPath = new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url);
 
 const part = (renderCategory: RenderCategory, material: number, vertexCount: number, indices: number[]): MeshData => {
   const positions = new Float32Array(vertexCount * 3);

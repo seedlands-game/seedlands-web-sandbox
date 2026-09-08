@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { decideLogicIntents as decideWithConfig } from '../../../src/server/logic/logic-decision';
+import { decideLogicIntents as decideWithConfig } from '../../../packages/game-core/src/server/logic/logic-decision';
 import type {
   ActorActionSnapshot,
   LogicEntity,
   LogicObservation,
   TerrainWindow,
-} from '../../../src/server/logic/logic-protocol';
-import type { ActorState } from '../../../src/server/simulation/actor-state';
+} from '../../../packages/game-core/src/server/logic/logic-protocol';
+import type { ActorState } from '../../../packages/game-core/src/server/simulation/actor-state';
 
 const decideLogicIntents = (input: LogicObservation, physicsHz: 30 | 60 | 120 = 60) =>
   decideWithConfig(input, { physicsHz });

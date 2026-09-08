@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { FaceMaterial } from '../../src/world/voxel';
-import { builtinTerrainTextures, terrainMaterials } from '../../src/client/presentation/terrain-assets';
-import { compileTextureAtlas, validateTerrainTexture } from '../../src/client/presentation/texture-pack';
+import { FaceMaterial } from '../../packages/game-core/src/world/voxel';
+import { builtinTerrainTextures, terrainMaterials } from '../../apps/web/src/client/presentation/terrain-assets';
+import { compileTextureAtlas, validateTerrainTexture } from '../../apps/web/src/client/presentation/texture-pack';
 
 describe('纹理源与编译合同', () => {
   it('覆盖全部逻辑方块面，源贴图为16像素，材质ID不依赖图集位置', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildToolMesh, toolModelDefinition } from '../../src/client/presentation/voxel-tool-model';
+import { buildToolMesh, toolModelDefinition } from '../../apps/web/src/client/presentation/voxel-tool-model';
 
 describe('体素工具共享资产', () => {
   it('相邻像素只输出外表面，面朝外且有真实厚度', () => {

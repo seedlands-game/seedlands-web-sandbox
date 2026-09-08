@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { GroundNavigator } from '../../src/server/simulation/ground-navigator';
-import { Voxel } from '../../src/world/voxel';
+import { GroundNavigator } from '../../packages/game-core/src/server/simulation/ground-navigator';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 const flatWorld = (blocked = new Set<string>()) =>
   new GroundNavigator((x, y, z) => (y <= 0 || blocked.has(`${x},${y},${z}`) ? Voxel.Stone : Voxel.Air));

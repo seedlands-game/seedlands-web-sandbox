@@ -4,13 +4,13 @@ import {
   createPlayCanvasChunkAdapter,
   MAX_ACTIVE_WATER_TRANSITIONS,
   type PlayCanvasChunkResource,
-} from '../../src/app/world/playcanvas-chunk-adapter';
-import type { MeshPart, PendingMeshTask } from '../../src/app/app-contracts';
-import type { PerformanceTelemetry } from '../../src/client/presentation/performance-telemetry';
-import { batchMeshData, compactMeshData, meshChunk } from '../../src/world/mesh';
-import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../src/world/voxel';
-import type { PlayCanvasWaterTransitionFactory } from '../../src/app/scene/playcanvas-water-transition';
-import { WaterMeshTransitionTracker } from '../../src/app/scene/water-mesh-transition';
+} from '../../apps/web/src/app/world/playcanvas-chunk-adapter';
+import type { MeshPart, PendingMeshTask } from '../../apps/web/src/app/app-contracts';
+import type { PerformanceTelemetry } from '../../apps/web/src/client/presentation/performance-telemetry';
+import { batchMeshData, compactMeshData, meshChunk } from '../../packages/game-core/src/world/mesh';
+import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex } from '../../packages/game-core/src/world/voxel';
+import type { PlayCanvasWaterTransitionFactory } from '../../apps/web/src/app/scene/playcanvas-water-transition';
+import { WaterMeshTransitionTracker } from '../../apps/web/src/app/scene/water-mesh-transition';
 
 const waterPart = (level: number): MeshPart => {
   const data = new Uint16Array(CHUNK_SIZE ** 3);

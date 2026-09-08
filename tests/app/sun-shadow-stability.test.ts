@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { EnvironmentPresentationClock } from '../../src/client/presentation/environment-presentation-clock';
-import { sunShadowOptions } from '../../src/app/scene/sun-shadow-policy';
+import { EnvironmentPresentationClock } from '../../apps/web/src/client/presentation/environment-presentation-clock';
+import { sunShadowOptions } from '../../apps/web/src/app/scene/sun-shadow-policy';
 import {
   normalizeSunMotionSamples,
   normalizeSunMotionTailWindows,

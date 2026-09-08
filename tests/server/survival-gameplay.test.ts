@@ -1,10 +1,11 @@
+import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
-import { GameServer } from '../../src/server/game-server';
-import { ItemIds } from '../../src/server/gameplay/item-registry';
-import { Voxel } from '../../src/world/voxel';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 const createPlayerServer = (position: [number, number, number] = [0.5, 34.6, 0.5]) => {
-  const server = new GameServer({ seedText: 'survival-rules' });
+  const server = new GameServer({ platform: testCorePlatform, seedText: 'survival-rules' });
   server.spawnPlayer({ id: 'player-1', position });
   return server;
 };

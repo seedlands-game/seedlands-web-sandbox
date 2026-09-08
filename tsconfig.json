@@ -1,16 +1,4 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "useDefineForClassFields": true,
-    "module": "ESNext",
-    "lib": ["ES2022", "DOM", "WebWorker"],
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": false,
-    "noEmit": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true
-  },
-  "include": ["src"]
+  "files": [],
+  "references": [{ "path": "packages/game-core" }, { "path": "apps/web" }, { "path": "apps/node-server" }]
 }

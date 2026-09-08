@@ -1,10 +1,11 @@
+import { testCorePlatform } from '../support/core-platform';
 import { readFileSync } from 'node:fs';
 import { arch, platform } from 'node:os';
 import { describe, expect, it } from 'vitest';
-import { resolveFillCommand } from '../../src/server/commands/fill-command';
-import { GameServer } from '../../src/server/game-server';
-import { WorldMutationBuffer } from '../../src/server/world-mutation';
-import { Voxel } from '../../src/world/voxel';
+import { resolveFillCommand } from '../../packages/game-core/src/server/commands/fill-command';
+import { GameServer } from '../../packages/game-core/src/server/game-server';
+import { WorldMutationBuffer } from '../../packages/game-core/src/server/world-mutation';
+import { Voxel } from '../../packages/game-core/src/world/voxel';
 
 type PerformanceBaseline = {
   environment: { node: string; platform: string; arch: string };
@@ -60,7 +61,7 @@ describe.skipIf(!performanceGateEnabled)('world mutation performance gate', () =
     const runP50Ms: number[] = [];
     const runP95Ms: number[] = [];
     for (let run = 0; run < 3; run += 1) {
-      const server = new GameServer({ seedText: `transaction-single-performance-${run}` });
+      const server = new GameServer({ platform: testCorePlatform, seedText: `transaction-single-performance-${run}` });
       materializeFillChunks(server);
       sampleSingleEdits(server, 10_000, Voxel.Wood);
       const samples = Array.from({ length: 9 }, (_, sample) =>
@@ -81,8 +82,11 @@ describe.skipIf(!performanceGateEnabled)('world mutation performance gate', () =
     const sequentialRunP50Ms: number[] = [];
     const batchRunP50Ms: number[] = [];
     for (let run = 0; run < 3; run += 1) {
-      const sequential = new GameServer({ seedText: `transaction-sequential-performance-${run}` });
-      const batched = new GameServer({ seedText: `transaction-batch-performance-${run}` });
+      const sequential = new GameServer({
+        platform: testCorePlatform,
+        seedText: `transaction-sequential-performance-${run}`,
+      });
+      const batched = new GameServer({ platform: testCorePlatform, seedText: `transaction-batch-performance-${run}` });
       materializeFillChunks(sequential);
       materializeFillChunks(batched);
       sampleSingleEdits(sequential, 100_000, Voxel.Wood);
@@ -113,7 +117,7 @@ describe.skipIf(!performanceGateEnabled)('world mutation performance gate', () =
   });
 
   it('coalesces an overwrite-heavy 100k input buffer into 10k canonical writes', () => {
-    const server = new GameServer({ seedText: 'transaction-overwrite-performance' });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'transaction-overwrite-performance' });
     const buffer = new WorldMutationBuffer({ sourceId: 'overwrite-heavy', priority: 0, initialCapacity: 100_000 });
     for (let pass = 0; pass < 10; pass += 1)
       for (let index = 0; index < 10_000; index += 1)

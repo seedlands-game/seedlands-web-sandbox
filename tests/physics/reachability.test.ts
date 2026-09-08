@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { selectReachableBodyTarget, type BodyConfig, type Collider, type PhysicsWorld } from '../../src/physics';
+import {
+  selectReachableBodyTarget,
+  type BodyConfig,
+  type Collider,
+  type PhysicsWorld,
+} from '../../packages/game-core/src/physics';
 
 const itemBody: BodyConfig = {
   localAabb: { min: { x: -0.2, y: 0, z: -0.2 }, max: { x: 0.2, y: 0.4, z: 0.2 } },

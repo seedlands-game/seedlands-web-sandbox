@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 1,
+  "kind": "webtransport-browser-capability-matrix",
+  "scope": {
+    "transport": "github.com/quic-go/webtransport-go v0.13.0 draft-16",
+    "network": "IPv4 loopback only",
+    "performanceSampling": false,
+    "browserDownloads": false,
+    "remoteWrites": false,
+    "productionAdoption": false
+  },
+  "sharedEnvironment": {
+    "go": "go1.26.3 darwin/arm64",
+    "node": "v22.23.2",
+    "playwright": "1.62.1",
+    "serverBinarySha256": "78128239b3cadeb38b7617d508a249282c74c2d4a54203bdaae6eacaed855eb7",
+    "certificate": {
+      "algorithm": "ECDSA P-256",
+      "validity": "24 hours",
+      "serverCertificateHashes": true,
+      "certificateErrorsIgnored": false,
+      "systemTrustChanged": false,
+      "privateKeyPersisted": false
+    },
+    "paths": {
+      "temporaryProbe": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy",
+      "existingChromeEvidence": "changes/2026-09-06-node-dedicated-server/network-webtransport-loopback-evidence.json"
+    }
+  },
+  "matrix": [
+    {
+      "target": "Chromium",
+      "version": "Google Chrome 152.0.7977.76",
+      "status": "PASSED",
+      "evidence": "existing frozen Chrome loopback evidence; not modified by this matrix"
+    },
+    {
+      "target": "Firefox",
+      "version": "Playwright Firefox 153.0",
+      "status": "PASSED",
+      "checks": {
+        "secureContext": true,
+        "webTransportApi": "function",
+        "serverCertificateHashesConstructor": "accepted",
+        "ready": true,
+        "serverSession": true,
+        "reliableBidirectionalEcho": true,
+        "datagramEcho": true,
+        "closed": true
+      },
+      "artifacts": {
+        "run": {
+          "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/run-20260907T041154Z-firefox.json",
+          "sha256": "bdd6f181144ce8c192edfe488e0bb57a91c268e957ee44704e54e41344568c80"
+        },
+        "browserResult": {
+          "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/browser-result-20260907T041154Z-firefox.json",
+          "sha256": "c874bee4f6ff97e4aa4341cf9a9b35768f7d69244b7bb50c95aec4ad8c578990"
+        },
+        "serverEvents": {
+          "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/server-events-20260907T041154Z-firefox.jsonl",
+          "sha256": "ddca623c5f08c147335b7d928574547db9cf3f706b9fdd9210de894ba3186331"
+        },
+        "readiness": {
+          "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/ready-20260907T041154Z-firefox.json",
+          "sha256": "722bf9cdcc080e2da7f4acb0783423a7ef6589d19f00cd3d4f7dcd45d650fbd8"
+        }
+      }
+    },
+    {
+      "target": "Playwright WebKit",
+      "version": "26.5",
+      "status": "DATA_PATH_FAILED",
+      "checks": {
+        "secureContext": true,
+        "webTransportApi": "function",
+        "serverCertificateHashesConstructor": "accepted",
+        "ready": true,
+        "serverSession": true,
+        "reliableBidirectionalEcho": false,
+        "reliableFailure": {
+          "stage": "createBidirectionalStream",
+          "type": "deadline",
+          "message": "create-bidirectional-stream timeout after 10000ms"
+        },
+        "datagramEcho": false,
+        "datagramFailure": {
+          "stage": "transport.datagrams",
+          "type": "TypeError",
+          "message": "undefined is not an object (evaluating 'transport.datagrams.writable.getWriter')"
+        },
+        "closed": true
+      },
+      "interpretation": "Current WebKit build and current local candidate do not meet N1 stream-plus-datagram requirements. This is not an API-absence, handshake-failure, Safari, or iOS generalization.",
+      "initialHarness": {
+        "status": "INCONCLUSIVE",
+        "reason": "first runner omitted a createBidirectionalStream deadline; no browser result was produced",
+        "runSha256": "c3d366f5680d8083448a16e07c019b784db44b52747ceb6d704373237eebdeb7",
+        "emptyBrowserResultSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "serverEventsSha256": "29015f70f289e029d79662fb38a7507c951d799e5771df9248f12af7339435d3"
+      },
+      "artifacts": {
+        "run": {
+          "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/run-20260907T041803Z-webkit-independent.json",
+          "sha256": "803b38670a350a745480af6dae8d949c349d783a6736503b0fe18e05ff272a3a"
+        },
+        "browserResult": {
+          "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/browser-result-20260907T041803Z-webkit-independent.json",
+          "sha256": "7d8d2d6ebfc17afe638de69e865aeae9916d140ae823ea77ff906ea3f93fd9a3"
+        },
+        "serverEvents": {
+          "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/server-events-20260907T041803Z-webkit-independent.jsonl",
+          "sha256": "99bcfd8e2af503d7d44ee5b8738b43e5e1240f16284597d0a24c634ccf7624ae"
+        },
+        "runner": {
+          "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/browser-engine-independent-paths.mjs",
+          "sha256": "15e33e66074ba6952f188b26c7a06522142330b1fa9a29e0eb4d6416380041c8"
+        }
+      }
+    },
+    {
+      "target": "Safari desktop",
+      "status": "NOT_COLLECTED",
+      "reason": "Safari.app presence is not a WebKit Playwright or Safari automation result"
+    },
+    {
+      "target": "iOS Safari",
+      "status": "NOT_COLLECTED",
+      "reason": "no Simulator and no connected device; Playwright WebKit does not substitute for iOS"
+    },
+    {
+      "target": "Android browser",
+      "status": "NOT_COLLECTED",
+      "reason": "no Android SDK, adb, emulator, or connected device"
+    }
+  ],
+  "limits": [
+    "No browser result proves Linux x64, LAN/WAN UDP, IPv6, public TLS, proxy, authentication, WSS fallback, or transport adoption.",
+    "No browser result contains game DTO or wire-v1 evidence.",
+    "No result is a performance measurement or transport ranking."
+  ],
+  "linuxAmd64CrossCompilation": {
+    "status": "CROSS_COMPILE_PASSED_RUNTIME_NOT_COLLECTED",
+    "command": "CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath",
+    "go": "go1.26.3 darwin/arm64",
+    "artifact": {
+      "path": "/tmp/seedlands-webtransport-go-loopback-v013-G3KZiy/webtransport-loopback-server-linux-amd64",
+      "sha256": "46345c3b68ee6bed57a29e4a659421296ef182777364b28785acbc643932bba8",
+      "bytes": 11182631,
+      "fileClassification": "ELF 64-bit LSB executable, x86-64, statically linked"
+    },
+    "frozenInputs": {
+      "goModSha256BeforeAndAfter": "43f3cd7471020299911202c728dbb30bc29a2eaaff349750c0465143d02f1df5",
+      "goSumSha256BeforeAndAfter": "c07dc55f5b68455a49f1ff3768696af9202b3c508bb8a250b80e6c815711a687",
+      "changed": false
+    },
+    "inspectionLimit": "readelf and greadelf are unavailable locally; static-link conclusion is limited to file output",
+    "localRuntimeInventory": {
+      "orbStackExistingInstance": "ubuntu noble arm64 running",
+      "dockerRunningContainers": 0,
+      "linuxX64RuntimeAvailable": false
+    },
+    "notCollected": [
+      "Linux x64 binary execution",
+      "Linux x64 HTTP/3/WebTransport handshake, stream, datagram, and close",
+      "Linux loader and dynamic-section inspection",
+      "offline deployment, artifact distribution, and resource isolation"
+    ]
+  }
+}

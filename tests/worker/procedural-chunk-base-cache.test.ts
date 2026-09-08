@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ProceduralChunkBaseCache } from '../../src/worker/procedural-chunk-base-cache';
-import { createStoredChunkRecord, decodeStoredChunkRecord } from '../../src/world/chunk-snapshot-codec';
-import { CHUNK_SIZE } from '../../src/world/voxel';
+import { ProceduralChunkBaseCache } from '../../apps/web/src/worker/procedural-chunk-base-cache';
+import {
+  createStoredChunkRecord,
+  decodeStoredChunkRecord,
+} from '../../packages/game-core/src/world/chunk-snapshot-codec';
+import { CHUNK_SIZE } from '../../packages/game-core/src/world/voxel';
 
 const identity = (cx = 0, seedText = 'seed', generatorVersion = 3, cy = 0, cz = 0) => ({
   seedText,

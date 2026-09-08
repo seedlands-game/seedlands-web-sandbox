@@ -1,0 +1,146 @@
+# Node Dedicated Server 当前状态与阶段证据
+
+## 恢复入口：真实客户端基线消费组合
+
+整个 change 仍 **Active**。上一已推送检查点为 `234e4c80bbf8a787fbd2605c02f0e2d1ded69801`；本批完成 consumer、实际碰撞提交桥及真实 r2 到调度器/网格算法的组合，并重跑全仓静态、构建和本地浏览器核心旅程。
+
+- [consumer 与独立审查](network-baseline-consumer-progress.md)：单连接 owner、共享缓存、完整邻域版本失效、worker 副本物理结算；修复提交删除缓存的账本、未拥有 key 的 guard 残留，以及回调重入关闭后继续处理的问题。4 文件/19 项定向通过，已纳入最终全仓检查。
+- [真实组合](network-baseline-client-integration-plan.md)：C0 解码 artifact → 生产重组器 → consumer → 真实调度器 → 54 buffer transfer → 真实网格算法，最终 1/1 通过；缓存独立、生成回退为零、提交缺口后旧结果拒绝。此项为 Vitest，尚未证明 Web Worker、GPU 或网络旅程。
+- [基线 codec](network-baseline-codec-progress.md)：v2 修正 C0 的完整 1 MiB frame 边界，v1 保留；三候选 333 条真实消息和 32 KiB 合法分页继续通过，生产重组只读 oracle 1/1。C0/C1/C2 应用字节仍为 5,609,513 / 5,490,424 / 5,475,097 B；没有耗时、压缩或采用结论。
+- [完整 worker](network-complete-baseline-worker-plan.md) 在清理已确认属于本任务的早期遗留测试后，经 45 秒外层监督再次 20/20 通过并正常退出；日志 `/tmp/seedlands-complete-worker-clean-recheck.log`。[调度/结算](network-baseline-scheduler-progress.md) 的 10 项保留为前一检查点定向证据。本批真实组合使用同一实现，实际 app 仍使用本地会话。
+
+最终统一验证使用官方 Node 22.23.2：
+
+| 证据                 | 结果与范围                                                                                                                                                                                                                                        |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm verify:static` | **199 文件/1093 项通过**，另 2 文件/4 项跳过；Prettier、ESLint、路径、V8 coverage、Svelte/TypeScript 全通过，world 行覆盖 96.37%。最终日志 `/tmp/seedlands-baseline-client-final-static.log`。1091 项是重入关闭修复前的一次检查，不当作最终结果。 |
+| 显式 change runner   | 最终客户端组合 1/1、codec v2 只读重组 1/1；日志 `/tmp/seedlands-baseline-client-final-integration.log`、`/tmp/seedlands-baseline-codec-v2.log`。                                                                                                  |
+| 本地 Playwright 基线 | headless Chromium 8/8，独立端口 4197、不复用其他开发服务；日志 `/tmp/seedlands-baseline-client-browser.log`。功能耗时不作为性能采样。                                                                                                             |
+| 浏览器构建           | `pnpm build` 通过，保留既有大 bundle 提示；日志 `/tmp/seedlands-baseline-client-build.log`。                                                                                                                                                      |
+| Node 五入口构建      | 通过；manifest 记录 `sourceSha=234e4c8`、`sourceDirty=true`、`sourceInputsSha256=8897157545cfd4104a2855b0775618c2ed2d8f605eb9578983133a240be2d3fb`。未冒称构建未来提交。日志 `/tmp/seedlands-baseline-client-node-build.log`。                    |
+
+本批没有新增远端 UI、Midscene、Linux x64/WAN 或正式 benchmark 证据。[采样口径](network-codec-measurement-plan.md) 已明确计时边界和排他门，[筛选实际记录](network-baseline-codec-screening-progress.md) 中，v1 的 120 个原始 batch 正确性通过但整组环境未验证；v2 因 20 次持续高负载快照拒绝启动。没有可采用的性能组。GUI/远端可玩、WAN/CI、N2–N4 采用和 A13 不退化仍未完成；冻结 spec hash 保持不变。
+
+上述客户端源码与统一证据已保存为 `0378b970ee688529718dc8f79f64586fc71857ef` 并推送到 `origin/codex/node-dedicated-server`。后续仅记录采样准备、独立审查与环境清理时，不改变该源码检查点的验证范围。
+
+## 上一完整验证：完整基线的公开参考接线
+
+整个 change 仍 **Active**。已推送检查点为 `80109458d8b45de6d02f7f4d47e6fb64f4d88044`，包含真实基线语料和真实 Node 控制端口中断测试。本批已完成公开参考投影、分页发布与有界重组，并通过统一静态检查和两端构建；下面的 1030 项计数属于此前完整验证，当前为 **195 文件/1074 项通过**（另 2 文件/4 项跳过）。
+
+- [真实基线语料](network-baseline-corpus-progress.md)：Node 22 下实际 Host 采集 27/27/1 项，110 个显式 LE/raw sidecar。编辑使 main revision 0→1、Authority commit 2→3；旧 owned bytes 不变。完整数据调用真实网格输入算法，两个生成回退计数均为零，但尚未接浏览器 Remote adapter。
+- [采集中断回归](network-capture-failure-progress.md)：真实 Authority/Persistence/compute Worker，控制端口失效后请求立即失败，stop 等待已接纳计算请求物理结算后才完成失败清理。2/2 聚焦通过；fixture 负对照不计为生产缺陷。
+- [公开基线合同](network-baseline-reference-plan.md)：显式 LE 转换、独立块与发送账本、描述 FIFO、按需分页、有界重组。仍为 `not-adopted`，不含认证 owner、真实 socket 背压或浏览器安装。
+- [真实来源的派生验证](network-baseline-reference-corpus-progress.md)：冻结的 projected r2 只读取原始 r2，三条记录生成 162/162/6 页，共 330 个实际 sidecar；乱序重组与原始块字节/hash 全等。生产七个源码与五个派生程序文件绑定精确 hash，默认只读复核通过。16 KiB 和 JSON metadata 加 raw bytes 是候选配置及参考计量，不是 codec 采用。
+- [客户端下一接线](network-client-baseline-consumption-plan.md)：完整版本向量贯通、shared owner 回收、worker transfer 副本、受限 World 能力和不可读碰撞门禁已补入草案，尚未实施。
+
+本批统一验证使用官方 Node 22.23.2：
+
+- `pnpm verify:static` 完整通过：Prettier、ESLint、路径规范、V8 coverage、Svelte 与生产/测试 TypeScript；world 行覆盖率 96.37%。日志为 `/tmp/seedlands-baseline-reference-static.log`。
+- `pnpm build` 与 Node 五入口构建通过；浏览器保留既有大 bundle 提示。Node artifact manifest 记录 `sourceSha=8010945`、`sourceDirty=true`、`sourceInputsSha256=1c02da36f90682d94be3e63c5aaae71ce07d5e14503ce4f4c73c893a97e811ab`。新参考模块尚未连接网络启动入口，不能把构建通过解释为包含可玩远端服务器。
+- 参考层聚焦 42 项、真实 Node 中断 2 项纳入本次完整单元检查。原始与派生 corpus 使用显式 change runner，分别为独立证据；没有把它们加入默认长期浏览器基线。
+- 两个独立 Terra 子任务验证并发和发送预算，另对 Sol 实现的生产模块做独立审查；修复重复交付、关联畸形页清理、checkpoint 别名与队列引用等问题，准入 high-water 仅在成功接纳描述后推进。具体真实 RED、源码 hash 与范围见 [实现记录](network-baseline-reference-progress.md)。
+
+本批没有新的 UI/输入/渲染行为，未重复浏览器回归或 Midscene，也没有用单元/构建代替后续远端旅程。未运行正式 benchmark、未修改远端。网络/codec 选择、实际远端游玩与迁移不退化仍按原 N2–N4/A13 证据门推进，不能由功能结果推导收益。
+
+## 上一完整验证：2026-09-07 完整基线采集检查点
+
+整个 change 仍 **Active**。本页随当前功能分支源码提交；上一已推送检查点为 `c4e2f16`。本批完整静态 **189 文件/1030 项通过**（另 2 文件/4 项跳过），world 行覆盖 96.37%；浏览器与 Node 五入口构建通过。以下较早计数及“尚未 push”等表述仅属于各自历史阶段。
+
+| 门禁                 | 当前事实与仍需完成                                                                                                                                                                                                                      | 详细证据                                                                                                                |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| N0 公共语义          | 已有输入/动作/correction/Gameplay/Welcome/WorldCommit 参考；新增兴趣控制纯 DTO，以及真实 Node Authority 内完整 27 块/单块采集、共享生成预算、取消/stop 和 owned transfer。公开 interest 会话、分页/安装门与大提交分帧/resync 仍未完成。 | [本批采集](network-baseline-capture-progress.md)、[兴趣计划](network-interest-baseline-plan.md)                         |
+| N1 能力              | 普通 WS loopback 的单连接及双连接回显在 Chrome/Firefox/Playwright WebKit 通过；现代 Go WebTransport 在 Chrome/Firefox 的可靠流/datagram 通过，WebKit 数据路径失败。WSS 可信证书、真实 x64/移动端/IPv6/WAN 未采集。                      | [WS 探针](network-websocket-loopback-progress.md)、[WebTransport 矩阵](network-webtransport-browser-matrix-progress.md) |
+| N2 编解码            | 此前已采集的参考包通过三候选强等价与 Node/Chrome 双向；本批内部 capture 不冒充公开 codec/page 证据。正式阶段成本、分配/GC、代表性负载未采样；C0 大 metadata 和超过 512 项 commit 的表示限制保留。                                       | [密度](network-density-codec-progress.md)、[呈现编解码](network-presentation-codec-evidence.json)                       |
+| N3/N4 网络选择与采用 | 正式对照未完成，wire 和最终传输未采用；功能探针不能默认选择 JSON/WSS 或 QUIC。                                                                                                                                                          | [冻结选型合同](network-selection.md)                                                                                    |
+| 产品与性能           | 常驻 Node 权威、持久化 lane 和线程/进程执行器已运行；远端可玩客户端/双模式 GUI、目标远端/CI、迁移加 feature 收益与计算上移不退化 A/B 仍待完成。                                                                                         | [剩余合同](#合同剩余状态)、[滚动估算](stage-estimate.md)                                                                |
+
+## 本批统一验证
+
+- `pnpm verify:static` 一次完整通过：Prettier、ESLint、路径规范、V8 coverage、Svelte 和生产/测试 TypeScript。新增共享生成/取消/预算、异步请求副本、真实 Worker 错误回复和 RPC 派发顺序回归均在本批内。
+- `pnpm build` 通过，保留已有 500 kB bundle 提示；随后官方 Node 22 执行 `scripts/build-node-server.mjs` 生成 5 个 ESM 入口。产物记录 `sourceSha=c4e2f16`、`sourceDirty=true`，source inputs SHA-256 为 `1c02da36f90682d94be3e63c5aaae71ce07d5e14503ce4f4c73c893a97e811ab`；不冒称构建了未来的提交 SHA。
+- 共享 Host 核心和 Node 接线均经独立 Terra 审阅；没有发现新增 P1/P2 阻断。真实控制端口在 capture 执行中断开的组合故障注入仍未单独采集，普通 stop 和机制测试不能替代。
+- 本批没有执行正式 benchmark，没有远端写入、部署或网络采用。常规浏览器回归使用独立端口 4197、CI 模式禁止复用其他工作树的开发服务，Chromium 8/8 通过；它不代表远端 GUI 或 WAN 已验收。
+
+## 上一批验证：呈现字段与来源锚点
+
+- `pnpm verify:static` 最终通过：Prettier、ESLint、路径规范、V8 coverage、Svelte 和两份 TypeScript 检查。先前一次运行的 983 项单元通过，但类型检查失败；修复可空闭包、字面量推断和测试故意构造非法值的类型后，再完整执行至上述 984 项通过。
+- `pnpm build` 通过；现有 500 kB bundle 提示保留。完整类型检查后使用官方 Node 22 执行 `scripts/build-node-server.mjs`，生成 5 个 ESM 入口；产物记录基线 `6de696b` 与未提交源码状态，不伪称已在未来提交 SHA 构建。
+- 最终 WorldCommit corpus 为 `/tmp/seedlands-network-world-commit-presentation-corpus-v2-r5`，官方 Node 22.23.2 直接执行独立 config，1/1 通过；实际 Authority C 为 2→3→4→5。早期直接 server 调用导致 C 不推进的记录、Node 26 的 r3、类型修正前的 r4 均保留历史，未进入最终 codec 输入。
+- Welcome 最终 corpus 为 `/tmp/seedlands-network-bootstrap-welcome-corpus-v2-source-bound`，Node 22 1/1 通过；新建、同 epoch 当前状态和持久化恢复的 body/worldTime/checkpoint 绑定同一 snapshot。首次 attach/reconnect 和相机表现继续为未采集。
+- 两组 presentation corpus 的当前显式 source hash、manifest、逐条内容、输入/输出绑定和三候选严格深相等均通过；真实 Chrome 152 与 Node 22 的两个方向分别通过。C2 的矛盾 presence 帧修复前取得真实 RED，修复后 5 类帧均在 consumer 前拒绝；旧 59 条参考回归仍通过。
+- 本批没有新增 UI 或网络入口，未把上述结果当作 Playwright 产品旅程、Midscene 视觉语义、WAN 或性能 A/B；没有运行正式 benchmark。
+
+以下保留各阶段原始证据。恢复先读上表及当前切片，只有追溯失败或环境时才展开历史。
+
+---
+
+# 无网络宿主阶段验证快照
+
+2026-09-07，本阶段已形成可运行的 TS Node 世界宿主；整个 Node Dedicated Server change 仍 **Active**，不标为 Delivered。批准的 spec 与附件 hash 保持冻结，实施状态以本页、[实施记录](execution.md)和源码为准。
+
+## 本次统一验证
+
+验证环境为 macOS arm64 Node 22.23.2；所有 subagent 实现冻结后，由 root 执行完整组合检查。未运行正式 benchmark。Wasm 任务已明确交还资源；其代码未自动合入。
+
+| 证据                       | 实际结果                                                                                                                 | 边界                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `pnpm verify:static`       | 通过；174测试文件通过/2跳过，910项通过/4跳过；world 行覆盖96.37%；Prettier、ESLint、路径、Svelte与两份TypeScript检查通过 | coverage只覆盖规定的world范围，不代表所有Node代码覆盖率                       |
+| `pnpm build`               | 通过                                                                                                                     | Vite提示现有大bundle警告；不证明FPS或远端可玩                                 |
+| `pnpm build:server`        | 通过；5个独立Node22 ESM入口                                                                                              | 产物无需源码/Vite/运行依赖安装                                                |
+| `pnpm test:e2e:regression` | headless Chromium 8/8通过                                                                                                | 当前本地浏览器长期基线；不是远端GUI旅程                                       |
+| 显式 change corpus runner  | 1/1通过                                                                                                                  | 真实Host生成/编辑/动作与公开参考投影；不是codec计时或N2准出                   |
+| Node实际进程               | artifact、启动中SIGTERM、SIGKILL恢复均在完整Vitest中通过                                                                 | 单独区分顺序关停、最后durable恢复和线程/子进程清理；不宣称设备断电            |
+| Linux离线产物              | Node22.23.2/linux arm64、无网络、非root、只读根FS；thread/process各两轮启动/关停/恢复及5文件hash核验通过                 | [完整记录](linux-offline-final-evidence.json)；目标CT105 x64与LAN/WAN尚未验证 |
+
+change corpus 显式命令为 `pnpm exec vitest run --config changes/2026-09-06-node-dedicated-server/e2e/vitest.real-corpus.config.ts`。原本错误的畸形publication mock与未处理Promise导致的一次完整检查失败已保留在实施记录，不混入本次通过计数；修正后重新从格式检查开始完整执行。
+
+当前离线产物的 source inputs SHA-256 为 `caba7a665a46b5fdc85a781543cbbf5ffec96aa6d7923a3123a0fd2d18cb3f70`。清单标记当时 `sourceSha=485de57`、`sourceDirty=true`，并提供每个产物hash，因此不会把工作树产物伪称已提交构建。随后的本地语义提交用于保存本阶段源码/证据，不改变这份历史构建元数据。
+
+## 合同剩余状态
+
+| Acceptance                 | 状态                                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------------- |
+| A1 Node常驻                | 本地无网络核心已实现并验证；受控浏览器连接旅程未完成，整项部分完成                      |
+| A2 网络权限/顺序/背压/镜像 | 仅参考消息与内部RPC，公开网络尚未实施                                                   |
+| A3 冻结持久化与硬kill      | FileStore/真实进程恢复已有证据；Playwright-change未完成，设备断电按原合同不承诺         |
+| A4 双模式GUI               | 未实施                                                                                  |
+| A5 Node分项feature实验     | 线程/子进程执行器有功能证据，收益实验未完成                                             |
+| A6 完整归因                | 未完成，历史争用或方法不合格计时已排除                                                  |
+| A7 本地旅程与架构          | 本阶段静态/构建/8项基线通过；后续产品改造继续保护                                       |
+| A8 macOS/Linux与LAN可玩    | 两平台离线宿主通过；LAN客户端可玩未完成                                                 |
+| A9 可恢复交付              | README、代码地图、目录边界和阶段证据已同步；整个change未交付                            |
+| A10 CI推送CT105            | 未实施、未远端写入                                                                      |
+| A11 WAN预测/重连/MC共存    | 未实施                                                                                  |
+| A12 消息与选型             | N0参考投影推进，N1部分探索；N2–N4未准出，wire尚未冻结                                   |
+| A13 计算上移不退化         | 服务端职责与有界执行链已接线；完整观测、受控A/B及WAN SLO未完成                          |
+| A14 双口径预算             | 工作区规则、初版与[滚动估算](stage-estimate.md)已落地；实际task工时/credits未知，未伪造 |
+
+后续依赖仍为：真实代表性corpus与N2/N3选型 → 有证据的N4采用 → 受限网络和完整客户端镜像/预测 → 双模式GUI → 真实远端/CI → 宿主与feature分项及组合A/B。T0/C0受控最小可玩探针可提前用于选型，不等正式GUI，也不代表正式wire已采纳。任务恢复从本页进入，避免把冻结spec的“设计时尚未实现”或早期失败记录当成最新状态。
+
+本阶段没有push、PR发布、远端部署、Wasm合并、goal创建或reset兑换。长期docs baseline只更新已实际验证的Node所有权与入口；未把网络/GUI/性能建议写成现有能力。
+
+# 网络准备批次的补充检查点
+
+本节补充于 2026-09-07，整个 change 仍 Active。已通过的无网络宿主基线为 `ed9aec5`，用户恢复额度后授权推送，现已保存到 `origin/codex/node-dedicated-server`；本节随新的网络准备检查点交付，相关提交 SHA 以该功能分支的 Git 历史为准。
+
+## 变更与独立复审
+
+Authority lane 增加 readonly collision baseline RPC，使用现有权威读取，不自动请求未知 Chunk；固定数据长度与控制通道预算继续生效。回复除既有消息 identity 外还绑定请求 key/最低 revision，错误回复进入失败及有序清理。客户端预测/排序门禁的参数改为实际使用的字段集，完整 Worker 快照仍兼容。
+
+change 专用接收路径复用现有 collision mirror、统一物理与预测，实现完整 LE baseline 的双块 hash/副本/版本门，并覆盖丢失提交、迟到旧基线、旧 epoch 和重同步。实际 C0/C1/C2 解码的九条真实语料与原始语料得到同样的镜像/预测状态；gameplay/action 仅验证 DTO 等价，没有宣称 UI 或完整重连回执状态机通过。Sol/high 与 Terra/high 的独立评审/修复记录见各附属文档。
+
+## 当前可复核证据
+
+环境为 macOS arm64、官方校验的 Node 22.23.2；以下均为功能/静态证据，运行耗时不用于性能收益。
+
+- `pnpm verify:static`：重跑通过，175 文件通过/2 跳过、916 项通过/4 跳过；world 行覆盖 96.37%。首次完整运行暴露只读测试将后台 active-window 生成误归因于 RPC；已改为指定 key 的读取/显式生成对照，没有放宽阈值或全套改为串行，默认配置复验通过。
+- `pnpm build`、`pnpm build:server`：通过，浏览器保留既有大 bundle 提示。当前生产源码在这两次构建后未改动；后续只调整测试与文档。
+- Node 实际五入口 artifact 与 baseline RPC/protocol 聚焦：3 文件 12 项通过。产物测试实际运行 thread/process 两模式并关停、重启恢复，不以 mock 代替。
+- 客户端预测/门禁/镜像：3 文件 19 项通过；reference receiver：5/5；真实 corpus recorder：1/1；三 codec 应用 oracle：1/1。独立配置和显式 fixture 环境变量见 [应用证据](network-codec-application-evidence.md)。
+- 当前批次没有新跑 Linux、Playwright、Midscene、WAN、压力或正式性能组。上一检查点的证据保留为其历史结果，不声称验证了新增 RPC 的目标 Linux x64 部署。
+
+## 尚未放行的网络选型
+
+九条通过只覆盖当前受控 subset，不能宣布完整 N2。C1/C2 仍有非空 gameplay/其他动作域缺口；独立复审要求统一 parser/语义校验/资源预检/输出所有权/hash 阶段，避免比较时额外复制或少校验带来偏差。T0/T1 已通过小型 loopback 功能探针，T2/T3 仍有能力与依赖门。所有候选继续 `not-adopted`，没有公开 listener/GUI 或远端部署。
+
+---

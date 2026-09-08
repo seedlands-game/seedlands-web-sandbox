@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MultiRateScheduler } from '../../src/runtime/multi-rate-scheduler';
+import { MultiRateScheduler } from '../../packages/game-core/src/runtime/multi-rate-scheduler';
 
 describe('MultiRateScheduler', () => {
   it.each([30, 60, 120] as const)('以 %sHz 独立产生固定物理步', (physicsHz) => {

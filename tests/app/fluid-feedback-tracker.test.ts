@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FluidFeedbackTracker } from '../../src/app/gameplay/fluid-feedback-tracker';
+import { FluidFeedbackTracker } from '../../apps/web/src/app/gameplay/fluid-feedback-tracker';
 
 describe('FluidFeedbackTracker', () => {
   it('reports edit, commit, worker, attach, and visible stages for warm samples', () => {

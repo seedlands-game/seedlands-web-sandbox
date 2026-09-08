@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "runId": "N2-contended-2026-09-06T17:30Z",
+  "status": "CONTENDED_OR_UNVERIFIED",
+  "startedUTCApprox": "2026-09-06T17:30:22Z",
+  "finishedUTC": "2026-09-06T17:32:02.671Z",
+  "reason": "运行中确认另一个 WASM benchmark 并行；无法证明 CPU 独占，所有时序数据作废，不用于 codec 优劣、门禁或采用结论。",
+  "rawTimingAvailability": "NOT_RETAINED_AFTER_ISOLATED_RERUN_OVERWROTE_THE_TEMPORARY_EVIDENCE_FILE",
+  "retainedFacts": {
+    "corpusCount": 28,
+    "nodeAndBrowserRoundtrip": "C0/C1/C2 均完成强等价；该事实不依赖 CPU 独占。",
+    "encodedBytes": "已由后续隔离 run 重新采集；请使用 network-codec-evidence.json。"
+  }
+}

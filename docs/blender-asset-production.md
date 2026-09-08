@@ -20,7 +20,7 @@ blender --background --factory-startup \
   --output-dir "$out_dir"
 ```
 
-输出包括 `brass-trail-lantern.glb`、`lantern.recipe.json`、两张 36×36 的 16px 图集源和 `generation-report.json`。GLB 为静态单场景，含一个网格、168 个三角形、内嵌 PNG 材质纹理（底色和发光），没有外链 URI、相机或灯光。示例交付文件位于 `public/assets/samples/brass-trail-lantern.glb`。
+输出包括 `brass-trail-lantern.glb`、`lantern.recipe.json`、两张 36×36 的 16px 图集源和 `generation-report.json`。GLB 为静态单场景，含一个网格、168 个三角形、内嵌 PNG 材质纹理（底色和发光），没有外链 URI、相机或灯光。示例交付文件位于 `apps/web/public/assets/samples/brass-trail-lantern.glb`。
 
 ## 导入与重导入
 

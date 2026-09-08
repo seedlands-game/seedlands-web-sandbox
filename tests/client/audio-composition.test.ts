@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { composeMusicCue, synthesizeSfx } from '../../src/client/audio/audio-composition';
+import { composeMusicCue, synthesizeSfx } from '../../apps/web/src/client/audio/audio-composition';
 
 describe('原创电子声音素材', () => {
   it('三首可重建乐谱有完整时长、两层以上音色、稀疏音符和有界音域', () => {

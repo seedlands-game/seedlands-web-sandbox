@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SnapshotInterpolator } from '../../src/client/snapshot-interpolator';
+import { SnapshotInterpolator } from '../../apps/web/src/client/snapshot-interpolator';
 
 describe('SnapshotInterpolator', () => {
   it('按快照已积分物理时间插值其他实体', () => {

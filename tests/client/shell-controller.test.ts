@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ShellController, sanitizeQuality } from '../../src/client/shell/shell-controller';
+import { ShellController, sanitizeQuality } from '../../apps/web/src/client/shell/shell-controller';
 
 const port = () => ({ start: vi.fn(async () => {}), leave: vi.fn(async () => {}), pause: vi.fn() });
 

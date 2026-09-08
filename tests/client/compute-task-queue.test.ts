@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ComputeTaskQueue, type ComputeTask } from '../../src/runtime/compute-task-queue';
+import { ComputeTaskQueue, type ComputeTask } from '../../packages/game-core/src/runtime/compute-task-queue';
 
 const task = (overrides: Partial<ComputeTask> = {}): ComputeTask => ({
   protocolVersion: 1,
@@ -55,6 +55,32 @@ describe('ComputeTaskQueue', () => {
       status: 'backpressure',
       reason: 'task-and-byte-limit',
     });
+  });
+
+  it('默认仍只以排队字节限流，服务器可显式计入在途字节', () => {
+    const browserQueue = new ComputeTaskQueue({ epoch: 'world:1', maxTasks: 8, maxBytes: 100 });
+    browserQueue.enqueue(task({ estimatedBytes: 80 }));
+    browserQueue.take('general');
+    expect(browserQueue.enqueue(task({ taskId: 2, key: 'next', estimatedBytes: 80 })).status).toBe('queued');
+
+    const serverQueue = new ComputeTaskQueue({
+      epoch: 'world:1',
+      maxTasks: 8,
+      maxBytes: 100,
+      includeRunningBytes: true,
+    });
+    serverQueue.enqueue(task({ estimatedBytes: 80 }));
+    serverQueue.take('general');
+    expect(serverQueue.enqueue(task({ taskId: 2, key: 'next', estimatedBytes: 80 }))).toMatchObject({
+      status: 'backpressure',
+      reason: 'byte-limit',
+    });
+  });
+
+  it('logic lane remains independent from fluid and general lanes', () => {
+    const queue = new ComputeTaskQueue({ epoch: 'world:1', maxTasks: 8, maxBytes: 1_024 });
+    queue.enqueue(task({ lane: 'logic', category: 'logic', key: 'logic:1' }));
+    expect(queue.take('logic')).toMatchObject({ category: 'logic' });
   });
 
   it('取消未开始任务并在世界切换时拒绝旧 epoch', () => {

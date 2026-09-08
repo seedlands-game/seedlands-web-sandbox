@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const createEslint = () => new ESLint({ cwd: process.cwd(), overrideConfigFile: 'eslint.config.mjs' });
 
-const lintSource = async (source: string, filePath = 'src/app/module-size-probe.ts') => {
+const lintSource = async (source: string, filePath = 'apps/web/src/app/module-size-probe.ts') => {
   const eslint = createEslint();
   return eslint.lintText(source, { filePath });
 };
@@ -12,8 +12,8 @@ const effectiveLines = (count: number) =>
   Array.from({ length: count }, (_, index) => `export const line${index} = ${index};`).join('\n');
 
 const governedPaths = [
-  'src/app/module-size-probe.ts',
-  'src/world/module-size-probe.ts',
+  'apps/web/src/app/module-size-probe.ts',
+  'packages/game-core/src/world/module-size-probe.ts',
   'tests/governance/module-size-probe.test.ts',
   'scripts/module-size-probe.mjs',
   'changes/2026-09-04-app-module-boundaries/e2e/module-size-probe.spec.ts',

@@ -4,7 +4,7 @@ import {
   preflightClientCapabilities,
   probeModuleWorker,
   requiredWorkerCount,
-} from '../../src/app/client-capability-preflight';
+} from '../../apps/web/src/app/client-capability-preflight';
 
 class FakeProbeWorker {
   onmessage: ((event: MessageEvent<unknown>) => void) | null = null;

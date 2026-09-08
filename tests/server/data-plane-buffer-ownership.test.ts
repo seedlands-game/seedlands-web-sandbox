@@ -2,19 +2,19 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   AuthorityCollisionBaselineClient,
   type AuthorityCollisionBaselinePayload,
-} from '../../src/client/authority/authority-collision-baseline-client';
+} from '../../apps/web/src/client/authority/authority-collision-baseline-client';
 import {
   AuthorityCollisionRevisionGuard,
   acceptAuthorityCollisionBaseline,
   consumeTransferredAuthorityCollisionBaseline,
   type AuthorityCollisionCachedChunk,
-} from '../../src/client/authority/authority-collision-mirror';
+} from '../../apps/web/src/client/authority/authority-collision-mirror';
 import {
   computeFluidCandidate,
   consumeFluidCandidate,
   type FluidAuthoritySnapshot,
-} from '../../src/server/fluid/fluid-transaction';
-import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
+} from '../../packages/game-core/src/server/fluid/fluid-transaction';
+import { CHUNK_SIZE, Voxel, voxelIndex } from '../../packages/game-core/src/world/voxel';
 
 const snapshot = (): FluidAuthoritySnapshot => {
   const voxels = new Uint16Array(CHUNK_SIZE ** 3);

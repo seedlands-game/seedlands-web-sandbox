@@ -6,7 +6,7 @@ import {
   TransactionDeduplicator,
   createSessionEpoch,
   type InputCommand,
-} from '../../src/runtime/session-protocol';
+} from '../../packages/game-core/src/runtime/session-protocol';
 
 describe('runtime session protocol', () => {
   it('拒绝旧 epoch、乱序和重复输入', () => {

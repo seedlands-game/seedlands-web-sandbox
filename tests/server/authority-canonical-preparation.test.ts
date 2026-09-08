@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   AuthorityCanonicalPreparation,
   createAuthorityCanonicalRouter,
-} from '../../src/server/authority/authority-canonical-preparation';
+} from '../../packages/game-core/src/server/authority/authority-canonical-preparation';
 
 const deferred = () => {
   let resolve!: (value: boolean) => void;
