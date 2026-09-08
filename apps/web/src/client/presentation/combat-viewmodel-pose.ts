@@ -10,8 +10,8 @@ export function combatViewmodelPose(active: CombatSnapshot['active']): Pose | nu
   const t = Number.isFinite(raw) ? Math.min(1, Math.max(0, raw)) : 0;
   const eased = t * t * (3 - 2 * t);
   const direction = active.comboStep % 2 === 0 ? 1 : -1;
-  const raised: Pose = { shoulder: -36, elbow: -28, wrist: -34 * direction };
-  const struck: Pose = { shoulder: 42, elbow: -52, wrist: 45 * direction };
+  const raised: Pose = { shoulder: -66, elbow: -56 * direction, wrist: -58 * direction };
+  const struck: Pose = { shoulder: 58, elbow: 70 * direction, wrist: 74 * direction };
   const from = active.phase === 'windup' ? rest : active.phase === 'hit' ? raised : struck;
   const to = active.phase === 'windup' ? raised : active.phase === 'hit' ? struck : rest;
   return {

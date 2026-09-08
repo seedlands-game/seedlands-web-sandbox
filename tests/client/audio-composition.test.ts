@@ -52,5 +52,7 @@ describe('原创电子声音素材', () => {
     }
     expect(synthesizeSfx('creature', 22050, 17).length).toBeGreaterThanOrEqual(22050 * 0.5);
     expect(synthesizeSfx('step-stone', 22050, 17)).not.toEqual(synthesizeSfx('step-grass', 22050, 17));
+    expect(synthesizeSfx('damage', 22050, 17).length).toBeGreaterThan(synthesizeSfx('attack', 22050, 17).length);
+    expect(synthesizeSfx('damage', 22050, 17)).not.toEqual(synthesizeSfx('attack', 22050, 17));
   });
 });

@@ -42,6 +42,7 @@ import {
 import { GameExperimentState } from './experimental/game-experiment-state';
 import { GameFrameLoop } from './game-frame-loop';
 import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
+import { GameSaveQueue } from './world/game-save-queue';
 
 export class Game {
   private paused = false;
@@ -64,8 +65,7 @@ export class Game {
   private serverPlayerId: string | null = null;
   private seedText = '';
   private qualityLevel: QualityLevel = 'medium';
-  private saveTimer: number | null = null;
-  private saveInFlight: Promise<void> = Promise.resolve();
+  private readonly saveQueue: GameSaveQueue;
   private removeHarness: (() => void) | null = null;
   private commandExecutor: CommandExecutorPort | null = null;
   private commandSource: CommandSource | null = null;
@@ -92,6 +92,7 @@ export class Game {
     experiments: ResolvedExperimentalClientOptions = resolveExperimentalClientOptions(),
   ) {
     this.experimentState = new GameExperimentState(experiments);
+    this.saveQueue = new GameSaveQueue(() => this.authority, this.performanceTelemetry);
     this.frameLoop = new GameFrameLoop({
       app: () => this.app,
       authority: () => this.authority,
@@ -239,6 +240,9 @@ export class Game {
       queueSave: () => this.queueSave(),
       releaseInput: () => this.controller?.releaseInput(),
       movePlayer: (target) => this.controller?.movePlayerTo(...target),
+      orientPlayer: (yaw, pitch) => this.controller?.setView(yaw, pitch),
+      executeCommand: (command) => this.executeGameplayCommand(command),
+      onPlayerDamage: (amount) => this.controller?.presentDamage(amount),
       onPresentation: (event) => this.worldAudio?.present(event),
     });
     this.controller = this.createController(this.camera);
@@ -299,7 +303,13 @@ export class Game {
       };
     }
     const harnessEnabled = new URLSearchParams(location.search).has('harness');
-    this.uiBridge.publishShell({ phase: 'playing', enterLabel: '进入世界', commandOpen: false, mapOpen: false });
+    this.uiBridge.publishShell({
+      phase: 'playing',
+      enterLabel: '进入世界',
+      commandOpen: false,
+      mapOpen: false,
+      experience: null,
+    });
     this.uiSession?.publishHud(++this.hudSequence, { visible: true });
     this.gameplayClient?.refresh();
     this.publishDebugVisibility(harnessEnabled);
@@ -331,12 +341,7 @@ export class Game {
         setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed),
         blockLogicWorker: (ms) =>
           this.logicClient?.blockForHarness(ms) ?? Promise.reject(new Error('Logic Worker不可用。')),
-        executeGameplayCommand: async (command) => {
-          if (!this.commandExecutor || !this.commandSource) throw new Error('Harness command runtime is unavailable.');
-          const result = await this.commandExecutor.execute(this.commandSource, command);
-          if (result.success) this.consumeBrowserCommand(command, result);
-          return result;
-        },
+        executeGameplayCommand: (command) => this.executeGameplayCommand(command),
         queueSave: () => this.queueSave(),
         flushSave: () => this.flushSave(),
         experiments: () => this.experimentState.diagnostics(this.computeRuntime?.diagnostics.workerKernelStates ?? []),
@@ -350,6 +355,10 @@ export class Game {
     if (execution.command && execution.result.success) this.consumeBrowserCommand(execution.command, execution.result);
     return execution;
   }
+
+  prepareMeleeShowcase = async () => void (await this.gameplayClient?.prepareMeleeShowcase());
+
+  triggerMeleeShowcaseDamage = async () => void (await this.gameplayClient?.triggerMeleeShowcaseDamage());
 
   releaseInput = () => this.controller?.releaseInput();
 
@@ -439,6 +448,13 @@ export class Game {
     this.gameplayClient?.refresh();
   }
 
+  private async executeGameplayCommand(command: ServerCommand) {
+    if (!this.commandExecutor || !this.commandSource) throw new Error('Gameplay command runtime is unavailable.');
+    const result = await this.commandExecutor.execute(this.commandSource, command);
+    if (result.success) this.consumeBrowserCommand(command, result);
+    return result;
+  }
+
   private publishDebugVisibility(visible: boolean) {
     this.uiBridge.publishDebug({ visible });
   }
@@ -463,30 +479,11 @@ export class Game {
   }
 
   private queueSave() {
-    if (this.saveTimer !== null) return;
-    this.saveTimer = window.setTimeout(() => {
-      this.saveTimer = null;
-      void this.flushSave().catch(() => undefined);
-    }, 48);
+    this.saveQueue.queue();
   }
 
   private flushSave(): Promise<void> {
-    if (this.saveTimer !== null) {
-      window.clearTimeout(this.saveTimer);
-      this.saveTimer = null;
-    }
-    const authority = this.authority;
-    if (!authority) return this.saveInFlight;
-    const save = this.saveInFlight.then(async () => {
-      const span = this.performanceTelemetry.beginSpan('persistence', 'FlushWorldSave');
-      try {
-        await authority.save();
-      } finally {
-        this.performanceTelemetry.endSpan(span);
-      }
-    });
-    this.saveInFlight = save.catch(() => undefined);
-    return save;
+    return this.saveQueue.flush();
   }
 
   private disposeRuntime() {

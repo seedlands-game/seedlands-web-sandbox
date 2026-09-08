@@ -17,6 +17,8 @@ import type {
   AuthorityGameplayView,
 } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
+import type { CommandResult, ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
+import { meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
   gameplay: AuthorityGameplayView;
@@ -36,6 +38,9 @@ type Options = {
   queueSave: () => void;
   releaseInput: () => void;
   movePlayer: (position: [number, number, number]) => void | Promise<void>;
+  orientPlayer: (yaw: number, pitch: number) => void;
+  executeCommand: (command: ServerCommand) => Promise<CommandResult>;
+  onPlayerDamage?: (amount: number) => void;
   onPresentation?: (event: GameplayPresentationEvent) => void;
 };
 
@@ -67,6 +72,48 @@ export class BrowserGameplay {
     this.aimTarget = target?.inRange ? target : null;
   }
 
+  async prepareMeleeShowcase(): Promise<void> {
+    const authority = this.options.authority;
+    if (authority.gameplay.player.lifecycle === 'dead') await this.executeShowcaseCommand({ type: 'respawn' });
+    const existingIds = new Set(authority.gameplay.entities.map((entity) => entity.id));
+    for (const command of meleeShowcaseCommands(existingIds)) await this.executeShowcaseCommand(command);
+
+    let swordSlot = authority.gameplay.player.inventory.findIndex((slot) => slot?.itemId === 'wood-sword');
+    if (swordSlot < 0) {
+      await this.executeShowcaseCommand({ type: 'give-item', itemId: 'wood-sword', count: 1 });
+      swordSlot = authority.gameplay.player.inventory.findIndex((slot) => slot?.itemId === 'wood-sword');
+    }
+    if (swordSlot < 0) throw new Error('体验场无法把木剑放入背包。');
+    if (swordSlot >= authority.gameplay.player.hotbarSize) {
+      const empty = authority.gameplay.player.inventory
+        .slice(0, authority.gameplay.player.hotbarSize)
+        .findIndex((slot) => slot === null);
+      const target = empty >= 0 ? empty : 0;
+      const moved = await authority.performAction({ type: 'move-inventory', source: swordSlot, target });
+      if (!(moved.result as { success?: boolean }).success) throw new Error('体验场无法把木剑移动到快捷栏。');
+      swordSlot = target;
+    }
+    const selected = await authority.performAction({ type: 'select-hotbar', slot: swordSlot });
+    if (!(selected.result as { success?: boolean }).success) throw new Error('体验场无法装备木剑。');
+    await this.options.movePlayer([...MELEE_SHOWCASE_PLAYER_CAMERA]);
+    this.options.orientPlayer(0, -15);
+    this.refresh();
+    this.options.bridge.publishShell({ experience: 'melee-showcase' });
+    this.options.session.publishFeedback(this.options.nextInteractionSequence(), {
+      message: '体验场已布置：准星已对准中央训练目标，按住左键观察两段反向挥砍。',
+      tone: 'info',
+      durationMs: 4_000,
+    });
+    this.options.queueSave();
+  }
+
+  async triggerMeleeShowcaseDamage(): Promise<void> {
+    const player = this.options.authority.gameplay.player;
+    if (player.lifecycle === 'dead') await this.executeShowcaseCommand({ type: 'respawn' });
+    else if (player.health <= 2) await this.executeShowcaseCommand({ type: 'heal', amount: 20 });
+    await this.executeShowcaseCommand({ type: 'apply-damage', amount: 2 });
+  }
+
   advance(seconds: number): void {
     this.breakProjectionElapsedSeconds += seconds;
     this.outline.update(this.blocksInput ? null : this.aimTarget);
@@ -80,6 +127,11 @@ export class BrowserGameplay {
     this.refresh(false, seconds);
   }
 
+  private async executeShowcaseCommand(command: ServerCommand): Promise<void> {
+    const result = await this.options.executeCommand(command);
+    if (!result.success) throw new Error(`体验场布置失败：${result.error.message}`);
+  }
+
   refresh(forceBreakProjection = true, renderDeltaSeconds = 0): void {
     const view = this.options.authority.gameplay;
     const player = view.player;
@@ -89,7 +141,11 @@ export class BrowserGameplay {
     const entities = view.entities.filter((entity) => entity.type !== 'player');
     const actorStates = new Map(view.actors.map((actor) => [actor.entityId, actor] as const));
     this.presenter.reconcile(entities, renderDeltaSeconds);
-    if (this.previousHealth !== null && player.health < this.previousHealth) this.present({ kind: 'damage' });
+    if (this.previousHealth !== null && player.health < this.previousHealth) {
+      const amount = this.previousHealth - player.health;
+      this.options.onPlayerDamage?.(amount);
+      this.present({ kind: 'damage', amount });
+    }
     this.previousHealth = player.health;
     const currentBreaking = player.breakAction
       ? {
@@ -337,7 +393,9 @@ export class BrowserGameplay {
     }
     if (kind === 'attack' || kind === 'place' || kind === 'eat' || kind === 'damage') {
       const sequence = this.options.nextInteractionSequence();
-      this.options.session.publishInteraction(sequence, { gesture: { kind, sequence } });
+      this.options.session.publishInteraction(sequence, {
+        gesture: { kind, sequence, ...(event.kind === 'damage' ? { amount: event.amount } : {}) },
+      });
     }
   }
 

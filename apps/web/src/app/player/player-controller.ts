@@ -16,6 +16,7 @@ import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/game-core/world/voxel
 import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
 import { PlayerDebugTimeKeys } from './player-debug-time-keys';
 import { bodyOverlapsWorld } from './player-collision-query';
+import { playerDamageCameraOffset } from '../../client/presentation/player-damage-feedback';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
@@ -36,6 +37,8 @@ export class PlayerController {
   private readonly prediction: LocalPlayerPrediction;
   private latestSnapshot: AuthoritySnapshot | null = null;
   private readonly debugTimeKeys: PlayerDebugTimeKeys;
+  private damageElapsedSeconds = Number.POSITIVE_INFINITY;
+  private damageAmount = 0;
 
   constructor(private readonly options: PlayerControllerOptions) {
     this.prediction = new LocalPlayerPrediction(options.authority?.epoch ?? 'unit-test', options.physicsHz, {
@@ -76,6 +79,10 @@ export class PlayerController {
       resetCounts: this.prediction.resetCounts,
       presentationOffset: this.prediction.presentationOffset,
     };
+  }
+
+  get damageFeedback() {
+    return playerDamageCameraOffset(this.damageElapsedSeconds, this.damageAmount);
   }
 
   get isColliding() {
@@ -262,7 +269,15 @@ export class PlayerController {
       if (this.interactionBlocked) this.stopMining();
       else this.continueMining(target);
     }
+    const damageOffset = this.damageFeedback;
+    camera.setEulerAngles(this.pitch + damageOffset.pitch, this.yaw + damageOffset.yaw, damageOffset.roll);
+    this.damageElapsedSeconds += dt;
     this.options.telemetry.endSpan(span);
+  }
+
+  presentDamage(amount: number): void {
+    this.damageAmount = Number.isFinite(amount) ? Math.max(0, amount) : 0;
+    this.damageElapsedSeconds = 0;
   }
 
   releaseInput() {

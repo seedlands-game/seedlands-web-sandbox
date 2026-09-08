@@ -62,6 +62,7 @@ const initialShell = (): ShellState => ({
   commandEntries: [],
   commandStatus: '输入 slash command，按 Enter 执行。',
   commandStatusState: 'idle',
+  experience: null,
   gameplay: {
     inventoryOpen: false,
     lifecycle: 'alive',

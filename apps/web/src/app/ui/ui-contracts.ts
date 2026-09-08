@@ -30,6 +30,7 @@ export type ShellState = Readonly<{
   commandEntries: readonly CommandEntry[];
   commandStatus: string;
   commandStatusState: 'idle' | 'running' | 'success' | 'error';
+  experience: 'melee-showcase' | null;
   gameplay: Readonly<{
     inventoryOpen: boolean;
     lifecycle: 'alive' | 'dead';
@@ -64,7 +65,7 @@ export type InteractionTarget = Readonly<{
 }>;
 
 export type InteractionState = Readonly<{
-  gesture: Readonly<{ kind: 'attack' | 'place' | 'eat' | 'damage'; sequence: number }> | null;
+  gesture: Readonly<{ kind: 'attack' | 'place' | 'eat' | 'damage'; sequence: number; amount?: number }> | null;
   target: InteractionTarget | null;
   feedback: Readonly<{ message: string; tone: FeedbackTone }> | null;
   breaking: Readonly<{ progress: number; label: string }> | null;
@@ -117,6 +118,9 @@ export type UiMetrics = Readonly<{
 
 export type UiActionPort = {
   startWorld: (seed: string, quality: QualityLevel, openMode?: WorldOpenMode) => Promise<void>;
+  startMeleeShowcase: (quality: QualityLevel) => Promise<void>;
+  resetMeleeShowcase: () => Promise<void>;
+  triggerMeleeShowcaseDamage: () => Promise<void>;
   selectHotbarSlot: (slot: number) => void;
   toggleInventory: () => void;
   closeInventory: () => void;

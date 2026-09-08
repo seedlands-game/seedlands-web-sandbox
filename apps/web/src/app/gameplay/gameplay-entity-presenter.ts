@@ -11,6 +11,7 @@ import {
   type ModelAnimationClips,
   type ModelAnimationController,
 } from './model-animation';
+import { createDamageTintMaterial } from './damage-tint-material';
 
 const PRESENTATION_SETTLE_DISTANCE = 0.001;
 
@@ -28,6 +29,8 @@ export class GameplayEntityPresenter {
   private readonly health = new Map<string, number>();
   private readonly hurtUntil = new Map<string, number>();
   private readonly originalMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
+  private readonly damageMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
+  private readonly damageMaterialResources = new Set<pc.StandardMaterial>();
   private readonly animated = new Map<string, AnimatedEntity>();
   private readonly assetsLease: GameplayModelAssetsLease;
   private readonly bindings: NonNullable<AppearanceProject['animationBindings']>;
@@ -60,6 +63,8 @@ export class GameplayEntityPresenter {
     this.health.clear();
     this.hurtUntil.clear();
     for (const id of this.animated.keys()) this.releaseAnimated(id);
+    this.damageMaterialResources.forEach((material) => material.destroy());
+    this.damageMaterialResources.clear();
     this.assetsLease.release();
     this.presentationTime = 0;
   }
@@ -103,7 +108,8 @@ export class GameplayEntityPresenter {
       node.findByName(`arm-${side}-pivot`)?.setLocalEulerAngles(pose.stride * (side === 'left' ? 1 : -1), 0, 0);
     this.forEachRender(node, (part) => {
       const material = this.originalMaterials.get(part);
-      if (part.render && material) part.render.material = flash > 0 ? this.assets.materials.hurt : material;
+      const damageMaterial = this.damageMaterials.get(part);
+      if (part.render && material) part.render.material = flash > 0 && damageMaterial ? damageMaterial : material;
       if (/leg-|front-|back-/.test(part.name))
         part.setLocalEulerAngles(pose.stride * (part.name.includes('left') ? 1 : -1), 0, 0);
     });
@@ -127,9 +133,7 @@ export class GameplayEntityPresenter {
     else if (entity.archetype === 'night-stalker') addBuiltinActorModel(this.assets, visual, 'stalker');
     else if (entity.archetype === 'settler') addBuiltinActorModel(this.assets, visual, 'settler');
     else this.assets.addBox(visual, 'fallback-body', 'charcoal', { x: 0, y: 0.75, z: 0 }, { x: 0.7, y: 1.1, z: 0.7 });
-    this.forEachRender(node, (part) => {
-      if (part.render?.material instanceof pc.StandardMaterial) this.originalMaterials.set(part, part.render.material);
-    });
+    this.registerDamageMaterials(node);
     this.app.root.addChild(node);
     this.presented.set(entity.id, node);
     if (entity.archetype) {
@@ -167,6 +171,7 @@ export class GameplayEntityPresenter {
         return;
       }
       for (const child of [...visual.children]) if (child !== lease.entity) (child as pc.Entity).destroy();
+      this.registerDamageMaterials(lease.entity);
       state.lease = lease;
       state.controller = createModelAnimationController(clips, lease.playback);
     } catch {
@@ -181,6 +186,17 @@ export class GameplayEntityPresenter {
         names.has(entry[1]),
       ),
     );
+  }
+
+  private registerDamageMaterials(root: pc.Entity): void {
+    this.forEachRender(root, (part) => {
+      if (!(part.render?.material instanceof pc.StandardMaterial) || this.originalMaterials.has(part)) return;
+      const original = part.render.material;
+      const damage = createDamageTintMaterial(original);
+      this.originalMaterials.set(part, original);
+      this.damageMaterials.set(part, damage);
+      this.damageMaterialResources.add(damage);
+    });
   }
 
   private releaseAnimated(id: string): void {
