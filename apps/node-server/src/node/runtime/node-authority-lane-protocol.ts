@@ -17,6 +17,8 @@ export const MAX_AUTHORITY_PUBLICATION_BYTES = 16 * 1_024 * 1_024;
 export const AUTHORITY_OPERATION_KINDS = [
   ...AUTHORITY_BASELINE_KINDS,
   'authority-receive-input',
+  'authority-clear-input',
+  'authority-read-ready',
   'authority-perform-action',
   'authority-request-chunk',
   'authority-read-collision-baseline',
@@ -298,6 +300,28 @@ function diagnostics(value: unknown): void {
   record(compute.logic, 'Authority diagnostics logic');
 }
 
+function ready(value: unknown): void {
+  const candidate = record(value, 'Authority ready');
+  if (
+    typeof candidate.playerId !== 'string' ||
+    !candidate.playerId ||
+    !Array.isArray(candidate.playerBodyPosition) ||
+    candidate.playerBodyPosition.length !== 3 ||
+    !candidate.playerBodyPosition.every(Number.isFinite) ||
+    typeof candidate.seedText !== 'string' ||
+    !candidate.seedText ||
+    !nonNegativeInteger(candidate.seed) ||
+    !nonNegativeInteger(candidate.generatorVersion) ||
+    typeof candidate.worldTime !== 'number' ||
+    !Number.isFinite(candidate.worldTime) ||
+    typeof candidate.isNew !== 'boolean'
+  )
+    throw new TypeError('Authority ready 回复无效。');
+  record(candidate.snapshot, 'Authority ready snapshot');
+  record(candidate.gameplay, 'Authority ready gameplay');
+  record(candidate.frequencies, 'Authority ready frequencies');
+}
+
 export function validateAuthorityRequestPayload(kind: string, value: unknown): NodeRpcPayload {
   if (!(AUTHORITY_OPERATION_KINDS as readonly string[]).includes(kind))
     throw new TypeError(`Authority lane 不支持 RPC：${kind}`);
@@ -308,9 +332,12 @@ export function validateAuthorityRequestPayload(kind: string, value: unknown): N
     if (!only(request, ['input'])) throw new TypeError('Authority input 请求无效。');
     input(request.input);
   } else if (kind === 'authority-perform-action') {
-    if (!only(request, ['action', 'sequence'])) throw new TypeError('Authority action 请求无效。');
+    if (!only(request, ['action', 'sequence', 'expectedCommitSequence']))
+      throw new TypeError('Authority action 请求无效。');
     action(request.action);
     if (!nonNegativeInteger(request.sequence)) throw new TypeError('Authority action sequence 无效。');
+    if (request.expectedCommitSequence !== undefined && !nonNegativeInteger(request.expectedCommitSequence))
+      throw new TypeError('Authority action expectedCommitSequence 无效。');
   } else if (kind === 'authority-request-chunk') {
     if (!only(request, ['key'])) throw new TypeError('Authority Chunk 请求无效。');
     if (typeof request.key !== 'string' || !request.key) throw new TypeError('Authority Chunk key 无效。');
@@ -331,11 +358,16 @@ export function validateAuthorityResponsePayload(kind: string, value: unknown): 
   } else if (kind === 'authority-receive-input') {
     if (typeof value !== 'string' || !SEQUENCE_DECISIONS.has(value)) throw new TypeError('Authority input 回复无效。');
   } else if (kind === 'authority-perform-action') receipt(value);
+  else if (kind === 'authority-read-ready') ready(value);
   else if (kind === 'authority-request-chunk') {
     if (typeof value !== 'boolean') throw new TypeError('Authority Chunk 回复无效。');
   } else if (kind === 'authority-read-collision-baseline') {
     collisionBaseline(value);
-  } else if (kind === 'authority-set-interest-radius' || kind === 'authority-wait-for-idle') {
+  } else if (
+    kind === 'authority-set-interest-radius' ||
+    kind === 'authority-wait-for-idle' ||
+    kind === 'authority-clear-input'
+  ) {
     if (!only(record(value, 'Authority empty response'), [])) throw new TypeError('Authority 空回复无效。');
   } else if (kind === 'authority-request-checkpoint') checkpoint(value);
   else if (kind === 'authority-read-diagnostics') diagnostics(value);

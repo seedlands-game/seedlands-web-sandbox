@@ -23,4 +23,20 @@ describe('Node authority publication listeners', () => {
     expect(onFailure).toHaveBeenCalledWith(failure);
     expect(healthy).toHaveBeenCalledTimes(1);
   });
+
+  it('also isolates a broken per-listener cleanup callback', () => {
+    const healthy = vi.fn();
+    const broken = Object.assign(
+      () => {
+        throw new Error('encode failed');
+      },
+      {
+        onFailure: () => {
+          throw new Error('socket close failed');
+        },
+      },
+    );
+    expect(() => notifyAuthorityPublicationListeners(new Set([broken, healthy]), {} as never)).not.toThrow();
+    expect(healthy).toHaveBeenCalledTimes(1);
+  });
 });

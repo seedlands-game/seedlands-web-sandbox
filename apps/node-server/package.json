@@ -14,10 +14,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@seedlands/game-core": "workspace:*"
+    "@seedlands/game-core": "workspace:*",
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "@types/node": "26.4.1",
+    "@types/ws": "^8.18.1",
     "esbuild": "0.28.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.11"

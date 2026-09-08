@@ -32,6 +32,9 @@ export async function buildNodeServer(outputDirectory = resolve(packageRoot, 'di
     platform: 'node',
     target: 'node22',
     format: 'esm',
+    banner: {
+      js: "import { createRequire as __seedlandsCreateRequire } from 'node:module'; const require = __seedlandsCreateRequire(import.meta.url);",
+    },
     bundle: true,
     splitting: false,
     metafile: true,

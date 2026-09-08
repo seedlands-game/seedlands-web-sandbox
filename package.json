@@ -51,6 +51,7 @@
     "prepare": "husky",
     "build:server": "pnpm --filter @seedlands/node-server build",
     "verify:node-isolation": "node scripts/verify-node-package-isolation.mjs",
+    "verify:web-node-playable-dist": "pnpm build:server && node scripts/verify-web-node-playable-dist.mjs",
     "server:dedicated": "pnpm --filter @seedlands/node-server start",
     "wasm:simd:build": "node scripts/build-simd-experiment.mjs",
     "rust:check": "node scripts/check-rust-kernel-boundary.mjs",

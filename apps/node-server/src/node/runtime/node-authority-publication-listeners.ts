@@ -12,7 +12,11 @@ export function notifyAuthorityPublicationListeners(
     try {
       listener(structuredClone(publication));
     } catch (error) {
-      listener.onFailure?.(error instanceof Error ? error : new Error(String(error)));
+      try {
+        listener.onFailure?.(error instanceof Error ? error : new Error(String(error)));
+      } catch {
+        // A broken cleanup hook still belongs to that consumer and cannot fail the authority lane.
+      }
     }
   }
 }

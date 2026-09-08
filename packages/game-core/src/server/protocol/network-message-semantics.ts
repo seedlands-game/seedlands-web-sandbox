@@ -1,4 +1,9 @@
 import type { AuthorityAction } from '../../compute/authority-worker-protocol';
+import {
+  isPlayablePublicOutboundMessage,
+  type PlayablePublicOutboundMessage,
+} from './network-playable-message-semantics';
+export type { PlayablePublicOutboundMessage } from './network-playable-message-semantics';
 
 export const NETWORK_DRAFT_PROTOCOL_VERSION = 1 as const;
 
@@ -14,6 +19,13 @@ export type NetworkMessageClass =
   | 'resync-request'
   | 'heartbeat'
   | 'disconnect'
+  | 'authority-state'
+  | 'input-decision'
+  | 'action-receipt'
+  | 'baseline-descriptor'
+  | 'baseline-page'
+  | 'baseline-unavailable'
+  | 'heartbeat-receipt'
   | 'player-correction'
   | 'entity-pose'
   | 'gameplay-view'
@@ -43,6 +55,13 @@ export const NETWORK_MESSAGE_CLASSES: Readonly<Record<NetworkMessageClass, Netwo
   'resync-request': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   heartbeat: { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   disconnect: { direction: 'inbound', reliability: 'reliable', stream: 'control' },
+  'authority-state': { direction: 'outbound', reliability: 'latest', stream: 'pose' },
+  'input-decision': { direction: 'outbound', reliability: 'reliable', stream: 'control' },
+  'action-receipt': { direction: 'outbound', reliability: 'reliable', stream: 'events' },
+  'baseline-descriptor': { direction: 'outbound', reliability: 'reliable', stream: 'world' },
+  'baseline-page': { direction: 'outbound', reliability: 'reliable', stream: 'world' },
+  'baseline-unavailable': { direction: 'outbound', reliability: 'reliable', stream: 'world' },
+  'heartbeat-receipt': { direction: 'outbound', reliability: 'reliable', stream: 'control' },
   'player-correction': { direction: 'outbound', reliability: 'reliable', stream: 'control' },
   'entity-pose': { direction: 'outbound', reliability: 'latest', stream: 'pose' },
   'gameplay-view': { direction: 'outbound', reliability: 'reliable', stream: 'events' },
@@ -66,6 +85,7 @@ export type PublicInboundMessage =
   | Readonly<{
       kind: 'session-hello';
       protocolVersion: typeof NETWORK_DRAFT_PROTOCOL_VERSION;
+      transport: 'experimental-local-c0-v1';
       accessKey: string;
     }>
   | Readonly<{
@@ -106,7 +126,14 @@ export type PublicInboundMessage =
   | Readonly<{ kind: 'disconnect'; ref: PublicSessionRef; reason: 'client-close' | 'mode-switch' }>;
 
 export type PublicOutboundMessage =
-  | Readonly<{ kind: 'welcome'; ref: PublicSessionRef; serverEpoch: string; physicsHz: 30 | 60 | 120 }>
+  | Readonly<{
+      kind: 'welcome';
+      ref: PublicSessionRef;
+      serverEpoch: string;
+      physicsHz: 30 | 60 | 120;
+      presentation?: Readonly<Record<string, unknown>>;
+      gameplay?: Readonly<Record<string, unknown>>;
+    }>
   | Readonly<{ kind: 'session-rejected'; code: 'authentication' | 'version' | 'capacity' }>
   | Readonly<{
       kind: 'player-correction';
@@ -167,7 +194,7 @@ export type PublicOutboundMessage =
 export type NormalizedNetworkCorpusMessage = Readonly<{
   draftVersion: typeof NETWORK_DRAFT_PROTOCOL_VERSION;
   messageClass: NetworkMessageClass;
-  message: PublicInboundMessage | PublicOutboundMessage;
+  message: PublicInboundMessage | PublicOutboundMessage | PlayablePublicOutboundMessage;
 }>;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -218,7 +245,7 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
 };
 
 const inboundKeys = {
-  'session-hello': ['protocolVersion', 'accessKey'],
+  'session-hello': ['protocolVersion', 'transport', 'accessKey'],
   'input-state': [
     'inputSequence',
     'targetPhysicsTick',
@@ -243,6 +270,7 @@ export function isPublicInboundMessage(value: unknown): value is PublicInboundMe
     return (
       hasOnlyKeys(value, ['kind', ...inboundKeys['session-hello']]) &&
       value.protocolVersion === NETWORK_DRAFT_PROTOCOL_VERSION &&
+      value.transport === 'experimental-local-c0-v1' &&
       typeof value.accessKey === 'string' &&
       value.accessKey.length > 0 &&
       value.accessKey.length <= 256
@@ -296,7 +324,9 @@ export function isPublicInboundMessage(value: unknown): value is PublicInboundMe
   return value.kind === 'disconnect' && (value.reason === 'client-close' || value.reason === 'mode-switch');
 }
 
-export function isPublicOutboundMessage(value: unknown): value is PublicOutboundMessage {
+export function isPublicOutboundMessage(
+  value: unknown,
+): value is PublicOutboundMessage | PlayablePublicOutboundMessage {
   if (!isRecord(value) || !hasNoCapabilities(value) || typeof value.kind !== 'string') return false;
   if (value.kind === 'session-rejected')
     return (
@@ -311,11 +341,16 @@ export function isPublicOutboundMessage(value: unknown): value is PublicOutbound
       ['idle', 'backpressure', 'protocol'].includes(value.code)
     );
   if (!isPublicSessionRef(value.ref)) return false;
+  if (isPlayablePublicOutboundMessage(value, isPublicSessionRef)) return true;
   if (value.kind === 'welcome')
     return (
-      hasOnlyKeys(value, ['kind', 'ref', 'serverEpoch', 'physicsHz']) &&
+      hasOnlyKeys(value, ['kind', 'ref', 'serverEpoch', 'physicsHz', 'presentation', 'gameplay']) &&
       isNonEmptyString(value.serverEpoch) &&
-      [30, 60, 120].includes(value.physicsHz as number)
+      [30, 60, 120].includes(value.physicsHz as number) &&
+      (value.presentation === undefined ||
+        (isRecord(value.presentation) && value.presentation.kind === 'welcome-presentation-reference')) &&
+      (value.gameplay === undefined ||
+        (isRecord(value.gameplay) && value.gameplay.kind === 'gameplay-consumer-reference'))
     );
   if (value.kind === 'player-correction') {
     const isAcknowledgement = (sequence: unknown) => sequence === -1 || isSafeInteger(sequence);

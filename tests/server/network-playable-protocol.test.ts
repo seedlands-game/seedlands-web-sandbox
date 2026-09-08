@@ -9,7 +9,12 @@ const utf8 = {
 
 describe('playable public network protocol', () => {
   it('accepts only a bounded credential hello before a session exists', () => {
-    const hello = { kind: 'session-hello', protocolVersion: 1, accessKey: 'synthetic-test-key' } as const;
+    const hello = {
+      kind: 'session-hello',
+      protocolVersion: 1,
+      transport: 'experimental-local-c0-v1',
+      accessKey: 'synthetic-test-key',
+    } as const;
     const bytes = encodeC0Envelope({ messageClass: 'session-hello', message: hello, blocks: [] }, utf8);
     expect(decodeC0Envelope(bytes, utf8).message).toEqual(hello);
     expect(isPublicInboundMessage({ ...hello, accessKey: 'x'.repeat(257) })).toBe(false);

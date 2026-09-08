@@ -241,9 +241,25 @@ async function start(bootstrap: NodeAuthorityWorkerBootstrap): Promise<Authority
     handle: async ({ kind, payload, signal }) => {
       const request = object(payload, 'Authority RPC 请求');
       if (kind === 'authority-receive-input') return { payload: host.receiveInput(request.input as never) };
+      if (kind === 'authority-clear-input') {
+        host.clearInput();
+        return { payload: {} };
+      }
+      if (kind === 'authority-read-ready') {
+        // This product-only read is a JSON-shaped public projection source. The
+        // RPC meter deliberately rejects shared object identities, so detach
+        // every nested value from Authority-owned snapshots before transport.
+        return { payload: JSON.parse(JSON.stringify(host.ready())) as ReturnType<typeof host.ready> };
+      }
       if (kind === 'authority-perform-action') {
         if (!Number.isSafeInteger(request.sequence)) throw new TypeError('Authority action sequence 无效。');
-        return { payload: await host.performAction(request.action as never, request.sequence as number) };
+        return {
+          payload: await host.performAction(
+            request.action as never,
+            request.sequence as number,
+            request.expectedCommitSequence as number | undefined,
+          ),
+        };
       }
       if (kind === 'authority-request-chunk') {
         if (typeof request.key !== 'string') throw new TypeError('Authority Chunk key 无效。');

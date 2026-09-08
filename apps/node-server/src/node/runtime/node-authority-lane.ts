@@ -1,6 +1,7 @@
 import { MessageChannel, Worker, type MessagePort } from 'node:worker_threads';
 import type { AuthorityAction } from '@seedlands/game-core/compute/authority-worker-protocol';
 import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
+import type { AuthorityReady } from '@seedlands/game-core/compute/authority-worker-protocol';
 import type { AuthorityTransactionReceipt } from '@seedlands/game-core/server/authority/authority-runtime-types';
 import type {
   DedicatedHostOptions,
@@ -77,7 +78,13 @@ export type NodeAuthorityLane = Readonly<{
   epoch: string;
   state: () => NodeAuthorityLaneDiagnostics['state'];
   receiveInput(input: InputCommand): Promise<SequenceDecision>;
-  performAction(action: AuthorityAction, sequence: number): Promise<AuthorityTransactionReceipt<unknown>>;
+  clearInput(): Promise<void>;
+  readReady(): Promise<AuthorityReady>;
+  performAction(
+    action: AuthorityAction,
+    sequence: number,
+    expectedCommitSequence?: number,
+  ): Promise<AuthorityTransactionReceipt<unknown>>;
   requestChunk(key: string): Promise<boolean>;
   readCollisionBaseline(key: string, minimumRevision: number): Promise<AuthorityCollisionBaselineResult>;
   captureBaseline(request: AuthorityBaselineCaptureRequest): Promise<AuthorityBaselineCaptureResult>;
@@ -358,7 +365,16 @@ export async function createNodeAuthorityLane(options: NodeAuthorityLaneOptions)
     epoch: options.epoch,
     state: () => currentState,
     receiveInput: (input) => request('authority-receive-input', { input }),
-    performAction: (action, sequence) => request('authority-perform-action', { action, sequence }),
+    clearInput: async () => {
+      await request('authority-clear-input', {});
+    },
+    readReady: () => request('authority-read-ready', {}),
+    performAction: (action, sequence, expectedCommitSequence) =>
+      request('authority-perform-action', {
+        action,
+        sequence,
+        ...(expectedCommitSequence === undefined ? {} : { expectedCommitSequence }),
+      }),
     requestChunk: (key) => request('authority-request-chunk', { key }),
     captureBaseline: async (capture) => {
       const kind =
