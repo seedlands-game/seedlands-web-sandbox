@@ -2,17 +2,17 @@
 
 ## 完成状态
 
-状态：Active，尚未 Delivered；PR #17 保持 Draft，base 为 main。本机与Linux完整闭环已经通过，等待正式CI环境采用后的必要门禁全绿。
+状态：Delivered，实现与CI配置基线为04a0c5d，base为main。CI34242169218的Static verification、Production build和Chromium regression全部成功，PR #17无冲突。收尾记录单独提交，最新检查通过后转为Ready交人类审核；不自动合并。
 
 干净 `77caf7a` 在本机原生 GPU / Medium 和managed完整Chromium/SwiftShader/Low完成认证连接、脚下3×3首屏、真实移动/转向/跳跃、挖块/拾取/放块、durable保存、关闭页面后Node继续、手动重连及Node重启恢复。两份48项sourceInputs由root与独立验收核对，原始连续帧已审看；证据保存为 `fd0c283`。原生11文件37项Vitest及2项Chromium通过，软件Low两项Chromium通过，durable stop与重启读取分别为732和1261。
 
 Linux CI34240608181在merge `4148bf9`（main840f4fb+fd0c283）完成相同Low完整旅程及错误认证用例。48项来源绑定一致、工作树干净，durable3687，重连tick2392→3013，重启新epoch且恢复修改。root与独立验收审看全部5张原图，保存于evidence/linux-low；这是软件环境功能兼容证据，不是Medium或性能结论。
 
-CI342406的旧默认headless shell步骤仍首屏失败，故整项Chromium job未绿。按预先定义的准出条件，已将验证通过的fullChromium/SwiftShader/Low用于正式Active步骤，原脚本、完整断言和其它回归保留，移除重复临时对照。等待该配置的新HEAD CI；不以旧失败环境标记成功。固定AAABBA绘制实验已按停止线结束，没有采用autoRender候选。
+正式CI34242169218使用验证过的fullChromium/SwiftShader/Low运行原Active脚本，两项旅程通过且没有重试，全部必要门禁绿色。其merge source35e8042（main840f4fb+04a0c5d）、48项来源绑定与干净工作树均核对；durable3347，重连tick2132→2734，重启恢复通过。旧默认headless shell仍是未覆盖环境；固定AAABBA已停止，没有采用autoRender或宣称性能收益。
 
 ## 提交和推送
 
-功能分支 `origin/codex/web-node-playable` 已推送至 `fd0c283`；CI环境采用与Linux证据将作为下一独立检查点保存。关键检查点包括 `d7f86ec` 输入target单调保护、`4e63fb7` 交互网格公平调度、`26850f6` 诊断字段白名单和 `2dabe70` 真实键盘测试结算屏障。main已合入的底座、CI及审阅规则已同步到本分支；本任务不修改PR #15。
+功能分支 `origin/codex/web-node-playable` 的实现与CI配置已推送为 `04a0c5d`，随后单独提交本交付快照。关键检查点包括 `d7f86ec` 输入target单调保护、`4e63fb7` 交互网格公平调度、`26850f6` 诊断字段白名单和 `2dabe70` 真实键盘测试结算屏障。main840f4fb已同步；本任务未修改PR #15。
 
 ## 变更
 
@@ -25,7 +25,7 @@ CI342406的旧默认headless shell步骤仍首屏失败，故整项Chromium job�
 
 ## 验证结果
 
-本机77caf7a双配置及Linux4148bf9的原完整旅程已独立复核；真实WS负向、分页交错、迟到结果、capture关闭与单Authority离线运行均有明确证据。2dabe70的5项驱动测试与完整typecheck通过，LinuxCI的Production build成功；最新完整静态与必要门禁以正式环境采用后的CI终态为准。原始日志、source/hash绑定与帧清单见execution.md、independent-validation.md及evidence/。
+本机77caf7a双配置及Linux4148bf9原完整旅程已独立复核；真实WS负向、分页交错、迟到结果、capture关闭与单Authority离线运行均有证据。正式CI34242169218：264个测试文件/1321项通过（原有2文件/4项skip未扩大），Active Node 35项通过，两端构建和隔离运行通过，既有浏览器回归15项、资产集成2项、新旅程37项Vitest及2项浏览器通过。原始日志、source/hash绑定与帧清单见execution.md、independent-validation.md及evidence/。
 
 ## 限制
 
@@ -33,4 +33,4 @@ CI342406的旧默认headless shell步骤仍首屏失败，故整项Chromium job�
 
 ## 剩余工作
 
-取得正式CI环境采用后的必要门禁全绿，更新交付快照，确认#17无冲突后转为ready-for-review交人类审核；不自动合并。PR #15由用户在另一台设备处理。
+实现范围内无未完成产品任务。收尾提交保持同一实现与CI配置，核对最新必要门禁后将#17交人类审核；公网/多人/正式协议与性能采用属于后续独立合同。PR #15由用户在另一台设备处理。

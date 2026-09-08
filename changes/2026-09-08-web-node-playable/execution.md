@@ -146,3 +146,9 @@ d7f86ec修复同连接target tick回退，确定性RED/GREEN及独立审阅通�
 CI34240608181绑定fd0c283；完整Chromium/SwiftShader/Low两项测试首次完整通过，旧默认shell步骤失败导致Chromium job仍红，Production build成功。source4148bf9fd72f821babaccf973d7e98fc1d182420已fetch核对parents840f4fb+fd0c283、tree4570d377f058e37221f2108dd224222130057afc，treeStatus为空，48项hash与该Git源码及本机同源Node产物一致。图形身份为Linux/Subzero/managed Chromium151，三次连接均Low。placed[1,19,0]、chunk revision2，durable stop3687；afterPlace tick2392→重连3013、同Node epoch，重启新epoch且恢复修改。root审看完整5帧，包含真实放置方块与重启世界；保存至evidence/linux-low。
 
 依据预先定义的采用条件，正式Active步骤保留pnpm test:web-node-playable（37项定向Vitest及完整2项浏览器），指定完整Chromium/SwiftShader/Low，并移除重复临时比较。其它回归、context、产品输入/画质默认、原超时和状态断言不变；artifact保存改为通用旅程名称。原生Medium与软件环境结论分开，最新必要CI绿色仍待配置采用后的提交验证。
+
+## 正式必要门禁全绿（04a0c5d）
+
+CI34242169218全部success，三项required checks均pass且PR17 MERGEABLE，base仍840f4fb。Static verification为264文件/1321项通过，原有2文件/4项skip未扩大；portable Active Node 4文件35项通过。Production build完成core/Web/Node构建及隔离安装/运行。Chromium regression包括既有15项、资产集成2项、当前37项Vitest及完整2项浏览器，全部通过，无flaky/retry报告；当前浏览器执行1.3分钟仅为功能记录。
+
+正式旅程merge source35e8042b27c48f55ec83e414023e660441ae06a1，parents840f4fb+04a0c5d、tree9fdcb87d9273b9b97e2702e4c81fa440346b797d。48项来源绑定一致且treeStatus为空；Linux Low放置[2,19,0]、chunk revision2，durable3347、tick2132→2734同epoch重连、新epoch重启恢复。原始工件/tmp/seedlands-web-node-playable/ci-final-34242169218，日志/tmp/seedlands-web-node-playable/ci-34242169218.log；已保存独立复核的前轮Linux完整5帧，未将本轮结构化结果当作新增性能结论。随后只提交交付记录，保持实现与CI配置不变，并在PR Ready前核对收尾提交的最新必要检查。
