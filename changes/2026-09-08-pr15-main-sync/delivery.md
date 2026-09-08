@@ -10,13 +10,13 @@
 
 ## 验证记录
 
-本地记录来自本工作区的待提交集成源码；Node 构建输出中的 Git SHA 在提交前仍是父提交，不作为新提交的远端准出证明。最终提交对应的 CI 与 mergeability 由 PR 描述绑定读回。
+运行时源码冻结于 bb22da4。本地记录来自该提交对应的集成源码；Node 构建输出中的 Git SHA 在提交前仍是父提交，不作为新提交的远端准出证明。最终提交对应的 CI 与 mergeability 由 PR 描述绑定读回。
 
 - Web 普通构建与 `/seedlands-web-sandbox/` 前缀生产构建通过，Svelte/TypeScript 无错误。
 - 原有 Chromium regression 15/15，包括 Wasm 默认、显式 TS fallback、启动/加载、真实输入、挖放与存档。
 - 新增资产集成 2/2 在开发服务器通过，在带部署前缀的生产 preview 再次 2/2 通过：草稿/应用/刷新、游戏启动/高清图标、公开 GLB、导入后刷新。生产预览进程已清理。
 - Active Node portable 检查 4 文件 35/35 通过；Node 五入口构建通过。
-- 最终全量静态检查及存储用例计数在提交前补齐；初次全量为 1264 passed、4 既有 skip，世界行覆盖率 96.89%。
+- 最终 `pnpm verify:static` 通过：249 个测试文件通过、2 个既有跳过；1266 项测试通过、4 项既有跳过，世界行覆盖率 96.89%。包含格式、ESLint、命名、覆盖率及 core/Web/Node/test 类型检查。存储相关 6 文件 44/44 通过。
 - 存储 RED/GREEN 与故障窗口见 [存储记录](storage-notes.md)；独立 Sol/xhigh 复核通过，见 [复核记录](review.md)。
 
 Node 包的独立安装/构建验收使用 PR CI 的隔离 runner；本地没有运行会覆盖共享 `/tmp/seedlands-monorepo` 目录的隔离脚本。必要 CI 包含 Static verification、Package builds（含独立安装）和 Chromium regression（含新增资产旅程）。PR 不自动合并。
