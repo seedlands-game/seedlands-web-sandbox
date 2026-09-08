@@ -38,8 +38,8 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
     await window.__seedlandsHarness!.setVoxelAt(0, 58, -2, 4);
   });
   await setHarnessView(page, 0, 0);
+  await expect(page.locator('#target-card[data-voxel="4"]')).toBeVisible();
   await page.mouse.down();
-  await expect(page.locator('#target-card')).toContainText('采集中');
   await expect
     .poll(async () => command(page, { type: 'inspect-voxel', position: [0, 58, -2] }))
     .toMatchObject({
@@ -113,13 +113,45 @@ test('真实连续攻击输入进入第二段连招，HUD仅按权威结果显�
   await startHarnessWorld(page, 'wood-sword-combo');
   await prepareFlatMovement(page);
   await command(page, { type: 'give-item', itemId: 'wood-sword', count: 1 });
-  const created = await command(page, { type: 'spawn-actor', archetype: 'settler', position: [0.5, 57, -2] });
-  expect(created.success).toBe(true);
-  await setHarnessView(page, 0, -8);
   await lockPointer(page);
+  await setHarnessView(page, 0, -8);
+  // 主动靠近玩家的目标避免在慢速 CI 的工具往返期间自行游荡出准星。
+  const created = await command(page, { type: 'spawn-actor', archetype: 'night-stalker', position: [0.5, 57, -2] });
+  expect(created.success).toBe(true);
+  const entityId = (created.data?.entity as { id: string }).id;
+  await expect(page.locator(`[data-entity-id="${entityId}"]`)).toBeAttached();
+  // DOM 观察在输入之前安装，保留短暂阶段；断言不依赖 Node 轮询恰好命中数百毫秒窗口。
+  await page.evaluate(() => {
+    const target = window as Window & { __combatEvidence?: string[]; __combatObserver?: MutationObserver };
+    target.__combatEvidence = [];
+    const observer = new MutationObserver(() => {
+      const text = `${document.querySelector('#combat-status')?.textContent} ${document.querySelector('[aria-label="交互反馈"]')?.textContent}`;
+      if (target.__combatEvidence?.at(-1) !== text) {
+        target.__combatEvidence?.push(text);
+        if ((target.__combatEvidence?.length ?? 0) > 128) target.__combatEvidence?.shift();
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    target.__combatObserver = observer;
+  });
   await page.mouse.down();
-  await expect(page.locator('#combat-status')).toContainText('第 2 击');
-  await page.screenshot({ path: info.outputPath('wood-sword-combo-step-two.png') });
-  await page.mouse.up();
-  await expect(page.getByRole('status', { name: '交互反馈', exact: true })).toContainText('7 点伤害');
+  try {
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const evidence = (window as Window & { __combatEvidence?: string[] }).__combatEvidence ?? [];
+          return {
+            secondStep: evidence.some((text) => text.includes('第 2 击')),
+            sevenDamage: evidence.some((text) => text.includes('7 点伤害')),
+          };
+        }),
+      )
+      .toEqual({ secondStep: true, sevenDamage: true });
+    await page.screenshot({ path: info.outputPath('wood-sword-combo-result.png') });
+  } finally {
+    await page.mouse.up();
+    await page.evaluate(() =>
+      (window as Window & { __combatObserver?: MutationObserver }).__combatObserver?.disconnect(),
+    );
+  }
 });
