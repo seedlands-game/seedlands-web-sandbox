@@ -128,3 +128,7 @@ d7f86ec修复同连接target tick回退，确定性RED/GREEN及独立审阅通�
 干净26850f64392e32a198f126e58b3ac2e1a9c14fe2执行 managed fullChromium/SwiftShader 的原浏览器脚本，两项通过（36.0秒，只是功能执行时间）；41项sourceInputs与Git源码/实际Node dist逐一匹配，sourceTreeStatus为空。完整挖放、保存、重连及重启的原断言保持。放置[2,18,2]的chunk0,0,0记录57条关联trace，包含visible-postrender；root审看放置帧中完整方块及重启后的真实世界帧。对应六份软件证据随后单独保存到evidence/software，7274原生证据仍保留。
 
 新诊断allowlist的RED证实原event args中合成errorMessage会进入输出；GREEN两文件7项、受影响ESLint、测试typecheck及pnpm build退出0。完整最新静态以CI34232573762终态为准；该CI仍待采集Linux故障目标chunk的阶段证据。
+
+## aeaa9ce 原生 Medium 冻结验证
+
+干净aeaa9ceb65c7947ef0cfdf292de9229dbcb3a0d8执行pnpm test:web-node-playable，11文件37项Vitest及2项Chromium通过（浏览器20.3秒，仅功能执行记录）。新增真实画质select在三次连接均选择Medium，graphics identity均为原生ANGLE Metal；44项sourceInputs逐一匹配，sourceTreeStatus为空。placed[-1,20,-2]、chunk revision2，durable stop797；afterPlace tick495→重连648，Node重启后的新epoch及修改恢复通过。root审看early/moving/turned/placed连续原始帧，放置方块实际可见。六份原生证据随后保存到evidence/；Linux Low对照由CI34235218286单独验收。
