@@ -65,3 +65,5 @@ ae8a49f 通过第一轮源码冻结，f1d9116 修正真实 WebSocket burst 测�
 2026-09-08 再次 fetch 后，main 从 5557f34 前进到 f47c44fc58a04954372b71df129d9fa6bbc64e9e（PR #12，统一资产工坊），共 189 个文件。已读取变更清单及 game.ts、browser-gameplay.ts、first-person-viewmodel.ts、Vite 和长期文档的接缝：新增资产入口、应用快照、材质装载与手持表现，仍使用根 src/public 和旧 Vite 布局；没有改本轮 Node 网络权威合同。
 
 PR #15 仍 OPEN，base 分支保持 3c727f7；本 PR #17 对该 base 可合并。本次保留已验收的独立试玩节点，不把 189 文件资产迁移混入 Node 接线。下一步在 monorepo 底座 #15 统一同步 main：把新增 app/client/public/入口迁入各自 Web 职责、合并 Vite 多入口和 game 的 appearance 创建，再验收工坊、原本地世界及 Node 远端三条路径。底座完成后 #17 跟进其提交；若 #15 先合入 main，先核对 ancestry 再 retarget。不要直接把旧 src 目录复活，也不要在两个 PR 重复迁移。
+
+后续用户明确调整职责：PR #15 的冲突解决与 main 整合由用户在另一台设备负责。本任务只维护 PR #17，保留 `codex/node-monorepo` base；上段整合方案仅为当时的接缝分析，不再作为本任务执行计划。不修改、整合或监控 #15。
