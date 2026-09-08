@@ -1,33 +1,45 @@
 import * as pc from 'playcanvas';
+import { GameplayModelAssets } from '../gameplay/gameplay-model-assets';
+import { setAppearanceResources } from '../gameplay/appearance-runtime';
+import type { AppearanceProject } from '../../client/presentation/appearance-project';
 import type { Asset } from '../../client/presentation/asset-types';
 import type { HeldAction } from '../../client/presentation/gameplay-model-definition';
 import { resolvePixelModel } from '../../client/presentation/asset-package';
 import { publicAssetUrl } from '../../client/presentation/public-asset-url';
-import { acquireGameplayModelAssets } from '../gameplay/gameplay-model-assets';
 import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
 import { pixelCanvas } from '../gameplay/asset-image';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
+import { addBuiltinActorModel, addPlayerArm } from '../gameplay/builtin-actor-models';
+import { addVoxelPreview } from './voxel-preview-resource';
+import { addGlbModel } from '../gameplay/glb-model-resource';
+import { terrainMaterials } from '../../client/presentation/terrain-assets';
+import { modelMaterialDefinitions } from '../../client/presentation/model-material-definitions';
 
 export class PreviewScene {
   readonly app: pc.Application;
   private camera: pc.Entity;
   private pivot: pc.Entity;
   private light: pc.Entity;
-  private assets;
   private viewmodel: FirstPersonViewmodel | null = null;
   private release: (() => void) | null = null;
   private generation = 0;
   private disposed = false;
+  private abort: AbortController | null = null;
   private yaw = 25;
   private pitch = 12;
   private distance = 2.4;
   private initialDistance = 2.4;
   private observer: ResizeObserver;
+  private shownAssetId = '';
   mode: 'model' | 'held' = 'model';
 
-  constructor(private canvas: HTMLCanvasElement) {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    project?: AppearanceProject,
+    private fixedSize?: number,
+  ) {
     this.app = new pc.Application(canvas, {
-      graphicsDeviceOptions: { deviceTypes: [pc.DEVICETYPE_WEBGL2], antialias: true },
+      graphicsDeviceOptions: { deviceTypes: [pc.DEVICETYPE_WEBGL2], antialias: true, preserveDrawingBuffer: true },
     });
     if (this.app.graphicsDevice.deviceType !== 'webgl2') {
       this.app.destroy();
@@ -36,9 +48,9 @@ export class PreviewScene {
     this.camera = new pc.Entity('Asset preview camera', this.app);
     this.pivot = new pc.Entity('Asset preview content', this.app);
     this.light = new pc.Entity('Asset preview light', this.app);
-    this.assets = acquireGameplayModelAssets(this.app);
+    if (project) setAppearanceResources(this.app, project);
     this.camera.addComponent('camera', {
-      clearColor: new pc.Color(0.06, 0.08, 0.09),
+      clearColor: fixedSize ? new pc.Color(0, 0, 0, 0) : new pc.Color(0.06, 0.08, 0.09),
       fov: 48,
       nearClip: 0.01,
       farClip: 50,
@@ -61,8 +73,8 @@ export class PreviewScene {
     const ratio = Math.min(devicePixelRatio, 2);
     this.app.setCanvasResolution(
       pc.RESOLUTION_FIXED,
-      Math.max(1, Math.floor(width * ratio)),
-      Math.max(1, Math.floor(height * ratio)),
+      this.fixedSize ?? Math.max(1, Math.floor(width * ratio)),
+      this.fixedSize ?? Math.max(1, Math.floor(height * ratio)),
     );
   }
   private clear() {
@@ -74,6 +86,9 @@ export class PreviewScene {
   }
   async show(asset: Asset, all: Asset[], mode: 'model' | 'held', filtering: 'nearest' | 'linear', repeat: number) {
     const generation = ++this.generation;
+    this.abort?.abort();
+    this.abort = new AbortController();
+    const sceneAssets = new GameplayModelAssets(this.app, all);
     const stage = new pc.Entity('Asset preview staging', this.app);
     stage.enabled = false;
     let release: (() => void) | null = null;
@@ -84,13 +99,55 @@ export class PreviewScene {
         const definition = resolvePixelModel(asset, all);
         distance = Math.max(2.4, (definition.pixels.length / 16) * 2.4);
         if (mode === 'held') {
-          viewmodel = new FirstPersonViewmodel(this.app, this.camera);
+          viewmodel = new FirstPersonViewmodel(this.app, this.camera, sceneAssets);
           viewmodel.setVisible(false);
           viewmodel.setHeldDefinition(definition);
         } else release = createDraftPixelResource(this.app, stage, definition);
       } else if (asset.type === 'builtin-item-model') {
         distance = 1.5;
-        this.assets.assets.addItem(stage, asset.payload.itemId);
+        if (mode === 'held') {
+          viewmodel = new FirstPersonViewmodel(this.app, this.camera, sceneAssets);
+          viewmodel.setVisible(false);
+          viewmodel.setHeldItem(asset.payload.itemId);
+        } else sceneAssets.addItem(stage, asset.payload.itemId);
+      } else if (asset.type === 'glb-model') {
+        distance = 3;
+        release = (await addGlbModel(this.app, stage, asset.payload.modelId, this.abort.signal)).release;
+      } else if (asset.type === 'builtin-voxel-model') {
+        distance = 2.6;
+        release = await addVoxelPreview(this.app, stage, asset.payload.voxelId, undefined, all);
+      } else if (asset.type === 'builtin-actor-model') {
+        distance = 4;
+        const actor = new pc.Entity('Actor preview', this.app);
+        stage.addChild(actor);
+        addBuiltinActorModel(sceneAssets, actor, asset.payload.kind);
+        actor.setLocalPosition(0, -0.9, 0);
+      } else if (asset.type === 'builtin-arm-model') {
+        distance = 2.4;
+        addPlayerArm(sceneAssets, stage);
+      } else if (asset.type === 'material') {
+        distance = 2.6;
+        const terrain = terrainMaterials.find((m) => m.id === asset.id);
+        if (terrain) release = await addVoxelPreview(this.app, stage, 2, terrain.faceMaterial, all);
+        else {
+          const definition = modelMaterialDefinitions.find((m) => `seedlands:material/model/${m.id}` === asset.id);
+          const materialAssets = new GameplayModelAssets(
+            this.app,
+            definition
+              ? all
+              : [
+                  ...all.filter((candidate) => candidate.id !== 'seedlands:material/model/stone'),
+                  { ...asset, id: 'seedlands:material/model/stone' },
+                ],
+          );
+          const cube = new pc.Entity('Shared model material', this.app);
+          cube.addComponent('render', { type: 'box', material: materialAssets.materials[definition?.id ?? 'stone'] });
+          stage.addChild(cube);
+          release = () => {
+            cube.destroy();
+            materialAssets.dispose();
+          };
+        }
       } else {
         distance = 2.4;
         let source: HTMLCanvasElement | HTMLImageElement;
@@ -101,6 +158,7 @@ export class PreviewScene {
           await image.decode();
           if (this.disposed || generation !== this.generation) {
             stage.destroy();
+            sceneAssets.dispose();
             return;
           }
           source = image;
@@ -138,9 +196,19 @@ export class PreviewScene {
       viewmodel?.dispose();
       release?.();
       stage.destroy();
+      sceneAssets.dispose();
       throw error;
     }
+    if (this.disposed || generation !== this.generation) {
+      viewmodel?.dispose();
+      release?.();
+      stage.destroy();
+      sceneAssets.dispose();
+      return;
+    }
     this.clear();
+    const changed = this.shownAssetId !== asset.id || this.mode !== mode;
+    this.shownAssetId = asset.id;
     this.mode = mode;
     this.initialDistance = distance;
     this.pivot.addChild(stage);
@@ -151,9 +219,28 @@ export class PreviewScene {
     this.release = () => {
       release?.();
       stage.destroy();
+      sceneAssets.dispose();
     };
-    this.distance = this.initialDistance;
+    if (changed) this.reset();
     this.updateCamera();
+  }
+  async capturePng(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const capture = () => {
+        clearTimeout(timer);
+        try {
+          resolve(this.canvas.toDataURL('image/png'));
+        } catch (error) {
+          reject(error);
+        }
+      };
+      const timer = setTimeout(() => {
+        this.app.off('postrender', capture);
+        reject(new Error('缩略图渲染超时'));
+      }, 5000);
+      this.app.once('postrender', capture);
+      this.app.renderNextFrame = true;
+    });
   }
   action(action: HeldAction) {
     this.viewmodel?.setAction(action, true);
@@ -192,10 +279,10 @@ export class PreviewScene {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.abort?.abort();
     this.generation++;
     this.observer.disconnect();
     this.clear();
-    this.assets.release();
     this.app.destroy();
   }
 }

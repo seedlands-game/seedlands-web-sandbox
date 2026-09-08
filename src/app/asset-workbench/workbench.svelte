@@ -1,27 +1,31 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import type { NativeAsset, PixelTexture, PixelModel, Rgb } from '../../client/presentation/asset-types';
+  import type { Asset, NativeAsset, PixelTexture, PixelModel, Rgb } from '../../client/presentation/asset-types';
   import { builtinItemBindings } from '../../client/presentation/asset-catalog';
   import { assetAdapter, assetDependencies, isNativeAsset } from '../../client/presentation/asset-adapters';
   import { parseAssetPackage } from '../../client/presentation/asset-package';
   import { publicAssetUrl } from '../../client/presentation/public-asset-url';
   import { loadAssetLibrary, saveAssetLibrary } from '../../client/persistence/asset-workbench-store';
   import { EditorState } from './editor-state';
-  import AssetThumbnail from './asset-thumbnail.svelte';
   import AssetPreview from './asset-preview.svelte';
   import PixelEditor from './pixel-editor.svelte';
   import NewAssetDialog from './new-asset-dialog.svelte';
   import WorkbenchStatus from './workbench-status.svelte';
   import './workbench.css';
+  import AssetLibrary from './asset-library.svelte';
+  import AssetDetails from './asset-details.svelte';
+  import ModelProperties from './model-properties.svelte';
+  import TexturePackPanel from './texture-pack-panel.svelte';
+  import type { StoredGlb } from '../../client/presentation/glb-model';
+  import { listGlbModels } from '../../client/persistence/glb-model-store';
 
   const editor = new EditorState();
   let revision = $state(0);
   let libraryRevision = 0;
   let loaded = $state(false);
   let saving = $state(false);
-  let search = $state('');
-  let tab = $state<'items' | 'assets'>('items');
-  let filter = $state('all');
+  let tab = $state<'usage' | 'items' | 'assets'>('usage');
+  let models = $state<StoredGlb[]>([]);
   let mobilePanel = $state<'library' | 'edit' | 'preview'>('edit');
   let status = $state('正在打开本地资产库…');
   let failure = $state(false);
@@ -29,15 +33,31 @@
   let imageFailure = $state(false);
   let imageSize = $state('');
   let showNew = $state(false);
+  let viewportWidth = $state(1280);
   let importInput: HTMLInputElement;
 
   const all = $derived.by(() => {
     revision;
-    return editor.all;
+    return [
+      ...editor.all,
+      ...models.map((model): Asset => ({
+        id: model.id,
+        name: model.name,
+        revision: model.revision,
+        source: 'user',
+        type: 'glb-model',
+        payload: {
+          modelId: model.id,
+          byteLength: model.byteLength,
+          nodeCount: model.nodeCount,
+          triangleCount: model.triangleCount,
+        },
+      })),
+    ];
   });
   const selected = $derived.by(() => {
     revision;
-    return editor.selected;
+    return all.find((asset) => asset.id === editor.selectedId);
   });
   const canUndo = $derived.by(() => {
     revision;
@@ -53,24 +73,17 @@
   });
   const texture = $derived.by((): PixelTexture | undefined => {
     if (selected?.type === 'pixel-texture') return selected;
-    if (selected?.type === 'extruded-pixel-model')
+    if (selected?.type === 'extruded-pixel-model' || selected?.type === 'material')
       return all.find((a) => a.id === selected.payload.textureId && a.type === 'pixel-texture') as
         PixelTexture | undefined;
   });
-  const readonly = $derived(selected?.source !== 'user');
+  const readonly = $derived(!selected || selected.source !== 'user' || !isNativeAsset(selected));
   const users = $derived(
     selected
       ? builtinItemBindings.filter((b) => b.iconId === selected.id || b.modelId === selected.id).map((b) => b.name)
       : [],
   );
   const references = $derived(selected ? all.filter((a) => assetDependencies(a).includes(selected.id)) : []);
-  const listed = $derived(
-    all.filter(
-      (a) =>
-        (filter === 'all' || a.type === filter || (filter === 'user' && a.source === 'user')) &&
-        `${a.name} ${a.id}`.toLowerCase().includes(search.toLowerCase()),
-    ),
-  );
 
   function refresh() {
     revision++;
@@ -106,6 +119,11 @@
     } catch (error) {
       message(`本地保存不可用：${error instanceof Error ? error.message : String(error)}。仍可编辑并导出。`, true);
     } finally {
+      try {
+        models = await listGlbModels();
+      } catch (error) {
+        message(`模型库读取失败：${String(error)}`, true);
+      }
       loaded = true;
     }
   }
@@ -199,6 +217,7 @@
   }
 </script>
 
+<svelte:window bind:innerWidth={viewportWidth} />
 <svelte:head
   ><title>资产工坊 · Seedlands</title><meta
     name="description"
@@ -228,69 +247,25 @@
       >{/each}
   </nav>
   <div class="workspace-grid">
-    <aside class="library pane" class:mobile-visible={mobilePanel === 'library'}>
-      <div class="section-heading">
-        <h2>资产库</h2>
-        <span>{all.length}</span>
-      </div>
-      <div class="segmented">
-        <button class:active={tab === 'items'} onclick={() => (tab = 'items')}>按物品</button><button
-          class:active={tab === 'assets'}
-          onclick={() => (tab = 'assets')}>按资产</button
-        >
-      </div>
-      <input class="search" aria-label="搜索资产" placeholder="搜索名称或标识…" bind:value={search} />
-      {#if tab === 'assets'}<select aria-label="资产类型筛选" bind:value={filter}
-          ><option value="all">所有类型</option><option value="user">我的草稿</option><option value="pixel-texture"
-            >像素贴图</option
-          ><option value="extruded-pixel-model">像素挤出模型</option><option value="image-texture">图片贴图</option
-          ><option value="builtin-item-model">内置模型</option></select
-        >{/if}
-      <div class="asset-list">
-        {#if tab === 'items'}
-          {#each builtinItemBindings.filter( (b) => `${b.name} ${b.itemId}`.includes(search) ) as binding (binding.itemId)}
-            {@const model = all.find((a) => a.id === binding.modelId)!}
-            <button
-              class="asset-row"
-              class:selected={selected?.id === binding.modelId || selected?.id === binding.iconId}
-              onclick={() => select(binding.modelId)}
-            >
-              <AssetThumbnail asset={model} assets={all} {revision} /><span
-                ><strong>{binding.name}</strong><small>{assetAdapter(model.type).label}</small></span
-              >
-            </button>
-            {#if selected?.id === binding.modelId || selected?.id === binding.iconId}<div class="item-links">
-                <button onclick={() => select(binding.modelId)}>模型</button><button
-                  onclick={() => select(binding.iconId)}>图标 / 贴图</button
-                >
-              </div>{/if}
-          {/each}
-        {:else}
-          {#each listed as asset (asset.id)}<button
-              class="asset-row"
-              class:selected={selected?.id === asset.id}
-              onclick={() => select(asset.id)}
-              ><AssetThumbnail {asset} assets={all} {revision} /><span
-                ><strong>{asset.name}</strong><small
-                  >{asset.source === 'user' ? '草稿 · ' : ''}{assetAdapter(asset.type).label}</small
-                ></span
-              ></button
-            >{/each}
-          {#if !listed.length}<p class="empty">没有匹配的资产</p>{/if}
-        {/if}
-      </div>
-      <div class="library-footer">
-        <button disabled={!loaded} onclick={() => importInput.click()}>导入资产包</button><button
-          onclick={reloadLibrary}>重新加载</button
-        ><input
-          bind:this={importInput}
-          type="file"
-          accept=".json,application/json"
-          hidden
-          onchange={importFile}
-        /><small>源资产保存在此浏览器<br />导出文件可用作备份</small>
-      </div>
-    </aside>
+    <AssetLibrary
+      assets={all}
+      selectedId={editor.selectedId}
+      {revision}
+      {loaded}
+      mobileVisible={mobilePanel === 'library'}
+      bind:tab
+      onselect={select}
+      onreload={reloadLibrary}
+      onimport={() => importInput.click()}
+      onmodel={(model) => {
+        models = [...models, model];
+        select(model.id);
+        tab = 'usage';
+        message('模型已导入并保存到本地');
+      }}
+      onerror={(error) => message(error, true)}
+    />
+    <input bind:this={importInput} type="file" accept=".json,application/json" hidden onchange={importFile} />
     {#if selected}
       <main class="editor-pane pane" class:mobile-visible={mobilePanel === 'edit'}>
         <div class="eyebrow">{selected.source === 'builtin' ? 'FIRST-PARTY / 内置资产' : 'MY LIBRARY / 本地草稿'}</div>
@@ -379,12 +354,21 @@
               {imageSize} · 原始 PNG · 透明背景
             </p>{/if}
         {:else}
-          <div class="model-description">
-            <AssetThumbnail asset={selected} assets={all} {revision} />
-            <h2>游戏中的原始模型</h2>
-            <p>右侧使用游戏现有代码展示这件物品。它保留自己的生产方式，不经过像素挤出编辑器。</p>
-            <span class="type-tag">只读预览</span>
-          </div>
+          {#if viewportWidth > 850}<div class="model-stage">
+              <AssetPreview asset={selected} assets={all} {revision} />
+            </div>{:else}<p class="hint">切换「预览」面板可旋转查看此模型。</p>{/if}
+        {/if}
+        {#if texture || selected.type === 'image-texture'}<AssetDetails
+            asset={selected}
+            assets={all}
+            onselect={select}
+            onerror={(error) => message(error, true)}
+            ondeleted={(id) => {
+              models = models.filter((model) => model.id !== id);
+              select('builtin:model:stone-pickaxe');
+              message('模型已删除');
+            }}
+          />
         {/if}
         <div class="metadata">
           <label
@@ -405,64 +389,46 @@
           >
           <div><span>标识</span><code>{selected.id}</code></div>
           <div>
-            <span>来源</span><strong>{readonly ? '项目内置 / 只读' : '本地可编辑源'} · r{selected.revision}</strong>
+            <span>来源</span><strong
+              >{selected.source === 'builtin'
+                ? '项目内置 / 只读'
+                : selected.type === 'glb-model'
+                  ? '本地 GLB / 已保存'
+                  : '本地可编辑源'} · r{selected.revision}</strong
+            >
           </div>
-          {#if selected.type === 'extruded-pixel-model'}
-            <label
-              >关联贴图 <select
-                aria-label="关联贴图"
-                disabled={readonly}
-                value={selected.payload.textureId}
-                onchange={(event) =>
-                  editModel((model) => {
-                    const next = all.find((a) => a.id === event.currentTarget.value) as PixelTexture;
-                    model.payload.textureId = next.id;
-                    model.payload.grip = [
-                      Math.min(model.payload.grip[0], next.payload.width),
-                      Math.min(model.payload.grip[1], next.payload.height),
-                    ];
-                  })}
-                >{#each all.filter((a) => a.type === 'pixel-texture' && (readonly || a.source === 'user')) as t (t.id)}<option
-                    value={t.id}>{t.name}</option
-                  >{/each}</select
-              ></label
-            >
-            <label
-              >总厚度（像素）<input
-                aria-label="模型厚度"
-                type="range"
-                min="1"
-                max="8"
-                step="1"
-                disabled={readonly}
-                value={selected.payload.thicknessPixels}
-                oninput={(event) =>
-                  editModel((model) => (model.payload.thicknessPixels = Number(event.currentTarget.value)))}
-              /><output>{selected.payload.thicknessPixels}</output></label
-            >
-            {#each ['X', 'Y'] as axis, i (axis)}<label
-                >握持点 {axis}<input
-                  aria-label={`握持点 ${axis}`}
-                  type="number"
-                  min="0"
-                  max={texture?.payload.width ?? 64}
-                  step="0.5"
-                  disabled={readonly}
-                  value={selected.payload.grip[i]}
-                  onchange={(event) => {
-                    const value = Number(event.currentTarget.value);
-                    if (Number.isFinite(value))
-                      editModel(
-                        (model) => (model.payload.grip[i] = Math.max(0, Math.min(texture?.payload.width ?? 64, value))),
-                      );
-                  }}
-                /></label
-              >{/each}
-          {/if}
+          {#if selected.type === 'extruded-pixel-model'}<ModelProperties
+              model={selected}
+              {all}
+              {texture}
+              {readonly}
+              onedit={editModel}
+            />{/if}
         </div>
       </main>
       <aside class="preview-pane pane" class:mobile-visible={mobilePanel === 'preview'}>
-        <AssetPreview asset={selected} assets={all} {revision} />
+        {#if texture || selected.type === 'image-texture' || viewportWidth <= 850}<AssetPreview
+            asset={selected}
+            assets={all}
+            {revision}
+          />
+        {:else}<h2>资产信息</h2>
+          <AssetDetails
+            asset={selected}
+            assets={all}
+            onselect={select}
+            onerror={(error) => message(error, true)}
+            ondeleted={(id) => {
+              models = models.filter((model) => model.id !== id);
+              select('builtin:model:stone-pickaxe');
+              message('模型已删除');
+            }}
+          />{/if}
+        {#if texture || selected.type === 'builtin-voxel-model'}<TexturePackPanel
+            {texture}
+            textures={all.filter((a): a is PixelTexture => a.type === 'pixel-texture')}
+            onapplied={refresh}
+          />{/if}
         <section class="usage">
           <h2>引用与用途</h2>
           {#if users.length}{#each users as name (name)}<p>
@@ -470,7 +436,11 @@
               </p>{/each}{/if}{#each references as ref (ref.id)}<button onclick={() => select(ref.id)}
               >{ref.name} → 使用此贴图</button
             >{/each}{#if !users.length && !references.length}<p class="muted">
-              暂无游戏绑定。草稿不会自动覆盖游戏资产。
+              {selected.source === 'builtin'
+                ? selected.type === 'builtin-actor-model' && selected.payload.kind === 'player'
+                  ? '玩家比例基准；第一人称手臂使用相同定义。'
+                  : '项目内置资产，由对应游戏表现适配器使用。'
+                : '暂无游戏绑定。草稿和导入模型不会自动覆盖游戏资产。'}
             </p>{/if}
         </section>
         <section class="pipeline-note">

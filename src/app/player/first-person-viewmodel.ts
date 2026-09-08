@@ -1,6 +1,11 @@
 import * as pc from 'playcanvas';
 import { type HeldAction, viewmodelPose } from '../../client/presentation/gameplay-model-definition';
-import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from '../gameplay/gameplay-model-assets';
+import { addPlayerArm } from '../gameplay/builtin-actor-models';
+import {
+  acquireGameplayModelAssets,
+  type GameplayModelAssetsLease,
+  type GameplayModelAssets,
+} from '../gameplay/gameplay-model-assets';
 import { resolveViewmodelLayout } from '../../client/presentation/viewmodel-layout';
 
 import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
@@ -25,8 +30,9 @@ export class FirstPersonViewmodel {
   constructor(
     private readonly app: pc.Application,
     private readonly camera: pc.Entity,
+    assets?: GameplayModelAssets,
   ) {
-    this.assetsLease = acquireGameplayModelAssets(app);
+    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app);
     if (app.root && app.scene?.layers) {
       this.layer = new pc.Layer({ name: 'First Person Viewmodel' });
       app.scene.layers.push(this.layer);
@@ -48,36 +54,17 @@ export class FirstPersonViewmodel {
     // Screen anchor: hand at the lower-right; the tool extends left and upward from its grip.
     this.root.setLocalEulerAngles(-4, -10, 0);
     (this.viewmodelCamera ?? camera).addChild(this.root);
-    this.forearm.setLocalPosition(0.035, -0.5, -0.1);
+    // Point the canonical downward arm toward the grip; the sleeve extends out of the lower screen.
+    this.forearm.setLocalPosition(0, -0.3375, -0.14);
     this.held.setLocalEulerAngles(0, 0, 24);
     this.root.addChild(this.handPivot);
     this.handPivot.addChild(this.held);
     this.held.addChild(this.forearm);
     this.held.addChild(this.item);
-    this.assets.addBox(
-      this.forearm,
-      'sleeve',
-      'cloth',
-      { x: 0.02, y: 0, z: 0 },
-      { x: 0.16, y: 0.6, z: 0.17 },
-      { castShadows: false },
-    );
-    this.assets.addBox(
-      this.forearm,
-      'sleeve-cuff',
-      'brass',
-      { x: 0.02, y: 0.27, z: 0 },
-      { x: 0.175, y: 0.045, z: 0.18 },
-      { castShadows: false },
-    );
-    this.assets.addBox(
-      this.held,
-      'hand',
-      'skin',
-      { x: 0, y: -0.15, z: -0.14 },
-      { x: 0.18, y: 0.14, z: 0.15 },
-      { castShadows: false },
-    );
+    const arm = new pc.Entity('viewmodel arm orientation');
+    arm.setLocalEulerAngles(0, 0, 180);
+    this.forearm.addChild(arm);
+    addPlayerArm(this.assets, arm);
     this.applyLayer(this.root);
   }
 

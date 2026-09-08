@@ -18,7 +18,7 @@ const integer = (value: unknown, min: number, max: number): number =>
 const string = (value: unknown): string =>
   typeof value === 'string' && value.trim().length > 0 && value.length <= 120 ? value : fail('名称或标识无效');
 
-export function validateNativeAssets(input: unknown): NativeAsset[] {
+export function validateNativeAssets(input: unknown, allowBuiltin = false): NativeAsset[] {
   if (!Array.isArray(input) || input.length > 128) fail('资产数量超限');
   const assets: NativeAsset[] = (input as unknown[]).map((entry) => {
     const a = record(entry);
@@ -27,9 +27,9 @@ export function validateNativeAssets(input: unknown): NativeAsset[] {
       id: string(a.id),
       name: string(a.name),
       revision: integer(a.revision, 1, Number.MAX_SAFE_INTEGER),
-      source: 'user' as const,
+      source: a.source === 'builtin' && allowBuiltin ? ('builtin' as const) : ('user' as const),
     };
-    if (a.source !== 'user') fail('只能导入用户资产副本');
+    if (a.source !== 'user' && !(allowBuiltin && a.source === 'builtin')) fail('只能导入用户资产副本');
     const p = record(a.payload);
     if (a.type === 'pixel-texture') {
       keys(p, ['width', 'height', 'palette', 'pixels']);
