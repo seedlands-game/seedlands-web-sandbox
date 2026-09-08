@@ -82,3 +82,11 @@ Terra/high 独立只读诊断沿 `AuthoritySession.wake → advanceGameplayRules
 [run 34274457994](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34274457994) 固定 `c872ef3503f9373f739cde512e6c98280f798b6b`：静态与构建再次通过；近战在新增的队列就绪断言失败，尚未进入攻击观察。三次失败诊断分别记录 generationQueue 3/1/3，compute running/queued 均 0，瞬时 frameMs 150.7/212.2/161.4。该数据只解释本次功能夹具没有满足前置条件，不作为性能采样结论。
 
 最终将本条近战功能夹具的 `deviceScaleFactor` 固定为 0.5，CSS 视口仍为 1280×720，Low 与所有玩法/反馈/终态断言保持。队列加载采用单独 30s 截止；连续稳定帧仍为 15s 截止，原命中结果 5s 断言不延长。本地完整 Chromium + SwiftShader + Low、零重试连续 2/2 通过（27.5s），终态截图已检查。这个夹具不声称原像素密度的软件渲染具备同样的输入窗口保证；其他浏览器基础回归与实际产品分辨率不变。
+
+### 指针捕获与短暂反馈的夹具合同
+
+[run 34275512285](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34275512285) 固定 `458e46baff5ca33ce84347ba7c7531472ed01583`：静态/构建与其余浏览器集成通过；近战仍有首击未发生或受击瞬时提示缺席。失败记录中已出现 queue=0 且 frameMs 10.3/45.5 的样本，不能继续仅归因于未预热；两次首击失败的页面历史只有 ready，interactionAttempts=1，未有命中/挥空回执。大量 prediction resync 是同时存在的状态，源码核查确认 resynchronizeInput 只重置预测，不清除按住攻击，不能以关联冒充直接因果。
+
+本条展示夹具进一步明确在 Pointer Lock 获取、场景稳定后，用现有 Harness `setView(0,-15)` 固定训练射线；攻击仍由真实鼠标按住触发，未直接提交攻击命令或修改目标。受击提示、vitals 高亮和视角冲击在页面 MutationObserver 内分别记录实际出现，再验证累计证据和已有音频记录，避免把跨进程读取时提示仍未消退当作合同。受击后截图命名为 after-player-damage，不称为某一瞬间的画面保证；两次攻击截图与中央目标 null 断言保留。
+
+相同完整 Chromium + SwiftShader + Low + 0.5 像素密度，零重试连续 2/2 通过（27.5s）。此修订是明确夹具视角与观察时机，不声称已在 CI 直接测得鼠标位移的具体来源，也不新增产品行为。

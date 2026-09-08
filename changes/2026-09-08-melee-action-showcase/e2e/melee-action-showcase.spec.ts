@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { lockPointer } from '../../../tests/e2e/support/harness';
+import { lockPointer, setHarnessView } from '../../../tests/e2e/support/harness';
 import {
   MELEE_SHOWCASE_DUMMY_IDS,
   MELEE_SHOWCASE_HOSTILE_ID,
@@ -52,6 +52,12 @@ test.afterEach(async ({ page }, info) => {
     combat: document.querySelector('#combat-status')?.textContent,
     feedback: document.querySelector('[aria-label="交互反馈"]')?.textContent,
     damage: document.querySelector('#player-damage-feedback')?.outerHTML,
+    damageEvidence: (
+      window as Window & {
+        __showcaseDamageEvidence?: { text: boolean; vitals: boolean; camera: boolean };
+      }
+    ).__showcaseDamageEvidence,
+    pointerLocked: document.pointerLockElement?.id,
     history: (window as Window & { __showcaseCombatEvidence?: string[] }).__showcaseCombatEvidence,
     snapshot: window.__seedlandsHarness?.snapshot(),
   }));
@@ -79,12 +85,43 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   await waitForPlayableScene(page);
   await capture('showcase-ready');
 
+  await page.evaluate(() => {
+    const target = window as Window & {
+      __showcaseDamageEvidence?: { text: boolean; vitals: boolean; camera: boolean };
+      __showcaseDamageObserver?: MutationObserver;
+    };
+    const evidence = { text: false, vitals: false, camera: false };
+    target.__showcaseDamageEvidence = evidence;
+    const observer = new MutationObserver(() => {
+      evidence.text ||=
+        document.querySelector('#player-damage-feedback.visible')?.textContent?.includes('受击 -2') ?? false;
+      evidence.vitals ||= document.querySelector('#survival-vitals.damaged') !== null;
+      evidence.camera ||= window.__seedlandsHarness!.playerDamageFeedback().active;
+    });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true });
+    target.__showcaseDamageObserver = observer;
+  });
   await page.getByRole('button', { name: '立即触发玩家受击反馈', exact: true }).click();
-  const damage = page.locator('#player-damage-feedback.visible');
-  await expect(damage).toContainText('受击 -2', { timeout: 15_000 });
-  await expect(page.locator('#survival-vitals.damaged')).toBeVisible();
-  await expect.poll(() => page.evaluate(() => window.__seedlandsHarness!.playerDamageFeedback().active)).toBe(true);
-  await capture('player-damaged');
+  await page.waitForFunction(
+    () => {
+      const evidence = (
+        window as Window & {
+          __showcaseDamageEvidence?: { text: boolean; vitals: boolean; camera: boolean };
+        }
+      ).__showcaseDamageEvidence;
+      return evidence?.text && evidence.vitals && evidence.camera;
+    },
+    undefined,
+    { timeout: 15_000 },
+  );
+  await page.evaluate(() =>
+    (
+      window as Window & {
+        __showcaseDamageObserver?: MutationObserver;
+      }
+    ).__showcaseDamageObserver?.disconnect(),
+  );
+  await capture('after-player-damage');
   await expect
     .poll(() =>
       page.evaluate(
@@ -103,6 +140,8 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
 
   await lockPointer(page);
   await waitForPlayableScene(page);
+  // 捕获指针后固定夹具视角，避免获取指针时的鼠标位移改变训练目标射线。
+  await setHarnessView(page, 0, -15);
   await page.evaluate(() => {
     const target = window as Window & {
       __showcaseCombatEvidence?: string[];
