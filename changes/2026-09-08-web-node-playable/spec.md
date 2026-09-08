@@ -63,3 +63,5 @@
 诊断提交 e6c5b3e 推送后，PR17 因目标 codex/node-monorepo 已推进至 21d6e37 而出现合并冲突，GitHub 未创建新的 PR CI。用户负责另一台设备上的 PR15；本任务只在 PR17 分支合并已推送的目标提交，不修改 PR15 或其分支。保持 Node 唯一权威、现有30秒首屏合同与完整本地/远端玩法，接入新底座的资产加载和持久化修复。
 
 可执行 RED：git merge-tree 报告 ci.yml、game.ts、code-map.md 三处冲突，PR17 mergeable=CONFLICTING。GREEN：三处保留双方功能；本地静态、两端构建及受影响浏览器路径通过，PR17恢复可合并并获得最新CI。旧4cf截图仅作为旧源码旅程证据，接入新资产后重新取得真实远端旅程，不将旧图当成更新后的视觉验收。
+
+目标随后切换为 main@ddffbcb（底座 squash 合入）。已核对其树与本分支已包含的 21d6e37，仅 CI context 名称恢复为 Production build 及上游交付记录不同。以 21d6e37 为内容参照应用这两项精确差异并记录 main 合并父提交，保留全部 PR17 增量；不用旧目录历史重放整个迁移。PR17 后续以 main 为 base 验收。此步没有产品源码变化。

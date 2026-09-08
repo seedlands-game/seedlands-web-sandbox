@@ -37,7 +37,7 @@ jobs:
         run: pnpm test:active-node:critical
 
   build:
-    name: Package builds
+    name: Production build
     runs-on: ubuntu-24.04
     steps:
       - name: Check out source

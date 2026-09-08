@@ -19,7 +19,9 @@
 - 最终 `pnpm verify:static` 通过：249 个测试文件通过、2 个既有跳过；1266 项测试通过、4 项既有跳过，世界行覆盖率 96.89%。包含格式、ESLint、命名、覆盖率及 core/Web/Node/test 类型检查。存储相关 6 文件 44/44 通过。
 - 存储 RED/GREEN 与故障窗口见 [存储记录](storage-notes.md)；独立 Sol/xhigh 复核通过，见 [复核记录](review.md)。
 
-Node 包的独立安装/构建验收使用 PR CI 的隔离 runner；本地没有运行会覆盖共享 `/tmp/seedlands-monorepo` 目录的隔离脚本。必要 CI 包含 Static verification、Package builds（含独立安装）和 Chromium regression（含新增资产旅程）。PR 不自动合并。
+Node 包的独立安装/构建验收使用 PR CI 的隔离 runner；本地没有运行会覆盖共享 `/tmp/seedlands-monorepo` 目录的隔离脚本。必要 CI 包含 Static verification、Production build（含三包构建和 Node 独立安装）和 Chromium regression（含新增资产旅程）。PR 不自动合并。
+
+首次远端集成提交 21d6e37 的三项 CI 全通过，但最终读回发现 main ruleset 要求的检查名为 `Production build`，原三包迁移将 job 改名为 `Package builds`，导致必需检查缺失而 BLOCKED。本次仅恢复原必需 context 名称，全部构建/隔离步骤保持不变；不修改 ruleset 或降低门禁。名称修复后的提交必须重新通过必要 CI，并确认 GitHub 为 CLEAN 后才交棒。
 
 ## 长期文档与证据边界
 
