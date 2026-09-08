@@ -1,6 +1,6 @@
 # 对象外观与统一资产生产
 
-状态：Active。类型：Breaking。用户已明确批准收拢此前方案、按设计与优化边界实施，并要求灯笼MVP通过后直接推广全部现有素材；本合同记录该明确授权，不重复要求hash确认。基线68bf592，既有PR #16尚未合并，本change在其上叠加独立分支交付，不自动合并。
+状态：Delivered（实现与本地证据已交付；远端准出见PR实时检查）。类型：Breaking。用户已明确批准收拢此前方案、按设计与优化边界实施，并要求灯笼MVP通过后直接推广全部现有素材；本合同记录该明确授权，不重复要求hash确认。基线68bf592，既有PR #16尚未合并，本change在其上叠加独立分支交付，不自动合并。
 
 ## 目标与决定
 
@@ -46,11 +46,11 @@
 - [x] 全量素材纳管与能力验收
 - [x] 包恢复/GLB重导入/高清缩略图
 - [x] noa有界实验与采用结论
-- [ ] static/build/浏览器/文档/语义commit/PR/CI
+- [x] static/build/浏览器/文档/语义commit/PR
 
 ## Delivery Snapshot
 
-实现与本地验收已完成，待语义commit、PR和最新HEAD CI读回。独立分支`codex/asset-appearance-center`，目标base为仍打开的PR #16分支`codex/unified-visual-assets`。长期docs baseline已更新：`docs/asset-workbench.md`记录分层、能力、快照/项目包与GPU所有权，`docs/code-map.md`更新入口，`docs/blender-asset-production.md`及`ASSETS.md`记录可复现源和许可。世界、协议及Chunk实现没有扩展。
+实现与本地验收已完成。生产实现提交`ed61d4a`，Blender配方提交`4494cd1`；[PR #18](https://github.com/seedlands-game/seedlands-web-sandbox/pull/18)已创建且为ready for review，远端CI以PR最新HEAD的实时检查为准，人类审核和合并仍待完成。独立分支`codex/asset-appearance-center`，目标base为仍打开的PR #16分支`codex/unified-visual-assets`。长期docs baseline已更新：`docs/asset-workbench.md`记录分层、能力、快照/项目包与GPU所有权，`docs/code-map.md`更新入口，`docs/blender-asset-production.md`及`ASSETS.md`记录可复现源和许可。世界、协议及Chunk实现没有扩展。
 
 主任务请求Astra/high；方案固定Sol/xhigh只读复核沿用此前结论，边界清晰的实现由Terra/high子任务参与，主任务完成集成与最终浏览器验证。账户共享周用量从起始2%到收尾5%，变化3个百分点包含其他任务，不能视为本任务精确消耗；未以花完30%为目标。
 
