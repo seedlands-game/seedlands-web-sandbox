@@ -45,9 +45,9 @@
 
 ### 首屏绘制竞争非生产实验
 
-CI 已证明 Node 完整发送 baseline，而页面进入 mirror 前逐步变慢；已进入 mirror 的 page 校验只需约 0.1–0.5ms。加载期间连续 3D 绘制是否竞争浏览器消息调度仍是假设，先按 `render-contention-experiment.json` 做单轴、可丢弃实验，不直接改产品。A 保持现有连续绘制；B 只在远端 loading 阶段关闭 `autoRender`，每 100ms 用 `renderNextFrame` 执行真实绘制，保持 update/rAF、网络、Worker、mesh attach 与 postrender。ready、失败或关闭都恢复连续绘制并强制一帧。
+CI 已证明 Node 完整发送 baseline，而页面进入 mirror 前逐步变慢；已进入 mirror 的 page 校验只需约 0.1–0.5ms。加载期间连续 3D 绘制是否竞争浏览器消息调度仍是假设，先按 `render-contention-experiment.json` 做单轴、可丢弃实验，不直接改产品。A 保持现有连续绘制；B 只在远端 loading 阶段关闭 `autoRender`，每 100ms 用 `renderNextFrame` 执行真实绘制，保持 update/rAF、网络、Worker、mesh attach 与 postrender。ready 时恢复连续绘制并强制一帧验证真实 postrender；失败或关闭时恢复可恢复状态，app 销毁后准确记录 postrender 不可观察，不强制 render 或伪造完成。
 
-正式批次固定为 `AAABBA`：首两个 A 只验证同一 30 秒失败模式，timeout 是右删失，不能当真实 ready 时间或用于速度倍率；第 3/6 个 A 是顺序稳定性对照。两个 B 必须均在 24 秒内完成脚下 9 个 rendered revision、恢复连续绘制并产出真实原始帧，才得到相对失败截止至少 6 秒的保守余量。任一正确性/画面/SwiftShader 身份失败，A 未复现，或 B 未过固定余量，都停止且不产品化。正式采样由 Terra 以 `seedlands-performance-validator` 身份独占 benchmark window 执行；实现者只做非计时功能自检。
+正式批次固定为 `AAABBA`：首两个 A 只验证同一 30 秒失败模式，timeout 是右删失，不能当真实 ready 时间或用于速度倍率；第 3/6 个 A 是顺序稳定性对照。两个 B 必须均在 24 秒内完成脚下 9 个 rendered revision、恢复连续绘制并产出真实原始帧，才得到相对失败截止至少 6 秒的保守余量。任一正确性/画面/SwiftShader 身份失败，A 未复现，或 B 未过固定余量，都停止且不产品化。正式批次由现有 Chromium CI job 在全部原门禁之后独占 benchmark window 执行，Terra 担任 `seedlands-performance-validator` 审阅冻结输入、原始结果与准出，root 通过已授权 push 触发；实现者只做非计时功能自检。CI 接线仅限当前功能分支的一次诊断批次，原失败门禁保留失败状态，完成后移除临时步骤；失败结果与原始帧一并保留。
 
 ## 阶段与保存
 

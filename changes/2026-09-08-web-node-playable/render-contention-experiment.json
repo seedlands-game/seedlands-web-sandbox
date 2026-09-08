@@ -4,7 +4,7 @@
   "sourceRequirement": "正式采样必须绑定冻结且干净的源码、Node dist及本合同输入哈希",
   "axis": {
     "A": "现有连续PlayCanvas绘制，autoRender保持true",
-    "B": "仅远端loading阶段autoRender=false，每100ms设置renderNextFrame=true；update、rAF、网络、Worker、attach及真实postrender保持；ready/failure/close时恢复连续绘制并强制一帧"
+    "B": "仅远端loading阶段autoRender=false，每100ms设置renderNextFrame=true；update、rAF、网络、Worker、attach及真实postrender保持；ready时恢复连续绘制并强制一帧验证postrender；failure/close时恢复可恢复状态，app销毁后记录不可观察，不强制render或伪造postrender"
   },
   "fixedEnvironment": {
     "sequence": ["A", "A", "A", "B", "B", "A"],
@@ -15,7 +15,7 @@
     "browserWarmup": "同一浏览器进程，每个trial创建并关闭独立新context；顺序AA后ABBA平衡",
     "productDeadlineMs": 30000,
     "browser": "Chromium with explicitly forced SwiftShader and renderer readback",
-    "execution": "seedlands-performance-validator holds scripts/benchmark-window.mjs for the complete batch"
+    "execution": "native CI holds scripts/benchmark-window.mjs for the complete batch; Terra owns seedlands-performance-validator review and acceptance"
   },
   "metric": "真实UI连接点击至远端初始9个必需区块ready的页面单调时钟毫秒；timeout按30000ms右删失值记录",
   "noise": "首两个A构成A/A；若均在30秒timeout，则只确认失败模式复现，计时噪声记NOT_ESTIMABLE_CENSORED，不把30秒当真实ready时间",
@@ -30,5 +30,5 @@
   "stopLine": "A不能复现、B未超过固定收益线、结果落入A/A噪声带或任一否决项触发时，停止该候选且不改产品；不得调CPU、分辨率、seed、deadline、cadence或样本顺序挑选结果",
   "artifacts": "/tmp/seedlands-web-node-playable/render-contention/ 下保留 invocation.json、playwright.log、exit-code.txt、raw-results.json及每次ready后的原始PNG",
   "formalCommand": "node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm experiment:web-node-render-contention",
-  "notes": "本地仅运行--self-test功能自检；正式AAABBA由Terra/seedlands-performance-validator执行。同批次之外的构建、测试或benchmark不得并发。"
+  "notes": "本地仅运行--self-test功能自检；正式AAABBA由原生CI持锁执行，Terra/seedlands-performance-validator审阅执行身份、原始结果与准出，root触发已授权push。同批次之外的构建、测试或benchmark不得并发。"
 }
