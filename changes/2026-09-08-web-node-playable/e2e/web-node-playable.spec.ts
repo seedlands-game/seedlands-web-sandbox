@@ -1,8 +1,7 @@
-import { execFileSync, spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import {
   expect,
@@ -14,6 +13,7 @@ import {
 } from '@playwright/test';
 import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
 import { COLLISION_EPSILON } from '../../../packages/game-core/src/physics/geometry';
+import { REMOTE_PLAYABLE_ACCESS_KEY, RemotePlayableNodeFixture } from './remote-playable-node-fixture';
 
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const sourceTreeStatus = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim();
@@ -34,6 +34,7 @@ const sourceFiles = [
   'apps/web/src/client/authority/remote-authority-client.ts',
   'apps/web/src/client/authority/remote-authority-input-pipeline.ts',
   'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
+  'changes/2026-09-08-web-node-playable/e2e/remote-playable-node-fixture.ts',
   'changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts',
 ] as const;
 // prettier-ignore
@@ -43,11 +44,9 @@ const sourceInputs = Object.fromEntries([...sourceFiles, ...appearanceSourceFile
 const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
 const nodePort = 18_787;
 const nodeUrl = `ws://127.0.0.1:${nodePort}/seedlands`;
-const accessKey = 'seedlands-e2e-synthetic-key';
+const accessKey = REMOTE_PLAYABLE_ACCESS_KEY;
 const evidenceDirectory = resolve('changes/2026-09-08-web-node-playable/evidence');
-let dataDirectory = '';
-let keyFile = '';
-let nodeProcess: ChildProcessWithoutNullStreams | null = null;
+let nodeFixture: RemotePlayableNodeFixture | null = null;
 let nodeLog: string[] = [];
 
 const evidence = (page: Page) =>
@@ -58,7 +57,7 @@ const evidence = (page: Page) =>
 
 const redactDiagnostic = (value: string): string => {
   let redacted = value.replaceAll(accessKey, '[REDACTED_ACCESS_KEY]');
-  if (keyFile) redacted = redacted.replaceAll(keyFile, '[REDACTED_KEY_FILE]');
+  if (nodeFixture) redacted = redacted.replaceAll(nodeFixture.keyFile, '[REDACTED_KEY_FILE]');
   return redacted;
 };
 
@@ -67,69 +66,15 @@ const appendDiagnostic = (entries: string[], value: string): void => {
   if (entries.length > 100) entries.shift();
 };
 
-async function waitForOutput(process: ChildProcessWithoutNullStreams, value: string): Promise<void> {
-  await new Promise<void>((resolveReady, reject) => {
-    const timer = setTimeout(() => reject(new Error(`Node did not print ${value}.`)), 15_000);
-    const inspect = () => {
-      if (!nodeLog.some((line) => line.includes(value))) return;
-      clearTimeout(timer);
-      process.stdout.off('data', inspect);
-      resolveReady();
-    };
-    process.stdout.on('data', inspect);
-    process.once('exit', (code) => {
-      clearTimeout(timer);
-      reject(new Error(`Node exited before ready with code ${String(code)}.`));
-    });
-  });
-}
-
 async function startNode(): Promise<void> {
-  nodeLog = [];
-  nodeProcess = spawn(
-    process.execPath,
-    [
-      'apps/node-server/dist/node-server.js',
-      '--data-directory',
-      dataDirectory,
-      '--seed',
-      'mosslight-68',
-      '--compute',
-      'inline',
-      '--listen',
-      `127.0.0.1:${nodePort}`,
-      '--origin',
-      origin,
-      '--access-key-file',
-      keyFile,
-    ],
-    {
-      cwd: process.cwd(),
-      stdio: 'pipe',
-      env: { ...process.env, SEEDLANDS_E2E_PLAYABLE_DIAGNOSTICS: '1' },
-    },
-  );
-  nodeProcess.stdout.on('data', (chunk: Buffer) =>
-    nodeLog.push(...chunk.toString('utf8').split(/\r?\n/u).filter(Boolean)),
-  );
-  nodeProcess.stderr.on('data', (chunk: Buffer) =>
-    nodeLog.push(...chunk.toString('utf8').split(/\r?\n/u).filter(Boolean)),
-  );
-  await waitForOutput(nodeProcess, '"kind":"ready"');
+  nodeFixture ??= await RemotePlayableNodeFixture.create(nodePort);
+  await nodeFixture.start(origin);
+  nodeLog = [...nodeFixture.logs()];
 }
 
 async function stopNode(): Promise<readonly string[]> {
-  const process = nodeProcess;
-  if (!process) return nodeLog;
-  nodeProcess = null;
-  process.kill('SIGINT');
-  await new Promise<void>((resolveExit) => {
-    const timer = setTimeout(() => process.kill('SIGKILL'), 10_000);
-    process.once('exit', () => {
-      clearTimeout(timer);
-      resolveExit();
-    });
-  });
+  if (!nodeFixture) return nodeLog;
+  nodeLog = [...(await nodeFixture.stop())];
   return nodeLog;
 }
 
@@ -241,7 +186,7 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
           consoleMessages,
           pageErrors,
           webSocketEvents,
-          nodeLog: nodeLog.map(redactDiagnostic),
+          nodeLog: (nodeFixture?.logs() ?? nodeLog).map(redactDiagnostic),
           screenshotAttached,
           screenshotError,
         };
@@ -260,7 +205,7 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
               consoleMessages,
               pageErrors,
               webSocketEvents,
-              nodeLog,
+              nodeLog: nodeFixture?.logs() ?? nodeLog,
             }),
           ),
         );
@@ -336,15 +281,13 @@ async function placeSelectedBlock(
 test.describe.serial('Web to Node local playable loop', () => {
   test.beforeAll(async () => {
     test.setTimeout(30_000);
-    dataDirectory = await mkdtemp(join(tmpdir(), 'seedlands-web-node-playable-'));
-    keyFile = join(dataDirectory, 'access-key');
-    await writeFile(keyFile, `${accessKey}\n`, { mode: 0o600 });
     await mkdir(evidenceDirectory, { recursive: true });
     await startNode();
   });
 
   test.afterAll(async () => {
-    await stopNode();
+    await nodeFixture?.dispose();
+    nodeFixture = null;
   });
 
   test('真实输入、挖放、关闭重连与Node重启保持权威世界', async ({ context, page }, testInfo) => {
@@ -510,7 +453,7 @@ test.describe.serial('Web to Node local playable loop', () => {
           reconnected,
           restarted,
           durableStop: JSON.parse(durableStop),
-          nodeRuns: { beforeRestart: stoppedLog, afterRestart: nodeLog },
+          nodeRuns: { beforeRestart: stoppedLog, afterRestart: nodeFixture?.logs() ?? nodeLog },
         },
         null,
         2,

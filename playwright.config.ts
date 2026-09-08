@@ -7,11 +7,14 @@ const e2ePort = process.env.SEEDLANDS_E2E_PORT ?? '4173';
 const serverOrigin = `http://127.0.0.1:${e2ePort}`;
 const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
 const baseURL = new URL(basePath, `${serverOrigin}/`).href;
+const renderContentionExperiment = process.env.SEEDLANDS_RENDER_CONTENTION_EXPERIMENT === '1';
+const experimentOutput =
+  process.env.SEEDLANDS_RENDER_CONTENTION_OUTPUT ?? '/tmp/seedlands-web-node-playable/render-contention';
 
 export default defineConfig({
   testDir: '.',
   testMatch: ['tests/e2e/**/*.spec.ts', 'changes/*/e2e/**/*.spec.ts'],
-  outputDir: 'test-results',
+  outputDir: renderContentionExperiment ? `${experimentOutput}/playwright` : 'test-results',
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
@@ -22,7 +25,16 @@ export default defineConfig({
     viewport: { width: 1280, height: 720 },
     headless: true,
     trace: 'on-first-retry',
-    ...(executablePath ? { launchOptions: { executablePath } } : {}),
+    ...(executablePath || renderContentionExperiment
+      ? {
+          launchOptions: {
+            ...(executablePath ? { executablePath } : {}),
+            ...(renderContentionExperiment
+              ? { args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] }
+              : {}),
+          },
+        }
+      : {}),
   },
   webServer: {
     command: `pnpm --filter @seedlands/web exec vite --host 127.0.0.1 --port ${e2ePort}`,
