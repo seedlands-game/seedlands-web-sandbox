@@ -2,7 +2,7 @@
 
 ## 完成状态
 
-本地完整闭环已实现并有 source-bound 真实旅程：浏览器完成认证连接、脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复。正常 60Hz 输入已有单一在途/latest 背压，首屏必需 key 在单 Worker 下优先于其余未开始的 streaming 请求，合法空网格也可结算。GitHub CI 仍在初始同步 30 秒门槛失败，当前状态不是 Delivered；已加入只面向 Harness 的有界匿名诊断，以区分 Node capture/projection/send 和 Web descriptor/page/ready 阶段，待下一轮 CI 实证后继续修复。
+合并新 base 后，本地完整闭环已重新以 `04a8076` source-bound 真实旅程验证：浏览器完成认证连接、脚下 3×3 首屏、移动/转向/跳跃、挖块/拾取/放块、durable 保存、关闭页面后 Node 继续、手动重连和 Node 重启恢复；29 项输入同时绑定合并后的 appearance 装载、地形、物品和 UI 资源，五张原始帧已重建并视检。GitHub CI 仍在初始同步 30 秒门槛失败，当前状态不是 Delivered；最新诊断已把问题收窄到浏览器 descriptor 后的 page 消费/重组，仍需最后一层 arrival/verification 诊断后据证据修复。
 
 ## 提交和推送
 
@@ -23,6 +23,9 @@
 - `9ef0982`：旧输入回执不解锁新代际。
 - `4cf859d`：脚下 3×3 首屏请求优先及只读队列诊断。
 - `21d210b`：全空远端首屏按必需网格 postrender 结算。
+- `dae0ea6`：有界匿名 baseline 分段诊断。
+- `b0a5a1d`：普通合并新 base，保留远端会话与 appearance 接缝。
+- `04a8076`：将合并后的 appearance 源码与实际 UI/物品资源加入真实旅程 source binding。
 
 ## 变更
 
@@ -35,7 +38,7 @@
 
 ## 验证结果
 
-`4cf859d` 的 source-bound `pnpm test:web-node-playable` 为 11 文件 32 项 Vitest + 1 项真实 Chromium 全绿；同源码的 `pnpm verify:static:ci`（245 文件、1245 项通过）、`pnpm build:web`、`pnpm build:server`、`pnpm verify:node-isolation`、`pnpm verify:web-node-playable-dist` 与既有 15 项 Chromium regression 均退出 0。最终 `21d210b` 的全空首屏 delta 另有 3 文件 22 项、typecheck 与 ESLint 全绿，最新 CI 由 root 收口。完整数值、日志摘要、source/hash 绑定和原始帧清单见 `execution.md` 与 `evidence/`。
+`04a8076` 的 source-bound `pnpm test:web-node-playable` 为 11 文件 34 项 Vitest + 1 项真实 Chromium 全绿；合并后的 `pnpm verify:static:ci`（260 文件、1302 项通过）、`pnpm build:web`、`pnpm build:server`、`pnpm verify:node-isolation`、`pnpm verify:web-node-playable-dist`、既有 15 项 Chromium regression 与资产集成 2 项均退出 0。GitHub CI 的初始同步超时仍在定位，完整数值、日志摘要、source/hash 绑定和原始帧清单见 `execution.md` 与 `evidence/`。
 
 ## 限制
 

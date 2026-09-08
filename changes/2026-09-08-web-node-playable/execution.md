@@ -25,33 +25,33 @@
 
 ## 冻结源码与真实旅程
 
-- 完整真实旅程冻结提交：`4cf859db1f1edf882a0f2f672852f7bd57ea93e7`。旅程开始时 `git status --porcelain` 为空；JSON 中 `sourceTreeStatus` 为 `""`，并记录 15 个关键源码/测试输入及实际 `apps/node-server/dist/node-server.js` 的 SHA-256。最终产品源码为 `21d210b`；它只从远端屏障移除非空 first-visible 前置条件，并增加永不 resolve 的 first-visible + 9 个已 postrender 空网格 RED/GREEN。当前 `initial-playable-area.ts` hash 为 `c4414435cc3f42fcecb4f564578dcd85bff29fab00dac4028064f4ae599cf4c7`，这是与旅程 sourceInputs 唯一的生产差异。
-- 命令：`pnpm test:web-node-playable`，退出码 0。Node 先从冻结源码重建 5 个 ESM 入口；Vitest 11 个文件、32 项通过；真实 Chromium 1 项通过，21.3 秒。该耗时只表示功能测试完成，不是性能样本。
-- 同一 Pointer Lock 流程中，初始 Authority tick 217，脚下层 3×3 均已有 rendered revision，初始 loaded/rendered/ready baseline 为 9/9/9；WASD 移动后转向，跳跃从 y=18 到 y=18.991667 且峰值 `onGround=false`。
-- 左键挖掘使 world revision 从 1 到 2；真实拾取并切换 hotbar 后右键在 `[0,19,-1]` 放置 voxel 2，world revision 为 3，collision chunk revision 与 rendered revision 均为 2 后才截图。
-- 保存返回菜单后关闭页面，重新连接仍是同一 server epoch，Authority tick 从放置后的 778 增至 915 且方块仍在。停止日志给出 `durableCommitSequence: 1129`；同数据目录重启后 server epoch 改变，ready 日志从 durable 1129 恢复，方块仍在。无连接持续 tick 另由直接读取 `runtime.authority.latestSnapshot()` 的 Node 集成测试证明，不依赖公开调试 RPC。
+- 合并新 base 后的完整真实旅程冻结提交：`04a80763c5e723a6fb01d23fc9856f6fcd9a70be`，其父 `b0a5a1d` 是 PR #17 与新 base `21d6e37` 的普通 merge。旅程开始时 `git status --porcelain` 为空；JSON 中 `sourceTreeStatus` 为 `""`，并记录 29 个网络、首屏、输入、实际 Node dist、appearance 装载、地形/物品/UI 资源与 E2E 输入的 SHA-256。
+- 命令：`pnpm test:web-node-playable`，退出码 0。Node 从冻结源码重建 5 个 ESM 入口；Vitest 11 个文件、34 项通过；真实 Chromium 1 项通过，20.2 秒。该耗时只表示功能测试完成，不是性能样本。
+- 同一 Pointer Lock 流程中，初始 Authority tick 215，脚下层 3×3 均已有 rendered revision，初始 loaded/rendered/ready baseline 为 9/9/9；WASD 移动后转向，跳跃从 y=18 到 y=18.708333 且峰值 `onGround=false`。
+- 左键挖掘使 world revision 从 1 到 2；真实拾取并切换 hotbar 后右键在 `[-1,20,-2]` 放置 voxel 2，world revision 为 3，collision chunk revision 与 rendered revision 均为 2 后才截图。
+- 保存返回菜单后关闭页面，重新连接仍是同一 server epoch，Authority tick 从放置后的 720 增至 850 且方块仍在。停止日志给出 `durableCommitSequence: 1052`；同数据目录重启后 server epoch 改变，ready 日志从 durable 1052 恢复，方块仍在。无连接持续 tick 另由直接读取 `runtime.authority.latestSnapshot()` 的 Node 集成测试证明，不依赖公开调试 RPC。
 
 ### 原始证据
 
-| 文件                                  | SHA-256                                                            | 作用                                                                 |
-| ------------------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------- |
-| `evidence/web-node-01-early.png`      | `025cd6c2d6bf40e672e966c3f27e07a6b0383f4c912e3b60e1791a652b04753b` | 完成脚下 3×3 mesh 后的早帧，NPC 脚下无天空洞                         |
-| `evidence/web-node-02-moving.png`     | `5b41b8e8ab6547502fa7b0dbe1c61a093561cc1f728beb8e27fb8606bfaf2b42` | 同一 Pointer Lock 流程移动中帧                                       |
-| `evidence/web-node-03-turned.png`     | `227ffed08eb661fa2f3682664e45746af4352d1dc9b07cd9df3812cfceb23460` | 同一流程相机转向帧                                                   |
-| `evidence/web-node-04-placed.png`     | `c78b923bc31ce8fe08c058ac3c59a2591f487ef59e4b0ef379a61b434546ae7a` | 对应 revision 网格完成后的可见泥土方块                               |
-| `evidence/web-node-05-restarted.png`  | `cedb32049267c766f9aa597edbf256da2c9492425a4938fb62eca254126ba30e` | Node 重启恢复后的真实画面                                            |
-| `evidence/web-node-playable-run.json` | `67bca37aa22b615ab2b30f54ab681ba264a04552c9855cb6142ea85b38fb659e` | 原始 Authority/镜像、jump、挖放、durable、重连/重启和 source binding |
+| 文件                                  | SHA-256                                                            | 作用                                                                |
+| ------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| `evidence/web-node-01-early.png`      | `0e71a9f51ded2d9fa2b6373f428b74cdf20c56b99d776098062626c082d9c85d` | 合并后 appearance 生效且完成脚下 3×3 mesh 的早帧                    |
+| `evidence/web-node-02-moving.png`     | `b2f4b18f46458f5c70c5a9cfb86e5bcbe9d90dafb88249444a22b51d34413736` | 同一 Pointer Lock 流程移动中帧                                      |
+| `evidence/web-node-03-turned.png`     | `ebc8aae19394daeb04d4ac7a2208e2b4a6a3d8197b424a67f46bcabb9447f4a6` | 同一流程相机转向帧                                                  |
+| `evidence/web-node-04-placed.png`     | `80961e347b5769a83f6311458c407e50c4b07b7f161fa4cc5d04e13f94fcf7d9` | 新地形外观下对应 revision 网格完成后的可见泥土方块                  |
+| `evidence/web-node-05-restarted.png`  | `da2342f7f3a3bb277b3ccc7d19b298aedea27960d8de35d7ecd12ada0ff1a723` | Node 重启恢复后的真实画面                                           |
+| `evidence/web-node-playable-run.json` | `1c4552cfbd2711651e2599699018bf14b5247e348074a56f4dfbb48ab001baf5` | 原始 Authority/镜像、jump、挖放、durable、重连/重启和 29 项源码绑定 |
 
 JSON 经 Prettier 格式化后内容未变，表中为最终提交文件 hash。
 
 ## 回归门禁
 
-- `pnpm verify:static:ci`：退出码 0；245 个文件通过、2 个 skipped，1245 项通过、4 项 skipped；line coverage 96.89%。首次运行只发现新生成 JSON 未格式化，执行现有 `pnpm format` 后完整重跑通过。
+- 合并新 base 后 `pnpm verify:static:ci`：退出码 0；260 个文件通过、2 个 skipped，1302 项通过、4 项 skipped；line coverage 96.89%。原始日志为 `/tmp/seedlands-web-node-playable/base-sync-static.log`。
 - `pnpm build:web`：退出码 0；Svelte/TypeScript 和 Vite 生产构建通过。
 - `pnpm build:server`：退出码 0；Node 5 入口构建通过。
 - `pnpm verify:node-isolation`：退出码 0；隔离目录没有 Web 源码、未复用根 `node_modules`、未发现 Web 产品依赖。
 - `pnpm verify:web-node-playable-dist`：退出码 0；仅 dist 真实 listen+hello 通过。
-- `pnpm test:e2e:regression`：退出码 0；既有 Chromium 15 项通过。该命令改写的 Delivered loading 截图已用 Git 恢复，未提交历史证据变化。
+- `pnpm test:e2e:regression`：退出码 0；既有 Chromium 15 项通过且未改写历史 evidence。`pnpm test:pr15:integration`：退出码 0；合并 base 的资产包/外观应用 2 项通过。本任务仅验证合并后的 PR #17 接缝，不处理或修改 PR #15。
 - 删除现成 `apps/node-server/dist` 后单独运行真实 WS 与 offline runtime 两个测试文件：5 项通过，证明默认 static/coverage 不依赖工作区遗留 dist；临时 source artifact 在测试 teardown 删除。
 - 独立 Terra/high 对 `ae8a49f` 的 source binding、五张原帧、WASD/jump/挖放/durable/reconnect/restart 与 5 个关键测试文件 13 项复核通过（7.80 秒）；`4cf859d` 的新 source binding、`21d210b` 的最终 delta 和 CI 终态由 root 继续独立收口。
 
@@ -78,6 +78,7 @@ JSON 经 Prettier 格式化后内容未变，表中为最终提交文件 hash。
 - 当前诊断 checkpoint 只为 Harness/E2E 打开：Node 对前 12 个 baseline 请求、最多 96 条事件记录匿名 ordinal、tail 等待、capture、projection、send 的耗时与结果，以及实际 page count/bytes；Web 只保留首 9 个匿名请求的 descriptor 到达、期望/已收页数、字节数与 ready 耗时。字段不含 chunk key、requestId、口令、口令文件或 frame，回调异常不影响网络会话。
 - 本地可玩闭环和 `4cf859d` source-bound 旅程已通过；GitHub CI 的初始同步超时仍是 Active 产品问题。本 checkpoint 用下一轮一次失败还原第 8 个请求停在 capture、projection、发送或浏览器重组中的哪一段，再据证据做有界修复；没有改并发、baselineTail、协议、Node 预算或 30 秒门槛。
 - 定向验证：`pnpm exec vitest run tests/node/node-playable-network-session.test.ts tests/client/remote-authority-mesh-mirror.test.ts tests/app/world-initial-playable-area.test.ts --maxWorkers=1`，3 文件 14 项通过；Node/Web typecheck、受影响文件 ESLint/Prettier、`pnpm build:server` 与 `pnpm build:web` 均退出 0。Node 测试连续排入 20 个 unavailable baseline，确认只记录前 12 个且总数不超过 96；Web 测试完成真实 descriptor/分页重组后再排请求，确认只保留前 9 个匿名状态且字段不含 key/requestId。
+- 合并后的诊断 CI `34211532822` 将方向进一步收窄到浏览器收到 descriptor 后的 page 消费/重组：Node 后续请求 capture 为 13–68ms、projection 为 4–15ms、send 为 4–18ms 且均已发送 54 页；Web 前几个 descriptor→ready 约 1 秒，第 7 个增至约 5–10 秒，第 8 个在超时前只处理 12/26 页。该证据不支持把问题归因于 Node capture/tail，也不支持未经测量改并发或串行 hash；下一步只补 Web arrival/verification 和 reassembler 汇总诊断。
 
 ## 剩余边界
 
