@@ -36,9 +36,10 @@ const sourceFiles = [
   'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
   'changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts',
 ] as const;
-const sourceInputs = Object.fromEntries(
-  sourceFiles.map((path) => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]),
-);
+// prettier-ignore
+const appearanceSourceFiles = ['apps/web/src/app/gameplay/asset-image.ts', 'apps/web/src/app/gameplay/load-appearance-runtime.ts', 'apps/web/src/app/scene/voxel-materials.ts', 'apps/web/src/app/ui/styles/experience.css', 'apps/web/src/client/presentation/item-mesh-definition.ts', 'apps/web/src/client/presentation/terrain-assets.ts', 'apps/web/src/client/presentation/visual-asset-catalog.ts', 'apps/web/public/assets/item-thumbnails/berry.png', 'apps/web/public/assets/item-thumbnails/dirt-block.png', 'apps/web/public/assets/ui/health-heart.png', 'apps/web/public/assets/ui/hunger-drumstick.png', 'apps/web/public/assets/ui/obsidian-hotbar-slot.png'] as const;
+// prettier-ignore
+const sourceInputs = Object.fromEntries([...sourceFiles, ...appearanceSourceFiles].map((path) => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
 const nodePort = 18_787;
 const nodeUrl = `ws://127.0.0.1:${nodePort}/seedlands`;
