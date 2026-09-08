@@ -76,3 +76,9 @@ Terra/high 独立只读诊断沿 `AuthoritySession.wake → advanceGameplayRules
 保留截图，改为在场景创建与重新布置后先确认生成/网格/计算队列为空，再确认连续 8 帧间隔小于 100ms（15s 有界失败），之后才进行短窗口输入验收。同一软件渲染环境、`--repeat-each=2 --retries=0` 2/2 通过（25.8s）。这定义的是稳定可玩场景的测试前置条件，不是性能改善声明，也不能据此宣称冷启动掉帧时按住连击或所有短暂 HUD 反馈已得到无条件保证。没有延长原命中谓词超时、增加 retry 或改产品规则。
 
 提取的真实反馈序列、失败/通过结果、原日志 hash 与测试变体见[软件渲染诊断证据](evidence/melee-software-rendering.json)。截图删除候选被否决并恢复；失败日志不覆盖。失败时测试输出诊断 JSON，后续 CI 即使未上传 artifacts 也能从日志获取状态。
+
+### CI 软件栅格的功能夹具边界
+
+[run 34274457994](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34274457994) 固定 `c872ef3503f9373f739cde512e6c98280f798b6b`：静态与构建再次通过；近战在新增的队列就绪断言失败，尚未进入攻击观察。三次失败诊断分别记录 generationQueue 3/1/3，compute running/queued 均 0，瞬时 frameMs 150.7/212.2/161.4。该数据只解释本次功能夹具没有满足前置条件，不作为性能采样结论。
+
+最终将本条近战功能夹具的 `deviceScaleFactor` 固定为 0.5，CSS 视口仍为 1280×720，Low 与所有玩法/反馈/终态断言保持。队列加载采用单独 30s 截止；连续稳定帧仍为 15s 截止，原命中结果 5s 断言不延长。本地完整 Chromium + SwiftShader + Low、零重试连续 2/2 通过（27.5s），终态截图已检查。这个夹具不声称原像素密度的软件渲染具备同样的输入窗口保证；其他浏览器基础回归与实际产品分辨率不变。
