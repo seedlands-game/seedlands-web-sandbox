@@ -28,7 +28,6 @@ test.beforeEach(async ({ page }) => {
       window.addEventListener(
         type,
         (event) => {
-          if (event.type === 'mousemove' && event instanceof MouseEvent && event.buttons === 0) return;
           target.__inputEvidence?.push({
             type,
             time: Math.round(performance.now()),
@@ -51,7 +50,33 @@ test.afterEach(async ({ page }, info) => {
   if (info.status === info.expectedStatus || page.isClosed()) return;
   const evidence = await page.evaluate(async () => {
     const current = window.__seedlandsHarness?.snapshot();
+    const moduleUrl = performance
+      .getEntriesByType('resource')
+      .find((entry) => new URL(entry.name).pathname.endsWith('/playcanvas.js'))?.name;
+    type NodeView = {
+      name: string;
+      forward: { x: number; y: number; z: number };
+      getPosition(): { x: number; y: number; z: number };
+      getEulerAngles(): { x: number; y: number; z: number };
+    };
+    const runtime = moduleUrl
+      ? ((await import(moduleUrl)) as {
+          Application: {
+            getApplication(id: string): { root: { findComponents(type: string): { entity: NodeView }[] } } | undefined;
+          };
+        })
+      : null;
+    const cameras = runtime?.Application.getApplication('game')
+      ?.root.findComponents('camera')
+      .map(({ entity }) => ({
+        name: entity.name,
+        position: entity.getPosition(),
+        angles: entity.getEulerAngles(),
+        forward: entity.forward,
+      }));
     return {
+      cameras,
+      localVoxel: window.__seedlandsHarness?.getVoxelAt?.(0, 58, -2),
       input: (window as Window & { __inputEvidence?: unknown[] }).__inputEvidence,
       combat: (window as Window & { __combatEvidence?: string[] }).__combatEvidence,
       target: document.querySelector('#target-card')?.textContent,
