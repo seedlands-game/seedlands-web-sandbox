@@ -56,6 +56,11 @@ test('持续跨区块移动后近场完整并保留位置对账', async ({ page 
     await page.locator('input[type="password"]').fill(REMOTE_PLAYABLE_ACCESS_KEY);
     await page.click('#enter');
     await page.waitForFunction(() => Boolean(window.__seedlandsRemoteEvidence), null, { timeout: 30_000 });
+    const respawn = page.getByRole('button', { name: '复活', exact: true });
+    if (await respawn.isVisible()) {
+      await respawn.click();
+      await expect(page.getByRole('dialog', { name: '你倒下了' })).toBeHidden();
+    }
     await page.locator('#game').click();
     await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe('game');
     const capture = async (stage: string) => {

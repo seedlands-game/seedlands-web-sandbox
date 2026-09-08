@@ -59,6 +59,8 @@ test('远端木剑真实输入完成前摇、命中与连击，保存结果由 N
     await expect(page.locator('#enter')).toBeEnabled();
     await page.selectOption('#quality', 'low');
     await page.getByRole('button', { name: '木剑动作体验场', exact: true }).click();
+    const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });
+    if (await continueDespiteWarning.isVisible()) await continueDespiteWarning.click();
     await expect(page.locator('#melee-showcase-guide')).toBeVisible();
     await page.keyboard.press('Escape');
     await page.getByRole('button', { name: '保存并返回主菜单', exact: true }).click();
