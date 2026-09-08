@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import type { Page, TestInfo } from '@playwright/test';
 import type { GraphicsIdentitySnapshot } from './graphics-identity-probe';
 
@@ -14,6 +14,9 @@ export type ConnectionGraphicsIdentity = Readonly<
     attempt: string;
     outcome: 'connected' | 'connection-failure';
     browserVersion: string;
+    browserUserAgent: string;
+    configuredChannel: string;
+    executableSource: string;
   }
 >;
 
@@ -33,6 +36,11 @@ export async function captureGraphicsIdentity(
     attempt,
     outcome,
     browserVersion: page.context().browser()?.version() ?? 'UNAVAILABLE',
+    browserUserAgent: await page.evaluate(() => navigator.userAgent),
+    configuredChannel: testInfo.project.use.channel ?? 'unspecified',
+    executableSource: testInfo.project.use.launchOptions?.executablePath
+      ? basename(testInfo.project.use.launchOptions.executablePath)
+      : 'playwright-managed',
   } as const;
   await testInfo.attach(`${attempt}-graphics-identity`, {
     body: Buffer.from(`${JSON.stringify(identity, null, 2)}\n`),

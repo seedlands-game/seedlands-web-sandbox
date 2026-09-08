@@ -145,11 +145,12 @@ jobs:
         env:
           SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT: /tmp/seedlands-web-node-playable/journey
         run: pnpm test:web-node-playable
-      - name: Check PR17 journey with explicit software graphics
+      - name: Check PR17 journey with full Chromium software graphics
         if: ${{ !cancelled() && github.event_name == 'pull_request' && github.head_ref == 'codex/web-node-playable' }}
         timeout-minutes: 15
         env:
           SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
           SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT: /tmp/seedlands-web-node-playable/graphics-forced
           SEEDLANDS_RESERVATION_EVIDENCE: /tmp/seedlands-web-node-playable/graphics-window.json
           SEEDLANDS_RESERVATION_RUN: pr17-graphics-${{ github.run_id }}

@@ -2,7 +2,10 @@ import { existsSync } from 'node:fs';
 import { defineConfig } from '@playwright/test';
 
 const systemChrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const executablePath = process.env.SEEDLANDS_CHROME_PATH ?? (existsSync(systemChrome) ? systemChrome : undefined);
+const fullChromium = process.env.SEEDLANDS_E2E_FULL_CHROMIUM === '1';
+const executablePath = fullChromium
+  ? undefined
+  : (process.env.SEEDLANDS_CHROME_PATH ?? (existsSync(systemChrome) ? systemChrome : undefined));
 const e2ePort = process.env.SEEDLANDS_E2E_PORT ?? '4173';
 const serverOrigin = `http://127.0.0.1:${e2ePort}`;
 const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
@@ -26,6 +29,7 @@ export default defineConfig({
     baseURL,
     viewport: { width: 1280, height: 720 },
     headless: true,
+    ...(fullChromium ? { channel: 'chromium' as const } : {}),
     trace: 'on-first-retry',
     ...(executablePath || useSwiftShader
       ? {

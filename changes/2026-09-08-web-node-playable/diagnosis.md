@@ -20,3 +20,11 @@
 - 同 base path、独立 Node 数据目录和 `/tmp` 证据目录执行真实 Chromium：错误认证后的 graphics identity 缓存用例通过；完整旅程的 W 阶段从 `[-3.5,18,-3.5]` 移动到 `[-1.52877,18,-2.49377]`，`movement-window-after` 已保存。Web 对账为 sent `70`、matched `70`、accepted `65`、late/resync 各 `5`；会话结束 Node 汇总为 received `164`、accepted `119`、late/resync 各 `45`，非中性样本 `14` 条且含 `inputSequence`。
 - 该旅程随后在既有挖放 mesh revision 等待处失败；本轮不据此改变产品规则。失败路径仍保存 live current evidence、Pointer Lock/focus/visibility、graphics identity、原错误与关闭连接后新增的 Node terminal 汇总，证明诊断不会等到完整旅程成功才产出。
 - 原始功能诊断位于 `/tmp/seedlands-web-node-playable/movement-diagnostics-local-ffd9-v2/diagnostics/journey-progress-retry-0.json` 与 `journey-failure-retry-0.json`。该运行基于本地未提交诊断源码，只证明字段和生命周期可工作，不作为冻结 source-bound 交付或性能结论。
+
+## 冻结诊断与完整 Chromium 候选
+
+- 干净 b7e695a 本机执行完整脚本：11文件36项Vitest、2项Chromium全绿。40个sourceInputs逐一匹配，durableStop=1038，放置[1,19,-1] voxel2/revision2；root视检原始placed帧。记录在 `/tmp/seedlands-web-node-playable/local-b7e695a/`。
+- CI34226402889 的默认首屏三次超时，forced通过W但转向yaw差0。两端输入累计对账一致：103 received/sent、69 accepted、28 late、33 resync；含4次target-out-of-order、1次too-far-ahead。真实Pointer Lock、focus、visibility有效且interactionBlocked=false。这证明迟到及target回退确实存在，但不证明它们导致鼠标yaw失败。
+- CI源码为merge a1f6dd30，parents=637a8d2+b7e695a、tree=af0dfab3。随后本地正常合并origin/main的CI路径选择和review指南，80e781b的tree与该CI完全相同，生产行为没有新增差异。
+- 独立审阅允许保持原forced配置，仅新增完整Chromium channel兼容对照；参考对象是前一forced旅程，不是default gate。不能给channel或GL flags单独做根因归因。
+- 本机候选语法/ESLint/typecheck通过。实际managed Chromium151/SwiftShader、channel=chromium正确回读；认证失败、首屏、W、转向、跳跃通过，随后挖掘15秒等待失败，完整兼容候选尚未通过。该记录在 `/tmp/seedlands-web-node-playable/full-chromium-local/`，不是交付证据。Linux继续用原完整断言评估，保留default gate，不采用或放宽产品合同。

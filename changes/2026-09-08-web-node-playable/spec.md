@@ -61,6 +61,12 @@ CI `34222361251` 中默认与显式对照实际都回读为 SwiftShader；显式
 
 完整旅程从 initial connect 起维护当前 stage，并在 W 前后写独立 `/tmp` progress；任一后续失败写 failure JSON，包含 initial/current 权威与呈现位置、physics tick、ground/view/aim、`interactionBlocked`、Pointer Lock/focus/visibility、已缓存 graphics identity 和 Node 日志。RED 为现有 W 失败只能看到位移断言，Web/Node 都没有可对账 input summary，且最终 JSON 之前不会保留进度。GREEN 用确定性 accepted/late/resync 时钟夹具核对计数和延迟，以超过 16 个非中性输入证明有界，并用真实错误/正常浏览器流程证明失败前已保存阶段证据。CI 观察以同一完整旅程原断言为准：若 W 失败，必须能判断非中性输入是否发出、其 target 与 admission tick、decision 及失败时两侧位置；取得这些证据前不修改 lead 或放宽 late。
 
+### 完整 Chromium headless 兼容对照
+
+CI34226402889 的 forced 旅程已取得真实移动，但 camera-turn 的 yaw 差为0；Linux实际运行的是 Playwright 默认的 chromium-headless-shell，本机则显式使用完整系统Chrome。已核对安装版 Playwright 1.62.1 的 getExecutableName 分支及[官方浏览器文档](https://playwright.dev/docs/browsers#chromium-new-headless-mode)：channel=chromium 选择完整Chromium的新headless，未指定channel的headless使用独立shell。相同renderer/version字符串不能证明这两个可执行产品相同。
+
+下一有界对照只给原forced兼容旅程增加 channel=chromium，1280×720、既有Medium配置、真实键鼠、截图、30秒首屏与全部状态断言不变；原default gate保持，尚不采用为CI最终配置。不修改产品行为或降低画质。图形身份新增configured channel、executable source及实际browser user agent，失败继续保留input/阶段对账。GREEN必须完成完整旅程及认证失败缓存用例，不能以仅首屏或仅转向通过准出；失败则记录实际失败阶段再决定，禁止盲目重跑。
+
 ## 阶段与保存
 
 - [x] M0：合同、预算、接口接缝审阅与可执行 RED；提交并推送。
