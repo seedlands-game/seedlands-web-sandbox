@@ -26,6 +26,9 @@ export async function inspectGlbModel(modelId: string): Promise<GlbModelStats | 
   }
 }
 
+export const modelPreviewClip = (stats: GlbModelStats, current: string): string =>
+  stats.animationClips.some((clip) => clip.name === current) ? current : (stats.animationClips[0]?.name ?? '');
+
 export const glbModelAssets = (models: readonly StoredGlb[]): Asset[] =>
   models.map((model) => ({
     id: model.id,

@@ -3,6 +3,7 @@ import { bodyConfigFor } from '../../physics/body-registry';
 import { EntityStore, type GameplayEntity } from './entity-store';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import type { CoreClone } from '../../runtime/platform-ports';
+import type { MeleeDefinition } from './combat-runtime';
 
 type Position = [number, number, number];
 
@@ -142,6 +143,7 @@ export function validateGameplaySnapshot(
     getVoxel: (x: number, y: number, z: number) => number;
     getWorldTime: () => number;
     clone: CoreClone;
+    meleeDefinitions?: readonly MeleeDefinition[];
   },
 ): ValidatedGameplaySnapshot {
   const source = raw as GameplaySnapshot;
@@ -193,6 +195,7 @@ export function validateGameplaySnapshot(
     getWorldTime: options.getWorldTime,
     isPlayerAlive: (id) => players.get(id)?.lifecycle === 'alive',
     clone: options.clone,
+    meleeDefinitions: options.meleeDefinitions,
   });
   validator.restore(simulationSnapshotFor(source));
   const snapshot: GameplaySnapshotV3 = {

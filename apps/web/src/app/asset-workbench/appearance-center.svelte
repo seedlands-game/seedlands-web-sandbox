@@ -56,6 +56,7 @@
     focusedPixelTexture,
     glbModelAssets,
     inspectGlbModel,
+    modelPreviewClip,
     sharedMaterialNote as appearanceSharedMaterialNote,
   } from './appearance-resource-selection';
   import NewAssetDialog from './new-asset-dialog.svelte';
@@ -152,12 +153,15 @@
     modelStats = {};
   };
   async function ensureModelStats(modelId: string) {
-    if (modelStats[modelId]) return;
-    const stats = await inspectGlbModel(modelId);
-    if (typeof stats === 'string') return notify(`读取 GLB 动画片段失败：${stats}`, true);
-    modelStats = { ...modelStats, [modelId]: stats };
-    if (focusAsset?.type === 'glb-model' && focusAsset.payload.modelId === modelId && !previewAnimationClip)
-      previewAnimationClip = stats.animationClips[0]?.name ?? '';
+    let stats = modelStats[modelId];
+    if (!stats) {
+      const inspected = await inspectGlbModel(modelId);
+      if (typeof inspected === 'string') return notify(`读取 GLB 动画片段失败：${inspected}`, true);
+      stats = inspected;
+      modelStats = { ...modelStats, [modelId]: stats };
+    }
+    if (focusAsset?.type === 'glb-model' && focusAsset.payload.modelId === modelId)
+      previewAnimationClip = modelPreviewClip(stats, previewAnimationClip);
   }
   $effect(() => {
     if (focusAsset?.type === 'glb-model') void ensureModelStats(focusAsset.payload.modelId);
@@ -250,6 +254,8 @@
       const saved = await restoreAppearanceProject(projectRevision, mode);
       projectRevision = saved.revision;
       editor.load(saved.draft);
+      await refreshModels();
+      selectLantern();
       refresh();
       notify(mode === 'default' ? '已恢复默认外观；下次进入世界生效。' : '已恢复上一个已应用外观；下次进入世界生效。');
     } catch (error) {

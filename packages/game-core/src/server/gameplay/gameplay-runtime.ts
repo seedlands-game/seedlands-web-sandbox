@@ -440,6 +440,7 @@ export class GameplayRuntime {
           getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
           getWorldTime: this.callbacks.getWorldTime,
           clone: this.callbacks.platform.clone,
+          meleeDefinitions: this.callbacks.meleeDefinitions,
         },
       );
       this.entities.restore(snapshot.entities, snapshot.entitySequence);

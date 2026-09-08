@@ -12,11 +12,13 @@ import { createRecipeRegistry, getRecipe } from '../../packages/game-core/src/se
 import {
   CombatRuntime,
   createMeleeDefinitionRegistry,
+  listMeleeDefinitions,
+  type MeleeDefinition,
 } from '../../packages/game-core/src/server/gameplay/combat-runtime';
 import { GameServer } from '../../packages/game-core/src/server/game-server';
 import { Voxel } from '../../packages/game-core/src/world/voxel';
 
-const openWorld = () => {
+const openWorld = (meleeDefinitions?: readonly MeleeDefinition[]) => {
   const cells = new Map<string, number>();
   const runtime = new GameplayRuntime({
     getVoxel: ([x, y, z]) => cells.get(`${x},${y},${z}`) ?? Voxel.Air,
@@ -25,6 +27,7 @@ const openWorld = () => {
     },
     getWorldTime: () => 9,
     platform: testCorePlatform,
+    ...(meleeDefinitions ? { meleeDefinitions } : {}),
   });
   runtime.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
   const target = runtime.spawn({
@@ -300,6 +303,35 @@ describe('authoritative melee runtime', () => {
     restored.advanceRules(0.6);
     expect(restored.getEntity('target')).toMatchObject({ health: 15 });
     expect(restored.attackEntity('player', 'target')).toMatchObject({ success: true });
+  });
+
+  it('validates and restores active combat with the injected melee definitions', () => {
+    const definitions = listMeleeDefinitions().map((definition) =>
+      definition.id === 'wood-sword'
+        ? {
+            ...definition,
+            steps: [{ damage: 6, windupSeconds: 0.8, hitSeconds: 0.1, recoverySeconds: 0.2 }],
+          }
+        : definition,
+    );
+    const source = openWorld(definitions);
+    source.runtime.giveItem('player', { itemId: ItemIds.WoodSword, count: 1 });
+    expect(source.runtime.attackEntity('player', 'target')).toMatchObject({ success: true });
+    source.runtime.advanceRules(0.3);
+    expect(source.runtime.getPlayerState('player').combat?.active).toMatchObject({
+      phase: 'windup',
+      phaseElapsedSeconds: 0.3,
+      phaseDurationSeconds: 0.8,
+    });
+
+    const restored = openWorld(definitions);
+    expect(restored.runtime.restoreSnapshot(source.runtime.createSnapshot())).toMatchObject({ version: 3 });
+    expect(restored.runtime.getEntity('target')).toMatchObject({ health: 20 });
+    expect(restored.runtime.getPlayerState('player').combat).toMatchObject({
+      active: null,
+      cooldownRemainingSeconds: 0.8,
+      lastResult: { outcome: 'cancelled', reason: 'restore-cancelled' },
+    });
   });
 
   it('keeps unarmed immediate compatibility and runs NPC attacks through the same staged owner', () => {

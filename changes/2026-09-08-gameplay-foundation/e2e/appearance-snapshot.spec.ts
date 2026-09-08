@@ -1,4 +1,58 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('恢复上一版后工坊重载模型集合与片段，并可继续保存导出', async ({ page }) => {
+  await page.goto('asset-workbench.html');
+  await expect(page.locator('.viewport')).toHaveAttribute('data-ready', 'true');
+  await page.evaluate(async () => {
+    const base = new URL('.', location.href);
+    const store = (await import(
+      new URL('src/client/persistence/appearance-project-store.ts', base).href
+    )) as typeof import('../../../apps/web/src/client/persistence/appearance-project-store');
+    const { createEmptyAppearanceProject } = (await import(
+      new URL('src/client/presentation/appearance-project.ts', base).href
+    )) as typeof import('../../../apps/web/src/client/presentation/appearance-project');
+    const animated = await (await fetch(new URL('models/voxel-settler-animated.glb', base))).blob();
+    const plain = await (await fetch(new URL('assets/samples/static-crate.glb', base))).blob();
+    const project = createEmptyAppearanceProject();
+    const initial = await store.loadAppearanceProject();
+    const previous = await store.saveAppearanceProject(project, initial.revision, true, [
+      { id: 'shared', name: '共享角色.glb', revision: 1, blob: animated },
+      { id: 'alpha', name: '上一版模型.glb', revision: 1, blob: plain },
+    ]);
+    await store.saveAppearanceProject(project, previous.revision, true, [
+      { id: 'shared', name: '共享角色.glb', revision: 2, blob: plain },
+      { id: 'beta', name: '当前版模型.glb', revision: 1, blob: plain },
+    ]);
+  });
+  await page.reload();
+  await page.getByRole('button', { name: /共享角色.glb/ }).click();
+  await expect(page.getByText('此模型没有动画片段，继续按旧静态 GLB 路径使用。')).toBeVisible();
+  await expect(page.getByRole('button', { name: /当前版模型.glb/ })).toBeVisible();
+  await page.getByRole('button', { name: '恢复上一个应用版本', exact: true }).click();
+  await expect(page.getByText('已恢复上一个已应用外观；下次进入世界生效。')).toBeVisible();
+  await expect(page.getByRole('button', { name: /上一版模型.glb/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /当前版模型.glb/ })).toHaveCount(0);
+  await page.getByRole('button', { name: /共享角色.glb/ }).click();
+  await expect(page.getByText('1 套 skin · 4 个片段')).toBeVisible();
+  await expect(page.getByLabel('预览动画片段', { exact: true })).toHaveValue('Attack');
+  await page.getByRole('button', { name: '保存草稿', exact: true }).click();
+  await expect(page.getByText('草稿已保存到此浏览器，游戏外观尚未改变。')).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: '导出完整项目', exact: true }).click();
+  const exported = await download;
+  expect(exported.suggestedFilename()).toBe('seedlands-appearance-project.json');
+  const exportPath = await exported.path();
+  if (!exportPath) throw new Error('外观包未下载到本地');
+  const exportedPackage: unknown = JSON.parse(await readFile(exportPath, 'utf8'));
+  expect(exportedPackage).toMatchObject({
+    models: expect.arrayContaining([
+      expect.objectContaining({ id: 'shared', revision: 1 }),
+      expect.objectContaining({ id: 'alpha', revision: 1 }),
+    ]),
+  });
+  await expect(page.getByText('已导出完整外观项目包。')).toBeVisible();
+});
 
 test('真实IndexedDB保持动画引用完整，并冻结启动时的模型Blob', async ({ page }) => {
   await page.goto('asset-workbench.html');
