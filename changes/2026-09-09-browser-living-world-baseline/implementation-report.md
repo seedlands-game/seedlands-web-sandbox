@@ -106,3 +106,11 @@ Terra/high 独立只读诊断沿 `AuthoritySession.wake → advanceGameplayRules
 最终撤销本轮所有诊断性的E2E行为改写：稳定帧/队列等待、0.5像素密度、固定视角、页面内受击替代、相位谓词放宽、截图删除均不保留。近战spec恢复归档基线ec77fdd的原始行为，仅保留解除退役目录helper依赖和浏览器环境变量命名。CI的完整Chromium/SwiftShader开关保留，与该已通过基线一致。
 
 `SEEDLANDS_E2E_FULL_CHROMIUM=1 SEEDLANDS_E2E_SWIFTSHADER=1 SEEDLANDS_BROWSER_E2E_QUALITY=low CI=true pnpm test:pr17:integration --retries=0` 原始用例本地1/1通过（14.2s）。确定性合并步进测试作为有明确边界的诊断用例保留，不能代替浏览器验收。旧诊断阶段的数据与候选叙述是历史过程，以本节和当前spec为最终交付范围；原始像素密度和全部原有玩法断言保持。
+
+## PR 审核收尾：Headless 工具类型门禁
+
+收敛版本 `95e29310ca33ac70f744d12b147179f8d7a24291` 的 [CI run 34280080663](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34280080663) 已通过 Static verification、Production build 和 Chromium regression，发布步骤按 PR 规则跳过。
+
+随后读取未解决的自动审核讨论，确认迁移后的 `scripts/headless/node-core-platform.ts` 不在既有 typecheck 文件列表中。新增根 `tsconfig.tools.json`，仅使用 ES2022/Node 类型，覆盖 `scripts/headless/**/*.ts` 并接入根 typecheck；根工具声明已有 `@seedlands/game-core` workspace 开发依赖，尊重其 exports，不建立跳过包边界的 paths alias。没有新第三方依赖或运行时代码变更。
+
+RED：既有 typecheck 文件列表缺少适配文件。负例：临时将 now 返回值改为字符串，新工具门禁以 TS2322 拒绝不符合 CorePlatformPorts 的实现；finally 恢复原文件后 GREEN。完整 `pnpm typecheck` 通过。最新 SHA 的最终检查仍以 GitHub 为准，不用上一 SHA 的绿灯替代。长期代码地图同步工具检查入口，其余路线不变。

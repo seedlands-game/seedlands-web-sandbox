@@ -21,6 +21,7 @@ Node 产品从 workspace、根 typecheck/build/test、Lint/依赖扫描、CI 和
 3. Given Headless 单进程，When 多条世界查询/时间命令，Then 启动可用、状态保持且不加载 Node 产品目录。仅保留当前能力，不称新 REPL 已交付。
 4. Given 浏览器默认单人会话，When 启动并操作，Then Worker Authority 与本地世界仍运行；以现有浏览器回归证明，不以 build 替代。
 5. Given 包边界负例，When 导入已退役 Node 路径/包，Then 仍拒绝 Web→Node、core→app 及跨包相对导入。
+6. Given 迁移到 scripts 的 Headless 平台适配，When 根 typecheck，Then 使用仅 ES2022/Node 类型的工具配置检查其 CorePlatformPorts 合同。审核 RED：原有检查文件列表不含该文件；修复后检查覆盖，并用临时错误类型证明门禁拒绝后恢复原文件。
 
 ## 验收与任务
 
