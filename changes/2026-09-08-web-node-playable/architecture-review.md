@@ -53,3 +53,15 @@ Terra/high 最终合同的首轮静态检查已完成，原始报告为 `/tmp/se
 - Web per-chunk revision watermark 与 owner 失效处理已覆盖旧基线的拒绝路径；closedSignal 参与 baseline race 后，网络 drain 不再必须等待被阻塞的 capture 完成。旧 P1 的具体调用链已有针对性实现，最终仍需交错提交和阻塞 capture 的确定性实证。
 - 首轮真实键鼠、保存、重连和重启旅程已通过实施者测试，但当时 JSON 指向 8cd0868 且缺少逐文件绑定，不能作为 51e97fa 的准出证据。ef71bfb 补入源文件绑定机制；最终必须重跑并核对源文件、原始帧、跳跃峰值、durable ACK 与停止日志。
 - 51e97fa 的 CI 34194141726：Chromium regression 成功；Static verification 和 Package builds 同因预渲染启动页未更新失败。日志保存在 `/tmp/seedlands-web-node-playable/ci-34194141726-failed.log`，已交 Terra 归因。不能以此前 M1 的绿色 CI 替代本阶段准出。
+
+## 最终源码审阅
+
+ae8a49f 通过第一轮源码冻结，f1d9116 修正真实 WebSocket burst 测试的时钟假设。后续 Linux CI 的失败诊断暴露正常输入流的背压缺口：初始计算较慢时，每帧直发输入触发 Node 32 个在途保护。7da861a 改为 Web 单个在途输入与单个最新待发送状态，匹配 decision 后结算；Node 保护上限保持不变，跳跃期限、重同步与关闭清理另有确定性用例。该产品修复需要新源码冻结与真实旅程复验，不能沿用 ae8 的绿色声明。
+
+分阶段独立结论见 independent-validation.md：完整权威输入与每任务租约、公开字段白名单、单玩家与输入租期、捕获/分页 revision 水位、迟到 Worker 结果、阻塞 capture 关闭、输入/checkpoint 在途上限以及真实游玩与 durable 重启恢复均已复核；7da861a 的最终独立复核及最新 CI 仍待交付快照绑定。
+
+## 收尾时的 main 更新决策
+
+2026-09-08 再次 fetch 后，main 从 5557f34 前进到 f47c44fc58a04954372b71df129d9fa6bbc64e9e（PR #12，统一资产工坊），共 189 个文件。已读取变更清单及 game.ts、browser-gameplay.ts、first-person-viewmodel.ts、Vite 和长期文档的接缝：新增资产入口、应用快照、材质装载与手持表现，仍使用根 src/public 和旧 Vite 布局；没有改本轮 Node 网络权威合同。
+
+PR #15 仍 OPEN，base 分支保持 3c727f7；本 PR #17 对该 base 可合并。本次保留已验收的独立试玩节点，不把 189 文件资产迁移混入 Node 接线。下一步在 monorepo 底座 #15 统一同步 main：把新增 app/client/public/入口迁入各自 Web 职责、合并 Vite 多入口和 game 的 appearance 创建，再验收工坊、原本地世界及 Node 远端三条路径。底座完成后 #17 跟进其提交；若 #15 先合入 main，先核对 ancestry 再 retarget。不要直接把旧 src 目录复活，也不要在两个 PR 重复迁移。
