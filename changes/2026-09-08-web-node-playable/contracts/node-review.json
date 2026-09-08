@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "id": "web-node-playable-node-review",
+  "initiatedBy": "agent",
+  "role": "Node网络检查点独立审阅者",
+  "workType": "validation",
+  "goal": "独立审阅已push的b6ab3e0 Node公开网络检查点，优先找可导致重复动作、越权、泄漏、世界停服或永久失步的真实缺陷；只报告最小复现和源码证据，后续Web完整闭环由另一次冻结验收负责。",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-web-node-playable/spec.md",
+      "purpose": "用户已授权的完整闭环合同"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-web-node-playable/architecture-review.md",
+      "purpose": "root架构准出边界"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/docs/code-map.md",
+      "purpose": "实际三包接缝导航"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/tmp/seedlands-web-node-playable"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills",
+      "/tmp"
+    ],
+    "nonGoals": [
+      "不改世界算法或存档payload，不增加多人、公网部署或正式网络性能采用",
+      "不自动合并PR，不购买或重置额度",
+      "不读取.env或真实密钥，不输出凭据；不修改其他worktree或用户存档",
+      "不修改生产源码、测试期望、合同或历史证据；不暂存、commit、push或创建PR",
+      "不重复已有同源码的全套验证，除非来源不匹配或发现缺口；不把功能测试当性能证据",
+      "不等待Web实现，不做全套回归或性能采样；不因后续工作区更新漂移冻结审阅对象"
+    ]
+  },
+  "outputs": [
+    "/tmp/seedlands-web-node-playable/node-checkpoint-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "read",
+      "check": "以git show b6ab3e0:<path>读取冻结Node网络session/server、公开协议、Authority接线及构建验证；区分后续工作区改动",
+      "evidence": "冻结源码路径/行号与实际调用链"
+    },
+    {
+      "id": "boundary",
+      "check": "独立检查认证占位与Origin/token、公开allowlist、序号/动作缓存、入站与排队预算、取消/关闭/异常、capture发布因果；仅报告有具体触发条件的缺陷",
+      "evidence": "静态可复现触发步骤，必要临时有界测试但禁止编辑生产源码"
+    },
+    {
+      "id": "report",
+      "check": "报告最高优先级问题及已有证据缺口，注明当前checkpoint尚未完成Web，禁止提前声称全功能验收",
+      "evidence": "/tmp/seedlands-web-node-playable/node-checkpoint-review.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 1
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-web-node-playable/contracts/root.json",
+    "sha256": "51c98d5c16d86948c9344ad3c1842204c762d22798ff758a55d4121e3794c7e0"
+  },
+  "resources": {
+    "exclusiveGroup": "seedlands-web-node-playable"
+  },
+  "escalation": [
+    "范围或平台契约需改变",
+    "同原因失败 5 次或预计超出规划时间"
+  ],
+  "reportFields": [
+    "完成状态",
+    "提交和推送",
+    "变更",
+    "验证结果",
+    "限制",
+    "剩余工作"
+  ]
+}

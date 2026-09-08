@@ -352,7 +352,7 @@ export class PerformanceTelemetry {
         dur: 0,
         pid: 'seedlands-client',
         tid: mark.lane,
-        args: { traceId: trace.traceId },
+        args: { traceId: trace.traceId, traceName: trace.name },
       })),
     );
     return { traceEvents: [...spans, ...traces, ...marks] };

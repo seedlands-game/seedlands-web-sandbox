@@ -17,6 +17,7 @@ type MeshWorkerPort = {
 type Options = Readonly<{
   epoch: SessionEpoch;
   generalWorkerCount: 1 | 2;
+  fluidWorkerEnabled?: boolean;
   wasm?: WasmWorkerSelection;
   createWorker?: (lane: ComputeLane, index: number) => ComputeWorkerPort;
   onFluidCandidate: (candidate: FluidCandidate) => void;
@@ -63,6 +64,7 @@ export class BrowserComputeRuntime {
     this.pool = new ComputeWorkerPool({
       epoch: options.epoch,
       generalWorkerCount: options.generalWorkerCount,
+      fluidWorkerEnabled: options.fluidWorkerEnabled,
       maxTasks: 96,
       maxBytes: 96 * 1024 * 1024,
       createWorker:

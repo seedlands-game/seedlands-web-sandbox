@@ -49,5 +49,6 @@ export interface ChunkPersistence {
   ): Promise<ChunkPersistenceLoadDiagnostics | void>;
   preparedSnapshotStatus?(key: string): ChunkPersistencePreparedStatus;
   releaseNeighborhood?(cx: number, cy: number, cz: number): void;
+  /** Releases prepared read cache only; durable data remains available for a later ensure. */
   evictSnapshot?(key: string): void;
 }

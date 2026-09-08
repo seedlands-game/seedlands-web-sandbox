@@ -1,0 +1,272 @@
+{
+  "productionCommit": "926c97dd149240643ab483aa4828595e92afdfd2",
+  "environment": {
+    "seed": "node-playable-trial",
+    "compute": "worker-thread",
+    "quality": "low",
+    "profile": "balanced",
+    "viewport": [2560, 1359],
+    "deviceScaleFactor": 2
+  },
+  "unavailableCount": 0,
+  "pageErrors": [],
+  "samples": [
+    {
+      "stage": "early",
+      "position": [0.5, 16, 0.5],
+      "resetCounts": {},
+      "missingNear": []
+    },
+    {
+      "stage": "mined",
+      "position": [0.5, 16, 0.5],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "walking-start",
+      "position": [0.5, 16, 0.5],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-5",
+      "position": [14.043401892509344, 18.053333772543468, 15.706390616333792],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-10",
+      "position": [29.94915035607673, 18.02500081802916, 31.620440529321467],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-15",
+      "position": [45.854898819644035, 17.991667484695824, 47.53449044230913],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-20",
+      "position": [61.813666454244014, 17.991667484695824, 63.50158719783249],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-25",
+      "position": [77.7194150025642, 16.466667484695822, 79.41563719561351],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-30",
+      "position": [93.62516346613359, 16.38333415136249, 95.32968710859915],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-35",
+      "position": [111.28054457378165, 16.57000081802916, 112.99428282526264],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-40",
+      "position": [127.18629303735104, 16.641667484695827, 128.90833273824853],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": ["2,0,5", "3,0,5", "4,0,5"]
+    },
+    {
+      "stage": "moving-45",
+      "position": [143.19807984298188, 16.57000081802916, 144.92847633630964],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-50",
+      "position": [159.15684747757987, 16.57000081802916, 160.89557309183505],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": ["3,0,6", "4,0,6", "5,0,6"]
+    },
+    {
+      "stage": "moving-55",
+      "position": [174.95655759907984, 16.77000081802916, 176.70352931975333],
+      "resetCounts": {
+        "collision-history-missing": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "moving-60",
+      "position": [190.9683444047105, 16.708334151362493, 192.72367291781444],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": ["4,0,7", "5,0,7", "6,0,7"]
+    },
+    {
+      "stage": "outbound-end",
+      "position": [191.07438274677585, 16.57000081802916, 192.82976660288585],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": ["4,0,7", "5,0,7", "6,0,7"]
+    },
+    {
+      "stage": "returning-5",
+      "position": [175.88704016961873, 16.411667484695826, 177.608046027542],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-10",
+      "position": [159.99518557769318, 16.493334151362493, 161.68012160379752],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-15",
+      "position": [143.9973852695298, 16.411667484695826, 145.6460109982267],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-20",
+      "position": [128.10553067760424, 16.493334151362493, 129.71808657448221],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-25",
+      "position": [112.16070322755976, 16.493334151362493, 113.7370690598283],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-30",
+      "position": [96.32182149375313, 16.641667484695827, 97.86223772700113],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-35",
+      "position": [80.37699404370866, 16.641667484695827, 81.88122021234766],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-40",
+      "position": [64.43216659366419, 16.641667484695827, 65.90020269769418],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-45",
+      "position": [49.151109676408666, 17.466667484695822, 51.12405726297205],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-50",
+      "position": [33.206282226362106, 17.466667484695822, 35.14303974831858],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-55",
+      "position": [17.367400492554385, 17.295000818029155, 19.268208415491408],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "returning-60",
+      "position": [1.3695996934624048, 16.32500081802916, 3.2340973178833003],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    },
+    {
+      "stage": "settled",
+      "position": [1.082124786063534, 16.000000089954742, 2.9457807883362146],
+      "resetCounts": {
+        "collision-history-missing": 2,
+        "large-error": 2
+      },
+      "missingNear": []
+    }
+  ],
+  "artifactHashes": {
+    "journey.json": "38b84a5597194ba3501ea190bdc5c0690c6e5cdff816936aa16e5f14d3e4d4ae",
+    "full-green.log": "31383d189afdb5bf06c49dc8e6202a03649d668f25153349223fd23bf8e7cdf4",
+    "early.png": "78be75ce1eee532fb74ed494e81eeea3cdde7b8cc2fe64c99ac128ef80191145",
+    "middle.png": "87255b13d9128a71637bab34a5c8f3f5ce75b7712d142edb499da2071fed2497",
+    "turned.png": "e8b0a071517f005ed8d9963a63ca7415bcaae883d707888070a1fa938b84e365",
+    "settled.png": "5d50bac90eeabb3c3ec50cc90baad562d3274eb4eb77955dfccbfab961c3887f",
+    "cache-cap-red.log": "6a1e1384f02c2fd785261f18feaf0e57dde91960dae66623aaa9f6f7388fb215",
+    "lifecycle-red.log": "d8e2982ea290b364ea04680487be4d11e681c69fed73af083741d1e6eb243a71",
+    "lifecycle-green.log": "470d7de26cf92c2bf41d0c0e40e33f3994a4aed8da8571a1cc362fa0298d6579",
+    "cancel-green.log": "5f929c54a60529046e8489a471acb0fe77284edf0f50d38018d428c17e906f6c"
+  }
+}

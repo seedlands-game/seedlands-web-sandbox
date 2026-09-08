@@ -27,16 +27,21 @@
   let latestSeed = $state('');
   let error = $state('');
   let workerSupport = $state<WorkerSupport>('checking');
+  let controllerState = $state(untrack(() => application?.controller.state));
   onMount(() =>
     application?.subscribe(() => {
       latestSeed = application.latestSeed;
       error = application.controller.state.error;
       workerSupport = application.capabilities.workerSupport;
+      controllerState = application.controller.state;
     }),
   );
   let seed = $state(untrack(() => shell.seed));
   let quality = $state<QualityLevel>(untrack(() => shell.quality));
   let openMode = $state<WorldOpenMode>('continue');
+  let connectionMode = $state<'local' | 'remote'>('local');
+  let nodeUrl = $state('ws://127.0.0.1:8787/seedlands');
+  let nodeAccessKey = $state('');
   let previousPhase: ShellState['phase'] = untrack(() => shell.phase);
   let seedTouched = $state(untrack(() => Boolean(shell.seed)));
   let qualityTouched = $state(untrack(() => shell.quality !== 'medium'));
@@ -48,11 +53,19 @@
     }
     previousPhase = shell.phase;
   });
+  const connectRemote = () => {
+    const accessKey = nodeAccessKey;
+    nodeAccessKey = '';
+    void application?.connectRemote(nodeUrl, accessKey, quality);
+  };
 </script>
 
 <GamePanel id="start-card" class="start-card" role="region" hidden={shell.phase === 'playing'}>
   {#if shell.phase === 'loading'}
     <WorldLoading />
+    {#if application?.controller.state.mode === 'remote'}
+      <GameButton label="取消连接" onclick={() => application.controller.cancelStart()}>取消连接</GameButton>
+    {/if}
   {:else}
     <SeedlandsMark {assetBase} />
     <p class="eyebrow">PROCEDURAL FANTASY WORLD</p>
@@ -61,7 +74,14 @@
     <div class="world-tags" aria-hidden="true">
       <span>草原</span><span>森林</span><span>山脉</span><span>河湖</span>
     </div>
-    {#if latestSeed && !shell.initializationError}
+    <label for="connection-mode">
+      世界来源
+      <select id="connection-mode" bind:value={connectionMode}>
+        <option value="local">此浏览器</option>
+        <option value="remote">本机 Node</option>
+      </select>
+    </label>
+    {#if connectionMode === 'local' && latestSeed && !shell.initializationError}
       <GameButton
         class="continue-world"
         label="继续世界"
@@ -70,14 +90,24 @@
       >
     {/if}
     <div class="start-fields">
-      <GameTextField
-        id="seed"
-        label="世界 Seed"
-        bind:value={seed}
-        maxlength={48}
-        placeholder="留空创建随机世界"
-        oninput={() => (seedTouched = true)}
-      />
+      {#if connectionMode === 'local'}<GameTextField
+          id="seed"
+          label="世界 Seed"
+          bind:value={seed}
+          maxlength={48}
+          placeholder="留空创建随机世界"
+          oninput={() => (seedTouched = true)}
+        />{:else}
+        <GameTextField id="node-url" label="Node 地址" bind:value={nodeUrl} maxlength={128} />
+        <GameTextField
+          id="node-access-key"
+          label="访问口令"
+          type="password"
+          bind:value={nodeAccessKey}
+          maxlength={256}
+          placeholder="只用于本次连接"
+        />
+      {/if}
       <label for="quality">
         视觉质量
         <select id="quality" bind:value={quality} onchange={() => (qualityTouched = true)}>
@@ -87,43 +117,53 @@
         </select>
       </label>
     </div>
-    <label class="world-version-choice" for="world-version-mode">
-      世界版本
-      <select id="world-version-mode" bind:value={openMode}>
-        <option value="continue">默认继续（优先已有新版）</option>
-        <option value="continue-legacy">明确继续旧版 v2</option>
-        <option value="new-current">新建或进入新版 v3（保留旧档）</option>
-      </select>
-    </label>
+    {#if connectionMode === 'local'}<label class="world-version-choice" for="world-version-mode">
+        世界版本
+        <select id="world-version-mode" bind:value={openMode}>
+          <option value="continue">默认继续（优先已有新版）</option>
+          <option value="continue-legacy">明确继续旧版 v2</option>
+          <option value="new-current">新建或进入新版 v3（保留旧档）</option>
+        </select>
+      </label>{:else}<p class="muted">只允许本机 ws 地址；关闭网页后世界仍会继续，存档保存在 Node 服务端。</p>{/if}
+    {#if controllerState?.mode === 'remote' && controllerState.remoteUrl}
+      <p class="muted" data-remote-server-info>
+        上次连接：{controllerState.remoteUrl}{controllerState.serverSeed
+          ? ` · 服务器 Seed：${controllerState.serverSeed}`
+          : ''}
+      </p>
+    {/if}
     {#if shell.initializationError}
       <GameButton id="enter" label={shell.enterLabel} onclick={() => application?.reloadAfterInitializationFailure()}>
         {shell.enterLabel}
       </GameButton>
     {:else}
-      <GameButton
-        class="recommended-start"
-        label="推荐起点：林间河岸"
-        disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
-        onclick={() => {
-          seedTouched = true;
-          seed = 'mosslight-68';
-        }}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
-      >
+      {#if connectionMode === 'local'}<GameButton
+          class="recommended-start"
+          label="推荐起点：林间河岸"
+          disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
+          onclick={() => {
+            seedTouched = true;
+            seed = 'mosslight-68';
+          }}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
+        >
+      {/if}
       <GameButton
         id="enter"
-        label={shell.enterLabel}
-        disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
-        onclick={() => onstart(seed, quality, openMode)}
+        label={connectionMode === 'remote' ? '连接本机 Node' : shell.enterLabel}
+        disabled={shell.phase === 'boot' ||
+          workerSupport !== 'supported' ||
+          (connectionMode === 'remote' && !nodeAccessKey)}
+        onclick={() => (connectionMode === 'remote' ? connectRemote() : onstart(seed, quality, openMode))}
       >
-        {shell.enterLabel}
+        {connectionMode === 'remote' ? '连接本机 Node' : shell.enterLabel}
       </GameButton>
-      <GameButton
-        class="melee-showcase-start"
-        label="木剑动作体验场"
-        disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
-        onclick={() => onstartshowcase(quality)}
-        >木剑动作体验场 <small>木剑已装备 · 两段斜劈 · 玩家受击反馈</small></GameButton
-      >
+      {#if connectionMode === 'local'}<GameButton
+          class="melee-showcase-start"
+          label="木剑动作体验场"
+          disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
+          onclick={() => onstartshowcase(quality)}
+          >木剑动作体验场 <small>木剑已装备 · 两段斜劈 · 玩家受击反馈</small></GameButton
+        >{/if}
     {/if}
     <div class="menu-secondary">
       <GameButton label="设置" onclick={() => application?.openPanel('settings')}>设置</GameButton>
@@ -137,6 +177,8 @@
     {#if workerSupport === 'unsupported'}
       <p class="start-error" role="alert">当前浏览器不支持运行游戏所需的 Web Worker，无法进入世界。</p>
     {/if}
-    <small>旧版河岸不会自动改变；版本选择可继续 v2，也可为同名 Seed 保留旧档并进入 v3。</small>
+    {#if connectionMode === 'local'}<small
+        >旧版河岸不会自动改变；版本选择可继续 v2，也可为同名 Seed 保留旧档并进入 v3。</small
+      >{/if}
   {/if}
 </GamePanel>

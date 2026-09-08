@@ -102,7 +102,9 @@ const projectBreakAction = (value: AuthorityGameplayView['player']['breakAction'
     requiredSeconds: assertFinite(value.requiredSeconds, 'breakAction.requiredSeconds'),
   };
 };
-const projectCombat = (value: AuthorityGameplayView['player']['combat']): GameplayCombatReference | undefined => {
+export const projectCombatReference = (
+  value: AuthorityGameplayView['player']['combat'],
+): GameplayCombatReference | undefined => {
   if (!value) return undefined;
   const active = value.active
     ? {
@@ -156,7 +158,7 @@ const projectCombat = (value: AuthorityGameplayView['player']['combat']): Gamepl
   };
 };
 const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerReference => {
-  const combat = projectCombat(value.combat);
+  const combat = projectCombatReference(value.combat);
   return {
     entityId: assertText(value.entityId, 'gameplay.player.entityId'),
     health: assertFinite(value.health, 'gameplay.player.health'),
@@ -180,7 +182,7 @@ const projectEntity = (value: AuthorityGameplayView['entities'][number]): Gamepl
     throw new TypeError('NPC presentation archetype must be settler.');
   if (value.type === 'creature' && value.archetype === 'settler')
     throw new TypeError('Creature presentation archetype cannot be settler.');
-  const combat = projectCombat(value.combat);
+  const combat = projectCombatReference(value.combat);
   const projected: GameplayEntityReference = {
     id: assertText(value.id, 'entity.id'),
     type: value.type,

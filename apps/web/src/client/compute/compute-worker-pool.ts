@@ -63,6 +63,7 @@ type PendingTransfer = { transfer: Transferable[] };
 type ComputeWorkerPoolOptions = Readonly<{
   epoch: SessionEpoch;
   generalWorkerCount: 1 | 2;
+  fluidWorkerEnabled?: boolean;
   maxTasks: number;
   maxBytes: number;
   createWorker: (lane: BrowserComputeLane, index: number) => ComputeWorkerPort;
@@ -261,7 +262,7 @@ export class ComputeWorkerPool {
   }
 
   private createSlots(): void {
-    const lanes: BrowserComputeLane[] = ['fluid'];
+    const lanes: BrowserComputeLane[] = this.options.fluidWorkerEnabled === false ? [] : ['fluid'];
     for (let index = 0; index < this.options.generalWorkerCount; index += 1) lanes.push('general');
     this.slots = lanes.map((lane, index) => ({
       lane,

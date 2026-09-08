@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "id": "web-node-playable-root",
+  "initiatedBy": "human",
+  "role": "本机Web/Node单人闭环负责人",
+  "workType": "design",
+  "goal": "从已验证monorepo分支推进真实Web连接Node的单人游玩、保存、手动重连与重启恢复，持续commit/push并交付CI通过的可审核PR。",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation/changes/2026-09-08-web-node-playable/spec.md",
+      "purpose": "用户已授权的完整闭环合同"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/tmp/seedlands-web-node-playable"
+    ],
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/6f46/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills",
+      "/tmp"
+    ],
+    "nonGoals": [
+      "不改世界算法或存档payload，不增加多人、公网部署或正式网络性能采用",
+      "不自动合并PR，不购买或重置额度",
+      "不读取.env或真实密钥，不输出凭据；不修改其他worktree或用户存档"
+    ]
+  },
+  "outputs": [
+    "可手动复现的完整本机单人闭环、验证与持续提交、可审核PR"
+  ],
+  "execution": {
+    "form": "current-agent",
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "done",
+      "check": "spec完整闭环通过真实Web/Node E2E与独立验收；最新HEAD必要CI成功、无冲突、PR ready",
+      "evidence": "delivery.md、源码/日志绑定与PR CI"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 5,
+    "maxAgentHours": 18
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": true,
+    "delegate": true
+  },
+  "parent": null,
+  "resources": {
+    "exclusiveGroup": "seedlands-web-node-playable"
+  },
+  "escalation": [
+    "范围或平台契约需改变",
+    "同原因失败 5 次或预计超出规划时间"
+  ],
+  "reportFields": [
+    "完成状态",
+    "提交和推送",
+    "变更",
+    "验证结果",
+    "限制",
+    "剩余工作"
+  ]
+}

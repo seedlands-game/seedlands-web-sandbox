@@ -136,9 +136,38 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
       - name: Run deterministic browser regression
+        env:
+          SEEDLANDS_LOADING_EVIDENCE_OUTPUT: /tmp/seedlands-web-node-playable/loading
         run: pnpm test:e2e:regression
       - name: Run PR15 asset integration
         run: pnpm test:pr15:integration
+      - name: Run Active Web to Node playable change
+        timeout-minutes: 15
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
+          SEEDLANDS_WEB_NODE_QUALITY: low
+          SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT: /tmp/seedlands-web-node-playable/journey
+          SEEDLANDS_RESERVATION_EVIDENCE: /tmp/seedlands-web-node-playable/graphics-window.json
+          SEEDLANDS_RESERVATION_RUN: web-node-playable-${{ github.run_id }}
+        run: node scripts/benchmark-window.mjs --owner-thread seedlands-performance-validator --wait-timeout-ms 600000 -- pnpm test:web-node-playable
+      - name: Run PR17 main gameplay integration
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
+          SEEDLANDS_WEB_NODE_QUALITY: low
+        run: pnpm test:pr17:integration
+      - name: Preserve Web to Node playable evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: web-node-playable-${{ github.run_id }}
+          path: |
+            /tmp/seedlands-web-node-playable/journey/
+            /tmp/seedlands-web-node-playable/graphics-window.json
+            test-results/
+          if-no-files-found: error
+          retention-days: 7
 
   deploy:
     name: Deploy GitHub Pages

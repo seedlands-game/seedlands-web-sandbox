@@ -10,7 +10,16 @@ const reasonsByAction = {
   respawn: ['player-alive'],
   craft: ['player-dead', 'unknown-recipe', 'missing-inputs', 'no-output-capacity'],
   'begin-break': ['player-dead', 'out-of-range', 'chunk-unavailable', 'unbreakable'],
-  attack: ['player-dead', 'cooldown', 'invalid-target', 'out-of-range', 'chunk-unavailable', 'blocked'],
+  attack: [
+    'player-dead',
+    'cooldown',
+    'invalid-target',
+    'out-of-range',
+    'chunk-unavailable',
+    'blocked',
+    'buffer-full',
+    'combo-window-closed',
+  ],
   place: [
     'player-dead',
     'out-of-range',
@@ -27,7 +36,15 @@ const reasonsByAction = {
 type ActionFailureReason = (typeof reasonsByAction)[AuthorityAction['type']][number];
 type ActionOutcomeReference =
   | Readonly<{ success: false; reason: ActionFailureReason }>
-  | Readonly<{ success: true; recipeId?: string; requiredSeconds?: number; damage?: number; worldRevision?: number }>;
+  | Readonly<{
+      success: true;
+      recipeId?: string;
+      requiredSeconds?: number;
+      damage?: number;
+      actionId?: string;
+      buffered?: boolean;
+      worldRevision?: number;
+    }>;
 type ReceiptIdentity = Readonly<{ epoch: string; issuer: string; stream: string; sequence: number }>;
 type ReceiptBase = Readonly<{
   kind: 'action-receipt-reference';
@@ -79,8 +96,16 @@ function outcome(action: AuthorityAction, value: unknown): ActionOutcomeReferenc
     }
     case 'begin-break':
       return { success: true, requiredSeconds: number(source.requiredSeconds, 'requiredSeconds', false) };
-    case 'attack':
-      return { success: true, damage: number(source.damage, 'damage', false) };
+    case 'attack': {
+      if (source.actionId === undefined) return { success: true, damage: number(source.damage, 'damage', false) };
+      if (typeof source.buffered !== 'boolean') throw new TypeError('Invalid attack buffered flag.');
+      return {
+        success: true,
+        actionId: text(source.actionId, 'attack actionId'),
+        buffered: source.buffered,
+        ...(source.damage === undefined ? {} : { damage: number(source.damage, 'damage', false) }),
+      };
+    }
     case 'place': {
       const commit = record(source.commit, 'place commit');
       if (commit.committed !== true) throw new TypeError('Successful placement requires a committed world change.');

@@ -1,18 +1,32 @@
 import type { AuthorityAction } from '../../compute/authority-worker-protocol';
+import {
+  isPlayablePublicOutboundMessage,
+  type PlayablePublicOutboundMessage,
+} from './network-playable-message-semantics';
+export type { PlayablePublicOutboundMessage } from './network-playable-message-semantics';
 
 export const NETWORK_DRAFT_PROTOCOL_VERSION = 1 as const;
 
 export type NetworkMessageClass =
+  | 'session-hello'
   | 'welcome'
   | 'session-rejected'
   | 'input-state'
   | 'input-edge'
   | 'player-action'
   | 'interest-update'
+  | 'interest-cancel'
   | 'checkpoint-request'
   | 'resync-request'
   | 'heartbeat'
   | 'disconnect'
+  | 'authority-state'
+  | 'input-decision'
+  | 'action-receipt'
+  | 'baseline-descriptor'
+  | 'baseline-page'
+  | 'baseline-unavailable'
+  | 'heartbeat-receipt'
   | 'player-correction'
   | 'entity-pose'
   | 'gameplay-view'
@@ -31,16 +45,25 @@ export type NetworkMessageClassSpec = Readonly<{
 }>;
 
 export const NETWORK_MESSAGE_CLASSES: Readonly<Record<NetworkMessageClass, NetworkMessageClassSpec>> = {
+  'session-hello': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   welcome: { direction: 'outbound', reliability: 'reliable', stream: 'control' },
   'session-rejected': { direction: 'outbound', reliability: 'reliable', stream: 'control' },
   'input-state': { direction: 'inbound', reliability: 'latest', stream: 'input' },
   'input-edge': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   'player-action': { direction: 'inbound', reliability: 'reliable', stream: 'events' },
   'interest-update': { direction: 'inbound', reliability: 'latest', stream: 'world' },
+  'interest-cancel': { direction: 'inbound', reliability: 'reliable', stream: 'world' },
   'checkpoint-request': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   'resync-request': { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   heartbeat: { direction: 'inbound', reliability: 'reliable', stream: 'control' },
   disconnect: { direction: 'inbound', reliability: 'reliable', stream: 'control' },
+  'authority-state': { direction: 'outbound', reliability: 'latest', stream: 'pose' },
+  'input-decision': { direction: 'outbound', reliability: 'reliable', stream: 'control' },
+  'action-receipt': { direction: 'outbound', reliability: 'reliable', stream: 'events' },
+  'baseline-descriptor': { direction: 'outbound', reliability: 'reliable', stream: 'world' },
+  'baseline-page': { direction: 'outbound', reliability: 'reliable', stream: 'world' },
+  'baseline-unavailable': { direction: 'outbound', reliability: 'reliable', stream: 'world' },
+  'heartbeat-receipt': { direction: 'outbound', reliability: 'reliable', stream: 'control' },
   'player-correction': { direction: 'outbound', reliability: 'reliable', stream: 'control' },
   'entity-pose': { direction: 'outbound', reliability: 'latest', stream: 'pose' },
   'gameplay-view': { direction: 'outbound', reliability: 'reliable', stream: 'events' },
@@ -61,6 +84,12 @@ export type PublicSessionRef = Readonly<{
 }>;
 
 export type PublicInboundMessage =
+  | Readonly<{
+      kind: 'session-hello';
+      protocolVersion: typeof NETWORK_DRAFT_PROTOCOL_VERSION;
+      transport: 'experimental-local-c0-v1';
+      accessKey: string;
+    }>
   | Readonly<{
       kind: 'input-state';
       ref: PublicSessionRef;
@@ -88,6 +117,7 @@ export type PublicInboundMessage =
       action: AuthorityAction;
     }>
   | Readonly<{ kind: 'interest-update'; ref: PublicSessionRef; requestId: number; keys: readonly string[] }>
+  | Readonly<{ kind: 'interest-cancel'; ref: PublicSessionRef; requestId: number; targetRequestId: number }>
   | Readonly<{ kind: 'checkpoint-request'; ref: PublicSessionRef; requestId: number }>
   | Readonly<{
       kind: 'resync-request';
@@ -99,7 +129,14 @@ export type PublicInboundMessage =
   | Readonly<{ kind: 'disconnect'; ref: PublicSessionRef; reason: 'client-close' | 'mode-switch' }>;
 
 export type PublicOutboundMessage =
-  | Readonly<{ kind: 'welcome'; ref: PublicSessionRef; serverEpoch: string; physicsHz: 30 | 60 | 120 }>
+  | Readonly<{
+      kind: 'welcome';
+      ref: PublicSessionRef;
+      serverEpoch: string;
+      physicsHz: 30 | 60 | 120;
+      presentation?: Readonly<Record<string, unknown>>;
+      gameplay?: Readonly<Record<string, unknown>>;
+    }>
   | Readonly<{ kind: 'session-rejected'; code: 'authentication' | 'version' | 'capacity' }>
   | Readonly<{
       kind: 'player-correction';
@@ -160,7 +197,7 @@ export type PublicOutboundMessage =
 export type NormalizedNetworkCorpusMessage = Readonly<{
   draftVersion: typeof NETWORK_DRAFT_PROTOCOL_VERSION;
   messageClass: NetworkMessageClass;
-  message: PublicInboundMessage | PublicOutboundMessage;
+  message: PublicInboundMessage | PublicOutboundMessage | PlayablePublicOutboundMessage;
 }>;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -211,6 +248,7 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
 };
 
 const inboundKeys = {
+  'session-hello': ['protocolVersion', 'transport', 'accessKey'],
   'input-state': [
     'inputSequence',
     'targetPhysicsTick',
@@ -223,6 +261,7 @@ const inboundKeys = {
   'input-edge': ['edgeId', 'targetPhysicsTick', 'expiresAfterPhysicsTick', 'type'],
   'player-action': ['requestId', 'expectedCommitSequence', 'action'],
   'interest-update': ['requestId', 'keys'],
+  'interest-cancel': ['requestId', 'targetRequestId'],
   'checkpoint-request': ['requestId'],
   'resync-request': ['requestId', 'reason'],
   heartbeat: ['nonce'],
@@ -230,8 +269,17 @@ const inboundKeys = {
 } as const;
 
 export function isPublicInboundMessage(value: unknown): value is PublicInboundMessage {
-  if (!isRecord(value) || !hasNoCapabilities(value) || !isPublicSessionRef(value.ref) || typeof value.kind !== 'string')
-    return false;
+  if (!isRecord(value) || !hasNoCapabilities(value) || typeof value.kind !== 'string') return false;
+  if (value.kind === 'session-hello')
+    return (
+      hasOnlyKeys(value, ['kind', ...inboundKeys['session-hello']]) &&
+      value.protocolVersion === NETWORK_DRAFT_PROTOCOL_VERSION &&
+      value.transport === 'experimental-local-c0-v1' &&
+      typeof value.accessKey === 'string' &&
+      value.accessKey.length > 0 &&
+      value.accessKey.length <= 256
+    );
+  if (!isPublicSessionRef(value.ref)) return false;
   if (
     !Object.hasOwn(inboundKeys, value.kind) ||
     !hasOnlyKeys(value, ['kind', 'ref', ...inboundKeys[value.kind as keyof typeof inboundKeys]])
@@ -266,8 +314,18 @@ export function isPublicInboundMessage(value: unknown): value is PublicInboundMe
     return (
       isSafeInteger(value.requestId) &&
       Array.isArray(value.keys) &&
-      value.keys.length <= 256 &&
-      value.keys.every(isNonEmptyString)
+      value.keys.length === 1 &&
+      value.keys.every((key) => {
+        if (!isNonEmptyString(key)) return false;
+        const coordinates = key.split(',').map(Number);
+        return coordinates.length === 3 && coordinates.every(Number.isSafeInteger) && coordinates.join(',') === key;
+      })
+    );
+  if (value.kind === 'interest-cancel')
+    return (
+      isSafeInteger(value.requestId) &&
+      isSafeInteger(value.targetRequestId) &&
+      value.requestId !== value.targetRequestId
     );
   if (value.kind === 'checkpoint-request') return isSafeInteger(value.requestId);
   if (value.kind === 'resync-request')
@@ -276,7 +334,9 @@ export function isPublicInboundMessage(value: unknown): value is PublicInboundMe
   return value.kind === 'disconnect' && (value.reason === 'client-close' || value.reason === 'mode-switch');
 }
 
-export function isPublicOutboundMessage(value: unknown): value is PublicOutboundMessage {
+export function isPublicOutboundMessage(
+  value: unknown,
+): value is PublicOutboundMessage | PlayablePublicOutboundMessage {
   if (!isRecord(value) || !hasNoCapabilities(value) || typeof value.kind !== 'string') return false;
   if (value.kind === 'session-rejected')
     return (
@@ -291,11 +351,16 @@ export function isPublicOutboundMessage(value: unknown): value is PublicOutbound
       ['idle', 'backpressure', 'protocol'].includes(value.code)
     );
   if (!isPublicSessionRef(value.ref)) return false;
+  if (isPlayablePublicOutboundMessage(value, isPublicSessionRef)) return true;
   if (value.kind === 'welcome')
     return (
-      hasOnlyKeys(value, ['kind', 'ref', 'serverEpoch', 'physicsHz']) &&
+      hasOnlyKeys(value, ['kind', 'ref', 'serverEpoch', 'physicsHz', 'presentation', 'gameplay']) &&
       isNonEmptyString(value.serverEpoch) &&
-      [30, 60, 120].includes(value.physicsHz as number)
+      [30, 60, 120].includes(value.physicsHz as number) &&
+      (value.presentation === undefined ||
+        (isRecord(value.presentation) && value.presentation.kind === 'welcome-presentation-reference')) &&
+      (value.gameplay === undefined ||
+        (isRecord(value.gameplay) && value.gameplay.kind === 'gameplay-consumer-reference'))
     );
   if (value.kind === 'player-correction') {
     const isAcknowledgement = (sequence: unknown) => sequence === -1 || isSafeInteger(sequence);

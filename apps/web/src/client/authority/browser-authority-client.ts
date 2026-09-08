@@ -46,6 +46,7 @@ export type AuthorityWorkerPort = import('./browser-authority-client-contract').
 const failedClientError = (error: Error) => new Error(`Authority client failed: ${error.message}`, { cause: error });
 
 export class BrowserAuthorityClient {
+  readonly mode = 'local' as const;
   private requestSequence = 0;
   private readonly transactionSequences = new Map<string, number>();
   private readonly requests: ClientRequestRegistry;

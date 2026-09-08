@@ -1,0 +1,494 @@
+import { execFileSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join, resolve } from 'node:path';
+import {
+  expect,
+  test,
+  type ConsoleMessage,
+  type Page,
+  type TestInfo,
+  type WebSocket as PlaywrightWebSocket,
+} from '@playwright/test';
+import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
+import { COLLISION_EPSILON } from '../../../packages/game-core/src/physics/geometry';
+import { alignWithAimedColumn } from './aimed-column-alignment';
+import {
+  armGraphicsIdentity,
+  captureGraphicsIdentity,
+  releaseGraphicsIdentity,
+  type ConnectionGraphicsIdentity,
+} from './graphics-identity-evidence';
+import { JourneyProgressDiagnostics } from './journey-progress-diagnostics';
+import { journeyQuality, selectJourneyQuality } from './journey-quality';
+import { REMOTE_PLAYABLE_ACCESS_KEY, RemotePlayableNodeFixture } from './remote-playable-node-fixture';
+import { webNodePlayableSourceInputs as sourceInputs } from './web-node-playable-source-inputs';
+
+const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+const sourceTreeStatus = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim();
+const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
+const nodePort = 18_787;
+const nodeUrl = `ws://127.0.0.1:${nodePort}/seedlands`;
+const accessKey = REMOTE_PLAYABLE_ACCESS_KEY;
+const evidenceDirectory = resolve(
+  process.env.SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT ?? 'changes/2026-09-08-web-node-playable/evidence',
+);
+const journeyDiagnosticDirectory = resolve(
+  process.env.SEEDLANDS_WEB_NODE_DIAGNOSTIC_OUTPUT ??
+    (process.env.SEEDLANDS_WEB_NODE_EVIDENCE_OUTPUT
+      ? join(evidenceDirectory, 'diagnostics')
+      : '/tmp/seedlands-web-node-playable/journey-diagnostics'),
+);
+let nodeFixture: RemotePlayableNodeFixture | null = null;
+let nodeLog: string[] = [];
+const graphicsIdentities: ConnectionGraphicsIdentity[] = [];
+const playableSockets = new WeakMap<Page, PlaywrightWebSocket>();
+let activeJourneyDiagnostics: JourneyProgressDiagnostics | null = null;
+
+const evidence = (page: Page) =>
+  page.evaluate(() => {
+    if (!window.__seedlandsRemoteEvidence) throw new Error('Remote evidence is unavailable.');
+    return window.__seedlandsRemoteEvidence.snapshot();
+  });
+
+const redactDiagnostic = (value: string): string => {
+  let redacted = value.replaceAll(accessKey, '[REDACTED_ACCESS_KEY]');
+  if (nodeFixture) redacted = redacted.replaceAll(nodeFixture.keyFile, '[REDACTED_KEY_FILE]');
+  return redacted;
+};
+
+const appendDiagnostic = (entries: string[], value: string): void => {
+  entries.push(redactDiagnostic(value));
+  if (entries.length > 100) entries.shift();
+};
+
+async function startNode(): Promise<void> {
+  nodeFixture ??= await RemotePlayableNodeFixture.create(nodePort);
+  await nodeFixture.start(origin);
+  nodeLog = [...nodeFixture.logs()];
+}
+
+async function stopNode(): Promise<readonly string[]> {
+  if (!nodeFixture) return nodeLog;
+  nodeLog = [...(await nodeFixture.stop())];
+  return nodeLog;
+}
+
+async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise<RemotePlayableEvidence> {
+  const consoleMessages: string[] = [];
+  const pageErrors: string[] = [];
+  const webSocketEvents: string[] = [];
+  const webSocketCloseListeners = new Map<PlaywrightWebSocket, () => void>();
+  const onConsole = (message: ConsoleMessage) =>
+    appendDiagnostic(consoleMessages, `${message.type()}: ${message.text()}`);
+  const onPageError = (error: Error) => appendDiagnostic(pageErrors, error.stack ?? error.message);
+  const onWebSocket = (socket: PlaywrightWebSocket) => {
+    if (socket.url() === nodeUrl) playableSockets.set(page, socket);
+    const onClose = () => appendDiagnostic(webSocketEvents, `close ${socket.url()}`);
+    webSocketCloseListeners.set(socket, onClose);
+    socket.on('close', onClose);
+  };
+  page.on('console', onConsole);
+  page.on('pageerror', onPageError);
+  page.on('websocket', onWebSocket);
+  try {
+    await page.goto('/?harness=1');
+    await expect(page.locator('#enter')).toBeEnabled({ timeout: 20_000 });
+    await expect
+      .poll(async () => {
+        await page.selectOption('#connection-mode', 'remote');
+        return page.locator('#node-url').isVisible();
+      })
+      .toBe(true);
+    await selectJourneyQuality(page);
+    await armGraphicsIdentity(page);
+    await page.fill('#node-url', nodeUrl);
+    await page.locator('input[type="password"]').fill(accessKey);
+    await page.click('#enter');
+    try {
+      await page.waitForFunction(() => Boolean(window.__seedlandsRemoteEvidence), null, { timeout: 30_000 });
+    } catch (error) {
+      try {
+        const currentUrl = new URL(page.url());
+        let graphicsIdentity: ConnectionGraphicsIdentity | null = null;
+        let graphicsIdentityError: string | null = null;
+        try {
+          graphicsIdentity = await captureGraphicsIdentity(page, testInfo, attempt, 'connection-failure');
+          graphicsIdentities.push(graphicsIdentity);
+        } catch (identityError) {
+          graphicsIdentityError = redactDiagnostic(
+            identityError instanceof Error ? identityError.message : String(identityError),
+          );
+        }
+        let screenshotAttached = false;
+        let screenshotError: string | null = null;
+        try {
+          const body = await page.screenshot({ fullPage: true });
+          await testInfo.attach(`${attempt}-connect-failure`, { body, contentType: 'image/png' });
+          screenshotAttached = true;
+        } catch (captureError) {
+          screenshotError = redactDiagnostic(
+            captureError instanceof Error ? captureError.message : String(captureError),
+          );
+        }
+        const diagnostics = {
+          kind: 'web-node-connect-failure',
+          attempt,
+          failure: redactDiagnostic(error instanceof Error ? (error.stack ?? error.message) : String(error)),
+          url: redactDiagnostic(currentUrl.href),
+          pathname: currentUrl.pathname,
+          search: currentUrl.search,
+          evidencePresent: await page.evaluate(() => Boolean(window.__seedlandsRemoteEvidence)).catch(() => false),
+          startCard: {
+            count: await page.locator('#start-card').count(),
+            visible: await page
+              .locator('#start-card')
+              .isVisible()
+              .catch(() => false),
+          },
+          errors: {
+            count: await page.locator('.start-error').count(),
+            visible: await page.locator('.start-error:visible').count(),
+            text: (await page.locator('.start-error').allTextContents()).map(redactDiagnostic),
+          },
+          enterButton: {
+            count: await page.locator('#enter').count(),
+            visible: await page
+              .locator('#enter')
+              .isVisible()
+              .catch(() => false),
+            enabled: await page
+              .locator('#enter')
+              .isEnabled()
+              .catch(() => false),
+            text: redactDiagnostic(
+              (await page
+                .locator('#enter')
+                .textContent()
+                .catch(() => null)) ?? '',
+            ),
+          },
+          connectionMode: await page
+            .locator('#connection-mode')
+            .inputValue()
+            .catch(() => null),
+          nodeUrl: redactDiagnostic(
+            (await page
+              .locator('#node-url')
+              .inputValue()
+              .catch(() => '')) || '',
+          ),
+          password: {
+            count: await page.locator('input[type="password"]').count(),
+            visible: await page
+              .locator('input[type="password"]')
+              .isVisible()
+              .catch(() => false),
+            filled:
+              (
+                await page
+                  .locator('input[type="password"]')
+                  .inputValue()
+                  .catch(() => '')
+              ).length > 0,
+          },
+          consoleMessages,
+          pageErrors,
+          webSocketEvents,
+          graphicsIdentity,
+          graphicsIdentityError,
+          nodeLog: (nodeFixture?.logs() ?? nodeLog).map(redactDiagnostic),
+          screenshotAttached,
+          screenshotError,
+        };
+        console.error(redactDiagnostic(JSON.stringify(diagnostics)));
+      } catch (diagnosticError) {
+        console.error(
+          redactDiagnostic(
+            JSON.stringify({
+              kind: 'web-node-connect-failure',
+              attempt,
+              failure: error instanceof Error ? (error.stack ?? error.message) : String(error),
+              diagnosticFailure:
+                diagnosticError instanceof Error
+                  ? (diagnosticError.stack ?? diagnosticError.message)
+                  : String(diagnosticError),
+              consoleMessages,
+              pageErrors,
+              webSocketEvents,
+              nodeLog: nodeFixture?.logs() ?? nodeLog,
+            }),
+          ),
+        );
+      }
+      throw error;
+    }
+    const connectedEvidence = await evidence(page);
+    const graphicsIdentity = await captureGraphicsIdentity(page, testInfo, attempt, 'connected');
+    graphicsIdentities.push(graphicsIdentity);
+    expect(graphicsIdentity.deviceType).toBe('webgl2');
+    return connectedEvidence;
+  } finally {
+    await releaseGraphicsIdentity(page);
+    page.off('console', onConsole);
+    page.off('pageerror', onPageError);
+    page.off('websocket', onWebSocket);
+    for (const [socket, listener] of webSocketCloseListeners) socket.off('close', listener);
+  }
+}
+
+async function attachFrame(page: Page, testInfo: TestInfo, name: string): Promise<void> {
+  const path = join(evidenceDirectory, `${name}.png`);
+  const body = await page.screenshot({ path });
+  await testInfo.attach(name, { body, contentType: 'image/png' });
+}
+
+async function placeSelectedBlock(
+  page: Page,
+): Promise<Readonly<{ position: readonly [number, number, number]; voxel: number }>> {
+  const directions = [
+    [640, 100],
+    [800, 140],
+    [1_000, 200],
+    [1_200, 300],
+    [1_270, 500],
+    [1_100, 680],
+  ] as const;
+  for (const [x, y] of directions) {
+    await page.mouse.move(x, y, { steps: 5 });
+    await page.waitForTimeout(80);
+    const current = await evidence(page);
+    if (current.aimedAdjacent) {
+      const position = current.aimedAdjacent;
+      await page.mouse.down({ button: 'right' });
+      await page.mouse.up({ button: 'right' });
+      await page.waitForTimeout(350);
+      if (!(await page.evaluate(() => Boolean(window.__seedlandsRemoteEvidence))))
+        throw new Error(`放置后远端会话失败：${await page.locator('.start-error').allTextContents()}`);
+      const voxel = await page.evaluate(
+        ([vx, vy, vz]) => window.__seedlandsRemoteEvidence!.voxelAt(vx, vy, vz),
+        position,
+      );
+      if (voxel > 0) return { position, voxel };
+    }
+  }
+  throw new Error('真实鼠标环顾与右键未找到可放置格。');
+}
+
+test.describe.serial('Web to Node local playable loop', () => {
+  test.beforeAll(async () => {
+    test.setTimeout(30_000);
+    await mkdir(evidenceDirectory, { recursive: true });
+    await startNode();
+  });
+
+  test.afterAll(async () => {
+    await nodeFixture?.dispose();
+    nodeFixture = null;
+  });
+
+  test.afterEach(async ({ page: _page }, testInfo) => {
+    if (activeJourneyDiagnostics && testInfo.status !== testInfo.expectedStatus)
+      await activeJourneyDiagnostics.writeFailure(testInfo).catch((error) => {
+        console.error(`web-node journey failure diagnostics failed: ${String(error)}`);
+      });
+    activeJourneyDiagnostics = null;
+  });
+
+  test('真实输入、挖放、关闭重连与Node重启保持权威世界', async ({ context, page }, testInfo) => {
+    test.setTimeout(120_000);
+    graphicsIdentities.length = 0;
+    const journey = new JourneyProgressDiagnostics(page, {
+      outputDirectory: journeyDiagnosticDirectory,
+      retry: testInfo.retry,
+      sourceSha,
+      readEvidence: evidence,
+      graphicsIdentity: () => graphicsIdentities.at(-1) ?? null,
+      nodeLog: () => (nodeFixture?.logs() ?? nodeLog).map(redactDiagnostic),
+    });
+    activeJourneyDiagnostics = journey;
+    journey.setStage('initial-connect');
+    const initial = await connect(page, testInfo, 'initial');
+    journey.setInitial(initial);
+    expect(initial.source).toBe('remote-node');
+    expect(initial.readyBaselines).toBeGreaterThan(0);
+    expect(initial.renderedChunks).toBeGreaterThan(0);
+    const initialChunkX = Math.floor(initial.authoritativePlayer[0] / 32);
+    const initialChunkY = Math.floor((initial.authoritativePlayer[1] - COLLISION_EPSILON) / 32);
+    const initialChunkZ = Math.floor(initial.authoritativePlayer[2] / 32);
+    for (let cz = initialChunkZ - 1; cz <= initialChunkZ + 1; cz += 1)
+      for (let cx = initialChunkX - 1; cx <= initialChunkX + 1; cx += 1)
+        expect(
+          await page.evaluate(
+            ([x, y, z]) => window.__seedlandsRemoteEvidence!.renderedRevisionAt(x, y, z),
+            [cx * 32, initialChunkY * 32, cz * 32],
+          ),
+        ).not.toBeNull();
+    await page.bringToFront();
+    await page.locator('#game').click();
+    await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe('game');
+    await attachFrame(page, testInfo, 'web-node-01-early');
+
+    await journey.checkpoint('movement-window-before', page, await evidence(page), true);
+    journey.setStage('movement-window-input');
+    await page.keyboard.down('KeyW');
+    await expect
+      .poll(async () => {
+        const current = await evidence(page);
+        return Math.hypot(
+          current.authoritativePlayer[0] - initial.authoritativePlayer[0],
+          current.authoritativePlayer[2] - initial.authoritativePlayer[2],
+        );
+      })
+      .toBeGreaterThan(1);
+    await journey.checkpoint('movement-window-after', page, await evidence(page));
+    await attachFrame(page, testInfo, 'web-node-02-moving');
+    await page.keyboard.up('KeyW');
+
+    journey.setStage('camera-turn');
+    const beforeTurn = await evidence(page);
+    await page.mouse.move(640, 360);
+    await page.mouse.move(900, 360, { steps: 4 });
+    await expect
+      .poll(async () => Math.abs((await evidence(page)).viewAngles[0] - beforeTurn.viewAngles[0]))
+      .toBeGreaterThan(5);
+    await attachFrame(page, testInfo, 'web-node-03-turned');
+
+    journey.setStage('jump');
+    await expect.poll(async () => (await evidence(page)).onGround).toBe(true);
+    const beforeJump = await evidence(page);
+    let peakJump = beforeJump;
+    await page.keyboard.down('Space');
+    await expect
+      .poll(async () => {
+        peakJump = await evidence(page);
+        return peakJump.authoritativePlayer[1];
+      })
+      .toBeGreaterThan(beforeJump.authoritativePlayer[1] + 0.1);
+    await page.keyboard.up('Space');
+
+    journey.setStage('break-and-place');
+    await expect.poll(async () => (await evidence(page)).onGround).toBe(true);
+    await page.mouse.move(900, 1_100, { steps: 6 });
+    await expect.poll(async () => (await evidence(page)).aimedVoxel).not.toBeNull();
+    const playableSocket = playableSockets.get(page);
+    if (!playableSocket || playableSocket.isClosed()) throw new Error('站位准备缺少活动的 Node WebSocket。');
+    await alignWithAimedColumn({ page, socket: playableSocket, nodeUrl, evidence });
+    const beforeBreak = await evidence(page);
+    const minedVoxel = beforeBreak.aimedVoxel!;
+    expect(beforeBreak.aimedVoxelType).toBeGreaterThan(0);
+    expect(
+      Math.hypot(
+        minedVoxel[0] + 0.5 - beforeBreak.authoritativePlayer[0],
+        minedVoxel[1] + 0.5 - beforeBreak.authoritativePlayer[1],
+        minedVoxel[2] + 0.5 - beforeBreak.authoritativePlayer[2],
+      ),
+    ).toBeLessThan(2.5);
+    await journey.setMeshTarget(minedVoxel, null);
+    await page.mouse.down({ button: 'left' });
+    try {
+      await expect.poll(async () => (await evidence(page)).breakActionPosition).toEqual(minedVoxel);
+      await expect
+        .poll(() => page.evaluate(([x, y, z]) => window.__seedlandsRemoteEvidence!.voxelAt(x, y, z), minedVoxel), {
+          timeout: 15_000,
+        })
+        .toBe(0);
+    } finally {
+      await page.mouse.up({ button: 'left' });
+    }
+    const afterBreak = await evidence(page);
+    await expect.poll(async () => page.locator('#hotbar button[data-item$="-block"]').count()).toBeGreaterThan(0);
+    const occupiedSlot = await page
+      .locator('#hotbar button')
+      .evaluateAll((slots) => slots.findIndex((slot) => slot.getAttribute('data-item')?.endsWith('-block')));
+    expect(occupiedSlot).toBeGreaterThanOrEqual(0);
+    await page.keyboard.press(`Digit${occupiedSlot + 1}`);
+    await expect.poll(async () => (await evidence(page)).selectedSlot).toBe(occupiedSlot);
+    await expect.poll(async () => (await evidence(page)).selectedItem).toMatch(/-block$/u);
+    const placement = await placeSelectedBlock(page);
+    const placedVoxel = placement.position;
+    const placedVoxelType = placement.voxel;
+    const placedChunkRevision = await page.evaluate(
+      ([x, y, z]) => window.__seedlandsRemoteEvidence!.chunkRevisionAt(x, y, z),
+      placedVoxel,
+    );
+    expect(placedChunkRevision).not.toBeNull();
+    await journey.setMeshTarget(placedVoxel, placedChunkRevision);
+    await expect
+      .poll(() =>
+        page.evaluate(([x, y, z]) => window.__seedlandsRemoteEvidence!.renderedRevisionAt(x, y, z), placedVoxel),
+      )
+      .toBe(placedChunkRevision);
+    const afterPlace = await evidence(page);
+    await attachFrame(page, testInfo, 'web-node-04-placed');
+
+    journey.setStage('save-and-return');
+    await page.keyboard.press('Escape');
+    const pauseDialog = page.getByRole('dialog', { name: '暂停游戏' });
+    await expect(pauseDialog).toBeVisible();
+    await expect(page.getByText('菜单期间 Node 世界仍在继续')).toBeVisible();
+    await expect(pauseDialog.locator('[data-remote-server-info]')).toContainText(nodeUrl);
+    await expect(pauseDialog.locator('[data-remote-server-info]')).toContainText('mosslight-68');
+    await page.getByRole('button', { name: '保存到 Node 并返回主菜单' }).click();
+    await expect(page.locator('#connection-mode')).toBeVisible({ timeout: 20_000 });
+    await expect(page.locator('#start-card [data-remote-server-info]')).toContainText('mosslight-68');
+
+    const tickBeforeClose = afterPlace.physicsTick;
+    const oldServerEpoch = afterPlace.serverEpoch;
+    await page.close();
+    await new Promise((resolveWait) => setTimeout(resolveWait, 1_200));
+    const reconnectPage = await context.newPage();
+    journey.setStage('reconnect', reconnectPage);
+    const reconnected = await connect(reconnectPage, testInfo, 'reconnect');
+    expect(reconnected.serverEpoch).toBe(oldServerEpoch);
+    expect(reconnected.physicsTick).toBeGreaterThan(tickBeforeClose + 15);
+    await expect
+      .poll(() =>
+        reconnectPage.evaluate(([x, y, z]) => window.__seedlandsRemoteEvidence!.voxelAt(x, y, z), placedVoxel),
+      )
+      .toBe(placedVoxelType);
+
+    const stoppedLog = await stopNode();
+    expect(stoppedLog.some((line) => line.includes('"kind":"stopped"'))).toBe(true);
+    const durableStop = stoppedLog.find((line) => line.includes('"kind":"stopped"'))!;
+    await startNode();
+    await reconnectPage.close();
+    const restartedPage = await context.newPage();
+    journey.setStage('restart', restartedPage);
+    const restarted = await connect(restartedPage, testInfo, 'restart');
+    expect(restarted.serverEpoch).not.toBe(oldServerEpoch);
+    await expect
+      .poll(() =>
+        restartedPage.evaluate(([x, y, z]) => window.__seedlandsRemoteEvidence!.voxelAt(x, y, z), placedVoxel),
+      )
+      .toBe(placedVoxelType);
+    await attachFrame(restartedPage, testInfo, 'web-node-05-restarted');
+
+    await writeFile(
+      join(evidenceDirectory, 'web-node-playable-run.json'),
+      `${JSON.stringify(
+        {
+          sourceSha,
+          sourceTreeStatus,
+          sourceInputs,
+          quality: journeyQuality,
+          graphicsIdentities,
+          initial,
+          beforeJump,
+          peakJump,
+          beforeBreak,
+          afterBreak,
+          placedVoxel,
+          placedVoxelType,
+          placedChunkRevision,
+          afterPlace,
+          reconnected,
+          restarted,
+          durableStop: JSON.parse(durableStop),
+          nodeRuns: { beforeRestart: stoppedLog, afterRestart: nodeFixture?.logs() ?? nodeLog },
+        },
+        null,
+        2,
+      )}\n`,
+    );
+  });
+});

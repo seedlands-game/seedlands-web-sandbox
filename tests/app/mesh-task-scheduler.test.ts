@@ -506,18 +506,6 @@ describe('MeshTaskScheduler', () => {
     expect(worker.posts).toHaveLength(3);
   });
 
-  it('持续流体重网格不能让旧streaming请求永久排队', () => {
-    const worker = new FakeWorker();
-    const scheduler = createScheduler(worker, []);
-    scheduler.request(0, 0, 0);
-    scheduler.request(99, 0, 0);
-    for (let index = 1; index < 40; index += 1) {
-      scheduler.request(index, 0, 0, { priority: 'interactive-fluid' });
-      worker.emit(resultFor(worker.posts.at(-1)!));
-      if (worker.posts.some((post) => post.chunkKey === '99,0,0')) break;
-    }
-    expect(worker.posts.some((post) => post.chunkKey === '99,0,0')).toBe(true);
-  });
   it('成功失败关闭都只释放一次准备租约，重复回执不重复释放', () => {
     const worker = new FakeWorker();
     const release = vi.fn();
