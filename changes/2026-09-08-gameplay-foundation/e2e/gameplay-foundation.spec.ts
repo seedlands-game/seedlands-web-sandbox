@@ -12,6 +12,58 @@ type CommandResult = { success: boolean; data?: Record<string, unknown> };
 const command = (page: Page, input: ServerCommand) =>
   page.evaluate((value) => window.__seedlandsHarness!.executeGameplayCommand(value) as Promise<CommandResult>, input);
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    const target = window as Window & { __inputEvidence?: unknown[] };
+    target.__inputEvidence = [];
+    for (const type of [
+      'mousedown',
+      'mouseup',
+      'pointerlockchange',
+      'blur',
+      'focus',
+      'visibilitychange',
+      'mousemove',
+    ]) {
+      window.addEventListener(
+        type,
+        (event) => {
+          if (event.type === 'mousemove' && event instanceof MouseEvent && event.buttons === 0) return;
+          target.__inputEvidence?.push({
+            type,
+            time: Math.round(performance.now()),
+            trusted: event.isTrusted,
+            buttons: event instanceof MouseEvent ? event.buttons : null,
+            movement: event instanceof MouseEvent ? [event.movementX, event.movementY] : null,
+            locked: document.pointerLockElement?.id ?? null,
+            focus: document.hasFocus(),
+            visibility: document.visibilityState,
+          });
+          if ((target.__inputEvidence?.length ?? 0) > 60) target.__inputEvidence?.shift();
+        },
+        true,
+      );
+    }
+  });
+});
+
+test.afterEach(async ({ page }, info) => {
+  if (info.status === info.expectedStatus || page.isClosed()) return;
+  const evidence = await page.evaluate(async () => {
+    const current = window.__seedlandsHarness?.snapshot();
+    return {
+      input: (window as Window & { __inputEvidence?: unknown[] }).__inputEvidence,
+      combat: (window as Window & { __combatEvidence?: string[] }).__combatEvidence,
+      target: document.querySelector('#target-card')?.textContent,
+      player: current?.player,
+      attempts: current?.interactionAttempts,
+      tick: current?.authority.physicsTick,
+      state: await window.__seedlandsHarness?.executeGameplayCommand({ type: 'query-player-state' }),
+    };
+  });
+  console.log('GAMEPLAY_INPUT_EVIDENCE', JSON.stringify(evidence));
+});
+
 async function inventory(page: Page) {
   await page.keyboard.press('KeyE');
   const panel = page.getByRole('dialog', { name: '背包与合成' });
