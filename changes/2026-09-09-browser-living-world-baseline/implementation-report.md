@@ -98,3 +98,11 @@ Terra/high 独立只读诊断沿 `AuthoritySession.wake → advanceGameplayRules
 最终恢复两项浏览器开关；Node步骤不恢复。近战夹具像素密度恢复默认1，保留既有1280×720 CSS视口与Low。完整Chromium/SwiftShader/Low/原像素密度，`--retries=0 --repeat-each=2` 2/2通过（27.5s）。0.5像素密度候选已撤销；第二轮移除中间截图也仍1/2失败，已撤销。保留场景就绪、固定瞄准、页面内短暂反馈观察和完整5/7/目标终态断言。
 
 最近失败 [run 34277022413](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34277022413) 的三次记录均证明受击text/vitals/camera出现、Pointer Lock存在、首击5成立而第二击未出现；这些都是恢复通用浏览器开关之前的配置，不能代替最终配置的CI验收。最终PR以恢复配置的新SHA检查为准。
+
+## 交付收敛：恢复主线原始近战验收
+
+[run 34278706026](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34278706026) 已使用恢复后的完整Chromium/SwiftShader；它失败在本轮新增的稳定帧阈值，queue已为0，瞬时frameMs约318/318/387。这表明把额外性能门槛附加到本期功能回归会产生新的准出条件，不能据此宣称原始近战合同失败。
+
+最终撤销本轮所有诊断性的E2E行为改写：稳定帧/队列等待、0.5像素密度、固定视角、页面内受击替代、相位谓词放宽、截图删除均不保留。近战spec恢复归档基线ec77fdd的原始行为，仅保留解除退役目录helper依赖和浏览器环境变量命名。CI的完整Chromium/SwiftShader开关保留，与该已通过基线一致。
+
+`SEEDLANDS_E2E_FULL_CHROMIUM=1 SEEDLANDS_E2E_SWIFTSHADER=1 SEEDLANDS_BROWSER_E2E_QUALITY=low CI=true pnpm test:pr17:integration --retries=0` 原始用例本地1/1通过（14.2s）。确定性合并步进测试作为有明确边界的诊断用例保留，不能代替浏览器验收。旧诊断阶段的数据与候选叙述是历史过程，以本节和当前spec为最终交付范围；原始像素密度和全部原有玩法断言保持。
