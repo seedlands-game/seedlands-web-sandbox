@@ -24,10 +24,10 @@ describe('统一资产目录与有界适配', () => {
     expect(assetAdapter('builtin-item-model').editable).toBe(false);
     expect(assetAdapter('extruded-pixel-model').editable).toBe(true);
     for (const item of listItemDefinitions()) {
-      expect(acceptsPixelItem(item)).toBe(['wood-axe', 'stone-pickaxe'].includes(item.id));
+      expect(acceptsPixelItem(item)).toBe(item.itemType === 'tool' && item.placesVoxel === undefined);
     }
     expect(acceptsPixelItem({ id: 'wood-axe', itemType: 'tool', placesVoxel: 1 })).toBe(false);
-    expect(acceptsPixelItem({ id: 'unknown', itemType: 'tool' })).toBe(false);
+    expect(acceptsPixelItem({ id: 'custom-tool', itemType: 'tool' })).toBe(true);
   });
   it('复制模型包含独立贴图，并在导出导入后可重建同一模型', () => {
     const binding = builtinItemBindings.find((b) => b.itemId === 'stone-pickaxe')!;

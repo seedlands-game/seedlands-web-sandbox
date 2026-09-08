@@ -7,7 +7,14 @@
     assets,
     revision,
     contextMode,
-  }: { asset: Asset; assets: Asset[]; revision: number; contextMode?: 'model' | 'held' } = $props();
+    animationClip,
+  }: {
+    asset: Asset;
+    assets: Asset[];
+    revision: number;
+    contextMode?: 'model' | 'held';
+    animationClip?: string;
+  } = $props();
   let canvas: HTMLCanvasElement;
   let scene = $state<PreviewScene | null>(null);
   let mode = $state<'model' | 'held'>('model');
@@ -43,12 +50,17 @@
       void scene
         .show(asset, assets, contextMode ?? mode, filtering, repeat)
         .then(() => {
-          if (current === request) ready = true;
+          if (current === request) {
+            ready = true;
+          }
         })
         .catch((e: unknown) => {
           if (current === request) error = `无法预览：${e instanceof Error ? e.message : String(e)}`;
         });
     }
+  });
+  $effect(() => {
+    if (ready && animationClip) scene?.playClip(animationClip);
   });
 </script>
 

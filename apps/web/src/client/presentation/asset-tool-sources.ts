@@ -13,7 +13,31 @@ const palette = {
 } as const;
 
 const sources = {
+  'wood-sword': {
+    name: '木剑',
+    palette,
+    grip: [7.5, 12.5],
+    pixels: [
+      '.......o........',
+      '......oeo.......',
+      '......oleo......',
+      '......olwo......',
+      '......olwo......',
+      '......olwo......',
+      '......olwo......',
+      '......olwo......',
+      '......olwo......',
+      '....ooohleoo....',
+      '....ohleehho....',
+      '....oooohooo....',
+      '.......hlo......',
+      '.......hlo......',
+      '.......ooo......',
+      '................',
+    ],
+  },
   'wood-axe': {
+    name: '木斧',
     palette,
     grip: [7.5, 11.5],
     pixels: [
@@ -36,6 +60,7 @@ const sources = {
     ],
   },
   'stone-pickaxe': {
+    name: '石镐',
     palette,
     grip: [7.5, 11.5],
     pixels: [
@@ -65,7 +90,7 @@ export const nativeToolAssets: NativeAsset[] = Object.entries(sources).flatMap((
   return [
     {
       id: textureId,
-      name: itemId === 'wood-axe' ? '木斧像素' : '石镐像素',
+      name: `${model.name}像素`,
       source: 'builtin',
       revision: 1,
       type: 'pixel-texture',
@@ -78,11 +103,11 @@ export const nativeToolAssets: NativeAsset[] = Object.entries(sources).flatMap((
     },
     {
       id: `builtin:model:${itemId}`,
-      name: itemId === 'wood-axe' ? '木斧' : '石镐',
+      name: model.name,
       source: 'builtin',
       revision: 1,
       type: 'extruded-pixel-model',
-      payload: { textureId, thicknessPixels: 2, grip: [7.5, 11.5], generatorVersion: 1 },
+      payload: { textureId, thicknessPixels: 2, grip: model.grip as [number, number], generatorVersion: 1 },
     },
   ];
 });

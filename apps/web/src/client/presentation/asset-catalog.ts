@@ -12,6 +12,7 @@ const items = [
   ['berry', '浆果'],
   ['plank', '木板'],
   ['wood-axe', '木斧'],
+  ['wood-sword', '木剑'],
   ['stone-pickaxe', '石镐'],
   ['glowstone-block', '辉光石'],
   ['lantern', '灯笼'],
@@ -40,7 +41,7 @@ export const builtinAssets: Asset[] = [
     payload: { path: `assets/item-thumbnails/${id}.png` },
   })),
   ...items
-    .filter(([id]) => id !== 'wood-axe' && id !== 'stone-pickaxe')
+    .filter(([id]) => !nativeToolAssets.some((asset) => asset.id === `builtin:model:${id}`))
     .map(([id, name]): Asset => ({
       id: `builtin:model:${id}`,
       name,
@@ -65,9 +66,8 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
   itemId,
   name,
   modelId: `builtin:model:${itemId}`,
-  iconId:
-    itemId === 'wood-axe' || itemId === 'stone-pickaxe'
-      ? `builtin:texture:${itemId}`
-      : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
+  iconId: nativeToolAssets.some((asset) => asset.id === `builtin:texture:${itemId}`)
+    ? `builtin:texture:${itemId}`
+    : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
 }));
 export const builtinBinding = (itemId: string) => builtinItemBindings.find((b) => b.itemId === itemId);

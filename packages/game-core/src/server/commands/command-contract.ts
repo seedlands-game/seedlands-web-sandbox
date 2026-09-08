@@ -62,7 +62,7 @@ export type ServerCommand =
   | { type: 'give-item'; entityId?: string; itemId: string; count: number }
   | { type: 'remove-item'; entityId?: string; itemId: string; count: number }
   | { type: 'spawn-world-item'; itemId: string; count: number; position: readonly [number, number, number] }
-  | { type: 'spawn-creature'; position: readonly [number, number, number] }
+  | { type: 'spawn-creature'; id?: string; position: readonly [number, number, number] }
   | { type: 'spawn-actor'; id?: string; archetype: ActorArchetype; position: readonly [number, number, number] }
   | {
       type: 'register-poi';

@@ -40,7 +40,9 @@ export function synthesizeSfx(key: SfxKey, sampleRate: number, seed: number) {
   const creature = key === 'creature';
   const waterMovement = key.startsWith('water-');
   const chime = ['pickup', 'confirm', 'hover', 'discovery'].includes(key);
-  const damage = key === 'damage' || key === 'attack';
+  const playerDamage = key === 'damage';
+  const weaponImpact = key === 'attack';
+  const damage = playerDamage || weaponImpact;
   const material = key.split('-')[1] ?? 'grass';
   const pitch = waterMovement
     ? key === 'water-enter'
@@ -54,13 +56,15 @@ export function synthesizeSfx(key: SfxKey, sampleRate: number, seed: number) {
         ? key === 'hover'
           ? 620
           : 880
-        : damage
-          ? 95
-          : material === 'stone'
-            ? 460
-            : material === 'wood'
-              ? 170
-              : 110;
+        : playerDamage
+          ? 68
+          : weaponImpact
+            ? 126
+            : material === 'stone'
+              ? 460
+              : material === 'wood'
+                ? 170
+                : 110;
   const duration = waterMovement
     ? key === 'water-enter' || key === 'water-exit'
       ? 0.44
@@ -73,9 +77,11 @@ export function synthesizeSfx(key: SfxKey, sampleRate: number, seed: number) {
           ? 0.38
           : key.startsWith('break')
             ? 0.28
-            : damage
-              ? 0.26
-              : 0.16;
+            : playerDamage
+              ? 0.34
+              : weaponImpact
+                ? 0.18
+                : 0.16;
   const count = Math.max(2, Math.ceil(sampleRate * duration));
   const samples = new Float32Array(count);
   let noiseState = 0;
@@ -88,6 +94,7 @@ export function synthesizeSfx(key: SfxKey, sampleRate: number, seed: number) {
     noiseState += (material === 'sand' || material === 'grass' ? 0.55 : 0.2) * (noise - noiseState);
     const sweep = damage ? pitch * (time - time * time * 1.3) : pitch * time;
     const fundamental = Math.sin(2 * Math.PI * sweep);
+    const bodyImpact = playerDamage ? Math.sin(2 * Math.PI * (54 - time * 42) * time) * Math.exp(-time * 11) * 0.52 : 0;
     const overtone = Math.sin(2 * Math.PI * pitch * (chime ? 2.502 : 2.37) * time) * Math.exp(-time * 16);
     const tone = fundamental * (chime ? 0.65 : 0.23) + overtone * (chime ? 0.24 : 0.1);
     const callTone =
@@ -95,8 +102,8 @@ export function synthesizeSfx(key: SfxKey, sampleRate: number, seed: number) {
       Math.sin(Math.PI * pitch * time) * 0.2;
     const waterTone = Math.sin(2 * Math.PI * (pitch + 28 * Math.sin(time * 11)) * time) * 0.08;
     samples[i] =
-      ((waterMovement ? waterTone : creature ? callTone : tone) +
-        noiseState * (waterMovement ? 0.82 : creature ? 0.04 : chime ? 0.008 : 0.65)) *
+      ((waterMovement ? waterTone : creature ? callTone : tone + bodyImpact) +
+        noiseState * (waterMovement ? 0.82 : creature ? 0.04 : chime ? 0.008 : playerDamage ? 0.78 : 0.54)) *
       envelope *
       (damage ? 0.7 : 0.48);
   }

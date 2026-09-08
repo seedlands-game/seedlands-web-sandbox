@@ -229,6 +229,7 @@ type HarnessWindow = Window & {
     beginFluidFeedbackSample?: () => void;
     setWaterTransitionHold?: (held: boolean) => void;
     flushSave: () => Promise<void>;
+    playerDamageFeedback: () => { pitch: number; yaw: number; roll: number; active: boolean };
   };
 };
 

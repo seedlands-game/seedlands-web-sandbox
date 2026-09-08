@@ -9,7 +9,10 @@ import {
 describe('appearance navigation', () => {
   it('projects every source into semantic resource categories without changing identities', () => {
     expect(new Set(builtinAssets.map(assetCategory))).toEqual(new Set(['model', 'material', 'image']));
-    expect(builtinAssets).toHaveLength(108);
+    expect(new Set(builtinAssets.map((asset) => asset.id)).size).toBe(builtinAssets.length);
+    expect(builtinAssets).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'builtin:model:wood-sword' })]),
+    );
   });
   it('groups the placed lantern and its item contexts in one appearance', () => {
     const lantern = appearanceObjects(builtinAssets).find((entry) => entry.id === 'builtin:model:lantern')!;

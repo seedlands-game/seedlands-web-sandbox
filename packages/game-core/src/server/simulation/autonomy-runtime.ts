@@ -17,6 +17,15 @@ import { PoiRegistry, type PoiInput } from './poi-registry';
 import { resolveActionTarget, updateActorActive } from './autonomy-helpers';
 import { tickAuthorityActorRules, type ActorAuthorityRulesContext } from './actor-authority-rules';
 import type { CoreClone } from '../../runtime/platform-ports';
+import {
+  CombatRuntime,
+  createMeleeDefinitionRegistry,
+  emptyCombatRuntimeSnapshot,
+  type CombatRequestResult,
+  type CombatRuntimeCallbacks,
+  type CombatSnapshot,
+  type MeleeDefinition,
+} from '../gameplay/combat-runtime';
 
 export type { ActorBehavior, ActorRegistration, ActorState, SimulationSnapshot } from './actor-state';
 
@@ -26,6 +35,8 @@ type Options = {
   getWorldTime: () => number;
   isPlayerAlive: (id: string) => boolean;
   clone: CoreClone;
+  combat?: CombatRuntimeCallbacks;
+  meleeDefinitions?: readonly MeleeDefinition[];
 };
 
 export class AutonomyRuntime {
@@ -33,6 +44,7 @@ export class AutonomyRuntime {
   readonly actions: ActionRuntime;
   readonly navigator: GroundNavigator;
   readonly perception: PerceptionRuntime;
+  readonly combat: CombatRuntime;
   private readonly actors = new Map<string, ActorState>();
   private time = 0;
   private stepAccumulator = 0;
@@ -57,6 +69,15 @@ export class AutonomyRuntime {
       getVoxel: options.getVoxel,
       isPlayerAlive: options.isPlayerAlive,
     });
+    this.combat = new CombatRuntime(
+      options.combat ?? {
+        actorAvailable: () => false,
+        targetAvailable: () => false,
+        validateHit: () => 'combat-unavailable',
+        applyDamage: () => null,
+      },
+      options.meleeDefinitions ? createMeleeDefinitionRegistry(options.meleeDefinitions) : undefined,
+    );
   }
 
   registerActor(entityId: string, input: ActorRegistration): ActorState {
@@ -77,7 +98,6 @@ export class AutonomyRuntime {
       workPoiId: input.workPoiId ?? null,
       foodPoiId: input.foodPoiId ?? null,
       active: false,
-      attackCooldownSeconds: 0,
       wanderIndex: 0,
     };
     this.actors.set(entityId, actor);
@@ -88,6 +108,7 @@ export class AutonomyRuntime {
   unregisterActor(entityId: string, reason = 'entity-removed'): ItemStack | null {
     const actor = this.actors.get(entityId);
     if (!actor) return null;
+    this.cancelCombat(entityId, reason);
     if (this.actions.interruptActor(entityId, this.time, reason)) this.actionInterruptionCount += 1;
     this.actors.delete(entityId);
     return actor.archetype === 'grazer'
@@ -99,11 +120,57 @@ export class AutonomyRuntime {
 
   getActor(entityId: string): ActorState | null {
     const actor = this.actors.get(entityId);
-    return actor ? cloneActor(actor) : null;
+    return actor ? cloneActor(actor, this.combat.snapshotFor(entityId).cooldownRemainingSeconds) : null;
   }
 
   queryActors(): ActorState[] {
-    return [...this.actors.values()].map(cloneActor);
+    return [...this.actors.values()].map((actor) =>
+      cloneActor(actor, this.combat.snapshotFor(actor.entityId).cooldownRemainingSeconds),
+    );
+  }
+
+  requestCombat(actorId: string, targetId: string, definitionId: string): CombatRequestResult {
+    return this.combat.request(actorId, targetId, definitionId);
+  }
+
+  requestActorCombat(
+    actorId: string,
+    targetId: string,
+    definitionId: string,
+    existingActionId?: string,
+  ): CombatRequestResult {
+    const actor = this.actors.get(actorId);
+    if (!actor) return { success: false, reason: 'invalid-attacker' };
+    if (existingActionId) return this.combat.retain(actorId, existingActionId);
+    const result = this.combat.request(actorId, targetId, definitionId, () => {
+      const action = this.startAction(actorId, { type: 'attack', targetEntityId: targetId });
+      this.actions.markRunning(action.id, []);
+      return action.id;
+    });
+    if (result.success) {
+      actor.behavior = 'attack';
+      actor.targetEntityId = targetId;
+    }
+    return result;
+  }
+
+  combatSnapshotFor(actorId: string): CombatSnapshot {
+    return this.combat.snapshotFor(actorId);
+  }
+
+  restoreCombatLockout(actorId: string, seconds: number): void {
+    this.combat.restoreLockout(actorId, seconds);
+  }
+
+  cancelCombat(actorId: string, reason: string): boolean {
+    const cancelled = this.combat.cancelActor(actorId, reason);
+    this.reconcileCombatEvents();
+    return cancelled;
+  }
+
+  cancelCombatTarget(targetId: string, reason = 'target-missing', exceptActorId?: string): void {
+    this.combat.cancelTarget(targetId, reason, exceptActorId);
+    this.reconcileCombatEvents();
   }
 
   registerPoi(input: PoiInput) {
@@ -112,15 +179,15 @@ export class AutonomyRuntime {
 
   startAction(actorId: string, input: Omit<ActorActionInput, 'actorId'>): ActorAction {
     if (!this.actors.has(actorId)) throw new RangeError(`Unknown autonomous actor: ${actorId}`);
-    if (this.actions.forActor(actorId) && this.actions.interruptActor(actorId, this.time, 'replaced'))
-      this.actionInterruptionCount += 1;
+    this.interruptAction(actorId, 'replaced');
     return this.actions.start({ ...input, actorId }, this.time);
   }
 
   interruptAction(actorId: string, reason = 'stopped'): boolean {
-    const interrupted = this.actions.interruptActor(actorId, this.time, reason);
-    if (interrupted) this.actionInterruptionCount += 1;
-    return interrupted;
+    const combatCancelled = this.cancelCombat(actorId, reason);
+    const actionInterrupted = this.actions.interruptActor(actorId, this.time, reason);
+    if (actionInterrupted) this.actionInterruptionCount += 1;
+    return combatCancelled || actionInterrupted;
   }
 
   observe(actorId: string, range?: number): PerceptionSnapshot {
@@ -139,6 +206,8 @@ export class AutonomyRuntime {
 
   advanceAuthorityRules(seconds: number): void {
     if (!Number.isFinite(seconds) || seconds < 0) throw new TypeError('Actor rule seconds must be non-negative.');
+    this.combat.advance(seconds);
+    this.reconcileCombatEvents();
     this.stepAccumulator = round(this.stepAccumulator + seconds);
     while (this.stepAccumulator + Number.EPSILON >= STEP_SECONDS) {
       this.stepAccumulator = round(this.stepAccumulator - STEP_SECONDS);
@@ -164,6 +233,7 @@ export class AutonomyRuntime {
       actors: this.queryActors(),
       pois: this.pois.snapshot(),
       actions: this.actions.snapshot(),
+      combat: this.combat.snapshot(),
     };
   }
 
@@ -193,6 +263,7 @@ export class AutonomyRuntime {
         if (restored.has(actor.entityId)) throw new TypeError('duplicate actor id');
         restored.set(actor.entityId, cloneActor(actor));
       }
+      this.validateCombatActionLinks(snapshot, restored);
       this.pois.restore(snapshot.pois);
       this.actions.restore(snapshot.actions);
       this.actors.clear();
@@ -203,6 +274,15 @@ export class AutonomyRuntime {
       this.perceptionAccumulator = snapshot.perceptionAccumulator;
       this.behaviorAccumulator = snapshot.behaviorAccumulator;
       this.starterVersion = snapshot.starterEcologyVersion;
+      this.combat.restore(snapshot.combat ?? emptyCombatRuntimeSnapshot());
+      if (!snapshot.combat) {
+        for (const actorId of restored.keys()) {
+          const action = this.actions.forActor(actorId);
+          if (action?.type === 'attack' && this.actions.interruptActor(actorId, snapshot.time, 'restore-cancelled'))
+            this.actionInterruptionCount += 1;
+        }
+      }
+      this.reconcileCombatEvents();
     } catch (error) {
       throw new Error(`Invalid simulation snapshot: ${error instanceof Error ? error.message : String(error)}`, {
         cause: error,
@@ -264,9 +344,59 @@ export class AutonomyRuntime {
       !Number.isFinite(actor.hunger) ||
       actor.hunger < 0 ||
       actor.hunger > 100 ||
-      !Number.isFinite(actor.attackCooldownSeconds) ||
+      (actor.attackCooldownSeconds !== undefined &&
+        (!Number.isFinite(actor.attackCooldownSeconds) || actor.attackCooldownSeconds < 0)) ||
       !Number.isInteger(actor.wanderIndex)
     )
       throw new TypeError('actor fields are invalid');
+  }
+
+  private validateCombatActionLinks(snapshot: SimulationSnapshot, actors: ReadonlyMap<string, ActorState>): void {
+    if (!snapshot.combat || !Array.isArray(snapshot.combat.combatants) || !Array.isArray(snapshot.actions?.actions))
+      return;
+    const runningAttacks = new Map<string, ActorAction>();
+    for (const action of snapshot.actions.actions) {
+      if (
+        !actors.has(action.actorId) ||
+        action.type !== 'attack' ||
+        ['succeeded', 'failed', 'interrupted'].includes(action.status)
+      )
+        continue;
+      if (action.status !== 'running' || runningAttacks.has(action.actorId))
+        throw new TypeError('autonomous combat action is invalid or duplicated');
+      runningAttacks.set(action.actorId, action);
+    }
+    const activeCombatActors = new Set<string>();
+    for (const entry of snapshot.combat.combatants) {
+      if (!actors.has(entry.actorId) || !entry.combat?.active) continue;
+      if (activeCombatActors.has(entry.actorId))
+        throw new TypeError('autonomous combat action is invalid or duplicated');
+      activeCombatActors.add(entry.actorId);
+      const action = runningAttacks.get(entry.actorId);
+      if (
+        !action ||
+        action.id !== entry.combat.active.actionId ||
+        action.targetEntityId !== entry.combat.active.targetId
+      )
+        throw new TypeError('autonomous combat action does not match its running action');
+      runningAttacks.delete(entry.actorId);
+    }
+    if (runningAttacks.size > 0) throw new TypeError('running attack action is missing autonomous combat');
+  }
+
+  private reconcileCombatEvents(): void {
+    for (const event of this.combat.takeLifecycleEvents()) {
+      const actor = this.actors.get(event.actorId);
+      if (!actor) continue;
+      const action = this.actions.forActor(event.actorId);
+      if (action?.id === event.actionId) {
+        if (event.status === 'cancelled') {
+          if (this.actions.interruptActor(event.actorId, this.time, event.result?.reason ?? 'combat-cancelled'))
+            this.actionInterruptionCount += 1;
+        } else this.finishSuccess(event.actionId, event.result ?? undefined);
+      }
+      actor.behavior = 'idle';
+      actor.targetEntityId = null;
+    }
   }
 }

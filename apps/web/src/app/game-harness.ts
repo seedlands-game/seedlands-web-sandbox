@@ -62,6 +62,7 @@ export type HarnessApi = {
     grounded: boolean;
   } | null;
   presentedEntityPosition: (entityId: string) => [number, number, number] | null;
+  playerDamageFeedback: () => { pitch: number; yaw: number; roll: number; active: boolean };
 };
 
 type RuntimeHarnessBindings = {
@@ -445,6 +446,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
         : null;
     },
     presentedEntityPosition: (entityId) => bindings.gameplay()?.presentedEntityPosition(entityId) ?? null,
+    playerDamageFeedback: () => bindings.controller()?.damageFeedback ?? { pitch: 0, yaw: 0, roll: 0, active: false },
   };
 }
 

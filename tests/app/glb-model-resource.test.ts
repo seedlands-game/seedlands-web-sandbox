@@ -13,11 +13,72 @@ describe('GLB 预览归一化', () => {
     const transform = normalizeGlbBounds([10, -4, 2], [12, -2, 4]);
     expect(transform.scale).toBe(0.75);
     expect(transform.position).toEqual([-8.25, 2.25, -2.25]);
+    expect(normalizeGlbBounds([10, -4, 2], [12, -2, 4], 'feet').position).toEqual([-8.25, 3, -2.25]);
     expect(
       transform.position.map(
         (offset, axis) => offset + (([10, -4, 2][axis] + [12, -2, 4][axis]) / 2) * transform.scale,
       ),
     ).toEqual([0, 0, 0]);
+  });
+
+  it('动画控制器按权威动作标识去重，移动和受伤使用各自绑定', async () => {
+    const { createModelAnimationController } = await import('../../apps/web/src/app/gameplay/model-animation');
+    const play = vi.fn();
+    const locate = vi.fn();
+    const controller = createModelAnimationController(
+      { idle: 'Idle', move: 'Walk', attack: 'Attack', hurt: 'Hurt' },
+      { play, locate },
+    );
+    controller.update({ moving: false, hurtSequence: null, activeAction: null });
+    controller.update({ moving: true, hurtSequence: null, activeAction: null });
+    controller.update({
+      moving: true,
+      hurtSequence: null,
+      activeAction: {
+        actionId: 'action-1',
+        comboStep: 0,
+        phase: 'windup',
+        phaseElapsedSeconds: 0.5,
+        phaseDurationSeconds: 1,
+      },
+    });
+    controller.update({
+      moving: true,
+      hurtSequence: null,
+      activeAction: {
+        actionId: 'action-1',
+        comboStep: 0,
+        phase: 'hit',
+        phaseElapsedSeconds: 0.25,
+        phaseDurationSeconds: 0.5,
+      },
+    });
+    controller.update({
+      moving: true,
+      hurtSequence: null,
+      activeAction: {
+        actionId: 'action-1',
+        comboStep: 1,
+        phase: 'windup',
+        phaseElapsedSeconds: 0,
+        phaseDurationSeconds: 0.2,
+      },
+    });
+    controller.update({ moving: false, hurtSequence: 4, activeAction: null });
+    expect(play.mock.calls).toEqual([
+      ['Idle', { loop: true, blendSeconds: 0 }],
+      ['Walk', { loop: true, blendSeconds: 0.12 }],
+      ['Attack', { loop: false, blendSeconds: 0.06 }],
+      ['Attack', { loop: false, blendSeconds: 0.06 }],
+      ['Hurt', { loop: false, blendSeconds: 0.04 }],
+    ]);
+    expect(locate).toHaveBeenCalledTimes(3);
+    expect(locate.mock.calls[0][0]).toBeCloseTo(0.175);
+    expect(locate.mock.calls[0][1]).toBeCloseTo(0.35);
+    expect(locate.mock.calls[1][0]).toBeCloseTo(0.475);
+    expect(locate.mock.calls[1][1]).toBeCloseTo(0.5);
+    expect(locate.mock.calls[2][0]).toBeCloseTo(0);
+    expect(locate.mock.calls[2][1]).toBeCloseTo(1.75);
   });
 
   it('取消后仍释放迟到完成时才出现的容器资源', async () => {

@@ -43,6 +43,7 @@ const createGame = () =>
     loadLatestWorldSeed: vi.fn(async () => null),
     loadSavedSession: vi.fn(() => null),
     start: vi.fn(async () => undefined),
+    prepareMeleeShowcase: vi.fn(async () => undefined),
     abortStart: vi.fn(),
     leaveWorld: vi.fn(async () => undefined),
     setPaused: vi.fn(),
@@ -130,6 +131,22 @@ describe('ApplicationShell experiment and capability gates', () => {
     releaseResource();
     await initializing;
     expect(bridge.shell.get().phase).toBe('menu');
+    application.dispose();
+  });
+
+  it('木剑体验场跨过低核心确认后仍以固定新世界启动并完成布置', async () => {
+    const game = createGame();
+    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
+      preflight: async () => capability({ estimatedCores: 4, lowCoreWarning: true }),
+    });
+    await application.initialize();
+
+    await application.startMeleeShowcase('high');
+    expect(game.start).not.toHaveBeenCalled();
+    await application.confirmPerformanceWarning();
+
+    expect(game.start).toHaveBeenCalledWith('wood-sword-action-stage-v1', null, 'high', 'new-current');
+    expect(game.prepareMeleeShowcase).toHaveBeenCalledOnce();
     application.dispose();
   });
 });

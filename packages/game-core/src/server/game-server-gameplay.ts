@@ -150,6 +150,9 @@ export abstract class GameServerGameplayFacade {
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
   }
+  getCombatState(entityId: string) {
+    return this.gameplay.getCombatState(entityId);
+  }
   applyDamage(actorId: string, playerId: string, amount: number, cause: string) {
     return this.gameplay.applyDamage(actorId, playerId, amount, cause);
   }
@@ -172,7 +175,6 @@ export abstract class GameServerGameplayFacade {
         simulation: this.gameplay.simulation,
         getVoxel: (position) => this.readGameplayVoxel(...position),
         isPlayerAlive: (id) => this.gameplay.getPlayerState(id).lifecycle === 'alive',
-        damagePlayer: (source, target, amount) => this.gameplay.applyDamage(source, target, amount, 'actor').success,
         touch: () => this.gameplay.recordAuthorityMutation(),
       },
       actorId,

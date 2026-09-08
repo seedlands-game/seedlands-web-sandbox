@@ -17,7 +17,6 @@ export type ActorAuthorityActionResult = Readonly<
 export const ACTOR_ATTACK_DISTANCE = 1.7;
 export const ACTOR_CONSUME_DISTANCE = 1.1;
 export const ACTOR_MOVE_ARRIVAL_DISTANCE = 0.8;
-export const ACTOR_ATTACK_COOLDOWN_SECONDS = 1;
 
 export type ActorAuthorityRulesContext = Readonly<{
   actors: Map<string, ActorState>;
@@ -71,32 +70,6 @@ export function retainAuthorityAction(
     : { accepted: true, changed: false, action: current };
 }
 
-export function executeAuthorityAttack(
-  context: ActorAuthorityRulesContext,
-  actorId: string,
-  targetId: string,
-  applyDamage: () => boolean,
-  start: () => ActorAction,
-  existingActionId?: string,
-): ActorAuthorityActionResult {
-  const actor = context.actors.get(actorId);
-  if (!actor || actor.archetype !== 'night-stalker') return reject('invalid-attacker');
-  if (actor.attackCooldownSeconds > 0) return reject('cooldown');
-  const existing = existingActionId ? context.actions.forActor(actorId) : null;
-  if (existingActionId && (!existing || existing.id !== existingActionId || existing.type !== 'attack'))
-    return reject('action-mismatch');
-  const action = existing ?? start();
-  if (!applyDamage()) {
-    context.finishFailure(action.id, 'target-unavailable');
-    return { accepted: false, changed: true, reason: 'target-unavailable' };
-  }
-  actor.behavior = 'attack';
-  actor.targetEntityId = targetId;
-  actor.attackCooldownSeconds = ACTOR_ATTACK_COOLDOWN_SECONDS;
-  context.finishSuccess(action.id, { damage: 2 });
-  return { accepted: true, changed: true, action: context.actions.get(action.id)! };
-}
-
 export function executeAuthorityConsume(
   context: ActorAuthorityRulesContext,
   actorId: string,
@@ -127,12 +100,6 @@ export function tickAuthorityActorRules(context: ActorAuthorityRulesContext, ela
     throw new RangeError('Actor rule elapsed seconds must be non-negative and finite.');
   context.actors.forEach((actor) => {
     context.updateActive(actor);
-    actor.attackCooldownSeconds =
-      Math.round(Math.max(0, actor.attackCooldownSeconds - elapsedSeconds) * 1_000_000) / 1_000_000;
-    if (actor.attackCooldownSeconds === 0 && actor.behavior === 'attack') {
-      actor.behavior = 'idle';
-      actor.targetEntityId = null;
-    }
     const action = context.actions.forActor(actor.entityId);
     if (!action || !['move-to', 'wander', 'flee', 'go-to-poi'].includes(action.type)) return;
     const entity = context.entities.get(actor.entityId);

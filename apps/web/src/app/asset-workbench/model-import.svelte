@@ -39,8 +39,8 @@
     >{importing ? '正在导入…' : '导入静态 GLB'}</button
   >
   <a
-    href={publicAssetUrl(import.meta.env.BASE_URL, 'assets/samples/static-crate.glb')}
-    download="seedlands-static-crate.glb">下载模型样例</a
+    href={publicAssetUrl(import.meta.env.BASE_URL, 'models/voxel-settler-animated.glb')}
+    download="seedlands-voxel-settler-animated.glb">下载骨骼动画样例</a
   >
   <input
     bind:this={input}
@@ -52,6 +52,6 @@
     disabled={importing}
   />
   <p aria-live="polite" class:error={failed}>
-    {importing ? '正在导入静态 GLB…' : status || '静态 GLB · 最大 16 MiB · 不含骨骼动画'}
+    {importing ? '正在导入 GLB…' : status || '自包含 GLB · 最大 16 MiB · 支持有界骨骼动画'}
   </p>
 </div>

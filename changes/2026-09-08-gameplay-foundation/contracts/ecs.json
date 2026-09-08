@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "id": "ecs",
+  "initiatedBy": "agent",
+  "role": "ECS 有界准入与实体门面实施负责人",
+  "workType": "implementation",
+  "goal": "验证已发布bitECS并将EntityStore生命周期/类型化组件和查询迁入内部ECS，保持公开ID/快照/空间索引兼容",
+  "context": [
+    {
+      "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/spec.md",
+      "purpose": "范围与验收"
+    }
+  ],
+  "scope": {
+    "writePaths": [
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/packages/game-core/src/server/gameplay/entity-store.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/packages/game-core/src/server/gameplay/entity-components.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/tests/server/entity-components.test.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/tests/server/entity-store.test.ts",
+      "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/ecs"
+    ],
+    "readPaths": ["/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox"],
+    "nonGoals": ["不合并不发布不改权限不读凭据"]
+  },
+  "outputs": ["玩法首版和测试证据"],
+  "execution": { "form": "subagent", "model": "gpt-5.6-sol", "effort": "high" },
+  "acceptance": [
+    {
+      "id": "ecs",
+      "check": "发布包静态准入；RED/GREEN多世界、生命周期/回收、组件查询、稳定ID、快照恢复、既有EntityStore合同通过；无性能宣称",
+      "evidence": "发布源与定向测试"
+    }
+  ],
+  "budget": { "maxAttempts": 3, "maxAgentHours": 6 },
+  "permissions": { "localWrite": true, "externalWrite": false, "delegate": false },
+  "parent": {
+    "path": "/Users/bytedance/.codex/worktrees/0709/seedlands-web-sandbox/changes/2026-09-08-gameplay-foundation/contracts/root.json",
+    "sha256": "55dd481bd0e5c07704b373c94c68e479ea3956400e39f04b5ce9e057bba67156"
+  },
+  "resources": { "exclusiveGroup": null },
+  "escalation": ["范围/公开接口/授权变化", "两次同因失败", "预计超过预算"],
+  "reportFields": ["完成状态", "改动文件", "验证结果", "限制", "下一步"]
+}

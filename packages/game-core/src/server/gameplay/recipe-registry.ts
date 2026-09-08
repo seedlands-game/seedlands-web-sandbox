@@ -1,5 +1,5 @@
 import { Inventory } from './inventory';
-import { ItemIds, type ItemStack } from './item-registry';
+import { ItemIds, assertItemStack, type ItemStack } from './item-registry';
 
 export type Recipe = Readonly<{
   id: string;
@@ -7,18 +7,51 @@ export type Recipe = Readonly<{
   outputs: readonly Readonly<ItemStack>[];
 }>;
 
-const recipes: Readonly<Record<string, Recipe>> = Object.freeze({
-  planks: {
-    id: 'planks',
-    inputs: [{ itemId: ItemIds.WoodBlock, count: 1 }],
-    outputs: [{ itemId: ItemIds.Plank, count: 4 }],
-  },
-  'wood-axe': {
-    id: 'wood-axe',
-    inputs: [{ itemId: ItemIds.Plank, count: 3 }],
-    outputs: [{ itemId: ItemIds.WoodAxe, count: 1 }],
-  },
-  'stone-pickaxe': {
+export type RecipeRegistry = Readonly<{
+  get: (id: string) => Recipe | undefined;
+  list: () => readonly Recipe[];
+}>;
+
+export function createRecipeRegistry(inputs: readonly Recipe[]): RecipeRegistry {
+  const registered = new Map<string, Recipe>();
+  for (const source of inputs) {
+    if (!source.id?.trim() || registered.has(source.id)) throw new TypeError(`Duplicate or empty recipe: ${source.id}`);
+    if (
+      !Array.isArray(source.inputs) ||
+      source.inputs.length === 0 ||
+      !Array.isArray(source.outputs) ||
+      source.outputs.length === 0
+    )
+      throw new TypeError(`Recipe inputs and outputs are required: ${source.id}`);
+    const freezeStacks = (stacks: readonly Readonly<ItemStack>[], side: string) => {
+      const seen = new Set<string>();
+      return Object.freeze(
+        stacks.map((stack) => {
+          assertItemStack(stack);
+          if (seen.has(stack.itemId))
+            throw new TypeError(`Duplicate ${side} item in recipe ${source.id}: ${stack.itemId}`);
+          seen.add(stack.itemId);
+          return Object.freeze({ ...stack });
+        }),
+      );
+    };
+    registered.set(
+      source.id,
+      Object.freeze({
+        id: source.id,
+        inputs: freezeStacks(source.inputs, 'input'),
+        outputs: freezeStacks(source.outputs, 'output'),
+      }),
+    );
+  }
+  const values = Object.freeze([...registered.values()]);
+  return Object.freeze({ get: (id: string) => registered.get(id), list: () => values });
+}
+
+const registry = createRecipeRegistry([
+  { id: 'planks', inputs: [{ itemId: ItemIds.WoodBlock, count: 1 }], outputs: [{ itemId: ItemIds.Plank, count: 4 }] },
+  { id: 'wood-axe', inputs: [{ itemId: ItemIds.Plank, count: 3 }], outputs: [{ itemId: ItemIds.WoodAxe, count: 1 }] },
+  {
     id: 'stone-pickaxe',
     inputs: [
       { itemId: ItemIds.Plank, count: 2 },
@@ -26,7 +59,12 @@ const recipes: Readonly<Record<string, Recipe>> = Object.freeze({
     ],
     outputs: [{ itemId: ItemIds.StonePickaxe, count: 1 }],
   },
-  lantern: {
+  {
+    id: 'wood-sword',
+    inputs: [{ itemId: ItemIds.Plank, count: 2 }],
+    outputs: [{ itemId: ItemIds.WoodSword, count: 1 }],
+  },
+  {
     id: 'lantern',
     inputs: [
       { itemId: ItemIds.Plank, count: 2 },
@@ -34,28 +72,24 @@ const recipes: Readonly<Record<string, Recipe>> = Object.freeze({
     ],
     outputs: [{ itemId: ItemIds.Lantern, count: 1 }],
   },
-});
-
-const cloneRecipe = (recipe: Recipe): Recipe => ({
-  id: recipe.id,
-  inputs: recipe.inputs.map((stack) => ({ ...stack })),
-  outputs: recipe.outputs.map((stack) => ({ ...stack })),
-});
+]);
 
 export function getRecipe(id: string): Recipe {
-  const recipe = recipes[id];
+  const recipe = registry.get(id);
   if (!recipe) throw new RangeError(`Unknown recipe: ${id}`);
-  return cloneRecipe(recipe);
+  return recipe;
 }
 
-export const listRecipes = (): readonly Recipe[] => Object.values(recipes).map(cloneRecipe);
+export const listRecipes = (): readonly Recipe[] => registry.list();
 
 export const listCraftableRecipes = (inventory: Inventory): readonly Recipe[] =>
-  listRecipes().filter(
-    (recipe) =>
-      recipe.inputs.every((stack) => inventory.contains(stack)) &&
-      recipe.outputs.every((stack) => inventory.canAdd(stack)),
-  );
+  registry
+    .list()
+    .filter(
+      (recipe) =>
+        recipe.inputs.every((stack) => inventory.contains(stack)) &&
+        recipe.outputs.every((stack) => inventory.canAdd(stack)),
+    );
 
 export function craftRecipe(
   inventory: Inventory,
@@ -63,7 +97,7 @@ export function craftRecipe(
 ):
   | { success: true; recipe: Recipe }
   | { success: false; reason: 'unknown-recipe' | 'missing-inputs' | 'no-output-capacity' } {
-  const recipe = recipes[recipeId];
+  const recipe = registry.get(recipeId);
   if (!recipe) return { success: false, reason: 'unknown-recipe' };
   if (!recipe.inputs.every((stack) => inventory.contains(stack))) return { success: false, reason: 'missing-inputs' };
   if (!recipe.outputs.every((stack) => inventory.canAdd(stack)))
@@ -74,5 +108,5 @@ export function craftRecipe(
     if (!candidate.add(output)) return { success: false, reason: 'no-output-capacity' };
   }
   inventory.replace(candidate.snapshot());
-  return { success: true, recipe: cloneRecipe(recipe) };
+  return { success: true, recipe };
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFile } from 'node:fs/promises';
 import { builtinAssets } from '../../apps/web/src/client/presentation/asset-catalog';
 import {
   createEmptyAppearanceProject,
@@ -149,5 +150,24 @@ describe('外观项目', () => {
         triangleCount,
       })),
     ).toEqual([{ id: 'project:glb:lantern', name: '灯笼.glb', revision: 3, nodeCount: 1, triangleCount: 1 }]);
+  });
+});
+
+describe('动画项目包的模型引用', () => {
+  it('拒绝不存在的模型和片段，允许真实片段往返', async () => {
+    const project = {
+      ...createEmptyAppearanceProject(),
+      animationBindings: { settler: { modelId: 'actor', clips: { idle: 'Idle' } } },
+    };
+    await expect(encodeAppearancePackage(project, [])).rejects.toThrow(/模型/);
+    const bytes = await readFile(new URL('../../apps/web/public/models/voxel-settler-animated.glb', import.meta.url));
+    const models = [{ id: 'actor', name: '角色.glb', revision: 1, blob: new Blob([new Uint8Array(bytes)]) }];
+    const encoded = await encodeAppearancePackage(project, models);
+    expect((await decodeAppearancePackage(encoded)).project.animationBindings).toEqual(project.animationBindings);
+    const invalid = { ...project, animationBindings: { settler: { modelId: 'actor', clips: { attack: 'Missing' } } } };
+    await expect(encodeAppearancePackage(invalid, models)).rejects.toThrow(/片段/);
+    const payload = JSON.parse(await encoded.text()) as { project: typeof invalid };
+    payload.project = invalid;
+    await expect(decodeAppearancePackage(new Blob([JSON.stringify(payload)]))).rejects.toThrow(/片段/);
   });
 });

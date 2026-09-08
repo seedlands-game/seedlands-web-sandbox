@@ -198,6 +198,7 @@ export async function executeGameplayCommand(
     }
     case 'spawn-creature': {
       const entity = server.spawnEntity({
+        id: command.id,
         type: 'creature',
         position: position(command.position),
         health: 12,

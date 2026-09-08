@@ -427,11 +427,18 @@ export class AuthorityRuntime {
   }
 
   view(): AuthorityGameplayView {
+    const entities = this.server
+      .queryEntities()
+      .map((entity) =>
+        entity.type === 'creature' || entity.type === 'npc'
+          ? { ...entity, combat: this.server.getCombatState(entity.id) }
+          : entity,
+      );
     return {
       gameplayRevision: this.server.gameplayRevision,
       gameplayTime: this.server.gameplayTime,
       player: this.server.getPlayerState(this.playerId),
-      entities: this.server.queryEntities(),
+      entities,
       actors: this.server.simulationSnapshot().actors,
       craftableRecipeIds: this.server.listCraftableRecipes(this.playerId).map((recipe) => recipe.id),
       metrics: this.server.gameplayMetrics(),

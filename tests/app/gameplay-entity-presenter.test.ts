@@ -1,7 +1,22 @@
 import * as pc from 'playcanvas';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameplayEntityPresenter } from '../../apps/web/src/app/gameplay/gameplay-entity-presenter';
 import type { GameplayEntity } from '../../packages/game-core/src/server/gameplay/entity-store';
+
+const animationState = vi.hoisted(() => ({
+  bindings: {} as Record<string, unknown>,
+  blob: undefined as Blob | undefined,
+  addGlbModel: vi.fn(),
+}));
+
+vi.mock('../../apps/web/src/app/gameplay/appearance-runtime', () => ({
+  getAppearanceAnimationBindings: () => animationState.bindings,
+  getAppearanceModelBlob: () => animationState.blob,
+}));
+
+vi.mock('../../apps/web/src/app/gameplay/glb-model-resource', () => ({
+  addGlbModel: animationState.addGlbModel,
+}));
 
 vi.mock('../../apps/web/src/app/gameplay/gameplay-model-assets', () => ({
   acquireGameplayModelAssets: () => ({
@@ -52,6 +67,12 @@ const reconcileFrame = (
 ) => presenter.reconcile(entities, renderDeltaSeconds);
 
 describe('玩法实体的独立表现时钟', () => {
+  beforeEach(() => {
+    animationState.bindings = {};
+    animationState.blob = undefined;
+    animationState.addGlbModel.mockReset();
+  });
+
   it('每50ms前进2cm的慢速目标不会在快照回调跳动，并在中间渲染帧继续前进', () => {
     const root = new pc.Entity('root');
     const presenter = new GameplayEntityPresenter({ root } as pc.Application);
@@ -135,5 +156,39 @@ describe('玩法实体的独立表现时钟', () => {
     expect(leftPivot.getLocalEulerAngles().x).not.toBe(0);
     expect(leftSleeve.getLocalEulerAngles().length()).toBeCloseTo(0);
     expect(leftHand.getLocalEulerAngles().length()).toBeCloseTo(0);
+  });
+
+  it('居民模型只消费游戏启动时保存的绑定与 Blob 快照', async () => {
+    const root = new pc.Entity('root');
+    const app = { root } as pc.Application;
+    const blob = new Blob(['startup-snapshot'], { type: 'model/gltf-binary' });
+    animationState.bindings = {
+      settler: { modelId: 'glb:settler', clips: { idle: 'Idle' } },
+    };
+    animationState.blob = blob;
+    animationState.addGlbModel.mockImplementation(async (_app: pc.Application, parent: pc.Entity) => {
+      const entity = new pc.Entity('snapshot-model');
+      parent.addChild(entity);
+      return {
+        entity,
+        animationClips: ['Idle'],
+        playback: { play: vi.fn(), locate: vi.fn() },
+        release: vi.fn(),
+      };
+    });
+    const presenter = new GameplayEntityPresenter(app);
+
+    reconcileFrame(presenter, [settler(0)], 0);
+
+    await vi.waitFor(() => expect(animationState.addGlbModel).toHaveBeenCalledOnce());
+    expect(animationState.addGlbModel).toHaveBeenCalledWith(
+      app,
+      expect.any(pc.Entity),
+      'glb:settler',
+      expect.any(AbortSignal),
+      blob,
+      'feet',
+    );
+    presenter.dispose();
   });
 });

@@ -1,4 +1,6 @@
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { projectCombatUi, type CombatUiProjection } from './combat-ui-projector';
+import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
+import { getItemCapability, getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 import { listRecipes } from '@seedlands/game-core/server/gameplay/recipe-registry';
 
 export type GameplayItemPresentation = Readonly<{
@@ -12,6 +14,7 @@ export type GameplayItemPresentation = Readonly<{
 export type GameplayUiSource = Readonly<{
   revision: number;
   player: Readonly<{
+    combat?: CombatSnapshot;
     lifecycle: 'alive' | 'dead';
     health: number;
     hunger: number;
@@ -26,6 +29,7 @@ export type GameplayUiSource = Readonly<{
 
 export type GameplayUiProjection = Readonly<{
   hud: Readonly<{
+    combat: CombatUiProjection;
     health: Readonly<{ value: number; max: 20 }>;
     hunger: Readonly<{ value: number; max: 20 }>;
     selectedHotbarSlot: number;
@@ -68,7 +72,7 @@ const projectInventory = (
           itemId: stack.itemId,
           count: stack.count,
           name: getItemDefinition(stack.itemId).name,
-          edible: getItemDefinition(stack.itemId).itemType === 'food',
+          edible: Boolean(getItemCapability(stack.itemId, 'consume')),
         }
       : { slot, itemId: null, count: 0, name: '空槽位', edible: false };
   });
@@ -77,6 +81,7 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
   const inventory = projectInventory(source.player.inventory, 24);
   const hud = reuse(
     {
+      combat: projectCombatUi(source.player.combat),
       health: { value: source.player.health, max: 20 as const },
       hunger: { value: source.player.hunger, max: 20 as const },
       selectedHotbarSlot: source.player.selectedHotbarSlot,

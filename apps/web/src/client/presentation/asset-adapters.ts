@@ -21,6 +21,4 @@ export const assetDependencies = (asset: Asset): string[] =>
       ? asset.payload.materialIds
       : [];
 export const acceptsPixelItem = (item: { id: string; itemType: string; placesVoxel?: number }) =>
-  (item.id === 'wood-axe' || item.id === 'stone-pickaxe') &&
-  item.itemType !== 'block' &&
-  item.placesVoxel === undefined;
+  item.itemType === 'tool' && item.placesVoxel === undefined;

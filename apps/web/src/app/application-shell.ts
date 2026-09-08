@@ -19,6 +19,7 @@ import {
   requiredWorkerCount,
   type ClientCapabilityState,
 } from './client-capability-preflight';
+import { MELEE_SHOWCASE_SEED } from './gameplay/melee-action-showcase';
 
 const QUALITY_KEY = 'seedlands.quality.v1';
 
@@ -26,6 +27,7 @@ type PendingStart = Readonly<{
   seed: string;
   quality: ShellQuality;
   openMode: WorldOpenMode;
+  experience: 'melee-showcase' | null;
 }>;
 
 type ApplicationShellOptions = Readonly<{
@@ -48,6 +50,7 @@ export class ApplicationShell {
   private readonly generalWorkerCount: 1 | 2;
   private readonly preflight: (generalWorkerCount: 1 | 2) => Promise<ClientCapabilityState>;
   private pendingStart: PendingStart | null = null;
+  private startingExperience: PendingStart['experience'] = null;
   private performanceWarningAccepted = false;
 
   constructor(
@@ -80,11 +83,14 @@ export class ApplicationShell {
     }
     this.controller = new ShellController({
       start: async (seed, quality, openMode) => {
+        const experience = this.startingExperience;
+        this.startingExperience = null;
         await audio.unlock();
         const restore = game.loadSavedSession();
-        bridge.publishShell({ phase: 'loading', seed, quality, enterLabel: '正在唤醒世界…' });
+        bridge.publishShell({ phase: 'loading', seed, quality, enterLabel: '正在唤醒世界…', experience: null });
         try {
           await game.start(seed, restore?.seed === seed ? restore : null, quality, openMode);
+          if (experience === 'melee-showcase') await game.prepareMeleeShowcase();
         } catch (error) {
           game.abortStart();
           bridge.publishShell({ phase: 'error', enterLabel: '重试进入' });
@@ -159,15 +165,29 @@ export class ApplicationShell {
   }
 
   async start(seedInput: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {
+    return this.requestStart(seedInput, quality, openMode, null);
+  }
+
+  async startMeleeShowcase(quality: ShellQuality) {
+    return this.requestStart(MELEE_SHOWCASE_SEED, quality, 'new-current', 'melee-showcase');
+  }
+
+  private async requestStart(
+    seedInput: string,
+    quality: ShellQuality,
+    openMode: WorldOpenMode,
+    experience: PendingStart['experience'],
+  ) {
     this.setQuality(quality);
     const seed = seedInput.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;
     if (this.capabilities.workerSupport !== 'supported') throw new Error('当前浏览器不支持运行游戏所需的 Web Worker。');
     if (this.capabilities.lowCoreWarning && !this.performanceWarningAccepted) {
-      this.pendingStart = { seed, quality, openMode };
+      this.pendingStart = { seed, quality, openMode, experience };
       this.performanceWarningOpen = true;
       this.publish();
       return;
     }
+    this.startingExperience = experience;
     await this.controller.start(seed, quality, openMode);
   }
 
@@ -177,11 +197,15 @@ export class ApplicationShell {
     this.performanceWarningOpen = false;
     this.performanceWarningAccepted = true;
     this.publish();
-    if (pending) await this.controller.start(pending.seed, pending.quality, pending.openMode);
+    if (pending) {
+      this.startingExperience = pending.experience;
+      await this.controller.start(pending.seed, pending.quality, pending.openMode);
+    }
   }
 
   cancelPerformanceWarning() {
     this.pendingStart = null;
+    this.startingExperience = null;
     this.performanceWarningOpen = false;
     this.publish();
   }
@@ -242,6 +266,7 @@ export class ApplicationShell {
 
   dispose() {
     this.pendingStart = null;
+    this.startingExperience = null;
     this.performanceWarningOpen = false;
     this.disposers
       .splice(0)

@@ -1,6 +1,7 @@
 import type { ActorArchetype } from '../gameplay/entity-store';
 import type { ActionRuntime } from './action-runtime';
 import type { PoiSnapshot } from './poi-registry';
+import type { CombatRuntimeSnapshot } from '../gameplay/combat-runtime';
 
 export type ActorBehavior =
   'idle' | 'wander' | 'seek-food' | 'flee' | 'chase' | 'attack' | 'routine-home' | 'routine-work';
@@ -15,7 +16,8 @@ export type ActorState = {
   workPoiId: string | null;
   foodPoiId: string | null;
   active: boolean;
-  attackCooldownSeconds: number;
+  /** Legacy projection; the combat runtime is the only mutable cooldown owner. */
+  attackCooldownSeconds?: number;
   wanderIndex: number;
 };
 
@@ -38,6 +40,7 @@ export type SimulationSnapshot = {
   actors: ActorState[];
   pois: PoiSnapshot;
   actions: ReturnType<ActionRuntime['snapshot']>;
+  combat?: CombatRuntimeSnapshot;
 };
 
 export const MAX_RETAINED_ACTORS = 512;
@@ -53,7 +56,11 @@ export const rangeByArchetype: Readonly<Record<ActorArchetype, number>> = {
   'night-stalker': 12,
   settler: 10,
 };
-export const cloneActor = (actor: ActorState): ActorState => ({ ...actor });
+export const cloneActor = (actor: ActorState, attackCooldownSeconds?: number): ActorState => {
+  const cloned = { ...actor };
+  delete cloned.attackCooldownSeconds;
+  return attackCooldownSeconds === undefined ? cloned : { ...cloned, attackCooldownSeconds };
+};
 export const roundSimulation = (value: number) => Math.round(value * 1_000_000) / 1_000_000;
 export const simulationDistanceSquared = (left: readonly number[], right: readonly number[]) =>
   left.reduce((sum, value, index) => sum + (value - right[index]) ** 2, 0);

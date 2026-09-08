@@ -4,7 +4,7 @@ import type { VoxelTarget } from '../../client/presentation/voxel-target';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
 import { entityHitDistance } from '../../client/presentation/entity-hit-volume';
 import type * as pc from 'playcanvas';
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { getItemCapability, getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 import { voxelNames } from '@seedlands/game-core/world/voxel';
 import { GameplayEntityPresenter } from './gameplay-entity-presenter';
 import { projectGameplayUi, type GameplayUiProjection } from '../ui/gameplay-ui-projector';
@@ -17,6 +17,8 @@ import type {
   AuthorityGameplayView,
 } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
+import type { CommandResult, ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
+import { meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
   gameplay: AuthorityGameplayView;
@@ -36,6 +38,9 @@ type Options = {
   queueSave: () => void;
   releaseInput: () => void;
   movePlayer: (position: [number, number, number]) => void | Promise<void>;
+  orientPlayer: (yaw: number, pitch: number) => void;
+  executeCommand: (command: ServerCommand) => Promise<CommandResult>;
+  onPlayerDamage?: (amount: number) => void;
   onPresentation?: (event: GameplayPresentationEvent) => void;
 };
 
@@ -49,6 +54,7 @@ export class BrowserGameplay {
   private inventoryOpen = false;
   private previousProjection: GameplayUiProjection | undefined;
   private previousHealth: number | null = null;
+  private lastCombatResultSequence: number | null = null;
   private breakProjectionElapsedSeconds = Number.POSITIVE_INFINITY;
 
   constructor(private readonly options: Options) {
@@ -66,27 +72,80 @@ export class BrowserGameplay {
     this.aimTarget = target?.inRange ? target : null;
   }
 
+  async prepareMeleeShowcase(): Promise<void> {
+    const authority = this.options.authority;
+    if (authority.gameplay.player.lifecycle === 'dead') await this.executeShowcaseCommand({ type: 'respawn' });
+    const existingIds = new Set(authority.gameplay.entities.map((entity) => entity.id));
+    for (const command of meleeShowcaseCommands(existingIds)) await this.executeShowcaseCommand(command);
+
+    let swordSlot = authority.gameplay.player.inventory.findIndex((slot) => slot?.itemId === 'wood-sword');
+    if (swordSlot < 0) {
+      await this.executeShowcaseCommand({ type: 'give-item', itemId: 'wood-sword', count: 1 });
+      swordSlot = authority.gameplay.player.inventory.findIndex((slot) => slot?.itemId === 'wood-sword');
+    }
+    if (swordSlot < 0) throw new Error('体验场无法把木剑放入背包。');
+    if (swordSlot >= authority.gameplay.player.hotbarSize) {
+      const empty = authority.gameplay.player.inventory
+        .slice(0, authority.gameplay.player.hotbarSize)
+        .findIndex((slot) => slot === null);
+      const target = empty >= 0 ? empty : 0;
+      const moved = await authority.performAction({ type: 'move-inventory', source: swordSlot, target });
+      if (!(moved.result as { success?: boolean }).success) throw new Error('体验场无法把木剑移动到快捷栏。');
+      swordSlot = target;
+    }
+    const selected = await authority.performAction({ type: 'select-hotbar', slot: swordSlot });
+    if (!(selected.result as { success?: boolean }).success) throw new Error('体验场无法装备木剑。');
+    await this.options.movePlayer([...MELEE_SHOWCASE_PLAYER_CAMERA]);
+    this.options.orientPlayer(0, -15);
+    this.refresh();
+    this.options.bridge.publishShell({ experience: 'melee-showcase' });
+    this.options.session.publishFeedback(this.options.nextInteractionSequence(), {
+      message: '体验场已布置：准星已对准中央训练目标，按住左键观察两段反向挥砍。',
+      tone: 'info',
+      durationMs: 4_000,
+    });
+    this.options.queueSave();
+  }
+
+  async triggerMeleeShowcaseDamage(): Promise<void> {
+    const player = this.options.authority.gameplay.player;
+    if (player.lifecycle === 'dead') await this.executeShowcaseCommand({ type: 'respawn' });
+    else if (player.health <= 2) await this.executeShowcaseCommand({ type: 'heal', amount: 20 });
+    await this.executeShowcaseCommand({ type: 'apply-damage', amount: 2 });
+  }
+
   advance(seconds: number): void {
     this.breakProjectionElapsedSeconds += seconds;
     this.outline.update(this.blocksInput ? null : this.aimTarget);
     this.gestureSeconds = Math.max(0, this.gestureSeconds - seconds);
     const state = this.options.authority.gameplay.player;
     this.viewmodel.setHeldItem(state.inventory[state.selectedSlot]?.itemId ?? null);
+    this.viewmodel.setCombatAction(state.combat?.active ?? null);
     this.viewmodel.setVisible(!this.blocksInput);
     if (!this.gestureSeconds) this.viewmodel.setAction(state.breakAction ? 'mine' : 'idle');
     this.viewmodel.update(seconds);
     this.refresh(false, seconds);
   }
 
+  private async executeShowcaseCommand(command: ServerCommand): Promise<void> {
+    const result = await this.options.executeCommand(command);
+    if (!result.success) throw new Error(`体验场布置失败：${result.error.message}`);
+  }
+
   refresh(forceBreakProjection = true, renderDeltaSeconds = 0): void {
     const view = this.options.authority.gameplay;
     const player = view.player;
+    this.consumeCombatResult();
     const becameDead = player.lifecycle === 'dead' && this.previousProjection?.shell.gameplay.lifecycle !== 'dead';
     if (becameDead) this.inventoryOpen = false;
     const entities = view.entities.filter((entity) => entity.type !== 'player');
     const actorStates = new Map(view.actors.map((actor) => [actor.entityId, actor] as const));
     this.presenter.reconcile(entities, renderDeltaSeconds);
-    if (this.previousHealth !== null && player.health < this.previousHealth) this.present({ kind: 'damage' });
+    if (this.previousHealth !== null && player.health < this.previousHealth) {
+      const amount = this.previousHealth - player.health;
+      this.options.onPlayerDamage?.(amount);
+      this.present({ kind: 'damage', amount });
+    }
     this.previousHealth = player.health;
     const currentBreaking = player.breakAction
       ? {
@@ -112,6 +171,7 @@ export class BrowserGameplay {
       {
         revision: view.gameplayRevision,
         player: {
+          combat: player.combat,
           lifecycle: player.lifecycle,
           health: player.health,
           hunger: player.hunger,
@@ -203,9 +263,20 @@ export class BrowserGameplay {
       .sort((left, right) => left.distance - right.distance)[0]?.entity;
     if (!target) return false;
     void this.action({ type: 'attack', targetId: target.id }, (result) => {
-      this.feedback(result.success ? '攻击命中' : `攻击失败 · ${result.reason}`, result.success ? 'success' : 'error');
-      if (result.success) this.present({ kind: 'attack', position: target.position });
-      if (result.success) this.options.queueSave();
+      if (!result.success) {
+        if (result.reason === 'cooldown' || result.reason === 'attack-cooldown' || result.reason === 'buffer-full')
+          return;
+        if (result.reason === 'combo-window-closed') return this.feedback('等待衔接窗口', 'info');
+        const reason =
+          result.reason === 'out-of-range'
+            ? '目标超出攻击距离'
+            : result.reason === 'blocked'
+              ? '目标被方块遮挡'
+              : result.reason === 'invalid-target'
+                ? '目标已离开或倒下'
+                : '当前无法攻击';
+        this.feedback(reason, 'error');
+      } else if (result.buffered) this.feedback('已衔接下一击', 'info');
     });
     return true;
   }
@@ -269,7 +340,7 @@ export class BrowserGameplay {
   useHeldItem(): boolean {
     const player = this.options.authority.gameplay.player;
     const stack = player.inventory[player.selectedSlot];
-    if (!stack || getItemDefinition(stack.itemId).itemType !== 'food') return false;
+    if (!stack || !getItemCapability(stack.itemId, 'consume')) return false;
     this.useInventoryItem(player.selectedSlot);
     return true;
   }
@@ -296,6 +367,23 @@ export class BrowserGameplay {
     this.viewmodel.dispose();
   }
 
+  private consumeCombatResult(): void {
+    const result = this.options.authority.gameplay.player.combat?.lastResult;
+    const sequence = result?.sequence ?? 0;
+    if (this.lastCombatResultSequence === null) {
+      this.lastCombatResultSequence = sequence;
+      return;
+    }
+    if (!result || sequence <= this.lastCombatResultSequence) return;
+    this.lastCombatResultSequence = sequence;
+    if (result.outcome === 'hit') {
+      this.feedback(`命中 · ${result.damage} 点伤害`, 'success');
+      this.present({ kind: 'attack' });
+      this.options.queueSave();
+    } else if (result.outcome === 'miss') this.feedback('挥空 · 目标离开范围或被遮挡', 'info');
+    else this.feedback('攻击已取消', 'info');
+  }
+
   private present(event: GameplayPresentationEvent): void {
     this.options.onPresentation?.(event);
     const kind = event.kind;
@@ -305,7 +393,9 @@ export class BrowserGameplay {
     }
     if (kind === 'attack' || kind === 'place' || kind === 'eat' || kind === 'damage') {
       const sequence = this.options.nextInteractionSequence();
-      this.options.session.publishInteraction(sequence, { gesture: { kind, sequence } });
+      this.options.session.publishInteraction(sequence, {
+        gesture: { kind, sequence, ...(event.kind === 'damage' ? { amount: event.amount } : {}) },
+      });
     }
   }
 
@@ -316,11 +406,11 @@ export class BrowserGameplay {
 
   private async action(
     action: AuthorityAction,
-    consume: (result: { success: boolean; reason?: string }) => void = () => undefined,
+    consume: (result: { success: boolean; reason?: string; buffered?: boolean }) => void = () => undefined,
   ): Promise<void> {
     try {
       const response = await this.options.authority.performAction(action);
-      consume(response.result as { success: boolean; reason?: string });
+      consume(response.result as { success: boolean; reason?: string; buffered?: boolean });
       this.refresh();
     } catch (error) {
       this.feedback(error instanceof Error ? error.message : String(error), 'error');

@@ -282,6 +282,18 @@ body {
   margin: 10px 0;
 }
 
+#start-card .melee-showcase-start {
+  width: 100%;
+  margin-top: 10px;
+  border-color: #a64d40;
+  background: #3b1c1a;
+}
+
+#start-card .melee-showcase-start small {
+  margin: 2px 0 0;
+  color: #e9aca3;
+}
+
 #start-card .game-button {
   font-size: 13px;
 }

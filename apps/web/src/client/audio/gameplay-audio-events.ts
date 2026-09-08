@@ -3,8 +3,9 @@ import type { SfxKey, SurfaceSound } from './audio-types';
 
 export type GameplayPresentationEvent =
   | { kind: 'break' | 'place'; voxel: number; position: readonly [number, number, number] }
+  | { kind: 'damage'; amount: number; position?: readonly [number, number, number] }
   | {
-      kind: 'pickup' | 'craft' | 'eat' | 'attack' | 'damage' | 'rejected';
+      kind: 'pickup' | 'craft' | 'eat' | 'attack' | 'rejected';
       position?: readonly [number, number, number];
     };
 
