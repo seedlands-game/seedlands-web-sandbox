@@ -54,7 +54,7 @@
 - [x] 给出具体切片、阶段依赖和失败验收矩阵。
 - [x] Terra/high 完成独立审阅与一次定向复核；receipt ledger、版本化保存和恢复回执一致性已修订，见 [设计审阅](design-review.md)。
 - [x] 文档格式/本地链接/预算算术核对。
-- [ ] 语义 commit 与 PR 交接。
+- [x] 语义 commit `25d596f` 与 [PR #24](https://github.com/seedlands-game/seedlands-web-sandbox/pull/24) 交接。
 - [ ] 用户审核实施阶段具体 spec/hash（后续任务，不阻塞本次设计交付）。
 
 长期 docs baseline 由退役 PR 更新，因为定位和路线变化；本 change 的具体接口/限额是设计候选，实施前按精确 spec 审核，不将未经实现验证的 schema 声称稳定公开 API。
