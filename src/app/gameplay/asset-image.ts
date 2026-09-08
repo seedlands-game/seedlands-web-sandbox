@@ -1,6 +1,7 @@
 import type { PixelTexture } from '../../client/presentation/asset-types';
-import { builtinAssets, builtinBinding } from '../../client/presentation/asset-catalog';
-import { publicAssetUrl } from '../../client/presentation/public-asset-url';
+import { builtinAssets, builtinBinding, builtinItemBindings } from '../../client/presentation/asset-catalog';
+import { publicAssetUrl, setPublicAssetOverrides } from '../../client/presentation/public-asset-url';
+import type { AppearanceProject } from '../../client/presentation/appearance-project';
 
 export function pixelCanvas(asset: PixelTexture): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
@@ -18,14 +19,25 @@ export function pixelCanvas(asset: PixelTexture): HTMLCanvasElement {
   return canvas;
 }
 export const pixelImageUrl = (asset: PixelTexture) => pixelCanvas(asset).toDataURL('image/png');
-const icons = new Map<string, string>();
+let thumbnails: Record<string, string> = {};
+export function setAppearanceImages(project: AppearanceProject) {
+  thumbnails = { ...project.thumbnails };
+  const overrides: Record<string, string> = {};
+  for (const asset of project.assets) {
+    const builtin = builtinAssets.find((candidate) => candidate.id === asset.id);
+    if (asset.type === 'image-texture' && builtin?.type === 'image-texture') {
+      overrides[builtin.payload.path] = asset.payload.path;
+      for (const binding of builtinItemBindings) {
+        if (binding.iconId === asset.id && asset.id === `builtin:image:${binding.itemId}`)
+          thumbnails[binding.modelId] = asset.payload.path;
+      }
+    }
+  }
+  setPublicAssetOverrides(overrides);
+}
 export function itemIconUrl(itemId: string, base: string): string {
   const binding = builtinBinding(itemId);
-  const asset = builtinAssets.find((a) => a.id === binding?.iconId);
-  if (asset?.type === 'pixel-texture') {
-    if (!icons.has(asset.id)) icons.set(asset.id, pixelImageUrl(asset));
-    return icons.get(asset.id)!;
-  }
-  if (asset?.type === 'image-texture') return publicAssetUrl(base, asset.payload.path);
+  if (binding && thumbnails[binding.modelId]) return thumbnails[binding.modelId];
+  if (binding) return publicAssetUrl(base, `assets/item-thumbnails/${itemId}.png`);
   return '';
 }

@@ -6,6 +6,12 @@ import {
   MAX_GLB_TRIANGLES,
   type StoredGlb,
 } from '../presentation/glb-model';
+import {
+  deleteAppearanceModel,
+  loadAppearanceModelBlob,
+  loadAppearanceModelBlobs,
+  reimportAppearanceModel,
+} from './appearance-project-store';
 
 type StoredRecord = StoredGlb & { blob: Blob };
 
@@ -19,7 +25,7 @@ function metadata(record: StoredRecord): StoredGlb {
   return {
     id: record.id,
     name: record.name,
-    revision: 1,
+    revision: record.revision,
     byteLength: record.byteLength,
     nodeCount: record.nodeCount,
     triangleCount: record.triangleCount,
@@ -37,7 +43,8 @@ function decodeRecord(value: unknown): StoredRecord {
     !record.id ||
     typeof record.name !== 'string' ||
     !record.name ||
-    record.revision !== 1 ||
+    !Number.isSafeInteger(record.revision) ||
+    (record.revision ?? 0) < 1 ||
     !Number.isSafeInteger(byteLength) ||
     (byteLength ?? 0) <= 0 ||
     !Number.isSafeInteger(nodeCount) ||
@@ -86,7 +93,7 @@ async function openDatabase(): Promise<IDBDatabase> {
 export async function listGlbModels(): Promise<StoredGlb[]> {
   const database = await openDatabase();
   try {
-    return await new Promise((resolve, reject) => {
+    const legacy = await new Promise<StoredGlb[]>((resolve, reject) => {
       const transaction = database.transaction(storeName, 'readonly');
       const request = transaction.objectStore(storeName).getAll();
       let records: StoredGlb[] = [];
@@ -104,6 +111,10 @@ export async function listGlbModels(): Promise<StoredGlb[]> {
       transaction.onabort = () => reject(transaction.error ?? new Error('读取 GLB 模型库被中断'));
       transaction.onerror = () => reject(transaction.error ?? new Error('读取 GLB 模型库失败'));
     });
+    const project = await loadAppearanceModelBlobs();
+    const byId = new Map(legacy.map((model) => [model.id, model]));
+    for (const model of project) byId.set(model.id, metadata(model));
+    return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
   } finally {
     database.close();
   }
@@ -155,6 +166,8 @@ export async function importGlbModel(file: File): Promise<StoredGlb> {
 }
 
 export async function loadGlbBlob(id: string): Promise<Blob> {
+  const project = await loadAppearanceModelBlob(id);
+  if (project) return project.blob;
   const database = await openDatabase();
   try {
     return await new Promise((resolve, reject) => {
@@ -178,8 +191,64 @@ export async function loadGlbBlob(id: string): Promise<Blob> {
   }
 }
 
-export async function deleteGlbModel(id: string): Promise<void> {
+export async function reimportGlbModel(id: string, file: File, expectedRevision: number): Promise<StoredGlb> {
+  const project = await reimportAppearanceModel(id, file, expectedRevision);
+  if (project) return metadata(project);
+  const stats = await inspectGlbFile(file);
+  const database = await openDatabase();
+  try {
+    return await new Promise((resolve, reject) => {
+      const transaction = database.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      const request = store.get(id);
+      let result: StoredGlb;
+      let problem: unknown;
+      request.onsuccess = () => {
+        try {
+          if (request.result === undefined) throw new Error('GLB 模型不存在，可能已被删除');
+          const current = decodeRecord(request.result);
+          if (current.revision !== expectedRevision) throw new Error('模型已被另一页面重导入，请重新加载后再试。');
+          const next: StoredRecord = {
+            ...current,
+            name: file.name,
+            revision: current.revision + 1,
+            byteLength: file.size,
+            nodeCount: stats.nodeCount,
+            triangleCount: stats.triangleCount,
+            blob: file.slice(0, file.size, 'model/gltf-binary'),
+          };
+          const totals = store.getAll();
+          totals.onsuccess = () => {
+            try {
+              const byteLength = totals.result
+                .map(decodeRecord)
+                .reduce((total, record) => total + record.byteLength, 0);
+              if (byteLength - current.byteLength + next.byteLength > MAX_GLB_LIBRARY_BYTES)
+                throw new Error(`GLB 模型库最多保存 ${MAX_GLB_LIBRARY_BYTES / 1024 / 1024} MiB`);
+              store.put(next);
+              result = metadata(next);
+            } catch (error) {
+              problem = error;
+              transaction.abort();
+            }
+          };
+        } catch (error) {
+          problem = error;
+          transaction.abort();
+        }
+      };
+      transaction.oncomplete = () => resolve(result);
+      transaction.onabort = transaction.onerror = () =>
+        reject(problem instanceof Error ? problem : writeError(transaction.error));
+    });
+  } finally {
+    database.close();
+  }
+}
+
+export async function deleteGlbModel(id: string, expectedRevision?: number): Promise<'project' | 'legacy'> {
   if (!id) throw new Error('GLB 模型标识不能为空');
+  if (await deleteAppearanceModel(id, expectedRevision)) return 'project';
   const database = await openDatabase();
   try {
     await new Promise<void>((resolve, reject) => {
@@ -192,4 +261,5 @@ export async function deleteGlbModel(id: string): Promise<void> {
   } finally {
     database.close();
   }
+  return 'legacy';
 }

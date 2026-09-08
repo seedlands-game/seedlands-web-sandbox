@@ -3,7 +3,10 @@
   import { publicAssetUrl } from '../../client/presentation/public-asset-url';
   import { importGlbModel } from '../../client/persistence/glb-model-store';
 
-  let { onimport, onerror }: { onimport: (model: StoredGlb) => void; onerror?: (message: string) => void } = $props();
+  let {
+    onimport,
+    onerror,
+  }: { onimport: (model: StoredGlb) => void | Promise<void>; onerror?: (message: string) => void } = $props();
   let input: HTMLInputElement;
   let importing = $state(false);
   let status = $state('');
@@ -18,7 +21,7 @@
     try {
       const model = await importGlbModel(file);
       status = `已导入 ${model.name}（${model.nodeCount} 节点，${model.triangleCount} 三角形）`;
-      onimport(model);
+      await onimport(model);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       status = message;

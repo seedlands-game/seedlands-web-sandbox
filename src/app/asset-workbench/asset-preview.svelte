@@ -2,7 +2,12 @@
   import { onMount } from 'svelte';
   import type { Asset } from '../../client/presentation/asset-types';
   import { PreviewScene } from './preview-scene';
-  let { asset, assets, revision }: { asset: Asset; assets: Asset[]; revision: number } = $props();
+  let {
+    asset,
+    assets,
+    revision,
+    contextMode,
+  }: { asset: Asset; assets: Asset[]; revision: number; contextMode?: 'model' | 'held' } = $props();
   let canvas: HTMLCanvasElement;
   let scene = $state<PreviewScene | null>(null);
   let mode = $state<'model' | 'held'>('model');
@@ -36,7 +41,7 @@
       error = '';
       ready = false;
       void scene
-        .show(asset, assets, asset.type === 'extruded-pixel-model' ? mode : 'model', filtering, repeat)
+        .show(asset, assets, contextMode ?? mode, filtering, repeat)
         .then(() => {
           if (current === request) ready = true;
         })
@@ -49,7 +54,7 @@
 
 <div class="preview-toolbar">
   <strong>实时预览</strong>
-  {#if asset.type === 'extruded-pixel-model'}
+  {#if !contextMode && (asset.type === 'extruded-pixel-model' || asset.type === 'builtin-item-model')}
     <select aria-label="预览模式" bind:value={mode}
       ><option value="model">模型检视</option><option value="held">第一人称手持</option></select
     >
@@ -87,11 +92,9 @@
     }}
   ></canvas>
   {#if error}<p class="preview-error" role="alert">{error}</p>{/if}
-  <span class="view-label"
-    >{mode === 'held' && asset.type === 'extruded-pixel-model' ? '共享游戏手持表现' : '拖动旋转 · 滚轮缩放'}</span
-  >
+  <span class="view-label">{(contextMode ?? mode) === 'held' ? '共享游戏手持表现' : '拖动旋转 · 滚轮缩放'}</span>
 </div>
-{#if asset.type === 'extruded-pixel-model' && mode === 'held'}
+{#if (contextMode ?? mode) === 'held'}
   <div class="action-strip">
     <button onclick={() => scene?.action('attack')}>挥动</button>
     <button onclick={() => scene?.action('mine')}>连续采集</button>

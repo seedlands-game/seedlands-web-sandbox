@@ -1,4 +1,4 @@
 import { mount } from 'svelte';
-import Workbench from './workbench.svelte';
+import AppearanceCenter from './appearance-center.svelte';
 
-mount(Workbench, { target: document.getElementById('asset-workbench')! });
+mount(AppearanceCenter, { target: document.getElementById('asset-workbench')! });

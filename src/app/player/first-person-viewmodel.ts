@@ -1,7 +1,11 @@
 import * as pc from 'playcanvas';
 import { type HeldAction, viewmodelPose } from '../../client/presentation/gameplay-model-definition';
 import { addPlayerArm } from '../gameplay/builtin-actor-models';
-import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from '../gameplay/gameplay-model-assets';
+import {
+  acquireGameplayModelAssets,
+  type GameplayModelAssetsLease,
+  type GameplayModelAssets,
+} from '../gameplay/gameplay-model-assets';
 import { resolveViewmodelLayout } from '../../client/presentation/viewmodel-layout';
 
 import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
@@ -26,8 +30,9 @@ export class FirstPersonViewmodel {
   constructor(
     private readonly app: pc.Application,
     private readonly camera: pc.Entity,
+    assets?: GameplayModelAssets,
   ) {
-    this.assetsLease = acquireGameplayModelAssets(app);
+    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app);
     if (app.root && app.scene?.layers) {
       this.layer = new pc.Layer({ name: 'First Person Viewmodel' });
       app.scene.layers.push(this.layer);
