@@ -19,11 +19,15 @@ const SELF_TEST_CASES = [
 ] as const;
 const PRODUCT_DEADLINE_MS = 30_000;
 const READY_POLL_DEADLINE_MS = 31_500;
-const probePath = `/@fs${resolve('changes/2026-09-08-web-node-playable/e2e/render-contention-probe.ts')}`;
+const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
+const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
+const probePath = new URL(
+  `@fs${resolve('changes/2026-09-08-web-node-playable/e2e/render-contention-probe.ts')}`,
+  new URL(basePath, `${origin}/`),
+).pathname;
 const outputDirectory = resolve(
   process.env.SEEDLANDS_RENDER_CONTENTION_OUTPUT ?? '/tmp/seedlands-web-node-playable/render-contention',
 );
-const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
 const nodePort = Number(process.env.SEEDLANDS_RENDER_CONTENTION_NODE_PORT ?? '18789');
 const selfTest = process.env.SEEDLANDS_RENDER_CONTENTION_SELF_TEST === '1';
 const trialCases = selfTest
