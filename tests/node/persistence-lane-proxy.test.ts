@@ -154,6 +154,49 @@ describe('Persistence lane Authority 侧同步缓存', () => {
     });
   });
 
+  it.each(['restored', 'generated', 'synchronous'] as const)(
+    'canonical 接管 %s 后释放准备缓存，连续探索不耗尽条目',
+    async (mode) => {
+      const rpc = rpcWith(async (kind, payload) => {
+        if (kind === 'persistence-open') return { identity, gameplay: null, checkpoint: null };
+        if (kind === 'persistence-ensure') {
+          const key = (payload as { key: string }).key;
+          return mode === 'restored'
+            ? { key, status: 'found', snapshot: chunk(key, 7, Voxel.Wood) }
+            : { key, status: 'missing' };
+        }
+        throw new Error(`unexpected ${kind}`);
+      });
+      const proxy = await openNodePersistenceLaneProxy({ rpc, identity, limits: { maxCachedChunks: 2 } });
+      const server = new GameServer({
+        platform: testCorePlatform,
+        seedText: identity.seedText,
+        persistence: proxy,
+        ...(mode === 'synchronous' ? {} : { onUnknownChunk: () => undefined }),
+      });
+      for (let cx = 0; cx < 8; cx += 1) {
+        const available = await server.prepareCanonicalChunkForMutation(cx, 0, 0);
+        if (mode === 'generated') {
+          expect(available).toBe(false);
+          expect(
+            server.acceptWorkerCanonical({
+              key: `${cx},0,0`,
+              cx,
+              cy: 0,
+              cz: 0,
+              chunkRevision: 0,
+              generatorVersion: GENERATOR_VERSION,
+              canonical: new Uint16Array(32 ** 3),
+            }),
+          ).toBe(true);
+        } else expect(available).toBe(true);
+      }
+      expect(proxy.diagnostics()).toMatchObject({ cachedChunkCount: 0, missingChunkCount: 0, prepareMetadataCount: 0 });
+      expect(server.hasLoadedCanonicalChunk('0,0,0')).toBe(true);
+      if (mode === 'restored') expect(server.getChunk(0, 0, 0)).toMatchObject({ revision: 7, persistedRevision: 7 });
+    },
+  );
+
   it('在途 prepare 元数据受缓存条目上限约束', async () => {
     const replies = [deferred<unknown>(), deferred<unknown>()];
     let index = 0;

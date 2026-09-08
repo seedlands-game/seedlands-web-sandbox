@@ -392,6 +392,7 @@ export class RemoteAuthorityMeshMirror {
     if (this.baselineRequestIds.get(key) !== requestId) return;
     const owner = this.owners.get(key);
     if (owner?.descriptor.requestId === requestId) {
+      this.ignoreBundle(owner.descriptor.bundleId);
       void this.reassembler?.cancel(owner.descriptor.bundleId).catch(() => undefined);
       this.releaseOwner(key, owner);
     }

@@ -112,7 +112,7 @@ async function pagedBundle(requestId = 11) {
     inFlight: createBaselineReferenceInFlightLedger(limits.baselineInFlightBytesMax),
   });
   if (!('publish' in prepared)) throw new Error(`Expected a baseline bundle, received ${prepared.reason}.`);
-  const publication = createBaselineReferencePublicationQueue();
+  const publication = createBaselineReferencePublicationQueue({ startBundleId: requestId });
   const published = prepared.publish(publication);
   const send = createBaselineReferenceSendQueue(limits.sendQueueBytesMax);
   const descriptorLease = publication.takeDescriptor(send);
@@ -137,6 +137,37 @@ const acceptPage = (mirror: RemoteAuthorityMeshMirror, reference: BaselinePageRe
 };
 
 describe('remote Authority baseline causal barrier', () => {
+  it.each([false, true])('ignores cancelled late pages and retries, digest in flight: %s', async (inFlight) => {
+    const { mirror, requests } = fixture();
+    const load = mirror.ensure(0, 0, 0).catch((error: Error) => error);
+    const old = await pagedBundle();
+    mirror.acceptDescriptor({ descriptor: old.descriptor });
+    const firstPage = acceptPage(mirror, old.pages[0]!);
+    if (!inFlight) await firstPage;
+    mirror.release(0, 0, 0);
+    await firstPage;
+    expect(await load).toBeInstanceOf(Error);
+    for (const page of old.pages.slice(1)) await acceptPage(mirror, page);
+    const retry = mirror.ensure(0, 0, 0);
+    const fresh = await pagedBundle(12);
+    mirror.acceptDescriptor({ descriptor: fresh.descriptor });
+    for (const page of fresh.pages) await acceptPage(mirror, page);
+    await retry;
+    expect(requests).toHaveLength(2);
+    expect(mirror.readyOwnerCount).toBe(1);
+    old.close();
+    fresh.close();
+    mirror.dispose();
+  });
+
+  it('still rejects pages without a descriptor when the bundle was never cancelled', async () => {
+    const { mirror } = fixture();
+    const bundle = await pagedBundle();
+    await expect(acceptPage(mirror, bundle.pages[0]!)).rejects.toThrow('no active descriptor');
+    bundle.close();
+    mirror.dispose();
+  });
+
   it('keeps bounded anonymous descriptor and page progress for initial-sync failure diagnostics', async () => {
     const { mirror, advance } = fixture(true);
     const load = mirror.ensure(0, 0, 0);
