@@ -51,7 +51,7 @@ CI 已证明 Node 完整发送 baseline，而页面进入 mirror 前逐步变慢
 
 CI `34219596804` 的正式 `AAABBA` 中 A/B 全部在约 8–11 秒 ready，A 未复现既有 30 秒失败，按固定停止线终止 `autoRender` 候选，不改产品绘制调度，也不从该批次计算或宣称性能倍数。同一 run 的原 Active 完整旅程仍按默认图形启动在 30 秒失败；实验唯一显式环境差异是 Chromium 使用 `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader`，原 gate 没有回读 renderer identity。
 
-下一步只做图形环境正确性兼容对照：同一 Linux/base/seed、完整 Pointer Lock 键鼠、挖放、保存、关闭重连及 Node 重启旅程和 30 秒门槛保持不变，分别记录默认启动与显式 SwiftShader 的真实 WebGL2 renderer、vendor、version 和 browserVersion。Playwright 只在测试环境变量明确开启时增加与停止实验完全相同的 3 个 Chromium 参数；默认启动不变。identity 必须从 PlayCanvas 已创建的 `Application.graphicsDevice` 只读取得，不提前调用 `canvas.getContext`，并进入成功 JSON 或失败诊断。显式 SwiftShader 对照若任一原断言失败、不是 WebGL2、未回读 SwiftShader 或不能完成原始最终帧，即判兼容失败；通过只说明该图形环境可完成原旅程，不代表性能改善。RED 为当前旅程 JSON/失败诊断没有图形身份，且没有独立测试开关可复现实验启动参数。
+下一步只做图形环境正确性兼容对照：同一 Linux/base/seed、完整 Pointer Lock 键鼠、挖放、保存、关闭重连及 Node 重启旅程和 30 秒门槛保持不变，分别记录默认启动与显式 SwiftShader 的真实 WebGL2 renderer、vendor、version 和 browserVersion。Playwright 只在测试环境变量明确开启时增加与停止实验完全相同的 3 个 Chromium 参数；默认启动不变。identity probe 在点击前 arm，以临时 rAF 等待 PlayCanvas 创建真实 `Application.graphicsDevice`，首次读取后立即停止并缓存；成功或 Application 已销毁的失败路径均读取该缓存，连接结算时清除未完成 rAF。它不提前调用 `canvas.getContext`、不改变 render 状态或逐帧采样，并将身份放入成功 JSON 或失败诊断。显式 SwiftShader 对照若任一原断言失败、不是 WebGL2、未回读 SwiftShader 或不能完成原始最终帧，即判兼容失败；通过只说明该图形环境可完成原旅程，不代表性能改善。RED 为当前旅程 JSON/失败诊断没有图形身份，且没有独立测试开关可复现实验启动参数。
 
 ## 阶段与保存
 

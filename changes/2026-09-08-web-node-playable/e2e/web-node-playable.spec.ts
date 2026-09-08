@@ -13,7 +13,13 @@ import {
 } from '@playwright/test';
 import type { RemotePlayableEvidence } from '../../../apps/web/src/app/world/remote-playable-evidence';
 import { COLLISION_EPSILON } from '../../../packages/game-core/src/physics/geometry';
-import type { GraphicsIdentitySnapshot } from './graphics-identity-probe';
+import {
+  armGraphicsIdentity,
+  captureGraphicsIdentity,
+  hasCurrentApplication,
+  releaseGraphicsIdentity,
+  type ConnectionGraphicsIdentity,
+} from './graphics-identity-evidence';
 import { REMOTE_PLAYABLE_ACCESS_KEY, RemotePlayableNodeFixture } from './remote-playable-node-fixture';
 
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
@@ -37,6 +43,7 @@ const sourceFiles = [
   'apps/web/src/client/authority/remote-authority-client.ts',
   'apps/web/src/client/authority/remote-authority-input-pipeline.ts',
   'apps/web/src/client/authority/remote-authority-mesh-mirror.ts',
+  'changes/2026-09-08-web-node-playable/e2e/graphics-identity-evidence.ts',
   'changes/2026-09-08-web-node-playable/e2e/remote-playable-node-fixture.ts',
   'changes/2026-09-08-web-node-playable/e2e/graphics-identity-probe.ts',
   'changes/2026-09-08-web-node-playable/e2e/web-node-playable.spec.ts',
@@ -46,11 +53,6 @@ const appearanceSourceFiles = ['apps/web/src/app/gameplay/asset-image.ts', 'apps
 // prettier-ignore
 const sourceInputs = Object.fromEntries([...sourceFiles, ...appearanceSourceFiles].map((path) => [path, createHash('sha256').update(readFileSync(path)).digest('hex')]));
 const origin = `http://127.0.0.1:${process.env.SEEDLANDS_E2E_PORT ?? '4173'}`;
-const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
-const graphicsIdentityProbePath = new URL(
-  `@fs${resolve('changes/2026-09-08-web-node-playable/e2e/graphics-identity-probe.ts')}`,
-  new URL(basePath, `${origin}/`),
-).pathname;
 const nodePort = 18_787;
 const nodeUrl = `ws://127.0.0.1:${nodePort}/seedlands`;
 const accessKey = REMOTE_PLAYABLE_ACCESS_KEY;
@@ -60,14 +62,6 @@ const evidenceDirectory = resolve(
 let nodeFixture: RemotePlayableNodeFixture | null = null;
 let nodeLog: string[] = [];
 const graphicsIdentities: ConnectionGraphicsIdentity[] = [];
-
-type ConnectionGraphicsIdentity = Readonly<
-  GraphicsIdentitySnapshot & {
-    attempt: string;
-    outcome: 'connected' | 'connection-failure';
-    browserVersion: string;
-  }
->;
 
 const evidence = (page: Page) =>
   page.evaluate(() => {
@@ -85,31 +79,6 @@ const appendDiagnostic = (entries: string[], value: string): void => {
   entries.push(redactDiagnostic(value));
   if (entries.length > 100) entries.shift();
 };
-
-async function captureGraphicsIdentity(
-  page: Page,
-  testInfo: TestInfo,
-  attempt: string,
-  outcome: ConnectionGraphicsIdentity['outcome'],
-): Promise<ConnectionGraphicsIdentity> {
-  const graphics = await page.evaluate(
-    async (path) => ((await import(path)) as typeof import('./graphics-identity-probe')).readGraphicsIdentity(),
-    graphicsIdentityProbePath,
-  );
-  if (!graphics) throw new Error('PlayCanvas WebGL2 graphics identity is unavailable.');
-  const identity = {
-    ...graphics,
-    attempt,
-    outcome,
-    browserVersion: page.context().browser()?.version() ?? 'UNAVAILABLE',
-  } as const;
-  graphicsIdentities.push(identity);
-  await testInfo.attach(`${attempt}-graphics-identity`, {
-    body: Buffer.from(`${JSON.stringify(identity, null, 2)}\n`),
-    contentType: 'application/json',
-  });
-  return identity;
-}
 
 async function startNode(): Promise<void> {
   nodeFixture ??= await RemotePlayableNodeFixture.create(nodePort);
@@ -148,6 +117,7 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
         return page.locator('#node-url').isVisible();
       })
       .toBe(true);
+    await armGraphicsIdentity(page);
     await page.fill('#node-url', nodeUrl);
     await page.locator('input[type="password"]').fill(accessKey);
     await page.click('#enter');
@@ -160,6 +130,7 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
         let graphicsIdentityError: string | null = null;
         try {
           graphicsIdentity = await captureGraphicsIdentity(page, testInfo, attempt, 'connection-failure');
+          graphicsIdentities.push(graphicsIdentity);
         } catch (identityError) {
           graphicsIdentityError = redactDiagnostic(
             identityError instanceof Error ? identityError.message : String(identityError),
@@ -270,9 +241,11 @@ async function connect(page: Page, testInfo: TestInfo, attempt: string): Promise
     }
     const connectedEvidence = await evidence(page);
     const graphicsIdentity = await captureGraphicsIdentity(page, testInfo, attempt, 'connected');
+    graphicsIdentities.push(graphicsIdentity);
     expect(graphicsIdentity.deviceType).toBe('webgl2');
     return connectedEvidence;
   } finally {
+    await releaseGraphicsIdentity(page);
     page.off('console', onConsole);
     page.off('pageerror', onPageError);
     page.off('websocket', onWebSocket);
@@ -519,5 +492,25 @@ test.describe.serial('Web to Node local playable loop', () => {
         2,
       )}\n`,
     );
+  });
+
+  test('错误认证销毁Application后仍保留图形身份', async ({ page }, testInfo) => {
+    await page.goto('/?harness=1');
+    await expect(page.locator('#enter')).toBeEnabled({ timeout: 20_000 });
+    await page.selectOption('#connection-mode', 'remote');
+    await expect(page.locator('#node-url')).toBeVisible();
+    await armGraphicsIdentity(page);
+    try {
+      await page.fill('#node-url', nodeUrl);
+      await page.locator('input[type="password"]').fill('seedlands-e2e-invalid-key');
+      await page.click('#enter');
+      await expect(page.locator('.start-error')).toBeVisible({ timeout: 10_000 });
+      await expect.poll(() => hasCurrentApplication(page)).toBe(false);
+      const identity = await captureGraphicsIdentity(page, testInfo, 'authentication-failure', 'connection-failure');
+      expect(identity.deviceType).toBe('webgl2');
+      expect(identity.renderer).not.toBe('UNAVAILABLE');
+    } finally {
+      await releaseGraphicsIdentity(page);
+    }
   });
 });
