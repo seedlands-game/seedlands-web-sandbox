@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "id": "npc-persistence-review-fixes",
+  "role": "persistent workspace and standard Agent framework implementation engineer",
+  "workType": "implementation",
+  "goal": "Fix independent P1 findings in /tmp/npc-persistence-independent-review.md against current working tree, preserving Root additions. Own workspace/* and tests/agent-server/persistent-workspace.test.ts plus new focused workspace review tests only. Fix frozen journal lifecycle (reject ordinary append while frozen, failure recovery safely reopen or keep blocked with explicit caller contract), bound journal message writes/reads, full portable relational validation before import, immutable manifest/receipt conflicts fail closed. Root owns resident-agent/request-budget/journal and will implement pre-admission budget; coordinate public API early. Add actual disposable PG RED/GREEN for every finding and failure/restart interleavings. No real provider, no env/secrets, no Git/package/Web/core/host edits. Finish /tmp/npc-persistence-review-fixes.md and freeze owned files.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/workspace",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/persistent-workspace.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/workspace-review.test.ts",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-persistence-review-fixes.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "review-fixes",
+      "check": "Actual PG regressions prove all four persistence P1 fixes, affected typecheck and lint pass",
+      "evidence": "/tmp/npc-persistence-review-fixes.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 3
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

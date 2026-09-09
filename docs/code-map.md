@@ -153,7 +153,7 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 
 ## 单 NPC 认知路线
 
-从 [角色协议](../packages/game-core/src/runtime/character-control-protocol.ts) 读跨宿主合同，再读 core `server/simulation/character-runtime.ts` 的身体/目标/记忆所有权、[浏览器 Bridge](../apps/web/src/client/character/controller-bridge.ts) 的绑定和迟到消息门禁、[伙伴会话](../apps/web/src/app/gameplay/companion/companion-session.ts) 的玩家入口。`apps/agent-server/src/` 的图、调度、上下文和模型适配只产生提案；世界由 Authority 提交。行为与记忆决策见[现行认知基线](living-npc-cognition.md)。
+从 [角色协议](../packages/game-core/src/runtime/character-control-protocol.ts) 读跨宿主合同，再读 core `server/simulation/character-runtime.ts` 与 `character-behavior-runtime.ts` 的身体/持续树所有权、[浏览器 Bridge](../apps/web/src/client/character/resident-bridge.ts) 的绑定和迟到消息门禁、[伙伴会话](../apps/web/src/app/gameplay/companion/companion-session.ts) 的玩家入口。`apps/agent-server/src/resident-agent.ts` 复用标准 Agent，`resident-channel.ts` / `resident-scheduler.ts` 管理逻辑唤醒，`workspace/` 管理 PG 文档、journal 与 Pro 发布事务；世界由 Authority 提交。`node/resident-host.ts` 复用一条连接承载三个独立角色。`scripts/model-gateway/` 拥有 LiteLLM 镜像与供应请求边界。浏览器 `client/persistence/application-checkpoint.ts` 与 `cognition-timeline.ts` 配对世界/记忆恢复。行为与记忆决策见[现行认知基线](npc-behavior-and-memory.md)。
 
 认知传输合同位于 `packages/cognition-protocol/src/index.ts`，由 Web 与 Agent Server 消费；只依赖 core 公开角色类型，core 不反向依赖。模型状态、上下文窗口和 token 用量不进入权威世界协议。角色执行在 `character-runtime.ts`、`character-goal-runtime.ts`、`character-runtime-types.ts` 和 `character-runtime-validation.ts` 按执行、目标、状态与输入验证分工。
 

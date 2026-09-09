@@ -1,0 +1,202 @@
+{
+  "phase": "replacement",
+  "startedAt": 1788969312230,
+  "gatewayBaseUrl": "http://127.0.0.1:56811",
+  "responses": [
+    {
+      "status": 200,
+      "elapsedMs": 141,
+      "retryAfter": null,
+      "body": {
+        "id": "mock-4",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "logprobs": null,
+            "message": {
+              "role": "assistant",
+              "content": "TEXT:complete"
+            }
+          }
+        ],
+        "created": 1788969312,
+        "model": "mock-flash-replacement",
+        "object": "chat.completion",
+        "system_fingerprint": "",
+        "usage": {
+          "prompt_tokens": 11,
+          "prompt_tokens_details": {
+            "cached_read_tokens": 3,
+            "cached_tokens": 3,
+            "cache_write_tokens": 0
+          },
+          "completion_tokens": 7,
+          "total_tokens": 18
+        },
+        "extra_fields": {
+          "request_type": "chat_completion",
+          "routing_info": {
+            "provider": "mock-shared",
+            "model": "flash",
+            "key": "local-mock",
+            "resolved_key_alias": {
+              "model_id": "mock-flash-replacement"
+            }
+          },
+          "provider": "mock-shared",
+          "original_model_requested": "flash",
+          "resolved_model_used": "flash",
+          "latency": 126,
+          "upstream_latency": 126,
+          "chunk_index": 0,
+          "raw_response": {
+            "id": "mock-4",
+            "object": "chat.completion",
+            "created": 1788969312,
+            "model": "mock-flash-replacement",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "TEXT:complete"
+                },
+                "finish_reason": "stop",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 11,
+              "completion_tokens": 7,
+              "total_tokens": 18,
+              "prompt_tokens_details": {
+                "cached_tokens": 3
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 141,
+      "retryAfter": null,
+      "body": {
+        "id": "mock-4",
+        "choices": [
+          {
+            "index": 0,
+            "finish_reason": "stop",
+            "logprobs": null,
+            "message": {
+              "role": "assistant",
+              "content": "TEXT:complete"
+            }
+          }
+        ],
+        "created": 1788969312,
+        "model": "mock-pro-backend",
+        "object": "chat.completion",
+        "system_fingerprint": "",
+        "usage": {
+          "prompt_tokens": 11,
+          "prompt_tokens_details": {
+            "cached_read_tokens": 3,
+            "cached_tokens": 3,
+            "cache_write_tokens": 0
+          },
+          "completion_tokens": 7,
+          "total_tokens": 18
+        },
+        "extra_fields": {
+          "request_type": "chat_completion",
+          "routing_info": {
+            "provider": "mock-shared",
+            "model": "pro",
+            "key": "local-mock",
+            "resolved_key_alias": {
+              "model_id": "mock-pro-backend"
+            }
+          },
+          "provider": "mock-shared",
+          "original_model_requested": "pro",
+          "resolved_model_used": "pro",
+          "latency": 125,
+          "upstream_latency": 125,
+          "chunk_index": 0,
+          "raw_response": {
+            "id": "mock-4",
+            "object": "chat.completion",
+            "created": 1788969312,
+            "model": "mock-pro-backend",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "TEXT:complete"
+                },
+                "finish_reason": "stop",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 11,
+              "completion_tokens": 7,
+              "total_tokens": 18,
+              "prompt_tokens_details": {
+                "cached_tokens": 3
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "mappingState": {
+    "active": 0,
+    "maxActive": 2,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788969312279,
+        "event": "start",
+        "scenario": "TEXT",
+        "attempt": 1,
+        "model": "mock-pro-backend",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788969312280,
+        "event": "start",
+        "scenario": "TEXT",
+        "attempt": 1,
+        "model": "mock-flash-replacement",
+        "active": 2
+      },
+      {
+        "seq": 3,
+        "atMs": 1788969312402,
+        "event": "end",
+        "scenario": "TEXT",
+        "attempt": 1,
+        "model": "mock-pro-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 4,
+        "atMs": 1788969312402,
+        "event": "end",
+        "scenario": "TEXT",
+        "attempt": 1,
+        "model": "mock-flash-replacement",
+        "active": 0,
+        "status": 200
+      }
+    ]
+  },
+  "elapsedMs": 181
+}

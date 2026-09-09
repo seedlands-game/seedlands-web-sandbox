@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "id": "npc-resident-host-recovery",
+  "role": "resident host integration engineer",
+  "workType": "implementation",
+  "goal": "Correct Root-discovered host checkpoint and restart boundaries. Current parseManifest requires1..3 workspaces but export includes all historical/dead residents (up to1024); allow empty world and up to1024 history namespaces consistently, stillmax3livechannels. Fatal UTF8 decoding. Export currently rejects zero bindings: support empty paired checkpoint before Factory. Add actual PG/WS regressions empty and4+historical namespaces restore. Inspect saved scheduler.inFlight -> constructor blocked and initialization recovery: interrupted disconnect/server restart must not permanently block cognition; reconcile journal tool outcomes unknown, explicit reset only after recovery, persist settled scheduler state. Inspect old channel disposal/new connection race and ensure old async writes cannot race new namespace owner. Own previous host paths plus resident-scheduler.ts/test. No Root Web/core/Agent/workspace edits; request API if needed. No real provider/env/key/Git/package or unknown services. Report /tmp/npc-resident-host-recovery.md with RED/GREEN and freeze.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/resident-channel.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/node",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/resident-factory.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/resident-host.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/resident-factory.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/resident-host",
+      "/private/tmp",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/resident-scheduler.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/resident-scheduler.test.ts"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-resident-host-recovery.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "recovery",
+      "check": "Actual PG/WS empty and historical saves plus restart/interruption pass with no cross-channel effects",
+      "evidence": "/tmp/npc-resident-host-recovery.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

@@ -99,8 +99,20 @@ describe('gateway BaseChatModel', () => {
       { tool_choice: 'required' } as never,
     );
     await model.invoke([new HumanMessage('publish')]);
-    await model.invoke([new HumanMessage('optional')], { tool_choice: 'auto' } as never);
+    await model.invoke([new HumanMessage('optional')], { tool_choice: 'auto', reasoning_effort: 'low' } as never);
     expect(bodies.map((entry) => entry.tool_choice)).toEqual(['required', 'auto']);
+    expect(bodies[1].reasoning_effort).toBe('low');
+  });
+
+  it('supports the standard structured-output parser using the same non-streaming adapter', async () => {
+    const model = createGatewayChatModel({
+      tier: 'pro',
+      baseUrl: 'http://127.0.0.1:9/v1',
+      apiKey: 'fake-local',
+      fetch: async () => new Response(JSON.stringify(responseBody)),
+    });
+    const structured = model.withStructuredOutput({ type: 'object', properties: {} }, { name: 'observe_self' });
+    await expect(structured.invoke([new HumanMessage('create')])).resolves.toEqual({});
   });
 
   it('preserves malformed tool arguments as invalid tool calls', async () => {

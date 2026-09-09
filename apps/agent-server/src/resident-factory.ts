@@ -233,7 +233,7 @@ export class ResidentFactory {
           }),
         }),
       ],
-      { signal },
+      { signal, reasoning_effort: 'low' } as never,
     );
     return validateBirth(parsed, birthId);
   }

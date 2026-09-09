@@ -1,0 +1,37 @@
+{
+  "candidate": "Bifrost HTTP Transport v2.1.0",
+  "imageDigest": "sha256:653b74a8410e5757375aa9a25ce21f90f4591fc11d65879451939b6172ce80ed",
+  "admission": "NO-GO",
+  "checks": {
+    "releasedImageIdentity": true,
+    "flashAndProAliases": true,
+    "providerWideConcurrencyTwo": true,
+    "pendingQueueThirtyTwo": true,
+    "slowDoesNotBlockCapacity": true,
+    "atMostThreeTotalAttempts": true,
+    "honorsRetryAfterOneSecond": false,
+    "totalDeadlineIncludesRetries": false,
+    "providerDeadlineBounded": true,
+    "cancellationPreventsLaterAttempts": true,
+    "promptDownstreamCancellation": false,
+    "toolIdsAndReasoningRoundtrip": true,
+    "opaqueRoundtrip": false,
+    "sameTierReplacement": true
+  },
+  "failed": [
+    "honorsRetryAfterOneSecond",
+    "totalDeadlineIncludesRetries",
+    "promptDownstreamCancellation",
+    "opaqueRoundtrip"
+  ],
+  "measurements": {
+    "retryStartGapsMs": [103, 101],
+    "retryDeadlineElapsedMs": 2326,
+    "retryDeadlineAttempts": 3,
+    "cancellationClientElapsedMs": 204,
+    "cancellationBackendCloseMs": 2005,
+    "queueSuccesses": 34,
+    "queueOverloads": 1,
+    "backendMaxActive": 2
+  }
+}

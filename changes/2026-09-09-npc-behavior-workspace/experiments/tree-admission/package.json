@@ -1,0 +1,11 @@
+{
+  "name": "seedlands-mistreevous-admission",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "admission": "node admission.cjs"
+  },
+  "dependencies": {
+    "mistreevous": "4.3.1"
+  }
+}

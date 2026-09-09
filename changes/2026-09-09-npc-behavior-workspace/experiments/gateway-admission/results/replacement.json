@@ -1,0 +1,116 @@
+{
+  "phase": "replacement",
+  "startedAt": 1788966478501,
+  "gatewayBaseUrl": "http://127.0.0.1:53769",
+  "responses": [
+    {
+      "status": 200,
+      "elapsedMs": 552,
+      "body": {
+        "id": "mock-4",
+        "created": 1788966479,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "TEXT:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 549,
+      "body": {
+        "id": "mock-4",
+        "created": 1788966479,
+        "model": "pro",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "TEXT:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    }
+  ],
+  "mappingState": {
+    "active": 0,
+    "maxActive": 2,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788966478949,
+        "event": "start",
+        "scenario": "TEXT",
+        "attempt": 1,
+        "model": "mock-flash-replacement",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788966478949,
+        "event": "start",
+        "scenario": "TEXT",
+        "attempt": 1,
+        "model": "mock-pro-backend",
+        "active": 2
+      },
+      {
+        "seq": 3,
+        "atMs": 1788966479070,
+        "event": "end",
+        "scenario": "TEXT",
+        "attempt": 1,
+        "model": "mock-flash-replacement",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 4,
+        "atMs": 1788966479070,
+        "event": "end",
+        "scenario": "TEXT",
+        "attempt": 1,
+        "model": "mock-pro-backend",
+        "active": 0,
+        "status": 200
+      }
+    ]
+  },
+  "elapsedMs": 589
+}

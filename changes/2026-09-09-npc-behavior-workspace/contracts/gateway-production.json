@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "id": "npc-gateway-production",
+  "role": "gateway deployment engineer",
+  "workType": "implementation",
+  "goal": "Promote admitted LiteLLM ASGI extension into production engineering scripts/model-gateway with fixed image digest. Read /tmp/npc-litellm-compatibility.md. Complete safe bounded request body/timeout (128K tokens needs suitable ~2MiB+ body ceiling), accepted chat routes cannot bypass gate, reject unsupported routes, clean up every disconnect/acquire/monitor child task under cancellation/timeout; tier total defaults flash60/pro300, shared2+pending32, all attempts<=3, one uvicorn worker. Root noticed current wrapper only matches /v1/chat/completions, body reads happen before timeout context, and disconnect_task may leak on outer timeout: fix with explicit focused regression tests and rerun complete mock G on final product artifact. Preserve old failed experiments. Provide Dockerfile/config/example startup documentation/scripts; no provider keys in repo, no .env read. Host receives only local gateway URL/token; provider credentials and actual model mapping remain gateway-only. Do not call realprovider; Root will use inherited process env Midscene key+matching endpoint after mock admission. BaseGateway config aliases flash/pro only, no default silently lower Pro. Can invoke disposable Docker mock artifacts and cleanup only owned containers. No package/lock/Web/core/agent edits or commits. Document hash of final artifact, tests and run commands in report. Root works browser checkpoint/integration; hostagent works actual PG WS. This is bounded4h independent implementation.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/scripts/model-gateway",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-production",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-gateway-production.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "gateway-production",
+      "check": "Concrete report with exact source/artifact and reproducible evidence; bounded owned paths only",
+      "evidence": "/tmp/npc-gateway-production.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 4
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

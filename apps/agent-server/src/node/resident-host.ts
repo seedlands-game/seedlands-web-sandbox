@@ -277,18 +277,18 @@ export async function startResidentServer(options: ResidentServerOptions) {
             throw new Error('checkpoint digest mismatch');
           const manifest = parseManifest(payload, world);
           await Promise.all(manifest.workspaces.map((portable) => validatePortableWorkspace(portable)));
-          for (const portable of manifest.workspaces) {
-            const source = portable.binding;
-            await options.workspace.importPortable(
-              {
-                worldId: world.worldId,
-                timelineId: world.timelineId,
-                actorId: source.actorId,
-                incarnation: source.incarnation,
+          const targetScope = { worldId: world.worldId, timelineId: world.timelineId };
+          await options.workspace.importPortableBatch(
+            targetScope,
+            manifest.workspaces.map((portable) => ({
+              target: {
+                ...targetScope,
+                actorId: portable.binding.actorId,
+                incarnation: portable.binding.incarnation,
               },
               portable,
-            );
-          }
+            })),
+          );
           imports.delete(message.transferId);
           send({
             kind: 'checkpoint-imported',
@@ -305,6 +305,7 @@ export async function startResidentServer(options: ResidentServerOptions) {
       if (message.kind === 'bind') {
         if (
           channels.size >= RESIDENT_MAX_CHARACTERS ||
+          channels.has(message.binding?.sessionId) ||
           !validBinding(message.binding, world) ||
           [...channels.values()].some((entry) => entry.binding.entityId === message.binding.entityId) ||
           !observationMatches(message.observation, message.binding) ||
@@ -358,7 +359,8 @@ export async function startResidentServer(options: ResidentServerOptions) {
             },
           },
           status: (status) => {
-            if (channels.get(channelId)?.ready) send({ kind: 'status', channelId, status });
+            if (channels.get(channelId)?.binding === binding && channels.get(channelId)?.ready)
+              send({ kind: 'status', channelId, status });
           },
         });
         const channel = { resident, binding, ready: false };

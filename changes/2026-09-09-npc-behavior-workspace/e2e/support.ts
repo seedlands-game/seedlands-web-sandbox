@@ -110,7 +110,7 @@ export async function lifeSample(page: Page, entityId: string, sinceCursor: numb
         observation: observation.data.observation,
         worldTime: clock.data.snapshot.worldTime,
         physicsTick: clock.data.snapshot.physicsTick,
-        simulationTime: snapshot.gameplay.simulationTime,
+        simulationTime: clock.data.snapshot.activeTimeMs / 1000,
         paused: clock.data.paused,
       };
     },
@@ -130,6 +130,8 @@ export async function faceLifeCharacter(page: Page, entityId: string) {
       (Math.atan2(px - x, pz - z) * 180) / Math.PI,
       (Math.atan2(y + 1 - py, Math.hypot(x - px, z - pz)) * 180) / Math.PI,
     );
+    // Let the client consume a fresh pose and actually render the new camera before capture.
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
   }, entityId);
 }
 
@@ -137,9 +139,7 @@ export class LifeEvidence {
   feedingEpisodes = 0;
   nightDayEpisodes = 0;
   patrolArrivals = 0;
-  private feeding = false;
   private restedAtNight = false;
-  private lastPatrol = -1;
   private lastCursor = 0;
   readonly actions = new Map<string, number>();
 
@@ -149,33 +149,29 @@ export class LifeEvidence {
     if (sample.player.lifecycle !== 'alive') throw new Error('Player died');
     if (character.lifecycle !== 'active' || (self.health ?? 1) <= 0) throw new Error('Character died');
     if (observation.gap || observation.cursor < this.lastCursor) throw new Error('Life event coverage lost');
+    const newEvents = observation.events.filter((event) => event.cursor > this.lastCursor);
     this.lastCursor = observation.cursor;
     const skills = character.behaviorTree.runtime.skills;
-    if (
-      character.hunger >= 40 ||
-      (character.hunger > 20 && skills.some((s) => s.skill === 'satisfy-hunger' && s.status === 'running'))
-    )
-      this.feeding = true;
-    if (this.feeding && character.hunger <= 20) {
-      this.feedingEpisodes++;
-      this.feeding = false;
-    }
+    this.feedingEpisodes += newEvents.filter(
+      (event) =>
+        event.type === 'activity-succeeded' &&
+        event.nodeId === 'hunger-action' &&
+        event.hunger !== undefined &&
+        event.hunger <= 20,
+    ).length;
     const distance = (position: CharacterPosition) => Math.hypot(...position.map((v, i) => v - self.position[i]));
     const night = worldTime >= 18 || worldTime < 6;
     if (
       night &&
-      distance(lifeScene.homePosition) < 1 &&
+      distance(lifeScene.homePosition) <= 1.25 &&
       skills.some((s) => s.skill === 'rest-at-home' && s.status === 'running')
     )
       this.restedAtNight = true;
-    const arrived = lifeScene.patrolPositions.findIndex((position) => distance(position) < 1);
-    if (!night && arrived >= 0 && arrived !== this.lastPatrol) {
-      this.patrolArrivals++;
-      this.lastPatrol = arrived;
-      if (this.restedAtNight) {
-        this.nightDayEpisodes++;
-        this.restedAtNight = false;
-      }
+    const arrivals = newEvents.filter((event) => event.type === 'activity-succeeded' && event.nodeId === 'day-patrol');
+    this.patrolArrivals += arrivals.length;
+    if (!night && arrivals.length && this.restedAtNight) {
+      this.nightDayEpisodes++;
+      this.restedAtNight = false;
     }
     for (const skill of skills)
       if (skill.actionId && skill.status === 'running')

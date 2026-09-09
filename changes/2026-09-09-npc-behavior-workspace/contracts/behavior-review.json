@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "id": "npc-behavior-review",
+  "role": "independent behavior reviewer",
+  "workType": "validation",
+  "goal": "Independently review exact commit be49081c294bcfddda52304ae3b2c5d95bd762c5 versus its parent094dc7d43cf0941a09793c2c9daee4a6931bc0a7. Follow .agents/skills/seedlands-code-review/SKILL.md and routed references. Freeze base/head, read changed and adjacent sources via git show immutable trees, baseline rules from base. Do NOT mix WIP. Focus complete behavior tree lifetime, nonblocking monitors, skills/action identity/interruption/hot swap/save restoration, restricted observations, and included Web resident bridge/UI. Explain code first, then evidence-backed P0/P1/P2 findings with exactlines/trigger/impact and coverage. Tests A short passed frozen build, Headless3days passed; current60min browser on immutable be49081 artifact running, no final claim yet. Evidence /tmp/npc-world-behavior-a.md /tmp/npc-a-be49081-build.log /tmp/npc-a-be49081-short; may read raw long observations read-only. Do not stop servers or rerun long test, no edits outside report/tmp, no gitwrites or comments. Root continues Web/save integration and gateway is separately delegated. Report /tmp/npc-behavior-independent-review.md. Budget3h, askonly concrete blocked sources, do not approve/merge.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-behavior-independent-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "behavior-review",
+      "check": "Concrete report with exact source/artifact and reproducible evidence; bounded owned paths only",
+      "evidence": "/tmp/npc-behavior-independent-review.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 3
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

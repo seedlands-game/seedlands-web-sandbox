@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "id": "npc-resident-host",
+  "role": "resident host integration engineer",
+  "workType": "implementation",
+  "goal": "Complete Root-started resident-channel.ts and node/resident-host.ts into actual B/C v2 WS host using incoming persistent workspace/resident-agent APIs. Own host orchestration + Factory + Node startup + focused actual WS/PG tests. One WS has3 independent residents/world ports, no global NPC model lock; identity/sequence/capability/reconnect/late response bounded; invalid actor frames cannot affect another. Persist scheduler metadata and explicit page coverage via workspace APIs (coordinate workspace_foundation). Compaction must happen as maintenance before logical round admission, never refresh fallback or increment logicalRounds itself; freeze observation includedThrough before model call. Queue ingestion bounded/peractor; model abort onpause/disconnect, old tree unaffected. Produce AGENT via shared registry helper; birth uses Pro standard tools/schema, generation and activation idempotent; world validates birth tree. Implement chunked <=64MiB checkpoint cognition export/import by protocol, checksum/size/ttl/frozen manifest, import only into new timeline authorized world binding; no claim PG/world atomic transaction. Root owns Web bridge save manifest/UI. Replace Node main active boot with PG+logical gateway flash/pro only (process env reads no .env/key output), no direct provider runtime in active path; preserve legacy sources temporarily for old tests until cleanup. Root draft host/channel contain known incomplete schema validation, absent birth/checkpoint handlers, absent runtime metadata, and budget check incorrectly inside admitted run: fix these. Tests actual three-channel WS+PG with fake BaseChatModel, queue/failure/reconnect, malformed/oversized/cross-channel receipts, export/import/newtimeline no future memory, factory duplicate activation. Do not touch package/lock/core/Web/shared protocol; ask Root for needed protocol edits. Report /tmp/npc-resident-host.md. Root runs A60min/browser product integration independently.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/resident-channel.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/node",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/resident-factory.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/resident-host.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/resident-factory.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/resident-host",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-resident-host.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "host-bc",
+      "check": "Actual PG/WS three residents standard-agent host, bounded Factory and portable cognition manifest with deterministic failure tests",
+      "evidence": "/tmp/npc-resident-host.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 6
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

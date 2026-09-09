@@ -1,0 +1,35 @@
+#0 building with "orbstack" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 977B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/berriai/litellm@sha256:c8756e7b9a61fe45df2ccb5b781d388c3b2f3a21ef9e4956630caef20f9f03aa
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [1/4] FROM ghcr.io/berriai/litellm@sha256:c8756e7b9a61fe45df2ccb5b781d388c3b2f3a21ef9e4956630caef20f9f03aa
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 87B done
+#5 DONE 0.0s
+
+#6 [3/4] COPY compatibility_gateway.py /app/compatibility_gateway.py
+#6 CACHED
+
+#7 [2/4] COPY gateway_middleware.py /app/model_gateway/gateway_middleware.py
+#7 CACHED
+
+#8 [4/4] RUN touch /app/model_gateway/__init__.py && python - <<'PY'
+#8 CACHED
+
+#9 exporting to image
+#9 exporting layers done
+#9 writing image sha256:ad2eb97b3dbd125abdb4e1c80a0d1c776654d5db4fd10bb53f6276a8f559be2b done
+#9 naming to docker.io/library/seedlands-model-gateway:litellm-1.100.0 done
+#9 DONE 0.0s
+sha256:ad2eb97b3dbd125abdb4e1c80a0d1c776654d5db4fd10bb53f6276a8f559be2b

@@ -145,6 +145,13 @@ export type PortableWorkspace = Readonly<{
   blobs: readonly Readonly<Record<string, unknown>>[];
 }>;
 
+export type WorkspaceTimelineScope = Readonly<Pick<WorkspaceBinding, 'worldId' | 'timelineId'>>;
+
+export type PortableWorkspaceImport = Readonly<{
+  target: WorkspaceBinding;
+  portable: PortableWorkspace;
+}>;
+
 export type InitializeNpcInput = Readonly<{
   agent: string;
   soul: string;

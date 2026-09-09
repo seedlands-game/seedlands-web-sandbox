@@ -1,0 +1,48 @@
+2026/09/09 15:55:10 maxprocs: Leaving GOMAXPROCS=12: CPU quota undefined
+
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║   ██████╗ ██╗███████╗██████╗  ██████╗ ███████╗████████╗   ║
+║   ██╔══██╗██║██╔════╝██╔══██╗██╔═══██╗██╔════╝╚══██╔══╝   ║
+║   ██████╔╝██║█████╗  ██████╔╝██║   ██║███████╗   ██║      ║
+║   ██╔══██╗██║██╔══╝  ██╔══██╗██║   ██║╚════██║   ██║      ║
+║   ██████╔╝██║██║     ██║  ██║╚██████╔╝███████║   ██║      ║
+║   ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝      ║
+║                                                           ║
+║═══════════════════════════════════════════════════════════║
+║                          v2.1.0                           ║
+║═══════════════════════════════════════════════════════════║
+║                 The Fastest LLM Gateway                   ║
+║═══════════════════════════════════════════════════════════║
+║             https://github.com/maximhq/bifrost            ║
+╚═══════════════════════════════════════════════════════════╝
+
+[33m╔══════════════════════════════════════════════════════════════════════════════════════════════════╗[0m
+[33m║ config file /app/data/config.json does not include a "$schema" location. Set it to               ║[0m
+[33m║ "https://www.getbifrost.ai/schema" or your mirrored schema location to enable IDE validation.    ║[0m
+[33m╚══════════════════════════════════════════════════════════════════════════════════════════════════╝[0m
+
+{"level":"warn","time":"2026-09-09T15:55:10Z","message":"config file /app/data/config.json does not include a \"$schema\" location"}
+{"level":"info","time":"2026-09-09T15:55:10Z","message":"loading configuration from: /app/data/config.json"}
+{"level":"warn","time":"2026-09-09T15:55:10Z","message":"config store is nil, skipping token refresh worker"}
+{"level":"warn","time":"2026-09-09T15:55:10Z","message":"per-user OAuth sweep worker not started: provider or config store is nil"}
+{"level":"warn","time":"2026-09-09T15:55:10Z","message":"per-user headers credential sweep worker not started: provider or config store is nil"}
+{"level":"info","time":"2026-09-09T15:55:10Z","message":"pricing sync interval set to 24h0m0s (scheduler checks every 5m0s)"}
+{"level":"info","time":"2026-09-09T15:55:10Z","message":"initializing model catalog..."}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"initializing MCP catalog..."}
+{"level":"warn","time":"2026-09-09T15:55:12Z","message":"governance plugin requires config store to persist data, running in memory only mode"}
+{"level":"error","time":"2026-09-09T15:55:12Z","message":"failed to initialize governance plugin: failed to initialize governance store: failed to load governance data from config memory: governance config is nil"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"bifrost client initialized"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"listing all models and adding to model catalog"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"models added to catalog"}
+{"level":"warn","time":"2026-09-09T15:55:12Z","message":"batch accounting sweeper not wired: logging plugin not found (err=plugin logging not found)"}
+{"level":"error","time":"2026-09-09T15:55:12Z","message":"auth middleware requires config store, skipping auth middleware initialization"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"background live model refresh is disabled"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"Time spent in Bifrost server bootstrap 1784 ms"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"plugin status: telemetry - active"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"plugin status: governance - error"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"plugin status: compat - active"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"plugin status: model-catalog-resolver - active"}
+{"level":"info","time":"2026-09-09T15:55:12Z","message":"successfully started bifrost, serving UI on http://0.0.0.0:8080"}
+{"level":"info","http.method":"POST","http.target":"/v1/chat/completions","http.status_code":200,"http.request_duration_ms":134,"http.remote_addr":"192.168.215.1:37364","http.user_agent":"node","trace_id":"8eb4279210174793b88b03cfcf03789c","request_id":"47f41f41-4672-4320-975b-74f9dca62fdc","time":"2026-09-09T15:55:12Z","message":"request completed"}
+{"level":"info","http.method":"POST","http.target":"/v1/chat/completions","http.status_code":200,"http.request_duration_ms":135,"http.remote_addr":"192.168.215.1:37380","http.user_agent":"node","trace_id":"de0632bfdd0b45f787e86bb98152953d","request_id":"d697f309-2824-4461-b9e9-90bec7ed7ae8","time":"2026-09-09T15:55:12Z","message":"request completed"}

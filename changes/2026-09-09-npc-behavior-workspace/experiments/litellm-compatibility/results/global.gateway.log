@@ -1,0 +1,69 @@
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+
+   ██╗     ██╗████████╗███████╗██╗     ██╗     ███╗   ███╗
+   ██║     ██║╚══██╔══╝██╔════╝██║     ██║     ████╗ ████║
+   ██║     ██║   ██║   █████╗  ██║     ██║     ██╔████╔██║
+   ██║     ██║   ██║   ██╔══╝  ██║     ██║     ██║╚██╔╝██║
+   ███████╗██║   ██║   ███████╗███████╗███████╗██║ ╚═╝ ██║
+   ╚══════╝╚═╝   ╚═╝   ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝
+
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:4000 (Press CTRL+C to quit)
+
+[1;37m#------------------------------------------------------------#[0m
+[1;37m#                                                            #[0m
+[1;37m#           'I get frustrated when the product...'            #[0m
+[1;37m#        https://github.com/BerriAI/litellm/issues/new        #[0m
+[1;37m#                                                            #[0m
+[1;37m#------------------------------------------------------------#[0m
+
+ Thank you for using LiteLLM! - Krrish & Ishaan
+
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+
+
+[32mLiteLLM: Proxy initialized with Config, Set models:[0m
+[32m    flash[0m
+[32m    pro[0m
+INFO:     192.168.215.1:47842 - "GET /health/liveliness HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47854 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47868 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47874 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48152 - "POST /v1/chat/completions HTTP/1.1" 429 Too Many Requests
+INFO:     192.168.215.1:47868 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47854 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47892 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47874 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47902 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47878 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47914 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47922 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47930 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47942 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47968 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47954 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47982 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47978 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48014 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:47998 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48020 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48026 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48028 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48036 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48056 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48046 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48074 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48064 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48088 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48086 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48096 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48094 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48098 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48100 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48114 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48130 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48138 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     192.168.215.1:48144 - "POST /v1/chat/completions HTTP/1.1" 200 OK

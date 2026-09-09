@@ -84,6 +84,6 @@ Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟�
 
 ## 本机认知服务
 
-`apps/agent-server/src/` 承载 LangGraph、DeepSeek 协议、调度/压缩和 WebSocket 生命周期；通过 core 声明 exports 消费通用角色控制合同，与 Web 互不导入。`apps/web/src/client/character/` 承载浏览器绑定与消息校验；`apps/web/src/app/gameplay/companion/` 管理玩家伙伴会话，`app/ui/companion-panel.svelte` 展示玩家可读状态。当前 Node Dedicated 仍保持归档，认知服务不是游戏服务器。
+`apps/agent-server/src/` 承载 LangChain 标准 Agent、LangGraph PG saver/store、角色工作区、调度/Pro 压缩和 WebSocket 生命周期；供应商、真实模型映射与传输重试放在 `scripts/model-gateway/` 的固定 LiteLLM 宿主。认知服务只消费标准接口中的 `flash` / `pro`；通过 core 声明 exports 消费通用角色控制合同，与 Web 互不导入。`apps/web/src/client/character/` 承载浏览器绑定与消息校验；`apps/web/src/app/gameplay/companion/` 管理玩家伙伴会话，`app/ui/companion-panel.svelte` 展示玩家可读状态。当前 Node Dedicated 仍保持归档，认知服务不是游戏服务器。
 
 认知传输合同位于 `packages/cognition-protocol/src/index.ts`，由 Web 与 Agent Server 消费；只依赖 core 公开角色类型，core 不反向依赖。模型状态、上下文窗口和 token 用量不进入权威世界协议。角色执行在 `character-runtime.ts`、`character-goal-runtime.ts`、`character-runtime-types.ts` 和 `character-runtime-validation.ts` 按执行、目标、状态与输入验证分工。

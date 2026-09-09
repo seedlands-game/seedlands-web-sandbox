@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "candidate": "LiteLLM Proxy 1.100.0",
+  "admitted": false,
+  "checks": {
+    "fullToolLoopAndOpaqueRoundtrip": true,
+    "aliasesReachCorrectBackends": true,
+    "sameTierReplacement": true,
+    "sameDeploymentConcurrencyTwo": true,
+    "slowADoesNotBlockBC": true,
+    "retryAfterAndThreeTotalAttempts": true,
+    "totalCrossAliasConcurrencyTwo": false,
+    "boundedQueue32Backpressure": false,
+    "totalDeadline": false,
+    "downstreamCancellation": false
+  },
+  "observations": {
+    "crossAliasBackendMaxActive": 3,
+    "queuedRequestsAccepted": 35,
+    "queuedRequestsTotal": 35,
+    "deadlineElapsedMs": 10717,
+    "deadlineProviderAttempts": 3,
+    "cancelledClientElapsedMs": 206,
+    "cancellationProviderAttempts": 3
+  }
+}

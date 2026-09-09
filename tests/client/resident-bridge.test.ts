@@ -119,6 +119,17 @@ afterEach(() => {
 });
 
 describe('multiplexed resident bridge', () => {
+  it('retires a channel whose Authority disposal rejects after an epoch change', async () => {
+    const { bridge, ports, socket } = await setup();
+    ports[0].dispose.mockRejectedValueOnce(new Error('WORLD_EPOCH_STALE'));
+    await expect(bridge.unbind('a')).resolves.toBeUndefined();
+    expect(
+      socket.sent.filter((message) => message.kind === 'unbind' && message.channelId === 'channel-a'),
+    ).toHaveLength(1);
+    await bridge.unbind('a');
+    expect(ports[0].dispose).toHaveBeenCalledTimes(1);
+  });
+
   it('binds three actors through one handshake and only dispatches a proposal to its bound actor', async () => {
     const { socket, ports } = await setup();
     expect(socket.sent.filter((message) => message.kind === 'hello')).toHaveLength(1);

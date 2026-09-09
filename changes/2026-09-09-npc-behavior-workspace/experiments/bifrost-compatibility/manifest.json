@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "candidate": "Bifrost HTTP Transport compatibility patch",
+  "upstreamTag": "transports/v2.1.0",
+  "upstreamTagObject": "5e349341a7efac51f392fdb9aefc7ca6cb6908e7",
+  "upstreamCommit": "b211fdaed3b6829e126edaeb6b43503849c062a0",
+  "sourceTarballSha256": "454c594252c557f7f593df31df12935c1f3057f2834807809c5c2d07d4613571",
+  "baseImageDigest": "sha256:653b74a8410e5757375aa9a25ce21f90f4591fc11d65879451939b6172ce80ed",
+  "outcome": "BLOCKED_BEFORE_PATCH",
+  "blocker": "fasthttp unary ingress cannot observe ordinary client disconnects"
+}

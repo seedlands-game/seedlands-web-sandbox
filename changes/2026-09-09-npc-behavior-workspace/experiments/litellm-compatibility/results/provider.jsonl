@@ -1,0 +1,4 @@
+{"seq":1,"atMs":1788971241744,"event":"start","scenario":"TEXT","attempt":1,"model":"mock-flash-replacement","active":1}
+{"seq":2,"atMs":1788971241744,"event":"start","scenario":"TEXT","attempt":1,"model":"mock-pro-backend","active":2}
+{"seq":3,"atMs":1788971241865,"event":"end","scenario":"TEXT","attempt":1,"model":"mock-flash-replacement","active":1,"status":200}
+{"seq":4,"atMs":1788971241865,"event":"end","scenario":"TEXT","attempt":1,"model":"mock-pro-backend","active":0,"status":200}

@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "id": "npc-atomic-checkpoint-import",
+  "role": "persistent workspace and standard Agent framework implementation engineer",
+  "workType": "implementation",
+  "goal": "Fix final independent review P1 cross-workspace partial checkpoint import in /tmp/npc-host-persistence-final-review.md. Implement actual PostgreSQL all-or-nothing batch portable import into one target world/timeline, serialized target import with transaction/advisory lock and no partial target bindings after failure or concurrent collision. Expose batch API for Root to call from host. Preserve single workspace import API. Own workspace/* and tests/agent-server/workspace-review.test.ts plus new workspace-batch-import.test.ts only. Add real disposable PG RED/GREEN failure on second member plus concurrent import; no model/provider/env/host/Git/package edits. Coordinate public API immediately. Report /tmp/npc-atomic-checkpoint-import.md then freeze.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/workspace",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/workspace-review.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/workspace-batch-import.test.ts",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-atomic-checkpoint-import.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "atomic-import",
+      "check": "Actual PG failure and concurrency tests prove zero partial target bindings, complete successful import, owned lint/types pass",
+      "evidence": "/tmp/npc-atomic-checkpoint-import.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

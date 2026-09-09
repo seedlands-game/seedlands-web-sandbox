@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "id": "npc-behavior-review-fixes",
+  "role": "behavior correction engineer",
+  "workType": "implementation",
+  "goal": "Fix four independently reviewed P1s from /tmp/npc-behavior-independent-review.md against current core A source. Own behavior runtime/skills/definition/validation and focused behavior tests only, no CharacterRuntime/creation Web/host/workspace. Produce executable RED then GREEN for: healthy long travel must not consume replan budget every second (retain actual dynamic invalidation/recovery); hot swap terminal ledger must respect changed topology/context, while unchanged compatible running action and unchanged speech effect must not replay; restore rejects ledger.skill mismatching definition/node signature atomically; dialogue-received supports well-defined per-consumer edge/cursor in composite monitor/guard or explicitly restrict unsupported placement with clear validation (prefer full composability if bounded). Do not blindly clear all terminal nodes and replay unchanged speech; derive semantic migration policy and verify unchanged and reorder cases. Read current spec/approved proposal and frozen review, record chosen contract. Root currently editing character-runtime.ts only legacy-goal extraction and creation idempotency, avoid it. A60min immutable be49081 still running untouched. Root handles Agent budget/journal and Web, world_harness handles host. Run focused core3day + typecheck/lint, report /tmp/npc-behavior-review-fixes.md. No commit/Git/global formatting/real provider or keys. Scope3h.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/server/simulation/character-behavior-runtime.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/server/simulation/character-behavior-skills.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/server/simulation/character-behavior-definition.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/server/simulation/character-runtime-validation.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/server/character-behavior-runtime.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/server/world-behavior-a.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/server/character-behavior-review.test.ts",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-behavior-review-fixes.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "fixes",
+      "check": "4 concrete RED/GREEN counterexamples and unchanged-life behavior regression",
+      "evidence": "/tmp/npc-behavior-review-fixes.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 3
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}
