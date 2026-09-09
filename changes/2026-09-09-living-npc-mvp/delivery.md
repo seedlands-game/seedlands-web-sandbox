@@ -1,6 +1,6 @@
 # 浏览器持久伙伴交付记录
 
-当前为最终验收阶段；PR 与最新 SHA 的终态在本页末尾补齐。此记录区分模型语义、真实世界执行和工程门禁，不以任一层替代其它层。
+本地实现与独立审阅已完成；PR 的最新 SHA CI 终态以 PR 检查和交付回复为准。此记录区分模型语义、真实世界执行和工程门禁，不以任一层替代其它层。
 
 ## 可交付体验
 
@@ -18,7 +18,7 @@
 | 真实日常认知   | `evidence/real-browser-green.json`，连续行走截图     | 实际 DeepSeek Flash 文本调用，真实玩家输入和 NPC 身体运动                    |
 | 真实压缩       | `evidence/live-semantic-fixed.json`                  | 实际 Pro 读取完整公共历史，摘要经 Authority ACK 后轮换；人为降低阈值验证机制 |
 | 上下文预算     | `docs/living-npc-cognition.md`                       | 128K/256K 是已实现容量选项；没有长窗口质量/时延 A/B                          |
-| 独立审阅       | `integrated-review.md`                               | 冻结 114 文件，发现目标引用表无上限 P1，须修复并复验后交付                   |
+| 独立审阅       | `integrated-review.md`                               | 冻结 114 文件及两轮增量复核；P1/P2 均修复，最终无残余具体发现                |
 
 真实浏览器的两个回应分别表达“找一处安心生活、熟悉周围、收集食物”，以及“愿意同行，但不会服从不吃东西、硬闯危险地带的要求”。第二轮模型选择 follow 后，3.5秒连续 WASD 期间玩家位置从 `[0.5,58.6,0.5]` 到约 `[8.89,58.6,0.5]`，NPC 从 `[1.80,57,0.5]` 到约 `[9.54,57,0.5]`。这些位置来自 Authority/玩家快照，没有通过测试直接写身体位置。
 
@@ -50,3 +50,17 @@ Flash 私有 wire history 仅在认知服务内存中。服务重启或重连以
 4. World AI 再独立设计区域/聚居地目标与预算，复用个体事件/Action/存档合同，并保持全局信息与局部感知边界。
 
 长期 docs baseline 已更新：`living-world-alignment.md`、`living-npc-cognition.md` 与代码地图明确当前三层回路、框架/模型、协议归属和后续路线；历史 H1/H2 设计保留并指向现行决策，不重写历史证据。
+
+## 最终本地门禁
+
+源码候选 `5dc9c0f`：`pnpm verify:static` 通过，249个测试文件通过、2文件跳过，1223测试通过、4测试跳过；所有静态/路径/格式/类型检查完成。独立 `pnpm build` 同时构建 Web 与本机认知宿主。
+
+同候选最终共享 Harness/诊断+NPC 浏览器4/4通过（25.1秒）。旧浏览器20/20、资产2/2、近战1/1在冻结 `4fe7d32` 的独立工作目录通过；其后生产增量仅为新角色目标引用上限、非法发言原子性及伙伴CSS，已由受影响测试和最终4项浏览器覆盖。
+
+审阅P1修复见 `target-bound-fix.md`；新增非法发言原子拒绝先得到状态被修改的RED，修复后角色focused11/11通过。最终增量独立复核见 `final-recheck.md` 和 `target-retention-recheck.md`。
+
+最终复核补充：`5ee5b05` 修复满引用表受击时淘汰当前 follow 引用的问题。真实 `attackEntity` 回归先得到 `CHARACTER_TARGET_UNAVAILABLE` RED，共享可见/执行目标保留集合后12项角色测试通过；未重新观察，直接复用原引用重试。独立复核无残余具体 P0/P1/P2。受影响的两项 NPC 浏览器旅程再次2/2通过（11.9秒）。
+
+前置 Harness PR #25 的 `b1b41cd` 已在 CI run `34330619783` 全绿（静态、构建、Chromium）。本 NPC PR 以 `codex/developer-world-harness` 为 base，待人类合并 #25 后再调整到 main；未自动合并。
+
+最终类型检查发现可选参数被 closure 捕获时 TypeScript 不保留 `??=` 缩窄。`c48be63` 改为局部 `const retainedTargets`，不改变保留算法；全量250个测试文件/1224测试通过（4跳过），独立完整 typecheck 和 Web/Agent build 通过。该词法修正之后的完整静态命令再次记录至本地 release 日志，远端对最终提交重做相同门禁。
