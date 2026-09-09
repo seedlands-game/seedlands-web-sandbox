@@ -111,11 +111,48 @@ async function lockGameplayPointer(page: Page) {
   );
 }
 
+// 慢速 runner 按真实库存终态停止移动；不以固定墙钟推断已走到掉落物。
+async function itemCount(page: Page, itemId: string) {
+  const inventory = await command(page, { type: 'query-inventory' });
+  const slots = (inventory.data?.inventory as { slots: { itemId: string; count: number }[] }).slots;
+  return slots.reduce((count, slot) => count + (slot.itemId === itemId ? slot.count : 0), 0);
+}
+
+async function walkToDrop(page: Page, itemId: string, baselineCount: number) {
+  await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe('game');
+  await page.keyboard.down('KeyW');
+  try {
+    await page.waitForFunction(
+      async ({ wanted, before }) => {
+        const harness = window.__seedlandsHarness!;
+        const inventory = (await harness.executeGameplayCommand({ type: 'query-inventory' })) as CommandResult;
+        const slots = (inventory.data?.inventory as { slots: { itemId: string; count: number }[] } | undefined)?.slots;
+        if (slots && slots.reduce((count, slot) => count + (slot.itemId === wanted ? slot.count : 0), 0) > before)
+          return true;
+        const nearby = (await harness.executeGameplayCommand({ type: 'query-nearby', radius: 16 })) as CommandResult;
+        const entities = nearby.data?.entities as
+          { type: string; stack?: { itemId: string }; position: [number, number, number] }[] | undefined;
+        const drop = entities?.find((entity) => entity.type === 'world-item' && entity.stack?.itemId === wanted);
+        if (drop) {
+          const player = harness.snapshot().player;
+          harness.setView((Math.atan2(player[0] - drop.position[0], player[2] - drop.position[2]) * 180) / Math.PI, 0);
+        }
+        return false;
+      },
+      { wanted: itemId, before: baselineCount },
+      { timeout: 15_000, polling: 100 },
+    );
+  } finally {
+    await page.keyboard.up('KeyW');
+  }
+}
+
 test('木剑通过真实采集合成与输入战斗，拾取后保存重进', async ({ page }, info) => {
   test.setTimeout(90_000);
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await startHarnessWorld(page, 'wood-sword-journey');
+  const woodBefore = await itemCount(page, 'wood-block');
   let panel = await inventory(page);
   await expect(panel.getByRole('button', { name: '缺少材料 木剑', exact: true })).toBeDisabled();
   await closeInventory(page);
@@ -134,9 +171,7 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
       data: { voxel: 0 },
     });
   await page.mouse.up();
-  await page.keyboard.down('KeyW');
-  await page.waitForTimeout(600);
-  await page.keyboard.up('KeyW');
+  await walkToDrop(page, 'wood-block', woodBefore);
   panel = await inventory(page);
   await expect(panel.getByRole('gridcell', { name: '原木 1', exact: true })).toBeVisible();
   await panel.getByRole('button', { name: '合成 木板', exact: true }).click();
@@ -146,8 +181,14 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
   await closeInventory(page);
   await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
   await expect(page.locator('#combat-status')).toContainText('就绪');
-  await page.screenshot({ path: info.outputPath('wood-sword-equipped.png') });
-  const created = await command(page, { type: 'spawn-actor', archetype: 'night-stalker', position: [0.5, 57, -3.2] });
+  if (!process.env.CI) await page.screenshot({ path: info.outputPath('wood-sword-equipped.png') });
+  const stoneBefore = await itemCount(page, 'stone-block');
+  const playerBeforeCombat = (await snapshot(page))!.player;
+  const created = await command(page, {
+    type: 'spawn-actor',
+    archetype: 'night-stalker',
+    position: [playerBeforeCombat[0], 57, playerBeforeCombat[2] - 1.8],
+  });
   expect(created.success).toBe(true);
   const enemyId = (created.data?.entity as { id: string }).id;
   const enemy = page.locator(`[data-entity-id="${enemyId}"]`);
@@ -166,10 +207,10 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
     );
     await page.mouse.click(0, 0);
     if (attempt === 0) {
-      await page.screenshot({ path: info.outputPath('wood-sword-windup.png') });
+      if (!process.env.CI) await page.screenshot({ path: info.outputPath('wood-sword-windup.png') });
       await page.waitForTimeout(220);
       await page.mouse.click(0, 0); // 在权威窗口提交一次第二段输入。
-      await page.screenshot({ path: info.outputPath('wood-sword-followup.png') });
+      if (!process.env.CI) await page.screenshot({ path: info.outputPath('wood-sword-followup.png') });
     }
     await page.waitForTimeout(650); // 真实动作恢复；终态用权威实体和库存读回断言。
   }
@@ -180,14 +221,12 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
       data: { entity: null },
     });
   await expect(page.getByRole('button', { name: '复活', exact: true })).toBeHidden();
-  await page.keyboard.down('KeyW');
-  await page.waitForTimeout(500);
-  await page.keyboard.up('KeyW');
+  await walkToDrop(page, 'stone-block', stoneBefore);
   panel = await inventory(page);
   await expect(panel.getByRole('gridcell', { name: '石块 1', exact: true })).toBeVisible();
   await expect(panel.getByRole('gridcell', { name: '木剑 1', exact: true })).toBeVisible();
   await page.evaluate(() => window.__seedlandsHarness!.flushSave());
-  await page.screenshot({ path: info.outputPath('wood-sword-loot.png') });
+  if (!process.env.CI) await page.screenshot({ path: info.outputPath('wood-sword-loot.png') });
   await startHarnessWorld(page, 'wood-sword-journey');
   panel = await inventory(page);
   await expect(panel.getByRole('gridcell', { name: '木剑 1', exact: true })).toBeVisible();

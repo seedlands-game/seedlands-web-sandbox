@@ -1,0 +1,79 @@
+{
+  "baseSha": "01bab28ace506685f39c1d4a86fec541cbbf2f1b",
+  "node": "v24.20.0",
+  "os": "macOS-26.5.2-arm64-arm-64bit",
+  "arch": "arm64",
+  "vitestConfigSha256": "2715deb8c7e3e42d362070af83815d5e4790e8b40d364808813f3bd7a1e9bd60",
+  "lockfileSha256": "682970c55b4d1bffca8041417860c8e9dfa89ff515805553007887c93593293c",
+  "maxWorkers": 1,
+  "coverage": "v8 unchanged",
+  "samples": [
+    {
+      "sample": "A1",
+      "durationSeconds": 97.55,
+      "testsPassed": 11,
+      "filesPassed": 5,
+      "worldLinesPercent": 66.45,
+      "exitCode": 1,
+      "exitReason": "partial corpus below unchanged global 80% line threshold"
+    },
+    {
+      "sample": "A2",
+      "durationSeconds": 97.32,
+      "testsPassed": 11,
+      "filesPassed": 5,
+      "worldLinesPercent": 66.45,
+      "exitCode": 1,
+      "exitReason": "partial corpus below unchanged global 80% line threshold"
+    },
+    {
+      "sample": "B1",
+      "durationSeconds": 21.9,
+      "testsPassed": 11,
+      "filesPassed": 5,
+      "worldLinesPercent": 66.45,
+      "exitCode": 1,
+      "exitReason": "partial corpus below unchanged global 80% line threshold"
+    },
+    {
+      "sample": "A3",
+      "durationSeconds": 90.24,
+      "testsPassed": 11,
+      "filesPassed": 5,
+      "worldLinesPercent": 66.45,
+      "exitCode": 1,
+      "exitReason": "partial corpus below unchanged global 80% line threshold"
+    },
+    {
+      "sample": "B2",
+      "durationSeconds": 21.08,
+      "testsPassed": 11,
+      "filesPassed": 5,
+      "worldLinesPercent": 66.45,
+      "exitCode": 1,
+      "exitReason": "partial corpus below unchanged global 80% line threshold"
+    }
+  ],
+  "files": {
+    "tests/world/wasm-mesh-equivalence.test.ts": {
+      "controlSha256": "76ace4c4f46cac367b8785bef77149d42adc1518986cf900e8de8336d7b9d0d5",
+      "candidateSha256": "3d83b797b3a9aaa65e2c67c7bb9fe724723d01e17a3bece6e7258c6780d960de"
+    },
+    "tests/server/wasm-fluid-logic-equivalence.test.ts": {
+      "controlSha256": "56104da66434fed6e2a660d957cd55762da11071944d3a8c30924a81cc226271",
+      "candidateSha256": "2b605f18eaa600e594e30c9cf094d139d870f9ab07e405377912130a2d2ce7cb"
+    },
+    "tests/world/data-plane-rust.test.ts": {
+      "controlSha256": "3e7374aa1671df17efd8db97a35893814e79527bb03d95c8114c6599b6cac1cd",
+      "candidateSha256": "9ab3f59625eb8764b0a4b17297d5cd1eb0263ef0ec61030be3482af7c3cd6705"
+    },
+    "tests/world/wasm-world-kernel-equivalence.test.ts": {
+      "controlSha256": "36b1c151c25863862fd318474094d701969e1a3ee028abc34bf48ef814e30616",
+      "candidateSha256": "64152910c1fd4596e27a80aea376587739a837f7d5faa546c623075130da8ffa"
+    },
+    "tests/world/wasm-halo-equivalence.test.ts": {
+      "controlSha256": "ddafead6ab04f7418514d45cb31cdd1311c1f5fceeb1d6cec4ce523940608bc0",
+      "candidateSha256": "a3c0fe5d71c6d0413ff569beb1c1433e8a6718239d454c8b638e9ea987a53460"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { deepStrictEqual } from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { expect, it } from 'vitest';
 import { createKernelMemory } from '../../apps/web/src/compute/kernel-memory';
@@ -14,18 +15,18 @@ it('Rust core artifact matches exact chunk and codec production outputs with no 
   for (const input of makeWorkloadCorpus('w14')) {
     if (input.kind !== 'w14') throw new Error('corpus');
     const before = structuredClone(input.record);
-    expect(encodeStoredChunkRecord(codec, input.record)).toEqual(createStoredChunkRecord(input.record));
-    expect(input.record).toEqual(before);
+    deepStrictEqual(encodeStoredChunkRecord(codec, input.record), createStoredChunkRecord(input.record));
+    deepStrictEqual(input.record, before);
     expect(memory.failed).toBe(false);
   }
   for (const input of makeWorkloadCorpus('w03')) {
     if (input.kind !== 'w03') throw new Error('corpus');
-    expect(createHaloKernel(memory)(input.options)).toEqual(createHaloStaged(input.options));
+    deepStrictEqual(createHaloKernel(memory)(input.options), createHaloStaged(input.options));
     expect(memory.failed).toBe(false);
   }
   for (const input of makeWorkloadCorpus('w02')) {
     if (input.kind !== 'w02') throw new Error('corpus');
-    expect(createChunkKernel(memory)(...input.args)).toEqual(makeChunkStaged(...input.args));
+    deepStrictEqual(createChunkKernel(memory)(...input.args), makeChunkStaged(...input.args));
     expect(memory.failed).toBe(false);
   }
 }, 120_000);

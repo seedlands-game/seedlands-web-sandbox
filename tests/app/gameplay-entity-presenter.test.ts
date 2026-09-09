@@ -124,6 +124,30 @@ describe('玩法实体的独立表现时钟', () => {
     expect(root.findByName('gameplay:drop')).toBeNull();
   });
 
+  it('仅在动态投影实体的表现发生变化时提升阴影 revision', () => {
+    const root = new pc.Entity('root');
+    const presenter = new GameplayEntityPresenter({ root } as pc.Application);
+
+    expect(presenter.shadowCasters).toEqual([]);
+    reconcileFrame(presenter, [item(1)], 0);
+    const created = presenter.shadowCasters[0]!.revision;
+    expect(created).toBeGreaterThan(0);
+
+    reconcileFrame(presenter, [item(1)], 0);
+    expect(presenter.shadowCasters[0]!.revision).toBe(created);
+
+    reconcileFrame(presenter, [item(1)], 1 / 60);
+    const rotated = presenter.shadowCasters[0]!.revision;
+    expect(rotated).toBeGreaterThan(created);
+
+    reconcileFrame(presenter, [item(0)], 1 / 60);
+    const moved = presenter.shadowCasters[0]!.revision;
+    expect(moved).toBeGreaterThan(rotated);
+
+    reconcileFrame(presenter, [], 1 / 60);
+    expect(presenter.shadowCasters).toEqual([]);
+  });
+
   it('非法或负表现步长不污染节点，后续合法帧仍可推进', () => {
     const root = new pc.Entity('root');
     const presenter = new GameplayEntityPresenter({ root } as pc.Application);

@@ -48,6 +48,7 @@ export type HarnessSnapshot = {
       lastSaveError: string | null;
     } | null;
   };
+  trajectory: readonly { physicsTick: number; activeTimeMs: number; position: [number, number, number] }[];
   generatorVersion: number;
   renderPipeline: {
     drawUnit: 'chunk-render-category';

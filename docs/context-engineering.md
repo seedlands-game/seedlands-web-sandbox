@@ -4,4 +4,6 @@
 
 当前成熟候选是 **Seedlands Harness、多层证据与性能诊断**：它有固定脚本、浏览器/Harness 关联 run id、证据不能互相替代的边界，以及多次出现的错误样本（例如把历史浏览器结果当作当前证据、把 readback 采集时间当作帧性能）。因此项目内 skill 位于 `.agents/skills/seedlands-evidence/SKILL.md`；它渐进披露并链接现有脚本和本页，不复制通用 Vitest、Playwright 或 Git 教程。
 
+该 skill 的参考文档与可执行入口通过包内 `references/`、`scripts/` 的相对软链接暴露；源文件仍在仓库单点维护。只纳入所需文档、入口及本地 helper，维护时检查链接、依赖解析和真实入口行为。完整 checkout 是其运行上下文；独立分发需解引用资源并携带运行依赖。
+
 长期目标、普通源码导航和单次方案通常留在 docs 足够，不晋升 skill。每个 change 的 Delivery Snapshot 写明本页或其他 baseline 是否更新及理由。

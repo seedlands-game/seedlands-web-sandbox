@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   LIGHTING_QUALITY_BUDGETS,
+  localShadowCasterSignature,
   localShadowNeedsUpdate,
   reconcileLocalLightSlots,
   selectNearestLanterns,
@@ -71,8 +72,64 @@ describe('高级光影预算', () => {
       2,
     );
     expect(second).toEqual(first);
-    expect(localShadowNeedsUpdate({ previousWorldRevision: 4, worldRevision: 4, slotsChanged: false })).toBe(false);
-    expect(localShadowNeedsUpdate({ previousWorldRevision: 4, worldRevision: 5, slotsChanged: false })).toBe(true);
-    expect(localShadowNeedsUpdate({ previousWorldRevision: 5, worldRevision: 5, slotsChanged: true })).toBe(true);
+    expect(
+      localShadowNeedsUpdate({
+        previousWorldRevision: 4,
+        worldRevision: 4,
+        previousCasterSignature: '[["drop",7]]',
+        casterSignature: '[["drop",7]]',
+        slotsChanged: false,
+      }),
+    ).toBe(false);
+    expect(
+      localShadowNeedsUpdate({
+        previousWorldRevision: 4,
+        worldRevision: 5,
+        previousCasterSignature: '[["drop",7]]',
+        casterSignature: '[["drop",7]]',
+        slotsChanged: false,
+      }),
+    ).toBe(true);
+    expect(
+      localShadowNeedsUpdate({
+        previousWorldRevision: 5,
+        worldRevision: 5,
+        previousCasterSignature: '[["drop",7]]',
+        casterSignature: '[["drop",7]]',
+        slotsChanged: true,
+      }),
+    ).toBe(true);
+    expect(
+      localShadowNeedsUpdate({
+        previousWorldRevision: 5,
+        worldRevision: 5,
+        previousCasterSignature: '[["drop",7]]',
+        casterSignature: '[["drop",8]]',
+        slotsChanged: false,
+      }),
+    ).toBe(true);
+  });
+
+  it('最后一个投影实体移除时即使体素与灯槽未变也必须清除旧阴影', () => {
+    expect(
+      localShadowNeedsUpdate({
+        previousWorldRevision: 5,
+        worldRevision: 5,
+        previousCasterSignature: '[["drop",7]]',
+        casterSignature: '[]',
+        slotsChanged: false,
+      }),
+    ).toBe(true);
+  });
+
+  it('仅把可能进入有阴影局部灯范围的动态实体纳入失效签名', () => {
+    const slots = [[0, 10, 0]] as const;
+    expect(
+      localShadowCasterSignature(slots, 1, [
+        { id: 'near', revision: 3, position: [1, 10, 1] },
+        { id: 'far', revision: 9, position: [40, 10, 40] },
+      ]),
+    ).toBe('[["near",3]]');
+    expect(localShadowCasterSignature(slots, 0, [{ id: 'near', revision: 4, position: [1, 10, 1] }])).toBe('[]');
   });
 });
