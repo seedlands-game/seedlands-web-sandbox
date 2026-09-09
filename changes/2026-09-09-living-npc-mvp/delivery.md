@@ -140,3 +140,7 @@ CI run34357206570的Static/build通过，但历史近战首轮5s就绪断言失�
 第九轮暂停边界实现见`round9-pause-fix.md`：Game→Companion→Bridge在同一次暂停切换同步通知，迟到intent回WORLD_PAUSED且不触达Authority；memory仍走正常提交/回执。2项RED后3文件9测试GREEN，含首次暂停连接、恢复和压缩对账。Root另扩展真实Browser模型请求挂起→玩家暂停→AbortSignal→迟到完成→目标/发言不变→恢复的旅程，待整合执行。
 
 第九轮世界修复见`round9-world-fix.md`：Logic读取由Character owner派生的持续目标，避险/已跟踪移动优先，非forage等待状态hold；forage保留已有探索。存档派生字段不作授权状态，restore重新构建。focused5文件27测试GREEN；flat fixture只证明到达保持及新规划/输入接纳，其身体续跟缺口由真实Browser补齐，不能把wish当运动。Root实际Browser两项18.7秒通过：到达无Action后跨90 Physics ticks保持（水平位移<0.02），真实WASD玩家移动>4格后NPC身体移动>1格且靠近玩家；在途模型暂停/迟到完成/恢复也通过。最终再次运行会显式保存JSON文件，避免line reporter丢失内存附件。长期docs baseline已补持续目标执行权和即时暂停/记忆对账边界，产品路线与模型预算不变。
+
+第九轮最终生产冻结`a63398d`：完整static通过（262文件、1289测试通过、4跳过），独立Web/Agent构建通过。NPC2/2（18.7秒）、共享Harness/诊断2/2（8.8秒）、近战1/1（10.3秒）通过。后续套件覆盖了test-results，因此单独再次运行NPC2/2并立即保存JSON，未调用真实模型。实际身体记录从tick391到504保持同一位置；玩家随后前进8.42格，NPC身体从[1.95,57,0.5]到[0.535,57,-1.975]。暂停回执记录abort=true，迟到完成前后revision=3、目标和发言一致。证据见evidence/round9-*；这证明当前纵向切片的持续行为，不等价于长期人格质量或所有玩家能力。
+
+`round9-recheck.md`独立静态复核31个冻结差异文件，无新具体P0/P1/P2。其指出的冻结树缺少新身体附件问题，已由本交付提交补入刚完成的实际Browser JSON与所有最终门禁日志。生产内容仍为a63398d，不因补证据重跑模型。最新远端CI与自动审核以PR最终SHA为准，未自动合并。
