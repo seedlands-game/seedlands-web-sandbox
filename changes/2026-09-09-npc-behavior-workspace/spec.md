@@ -66,3 +66,11 @@ H1回归暴露原始world checkpoint恢复后，伙伴回调重复设置应用�
 ## Delivery Snapshot
 
 实现及当前本地证据见[交付记录](delivery.md)。长期baseline已更新为单树持续生活、持久工作区与flash/pro网关；旧单目标合同明确被新合同替代，不修改旧证据来伪装通过。当前change用例在CI显式执行，尚未提炼为tests/e2e长期基线。PR与人类体验审核状态以交付记录为准。
+
+## CI首次回执与fixture预算修正
+
+PR #29 首次CI 34392519474的静态与构建通过，21项浏览器基础回归中loading用例首轮因总30秒超时、重试5.17秒通过，严格flaky门禁正确拒绝。独立分诊确认总预算截断HUD单独声明的30秒；只将该用例总预算设50秒（资源ready15秒+HUD30秒+交互余量），不改HUD期限与可见性/Chunk断言，不宣称已证明首轮慢启动的唯一原因。当前change记录这次历史fixture适配，旧失败证据保留。
+
+本地完整回归复现同一失败，并获得首轮trace：世界初始化后再次导航到同URL、Vite连接日志出现两次，页面回到开始菜单。网络中新增mistreevous预打包请求。新增冷缓存受控对照：A为当前Vite配置+--force，B只增加core嵌套mistreevous的optimizeDeps.include；同loading seed/画质/浏览器/30秒HUD期限，检查首次进入世界不刷新且HUD可见。此为功能稳定性对照，不宣称启动性能收益。
+
+冷缓存对照已通过：A补预打包触发reloading且导航2次；B预声明依赖后导航1次且首次加载通过。配置仅作用开发依赖优化，采用[Vite官方include合同](https://vite.dev/config/dep-optimization-options#optimizedeps-include)；生产构建独立回归。全流程失败与重试证据不删除。

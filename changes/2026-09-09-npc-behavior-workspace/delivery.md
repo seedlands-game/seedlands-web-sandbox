@@ -52,3 +52,11 @@ PG恢复保证认知数据整批提交；世界与PG仍是两个owner，通过�
 开发机可玩环境：`http://127.0.0.1:4319/`；本机思考服务`ws://127.0.0.1:8799/`。本地配对码保存在仅当前用户可读的`/tmp/seedlands-npc-playable/connection.json`，不提交仓库。PG使用独立持久卷；启动检查只验证服务可用，没有开启世界或继续付费推理。
 
 长期docs baseline已更新：`docs/npc-behavior-and-memory.md`、代码地图、目录规范。Node Dedicated冻结保持不变；LOD、离线追赶、World AI与玩法插件不在本交付范围。用户体验中的“活人感”仍需后续真实游玩反馈，本记录证明具体行为及后果，不将架构完成等同于主观体验完成。
+
+## PR交接
+
+[PR #29](https://github.com/seedlands-game/seedlands-web-sandbox/pull/29) 替代旧draft #26。首次run34392519474：Static verification与Production build通过；Chromium基础回归20通过、1flaky，按failOnFlakyTests拒绝。经独立分诊后修正loading fixture的总预算50秒，保留HUD30秒期限。最终远端状态以PR checks和交接说明为准；本文记录本地冻结交付和首次CI事实，不将静态文档用作CI实时状态源。
+
+首次分诊只确认了总预算冲突，后续本地完整回归取得首轮trace并定位额外根因：延迟发现mistreevous令Vite整页刷新，世界已创建但浏览器返回开始菜单。冷缓存A/B固定总50秒/HUD30秒：A记录2次文档请求和明确的new dependencies/reloading日志并失败；B只增加`@seedlands/game-core > mistreevous`预打包，1次文档请求、无刷新并通过。结果见[冷启动功能对照](experiments/vite-cold-start/results.json)。保留50秒预算以正确容纳setup，实际刷新缺陷由Vite配置修复；不将预算调整描述为根因修复，不宣称性能收益。
+
+修复后的冷缓存完整`pnpm test:e2e:regression` 21/21通过（43.1秒功能回归）；Vite配置与用例ESLint、完整typecheck、`pnpm build`分别通过。新必要CI在修复提交上重新执行。

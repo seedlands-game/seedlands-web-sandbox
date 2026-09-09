@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "id": "npc-ci-failure-triage",
+  "role": "CI failure triage",
+  "workType": "validation",
+  "goal": "Read exact CI34392519474 SHA97f6b3e failure /tmp/npc-ci-failed-34392519474.log and downloaded /tmp/npc-ci-regression-34392519474. Static/build passed, baseline loading UI test first attempt hits overall30000ms timeout while HUD await requests30000ms after asset readiness setup, retry passed. Determine concrete cause supported by artifacts, discriminate actual bootstrap defect vs fixture total budget; inspect loading-performance.spec.ts. Recommend minimal valid correction without hiding flakiness or reducing HUD deadline. Output /tmp/npc-ci-triage.md then stop. No source/Git/services/provider/network writes; read-only artifacts. Root handles implementation and rerun.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-ci-triage.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "ci-triage",
+      "check": "Minimal failed evidence and bounded justified next step",
+      "evidence": "/tmp/npc-ci-triage.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.25
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

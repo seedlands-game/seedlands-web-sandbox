@@ -56,6 +56,7 @@ test('资源预取失败时保留可读的重试入口', async ({ page }) => {
 });
 
 test('世界初始化期间显示专用 loading 菜单', async ({ page }) => {
+  test.setTimeout(50_000); // 15s asset readiness + 30s HUD deadline + bounded interaction overhead.
   await page.goto('/?harness=1');
   const enter = page.getByRole('button', { name: '进入世界', exact: true });
   await expect(enter).toBeEnabled({ timeout: 15_000 });

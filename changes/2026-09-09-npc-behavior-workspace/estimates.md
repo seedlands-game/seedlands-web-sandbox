@@ -44,3 +44,5 @@ Factory后续两项拒绝已归因：一次后端不支持forced tool_choice（4
 真实调用累计8次Flash生成、5次Pro生成，另有2次Pro gateway请求以400拒绝（一次后端拒绝forced tool choice，一次网关拒绝未允许参数且provider调用0）。成功Factory一次Pro：输入2008、输出4707、合计6715 tokens，其中reasoning3981；未获得其余调用完整账单，实际credits/API费用仍unknown，不以token替代计费。实际生成次数未超调整后12Flash+6Pro上限。最终core回归约0.35 agent小时、最后core独立复核分配最多0.5小时，均计入原79.2共享上限。全任务精确agent工时与账户归因不可获取；不把跨任务共享额度差值当作本任务费用。
 
 最后core审阅回填约0.6 agent小时，超过该子项0.5小时估计；超额0.1小时计入父共享缓冲，不隐去。容量与新生对话修复复核另分配最多0.35小时，仍计入原共享预算。
+
+CI分诊实际0.25 agent小时；后续本机Vite冷缓存A/B及组合浏览器验证无真实模型调用。首次CI静态/构建通过，loading flaky保留；修正后重新执行必要CI，不增加模型费用。
