@@ -1,5 +1,11 @@
 export type SchedulerTrigger = Readonly<{ kind: 'event' | 'fallback'; reasons: readonly string[] }>;
 
+export type SchedulerDispatch = Readonly<{
+  dispatched: boolean;
+  completion: Promise<void>;
+  retryAfterMs?: number;
+}>;
+
 export type SchedulerClock = Readonly<{
   now: () => number;
   setTimeout: (callback: () => void, delayMs: number) => ReturnType<typeof setTimeout>;
@@ -10,7 +16,7 @@ export type CognitionSchedulerOptions = Readonly<{
   fallbackSeconds?: number;
   debounceMs?: number;
   clock?: SchedulerClock;
-  dispatch: (trigger: SchedulerTrigger) => Readonly<{ dispatched: boolean; completion: Promise<void> }>;
+  dispatch: (trigger: SchedulerTrigger) => SchedulerDispatch;
 }>;
 
 const systemClock: SchedulerClock = {
@@ -116,11 +122,23 @@ export class CognitionScheduler {
     // Reset at the exact point the owner confirms provider work started, before awaiting its completion.
     if (dispatch.dispatched) this.dueAt = now + this.fallbackMs;
     else if (fallbackDue) this.dueAt = now + this.fallbackMs;
+    // A transport backoff postpones an event; it must not consume the wakeup.
+    const retryAfterMs = dispatch.retryAfterMs;
+    if (
+      eventDue &&
+      !dispatch.dispatched &&
+      retryAfterMs !== undefined &&
+      Number.isFinite(retryAfterMs) &&
+      retryAfterMs > 0
+    ) {
+      for (const reason of reasons) this.pendingEventReasons.add(reason);
+      this.debounceDueAt = now + retryAfterMs;
+    }
     try {
       await dispatch.completion;
     } finally {
       this.inFlight = false;
-      if (this.pendingEventReasons.size) this.debounceDueAt = this.clock.now() + this.debounceMs;
+      if (this.pendingEventReasons.size) this.debounceDueAt ??= this.clock.now() + this.debounceMs;
       this.scheduleNext();
     }
   }

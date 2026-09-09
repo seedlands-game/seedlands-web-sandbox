@@ -50,4 +50,34 @@ describe('CognitionScheduler', () => {
     expect(dispatch).toHaveBeenCalledTimes(2);
     scheduler.dispose();
   });
+
+  it('retains and coalesces postponed reasons without retrying early, and respects pause/dispose', async () => {
+    const dispatch = vi
+      .fn()
+      .mockReturnValueOnce({ dispatched: false, completion: Promise.resolve(), retryAfterMs: 1000 })
+      .mockReturnValue({ dispatched: true, completion: Promise.resolve() });
+    const scheduler = new CognitionScheduler({ fallbackSeconds: 60, debounceMs: 10, dispatch });
+    scheduler.notifyEvent('dialogue');
+    await vi.advanceTimersByTimeAsync(10);
+    scheduler.notifyEvent('attacked');
+    scheduler.notifyEvent('dialogue');
+    await vi.advanceTimersByTimeAsync(999);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    scheduler.pause();
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    scheduler.resume();
+    await vi.advanceTimersByTimeAsync(10);
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch).toHaveBeenLastCalledWith({ kind: 'event', reasons: ['dialogue', 'attacked'] });
+    await vi.advanceTimersByTimeAsync(59_999);
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(dispatch).toHaveBeenLastCalledWith({ kind: 'fallback', reasons: [] });
+    scheduler.notifyEvent('dialogue');
+    scheduler.dispose();
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(dispatch).toHaveBeenCalledTimes(3);
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
