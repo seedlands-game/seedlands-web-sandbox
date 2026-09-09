@@ -1,0 +1,86 @@
+10:29:32 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/character-target-namespace.test.ts (3 tests | 3 failed) 377ms
+     × rejects a stale entity reference when only a same-id POI remains visible 150ms
+     × ends an ongoing follow when the entity leaves visibility but a same-id POI remains 142ms
+     × rejects POI references as follow goals without mutating the character 84ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/character-target-namespace.test.ts > character target namespaces > rejects a stale entity reference when only a same-id POI remains visible
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/server/character-target-namespace.test.ts:45:7
+     43|         goal: { kind: 'follow', target },
+     44|       }),
+     45|     ).toThrow(/CHARACTER_TARGET_UNAVAILABLE/);
+       |       ^
+     46|     expect(server.character({ kind: 'inspect', entityId })).toEqual(be…
+     47|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/server/character-target-namespace.test.ts > character target namespaces > ends an ongoing follow when the entity leaves visibility but a same-id POI remains
+AssertionError: expected { kind: 'state', character: { …(12) } } to match object { kind: 'state', character: { …(1) } }
+(19 matching properties omitted from actual)
+
+- Expected
++ Received
+
+@@ -2,11 +2,11 @@
+    "character": {
+      "currentGoal": {
+        "goal": {
+          "kind": "follow",
+        },
+-       "reason": "target-unavailable",
++       "reason": "path-unreachable",
+        "status": "failed",
+      },
+    },
+    "kind": "state",
+  }
+
+ ❯ tests/server/character-target-namespace.test.ts:65:61
+     63|     server.advanceGameplayRules(0.1);
+     64|
+     65|     expect(server.character({ kind: 'inspect', entityId })).toMatchObj…
+       |                                                             ^
+     66|       kind: 'state',
+     67|       character: {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/server/character-target-namespace.test.ts > character target namespaces > rejects POI references as follow goals without mutating the character
+AssertionError: expected [Function] to throw error matching /Character follow target is invalid/ but got 'CHARACTER_TARGET_UNAVAILABLE: Charact…'
+
+- Expected:
+/Character follow target is invalid/
+
++ Received:
+"CHARACTER_TARGET_UNAVAILABLE: Character target is unavailable."
+
+ ❯ tests/server/character-target-namespace.test.ts:91:7
+     89|         goal: { kind: 'follow', target: poi },
+     90|       }),
+     91|     ).toThrow(/Character follow target is invalid/);
+       |       ^
+     92|     expect(server.character({ kind: 'inspect', entityId })).toEqual(be…
+     93|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  22:29:32
+   Duration  683ms (transform 201ms, setup 0ms, import 241ms, tests 377ms, environment 0ms)
+

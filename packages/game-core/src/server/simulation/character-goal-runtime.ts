@@ -15,7 +15,7 @@ type Callbacks = Readonly<{
     fields?: Pick<CharacterEvent, 'text' | 'target' | 'reason'>,
   ) => CharacterEvent;
   reference: (record: CharacterRecord, kind: CharacterTargetBinding['kind'], targetId: string) => CharacterTargetRef;
-  isVisible: (record: CharacterRecord, targetId: string) => boolean;
+  isVisible: (record: CharacterRecord, kind: CharacterTargetBinding['kind'], targetId: string) => boolean;
   requireEntity: (entityId: string) => GameplayEntity;
 }>;
 
@@ -102,7 +102,8 @@ export class CharacterGoalRuntime {
 
   private advanceFollow(record: CharacterRecord, entity: GameplayEntity, seconds: number): void {
     const target = record.executionTargetId ? this.options.entities.get(record.executionTargetId) : null;
-    if (!target || !this.callbacks.isVisible(record, target.id)) return this.fail(record, 'target-unavailable', true);
+    if (!target || !this.callbacks.isVisible(record, 'entity', target.id))
+      return this.fail(record, 'target-unavailable', true);
     record.refreshSeconds += seconds;
     if (distance(entity.position, target.position) <= 1.5) {
       const action = record.actionId ? this.options.action(record.actionId) : null;
