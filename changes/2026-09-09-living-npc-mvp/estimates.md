@@ -35,3 +35,5 @@ GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，li
 第六轮容量预检继续在原共享工时池内完成，两次独立窄复核成本见对应报告；最终1255测试与独立build通过。未新增provider、购买或reset；任务级实际credits仍unknown。
 
 第七轮Wire实现约0.28 agent小时，原共享池内；Root处理checkpoint联结。无真实provider调用，模型/API费用新增0，Codex任务级credits仍unknown。
+
+第七轮独立复核约0.22 agent小时，最终窄复核见round7-final-recheck.md。Root补连续分页与零号事件回归；static独立执行1269测试通过。仍在原共享池，无新增真实provider调用、购买或reset，实际任务credits不可计量。
