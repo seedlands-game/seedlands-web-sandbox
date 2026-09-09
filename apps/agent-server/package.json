@@ -6,10 +6,10 @@
   "exports": {
     ".": "./src/index.ts",
     "./*": "./src/*.ts",
-    "./websocket-host": "./src/node/websocket-host.ts"
+    "./resident-host": "./src/node/resident-host.ts"
   },
   "scripts": {
-    "build": "pnpm exec esbuild src/node/main.ts --bundle --platform=node --format=esm --external:@langchain/* --external:ws --outfile=dist/main.js",
+    "build": "pnpm exec esbuild src/node/main.ts --bundle --platform=node --format=esm --external:@langchain/* --external:ws --external:pg --external:langchain --external:deepagents --outfile=dist/main.js",
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "pnpm --dir ../.. exec vitest run tests/agent-server"

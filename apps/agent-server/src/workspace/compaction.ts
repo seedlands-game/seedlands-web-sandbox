@@ -55,7 +55,7 @@ export async function freezeWorkspace(
   schema: string,
   binding: WorkspaceBinding,
   readMemory: () => Promise<WorkspaceDocument>,
-  readJournal: (through: number) => Promise<readonly JournalMessage[]>,
+  readJournal: (windowId: string, through: number) => Promise<readonly JournalMessage[]>,
 ): Promise<FrozenCompaction> {
   const namespace = createWorkspaceNamespace(binding);
   const client = await pool.connect();
@@ -94,7 +94,7 @@ export async function freezeWorkspace(
   } finally {
     client.release();
   }
-  const [memory, messages] = await Promise.all([readMemory(), readJournal(through)]);
+  const [memory, messages] = await Promise.all([readMemory(), readJournal(state.current_window_id, through)]);
   return {
     windowId: state.current_window_id,
     memoryRevision: state.memory_revision,

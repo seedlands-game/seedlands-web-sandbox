@@ -4,6 +4,11 @@ export const CONTEXT_TOKEN_BUDGET = 128_000;
 export const CONTEXT_SOFT_TOKEN_LIMIT = 112_000;
 export const MEMORY_TOKEN_LIMIT = 4_000;
 export const MEMORY_UTF8_LIMIT = 16 * 1024;
+export const JOURNAL_MESSAGE_UTF8_LIMIT = 512 * 1024;
+export const JOURNAL_WINDOW_UTF8_LIMIT = 2 * 1024 * 1024;
+export const JOURNAL_WINDOW_MESSAGE_LIMIT = 4_096;
+export const JOURNAL_READ_UTF8_LIMIT = JOURNAL_WINDOW_UTF8_LIMIT;
+export const JOURNAL_READ_ROW_LIMIT = JOURNAL_WINDOW_MESSAGE_LIMIT;
 
 export function assessContextBudget(estimatedTokens: number): 'ready' | 'compact' | 'suspend' {
   if (!Number.isFinite(estimatedTokens) || estimatedTokens < 0) throw new Error('invalid context token estimate');

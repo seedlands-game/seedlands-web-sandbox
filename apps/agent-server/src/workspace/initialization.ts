@@ -28,7 +28,7 @@ export async function initializeWorkspace(
   )
     throw new Error('memory token estimate exceeds limit');
   if (memoryBytes > MEMORY_UTF8_LIMIT) throw new Error('memory UTF-8 size exceeds limit');
-  if (new TextEncoder().encode(input.agent).byteLength > 8 * 1024) throw new Error('AGENT UTF-8 size exceeds limit');
+  if (new TextEncoder().encode(input.agent).byteLength > 32 * 1024) throw new Error('AGENT UTF-8 size exceeds limit');
   if (new TextEncoder().encode(input.soul).byteLength > 4 * 1024) throw new Error('SOUL UTF-8 size exceeds limit');
   const trusted = normalizeWorkspaceBinding(binding);
   const namespace = createWorkspaceNamespace(trusted);

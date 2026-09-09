@@ -1,27 +1,53 @@
-# 本机角色认知宿主
+# 本机 NPC 认知服务
 
-`@seedlands/agent-server` 是浏览器单角色控制器的本机 Node 宿主。它持有模型 wire history、调度、会话预算与待确认草稿，不持有或直接修改游戏世界。浏览器 Authority 仍会验证每个 `intent` 和 `memory` 请求并返回回执。
+浏览器 Authority 持续执行每个角色唯一的行为树。此服务只保存人物文档、标准模型会话、事件游标和记忆；通过受限世界工具观察、说话及提议整棵树。关闭服务后身体仍执行当前树。
+
+当前支持一个本机世界连接、最多三个活动角色。每个角色独立 PG namespace、Agent 与调度；真实供应商与凭据只进入模型网关。多租户、云部署与 World AI 不在此版。
 
 ## 启动
 
+先准备本机 PostgreSQL（示例密码仅适用于本地开发）：
+
 ```sh
-corepack pnpm --filter @seedlands/agent-server build
-DEEPSEEK_API_KEY=... corepack pnpm --filter @seedlands/agent-server start
+docker run --name seedlands-cognition-pg -d \
+  -e POSTGRES_PASSWORD=local-development-only \
+  -e POSTGRES_DB=seedlands \
+  -p 127.0.0.1:54329:5432 \
+  -v seedlands-cognition-pg:/var/lib/postgresql/data postgres:16-alpine
 ```
 
-服务只监听显式 loopback 地址，CLI 默认使用 `127.0.0.1:8787`；`AGENT_SERVER_PORT=0` 可选择随机空闲端口。启动后 stdout 输出一行 JSON，包含 `url`、临时 `pairingToken` 和模型可用状态，不包含模型密钥。浏览器必须把 token 放在首个 `hello` 帧中；不要把 token 放进 URL。允许来源通过逗号分隔的 `SEEDLANDS_ALLOWED_ORIGINS` 配置，默认是本地 Vite 的 `localhost:5173` 和 `127.0.0.1:5173`。
+已有同名容器或端口时复用自己确认的实例，或选择其他名称/端口；不要覆盖现有数据库。PG volume 保存记忆，删除它会删除本地人物会话。
 
-凭据按以下顺序解析，不读取 `.env`：
+按[网关说明](../../scripts/model-gateway/README.md)启动网关。它可以复用同一环境里的 `MIDSCENE_MODEL_API_KEY` 与 `MIDSCENE_MODEL_BASE_URL`；必须同时提供两者，不读取 `.env`。供应商密钥不传给浏览器或认知服务。
 
-1. `DEEPSEEK_API_KEY`，端点为 `DEEPSEEK_BASE_URL` 或官方默认端点。
-2. `MIDSCENE_MODEL_API_KEY`，仅在同时存在 `MIDSCENE_MODEL_BASE_URL` 时复用，避免把代理密钥发往不同端点。
+在另一个终端启动认知服务（下列网关凭据是你为本机网关设置的凭据）：
 
-日常决定固定使用文本输入的 `deepseek-v4-flash-vision-exp`；`deepseek-v4-pro` 只用于上下文压缩。Flash 历史保留 provider reasoning 以满足后续调用的协议要求，但 reasoning 不进入 Pro 压缩输入、世界记忆、普通日志或浏览器帧。压缩前，公开历史会转换成单个带来源与可信度标签的用户数据文档，不把 Flash 的原生 assistant/tool 协议轮次交给 Pro 续写；Pro 若返回工具调用或控制标记，候选摘要会被拒绝。
+```sh
+export SEEDLANDS_COGNITION_DATABASE_URL='postgresql://postgres:local-development-only@127.0.0.1:54329/seedlands'
+export SEEDLANDS_MODEL_GATEWAY_URL='http://127.0.0.1:4000/v1'
+export SEEDLANDS_MODEL_GATEWAY_TOKEN='<本机网关凭据>'
+export SEEDLANDS_ALLOWED_ORIGINS='http://127.0.0.1:5173,http://localhost:5173'
+pnpm agent:dev
+```
 
-## 生命周期边界
+默认服务监听 `127.0.0.1:8787`；`AGENT_SERVER_PORT` 可改端口。终端输出一次浏览器连接地址及临时配对码。进入游戏按 **T** 打开伙伴面板，在“思考设置”填入地址、配对码并连接。页面来源须与 `SEEDLANDS_ALLOWED_ORIGINS` 精确一致。
 
-事件会合并后唤醒决定，实际派发模型请求时才重置 60–600 秒的活跃时间兜底（默认 180 秒）。暂停不会累计补发请求。连接内同时最多一个模型请求和一个尚未闭合的语义工具调用；Authority 回执会闭合 DeepSeek tool pair，迟到或不匹配的回执不会影响当前决定。
+如果暂不配置网关 URL/token，服务仍能提供 PG 工作区和保存恢复，认知状态明确显示缺少网关。不会悄悄退回另一模型。独立 REPL 仍使用 `pnpm server:headless -- --repl`；进入后可直接执行 `await world.clock({ kind: "advance", elapsedMs: 1000 })`。
 
-上下文默认 128K，在 112K 软阈值准备压缩；可切换 256K/224K。压缩冻结 event cursor，新事件继续进入尾部；只有 Authority 接纳 `memory` 后才原子切换，拒绝或失败保留旧历史。Pro 失败且达到硬阈值时生成明确标注的确定性恢复摘要，仍须 Authority 接纳。
+## 玩家可以试什么
 
-模型预算是每次本机 runtime session 的上限，不会在一小时后自动刷新。状态中的 `estimatedCostUsd` 按 2026-09-09 的公开价目保守估算，供保护与诊断使用，不是供应商实际账单。服务重启后，未压缩的私有 Flash history 不恢复；世界持久摘要与 Authority 保留的近期事件用于创建新的认知会话。
+- 邀请默认伙伴，看它自行进食、白天巡视、晚上休息；这些不调用模型。
+- 连接服务后和伙伴交谈。Flash 根据性格、当前树、受限观察与经过的事件调整整棵持续树。
+- 在思考设置输入性格/经历标签，由 Pro 创作出生包并邀请新伙伴。
+- 查看 `AGENT.md`、`SOUL.md`、`MEMORY.md`、生效行为树及执行状态。
+- 从“世界与伙伴存档”导出配对文件。导入后创建新 timeline，世界保持暂停，确认后点“继续这个世界”。如果 PG 导入中断，重新连接并导入原文件，不能用新空白记忆替代。
+
+## 边界与验证
+
+每个角色最多一个在途认知回合，250ms 合并事件；兜底默认180秒（60–600秒）。新逻辑回合刷新时钟，工具修正、网关重试和 Pro 压缩不刷新。每回合最多8个模型步骤、3次树提案。Pro 只在压缩维护和出生包流程调用；压缩失败保留原记忆，硬限暂停认知，身体继续。
+
+窗口总预算128000、软阈112000，当前以 UTF-8 字节的保守 token 上界预检；不把它当作供应商精确 token 数。MEMORY 同时受4000估计 tokens和16KiB约束。完整封存窗口仅供系统审计，人物和 Pro 都不能检索已遗忘的会话。
+
+运行 `pnpm --filter @seedlands/agent-server test` 验证实际临时 PG/WS 与标准工具；`pnpm test:npc-behavior` 验证浏览器。真实模型和60分钟旅程需要显式选择，避免普通测试产生费用或长等待。实际交付证据见[当前 change](../../changes/2026-09-09-npc-behavior-workspace/spec.md)。
+
+旧 v1 单目标宿主/测试仅保留给未归档历史 change 复验，不从当前包入口导出，也不由启动命令运行。当前包入口、文档与主产品均使用 resident v2。

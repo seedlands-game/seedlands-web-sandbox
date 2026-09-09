@@ -1,8 +1,15 @@
+import { behaviorCapabilities } from '../../packages/game-core/src/server/simulation/character-behavior-definition';
 import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createGatewayChatModel } from '../../apps/agent-server/src/gateway-model';
-import { AIMessage, createResidentAgent, HumanMessage, ToolMessage } from '../../apps/agent-server/src/resident-agent';
+import {
+  AIMessage,
+  createResidentAgent,
+  createResidentAgentDocument,
+  HumanMessage,
+  ToolMessage,
+} from '../../apps/agent-server/src/resident-agent';
 import {
   createDeepAgentsStoreBackend,
   createPostgresFrameworkPersistence,
@@ -81,7 +88,7 @@ describePostgres('persistent NPC workspace with actual PostgreSQL', () => {
     expect(createWorkspaceNamespace(a)).not.toBe(createWorkspaceNamespace(b));
     for (const binding of [a, b]) {
       await workspace.initializeNpc(binding, {
-        agent: 'protected agent contract',
+        agent: createResidentAgentDocument(behaviorCapabilities(), { name: binding.actorId }),
         soul: `soul:${binding.actorId}`,
         memory: `memory:${binding.actorId}`,
         memoryEstimatedTokens: 4,
