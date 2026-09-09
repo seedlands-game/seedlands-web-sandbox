@@ -45,3 +45,5 @@ GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，li
 第九轮暂停修复约0.17 agent小时，世界目标保持和CI近战分诊继续使用原共享池。低成本确定性fixture验证，不新增真实provider调用；最终实际credits不可按tokens推算。
 
 第九轮准出回填：世界修复约0.45 agent小时，暂停修复约0.17，独立静态复核约0.3；Root整合/门禁/受控就绪实验与证据整理计入原共享预算，不构造无法精确计量的credits或API等价换算。本轮真实provider调用为0；最终累计模型次数和精确usage缺口继续以delivery与provider-usage.json为准。后续仅最终远端门禁和人类审阅交接，产品范围不变。
+
+第十轮：命名空间修复约0.12 agent小时，独立分诊与冻结复核见报告；继续原共享工时池，无新增真实provider调用。最终任务credits/API等价无精确计量，保持unknown。

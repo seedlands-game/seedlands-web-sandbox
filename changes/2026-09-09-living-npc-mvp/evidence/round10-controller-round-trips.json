@@ -1,0 +1,285 @@
+{
+  "provider": "deterministic fixture, not real model evidence",
+  "calls": [
+    {
+      "goal": "forage",
+      "cursor": 71
+    },
+    {
+      "goal": "follow",
+      "cursor": 73
+    },
+    {
+      "goal": "follow",
+      "cursor": 76
+    },
+    {
+      "goal": "follow",
+      "cursor": 78
+    }
+  ],
+  "controls": ["pause", "resume"],
+  "pages": [
+    {
+      "cursor": 32,
+      "head": 70,
+      "count": 32
+    },
+    {
+      "cursor": 64,
+      "head": 70,
+      "count": 32
+    },
+    {
+      "cursor": 70,
+      "head": 70,
+      "count": 6
+    },
+    {
+      "cursor": 70,
+      "head": 70,
+      "count": 0
+    },
+    {
+      "cursor": 71,
+      "head": 71,
+      "count": 1
+    },
+    {
+      "cursor": 72,
+      "head": 72,
+      "count": 1
+    },
+    {
+      "cursor": 72,
+      "head": 72,
+      "count": 0
+    },
+    {
+      "cursor": 73,
+      "head": 73,
+      "count": 1
+    },
+    {
+      "cursor": 75,
+      "head": 75,
+      "count": 2
+    },
+    {
+      "cursor": 32,
+      "head": 75,
+      "count": 32
+    },
+    {
+      "cursor": 64,
+      "head": 76,
+      "count": 32
+    },
+    {
+      "cursor": 76,
+      "head": 76,
+      "count": 12
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 1
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 0
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 0
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 0
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 0
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 0
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 0
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 0
+    },
+    {
+      "cursor": 77,
+      "head": 77,
+      "count": 0
+    },
+    {
+      "cursor": 78,
+      "head": 78,
+      "count": 1
+    },
+    {
+      "cursor": 78,
+      "head": 78,
+      "count": 0
+    }
+  ],
+  "historyCursor": 70,
+  "controlled": {
+    "entityId": "npc-3",
+    "lifecycle": "active",
+    "incarnation": "character-1",
+    "revision": 2,
+    "policyRevision": 1,
+    "profile": {
+      "name": "阿岚",
+      "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+      "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+      "riskTolerance": 0.3
+    },
+    "currentGoal": {
+      "revision": 2,
+      "requestId": "7049da68-4d3b-4b5d-a867-80628793516c",
+      "goal": {
+        "kind": "follow",
+        "target": {
+          "kind": "entity",
+          "ref": "target-1",
+          "revision": 1
+        }
+      },
+      "status": "active"
+    },
+    "memory": {
+      "revision": 0,
+      "throughCursor": 0,
+      "summary": ""
+    },
+    "eventCursor": 75,
+    "lastSpeech": "第2次：好，我跟上你，咱们一起留意周围。",
+    "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+    "behavior": "idle",
+    "hunger": 60
+  },
+  "disconnected": {
+    "entityId": "npc-3",
+    "lifecycle": "active",
+    "incarnation": "character-1",
+    "revision": 2,
+    "policyRevision": 1,
+    "profile": {
+      "name": "阿岚",
+      "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+      "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+      "riskTolerance": 0.3
+    },
+    "currentGoal": {
+      "revision": 2,
+      "requestId": "7049da68-4d3b-4b5d-a867-80628793516c",
+      "goal": {
+        "kind": "follow",
+        "target": {
+          "kind": "entity",
+          "ref": "target-1",
+          "revision": 1
+        }
+      },
+      "status": "active"
+    },
+    "memory": {
+      "revision": 0,
+      "throughCursor": 0,
+      "summary": ""
+    },
+    "eventCursor": 75,
+    "lastSpeech": "第2次：好，我跟上你，咱们一起留意周围。",
+    "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+    "behavior": "idle",
+    "hunger": 60
+  },
+  "paused": {
+    "entityId": "npc-3",
+    "lifecycle": "active",
+    "incarnation": "character-1",
+    "revision": 3,
+    "policyRevision": 1,
+    "profile": {
+      "name": "阿岚",
+      "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+      "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+      "riskTolerance": 0.3
+    },
+    "currentGoal": {
+      "revision": 3,
+      "requestId": "f208bf85-b4d4-46e8-ac6f-4b806a2ac3d9",
+      "goal": {
+        "kind": "follow",
+        "target": {
+          "kind": "entity",
+          "ref": "target-1",
+          "revision": 1
+        }
+      },
+      "status": "active"
+    },
+    "memory": {
+      "revision": 0,
+      "throughCursor": 0,
+      "summary": ""
+    },
+    "eventCursor": 78,
+    "lastSpeech": "第3次：好，我跟上你，咱们一起留意周围。",
+    "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+    "behavior": "idle",
+    "hunger": 62
+  },
+  "afterLateCompletion": {
+    "entityId": "npc-3",
+    "lifecycle": "active",
+    "incarnation": "character-1",
+    "revision": 3,
+    "policyRevision": 1,
+    "profile": {
+      "name": "阿岚",
+      "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+      "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+      "riskTolerance": 0.3
+    },
+    "currentGoal": {
+      "revision": 3,
+      "requestId": "f208bf85-b4d4-46e8-ac6f-4b806a2ac3d9",
+      "goal": {
+        "kind": "follow",
+        "target": {
+          "kind": "entity",
+          "ref": "target-1",
+          "revision": 1
+        }
+      },
+      "status": "active"
+    },
+    "memory": {
+      "revision": 0,
+      "throughCursor": 0,
+      "summary": ""
+    },
+    "eventCursor": 78,
+    "lastSpeech": "第3次：好，我跟上你，咱们一起留意周围。",
+    "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+    "behavior": "idle",
+    "hunger": 62
+  },
+  "heldDecisionAborted": true
+}
