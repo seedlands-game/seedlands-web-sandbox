@@ -1,0 +1,95 @@
+$ pnpm ssg:check && pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage && pnpm typecheck
+$ pnpm --filter @seedlands/web ssg:check
+$ node scripts/render-prerendered-start-screen.mjs --check
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+$ ls-lint
+$ vitest run --coverage
+7:42:17 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+      Coverage enabled with v8
+
+拒绝覆盖已存在的恢复目录：restored/first-batch
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+只可归档明确 Delivered 的 change：changes/2026-09-01-example
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+运行入口仍引用 changes/2026-09-01-example：package.json
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+changes 路径必须位于仓库内：../outside
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+拒绝覆盖已存在的 ZIP：archives/changes/existing.zip
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+拒绝符号链接路径：changes
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+ZIP 只接受常规文件：/var/folders/bt/s2j98jm12_d5yylsv3vx8znh0000gn/T/seedlands-change-archive-xYxNX4/archives/changes/symlink.zip
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+ZIP 只接受常规文件：/var/folders/bt/s2j98jm12_d5yylsv3vx8znh0000gn/T/seedlands-change-archive-xYxNX4/archives/changes/symlink.zip
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+ZIP manifest 条目无效：changes/2026-09-01-example/spec.md
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+
+ Test Files  259 passed | 2 skipped (261)
+      Tests  1253 passed | 4 skipped (1257)
+   Start at  19:42:17
+   Duration  52.42s (transform 8.36s, setup 0ms, import 27.33s, tests 441.26s, environment 19ms)
+
+ % Coverage report from v8
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   95.37 |    90.42 |   96.93 |   96.89 |                   
+ ...pshot-codec.ts |   89.51 |    78.65 |     100 |   92.67 | ...03-306,320,328 
+ macro-world.ts    |   97.32 |    86.25 |     100 |   98.11 | 205-207           
+ mesh-batching.ts  |   98.75 |    95.45 |     100 |   98.59 | 37                
+ mesh.ts           |   95.45 |    93.24 |   95.83 |   96.41 | 254,446-451,453   
+ storage.ts        |   94.73 |    95.45 |     100 |     100 | 19                
+ voxel.ts          |   97.33 |    98.59 |   86.66 |     100 | 140               
+ ...w-direction.ts |   92.85 |       60 |     100 |     100 | 21-27             
+ ...r-immersion.ts |     100 |    92.85 |     100 |     100 | 57                
+ ...mesh-height.ts |     100 |    95.45 |     100 |     100 | 38                
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 95.37% ( 907/951 )
+Branches     : 90.42% ( 463/512 )
+Functions    : 96.93% ( 95/98 )
+Lines        : 96.89% ( 780/805 )
+================================================================================
+$ pnpm --filter @seedlands/game-core typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/agent-server typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+$ tsc -p tsconfig.json --noEmit
