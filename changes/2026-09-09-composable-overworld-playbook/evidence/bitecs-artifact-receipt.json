@@ -1,0 +1,367 @@
+{
+  "name": "bitecs",
+  "version": "0.4.0",
+  "upstreamMetadataUrl": "https://registry.npmjs.org/bitecs/0.4.0",
+  "verifiedArchiveUrl": "https://registry.npmjs.org/bitecs/-/bitecs-0.4.0.tgz",
+  "configuredPnpmRegistryOrigin": "redacted: configured registry differs from the public npm origin",
+  "actualInstallTransport": "unknown: original pnpm log reports store reuse/download but no per-package transport URL",
+  "actualArchiveSha256": "c6b7a6d7f836fde0b49d4dc9a4ec00d5783d2916e32bdfe509a86adee9ce238a",
+  "actualArchiveIntegrity": "sha512-ho6Zop/L79DRTnBAfakPpGPuX7y0+lAjX06CpaAW+5tnAc7BH3L3RlSrWAXAqwnQGDZ10GsoxaxyTTsddlun3g==",
+  "declaredArchiveIntegrity": "sha512-ho6Zop/L79DRTnBAfakPpGPuX7y0+lAjX06CpaAW+5tnAc7BH3L3RlSrWAXAqwnQGDZ10GsoxaxyTTsddlun3g==",
+  "installedFilesMatchVerifiedArchive": true,
+  "files": [
+    {
+      "path": ".github/FUNDING.yml",
+      "sha256": "9afd638f6f8eae9c019794c8c01043b179e19731e52b99d179004761847339b4"
+    },
+    {
+      "path": ".github/workflows/pr-test.yml",
+      "sha256": "0426d6d1f762ef8d77c7a90aee638f006b43c4122a03b0a7c5f8ac9a61f7e1b6"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5"
+    },
+    {
+      "path": "README.md",
+      "sha256": "d54beeecd3e2dd0fe2e910c264f4e2273da91722b6ca5f8f29a1732f62c0acc3"
+    },
+    {
+      "path": "dist/core/Component.d.ts",
+      "sha256": "22378c189c19abd833c64744bf0033781474e8a7e89c69cffba4556979da77be"
+    },
+    {
+      "path": "dist/core/Component.d.ts.map",
+      "sha256": "33431508cff03fa668236548781ad69ff0fb52ab380f1340c17cd6efe216d046"
+    },
+    {
+      "path": "dist/core/Entity.d.ts",
+      "sha256": "34304d9e0aeb3afeff167d3b27f28fb63eeef62d00b3272e94bce8d2b3e700bd"
+    },
+    {
+      "path": "dist/core/Entity.d.ts.map",
+      "sha256": "a9de5e0468b57642b5662af6c7b46d8e1f49c626dc000f2ed7b2d0aae4cb64bd"
+    },
+    {
+      "path": "dist/core/EntityIndex.d.ts",
+      "sha256": "51a225efc2c4d67a188439d6d224d540befd2488df3c05af567605b196c17a5e"
+    },
+    {
+      "path": "dist/core/EntityIndex.d.ts.map",
+      "sha256": "d27e83a073b001367ca5b1286eadd4594046cb4d0078fc09ba31e0f6b09e026c"
+    },
+    {
+      "path": "dist/core/Hierarchy.d.ts",
+      "sha256": "16f07263698ae5ac663ab937a154d792cf2e61e1fc9ad9bdbb065c815b62748f"
+    },
+    {
+      "path": "dist/core/Hierarchy.d.ts.map",
+      "sha256": "f29525ce642306a702c18458bb75f05103c30196680b66c0ca3adf7c4163a327"
+    },
+    {
+      "path": "dist/core/Query.d.ts",
+      "sha256": "972a741ac7860cb54b4a5bca2e9e91902fd56d36faa00cd02e5c99b9caa3ac43"
+    },
+    {
+      "path": "dist/core/Query.d.ts.map",
+      "sha256": "1001fa816b76d463cda4edbfabc57e76885b476432a714c5422d35ec14b29b3e"
+    },
+    {
+      "path": "dist/core/Relation.d.ts",
+      "sha256": "7889b2bcfb2a2798cb3c27643d3bf6f613e1c35174c5b8ad6116e5dcc8b9d0a3"
+    },
+    {
+      "path": "dist/core/Relation.d.ts.map",
+      "sha256": "7142367746b70f0434b958ca396e35f081348e548a1b9c77e3b7c2170c134ce5"
+    },
+    {
+      "path": "dist/core/World.d.ts",
+      "sha256": "3ba79b7fa9e51f520ff6d4061d79b0dfaf23887791e1f6d31bb16e3750b334a4"
+    },
+    {
+      "path": "dist/core/World.d.ts.map",
+      "sha256": "a8047292f0d94aa0ca67a4cf9064e4eb891946062f9fe8b4b0d2cc0a982bf5bb"
+    },
+    {
+      "path": "dist/core/index.cjs",
+      "sha256": "23af472d5a6c332564681e6538d7571325ff9482dae78300f3889fd35cbbbb12"
+    },
+    {
+      "path": "dist/core/index.cjs.map",
+      "sha256": "c4d927165e4f1e612ac225487e100b1cf2239b0042ac6383031500e6325dd6ad"
+    },
+    {
+      "path": "dist/core/index.d.ts",
+      "sha256": "a0141543e3eb2214fcbe092bc4ae55c395390af0f5142caef86a4eb8327b2d06"
+    },
+    {
+      "path": "dist/core/index.d.ts.map",
+      "sha256": "068f44a0c2df6f7ea9ad4feca27ac44ca51fc0458d637cb96f2ec28333b6c426"
+    },
+    {
+      "path": "dist/core/index.min.cjs",
+      "sha256": "f111f786ee1ef8df2050ca456c73f40efb63c9ebdbaddd36871c106f14f7b3f9"
+    },
+    {
+      "path": "dist/core/index.min.cjs.map",
+      "sha256": "5614427f4aa53f0ce620646eed45bf02b5de4c27240319393c8022cbe797676a"
+    },
+    {
+      "path": "dist/core/index.min.mjs",
+      "sha256": "0dc3062c5414eb75980cc750d97d0663f5d5e8ab91dd58b5a556937949ad5f4b"
+    },
+    {
+      "path": "dist/core/index.min.mjs.map",
+      "sha256": "85b9ea7d8d5ff1fba98326053d8e5c5089132c06df5ed0ebf98b8ffd8dbf034a"
+    },
+    {
+      "path": "dist/core/index.mjs",
+      "sha256": "b84b82ba17b8f607051d2ab8670b063305251d539588481499d8fe2f7d02b2e5"
+    },
+    {
+      "path": "dist/core/index.mjs.map",
+      "sha256": "b1517db9007123b4e82e7e7ef81a530ab008deb5f681ee6ccc1ab8ce7a36b612"
+    },
+    {
+      "path": "dist/core/utils/Observer.d.ts",
+      "sha256": "777038026e696ff66cdc3c8775efe00747bcde4f60135411131ebcf374b2f741"
+    },
+    {
+      "path": "dist/core/utils/Observer.d.ts.map",
+      "sha256": "7c037b0c08163ef59c2e44112c7cd6a89c1a0878d7c46f329b1a994be1f08cb1"
+    },
+    {
+      "path": "dist/core/utils/SparseSet.d.ts",
+      "sha256": "38febe17b036150ab541b2400a062b59ea6ce82708c5e327b1804b2caf25162f"
+    },
+    {
+      "path": "dist/core/utils/SparseSet.d.ts.map",
+      "sha256": "38f56e2a013cf9dcd979531405a63cc287990df644f6e8330cf557f57f840055"
+    },
+    {
+      "path": "dist/core/utils/defineHiddenProperty.d.ts",
+      "sha256": "e57f4140abafbdf81ec55998826788145b1b83e4cb8050a70f98732ef549c959"
+    },
+    {
+      "path": "dist/core/utils/defineHiddenProperty.d.ts.map",
+      "sha256": "ce19970704833157ea192c769ef43ffe92700386af459a722b7a8e7e9c72750d"
+    },
+    {
+      "path": "dist/core/utils/pipe.d.ts",
+      "sha256": "7f66cba75697b4eb29414debd30ff9a4eedb4b905be7d1527cfdeca058279218"
+    },
+    {
+      "path": "dist/core/utils/pipe.d.ts.map",
+      "sha256": "8936c9d91e1634fa9797fa8edeb435e6ad640efc848fb391c4fcb2ef13f101ff"
+    },
+    {
+      "path": "dist/core/utils/soa.d.ts",
+      "sha256": "f7b548c9ac80933528ab4af98c3ed3c1b19c1ed41c53f5ed8e6c01e17b24ba0a"
+    },
+    {
+      "path": "dist/core/utils/soa.d.ts.map",
+      "sha256": "e4ddd20da94dfc0528681761130d32457ac1f9dd2188a3063a031b2a90dc40d0"
+    },
+    {
+      "path": "dist/legacy/index.cjs",
+      "sha256": "81f1d67252af65ca1b06988a2290df1942d3704c015a60fa3086f2d7603a5463"
+    },
+    {
+      "path": "dist/legacy/index.cjs.map",
+      "sha256": "4af744a6b189527b780f1ee9c0a2cbb5bb6112a170090b3967c25dbb1618b2f2"
+    },
+    {
+      "path": "dist/legacy/index.min.cjs",
+      "sha256": "a72902520fe95d1fb13f7ba13bda2315c3430541da1e0016b032ce214394248a"
+    },
+    {
+      "path": "dist/legacy/index.min.cjs.map",
+      "sha256": "7b5187b3cc48482ac10035cf1482c3690d719d5bbae6863ece10b68459451233"
+    },
+    {
+      "path": "dist/legacy/index.min.mjs",
+      "sha256": "cf7b8d50315cb519b202b371c5bda84238e0df9897b90e761b98c2f495a2cb98"
+    },
+    {
+      "path": "dist/legacy/index.min.mjs.map",
+      "sha256": "01c3bf500b552f9625f52a0a8a1a86fee2810a95e61b58905916574e7f11ac36"
+    },
+    {
+      "path": "dist/legacy/index.mjs",
+      "sha256": "cb42de4aff6a893b2f6ccd32612b5ad1364fc093c183e74fd155bbc19ee5aab1"
+    },
+    {
+      "path": "dist/legacy/index.mjs.map",
+      "sha256": "6ab4ca1f0a49ddb5433cec6346b84904d927c08998b3b85babed4203d4dae85d"
+    },
+    {
+      "path": "dist/serialization/AoSSerializer.d.ts",
+      "sha256": "deaa5fd1aac79b9d0e21ec020bea2e670f843cfa6a13fc89effd1026e81ab8fa"
+    },
+    {
+      "path": "dist/serialization/AoSSerializer.d.ts.map",
+      "sha256": "5fee7b518af13452e357d8327839fcb9eb42ee74661c2ef410868e5df434dae7"
+    },
+    {
+      "path": "dist/serialization/ObserverSerializer.d.ts",
+      "sha256": "f4042ce827de827d8080787a49c013bb3f7aee0a424a38605212afe162f1ef46"
+    },
+    {
+      "path": "dist/serialization/ObserverSerializer.d.ts.map",
+      "sha256": "e2df08bba226e2e9f2635364a9596e1fb48442db2fdb76c4416c080967a470b1"
+    },
+    {
+      "path": "dist/serialization/SnapshotSerializer.d.ts",
+      "sha256": "bc7448da6691c57ccaa4129bb5f7c7e96bb4f23153c6d6cbbfd041468ea210e2"
+    },
+    {
+      "path": "dist/serialization/SnapshotSerializer.d.ts.map",
+      "sha256": "6da247d82b31fcfba7097fc36d4ed7fdc57845f3104d68e69720436cf556ca20"
+    },
+    {
+      "path": "dist/serialization/SoASerializer.d.ts",
+      "sha256": "da47722a04ac82040e994830278a3a445dd7f8fb1f660ac4977eaeb694b2486c"
+    },
+    {
+      "path": "dist/serialization/SoASerializer.d.ts.map",
+      "sha256": "a24df55e6db3d9cb68b0c4fdb0074b486dd0cef23e75af4841819c7d1ce4df26"
+    },
+    {
+      "path": "dist/serialization/index.cjs",
+      "sha256": "e0fbcd14ce045d6380538807057e8a923fc8685b0b4ffd0d46f188145fad59a5"
+    },
+    {
+      "path": "dist/serialization/index.cjs.map",
+      "sha256": "ad59b3c53805166a530af0ad8034b4a9aeea866eaf5a277a8d59eab9b6d8109d"
+    },
+    {
+      "path": "dist/serialization/index.d.ts",
+      "sha256": "694820261e33aeaa8188dc491b3914799487bf78f2bc508f13dab3fc055fd135"
+    },
+    {
+      "path": "dist/serialization/index.d.ts.map",
+      "sha256": "77ddf8369d7944935699415c3a79e60918a8579ab6fbff1fcac64701ed3c53b7"
+    },
+    {
+      "path": "dist/serialization/index.min.cjs",
+      "sha256": "e445a9db8a20eeb9fd933e4f4f3286a7828823f743b02490c363ca040c56bb8b"
+    },
+    {
+      "path": "dist/serialization/index.min.cjs.map",
+      "sha256": "f33ec2282d74e5555d135fcaebcfcc25ca166cd560166aa0ca5700bdd0fea4b9"
+    },
+    {
+      "path": "dist/serialization/index.min.mjs",
+      "sha256": "908f210413243446963469e07d6653e65b5362af52b96d3bb5ca90be0183e170"
+    },
+    {
+      "path": "dist/serialization/index.min.mjs.map",
+      "sha256": "22b489807063e1de7e7300a9e7263201e2c48ccd62d0459138d35dc13101661b"
+    },
+    {
+      "path": "dist/serialization/index.mjs",
+      "sha256": "49f8f56d2bd46d841cbe97cf53f2057d0046da438a774c7fbf6c59624e36e680"
+    },
+    {
+      "path": "dist/serialization/index.mjs.map",
+      "sha256": "6590acdfa1199a9c00136389de5e1fc59f13b7ee8598691d80e7f8d20efe4a48"
+    },
+    {
+      "path": "docs/API.md",
+      "sha256": "266e7ef8a89ac80dc92905d082a1926041104ed95b467f6b529cc372fcd74144"
+    },
+    {
+      "path": "docs/Intro.md",
+      "sha256": "6512cb4ded7300db680cd9741eb604e0547ddc7110a6b940c1b051e5a4347fbd"
+    },
+    {
+      "path": "docs/MIGRATION_GUIDE_0.4.0.md",
+      "sha256": "a3722860a8fb0abcac283fe2c9d5962e671f3cedac25430ddfcf0b16cd199a32"
+    },
+    {
+      "path": "docs/Multithreading.md",
+      "sha256": "c0a121e46894c6b4ced7264a1e2bfe4e35fe52364a64cdb0961c2110a68a2685"
+    },
+    {
+      "path": "docs/RELEASE_NOTES_0.4.0.md",
+      "sha256": "054778ca356f38de1d6a8409a7bdf82df27237715073d74eee4c328c19b057e5"
+    },
+    {
+      "path": "docs/Serialization.md",
+      "sha256": "827ee8d46cdfabe39d6f3bf25321bfa17a67f137067fc9304e5033754e9832a6"
+    },
+    {
+      "path": "package.json",
+      "sha256": "2841ebdbfa395ca898388f0905e22fc353fdbdf599ef6b6df3856bdf14c03339"
+    },
+    {
+      "path": "test/core/Component.test.ts",
+      "sha256": "7191b1031b0065335f49912bc8c69b1a07d50e8f26fbe6c2cb4352471667a41e"
+    },
+    {
+      "path": "test/core/Entity.test.ts",
+      "sha256": "dc8040b4b57e202cf424094e92a09164cca4a15da76fabdd289844d317d50c08"
+    },
+    {
+      "path": "test/core/EntityIndex.test.ts",
+      "sha256": "fd6cf724b6b58fb65bfb841d9ed7bba0cb2dba6aafe62406a503bcce0631b1a7"
+    },
+    {
+      "path": "test/core/Observer.test.ts",
+      "sha256": "4ed2942b507a0ca453107f5cdc619a14675cb476ac6d45010b46439447adddfa"
+    },
+    {
+      "path": "test/core/Query.test.ts",
+      "sha256": "ed449c6f3388d6d4809df24de37b749510b1dabd2b1a77eca078dcab77edede6"
+    },
+    {
+      "path": "test/core/Relation.test.ts",
+      "sha256": "226f04e4ae49b103277b9591056c21624f416523762cb3b862cf3fbf8d981a17"
+    },
+    {
+      "path": "test/core/WildcardRemoval.test.ts",
+      "sha256": "2308b5668f24c12e1d0aa6e9c3b17a1b2379ac9af712f28e7c5b711fbaf7c14c"
+    },
+    {
+      "path": "test/core/World.test.ts",
+      "sha256": "e79da87c7808cef954c205d39e3480d16aa8b1d846f4c3dacda2623456000960"
+    },
+    {
+      "path": "test/serialization/AoSSerializer.test.ts",
+      "sha256": "466d159c83678c05c74c670f6a85a239b6c15052aa6f56a99899dae9f1297dce"
+    },
+    {
+      "path": "test/serialization/ObserverSerializer.test.ts",
+      "sha256": "bad13ab92c87663d36c5f2fab7c2aaf9b160079718d0770b93d4aed456f6a5f2"
+    },
+    {
+      "path": "test/serialization/SnapshotSerializer.test.ts",
+      "sha256": "7b9fea8ee4f76f68ba6adffeb23ab976e0e7be37528f3ac1539cf504db9a3c44"
+    },
+    {
+      "path": "test/serialization/SoASerializer.test.ts",
+      "sha256": "66f62df2ba1293f008197d4c09d29a9f308854895c3ec51a983f60516a17276c"
+    },
+    {
+      "path": "tsconfig.core.json",
+      "sha256": "84d9e422872a8bd53ce204829bf4c1bd22cb9df898225ee7d3e78731bf0e0f49"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "a78ad29b5747d968e7f706cc18bcf9d98bde421da2ecd33cb811139c8107c021"
+    },
+    {
+      "path": "tsconfig.serialization.json",
+      "sha256": "59d7cd29db795b9fd96b7bdaa451db958fe5b333d1451484ac6a2f05ae0bcf38"
+    },
+    {
+      "path": "tsconfig.tests.json",
+      "sha256": "20cae51b7d87e075b21b814d59637b7a232181a60e54cfa610600bd937ff934d"
+    }
+  ],
+  "isolatedManifestSha256": "362d0b615c46c8e13ed62e2633a4cafc44e53ecded8aaa1fb1da2874c5bb9d51",
+  "isolatedLockSha256": "339a29c0e7a4f3102a7f57f9fb732be0be0cb713008292f09efa5cd51b70b4fa",
+  "verificationCommand": "python3 experiments/verify-ecs-artifacts.py <isolated-pnpm-project> <output-directory>",
+  "python": "3.11.12",
+  "exitCode": 0
+}

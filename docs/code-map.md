@@ -150,3 +150,10 @@ Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通�
 - 有界 ECS 组件化尚未准入；当前实体状态仍由 `EntityStore` 的既有实现持有，不能将动作与动画扩展视为 ECS 迁移完成。
 
 PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给既有 [game-runtime-controls.ts](../apps/web/src/app/game-runtime-controls.ts)，`Game` 保持装配入口并满足文件规模门禁；地图状态仍归 `UiBridge`。
+
+## 可组合 Pack 的装配接缝（S1）
+
+- `packages/game-core/src/server/composition/`：每世界 Pack/module 依赖、注册与公开作者合同。作者只消费 `@seedlands/game-core/mod-api`；宿主负责装配和创建绑定 principal、原始 Actor 与 Pack 来源的执行入口。
+- `scripts/pack-integrity.mjs`：本地构建 Pack 在执行入口前的文件与锁摘要检查；不提供任意 URL 市场或恶意代码隔离。
+- `scripts/eslint/pack-api-boundary-rule.mjs` 与 `tests/governance/pack-api-boundary.test.ts`：第一方 Playbook 到内部实现的导入负例门禁。
+- `tests/server/composition/`、`tests/scripts/pack-integrity.test.ts`：装配、授权和真实产物加载合同。当前仍未把整个现有 GameplayRuntime 迁成标准模块；ECS、完整玩法与浏览器旅程状态以[本期合同](../changes/2026-09-09-composable-overworld-playbook/spec.md)为准。

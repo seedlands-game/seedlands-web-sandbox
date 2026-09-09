@@ -6,6 +6,7 @@ import { isBuiltin } from 'node:module';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createPackageBoundaryRule } from './scripts/eslint/package-boundary-rule.mjs';
+import { packApiBoundaryRule } from './scripts/eslint/pack-api-boundary-rule.mjs';
 
 const workspaceRoot = dirname(fileURLToPath(import.meta.url));
 
@@ -122,6 +123,7 @@ const topLevelOwnerRule = (allowed) => ({
 
 const seedlands = {
   rules: {
+    'pack-api-boundary': packApiBoundaryRule,
     'package-boundary': createPackageBoundaryRule(workspaceRoot),
     'node-platform-boundary': {
       meta: {
@@ -380,6 +382,11 @@ export default tseslint.config(
     plugins: { seedlands },
     languageOptions: { globals: globals.node },
     rules: { 'seedlands/server-purity': 'error' },
+  },
+  {
+    files: ['packages/game-core/src/server/gameplay/playbooks/**/*.ts'],
+    plugins: { seedlands },
+    rules: { 'seedlands/pack-api-boundary': 'error' },
   },
   {
     files: ['apps/*/src/**/*.{ts,svelte}', 'packages/*/src/**/*.ts'],
