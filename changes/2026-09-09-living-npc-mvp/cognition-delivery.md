@@ -16,7 +16,7 @@
 
 ## 验证
 
-- `corepack pnpm --filter @seedlands/agent-server test`：8 files / 25 tests 全部通过。覆盖模型 wire reasoning 回放、正负工具校验、两轮 accepted tool pair、迟到回执、scheduler、压缩 prepare/ACK/commit 与失败、pause/dispose abort、deceased 终态停机、missing-key configure/resume、密钥错误脱敏、最大中文 observation、Origin/配对/sequence 和 WebSocket 释放。
+- `corepack pnpm --filter @seedlands/agent-server test`：8 files / 28 tests 全部通过。覆盖真实返回形态的同轮多只读工具批次、混合/多 intent/过量批次拒绝与完整 tool ID 回执、模型在途同 revision 新 event 尾部保存、memory ACK 前不浪费 Flash、模型 wire reasoning 回放、两轮 accepted tool pair、迟到回执、scheduler、压缩 prepare/ACK/commit 与失败、pause/dispose abort、deceased 终态停机、missing-key configure/resume、密钥错误脱敏、最大中文 observation、Origin/配对/sequence 和 WebSocket 释放。
 - `corepack pnpm --filter @seedlands/agent-server typecheck`：通过。
 - `corepack pnpm --filter @seedlands/agent-server build`：通过，生成 ESM Node bundle；共享 core value 已打入 bundle，产物没有遗留 `@seedlands/game-core` TypeScript runtime import。
 - `prettier --check apps/agent-server tests/agent-server`、`eslint apps/agent-server/src tests/agent-server`、`git diff --check -- apps/agent-server tests/agent-server`：通过。

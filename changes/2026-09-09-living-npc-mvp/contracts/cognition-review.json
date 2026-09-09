@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "living-npc-cognition-review",
+  "role": "independent cognition code reviewer",
+  "workType": "validation",
+  "goal": "Independently review exact commit b763bb0 (parent b7d7169) for the A2 cognition host and shared character protocol. Read all changed files and necessary adjacent source from frozen git trees, never drifting WIP. Read base-tree AGENTS.md, the code review skill, its workflow and semantic rules. Focus scheduler event/reset behavior, provider reasoning/tool replay, context compression with concurrent events and Authority ACK, session budgets, transport auth/binding/sequences, cancellation/death, input validation and production startup. Source is frozen; 25 focused tests, app typecheck/build and ESLint passed before commit, core protocol ESLint property-name fix has a 6-test RED/GREEN. A1 world and A3 Browser are not committed and explicitly out of this diff. Root continues those. No production edits, environment/key reads, model calls, browser, full suite, commits/push or external comments. May create a small isolated /private/tmp probe against frozen sources if needed. Return concise logic report, full changed-file coverage, exact evidence-backed P0/P1/P2 findings last, and unverified gaps. No approval or merge claim. Evidence report /tmp/living-npc-cognition-review.md.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-cognition-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "review",
+      "check": "All 39 changed files accounted for at frozen SHA; findings actionable and evidence-backed",
+      "evidence": "independent review report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

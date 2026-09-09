@@ -20,6 +20,7 @@ export type RuntimeOptions = Readonly<{
   contextLimit?: ContextLimit;
   schedulerClock?: CognitionSchedulerOptions['clock'];
   requestId?: () => string;
+  context?: ContextSession;
 }>;
 
 class BudgetExceededError extends Error {}
@@ -84,6 +85,7 @@ export class CognitionRuntime {
   private hostSequence = 0;
   private pendingIntent: Readonly<{ requestId: string; toolCallId: string }> | null = null;
   private pendingMemoryRequestId: string | null = null;
+  private pendingContextTail: import('./model-types.js').DeepSeekMessage[] = [];
   private deferredTrigger = false;
   private paused = false;
   private terminal = false;
@@ -98,7 +100,7 @@ export class CognitionRuntime {
     this.requestId = options.requestId ?? (() => globalThis.crypto.randomUUID());
     this.contextLimit = options.contextLimit ?? 128_000;
     this.fallbackSeconds = validateFallbackSeconds(options.fallbackSeconds ?? 180);
-    this.context = new ContextSession([], { contextLimit: this.contextLimit });
+    this.context = options.context ?? new ContextSession([], { contextLimit: this.contextLimit });
     this.flashModel = options.model ? budgetedModel(options.model, this.budget, false) : null;
     this.proModel = options.model ? budgetedModel(options.model, this.budget, true) : null;
     this.graph = this.flashModel ? createCognitionGraph({ model: this.flashModel }) : null;
@@ -138,7 +140,9 @@ export class CognitionRuntime {
       this.latestObservation = message.observation;
       if (freshEvents.length) {
         this.latestEventCursor = Math.max(...freshEvents.map((event) => event.cursor));
+        const contextBoundary = this.context.messageCount;
         this.context.appendEvents(freshEvents);
+        if (this.pendingIntent) this.pendingContextTail.push(...this.context.extractTail(contextBoundary));
         for (const event of freshEvents) if (significantEvent(event.type)) this.scheduler.notifyEvent(event.type);
       }
       return;
@@ -176,6 +180,7 @@ export class CognitionRuntime {
     this.latestObservation = null;
     this.pendingIntent = null;
     this.pendingMemoryRequestId = null;
+    this.pendingContextTail = [];
     this.graph = null;
   }
 
@@ -195,6 +200,7 @@ export class CognitionRuntime {
     this.scheduler.dispose();
     this.pendingIntent = null;
     this.pendingMemoryRequestId = null;
+    this.pendingContextTail = [];
     this.deferredTrigger = false;
     this.context.rejectPreparedRotation();
     this.status('fallback', 'stale');
@@ -219,6 +225,7 @@ export class CognitionRuntime {
       if (receipt.status === 'accepted' || receipt.status === 'succeeded') this.context.commitPreparedRotation();
       else this.context.rejectPreparedRotation();
       this.pendingMemoryRequestId = null;
+      this.deferredTrigger = false;
       this.scheduler.notifyEvent('context-reconciled');
       this.status(this.pendingIntent ? 'awaiting-receipt' : 'ready');
       return;
@@ -236,7 +243,9 @@ export class CognitionRuntime {
           revision: receipt.revision,
         }),
       },
+      ...this.pendingContextTail,
     ]);
+    this.pendingContextTail = [];
     this.pendingIntent = null;
     if (this.deferredTrigger) {
       this.deferredTrigger = false;
@@ -248,12 +257,13 @@ export class CognitionRuntime {
   private beginDispatch(kind: 'event' | 'fallback'): Readonly<{ dispatched: boolean; completion: Promise<void> }> {
     const observation = this.latestObservation;
     const graph = this.graph;
-    if (this.pendingIntent && kind === 'event') this.deferredTrigger = true;
+    if ((this.pendingIntent || this.pendingMemoryRequestId) && kind === 'event') this.deferredTrigger = true;
     if (
       this.disposed ||
       this.terminal ||
       this.paused ||
       this.pendingIntent ||
+      this.pendingMemoryRequestId ||
       !observation ||
       !graph ||
       !this.flashModel ||
@@ -280,15 +290,20 @@ export class CognitionRuntime {
           4096,
           this.abort.signal,
         );
+        if (this.disposed || this.terminal || this.paused) return;
         if (rotation.memory) {
           const memoryRequestId = this.requestId();
           this.pendingMemoryRequestId = memoryRequestId;
           this.emit({ kind: 'memory', requestId: memoryRequestId, ...rotation.memory });
+          this.status('awaiting-receipt');
+          return;
         }
       }
 
       this.status('thinking');
-      const result = await decideWithGraph(graph, observation, this.context.messages, this.abort.signal);
+      const graphSnapshotLength = this.context.messageCount;
+      const graphMessages = [...this.context.messages];
+      const result = await decideWithGraph(graph, observation, graphMessages, this.abort.signal);
       if (
         this.disposed ||
         this.terminal ||
@@ -299,18 +314,22 @@ export class CognitionRuntime {
         if (!this.terminal) this.status('ready', 'stale');
         return;
       }
+      const concurrentTail = this.context.extractTail(graphSnapshotLength);
       this.context.replaceMessages(result.messages);
       this.lastDecisionCursor = observation.cursor;
       if (result.status !== 'intent' || !result.proposal) {
+        this.context.appendMessages(concurrentTail);
         this.status('fallback', result.status === 'over-budget' ? 'over-budget' : 'invalid-tool');
         return;
       }
       if (!result.intentToolCallId) {
+        this.context.appendMessages(concurrentTail);
         this.status('fallback', 'invalid-tool');
         return;
       }
       const requestId = this.requestId();
       this.pendingIntent = { requestId, toolCallId: result.intentToolCallId };
+      this.pendingContextTail.push(...concurrentTail);
       this.consecutiveFailures = 0;
       this.emit({
         kind: 'intent',
