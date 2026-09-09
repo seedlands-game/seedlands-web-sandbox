@@ -1,5 +1,12 @@
 import type { NavigationPosition } from './ground-navigator';
 import type { CoreClone } from '../../runtime/platform-ports';
+import {
+  entityReferenceExecutionFailure,
+  isEntityLifetimeReference,
+  rebindEntityLifetimeReference,
+  type EntityIdentityPort,
+  type EntityLifetimeReference,
+} from './action-identity';
 
 export type ActorActionType = 'move-to' | 'wander' | 'attack' | 'flee' | 'eat' | 'idle' | 'go-to-poi';
 export type ActorActionStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'interrupted';
@@ -21,15 +28,30 @@ export type ActorAction = {
 };
 export type ActorActionInput = Pick<ActorAction, 'actorId' | 'type'> &
   Partial<Pick<ActorAction, 'targetPosition' | 'targetEntityId' | 'poiId'>>;
-export type ActionSnapshot = { version: 1; sequence: number; actions: ActorAction[] };
+export type ActionSnapshotV1 = { version: 1; sequence: number; actions: ActorAction[] };
+export type BoundActorActionSnapshot = ActorAction & {
+  actorIdentity?: EntityLifetimeReference;
+  targetIdentity?: EntityLifetimeReference;
+};
+export type ActionSnapshotV2 = { version: 2; sequence: number; actions: BoundActorActionSnapshot[] };
+export type ActionSnapshot = ActionSnapshotV1 | ActionSnapshotV2;
+
+type ActionBindings = {
+  actor: EntityLifetimeReference | null;
+  target: EntityLifetimeReference | null;
+};
 
 const terminal = (status: ActorActionStatus) => ['succeeded', 'failed', 'interrupted'].includes(status);
 export class ActionRuntime {
   private readonly actions = new Map<string, ActorAction>();
   private readonly currentByActor = new Map<string, string>();
+  private readonly bindings = new Map<string, ActionBindings>();
   private sequence = 0;
 
-  constructor(private readonly cloneValue: CoreClone) {}
+  constructor(
+    private readonly cloneValue: CoreClone,
+    private readonly identity?: EntityIdentityPort,
+  ) {}
 
   private clone(action: ActorAction): ActorAction {
     return {
@@ -42,6 +64,7 @@ export class ActionRuntime {
 
   start(input: ActorActionInput, now: number): ActorAction {
     this.validateInput(input, now);
+    const bindings = this.captureBindings(input.actorId, input.targetEntityId);
     this.interruptActor(input.actorId, now, 'replaced');
     const action: ActorAction = {
       ...input,
@@ -54,6 +77,7 @@ export class ActionRuntime {
       repathCount: 0,
     };
     this.actions.set(action.id, action);
+    this.bindings.set(action.id, bindings);
     this.currentByActor.set(action.actorId, action.id);
     return this.clone(action);
   }
@@ -69,7 +93,7 @@ export class ActionRuntime {
   }
 
   markRunning(id: string, path: readonly NavigationPosition[]): ActorAction {
-    const action = this.requireActive(id);
+    const action = this.requireExecutable(id);
     action.status = 'running';
     action.path = path.map((point) => [...point]);
     action.pathIndex = Math.min(1, action.path.length);
@@ -77,7 +101,7 @@ export class ActionRuntime {
   }
 
   updatePath(id: string, path: readonly NavigationPosition[], repathCount: number): ActorAction {
-    const action = this.requireActive(id);
+    const action = this.requireExecutable(id);
     action.path = path.map((point) => [...point]);
     action.pathIndex = Math.min(1, action.path.length);
     action.repathCount = repathCount;
@@ -86,13 +110,15 @@ export class ActionRuntime {
   }
 
   setPathIndex(id: string, pathIndex: number): void {
-    const action = this.requireActive(id);
+    const action = this.requireExecutable(id);
     if (!Number.isInteger(pathIndex) || pathIndex < 0 || pathIndex > action.path.length)
       throw new TypeError('Action path index is invalid.');
     action.pathIndex = pathIndex;
   }
 
   succeed(id: string, now: number, result?: unknown): ActorAction {
+    // The committed effect may consume the target; actor identity still has to be current.
+    this.requireExecutable(id, false);
     return this.finish(id, 'succeeded', now, undefined, result);
   }
 
@@ -108,6 +134,20 @@ export class ActionRuntime {
   }
 
   snapshot(): ActionSnapshot {
+    if (this.identity) {
+      return {
+        version: 2,
+        sequence: this.sequence,
+        actions: [...this.actions.values()].map((action) => {
+          const bindings = this.bindings.get(action.id);
+          return {
+            ...this.clone(action),
+            ...(bindings?.actor ? { actorIdentity: { ...bindings.actor } } : {}),
+            ...(bindings?.target ? { targetIdentity: { ...bindings.target } } : {}),
+          };
+        }),
+      };
+    }
     return {
       version: 1,
       sequence: this.sequence,
@@ -120,18 +160,29 @@ export class ActionRuntime {
       const snapshot = raw as ActionSnapshot;
       if (
         !snapshot ||
-        snapshot.version !== 1 ||
+        (snapshot.version !== 1 && snapshot.version !== 2) ||
         !Number.isInteger(snapshot.sequence) ||
         snapshot.sequence < 0 ||
         !Array.isArray(snapshot.actions)
       )
         throw new TypeError('header is invalid');
+      if (snapshot.version === 2 && !this.identity) throw new TypeError('version 2 requires an entity identity port');
       const actions = new Map<string, ActorAction>();
       const current = new Map<string, string>();
-      for (const action of snapshot.actions) {
+      const bindings = new Map<string, ActionBindings>();
+      for (const encoded of snapshot.actions) {
+        const plainAction = { ...(encoded as BoundActorActionSnapshot) };
+        delete plainAction.actorIdentity;
+        delete plainAction.targetIdentity;
+        const action = this.clone(plainAction);
         this.validateAction(action);
         if (actions.has(action.id)) throw new TypeError('duplicate action id');
-        actions.set(action.id, this.clone(action));
+        const rebound =
+          snapshot.version === 2
+            ? this.restoreBoundAction(encoded as BoundActorActionSnapshot, action)
+            : this.restoreLegacyAction(action);
+        actions.set(action.id, action);
+        bindings.set(action.id, rebound);
         if (!terminal(action.status)) {
           if (current.has(action.actorId)) throw new TypeError('actor has multiple active actions');
           current.set(action.actorId, action.id);
@@ -141,6 +192,8 @@ export class ActionRuntime {
       actions.forEach((action, id) => this.actions.set(id, action));
       this.currentByActor.clear();
       current.forEach((id, actorId) => this.currentByActor.set(actorId, id));
+      this.bindings.clear();
+      bindings.forEach((value, id) => this.bindings.set(id, value));
       this.sequence = snapshot.sequence;
     } catch (error) {
       throw new Error(`Invalid action snapshot: ${error instanceof Error ? error.message : String(error)}`, {
@@ -172,8 +225,97 @@ export class ActionRuntime {
     return action;
   }
 
+  private requireExecutable(id: string, checkTarget = true): ActorAction {
+    const action = this.requireActive(id);
+    if (!this.identity) return action;
+    const bindings = this.bindings.get(id);
+    if (!bindings?.actor) return this.rejectExecution(action, 'actor-binding-missing');
+    const actorReason = entityReferenceExecutionFailure(this.identity, bindings.actor, action.actorId, 'actor');
+    if (actorReason) return this.rejectExecution(action, actorReason);
+    if (checkTarget && action.targetEntityId) {
+      if (!bindings.target) return this.rejectExecution(action, 'target-binding-missing');
+      const targetReason = entityReferenceExecutionFailure(
+        this.identity,
+        bindings.target,
+        action.targetEntityId,
+        'target',
+      );
+      if (targetReason) return this.rejectExecution(action, targetReason);
+    }
+    return action;
+  }
+
+  private rejectExecution(action: ActorAction, reason: string): never {
+    action.status = 'failed';
+    action.endedAt = action.startedAt;
+    action.reason = reason;
+    this.currentByActor.delete(action.actorId);
+    throw new Error(`Action identity rejected: ${reason}`);
+  }
+
+  private captureBindings(actorId: string, targetId?: string): ActionBindings {
+    if (!this.identity) return { actor: null, target: null };
+    const actor = this.identity.referenceFor(actorId);
+    if (!actor) throw new TypeError('Action actor binding is unavailable.');
+    const target = targetId ? this.identity.referenceFor(targetId) : null;
+    if (targetId && !target) throw new TypeError('Action target binding is unavailable.');
+    return { actor: { ...actor }, target: target ? { ...target } : null };
+  }
+
+  private restoreLegacyAction(action: ActorAction): ActionBindings {
+    if (!this.identity || terminal(action.status)) return { actor: null, target: null };
+    const actor = this.identity.referenceFor(action.actorId);
+    if (!actor) throw new TypeError('restore-actor-missing');
+    const target = action.targetEntityId ? this.identity.referenceFor(action.targetEntityId) : null;
+    if (action.targetEntityId && !target) this.settleRestoredAction(action, 'restore-target-missing');
+    return { actor: { ...actor }, target: target ? { ...target } : null };
+  }
+
+  private restoreBoundAction(encoded: BoundActorActionSnapshot, action: ActorAction): ActionBindings {
+    const actor = encoded.actorIdentity;
+    const target = encoded.targetIdentity;
+    if (actor !== undefined && (!isEntityLifetimeReference(actor) || actor.entityId !== action.actorId))
+      throw new TypeError('actor binding is invalid');
+    if (
+      target !== undefined &&
+      (!isEntityLifetimeReference(target) || !action.targetEntityId || target.entityId !== action.targetEntityId)
+    )
+      throw new TypeError('target binding is invalid');
+    if (terminal(action.status)) {
+      return {
+        actor: actor ? { ...actor } : null,
+        target: target ? { ...target } : null,
+      };
+    }
+    if (!actor) throw new TypeError('active actor binding is missing');
+    const reboundActor = rebindEntityLifetimeReference(this.identity!, actor, action.actorId, 'actor');
+    if (!reboundActor.ok) throw new TypeError(reboundActor.reason);
+    if (!action.targetEntityId) {
+      if (target) throw new TypeError('target binding has no target entity');
+      return { actor: reboundActor.reference, target: null };
+    }
+    if (!target) throw new TypeError('active target binding is missing');
+    const reboundTarget = rebindEntityLifetimeReference(this.identity!, target, action.targetEntityId, 'target');
+    if (!reboundTarget.ok) {
+      this.settleRestoredAction(action, reboundTarget.reason);
+      return { actor: reboundActor.reference, target: { ...target } };
+    }
+    return { actor: reboundActor.reference, target: reboundTarget.reference };
+  }
+
+  private settleRestoredAction(action: ActorAction, reason: string): void {
+    action.status = 'failed';
+    action.endedAt = action.startedAt;
+    action.reason = reason;
+  }
+
   private validateInput(input: ActorActionInput, now: number): void {
     if (!input.actorId?.trim() || !Number.isFinite(now)) throw new TypeError('Action identity or time is invalid.');
+    if (
+      Object.prototype.hasOwnProperty.call(input, 'actorIdentity') ||
+      Object.prototype.hasOwnProperty.call(input, 'targetIdentity')
+    )
+      throw new TypeError('Action identity binding must be supplied by the host.');
     if (!['move-to', 'wander', 'attack', 'flee', 'eat', 'idle', 'go-to-poi'].includes(input.type))
       throw new TypeError('Action type is invalid.');
     if (input.targetPosition && (input.targetPosition.length !== 3 || !input.targetPosition.every(Number.isFinite)))

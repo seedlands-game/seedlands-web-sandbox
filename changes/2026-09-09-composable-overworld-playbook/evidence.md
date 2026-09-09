@@ -100,3 +100,13 @@ reviewer 同时确认新长期测试覆盖独立包 exports、真实字节/副�
 - 随后串行执行 `pnpm build`，exit 0；无新的生产代码修改发生在这两项检查之后。文档仅补终态，独立审阅已收敛。最终 S1 源码/配置/测试摘要见 [source receipt](evidence/s1-source-receipt.json)。
 - 原批准 spec/附件字节及 ECS 六份绑定摘要再次一致；生产 lockfile 没有新增 ECS。保存本地语义阶段 commit；整个 change 仍 Implementing，未 push/发 PR/merge，T04–T14 的产品交付不因此完成。
 - 下一门明确来自已批准 D3：具体 `bitecs@0.4.0` 生产依赖与适配合同经精确 hash 批准后，继续 S2 owner/存档迁移。S3–S6 未开始，不重复申请原方案批准。
+
+## 自主推进与项目 registry 决定
+
+用户批准 ECS 补充合同并授权自主持续推进 S2–S6，原始准入合同字节保存在 `evidence/ecs-admission-approved.txt`。安装首先遇到配置源缺失已锁定 `devalue@5.9.2`：正常 add 及经 pnpm 源码定位后的单命令关闭 peer 去重尝试均返回 `ERR_PNPM_NO_MATCHING_VERSION`，未修改生产 manifest/lock。只读 `pnpm view devalue versions --json` 的 47 个版本不含 5.9.2；公共 npm 的 `/devalue/5.9.2` 与 `/devalue/latest` 均实际 HTTP 200、version=5.9.2。
+
+用户随后明确指示本项目全部使用 npmjs 公共源并记住该约定，因此在本项目 `.npmrc` 新增 registry=https://registry.npmjs.org/；保留既有其他配置，不修改宿主机全局 registry。该来源调整有本轮明确授权，候选仍为已批准 bitecs 0.4.0，旧包版本、完整性与供应链门禁不变。
+
+### npmjs 生产依赖安装读回
+
+用户明确要求本项目使用 npmjs 后，仅在仓库 `.npmrc` 增加 `registry=https://registry.npmjs.org/`。`pnpm config get registry` 读回一致，正常 `pnpm --filter @seedlands/game-core add --save-exact bitecs@0.4.0` 成功退出；保留现有供应链检查，未改变全局配置。package/lock diff 仅新增精确 bitecs 依赖、integrity 和空依赖快照，无无关升级。实际生产安装包的 87 个文件逐一计算 SHA-256，与已获批 `evidence/bitecs-artifact-receipt.json` 全部一致；元数据为 bitecs 0.4.0 / MPL-2.0。当前源配置不追认为旧实验安装的网络传输来源。

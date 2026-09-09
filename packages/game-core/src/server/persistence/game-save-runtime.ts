@@ -1,5 +1,5 @@
 import { chunkKey } from '../../world/voxel';
-import type { GameplaySnapshotV3 } from '../gameplay/gameplay-runtime';
+import type { GameplaySnapshotV4 } from '../gameplay/gameplay-runtime';
 import type { ServerChunk } from '../game-server-types';
 import type { ChunkPersistence } from './chunk-persistence';
 import { createChunkSnapshot } from './create-chunk-snapshot';
@@ -20,7 +20,7 @@ type Options = {
   persistence?: Persistence;
   chunks: Map<string, ServerChunk>;
   getWorldRevision: () => number;
-  createGameplaySnapshot: () => GameplaySnapshotV3;
+  createGameplaySnapshot: () => GameplaySnapshotV4;
   markGameplayPersisted: (revision: number) => void;
   clone: CoreClone;
 };

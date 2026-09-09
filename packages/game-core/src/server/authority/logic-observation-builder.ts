@@ -190,7 +190,9 @@ export class AuthorityLogicObservationBuilder {
   }
 
   identityRevision(entity: GameplayEntity): number {
-    const signature = `${entity.type}:${entity.archetype ?? ''}:${entity.stack?.itemId ?? ''}`;
+    const reference = this.server.createEntityReference(entity.id);
+    if (!reference) return 0;
+    const signature = `${reference.epoch}:${reference.lifetime}:${entity.type}:${entity.archetype ?? ''}:${entity.stack?.itemId ?? ''}`;
     const current = this.entityIdentities.get(entity.id);
     if (current?.signature === signature) return current.revision;
     const revision = ++this.identityRevisionSequence;

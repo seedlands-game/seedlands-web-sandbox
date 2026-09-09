@@ -1,4 +1,4 @@
-import { Inventory } from './inventory';
+import { Inventory, type InventoryAccess } from './inventory';
 import { ItemIds, assertItemStack, type ItemStack } from './item-registry';
 
 export type Recipe = Readonly<{
@@ -82,7 +82,7 @@ export function getRecipe(id: string): Recipe {
 
 export const listRecipes = (): readonly Recipe[] => registry.list();
 
-export const listCraftableRecipes = (inventory: Inventory): readonly Recipe[] =>
+export const listCraftableRecipes = (inventory: InventoryAccess): readonly Recipe[] =>
   registry
     .list()
     .filter(
@@ -92,7 +92,7 @@ export const listCraftableRecipes = (inventory: Inventory): readonly Recipe[] =>
     );
 
 export function craftRecipe(
-  inventory: Inventory,
+  inventory: InventoryAccess,
   recipeId: string,
 ):
   | { success: true; recipe: Recipe }

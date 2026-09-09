@@ -17,6 +17,7 @@ import { PoiRegistry, type PoiInput } from './poi-registry';
 import { resolveActionTarget, updateActorActive } from './autonomy-helpers';
 import { tickAuthorityActorRules, type ActorAuthorityRulesContext } from './actor-authority-rules';
 import type { CoreClone } from '../../runtime/platform-ports';
+import type { EntityIdentityPort } from './action-identity';
 import {
   CombatRuntime,
   createMeleeDefinitionRegistry,
@@ -61,7 +62,15 @@ export class AutonomyRuntime {
   private actionInterruptionCount = 0;
 
   constructor(private readonly options: Options) {
-    this.actions = new ActionRuntime(options.clone);
+    const identity: EntityIdentityPort = {
+      referenceFor: (entityId) => options.entities.createReference(entityId),
+      resolve: (reference) => options.entities.resolveReference(reference)?.id ?? null,
+      rebind: (reference) => {
+        const current = options.entities.createReference(reference.entityId);
+        return current?.lifetime === reference.lifetime ? current : null;
+      },
+    };
+    this.actions = new ActionRuntime(options.clone, identity);
     this.navigator = new GroundNavigator(options.getVoxel);
     this.perception = new PerceptionRuntime({
       entities: options.entities,
@@ -77,6 +86,7 @@ export class AutonomyRuntime {
         applyDamage: () => null,
       },
       options.meleeDefinitions ? createMeleeDefinitionRegistry(options.meleeDefinitions) : undefined,
+      identity,
     );
   }
 
@@ -100,6 +110,7 @@ export class AutonomyRuntime {
       active: false,
       wanderIndex: 0,
     };
+    this.bindActorNeeds(actor);
     this.actors.set(entityId, actor);
     updateActorActive(actor, this.options.entities, this.options.isPlayerAlive);
     return cloneActor(actor);
@@ -267,7 +278,10 @@ export class AutonomyRuntime {
       this.pois.restore(snapshot.pois);
       this.actions.restore(snapshot.actions);
       this.actors.clear();
-      restored.forEach((actor, id) => this.actors.set(id, actor));
+      restored.forEach((actor, id) => {
+        this.bindActorNeeds(actor);
+        this.actors.set(id, actor);
+      });
       this.time = snapshot.time;
       this.stepAccumulator = snapshot.stepAccumulator;
       this.needsAccumulator = snapshot.needsAccumulator;
@@ -323,6 +337,19 @@ export class AutonomyRuntime {
       finishSuccess: (id, result) => this.finishSuccess(id, result),
       finishFailure: (id, reason) => this.finishFailure(id, reason),
     };
+  }
+
+  private bindActorNeeds(actor: ActorState): void {
+    const state = this.options.entities.actorStateAccess(actor.entityId);
+    state.hunger = actor.hunger;
+    Object.defineProperty(actor, 'hunger', {
+      enumerable: true,
+      configurable: true,
+      get: () => state.hunger,
+      set: (value: number) => {
+        state.hunger = value;
+      },
+    });
   }
 
   private finishSuccess(id: string, result?: unknown): void {

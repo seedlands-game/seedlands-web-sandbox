@@ -1,3 +1,4 @@
+import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { clearAuthorityHorizontalVelocity } from './authority-input-neutralization';
 import {
   bodyWorldAabb,
@@ -27,7 +28,13 @@ import type {
 } from './authority-session-types';
 import { VoxelCollisionWorld, type LoadedVoxelSource } from './voxel-collision-world';
 import { bodyActiveChunkKeys } from './authority-physics-active-chunks';
-import { selectAuthorityPhysicsInput, ZERO_AUTHORITY_PHYSICS_INPUT } from './authority-physics-input';
+import {
+  selectAuthorityPhysicsInput,
+  worldItemAttraction,
+  ZERO_AUTHORITY_PHYSICS_INPUT,
+  acceptBoundPhysicsIntents,
+  isAuthorityPlayerBindingCurrent,
+} from './authority-physics-input';
 
 export type * from './authority-session-types';
 
@@ -78,6 +85,7 @@ export class AuthoritySession {
   private readonly physicsCost = new BoundedCostSamples();
   private readonly scheduler: MultiRateScheduler;
   private readonly input: InputCommandBuffer;
+  private readonly playerReference: EntityLifetimeReference | null;
   private readonly collisionWorld: VoxelCollisionWorld;
   private readonly bodies = new Map<string, AuthorityBodySnapshot>();
   private readonly logicIntents = new Map<string, LogicIntent>();
@@ -103,12 +111,21 @@ export class AuthoritySession {
     this.clock = new ActiveMonotonicClock(options.startTimeMs);
     this.scheduler = new MultiRateScheduler({ ...options.frequencies, maxPhysicsCatchUpSteps: 4 });
     this.input = new InputCommandBuffer(options.epoch, 'player-input');
+    this.playerReference = options.server.createEntityReference?.(options.playerId) ?? null;
     this.collisionWorld = new VoxelCollisionWorld(options.voxelSource, options.requestUnknownChunk);
     this.refreshBodies();
     for (const id of this.bodies.keys()) this.requestBodyRecovery(id, 'initialization', 2);
   }
 
+  get playerBindingCurrent(): boolean {
+    return isAuthorityPlayerBindingCurrent(this.playerReference, this.options.server);
+  }
+
   receiveInput(command: InputCommand): SequenceDecision {
+    if (!this.playerBindingCurrent) {
+      this.input.clear();
+      return 'wrong-epoch';
+    }
     return this.input.push(command);
   }
 
@@ -127,10 +144,12 @@ export class AuthoritySession {
 
   receiveLogicIntents(epoch: string, intents: readonly LogicIntent[]) {
     if (epoch !== this.options.epoch) return false;
-    intents.forEach((intent) => {
-      if (intent.expiresAtPhysicsTick >= this.physicsTick) this.logicIntents.set(intent.entityId, intent);
-    });
-    return true;
+    return acceptBoundPhysicsIntents(
+      this.logicIntents,
+      intents,
+      this.physicsTick,
+      this.options.server.resolveEntityReference,
+    );
   }
 
   requestBodyRecovery(entityId: string, reason: BodyRecoveryReason, maxDistance: number): boolean {
@@ -234,6 +253,7 @@ export class AuthoritySession {
   private stepPhysics(dt: number) {
     this.collisionWorld.beginStep();
     this.processRecoveryQueue();
+    if (!this.playerBindingCurrent) this.input.clear();
     const input = this.input.consumeForTick(this.physicsTick);
     const entities = this.options.server.queryEntities().sort((left, right) => left.id.localeCompare(right.id));
     const pickupTargets = [...(this.options.server.queryPickupTargets?.() ?? [])].sort((left, right) =>
@@ -258,6 +278,7 @@ export class AuthoritySession {
         input,
         this.logicIntents,
         this.physicsTick,
+        this.options.server.resolveEntityReference,
       );
       const initialState = toBodyState(entity);
       const trackPickupCursor =
@@ -290,7 +311,7 @@ export class AuthoritySession {
           );
       }
       if (target) selectedTargets.set(entity.id, target.id);
-      const attraction = target ? this.itemAttraction(initialState, target.position) : null;
+      const attraction = target ? worldItemAttraction(initialState, target.position) : null;
       const result = stepBody({
         state: initialState,
         config: attraction ? { ...config, groundAcceleration: 0, airAcceleration: 0 } : config,
@@ -355,21 +376,6 @@ export class AuthoritySession {
     if (snapshot.body === body) return snapshot;
     const probe = probeBodyContacts({ state: body, config, world: this.collisionWorld });
     return { ...snapshot, body, grounded: probe.grounded, contacts: probe.contacts };
-  }
-
-  private itemAttraction(state: BodyState, target: BodyState['position']): BodyState['velocity'] | null {
-    const delta = {
-      x: target.x - state.position.x,
-      y: target.y - state.position.y,
-      z: target.z - state.position.z,
-    };
-    const distance = Math.hypot(delta.x, delta.y, delta.z);
-    if (distance <= Number.EPSILON) return null;
-    return {
-      x: (delta.x / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
-      y: (delta.y / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
-      z: (delta.z / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
-    };
   }
 
   private processPickups(selectedTargets: ReadonlyMap<string, string>): void {

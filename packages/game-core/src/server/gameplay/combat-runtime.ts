@@ -1,3 +1,19 @@
+import {
+  entityReferenceExecutionFailure,
+  type EntityIdentityPort,
+  type EntityLifetimeReference,
+} from '../simulation/action-identity';
+import {
+  decodeBoundCombatSnapshot,
+  encodeBoundCombatSnapshot,
+  validateCombatSnapshot,
+  type CombatRuntimeSnapshot,
+  type CombatRuntimeSnapshotV2,
+} from './combat-runtime-snapshot';
+
+export type * from './combat-runtime-snapshot';
+export { emptyCombatRuntimeSnapshot } from './combat-runtime-snapshot';
+
 export type CombatPhase = 'windup' | 'hit' | 'recovery';
 export type CombatOutcome = 'hit' | 'miss' | 'cancelled';
 
@@ -31,13 +47,6 @@ export type CombatSnapshot = Readonly<{
   lastResult: CombatResultSnapshot | null;
 }>;
 
-export type CombatRuntimeSnapshot = Readonly<{
-  version: 1;
-  actionSequence: number;
-  resultSequence: number;
-  combatants: readonly Readonly<{ actorId: string; combat: CombatSnapshot }>[];
-}>;
-
 export type MeleeStepDefinition = Readonly<{
   damage: number;
   windupSeconds: number;
@@ -69,12 +78,15 @@ type InternalActiveCombat = {
   phase: CombatPhase;
   phaseElapsedSeconds: number;
   bufferedTargetId: string | null;
+  targetIdentity: EntityLifetimeReference | null;
+  bufferedTargetIdentity: EntityLifetimeReference | null;
 };
 
 type CombatantState = {
   active: InternalActiveCombat | null;
   lastResult: CombatResultSnapshot | null;
   lockoutSeconds: number;
+  actorIdentity: EntityLifetimeReference | null;
 };
 
 export type CombatRuntimeCallbacks = Readonly<{
@@ -164,6 +176,7 @@ export class CombatRuntime {
   constructor(
     private readonly callbacks: CombatRuntimeCallbacks,
     private readonly registry: MeleeDefinitionRegistry = defaultRegistry,
+    private readonly identity?: EntityIdentityPort,
   ) {}
 
   hasDefinition(id: string): boolean {
@@ -176,6 +189,10 @@ export class CombatRuntime {
     if (!definition) return { success: false, reason: 'invalid-definition' };
     if (!this.callbacks.actorAvailable(actorId)) return { success: false, reason: 'invalid-attacker' };
     if (!this.callbacks.targetAvailable(targetId)) return { success: false, reason: 'invalid-target' };
+    const actorIdentity = this.identity?.referenceFor(actorId) ?? null;
+    const targetIdentity = this.identity?.referenceFor(targetId) ?? null;
+    if (this.identity && !actorIdentity) return { success: false, reason: 'invalid-attacker' };
+    if (this.identity && !targetIdentity) return { success: false, reason: 'invalid-target' };
     const currentState = this.combatants.get(actorId);
     const existing = currentState?.active ?? null;
     if (existing) {
@@ -186,13 +203,15 @@ export class CombatRuntime {
       const validation = this.callbacks.validateHit(actorId, targetId, definition);
       if (validation) return { success: false, reason: validation };
       existing.bufferedTargetId = targetId;
+      existing.bufferedTargetIdentity = targetIdentity ? { ...targetIdentity } : null;
       return { success: true, actionId: existing.actionId, buffered: true };
     }
     if (currentState && currentState.lockoutSeconds > 0) return { success: false, reason: 'cooldown' };
     const validation = this.callbacks.validateHit(actorId, targetId, definition);
     if (validation) return { success: false, reason: validation };
     const actionId = createActionId?.() ?? `combat-${++this.actionSequence}`;
-    const state = currentState ?? { active: null, lastResult: null, lockoutSeconds: 0 };
+    const state = currentState ?? { active: null, lastResult: null, lockoutSeconds: 0, actorIdentity: null };
+    state.actorIdentity = actorIdentity ? { ...actorIdentity } : null;
     state.active = {
       actionId,
       definitionId,
@@ -201,6 +220,8 @@ export class CombatRuntime {
       phase: 'windup',
       phaseElapsedSeconds: 0,
       bufferedTargetId: null,
+      targetIdentity: targetIdentity ? { ...targetIdentity } : null,
+      bufferedTargetIdentity: null,
     };
     this.combatants.set(actorId, state);
     if (definition.steps[0].windupSeconds === 0) this.enterHit(actorId, state, definition);
@@ -208,7 +229,25 @@ export class CombatRuntime {
   }
 
   retain(actorId: string, actionId: string): CombatRequestResult {
-    const active = this.combatants.get(actorId)?.active;
+    const state = this.combatants.get(actorId);
+    const active = state?.active;
+    if (state && active?.actionId === actionId) {
+      const actorFailure = entityReferenceExecutionFailure(this.identity, state.actorIdentity, actorId, 'actor');
+      if (actorFailure) {
+        this.cancel(actorId, state, actorFailure);
+        return { success: false, reason: actorFailure };
+      }
+      const targetFailure = entityReferenceExecutionFailure(
+        this.identity,
+        active.targetIdentity,
+        active.targetId,
+        'target',
+      );
+      if (targetFailure) {
+        this.cancel(actorId, state, targetFailure);
+        return { success: false, reason: targetFailure };
+      }
+    }
     return active?.actionId === actionId
       ? { success: true, actionId, buffered: active.bufferedTargetId !== null }
       : { success: false, reason: 'action-mismatch' };
@@ -238,7 +277,12 @@ export class CombatRuntime {
     if (!actorId.trim() || !Number.isFinite(seconds) || seconds < 0)
       throw new TypeError('Legacy combat lockout is invalid.');
     if (seconds === 0) return;
-    const state = this.combatants.get(actorId) ?? { active: null, lastResult: null, lockoutSeconds: 0 };
+    const state = this.combatants.get(actorId) ?? {
+      active: null,
+      lastResult: null,
+      lockoutSeconds: 0,
+      actorIdentity: null,
+    };
     if (!state.active) state.lockoutSeconds = Math.max(state.lockoutSeconds, seconds);
     this.combatants.set(actorId, state);
   }
@@ -261,6 +305,10 @@ export class CombatRuntime {
   }
 
   snapshot(): CombatRuntimeSnapshot {
+    if (this.identity)
+      return encodeBoundCombatSnapshot(this.actionSequence, this.resultSequence, this.combatants, (actorId) =>
+        this.snapshotFor(actorId),
+      );
     return {
       version: 1,
       actionSequence: this.actionSequence,
@@ -273,7 +321,7 @@ export class CombatRuntime {
     const snapshot = raw as CombatRuntimeSnapshot;
     if (
       !snapshot ||
-      snapshot.version !== 1 ||
+      (snapshot.version !== 1 && snapshot.version !== 2) ||
       !Number.isSafeInteger(snapshot.actionSequence) ||
       snapshot.actionSequence < 0 ||
       !Number.isSafeInteger(snapshot.resultSequence) ||
@@ -281,17 +329,26 @@ export class CombatRuntime {
       !Array.isArray(snapshot.combatants)
     )
       throw new TypeError('Combat snapshot header is invalid.');
+    if (snapshot.version === 2) return this.restoreBoundSnapshot(snapshot);
     const restored = new Map<string, CombatantState>();
     for (const entry of snapshot.combatants) {
       if (!entry?.actorId?.trim() || restored.has(entry.actorId))
         throw new TypeError('Combat actor is invalid or duplicated.');
-      this.validateCombatSnapshot(entry.combat, snapshot.resultSequence);
+      validateCombatSnapshot(entry.combat, snapshot.resultSequence, (id) => this.requireDefinition(id));
       restored.set(entry.actorId, {
-        active: entry.combat.active ? { ...entry.combat.active, bufferedTargetId: null } : null,
+        active: entry.combat.active
+          ? {
+              ...entry.combat.active,
+              bufferedTargetId: null,
+              targetIdentity: null,
+              bufferedTargetIdentity: null,
+            }
+          : null,
         lastResult: cloneResult(entry.combat.lastResult),
         // An active projection already includes any buffered next step in this value.
         // Preserve that authority promise even though restore deliberately discards the queued target and cancels the action.
         lockoutSeconds: entry.combat.cooldownRemainingSeconds,
+        actorIdentity: null,
       });
     }
     this.combatants.clear();
@@ -317,7 +374,21 @@ export class CombatRuntime {
         state.lockoutSeconds = round(state.lockoutSeconds - seconds);
         return;
       }
+      const actorIdentityFailure = entityReferenceExecutionFailure(
+        this.identity,
+        state.actorIdentity,
+        actorId,
+        'actor',
+      );
+      if (actorIdentityFailure) return this.cancel(actorId, state, actorIdentityFailure);
       if (!this.callbacks.actorAvailable(actorId)) return this.cancel(actorId, state, 'attacker-dead');
+      const targetIdentityFailure = entityReferenceExecutionFailure(
+        this.identity,
+        active.targetIdentity,
+        active.targetId,
+        'target',
+      );
+      if (targetIdentityFailure) return this.cancel(actorId, state, targetIdentityFailure);
       if (active.phase === 'windup' && !this.callbacks.targetAvailable(active.targetId))
         return this.cancel(actorId, state, 'target-missing');
       const definition = this.requireDefinition(active.definitionId);
@@ -336,7 +407,9 @@ export class CombatRuntime {
       } else if (active.bufferedTargetId && active.comboStep + 1 < definition.steps.length) {
         active.comboStep += 1;
         active.targetId = active.bufferedTargetId;
+        active.targetIdentity = active.bufferedTargetIdentity;
         active.bufferedTargetId = null;
+        active.bufferedTargetIdentity = null;
         active.phase = 'windup';
         active.phaseElapsedSeconds = 0;
         if (this.phaseDuration(active, definition) === 0) this.enterHit(actorId, state, definition);
@@ -357,6 +430,15 @@ export class CombatRuntime {
   private enterHit(actorId: string, state: CombatantState, definition: MeleeDefinition): void {
     const active = state.active;
     if (!active) return;
+    const actorIdentityFailure = entityReferenceExecutionFailure(this.identity, state.actorIdentity, actorId, 'actor');
+    if (actorIdentityFailure) return this.cancel(actorId, state, actorIdentityFailure);
+    const targetIdentityFailure = entityReferenceExecutionFailure(
+      this.identity,
+      active.targetIdentity,
+      active.targetId,
+      'target',
+    );
+    if (targetIdentityFailure) return this.cancel(actorId, state, targetIdentityFailure);
     active.phase = 'hit';
     active.phaseElapsedSeconds = 0;
     const stepDefinition = definition.steps[active.comboStep];
@@ -439,47 +521,17 @@ export class CombatRuntime {
     return round(currentRemaining + next.windupSeconds + next.hitSeconds + next.recoverySeconds);
   }
 
-  private validateCombatSnapshot(combat: CombatSnapshot, resultSequence: number): void {
-    if (!combat || !Number.isFinite(combat.cooldownRemainingSeconds) || combat.cooldownRemainingSeconds < 0)
-      throw new TypeError('Combat projection is invalid.');
-    if (combat.lastResult) {
-      const result = combat.lastResult;
-      if (
-        !Number.isSafeInteger(result.sequence) ||
-        result.sequence < 0 ||
-        result.sequence > resultSequence ||
-        !result.actionId.trim() ||
-        !result.definitionId.trim() ||
-        !result.targetId.trim() ||
-        !Number.isSafeInteger(result.comboStep) ||
-        result.comboStep < 0 ||
-        !['hit', 'miss', 'cancelled'].includes(result.outcome) ||
-        !Number.isFinite(result.damage) ||
-        result.damage < 0
-      )
-        throw new TypeError('Combat result is invalid.');
-    }
-    if (!combat.active) return;
-    const active = combat.active;
-    const definition = this.requireDefinition(active.definitionId);
-    if (
-      !active.actionId.trim() ||
-      !active.targetId.trim() ||
-      !Number.isSafeInteger(active.comboStep) ||
-      active.comboStep < 0 ||
-      active.comboStep >= definition.steps.length ||
-      active.comboLength !== definition.steps.length ||
-      !['windup', 'hit', 'recovery'].includes(active.phase) ||
-      !Number.isFinite(active.phaseElapsedSeconds) ||
-      active.phaseElapsedSeconds < 0 ||
-      !Number.isFinite(active.phaseDurationSeconds) ||
-      active.phaseDurationSeconds < 0 ||
-      active.phaseDurationSeconds !== this.phaseDuration({ ...active, bufferedTargetId: null }, definition) ||
-      active.phaseElapsedSeconds > active.phaseDurationSeconds ||
-      typeof active.canBuffer !== 'boolean' ||
-      typeof active.buffered !== 'boolean'
-    )
-      throw new TypeError('Active combat projection is invalid.');
+  private restoreBoundSnapshot(snapshot: CombatRuntimeSnapshotV2): void {
+    if (!this.identity) throw new TypeError('Combat snapshot version 2 requires an entity identity port.');
+    const decoded = decodeBoundCombatSnapshot(snapshot, {
+      identity: this.identity,
+      definitionFor: (id) => this.requireDefinition(id),
+    });
+    this.combatants.clear();
+    decoded.combatants.forEach((state, actorId) => this.combatants.set(actorId, state));
+    this.actionSequence = snapshot.actionSequence;
+    this.resultSequence = decoded.resultSequence;
+    this.lifecycleEvents.splice(0, this.lifecycleEvents.length, ...decoded.events);
   }
 
   private requireDefinition(id: string): MeleeDefinition {
@@ -488,10 +540,3 @@ export class CombatRuntime {
     return definition;
   }
 }
-
-export const emptyCombatRuntimeSnapshot = (): CombatRuntimeSnapshot => ({
-  version: 1,
-  actionSequence: 0,
-  resultSequence: 0,
-  combatants: [],
-});

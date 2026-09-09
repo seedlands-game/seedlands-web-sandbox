@@ -1,3 +1,4 @@
+import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { TransactionDeduplicator, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type {
@@ -30,7 +31,7 @@ import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from '.
 import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 import type { AuthorityRuntimeOptions } from './authority-runtime-options';
 import { AuthorityLogicCandidates } from './authority-logic-candidates';
-import { acceptLogicIntentBatch } from './authority-logic-intent-acceptance';
+import { acceptLogicIntentBatch, isValidLogicIntent } from './authority-logic-intent-acceptance';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -94,6 +95,8 @@ export class AuthorityRuntime {
         return server.fluidDiagnostics;
       },
       getEntity: (id: string) => server.getEntity(id),
+      createEntityReference: (id: string) => server.createEntityReference(id),
+      resolveEntityReference: (reference: EntityLifetimeReference) => server.resolveEntityReference(reference) !== null,
       queryEntities: () => server.queryEntities(),
       updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) =>
         server.updateEntityWithoutSnapshot(id, update),
@@ -267,9 +270,10 @@ export class AuthorityRuntime {
       physicsHz: this.frequencies.physicsHz,
       currentEntities: this.server.queryEntities(),
       identityRevision: (entity) => this.logicObservationBuilder.identityRevision(entity),
+      referenceFor: (id) => this.server.createEntityReference(id),
       currentChunkRevisions: (reads) => this.currentChunkRevisions(reads),
       applyAction: (entityId, action) => this.applyLogicAction(entityId, action),
-      validIntent: (intent) => this.validLogicIntent(intent),
+      validIntent: isValidLogicIntent,
     });
     if (canonicalChanged) this.session.commitExternalState(false);
     return this.session.receiveLogicIntents(batch.epoch, intents);
@@ -393,8 +397,19 @@ export class AuthorityRuntime {
 
   async performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
     const submittedAction = this.options.platform.clone(action);
+    const target =
+      submittedAction.type === 'attack' ? this.server.createEntityReference(submittedAction.targetId) : null;
+    const rejectStale = (reason: string): AuthorityActionResult => ({
+      submittedAction,
+      result: { success: false, reason },
+      gameplay: this.view(),
+      commits: [],
+    });
+    if (!this.session.playerBindingCurrent) return rejectStale('stale-control-binding');
     if (!(await this.mutationPreparation.prepareAction(submittedAction, this.playerId)))
       return unavailableAuthorityPlayerAction(submittedAction, this.view());
+    if (!this.session.playerBindingCurrent) return rejectStale('stale-control-binding');
+    if (target && !this.server.resolveEntityReference(target)) return rejectStale('stale-target-lifetime');
     const before = this.serverStateVersion();
     const result = applyAuthorityPlayerAction(this.server, this.playerId, submittedAction, (commit) =>
       this.recordWorldCommit(commit),
@@ -511,20 +526,6 @@ export class AuthorityRuntime {
 
   private applyLogicAction(entityId: string, action: LogicIntentBatch['intents'][number]['action']) {
     return action ? this.server.applyActorAuthorityAction(entityId, action) : null;
-  }
-
-  private validLogicIntent(intent: LogicIntentBatch['intents'][number]): boolean {
-    if (
-      !Number.isFinite(intent.wish.x) ||
-      !Number.isFinite(intent.wish.z) ||
-      ![-1, 0, 1].includes(intent.verticalIntent)
-    )
-      return false;
-    const action = intent.action;
-    if (!action) return true;
-    if (action.type === 'move-to') return action.target.length === 3 && action.target.every(Number.isFinite);
-    if (action.type === 'start-existing-action') return Boolean(action.actionId.trim());
-    return Boolean(action.targetId.trim());
   }
 
   private serverStateVersion() {

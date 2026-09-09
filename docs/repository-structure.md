@@ -89,3 +89,5 @@ Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟�
 Playbook 代码只能从显式 `mod-api` 或自己的包目录导入。`seedlands/pack-api-boundary` 对静态 import/re-export、动态 import、require 与 import type 做正反例检查；无法静态定位的导入拒绝。这里约束的是仓库内受检源码，不是恶意 JavaScript 沙箱，也不自动给任意外部源码加隔离。跨 Pack 能力通过注册合同消费，不导入另一 Pack 的私有文件。
 
 发布 Pack 的字节/路径/摘要校验属于 `scripts/pack-integrity.mjs` 工程适配；core 只校验已接收描述的业务合同，不加入 Node 文件系统或摘要计算依赖。ECS 准入实验与未批准的适配方案保留在当前 change，不因实验通过就增加生产依赖。
+
+实体 ECS 适配留在 `packages/game-core/src/server/gameplay/`：`ecs-entity-owner.ts` 拥有 per-world bitECS 实例；`ecs-actor-components.ts` / `ecs-actor-state.ts` 拥有 actor 组件和受身份绑定的访问门面。`EntityStore` 负责兼容 API 与派生空间索引，不能保留第二份权威实体数据。Action 身份合同归 `server/simulation/action-identity.ts`，战斗快照编解码归 `server/gameplay/combat-runtime-snapshot.ts`。

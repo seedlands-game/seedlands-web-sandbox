@@ -1,5 +1,12 @@
 import type { WorldCommitResult, WorldEditBatch } from './game-server';
-import type { ActorArchetype, EntityQuery, EntitySpawn, EntityUpdate, GameplayEntity } from './gameplay/entity-store';
+import type {
+  ActorArchetype,
+  EntityQuery,
+  EntitySpawn,
+  EntityUpdate,
+  GameplayEntity,
+  EntityLifetimeReference,
+} from './gameplay/entity-store';
 import { GameplayRuntime } from './gameplay/gameplay-runtime';
 import { legacyPlayerPositionToFeet } from './gameplay/gameplay-snapshot';
 import type { ItemStack } from './gameplay/item-registry';
@@ -17,7 +24,7 @@ type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 export abstract class GameServerGameplayFacade {
   protected readonly gameplay: GameplayRuntime;
   private readonly legacyEntityIds = new Set<string>();
-  private restoredVersion: 1 | 2 | 3 | null = null;
+  private restoredVersion: 1 | 2 | 3 | 4 | null = null;
 
   protected constructor(
     private readonly gameplayPersistence: Persistence | undefined,
@@ -82,6 +89,12 @@ export abstract class GameServerGameplayFacade {
   getEntity(id: string): GameplayEntity | null {
     const entity = this.gameplay.getEntity(id);
     return entity && this.legacyEntityIds.has(id) ? this.legacyEntity(entity) : entity;
+  }
+  createEntityReference(id: string): EntityLifetimeReference | null {
+    return this.gameplay.entities.createReference(id);
+  }
+  resolveEntityReference(reference: EntityLifetimeReference): GameplayEntity | null {
+    return this.gameplay.entities.resolveReference(reference);
   }
   updateEntity(id: string, update: EntityUpdate): GameplayEntity {
     const entity = this.gameplay.updateEntity(id, update);

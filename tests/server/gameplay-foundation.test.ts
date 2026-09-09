@@ -17,6 +17,7 @@ import {
 } from '../../packages/game-core/src/server/gameplay/combat-runtime';
 import { GameServer } from '../../packages/game-core/src/server/game-server';
 import { Voxel } from '../../packages/game-core/src/world/voxel';
+import type { GameplaySnapshotV3 } from '../../packages/game-core/src/server/gameplay/gameplay-snapshot';
 
 const openWorld = (meleeDefinitions?: readonly MeleeDefinition[]) => {
   const cells = new Map<string, number>();
@@ -227,7 +228,7 @@ describe('authoritative melee runtime', () => {
     });
   });
 
-  it('cancels on slot changes and death, and never restores in-flight damage', () => {
+  it('cancels on slot changes and death, while V4 resumes bound in-flight damage once', () => {
     const slot = openWorld();
     slot.runtime.giveItem('player', { itemId: ItemIds.WoodSword, count: 1 });
     slot.runtime.attackEntity('player', 'target');
@@ -263,15 +264,15 @@ describe('authoritative melee runtime', () => {
     });
     restored.restoreSnapshot(source.runtime.createSnapshot());
     expect(restored.getEntity('target')).toMatchObject({ health: 20 });
-    expect(restored.getPlayerState('player').combat?.active).toBeNull();
-    expect(restored.getPlayerState('player').combat?.lastResult).toMatchObject({
-      outcome: 'cancelled',
-      reason: 'restore-cancelled',
+    expect(restored.getPlayerState('player').combat?.active).toMatchObject({
+      definitionId: 'wood-sword',
+      targetId: 'target',
+      phase: 'windup',
     });
-    const lockout = restored.getPlayerState('player').combat?.cooldownRemainingSeconds ?? 0;
-    expect(lockout).toBeGreaterThan(0);
-    expect(restored.attackEntity('player', 'target')).toMatchObject({ success: false, reason: 'cooldown' });
-    restored.advanceRules(lockout);
+    restored.advanceRules(0.18);
+    expect(restored.getEntity('target')).toMatchObject({ health: 15 });
+    restored.advanceRules(1);
+    expect(restored.getEntity('target')).toMatchObject({ health: 15 });
     expect(restored.attackEntity('player', 'target')).toMatchObject({ success: true });
   });
 
@@ -299,7 +300,7 @@ describe('authoritative melee runtime', () => {
     });
   });
 
-  it('preserves the full buffered combo lockout on restore without replaying its damage', () => {
+  it('preserves the full buffered combo phase and settles each remaining hit once on V4 restore', () => {
     const source = openWorld();
     source.runtime.giveItem('player', { itemId: ItemIds.WoodSword, count: 1 });
     expect(source.runtime.attackEntity('player', 'target')).toMatchObject({ success: true, buffered: false });
@@ -312,16 +313,16 @@ describe('authoritative melee runtime', () => {
     restored.restoreSnapshot(source.runtime.createSnapshot());
     expect(restored.getEntity('target')).toMatchObject({ health: 15 });
     expect(restored.getPlayerState('player').combat).toMatchObject({
-      active: null,
+      active: { phase: 'hit', buffered: true, comboStep: 0 },
       cooldownRemainingSeconds: 0.92,
-      lastResult: { outcome: 'cancelled', reason: 'restore-cancelled' },
+      lastResult: { outcome: 'hit', damage: 5 },
     });
     restored.advanceRules(0.32);
     expect(restored.getEntity('target')).toMatchObject({ health: 15 });
-    expect(restored.attackEntity('player', 'target')).toMatchObject({ success: false, reason: 'cooldown' });
-    restored.advanceRules(0.6);
-    expect(restored.getEntity('target')).toMatchObject({ health: 15 });
-    expect(restored.attackEntity('player', 'target')).toMatchObject({ success: true });
+    restored.advanceRules(0.14);
+    expect(restored.getEntity('target')).toMatchObject({ health: 8 });
+    restored.advanceRules(1);
+    expect(restored.getEntity('target')).toMatchObject({ health: 8 });
   });
 
   it('validates and restores active combat with the injected melee definitions', () => {
@@ -344,13 +345,17 @@ describe('authoritative melee runtime', () => {
     });
 
     const restored = openWorld(definitions);
-    expect(restored.runtime.restoreSnapshot(source.runtime.createSnapshot())).toMatchObject({ version: 3 });
+    expect(restored.runtime.restoreSnapshot(source.runtime.createSnapshot())).toMatchObject({ version: 4 });
     expect(restored.runtime.getEntity('target')).toMatchObject({ health: 20 });
     expect(restored.runtime.getPlayerState('player').combat).toMatchObject({
-      active: null,
+      active: { phase: 'windup', phaseElapsedSeconds: 0.3, phaseDurationSeconds: 0.8 },
       cooldownRemainingSeconds: 0.8,
-      lastResult: { outcome: 'cancelled', reason: 'restore-cancelled' },
+      lastResult: null,
     });
+    restored.runtime.advanceRules(0.5);
+    expect(restored.runtime.getEntity('target')).toMatchObject({ health: 14 });
+    restored.runtime.advanceRules(1);
+    expect(restored.runtime.getEntity('target')).toMatchObject({ health: 14 });
   });
 
   it('keeps unarmed immediate compatibility and runs NPC attacks through the same staged owner', () => {
@@ -386,9 +391,22 @@ describe('authoritative melee runtime', () => {
   });
 
   it('migrates a legacy player cooldown into the combat owner', () => {
-    const source = openWorld().runtime.createSnapshot();
-    delete source.simulation.combat;
-    source.players[0].attackCooldownSeconds = 0.3;
+    const sourceRuntime = openWorld().runtime;
+    const current = sourceRuntime.createSnapshot();
+    const legacySimulation = structuredClone(current.simulation);
+    delete legacySimulation.combat;
+    const source: GameplaySnapshotV3 = {
+      version: 3,
+      revision: current.revision,
+      gameplayTime: current.gameplayTime,
+      worldTime: current.worldTime,
+      entitySequence: current.entityStore.sequence,
+      entities: current.entityStore.entities,
+      players: [{ ...sourceRuntime.getPlayerState('player'), attackCooldownSeconds: 0.3 }],
+      simulation: { ...legacySimulation, actions: { version: 1, sequence: 0, actions: [] } },
+      coordinateSchema: current.coordinateSchema,
+      physicsSchema: current.physicsSchema,
+    };
     const restored = openWorld().runtime;
 
     expect(restored.restoreSnapshot(source)).toMatchObject({ version: 3 });

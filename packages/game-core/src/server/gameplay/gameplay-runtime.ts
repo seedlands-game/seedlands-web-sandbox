@@ -12,6 +12,7 @@ import {
 } from './entity-store';
 import { getItemCapability, listItemDefinitions, type ItemStack } from './item-registry';
 import { PlayerState, type PlayerSnapshot } from './player-state';
+import type { ActorComponentAccess } from './ecs-actor-components';
 import { craftRecipe, listCraftableRecipes, listRecipes } from './recipe-registry';
 import { getVoxelGameplayDefinition } from './voxel-gameplay';
 import * as GameplaySnapshot from './gameplay-snapshot';
@@ -21,7 +22,13 @@ import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { CombatSnapshot, MeleeDefinition } from './combat-runtime';
 import { applyCombatDamage, isCombatantAvailable, validateCombatHit } from './gameplay-combat';
 
-export type { GameplaySnapshot, GameplaySnapshotV1, GameplaySnapshotV2, GameplaySnapshotV3 } from './gameplay-snapshot';
+export type {
+  GameplaySnapshot,
+  GameplaySnapshotV1,
+  GameplaySnapshotV2,
+  GameplaySnapshotV3,
+  GameplaySnapshotV4,
+} from './gameplay-snapshot';
 
 type Position = [number, number, number];
 type GameplayCallbacks = {
@@ -94,7 +101,7 @@ export class GameplayRuntime {
   spawn(input: EntitySpawn): GameplayEntity {
     const entity = this.entities.spawn(input);
     if (entity.type === 'player')
-      this.players.set(entity.id, new PlayerState(entity.id, clonePosition(entity.position)));
+      this.players.set(entity.id, new PlayerState(entity.id, clonePosition(entity.position), undefined, this.entities));
     if (input.archetype) this.simulation.registerActor(entity.id, { archetype: input.archetype });
     this.touch();
     return entity;
@@ -105,8 +112,7 @@ export class GameplayRuntime {
   }
 
   spawnWorldItem(position: Position, stack: ItemStack): GameplayEntity {
-    const entity = this.spawn({ type: 'world-item', position, stack });
-    return entity;
+    return this.spawn({ type: 'world-item', position, stack });
   }
 
   spawnAutonomous(input: EntitySpawn, registration: ActorRegistration): GameplayEntity {
@@ -159,12 +165,12 @@ export class GameplayRuntime {
   }
 
   getInventory(id: string) {
-    const player = this.player(id);
+    const player = this.inventoryActor(id);
     return { slots: player.inventory.snapshot(), selectedSlot: player.selectedSlot };
   }
 
   giveItem(id: string, stack: ItemStack): GameplayResult<{ inventory: ReturnType<GameplayRuntime['getInventory']> }> {
-    const player = this.player(id);
+    const player = this.inventoryActor(id);
     if (!player.inventory.add(stack)) return { success: false, reason: 'inventory-full' };
     this.inventoryOperationCount += 1;
     this.touch();
@@ -172,14 +178,14 @@ export class GameplayRuntime {
   }
 
   removeItem(id: string, stack: ItemStack): GameplayResult {
-    if (!this.player(id).inventory.remove(stack)) return { success: false, reason: 'missing-items' };
+    if (!this.inventoryActor(id).inventory.remove(stack)) return { success: false, reason: 'missing-items' };
     this.inventoryOperationCount += 1;
     this.touch();
     return { success: true };
   }
 
   selectHotbarSlot(id: string, slot: number): GameplayResult {
-    const player = this.player(id);
+    const player = this.inventoryActor(id);
     const previous = player.selectedSlot;
     if (!player.selectSlot(slot)) return { success: false, reason: 'invalid-slot' };
     if (slot !== previous) this.simulation.cancelCombat(id, 'slot-changed');
@@ -188,7 +194,7 @@ export class GameplayRuntime {
   }
 
   moveInventorySlot(id: string, source: number, target: number): GameplayResult {
-    const player = this.player(id);
+    const player = this.inventoryActor(id);
     const active = this.requireAlive(player);
     if (active) return active;
     if (!player.inventory.moveStack(source, target)) return { success: false, reason: 'cannot-move-item' };
@@ -200,7 +206,7 @@ export class GameplayRuntime {
   }
 
   craft(id: string, recipeId: string): ReturnType<typeof craftRecipe> | { success: false; reason: 'player-dead' } {
-    const player = this.player(id);
+    const player = this.inventoryActor(id);
     if (player.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
     const result = craftRecipe(player.inventory, recipeId);
     if (result.success) {
@@ -211,7 +217,7 @@ export class GameplayRuntime {
   }
 
   listCraftable(id: string) {
-    return listCraftableRecipes(this.player(id).inventory);
+    return listCraftableRecipes(this.inventoryActor(id).inventory);
   }
 
   listRecipes() {
@@ -250,7 +256,7 @@ export class GameplayRuntime {
   }
 
   pickupItem(playerId: string, entityId: string): GameplayResult {
-    const player = this.player(playerId);
+    const player = this.inventoryActor(playerId);
     const active = this.requireAlive(player);
     if (active) return active;
     const item = this.entities.get(entityId);
@@ -268,7 +274,7 @@ export class GameplayRuntime {
   }
 
   dropItem(playerId: string, slot: number, count: number): GameplayResult<{ entity: GameplayEntity }> {
-    const player = this.player(playerId);
+    const player = this.inventoryActor(playerId);
     const active = this.requireAlive(player);
     if (active) return active;
     if (!Number.isInteger(slot) || slot < 0 || slot >= player.inventory.capacity)
@@ -311,11 +317,11 @@ export class GameplayRuntime {
   }
 
   useSelectedItem(id: string): GameplayResult {
-    return this.useInventoryItem(id, this.player(id).selectedSlot);
+    return this.useInventoryItem(id, this.inventoryActor(id).selectedSlot);
   }
 
   useInventoryItem(id: string, slot: number): GameplayResult {
-    const player = this.player(id);
+    const player = this.inventoryActor(id);
     const active = this.requireAlive(player);
     if (active) return active;
     if (!Number.isInteger(slot) || slot < 0 || slot >= player.inventory.capacity)
@@ -324,10 +330,14 @@ export class GameplayRuntime {
     if (!selected) return { success: false, reason: 'no-selected-item' };
     const consume = getItemCapability(selected.itemId, 'consume');
     if (!consume) return { success: false, reason: 'item-not-usable' };
-    if (player.hunger >= player.maxHunger) return { success: false, reason: 'hunger-full' };
+    if (player.hungerMeaning === 'satiety' ? player.hunger >= player.maxHunger : player.hunger <= 0)
+      return { success: false, reason: 'hunger-full' };
     player.inventory.removeFromSlot(slot, 1);
     this.inventoryOperationCount += 1;
-    player.hunger = Math.min(player.maxHunger, player.hunger + consume.hungerRestore);
+    player.hunger =
+      player.hungerMeaning === 'satiety'
+        ? Math.min(player.maxHunger, player.hunger + consume.hungerRestore)
+        : Math.max(0, player.hunger - consume.hungerRestore);
     this.touch();
     return { success: true };
   }
@@ -400,18 +410,14 @@ export class GameplayRuntime {
     return { commits };
   }
 
-  createSnapshot(): GameplaySnapshot.GameplaySnapshotV3 {
-    return {
-      version: 3,
-      revision: this.revision,
-      gameplayTime: this.time,
-      worldTime: this.callbacks.getWorldTime(),
-      entitySequence: this.entities.nextSequence,
-      entities: this.entities.exportSnapshot(),
-      players: [...this.players.values()].map((player) => player.snapshot()),
-      simulation: this.simulation.snapshot(),
-      ...GameplaySnapshot.createGameplaySnapshotMetadata(),
-    };
+  createSnapshot(): GameplaySnapshot.GameplaySnapshotV4 {
+    return GameplaySnapshot.createGameplaySnapshotV4(
+      this.revision,
+      this.time,
+      this.callbacks.getWorldTime(),
+      this.entities.exportComponentSnapshot(),
+      this.simulation.snapshot(),
+    );
   }
 
   metrics() {
@@ -432,31 +438,21 @@ export class GameplayRuntime {
     };
   }
 
-  restoreSnapshot(raw: unknown): { version: 1 | 2 | 3; worldTime?: number } {
-    try {
-      const { snapshot, sourceVersion, players, legacyCombatLockouts } = GameplaySnapshot.validateGameplaySnapshot(
-        raw,
-        {
-          getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
-          getWorldTime: this.callbacks.getWorldTime,
-          clone: this.callbacks.platform.clone,
-          meleeDefinitions: this.callbacks.meleeDefinitions,
-        },
-      );
-      this.entities.restore(snapshot.entities, snapshot.entitySequence);
-      this.players.clear();
-      players.forEach((player, id) => this.players.set(id, player));
-      this.time = snapshot.gameplayTime;
-      this.revision = snapshot.revision;
-      this.persistedRevision = snapshot.revision;
-      this.simulation.restore(GameplaySnapshot.simulationSnapshotFor(snapshot));
-      legacyCombatLockouts.forEach((seconds, actorId) => this.simulation.restoreCombatLockout(actorId, seconds));
-      return sourceVersion === 1 ? { version: 1 } : { version: sourceVersion, worldTime: snapshot.worldTime };
-    } catch (error) {
-      throw new Error(`Invalid gameplay snapshot: ${error instanceof Error ? error.message : String(error)}`, {
-        cause: error,
-      });
-    }
+  restoreSnapshot(raw: unknown): { version: 1 | 2 | 3 | 4; worldTime?: number } {
+    return GameplaySnapshot.restoreGameplayRuntimeSnapshot(raw, {
+      getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
+      getWorldTime: this.callbacks.getWorldTime,
+      clone: this.callbacks.platform.clone,
+      meleeDefinitions: this.callbacks.meleeDefinitions,
+      entities: this.entities,
+      simulation: this.simulation,
+      players: this.players,
+      installMetadata: (gameplayTime, revision) => {
+        this.time = gameplayTime;
+        this.revision = revision;
+        this.persistedRevision = revision;
+      },
+    });
   }
 
   markPersisted(revision: number): void {
@@ -500,6 +496,7 @@ export class GameplayRuntime {
       return;
     }
     action.elapsedSeconds += seconds;
+    player.breakAction = action;
     if (action.elapsedSeconds + Number.EPSILON < action.requiredSeconds) return;
     player.breakAction = null;
     const definition = getVoxelGameplayDefinition(action.voxel);
@@ -515,6 +512,10 @@ export class GameplayRuntime {
     this.simulation.cancelCombat(player.entityId, 'attacker-dead');
     const position = this.entities.get(player.entityId)!.position;
     player.inventory.clear().forEach((stack) => this.spawnWorldItem(clonePosition(position), stack));
+  }
+
+  private inventoryActor(id: string): ActorComponentAccess {
+    return this.entities.actorStateAccess(id);
   }
 
   private player(id: string): PlayerState {
@@ -541,7 +542,7 @@ export class GameplayRuntime {
     );
   }
 
-  private requireAlive(player: PlayerState): Failure | null {
+  private requireAlive(player: Pick<PlayerState, 'lifecycle'>): Failure | null {
     return player.lifecycle === 'alive' ? null : { success: false, reason: 'player-dead' };
   }
 

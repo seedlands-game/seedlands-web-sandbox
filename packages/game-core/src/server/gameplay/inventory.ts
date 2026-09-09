@@ -2,6 +2,27 @@ import { assertItemStack, getItemDefinition, type ItemId, type ItemStack } from 
 
 export type InventorySlot = ItemStack | null;
 
+export type InventoryAccess = Pick<Inventory, keyof Inventory>;
+
+/** Resolve on every operation so retained handles cannot mutate an entity after removal or restore. */
+export const createInventoryAccess = (resolve: () => Inventory): InventoryAccess =>
+  Object.freeze({
+    get capacity() {
+      return resolve().capacity;
+    },
+    snapshot: () => resolve().snapshot(),
+    slot: (index: number) => resolve().slot(index),
+    contains: (stack: ItemStack) => resolve().contains(stack),
+    canAdd: (stack: ItemStack) => resolve().canAdd(stack),
+    add: (stack: ItemStack) => resolve().add(stack),
+    remove: (stack: ItemStack) => resolve().remove(stack),
+    split: (source: number, count: number, target: number) => resolve().split(source, count, target),
+    moveStack: (source: number, target: number) => resolve().moveStack(source, target),
+    removeFromSlot: (index: number, count: number) => resolve().removeFromSlot(index, count),
+    replace: (snapshot: readonly InventorySlot[]) => resolve().replace(snapshot),
+    clear: () => resolve().clear(),
+  });
+
 const cloneSlot = (slot: InventorySlot): InventorySlot => (slot ? { ...slot } : null);
 
 export class Inventory {

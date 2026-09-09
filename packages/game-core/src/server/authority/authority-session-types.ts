@@ -1,3 +1,4 @@
+import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import type { BodyState, Contact } from '../../physics';
 import type { CostSampleWindow } from '../../runtime/bounded-cost-samples';
 import type { FluidAuthorityDiagnostics } from '../fluid/fluid-transaction';
@@ -22,6 +23,8 @@ export type AuthorityServerPort = {
   readonly worldTime: number;
   readonly fluidDiagnostics?: FluidAuthorityDiagnostics;
   getEntity: (id: string) => AuthorityEntity | null;
+  createEntityReference?: (id: string) => EntityLifetimeReference | null;
+  resolveEntityReference?: (reference: EntityLifetimeReference) => boolean;
   queryEntities: () => AuthorityEntity[];
   updateEntity: (
     id: string,
@@ -36,6 +39,7 @@ export type AuthorityServerPort = {
 
 export type LogicIntent = Readonly<{
   entityId: string;
+  entityReference?: EntityLifetimeReference;
   wish: Readonly<{ x: number; z: number }>;
   jumpRequested: boolean;
   verticalIntent: -1 | 0 | 1;

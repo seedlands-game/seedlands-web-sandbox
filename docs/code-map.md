@@ -147,7 +147,8 @@ Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通�
 
 - core 的 `server/gameplay/item-registry.ts` 和 `recipe-registry.ts` 持有类型化物品能力与配方定义；`combat-runtime.ts` 持有分阶段攻击执行器，`gameplay-combat.ts` 负责玩家命令与执行器的组合。模型名称与外观绑定不参与伤害判定。
 - `app/ui/combat-ui-projector.ts` 与 `client/presentation/combat-viewmodel-pose.ts` 将权威阶段投影到 HUD 和第一人称动作，不推进权威时间。`app/gameplay/model-animation.ts` 将同一动作事实定位到骨骼片段。
-- 有界 ECS 组件化尚未准入；当前实体状态仍由 `EntityStore` 的既有实现持有，不能将动作与动画扩展视为 ECS 迁移完成。
+- `server/gameplay/ecs-entity-owner.ts` 以每世界 bitECS 实例持有稳定实体身份、位置/速度/生命和 actor 组件；`EntityStore` 保留空间查询与兼容门面。`ecs-actor-components.ts` / `ecs-actor-state.ts` 定义需求、库存/装备、控制与玩家状态访问，`PlayerState` 转发到同一组件 owner。内部 EID 不进入协议或存档。
+- `gameplay-snapshot.ts` 的 V4 组件 codec 保存稳定 ID/lifetime；`simulation/action-identity.ts` 将动作和战斗引用绑定到当前 epoch。Authority 在观察、接收与执行前复核身份，恢复后不能使用旧组件访问器或旧控制输入。旧 V1/V2/V3 由显式迁移保留。
 
 PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给既有 [game-runtime-controls.ts](../apps/web/src/app/game-runtime-controls.ts)，`Game` 保持装配入口并满足文件规模门禁；地图状态仍归 `UiBridge`。
 
