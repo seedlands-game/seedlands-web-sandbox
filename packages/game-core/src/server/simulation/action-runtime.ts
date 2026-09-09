@@ -46,9 +46,17 @@ export class ActionRuntime {
     };
   }
 
-  start(input: ActorActionInput, now: number): ActorAction {
+  canStart(): boolean {
+    return Number.isSafeInteger(this.sequence + 1);
+  }
+
+  validateStart(input: ActorActionInput, now: number): void {
     this.validateInput(input, now);
-    if (!Number.isSafeInteger(this.sequence + 1)) throw new RangeError('Action sequence is exhausted.');
+    if (!this.canStart()) throw new RangeError('Action sequence is exhausted.');
+  }
+
+  start(input: ActorActionInput, now: number): ActorAction {
+    this.validateStart(input, now);
     this.interruptActor(input.actorId, now, 'replaced');
     const action: ActorAction = {
       ...input,

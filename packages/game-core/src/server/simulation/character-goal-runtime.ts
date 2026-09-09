@@ -139,6 +139,7 @@ export class CharacterGoalRuntime {
   }
 
   private startMovement(record: CharacterRecord, target: readonly number[], targetEntityId?: string): void {
+    if (!this.options.canStartAction()) return this.fail(record, 'action-sequence-exhausted', true);
     const targetPosition = characterPosition(target, 'Character movement target');
     const entity = this.callbacks.requireEntity(record.entityId);
     const plan = this.options.plan(entity.position, targetPosition);

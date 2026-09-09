@@ -88,6 +88,7 @@ export class AutonomyRuntime {
       observe: (entityId) => this.observe(entityId),
       poi: (id) => this.pois.get(id),
       action: (id) => this.actions.get(id),
+      canStartAction: () => this.actions.canStart(),
       startAction: (actorId, input) => this.startAction(actorId, input),
       markActionRunning: (actionId, path) => this.actions.markRunning(actionId, path),
       setActionPathIndex: (actionId, pathIndex) => this.actions.setPathIndex(actionId, pathIndex),
@@ -206,6 +207,7 @@ export class AutonomyRuntime {
 
   startAction(actorId: string, input: Omit<ActorActionInput, 'actorId'>): ActorAction {
     if (!this.actors.has(actorId)) throw new RangeError(`Unknown autonomous actor: ${actorId}`);
+    this.actions.validateStart({ ...input, actorId }, this.time);
     this.interruptAction(actorId, 'replaced');
     return this.actions.start({ ...input, actorId }, this.time);
   }
