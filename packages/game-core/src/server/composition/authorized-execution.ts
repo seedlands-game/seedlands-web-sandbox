@@ -74,12 +74,19 @@ export const snapshotInvocationInput = (
   return snapshot;
 };
 
-export type ModuleExecutionContext = Readonly<{
+export type ModuleExecutionBinding =
+  | Readonly<{ kind?: 'actor'; originalActorId: string; systemId?: never }>
+  | Readonly<{ kind: 'system'; systemId: string; originalActorId?: never }>;
+type ModuleContextBase = Readonly<{
   principal: WorldPrincipal;
-  originalActorId: string;
   provenance: Readonly<{ packId: string; moduleId: string }>;
   target: WorldAuthorizationTarget;
 }>;
+export type ActorModuleExecutionContext = ModuleContextBase &
+  Readonly<{ kind: 'actor'; originalActorId: string; systemId?: never }>;
+export type SystemModuleExecutionContext = ModuleContextBase &
+  Readonly<{ kind: 'system'; systemId: string; originalActorId?: never }>;
+export type ModuleExecutionContext = ActorModuleExecutionContext | SystemModuleExecutionContext;
 
 export type ModuleResourceExecutor = Readonly<
   Partial<
@@ -107,18 +114,22 @@ export function createAuthorizedModuleExecution(
     composition: WorldComposition;
     moduleId: string;
     principalId: string;
-    originalActorId: string;
     authorizer: WorldResourceAuthorizer;
     clone: CoreClone;
     executors: Readonly<Record<string, ModuleResourceExecutor>>;
-  }>,
+  }> &
+    ModuleExecutionBinding,
 ): AuthorizedModuleExecution {
-  const { moduleId, principalId, originalActorId, authorizer, clone } = input;
+  const { moduleId, principalId, authorizer, clone } = input;
   if (typeof clone !== 'function') throw new TypeError('Authorized module execution requires a core clone port.');
   const binding = input.composition.moduleBindings[moduleId];
   if (!binding) throw new TypeError(`Unknown assembled module: ${moduleId}`);
   const principal = authorizer.principal(principalId);
-  if (principal?.boundEntityId && principal.boundEntityId !== originalActorId)
+  if (input.kind === 'system' && (principal?.kind !== 'system' || principal.boundEntityId !== undefined))
+    throw new TypeError('System execution requires an explicit unbound system principal.');
+  if (input.kind !== 'system' && principal?.kind === 'system')
+    throw new TypeError('System principal cannot execute as an actor.');
+  if (input.kind !== 'system' && principal?.boundEntityId && principal.boundEntityId !== input.originalActorId)
     throw new TypeError('Original actor does not match the host-bound principal.');
   const permissions = Object.freeze(
     binding.permissions.map((permission) =>
@@ -141,6 +152,8 @@ export function createAuthorizedModuleExecution(
   };
   return Object.freeze({
     invoke(invocation: ModuleInvocation): ModuleInvocationResult {
+      if (input.kind === 'system' && invocation.operation === 'execute' && invocation.target.kind !== 'world')
+        throw new TypeError('System execution requires a world target.');
       const request = Object.freeze({
         resource: invocation.resource,
         operation: invocation.operation,
@@ -162,12 +175,11 @@ export function createAuthorizedModuleExecution(
           code: 'MODULE_RESOURCE_EXECUTOR_MISSING',
           message: 'No host executor is registered for this world resource operation.',
         });
-      const context = Object.freeze({
-        principal: decision.principal,
-        originalActorId,
-        provenance,
-        target: request.target,
-      });
+      const common = { principal: decision.principal, provenance, target: request.target };
+      const context: ModuleExecutionContext =
+        input.kind === 'system'
+          ? Object.freeze({ ...common, kind: 'system', systemId: input.systemId })
+          : Object.freeze({ ...common, kind: 'actor', originalActorId: input.originalActorId });
       const snapshot = snapshotInvocationInput(invocation.input, clone);
       return Object.freeze({ ok: true, value: executor(context, snapshot) });
     },

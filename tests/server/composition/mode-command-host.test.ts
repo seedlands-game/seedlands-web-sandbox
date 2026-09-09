@@ -40,6 +40,7 @@ it('executes through an ordinary self principal in the actual Headless Harness',
       authorization: {
         principals: [{ id: 'human', boundEntityId: 'ordinary' }],
         rules: [
+          { effect: 'allow', resources: ['seedlands.ruleset'], operations: ['read'], scope: 'any' },
           {
             effect: 'allow',
             principal: { ids: ['human'] },

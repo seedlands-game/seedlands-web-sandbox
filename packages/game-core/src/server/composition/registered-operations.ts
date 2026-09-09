@@ -95,25 +95,66 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
   }
 
   function bind(source: RegisteredOperationBinding): RegisteredOperationExecution {
-    const binding = Object.freeze({
-      moduleId: source.moduleId,
-      principalId: source.principalId,
-      originalActorId: source.originalActorId,
-    });
+    const binding: RegisteredOperationBinding =
+      source.kind === 'system'
+        ? Object.freeze({
+            kind: 'system',
+            moduleId: source.moduleId,
+            principalId: source.principalId,
+            systemId: source.systemId,
+          })
+        : Object.freeze({
+            kind: 'actor',
+            moduleId: source.moduleId,
+            principalId: source.principalId,
+            originalActorId: source.originalActorId,
+          });
     if (!options.composition.moduleBindings[binding.moduleId]) throw new TypeError('Unknown module binding.');
     const principal = options.authorizer.principal(binding.principalId);
-    if (principal?.boundEntityId && principal.boundEntityId !== binding.originalActorId)
-      throw new TypeError('Original actor does not match the host-bound principal.');
+    let systemOperations: readonly string[] = [];
+    if (binding.kind === 'system') {
+      if (principal?.kind !== 'system' || principal.boundEntityId !== undefined)
+        throw new TypeError('System binding requires an explicit unbound system principal.');
+      const system = options.composition.registrations.systems.find(
+        (entry) => entry.moduleId === binding.moduleId && entry.definition.id === binding.systemId,
+      );
+      const lifecycle =
+        binding.systemId === `${binding.moduleId}/lifecycle`
+          ? options.composition.registrations.lifecycles.find((entry) => entry.moduleId === binding.moduleId)
+          : undefined;
+      if (!system && !lifecycle) throw new TypeError('Unknown system execution binding.');
+      systemOperations = system
+        ? [system.definition.operationId]
+        : [lifecycle!.definition.startOperationId, lifecycle!.definition.stopOperationId].filter(
+            (id): id is string => id !== undefined,
+          );
+    } else {
+      if (principal?.kind === 'system') throw new TypeError('System principal cannot execute as an actor.');
+      if (typeof binding.originalActorId !== 'string' || !binding.originalActorId.trim())
+        throw new TypeError('Original actor identity is missing.');
+      if (principal?.boundEntityId && principal.boundEntityId !== binding.originalActorId)
+        throw new TypeError('Original actor does not match the host-bound principal.');
+    }
     const execution: RegisteredOperationExecution = Object.freeze({
       invoke(request: RegisteredOperationRequest): RegisteredOperationResult {
         if (options.bindingValid?.(binding) === false)
-          return fail('ACTOR_REFERENCE_STALE', 'The bound actor lifetime has ended.');
+          return fail(
+            binding.kind === 'system' ? 'SYSTEM_REFERENCE_STALE' : 'ACTOR_REFERENCE_STALE',
+            'The bound execution lifetime has ended.',
+          );
         if (disposed) return fail('RUNTIME_DISPOSED', 'The module runtime has been disposed.');
         if (busy) return fail('TRANSACTION_REENTRANT', 'Synchronous transaction reentry is forbidden.');
         const owned = operations.get(request.operationId);
         if (!owned) return fail('OPERATION_UNKNOWN', 'The operation is not registered.');
         if (owned.moduleId !== binding.moduleId)
           return fail('OPERATION_NOT_OWNED', 'The operation belongs to another module.');
+        if ((owned.definition.executionKind ?? 'actor') !== (binding.kind ?? 'actor'))
+          return fail('EXECUTION_KIND_MISMATCH', 'Actor and system execution kinds are disjoint.');
+        if (
+          binding.kind === 'system' &&
+          (request.target.kind !== 'world' || !systemOperations.includes(request.operationId))
+        )
+          return fail('SYSTEM_OPERATION_NOT_BOUND', 'The world operation does not match the registered system.');
         if (options.transactionScope && !options.transactionScope.enter())
           return fail('TRANSACTION_REENTRANT', 'The world already has an active transaction.');
         busy = true;
@@ -160,18 +201,42 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
               },
             });
           };
-          const value = copy(owned.definition.run(context, input, candidateFor(binding)));
-          for (const rule of options.composition.registrations.rules) {
-            if (rule.definition.operationId !== request.operationId) continue;
-            const ruleBinding = Object.freeze({ ...binding, moduleId: rule.moduleId });
-            const ruleContext = permit(ruleBinding, owned.definition.resource, 'execute', context.target);
-            const result = rule.definition.apply(ruleContext, input, candidateFor(ruleBinding));
-            if (result !== undefined) {
-              if (!result || typeof result.reject !== 'string' || !result.reject.trim())
-                throw new TypeError('Rules must synchronously accept or return a rejection.');
-              return reject('RULE_REJECTED', result.reject);
+          const applyRules = (stage: 'before' | 'after', startingInput: ModuleInvocationValue | undefined) => {
+            let effectiveInput = startingInput;
+            for (const rule of options.composition.registrations.rules) {
+              if (rule.definition.operationId !== request.operationId || (rule.definition.stage ?? 'after') !== stage)
+                continue;
+              const ruleBinding = Object.freeze({ ...binding, moduleId: rule.moduleId });
+              const ruleContext = permit(ruleBinding, owned.definition.resource, 'execute', context.target);
+              const result = rule.definition.apply(ruleContext, effectiveInput, candidateFor(ruleBinding));
+              if (result === undefined) continue;
+              const decision = copy(result);
+              if (
+                !decision ||
+                typeof decision !== 'object' ||
+                Array.isArray(decision) ||
+                Object.keys(decision).length !== 1
+              )
+                throw new TypeError('Rules must synchronously accept, reject, or transform before input.');
+              if ('reject' in decision && typeof decision.reject === 'string' && decision.reject.trim())
+                return reject('RULE_REJECTED', decision.reject);
+              if (stage !== 'before' || !('input' in decision))
+                throw new TypeError('Only before rules can replace operation input.');
+              effectiveInput = copy(decision.input);
             }
+            return effectiveInput;
+          };
+          const effectiveInput = applyRules('before', input);
+          let result: ModuleInvocationValue;
+          if (owned.definition.executionKind === 'system') {
+            if (context.kind !== 'system') return reject('EXECUTION_KIND_MISMATCH', 'Expected a system context.');
+            result = owned.definition.run(context, effectiveInput, candidateFor(binding));
+          } else {
+            if (context.kind !== 'actor') return reject('EXECUTION_KIND_MISMATCH', 'Expected an actor context.');
+            result = owned.definition.run(context, effectiveInput, candidateFor(binding));
           }
+          const value = copy(result);
+          applyRules('after', effectiveInput);
           for (const write of writes.values()) {
             if (states.get(write.address.componentId)!.definition.validate(write.value) !== true)
               return reject('STATE_SCHEMA_INVALID', 'A candidate violates its registered component invariant.');
@@ -188,6 +253,8 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
             context,
             revision: committed.revision,
             value,
+            ...(input === undefined ? {} : { input }),
+            ...(effectiveInput === undefined ? {} : { effectiveInput }),
             observed: observations,
             writes: changes,
           });

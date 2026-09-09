@@ -115,6 +115,7 @@ describe('module execution authorization', () => {
     ).toEqual({
       ok: true,
       value: {
+        kind: 'actor',
         principal: expect.objectContaining({ id: 'player-principal', boundEntityId: 'player-1' }),
         originalActorId: 'player-1',
         provenance: { packId: 'example:root', moduleId: 'example:inventory-module' },
@@ -256,6 +257,7 @@ describe('module execution authorization', () => {
     if (!result.ok) throw new Error('Expected authorized invocation.');
     await expect(result.value).resolves.toEqual({
       context: {
+        kind: 'actor',
         principal: expect.objectContaining({ id: 'player-principal', boundEntityId: 'player-1' }),
         originalActorId: 'player-1',
         provenance: { packId: 'example:root', moduleId: 'example:inventory-module' },

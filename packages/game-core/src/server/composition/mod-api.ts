@@ -38,3 +38,6 @@ export type { ItemDefinitionRegistry, ItemDefinitionInput, ItemStack } from '../
 export type { Recipe } from '../gameplay/recipe-registry';
 
 export { defineModeModule } from '../gameplay/modules/mode-module';
+
+export { defineRulesetModule } from '../gameplay/modules/ruleset-module';
+export type { WorldRulesetDefinition, WorldRulesetV1 } from '../gameplay/modules/ruleset-module';

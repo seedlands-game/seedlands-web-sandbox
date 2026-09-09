@@ -15,6 +15,7 @@ export function assembleOverworldPacks(artifacts: readonly VerifiedPackArtifact[
     approvedPermissions: {
       'seedlands:overworld': [
         { resource: 'seedlands.inventory', operations: ['read', 'write', 'execute'] },
+        { resource: 'seedlands.ruleset', operations: ['read'] },
         { resource: 'seedlands.mode', operations: ['read', 'write', 'execute'] },
       ],
     },

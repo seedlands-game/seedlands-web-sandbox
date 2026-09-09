@@ -1,5 +1,5 @@
 import type { WorldResourceAuthorizer } from './harness/world-authorization';
-import type { RegisteredOperationBinding, RegisteredOperationRequest } from './composition/operation-contracts';
+import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from './composition/operation-contracts';
 import type { WorldCommitResult, WorldEditBatch } from './game-server';
 import type {
   ActorArchetype,
@@ -35,7 +35,10 @@ export abstract class GameServerGameplayFacade {
     private readonly gameplayPersistence: Persistence | undefined,
     platform: CorePlatformPorts,
     content?: GameplayContent,
-    compositionOptions: Pick<GameServerOptions, 'composition' | 'allowLegacyCompositionMigration'> = {},
+    compositionOptions: Pick<
+      GameServerOptions,
+      'composition' | 'allowLegacyCompositionMigration' | 'moduleSystemAuthority'
+    > = {},
   ) {
     this.gameplay = new GameplayRuntime({
       getVoxel: (position) => this.readGameplayVoxel(...position),
@@ -48,6 +51,7 @@ export abstract class GameServerGameplayFacade {
       platform,
       content,
       composition: compositionOptions.composition,
+      moduleSystemAuthority: compositionOptions.moduleSystemAuthority,
       allowLegacyCompositionMigration: compositionOptions.allowLegacyCompositionMigration,
     });
   }
@@ -125,12 +129,12 @@ export abstract class GameServerGameplayFacade {
   getActorModeState(id: string) {
     return this.gameplay.getActorModeState(id);
   }
-  bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredOperationBinding) {
+  bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
     return this.gameplay.bindModuleOperations(authorizer, source);
   }
   invokeModuleOperation(
     authorizer: WorldResourceAuthorizer,
-    source: Omit<RegisteredOperationBinding, 'moduleId'>,
+    source: Omit<RegisteredActorOperationBinding, 'moduleId'>,
     request: RegisteredOperationRequest,
   ) {
     return this.gameplay.invokeModuleOperation(authorizer, source, request);

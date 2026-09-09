@@ -75,6 +75,13 @@ export class BrowserAuthorityIngress {
           },
           {
             effect: 'allow',
+            principal: { ids: ['browser-player'] },
+            resources: ['seedlands.ruleset'],
+            operations: ['read'],
+            scope: 'any',
+          },
+          {
+            effect: 'allow',
             principal: { ids: ['browser-command'] },
             resources: ['*'],
             operations: ['*'],

@@ -51,3 +51,18 @@
 - S4 物品实例已接入实际 ECS 世界掉落物与库存候选，give/drop/V4 restore/pickup 保持独立耐久状态。默认工具耐久扣减、工位 ECS 生命周期与注册操作尚未完成。
 
 - S3 产品接线检查点：全量 static 1351 passed / 4 skipped 与 build 已分别通过；四项真实 Browser 场景通过，截图复核发现并修复按钮布局覆盖。最终布局修复后 static/build 再次分别通过，Browser 4/4 再次通过；4173 已释放。详细失败、范围和仍缺口见 [检查点](s3-product-checkpoint.md)。剩余机制已取得一次独立只读复核，按 [闭环切口](s3-mechanism-closure.md) 实施。
+
+## S3 机制闭环恢复点
+
+- 可运行检查点已提交 `7a474da217071621930f9745ae3a700050fcddb3`，提交后工作树曾确认干净；该提交包含最终 static/build 与四项 Browser 定向验证的产品接线，未标记 S3 完成。
+- 当前 `s3_mode_ui` 名称复用为生命周期合同实施者，只拥有 lifecycle-contracts/lifecycle-registration/module-lifecycle 与自身测试、设计、证据；原 UI 路径已经归还主任务。
+- 当前 `s2_action_restore` 名称复用为持久授权来源合同实施者，只拥有 world-authorization、新 execution-origin 与自身测试、设计、证据；原 Item/Inventory 路径已经归还主任务。
+- 主任务拥有规则阶段、composition identity、真实 Gameplay/Authority/存档与后续原子 owner 集成。两个 child 不改这些路径、不运行完整 static/build、不提交。
+- before/effective input/operation/after 已补三项决定性 RED 后取得 GREEN，加既有事务回归共 2 files / 10 tests。规则阶段进入组合身份，反向跨阶段依赖在装配时拒绝。尚未声称默认 needs/combat 已迁成真实注册操作。
+
+- 持久来源 child 已返回：稳定 subject 的精确宿主映射、Pack/module 和原 actor lifetime 校验、恢复重新授权合同通过，getter 输入在读取前拒绝；当前还未接入实际 Combat 当前/缓冲动作。
+- 根任务已接入 actor/system 操作联合：独立 system principal、准确注册 system ID、world operation target；不虚构 originalActor，不允许管理员或服务主体互换。真实 manager 的 system binding 随恢复代次和 dispose 失效。独立机制 reviewer 已完成，当前只读，无源码所有权。
+- 明确 world Ruleset owner 与只读状态 observation 已接入实际 Mode 操作和 V4；before/effective input/after 阶段进入冻结组合身份。默认 needs/damage/place 规则仍待实际迁移。
+- 实际 GameplayRuntime 已接入组合世界的唯一 ModuleLifecycle 时间与 V4 moduleSchedule；新世界首次推进/保存激活，直接恢复不先 start，恢复成功使旧 binding 失效。保存前有界排空队列，仍有工作则拒绝保存。真实 0.4+恢复+0.6、无重复 start、坏 schedule 无替换、撤权拒绝、循环队列拒绝通过；当前定向 composition 14 files / 78 tests GREEN。本次新增尚未由全量 static/build 或 Browser 覆盖。
+
+- 生命周期补强已返回且归还全部路径。当前无写入 child。此轮 full static 1380 passed / 4 skipped、build 与 Browser 4/4 分别通过；失败和修复、仍缺口见 [机制检查点](s3-mechanism-checkpoint.md)。下一切片：ECS 与 World 参与者的完整预校验和无失败同步 apply，随后实际 needs/Combat 消费。未改变 S3/S6 状态。

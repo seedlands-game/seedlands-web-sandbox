@@ -84,6 +84,13 @@ const createRuntime = () => {
         {
           effect: 'allow',
           principal: { ids: ['human'] },
+          resources: ['seedlands.ruleset'],
+          operations: ['read'],
+          scope: 'any',
+        },
+        {
+          effect: 'allow',
+          principal: { ids: ['human'] },
           resources: ['seedlands.mode'],
           operations: ['read', 'write', 'execute'],
           scope: 'self',

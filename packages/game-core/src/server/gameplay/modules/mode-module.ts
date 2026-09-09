@@ -3,6 +3,13 @@ import type { ItemDefinitionRegistry } from '../item-registry';
 import { validateActorModeFacets } from '../ecs-actor-state';
 import type { ActorModeSnapshotFacets } from '../ecs-actor-components';
 
+import {
+  RULESET_COMPONENT,
+  RULESET_RESOURCE,
+  validateWorldRuleset,
+  type WorldRulesetDefinition,
+} from './ruleset-module';
+
 const RESOURCE = 'seedlands.mode';
 export const MODE_COMPONENT = 'seedlands:actor-mode';
 const data = (value: ModuleInvocationValue | undefined): Readonly<Record<string, ModuleInvocationValue>> => {
@@ -14,13 +21,20 @@ export function defineModeModule(): ModModule {
     descriptor: {
       id: 'seedlands:mode-module',
       version: '1.0.0',
-      requires: [{ id: 'seedlands:items', version: '1.0.0' }],
+      requires: [
+        { id: 'seedlands:items', version: '1.0.0' },
+        { id: RULESET_COMPONENT, version: '1.0.0' },
+      ],
       provides: [{ id: 'seedlands:actor-modes', version: '1.0.0' }],
       resources: [{ id: RESOURCE, operations: ['read', 'write', 'execute'] }],
-      permissions: [{ resource: RESOURCE, operations: ['read', 'write', 'execute'] }],
+      permissions: [
+        { resource: RESOURCE, operations: ['read', 'write', 'execute'] },
+        { resource: RULESET_RESOURCE, operations: ['read'] },
+      ],
     },
     register(api) {
       const items = api.requireCapability<ItemDefinitionRegistry>('seedlands:items');
+      const ruleset = api.requireCapability<WorldRulesetDefinition>(RULESET_COMPONENT);
       api.provideCapability(
         'seedlands:actor-modes',
         Object.freeze({
@@ -51,6 +65,7 @@ export function defineModeModule(): ModModule {
           run(context, input, state) {
             if (context.target.kind !== 'entity' || context.target.entityId !== context.originalActorId)
               throw new TypeError('Mode target must match the bound actor.');
+            validateWorldRuleset(state.read({ componentId: RULESET_COMPONENT, target: { kind: 'world' } }), ruleset);
             const address = { componentId: MODE_COMPONENT, target: context.target };
             const current = validateActorModeFacets(data(state.read(address)) as ActorModeSnapshotFacets, items);
             const args = data(input);

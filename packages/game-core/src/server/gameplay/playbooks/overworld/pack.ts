@@ -1,4 +1,10 @@
-import { definePack, defineContentModule, defineInventoryModule, defineModeModule } from '@seedlands/game-core/mod-api';
+import {
+  definePack,
+  defineContentModule,
+  defineInventoryModule,
+  defineModeModule,
+  defineRulesetModule,
+} from '@seedlands/game-core/mod-api';
 import { overworldItems } from './items';
 import { overworldRecipes } from './recipes';
 import { overworldMeleeDefinitions } from './combat';
@@ -23,6 +29,7 @@ export const pack = definePack({
       })),
       meleeDefinitions: overworldMeleeDefinitions,
     }),
+    defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule(),
     defineModeModule(),
   ],

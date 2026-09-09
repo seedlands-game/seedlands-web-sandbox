@@ -1,6 +1,10 @@
 import type { CoreClone } from '../../runtime/platform-ports';
 import type { WorldAuthorizationTarget, WorldResourceAuthorizer } from '../harness/world-authorization';
-import type { ModuleExecutionContext } from './authorized-execution';
+import type {
+  ModuleExecutionContext,
+  ActorModuleExecutionContext,
+  SystemModuleExecutionContext,
+} from './authorized-execution';
 import type { ModuleInvocationValue, WorldComposition } from './contracts';
 
 export type ModStateAddress = Readonly<{ componentId: string; target: WorldAuthorizationTarget }>;
@@ -14,26 +18,35 @@ export type ModCandidateState = Readonly<{
   read(address: ModStateAddress): ModuleInvocationValue;
   write(address: ModStateAddress, value: ModuleInvocationValue): void;
 }>;
-export type ModOperationDefinition = Readonly<{
-  id: string;
-  resource: string;
-  run(
-    context: ModuleExecutionContext,
-    input: ModuleInvocationValue | undefined,
-    state: ModCandidateState,
-  ): ModuleInvocationValue;
-}>;
-export type ModRuleDefinition = Readonly<{
+type OperationRun<Context extends ModuleExecutionContext> = (
+  context: Context,
+  input: ModuleInvocationValue | undefined,
+  state: ModCandidateState,
+) => ModuleInvocationValue;
+export type ModOperationDefinition = Readonly<{ id: string; resource: string }> &
+  (
+    | Readonly<{ executionKind?: 'actor'; run: OperationRun<ActorModuleExecutionContext> }>
+    | Readonly<{ executionKind: 'system'; run: OperationRun<SystemModuleExecutionContext> }>
+  );
+type ModRuleIdentity = Readonly<{
   id: string;
   operationId: string;
   before?: readonly string[];
   after?: readonly string[];
-  apply(
-    context: ModuleExecutionContext,
-    input: ModuleInvocationValue | undefined,
-    state: ModCandidateState,
-  ): void | Readonly<{ reject: string }>;
 }>;
+type RuleApply<Result> = (
+  context: ModuleExecutionContext,
+  input: ModuleInvocationValue | undefined,
+  state: ModCandidateState,
+) => Result;
+export type ModRuleDefinition = ModRuleIdentity &
+  (
+    | Readonly<{
+        stage: 'before';
+        apply: RuleApply<void | Readonly<{ reject: string }> | Readonly<{ input: ModuleInvocationValue }>>;
+      }>
+    | Readonly<{ stage?: 'after'; apply: RuleApply<void | Readonly<{ reject: string }>> }>
+  );
 export type ModuleOwned<Definition> = Readonly<{ moduleId: string; definition: Definition }>;
 export type OperationRegistrations = Readonly<{
   states: readonly ModuleOwned<ModStateDefinition>[];
@@ -63,10 +76,26 @@ export type CommittedOperationFact = Readonly<{
   context: ModuleExecutionContext;
   revision: number;
   value: ModuleInvocationValue;
+  input?: ModuleInvocationValue;
+  effectiveInput?: ModuleInvocationValue;
   observed: readonly ObservedModState[];
   writes: readonly ModStateWrite[];
 }>;
-export type RegisteredOperationBinding = Readonly<{ moduleId: string; principalId: string; originalActorId: string }>;
+export type RegisteredActorOperationBinding = Readonly<{
+  moduleId: string;
+  principalId: string;
+  kind?: 'actor';
+  originalActorId: string;
+  systemId?: never;
+}>;
+export type RegisteredSystemOperationBinding = Readonly<{
+  moduleId: string;
+  principalId: string;
+  kind: 'system';
+  systemId: string;
+  originalActorId?: never;
+}>;
+export type RegisteredOperationBinding = RegisteredActorOperationBinding | RegisteredSystemOperationBinding;
 export type RegisteredOperationListener = (
   fact: CommittedOperationFact,
   enqueue: (request: RegisteredOperationRequest) => boolean,

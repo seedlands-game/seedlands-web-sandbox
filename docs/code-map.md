@@ -164,3 +164,5 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 `server/gameplay/playbooks/overworld/` 保存默认 Playbook 的物品、配方与版本化旧 ID 映射；只经 `mod-api` 消费标准机制。`server/gameplay/modules/` 保存可复用机制；`server/composition/` 的注册操作、状态提交与逻辑生命周期由宿主绑定权限后执行。旧自由函数在迁移期读取同一份第一方定义，不能另维护内容副本。
 
 `server/gameplay/modules/actor-vitals-runtime.ts` 与 `block-interaction-runtime.ts` 承接原 GameplayRuntime 的生命和方块流程，迁移中的规则 owner 仍以当前 spec 为准。`server/authority/actor-movement-projection.ts` 派生模式/飞行版本并防止旧输入重放；`authority-gameplay-view.ts` 投影实际每世界内容。Browser `worker/pack-loader.ts` 与 Headless 共用构建产物身份，`scripts/build-gameplay-packs.mjs` 生成被忽略的 ESM/manifest/lock。
+
+`server/composition/execution-origin.ts` 保存稳定主体来源合同，actor/system 执行在 `authorized-execution.ts` 与 `registered-operations.ts` 分离。`server/gameplay/modules/world-ruleset-state.ts` 拥有每世界只读 Ruleset；`gameplay-module-schedule.ts` 将显式宿主 service 授权、唯一组合玩法时钟与 V4 存档 frontier 接入 GameplayRuntime。默认 needs/combat 的注册迁移状态继续以当前 change 为准。

@@ -11,3 +11,5 @@
 决定性 RED：默认注册是真实消费者而非 descriptor；0.4 秒后恢复再走 0.6 秒等价于连续 1 秒且不重跑 start；Browser/Headless 不同 alias 的同 subject 延迟动作保持授权来源；同世界生存/创造 Ruleset 不串改；致死或库存加体素联合提交在最终 apply 前失败时全部状态、版本和 facts 不变。
 
 按来源合同、生命周期合同、规则阶段与实际 owner 集成分配互斥路径。先验证各自合同，再由主任务统一真实宿主接线和冻结验收。S4 实际工位、成长与 S5 替代 provider 继续依赖此闭环；不能跳过以标记 S6。
+
+补充同次复核的系统来源裁决：采用显式 actor/system 执行联合。system 绑定独立宿主 service principal 与准确 system/lifecycle ID，没有原始 actor，只运行 world target 的 system operation；actor operation 不能用 system principal。调度 Combat 只推进待命中状态，真正伤害在提交后按保存的 actor durable origin 独立重授权。不得拿某个玩家、管理员或虚构实体填充系统原始角色，也不在本期增加 entity cadence。新增 execution-kinds RED 验证种类隔离、无 actor 的系统上下文、伪造 system ID 与管理员借用拒绝。

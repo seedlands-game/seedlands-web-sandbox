@@ -1,3 +1,4 @@
+import type { ModuleSystemAuthority } from './gameplay/modules/gameplay-module-schedule';
 import type { MeshAuthorityOverlay } from '../world/mesh';
 import type { ChunkCoord } from '../world/voxel';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
@@ -85,6 +86,7 @@ export type GameServerOptions = {
   platform: CorePlatformPorts;
   content?: GameplayContent;
   composition?: WorldComposition;
+  moduleSystemAuthority?: ModuleSystemAuthority;
   allowLegacyCompositionMigration?: boolean;
   generatorVersion?: number;
   persistence?: ChunkPersistence & Partial<GameplayPersistence>;

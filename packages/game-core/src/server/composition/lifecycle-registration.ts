@@ -1,6 +1,41 @@
 import type { ModLifecycleDefinition, ModSystemDefinition, LifecycleRegistrations } from './lifecycle-contracts';
 import type { ModOperationDefinition, ModuleOwned } from './operation-contracts';
 
+const SYSTEM_ID = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
+const TIME_SCALE = 1e9;
+const MIN_INTERVAL_UNITS = 1e6;
+
+const denseDependencies = (value: readonly string[] | undefined, label: string): readonly string[] => {
+  if (value === undefined) return Object.freeze([]);
+  if (!Array.isArray(value) || !value.every((_, index) => Object.hasOwn(value, index)))
+    throw new TypeError(`System ${label} dependencies must be a dense array.`);
+  const dependencies = value.map((id) => {
+    if (typeof id !== 'string' || !SYSTEM_ID.test(id)) throw new TypeError(`Invalid system ${label} dependency.`);
+    return id;
+  });
+  if (new Set(dependencies).size !== dependencies.length) throw new TypeError(`Duplicate system ${label} dependency.`);
+  return Object.freeze(dependencies);
+};
+
+const normalizeSystem = (definition: ModSystemDefinition): ModSystemDefinition => {
+  const cadence = definition.cadence ?? 'interval';
+  const before = denseDependencies(definition.before, 'before');
+  const after = denseDependencies(definition.after, 'after');
+  if (before.some((id) => after.includes(id))) throw new TypeError(`Conflicting system dependency: ${definition.id}`);
+  if (cadence === 'every-advance') {
+    if (definition.intervalSeconds !== undefined)
+      throw new TypeError(`Every-advance system cannot define an interval: ${definition.id}`);
+    return Object.freeze({ ...definition, cadence, before, after });
+  }
+  if (cadence !== 'interval') throw new TypeError(`Unknown system cadence: ${definition.id}`);
+  if (typeof definition.intervalSeconds !== 'number')
+    throw new TypeError(`System interval must be a safe value of at least one millisecond: ${definition.id}`);
+  const units = Math.round(definition.intervalSeconds * TIME_SCALE);
+  if (!Number.isSafeInteger(units) || units < MIN_INTERVAL_UNITS)
+    throw new TypeError(`System interval must be a safe value of at least one millisecond: ${definition.id}`);
+  return Object.freeze({ ...definition, cadence, intervalSeconds: units / TIME_SCALE, before, after });
+};
+
 export function createLifecycleRegistration() {
   const lifecycles = new Map<string, ModuleOwned<ModLifecycleDefinition>>();
   const systems = new Map<string, ModuleOwned<ModSystemDefinition>>();
@@ -15,19 +50,13 @@ export function createLifecycleRegistration() {
         },
         registerSystem(definition: ModSystemDefinition) {
           assertOpen();
-          if (!/^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/.test(definition.id) || systems.has(definition.id))
+          if (!SYSTEM_ID.test(definition.id) || systems.has(definition.id))
             throw new TypeError(`Invalid or duplicate system: ${definition.id}`);
-          if (!Number.isFinite(definition.intervalSeconds) || definition.intervalSeconds < 0.001)
-            throw new TypeError(`System interval must be at least one millisecond: ${definition.id}`);
           systems.set(
             definition.id,
             Object.freeze({
               moduleId,
-              definition: Object.freeze({
-                ...definition,
-                before: Object.freeze([...(definition.before ?? [])]),
-                after: Object.freeze([...(definition.after ?? [])]),
-              }),
+              definition: normalizeSystem(definition),
             }),
           );
         },
@@ -39,6 +68,8 @@ export function createLifecycleRegistration() {
     ): LifecycleRegistrations {
       const operationOwners = new Map(operations.map(({ moduleId, definition }) => [definition.id, moduleId]));
       const assertOwner = (moduleId: string, operationId: string) => {
+        if (operations.find((entry) => entry.definition.id === operationId)?.definition.executionKind !== 'system')
+          throw new TypeError(`Lifecycle requires a system operation: ${operationId}`);
         if (operationOwners.get(operationId) !== moduleId)
           throw new TypeError(`Lifecycle operation is missing or belongs to another module: ${operationId}`);
       };

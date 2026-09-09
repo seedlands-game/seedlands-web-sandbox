@@ -47,6 +47,9 @@ export type WorldResourceRegistration = Readonly<{
 
 export type WorldPrincipal = Readonly<{
   id: string;
+  kind?: 'actor' | 'system';
+  /** Stable host-neutral identity. Required only when an execution origin must survive this host session. */
+  subject?: string;
   labels?: readonly string[];
   boundEntityId?: string;
 }>;
@@ -113,20 +116,36 @@ const ruleMatches = (
  */
 export class WorldResourceAuthorizer {
   private readonly principals: ReadonlyMap<string, WorldPrincipal>;
+  private readonly principalsBySubject: ReadonlyMap<string, WorldPrincipal>;
   private readonly resources: ReadonlyMap<WorldResource, ReadonlySet<WorldOperation>>;
   private readonly rules: readonly WorldAuthorizationRule[];
 
   constructor(policy: WorldAuthorizationPolicy, moduleResources: readonly WorldResourceRegistration[] = []) {
     const principals = new Map<string, WorldPrincipal>();
+    const principalsBySubject = new Map<string, WorldPrincipal>();
     for (const principal of policy.principals) {
+      if (principal.kind !== undefined && principal.kind !== 'actor' && principal.kind !== 'system')
+        throw new TypeError('World principal kind is invalid.');
+      if (principal.kind === 'system' && principal.boundEntityId !== undefined)
+        throw new TypeError('System principal cannot be bound to an actor.');
       if (!principal.id.trim()) throw new TypeError('World principal id must not be empty.');
       if (principals.has(principal.id)) throw new TypeError(`Duplicate world principal: ${principal.id}`);
-      principals.set(
-        principal.id,
-        Object.freeze({ ...principal, labels: Object.freeze([...(principal.labels ?? [])]) }),
-      );
+      if (
+        principal.subject !== undefined &&
+        (typeof principal.subject !== 'string' ||
+          principal.subject.length === 0 ||
+          principal.subject.length > 256 ||
+          principal.subject.trim() !== principal.subject)
+      )
+        throw new TypeError(`World principal subject is invalid: ${principal.id}`);
+      if (principal.subject !== undefined && principalsBySubject.has(principal.subject))
+        throw new TypeError(`Duplicate world principal subject: ${principal.subject}`);
+      const frozen = Object.freeze({ ...principal, labels: Object.freeze([...(principal.labels ?? [])]) });
+      principals.set(principal.id, frozen);
+      if (frozen.subject !== undefined) principalsBySubject.set(frozen.subject, frozen);
     }
     this.principals = principals;
+    this.principalsBySubject = principalsBySubject;
     this.rules = Object.freeze(
       policy.rules.map((rule) =>
         Object.freeze({
@@ -168,6 +187,10 @@ export class WorldResourceAuthorizer {
 
   principal(id: string): WorldPrincipal | null {
     return this.principals.get(id) ?? null;
+  }
+
+  principalForSubject(subject: string): WorldPrincipal | null {
+    return this.principalsBySubject.get(subject) ?? null;
   }
 
   authorize(principalId: string, request: WorldAuthorizationRequest): WorldAuthorizationDecision {

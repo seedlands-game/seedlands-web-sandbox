@@ -28,6 +28,7 @@ function setup(allow = true, floor = true) {
       principals: [{ id: 'human', boundEntityId: 'alice' }],
       rules: allow
         ? [
+            { effect: 'allow', resources: ['seedlands.ruleset'], operations: ['read'], scope: 'any' },
             {
               effect: 'allow',
               principal: { ids: ['human'] },
@@ -106,6 +107,31 @@ describe('composed mode operations with actual ECS and physical landing', () => 
     expect(world.gameplay.createSnapshot()).toEqual(beforeInvalidAdvance);
     world.gameplay.advanceRules(0.05);
     expect(world.gameplay.getActorModeState('alice')!.flight.enabled).toBe(false);
+  });
+
+  it('drains a bounded queue before snapshot and refuses a still-pending frontier', () => {
+    const world = setup();
+    let enabled = false;
+    const unsubscribe = world.binding.subscribe((_fact, enqueue) => {
+      expect(
+        enqueue({
+          operationId: 'seedlands:set-flight',
+          target: { kind: 'entity', entityId: 'alice' },
+          input: { enabled },
+        }),
+      ).toBe(true);
+      enabled = !enabled;
+    });
+    expect(world.setMode('creative')).toMatchObject({ ok: true });
+    expect(() => world.gameplay.createSnapshot()).toThrow(/snapshot frontier budget/i);
+    unsubscribe();
+    const saved = world.gameplay.createSnapshot();
+    expect(saved.moduleSchedule?.time).toBe(saved.gameplayTime);
+    const restored = setup();
+    restored.gameplay.restoreSnapshot(saved);
+    expect(restored.gameplay.getActorModeState('alice')).toEqual(world.gameplay.getActorModeState('alice'));
+    world.gameplay.dispose();
+    restored.gameplay.dispose();
   });
 
   it('restores mode and invalidates retained operation bindings after restore or respawn', () => {

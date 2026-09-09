@@ -31,12 +31,22 @@ export function snapshotOperationIdentity(registrations: OperationRegistrations)
     ),
     operations: Object.freeze(
       registrations.operations.map(({ moduleId, definition }) =>
-        Object.freeze({ id: definition.id, resource: definition.resource, moduleId }),
+        Object.freeze({
+          id: definition.id,
+          resource: definition.resource,
+          moduleId,
+          executionKind: definition.executionKind ?? 'actor',
+        }),
       ),
     ),
     rules: Object.freeze(
       registrations.rules.map(({ moduleId, definition }) =>
-        Object.freeze({ id: definition.id, operationId: definition.operationId, moduleId }),
+        Object.freeze({
+          id: definition.id,
+          operationId: definition.operationId,
+          moduleId,
+          stage: definition.stage ?? 'after',
+        }),
       ),
     ),
   });

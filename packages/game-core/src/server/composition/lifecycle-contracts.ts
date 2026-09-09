@@ -1,13 +1,14 @@
 import type { ModuleOwned } from './operation-contracts';
 
 export type ModLifecycleDefinition = Readonly<{ startOperationId?: string; stopOperationId?: string }>;
-export type ModSystemDefinition = Readonly<{
+type ModSystemBase = Readonly<{
   id: string;
   operationId: string;
-  intervalSeconds: number;
   before?: readonly string[];
   after?: readonly string[];
 }>;
+export type ModSystemDefinition = ModSystemBase &
+  Readonly<{ cadence?: 'interval'; intervalSeconds: number } | { cadence: 'every-advance'; intervalSeconds?: never }>;
 export type LifecycleRegistrations = Readonly<{
   lifecycles: readonly ModuleOwned<ModLifecycleDefinition>[];
   systems: readonly ModuleOwned<ModSystemDefinition>[];

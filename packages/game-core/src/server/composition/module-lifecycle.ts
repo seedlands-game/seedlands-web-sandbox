@@ -1,44 +1,122 @@
 import type { WorldComposition } from './contracts';
-import type { ModuleScheduleSnapshot } from './lifecycle-contracts';
+import type { ModSystemDefinition, ModuleScheduleSnapshot } from './lifecycle-contracts';
 import type { RegisteredOperationRequest, RegisteredOperationResult } from './operation-contracts';
 
-const round = (value: number) => Math.round(value * 1e9) / 1e9;
+const TIME_SCALE = 1e9;
 const MAX_OPERATIONS_PER_ADVANCE = 256;
+const TOP_LEVEL_KEYS = ['systems', 'time', 'version'] as const;
+const ENTRY_KEYS = ['id', 'remainder'] as const;
+
+type ScheduleEntry = Readonly<{
+  id: string;
+  remainderUnits: number;
+}>;
+type DueEvent = Readonly<{
+  moduleId: string;
+  systemId: string;
+  operationId: string;
+  seconds: number;
+  atUnits: number;
+  order: number;
+}>;
+
+const exactObject = (value: unknown, keys: readonly string[], label: string): Record<string, unknown> => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value))
+    throw new TypeError(`Module schedule ${label} is invalid.`);
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) throw new TypeError(`Module schedule ${label} is invalid.`);
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const actual = Reflect.ownKeys(descriptors);
+  if (actual.length !== keys.length || keys.some((key) => !actual.includes(key)))
+    throw new TypeError(`Module schedule ${label} has unknown or missing fields.`);
+  const result: Record<string, unknown> = {};
+  for (const key of keys) {
+    const descriptor = descriptors[key];
+    if (!descriptor || !('value' in descriptor))
+      throw new TypeError(`Module schedule ${label} cannot contain accessor fields.`);
+    result[key] = descriptor.value;
+  }
+  return result;
+};
+
+const denseArray = (value: unknown, length: number): readonly unknown[] => {
+  if (!Array.isArray(value) || value.length !== length) throw new TypeError('Module schedule systems are incomplete.');
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const actual = Reflect.ownKeys(descriptors).filter((key) => key !== 'length');
+  const expected = Array.from({ length }, (_, index) => String(index));
+  if (actual.length !== length || !expected.every((key) => actual.includes(key)))
+    throw new TypeError('Module schedule systems must be a dense array without extra fields.');
+  return expected.map((key) => {
+    const descriptor = descriptors[key];
+    if (!descriptor || !('value' in descriptor))
+      throw new TypeError('Module schedule systems cannot contain accessor entries.');
+    return descriptor.value;
+  });
+};
+
+const secondsToUnits = (value: unknown, label: string, allowZero: boolean): number => {
+  if (typeof value !== 'number' || !Number.isFinite(value) || Object.is(value, -0) || value < 0)
+    throw new TypeError(`Module ${label} must be finite and non-negative.`);
+  const units = Math.round(value * TIME_SCALE);
+  if (!Number.isSafeInteger(units) || (!allowZero && units <= 0) || (value > 0 && units === 0))
+    throw new RangeError(`Module ${label} exceeds schedule precision or range.`);
+  return units;
+};
+
+const canonicalSnapshotUnits = (value: unknown, label: string): number => {
+  const units = secondsToUnits(value, `schedule ${label}`, true);
+  if (units / TIME_SCALE !== value) throw new TypeError(`Module schedule ${label} is not canonical.`);
+  return units;
+};
+
+const intervalUnits = (definition: ModSystemDefinition): number => {
+  if (definition.cadence === 'every-advance') return 0;
+  return secondsToUnits(definition.intervalSeconds, `system interval ${definition.id}`, false);
+};
 
 /** Logical scheduling only. The host binds each module to its approved service principal. */
 export function createModuleLifecycle(
   options: Readonly<{
     composition: WorldComposition;
-    invoke(moduleId: string, request: RegisteredOperationRequest): RegisteredOperationResult;
+    invoke(moduleId: string, request: RegisteredOperationRequest, systemId: string): RegisteredOperationResult;
   }>,
 ) {
   const { systems, lifecycles } = options.composition.registrations;
+  const intervals = new Map(systems.map(({ definition }) => [definition.id, intervalUnits(definition)]));
   const remainders = new Map(systems.map(({ definition }) => [definition.id, 0]));
   let status: 'created' | 'running' | 'failed' | 'disposed' = 'created';
-  let time = 0;
+  let timeUnits = 0;
   let busy = false;
-  const started: (typeof lifecycles)[number][] = [];
-  const invoke = (moduleId: string, operationId: string, seconds?: number) => {
+  const active: (typeof lifecycles)[number][] = [];
+
+  const rejectReentry = () => {
+    if (busy) throw new Error('Module lifecycle reentry is forbidden.');
+  };
+  const requireRunning = () => {
+    rejectReentry();
+    if (status !== 'running') throw new Error(`Module lifecycle is not running: ${status}`);
+  };
+  const invoke = (moduleId: string, operationId: string, seconds?: number, systemId = `${moduleId}/lifecycle`) => {
     busy = true;
     let result: RegisteredOperationResult;
     try {
-      result = options.invoke(moduleId, {
-        operationId,
-        target: { kind: 'world' },
-        ...(seconds === undefined ? {} : { input: { seconds } }),
-      });
+      result = options.invoke(
+        moduleId,
+        {
+          operationId,
+          target: { kind: 'world' },
+          ...(seconds === undefined ? {} : { input: { seconds } }),
+        },
+        systemId,
+      );
     } finally {
       busy = false;
     }
     if (!result.ok) throw new Error(`Module lifecycle failed: ${operationId}: ${result.code}: ${result.message}`);
   };
-  const requireRunning = () => {
-    if (busy) throw new Error('Module lifecycle reentry is forbidden.');
-    if (status !== 'running') throw new Error(`Module lifecycle is not running: ${status}`);
-  };
-  const stop = () => {
+  const stopActive = () => {
     const failures: string[] = [];
-    for (const { moduleId, definition } of started.splice(0).reverse()) {
+    for (const { moduleId, definition } of active.splice(0).reverse()) {
       try {
         if (definition.stopOperationId) invoke(moduleId, definition.stopOperationId);
       } catch (error) {
@@ -47,95 +125,151 @@ export function createModuleLifecycle(
     }
     if (failures.length) throw new Error(failures.join('; '));
   };
-  return Object.freeze({
-    start() {
-      if (busy) throw new Error('Module lifecycle reentry is forbidden.');
-      if (status !== 'created') throw new Error(`Cannot start module lifecycle: ${status}`);
-      try {
-        for (const entry of lifecycles) {
-          if (entry.definition.startOperationId) invoke(entry.moduleId, entry.definition.startOperationId);
-          started.push(entry);
-        }
-        status = 'running';
-      } catch (error) {
-        status = 'failed';
-        try {
-          stop();
-        } catch (cleanup) {
-          throw new Error(`Module startup and cleanup failed: ${String(error)}; ${String(cleanup)}`, {
-            cause: cleanup,
-          });
-        }
-        throw error;
+  const validateSnapshot = (
+    snapshot: ModuleScheduleSnapshot,
+  ): Readonly<{ timeUnits: number; entries: ScheduleEntry[] }> => {
+    const root = exactObject(snapshot, TOP_LEVEL_KEYS, 'snapshot');
+    if (root.version !== 1) throw new TypeError('Module schedule version is invalid.');
+    const candidateTime = canonicalSnapshotUnits(root.time, 'time');
+    const savedSystems = denseArray(root.systems, systems.length);
+    const seen = new Set<string>();
+    const entries = systems.map(({ definition }, index) => {
+      const saved = exactObject(savedSystems[index], ENTRY_KEYS, 'entry');
+      if (typeof saved.id !== 'string' || seen.has(saved.id) || saved.id !== definition.id)
+        throw new TypeError(`Module schedule system order is invalid: ${definition.id}`);
+      seen.add(saved.id);
+      const remainderUnits = canonicalSnapshotUnits(saved.remainder, `remainder ${definition.id}`);
+      const interval = intervals.get(definition.id)!;
+      if (
+        (definition.cadence === 'every-advance' && remainderUnits !== 0) ||
+        (definition.cadence !== 'every-advance' && remainderUnits >= interval)
+      )
+        throw new TypeError(`Module schedule entry is invalid: ${definition.id}`);
+      return { id: definition.id, remainderUnits };
+    });
+    return { timeUnits: candidateTime, entries };
+  };
+  const install = (schedule: ReturnType<typeof validateSnapshot>) => {
+    timeUnits = schedule.timeUnits;
+    for (const entry of schedule.entries) remainders.set(entry.id, entry.remainderUnits);
+  };
+  const activateFresh = () => {
+    rejectReentry();
+    if (status !== 'created') throw new Error(`Cannot activate module lifecycle: ${status}`);
+    try {
+      for (const entry of lifecycles) {
+        if (entry.definition.startOperationId) invoke(entry.moduleId, entry.definition.startOperationId);
+        active.push(entry);
       }
+      status = 'running';
+    } catch (error) {
+      status = 'failed';
+      try {
+        stopActive();
+      } catch (cleanup) {
+        throw new Error(`Module startup and cleanup failed: ${String(error)}; ${String(cleanup)}`, {
+          cause: cleanup,
+        });
+      }
+      throw error;
+    }
+  };
+
+  return Object.freeze({
+    activateFresh,
+    start: activateFresh,
+    validate(snapshot: ModuleScheduleSnapshot): void {
+      rejectReentry();
+      validateSnapshot(snapshot);
+    },
+    resume(snapshot: ModuleScheduleSnapshot) {
+      rejectReentry();
+      if (status !== 'created') throw new Error(`Cannot resume module lifecycle: ${status}`);
+      const schedule = validateSnapshot(snapshot);
+      install(schedule);
+      active.push(...lifecycles);
+      status = 'running';
     },
     advance(seconds: number) {
       requireRunning();
-      if (!Number.isFinite(seconds) || seconds < 0 || !Number.isFinite(time + seconds))
-        throw new TypeError('Module logical advance must be finite and non-negative.');
+      const elapsedUnits = secondsToUnits(seconds, 'logical advance', true);
+      if (elapsedUnits === 0) return;
+      if (!Number.isSafeInteger(timeUnits + elapsedUnits))
+        throw new RangeError('Module logical advance exceeds schedule precision or range.');
       let count = 0;
-      const due = systems.map(({ moduleId, definition }) => {
-        const elapsed = round(remainders.get(definition.id)! + seconds);
-        const ticks = Math.floor(round(elapsed / definition.intervalSeconds));
+      const nextRemainders = new Map<string, number>();
+      const events: DueEvent[] = [];
+      for (let order = 0; order < systems.length; order++) {
+        const { moduleId, definition } = systems[order];
+        if (definition.cadence === 'every-advance') {
+          count += 1;
+          events.push({
+            moduleId,
+            systemId: definition.id,
+            operationId: definition.operationId,
+            seconds: elapsedUnits / TIME_SCALE,
+            atUnits: elapsedUnits,
+            order,
+          });
+          nextRemainders.set(definition.id, 0);
+          continue;
+        }
+        const previous = remainders.get(definition.id)!;
+        const elapsed = previous + elapsedUnits;
+        if (!Number.isSafeInteger(elapsed))
+          throw new RangeError('Module logical advance exceeds schedule precision or range.');
+        const interval = intervals.get(definition.id)!;
+        const ticks = Math.floor(elapsed / interval);
         count += ticks;
-        return { moduleId, definition, ticks, remainder: round(elapsed - ticks * definition.intervalSeconds) };
-      });
+        if (count > MAX_OPERATIONS_PER_ADVANCE)
+          throw new RangeError('Module schedule catch-up exceeds operation budget.');
+        for (let index = 0; index < ticks; index++)
+          events.push({
+            moduleId,
+            systemId: definition.id,
+            operationId: definition.operationId,
+            seconds: interval / TIME_SCALE,
+            atUnits: (index + 1) * interval - previous,
+            order,
+          });
+        nextRemainders.set(definition.id, elapsed - ticks * interval);
+      }
       if (count > MAX_OPERATIONS_PER_ADVANCE)
         throw new RangeError('Module schedule catch-up exceeds operation budget.');
+      events.sort((left, right) => left.atUnits - right.atUnits || left.order - right.order);
       try {
-        const events = due.flatMap((entry, order) =>
-          Array.from({ length: entry.ticks }, (_, index) => ({
-            entry,
-            order,
-            at: round((index + 1) * entry.definition.intervalSeconds - remainders.get(entry.definition.id)!),
-          })),
-        );
-        events.sort((a, b) => a.at - b.at || a.order - b.order);
-        for (const { entry } of events)
-          invoke(entry.moduleId, entry.definition.operationId, entry.definition.intervalSeconds);
-        for (const entry of due) remainders.set(entry.definition.id, entry.remainder);
-        time = round(time + seconds);
+        for (const event of events) invoke(event.moduleId, event.operationId, event.seconds, event.systemId);
+        for (const [id, remainder] of nextRemainders) remainders.set(id, remainder);
+        timeUnits += elapsedUnits;
       } catch (error) {
         status = 'failed';
         throw error;
       }
+    },
+    get time() {
+      requireRunning();
+      return timeUnits / TIME_SCALE;
     },
     snapshot(): ModuleScheduleSnapshot {
       requireRunning();
       return {
         version: 1,
-        time,
-        systems: systems.map(({ definition }) => ({ id: definition.id, remainder: remainders.get(definition.id)! })),
+        time: timeUnits / TIME_SCALE,
+        systems: systems.map(({ definition }) => ({
+          id: definition.id,
+          remainder: definition.cadence === 'every-advance' ? 0 : remainders.get(definition.id)! / TIME_SCALE,
+        })),
       };
     },
     restore(snapshot: ModuleScheduleSnapshot) {
       requireRunning();
-      if (
-        snapshot.version !== 1 ||
-        !Number.isFinite(snapshot.time) ||
-        snapshot.time < 0 ||
-        snapshot.systems.length !== systems.length
-      )
-        throw new TypeError('Module schedule snapshot is invalid.');
-      for (let index = 0; index < systems.length; index++) {
-        const saved = snapshot.systems[index],
-          definition = systems[index].definition;
-        if (
-          saved.id !== definition.id ||
-          !Number.isFinite(saved.remainder) ||
-          saved.remainder < 0 ||
-          saved.remainder >= definition.intervalSeconds
-        )
-          throw new TypeError(`Module schedule entry is invalid: ${definition.id}`);
-      }
-      time = snapshot.time;
-      snapshot.systems.forEach((entry) => remainders.set(entry.id, entry.remainder));
+      install(validateSnapshot(snapshot));
     },
     dispose() {
-      if (busy) throw new Error('Module lifecycle reentry is forbidden.');
+      rejectReentry();
       if (status === 'disposed') return;
       status = 'disposed';
-      stop();
+      stopActive();
     },
   });
 }

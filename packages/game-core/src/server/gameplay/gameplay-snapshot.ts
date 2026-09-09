@@ -1,3 +1,5 @@
+import type { ModuleScheduleSnapshot } from '../composition/lifecycle-contracts';
+import type { WorldRulesetV1 } from './modules/ruleset-module';
 import { AutonomyRuntime, type SimulationSnapshot } from '../simulation/autonomy-runtime';
 import { bodyConfigFor } from '../../physics/body-registry';
 import { EntityStore, type EntityStoreComponentSnapshot, type GameplayEntity } from './entity-store';
@@ -39,6 +41,8 @@ export type GameplaySnapshotV3 = Omit<GameplaySnapshotV2, 'version'> & {
 export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySequence' | 'entities' | 'players'> & {
   version: 4;
   composition?: CompositionCheckpointIdentity;
+  ruleset?: WorldRulesetV1;
+  moduleSchedule?: ModuleScheduleSnapshot;
   entityStore: EntityStoreComponentSnapshot;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;

@@ -1,10 +1,12 @@
+import { createGameplayModuleSchedule, type ModuleSystemAuthority } from './modules/gameplay-module-schedule';
+import { createWorldRulesetState } from './modules/world-ruleset-state';
 import { ActorVitalsRuntime } from './modules/actor-vitals-runtime';
 import { ModeRuntime } from './modules/mode-runtime';
 import { createModeStatePort } from './modules/mode-state-port';
 import { GameplayModuleRuntime } from './modules/gameplay-module-runtime';
 import { findSafeModeLanding } from '../authority/creative-physics';
 import type { WorldResourceAuthorizer } from '../harness/world-authorization';
-import type { RegisteredOperationBinding, RegisteredOperationRequest } from '../composition/operation-contracts';
+import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from '../composition/operation-contracts';
 import { ActorInventoryRuntime } from './modules/actor-inventory-runtime';
 import { createInventoryStatePort } from './modules/inventory-state-port';
 import { resolveGameplayComposition } from '../composition/gameplay-composition';
@@ -49,6 +51,7 @@ export type GameplayCallbacks = {
   platform: CorePlatformPorts;
   content?: GameplayContent;
   composition?: WorldComposition;
+  moduleSystemAuthority?: ModuleSystemAuthority;
   allowLegacyCompositionMigration?: boolean;
   meleeDefinitions?: readonly MeleeDefinition[];
 };
@@ -72,10 +75,13 @@ export class GameplayRuntime {
   private readonly vitals;
   private readonly modules;
   private readonly blocks;
+  private readonly ruleset;
+  private readonly schedule;
 
   constructor(private readonly callbacks: GameplayCallbacks) {
     const resolved = resolveGameplayComposition(callbacks);
     this.content = resolved.content;
+    this.ruleset = createWorldRulesetState(callbacks.composition);
     this.compositionGuard = resolved.guard;
     this.entities = new EntityStore(this.content.items);
     this.inventoryState = createInventoryStatePort({
@@ -142,8 +148,12 @@ export class GameplayRuntime {
       entities: this.entities,
       clone: callbacks.platform.clone,
       inventory: this.inventoryState,
+      ruleset: this.ruleset.port,
       mode: createModeStatePort(this.entities, this.modes, () => this.revision),
     });
+    this.schedule = callbacks.composition
+      ? createGameplayModuleSchedule(callbacks.composition, this.modules, callbacks.moduleSystemAuthority)
+      : null;
     this.simulation = new AutonomyRuntime({
       entities: this.entities,
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
@@ -179,22 +189,26 @@ export class GameplayRuntime {
     const entity = this.entities.get(id);
     return entity && entity.type !== 'world-item' ? this.modes.stateFor(id) : null;
   }
-  bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredOperationBinding) {
+  bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
     return this.modules.bind(authorizer, source);
   }
   invokeModuleOperation(
     authorizer: WorldResourceAuthorizer,
-    source: Omit<RegisteredOperationBinding, 'moduleId'>,
+    source: Omit<RegisteredActorOperationBinding, 'moduleId'>,
     request: RegisteredOperationRequest,
   ) {
     return this.modules.invoke(authorizer, source, request);
   }
   dispose(): void {
-    this.modules.dispose();
+    try {
+      this.schedule?.dispose();
+    } finally {
+      this.modules.dispose();
+    }
   }
 
   get gameplayTime(): number {
-    return this.time;
+    return this.schedule?.time ?? this.time;
   }
 
   get gameplayRevision(): number {
@@ -354,25 +368,7 @@ export class GameplayRuntime {
   }
 
   useInventoryItem(id: string, slot: number): GameplayResult {
-    const player = this.inventoryActor(id);
-    const active = this.requireAlive(player);
-    if (active) return active;
-    if (!Number.isInteger(slot) || slot < 0 || slot >= player.inventory.capacity)
-      return { success: false, reason: 'invalid-slot' };
-    const selected = player.inventory.slot(slot);
-    if (!selected) return { success: false, reason: 'no-selected-item' };
-    const consume = this.content.items.capability(selected.itemId, 'consume');
-    if (!consume) return { success: false, reason: 'item-not-usable' };
-    if (player.hungerMeaning === 'satiety' ? player.hunger >= player.maxHunger : player.hunger <= 0)
-      return { success: false, reason: 'hunger-full' };
-    player.inventory.removeFromSlot(slot, 1);
-    this.inventoryOperationCount += 1;
-    player.hunger =
-      player.hungerMeaning === 'satiety'
-        ? Math.min(player.maxHunger, player.hunger + consume.hungerRestore)
-        : Math.max(0, player.hunger - consume.hungerRestore);
-    this.touch();
-    return { success: true };
+    return this.inventoryActions.consume(id, slot);
   }
 
   attackEntity(
@@ -413,26 +409,33 @@ export class GameplayRuntime {
 
   advanceRules(seconds: number): { commits: WorldCommitResult[] } {
     assertGameplayAdvance(seconds);
+    this.schedule?.assertAdvance(seconds);
     this.modules.flushQueued();
     const commits: WorldCommitResult[] = [];
     advanceGameplayClock(seconds, (step) => {
-      this.time += step;
-      this.players.forEach((player) => this.advancePlayer(player, step, commits));
-      this.simulation.advanceAuthorityRules(step);
+      const elapsed = this.schedule ? this.schedule.advance(step) : step;
+      if (!this.schedule) this.time += elapsed;
+      this.players.forEach((player) => this.advancePlayer(player, elapsed, commits));
+      this.simulation.advanceAuthorityRules(elapsed);
     });
     if (seconds > 0) this.touch(false);
     return { commits };
   }
 
   createSnapshot(): GameplaySnapshot.GameplaySnapshotV4 {
+    const moduleSchedule = this.schedule?.snapshot();
+    this.modules.prepareSnapshot();
     const snapshot = GameplaySnapshot.createGameplaySnapshotV4(
       this.revision,
-      this.time,
+      this.gameplayTime,
       this.callbacks.getWorldTime(),
       this.entities.exportComponentSnapshot(),
       this.simulation.snapshot(),
     );
     if (this.compositionGuard) snapshot.composition = this.compositionGuard.snapshot();
+    const ruleset = this.ruleset.snapshot();
+    if (ruleset) snapshot.ruleset = ruleset;
+    if (moduleSchedule) snapshot.moduleSchedule = moduleSchedule;
     return snapshot;
   }
 
@@ -456,8 +459,12 @@ export class GameplayRuntime {
 
   restoreSnapshot(raw: unknown): { version: 1 | 2 | 3 | 4; worldTime?: number } {
     this.compositionGuard?.validateGameplay(raw);
+    this.ruleset.validateGameplay(raw);
     if (!this.compositionGuard && raw && typeof raw === 'object' && 'composition' in raw)
       throw new TypeError('Gameplay composition requires a matching composed host.');
+    const installSchedule = this.schedule?.prepareRestore(raw);
+    if (!this.schedule && raw && typeof raw === 'object' && 'moduleSchedule' in raw)
+      throw new TypeError('Gameplay module schedule requires a composed host.');
     const restored = GameplaySnapshot.restoreGameplayRuntimeSnapshot(raw, {
       getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: this.callbacks.getWorldTime,
@@ -473,6 +480,7 @@ export class GameplayRuntime {
         this.persistedRevision = revision;
       },
     });
+    installSchedule?.();
     this.modules.clearBindings();
     return restored;
   }

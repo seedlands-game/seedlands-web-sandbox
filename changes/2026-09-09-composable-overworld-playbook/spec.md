@@ -169,3 +169,5 @@ Browser/Headless 从同一 checkpoint 恢复后比较权威事实和显式推进
 - S1 RED/GREEN 见 [接缝证据](s1-evidence.md)；`pnpm verify:static`（1213 passed / 4 skipped）与 `pnpm build` 分别通过。独立 S1 审阅问题已修正并回读通过；ECS 有界准入复核与 [具体依赖合同](ecs-admission.md) 审核通过，S2 开始；当前进度见 [progress](progress.md)。
 - S2 已完成 ECS owner 与 V4/旧版本迁移并提交。S3 已接通真实 ESM Pack 启动、每世界内容、注册库存/模式与创造输入；完整 static（1351 passed / 4 skipped）和 build 分别通过，Browser 四项定向通过。剩余规则/生命周期/事务闭环见 [机制实施切口](s3-mechanism-closure.md)。S4 仅候选机制先行，完整生存成长、S5/S6 和 PR 尚未完成。本 change 保持 Implementing。
 - 运行环境与审核读回记录：[evidence.md](evidence.md)。本节不预填通过。
+
+- 后续机制检查点：明确执行种类、Ruleset、规则阶段与实际组合时钟/frontier 接线后，static（1380 passed / 4 skipped）、build 与 Browser 4/4 分别通过；证据与缺口见 [机制检查点](s3-mechanism-checkpoint.md)。默认 needs/combat 和跨 owner 原子提交仍在实施。

@@ -35,6 +35,12 @@ export function createOperationRegistration(resources: ReadonlySet<string>) {
           assertOpen();
           identity(definition.id, operations);
           resource(definition.resource);
+          if (
+            definition.executionKind !== undefined &&
+            definition.executionKind !== 'actor' &&
+            definition.executionKind !== 'system'
+          )
+            throw new TypeError('Operation execution kind is invalid.');
           if (typeof definition.run !== 'function') throw new TypeError('Operation executor is missing.');
           operations.set(definition.id, Object.freeze({ moduleId, definition: Object.freeze({ ...definition }) }));
         },
@@ -42,6 +48,8 @@ export function createOperationRegistration(resources: ReadonlySet<string>) {
           assertOpen();
           identity(definition.id, rules);
           if (typeof definition.apply !== 'function') throw new TypeError('Rule executor is missing.');
+          if (definition.stage !== undefined && definition.stage !== 'before' && definition.stage !== 'after')
+            throw new TypeError('Rule stage is invalid.');
           rules.set(
             definition.id,
             Object.freeze({
@@ -68,14 +76,22 @@ export function createOperationRegistration(resources: ReadonlySet<string>) {
       }
       for (const [id, { definition }] of rules)
         for (const next of definition.before ?? []) dependencies.get(next)!.add(id);
+      for (const [id, peers] of dependencies)
+        if (rules.get(id)!.definition.stage === 'before')
+          for (const peer of peers)
+            if (rules.get(peer)!.definition.stage !== 'before')
+              throw new TypeError(`Rule dependency contradicts stage order: ${peer} -> ${id}`);
       const sortedRules: ModuleOwned<ModRuleDefinition>[] = [];
       while (dependencies.size) {
         const ready = [...dependencies]
           .filter(([, peers]) => peers.size === 0)
           .map(([id]) => id)
-          .sort();
+          .sort((left, right) => {
+            const rank = (id: string) => (rules.get(id)!.definition.stage === 'before' ? 0 : 1);
+            return rank(left) - rank(right) || (left < right ? -1 : left > right ? 1 : 0);
+          });
         if (!ready.length) throw new TypeError('Rule dependency cycle.');
-        for (const id of ready) {
+        for (const id of ready.slice(0, 1)) {
           sortedRules.push(rules.get(id)!);
           dependencies.delete(id);
           for (const peers of dependencies.values()) peers.delete(id);
