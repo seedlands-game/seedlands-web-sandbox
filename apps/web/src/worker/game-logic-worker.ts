@@ -48,6 +48,11 @@ export function createGameLogicWorkerHandler(options: HandlerOptions) {
       if (messageEpoch !== epoch) return;
 
       switch (message.kind) {
+        case 'reset-logic-epoch':
+          if (!message.nextEpoch.trim()) throw new TypeError('Next Logic epoch must not be empty.');
+          epoch = message.nextEpoch;
+          options.postMessage({ kind: 'logic-ready', protocolVersion: LOGIC_PROTOCOL_VERSION, epoch });
+          break;
         case 'logic-observation':
           options.postMessage({
             kind: 'logic-intents',

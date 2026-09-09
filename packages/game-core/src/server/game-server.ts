@@ -90,7 +90,7 @@ export class GameServer extends GameServerGameplayFacade {
     });
     this.fluidChunks = new FluidChunkAccess(this.chunks, (cx, cy, cz) => this.getChunk(cx, cy, cz));
     this.fluidRuntime = new FluidTransactionRuntime({
-      epoch: 1,
+      epoch: options.fluidEpoch ?? 1,
       readChunk: (key) =>
         FluidSidecars.readFluidChunk(key, (candidate) => this.fluidWindow.allowsKey(candidate), this.chunks),
       readCell: (position) =>
@@ -414,6 +414,10 @@ export class GameServer extends GameServerGameplayFacade {
     return this.saves.freeze(commitSequence);
   }
 
+  freezePortableSaveSnapshot(commitSequence: number): FrozenGameSaveSnapshot {
+    return this.saves.freezePortable(commitSequence);
+  }
+
   saveFrozen(
     snapshot: FrozenGameSaveSnapshot,
   ): Promise<{ savedChunks: string[]; gameplaySaved: boolean; commitSequence: number }> {
@@ -542,10 +546,6 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   private prepareCanonicalAdmission(key: string): boolean {
-    if (this.chunks.has(key)) return true;
-    this.maintainCanonicalResidency();
-    if (this.canonicalResidency.canAdmit(this.chunks, key)) return true;
-    this.canonicalResidency.recordRejectedAdmission();
-    return false;
+    return this.canonicalResidency.prepareAdmission(this.chunks, key, () => this.maintainCanonicalResidency());
   }
 }

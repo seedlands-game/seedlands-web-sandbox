@@ -41,7 +41,7 @@ export type PersistenceSaveMetadataTask = {
 };
 export type PersistenceSaveGameplayTask = { kind: 'save-gameplay'; requestId: number; snapshot: unknown };
 export type PersistenceSaveFrozenTask = {
-  kind: 'save-frozen';
+  kind: 'save-frozen' | 'replace-frozen';
   requestId: number;
   snapshot: FrozenSaveTaskSnapshot;
 };

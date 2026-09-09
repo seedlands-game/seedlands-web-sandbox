@@ -76,6 +76,16 @@ export class AuthorityMutationPreparation {
     return this.prepareKeys(keys);
   }
 
+  prepareChunks(chunks: readonly (readonly [number, number, number])[]): Promise<boolean> {
+    const keys = new Set(
+      chunks.map((chunk) => {
+        if (!chunk.every(Number.isSafeInteger)) throw new TypeError('Chunk coordinates must be safe integers.');
+        return chunkKey(...chunk);
+      }),
+    );
+    return this.prepareKeys(keys);
+  }
+
   prepareAction(action: AuthorityAction, playerId: string): Promise<boolean> {
     const keys = new Set<string>();
     if (action.type === 'place' || action.type === 'begin-break')

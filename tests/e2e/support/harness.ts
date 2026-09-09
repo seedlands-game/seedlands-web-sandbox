@@ -318,12 +318,13 @@ export async function waitForPlayerMovement(
   }
 }
 
-export async function lockPointer(page: Page): Promise<Locator> {
+export async function lockPointer(page: Page, actionTimeoutMs?: number): Promise<Locator> {
   await page.bringToFront();
   const canvas = page.locator('#game');
-  const box = await canvas.boundingBox();
+  const limits = actionTimeoutMs === undefined ? {} : { timeout: actionTimeoutMs };
+  const box = await canvas.boundingBox(limits);
   if (!box) throw new Error('Game canvas has no visible bounding box.');
-  await canvas.click({ position: { x: box.width / 2, y: box.height / 2 } });
+  await canvas.click({ ...limits, position: { x: box.width / 2, y: box.height / 2 } });
   await page.waitForFunction(() => document.pointerLockElement?.id === 'game', undefined, { timeout: 5_000 });
   return canvas;
 }

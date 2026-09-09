@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-08T15:25:45Z",
+  "sha": "5dda764ed3aa172535a7967b06ff95d9cbfe536a",
+  "url": "https://github.com/deepseek-ai/deepseek-harness/commit/5dda764ed3aa172535a7967b06ff95d9cbfe536a",
+  "checkedAt": "2026-09-09 Asia/Shanghai",
+  "documents": [
+    {
+      "path": "packages/sdk/client/README.md",
+      "url": "https://github.com/deepseek-ai/deepseek-harness/blob/5dda764ed3aa172535a7967b06ff95d9cbfe536a/packages/sdk/client/README.md",
+      "sha256": "f77a09b88b18cfc155e74915d9069824f6dd6c065b3315a271138a7ebaba2c11"
+    },
+    {
+      "path": "packages/sdk/client/package.json",
+      "url": "https://github.com/deepseek-ai/deepseek-harness/blob/5dda764ed3aa172535a7967b06ff95d9cbfe536a/packages/sdk/client/package.json",
+      "sha256": "1de20fb3bacdc4828199206b84f98749e3d8f09547479b42c62f64adb7758599"
+    }
+  ],
+  "evidence": "Read-only official source; not a runtime SDK probe. SDK 0.1.5-alpha.1. Public README states no mid-turn cancel and same-version runtime resolution."
+}

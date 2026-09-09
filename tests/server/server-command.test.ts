@@ -108,7 +108,7 @@ describe('server command boundary', () => {
     const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
     const queryOnly: CommandSource = {
       actorId: 'observer',
-      sourceType: 'agent',
+      sourceType: 'scripted-test',
       capabilities: ['query'],
     };
 

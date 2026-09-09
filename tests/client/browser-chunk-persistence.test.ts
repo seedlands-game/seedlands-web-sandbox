@@ -61,6 +61,7 @@ class FakePersistenceWorker {
   failNextSave = false;
   deferSave = false;
   readonly deferredSaveRequestIds: number[] = [];
+  lastSaveKind: string | null = null;
 
   private respond(requestId: number, result: unknown) {
     queueMicrotask(() => this.onmessage?.({ data: { requestId, ok: true, result } } as MessageEvent));
@@ -113,7 +114,8 @@ class FakePersistenceWorker {
       this.respond(requestId, result);
       return;
     }
-    if (message.kind === 'save' || message.kind === 'save-frozen') {
+    if (message.kind === 'save' || message.kind === 'save-frozen' || message.kind === 'replace-frozen') {
+      this.lastSaveKind = message.kind as string;
       if (this.failNextSave) {
         this.failNextSave = false;
         this.reject(requestId, 'save failed');
@@ -380,6 +382,16 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     worker.singleLoadRevision = 2;
     await persistence.ensureSnapshot(0, 0, 0);
     expect(persistence.loadSnapshot(chunkKey(0, 0, 0))?.revision).toBe(2);
+    persistence.dispose();
+  });
+
+  it('uses the atomic replace operation and adopts the restored world identity', async () => {
+    const worker = new FakePersistenceWorker();
+    const persistence = await open(worker, 'old-world');
+    await persistence.replaceFrozenSnapshot(frozenSnapshot('restored-world', 2));
+    expect(worker.lastSaveKind).toBe('replace-frozen');
+    expect(persistence.seedText).toBe('restored-world');
+    expect(persistence.worldId).toBe(`seedlands:g${GENERATOR_VERSION}:restored-world`);
     persistence.dispose();
   });
 

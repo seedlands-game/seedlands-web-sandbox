@@ -1,0 +1,26 @@
+{
+  "versions": {
+    "langgraph": "1.4.14",
+    "deepseek": "1.1.11",
+    "agents": "0.17.2"
+  },
+  "langchain": {
+    "inboundReasoningPreserved": true,
+    "outboundReasoningPreserved": false,
+    "requestCount": 2
+  },
+  "openaiAgents": {
+    "outboundReasoningPreserved": false,
+    "requestCount": 2
+  },
+  "langgraph": {
+    "pausedBeforeCompletion": true,
+    "submitCountAfterResume": 1,
+    "terminalReceipt": {
+      "actionId": "a1",
+      "status": "completed",
+      "commitSequence": 7
+    }
+  },
+  "boundary": "Mock transport and graph only. No real DeepSeek call; no latency/cost/quality claim."
+}

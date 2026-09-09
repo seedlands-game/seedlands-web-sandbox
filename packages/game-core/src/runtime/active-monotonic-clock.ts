@@ -57,6 +57,19 @@ export class ActiveMonotonicClock {
     return { ...snapshot, paused: false };
   }
 
+  /** 暂停态的确定推进只增加模拟 active time，不把宿主 wall-clock 游标推到未来。 */
+  advancePaused(elapsedMs: number): ActiveClockSnapshot {
+    if (!this.pausedValue) throw new Error('Active clock must be paused before deterministic advancement.');
+    if (!Number.isFinite(elapsedMs) || elapsedMs < 0)
+      throw new RangeError('Paused clock advance must be finite and non-negative.');
+    this.activeTimeMs += elapsedMs;
+    return {
+      activeTimeMs: this.activeTimeMs,
+      elapsedRealTimeMs: this.lastTimeMs - this.startedAtMs,
+      paused: true,
+    };
+  }
+
   private assertTime(timeMs: number) {
     if (!Number.isFinite(timeMs)) throw new TypeError('Clock input must be finite.');
   }

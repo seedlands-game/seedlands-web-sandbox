@@ -26,11 +26,11 @@ export type GameplayCommandPayload = {
 
 export class GameplayCommandPermissionError extends Error {}
 
+const MAX_DEVELOPER_QUERY_DISTANCE = 256;
+
 const playerId = (source: CommandSource, explicit?: string): string => {
   const id = explicit ?? source.entityId;
   if (!id) throw new TypeError('Gameplay command requires CommandSource.entityId or an explicit entityId.');
-  if ((source.sourceType === 'player' || source.sourceType === 'agent') && id !== source.entityId)
-    throw new GameplayCommandPermissionError('Player and agent sources may only access their own gameplay state.');
   return id;
 };
 
@@ -48,6 +48,23 @@ const positive = (value: number, label: string, integer = false): number => {
   if (!Number.isFinite(value) || value <= 0 || (integer && !Number.isInteger(value)))
     throw new TypeError(`${label} must be a positive ${integer ? 'integer' : 'number'}.`);
   return value;
+};
+
+const boundedQueryDistance = (value: number, label: string): number => {
+  const distance = positive(value, label);
+  if (distance > MAX_DEVELOPER_QUERY_DISTANCE)
+    throw new RangeError(`${label} must not exceed ${MAX_DEVELOPER_QUERY_DISTANCE}.`);
+  return distance;
+};
+
+const boundedQueryTarget = (
+  origin: readonly [number, number, number],
+  target: readonly [number, number, number],
+): [number, number, number] => {
+  const checked = position(target);
+  if (Math.hypot(checked[0] - origin[0], checked[1] - origin[1], checked[2] - origin[2]) > MAX_DEVELOPER_QUERY_DISTANCE)
+    throw new RangeError(`Path target must be within ${MAX_DEVELOPER_QUERY_DISTANCE} blocks of the actor.`);
+  return checked;
 };
 
 const mutationPayload = (
@@ -103,7 +120,7 @@ export async function executeGameplayCommand(
       const id = playerId(source, command.entityId);
       const observation = server.observeActor(
         id,
-        command.range === undefined ? undefined : positive(command.range, 'Range'),
+        command.range === undefined ? undefined : boundedQueryDistance(command.range, 'Range'),
       );
       return { message: `Observation for ${id}.`, data: { observation } };
     }
@@ -111,21 +128,19 @@ export async function executeGameplayCommand(
       const id = playerId(source, command.entityId);
       const entity = server.getEntity(id);
       if (!entity) throw new RangeError(`Unknown entity: ${id}`);
-      const pois = server.queryPois(entity.position, positive(command.radius, 'Radius'), command.kind);
+      const pois = server.queryPois(entity.position, boundedQueryDistance(command.radius, 'Radius'), command.kind);
       return { message: `POIs within ${command.radius} of ${id}.`, data: { pois } };
     }
     case 'query-action': {
-      if (command.actionId && source.sourceType !== 'player' && source.sourceType !== 'agent')
-        return { message: `Action ${command.actionId}.`, data: { action: server.getAction(command.actionId) } };
       const id = playerId(source, command.entityId);
       const action = command.actionId ? server.getAction(command.actionId) : server.getActorAction(id);
-      if (action && action.actorId !== id)
-        throw new GameplayCommandPermissionError('Player and agent sources may only access their own actions.');
       return { message: `Action for ${id}.`, data: { action } };
     }
     case 'query-path': {
       const id = playerId(source, command.entityId);
-      const path = server.queryNavigationPath(id, position(command.position));
+      const entity = server.getEntity(id);
+      if (!entity) throw new RangeError(`Unknown actor: ${id}`);
+      const path = server.queryNavigationPath(id, boundedQueryTarget(entity.position, command.position));
       return { message: `Navigation path for ${id}.`, data: { path } };
     }
     case 'select-slot':

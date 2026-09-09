@@ -36,14 +36,16 @@ type Options = Readonly<{
   onCommit: (commit: WorldCommitResult) => void;
   onUnknownChunk: (key: string) => void;
   onInputDecision: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
+  onWorldRestored?: (ready: BrowserWorkerSession['ready']) => void;
   onFatal: (error: Error) => void;
 }>;
 
 export async function startBrowserWorkerSession(options: Options): Promise<BrowserWorkerSession> {
   const epoch = createSessionEpoch(`seedlands:${options.seedText}`, options.epochSequence);
   let authorityReady: BrowserWorkerSession['ready'] | null = null;
+  let authorityGeneration = 0;
   const queuedAuthorityChunks = new Set<string>();
-  const generatingAuthorityChunks = new Set<string>();
+  const generatingAuthorityChunks = new Map<string, number>();
   const compute = new BrowserComputeRuntime({
     epoch,
     generalWorkerCount: options.generalWorkerCount,
@@ -63,12 +65,15 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
       queuedAuthorityChunks.add(key);
       return;
     }
-    if (generatingAuthorityChunks.has(key)) return;
-    generatingAuthorityChunks.add(key);
+    const generation = authorityGeneration;
+    const ready = authorityReady;
+    if (generatingAuthorityChunks.get(key) === generation) return;
+    generatingAuthorityChunks.set(key, generation);
     void compute
-      .generateCanonicalChunk(authorityReady.seed, authorityReady.generatorVersion, key)
-      .then((chunk) =>
-        authority.acceptWorkerCanonical(
+      .generateCanonicalChunk(ready.seed, ready.generatorVersion, key)
+      .then((chunk) => {
+        if (generation !== authorityGeneration) return false;
+        return authority.acceptWorkerCanonical(
           {
             chunkKey: chunk.key,
             cx: chunk.cx,
@@ -78,10 +83,12 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
             generatorVersion: chunk.generatorVersion,
           },
           { canonical: chunk.voxels, generatorVersion: chunk.generatorVersion },
-        ),
-      )
+        );
+      })
       .catch(() => false)
-      .finally(() => generatingAuthorityChunks.delete(key));
+      .finally(() => {
+        if (generatingAuthorityChunks.get(key) === generation) generatingAuthorityChunks.delete(key);
+      });
   };
   const authority = BrowserAuthorityClient.create(epoch, {
     onSnapshot: options.onSnapshot,
@@ -97,6 +104,16 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     onUnknownChunk: options.onUnknownChunk,
     onInputDecision: options.onInputDecision,
     onFatal: options.onFatal,
+    onWorldEpochChanged: (nextEpoch, ready) => {
+      authorityGeneration += 1;
+      authorityReady = ready;
+      generatingAuthorityChunks.clear();
+      logic.rebindEpoch(nextEpoch);
+      options.onWorldRestored?.(ready);
+      const queued = [...queuedAuthorityChunks];
+      queuedAuthorityChunks.clear();
+      queued.forEach(generateAuthorityChunk);
+    },
     transportFaults: options.authorityTransportFaults,
   });
   try {
@@ -107,6 +124,7 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
       legacySnapshots: options.legacySnapshots,
       initialWorldTime: options.initialWorldTime,
       frequencies: options.frequencies,
+      developerWorldHarness: options.harnessEnabled,
     });
     authorityReady = ready;
     queuedAuthorityChunks.forEach(generateAuthorityChunk);

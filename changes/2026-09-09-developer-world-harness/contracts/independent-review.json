@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "id": "h1h2-independent-verification",
+  "role": "Independent design and implementation verification",
+  "workType": "validation",
+  "goal": "Independently inspect H1/H2 design, UI diagnostic changes and world harness implementation against current spec. Root is still integrating, so record each reviewed file hash and flag recheck when changed. Start with frozen framework-decision.md, agent-harness-design.md and UI/compute files/tests; do not review PR yet. Then review completed core/Headless/Browser implementation after root coordination. Focus real behavioral errors, common authorization paths and disclosure, trusted principal ownership, atomic restore and epochs, paused clock/barrier freshness, bounded JSONL/REPL, diagnostics sources/lifecycle, source-backed framework decisions. Do not modify production files, run full suites/build/browser, install SDKs, call models or access secrets. Focused deterministic tests and /tmp repro allowed. Report actionable findings with locations, triggers, impacts and evidence; distinguish measured from plans. Write /tmp/seedlands-h1h2-independent-review.md. No git writes or external writes.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-developer-world-harness/spec.md",
+      "purpose": "Authorized implementation and acceptance contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No production edits",
+      "No full suites or browsers while root owns runtime tests",
+      "No merge, push, approval or external writes"
+    ]
+  },
+  "outputs": [
+    "/tmp/seedlands-h1h2-independent-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "review",
+      "check": "Source and reproducible behavioral findings plus explicit gaps and reviewed hashes",
+      "evidence": "Chinese independent report in /tmp"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 4
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-developer-world-harness/contracts/parent.json",
+    "sha256": "c6277b0a3ca22c89de3f30e7197cf0dc6af4f62b616a65da6598b52d35a3cb87"
+  }
+}

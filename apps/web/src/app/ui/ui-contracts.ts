@@ -80,6 +80,7 @@ export type InteractionState = Readonly<{
 }>;
 
 export type DebugState = Readonly<{
+  panel?: import('./debug-diagnostics').DebugPanel;
   visible: boolean;
   text: string;
   fps?: number;

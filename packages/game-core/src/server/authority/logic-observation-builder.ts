@@ -6,6 +6,7 @@ import type { ActorState, SimulationSnapshot } from '../simulation/actor-state';
 import { getItemDefinition } from '../gameplay/item-registry';
 import { CHUNK_SIZE, chunkKey, floorDiv, isSolid } from '../../world/voxel';
 import type { CoreClone } from '../../runtime/platform-ports';
+import type { GameServer } from '../game-server';
 
 type LoadedVoxel = Readonly<{ voxel: number; chunkKey: string; revision: number }>;
 
@@ -161,4 +162,39 @@ export function buildLogicObservation(options: BuildOptions): LogicObservation {
       terrainWindows,
     },
   };
+}
+
+/** Maintains identity revisions while building bounded, immutable Logic observations. */
+export class AuthorityLogicObservationBuilder {
+  private identityRevisionSequence = 0;
+  private readonly entityIdentities = new Map<string, { signature: string; revision: number }>();
+
+  constructor(
+    private readonly clone: CoreClone,
+    private readonly epoch: string,
+    private readonly server: GameServer,
+  ) {}
+
+  build(sequence: number, snapshot: AuthoritySnapshot): LogicObservation {
+    const entities = this.server.queryEntities();
+    return buildLogicObservation({
+      clone: this.clone,
+      epoch: this.epoch,
+      observationSequence: sequence,
+      snapshot,
+      entities,
+      simulation: this.server.simulationSnapshot(),
+      identityRevision: (entity) => this.identityRevision(entity),
+      getLoadedVoxel: (x, y, z) => this.server.peekLoadedVoxel(x, y, z),
+    });
+  }
+
+  identityRevision(entity: GameplayEntity): number {
+    const signature = `${entity.type}:${entity.archetype ?? ''}:${entity.stack?.itemId ?? ''}`;
+    const current = this.entityIdentities.get(entity.id);
+    if (current?.signature === signature) return current.revision;
+    const revision = ++this.identityRevisionSequence;
+    this.entityIdentities.set(entity.id, { signature, revision });
+    return revision;
+  }
 }

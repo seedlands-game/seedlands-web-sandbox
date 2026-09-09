@@ -1,6 +1,7 @@
 import { PROTOCOL_VERSION } from '@seedlands/game-core/runtime/session-protocol';
 import type { ComputeTask } from '@seedlands/game-core/runtime/compute-task-queue';
 import type { ComputeWorkerRequest } from './compute-worker-protocol';
+import type { KernelDiagnostics } from '../compute/kernel-memory';
 
 const RECENTLY_SETTLED_LIMIT = 256;
 
@@ -22,6 +23,7 @@ type ActiveTask = { task: ComputeTask; cancelled: boolean };
 type Options = Readonly<{
   run: (task: ComputeTask, isCancelled: () => boolean) => Promise<ComputeWorkerExecution>;
   postMessage: (message: unknown, transfer: Transferable[]) => void;
+  kernelDiagnostics?: () => KernelDiagnostics | null;
 }>;
 
 const taskKey = (epoch: string, taskId: number) => `${epoch}\u0000${taskId}`;
@@ -62,6 +64,8 @@ export function createComputeWorkerEntryLifecycle(options: Options) {
       .then((execution) => {
         if (disposed || active.get(key) !== state) return;
         const workerDurationMs = execution.workerDurationMs;
+        const kernelDiagnostics = options.kernelDiagnostics?.();
+        const diagnosticFields = kernelDiagnostics ? { kernelDiagnostics } : {};
         if (state.cancelled) {
           options.postMessage(
             {
@@ -70,6 +74,7 @@ export function createComputeWorkerEntryLifecycle(options: Options) {
               epoch: task.epoch,
               taskId: task.taskId,
               ok: false,
+              ...diagnosticFields,
               ...(workerDurationMs === undefined ? {} : { workerDurationMs }),
               error: 'cancelled',
             },
@@ -85,6 +90,7 @@ export function createComputeWorkerEntryLifecycle(options: Options) {
               epoch: task.epoch,
               taskId: task.taskId,
               ok: false,
+              ...diagnosticFields,
               ...(workerDurationMs === undefined ? {} : { workerDurationMs }),
               error: errorMessage(execution.error),
             },
@@ -99,6 +105,7 @@ export function createComputeWorkerEntryLifecycle(options: Options) {
             epoch: task.epoch,
             taskId: task.taskId,
             ok: true,
+            ...diagnosticFields,
             ...(workerDurationMs === undefined ? {} : { workerDurationMs }),
             result: execution.result,
           },

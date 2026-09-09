@@ -25,7 +25,10 @@ describe('碰撞调试面板', () => {
   });
 
   it('在普通调试面板提供碰撞箱、接触和传感器的等价控件', () => {
-    const source = readFileSync(new URL('../../apps/web/src/app/ui/app-root.svelte', import.meta.url), 'utf8');
+    const source = readFileSync(
+      new URL('../../apps/web/src/app/ui/runtime-diagnostics.svelte', import.meta.url),
+      'utf8',
+    );
 
     expect(source).toContain('id="collision-debug-toggle"');
     expect(source).toContain('id="collision-debug-contacts"');
