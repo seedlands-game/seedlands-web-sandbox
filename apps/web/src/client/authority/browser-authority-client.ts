@@ -78,9 +78,26 @@ export class BrowserAuthorityClient {
       identity: () => this.worldRequest('identity'),
       inspect: (request) => this.worldRequest('inspect', request),
       prepare: async (request) => {
-        await this.prepareWorldRequest(request);
         const result = await this.worldRequest('prepare', request);
-        if (result.ok) await this.prepareWorldRequest(request);
+        if (result.ok) {
+          try {
+            await this.prepareWorldRequest(request);
+            const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
+            for (const [cx, cy, cz] of chunks)
+              if (!(await this.chunks.refreshCollisionBaseline(cx, cy, cz)))
+                throw new Error(`Authority collision baseline is unavailable: ${cx},${cy},${cz}.`);
+          } catch (error) {
+            return {
+              ok: false,
+              error: {
+                code: 'WORLD_PREPARE_UNAVAILABLE',
+                message: error instanceof Error ? error.message : String(error),
+                kind: 'unavailable',
+              },
+              frontier: result.frontier,
+            };
+          }
+        }
         return result;
       },
       command: (command, options) => this.worldRequest('command', command, options),

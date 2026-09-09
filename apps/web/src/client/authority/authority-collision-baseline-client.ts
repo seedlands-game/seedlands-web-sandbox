@@ -65,37 +65,41 @@ export class AuthorityCollisionBaselineClient {
         continue;
       }
       if (!this.guard.require(key, minimumRevision)) continue;
-      const lease = this.guard.beginBaseline(key);
-      void this.request({ kind: 'request-collision-baseline', key, minimumRevision })
-        .then((payload) => {
-          if (
-            payload.status !== 'available' ||
-            payload.key !== key ||
-            payload.chunkRevision < minimumRevision ||
-            payload.canonical.byteLength !== CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT ||
-            payload.fluid.byteLength !== CHUNK_SIZE ** 3
-          )
-            return;
-          cacheAuthorityCollisionBaseline(
-            this.chunks,
-            key,
-            {
-              // Public request callbacks retain the old copy contract. The browser
-              // Worker path opts in only after transfer establishes exclusivity.
-              canonical: this.options.consumeTransferredBuffers
-                ? new Uint16Array(payload.canonical)
-                : new Uint16Array(payload.canonical).slice(),
-              fluid: this.options.consumeTransferredBuffers
-                ? new Uint8Array(payload.fluid)
-                : new Uint8Array(payload.fluid).slice(),
-              chunkRevision: payload.chunkRevision,
-            },
-            this.guard,
-            lease,
-          );
-        })
-        .catch(() => undefined)
-        .finally(() => this.guard.finishBaseline(lease));
+      void this.refresh(key, minimumRevision).catch(() => undefined);
+    }
+  }
+
+  async refresh(key: string, minimumRevision: number): Promise<boolean> {
+    const lease = this.guard.beginBaseline(key);
+    try {
+      const payload = await this.request({ kind: 'request-collision-baseline', key, minimumRevision });
+      if (
+        payload.status !== 'available' ||
+        payload.key !== key ||
+        payload.chunkRevision < minimumRevision ||
+        payload.canonical.byteLength !== CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT ||
+        payload.fluid.byteLength !== CHUNK_SIZE ** 3
+      )
+        return false;
+      return cacheAuthorityCollisionBaseline(
+        this.chunks,
+        key,
+        {
+          // Public request callbacks retain the old copy contract. The browser
+          // Worker path opts in only after transfer establishes exclusivity.
+          canonical: this.options.consumeTransferredBuffers
+            ? new Uint16Array(payload.canonical)
+            : new Uint16Array(payload.canonical).slice(),
+          fluid: this.options.consumeTransferredBuffers
+            ? new Uint8Array(payload.fluid)
+            : new Uint8Array(payload.fluid).slice(),
+          chunkRevision: payload.chunkRevision,
+        },
+        this.guard,
+        lease,
+      );
+    } finally {
+      this.guard.finishBaseline(lease);
     }
   }
 

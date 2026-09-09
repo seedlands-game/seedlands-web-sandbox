@@ -147,6 +147,10 @@ export class BrowserAuthorityChunkClient {
     return this.baselines.getChunkRevision(cx, cy, cz);
   }
 
+  refreshCollisionBaseline(cx: number, cy: number, cz: number): Promise<boolean> {
+    return this.baselines.refresh(chunkKey(cx, cy, cz), 0);
+  }
+
   initialize(worldRevision: number): void {
     this.revisions.initializeCommitDelivery(worldRevision);
   }

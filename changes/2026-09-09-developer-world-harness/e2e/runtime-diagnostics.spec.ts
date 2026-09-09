@@ -71,6 +71,7 @@ test('F3 分类仪表板展示真实调度与缺失测量，小视口可操作',
     element.scrollTop = element.scrollHeight;
   });
   await panel.locator('.collision-details summary').click();
+  await panel.locator('#collision-debug-toggle').scrollIntoViewIfNeeded();
   await expect(panel.locator('#collision-debug-toggle')).toBeVisible();
   const dimensions = await panel.boundingBox();
   expect(dimensions!.x + dimensions!.width).toBeLessThanOrEqual(800);
