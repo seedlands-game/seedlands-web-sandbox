@@ -96,3 +96,7 @@ F3调度投影同步新的直接通道口径，显示Logic收到/拒绝计数，
 34401785567的静态、构建、21项基础与2项H1通过，NPC短时取食、阻塞隔离和三角色/PG通过；仅三昼夜两轮均达到240秒期限。先保持完整1800模拟秒、树、资源与断言，排查浏览器图形宿主差异。临时分段诊断100模拟秒的Authority计算约0.72秒、Logic等待约0.04秒，并不支持先重写模拟算法；临时埋点不保留。
 
 候选与已有melee CI一致，显式固定ANGLE SwiftShader测试宿主。受控轴仅启动图形参数：A默认无头shell，B同shell显式SwiftShader；同seed/树/资源/viewport/source，以三昼夜完整通过且240秒内为准入，错误、行为计数与快照连续性为否决项，不降低规则和帧数。先A/A估宿主噪声，再B/A/B平衡对照，经机器窗口串行执行；记录原始产物。此为测试宿主选择，生产图形设置保持不变，不将宿主对照倍率当产品性能收益。
+
+### 短测试的Action连续性证据
+
+34405241800三昼夜与其余功能通过，仅短测试首次运行未在两次wall-clock/UI采样中看见同一RUNNING动作而被failOnFlakyTests拒绝，重试通过。稳定Action身份改由同一饥饿节点的权威item-picked-up→item-consumed→activity-succeeded事件共享actionId，并查询该ID的真实succeeded移动Action账本证明；保留实际Physics推进、身体位移、物品后果和UI一致性，不依赖观察器必须恰好采到两帧RUNNING。Headless兼容热更新/回档保持同一RUNNING身份的确定性测试保留。

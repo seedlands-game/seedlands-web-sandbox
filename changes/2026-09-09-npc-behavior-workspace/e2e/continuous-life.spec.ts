@@ -48,7 +48,23 @@ test('固定行为树通过真实身体连续补给，并在面板显示生效�
     expect(samples.flatMap((sample) => sample.observation.events).map((event) => event.type)).toEqual(
       expect.arrayContaining(['item-picked-up', 'item-consumed']),
     );
-    expect([...evidence.actions.values()].some((count) => count >= 2)).toBe(true);
+    const hungerEvents = samples
+      .flatMap((sample) => sample.observation.events)
+      .filter((event) => event.nodeId === 'hunger-action');
+    const pickup = hungerEvents.find((event) => event.type === 'item-picked-up');
+    expect(pickup?.actionId).toEqual(expect.any(String));
+    expect(hungerEvents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'item-consumed', actionId: pickup!.actionId }),
+        expect.objectContaining({ type: 'activity-succeeded', actionId: pickup!.actionId }),
+      ]),
+    );
+    expect(
+      await page.evaluate((actionId) => window.__seedlandsHarness!.world.actions({ actionId }), pickup!.actionId!),
+    ).toMatchObject({
+      ok: true,
+      data: { actions: [{ id: pickup!.actionId, actorId: character.entityId, type: 'move-to', status: 'succeeded' }] },
+    });
     expect(lived.physicsTick).toBeGreaterThan(first.physicsTick);
     await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
     const paused = await lifeSample(page, character.entityId, cursor);
