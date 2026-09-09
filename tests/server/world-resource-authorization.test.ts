@@ -62,6 +62,28 @@ describe('world resource authorization', () => {
     ).toMatchObject({ allowed: false });
   });
 
+  it('keeps developer observation, POI and path queries behind world scope', () => {
+    const authorization = new WorldResourceAuthorizer(policy);
+    const source = {
+      actorId: 'player-1',
+      entityId: 'player-1',
+      sourceType: 'restricted',
+      capabilities: ['query'],
+    } as const;
+    for (const command of [
+      { type: 'query-observation', entityId: 'player-1' },
+      { type: 'query-pois', entityId: 'player-1', radius: 10 },
+      { type: 'query-path', entityId: 'player-1', position: [1, 2, 3] },
+    ] as const) {
+      const request = commandAuthorizationRequests(source, command)[0];
+      expect(request.target).toEqual({ kind: 'world' });
+      expect(authorization.authorize('player', request)).toMatchObject({
+        allowed: false,
+        code: 'WORLD_PERMISSION_DENIED',
+      });
+    }
+  });
+
   it('keeps the command resource directory exhaustive', () => {
     const commandTypes: ServerCommand['type'][] = [
       'set-block',

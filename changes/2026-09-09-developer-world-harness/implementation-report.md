@@ -34,6 +34,10 @@
 
 fluid barrier 的“两个 lease 乱序完成”假设经源码核对撤回：`requestFluidWork()` 在已有 lease 时拒绝再发，因此当前 issued/settled 计数具有连续水位语义；不能为了不可达反例增加第二套状态机。该前提随未来并发 lease 合同改变时必须重新设计。
 
+## 集成失败记录（保留，不作为通过证据）
+
+候选 `12f379d8209741476a2fd9f416f3093fee2cfbca` 的首次最终集成：生产 `pnpm build` 通过；浏览器 2 项均失败（跨 seed 的派生 voxel 尚未同步；旧 setVoxelAt 入口被绑定身份拒绝）。根 coverage 为 233 文件通过、3 文件失败、2 文件跳过，1157 测试通过、4 失败、4 跳过：他人查询未拒绝、Fluid 新字段与完整对象断言不一致、两个恢复用例超时。保留日志路径 `/tmp/seedlands-h1h2-ui/{browser-final,static-final,build-final}.log`；修复后必须有新源码对应的新证据，不以重试消除这些失败。
+
 ## 准出待办
 
 - 同 fixture 的 Headless ↔ Browser 实际世界/Action/Chunk 与 checkpoint 往返。

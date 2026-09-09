@@ -1,6 +1,6 @@
 # H1/H2 世界开发 Harness 与运行诊断
 
-- 状态：实施前合同，2026-09-09。
+- 状态：实施完成，集成问题修复与独立验收中，2026-09-09。
 - 基点：`3c93101861925b0faa89b143993059f36b5fafe3`，PR #24 尚未合并。本分支 `codex/developer-world-harness` 以该交付为前置。
 - 授权：用户明确要求自主交付 H1/H2、可见调试面板和下一阶段方案。本轮覆盖下述开发合同、统一权限接缝和内部协议修改；不以旧设计待审核状态阻止已授权的 H1/H2。不实施模型 NPC 产品、远端身份服务或权限管理后台。
 
@@ -20,7 +20,7 @@
 
 现有命令进入可枚举资源目录；目标至少覆盖自身 Actor、其他实体、世界查询/编辑、时间、Logic、trace、checkpoint。玩家、脚本/API 走同一策略判定，标签不决定权限；旧 command category 只作为兼容适配，不能绕过资源策略。新的底层协议不能固化 agent/LLM/provider 枚举。
 
-全局 inspect 与局部 observation 权限分离，角色可见性由玩法感知决定。不将同源开发工具伪称为 UGC 沙箱，不声称本期完成后续 NPC 平权重构。
+全局 inspect 与局部 observation 权限分离，角色可见性由玩法感知决定。不将同源开发工具伪称为 UGC 沙箱，不声称本期完成后续 NPC 平权重构。现有可指定搜索范围的 query-observation/query-pois/query-path 是开发查询，要求全局资源权限，不能由 self Actor grant 获得；真正的局部投影在 A1 实现。
 
 ## H1：共享世界能力与持续 REPL
 
@@ -66,4 +66,4 @@ F3 保持入口，打开时释放 Pointer Lock 和已按住输入，正常世界
 - [ ] 独立验收、静态/构建、浏览器证据。
 - [ ] 长期 docs、语义提交、PR 交接，不合并。
 
-当前运行验收 NOT_RUN；结果写入 implementation-report.md，保留失败证据。
+定点运行已有通过证据；全量准出尚未通过，结果写入 implementation-report.md，保留失败证据。

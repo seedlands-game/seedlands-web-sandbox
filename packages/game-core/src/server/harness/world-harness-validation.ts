@@ -1,6 +1,10 @@
 import { CHUNK_SIZE, chunkKey, Voxel } from '../../world/voxel';
 import { GAME_SAVE_SCHEMA_VERSION, type FrozenGameSaveSnapshot } from '../persistence/game-save-snapshot';
-import { WORLD_HARNESS_MAX_CHECKPOINT_BYTES, type WorldFrontier } from './world-harness-contract';
+import {
+  WORLD_HARNESS_MAX_CHECKPOINT_BYTES,
+  type WorldFrontier,
+  type WorldLogicRequest,
+} from './world-harness-contract';
 
 export const finiteTuple = (value: unknown): value is readonly [number, number, number] =>
   Array.isArray(value) && value.length === 3 && value.every(Number.isFinite);
@@ -78,4 +82,66 @@ export function validateWorldFrontier(frontier: WorldFrontier): void {
     frontier.logicObservationSequence < 0
   )
     throw new TypeError('World barrier frontier is invalid.');
+}
+
+const record = (value: unknown): Record<string, unknown> | null =>
+  value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+const safeSequence = (value: unknown) => Number.isSafeInteger(value) && (value as number) >= 0;
+
+export function validateWorldLogicRequest(value: unknown): asserts value is WorldLogicRequest {
+  const request = record(value);
+  if (!request || !['mode', 'observe', 'submit'].includes(String(request.kind)))
+    throw new TypeError('World Logic request is invalid.');
+  if (request.kind === 'mode') {
+    if (request.mode !== 'automatic' && request.mode !== 'scripted')
+      throw new TypeError('World Logic mode is invalid.');
+    return;
+  }
+  if (request.kind === 'observe') return;
+  const batch = record(request.batch);
+  if (
+    !batch ||
+    batch.protocolVersion !== 1 ||
+    typeof batch.epoch !== 'string' ||
+    !safeSequence(batch.observationSequence) ||
+    !safeSequence(batch.expiresAtPhysicsTick) ||
+    !Array.isArray(batch.intents) ||
+    batch.intents.length > 512
+  )
+    throw new TypeError('World Logic batch is invalid.');
+  for (const value of batch.intents) {
+    const intent = record(value);
+    const wish = record(intent?.wish);
+    if (
+      !intent ||
+      typeof intent.entityId !== 'string' ||
+      !intent.entityId.trim() ||
+      !safeSequence(intent.identityRevision) ||
+      !safeSequence(intent.observedPoseRevision) ||
+      !Array.isArray(intent.readChunkRevisions) ||
+      !intent.readChunkRevisions.every((entry) => {
+        const revision = record(entry);
+        return Boolean(revision && typeof revision.key === 'string' && safeSequence(revision.revision));
+      }) ||
+      !wish ||
+      !Number.isFinite(wish.x) ||
+      !Number.isFinite(wish.z) ||
+      typeof intent.jumpRequested !== 'boolean' ||
+      ![-1, 0, 1].includes(intent.verticalIntent as number) ||
+      !validLogicAction(intent.action)
+    )
+      throw new TypeError('World Logic intent is invalid.');
+  }
+}
+
+function validLogicAction(value: unknown): boolean {
+  if (value === undefined) return true;
+  const action = record(value);
+  if (!action || typeof action.type !== 'string') return false;
+  if (action.type === 'move-to') return finiteTuple(action.target);
+  if (action.type === 'start-existing-action')
+    return typeof action.actionId === 'string' && Boolean(action.actionId.trim());
+  if (action.type === 'attack' || action.type === 'consume-world-item')
+    return typeof action.targetId === 'string' && Boolean(action.targetId.trim());
+  return false;
 }

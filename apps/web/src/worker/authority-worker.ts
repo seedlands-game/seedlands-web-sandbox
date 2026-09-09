@@ -215,8 +215,8 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     authorization: new WorldResourceAuthorizer(policy),
     owner: (): AuthorityWorldOwner => ({ runtime: runtime!, epoch: worldEpoch, worldId: persistence!.worldId }),
     prepareChunk: async ([cx, cy, cz]) => {
-      const result = runtime!.readCollisionBaseline(`${cx},${cy},${cz}`, 0);
-      if (result.status === 'unavailable') throw new Error(`Authority Chunk is unavailable: ${cx},${cy},${cz}.`);
+      if (!(await runtime!.prepareHarnessChunks([[cx, cy, cz]])))
+        throw new Error(`Authority Chunk is unavailable: ${cx},${cy},${cz}.`);
     },
     advance: async (elapsedMs) => runtime!.advancePausedSession(elapsedMs),
     restore: restoreWorld,

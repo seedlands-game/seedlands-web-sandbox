@@ -56,11 +56,11 @@ JSONL 请求示例：
 
 JSONL checkpoint 的 Uint16 体素数组采用 `u16le-base64`，Uint8 流体数组采用 `u8-base64`，带 byteLength；恢复严格验证类型、容量和 canonical base64，再交 core 校验完整 snapshot。不能用普通 JSON.stringify 的数字键对象替代 typed array。进程内与 Browser MessagePort 保持原生 typed arrays。
 
-保存格式仍是既有 `FrozenGameSaveSnapshot`，没有 SDK/模型专属字段。开发导出不等于把文件写入磁盘；Headless persistence 是内存适配，要持久保留需保存返回的完整包。浏览器恢复需要通过候选验证并替换完整保存集合，不能把目标世界旧的额外 Chunk 拼进源 snapshot。
+保存格式仍是既有 `FrozenGameSaveSnapshot`，没有 SDK/模型专属字段。当前 export 先冻结 snapshot，再等待宿主 persistence adapter 的保存回执，成功后返回完整包并推进 checkpoint ACK；浏览器对应 IndexedDB，Headless 对应内存适配。它不自动生成磁盘文件；Headless 要跨进程持久保留需另存返回的完整包。浏览器恢复需要通过候选验证并替换完整保存集合，不能把目标世界旧的额外 Chunk 拼进源 snapshot。
 
 ## Logic、Action、屏障与 trace
 
-使用 `world.logic({kind:'mode', mode:'scripted'})` 关闭自动算法候选竞争，再通过 `observe` 取得当前 Logic 观察、`submit` 提交批次。切回 automatic 或恢复后旧候选失效。这里是开发观察，不是模型角色的局部感知接口。
+使用 `world.logic({kind:'mode', mode:'scripted'})` 关闭自动算法候选竞争，再通过 `observe` 取得当前 Logic 观察、`submit` 提交批次。切回 automatic 或恢复后旧候选失效。这里是开发观察，不是模型角色的局部感知接口。现有 query-observation/query-pois/query-path 也属于全局开发查询，不能仅凭 self Actor 读取权限使用；A1 会提供真正受感知范围约束的投影。
 
 `world.actions({entityId})` / `{actionId}` 查询真实动作；组合参数必须与实际 owner 一致。成功、失败、中断来自执行器，不能由调用脚本直接宣称成功。`world.barrier({kind,frontier,timeoutMs})` 绑定有限 frontier：committed、settled 和 checkpoint ACK 分开，超时/旧 epoch 是明确错误；不用 sleep 推断完成。
 

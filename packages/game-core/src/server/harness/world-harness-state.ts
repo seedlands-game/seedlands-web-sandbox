@@ -84,7 +84,7 @@ export class WorldTraceRuntime {
         ? Math.min(WORLD_HARNESS_TRACE_CAPACITY, Math.max(0, request.limit ?? 64))
         : WORLD_HARNESS_TRACE_CAPACITY;
     if (!Number.isSafeInteger(limit)) throw new TypeError('Trace limit must be a safe integer.');
-    const events = this.events.slice(-limit);
+    const events = limit === 0 ? [] : this.events.slice(-limit);
     return {
       events,
       dropped: this.dropped,
