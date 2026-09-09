@@ -67,6 +67,10 @@ export class CharacterRuntime {
     });
   }
 
+  retainedActionIds(): string[] {
+    return [...this.records.values()].flatMap((record) => (record.actionId ? [record.actionId] : []));
+  }
+
   validateRegistration(profile: CharacterProfile, homePosition: readonly number[]): void {
     validateCharacterProfile(profile);
     position(homePosition, 'Character home position');

@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "id": "living-npc-round5-world-fix",
+  "role": "world correctness implementer",
+  "workType": "implementation",
+  "goal": "Fix confirmed review5153487626 P1 at8f80eca: follow startMovement creates action every1s, ActionRuntime Map/checkpoint grows unbounded. Implement bounded terminal Action history (recommend256 global recent terminal plus active and explicitly pinned Character action references; no provider-specific concept). Inspect combat links: active combat always active action, lifecycle events reconciled currentByActor; protect anything genuinely needed. Runtime trim on finish/start with read-only pin callback or equally robust simple design; restoring old large snapshots must validate full Character/combat links before prune, no loss of valid pending terminal links. Preserve monotonic IDs and active actions. Avoid continuous follow redesign; retention addresses all Action producers. Add meaningful RED/GREEN for >cap terminal, active/old pinned terminal link, restore large old snapshot/next sequence, and sustained real Character follow under tick proving bounded count/serialized size at two durations. Root inspects browser/consumer semantics and owns docs/global gates/Git. No browser/provider/install/globalformat/commit/push. Write source only action-runtime.ts, autonomy-runtime.ts, character-runtime.ts (other source requires ask root), focused tests new or existing. Report /tmp/living-npc-round5-world-fix.md; preserve RED/GREEN logs there. .75h originalpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/server/simulation/action-runtime.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/server/simulation/autonomy-runtime.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/server/simulation/character-runtime.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/server/action-history-retention.test.ts",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round5-world-fix.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "regression",
+      "check": "Verified findings resolved with meaningful RED/GREEN; no unrelated edits",
+      "evidence": "focused tests and report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.75
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}
