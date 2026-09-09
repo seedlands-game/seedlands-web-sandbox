@@ -67,3 +67,7 @@ F3 保持入口，打开时释放 Pointer Lock 和已按住输入，正常世界
 - [x] 长期 docs、语义提交、PR 交接，不合并。
 
 最终静态、构建、新增真实 Browser 与必要集成门禁已通过；旧完整回归一次 19/20 的失败及后续有界对照如实保留，详见 [实施记录](implementation-report.md)。PR/CI 状态以远端当前 head 为准。
+
+## 2026-09-09 前序合并后的 CI 复验
+
+远端 `b7d7169` 与此前绿色 `5d49ce8` 的源码树完全相同；run `34322183659` 的 parity 场景三次超时，artifact 显示约 3–4 FPS 与 WebGL stall。此为保留的运行 RED，尚不能证明特定队列死锁。parity 不验证画质，将其首次导航前固定为产品 Low 配置并断言 snapshot quality；仍验证同一 Authority、Worker、checkpoint、显式推进和真实输入。仅做一次无重试受影响复验；若仍超时，进一步采集请求时序，不提高 timeout 或改变生产调度。
