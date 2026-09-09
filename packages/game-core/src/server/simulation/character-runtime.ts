@@ -19,6 +19,7 @@ import {
   CHARACTER_MAX_EVENTS,
   CHARACTER_MAX_MEMORY_TEXT,
   CHARACTER_MAX_SPEECH_TEXT,
+  CHARACTER_MAX_TARGETS,
   createCharacterInventory,
   type CharacterPositionTuple as Position,
   type CharacterRecord,
@@ -252,6 +253,10 @@ export class CharacterRuntime {
     if (request.expectedRevision !== record.revision)
       throw new CharacterControlFailure('CHARACTER_REVISION_CONFLICT', 'Character revision changed.');
     validateCharacterGoal(request.goal);
+    const speech =
+      request.say === undefined || request.say === ''
+        ? undefined
+        : text(request.say, 'Character speech', CHARACTER_MAX_SPEECH_TEXT);
     let executionTargetId = sameGoal(record.currentGoal.goal, request.goal) ? record.executionTargetId : undefined;
     if (request.goal.kind === 'follow')
       executionTargetId = this.resolveVisibleTarget(record, request.goal.target, 'entity');
@@ -276,8 +281,7 @@ export class CharacterRuntime {
       record.lastPosition = [...this.requireEntity(record.entityId).position];
       this.record(record, 'goal-started');
     }
-    if (request.say) {
-      const speech = text(request.say, 'Character speech', CHARACTER_MAX_SPEECH_TEXT);
+    if (speech) {
       record.lastSpeech = speech;
       this.record(record, 'speech', { text: speech });
     }
@@ -319,6 +323,12 @@ export class CharacterRuntime {
     }
     const perception = this.options.observe(record.entityId);
     const observedCharacter = this.requireEntity(record.entityId);
+    const protectedTargets = new Set<string>();
+    for (const entry of perception.visibleEntities.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES))
+      if (this.options.entities.get(entry.entityId)) protectedTargets.add(`entity:${entry.entityId}`);
+    for (const entry of perception.pois.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_POIS))
+      if (this.options.poi(entry.poiId)) protectedTargets.add(`poi:${entry.poiId}`);
+    if (record.executionTargetId) protectedTargets.add(`entity:${record.executionTargetId}`);
     const visibleEntities = perception.visibleEntities
       .slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES)
       .flatMap((entry) => {
@@ -326,7 +336,7 @@ export class CharacterRuntime {
         if (!entity) return [];
         return [
           {
-            target: this.reference(record, 'entity', entity.id),
+            target: this.reference(record, 'entity', entity.id, protectedTargets),
             type: entity.type,
             distance: entry.distance,
             position: [...entity.position] as Position,
@@ -339,7 +349,7 @@ export class CharacterRuntime {
       return poi
         ? [
             {
-              target: this.reference(record, 'poi', poi.id),
+              target: this.reference(record, 'poi', poi.id, protectedTargets),
               type: poi.kind,
               position: [...poi.position] as Position,
               distance: entry.distance,
@@ -386,9 +396,22 @@ export class CharacterRuntime {
     );
   }
 
-  private reference(record: CharacterRecord, kind: TargetBinding['kind'], targetId: string): CharacterTargetRef {
+  private reference(
+    record: CharacterRecord,
+    kind: TargetBinding['kind'],
+    targetId: string,
+    protectedTargets: ReadonlySet<string> = new Set(),
+  ): CharacterTargetRef {
     let binding = record.targets.find((candidate) => candidate.kind === kind && candidate.targetId === targetId);
     if (!binding) {
+      if (record.targetSequence >= Number.MAX_SAFE_INTEGER)
+        throw new TypeError('Character target sequence is exhausted.');
+      if (record.targets.length >= CHARACTER_MAX_TARGETS) {
+        const evicted = record.targets.findIndex(
+          (candidate) => !protectedTargets.has(`${candidate.kind}:${candidate.targetId}`),
+        );
+        record.targets.splice(evicted < 0 ? 0 : evicted, 1);
+      }
       binding = { kind, targetId, ref: `target-${++record.targetSequence}`, revision: 1 };
       record.targets.push(binding);
       this.options.changed();

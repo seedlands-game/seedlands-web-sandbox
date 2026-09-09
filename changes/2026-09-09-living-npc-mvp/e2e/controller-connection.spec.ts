@@ -69,6 +69,11 @@ test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发
         if (!list.ok || list.data.kind !== 'list') throw new Error('Character missing');
         return list.data.characters[0];
       });
+    const inputBounds = await page.getByLabel('和阿岚说句话').boundingBox();
+    expect(inputBounds!.width).toBeGreaterThan(140);
+    await page.getByRole('button', { name: /思考设置/ }).click();
+    await page.screenshot({ path: testInfo.outputPath('companion-dialogue-layout.png') });
+    await page.getByRole('button', { name: /思考设置/ }).click();
     const controlled = await readCharacter();
     expect(controlled.currentGoal.goal.kind).toBe('follow');
     await page.getByRole('button', { name: '断开', exact: true }).click();

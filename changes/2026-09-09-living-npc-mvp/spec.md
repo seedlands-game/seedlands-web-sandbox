@@ -52,3 +52,7 @@ A3：浏览器可直接创建/继续伙伴，展示姓名、目标、行为、�
 ### 认知传输与世界协议分离
 
 集成复核发现认知 ready 状态及 token 用量落入 core。将客户端/认知宿主消息和帧预算移入实际被 Web 与 Agent Server 共同消费的 `@seedlands/cognition-protocol` 类型包；该包仅依赖 core 公开的角色类型，core 不依赖该包。core 继续拥有身份绑定、世界命令、观察和回执。静态边界必须拒绝 core 反向导入，所有既有 wire 校验/真实连接测试保持。
+
+审阅修复：持久角色目标引用表必须有明确上限；连续发现/消耗新物品不能让 checkpoint 无限增长。验证超过上限的恢复原子拒绝，旧引用淘汰后统一不可用，当前可见新引用仍可正常操作。先增加连续大量物品/观察的 RED，再给引用分配有界保留策略。
+
+输入原子性补充：非法 speech 必须在 interrupt/revision/goal/event/requestId 等任何写入之前被拒绝；core/JSONL 入口不能依赖 Browser 和模型工具层的提前校验。记录非法类型与超长字符串的状态不变 RED/GREEN。

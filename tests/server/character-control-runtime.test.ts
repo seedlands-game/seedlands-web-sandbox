@@ -13,6 +13,27 @@ const profile = {
 } as const;
 
 describe('character control runtime', () => {
+  it('rejects malformed speech before changing the goal, revision or action state', () => {
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'character-state' });
+    server.spawnPlayer({ id: 'player', position: [0.5, 34, 0.5] });
+    const created = server.character({ kind: 'create', profile, position: [1.5, 34, 0.5] });
+    if (created.kind !== 'created') throw new Error('Character was not created.');
+    const before = testCorePlatform.clone(server.simulationSnapshot());
+    for (const say of ['x'.repeat(281), 12]) {
+      expect(() =>
+        server.character({
+          kind: 'intent',
+          entityId: created.character.entityId,
+          requestId: 'malformed-speech',
+          expectedRevision: 0,
+          goal: { kind: 'idle' },
+          say: say as string,
+        }),
+      ).toThrow();
+      expect(server.simulationSnapshot()).toEqual(before);
+    }
+  });
+
   it('creates, lists and observes a persistent character through bounded target references', async () => {
     const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const server = new GameServer({ platform: testCorePlatform, seedText: 'character-state', persistence });
@@ -94,6 +115,54 @@ describe('character control runtime', () => {
     expect(server.character({ kind: 'list' })).toEqual({ kind: 'list', characters: [] });
   });
 
+  it('bounds references across many distinct observed and consumed targets', () => {
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'character-target-bound' });
+    server.spawnPlayer({ id: 'player', position: [0.5, 34, 0.5] });
+    const created = server.character({ kind: 'create', profile, position: [1.5, 34, 0.5] });
+    if (created.kind !== 'created') throw new Error('Character was not created.');
+    const entityId = created.character.entityId;
+    let oldestTarget: Readonly<{ kind: 'entity'; ref: string; revision: number }> | undefined;
+
+    for (let index = 0; index < 116; index += 1) {
+      const id = `observed-${index}`;
+      server.spawnAutonomousActor({ id, archetype: 'settler', position: [2.5, 34, 0.5] });
+      const observed = server.character({ kind: 'observe', entityId });
+      if (observed.kind !== 'observation') throw new Error('Character observation unavailable.');
+      const target = observed.observation.visibleEntities.find((entry) => entry.type === 'npc')?.target;
+      if (!target || target.kind !== 'entity') throw new Error('Observed target is unavailable.');
+      oldestTarget ??= { kind: 'entity', ref: target.ref, revision: target.revision };
+      server.despawnEntity(id);
+    }
+
+    for (let index = 0; index < 20; index += 1) {
+      server.advanceGameplayRules(5);
+      const character = server.getEntity(entityId);
+      if (!character) throw new Error('Character entity is unavailable.');
+      server.spawnWorldItem(character.position, { itemId: ItemIds.Berry, count: 1 });
+      server.advanceGameplayRules(0.1);
+    }
+
+    const snapshot = server.freezePortableSaveSnapshot(1).gameplay.simulation.characters?.characters[0];
+    if (!snapshot || !oldestTarget) throw new Error('Character target snapshot is unavailable.');
+    expect(snapshot.targets).toHaveLength(128);
+    expect(snapshot.targets.some((target) => target.ref === oldestTarget.ref)).toBe(false);
+    const pickupTargets = snapshot.events.flatMap((event) =>
+      event.type === 'item-picked-up' && event.target ? [event.target.ref] : [],
+    );
+    expect(pickupTargets).toHaveLength(20);
+    expect(pickupTargets.every((ref) => snapshot.targets.some((target) => target.ref === ref))).toBe(true);
+    server.spawnAutonomousActor({ id: 'observed-0', archetype: 'settler', position: [2.5, 34, 0.5] });
+    expect(() =>
+      server.character({
+        kind: 'intent',
+        entityId,
+        requestId: 'evicted-target',
+        expectedRevision: 0,
+        goal: { kind: 'follow', target: oldestTarget },
+      }),
+    ).toThrow(/CHARACTER_TARGET_UNAVAILABLE/);
+  });
+
   it('pages bounded events and rejects a corrupt character snapshot without changing current state', async () => {
     const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const server = new GameServer({ platform: testCorePlatform, seedText: 'character-validation', persistence });
@@ -121,6 +190,36 @@ describe('character control runtime', () => {
     if (!characters?.[0]) throw new Error('Character snapshot unavailable.');
     (characters[0].profile as { riskTolerance?: number }).riskTolerance = 9;
     persistence.saveFrozenSnapshot(corrupt);
+    await expect(server.restore()).rejects.toThrow(/Invalid gameplay snapshot/);
+    expect(server.character({ kind: 'list' })).toEqual(before);
+
+    const oversized = testCorePlatform.clone(server.freezeSaveSnapshot(5));
+    const oversizedRecord = oversized.gameplay.simulation.characters?.characters[0] as
+      | {
+          targets: { kind: 'entity' | 'poi'; ref: string; targetId: string; revision: number }[];
+          targetSequence: number;
+        }
+      | undefined;
+    if (!oversizedRecord) throw new Error('Character snapshot unavailable.');
+    while (oversizedRecord.targets.length <= 128) {
+      oversizedRecord.targetSequence += 1;
+      oversizedRecord.targets.push({
+        kind: 'entity',
+        ref: `target-${oversizedRecord.targetSequence}`,
+        targetId: `oversized-${oversizedRecord.targetSequence}`,
+        revision: 1,
+      });
+    }
+    persistence.saveFrozenSnapshot(oversized);
+    await expect(server.restore()).rejects.toThrow(/Invalid gameplay snapshot/);
+    expect(server.character({ kind: 'list' })).toEqual(before);
+
+    const inconsistent = testCorePlatform.clone(server.freezeSaveSnapshot(6));
+    const inconsistentRecord = inconsistent.gameplay.simulation.characters?.characters[0] as
+      { targets: { ref: string }[]; targetSequence: number } | undefined;
+    if (!inconsistentRecord?.targets[0]) throw new Error('Character target snapshot unavailable.');
+    inconsistentRecord.targets[0].ref = `target-${inconsistentRecord.targetSequence + 1}`;
+    persistence.saveFrozenSnapshot(inconsistent);
     await expect(server.restore()).rejects.toThrow(/Invalid gameplay snapshot/);
     expect(server.character({ kind: 'list' })).toEqual(before);
   });

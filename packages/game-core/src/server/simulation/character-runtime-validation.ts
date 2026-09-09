@@ -10,6 +10,7 @@ import {
   CHARACTER_MAX_EVENTS,
   CHARACTER_MAX_MEMORY_TEXT,
   CHARACTER_MAX_PROFILE_TEXT,
+  CHARACTER_MAX_TARGETS,
   type CharacterPositionTuple,
   type CharacterSnapshotRecord,
 } from './character-runtime-types';
@@ -138,6 +139,7 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
     !Array.isArray(value.inventory) ||
     value.inventory.length !== CHARACTER_INVENTORY_CAPACITY ||
     !Array.isArray(value.targets) ||
+    value.targets.length > CHARACTER_MAX_TARGETS ||
     !Array.isArray(value.requestIds) ||
     value.requestIds.length > 64
   )
@@ -182,11 +184,14 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
   }
   const refs = new Set<string>();
   const resources = new Set<string>();
+  let greatestTargetSequence = 0;
   for (const target of value.targets) {
     const resource = `${target.kind}:${target.targetId}`;
+    const refMatch = /^target-([1-9]\d*)$/.exec(target.ref);
+    const refSequence = refMatch ? Number(refMatch[1]) : Number.NaN;
     if (
       !['entity', 'poi'].includes(target.kind) ||
-      !target.ref?.trim() ||
+      !Number.isSafeInteger(refSequence) ||
       !target.targetId?.trim() ||
       !Number.isSafeInteger(target.revision) ||
       target.revision < 1 ||
@@ -196,8 +201,9 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
       throw new TypeError('Character snapshot target is invalid or duplicated.');
     refs.add(target.ref);
     resources.add(resource);
+    greatestTargetSequence = Math.max(greatestTargetSequence, refSequence);
   }
-  if (!Number.isSafeInteger(value.targetSequence) || value.targetSequence < value.targets.length)
+  if (!Number.isSafeInteger(value.targetSequence) || value.targetSequence !== greatestTargetSequence)
     throw new TypeError('Character snapshot target sequence is invalid.');
   const requestIds = new Set<string>();
   for (const requestId of value.requestIds) {

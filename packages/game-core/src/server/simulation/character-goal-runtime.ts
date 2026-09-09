@@ -147,12 +147,13 @@ export class CharacterGoalRuntime {
     if (!target.stack || target.type !== 'world-item') return false;
     const before = record.inventory.snapshot();
     if (!record.inventory.add({ itemId: target.stack.itemId, count: 1 })) return false;
+    const eventTarget = this.callbacks.reference(record, 'entity', target.id);
     if (!this.options.entities.consumeWorldItemUnit(target.id)) {
       record.inventory.replace(before);
       return false;
     }
     this.callbacks.record(record, 'item-picked-up', {
-      target: this.callbacks.reference(record, 'entity', target.id),
+      target: eventTarget,
     });
     this.options.changed();
     return true;

@@ -222,6 +222,7 @@
     top: 104px;
     width: 292px;
     pointer-events: auto;
+    z-index: 10;
     color: #f4eedc;
     background: rgb(23 33 30 / 94%);
     border: 1px solid #647565;
@@ -232,12 +233,12 @@
       sans-serif;
     overflow: hidden;
   }
-  button,
-  input,
-  select {
+  #companion button,
+  #companion input,
+  #companion select {
     font: inherit;
   }
-  button {
+  #companion button {
     cursor: pointer;
     color: inherit;
     border: 1px solid #5e7564;
@@ -245,20 +246,20 @@
     padding: 7px 10px;
     background: #31483b;
   }
-  button:disabled {
+  #companion button:disabled {
     opacity: 0.5;
     cursor: default;
   }
-  button:hover:not(:disabled) {
+  #companion button:hover:not(:disabled) {
     background: #48654e;
   }
-  button:focus-visible,
-  input:focus-visible,
-  select:focus-visible {
+  #companion button:focus-visible,
+  #companion input:focus-visible,
+  #companion select:focus-visible {
     outline: 2px solid #eac67e;
     outline-offset: 2px;
   }
-  .companion-toggle {
+  #companion .companion-toggle {
     width: 100%;
     display: flex;
     align-items: center;
@@ -269,7 +270,7 @@
     background: transparent;
     text-align: left;
   }
-  .avatar {
+  #companion .avatar {
     display: grid;
     place-items: center;
     width: 36px;
@@ -280,68 +281,68 @@
     font-weight: 800;
     font-size: 18px;
   }
-  .identity {
+  #companion .identity {
     display: flex;
     flex-direction: column;
     flex: 1;
   }
-  .identity strong {
+  #companion .identity strong {
     font-size: 15px;
   }
-  .identity small {
+  #companion .identity small {
     font-size: 11px;
     color: #b2c0ae;
   }
-  .indicator {
+  #companion .indicator {
     width: 7px;
     height: 7px;
     background: #8b977e;
     border-radius: 50%;
   }
-  .indicator[data-phase='thinking'],
-  .indicator[data-phase='compressing'] {
+  #companion .indicator[data-phase='thinking'],
+  #companion .indicator[data-phase='compressing'] {
     background: #eac67e;
   }
-  .indicator[data-phase='ready'] {
+  #companion .indicator[data-phase='ready'] {
     background: #9fda95;
   }
   #companion-content {
     border-top: 1px solid #4b5c4c;
     padding: 14px;
-    max-height: min(68vh, 660px);
+    max-height: max(120px, calc(100dvh - 350px));
     overflow-y: auto;
   }
-  .intro {
+  #companion .intro {
     margin: 0 0 12px;
     color: #c6cebe;
   }
-  .primary {
+  #companion .primary {
     background: #cfb67c;
     color: #263628;
     border-color: #cfb67c;
     font-weight: 700;
   }
-  .primary:hover:not(:disabled) {
+  #companion .primary:hover:not(:disabled) {
     background: #e2c995;
   }
-  .plan {
+  #companion .plan {
     display: flex;
     flex-direction: column;
     gap: 2px;
   }
-  .plan small {
+  #companion .plan small {
     font-size: 10px;
     letter-spacing: 2px;
     color: #a7b59e;
   }
-  .plan strong {
+  #companion .plan strong {
     font-size: 20px;
   }
-  .plan span {
+  #companion .plan span {
     color: #bdc8b5;
     font-size: 11px;
   }
-  .vitals {
+  #companion .vitals {
     display: flex;
     justify-content: space-between;
     margin: 14px 0;
@@ -350,41 +351,41 @@
     color: #b8c5b0;
     font-size: 11px;
   }
-  .vitals b {
+  #companion .vitals b {
     color: #e9d5a5;
     margin-left: 5px;
   }
-  blockquote {
+  #companion blockquote {
     margin: 10px 0;
     padding: 10px 12px;
     border-left: 2px solid #c8ae77;
     color: #f2deae;
     background: #d3bd7810;
   }
-  .conversation {
+  #companion .conversation {
     max-height: 120px;
     overflow: auto;
   }
-  .conversation p {
+  #companion .conversation p {
     margin: 6px 0;
     font-size: 11px;
     color: #c1cbb8;
   }
-  .conversation small {
+  #companion .conversation small {
     margin-right: 7px;
     color: #d6bd87;
   }
-  .conversation .heard {
+  #companion .conversation .heard {
     color: #adbda3;
   }
-  label {
+  #companion label {
     display: block;
     font-size: 11px;
     color: #bccab3;
     margin: 10px 0 5px;
   }
-  input,
-  select {
+  #companion input,
+  #companion select {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
@@ -394,27 +395,27 @@
     border-radius: 6px;
     color: #f4eedc;
   }
-  .compose {
+  #companion .compose {
     display: flex;
     gap: 6px;
   }
-  .compose input {
+  #companion .compose input {
     flex: 1;
   }
-  .compose button {
+  #companion .compose button {
     flex: 0 0 auto;
     width: auto;
   }
-  input[type='range'] {
+  #companion input[type='range'] {
     padding: 0;
     accent-color: #d2b77b;
   }
-  .connection {
+  #companion .connection {
     font-size: 11px;
     color: #a7b99e;
     margin: 12px 0;
   }
-  .settings-toggle {
+  #companion .settings-toggle {
     display: flex;
     justify-content: space-between;
     width: 100%;
@@ -425,23 +426,23 @@
     color: #afbfaa;
     font-size: 11px;
   }
-  .settings-toggle span {
+  #companion .settings-toggle span {
     color: #d6bd87;
   }
-  .settings label strong {
+  #companion .settings label strong {
     float: right;
     font-weight: 400;
   }
-  .hint {
+  #companion .hint {
     font-size: 10px;
     color: #9eae97;
   }
-  .connection-actions {
+  #companion .connection-actions {
     display: flex;
     gap: 8px;
     margin-top: 12px;
   }
-  .error {
+  #companion .error {
     color: #ffbca6;
     font-size: 12px;
   }
