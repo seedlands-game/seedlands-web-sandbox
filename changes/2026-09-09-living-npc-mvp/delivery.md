@@ -128,3 +128,5 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 第七轮独立复核补充了分页连续性缺口。Root以32条 `[1..31,104]`（不是报告中的连续示例）和零号事件取得2项RED，修复以页尾减长度推导连续区间。初次完整static有一项Headless死亡绑定测试超过5秒；同次构建和Browser并发运行，不能断言超时根因。该文件单独重验4/4通过，未放宽超时或改测试；最终static将独立运行以确认。初次Web/Agent构建与Browser2/2通过（1真实模型用例跳过），无新增provider调用。
 
 第七轮最终生产冻结 `51ab780`：完整static独立执行通过（259文件、1269测试通过、4跳过），独立Web/Agent构建通过，Browser两项2/2通过（真实provider用例跳过）。`round7-final-recheck.md`确认连续分页修复有效，无新具体P0/P1/P2。长期docs baseline不变，本轮只是既定Authority输入和存档合同的边界补全。后续仅交付记录；最新远端SHA的CI和自动复核结果以PR #26及最终交接为准。
+
+主线同步：`3abf70b` 的CI未触发，GitHub读回CONFLICTING；主线已合入 #27 (`baeba09`)。恢复分支 `codex/living-npc-pre-main-sync-3abf70b` 保留同步前状态，合并 `4e39e48` 的唯一人工冲突处理是tsconfig.test.json并集。集成后完整static通过（260文件、1276测试通过、4跳过），Web/Agent build通过，NPC Browser2/2和共享Harness/诊断2/2通过；真实provider用例明确跳过。`main-sync-recheck.md`独立复核确认双方CI/测试/生产边界保留，无集成P0/P1/P2。长期baseline沿用双方现行docs，不重写主线历史。此前未触发CI不记为通过，最终SHA重新等待远端门禁。
