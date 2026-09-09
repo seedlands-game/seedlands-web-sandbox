@@ -143,7 +143,14 @@ export class CognitionRuntime {
       }
       if (this.terminal) return;
       if (!validateObservationBinding(this.options.binding, message.observation)) {
-        this.status('fallback', 'stale');
+        this.status(this.paused ? 'paused' : 'fallback', 'stale');
+        return;
+      }
+      if (!this.latestObservation) {
+        this.latestObservation = message.observation;
+        this.latestEventCursor = message.observation.cursor;
+        this.lastDecisionCursor = message.observation.cursor;
+        this.context.appendEvents(message.observation.events);
         return;
       }
       const freshEvents = message.observation.events.filter((event) => event.cursor > this.latestEventCursor);

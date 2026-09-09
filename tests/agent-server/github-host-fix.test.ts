@@ -4,7 +4,7 @@ import type { ControllerClientMessage, ControllerHostMessage } from '@seedlands/
 import { ContextSession } from '../../apps/agent-server/src/context-session';
 import type { CognitionModel, ModelCompletion, ModelRequest } from '../../apps/agent-server/src/model-types';
 import { CognitionRuntime } from '../../apps/agent-server/src/runtime';
-import { binding, event, observation } from './fixtures';
+import { baselineObservation, binding, event, observation } from './fixtures';
 
 const receiptMessage = (sequence: number, receipt: ControllerReceipt): ControllerClientMessage => ({
   kind: 'receipt',
@@ -13,6 +13,16 @@ const receiptMessage = (sequence: number, receipt: ControllerReceipt): Controlle
   sequence,
   receipt,
 });
+
+const seedRuntime = (runtime: CognitionRuntime): void => {
+  runtime.receive({
+    kind: 'observe',
+    protocolVersion: 1,
+    binding: binding(),
+    sequence: 0,
+    observation: baselineObservation(),
+  });
+};
 
 describe('GitHub cognition host correctness fixes', () => {
   beforeEach(() => vi.useFakeTimers());
@@ -48,6 +58,7 @@ describe('GitHub cognition host correctness fixes', () => {
       send: (message) => sent.push(message),
       requestId: () => 'retry-memory',
     });
+    seedRuntime(runtime);
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,
@@ -100,6 +111,7 @@ describe('GitHub cognition host correctness fixes', () => {
       },
     };
     const runtime = new CognitionRuntime({ binding: binding(), model, send: (message) => sent.push(message) });
+    seedRuntime(runtime);
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,

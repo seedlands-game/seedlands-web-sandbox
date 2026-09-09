@@ -10,9 +10,24 @@ test('玩家可邀请持久伙伴，真实拾取食用，并以完整 checkpoint
   await prepareCompanionGround(page);
   await page.keyboard.press('F3');
   await expect(page.locator('#debug')).toBeHidden();
+  await page.evaluate(async () => {
+    await window.__seedlandsHarness!.setTimePaused(false);
+    await window.__seedlandsHarness!.setTimeSpeed(1);
+  });
   await lockPointer(page);
   await page.keyboard.press('KeyT');
   await expect.poll(() => page.evaluate(() => document.pointerLockElement === null)).toBe(true);
+  const dialogueClockDelta = await page.evaluate(async () => {
+    const world = window.__seedlandsHarness!.world;
+    await world.clock({ kind: 'pause' });
+    // Drain the pre-pause gameplay frontier before comparing two equal advances.
+    const before = await world.clock({ kind: 'advance', elapsedMs: 1000 });
+    const after = await world.clock({ kind: 'advance', elapsedMs: 1000 });
+    await world.clock({ kind: 'run' });
+    if (!before.ok || !after.ok) throw new Error('World clock unavailable');
+    return (after.data.snapshot.worldTime - before.data.snapshot.worldTime + 24) % 24;
+  });
+  expect(dialogueClockDelta).toBeCloseTo(0.04, 3);
   await page.getByRole('button', { name: '邀请阿岚进入世界' }).click();
   await expect(page.locator('#companion .identity strong')).toHaveText('阿岚');
   const initial = await page.evaluate(async () => {

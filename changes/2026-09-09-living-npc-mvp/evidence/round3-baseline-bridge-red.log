@@ -1,0 +1,63 @@
+6:38:03 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/client/character-controller-bridge.test.ts (6 tests | 3 failed) 19ms
+     × publishes ready only after the initial history is sent (paused=false) 14ms
+     × publishes ready only after the initial history is sent (paused=true) 1ms
+     × pauses observations with the world and resumes without a second world or binding 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/client/character-controller-bridge.test.ts > character bridge lifecycle > publishes ready only after the initial history is sent (paused=false)
+AssertionError: expected { phase: 'ready', …(1) } to match object { phase: 'connecting' }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "phase": "connecting",
++   "phase": "ready",
+  }
+
+ ❯ tests/client/character-controller-bridge.test.ts:122:44
+    120|     await vi.advanceTimersByTimeAsync(0);
+    121|     expect(port.observe).toHaveBeenCalledOnce();
+    122|     expect(onState.mock.calls.at(-1)?.[0]).toMatchObject({ phase: 'con…
+       |                                            ^
+    123|     release({ ok: true, frontier, data: { kind: 'observation', observa…
+    124|     await vi.advanceTimersByTimeAsync(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/client/character-controller-bridge.test.ts > character bridge lifecycle > publishes ready only after the initial history is sent (paused=true)
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ tests/client/character-controller-bridge.test.ts:121:26
+    119|     socket.receive({ kind: 'ready', sequence: 0, fallbackSeconds: 180,…
+    120|     await vi.advanceTimersByTimeAsync(0);
+    121|     expect(port.observe).toHaveBeenCalledOnce();
+       |                          ^
+    122|     expect(onState.mock.calls.at(-1)?.[0]).toMatchObject({ phase: 'con…
+    123|     release({ ok: true, frontier, data: { kind: 'observation', observa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/client/character-controller-bridge.test.ts > character bridge lifecycle > pauses observations with the world and resumes without a second world or binding
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ tests/client/character-controller-bridge.test.ts:174:26
+    172|     socket.receive({ kind: 'ready', sequence: 0, fallbackSeconds: 180,…
+    173|     await vi.advanceTimersByTimeAsync(1000);
+    174|     expect(port.observe).toHaveBeenCalledOnce();
+       |                          ^
+    175|     expect(socket.sent).toContainEqual(expect.objectContaining({ kind:…
+    176|     pause(false);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 3 passed (6)
+   Start at  18:38:03
+   Duration  148ms (transform 41ms, setup 0ms, import 51ms, tests 19ms, environment 0ms)
+

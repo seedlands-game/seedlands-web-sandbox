@@ -33,8 +33,10 @@ export class PlayerDebugTimeKeys {
       this.options.onSetWorldClockPaused(!environment.paused);
       return true;
     }
-    if (event.code === 'KeyT' && environment) {
-      this.options.onSetWorldClockSpeed(environment.speed === 1 ? 20 : environment.speed === 20 ? 100 : 1);
+    if (event.code === 'KeyT' && event.altKey && !event.ctrlKey && !event.metaKey && environment) {
+      event.preventDefault();
+      if (!event.repeat)
+        this.options.onSetWorldClockSpeed(environment.speed === 1 ? 20 : environment.speed === 20 ? 100 : 1);
       return true;
     }
     return false;

@@ -111,6 +111,26 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe('character bridge lifecycle', () => {
+  it.each([false, true])('publishes ready only after the initial history is sent (paused=%s)', async (paused) => {
+    const { socket, port, bridge, onState, pause } = setup();
+    pause(paused);
+    let release!: (result: Awaited<ReturnType<CharacterControllerPort['observe']>>) => void;
+    vi.mocked(port.observe).mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    socket.receive({ kind: 'ready', sequence: 0, fallbackSeconds: 180, modelAvailability: 'available' });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(port.observe).toHaveBeenCalledOnce();
+    expect(onState.mock.calls.at(-1)?.[0]).toMatchObject({ phase: 'connecting' });
+    release({ ok: true, frontier, data: { kind: 'observation', observation } });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(socket.sent.at(-1)).toMatchObject({ kind: 'observe', observation });
+    expect(onState.mock.calls.at(-1)?.[0]).toMatchObject({ phase: 'ready' });
+    bridge.disconnect();
+  });
   it('waits for binding ready, returns Authority rejection, and blocks delayed work after disconnect', async () => {
     const { socket, port, bridge } = setup();
     expect(socket.sent.map((message) => message.kind)).toEqual(['hello']);
@@ -156,11 +176,11 @@ describe('character bridge lifecycle', () => {
     pause(true);
     socket.receive({ kind: 'ready', sequence: 0, fallbackSeconds: 180, modelAvailability: 'available' });
     await vi.advanceTimersByTimeAsync(1000);
-    expect(port.observe).not.toHaveBeenCalled();
+    expect(port.observe).toHaveBeenCalledOnce();
     expect(socket.sent).toContainEqual(expect.objectContaining({ kind: 'control', command: 'pause' }));
     pause(false);
     await vi.advanceTimersByTimeAsync(500);
-    expect(port.observe).toHaveBeenCalledOnce();
+    expect(port.observe).toHaveBeenCalledTimes(2);
     expect(socket.sent).toContainEqual(expect.objectContaining({ kind: 'control', command: 'resume' }));
     bridge.disconnect();
   });

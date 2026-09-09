@@ -127,6 +127,7 @@ export class CompanionSession {
     });
   dialogue = (text: string) =>
     this.run(async (authority) => {
+      if (this.value.connection.phase === 'connecting') throw new Error('连接正在初始化，请稍候再说。');
       const character = this.value.character;
       if (!character || character.lifecycle !== 'active' || !text.trim()) return;
       const result = await authority.character({

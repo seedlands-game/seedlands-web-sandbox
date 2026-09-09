@@ -235,7 +235,23 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
 const samePosition = (left: readonly number[] | undefined, right: readonly number[]) =>
   Boolean(left && left.length === right.length && left.every((coordinate, index) => coordinate === right[index]));
 
+const validateFollowExecutionLink = (value: CharacterSnapshotRecord, goalState: CharacterGoalState) => {
+  const goal = goalState.goal;
+  if (goal.kind !== 'follow' || !['active', 'suspended'].includes(goalState.status)) return;
+  const binding = value.targets.find((target) => target.ref === goal.target.ref);
+  if (
+    !value.executionTargetId ||
+    !binding ||
+    binding.kind !== 'entity' ||
+    binding.revision !== goal.target.revision ||
+    binding.targetId !== value.executionTargetId
+  )
+    throw new TypeError('Character snapshot follow target is inconsistent.');
+};
+
 export function validateCharacterActionLink(value: CharacterSnapshotRecord, action: ActorAction | null): void {
+  validateFollowExecutionLink(value, value.currentGoal);
+  if (value.suspendedGoal) validateFollowExecutionLink(value, value.suspendedGoal);
   if (!value.actionId) return;
   const goal = value.currentGoal.goal;
   if (
@@ -254,15 +270,5 @@ export function validateCharacterActionLink(value: CharacterSnapshotRecord, acti
   if (goal.kind === 'forage' || goal.kind === 'follow') {
     if (!value.executionTargetId || action.targetEntityId !== value.executionTargetId)
       throw new TypeError('Character snapshot target action is inconsistent.');
-  }
-  if (goal.kind === 'follow') {
-    const binding = value.targets.find((target) => target.ref === goal.target.ref);
-    if (
-      !binding ||
-      binding.kind !== 'entity' ||
-      binding.revision !== goal.target.revision ||
-      binding.targetId !== value.executionTargetId
-    )
-      throw new TypeError('Character snapshot follow target is inconsistent.');
   }
 }

@@ -29,7 +29,7 @@ test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发
                 name: 'propose_intent',
                 arguments: JSON.stringify({
                   goal,
-                  say: calls.length === 1 ? '我先去附近找点吃的。' : '好，我跟上你，咱们一起留意周围。',
+                  say: `第${calls.length}次：${calls.length === 1 ? '我先去附近找点吃的。' : '好，我跟上你，咱们一起留意周围。'}`,
                 }),
               },
             },
@@ -81,6 +81,14 @@ test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发
     const disconnected = await readCharacter();
     expect(disconnected.entityId).toBe(controlled.entityId);
     expect(disconnected.currentGoal.goal).toEqual(controlled.currentGoal.goal);
+    const beforeReconnect = calls.length;
+    await page.getByRole('button', { name: '连接', exact: true }).click();
+    await page.getByLabel('和阿岚说句话').fill('重新连接了，继续一起走吧。');
+    // The button waits for the initial history baseline before allowing this new dialogue.
+    await page.getByRole('button', { name: '说话', exact: true }).click();
+    await expect(page.getByTestId('companion-speech')).toContainText(`第${beforeReconnect + 1}次`, { timeout: 20_000 });
+    expect(calls).toHaveLength(beforeReconnect + 1);
+    expect((await readCharacter()).entityId).toBe(controlled.entityId);
     expect(await page.locator('#companion').innerText()).not.toContain('fixture-private-reasoning');
     await testInfo.attach('controller-round-trips', {
       body: JSON.stringify({

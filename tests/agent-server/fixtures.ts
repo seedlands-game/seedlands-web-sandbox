@@ -56,3 +56,12 @@ export const observation = (overrides: Partial<CharacterObservation> = {}): Char
   cursor: 1,
   ...overrides,
 });
+
+export const baselineObservation = (): CharacterObservation => {
+  const current = observation();
+  return observation({
+    character: { ...current.character, eventCursor: 0 },
+    events: [],
+    cursor: 0,
+  });
+};

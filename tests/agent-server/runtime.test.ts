@@ -5,7 +5,7 @@ import { CognitionRuntime } from '../../apps/agent-server/src/runtime';
 import type { CognitionModel, ModelCompletion, ModelRequest } from '../../apps/agent-server/src/model-types';
 import { ContextSession } from '../../apps/agent-server/src/context-session';
 import { FLASH_MODEL, PRO_MODEL } from '../../apps/agent-server/src/config';
-import { binding, event, observation } from './fixtures';
+import { baselineObservation, binding, event, observation } from './fixtures';
 
 const receiptMessage = (sequence: number, receipt: ControllerReceipt): ControllerClientMessage => ({
   kind: 'receipt',
@@ -14,6 +14,16 @@ const receiptMessage = (sequence: number, receipt: ControllerReceipt): Controlle
   sequence,
   receipt,
 });
+
+const seedRuntime = (runtime: CognitionRuntime): void => {
+  runtime.receive({
+    kind: 'observe',
+    protocolVersion: 1,
+    binding: binding(),
+    sequence: 0,
+    observation: baselineObservation(),
+  });
+};
 
 describe('CognitionRuntime', () => {
   beforeEach(() => vi.useFakeTimers());
@@ -51,6 +61,7 @@ describe('CognitionRuntime', () => {
       send: (message) => sent.push(message),
       requestId: () => `request-${nextId++}`,
     });
+    seedRuntime(runtime);
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,
@@ -172,6 +183,7 @@ describe('CognitionRuntime', () => {
       send: (message) => sent.push(message),
       requestId: () => `tail-request-${nextId++}`,
     });
+    seedRuntime(runtime);
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,
@@ -247,6 +259,7 @@ describe('CognitionRuntime', () => {
       send: (message) => sent.push(message),
       requestId: () => `compression-request-${nextId++}`,
     });
+    seedRuntime(runtime);
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,
@@ -301,6 +314,7 @@ describe('CognitionRuntime', () => {
     };
     const sent: ControllerHostMessage[] = [];
     const runtime = new CognitionRuntime({ binding: binding(), model, send: (message) => sent.push(message) });
+    seedRuntime(runtime);
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,
@@ -347,6 +361,7 @@ describe('CognitionRuntime', () => {
       send: (message) => sent.push(message),
       requestId: () => 'terminal-request',
     });
+    seedRuntime(runtime);
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,
@@ -407,6 +422,7 @@ describe('CognitionRuntime', () => {
       },
     };
     const runtime = new CognitionRuntime({ binding: binding(), model, send: (message) => sent.push(message) });
+    seedRuntime(runtime);
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,

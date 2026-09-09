@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { ControllerHostMessage } from '@seedlands/cognition-protocol';
 import { CognitionRuntime } from '../../apps/agent-server/src/runtime';
 import type { CognitionModel } from '../../apps/agent-server/src/model-types';
-import { binding, event, observation } from './fixtures';
+import { baselineObservation, binding, event, observation } from './fixtures';
 
 beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
@@ -45,6 +45,7 @@ it.each(['dialogue-heard', 'attacked'] as const)(
         observation: value,
       });
     try {
+      observe(baselineObservation());
       observe(first);
       await vi.advanceTimersByTimeAsync(250);
       expect(calls).toBe(1);
