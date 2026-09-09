@@ -1,114 +1,109 @@
 import { describe, expect, it } from 'vitest';
 import { GameServer } from '../../packages/game-core/src/server/game-server';
-import { HeadlessSession } from '../../packages/game-core/src/server/headless/headless-session';
 import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
 import { testCorePlatform } from '../support/core-platform';
 
 const profile = { name: 'Lin', personality: 'Cautious and practical.', riskTolerance: 0.25 } as const;
-
-const createServer = (seedText: string, persistence?: MemoryGamePersistence) => {
+const threatPolicy = (response: 'flee-threat' | 'ignore-threat') => ({
+  goal: {
+    description: response === 'flee-threat' ? 'Flee danger, otherwise hold.' : 'Observe danger without fleeing.',
+  },
+  definition: {
+    version: 1 as const,
+    root:
+      response === 'flee-threat'
+        ? {
+            id: 'safety',
+            type: 'selector' as const,
+            children: [
+              {
+                id: 'respond-to-threat',
+                type: 'action' as const,
+                skill: 'flee-threat',
+                guard: { name: 'threat-visible' },
+              },
+              {
+                id: 'hold-position',
+                type: 'action' as const,
+                skill: 'hold',
+                guard: { not: { name: 'threat-visible' } },
+              },
+            ],
+          }
+        : { id: 'observe-threat', type: 'action' as const, skill: 'ignore-threat' },
+  },
+});
+const createServer = (
+  seedText: string,
+  response: 'flee-threat' | 'ignore-threat',
+  persistence?: MemoryGamePersistence,
+) => {
   const server = new GameServer({ platform: testCorePlatform, seedText, persistence });
   server.spawnPlayer({ id: 'player', position: [0.5, 34.6, 0.5] });
-  const created = server.character({ kind: 'create', profile, position: [1.5, 34.6, 0.5] });
+  const created = server.character({
+    kind: 'create',
+    profile,
+    position: [1.5, 34.6, 0.5],
+    behaviorTree: threatPolicy(response),
+  });
   if (created.kind !== 'created') throw new Error('Character was not created.');
   return { server, entityId: created.character.entityId };
 };
 
-describe('character terminal-goal danger recovery', () => {
-  it('uses fallback life after repeated attacks on a succeeded goal and resumes across persistence', async ({
-    onTestFinished,
-  }) => {
-    const source = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'danger-succeeded' });
-    onTestFinished(() => source.dispose());
-    await source.world.clock({ kind: 'pause' });
-    const created = await source.world.character({ kind: 'create', profile });
-    if (!created.ok || created.data.kind !== 'created') throw new Error('Character was not created.');
-    const entityId = created.data.character.entityId;
-    const position = source.runtime.server.getEntity(entityId)?.position;
-    if (!position) throw new Error('Character position is unavailable.');
-    expect(
-      await source.world.character({
-        kind: 'intent',
-        entityId,
-        requestId: 'already-complete',
-        expectedRevision: 0,
-        goal: { kind: 'move-to', position },
-      }),
-    ).toMatchObject({ ok: true });
-    await source.world.clock({ kind: 'advance', elapsedMs: 100 });
-    expect(await source.world.character({ kind: 'inspect', entityId })).toMatchObject({
-      ok: true,
-      data: { character: { currentGoal: { requestId: 'already-complete', status: 'succeeded' } } },
-    });
-
-    expect(source.runtime.server.attackEntity(source.runtime.playerId, entityId)).toMatchObject({ success: true });
-    await source.world.clock({ kind: 'advance', elapsedMs: 500 });
-    const moved = source.runtime.server.getEntity(entityId)?.position;
-    if (!moved) throw new Error('Character position is unavailable.');
-    source.runtime.setPlayerPosition(moved);
-    expect(source.runtime.server.attackEntity(source.runtime.playerId, entityId)).toMatchObject({ success: true });
-    await source.world.clock({ kind: 'advance', elapsedMs: 2_900 });
-    expect(await source.world.character({ kind: 'inspect', entityId })).toMatchObject({
-      ok: true,
-      data: { character: { currentGoal: { status: 'suspended' } } },
-    });
-
-    const checkpoint = await source.world.checkpoint({ kind: 'export' });
-    if (!checkpoint.ok) throw new Error(checkpoint.error.message);
-    const restored = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'danger-target' });
-    onTestFinished(() => restored.dispose());
-    expect(await restored.world.checkpoint({ kind: 'restore', snapshot: checkpoint.data.snapshot })).toMatchObject({
-      ok: true,
-    });
-    await restored.world.clock({ kind: 'advance', elapsedMs: 200 });
-    const observation = await restored.world.character({ kind: 'observe', entityId, sinceCursor: 0 });
-    expect(observation).toMatchObject({
-      ok: true,
-      data: {
-        observation: {
-          character: {
-            currentGoal: { requestId: 'fallback-life', goal: { kind: 'forage' }, status: 'active' },
-          },
-        },
-      },
-    });
-    if (!observation.ok || observation.data.kind !== 'observation')
-      throw new Error('Character observation unavailable.');
-    expect(
-      observation.data.observation.events.filter(
-        (event) => event.type === 'fallback' && event.reason === 'danger-cleared',
-      ),
-    ).toHaveLength(1);
-  }, 30_000);
-
-  it('uses fallback life after an attack on a failed goal without resurrecting it', () => {
-    const { server, entityId } = createServer('danger-failed');
-    const targetEntity = server.spawnWorldItem([2, 34.6, 0.5], { itemId: 'berry', count: 1 });
-    const observed = server.character({ kind: 'observe', entityId });
-    if (observed.kind !== 'observation') throw new Error('Character observation unavailable.');
-    const target = observed.observation.visibleEntities.find((entry) => entry.stack?.itemId === 'berry')?.target;
-    if (!target) throw new Error('Character target is unavailable.');
-    server.character({
-      kind: 'intent',
-      entityId,
-      requestId: 'lost-follow-target',
-      expectedRevision: 0,
-      goal: { kind: 'follow', target },
-    });
-    server.despawnEntity(targetEntity.id);
+describe('tree-owned character danger response', () => {
+  it('runs configured flee after repeated attacks and resumes the guarded fallback across persistence', async () => {
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const { server, entityId } = createServer('danger-flee-tree', 'flee-threat', persistence);
     server.advanceGameplayRules(0.1);
     expect(server.character({ kind: 'inspect', entityId })).toMatchObject({
       kind: 'state',
-      character: { currentGoal: { requestId: 'lost-follow-target', status: 'failed' } },
+      character: { behaviorTree: { runtime: { activeNodeIds: ['hold-position'] } } },
     });
-
     expect(server.attackEntity('player', entityId)).toMatchObject({ success: true, damage: 4 });
-    server.advanceGameplayRules(3.1);
+    server.advanceGameplayRules(0.5);
     expect(server.character({ kind: 'inspect', entityId })).toMatchObject({
       kind: 'state',
-      character: {
-        currentGoal: { requestId: 'fallback-life', goal: { kind: 'forage' }, status: 'active' },
+      character: { behaviorTree: { runtime: { activeNodeIds: ['respond-to-threat'] } } },
+    });
+    const position = server.getEntity(entityId)?.position;
+    if (!position) throw new Error('Character position is unavailable.');
+    server.spawnPlayer({ id: 'second-attacker', position: [position[0], position[1], position[2] + 1] });
+    expect(server.attackEntity('second-attacker', entityId)).toMatchObject({ success: true, damage: 4 });
+    server.advanceGameplayRules(2.9);
+    expect(server.character({ kind: 'inspect', entityId })).toMatchObject({
+      kind: 'state',
+      character: { behaviorTree: { runtime: { activeNodeIds: ['respond-to-threat'] } } },
+    });
+    await server.save(10);
+    await expect(server.restore()).resolves.toBeUndefined();
+    server.advanceGameplayRules(0.3);
+    expect(server.character({ kind: 'observe', entityId, sinceCursor: 0 })).toMatchObject({
+      kind: 'observation',
+      observation: {
+        character: { behaviorTree: { runtime: { activeNodeIds: ['hold-position'] } } },
+        events: expect.arrayContaining([
+          expect.objectContaining({ type: 'activity-interrupted', nodeId: 'respond-to-threat' }),
+        ]),
       },
     });
+  });
+
+  it('keeps an explicit ignore policy and never injects a hidden flee action', () => {
+    const { server, entityId } = createServer('danger-ignore-tree', 'ignore-threat');
+    const before = server.character({ kind: 'inspect', entityId });
+    expect(server.attackEntity('player', entityId)).toMatchObject({ success: true, damage: 4 });
+    server.advanceGameplayRules(3.2);
+    const after = server.character({ kind: 'observe', entityId, sinceCursor: 0 });
+    expect(after).toMatchObject({
+      kind: 'observation',
+      observation: { events: expect.arrayContaining([expect.objectContaining({ type: 'attacked' })]) },
+    });
+    if (before.kind !== 'state' || after.kind !== 'observation') throw new Error('Character state unavailable.');
+    expect(after.observation.character.behaviorTree.definition).toEqual(before.character.behaviorTree.definition);
+    expect(
+      server
+        .simulationSnapshot()
+        .actions.actions.filter((action) => action.actorId === entityId && action.type === 'flee'),
+    ).toEqual([]);
   });
 });

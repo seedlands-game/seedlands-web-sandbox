@@ -32,14 +32,24 @@ function fixture() {
   const observed = runtime.characters.execute({ kind: 'observe', entityId: 'npc' });
   if (observed.kind !== 'observation') throw new Error('Missing observation');
   const player = observed.observation.visibleEntities.find((entity) => entity.type === 'player')!;
+  const followDefinition = {
+    version: 1 as const,
+    root: {
+      id: 'follow-player',
+      type: 'action' as const,
+      skill: 'follow',
+      args: { targetRef: player.target.ref, maxReplans: 64 },
+    },
+  };
   runtime.characters.execute({
-    kind: 'intent',
+    kind: 'behavior',
     entityId: 'npc',
     requestId: 'follow',
-    expectedRevision: 0,
-    goal: { kind: 'follow', target: player.target },
+    expectedBehaviorRevision: 1,
+    goal: { description: 'Follow the visible player.' },
+    definition: followDefinition,
   });
-  return { runtime, entities };
+  return { runtime, entities, followDefinition };
 }
 
 function churn(actions: ActionRuntime, count: number) {
@@ -101,27 +111,32 @@ describe('bounded action completion history', () => {
     expect(runtime.snapshot()).toEqual(before);
     expect(() =>
       runtime.characters.execute({
-        kind: 'intent',
+        kind: 'behavior',
         entityId: 'npc',
         requestId: 'exhausted',
-        expectedRevision: before.characters!.characters[0]!.revision,
-        goal: { kind: 'move-to', position: [3.5, 1, 0.5] },
+        expectedBehaviorRevision: before.characters!.characters[0]!.behaviorTree!.revision,
+        goal: { description: 'Move to the requested position.' },
+        definition: {
+          version: 1,
+          root: { id: 'move-exhausted', type: 'action', skill: 'move-to', args: { position: [3.5, 1, 0.5] } },
+        },
       }),
     ).toThrow(/sequence/);
     expect(runtime.snapshot()).toEqual(before);
     expect(() => runtime.advanceAuthorityRules(2)).not.toThrow();
-    expect(runtime.characters.snapshot().characters[0]!.currentGoal).toMatchObject({
-      status: 'failed',
-      reason: 'action-sequence-exhausted',
+    expect(runtime.actions.snapshot().sequence).toBe(Number.MAX_SAFE_INTEGER);
+    expect(runtime.characters.snapshot().characters[0]!.behaviorTree!.skills[0]).toMatchObject({
+      actionId: before.characters!.characters[0]!.behaviorTree!.skills[0]!.actionId,
+      status: 'running',
     });
   });
 
-  it('rejects the same follow goal atomically when arrival left no action and capacity is exhausted', () => {
-    const { runtime, entities } = fixture();
+  it('rejects the same follow tree atomically when arrival left no action and capacity is exhausted', () => {
+    const { runtime, entities, followDefinition } = fixture();
     entities.update('npc', { position: [4.5, 1, 0.5] });
     runtime.advanceAuthorityRules(0.1);
     const snapshot = runtime.snapshot();
-    expect(snapshot.characters!.characters[0]!.actionId).toBeUndefined();
+    expect(snapshot.characters!.characters[0]!.behaviorTree!.skills[0]!.actionId).toBeUndefined();
     snapshot.actions.sequence = Number.MAX_SAFE_INTEGER;
     runtime.restore(snapshot);
     entities.update('player', { position: [7.5, 1, 0.5] });
@@ -129,12 +144,12 @@ describe('bounded action completion history', () => {
     const character = before.characters!.characters[0]!;
     expect(() =>
       runtime.characters.execute({
-        kind: 'intent',
+        kind: 'behavior',
         entityId: 'npc',
         requestId: 'same-follow',
-        expectedRevision: character.revision,
-        goal: character.currentGoal.goal,
-        say: 'I will follow.',
+        expectedBehaviorRevision: character.behaviorTree!.revision,
+        goal: { description: 'Continue following the visible player.' },
+        definition: followDefinition,
       }),
     ).toThrow(/sequence/);
     expect(runtime.snapshot()).toEqual(before);
@@ -159,7 +174,7 @@ describe('bounded action completion history', () => {
     const { runtime } = fixture();
     runtime.advanceAuthorityRules(0.1);
     const snapshot = runtime.snapshot();
-    const linked = snapshot.characters!.characters[0]!.actionId!;
+    const linked = snapshot.characters!.characters[0]!.behaviorTree!.skills[0]!.actionId!;
     const action = snapshot.actions.actions.find((value) => value.id === linked)!;
     action.status = 'succeeded';
     action.endedAt = 0.1;
@@ -179,11 +194,11 @@ describe('bounded action completion history', () => {
     expect(runtime.actions.get(linked)?.status).toBe('succeeded');
     expect(runtime.actions.snapshot().actions).toHaveLength(257);
     runtime.advanceAuthorityRules(0.1);
-    expect(runtime.characters.snapshot().characters[0]!.actionId).toBeUndefined();
+    const execution = runtime.characters.snapshot().characters[0]!.behaviorTree!.skills[0]!;
+    expect(execution.actionId).toBe(`action-${nextSequence + 1}`);
     expect(runtime.actions.get(linked)).toBeNull();
-    expect(runtime.actions.snapshot().actions).toHaveLength(256);
-    runtime.advanceAuthorityRules(0.1);
-    expect(runtime.actions.forActor('npc')?.id).toBe(`action-${nextSequence + 1}`);
+    expect(runtime.actions.snapshot().actions).toHaveLength(257);
+    expect(runtime.actions.forActor('npc')?.id).toBe(execution.actionId);
   });
 
   it('preserves an active combat action and its checkpoint link during other actors history churn', () => {
@@ -205,22 +220,25 @@ describe('bounded action completion history', () => {
     const { runtime, entities } = fixture();
     const samples: { count: number; bytes: number; sequence: number }[] = [];
     // Controlled poses isolate repeated follow planning from the independently tested body/Physics loop.
-    for (let seconds = 1; seconds <= 800; seconds += 1) {
-      entities.update('player', { position: [seconds % 2 ? 4.5 : 5.5, 1, 0.5] });
-      runtime.advanceAuthorityRules(1);
-      if (seconds === 400 || seconds === 800) {
+    for (let step = 1; step <= 8_000; step += 1) {
+      entities.update('npc', { position: [0.5, 1, step % 2 ? 0.5 : 0.6] });
+      if (step % 200 === 0) entities.update('player', { position: [step % 400 === 0 ? 4.5 : 5.5, 1, 0.5] });
+      runtime.advanceAuthorityRules(0.1);
+      if (step === 4_000 || step === 8_000) {
         const actions = runtime.snapshot().actions;
         samples.push({
           count: actions.actions.length,
           bytes: JSON.stringify(actions).length,
           sequence: actions.sequence,
         });
-        expect(runtime.characters.snapshot().characters[0]?.currentGoal.status).toBe('active');
+        expect(runtime.characters.snapshot().characters[0]?.behaviorTree?.skills[0]).toMatchObject({
+          skill: 'follow',
+          status: 'running',
+        });
       }
     }
-    expect(samples[0]!.sequence).toBeGreaterThanOrEqual(350);
-    expect(samples[1]!.sequence).toBeGreaterThan(samples[0]!.sequence + 350);
-    expect(samples.map((sample) => sample.count)).toEqual([257, 257]);
+    expect(samples.map((sample) => sample.sequence)).toEqual([1, 1]);
+    expect(samples.map((sample) => sample.count)).toEqual([1, 1]);
     expect(samples[1]!.bytes).toBeLessThanOrEqual(samples[0]!.bytes * 1.05);
     runtime.restore(runtime.snapshot());
     runtime.advanceAuthorityRules(1);

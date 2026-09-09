@@ -14,6 +14,7 @@ import { CharacterBehaviorRuntime, createBehaviorRecord } from './character-beha
 import {
   behaviorCapabilities,
   behaviorDefinitionForLegacyGoal,
+  behaviorMayStartAction,
   validateBehavior,
 } from './character-behavior-definition';
 import {
@@ -359,6 +360,13 @@ export class CharacterRuntime {
       request.say === undefined || request.say === ''
         ? undefined
         : text(request.say, 'Character speech', CHARACTER_MAX_SPEECH_TEXT);
+    const nextDefinition = behaviorDefinitionForLegacyGoal(
+      request.goal,
+      record.homePosition,
+      this.options.actor(record.entityId)?.hunger,
+    );
+    if (!this.options.canStartAction() && behaviorMayStartAction(nextDefinition))
+      throw new RangeError('Action sequence is exhausted.');
     let executionTargetId = sameGoal(record.currentGoal.goal, request.goal) ? record.executionTargetId : undefined;
     if (request.goal.kind === 'follow')
       executionTargetId = this.resolveVisibleTarget(record, request.goal.target, 'entity');
@@ -388,11 +396,7 @@ export class CharacterRuntime {
       this.record(record, 'speech', { text: speech });
     }
     if (!retainsAction)
-      this.behaviors.install(
-        record,
-        { description: `Character goal: ${request.goal.kind}.` },
-        behaviorDefinitionForLegacyGoal(request.goal, record.homePosition, this.options.actor(record.entityId)?.hunger),
-      );
+      this.behaviors.install(record, { description: `Character goal: ${request.goal.kind}.` }, nextDefinition);
     if (!retainsAction) this.behaviors.advance(record, 0);
     this.options.changed();
     return this.state(record);
@@ -410,6 +414,8 @@ export class CharacterRuntime {
     validateBehavior(request.goal, request.definition);
     if (request.expectedBehaviorRevision !== record.behaviorTree.revision)
       throw new CharacterControlFailure('CHARACTER_BEHAVIOR_CONFLICT', 'Character behavior revision changed.');
+    if (!this.options.canStartAction() && behaviorMayStartAction(request.definition))
+      throw new RangeError('Action sequence is exhausted.');
     this.behaviors.install(record, request.goal, request.definition);
     record.revision += 1;
     record.currentGoal = {
