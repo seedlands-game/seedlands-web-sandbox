@@ -5,9 +5,12 @@ import type { WorldCommitResult } from '../../packages/game-core/src/server/game
 describe('World 权威提交单一发布点', () => {
   it('编辑Promise只返回结果，不再次消费已由Authority消息发布的提交', async () => {
     const result = { committed: true } as WorldCommitResult;
-    const editWorld = vi.fn(async () => result);
+    const editWorld = vi.fn(async (_actorId: string, _edits: unknown) => result);
     const consumeServerCommit = vi.fn();
-    const receiver = { authority: { editWorld }, consumeServerCommit } as unknown as World;
+    const receiver = {
+      authority: { editWorld, gameplay: { player: { entityId: 'bound-player' } } },
+      consumeServerCommit,
+    } as unknown as World;
 
     await expect(World.prototype.edit.call(receiver, 1, 2, 3, 0)).resolves.toBe(result);
     await expect(
@@ -19,6 +22,7 @@ describe('World 权威提交单一发布点', () => {
     await expect(World.prototype.restoreLegacyChanges.call(receiver, [[7, 8, 9, 2]])).resolves.toBe(result);
 
     expect(editWorld).toHaveBeenCalledTimes(3);
+    expect(editWorld.mock.calls.map((call) => call[0])).toEqual(['bound-player', 'bound-player', 'bound-player']);
     expect(consumeServerCommit).not.toHaveBeenCalled();
   });
 });
