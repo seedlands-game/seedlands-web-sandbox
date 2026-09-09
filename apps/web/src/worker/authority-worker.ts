@@ -1,3 +1,4 @@
+import { browserWorldOwnerPolicy } from './authority-worker-world-policy';
 /// <reference lib="webworker" />
 
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
@@ -212,10 +213,10 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
   });
   worldEpoch = `${epoch}:world:0`;
-  const principalId = 'browser-developer';
+  const principalId = message.developerWorldHarness ? 'browser-developer' : 'browser-world-owner';
   const policy = message.developerWorldHarness
     ? developmentWorldAuthorizationPolicy(principalId, runtime.playerId)
-    : { principals: [{ id: principalId, boundEntityId: runtime.playerId }], rules: [] };
+    : browserWorldOwnerPolicy(principalId, runtime.playerId);
   worldHarness = new AuthorityWorldHarness({
     platform: browserCorePlatform,
     principalId,

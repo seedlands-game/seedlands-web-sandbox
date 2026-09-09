@@ -158,7 +158,14 @@ describe('multiplexed resident bridge', () => {
   it('rejects a paused proposal without disconnecting other actors or submitting world writes', async () => {
     const { socket, ports, pause, onConnection } = await setup();
     pause();
-    socket.receive({ kind: 'speak', sequence: 4, channelId: 'channel-a', requestId: 'late-speech', text: 'hello' });
+    socket.receive({
+      kind: 'speak',
+      effectRequestId: 'speech-effect',
+      sequence: 4,
+      channelId: 'channel-a',
+      requestId: 'late-speech',
+      text: 'hello',
+    });
     await vi.advanceTimersByTimeAsync(0);
     expect(ports[0]!.speak).not.toHaveBeenCalled();
     expect(socket.sent.at(-1)).toMatchObject({
@@ -173,10 +180,24 @@ describe('multiplexed resident bridge', () => {
   it('ignores a removed channel and rejects replayed sequence before invoking its port', async () => {
     const { bridge, socket, ports } = await setup();
     await bridge.unbind('a');
-    socket.receive({ kind: 'speak', sequence: 4, channelId: 'channel-a', requestId: 'late', text: 'hello' });
+    socket.receive({
+      kind: 'speak',
+      effectRequestId: 'speech-effect',
+      sequence: 4,
+      channelId: 'channel-a',
+      requestId: 'late',
+      text: 'hello',
+    });
     await vi.advanceTimersByTimeAsync(0);
     expect(ports[0]!.speak).not.toHaveBeenCalled();
-    socket.receive({ kind: 'speak', sequence: 4, channelId: 'channel-b', requestId: 'replay', text: 'hello' });
+    socket.receive({
+      kind: 'speak',
+      effectRequestId: 'speech-effect',
+      sequence: 4,
+      channelId: 'channel-b',
+      requestId: 'replay',
+      text: 'hello',
+    });
     await vi.advanceTimersByTimeAsync(0);
     expect(ports[1]!.speak).not.toHaveBeenCalled();
     expect(socket.close).toHaveBeenCalledOnce();

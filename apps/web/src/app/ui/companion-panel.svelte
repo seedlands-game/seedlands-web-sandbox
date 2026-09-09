@@ -187,90 +187,107 @@
               >
             </div>
           </form>
-          <p class="connection" role="status">{view.connection.message}</p>
-          <button class="settings-toggle" onclick={() => (settings = !settings)} aria-expanded={settings}
-            >思考设置 <span>{settings ? '收起' : '展开'}</span></button
-          >
-          {#if settings}
-            <div class="settings">
-              <label for="companion-frequency">思考频率 <strong>最多等待 {minutes} 分钟</strong></label>
-              <input
-                id="companion-frequency"
-                type="range"
-                min="1"
-                max="10"
-                step="1"
-                bind:value={minutes}
-                oninput={configure}
-              />
-              <p class="hint">重要事件会提前触发思考；等待期间仍会执行计划。更频繁会消耗更多模型额度。</p>
-              <p class="hint">经历窗口 128K · 接近 112K 时由 Pro 整理记忆。整理与断线期间，伙伴继续执行当前行为树。</p>
-              <label for="companion-url">本机思考服务</label><input
-                id="companion-url"
-                bind:value={url}
-                spellcheck="false"
-              />
-              <label for="companion-token">配对码</label><input
-                id="companion-token"
-                type="password"
-                bind:value={token}
-                autocomplete="off"
-                placeholder="启动本机服务后获得"
-              />
-              <div class="connection-actions">
-                <button
-                  class="primary"
-                  disabled={view.busy || !token.trim()}
-                  onclick={() => session.connect(url, token)}>连接</button
-                ><button onclick={session.disconnect}>断开</button>
-              </div>
-              {#if view.cognition}
-                <div class="cognition-stats" aria-label="认知状态">
-                  <span>思考 <b>{view.cognition.logicalRounds}</b> 次</span>
-                  <span>整理 <b>{view.cognition.compactions}</b> 次</span>
-                  <span>上下文约 <b>{Math.round(view.cognition.estimatedContextTokens / 1000)}K</b></span>
-                  <p>{view.cognition.message}</p>
-                  <small
-                    >事件已保存 {view.cognition.receivedThrough} · 已纳入 {view.cognition.includedThrough} · 已整理 {view
-                      .cognition.compactedThrough}</small
-                  >
-                </div>
-                <div class="documents" aria-label="伙伴工作区">
-                  {#each ['/AGENT.md', '/SOUL.md', '/MEMORY.md', '/behavior/current.json'] as path (path)}
-                    <button
-                      disabled={view.busy}
-                      onclick={() =>
-                        session.readDocument(
-                          path as '/AGENT.md' | '/SOUL.md' | '/MEMORY.md' | '/behavior/current.json',
-                        )}>{path.split('/').at(-1)}</button
-                    >
-                  {/each}
-                </div>
-              {/if}
-              {#if view.connection.phase === 'ready' && view.characters.filter((entry) => entry.lifecycle === 'active').length < 3}
-                <label for="companion-birth-tags">下一位伙伴的性格与经历</label>
-                <input id="companion-birth-tags" bind:value={birthTags} maxlength="240" />
-                <button
-                  disabled={view.busy || !birthTags.trim()}
-                  onclick={() =>
-                    session.create(
-                      birthTags
-                        .split(/[,，]/u)
-                        .map((value) => value.trim())
-                        .filter(Boolean),
-                    )}>由 Pro 创作并邀请伙伴</button
-                >
-              {/if}
-            </div>
-          {/if}
         {/if}
       {/if}
+      <p class="connection" role="status">{view.connection.message}</p>
+      <button class="settings-toggle" onclick={() => (settings = !settings)} aria-expanded={settings}
+        >思考设置 <span>{settings ? '收起' : '展开'}</span></button
+      >
+      {#if settings}
+        <div class="settings">
+          <label for="companion-frequency">思考频率 <strong>最多等待 {minutes} 分钟</strong></label>
+          <input
+            id="companion-frequency"
+            type="range"
+            min="1"
+            max="10"
+            step="1"
+            bind:value={minutes}
+            oninput={configure}
+          />
+          <p class="hint">重要事件会提前触发思考；等待期间仍会执行计划。更频繁会消耗更多模型额度。</p>
+          <p class="hint">经历窗口 128K · 接近 112K 时由 Pro 整理记忆。整理与断线期间，伙伴继续执行当前行为树。</p>
+          <label for="companion-url">本机思考服务</label><input
+            id="companion-url"
+            bind:value={url}
+            spellcheck="false"
+          />
+          <label for="companion-token">配对码</label><input
+            id="companion-token"
+            type="password"
+            bind:value={token}
+            autocomplete="off"
+            placeholder="启动本机服务后获得"
+          />
+          <div class="connection-actions">
+            <button class="primary" disabled={view.busy || !token.trim()} onclick={() => session.connect(url, token)}
+              >连接</button
+            ><button onclick={session.disconnect}>断开</button>
+          </div>
+          {#if view.cognition}
+            <div class="cognition-stats" aria-label="认知状态">
+              <span>思考 <b>{view.cognition.logicalRounds}</b> 次</span>
+              <span>整理 <b>{view.cognition.compactions}</b> 次</span>
+              <span>上下文约 <b>{Math.round(view.cognition.estimatedContextTokens / 1000)}K</b></span>
+              <p>{view.cognition.message}</p>
+              <small
+                >事件已保存 {view.cognition.receivedThrough} · 已纳入 {view.cognition.includedThrough} · 已整理 {view
+                  .cognition.compactedThrough}</small
+              >
+            </div>
+            <div class="documents" aria-label="伙伴工作区">
+              {#each ['/AGENT.md', '/SOUL.md', '/MEMORY.md', '/behavior/current.json'] as path (path)}
+                <button
+                  disabled={view.busy}
+                  onclick={() =>
+                    session.readDocument(path as '/AGENT.md' | '/SOUL.md' | '/MEMORY.md' | '/behavior/current.json')}
+                  >{path.split('/').at(-1)}</button
+                >
+              {/each}
+            </div>
+          {/if}
+          {#if view.connection.phase === 'ready' && view.characters.filter((entry) => entry.lifecycle === 'active').length < 3}
+            <label for="companion-birth-tags">下一位伙伴的性格与经历</label>
+            <input id="companion-birth-tags" bind:value={birthTags} maxlength="240" />
+            <button
+              disabled={view.busy || !birthTags.trim()}
+              onclick={() =>
+                session.create(
+                  birthTags
+                    .split(/[,，]/u)
+                    .map((value) => value.trim())
+                    .filter(Boolean),
+                )}>由 Pro 创作并邀请伙伴</button
+            >
+          {/if}
+        </div>
+      {/if}
+      <details class="application-save">
+        <summary>世界与伙伴存档</summary>
+        <button disabled={view.busy} onclick={() => session.resumeWorld()}>继续这个世界</button>
+        <p class="hint">连接思考服务时，会一起保存世界、伙伴记忆和完整会话。恢复后世界暂停，确认后可继续。</p>
+        <button disabled={view.busy} onclick={() => session.exportCheckpoint()}>准备此刻的存档</button>
+        {#if view.download}<a href={view.download.url} download={view.download.filename}>下载世界与伙伴存档</a>{/if}
+        <label for="application-checkpoint">恢复存档文件</label>
+        <input
+          id="application-checkpoint"
+          type="file"
+          accept="application/json,.json"
+          disabled={view.busy}
+          onchange={(event) => {
+            const file = event.currentTarget.files?.[0];
+            if (file) void session.importCheckpoint(file);
+            event.currentTarget.value = '';
+          }}
+        />
+      </details>
       {#if view.document}
         <section class="workspace-document" aria-label="工作区文档">
           <div><strong>{view.document.path}</strong><button onclick={session.closeDocument}>关闭</button></div>
           <pre>{view.document.content}</pre>
         </section>
       {/if}
+      {#if view.notice}<p class="hint" role="status">{view.notice}</p>{/if}
       {#if view.error}<p class="error" role="alert">{view.error}</p>{/if}
     </div>
   {/if}
