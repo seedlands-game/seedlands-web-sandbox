@@ -69,6 +69,12 @@ const purityRule = (forbiddenImport, extraGlobals = []) => ({
       Identifier(node) {
         if (!forbiddenRuntimeGlobals.has(node.name) && !extraGlobals.includes(node.name)) return;
         if (node.parent.type === 'Property' && node.parent.key === node && !node.parent.computed) return;
+        if (
+          (node.parent.type === 'TSPropertySignature' || node.parent.type === 'TSMethodSignature') &&
+          node.parent.key === node &&
+          !node.parent.computed
+        )
+          return;
         if (node.parent.type === 'MemberExpression' && node.parent.property === node && !node.parent.computed) return;
         context.report({ node, messageId: 'forbidden', data: { dependency: node.name } });
       },
