@@ -73,3 +73,9 @@ export function publishDebugVisibility(
   }
   uiBridge.publishDebug({ visible });
 }
+
+export function toggleCommandShell(uiBridge: UiBridge, controller: { releaseInput(): void } | null): void {
+  const open = !uiBridge.shell.get().commandOpen;
+  if (open) controller?.releaseInput();
+  uiBridge.publishShell({ commandOpen: open });
+}

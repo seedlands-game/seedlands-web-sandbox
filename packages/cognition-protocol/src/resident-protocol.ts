@@ -22,6 +22,7 @@ export const RESIDENT_TRANSFER_MAX_BYTES = 64 * 1024 * 1024;
 export type ResidentWorldBinding = Readonly<{ worldId: string; timelineId: string; epoch: string }>;
 export type ResidentDocumentPath = '/AGENT.md' | '/SOUL.md' | '/MEMORY.md' | '/behavior/current.json';
 export type ResidentBirthPackage = Readonly<{
+  birthId: string;
   profile: CharacterProfile;
   agent: string;
   soul: string;
@@ -34,7 +35,12 @@ type Channel = Readonly<{ channelId: string }>;
 type Request = Readonly<{ requestId: string }>;
 export type ResidentClientMessage = Envelope &
   (
-    | Readonly<{ kind: 'hello'; pairingToken: string; world: ResidentWorldBinding }>
+    | Readonly<{
+        kind: 'hello';
+        pairingToken: string;
+        world: ResidentWorldBinding;
+        capabilities: readonly BehaviorCapability[];
+      }>
     | Readonly<{
         kind: 'bind';
         binding: ControlBinding;
@@ -89,7 +95,7 @@ export type ResidentHostMessage = Envelope &
           proposal: Omit<BehaviorUpdateRequest, 'kind' | 'entityId' | 'requestId'>;
         }>)
     | (Channel & Request & Readonly<{ kind: 'observation-request' }>)
-    | (Channel & Request & Readonly<{ kind: 'speak'; text: string }>)
+    | (Channel & Request & Readonly<{ kind: 'speak'; effectRequestId: string; text: string }>)
     | (Channel & Request & Readonly<{ kind: 'workspace-result'; path: ResidentDocumentPath; content: string }>)
     | (Request &
         Readonly<{ kind: 'checkpoint-ready'; transferId: string; parts: number; byteLength: number; sha256: string }>)

@@ -53,6 +53,7 @@ export class ResidentBridge {
   private world: ResidentWorldBinding | null = null;
   private capabilities: readonly BehaviorCapability[] = [];
   private ready = false;
+  private readyWaiters: { resolve(): void; reject(error: Error): void }[] = [];
   private paused = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private authTimer: ReturnType<typeof setTimeout> | null = null;
@@ -75,7 +76,7 @@ export class ResidentBridge {
       if (generation === this.generation && !this.ready) this.fail('本机服务连接超时');
     }, 10000);
     socket.onopen = () => {
-      if (generation === this.generation) this.send({ kind: 'hello', pairingToken: token, world });
+      if (generation === this.generation) this.send({ kind: 'hello', pairingToken: token, world, capabilities });
     };
     socket.onmessage = (event) => {
       if (generation !== this.generation) return;
@@ -117,6 +118,12 @@ export class ResidentBridge {
     socket.onclose = () => {
       if (generation === this.generation) this.fail('连接已断开，伙伴继续当前生活');
     };
+  }
+
+  whenReady(): Promise<void> {
+    if (this.ready) return Promise.resolve();
+    if (!this.socket) return Promise.reject(new Error('思考服务未连接'));
+    return new Promise((resolve, reject) => this.readyWaiters.push({ resolve, reject }));
   }
 
   async bind(port: BoundCharacterControlPort, birth?: ResidentBirthPackage): Promise<void> {
@@ -165,7 +172,7 @@ export class ResidentBridge {
   }
 
   async generateBirth(tags: readonly string[]): Promise<ResidentBirthPackage> {
-    const result = await this.request({ kind: 'birth', tags }, 120000);
+    const result = await this.request({ kind: 'birth', tags }, 330000);
     if (result.kind !== 'birth-package' || !result.birth) throw new Error('出生资料回执无效');
     return result.birth;
   }
@@ -187,8 +194,33 @@ export class ResidentBridge {
     });
   }
 
+  async flushObservations(): Promise<void> {
+    if (!this.ready) throw new Error('思考服务尚未就绪');
+    const generation = this.generation;
+    await Promise.all(
+      [...this.channels].map(async ([channelId, channel]) => {
+        if (!channel.ready) throw new Error('伙伴工作区尚未就绪');
+        let cursor = channel.receivedThrough;
+        let through: number | undefined;
+        for (let page = 0; page < 32; page++) {
+          const result = await channel.port.observe(cursor, through);
+          if (generation !== this.generation || !this.channels.has(channelId)) throw new Error('角色连接已失效');
+          if (!result.ok || result.data.kind !== 'observation') throw new Error('无法保存最后的世界观察');
+          const observation = result.data.observation;
+          if (!this.send({ kind: 'observe', channelId, observation })) throw new Error('观察传输失败');
+          through = observation.eventCoverage.through;
+          cursor = Math.max(observation.eventCoverage.returnedThrough, observation.eventCoverage.lostRange?.to ?? 0);
+          if (!observation.eventCoverage.hasMore) return;
+        }
+        throw new Error('观察分页未能完成');
+      }),
+    );
+  }
+
   disconnect(notify = true): void {
     this.generation++;
+    for (const waiter of this.readyWaiters) waiter.reject(new Error('思考连接已中止'));
+    this.readyWaiters = [];
     if (this.timer) clearTimeout(this.timer);
     if (this.authTimer) clearTimeout(this.authTimer);
     this.timer = this.authTimer = null;
@@ -273,6 +305,8 @@ export class ResidentBridge {
       if (this.authTimer) clearTimeout(this.authTimer);
       this.authTimer = null;
       this.ready = true;
+      for (const waiter of this.readyWaiters) waiter.resolve();
+      this.readyWaiters = [];
       this.options.onConnection('ready', message.modelAvailable ? '思考服务已连接' : '模型不可用，伙伴继续当前生活');
       this.setPaused(this.options.paused());
       for (const channel of this.channels.values())
@@ -347,7 +381,7 @@ export class ResidentBridge {
       const result =
         message.kind === 'behavior-proposal'
           ? await channel.port.behavior({ ...message.proposal, requestId: message.requestId })
-          : await channel.port.speak(message.requestId, message.text);
+          : await channel.port.speak(message.effectRequestId, message.text);
       if (generation === this.generation && this.channels.has(message.channelId))
         this.send({ kind: 'receipt', channelId: message.channelId, requestId: message.requestId, result });
       return;
@@ -375,7 +409,7 @@ export class ResidentBridge {
             const observation = result.data.observation;
             if (!this.send({ kind: 'observe', channelId, observation })) return;
             through = observation.eventCoverage.through;
-            cursor = observation.eventCoverage.returnedThrough;
+            cursor = Math.max(observation.eventCoverage.returnedThrough, observation.eventCoverage.lostRange?.to ?? 0);
             if (!observation.eventCoverage.hasMore) break;
           }
         } finally {

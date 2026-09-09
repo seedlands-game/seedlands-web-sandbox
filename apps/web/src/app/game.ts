@@ -63,6 +63,7 @@ export class Game {
   readonly companion = new CompanionSession(
     () => this.authority,
     () => this.paused,
+    (paused) => this.setPaused(paused),
   );
   private computeRuntime: BrowserComputeRuntime | null = null;
   private logicClient: BrowserLogicClient | null = null;
@@ -286,6 +287,7 @@ export class Game {
   }
 
   private restoreBrowserWorld(ready: AuthorityReady) {
+    this.companion.worldRestored();
     const authority = this.authority;
     if (!authority || !this.world || !this.camera || !this.environment) return;
     // prettier-ignore
@@ -455,11 +457,7 @@ export class Game {
 
   respawn = () => this.gameplayClient?.respawn();
 
-  toggleCommandShell() {
-    const open = !this.uiBridge.shell.get().commandOpen;
-    if (open) this.controller?.releaseInput();
-    this.uiBridge.publishShell({ commandOpen: open });
-  }
+  toggleCommandShell = () => runtimeControls.toggleCommandShell(this.uiBridge, this.controller);
 
   closeCommandShell = () => this.uiBridge.publishShell({ commandOpen: false });
 
