@@ -1,25 +1,23 @@
+import { CharacterObservationRuntime } from './character-observation-runtime';
 import type {
   CharacterControlRequest,
   CharacterControlResult,
   CharacterEvent,
-  CharacterObservation,
   CharacterProfile,
   CharacterState,
   CharacterTargetRef,
+  CharacterBehaviorInput,
+  CharacterGoal,
 } from '../../runtime/character-control-protocol';
-import {
-  CHARACTER_OBSERVATION_MAX_EVENTS,
-  CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES,
-  CHARACTER_OBSERVATION_MAX_VISIBLE_POIS,
-} from '../../runtime/character-control-protocol';
+import { createLifeBehavior } from '../../runtime/character-control-protocol';
 import type { GameplayEntity } from '../gameplay/entity-store';
-import { CharacterGoalRuntime } from './character-goal-runtime';
+import { CharacterBehaviorRuntime, createBehaviorRecord } from './character-behavior-runtime';
+import { behaviorCapabilities, validateBehavior } from './character-behavior-definition';
 import {
   CHARACTER_MAX_DIALOGUE_TEXT,
   CHARACTER_MAX_EVENTS,
   CHARACTER_MAX_MEMORY_TEXT,
   CHARACTER_MAX_SPEECH_TEXT,
-  CHARACTER_MAX_TARGETS,
   createCharacterInventory,
   type CharacterPositionTuple as Position,
   type CharacterRecord,
@@ -39,8 +37,8 @@ import {
   validateCharacterSnapshotRecord,
 } from './character-runtime-validation';
 import type { ActorPersistentGoal } from './actor-state';
+import type { BehaviorDefinition, BehaviorNode } from '../../runtime/behavior-control-protocol';
 
-const DANGER_SECONDS = 3;
 const MOVEMENT_REFRESH_SECONDS = 1;
 
 export type { CharacterSnapshot } from './character-runtime-types';
@@ -56,32 +54,65 @@ export class CharacterControlFailure extends Error {
 
 export class CharacterRuntime {
   private readonly records = new Map<string, CharacterRecord>();
-  private readonly goals: CharacterGoalRuntime;
+  private readonly behaviors: CharacterBehaviorRuntime;
+  private readonly observations: CharacterObservationRuntime;
   private sequence = 0;
 
   constructor(private readonly options: Options) {
-    this.goals = new CharacterGoalRuntime(options, {
+    this.observations = new CharacterObservationRuntime(
+      options,
+      (record) => this.state(record),
+      (id) => this.requireEntity(id),
+    );
+    this.behaviors = new CharacterBehaviorRuntime(options, {
       record: (record, type, fields) => this.record(record, type, fields),
-      reference: (record, kind, targetId) => this.reference(record, kind, targetId),
-      isVisible: (record, kind, targetId) => this.isVisible(record, kind, targetId),
-      requireEntity: (entityId) => this.requireEntity(entityId),
+      resolveTargetRef: (record, ref) => {
+        const binding = record.targets.find((entry) => entry.kind === 'entity' && entry.ref === ref);
+        return binding && this.observations.isVisible(record, 'entity', binding.targetId) ? binding.targetId : null;
+      },
     });
   }
 
   retainedActionIds(): string[] {
-    return [...this.records.values()].flatMap((record) => (record.actionId ? [record.actionId] : []));
+    return [...this.records.values()].flatMap((record) => [
+      ...(record.actionId ? [record.actionId] : []),
+      ...record.behaviorTree.skills.flatMap((entry) => (entry.actionId ? [entry.actionId] : [])),
+    ]);
   }
 
-  validateRegistration(profile: CharacterProfile, homePosition: readonly number[]): void {
+  has(entityId: string): boolean {
+    return this.records.get(entityId)?.lifecycle === 'active';
+  }
+
+  validateRegistration(
+    profile: CharacterProfile,
+    homePosition: readonly number[],
+    behaviorTree?: CharacterBehaviorInput,
+  ): void {
     validateCharacterProfile(profile);
     position(homePosition, 'Character home position');
+    if (behaviorTree) validateBehavior(behaviorTree.goal, behaviorTree.definition);
   }
 
-  register(entityId: string, profile: CharacterProfile, homePosition: readonly number[]): CharacterState {
+  register(
+    entityId: string,
+    profile: CharacterProfile,
+    homePosition: readonly number[],
+    behaviorTree?: CharacterBehaviorInput,
+  ): CharacterState {
     if (this.records.has(entityId)) throw new Error(`Character already exists: ${entityId}`);
     validateCharacterProfile(profile);
     const entity = this.requireEntity(entityId);
     const home = position(homePosition, 'Character home position');
+    const policy =
+      behaviorTree ??
+      createLifeBehavior({
+        homePosition: home,
+        patrolPositions: [
+          [home[0] + 3, home[1], home[2]],
+          [home[0], home[1], home[2] + 3],
+        ],
+      });
     const record: CharacterRecord = {
       lifecycle: 'active',
       entityId,
@@ -104,6 +135,7 @@ export class CharacterRuntime {
       lastBehavior: 'idle',
       hunger: this.options.actor(entityId)?.hunger ?? 0,
       dangerSecondsRemaining: 0,
+      behaviorTree: createBehaviorRecord(policy.goal, policy.definition),
     };
     this.records.set(entityId, record);
     this.options.changed();
@@ -121,7 +153,7 @@ export class CharacterRuntime {
     record.lifecycle = 'deceased';
     record.policyRevision += 1;
     record.revision += 1;
-    this.options.interruptAction(entityId, reason);
+    this.behaviors.dispose(record, reason);
     record.actionId = undefined;
     record.executionTargetId = undefined;
     record.suspendedGoal = undefined;
@@ -137,6 +169,7 @@ export class CharacterRuntime {
 
   execute(request: Exclude<CharacterControlRequest, { kind: 'create' }>): CharacterControlResult {
     if (!request || typeof request !== 'object') throw new TypeError('Character request is invalid.');
+    if (request.kind === 'capabilities') return { kind: 'capabilities', capabilities: behaviorCapabilities() };
     if (request.kind === 'list')
       return {
         kind: 'list',
@@ -144,12 +177,15 @@ export class CharacterRuntime {
           .sort((a, b) => a.entityId.localeCompare(b.entityId))
           .map((record) => this.state(record)),
       };
-    if (!['inspect', 'observe', 'dialogue', 'memory', 'intent'].includes(request.kind))
+    if (!['inspect', 'observe', 'dialogue', 'speak', 'memory', 'intent', 'behavior'].includes(request.kind))
       throw new TypeError('Character request kind is invalid.');
     const record = this.requireRecord(request.entityId);
     if (request.kind === 'inspect') return { kind: 'state', character: this.state(record) };
     if (request.kind === 'observe')
-      return { kind: 'observation', observation: this.observe(record, request.sinceCursor) };
+      return {
+        kind: 'observation',
+        observation: this.observations.observe(record, request.sinceCursor, request.throughCursor),
+      };
     if (request.kind === 'dialogue') {
       this.requireActive(record);
       return {
@@ -159,32 +195,42 @@ export class CharacterRuntime {
         }),
       };
     }
+    if (request.kind === 'speak') {
+      this.requireActive(record);
+      const requestId = text(request.requestId, 'Speech request id', 256);
+      const prior = record.events.find((event) => event.type === 'speech' && event.reason === requestId);
+      if (prior) return { kind: 'speak', event: { ...prior }, character: this.state(record) };
+      const event = this.record(record, 'speech', {
+        text: text(request.text, 'Character speech', CHARACTER_MAX_SPEECH_TEXT),
+        reason: requestId,
+      });
+      record.lastSpeech = event.text;
+      record.requestIds = [...record.requestIds.filter((id) => id !== requestId), requestId].slice(-64);
+      return { kind: 'speak', event, character: this.state(record) };
+    }
     if (request.kind === 'memory') return { kind: 'memory', character: this.updateMemory(record, request) };
+    if (request.kind === 'behavior')
+      return { kind: 'behavior', accepted: true, character: this.applyBehavior(record, request) };
     return { kind: 'intent', accepted: true, character: this.applyIntent(record, request) };
   }
 
   recordAttacked(entityId: string, attackerId: string): void {
     const record = this.records.get(entityId);
     if (!record || record.lifecycle !== 'active') return;
-    const target = this.reference(record, 'entity', attackerId);
-    if (record.currentGoal.status === 'active') record.suspendedGoal = cloneGoalState(record.currentGoal);
-    this.options.interruptAction(entityId, 'danger');
-    record.actionId = undefined;
-    record.currentGoal = { ...record.currentGoal, status: 'suspended', reason: 'danger' };
-    record.revision += 1;
-    record.dangerSecondsRemaining = DANGER_SECONDS;
-    record.lastBehavior = this.options.actor(entityId)?.behavior ?? 'flee';
+    const target = this.observations.reference(record, 'entity', attackerId);
+    record.lastThreatEntityId = attackerId;
+    record.dangerSecondsRemaining = 3;
     this.record(record, 'attacked', { target });
     this.options.changed();
   }
 
   advance(seconds: number): void {
-    for (const record of this.records.values()) this.goals.advance(record, seconds);
+    for (const record of this.records.values()) this.behaviors.advance(record, seconds);
   }
 
   snapshot(): CharacterSnapshot {
     return {
-      version: 1,
+      version: 2,
       sequence: this.sequence,
       characters: [...this.records.values()].map((record) => ({
         ...this.stateFields(record),
@@ -203,6 +249,8 @@ export class CharacterRuntime {
         lastBehavior: record.lastBehavior,
         hunger: record.hunger,
         dangerSecondsRemaining: record.dangerSecondsRemaining,
+        ...(record.lastThreatEntityId ? { lastThreatEntityId: record.lastThreatEntityId } : {}),
+        behaviorTree: JSON.parse(JSON.stringify(record.behaviorTree)),
       })),
     };
   }
@@ -227,7 +275,7 @@ export class CharacterRuntime {
     const snapshot = raw as CharacterSnapshot;
     if (
       !snapshot ||
-      snapshot.version !== 1 ||
+      ![1, 2].includes(snapshot.version) ||
       !Number.isSafeInteger(snapshot.sequence) ||
       !Number.isSafeInteger(snapshot.sequence + 1) ||
       snapshot.sequence < 0 ||
@@ -244,7 +292,14 @@ export class CharacterRuntime {
         (value.lifecycle === 'deceased' && this.options.actor(value.entityId))
       )
         throw new TypeError('Character snapshot actor lifecycle is invalid or duplicated.');
-      next.set(value.entityId, {
+      const migrated =
+        value.behaviorTree ??
+        createBehaviorRecord(
+          { description: `Continue ${value.currentGoal.goal.kind}.` },
+          this.definitionForGoal(value.currentGoal.goal, value.homePosition, value.hunger),
+        );
+      if (snapshot.version === 2 && !value.behaviorTree) throw new TypeError('Character behavior snapshot is missing.');
+      const restored: CharacterRecord = {
         ...value,
         profile: { ...value.profile },
         currentGoal: cloneGoalState(value.currentGoal),
@@ -259,7 +314,10 @@ export class CharacterRuntime {
         requestIds: [...value.requestIds],
         lastPosition: [...value.lastPosition],
         ...(value.suspendedGoal ? { suspendedGoal: cloneGoalState(value.suspendedGoal) } : {}),
-      });
+        behaviorTree: JSON.parse(JSON.stringify(migrated)),
+      };
+      this.behaviors.rebuildAfterRestore(restored);
+      next.set(value.entityId, restored);
     }
     this.records.clear();
     next.forEach((record, id) => this.records.set(id, record));
@@ -291,9 +349,7 @@ export class CharacterRuntime {
       record.currentGoal.status === 'active' &&
       sameGoal(record.currentGoal.goal, request.goal) &&
       record.executionTargetId === executionTargetId;
-    if (request.goal.kind !== 'idle' && !this.options.canStartAction())
-      throw new RangeError('Action sequence is exhausted.');
-    if (!retainsAction) this.options.interruptAction(record.entityId, 'goal-replaced');
+    if (!retainsAction) this.behaviors.dispose(record, 'goal-replaced');
     record.revision += 1;
     record.currentGoal = {
       revision: record.revision,
@@ -314,7 +370,40 @@ export class CharacterRuntime {
       record.lastSpeech = speech;
       this.record(record, 'speech', { text: speech });
     }
-    if (!retainsAction) this.goals.start(record);
+    if (!retainsAction)
+      this.behaviors.install(
+        record,
+        { description: `Character goal: ${request.goal.kind}.` },
+        this.definitionForGoal(request.goal, record.homePosition, this.options.actor(record.entityId)?.hunger),
+      );
+    if (!retainsAction) this.behaviors.advance(record, 0);
+    this.options.changed();
+    return this.state(record);
+  }
+
+  private applyBehavior(
+    record: CharacterRecord,
+    request: Extract<CharacterControlRequest, { kind: 'behavior' }>,
+  ): CharacterState {
+    this.requireActive(record);
+    text(request.requestId, 'Behavior request id', 256);
+    if (record.requestIds.includes(request.requestId)) return this.state(record);
+    if (!Number.isSafeInteger(request.expectedBehaviorRevision) || request.expectedBehaviorRevision < 0)
+      throw new TypeError('Expected behavior revision is invalid.');
+    validateBehavior(request.goal, request.definition);
+    if (request.expectedBehaviorRevision !== record.behaviorTree.revision)
+      throw new CharacterControlFailure('CHARACTER_BEHAVIOR_CONFLICT', 'Character behavior revision changed.');
+    this.behaviors.install(record, request.goal, request.definition);
+    record.revision += 1;
+    record.currentGoal = {
+      revision: record.revision,
+      requestId: request.requestId,
+      goal: { kind: 'idle' },
+      status: 'active',
+    };
+    record.requestIds = [...record.requestIds.filter((id) => id !== request.requestId), request.requestId].slice(-64);
+    this.record(record, 'behavior-updated', { reason: request.requestId });
+    this.behaviors.advance(record, 0);
     this.options.changed();
     return this.state(record);
   }
@@ -337,128 +426,25 @@ export class CharacterRuntime {
     return this.state(record);
   }
 
-  private observe(record: CharacterRecord, sinceCursor = record.eventCursor): CharacterObservation {
-    if (!Number.isSafeInteger(sinceCursor) || sinceCursor < 0 || sinceCursor > record.eventCursor)
-      throw new TypeError('Character event cursor is invalid.');
-    if (record.lifecycle === 'deceased') {
-      const page = this.eventPage(record, sinceCursor);
-      return {
-        character: this.state(record),
-        self: { position: [...record.lastPosition], health: 0 },
-        visibleEntities: [],
-        visiblePois: [],
-        ...page,
-      };
-    }
-    const perception = this.options.observe(record.entityId);
-    const observedCharacter = this.requireEntity(record.entityId);
-    const protectedTargets = this.protectedTargets(record, perception);
-    const visibleEntities = perception.visibleEntities
-      .slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES)
-      .flatMap((entry) => {
-        const entity = this.options.entities.get(entry.entityId);
-        if (!entity) return [];
-        return [
-          {
-            target: this.reference(record, 'entity', entity.id, protectedTargets),
-            type: entity.type,
-            distance: entry.distance,
-            position: [...entity.position] as Position,
-            ...(entity.stack ? { stack: { ...entity.stack } } : {}),
-          },
-        ];
-      });
-    const visiblePois = perception.pois.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_POIS).flatMap((entry) => {
-      const poi = this.options.poi(entry.poiId);
-      return poi
-        ? [
-            {
-              target: this.reference(record, 'poi', poi.id, protectedTargets),
-              type: poi.kind,
-              position: [...poi.position] as Position,
-              distance: entry.distance,
-            },
-          ]
-        : [];
-    });
-    const page = this.eventPage(record, sinceCursor);
-    const gap =
-      Boolean(page.gap) ||
-      perception.visibleEntities.length > CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES ||
-      perception.pois.length > CHARACTER_OBSERVATION_MAX_VISIBLE_POIS;
-    return {
-      character: this.state(record),
-      self: {
-        position: [...observedCharacter.position],
-        ...(observedCharacter.health === undefined ? {} : { health: observedCharacter.health }),
-      },
-      visibleEntities,
-      visiblePois,
-      events: page.events,
-      cursor: page.cursor,
-      ...(gap ? { gap: true } : {}),
-    };
-  }
-
   private resolveVisibleTarget(record: CharacterRecord, target: CharacterTargetRef, kind: TargetBinding['kind']) {
     const binding = record.targets.find((candidate) => candidate.ref === target.ref);
     if (
       !binding ||
       binding.kind !== kind ||
       binding.revision !== target.revision ||
-      !this.isVisible(record, kind, binding.targetId)
+      !this.observations.isVisible(record, kind, binding.targetId)
     )
       throw new CharacterControlFailure('CHARACTER_TARGET_UNAVAILABLE', 'Character target is unavailable.');
     return binding.targetId;
   }
 
-  private isVisible(record: CharacterRecord, kind: TargetBinding['kind'], targetId: string): boolean {
-    const observed = this.options.observe(record.entityId);
-    return kind === 'entity'
-      ? observed.visibleEntities.some((entry) => entry.entityId === targetId)
-      : observed.pois.some((entry) => entry.poiId === targetId);
-  }
-
-  private protectedTargets(record: CharacterRecord, perception = this.options.observe(record.entityId)) {
-    const protectedTargets = new Set<string>();
-    for (const entry of perception.visibleEntities.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES))
-      if (this.options.entities.get(entry.entityId)) protectedTargets.add(`entity:${entry.entityId}`);
-    for (const entry of perception.pois.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_POIS))
-      if (this.options.poi(entry.poiId)) protectedTargets.add(`poi:${entry.poiId}`);
-    if (record.executionTargetId) protectedTargets.add(`entity:${record.executionTargetId}`);
-    return protectedTargets;
-  }
-
-  private reference(
-    record: CharacterRecord,
-    kind: TargetBinding['kind'],
-    targetId: string,
-    protectedTargets?: ReadonlySet<string>,
-  ): CharacterTargetRef {
-    let binding = record.targets.find((candidate) => candidate.kind === kind && candidate.targetId === targetId);
-    if (!binding) {
-      if (record.targetSequence >= Number.MAX_SAFE_INTEGER)
-        throw new TypeError('Character target sequence is exhausted.');
-      if (record.targets.length >= CHARACTER_MAX_TARGETS) {
-        const retainedTargets = protectedTargets ?? this.protectedTargets(record);
-        const evicted = record.targets.findIndex(
-          (candidate) => !retainedTargets.has(`${candidate.kind}:${candidate.targetId}`),
-        );
-        record.targets.splice(evicted < 0 ? 0 : evicted, 1);
-      }
-      binding = { kind, targetId, ref: `target-${++record.targetSequence}`, revision: 1 };
-      record.targets.push(binding);
-      this.options.changed();
-    }
-    return { kind, ref: binding.ref, revision: binding.revision };
-  }
-
   private record(
     record: CharacterRecord,
     type: CharacterEvent['type'],
-    fields: Pick<CharacterEvent, 'text' | 'target' | 'reason'> = {},
+    fields: Omit<Partial<CharacterEvent>, 'cursor' | 'at' | 'type'> = {},
   ): CharacterEvent {
     const event = { cursor: ++record.eventCursor, at: this.options.now(), type, ...fields };
+    if (type === 'speech' && event.text) record.lastSpeech = event.text;
     record.events.push(event);
     record.events = record.events.slice(-CHARACTER_MAX_EVENTS);
     this.options.changed();
@@ -474,6 +460,7 @@ export class CharacterRuntime {
       inventory: record.inventory.snapshot(),
       behavior: actor?.behavior ?? record.lastBehavior,
       hunger: actor?.hunger ?? record.hunger,
+      behaviorTree: this.behaviors.state(record),
     };
   }
 
@@ -503,17 +490,29 @@ export class CharacterRuntime {
       throw new CharacterControlFailure('CHARACTER_UNAVAILABLE', 'Character is unavailable.');
   }
 
-  private eventPage(record: CharacterRecord, sinceCursor: number) {
-    const firstCursor = record.events[0]?.cursor ?? record.eventCursor + 1;
-    const events = record.events
-      .filter((event) => event.cursor > sinceCursor)
-      .slice(0, CHARACTER_OBSERVATION_MAX_EVENTS)
-      .map((event) => ({ ...event, ...(event.target ? { target: { ...event.target } } : {}) }));
-    return {
-      events,
-      cursor: events.at(-1)?.cursor ?? sinceCursor,
-      ...(sinceCursor < firstCursor - 1 ? { gap: true } : {}),
-    };
+  private definitionForGoal(goal: CharacterGoal, home: Position, hunger = 60): BehaviorDefinition {
+    let action: BehaviorNode;
+    if (goal.kind === 'idle') action = { id: 'legacy-goal', type: 'action', skill: 'hold' };
+    else if (goal.kind === 'forage')
+      action = {
+        id: 'legacy-goal',
+        type: 'action',
+        skill: 'satisfy-hunger',
+        args: { satisfiedAt: Math.max(0, hunger - 4) },
+      };
+    else if (goal.kind === 'follow')
+      action = { id: 'legacy-goal', type: 'action', skill: 'follow', args: { targetRef: goal.target.ref } };
+    else if (goal.kind === 'return-home')
+      action = {
+        id: 'legacy-goal',
+        type: 'action',
+        skill: 'move-to',
+        args: { position: home },
+      };
+    else if ('position' in goal)
+      action = { id: 'legacy-goal', type: 'action', skill: 'move-to', args: { position: goal.position } };
+    else throw new TypeError('Character goal is invalid.');
+    return { version: 1, root: action };
   }
 
   private requireEntity(entityId: string): GameplayEntity {

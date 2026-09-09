@@ -6,6 +6,42 @@ import { testCorePlatform } from '../support/core-platform';
 const profile = { name: 'Lin', personality: 'Practical and kind.', riskTolerance: 0.25 } as const;
 
 describe('Browser character authority', () => {
+  it('applies the shared resource policy to a bound visitor before execution', async () => {
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'bound-resource-policy' });
+    try {
+      const authority = new BrowserCharacterAuthority({
+        runtime: () => session.runtime,
+        worldId: () => 'world-id',
+        worldEpoch: () => 'world:0',
+        authorizationRules: [
+          { effect: 'deny', resources: ['world.character'], operations: ['execute'], scope: 'self' },
+        ],
+      });
+      const created = authority.trusted({ kind: 'create', profile });
+      if (!created.ok || created.data.kind !== 'created') throw new Error('Character was not created.');
+      const character = created.data.character;
+      const binding = authority.bind(character.entityId);
+      expect(authority.control(binding, 1, { kind: 'observe', entityId: character.entityId })).toMatchObject({
+        ok: true,
+      });
+      expect(
+        authority.control(binding, 2, {
+          kind: 'intent',
+          entityId: character.entityId,
+          requestId: 'policy-denied',
+          expectedRevision: character.revision,
+          expectedCursor: character.eventCursor,
+          goal: { kind: 'idle' },
+        }),
+      ).toMatchObject({ ok: false, error: { code: 'WORLD_PERMISSION_DENIED' } });
+      expect(authority.trusted({ kind: 'inspect', entityId: character.entityId })).toMatchObject({
+        ok: true,
+        data: { character: { revision: character.revision } },
+      });
+    } finally {
+      await session.dispose();
+    }
+  }, 20000);
   it('enforces proximity for dialogue and requires an Authority binding for writes', async () => {
     const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'browser-character' });
     const worldEpoch = 'world:0';

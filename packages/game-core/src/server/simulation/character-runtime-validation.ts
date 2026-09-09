@@ -5,6 +5,7 @@ import type {
   CharacterProfile,
 } from '../../runtime/character-control-protocol';
 import type { ActorAction } from './action-runtime';
+import { validateBehavior } from './character-behavior-definition';
 import {
   createCharacterInventory,
   CHARACTER_INVENTORY_CAPACITY,
@@ -27,6 +28,12 @@ const eventTypes: readonly CharacterEvent['type'][] = [
   'target-lost',
   'item-picked-up',
   'item-consumed',
+  'activity-started',
+  'activity-succeeded',
+  'activity-failed',
+  'activity-interrupted',
+  'rejudge-requested',
+  'behavior-updated',
   'fallback',
 ];
 
@@ -164,6 +171,47 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
     throw new TypeError('Character snapshot memory is invalid.');
   characterText(value.memory.summary, 'Character memory summary', CHARACTER_MAX_MEMORY_TEXT, true);
   if (value.lastSpeech !== undefined) characterText(value.lastSpeech, 'Character speech', 280);
+  if (value.behaviorTree) {
+    validateBehavior(value.behaviorTree.goal, value.behaviorTree.definition);
+    if (
+      !Number.isSafeInteger(value.behaviorTree.revision) ||
+      value.behaviorTree.revision < 1 ||
+      !Number.isSafeInteger(value.behaviorTree.cycle) ||
+      value.behaviorTree.cycle < 0 ||
+      !Number.isSafeInteger(value.behaviorTree.activationSequence) ||
+      value.behaviorTree.activationSequence < 0 ||
+      !Array.isArray(value.behaviorTree.skills) ||
+      value.behaviorTree.skills.length > 64 ||
+      !Array.isArray(value.behaviorTree.monitors) ||
+      value.behaviorTree.monitors.length > 128
+    )
+      throw new TypeError('Character behavior snapshot is invalid.');
+    const nodes = new Set<string>();
+    for (const skill of value.behaviorTree.skills) {
+      if (
+        !skill.nodeId?.trim() ||
+        nodes.has(skill.nodeId) ||
+        !skill.skill?.trim() ||
+        !skill.signature?.trim() ||
+        !Number.isSafeInteger(skill.activation) ||
+        skill.activation < 1 ||
+        skill.activation > value.behaviorTree.activationSequence ||
+        !['running', 'succeeded', 'failed', 'interrupted'].includes(skill.status) ||
+        !Number.isFinite(skill.elapsedSeconds) ||
+        skill.elapsedSeconds < 0 ||
+        !Number.isSafeInteger(skill.replanCount) ||
+        skill.replanCount < 0 ||
+        !Number.isSafeInteger(skill.count) ||
+        skill.count < 0 ||
+        (skill.targetPosition !== undefined &&
+          (!Array.isArray(skill.targetPosition) ||
+            skill.targetPosition.length !== 3 ||
+            !skill.targetPosition.every(Number.isFinite)))
+      )
+        throw new TypeError('Character behavior execution snapshot is invalid.');
+      nodes.add(skill.nodeId);
+    }
+  }
 
   let previousCursor = value.eventCursor - value.events.length;
   if (previousCursor < 0) throw new TypeError('Character snapshot event is invalid.');
@@ -187,6 +235,16 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
         event.target.revision < 1
       )
         throw new TypeError('Character snapshot event target is invalid.');
+    if (
+      (event.nodeId !== undefined && (typeof event.nodeId !== 'string' || !event.nodeId.trim())) ||
+      (event.actionId !== undefined && (typeof event.actionId !== 'string' || !event.actionId.trim())) ||
+      (event.episode !== undefined && (!Number.isSafeInteger(event.episode) || event.episode < 0)) ||
+      (event.count !== undefined && (!Number.isSafeInteger(event.count) || event.count < 0)) ||
+      (event.hunger !== undefined && (!Number.isFinite(event.hunger) || event.hunger < 0 || event.hunger > 100)) ||
+      (event.position !== undefined &&
+        (!Array.isArray(event.position) || event.position.length !== 3 || !event.position.every(Number.isFinite)))
+    )
+      throw new TypeError('Character snapshot activity event is invalid.');
     previousCursor = event.cursor;
   }
   const refs = new Set<string>();
@@ -235,7 +293,8 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
     !Number.isFinite(value.dangerSecondsRemaining) ||
     value.dangerSecondsRemaining < 0 ||
     (value.executionTargetId !== undefined && !value.executionTargetId.trim()) ||
-    (value.actionId !== undefined && !value.actionId.trim())
+    (value.actionId !== undefined && !value.actionId.trim()) ||
+    (value.lastThreatEntityId !== undefined && !value.lastThreatEntityId.trim())
   )
     throw new TypeError('Character snapshot execution state is invalid.');
   if (value.lifecycle === 'deceased' && (value.actionId || value.suspendedGoal || value.inventory.some(Boolean)))

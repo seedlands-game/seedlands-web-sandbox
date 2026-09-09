@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CompanionSession } from '../../apps/web/src/app/gameplay/companion/companion-session';
-import type { CharacterState } from '@seedlands/game-core/runtime/character-control-protocol';
-import type { CharacterControllerPort } from '../../apps/web/src/client/character/controller-bridge';
+import { createLifeBehavior, type CharacterState } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { BoundCharacterControlPort } from '../../apps/web/src/client/authority/browser-authority-client-contract';
 const frontier = {
   worldId: 'w',
   epoch: 'e',
@@ -19,6 +19,11 @@ const character: CharacterState = {
   policyRevision: 1,
   profile: { name: '阿岚', personality: '谨慎' },
   currentGoal: { revision: 0, requestId: 'create', goal: { kind: 'forage' }, status: 'active' },
+  behaviorTree: {
+    revision: 1,
+    ...createLifeBehavior({ homePosition: [1, 2, 3], patrolPositions: [[2, 2, 3]] }),
+    runtime: { cycle: 1, activeNodeIds: [], skills: [], monitors: [], milestones: [] },
+  },
   behavior: 'forage',
   hunger: 60,
   inventory: [],
@@ -29,13 +34,15 @@ afterEach(() => vi.useRealTimers());
 describe('companion UI session lifecycle', () => {
   it('keeps a saved identity and requests recent events; releases a binding that arrives after world exit', async () => {
     vi.useFakeTimers();
-    let bind!: (port: CharacterControllerPort) => void;
-    const port: CharacterControllerPort = {
+    let bind!: (port: BoundCharacterControlPort) => void;
+    const port: BoundCharacterControlPort = {
       binding: { sessionId: 's', worldId: 'w', epoch: 'e', entityId: 'n', incarnation: 'i', policyRevision: 1 },
       dispose: vi.fn(),
       observe: vi.fn(),
       intent: vi.fn(),
       memory: vi.fn(),
+      behavior: vi.fn(),
+      speak: vi.fn(),
     };
     const characterRequest = vi.fn(async () => ({
       ok: true as const,

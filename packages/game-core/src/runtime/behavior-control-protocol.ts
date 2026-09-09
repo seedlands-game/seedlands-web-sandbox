@@ -15,7 +15,13 @@ export type BehaviorCondition =
   | Readonly<{ not: BehaviorCondition }>;
 
 export type BehaviorNode =
-  | Readonly<{ id: string; type: 'selector' | 'sequence'; children: readonly BehaviorNode[] }>
+  | Readonly<{
+      id: string;
+      type: 'selector' | 'sequence';
+      children: readonly BehaviorNode[];
+      /** Live subtree guard; an abort cleans up the currently running descendant. */
+      guard?: BehaviorCondition;
+    }>
   | Readonly<{ id: string; type: 'condition'; condition: BehaviorCondition }>
   | Readonly<{
       id: string;

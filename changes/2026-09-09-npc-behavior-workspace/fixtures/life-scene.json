@@ -16,6 +16,7 @@
     { "position": [-4.5, 57, -2.5], "itemId": "berry", "count": 64 }
   ],
   "feeding": { "startHungerAtLeast": 40, "finishHungerAtMost": 20 },
+  "playerFood": { "itemId": "berry", "count": 8, "useEverySimulatedSeconds": 600 },
   "duration": { "headlessSimulatedSeconds": 1800, "browserWallSeconds": 3600 },
   "acceptance": {
     "completedFeedingEpisodesAtLeast": 3,

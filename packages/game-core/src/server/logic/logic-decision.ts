@@ -141,6 +141,23 @@ function chooseGoal(
 ): Goal {
   const state = entry.state;
   if (!state.active) return { kind: 'hold' };
+  if (state.behaviorTreeOwned) {
+    if (
+      entry.activeAction?.type === 'move-to' &&
+      entry.activeAction.targetPosition &&
+      entry.activeAction.status !== 'failed' &&
+      entry.activeAction.status !== 'interrupted'
+    )
+      return {
+        kind: 'move',
+        target: clonePosition(
+          entry.activeAction.path[entry.activeAction.pathIndex] ?? entry.activeAction.targetPosition,
+        ),
+        actionId: entry.activeAction.id,
+        ...(entry.activeAction.targetEntityId ? { targetEntityId: entry.activeAction.targetEntityId } : {}),
+      };
+    return { kind: 'hold' };
+  }
   const perceptionRange = rangeByArchetype[state.archetype];
   const recordedAttacker =
     state.behavior === 'flee' && state.targetEntityId

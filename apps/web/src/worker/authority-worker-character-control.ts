@@ -11,6 +11,11 @@ import type {
   WorldHarnessError,
   WorldHarnessResult,
 } from '@seedlands/game-core/server/harness/world-harness-contract';
+import {
+  WorldResourceAuthorizer,
+  type WorldAuthorizationRule,
+} from '@seedlands/game-core/server/harness/world-authorization';
+import { characterHarnessOperation } from '@seedlands/game-core/server/harness/world-harness-operations';
 
 const DIALOGUE_RANGE = 10;
 
@@ -18,9 +23,11 @@ type Options = Readonly<{
   runtime: () => AuthorityRuntime;
   worldId: () => string;
   worldEpoch: () => string;
+  /** Additional world rules. Explicit denies override the bound visitor's default self grants. */
+  authorizationRules?: readonly WorldAuthorizationRule[];
 }>;
 
-type BindingRecord = { binding: ControlBinding; lastSequence: number };
+type BindingRecord = { binding: ControlBinding; lastSequence: number; authorizer: WorldResourceAuthorizer };
 
 const distance = (left: readonly number[], right: readonly number[]) =>
   Math.hypot(left[0] - right[0], left[1] - right[1], left[2] - right[2]);
@@ -52,7 +59,12 @@ export class BrowserCharacterAuthority {
     try {
       if (!request || typeof request !== 'object' || typeof request.kind !== 'string')
         throw new TypeError('Character request is invalid.');
-      if (request.kind === 'intent' || request.kind === 'memory')
+      if (
+        request.kind === 'intent' ||
+        request.kind === 'memory' ||
+        request.kind === 'behavior' ||
+        request.kind === 'speak'
+      )
         return this.denied('Bound character control is required.');
       if (request.kind === 'dialogue') this.assertDialogueAvailable(request.entityId);
       return this.success(this.options.runtime().character(request));
@@ -74,7 +86,19 @@ export class BrowserCharacterAuthority {
       incarnation: state.incarnation,
       policyRevision: state.policyRevision,
     });
-    this.bindings.set(binding.sessionId, { binding, lastSequence: -1 });
+    const authorizer = new WorldResourceAuthorizer({
+      principals: [{ id: binding.sessionId, boundEntityId: entityId, labels: ['character-controller'] }],
+      rules: [
+        {
+          effect: 'allow',
+          resources: ['world.character'],
+          operations: ['read', 'execute', 'write'],
+          scope: 'self',
+        },
+        ...(this.options.authorizationRules ?? []),
+      ],
+    });
+    this.bindings.set(binding.sessionId, { binding, lastSequence: -1, authorizer });
     return binding;
   }
 
@@ -87,12 +111,18 @@ export class BrowserCharacterAuthority {
       const record = this.requireBinding(binding);
       if (!Number.isSafeInteger(sequence) || sequence <= record.lastSequence)
         throw new BoundControlFailure('CHARACTER_SEQUENCE_STALE', 'Character control sequence is stale.');
-      if (!request || typeof request !== 'object' || !['observe', 'intent', 'memory'].includes(request.kind))
+      if (
+        !request ||
+        typeof request !== 'object' ||
+        !['observe', 'intent', 'memory', 'behavior', 'speak'].includes(request.kind)
+      )
         throw new TypeError('Bound character request is invalid.');
       if (request.entityId !== binding.entityId)
         throw new BoundControlFailure('CHARACTER_BINDING_INVALID', 'Character binding is invalid.');
       if (request.kind === 'intent' && (!Number.isSafeInteger(request.expectedCursor) || request.expectedCursor < 0))
         throw new TypeError('Bound character event cursor is invalid.');
+      const decision = record.authorizer.authorize(binding.sessionId, characterHarnessOperation(request).authorization);
+      if (!decision.allowed) return this.denied(decision.message);
       record.lastSequence = sequence;
       return this.success(this.options.runtime().character(request));
     } catch (cause) {
