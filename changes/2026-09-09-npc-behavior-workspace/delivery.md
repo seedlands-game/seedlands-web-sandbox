@@ -70,3 +70,7 @@ PG恢复保证认知数据整批提交；世界与PG仍是两个owner，通过�
 `docs/code-map.md`、`docs/developer-world-harness.md`的长期baseline同步直接Worker通道和快进语义；F3往返来源已从旧主线程relay改为Authority↔Logic。真实模型调用数量没有增加。随后修正初始化MessagePort在显式故障注入传输中的一次性移交，受影响故障回归与最终全量门禁继续记录于PR交接。
 
 最终本地准出补记：`pnpm verify:static`完成286文件/1376项通过、2文件/4项明确跳过；之后一次性MessagePort故障注入适配的最终变更由35项相关单测、Web/test类型与受影响lint补验。最后生产源码冻结后的`pnpm build`通过。浏览器21项基础回归与2项H1恢复全部通过；额外4项30/60/120Hz延迟乱序、事务与碰撞回归24.6秒通过。旧测试松键后读取旧快照的竞态通过只读记录真实释放输入sequence并等待Authority回执消除，未改变输入、重排规则或0.08米停止断言。远端全量检查继续在最新提交执行。
+
+第三轮CI34401785567：完整Static verification与Production build通过，21项基础和2项H1通过；NPC短时取食、主线程阻塞隔离、三角色/PG通过，只有三昼夜在240秒达到期限。两次均在持续正常行动（1590/1190模拟秒），不记作生活验收通过。经[同源图形宿主对照](experiments/browser-simulation-host/README.md)，NPC CI固定既有ANGLE SwiftShader测试参数，保持全程模拟、画面与断言，不延长240秒限时。长期产品基线与生产图形设置不变；最终CI另在新提交检查。
+
+固定测试宿主后的完整NPC组合本地4项通过、3项明确opt-in跳过；此后提交远端全量检查，正式生产源码仍为3f745a5。
