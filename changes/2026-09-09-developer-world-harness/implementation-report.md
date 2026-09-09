@@ -64,3 +64,9 @@ CLI 的真实子进程 9/9 通过，覆盖非法参数后继续、checkpoint 往
 固定版本 mock 实验确认 ChatDeepSeek 1.1.11 和 OpenAI Agents 0.17.2 的默认链路丢失第二轮工具调用所需 reasoning replay；LangGraph 1.4.14 暂停/恢复没有重复提交。DeepSeek Harness 固定源码提交与 SDK 生命周期限制为静态证据。全部实验零真实模型调用，不代表模型质量、延迟或费用验收；生产未加入模型 SDK。
 
 更新了长期路线、产品定位、代码地图、README 和 [Harness 使用文档](../../docs/developer-world-harness.md)，旧设计增加 supersession 入口。下一阶段 A1 通用 Actor/Action/反射/受限感知/持久化，A2 模型适配与 Bridge，A3 性格目标与可玩后果。**本 PR 没有模型驱动 NPC、LOD、离线追赶或 World AI。** 实际预算与额度边界见 [estimates.md](estimates.md)。
+
+## 前序合并后的低负载 parity 复验
+
+`b7d7169` 的 CI run `34322183659` 中，parity 三次超时；源码树与此前通过的 `5d49ce8` 相同。独立分诊从 artifact 观察到 3–4 FPS、271–291ms p95 和 WebGL stall，未找到可归因该提交的生产改动。此观察只支持资源压力假设，不证明特定 Worker 队列的因果。
+
+将这一功能合同用例在首次导航前设为既有 Low 质量，并断言实际 snapshot quality；不改 world/clock、旧断言、timeout 或 Worker 拓扑。2026-09-09 在隔离 checkout 执行 `SEEDLANDS_E2E_PORT=4175 pnpm exec playwright test changes/2026-09-09-developer-world-harness/e2e/browser-world-parity.spec.ts --retries=0 --trace=on`，1/1 通过（15.5秒）。日志保留 `/tmp/seedlands-living-npc/harness-low-fixture.log`，该次不是性能实验，也不代表软件渲染 CI 的终态；以新提交远端 CI 为准。长期 docs baseline 未变，本次只固定不验证画质的测试夹具。
