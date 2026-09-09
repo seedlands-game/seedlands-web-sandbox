@@ -33,6 +33,7 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
   let modelCalls = 0;
   let birthCalls = 0;
   let blockNextModel = false;
+  let blockedMessages: unknown[] = [];
   let modelAbortCount = 0;
 
   beforeAll(async () => {
@@ -47,6 +48,7 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
       fetch: async (_input, init) => {
         modelCalls++;
         if (blockNextModel) {
+          blockedMessages = JSON.parse(String(init?.body)).messages;
           blockNextModel = false;
           await new Promise<never>((_resolve, reject) => {
             const abort = () => {
@@ -469,10 +471,6 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
         content: expect.stringContaining('unknown'),
       }),
     );
-    await expect(workspace.getRuntimeMetadata(identity)).resolves.toMatchObject({
-      logicalRounds: 7,
-      snapshot: { scheduler: { inFlight: false, blocked: false } },
-    });
     await expect(
       client.wait(
         'status',
@@ -483,6 +481,17 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
       ),
     ).resolves.toMatchObject({ kind: 'status' });
     await expect.poll(() => blockNextModel, { timeout: 5_000 }).toBe(false);
+    expect(blockedMessages).toContainEqual(
+      expect.objectContaining({
+        role: 'tool',
+        tool_call_id: 'open-tool-call',
+        content: expect.stringContaining('unknown'),
+      }),
+    );
+    await expect(workspace.getRuntimeMetadata(identity)).resolves.toMatchObject({
+      logicalRounds: 8,
+      snapshot: { scheduler: { inFlight: true, blocked: false } },
+    });
 
     client.send({ kind: 'configure', channelId: current.binding.sessionId, fallbackSeconds: 120 });
     await client.close();
