@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "living-npc-round3-recheck",
+  "role": "independent cognition code reviewer",
+  "workType": "validation",
+  "goal": "Review frozen 0ce2bfc3b53e6be179f6d315016972d4be5e1885..db0056142e5218c4ce0edf72831ac2ce0aca3106 delta (18 source/test files plus docs) against review5152979283 four P1 and Root first-observation integration fix. Read round3-triage, round3-host-fix, round3-world-fix, round3-browser-fix reports. Validate Alt+T alone changes speed, T companion remains functional; first valid host observation seeds cursor baseline/context no replay, new event continues and prior async negative tests retain semantics; core no-action active/suspended follow link validation and atomic failed actor creation; Bridge sends first baseline even paused before publishing ready, generation/disconnect remains safe, UI+session block premature dialogue. Real Browser2/2 passed13.3s including Authority time-rate assertion and disconnect/reconnect/new-dialogue once. Root fullstatic/build ongoing. Review all production changed paths and tests; do not reopen whole PR. No tests/provider/browser/repo edits/Git/external comments. Write /tmp/living-npc-round3-recheck.md; report any concrete residual P0/P1/P2 promptly and freeze. .5h within original reviewpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round3-recheck.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "recheck",
+      "check": "Frozen delta fully reviewed; P1 resolution and any residual concrete bugs reported",
+      "evidence": "recheck report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.5
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

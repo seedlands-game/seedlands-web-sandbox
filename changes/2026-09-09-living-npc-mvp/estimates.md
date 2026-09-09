@@ -23,3 +23,5 @@
 GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，line reporter未保存内存usage附件。该轮确切调用/usage unknown、由测试约束2–6 Flash；最终总调用范围18–22 Flash/4 Pro，保持22/4上限，不再补跑provider。已有回执估价$0.0454仅为已核算部分，最终总账单unknown。世界修复约25分钟、宿主约0.35 agent小时；处于原工时池内，不从账户余额推算任务credits。
 
 第二轮恢复修复：世界实现约12分钟，独立复核约0.28 agent小时，仍在原工时池内；未新增真实provider调用、购买或使用reset。最终Codex实际credits和API等价仍无任务级计量。
+
+第三轮：宿主约0.20 agent小时，世界约18分钟，初始独立分诊约0.28 agent小时，冻结复核实际见round3-recheck.md；继续使用原共享工时池。无新增provider调用或reset，实际Codex消费仍无任务级计量。
