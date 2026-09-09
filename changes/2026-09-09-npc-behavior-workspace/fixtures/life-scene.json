@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "seed": "npc-continuous-life-v1",
+  "floor": { "from": [-8, 56, -12], "to": [8, 56, 8], "voxel": 3 },
+  "air": { "from": [-8, 57, -12], "to": [8, 61, 8], "voxel": 0 },
+  "actorPosition": [1.5, 57, 0.5],
+  "homePosition": [3.5, 57, 4.5],
+  "patrolPositions": [
+    [-4.5, 57, -4.5],
+    [4.5, 57, -7.5]
+  ],
+  "food": [
+    { "position": [4.5, 57, -1.5], "itemId": "berry", "count": 64 },
+    { "position": [3.5, 57, -3.5], "itemId": "berry", "count": 64 },
+    { "position": [-2.5, 57, 2.5], "itemId": "berry", "count": 64 },
+    { "position": [-4.5, 57, -2.5], "itemId": "berry", "count": 64 }
+  ],
+  "feeding": { "startHungerAtLeast": 40, "finishHungerAtMost": 20 },
+  "duration": { "headlessSimulatedSeconds": 1800, "browserWallSeconds": 3600 },
+  "acceptance": {
+    "completedFeedingEpisodesAtLeast": 3,
+    "nightRestThenDayResumptionAtLeast": 2,
+    "patrolArrivalsAtLeast": 4,
+    "initialFoodUnits": 256,
+    "treeDefinitionChanges": 0,
+    "modelCalls": 0,
+    "postStartResourceInjection": 0
+  }
+}

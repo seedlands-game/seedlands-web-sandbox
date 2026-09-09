@@ -27,7 +27,7 @@
 
 ## 二、长期价值与完成态
 
-最新认知基线见[单角色认知与持续生活](living-npc-cognition.md)：确定性执行持续运行；Flash Vision 仅文本，事件提前唤醒并重置60–600秒兜底；Pro仅上下文压缩；默认128K/可选256K。本期不增加每日回顾、自动高级决策、LOD或World AI。
+最新认知基线见[NPC持续行为与持久认知](npc-behavior-and-memory.md)：先证明一棵可修改的固定树长期生活，再接单Agent持久工作区与认知，最后验证三个实例共用模型网关。flash/pro是供应商无关档位，Pro负责记忆压缩及出生包；LiteLLM本地Docker首选，边缘与多租户延后。旧单目标MVP停止继续完善；本期不增加LOD或World AI。
 
 ### 2.1 世界作为 Agent 的行动环境
 
