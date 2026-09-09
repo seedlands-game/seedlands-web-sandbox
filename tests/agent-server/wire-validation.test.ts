@@ -18,6 +18,7 @@ describe('controller wire validation', () => {
       observation: observation({
         character: {
           ...observation().character,
+          eventCursor: CHARACTER_OBSERVATION_MAX_EVENTS,
           memory: { revision: 4, throughCursor: 0, summary: '忆'.repeat(16_000) },
         },
         events,
@@ -26,6 +27,85 @@ describe('controller wire validation', () => {
     };
     expect(Buffer.byteLength(JSON.stringify(message), 'utf8')).toBeLessThan(CONTROLLER_FRAME_MAX_BYTES);
     expect(parseControllerClientMessage(message)).not.toBeNull();
+  });
+
+  it('accepts Authority historical, moving-head, final, and empty pages', () => {
+    const frame = (events: ReturnType<typeof event>[], cursor: number, eventCursor: number) => ({
+      kind: 'observe',
+      protocolVersion: 1,
+      binding: binding(),
+      sequence: 1,
+      observation: observation({
+        character: { ...observation().character, eventCursor },
+        events,
+        cursor,
+      }),
+    });
+    expect(
+      parseControllerClientMessage(
+        frame(
+          Array.from({ length: 32 }, (_, index) => event(index + 1)),
+          32,
+          80,
+        ),
+      ),
+    ).not.toBeNull();
+    expect(
+      parseControllerClientMessage(
+        frame(
+          Array.from({ length: 32 }, (_, index) => event(index + 33)),
+          64,
+          81,
+        ),
+      ),
+    ).not.toBeNull();
+    expect(
+      parseControllerClientMessage(
+        frame(
+          Array.from({ length: 17 }, (_, index) => event(index + 65)),
+          81,
+          81,
+        ),
+      ),
+    ).not.toBeNull();
+    expect(parseControllerClientMessage(frame([], 81, 81))).not.toBeNull();
+    expect(
+      parseControllerClientMessage(
+        frame(
+          Array.from({ length: 32 }, (_, index) => event(index + 73)),
+          104,
+          200,
+        ),
+      ),
+    ).not.toBeNull();
+  });
+
+  const invalidPages: ReadonlyArray<readonly [string, number, ReturnType<typeof event>[], number]> = [
+    ['missing head', undefined as unknown as number, [event(1)], 1],
+    ['negative head', -1, [event(1)], 1],
+    ['unsafe head', Number.MAX_VALUE, [event(1)], 1],
+    ['page beyond head', 1, [event(2)], 2],
+    ['duplicate event cursor', 1, [event(1), event(1)], 1],
+    ['last event differs from page cursor', 80, Array.from({ length: 32 }, (_, index) => event(index + 1)), 31],
+    ['short page stops before head', 80, Array.from({ length: 16 }, (_, index) => event(index + 1)), 16],
+    ['event outside retained window', 200, Array.from({ length: 32 }, (_, index) => event(index + 1)), 32],
+    ['empty page differs from head', 81, [], 80],
+  ];
+
+  it.each(invalidPages)('rejects an inconsistent event page: %s', (_name, eventCursor, events, cursor) => {
+    expect(
+      parseControllerClientMessage({
+        kind: 'observe',
+        protocolVersion: 1,
+        binding: binding(),
+        sequence: 1,
+        observation: observation({
+          character: { ...observation().character, eventCursor },
+          events,
+          cursor,
+        }),
+      }),
+    ).toBeNull();
   });
 
   it('rejects excess events, unknown fields, and binding mismatches', () => {

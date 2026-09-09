@@ -17,6 +17,38 @@ const exactKeys = (source: Record<string, unknown>, allowed: readonly string[]):
 const boundedText = (value: unknown, max: number): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= max;
 
+const CHARACTER_RETAINED_EVENT_LIMIT = 128;
+
+function validEventPage(events: readonly unknown[], pageCursor: number, headCursor: number): boolean {
+  if (
+    !Number.isSafeInteger(pageCursor) ||
+    pageCursor < 0 ||
+    !Number.isSafeInteger(headCursor) ||
+    headCursor < 0 ||
+    pageCursor > headCursor
+  )
+    return false;
+  if (events.length === 0) return pageCursor === headCursor;
+  if (events.length < CHARACTER_OBSERVATION_MAX_EVENTS && pageCursor !== headCursor) return false;
+
+  let previousCursor = -1;
+  for (const event of events) {
+    const entry = record(event);
+    if (
+      !entry ||
+      !Number.isSafeInteger(entry.cursor) ||
+      (entry.cursor as number) <= previousCursor ||
+      (entry.cursor as number) > pageCursor ||
+      (entry.cursor as number) <= headCursor - CHARACTER_RETAINED_EVENT_LIMIT ||
+      (entry.text !== undefined && (typeof entry.text !== 'string' || entry.text.length > 2000)) ||
+      (entry.reason !== undefined && (typeof entry.reason !== 'string' || entry.reason.length > 2000))
+    )
+      return false;
+    previousCursor = entry.cursor as number;
+  }
+  return previousCursor === pageCursor;
+}
+
 function parseBinding(value: unknown): ControlBinding | null {
   const source = record(value);
   if (
@@ -48,6 +80,8 @@ function validObservation(value: unknown, binding: ControlBinding): value is Cha
     source.events.length > CHARACTER_OBSERVATION_MAX_EVENTS ||
     !Number.isSafeInteger(source.cursor) ||
     (source.cursor as number) < 0 ||
+    !Number.isSafeInteger(character.eventCursor) ||
+    (character.eventCursor as number) < 0 ||
     character.entityId !== binding.entityId ||
     character.incarnation !== binding.incarnation ||
     (character.lifecycle !== 'active' && character.lifecycle !== 'deceased') ||
@@ -61,16 +95,7 @@ function validObservation(value: unknown, binding: ControlBinding): value is Cha
     (character.revision as number) < 0
   )
     return false;
-  return source.events.every((event) => {
-    const entry = record(event);
-    return (
-      entry &&
-      Number.isSafeInteger(entry.cursor) &&
-      (entry.cursor as number) >= 0 &&
-      (entry.text === undefined || (typeof entry.text === 'string' && entry.text.length <= 2000)) &&
-      (entry.reason === undefined || (typeof entry.reason === 'string' && entry.reason.length <= 2000))
-    );
-  });
+  return validEventPage(source.events, source.cursor as number, character.eventCursor as number);
 }
 
 export function parseControllerClientMessage(value: unknown): ControllerClientMessage | null {

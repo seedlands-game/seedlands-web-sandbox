@@ -137,6 +137,7 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
     value.eventCursor < 0 ||
     !Array.isArray(value.events) ||
     value.events.length > CHARACTER_MAX_EVENTS ||
+    (value.eventCursor > 0 && value.events.length === 0) ||
     !Array.isArray(value.inventory) ||
     value.inventory.length !== CHARACTER_INVENTORY_CAPACITY ||
     !Array.isArray(value.targets) ||
@@ -204,7 +205,11 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
     resources.add(resource);
     greatestTargetSequence = Math.max(greatestTargetSequence, refSequence);
   }
-  if (!Number.isSafeInteger(value.targetSequence) || value.targetSequence !== greatestTargetSequence)
+  if (
+    !Number.isSafeInteger(value.targetSequence) ||
+    !Number.isSafeInteger(value.targetSequence + 1) ||
+    value.targetSequence !== greatestTargetSequence
+  )
     throw new TypeError('Character snapshot target sequence is invalid.');
   const requestIds = new Set<string>();
   for (const requestId of value.requestIds) {
