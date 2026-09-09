@@ -116,6 +116,30 @@ describe('bounded action completion history', () => {
     });
   });
 
+  it('rejects the same follow goal atomically when arrival left no action and capacity is exhausted', () => {
+    const { runtime, entities } = fixture();
+    entities.update('npc', { position: [4.5, 1, 0.5] });
+    runtime.advanceAuthorityRules(0.1);
+    const snapshot = runtime.snapshot();
+    expect(snapshot.characters!.characters[0]!.actionId).toBeUndefined();
+    snapshot.actions.sequence = Number.MAX_SAFE_INTEGER;
+    runtime.restore(snapshot);
+    entities.update('player', { position: [7.5, 1, 0.5] });
+    const before = runtime.snapshot();
+    const character = before.characters!.characters[0]!;
+    expect(() =>
+      runtime.characters.execute({
+        kind: 'intent',
+        entityId: 'npc',
+        requestId: 'same-follow',
+        expectedRevision: character.revision,
+        goal: character.currentGoal.goal,
+        say: 'I will follow.',
+      }),
+    ).toThrow(/sequence/);
+    expect(runtime.snapshot()).toEqual(before);
+  });
+
   it('retains active actions and orders a long-running completion by finish time', () => {
     const actions = new ActionRuntime(testCorePlatform.clone);
     const old = actions.start({ actorId: 'npc', type: 'move-to' }, 0);

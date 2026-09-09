@@ -277,7 +277,7 @@ export class CharacterRuntime {
       record.currentGoal.status === 'active' &&
       sameGoal(record.currentGoal.goal, request.goal) &&
       record.executionTargetId === executionTargetId;
-    if (!retainsAction && request.goal.kind !== 'idle' && !this.options.canStartAction())
+    if (request.goal.kind !== 'idle' && !this.options.canStartAction())
       throw new RangeError('Action sequence is exhausted.');
     if (!retainsAction) this.options.interruptAction(record.entityId, 'goal-replaced');
     record.revision += 1;
