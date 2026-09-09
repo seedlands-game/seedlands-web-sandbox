@@ -70,3 +70,7 @@ CLI 的真实子进程 9/9 通过，覆盖非法参数后继续、checkpoint 往
 `b7d7169` 的 CI run `34322183659` 中，parity 三次超时；源码树与此前通过的 `5d49ce8` 相同。独立分诊从 artifact 观察到 3–4 FPS、271–291ms p95 和 WebGL stall，未找到可归因该提交的生产改动。此观察只支持资源压力假设，不证明特定 Worker 队列的因果。
 
 将这一功能合同用例在首次导航前设为既有 Low 质量，并断言实际 snapshot quality；不改 world/clock、旧断言、timeout 或 Worker 拓扑。2026-09-09 在隔离 checkout 执行 `SEEDLANDS_E2E_PORT=4175 pnpm exec playwright test changes/2026-09-09-developer-world-harness/e2e/browser-world-parity.spec.ts --retries=0 --trace=on`，1/1 通过（15.5秒）。日志保留 `/tmp/seedlands-living-npc/harness-low-fixture.log`，该次不是性能实验，也不代表软件渲染 CI 的终态；以新提交远端 CI 为准。长期 docs baseline 未变，本次只固定不验证画质的测试夹具。
+
+低画质后的 CI `34324832874` 仍失败；逐操作 trace 将原因收敛为**整个测试30秒预算耗尽**：Browser parity evaluate 在7.872–14.741秒成功，随后Headless往返和断言耗去至少16.252秒，`beforeMovement` 到30.993秒才开始。失败上下文显示世界已运行、tick推进，不能把末尾报告位置当作clock死锁。
+
+因此仅该重集成case获得90秒总预算，并新增测试侧clock:run 5秒deadline；通过可选参数将该case的boundingBox/click限制为5秒，原15秒KeyW位移断言不变，其他调用lockPointer的用例默认行为不变。相同本地命令无重试通过1/1（14.1秒），日志 `/tmp/seedlands-living-npc/harness-deadline-fixture.log`。新增局部界限防止总预算调整掩盖挂起；远端结果继续按新SHA验收。
