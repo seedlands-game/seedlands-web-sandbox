@@ -116,3 +116,7 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 最终生产冻结 `3d1f5cd`：完整 `pnpm verify:static` 通过（259文件、1253测试通过，4测试跳过），独立Web/Agent构建通过；两项Browser旅程2/2通过（17.3秒），真实provider用例明确跳过。动作保留与存档新增/关联14测试通过，旧大存档、跨Actor序号、同tick完成顺序和800模拟秒重规划均覆盖。`round5-final-recheck.md`确认动作历史P1及额外序号P1/排序P2全部解决，未发现新具体问题。后续仅交付文档；远端最终SHA CI与自动审阅以PR #26和交接回复为准。
 
 第六轮自动审阅 `5153861695` 发现序号耗尽检查仅在ActionRuntime内，Autonomy和Character可能在调用前先写状态。已通过完整simulation snapshot取得RED，修复将容量/输入预检前移到中断与目标修改之前；内部重规划耗尽改为具名目标失败，不中断世界推进。新增及关联12测试GREEN，完整门禁再次针对冻结生产执行。无新provider调用，仍属既有原子性合同修复，长期baseline不变。
+
+`1044a50` 的远端 CI run `34347121272` 全绿。第六轮进一步统一所有非idle意图的容量预检，覆盖同目标但没有活动动作的follow；13项focused通过。Browser在 `8590f98` 两项2/2通过（18.1秒）；此后生产变化仅为同目标也进入容量预检，由新增确定性回归直接覆盖，最终远端仍对最新SHA执行浏览器门禁。
+
+第六轮最终生产 `38c97f5`：完整static通过（259文件、1255测试通过，4跳过），独立Web/Agent build通过。`round6-final-recheck.md`确认同目标无Action边界已解决，无新具体P0/P1/P2。后续仅证据与交付记录；实际人格/模型用量沿用此前实测，无新增provider调用。
