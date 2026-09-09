@@ -45,7 +45,6 @@ export class AuthorityRuntime {
   private readonly newPlayer: boolean;
   private readonly initialBodyPosition: [number, number, number];
   private pendingCommits: WorldCommitResult[] = [];
-  private latestPhysicsTick = 0;
   private readonly logicCandidates = new AuthorityLogicCandidates();
   private readonly logicObservationBuilder: AuthorityLogicObservationBuilder;
   private currentTimeMs: number;
@@ -181,10 +180,7 @@ export class AuthorityRuntime {
       generatorVersion: this.server.generatorVersion,
       worldTime: this.server.worldTime,
       frequencies: this.frequencies,
-      snapshot: withAuthorityResidencyDiagnostics(
-        this.session.wake(this.options.startTimeMs),
-        this.residency.diagnostics,
-      ),
+      snapshot: withAuthorityResidencyDiagnostics(this.session.currentSnapshot, this.residency.diagnostics),
       gameplay: this.view(),
       ...(camp ? { campPosition: [...camp.position] as [number, number, number] } : {}),
     };
@@ -193,7 +189,6 @@ export class AuthorityRuntime {
   wake(nowMs: number): AuthoritySnapshot {
     const snapshot = this.session.wake(nowMs);
     this.currentTimeMs = nowMs;
-    this.latestPhysicsTick = snapshot.physicsTick;
     this.residency.maintain(snapshot.activeTimeMs);
     return withAuthorityResidencyDiagnostics(snapshot, this.residency.diagnostics);
   }
@@ -262,12 +257,13 @@ export class AuthorityRuntime {
 
   receiveLogicIntentBatch(batch: LogicIntentBatch): boolean {
     if (batch.protocolVersion !== LOGIC_PROTOCOL_VERSION || batch.epoch !== this.options.epoch) return false;
+    const latestPhysicsTick = this.session.currentSnapshot.physicsTick;
     const observation = this.logicCandidates.consume(batch.observationSequence);
-    if (!observation || batch.expiresAtPhysicsTick < this.latestPhysicsTick) return false;
+    if (!observation || batch.expiresAtPhysicsTick < latestPhysicsTick) return false;
     const { intents, canonicalChanged } = acceptLogicIntentBatch({
       batch,
       observation,
-      latestPhysicsTick: this.latestPhysicsTick,
+      latestPhysicsTick,
       physicsHz: this.frequencies.physicsHz,
       currentEntities: this.server.queryEntities(),
       identityRevision: (entity) => this.logicObservationBuilder.identityRevision(entity),
