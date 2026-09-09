@@ -1,4 +1,4 @@
-import type { ControllerUsage } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { ControllerUsage } from '@seedlands/cognition-protocol';
 import type { ModelUsage } from './model-types.js';
 
 export type BudgetLimits = Readonly<{

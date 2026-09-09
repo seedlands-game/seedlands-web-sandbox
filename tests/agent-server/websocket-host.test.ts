@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import type { ControllerHostMessage } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { ControllerHostMessage } from '@seedlands/cognition-protocol';
 import {
   AgentServerWebSocketClient as WebSocket,
   startAgentServer,

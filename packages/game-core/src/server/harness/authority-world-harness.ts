@@ -32,10 +32,12 @@ import { WorldBarrierRuntime } from './world-barrier-runtime';
 import { WorldCheckpointRuntime, WorldOperationFailure, WorldTraceRuntime } from './world-harness-state';
 import {
   authorizationRequest,
+  characterHarnessOperation,
   commandSourceForPrincipal,
   inspectAuthorizationRequest,
 } from './world-harness-operations';
 import { worldHarnessError } from './world-harness-errors';
+import type { CharacterControlRequest } from '../../runtime/character-control-protocol';
 
 export { validatePortableCheckpoint } from './world-harness-validation';
 export { chunkForVoxel } from './world-harness-operations';
@@ -221,7 +223,7 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
         const current = this.options.owner();
         const operation = current.runtime.executeTransaction(
           {
-            epoch: current.epoch,
+            epoch: current.runtime.snapshot().epoch,
             issuer: this.options.principalId,
             stream: 'world-harness-command',
             sequence,
@@ -342,6 +344,13 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
             : runtime.server.simulationSnapshot().actions.actions;
         return { actions };
       },
+    );
+  }
+
+  character(request: CharacterControlRequest) {
+    return this.run(
+      () => characterHarnessOperation(request),
+      async () => this.options.owner().runtime.character(request),
     );
   }
 

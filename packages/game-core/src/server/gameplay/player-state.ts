@@ -89,6 +89,30 @@ export class PlayerState {
     this.hungerAccumulator = this.healingAccumulator = this.starvationAccumulator = 0;
   }
 
+  advanceSurvival(seconds: number, onDeath: () => void): void {
+    this.hungerAccumulator += seconds;
+    while (this.hungerAccumulator >= 120) {
+      this.hungerAccumulator -= 120;
+      this.hunger = Math.max(0, this.hunger - 1);
+    }
+    if (this.hunger >= 16 && this.health < this.maxHealth) {
+      this.healingAccumulator += seconds;
+      while (this.healingAccumulator >= 10 && this.hunger >= 16 && this.health < this.maxHealth) {
+        this.healingAccumulator -= 10;
+        this.health += 1;
+        this.hunger -= 1;
+      }
+    } else this.healingAccumulator = 0;
+    if (this.hunger === 0) {
+      this.starvationAccumulator += seconds;
+      while (this.starvationAccumulator >= 15 && this.lifecycle === 'alive') {
+        this.starvationAccumulator -= 15;
+        this.health = Math.max(0, this.health - 1);
+        if (this.health === 0) onDeath();
+      }
+    } else this.starvationAccumulator = 0;
+  }
+
   private restoreFields(snapshot: Partial<PlayerSnapshot>): void {
     const numeric = [snapshot.health, snapshot.hunger, snapshot.selectedSlot, snapshot.attackCooldownSeconds].filter(
       (value) => value !== undefined,

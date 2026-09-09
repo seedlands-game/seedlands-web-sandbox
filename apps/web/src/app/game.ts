@@ -38,10 +38,11 @@ import { GameFrameLoop } from './game-frame-loop';
 import { GameSaveQueue } from './world/game-save-queue';
 import { startBrowserWorkerSession } from './browser-worker-session';
 import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
-import { releasePointerLock } from './player/pointer-lock';
 import type { AuthorityReady } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { readGameRuntimeDiagnostics } from './experimental/game-runtime-diagnostics';
 import { restoreBrowserPresentation } from './world/browser-world-restore';
+
+import { CompanionSession } from './gameplay/companion/companion-session';
 
 export class Game {
   private paused = false;
@@ -59,6 +60,10 @@ export class Game {
   private performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
   private readonly store = new BrowserWorldStore();
   private authority: BrowserAuthorityClient | null = null;
+  readonly companion = new CompanionSession(
+    () => this.authority,
+    () => this.paused,
+  );
   private computeRuntime: BrowserComputeRuntime | null = null;
   private logicClient: BrowserLogicClient | null = null;
   private serverPlayerId: string | null = null;
@@ -254,6 +259,7 @@ export class Game {
     await initialWorldReady;
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
+    this.companion.start();
     return { seed: ready.seedText };
   }
 
@@ -486,13 +492,8 @@ export class Game {
     return result;
   }
 
-  private publishDebugVisibility(visible: boolean) {
-    if (visible) {
-      this.controller?.releaseInput();
-      releasePointerLock();
-    }
-    this.uiBridge.publishDebug({ visible });
-  }
+  private publishDebugVisibility = (visible: boolean) =>
+    runtimeControls.publishDebugVisibility(this.uiBridge, this.controller, visible);
 
   toggleMap = () => runtimeControls.toggleMap(this.uiBridge, this.world, this.camera, this.controller);
 
@@ -502,6 +503,7 @@ export class Game {
   }
 
   private disposeRuntime() {
+    this.companion.stop();
     this.startGeneration += 1;
     this.worldAudio?.dispose();
     this.worldAudio = null;

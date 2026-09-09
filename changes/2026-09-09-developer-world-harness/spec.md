@@ -75,3 +75,5 @@ F3 保持入口，打开时释放 Pointer Lock 和已按住输入，正常世界
 后续 run `34324832874` 的逐操作 trace 证实：Browser parity evaluate 已在7.872–14.741秒成功，但Headless round-trip与断言又占至少16.252秒；末尾snapshot在30.993秒才开始，被整个默认30秒测试预算截断。故为这条包含多宿主完整存档往返的集成测试设置90秒总预算；clock:run的测试侧deadline、canvas boundingBox/click各5秒，真实KeyW位移仍15秒。共享lockPointer新增可选timeout，仅该case启用，其他case默认行为不变。没有改变任何生产调度或一致性断言。
 
 静态回归补充：54debdc 的 CI 34326581294 中 Chromium 与 build 通过；malformed-arguments 用例 5174ms 超出遗漏设置的默认 5s，同文件其余单世界 fixture 均使用20s。为此用例补上相同20s fixture预算与结束dispose，保留全部九个入口验证断言，不修改生产实现或全局超时。
+
+世界命令修复：NPC 浏览器真实物品 fixture 得到 WORLD_REQUEST_INVALID / Transaction epoch does not match the session（可执行 RED）。Browser world epoch 用于恢复新鲜度，runtime epoch 用于事务去重；此前误把前者传入事务。改为从当前 AuthorityRuntime 读取自身 epoch，世界排队和旧请求检查保持。parity 补上恢复前 set-block 与恢复后 time-get 成功断言，避免忽略命令错误导致假通过。

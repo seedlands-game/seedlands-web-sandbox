@@ -170,13 +170,14 @@ describe('gameplay persistence', () => {
 
 describe('headless survival workflow', () => {
   it('runs gameplay commands without loading browser or PlayCanvas globals', () => {
-    const run = spawnSync('pnpm', ['--silent', 'server:headless', '--', '--seed', 'survival-headless', '--json'], {
+    const run = spawnSync(process.execPath, ['scripts/server-headless.mjs', '--seed', 'survival-headless', '--json'], {
       cwd: new URL('../..', import.meta.url),
       encoding: 'utf8',
       input: ['/give wood-block 1', '/craft planks', '/craft wood-axe', '/damage 20', '/respawn', '/save', ''].join(
         '\n',
       ),
-      env: { ...process.env, CI: 'true' },
+      env: process.env,
+      timeout: 15_000,
     });
 
     expect(run.status, run.stderr).toBe(0);

@@ -136,3 +136,13 @@ describe('认知服务边界', () => {
     ).toHaveLength(1);
   });
 });
+
+describe('认知传输合同归属', () => {
+  it('允许产品消费认知合同，但禁止 core 反向依赖', async () => {
+    for (const filePath of ['apps/web/src/client/character/probe.ts', 'apps/agent-server/src/probe.ts'])
+      expect(await lintPackageBoundary("import '@seedlands/cognition-protocol';", filePath)).toEqual([]);
+    expect(
+      await lintPackageBoundary("import '@seedlands/cognition-protocol';", 'packages/game-core/src/runtime/probe.ts'),
+    ).toHaveLength(1);
+  });
+});

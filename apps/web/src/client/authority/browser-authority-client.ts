@@ -16,7 +16,16 @@ import type {
   AuthoritySessionControlResult,
 } from '@seedlands/game-core/compute/authority-worker-protocol';
 import type { LogicIntentBatch } from '@seedlands/game-core/server/logic/logic-protocol';
-import type { WorldHarnessPort, WorldPrepareRequest } from '@seedlands/game-core/server/harness/world-harness-contract';
+import type {
+  WorldHarnessPort,
+  WorldHarnessResult,
+  WorldPrepareRequest,
+} from '@seedlands/game-core/server/harness/world-harness-contract';
+import type {
+  CharacterControlRequest,
+  CharacterControlResult,
+  ControlBinding,
+} from '@seedlands/game-core/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
@@ -24,8 +33,10 @@ import { authorityInputTransitBudgetMs, createAuthorityTransport } from './autho
 import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
 import type { VisibilityTask } from './authority-prepared-mesh-visibility';
 import { BrowserAuthorityChunkClient } from './browser-authority-chunk-client';
+import { createBoundCharacterControlPort } from './browser-character-control-port';
 import type {
   AuthorityClientOptions,
+  BoundCharacterControlPort,
   AuthoritySaveResult,
   AuthorityStartOptions,
 } from './browser-authority-client-contract';
@@ -104,6 +115,7 @@ export class BrowserAuthorityClient {
       clock: (request) => this.worldRequest('clock', request),
       logic: (request) => this.worldRequest('logic', request),
       actions: (query) => this.worldRequest('actions', query),
+      character: (request) => this.worldRequest('character', request),
       barrier: (request) => this.worldRequest('barrier', request),
       trace: (request) => this.worldRequest('trace', request),
       checkpoint: (request) => this.worldRequest('checkpoint', request),
@@ -283,6 +295,15 @@ export class BrowserAuthorityClient {
 
   performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
     return this.request({ kind: 'gameplay-action', action }, [], 'gameplay-action') as Promise<AuthorityActionResult>;
+  }
+
+  character(request: CharacterControlRequest): Promise<WorldHarnessResult<CharacterControlResult>> {
+    return this.request({ kind: 'character-control', request }) as Promise<WorldHarnessResult<CharacterControlResult>>;
+  }
+
+  async bindCharacter(entityId: string): Promise<BoundCharacterControlPort> {
+    const binding = (await this.request({ kind: 'bind-character', entityId })) as ControlBinding;
+    return createBoundCharacterControlPort(binding, (request) => this.request(request));
   }
 
   executeCommand(source: CommandSource, command: ServerCommand): Promise<CommandResult> {

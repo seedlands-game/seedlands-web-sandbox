@@ -2,6 +2,7 @@ import type { ActorArchetype } from '../gameplay/entity-store';
 import type { ActionRuntime } from './action-runtime';
 import type { PoiSnapshot } from './poi-registry';
 import type { CombatRuntimeSnapshot } from '../gameplay/combat-runtime';
+import type { CharacterSnapshot } from './character-runtime';
 
 export type ActorBehavior =
   'idle' | 'wander' | 'seek-food' | 'flee' | 'chase' | 'attack' | 'routine-home' | 'routine-work';
@@ -41,6 +42,8 @@ export type SimulationSnapshot = {
   pois: PoiSnapshot;
   actions: ReturnType<ActionRuntime['snapshot']>;
   combat?: CombatRuntimeSnapshot;
+  /** Missing in pre-character saves and migrated to an empty character catalog. */
+  characters?: CharacterSnapshot;
 };
 
 export const MAX_RETAINED_ACTORS = 512;

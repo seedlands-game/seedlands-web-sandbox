@@ -83,5 +83,5 @@ ignore:
   - node_modules
   - apps/*/node_modules
   - apps/web/node_modules
-  - packages/game-core/node_modules
+  - packages/*/node_modules
   - crates/target

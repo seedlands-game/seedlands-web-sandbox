@@ -23,6 +23,9 @@ importers:
       '@playwright/test':
         specifier: 1.62.1
         version: 1.62.1
+      '@seedlands/cognition-protocol':
+        specifier: workspace:*
+        version: link:packages/cognition-protocol
       '@seedlands/game-core':
         specifier: workspace:*
         version: link:packages/game-core
@@ -89,6 +92,9 @@ importers:
       '@langchain/langgraph':
         specifier: 1.4.14
         version: 1.4.14(@langchain/core@1.2.9(openai@6.3.0(ws@8.21.3)(zod@3.25.76))(ws@8.21.3))(zod@3.25.76)
+      '@seedlands/cognition-protocol':
+        specifier: workspace:*
+        version: link:../../packages/cognition-protocol
       '@seedlands/game-core':
         specifier: workspace:*
         version: link:../../packages/game-core
@@ -114,6 +120,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@seedlands/cognition-protocol':
+        specifier: workspace:*
+        version: link:../../packages/cognition-protocol
       '@seedlands/game-core':
         specifier: workspace:*
         version: link:../../packages/game-core
@@ -145,6 +154,12 @@ importers:
       vitest:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@26.4.1)(@vitest/coverage-v8@4.1.11)(vite@7.3.6(@types/node@26.4.1)(jiti@2.6.1)(yaml@2.9.0))
+
+  packages/cognition-protocol:
+    dependencies:
+      '@seedlands/game-core':
+        specifier: workspace:*
+        version: link:../game-core
 
   packages/game-core:
     devDependencies:
