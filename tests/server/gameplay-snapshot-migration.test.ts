@@ -18,7 +18,7 @@ import type { PlayerSnapshot } from '../../packages/game-core/src/server/gamepla
 
 const callbacks = {
   getVoxel: () => 0,
-  editVoxel: () => ({ committed: false }) as never,
+  prepareVoxelEdit: () => ({ committed: false }) as never,
   getWorldTime: () => 9,
 };
 

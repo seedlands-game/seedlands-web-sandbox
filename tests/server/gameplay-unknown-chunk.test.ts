@@ -59,8 +59,8 @@ describe('玩法事务只读取已加载权威Chunk', () => {
     const gameplay = new GameplayRuntime({
       platform: testCorePlatform,
       getVoxel: () => undefined,
-      editVoxel: () => {
-        throw new Error('未知Chunk不应进入editVoxel。');
+      prepareVoxelEdit: () => {
+        throw new Error('未知Chunk不应进入prepareVoxelEdit。');
       },
       getWorldTime: () => 9,
     });
@@ -84,7 +84,7 @@ describe('玩法事务只读取已加载权威Chunk', () => {
     const gameplay = new GameplayRuntime({
       platform: testCorePlatform,
       getVoxel: () => undefined,
-      editVoxel: () => {
+      prepareVoxelEdit: () => {
         throw new Error('Actor LOS不得同步写世界。');
       },
       getWorldTime: () => 9,

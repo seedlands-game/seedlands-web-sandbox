@@ -7,7 +7,7 @@ const createRuntime = () => {
   const runtime = new GameplayRuntime({
     platform: testCorePlatform,
     getVoxel: () => 0,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('Unexpected edit');
     },
     getWorldTime: () => 9,

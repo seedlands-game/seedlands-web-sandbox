@@ -1,8 +1,12 @@
 import { Voxel } from '../../../world/voxel';
 import type { WorldCommitResult } from '../../game-server-types';
-import type { GameplayEntity } from '../entity-store';
+import type { EntityStore, GameplayEntity } from '../entity-store';
+import type { PreparedWorldEdit } from '../../prepared-world-edit';
+import type { ActorComponentSnapshot } from '../ecs-actor-components';
+import { prepareEntityMutation, type PreparedWorldItemSpawn } from '../prepared-entity-mutation';
+import { Inventory } from '../inventory';
 import { clonePosition, positionsInRange, voxelCenter } from '../gameplay-geometry';
-import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
+import type { ItemDefinitionRegistry } from '../item-registry';
 import { playerOccupiesVoxelShape } from '../player-occupancy';
 import type { PlayerState } from '../player-state';
 import { getVoxelGameplayDefinition } from '../voxel-gameplay';
@@ -15,10 +19,11 @@ export type BlockInteractionRuntimeOptions = Readonly<{
   player: (id: string) => PlayerState;
   entity: (id: string) => GameplayEntity | null;
   getVoxel: (position: Position) => number | undefined;
-  editVoxel: (actorId: string, position: Position, voxel: number) => WorldCommitResult;
+  prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
+  entities: EntityStore;
+  assertCanChange(): void;
   items: ItemDefinitionRegistry;
   changed: (inventoryOperation: boolean) => void;
-  spawnDrop: (position: Position, stack: ItemStack) => void;
 }>;
 
 export class BlockInteractionRuntime {
@@ -34,9 +39,10 @@ export class BlockInteractionRuntime {
     const definition = getVoxelGameplayDefinition(voxel);
     if (definition.hardnessSeconds === null) return { success: false, reason: 'unbreakable' };
     if (player.mode === 'creative') {
-      const commit = this.options.editVoxel(id, position, Voxel.Air);
-      if (!commit.committed) return { success: false, reason: 'world-not-changed' };
-      player.breakAction = null;
+      const world = this.options.prepareVoxelEdit(id, position, Voxel.Air);
+      if (!world.committed) return { success: false, reason: 'world-not-changed' };
+      const components = this.options.entities.actorComponentSnapshot(id);
+      const commit = this.commit(id, world, { ...components, player: { ...components.player!, breakAction: null } });
       this.options.changed(false);
       return { success: true, requiredSeconds: 0, commit };
     }
@@ -79,9 +85,12 @@ export class BlockInteractionRuntime {
     if (!place) return { success: false, reason: 'item-not-placeable' };
     if (playerOccupiesVoxelShape(entity.position, position, place.voxel))
       return { success: false, reason: 'player-collision' };
-    const commit = this.options.editVoxel(id, position, place.voxel);
-    if (!commit.committed) return { success: false, reason: 'world-not-changed' };
-    if (!creative) player.inventory.removeFromSlot(player.selectedSlot, 1);
+    const world = this.options.prepareVoxelEdit(id, position, place.voxel);
+    if (!world.committed) return { success: false, reason: 'world-not-changed' };
+    const components = this.options.entities.actorComponentSnapshot(id);
+    const inventory = new Inventory(player.inventory.capacity, components.inventory, this.options.items);
+    if (!creative) inventory.removeFromSlot(player.selectedSlot, 1);
+    const commit = this.commit(id, world, { ...components, inventory: inventory.snapshot() });
     this.options.changed(!creative);
     return { success: true, commit };
   }
@@ -97,15 +106,45 @@ export class BlockInteractionRuntime {
       player.breakAction = null;
       return;
     }
-    action.elapsedSeconds += seconds;
-    player.breakAction = action;
-    if (action.elapsedSeconds + Number.EPSILON < action.requiredSeconds) return;
-    player.breakAction = null;
+    const elapsedSeconds = action.elapsedSeconds + seconds;
+    if (elapsedSeconds + Number.EPSILON < action.requiredSeconds) {
+      player.breakAction = { ...action, elapsedSeconds };
+      return;
+    }
     const definition = getVoxelGameplayDefinition(action.voxel);
-    const commit = this.options.editVoxel(id, action.position, Voxel.Air);
-    if (!commit.committed) return;
-    commits.push(commit);
-    if (player.mode !== 'creative' && definition.drop)
-      this.options.spawnDrop(voxelCenter(action.position), { ...definition.drop });
+    const world = this.options.prepareVoxelEdit(id, action.position, Voxel.Air);
+    if (!world.committed) return;
+    const components = this.options.entities.actorComponentSnapshot(id);
+    const spawns =
+      player.mode !== 'creative' && definition.drop
+        ? [{ position: voxelCenter(action.position), stack: { ...definition.drop } }]
+        : [];
+    const committed = this.commit(
+      id,
+      world,
+      { ...components, player: { ...components.player!, breakAction: null } },
+      spawns,
+    );
+    commits.push(committed);
+    this.options.changed(false);
+  }
+
+  private commit(
+    id: string,
+    world: PreparedWorldEdit,
+    components: ActorComponentSnapshot,
+    spawns: readonly PreparedWorldItemSpawn[] = [],
+  ): WorldCommitResult {
+    this.options.assertCanChange();
+    const entities = prepareEntityMutation(this.options.entities, {
+      actors: [
+        { reference: this.options.entities.createReference(id)!, health: this.options.entity(id)!.health!, components },
+      ],
+      spawns,
+    });
+    entities.validate();
+    world.validate();
+    entities.apply();
+    return world.apply();
   }
 }

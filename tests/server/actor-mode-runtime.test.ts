@@ -13,7 +13,7 @@ const creativeHotbar = (itemId = 'berry') => [itemId, ...Array.from({ length: 7 
 const createGameplay = () =>
   new GameplayRuntime({
     getVoxel: () => Voxel.Air,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('unexpected edit');
     },
     getWorldTime: () => 9,

@@ -21,7 +21,7 @@ function create(digest = 'a') {
     platform: testCorePlatform,
     getVoxel: () => 0,
     getWorldTime: () => 12,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('unused');
     },
   });

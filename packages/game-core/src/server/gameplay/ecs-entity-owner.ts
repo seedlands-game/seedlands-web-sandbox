@@ -20,8 +20,11 @@ import {
   clearActorComponents,
   createActorStateAccess,
   createPlayerStateAccess,
+  installPreparedActorComponentSnapshot,
+  prepareActorComponentSnapshot,
   readActorComponentSnapshot,
   restoreActorComponentSnapshot,
+  type PreparedActorComponentSnapshot,
 } from './ecs-actor-state';
 import type { ActorComponentSnapshot } from './ecs-actor-components';
 
@@ -116,6 +119,11 @@ export class EcsEntityOwner {
     return this.createWithLifetime(entity, lifetime);
   }
 
+  /** Installs a world item that the EntityStore prepared and freshness-checked. */
+  createPreparedWorldItem(entity: EcsOwnedEntity): EcsOwnedEntity {
+    return this.installEntity(entity);
+  }
+
   private createWithLifetime(entity: EcsOwnedEntity, restoredLifetime?: number): EcsOwnedEntity {
     this.assertAvailable();
     if (entity.stack) this.items.assertStack(entity.stack);
@@ -125,6 +133,10 @@ export class EcsEntityOwner {
       throw new RangeError('Entity lifetime sequence is exhausted.');
     if (this.orderSequence >= Number.MAX_SAFE_INTEGER) throw new RangeError('Entity order sequence is exhausted.');
 
+    return this.installEntity(entity, restoredLifetime);
+  }
+
+  private installEntity(entity: EcsOwnedEntity, restoredLifetime?: number): EcsOwnedEntity {
     // bitECS defers query removals; flush before allocation so a recycled EID
     // cannot retain membership from its previous lifetime.
     commitRemovals(this.world);
@@ -239,6 +251,19 @@ export class EcsEntityOwner {
     return readActorComponentSnapshot(this.actors, eid, id, entity.type === 'player');
   }
 
+  prepareActorComponentSnapshot(id: string, snapshot: ActorComponentSnapshot): PreparedActorComponentSnapshot {
+    const eid = this.require(id);
+    const entity = this.project(eid);
+    if (entity.type === 'world-item') throw new TypeError(`World item does not have actor components: ${id}`);
+    return prepareActorComponentSnapshot(snapshot, entity.type === 'player', this.items);
+  }
+
+  installPreparedActorReplacement(id: string, health: number, prepared: PreparedActorComponentSnapshot): void {
+    const eid = this.require(id);
+    this.components.health.current[eid] = health;
+    installPreparedActorComponentSnapshot(this.actors, eid, prepared);
+  }
+
   restoreActorComponentSnapshot(snapshot: ActorComponentSnapshot): void {
     const eid = this.require(snapshot.entityId);
     const entity = this.project(eid);
@@ -301,6 +326,13 @@ export class EcsEntityOwner {
     this.lifetimeSequence = value;
   }
 
+  validateCreateCapacity(count: number): void {
+    this.assertAvailable();
+    if (!Number.isSafeInteger(count) || count < 0) throw new TypeError('Entity create capacity is invalid.');
+    if (this.lifetimeSequence > Number.MAX_SAFE_INTEGER - count || this.orderSequence > Number.MAX_SAFE_INTEGER - count)
+      throw new RangeError('Entity lifetime or order capacity is exhausted.');
+  }
+
   identitySnapshots(): EntityLifetimeSnapshot[] {
     return this.query().map((entity) => {
       const reference = this.createReference(entity.id)!;
@@ -310,6 +342,10 @@ export class EcsEntityOwner {
 
   get lifetimeHighWater(): number {
     return this.lifetimeSequence;
+  }
+
+  get orderHighWater(): number {
+    return this.orderSequence;
   }
 
   get epoch(): number {

@@ -89,7 +89,7 @@ describe('GameplaySnapshot V4 component codec', () => {
   it('writes V4 without a duplicate players array and restores NPC inventory before simulation bindings', () => {
     const runtime = new GameplayRuntime({
       getVoxel: () => 0,
-      editVoxel: () => ({ committed: false }) as never,
+      prepareVoxelEdit: () => ({ committed: false }) as never,
       getWorldTime: () => 9,
       platform: testCorePlatform,
     });
@@ -117,7 +117,7 @@ describe('GameplaySnapshot V4 component codec', () => {
   it('leaves the complete live component and simulation state unchanged when V4 validation fails', () => {
     const runtime = new GameplayRuntime({
       getVoxel: () => 0,
-      editVoxel: () => ({ committed: false }) as never,
+      prepareVoxelEdit: () => ({ committed: false }) as never,
       getWorldTime: () => 9,
       platform: testCorePlatform,
     });

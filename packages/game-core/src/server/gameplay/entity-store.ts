@@ -10,6 +10,11 @@ import {
 } from './ecs-entity-owner';
 import type { ActorComponentSnapshot } from './ecs-actor-components';
 import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry, type ItemStack } from './item-registry';
+import {
+  prepareEntityMutationParticipant,
+  type PreparedEntityMutation,
+  type PreparedEntityMutationInput,
+} from './prepared-entity-mutation';
 
 export type EntityType = EcsEntityType;
 export type ActorArchetype = EcsActorArchetype;
@@ -184,6 +189,29 @@ export class EntityStore {
         .filter((entity) => entity.type !== 'world-item')
         .map((entity) => this.owner.actorComponentSnapshot(entity.id)),
     };
+  }
+
+  /** Reads one actor's complete ECS component state without exporting or scanning the world. */
+  actorComponentSnapshot(id: string): ActorComponentSnapshot {
+    return this.owner.actorComponentSnapshot(id);
+  }
+
+  /** Prepares one bounded host-only EntityStore transaction participant. */
+  prepareMutation(input: PreparedEntityMutationInput): PreparedEntityMutation {
+    return prepareEntityMutationParticipant(
+      {
+        owner: this.owner,
+        sequence: this.sequence,
+        isCurrent: (owner, sequence) => this.owner === owner && this.sequence === sequence,
+        prepareWorldItem: (input, id) => this.prepareEntity(input, id, 'world-item'),
+        removeFromBucket: (entity) => this.removeFromBucket(entity, this.buckets),
+        addToBucket: (entity) => this.addToBucket(entity, this.buckets),
+        commitSequence: (sequence) => {
+          this.sequence = sequence;
+        },
+      },
+      input,
+    );
   }
 
   restoreComponentSnapshot(raw: unknown): void {

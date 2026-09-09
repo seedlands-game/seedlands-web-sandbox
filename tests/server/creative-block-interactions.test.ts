@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { assembleOverworldPacks } from '@seedlands/game-core/server/composition/host-api';
 import { pack } from '../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import { GameplayRuntime, type GameplayResult } from '../../packages/game-core/src/server/gameplay/gameplay-runtime';
+import type { PreparedWorldEdit } from '../../packages/game-core/src/server/prepared-world-edit';
 import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
 import { WorldResourceAuthorizer } from '../../packages/game-core/src/server/harness/world-authorization';
 import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
@@ -45,14 +46,30 @@ class FakeVoxelWorld {
   getVoxel = (position: Position): number | undefined =>
     this.unavailable.has(key(position)) ? undefined : (this.cells.get(key(position)) ?? Voxel.Air);
 
-  editVoxel = (actorId: string, position: Position, voxel: number): WorldCommitResult => {
+  prepareVoxelEdit = (actorId: string, position: Position, voxel: number): PreparedWorldEdit => {
     this.edits.push({ actorId, position: [...position], voxel });
-    if (this.denyEdits) return (this.lastCommit = commit(this.revision, false));
-    const cell = key(position);
-    if (this.getVoxel(position) === voxel) return (this.lastCommit = commit(this.revision, false));
-    this.cells.set(cell, voxel);
-    this.revision += 1;
-    return (this.lastCommit = commit(this.revision, true));
+    const revision = this.revision;
+    const previous = this.getVoxel(position);
+    const result = commit(
+      revision + Number(!this.denyEdits && previous !== voxel),
+      !this.denyEdits && previous !== voxel,
+    );
+    let validated = false;
+    return {
+      committed: result.committed,
+      validate: () => {
+        if (this.revision !== revision || this.getVoxel(position) !== previous) throw new Error('Stale world edit.');
+        validated = true;
+      },
+      apply: () => {
+        if (!validated) throw new Error('World edit requires validation.');
+        if (result.committed) {
+          this.cells.set(key(position), voxel);
+          this.revision += 1;
+        }
+        return (this.lastCommit = result);
+      },
+    };
   };
 }
 
@@ -74,7 +91,7 @@ const createRuntime = () => {
     platform: testCorePlatform,
     getWorldTime: () => 9,
     getVoxel: world.getVoxel,
-    editVoxel: world.editVoxel,
+    prepareVoxelEdit: world.prepareVoxelEdit,
   });
   gameplay.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
   const authorizer = new WorldResourceAuthorizer(
@@ -180,6 +197,21 @@ describe('creative block interactions through GameplayRuntime', () => {
     expect(gameplay.placeVoxel('player', [2, 1, 0])).toEqual({ success: false, reason: 'world-not-changed' });
     expect(gameplay.createSnapshot()).toEqual(before);
     expect(gameplay.getInventory('player').slots[0]).toEqual({ itemId: ItemIds.DirtBlock, count: 2 });
+  });
+
+  it('does not remove a survival block or clear its action when the required drop cannot allocate', () => {
+    const { gameplay, world } = createRuntime();
+    world.cells.set(key([1, 1, 0]), Voxel.Wood);
+    gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1 });
+    gameplay.beginBreak('player', [1, 1, 0]);
+    const exhausted = gameplay.createSnapshot();
+    exhausted.entityStore.sequence = Number.MAX_SAFE_INTEGER;
+    gameplay.restoreSnapshot(exhausted);
+    const before = gameplay.createSnapshot().entityStore;
+    expect(() => gameplay.advanceRules(0.4)).toThrow(/sequence.*exhausted/i);
+    expect(world.getVoxel([1, 1, 0])).toBe(Voxel.Wood);
+    expect(gameplay.createSnapshot().entityStore).toEqual(before);
+    expect(world.revision).toBe(0);
   });
 
   it('retains survival break timing, tool multiplier, drops and placement consumption', () => {

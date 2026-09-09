@@ -68,7 +68,7 @@ function setup(allow = true) {
     platform: testCorePlatform,
     getWorldTime: () => 0,
     getVoxel: () => 0,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('unexpected edit');
     },
   });

@@ -1,3 +1,8 @@
+import { prepareEntityMutation } from '../prepared-entity-mutation';
+import type { EntityStore } from '../entity-store';
+import { Inventory } from '../inventory';
+import { positionsInRange } from '../gameplay-geometry';
+import { traceVoxelRay } from '../voxel-ray';
 import type { ActorComponentAccess } from '../ecs-actor-components';
 import type { ItemStack } from '../item-registry';
 import { craftRecipe, listCraftableRecipes, type RecipeRegistry } from '../recipe-registry';
@@ -5,6 +10,10 @@ import { craftRecipe, listCraftableRecipes, type RecipeRegistry } from '../recip
 type Result = { success: true } | { success: false; reason: string };
 type Owner = Readonly<{
   actor(id: string): ActorComponentAccess;
+  entities: EntityStore;
+  getVoxel(position: [number, number, number]): number | undefined;
+  assertCanChange(): void;
+  assertCanCancelCombat(id: string): void;
   changed(inventoryOperation: boolean): void;
   cancelCombat(id: string, reason: string): void;
   recipes: RecipeRegistry;
@@ -49,6 +58,64 @@ export class ActorInventoryRuntime {
     const result = craftRecipe(actor.inventory, recipeId, this.owner.recipes);
     if (result.success) this.owner.changed(true);
     return result;
+  }
+  drop(id: string, slot: number, count: number) {
+    const actor = this.owner.actor(id);
+    if (actor.lifecycle !== 'alive') return { success: false as const, reason: 'player-dead' };
+    if (!Number.isInteger(slot) || slot < 0 || slot >= actor.inventory.capacity)
+      return { success: false as const, reason: 'invalid-slot' };
+    if (!Number.isInteger(count) || count <= 0) return { success: false as const, reason: 'invalid-count' };
+    const stack = actor.inventory.slot(slot);
+    if (!stack || stack.count < count) return { success: false as const, reason: 'missing-items' };
+    const candidate = new Inventory(actor.inventory.capacity, actor.inventory.snapshot(), actor.inventory.items);
+    candidate.removeFromSlot(slot, count);
+    const components = this.owner.entities.actorComponentSnapshot(id);
+    this.owner.assertCanChange();
+    if (slot === actor.selectedSlot) this.owner.assertCanCancelCombat(id);
+    const prepared = prepareEntityMutation(this.owner.entities, {
+      actors: [
+        {
+          reference: this.owner.entities.createReference(id)!,
+          health: actor.health,
+          components: { ...components, inventory: candidate.snapshot() },
+        },
+      ],
+      spawns: [{ position: this.owner.entities.get(id)!.position, stack: { ...stack, count } }],
+    });
+    prepared.validate();
+    const committed = prepared.apply();
+    if (slot === actor.selectedSlot) this.owner.cancelCombat(id, 'slot-changed');
+    this.owner.changed(true);
+    return { success: true as const, entity: committed.spawned[0] };
+  }
+  pickup(id: string, entityId: string): Result {
+    const actor = this.owner.actor(id);
+    if (actor.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
+    const item = this.owner.entities.get(entityId);
+    if (!item || item.type !== 'world-item' || !item.stack) return { success: false, reason: 'invalid-item' };
+    const entity = this.owner.entities.get(id)!;
+    if (!positionsInRange(entity.position, item.position, 1.5)) return { success: false, reason: 'out-of-range' };
+    const visibility = traceVoxelRay(item.position, entity.position, (x, y, z) => this.owner.getVoxel([x, y, z]));
+    if (visibility !== 'clear')
+      return { success: false, reason: visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
+    const candidate = new Inventory(actor.inventory.capacity, actor.inventory.snapshot(), actor.inventory.items);
+    if (!candidate.add(item.stack)) return { success: false, reason: 'inventory-full' };
+    const components = this.owner.entities.actorComponentSnapshot(id);
+    this.owner.assertCanChange();
+    const prepared = prepareEntityMutation(this.owner.entities, {
+      actors: [
+        {
+          reference: this.owner.entities.createReference(id)!,
+          health: actor.health,
+          components: { ...components, inventory: candidate.snapshot() },
+        },
+      ],
+      despawns: [this.owner.entities.createReference(entityId)!],
+    });
+    prepared.validate();
+    prepared.apply();
+    this.owner.changed(true);
+    return { success: true };
   }
   consume(id: string, slot: number): Result {
     const actor = this.owner.actor(id);

@@ -173,6 +173,10 @@ export class AutonomyRuntime {
     this.combat.restoreLockout(actorId, seconds);
   }
 
+  assertCanCancelCombat(actorId: string): void {
+    this.combat.assertCanCancelActor(actorId);
+  }
+
   cancelCombat(actorId: string, reason: string): boolean {
     const cancelled = this.combat.cancelActor(actorId, reason);
     this.reconcileCombatEvents();

@@ -10,7 +10,7 @@ import { listMeleeDefinitions } from '../../packages/game-core/src/server/gamepl
 const runtimeFor = (content: GameplayContent) => {
   const runtime = new GameplayRuntime({
     getVoxel: () => 0,
-    editVoxel: () => ({ committed: false }) as never,
+    prepareVoxelEdit: () => ({ committed: false }) as never,
     getWorldTime: () => 9,
     platform: testCorePlatform,
     content,

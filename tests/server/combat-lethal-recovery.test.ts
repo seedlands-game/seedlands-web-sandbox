@@ -46,7 +46,7 @@ const recordingCallbacks = (hits: number[]): CombatRuntimeCallbacks => ({
 const openWorld = () => {
   const runtime = new GameplayRuntime({
     getVoxel: () => Voxel.Air,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('unexpected edit');
     },
     getWorldTime: () => 9,

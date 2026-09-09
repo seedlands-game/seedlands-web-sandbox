@@ -1,3 +1,4 @@
+import type { PreparedWorldEdit } from './prepared-world-edit';
 import type { WorldResourceAuthorizer } from './harness/world-authorization';
 import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from './composition/operation-contracts';
 import type { WorldCommitResult, WorldEditBatch } from './game-server';
@@ -42,11 +43,7 @@ export abstract class GameServerGameplayFacade {
   ) {
     this.gameplay = new GameplayRuntime({
       getVoxel: (position) => this.readGameplayVoxel(...position),
-      editVoxel: (actorId, position, voxel) =>
-        this.editBatch({
-          actorId,
-          edits: [{ x: position[0], y: position[1], z: position[2], value: voxel }],
-        }),
+      prepareVoxelEdit: (actorId, position, voxel) => this.prepareVoxelEdit(actorId, position, voxel),
       getWorldTime: () => this.worldTime,
       platform,
       content,
@@ -59,6 +56,11 @@ export abstract class GameServerGameplayFacade {
   abstract get worldTime(): number;
   abstract getVoxel(x: number, y: number, z: number): number;
   abstract editBatch(batch: WorldEditBatch): WorldCommitResult;
+  abstract prepareVoxelEdit(
+    actorId: string,
+    position: readonly [number, number, number],
+    voxel: number,
+  ): PreparedWorldEdit;
   abstract setWorldTime(hours: number): number;
 
   protected readGameplayVoxel(x: number, y: number, z: number): number | undefined {

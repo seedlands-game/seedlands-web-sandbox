@@ -130,13 +130,22 @@ export function readActorComponentSnapshot(
   };
 }
 
-export function restoreActorComponentSnapshot(
-  components: Components,
-  eid: number,
+export type PreparedActorComponentSnapshot = Readonly<{
+  entityId: string;
+  needs: ActorNeeds;
+  inventory: Inventory;
+  equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
+  lifecycle: ActorComponentSnapshot['lifecycle'];
+  controlSource: ActorComponentSnapshot['controlSource'];
+  modeFacets: CompleteModeFacets;
+  player: Readonly<{ spawnPosition: [number, number, number]; breakAction: BreakAction | null }> | null;
+}>;
+
+export function prepareActorComponentSnapshot(
   snapshot: ActorComponentSnapshot,
   player: boolean,
   items: ItemDefinitionRegistry,
-): void {
+): PreparedActorComponentSnapshot {
   const needs = snapshot.needs;
   if (
     !needs ||
@@ -173,26 +182,74 @@ export function restoreActorComponentSnapshot(
 
   const inventory = new Inventory(24, snapshot.inventory, items);
   const modeFacets = validateActorModeFacets(snapshot, items);
+  let preparedPlayer: PreparedActorComponentSnapshot['player'] = null;
+  if (snapshot.player) {
+    if (snapshot.player.spawnPosition.length !== 3 || !snapshot.player.spawnPosition.every(Number.isFinite))
+      throw new TypeError('Player spawn position component is invalid.');
+    preparedPlayer = Object.freeze({
+      spawnPosition: [
+        snapshot.player.spawnPosition[0],
+        snapshot.player.spawnPosition[1],
+        snapshot.player.spawnPosition[2],
+      ],
+      breakAction: copyBreakAction(snapshot.player.breakAction),
+    });
+  }
+  return Object.freeze({
+    entityId: snapshot.entityId,
+    needs: Object.freeze({ ...needs }),
+    inventory,
+    equipment: Object.freeze({ ...snapshot.equipment }),
+    lifecycle: snapshot.lifecycle,
+    controlSource: snapshot.controlSource,
+    modeFacets: Object.freeze({
+      mode: Object.freeze({ ...modeFacets.mode }),
+      creativeCatalog: Object.freeze({
+        ...modeFacets.creativeCatalog,
+        hotbar: Object.freeze([...modeFacets.creativeCatalog.hotbar]),
+      }),
+      flight: Object.freeze({ ...modeFacets.flight }),
+    }),
+    player: preparedPlayer,
+  });
+}
+
+export function installPreparedActorComponentSnapshot(
+  components: Components,
+  eid: number,
+  prepared: PreparedActorComponentSnapshot,
+): void {
+  const { needs } = prepared;
   components.needs.hunger[eid] = needs.hunger;
   components.needs.maxHunger[eid] = needs.maxHunger;
   components.needs.hungerMeaning[eid] = needs.hungerMeaning;
   components.needs.hungerAccumulator[eid] = needs.hungerAccumulator;
   components.needs.healingAccumulator[eid] = needs.healingAccumulator;
   components.needs.starvationAccumulator[eid] = needs.starvationAccumulator;
-  components.inventory.value[eid] = inventory;
-  components.equipment.selectedSlot[eid] = snapshot.equipment.selectedSlot;
-  components.equipment.hotbarSize[eid] = snapshot.equipment.hotbarSize;
-  components.life.lifecycle[eid] = snapshot.lifecycle;
-  components.control.source[eid] = snapshot.controlSource;
-  writeModeFacets(components, eid, modeFacets);
-  if (snapshot.player) {
-    if (snapshot.player.spawnPosition.length !== 3 || !snapshot.player.spawnPosition.every(Number.isFinite))
-      throw new TypeError('Player spawn position component is invalid.');
-    components.player.spawnX[eid] = snapshot.player.spawnPosition[0];
-    components.player.spawnY[eid] = snapshot.player.spawnPosition[1];
-    components.player.spawnZ[eid] = snapshot.player.spawnPosition[2];
-    components.player.breakAction[eid] = copyBreakAction(snapshot.player.breakAction);
+  components.inventory.value[eid] = prepared.inventory;
+  components.equipment.selectedSlot[eid] = prepared.equipment.selectedSlot;
+  components.equipment.hotbarSize[eid] = prepared.equipment.hotbarSize;
+  components.life.lifecycle[eid] = prepared.lifecycle;
+  components.control.source[eid] = prepared.controlSource;
+  writeModeFacets(components, eid, prepared.modeFacets);
+  if (prepared.player) {
+    components.player.spawnX[eid] = prepared.player.spawnPosition[0];
+    components.player.spawnY[eid] = prepared.player.spawnPosition[1];
+    components.player.spawnZ[eid] = prepared.player.spawnPosition[2];
+    components.player.breakAction[eid] = prepared.player.breakAction
+      ? { ...prepared.player.breakAction, position: [...prepared.player.breakAction.position] }
+      : null;
   }
+}
+
+export function restoreActorComponentSnapshot(
+  components: Components,
+  eid: number,
+  snapshot: ActorComponentSnapshot,
+  player: boolean,
+  items: ItemDefinitionRegistry,
+): void {
+  installPreparedActorComponentSnapshot(components, eid, prepareActorComponentSnapshot(snapshot, player, items));
 }
 
 export type ActorAccessBindings = Readonly<{

@@ -6,7 +6,7 @@ import { testCorePlatform } from '../support/core-platform';
 const createRuntime = () =>
   new GameplayRuntime({
     getVoxel: () => Voxel.Air,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('Unexpected world edit');
     },
     getWorldTime: () => 9,

@@ -23,7 +23,7 @@ const openWorld = (meleeDefinitions?: readonly MeleeDefinition[]) => {
   const cells = new Map<string, number>();
   const runtime = new GameplayRuntime({
     getVoxel: ([x, y, z]) => cells.get(`${x},${y},${z}`) ?? Voxel.Air,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('unexpected edit');
     },
     getWorldTime: () => 9,
@@ -256,7 +256,7 @@ describe('authoritative melee runtime', () => {
     source.runtime.attackEntity('player', 'target');
     const restored = new GameplayRuntime({
       getVoxel: () => Voxel.Air,
-      editVoxel: () => {
+      prepareVoxelEdit: () => {
         throw new Error('unexpected edit');
       },
       getWorldTime: () => 9,

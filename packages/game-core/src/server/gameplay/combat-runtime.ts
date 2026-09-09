@@ -1,3 +1,11 @@
+import {
+  createMeleeDefinitionRegistry,
+  MAX_COMBO_STEPS,
+  type MeleeDefinition,
+  type MeleeDefinitionRegistry,
+} from './melee-definition-registry';
+export { createMeleeDefinitionRegistry } from './melee-definition-registry';
+export type { MeleeDefinition, MeleeStepDefinition, MeleeDefinitionRegistry } from './melee-definition-registry';
 import { overworldMeleeDefinitions as builtInDefinitions } from './playbooks/overworld/combat';
 import {
   entityReferenceExecutionFailure,
@@ -51,19 +59,6 @@ export type CombatSnapshot = Readonly<{
   lastResult: CombatResultSnapshot | null;
 }>;
 
-export type MeleeStepDefinition = Readonly<{
-  damage: number;
-  windupSeconds: number;
-  hitSeconds: number;
-  recoverySeconds: number;
-}>;
-
-export type MeleeDefinition = Readonly<{
-  id: string;
-  range: number;
-  steps: readonly MeleeStepDefinition[];
-}>;
-
 export type CombatRequestResult =
   Readonly<{ success: true; actionId: string; buffered: boolean }> | Readonly<{ success: false; reason: string }>;
 
@@ -100,50 +95,8 @@ export type CombatRuntimeCallbacks = Readonly<{
   applyDamage: (actorId: string, targetId: string, damage: number) => number | null;
 }>;
 
-const MAX_MELEE_DEFINITIONS = 64;
-const MAX_COMBO_STEPS = 8;
-
 const round = (value: number) => Math.round(Math.max(0, value) * 1_000_000) / 1_000_000;
 const cloneResult = (value: CombatResultSnapshot | null): CombatResultSnapshot | null => (value ? { ...value } : null);
-
-export type MeleeDefinitionRegistry = Readonly<{
-  get: (id: string) => MeleeDefinition | undefined;
-  list: () => readonly MeleeDefinition[];
-}>;
-
-export function createMeleeDefinitionRegistry(inputs: readonly MeleeDefinition[]): MeleeDefinitionRegistry {
-  if (inputs.length > MAX_MELEE_DEFINITIONS) throw new TypeError('Melee definition registry exceeds its limit.');
-  const registered = new Map<string, MeleeDefinition>();
-  for (const input of inputs) {
-    if (!input.id?.trim() || registered.has(input.id))
-      throw new TypeError(`Duplicate or empty melee definition: ${input.id}`);
-    if (
-      !Number.isFinite(input.range) ||
-      input.range <= 0 ||
-      !Array.isArray(input.steps) ||
-      input.steps.length === 0 ||
-      input.steps.length > MAX_COMBO_STEPS
-    )
-      throw new TypeError(`Melee definition is invalid: ${input.id}`);
-    const steps = input.steps.map((value) => {
-      if (
-        !Number.isFinite(value.damage) ||
-        value.damage <= 0 ||
-        !Number.isFinite(value.windupSeconds) ||
-        value.windupSeconds < 0 ||
-        !Number.isFinite(value.hitSeconds) ||
-        value.hitSeconds <= 0 ||
-        !Number.isFinite(value.recoverySeconds) ||
-        value.recoverySeconds < 0
-      )
-        throw new TypeError(`Melee step is invalid: ${input.id}`);
-      return Object.freeze({ ...value });
-    });
-    registered.set(input.id, Object.freeze({ id: input.id, range: input.range, steps: Object.freeze(steps) }));
-  }
-  const values = Object.freeze([...registered.values()]);
-  return Object.freeze({ get: (id: string) => registered.get(id), list: () => values });
-}
 
 const defaultRegistry = createMeleeDefinitionRegistry(builtInDefinitions);
 
@@ -252,6 +205,10 @@ export class CombatRuntime {
       throw new TypeError('Combat seconds must be non-negative and finite.');
     assertCombatResultCapacity(this.resultSequence, this.pendingResultBound());
     for (const actorId of [...this.combatants.keys()]) this.advanceActor(actorId, seconds);
+  }
+
+  assertCanCancelActor(actorId: string): void {
+    assertCombatResultCapacity(this.resultSequence, this.combatants.get(actorId)?.active ? 1 : 0);
   }
 
   cancelActor(actorId: string, reason: string): boolean {

@@ -5,7 +5,7 @@ import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayFacade } from './game-server-gameplay';
 import { createStarterEcology } from './simulation/starter-ecology';
 import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
-import { commitWorldEditBatch } from './world-transaction-commit';
+import { commitServerWorldEdit, prepareServerWorldEdit } from './world-edit-runtime';
 import type { FluidCell } from './fluid/fluid-cell';
 import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
@@ -347,35 +347,33 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   editBatch(batch: WorldEditBatch): WorldCommitResult {
-    const previousFluid = FluidSidecars.captureBatchFluidState(batch, {
-      getVoxel: (x, y, z) => this.getVoxel(x, y, z),
-      getCell: (x, y, z) => this.fluidChunks.cell(x, y, z, true),
-    });
-    const result = commitWorldEditBatch(
-      {
-        getChunk: (cx, cy, cz) => this.getChunk(cx, cy, cz),
-        getRevision: () => this.revision,
-        setRevision: (revision) => {
-          this.revision = revision;
-        },
-        addMutationCount: (count) => {
-          this.appliedMutationCount += count;
-        },
-        commitSingleEdit: (actorId, x, y, z, value) => this.commitSingleEdit(actorId, x, y, z, value),
+    return commitServerWorldEdit(this.worldEditOptions(), batch);
+  }
+
+  prepareVoxelEdit(actorId: string, position: readonly [number, number, number], value: number) {
+    return prepareServerWorldEdit(this.worldEditOptions(), { actorId, position, value });
+  }
+
+  private worldEditOptions() {
+    return {
+      chunks: this.chunks,
+      getChunk: (cx: number, cy: number, cz: number) => this.getChunk(cx, cy, cz),
+      getVoxel: this.getVoxel,
+      getRevision: () => this.revision,
+      setRevision: (revision: number) => {
+        this.revision = revision;
       },
-      batch,
-      this.options.platform.now,
-    );
-    if (result.committed)
-      FluidSidecars.commitBatchFluidSidecars(previousFluid, {
-        getVoxel: (x, y, z) => this.getVoxel(x, y, z),
-        includeEditedPosition: (x, y, z) => this.fluidWindow.includeEditedPosition(x, y, z),
-        writeCell: (x, y, z, cell) => this.fluidChunks.write(x, y, z, cell),
-        peekVoxel: (x, y, z) => this.fluidChunks.peekVoxel(x, y, z),
-        activate: (position) => this.fluidRuntime.activate(position, this.fluidPriorityForBatch(batch)),
-        removeSource: (position) => this.fluidRuntime.removeSource(position),
-      });
-    return result;
+      addMutationCount: (count: number) => {
+        this.appliedMutationCount += count;
+      },
+      commitSingleEdit: (actorId: string, x: number, y: number, z: number, value: number) =>
+        this.commitSingleEdit(actorId, x, y, z, value),
+      now: this.options.platform.now,
+      fluidChunks: this.fluidChunks,
+      fluidWindow: this.fluidWindow,
+      fluidRuntime: this.fluidRuntime,
+      priorityForBatch: (batch: WorldEditBatch) => this.fluidPriorityForBatch(batch),
+    };
   }
 
   private applyFluidCandidate(candidate: FluidCandidate): WorldCommitResult {

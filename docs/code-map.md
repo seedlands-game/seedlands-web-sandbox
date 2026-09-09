@@ -166,3 +166,5 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 `server/gameplay/modules/actor-vitals-runtime.ts` 与 `block-interaction-runtime.ts` 承接原 GameplayRuntime 的生命和方块流程，迁移中的规则 owner 仍以当前 spec 为准。`server/authority/actor-movement-projection.ts` 派生模式/飞行版本并防止旧输入重放；`authority-gameplay-view.ts` 投影实际每世界内容。Browser `worker/pack-loader.ts` 与 Headless 共用构建产物身份，`scripts/build-gameplay-packs.mjs` 生成被忽略的 ESM/manifest/lock。
 
 `server/composition/execution-origin.ts` 保存稳定主体来源合同，actor/system 执行在 `authorized-execution.ts` 与 `registered-operations.ts` 分离。`server/gameplay/modules/world-ruleset-state.ts` 拥有每世界只读 Ruleset；`gameplay-module-schedule.ts` 将显式宿主 service 授权、唯一组合玩法时钟与 V4 存档 frontier 接入 GameplayRuntime。默认 needs/combat 的注册迁移状态继续以当前 change 为准。
+
+`server/gameplay/melee-definition-registry.ts` 保存纯近战定义 schema、注册与限制；CombatRuntime 保留旧导出门面并拥有动作状态。`server/world-edit-runtime.ts` 组合普通编辑与流体 sidecar，`server/prepared-world-edit.ts` 为有界玩法事务提供单方块预校验参与者；现有单编辑结果构造复用 `single-world-edit.ts`。

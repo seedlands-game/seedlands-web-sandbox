@@ -17,7 +17,7 @@ function setup() {
     platform: testCorePlatform,
     getWorldTime: () => 0,
     getVoxel: ([, y]) => (y === 0 ? 3 : 0),
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('unexpected edit');
     },
   });

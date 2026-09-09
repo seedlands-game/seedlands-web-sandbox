@@ -13,9 +13,9 @@ import { resolveGameplayComposition } from '../composition/gameplay-composition'
 import type { WorldComposition } from '../composition/contracts';
 import { advancePlayerNeeds } from './modules/needs-runtime';
 import { BlockInteractionRuntime } from './modules/block-interaction-runtime';
-import { traceVoxelRay } from './voxel-ray';
 import { Voxel, CHUNK_SIZE, chunkKey } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
+import type { PreparedWorldEdit } from '../prepared-world-edit';
 import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
 import {
   EntityStore,
@@ -30,7 +30,7 @@ import type { ActorComponentAccess } from './ecs-actor-components';
 import { type GameplayContent } from './gameplay-content';
 import * as GameplaySnapshot from './gameplay-snapshot';
 import { advanceGameplayClock, assertGameplayAdvance } from './gameplay-clock';
-import { clonePosition, positionsInRange } from './gameplay-geometry';
+import { clonePosition } from './gameplay-geometry';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { CombatSnapshot, MeleeDefinition } from './combat-runtime';
 import { applyCombatDamage, isCombatantAvailable, validateCombatHit } from './gameplay-combat';
@@ -46,7 +46,7 @@ export type {
 type Position = [number, number, number];
 export type GameplayCallbacks = {
   getVoxel: (position: Position) => number | undefined;
-  editVoxel: (actorId: string, position: Position, voxel: number) => WorldCommitResult;
+  prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
   getWorldTime: () => number;
   platform: CorePlatformPorts;
   content?: GameplayContent;
@@ -93,6 +93,10 @@ export class GameplayRuntime {
     this.inventoryActions = new ActorInventoryRuntime({
       actor: (id) => this.inventoryActor(id),
       recipes: this.content.recipes,
+      entities: this.entities,
+      getVoxel: callbacks.getVoxel,
+      assertCanChange: () => this.assertRevisionCapacity(),
+      assertCanCancelCombat: (id) => this.simulation.assertCanCancelCombat(id),
       cancelCombat: (id, reason) => this.simulation.cancelCombat(id, reason),
       changed: (operation) => {
         if (operation) this.inventoryOperationCount++;
@@ -135,13 +139,14 @@ export class GameplayRuntime {
       player: (id) => this.player(id),
       entity: (id) => this.entities.get(id),
       getVoxel: callbacks.getVoxel,
-      editVoxel: callbacks.editVoxel,
+      prepareVoxelEdit: callbacks.prepareVoxelEdit,
+      entities: this.entities,
+      assertCanChange: () => this.assertRevisionCapacity(),
       items: this.content.items,
       changed: (inventoryOperation) => {
         if (inventoryOperation) this.inventoryOperationCount++;
         this.touch();
       },
-      spawnDrop: (position, stack) => void this.spawnWorldItem(position, stack),
     });
     this.modules = new GameplayModuleRuntime({
       composition: callbacks.composition,
@@ -322,41 +327,11 @@ export class GameplayRuntime {
   }
 
   pickupItem(playerId: string, entityId: string): GameplayResult {
-    const player = this.inventoryActor(playerId);
-    const active = this.requireAlive(player);
-    if (active) return active;
-    const item = this.entities.get(entityId);
-    if (!item || item.type !== 'world-item' || !item.stack) return { success: false, reason: 'invalid-item' };
-    const entity = this.entities.get(playerId)!;
-    if (!positionsInRange(entity.position, item.position, 1.5)) return { success: false, reason: 'out-of-range' };
-    const visibility = traceVoxelRay(item.position, entity.position, (x, y, z) => this.callbacks.getVoxel([x, y, z]));
-    if (visibility !== 'clear')
-      return { success: false, reason: visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
-    if (!player.inventory.add(item.stack)) return { success: false, reason: 'inventory-full' };
-    this.inventoryOperationCount += 1;
-    this.entities.despawn(entityId);
-    this.touch();
-    return { success: true };
+    return this.inventoryActions.pickup(playerId, entityId);
   }
 
   dropItem(playerId: string, slot: number, count: number): GameplayResult<{ entity: GameplayEntity }> {
-    const player = this.inventoryActor(playerId);
-    const active = this.requireAlive(player);
-    if (active) return active;
-    if (!Number.isInteger(slot) || slot < 0 || slot >= player.inventory.capacity)
-      return { success: false, reason: 'invalid-slot' };
-    if (!Number.isInteger(count) || count <= 0) return { success: false, reason: 'invalid-count' };
-    const stack = player.inventory.slot(slot);
-    if (!stack || stack.count < count) return { success: false, reason: 'missing-items' };
-    player.inventory.removeFromSlot(slot, count);
-    if (slot === player.selectedSlot) this.simulation.cancelCombat(playerId, 'slot-changed');
-    this.inventoryOperationCount += 1;
-    const entity = this.spawnWorldItem(clonePosition(this.entities.get(playerId)!.position), {
-      ...stack,
-      count,
-    });
-    this.touch();
-    return { success: true, entity };
+    return this.inventoryActions.drop(playerId, slot, count);
   }
 
   placeVoxel(id: string, position: Position): GameplayResult<{ commit: WorldCommitResult }> {
@@ -534,6 +509,11 @@ export class GameplayRuntime {
 
   private requireAlive(player: Pick<PlayerState, 'lifecycle'>): Failure | null {
     return player.lifecycle === 'alive' ? null : { success: false, reason: 'player-dead' };
+  }
+
+  private assertRevisionCapacity(): void {
+    if (!Number.isSafeInteger(this.revision) || this.revision >= Number.MAX_SAFE_INTEGER)
+      throw new RangeError('Gameplay revision capacity is exhausted.');
   }
 
   private touch(event = true): void {

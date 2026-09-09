@@ -18,7 +18,7 @@ const runtime = () =>
     platform: testCorePlatform,
     getVoxel: () => 0,
     getWorldTime: () => 9,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('unused');
     },
   });

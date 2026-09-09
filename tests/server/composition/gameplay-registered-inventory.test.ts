@@ -10,7 +10,7 @@ function setup(selfOnly = false, veto = false) {
   const gameplay = new GameplayRuntime({
     platform: testCorePlatform,
     getVoxel: () => 0,
-    editVoxel: () => {
+    prepareVoxelEdit: () => {
       throw new Error('unexpected edit');
     },
     getWorldTime: () => 9,

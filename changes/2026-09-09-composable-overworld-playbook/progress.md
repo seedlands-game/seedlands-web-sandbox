@@ -66,3 +66,9 @@
 - 实际 GameplayRuntime 已接入组合世界的唯一 ModuleLifecycle 时间与 V4 moduleSchedule；新世界首次推进/保存激活，直接恢复不先 start，恢复成功使旧 binding 失效。保存前有界排空队列，仍有工作则拒绝保存。真实 0.4+恢复+0.6、无重复 start、坏 schedule 无替换、撤权拒绝、循环队列拒绝通过；当前定向 composition 14 files / 78 tests GREEN。本次新增尚未由全量 static/build 或 Browser 覆盖。
 
 - 生命周期补强已返回且归还全部路径。当前无写入 child。此轮 full static 1380 passed / 4 skipped、build 与 Browser 4/4 分别通过；失败和修复、仍缺口见 [机制检查点](s3-mechanism-checkpoint.md)。下一切片：ECS 与 World 参与者的完整预校验和无失败同步 apply，随后实际 needs/Combat 消费。未改变 S3/S6 状态。
+
+- 机制检查点已提交 `df8a8f263f60082f0786cb05394302206eca46b4`，提交后工作树曾干净，Browser 4173 端口已释放。`s2_action_restore` 再次复用，合同 `/tmp/seedlands-s3-handoff/entity-atomic.json` 限定为 prepared ECS participant，拥有 EntityStore、EcsEntityOwner、ecs-actor-state、新 prepared-entity-mutation 与自身测试/设计/证据。Root 拥有 World 单编辑参与者和后续实际协调器；旧其他 child 均已返回。
+
+- ECS participant child 已归还全部路径，当前无 child 写入。真实 drop/pickup 与放置/挖掘已采用 prepared ECS/World 参与者，定向故障与真实 GameServer 测试通过。正在冻结全量验收，见 [原子检查点](s3-atomic-checkpoint.md)。needs/Combat/致死原子结算与 S4–S6 仍未完成。
+
+- 原子参与者冻结验收：full static 1398 passed / 4 skipped、build、Browser 组合 4/4 与真实采集合成战斗保存旅程 2/2 分别通过；任务 4173 端口已释放。形成下一可运行检查点，S3 仍在实施。
