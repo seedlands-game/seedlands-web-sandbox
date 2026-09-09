@@ -8,7 +8,11 @@ import type {
   RegisteredOperationRequest,
   RegisteredOperationResult,
 } from '../../composition/operation-contracts';
-import { captureDurableExecutionOrigin } from '../../composition/execution-origin';
+import {
+  captureDurableExecutionOrigin,
+  rebindDurableExecutionOrigin,
+  validateDurableExecutionOrigin,
+} from '../../composition/execution-origin';
 import type { WorldModuleBinding } from '../../commands/module-command';
 import type { CombatRequestResult, PreparedCombatMutation } from '../combat-runtime';
 import { prepareCombatDamage } from '../prepared-combat-damage';
@@ -291,6 +295,37 @@ export class RegisteredCombatRuntime {
     const actor = this.options.entities.get(actorId);
     const authority = binding ?? (actor && this.options.actorAuthority?.forActor(actorId, actor.type));
     if (!authority) return { success: false, reason: 'combat-authority-missing' };
+    if (binding && existingActionId) {
+      const active = this.options
+        .simulation()
+        .combat.snapshot()
+        .combatants.find((entry) => entry.actorId === actorId)?.combat.active;
+      const principal = binding.authorizer.principal(binding.principalId);
+      if (!active || !('origin' in active)) return { success: false, reason: 'combat-origin-mismatch' };
+      try {
+        const origin = validateDurableExecutionOrigin(active.origin);
+        if (origin.principalSubject !== principal?.subject) return { success: false, reason: 'combat-origin-mismatch' };
+        rebindDurableExecutionOrigin({
+          composition: this.options.composition,
+          identity: this.environment.identity,
+          authorizer: binding.authorizer,
+          origin,
+          request: { resource: COMBAT_RESOURCE, operation: 'execute', target: { kind: 'entity', entityId: targetId } },
+        });
+      } catch (error) {
+        if (!(error instanceof TypeError)) throw error;
+        return { success: false, reason: 'combat-origin-unavailable' };
+      }
+      for (const entityId of [actorId, targetId])
+        if (
+          !binding.authorizer.authorize(binding.principalId, {
+            resource: COMBAT_RESOURCE,
+            operation: 'read',
+            target: { kind: 'entity', entityId },
+          }).allowed
+        )
+          return { success: false, reason: 'combat-observation-denied' };
+    }
     this.drain();
     if (existingActionId) {
       const active = this.options.simulation().combat.snapshotFor(actorId).active;

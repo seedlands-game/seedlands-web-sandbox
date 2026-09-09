@@ -1,4 +1,5 @@
 import { createHeadlessGameplayAuthorities, headlessModuleCommandBinding } from './headless-gameplay-authority';
+import { resolveHeadlessWorldHarness } from './headless-gameplay-authority';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { runWorldComputeTask } from '../../compute/world-compute-task';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
@@ -20,7 +21,6 @@ import { AuthorityWorldHarness, type AuthorityWorldOwner } from '../harness/auth
 import {
   WorldResourceAuthorizer,
   commandAuthorizationRequests,
-  developmentWorldAuthorizationPolicy,
   type WorldAuthorizationPolicy,
 } from '../harness/world-authorization';
 import { HeadlessClockScheduler } from './headless-clock-scheduler';
@@ -141,10 +141,7 @@ export class HeadlessSession {
       entityId: runtime.playerId,
       capabilities: ALL_COMMAND_CAPABILITIES,
     };
-    const worldHarness = options.worldHarness ?? {
-      principalId: 'headless-developer',
-      authorization: developmentWorldAuthorizationPolicy('headless-developer', runtime.playerId),
-    };
+    const worldHarness = resolveHeadlessWorldHarness(options.worldHarness);
     const session = new HeadlessSession(
       runtime,
       persistence,
@@ -175,7 +172,10 @@ export class HeadlessSession {
       seedText: options.seedText,
       platform: options.platform,
       composition,
-      ...createHeadlessGameplayAuthorities(composition, options.worldHarness?.authorization),
+      ...createHeadlessGameplayAuthorities(
+        composition,
+        resolveHeadlessWorldHarness(options.worldHarness).authorization,
+      ),
       allowLegacyCompositionMigration: Boolean(options.createComposition),
       persistence,
       initialWorldTime: options.initialWorldTime ?? 9,

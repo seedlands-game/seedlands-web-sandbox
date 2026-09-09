@@ -15,6 +15,8 @@ export function assembleOverworldPacks(artifacts: readonly VerifiedPackArtifact[
     approvedPermissions: {
       'seedlands:overworld': [
         { resource: 'seedlands.inventory', operations: ['read', 'write', 'execute'] },
+        { resource: 'seedlands.feeding-actor', operations: ['read', 'execute'] },
+        { resource: 'seedlands.feeding-item', operations: ['read', 'execute'] },
         { resource: 'seedlands.inventory-item', operations: ['read', 'execute'] },
         { resource: 'seedlands.block-actor', operations: ['read', 'execute'] },
         { resource: 'seedlands.block-voxel', operations: ['read', 'execute'] },

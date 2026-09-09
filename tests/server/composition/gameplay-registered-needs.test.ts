@@ -18,7 +18,13 @@ import { testCorePlatform } from '../../support/core-platform';
 function setup(needs: boolean) {
   const modules = [
     ...pack.modules.filter(
-      (module) => !['seedlands:needs-module', 'seedlands:overworld-needs-rules'].includes(module.descriptor.id),
+      (module) =>
+        ![
+          'seedlands:needs-module',
+          'seedlands:overworld-needs-rules',
+          'seedlands:feeding-actions-module',
+          'seedlands:overworld-feeding-rules',
+        ].includes(module.descriptor.id),
     ),
     ...(needs
       ? [

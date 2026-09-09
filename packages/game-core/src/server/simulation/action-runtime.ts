@@ -85,11 +85,16 @@ export class ActionRuntime {
     return prepared.action;
   }
 
-  prepareStart(input: ActorActionInput, now: number, options: Readonly<{ status?: 'pending' | 'running' }> = {}) {
+  prepareStart(
+    input: ActorActionInput,
+    now: number,
+    options: Readonly<{ status?: 'pending' | 'running' } | { status: 'succeeded'; result?: unknown }> = {},
+  ) {
     this.validateInput(input, now);
     if (this.sequence >= Number.MAX_SAFE_INTEGER) throw new RangeError('Action sequence is exhausted.');
     const status = options.status ?? 'pending';
-    if (status !== 'pending' && status !== 'running') throw new TypeError('Prepared Action status is invalid.');
+    if (status !== 'pending' && status !== 'running' && status !== 'succeeded')
+      throw new TypeError('Prepared Action status is invalid.');
     const bindings = this.captureBindings(input.actorId, input.targetEntityId);
     const sequence = this.sequence,
       token = this.frontierToken;
@@ -103,6 +108,9 @@ export class ActionRuntime {
       id: `action-${sequence + 1}`,
       status,
       startedAt: now,
+      ...(status === 'succeeded'
+        ? { endedAt: now, ...('result' in options ? { result: this.cloneValue(options.result) } : {}) }
+        : {}),
       path: [],
       pathIndex: 0,
       repathCount: 0,
@@ -143,7 +151,8 @@ export class ActionRuntime {
         this.sequence = sequence + 1;
         this.actions.set(action.id, action);
         this.bindings.set(action.id, bindings);
-        this.currentByActor.set(action.actorId, action.id);
+        if (status === 'succeeded') this.currentByActor.delete(action.actorId);
+        else this.currentByActor.set(action.actorId, action.id);
         used = true;
       },
     });

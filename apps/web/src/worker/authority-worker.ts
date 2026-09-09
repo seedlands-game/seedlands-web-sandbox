@@ -37,6 +37,7 @@ import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } 
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
 let packArtifacts: readonly VerifiedPackArtifact[] = [];
+let developerPolicy: ReturnType<typeof developmentWorldAuthorizationPolicy> | undefined;
 let persistence: BrowserChunkPersistence | null = null;
 let worldHarness: AuthorityWorldHarness | null = null;
 let worldEpoch = '';
@@ -122,7 +123,12 @@ const runtimeComposition = () => {
   return {
     composition,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
-    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'browser-player' }),
+    moduleActorAuthority: createGameplayActorAuthority(composition.resources, {
+      playerAlias: 'browser-player',
+      scriptAuthorization: developerPolicy
+        ? new WorldResourceAuthorizer(developerPolicy, composition.resources)
+        : undefined,
+    }),
   };
 };
 
@@ -206,6 +212,9 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     legacySnapshots: message.legacySnapshots as readonly SerializedChunkSnapshot[],
     openMode: message.openMode,
   });
+  developerPolicy = message.developerWorldHarness
+    ? developmentWorldAuthorizationPolicy('browser-developer')
+    : undefined;
   runtime = await AuthorityRuntime.create({
     ...runtimeComposition(),
     allowLegacyCompositionMigration: true,
@@ -232,9 +241,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   });
   worldEpoch = `${epoch}:world:0`;
   const principalId = 'browser-developer';
-  const policy = message.developerWorldHarness
-    ? developmentWorldAuthorizationPolicy(principalId, runtime.playerId)
-    : { principals: [{ id: principalId, boundEntityId: runtime.playerId }], rules: [] };
+  const policy = developerPolicy ?? { principals: [{ id: principalId, boundEntityId: runtime.playerId }], rules: [] };
   worldHarness = new AuthorityWorldHarness({
     platform: browserCorePlatform,
     principalId,

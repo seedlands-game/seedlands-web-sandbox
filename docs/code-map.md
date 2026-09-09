@@ -182,3 +182,5 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 `server/gameplay/modules/inventory-action-model.ts` 与 `inventory-actions-module.ts` 定义六类纯库存操作候选及 actor/item 资源；`registered-inventory-runtime.ts` 核对当前来源、观察和候选，并预提交 ECS、物品实体及 Combat 取消。`server/commands/inventory-module-command.ts` 保留真实命令调用者的绑定。`mode-state-port.ts` 与 `mode-runtime.ts` 预备模式、落点、速度和不兼容 Action 的统一变更。
 
 `server/gameplay/gameplay-domain-adapters.ts` 将既有库存、生命和未组合方块门面的实例端口集中装配，仍共享同一 ECS/Gameplay owner。`block-actions-module.ts` 与 `block-rules-module.ts` 分开纯方块候选和默认规则；`registered-block-runtime.ts`、`block-state-port.ts`、`block-origin-environment.ts`、`block-host-commit.ts` 负责真实当前来源、投影和世界/库存/掉落预提交。普通命令通过 `server/commands/block-module-command.ts` 保留实际宿主绑定并交付真实世界回执。迁移准出状态继续以本期 change 为准。
+
+`server/gameplay/gameplay-registered-adapters.ts` 装配 Inventory、Combat、Block 与 Feeding 的注册宿主端口。`modules/feeding-model.ts`、`feeding-actions-module.ts` 与 `feeding-rules-module.ts` 分开纯投影候选、操作和显式默认规则；`registered-feeding-runtime.ts` 统一 ECS needs、world-item 与 `simulation/prepared-feeding-effects.ts` 的即时 Eat/Combat/自治效果。脚本 Logic 由 AuthorityWorldHarness 将实际主体绑定送达 AuthorityRuntime 和这些 owner，默认开发者主体在宿主间稳定，别名和授权仍由当前宿主决定。

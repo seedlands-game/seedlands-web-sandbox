@@ -33,6 +33,7 @@ import { WorldBarrierRuntime } from './world-barrier-runtime';
 import { WorldCheckpointRuntime, WorldOperationFailure, WorldTraceRuntime } from './world-harness-state';
 import {
   authorizationRequest,
+  worldFrontierFor,
   commandSourceForPrincipal,
   inspectAuthorizationRequest,
 } from './world-harness-operations';
@@ -327,7 +328,13 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
             'Scripted Logic submission requires scripted mode.',
             'conflict',
           );
-        return { accepted: runtime.receiveLogicIntentBatch(request.batch), mode: this.logicModeValue };
+        return {
+          accepted: runtime.receiveLogicIntentBatch(request.batch, {
+            authorizer: this.options.authorization,
+            principalId: this.options.principalId,
+          }),
+          mode: this.logicModeValue,
+        };
       },
     );
   }
@@ -492,17 +499,7 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
   }
 
   private frontier(): WorldFrontier {
-    const owner = this.options.owner();
-    const snapshot = owner.runtime.snapshot();
-    return {
-      worldId: owner.worldId,
-      epoch: owner.epoch,
-      worldRevision: snapshot.worldRevision,
-      commitSequence: snapshot.commitSequence,
-      physicsTick: snapshot.physicsTick,
-      fluidWorkSequence: owner.runtime.settlementDiagnostics.fluidIssuedWorkCount,
-      logicObservationSequence: owner.runtime.settlementDiagnostics.logicIssuedObservationSequence,
-    };
+    return worldFrontierFor(this.options.owner());
   }
 
   private safeFrontier(): WorldFrontier | null {

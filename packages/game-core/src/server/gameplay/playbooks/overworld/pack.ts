@@ -7,6 +7,8 @@ import {
   defineBlockRulesModule,
   defineModeModule,
   defineNeedsModule,
+  defineFeedingActionsModule,
+  defineFeedingRulesModule,
   defineCombatModule,
   defineCombatRulesModule,
   defineNeedsRulesModule,
@@ -46,6 +48,13 @@ export const pack = definePack({
     defineCombatRulesModule({
       moduleId: 'seedlands:overworld-combat-rules',
       profile: { damageMultiplier: 1, immuneTargetModes: ['creative'] },
+    }),
+    defineFeedingActionsModule(),
+    defineFeedingRulesModule({
+      moduleId: 'seedlands:overworld-feeding-rules',
+      eligibleArchetypes: ['grazer'],
+      deficitThreshold: 50,
+      restore: 'full',
     }),
     defineNeedsModule(),
     defineNeedsRulesModule({

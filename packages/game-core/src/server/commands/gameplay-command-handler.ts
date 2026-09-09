@@ -208,6 +208,16 @@ export async function executeGameplayCommand(
       return mutationPayload('Respawned player.', server.respawnPlayer(playerId(source)));
     case 'start-action': {
       const id = playerId(source, command.entityId);
+      if (command.action === 'eat' && server.hasGameplayComposition) {
+        if (!moduleOperation || !command.targetEntityId)
+          throw new Error('Feeding requires a host-authorized module binding and target.');
+        const result = moduleOperation(id, {
+          operationId: 'seedlands:consume-world-item',
+          target: { kind: 'entity', entityId: command.targetEntityId },
+        });
+        if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
+        return { message: `Completed Eat action for ${id}.`, data: result.value };
+      }
       if (command.action === 'attack' && server.hasGameplayComposition) {
         if (!moduleOperation || !command.targetEntityId)
           throw new Error('Combat requires a host-authorized module binding and target.');

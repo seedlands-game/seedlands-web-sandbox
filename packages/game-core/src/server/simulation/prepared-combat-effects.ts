@@ -10,6 +10,7 @@ export type CombatAutonomyEffects = Readonly<{
   removals?: readonly string[];
   attacked?: Readonly<{ targetId: string; actorId: string }>;
   started?: Readonly<{ actorId: string; targetId: string; replaced: boolean }>;
+  completedAction?: Readonly<{ actorId: string; actionId: string; replacedActionId?: string }>;
 }>;
 
 /** Uses one already prepared Combat frontier; never prepares or applies a second one. */
@@ -33,6 +34,13 @@ export function prepareCombatEffects(
   const records: { observerId: string; event: ObservationEvent }[] = [];
   const completedObservers = new Map<string, string>();
   const absent = new Set<string>();
+  const completion = options.completedAction;
+  if (
+    completion &&
+    (!completion.actorId.trim() || !completion.actionId.trim() || options.deaths?.includes(completion.actorId))
+  )
+    throw new TypeError('Prepared instant Action completion is invalid.');
+  const externallyHandled = new Set(completion ? [completion.actionId, completion.replacedActionId] : []);
   const capture = (id: string) => {
     const actor = options.actors.get(id);
     if (!actor) absent.add(id);
@@ -42,7 +50,7 @@ export function prepareCombatEffects(
   for (const event of options.combatPlan.lifecycleEvents) {
     const actor = capture(event.actorId);
     const action = options.actions.forActor(event.actorId);
-    if (action?.id === event.actionId) {
+    if (action?.id === event.actionId && !externallyHandled.has(action.id)) {
       settlements.set(
         action.id,
         event.status === 'cancelled'
@@ -91,6 +99,13 @@ export function prepareCombatEffects(
       records.push({ observerId, event: { type: 'action-completed', subjectId: actionId } });
   if (options.started && capture(options.started.actorId))
     updates.set(options.started.actorId, { behavior: 'attack', target: options.started.targetId });
+  if (completion && capture(completion.actorId)) {
+    updates.set(completion.actorId, { behavior: 'idle', target: null });
+    records.push({
+      observerId: completion.actorId,
+      event: { type: 'action-completed', subjectId: completion.actionId },
+    });
+  }
   const entries = [...settlements.values()];
   const actions: ReturnType<ActionRuntime['prepareSettlements']>[] = [];
   for (let offset = 0; offset < entries.length; offset += 128)
@@ -99,8 +114,11 @@ export function prepareCombatEffects(
   let used = false,
     validated = false;
   return Object.freeze({
-    interrupted: entries.filter((entry) => entry.status === 'interrupted').length + (options.started?.replaced ? 1 : 0),
-    completed: entries.filter((entry) => entry.status === 'succeeded').length,
+    interrupted:
+      entries.filter((entry) => entry.status === 'interrupted').length +
+      (options.started?.replaced ? 1 : 0) +
+      (completion?.replacedActionId ? 1 : 0),
+    completed: entries.filter((entry) => entry.status === 'succeeded').length + Number(Boolean(completion)),
     validate() {
       if (used) throw new Error('Prepared Combat effects were already used.');
       validated = false;

@@ -1,3 +1,4 @@
+import type { WorldModuleBinding } from './commands/module-command';
 import type { ModuleInvocationValue } from './composition/contracts';
 import type { PreparedWorldEdit } from './prepared-world-edit';
 import type { WorldResourceAuthorizer } from './harness/world-authorization';
@@ -227,7 +228,7 @@ export abstract class GameServerGameplayFacade {
   advanceGameplayRules(seconds: number) {
     return this.gameplay.advanceRules(seconds);
   }
-  applyActorAuthorityAction(actorId: string, action: ActorAuthorityAction) {
+  applyActorAuthorityAction(actorId: string, action: ActorAuthorityAction, binding?: WorldModuleBinding) {
     return applyActorAction(
       {
         entities: this.gameplay.entities,
@@ -236,6 +237,12 @@ export abstract class GameServerGameplayFacade {
         isPlayerAlive: (id) => this.gameplay.getPlayerState(id).lifecycle === 'alive',
         items: this.gameplay.content.items,
         touch: () => this.gameplay.recordAuthorityMutation(),
+        ...(this.hasGameplayComposition ? { consumeWorldItem: this.gameplay.bindFeeding(binding) } : {}),
+        ...(binding && this.hasGameplayComposition
+          ? {
+              requestCombat: this.gameplay.bindActorCombat(binding),
+            }
+          : {}),
       },
       actorId,
       action,

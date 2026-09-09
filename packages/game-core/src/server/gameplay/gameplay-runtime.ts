@@ -1,11 +1,12 @@
+import type { WorldModuleBinding } from '../commands/module-command';
 import { createGameplayDomainAdapters } from './gameplay-domain-adapters';
 import type { ModuleInvocationValue } from '../composition/contracts';
-import { RegisteredBlockRuntime } from './modules/registered-block-runtime';
+import { createGameplayRegisteredAdapters } from './gameplay-registered-adapters';
 import { BLOCK_WORLD_COMPONENT } from './modules/block-action-model';
 import type { GameplayCallbacks, GameplayResult, GameplayFailure as Failure } from './gameplay-runtime-contracts';
 export type * from './gameplay-runtime-contracts';
-import { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
-import { RegisteredInventoryRuntime } from './modules/registered-inventory-runtime';
+import type { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
+import type { RegisteredFeedingRuntime } from './modules/registered-feeding-runtime';
 import { COMBAT_REQUEST_OPERATION } from './modules/combat-model';
 import { NEEDS_COMPONENT } from './modules/needs-model';
 import { createNeedsStatePort } from './modules/needs-state-port';
@@ -61,6 +62,7 @@ export class GameplayRuntime {
   private readonly ruleset;
   private readonly schedule;
   private readonly needsPlayerLimit;
+  private readonly registeredFeeding: RegisteredFeedingRuntime | null;
   private readonly registeredCombat: RegisteredCombatRuntime | null;
 
   constructor(private readonly callbacks: GameplayCallbacks) {
@@ -111,12 +113,19 @@ export class GameplayRuntime {
         this.touch();
       },
     };
-    this.registeredInventory = callbacks.composition
-      ? new RegisteredInventoryRuntime({
-          ...registeredPorts,
-          composition: callbacks.composition,
-        })
-      : null;
+    const registered = createGameplayRegisteredAdapters({
+      ...registeredPorts,
+      composition: callbacks.composition,
+      actorIds: () => [...this.players.keys(), ...this.simulation.actorIds()],
+      rulesetRevision: () => this.ruleset.snapshot()?.revision ?? 0,
+      now: () => this.gameplayTime,
+      systemAuthority: callbacks.moduleSystemAuthority,
+      prepareVoxelEdit: callbacks.prepareVoxelEdit,
+    });
+    this.registeredInventory = registered.inventory;
+    this.registeredCombat = registered.combat;
+    this.registeredBlocks = registered.blocks;
+    this.registeredFeeding = registered.feeding;
     this.modes = new ModeRuntime({
       entities: this.entities,
       findSafeLanding: (id) => findGameplayModeLanding(this.entities.get(id)!, callbacks.getVoxel, this.revision),
@@ -124,27 +133,10 @@ export class GameplayRuntime {
       prepareCancelIncompatibleActions: (id, reason) => this.simulation.prepareInterruption(id, reason),
       changed: () => this.touch(),
     });
-    this.registeredCombat = callbacks.composition
-      ? new RegisteredCombatRuntime({
-          ...registeredPorts,
-          composition: callbacks.composition,
-          actorIds: () => [...this.players.keys(), ...this.simulation.actorIds()],
-          rulesetRevision: () => this.ruleset.snapshot()?.revision ?? 0,
-          now: () => this.gameplayTime,
-          systemAuthority: callbacks.moduleSystemAuthority,
-        })
-      : null;
-    this.registeredBlocks = callbacks.composition
-      ? new RegisteredBlockRuntime({
-          ...registeredPorts,
-          composition: callbacks.composition,
-          systemAuthority: callbacks.moduleSystemAuthority,
-          prepareVoxelEdit: callbacks.prepareVoxelEdit,
-        })
-      : null;
     this.modules = new GameplayModuleRuntime({
       combat: this.registeredCombat?.state,
       blocks: this.registeredBlocks?.state,
+      feeding: this.registeredFeeding?.state,
       composition: callbacks.composition,
       entities: this.entities,
       clone: callbacks.platform.clone,
@@ -367,6 +359,17 @@ export class GameplayRuntime {
     return (this.registeredInventory ?? this.inventoryActions).consume(id, slot);
   }
 
+  bindFeeding(binding?: WorldModuleBinding) {
+    if (!this.registeredFeeding) throw new Error('Registered Feeding is unavailable.');
+    return (actorId: string, targetId: string, existingActionId?: string) =>
+      this.registeredFeeding!.request(actorId, targetId, existingActionId, binding);
+  }
+  bindActorCombat(binding: WorldModuleBinding) {
+    if (!this.registeredCombat) throw new Error('Registered Combat is unavailable.');
+    return (actorId: string, targetId: string, existingActionId?: string) =>
+      this.registeredCombat!.request(actorId, targetId, existingActionId, binding);
+  }
+
   attackEntity(
     playerId: string,
     targetId: string,
@@ -483,6 +486,7 @@ export class GameplayRuntime {
       meleeDefinitions: this.content.meleeDefinitions,
       entities: this.entities,
       registeredNeeds: !!this.schedule,
+      registeredFeeding: !!this.callbacks.composition,
       registeredBlocks: this.callbacks.composition?.registrations.states.some(
         ({ definition }) => definition.id === BLOCK_WORLD_COMPONENT,
       ),

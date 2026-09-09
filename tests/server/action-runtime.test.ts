@@ -3,6 +3,30 @@ import { describe, expect, it } from 'vitest';
 import { ActionRuntime } from '../../packages/game-core/src/server/simulation/action-runtime';
 
 describe('asynchronous actor actions', () => {
+  it('prepares an instant completed action and replacement before any live history changes', () => {
+    const actions = new ActionRuntime(testCorePlatform.clone);
+    const old = actions.start({ actorId: 'actor', type: 'idle' }, 0);
+    const before = actions.snapshot();
+    const result = { consumedEntityId: 'food', count: 1 };
+    const plan = actions.prepareStart({ actorId: 'actor', type: 'eat', targetEntityId: 'food' }, 1, {
+      status: 'succeeded',
+      result,
+    });
+    result.count = 9;
+    expect(actions.snapshot()).toEqual(before);
+    plan.validate();
+    plan.apply();
+    expect(actions.forActor('actor')).toBeNull();
+    expect(actions.get(old.id)).toMatchObject({ status: 'interrupted', reason: 'replaced' });
+    expect(actions.get(plan.action.id)).toMatchObject({
+      status: 'succeeded',
+      startedAt: 1,
+      endedAt: 1,
+      result: { consumedEntityId: 'food', count: 1 },
+    });
+    expect(() => plan.apply()).toThrow(/used/i);
+  });
+
   it('moves through pending, running and succeeded states using stable ids', () => {
     const actions = new ActionRuntime(testCorePlatform.clone);
     const accepted = actions.start({ actorId: 'actor-1', type: 'move-to', targetPosition: [4.5, 1, 0.5] }, 10);

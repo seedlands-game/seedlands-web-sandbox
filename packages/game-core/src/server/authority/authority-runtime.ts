@@ -33,7 +33,7 @@ import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from '.
 import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 import type { AuthorityRuntimeOptions } from './authority-runtime-options';
 import { AuthorityLogicCandidates } from './authority-logic-candidates';
-import { acceptLogicIntentBatch, isValidLogicIntent } from './authority-logic-intent-acceptance';
+import { acceptLogicIntentBatch, isValidLogicIntent, applyBoundLogicAction } from './authority-logic-intent-acceptance';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -265,7 +265,7 @@ export class AuthorityRuntime {
     return this.session.receiveLogicIntents(epoch, intents);
   }
 
-  receiveLogicIntentBatch(batch: LogicIntentBatch): boolean {
+  receiveLogicIntentBatch(batch: LogicIntentBatch, binding?: WorldModuleBinding): boolean {
     if (batch.protocolVersion !== LOGIC_PROTOCOL_VERSION || batch.epoch !== this.options.epoch) return false;
     const latestPhysicsTick = this.session.currentSnapshot.physicsTick;
     const observation = this.logicCandidates.consume(batch.observationSequence);
@@ -279,7 +279,7 @@ export class AuthorityRuntime {
       identityRevision: (entity) => this.logicObservationBuilder.identityRevision(entity),
       referenceFor: (id) => this.server.createEntityReference(id),
       currentChunkRevisions: (reads) => this.currentChunkRevisions(reads),
-      applyAction: (entityId, action) => this.applyLogicAction(entityId, action),
+      applyAction: (entityId, action) => applyBoundLogicAction(this.server, entityId, action, binding),
       validIntent: isValidLogicIntent,
     });
     if (canonicalChanged) this.session.commitExternalState(false);
@@ -521,10 +521,6 @@ export class AuthorityRuntime {
         revision
       );
     });
-  }
-
-  private applyLogicAction(entityId: string, action: LogicIntentBatch['intents'][number]['action']) {
-    return action ? this.server.applyActorAuthorityAction(entityId, action) : null;
   }
 
   private serverStateVersion() {

@@ -1,3 +1,4 @@
+import { FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT } from './feeding-model';
 import { BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT } from './block-action-model';
 import type { WorldComposition } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
@@ -46,6 +47,7 @@ export class GameplayModuleRuntime {
       needs: RegisteredStatePort;
       combat?: RegisteredStatePort;
       blocks?: RegisteredStatePort;
+      feeding?: RegisteredStatePort;
     }>,
   ) {}
 
@@ -83,6 +85,8 @@ export class GameplayModuleRuntime {
         this.options.blocks
       )
         return this.options.blocks;
+      if ([FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT].includes(component) && this.options.feeding)
+        return this.options.feeding;
       if (component === NEEDS_COMPONENT) return this.options.needs;
       if (component === MODE_COMPONENT) return this.options.mode;
       if (component === RULESET_COMPONENT) return this.options.ruleset;

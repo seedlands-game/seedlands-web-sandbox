@@ -408,12 +408,22 @@ export const playerActionAuthorizationRequests = (
   return requests;
 };
 
+export const DEVELOPER_WORLD_SUBJECT = 'seedlands:developer-world-harness';
+
 export function developmentWorldAuthorizationPolicy(
   principalId: string,
   boundEntityId?: string,
 ): WorldAuthorizationPolicy {
   return {
-    principals: [{ id: principalId, labels: ['trusted-developer'], ...(boundEntityId ? { boundEntityId } : {}) }],
+    principals: [
+      {
+        id: principalId,
+        kind: 'actor',
+        subject: DEVELOPER_WORLD_SUBJECT,
+        labels: ['trusted-developer'],
+        ...(boundEntityId ? { boundEntityId } : {}),
+      },
+    ],
     rules: [
       {
         effect: 'allow',

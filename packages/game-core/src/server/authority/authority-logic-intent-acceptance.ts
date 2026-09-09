@@ -1,3 +1,5 @@
+import type { GameServer } from '../game-server';
+import type { WorldModuleBinding } from '../commands/module-command';
 import type { GameplayEntity, EntityLifetimeReference } from '../gameplay/entity-store';
 import type { LogicIntentBatch, LogicObservation } from '../logic/logic-protocol';
 import type { LogicIntent } from './authority-session';
@@ -74,4 +76,22 @@ export function isValidLogicIntent(intent: Intent): boolean {
   if (action.type === 'move-to') return action.target.length === 3 && action.target.every(Number.isFinite);
   if (action.type === 'start-existing-action') return Boolean(action.actionId.trim());
   return Boolean(action.targetId.trim());
+}
+
+export function applyBoundLogicAction(
+  server: GameServer,
+  entityId: string,
+  action: Intent['action'],
+  binding?: WorldModuleBinding,
+) {
+  if (
+    binding &&
+    !binding.authorizer.authorize(binding.principalId, {
+      resource: 'world.action',
+      operation: 'execute',
+      target: { kind: 'entity', entityId },
+    }).allowed
+  )
+    return { accepted: false, changed: false };
+  return action ? server.applyActorAuthorityAction(entityId, action, binding) : null;
 }

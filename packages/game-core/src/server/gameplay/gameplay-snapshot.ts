@@ -83,6 +83,7 @@ type GameplaySnapshotValidationOptions = {
   items?: ItemDefinitionRegistry;
   meleeDefinitions?: readonly MeleeDefinition[];
   registeredNeeds?: boolean;
+  registeredFeeding?: boolean;
   registeredBlocks?: boolean;
   combatOriginFor?(entities: EntityStore): CombatOriginRuntimeOptions;
   needsPlayerLimit?: number;
@@ -277,6 +278,15 @@ export function validateGameplaySnapshot(
       combatOrigin: options.combatOriginFor?.(entities),
     });
     validator.restore(simulationSnapshotFor(source));
+    if (options.registeredFeeding) {
+      // Registered Feeding commits immediately; a pending Eat has no durable authorization origin.
+      for (const actorId of validator.actorIds()) {
+        if (validator.actionForActor(actorId)?.type !== 'eat') continue;
+        const cancellation = validator.prepareInterruption(actorId, 'restore-cancelled');
+        cancellation.validate();
+        cancellation.apply();
+      }
+    }
     const snapshot = createGameplaySnapshotV4(
       source.revision,
       source.gameplayTime,

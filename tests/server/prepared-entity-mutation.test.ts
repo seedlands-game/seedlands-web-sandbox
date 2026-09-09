@@ -40,6 +40,42 @@ const populated = () => {
 };
 
 describe('prepared EntityStore mutation', () => {
+  it('prepares a partial world-item count without changing its identity or allocator', () => {
+    const store = populated();
+    const reference = store.createReference('old-drop')!;
+    const before = store.exportComponentSnapshot();
+    const plan = prepareEntityMutation(store, { worldItems: [{ reference, count: 1 }] });
+    expect(store.exportComponentSnapshot()).toEqual(before);
+    plan.validate();
+    plan.apply();
+    expect(store.get('old-drop')).toMatchObject({ stack: { itemId: 'test:berry', count: 1 }, position: [1, 2, 0] });
+    expect(store.createReference('old-drop')).toEqual(reference);
+    const after = store.exportComponentSnapshot();
+    expect(after).toEqual({
+      ...before,
+      entities: before.entities.map((entity) =>
+        entity.id === 'old-drop' ? { ...entity, stack: { itemId: 'test:berry', count: 1 } } : entity,
+      ),
+    });
+  });
+
+  it('rejects invalid or stale partial world-item replacements before touching actor needs', () => {
+    const store = populated();
+    const before = store.exportComponentSnapshot();
+    expect(() =>
+      prepareEntityMutation(store, { worldItems: [{ reference: store.createReference('old-drop')!, count: 0 }] }),
+    ).toThrow();
+    expect(store.exportComponentSnapshot()).toEqual(before);
+    const plan = prepareEntityMutation(store, {
+      worldItems: [{ reference: store.createReference('old-drop')!, count: 1 }],
+    });
+    plan.validate();
+    store.consumeWorldItemUnit('old-drop');
+    const changed = store.exportComponentSnapshot();
+    expect(() => plan.apply()).toThrow(/stale/i);
+    expect(store.exportComponentSnapshot()).toEqual(changed);
+  });
+
   it('keeps ordinary actor restore atomic when a late player component is invalid', () => {
     const owner = new EcsEntityOwner(1, items);
     owner.create({

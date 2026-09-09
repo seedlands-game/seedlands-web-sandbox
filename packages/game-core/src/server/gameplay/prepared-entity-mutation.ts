@@ -20,6 +20,7 @@ export type PreparedWorldItemSpawn = Readonly<{
 
 export type PreparedEntityMutationInput = Readonly<{
   actors?: readonly PreparedActorReplacement[];
+  worldItems?: readonly Readonly<{ reference: EntityLifetimeReference; count: number }>[];
   spawns?: readonly PreparedWorldItemSpawn[];
   despawns?: readonly EntityLifetimeReference[];
 }>;
@@ -64,14 +65,15 @@ function prepareMutation(
 ): PreparedEntityMutation {
   if (!input || typeof input !== 'object') throw new TypeError('Prepared entity mutation input is invalid.');
   const actorInputs = input.actors ?? [];
+  const worldItemInputs = input.worldItems ?? [];
   const spawnInputs = input.spawns ?? [];
   const despawnInputs = input.despawns ?? [];
-  for (const entries of [actorInputs, spawnInputs, despawnInputs])
+  for (const entries of [actorInputs, worldItemInputs, spawnInputs, despawnInputs])
     if (!Array.isArray(entries)) throw new TypeError('Prepared entity mutation entries must be arrays.');
-  const entryCount = actorInputs.length + spawnInputs.length + despawnInputs.length;
+  const entryCount = actorInputs.length + worldItemInputs.length + spawnInputs.length + despawnInputs.length;
   if (!Number.isSafeInteger(entryCount) || entryCount < 1 || entryCount > maxEntries)
     throw new RangeError(`Prepared entity mutation must contain between 1 and ${maxEntries} entries.`);
-  for (const entries of [actorInputs, spawnInputs, despawnInputs]) assertDense(entries);
+  for (const entries of [actorInputs, worldItemInputs, spawnInputs, despawnInputs]) assertDense(entries);
 
   const capturedOwner = host.owner;
   const capturedEpoch = capturedOwner.epoch;
@@ -128,6 +130,17 @@ function prepareMutation(
       position: copyPosition(candidate.position, 'position'),
       physicsVelocity: copyPosition(candidate.physicsVelocity, 'physics velocity'),
     });
+  });
+
+  const worldItems = worldItemInputs.map((candidate) => {
+    const entity = capture(candidate.reference, 'world-item');
+    if (entity.type !== 'world-item' || !entity.stack || !Number.isSafeInteger(candidate.count) || candidate.count <= 0)
+      throw new TypeError('Prepared world-item count is invalid.');
+    host.prepareWorldItem(
+      { type: 'world-item', position: entity.position, stack: { ...entity.stack, count: candidate.count } },
+      entity.id,
+    );
+    return Object.freeze({ id: entity.id, count: candidate.count });
   });
 
   const despawns = despawnInputs.map((reference) => {
@@ -210,6 +223,7 @@ function prepareMutation(
         });
         if (actor.position) host.addToBucket(capturedOwner.get(actor.id)!);
       }
+      for (const item of worldItems) capturedOwner.setStackCount(item.id, item.count);
       for (const despawn of despawns) {
         host.removeFromBucket(despawn.entity);
         capturedOwner.destroy(despawn.id);

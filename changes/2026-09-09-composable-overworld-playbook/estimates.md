@@ -151,3 +151,9 @@ Inventory 纯注册候选实施追加 Sol/high 2.5 小时，合同 SHA-256 `86fd
 方块脚本/恢复集成测试追加 Sol/high 最多 1.5 小时，时钟失败边界独立只读复核追加 Sol/xhigh 最多 1 小时；累计 child 分配上限 53.25/60 小时。当前分配不是实际耗时，账户额度及费用仍未刷新。
 
 方块冻结消费者正确性复核追加 Sol/xhigh 最多 0.75 小时，累计 child 分配上限 54/60 小时；合同 hash `e659595fa3954fb307ba5f59ba25d6a42446c20fc7283568e87eb6e638070141`。仅只读，不把静态、Browser 或复核时长推算成模型实际费用。
+
+S3 脚本 Logic 接线复用 Sol/xhigh 独立 reviewer 作默认开发者身份方案回读，上限 0.5h（合同 `logic-developer-review.json`，SHA `0ca6c63abb6182a03928abe9ff33fdb77e12ee17071c90ca64eabd7520c5239e`）。子任务累计分配上限 54.5/60h；这是调度预算，不是实耗。费率、credits 与实时额度仍 unknown；未新增完整阶段预算。
+
+地面食物纯机制与规则委派 Sol/high，4h 上限；合同 `feeding-pure.json` SHA `41d226611348742917d32c86b96e0388b3b9fb649ba7e2dd8020d3f2dbd4fd0e`。只拥有三个新模块文件与候选测试，root 持有 ECS/Action/host/Pack 写入。累计子任务分配上限 58.5/60h；actual tokens、credits、API-equivalent 与额度占比仍 unknown，不据此宣称实际花费。
+
+Logic 与 Feeding 实际消费者冻结复核分配 Sol/xhigh 只读最多 1.5h，合同 `logic-feeding-review.json` SHA `c152a7ee8d39bd8553ad41b733181221592dabd6a1df010905bf9648dc00be7e`。累计 child 分配上限 60/60h；后续委派前须重估，当前并非实际小时消耗报告。root 验证、Browser 与未完 S3–S6 按既有阶段规划继续，实际计费 unknown。

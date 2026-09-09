@@ -46,14 +46,14 @@ export function createGameplayActorAuthority(
           {
             effect: 'allow',
             principal: { ids: [principalId] },
-            resources: ['seedlands.inventory', 'seedlands.mode', 'seedlands.block-actor'],
+            resources: ['seedlands.inventory', 'seedlands.mode', 'seedlands.block-actor', 'seedlands.feeding-actor'],
             operations: ['read', 'write', 'execute'],
             scope: kind === 'player' ? 'self' : 'any',
           },
           {
             effect: 'allow',
             principal: { ids: [principalId] },
-            resources: ['seedlands.inventory-item', 'seedlands.block-voxel'],
+            resources: ['seedlands.inventory-item', 'seedlands.block-voxel', 'seedlands.feeding-item'],
             operations: ['read', 'execute'],
             scope: 'any',
           },

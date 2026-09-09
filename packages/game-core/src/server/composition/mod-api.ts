@@ -60,3 +60,7 @@ export {
 } from '../gameplay/modules/block-actions-module';
 export { defineBlockRulesModule } from '../gameplay/modules/block-rules-module';
 export * from '../gameplay/modules/block-action-model';
+
+export { defineFeedingActionsModule } from '../gameplay/modules/feeding-actions-module';
+export { defineFeedingRulesModule } from '../gameplay/modules/feeding-rules-module';
+export * from '../gameplay/modules/feeding-model';
