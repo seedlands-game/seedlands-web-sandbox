@@ -1,5 +1,5 @@
 {
-  "basis": "actual provider usage; estimated official peak prices, not billing receipt",
+  "basis": "Complete receipts for earlier runs; final real-browser run passed but line reporter lost in-memory usage attachment. See unaccountedRuns; summary is partial, not total billing.",
   "summary": {
     "flash": {
       "calls": 16,
@@ -234,6 +234,18 @@
         "cacheHitTokens": 0,
         "outputTokens": 68
       }
+    }
+  ],
+  "unaccountedRuns": [
+    {
+      "source": "final-real-browser",
+      "sourceSha": "38771ccac7864b2744c64f6d78a0c3204efc8221",
+      "status": "passed",
+      "flashCallsMin": 2,
+      "flashCallsMax": 6,
+      "exactCalls": null,
+      "usage": null,
+      "note": "No additional provider calls to recover missing metadata."
     }
   ]
 }
