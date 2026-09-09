@@ -60,6 +60,8 @@ JSONL checkpoint 的 Uint16 体素数组采用 `u16le-base64`，Uint8 流体数�
 
 ## Logic、Action、屏障与 trace
 
+浏览器自动 Logic 通过 Authority/Logic 两个 Worker 的直接 MessagePort 往返。主线程负责启动、展示和只读诊断；已加载场景中，渲染线程繁忙不应截断角色的持续身体动作。暂停快进仍逐段等待正式 Logic 回执并执行相同物理，不直接修改位置、库存或行为终态。回档由 Authority 顺序切换通道 epoch，旧候选继续受原有身份、revision 与 200ms 新鲜度约束。
+
 使用 `world.logic({kind:'mode', mode:'scripted'})` 关闭自动算法候选竞争，再通过 `observe` 取得当前 Logic 观察、`submit` 提交批次。切回 automatic 或恢复后旧候选失效。这里是开发观察，不是模型角色的局部感知接口。现有 query-observation/query-pois/query-path 也属于全局开发查询，不能仅凭 self Actor 读取权限使用；A1 会提供真正受感知范围约束的投影。
 
 `world.actions({entityId})` / `{actionId}` 查询真实动作；组合参数必须与实际 owner 一致。动作查询不是无限审计日志：保留活动动作、最近256条终态，以及角色尚未结算的动作引用。旧终态淘汰后，按ID查询沿用资源不可用的统一拒绝；需要长期分析时应及时导出trace或checkpoint。成功、失败、中断来自执行器，不能由调用脚本直接宣称成功。`world.barrier({kind,frontier,timeoutMs})` 绑定有限 frontier：committed、settled 和 checkpoint ACK 分开，超时/旧 epoch 是明确错误；不用 sleep 推断完成。

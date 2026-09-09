@@ -1,0 +1,45 @@
+{
+  "sourceSha": "1a2cfd8ff4e99a58215b3be20e35cf5928e49865",
+  "test": "main-thread-isolation",
+  "condition": "30 x (300ms main busy + 10ms yield)",
+  "control": {
+    "first": {
+      "simulationTime": 0.24779999995231627,
+      "physicsTick": 14,
+      "paused": false,
+      "position": [1.5, 57, 0.5],
+      "hunger": 60,
+      "events": [],
+      "skills": []
+    },
+    "last": {
+      "simulationTime": 9.607200000047683,
+      "physicsTick": 576,
+      "paused": false,
+      "position": [1.9399999999999995, 57, 0.5],
+      "hunger": 61,
+      "events": [
+        {
+          "cursor": 1,
+          "at": 0.3,
+          "type": "activity-started",
+          "nodeId": "hunger-action",
+          "episode": 1
+        }
+      ],
+      "skills": [
+        {
+          "nodeId": "hunger-action",
+          "skill": "satisfy-hunger",
+          "activation": 1,
+          "status": "running",
+          "phase": "moving",
+          "elapsedSeconds": 9.399999999999983,
+          "replanCount": 9,
+          "actionId": "action-1"
+        }
+      ]
+    }
+  },
+  "traceSha256": "b5aa669e3969c7fcb065e7a5adcae599778374bd13fdfc6cfb0b37e3b45d4ac4"
+}
