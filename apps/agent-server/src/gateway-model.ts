@@ -92,7 +92,11 @@ export class GatewayChatModel extends BaseChatModel {
   readonly options: GatewayChatModelOptions;
   private readonly boundTools: readonly unknown[];
 
-  constructor(options: GatewayChatModelOptions, boundTools: readonly unknown[] = []) {
+  constructor(
+    options: GatewayChatModelOptions,
+    boundTools: readonly unknown[] = [],
+    private readonly boundCallOptions: Readonly<Record<string, unknown>> = {},
+  ) {
     super({ ...options, maxRetries: 0 });
     if (!options.baseUrl || !options.apiKey)
       throw new Error('gateway base URL and an explicitly supplied credential are required');
@@ -105,10 +109,10 @@ export class GatewayChatModel extends BaseChatModel {
   }
 
   bindTools(tools: BindToolsInput[], kwargs?: Partial<this['ParsedCallOptions']>) {
-    void kwargs;
     return new GatewayChatModel(
       this.options,
       tools.map((entry) => convertToOpenAITool(entry)),
+      kwargs ?? {},
     );
   }
 
@@ -135,6 +139,12 @@ export class GatewayChatModel extends BaseChatModel {
           messages: messages.map(wireMessage),
           ...(this.boundTools.length ? { tools: this.boundTools } : {}),
           max_tokens: this.options.maxOutputTokens ?? 8192,
+          ...(((options as Record<string, unknown> | undefined)?.tool_choice ?? this.boundCallOptions.tool_choice)
+            ? {
+                tool_choice:
+                  (options as Record<string, unknown> | undefined)?.tool_choice ?? this.boundCallOptions.tool_choice,
+              }
+            : {}),
         }),
         signal: controller?.signal ?? options?.signal,
       });

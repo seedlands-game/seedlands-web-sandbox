@@ -51,6 +51,7 @@ function mockModel(toolCall?: Readonly<{ id: string; name: string; args: Record<
 function fakeWorkspace() {
   const journal: { seq: number; windowId: string; message: unknown }[] = [];
   const manifests: unknown[] = [];
+  const receipts = new Map<string, Record<string, unknown>>();
   let suspended = false;
   const workspace = {
     async readFile(_binding: WorkspaceBinding, path: string) {
@@ -87,7 +88,12 @@ function fakeWorkspace() {
     async recordRequestManifest(_binding: WorkspaceBinding, manifest: unknown) {
       manifests.push(manifest);
     },
-    async recordRequestReceipt() {},
+    async getRequestReceipt(_binding: WorkspaceBinding, id: string) {
+      return receipts.get(id) ?? null;
+    },
+    async recordRequestReceipt(_binding: WorkspaceBinding, id: string, outcome: Record<string, unknown>) {
+      receipts.set(id, outcome);
+    },
     async isCognitionSuspended() {
       return suspended;
     },
@@ -244,10 +250,9 @@ describe('standard resident Agent', () => {
     await expect(agent.compactMemory({ requestId: 'compact-success', hardLimitReached: false })).resolves.toEqual({
       status: 'published',
     });
-    expect(fake.manifests).toHaveLength(2);
+    expect(fake.manifests).toHaveLength(1);
     expect(fake.manifests).toEqual([
       expect.objectContaining({ requestId: 'compact-success:model:1', logicalModel: 'pro' }),
-      expect.objectContaining({ requestId: 'compact-success:model:2', logicalModel: 'pro' }),
     ]);
   });
 });
@@ -323,6 +328,11 @@ describe('resident round budgets and partial journal', () => {
     const messages = fake.journal.map((entry) => entry.message as { _getType(): string; content: unknown });
     expect(messages.map((entry) => entry._getType())).toEqual(['human', 'ai', 'tool']);
     expect(messages.at(-1)?.content).toContain('accepted');
+    await expect(agent.invokeTurn({ requestId: 'partial', message: new HumanMessage('retry') })).rejects.toThrow(
+      'immutable terminal receipt',
+    );
+    expect(world.speak).toHaveBeenCalledOnce();
+    expect(calls).toBe(2);
   });
   it('excludes sealed history from pre-admission and checks a large new tool/environment payload before a call', async () => {
     const fetch = vi.fn(async () => response('unexpected'));
@@ -333,6 +343,8 @@ describe('resident round budgets and partial journal', () => {
     expect((await agent.assessNextTurnBudget(message)).status).toBe('suspend');
     await expect(agent.invokeTurn({ requestId: 'oversize', message })).rejects.toThrow('context budget');
     expect(fetch).not.toHaveBeenCalled();
+    expect(fake.journal).toHaveLength(1);
+    expect((await agent.assessNextTurnBudget(new HumanMessage('still small'))).status).toBe('ready');
   });
   it('admits at most three behavior proposals even when the model keeps submitting', async () => {
     let calls = 0;

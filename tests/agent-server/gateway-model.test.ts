@@ -84,6 +84,25 @@ describe('gateway BaseChatModel', () => {
     expect(fakeFetch).toHaveBeenCalledTimes(2);
   });
 
+  it('preserves bound tool choice and lets explicit invocation options override it', async () => {
+    const bodies: Record<string, unknown>[] = [];
+    const model = createGatewayChatModel({
+      tier: 'pro',
+      baseUrl: 'http://127.0.0.1:9/v1',
+      apiKey: 'fake-local',
+      fetch: async (_url, init) => {
+        bodies.push(JSON.parse(String(init?.body)));
+        return new Response(JSON.stringify({ choices: [{ message: { role: 'assistant', content: 'done' } }] }));
+      },
+    }).bindTools(
+      [{ type: 'function', function: { name: 'publish', parameters: { type: 'object', properties: {} } } }],
+      { tool_choice: 'required' } as never,
+    );
+    await model.invoke([new HumanMessage('publish')]);
+    await model.invoke([new HumanMessage('optional')], { tool_choice: 'auto' } as never);
+    expect(bodies.map((entry) => entry.tool_choice)).toEqual(['required', 'auto']);
+  });
+
   it('preserves malformed tool arguments as invalid tool calls', async () => {
     const model = createGatewayChatModel({
       tier: 'flash',

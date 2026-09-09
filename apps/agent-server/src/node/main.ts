@@ -1,6 +1,7 @@
-import { resolveDeepSeekEndpoint } from '../config.js';
-import { DeepSeekChatCompletionsTransport } from '../deepseek-transport.js';
-import { startAgentServer } from './websocket-host.js';
+import { createGatewayChatModel } from '../gateway-model.js';
+import { ResidentFactory } from '../resident-factory.js';
+import { createPostgresFrameworkPersistence, PersistentNpcWorkspace } from '../workspace/index.js';
+import { startResidentServer } from './resident-host.js';
 
 function parsePort(raw: string | undefined): number {
   if (raw === undefined) return 0;
@@ -9,30 +10,69 @@ function parsePort(raw: string | undefined): number {
   return port;
 }
 
+function gatewayUrl(raw: string | undefined): string | null {
+  if (!raw?.trim()) return null;
+  const value = new URL(raw);
+  if (
+    !['http:', 'https:'].includes(value.protocol) ||
+    !['127.0.0.1', 'localhost', '::1'].includes(value.hostname) ||
+    value.username ||
+    value.password ||
+    value.search ||
+    value.hash
+  )
+    throw new Error('SEEDLANDS_MODEL_GATEWAY_URL must be an exact loopback gateway URL');
+  return value.toString().replace(/\/$/u, '');
+}
+
 const origins = (process.env.SEEDLANDS_ALLOWED_ORIGINS ?? 'http://localhost:5173,http://127.0.0.1:5173')
   .split(',')
   .map((entry) => entry.trim())
   .filter(Boolean);
-const endpoint = resolveDeepSeekEndpoint(process.env);
-const handle = await startAgentServer({
-  model: endpoint ? new DeepSeekChatCompletionsTransport({ endpoint }) : null,
+const connectionString = process.env.SEEDLANDS_COGNITION_DATABASE_URL?.trim();
+if (!connectionString) throw new Error('SEEDLANDS_COGNITION_DATABASE_URL is required');
+const baseUrl = gatewayUrl(process.env.SEEDLANDS_MODEL_GATEWAY_URL);
+const gatewayToken = process.env.SEEDLANDS_MODEL_GATEWAY_TOKEN?.trim();
+if (Boolean(baseUrl) !== Boolean(gatewayToken))
+  throw new Error('SEEDLANDS_MODEL_GATEWAY_URL and SEEDLANDS_MODEL_GATEWAY_TOKEN must be configured together');
+const flash = baseUrl && gatewayToken ? createGatewayChatModel({ tier: 'flash', baseUrl, apiKey: gatewayToken }) : null;
+const pro = baseUrl && gatewayToken ? createGatewayChatModel({ tier: 'pro', baseUrl, apiKey: gatewayToken }) : null;
+
+const workspace = PersistentNpcWorkspace.open({ connectionString });
+await workspace.setup();
+const framework = await createPostgresFrameworkPersistence(connectionString);
+const factory = pro ? ResidentFactory.open({ pro, connectionString }) : null;
+if (factory) await factory.setup();
+const handle = await startResidentServer({
+  workspace,
+  framework,
+  flash,
+  pro,
+  factory: factory ?? undefined,
   allowedOrigins: origins,
   port: parsePort(process.env.AGENT_SERVER_PORT ?? '8787'),
 });
 
 process.stdout.write(
   `${JSON.stringify({
-    kind: 'agent-server-ready',
-    protocolVersion: 1,
+    kind: 'resident-server-ready',
+    protocolVersion: 2,
     url: handle.url,
     pairingToken: handle.pairingToken,
-    modelAvailability: endpoint ? 'available' : 'missing-key',
+    modelAvailability: flash && pro ? 'available' : 'missing-gateway',
   })}\n`,
 );
 
-const stop = async (): Promise<void> => {
-  await handle.close();
-  process.exitCode = 0;
+let stopping: Promise<void> | null = null;
+const stop = (): Promise<void> => {
+  stopping ??= (async () => {
+    await handle.close();
+    await factory?.close();
+    await framework.close();
+    await workspace.close();
+    process.exitCode = 0;
+  })();
+  return stopping;
 };
 process.once('SIGINT', () => void stop());
 process.once('SIGTERM', () => void stop());

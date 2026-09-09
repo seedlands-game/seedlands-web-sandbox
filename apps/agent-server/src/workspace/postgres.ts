@@ -1,15 +1,12 @@
-import {
-  mapChatMessagesToStoredMessages,
-  mapStoredMessagesToChatMessages,
-  type BaseMessage,
-  type StoredMessage,
-} from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import { Pool, type PoolClient } from 'pg';
+import { boundedInteger, canonicalJson, hashJson, integer, iso, jsonValue } from './codec.js';
 import { createWorkspaceNamespace, normalizeWorkspaceBinding } from './namespace.js';
 import { initializeWorkspace } from './initialization.js';
 import { setupWorkspaceSchema } from './schema.js';
 import { exportPortableWorkspace, importPortableWorkspace } from './portable.js';
 import { freezeWorkspace, publishWorkspaceCompaction } from './compaction.js';
+import { appendWorkspaceMessages, getWorkspaceJournal, restoreWorkspaceMessages } from './journal.js';
 import {
   getWorkspaceRuntimeMetadata,
   readWorkspaceEventCoverage,
@@ -49,14 +46,15 @@ type WorkspaceStateRow = {
   cognition_suspended: boolean;
 };
 
-type JournalRow = {
-  seq: string | number;
-  message_id: string;
-  window_id: string;
-  message: StoredMessage;
-  content_hash: string;
-  world_event_range: [number, number] | null;
-  created_at: Date | string;
+type ManifestRow = {
+  logical_model: string;
+  through_journal_seq: string | number;
+  request_payload_ref: string;
+  prefix_ref: string;
+  tool_schema_ref: string;
+  tool_schema_revision: string;
+  model_configuration_revision: string;
+  gateway_audit_ref: string | null;
 };
 
 function assertSchema(schema: string): string {
@@ -64,54 +62,8 @@ function assertSchema(schema: string): string {
   return `"${schema}"`;
 }
 
-function jsonValue(value: unknown): unknown {
-  return JSON.parse(JSON.stringify(value)) as unknown;
-}
-
-function canonicalJson(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
-  if (value && typeof value === 'object') {
-    const object = value as Record<string, unknown>;
-    return `{${Object.keys(object)
-      .sort()
-      .map((key) => `${JSON.stringify(key)}:${canonicalJson(object[key])}`)
-      .join(',')}}`;
-  }
-  return JSON.stringify(value);
-}
-
-async function hashJson(value: unknown): Promise<string> {
-  const bytes = new TextEncoder().encode(canonicalJson(jsonValue(value)));
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
-  return `sha256:${[...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('')}`;
-}
-
-function iso(value: Date | string): string {
-  return value instanceof Date ? value.toISOString() : new Date(value).toISOString();
-}
-
-function integer(value: string | number): number {
-  return typeof value === 'number' ? value : Number.parseInt(value, 10);
-}
-
 function assertPath(path: string): asserts path is WorkspaceFilePath {
   if (!VISIBLE_PATHS.includes(path as WorkspaceFilePath)) throw new Error('workspace path is not visible');
-}
-
-function journalMessage(row: JournalRow): JournalMessage {
-  return {
-    seq: integer(row.seq),
-    messageId: row.message_id,
-    windowId: row.window_id,
-    storedMessage: row.message,
-    contentHash: row.content_hash,
-    worldEventRange: row.world_event_range,
-    createdAt: iso(row.created_at),
-  };
-}
-
-function messageId(message: BaseMessage, fallback: string): string {
-  return message.id && message.id.length > 0 ? message.id : fallback;
 }
 
 export class PersistentNpcWorkspace {
@@ -233,74 +185,24 @@ export class PersistentNpcWorkspace {
     binding: WorkspaceBinding,
     entries: readonly JournalMessageInput[],
   ): Promise<readonly JournalMessage[]> {
-    const namespace = createWorkspaceNamespace(binding);
-    const client = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-      const state = await this.lockedState(client, binding);
-      let next = integer(state.next_journal_seq);
-      const appended: JournalMessage[] = [];
-      for (const entry of entries) {
-        if (!entry.idempotencyKey) throw new Error('journal idempotency key is required');
-        const id = messageId(entry.message, `${state.current_window_id}:${next}`);
-        const serialized = mapChatMessagesToStoredMessages([entry.message])[0];
-        if (!serialized) throw new Error('message serialization failed');
-        const stored: StoredMessage = entry.message.id
-          ? serialized
-          : { ...serialized, data: { ...serialized.data, id } };
-        const storedHash = await hashJson(stored);
-        const result = await client.query<JournalRow>(
-          `INSERT INTO ${this.schemaSql}.journal
-            (namespace,seq,idempotency_key,message_id,window_id,message,content_hash,world_event_range)
-           VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8::jsonb)
-           ON CONFLICT (namespace,idempotency_key) DO UPDATE SET idempotency_key=EXCLUDED.idempotency_key
-           RETURNING seq,message_id,window_id,message,content_hash,world_event_range,created_at`,
-          [
-            namespace,
-            next,
-            entry.idempotencyKey,
-            id,
-            state.current_window_id,
-            JSON.stringify(stored),
-            storedHash,
-            entry.worldEventRange ? JSON.stringify(entry.worldEventRange) : null,
-          ],
-        );
-        const row = result.rows[0];
-        if (!row) throw new Error('journal insert failed');
-        if (row.content_hash !== storedHash) throw new Error('journal idempotency key payload conflict');
-        appended.push(journalMessage(row));
-        if (integer(row.seq) === next) next += 1;
-      }
-      await client.query(
-        `UPDATE ${this.schemaSql}.workspace_state SET next_journal_seq=$2,updated_at=clock_timestamp() WHERE namespace=$1`,
-        [namespace, next],
-      );
-      await client.query('COMMIT');
-      return appended;
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
+    return appendWorkspaceMessages(this.pool, this.schemaSql, binding, entries);
   }
 
   async getJournal(
     binding: WorkspaceBinding,
-    options: Readonly<{ from?: number; through?: number }> = {},
+    options: Readonly<{
+      from?: number;
+      through?: number;
+      windowId?: string;
+      limit?: number;
+      maxUtf8Bytes?: number;
+    }> = {},
   ): Promise<readonly JournalMessage[]> {
-    const namespace = createWorkspaceNamespace(binding);
-    const result = await this.pool.query<JournalRow>(
-      `SELECT seq,message_id,window_id,message,content_hash,world_event_range,created_at
-       FROM ${this.schemaSql}.journal WHERE namespace=$1 AND seq >= $2 AND seq <= $3 ORDER BY seq`,
-      [namespace, options.from ?? 1, options.through ?? Number.MAX_SAFE_INTEGER],
-    );
-    return result.rows.map(journalMessage);
+    return getWorkspaceJournal(this.pool, this.schemaSql, binding, options);
   }
 
   restoreMessages(messages: readonly JournalMessage[]): BaseMessage[] {
-    return mapStoredMessagesToChatMessages(messages.map((entry) => entry.storedMessage));
+    return restoreWorkspaceMessages(messages);
   }
 
   async receiveEvents(binding: WorkspaceBinding, events: readonly WorkspaceEvent[]): Promise<Watermarks> {
@@ -405,6 +307,8 @@ export class PersistentNpcWorkspace {
   }
 
   async recordRequestManifest(binding: WorkspaceBinding, input: RequestManifestInput): Promise<void> {
+    if (!input.requestId || input.requestId.length > 256) throw new Error('request manifest id is invalid');
+    boundedInteger(input.throughJournalSeq, 'request manifest journal boundary', 0, Number.MAX_SAFE_INTEGER);
     const namespace = createWorkspaceNamespace(binding);
     const requestRef = await hashJson(input.requestPayload);
     const prefixRef = await hashJson(input.systemPrefix);
@@ -418,16 +322,21 @@ export class PersistentNpcWorkspace {
         [prefixRef, input.systemPrefix],
         [toolRef, input.toolSchema],
       ] as const) {
-        await client.query(
+        const blob = await client.query<{ payload: unknown }>(
           `INSERT INTO ${this.schemaSql}.immutable_blobs(content_hash,payload) VALUES ($1,$2::jsonb)
-           ON CONFLICT (content_hash) DO NOTHING`,
+           ON CONFLICT (content_hash) DO UPDATE SET content_hash=EXCLUDED.content_hash RETURNING payload`,
           [ref, JSON.stringify(payload)],
         );
+        if (canonicalJson(blob.rows[0]?.payload) !== canonicalJson(jsonValue(payload)))
+          throw new Error('immutable blob hash payload conflict');
       }
-      await client.query(
+      const recorded = await client.query<ManifestRow>(
         `INSERT INTO ${this.schemaSql}.request_manifests
           (namespace,request_id,logical_model,through_journal_seq,request_payload_ref,prefix_ref,tool_schema_ref,tool_schema_revision,model_configuration_revision,gateway_audit_ref)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (namespace,request_id) DO NOTHING`,
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+         ON CONFLICT (namespace,request_id) DO UPDATE SET request_id=EXCLUDED.request_id
+         RETURNING logical_model,through_journal_seq,request_payload_ref,prefix_ref,tool_schema_ref,
+           tool_schema_revision,model_configuration_revision,gateway_audit_ref`,
         [
           namespace,
           input.requestId,
@@ -441,6 +350,19 @@ export class PersistentNpcWorkspace {
           input.gatewayAuditRef ?? null,
         ],
       );
+      const row = recorded.rows[0];
+      if (
+        !row ||
+        row.logical_model !== input.logicalModel ||
+        integer(row.through_journal_seq) !== input.throughJournalSeq ||
+        row.request_payload_ref !== requestRef ||
+        row.prefix_ref !== prefixRef ||
+        row.tool_schema_ref !== toolRef ||
+        row.tool_schema_revision !== input.toolSchemaRevision ||
+        row.model_configuration_revision !== input.modelConfigurationRevision ||
+        row.gateway_audit_ref !== (input.gatewayAuditRef ?? null)
+      )
+        throw new Error('request manifest immutable evidence conflict');
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
@@ -455,12 +377,43 @@ export class PersistentNpcWorkspace {
     requestId: string,
     outcome: Readonly<Record<string, unknown>>,
   ): Promise<void> {
+    if (!requestId || requestId.length > 256) throw new Error('request receipt id is invalid');
     const namespace = createWorkspaceNamespace(binding);
-    await this.pool.query(
-      `INSERT INTO ${this.schemaSql}.request_receipts(namespace,request_id,outcome)
-       VALUES ($1,$2,$3::jsonb) ON CONFLICT (namespace,request_id) DO NOTHING`,
-      [namespace, requestId, JSON.stringify(outcome)],
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await this.lockedState(client, binding);
+      const recorded = await client.query<{ outcome: unknown }>(
+        `INSERT INTO ${this.schemaSql}.request_receipts(namespace,request_id,outcome)
+         VALUES ($1,$2,$3::jsonb)
+         ON CONFLICT (namespace,request_id) DO UPDATE SET request_id=EXCLUDED.request_id RETURNING outcome`,
+        [namespace, requestId, JSON.stringify(outcome)],
+      );
+      if (canonicalJson(recorded.rows[0]?.outcome) !== canonicalJson(jsonValue(outcome)))
+        throw new Error('request receipt immutable outcome conflict');
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /** Trusted pre-admission lookup. A terminal receipt makes the logical request id immutable. */
+  async getRequestReceipt(
+    binding: WorkspaceBinding,
+    requestId: string,
+  ): Promise<Readonly<Record<string, unknown>> | null> {
+    if (!requestId || requestId.length > 256) throw new Error('request receipt id is invalid');
+    const result = await this.pool.query<{ outcome: Readonly<Record<string, unknown>> | null }>(
+      `SELECT r.outcome FROM ${this.schemaSql}.workspace_state s
+       LEFT JOIN ${this.schemaSql}.request_receipts r ON r.namespace=s.namespace AND r.request_id=$2
+       WHERE s.namespace=$1`,
+      [createWorkspaceNamespace(binding), requestId],
     );
+    if (!result.rows[0]) throw new Error('workspace is not initialized');
+    return result.rows[0].outcome;
   }
 
   async freezeForCompaction(binding: WorkspaceBinding): Promise<FrozenCompaction> {
@@ -469,7 +422,7 @@ export class PersistentNpcWorkspace {
       this.schemaSql,
       binding,
       () => this.readFile(binding, '/MEMORY.md', 'memory-editor'),
-      (through) => this.getJournal(binding, { through }),
+      (windowId, through) => this.getJournal(binding, { windowId, through }),
     );
   }
 
@@ -480,12 +433,49 @@ export class PersistentNpcWorkspace {
     return publishWorkspaceCompaction(this.pool, this.schemaSql, binding, draft);
   }
 
-  async markCompactionFailure(binding: WorkspaceBinding, hardLimitReached: boolean): Promise<void> {
-    if (!hardLimitReached) return;
-    await this.pool.query(
-      `UPDATE ${this.schemaSql}.workspace_state SET cognition_suspended=true,updated_at=clock_timestamp() WHERE namespace=$1`,
-      [createWorkspaceNamespace(binding)],
-    );
+  /**
+   * Completes the failure side of freezeForCompaction. Soft failure reopens the exact frozen window;
+   * hard failure keeps it frozen and blocks cognition until a successful publication creates a new window.
+   */
+  async markCompactionFailure(
+    binding: WorkspaceBinding,
+    hardLimitReached: boolean,
+    frozenWindowId?: string,
+  ): Promise<void> {
+    const namespace = createWorkspaceNamespace(binding);
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const state = await this.lockedState(client, binding);
+      const expectedWindowId = frozenWindowId ?? state.current_window_id;
+      if (state.current_window_id !== expectedWindowId) throw new Error('compaction failure window conflict');
+      const window = await client.query<{ status: string }>(
+        `SELECT status FROM ${this.schemaSql}.windows WHERE namespace=$1 AND window_id=$2 FOR UPDATE`,
+        [namespace, expectedWindowId],
+      );
+      if (window.rows[0]?.status !== 'frozen') throw new Error('compaction failure requires the current frozen window');
+      if (hardLimitReached) {
+        await client.query(
+          `UPDATE ${this.schemaSql}.workspace_state
+           SET cognition_suspended=true,updated_at=clock_timestamp() WHERE namespace=$1`,
+          [namespace],
+        );
+      } else {
+        if (state.cognition_suspended) throw new Error('hard-limit compaction failure requires successful publication');
+        await client.query(
+          `UPDATE ${this.schemaSql}.windows
+           SET status='active',frozen_through_journal_seq=NULL,frozen_through_event_cursor=NULL
+           WHERE namespace=$1 AND window_id=$2`,
+          [namespace, expectedWindowId],
+        );
+      }
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async isCognitionSuspended(binding: WorkspaceBinding): Promise<boolean> {
