@@ -113,7 +113,12 @@ export class GameplayRuntime {
 
   spawnAutonomous(input: EntitySpawn, registration: ActorRegistration): GameplayEntity {
     const entity = this.entities.spawn(input);
-    this.simulation.registerActor(entity.id, registration);
+    try {
+      this.simulation.registerActor(entity.id, registration);
+    } catch (cause) {
+      this.entities.despawn(entity.id);
+      throw cause;
+    }
     this.touch();
     return entity;
   }

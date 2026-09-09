@@ -185,12 +185,13 @@ export class CharacterControllerBridge {
       if (this.ready) return this.fail('本机服务重复初始化');
       this.ready = true;
       this.configure(this.fallbackSeconds, this.contextLimit);
+      await this.poll(generation, true);
+      if (generation !== this.generation || !this.ready) return;
       this.options.onState(
         message.modelAvailability === 'available'
           ? { phase: 'ready', message: stateText.ready }
           : { phase: 'fallback', message: '模型暂不可用，伙伴继续基础生活' },
       );
-      await this.poll(generation);
       return;
     }
     if (!this.ready) return this.fail('本机服务尚未完成身份绑定');
@@ -227,7 +228,7 @@ export class CharacterControllerBridge {
     });
   }
 
-  private async poll(generation: number): Promise<void> {
+  private async poll(generation: number, initialize = false): Promise<void> {
     if (generation !== this.generation || !this.port) return;
     try {
       const paused = this.options.paused();
@@ -235,7 +236,7 @@ export class CharacterControllerBridge {
         this.paused = paused;
         this.send({ kind: 'control', command: paused ? 'pause' : 'resume' });
       }
-      if (!paused) {
+      if (!paused || initialize) {
         const result = await this.port.observe(this.cursor);
         if (generation !== this.generation) return;
         if (!result.ok || result.data.kind !== 'observation') return this.fail('角色世界已变化，请重新连接');

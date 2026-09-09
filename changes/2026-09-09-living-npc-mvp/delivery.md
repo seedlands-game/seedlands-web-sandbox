@@ -92,3 +92,9 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 生产修复冻结 `26ea895`，`github-round2-recheck.md` 独立覆盖6个差异文件，确认两条P1解决且无新的具体P0/P1/P2。浏览器两项2/2通过（12.3秒）。首次全量coverage中新增Headless checkpoint测试耗时7.5秒，超过默认5秒而超时；没有断言失败。测试按既有同类30秒截止，并用onTestFinished保证两session清理；生产不变，完整门禁重新执行。
 
 最终本地增量门禁：完整 `pnpm verify:static` 通过（254文件、1238测试通过，4测试跳过），独立 `pnpm build` Web/Agent通过。两项Browser旅程2/2通过（12.3秒）。生产仍为 `26ea895`，后续仅测试截止/清理和交付记录。两轮共8项GitHub发现均已修复并独立复核；远端最终SHA的CI与自动审阅以PR #26检查和最终交接为准。此轮不需要更新长期docs baseline：仅补齐现有事件调度、反射和持久化合同的恢复行为，未扩大产品范围。
+
+## 第三轮边界修复
+
+`0ce2bfc` 的远端CI run `34339142987` 全绿，但自动审阅 `5152979283` 新增4项P1，独立分诊均有效（`round3-triage.md`）。伙伴T与旧时间加速键冲突由真实浏览器复现：显式推进1秒，世界时间增长0.8小时而非正常0.04小时；因此将调试倍率移至Alt+T。重连历史采用首观察基线重建，不再自动重放旧决定；持久目标继续基础执行，后续新事件唤醒。核心补无actionId/危险暂停的follow目标联结，以及Actor注册失败的实体回滚。新验收仍不使用真实provider。
+
+本轮长期docs baseline更新：`living-npc-cognition.md`明确重连历史边界，`developer-world-harness.md`明确互不冲突的玩家交流/调试快捷键；不扩大玩法范围。

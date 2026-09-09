@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "id": "living-npc-round3-world-fix",
+  "role": "world correctness implementer",
+  "workType": "implementation",
+  "goal": "Fix review5152979283 two core P1 at 0ce2bfc3b53e6be179f6d315016972d4be5e1885. 1 validate follow executionTargetId against goal target binding even without actionId, including suspendedGoal during danger; reject inconsistent restored checkpoint atomically, preserve legitimate pending/terminal/forage/idle states. 2 make GameplayRuntime.spawnAutonomous atomic when simulation.registerActor fails after entities.spawn; remove orphan entity, preserve revision and existing actors. Root confirmed spawn call before try and no cleanup in spawnAutonomous. Add meaningful RED/GREEN via corrupted active no-action follow, suspended follow, and actual MAX_RETAINED_ACTORS saturation (bounded fast fixture) with entity/actor/revision counts unchanged; avoid only mock throw test. Root owns UI, host, docs/Git/globalgates. No provider/browser/install/globalformat/commit/push. Only core validation and gameplay-runtime plus focused tests. Report /tmp/living-npc-round3-world-fix.md and freeze. Budget .75h originalpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/server/simulation/character-runtime-validation.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/server/gameplay/gameplay-runtime.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/server/character-control-correctness.test.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/server/character-creation-atomicity.test.ts",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round3-world-fix.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "regression",
+      "check": "Verified findings resolved with meaningful RED/GREEN; no unrelated edits",
+      "evidence": "focused tests and report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.75
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

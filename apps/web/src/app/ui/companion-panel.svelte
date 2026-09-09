@@ -160,7 +160,11 @@
                 maxlength="280"
                 placeholder="一起去找点吃的吧？"
                 onfocus={releaseInput}
-              /><button class="primary" type="submit" disabled={view.busy || !text.trim()}>说话</button>
+              /><button
+                class="primary"
+                type="submit"
+                disabled={view.busy || view.connection.phase === 'connecting' || !text.trim()}>说话</button
+              >
             </div>
           </form>
           <p class="connection" role="status">{view.connection.message}</p>

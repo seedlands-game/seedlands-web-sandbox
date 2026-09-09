@@ -130,4 +130,56 @@ describe('character control correctness', () => {
     server.advanceGameplayRules(0.1);
     expect(server.freezeSaveSnapshot(12).gameplay.simulation.characters?.characters[0]?.actionId).toBeUndefined();
   });
+
+  it('atomically rejects inconsistent active and suspended follow execution targets without actions', async () => {
+    const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'character-follow-link', persistence });
+    server.spawnPlayer({ id: 'player', position: [0.5, 34.6, 0.5] });
+    const created = server.character({ kind: 'create', profile, position: [1.5, 34.6, 0.5] });
+    if (created.kind !== 'created') throw new Error('Character was not created.');
+    const entityId = created.character.entityId;
+    const observed = server.character({ kind: 'observe', entityId });
+    if (observed.kind !== 'observation') throw new Error('Character observation unavailable.');
+    const target = observed.observation.visibleEntities.find((entry) => entry.type === 'player')?.target;
+    if (!target) throw new Error('Player target is unavailable.');
+    server.character({
+      kind: 'intent',
+      entityId,
+      requestId: 'nearby-follow',
+      expectedRevision: 0,
+      goal: { kind: 'follow', target },
+    });
+    server.advanceGameplayRules(0.1);
+    const activeFollow = server.freezeSaveSnapshot(20).gameplay.simulation.characters?.characters[0];
+    expect(activeFollow).toMatchObject({
+      currentGoal: { status: 'active', goal: { kind: 'follow' } },
+      executionTargetId: 'player',
+    });
+    expect(activeFollow?.actionId).toBeUndefined();
+    await server.save(20);
+    await expect(server.restore()).resolves.toBeUndefined();
+
+    const rejectExecutionMismatch = async (sequence: number) => {
+      const before = server.character({ kind: 'inspect', entityId });
+      const corrupt = testCorePlatform.clone(server.freezeSaveSnapshot(sequence));
+      const record = corrupt.gameplay.simulation.characters?.characters[0] as { executionTargetId?: string };
+      record.executionTargetId = 'different-target';
+      persistence.saveFrozenSnapshot(corrupt);
+      await expect(server.restore()).rejects.toThrow(/Invalid gameplay snapshot/);
+      expect(server.character({ kind: 'inspect', entityId })).toEqual(before);
+    };
+    await rejectExecutionMismatch(21);
+
+    expect(server.attackEntity('player', entityId)).toMatchObject({ success: true, damage: 4 });
+    await server.save(22);
+    await expect(server.restore()).resolves.toBeUndefined();
+    const suspendedFollow = server.freezeSaveSnapshot(22).gameplay.simulation.characters?.characters[0];
+    expect(suspendedFollow).toMatchObject({
+      currentGoal: { status: 'suspended', goal: { kind: 'follow' } },
+      suspendedGoal: { status: 'active', goal: { kind: 'follow' } },
+      executionTargetId: 'player',
+    });
+    expect(suspendedFollow?.actionId).toBeUndefined();
+    await rejectExecutionMismatch(23);
+  });
 });
