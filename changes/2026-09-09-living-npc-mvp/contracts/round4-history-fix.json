@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "id": "living-npc-round4-history-fix",
+  "role": "cognition correctness implementer",
+  "workType": "implementation",
+  "goal": "Fix confirmed review5153227643 P1 at22f27f8984f890b011ff8e0903300a576e26baae: Authority returns max32 event page and observation.cursor is page end while character.eventCursor is full head. Current first-page baseline lets later retained pages trigger model. Add immutable per-runtime initial historyThroughCursor from FIRST VALID observation.character.eventCursor; use it for initial lastDecisionCursor and suppress notifications for all event.cursor<=historyThroughCursor, while STILL append subsequent pages to context and advance latestEventCursor by page cursor. Do not chase moving character.eventCursor as newer events arrive. New event above frozen boundary in mixed final history/new page must wake exactly once; fallback must not replay historical pages, including pause/resume. Meaningful RED/GREEN with >=80 retained events, later pages dialogue/attack and a new event during pagination; prove all historical text stays context, initial no calls through fallback, new event exactly one intent. Only apps/agent-server/src/runtime.ts and focused tests/agent-server/round4-history.test.ts; existing tests no semantic weakening. Root owns actual Browser >32 history fixture, docs/Git/fullgates. No provider/browser/install/commit/push/globalformat. .4h originalpool, report and freeze.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/agent-server/src/runtime.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/agent-server/round4-history.test.ts",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round4-history-fix.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "regression",
+      "check": "Verified findings resolved with meaningful RED/GREEN; no unrelated edits",
+      "evidence": "focused tests and report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.4
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

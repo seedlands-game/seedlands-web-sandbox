@@ -1,0 +1,30 @@
+
+Running 1 test using 1 worker
+
+(node:29211) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/1] [chromium] › changes/2026-09-09-living-npc-mvp/e2e/controller-connection.spec.ts:10:1 › 浏览器双向控制经过 Authority 回执，第二轮交谈继续触发，断连保持角色
+  1) [chromium] › changes/2026-09-09-living-npc-mvp/e2e/controller-connection.spec.ts:10:1 › 浏览器双向控制经过 Authority 回执，第二轮交谈继续触发，断连保持角色 
+
+    Error: expect(received).toHaveLength(expected)
+
+    Expected length: 0
+    Received length: 2
+    Received array:  [{"cursor": 64, "goal": "forage"}, {"cursor": 70, "goal": "follow"}]
+
+      94 |     await expect.poll(() => pages.some((entry) => entry.cursor >= historyCursor)).toBe(true);
+      95 |     expect(pages.length).toBeGreaterThanOrEqual(3);
+    > 96 |     expect(calls).toHaveLength(0);
+         |                   ^
+      97 |     await page.getByLabel('和阿岚说句话').fill('先去找些吃的吧。');
+      98 |     await page.getByRole('button', { name: '说话', exact: true }).click();
+      99 |     await expect(page.getByTestId('companion-speech')).toContainText('找点吃的', { timeout: 20_000 });
+        at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/e2e/controller-connection.spec.ts:96:19
+
+    Error Context: test-results/changes-2026-09-09-living--25af6-thority-回执，第二轮交谈继续触发，断连保持角色-chromium/error-context.md
+
+
+  1 failed
+    [chromium] › changes/2026-09-09-living-npc-mvp/e2e/controller-connection.spec.ts:10:1 › 浏览器双向控制经过 Authority 回执，第二轮交谈继续触发，断连保持角色 
