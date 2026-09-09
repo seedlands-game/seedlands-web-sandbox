@@ -79,5 +79,44 @@
     "No 128K-window memory quality benchmark.",
     "Real 60 minute evidence was failed; second run cancelled on user instruction.",
     "World and PG use application checkpoint coordination, not a distributed transaction."
-  ]
+  ],
+  "finalBrowserSuite": {
+    "passed": 3,
+    "skipped": 3,
+    "wallSeconds": 49.6,
+    "skippedReasons": [
+      "real-time diagnostic opt-in",
+      "paid Flash/Pro chain already independently validated",
+      "paid Factory already independently validated"
+    ],
+    "threeDaysOutcomesUnchanged": true
+  },
+  "newbornDialogueRegression": {
+    "deterministicRed": true,
+    "deterministicGreen": true,
+    "browserBefore": {
+      "failed": 2,
+      "runs": 3
+    },
+    "browserAfter": {
+      "passed": 3,
+      "runs": 3,
+      "wallSeconds": 42.4
+    }
+  },
+  "developerHarnessFinal": {
+    "passed": 2,
+    "wallSeconds": 10.2,
+    "rawWorldRestoreInputResumed": true,
+    "diagnostics": true
+  },
+  "finalStatic": {
+    "command": "pnpm verify:static",
+    "passedFiles": 285,
+    "passedTests": 1369,
+    "skippedFiles": 2,
+    "skippedTests": 4,
+    "typecheck": "passed",
+    "build": "passed separately"
+  }
 }

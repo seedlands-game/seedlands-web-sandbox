@@ -38,3 +38,9 @@ A 的三昼夜 Headless 主线与 19 项聚焦检查已通过，60 分钟 Browse
 目前实际供应商调用8次Flash、4次Pro（含2次成功压缩流程调用、一次结构化适配失败、一次未返回tool的Factory失败）。不重复Flash或压缩流程；Factory局部修复后增加最多2次Pro验证，总限12Flash+6Pro。新增最多两个8192输出预算请求，只用于明确失败的结构化出生，不进行长窗口质量评估。实际token账单/credits仍unknown，未读取密钥或购买额度。PG原子批量恢复修复最多2AI小时、浏览器推进修复0.30AI小时均计入原79.2共享上限。
 
 Factory后续两项拒绝已归因：一次后端不支持forced tool_choice（400，不生成），一次LiteLLM未透传标准reasoning_effort（400，provider调用0）。已用正式gateway+fake HTTP provider验证显式allow参数后low透传一次。局部真实验收追加最多2次gateway请求；Pro实际生成预算仍限6次，绝不重跑Flash和压缩。
+
+## 最终验收实际值
+
+真实调用累计8次Flash生成、5次Pro生成，另有2次Pro gateway请求以400拒绝（一次后端拒绝forced tool choice，一次网关拒绝未允许参数且provider调用0）。成功Factory一次Pro：输入2008、输出4707、合计6715 tokens，其中reasoning3981；未获得其余调用完整账单，实际credits/API费用仍unknown，不以token替代计费。实际生成次数未超调整后12Flash+6Pro上限。最终core回归约0.35 agent小时、最后core独立复核分配最多0.5小时，均计入原79.2共享上限。全任务精确agent工时与账户归因不可获取；不把跨任务共享额度差值当作本任务费用。
+
+最后core审阅回填约0.6 agent小时，超过该子项0.5小时估计；超额0.1小时计入父共享缓冲，不隐去。容量与新生对话修复复核另分配最多0.35小时，仍计入原共享预算。

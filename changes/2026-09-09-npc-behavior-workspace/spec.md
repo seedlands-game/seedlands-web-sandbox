@@ -1,6 +1,6 @@
 # NPC 持续行为与持久认知重构
 
-状态：Active，A/B 已通过主要体验验证，C/Factory 与最终工程门禁收口。2026-09-09 用户明确停止旧完善工作，授权实现「评估 NPC Agent 架构改进方案」最终确认方案；本合同将其落地，不再沿旧单目标修补路线。旧 PR #26 转回 draft，基线 2ea8b5cb1e4c27f1acba8ffbd6a36bcd0ab7fa4c 完整保留。独立分支 codex/npc-behavior-workspace。
+状态：Active，A/B/C/Factory 已通过主要体验验证，最终工程门禁与PR收口。2026-09-09 用户明确停止旧完善工作，授权实现「评估 NPC Agent 架构改进方案」最终确认方案；本合同将其落地，不再沿旧单目标修补路线。旧 PR #26 转回 draft，基线 2ea8b5cb1e4c27f1acba8ffbd6a36bcd0ab7fa4c 完整保留。独立分支 codex/npc-behavior-workspace。
 
 ## 需求与技术路线
 
@@ -57,6 +57,12 @@ G：固定 LiteLLM 镜像/版本；flash/pro 标准工具完整多轮与必要�
 
 旧版只有固定goal枚举，无正式树更新/虚拟工作区/无损journal与网关，两秒慢调用连续性测试不能证明A的长期生活。先按E/G取得可执行准入结果，再为A定义失败fixture并实现。原版实际60分钟旅程已完成采样但未通过当时计数断言；原始证据保留。修复版重跑于用户调整验收后主动取消，不记作通过。当前按确定性多日与短浏览器验收。详见 tasks.md / estimates.md；每阶段维护真实状态，不以旧PR绿色工程门禁证明本需求。
 
+## CI 当前合同迁移
+
+旧单目标NPC E2E属于被本方案替代的历史change。CI的伙伴集成步骤改为`pnpm test:npc-behavior`，覆盖当前固定树、三昼夜快进、三角色与PG恢复；真实模型及60分钟诊断必须显式opt-in，不在无凭据CI中调用供应商。旧测试与旧命令保留为Delivered历史，不因旧断言与新单树合同冲突而恢复树外强制安全控制。其他玩家/世界/物理/存档门禁继续保留。
+
+H1回归暴露原始world checkpoint恢复后，伙伴回调重复设置应用输入暂停，world.clock(run)后输入仍锁定。移除伙伴回调对应用暂停的越权写入：Authority checkpoint拥有世界暂停；应用存档导入显式管理自己的UI暂停；伙伴回调只退役认知连接并切换时间线。原始Pointer Lock与WASD断言不改，保留RED失败。
+
 ## Delivery Snapshot
 
-尚未交付。长期baseline将更新为单树持续生活、持久工作区与flash/pro网关；旧单目标合同明确被新合同替代，不修改旧证据来伪装通过。
+实现及当前本地证据见[交付记录](delivery.md)。长期baseline已更新为单树持续生活、持久工作区与flash/pro网关；旧单目标合同明确被新合同替代，不修改旧证据来伪装通过。当前change用例在CI显式执行，尚未提炼为tests/e2e长期基线。PR与人类体验审核状态以交付记录为准。

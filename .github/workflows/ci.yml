@@ -175,14 +175,14 @@ jobs:
             playwright-report/
           if-no-files-found: warn
           retention-days: 7
-      - name: Run living companion integration
-        id: living-npc
-        run: pnpm test:living-npc
-      - name: Preserve living companion evidence
-        if: ${{ always() && steps.living-npc.outcome != 'skipped' }}
+      - name: Run persistent resident integration
+        id: npc-behavior
+        run: pnpm test:npc-behavior
+      - name: Preserve persistent resident evidence
+        if: ${{ always() && steps.npc-behavior.outcome != 'skipped' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: living-npc-${{ github.run_id }}
+          name: npc-behavior-${{ github.run_id }}
           path: |
             test-results/
             playwright-report/
