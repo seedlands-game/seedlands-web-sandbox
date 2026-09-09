@@ -34,6 +34,7 @@ export function createBehaviorRecord(
   goal: CharacterBehaviorRecord['goal'],
   definition: BehaviorDefinition,
   revision = 1,
+  dialogueCursor = 0,
 ): CharacterBehaviorRecord {
   validateBehavior(goal, definition);
   return {
@@ -43,7 +44,9 @@ export function createBehaviorRecord(
     cycle: 0,
     activationSequence: 0,
     skills: [],
-    monitors: [],
+    monitors: behaviorConditionConsumers(definition)
+      .filter((entry) => behaviorConditionContainsDialogue(entry.condition))
+      .map((entry) => ({ nodeId: entry.id, matched: false, episode: 0, version: dialogueCursor })),
   };
 }
 
