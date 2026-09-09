@@ -1,0 +1,62 @@
+$ vitest run tests/server/action-history-retention.test.ts
+7:56:29 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/action-history-retention.test.ts (8 tests | 1 failed) 133ms
+     × preflights exhausted capacity before Autonomy or Character request side effects 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/action-history-retention.test.ts > bounded action completion history > preflights exhausted capacity before Autonomy or Character request side effects
+AssertionError: expected { version: 1, time: +0, …(10) } to deeply equal { version: 1, time: +0, …(10) }
+
+- Expected
++ Received
+
+@@ -1,10 +1,11 @@
+  {
+    "actions": {
+      "actions": [
+        {
+          "actorId": "npc",
++         "endedAt": 0,
+          "id": "action-1",
+          "path": [
+            [
+              0.5,
+              1,
+@@ -30,13 +31,14 @@
+              1,
+              0.5,
+            ],
+          ],
+          "pathIndex": 1,
++         "reason": "replaced",
+          "repathCount": 0,
+          "startedAt": 0,
+-         "status": "running",
++         "status": "interrupted",
+          "targetEntityId": "player",
+          "targetPosition": [
+            4.5,
+            1,
+            0.5,
+
+ ❯ tests/server/action-history-retention.test.ts:101:32
+     99|     const before = runtime.snapshot();
+    100|     expect(() => runtime.startAction('npc', { type: 'idle' })).toThrow…
+    101|     expect(runtime.snapshot()).toEqual(before);
+       |                                ^
+    102|     expect(() =>
+    103|       runtime.characters.execute({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  19:56:29
+   Duration  357ms (transform 128ms, setup 0ms, import 155ms, tests 133ms, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.

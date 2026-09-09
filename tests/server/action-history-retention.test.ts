@@ -91,6 +91,31 @@ describe('bounded action completion history', () => {
     expect(restored.get(older.id)?.status).toBe('succeeded');
   });
 
+  it('preflights exhausted capacity before Autonomy or Character request side effects', () => {
+    const { runtime } = fixture();
+    const snapshot = runtime.snapshot();
+    snapshot.actions.sequence = Number.MAX_SAFE_INTEGER;
+    runtime.restore(snapshot);
+    const before = runtime.snapshot();
+    expect(() => runtime.startAction('npc', { type: 'idle' })).toThrow(/sequence/);
+    expect(runtime.snapshot()).toEqual(before);
+    expect(() =>
+      runtime.characters.execute({
+        kind: 'intent',
+        entityId: 'npc',
+        requestId: 'exhausted',
+        expectedRevision: before.characters!.characters[0]!.revision,
+        goal: { kind: 'move-to', position: [3.5, 1, 0.5] },
+      }),
+    ).toThrow(/sequence/);
+    expect(runtime.snapshot()).toEqual(before);
+    expect(() => runtime.advanceAuthorityRules(2)).not.toThrow();
+    expect(runtime.characters.snapshot().characters[0]!.currentGoal).toMatchObject({
+      status: 'failed',
+      reason: 'action-sequence-exhausted',
+    });
+  });
+
   it('retains active actions and orders a long-running completion by finish time', () => {
     const actions = new ActionRuntime(testCorePlatform.clone);
     const old = actions.start({ actorId: 'npc', type: 'move-to' }, 0);

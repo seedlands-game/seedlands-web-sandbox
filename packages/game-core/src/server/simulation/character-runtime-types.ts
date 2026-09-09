@@ -96,6 +96,7 @@ export type CharacterRuntimeOptions = Readonly<{
   observe: (entityId: string) => PerceptionSnapshot;
   poi: (id: string) => Readonly<{ id: string; kind: string; position: CharacterPositionTuple }> | null;
   action: (id: string) => ActorAction | null;
+  canStartAction: () => boolean;
   startAction: (actorId: string, input: Omit<ActorActionInput, 'actorId'>) => ActorAction;
   markActionRunning: (actionId: string, path: readonly CharacterPositionTuple[]) => ActorAction;
   setActionPathIndex: (actionId: string, pathIndex: number) => void;
