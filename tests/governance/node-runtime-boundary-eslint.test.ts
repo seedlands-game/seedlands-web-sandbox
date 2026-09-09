@@ -7,7 +7,7 @@ const lint = async (source: string, filePath: string) => {
   return result.messages.filter((message) => message.ruleId === 'seedlands/node-platform-boundary');
 };
 
-describe('Node 平台依赖边界', () => {
+describe('退役后的 Node 平台依赖边界', () => {
   it.each([
     'packages/game-core/src/world',
     'packages/game-core/src/physics',
@@ -31,29 +31,8 @@ describe('Node 平台依赖边界', () => {
     const messages = await lint(
       `export const load = () => import('node:worker_threads');
        export const fs = require('fs');`,
-      'packages/game-core/src/server/dedicated/node-boundary-probe.ts',
+      'packages/game-core/src/server/node-boundary-probe.ts',
     );
     expect(messages).toHaveLength(2);
-  });
-
-  it('允许 Node adapter 组合纯服务与平台依赖', async () => {
-    expect(
-      await lint(
-        `import { readFile } from 'node:fs/promises';
-         import { DedicatedServerHost } from '../../server/dedicated/dedicated-server-host';
-         export const dependencies = [readFile, DedicatedServerHost];`,
-        'apps/node-server/src/node/server/node-boundary-probe.ts',
-      ),
-    ).toEqual([]);
-  });
-
-  it('拒绝 Node adapter 反向使用 app、client、DOM 或 Worker global', async () => {
-    const messages = await lint(
-      `import { Game } from '../../app/game';
-       import { Client } from '../../client/authority/browser-authority-client';
-       export const dependencies = [Game, Client, document, self];`,
-      'apps/node-server/src/node/server/node-boundary-probe.ts',
-    );
-    expect(messages).toHaveLength(4);
   });
 });

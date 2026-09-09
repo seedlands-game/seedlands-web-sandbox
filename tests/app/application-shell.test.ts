@@ -43,7 +43,6 @@ const createGame = () =>
     loadLatestWorldSeed: vi.fn(async () => null),
     loadSavedSession: vi.fn(() => null),
     start: vi.fn(async () => undefined),
-    startRemote: vi.fn(async () => undefined),
     prepareMeleeShowcase: vi.fn(async () => undefined),
     abortStart: vi.fn(),
     leaveWorld: vi.fn(async () => undefined),
@@ -135,38 +134,6 @@ describe('ApplicationShell experiment and capability gates', () => {
     application.dispose();
   });
 
-  it('连接取消后的迟到失败不会中止新远端会话', async () => {
-    let rejectFirst!: (error: Error) => void;
-    let resolveSecond!: (value: { seed: string }) => void;
-    const first = new Promise<{ seed: string }>((_resolve, reject) => (rejectFirst = reject));
-    const second = new Promise<{ seed: string }>((resolve) => (resolveSecond = resolve));
-    const game = createGame();
-    vi.mocked(game.startRemote)
-      .mockImplementationOnce(() => first)
-      .mockImplementationOnce(() => second);
-    const bridge = createUiBridge();
-    const application = new ApplicationShell(game, bridge, createAudio(), {
-      preflight: async () => capability(),
-    });
-    await application.initialize();
-
-    const oldConnection = application.connectRemote('ws://127.0.0.1:8787/seedlands', 'old', 'medium');
-    await Promise.resolve();
-    application.controller.cancelStart();
-    const newConnection = application.connectRemote('ws://127.0.0.1:8787/seedlands', 'new', 'medium');
-    await Promise.resolve();
-    rejectFirst(new Error('old connection failed late'));
-    await oldConnection;
-
-    expect(game.abortStart).toHaveBeenCalledOnce();
-    expect(application.controller.state.phase).toBe('loading');
-    resolveSecond({ seed: 'mosslight-68' });
-    await newConnection;
-    expect(application.controller.state.phase).toBe('playing');
-    expect(bridge.shell.get().phase).not.toBe('error');
-    application.dispose();
-  });
-
   it('木剑体验场跨过低核心确认后仍以固定新世界启动并完成布置', async () => {
     const game = createGame();
     const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
@@ -180,40 +147,6 @@ describe('ApplicationShell experiment and capability gates', () => {
 
     expect(game.start).toHaveBeenCalledWith('wood-sword-action-stage-v1', null, 'high', 'new-current');
     expect(game.prepareMeleeShowcase).toHaveBeenCalledOnce();
-    application.dispose();
-  });
-  it('取消的本地体验场迟到完成不能向新的远端会话发送造景命令', async () => {
-    let resolveLocal!: () => void;
-    const game = createGame();
-    vi.mocked(game.start).mockImplementationOnce(
-      () =>
-        new Promise<{ seed: string }>((resolve) => {
-          resolveLocal = () => resolve({ seed: 'wood-sword-action-stage-v1' });
-        }),
-    );
-    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
-      preflight: async () => capability(),
-    });
-    await application.initialize();
-    const oldStart = application.startMeleeShowcase('low');
-    await Promise.resolve();
-    application.controller.cancelStart();
-    await application.connectRemote('ws://127.0.0.1:8787/seedlands', 'synthetic', 'low');
-    resolveLocal();
-    await oldStart;
-    expect(game.prepareMeleeShowcase).not.toHaveBeenCalled();
-    expect(application.controller.state.phase).toBe('playing');
-    application.dispose();
-  });
-  it('从本地体验场连接远端会清除体验场管理面板状态', async () => {
-    const bridge = createUiBridge();
-    const application = new ApplicationShell(createGame(), bridge, createAudio(), {
-      preflight: async () => capability(),
-    });
-    await application.initialize();
-    bridge.publishShell({ experience: 'melee-showcase' });
-    await application.connectRemote('ws://127.0.0.1:8787/seedlands', 'synthetic', 'low');
-    expect(bridge.shell.get().experience).toBeNull();
     application.dispose();
   });
 });

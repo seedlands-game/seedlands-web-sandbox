@@ -15,7 +15,7 @@ const sequence = (value: unknown): number => {
   return canonicalReferenceInteger(value);
 };
 
-/** 参考 DTO 只含 DedicatedServerHost.performAction 的两个实参。 */
+/** 参考 DTO 只含 Authority 动作执行所需的两个实参。 */
 export function projectActionRequestReference(action: AuthorityAction, actionSequence: number): ActionRequestReference {
   return {
     kind: 'action-request-reference',

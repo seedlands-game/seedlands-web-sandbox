@@ -5,13 +5,9 @@ export type ApplicationShellState = Readonly<{
   seed: string;
   quality: ShellQuality;
   error: string;
-  mode: 'local' | 'remote';
-  remoteUrl: string;
-  serverSeed: string;
 }>;
 type GamePort = {
   start: (seed: string, quality: ShellQuality, openMode: WorldOpenMode) => Promise<void>;
-  startRemote: (url: string, accessKey: string, quality: ShellQuality) => Promise<void | { seed: string }>;
   leave: () => Promise<void>;
   pause: (paused: boolean) => void;
   abortStart: () => void;
@@ -27,9 +23,6 @@ export class ShellController {
     seed: '',
     quality: 'medium',
     error: '',
-    mode: 'local',
-    remoteUrl: '',
-    serverSeed: '',
   };
   private transitionSequence = 0;
   private readonly subscribers = new Set<(value: ApplicationShellState) => void>();
@@ -49,27 +42,13 @@ export class ShellController {
   async start(seed: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {
     if (this.value.phase !== 'menu') return;
     const transition = ++this.transitionSequence;
-    this.publish({ phase: 'loading', seed, quality, error: '', mode: 'local', remoteUrl: '', serverSeed: '' });
+    this.publish({ phase: 'loading', seed, quality, error: '' });
     try {
       await this.game.start(seed, quality, openMode);
       if (transition === this.transitionSequence) this.publish({ phase: 'playing' });
     } catch (error) {
       if (transition === this.transitionSequence)
         this.publish({ phase: 'menu', error: this.message(error, '世界未能启动，请重试。') });
-    }
-  }
-
-  async connectRemote(url: string, accessKey: string, quality: ShellQuality) {
-    if (this.value.phase !== 'menu') return;
-    const transition = ++this.transitionSequence;
-    this.publish({ phase: 'loading', quality, error: '', mode: 'remote', remoteUrl: url, serverSeed: '' });
-    try {
-      const remote = await this.game.startRemote(url, accessKey, quality);
-      const serverSeed = remote?.seed ?? '';
-      if (transition === this.transitionSequence) this.publish({ phase: 'playing', seed: serverSeed, serverSeed });
-    } catch (error) {
-      if (transition === this.transitionSequence)
-        this.publish({ phase: 'menu', error: this.message(error, '未能连接 Node，请检查地址和口令。') });
     }
   }
 
@@ -102,7 +81,7 @@ export class ShellController {
     if (this.value.phase !== 'loading') return;
     this.transitionSequence += 1;
     this.game.abortStart();
-    this.publish({ phase: 'menu', error: '已取消连接。' });
+    this.publish({ phase: 'menu', error: '已取消启动。' });
   }
 
   fail(error: unknown) {

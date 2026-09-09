@@ -29,9 +29,7 @@ try {
   const { HeadlessSession } = await moduleRunner.ssrLoadModule(
     '/packages/game-core/src/server/headless/headless-session.ts',
   );
-  const { nodeCorePlatform } = await moduleRunner.ssrLoadModule(
-    '/apps/node-server/src/node/runtime/node-core-platform.ts',
-  );
+  const { nodeCorePlatform } = await moduleRunner.ssrLoadModule('/scripts/headless/node-core-platform.ts');
   const session = await HeadlessSession.create({ seedText: options.seed, platform: nodeCorePlatform });
   const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY && !options.json);
   const lines = createInterface({

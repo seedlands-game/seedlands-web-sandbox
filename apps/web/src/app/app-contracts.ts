@@ -32,7 +32,6 @@ export type WorkerResult = {
   workerGenerationMs?: number;
   workerHaloMs?: number;
   computedHaloRevision?: string;
-  authorityComplete?: true;
   proceduralVoxelSamples?: number;
   macroContextCount?: number;
   canonical?: ArrayBuffer;
