@@ -282,7 +282,7 @@
     margin: 0;
     border: 0;
   }
-  .collision-debug-controls label {
+  #debug .collision-debug-controls label {
     display: flex;
     align-items: center;
     gap: 6px;
