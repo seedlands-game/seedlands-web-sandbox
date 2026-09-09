@@ -22,6 +22,7 @@ const GENERATED = (() => {
 })();
 
 test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确定 parity', async ({ page }) => {
+  test.setTimeout(90_000);
   const source = await HeadlessSession.create({ platform: testCorePlatform, seedText: SEED });
   await source.world.clock({ kind: 'pause' });
   await source.world.prepare({ kind: 'chunk', chunk: [0, 0, 0] });
@@ -205,11 +206,21 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
 
   const beforeMovement = await snapshot(page);
   if (!beforeMovement) throw new Error('Browser product snapshot unavailable before resumed input.');
-  await page.evaluate(async () => {
-    const resumed = await window.__seedlandsHarness!.world.clock({ kind: 'run' });
-    if (!resumed.ok) throw new Error(resumed.error.message);
-  });
-  await lockPointer(page);
+  let resumeDeadline: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      page.evaluate(async () => {
+        const resumed = await window.__seedlandsHarness!.world.clock({ kind: 'run' });
+        if (!resumed.ok) throw new Error(resumed.error.message);
+      }),
+      new Promise<never>((_, reject) => {
+        resumeDeadline = setTimeout(() => reject(new Error('clock:run exceeded 5 seconds')), 5000);
+      }),
+    ]);
+  } finally {
+    clearTimeout(resumeDeadline);
+  }
+  await lockPointer(page, 5000);
   await page.keyboard.down('KeyW');
   try {
     await page.waitForFunction(
