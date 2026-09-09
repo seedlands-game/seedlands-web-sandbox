@@ -1,0 +1,11 @@
+$ vitest run tests/agent-server
+8:35:07 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+
+ Test Files  12 passed (12)
+      Tests  57 passed (57)
+   Start at  20:35:07
+   Duration  772ms (transform 1.07s, setup 0ms, import 4.10s, tests 486ms, environment 1ms)
+

@@ -2,9 +2,16 @@ import type { ActorArchetype } from '../gameplay/entity-store';
 import type { ActionRuntime } from './action-runtime';
 import type { PoiSnapshot } from './poi-registry';
 import type { CombatRuntimeSnapshot } from '../gameplay/combat-runtime';
+import type { CharacterSnapshot } from './character-runtime';
+import type { CharacterGoal } from '../../runtime/character-control-protocol';
 
 export type ActorBehavior =
   'idle' | 'wander' | 'seek-food' | 'flee' | 'chase' | 'attack' | 'routine-home' | 'routine-work';
+
+export type ActorPersistentGoal = Readonly<{
+  kind: CharacterGoal['kind'];
+  status: 'active' | 'suspended';
+}>;
 
 export type ActorState = {
   entityId: string;
@@ -19,6 +26,8 @@ export type ActorState = {
   /** Legacy projection; the combat runtime is the only mutable cooldown owner. */
   attackCooldownSeconds?: number;
   wanderIndex: number;
+  /** Derived Character ownership projection. Restore rebuilds it from the Character record. */
+  persistentGoal?: ActorPersistentGoal;
 };
 
 export type ActorRegistration = {
@@ -41,6 +50,8 @@ export type SimulationSnapshot = {
   pois: PoiSnapshot;
   actions: ReturnType<ActionRuntime['snapshot']>;
   combat?: CombatRuntimeSnapshot;
+  /** Missing in pre-character saves and migrated to an empty character catalog. */
+  characters?: CharacterSnapshot;
 };
 
 export const MAX_RETAINED_ACTORS = 512;
@@ -59,6 +70,7 @@ export const rangeByArchetype: Readonly<Record<ActorArchetype, number>> = {
 export const cloneActor = (actor: ActorState, attackCooldownSeconds?: number): ActorState => {
   const cloned = { ...actor };
   delete cloned.attackCooldownSeconds;
+  delete cloned.persistentGoal;
   return attackCooldownSeconds === undefined ? cloned : { ...cloned, attackCooldownSeconds };
 };
 export const roundSimulation = (value: number) => Math.round(value * 1_000_000) / 1_000_000;

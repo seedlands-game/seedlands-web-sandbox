@@ -26,6 +26,7 @@ import {
   type CombatSnapshot,
   type MeleeDefinition,
 } from '../gameplay/combat-runtime';
+import { CharacterRuntime } from './character-runtime';
 
 export type { ActorBehavior, ActorRegistration, ActorState, SimulationSnapshot } from './actor-state';
 
@@ -37,6 +38,7 @@ type Options = {
   clone: CoreClone;
   combat?: CombatRuntimeCallbacks;
   meleeDefinitions?: readonly MeleeDefinition[];
+  changed?: () => void;
 };
 
 export class AutonomyRuntime {
@@ -45,6 +47,7 @@ export class AutonomyRuntime {
   readonly navigator: GroundNavigator;
   readonly perception: PerceptionRuntime;
   readonly combat: CombatRuntime;
+  readonly characters: CharacterRuntime;
   private readonly actors = new Map<string, ActorState>();
   private time = 0;
   private stepAccumulator = 0;
@@ -61,7 +64,7 @@ export class AutonomyRuntime {
   private actionInterruptionCount = 0;
 
   constructor(private readonly options: Options) {
-    this.actions = new ActionRuntime(options.clone);
+    this.actions = new ActionRuntime(options.clone, () => this.characters.retainedActionIds());
     this.navigator = new GroundNavigator(options.getVoxel);
     this.perception = new PerceptionRuntime({
       entities: options.entities,
@@ -78,6 +81,30 @@ export class AutonomyRuntime {
       },
       options.meleeDefinitions ? createMeleeDefinitionRegistry(options.meleeDefinitions) : undefined,
     );
+    this.characters = new CharacterRuntime({
+      entities: options.entities,
+      now: () => this.time,
+      actor: (entityId) => this.actors.get(entityId) ?? null,
+      observe: (entityId) => this.observe(entityId),
+      poi: (id) => this.pois.get(id),
+      action: (id) => this.actions.get(id),
+      canStartAction: () => this.actions.canStart(),
+      startAction: (actorId, input) => this.startAction(actorId, input),
+      markActionRunning: (actionId, path) => this.actions.markRunning(actionId, path),
+      setActionPathIndex: (actionId, pathIndex) => this.actions.setPathIndex(actionId, pathIndex),
+      plan: (start, target) => this.navigator.plan(start, target),
+      interruptAction: (actorId, reason) => this.interruptAction(actorId, reason),
+      failAction: (actionId, reason) => this.finishFailure(actionId, reason),
+      succeedAction: (actionId, result) => this.finishSuccess(actionId, result),
+      clearDanger: (entityId) => {
+        const actor = this.actors.get(entityId);
+        if (!actor) return;
+        this.interruptAction(entityId, 'danger-cleared');
+        actor.behavior = 'idle';
+        actor.targetEntityId = null;
+      },
+      changed: options.changed ?? (() => undefined),
+    });
   }
 
   registerActor(entityId: string, input: ActorRegistration): ActorState {
@@ -110,6 +137,7 @@ export class AutonomyRuntime {
     if (!actor) return null;
     this.cancelCombat(entityId, reason);
     if (this.actions.interruptActor(entityId, this.time, reason)) this.actionInterruptionCount += 1;
+    this.characters.unregister(entityId, reason);
     this.actors.delete(entityId);
     return actor.archetype === 'grazer'
       ? { itemId: 'berry', count: 2 }
@@ -179,6 +207,7 @@ export class AutonomyRuntime {
 
   startAction(actorId: string, input: Omit<ActorActionInput, 'actorId'>): ActorAction {
     if (!this.actors.has(actorId)) throw new RangeError(`Unknown autonomous actor: ${actorId}`);
+    this.actions.validateStart({ ...input, actorId }, this.time);
     this.interruptAction(actorId, 'replaced');
     return this.actions.start({ ...input, actorId }, this.time);
   }
@@ -202,6 +231,7 @@ export class AutonomyRuntime {
     actor.behavior = 'flee';
     actor.targetEntityId = attackerId;
     this.perception.record(entityId, { type: 'attacked', subjectId: attackerId });
+    this.characters.recordAttacked(entityId, attackerId);
   }
 
   advanceAuthorityRules(seconds: number): void {
@@ -214,6 +244,8 @@ export class AutonomyRuntime {
       this.time = round(this.time + STEP_SECONDS);
       this.needsAccumulator = round(this.needsAccumulator + STEP_SECONDS);
       tickAuthorityActorRules(this.authorityRulesContext(), STEP_SECONDS);
+      this.characters.advance(STEP_SECONDS);
+      this.actions.pruneHistory();
       if (this.needsAccumulator + Number.EPSILON >= 5) {
         this.needsAccumulator = round(this.needsAccumulator - 5);
         this.actors.forEach((actor) => (actor.hunger = round(Math.min(100, actor.hunger + 1))));
@@ -230,10 +262,14 @@ export class AutonomyRuntime {
       perceptionAccumulator: this.perceptionAccumulator,
       behaviorAccumulator: this.behaviorAccumulator,
       starterEcologyVersion: this.starterVersion,
-      actors: this.queryActors(),
+      actors: this.queryActors().map((actor) => {
+        const persistentGoal = this.characters.persistentGoalFor(actor.entityId);
+        return persistentGoal ? { ...actor, persistentGoal } : actor;
+      }),
       pois: this.pois.snapshot(),
       actions: this.actions.snapshot(),
       combat: this.combat.snapshot(),
+      characters: this.characters.snapshot(),
     };
   }
 
@@ -265,7 +301,7 @@ export class AutonomyRuntime {
       }
       this.validateCombatActionLinks(snapshot, restored);
       this.pois.restore(snapshot.pois);
-      this.actions.restore(snapshot.actions);
+      this.actions.restore(snapshot.actions, { deferPruning: true });
       this.actors.clear();
       restored.forEach((actor, id) => this.actors.set(id, actor));
       this.time = snapshot.time;
@@ -275,6 +311,7 @@ export class AutonomyRuntime {
       this.behaviorAccumulator = snapshot.behaviorAccumulator;
       this.starterVersion = snapshot.starterEcologyVersion;
       this.combat.restore(snapshot.combat ?? emptyCombatRuntimeSnapshot());
+      this.characters.restore(snapshot.characters);
       if (!snapshot.combat) {
         for (const actorId of restored.keys()) {
           const action = this.actions.forActor(actorId);
@@ -283,6 +320,7 @@ export class AutonomyRuntime {
         }
       }
       this.reconcileCombatEvents();
+      this.actions.pruneHistory();
     } catch (error) {
       throw new Error(`Invalid simulation snapshot: ${error instanceof Error ? error.message : String(error)}`, {
         cause: error,
@@ -349,6 +387,12 @@ export class AutonomyRuntime {
       !Number.isInteger(actor.wanderIndex)
     )
       throw new TypeError('actor fields are invalid');
+    if (
+      actor.persistentGoal &&
+      (!['idle', 'forage', 'follow', 'return-home', 'move-to'].includes(actor.persistentGoal.kind) ||
+        !['active', 'suspended'].includes(actor.persistentGoal.status))
+    )
+      throw new TypeError('actor persistent goal projection is invalid');
   }
 
   private validateCombatActionLinks(snapshot: SimulationSnapshot, actors: ReadonlyMap<string, ActorState>): void {

@@ -124,11 +124,19 @@ TTY 进入持续 JavaScript REPL，公开 `world`，支持 top-level await；`.c
 
 无头 Harness 使用进程内存持久化。`/save` 会真实经过 Chunk 与 gameplay snapshot 的 persistence boundary，并可在同一进程的重载测试中恢复；进程退出后不会生成持久世界文件。
 
+## 浏览器伙伴
+
+运行 `pnpm dev` 并进入世界，按 T 或点右侧“结识旅伴”邀请阿岚。伙伴拥有自己的身体、行囊与目标，可以在没有模型连接时进行基础活动。展开面板可以交谈、查看当前打算和思考状态。
+
+另开终端运行 `pnpm agent:dev`。本机服务从进程环境读取 `DEEPSEEK_API_KEY`，或复用成对的 `MIDSCENE_MODEL_API_KEY` / `MIDSCENE_MODEL_BASE_URL`；不会读取 `.env`。将终端输出的服务地址与临时配对码填入伙伴的“思考设置”，API key 不进入网页。默认本机地址为 `ws://127.0.0.1:8787`；`AGENT_SERVER_PORT` 可覆盖端口，`SEEDLANDS_ALLOWED_ORIGINS` 配置允许的完整浏览器 origin（默认 localhost/127.0.0.1:5173）。
+
+Flash Vision 仅使用文本，重要事件可以提前唤醒，滑杆设置1–10分钟的时间兜底。Pro仅在上下文需要压缩时整理记忆。初始128K，可选256K；设置是容量上限，不会每轮主动填满。断开后继续基础行为；重连通过持久摘要与近期事件重建认知，不恢复服务退出前的完整私有 Flash 历史。详见[认知与记忆边界](docs/living-npc-cognition.md)。
+
 ## Node 研究归档
 
 Node Dedicated Server 已在完成 MVP 研究后从活跃产品和强制门禁退出。历史版本固定为 `archive/node-dedicated-mvp-2026-09-09`，恢复方式见[归档索引](docs/change-archive.md#node-dedicated-server-研究归档)。后续不承诺兼容或持续编译运行。
 
-当前产品以浏览器单人世界为中心，详细边界见[产品定位](docs/product-positioning.md)。共享世界端口和持续 REPL 作为开发工具交付；模型 NPC MVP 仍是下一阶段。
+当前产品以浏览器单人世界为中心，详细边界见[产品定位](docs/product-positioning.md)。共享世界端口和持续 REPL 作为开发工具交付；浏览器单 NPC 认知接入见下节，当前交付边界与证据见[本期记录](changes/2026-09-09-living-npc-mvp/spec.md)。
 
 ## 架构
 

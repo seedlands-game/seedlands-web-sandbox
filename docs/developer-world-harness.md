@@ -62,7 +62,7 @@ JSONL checkpoint 的 Uint16 体素数组采用 `u16le-base64`，Uint8 流体数�
 
 使用 `world.logic({kind:'mode', mode:'scripted'})` 关闭自动算法候选竞争，再通过 `observe` 取得当前 Logic 观察、`submit` 提交批次。切回 automatic 或恢复后旧候选失效。这里是开发观察，不是模型角色的局部感知接口。现有 query-observation/query-pois/query-path 也属于全局开发查询，不能仅凭 self Actor 读取权限使用；A1 会提供真正受感知范围约束的投影。
 
-`world.actions({entityId})` / `{actionId}` 查询真实动作；组合参数必须与实际 owner 一致。成功、失败、中断来自执行器，不能由调用脚本直接宣称成功。`world.barrier({kind,frontier,timeoutMs})` 绑定有限 frontier：committed、settled 和 checkpoint ACK 分开，超时/旧 epoch 是明确错误；不用 sleep 推断完成。
+`world.actions({entityId})` / `{actionId}` 查询真实动作；组合参数必须与实际 owner 一致。动作查询不是无限审计日志：保留活动动作、最近256条终态，以及角色尚未结算的动作引用。旧终态淘汰后，按ID查询沿用资源不可用的统一拒绝；需要长期分析时应及时导出trace或checkpoint。成功、失败、中断来自执行器，不能由调用脚本直接宣称成功。`world.barrier({kind,frontier,timeoutMs})` 绑定有限 frontier：committed、settled 和 checkpoint ACK 分开，超时/旧 epoch 是明确错误；不用 sleep 推断完成。
 
 `world.trace({kind:'read',limit:64})` 读取有界开发操作 trace，`export` 导出 JSONL。当前 trace 描述 Harness 操作及提交引用，不是未来角色认知日志，也不是所有世界事件的永久档案。长期 Agent 的因果事件 ledger 在 A1/A2 单独实现。
 
@@ -73,6 +73,8 @@ JSONL checkpoint 的 Uint16 体素数组采用 `u16le-base64`，Uint8 流体数�
 权限配置不改变世界规则。允许执行拾取/攻击等交互，不等于允许瞬移、直接 patch 体素或获取隐藏信息。当前开发 inspect 是全局工具；面向普通 Actor 的字段投影、感知目标引用和认知资源在 A1 增加，不能提前对模型开放整个开发端口。
 
 ## F3 运行诊断
+
+游玩时 T 打开伙伴交流；调试昼夜倍率使用 Alt+T（1×/20×/100×循环），P 切换昼夜暂停。调试时间倍率不与伙伴交流共用按键。
 
 F3 打开分类仪表板并释放 Pointer Lock，世界继续正常运行；单击世界恢复操控。六类为概览、世界、调度、渲染、Wasm、内存，支持紧凑布局和滚动；碰撞箱、接触点、传感器与旧地理信息保留在折叠区。
 

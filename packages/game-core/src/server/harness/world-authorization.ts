@@ -9,6 +9,7 @@ export type WorldResource =
   | 'world.chunk'
   | 'world.entity'
   | 'world.actor'
+  | 'world.character'
   | 'world.prepare'
   | 'world.command'
   | 'world.clock'

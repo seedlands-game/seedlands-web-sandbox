@@ -31,6 +31,7 @@ import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 import type { AuthorityRuntimeOptions } from './authority-runtime-options';
 import { AuthorityLogicCandidates } from './authority-logic-candidates';
 import { acceptLogicIntentBatch } from './authority-logic-intent-acceptance';
+import type { CharacterControlRequest, CharacterControlResult } from '../../runtime/character-control-protocol';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -426,6 +427,13 @@ export class AuthorityRuntime {
     }).execute(source, command);
     if (result.success && result.commit?.committed) this.recordWorldCommit(result.commit);
     if (command.type !== 'advance-gameplay') this.commitIfServerChanged(before);
+    return result;
+  }
+
+  character(request: CharacterControlRequest): CharacterControlResult {
+    const before = this.serverStateVersion();
+    const result = this.server.character(request);
+    this.commitIfServerChanged(before);
     return result;
   }
 

@@ -1,0 +1,85 @@
+$ pnpm ssg:check && pnpm format:check && pnpm lint && pnpm lint:paths && pnpm test:coverage && pnpm typecheck
+$ pnpm --filter @seedlands/web ssg:check
+$ node scripts/render-prerendered-start-screen.mjs --check
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+$ eslint .
+$ ls-lint
+$ vitest run --coverage
+8:31:23 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+      Coverage enabled with v8
+
+ ❯ tests/client/browser-character-authority.test.ts (4 tests | 1 failed) 18337ms
+     × invalidates an existing binding when its character dies and retains terminal identity 5914ms
+拒绝覆盖已存在的恢复目录：restored/first-batch
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+只可归档明确 Delivered 的 change：changes/2026-09-01-example
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+运行入口仍引用 changes/2026-09-01-example：package.json
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+changes 路径必须位于仓库内：../outside
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+拒绝覆盖已存在的 ZIP：archives/changes/existing.zip
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+拒绝符号链接路径：changes
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+ZIP 只接受常规文件：/var/folders/bt/s2j98jm12_d5yylsv3vx8znh0000gn/T/seedlands-change-archive-yFA1TA/archives/changes/symlink.zip
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+ZIP 只接受常规文件：/var/folders/bt/s2j98jm12_d5yylsv3vx8znh0000gn/T/seedlands-change-archive-yFA1TA/archives/changes/symlink.zip
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+ZIP manifest 条目无效：changes/2026-09-01-example/spec.md
+用法：
+  node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
+  node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/client/browser-character-authority.test.ts > Browser character authority > invalidates an existing binding when its character dies and retains terminal identity
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/client/browser-character-authority.test.ts:131:3
+    129|   });
+    130|
+    131|   it('invalidates an existing binding when its character dies and reta…
+       |   ^
+    132|     const session = await HeadlessSession.create({ platform: testCoreP…
+    133|     const authority = new BrowserCharacterAuthority({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 258 passed | 2 skipped (261)
+      Tests  1 failed | 1266 passed | 4 skipped (1271)
+   Start at  20:31:23
+   Duration  67.91s (transform 15.43s, setup 0ms, import 46.95s, tests 559.41s, environment 31ms)
+
+[ELIFECYCLE] Command failed with exit code 1.
+[ELIFECYCLE] Command failed with exit code 1.

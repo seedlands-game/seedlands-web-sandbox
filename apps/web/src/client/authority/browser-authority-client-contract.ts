@@ -13,6 +13,30 @@ import type { SerializedChunkSnapshot } from '../persistence/browser-chunk-persi
 import type { AuthorityTransportFaults } from './authority-transport';
 import type { provideAuthorityBootstrap } from './authority-bootstrap-client';
 import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type {
+  CharacterControlResult,
+  CharacterGoal,
+  ControlBinding,
+} from '@seedlands/game-core/runtime/character-control-protocol';
+import type { WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
+
+export type BoundCharacterControlPort = Readonly<{
+  binding: ControlBinding;
+  observe(sinceCursor?: number): Promise<WorldHarnessResult<CharacterControlResult>>;
+  intent(
+    requestId: string,
+    expectedRevision: number,
+    expectedCursor: number,
+    goal: CharacterGoal,
+    say?: string,
+  ): Promise<WorldHarnessResult<CharacterControlResult>>;
+  memory(
+    expectedMemoryRevision: number,
+    throughCursor: number,
+    summary: string,
+  ): Promise<WorldHarnessResult<CharacterControlResult>>;
+  dispose(): Promise<void>;
+}>;
 
 export type AuthorityWorkerPort = {
   onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null;

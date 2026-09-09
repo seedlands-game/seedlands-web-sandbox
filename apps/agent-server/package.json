@@ -1,0 +1,33 @@
+{
+  "name": "@seedlands/agent-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts",
+    "./websocket-host": "./src/node/websocket-host.ts"
+  },
+  "scripts": {
+    "build": "pnpm exec esbuild src/node/main.ts --bundle --platform=node --format=esm --external:@langchain/* --external:ws --outfile=dist/main.js",
+    "start": "node dist/main.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "pnpm --dir ../.. exec vitest run tests/agent-server"
+  },
+  "dependencies": {
+    "@langchain/langgraph": "1.4.14",
+    "@seedlands/game-core": "workspace:*",
+    "ws": "^8.18.3",
+    "@seedlands/cognition-protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "26.4.1",
+    "@types/ws": "^8.18.1",
+    "esbuild": "0.28.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

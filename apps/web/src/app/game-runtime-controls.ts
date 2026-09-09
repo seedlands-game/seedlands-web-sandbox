@@ -1,3 +1,4 @@
+import { releasePointerLock } from './player/pointer-lock';
 import type { MapLayer } from './ui/ui-contracts';
 import type { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
@@ -59,4 +60,16 @@ export function toggleMap(
     mapCenter: [position.x, position.z],
     mapRevision: shell.mapRevision + 1,
   });
+}
+
+export function publishDebugVisibility(
+  uiBridge: UiBridge,
+  controller: { releaseInput(): void } | null,
+  visible: boolean,
+): void {
+  if (visible) {
+    controller?.releaseInput();
+    releasePointerLock();
+  }
+  uiBridge.publishDebug({ visible });
 }
