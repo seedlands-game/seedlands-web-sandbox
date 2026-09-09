@@ -412,9 +412,9 @@ export class CharacterRuntime {
       if (record.targetSequence >= Number.MAX_SAFE_INTEGER)
         throw new TypeError('Character target sequence is exhausted.');
       if (record.targets.length >= CHARACTER_MAX_TARGETS) {
-        protectedTargets ??= this.protectedTargets(record);
+        const retainedTargets = protectedTargets ?? this.protectedTargets(record);
         const evicted = record.targets.findIndex(
-          (candidate) => !protectedTargets.has(`${candidate.kind}:${candidate.targetId}`),
+          (candidate) => !retainedTargets.has(`${candidate.kind}:${candidate.targetId}`),
         );
         record.targets.splice(evicted < 0 ? 0 : evicted, 1);
       }
