@@ -105,6 +105,10 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
       const roundTripCheckpoint = await world.checkpoint({ kind: 'export' });
       if (!roundTripCheckpoint.ok || !roundTripCheckpoint.data.snapshot)
         throw new Error('Browser round-trip checkpoint unavailable.');
+      // Runtime ticks are epoch-local; compare both hosts after the same restore lifecycle.
+      const roundTripRestore = await world.checkpoint({ kind: 'restore', snapshot: roundTripCheckpoint.data.snapshot });
+      if (!roundTripRestore.ok) throw new Error(`Browser re-restore failed: ${JSON.stringify(roundTripRestore)}`);
+      await world.logic({ kind: 'mode', mode: 'scripted' });
       const roundTripAdvance = await world.clock({ kind: 'advance', elapsedMs: 100 });
       const roundTripVoxel = await world.inspect({ kind: 'voxel', position: edited });
       const roundTripActor = await world.inspect({ kind: 'actor', entityId: 'parity-actor' });

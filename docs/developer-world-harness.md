@@ -56,7 +56,7 @@ JSONL 请求示例：
 
 JSONL checkpoint 的 Uint16 体素数组采用 `u16le-base64`，Uint8 流体数组采用 `u8-base64`，带 byteLength；恢复严格验证类型、容量和 canonical base64，再交 core 校验完整 snapshot。不能用普通 JSON.stringify 的数字键对象替代 typed array。进程内与 Browser MessagePort 保持原生 typed arrays。
 
-保存格式仍是既有 `FrozenGameSaveSnapshot`，没有 SDK/模型专属字段。当前 export 先冻结 snapshot，再等待宿主 persistence adapter 的保存回执，成功后返回完整包并推进 checkpoint ACK；浏览器对应 IndexedDB，Headless 对应内存适配。它不自动生成磁盘文件；Headless 要跨进程持久保留需另存返回的完整包。浏览器恢复需要通过候选验证并替换完整保存集合，不能把目标世界旧的额外 Chunk 拼进源 snapshot。
+保存格式仍是既有 `FrozenGameSaveSnapshot`，没有 SDK/模型专属字段。恢复会创建新的运行 epoch，physics tick 从新会话开始，activation 产生新的提交；旧 epoch 的运行 tick 不写入当前存档，跨宿主一致性比较应让双方从同一 snapshot 恢复后再推进。当前 export 先冻结 snapshot，再等待宿主 persistence adapter 的保存回执，成功后返回完整包并推进 checkpoint ACK；浏览器对应 IndexedDB，Headless 对应内存适配。它不自动生成磁盘文件；Headless 要跨进程持久保留需另存返回的完整包。浏览器恢复需要通过候选验证并替换完整保存集合，不能把目标世界旧的额外 Chunk 拼进源 snapshot。
 
 ## Logic、Action、屏障与 trace
 
