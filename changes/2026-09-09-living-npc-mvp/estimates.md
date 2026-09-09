@@ -31,3 +31,5 @@ GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，li
 动作历史增量由Root实现；被中止的子任务没有文件输出，实际计费unknown。新增5项回归，工时沿用原共享池；无provider、购买或reset。
 
 动作历史最终窄复核约0.12 agent小时；完整静态1253测试、Web/Agent构建和2项Browser均通过，未新增provider调用。实际任务credits/API等价仍unknown。
+
+第六轮容量预检继续在原共享工时池内完成，两次独立窄复核成本见对应报告；最终1255测试与独立build通过。未新增provider、购买或reset；任务级实际credits仍unknown。
