@@ -348,7 +348,6 @@ export class CompanionSession {
     this.timelineMustFork = true;
     this.forkedTimeline = crypto.randomUUID();
     if (this.worldId) this.timelines.select(this.worldId, this.forkedTimeline);
-    this.changePause(true);
     this.controller.disconnect();
     this.bound.clear();
     this.statuses.clear();

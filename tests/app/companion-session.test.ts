@@ -30,8 +30,24 @@ const character: CharacterState = {
   memory: { revision: 0, summary: '', throughCursor: 0 },
   eventCursor: 10,
 };
-afterEach(() => vi.useRealTimers());
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+});
 describe('companion UI session lifecycle', () => {
+  it('retires cognition after a raw world restore without acquiring a second input pause owner', () => {
+    vi.stubGlobal('localStorage', { getItem: () => null, setItem: vi.fn(), removeItem: vi.fn() });
+    const changePause = vi.fn();
+    const session = new CompanionSession(
+      () => null,
+      () => false,
+      changePause,
+    );
+    session.worldRestored('restored-world');
+    expect(changePause).not.toHaveBeenCalled();
+    expect(session.get().connection.phase).toBe('disconnected');
+    session.stop();
+  });
   it('keeps a saved identity and requests recent events; releases a binding that arrives after world exit', async () => {
     vi.useFakeTimers();
     let bind!: (port: BoundCharacterControlPort) => void;

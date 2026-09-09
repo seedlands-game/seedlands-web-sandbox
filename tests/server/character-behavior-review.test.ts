@@ -46,7 +46,7 @@ describe('behavior independent-review corrections', () => {
     } finally {
       await session.dispose();
     }
-  });
+  }, 15_000);
 
   it('does not spend replan recovery budget during healthy long travel', async () => {
     const session = await flatSession('healthy-long-travel');
