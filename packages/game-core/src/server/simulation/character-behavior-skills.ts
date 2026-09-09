@@ -247,8 +247,14 @@ export class CharacterBehaviorSkills {
     execution.phase = 'moving';
     const changed = !execution.targetPosition || distance(execution.targetPosition, target) > 0.25;
     const due = execution.elapsedSeconds >= (execution.replanCount + 1) * REPLAN_SECONDS;
-    if (existing && !changed && !due) return this.advanceWaypoint(existing, entity);
-    if (execution.replanCount >= maxReplans) return this.finish(record, execution, 'failed', 'replan-limit');
+    if (existing && !changed) {
+      this.advanceWaypoint(existing, entity);
+      existing = this.options.action(existing.id);
+      const progressing = distance(entity.position, record.lastPosition) > 0.05;
+      if (!due || progressing) return;
+    }
+    if (existing && execution.replanCount >= maxReplans)
+      return this.finish(record, execution, 'failed', 'replan-limit');
     const plan = this.options.plan(entity.position, target);
     if (plan.status !== 'reached') {
       execution.replanCount += 1;
@@ -372,10 +378,16 @@ export class CharacterBehaviorSkills {
     return hour >= 6 && hour < 18;
   }
 
-  condition(record: CharacterRecord, condition: BehaviorCondition): boolean {
-    if ('all' in condition) return condition.all.every((entry) => this.condition(record, entry));
-    if ('any' in condition) return condition.any.some((entry) => this.condition(record, entry));
-    if ('not' in condition) return !this.condition(record, condition.not);
+  condition(record: CharacterRecord, condition: BehaviorCondition, dialogueAfterCursor = 0): boolean {
+    if ('all' in condition) {
+      const values = condition.all.map((entry) => this.condition(record, entry, dialogueAfterCursor));
+      return values.every(Boolean);
+    }
+    if ('any' in condition) {
+      const values = condition.any.map((entry) => this.condition(record, entry, dialogueAfterCursor));
+      return values.some(Boolean);
+    }
+    if ('not' in condition) return !this.condition(record, condition.not, dialogueAfterCursor);
     const args = behaviorArgs(condition.args);
     const actor = this.options.actor(record.entityId);
     const entity = this.options.entities.get(record.entityId);
@@ -385,7 +397,7 @@ export class CharacterBehaviorSkills {
       case 'threat-visible':
         return Boolean(this.threat(record));
       case 'dialogue-received':
-        return record.events.some((event) => event.type === 'dialogue-heard');
+        return record.events.some((event) => event.type === 'dialogue-heard' && event.cursor > dialogueAfterCursor);
       case 'hunger-at-least':
         return Boolean(actor && actor.hunger >= numberArg(args, 'value', 0));
       case 'hunger-at-most':
