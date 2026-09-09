@@ -9,6 +9,10 @@ import { parseSlashCommand } from '../../packages/game-core/src/server/commands/
 import { GameServer } from '../../packages/game-core/src/server/game-server';
 import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
 import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
+import {
+  WorldResourceAuthorizer,
+  commandAuthorizationRequests,
+} from '../../packages/game-core/src/server/harness/world-authorization';
 
 const admin = {
   actorId: 'headless-admin',
@@ -22,7 +26,29 @@ describe('gameplay command boundary', () => {
     const server = new GameServer({ platform: testCorePlatform, seedText: 'gameplay-command' });
     server.spawnPlayer({ id: 'player-1', position: [0, 34, 0] });
     server.spawnPlayer({ id: 'player-2', position: [2, 34, 0] });
-    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
+    const authorization = new WorldResourceAuthorizer({
+      principals: [
+        { id: admin.actorId, boundEntityId: admin.entityId },
+        { id: 'player-1', boundEntityId: 'player-1' },
+      ],
+      rules: [
+        { effect: 'allow', principal: { ids: [admin.actorId] }, resources: ['*'], operations: ['*'], scope: 'any' },
+        {
+          effect: 'allow',
+          principal: { ids: ['player-1'] },
+          resources: ['world.entity', 'world.action'],
+          operations: ['read', 'execute', 'write'],
+          scope: 'self',
+        },
+      ],
+    });
+    const executor = new ServerCommandExecutor(server, {
+      now: testCorePlatform.now,
+      authorize: (source, command) =>
+        commandAuthorizationRequests(source, command, (actionId) => server.getAction(actionId)?.actorId ?? null).every(
+          (request) => authorization.authorize(source.actorId, request).allowed,
+        ),
+    });
 
     expect(
       await executor.execute(admin, { type: 'give-item', entityId: 'player-1', itemId: ItemIds.WoodBlock, count: 2 }),

@@ -27,7 +27,7 @@ import {
   type WorldAuthorizationRequest,
   type WorldPrincipal,
 } from './world-authorization';
-import { integerTuple } from './world-harness-validation';
+import { integerTuple, validateWorldLogicRequest } from './world-harness-validation';
 import { WorldBarrierRuntime } from './world-barrier-runtime';
 import { WorldCheckpointRuntime, WorldOperationFailure, WorldTraceRuntime } from './world-harness-state';
 import {
@@ -291,8 +291,7 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
   logic(request: WorldLogicRequest) {
     return this.run(
       () => {
-        if (!request || typeof request !== 'object' || !['mode', 'observe', 'submit'].includes(request.kind))
-          throw new TypeError('World Logic request is invalid.');
+        validateWorldLogicRequest(request);
         return {
           name: `logic:${request.kind}`,
           authorization: authorizationRequest(

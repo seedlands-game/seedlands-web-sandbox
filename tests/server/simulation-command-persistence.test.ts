@@ -91,6 +91,23 @@ describe('simulation commands and persistence', () => {
     });
   });
 
+  it('bounds global developer observation, POI and path queries', async () => {
+    const server = new GameServer({ platform: testCorePlatform, seedText: 'bounded-developer-query' });
+    server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
+    const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
+
+    for (const command of [
+      { type: 'query-observation', range: 257 },
+      { type: 'query-pois', radius: 257 },
+      { type: 'query-path', position: [257, 1, 0.5] },
+    ] as const) {
+      await expect(executor.execute(developer, command)).resolves.toMatchObject({
+        success: false,
+        error: { kind: 'execution' },
+      });
+    }
+  });
+
   it('roundtrips V2 actor, POI, action and world time without duplicate starter content', async () => {
     const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
     const server = new GameServer({ platform: testCorePlatform, seedText: 'simulation-save', persistence });

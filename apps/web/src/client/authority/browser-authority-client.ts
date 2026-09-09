@@ -79,7 +79,9 @@ export class BrowserAuthorityClient {
       inspect: (request) => this.worldRequest('inspect', request),
       prepare: async (request) => {
         await this.prepareWorldRequest(request);
-        return this.worldRequest('prepare', request);
+        const result = await this.worldRequest('prepare', request);
+        if (result.ok) await this.prepareWorldRequest(request);
+        return result;
       },
       command: (command, options) => this.worldRequest('command', command, options),
       clock: (request) => this.worldRequest('clock', request),

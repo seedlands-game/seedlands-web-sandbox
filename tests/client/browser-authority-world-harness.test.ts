@@ -104,6 +104,82 @@ const ready = (): AuthorityReady => ({
 });
 
 describe('Browser Authority world harness', () => {
+  it('refreshes the product collision cache after Authority prepares an initially unknown chunk', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const starting = client.start({
+      seedText: 'target-seed',
+      openMode: 'continue',
+      legacySnapshots: [],
+      initialWorldTime: 9,
+      frequencies: { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
+    });
+    worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch: 'world:1', ready: ready() });
+    await starting;
+
+    const preparing = client.world.prepare({ kind: 'chunk', chunk: [6, 0, 0] });
+    const firstMesh = worker.posts.at(-1) as { requestId: number };
+    worker.emit({
+      kind: 'mesh-prepared',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: firstMesh.requestId,
+      payload: {
+        key: '6,0,0',
+        cx: 6,
+        cy: 0,
+        cz: 0,
+        chunkRevision: 0,
+        generatorVersion: 3,
+        overlays: [],
+      },
+    });
+    await vi.waitFor(() => expect(worker.posts.at(-1)).toMatchObject({ kind: 'world-harness-rpc', method: 'prepare' }));
+    const harnessRequest = worker.posts.at(-1) as { requestId: number };
+    worker.emit({
+      kind: 'world-harness-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: harnessRequest.requestId,
+      result: {
+        ok: true,
+        data: { prepared: ['6,0,0'] },
+        frontier: {
+          worldId: 'seedlands:g3:worker-client',
+          epoch: 'world:1:world:0',
+          worldRevision: 0,
+          commitSequence: 0,
+          physicsTick: 0,
+          fluidWorkSequence: 0,
+          logicObservationSequence: 0,
+        },
+      },
+    });
+    await vi.waitFor(() => expect(worker.posts.at(-1)).toMatchObject({ kind: 'prepare-mesh', cx: 6, cy: 0, cz: 0 }));
+    const refreshedMesh = worker.posts.at(-1) as { requestId: number };
+    const canonical = new Uint16Array(32 ** 3);
+    canonical[0] = 6;
+    worker.emit({
+      kind: 'mesh-prepared',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: refreshedMesh.requestId,
+      payload: {
+        key: '6,0,0',
+        cx: 6,
+        cy: 0,
+        cz: 0,
+        chunkRevision: 0,
+        generatorVersion: 3,
+        canonical: canonical.buffer,
+        overlays: [],
+      },
+    });
+
+    await expect(preparing).resolves.toMatchObject({ ok: true });
+    expect(client.getVoxel(6 * 32, 0, 0)).toBe(6);
+  });
+
   it('通过稳定 world 代理把开发请求发送到真实 Authority Worker 协议', async () => {
     const worker = new FakeAuthorityWorker();
     const client = new BrowserAuthorityClient(worker, 'world:1');

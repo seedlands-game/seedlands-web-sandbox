@@ -355,6 +355,10 @@ export class AuthorityRuntime {
     return prepareAuthorityMeshPayload(this.server, this.options.platform.now, cx, cy, cz);
   }
 
+  prepareHarnessChunks(chunks: readonly (readonly [number, number, number])[]): Promise<boolean> {
+    return this.mutationPreparation.prepareChunks(chunks);
+  }
+
   acceptGeneratedChunk(result: WorkerCanonicalResult): boolean {
     const accepted = this.server.acceptWorkerCanonical(result);
     const exactKey = result.key === chunkKey(result.cx, result.cy, result.cz);

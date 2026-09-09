@@ -329,7 +329,7 @@ export class World {
   async restoreLegacyChanges(changes: WorldChange[]) {
     if (!changes.length) return;
     const result = await this.authority.editWorld(
-      'legacy-storage-migration',
+      this.authority.gameplay.player.entityId,
       changes.map(([x, y, z, value]) => ({ x, y, z, value })),
     );
     return result;
@@ -402,13 +402,13 @@ export class World {
   }
 
   async edit(x: number, y: number, z: number, value: number) {
-    return this.authority.editWorld('player-edit', [{ x, y, z, value }]);
+    return this.authority.editWorld(this.authority.gameplay.player.entityId, [{ x, y, z, value }]);
   }
 
   async editBatch(batch: WorldEditBatch) {
     const edits = [...(batch.edits ?? [])];
     batch.buffers?.forEach((buffer) => buffer.forEach((x, y, z, value) => edits.push({ x, y, z, value })));
-    return this.authority.editWorld(batch.actorId, edits);
+    return this.authority.editWorld(this.authority.gameplay.player.entityId, edits);
   }
 
   async fill(actorId: string, command: FillCommand) {

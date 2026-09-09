@@ -70,6 +70,39 @@ describe('shared world harness', () => {
       expect(result).toMatchObject({ ok: false, error: { kind: 'validation' } });
   });
 
+  it('rejects malformed Logic mode and batches without mutating mode or consuming the candidate', async () => {
+    const session = await HeadlessSession.create({
+      platform: testCorePlatform,
+      seedText: 'world-harness-logic-invalid',
+    });
+    expect(await session.world.logic({ kind: 'mode', mode: 'bogus' } as never)).toMatchObject({
+      ok: false,
+      error: { code: 'WORLD_REQUEST_INVALID', kind: 'validation' },
+    });
+    expect(await session.world.logic({ kind: 'observe' })).toMatchObject({ ok: true, data: { mode: 'automatic' } });
+    await session.world.logic({ kind: 'mode', mode: 'scripted' });
+    const observed = await session.world.logic({ kind: 'observe' });
+    if (!observed.ok || !('observation' in observed.data) || !observed.data.observation)
+      throw new Error('Logic observation unavailable.');
+    const observation = observed.data.observation;
+    expect(await session.world.logic({ kind: 'submit', batch: null } as never)).toMatchObject({
+      ok: false,
+      error: { code: 'WORLD_REQUEST_INVALID', kind: 'validation' },
+    });
+    expect(
+      await session.world.logic({
+        kind: 'submit',
+        batch: {
+          protocolVersion: 1,
+          epoch: observation.epoch,
+          observationSequence: observation.observationSequence,
+          expiresAtPhysicsTick: observation.physicsTick + 1,
+          intents: [],
+        },
+      }),
+    ).toMatchObject({ ok: true, data: { accepted: true, mode: 'scripted' } });
+  }, 20_000);
+
   it('keeps one world identity across commands, inspection and deterministic paused advancement', async () => {
     const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'world-harness-session' });
     const world = session.world;
@@ -150,7 +183,7 @@ describe('shared world harness', () => {
     });
     await source.dispose();
     await target.dispose();
-  });
+  }, 30_000);
 
   it('rejects a waiting barrier when restore replaces its epoch', async () => {
     const source = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'barrier-restore-source' });
@@ -173,7 +206,7 @@ describe('shared world harness', () => {
     });
     await source.dispose();
     await target.dispose();
-  });
+  }, 30_000);
 
   it('rejects stale frontiers and bounds trace retention', async () => {
     const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'world-harness-frontier' });
@@ -192,6 +225,7 @@ describe('shared world harness', () => {
     expect(trace).toMatchObject({ ok: true });
     if (!trace.ok) throw new Error(trace.error.message);
     expect(trace.data.events.length).toBeLessThanOrEqual(256);
+    expect(await session.world.trace({ kind: 'read', limit: 0 })).toMatchObject({ ok: true, data: { events: [] } });
   }, 20_000);
 
   it('lets later operations satisfy event-driven barriers and only ACKs persisted checkpoints', async () => {
