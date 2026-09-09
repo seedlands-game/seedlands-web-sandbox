@@ -4,6 +4,16 @@ export const BEHAVIOR_MAX_NODES = 64;
 export const BEHAVIOR_MAX_DEPTH = 12;
 export const BEHAVIOR_MAX_BYTES = 32 * 1024;
 
+/** Public authoring guide shared by world tools and external policy editors. */
+export const BEHAVIOR_TREE_AUTHORING_GUIDE = `A definition is {version:1,root:Node,monitors?:Monitor[]}.
+Node is {id,type:"selector"|"sequence",children:Node[],guard?:Condition}, or {id,type:"condition",condition:Condition}, or {id,type:"action",skill:registryName,args?:object,guard?:Condition}.
+Condition is {name:registryCondition,args?:object}, {all:Condition[]}, {any:Condition[]}, or {not:Condition}.
+Monitor is {id,condition:Condition,reason:string}; monitors only send nonblocking rejudge notifications and do not stop the body.
+A selector retains its RUNNING child. To preempt a running activity for a higher priority need, explicitly put a live guard on the lower priority activity/subtree. Do not assume selector priority is rechecked automatically.
+Use unique stable node ids. Unchanged compatible running activities retain their Action identity. Goal is {description:string,milestones?:[{id,description,condition}]}.
+Use only the supplied registry. Positions are [x,y,z]; patrol positions are flattened [x,y,z,x,y,z,...]. Never invent unseen coordinates.
+Budget: at most 64 nodes, depth 12, and 32KiB for goal plus definition. Runtime validates every candidate before atomic installation.`;
+
 export type BehaviorScalar = string | number | boolean;
 export type BehaviorArguments = Readonly<Record<string, BehaviorScalar | readonly BehaviorScalar[]>>;
 

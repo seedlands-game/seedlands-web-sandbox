@@ -123,7 +123,7 @@ describe('character control runtime', () => {
     const entityId = created.character.entityId;
     let oldestTarget: Readonly<{ kind: 'entity'; ref: string; revision: number }> | undefined;
 
-    for (let index = 0; index < 116; index += 1) {
+    for (let index = 0; index < 150; index += 1) {
       const id = `observed-${index}`;
       server.spawnAutonomousActor({ id, archetype: 'settler', position: [2.5, 34, 0.5] });
       const observed = server.character({ kind: 'observe', entityId });
@@ -146,11 +146,10 @@ describe('character control runtime', () => {
     if (!snapshot || !oldestTarget) throw new Error('Character target snapshot is unavailable.');
     expect(snapshot.targets).toHaveLength(128);
     expect(snapshot.targets.some((target) => target.ref === oldestTarget.ref)).toBe(false);
-    const pickupTargets = snapshot.events.flatMap((event) =>
-      event.type === 'item-picked-up' && event.target ? [event.target.ref] : [],
-    );
-    expect(pickupTargets).toHaveLength(20);
-    expect(pickupTargets.every((ref) => snapshot.targets.some((target) => target.ref === ref))).toBe(true);
+    expect(snapshot.targets.length).toBeLessThanOrEqual(128);
+    expect(new Set(snapshot.targets.map((target) => target.ref)).size).toBe(snapshot.targets.length);
+    // Consumed items no longer need a new live target reference merely to record a historical pickup.
+    expect(snapshot.events.some((event) => event.type === 'item-picked-up')).toBe(true);
     server.spawnAutonomousActor({ id: 'observed-0', archetype: 'settler', position: [2.5, 34, 0.5] });
     expect(() =>
       server.character({
@@ -255,7 +254,7 @@ describe('character control runtime', () => {
     const final = session.runtime.server.getEntity(character.entityId);
     expect(final?.position).not.toEqual(initial.position);
     expect(observed.data.observation.events.map((event) => event.type)).toEqual(
-      expect.arrayContaining(['item-picked-up', 'item-consumed', 'goal-succeeded']),
+      expect.arrayContaining(['activity-started', 'item-picked-up', 'item-consumed']),
     );
     expect(
       session.runtime.server
@@ -308,12 +307,10 @@ describe('character control runtime', () => {
       sinceCursor: 0,
     });
     if (!fallback.ok || fallback.data.kind !== 'observation') throw new Error('Character observation unavailable.');
-    expect(fallback.data.observation.events).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ type: 'target-lost', reason: 'target-unavailable' }),
-        expect.objectContaining({ type: 'fallback', reason: 'target-unavailable' }),
-      ]),
+    expect(fallback.data.observation.character.behaviorTree.runtime.skills).toEqual(
+      expect.arrayContaining([expect.objectContaining({ nodeId: 'hunger-action', status: 'running' })]),
     );
+    expect(fallback.data.observation.events.some((event) => event.type === 'fallback')).toBe(false);
     await session.dispose();
   }, 30_000);
 
@@ -360,7 +357,7 @@ describe('character control runtime', () => {
     await session.dispose();
   }, 30_000);
 
-  it('uses the ordinary settler roam fallback while an active forage goal has no visible food', async () => {
+  it('keeps the tree-owned food search moving when no food is visible', async () => {
     const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'character-roam' });
     await session.world.clock({ kind: 'pause' });
     for (const item of session.runtime.server.queryEntities({ type: 'world-item' }))
@@ -384,7 +381,7 @@ describe('character control runtime', () => {
     await session.dispose();
   }, 30_000);
 
-  it('interrupts a goal to flee through ordinary movement and resumes after danger clears', async () => {
+  it('records a hit first, then lets the explicit tree flee and continue after danger clears', async () => {
     const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'character-flee' });
     await session.world.clock({ kind: 'pause' });
     const player = session.runtime.server.getEntity(session.runtime.playerId);
@@ -403,7 +400,7 @@ describe('character control runtime', () => {
     });
     expect(await session.world.character({ kind: 'inspect', entityId })).toMatchObject({
       ok: true,
-      data: { kind: 'state', character: { behavior: 'flee', currentGoal: { status: 'suspended' } } },
+      data: { kind: 'state', character: { currentGoal: { status: 'active' } } },
     });
 
     await session.world.clock({ kind: 'advance', elapsedMs: 1_000 });
@@ -419,8 +416,13 @@ describe('character control runtime', () => {
     });
     if (!resumed.ok || resumed.data.kind !== 'observation') throw new Error('Character observation unavailable.');
     expect(resumed.data.observation.events).toContainEqual(
-      expect.objectContaining({ type: 'fallback', reason: 'danger-cleared' }),
+      expect.objectContaining({ type: 'activity-started', nodeId: 'threat-action' }),
     );
+    expect(
+      resumed.data.observation.character.behaviorTree.runtime.skills.some(
+        (skill) => skill.skill === 'flee-threat' && skill.status === 'running',
+      ),
+    ).toBe(false);
     await session.dispose();
   }, 30_000);
 

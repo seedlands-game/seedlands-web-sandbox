@@ -12,13 +12,23 @@ import type {
   CharacterRuntimeOptions,
   CharacterSkillExecution,
 } from './character-runtime-types';
-import { behaviorArgs, validateBehavior } from './character-behavior-definition';
+import {
+  behaviorActionNodes,
+  behaviorActionSignature,
+  behaviorConditionConsumers,
+  behaviorConditionContainsDialogue,
+  behaviorArgs,
+  validateBehavior,
+} from './character-behavior-definition';
 
-type TreeSession = { tree: BehaviourTree; delta: number; invoked: Set<string>; guardValues: Map<string, boolean> };
+type TreeSession = {
+  tree: BehaviourTree;
+  delta: number;
+  invoked: Set<string>;
+  conditionValues: Map<string, boolean>;
+};
 
 const cloneJson = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
-const nodeSignature = (node: Extract<BehaviorNode, { type: 'action' }>) =>
-  JSON.stringify({ skill: node.skill, args: node.args ?? {}, guard: node.guard ?? null });
 
 export function createBehaviorRecord(
   goal: CharacterBehaviorRecord['goal'],
@@ -53,6 +63,7 @@ export class CharacterBehaviorRuntime {
     const active = record.behaviorTree.skills
       .filter((entry) => entry.status === 'running')
       .map((entry) => entry.nodeId);
+    const publicMonitorIds = new Set((record.behaviorTree.definition.monitors ?? []).map((entry) => entry.id));
     return {
       revision: record.behaviorTree.revision,
       goal: cloneJson(record.behaviorTree.goal),
@@ -65,7 +76,9 @@ export class CharacterBehaviorRuntime {
             ...entry,
           }),
         ),
-        monitors: record.behaviorTree.monitors.map(({ version: _version, ...entry }) => ({ ...entry })),
+        monitors: record.behaviorTree.monitors
+          .filter((entry) => publicMonitorIds.has(entry.nodeId))
+          .map(({ version: _version, ...entry }) => ({ ...entry })),
         milestones: (record.behaviorTree.goal.milestones ?? []).map((entry) => ({
           id: entry.id,
           satisfied: this.skills.condition(record, entry.condition),
@@ -76,19 +89,28 @@ export class CharacterBehaviorRuntime {
 
   install(record: CharacterRecord, goal: CharacterBehaviorRecord['goal'], definition: BehaviorDefinition): void {
     validateBehavior(goal, definition);
-    const signatures = this.actionNodes(definition).map((node) => [node.id, nodeSignature(node)] as const);
-    const compatible = new Map(signatures);
+    const previousContexts = this.actionContexts(record.behaviorTree.definition);
+    const nextContexts = this.actionContexts(definition);
+    const nextSignatures = new Map(
+      behaviorActionNodes(definition).map((node) => [node.id, behaviorActionSignature(node)]),
+    );
+    const compatible = (execution: CharacterSkillExecution) =>
+      nextSignatures.get(execution.nodeId) === execution.signature &&
+      previousContexts.get(execution.nodeId) === nextContexts.get(execution.nodeId);
     for (const execution of record.behaviorTree.skills)
-      if (execution.status === 'running' && compatible.get(execution.nodeId) !== execution.signature)
+      if (execution.status === 'running' && !compatible(execution))
         this.skills.interrupt(record, execution, 'behavior-replaced');
+    const dialogueCursor = this.latestDialogueCursor(record);
     record.behaviorTree = {
       revision: record.behaviorTree.revision + 1,
       goal: cloneJson(goal),
       definition: cloneJson(definition),
       cycle: record.behaviorTree.cycle,
       activationSequence: record.behaviorTree.activationSequence,
-      skills: record.behaviorTree.skills.filter((entry) => compatible.get(entry.nodeId) === entry.signature),
-      monitors: [],
+      skills: record.behaviorTree.skills.filter(compatible),
+      monitors: behaviorConditionConsumers(definition)
+        .filter((entry) => behaviorConditionContainsDialogue(entry.condition))
+        .map((entry) => ({ nodeId: entry.id, matched: false, episode: 0, version: dialogueCursor })),
     };
     this.sessions.delete(record.entityId);
   }
@@ -104,13 +126,13 @@ export class CharacterBehaviorRuntime {
     const entity = this.options.entities.get(record.entityId);
     const actor = this.options.actor(record.entityId);
     if (!entity || !actor) return;
-    record.lastPosition = [...entity.position];
     record.lastBehavior = actor.behavior;
     record.hunger = actor.hunger;
     let session = this.sessions.get(record.entityId);
     if (!session) session = this.rebuild(record);
     session.delta = seconds;
     session.invoked.clear();
+    session.conditionValues.clear();
     this.observeMonitors(record, session);
     if (session.tree.getState() === State.SUCCEEDED || session.tree.getState() === State.FAILED) {
       record.behaviorTree.cycle += 1;
@@ -120,24 +142,27 @@ export class CharacterBehaviorRuntime {
     session.tree.step();
     record.dangerSecondsRemaining = Math.max(0, record.dangerSecondsRemaining - seconds);
     if (record.dangerSecondsRemaining === 0) record.lastThreatEntityId = undefined;
+    record.lastPosition = [...entity.position];
     this.options.changed();
   }
 
   rebuildAfterRestore(record: CharacterRecord): void {
     validateBehavior(record.behaviorTree.goal, record.behaviorTree.definition);
     const valid = new Map(
-      this.actionNodes(record.behaviorTree.definition).map((node) => [node.id, nodeSignature(node)]),
+      behaviorActionNodes(record.behaviorTree.definition).map((node) => [
+        node.id,
+        { skill: node.skill, signature: behaviorActionSignature(node) },
+      ]),
     );
     for (const execution of record.behaviorTree.skills) {
-      if (valid.get(execution.nodeId) !== execution.signature)
+      const expected = valid.get(execution.nodeId);
+      if (!expected || expected.signature !== execution.signature || expected.skill !== execution.skill)
         throw new TypeError('Character behavior ledger references an incompatible node.');
       if (execution.actionId) {
         const action = this.options.action(execution.actionId);
-        if (
-          !action ||
-          action.actorId !== record.entityId ||
-          (execution.skill === 'attack-threat' ? action.type !== 'attack' : action.type !== 'move-to')
-        )
+        const expectedAction =
+          expected.skill === 'attack-threat' ? 'attack' : this.isMovementSkill(expected.skill) ? 'move-to' : null;
+        if (!action || action.actorId !== record.entityId || expectedAction === null || action.type !== expectedAction)
           throw new TypeError('Character behavior ledger action is missing or owned by another actor.');
       }
     }
@@ -146,7 +171,7 @@ export class CharacterBehaviorRuntime {
 
   private rebuild(record: CharacterRecord): TreeSession {
     const agent: Record<string, unknown> = {};
-    for (const node of this.actionNodes(record.behaviorTree.definition)) {
+    for (const node of behaviorActionNodes(record.behaviorTree.definition)) {
       agent[`action_${node.id}`] = () => this.runSkill(record, node, this.sessions.get(record.entityId)!);
       agent[`exit_${node.id}`] = (result: { aborted?: boolean }) => {
         if (!result?.aborted) return;
@@ -157,7 +182,11 @@ export class CharacterBehaviorRuntime {
       };
     }
     this.walkConditions(record.behaviorTree.definition.root, (key, condition) => {
-      agent[key] = () => this.skills.condition(record, condition);
+      const consumerId = key.startsWith('guard_')
+        ? `$guard:${key.slice('guard_'.length)}`
+        : `$condition:${key.slice('condition_'.length)}`;
+      agent[key] = () =>
+        this.evaluateCondition(record, this.sessions.get(record.entityId)!, consumerId, condition).matched;
     });
     const session: TreeSession = {
       tree: new BehaviourTree(this.compile(record.behaviorTree.definition.root) as never, agent, {
@@ -166,7 +195,7 @@ export class CharacterBehaviorRuntime {
       }),
       delta: 0,
       invoked: new Set(),
-      guardValues: new Map(),
+      conditionValues: new Map(),
     };
     this.sessions.set(record.entityId, session);
     return session;
@@ -178,13 +207,13 @@ export class CharacterBehaviorRuntime {
     session: TreeSession,
   ): State {
     let execution = record.behaviorTree.skills.find(
-      (entry) => entry.nodeId === node.id && entry.signature === nodeSignature(node),
+      (entry) => entry.nodeId === node.id && entry.signature === behaviorActionSignature(node),
     );
     if (!execution) {
       execution = {
         nodeId: node.id,
         skill: node.skill,
-        signature: nodeSignature(node),
+        signature: behaviorActionSignature(node),
         activation: ++record.behaviorTree.activationSequence,
         status: 'running',
         phase: 'starting',
@@ -211,29 +240,9 @@ export class CharacterBehaviorRuntime {
 
   private observeMonitors(record: CharacterRecord, session: TreeSession): void {
     for (const entry of record.behaviorTree.definition.monitors ?? []) {
-      let monitor = record.behaviorTree.monitors.find((value) => value.nodeId === entry.id);
-      const dialogueCursor =
-        'name' in entry.condition && entry.condition.name === 'dialogue-received'
-          ? ([...record.events].reverse().find((event) => event.type === 'dialogue-heard')?.cursor ?? 0)
-          : undefined;
-      const matched =
-        dialogueCursor === undefined
-          ? this.skills.condition(record, entry.condition)
-          : dialogueCursor > (monitor?.version ?? dialogueCursor);
-      const old = session.guardValues.get(entry.id);
-      session.guardValues.set(entry.id, matched);
-      if (!monitor) {
-        monitor = {
-          nodeId: entry.id,
-          matched,
-          episode: matched ? 1 : 0,
-          ...(dialogueCursor === undefined ? {} : { version: dialogueCursor }),
-        };
-        record.behaviorTree.monitors.push(monitor);
-      } else if (matched && (!monitor.matched || dialogueCursor !== undefined)) monitor.episode += 1;
-      monitor.matched = matched;
-      if (dialogueCursor !== undefined) monitor.version = dialogueCursor;
-      if ((old === false && matched) || (dialogueCursor !== undefined && matched)) {
+      const evaluation = this.evaluateCondition(record, session, entry.id, entry.condition, true);
+      if ((evaluation.previous === false && evaluation.matched) || evaluation.dialogueEdge) {
+        const monitor = record.behaviorTree.monitors.find((value) => value.nodeId === entry.id)!;
         this.callbacks.record(record, 'rejudge-requested', {
           nodeId: entry.id,
           episode: monitor.episode,
@@ -243,14 +252,72 @@ export class CharacterBehaviorRuntime {
     }
   }
 
-  private actionNodes(definition: BehaviorDefinition): Extract<BehaviorNode, { type: 'action' }>[] {
-    const result: Extract<BehaviorNode, { type: 'action' }>[] = [];
-    const walk = (node: BehaviorNode) => {
-      if (node.type === 'action') result.push(node);
-      else if (node.type === 'selector' || node.type === 'sequence') node.children.forEach(walk);
+  private evaluateCondition(
+    record: CharacterRecord,
+    session: TreeSession,
+    consumerId: string,
+    condition: BehaviorCondition,
+    trackLevel = false,
+  ): Readonly<{ matched: boolean; previous: boolean | undefined; dialogueEdge: boolean }> {
+    const cached = session.conditionValues.get(consumerId);
+    const existing = record.behaviorTree.monitors.find((entry) => entry.nodeId === consumerId);
+    if (cached !== undefined) return { matched: cached, previous: existing?.matched, dialogueEdge: false };
+
+    const hasDialogue = behaviorConditionContainsDialogue(condition);
+    const latestDialogueCursor = this.latestDialogueCursor(record);
+    const previous = existing?.matched;
+    const previousCursor = existing?.version ?? latestDialogueCursor;
+    const matched = this.skills.condition(record, condition, previousCursor);
+    const dialogueEdge = hasDialogue && latestDialogueCursor > previousCursor && matched;
+    session.conditionValues.set(consumerId, matched);
+
+    if (!hasDialogue && !trackLevel) return { matched, previous, dialogueEdge: false };
+    if (!existing) {
+      record.behaviorTree.monitors.push({
+        nodeId: consumerId,
+        matched,
+        episode: matched ? 1 : 0,
+        ...(hasDialogue ? { version: latestDialogueCursor } : {}),
+      });
+    } else {
+      if (matched && (!previous || dialogueEdge)) existing.episode += 1;
+      existing.matched = matched;
+      if (hasDialogue) existing.version = latestDialogueCursor;
+    }
+    return { matched, previous, dialogueEdge };
+  }
+
+  private latestDialogueCursor(record: CharacterRecord): number {
+    return [...record.events].reverse().find((event) => event.type === 'dialogue-heard')?.cursor ?? 0;
+  }
+
+  private actionContexts(definition: BehaviorDefinition): ReadonlyMap<string, string> {
+    const result = new Map<string, string>();
+    const walk = (node: BehaviorNode, context: readonly unknown[]) => {
+      if (node.type === 'action') {
+        result.set(node.id, JSON.stringify(context));
+        return;
+      }
+      if (node.type === 'selector' || node.type === 'sequence') {
+        node.children.forEach((child, index) =>
+          walk(child, [
+            ...context,
+            {
+              id: node.id,
+              type: node.type,
+              guard: node.guard ?? null,
+              preceding: node.children.slice(0, index),
+            },
+          ]),
+        );
+      }
     };
-    walk(definition.root);
+    walk(definition.root, []);
     return result;
+  }
+
+  private isMovementSkill(skill: string): boolean {
+    return ['flee-threat', 'satisfy-hunger', 'rest-at-home', 'patrol', 'wander', 'move-to', 'follow'].includes(skill);
   }
 
   private walkConditions(node: BehaviorNode, add: (key: string, condition: BehaviorCondition) => void): void {

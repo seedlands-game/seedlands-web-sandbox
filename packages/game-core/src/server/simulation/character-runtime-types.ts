@@ -55,6 +55,7 @@ export type CharacterBehaviorRecord = {
 };
 
 export type CharacterRecord = {
+  creation?: Readonly<{ id: string; fingerprint: string }>;
   lifecycle: 'active' | 'deceased';
   entityId: string;
   incarnation: string;
@@ -85,6 +86,7 @@ export type CharacterRecord = {
 };
 
 export type CharacterSnapshotRecord = Readonly<{
+  creation?: Readonly<{ id: string; fingerprint: string }>;
   lifecycle: 'active' | 'deceased';
   entityId: string;
   incarnation: string;

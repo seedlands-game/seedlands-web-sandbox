@@ -1,3 +1,4 @@
+import type { CharacterGoal } from '../../runtime/character-control-protocol';
 import {
   BEHAVIOR_MAX_BYTES,
   BEHAVIOR_MAX_DEPTH,
@@ -138,6 +139,44 @@ const utf8Bytes = (text: string) => {
   return bytes;
 };
 
+export const behaviorActionSignature = (node: Extract<BehaviorNode, { type: 'action' }>): string =>
+  JSON.stringify({ skill: node.skill, args: node.args ?? {}, guard: node.guard ?? null });
+
+export function behaviorActionNodes(
+  definition: BehaviorDefinition,
+): readonly Extract<BehaviorNode, { type: 'action' }>[] {
+  const result: Extract<BehaviorNode, { type: 'action' }>[] = [];
+  const walk = (node: BehaviorNode) => {
+    if (node.type === 'action') result.push(node);
+    else if (node.type === 'selector' || node.type === 'sequence') node.children.forEach(walk);
+  };
+  walk(definition.root);
+  return result;
+}
+
+export function behaviorConditionContainsDialogue(condition: BehaviorCondition): boolean {
+  if ('name' in condition) return condition.name === 'dialogue-received';
+  if ('not' in condition) return behaviorConditionContainsDialogue(condition.not);
+  const entries = 'all' in condition ? condition.all : condition.any;
+  return entries.some(behaviorConditionContainsDialogue);
+}
+
+export function behaviorConditionConsumers(
+  definition: BehaviorDefinition,
+): readonly Readonly<{ id: string; condition: BehaviorCondition; monitor: boolean }>[] {
+  const result: Readonly<{ id: string; condition: BehaviorCondition; monitor: boolean }>[] = [];
+  const walk = (node: BehaviorNode) => {
+    if ('guard' in node && node.guard) result.push({ id: `$guard:${node.id}`, condition: node.guard, monitor: false });
+    if (node.type === 'condition')
+      result.push({ id: `$condition:${node.id}`, condition: node.condition, monitor: false });
+    else if (node.type === 'selector' || node.type === 'sequence') node.children.forEach(walk);
+  };
+  walk(definition.root);
+  for (const monitor of definition.monitors ?? [])
+    result.push({ id: monitor.id, condition: monitor.condition, monitor: true });
+  return result;
+}
+
 function validateArgs(capability: BehaviorCapability, raw: unknown): void {
   const args = raw === undefined ? {} : raw;
   if (!object(args)) throw new TypeError(`Behavior ${capability.name} arguments are invalid.`);
@@ -245,6 +284,8 @@ export function validateBehavior(goal: BehaviorGoal, definition: BehaviorDefinit
     if (typeof milestone.description !== 'string' || !milestone.description.trim())
       throw new TypeError('Behavior milestone is invalid.');
     validateCondition(milestone.condition, 1, count);
+    if (behaviorConditionContainsDialogue(milestone.condition))
+      throw new TypeError('Behavior milestone cannot use the edge-triggered dialogue-received condition.');
   }
   if (count.value > BEHAVIOR_MAX_NODES) throw new TypeError('Behavior definition exceeds the node limit.');
   assertMistreevousDefinition(definition);
@@ -276,3 +317,32 @@ function assertMistreevousDefinition(definition: BehaviorDefinition): void {
 export const behaviorCapabilities = (): readonly BehaviorCapability[] =>
   capabilities.map((entry) => ({ ...entry, arguments: { ...entry.arguments } }));
 export const behaviorArgs = (args?: BehaviorArguments): Record<string, unknown> => ({ ...(args ?? {}) });
+
+export function behaviorDefinitionForLegacyGoal(
+  goal: CharacterGoal,
+  home: readonly [number, number, number],
+  hunger = 60,
+): BehaviorDefinition {
+  let action: BehaviorNode;
+  if (goal.kind === 'idle') action = { id: 'legacy-goal', type: 'action', skill: 'hold' };
+  else if (goal.kind === 'forage')
+    action = {
+      id: 'legacy-goal',
+      type: 'action',
+      skill: 'satisfy-hunger',
+      args: { satisfiedAt: Math.max(0, hunger - 4) },
+    };
+  else if (goal.kind === 'follow')
+    action = { id: 'legacy-goal', type: 'action', skill: 'follow', args: { targetRef: goal.target.ref } };
+  else if (goal.kind === 'return-home')
+    action = {
+      id: 'legacy-goal',
+      type: 'action',
+      skill: 'move-to',
+      args: { position: home },
+    };
+  else if ('position' in goal)
+    action = { id: 'legacy-goal', type: 'action', skill: 'move-to', args: { position: goal.position } };
+  else throw new TypeError('Character goal is invalid.');
+  return { version: 1, root: action };
+}

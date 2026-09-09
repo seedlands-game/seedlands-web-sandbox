@@ -5,7 +5,13 @@ import type {
   CharacterProfile,
 } from '../../runtime/character-control-protocol';
 import type { ActorAction } from './action-runtime';
-import { validateBehavior } from './character-behavior-definition';
+import {
+  behaviorActionNodes,
+  behaviorActionSignature,
+  behaviorConditionConsumers,
+  behaviorConditionContainsDialogue,
+  validateBehavior,
+} from './character-behavior-definition';
 import {
   createCharacterInventory,
   CHARACTER_INVENTORY_CAPACITY,
@@ -123,6 +129,12 @@ const validGoalState = (value: CharacterGoalState, maximumRevision: number) => {
 };
 
 export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord): void {
+  if (value?.creation !== undefined) {
+    if (!value.creation || typeof value.creation !== 'object')
+      throw new TypeError('Character creation identity is invalid.');
+    characterText(value.creation.id, 'Character creation request id', 160);
+    characterText(value.creation.fingerprint, 'Character creation fingerprint', 65536);
+  }
   if (
     !value ||
     typeof value.entityId !== 'string' ||
@@ -173,6 +185,12 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
   if (value.lastSpeech !== undefined) characterText(value.lastSpeech, 'Character speech', 280);
   if (value.behaviorTree) {
     validateBehavior(value.behaviorTree.goal, value.behaviorTree.definition);
+    const actionNodes = new Map(
+      behaviorActionNodes(value.behaviorTree.definition).map((node) => [
+        node.id,
+        { skill: node.skill, signature: behaviorActionSignature(node) },
+      ]),
+    );
     if (
       !Number.isSafeInteger(value.behaviorTree.revision) ||
       value.behaviorTree.revision < 1 ||
@@ -188,11 +206,15 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
       throw new TypeError('Character behavior snapshot is invalid.');
     const nodes = new Set<string>();
     for (const skill of value.behaviorTree.skills) {
+      const expected = actionNodes.get(skill.nodeId);
       if (
         !skill.nodeId?.trim() ||
         nodes.has(skill.nodeId) ||
         !skill.skill?.trim() ||
         !skill.signature?.trim() ||
+        !expected ||
+        expected.skill !== skill.skill ||
+        expected.signature !== skill.signature ||
         !Number.isSafeInteger(skill.activation) ||
         skill.activation < 1 ||
         skill.activation > value.behaviorTree.activationSequence ||
@@ -210,6 +232,29 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
       )
         throw new TypeError('Character behavior execution snapshot is invalid.');
       nodes.add(skill.nodeId);
+    }
+    const conditionConsumers = new Map(
+      behaviorConditionConsumers(value.behaviorTree.definition)
+        .filter((entry) => entry.monitor || behaviorConditionContainsDialogue(entry.condition))
+        .map((entry) => [entry.id, entry.condition]),
+    );
+    const monitorIds = new Set<string>();
+    for (const monitor of value.behaviorTree.monitors) {
+      const condition = conditionConsumers.get(monitor.nodeId);
+      const hasDialogue = condition ? behaviorConditionContainsDialogue(condition) : false;
+      if (
+        !monitor.nodeId?.trim() ||
+        monitorIds.has(monitor.nodeId) ||
+        !condition ||
+        typeof monitor.matched !== 'boolean' ||
+        !Number.isSafeInteger(monitor.episode) ||
+        monitor.episode < 0 ||
+        (monitor.version !== undefined &&
+          (!Number.isSafeInteger(monitor.version) || monitor.version < 0 || monitor.version > value.eventCursor)) ||
+        (hasDialogue && monitor.version === undefined)
+      )
+        throw new TypeError('Character behavior monitor snapshot is invalid.');
+      monitorIds.add(monitor.nodeId);
     }
   }
 

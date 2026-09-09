@@ -7,19 +7,21 @@ import type {
   CharacterState,
   CharacterTargetRef,
   CharacterBehaviorInput,
-  CharacterGoal,
 } from '../../runtime/character-control-protocol';
 import { createLifeBehavior } from '../../runtime/character-control-protocol';
 import type { GameplayEntity } from '../gameplay/entity-store';
 import { CharacterBehaviorRuntime, createBehaviorRecord } from './character-behavior-runtime';
-import { behaviorCapabilities, validateBehavior } from './character-behavior-definition';
+import {
+  behaviorCapabilities,
+  behaviorDefinitionForLegacyGoal,
+  validateBehavior,
+} from './character-behavior-definition';
 import {
   CHARACTER_MAX_DIALOGUE_TEXT,
   CHARACTER_MAX_EVENTS,
   CHARACTER_MAX_MEMORY_TEXT,
   CHARACTER_MAX_SPEECH_TEXT,
   createCharacterInventory,
-  type CharacterPositionTuple as Position,
   type CharacterRecord,
   type CharacterRuntimeOptions as Options,
   type CharacterSnapshot,
@@ -37,7 +39,6 @@ import {
   validateCharacterSnapshotRecord,
 } from './character-runtime-validation';
 import type { ActorPersistentGoal } from './actor-state';
-import type { BehaviorDefinition, BehaviorNode } from '../../runtime/behavior-control-protocol';
 
 const MOVEMENT_REFRESH_SECONDS = 1;
 
@@ -94,11 +95,20 @@ export class CharacterRuntime {
     if (behaviorTree) validateBehavior(behaviorTree.goal, behaviorTree.definition);
   }
 
+  createdForRequest(id: string, fingerprint: string): CharacterState | null {
+    const previous = [...this.records.values()].find((record) => record.creation?.id === id);
+    if (!previous) return null;
+    if (previous.creation?.fingerprint !== fingerprint)
+      throw new CharacterControlFailure('CHARACTER_CREATION_CONFLICT', 'Creation request payload changed.');
+    return this.state(previous);
+  }
+
   register(
     entityId: string,
     profile: CharacterProfile,
     homePosition: readonly number[],
     behaviorTree?: CharacterBehaviorInput,
+    creation?: CharacterRecord['creation'],
   ): CharacterState {
     if (this.records.has(entityId)) throw new Error(`Character already exists: ${entityId}`);
     validateCharacterProfile(profile);
@@ -114,6 +124,7 @@ export class CharacterRuntime {
         ],
       });
     const record: CharacterRecord = {
+      ...(creation ? { creation: { ...creation } } : {}),
       lifecycle: 'active',
       entityId,
       incarnation: `character-${++this.sequence}`,
@@ -234,6 +245,7 @@ export class CharacterRuntime {
       sequence: this.sequence,
       characters: [...this.records.values()].map((record) => ({
         ...this.stateFields(record),
+        ...(record.creation ? { creation: { ...record.creation } } : {}),
         inventory: record.inventory.snapshot(),
         events: record.events.map((event) => ({ ...event, ...(event.target ? { target: { ...event.target } } : {}) })),
         homePosition: [...record.homePosition],
@@ -283,8 +295,13 @@ export class CharacterRuntime {
     )
       throw new TypeError('Character snapshot header is invalid.');
     const next = new Map<string, CharacterRecord>();
+    const creationIds = new Set<string>();
     for (const value of snapshot.characters) {
       validateCharacterSnapshotRecord(value);
+      if (value.creation) {
+        if (creationIds.has(value.creation.id)) throw new TypeError('Duplicate character creation identity.');
+        creationIds.add(value.creation.id);
+      }
       validateCharacterActionLink(value, value.actionId ? this.options.action(value.actionId) : null);
       if (
         next.has(value.entityId) ||
@@ -296,7 +313,7 @@ export class CharacterRuntime {
         value.behaviorTree ??
         createBehaviorRecord(
           { description: `Continue ${value.currentGoal.goal.kind}.` },
-          this.definitionForGoal(value.currentGoal.goal, value.homePosition, value.hunger),
+          behaviorDefinitionForLegacyGoal(value.currentGoal.goal, value.homePosition, value.hunger),
         );
       if (snapshot.version === 2 && !value.behaviorTree) throw new TypeError('Character behavior snapshot is missing.');
       const restored: CharacterRecord = {
@@ -374,7 +391,7 @@ export class CharacterRuntime {
       this.behaviors.install(
         record,
         { description: `Character goal: ${request.goal.kind}.` },
-        this.definitionForGoal(request.goal, record.homePosition, this.options.actor(record.entityId)?.hunger),
+        behaviorDefinitionForLegacyGoal(request.goal, record.homePosition, this.options.actor(record.entityId)?.hunger),
       );
     if (!retainsAction) this.behaviors.advance(record, 0);
     this.options.changed();
@@ -488,31 +505,6 @@ export class CharacterRuntime {
   private requireActive(record: CharacterRecord): void {
     if (record.lifecycle !== 'active')
       throw new CharacterControlFailure('CHARACTER_UNAVAILABLE', 'Character is unavailable.');
-  }
-
-  private definitionForGoal(goal: CharacterGoal, home: Position, hunger = 60): BehaviorDefinition {
-    let action: BehaviorNode;
-    if (goal.kind === 'idle') action = { id: 'legacy-goal', type: 'action', skill: 'hold' };
-    else if (goal.kind === 'forage')
-      action = {
-        id: 'legacy-goal',
-        type: 'action',
-        skill: 'satisfy-hunger',
-        args: { satisfiedAt: Math.max(0, hunger - 4) },
-      };
-    else if (goal.kind === 'follow')
-      action = { id: 'legacy-goal', type: 'action', skill: 'follow', args: { targetRef: goal.target.ref } };
-    else if (goal.kind === 'return-home')
-      action = {
-        id: 'legacy-goal',
-        type: 'action',
-        skill: 'move-to',
-        args: { position: home },
-      };
-    else if ('position' in goal)
-      action = { id: 'legacy-goal', type: 'action', skill: 'move-to', args: { position: goal.position } };
-    else throw new TypeError('Character goal is invalid.');
-    return { version: 1, root: action };
   }
 
   private requireEntity(entityId: string): GameplayEntity {

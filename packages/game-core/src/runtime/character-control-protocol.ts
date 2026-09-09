@@ -104,6 +104,7 @@ export type CharacterControlRequest =
   | Readonly<{ kind: 'capabilities' }>
   | Readonly<{
       kind: 'create';
+      creationRequestId?: string;
       profile: CharacterProfile;
       position?: CharacterPosition;
       homePosition?: CharacterPosition;

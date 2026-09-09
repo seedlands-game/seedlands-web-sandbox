@@ -1,3 +1,4 @@
+import { characterText } from '../simulation/character-runtime-validation';
 import type {
   CharacterControlRequest,
   CharacterControlResult,
@@ -41,6 +42,23 @@ export function executeGameplayCharacterRequest(
   if (!request || typeof request !== 'object' || typeof request.kind !== 'string')
     throw new TypeError('Character request is invalid.');
   if (request.kind !== 'create') return options.simulation.characters.execute(request);
+  const creation =
+    request.creationRequestId === undefined
+      ? undefined
+      : {
+          id: characterText(request.creationRequestId, 'Creation request id', 160),
+          fingerprint: JSON.stringify({
+            profile: request.profile,
+            position: request.position ?? null,
+            homePosition: request.homePosition ?? null,
+            behaviorTree: request.behaviorTree ?? null,
+          }),
+        };
+  if (creation) {
+    characterText(creation.fingerprint, 'Creation fingerprint', 65536);
+    const previous = options.simulation.characters.createdForRequest(creation.id, creation.fingerprint);
+    if (previous) return { kind: 'created', character: previous };
+  }
   const player = options.entities.query({ type: 'player' })[0];
   const requested = request.position
     ? characterPosition(request.position)
@@ -61,7 +79,13 @@ export function executeGameplayCharacterRequest(
   try {
     return {
       kind: 'created',
-      character: options.simulation.characters.register(entity.id, request.profile, home, request.behaviorTree),
+      character: options.simulation.characters.register(
+        entity.id,
+        request.profile,
+        home,
+        request.behaviorTree,
+        creation,
+      ),
     };
   } catch (error) {
     options.simulation.unregisterActor(entity.id);
