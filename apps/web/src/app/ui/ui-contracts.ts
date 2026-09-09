@@ -118,6 +118,7 @@ export type UiMetrics = Readonly<{
 }>;
 
 export type UiActionPort = {
+  companion?: import('../gameplay/companion/companion-session').CompanionSession;
   startWorld: (seed: string, quality: QualityLevel, openMode?: WorldOpenMode) => Promise<void>;
   startMeleeShowcase: (quality: QualityLevel) => Promise<void>;
   resetMeleeShowcase: () => Promise<void>;

@@ -16,7 +16,7 @@ DEEPSEEK_API_KEY=... corepack pnpm --filter @seedlands/agent-server start
 1. `DEEPSEEK_API_KEY`，端点为 `DEEPSEEK_BASE_URL` 或官方默认端点。
 2. `MIDSCENE_MODEL_API_KEY`，仅在同时存在 `MIDSCENE_MODEL_BASE_URL` 时复用，避免把代理密钥发往不同端点。
 
-日常决定固定使用文本输入的 `deepseek-v4-flash-vision-exp`；`deepseek-v4-pro` 只用于上下文压缩。Flash 历史保留 provider reasoning 以满足后续调用的协议要求，但 reasoning 不进入 Pro 压缩输入、世界记忆、普通日志或浏览器帧。
+日常决定固定使用文本输入的 `deepseek-v4-flash-vision-exp`；`deepseek-v4-pro` 只用于上下文压缩。Flash 历史保留 provider reasoning 以满足后续调用的协议要求，但 reasoning 不进入 Pro 压缩输入、世界记忆、普通日志或浏览器帧。压缩前，公开历史会转换成单个带来源与可信度标签的用户数据文档，不把 Flash 的原生 assistant/tool 协议轮次交给 Pro 续写；Pro 若返回工具调用或控制标记，候选摘要会被拒绝。
 
 ## 生命周期边界
 

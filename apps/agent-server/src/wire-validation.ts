@@ -1,8 +1,5 @@
-import type {
-  CharacterObservation,
-  ControlBinding,
-  ControllerClientMessage,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+import type { CharacterObservation, ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { ControllerClientMessage } from '@seedlands/cognition-protocol';
 import {
   CHARACTER_OBSERVATION_MAX_EVENTS,
   CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES,

@@ -127,11 +127,19 @@ A TTY opens a persistent JavaScript REPL with `world` and top-level await. Use `
 
 Headless uses in-process memory persistence. `/save` exercises both chunk and gameplay snapshot persistence and supports reload tests within the process; it does not create a durable world file after the process exits.
 
+## Browser companion
+
+Run `pnpm dev`, enter a world, press T or use the companion card on the right to invite Aran. The character has a body, inventory and ongoing goals, with algorithmic behavior available without a model connection.
+
+In another terminal, run `pnpm agent:dev`. The local service reads inherited `DEEPSEEK_API_KEY`, or the paired `MIDSCENE_MODEL_API_KEY` and `MIDSCENE_MODEL_BASE_URL`; it does not read `.env`. Enter the printed WebSocket URL and temporary pairing code in the companion settings. API credentials stay in the local service. The default URL is `ws://127.0.0.1:8787`; override the port with `AGENT_SERVER_PORT` and allowed exact browser origins with `SEEDLANDS_ALLOWED_ORIGINS` (default localhost/127.0.0.1:5173).
+
+Flash Vision uses text only. Meaningful events may trigger a decision before the configurable one-to-ten-minute fallback interval. Pro handles context compaction only. The default input cap is 128K, with 256K optional; the cap is not a target to fill. Reconnection rebuilds context from saved memory and recent events, not the full private Flash history of a closed service. See the [cognition boundaries](docs/living-npc-cognition.md).
+
 ## Archived Node research
 
 The Node Dedicated Server MVP has been retired from active product code and required checks. Its complete snapshot is tagged `archive/node-dedicated-mvp-2026-09-09`; see the [recovery instructions](docs/change-archive.md#node-dedicated-server-研究归档). Future changes do not promise compatibility or continued builds.
 
-The product now centers on browser single-player worlds; see the [product baseline](docs/product-positioning.md). The shared world port and persistent REPL are developer tools. Model-driven NPC integration is the next stage.
+The product now centers on browser single-player worlds; see the [product baseline](docs/product-positioning.md). The shared world port and persistent REPL are developer tools. Browser NPC integration and its evidence are tracked in the [current delivery](changes/2026-09-09-living-npc-mvp/spec.md).
 
 ## Architecture
 

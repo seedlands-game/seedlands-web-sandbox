@@ -1,4 +1,5 @@
 <script lang="ts">
+  import CompanionPanel from './companion-panel.svelte';
   import { onMount } from 'svelte';
   import type { UiBridge } from './ui-bridge';
   import type { DebugState, HudState, InteractionState, ShellState, UiActionPort } from './ui-contracts';
@@ -106,6 +107,18 @@
       {interaction.feedback?.message ?? ''}
     </div>
     <RuntimeDiagnostics {debug} {actions} />
+    {#if actions.companion && hud.visible}
+      <CompanionPanel
+        session={actions.companion}
+        releaseInput={actions.releaseInput}
+        canOpen={shell.phase === 'playing' &&
+          shell.gameplay.lifecycle === 'alive' &&
+          !debug.visible &&
+          !shell.gameplay.inventoryOpen &&
+          !shell.mapOpen &&
+          !shell.commandOpen}
+      />
+    {/if}
     <DebugCommandShell open={shell.commandOpen} {actions} />
     <GameButton id="map-toggle" class="game-panel map-toggle" label="Macro 地图" onclick={actions.toggleMap}>
       Macro 地图

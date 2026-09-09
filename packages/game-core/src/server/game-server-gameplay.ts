@@ -11,6 +11,7 @@ import type { PoiInput, PoiKind } from './simulation/poi-registry';
 import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
+import type { CharacterControlRequest } from '../runtime/character-control-protocol';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 
@@ -78,6 +79,9 @@ export abstract class GameServerGameplayFacade {
       },
       { archetype: input.archetype, ...input.registration },
     );
+  }
+  character(request: CharacterControlRequest) {
+    return this.gameplay.character(request);
   }
   getEntity(id: string): GameplayEntity | null {
     const entity = this.gameplay.getEntity(id);

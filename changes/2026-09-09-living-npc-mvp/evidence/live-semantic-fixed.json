@@ -1,0 +1,526 @@
+{
+  "kind": "real-provider-world-contract",
+  "calls": [
+    {
+      "model": "deepseek-v4-flash-vision-exp",
+      "latencyMs": 7018,
+      "usage": {
+        "inputTokens": 1722,
+        "cacheHitTokens": 0,
+        "outputTokens": 711,
+        "totalTokens": 2433
+      },
+      "finishReason": "tool_calls",
+      "toolNames": ["inspect_visible"],
+      "reasoningPresent": true
+    },
+    {
+      "model": "deepseek-v4-flash-vision-exp",
+      "latencyMs": 1885,
+      "usage": {
+        "inputTokens": 2491,
+        "cacheHitTokens": 2432,
+        "outputTokens": 142,
+        "totalTokens": 2633
+      },
+      "finishReason": "tool_calls",
+      "toolNames": ["propose_intent"],
+      "reasoningPresent": true
+    },
+    {
+      "model": "deepseek-v4-flash-vision-exp",
+      "latencyMs": 7283,
+      "usage": {
+        "inputTokens": 3621,
+        "cacheHitTokens": 2560,
+        "outputTokens": 737,
+        "totalTokens": 4358
+      },
+      "finishReason": "tool_calls",
+      "toolNames": ["propose_intent"],
+      "reasoningPresent": true
+    },
+    {
+      "model": "deepseek-v4-pro",
+      "latencyMs": 26809,
+      "usage": {
+        "inputTokens": 2854,
+        "cacheHitTokens": 0,
+        "outputTokens": 2085,
+        "totalTokens": 4939
+      },
+      "finishReason": "stop",
+      "reasoningPresent": true
+    }
+  ],
+  "rounds": [
+    {
+      "input": "阿岚，你好。我想认识你。你愿意先在附近找些吃的吗？",
+      "observation": {
+        "character": {
+          "entityId": "npc-3",
+          "lifecycle": "active",
+          "incarnation": "character-1",
+          "revision": 0,
+          "policyRevision": 1,
+          "profile": {
+            "name": "阿岚",
+            "personality": "谨慎好奇，友善但有自己的目标，珍惜食物，遇险先保护自己。说简短自然的中文。",
+            "riskTolerance": 0.25
+          },
+          "currentGoal": {
+            "revision": 0,
+            "requestId": "fallback-life",
+            "goal": {
+              "kind": "forage"
+            },
+            "status": "active"
+          },
+          "memory": {
+            "revision": 0,
+            "throughCursor": 0,
+            "summary": ""
+          },
+          "eventCursor": 1,
+          "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+          "behavior": "idle",
+          "hunger": 60
+        },
+        "self": {
+          "position": [-1.5, 9, 0.5],
+          "health": 20
+        },
+        "visibleEntities": [
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-1",
+              "revision": 1
+            },
+            "type": "player",
+            "distance": 2,
+            "position": [0.5, 9, 0.5]
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-2",
+              "revision": 1
+            },
+            "type": "creature",
+            "distance": 2.8284271247461903,
+            "position": [-3.5, 9, 2.5]
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-3",
+              "revision": 1
+            },
+            "type": "creature",
+            "distance": 3,
+            "position": [1.5, 9, 0.5]
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-4",
+              "revision": 1
+            },
+            "type": "world-item",
+            "distance": 3.6055512754639896,
+            "position": [-4.5, 9, 2.5],
+            "stack": {
+              "itemId": "berry",
+              "count": 1
+            }
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-5",
+              "revision": 1
+            },
+            "type": "npc",
+            "distance": 7.211102550927979,
+            "position": [-7.5, 9, 4.5]
+          }
+        ],
+        "visiblePois": [
+          {
+            "target": {
+              "kind": "poi",
+              "ref": "target-6",
+              "revision": 1
+            },
+            "type": "home",
+            "position": [1.5, 9, 0.5],
+            "distance": 3
+          },
+          {
+            "target": {
+              "kind": "poi",
+              "ref": "target-7",
+              "revision": 1
+            },
+            "type": "camp",
+            "position": [-7.5, 9, 4.5],
+            "distance": 7.211102550927978
+          },
+          {
+            "target": {
+              "kind": "poi",
+              "ref": "target-8",
+              "revision": 1
+            },
+            "type": "home",
+            "position": [-7.5, 9, 4.5],
+            "distance": 7.211102550927978
+          },
+          {
+            "target": {
+              "kind": "poi",
+              "ref": "target-9",
+              "revision": 1
+            },
+            "type": "food",
+            "position": [-6.5, 9, 7.5],
+            "distance": 8.602325267042627
+          }
+        ],
+        "events": [
+          {
+            "cursor": 1,
+            "at": 0,
+            "type": "dialogue-heard",
+            "text": "阿岚，你好。我想认识你。你愿意先在附近找些吃的吗？"
+          }
+        ],
+        "cursor": 1
+      },
+      "proposal": {
+        "goal": {
+          "kind": "forage"
+        },
+        "say": "好，我去找点吃的。"
+      },
+      "receipt": {
+        "ok": true,
+        "data": {
+          "kind": "intent",
+          "accepted": true,
+          "character": {
+            "entityId": "npc-3",
+            "lifecycle": "active",
+            "incarnation": "character-1",
+            "revision": 1,
+            "policyRevision": 1,
+            "profile": {
+              "name": "阿岚",
+              "personality": "谨慎好奇，友善但有自己的目标，珍惜食物，遇险先保护自己。说简短自然的中文。",
+              "riskTolerance": 0.25
+            },
+            "currentGoal": {
+              "revision": 1,
+              "requestId": "live-round-0",
+              "goal": {
+                "kind": "forage"
+              },
+              "status": "active"
+            },
+            "memory": {
+              "revision": 0,
+              "throughCursor": 0,
+              "summary": ""
+            },
+            "eventCursor": 2,
+            "lastSpeech": "好，我去找点吃的。",
+            "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+            "behavior": "idle",
+            "hunger": 60
+          }
+        },
+        "frontier": {
+          "worldId": "seedlands:g3:living-npc-real-provider",
+          "epoch": "headless:living-npc-real-provider",
+          "worldRevision": 1,
+          "commitSequence": 5,
+          "physicsTick": 0,
+          "fluidWorkSequence": 0,
+          "logicObservationSequence": 0
+        }
+      }
+    },
+    {
+      "input": "我就在你身边。先放下找食物的事，跟着我走一会儿吧。你为什么愿意跟我来？",
+      "observation": {
+        "character": {
+          "entityId": "npc-3",
+          "lifecycle": "active",
+          "incarnation": "character-1",
+          "revision": 1,
+          "policyRevision": 1,
+          "profile": {
+            "name": "阿岚",
+            "personality": "谨慎好奇，友善但有自己的目标，珍惜食物，遇险先保护自己。说简短自然的中文。",
+            "riskTolerance": 0.25
+          },
+          "currentGoal": {
+            "revision": 1,
+            "requestId": "live-round-0",
+            "goal": {
+              "kind": "forage"
+            },
+            "status": "active"
+          },
+          "memory": {
+            "revision": 0,
+            "throughCursor": 0,
+            "summary": ""
+          },
+          "eventCursor": 3,
+          "lastSpeech": "好，我去找点吃的。",
+          "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+          "behavior": "idle",
+          "hunger": 60
+        },
+        "self": {
+          "position": [-1.5, 9, 0.5],
+          "health": 20
+        },
+        "visibleEntities": [
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-1",
+              "revision": 1
+            },
+            "type": "player",
+            "distance": 2,
+            "position": [0.5, 9, 0.5]
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-2",
+              "revision": 1
+            },
+            "type": "creature",
+            "distance": 2.8284271247461903,
+            "position": [-3.5, 9, 2.5]
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-3",
+              "revision": 1
+            },
+            "type": "creature",
+            "distance": 3,
+            "position": [1.5, 9, 0.5]
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-4",
+              "revision": 1
+            },
+            "type": "world-item",
+            "distance": 3.6055512754639896,
+            "position": [-4.5, 9, 2.5],
+            "stack": {
+              "itemId": "berry",
+              "count": 1
+            }
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-5",
+              "revision": 1
+            },
+            "type": "npc",
+            "distance": 8.533674707115525,
+            "position": [-8.956614735027909, 9, 4.65000008436481]
+          }
+        ],
+        "visiblePois": [
+          {
+            "target": {
+              "kind": "poi",
+              "ref": "target-6",
+              "revision": 1
+            },
+            "type": "home",
+            "position": [1.5, 9, 0.5],
+            "distance": 3
+          },
+          {
+            "target": {
+              "kind": "poi",
+              "ref": "target-7",
+              "revision": 1
+            },
+            "type": "camp",
+            "position": [-7.5, 9, 4.5],
+            "distance": 7.211102550927978
+          },
+          {
+            "target": {
+              "kind": "poi",
+              "ref": "target-8",
+              "revision": 1
+            },
+            "type": "home",
+            "position": [-7.5, 9, 4.5],
+            "distance": 7.211102550927978
+          },
+          {
+            "target": {
+              "kind": "poi",
+              "ref": "target-9",
+              "revision": 1
+            },
+            "type": "food",
+            "position": [-6.5, 9, 7.5],
+            "distance": 8.602325267042627
+          }
+        ],
+        "events": [
+          {
+            "cursor": 1,
+            "at": 0,
+            "type": "dialogue-heard",
+            "text": "阿岚，你好。我想认识你。你愿意先在附近找些吃的吗？"
+          },
+          {
+            "cursor": 2,
+            "at": 0,
+            "type": "speech",
+            "text": "好，我去找点吃的。"
+          },
+          {
+            "cursor": 3,
+            "at": 1,
+            "type": "dialogue-heard",
+            "text": "我就在你身边。先放下找食物的事，跟着我走一会儿吧。你为什么愿意跟我来？"
+          }
+        ],
+        "cursor": 3
+      },
+      "proposal": {
+        "goal": {
+          "kind": "forage"
+        },
+        "say": "我有点饿了，先摘点吃的再聊吧。"
+      },
+      "receipt": {
+        "ok": true,
+        "data": {
+          "kind": "intent",
+          "accepted": true,
+          "character": {
+            "entityId": "npc-3",
+            "lifecycle": "active",
+            "incarnation": "character-1",
+            "revision": 2,
+            "policyRevision": 1,
+            "profile": {
+              "name": "阿岚",
+              "personality": "谨慎好奇，友善但有自己的目标，珍惜食物，遇险先保护自己。说简短自然的中文。",
+              "riskTolerance": 0.25
+            },
+            "currentGoal": {
+              "revision": 2,
+              "requestId": "live-round-1",
+              "goal": {
+                "kind": "forage"
+              },
+              "status": "active"
+            },
+            "memory": {
+              "revision": 0,
+              "throughCursor": 0,
+              "summary": ""
+            },
+            "eventCursor": 4,
+            "lastSpeech": "我有点饿了，先摘点吃的再聊吧。",
+            "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+            "behavior": "idle",
+            "hunger": 60
+          }
+        },
+        "frontier": {
+          "worldId": "seedlands:g3:living-npc-real-provider",
+          "epoch": "headless:living-npc-real-provider",
+          "worldRevision": 1,
+          "commitSequence": 88,
+          "physicsTick": 60,
+          "fluidWorkSequence": 0,
+          "logicObservationSequence": 20
+        }
+      }
+    }
+  ],
+  "compression": {
+    "source": "complete actual Flash tool history plus Authority public events; forced mechanism threshold",
+    "kind": "pro",
+    "memory": {
+      "summary": "Memory summary (through event cursor 4):\n- Character: 阿岚 (npc-3), health 20, hunger 60, empty inventory, riskTolerance 0.25. Active goal: forage (live-round-1). Last speech: “我有点饿了，先摘点吃的再聊吧。”\n- Position: [-1.5, 9, 0.5].\n- Visible: player target-1 dist 2 at [0.5,9,0.5]; creatures target-2 dist 2.83 at [-3.5,9,2.5] and target-3 dist 3 at [1.5,9,0.5]; world-item berry target-4 count 1 dist 3.61 at [-4.5,9,2.5]; npc target-5 dist ~8.53 near [-8.96,9,4.65].\n- POIs: home target-6 at [1.5,9,0.5] dist 3; camp/home target-7/8 at [-7.5,9,4.5] dist ~7.21; food target-9 at [-6.5,9,7.5] dist ~8.60.\n- Dialogue history: player asked 阿岚 to find food nearby; 阿岚 agreed to forage. Player then asked her to stop foraging and follow him, and asked why she would come; 阿岚 replied she was hungry and would pick food first.\n- Confirmed authority outcomes: two propose_intent calls were accepted, both with goal kind forage.\n- Observed inspect result: target-4 is a world-item berry, count 1.\n- Unconfirmed model reasoning: model viewed the berry as close, chose to keep foraging, and reasoned it did not want to abandon food or follow a stranger unsafely; it prioritized picking the berry first.",
+      "throughCursor": 4,
+      "expectedMemoryRevision": 0
+    },
+    "receipt": {
+      "ok": true,
+      "data": {
+        "kind": "memory",
+        "character": {
+          "entityId": "npc-3",
+          "lifecycle": "active",
+          "incarnation": "character-1",
+          "revision": 2,
+          "policyRevision": 1,
+          "profile": {
+            "name": "阿岚",
+            "personality": "谨慎好奇，友善但有自己的目标，珍惜食物，遇险先保护自己。说简短自然的中文。",
+            "riskTolerance": 0.25
+          },
+          "currentGoal": {
+            "revision": 2,
+            "requestId": "live-round-1",
+            "goal": {
+              "kind": "forage"
+            },
+            "status": "active"
+          },
+          "memory": {
+            "revision": 1,
+            "throughCursor": 4,
+            "summary": "Memory summary (through event cursor 4):\n- Character: 阿岚 (npc-3), health 20, hunger 60, empty inventory, riskTolerance 0.25. Active goal: forage (live-round-1). Last speech: “我有点饿了，先摘点吃的再聊吧。”\n- Position: [-1.5, 9, 0.5].\n- Visible: player target-1 dist 2 at [0.5,9,0.5]; creatures target-2 dist 2.83 at [-3.5,9,2.5] and target-3 dist 3 at [1.5,9,0.5]; world-item berry target-4 count 1 dist 3.61 at [-4.5,9,2.5]; npc target-5 dist ~8.53 near [-8.96,9,4.65].\n- POIs: home target-6 at [1.5,9,0.5] dist 3; camp/home target-7/8 at [-7.5,9,4.5] dist ~7.21; food target-9 at [-6.5,9,7.5] dist ~8.60.\n- Dialogue history: player asked 阿岚 to find food nearby; 阿岚 agreed to forage. Player then asked her to stop foraging and follow him, and asked why she would come; 阿岚 replied she was hungry and would pick food first.\n- Confirmed authority outcomes: two propose_intent calls were accepted, both with goal kind forage.\n- Observed inspect result: target-4 is a world-item berry, count 1.\n- Unconfirmed model reasoning: model viewed the berry as close, chose to keep foraging, and reasoned it did not want to abandon food or follow a stranger unsafely; it prioritized picking the berry first."
+          },
+          "eventCursor": 4,
+          "lastSpeech": "我有点饿了，先摘点吃的再聊吧。",
+          "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+          "behavior": "idle",
+          "hunger": 60
+        }
+      },
+      "frontier": {
+        "worldId": "seedlands:g3:living-npc-real-provider",
+        "epoch": "headless:living-npc-real-provider",
+        "worldRevision": 1,
+        "commitSequence": 169,
+        "physicsTick": 120,
+        "fluidWorkSequence": 0,
+        "logicObservationSequence": 40
+      }
+    },
+    "generationBefore": 1,
+    "generationAfter": 2
+  },
+  "checkpoint": {
+    "saved": true,
+    "characterId": "npc-3"
+  },
+  "status": "passed"
+}

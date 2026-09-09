@@ -1,0 +1,102 @@
+import { describe, expect, it } from 'vitest';
+import { HeadlessSession } from '../../packages/game-core/src/server/headless/headless-session';
+import { BrowserCharacterAuthority } from '../../apps/web/src/worker/authority-worker-character-control';
+import { testCorePlatform } from '../support/core-platform';
+
+const profile = { name: 'Lin', personality: 'Practical and kind.', riskTolerance: 0.25 } as const;
+
+describe('Browser character authority', () => {
+  it('enforces proximity for dialogue and requires an Authority binding for writes', async () => {
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'browser-character' });
+    const worldEpoch = 'world:0';
+    const authority = new BrowserCharacterAuthority({
+      runtime: () => session.runtime,
+      worldId: () => 'world-id',
+      worldEpoch: () => worldEpoch,
+    });
+    const created = authority.trusted({ kind: 'create', profile });
+    if (!created.ok || created.data.kind !== 'created') throw new Error('Character was not created.');
+    const entityId = created.data.character.entityId;
+    expect(
+      authority.trusted({
+        kind: 'intent',
+        entityId,
+        requestId: 'unbound',
+        expectedRevision: 0,
+        goal: { kind: 'idle' },
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'WORLD_PERMISSION_DENIED' } });
+
+    expect(authority.trusted({ kind: 'dialogue', entityId, text: 'Hello.' })).toMatchObject({ ok: true });
+    session.runtime.setPlayerPosition([100, 34, 100]);
+    expect(authority.trusted({ kind: 'dialogue', entityId, text: 'Too far.' })).toMatchObject({
+      ok: false,
+      error: { code: 'CHARACTER_UNAVAILABLE' },
+    });
+    await session.dispose();
+  });
+
+  it('rejects forged, repeated and stale-generation bound requests before mutation', async () => {
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'browser-binding' });
+    let worldEpoch = 'world:0';
+    const authority = new BrowserCharacterAuthority({
+      runtime: () => session.runtime,
+      worldId: () => 'world-id',
+      worldEpoch: () => worldEpoch,
+    });
+    const created = authority.trusted({ kind: 'create', profile });
+    if (!created.ok || created.data.kind !== 'created') throw new Error('Character was not created.');
+    const entityId = created.data.character.entityId;
+    const binding = authority.bind(entityId);
+    expect(authority.control(binding, 1, { kind: 'observe', entityId })).toMatchObject({ ok: true });
+    expect(
+      authority.control(binding, 1, {
+        kind: 'memory',
+        entityId,
+        expectedMemoryRevision: 0,
+        throughCursor: 0,
+        summary: 'must not apply',
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'CHARACTER_SEQUENCE_STALE' } });
+    expect(authority.trusted({ kind: 'inspect', entityId })).toMatchObject({
+      ok: true,
+      data: { character: { memory: { revision: 0 } } },
+    });
+    expect(
+      authority.control({ ...binding, entityId: 'forged' }, 2, { kind: 'observe', entityId: 'forged' }),
+    ).toMatchObject({ ok: false, error: { code: 'CHARACTER_BINDING_INVALID' } });
+    worldEpoch = 'world:1';
+    expect(authority.control(binding, 2, { kind: 'observe', entityId })).toMatchObject({
+      ok: false,
+      error: { code: 'CHARACTER_BINDING_INVALID' },
+    });
+    expect(authority.unbind(binding)).toBe(true);
+    expect(authority.unbind(binding)).toBe(false);
+    await session.dispose();
+  });
+
+  it('invalidates an existing binding when its character dies and retains terminal identity', async () => {
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'browser-character-death' });
+    const authority = new BrowserCharacterAuthority({
+      runtime: () => session.runtime,
+      worldId: () => 'world-id',
+      worldEpoch: () => 'world:0',
+    });
+    const created = authority.trusted({ kind: 'create', profile });
+    if (!created.ok || created.data.kind !== 'created') throw new Error('Character was not created.');
+    const entityId = created.data.character.entityId;
+    const binding = authority.bind(entityId);
+    session.runtime.server.despawnEntity(entityId);
+
+    expect(authority.control(binding, 1, { kind: 'observe', entityId })).toMatchObject({
+      ok: false,
+      error: { code: 'CHARACTER_BINDING_INVALID' },
+    });
+    expect(authority.trusted({ kind: 'list' })).toMatchObject({
+      ok: true,
+      data: { kind: 'list', characters: [{ entityId, lifecycle: 'deceased' }] },
+    });
+    expect(() => authority.bind(entityId)).toThrow(/CHARACTER_UNAVAILABLE/);
+    await session.dispose();
+  });
+});

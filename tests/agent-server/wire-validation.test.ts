@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import {
-  CHARACTER_OBSERVATION_MAX_EVENTS,
-  CONTROLLER_FRAME_MAX_BYTES,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+import { CHARACTER_OBSERVATION_MAX_EVENTS } from '@seedlands/game-core/runtime/character-control-protocol';
+import { CONTROLLER_FRAME_MAX_BYTES } from '@seedlands/cognition-protocol';
 import { parseControllerClientMessage } from '../../apps/agent-server/src/wire-validation';
 import { binding, event, observation } from './fixtures';
 

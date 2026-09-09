@@ -30,6 +30,7 @@ export function readWorldHarnessRpcRequest(value: unknown): WorldHarnessRpcReque
       'clock',
       'logic',
       'actions',
+      'character',
       'barrier',
       'trace',
       'checkpoint',
@@ -102,6 +103,12 @@ export async function dispatchWorldHarnessRpc(
           request.args.length <= 1
             ? await world.actions(request.args[0] as never)
             : requestError(request.requestId, 'WORLD_RPC_INVALID', 'actions takes zero or one argument.').result;
+        break;
+      case 'character':
+        result =
+          request.args.length === 1
+            ? await world.character(request.args[0] as never)
+            : requestError(request.requestId, 'WORLD_RPC_INVALID', 'character takes one argument.').result;
         break;
       case 'barrier':
         result =

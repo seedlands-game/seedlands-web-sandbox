@@ -24,12 +24,27 @@ type Goal =
   | Readonly<{ kind: 'hold' }>
   | Readonly<{ kind: 'attack'; target: LogicEntity }>
   | Readonly<{ kind: 'consume'; target: LogicEntity }>
-  | Readonly<{ kind: 'move'; target: LogicPosition; targetEntityId?: string; poiId?: string }>;
+  | Readonly<{
+      kind: 'move';
+      target: LogicPosition;
+      targetEntityId?: string;
+      poiId?: string;
+      actionId?: string;
+    }>;
 
 const finitePosition = (position: readonly number[]) => position.length === 3 && position.every(Number.isFinite);
 const distance = (left: LogicPosition, right: LogicPosition) =>
   Math.hypot(left[0] - right[0], left[1] - right[1], left[2] - right[2]);
 const clonePosition = (position: readonly [number, number, number]): LogicPosition => [...position];
+const followPlannedStep = (from: LogicPosition, to: LogicPosition) => {
+  const dx = to[0] - from[0];
+  const dz = to[2] - from[2];
+  const length = Math.hypot(dx, dz);
+  return {
+    wish: length <= 1e-6 ? { x: 0, z: 0 } : { x: dx / length, z: dz / length },
+    jumpRequested: to[1] > from[1] + 0.5,
+  };
+};
 
 function validateObservation(observation: LogicObservation): void {
   if (
@@ -144,6 +159,19 @@ function chooseGoal(
   if (state.archetype !== 'night-stalker' && threat)
     return { kind: 'move', target: fleeTarget(entity, threat), targetEntityId: threat.id };
 
+  if (
+    entry.activeAction?.type === 'move-to' &&
+    entry.activeAction.targetPosition &&
+    entry.activeAction.status !== 'failed' &&
+    entry.activeAction.status !== 'interrupted'
+  )
+    return {
+      kind: 'move',
+      target: clonePosition(entry.activeAction.path[entry.activeAction.pathIndex] ?? entry.activeAction.targetPosition),
+      actionId: entry.activeAction.id,
+      ...(entry.activeAction.targetEntityId ? { targetEntityId: entry.activeAction.targetEntityId } : {}),
+    };
+
   if (state.archetype === 'grazer') {
     const food = visibleNearest(
       entity,
@@ -203,6 +231,7 @@ const samePosition = (left?: readonly number[], right?: readonly number[]) =>
 
 function matchesAction(goal: Goal, action: ActorAction | null): boolean {
   if (!action) return false;
+  if (goal.kind === 'move' && goal.actionId === action.id) return true;
   if (goal.kind === 'attack') return action.type === 'attack' && action.targetEntityId === goal.target.id;
   if (goal.kind === 'consume') return action.type === 'eat' && action.targetEntityId === goal.target.id;
   if (goal.kind !== 'move') return action.type === 'idle';
@@ -242,7 +271,9 @@ function decideActor(entry: ActorObservation, observation: LogicObservation): Lo
   let wish = { x: 0, z: 0 };
   let jumpRequested = false;
   if (goal.kind === 'move') {
-    const step = terrain.nextStep(entity.bodyKind, entity.position, goal.target);
+    const step = goal.actionId
+      ? followPlannedStep(entity.position, goal.target)
+      : terrain.nextStep(entity.bodyKind, entity.position, goal.target);
     if (!step || terrain.hasMissingData) return holdIntent(entry, entity, terrain);
     wish = step.wish;
     jumpRequested = step.jumpRequested && entity.grounded;

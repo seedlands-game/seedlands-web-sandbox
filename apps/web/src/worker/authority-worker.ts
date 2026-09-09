@@ -25,6 +25,7 @@ import { SwitchableAuthorityPersistence } from './authority-worker-persistence';
 import type { AuthorityPersistence } from '@seedlands/game-core/server/authority/authority-runtime-options';
 import { decodeAuthorityBootstrapResult } from './authority-worker-bootstrap';
 import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } from './authority-worker-response';
+import { BrowserCharacterAuthority } from './authority-worker-character-control';
 
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
@@ -37,6 +38,7 @@ let epoch = '';
 let runtimeEpoch = '';
 let fluidEpoch = 1;
 let ingress: BrowserAuthorityIngress | null = null;
+let characterAuthority: BrowserCharacterAuthority | null = null;
 let lastSnapshotPublishedAt = Number.NEGATIVE_INFINITY;
 let lastGameplayPublishedAt = Number.NEGATIVE_INFINITY;
 let bootstrapRequestSequence = 0;
@@ -171,6 +173,11 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
   runtimeEpoch = nextRuntimeEpoch;
   fluidEpoch = nextFluidEpoch;
   worldEpoch = `${epoch}:world:${worldRestoreSequence}`;
+  characterAuthority = new BrowserCharacterAuthority({
+    runtime: () => runtime!,
+    worldId: () => persistence!.worldId,
+    worldEpoch: () => worldEpoch,
+  });
 };
 
 const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority' }>) => {
@@ -223,6 +230,11 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     clockNow: browserCorePlatform.now,
   });
   ingress = new BrowserAuthorityIngress(runtime.playerId);
+  characterAuthority = new BrowserCharacterAuthority({
+    runtime: () => runtime!,
+    worldId: () => persistence!.worldId,
+    worldEpoch: () => worldEpoch,
+  });
   post({ kind: 'authority-ready', protocolVersion: PROTOCOL_VERSION, epoch, ready: runtime.ready() });
   interval = setInterval(tick, 8);
 };
@@ -359,6 +371,29 @@ const handleCurrent = async (message: AuthorityRequest) => {
     case 'save-authority':
       postAuthoritySuccess(post, epoch, current, message.requestId, await current.save(), { gameplay: true });
       break;
+    case 'character-control':
+      postAuthoritySuccess(post, epoch, current, message.requestId, characterAuthority!.trusted(message.request), {
+        gameplay: true,
+      });
+      break;
+    case 'bind-character':
+      postAuthoritySuccess(post, epoch, current, message.requestId, characterAuthority!.bind(message.entityId));
+      break;
+    case 'bound-character-control':
+      postAuthoritySuccess(
+        post,
+        epoch,
+        current,
+        message.requestId,
+        characterAuthority!.control(message.binding, message.sequence, message.request),
+        { gameplay: true },
+      );
+      break;
+    case 'unbind-character':
+      postAuthoritySuccess(post, epoch, current, message.requestId, {
+        unbound: characterAuthority!.unbind(message.binding),
+      });
+      break;
     case 'fluid-candidate':
       ingress!.fluid('execute');
       commitFluidCandidateAndPublish(epoch, current, message.candidate, post);
@@ -433,6 +468,8 @@ const handle = async (message: AuthorityRequest) => {
     pendingBootstrap = null;
     worldHarness = null;
     ingress = null;
+    characterAuthority?.clear();
+    characterAuthority = null;
     runtime = null;
     scope.close();
     return;

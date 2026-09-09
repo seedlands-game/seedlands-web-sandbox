@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ContextSession } from '../../apps/agent-server/src/context-session';
 import type { CognitionModel, ModelCompletion } from '../../apps/agent-server/src/model-types';
-import { event } from './fixtures';
+import { event, observation } from './fixtures';
 
 const memory = { revision: 7, throughCursor: 0, summary: 'old' };
 
@@ -18,7 +18,27 @@ describe('ContextSession rotation', () => {
     const session = new ContextSession(
       [
         { role: 'user', content: 'older evidence' },
-        { role: 'assistant', content: 'public response', reasoning_content: 'private source reasoning' },
+        {
+          role: 'assistant',
+          content: 'public response',
+          reasoning_content: 'private source reasoning',
+          tool_calls: [
+            {
+              id: 'proposal-1',
+              type: 'function',
+              function: { name: 'propose_intent', arguments: '{"goal":{"kind":"forage"}}' },
+            },
+          ],
+        },
+        {
+          role: 'tool',
+          tool_call_id: 'proposal-1',
+          content: '{"status":"accepted","revision":8}',
+        },
+        {
+          role: 'user',
+          content: JSON.stringify({ instruction: 'decide', observation: observation() }),
+        },
       ],
       {
         estimateTokens: () => 20,
@@ -51,6 +71,22 @@ describe('ContextSession rotation', () => {
     expect(session.generation).toBe(1);
     expect(JSON.stringify(compressionMessages)).not.toContain('private source reasoning');
     expect(JSON.stringify(compressionMessages)).toContain('public response');
+    expect(compressionMessages.map((message) => message.role)).toEqual(['system', 'user']);
+    expect(compressionMessages[1]?.tool_calls).toBeUndefined();
+    const transcript = JSON.parse(compressionMessages[1]?.content ?? '{}') as {
+      priorMemory?: { source?: string; certainty?: string };
+      records?: { source?: string; certainty?: string; data?: unknown }[];
+    };
+    expect(transcript.priorMemory).toMatchObject({ source: 'prior-memory', certainty: 'confirmed' });
+    expect(transcript.records).toContainEqual(
+      expect.objectContaining({ source: 'model-proposal', certainty: 'unconfirmed' }),
+    );
+    expect(transcript.records).toContainEqual(
+      expect.objectContaining({ source: 'authority-receipt', certainty: 'confirmed' }),
+    );
+    expect(transcript.records).toContainEqual(
+      expect.objectContaining({ source: 'authorized-observation', certainty: 'observed' }),
+    );
 
     expect(session.commitPreparedRotation()).toBe(true);
     expect(session.generation).toBe(2);
@@ -82,6 +118,69 @@ describe('ContextSession rotation', () => {
     session.rejectPreparedRotation();
     expect(session.messages).toEqual(before);
     expect(session.generation).toBe(1);
+  });
+
+  it.each([
+    {
+      name: 'tool calls',
+      completion: {
+        message: {
+          role: 'assistant' as const,
+          content: 'not a memory',
+          tool_calls: [
+            {
+              id: 'bad-control',
+              type: 'function' as const,
+              function: { name: 'propose_intent', arguments: '{"goal":{"kind":"forage"}}' },
+            },
+          ],
+        },
+        finishReason: 'tool_calls',
+        usage: null,
+        latencyMs: 1,
+      },
+    },
+    {
+      name: 'provider control markup',
+      completion: {
+        message: {
+          role: 'assistant' as const,
+          content: '<｜｜DSML｜｜tool_calls><｜｜DSML｜｜invoke name="propose_intent">',
+        },
+        finishReason: 'stop',
+        usage: null,
+        latencyMs: 1,
+      },
+    },
+    {
+      name: 'empty output',
+      completion: {
+        message: { role: 'assistant' as const, content: '   ' },
+        finishReason: 'stop',
+        usage: null,
+        latencyMs: 1,
+      },
+    },
+    {
+      name: 'oversized output',
+      completion: {
+        message: { role: 'assistant' as const, content: 'x'.repeat(16_001) },
+        finishReason: 'stop',
+        usage: null,
+        latencyMs: 1,
+      },
+    },
+  ])('rejects $name without replacing the old history', async ({ completion }) => {
+    const session = new ContextSession([{ role: 'user', content: 'preserve this history' }], {
+      estimateTokens: () => 20,
+      softThreshold: 10,
+      hardThreshold: 30,
+    });
+    const before = [...session.messages];
+    const model: CognitionModel = { complete: async () => completion };
+    expect(await session.rotate(model, memory)).toMatchObject({ kind: 'none', error: 'compression-failed' });
+    expect(session.messages).toEqual(before);
+    expect(session.hasPreparedRotation).toBe(false);
   });
 
   it('uses deterministic recovery at the hard threshold and never truncates an open tool pair', async () => {

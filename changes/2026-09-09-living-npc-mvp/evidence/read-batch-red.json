@@ -1,0 +1,22 @@
+{
+  "kind": "real-provider-world-contract",
+  "calls": [
+    {
+      "model": "deepseek-v4-flash-vision-exp",
+      "latencyMs": 13757,
+      "usage": {
+        "inputTokens": 1534,
+        "cacheHitTokens": 0,
+        "outputTokens": 1397,
+        "totalTokens": 2931
+      },
+      "finishReason": "tool_calls",
+      "toolNames": ["available_actions", "inspect_visible"],
+      "reasoningPresent": true
+    }
+  ],
+  "rounds": [],
+  "compression": null,
+  "status": "failed",
+  "error": "Model decision failed: invalid-tool"
+}

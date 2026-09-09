@@ -1,9 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type {
-  ControllerClientMessage,
-  ControllerHostMessage,
-  ControllerReceipt,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+import type { ControllerReceipt } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { ControllerClientMessage, ControllerHostMessage } from '@seedlands/cognition-protocol';
 import { CognitionRuntime } from '../../apps/agent-server/src/runtime';
 import type { CognitionModel, ModelCompletion, ModelRequest } from '../../apps/agent-server/src/model-types';
 import { ContextSession } from '../../apps/agent-server/src/context-session';
@@ -67,8 +64,15 @@ describe('CognitionRuntime', () => {
     );
     expect(firstIntent?.requestId).toBe('request-1');
 
+    runtime.receive({
+      kind: 'control',
+      protocolVersion: 1,
+      binding: binding(),
+      sequence: 2,
+      command: 'pause',
+    });
     runtime.receive(
-      receiptMessage(2, {
+      receiptMessage(3, {
         requestId: 'request-1',
         actionId: 'goal-1',
         status: 'accepted',
@@ -76,11 +80,19 @@ describe('CognitionRuntime', () => {
         revision: 9,
       }),
     );
+    expect(sent.at(-1)).toMatchObject({ kind: 'status', state: 'paused' });
+    runtime.receive({
+      kind: 'control',
+      protocolVersion: 1,
+      binding: binding(),
+      sequence: 4,
+      command: 'resume',
+    });
     runtime.receive({
       kind: 'observe',
       protocolVersion: 1,
       binding: binding(),
-      sequence: 3,
+      sequence: 5,
       observation: observation({ events: [event(2)], cursor: 2 }),
     });
     await vi.advanceTimersByTimeAsync(250);
@@ -255,14 +267,29 @@ describe('CognitionRuntime', () => {
     expect(models).toEqual([PRO_MODEL]);
     expect(sent).toContainEqual(expect.objectContaining({ kind: 'memory', requestId: 'compression-request-1' }));
 
+    runtime.receive({
+      kind: 'control',
+      protocolVersion: 1,
+      binding: binding(),
+      sequence: 2,
+      command: 'pause',
+    });
     runtime.receive(
-      receiptMessage(2, {
+      receiptMessage(3, {
         requestId: 'compression-request-1',
         status: 'accepted',
         cursor: 1,
         revision: 8,
       }),
     );
+    expect(sent.at(-1)).toMatchObject({ kind: 'status', state: 'paused' });
+    runtime.receive({
+      kind: 'control',
+      protocolVersion: 1,
+      binding: binding(),
+      sequence: 4,
+      command: 'resume',
+    });
     await vi.advanceTimersByTimeAsync(250);
     expect(models).toEqual([PRO_MODEL, FLASH_MODEL]);
     expect(sent).toContainEqual(expect.objectContaining({ kind: 'intent', requestId: 'compression-request-2' }));

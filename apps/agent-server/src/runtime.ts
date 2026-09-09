@@ -1,10 +1,9 @@
 import type {
   CharacterObservation,
   ControlBinding,
-  ControllerClientMessage,
-  ControllerHostMessage,
   ControllerReceipt,
 } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { ControllerClientMessage, ControllerHostMessage } from '@seedlands/cognition-protocol';
 import { CognitionBudget, type BudgetReservation } from './budget.js';
 import { createCognitionGraph, decideWithGraph } from './cognition-graph.js';
 import { ContextSession, estimateWireTokens, type ContextLimit } from './context-session.js';
@@ -227,7 +226,7 @@ export class CognitionRuntime {
       this.pendingMemoryRequestId = null;
       this.deferredTrigger = false;
       this.scheduler.notifyEvent('context-reconciled');
-      this.status(this.pendingIntent ? 'awaiting-receipt' : 'ready');
+      this.status(this.paused ? 'paused' : this.pendingIntent ? 'awaiting-receipt' : 'ready');
       return;
     }
     if (receipt.requestId !== this.pendingIntent?.requestId) return;
@@ -251,7 +250,7 @@ export class CognitionRuntime {
       this.deferredTrigger = false;
       this.scheduler.notifyEvent('deferred-event');
     }
-    this.status('ready');
+    this.status(this.paused ? 'paused' : 'ready');
   }
 
   private beginDispatch(kind: 'event' | 'fallback'): Readonly<{ dispatched: boolean; completion: Promise<void> }> {

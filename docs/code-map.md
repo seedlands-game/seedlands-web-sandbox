@@ -2,7 +2,7 @@
 
 本页回答“从哪里开始读、某项行为由谁负责”。目录归属见[仓库结构规范](repository-structure.md)，宏观取舍见[长期目标与路线图](living-world-alignment.md)，运行方式与当前能力见 [README](../README.zh-CN.md)。
 
-核对日期：2026-09-09；活跃产品为 Web 与 game-core，Node Dedicated 已归档退出。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
+核对日期：2026-09-09；活跃产品为 Web、game-core 与本机认知服务，Node Dedicated 已归档退出。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
 
 首屏由 [prerender-entry.ts](../apps/web/src/app/ui/prerender-entry.ts) 在开发请求或构建前调用同一个 `AppRoot` 生成，浏览器入口随后对该 DOM 做严格 hydration；生成与注入脚本位于 `apps/web/scripts/prerendered-start-screen.*`。
 
@@ -150,3 +150,9 @@ Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通�
 - 有界 ECS 组件化尚未准入；当前实体状态仍由 `EntityStore` 的既有实现持有，不能将动作与动画扩展视为 ECS 迁移完成。
 
 PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给既有 [game-runtime-controls.ts](../apps/web/src/app/game-runtime-controls.ts)，`Game` 保持装配入口并满足文件规模门禁；地图状态仍归 `UiBridge`。
+
+## 单 NPC 认知路线
+
+从 [角色协议](../packages/game-core/src/runtime/character-control-protocol.ts) 读跨宿主合同，再读 core `server/simulation/character-runtime.ts` 的身体/目标/记忆所有权、[浏览器 Bridge](../apps/web/src/client/character/controller-bridge.ts) 的绑定和迟到消息门禁、[伙伴会话](../apps/web/src/app/gameplay/companion/companion-session.ts) 的玩家入口。`apps/agent-server/src/` 的图、调度、上下文和模型适配只产生提案；世界由 Authority 提交。行为与记忆决策见[现行认知基线](living-npc-cognition.md)。
+
+认知传输合同位于 `packages/cognition-protocol/src/index.ts`，由 Web 与 Agent Server 消费；只依赖 core 公开角色类型，core 不反向依赖。模型状态、上下文窗口和 token 用量不进入权威世界协议。角色执行在 `character-runtime.ts`、`character-goal-runtime.ts`、`character-runtime-types.ts` 和 `character-runtime-validation.ts` 按执行、目标、状态与输入验证分工。

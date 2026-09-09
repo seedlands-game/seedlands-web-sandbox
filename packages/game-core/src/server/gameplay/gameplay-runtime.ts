@@ -20,6 +20,8 @@ import { clonePosition, positionsInRange, voxelCenter } from './gameplay-geometr
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { CombatSnapshot, MeleeDefinition } from './combat-runtime';
 import { applyCombatDamage, isCombatantAvailable, validateCombatHit } from './gameplay-combat';
+import type { CharacterControlRequest, CharacterControlResult } from '../../runtime/character-control-protocol';
+import { executeGameplayCharacterRequest } from './gameplay-character-control';
 
 export type { GameplaySnapshot, GameplaySnapshotV1, GameplaySnapshotV2, GameplaySnapshotV3 } from './gameplay-snapshot';
 
@@ -71,6 +73,7 @@ export class GameplayRuntime {
           ),
         applyDamage: (actorId, targetId, damage) => this.applyCombatDamage(actorId, targetId, damage),
       },
+      changed: () => this.touch(),
     });
     for (const item of listItemDefinitions()) {
       const melee = getItemCapability(item.id, 'melee');
@@ -105,8 +108,7 @@ export class GameplayRuntime {
   }
 
   spawnWorldItem(position: Position, stack: ItemStack): GameplayEntity {
-    const entity = this.spawn({ type: 'world-item', position, stack });
-    return entity;
+    return this.spawn({ type: 'world-item', position, stack });
   }
 
   spawnAutonomous(input: EntitySpawn, registration: ActorRegistration): GameplayEntity {
@@ -114,6 +116,10 @@ export class GameplayRuntime {
     this.simulation.registerActor(entity.id, registration);
     this.touch();
     return entity;
+  }
+
+  character(request: CharacterControlRequest): CharacterControlResult {
+    return executeGameplayCharacterRequest(this, request);
   }
 
   getEntity(id: string): GameplayEntity | null {
@@ -466,27 +472,7 @@ export class GameplayRuntime {
   private advancePlayer(player: PlayerState, seconds: number, commits: WorldCommitResult[]): void {
     if (player.lifecycle !== 'alive') return;
     this.advanceBreak(player, seconds, commits);
-    player.hungerAccumulator += seconds;
-    while (player.hungerAccumulator >= 120) {
-      player.hungerAccumulator -= 120;
-      player.hunger = Math.max(0, player.hunger - 1);
-    }
-    if (player.hunger >= 16 && player.health < player.maxHealth) {
-      player.healingAccumulator += seconds;
-      while (player.healingAccumulator >= 10 && player.hunger >= 16 && player.health < player.maxHealth) {
-        player.healingAccumulator -= 10;
-        player.health += 1;
-        player.hunger -= 1;
-      }
-    } else player.healingAccumulator = 0;
-    if (player.hunger === 0) {
-      player.starvationAccumulator += seconds;
-      while (player.starvationAccumulator >= 15 && player.lifecycle === 'alive') {
-        player.starvationAccumulator -= 15;
-        player.health = Math.max(0, player.health - 1);
-        if (player.health === 0) this.killPlayer(player);
-      }
-    } else player.starvationAccumulator = 0;
+    player.advanceSurvival(seconds, () => this.killPlayer(player));
   }
 
   private advanceBreak(player: PlayerState, seconds: number, commits: WorldCommitResult[]): void {

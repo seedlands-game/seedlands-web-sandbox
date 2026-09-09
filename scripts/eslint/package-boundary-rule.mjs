@@ -26,6 +26,7 @@ export function createPackageBoundaryRule(workspaceRoot) {
     ['@seedlands/web', 'apps/web'],
     ['@seedlands/agent-server', 'apps/agent-server'],
     ['@seedlands/game-core', 'packages/game-core'],
+    ['@seedlands/cognition-protocol', 'packages/cognition-protocol'],
   ].map(([name, relativeRoot]) => {
     const root = normalize(resolve(workspaceRoot, relativeRoot));
     const manifest = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
@@ -34,7 +35,9 @@ export function createPackageBoundaryRule(workspaceRoot) {
   const packageByName = new Map(packageDefinitions.map((entry) => [entry.name, entry]));
   const ownerOf = (path) => packageDefinitions.find((entry) => within(normalize(path), entry.root));
   const allowedWorkspaceDirection = (owner, target) =>
-    owner.name === target.name || target.name === '@seedlands/game-core';
+    owner.name === target.name ||
+    target.name === '@seedlands/game-core' ||
+    (owner.name !== '@seedlands/game-core' && target.name === '@seedlands/cognition-protocol');
 
   return {
     meta: {

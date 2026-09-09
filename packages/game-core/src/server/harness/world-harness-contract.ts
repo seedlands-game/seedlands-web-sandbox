@@ -8,6 +8,7 @@ import type { FrozenGameSaveSnapshot } from '../persistence/game-save-snapshot';
 import type { ActorState } from '../simulation/actor-state';
 import type { ActorAction } from '../simulation/action-runtime';
 import type { WorldAuthorizationPolicy } from './world-authorization';
+import type { CharacterControlRequest, CharacterControlResult } from '../../runtime/character-control-protocol';
 
 export const WORLD_HARNESS_PROTOCOL_VERSION = 1 as const;
 export const WORLD_HARNESS_TRACE_CAPACITY = 256;
@@ -140,6 +141,7 @@ export interface WorldHarnessPort {
   clock(request: WorldClockRequest): Promise<WorldHarnessResult<WorldClockResult>>;
   logic(request: WorldLogicRequest): Promise<WorldHarnessResult<WorldLogicResult>>;
   actions(query?: WorldActionQuery): Promise<WorldHarnessResult<WorldActionQueryResult>>;
+  character(request: CharacterControlRequest): Promise<WorldHarnessResult<CharacterControlResult>>;
   barrier(
     request: WorldBarrierRequest,
   ): Promise<WorldHarnessResult<{ reached: true; kind: WorldBarrierRequest['kind'] }>>;

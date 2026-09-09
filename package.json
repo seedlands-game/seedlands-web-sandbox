@@ -18,9 +18,9 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @seedlands/web dev",
-    "build": "pnpm build:web",
+    "build": "pnpm build:web && pnpm build:agent",
     "build:web": "pnpm --filter @seedlands/web build",
-    "typecheck": "pnpm --filter @seedlands/game-core typecheck && pnpm --filter @seedlands/web typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit",
+    "typecheck": "pnpm --filter @seedlands/game-core typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/agent-server typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit",
     "lint": "eslint .",
     "lint:paths": "ls-lint",
     "format": "prettier --write .",
@@ -58,7 +58,10 @@
     "perf:adoption:summary": "node scripts/summarize-adoption-experiment.mjs",
     "test:pr15:integration": "playwright test changes/2026-09-08-pr15-main-sync/e2e/asset-package-integration.spec.ts",
     "test:gameplay-foundation": "playwright test changes/2026-09-08-gameplay-foundation/e2e",
-    "test:pr17:integration": "playwright test changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts"
+    "test:pr17:integration": "playwright test changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts",
+    "build:agent": "pnpm --filter @seedlands/agent-server build",
+    "agent:dev": "pnpm build:agent && pnpm --filter @seedlands/agent-server start",
+    "test:living-npc": "playwright test changes/2026-09-09-living-npc-mvp/e2e"
   },
   "dependencies": {},
   "devDependencies": {
@@ -86,7 +89,8 @@
     "vitest": "^4.1.11",
     "playcanvas": "^2.21.4",
     "svelte": "^5.57.0",
-    "tone": "^15.1.22"
+    "tone": "^15.1.22",
+    "@seedlands/cognition-protocol": "workspace:*"
   },
   "lint-staged": {
     "*.{ts,mts,cts,js,mjs,cjs,svelte}": [

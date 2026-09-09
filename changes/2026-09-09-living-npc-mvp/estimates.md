@@ -9,3 +9,9 @@
 真实DeepSeek验证采用有界样本：首轮最多12次Flash与3次Pro，每次输出上限4096，长上下文最多各一组128K/256K，估算API上限5美元（非承诺付费额度，按实际provider usage记录）；先小请求准入，失败分类而不盲重试。服务默认独立运行预算，禁止测试启动无限模型循环。用户明确授权复用Midscene环境key，不读取.env或输出key。Flash Vision仅文本，Pro仅压缩。
 
 来源：[credits](https://learn.chatgpt.com/docs/pricing)、[API compare](https://developers.openai.com/api/docs/models/compare)、[DeepSeek价格](https://api-docs.deepseek.com/quick_start/pricing/)。各模型实际tokens/credits/API等价与任务活跃工时尚unknown；墙钟起点以创建本spec时间记录，后续回填。
+
+### 阶段复核（2026-09-09 实施中）
+
+账户共享周用量90%（余10%），额外余额仍511.183598 credits；这是账户范围，不能归因本任务7个百分点的变化。未购买或使用reset。A2首次独立review实际约0.5 agent小时，覆盖39/39文件并发现一项事件覆盖P1；前置CI只读分诊和修复维持review6小时共享池。当前真实模型4次Flash、2次Pro：其中一轮Flash合法返回两个只读工具，被当前宿主拒绝，列为修复RED，不盲重试。预算不扩大，后续浏览器单次测试限制6次请求；真实长窗口质量A/B尚未完成，不宣称128K相对256K有实测优势。
+
+全历史 Pro 真实测试检出语义失败（返回工具标记而非记忆），因此重估验证样本上限为16次Flash、4次Pro，原5美元估算上限保持。新增配额仅用于该已复现失败修复及真实浏览器两轮交谈；当前累计6次Flash、3次Pro，不能把HTTP成功计为语义验收通过。活跃工时仍在原64小时共享池内。
