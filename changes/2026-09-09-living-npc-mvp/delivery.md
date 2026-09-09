@@ -82,3 +82,13 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 `github-recheck.md` 对28个差异文件独立复核，确认 GitHub 5项P1与1项P2全部解决，未发现新 P0/P1/P2。该源码此后仅增加测试 JSON 输出文件的持久化与交付记录，没有修改生产行为。
 
 最后一轮使用 line reporter，内存 JSON attachment 未落盘，因此该轮精确调用数、token/缓存 usage 和坐标样本不可恢复；保留了真实断言日志和四张截图，不能将此前16 Flash/4 Pro的完整账本冒充最终总用量。该轮由测试限制为2–6 Flash，所以最终累计18–22 Flash、4 Pro，仍在22/4上限内。没有为补日志继续调用模型。未来同一测试会显式写 JSON 文件再附加 path；本轮用量缺口已写入 `provider-usage.json`，实际总价保持unknown。
+
+## 第二轮恢复路径修复
+
+`7c36c43` 的远端 CI run `34336382567` 全绿；GitHub review `5152630270` 又检出两条恢复路径 P1，独立分诊确认有效。因此继续修复，未把该提交当作最终交付。退避期新事件保留到期重试；终态目标受击后的恢复进入基础生活，避免永久 suspended。RED/GREEN 和冻结复核分别见 `github-backoff-fix.md`、`github-round2-triage.md` 及后续恢复报告。此轮不再消费真实 provider。
+
+审阅监控修正：GitHub review 元数据可能先于 inline comments 可见；监控改为等待发布稳定后按确切 review ID 读取，不能以当前 commit_id 过滤重映射的旧评论，也不能在评论尚未发布时宣称零问题。
+
+生产修复冻结 `26ea895`，`github-round2-recheck.md` 独立覆盖6个差异文件，确认两条P1解决且无新的具体P0/P1/P2。浏览器两项2/2通过（12.3秒）。首次全量coverage中新增Headless checkpoint测试耗时7.5秒，超过默认5秒而超时；没有断言失败。测试按既有同类30秒截止，并用onTestFinished保证两session清理；生产不变，完整门禁重新执行。
+
+最终本地增量门禁：完整 `pnpm verify:static` 通过（254文件、1238测试通过，4测试跳过），独立 `pnpm build` Web/Agent通过。两项Browser旅程2/2通过（12.3秒）。生产仍为 `26ea895`，后续仅测试截止/清理和交付记录。两轮共8项GitHub发现均已修复并独立复核；远端最终SHA的CI与自动审阅以PR #26检查和最终交接为准。此轮不需要更新长期docs baseline：仅补齐现有事件调度、反射和持久化合同的恢复行为，未扩大产品范围。

@@ -1,0 +1,36 @@
+5:57:27 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/agent-server/backoff-recovery.test.ts (2 tests | 2 failed) 23ms
+   × retries dialogue-heard at backoff expiry instead of the fallback window 20ms
+   × retries attacked at backoff expiry instead of the fallback window 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-server/backoff-recovery.test.ts > retries dialogue-heard at backoff expiry instead of the fallback window
+ FAIL  tests/agent-server/backoff-recovery.test.ts > retries attacked at backoff expiry instead of the fallback window
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ tests/agent-server/backoff-recovery.test.ts:34:19
+     32|     expect(calls).toBe(1);
+     33|     await vi.advanceTimersByTimeAsync(1);
+     34|     expect(calls).toBe(2);
+       |                   ^
+     35|     expect(sent).toContainEqual(expect.objectContaining({ kind: 'inten…
+     36|   } finally { runtime.dispose(); }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  17:57:27
+   Duration  448ms (transform 78ms, setup 0ms, import 333ms, tests 23ms, environment 0ms)
+
