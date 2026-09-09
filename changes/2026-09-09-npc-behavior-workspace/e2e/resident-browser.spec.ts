@@ -10,6 +10,7 @@ test('一个浏览器连接承载三位持续生活伙伴，并恢复配对的�
   const errors: string[] = [];
   const transport: unknown[] = [];
   page.on('websocket', (socket) => {
+    if (new URL(socket.url()).href !== new URL(runtime.host.url).href) return;
     sockets.push(socket.url());
     const record = (direction: string, payload: string | Buffer) => {
       try {

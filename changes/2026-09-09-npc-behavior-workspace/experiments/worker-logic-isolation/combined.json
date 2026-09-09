@@ -1,0 +1,20 @@
+{
+  "hash": "20b4bb500994605e03b7f61a9b0350d59bd9efa0e3c0ef28962cb305bce7e989",
+  "feedingEpisodes": 18,
+  "nightDayEpisodes": 3,
+  "patrolArrivals": 194,
+  "modelCalls": 0,
+  "postStartResourceInjection": 0,
+  "treeChanges": 0,
+  "simulatedSeconds": 1800.0010000025316,
+  "outcomesSha256": "6cecc63817752e0ad5722c4661d9cee8e9f9493ea0701c395209bed9d98af352",
+  "browser": "Playwright headless shell1243",
+  "basePath": "/seedlands-web-sandbox/",
+  "suite": {
+    "passed": 4,
+    "explicitOptInSkipped": 3,
+    "wallLabel": "2.1m",
+    "timingIsPerformanceClaim": false
+  },
+  "sourcePhase": "Direct Worker final lifecycle fixes before transport-fault initialization fix; default transport unaffected"
+}

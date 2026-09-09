@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "id": "npc-ci-life-stall-triage",
+  "role": "CI failure triage",
+  "workType": "validation",
+  "goal": "Read-only diagnosis of CI34394673448 HEAD1a2cfd8. Actual artifacts already locally extracted /tmp/npc-ci-partial/test-results. Short continuous-life test 60s has physics/time advancing but NPC x stuck2.45,z0.5, repeated hunger replan each second, zero feeding. Inspect short retry trace.zip attachment life-world-observations and source Action/Physics/Logic intent freshness to explain actual failure. Three-day firstattempt failed first10s advance (receipt false not logged), retry passed10s then Authority request timeout15s. Local sameVite/basepath and Chrome or bundled Chromium both pass2tests within47/57s. Find concrete source root cause or bounded fault injection/reproduction hypothesis. No source edits or test/service execution. Root owns implementation and tests. Write /tmp/npc-ci-life-stall-triage.md and stop. Do not read raw private gateway logs or secrets.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-ci-life-stall-triage.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "ci-triage",
+      "check": "Minimal failed evidence and bounded justified next step",
+      "evidence": "/tmp/npc-ci-life-stall-triage.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.25
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

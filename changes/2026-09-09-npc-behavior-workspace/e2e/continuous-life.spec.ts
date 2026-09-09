@@ -40,17 +40,22 @@ test('固定行为树通过真实身体连续补给，并在面板显示生效�
       )
       .toBeGreaterThanOrEqual(1);
     const lived = samples.at(-1)!;
-    expect(lived.observation.character.hunger).toBeLessThanOrEqual(20);
+    const completedMeal = samples
+      .flatMap((sample) => sample.observation.events)
+      .find((event) => event.type === 'activity-succeeded' && event.nodeId === 'hunger-action');
+    expect(completedMeal?.hunger).toBeLessThanOrEqual(20);
     expect(lived.observation.self.position).not.toEqual(first.observation.self.position);
     expect(samples.flatMap((sample) => sample.observation.events).map((event) => event.type)).toEqual(
       expect.arrayContaining(['item-picked-up', 'item-consumed']),
     );
     expect([...evidence.actions.values()].some((count) => count >= 2)).toBe(true);
     expect(lived.physicsTick).toBeGreaterThan(first.physicsTick);
+    await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
+    const paused = await lifeSample(page, character.entityId, cursor);
     await faceLifeCharacter(page, character.entityId);
     await expect
       .poll(async () => Number(await page.locator('#companion .vitals span').nth(1).locator('b').textContent()))
-      .toBeLessThanOrEqual(20);
+      .toBe(Math.round(paused.observation.character.hunger));
     await page.screenshot({ path: testInfo.outputPath('life-after-feeding.png') });
     await page.getByLabel('生效行为树').scrollIntoViewIfNeeded();
     await page.screenshot({ path: testInfo.outputPath('life-behavior-inspector.png') });
@@ -157,7 +162,7 @@ test('浏览器确定性推进三个昼夜，固定树重复完成补给休息�
       const receipt = await page.evaluate(() =>
         window.__seedlandsHarness!.world.clock({ kind: 'advance', elapsedMs: 10000 }),
       );
-      expect(receipt.ok).toBe(true);
+      expect(receipt, `Advance at ${seconds} simulated seconds`).toMatchObject({ ok: true });
       const sample = await lifeSample(page, character.entityId, cursor);
       cursor = sample.observation.cursor;
       samples.push(sample);

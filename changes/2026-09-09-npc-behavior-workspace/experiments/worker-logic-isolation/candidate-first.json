@@ -1,0 +1,243 @@
+{
+  "sourcePhase": "Direct MessageChannel candidate before final lifecycle review fixes; base1a2cfd8",
+  "test": "main-thread-isolation",
+  "condition": "30 x (300ms main busy + 10ms yield)",
+  "candidate": {
+    "first": {
+      "simulationTime": 0.2176999999284744,
+      "physicsTick": 13,
+      "paused": false,
+      "position": [1.5, 57, 0.5],
+      "hunger": 60,
+      "events": [],
+      "skills": []
+    },
+    "last": {
+      "simulationTime": 9.569599999904632,
+      "physicsTick": 574,
+      "paused": false,
+      "position": [-3.70100449773586, 57, -3.490964258918827],
+      "hunger": 21,
+      "events": [
+        {
+          "cursor": 1,
+          "at": 0.3,
+          "type": "activity-started",
+          "nodeId": "hunger-action",
+          "episode": 1
+        },
+        {
+          "cursor": 2,
+          "at": 1.9,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 1
+        },
+        {
+          "cursor": 3,
+          "at": 2,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 1,
+          "hunger": 56
+        },
+        {
+          "cursor": 4,
+          "at": 2.1,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 2
+        },
+        {
+          "cursor": 5,
+          "at": 2.2,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 2,
+          "hunger": 52
+        },
+        {
+          "cursor": 6,
+          "at": 2.3,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 3
+        },
+        {
+          "cursor": 7,
+          "at": 2.4,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 3,
+          "hunger": 48
+        },
+        {
+          "cursor": 8,
+          "at": 2.5,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 4
+        },
+        {
+          "cursor": 9,
+          "at": 2.6,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 4,
+          "hunger": 44
+        },
+        {
+          "cursor": 10,
+          "at": 2.7,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 5
+        },
+        {
+          "cursor": 11,
+          "at": 2.8,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 5,
+          "hunger": 40
+        },
+        {
+          "cursor": 12,
+          "at": 2.9,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 6
+        },
+        {
+          "cursor": 13,
+          "at": 3,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 6,
+          "hunger": 36
+        },
+        {
+          "cursor": 14,
+          "at": 3.1,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 7
+        },
+        {
+          "cursor": 15,
+          "at": 3.2,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 7,
+          "hunger": 32
+        },
+        {
+          "cursor": 16,
+          "at": 3.3,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 8
+        },
+        {
+          "cursor": 17,
+          "at": 3.4,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 8,
+          "hunger": 28
+        },
+        {
+          "cursor": 18,
+          "at": 3.5,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 9
+        },
+        {
+          "cursor": 19,
+          "at": 3.6,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 9,
+          "hunger": 24
+        },
+        {
+          "cursor": 20,
+          "at": 3.7,
+          "type": "item-picked-up",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 10
+        },
+        {
+          "cursor": 21,
+          "at": 3.8,
+          "type": "item-consumed",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "count": 10,
+          "hunger": 20
+        },
+        {
+          "cursor": 22,
+          "at": 3.8,
+          "type": "activity-succeeded",
+          "nodeId": "hunger-action",
+          "actionId": "action-1",
+          "episode": 1,
+          "count": 10,
+          "position": [4.390748915416767, 57, -0.9414995184272872],
+          "hunger": 20
+        },
+        {
+          "cursor": 23,
+          "at": 3.9,
+          "type": "activity-started",
+          "nodeId": "day-patrol",
+          "episode": 2
+        },
+        {
+          "cursor": 24,
+          "at": 9.1,
+          "type": "activity-succeeded",
+          "nodeId": "day-patrol",
+          "actionId": "action-2",
+          "episode": 2,
+          "position": [-4.5, 57, -4.5],
+          "count": 1
+        }
+      ],
+      "skills": [
+        {
+          "nodeId": "day-patrol",
+          "skill": "patrol",
+          "activation": 2,
+          "status": "running",
+          "phase": "moving",
+          "elapsedSeconds": 5.699999999999996,
+          "replanCount": 0,
+          "actionId": "action-3"
+        }
+      ]
+    }
+  },
+  "traceSha256": "6d4db1188f3284be0a8423c50803d8caac9dd14db4c37516d30fd55e3953cb22"
+}

@@ -10,9 +10,11 @@ class FakeWorker implements LogicWorkerPort {
   onmessage: ((event: MessageEvent<LogicWorkerResponse>) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
   posts: unknown[] = [];
+  transfers: Transferable[][] = [];
   terminated = false;
-  postMessage(message: unknown) {
+  postMessage(message: unknown, transfer: Transferable[] = []) {
     this.posts.push(message);
+    this.transfers.push(transfer);
   }
   terminate() {
     this.terminated = true;
@@ -147,5 +149,43 @@ describe('BrowserLogicClient', () => {
       },
     } as MessageEvent);
     expect(batches).toEqual([]);
+  });
+
+  it('直连端口只转移一次且恢复时由Authority端FIFO重绑epoch', async () => {
+    const worker = new FakeWorker();
+    const client = new BrowserLogicClient(worker, 'epoch:old');
+    const port = {} as MessagePort;
+    client.attachDirectAuthority(port);
+    expect(worker.posts[0]).toMatchObject({ kind: 'attach-direct-logic', epoch: 'epoch:old', port });
+    expect(worker.transfers[0]).toEqual([port]);
+    const starting = client.start(false, 60);
+    worker.onmessage?.({
+      data: { kind: 'logic-ready', protocolVersion: LOGIC_PROTOCOL_VERSION, epoch: 'epoch:old' },
+    } as MessageEvent);
+    await starting;
+
+    client.rebindEpoch('epoch:new');
+    expect(worker.posts.some((post) => (post as { kind?: string }).kind === 'reset-logic-epoch')).toBe(false);
+    client.acceptDirectDiagnostics({
+      kind: 'direct-logic-diagnostics',
+      protocolVersion: 1,
+      epoch: 'epoch:new',
+      observationInFlight: true,
+      pendingObservationCount: 1,
+      submittedObservationCount: 4,
+      receivedBatchCount: 3,
+      completedBatchCount: 2,
+      rejectedBatchCount: 1,
+      lastRoundTripMs: 12,
+    });
+    expect(client.diagnostics).toMatchObject({
+      observationInFlight: true,
+      pendingObservationCount: 1,
+      submittedObservationCount: 4,
+      receivedBatchCount: 3,
+      completedBatchCount: 2,
+      rejectedBatchCount: 1,
+      lastRoundTripMs: 12,
+    });
   });
 });

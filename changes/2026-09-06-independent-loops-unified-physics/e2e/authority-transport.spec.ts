@@ -11,6 +11,7 @@ import {
 } from '../../../tests/e2e/support/harness';
 
 type HarnessWindow = Window & {
+  __releaseInputProbe?: { after: number; sequence: number | null };
   __seedlandsHarness?: {
     setVoxelAt: (x: number, y: number, z: number, voxel: number) => Promise<void>;
     getVoxelAt?: (x: number, y: number, z: number) => number | null;
@@ -36,6 +37,22 @@ const scenarios = [
 
 for (const scenario of scenarios) {
   test(`${scenario.physicsHz}Hz、${scenario.latencyMs}ms、重复乱序下维持移动与世界事务一次性`, async ({ page }) => {
+    await page.addInitScript(() => {
+      const original = Worker.prototype.postMessage;
+      Worker.prototype.postMessage = function (message, options) {
+        const probe = (window as HarnessWindow).__releaseInputProbe;
+        if (
+          probe &&
+          probe.sequence === null &&
+          message?.kind === 'input' &&
+          message.sequence > probe.after &&
+          message.state?.moveX === 0 &&
+          message.state?.moveZ === 0
+        )
+          probe.sequence = message.sequence;
+        return Reflect.apply(original, this, options === undefined ? [message] : [message, options]);
+      };
+    });
     const query =
       `&physicsHz=${scenario.physicsHz}&authorityLatencyMs=${scenario.latencyMs}` +
       '&authorityDuplicate=1&authorityReorder=1';
@@ -56,6 +73,14 @@ for (const scenario of scenarios) {
     });
     await page.keyboard.up('KeyW');
     expect(moved.colliding).toBe(false);
+    await page.evaluate((after) => {
+      (window as HarnessWindow).__releaseInputProbe = { after, sequence: null };
+    }, moved.authority.acknowledgedInputSequence);
+    await page.waitForFunction(() => (window as HarnessWindow).__releaseInputProbe?.sequence != null);
+    const releasedSequence = await page.evaluate(() => (window as HarnessWindow).__releaseInputProbe!.sequence!);
+    await expect
+      .poll(async () => (await snapshot(page))?.authority.acknowledgedInputSequence ?? -1)
+      .toBeGreaterThanOrEqual(releasedSequence);
     const stopped = await waitForSnapshot(
       page,
       (current) => Math.hypot(current.serverPlayerVelocity[0], current.serverPlayerVelocity[2]) < 0.05,

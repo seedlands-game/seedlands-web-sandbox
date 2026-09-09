@@ -60,3 +60,13 @@ PG恢复保证认知数据整批提交；世界与PG仍是两个owner，通过�
 首次分诊只确认了总预算冲突，后续本地完整回归取得首轮trace并定位额外根因：延迟发现mistreevous令Vite整页刷新，世界已创建但浏览器返回开始菜单。冷缓存A/B固定总50秒/HUD30秒：A记录2次文档请求和明确的new dependencies/reloading日志并失败；B只增加`@seedlands/game-core > mistreevous`预打包，1次文档请求、无刷新并通过。结果见[冷启动功能对照](experiments/vite-cold-start/results.json)。保留50秒预算以正确容纳setup，实际刷新缺陷由Vite配置修复；不将预算调整描述为根因修复，不宣称性能收益。
 
 修复后的冷缓存完整`pnpm test:e2e:regression` 21/21通过（43.1秒功能回归）；Vite配置与用例ESLint、完整typecheck、`pnpm build`分别通过。新必要CI在修复提交上重新执行。
+
+## CI 暴露的模拟链路修正
+
+第二轮CI34394673448保留了两类独立失败：Vite HMR被误计为第二条Agent连接；以及主线程转发Logic时身体停滞。后者通过300ms主线程阻塞的固定场景取得因果RED/GREEN：控制版9.36秒模拟中NPC只走0.44米且没吃到食物，直接MessageChannel候选在同等阻塞中正常完成补给。Authority仍做原有epoch/revision/200ms新鲜度校验；模型、树和游戏规则未更改。
+
+最终默认无头shell组合4项通过、3项明确opt-in跳过，约2.1分钟：1800模拟秒、18次补给、3次跨夜休息、194次巡逻到点；主线程阻塞和F3收到/拒绝计数可见、一个Agent WS承载三角色及实际PG配对恢复均通过。证据见[隔离对照](experiments/worker-logic-isolation/README.md)和[调度面板](evidence/direct-logic-diagnostics.png)。这是功能验证计时，不宣称性能倍率。
+
+`docs/code-map.md`、`docs/developer-world-harness.md`的长期baseline同步直接Worker通道和快进语义；F3往返来源已从旧主线程relay改为Authority↔Logic。真实模型调用数量没有增加。随后修正初始化MessagePort在显式故障注入传输中的一次性移交，受影响故障回归与最终全量门禁继续记录于PR交接。
+
+最终本地准出补记：`pnpm verify:static`完成286文件/1376项通过、2文件/4项明确跳过；之后一次性MessagePort故障注入适配的最终变更由35项相关单测、Web/test类型与受影响lint补验。最后生产源码冻结后的`pnpm build`通过。浏览器21项基础回归与2项H1恢复全部通过；额外4项30/60/120Hz延迟乱序、事务与碰撞回归24.6秒通过。旧测试松键后读取旧快照的竞态通过只读记录真实释放输入sequence并等待Authority回执消除，未改变输入、重排规则或0.08米停止断言。远端全量检查继续在最新提交执行。

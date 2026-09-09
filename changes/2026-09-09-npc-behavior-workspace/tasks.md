@@ -29,3 +29,14 @@ C：初轮一个Browser连接承载三NPC、独立PG工作区及配对checkpoint
 权限：所有新世界行为沿用统一WorldResourceAuthorizer；旧绑定入口在明确deny world.character execute时仍接受intent的RED已修正。Agent仅局部观察与正常规则Action，开发全局Harness不进入模型工具。
 
 长期文档已更新单树持续行为、128K窗口、PG持久化、逻辑flash/pro网关和快进验收边界。最终结果见后续delivery.md，不以旧PR绿色代替本变更。
+
+## CI 后续修正（准出仍待最终 checks）
+
+- [x] 首次冷缓存进入世界触发 Vite 补依赖刷新：受控 A/B 修复并完成21项完整基线。
+- [x] 第二轮 CI 的 HMR socket 被误计为 Agent 连接：测试按实际服务 URL 匹配；无头shell组合复验通过。
+- [x] 主线程300ms阻塞可复现世界计时/物理正常而 NPC 补给停滞，已保存 RED 权威记录。
+- [x] Authority/Logic Worker 直接通信、生命周期及回档验证；保留原200ms新鲜度。
+- [x] 相同主线程阻塞下完成补给、无头shell三昼夜及三角色/PG恢复组合验证。
+- [ ] 最新SHA静态、构建、远端checks通过，PR转可审核。
+
+Headless三日CI一轮87.319秒通过、一轮120秒被宿主测试期限中止；调整单例有界期限180秒并保留所有模拟步骤和功能断言。此与浏览器运动停滞分别处理，不以超时改动代替产品修复。

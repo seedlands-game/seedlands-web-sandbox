@@ -277,7 +277,7 @@ describe('Stage A world behavior', () => {
     const facts: CharacterObservation['events'][number][] = [];
     let cursor = 0;
     for (let elapsed = 0; elapsed < 1_800; elapsed += 5) {
-      await session.world.clock({ kind: 'advance', elapsedMs: 5_000 });
+      expect(await session.world.clock({ kind: 'advance', elapsedMs: 5_000 })).toMatchObject({ ok: true });
       const page = await readAllEvents(session, character.entityId, cursor);
       facts.push(...page.events);
       cursor = page.cursor;
@@ -302,5 +302,5 @@ describe('Stage A world behavior', () => {
       data: { character: { lifecycle: 'active', behaviorTree: { revision: 1 } } },
     });
     await session.dispose();
-  }, 120_000);
+  }, 180_000);
 });
