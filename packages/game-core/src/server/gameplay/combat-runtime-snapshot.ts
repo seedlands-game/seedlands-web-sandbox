@@ -288,3 +288,27 @@ function validateBoundActive(active: BoundActiveCombatSnapshot, lastResult: Comb
   )
     throw new TypeError('Active combat hit dedupe result is invalid.');
 }
+
+export function validateCombatAllocator(snapshot: CombatRuntimeSnapshot): void {
+  if (
+    !snapshot ||
+    (snapshot.version !== 1 && snapshot.version !== 2) ||
+    !Number.isSafeInteger(snapshot.actionSequence) ||
+    snapshot.actionSequence < 0 ||
+    !Number.isSafeInteger(snapshot.resultSequence) ||
+    snapshot.resultSequence < 0 ||
+    !Array.isArray(snapshot.combatants)
+  )
+    throw new TypeError('Combat snapshot header is invalid.');
+
+  for (const entry of snapshot.combatants) {
+    for (const id of [entry?.combat?.active?.actionId, entry?.combat?.lastResult?.actionId]) {
+      if (typeof id !== 'string') continue;
+      const match = /^combat-(\d+)$/.exec(id);
+      if (!match) continue; // Autonomous actions use the separate ActionRuntime allocator.
+      const ordinal = Number(match[1]);
+      if (!Number.isSafeInteger(ordinal) || ordinal <= 0 || ordinal > snapshot.actionSequence)
+        throw new TypeError('Combat identity exceeds the allocator high-water mark.');
+    }
+  }
+}

@@ -1,3 +1,5 @@
+import { ActionRuntime } from '../../packages/game-core/src/server/simulation/action-runtime';
+import { CombatRuntime } from '../../packages/game-core/src/server/gameplay/combat-runtime';
 import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import { GameplayRuntime } from '../../packages/game-core/src/server/gameplay/gameplay-runtime';
@@ -235,5 +237,58 @@ describe('GameplaySnapshot V1-V4 坐标、组件与物理迁移', () => {
     invalidNumber.entityStore.entities[0]!.position[1] = Number.NaN;
     expect(() => runtime.restoreSnapshot(invalidNumber)).toThrow(/gameplay snapshot/i);
     expect(runtime.createSnapshot()).toEqual(before);
+  });
+});
+
+describe('legacy gameplay wrapper action migration', () => {
+  it.each([v2Fixture, v3Fixture])(
+    'migrates active and deleted terminal target identities through Gameplay V%s',
+    (fixture) => {
+      const snapshot = fixture();
+      const actions = new ActionRuntime(testCorePlatform.clone);
+      const history = actions.start({ actorId: 'removed-actor', type: 'eat', targetEntityId: 'removed-food' }, 0);
+      actions.succeed(history.id, 0);
+      const active = actions.start({ actorId: 'settler', type: 'move-to', targetEntityId: 'world-item-1' }, 0);
+      actions.markRunning(active.id, [
+        [6, 39, -2],
+        [4, 40, -2],
+      ]);
+      snapshot.simulation.actions = actions.snapshot();
+      const restored = createCurrentRuntime();
+      restored.restoreSnapshot(snapshot);
+      expect(restored.simulation.actions.get(history.id)).toMatchObject({
+        status: 'succeeded',
+        targetEntityId: 'removed-food',
+      });
+      expect(restored.simulation.actions.get(active.id)).toMatchObject({ status: 'running', pathIndex: 1 });
+      expect(restored.simulation.actions.snapshot()).toMatchObject({
+        version: 2,
+        actions: [{}, { actorIdentity: { entityId: 'settler' }, targetIdentity: { entityId: 'world-item-1' } }],
+      });
+      snapshot.entities = snapshot.entities.filter((entity) => entity.id !== 'world-item-1');
+      restored.restoreSnapshot(snapshot);
+      expect(restored.simulation.actions.get(active.id)).toMatchObject({
+        status: 'failed',
+        reason: 'restore-target-missing',
+      });
+    },
+  );
+  it.each([v2Fixture, v3Fixture])('keeps legacy Combat v1 cancellation in the gameplay wrapper', (fixture) => {
+    const snapshot = fixture();
+    const combat = new CombatRuntime({
+      actorAvailable: () => true,
+      targetAvailable: () => true,
+      validateHit: () => null,
+      applyDamage: () => 1,
+    });
+    combat.request('player', 'settler', 'unarmed');
+    combat.advance(0.03);
+    snapshot.simulation.combat = combat.snapshot();
+    const restored = createCurrentRuntime();
+    restored.restoreSnapshot(snapshot);
+    expect(restored.getCombatState('player')).toMatchObject({
+      active: null,
+      lastResult: { outcome: 'cancelled', reason: 'restore-cancelled' },
+    });
   });
 });

@@ -40,4 +40,24 @@ describe('asynchronous actor actions', () => {
       /Invalid action snapshot/,
     );
   });
+  it.each(['allocator', 'negative-index', 'oversized-index', 'negative-repath'] as const)(
+    'atomically rejects invalid saved action invariants: %s',
+    (kind) => {
+      const source = new ActionRuntime(testCorePlatform.clone);
+      source.start({ actorId: 'source', type: 'idle' }, 0);
+      const malformed = source.snapshot();
+      if (kind === 'allocator') malformed.sequence = 0;
+      if (kind === 'negative-index') malformed.actions[0].pathIndex = -1;
+      if (kind === 'oversized-index') malformed.actions[0].pathIndex = 1;
+      if (kind === 'negative-repath') malformed.actions[0].repathCount = -1;
+      const current = new ActionRuntime(testCorePlatform.clone);
+      current.start({ actorId: 'current', type: 'idle' }, 0);
+      const before = current.snapshot();
+      expect(() => current.restore(malformed)).toThrow(/Invalid action snapshot/);
+      expect(current.snapshot()).toEqual(before);
+      const next = current.start({ actorId: 'next', type: 'idle' }, 1);
+      expect(next.id).toBe('action-2');
+      expect(current.forActor('current')?.actorId).toBe('current');
+    },
+  );
 });

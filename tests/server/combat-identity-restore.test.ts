@@ -186,4 +186,22 @@ describe('combat lifetime identity restore', () => {
       lastResult: { targetId: 'target', outcome: 'hit' },
     });
   });
+  it.each([
+    [false, false],
+    [false, true],
+    [true, false],
+    [true, true],
+  ])('rejects allocator rollback before replacing state (bound=%s terminal=%s)', (bound, terminal) => {
+    const host = identities({ actor: 1, target: 2 });
+    const source = new CombatRuntime(callbacks([]), undefined, bound ? host.port : undefined);
+    source.request('actor', 'target', 'wood-sword');
+    if (terminal) source.advance(2);
+    const malformed = source.snapshot();
+    malformed.actionSequence = 0;
+    const current = new CombatRuntime(callbacks([]), undefined, bound ? host.port : undefined);
+    current.request('actor', 'target', 'wood-sword');
+    const before = current.snapshot();
+    expect(() => current.restore(malformed)).toThrow(/allocator/i);
+    expect(current.snapshot()).toEqual(before);
+  });
 });

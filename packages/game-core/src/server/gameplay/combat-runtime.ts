@@ -7,6 +7,7 @@ import {
   decodeBoundCombatSnapshot,
   encodeBoundCombatSnapshot,
   validateCombatSnapshot,
+  validateCombatAllocator,
   type CombatRuntimeSnapshot,
   type CombatRuntimeSnapshotV2,
 } from './combat-runtime-snapshot';
@@ -209,6 +210,8 @@ export class CombatRuntime {
     if (currentState && currentState.lockoutSeconds > 0) return { success: false, reason: 'cooldown' };
     const validation = this.callbacks.validateHit(actorId, targetId, definition);
     if (validation) return { success: false, reason: validation };
+    if (!createActionId && this.actionSequence >= Number.MAX_SAFE_INTEGER)
+      return { success: false, reason: 'action-sequence-exhausted' };
     const actionId = createActionId?.() ?? `combat-${++this.actionSequence}`;
     const state = currentState ?? { active: null, lastResult: null, lockoutSeconds: 0, actorIdentity: null };
     state.actorIdentity = actorIdentity ? { ...actorIdentity } : null;
@@ -319,16 +322,7 @@ export class CombatRuntime {
 
   restore(raw: unknown): void {
     const snapshot = raw as CombatRuntimeSnapshot;
-    if (
-      !snapshot ||
-      (snapshot.version !== 1 && snapshot.version !== 2) ||
-      !Number.isSafeInteger(snapshot.actionSequence) ||
-      snapshot.actionSequence < 0 ||
-      !Number.isSafeInteger(snapshot.resultSequence) ||
-      snapshot.resultSequence < 0 ||
-      !Array.isArray(snapshot.combatants)
-    )
-      throw new TypeError('Combat snapshot header is invalid.');
+    validateCombatAllocator(snapshot);
     if (snapshot.version === 2) return this.restoreBoundSnapshot(snapshot);
     const restored = new Map<string, CombatantState>();
     for (const entry of snapshot.combatants) {

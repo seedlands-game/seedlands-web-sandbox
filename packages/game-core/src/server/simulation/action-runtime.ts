@@ -41,6 +41,13 @@ type ActionBindings = {
   target: EntityLifetimeReference | null;
 };
 
+const validatePath = (path: readonly NavigationPosition[]): void => {
+  if (
+    !Array.isArray(path) ||
+    path.some((point) => !Array.isArray(point) || point.length !== 3 || !point.every(Number.isFinite))
+  )
+    throw new TypeError('Action path is invalid.');
+};
 const terminal = (status: ActorActionStatus) => ['succeeded', 'failed', 'interrupted'].includes(status);
 export class ActionRuntime {
   private readonly actions = new Map<string, ActorAction>();
@@ -64,6 +71,7 @@ export class ActionRuntime {
 
   start(input: ActorActionInput, now: number): ActorAction {
     this.validateInput(input, now);
+    if (this.sequence >= Number.MAX_SAFE_INTEGER) throw new RangeError('Action sequence is exhausted.');
     const bindings = this.captureBindings(input.actorId, input.targetEntityId);
     this.interruptActor(input.actorId, now, 'replaced');
     const action: ActorAction = {
@@ -93,6 +101,7 @@ export class ActionRuntime {
   }
 
   markRunning(id: string, path: readonly NavigationPosition[]): ActorAction {
+    validatePath(path);
     const action = this.requireExecutable(id);
     action.status = 'running';
     action.path = path.map((point) => [...point]);
@@ -101,6 +110,8 @@ export class ActionRuntime {
   }
 
   updatePath(id: string, path: readonly NavigationPosition[], repathCount: number): ActorAction {
+    validatePath(path);
+    if (!Number.isSafeInteger(repathCount) || repathCount < 0) throw new TypeError('Action repath count is invalid.');
     const action = this.requireExecutable(id);
     action.path = path.map((point) => [...point]);
     action.pathIndex = Math.min(1, action.path.length);
@@ -161,7 +172,7 @@ export class ActionRuntime {
       if (
         !snapshot ||
         (snapshot.version !== 1 && snapshot.version !== 2) ||
-        !Number.isInteger(snapshot.sequence) ||
+        !Number.isSafeInteger(snapshot.sequence) ||
         snapshot.sequence < 0 ||
         !Array.isArray(snapshot.actions)
       )
@@ -176,6 +187,9 @@ export class ActionRuntime {
         delete plainAction.targetIdentity;
         const action = this.clone(plainAction);
         this.validateAction(action);
+        const ordinal = Number(/^action-([1-9]\d*)$/.exec(action.id)?.[1]);
+        if (!Number.isSafeInteger(ordinal) || ordinal > snapshot.sequence)
+          throw new TypeError('Action identity exceeds the allocator high-water mark.');
         if (actions.has(action.id)) throw new TypeError('duplicate action id');
         const rebound =
           snapshot.version === 2
@@ -328,12 +342,13 @@ export class ActionRuntime {
       !action.id?.trim() ||
       !['pending', 'running', 'succeeded', 'failed', 'interrupted'].includes(action.status) ||
       !Array.isArray(action.path) ||
-      !Number.isInteger(action.pathIndex) ||
-      !Number.isInteger(action.repathCount)
+      !Number.isSafeInteger(action.pathIndex) ||
+      action.pathIndex < 0 ||
+      action.pathIndex > action.path.length ||
+      !Number.isSafeInteger(action.repathCount) ||
+      action.repathCount < 0
     )
       throw new TypeError('action fields are invalid');
-    action.path.forEach((point) => {
-      if (point.length !== 3 || !point.every(Number.isFinite)) throw new TypeError('action path is invalid');
-    });
+    validatePath(action.path);
   }
 }
