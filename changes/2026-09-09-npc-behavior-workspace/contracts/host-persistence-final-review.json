@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "id": "npc-host-persistence-final-review",
+  "role": "independent persistence reviewer",
+  "workType": "validation",
+  "goal": "Final independent review of frozen fdde0579d217a8beffee79a8201aef7a47f36078 -> f7032bf7c1c8206819bd195fa6ae05982750354f (30 files, persistent host/Factory/scheduler and persistence review corrections). Follow Seedlands code review skill immutable base/head rules. Read new host connection lifecycle, same-namespace retirement, exactIdentity/seq/capability isolation, bounded request queues and transfers, allhistoricalnamespace imports, graceful/hardrestart recovery. Recheck prior persistence P1 fixes from /tmp/npc-persistence-independent-review.md against actual frozen code: frozen journal safe reopen/hard suspend, bounded writes/reads, portable topology, immutable request precheck/receipts; Pro returnDirect and publish-aftererror behavior; LangGraph checkpoint activewindow resume/compaction isolation. Review Factory idempotency and standard tool schema birth to Authority interface. Tests96Agent/PG plus12Host green before small responsibility splits; latest5Hosttests passed aftersplit, typecheck pending final. Known Root followups outsidehead: Web crossseed marker fix and Browser fastforward logic interleaving, not thisreview. No source/Git/services/provider/keys edits. Report /tmp/npc-host-persistence-final-review.md with fullcoverage and exactconcrete findings. Budget2h.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-host-persistence-final-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "host-persistence-review",
+      "check": "Frozen30file review and priorP1 disposition with concrete findings and evidence limits",
+      "evidence": "/tmp/npc-host-persistence-final-review.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

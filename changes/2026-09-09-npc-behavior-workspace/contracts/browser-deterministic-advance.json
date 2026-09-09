@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "id": "npc-browser-deterministic-advance",
+  "role": "browser world harness deterministic advance engineer",
+  "workType": "implementation",
+  "goal": "User replaced60min wall-clock gate with deterministic time fast-forward and explicit model triggers. Actual browser3dayfast test exposes serious parity bug: apps/web/src/worker/authority-worker.ts advance directly runtime.advancePausedSession(10000), simulation clock/skills progress but bodies nevermove; external Logic Worker replies cannot interleave synchronous batch. Headless advanceWith works because processes logic/loadchunks between slices. Diagnose actual owner/logic dispatch pipeline. Implement deterministic paused Browser world.clock advance that processes normal shared logic/physics ordering and generated collision residency, without Agent awareness, statepatches or secondarywriters. Reuse existing core computation or await bounded worker barriers/slices; ensure no deadlock world operation queue, stale replies ignored, normal browser path unchanged. Own apps/web/src/worker/authority-worker.ts plus new focused worker deterministic advance module/tests; core authority/headless helper changes only if necessary with early API notice. Do not touch host/Agent/PG/Companion or package/index. RED evidence /tmp/npc-a-fast-three-days three-day-world-outcomes shows NPCpositionstatic,106hunger attempts105replanlimits,nofood while1800simsecondsadvance; Headless3dayspasses. Existing real60minute run hadphysicalmovement, so cannot blame tree. Root owns e2e spec/support and reruns browser afterfix; add meaningful focused deterministic checks and report /tmp/npc-browser-deterministic-advance.md with exact source/validation and freeze. No provider/secrets/services or Git. Budget2h.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/web/src/worker/authority-worker.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/web/src/worker/authority-worker-deterministic-advance.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/server/authority",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/server/headless",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/client/authority-worker-deterministic-advance.test.ts",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-browser-deterministic-advance.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "browser-advance",
+      "check": "Paused Browser deterministic advance interleaves actual logic and physics; no stale replies or secondaryworldwriter; focused tests and typecheck",
+      "evidence": "/tmp/npc-browser-deterministic-advance.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

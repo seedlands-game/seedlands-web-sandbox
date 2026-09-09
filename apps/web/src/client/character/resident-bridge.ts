@@ -148,7 +148,8 @@ export class ResidentBridge {
       if (channel.port.binding.entityId === entityId) {
         this.channels.delete(channelId);
         this.send({ kind: 'unbind', channelId });
-        await channel.port.dispose();
+        // A restored Authority has already invalidated this old binding. Local retirement must still finish.
+        await channel.port.dispose().catch(() => undefined);
       }
   }
 

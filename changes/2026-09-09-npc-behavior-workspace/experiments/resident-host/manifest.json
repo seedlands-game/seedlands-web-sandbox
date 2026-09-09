@@ -1,0 +1,27 @@
+{
+  "experiment": "resident-host-v2",
+  "date": "2026-09-10",
+  "runtime": {
+    "node": ">=22.12.0",
+    "postgres": "postgres:16-alpine",
+    "transport": "ws",
+    "models": "injected deterministic BaseChatModel fixtures"
+  },
+  "commands": [
+    "node_modules/.bin/vitest run tests/agent-server/resident-scheduler.test.ts tests/agent-server/resident-host.test.ts tests/agent-server/resident-factory.test.ts --no-file-parallelism --maxWorkers=1",
+    "node_modules/.bin/tsc -p apps/agent-server/tsconfig.json --noEmit --pretty false",
+    "node_modules/.bin/tsc -p tsconfig.test.json --noEmit --pretty false",
+    "node_modules/.bin/eslint apps/agent-server/src/node/resident-host.ts apps/agent-server/src/node/resident-host-validation.ts apps/agent-server/src/node/main.ts apps/agent-server/src/resident-channel.ts apps/agent-server/src/resident-factory.ts tests/agent-server/resident-host.test.ts tests/agent-server/resident-factory.test.ts"
+  ],
+  "boundaries": {
+    "residentChannelsPerSocket": 3,
+    "pendingWorldRequestsPerChannel": 8,
+    "pendingWorldRequestsPerSocket": 16,
+    "queuedObservationPagesPerChannel": 16,
+    "decodedCheckpointChunkBytes": 49152,
+    "checkpointBytes": 67108864,
+    "transferTtlMilliseconds": [1000, 600000],
+    "factoryBirthsPerTimeline": 64,
+    "historicalResidentNamespacesPerTimeline": 1024
+  }
+}

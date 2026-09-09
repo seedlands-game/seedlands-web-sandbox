@@ -1,0 +1,731 @@
+{
+  "phase": "router",
+  "startedAt": 1788971199874,
+  "gatewayBaseUrl": "http://127.0.0.1:62793",
+  "toolLoops": {
+    "flash": {
+      "first": {
+        "status": 200,
+        "elapsedMs": 641,
+        "body": {
+          "id": "mock-2",
+          "created": 1788971200,
+          "model": "flash",
+          "object": "chat.completion",
+          "choices": [
+            {
+              "finish_reason": "tool_calls",
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "tool_calls": [
+                  {
+                    "function": {
+                      "arguments": "{\"kind\":\"berry\"}",
+                      "name": "lookup_food"
+                    },
+                    "id": "call-admission-1",
+                    "type": "function"
+                  }
+                ],
+                "reasoning_content": "reasoning-round-1",
+                "provider_specific_fields": {
+                  "admission_state": "opaque-round-1",
+                  "refusal": null
+                },
+                "content": null
+              },
+              "provider_specific_fields": {}
+            }
+          ],
+          "usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 11,
+            "total_tokens": 18,
+            "prompt_tokens_details": {
+              "cached_tokens": 3
+            }
+          }
+        }
+      },
+      "second": {
+        "status": 200,
+        "elapsedMs": 141,
+        "body": {
+          "id": "mock-5",
+          "created": 1788971200,
+          "model": "flash",
+          "object": "chat.completion",
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "message": {
+                "content": "tool-loop-complete:{\"toolCallId\":\"call-admission-1\",\"reasoning\":\"reasoning-round-1\",\"opaque\":\"opaque-round-1\"}",
+                "role": "assistant",
+                "reasoning_content": "reasoning-round-2",
+                "provider_specific_fields": {
+                  "admission_state": "opaque-round-2",
+                  "refusal": null
+                }
+              },
+              "provider_specific_fields": {}
+            }
+          ],
+          "usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 11,
+            "total_tokens": 18,
+            "prompt_tokens_details": {
+              "cached_tokens": 3
+            }
+          }
+        }
+      },
+      "exposed": {
+        "toolCallId": "call-admission-1",
+        "reasoning": "reasoning-round-1",
+        "opaque": "opaque-round-1",
+        "secondReasoning": "reasoning-round-2",
+        "secondOpaque": "opaque-round-2"
+      }
+    },
+    "pro": {
+      "first": {
+        "status": 200,
+        "elapsedMs": 139,
+        "body": {
+          "id": "mock-7",
+          "created": 1788971200,
+          "model": "pro",
+          "object": "chat.completion",
+          "choices": [
+            {
+              "finish_reason": "tool_calls",
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "tool_calls": [
+                  {
+                    "function": {
+                      "arguments": "{\"kind\":\"berry\"}",
+                      "name": "lookup_food"
+                    },
+                    "id": "call-admission-1",
+                    "type": "function"
+                  }
+                ],
+                "reasoning_content": "reasoning-round-1",
+                "provider_specific_fields": {
+                  "admission_state": "opaque-round-1",
+                  "refusal": null
+                },
+                "content": null
+              },
+              "provider_specific_fields": {}
+            }
+          ],
+          "usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 11,
+            "total_tokens": 18,
+            "prompt_tokens_details": {
+              "cached_tokens": 3
+            }
+          }
+        }
+      },
+      "second": {
+        "status": 200,
+        "elapsedMs": 137,
+        "body": {
+          "id": "mock-10",
+          "created": 1788971200,
+          "model": "pro",
+          "object": "chat.completion",
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "message": {
+                "content": "tool-loop-complete:{\"toolCallId\":\"call-admission-1\",\"reasoning\":\"reasoning-round-1\",\"opaque\":\"opaque-round-1\"}",
+                "role": "assistant",
+                "reasoning_content": "reasoning-round-2",
+                "provider_specific_fields": {
+                  "admission_state": "opaque-round-2",
+                  "refusal": null
+                }
+              },
+              "provider_specific_fields": {}
+            }
+          ],
+          "usage": {
+            "completion_tokens": 7,
+            "prompt_tokens": 11,
+            "total_tokens": 18,
+            "prompt_tokens_details": {
+              "cached_tokens": 3
+            }
+          }
+        }
+      },
+      "exposed": {
+        "toolCallId": "call-admission-1",
+        "reasoning": "reasoning-round-1",
+        "opaque": "opaque-round-1",
+        "secondReasoning": "reasoning-round-2",
+        "secondOpaque": "opaque-round-2"
+      }
+    }
+  },
+  "toolState": {
+    "active": 0,
+    "maxActive": 1,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788971200423,
+        "event": "start",
+        "scenario": "TOOL",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788971200546,
+        "event": "end",
+        "scenario": "TOOL",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 3,
+        "atMs": 1788971200570,
+        "event": "start",
+        "scenario": "TOOL",
+        "attempt": 2,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 4,
+        "atMs": 1788971200692,
+        "event": "tool-roundtrip",
+        "scenario": "TOOL",
+        "attempt": 2,
+        "model": "mock-flash-backend",
+        "roundtrip": {
+          "toolCallId": "call-admission-1",
+          "reasoning": "reasoning-round-1",
+          "opaque": "opaque-round-1"
+        }
+      },
+      {
+        "seq": 5,
+        "atMs": 1788971200692,
+        "event": "end",
+        "scenario": "TOOL",
+        "attempt": 2,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 6,
+        "atMs": 1788971200713,
+        "event": "start",
+        "scenario": "TOOL",
+        "attempt": 1,
+        "model": "mock-pro-backend",
+        "active": 1
+      },
+      {
+        "seq": 7,
+        "atMs": 1788971200836,
+        "event": "end",
+        "scenario": "TOOL",
+        "attempt": 1,
+        "model": "mock-pro-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 8,
+        "atMs": 1788971200844,
+        "event": "start",
+        "scenario": "TOOL",
+        "attempt": 2,
+        "model": "mock-pro-backend",
+        "active": 1
+      },
+      {
+        "seq": 9,
+        "atMs": 1788971200966,
+        "event": "tool-roundtrip",
+        "scenario": "TOOL",
+        "attempt": 2,
+        "model": "mock-pro-backend",
+        "roundtrip": {
+          "toolCallId": "call-admission-1",
+          "reasoning": "reasoning-round-1",
+          "opaque": "opaque-round-1"
+        }
+      },
+      {
+        "seq": 10,
+        "atMs": 1788971200973,
+        "event": "end",
+        "scenario": "TOOL",
+        "attempt": 2,
+        "model": "mock-pro-backend",
+        "active": 0,
+        "status": 200
+      }
+    ]
+  },
+  "sameDeployment": [
+    {
+      "status": 200,
+      "elapsedMs": 1218,
+      "body": {
+        "id": "mock-6",
+        "created": 1788971202,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "SLOW_A:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 135,
+      "body": {
+        "id": "mock-3",
+        "created": 1788971201,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "FAST_B:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 265,
+      "body": {
+        "id": "mock-5",
+        "created": 1788971201,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "FAST_C:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    }
+  ],
+  "sameDeploymentState": {
+    "active": 0,
+    "maxActive": 2,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788971200989,
+        "event": "start",
+        "scenario": "FAST_B",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788971200990,
+        "event": "start",
+        "scenario": "SLOW_A",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 3,
+        "atMs": 1788971201111,
+        "event": "end",
+        "scenario": "FAST_B",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 4,
+        "atMs": 1788971201119,
+        "event": "start",
+        "scenario": "FAST_C",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 5,
+        "atMs": 1788971201241,
+        "event": "end",
+        "scenario": "FAST_C",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 6,
+        "atMs": 1788971202192,
+        "event": "end",
+        "scenario": "SLOW_A",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      }
+    ]
+  },
+  "retryAndProgress": [
+    {
+      "status": 200,
+      "elapsedMs": 2944,
+      "body": {
+        "id": "mock-10",
+        "created": 1788971205,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "RETRY_429:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 142,
+      "body": {
+        "id": "mock-4",
+        "created": 1788971202,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "FAST_B:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 361,
+      "body": {
+        "id": "mock-6",
+        "created": 1788971202,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "FAST_C:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    }
+  ],
+  "retryState": {
+    "active": 0,
+    "maxActive": 1,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788971202208,
+        "event": "start",
+        "scenario": "RETRY_429",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788971202208,
+        "event": "end",
+        "scenario": "RETRY_429",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 429
+      },
+      {
+        "seq": 3,
+        "atMs": 1788971202236,
+        "event": "start",
+        "scenario": "FAST_B",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 4,
+        "atMs": 1788971202358,
+        "event": "end",
+        "scenario": "FAST_B",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 5,
+        "atMs": 1788971202455,
+        "event": "start",
+        "scenario": "FAST_C",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 6,
+        "atMs": 1788971202577,
+        "event": "end",
+        "scenario": "FAST_C",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 7,
+        "atMs": 1788971203523,
+        "event": "start",
+        "scenario": "RETRY_429",
+        "attempt": 2,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 8,
+        "atMs": 1788971203523,
+        "event": "end",
+        "scenario": "RETRY_429",
+        "attempt": 2,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 429
+      },
+      {
+        "seq": 9,
+        "atMs": 1788971205014,
+        "event": "start",
+        "scenario": "RETRY_429",
+        "attempt": 3,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 10,
+        "atMs": 1788971205136,
+        "event": "end",
+        "scenario": "RETRY_429",
+        "attempt": 3,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      }
+    ]
+  },
+  "deadline": {
+    "status": 504,
+    "elapsedMs": 5006,
+    "body": {
+      "error": {
+        "message": "gateway total request deadline exceeded",
+        "type": "gateway_admission_error"
+      }
+    }
+  },
+  "deadlineState": {
+    "active": 0,
+    "maxActive": 1,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788971205160,
+        "event": "start",
+        "scenario": "DEADLINE",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788971210150,
+        "event": "client-closed",
+        "scenario": "DEADLINE",
+        "attempt": 1,
+        "model": "mock-flash-backend"
+      },
+      {
+        "seq": 3,
+        "atMs": 1788971210150,
+        "event": "end",
+        "scenario": "DEADLINE",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": "cancelled"
+      }
+    ]
+  },
+  "cancellation": {
+    "status": "client-error",
+    "elapsedMs": 202,
+    "error": "AbortError"
+  },
+  "cancellationState": {
+    "active": 0,
+    "maxActive": 1,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788971210267,
+        "event": "start",
+        "scenario": "CANCEL",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788971210459,
+        "event": "client-closed",
+        "scenario": "CANCEL",
+        "attempt": 1,
+        "model": "mock-flash-backend"
+      },
+      {
+        "seq": 3,
+        "atMs": 1788971210459,
+        "event": "end",
+        "scenario": "CANCEL",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": "cancelled"
+      }
+    ]
+  },
+  "elapsedMs": 10785
+}

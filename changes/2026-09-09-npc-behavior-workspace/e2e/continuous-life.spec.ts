@@ -141,3 +141,62 @@ test('固定初始资源、零模型、零换树的60分钟浏览器生活', asy
     });
   }
 });
+
+test('浏览器确定性推进三个昼夜，固定树重复完成补给休息与巡逻', async ({ page }, testInfo) => {
+  test.setTimeout(240000);
+  const character = await startLifeScene(page);
+  await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
+  const first = await lifeSample(page, character.entityId, 0);
+  const hash = definitionHash(first.observation);
+  const evidence = new LifeEvidence();
+  const samples = [first];
+  let cursor = 0;
+  let nextMeal = lifeScene.playerFood.useEverySimulatedSeconds;
+  try {
+    for (let seconds = 0; seconds < 1800; seconds += 10) {
+      const receipt = await page.evaluate(() =>
+        window.__seedlandsHarness!.world.clock({ kind: 'advance', elapsedMs: 10000 }),
+      );
+      expect(receipt.ok).toBe(true);
+      const sample = await lifeSample(page, character.entityId, cursor);
+      cursor = sample.observation.cursor;
+      samples.push(sample);
+      expect(definitionHash(sample.observation)).toBe(hash);
+      evidence.record(sample);
+      if (sample.simulationTime - first.simulationTime >= nextMeal) {
+        const slot = sample.player.inventory.findIndex((entry) => entry?.itemId === lifeScene.playerFood.itemId);
+        expect(slot).toBeGreaterThanOrEqual(0);
+        expect(
+          await page.evaluate(async (slot) => {
+            const world = window.__seedlandsHarness!.world;
+            await world.command({ type: 'select-slot', slot });
+            return world.command({ type: 'use-item' });
+          }, slot),
+        ).toMatchObject({ ok: true, data: { success: true } });
+        nextMeal += lifeScene.playerFood.useEverySimulatedSeconds;
+      }
+      if ([0, 890, 1790].includes(seconds)) {
+        await faceLifeCharacter(page, character.entityId);
+        await page.screenshot({ path: testInfo.outputPath(`life-sim-${seconds + 10}.png`) });
+      }
+    }
+    expect(evidence.feedingEpisodes).toBeGreaterThanOrEqual(3);
+    expect(evidence.nightDayEpisodes).toBeGreaterThanOrEqual(2);
+    expect(evidence.patrolArrivals).toBeGreaterThanOrEqual(4);
+    expect(samples.at(-1)!.simulationTime - first.simulationTime).toBeGreaterThanOrEqual(1800);
+  } finally {
+    writeFileSync(
+      testInfo.outputPath('three-day-world-outcomes.json'),
+      JSON.stringify({
+        hash,
+        samples,
+        feedingEpisodes: evidence.feedingEpisodes,
+        nightDayEpisodes: evidence.nightDayEpisodes,
+        patrolArrivals: evidence.patrolArrivals,
+        modelCalls: 0,
+        postStartResourceInjection: 0,
+        treeChanges: 0,
+      }),
+    );
+  }
+});

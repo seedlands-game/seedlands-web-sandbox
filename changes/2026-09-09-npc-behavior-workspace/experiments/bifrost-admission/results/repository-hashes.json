@@ -1,0 +1,38 @@
+[
+  {
+    "path": "results/image-repo-digests.json",
+    "capturedSha256": "14809b9291089ce21dec598ed6f3de9268a571d332b5254f4e2c30bd7c05de8b",
+    "repositorySha256": "14809b9291089ce21dec598ed6f3de9268a571d332b5254f4e2c30bd7c05de8b",
+    "reason": "repository formatting; original captured digest retained"
+  },
+  {
+    "path": "results/main-gateway-startup.log",
+    "capturedSha256": "9a690835b376916ee401a1fefb2c70e54d68d0c502cfcd87f9f99bff2c465023",
+    "repositorySha256": "9a690835b376916ee401a1fefb2c70e54d68d0c502cfcd87f9f99bff2c465023",
+    "reason": "repository formatting; original captured digest retained"
+  },
+  {
+    "path": "results/main.json",
+    "capturedSha256": "b19acf749dfaf80056ebcad5ab26c3d3b9f4403e264f18b66e2d4830bf307722",
+    "repositorySha256": "b19acf749dfaf80056ebcad5ab26c3d3b9f4403e264f18b66e2d4830bf307722",
+    "reason": "repository formatting; original captured digest retained"
+  },
+  {
+    "path": "results/replacement-gateway-startup.log",
+    "capturedSha256": "ec7122bb44144e36ceff9b40d3cf1ed3f6393f6088a7c2c37a6668d292362c69",
+    "repositorySha256": "ec7122bb44144e36ceff9b40d3cf1ed3f6393f6088a7c2c37a6668d292362c69",
+    "reason": "repository formatting; original captured digest retained"
+  },
+  {
+    "path": "results/replacement.json",
+    "capturedSha256": "5081d373e845a591516b3cfbbe18b9d38a4a5c2275995240aa9d2c640faaa5c0",
+    "repositorySha256": "5081d373e845a591516b3cfbbe18b9d38a4a5c2275995240aa9d2c640faaa5c0",
+    "reason": "repository formatting; original captured digest retained"
+  },
+  {
+    "path": "results/summary.json",
+    "capturedSha256": "689bc1311db18eac6939d31bc5de9cadb3b162abac0d750aa34530666f062807",
+    "repositorySha256": "be0012a00c16b80a7e086e2b2e2f9fe06da49661134dff650c16ab57ab4c94ee",
+    "reason": "repository formatting; original captured digest retained"
+  }
+]

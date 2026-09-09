@@ -1,0 +1,58 @@
+{
+  "source_of_truth": "config.json",
+  "client": {
+    "initial_pool_size": 2,
+    "drop_excess_requests": true,
+    "enable_logging": false,
+    "disable_content_logging": true,
+    "mcp_disable_auto_tool_inject": true
+  },
+  "providers": {
+    "mock-shared": {
+      "send_back_raw_response": true,
+      "keys": [
+        {
+          "name": "local-mock",
+          "value": "env.MOCK_PROVIDER_KEY",
+          "models": ["flash", "pro"],
+          "weight": 1,
+          "aliases": {
+            "flash": "mock-flash-replacement",
+            "pro": "mock-pro-backend"
+          }
+        }
+      ],
+      "network_config": {
+        "base_url": "http://host.docker.internal:53767",
+        "default_request_timeout_in_seconds": 2,
+        "max_retries": 2,
+        "retry_backoff_initial": 100,
+        "retry_backoff_max": 100
+      },
+      "concurrency_and_buffer_size": {
+        "concurrency": 2,
+        "buffer_size": 32
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai",
+        "allowed_requests": {
+          "chat_completion": true
+        },
+        "request_path_overrides": {
+          "chat_completion": "/v1/chat/completions"
+        }
+      }
+    }
+  },
+  "config_store": { "enabled": false },
+  "logs_store": { "enabled": false },
+  "plugins": [],
+  "mcp": { "client_configs": [] },
+  "framework": {
+    "pricing": {
+      "pricing_url": "http://host.docker.internal:53767/pricing",
+      "pricing_sync_interval": 86400,
+      "live_models_sync_interval": 0
+    }
+  }
+}

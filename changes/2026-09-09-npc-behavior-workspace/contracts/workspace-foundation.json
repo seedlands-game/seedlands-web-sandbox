@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "id": "npc-persistent-workspace-foundation",
+  "role": "persistent workspace and standard Agent framework implementation engineer",
+  "workType": "implementation",
+  "goal": "Prepare the independent Stage B foundation while Stage A world owner and gateway fallback admission run separately. Implement PostgreSQL-backed per-NPC virtual workspace and lossless journal, standard LangChain createAgent + tools/messages/checkpointer/store adapter, and Pro-only compaction transaction. Read approved-proposal sections on workspace, context, permissions, archive and publication fully. Trusted namespace derives only from worldId/timelineId/actorId/incarnation. Reuse Deep Agents StoreBackend and LangGraph PostgresSaver/PostgresStore publicly; no actual per-NPC filesystem, no generic Agent framework, no default unrestricted DeepAgent tools. AGENT.md and SOUL.md readonly, MEMORY.md only trusted pro workflow with expected revision/frozen window and source validation plus 4000 estimated tokens/16KiB cap, behavior/current.json readonly Authority projection, sessions system-only and hidden even from Pro. Standard Human/AI/Tool messages and required opaque fields losslessly journaled from first message; reproducible request manifest points to immutable full payloads/tool schema/prefix. Persistent received/included/compacted watermarks separate; duplicates/restart and frozen page/tail data explicit. Window128K/soft112K, full-round boundary compaction: freeze old memory+semantic window, bounded pro draft/validate/publish commit/newwindow/tail; failures retain old window/memory, hard-limit suspends cognition only, no flash/deterministic summary. Explicit business SQL transaction owns publication; framework saver/store is not fictional shared transaction. Provide portable export/import and new-timeline restore prevents future memory; idempotent request receipts/no external world exactly-once claim. Use provider-neutral flash/pro BaseChatModel inputs and no transport retry/pool. First test standard ChatOpenAI opaque/reasoning/tool roundtrip; only if concrete loss write thin gateway BaseChatModel adapter preserving additional_kwargs/AbortSignal with maxRetries0, no provider model names/keys. Domain world port injected (observe, events, propose behavior) and no Web/core/runtime scheduler integration yet. Root owns host wire/protocol/main later and package/lock install. Add meaningful RED/GREEN tests incl actual disposable local PG saver/store restart and transaction/cross-NPC/permissions/compaction tails; mock models only, no real provider or env/key reading. Start only owned local PG Docker on a free loopback port with fake local password, clean it at end; do not inspect or stop unrelated containers. Report API exports early for Root integration. Finish /tmp/npc-persistent-workspace-foundation.md with exact evidence, dependencies/API blockers, files, actual costs. No Git or global format.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/workspace",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/gateway-model.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/agent-server/src/resident-agent.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/persistent-workspace.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/resident-agent.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/agent-server/gateway-model.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/workspace-foundation",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-persistent-workspace-foundation.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "workspace-foundation",
+      "check": "Public standard Agent and actual PostgreSQL persistence/permissions/compaction restart tests pass with frozen mock model; no real gateway product success claim",
+      "evidence": "/tmp/npc-persistent-workspace-foundation.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 6
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

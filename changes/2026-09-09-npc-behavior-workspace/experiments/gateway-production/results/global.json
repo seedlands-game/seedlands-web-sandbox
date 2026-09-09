@@ -1,0 +1,1919 @@
+{
+  "phase": "global",
+  "startedAt": 1788973758000,
+  "gatewayBaseUrl": "http://127.0.0.1:54895",
+  "crossAlias": [
+    {
+      "status": 200,
+      "elapsedMs": 1670,
+      "body": {
+        "id": "mock-4",
+        "created": 1788973759,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "SLOW_A:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1671,
+      "body": {
+        "id": "mock-4",
+        "created": 1788973759,
+        "model": "pro",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "SLOW_B:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1350,
+      "body": {
+        "id": "mock-6",
+        "created": 1788973759,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "FAST_C:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    }
+  ],
+  "crossAliasState": {
+    "active": 0,
+    "maxActive": 2,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788973758487,
+        "event": "start",
+        "scenario": "SLOW_A",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788973758487,
+        "event": "start",
+        "scenario": "SLOW_B",
+        "attempt": 1,
+        "model": "mock-pro-backend",
+        "active": 2
+      },
+      {
+        "seq": 3,
+        "atMs": 1788973759689,
+        "event": "end",
+        "scenario": "SLOW_B",
+        "attempt": 1,
+        "model": "mock-pro-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 4,
+        "atMs": 1788973759690,
+        "event": "end",
+        "scenario": "SLOW_A",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 5,
+        "atMs": 1788973759721,
+        "event": "start",
+        "scenario": "FAST_C",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 6,
+        "atMs": 1788973759843,
+        "event": "end",
+        "scenario": "FAST_C",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      }
+    ]
+  },
+  "queueOverCapacity": [
+    {
+      "status": 200,
+      "elapsedMs": 159,
+      "body": {
+        "id": "mock-4",
+        "created": 1788973759,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_0:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 158,
+      "body": {
+        "id": "mock-4",
+        "created": 1788973759,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_1:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 304,
+      "body": {
+        "id": "mock-8",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_2:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 304,
+      "body": {
+        "id": "mock-8",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_3:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 598,
+      "body": {
+        "id": "mock-16",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_4:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 449,
+      "body": {
+        "id": "mock-12",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_5:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 597,
+      "body": {
+        "id": "mock-16",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_6:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 743,
+      "body": {
+        "id": "mock-20",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_7:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 744,
+      "body": {
+        "id": "mock-20",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_8:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 894,
+      "body": {
+        "id": "mock-24",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_9:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1041,
+      "body": {
+        "id": "mock-28",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_10:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 894,
+      "body": {
+        "id": "mock-24",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_11:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1041,
+      "body": {
+        "id": "mock-28",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_12:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1334,
+      "body": {
+        "id": "mock-36",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_13:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1188,
+      "body": {
+        "id": "mock-32",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_14:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 2506,
+      "body": {
+        "id": "mock-68",
+        "created": 1788973762,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_15:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1188,
+      "body": {
+        "id": "mock-32",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_16:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1335,
+      "body": {
+        "id": "mock-36",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_17:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 2068,
+      "body": {
+        "id": "mock-56",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_18:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1488,
+      "body": {
+        "id": "mock-40",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_19:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 449,
+      "body": {
+        "id": "mock-12",
+        "created": 1788973760,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_20:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1487,
+      "body": {
+        "id": "mock-40",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_21:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1924,
+      "body": {
+        "id": "mock-52",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_22:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1632,
+      "body": {
+        "id": "mock-44",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_23:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1778,
+      "body": {
+        "id": "mock-48",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_24:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 2210,
+      "body": {
+        "id": "mock-59",
+        "created": 1788973762,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_25:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 2505,
+      "body": {
+        "id": "mock-68",
+        "created": 1788973762,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_26:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 429,
+      "elapsedMs": 30,
+      "body": {
+        "error": {
+          "message": "model gateway pending queue is full",
+          "type": "model_gateway_error"
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1779,
+      "body": {
+        "id": "mock-48",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_28:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1925,
+      "body": {
+        "id": "mock-52",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_29:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 2067,
+      "body": {
+        "id": "mock-56",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_30:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 2359,
+      "body": {
+        "id": "mock-64",
+        "created": 1788973762,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_31:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 2211,
+      "body": {
+        "id": "mock-60",
+        "created": 1788973762,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_32:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 2359,
+      "body": {
+        "id": "mock-64",
+        "created": 1788973762,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_33:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    },
+    {
+      "status": 200,
+      "elapsedMs": 1632,
+      "body": {
+        "id": "mock-44",
+        "created": 1788973761,
+        "model": "flash",
+        "object": "chat.completion",
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "content": "QUEUE_34:complete",
+              "role": "assistant",
+              "provider_specific_fields": {
+                "refusal": null
+              }
+            },
+            "provider_specific_fields": {}
+          }
+        ],
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 11,
+          "total_tokens": 18,
+          "prompt_tokens_details": {
+            "cached_tokens": 3
+          }
+        }
+      }
+    }
+  ],
+  "queueOverCapacityState": {
+    "active": 0,
+    "maxActive": 2,
+    "events": [
+      {
+        "seq": 1,
+        "atMs": 1788973759876,
+        "event": "start",
+        "scenario": "QUEUE_0",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 2,
+        "atMs": 1788973759876,
+        "event": "start",
+        "scenario": "QUEUE_1",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 3,
+        "atMs": 1788973759998,
+        "event": "end",
+        "scenario": "QUEUE_0",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 4,
+        "atMs": 1788973759998,
+        "event": "end",
+        "scenario": "QUEUE_1",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 5,
+        "atMs": 1788973760023,
+        "event": "start",
+        "scenario": "QUEUE_3",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 6,
+        "atMs": 1788973760023,
+        "event": "start",
+        "scenario": "QUEUE_2",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 7,
+        "atMs": 1788973760145,
+        "event": "end",
+        "scenario": "QUEUE_3",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 8,
+        "atMs": 1788973760145,
+        "event": "end",
+        "scenario": "QUEUE_2",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 9,
+        "atMs": 1788973760168,
+        "event": "start",
+        "scenario": "QUEUE_5",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 10,
+        "atMs": 1788973760168,
+        "event": "start",
+        "scenario": "QUEUE_20",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 11,
+        "atMs": 1788973760290,
+        "event": "end",
+        "scenario": "QUEUE_20",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 12,
+        "atMs": 1788973760290,
+        "event": "end",
+        "scenario": "QUEUE_5",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 13,
+        "atMs": 1788973760316,
+        "event": "start",
+        "scenario": "QUEUE_4",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 14,
+        "atMs": 1788973760316,
+        "event": "start",
+        "scenario": "QUEUE_6",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 15,
+        "atMs": 1788973760438,
+        "event": "end",
+        "scenario": "QUEUE_4",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 16,
+        "atMs": 1788973760438,
+        "event": "end",
+        "scenario": "QUEUE_6",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 17,
+        "atMs": 1788973760460,
+        "event": "start",
+        "scenario": "QUEUE_8",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 18,
+        "atMs": 1788973760463,
+        "event": "start",
+        "scenario": "QUEUE_7",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 19,
+        "atMs": 1788973760583,
+        "event": "end",
+        "scenario": "QUEUE_8",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 20,
+        "atMs": 1788973760583,
+        "event": "end",
+        "scenario": "QUEUE_7",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 21,
+        "atMs": 1788973760611,
+        "event": "start",
+        "scenario": "QUEUE_9",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 22,
+        "atMs": 1788973760612,
+        "event": "start",
+        "scenario": "QUEUE_11",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 23,
+        "atMs": 1788973760734,
+        "event": "end",
+        "scenario": "QUEUE_9",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 24,
+        "atMs": 1788973760734,
+        "event": "end",
+        "scenario": "QUEUE_11",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 25,
+        "atMs": 1788973760761,
+        "event": "start",
+        "scenario": "QUEUE_12",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 26,
+        "atMs": 1788973760761,
+        "event": "start",
+        "scenario": "QUEUE_10",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 27,
+        "atMs": 1788973760883,
+        "event": "end",
+        "scenario": "QUEUE_12",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 28,
+        "atMs": 1788973760883,
+        "event": "end",
+        "scenario": "QUEUE_10",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 29,
+        "atMs": 1788973760908,
+        "event": "start",
+        "scenario": "QUEUE_14",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 30,
+        "atMs": 1788973760908,
+        "event": "start",
+        "scenario": "QUEUE_16",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 31,
+        "atMs": 1788973761030,
+        "event": "end",
+        "scenario": "QUEUE_14",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 32,
+        "atMs": 1788973761030,
+        "event": "end",
+        "scenario": "QUEUE_16",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 33,
+        "atMs": 1788973761053,
+        "event": "start",
+        "scenario": "QUEUE_17",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 34,
+        "atMs": 1788973761054,
+        "event": "start",
+        "scenario": "QUEUE_13",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 35,
+        "atMs": 1788973761176,
+        "event": "end",
+        "scenario": "QUEUE_13",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 36,
+        "atMs": 1788973761176,
+        "event": "end",
+        "scenario": "QUEUE_17",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 37,
+        "atMs": 1788973761199,
+        "event": "start",
+        "scenario": "QUEUE_19",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 38,
+        "atMs": 1788973761200,
+        "event": "start",
+        "scenario": "QUEUE_21",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 39,
+        "atMs": 1788973761322,
+        "event": "end",
+        "scenario": "QUEUE_19",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 40,
+        "atMs": 1788973761322,
+        "event": "end",
+        "scenario": "QUEUE_21",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 41,
+        "atMs": 1788973761355,
+        "event": "start",
+        "scenario": "QUEUE_34",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 42,
+        "atMs": 1788973761356,
+        "event": "start",
+        "scenario": "QUEUE_23",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 43,
+        "atMs": 1788973761476,
+        "event": "end",
+        "scenario": "QUEUE_34",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 44,
+        "atMs": 1788973761476,
+        "event": "end",
+        "scenario": "QUEUE_23",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 45,
+        "atMs": 1788973761499,
+        "event": "start",
+        "scenario": "QUEUE_28",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 46,
+        "atMs": 1788973761499,
+        "event": "start",
+        "scenario": "QUEUE_24",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 47,
+        "atMs": 1788973761621,
+        "event": "end",
+        "scenario": "QUEUE_28",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 48,
+        "atMs": 1788973761621,
+        "event": "end",
+        "scenario": "QUEUE_24",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 49,
+        "atMs": 1788973761644,
+        "event": "start",
+        "scenario": "QUEUE_29",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 50,
+        "atMs": 1788973761647,
+        "event": "start",
+        "scenario": "QUEUE_22",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 51,
+        "atMs": 1788973761767,
+        "event": "end",
+        "scenario": "QUEUE_29",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 52,
+        "atMs": 1788973761767,
+        "event": "end",
+        "scenario": "QUEUE_22",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 53,
+        "atMs": 1788973761788,
+        "event": "start",
+        "scenario": "QUEUE_30",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 54,
+        "atMs": 1788973761790,
+        "event": "start",
+        "scenario": "QUEUE_18",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 55,
+        "atMs": 1788973761909,
+        "event": "end",
+        "scenario": "QUEUE_30",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 56,
+        "atMs": 1788973761910,
+        "event": "end",
+        "scenario": "QUEUE_18",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 57,
+        "atMs": 1788973761931,
+        "event": "start",
+        "scenario": "QUEUE_25",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 58,
+        "atMs": 1788973761934,
+        "event": "start",
+        "scenario": "QUEUE_32",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 59,
+        "atMs": 1788973762054,
+        "event": "end",
+        "scenario": "QUEUE_25",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 60,
+        "atMs": 1788973762055,
+        "event": "end",
+        "scenario": "QUEUE_32",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 61,
+        "atMs": 1788973762077,
+        "event": "start",
+        "scenario": "QUEUE_33",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 62,
+        "atMs": 1788973762079,
+        "event": "start",
+        "scenario": "QUEUE_31",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 63,
+        "atMs": 1788973762200,
+        "event": "end",
+        "scenario": "QUEUE_33",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 64,
+        "atMs": 1788973762200,
+        "event": "end",
+        "scenario": "QUEUE_31",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      },
+      {
+        "seq": 65,
+        "atMs": 1788973762225,
+        "event": "start",
+        "scenario": "QUEUE_15",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1
+      },
+      {
+        "seq": 66,
+        "atMs": 1788973762227,
+        "event": "start",
+        "scenario": "QUEUE_26",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 2
+      },
+      {
+        "seq": 67,
+        "atMs": 1788973762348,
+        "event": "end",
+        "scenario": "QUEUE_15",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 1,
+        "status": 200
+      },
+      {
+        "seq": 68,
+        "atMs": 1788973762348,
+        "event": "end",
+        "scenario": "QUEUE_26",
+        "attempt": 1,
+        "model": "mock-flash-backend",
+        "active": 0,
+        "status": 200
+      }
+    ]
+  },
+  "elapsedMs": 4356
+}

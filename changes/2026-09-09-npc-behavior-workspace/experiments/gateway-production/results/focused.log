@@ -1,0 +1,51 @@
+#0 building with "orbstack" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 977B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/berriai/litellm@sha256:c8756e7b9a61fe45df2ccb5b781d388c3b2f3a21ef9e4956630caef20f9f03aa
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 12.30kB done
+#4 DONE 0.0s
+
+#5 [1/4] FROM ghcr.io/berriai/litellm@sha256:c8756e7b9a61fe45df2ccb5b781d388c3b2f3a21ef9e4956630caef20f9f03aa
+#5 CACHED
+
+#6 [2/4] COPY gateway_middleware.py /app/model_gateway/gateway_middleware.py
+#6 DONE 0.1s
+
+#7 [3/4] COPY compatibility_gateway.py /app/compatibility_gateway.py
+#7 DONE 0.1s
+
+#8 [4/4] RUN touch /app/model_gateway/__init__.py && python - <<'PY'
+#8 DONE 0.2s
+
+#9 exporting to image
+#9 exporting layers 0.1s done
+#9 writing image sha256:ad2eb97b3dbd125abdb4e1c80a0d1c776654d5db4fd10bb53f6276a8f559be2b done
+#9 naming to docker.io/library/seedlands-model-gateway:litellm-1.100.0 done
+#9 DONE 0.1s
+sha256:ad2eb97b3dbd125abdb4e1c80a0d1c776654d5db4fd10bb53f6276a8f559be2b
+test_alias_and_gateway_owned_routing_are_enforced (__main__.GatewayMiddlewareTests.test_alias_and_gateway_owned_routing_are_enforced) ... ok
+test_body_limit_accepts_more_than_two_mib_of_history (__main__.GatewayMiddlewareTests.test_body_limit_accepts_more_than_two_mib_of_history) ... ok
+test_content_length_and_streaming_body_are_bounded (__main__.GatewayMiddlewareTests.test_content_length_and_streaming_body_are_bounded) ... ok
+test_defaults_preserve_product_bounds (__main__.GatewayMiddlewareTests.test_defaults_preserve_product_bounds) ... ok
+test_only_canonical_chat_and_health_routes_are_exposed (__main__.GatewayMiddlewareTests.test_only_canonical_chat_and_health_routes_are_exposed) ... ok
+test_outer_task_cancellation_cleans_inflight_children (__main__.GatewayMiddlewareTests.test_outer_task_cancellation_cleans_inflight_children) ... ok
+test_pending_queue_overload_and_disconnect_release_all_state (__main__.GatewayMiddlewareTests.test_pending_queue_overload_and_disconnect_release_all_state) ... ok
+test_queue_deadline_cleans_unclaimed_acquire_task (__main__.GatewayMiddlewareTests.test_queue_deadline_cleans_unclaimed_acquire_task) ... ok
+test_request_body_read_has_its_own_timeout (__main__.GatewayMiddlewareTests.test_request_body_read_has_its_own_timeout) ... ok
+test_tier_total_deadline_includes_request_body_time (__main__.GatewayMiddlewareTests.test_tier_total_deadline_includes_request_body_time) ... ok
+test_total_deadline_cancels_inner_and_leaves_no_child_tasks (__main__.GatewayMiddlewareTests.test_total_deadline_cancels_inner_and_leaves_no_child_tasks) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.117s
+
+OK

@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "id": "npc-web-checkpoint-review",
+  "role": "independent Web and checkpoint reviewer",
+  "workType": "validation",
+  "goal": "Independently review frozen 9ea0b23710f39b6fe4fcc4fbe325dbd36b80c547 -> fdde0579d217a8beffee79a8201aef7a47f36078 (16 files Web paired checkpoint/timeline/UI/bridge). Follow Seedlands code review skill from base immutable tree. Review hash and typedarray validation before world mutation, timeline fork and PG import ordering, persistent pending recovery marker/reload, actor bindings and late responses, capability and world authority isolation, 3 residents UI/bridge disposal/memory/socket bounds, save all-dead/zero cases. Adjacent current host stillWIP but use frozen interfaces and protocol; flag missing supporting artifacts as limitation. Root mocks actualPG/Browser test has passed short3characters oneWS pairedsave restore, not finalmodel or lifetimeclaim. No source/Git/services/keys edits, write /tmp/npc-web-checkpoint-review.md with full frozen coverage, exact line findings, severity, evidence. Budget2h.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-web-checkpoint-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "web-review",
+      "check": "Frozen16-file full coverage with concrete independent findings",
+      "evidence": "/tmp/npc-web-checkpoint-review.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

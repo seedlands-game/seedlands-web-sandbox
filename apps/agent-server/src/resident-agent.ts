@@ -1,5 +1,9 @@
 import { RESIDENT_TOOL_REGISTRY, residentToolDefinition } from './resident-tool-registry.js';
-export { RESIDENT_TOOL_REGISTRY, createResidentAgentDocument } from './resident-tool-registry.js';
+export {
+  RESIDENT_TOOL_REGISTRY,
+  createResidentAgentDocument,
+  createResidentSoulDocument,
+} from './resident-tool-registry.js';
 import {
   assessResidentRequest,
   RESIDENT_MAX_MODEL_STEPS,

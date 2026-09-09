@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "id": "npc-world-behavior-a",
+  "role": "world behavior implementation engineer",
+  "workType": "implementation",
+  "goal": "Implement Stage A world-owned continuous behavior in the new worktree. Adopt admitted Mistreevous 4.3.1 via public API, canonical validated schema, per-character persistent ExecutionLedger and one effective tree owner. Replace legacy CharacterGoalRuntime ownership and hidden attack/flee arbitration for tree characters; preserve ordinary ecology explicitly. Implement bounded durable skills including movement/replan, SatisfyHunger through actual inventory pickup/eat, home/rest until daylight, patrol/wander, configurable threat response including flee/attack/ignore, waits and nonblocking RequestRejudge monitors. A default fixed full life tree lives without model. Atomic expected behavior revision goal+tree install, validation/permission registry, compatible stable-node progress preservation and changed-node cancellation, explicit checkpoint migration/recovery no replay. Use existing Action/Physics/Combat, never body teleport or second decision controller. Add complete bounded actor observation of world time, active definition/runtime/goals, proper side-effect events. CharacterState.behaviorTree is the shared public field. Integrate kind behavior and accepted result into core CharacterControlRequest and unified Authority harness resource authorization; create accepts optional validated goal+definition. Root owns behavior-control-protocol.ts; request schema changes before editing it. Implement meaningful RED/GREEN world tests and real Headless Physics multi-day fixture using supplied finite life-scene; no fake GameServer-only movement evidence. Root handles Web UI/browser-long-test and dependency lock. Do not run old cognition-host E2E as replacement evidence or adapt old host in this task. No new generic BT framework, provider, browser, Git commit, global formatter, secrets, .env or unrelated source. Keep source readable, separate behavior/skills/registry modules. Report early schema/API needs and progress; conclude with exact tests/evidence and remaining Stage A limits at /tmp/npc-world-behavior-a.md.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/integration-plan.md",
+      "purpose": "Owner migration and contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/runtime/behavior-control-protocol.ts",
+      "purpose": "Root-owned public schema"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/fixtures/life-scene.json",
+      "purpose": "Finite preset food, 3 days and later 60 minute Browser acceptance"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/server",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/runtime/character-control-protocol.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/runtime/logic",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/server",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/runtime",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/world-behavior",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-world-behavior-a.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "behavior-a",
+      "check": "Real Headless Authority/Logic/Physics fixed tree survives >=3 days with preset finite food and no model; dynamic obstacle/cancel/failure/save restore tests; schema and existing affected tests pass",
+      "evidence": "/tmp/npc-world-behavior-a.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 6
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

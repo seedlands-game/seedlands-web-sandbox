@@ -4,7 +4,8 @@ import { boundedInteger, canonicalJson, hashJson, integer, iso, jsonValue } from
 import { createWorkspaceNamespace, normalizeWorkspaceBinding } from './namespace.js';
 import { initializeWorkspace } from './initialization.js';
 import { setupWorkspaceSchema } from './schema.js';
-import { exportPortableWorkspace, importPortableWorkspace } from './portable.js';
+import { exportPortableWorkspace } from './portable.js';
+import { importPortableWorkspace, importPortableWorkspaceBatch } from './portable-import.js';
 import { freezeWorkspace, publishWorkspaceCompaction } from './compaction.js';
 import { appendWorkspaceMessages, getWorkspaceJournal, restoreWorkspaceMessages } from './journal.js';
 import {
@@ -22,6 +23,7 @@ import {
   type JournalMessageInput,
   type MemoryDraft,
   type PortableWorkspace,
+  type PortableWorkspaceImport,
   type ReceivedEventPage,
   type RequestManifestInput,
   type Watermarks,
@@ -30,6 +32,7 @@ import {
   type WorkspaceEvent,
   type WorkspaceFilePath,
   type WorkspaceReaderRole,
+  type WorkspaceTimelineScope,
 } from './types.js';
 
 const VISIBLE_PATHS: readonly WorkspaceFilePath[] = ['/AGENT.md', '/SOUL.md', '/MEMORY.md', '/behavior/current.json'];
@@ -509,6 +512,10 @@ export class PersistentNpcWorkspace {
 
   async importPortable(target: WorkspaceBinding, portable: PortableWorkspace): Promise<void> {
     await importPortableWorkspace(this.pool, this.schemaSql, target, portable);
+  }
+
+  async importPortableBatch(scope: WorkspaceTimelineScope, entries: readonly PortableWorkspaceImport[]): Promise<void> {
+    await importPortableWorkspaceBatch(this.pool, this.schemaSql, scope, entries);
   }
 
   private async assertInitialized(binding: WorkspaceBinding): Promise<void> {

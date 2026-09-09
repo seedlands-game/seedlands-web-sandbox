@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "evidence": {
+    "actualPostgresWebSocket": {
+      "files": 1,
+      "tests": 5,
+      "outcome": "passed",
+      "covered": [
+        "birth before first actor",
+        "three isolated resident channels",
+        "cross-channel stale receipt",
+        "bad actor frame isolation",
+        "persistent logical round metadata",
+        "all-namespace cognition export",
+        "empty cognition export and import",
+        "five historical namespaces with no live channels",
+        "fatal malformed UTF-8 rejection",
+        "interrupted journal recovery before scheduler reset",
+        "old channel durable drain before same namespace rebind",
+        "chunk checksum and new-timeline import",
+        "no post-export future journal",
+        "malformed sequence close",
+        "oversized frame close and reconnect"
+      ]
+    },
+    "schedulerRecovery": {
+      "files": 1,
+      "tests": 5,
+      "outcome": "passed",
+      "covered": [
+        "interrupted snapshots stay blocked before explicit recovery",
+        "settled recovery persists before activation",
+        "pause and remaining active-time restore",
+        "rejected maintenance does not refresh fallback"
+      ]
+    },
+    "actualPostgresFactory": {
+      "files": 1,
+      "tests": 2,
+      "outcome": "passed",
+      "covered": [
+        "concurrent duplicate birth id invokes Pro once",
+        "payload conflict",
+        "trusted timeline isolation",
+        "64 birth timeline bound"
+      ]
+    },
+    "typecheck": "agent-server passed; whole test tree pending an unrelated tuple fixture correction",
+    "lint": "passed"
+  },
+  "claimsExcluded": [
+    "provider quality or availability",
+    "browser product behavior",
+    "cross-actor PostgreSQL transaction atomicity",
+    "multi-tenant or remote gateway deployment"
+  ]
+}

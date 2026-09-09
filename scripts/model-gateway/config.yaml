@@ -1,0 +1,26 @@
+model_list:
+  - model_name: flash
+    litellm_params:
+      model: os.environ/MODEL_GATEWAY_FLASH_ROUTE
+      api_base: os.environ/DEEPSEEK_API_BASE
+      api_key: os.environ/DEEPSEEK_API_KEY
+      allowed_openai_params: [reasoning_effort]
+  - model_name: pro
+    litellm_params:
+      model: os.environ/MODEL_GATEWAY_PRO_ROUTE
+      api_base: os.environ/DEEPSEEK_API_BASE
+      api_key: os.environ/DEEPSEEK_API_KEY
+      allowed_openai_params: [reasoning_effort]
+
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 2
+
+litellm_settings:
+  request_timeout: 310
+  turn_off_message_logging: true
+  telemetry: false
+
+general_settings:
+  master_key: os.environ/MODEL_GATEWAY_TOKEN
+  disable_spend_logs: true

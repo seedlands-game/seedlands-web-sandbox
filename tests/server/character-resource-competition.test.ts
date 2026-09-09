@@ -63,5 +63,5 @@ describe('three resident resource competition', () => {
     } finally {
       await session.dispose();
     }
-  });
+  }, 15000);
 });

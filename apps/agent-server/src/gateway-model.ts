@@ -4,7 +4,7 @@ import {
   type BaseChatModelParams,
   type BindToolsInput,
 } from '@langchain/core/language_models/chat_models';
-import { AIMessage, type BaseMessage } from '@langchain/core/messages';
+import { AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
 import type { ChatResult } from '@langchain/core/outputs';
 import { convertToOpenAITool } from '@langchain/core/utils/function_calling';
 import { ChatOpenAI } from '@langchain/openai';
@@ -139,6 +139,9 @@ export class GatewayChatModel extends BaseChatModel {
           messages: messages.map(wireMessage),
           ...(this.boundTools.length ? { tools: this.boundTools } : {}),
           max_tokens: this.options.maxOutputTokens ?? 8192,
+          ...((options as Record<string, unknown> | undefined)?.reasoning_effort
+            ? { reasoning_effort: (options as Record<string, unknown>).reasoning_effort }
+            : {}),
           ...(((options as Record<string, unknown> | undefined)?.tool_choice ?? this.boundCallOptions.tool_choice)
             ? {
                 tool_choice:
@@ -161,7 +164,8 @@ export class GatewayChatModel extends BaseChatModel {
     const message = rawMessage as Record<string, unknown>;
     const content = typeof message.content === 'string' || Array.isArray(message.content) ? message.content : '';
     const parsedToolCalls = responseToolCalls(message);
-    const aiMessage = new AIMessage({
+    // The standard structured-output pipeline requires a complete AIMessageChunk, even without streaming.
+    const aiMessage = new AIMessageChunk({
       content,
       id: typeof raw.id === 'string' ? raw.id : undefined,
       tool_calls: parsedToolCalls.valid,
@@ -173,6 +177,8 @@ export class GatewayChatModel extends BaseChatModel {
         usage: raw.usage,
       },
     });
+    // Non-streaming responses must keep strict JSON failures; chunk construction resets this field.
+    aiMessage.invalid_tool_calls = parsedToolCalls.invalid;
     return {
       generations: [{ text: typeof content === 'string' ? content : JSON.stringify(content), message: aiMessage }],
       llmOutput: { gateway_raw_response: raw },

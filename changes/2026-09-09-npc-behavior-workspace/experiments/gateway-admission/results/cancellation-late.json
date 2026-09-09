@@ -1,0 +1,87 @@
+{
+  "active": 0,
+  "maxActive": 1,
+  "events": [
+    {
+      "seq": 1,
+      "atMs": 1788966625748,
+      "event": "start",
+      "scenario": "CANCEL",
+      "attempt": 1,
+      "model": "mock-flash-backend",
+      "active": 1
+    },
+    {
+      "seq": 2,
+      "atMs": 1788966627790,
+      "event": "client-closed",
+      "scenario": "CANCEL",
+      "attempt": 1,
+      "model": "mock-flash-backend"
+    },
+    {
+      "seq": 3,
+      "atMs": 1788966627791,
+      "event": "end",
+      "scenario": "CANCEL",
+      "attempt": 1,
+      "model": "mock-flash-backend",
+      "active": 0,
+      "status": "cancelled"
+    },
+    {
+      "seq": 4,
+      "atMs": 1788966628569,
+      "event": "start",
+      "scenario": "CANCEL",
+      "attempt": 2,
+      "model": "mock-flash-backend",
+      "active": 1
+    },
+    {
+      "seq": 5,
+      "atMs": 1788966630598,
+      "event": "client-closed",
+      "scenario": "CANCEL",
+      "attempt": 2,
+      "model": "mock-flash-backend"
+    },
+    {
+      "seq": 6,
+      "atMs": 1788966630598,
+      "event": "end",
+      "scenario": "CANCEL",
+      "attempt": 2,
+      "model": "mock-flash-backend",
+      "active": 0,
+      "status": "cancelled"
+    },
+    {
+      "seq": 7,
+      "atMs": 1788966631764,
+      "event": "start",
+      "scenario": "CANCEL",
+      "attempt": 3,
+      "model": "mock-flash-backend",
+      "active": 1
+    },
+    {
+      "seq": 8,
+      "atMs": 1788966633793,
+      "event": "client-closed",
+      "scenario": "CANCEL",
+      "attempt": 3,
+      "model": "mock-flash-backend"
+    },
+    {
+      "seq": 9,
+      "atMs": 1788966633793,
+      "event": "end",
+      "scenario": "CANCEL",
+      "attempt": 3,
+      "model": "mock-flash-backend",
+      "active": 0,
+      "status": "cancelled"
+    }
+  ]
+}

@@ -69,6 +69,7 @@ export class CompanionSession {
   private timelineMustFork = false;
   private recoveryBlocked = false;
   private pendingCognition: string | null = null;
+  private restoringCheckpoint = false;
   private connectionSettings: { url: string; token: string } | null = null;
 
   constructor(
@@ -341,7 +342,9 @@ export class CompanionSession {
       if (generation === this.generation && this.value.character?.entityId === id)
         this.publish({ document: { path, content } });
     });
-  worldRestored = () => {
+  worldRestored = (worldId = this.worldId) => {
+    if (this.restoringCheckpoint) return;
+    this.worldId = worldId;
     this.timelineMustFork = true;
     this.forkedTimeline = crypto.randomUUID();
     if (this.worldId) this.timelines.select(this.worldId, this.forkedTimeline);
@@ -391,16 +394,21 @@ export class CompanionSession {
       const paused = await authority.world.clock({ kind: 'pause' });
       if (!paused.ok) throw new Error('世界无法暂停');
       this.controller.setPaused(true);
-      const identity = await authority.world.identity();
-      if (!identity.ok) throw new Error('世界身份暂不可用');
-      const restoreWorldId = identity.data.worldId;
+      const restoreWorldId = `seedlands:g${checkpoint.world.generatorVersion}:${checkpoint.world.seedText}`;
+      const alreadyPending = this.timelines.requiresRestore(restoreWorldId);
       if (checkpoint.cognition !== null) this.timelines.beginRestore(restoreWorldId);
-      const result = await authority.world.checkpoint({ kind: 'restore', snapshot: checkpoint.world });
+      this.restoringCheckpoint = true;
+      let result;
+      try {
+        result = await authority.world.checkpoint({ kind: 'restore', snapshot: checkpoint.world });
+      } finally {
+        this.restoringCheckpoint = false;
+      }
       if (!result.ok) {
-        this.timelines.finishRestore(restoreWorldId);
+        if (!alreadyPending) this.timelines.finishRestore(restoreWorldId);
         throw new Error('世界存档恢复失败，原世界保持不变');
       }
-      this.worldRestored();
+      this.worldRestored(restoreWorldId);
       this.pendingCognition = checkpoint.cognition;
       if (checkpoint.cognition === null) this.timelines.finishRestore(restoreWorldId);
       const listed = await authority.character({ kind: 'list' });

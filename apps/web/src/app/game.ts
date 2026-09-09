@@ -287,7 +287,7 @@ export class Game {
   }
 
   private restoreBrowserWorld(ready: AuthorityReady) {
-    this.companion.worldRestored();
+    this.companion.worldRestored(`seedlands:g${ready.generatorVersion}:${ready.seedText}`);
     const authority = this.authority;
     if (!authority || !this.world || !this.camera || !this.environment) return;
     // prettier-ignore

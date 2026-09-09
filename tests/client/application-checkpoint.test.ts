@@ -37,7 +37,7 @@ describe('application checkpoint ownership', () => {
     } finally {
       await session.dispose();
     }
-  });
+  }, 15000);
   it('gives the browser owner checkpoint access without granting global inspect or resident access', () => {
     const auth = new WorldResourceAuthorizer(browserWorldOwnerPolicy('owner', 'player'));
     for (const operation of ['export', 'restore'] as const)

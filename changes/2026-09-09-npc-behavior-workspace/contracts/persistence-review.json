@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "id": "npc-persistence-review",
+  "role": "independent persistence reviewer",
+  "workType": "validation",
+  "goal": "Independently review frozen be49081c294bcfddda52304ae3b2c5d95bd762c5 -> f1ebda8a2c24941fb7e36efbd4339882f4092d53 (18-file standard Agent/PG foundation commit). Follow Seedlands code-review skill and all references, read immutable git show sources and base rules, no WIP mixing. Review PG isolation/read bounds/portable restore validation/compaction transaction and authority-source receipts, intermediate journal and cancellation recovery, LangChain thread/window restoration, request step and token budgets, gateway adapter lifetime and standard message field preservation. Root21 targeted tests including actualPG passed. Known WIP fixes not part of review: AGENT combined catalog exceeds8KiB under real capability schema, now increased complete file32KiB with narrative slot6KiB; grammar doc reuse; bindTools kwargs preserved; host/web separately uncommitted. Record frozen findings even if noted fixed, clearly separate current evidence. Do not edit source/Git/keys/services; report /tmp/npc-persistence-independent-review.md with full read report and exactline concrete findings. Root real Browser/model integration continues independently. Budget3h.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-persistence-independent-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "persistence-review",
+      "check": "Complete frozen18-file coverage and concrete independent findings with report",
+      "evidence": "/tmp/npc-persistence-independent-review.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 3
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

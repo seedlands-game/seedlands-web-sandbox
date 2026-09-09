@@ -27,6 +27,7 @@ import type { AuthorityPersistence } from '@seedlands/game-core/server/authority
 import { decodeAuthorityBootstrapResult } from './authority-worker-bootstrap';
 import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } from './authority-worker-response';
 import { BrowserCharacterAuthority } from './authority-worker-character-control';
+import { BrowserAuthorityDeterministicAdvance } from './authority-worker-deterministic-advance';
 
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
@@ -49,6 +50,7 @@ let pendingBootstrap: {
   reject: (error: Error) => void;
 } | null = null;
 let tickQueued = false;
+let deterministicAdvance: BrowserAuthorityDeterministicAdvance | null = null;
 
 const post = (message: AuthorityResponse, transfer: Transferable[] = []) => scope.postMessage(message, transfer);
 
@@ -65,6 +67,13 @@ const transact = async (
 ) => transactAuthorityRequest(post, epoch, runtimeEpoch, runtime!, message, operation);
 
 const fail = (requestId: number, error: unknown) => postAuthorityFailure(post, epoch, requestId, error);
+
+const publishLogicObservation = (
+  observation: Parameters<BrowserAuthorityDeterministicAdvance['publishLogicObservation']>[0],
+) => {
+  if (worldHarness?.acceptsAutomaticLogic() === false) return;
+  deterministicAdvance!.publishLogicObservation(observation);
+};
 
 const tick = () => {
   if (!runtime || !worldHarness || tickQueued) return;
@@ -132,18 +141,7 @@ const createRuntime = (
     fluidEpoch: candidateFluidEpoch,
     findInitialWorldBootstrap: requestBootstrap,
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
-    onLogicObservation: (observation) =>
-      worldHarness?.acceptsAutomaticLogic() === false
-        ? undefined
-        : post(
-            {
-              kind: 'logic-observation',
-              protocolVersion: PROTOCOL_VERSION,
-              epoch,
-              observation,
-            },
-            observation.decisionContext.terrainWindows.map((window) => window.occupancy.buffer),
-          ),
+    onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
   });
 
@@ -203,13 +201,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     fluidEpoch,
     findInitialWorldBootstrap: requestBootstrap,
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
-    onLogicObservation: (observation) =>
-      worldHarness?.acceptsAutomaticLogic() === false
-        ? undefined
-        : post(
-            { kind: 'logic-observation', protocolVersion: PROTOCOL_VERSION, epoch, observation },
-            observation.decisionContext.terrainWindows.map((window) => window.occupancy.buffer),
-          ),
+    onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
   });
   worldEpoch = `${epoch}:world:0`;
@@ -217,6 +209,16 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   const policy = message.developerWorldHarness
     ? developmentWorldAuthorizationPolicy(principalId, runtime.playerId)
     : browserWorldOwnerPolicy(principalId, runtime.playerId);
+  deterministicAdvance = new BrowserAuthorityDeterministicAdvance({
+    runtime: () => runtime!,
+    postLogicObservation: (observation) =>
+      post(
+        { kind: 'logic-observation', protocolVersion: PROTOCOL_VERSION, epoch, observation },
+        observation.decisionContext.terrainWindows.map((window) => window.occupancy.buffer),
+      ),
+    yieldTurn: browserCorePlatform.yieldTurn,
+    timers: browserCorePlatform.timers,
+  });
   worldHarness = new AuthorityWorldHarness({
     platform: browserCorePlatform,
     principalId,
@@ -226,7 +228,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
       if (!(await runtime!.prepareHarnessChunks([[cx, cy, cz]])))
         throw new Error(`Authority Chunk is unavailable: ${cx},${cy},${cz}.`);
     },
-    advance: async (elapsedMs) => runtime!.advancePausedSession(elapsedMs),
+    advance: (elapsedMs) => deterministicAdvance!.advancePaused(elapsedMs, worldHarness!.acceptsAutomaticLogic()),
     restore: restoreWorld,
     clockNow: browserCorePlatform.now,
   });
@@ -407,7 +409,7 @@ const handleCurrent = async (message: AuthorityRequest) => {
       break;
     case 'logic-intents':
       ingress!.logic();
-      if (worldHarness?.acceptsAutomaticLogic() !== false) current.receiveLogicIntentBatch(message.batch);
+      if (worldHarness?.acceptsAutomaticLogic() !== false) deterministicAdvance!.acceptLogicIntentBatch(message.batch);
       worldHarness?.notifyProgress();
       break;
     case 'request-logic-observation':
@@ -468,6 +470,7 @@ const handle = async (message: AuthorityRequest) => {
     pendingBootstrap?.reject(new Error('Authority Worker was disposed during bootstrap.'));
     pendingBootstrap = null;
     worldHarness = null;
+    deterministicAdvance = null;
     ingress = null;
     characterAuthority?.clear();
     characterAuthority = null;
@@ -488,9 +491,10 @@ const handle = async (message: AuthorityRequest) => {
     }
     await handleCurrent(message);
   };
-  // Canonical completion resolves a prepare operation that may own the command queue.
-  // It stays on this Authority writer and keeps the same epoch/revision validation.
-  if (message.kind === 'accept-generated-chunk') {
+  const interleavedLogic =
+    deterministicAdvance?.isAdvancing &&
+    (message.kind === 'logic-intents' || message.kind === 'request-logic-observation');
+  if (message.kind === 'accept-generated-chunk' || interleavedLogic) {
     await dispatchCurrent();
     worldHarness.notifyProgress();
   } else await worldHarness.hostOperation(dispatchCurrent);
