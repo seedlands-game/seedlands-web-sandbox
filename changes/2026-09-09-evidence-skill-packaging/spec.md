@@ -16,7 +16,8 @@
 
 - [x] frontmatter约束、资源链接与相对依赖校验（环境边界见下）。
 - [x] 定向包装测试；全量static与build基础检查。
-- [ ] 语义化提交并更新PR #27，读取最终SHA CI。
+- [x] 语义化提交并更新PR #27。
+- [ ] 最终SHA CI（终态记录到PR描述）。
 
 预计小型改动，非大规模change，不创建Goal。长期baseline更新AGENTS、CI文档、context-engineering与既有两项skill；不新增平行skill或审批流程。最终CI结果记录到PR描述，避免仅回填远端状态再次触发全套CI。
 
@@ -29,3 +30,5 @@
 skill-creator原Python校验器在默认与已有bundled Python中均缺少PyYAML，未安装依赖；改用仓库现有ESLint依赖中的js-yaml，核对同一frontmatter字段、命名、长度与TODO约束，结果通过。另做包内导航、14个相对链接、无用户绝对路径/本机包装器检查。原Python校验器未成功执行，不能记为该命令通过。
 
 最终PR exact-SHA CI在推送后读回并写入PR描述。本次只改项目内资源和规则，不修改全局skill、权限或分支保护，不自动合并。
+
+包装提交1fa0ac5的远端static和build通过，浏览器暴露既有edge-support时序误报。其定向修正和故障反例记录在同PR的CI change spec，不修改生产物理；完整CI以最终组合SHA为准。

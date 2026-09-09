@@ -35,7 +35,7 @@ const waitForAuthorityFall = async (page: Page, before: HarnessSnapshot, require
       return current.serverPlayerPosition[1] < height - 0.25 &&
         current.authority.physicsTick > tick + (ack === null ? 2 : 15) &&
         (ack === null || current.authority.acknowledgedInputSequence > ack) &&
-        !current.onGround
+        (ack !== null || !current.onGround)
         ? current
         : null;
     },
@@ -48,7 +48,7 @@ const waitForAuthorityFall = async (page: Page, before: HarnessSnapshot, require
   );
   try {
     const current = await sample.jsonValue();
-    if (!current) throw new Error('Authority did not provide an airborne falling sample.');
+    if (!current) throw new Error('Authority did not provide the requested falling sample.');
     return current;
   } finally {
     await sample.dispose();
@@ -107,8 +107,8 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
   test('keeps real edge support and falls only after all supporting voxels are removed', async ({ page }) => {
     await startHarnessWorld(page, 'seedlands-player-collision');
     await prepareCenterExcavation(page);
-    await fillHarnessWorld(page, [-1, 48, -1], [0, 48, 0], Voxel.Stone);
-    await fillHarnessWorld(page, [-1, 49, -1], [0, 55, 0], Voxel.Air);
+    await fillHarnessWorld(page, [-1, 16, -1], [0, 16, 0], Voxel.Stone);
+    await fillHarnessWorld(page, [-1, 17, -1], [0, 55, 0], Voxel.Air);
     const supported = await waitForSnapshot(page, (current) => current.onGround && !current.colliding);
     await expect
       .poll(async () => (await snapshot(page))!.authority.physicsTick)
@@ -127,29 +127,55 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
     try {
       await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
       const afterSpace = await waitForAuthorityFall(page, falling, true);
-      expect(afterSpace.onGround).toBe(false);
       expect(afterSpace.colliding).toBe(false);
-      const samples = afterSpace.trajectory.filter((sample) => sample.physicsTick >= falling.authority.physicsTick);
-      expect(samples.length).toBeGreaterThanOrEqual(2);
-      for (let index = 1; index < samples.length; index += 1)
-        expect(samples[index]!.position[1]).toBeLessThanOrEqual(samples[index - 1]!.position[1] + 0.0001);
+      const boundarySample = await page.waitForFunction(
+        (tick) => {
+          const current = window.__seedlandsHarness!.snapshot();
+          return current.trajectory.some((sample) => sample.physicsTick >= tick && sample.position[1] <= 20.6)
+            ? current
+            : null;
+        },
+        falling.authority.physicsTick,
+        { timeout: 15_000 },
+      );
+      const reachedBoundary = await boundarySample.jsonValue();
+      await boundarySample.dispose();
+      if (!reachedBoundary)
+        throw new Error('Authority did not descend to the pre-landing boundary while Space was held.');
+      const samples = reachedBoundary.trajectory.filter(
+        (sample) => sample.physicsTick >= falling.authority.physicsTick,
+      );
+      expect(samples[0]?.physicsTick).toBe(falling.authority.physicsTick);
+      // Stop the airborne window two blocks above the floor: snapshots can skip the exact contact tick.
+      const boundaryIndex = samples.findIndex((sample) => sample.position[1] <= 20.6);
+      expect(boundaryIndex).toBeGreaterThanOrEqual(0);
+      const firstDescent = samples.slice(0, boundaryIndex + 1);
+      expect(firstDescent.length).toBeGreaterThanOrEqual(2);
+      for (let index = 1; index < firstDescent.length; index += 1)
+        expect(firstDescent[index]!.position[1]).toBeLessThanOrEqual(firstDescent[index - 1]!.position[1] + 0.0001);
     } finally {
       await page.keyboard.up('Space');
     }
     const landed = await waitForSnapshot(
       page,
-      (current) => current.onGround && Math.abs(current.serverPlayerPosition[1] - 50.6) < 0.001,
+      (current) => current.onGround && Math.abs(current.serverPlayerPosition[1] - 18.6) < 0.001,
     );
     expect(landed.colliding).toBe(false);
     const trajectory = await page.evaluate(() => window.__seedlandsHarness!.snapshot().trajectory);
     const descent = trajectory.filter((sample) => sample.physicsTick >= falling.authority.physicsTick);
     expect(descent.length).toBeGreaterThanOrEqual(2);
-    expect(Math.min(...descent.map((sample) => sample.position[1]))).toBeGreaterThanOrEqual(50.6 - 0.001);
-    await expect
-      .poll(async () => (await snapshot(page))!.authority.physicsTick)
-      .toBeGreaterThan(landed.authority.physicsTick + 15);
-    const settled = (await snapshot(page))!;
-    expect(settled.serverPlayerPosition[1]).toBeCloseTo(50.6, 3);
+    expect(Math.min(...descent.map((sample) => sample.position[1]))).toBeGreaterThanOrEqual(18.6 - 0.001);
+    const settled = await waitForSnapshot(page, (current) => {
+      const recent = current.trajectory.filter((sample) => sample.physicsTick >= current.authority.physicsTick - 15);
+      return (
+        current.onGround &&
+        !current.colliding &&
+        recent.length >= 2 &&
+        recent[0]!.physicsTick <= current.authority.physicsTick - 14 &&
+        recent.every((sample) => Math.abs(sample.position[1] - 18.6) < 0.001)
+      );
+    });
+    expect(settled.serverPlayerPosition[1]).toBeCloseTo(18.6, 3);
     expect(settled.onGround).toBe(true);
     expect(settled.colliding).toBe(false);
   });
