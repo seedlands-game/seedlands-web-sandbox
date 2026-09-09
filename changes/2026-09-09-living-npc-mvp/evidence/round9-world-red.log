@@ -1,0 +1,76 @@
+10:01:00 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/character-logic-goal-ownership.test.ts (3 tests | 2 failed) 1438ms
+     × keeps an explicit idle character still without assigning ownership to an ordinary settler 1028ms
+     × rebuilds goal ownership from Character state across old or forged checkpoint projections 263ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/character-logic-goal-ownership.test.ts > persistent character goal ownership in Logic > keeps an explicit idle character still without assigning ownership to an ordinary settler
+AssertionError: expected { entityId: 'npc-3', …(10) } to match object { persistentGoal: { …(2) } }
+(11 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "persistentGoal": {
+-     "kind": "idle",
+-     "status": "active",
+-   },
++   "active": true,
++   "archetype": "settler",
++   "attackCooldownSeconds": 0,
++   "behavior": "idle",
++   "entityId": "npc-3",
++   "foodPoiId": null,
++   "homePoiId": null,
++   "hunger": 60,
++   "targetEntityId": null,
++   "wanderIndex": 0,
++   "workPoiId": null,
+  }
+
+ ❯ tests/server/character-logic-goal-ownership.test.ts:86:91
+     84|     expect(session.runtime.server.getActorAction(character.entityId)).…
+     85|     const projected = session.runtime.createLogicObservation().decisio…
+     86|     expect(projected.find((entry) => entry.state.entityId === characte…
+       |                                                                                           ^
+     87|       persistentGoal: { kind: 'idle', status: 'active' },
+     88|     });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/server/character-logic-goal-ownership.test.ts > persistent character goal ownership in Logic > rebuilds goal ownership from Character state across old or forged checkpoint projections
+AssertionError: expected { entityId: 'npc-2', …(11) } to match object { persistentGoal: { …(2) } }
+(11 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "persistentGoal": {
+-     "kind": "idle",
++     "kind": "forage",
+      "status": "active",
+    },
+  }
+
+ ❯ tests/server/character-logic-goal-ownership.test.ts:165:30
+    163|       (entry) => entry.state.entityId === character.entityId,
+    164|     );
+    165|     expect(projected?.state).toMatchObject({ persistentGoal: { kind: '…
+       |                              ^
+    166|   }, 30_000);
+    167| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  22:01:00
+   Duration  1.87s (transform 302ms, setup 0ms, import 361ms, tests 1.44s, environment 0ms)
+

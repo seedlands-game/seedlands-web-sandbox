@@ -132,6 +132,13 @@ export class CharacterControllerBridge {
     if (this.ready) this.send({ kind: 'configure', fallbackSeconds: this.fallbackSeconds, contextLimit });
   }
 
+  setPaused(paused: boolean): void {
+    if (!this.ready) return;
+    if (paused === this.paused) return;
+    this.paused = paused;
+    this.send({ kind: 'control', command: paused ? 'pause' : 'resume' });
+  }
+
   disconnect(notify = true): void {
     this.generation += 1;
     if (this.timer) clearTimeout(this.timer);
@@ -203,6 +210,20 @@ export class CharacterControllerBridge {
       });
       return;
     }
+    if (message.kind === 'intent' && this.options.paused()) {
+      this.setPaused(true);
+      this.send({
+        kind: 'receipt',
+        receipt: {
+          requestId: message.requestId,
+          status: 'rejected',
+          cursor: this.cursor,
+          revision: message.observedRevision,
+          reason: 'WORLD_PAUSED',
+        },
+      });
+      return;
+    }
     const result =
       message.kind === 'intent'
         ? await this.port.intent(
@@ -232,10 +253,7 @@ export class CharacterControllerBridge {
     if (generation !== this.generation || !this.port) return;
     try {
       const paused = this.options.paused();
-      if (paused !== this.paused) {
-        this.paused = paused;
-        this.send({ kind: 'control', command: paused ? 'pause' : 'resume' });
-      }
+      this.setPaused(paused);
       if (!paused || initialize) {
         const result = await this.port.observe(this.cursor);
         if (generation !== this.generation) return;

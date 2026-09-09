@@ -85,6 +85,12 @@ function validateObservation(observation: LogicObservation): void {
       (entry.activeAction?.actorId !== undefined && entry.activeAction.actorId !== entry.state.entityId)
     )
       throw new TypeError('Logic actor is invalid or duplicated.');
+    if (
+      entry.state.persistentGoal &&
+      (!['idle', 'forage', 'follow', 'return-home', 'move-to'].includes(entry.state.persistentGoal.kind) ||
+        !['active', 'suspended'].includes(entry.state.persistentGoal.status))
+    )
+      throw new TypeError('Logic actor persistent goal is invalid.');
     actors.add(entry.state.entityId);
   }
 }
@@ -171,6 +177,9 @@ function chooseGoal(
       actionId: entry.activeAction.id,
       ...(entry.activeAction.targetEntityId ? { targetEntityId: entry.activeAction.targetEntityId } : {}),
     };
+
+  // Forage deliberately delegates its no-food roaming baseline to ordinary settler Logic.
+  if (state.persistentGoal && state.persistentGoal.kind !== 'forage') return { kind: 'hold' };
 
   if (state.archetype === 'grazer') {
     const food = visibleNearest(

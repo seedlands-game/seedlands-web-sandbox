@@ -1,0 +1,49 @@
+Chromium regression	Run melee gameplay integration	﻿2026-09-09T13:34:36.2959905Z ##[group]Run pnpm test:pr17:integration
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2960632Z ^[[36;1mpnpm test:pr17:integration^[[0m
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2997092Z shell: /usr/bin/bash -e {0}
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2997376Z env:
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2997819Z   CI: true
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2998083Z   SEEDLANDS_BASE_PATH: /seedlands-web-sandbox/
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2998490Z   VITE_COMMIT_SHA: 0e3fd3270cef8a1811e41bac9ff7e2a4565b2a42
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2998871Z   PNPM_HOME: /home/runner/setup-pnpm
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2999188Z   PNPM_CONFIG_GLOBAL_SHIMS: {"node":false}
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2999512Z   SEEDLANDS_E2E_SWIFTSHADER: 1
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.2999794Z   SEEDLANDS_E2E_FULL_CHROMIUM: 1
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.3000085Z   SEEDLANDS_BROWSER_E2E_QUALITY: low
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.3000706Z ##[endgroup]
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:36.9272918Z $ playwright test changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:41.0461434Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:41.0462017Z Running 1 test using 1 worker
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:41.0462359Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:41.6021969Z [1/1] [chromium] › changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:17:1 › 开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈
+Chromium regression	Run melee gameplay integration	2026-09-09T13:34:51.2107542Z [2/1] (retries) [chromium] › changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:17:1 › 开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈 (retry #1)
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4002312Z   1) [chromium] › changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:17:1 › 开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4003365Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4003630Z     Error: expect(locator).toBeVisible() failed
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4004043Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4004275Z     Locator: locator('#melee-showcase-guide')
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4004812Z     Expected: visible
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4005242Z     Timeout: 5000ms
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4005648Z     Error: element(s) not found
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4005955Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4006113Z     Call log:
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4006568Z       - Expect "toBeVisible" with timeout 5000ms
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4007266Z       - waiting for locator('#melee-showcase-guide')
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4007696Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4007704Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4008351Z       27 |   const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4009496Z       28 |   if (await continueDespiteWarning.isVisible()) await continueDespiteWarning.click();
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4010798Z     > 29 |   await expect(page.locator('#melee-showcase-guide')).toBeVisible();
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4011631Z          |                                                       ^
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4012702Z       30 |   await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4013794Z       31 |   await expect(page.locator('#debug')).toContainText(`Seed ${MELEE_SHOWCASE_SEED}`);
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4014832Z       32 |   for (const id of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID])
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4016265Z         at /home/runner/work/seedlands-web-sandbox/seedlands-web-sandbox/changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:29:55
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4017289Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4020109Z     Error Context: test-results/changes-2026-09-08-melee-a-ea0ba--开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈-chromium/error-context.md
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4021326Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.4021340Z 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.5114563Z   1 flaky
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.5116019Z     [chromium] › changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:17:1 › 开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈 
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.5986433Z [ELIFECYCLE] Command failed with exit code 1.
+Chromium regression	Run melee gameplay integration	2026-09-09T13:35:13.6362507Z ##[error]Process completed with exit code 1.

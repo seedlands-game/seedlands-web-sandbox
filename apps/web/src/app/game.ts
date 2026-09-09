@@ -407,10 +407,10 @@ export class Game {
 
   setPaused(paused: boolean) {
     this.paused = paused;
+    this.companion.setPaused(paused);
     this.controller?.releaseInput();
-    const control =
-      this.authority?.mode === 'local' ? (paused ? this.authority.pause() : this.authority.resume()) : undefined;
-    void control?.catch(() => undefined);
+    const authority = this.authority?.mode === 'local' ? this.authority : null;
+    void (paused ? authority?.pause() : authority?.resume())?.catch(() => undefined);
     this.gameplayClient?.setSuspended(paused);
     // prettier-ignore
     this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, paused, this.controller?.waterImmersion);

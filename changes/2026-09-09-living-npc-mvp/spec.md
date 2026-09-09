@@ -103,3 +103,7 @@ A3：浏览器可直接创建/继续伙伴，展示姓名、目标、行为、�
 第八轮存档计数边界：自动复核5154415291发现eventCursor可恢复为MAX_SAFE_INTEGER，下一事件越界。检查同一角色存档中后续会递增的revision、policyRevision、memory.revision，一并要求增量空间；纯历史编号仍按原合同校验。事件尾部不得包含零号/负号，必须从正数连续到head，与Wire一致。真实GameServer恢复损坏快照须原子拒绝，再验证对话、观察与重新存档恢复正常；不改变计数格式和产品能力，无新provider调用。
 
 同轮计数审计覆盖角色集合的incarnation sequence：恢复不得接受负数或已耗尽的集合sequence，保持下一次注册身份生成仍在安全整数范围。
+
+第九轮活人感闭环：持久角色当前目标active但没有actionId时，Logic不得回落到传统settler游荡；idle应留在原地，follow到达后等待并继续跟随，不由未归属的新routine动作打断。世界暂停切换立即通知认知Bridge/host，迟到intent不能在暂停窗口写入目标/发言；恢复和初始暂停连接仍正确。真实Logic/Physics多轮推进与可控时钟Bridge先RED后GREEN，暂停不能承诺取消已发生的provider计费。近战CI失败另按加载owner完成边界复现，不扩大重试或隐藏flaky。
+
+近战CI修复依据：run34357206570首轮guide默认5s失败、重试成功仍被failOnFlakyTests正确拒绝；只有retry trace，不能归因首轮生产异常。retry中合法启动/布置等待几乎占满5秒，错误上下文最终也出现完整体验场。测试改为等待warning或guide的实际分支（15秒启动阶段预算），需要确认时点击，再等待完整guide；保持全部受击/实体/连击断言及90秒旅程预算，不改变CI重试。用6秒Authority Worker入口延迟故障注入在同一E2E取得旧RED/新GREEN，再无注入复验；注入脚本不进入生产。

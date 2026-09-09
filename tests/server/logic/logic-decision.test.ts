@@ -152,13 +152,33 @@ describe('Game Logic Worker 的纯意图计算', () => {
   it('保留 Authority 记录的受击逃跑状态，并生成远离攻击者的意图', () => {
     const grazer = entity({ position: [8.5, 1, 2.5] });
     const attacker = entity({ id: 'player', bodyKind: 'player', position: [6.5, 1, 2.5] });
-    const fleeing = actor({ behavior: 'flee', targetEntityId: 'player' });
+    const fleeing = actor({
+      behavior: 'flee',
+      targetEntityId: 'player',
+      persistentGoal: { kind: 'idle', status: 'suspended' },
+    });
 
     const batch = decideLogicIntents(observation([{ state: fleeing, identityRevision: 1 }], [grazer, attacker]));
 
     expect(batch.intents[0]).toMatchObject({
       wish: { x: 1, z: 0 },
       action: { type: 'move-to', target: [14.5, 1, 2.5] },
+    });
+  });
+
+  it('持久角色目标无 Action 时保持，而不接管成旧居民日程', () => {
+    const settler = entity({ id: 'settler', bodyKind: 'settler' });
+    const owned = actor({
+      entityId: 'settler',
+      archetype: 'settler',
+      persistentGoal: { kind: 'idle', status: 'active' },
+    });
+
+    expect(
+      decideLogicIntents(observation([{ state: owned, identityRevision: 1 }], [settler])).intents[0],
+    ).toMatchObject({
+      wish: { x: 0, z: 0 },
+      jumpRequested: false,
     });
   });
 

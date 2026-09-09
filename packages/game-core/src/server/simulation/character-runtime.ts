@@ -38,6 +38,7 @@ import {
   validateCharacterProfile,
   validateCharacterSnapshotRecord,
 } from './character-runtime-validation';
+import type { ActorPersistentGoal } from './actor-state';
 
 const DANGER_SECONDS = 3;
 const MOVEMENT_REFRESH_SECONDS = 1;
@@ -204,6 +205,17 @@ export class CharacterRuntime {
         dangerSecondsRemaining: record.dangerSecondsRemaining,
       })),
     };
+  }
+
+  persistentGoalFor(entityId: string): ActorPersistentGoal | null {
+    const record = this.records.get(entityId);
+    if (
+      !record ||
+      record.lifecycle !== 'active' ||
+      (record.currentGoal.status !== 'active' && record.currentGoal.status !== 'suspended')
+    )
+      return null;
+    return { kind: record.currentGoal.goal.kind, status: record.currentGoal.status };
   }
 
   restore(raw: unknown): void {

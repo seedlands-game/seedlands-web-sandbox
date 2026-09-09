@@ -262,7 +262,10 @@ export class AutonomyRuntime {
       perceptionAccumulator: this.perceptionAccumulator,
       behaviorAccumulator: this.behaviorAccumulator,
       starterEcologyVersion: this.starterVersion,
-      actors: this.queryActors(),
+      actors: this.queryActors().map((actor) => {
+        const persistentGoal = this.characters.persistentGoalFor(actor.entityId);
+        return persistentGoal ? { ...actor, persistentGoal } : actor;
+      }),
       pois: this.pois.snapshot(),
       actions: this.actions.snapshot(),
       combat: this.combat.snapshot(),
@@ -384,6 +387,12 @@ export class AutonomyRuntime {
       !Number.isInteger(actor.wanderIndex)
     )
       throw new TypeError('actor fields are invalid');
+    if (
+      actor.persistentGoal &&
+      (!['idle', 'forage', 'follow', 'return-home', 'move-to'].includes(actor.persistentGoal.kind) ||
+        !['active', 'suspended'].includes(actor.persistentGoal.status))
+    )
+      throw new TypeError('actor persistent goal projection is invalid');
   }
 
   private validateCombatActionLinks(snapshot: SimulationSnapshot, actors: ReadonlyMap<string, ActorState>): void {

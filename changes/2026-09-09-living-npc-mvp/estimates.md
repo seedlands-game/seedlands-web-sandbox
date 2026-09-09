@@ -41,3 +41,5 @@ GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，li
 外部主线#27同步继续使用原共享池，集成复核成本见main-sync-recheck.md；无新模型调用，任务credits仍unknown。合并引入的主线工作不计作本任务新实现。
 
 第八轮Root计数器恢复审计与复核保持原共享预算池；独立实际成本见round8-recheck.md。1283测试/build/Browser通过，无真实provider新增调用，不购买或使用reset；任务级credits仍unknown。
+
+第九轮暂停修复约0.17 agent小时，世界目标保持和CI近战分诊继续使用原共享池。低成本确定性fixture验证，不新增真实provider调用；最终实际credits不可按tokens推算。

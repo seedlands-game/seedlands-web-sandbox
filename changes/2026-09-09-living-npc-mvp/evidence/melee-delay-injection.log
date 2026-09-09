@@ -1,0 +1,23 @@
+--- original-test
++++ six-second-authority-worker-delay
+@@ -21,6 +21,12 @@
+     await page.screenshot({ path });
+     await info.attach(name, { path, contentType: 'image/png' });
+   };
++  let delayedAuthority = 0;
++  await page.route('**/worker/authority-worker.ts*', async (route) => {
++    delayedAuthority += 1;
++    await new Promise((resolve) => setTimeout(resolve, 6_000));
++    await route.continue();
++  });
+   await page.goto('./?harness=1');
+   await selectJourneyQuality(page);
+   await page.getByRole('button', { name: '木剑动作体验场', exact: true }).click();
+@@ -31,6 +37,7 @@
+   await expect(page.locator('#debug')).toContainText(`Seed ${MELEE_SHOWCASE_SEED}`);
+   for (const id of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID])
+     await expect(page.locator(`[data-entity-id="${id}"]`)).toBeAttached();
++  expect(delayedAuthority).toBeGreaterThan(0);
+   await capture('showcase-ready');
+ 
+   await page.getByRole('button', { name: '立即触发玩家受击反馈', exact: true }).click();
