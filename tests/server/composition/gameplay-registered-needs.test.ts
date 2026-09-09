@@ -103,6 +103,23 @@ function armStarvation(world: GameplayRuntime, ids: readonly string[]) {
 }
 
 describe('registered Needs is the real composed consumer', () => {
+  it('does not overflow revision after the last valid registered Needs commit', () => {
+    const { world } = setup(true);
+    const saved = world.createSnapshot();
+    saved.revision = Number.MAX_SAFE_INTEGER - 1;
+    world.restoreSnapshot(saved);
+    world.advanceRules(0.05);
+    expect(world.createSnapshot().revision).toBe(Number.MAX_SAFE_INTEGER);
+  });
+  it('rejects clock advance at exhausted revision before changing a world without Needs', () => {
+    const { world } = setup(false);
+    const saved = world.createSnapshot();
+    saved.revision = Number.MAX_SAFE_INTEGER;
+    world.restoreSnapshot(saved);
+    const before = world.createSnapshot();
+    expect(() => world.advanceRules(0.05)).toThrow(/revision capacity/);
+    expect(world.createSnapshot()).toEqual(before);
+  });
   it('uses registered Ruleset cadence instead of the old implicit need loop', () => {
     const { world } = setup(true);
     world.advanceRules(2);

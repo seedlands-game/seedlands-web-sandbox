@@ -89,3 +89,9 @@
 Combat 当前/缓冲来源及 Prepared Combat 子任务均已归还路径；没有写入 child。默认 Needs 已由真实注册系统处理，Browser/Headless 使用显式 system policy；无 Needs 组合关闭隐式玩家/NPC 分支。旧 V3 NPC phase、跨片死亡/掉落失败与 Action 结算定向通过。full static 1433 passed / 4 skipped、build、Browser 组合 4/4 和真实玩法旅程 2/2 分别通过，4173 已释放，见 [Needs 检查点](s3-needs-checkpoint.md)。只读 reviewer 正在复核该冻结切片。下个切口是 prepared attack request（含 zero-windup）与真实 actor-origin / registered damage 消费，S3 仍 Implementing，S4–S6 未准出。
 
 - Needs 检查点最终修复与准出：独立审阅发现并关闭 513 retained actor 恢复 P1，根复核补齐 20Hz phase 精度；最终 full static 1435 passed /4 skipped、build、Browser 6/6 分别通过。独立 bounded pass、43/43 source SHA 匹配，当前无 reviewer 或写入 child 活跃；4173 已释放。准备语义提交后进入 prepared request + registered damage。
+
+## 注册 Combat 继续点
+
+Needs 检查点已提交 `37c1619`，提交后工作树确认干净。复用 `s2_action_restore` 实施 prepared Combat request，合同 `/tmp/seedlands-s3-handoff/prepared-combat-request.json`，hash `cbc543538066e1bb7bcef4be9b5bd15f45152a1a6fb4c59794ec1e68dba9dc79`，仅拥有 CombatRuntime、prepared-combat-mutation、新 combat-request-candidate 和该切片的测试/设计/证据。Root 拥有 ActionRuntime prepared start、注册 Combat 与宿主 origin 接线；reviewer 已返回。上一轮通过不能覆盖本轮未提交的新代码。
+
+Prepared request 子任务已交还全部路径，当前没有写入 child。Action/Combat 接受候选及注册库存/时钟容量修复已冻结通过 full static 1446 passed /4 skipped、build 和 Browser 6/6，4173 已释放，见 [接受检查点](s3-prepared-acceptance-checkpoint.md)。`ecs_review` 只读复核后续真实 Combat 接缝，合同 `/tmp/seedlands-s3-handoff/combat-host-review.json`，hash `d0221cdf57d7fffb5d6a824d4dbc08ac58075bef083a2dbd8834ebe487e4269c`；不拥有写路径。S3 Implementing，下一步仍是注册攻击/调度/延迟伤害与宿主 origin，并非 S3 或 S6 准出。

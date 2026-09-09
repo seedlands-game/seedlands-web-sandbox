@@ -1,3 +1,4 @@
+import { prepareEntityMutationSeries, type PreparedEntityMutationInput } from '../prepared-entity-mutation';
 import type {
   RegisteredStatePort,
   ModStateAddress,
@@ -8,7 +9,13 @@ import type { EntityStore } from '../entity-store';
 import type { ItemDefinitionRegistry } from '../item-registry';
 import { createInventoryCandidate } from './inventory-api';
 
-type Owner = Readonly<{ entities: EntityStore; items: ItemDefinitionRegistry; revision(): number; changed(): void }>;
+type Owner = Readonly<{
+  entities: EntityStore;
+  items: ItemDefinitionRegistry;
+  revision(): number;
+  assertCanChange(): void;
+  changed(): void;
+}>;
 const keyFor = (address: ModStateAddress): string => {
   if (address.componentId !== 'seedlands:inventory' || address.target.kind !== 'entity')
     throw new TypeError('Unsupported inventory state address.');
@@ -34,9 +41,7 @@ export function createInventoryStatePort(owner: Owner): RegisteredStatePort {
   };
   function commit(observed: readonly ObservedModState[], writes: readonly ModStateWrite[]) {
     const expected = new Map<string, number>();
-    const prepared: Array<
-      Readonly<{ inventory: ReturnType<typeof read>['inventory']; slots: ReturnType<typeof read>['value'] }>
-    > = [];
+    const prepared: Array<Readonly<{ id: string; slots: ReturnType<typeof read>['value'] }>> = [];
     try {
       for (const entry of observed) {
         const id = keyFor(entry.address);
@@ -55,14 +60,26 @@ export function createInventoryStatePort(owner: Owner): RegisteredStatePort {
         const candidate = createInventoryCandidate(owner.items, entry.value);
         if (candidate.capacity !== live.inventory.capacity)
           return { ok: false as const, reason: 'inventory-capacity-mismatch' };
-        prepared.push({ inventory: live.inventory, slots: candidate.snapshot() });
+        prepared.push({ id, slots: candidate.snapshot() });
       }
     } catch {
       return { ok: false as const, reason: 'invalid-inventory-candidate' };
     }
-    // All inputs and owner references are checked in this synchronous phase before the first replacement.
-    for (const entry of prepared) entry.inventory.replace(entry.slots);
-    if (prepared.length) owner.changed();
+    if (prepared.length) {
+      owner.assertCanChange();
+      const actors = prepared.map(({ id, slots }) => ({
+        reference: owner.entities.createReference(id)!,
+        health: owner.entities.actorStateAccess(id).health,
+        components: { ...owner.entities.actorComponentSnapshot(id), inventory: slots },
+      }));
+      const segments: PreparedEntityMutationInput[] = [];
+      for (let offset = 0; offset < actors.length; offset += 128)
+        segments.push({ actors: actors.slice(offset, offset + 128) });
+      const mutation = prepareEntityMutationSeries(owner.entities, segments);
+      mutation.validate();
+      mutation.apply();
+      owner.changed();
+    }
     return { ok: true as const, revision: owner.revision() };
   }
   return Object.freeze({

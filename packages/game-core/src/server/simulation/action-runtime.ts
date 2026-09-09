@@ -62,6 +62,7 @@ export class ActionRuntime {
   private readonly currentByActor = new Map<string, string>();
   private readonly bindings = new Map<string, ActionBindings>();
   private sequence = 0;
+  private frontierToken = {};
 
   constructor(
     private readonly cloneValue: CoreClone,
@@ -78,24 +79,74 @@ export class ActionRuntime {
   }
 
   start(input: ActorActionInput, now: number): ActorAction {
+    const prepared = this.prepareStart(input, now);
+    prepared.validate();
+    prepared.apply();
+    return prepared.action;
+  }
+
+  prepareStart(input: ActorActionInput, now: number, options: Readonly<{ status?: 'pending' | 'running' }> = {}) {
     this.validateInput(input, now);
     if (this.sequence >= Number.MAX_SAFE_INTEGER) throw new RangeError('Action sequence is exhausted.');
+    const status = options.status ?? 'pending';
+    if (status !== 'pending' && status !== 'running') throw new TypeError('Prepared Action status is invalid.');
     const bindings = this.captureBindings(input.actorId, input.targetEntityId);
-    this.interruptActor(input.actorId, now, 'replaced');
+    const sequence = this.sequence,
+      token = this.frontierToken;
+    const previousId = this.currentByActor.get(input.actorId);
+    const replacement = previousId
+      ? this.prepareSettlements([{ id: previousId, status: 'interrupted', now, reason: 'replaced' }])
+      : null;
     const action: ActorAction = {
       ...input,
       ...(input.targetPosition ? { targetPosition: [...input.targetPosition] } : {}),
-      id: `action-${++this.sequence}`,
-      status: 'pending',
+      id: `action-${sequence + 1}`,
+      status,
       startedAt: now,
       path: [],
       pathIndex: 0,
       repathCount: 0,
     };
-    this.actions.set(action.id, action);
-    this.bindings.set(action.id, bindings);
-    this.currentByActor.set(action.actorId, action.id);
-    return this.clone(action);
+    const output = this.clone(action);
+    let used = false,
+      validated = false;
+    const assertFresh = () => {
+      if (used) throw new Error('Prepared Action start was already used.');
+      if (
+        this.frontierToken !== token ||
+        this.sequence !== sequence ||
+        this.currentByActor.get(action.actorId) !== previousId ||
+        this.actions.has(action.id)
+      )
+        throw new Error('Prepared Action start is stale.');
+      replacement?.validate();
+    };
+    return Object.freeze({
+      action: output,
+      replacedAction: replacement?.results[0] ?? null,
+      validate: () => {
+        validated = false;
+        assertFresh();
+        const actorFailure = entityReferenceExecutionFailure(this.identity, bindings.actor, action.actorId, 'actor');
+        const targetFailure = action.targetEntityId
+          ? entityReferenceExecutionFailure(this.identity, bindings.target, action.targetEntityId, 'target')
+          : null;
+        if (actorFailure || targetFailure)
+          throw new Error(`Prepared Action identity rejected: ${actorFailure ?? targetFailure}`);
+        validated = true;
+      },
+      apply: () => {
+        if (used) throw new Error('Prepared Action start was already used.');
+        if (!validated) throw new Error('Prepared Action start requires validation.');
+        assertFresh();
+        replacement?.apply();
+        this.sequence = sequence + 1;
+        this.actions.set(action.id, action);
+        this.bindings.set(action.id, bindings);
+        this.currentByActor.set(action.actorId, action.id);
+        used = true;
+      },
+    });
   }
 
   get(id: string): ActorAction | null {
@@ -210,6 +261,7 @@ export class ActionRuntime {
           current.set(action.actorId, action.id);
         }
       }
+      this.frontierToken = {};
       this.actions.clear();
       actions.forEach((action, id) => this.actions.set(id, action));
       this.currentByActor.clear();

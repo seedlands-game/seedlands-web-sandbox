@@ -103,21 +103,8 @@ const cloneEvent = (value: CombatLifecycleEvent): CombatLifecycleEvent => ({
 export const cloneCombatLifecycleEvents = (values: readonly CombatLifecycleEvent[]): CombatLifecycleEvent[] =>
   values.map(cloneEvent);
 
-export function acknowledgeCombatLifecycleEvents(events: CombatLifecycleEvent[], count: number): void {
-  if (!Number.isSafeInteger(count) || count < 0 || count > events.length)
-    throw new RangeError('Combat lifecycle acknowledgement count is invalid.');
-  events.splice(0, count);
-}
-
 export const listCombatPendingHits = (states: Iterable<PreparedCombatantState>): readonly CombatPendingHit[] =>
   Object.freeze([...states].flatMap((state) => (state.pendingHit ? [validateCombatPendingHit(state.pendingHit)] : [])));
-
-export const combatFrontierSignature = (
-  combatants: Iterable<readonly [string, PreparedCombatantState]>,
-  actionSequence: number,
-  resultSequence: number,
-  lifecycleEvents: readonly CombatLifecycleEvent[],
-): string => JSON.stringify({ actionSequence, resultSequence, combatants: [...combatants], lifecycleEvents });
 const cloneActive = (value: PreparedCombatActiveState | null): PreparedCombatActiveState | null =>
   value
     ? {
@@ -315,7 +302,7 @@ const enterPreparedHit = (
   return false;
 };
 
-const advanceActor = (
+export const advancePreparedCombatActor = (
   actorId: string,
   seconds: number,
   frontier: PreparedCombatFrontier,
@@ -411,7 +398,7 @@ const resolvePending = (
   state.pendingHit = null;
   active.phase = 'hit';
   active.phaseElapsedSeconds = 0;
-  advanceActor(actorId, pending.remainingSeconds, frontier, host);
+  advancePreparedCombatActor(actorId, pending.remainingSeconds, frontier, host);
 };
 
 const validateIds = (actorIds: readonly string[], targetIds: readonly string[]): void => {
@@ -427,6 +414,30 @@ const freezePending = (frontier: PreparedCombatFrontier): readonly CombatPending
   if (values.length > MAX_COMBAT_PENDING_HITS) throw new RangeError('Combat pending hit limit exceeded.');
   return Object.freeze(values.map((value) => validateCombatPendingHit(value)));
 };
+
+export function createPreparedCombatPlan(
+  host: PreparedCombatHost,
+  frontier: PreparedCombatFrontier,
+  capturedSignature: string,
+): PreparedCombatMutation {
+  const pendingHits = freezePending(frontier);
+  const lifecycleEvents = Object.freeze(frontier.lifecycleEvents.map((event) => Object.freeze(cloneEvent(event))));
+  let used = false;
+  const validate = () => {
+    if (used) throw new Error('Prepared combat mutation has already been used.');
+    if (host.signature() !== capturedSignature) throw new Error('Prepared combat mutation is stale.');
+  };
+  return Object.freeze({
+    pendingHits,
+    lifecycleEvents,
+    validate,
+    apply: () => {
+      validate();
+      used = true;
+      host.install(frontier);
+    },
+  });
+}
 
 export function prepareCombatMutation(
   host: PreparedCombatHost,
@@ -459,24 +470,9 @@ export function prepareCombatMutation(
       )
         cancel(actorId, state, raw.targetCancellationReason ?? 'target-missing', frontier, host.definitionFor);
   if (advanceSeconds > 0)
-    for (const actorId of frontier.combatants.keys()) advanceActor(actorId, advanceSeconds, frontier, host);
-  const pendingHits = freezePending(frontier);
-  const lifecycleEvents = Object.freeze(frontier.lifecycleEvents.map((event) => Object.freeze(cloneEvent(event))));
-  let used = false;
-  const validate = () => {
-    if (used) throw new Error('Prepared combat mutation has already been used.');
-    if (host.signature() !== capturedSignature) throw new Error('Prepared combat mutation is stale.');
-  };
-  return Object.freeze({
-    pendingHits,
-    lifecycleEvents,
-    validate,
-    apply: () => {
-      validate();
-      used = true;
-      host.install(frontier);
-    },
-  });
+    for (const actorId of frontier.combatants.keys())
+      advancePreparedCombatActor(actorId, advanceSeconds, frontier, host);
+  return createPreparedCombatPlan(host, frontier, capturedSignature);
 }
 
 export function prepareCombatRuntimeRestore(

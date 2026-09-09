@@ -121,3 +121,7 @@ S3 原子检查点后启用新的 36 小时 delegation envelope（不修改旧 p
 Prepared Combat frontier 子切片分配最多 3 agent 小时，请求 Sol/high；累计 child 分配上限 31 小时，仍共享 36 小时 envelope。只读机制复核已返回，根任务继续实际 Needs/Combat 接线；实际消费仍 unknown。
 
 本切片准出前复用一次只读 Sol/xhigh reviewer，最多 1 agent 小时；S3 累计 child 分配上限 32 小时，共享 36 小时 envelope。审阅与静态/构建属于不同证据，真实消费继续 unknown。
+
+Needs 检查点准出后，prepared Combat request（含 zero-windup）分配最多 3 agent 小时，请求 Sol/high；累计 child 分配上限 35 小时，仍共享当前 36 小时 envelope。根负责 Action prepared start 与注册消费者，下一机制切片前重估，实际阶段活跃工时/费用仍 unknown。
+
+真实 Combat 注册及宿主接入前再用一次最多 1 agent 小时的 Sol/xhigh 只读接缝复核；累计 child 分配上限 36 小时，当前 envelope 不再有新的派发空间。实际消耗仍 unknown；后续需要派发时先更新实施估计并冻结新 envelope，不能通过更改旧合同扩容。

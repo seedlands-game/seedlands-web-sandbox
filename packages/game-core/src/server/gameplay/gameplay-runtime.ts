@@ -94,6 +94,7 @@ export class GameplayRuntime {
       entities: this.entities,
       items: this.content.items,
       revision: () => this.revision,
+      assertCanChange: () => this.assertRevisionCapacity(),
       changed: () => this.touch(),
     });
     this.inventoryActions = new ActorInventoryRuntime({
@@ -406,7 +407,9 @@ export class GameplayRuntime {
   advanceRules(seconds: number): { commits: WorldCommitResult[] } {
     assertGameplayAdvance(seconds);
     this.schedule?.assertAdvance(seconds);
+    if (seconds > 0) this.assertRevisionCapacity();
     this.modules.flushQueued();
+    const startingRevision = this.revision;
     const commits: WorldCommitResult[] = [];
     advanceGameplayClock(seconds, (step) => {
       const canonical = this.schedule?.assertAdvance(step) ?? step;
@@ -418,7 +421,7 @@ export class GameplayRuntime {
       }
       this.simulation.advanceAuthorityRules(elapsed);
     });
-    if (seconds > 0) this.touch(false);
+    if (seconds > 0 && this.revision === startingRevision) this.touch(false);
     return { commits };
   }
 

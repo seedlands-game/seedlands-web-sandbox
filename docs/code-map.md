@@ -170,3 +170,5 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 `server/gameplay/melee-definition-registry.ts` 保存纯近战定义 schema、注册与限制；CombatRuntime 保留旧导出门面并拥有动作状态。`server/world-edit-runtime.ts` 组合普通编辑与流体 sidecar，`server/prepared-world-edit.ts` 为有界玩法事务提供单方块预校验参与者；现有单编辑结果构造复用 `single-world-edit.ts`。
 
 `server/simulation/prepared-death-effects.ts` 在 ECS 死亡提交前准备 Combat 取消和 Action 终态。`server/gameplay/prepared-entity-mutation.ts` 的 series 将多个有界片段纳入同一 allocator 预检；`prepared-combat-mutation.ts` 拥有不调用伤害回调的延迟命中候选，`combat-origin.ts` 与 `combat-pending-hit.ts` 保存可重授权的来源和待命中合同。
+
+`server/gameplay/combat-request-candidate.ts` 预备新攻击或连招缓冲，不触发伤害；`server/simulation/action-runtime.ts` 的 prepared start 在写入前构造旧动作替换和新动作，供跨 owner 接受协调使用。

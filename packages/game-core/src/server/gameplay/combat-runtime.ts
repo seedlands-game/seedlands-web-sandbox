@@ -17,11 +17,9 @@ import {
 import type { DurableExecutionOriginV1 } from '../composition/execution-origin';
 import { acceptCombatOrigin, combatOriginHitFailure, type CombatOriginRuntimeOptions } from './combat-origin';
 import {
-  acknowledgeCombatLifecycleEvents,
   capturePreparedCombatFrontier,
   cloneCombatLifecycleEvents,
   combatCanBuffer,
-  combatFrontierSignature,
   combatPhaseDuration,
   combatRemainingSeconds,
   listCombatPendingHits,
@@ -34,12 +32,20 @@ import {
   type PreparedCombatMutationInput,
 } from './prepared-combat-mutation';
 import type { CombatPendingHit } from './combat-pending-hit';
+import {
+  acknowledgeCombatLifecycleEvents,
+  combatFrontierSignature,
+  prepareCombatRequest,
+  type PreparedCombatRequestInput,
+  type PreparedCombatRequestResult,
+} from './combat-request-candidate';
 
 export type * from './combat-runtime-snapshot';
 export { emptyCombatRuntimeSnapshot } from './combat-runtime-snapshot';
 export type * from './combat-origin';
 export type * from './combat-pending-hit';
 export type * from './prepared-combat-mutation';
+export type * from './combat-request-candidate';
 
 export type CombatPhase = 'windup' | 'hit' | 'recovery';
 export type CombatOutcome = 'hit' | 'miss' | 'cancelled';
@@ -336,26 +342,11 @@ export class CombatRuntime {
   }
 
   prepareMutation(input: PreparedCombatMutationInput): PreparedCombatMutation {
-    return prepareCombatMutation(
-      {
-        callbacks: this.callbacks,
-        identity: this.identity,
-        requireOrigin: this.requireOrigin,
-        validationPort: this.originOptions.validationPort,
-        capture: () =>
-          capturePreparedCombatFrontier(
-            this.combatants,
-            this.actionSequence,
-            this.resultSequence,
-            this.lifecycleEvents,
-          ),
-        signature: () =>
-          combatFrontierSignature(this.combatants, this.actionSequence, this.resultSequence, this.lifecycleEvents),
-        install: (frontier) => this.installPreparedFrontier(frontier),
-        definitionFor: (id) => this.requireDefinition(id),
-      },
-      input,
-    );
+    return prepareCombatMutation(this.preparedHost(), input);
+  }
+
+  prepareRequest(input: PreparedCombatRequestInput): PreparedCombatRequestResult {
+    return prepareCombatRequest(this.preparedHost(), input);
   }
 
   peekPendingHits(): readonly CombatPendingHit[] {
@@ -519,6 +510,21 @@ export class CombatRuntime {
     this.actionSequence = frontier.actionSequence;
     this.resultSequence = frontier.resultSequence;
     this.lifecycleEvents.splice(0, this.lifecycleEvents.length, ...frontier.lifecycleEvents);
+  }
+
+  private preparedHost(): import('./prepared-combat-mutation').PreparedCombatHost {
+    return {
+      callbacks: this.callbacks,
+      identity: this.identity,
+      requireOrigin: this.requireOrigin,
+      validationPort: this.originOptions.validationPort,
+      capture: () =>
+        capturePreparedCombatFrontier(this.combatants, this.actionSequence, this.resultSequence, this.lifecycleEvents),
+      signature: () =>
+        combatFrontierSignature(this.combatants, this.actionSequence, this.resultSequence, this.lifecycleEvents),
+      install: (frontier) => this.installPreparedFrontier(frontier),
+      definitionFor: (id) => this.requireDefinition(id),
+    };
   }
 
   private requireDefinition(id: string): MeleeDefinition {

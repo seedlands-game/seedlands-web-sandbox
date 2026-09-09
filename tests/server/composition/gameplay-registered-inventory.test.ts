@@ -101,6 +101,20 @@ describe('registered inventory module with the actual ECS owner', () => {
     expect(world.execute.invoke(transfer)).toMatchObject({ ok: false, code });
     expect(world.gameplay.createSnapshot()).toEqual(before);
   });
+  it('rejects exhausted gameplay revision before either inventory is replaced or a fact is emitted', () => {
+    const world = setup();
+    const exhausted = world.gameplay.createSnapshot();
+    exhausted.revision = Number.MAX_SAFE_INTEGER;
+    world.gameplay.restoreSnapshot(exhausted);
+    const before = world.gameplay.createSnapshot();
+    let facts = 0;
+    world.execute.subscribe(() => {
+      facts++;
+    });
+    expect(world.execute.invoke(transfer)).toMatchObject({ ok: false });
+    expect(world.gameplay.createSnapshot()).toEqual(before);
+    expect(facts).toBe(0);
+  });
   it('rejects an old inventory observation after restoring the same gameplay revision', () => {
     const world = setup();
     const key = { componentId: 'seedlands:inventory', target: transfer.target };
