@@ -29,3 +29,5 @@ GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，li
 分页增量：宿主约0.18 agent小时，独立冻结复核见round4-recheck.md，维持原共享池；实际浏览器使用确定性model fixture，未增加真实provider调用。
 
 动作历史增量由Root实现；被中止的子任务没有文件输出，实际计费unknown。新增5项回归，工时沿用原共享池；无provider、购买或reset。
+
+动作历史最终窄复核约0.12 agent小时；完整静态1253测试、Web/Agent构建和2项Browser均通过，未新增provider调用。实际任务credits/API等价仍unknown。
