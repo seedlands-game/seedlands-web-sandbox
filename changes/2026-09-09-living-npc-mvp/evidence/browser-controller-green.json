@@ -1,0 +1,85 @@
+{
+  "provider": "deterministic fixture, not real model evidence",
+  "calls": [
+    {
+      "goal": "forage",
+      "cursor": 1
+    },
+    {
+      "goal": "follow",
+      "cursor": 3
+    }
+  ],
+  "controlled": {
+    "entityId": "npc-3",
+    "lifecycle": "active",
+    "incarnation": "character-1",
+    "revision": 2,
+    "policyRevision": 1,
+    "profile": {
+      "name": "阿岚",
+      "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+      "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+      "riskTolerance": 0.3
+    },
+    "currentGoal": {
+      "revision": 2,
+      "requestId": "917e2eae-90f8-4c53-9ddc-eb3e23594cae",
+      "goal": {
+        "kind": "follow",
+        "target": {
+          "kind": "entity",
+          "ref": "target-1",
+          "revision": 1
+        }
+      },
+      "status": "active"
+    },
+    "memory": {
+      "revision": 0,
+      "throughCursor": 0,
+      "summary": ""
+    },
+    "eventCursor": 5,
+    "lastSpeech": "好，我跟上你，咱们一起留意周围。",
+    "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+    "behavior": "idle",
+    "hunger": 60
+  },
+  "disconnected": {
+    "entityId": "npc-3",
+    "lifecycle": "active",
+    "incarnation": "character-1",
+    "revision": 2,
+    "policyRevision": 1,
+    "profile": {
+      "name": "阿岚",
+      "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+      "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+      "riskTolerance": 0.3
+    },
+    "currentGoal": {
+      "revision": 2,
+      "requestId": "917e2eae-90f8-4c53-9ddc-eb3e23594cae",
+      "goal": {
+        "kind": "follow",
+        "target": {
+          "kind": "entity",
+          "ref": "target-1",
+          "revision": 1
+        }
+      },
+      "status": "active"
+    },
+    "memory": {
+      "revision": 0,
+      "throughCursor": 0,
+      "summary": ""
+    },
+    "eventCursor": 5,
+    "lastSpeech": "好，我跟上你，咱们一起留意周围。",
+    "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+    "behavior": "idle",
+    "hunger": 60
+  }
+}

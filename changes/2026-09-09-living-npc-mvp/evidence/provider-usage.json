@@ -1,0 +1,239 @@
+{
+  "basis": "actual provider usage; estimated official peak prices, not billing receipt",
+  "summary": {
+    "flash": {
+      "calls": 16,
+      "inputTokens": 37344,
+      "cacheHitTokens": 24832,
+      "outputTokens": 10935,
+      "estimatedPeakUsd": 0.020287128
+    },
+    "pro": {
+      "calls": 4,
+      "inputTokens": 5481,
+      "cacheHitTokens": 0,
+      "outputTokens": 4506,
+      "estimatedPeakUsd": 0.02507868
+    }
+  },
+  "calls": [
+    {
+      "source": "live-model-smoke",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 1449,
+        "cacheHitTokens": 0,
+        "outputTokens": 1197,
+        "totalTokens": 2646
+      },
+      "latencyMs": 11625
+    },
+    {
+      "source": "live-model-smoke",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 3465,
+        "cacheHitTokens": 2560,
+        "outputTokens": 1168,
+        "totalTokens": 4633
+      },
+      "latencyMs": 11137
+    },
+    {
+      "source": "live-model-smoke",
+      "model": "deepseek-v4-pro",
+      "usage": {
+        "inputTokens": 315,
+        "cacheHitTokens": 0,
+        "outputTokens": 918,
+        "totalTokens": 1233
+      },
+      "latencyMs": 16471
+    },
+    {
+      "source": "read-batch-red",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 1534,
+        "cacheHitTokens": 0,
+        "outputTokens": 1397,
+        "totalTokens": 2931
+      },
+      "latencyMs": 13757
+    },
+    {
+      "source": "pro-semantic-red",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 1534,
+        "cacheHitTokens": 1408,
+        "outputTokens": 725,
+        "totalTokens": 2259
+      },
+      "latencyMs": 7179
+    },
+    {
+      "source": "pro-semantic-red",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 3079,
+        "cacheHitTokens": 2176,
+        "outputTokens": 431,
+        "totalTokens": 3510
+      },
+      "latencyMs": 4982
+    },
+    {
+      "source": "pro-semantic-red",
+      "model": "deepseek-v4-pro",
+      "usage": {
+        "inputTokens": 1972,
+        "cacheHitTokens": 0,
+        "outputTokens": 1435,
+        "totalTokens": 3407
+      },
+      "latencyMs": 22704
+    },
+    {
+      "source": "live-semantic-fixed",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 1722,
+        "cacheHitTokens": 0,
+        "outputTokens": 711,
+        "totalTokens": 2433
+      },
+      "latencyMs": 7018
+    },
+    {
+      "source": "live-semantic-fixed",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 2491,
+        "cacheHitTokens": 2432,
+        "outputTokens": 142,
+        "totalTokens": 2633
+      },
+      "latencyMs": 1885
+    },
+    {
+      "source": "live-semantic-fixed",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 3621,
+        "cacheHitTokens": 2560,
+        "outputTokens": 737,
+        "totalTokens": 4358
+      },
+      "latencyMs": 7283
+    },
+    {
+      "source": "live-semantic-fixed",
+      "model": "deepseek-v4-pro",
+      "usage": {
+        "inputTokens": 2854,
+        "cacheHitTokens": 0,
+        "outputTokens": 2085,
+        "totalTokens": 4939
+      },
+      "latencyMs": 26809
+    },
+    {
+      "source": "real-browser-input-red",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 1506,
+        "cacheHitTokens": 0,
+        "outputTokens": 342,
+        "totalTokens": 1848
+      },
+      "latencyMs": 3969
+    },
+    {
+      "source": "real-browser-input-red",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 2436,
+        "cacheHitTokens": 1792,
+        "outputTokens": 897,
+        "totalTokens": 3333
+      },
+      "latencyMs": 8646
+    },
+    {
+      "source": "real-browser-input-red",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 3364,
+        "cacheHitTokens": 3328,
+        "outputTokens": 662,
+        "totalTokens": 4026
+      },
+      "latencyMs": 6718
+    },
+    {
+      "source": "real-browser-input-red",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 2615,
+        "cacheHitTokens": 1792,
+        "outputTokens": 530,
+        "totalTokens": 3145
+      },
+      "latencyMs": 5637
+    },
+    {
+      "source": "real-browser-green",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 1506,
+        "cacheHitTokens": 1408,
+        "outputTokens": 539,
+        "totalTokens": 2045
+      },
+      "latencyMs": 5614
+    },
+    {
+      "source": "real-browser-green",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 2797,
+        "cacheHitTokens": 1920,
+        "outputTokens": 667,
+        "totalTokens": 3464
+      },
+      "latencyMs": 6853
+    },
+    {
+      "source": "real-browser-green",
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "inputTokens": 3885,
+        "cacheHitTokens": 3456,
+        "outputTokens": 725,
+        "totalTokens": 4610
+      },
+      "latencyMs": 6991
+    },
+    {
+      "source": "provider-preflight",
+      "model": "deepseek-v4-flash-vision-exp",
+      "latencyMs": 1068,
+      "usage": {
+        "inputTokens": 340,
+        "cacheHitTokens": 0,
+        "outputTokens": 65
+      }
+    },
+    {
+      "source": "provider-preflight",
+      "model": "deepseek-v4-pro",
+      "latencyMs": 1517,
+      "usage": {
+        "inputTokens": 340,
+        "cacheHitTokens": 0,
+        "outputTokens": 68
+      }
+    }
+  ]
+}

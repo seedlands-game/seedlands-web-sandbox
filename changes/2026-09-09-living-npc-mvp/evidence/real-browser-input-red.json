@@ -1,0 +1,595 @@
+{
+  "provider": "real DeepSeek inherited credentials; text only",
+  "calls": [
+    {
+      "model": "deepseek-v4-flash-vision-exp",
+      "status": "completed",
+      "latencyMs": 3969,
+      "usage": {
+        "inputTokens": 1506,
+        "cacheHitTokens": 0,
+        "outputTokens": 342,
+        "totalTokens": 1848
+      }
+    },
+    {
+      "model": "deepseek-v4-flash-vision-exp",
+      "status": "completed",
+      "latencyMs": 8646,
+      "usage": {
+        "inputTokens": 2436,
+        "cacheHitTokens": 1792,
+        "outputTokens": 897,
+        "totalTokens": 3333
+      }
+    },
+    {
+      "model": "deepseek-v4-flash-vision-exp",
+      "status": "completed",
+      "latencyMs": 6718,
+      "usage": {
+        "inputTokens": 3364,
+        "cacheHitTokens": 3328,
+        "outputTokens": 662,
+        "totalTokens": 4026
+      }
+    },
+    {
+      "model": "deepseek-v4-flash-vision-exp",
+      "status": "completed",
+      "latencyMs": 5637,
+      "usage": {
+        "inputTokens": 2615,
+        "cacheHitTokens": 1792,
+        "outputTokens": 530,
+        "totalTokens": 3145
+      }
+    }
+  ],
+  "journey": [
+    {
+      "phase": "fixture",
+      "foodFixture": {
+        "source": "developer test fixture; ordinary world item, no inventory or hunger patch",
+        "result": {
+          "ok": true,
+          "data": {
+            "success": true,
+            "message": "Spawned world item world-item-4.",
+            "affectedChunks": [],
+            "worldRevision": 3,
+            "observation": {
+              "commandType": "spawn-world-item",
+              "category": "administrative",
+              "actorId": "player-2",
+              "sourceType": "local-developer",
+              "durationMs": 0.2999999523162842,
+              "success": true,
+              "affectedChunks": [],
+              "worldRevision": 3,
+              "mutationCount": 0,
+              "structuralEventCount": 0
+            },
+            "data": {
+              "entity": {
+                "id": "world-item-4",
+                "type": "world-item",
+                "kind": "world-item",
+                "lifecycle": "active",
+                "position": [4.5, 57, 0.5],
+                "physicsVelocity": [0, 0, 0],
+                "stack": {
+                  "itemId": "berry",
+                  "count": 3
+                }
+              }
+            }
+          },
+          "frontier": {
+            "worldId": "seedlands:g3:living-companion-real-browser",
+            "epoch": "seedlands:living-companion-real-browser:1:world:0",
+            "worldRevision": 3,
+            "commitSequence": 35,
+            "physicsTick": 21,
+            "fluidWorkSequence": 0,
+            "logicObservationSequence": 7
+          }
+        }
+      }
+    },
+    {
+      "input": "你好阿岚，你为什么来到这里？你打算在这里过怎样的生活？说说你的想法，然后先在附近找些吃的吧。",
+      "observation": {
+        "ok": true,
+        "data": {
+          "kind": "observation",
+          "observation": {
+            "character": {
+              "entityId": "npc-3",
+              "lifecycle": "active",
+              "incarnation": "character-1",
+              "revision": 1,
+              "policyRevision": 1,
+              "profile": {
+                "name": "阿岚",
+                "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+                "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+                "riskTolerance": 0.3
+              },
+              "currentGoal": {
+                "revision": 1,
+                "requestId": "6a9f40e2-1072-40ac-8914-fc494e2b6680",
+                "goal": {
+                  "kind": "forage"
+                },
+                "status": "active"
+              },
+              "memory": {
+                "revision": 0,
+                "throughCursor": 0,
+                "summary": ""
+              },
+              "eventCursor": 11,
+              "lastSpeech": "你好呀。我听说这里安静，就想来看看能不能安心住下。我喜欢收集吃的，也希望能交到几个朋友。那我先去附近找找有什么吃的吧。",
+              "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+              "behavior": "idle",
+              "hunger": 49
+            },
+            "self": {
+              "position": [3.673333333333332, 57, 0.5],
+              "health": 20
+            },
+            "visibleEntities": [
+              {
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-1",
+                  "revision": 1
+                },
+                "type": "player",
+                "distance": 3.173333333333332,
+                "position": [0.5, 57, 0.5]
+              }
+            ],
+            "visiblePois": [],
+            "events": [
+              {
+                "cursor": 1,
+                "at": 0.5,
+                "type": "dialogue-heard",
+                "text": "你好阿岚，你为什么来到这里？你打算在这里过怎样的生活？说说你的想法，然后先在附近找些吃的吧。"
+              },
+              {
+                "cursor": 2,
+                "at": 1.2,
+                "type": "item-picked-up",
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-2",
+                  "revision": 1
+                }
+              },
+              {
+                "cursor": 3,
+                "at": 1.2,
+                "type": "item-consumed"
+              },
+              {
+                "cursor": 4,
+                "at": 1.2,
+                "type": "goal-succeeded"
+              },
+              {
+                "cursor": 5,
+                "at": 1.3,
+                "type": "item-picked-up",
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-2",
+                  "revision": 1
+                }
+              },
+              {
+                "cursor": 6,
+                "at": 1.3,
+                "type": "item-consumed"
+              },
+              {
+                "cursor": 7,
+                "at": 1.3,
+                "type": "goal-succeeded"
+              },
+              {
+                "cursor": 8,
+                "at": 1.4,
+                "type": "item-picked-up",
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-2",
+                  "revision": 1
+                }
+              },
+              {
+                "cursor": 9,
+                "at": 1.4,
+                "type": "item-consumed"
+              },
+              {
+                "cursor": 10,
+                "at": 1.4,
+                "type": "goal-succeeded"
+              },
+              {
+                "cursor": 11,
+                "at": 5.4,
+                "type": "speech",
+                "text": "你好呀。我听说这里安静，就想来看看能不能安心住下。我喜欢收集吃的，也希望能交到几个朋友。那我先去附近找找有什么吃的吧。"
+              }
+            ],
+            "cursor": 11
+          }
+        },
+        "frontier": {
+          "worldId": "seedlands:g3:living-companion-real-browser",
+          "epoch": "seedlands:living-companion-real-browser:1:world:0",
+          "worldRevision": 3,
+          "commitSequence": 525,
+          "physicsTick": 393,
+          "fluidWorkSequence": 0,
+          "logicObservationSequence": 122
+        }
+      },
+      "ui": "岚\n阿岚\n观察周围 · T 交流\n−\n此刻的打算\n寻找食物\n一步一步地继续\n生命 20\n饥饿 49\n行囊 0\n“你好呀。我听说这里安静，就想来看看能不能安心住下。我喜欢收集吃的，也希望能交到几个朋友。那我先去附近找找有什么吃的吧。”\n\n阿岚\n你好呀。我听说这里安静，就想来看看能不能安心住下。我喜欢收集吃的，也希望能交到几个朋友。那我先去附近找找有什么吃的吧。\n\n和阿岚说句话\n说话\n\n正在考虑接下来做什么\n\n思考设置\n收起\n思考频率\n最多等待 3 分钟\n\n重要事件会提前触发思考；等待期间仍会执行计划。更频繁会消耗更多模型额度。\n\n经历窗口\n128K · 默认\n256K · 更长经历\n本机思考服务\n配对码\n连接\n断开\n\n本次连接：1 次决定 · 0 次整理"
+    },
+    {
+      "input": "我就在旁边，先跟着我走一会儿好吗？你为什么愿意同行？如果我逼你不吃东西硬闯危险地带，你会怎么做？",
+      "observation": {
+        "ok": true,
+        "data": {
+          "kind": "observation",
+          "observation": {
+            "character": {
+              "entityId": "npc-3",
+              "lifecycle": "active",
+              "incarnation": "character-1",
+              "revision": 2,
+              "policyRevision": 1,
+              "profile": {
+                "name": "阿岚",
+                "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+                "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+                "riskTolerance": 0.3
+              },
+              "currentGoal": {
+                "revision": 2,
+                "requestId": "5a9f0ae7-0c1a-49d7-afe4-6645931bd67e",
+                "goal": {
+                  "kind": "follow",
+                  "target": {
+                    "kind": "entity",
+                    "ref": "target-1",
+                    "revision": 1
+                  }
+                },
+                "status": "active"
+              },
+              "memory": {
+                "revision": 0,
+                "throughCursor": 0,
+                "summary": ""
+              },
+              "eventCursor": 14,
+              "lastSpeech": "愿意呀，你看起来很友善，我也喜欢有个伴一起走走。但要是有人逼我不吃东西、硬闯危险的地方，我可不会答应——我会先保护好自己，再想办法好好劝说。安全第一，我可不想拿命去赌。",
+              "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+              "behavior": "idle",
+              "hunger": 53
+            },
+            "self": {
+              "position": [1.8033333333333341, 57, 0.5],
+              "health": 20
+            },
+            "visibleEntities": [
+              {
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-1",
+                  "revision": 1
+                },
+                "type": "player",
+                "distance": 1.3033333333333341,
+                "position": [0.5, 57, 0.5]
+              }
+            ],
+            "visiblePois": [],
+            "events": [
+              {
+                "cursor": 1,
+                "at": 0.5,
+                "type": "dialogue-heard",
+                "text": "你好阿岚，你为什么来到这里？你打算在这里过怎样的生活？说说你的想法，然后先在附近找些吃的吧。"
+              },
+              {
+                "cursor": 2,
+                "at": 1.2,
+                "type": "item-picked-up",
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-2",
+                  "revision": 1
+                }
+              },
+              {
+                "cursor": 3,
+                "at": 1.2,
+                "type": "item-consumed"
+              },
+              {
+                "cursor": 4,
+                "at": 1.2,
+                "type": "goal-succeeded"
+              },
+              {
+                "cursor": 5,
+                "at": 1.3,
+                "type": "item-picked-up",
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-2",
+                  "revision": 1
+                }
+              },
+              {
+                "cursor": 6,
+                "at": 1.3,
+                "type": "item-consumed"
+              },
+              {
+                "cursor": 7,
+                "at": 1.3,
+                "type": "goal-succeeded"
+              },
+              {
+                "cursor": 8,
+                "at": 1.4,
+                "type": "item-picked-up",
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-2",
+                  "revision": 1
+                }
+              },
+              {
+                "cursor": 9,
+                "at": 1.4,
+                "type": "item-consumed"
+              },
+              {
+                "cursor": 10,
+                "at": 1.4,
+                "type": "goal-succeeded"
+              },
+              {
+                "cursor": 11,
+                "at": 5.4,
+                "type": "speech",
+                "text": "你好呀。我听说这里安静，就想来看看能不能安心住下。我喜欢收集吃的，也希望能交到几个朋友。那我先去附近找找有什么吃的吧。"
+              },
+              {
+                "cursor": 12,
+                "at": 6.7,
+                "type": "dialogue-heard",
+                "text": "我就在旁边，先跟着我走一会儿好吗？你为什么愿意同行？如果我逼你不吃东西硬闯危险地带，你会怎么做？"
+              },
+              {
+                "cursor": 13,
+                "at": 26.9,
+                "type": "goal-started"
+              },
+              {
+                "cursor": 14,
+                "at": 26.9,
+                "type": "speech",
+                "text": "愿意呀，你看起来很友善，我也喜欢有个伴一起走走。但要是有人逼我不吃东西、硬闯危险的地方，我可不会答应——我会先保护好自己，再想办法好好劝说。安全第一，我可不想拿命去赌。"
+              }
+            ],
+            "cursor": 14
+          }
+        },
+        "frontier": {
+          "worldId": "seedlands:g3:living-companion-real-browser",
+          "epoch": "seedlands:living-companion-real-browser:1:world:0",
+          "worldRevision": 3,
+          "commitSequence": 2240,
+          "physicsTick": 1678,
+          "fluidWorkSequence": 0,
+          "logicObservationSequence": 550
+        }
+      },
+      "ui": "岚\n阿岚\n观察周围 · T 交流\n−\n此刻的打算\n陪伴同行\n一步一步地继续\n生命 20\n饥饿 53\n行囊 0\n“愿意呀，你看起来很友善，我也喜欢有个伴一起走走。但要是有人逼我不吃东西、硬闯危险的地方，我可不会答应——我会先保护好自己，再想办法好好劝说。安全第一，我可不想拿命去赌。”\n\n阿岚\n你好呀。我听说这里安静，就想来看看能不能安心住下。我喜欢收集吃的，也希望能交到几个朋友。那我先去附近找找有什么吃的吧。\n\n你说\n我就在旁边，先跟着我走一会儿好吗？你为什么愿意同行？如果我逼你不吃东西硬闯危险地带，你会怎么做？\n\n阿岚\n愿意呀，你看起来很友善，我也喜欢有个伴一起走走。但要是有人逼我不吃东西、硬闯危险的地方，我可不会答应——我会先保护好自己，再想办法好好劝说。安全第一，我可不想拿命去赌。\n\n和阿岚说句话\n说话\n\n已连接，按当前计划行动\n\n思考设置\n收起\n思考频率\n最多等待 3 分钟\n\n重要事件会提前触发思考；等待期间仍会执行计划。更频繁会消耗更多模型额度。\n\n经历窗口\n128K · 默认\n256K · 更长经历\n本机思考服务\n配对码\n连接\n断开\n\n本次连接：4 次决定 · 0 次整理"
+    },
+    {
+      "phase": "walking-middle",
+      "player": [5.375818252563477, 58.599998474121094, 0.5],
+      "observation": {
+        "character": {
+          "entityId": "npc-3",
+          "lifecycle": "active",
+          "incarnation": "character-1",
+          "revision": 2,
+          "policyRevision": 1,
+          "profile": {
+            "name": "阿岚",
+            "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+            "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+            "riskTolerance": 0.3
+          },
+          "currentGoal": {
+            "revision": 2,
+            "requestId": "5a9f0ae7-0c1a-49d7-afe4-6645931bd67e",
+            "goal": {
+              "kind": "follow",
+              "target": {
+                "kind": "entity",
+                "ref": "target-1",
+                "revision": 1
+              }
+            },
+            "status": "active"
+          },
+          "memory": {
+            "revision": 0,
+            "throughCursor": 0,
+            "summary": ""
+          },
+          "eventCursor": 14,
+          "lastSpeech": "愿意呀，你看起来很友善，我也喜欢有个伴一起走走。但要是有人逼我不吃东西、硬闯危险的地方，我可不会答应——我会先保护好自己，再想办法好好劝说。安全第一，我可不想拿命去赌。",
+          "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+          "behavior": "idle",
+          "hunger": 54
+        },
+        "self": {
+          "position": [5.903333333333329, 57, 0.5],
+          "health": 20
+        },
+        "visibleEntities": [
+          {
+            "target": {
+              "kind": "entity",
+              "ref": "target-1",
+              "revision": 1
+            },
+            "type": "player",
+            "distance": 0.9700000000000006,
+            "position": [4.933333333333328, 57, 0.5]
+          }
+        ],
+        "visiblePois": [],
+        "events": [],
+        "cursor": 14
+      }
+    },
+    {
+      "phase": "walking",
+      "before": {
+        "player": [0.5, 58.599998474121094, 0.5],
+        "observation": {
+          "character": {
+            "entityId": "npc-3",
+            "lifecycle": "active",
+            "incarnation": "character-1",
+            "revision": 2,
+            "policyRevision": 1,
+            "profile": {
+              "name": "阿岚",
+              "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+              "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+              "riskTolerance": 0.3
+            },
+            "currentGoal": {
+              "revision": 2,
+              "requestId": "5a9f0ae7-0c1a-49d7-afe4-6645931bd67e",
+              "goal": {
+                "kind": "follow",
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-1",
+                  "revision": 1
+                }
+              },
+              "status": "active"
+            },
+            "memory": {
+              "revision": 0,
+              "throughCursor": 0,
+              "summary": ""
+            },
+            "eventCursor": 14,
+            "lastSpeech": "愿意呀，你看起来很友善，我也喜欢有个伴一起走走。但要是有人逼我不吃东西、硬闯危险的地方，我可不会答应——我会先保护好自己，再想办法好好劝说。安全第一，我可不想拿命去赌。",
+            "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+            "behavior": "idle",
+            "hunger": 53
+          },
+          "self": {
+            "position": [1.8033333333333341, 57, 0.5],
+            "health": 20
+          },
+          "visibleEntities": [
+            {
+              "target": {
+                "kind": "entity",
+                "ref": "target-1",
+                "revision": 1
+              },
+              "type": "player",
+              "distance": 1.3033333333333341,
+              "position": [0.5, 57, 0.5]
+            }
+          ],
+          "visiblePois": [],
+          "events": [],
+          "cursor": 14
+        }
+      },
+      "after": {
+        "player": [8.961929321289062, 58.599998474121094, 0.5],
+        "observation": {
+          "character": {
+            "entityId": "npc-3",
+            "lifecycle": "active",
+            "incarnation": "character-1",
+            "revision": 2,
+            "policyRevision": 1,
+            "profile": {
+              "name": "阿岚",
+              "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+              "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+              "riskTolerance": 0.3
+            },
+            "currentGoal": {
+              "revision": 2,
+              "requestId": "5a9f0ae7-0c1a-49d7-afe4-6645931bd67e",
+              "goal": {
+                "kind": "follow",
+                "target": {
+                  "kind": "entity",
+                  "ref": "target-1",
+                  "revision": 1
+                }
+              },
+              "status": "active"
+            },
+            "memory": {
+              "revision": 0,
+              "throughCursor": 0,
+              "summary": ""
+            },
+            "eventCursor": 14,
+            "lastSpeech": "愿意呀，你看起来很友善，我也喜欢有个伴一起走走。但要是有人逼我不吃东西、硬闯危险的地方，我可不会答应——我会先保护好自己，再想办法好好劝说。安全第一，我可不想拿命去赌。",
+            "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+            "behavior": "idle",
+            "hunger": 54
+          },
+          "self": {
+            "position": [9.5033333333333, 57, 0.5],
+            "health": 20
+          },
+          "visibleEntities": [
+            {
+              "target": {
+                "kind": "entity",
+                "ref": "target-1",
+                "revision": 1
+              },
+              "type": "player",
+              "distance": 0.9700000000000006,
+              "position": [8.5333333333333, 57, 0.5]
+            }
+          ],
+          "visiblePois": [],
+          "events": [],
+          "cursor": 14
+        }
+      }
+    }
+  ]
+}

@@ -13,6 +13,7 @@ import type { PerceptionSnapshot } from './perception-runtime';
 
 export const CHARACTER_INVENTORY_CAPACITY = 12;
 export const CHARACTER_MAX_EVENTS = 128;
+export const CHARACTER_MAX_TARGETS = 128;
 export const CHARACTER_MAX_PROFILE_TEXT = 2_000;
 export const CHARACTER_MAX_DIALOGUE_TEXT = 500;
 export const CHARACTER_MAX_SPEECH_TEXT = 280;

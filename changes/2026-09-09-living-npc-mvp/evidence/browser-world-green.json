@@ -1,0 +1,172 @@
+{
+  "initial": {
+    "character": {
+      "entityId": "npc-3",
+      "lifecycle": "active",
+      "incarnation": "character-1",
+      "revision": 0,
+      "policyRevision": 1,
+      "profile": {
+        "name": "阿岚",
+        "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+        "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+        "riskTolerance": 0.3
+      },
+      "currentGoal": {
+        "revision": 0,
+        "requestId": "fallback-life",
+        "goal": {
+          "kind": "forage"
+        },
+        "status": "active"
+      },
+      "memory": {
+        "revision": 0,
+        "throughCursor": 0,
+        "summary": ""
+      },
+      "eventCursor": 0,
+      "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+      "behavior": "idle",
+      "hunger": 60
+    },
+    "position": [2.5, 57, 0.5]
+  },
+  "lived": {
+    "character": {
+      "entityId": "npc-3",
+      "lifecycle": "active",
+      "incarnation": "character-1",
+      "revision": 1,
+      "policyRevision": 1,
+      "profile": {
+        "name": "阿岚",
+        "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+        "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+        "riskTolerance": 0.3
+      },
+      "currentGoal": {
+        "revision": 1,
+        "requestId": "browser-forage",
+        "goal": {
+          "kind": "forage"
+        },
+        "status": "active"
+      },
+      "memory": {
+        "revision": 0,
+        "throughCursor": 0,
+        "summary": ""
+      },
+      "eventCursor": 6,
+      "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+      "behavior": "idle",
+      "hunger": 52
+    },
+    "self": {
+      "position": [4.333333333333335, 57, 0.5],
+      "health": 20
+    },
+    "visibleEntities": [
+      {
+        "target": {
+          "kind": "entity",
+          "ref": "target-1",
+          "revision": 1
+        },
+        "type": "player",
+        "distance": 3.833333333333335,
+        "position": [0.5, 57, 0.5]
+      }
+    ],
+    "visiblePois": [],
+    "events": [
+      {
+        "cursor": 1,
+        "at": 1.6,
+        "type": "item-picked-up",
+        "target": {
+          "kind": "entity",
+          "ref": "target-2",
+          "revision": 1
+        }
+      },
+      {
+        "cursor": 2,
+        "at": 1.6,
+        "type": "item-consumed"
+      },
+      {
+        "cursor": 3,
+        "at": 1.6,
+        "type": "goal-succeeded"
+      },
+      {
+        "cursor": 4,
+        "at": 1.7,
+        "type": "item-picked-up",
+        "target": {
+          "kind": "entity",
+          "ref": "target-2",
+          "revision": 1
+        }
+      },
+      {
+        "cursor": 5,
+        "at": 1.7,
+        "type": "item-consumed"
+      },
+      {
+        "cursor": 6,
+        "at": 1.7,
+        "type": "goal-succeeded"
+      }
+    ],
+    "cursor": 6
+  },
+  "restored": {
+    "ok": true,
+    "data": {
+      "kind": "state",
+      "character": {
+        "entityId": "npc-3",
+        "lifecycle": "active",
+        "incarnation": "character-1",
+        "revision": 1,
+        "policyRevision": 1,
+        "profile": {
+          "name": "阿岚",
+          "personality": "谨慎而好奇，珍惜朋友，喜欢收集食物。会坚持自己的目标，也会认真回应身边的人。遇到危险先保护自己。",
+          "background": "初来这片土地的旅行者，希望找到可以安心生活的地方。",
+          "riskTolerance": 0.3
+        },
+        "currentGoal": {
+          "revision": 1,
+          "requestId": "browser-forage",
+          "goal": {
+            "kind": "forage"
+          },
+          "status": "active"
+        },
+        "memory": {
+          "revision": 0,
+          "throughCursor": 0,
+          "summary": ""
+        },
+        "eventCursor": 6,
+        "inventory": [null, null, null, null, null, null, null, null, null, null, null, null],
+        "behavior": "idle",
+        "hunger": 52
+      }
+    },
+    "frontier": {
+      "worldId": "seedlands:g3:living-companion-browser-contract",
+      "epoch": "seedlands:living-companion-browser-contract:1:world:1",
+      "worldRevision": 3,
+      "commitSequence": 231,
+      "physicsTick": 0,
+      "fluidWorkSequence": 0,
+      "logicObservationSequence": 0
+    }
+  }
+}

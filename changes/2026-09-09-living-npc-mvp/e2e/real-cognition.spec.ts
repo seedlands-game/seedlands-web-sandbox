@@ -64,6 +64,7 @@ test('真实 Flash 与玩家共处浏览器世界并连续回应自己的动机'
     await page.getByLabel('本机思考服务', { exact: true }).fill(host.url);
     await page.getByLabel('配对码', { exact: true }).fill(host.pairingToken);
     await page.getByRole('button', { name: '连接', exact: true }).click();
+    await page.getByRole('button', { name: /思考设置/ }).click();
     for (const [index, dialogue] of [
       '你好阿岚，你为什么来到这里？你打算在这里过怎样的生活？说说你的想法，然后先在附近找些吃的吧。',
       '我就在旁边，先跟着我走一会儿好吗？你为什么愿意同行？如果我逼你不吃东西硬闯危险地带，你会怎么做？',
@@ -111,16 +112,17 @@ test('真实 Flash 与玩家共处浏览器世界并连续回应自己的动机'
         await page.waitForTimeout(1500);
       } finally {
         await page.keyboard.up('KeyW');
-        await page.evaluate(() => document.exitPointerLock());
+        await page.keyboard.press('KeyT');
       }
       const afterWalk = await readBodies();
       journey.push({ phase: 'walking', before: beforeWalk, after: afterWalk });
       expect(afterWalk.player).not.toEqual(beforeWalk.player);
       expect(afterWalk.observation.self.position).not.toEqual(beforeWalk.observation.self.position);
-      await page.locator('#companion .companion-toggle').click();
+      await expect(page.getByRole('dialog', { name: '暂停游戏' })).toBeHidden();
       await faceCompanion(page);
       await page.screenshot({ path: testInfo.outputPath('real-companion-followed.png') });
     }
+    await page.getByRole('button', { name: /思考设置/ }).click();
     await page.getByRole('button', { name: '断开', exact: true }).click();
     await expect(page.locator('#companion .connection')).toContainText('未连接模型');
   } finally {
