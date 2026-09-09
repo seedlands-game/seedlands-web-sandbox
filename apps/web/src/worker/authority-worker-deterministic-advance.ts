@@ -132,6 +132,10 @@ export class BrowserAuthorityDeterministicAdvance {
         else if (automaticLogic) await this.options.yieldTurn();
       } while (remaining > 0);
       return { ...latest, lanes, commits, gameplay: runtime.view() };
+    } catch (error) {
+      // Revocation belongs to Authority, so a late reply is also rejected by the normal Worker ingress.
+      runtime.invalidateLogicCandidates();
+      throw error;
     } finally {
       const pending = this.pendingLogic;
       this.pendingLogic = null;

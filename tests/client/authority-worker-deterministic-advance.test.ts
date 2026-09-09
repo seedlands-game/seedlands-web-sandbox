@@ -104,6 +104,50 @@ describe('Browser Authority deterministic paused advance', () => {
     expect(fixture.runtime.server.getEntity(fixture.actor.id)?.position[0]).toBeGreaterThan(10.5);
   });
 
+  it('invalidates a timed-out Logic candidate before failure and admits a fresh advance', async () => {
+    const fixture = await movementFixture();
+    let expire: (() => void) | undefined;
+    let received!: () => void;
+    const observed = new Promise<void>((resolve) => {
+      received = resolve;
+    });
+    let late!: LogicIntentBatch;
+    let reply = false;
+    const coordinator = new BrowserAuthorityDeterministicAdvance({
+      runtime: () => fixture.runtime,
+      postLogicObservation: (observation) => {
+        const batch = decideLogicIntents(observation, { physicsHz: 60 });
+        if (reply) queueMicrotask(() => coordinator.acceptLogicIntentBatch(batch));
+        else {
+          late = batch;
+          received();
+        }
+      },
+      yieldTurn: testCorePlatform.yieldTurn,
+      timers: {
+        ...testCorePlatform.timers,
+        set: (callback) => {
+          expire = callback;
+          return 0;
+        },
+        clear: () => {},
+      },
+    });
+    fixture.install(coordinator);
+    const failed = expect(coordinator.advancePaused(200, true)).rejects.toThrow('timed out');
+    await observed;
+    expire!();
+    await failed;
+    expect(coordinator.isAdvancing).toBe(false);
+    const before = fixture.runtime.snapshot();
+    // Use the ordinary runtime ingress, exactly as the Worker does after the advance has returned.
+    expect(fixture.runtime.receiveLogicIntentBatch(late)).toBe(false);
+    expect(fixture.runtime.snapshot()).toEqual(before);
+    reply = true;
+    await coordinator.advancePaused(300, true);
+    expect(fixture.runtime.server.getEntity(fixture.actor.id)?.position[0]).toBeGreaterThan(10.5);
+  });
+
   it('waits for generated collision residency before advancing the real body', async () => {
     const holder: { runtime?: AuthorityRuntime; coordinator?: BrowserAuthorityDeterministicAdvance } = {};
     const requested: string[] = [];
