@@ -317,6 +317,8 @@ export class CharacterRuntime {
         createBehaviorRecord(
           { description: `Continue ${value.currentGoal.goal.kind}.` },
           behaviorDefinitionForLegacyGoal(value.currentGoal.goal, value.homePosition, value.hunger),
+          1,
+          value.eventCursor,
         );
       if (snapshot.version === 2 && !value.behaviorTree) throw new TypeError('Character behavior snapshot is missing.');
       const restored: CharacterRecord = {

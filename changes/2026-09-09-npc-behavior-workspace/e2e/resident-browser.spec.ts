@@ -8,7 +8,29 @@ test('一个浏览器连接承载三位持续生活伙伴，并恢复配对的�
   const runtime = await startBrowserResidentFixture(new URL(baseURL!).origin);
   const sockets: string[] = [];
   const errors: string[] = [];
-  page.on('websocket', (socket) => sockets.push(socket.url()));
+  const transport: unknown[] = [];
+  page.on('websocket', (socket) => {
+    sockets.push(socket.url());
+    for (const direction of ['framesent', 'framereceived'] as const)
+      socket.on(direction, ({ payload }) => {
+        try {
+          const message = JSON.parse(String(payload));
+          transport.push({
+            direction,
+            kind: message.kind,
+            sequence: message.sequence,
+            channelId: message.channelId,
+            sessionId: message.binding?.sessionId,
+            entityId: message.binding?.entityId,
+            code: message.code,
+            message: message.kind === 'error' ? message.message : undefined,
+          });
+        } catch {
+          /* Preserve only protocol metadata, never auth or model contents. */
+        }
+      });
+    socket.on('close', () => transport.push({ kind: 'socket-closed' }));
+  });
   page.on('pageerror', (error) => errors.push(error.message));
   try {
     const first = await startLifeScene(page);
@@ -40,12 +62,14 @@ test('一个浏览器连接承载三位持续生活伙伴，并恢复配对的�
     const characters = await page.evaluate(async () => {
       const result = await window.__seedlandsHarness!.world.character({ kind: 'list' });
       if (!result.ok || result.data.kind !== 'list') throw new Error('character list unavailable');
-      for (const character of result.data.characters)
-        await window.__seedlandsHarness!.world.character({
+      for (const character of result.data.characters) {
+        const dialogue = await window.__seedlandsHarness!.world.character({
           kind: 'dialogue',
           entityId: character.entityId,
           text: '各自照看这里，饿了就吃饭。',
         });
+        if (!dialogue.ok) throw new Error(`Dialogue ${character.entityId}: ${JSON.stringify(dialogue.error)}`);
+      }
       return result.data.characters;
     });
     expect(characters).toHaveLength(3);
@@ -102,6 +126,7 @@ test('一个浏览器连接承载三位持续生活伙伴，并恢复配对的�
   } finally {
     writeFileSync(testInfo.outputPath('resident-model-calls.json'), JSON.stringify(runtime.calls));
     writeFileSync(testInfo.outputPath('resident-browser-errors.json'), JSON.stringify(errors));
+    writeFileSync(testInfo.outputPath('resident-transport.json'), JSON.stringify(transport));
     await runtime.close();
   }
 });

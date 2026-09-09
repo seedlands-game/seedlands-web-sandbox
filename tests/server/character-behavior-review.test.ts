@@ -22,6 +22,32 @@ async function events(session: HeadlessSession, entityId: string) {
 }
 
 describe('behavior independent-review corrections', () => {
+  it('retains dialogue received after creation but before the first behavior tick', async () => {
+    const session = await flatSession('newborn-dialogue-edge');
+    try {
+      const created = await session.world.character({ kind: 'create', profile, position: [0.5, 57, 0.5] });
+      if (!created.ok || created.data.kind !== 'created') throw new Error('create failed');
+      const entityId = created.data.character.entityId;
+      expect(
+        await session.world.character({ kind: 'dialogue', entityId, text: 'Welcome, please look around.' }),
+      ).toMatchObject({ ok: true });
+      expect(await session.world.clock({ kind: 'advance', elapsedMs: 100 })).toMatchObject({ ok: true });
+      expect(
+        (await events(session, entityId)).filter(
+          (event) => event.type === 'rejudge-requested' && event.reason === 'dialogue-received',
+        ),
+      ).toHaveLength(1);
+      expect(await session.world.clock({ kind: 'advance', elapsedMs: 200 })).toMatchObject({ ok: true });
+      expect(
+        (await events(session, entityId)).filter(
+          (event) => event.type === 'rejudge-requested' && event.reason === 'dialogue-received',
+        ),
+      ).toHaveLength(1);
+    } finally {
+      await session.dispose();
+    }
+  });
+
   it('does not spend replan recovery budget during healthy long travel', async () => {
     const session = await flatSession('healthy-long-travel');
     const created = await session.world.character({
