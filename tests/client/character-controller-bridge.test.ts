@@ -114,6 +114,7 @@ describe('character bridge lifecycle', () => {
   it.each([false, true])('publishes ready only after the initial history is sent (paused=%s)', async (paused) => {
     const { socket, port, bridge, onState, pause } = setup();
     pause(paused);
+    bridge.setPaused(paused);
     let release!: (result: Awaited<ReturnType<CharacterControllerPort['observe']>>) => void;
     vi.mocked(port.observe).mockImplementationOnce(
       () =>
@@ -128,6 +129,7 @@ describe('character bridge lifecycle', () => {
     release({ ok: true, frontier, data: { kind: 'observation', observation } });
     await vi.advanceTimersByTimeAsync(0);
     expect(socket.sent.at(-1)).toMatchObject({ kind: 'observe', observation });
+    expect(socket.sent.some((message) => message.kind === 'control' && message.command === 'pause')).toBe(paused);
     expect(onState.mock.calls.at(-1)?.[0]).toMatchObject({ phase: 'ready' });
     bridge.disconnect();
   });
@@ -182,6 +184,58 @@ describe('character bridge lifecycle', () => {
     await vi.advanceTimersByTimeAsync(500);
     expect(port.observe).toHaveBeenCalledTimes(2);
     expect(socket.sent).toContainEqual(expect.objectContaining({ kind: 'control', command: 'resume' }));
+    bridge.disconnect();
+  });
+  it('sends pause immediately and rejects an in-flight model intent before Authority writes', async () => {
+    const { socket, port, bridge, pause } = setup();
+    socket.receive({ kind: 'ready', sequence: 0, fallbackSeconds: 180, modelAvailability: 'available' });
+    await vi.advanceTimersByTimeAsync(0);
+    socket.receive({ kind: 'status', sequence: 1, state: 'thinking' });
+    await vi.advanceTimersByTimeAsync(0);
+
+    pause(true);
+    bridge.setPaused(true);
+    expect(socket.sent.at(-1)).toMatchObject({ kind: 'control', command: 'pause' });
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+
+    socket.receive({
+      kind: 'intent',
+      sequence: 2,
+      requestId: 'late-while-paused',
+      observedRevision: 1,
+      observedCursor: 3,
+      intent: {
+        goal: { kind: 'follow', target: { kind: 'entity', ref: 'player', revision: 1 } },
+        say: '我来了。',
+      },
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(port.intent).not.toHaveBeenCalled();
+    expect(socket.sent.at(-1)).toMatchObject({
+      kind: 'receipt',
+      receipt: { requestId: 'late-while-paused', status: 'rejected', reason: 'WORLD_PAUSED' },
+    });
+
+    socket.receive({
+      kind: 'memory',
+      sequence: 3,
+      requestId: 'memory-while-paused',
+      expectedMemoryRevision: 0,
+      throughCursor: 3,
+      summary: '已确认的公开经历',
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(port.memory).toHaveBeenCalledWith(0, 3, '已确认的公开经历');
+    expect(socket.sent.at(-1)).toMatchObject({
+      kind: 'receipt',
+      receipt: { requestId: 'memory-while-paused', status: 'rejected', reason: 'STALE_MEMORY' },
+    });
+
+    pause(false);
+    bridge.setPaused(false);
+    expect(socket.sent.at(-1)).toMatchObject({ kind: 'control', command: 'resume' });
+    await vi.advanceTimersByTimeAsync(500);
+    expect(port.observe).toHaveBeenCalledTimes(2);
     bridge.disconnect();
   });
 });

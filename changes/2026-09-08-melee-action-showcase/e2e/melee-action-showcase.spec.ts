@@ -25,8 +25,11 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   await selectJourneyQuality(page);
   await page.getByRole('button', { name: '木剑动作体验场', exact: true }).click();
   const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });
+  const guide = page.locator('#melee-showcase-guide');
+  // Startup includes Authority generation and showcase commands, before combat assertions begin.
+  await expect(continueDespiteWarning.or(guide)).toBeVisible({ timeout: 15_000 });
   if (await continueDespiteWarning.isVisible()) await continueDespiteWarning.click();
-  await expect(page.locator('#melee-showcase-guide')).toBeVisible();
+  await expect(guide).toBeVisible({ timeout: 15_000 });
   await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
   await expect(page.locator('#debug')).toContainText(`Seed ${MELEE_SHOWCASE_SEED}`);
   for (const id of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID])

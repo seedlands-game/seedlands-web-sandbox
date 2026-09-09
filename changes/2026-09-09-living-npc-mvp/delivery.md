@@ -134,3 +134,9 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 第八轮自动复核实际绑定`3abf70b`（review5154415291），发现eventCursor耗尽的快照在下一条事件后越界。最终SHA `9964bed` CI run34353266285全绿，但其自动复核30分钟未触发，不能将旧SHA审核当作最新通过。Root补同类可递增字段审计：角色revision、policyRevision、memory.revision、集合sequence均保留增量空间；集合sequence非负；事件尾从正数连续到head。7项坏快照分别RED后GREEN，完整Authority快照原子不变，随后正常对话/观察/再次保存恢复；与host整合69测试GREEN。无新provider调用，长期路线不变。
 
 第八轮最终生产冻结`2405493`：完整static通过（260文件、1283测试通过、4跳过），Web/Agent构建通过，NPC两项Browser通过，真实模型用例跳过。独立`round8-recheck.md`最终无新具体P0/P1/P2；复核中曾将 -1<0 错读为false的zeroEvent意见已由复核者撤回并记录，未因此更改正确代码。共享Harness在主线集成`4e39e48`两项通过，此后只修改存档非法输入拒绝。后续交付记录不改变生产行为，最新SHA远端门禁与自动审核单独核对。
+
+CI run34357206570的Static/build通过，但历史近战首轮5s就绪断言失败、重试成功，被failOnFlakyTests正确标红。`ci-melee-triage.md`保留首轮trace缺失与retry实际就绪耗时边界。Root在同一用例注入6秒Authority Worker脚本延迟，旧等待RED；修复等待warning或完整guide的15秒启动阶段后同注入GREEN（15.6秒），移除注入正常旅程GREEN（9.3秒）。注入仅存在证据patch，生产无延迟；原战斗/受击/实体断言、90秒总预算、CI重试和flaky规则不变。这不是加载性能优化或基准结果。
+
+第九轮暂停边界实现见`round9-pause-fix.md`：Game→Companion→Bridge在同一次暂停切换同步通知，迟到intent回WORLD_PAUSED且不触达Authority；memory仍走正常提交/回执。2项RED后3文件9测试GREEN，含首次暂停连接、恢复和压缩对账。Root另扩展真实Browser模型请求挂起→玩家暂停→AbortSignal→迟到完成→目标/发言不变→恢复的旅程，待整合执行。
+
+第九轮世界修复见`round9-world-fix.md`：Logic读取由Character owner派生的持续目标，避险/已跟踪移动优先，非forage等待状态hold；forage保留已有探索。存档派生字段不作授权状态，restore重新构建。focused5文件27测试GREEN；flat fixture只证明到达保持及新规划/输入接纳，其身体续跟缺口由真实Browser补齐，不能把wish当运动。Root实际Browser两项18.7秒通过：到达无Action后跨90 Physics ticks保持（水平位移<0.02），真实WASD玩家移动>4格后NPC身体移动>1格且靠近玩家；在途模型暂停/迟到完成/恢复也通过。最终再次运行会显式保存JSON文件，避免line reporter丢失内存附件。长期docs baseline已补持续目标执行权和即时暂停/记忆对账边界，产品路线与模型预算不变。

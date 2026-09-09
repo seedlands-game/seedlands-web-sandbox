@@ -1,0 +1,38 @@
+$ playwright test changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts
+
+Running 1 test using 1 worker
+
+(node:83590) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/1] [chromium] › changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:17:1 › 开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈
+  1) [chromium] › changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:17:1 › 开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('#melee-showcase-guide')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('#melee-showcase-guide')
+
+
+      33 |   const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });
+      34 |   if (await continueDespiteWarning.isVisible()) await continueDespiteWarning.click();
+    > 35 |   await expect(page.locator('#melee-showcase-guide')).toBeVisible();
+         |                                                       ^
+      36 |   await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
+      37 |   await expect(page.locator('#debug')).toContainText(`Seed ${MELEE_SHOWCASE_SEED}`);
+      38 |   for (const id of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID])
+        at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:35:55
+
+    Error Context: test-results/changes-2026-09-08-melee-a-ea0ba--开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈-chromium/error-context.md
+
+
+  1 failed
+    [chromium] › changes/2026-09-08-melee-action-showcase/e2e/melee-action-showcase.spec.ts:17:1 › 开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈 
+[ELIFECYCLE] Command failed with exit code 1.

@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "id": "living-npc-round9-world-fix",
+  "role": "world goal ownership implementer",
+  "workType": "implementation",
+  "goal": "Fix review5155067844 comment3969048769: Logic decision only respects activeAction, so persistent character idle or arrived active follow without action falls through settler wander/routine. Put generic persistent goal ownership/state in Logic observation as needed, keep engine free of Agent/provider concepts. In Character-owned active goals, hold when no tracked action; preserve deterministic flee/reflex priority and ordinary noncharacter NPC behavior. Add RED/GREEN real Logic/Physics multi-tick idle stays still and arrived follow stays then reacquires moving target, checkpoint and no-serverfallback semantics. Read current source; choose minimal contract-correct fix. Writes core server/logic and simulation and relevant tests/server only. No browser/provider/Git/globalformat; Root owns spec/docs/integration. Report /tmp/living-npc-round9-world-fix.md and freeze. .7h originalpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/server/logic",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/server/simulation",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/server",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round9-world-fix.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "regression",
+      "check": "Verified findings resolved with meaningful RED/GREEN; no unrelated edits",
+      "evidence": "focused tests and report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.7
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

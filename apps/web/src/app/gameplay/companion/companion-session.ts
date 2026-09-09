@@ -160,5 +160,6 @@ export class CompanionSession {
       }
     });
   disconnect = () => this.controller.disconnect();
+  setPaused = (paused: boolean) => this.controller.setPaused(paused);
   configure = (seconds: number, context: 128000 | 256000 = 128000) => this.controller.configure(seconds, context);
 }

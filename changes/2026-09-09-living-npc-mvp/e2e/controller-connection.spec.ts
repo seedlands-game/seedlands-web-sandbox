@@ -1,19 +1,30 @@
+import { writeFile } from 'node:fs/promises';
 import { prepareCompanionGround } from './support';
 import { expect, test } from '@playwright/test';
 import { startAgentServer } from '../../../apps/agent-server/src/node/websocket-host';
 import type { CognitionModel } from '../../../apps/agent-server/src/model-types';
 import type { CharacterObservation } from '../../../packages/game-core/src/runtime/character-control-protocol';
-import { startHarnessWorld, prepareFlatMovement } from '../../../tests/e2e/support/harness';
+import { startHarnessWorld, prepareFlatMovement, lockPointer } from '../../../tests/e2e/support/harness';
 import { CognitionRuntime } from '../../../apps/agent-server/src/runtime';
 import type { ControllerClientMessage } from '@seedlands/cognition-protocol';
 
 test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发，断连保持角色', async ({ page, baseURL }, testInfo) => {
   test.setTimeout(120_000);
+  const persistEvidence = async (name: string, value: unknown) => {
+    const path = testInfo.outputPath(`${name}.json`);
+    await writeFile(path, JSON.stringify(value, null, 2));
+    await testInfo.attach(name, { path, contentType: 'application/json' });
+  };
   const calls: { goal: string; cursor: number }[] = [];
   const pages: { cursor: number; head: number; count: number }[] = [];
+  const controls: string[] = [];
+  let holdNextDecision = false;
+  let releaseDecision: (() => void) | undefined;
+  let heldDecisionAborted = false;
   class ObservedRuntime extends CognitionRuntime {
     override receive(message: ControllerClientMessage) {
       super.receive(message);
+      if (message.kind === 'control') controls.push(message.command);
       if (message.kind === 'observe')
         pages.push({
           cursor: message.observation.cursor,
@@ -30,6 +41,20 @@ test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发
       const goal =
         calls.length && player ? { kind: 'follow' as const, target: player.target } : { kind: 'forage' as const };
       calls.push({ goal: goal.kind, cursor: observation.cursor });
+      if (holdNextDecision) {
+        holdNextDecision = false;
+        // Deliberately return a late completion even after cancellation.
+        await new Promise<void>((resolve) => {
+          releaseDecision = resolve;
+          request.signal?.addEventListener(
+            'abort',
+            () => {
+              heldDecisionAborted = true;
+            },
+            { once: true },
+          );
+        });
+      }
       return {
         message: {
           role: 'assistant',
@@ -128,18 +153,94 @@ test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发
     expect(calls).toHaveLength(beforeReconnect + 1);
     expect((await readCharacter()).entityId).toBe(controlled.entityId);
     expect(await page.locator('#companion').innerText()).not.toContain('fixture-private-reasoning');
-    await testInfo.attach('controller-round-trips', {
-      body: JSON.stringify({
-        provider: 'deterministic fixture, not real model evidence',
-        calls,
-        pages,
-        historyCursor,
-        controlled,
-        disconnected,
-      }),
-      contentType: 'application/json',
+    const readBodies = () =>
+      page.evaluate(async () => {
+        const harness = window.__seedlandsHarness!;
+        const list = await harness.world.character({ kind: 'list' });
+        if (!list.ok || list.data.kind !== 'list' || !list.data.characters[0]) throw new Error('Character missing');
+        const entityId = list.data.characters[0].entityId;
+        const observed = await harness.world.character({ kind: 'observe', entityId });
+        const actions = await harness.world.actions({ entityId });
+        const snapshot = harness.snapshot();
+        if (!observed.ok || observed.data.kind !== 'observation' || !actions.ok || !snapshot)
+          throw new Error('Body missing');
+        return {
+          player: snapshot.player,
+          npc: observed.data.observation.self.position,
+          actions: actions.data.actions,
+          tick: snapshot.authority.physicsTick,
+        };
+      });
+    await expect.poll(async () => (await readBodies()).actions.length, { timeout: 20_000 }).toBe(0);
+    const arrived = await readBodies();
+    await expect.poll(async () => (await readBodies()).tick, { timeout: 15_000 }).toBeGreaterThan(arrived.tick + 90);
+    const held = await readBodies();
+    expect(Math.hypot(held.npc[0] - arrived.npc[0], held.npc[2] - arrived.npc[2])).toBeLessThan(0.02);
+    expect(held.actions).toHaveLength(0);
+    await page.locator('#companion .companion-toggle').click();
+    await page.evaluate(() => window.__seedlandsHarness!.setView(0, 0));
+    await lockPointer(page);
+    await page.keyboard.down('KeyW');
+    try {
+      await expect
+        .poll(
+          async () => {
+            const current = await readBodies();
+            return Math.hypot(current.player[0] - held.player[0], current.player[2] - held.player[2]);
+          },
+          { timeout: 10_000 },
+        )
+        .toBeGreaterThan(4);
+    } finally {
+      await page.keyboard.up('KeyW');
+      await page.keyboard.press('KeyT');
+    }
+    await expect
+      .poll(
+        async () => {
+          const current = await readBodies();
+          return Math.hypot(current.npc[0] - held.npc[0], current.npc[2] - held.npc[2]);
+        },
+        { timeout: 15_000 },
+      )
+      .toBeGreaterThan(1);
+    const followed = await readBodies();
+    expect(Math.hypot(followed.npc[0] - followed.player[0], followed.npc[2] - followed.player[2])).toBeLessThan(
+      Math.hypot(held.npc[0] - followed.player[0], held.npc[2] - followed.player[2]),
+    );
+    await persistEvidence('hold-and-follow-bodies', { arrived, held, followed });
+    holdNextDecision = true;
+    await page.getByLabel('和阿岚说句话').fill('等一下，先别改变计划。');
+    await page.getByRole('button', { name: '说话', exact: true }).click();
+    await expect.poll(() => releaseDecision !== undefined).toBe(true);
+    await page.getByRole('button', { name: '暂停游戏', exact: true }).click();
+    await expect.poll(() => heldDecisionAborted).toBe(true);
+    expect(controls.at(-1)).toBe('pause');
+    const paused = await readCharacter();
+    releaseDecision!();
+    // Drain the deliberately late provider completion before querying Authority again.
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    await expect(page.locator('#companion .connection')).toContainText('世界已暂停');
+    const afterLateCompletion = await readCharacter();
+    expect(afterLateCompletion.revision).toBe(paused.revision);
+    expect(afterLateCompletion.lastSpeech).toBe(paused.lastSpeech);
+    expect(afterLateCompletion.currentGoal).toEqual(paused.currentGoal);
+    await page.getByRole('button', { name: '继续游戏', exact: true }).click();
+    await expect.poll(() => controls.at(-1)).toBe('resume');
+    await persistEvidence('controller-round-trips', {
+      provider: 'deterministic fixture, not real model evidence',
+      calls,
+      controls,
+      pages,
+      historyCursor,
+      controlled,
+      disconnected,
+      paused,
+      afterLateCompletion,
+      heldDecisionAborted,
     });
   } finally {
+    releaseDecision?.();
     await host.close();
   }
 });
