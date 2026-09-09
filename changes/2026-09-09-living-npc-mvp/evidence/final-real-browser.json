@@ -1,0 +1,19 @@
+{
+  "sourceSha": "38771ccac7864b2744c64f6d78a0c3204efc8221",
+  "provider": "real DeepSeek inherited credentials; text only",
+  "status": "passed",
+  "durationSeconds": 27.2,
+  "flashCalls": {
+    "minimum": 2,
+    "maximum": 6,
+    "exact": null
+  },
+  "usage": null,
+  "evidenceBoundary": "Line reporter did not persist in-memory JSON attachment. Exact call count, tokens and body coordinates from this final run are unavailable; do not combine with earlier complete provider usage as if fully accounted. Retained test assertions verify two changed replies, normal player/NPC movement when follow selected (walking screenshots exist), and disconnect. No further provider calls after this run.",
+  "screenshots": [
+    "final-real-companion-0.png",
+    "final-real-companion-1.png",
+    "final-real-companion-walking.png",
+    "final-real-companion-followed.png"
+  ]
+}

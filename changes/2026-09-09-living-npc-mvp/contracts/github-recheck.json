@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "living-npc-github-recheck",
+  "role": "independent cognition code reviewer",
+  "workType": "validation",
+  "goal": "Review frozen delta6a24891..38771ccac7864b2744c64f6d78a0c3204efc8221 against six independently validated GitHub findings. Read github-review-triage.md, github-world-fix.md and github-host-fix.md. Verify full cursor propagation, atomic Authority checks and idempotent retry; runtime same-revision event drops and debounce, stale Authority receipt waiting for fresh observation despite old receipt cursor; Pro pause/prepared cleanup and existing ACK; bounded response reader/cancel on overflow/HTTP, pre-aborted signal; POI follow tool schema+validator+available_actions; restored action owner/type/goal and legitimate terminal state. Root strengthened foreign action fixture to same type/target position so owner check independently needed. No tests/provider/browser/repo edits/Git/external comments. Root fullstatic/build ongoing, Browser2/2GREEN17.8s; one final realFlash journey planned within6remainingcalls. Write /tmp/living-npc-github-recheck.md with resolved/unresolved IDs and concrete new findings. Bound .5h within reviewpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-github-recheck.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "recheck",
+      "check": "Frozen delta fully reviewed; P1 resolution and any residual concrete bugs reported",
+      "evidence": "recheck report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.5
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

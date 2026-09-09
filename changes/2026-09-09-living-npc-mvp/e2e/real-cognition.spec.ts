@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { faceCompanion, prepareCompanionGround } from './support';
 import { startAgentServer } from '../../../apps/agent-server/src/node/websocket-host';
@@ -127,9 +128,11 @@ test('真实 Flash 与玩家共处浏览器世界并连续回应自己的动机'
     await expect(page.locator('#companion .connection')).toContainText('未连接模型');
   } finally {
     await host.close();
-    await testInfo.attach('real-cognition-journey', {
-      body: JSON.stringify({ provider: 'real DeepSeek inherited credentials; text only', calls, journey }, null, 2),
-      contentType: 'application/json',
-    });
+    const evidencePath = testInfo.outputPath('real-cognition-journey.json');
+    await writeFile(
+      evidencePath,
+      JSON.stringify({ provider: 'real DeepSeek inherited credentials; text only', calls, journey }, null, 2),
+    );
+    await testInfo.attach('real-cognition-journey', { path: evidencePath, contentType: 'application/json' });
   }
 });

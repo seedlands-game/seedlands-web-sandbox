@@ -36,7 +36,7 @@
 
 ## 模型用量与实现边界
 
-本轮所有准入、失败及成功样本合计16次 Flash、4次 Pro。供应商回执总计 Flash 输入37,344（缓存24,832）、输出10,935；Pro 输入5,481、输出4,506。按采样日官方峰时价估算约 **$0.0454**，不是供应商账单。明细见 `evidence/provider-usage.json`；不从这批数千 token 请求推断满128K/256K的效果。
+截至首轮实测有完整回执的准入、失败及成功样本合计16次 Flash、4次 Pro；最后一次增量复验的用量缺口见下文。供应商回执总计 Flash 输入37,344（缓存24,832）、输出10,935；Pro 输入5,481、输出4,506。按采样日官方峰时价估算约 **$0.0454**，不是供应商账单。明细见 `evidence/provider-usage.json`；不从这批数千 token 请求推断满128K/256K的效果。
 
 Flash 私有 wire history 仅在认知服务内存中。服务重启或重连以世界持久摘要和最多128条近期事件重建；没有承诺恢复尚未压缩的全部早期私有对话。身份、身体、行囊、目标、已提交摘要和终态事件由世界存档持久化。
 
@@ -74,3 +74,11 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 #25 已由外部合并到 main `01bab28`；其 tree `6d49e5cd2cec333ee69b4dd063cd3b9265f8a0f8` 与已集成的 `b1b41cd` 完全一致，`6a24891` 只补合并祖先关系，生产 tree 与 `9763281` 完全一致。#26 现直接面向 main。
 
 修复冻结：世界侧17项focused通过，Root额外将 foreign action 改为与NPC目标同类型、同位置以单独约束 ownership，并验证双方 action 均不变；该2项复验通过。宿主侧先取得6个RED，修复后5文件28测试通过；包括新事件触发新决定、stale receipt 的 cursor 仍旧时等待更新观察，避免立即重试旧快照。详见 `github-world-fix.md`、`github-host-fix.md`。Root 的 Bridge 5项通过；完整静态、构建、Browser与独立复核在本冻结候选上重新执行。
+
+## 最终增量验收
+
+生产候选 `38771cc`：完整 `pnpm verify:static` 通过（252文件、1233测试通过，4测试跳过），独立 Web 与 Agent build 通过。修复后的 Browser 两项2/2通过（17.8秒）；真实 Flash 浏览器旅程1/1通过（27.2秒），两轮实际回应、连续玩家输入和 NPC 跟随、T回到交流与断连均通过，截图见 `evidence/final-real-companion-*.png`。人格回应明确“珍惜朋友、愿意同行，但会先保护自己”，与预设一致。
+
+`github-recheck.md` 对28个差异文件独立复核，确认 GitHub 5项P1与1项P2全部解决，未发现新 P0/P1/P2。该源码此后仅增加测试 JSON 输出文件的持久化与交付记录，没有修改生产行为。
+
+最后一轮使用 line reporter，内存 JSON attachment 未落盘，因此该轮精确调用数、token/缓存 usage 和坐标样本不可恢复；保留了真实断言日志和四张截图，不能将此前16 Flash/4 Pro的完整账本冒充最终总用量。该轮由测试限制为2–6 Flash，所以最终累计18–22 Flash、4 Pro，仍在22/4上限内。没有为补日志继续调用模型。未来同一测试会显式写 JSON 文件再附加 path；本轮用量缺口已写入 `provider-usage.json`，实际总价保持unknown。
