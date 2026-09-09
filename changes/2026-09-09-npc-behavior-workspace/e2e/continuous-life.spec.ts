@@ -63,7 +63,7 @@ test('固定行为树通过真实身体连续补给，并在面板显示生效�
 });
 
 test('固定初始资源、零模型、零换树的60分钟浏览器生活', async ({ page }, testInfo) => {
-  test.skip(process.env.SEEDLANDS_NPC_LONG_LIFE !== '1', '显式 opt-in 的60分钟旅程；短测试不代替此验收');
+  test.skip(process.env.SEEDLANDS_NPC_LONG_LIFE !== '1', '独立的真实时间诊断；本次交付默认使用确定性多日推进');
   test.setTimeout((lifeScene.duration.browserWallSeconds + 120) * 1000);
   const character = await startLifeScene(page);
   const first = await lifeSample(page, character.entityId, 0);

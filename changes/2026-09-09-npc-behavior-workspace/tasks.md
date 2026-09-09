@@ -7,9 +7,11 @@
 - [x] A：Headless与Browser三个昼夜、物品争抢、跟随目标失联/重现
 - [x] B：标准Agent、持久workspace/journal、双唤醒、Pro事务压缩
 - [x] B：真实Flash回应玩家/替换策略/断线继续执行，真实Pro发布新记忆窗口
-- [ ] C：最终三角色Browser+PG配对恢复复验（已定位回档时旧port dispose未处理拒绝）
-- [ ] Factory：真实Pro出生包最终验证（模拟幂等激活通过；真实结构化工具修复进行中）
-- [ ] 最终静态/build、独立审阅问题闭环、可玩环境与PR交接
+- [x] C：最终三角色Browser+PG配对恢复复验14.8秒通过，pageerror为空
+- [x] Factory：真实Pro出生包+浏览器幂等激活通过（一次Pro生成小满，两次激活同一npc-8）
+- [x] 独立审阅问题闭环、最终NPC Browser套件及H1输入恢复回归、可玩环境
+- [x] 最终静态285files/1369tests、build、当前Browser/H1及独立复核
+- [ ] PR与必要CI交接
 
 ## 当前证据
 
@@ -19,9 +21,9 @@ A：冻结9ea0b23修复独立审阅四项P1（健康长路径预算、热更新�
 
 旧60分钟旅程完成采样但断言失败；旧产物的replan预算问题已复现修复。修复版第二轮在用户调整验收后主动取消。两者保留，不能记为通过，不再要求真实60分钟重跑。
 
-B：实际PG与标准Agent96项检查通过；追加日志上限、冻结窗口、恢复拓扑、不可变receipts及工具目录由独立审阅提出并修正。真实Flash第四次联调已回应玩家并安装跟随树；离开局部感知正确失败、重新出现后同树恢复跟随且断网继续执行。真实Pro两次工具调用完成一次压缩发布。Factory与其拆开验证，不重复已通过Flash/压缩。
+B：实际PG与标准Agent100项检查通过；追加日志上限、冻结窗口、恢复拓扑、不可变receipts及工具目录由独立审阅提出并修正。真实Flash第四次联调已回应玩家并安装跟随树；离开局部感知正确失败、重新出现后同树恢复跟随且断网继续执行。真实Pro两次工具调用完成一次压缩发布。Factory与其拆开验证，不重复已通过Flash/压缩。
 
-C：初轮一个Browser连接承载三NPC、独立PG工作区及配对checkpoint恢复15.4秒通过；最终复验发现旧Authority epoch的dispose Promise拒绝泄漏为pageerror，已补确定性RED/GREEN。独立Host审阅追加重复sessionId生命周期与多workspace导入部分提交P1，分别增加重复连接拒绝及PG整批事务/并发锁，待最终集成复验。
+C：初轮一个Browser连接承载三NPC、独立PG工作区及配对checkpoint恢复15.4秒通过；最终复验发现旧Authority epoch的dispose Promise拒绝泄漏为pageerror，已补确定性RED/GREEN。独立Host审阅追加重复sessionId生命周期与多workspace导入部分提交P1，分别增加重复连接拒绝及PG整批事务/并发锁，最终集成复验14.8秒通过。
 
 权限：所有新世界行为沿用统一WorldResourceAuthorizer；旧绑定入口在明确deny world.character execute时仍接受intent的RED已修正。Agent仅局部观察与正常规则Action，开发全局Harness不进入模型工具。
 

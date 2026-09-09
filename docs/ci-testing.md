@@ -65,3 +65,7 @@ CI 绿色表示当前 SHA 在声明的执行环境中通过指定断言，不能
 3. **减少重复 CLI bootstrap。** `server-headless-cli` 至少七次进程启动。可在同一 JSONL 生命周期中串联兼容的协议断言，把纯语义矩阵放低层；保留真实子进程的 stdin/stdout、退出码、EOF 与失败清理覆盖。不能为了省启动而删掉这些进程边界。
 
 `data-plane-rust` 的固定 workload corpus 同时检查 Rust/TS 等价和输入不变，不能把减少 corpus 或只比 hash 称作无损优化。四个慢文件的时间也不是全部可消除的时间。下一轮先以有限并发作单轴实验，再针对剩余热点优化初始化；通过项共存后仍需组合验证。组合CI还观察到一条edge-support flaky使serial组整组重跑，拆解不必要的串行依赖是失败成本候选；必须先确认各用例和结果汇总独立，不能把失败隐藏为部分PASS。
+
+## 当前NPC持续行为集成
+
+2026-09-10起，当前伙伴集成步骤为`pnpm test:npc-behavior`：正式行为树、确定性三昼夜、一个Browser连接的三个独立角色与实际PG配对恢复。`test:living-npc`仍是旧单目标change的历史命令，不再作为当前架构门禁。CI只使用明确的受控模型；真实Flash/Pro和真实60分钟均为显式opt-in，不能用CI绿色宣称实际供应商或长期主观体验通过。
