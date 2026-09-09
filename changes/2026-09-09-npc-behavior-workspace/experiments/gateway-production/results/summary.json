@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "candidate": "LiteLLM Proxy 1.100.0 with bounded ASGI compatibility extension",
+  "admitted": true,
+  "checks": {
+    "fullToolLoopAndOpaqueRoundtrip": true,
+    "aliasesReachCorrectBackends": true,
+    "sameTierReplacement": true,
+    "sameDeploymentConcurrencyTwo": true,
+    "slowADoesNotBlockBC": true,
+    "retryAfterAndThreeTotalAttempts": true,
+    "totalCrossAliasConcurrencyTwo": true,
+    "boundedQueue32Backpressure": true,
+    "totalDeadline": true,
+    "downstreamCancellation": true
+  },
+  "observations": {
+    "crossAliasBackendMaxActive": 2,
+    "queuedRequestsAccepted": 34,
+    "queuedRequestsOverloaded": 1,
+    "queuedRequestsTotal": 35,
+    "deadlineElapsedMs": 5005,
+    "deadlineProviderAttempts": 1,
+    "cancelledClientElapsedMs": 203,
+    "cancellationProviderAttempts": 1
+  }
+}

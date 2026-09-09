@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "id": "npc-worker-direct-logic",
+  "role": "browser world harness deterministic advance engineer",
+  "workType": "implementation",
+  "goal": "Implement Web-only direct MessageChannel Authority Worker ↔ Logic Worker to remove render main thread relay from body-control critical path. FIRST read spec final section and source, wait root RED confirmation before production edits. CI34394673448 life evidence in /tmp/npc-ci-partial shows running world but stale movement/replans; current TTL/pose200ms MUST remain. Root adding real browser 30*(300ms main busy+10msyield) fault test, oldrelay expectedfail feeding, normalfixture same. Preserve one Authority writer and same receiveLogicIntentBatch/ingress resource auth/runtimeEpoch gates, per-link oneinflight/latestpending, deterministicadvance exactseq waits and timeoutrevocation; no arbitrary bypass. Web-only typed port attachment (do not put MessagePort/DOM in core), use current LogicObservation/Intents wire data. Derivative occupancy buffers transfer directly; bound diagnostics to main without forwarding full simulation payload back to main. Main client still handles harness block-test ready/fatal/dispose and reports accurate logic stats. Restore switches epoch via port FIFO before new observations; lateoldbatches rejected; normal client rebind must not double reset. Close ports on failure/dispose; worker lifetime owns ports. Own apps/web/src/worker (focused new helper +authority-worker.ts+game-logic-worker.ts), apps/web/src/client/authority/browser-{authority,logic}-client.ts and Web-only protocol module there as needed, apps/web/src/app/browser-worker-session.ts and focused tests/client; do not edit e2e/root package/docs/Git. Add targeted fake-port tests RED/GREEN for sequence/epoch/lifecycle/transfer/backpressure; run owned tests+types. Root owns browser AB and final gates. Report /tmp/npc-worker-direct-logic.md. No paid calls/secrets/services, no TTL widening. Bounded1h; report promptly if causal mismatch or scope expansion needed.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/web/src/worker",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/web/src/client/authority",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/apps/web/src/app/browser-worker-session.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/client",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-worker-direct-logic.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "browser-advance",
+      "check": "Paused Browser deterministic advance interleaves actual logic and physics; no stale replies or secondaryworldwriter; focused tests and typecheck",
+      "evidence": "/tmp/npc-worker-direct-logic.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 1
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

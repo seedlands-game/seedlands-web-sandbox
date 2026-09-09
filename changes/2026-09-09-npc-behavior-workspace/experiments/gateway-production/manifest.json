@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "contractSha256": "4412230b0537e5ba4a65cc0d7bbdfa51e52b4999a14117ee73ef579e116ad67e",
+  "upstream": {
+    "name": "LiteLLM Proxy",
+    "version": "1.100.0",
+    "image": "ghcr.io/berriai/litellm@sha256:c8756e7b9a61fe45df2ccb5b781d388c3b2f3a21ef9e4956630caef20f9f03aa"
+  },
+  "artifact": {
+    "tag": "seedlands-model-gateway:litellm-1.100.0",
+    "imageId": "sha256:ad2eb97b3dbd125abdb4e1c80a0d1c776654d5db4fd10bb53f6276a8f559be2b"
+  },
+  "sourceSha256": {
+    "Dockerfile": "11019299e8cb03caeaeb3f33ff4ca918fd9c502852debf99c1a07bc326387b6b",
+    "gatewayMiddleware": "175cb03095139cebade47f28bfbadf37a9f828f7808edb58901c21c7c9d3bd52",
+    "compatibilityGateway": "67dfc755e614eb242b1a37d8f929d9f66843a3b8779a95282b9a1d3ed8124499",
+    "config": "5fa0f6ab619a10b33306e0347ec2409bfdaf23f346d971a4debbf605699b53b8",
+    "buildScript": "d698820907907d6e94fae887efbf71ce5e7a37cfe30028b473a751250f4de260",
+    "startScript": "3d02ef965becc80cc491ba150b27a1bf686ff306262dde15984c6d9dec73812b",
+    "fullGSummary": "67bb5bd6c94aca33ab6be2b6a6e040ebbe02611c3b62f0cd0a7f400dff98bf5a"
+  },
+  "limits": {
+    "litellmMode": "PRODUCTION",
+    "workers": 1,
+    "active": 2,
+    "pending": 32,
+    "maxBodyBytes": 4194304,
+    "bodyTimeoutSeconds": 10,
+    "flashTotalDeadlineSeconds": 60,
+    "proTotalDeadlineSeconds": 300,
+    "maximumAttempts": 3
+  },
+  "routes": {
+    "chat": "/v1/chat/completions",
+    "health": ["/health/liveliness", "/health/readiness"]
+  },
+  "outcome": "ADMITTED",
+  "reasoningCompatibility": {
+    "date": "2026-09-10",
+    "configSha256": "a9b216ddfbd6836ab240239ccd668cdd74fed486e98451590b28700a5cf02833",
+    "allowedOpenaiParams": ["reasoning_effort"],
+    "evidence": "results/reasoning-smoke.json",
+    "realFactory": "../../evidence/validation.json",
+    "note": "Original full-G source hashes retained; middleware/image unchanged."
+  }
+}

@@ -1,0 +1,2 @@
+go: downloading go1.27.0 (darwin/arm64)
+go: download go1.27.0: golang.org/toolchain@v0.0.1-go1.27.0.darwin-arm64: Get "https://proxy.golang.org/golang.org/toolchain/@v/v0.0.1-go1.27.0.darwin-arm64.zip": dial tcp [2607:f8b0:400e:c1b::8d]:443: i/o timeout

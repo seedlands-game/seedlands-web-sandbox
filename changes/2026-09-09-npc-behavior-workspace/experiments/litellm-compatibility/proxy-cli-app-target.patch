@@ -1,0 +1,12 @@
+--- litellm/proxy/proxy_cli.py
++++ litellm/proxy/proxy_cli.py
+@@ -257,7 +257,7 @@
+         import litellm
+         from litellm._logging import _get_uvicorn_json_log_config
+ 
+         uvicorn_args: Final = {
+-            "app": "litellm.proxy.proxy_server:app",
++            "app": "compatibility_gateway:app",
+             "host": host,
+             "port": port,
+         }

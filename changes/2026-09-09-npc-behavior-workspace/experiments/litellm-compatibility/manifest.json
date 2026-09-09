@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "candidate": "LiteLLM Proxy gateway compatibility extension",
+  "upstreamVersion": "1.100.0",
+  "upstreamImage": "ghcr.io/berriai/litellm@sha256:c8756e7b9a61fe45df2ccb5b781d388c3b2f3a21ef9e4956630caef20f9f03aa",
+  "upstreamRevisionLabel": "e4f25265704e2b2c6cf6e81be2e4c5cffff896f4",
+  "artifactImageId": "sha256:ed7959c9bb4e2e97fcc8c31669601db49bb3723bfc0b4c535574a7999d2f8070",
+  "compatibilityGatewaySha256": "4d048be230fb408ebb8d10020b42001b5c838691956f7b5d4da870a3f08f4499",
+  "dockerfileSha256": "9b223b43fff6c3450a891f0c9f3cd3b085707bf7107d0a05d10575aa25c5583f",
+  "resultSha256": "d673ed32e12d7f8f07762f2e519ab3b8af2bb2dc1762db49fd47a453886acb70",
+  "runtime": {
+    "workers": 1,
+    "providerConcurrency": 2,
+    "pendingLimit": 32,
+    "totalDeadlineSeconds": 5,
+    "routerRetries": 2,
+    "maximumAttempts": 3
+  },
+  "outcome": "ADMITTED"
+}

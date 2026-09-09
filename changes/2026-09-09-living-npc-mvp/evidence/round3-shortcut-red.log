@@ -1,0 +1,39 @@
+6:33:38 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/app/player-input-gates.test.ts (8 tests | 1 failed) 12ms
+   × 昼夜暂停和加速按键通过Authority回调而非只改本地显示 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/app/player-input-gates.test.ts > 昼夜暂停和加速按键通过Authority回调而非只改本地显示
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      20,
+    ]
+
+
+Number of calls: 1
+
+ ❯ tests/app/player-input-gates.test.ts:119:24
+    117|   windowStub.onkeydown!({ code: 'KeyP', target: {}, preventDefault: vi…
+    118|   windowStub.onkeydown!({ code: 'KeyT', target: {}, preventDefault: vi…
+    119|   expect(setSpeed).not.toHaveBeenCalled();
+       |                        ^
+    120|   windowStub.onkeydown!({ code: 'KeyT', altKey: true, target: {}, prev…
+    121|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  18:33:38
+   Duration  649ms (transform 141ms, setup 0ms, import 555ms, tests 12ms, environment 0ms)
+

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "living-npc-round4-recheck",
+  "role": "independent cognition code reviewer",
+  "workType": "validation",
+  "goal": "Review frozen delta22f27f8984f890b011ff8e0903300a576e26baae..7ff63253322c0b4168e8445e1b53efde2b63d6b7 for review5153227643 history paging P1. Root actual Browser70 retained events reproduced2old model calls atcursor64/70; fixed Browsernow1/1GREEN9.3s including no calls afterhistorydrain, new dialogues and reconnect. Host80event fixture mixed history65-80/new81, paused paging/fallback and ACK all44testsGREEN. Check source runtime initialHistoryThroughCursor freezes FIRST character.eventCursor, latestEventCursor follows page cursor, all historical pages append context but cannot notify or fallback, new events above fixed head still dispatch even if arrived mid-pagination. Review all3 source/test/E2E paths, read Authority eventPage semantics. Only docs/context updates beyondthose. No tests/provider/browser/repo edits/Git/external comments. Root fullstatic/build ongoing. Report /tmp/living-npc-round4-recheck.md with concrete remainingP0/P1/P2 ornone, freeze. .25h originalpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round4-recheck.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "recheck",
+      "check": "Frozen delta fully reviewed; P1 resolution and any residual concrete bugs reported",
+      "evidence": "recheck report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.25
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

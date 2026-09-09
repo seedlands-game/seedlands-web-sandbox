@@ -4,7 +4,6 @@ import { BrowserLogicClient } from '../client/authority/browser-logic-client';
 import { createSessionEpoch, type SequenceDecision } from '@seedlands/game-core/runtime/session-protocol';
 import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
 import type { FluidAuthoritySnapshot } from '@seedlands/game-core/server/fluid/fluid-transaction';
-import type { LogicObservation } from '@seedlands/game-core/server/logic/logic-protocol';
 import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
 import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
@@ -53,13 +52,7 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     onFluidCandidate: (candidate) => authority.commitFluid(candidate),
     onFluidFailure: (workId, error) => authority.failFluid(workId, error.message),
   });
-  const logic = BrowserLogicClient.create(epoch, {
-    onIntents: (batch) => {
-      authority.sendLogicIntents(batch);
-      authority.requestLogicObservation();
-    },
-    onFatal: options.onFatal,
-  });
+  const logic = BrowserLogicClient.create(epoch, { onFatal: options.onFatal });
   const generateAuthorityChunk = (key: string) => {
     if (!authorityReady) {
       queuedAuthorityChunks.add(key);
@@ -98,7 +91,6 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     },
     onCommit: options.onCommit,
     onFluidWork: (snapshot: FluidAuthoritySnapshot) => compute.enqueueFluid(snapshot),
-    onLogicObservation: (observation: LogicObservation) => logic.sendObservation(observation),
     onBootstrapGeneration: ({ seed, generatorVersion }) => compute.findSafeSpawn(seed, generatorVersion),
     onAuthorityChunkNeeded: generateAuthorityChunk,
     onUnknownChunk: options.onUnknownChunk,
@@ -117,6 +109,9 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     transportFaults: options.authorityTransportFaults,
   });
   try {
+    const directLogic = new MessageChannel();
+    logic.attachDirectAuthority(directLogic.port1);
+    authority.attachDirectLogic(directLogic.port2, (diagnostics) => logic.acceptDirectDiagnostics(diagnostics));
     await logic.start(options.harnessEnabled, options.frequencies.physicsHz);
     const ready = await authority.start({
       seedText: options.seedText,

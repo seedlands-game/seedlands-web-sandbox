@@ -20,7 +20,8 @@
     "@seedlands/game-core": "workspace:*",
     "playcanvas": "^2.21.4",
     "svelte": "^5.57.0",
-    "tone": "^15.1.22"
+    "tone": "^15.1.22",
+    "@seedlands/cognition-protocol": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.4",

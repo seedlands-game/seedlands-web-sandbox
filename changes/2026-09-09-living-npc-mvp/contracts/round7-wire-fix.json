@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "id": "living-npc-round7-wire-fix",
+  "role": "cognition wire validation implementer",
+  "workType": "implementation",
+  "goal": "Fix review5154055758 host P1 at9803ce9: validObservation omits character.eventCursor and page relationships, arbitraryMAX firsthead freezesbaseline. Validate safe nonnegative head and pagecursor, ordered event cursors withinhead/page, last event equals pagecursor, empty page matcheshead; respect realAuthority paging32 andretainedhistory128. Read actual CharacterRuntime.eventPage and rootround4history behavior. Do not claim server can detect internally consistent forged state from authenticated browser; reject malformed/inconsistentframes. Add RED/GREEN wire parser and authenticatedfirstobserve BAD_FRAME path plus valid historicalpages/midpaginationnewevent/empty. Keep existing fixtures valid by correcting only incoherent cursor fixtures; no provider/schema/core changes. Root owns target-sequence core/spec/docs/Git/globalgates. Writeapps/agent-server/src/wire-validation.ts, tests/agent-server only, /tmp. No browser/provider/install/globalformat/commit/push. Report /tmp/living-npc-round7-wire-fix.md with RED/GREEN and freeze. .5h originalpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/agent-server/src/wire-validation.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/agent-server",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round7-wire-fix.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "regression",
+      "check": "Verified findings resolved with meaningful RED/GREEN; no unrelated edits",
+      "evidence": "focused tests and report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.5
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

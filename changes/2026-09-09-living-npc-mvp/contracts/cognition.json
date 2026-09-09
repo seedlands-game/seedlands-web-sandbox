@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "id": "living-npc-cognition",
+  "role": "cognition implementer",
+  "workType": "implementation",
+  "goal": "Implement A2 local cognition host in apps/agent-server, own only this app and tests/agent-server. Node service owns cognition not game world. Use @langchain/langgraph explicit state graph and thin DeepSeek ChatCompletions fetch adapter; no OpenAI Agents SDK. Flash model deepseek-v4-flash-vision-exp text only, Pro deepseek-v4-pro compression only. User approved runtime MIDSCENE_MODEL_API_KEY reuse; do not inspect/output key or .env, no live calls yourself; Root live verifies. Runtime can read DEEPSEEK_API_KEY fallback MIDSCENE_MODEL_API_KEY, with matching approved endpoint configuration; secrets never Browser or error logs. Root freezes generic character-control-protocol.ts and bridge wire; communicate minimal API proposal immediately. Event trigger + 60..600s active-time fallback (180 default), event calls reset timer; debounce/concurrency/budget/backoff separate; no 60sec hard model cap. 128K/112K or256K/224K; preserve DeepSeek reasoning history; Pro only compression with frozen eventcursor/new-event buffer/atomic context switch; no daily review; no LLM raw logs in world. Loopback WebSocket with origin checking, explicit ephemeral pairing token, session/actor/world/epoch/sequence binding, bounded messages and resource disposal. No arbitrary world state patches; only one bounded goal/tool intent. Real scripts/startup metadata integration via Root. Dependency versions @langchain/langgraph1.4.14 and ws8 existing verify maintained docs; provide package scripts build/typecheck/test, avoid dependencies outside app and core exports. No global installs/package edits/git; tell Root dependency requirements for one root install. Focused mocked transport tests positive/negative, scheduler, compaction failure, runtime lifecycle and secrets redaction. Deliver concrete report and all types. Root owns UI/Browser Bridge and real model test.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/agent-server",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/agent-server",
+      "/private/tmp"
+    ],
+    "nonGoals": ["No Dedicated/LOD/World AI/custom rules/multimodal", "No merge, no credentials output or modification"]
+  },
+  "outputs": ["Implementation", "Focused RED/GREEN", "/tmp/living-npc-cognition-report.md"],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "delivery",
+      "check": "V01-V10 pass with explicit evidence boundaries",
+      "evidence": "implementation report and CI"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 17
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": ["范围改变或三次同因失败"],
+  "reportFields": ["变更", "验证", "风险", "实际成本"],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

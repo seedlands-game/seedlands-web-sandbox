@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "candidate": "Bifrost HTTP Transport",
+  "releaseTag": "transports/v2.1.0",
+  "releaseCommit": "b211fda",
+  "image": "ghcr.io/maximhq/bifrost:v2.1.0",
+  "digest": "sha256:653b74a8410e5757375aa9a25ce21f90f4591fc11d65879451939b6172ce80ed",
+  "reportedVersion": "2.1.0",
+  "mockOnly": true,
+  "logicalModels": ["flash", "pro"],
+  "provider": "mock-shared",
+  "fakeProviderKey": "fake-provider-key"
+}

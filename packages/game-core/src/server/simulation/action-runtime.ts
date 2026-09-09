@@ -23,13 +23,19 @@ export type ActorActionInput = Pick<ActorAction, 'actorId' | 'type'> &
   Partial<Pick<ActorAction, 'targetPosition' | 'targetEntityId' | 'poiId'>>;
 export type ActionSnapshot = { version: 1; sequence: number; actions: ActorAction[] };
 
+export const MAX_RETAINED_TERMINAL_ACTIONS = 256;
+
 const terminal = (status: ActorActionStatus) => ['succeeded', 'failed', 'interrupted'].includes(status);
 export class ActionRuntime {
   private readonly actions = new Map<string, ActorAction>();
   private readonly currentByActor = new Map<string, string>();
   private sequence = 0;
+  private readonly terminalOrder = new Set<string>();
 
-  constructor(private readonly cloneValue: CoreClone) {}
+  constructor(
+    private readonly cloneValue: CoreClone,
+    private readonly retainedActionIds: () => Iterable<string> = () => [],
+  ) {}
 
   private clone(action: ActorAction): ActorAction {
     return {
@@ -40,8 +46,17 @@ export class ActionRuntime {
     };
   }
 
-  start(input: ActorActionInput, now: number): ActorAction {
+  canStart(): boolean {
+    return Number.isSafeInteger(this.sequence + 1);
+  }
+
+  validateStart(input: ActorActionInput, now: number): void {
     this.validateInput(input, now);
+    if (!this.canStart()) throw new RangeError('Action sequence is exhausted.');
+  }
+
+  start(input: ActorActionInput, now: number): ActorAction {
+    this.validateStart(input, now);
     this.interruptActor(input.actorId, now, 'replaced');
     const action: ActorAction = {
       ...input,
@@ -76,11 +91,17 @@ export class ActionRuntime {
     return this.clone(action);
   }
 
-  updatePath(id: string, path: readonly NavigationPosition[], repathCount: number): ActorAction {
+  updatePath(
+    id: string,
+    path: readonly NavigationPosition[],
+    repathCount: number,
+    targetPosition?: NavigationPosition,
+  ): ActorAction {
     const action = this.requireActive(id);
     action.path = path.map((point) => [...point]);
     action.pathIndex = Math.min(1, action.path.length);
     action.repathCount = repathCount;
+    if (targetPosition) action.targetPosition = [...targetPosition];
     action.status = 'running';
     return this.clone(action);
   }
@@ -111,17 +132,32 @@ export class ActionRuntime {
     return {
       version: 1,
       sequence: this.sequence,
-      actions: [...this.actions.values()].map((action) => this.clone(action)),
+      actions: [
+        ...[...this.actions.values()].filter((action) => !terminal(action.status)),
+        ...[...this.terminalOrder].map((id) => this.actions.get(id)!),
+      ].map((action) => this.clone(action)),
     };
   }
 
-  restore(raw: unknown): void {
+  /** Preserve unresolved owner links in addition to the recent completion history. */
+  pruneHistory(): void {
+    const retained = new Set(this.retainedActionIds());
+    let recent = 0;
+    for (const id of [...this.terminalOrder].reverse()) {
+      if (retained.has(id)) continue;
+      if (++recent <= MAX_RETAINED_TERMINAL_ACTIONS) continue;
+      this.actions.delete(id);
+      this.terminalOrder.delete(id);
+    }
+  }
+
+  restore(raw: unknown, options: { deferPruning?: boolean } = {}): void {
     try {
       const snapshot = raw as ActionSnapshot;
       if (
         !snapshot ||
         snapshot.version !== 1 ||
-        !Number.isInteger(snapshot.sequence) ||
+        !Number.isSafeInteger(snapshot.sequence) ||
         snapshot.sequence < 0 ||
         !Array.isArray(snapshot.actions)
       )
@@ -130,6 +166,12 @@ export class ActionRuntime {
       const current = new Map<string, string>();
       for (const action of snapshot.actions) {
         this.validateAction(action);
+        const sequenceText = /^action-(\d+)$/.exec(action.id)?.[1];
+        if (
+          sequenceText !== undefined &&
+          (!Number.isSafeInteger(Number(sequenceText)) || Number(sequenceText) > snapshot.sequence)
+        )
+          throw new TypeError('action id exceeds snapshot sequence');
         if (actions.has(action.id)) throw new TypeError('duplicate action id');
         actions.set(action.id, this.clone(action));
         if (!terminal(action.status)) {
@@ -142,6 +184,14 @@ export class ActionRuntime {
       this.currentByActor.clear();
       current.forEach((id, actorId) => this.currentByActor.set(actorId, id));
       this.sequence = snapshot.sequence;
+      this.terminalOrder.clear();
+      // Stable ties preserve the completion order serialized by current snapshots.
+      // Legacy snapshots only provide completion time and creation order.
+      [...actions.values()]
+        .filter((action) => terminal(action.status))
+        .sort((a, b) => (a.endedAt ?? a.startedAt) - (b.endedAt ?? b.startedAt))
+        .forEach((action) => this.terminalOrder.add(action.id));
+      if (!options.deferPruning) this.pruneHistory();
     } catch (error) {
       throw new Error(`Invalid action snapshot: ${error instanceof Error ? error.message : String(error)}`, {
         cause: error,
@@ -162,6 +212,8 @@ export class ActionRuntime {
     if (reason) action.reason = reason;
     if (result !== undefined) action.result = this.cloneValue(result);
     this.currentByActor.delete(action.actorId);
+    this.terminalOrder.add(id);
+    this.pruneHistory();
     return this.clone(action);
   }
 

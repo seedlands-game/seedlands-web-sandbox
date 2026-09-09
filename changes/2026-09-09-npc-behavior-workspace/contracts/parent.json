@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "id": "npc-behavior-workspace-parent",
+  "role": "路线与交付负责者",
+  "workType": "design",
+  "goal": "Implement user-confirmed continuous behavior tree, persistent NPC workspace and provider-neutral gateway through A/B/C and Factory delivery",
+  "initiatedBy": "human",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "A fixed tree lives",
+    "B persistent Agent",
+    "C three agents shared gateway",
+    "Playable reviewed PR"
+  ],
+  "execution": {
+    "form": "current-agent",
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "delivery",
+      "check": "A/B/C and Factory pass with actual evidence",
+      "evidence": "spec delivery and current tests"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 79.2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": true,
+    "delegate": true
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": null
+}

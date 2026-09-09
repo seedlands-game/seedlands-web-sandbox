@@ -1,0 +1,36 @@
+$ vitest run tests/server/world-action-retention.test.ts
+7:31:25 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/world-action-retention.test.ts (1 test | 1 failed) 1534ms
+   × bounds command-created action history across Harness query and portable checkpoint restore 1534ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/world-action-retention.test.ts > bounds command-created action history across Harness query and portable checkpoint restore
+AssertionError: expected [ { type: 'idle', …(9) }, …(319) ] to have a length of 257 but got 320
+
+- Expected
++ Received
+
+- 257
++ 320
+
+ ❯ tests/server/world-action-retention.test.ts:23:30
+     21|   const query = await session.world.actions();
+     22|   if (!query.ok) throw new Error(query.error.message);
+     23|   expect(query.data.actions).toHaveLength(257);
+       |                              ^
+     24|   expect(await session.world.actions({ actionId: firstId })).toMatchOb…
+     25|     ok: false,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  19:31:25
+   Duration  2.06s (transform 372ms, setup 0ms, import 448ms, tests 1.53s, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.

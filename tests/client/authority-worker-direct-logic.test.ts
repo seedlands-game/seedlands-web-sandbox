@@ -1,0 +1,286 @@
+import { describe, expect, it, vi } from 'vitest';
+import { AuthorityWorkerDirectLogic } from '../../apps/web/src/worker/authority-worker-direct-logic';
+import { AuthorityWorkerDirectLogicOwner } from '../../apps/web/src/worker/authority-worker-direct-logic-owner';
+import {
+  DIRECT_LOGIC_PROTOCOL_VERSION,
+  type DirectLogicMessage,
+} from '../../apps/web/src/worker/authority-worker-direct-logic-protocol';
+import { createGameLogicWorkerHandler } from '../../apps/web/src/worker/game-logic-worker';
+import {
+  LOGIC_PROTOCOL_VERSION,
+  type LogicIntentBatch,
+  type LogicObservation,
+  type LogicWorkerResponse,
+} from '../../packages/game-core/src/server/logic/logic-protocol';
+
+class FakePort {
+  onmessage: ((event: MessageEvent<unknown>) => void) | null = null;
+  onmessageerror: (() => void) | null = null;
+  readonly posts: { message: unknown; transfer: readonly Transferable[] }[] = [];
+  started = 0;
+  closed = 0;
+  throwOnPost = false;
+
+  postMessage(message: unknown, transfer: Transferable[] = []) {
+    if (this.throwOnPost) throw new Error('port post failed');
+    this.posts.push({ message, transfer });
+  }
+
+  start() {
+    this.started += 1;
+  }
+
+  close() {
+    this.closed += 1;
+  }
+
+  emit(message: unknown) {
+    this.onmessage?.({ data: message } as MessageEvent<unknown>);
+  }
+}
+
+const observation = (epoch: string, sequence: number): LogicObservation => ({
+  protocolVersion: LOGIC_PROTOCOL_VERSION,
+  epoch,
+  observationSequence: sequence,
+  physicsTick: sequence,
+  activeTimeMs: sequence * 10,
+  worldTime: 8,
+  entities: [],
+  decisionContext: {
+    actors: [],
+    pois: { version: 1, sequence: 0, pois: [] },
+    terrainWindows: [
+      {
+        key: `0,0,${sequence}`,
+        chunkRevision: 0,
+        origin: [0, 0, 0],
+        size: [1, 1, 1],
+        occupancy: new Uint8Array([sequence]),
+      },
+    ],
+  },
+});
+
+const batch = (epoch: string, sequence: number): LogicIntentBatch => ({
+  protocolVersion: LOGIC_PROTOCOL_VERSION,
+  epoch,
+  observationSequence: sequence,
+  expiresAtPhysicsTick: sequence + 12,
+  intents: [],
+});
+
+const directBatch = (epoch: string, sequence: number): DirectLogicMessage => ({
+  kind: 'direct-logic-intents',
+  protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+  batch: batch(epoch, sequence),
+});
+
+const flush = async () => {
+  await Promise.resolve();
+  await Promise.resolve();
+};
+
+describe('AuthorityWorkerDirectLogic', () => {
+  it('直接转移派生占用缓冲且仅保留最新待处理观察', async () => {
+    const port = new FakePort();
+    const accepted: LogicIntentBatch[] = [];
+    const diagnostics: unknown[] = [];
+    const link = new AuthorityWorkerDirectLogic(port as unknown as MessagePort, 'epoch:1', {
+      acceptBatch: (value) => {
+        accepted.push(value);
+        return true;
+      },
+      now: () => 10,
+      diagnostics: (value) => diagnostics.push(value),
+      fatal: vi.fn(),
+      diagnosticIntervalMs: 0,
+    });
+    const first = observation('epoch:1', 1);
+    link.publish(first);
+    link.publish(observation('epoch:1', 2));
+    link.publish(observation('epoch:1', 3));
+
+    expect(port.posts).toHaveLength(1);
+    expect(port.posts[0]?.transfer).toEqual([first.decisionContext.terrainWindows[0]?.occupancy.buffer]);
+    expect(diagnostics.at(-1)).toMatchObject({ observationInFlight: true, pendingObservationCount: 1 });
+
+    port.emit(directBatch('epoch:other', 1));
+    port.emit(directBatch('epoch:1', 2));
+    await flush();
+    expect(accepted).toEqual([]);
+    expect(port.posts).toHaveLength(1);
+
+    port.emit(directBatch('epoch:1', 1));
+    await flush();
+    expect(accepted.map((value) => value.observationSequence)).toEqual([1]);
+    expect(
+      port.posts.map(
+        ({ message }) =>
+          (message as Extract<DirectLogicMessage, { kind: 'direct-logic-observation' }>).observation
+            ?.observationSequence,
+      ),
+    ).toEqual([1, 3]);
+    expect(diagnostics.at(-1)).toMatchObject({ receivedBatchCount: 3, completedBatchCount: 1, rejectedBatchCount: 2 });
+  });
+
+  it('await期间拒绝重复回执且epoch切换不会让旧回执清除新代次任务', async () => {
+    const port = new FakePort();
+    let resolveOld!: (accepted: boolean) => void;
+    const oldAcceptance = new Promise<boolean>((resolve) => (resolveOld = resolve));
+    const accepted = vi.fn((value: LogicIntentBatch) =>
+      value.epoch === 'epoch:old' ? oldAcceptance : Promise.resolve(true),
+    );
+    const link = new AuthorityWorkerDirectLogic(port as unknown as MessagePort, 'epoch:old', {
+      acceptBatch: accepted,
+      now: () => 20,
+      diagnostics: vi.fn(),
+      fatal: vi.fn(),
+      diagnosticIntervalMs: 0,
+    });
+    link.publish(observation('epoch:old', 1));
+    port.emit(directBatch('epoch:old', 1));
+    port.emit(directBatch('epoch:old', 1));
+    await flush();
+    expect(accepted).toHaveBeenCalledTimes(1);
+
+    link.rebindEpoch('epoch:new');
+    link.publish(observation('epoch:new', 1));
+    port.emit(directBatch('epoch:new', 1));
+    await flush();
+    resolveOld(true);
+    await flush();
+
+    expect(accepted).toHaveBeenCalledTimes(2);
+    expect(port.posts.map(({ message }) => (message as { kind: string }).kind)).toEqual([
+      'direct-logic-observation',
+      'direct-logic-reset',
+      'direct-logic-observation',
+    ]);
+  });
+
+  it('发送或重绑失败会关闭端口并报告fatal', () => {
+    const port = new FakePort();
+    const fatal = vi.fn();
+    const link = new AuthorityWorkerDirectLogic(port as unknown as MessagePort, 'epoch:1', {
+      acceptBatch: () => true,
+      now: () => 0,
+      diagnostics: vi.fn(),
+      fatal,
+    });
+    port.throwOnPost = true;
+    link.publish(observation('epoch:1', 1));
+    expect(port.closed).toBe(1);
+    expect(fatal).toHaveBeenCalledWith(expect.objectContaining({ message: 'port post failed' }));
+
+    const rebindPort = new FakePort();
+    const rebindFatal = vi.fn();
+    const rebindLink = new AuthorityWorkerDirectLogic(rebindPort as unknown as MessagePort, 'epoch:old', {
+      acceptBatch: () => true,
+      now: () => 0,
+      diagnostics: vi.fn(),
+      fatal: rebindFatal,
+    });
+    rebindPort.throwOnPost = true;
+    rebindLink.rebindEpoch('epoch:new');
+    expect(rebindPort.closed).toBe(1);
+    expect(rebindFatal).toHaveBeenCalledWith(expect.objectContaining({ message: 'port post failed' }));
+  });
+});
+
+describe('Game Logic Worker direct endpoint', () => {
+  it('在端口内计算intent并按FIFO切换epoch，主线程不接收完整batch', () => {
+    const mainPosts: LogicWorkerResponse[] = [];
+    const port = new FakePort();
+    const handle = createGameLogicWorkerHandler({ postMessage: (message) => mainPosts.push(message) });
+    handle({
+      kind: 'attach-direct-logic',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:old',
+      port: port as unknown as MessagePort,
+    });
+    handle({
+      kind: 'init-logic',
+      protocolVersion: LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:old',
+      harnessEnabled: false,
+      physicsHz: 60,
+    });
+    port.emit({
+      kind: 'direct-logic-observation',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      observation: observation('epoch:old', 1),
+    } satisfies DirectLogicMessage);
+    port.emit({
+      kind: 'direct-logic-reset',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:old',
+      nextEpoch: 'epoch:new',
+    } satisfies DirectLogicMessage);
+    port.emit({
+      kind: 'direct-logic-observation',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      observation: observation('epoch:old', 2),
+    } satisfies DirectLogicMessage);
+    port.emit({
+      kind: 'direct-logic-observation',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      observation: observation('epoch:new', 1),
+    } satisfies DirectLogicMessage);
+
+    expect(mainPosts.map((message) => message.kind)).toEqual(['logic-ready']);
+    expect(port.posts.map(({ message }) => (message as { batch: LogicIntentBatch }).batch.observationSequence)).toEqual(
+      [1, 1],
+    );
+    expect(port.started).toBe(1);
+  });
+});
+
+describe('AuthorityWorkerDirectLogicOwner', () => {
+  it('排队等待期间Authority owner被替换时拒绝旧batch且不触碰新世界', async () => {
+    let runQueued!: () => void;
+    const ingressLogic = vi.fn();
+    const acceptLogic = vi.fn(() => true);
+    const oldRuntime = { requestLogicObservation: vi.fn() };
+    const oldHarness = {
+      acceptsAutomaticLogic: () => true,
+      notifyProgress: vi.fn(),
+      hostOperation: (operation: () => boolean) =>
+        new Promise<boolean>((resolve) => {
+          runQueued = () => resolve(operation());
+        }),
+    };
+    const oldIngress = { logic: ingressLogic };
+    const oldAdvance = { isAdvancing: false, acceptLogicIntentBatch: acceptLogic };
+    let state = {
+      runtime: oldRuntime,
+      harness: oldHarness,
+      ingress: oldIngress,
+      advance: oldAdvance,
+    };
+    const port = new FakePort();
+    const owner = new AuthorityWorkerDirectLogicOwner({
+      state: () => state as never,
+      now: () => 0,
+      diagnostics: vi.fn(),
+      fatal: vi.fn(),
+    });
+    owner.attach({
+      kind: 'attach-direct-logic',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:old',
+      port: port as unknown as MessagePort,
+    });
+    owner.publish(observation('epoch:old', 1), vi.fn());
+    port.emit(directBatch('epoch:old', 1));
+    await flush();
+
+    state = { ...state, runtime: { requestLogicObservation: vi.fn() } };
+    runQueued();
+    await flush();
+
+    expect(ingressLogic).not.toHaveBeenCalled();
+    expect(acceptLogic).not.toHaveBeenCalled();
+    expect(oldRuntime.requestLogicObservation).not.toHaveBeenCalled();
+  });
+});

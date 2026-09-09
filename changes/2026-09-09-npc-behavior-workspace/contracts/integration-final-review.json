@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "id": "npc-integration-final-review",
+  "role": "independent persistence reviewer",
+  "workType": "validation",
+  "goal": "Independently review frozen f7032bf7c1c8206819bd195fa6ae05982750354f -> 66eb021cc5b9769b53ced87482a268d75f87fcc7 production fixes and focused regressions. Confirm previous duplicate-channel and partial-import P1 now closed; inspect portable-import transaction, cross-seed restore markers/disposal, Browser deterministic advance worker interleaving, GatewayChatModel complete chunk/structured output, Factory low auto-tool request, scripts/model-gateway admission/cancellation/credential routing. Focus concrete high-confidence P0/P1; skip reading every bulky historical experiment output, use manifests and supplied evidence. Read frozen base review rules and report complete production file coverage. Root actual Browser three-day29.8s, three-NPC14.8s, realFlash+Procompaction+realFactorypassed; fullstatic has9 legacy-goal assertions being resolved separately by world_harness and2 fixturetimingfixes committed. No writes except /tmp, no services/model/Git. Output /tmp/npc-integration-final-review.md; freeze.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-integration-final-review.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "final-review",
+      "check": "Independent concrete findings with frozen source positions, verify previous P1 dispositions and production coverage",
+      "evidence": "/tmp/npc-integration-final-review.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 1
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

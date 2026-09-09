@@ -1,10 +1,8 @@
+import { browserWorldOwnerPolicy } from './authority-worker-world-policy';
 /// <reference lib="webworker" />
 
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
-import {
-  AuthorityRuntime,
-  type AuthorityInitialWorldBootstrap,
-} from '@seedlands/game-core/server/authority/authority-runtime';
+import { AuthorityRuntime } from '@seedlands/game-core/server/authority/authority-runtime';
 import { PROTOCOL_VERSION } from '@seedlands/game-core/runtime/session-protocol';
 import type { AuthorityRequest, AuthorityResponse } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { commitFluidCandidateAndPublish } from './authority-commit-publisher';
@@ -23,8 +21,12 @@ import { dispatchWorldHarnessRpc } from '@seedlands/game-core/server/harness/wor
 import { BrowserAuthorityIngress, rejectStaleAuthorityMessage } from './authority-worker-ingress';
 import { SwitchableAuthorityPersistence } from './authority-worker-persistence';
 import type { AuthorityPersistence } from '@seedlands/game-core/server/authority/authority-runtime-options';
-import { decodeAuthorityBootstrapResult } from './authority-worker-bootstrap';
+import { AuthorityWorkerBootstrap } from './authority-worker-bootstrap';
 import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } from './authority-worker-response';
+import { BrowserCharacterAuthority } from './authority-worker-character-control';
+import { BrowserAuthorityDeterministicAdvance } from './authority-worker-deterministic-advance';
+import { AuthorityWorkerDirectLogicOwner } from './authority-worker-direct-logic-owner';
+import type { DirectLogicAttachRequest } from './authority-worker-direct-logic-protocol';
 
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
@@ -37,15 +39,11 @@ let epoch = '';
 let runtimeEpoch = '';
 let fluidEpoch = 1;
 let ingress: BrowserAuthorityIngress | null = null;
+let characterAuthority: BrowserCharacterAuthority | null = null;
 let lastSnapshotPublishedAt = Number.NEGATIVE_INFINITY;
 let lastGameplayPublishedAt = Number.NEGATIVE_INFINITY;
-let bootstrapRequestSequence = 0;
-let pendingBootstrap: {
-  requestId: number;
-  resolve: (bootstrap: AuthorityInitialWorldBootstrap) => void;
-  reject: (error: Error) => void;
-} | null = null;
 let tickQueued = false;
+let deterministicAdvance: BrowserAuthorityDeterministicAdvance | null = null;
 
 const post = (message: AuthorityResponse, transfer: Transferable[] = []) => scope.postMessage(message, transfer);
 
@@ -62,6 +60,22 @@ const transact = async (
 ) => transactAuthorityRequest(post, epoch, runtimeEpoch, runtime!, message, operation);
 
 const fail = (requestId: number, error: unknown) => postAuthorityFailure(post, epoch, requestId, error);
+const bootstrap = new AuthorityWorkerBootstrap(post);
+
+const directLogic = new AuthorityWorkerDirectLogicOwner({
+  state: () => ({ runtime, harness: worldHarness, ingress, advance: deterministicAdvance }),
+  now: () => performance.now(),
+  diagnostics: (value) => scope.postMessage(value),
+  fatal: (error) =>
+    post({ kind: 'authority-fatal', protocolVersion: PROTOCOL_VERSION, epoch, error: errorText(error) }),
+});
+
+const publishLogicObservation = (
+  observation: Parameters<BrowserAuthorityDeterministicAdvance['publishLogicObservation']>[0],
+) => {
+  if (worldHarness?.acceptsAutomaticLogic() === false) return;
+  deterministicAdvance!.publishLogicObservation(observation);
+};
 
 const tick = () => {
   if (!runtime || !worldHarness || tickQueued) return;
@@ -91,23 +105,6 @@ const tick = () => {
     .finally(() => (tickQueued = false));
 };
 
-const requestBootstrap = (seed: number, generatorVersion: number) => {
-  if (pendingBootstrap) return Promise.reject(new Error('Authority bootstrap generation is already pending.'));
-  const requestId = ++bootstrapRequestSequence;
-  const promise = new Promise<AuthorityInitialWorldBootstrap>((resolve, reject) => {
-    pendingBootstrap = { requestId, resolve, reject };
-  });
-  post({
-    kind: 'authority-bootstrap-needed',
-    protocolVersion: PROTOCOL_VERSION,
-    epoch,
-    requestId,
-    seed,
-    generatorVersion,
-  });
-  return promise;
-};
-
 const createRuntime = (
   seedText: string,
   generatorVersion: number,
@@ -127,20 +124,9 @@ const createRuntime = (
     startClock: browserCorePlatform.now,
     platform: browserCorePlatform,
     fluidEpoch: candidateFluidEpoch,
-    findInitialWorldBootstrap: requestBootstrap,
+    findInitialWorldBootstrap: (seed, generatorVersion) => bootstrap.request(epoch, seed, generatorVersion),
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
-    onLogicObservation: (observation) =>
-      worldHarness?.acceptsAutomaticLogic() === false
-        ? undefined
-        : post(
-            {
-              kind: 'logic-observation',
-              protocolVersion: PROTOCOL_VERSION,
-              epoch,
-              observation,
-            },
-            observation.decisionContext.terrainWindows.map((window) => window.occupancy.buffer),
-          ),
+    onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
   });
 
@@ -171,6 +157,12 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
   runtimeEpoch = nextRuntimeEpoch;
   fluidEpoch = nextFluidEpoch;
   worldEpoch = `${epoch}:world:${worldRestoreSequence}`;
+  characterAuthority = new BrowserCharacterAuthority({
+    runtime: () => runtime!,
+    worldId: () => persistence!.worldId,
+    worldEpoch: () => worldEpoch,
+  });
+  directLogic.rebindEpoch(nextRuntimeEpoch);
 };
 
 const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority' }>) => {
@@ -193,22 +185,28 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     startClock: browserCorePlatform.now,
     platform: browserCorePlatform,
     fluidEpoch,
-    findInitialWorldBootstrap: requestBootstrap,
+    findInitialWorldBootstrap: (seed, generatorVersion) => bootstrap.request(epoch, seed, generatorVersion),
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
-    onLogicObservation: (observation) =>
-      worldHarness?.acceptsAutomaticLogic() === false
-        ? undefined
-        : post(
-            { kind: 'logic-observation', protocolVersion: PROTOCOL_VERSION, epoch, observation },
-            observation.decisionContext.terrainWindows.map((window) => window.occupancy.buffer),
-          ),
+    onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
   });
   worldEpoch = `${epoch}:world:0`;
-  const principalId = 'browser-developer';
+  const principalId = message.developerWorldHarness ? 'browser-developer' : 'browser-world-owner';
   const policy = message.developerWorldHarness
     ? developmentWorldAuthorizationPolicy(principalId, runtime.playerId)
-    : { principals: [{ id: principalId, boundEntityId: runtime.playerId }], rules: [] };
+    : browserWorldOwnerPolicy(principalId, runtime.playerId);
+  deterministicAdvance = new BrowserAuthorityDeterministicAdvance({
+    runtime: () => runtime!,
+    postLogicObservation: (observation) =>
+      directLogic.publish(observation, () =>
+        post(
+          { kind: 'logic-observation', protocolVersion: PROTOCOL_VERSION, epoch, observation },
+          observation.decisionContext.terrainWindows.map((window) => window.occupancy.buffer),
+        ),
+      ),
+    yieldTurn: browserCorePlatform.yieldTurn,
+    timers: browserCorePlatform.timers,
+  });
   worldHarness = new AuthorityWorldHarness({
     platform: browserCorePlatform,
     principalId,
@@ -218,11 +216,16 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
       if (!(await runtime!.prepareHarnessChunks([[cx, cy, cz]])))
         throw new Error(`Authority Chunk is unavailable: ${cx},${cy},${cz}.`);
     },
-    advance: async (elapsedMs) => runtime!.advancePausedSession(elapsedMs),
+    advance: (elapsedMs) => deterministicAdvance!.advancePaused(elapsedMs, worldHarness!.acceptsAutomaticLogic()),
     restore: restoreWorld,
     clockNow: browserCorePlatform.now,
   });
   ingress = new BrowserAuthorityIngress(runtime.playerId);
+  characterAuthority = new BrowserCharacterAuthority({
+    runtime: () => runtime!,
+    worldId: () => persistence!.worldId,
+    worldEpoch: () => worldEpoch,
+  });
   post({ kind: 'authority-ready', protocolVersion: PROTOCOL_VERSION, epoch, ready: runtime.ready() });
   interval = setInterval(tick, 8);
 };
@@ -359,6 +362,29 @@ const handleCurrent = async (message: AuthorityRequest) => {
     case 'save-authority':
       postAuthoritySuccess(post, epoch, current, message.requestId, await current.save(), { gameplay: true });
       break;
+    case 'character-control':
+      postAuthoritySuccess(post, epoch, current, message.requestId, characterAuthority!.trusted(message.request), {
+        gameplay: true,
+      });
+      break;
+    case 'bind-character':
+      postAuthoritySuccess(post, epoch, current, message.requestId, characterAuthority!.bind(message.entityId));
+      break;
+    case 'bound-character-control':
+      postAuthoritySuccess(
+        post,
+        epoch,
+        current,
+        message.requestId,
+        characterAuthority!.control(message.binding, message.sequence, message.request),
+        { gameplay: true },
+      );
+      break;
+    case 'unbind-character':
+      postAuthoritySuccess(post, epoch, current, message.requestId, {
+        unbound: characterAuthority!.unbind(message.binding),
+      });
+      break;
     case 'fluid-candidate':
       ingress!.fluid('execute');
       commitFluidCandidateAndPublish(epoch, current, message.candidate, post);
@@ -370,8 +396,9 @@ const handleCurrent = async (message: AuthorityRequest) => {
       worldHarness?.notifyProgress();
       break;
     case 'logic-intents':
+      if (directLogic.attached) break;
       ingress!.logic();
-      if (worldHarness?.acceptsAutomaticLogic() !== false) current.receiveLogicIntentBatch(message.batch);
+      if (worldHarness?.acceptsAutomaticLogic() !== false) deterministicAdvance!.acceptLogicIntentBatch(message.batch);
       worldHarness?.notifyProgress();
       break;
     case 'request-logic-observation':
@@ -381,18 +408,16 @@ const handleCurrent = async (message: AuthorityRequest) => {
   }
 };
 
-const handle = async (message: AuthorityRequest) => {
+const handle = async (message: AuthorityRequest | DirectLogicAttachRequest) => {
+  if (message?.kind === 'attach-direct-logic') {
+    if (runtime) throw new Error('Direct Logic port must attach before Authority start.');
+    directLogic.attach(message);
+    return;
+  }
   if (!message || message.protocolVersion !== PROTOCOL_VERSION) return;
   if (message.kind === 'start-authority') return start(message);
   if (message.kind === 'authority-bootstrap-result') {
-    if (message.epoch !== epoch || !pendingBootstrap || message.requestId !== pendingBootstrap.requestId) return;
-    const pending = pendingBootstrap;
-    pendingBootstrap = null;
-    try {
-      pending.resolve(decodeAuthorityBootstrapResult(message));
-    } catch (error) {
-      pending.reject(error instanceof Error ? error : new Error(String(error)));
-    }
+    bootstrap.receive(epoch, message);
     return;
   }
   if (!runtime || message.epoch !== epoch) throw new Error('Authority session is unavailable or stale.');
@@ -429,10 +454,13 @@ const handle = async (message: AuthorityRequest) => {
     interval = null;
     persistence?.dispose();
     persistence = null;
-    pendingBootstrap?.reject(new Error('Authority Worker was disposed during bootstrap.'));
-    pendingBootstrap = null;
+    bootstrap.close();
     worldHarness = null;
+    deterministicAdvance = null;
+    directLogic.close();
     ingress = null;
+    characterAuthority?.clear();
+    characterAuthority = null;
     runtime = null;
     scope.close();
     return;
@@ -450,15 +478,16 @@ const handle = async (message: AuthorityRequest) => {
     }
     await handleCurrent(message);
   };
-  // Canonical completion resolves a prepare operation that may own the command queue.
-  // It stays on this Authority writer and keeps the same epoch/revision validation.
-  if (message.kind === 'accept-generated-chunk') {
+  const interleavedLogic =
+    deterministicAdvance?.isAdvancing &&
+    (message.kind === 'logic-intents' || message.kind === 'request-logic-observation');
+  if (message.kind === 'accept-generated-chunk' || interleavedLogic) {
     await dispatchCurrent();
     worldHarness.notifyProgress();
   } else await worldHarness.hostOperation(dispatchCurrent);
 };
 
-scope.onmessage = (event: MessageEvent<AuthorityRequest>) => {
+scope.onmessage = (event: MessageEvent<AuthorityRequest | DirectLogicAttachRequest>) => {
   const requestId = 'requestId' in event.data ? event.data.requestId : undefined;
   void handle(event.data).catch((error) => {
     if (typeof requestId === 'number') fail(requestId, error);

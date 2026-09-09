@@ -3,6 +3,7 @@ import type { AuthorityRuntime } from '../authority/authority-runtime';
 import { CHUNK_SIZE, floorDiv } from '../../world/voxel';
 import type { WorldInspectRequest } from './world-harness-contract';
 import type { WorldAuthorizationRequest, WorldAuthorizationTarget, WorldPrincipal } from './world-authorization';
+import type { CharacterControlRequest } from '../../runtime/character-control-protocol';
 
 export const authorizationRequest = (
   resource: WorldAuthorizationRequest['resource'],
@@ -33,6 +34,27 @@ export const inspectAuthorizationRequest = (request: WorldInspectRequest): World
           ? 'world.entity'
           : 'world.actor';
   return authorizationRequest(resource, 'read', target);
+};
+
+export const characterHarnessOperation = (request: CharacterControlRequest) => {
+  if (!request || typeof request !== 'object' || typeof request.kind !== 'string')
+    throw new TypeError('Character request is invalid.');
+  const operation =
+    request.kind === 'create' || request.kind === 'behavior'
+      ? 'write'
+      : request.kind === 'dialogue' || request.kind === 'speak' || request.kind === 'intent'
+        ? 'execute'
+        : request.kind === 'memory'
+          ? 'write'
+          : 'read';
+  const target =
+    request.kind === 'create' || request.kind === 'list' || request.kind === 'capabilities'
+      ? ({ kind: 'world' } as const)
+      : ({ kind: 'entity', entityId: request.entityId } as const);
+  return {
+    name: `character:${request.kind}`,
+    authorization: authorizationRequest('world.character', operation, target),
+  };
 };
 
 export const chunkForVoxel = (position: readonly [number, number, number]): readonly [number, number, number] =>

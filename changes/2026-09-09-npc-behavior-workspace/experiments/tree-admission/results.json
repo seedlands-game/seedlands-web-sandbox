@@ -1,0 +1,74 @@
+{
+  "candidate": {
+    "package": "mistreevous",
+    "version": "4.3.1",
+    "publicExports": ["BehaviourTree", "State", "convertMDSLToJSON", "validateDefinition"]
+  },
+  "checks": {
+    "instanceIsolation": {
+      "first": {
+        "actionId": "first-action-1",
+        "status": "succeeded",
+        "pollCount": 2
+      },
+      "second": {
+        "actionId": "second-action-1",
+        "status": "running",
+        "pollCount": 1
+      }
+    },
+    "injectedTimeAndRandom": {
+      "timerStates": ["mistreevous.running", "mistreevous.running", "mistreevous.succeeded"],
+      "randomChoices": [
+        { "input": 0, "choice": "left" },
+        { "input": 0.999, "choice": "right" }
+      ]
+    },
+    "persistentRunningIdentity": {
+      "actionId": "persistent-action-1",
+      "startCount": 1,
+      "pollCount": 5,
+      "status": "running"
+    },
+    "guardPreemptionAndReactivePriority": {
+      "rootState": "mistreevous.running",
+      "reactiveRestep": true,
+      "reactiveRestepBound": 1,
+      "routineStatus": "cancelled",
+      "routineCancelCount": 1,
+      "fleeStatus": "running",
+      "trace": [
+        { "type": "start", "nodeId": "routine", "actionId": "priority-action-1" },
+        { "type": "exit", "nodeId": "routine", "aborted": true },
+        { "type": "cancel", "nodeId": "routine", "actionId": "priority-action-1" },
+        { "type": "start", "nodeId": "flee", "actionId": "priority-action-2" }
+      ]
+    },
+    "lifeCyclesAndNonBlockingMonitors": {
+      "completedLifeCycles": 3,
+      "cycleSequence": 2,
+      "monitorPollCountWhileRootRunning": 5,
+      "sameRootActionId": "monitors-action-1",
+      "monitorInputs": [false, true, true, false, true],
+      "risingEdgeRejudgeCount": 2
+    },
+    "rebuildAndHotReplacement": {
+      "engineGeneratedRootIdChangedOnCompatibleRebuild": true,
+      "compatibleTravelActionId": "replace-action-2",
+      "compatibleTravelProgressBefore": 7,
+      "compatibleTravelProgressAfter": 7,
+      "travelStartCount": 1,
+      "changedTravelCancelCount": 1,
+      "replacementRestActionId": "replace-action-3",
+      "announceWorldEffectCount": 1,
+      "announceCallbackPollCount": 3
+    }
+  },
+  "constraints": {
+    "staticRegistryCalls": 0,
+    "privateHydrateCalls": 0,
+    "reactiveRestepBound": 1,
+    "worldOwnsActionIdentityAndProgress": true,
+    "browserOrPerformanceClaims": false
+  }
+}

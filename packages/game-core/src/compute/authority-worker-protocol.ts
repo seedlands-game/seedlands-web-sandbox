@@ -13,6 +13,12 @@ import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-p
 import type { ChunkPersistenceLoadDiagnostics } from '../server/persistence/chunk-persistence';
 import type { CombatSnapshot } from '../server/gameplay/combat-runtime';
 import type { WorldHarnessPort, WorldHarnessResult } from '../server/harness/world-harness-contract';
+import type { CharacterControlRequest, ControlBinding } from '../runtime/character-control-protocol';
+
+type CharacterIntentRequest = Extract<CharacterControlRequest, { kind: 'intent' }>;
+export type BoundCharacterControlRequest =
+  | Extract<CharacterControlRequest, { kind: 'observe' | 'memory' | 'behavior' | 'speak' }>
+  | Readonly<Omit<CharacterIntentRequest, 'expectedCursor'> & { expectedCursor: number }>;
 
 export type GameplayEntityView = GameplayEntity & Readonly<{ combat?: CombatSnapshot }>;
 
@@ -298,6 +304,36 @@ export type AuthorityRequest = (
       requestId: number;
       method: keyof WorldHarnessPort;
       args: readonly unknown[];
+    }>
+  | Readonly<{
+      kind: 'character-control';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      request: CharacterControlRequest;
+    }>
+  | Readonly<{
+      kind: 'bind-character';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      entityId: string;
+    }>
+  | Readonly<{
+      kind: 'bound-character-control';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      binding: ControlBinding;
+      sequence: number;
+      request: BoundCharacterControlRequest;
+    }>
+  | Readonly<{
+      kind: 'unbind-character';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      binding: ControlBinding;
     }>
   | Readonly<{ kind: 'dispose-authority'; protocolVersion: typeof PROTOCOL_VERSION; epoch: SessionEpoch }>
 ) &

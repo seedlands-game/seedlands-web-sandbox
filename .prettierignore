@@ -23,3 +23,6 @@ changes/2026-09-08-node-monorepo/contracts/
 changes/2026-09-08-web-node-playable/contracts/
 changes/2026-09-09-browser-living-world-baseline/contracts/
 changes/2026-09-09-developer-world-harness/contracts/
+
+changes/2026-09-09-living-npc-mvp/contracts/
+changes/2026-09-09-npc-behavior-workspace/contracts/

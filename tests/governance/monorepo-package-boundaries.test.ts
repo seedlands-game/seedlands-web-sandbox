@@ -23,8 +23,8 @@ const lintPackageBoundary = async (source: string, filePath: string) => {
   return result.messages.filter((message) => message.ruleId === 'seedlands/package-boundary');
 };
 
-describe('Web 与 game-core workspace 边界', () => {
-  it('声明 Web 和 game-core 两个活跃 workspace 包', async () => {
+describe('Web、认知服务与 game-core workspace 边界', () => {
+  it('声明 Web、认知服务和 game-core 活跃 workspace 包', async () => {
     const workspace = await readFile(join(root, 'pnpm-workspace.yaml'), 'utf8');
     expect(workspace).toContain('apps/*');
     expect(workspace).toContain('packages/*');
@@ -64,7 +64,11 @@ describe('Web 与 game-core workspace 边界', () => {
   });
 
   it('各包提供独立类型检查、构建和测试入口', async () => {
-    for (const packagePath of ['apps/web/package.json', 'packages/game-core/package.json']) {
+    for (const packagePath of [
+      'apps/web/package.json',
+      'apps/agent-server/package.json',
+      'packages/game-core/package.json',
+    ]) {
       const manifest = await readJson<PackageManifest>(packagePath);
       expect(manifest.scripts?.typecheck, packagePath).toBeTruthy();
       expect(manifest.scripts?.build, packagePath).toBeTruthy();
@@ -107,5 +111,38 @@ describe('Web 与 game-core workspace 边界', () => {
         'apps/web/src/client/authority/package-probe.ts',
       ),
     ).toEqual([]);
+  });
+});
+
+describe('认知服务边界', () => {
+  it('允许认知服务声明的框架和 core 合同，禁止产品互相导入或绕过包边界', async () => {
+    expect(
+      await lintPackageBoundary(
+        "import '@langchain/langgraph'; import 'ws'; import '@seedlands/game-core/runtime/character-control-protocol';",
+        'apps/agent-server/src/package-probe.ts',
+      ),
+    ).toEqual([]);
+    expect(
+      await lintPackageBoundary(
+        "import '@seedlands/web'; import '../../web/src/app/game';",
+        'apps/agent-server/src/package-probe.ts',
+      ),
+    ).toHaveLength(2);
+    expect(
+      await lintPackageBoundary("import '@seedlands/agent-server';", 'apps/web/src/client/character/package-probe.ts'),
+    ).toHaveLength(1);
+    expect(
+      await lintPackageBoundary("import '@seedlands/agent-server';", 'packages/game-core/src/runtime/package-probe.ts'),
+    ).toHaveLength(1);
+  });
+});
+
+describe('认知传输合同归属', () => {
+  it('允许产品消费认知合同，但禁止 core 反向依赖', async () => {
+    for (const filePath of ['apps/web/src/client/character/probe.ts', 'apps/agent-server/src/probe.ts'])
+      expect(await lintPackageBoundary("import '@seedlands/cognition-protocol';", filePath)).toEqual([]);
+    expect(
+      await lintPackageBoundary("import '@seedlands/cognition-protocol';", 'packages/game-core/src/runtime/probe.ts'),
+    ).toHaveLength(1);
   });
 });

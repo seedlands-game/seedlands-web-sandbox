@@ -1,0 +1,11 @@
+$ playwright test changes/2026-09-09-developer-world-harness/e2e
+
+Running 2 tests using 1 worker
+
+(node:91907) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/2] [chromium] › changes/2026-09-09-developer-world-harness/e2e/browser-world-parity.spec.ts:24:1 › Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确定 parity
+[2/2] [chromium] › changes/2026-09-09-developer-world-harness/e2e/runtime-diagnostics.spec.ts:4:1 › F3 分类仪表板展示真实调度与缺失测量，小视口可操作
+  2 passed (8.8s)

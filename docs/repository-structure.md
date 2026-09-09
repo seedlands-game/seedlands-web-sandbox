@@ -30,7 +30,7 @@
 ## 新增源码的归属顺序
 
 1. **先找已有功能所有者。** 在代码地图中定位同类行为及调用链。权威规则放服务端领域模块；客户端快照和碰撞镜像是派生数据，不另建一套真值。
-2. **再区分算法与平台适配。** 世界算法放 `packages/game-core/src/world`，共享物理解算放 core 的 `physics`，通用时钟和调度放 core 的 `runtime`。浏览器装配、输入、PlayCanvas、Svelte、客户端适配和浏览器 Worker 在 `apps/web/src`；Headless 开发宿主的 Node builtin/I/O 位于 `scripts/`，不进入 core/Web。未来 Agent Server 单独经审阅选择应用目录，不复用退役产品目录。
+2. **再区分算法与平台适配。** 世界算法放 `packages/game-core/src/world`，共享物理解算放 core 的 `physics`，通用时钟和调度放 core 的 `runtime`。浏览器装配、输入、PlayCanvas、Svelte、客户端适配和浏览器 Worker 在 `apps/web/src`；Headless 开发宿主的 Node builtin/I/O 位于 `scripts/`，不进入 core/Web。认知服务位于 `apps/agent-server`，只拥有模型调用、认知上下文和本机连接，不拥有世界，不复用退役产品目录。
 3. **把同一职责的辅助文件放在一起。** 接口类型、策略和局部工具靠近实际所有者。不要因为文件短就平铺到上层，也不要为了满足行数规则拆成无语义的编号片段。
 4. **出现稳定文件簇时建立领域子目录。** 以生命周期、状态或功能为单位，能用一句话说明该目录负责什么。移动已有文件属于独立迁移工作；当前已有 app/client 的职责目录应优先复用。
 5. **确有跨端复用时进入 core。** 先指出 Web 与 Headless 的实际调用方及稳定契约，经 `@seedlands/game-core` 的声明 subpath export 使用；不要通过相对文件路径绕过包边界，也不预建包罗万象的 `shared`、`common` 或 `utils`。
@@ -81,3 +81,9 @@ Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟�
 ## 维护责任
 
 新增一级模块、移动地图中的入口、改变状态所有者或运行链路时，在同一个 change 中更新代码地图；只有目录规则发生变化时才修改本规范。交付快照应列出迁移范围和验证结果。历史 change 继续作为当时的合同和证据，不追随每次目录调整重写。
+
+## 本机认知服务
+
+`apps/agent-server/src/` 承载 LangChain 标准 Agent、LangGraph PG saver/store、角色工作区、调度/Pro 压缩和 WebSocket 生命周期；供应商、真实模型映射与传输重试放在 `scripts/model-gateway/` 的固定 LiteLLM 宿主。认知服务只消费标准接口中的 `flash` / `pro`；通过 core 声明 exports 消费通用角色控制合同，与 Web 互不导入。`apps/web/src/client/character/` 承载浏览器绑定与消息校验；`apps/web/src/app/gameplay/companion/` 管理玩家伙伴会话，`app/ui/companion-panel.svelte` 展示玩家可读状态。当前 Node Dedicated 仍保持归档，认知服务不是游戏服务器。
+
+认知传输合同位于 `packages/cognition-protocol/src/index.ts`，由 Web 与 Agent Server 消费；只依赖 core 公开角色类型，core 不反向依赖。模型状态、上下文窗口和 token 用量不进入权威世界协议。角色执行在 `character-runtime.ts`、`character-goal-runtime.ts`、`character-runtime-types.ts` 和 `character-runtime-validation.ts` 按执行、目标、状态与输入验证分工。

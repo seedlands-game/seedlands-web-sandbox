@@ -6,6 +6,11 @@ import {
   type LogicWorkerRequest,
   type LogicWorkerResponse,
 } from '@seedlands/game-core/server/logic/logic-protocol';
+import {
+  DIRECT_LOGIC_PROTOCOL_VERSION,
+  type DirectLogicAttachRequest,
+  type DirectLogicMessage,
+} from './authority-worker-direct-logic-protocol';
 
 type HandlerOptions = Readonly<{
   postMessage: (message: LogicWorkerResponse) => void;
@@ -20,6 +25,8 @@ export function createGameLogicWorkerHandler(options: HandlerOptions) {
   let harnessEnabled = false;
   let physicsHz: 30 | 60 | 120 | null = null;
   let disposed = false;
+  let directPort: MessagePort | null = null;
+  let directAttachEpoch: string | null = null;
   const nowMs = options.nowMs ?? (() => performance.now());
   const fatal = (messageEpoch: string, error: unknown) =>
     options.postMessage({
@@ -29,12 +36,69 @@ export function createGameLogicWorkerHandler(options: HandlerOptions) {
       error: errorText(error),
     });
 
-  return (message: LogicWorkerRequest): void => {
-    if (disposed || !message || message.protocolVersion !== LOGIC_PROTOCOL_VERSION) return;
+  const closeDirect = () => {
+    if (!directPort) return;
+    const port = directPort;
+    directPort = null;
+    port.onmessage = null;
+    port.onmessageerror = null;
+    try {
+      port.close();
+    } catch {
+      // Local ownership has already been released.
+    }
+  };
+  const failDirect = (error: unknown) => {
+    fatal(epoch ?? directAttachEpoch ?? '', error);
+    disposed = true;
+    closeDirect();
+    options.close?.();
+  };
+  const receiveDirect = (message: DirectLogicMessage) => {
+    if (disposed || !message || message.protocolVersion !== DIRECT_LOGIC_PROTOCOL_VERSION) return;
+    try {
+      if (epoch === null || physicsHz === null) throw new Error('Game Logic Worker must be initialized before use.');
+      if (message.kind === 'direct-logic-reset') {
+        if (message.epoch !== epoch || !message.nextEpoch.trim()) return;
+        epoch = message.nextEpoch;
+        return;
+      }
+      if (message.kind !== 'direct-logic-observation') throw new Error('Direct Logic message direction is invalid.');
+      if (message.observation.epoch !== epoch) return;
+      directPort!.postMessage({
+        kind: 'direct-logic-intents',
+        protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+        batch: decideLogicIntents(message.observation, { physicsHz }),
+      } satisfies DirectLogicMessage);
+    } catch (error) {
+      failDirect(error);
+    }
+  };
+
+  return (message: LogicWorkerRequest | DirectLogicAttachRequest): void => {
+    if (disposed || !message) return;
+    if (message.kind === 'attach-direct-logic') {
+      if (message.protocolVersion !== DIRECT_LOGIC_PROTOCOL_VERSION) return;
+      if (directPort) return failDirect(new Error('Direct Logic port is already attached.'));
+      if (!message.epoch.trim()) return failDirect(new TypeError('Direct Logic attach epoch must not be empty.'));
+      directAttachEpoch = message.epoch;
+      directPort = message.port;
+      directPort.onmessage = (event) => receiveDirect(event.data as DirectLogicMessage);
+      directPort.onmessageerror = () => failDirect(new Error('Direct Logic port could not decode a message.'));
+      try {
+        directPort.start();
+      } catch (error) {
+        failDirect(error);
+      }
+      return;
+    }
+    if (message.protocolVersion !== LOGIC_PROTOCOL_VERSION) return;
     try {
       if (message.kind === 'init-logic') {
         if (epoch !== null) throw new Error('Game Logic Worker is already initialized.');
         if (!message.epoch.trim()) throw new TypeError('Logic epoch must not be empty.');
+        if (directAttachEpoch !== null && directAttachEpoch !== message.epoch)
+          throw new Error('Direct Logic attach epoch does not match initialization.');
         if (![30, 60, 120].includes(message.physicsHz)) throw new TypeError('Logic physics frequency is invalid.');
         epoch = message.epoch;
         harnessEnabled = message.harnessEnabled;
@@ -54,6 +118,7 @@ export function createGameLogicWorkerHandler(options: HandlerOptions) {
           options.postMessage({ kind: 'logic-ready', protocolVersion: LOGIC_PROTOCOL_VERSION, epoch });
           break;
         case 'logic-observation':
+          if (directPort) break;
           options.postMessage({
             kind: 'logic-intents',
             protocolVersion: LOGIC_PROTOCOL_VERSION,
@@ -84,6 +149,7 @@ export function createGameLogicWorkerHandler(options: HandlerOptions) {
         }
         case 'dispose-logic':
           disposed = true;
+          closeDirect();
           options.close?.();
           break;
       }
@@ -110,5 +176,5 @@ if (
     postMessage: (message) => scope.postMessage(message),
     close: () => scope.close(),
   });
-  scope.onmessage = (event: MessageEvent<LogicWorkerRequest>) => handle(event.data);
+  scope.onmessage = (event: MessageEvent<LogicWorkerRequest | DirectLogicAttachRequest>) => handle(event.data);
 }

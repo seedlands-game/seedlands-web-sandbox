@@ -4,7 +4,7 @@
 >
 > 当前产品决策以[产品定位基线](product-positioning.md)为准；它覆盖本文旧历史中的部署阶段顺序。
 >
-> 更新日期：2026-09-09。当前阶段：Web 单人世界为主产品；Node Dedicated MVP 完成研究验证后归档退出，进入共享世界 Harness 与单 NPC Agent 设计。
+> 更新日期：2026-09-09。当前阶段：Web 单人世界为主产品；Node Dedicated MVP 完成研究验证后归档退出，进入共享世界 Harness 与浏览器单 NPC Agent 实施。
 
 > 2026-09-07 玩法路线补充：详见[玩法路线详细基线](playbook-roadmap.md)与[ECS 研究附录](ecs-animation-research.md)。这一条线独立于大模型，先提取并打磨基础生存/创造 playbook，再经差异样例稳定 API v1，随后扩展异世界。下文历史实现证据仍保留原核查版本。
 >
@@ -26,6 +26,8 @@
 2026-09-09 H1/H2 修订：[共享开发端口与诊断](developer-world-harness.md)提供下一阶段底座。底层协议只认识主体、资源、操作与作用域，玩家/模型/API/脚本标签不决定权限。认知宿主下一阶段采用 LangGraph 显式回路与 DeepSeek V4 薄协议适配，依据[候选比较和 mock wire 实验](../changes/2026-09-09-developer-world-harness/framework-decision.md)；不代表已通过真实模型验证。
 
 ## 二、长期价值与完成态
+
+最新认知基线见[NPC持续行为与持久认知](npc-behavior-and-memory.md)：先证明一棵可修改的固定树长期生活，再接单Agent持久工作区与认知，最后验证三个实例共用模型网关。flash/pro是供应商无关档位，Pro负责记忆压缩及出生包；LiteLLM本地Docker首选，边缘与多租户延后。旧单目标MVP停止继续完善；本期不增加LOD或World AI。
 
 ### 2.1 世界作为 Agent 的行动环境
 

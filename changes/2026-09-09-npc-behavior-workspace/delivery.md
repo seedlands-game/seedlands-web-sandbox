@@ -1,0 +1,78 @@
+# 交付记录
+
+状态：本地交付验收完成，PR与远端必要CI交接中；人类体验审核待进行。
+
+## 交付行为
+
+NPC现在由一棵持续运行、可整体修改的行为树控制。Flash可以观察、发言与更新策略；寻路、拾取、吃饭、受阻和中断仍经过Authority规则与真实身体。模型停机时，树继续运行。人格起点、当前记忆与完整会话分别持久化；Pro独占记忆压缩发布，历史归档不向角色开放。
+
+浏览器一个连接容纳三个独立角色。角色身份、树、调度器、工作区、事件游标与上下文分别隔离，模型请求经过同一有界LiteLLM网关。出生Factory调用Pro生成标签对应的人格和初始树，再由世界接纳；重复请求不会生成第二个角色。
+
+## 体验证据
+
+| 验收                  | 实际结果                                                                            | 边界                                                                         |
+| --------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Browser固定树三个昼夜 | 1800模拟秒，18次完整补给、3次夜休后恢复巡游、192次巡逻到点；约29.8秒功能测试        | 无模型、无旅程补资源、无换树；不是性能倍率测试                               |
+| 真实Flash策略         | 回应玩家“舟”，更新白天跟随策略；重新进入局部感知后同树恢复跟随；断线后身体仍执行    | 有限真实对话，非长期主观体验研究                                             |
+| 真实Pro压缩           | 两个标准工具请求发布一次新MEMORY与新窗口                                            | 验证发布链路，未声称128K长窗口记忆质量达标                                   |
+| 三NPC Browser+PG      | 一个WS、三个workspace；配对存档恢复新timeline；14.8秒，pageerror为空                | 受控模型驱动三角色；真实供应商路径独立验证                                   |
+| 真实Pro Factory       | 一次Pro生成“小满”，两次世界激活均为npc-8；输出4707 tokens、输入2008 tokens          | 无重复付费抽签，真实实体与Physics推进                                        |
+| 玩家回归              | 真实Pointer Lock移动/跳跃、台阶/落地/流式加载、世界编辑存档、战斗与模型动画12项通过 | 两项工坊源码模块注入需Vite开发宿主，独立4秒2/2通过；生产preview不提供src模块 |
+
+精简可公开证据见[evidence/validation.json](evidence/validation.json)和[三角色截图](evidence/three-residents.png)。原始世界状态、模型消息、PG产物及失败输出保存在本机`/tmp/npc-*`，不把供应商原始推理/私有日志提交到PR。网关准入的所有模型均为明确fake provider，其成功与负结果保存在experiments。
+
+## 验收方式修订
+
+用户于2026-09-10明确要求提高效率。默认验收采用确定性模拟时间推进、显式模型触发、短浏览器交互。第一轮真实60分钟完成但断言失败；第二轮在用户调整后取消。均保留历史，不能记成GREEN，也不再要求再跑60分钟。真实长时间仅在定时器、泄漏、漂移等独立风险需要时启用。
+
+快进不是直接改世界时间：Browser Harness按100ms交错真实Authority、Logic Worker与Physics，准备碰撞Chunk并等待同epoch/sequence的回执。旧实现只推时钟、异步Logic无法插入，导致1800模拟秒NPC静止；修复后同一场景完成生活目标。
+
+## 复核问题闭环
+
+- A的长路径预算、热更新终态迁移、损坏Action ledger、复合对话边沿：9ea0b23修复，并补物品守恒/目标重现检查。
+- PG冻结窗口仍追加、journal无界、portable关系拓扑、不可变request证据、工具目录容量、bound kwargs、Pro发布后错误处理：f7032bf及后续适配修复，实际PG回归覆盖。
+- 跨seed恢复标记、重复fork、旧epoch解绑拒绝：66eb021及后续回归修正；失败后重建UI仍禁止空白记忆启动。
+- 重复sessionId覆盖活动角色：明确拒绝并关闭连接，旧角色shutdown恰一次。
+- 多workspace部分导入：同timeline advisory lock +单PG事务；第二成员注入失败后目标0个，重试完整成功；并发冲突恰一完整winner。
+- Browser推进超时后迟到Logic可能被接受：1cab2b9在失败返回前撤销候选；RED/GREEN 15项通过，独立复核关闭P1。
+- 最终旧合同迁移保留Action账本、目标授权与原子恢复检查；cde488c补安装容量原子拒绝及分支变化中断，41项相邻检查通过。未恢复树外强制逃跑。
+- cf20bd1补create的Action容量安装前检查，默认及自定义树均在spawn前拒绝，11项检查通过。
+- 短Browser回归发现刚出生、首次tick前的对话未触发思考；确定性RED证明新树缺少初始消费游标。2495733将新树对话游标从出生0开始，旧存档迁移保留历史边界；10项相邻检查通过。Browser三角色原3轮2失败，修复后3/3通过，42.4秒，未额外调用真实模型。最终整个`test:npc-behavior` 49.6秒：3通过、3个明确opt-in跳过；三个昼夜目标计数与此前一致。
+- 最终独立复核cde488c→2495733关闭剩余容量问题，未发现新的P0/P1/P2。
+- 原始H1 Browser验收发现裸world checkpoint恢复被伙伴回调额外锁住玩家输入；移除回调中的重复应用暂停，原Pointer Lock/WASD与F3两项10.2秒通过；配对应用存档继续显式控制自身暂停。
+- actual-PG恢复回归的旧断言依赖读取瞬时idle；改为模型请求必须包含恢复的unknown tool回执，并在阻塞模型边界验证round8/inFlight持久化，5项Host集成通过。
+- 最终`pnpm verify:static`完整通过：285个测试文件、1369项通过，2文件/4项明确跳过；format/lint/paths/coverage/typecheck全通过。`pnpm build`独立通过Web与Agent。新Headless场景使用15秒fixture限额，未改行为断言。
+
+## 启动与维护
+
+运行命令以根package.json及[Agent README](../../apps/agent-server/README.md)、[网关README](../../scripts/model-gateway/README.md)为准。先启动PG与网关，再`pnpm agent:dev`；浏览器T打开伙伴面板，思考设置填写本地Agent URL与配对码。供应商key只进入网关，Agent仅持有逻辑flash/pro网关凭据。
+
+PG恢复保证认知数据整批提交；世界与PG仍是两个owner，通过应用checkpoint清单协调，不宣称分布式原子事务。无数据库或模型时不得伪造记忆或假成功。
+
+开发机可玩环境：`http://127.0.0.1:4319/`；本机思考服务`ws://127.0.0.1:8799/`。本地配对码保存在仅当前用户可读的`/tmp/seedlands-npc-playable/connection.json`，不提交仓库。PG使用独立持久卷；启动检查只验证服务可用，没有开启世界或继续付费推理。
+
+长期docs baseline已更新：`docs/npc-behavior-and-memory.md`、代码地图、目录规范。Node Dedicated冻结保持不变；LOD、离线追赶、World AI与玩法插件不在本交付范围。用户体验中的“活人感”仍需后续真实游玩反馈，本记录证明具体行为及后果，不将架构完成等同于主观体验完成。
+
+## PR交接
+
+[PR #29](https://github.com/seedlands-game/seedlands-web-sandbox/pull/29) 替代旧draft #26。首次run34392519474：Static verification与Production build通过；Chromium基础回归20通过、1flaky，按failOnFlakyTests拒绝。经独立分诊后修正loading fixture的总预算50秒，保留HUD30秒期限。最终远端状态以PR checks和交接说明为准；本文记录本地冻结交付和首次CI事实，不将静态文档用作CI实时状态源。
+
+首次分诊只确认了总预算冲突，后续本地完整回归取得首轮trace并定位额外根因：延迟发现mistreevous令Vite整页刷新，世界已创建但浏览器返回开始菜单。冷缓存A/B固定总50秒/HUD30秒：A记录2次文档请求和明确的new dependencies/reloading日志并失败；B只增加`@seedlands/game-core > mistreevous`预打包，1次文档请求、无刷新并通过。结果见[冷启动功能对照](experiments/vite-cold-start/results.json)。保留50秒预算以正确容纳setup，实际刷新缺陷由Vite配置修复；不将预算调整描述为根因修复，不宣称性能收益。
+
+修复后的冷缓存完整`pnpm test:e2e:regression` 21/21通过（43.1秒功能回归）；Vite配置与用例ESLint、完整typecheck、`pnpm build`分别通过。新必要CI在修复提交上重新执行。
+
+## CI 暴露的模拟链路修正
+
+第二轮CI34394673448保留了两类独立失败：Vite HMR被误计为第二条Agent连接；以及主线程转发Logic时身体停滞。后者通过300ms主线程阻塞的固定场景取得因果RED/GREEN：控制版9.36秒模拟中NPC只走0.44米且没吃到食物，直接MessageChannel候选在同等阻塞中正常完成补给。Authority仍做原有epoch/revision/200ms新鲜度校验；模型、树和游戏规则未更改。
+
+最终默认无头shell组合4项通过、3项明确opt-in跳过，约2.1分钟：1800模拟秒、18次补给、3次跨夜休息、194次巡逻到点；主线程阻塞和F3收到/拒绝计数可见、一个Agent WS承载三角色及实际PG配对恢复均通过。证据见[隔离对照](experiments/worker-logic-isolation/README.md)和[调度面板](evidence/direct-logic-diagnostics.png)。这是功能验证计时，不宣称性能倍率。
+
+`docs/code-map.md`、`docs/developer-world-harness.md`的长期baseline同步直接Worker通道和快进语义；F3往返来源已从旧主线程relay改为Authority↔Logic。真实模型调用数量没有增加。随后修正初始化MessagePort在显式故障注入传输中的一次性移交，受影响故障回归与最终全量门禁继续记录于PR交接。
+
+最终本地准出补记：`pnpm verify:static`完成286文件/1376项通过、2文件/4项明确跳过；之后一次性MessagePort故障注入适配的最终变更由35项相关单测、Web/test类型与受影响lint补验。最后生产源码冻结后的`pnpm build`通过。浏览器21项基础回归与2项H1恢复全部通过；额外4项30/60/120Hz延迟乱序、事务与碰撞回归24.6秒通过。旧测试松键后读取旧快照的竞态通过只读记录真实释放输入sequence并等待Authority回执消除，未改变输入、重排规则或0.08米停止断言。远端全量检查继续在最新提交执行。
+
+第三轮CI34401785567：完整Static verification与Production build通过，21项基础和2项H1通过；NPC短时取食、主线程阻塞隔离、三角色/PG通过，只有三昼夜在240秒达到期限。两次均在持续正常行动（1590/1190模拟秒），不记作生活验收通过。经[同源图形宿主对照](experiments/browser-simulation-host/README.md)，NPC CI固定既有ANGLE SwiftShader测试参数，保持全程模拟、画面与断言，不延长240秒限时。长期产品基线与生产图形设置不变；最终CI另在新提交检查。
+
+固定测试宿主后的完整NPC组合本地4项通过、3项明确opt-in跳过；此后提交远端全量检查，正式生产源码仍为3f745a5。
+
+第四轮CI34405241800：静态/构建、基础/H1、完整三昼夜、阻塞隔离、三角色/PG通过；短测试首次未采到两帧同一RUNNING状态，重试通过，门禁正确按flaky拒绝。改为同一权威Action的拾取→食用→活动成功事件链，并核对succeeded账本，保留全部真实身体/UI断言；本地连续3次32.6秒通过，受影响lint与完整test类型检查通过。最新CI继续以PR checks为准。

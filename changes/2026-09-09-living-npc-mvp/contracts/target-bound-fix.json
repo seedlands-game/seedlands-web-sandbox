@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "id": "living-npc-target-bound-fix",
+  "role": "world implementer",
+  "workType": "implementation",
+  "goal": "Fix final reviewer P1 on frozen 3c2735b: CharacterRecord.targets grows forever because each observe allocates new refs and forage pickup allocates after despawn. Restrict work to character-runtime.ts, character-goal-runtime.ts, character-runtime-types.ts, character-runtime-validation.ts and tests/server/character-control-runtime.test.ts. Add meaningful RED for many distinct observed/consumed items, then bounded target map (e.g.128 entries) with evicted refs rejected uniformly; avoid issuing new refs for despawned pickup event; cap/validate snapshot atomically including targetSequence consistency with generated target-N refs. Preserve existing event/history and current local targets. Use .bin commands ONLY, no pnpm/install, no browser/global gates/Git. Run focused test and core/test tsc only; report /tmp/living-npc-target-bound-fix.md then freeze. Root doing predecessor/browser regression, reviewer continues. At most .5h within original A1 allocation.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/worker",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/client/authority",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/server",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/client",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-target-bound-fix.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "delivery",
+      "check": "V01-V10 pass with explicit evidence boundaries",
+      "evidence": "implementation report and CI"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.5
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "living-npc-round3-triage",
+  "role": "independent cognition code reviewer",
+  "workType": "validation",
+  "goal": "Triage four GitHub review5152979283 findings at 0ce2bfc3b53e6be179f6d315016972d4be5e1885. Read /tmp/seedlands-living-npc/final-review-comments.json. Confirm KeyT time shortcut collision, initial reconnect history retrigger, follow executionTarget mismatch without actionId (including suspendedGoal), orphan entity when spawnAutonomous registerActor throws. Root handles UI; world/host implementation independently authorized. Prioritize reconnect recommendation: first observation history baseline should rebuild context and seed processed cursor without notification/fallback replay; fresh subsequent events still wake, deterministic initial life remains. Identify risks in this minimal approach. No tests/provider/browser/repo edits/Git. Write /tmp/living-npc-round3-triage.md and send minimal scope promptly.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round3-triage.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "recheck",
+      "check": "Frozen delta fully reviewed; P1 resolution and any residual concrete bugs reported",
+      "evidence": "recheck report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.3
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

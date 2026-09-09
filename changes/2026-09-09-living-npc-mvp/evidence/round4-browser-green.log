@@ -1,0 +1,9 @@
+
+Running 1 test using 1 worker
+
+(node:29691) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/1] [chromium] › changes/2026-09-09-living-npc-mvp/e2e/controller-connection.spec.ts:10:1 › 浏览器双向控制经过 Authority 回执，第二轮交谈继续触发，断连保持角色
+  1 passed (9.3s)

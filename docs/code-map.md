@@ -2,7 +2,7 @@
 
 本页回答“从哪里开始读、某项行为由谁负责”。目录归属见[仓库结构规范](repository-structure.md)，宏观取舍见[长期目标与路线图](living-world-alignment.md)，运行方式与当前能力见 [README](../README.zh-CN.md)。
 
-核对日期：2026-09-09；活跃产品为 Web 与 game-core，Node Dedicated 已归档退出。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
+核对日期：2026-09-09；活跃产品为 Web、game-core 与本机认知服务，Node Dedicated 已归档退出。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
 
 首屏由 [prerender-entry.ts](../apps/web/src/app/ui/prerender-entry.ts) 在开发请求或构建前调用同一个 `AppRoot` 生成，浏览器入口随后对该 DOM 做严格 hydration；生成与注入脚本位于 `apps/web/scripts/prerendered-start-screen.*`。
 
@@ -79,6 +79,8 @@ Node Dedicated 的产品接线、文件存储、网络镜像、五入口构建�
 
 Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通过 [Headless 平台适配](../scripts/headless/node-core-platform.ts) 注入端口并创建同一 [HeadlessSession](../packages/game-core/src/server/headless/headless-session.ts)。世界事实和命令仍进入 AuthorityRuntime，开发宿主不持有第二份世界。共享 [WorldHarnessPort](../packages/game-core/src/server/harness/world-harness-contract.ts) 与 [AuthorityWorldHarness](../packages/game-core/src/server/harness/authority-world-harness.ts) 处理开发操作和资源授权；Node REPL/JSONL 的 I/O 与二进制编码在 [jsonl-transport.ts](../scripts/headless/jsonl-transport.ts)。使用和证据见[世界开发 Harness](developer-world-harness.md)。 Headless 平台适配由根 [tsconfig.tools.json](../tsconfig.tools.json) 纳入 `pnpm typecheck`，只使用 ES2022/Node 类型并经声明的 workspace 开发依赖读取 core exports。
 
+浏览器模拟观察/意图经 [authority-worker-direct-logic.ts](../apps/web/src/worker/authority-worker-direct-logic.ts) 的 MessagePort 在 Authority 与 Logic Worker 之间传递；[browser-worker-session.ts](../apps/web/src/app/browser-worker-session.ts) 只组合并移交通道。主线程接收有界诊断，渲染调度不承担身体指令转发；世界写入与候选新鲜度仍由 Authority 接纳。
+
 浏览器的 `window.__seedlandsHarness.world` 经 BrowserAuthorityClient → Authority Worker 进入同一世界端口；恢复只替换 Worker 内的 owner。F3 分类面板位于 [runtime-diagnostics.svelte](../apps/web/src/app/ui/runtime-diagnostics.svelte)，只读投影位于 [debug-diagnostics.ts](../apps/web/src/app/ui/debug-diagnostics.ts)；Wasm 调用/内存计数由 [KernelMemory](../apps/web/src/compute/kernel-memory.ts) 随计算任务 ACK 传回，不另开遥测轮询 RPC。
 
 最容易混淆的几个名称：
@@ -150,3 +152,13 @@ Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通�
 - 有界 ECS 组件化尚未准入；当前实体状态仍由 `EntityStore` 的既有实现持有，不能将动作与动画扩展视为 ECS 迁移完成。
 
 PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给既有 [game-runtime-controls.ts](../apps/web/src/app/game-runtime-controls.ts)，`Game` 保持装配入口并满足文件规模门禁；地图状态仍归 `UiBridge`。
+
+## 单 NPC 认知路线
+
+从 [角色协议](../packages/game-core/src/runtime/character-control-protocol.ts) 读跨宿主合同，再读 core `server/simulation/character-runtime.ts` 与 `character-behavior-runtime.ts` 的身体/持续树所有权、[浏览器 Bridge](../apps/web/src/client/character/resident-bridge.ts) 的绑定和迟到消息门禁、[伙伴会话](../apps/web/src/app/gameplay/companion/companion-session.ts) 的玩家入口。`apps/agent-server/src/resident-agent.ts` 复用标准 Agent，`resident-channel.ts` / `resident-scheduler.ts` 管理逻辑唤醒，`workspace/` 管理 PG 文档、journal 与 Pro 发布事务；世界由 Authority 提交。`node/resident-host.ts` 复用一条连接承载三个独立角色。`scripts/model-gateway/` 拥有 LiteLLM 镜像与供应请求边界。浏览器 `client/persistence/application-checkpoint.ts` 与 `cognition-timeline.ts` 配对世界/记忆恢复。行为与记忆决策见[现行认知基线](npc-behavior-and-memory.md)。
+
+认知传输合同位于 `packages/cognition-protocol/src/index.ts`，由 Web 与 Agent Server 消费；只依赖 core 公开角色类型，core 不反向依赖。模型状态、上下文窗口和 token 用量不进入权威世界协议。角色执行在 `character-runtime.ts`、`character-goal-runtime.ts`、`character-runtime-types.ts` 和 `character-runtime-validation.ts` 按执行、目标、状态与输入验证分工。
+
+## 持续角色行为与局部观察
+
+`character-runtime.ts` 持有角色身份、命令与存档；`character-behavior-runtime.ts` 持有生效树、生命周期和执行账本；`character-behavior-skills.ts` 通过既有 Action、导航、库存与 Combat 执行持续技能；`character-observation-runtime.ts` 生成局部感知、opaque target refs 与有界事件分页。树监视器只发重新思考事件，身体抢占来自树中显式 guard。伙伴面板的布局样式位于 `apps/web/src/app/ui/companion-panel.css`，以 `#companion` 限定作用域。

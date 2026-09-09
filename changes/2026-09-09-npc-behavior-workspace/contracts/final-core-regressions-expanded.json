@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "id": "npc-final-core-regressions-expanded",
+  "role": "browser world harness deterministic advance engineer",
+  "workType": "implementation",
+  "goal": "Resolve affected core deterministic regression failures from final pnpm verify:static, beginning tests/server/action-history-retention.test.ts four failures (log /tmp/npc-final-verify-static-3.log). Read new tree-owner contract. Update superseded legacy-goal test fixtures/assertions to actual new behavior contract while preserving action sequence exhaustion atomicity, bounded history, durable terminal linkage invariants. If real core regression, fix minimal owner implementation and tests. No weakening/deleting meaningful protections merely to pass. Own tests/server/action-history-retention.test.ts and packages/game-core/src/server/character-behavior*, character-runtime*, simulation/action-runtime* only; coordinate before touching other core files. Root owns Web/Agent/docs/Git. Report /tmp/npc-final-core-regressions.md with RED/GREEN and scope of any old baseline replaced; freeze. Final static completed: additional legacy-contract failures in tests/server/character-control-correctness.test.ts (2), character-danger-recovery.test.ts (2), character-target-retention.test.ts (1). Also own these tests and resolve as part of same contract; ROOT owns two fixture timeout-only failures in application-checkpoint and character-resource-competition. Preserve meaningful security/restore assertions and replace superseded forced-safety expectations with explicit tree-owned behavior. All 9 logic failures should be covered. Do not implement forced behavior outside editable tree to satisfy old tests.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/approved-proposal.md",
+      "purpose": "Full approved behavior, workspace and publication contracts"
+    },
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/gateway-admission/framework-inspection.md",
+      "purpose": "Frozen framework public API inspection"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/server/action-history-retention.test.ts",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/packages/game-core/src/server",
+      "/private/tmp",
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/tests/server"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-final-core-regressions.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "regressions",
+      "check": "Affected final static RED resolved with invariant-preserving tests, owned lint/types/format pass",
+      "evidence": "/tmp/npc-final-core-regressions.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}

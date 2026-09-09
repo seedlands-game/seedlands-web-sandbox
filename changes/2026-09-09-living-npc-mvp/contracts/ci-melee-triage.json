@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "living-npc-ci-melee-triage",
+  "role": "independent world code reviewer",
+  "workType": "validation",
+  "goal": "Read-only CI failure triage run34357206570 exact fe5e0f11a92f9706bd1a5ef0f32a27cb36c09e9e. Failed log /tmp/seedlands-living-npc/final-ci-failure.log: historical melee-showcase line29 guide absent within5s firstattempt, retry passes => failOnFlakyTests fails gate. Extract minimal actual failure from GitHub artifact melee-34357206570-1 or logs, inspect existing entry readiness and warning modal timing. Download/read artifacts to /tmp only, no browser/test execution/provider or repo/Git writes/retries/comments. Determine concrete cause evidence vs speculation and smallest owner-ready fix; report /tmp/living-npc-ci-melee-triage.md. Root concurrently reads test/helpers. .25h originalpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-ci-melee-triage.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "recheck",
+      "check": "Frozen delta fully reviewed; P1 resolution and any residual concrete bugs reported",
+      "evidence": "recheck report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.25
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}
