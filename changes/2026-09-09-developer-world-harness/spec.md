@@ -73,3 +73,5 @@ F3 保持入口，打开时释放 Pointer Lock 和已按住输入，正常世界
 远端 `b7d7169` 与此前绿色 `5d49ce8` 的源码树完全相同；run `34322183659` 的 parity 场景三次超时，artifact 显示约 3–4 FPS 与 WebGL stall。此为保留的运行 RED，尚不能证明特定队列死锁。parity 不验证画质，将其首次导航前固定为产品 Low 配置并断言 snapshot quality；仍验证同一 Authority、Worker、checkpoint、显式推进和真实输入。仅做一次无重试受影响复验；若仍超时，进一步采集请求时序，不提高 timeout 或改变生产调度。
 
 后续 run `34324832874` 的逐操作 trace 证实：Browser parity evaluate 已在7.872–14.741秒成功，但Headless round-trip与断言又占至少16.252秒；末尾snapshot在30.993秒才开始，被整个默认30秒测试预算截断。故为这条包含多宿主完整存档往返的集成测试设置90秒总预算；clock:run的测试侧deadline、canvas boundingBox/click各5秒，真实KeyW位移仍15秒。共享lockPointer新增可选timeout，仅该case启用，其他case默认行为不变。没有改变任何生产调度或一致性断言。
+
+静态回归补充：54debdc 的 CI 34326581294 中 Chromium 与 build 通过；malformed-arguments 用例 5174ms 超出遗漏设置的默认 5s，同文件其余单世界 fixture 均使用20s。为此用例补上相同20s fixture预算与结束dispose，保留全部九个入口验证断言，不修改生产实现或全局超时。
