@@ -15,13 +15,20 @@
     "test": "pnpm --dir ../.. exec vitest run tests/agent-server"
   },
   "dependencies": {
+    "@langchain/core": "1.2.9",
     "@langchain/langgraph": "1.4.14",
+    "@langchain/langgraph-checkpoint-postgres": "1.0.5",
+    "@langchain/openai": "1.5.11",
+    "@seedlands/cognition-protocol": "workspace:*",
     "@seedlands/game-core": "workspace:*",
-    "ws": "^8.18.3",
-    "@seedlands/cognition-protocol": "workspace:*"
+    "deepagents": "1.13.3",
+    "langchain": "1.5.10",
+    "pg": "8.23.0",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@types/node": "26.4.1",
+    "@types/pg": "8.23.1",
     "@types/ws": "^8.18.1",
     "esbuild": "0.28.2",
     "typescript": "^5.9.3",

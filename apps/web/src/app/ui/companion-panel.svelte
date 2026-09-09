@@ -1,6 +1,8 @@
 <script lang="ts">
+  import './companion-panel.css';
   import { onMount, tick } from 'svelte';
   import type { CompanionSession } from '../gameplay/companion/companion-session';
+  import CharacterBehaviorPanel from './character-behavior-panel.svelte';
   let {
     session,
     releaseInput,
@@ -18,7 +20,7 @@
   let url = $state('ws://127.0.0.1:8787');
   let token = $state('');
   let minutes = $state(3);
-  let context = $state<128000 | 256000>(128000);
+  let birthTags = $state('好奇, 种植, 珍惜朋友');
   const goals: Record<string, string> = {
     idle: '稍作休息',
     forage: '寻找食物',
@@ -75,7 +77,7 @@
     if (!view.error) text = '';
   }
   function configure() {
-    session.configure(Number(minutes) * 60, Number(context) as 128000 | 256000);
+    session.configure(Number(minutes) * 60);
   }
 </script>
 
@@ -87,7 +89,7 @@
     aria-controls="companion-content"
     title="T · 和伙伴交流"
   >
-    <span class="avatar" aria-hidden="true">岚</span>
+    <span class="avatar" aria-hidden="true">{view.character?.profile.name.slice(0, 1) ?? '友'}</span>
     <span class="identity"
       ><strong>{view.character?.profile.name ?? '结识旅伴'}</strong><small
         >{view.character?.lifecycle === 'deceased'
@@ -102,6 +104,19 @@
   </button>
   {#if open}
     <div id="companion-content">
+      {#if view.characters.length}
+        <nav class="residents" aria-label="选择伙伴">
+          {#each view.characters as character (character.entityId)}
+            <button
+              class:selected={character.entityId === view.character?.entityId}
+              onclick={() => session.select(character.entityId)}>{character.profile.name}</button
+            >
+          {/each}
+          {#if view.characters.filter((entry) => entry.lifecycle === 'active').length < 3}
+            <button disabled={view.busy} onclick={() => session.create()} aria-label="邀请另一位伙伴">＋</button>
+          {/if}
+        </nav>
+      {/if}
       {#if !view.character}
         <p class="intro">阿岚是一位谨慎而好奇的旅行者，会寻找食物、探索周围，也会因你的到来改变计划。</p>
         <button class="primary" disabled={view.busy} onclick={() => session.create()}>邀请阿岚进入世界</button>
@@ -110,7 +125,9 @@
           <small>{view.character.lifecycle === 'deceased' ? '旅程的终点' : '此刻的打算'}</small><strong
             >{view.character.lifecycle === 'deceased'
               ? `${view.character.profile.name}已经离世`
-              : (goals[view.character.currentGoal.goal.kind] ?? '自由探索')}</strong
+              : (view.character.behaviorTree?.goal.description ??
+                goals[view.character.currentGoal.goal.kind] ??
+                '自由探索')}</strong
           ><span
             >{view.character.lifecycle === 'deceased'
               ? '经历与留下的痕迹仍在这个世界里。'
@@ -129,6 +146,9 @@
           <span>饥饿 <b>{Math.round(view.character.hunger)}</b></span>
           <span>行囊 <b>{view.character.inventory.reduce((count, slot) => count + (slot?.count ?? 0), 0)}</b></span>
         </div>
+        {#if view.character.behaviorTree}
+          <CharacterBehaviorPanel behavior={view.character.behaviorTree} />
+        {/if}
         {#if view.character.lastSpeech}<blockquote data-testid="companion-speech">
             “{view.character.lastSpeech}”
           </blockquote>{/if}
@@ -184,10 +204,7 @@
                 oninput={configure}
               />
               <p class="hint">重要事件会提前触发思考；等待期间仍会执行计划。更频繁会消耗更多模型额度。</p>
-              <label for="companion-context">经历窗口</label>
-              <select id="companion-context" bind:value={context} onchange={configure}
-                ><option value={128000}>128K · 默认</option><option value={256000}>256K · 更长经历</option></select
-              >
+              <p class="hint">经历窗口 128K · 接近 112K 时由 Pro 整理记忆。整理与断线期间，伙伴继续执行当前行为树。</p>
               <label for="companion-url">本机思考服务</label><input
                 id="companion-url"
                 bind:value={url}
@@ -207,254 +224,54 @@
                   onclick={() => session.connect(url, token)}>连接</button
                 ><button onclick={session.disconnect}>断开</button>
               </div>
-              {#if view.connection.usage}<p class="hint">
-                  本次连接：{view.connection.usage.calls} 次决定 · {view.connection.usage.compressionCalls} 次整理
-                </p>{/if}
+              {#if view.cognition}
+                <div class="cognition-stats" aria-label="认知状态">
+                  <span>思考 <b>{view.cognition.logicalRounds}</b> 次</span>
+                  <span>整理 <b>{view.cognition.compactions}</b> 次</span>
+                  <span>上下文约 <b>{Math.round(view.cognition.estimatedContextTokens / 1000)}K</b></span>
+                  <p>{view.cognition.message}</p>
+                  <small
+                    >事件已保存 {view.cognition.receivedThrough} · 已纳入 {view.cognition.includedThrough} · 已整理 {view
+                      .cognition.compactedThrough}</small
+                  >
+                </div>
+                <div class="documents" aria-label="伙伴工作区">
+                  {#each ['/AGENT.md', '/SOUL.md', '/MEMORY.md', '/behavior/current.json'] as path (path)}
+                    <button
+                      disabled={view.busy}
+                      onclick={() =>
+                        session.readDocument(
+                          path as '/AGENT.md' | '/SOUL.md' | '/MEMORY.md' | '/behavior/current.json',
+                        )}>{path.split('/').at(-1)}</button
+                    >
+                  {/each}
+                </div>
+              {/if}
+              {#if view.connection.phase === 'ready' && view.characters.filter((entry) => entry.lifecycle === 'active').length < 3}
+                <label for="companion-birth-tags">下一位伙伴的性格与经历</label>
+                <input id="companion-birth-tags" bind:value={birthTags} maxlength="240" />
+                <button
+                  disabled={view.busy || !birthTags.trim()}
+                  onclick={() =>
+                    session.create(
+                      birthTags
+                        .split(/[,，]/u)
+                        .map((value) => value.trim())
+                        .filter(Boolean),
+                    )}>由 Pro 创作并邀请伙伴</button
+                >
+              {/if}
             </div>
           {/if}
         {/if}
+      {/if}
+      {#if view.document}
+        <section class="workspace-document" aria-label="工作区文档">
+          <div><strong>{view.document.path}</strong><button onclick={session.closeDocument}>关闭</button></div>
+          <pre>{view.document.content}</pre>
+        </section>
       {/if}
       {#if view.error}<p class="error" role="alert">{view.error}</p>{/if}
     </div>
   {/if}
 </aside>
-
-<style>
-  #companion {
-    position: absolute;
-    right: 20px;
-    top: 104px;
-    width: 292px;
-    pointer-events: auto;
-    z-index: 10;
-    color: #f4eedc;
-    background: rgb(23 33 30 / 94%);
-    border: 1px solid #647565;
-    border-radius: 14px;
-    box-shadow: 0 8px 28px #0005;
-    font:
-      13px/1.5 system-ui,
-      sans-serif;
-    overflow: hidden;
-  }
-  #companion button,
-  #companion input,
-  #companion select {
-    font: inherit;
-  }
-  #companion button {
-    cursor: pointer;
-    color: inherit;
-    border: 1px solid #5e7564;
-    border-radius: 7px;
-    padding: 7px 10px;
-    background: #31483b;
-  }
-  #companion button:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
-  #companion button:hover:not(:disabled) {
-    background: #48654e;
-  }
-  #companion button:focus-visible,
-  #companion input:focus-visible,
-  #companion select:focus-visible {
-    outline: 2px solid #eac67e;
-    outline-offset: 2px;
-  }
-  #companion .companion-toggle {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    text-align: left;
-  }
-  #companion .avatar {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    background: #84976b;
-    color: #1e3026;
-    border-radius: 10px;
-    font-weight: 800;
-    font-size: 18px;
-  }
-  #companion .identity {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-  #companion .identity strong {
-    font-size: 15px;
-  }
-  #companion .identity small {
-    font-size: 11px;
-    color: #b2c0ae;
-  }
-  #companion .indicator {
-    width: 7px;
-    height: 7px;
-    background: #8b977e;
-    border-radius: 50%;
-  }
-  #companion .indicator[data-phase='thinking'],
-  #companion .indicator[data-phase='compressing'] {
-    background: #eac67e;
-  }
-  #companion .indicator[data-phase='ready'] {
-    background: #9fda95;
-  }
-  #companion-content {
-    border-top: 1px solid #4b5c4c;
-    padding: 14px;
-    max-height: max(120px, calc(100dvh - 350px));
-    overflow-y: auto;
-  }
-  #companion .intro {
-    margin: 0 0 12px;
-    color: #c6cebe;
-  }
-  #companion .primary {
-    background: #cfb67c;
-    color: #263628;
-    border-color: #cfb67c;
-    font-weight: 700;
-  }
-  #companion .primary:hover:not(:disabled) {
-    background: #e2c995;
-  }
-  #companion .plan {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  #companion .plan small {
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: #a7b59e;
-  }
-  #companion .plan strong {
-    font-size: 20px;
-  }
-  #companion .plan span {
-    color: #bdc8b5;
-    font-size: 11px;
-  }
-  #companion .vitals {
-    display: flex;
-    justify-content: space-between;
-    margin: 14px 0;
-    padding: 9px 0;
-    border-block: 1px solid #425444;
-    color: #b8c5b0;
-    font-size: 11px;
-  }
-  #companion .vitals b {
-    color: #e9d5a5;
-    margin-left: 5px;
-  }
-  #companion blockquote {
-    margin: 10px 0;
-    padding: 10px 12px;
-    border-left: 2px solid #c8ae77;
-    color: #f2deae;
-    background: #d3bd7810;
-  }
-  #companion .conversation {
-    max-height: 120px;
-    overflow: auto;
-  }
-  #companion .conversation p {
-    margin: 6px 0;
-    font-size: 11px;
-    color: #c1cbb8;
-  }
-  #companion .conversation small {
-    margin-right: 7px;
-    color: #d6bd87;
-  }
-  #companion .conversation .heard {
-    color: #adbda3;
-  }
-  #companion label {
-    display: block;
-    font-size: 11px;
-    color: #bccab3;
-    margin: 10px 0 5px;
-  }
-  #companion input,
-  #companion select {
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    padding: 8px;
-    background: #15241d;
-    border: 1px solid #4d6352;
-    border-radius: 6px;
-    color: #f4eedc;
-  }
-  #companion .compose {
-    display: flex;
-    gap: 6px;
-  }
-  #companion .compose input {
-    flex: 1;
-  }
-  #companion .compose button {
-    flex: 0 0 auto;
-    width: auto;
-  }
-  #companion input[type='range'] {
-    padding: 0;
-    accent-color: #d2b77b;
-  }
-  #companion .connection {
-    font-size: 11px;
-    color: #a7b99e;
-    margin: 12px 0;
-  }
-  #companion .settings-toggle {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    border: 0;
-    background: transparent;
-    padding: 8px 0;
-    border-top: 1px solid #425444;
-    color: #afbfaa;
-    font-size: 11px;
-  }
-  #companion .settings-toggle span {
-    color: #d6bd87;
-  }
-  #companion .settings label strong {
-    float: right;
-    font-weight: 400;
-  }
-  #companion .hint {
-    font-size: 10px;
-    color: #9eae97;
-  }
-  #companion .connection-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  #companion .error {
-    color: #ffbca6;
-    font-size: 12px;
-  }
-  @media (max-width: 700px) {
-    #companion {
-      right: 8px;
-      top: 66px;
-      width: 250px;
-    }
-  }
-</style>

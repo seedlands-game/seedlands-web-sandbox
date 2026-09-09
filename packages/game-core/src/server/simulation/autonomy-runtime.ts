@@ -92,6 +92,8 @@ export class AutonomyRuntime {
       startAction: (actorId, input) => this.startAction(actorId, input),
       markActionRunning: (actionId, path) => this.actions.markRunning(actionId, path),
       setActionPathIndex: (actionId, pathIndex) => this.actions.setPathIndex(actionId, pathIndex),
+      updateActionPath: (actionId, path, repathCount, target) =>
+        this.actions.updatePath(actionId, path, repathCount, target),
       plan: (start, target) => this.navigator.plan(start, target),
       interruptAction: (actorId, reason) => this.interruptAction(actorId, reason),
       failAction: (actionId, reason) => this.finishFailure(actionId, reason),
@@ -103,6 +105,9 @@ export class AutonomyRuntime {
         actor.behavior = 'idle';
         actor.targetEntityId = null;
       },
+      worldTime: () => this.options.getWorldTime(),
+      requestCombat: (actorId, targetId, existingActionId) =>
+        this.requestActorCombat(actorId, targetId, 'unarmed', existingActionId),
       changed: options.changed ?? (() => undefined),
     });
   }
@@ -228,9 +233,11 @@ export class AutonomyRuntime {
   recordAttacked(entityId: string, attackerId: string): void {
     const actor = this.actors.get(entityId);
     if (!actor) return;
-    actor.behavior = 'flee';
-    actor.targetEntityId = attackerId;
     this.perception.record(entityId, { type: 'attacked', subjectId: attackerId });
+    if (!this.characters.has(entityId)) {
+      actor.behavior = 'flee';
+      actor.targetEntityId = attackerId;
+    }
     this.characters.recordAttacked(entityId, attackerId);
   }
 
@@ -264,7 +271,9 @@ export class AutonomyRuntime {
       starterEcologyVersion: this.starterVersion,
       actors: this.queryActors().map((actor) => {
         const persistentGoal = this.characters.persistentGoalFor(actor.entityId);
-        return persistentGoal ? { ...actor, persistentGoal } : actor;
+        return this.characters.has(actor.entityId)
+          ? { ...actor, behaviorTreeOwned: true as const, ...(persistentGoal ? { persistentGoal } : {}) }
+          : actor;
       }),
       pois: this.pois.snapshot(),
       actions: this.actions.snapshot(),

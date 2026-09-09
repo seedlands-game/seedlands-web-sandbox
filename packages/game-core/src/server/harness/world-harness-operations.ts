@@ -40,15 +40,15 @@ export const characterHarnessOperation = (request: CharacterControlRequest) => {
   if (!request || typeof request !== 'object' || typeof request.kind !== 'string')
     throw new TypeError('Character request is invalid.');
   const operation =
-    request.kind === 'create'
+    request.kind === 'create' || request.kind === 'behavior'
       ? 'write'
-      : request.kind === 'dialogue' || request.kind === 'intent'
+      : request.kind === 'dialogue' || request.kind === 'speak' || request.kind === 'intent'
         ? 'execute'
         : request.kind === 'memory'
           ? 'write'
           : 'read';
   const target =
-    request.kind === 'create' || request.kind === 'list'
+    request.kind === 'create' || request.kind === 'list' || request.kind === 'capabilities'
       ? ({ kind: 'world' } as const)
       : ({ kind: 'entity', entityId: request.entityId } as const);
   return {

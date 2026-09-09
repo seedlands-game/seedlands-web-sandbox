@@ -6,6 +6,7 @@ import type {
 } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
 import type { BoundCharacterControlPort } from './browser-authority-client-contract';
+import type { BehaviorUpdateRequest } from '@seedlands/game-core/runtime/behavior-control-protocol';
 
 type CharacterAuthorityRequest =
   | Readonly<{
@@ -28,8 +29,16 @@ export function createBoundCharacterControlPort(binding: ControlBinding, send: S
   };
   return Object.freeze({
     binding,
-    observe: (sinceCursor?: number) =>
-      control({ kind: 'observe', entityId: binding.entityId, ...(sinceCursor === undefined ? {} : { sinceCursor }) }),
+    observe: (sinceCursor?: number, throughCursor?: number) =>
+      control({
+        kind: 'observe',
+        entityId: binding.entityId,
+        ...(sinceCursor === undefined ? {} : { sinceCursor }),
+        ...(throughCursor === undefined ? {} : { throughCursor }),
+      }),
+    speak: (requestId: string, text: string) => control({ kind: 'speak', entityId: binding.entityId, requestId, text }),
+    behavior: (request: Omit<BehaviorUpdateRequest, 'kind' | 'entityId'>) =>
+      control({ ...request, kind: 'behavior', entityId: binding.entityId }),
     intent: (requestId: string, expectedRevision: number, expectedCursor: number, goal: CharacterGoal, say?: string) =>
       control({
         kind: 'intent',

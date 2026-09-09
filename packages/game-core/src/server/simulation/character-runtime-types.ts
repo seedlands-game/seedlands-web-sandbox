@@ -4,6 +4,7 @@ import type {
   CharacterMemory,
   CharacterProfile,
 } from '../../runtime/character-control-protocol';
+import type { BehaviorDefinition, BehaviorGoal, BehaviorSkillStatus } from '../../runtime/behavior-control-protocol';
 import type { EntityStore } from '../gameplay/entity-store';
 import { Inventory, type InventorySlot } from '../gameplay/inventory';
 import type { ActorAction, ActorActionInput } from './action-runtime';
@@ -25,6 +26,32 @@ export type CharacterTargetBinding = {
   ref: string;
   targetId: string;
   revision: number;
+};
+
+export type CharacterSkillExecution = {
+  nodeId: string;
+  skill: string;
+  signature: string;
+  activation: number;
+  status: BehaviorSkillStatus;
+  actionId?: string;
+  phase: string;
+  elapsedSeconds: number;
+  replanCount: number;
+  reason?: string;
+  targetEntityId?: string;
+  targetPosition?: CharacterPositionTuple;
+  count: number;
+};
+
+export type CharacterBehaviorRecord = {
+  revision: number;
+  goal: BehaviorGoal;
+  definition: BehaviorDefinition;
+  cycle: number;
+  activationSequence: number;
+  skills: CharacterSkillExecution[];
+  monitors: { nodeId: string; matched: boolean; episode: number; version?: number }[];
 };
 
 export type CharacterRecord = {
@@ -53,6 +80,8 @@ export type CharacterRecord = {
   lastBehavior: string;
   hunger: number;
   dangerSecondsRemaining: number;
+  lastThreatEntityId?: string;
+  behaviorTree: CharacterBehaviorRecord;
 };
 
 export type CharacterSnapshotRecord = Readonly<{
@@ -81,10 +110,12 @@ export type CharacterSnapshotRecord = Readonly<{
   lastBehavior: string;
   hunger: number;
   dangerSecondsRemaining: number;
+  lastThreatEntityId?: string;
+  behaviorTree?: CharacterBehaviorRecord;
 }>;
 
 export type CharacterSnapshot = Readonly<{
-  version: 1;
+  version: 1 | 2;
   sequence: number;
   characters: readonly CharacterSnapshotRecord[];
 }>;
@@ -100,11 +131,23 @@ export type CharacterRuntimeOptions = Readonly<{
   startAction: (actorId: string, input: Omit<ActorActionInput, 'actorId'>) => ActorAction;
   markActionRunning: (actionId: string, path: readonly CharacterPositionTuple[]) => ActorAction;
   setActionPathIndex: (actionId: string, pathIndex: number) => void;
+  updateActionPath: (
+    actionId: string,
+    path: readonly CharacterPositionTuple[],
+    repathCount: number,
+    targetPosition?: CharacterPositionTuple,
+  ) => ActorAction;
   plan: (start: CharacterPositionTuple, target: CharacterPositionTuple) => NavigationResult;
   interruptAction: (actorId: string, reason: string) => boolean;
   failAction: (actionId: string, reason: string) => void;
   succeedAction: (actionId: string, result?: unknown) => void;
   clearDanger: (entityId: string) => void;
+  worldTime: () => number;
+  requestCombat: (
+    actorId: string,
+    targetId: string,
+    existingActionId?: string,
+  ) => Readonly<{ success: boolean; actionId?: string; reason?: string }>;
   changed: () => void;
 }>;
 

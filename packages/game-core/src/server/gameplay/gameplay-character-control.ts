@@ -46,7 +46,7 @@ export function executeGameplayCharacterRequest(
     ? characterPosition(request.position)
     : defaultCharacterPosition(options, player?.position);
   const home = request.homePosition ? characterPosition(request.homePosition) : requested;
-  options.simulation.characters.validateRegistration(request.profile, home);
+  options.simulation.characters.validateRegistration(request.profile, home, request.behaviorTree);
   const entity = options.spawnAutonomous(
     {
       type: 'npc',
@@ -59,7 +59,10 @@ export function executeGameplayCharacterRequest(
     { archetype: 'settler', hunger: 60 },
   );
   try {
-    return { kind: 'created', character: options.simulation.characters.register(entity.id, request.profile, home) };
+    return {
+      kind: 'created',
+      character: options.simulation.characters.register(entity.id, request.profile, home, request.behaviorTree),
+    };
   } catch (error) {
     options.simulation.unregisterActor(entity.id);
     options.entities.despawn(entity.id);

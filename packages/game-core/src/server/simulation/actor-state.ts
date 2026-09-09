@@ -28,6 +28,8 @@ export type ActorState = {
   wanderIndex: number;
   /** Derived Character ownership projection. Restore rebuilds it from the Character record. */
   persistentGoal?: ActorPersistentGoal;
+  /** Derived marker: Authority Character behavior owns this actor's decision. */
+  behaviorTreeOwned?: true;
 };
 
 export type ActorRegistration = {
@@ -71,6 +73,7 @@ export const cloneActor = (actor: ActorState, attackCooldownSeconds?: number): A
   const cloned = { ...actor };
   delete cloned.attackCooldownSeconds;
   delete cloned.persistentGoal;
+  delete cloned.behaviorTreeOwned;
   return attackCooldownSeconds === undefined ? cloned : { ...cloned, attackCooldownSeconds };
 };
 export const roundSimulation = (value: number) => Math.round(value * 1_000_000) / 1_000_000;

@@ -19,10 +19,15 @@ import type {
   ControlBinding,
 } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
+import type { BehaviorUpdateRequest } from '@seedlands/game-core/runtime/behavior-control-protocol';
 
 export type BoundCharacterControlPort = Readonly<{
   binding: ControlBinding;
-  observe(sinceCursor?: number): Promise<WorldHarnessResult<CharacterControlResult>>;
+  observe(sinceCursor?: number, throughCursor?: number): Promise<WorldHarnessResult<CharacterControlResult>>;
+  speak(requestId: string, text: string): Promise<WorldHarnessResult<CharacterControlResult>>;
+  behavior(
+    request: Omit<BehaviorUpdateRequest, 'kind' | 'entityId'>,
+  ): Promise<WorldHarnessResult<CharacterControlResult>>;
   intent(
     requestId: string,
     expectedRevision: number,

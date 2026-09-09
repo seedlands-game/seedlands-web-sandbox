@@ -91,11 +91,17 @@ export class ActionRuntime {
     return this.clone(action);
   }
 
-  updatePath(id: string, path: readonly NavigationPosition[], repathCount: number): ActorAction {
+  updatePath(
+    id: string,
+    path: readonly NavigationPosition[],
+    repathCount: number,
+    targetPosition?: NavigationPosition,
+  ): ActorAction {
     const action = this.requireActive(id);
     action.path = path.map((point) => [...point]);
     action.pathIndex = Math.min(1, action.path.length);
     action.repathCount = repathCount;
+    if (targetPosition) action.targetPosition = [...targetPosition];
     action.status = 'running';
     return this.clone(action);
   }

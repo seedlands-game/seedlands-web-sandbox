@@ -1,3 +1,4 @@
+import { createLifeBehavior } from '@seedlands/game-core/runtime/character-control-protocol';
 import type {
   CharacterEvent,
   CharacterObservation,
@@ -35,6 +36,11 @@ export const observation = (overrides: Partial<CharacterObservation> = {}): Char
       goal: { kind: 'idle' },
       status: 'active',
     },
+    behaviorTree: {
+      revision: 1,
+      ...createLifeBehavior({ homePosition: [1, 2, 3], patrolPositions: [[2, 2, 3]] }),
+      runtime: { cycle: 1, activeNodeIds: [], skills: [], monitors: [], milestones: [] },
+    },
     behavior: 'idle',
     hunger: 0.7,
     inventory: [{ itemId: 'berry', count: 1 }],
@@ -54,6 +60,8 @@ export const observation = (overrides: Partial<CharacterObservation> = {}): Char
   visiblePois: [],
   events: [event(1)],
   cursor: 1,
+  worldTime: 12,
+  eventCoverage: { requestedAfter: 0, through: 1, returnedThrough: 1, hasMore: false },
   ...overrides,
 });
 
