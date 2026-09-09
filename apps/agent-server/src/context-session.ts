@@ -90,6 +90,10 @@ export class ContextSession {
     return this.generationValue;
   }
 
+  get messageCount(): number {
+    return this.messagesValue.length;
+  }
+
   get hasPreparedRotation(): boolean {
     return this.prepared !== null;
   }
@@ -100,6 +104,12 @@ export class ContextSession {
 
   replaceMessages(messages: readonly DeepSeekMessage[]): void {
     this.messagesValue = [...messages];
+  }
+
+  extractTail(fromIndex: number): readonly DeepSeekMessage[] {
+    if (!Number.isSafeInteger(fromIndex) || fromIndex < 0 || fromIndex > this.messagesValue.length)
+      throw new Error('invalid context snapshot boundary');
+    return this.messagesValue.splice(fromIndex);
   }
 
   configureLimit(contextLimit: ContextLimit): void {

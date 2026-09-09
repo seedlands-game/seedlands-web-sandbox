@@ -15,10 +15,24 @@ describe('cognition graph', () => {
             role: 'assistant',
             content: null,
             reasoning_content: first ? 'inspect privately' : 'choose privately',
-            tool_calls: [
-              first
-                ? { id: 'read-1', type: 'function', function: { name: 'inventory', arguments: '{}' } }
-                : {
+            tool_calls: first
+              ? [
+                  {
+                    id: 'read-actions',
+                    type: 'function',
+                    function: { name: 'available_actions', arguments: '{"ref":"drop-1"}' },
+                  },
+                  {
+                    id: 'read-visible',
+                    type: 'function',
+                    function: {
+                      name: 'inspect_visible',
+                      arguments: '{"ref":"drop-1","fields":["type","distance","stack"]}',
+                    },
+                  },
+                ]
+              : [
+                  {
                     id: 'intent-1',
                     type: 'function',
                     function: {
@@ -26,7 +40,7 @@ describe('cognition graph', () => {
                       arguments: '{"goal":{"kind":"forage"},"say":"I will look for berries."}',
                     },
                   },
-            ],
+                ],
           },
           finishReason: 'tool_calls',
           usage: null,
@@ -43,14 +57,35 @@ describe('cognition graph', () => {
     expect(requests[1]?.messages).toContainEqual(
       expect.objectContaining({ role: 'assistant', reasoning_content: 'inspect privately' }),
     );
-    expect(requests[1]?.messages).toContainEqual(expect.objectContaining({ role: 'tool', tool_call_id: 'read-1' }));
+    expect(requests[1]?.messages).toContainEqual(
+      expect.objectContaining({ role: 'tool', tool_call_id: 'read-actions' }),
+    );
+    expect(requests[1]?.messages).toContainEqual(
+      expect.objectContaining({ role: 'tool', tool_call_id: 'read-visible' }),
+    );
   });
 
-  it('rejects multiple calls and invisible target references without an intent', async () => {
+  it('rejects multiple intents, mixed read+intent, and invisible references while closing every tool call', async () => {
     const responses = [
       [
-        { id: 'one', type: 'function' as const, function: { name: 'inventory', arguments: '{}' } },
-        { id: 'two', type: 'function' as const, function: { name: 'inventory', arguments: '{}' } },
+        {
+          id: 'intent-one',
+          type: 'function' as const,
+          function: { name: 'propose_intent', arguments: '{"goal":{"kind":"idle"}}' },
+        },
+        {
+          id: 'intent-two',
+          type: 'function' as const,
+          function: { name: 'propose_intent', arguments: '{"goal":{"kind":"forage"}}' },
+        },
+      ],
+      [
+        { id: 'mixed-read', type: 'function' as const, function: { name: 'inventory', arguments: '{}' } },
+        {
+          id: 'mixed-intent',
+          type: 'function' as const,
+          function: { name: 'propose_intent', arguments: '{"goal":{"kind":"idle"}}' },
+        },
       ],
       [
         {
@@ -75,6 +110,32 @@ describe('cognition graph', () => {
       const result = await decideWithGraph(createCognitionGraph({ model }), observation(), []);
       expect(result.status).toBe('invalid-tool');
       expect(result.proposal).toBeUndefined();
+      for (const call of toolCalls)
+        expect(result.messages).toContainEqual(expect.objectContaining({ role: 'tool', tool_call_id: call.id }));
     }
+  });
+
+  it('rejects an over-budget read batch before another provider call and closes all IDs', async () => {
+    const calls = Array.from({ length: 5 }, (_, index) => ({
+      id: `read-${index}`,
+      type: 'function' as const,
+      function: { name: 'inventory', arguments: '{}' },
+    }));
+    let modelCalls = 0;
+    const model: CognitionModel = {
+      complete: async () => {
+        modelCalls += 1;
+        return {
+          message: { role: 'assistant', content: null, tool_calls: calls },
+          finishReason: 'tool_calls',
+          usage: null,
+          latencyMs: 1,
+        };
+      },
+    };
+    const result = await decideWithGraph(createCognitionGraph({ model }), observation(), []);
+    expect(result.status).toBe('over-budget');
+    expect(modelCalls).toBe(1);
+    expect(result.messages.filter((message) => message.role === 'tool')).toHaveLength(5);
   });
 });

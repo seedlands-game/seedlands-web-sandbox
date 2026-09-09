@@ -6,6 +6,8 @@ import type {
 } from '@seedlands/game-core/runtime/character-control-protocol';
 import { CognitionRuntime } from '../../apps/agent-server/src/runtime';
 import type { CognitionModel, ModelCompletion, ModelRequest } from '../../apps/agent-server/src/model-types';
+import { ContextSession } from '../../apps/agent-server/src/context-session';
+import { FLASH_MODEL, PRO_MODEL } from '../../apps/agent-server/src/config';
 import { binding, event, observation } from './fixtures';
 
 const receiptMessage = (sequence: number, receipt: ControllerReceipt): ControllerClientMessage => ({
@@ -121,6 +123,149 @@ describe('CognitionRuntime', () => {
     );
     await vi.advanceTimersByTimeAsync(250);
     expect(requests).toHaveLength(3);
+    runtime.dispose();
+  });
+
+  it('preserves a higher-cursor event that arrives during Flash with the same character revision', async () => {
+    const requests: ModelRequest[] = [];
+    const sent: ControllerHostMessage[] = [];
+    let resolveFirst!: (completion: ModelCompletion) => void;
+    const intentCompletion = (id: string): ModelCompletion => ({
+      message: {
+        role: 'assistant',
+        content: null,
+        tool_calls: [
+          {
+            id,
+            type: 'function',
+            function: { name: 'propose_intent', arguments: '{"goal":{"kind":"forage"}}' },
+          },
+        ],
+      },
+      finishReason: 'tool_calls',
+      usage: null,
+      latencyMs: 1,
+    });
+    const model: CognitionModel = {
+      complete: async (request) => {
+        requests.push(request);
+        if (requests.length === 1) return await new Promise<ModelCompletion>((resolve) => (resolveFirst = resolve));
+        return intentCompletion(`tail-tool-${requests.length}`);
+      },
+    };
+    let nextId = 1;
+    const runtime = new CognitionRuntime({
+      binding: binding(),
+      model,
+      send: (message) => sent.push(message),
+      requestId: () => `tail-request-${nextId++}`,
+    });
+    runtime.receive({
+      kind: 'observe',
+      protocolVersion: 1,
+      binding: binding(),
+      sequence: 1,
+      observation: observation(),
+    });
+    await vi.advanceTimersByTimeAsync(250);
+    expect(requests).toHaveLength(1);
+
+    runtime.receive({
+      kind: 'observe',
+      protocolVersion: 1,
+      binding: binding(),
+      sequence: 2,
+      observation: observation({ events: [event(2)], cursor: 2 }),
+    });
+    resolveFirst(intentCompletion('tail-tool-1'));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(sent).toContainEqual(expect.objectContaining({ kind: 'intent', requestId: 'tail-request-1' }));
+
+    runtime.receive(
+      receiptMessage(3, {
+        requestId: 'tail-request-1',
+        actionId: 'tail-action-1',
+        status: 'accepted',
+        cursor: 2,
+        revision: 8,
+      }),
+    );
+    await vi.advanceTimersByTimeAsync(250);
+    expect(requests).toHaveLength(2);
+    expect(requests[1]?.messages).toContainEqual(
+      expect.objectContaining({ role: 'tool', tool_call_id: 'tail-tool-1' }),
+    );
+    expect(requests[1]?.messages.some((message) => message.content?.includes('"cursor":2'))).toBe(true);
+    runtime.dispose();
+  });
+
+  it('waits for Authority memory ACK before spending the next Flash request', async () => {
+    const models: string[] = [];
+    const sent: ControllerHostMessage[] = [];
+    const model: CognitionModel = {
+      complete: async (request) => {
+        models.push(request.model);
+        if (request.model === PRO_MODEL)
+          return {
+            message: { role: 'assistant', content: 'compressed public memory' },
+            finishReason: 'stop',
+            usage: null,
+            latencyMs: 1,
+          };
+        return {
+          message: {
+            role: 'assistant',
+            content: null,
+            tool_calls: [
+              {
+                id: 'post-compression-intent',
+                type: 'function',
+                function: { name: 'propose_intent', arguments: '{"goal":{"kind":"idle"}}' },
+              },
+            ],
+          },
+          finishReason: 'tool_calls',
+          usage: null,
+          latencyMs: 1,
+        };
+      },
+    };
+    const context = new ContextSession([{ role: 'user', content: 'old public context' }], {
+      estimateTokens: (messages) =>
+        messages.some((message) => message.content?.includes('confirmed-memory')) ? 0 : 20,
+      softThreshold: 10,
+      hardThreshold: 30,
+    });
+    let nextId = 1;
+    const runtime = new CognitionRuntime({
+      binding: binding(),
+      model,
+      context,
+      send: (message) => sent.push(message),
+      requestId: () => `compression-request-${nextId++}`,
+    });
+    runtime.receive({
+      kind: 'observe',
+      protocolVersion: 1,
+      binding: binding(),
+      sequence: 1,
+      observation: observation(),
+    });
+    await vi.advanceTimersByTimeAsync(250);
+    expect(models).toEqual([PRO_MODEL]);
+    expect(sent).toContainEqual(expect.objectContaining({ kind: 'memory', requestId: 'compression-request-1' }));
+
+    runtime.receive(
+      receiptMessage(2, {
+        requestId: 'compression-request-1',
+        status: 'accepted',
+        cursor: 1,
+        revision: 8,
+      }),
+    );
+    await vi.advanceTimersByTimeAsync(250);
+    expect(models).toEqual([PRO_MODEL, FLASH_MODEL]);
+    expect(sent).toContainEqual(expect.objectContaining({ kind: 'intent', requestId: 'compression-request-2' }));
     runtime.dispose();
   });
 
