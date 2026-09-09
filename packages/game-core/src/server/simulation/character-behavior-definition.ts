@@ -154,6 +154,21 @@ export function behaviorActionNodes(
   return result;
 }
 
+const actionCapacitySkills = new Set([
+  'flee-threat',
+  'attack-threat',
+  'satisfy-hunger',
+  'rest-at-home',
+  'patrol',
+  'wander',
+  'move-to',
+  'follow',
+]);
+
+/** True when a valid definition can require a new Authority Action during its lifetime. */
+export const behaviorMayStartAction = (definition: BehaviorDefinition): boolean =>
+  behaviorActionNodes(definition).some((node) => actionCapacitySkills.has(node.skill));
+
 export function behaviorConditionContainsDialogue(condition: BehaviorCondition): boolean {
   if ('name' in condition) return condition.name === 'dialogue-received';
   if ('not' in condition) return behaviorConditionContainsDialogue(condition.not);

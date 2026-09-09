@@ -140,6 +140,9 @@ export class CharacterBehaviorRuntime {
       session.tree.reset();
     }
     session.tree.step();
+    for (const execution of record.behaviorTree.skills)
+      if (execution.status === 'running' && !session.invoked.has(execution.nodeId))
+        this.skills.interrupt(record, execution, 'branch-changed');
     record.dangerSecondsRemaining = Math.max(0, record.dangerSecondsRemaining - seconds);
     if (record.dangerSecondsRemaining === 0) record.lastThreatEntityId = undefined;
     record.lastPosition = [...entity.position];
@@ -164,9 +167,29 @@ export class CharacterBehaviorRuntime {
           expected.skill === 'attack-threat' ? 'attack' : this.isMovementSkill(expected.skill) ? 'move-to' : null;
         if (!action || action.actorId !== record.entityId || expectedAction === null || action.type !== expectedAction)
           throw new TypeError('Character behavior ledger action is missing or owned by another actor.');
+        this.validateFollowTarget(record, execution, action.targetEntityId, true);
       }
+      this.validateFollowTarget(record, execution, execution.targetEntityId, Boolean(execution.actionId));
     }
     this.sessions.delete(record.entityId);
+  }
+
+  private validateFollowTarget(
+    record: CharacterRecord,
+    execution: CharacterSkillExecution,
+    targetEntityId: string | undefined,
+    required: boolean,
+  ): void {
+    if (execution.skill !== 'follow') return;
+    if (targetEntityId === undefined) {
+      if (required) throw new TypeError('Character follow ledger target is missing.');
+      return;
+    }
+    const node = behaviorActionNodes(record.behaviorTree.definition).find((entry) => entry.id === execution.nodeId);
+    const targetRef = node ? behaviorArgs(node.args).targetRef : undefined;
+    const binding = record.targets.find((entry) => entry.kind === 'entity' && entry.ref === targetRef);
+    if (!binding || binding.targetId !== targetEntityId)
+      throw new TypeError('Character follow ledger target does not match its authorized reference.');
   }
 
   private rebuild(record: CharacterRecord): TreeSession {

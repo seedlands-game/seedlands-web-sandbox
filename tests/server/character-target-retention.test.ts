@@ -81,10 +81,13 @@ it('atomically rejects a checkpoint with no target reference sequence headroom b
   expect(server.freezeSaveSnapshot(1)).toEqual(before);
   server.spawnPlayer({ id: 'attacker', position: [2, 34.6, 1.5] });
   expect(server.attackEntity('attacker', entityId)).toMatchObject({ success: true, damage: 4 });
-  expect(server.character({ kind: 'inspect', entityId })).toMatchObject({
-    kind: 'state',
-    character: { currentGoal: { status: 'suspended' } },
+  const afterAttack = server.character({ kind: 'observe', entityId, sinceCursor: 0 });
+  expect(afterAttack).toMatchObject({
+    kind: 'observation',
+    observation: { events: expect.arrayContaining([expect.objectContaining({ type: 'attacked' })]) },
   });
+  if (afterAttack.kind !== 'observation') throw new Error('Character observation unavailable.');
+  expect(afterAttack.observation.character.behaviorTree).toEqual(created.character.behaviorTree);
 });
 
 it.each([
