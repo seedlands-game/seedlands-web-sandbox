@@ -39,7 +39,9 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
   const controlActor = await control.world.inspect({ kind: 'actor', entityId: 'parity-actor' });
   const controlActions = await control.world.actions({ entityId: 'parity-actor' });
 
+  await page.addInitScript(() => localStorage.setItem('seedlands.quality.v1', 'low'));
   await startHarnessWorld(page, BROWSER_TARGET_SEED);
+  expect((await snapshot(page))?.quality).toBe('low');
   const result = await page.evaluate(
     async ({ checkpoint, edited, extra, generated, lantern }) => {
       const world = window.__seedlandsHarness!.world;
