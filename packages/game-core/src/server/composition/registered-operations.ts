@@ -148,16 +148,14 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
           );
         if (disposed) return fail('RUNTIME_DISPOSED', 'The module runtime has been disposed.');
         if (busy) return fail('TRANSACTION_REENTRANT', 'Synchronous transaction reentry is forbidden.');
-        const owned = operations.get(request.operationId);
+        const operationId = request.operationId;
+        const owned = operations.get(operationId);
         if (!owned) return fail('OPERATION_UNKNOWN', 'The operation is not registered.');
         if (owned.moduleId !== binding.moduleId)
           return fail('OPERATION_NOT_OWNED', 'The operation belongs to another module.');
         if ((owned.definition.executionKind ?? 'actor') !== (binding.kind ?? 'actor'))
           return fail('EXECUTION_KIND_MISMATCH', 'Actor and system execution kinds are disjoint.');
-        if (
-          binding.kind === 'system' &&
-          (request.target.kind !== 'world' || !systemOperations.includes(request.operationId))
-        )
+        if (binding.kind === 'system' && (request.target.kind !== 'world' || !systemOperations.includes(operationId)))
           return fail('SYSTEM_OPERATION_NOT_BOUND', 'The world operation does not match the registered system.');
         if (options.transactionScope && !options.transactionScope.enter())
           return fail('TRANSACTION_REENTRANT', 'The world already has an active transaction.');
@@ -217,14 +215,17 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
               },
             });
           };
-          const applyRules = (stage: 'before' | 'after', startingInput: ModuleInvocationValue | undefined) => {
+          const applyRules = (
+            stage: 'before' | 'after',
+            startingInput: ModuleInvocationValue | undefined,
+            candidate?: ModuleInvocationValue,
+          ) => {
             let effectiveInput = startingInput;
             for (const rule of options.composition.registrations.rules) {
-              if (rule.definition.operationId !== request.operationId || (rule.definition.stage ?? 'after') !== stage)
-                continue;
+              if (rule.definition.operationId !== operationId || (rule.definition.stage ?? 'after') !== stage) continue;
               const ruleBinding = Object.freeze({ ...binding, moduleId: rule.moduleId });
               const ruleContext = permit(ruleBinding, owned.definition.resource, 'execute', context.target);
-              const result = rule.definition.apply(ruleContext, effectiveInput, candidateFor(ruleBinding));
+              const result = rule.definition.apply(ruleContext, effectiveInput, candidateFor(ruleBinding), candidate);
               if (result === undefined) continue;
               const decision = copy(result);
               if (
@@ -251,8 +252,8 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
             if (context.kind !== 'actor') return reject('EXECUTION_KIND_MISMATCH', 'Expected an actor context.');
             result = owned.definition.run(context, effectiveInput, candidateFor(binding));
           }
-          const value = copy(result);
-          applyRules('after', effectiveInput);
+          let value = copy(result);
+          applyRules('after', effectiveInput, value);
           for (const write of writes.values()) {
             if (states.get(write.address.componentId)!.definition.validate(write.value) !== true)
               return reject('STATE_SCHEMA_INVALID', 'A candidate violates its registered component invariant.');
@@ -262,10 +263,25 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
           );
           const changes = Object.freeze([...writes.values()]);
           candidateOpen = false;
-          const committed = options.state.commit(observations, changes);
+          const hostContext = Object.freeze({
+            operationId,
+            resource: owned.definition.resource,
+            context,
+            authorizer: options.authorizer,
+            candidateValue: value,
+            ...(effectiveInput === undefined ? {} : { effectiveInput }),
+          });
+          const prepared = options.state.prepareCommit?.(observations, changes, hostContext);
+          if (prepared && !prepared.ok) return fail(prepared.code, prepared.reason);
+          if (prepared) {
+            if (!Number.isSafeInteger(prepared.revision) || prepared.revision < 0)
+              return fail('STATE_REVISION_INVALID', 'Prepared owner returned an invalid revision.');
+            value = copy(prepared.value);
+          }
+          const committed = prepared ?? options.state.commit(observations, changes, hostContext);
           if (!committed.ok) return fail('STATE_CONFLICT', committed.reason);
           const fact: CommittedOperationFact = Object.freeze({
-            operationId: request.operationId,
+            operationId,
             context,
             revision: committed.revision,
             value,
@@ -274,6 +290,10 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
             observed: observations,
             writes: changes,
           });
+          if (prepared) {
+            prepared.validate();
+            prepared.apply();
+          }
           publish(fact, owned.definition.resource);
           return Object.freeze({ ok: true, value, revision: committed.revision });
         } catch (error) {

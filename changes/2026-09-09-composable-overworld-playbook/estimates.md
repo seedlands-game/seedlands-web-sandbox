@@ -125,3 +125,11 @@ Prepared Combat frontier 子切片分配最多 3 agent 小时，请求 Sol/high�
 Needs 检查点准出后，prepared Combat request（含 zero-windup）分配最多 3 agent 小时，请求 Sol/high；累计 child 分配上限 35 小时，仍共享当前 36 小时 envelope。根负责 Action prepared start 与注册消费者，下一机制切片前重估，实际阶段活跃工时/费用仍 unknown。
 
 真实 Combat 注册及宿主接入前再用一次最多 1 agent 小时的 Sol/xhigh 只读接缝复核；累计 child 分配上限 36 小时，当前 envelope 不再有新的派发空间。实际消耗仍 unknown；后续需要派发时先更新实施估计并冻结新 envelope，不能通过更改旧合同扩容。
+
+## 11. Combat 最终结果与真实来源接入重估
+
+独立复核发现现有同步 state commit 无法在写前确定真实 Action ID 的最终结果，因此补充 host prepareCommit、冻结候选供 after 验证、当前 actor origin resolver；这些均为既有原子/来源合同的必要接缝。S3 活跃规划由正常 18 /保守 36 调整为正常 24 /保守 48 小时，等待仍 1 /2；未扣实耗的剩余 S3–S6 规划相应为 51 /99 小时，保守 ×120% 向上取整 119 小时。仍非已消费工时或完成承诺，功能范围没有扩张。
+
+冻结新的 48 小时 delegation envelope，旧 hash 保持不变。纯 Combat module/规则/codec 候选子任务分配最多 3 agent 小时，累计已列 child 上限 39 小时；root 负责真实 host owner、来源和产品入口。实际活跃工时、tokens、credits/API 费用继续 unknown，不以累计派发上限代替消耗。
+
+真实注册 Combat 消费接线冻结后，再分配一次最多 2 agent 小时的 Sol/xhigh 只读正确性复核，累计 child 分配上限 41 小时，共享已冻结的 48 小时 envelope。该数字仍不是实际工时；根任务串行负责 static、build 与 Browser 验证。

@@ -1,3 +1,4 @@
+import type { ModuleActorAuthority } from '../composition/gameplay-actor-authority';
 import type { ModuleSystemAuthority } from '../gameplay/modules/gameplay-module-schedule';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { WorldComposition } from '../composition/contracts';
@@ -17,6 +18,7 @@ export type AuthorityRuntimeOptions = Readonly<{
   platform: CorePlatformPorts;
   composition?: WorldComposition;
   moduleSystemAuthority?: ModuleSystemAuthority;
+  moduleActorAuthority?: ModuleActorAuthority;
   allowLegacyCompositionMigration?: boolean;
   persistence?: AuthorityPersistence;
   generatorVersion?: number;

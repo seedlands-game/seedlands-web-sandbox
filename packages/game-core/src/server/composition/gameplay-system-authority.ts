@@ -14,7 +14,7 @@ export function createGameplaySystemAuthority(composition: WorldComposition): Mo
           {
             effect: 'allow',
             principal: { ids: [principalId] },
-            resources: ['seedlands.needs'],
+            resources: ['seedlands.needs', 'seedlands.combat-clock'],
             operations: ['read', 'write', 'execute'],
             scope: 'any',
           },

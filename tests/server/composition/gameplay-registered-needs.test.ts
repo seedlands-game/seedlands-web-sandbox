@@ -4,6 +4,7 @@ import {
   assembleWorldPacks,
   assembleOverworldPacks,
   createGameplaySystemAuthority,
+  createGameplayActorAuthority,
 } from '@seedlands/game-core/server/composition/host-api';
 import { pack } from '../../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import {
@@ -60,7 +61,7 @@ function setup(needs: boolean) {
         {
           effect: 'allow',
           principal: { ids: ['schedule'] },
-          resources: ['seedlands.needs', 'seedlands.ruleset'],
+          resources: ['seedlands.needs', 'seedlands.ruleset', 'seedlands.combat-clock'],
           operations: ['read', 'write', 'execute'],
           scope: 'any',
         },
@@ -78,6 +79,7 @@ function setup(needs: boolean) {
   const world = new GameplayRuntime({
     composition,
     moduleSystemAuthority: { authorizer, principalId: 'schedule' },
+    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'human' }),
     platform: testCorePlatform,
     allowLegacyCompositionMigration: true,
     getWorldTime: () => 0,
@@ -90,12 +92,12 @@ function setup(needs: boolean) {
   return { world, authorizer };
 }
 
-function armStarvation(world: GameplayRuntime, ids: readonly string[]) {
+function armStarvation(world: GameplayRuntime, ids: readonly string[], phase = 14) {
   const snapshot = world.createSnapshot();
   for (const actor of snapshot.entityStore.actors)
     if (ids.includes(actor.entityId)) {
       actor.needs.hunger = 0;
-      actor.needs.starvationAccumulator = 14;
+      actor.needs.starvationAccumulator = phase;
       const entity = snapshot.entityStore.entities.find((entry) => entry.id === actor.entityId)!;
       entity.health = 1;
     }
@@ -245,8 +247,8 @@ describe('registered Needs is the real composed consumer', () => {
     );
     const attack = world.simulation.requestActorCombat('stalker', 'alice', 'night-stalker-claw');
     expect(attack.success).toBe(true);
-    armStarvation(world, ['alice']);
-    world.advanceRules(1);
+    armStarvation(world, ['alice'], 14.95);
+    world.advanceRules(0.05);
     expect(world.getPlayerState('alice')).toMatchObject({ health: 0, lifecycle: 'dead' });
     expect(world.queryEntities({ type: 'world-item' })).toMatchObject([{ stack: { itemId: 'wood-block', count: 3 } }]);
     expect(world.simulation.actions.forActor('stalker')).toBeNull();

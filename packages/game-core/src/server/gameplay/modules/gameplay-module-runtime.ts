@@ -10,6 +10,7 @@ import type {
 import type { WorldResourceAuthorizer } from '../../harness/world-authorization';
 import type { CoreClone } from '../../../runtime/platform-ports';
 import type { EntityStore } from '../entity-store';
+import { COMBAT_ACTOR_COMPONENT, COMBAT_WORLD_COMPONENT } from './combat-model';
 import { NEEDS_COMPONENT } from './needs-model';
 import { MODE_COMPONENT } from './mode-module';
 import { RULESET_COMPONENT } from './ruleset-module';
@@ -39,6 +40,7 @@ export class GameplayModuleRuntime {
       mode: RegisteredStatePort;
       ruleset: RegisteredStatePort;
       needs: RegisteredStatePort;
+      combat?: RegisteredStatePort;
     }>,
   ) {}
 
@@ -64,6 +66,8 @@ export class GameplayModuleRuntime {
     if (!composition) throw new Error('Registered operations require a composed world.');
     const participant = (component: string) => {
       if (component === 'seedlands:inventory') return this.options.inventory;
+      if ((component === COMBAT_ACTOR_COMPONENT || component === COMBAT_WORLD_COMPONENT) && this.options.combat)
+        return this.options.combat;
       if (component === NEEDS_COMPONENT) return this.options.needs;
       if (component === MODE_COMPONENT) return this.options.mode;
       if (component === RULESET_COMPONENT) return this.options.ruleset;
@@ -77,10 +81,26 @@ export class GameplayModuleRuntime {
       bindingValid,
       state: {
         read: (address) => participant(address.componentId).read(address),
-        commit: (observed, writes) => {
+        prepareCommit: (observed, writes, execution) => {
+          const mutableObserved = observed.filter(({ address }) => address.componentId !== RULESET_COMPONENT);
+          const owners = new Set(
+            [...mutableObserved, ...writes].map(({ address }) => participant(address.componentId)),
+          );
+          if (owners.size !== 1) return undefined;
+          const owner = [...owners][0];
+          if (!owner.prepareCommit) return undefined;
+          const immutable = this.options.ruleset.commit(
+            observed.filter(({ address }) => address.componentId === RULESET_COMPONENT),
+            writes.filter(({ address }) => address.componentId === RULESET_COMPONENT),
+            execution,
+          );
+          if (!immutable.ok) return { ok: false, code: 'STATE_CONFLICT', reason: immutable.reason };
+          return owner.prepareCommit(mutableObserved, writes, execution);
+        },
+        commit: (observed, writes, execution) => {
           const rulesetObserved = observed.filter(({ address }) => address.componentId === RULESET_COMPONENT);
           const rulesetWrites = writes.filter(({ address }) => address.componentId === RULESET_COMPONENT);
-          const immutable = this.options.ruleset.commit(rulesetObserved, rulesetWrites);
+          const immutable = this.options.ruleset.commit(rulesetObserved, rulesetWrites, execution);
           if (!immutable.ok) return immutable;
           const mutableObserved = observed.filter(({ address }) => address.componentId !== RULESET_COMPONENT);
           const owners = new Set(
@@ -88,7 +108,7 @@ export class GameplayModuleRuntime {
           );
           if (owners.size === 0) return immutable;
           if (owners.size !== 1) return { ok: false, reason: 'unsupported-atomic-participants' };
-          return [...owners][0].commit(mutableObserved, writes);
+          return [...owners][0].commit(mutableObserved, writes, execution);
         },
       },
     });

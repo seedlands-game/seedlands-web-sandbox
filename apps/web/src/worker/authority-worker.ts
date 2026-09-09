@@ -4,6 +4,7 @@ import { loadBrowserPackArtifacts } from './pack-loader';
 import {
   assembleOverworldPacks,
   createGameplaySystemAuthority,
+  createGameplayActorAuthority,
   type VerifiedPackArtifact,
 } from '@seedlands/game-core/server/composition/host-api';
 
@@ -118,7 +119,11 @@ const requestBootstrap = (seed: number, generatorVersion: number) => {
 
 const runtimeComposition = () => {
   const composition = assembleOverworldPacks(packArtifacts);
-  return { composition, moduleSystemAuthority: createGameplaySystemAuthority(composition) };
+  return {
+    composition,
+    moduleSystemAuthority: createGameplaySystemAuthority(composition),
+    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'browser-player' }),
+  };
 };
 
 const createRuntime = (
@@ -242,6 +247,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     advance: async (elapsedMs) => runtime!.advancePausedSession(elapsedMs),
     restore: restoreWorld,
     clockNow: browserCorePlatform.now,
+    moduleCommandBinding: (command) => ingress!.commandBinding(command),
   });
   ingress = new BrowserAuthorityIngress(runtime.playerId, runtime.server.gameplayResources);
   post({ kind: 'authority-ready', protocolVersion: PROTOCOL_VERSION, epoch, ready: runtime.ready() });

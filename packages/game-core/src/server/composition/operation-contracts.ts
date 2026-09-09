@@ -40,6 +40,7 @@ type RuleApply<Result> = (
   context: ModuleExecutionContext,
   input: ModuleInvocationValue | undefined,
   state: ModCandidateState,
+  candidate?: ModuleInvocationValue,
 ) => Result;
 export type ModRuleDefinition = ModRuleIdentity &
   (
@@ -57,12 +58,36 @@ export type OperationRegistrations = Readonly<{
 }>;
 export type ObservedModState = Readonly<{ address: ModStateAddress; revision: number }>;
 export type ModStateWrite = Readonly<{ address: ModStateAddress; value: ModuleInvocationValue }>;
+/** Host-only authority derived from the executed operation, never from candidate data. */
+export type RegisteredCommitContext = Readonly<{
+  operationId: string;
+  resource: string;
+  context: ModuleExecutionContext;
+  authorizer: WorldResourceAuthorizer;
+  candidateValue: ModuleInvocationValue;
+  effectiveInput?: ModuleInvocationValue;
+}>;
+export type PreparedRegisteredCommit =
+  | Readonly<{ ok: false; code: string; reason: string }>
+  | Readonly<{
+      ok: true;
+      revision: number;
+      value: ModuleInvocationValue;
+      validate(): void;
+      apply(): void;
+    }>;
 /** A host owner must check every observed revision and validate the entire batch before replacing any state. */
 export type RegisteredStatePort = Readonly<{
   read(address: ModStateAddress): Readonly<{ revision: number; value: ModuleInvocationValue }>;
+  prepareCommit?(
+    observed: readonly ObservedModState[],
+    writes: readonly ModStateWrite[],
+    execution: RegisteredCommitContext,
+  ): PreparedRegisteredCommit | undefined;
   commit(
     observed: readonly ObservedModState[],
     writes: readonly ModStateWrite[],
+    execution?: RegisteredCommitContext,
   ): Readonly<{ ok: true; revision: number } | { ok: false; reason: string }>;
 }>;
 export type RegisteredOperationRequest = Readonly<{

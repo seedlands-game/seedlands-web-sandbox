@@ -37,7 +37,13 @@ function setup(allow = true) {
     version: '1.0.0',
     modules: [
       ...overworld.modules.filter(
-        (entry) => !['seedlands:needs-module', 'seedlands:overworld-needs-rules'].includes(entry.descriptor.id),
+        (entry) =>
+          ![
+            'seedlands:needs-module',
+            'seedlands:overworld-needs-rules',
+            'seedlands:combat-module',
+            'seedlands:overworld-combat-rules',
+          ].includes(entry.descriptor.id),
       ),
       module,
     ],

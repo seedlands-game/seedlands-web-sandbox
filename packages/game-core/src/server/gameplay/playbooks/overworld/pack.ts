@@ -4,6 +4,8 @@ import {
   defineInventoryModule,
   defineModeModule,
   defineNeedsModule,
+  defineCombatModule,
+  defineCombatRulesModule,
   defineNeedsRulesModule,
   defineRulesetModule,
 } from '@seedlands/game-core/mod-api';
@@ -34,6 +36,11 @@ export const pack = definePack({
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule(),
     defineModeModule(),
+    defineCombatModule(),
+    defineCombatRulesModule({
+      moduleId: 'seedlands:overworld-combat-rules',
+      profile: { damageMultiplier: 1, immuneTargetModes: ['creative'] },
+    }),
     defineNeedsModule(),
     defineNeedsRulesModule({
       moduleId: 'seedlands:overworld-needs-rules',

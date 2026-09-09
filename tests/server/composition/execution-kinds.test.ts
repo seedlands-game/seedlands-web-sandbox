@@ -5,10 +5,12 @@ import { definePack, type ModModule } from '@seedlands/game-core/mod-api';
 import { assembleWorldPacks, createRegisteredOperationRuntime } from '@seedlands/game-core/server/composition/host-api';
 import { WorldResourceAuthorizer } from '../../../packages/game-core/src/server/harness/world-authorization';
 import type { ModuleExecutionContext } from '../../../packages/game-core/src/server/composition/authorized-execution';
+import type { RegisteredStatePort } from '../../../packages/game-core/src/server/composition/operation-contracts';
 
 function setup(systemOperation = true) {
   let context: ModuleExecutionContext | undefined,
     commits = 0;
+  let ownerContext: unknown;
   const module: ModModule = {
     descriptor: {
       id: 'test:clock',
@@ -62,9 +64,15 @@ function setup(systemOperation = true) {
     composition,
     authorizer,
     clone: structuredClone,
-    state: { read: () => ({ revision: 0, value: null }), commit: () => ({ ok: true, revision: ++commits }) },
+    state: {
+      read: () => ({ revision: 0, value: null }),
+      commit: (...args: Parameters<RegisteredStatePort['commit']>) => {
+        ownerContext = (args as readonly unknown[])[2];
+        return { ok: true, revision: ++commits };
+      },
+    },
   });
-  return { runtime, composition, authorizer, state: () => ({ context, commits }) };
+  return { runtime, composition, authorizer, state: () => ({ context, commits, ownerContext }) };
 }
 
 describe('actor and world system execution are disjoint', () => {
@@ -83,6 +91,12 @@ describe('actor and world system execution are disjoint', () => {
       principal: { id: 'scheduler' },
     });
     expect(Object.hasOwn(world.state().context!, 'originalActorId')).toBe(false);
+    expect(world.state().ownerContext).toMatchObject({
+      operationId: 'test:tick-op',
+      resource: 'test.clock',
+      context: world.state().context,
+      authorizer: world.authorizer,
+    });
   });
   it('rejects kind mismatch, entity target and forged system identity before commit', () => {
     const world = setup();
@@ -116,7 +130,14 @@ describe('actor and world system execution are disjoint', () => {
   });
   it('invalidates real manager system bindings on restore-generation changes and disposal without any actor', () => {
     const world = setup();
-    const port = { read: () => ({ revision: 0, value: null }), commit: () => ({ ok: true as const, revision: 0 }) };
+    let routedContext: unknown;
+    const port: RegisteredStatePort = {
+      read: () => ({ revision: 0, value: null }),
+      commit: (...args) => {
+        routedContext = (args as readonly unknown[])[2];
+        return { ok: true as const, revision: 0 };
+      },
+    };
     const manager = new GameplayModuleRuntime({
       composition: world.composition,
       entities: new EntityStore(),
@@ -130,6 +151,11 @@ describe('actor and world system execution are disjoint', () => {
     const binding = manager.bindSystem(world.authorizer, source);
     const request = { operationId: 'test:tick-op', target: { kind: 'world' as const } };
     expect(binding.invoke(request)).toMatchObject({ ok: true });
+    expect(routedContext).toMatchObject({
+      operationId: 'test:tick-op',
+      context: { kind: 'system', systemId: 'test:tick' },
+      authorizer: world.authorizer,
+    });
     manager.clearBindings();
     expect(binding.invoke(request)).toMatchObject({ ok: false, code: 'SYSTEM_REFERENCE_STALE' });
     const fresh = manager.bindSystem(world.authorizer, source);

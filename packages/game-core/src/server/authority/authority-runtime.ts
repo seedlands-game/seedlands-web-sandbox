@@ -150,6 +150,7 @@ export class AuthorityRuntime {
       platform: options.platform,
       composition: options.composition,
       moduleSystemAuthority: options.moduleSystemAuthority,
+      moduleActorAuthority: options.moduleActorAuthority,
       allowLegacyCompositionMigration: options.allowLegacyCompositionMigration,
     });
     server.setWorldTime(options.initialWorldTime);

@@ -17,6 +17,8 @@ export function assembleOverworldPacks(artifacts: readonly VerifiedPackArtifact[
         { resource: 'seedlands.inventory', operations: ['read', 'write', 'execute'] },
         { resource: 'seedlands.ruleset', operations: ['read'] },
         { resource: 'seedlands.needs', operations: ['read', 'write', 'execute'] },
+        { resource: 'seedlands.combat', operations: ['read', 'execute'] },
+        { resource: 'seedlands.combat-clock', operations: ['read', 'execute'] },
         { resource: 'seedlands.mode', operations: ['read', 'write', 'execute'] },
       ],
     },

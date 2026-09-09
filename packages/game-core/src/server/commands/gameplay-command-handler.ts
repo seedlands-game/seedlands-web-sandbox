@@ -171,8 +171,18 @@ export async function executeGameplayCommand(
       return mutationPayload('Used selected item.', server.useSelectedItem(playerId(source)));
     case 'craft-recipe':
       return mutationPayload('Crafted recipe.', server.craft(playerId(source), command.recipeId));
-    case 'attack-entity':
-      return mutationPayload('Attacked entity.', server.attackEntity(playerId(source), command.entityId));
+    case 'attack-entity': {
+      if (!server.hasGameplayComposition)
+        return mutationPayload('Attacked entity.', server.attackEntity(playerId(source), command.entityId));
+      if (!moduleOperation) throw new Error('Combat requires a host-authorized module binding.');
+      const result = moduleOperation(playerId(source), {
+        operationId: 'seedlands:request-combat',
+        target: { kind: 'entity', entityId: command.entityId },
+        input: { targetId: command.entityId },
+      });
+      if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
+      return { message: 'Attacked entity.', data: result.value };
+    }
     case 'respawn':
       return mutationPayload('Respawned player.', server.respawnPlayer(playerId(source)));
     case 'start-action': {

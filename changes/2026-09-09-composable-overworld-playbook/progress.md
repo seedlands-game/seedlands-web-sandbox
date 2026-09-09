@@ -95,3 +95,14 @@ Combat 当前/缓冲来源及 Prepared Combat 子任务均已归还路径；没�
 Needs 检查点已提交 `37c1619`，提交后工作树确认干净。复用 `s2_action_restore` 实施 prepared Combat request，合同 `/tmp/seedlands-s3-handoff/prepared-combat-request.json`，hash `cbc543538066e1bb7bcef4be9b5bd15f45152a1a6fb4c59794ec1e68dba9dc79`，仅拥有 CombatRuntime、prepared-combat-mutation、新 combat-request-candidate 和该切片的测试/设计/证据。Root 拥有 ActionRuntime prepared start、注册 Combat 与宿主 origin 接线；reviewer 已返回。上一轮通过不能覆盖本轮未提交的新代码。
 
 Prepared request 子任务已交还全部路径，当前没有写入 child。Action/Combat 接受候选及注册库存/时钟容量修复已冻结通过 full static 1446 passed /4 skipped、build 和 Browser 6/6，4173 已释放，见 [接受检查点](s3-prepared-acceptance-checkpoint.md)。`ecs_review` 只读复核后续真实 Combat 接缝，合同 `/tmp/seedlands-s3-handoff/combat-host-review.json`，hash `d0221cdf57d7fffb5d6a824d4dbc08ac58075bef083a2dbd8834ebe487e4269c`；不拥有写路径。S3 Implementing，下一步仍是注册攻击/调度/延迟伤害与宿主 origin，并非 S3 或 S6 准出。
+
+接受检查点已提交 `e0ceac6`，提交后工作树曾确认干净。只读接缝复核已完成，采纳 typed candidate + host prepareCommit（最终 value 写前复制）与 after 第四参数。Root 已补 host envelope、冻结入口 operation ID 防止 after 规则被 request 对象修改绕过、prepared owner 路由；相关 composition 17 files /100 tests GREEN。另有 actor authority、perception、Combat damage/effects 定向 GREEN，当前尚未接入默认产品，不能用早期 static/build 覆盖这些新文件。
+
+Combat 纯模块子任务合同 `/tmp/seedlands-s3-handoff/combat-module-candidates.json`，hash `d301900e51e92345fefbae186d5bd5a9e85ac01e1ea431c0a322bf0c8a65bbdf`，48 小时新 envelope hash `608ce6a28da025c2d3e1ae39de93099c5e7b99e1f5a0d46e530b13b3e43f4e5f`。子任务已交还 3 个 Combat 模块文件、候选测试和自身证据；5 个纯候选测试 GREEN，无活跃写入 child。Root 正在实际 host owner/Autonomy/Gameplay/Browser/Headless 接线，方案见 [注册 Combat](s3-registered-combat-design.md)。其原 test-project 缺失 root 尚在创建的 effects 文件只是并发中间态，待全部写入结束后再统一验收。
+
+## S3 注册 Combat 实际消费恢复点（2026-09-10）
+
+- 当前在 `e0ceac6` 之上接入零状态写候选、host prepareCommit、真实 ECS 投影、共享 Combat/Action/ECS/Perception 提交、Browser/Headless 当前主体策略和命令入口。移除 Combat provider 的组合明确 unavailable。
+- 临时恢复校验 owner 使用当前来源策略；权限失效时玩家 Action 与 Combat 一同取消。空闲 Combat system 不占用最后一个 gameplay revision。定向组合/恢复/Headless 24 文件 149 用例通过。
+- 生产路径冻结后 `pnpm verify:static` 通过：295 文件 passed /2 skipped，1481 用例 passed /4 skipped；Svelte 0 errors/0 warnings。随后 `pnpm build` 通过，仍只有既有 PlayCanvas 大包提示。日志为 `/tmp/seedlands-s3-registered-combat-static.log` 与 `-build.log`。随后 Browser 6/6 通过（26.5 秒）且 4173 已释放；独立只读复核仍在运行。完整范围与后续问题见 [注册 Combat 检查点](s3-registered-combat-checkpoint.md)，不以此标记 S3 完成。
+- 下一轮必须解决/复核：连击切目标后的 Action/Combat 身份恢复合同、Mode/Inventory 取消的事务迁移、脚本控制实际入口的来源保留，以及完整标准模块边界。S3 仍为 Implementing；S4 工位与耐久实际消费、S5 替代组合、S6 全量旅程/交接未完成。

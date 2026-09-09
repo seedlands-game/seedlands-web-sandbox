@@ -1,3 +1,4 @@
+import type { ModuleActorAuthority } from './composition/gameplay-actor-authority';
 import type { ModuleSystemAuthority } from './gameplay/modules/gameplay-module-schedule';
 import type { MeshAuthorityOverlay } from '../world/mesh';
 import type { ChunkCoord } from '../world/voxel';
@@ -87,6 +88,7 @@ export type GameServerOptions = {
   content?: GameplayContent;
   composition?: WorldComposition;
   moduleSystemAuthority?: ModuleSystemAuthority;
+  moduleActorAuthority?: ModuleActorAuthority;
   allowLegacyCompositionMigration?: boolean;
   generatorVersion?: number;
   persistence?: ChunkPersistence & Partial<GameplayPersistence>;

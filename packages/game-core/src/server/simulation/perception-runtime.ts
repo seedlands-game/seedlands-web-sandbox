@@ -110,9 +110,36 @@ export class PerceptionRuntime {
   }
 
   record(observerId: string, event: ObservationEvent): void {
-    const events = this.recent.get(observerId) ?? [];
-    events.push({ ...event });
-    this.recent.set(observerId, events.slice(-16));
+    const plan = this.prepareRecords([{ observerId, event }]);
+    plan.validate();
+    plan.apply();
+  }
+
+  prepareRecords(records: readonly Readonly<{ observerId: string; event: ObservationEvent }>[]) {
+    if (records.length > 1024) throw new RangeError('Perception record batch exceeds its budget.');
+    const original = new Map<string, ObservationEvent[] | undefined>();
+    const candidates = new Map<string, ObservationEvent[]>();
+    for (const { observerId, event } of records) {
+      if (!original.has(observerId)) {
+        original.set(observerId, this.recent.get(observerId));
+        candidates.set(observerId, [...(this.recent.get(observerId) ?? [])]);
+      }
+      candidates.set(observerId, [...candidates.get(observerId)!, { ...event }].slice(-16));
+    }
+    let used = false;
+    const validate = () => {
+      if (used) throw new Error('Prepared perception records were already used.');
+      for (const [id, previous] of original)
+        if (this.recent.get(id) !== previous) throw new Error('Prepared perception records are stale.');
+    };
+    return Object.freeze({
+      validate,
+      apply: () => {
+        validate();
+        for (const [id, events] of candidates) this.recent.set(id, events);
+        used = true;
+      },
+    });
   }
 
   get totalLineOfSightChecks(): number {

@@ -38,7 +38,7 @@ export abstract class GameServerGameplayFacade {
     content?: GameplayContent,
     compositionOptions: Pick<
       GameServerOptions,
-      'composition' | 'allowLegacyCompositionMigration' | 'moduleSystemAuthority'
+      'composition' | 'allowLegacyCompositionMigration' | 'moduleSystemAuthority' | 'moduleActorAuthority'
     > = {},
   ) {
     this.gameplay = new GameplayRuntime({
@@ -49,6 +49,7 @@ export abstract class GameServerGameplayFacade {
       content,
       composition: compositionOptions.composition,
       moduleSystemAuthority: compositionOptions.moduleSystemAuthority,
+      moduleActorAuthority: compositionOptions.moduleActorAuthority,
       allowLegacyCompositionMigration: compositionOptions.allowLegacyCompositionMigration,
     });
   }
@@ -140,6 +141,9 @@ export abstract class GameServerGameplayFacade {
     request: RegisteredOperationRequest,
   ) {
     return this.gameplay.invokeModuleOperation(authorizer, source, request);
+  }
+  get hasGameplayComposition() {
+    return this.gameplay.hasComposition;
   }
   get gameplayResources() {
     return this.gameplay.resources;

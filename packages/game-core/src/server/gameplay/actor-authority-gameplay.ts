@@ -46,7 +46,7 @@ function attack(
   if (visibility !== 'clear') return reject(visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked');
   const result = context.simulation.requestActorCombat(actorId, targetId, 'night-stalker-claw', existingActionId);
   if (!result.success) return reject(result.reason);
-  if (!existingActionId) context.touch();
+  if (!existingActionId && !context.simulation.usesRegisteredCombat) context.touch();
   const action = context.simulation.actions.get(result.actionId);
   return { accepted: true, changed: existingActionId === undefined, ...(action ? { action } : {}) };
 }

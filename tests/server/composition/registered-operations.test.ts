@@ -7,11 +7,20 @@ import {
 } from '@seedlands/game-core/mod-api';
 import { assembleWorldPacks, createRegisteredOperationRuntime } from '@seedlands/game-core/server/composition/host-api';
 import { WorldResourceAuthorizer } from '../../../packages/game-core/src/server/harness/world-authorization';
+import type { RegisteredStatePort } from '../../../packages/game-core/src/server/composition/operation-contracts';
 
 const address = (entityId: string) => ({ componentId: 'test:coins', target: { kind: 'entity' as const, entityId } });
 const target = { kind: 'entity' as const, entityId: 'alice' };
 
-function setup(options: { veto?: boolean; selfOnly?: boolean; stale?: boolean } = {}) {
+function setup(
+  options: {
+    veto?: boolean;
+    selfOnly?: boolean;
+    stale?: boolean;
+    duringOperation?: () => void;
+    prepared?: 'accept' | 'reject' | 'stale' | 'clone-fails';
+  } = {},
+) {
   const values = new Map<string, ModuleInvocationValue>([
     ['alice', 10],
     ['bob', 0],
@@ -20,6 +29,8 @@ function setup(options: { veto?: boolean; selfOnly?: boolean; stale?: boolean } 
   let commits = 0;
   let reads = 0;
   let retained: ModCandidateState | undefined;
+  let committedContext: unknown;
+  let ruleCandidate: unknown;
   const module: ModModule = {
     descriptor: {
       id: 'test:bank',
@@ -46,6 +57,7 @@ function setup(options: { veto?: boolean; selfOnly?: boolean; stale?: boolean } 
           if (typeof balance !== 'number' || typeof recipient !== 'number') throw new TypeError('invalid balance');
           state.write(from, balance - 4);
           state.write(to, recipient + 4);
+          options.duringOperation?.();
           return { transferred: 4, actorId: context.originalActorId };
         },
       });
@@ -60,7 +72,8 @@ function setup(options: { veto?: boolean; selfOnly?: boolean; stale?: boolean } 
       api.registerRule({
         id: 'test:limit',
         operationId: 'test:transfer',
-        apply() {
+        apply(_context, _input, _state, candidate) {
+          ruleCandidate = candidate;
           if (options.veto) return { reject: 'limit' };
         },
       });
@@ -94,14 +107,39 @@ function setup(options: { veto?: boolean; selfOnly?: boolean; stale?: boolean } 
   const runtime = createRegisteredOperationRuntime({
     composition,
     authorizer,
-    clone: structuredClone,
+    clone: (value) => {
+      if (options.prepared === 'clone-fails' && value && typeof value === 'object' && 'actionId' in value)
+        throw new Error('host-result-clone-failed');
+      return structuredClone(value);
+    },
     state: {
+      prepareCommit() {
+        if (!options.prepared) return undefined;
+        if (options.prepared === 'reject')
+          return { ok: false as const, code: 'COMBAT_UNAVAILABLE', reason: 'no-melee' };
+        return {
+          ok: true as const,
+          revision: revision + 1,
+          value: { actionId: 'action-17' },
+          validate() {
+            if (options.prepared === 'stale') throw new Error('prepared-owner-stale');
+          },
+          apply() {
+            commits++;
+            revision++;
+            values.set('alice', 6);
+            values.set('bob', 4);
+          },
+        };
+      },
       read(key) {
         reads++;
         if (key.target.kind !== 'entity') throw new Error('unsupported target');
         return { revision, value: values.get(key.target.entityId) ?? null };
       },
-      commit(observed, writes) {
+      commit(...args: Parameters<RegisteredStatePort['commit']>) {
+        const [observed, writes] = args;
+        committedContext = (args as readonly unknown[])[2];
         if (options.stale || observed.some((entry) => entry.revision !== revision))
           return { ok: false, reason: 'stale-state' };
         for (const entry of writes) {
@@ -115,10 +153,80 @@ function setup(options: { veto?: boolean; selfOnly?: boolean; stale?: boolean } 
     },
   });
   const execution = runtime.bind({ moduleId: 'test:bank', principalId: 'human', originalActorId: 'alice' });
-  return { runtime, execution, values, retained: () => retained!, commits: () => commits, reads: () => reads };
+  return {
+    runtime,
+    execution,
+    values,
+    retained: () => retained!,
+    commits: () => commits,
+    reads: () => reads,
+    committedContext: () => committedContext,
+    ruleCandidate: () => ruleCandidate,
+    authorizer,
+  };
 }
 
 describe('registered operation candidate and commit stages', () => {
+  it('publishes the host allocator result only after prepared owner installation', () => {
+    const world = setup({ prepared: 'accept' });
+    const seen: unknown[] = [];
+    world.execution.subscribe((fact) =>
+      seen.push({ value: fact.value, revision: fact.revision, commits: world.commits() }),
+    );
+    expect(world.execution.invoke({ operationId: 'test:transfer', target })).toMatchObject({
+      ok: true,
+      value: { actionId: 'action-17' },
+      revision: 1,
+    });
+    expect(seen).toEqual([{ value: { actionId: 'action-17' }, revision: 1, commits: 1 }]);
+  });
+  it.each(['clone-fails', 'stale', 'reject'] as const)(
+    'does not install or publish a failed prepared owner: %s',
+    (prepared) => {
+      const world = setup({ prepared });
+      let facts = 0;
+      world.execution.subscribe(() => facts++);
+      expect(world.execution.invoke({ operationId: 'test:transfer', target })).toMatchObject({
+        ok: false,
+        ...(prepared === 'reject' ? { code: 'COMBAT_UNAVAILABLE' } : {}),
+      });
+      expect([...world.values]).toEqual([
+        ['alice', 10],
+        ['bob', 0],
+      ]);
+      expect(world.commits()).toBe(0);
+      expect(facts).toBe(0);
+    },
+  );
+  it('does not let caller request mutation skip the selected operation after rules', () => {
+    const request = { operationId: 'test:transfer', target };
+    const world = setup({
+      veto: true,
+      duringOperation: () => {
+        request.operationId = 'test:close';
+      },
+    });
+    expect(world.execution.invoke(request)).toMatchObject({ ok: false, code: 'RULE_REJECTED' });
+    expect([...world.values]).toEqual([
+      ['alice', 10],
+      ['bob', 0],
+    ]);
+    expect(world.commits()).toBe(0);
+    expect(world.committedContext()).toBeUndefined();
+  });
+  it('keeps the selected operation identity in owner context and committed facts after caller mutation', () => {
+    const request = { operationId: 'test:transfer', target };
+    const world = setup({
+      duringOperation: () => {
+        request.operationId = 'test:close';
+      },
+    });
+    const facts: string[] = [];
+    world.execution.subscribe((fact) => facts.push(fact.operationId));
+    expect(world.execution.invoke(request)).toMatchObject({ ok: true });
+    expect(world.committedContext()).toMatchObject({ operationId: 'test:transfer' });
+    expect(facts).toEqual(['test:transfer']);
+  });
   it('commits both inventory candidates once and retains the host actor despite forged payload fields', () => {
     const world = setup();
     expect(
@@ -133,6 +241,23 @@ describe('registered operation candidate and commit stages', () => {
       ['bob', 4],
     ]);
     expect(world.commits()).toBe(1);
+    expect(world.committedContext()).toMatchObject({
+      operationId: 'test:transfer',
+      resource: 'test.bank',
+      context: {
+        kind: 'actor',
+        originalActorId: 'alice',
+        principal: { id: 'human' },
+        provenance: { packId: 'test:playbook', moduleId: 'test:bank' },
+        target,
+      },
+      authorizer: world.authorizer,
+      candidateValue: { transferred: 4, actorId: 'alice' },
+      effectiveInput: { originalActorId: 'bob', principalId: 'admin' },
+    });
+    expect(world.ruleCandidate()).toEqual({ transferred: 4, actorId: 'alice' });
+    expect(Object.isFrozen(world.ruleCandidate())).toBe(true);
+    expect(Object.isFrozen(world.committedContext())).toBe(true);
   });
   it('does not commit either inventory or emit facts when a named rule vetoes', () => {
     const world = setup({ veto: true });
@@ -148,6 +273,7 @@ describe('registered operation candidate and commit stages', () => {
     ]);
     expect(world.commits()).toBe(0);
     expect(facts).toBe(0);
+    expect(world.committedContext()).toBeUndefined();
   });
   it('rejects stale observed state at atomic commit without publishing a fact', () => {
     const world = setup({ stale: true });

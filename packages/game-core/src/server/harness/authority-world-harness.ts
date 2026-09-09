@@ -1,3 +1,4 @@
+import type { WorldModuleBinding } from '../commands/module-command';
 import type { ServerCommand } from '../commands/command-contract';
 import type { AuthorityRuntime } from '../authority/authority-runtime';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
@@ -55,6 +56,7 @@ export type AuthorityWorldHarnessOptions = Readonly<{
   restore: (snapshot: FrozenGameSaveSnapshot) => Promise<void>;
   complete?: <Result>(operation: Promise<Result>) => Promise<Result>;
   clockNow?: () => number;
+  moduleCommandBinding?: (command: ServerCommand) => WorldModuleBinding;
 }>;
 
 type Operation = Readonly<{
@@ -230,10 +232,14 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
               : { expectedCommitSequence: commandOptions.expectedCommitSequence }),
           },
           () =>
-            current.runtime.executeCommand(source, command, {
-              authorizer: this.options.authorization,
-              principalId: this.options.principalId,
-            }),
+            current.runtime.executeCommand(
+              source,
+              command,
+              this.options.moduleCommandBinding?.(command) ?? {
+                authorizer: this.options.authorization,
+                principalId: this.options.principalId,
+              },
+            ),
         );
         const receipt = await (this.options.complete ? this.options.complete(operation) : operation);
         if (receipt.status !== 'executed')

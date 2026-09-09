@@ -1,3 +1,4 @@
+import type { CombatOriginRuntimeOptions } from './combat-origin';
 import type { ModuleScheduleSnapshot } from '../composition/lifecycle-contracts';
 import type { WorldRulesetV1 } from './modules/ruleset-module';
 import { AutonomyRuntime, type SimulationSnapshot } from '../simulation/autonomy-runtime';
@@ -81,6 +82,7 @@ type GameplaySnapshotValidationOptions = {
   items?: ItemDefinitionRegistry;
   meleeDefinitions?: readonly MeleeDefinition[];
   registeredNeeds?: boolean;
+  combatOriginFor?(entities: EntityStore): CombatOriginRuntimeOptions;
   needsPlayerLimit?: number;
 };
 
@@ -253,6 +255,7 @@ export function validateGameplaySnapshot(
       isPlayerAlive: (id) => players.get(id)?.lifecycle === 'alive',
       clone: options.clone,
       meleeDefinitions: options.meleeDefinitions,
+      combatOrigin: options.combatOriginFor?.(entities),
     });
     validator.restore(simulationSnapshotFor(source));
     const snapshot = createGameplaySnapshotV4(

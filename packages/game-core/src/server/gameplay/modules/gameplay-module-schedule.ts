@@ -17,6 +17,7 @@ export function createGameplayModuleSchedule(
   composition: WorldComposition,
   modules: GameplayModuleRuntime,
   authority?: ModuleSystemAuthority,
+  afterSystem?: () => void,
 ) {
   let active = false;
   let disposed = false;
@@ -37,7 +38,9 @@ export function createGameplayModuleSchedule(
         systemId,
       });
       try {
-        return execution.invoke(request);
+        const result = execution.invoke(request);
+        if (result.ok) afterSystem?.();
+        return result;
       } finally {
         execution.dispose();
       }

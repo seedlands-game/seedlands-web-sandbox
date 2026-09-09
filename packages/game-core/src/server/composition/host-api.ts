@@ -14,6 +14,8 @@ export { gameplayContentForComposition, assembleOverworldPacks } from './gamepla
 export type { ModuleScheduleSnapshot } from './lifecycle-contracts';
 export type {
   RegisteredStatePort,
+  RegisteredCommitContext,
+  PreparedRegisteredCommit,
   RegisteredOperationBinding,
   RegisteredOperationExecution,
   RegisteredOperationResult,
@@ -23,3 +25,5 @@ export type {
 } from './operation-contracts';
 
 export { createGameplaySystemAuthority } from './gameplay-system-authority';
+
+export { createGameplayActorAuthority, type ModuleActorAuthority } from './gameplay-actor-authority';

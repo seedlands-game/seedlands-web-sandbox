@@ -45,3 +45,7 @@ export type { WorldRulesetDefinition, WorldRulesetV1 } from '../gameplay/modules
 export { defineNeedsModule } from '../gameplay/modules/needs-module';
 export { defineNeedsRulesModule } from '../gameplay/modules/needs-rules-module';
 export type { NeedsProfiles, NeedsProfile } from '../gameplay/modules/needs-model';
+
+export { defineCombatModule } from '../gameplay/modules/combat-module';
+export { defineCombatRulesModule } from '../gameplay/modules/combat-rules-module';
+export * from '../gameplay/modules/combat-model';

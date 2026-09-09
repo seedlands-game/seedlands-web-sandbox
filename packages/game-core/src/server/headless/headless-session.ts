@@ -1,4 +1,4 @@
-import { createGameplaySystemAuthority } from '../composition/gameplay-system-authority';
+import { createHeadlessGameplayAuthorities, headlessModuleCommandBinding } from './headless-gameplay-authority';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { runWorldComputeTask } from '../../compute/world-compute-task';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
@@ -87,6 +87,7 @@ export class HeadlessSession {
     frequencies: HeadlessFrequencies,
     worldHarness: NonNullable<HeadlessSessionOptions['worldHarness']>,
     private readonly createComposition?: () => WorldComposition,
+    private readonly customWorldHarness?: HeadlessSessionOptions['worldHarness'],
   ) {
     this.ownerValue = {
       runtime,
@@ -109,6 +110,7 @@ export class HeadlessSession {
       restore: (snapshot) => this.restoreCheckpoint(snapshot),
       complete: (operation) => this.completeWithChunkPreparation(operation),
       clockNow: () => this.runtime.sessionTimeMs,
+      moduleCommandBinding: (command) => this.moduleCommandBinding(command),
     });
     this.clock = new HeadlessClockScheduler(platform, (elapsedMs, isCurrent) =>
       this.world.hostOperation(() => (isCurrent() ? this.advanceSessionUnqueued(elapsedMs) : undefined)),
@@ -152,6 +154,7 @@ export class HeadlessSession {
       frequencies,
       worldHarness,
       options.createComposition,
+      options.worldHarness,
     );
     holder.session = session;
     await session.loadEntityChunks();
@@ -172,7 +175,7 @@ export class HeadlessSession {
       seedText: options.seedText,
       platform: options.platform,
       composition,
-      moduleSystemAuthority: composition ? createGameplaySystemAuthority(composition) : undefined,
+      ...createHeadlessGameplayAuthorities(composition, options.worldHarness?.authorization),
       allowLegacyCompositionMigration: Boolean(options.createComposition),
       persistence,
       initialWorldTime: options.initialWorldTime ?? 9,
@@ -272,6 +275,7 @@ export class HeadlessSession {
         seedText: snapshot.seedText,
         platform: this.platform,
         createComposition: this.createComposition,
+        worldHarness: this.customWorldHarness,
         epoch: nextEpoch,
         initialWorldTime: snapshot.gameplay.worldTime ?? 9,
         frequencies: this.frequenciesValue,
@@ -312,6 +316,15 @@ export class HeadlessSession {
   advanceFluid(steps: number): Promise<HeadlessAdvanceResult> {
     assertStepCount('Fluid steps', steps);
     return this.advanceSession((steps * 1_000) / this.runtime.frequencies.fluidHz);
+  }
+
+  private moduleCommandBinding(command: import('../commands/command-contract').ServerCommand) {
+    return headlessModuleCommandBinding(
+      this.runtime,
+      command,
+      { authorizer: this.worldAuthorization, principalId: this.worldPrincipalId },
+      !!this.customWorldHarness,
+    );
   }
 
   async executeLine(input: string, sequence?: number): Promise<SlashCommandExecution> {
@@ -362,10 +375,7 @@ export class HeadlessSession {
         () =>
           parsed.command.type === 'advance-gameplay'
             ? this.executeTick(parsed.command.seconds)
-            : this.runtime.executeCommand(this.source, parsed.command, {
-                authorizer: this.worldAuthorization,
-                principalId: this.worldPrincipalId,
-              }),
+            : this.runtime.executeCommand(this.source, parsed.command, this.moduleCommandBinding(parsed.command)),
       ),
     );
     if (receipt.status !== 'executed')

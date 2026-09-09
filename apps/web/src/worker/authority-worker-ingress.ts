@@ -46,7 +46,7 @@ export class BrowserAuthorityIngress {
     this.authorization = new WorldResourceAuthorizer(
       {
         principals: [
-          { id: 'browser-player', boundEntityId: playerId },
+          { id: 'browser-player', kind: 'actor', subject: 'seedlands:local-player', boundEntityId: playerId },
           { id: 'browser-command', boundEntityId: playerId },
           { id: 'browser-logic' },
           { id: 'browser-fluid' },
@@ -82,6 +82,13 @@ export class BrowserAuthorityIngress {
           },
           {
             effect: 'allow',
+            principal: { ids: ['browser-player'] },
+            resources: ['seedlands.combat'],
+            operations: ['read', 'execute'],
+            scope: 'any',
+          },
+          {
+            effect: 'allow',
             principal: { ids: ['browser-command'] },
             resources: ['*'],
             operations: ['*'],
@@ -110,7 +117,7 @@ export class BrowserAuthorityIngress {
   commandBinding(command: ServerCommand) {
     return {
       authorizer: this.authorization,
-      principalId: isModeCommand(command) ? 'browser-player' : 'browser-command',
+      principalId: isModeCommand(command) || command.type === 'attack-entity' ? 'browser-player' : 'browser-command',
     };
   }
 

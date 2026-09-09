@@ -1,4 +1,7 @@
 import { prepareDeathEffects } from './prepared-death-effects';
+import { prepareCombatEffects, type CombatAutonomyEffects } from './prepared-combat-effects';
+import type { PreparedCombatMutation } from '../gameplay/prepared-combat-mutation';
+import type { CombatOriginRuntimeOptions } from '../gameplay/combat-origin';
 import { assertCombatResultCapacity } from '../gameplay/combat-runtime-snapshot';
 import type { EntityStore } from '../gameplay/entity-store';
 import type { ItemStack } from '../gameplay/item-registry';
@@ -41,6 +44,9 @@ type Options = {
   combat?: CombatRuntimeCallbacks;
   meleeDefinitions?: readonly MeleeDefinition[];
   registeredNeeds?: boolean;
+  registeredCombat?: boolean;
+  combatOrigin?: CombatOriginRuntimeOptions;
+  registeredCombatRequest?: (actorId: string, targetId: string, existingActionId?: string) => CombatRequestResult;
 };
 
 export class AutonomyRuntime {
@@ -90,6 +96,7 @@ export class AutonomyRuntime {
       },
       options.meleeDefinitions ? createMeleeDefinitionRegistry(options.meleeDefinitions) : undefined,
       identity,
+      options.combatOrigin,
     );
   }
 
@@ -135,6 +142,30 @@ export class AutonomyRuntime {
         this.actionCompletionCount += effects.completed;
       },
     };
+  }
+
+  prepareCombatEffects(combatPlan: PreparedCombatMutation, input: CombatAutonomyEffects = {}) {
+    const effects = prepareCombatEffects({
+      ...input,
+      combatPlan,
+      combat: this.combat,
+      actions: this.actions,
+      actors: this.actors,
+      perception: this.perception,
+      now: this.time,
+    });
+    return {
+      validate: () => effects.validate(),
+      apply: () => {
+        effects.apply();
+        this.actionInterruptionCount += effects.interrupted;
+        this.actionCompletionCount += effects.completed;
+      },
+    };
+  }
+
+  get usesRegisteredCombat(): boolean {
+    return this.options.registeredCombat === true;
   }
 
   actorDeathDrop(entityId: string): ItemStack | null {
@@ -183,6 +214,10 @@ export class AutonomyRuntime {
   }
 
   requestCombat(actorId: string, targetId: string, definitionId: string): CombatRequestResult {
+    if (this.options.registeredCombat)
+      return (
+        this.options.registeredCombatRequest?.(actorId, targetId) ?? { success: false, reason: 'combat-unavailable' }
+      );
     return this.combat.request(actorId, targetId, definitionId);
   }
 
@@ -192,6 +227,13 @@ export class AutonomyRuntime {
     definitionId: string,
     existingActionId?: string,
   ): CombatRequestResult {
+    if (this.options.registeredCombat)
+      return (
+        this.options.registeredCombatRequest?.(actorId, targetId, existingActionId) ?? {
+          success: false,
+          reason: 'combat-unavailable',
+        }
+      );
     const actor = this.actors.get(actorId);
     if (!actor) return { success: false, reason: 'invalid-attacker' };
     if (existingActionId) return this.combat.retain(actorId, existingActionId);
@@ -263,8 +305,10 @@ export class AutonomyRuntime {
 
   advanceAuthorityRules(seconds: number): void {
     if (!Number.isFinite(seconds) || seconds < 0) throw new TypeError('Actor rule seconds must be non-negative.');
-    this.combat.advance(seconds);
-    this.reconcileCombatEvents();
+    if (!this.options.registeredCombat) {
+      this.combat.advance(seconds);
+      this.reconcileCombatEvents();
+    }
     this.stepAccumulator = round(this.stepAccumulator + seconds);
     while (this.stepAccumulator + Number.EPSILON >= STEP_SECONDS) {
       this.stepAccumulator = round(this.stepAccumulator - STEP_SECONDS);
@@ -461,7 +505,6 @@ export class AutonomyRuntime {
   private reconcileCombatEvents(): void {
     for (const event of this.combat.takeLifecycleEvents()) {
       const actor = this.actors.get(event.actorId);
-      if (!actor) continue;
       const action = this.actions.forActor(event.actorId);
       if (action?.id === event.actionId) {
         if (event.status === 'cancelled') {
@@ -469,8 +512,10 @@ export class AutonomyRuntime {
             this.actionInterruptionCount += 1;
         } else this.finishSuccess(event.actionId, event.result ?? undefined);
       }
-      actor.behavior = 'idle';
-      actor.targetEntityId = null;
+      if (actor) {
+        actor.behavior = 'idle';
+        actor.targetEntityId = null;
+      }
     }
   }
 }

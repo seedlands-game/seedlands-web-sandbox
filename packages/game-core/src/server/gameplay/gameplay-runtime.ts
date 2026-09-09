@@ -1,3 +1,6 @@
+import { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
+import type { ModuleActorAuthority } from '../composition/gameplay-actor-authority';
+import { COMBAT_REQUEST_OPERATION } from './modules/combat-model';
 import { NEEDS_COMPONENT } from './modules/needs-model';
 import { createNeedsStatePort } from './modules/needs-state-port';
 import { createGameplayModuleSchedule, type ModuleSystemAuthority } from './modules/gameplay-module-schedule';
@@ -6,7 +9,7 @@ import { ActorVitalsRuntime } from './modules/actor-vitals-runtime';
 import { ModeRuntime } from './modules/mode-runtime';
 import { createModeStatePort } from './modules/mode-state-port';
 import { GameplayModuleRuntime } from './modules/gameplay-module-runtime';
-import { findSafeModeLanding } from '../authority/creative-physics';
+import { findGameplayModeLanding } from './gameplay-mode-landing';
 import type { WorldResourceAuthorizer } from '../harness/world-authorization';
 import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from '../composition/operation-contracts';
 import { ActorInventoryRuntime } from './modules/actor-inventory-runtime';
@@ -14,7 +17,7 @@ import { createInventoryStatePort } from './modules/inventory-state-port';
 import { resolveGameplayComposition } from '../composition/gameplay-composition';
 import type { WorldComposition } from '../composition/contracts';
 import { BlockInteractionRuntime } from './modules/block-interaction-runtime';
-import { Voxel, CHUNK_SIZE, chunkKey } from '../../world/voxel';
+import { Voxel } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
 import type { PreparedWorldEdit } from '../prepared-world-edit';
 import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
@@ -33,7 +36,7 @@ import { advanceGameplayClock, assertGameplayAdvance } from './gameplay-clock';
 import { clonePosition } from './gameplay-geometry';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { CombatSnapshot, MeleeDefinition } from './combat-runtime';
-import { applyCombatDamage, isCombatantAvailable, validateCombatHit } from './gameplay-combat';
+import { createGameplayCombatCallbacks } from './gameplay-combat-callbacks';
 
 export type {
   GameplaySnapshot,
@@ -52,6 +55,7 @@ export type GameplayCallbacks = {
   content?: GameplayContent;
   composition?: WorldComposition;
   moduleSystemAuthority?: ModuleSystemAuthority;
+  moduleActorAuthority?: ModuleActorAuthority;
   allowLegacyCompositionMigration?: boolean;
   meleeDefinitions?: readonly MeleeDefinition[];
 };
@@ -73,11 +77,12 @@ export class GameplayRuntime {
   private readonly inventoryActions;
   private readonly modes;
   private readonly vitals;
-  private readonly modules;
+  private readonly modules: GameplayModuleRuntime;
   private readonly blocks;
   private readonly ruleset;
   private readonly schedule;
   private readonly needsPlayerLimit;
+  private readonly registeredCombat: RegisteredCombatRuntime | null;
 
   constructor(private readonly callbacks: GameplayCallbacks) {
     const resolved = resolveGameplayComposition(callbacks);
@@ -122,23 +127,7 @@ export class GameplayRuntime {
     });
     this.modes = new ModeRuntime({
       entities: this.entities,
-      findSafeLanding: (id) =>
-        findSafeModeLanding(this.entities.get(id)!, {
-          getLoadedVoxel: (x, y, z) => {
-            const voxel = callbacks.getVoxel([x, y, z]);
-            return voxel === undefined
-              ? null
-              : {
-                  voxel,
-                  chunkKey: chunkKey(
-                    Math.floor(x / CHUNK_SIZE),
-                    Math.floor(y / CHUNK_SIZE),
-                    Math.floor(z / CHUNK_SIZE),
-                  ),
-                  revision: this.revision,
-                };
-          },
-        }),
+      findSafeLanding: (id) => findGameplayModeLanding(this.entities.get(id)!, callbacks.getVoxel, this.revision),
       cancelIncompatibleActions: (id, reason) => {
         this.simulation.interruptAction(id, reason);
         const player = this.players.get(id);
@@ -159,7 +148,26 @@ export class GameplayRuntime {
         this.touch();
       },
     });
+    this.registeredCombat = callbacks.composition
+      ? new RegisteredCombatRuntime({
+          composition: callbacks.composition,
+          entities: this.entities,
+          content: this.content,
+          simulation: () => this.simulation,
+          actorAuthority: callbacks.moduleActorAuthority,
+          actorIds: () => [...this.players.keys(), ...this.simulation.actorIds()],
+          getVoxel: callbacks.getVoxel,
+          revision: () => this.revision,
+          rulesetRevision: () => this.ruleset.snapshot()?.revision ?? 0,
+          now: () => this.gameplayTime,
+          assertCanChange: () => this.assertRevisionCapacity(),
+          changed: () => this.touch(),
+          modules: () => this.modules,
+          systemAuthority: callbacks.moduleSystemAuthority,
+        })
+      : null;
     this.modules = new GameplayModuleRuntime({
+      combat: this.registeredCombat?.state,
       composition: callbacks.composition,
       entities: this.entities,
       clone: callbacks.platform.clone,
@@ -176,37 +184,37 @@ export class GameplayRuntime {
       mode: createModeStatePort(this.entities, this.modes, () => this.revision),
     });
     this.schedule = callbacks.composition
-      ? createGameplayModuleSchedule(callbacks.composition, this.modules, callbacks.moduleSystemAuthority)
+      ? createGameplayModuleSchedule(callbacks.composition, this.modules, callbacks.moduleSystemAuthority, () =>
+          this.registeredCombat?.drain(),
+        )
       : null;
     this.simulation = new AutonomyRuntime({
       entities: this.entities,
       registeredNeeds: !!callbacks.composition,
+      registeredCombat: !!callbacks.composition,
+      combatOrigin: this.registeredCombat?.environment.originOptions,
+      registeredCombatRequest: (actorId, targetId, existingActionId) =>
+        this.registeredCombat!.request(actorId, targetId, existingActionId),
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: callbacks.getWorldTime,
       isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
       clone: callbacks.platform.clone,
       meleeDefinitions: this.content.meleeDefinitions,
-      combat: {
-        actorAvailable: (id) =>
-          isCombatantAvailable(this.entities, (playerId) => this.players.get(playerId)?.lifecycle === 'alive', id),
-        targetAvailable: (id) =>
-          isCombatantAvailable(this.entities, (playerId) => this.players.get(playerId)?.lifecycle === 'alive', id),
-        validateHit: (actorId, targetId, definition) =>
-          validateCombatHit(
-            {
-              entities: this.entities,
-              getVoxel: callbacks.getVoxel,
-              isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
-            },
-            actorId,
-            targetId,
-            definition,
-          ),
-        applyDamage: (actorId, targetId, damage) => this.applyCombatDamage(actorId, targetId, damage),
-      },
+      combat: createGameplayCombatCallbacks({
+        entities: this.entities,
+        players: this.players,
+        simulation: () => this.simulation,
+        vitals: this.vitals,
+        getVoxel: callbacks.getVoxel,
+        assertCanChange: () => this.assertRevisionCapacity(),
+        changed: () => this.touch(),
+      }),
     });
   }
 
+  get hasComposition() {
+    return !!this.callbacks.composition;
+  }
   get resources() {
     return this.callbacks.composition?.resources ?? [];
   }
@@ -222,7 +230,9 @@ export class GameplayRuntime {
     source: Omit<RegisteredActorOperationBinding, 'moduleId'>,
     request: RegisteredOperationRequest,
   ) {
-    return this.modules.invoke(authorizer, source, request);
+    const result = this.modules.invoke(authorizer, source, request);
+    if (result.ok && request.operationId === COMBAT_REQUEST_OPERATION) this.registeredCombat?.drain();
+    return result;
   }
   dispose(): void {
     try {
@@ -375,6 +385,7 @@ export class GameplayRuntime {
     const player = this.player(playerId);
     const active = this.requireAlive(player);
     if (active) return active;
+    if (this.registeredCombat) return this.registeredCombat.request(playerId, targetId);
     const selected = player.inventory.slot(player.selectedSlot);
     const melee = selected ? this.content.items.capability(selected.itemId, 'melee') : undefined;
     const result = this.simulation.requestCombat(playerId, targetId, melee?.definitionId ?? 'unarmed');
@@ -428,6 +439,9 @@ export class GameplayRuntime {
   createSnapshot(): GameplaySnapshot.GameplaySnapshotV4 {
     const moduleSchedule = this.schedule?.snapshot();
     this.modules.prepareSnapshot();
+    this.registeredCombat?.drain();
+    this.modules.prepareSnapshot();
+    this.registeredCombat?.drain();
     const snapshot = GameplaySnapshot.createGameplaySnapshotV4(
       this.revision,
       this.gameplayTime,
@@ -476,6 +490,7 @@ export class GameplayRuntime {
       meleeDefinitions: this.content.meleeDefinitions,
       entities: this.entities,
       registeredNeeds: !!this.schedule,
+      combatOriginFor: this.registeredCombat ? (entities) => this.registeredCombat!.originFor(entities) : undefined,
       needsPlayerLimit: this.needsPlayerLimit,
       simulation: this.simulation,
       players: this.players,
@@ -504,27 +519,6 @@ export class GameplayRuntime {
     const player = this.players.get(id);
     if (!player) throw new RangeError(`Unknown player: ${id}`);
     return player;
-  }
-
-  private applyCombatDamage(actorId: string, targetId: string, amount: number): number | null {
-    if (this.getActorModeState(targetId)?.mode === 'creative') return 0;
-    return applyCombatDamage(
-      {
-        entities: this.entities,
-        playerState: (id) => this.players.get(id),
-        damagePlayer: (actor, target, damage) => this.vitals.applyDamage(actor, target, damage, 'combat'),
-        recordAttacked: (target, actor) => this.simulation.recordAttacked(target, actor),
-        cancelTarget: (target, actor) => this.simulation.cancelCombatTarget(target, 'target-missing', actor),
-        unregisterActor: (target) => this.simulation.unregisterActor(target, 'killed'),
-        actorDeathDrop: (id) => this.simulation.actorDeathDrop(id),
-        assertCanRemoveActor: (target, actor) => this.simulation.assertCanRemoveActor(target, actor),
-        assertCanChange: () => this.assertRevisionCapacity(),
-        touch: () => this.touch(),
-      },
-      actorId,
-      targetId,
-      amount,
-    );
   }
 
   private requireAlive(player: Pick<PlayerState, 'lifecycle'>): Failure | null {
