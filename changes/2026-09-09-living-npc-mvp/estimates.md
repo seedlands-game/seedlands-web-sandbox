@@ -27,3 +27,5 @@ GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，li
 第三轮：宿主约0.20 agent小时，世界约18分钟，初始独立分诊约0.28 agent小时，冻结复核实际见round3-recheck.md；继续使用原共享工时池。无新增provider调用或reset，实际Codex消费仍无任务级计量。
 
 分页增量：宿主约0.18 agent小时，独立冻结复核见round4-recheck.md，维持原共享池；实际浏览器使用确定性model fixture，未增加真实provider调用。
+
+动作历史增量由Root实现；被中止的子任务没有文件输出，实际计费unknown。新增5项回归，工时沿用原共享池；无provider、购买或reset。

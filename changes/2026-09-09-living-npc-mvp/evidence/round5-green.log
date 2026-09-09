@@ -1,0 +1,11 @@
+$ vitest run tests/server/action-history-retention.test.ts tests/server/world-action-retention.test.ts
+7:35:25 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+
+ Test Files  2 passed (2)
+      Tests  5 passed (5)
+   Start at  19:35:25
+   Duration  2.42s (transform 590ms, setup 0ms, import 728ms, tests 1.98s, environment 0ms)
+

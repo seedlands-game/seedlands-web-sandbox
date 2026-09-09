@@ -64,7 +64,7 @@ export class AutonomyRuntime {
   private actionInterruptionCount = 0;
 
   constructor(private readonly options: Options) {
-    this.actions = new ActionRuntime(options.clone);
+    this.actions = new ActionRuntime(options.clone, () => this.characters.retainedActionIds());
     this.navigator = new GroundNavigator(options.getVoxel);
     this.perception = new PerceptionRuntime({
       entities: options.entities,
@@ -243,6 +243,7 @@ export class AutonomyRuntime {
       this.needsAccumulator = round(this.needsAccumulator + STEP_SECONDS);
       tickAuthorityActorRules(this.authorityRulesContext(), STEP_SECONDS);
       this.characters.advance(STEP_SECONDS);
+      this.actions.pruneHistory();
       if (this.needsAccumulator + Number.EPSILON >= 5) {
         this.needsAccumulator = round(this.needsAccumulator - 5);
         this.actors.forEach((actor) => (actor.hunger = round(Math.min(100, actor.hunger + 1))));
@@ -295,7 +296,7 @@ export class AutonomyRuntime {
       }
       this.validateCombatActionLinks(snapshot, restored);
       this.pois.restore(snapshot.pois);
-      this.actions.restore(snapshot.actions);
+      this.actions.restore(snapshot.actions, { deferPruning: true });
       this.actors.clear();
       restored.forEach((actor, id) => this.actors.set(id, actor));
       this.time = snapshot.time;
@@ -314,6 +315,7 @@ export class AutonomyRuntime {
         }
       }
       this.reconcileCombatEvents();
+      this.actions.pruneHistory();
     } catch (error) {
       throw new Error(`Invalid simulation snapshot: ${error instanceof Error ? error.message : String(error)}`, {
         cause: error,
