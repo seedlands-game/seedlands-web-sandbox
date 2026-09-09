@@ -283,11 +283,19 @@
     border: 0;
   }
   .collision-debug-controls label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
     font-size: 10px;
   }
   #debug .collision-debug-controls input {
     width: 14px;
     height: 14px;
+    min-height: 14px;
+    margin: 0;
+    padding: 0;
+    flex: 0 0 14px;
     appearance: auto;
     accent-color: var(--diagnostic-accent);
   }
