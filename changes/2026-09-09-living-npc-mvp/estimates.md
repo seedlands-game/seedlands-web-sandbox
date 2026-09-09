@@ -25,3 +25,5 @@ GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，li
 第二轮恢复修复：世界实现约12分钟，独立复核约0.28 agent小时，仍在原工时池内；未新增真实provider调用、购买或使用reset。最终Codex实际credits和API等价仍无任务级计量。
 
 第三轮：宿主约0.20 agent小时，世界约18分钟，初始独立分诊约0.28 agent小时，冻结复核实际见round3-recheck.md；继续使用原共享工时池。无新增provider调用或reset，实际Codex消费仍无任务级计量。
+
+分页增量：宿主约0.18 agent小时，独立冻结复核见round4-recheck.md，维持原共享池；实际浏览器使用确定性model fixture，未增加真实provider调用。
