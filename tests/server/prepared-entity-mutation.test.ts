@@ -120,6 +120,35 @@ describe('prepared EntityStore mutation', () => {
     expect(() => prepared.apply()).toThrow(/used|applied/i);
   });
 
+  it('prepares actor pose and velocity without leaking caller mutations or stale spatial buckets', () => {
+    const store = populated();
+    const reference = store.createReference('player')!;
+    const position: [number, number, number] = [24, 2, 0];
+    const velocity: [number, number, number] = [0, 0, 0];
+    const prepared = prepareEntityMutation(store, {
+      actors: [
+        {
+          reference,
+          health: 20,
+          components: actorSnapshot(store, 'player'),
+          position,
+          physicsVelocity: velocity,
+        },
+      ],
+    });
+
+    position[0] = 99;
+    velocity[0] = 99;
+    expect(store.queryNearby([0, 2, 0], 1).map(({ id }) => id)).toContain('player');
+    prepared.validate();
+    prepared.apply();
+
+    expect(store.get('player')).toMatchObject({ position: [24, 2, 0], physicsVelocity: [0, 0, 0] });
+    expect(store.queryNearby([0, 2, 0], 1).map(({ id }) => id)).not.toContain('player');
+    expect(store.queryNearby([24, 2, 0], 1).map(({ id }) => id)).toContain('player');
+    expect(store.createReference('player')).toEqual(reference);
+  });
+
   it('rejects an invalid final actor candidate without changing earlier actors, spawns or allocator state', () => {
     const store = populated();
     const playerReference = store.createReference('player')!;

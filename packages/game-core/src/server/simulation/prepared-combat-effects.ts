@@ -6,6 +6,7 @@ import type { PreparedCombatMutation } from '../gameplay/prepared-combat-mutatio
 
 export type CombatAutonomyEffects = Readonly<{
   deaths?: readonly string[];
+  interruptions?: readonly Readonly<{ actorId: string; reason: string }>[];
   removals?: readonly string[];
   attacked?: Readonly<{ targetId: string; actorId: string }>;
   started?: Readonly<{ actorId: string; targetId: string; replaced: boolean }>;
@@ -66,6 +67,15 @@ export function prepareCombatEffects(
     const action = options.actions.forActor(id);
     if (action)
       settlements.set(action.id, { id: action.id, status: 'interrupted', now: options.now, reason: 'actor-dead' });
+  }
+  const interruptions = options.interruptions ?? [];
+  if (interruptions.length > 640 || new Set(interruptions.map((entry) => entry.actorId)).size !== interruptions.length)
+    throw new RangeError('Combat interruption effects exceed their actor budget.');
+  for (const { actorId, reason } of interruptions) {
+    if (!actorId.trim() || !reason.trim()) throw new TypeError('Combat interruption is invalid.');
+    if (capture(actorId)) updates.set(actorId, { behavior: 'idle', target: null });
+    const action = options.actions.forActor(actorId);
+    if (action) settlements.set(action.id, { id: action.id, status: 'interrupted', now: options.now, reason });
   }
   if (options.attacked && !deaths.includes(options.attacked.targetId) && capture(options.attacked.targetId)) {
     updates.set(options.attacked.targetId, { behavior: 'flee', target: options.attacked.actorId });

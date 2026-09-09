@@ -1,9 +1,11 @@
+import type { GameplayCallbacks, GameplayResult, GameplayFailure as Failure } from './gameplay-runtime-contracts';
+export type * from './gameplay-runtime-contracts';
 import { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
-import type { ModuleActorAuthority } from '../composition/gameplay-actor-authority';
+import { RegisteredInventoryRuntime } from './modules/registered-inventory-runtime';
 import { COMBAT_REQUEST_OPERATION } from './modules/combat-model';
 import { NEEDS_COMPONENT } from './modules/needs-model';
 import { createNeedsStatePort } from './modules/needs-state-port';
-import { createGameplayModuleSchedule, type ModuleSystemAuthority } from './modules/gameplay-module-schedule';
+import { createGameplayModuleSchedule } from './modules/gameplay-module-schedule';
 import { createWorldRulesetState } from './modules/world-ruleset-state';
 import { ActorVitalsRuntime } from './modules/actor-vitals-runtime';
 import { ModeRuntime } from './modules/mode-runtime';
@@ -15,11 +17,9 @@ import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from
 import { ActorInventoryRuntime } from './modules/actor-inventory-runtime';
 import { createInventoryStatePort } from './modules/inventory-state-port';
 import { resolveGameplayComposition } from '../composition/gameplay-composition';
-import type { WorldComposition } from '../composition/contracts';
 import { BlockInteractionRuntime } from './modules/block-interaction-runtime';
 import { Voxel } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
-import type { PreparedWorldEdit } from '../prepared-world-edit';
 import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
 import {
   EntityStore,
@@ -34,34 +34,10 @@ import { type GameplayContent } from './gameplay-content';
 import * as GameplaySnapshot from './gameplay-snapshot';
 import { advanceGameplayClock, assertGameplayAdvance } from './gameplay-clock';
 import { clonePosition } from './gameplay-geometry';
-import type { CorePlatformPorts } from '../../runtime/platform-ports';
-import type { CombatSnapshot, MeleeDefinition } from './combat-runtime';
+import type { CombatSnapshot } from './combat-runtime';
 import { createGameplayCombatCallbacks } from './gameplay-combat-callbacks';
 
-export type {
-  GameplaySnapshot,
-  GameplaySnapshotV1,
-  GameplaySnapshotV2,
-  GameplaySnapshotV3,
-  GameplaySnapshotV4,
-} from './gameplay-snapshot';
-
 type Position = [number, number, number];
-export type GameplayCallbacks = {
-  getVoxel: (position: Position) => number | undefined;
-  prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
-  getWorldTime: () => number;
-  platform: CorePlatformPorts;
-  content?: GameplayContent;
-  composition?: WorldComposition;
-  moduleSystemAuthority?: ModuleSystemAuthority;
-  moduleActorAuthority?: ModuleActorAuthority;
-  allowLegacyCompositionMigration?: boolean;
-  meleeDefinitions?: readonly MeleeDefinition[];
-};
-type Failure = { success: false; reason: string };
-export type GameplayResult<Data extends object = Record<never, never>> = ({ success: true } & Data) | Failure;
-
 export class GameplayRuntime {
   readonly content: GameplayContent;
   readonly inventoryState: ReturnType<typeof createInventoryStatePort>;
@@ -75,6 +51,7 @@ export class GameplayRuntime {
   private eventCount = 0;
   private readonly compositionGuard;
   private readonly inventoryActions;
+  private readonly registeredInventory;
   private readonly modes;
   private readonly vitals;
   private readonly modules: GameplayModuleRuntime;
@@ -100,6 +77,7 @@ export class GameplayRuntime {
       items: this.content.items,
       revision: () => this.revision,
       assertCanChange: () => this.assertRevisionCapacity(),
+      prepareCancellation: (ids) => this.simulation.prepareCancellation(ids, 'slot-changed'),
       changed: () => this.touch(),
     });
     this.inventoryActions = new ActorInventoryRuntime({
@@ -115,6 +93,23 @@ export class GameplayRuntime {
         this.touch();
       },
     });
+    this.registeredInventory = callbacks.composition
+      ? new RegisteredInventoryRuntime({
+          composition: callbacks.composition,
+          entities: this.entities,
+          content: this.content,
+          actorAuthority: callbacks.moduleActorAuthority,
+          modules: () => this.modules,
+          simulation: () => this.simulation,
+          getVoxel: callbacks.getVoxel,
+          revision: () => this.revision,
+          assertCanChange: () => this.assertRevisionCapacity(),
+          changed: (operation) => {
+            if (operation) this.inventoryOperationCount++;
+            this.touch();
+          },
+        })
+      : null;
     this.vitals = new ActorVitalsRuntime({
       player: (id) => this.player(id),
       assertCanChange: () => this.assertRevisionCapacity(),
@@ -128,11 +123,8 @@ export class GameplayRuntime {
     this.modes = new ModeRuntime({
       entities: this.entities,
       findSafeLanding: (id) => findGameplayModeLanding(this.entities.get(id)!, callbacks.getVoxel, this.revision),
-      cancelIncompatibleActions: (id, reason) => {
-        this.simulation.interruptAction(id, reason);
-        const player = this.players.get(id);
-        if (player) player.breakAction = null;
-      },
+      assertCanChange: () => this.assertRevisionCapacity(),
+      prepareCancelIncompatibleActions: (id, reason) => this.simulation.prepareInterruption(id, reason),
       changed: () => this.touch(),
     });
     this.blocks = new BlockInteractionRuntime({
@@ -172,6 +164,7 @@ export class GameplayRuntime {
       entities: this.entities,
       clone: callbacks.platform.clone,
       inventory: this.inventoryState,
+      inventoryActions: this.registeredInventory?.state,
       ruleset: this.ruleset.port,
       needs: createNeedsStatePort({
         entities: this.entities,
@@ -230,8 +223,9 @@ export class GameplayRuntime {
     source: Omit<RegisteredActorOperationBinding, 'moduleId'>,
     request: RegisteredOperationRequest,
   ) {
+    const operationId = request.operationId;
     const result = this.modules.invoke(authorizer, source, request);
-    if (result.ok && request.operationId === COMBAT_REQUEST_OPERATION) this.registeredCombat?.drain();
+    if (result.ok && operationId === COMBAT_REQUEST_OPERATION) this.registeredCombat?.drain();
     return result;
   }
   dispose(): void {
@@ -332,15 +326,22 @@ export class GameplayRuntime {
     return this.inventoryActions.remove(id, stack);
   }
   selectHotbarSlot(id: string, slot: number) {
-    return this.getActorModeState(id)?.mode === 'creative'
-      ? this.modes.selectCreativeSlot(id, slot)
-      : this.inventoryActions.select(id, slot);
+    const state = this.getActorModeState(id);
+    if (state?.mode !== 'creative') return (this.registeredInventory ?? this.inventoryActions).select(id, slot);
+    if (!this.compositionGuard) return this.modes.selectCreativeSlot(id, slot);
+    if (!Number.isSafeInteger(slot) || slot < 0 || slot >= 8) return { success: false, reason: 'invalid-slot' };
+    const result = this.modules.invokeActor(this.callbacks.moduleActorAuthority, id, {
+      operationId: 'seedlands:set-creative-catalog',
+      target: { kind: 'entity', entityId: id },
+      input: { slot, itemId: state.creativeCatalog.hotbar[slot] },
+    });
+    return result.ok ? { success: true } : { success: false, reason: result.message };
   }
   moveInventorySlot(id: string, source: number, target: number) {
-    return this.inventoryActions.move(id, source, target);
+    return (this.registeredInventory ?? this.inventoryActions).move(id, source, target);
   }
   craft(id: string, recipeId: string) {
-    return this.inventoryActions.craft(id, recipeId);
+    return (this.registeredInventory ?? this.inventoryActions).craft(id, recipeId);
   }
   listCraftable(id: string) {
     return this.inventoryActions.listCraftable(id);
@@ -359,11 +360,11 @@ export class GameplayRuntime {
   }
 
   pickupItem(playerId: string, entityId: string): GameplayResult {
-    return this.inventoryActions.pickup(playerId, entityId);
+    return (this.registeredInventory ?? this.inventoryActions).pickup(playerId, entityId);
   }
 
   dropItem(playerId: string, slot: number, count: number): GameplayResult<{ entity: GameplayEntity }> {
-    return this.inventoryActions.drop(playerId, slot, count);
+    return (this.registeredInventory ?? this.inventoryActions).drop(playerId, slot, count);
   }
 
   placeVoxel(id: string, position: Position): GameplayResult<{ commit: WorldCommitResult }> {
@@ -375,7 +376,7 @@ export class GameplayRuntime {
   }
 
   useInventoryItem(id: string, slot: number): GameplayResult {
-    return this.inventoryActions.consume(id, slot);
+    return (this.registeredInventory ?? this.inventoryActions).consume(id, slot);
   }
 
   attackEntity(

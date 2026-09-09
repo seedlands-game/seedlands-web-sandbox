@@ -60,6 +60,7 @@ function setup(allow = true) {
         'test:playbook': [
           { resource: 'test.schedule', operations: ['execute'] },
           { resource: 'seedlands.inventory', operations: ['read', 'write', 'execute'] },
+          { resource: 'seedlands.inventory-item', operations: ['read', 'execute'] },
           { resource: 'seedlands.mode', operations: ['read', 'write', 'execute'] },
           { resource: 'seedlands.ruleset', operations: ['read'] },
         ],

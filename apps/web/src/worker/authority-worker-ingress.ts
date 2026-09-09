@@ -21,6 +21,8 @@ import {
 type ActionOwner = (actionId: string) => string | null;
 const isModeCommand = (command: ServerCommand) =>
   ['set-mode', 'set-flight', 'set-creative-slot'].includes(command.type);
+const isInventoryCommand = (command: ServerCommand) =>
+  ['select-slot', 'pickup-item', 'drop-item', 'use-item', 'craft-recipe'].includes(command.type);
 type Post = (response: AuthorityResponse) => void;
 
 export const rejectStaleAuthorityMessage = (message: AuthorityRequest, epoch: string, post: Post): void => {
@@ -69,7 +71,7 @@ export class BrowserAuthorityIngress {
           {
             effect: 'allow',
             principal: { ids: ['browser-player'] },
-            resources: ['seedlands.mode'],
+            resources: ['seedlands.mode', 'seedlands.inventory'],
             operations: ['read', 'write', 'execute'],
             scope: 'self',
           },
@@ -83,7 +85,7 @@ export class BrowserAuthorityIngress {
           {
             effect: 'allow',
             principal: { ids: ['browser-player'] },
-            resources: ['seedlands.combat'],
+            resources: ['seedlands.combat', 'seedlands.inventory-item'],
             operations: ['read', 'execute'],
             scope: 'any',
           },
@@ -117,7 +119,10 @@ export class BrowserAuthorityIngress {
   commandBinding(command: ServerCommand) {
     return {
       authorizer: this.authorization,
-      principalId: isModeCommand(command) || command.type === 'attack-entity' ? 'browser-player' : 'browser-command',
+      principalId:
+        isModeCommand(command) || isInventoryCommand(command) || command.type === 'attack-entity'
+          ? 'browser-player'
+          : 'browser-command',
     };
   }
 

@@ -1,5 +1,5 @@
 import type { ActorComponentSnapshot } from './ecs-actor-components';
-import type { EcsEntityOwner, EntityLifetimeReference } from './ecs-entity-owner';
+import type { EcsEntityOwner, EcsPosition, EntityLifetimeReference } from './ecs-entity-owner';
 import type { EntitySpawn, EntityStore, GameplayEntity } from './entity-store';
 import type { ItemStack } from './item-registry';
 
@@ -7,6 +7,8 @@ export type PreparedActorReplacement = Readonly<{
   reference: EntityLifetimeReference;
   health: number;
   components: ActorComponentSnapshot;
+  position?: readonly [number, number, number];
+  physicsVelocity?: readonly [number, number, number];
 }>;
 
 export type PreparedWorldItemSpawn = Readonly<{
@@ -45,6 +47,15 @@ export type PreparedEntityMutationHost = Readonly<{
 }>;
 
 const sameSnapshot = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
+
+function copyPosition(value: readonly number[] | undefined, field: string): EcsPosition | undefined {
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value) || value.length !== 3) throw new TypeError(`Prepared actor ${field} is invalid.`);
+  assertDense(value);
+  const copy = [...value];
+  if (!copy.every(Number.isFinite)) throw new TypeError(`Prepared actor ${field} is invalid.`);
+  return copy as EcsPosition;
+}
 
 function prepareMutation(
   host: PreparedEntityMutationHost,
@@ -111,8 +122,11 @@ function prepareMutation(
       throw new TypeError('Prepared actor health and lifecycle do not match.');
     return Object.freeze({
       id: entity.id,
+      entity,
       health: candidate.health,
       components: capturedOwner.prepareActorComponentSnapshot(entity.id, candidate.components),
+      position: copyPosition(candidate.position, 'position'),
+      physicsVelocity: copyPosition(candidate.physicsVelocity, 'physics velocity'),
     });
   });
 
@@ -188,8 +202,14 @@ function prepareMutation(
       state = 'used';
       assertFresh();
 
-      for (const actor of actors)
-        capturedOwner.installPreparedActorReplacement(actor.id, actor.health, actor.components);
+      for (const actor of actors) {
+        if (actor.position) host.removeFromBucket(actor.entity);
+        capturedOwner.installPreparedActorReplacement(actor.id, actor.health, actor.components, {
+          ...(actor.position ? { position: actor.position } : {}),
+          ...(actor.physicsVelocity ? { physicsVelocity: actor.physicsVelocity } : {}),
+        });
+        if (actor.position) host.addToBucket(capturedOwner.get(actor.id)!);
+      }
       for (const despawn of despawns) {
         host.removeFromBucket(despawn.entity);
         capturedOwner.destroy(despawn.id);

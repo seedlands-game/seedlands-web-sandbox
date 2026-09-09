@@ -47,7 +47,7 @@ function attack(
   const result = context.simulation.requestActorCombat(actorId, targetId, 'night-stalker-claw', existingActionId);
   if (!result.success) return reject(result.reason);
   if (!existingActionId && !context.simulation.usesRegisteredCombat) context.touch();
-  const action = context.simulation.actions.get(result.actionId);
+  const action = context.simulation.actionById(result.actionId);
   return { accepted: true, changed: existingActionId === undefined, ...(action ? { action } : {}) };
 }
 
@@ -93,7 +93,7 @@ export function applyActorAuthorityAction(
     return result;
   }
   if (action.type === 'start-existing-action') {
-    const current = context.simulation.actions.forActor(actorId);
+    const current = context.simulation.actionForActor(actorId);
     if (!current || current.id !== action.actionId) return reject('action-mismatch');
     if (current.type === 'attack' && current.targetEntityId)
       return attack(context, actorId, current.targetEntityId, current.id);

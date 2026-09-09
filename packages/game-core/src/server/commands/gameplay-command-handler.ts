@@ -1,3 +1,4 @@
+import { executeInventoryModuleCommand } from './inventory-module-command';
 import { executeModeCommand, type ModuleCommandPort } from './module-command';
 import type { GameServer, WorldCommitResult } from '../game-server';
 import { isItemId, type ItemId } from '../gameplay/item-registry';
@@ -86,6 +87,8 @@ export async function executeGameplayCommand(
   command: GameplayCommand,
   moduleOperation?: ModuleCommandPort,
 ): Promise<GameplayCommandPayload> {
+  const inventory = executeInventoryModuleCommand(server, source, command, moduleOperation);
+  if (inventory) return inventory;
   switch (command.type) {
     case 'set-mode':
     case 'set-flight':
@@ -149,8 +152,23 @@ export async function executeGameplayCommand(
       const path = server.queryNavigationPath(id, boundedQueryTarget(entity.position, command.position));
       return { message: `Navigation path for ${id}.`, data: { path } };
     }
-    case 'select-slot':
+    case 'select-slot': {
+      const state = server.getActorModeState(playerId(source));
+      if (server.hasGameplayComposition && state?.mode === 'creative') {
+        if (!Number.isSafeInteger(command.slot) || command.slot < 0 || command.slot >= 8)
+          throw new TypeError('Creative slot is invalid.');
+        return executeModeCommand(
+          source,
+          {
+            type: 'set-creative-slot',
+            slot: command.slot,
+            itemId: state.creativeCatalog.hotbar[command.slot],
+          },
+          moduleOperation,
+        );
+      }
       return mutationPayload('Selected hotbar slot.', server.selectHotbarSlot(playerId(source), command.slot));
+    }
     case 'break-voxel':
       return mutationPayload(
         'Started breaking voxel.',
@@ -187,6 +205,18 @@ export async function executeGameplayCommand(
       return mutationPayload('Respawned player.', server.respawnPlayer(playerId(source)));
     case 'start-action': {
       const id = playerId(source, command.entityId);
+      if (command.action === 'attack' && server.hasGameplayComposition) {
+        if (!moduleOperation || !command.targetEntityId)
+          throw new Error('Combat requires a host-authorized module binding and target.');
+        const result = moduleOperation(id, {
+          operationId: 'seedlands:request-combat',
+          target: { kind: 'entity', entityId: command.targetEntityId },
+          input: { targetId: command.targetEntityId },
+        });
+        if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
+        const action = server.getActorAction(id);
+        return { message: `Started Combat action ${action?.id} for ${id}.`, data: { action } };
+      }
       const action = server.startActorAction(id, {
         type: command.action,
         ...(command.position ? { targetPosition: position(command.position) } : {}),

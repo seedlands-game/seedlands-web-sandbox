@@ -26,7 +26,21 @@ export function headlessModuleCommandBinding(
   developer: WorldModuleBinding,
   custom: boolean,
 ): WorldModuleBinding {
-  if (custom || command.type !== 'attack-entity') return developer;
+  if (
+    custom ||
+    ![
+      'attack-entity',
+      'select-slot',
+      'pickup-item',
+      'drop-item',
+      'use-item',
+      'craft-recipe',
+      'set-mode',
+      'set-flight',
+      'set-creative-slot',
+    ].includes(command.type)
+  )
+    return developer;
   const binding = createGameplayActorAuthority(runtime.server.gameplayResources, {
     playerAlias: 'headless-player',
   }).forActor(runtime.playerId, 'player');

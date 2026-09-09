@@ -55,6 +55,10 @@ export type EntityLifetimeReference = Readonly<{
   lifetime: number;
 }>;
 export type EntityLifetimeSnapshot = Readonly<{ entityId: string; lifetime: number }>;
+export type PreparedActorSpatialReplacement = Readonly<{
+  position?: EcsPosition;
+  physicsVelocity?: EcsPosition;
+}>;
 
 type SlotArray<Value> = Array<Value | undefined>;
 type EntityComponents = ReturnType<typeof createEntityComponents>;
@@ -265,8 +269,19 @@ export class EcsEntityOwner {
     return prepareActorComponentSnapshot(snapshot, entity.type === 'player', this.items);
   }
 
-  installPreparedActorReplacement(id: string, health: number, prepared: PreparedActorComponentSnapshot): void {
+  installPreparedActorReplacement(
+    id: string,
+    health: number,
+    prepared: PreparedActorComponentSnapshot,
+    spatial: PreparedActorSpatialReplacement = {},
+  ): void {
     const eid = this.require(id);
+    if (spatial.position) this.writePosition(this.components.transform, eid, spatial.position);
+    if (spatial.physicsVelocity) {
+      if (!hasComponent(this.world, eid, this.components.velocity))
+        addComponent(this.world, eid, this.components.velocity);
+      this.writePosition(this.components.velocity, eid, spatial.physicsVelocity);
+    }
     this.components.health.current[eid] = health;
     installPreparedActorComponentSnapshot(this.actors, eid, prepared);
   }

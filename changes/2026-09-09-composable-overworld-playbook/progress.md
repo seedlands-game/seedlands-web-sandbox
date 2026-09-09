@@ -106,3 +106,13 @@ Combat 纯模块子任务合同 `/tmp/seedlands-s3-handoff/combat-module-candida
 - 临时恢复校验 owner 使用当前来源策略；权限失效时玩家 Action 与 Combat 一同取消。空闲 Combat system 不占用最后一个 gameplay revision。定向组合/恢复/Headless 24 文件 149 用例通过。
 - 生产路径冻结后 `pnpm verify:static` 通过：295 文件 passed /2 skipped，1481 用例 passed /4 skipped；Svelte 0 errors/0 warnings。随后 `pnpm build` 通过，仍只有既有 PlayCanvas 大包提示。日志为 `/tmp/seedlands-s3-registered-combat-static.log` 与 `-build.log`。随后 Browser 6/6 通过（26.5 秒）且 4173 已释放；独立只读复核仍在运行。完整范围与后续问题见 [注册 Combat 检查点](s3-registered-combat-checkpoint.md)，不以此标记 S3 完成。
 - 下一轮必须解决/复核：连击切目标后的 Action/Combat 身份恢复合同、Mode/Inventory 取消的事务迁移、脚本控制实际入口的来源保留，以及完整标准模块边界。S3 仍为 Implementing；S4 工位与耐久实际消费、S5 替代组合、S6 全量旅程/交接未完成。
+
+### 注册 Combat 后续复核与 Mode 接线（2026-09-10）
+
+`2686a5e` 独立复核已返回两个 P1：宿主 post-hook 读取可变请求，以及 resolve 内部失败被取消路径吞掉。两个有效 RED 与修复后 13/13 focused GREEN 已取得；新 Action 目标归属修复同时覆盖连击第一目标死亡后的保存恢复。全部新增代码尚未跑 full static/build，不计阶段准出。Mode prepared owner 子任务正在独占 mode-runtime、mode-state-port、prepared ECS pose 扩展及自身测试；root 负责 Autonomy 取消和实际接线。S3 仍 Implementing。
+
+真实脚本 `start-action attack` 绕过注册 Combat 的 RED 已确认并修复；实际 Headless 的直接攻击/Action 攻击、无权限拒绝、换别名恢复和当前撤权共 5/5 focused GREEN。真实创造快捷栏规则 veto 的 RED/GREEN 已取得；Mode 与 Combat 联合候选含 result allocator 耗尽负例 17/17 focused GREEN（后续追加快捷栏后 18/18）。Inventory transfer 失去当前武器时 Action/Combat 原子取消的 RED/GREEN 已取得；普通六项库存消费者接线见 [设计](s3-inventory-consumers-design.md)，仍在实施。
+
+## S3 库存与 Mode 检查点（2026-09-10）
+
+真实库存六类注册消费者、Mode prepared owner、命令来源保留、Action/Combat 目标恢复与 prior Combat P1 已闭合。独立复核发现并修复 craft receipt 使用旧 input、最终 clone 后世界几何陈旧两类问题；最终 full static 1528 passed /4 skipped、build、Browser 6/6（25.7 秒）分别通过，4173 已释放。独立 reviewer 对最终源码回读无剩余发现，见 [库存与 Mode 检查点](s3-inventory-mode-checkpoint.md)。S3 仍 Implementing；继续 Place/Break 与 give/remove，S4–S6 尚未准出。

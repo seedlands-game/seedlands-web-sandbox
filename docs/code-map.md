@@ -171,6 +171,12 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 
 `server/gameplay/gameplay-combat-callbacks.ts` 保留未组合宿主的伤害适配与共用几何检查；`gameplay-mode-landing.ts` 将玩法体素读取适配到既有安全落地查询。`server/simulation/prepared-combat-effects.ts` 预提交 Action、观察记录和 NPC 行为变化，`prepared-combat-damage.ts` 预提交生命、掉落和实体移除。
 
+`server/simulation/combat-action-snapshot.ts` 校验 Combat/Action 生命周期关联、规范化旧 V3 重复目标，并在命令/逻辑观察边界派生当前目标。
+
 `server/simulation/prepared-death-effects.ts` 在 ECS 死亡提交前准备 Combat 取消和 Action 终态。`server/gameplay/prepared-entity-mutation.ts` 的 series 将多个有界片段纳入同一 allocator 预检；`prepared-combat-mutation.ts` 拥有不调用伤害回调的延迟命中候选，`combat-origin.ts` 与 `combat-pending-hit.ts` 保存可重授权的来源和待命中合同。
 
 `server/gameplay/combat-request-candidate.ts` 预备新攻击或连招缓冲，不触发伤害；`server/simulation/action-runtime.ts` 的 prepared start 在写入前构造旧动作替换和新动作，供跨 owner 接受协调使用。
+
+`server/gameplay/gameplay-runtime-contracts.ts` 定义玩法宿主注入端口与操作结果，原 `gameplay-runtime.ts` 保留类型重导出以兼容当前调用方。
+
+`server/gameplay/modules/inventory-action-model.ts` 与 `inventory-actions-module.ts` 定义六类纯库存操作候选及 actor/item 资源；`registered-inventory-runtime.ts` 核对当前来源、观察和候选，并预提交 ECS、物品实体及 Combat 取消。`server/commands/inventory-module-command.ts` 保留真实命令调用者的绑定。`mode-state-port.ts` 与 `mode-runtime.ts` 预备模式、落点、速度和不兼容 Action 的统一变更。

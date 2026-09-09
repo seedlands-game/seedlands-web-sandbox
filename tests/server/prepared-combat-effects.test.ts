@@ -105,4 +105,19 @@ describe('prepared Combat lifecycle and autonomy effects', () => {
     expect(world.actions.forActor('wolf')?.status).toBe('pending');
     expect(world.combat.snapshotFor('wolf').active).not.toBeNull();
   });
+  it('prepares mode interruption of a non-Combat Action without changing it before apply', () => {
+    const world = setup();
+    world.actions.start({ actorId: 'builder', type: 'idle' }, 0);
+    const effects = prepareCombatEffects({
+      ...world,
+      now: 1,
+      interruptions: [{ actorId: 'builder', reason: 'mode-changed' }],
+    });
+    expect(world.actions.forActor('builder')?.status).toBe('pending');
+    effects.validate();
+    world.combatPlan.apply();
+    effects.apply();
+    expect(world.actions.forActor('builder')).toBeNull();
+    expect(world.actions.get('action-2')).toMatchObject({ status: 'interrupted', reason: 'mode-changed' });
+  });
 });

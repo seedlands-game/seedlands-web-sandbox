@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   assembleOverworldPacks,
   createGameplaySystemAuthority,
+  createGameplayActorAuthority,
 } from '@seedlands/game-core/server/composition/host-api';
 import { pack } from '../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import { GameplayRuntime, type GameplayResult } from '../../packages/game-core/src/server/gameplay/gameplay-runtime';
@@ -92,6 +93,7 @@ const createRuntime = () => {
   const gameplay = new GameplayRuntime({
     composition,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
+    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' }),
     platform: testCorePlatform,
     getWorldTime: () => 9,
     getVoxel: world.getVoxel,

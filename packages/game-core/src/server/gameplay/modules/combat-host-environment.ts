@@ -18,6 +18,8 @@ import {
   validateCombatWorldPartition,
 } from './combat-model';
 
+export class CombatOriginUnavailable extends TypeError {}
+
 export type CombatHostEnvironmentOptions = Readonly<{
   composition: WorldComposition;
   entities: EntityStore;
@@ -41,21 +43,28 @@ export function createCombatHostEnvironment(options: CombatHostEnvironmentOption
   const resolveOrigin = (origin: DurableExecutionOriginV1, targetId: string) => {
     const actor = entities.get(origin.originalActor.entityId);
     const binding = actor && options.actorAuthority?.resolveOrigin(origin, actor.type);
-    if (!binding) throw new TypeError('Combat origin has no current host authority.');
-    const rebound = rebindDurableExecutionOrigin({
-      composition,
-      identity,
-      authorizer: binding.authorizer,
-      origin,
-      request: { resource: COMBAT_RESOURCE, operation: 'execute', target: { kind: 'entity', entityId: targetId } },
-    });
+    if (!binding) throw new CombatOriginUnavailable('Combat origin has no current host authority.');
+    const rebound = (() => {
+      try {
+        return rebindDurableExecutionOrigin({
+          composition,
+          identity,
+          authorizer: binding.authorizer,
+          origin,
+          request: { resource: COMBAT_RESOURCE, operation: 'execute', target: { kind: 'entity', entityId: targetId } },
+        });
+      } catch (error) {
+        if (error instanceof TypeError) throw new CombatOriginUnavailable(error.message);
+        throw error;
+      }
+    })();
     for (const entityId of [actor.id, targetId]) {
       const decision = binding.authorizer.authorize(binding.principalId, {
         resource: COMBAT_RESOURCE,
         operation: 'read',
         target: { kind: 'entity', entityId },
       });
-      if (!decision.allowed) throw new TypeError('Current Combat observation permission denied.');
+      if (!decision.allowed) throw new CombatOriginUnavailable('Current Combat observation permission denied.');
     }
     return { ...binding, rebound };
   };
@@ -64,10 +73,12 @@ export function createCombatHostEnvironment(options: CombatHostEnvironmentOption
     validationPort: {
       validate(origin, checkpoint) {
         try {
-          if (origin.originalActor.entityId !== checkpoint.actorId) throw new Error('Combat actor origin mismatch.');
+          if (origin.originalActor.entityId !== checkpoint.actorId)
+            throw new CombatOriginUnavailable('Combat actor origin mismatch.');
           resolveOrigin(origin, checkpoint.targetId);
           return { ok: true };
-        } catch {
+        } catch (error) {
+          if (!(error instanceof CombatOriginUnavailable)) throw error;
           return { ok: false, reason: 'combat-origin-unavailable' };
         }
       },

@@ -1,3 +1,4 @@
+import { prepareCombatActionSnapshot, projectCombatAction } from './combat-action-snapshot';
 import { prepareDeathEffects } from './prepared-death-effects';
 import { prepareCombatEffects, type CombatAutonomyEffects } from './prepared-combat-effects';
 import type { PreparedCombatMutation } from '../gameplay/prepared-combat-mutation';
@@ -131,6 +132,7 @@ export class AutonomyRuntime {
       ids,
       combat: this.combat,
       actions: this.actions,
+      perception: this.perception,
       actors: this.actors,
       now: this.time,
     });
@@ -160,6 +162,27 @@ export class AutonomyRuntime {
         effects.apply();
         this.actionInterruptionCount += effects.interrupted;
         this.actionCompletionCount += effects.completed;
+      },
+    };
+  }
+
+  prepareInterruption(actorId: string, reason: string) {
+    return this.prepareCancellation([actorId], reason, true);
+  }
+
+  prepareCancellation(actorIds: readonly string[], reason: string, interruptActions = false) {
+    const combat = this.combat.prepareMutation({ cancelActorIds: actorIds, actorCancellationReason: reason });
+    const effects = this.prepareCombatEffects(combat, {
+      interruptions: interruptActions ? actorIds.map((actorId) => ({ actorId, reason })) : [],
+    });
+    return {
+      validate: () => {
+        combat.validate();
+        effects.validate();
+      },
+      apply: () => {
+        combat.apply();
+        effects.apply();
       },
     };
   }
@@ -247,6 +270,14 @@ export class AutonomyRuntime {
       actor.targetEntityId = targetId;
     }
     return result;
+  }
+
+  actionForActor(actorId: string) {
+    return projectCombatAction(this.actions.forActor(actorId), this.combat.snapshotFor(actorId));
+  }
+  actionById(actionId: string) {
+    const action = this.actions.get(actionId);
+    return projectCombatAction(action, action ? this.combat.snapshotFor(action.actorId) : undefined);
   }
 
   combatSnapshotFor(actorId: string): CombatSnapshot {
@@ -365,9 +396,9 @@ export class AutonomyRuntime {
         if (restored.has(actor.entityId)) throw new TypeError('duplicate actor id');
         restored.set(actor.entityId, cloneActor(actor));
       }
-      this.validateCombatActionLinks(snapshot, restored);
+      const actions = prepareCombatActionSnapshot(snapshot, new Set(restored.keys()));
       this.pois.restore(snapshot.pois);
-      this.actions.restore(snapshot.actions);
+      this.actions.restore(actions);
       this.actors.clear();
       restored.forEach((actor, id) => {
         this.bindActorNeeds(actor);
@@ -467,39 +498,6 @@ export class AutonomyRuntime {
       !Number.isInteger(actor.wanderIndex)
     )
       throw new TypeError('actor fields are invalid');
-  }
-
-  private validateCombatActionLinks(snapshot: SimulationSnapshot, actors: ReadonlyMap<string, ActorState>): void {
-    if (!snapshot.combat || !Array.isArray(snapshot.combat.combatants) || !Array.isArray(snapshot.actions?.actions))
-      return;
-    const runningAttacks = new Map<string, ActorAction>();
-    for (const action of snapshot.actions.actions) {
-      if (
-        !actors.has(action.actorId) ||
-        action.type !== 'attack' ||
-        ['succeeded', 'failed', 'interrupted'].includes(action.status)
-      )
-        continue;
-      if (action.status !== 'running' || runningAttacks.has(action.actorId))
-        throw new TypeError('autonomous combat action is invalid or duplicated');
-      runningAttacks.set(action.actorId, action);
-    }
-    const activeCombatActors = new Set<string>();
-    for (const entry of snapshot.combat.combatants) {
-      if (!actors.has(entry.actorId) || !entry.combat?.active) continue;
-      if (activeCombatActors.has(entry.actorId))
-        throw new TypeError('autonomous combat action is invalid or duplicated');
-      activeCombatActors.add(entry.actorId);
-      const action = runningAttacks.get(entry.actorId);
-      if (
-        !action ||
-        action.id !== entry.combat.active.actionId ||
-        action.targetEntityId !== entry.combat.active.targetId
-      )
-        throw new TypeError('autonomous combat action does not match its running action');
-      runningAttacks.delete(entry.actorId);
-    }
-    if (runningAttacks.size > 0) throw new TypeError('running attack action is missing autonomous combat');
   }
 
   private reconcileCombatEvents(): void {

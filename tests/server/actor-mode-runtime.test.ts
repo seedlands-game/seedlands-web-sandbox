@@ -21,6 +21,150 @@ const createGameplay = () =>
   });
 
 describe('actor mode runtime', () => {
+  it('prepares safe mode changes and leaves ECS and cancellation untouched on every preflight failure', () => {
+    const entities = new EntityStore();
+    entities.spawn({
+      id: 'player',
+      type: 'player',
+      position: [0, 20, 0],
+      physicsVelocity: [1, 2, 3],
+    });
+    let capacityFailure = true;
+    let cancellationPreparationFailure = false;
+    let cancellationValidationFailure = false;
+    let cancellationApplications = 0;
+    const modes = new ModeRuntime({
+      entities,
+      findSafeLanding: () => [24, 2, 0],
+      assertCanChange: () => {
+        if (capacityFailure) throw new RangeError('revision capacity exhausted');
+      },
+      prepareCancelIncompatibleActions: () => {
+        if (cancellationPreparationFailure) throw new Error('cancellation capacity exhausted');
+        return {
+          validate() {
+            if (cancellationValidationFailure) throw new Error('cancellation stale');
+          },
+          apply() {
+            cancellationApplications += 1;
+          },
+        };
+      },
+      changed: () => undefined,
+    });
+    const initial = entities.exportComponentSnapshot();
+    expect(() => modes.prepareSwitchMode('player', { mode: 'creative', creativeHotbar: creativeHotbar() })).toThrow(
+      /capacity/i,
+    );
+    expect(entities.exportComponentSnapshot()).toEqual(initial);
+    expect(cancellationApplications).toBe(0);
+
+    capacityFailure = false;
+    cancellationPreparationFailure = true;
+    expect(() => modes.prepareSwitchMode('player', { mode: 'creative', creativeHotbar: creativeHotbar() })).toThrow(
+      /cancellation capacity/i,
+    );
+    expect(entities.exportComponentSnapshot()).toEqual(initial);
+    expect(cancellationApplications).toBe(0);
+
+    cancellationPreparationFailure = false;
+    const prepared = modes.prepareSwitchMode('player', {
+      mode: 'creative',
+      creativeHotbar: creativeHotbar(),
+      flightEnabled: true,
+    });
+    expect(prepared.success).toBe(true);
+    expect(entities.exportComponentSnapshot()).toEqual(initial);
+    if (prepared.success) prepared.validate();
+    cancellationValidationFailure = true;
+    if (prepared.success) {
+      expect(() => prepared.validate()).toThrow(/cancellation stale/i);
+      expect(() => prepared.apply()).toThrow(/validate/i);
+    }
+    expect(entities.exportComponentSnapshot()).toEqual(initial);
+    expect(cancellationApplications).toBe(0);
+
+    cancellationValidationFailure = false;
+    const stale = modes.prepareSwitchMode('player', {
+      mode: 'creative',
+      creativeHotbar: creativeHotbar(),
+      flightEnabled: true,
+    });
+    entities.playerStateAccess('player').inventory.add({ itemId: 'wood-block', count: 1 });
+    const afterExternalMutation = entities.exportComponentSnapshot();
+    if (stale.success) expect(() => stale.validate()).toThrow(/stale|changed/i);
+    expect(entities.exportComponentSnapshot()).toEqual(afterExternalMutation);
+    expect(cancellationApplications).toBe(0);
+  });
+
+  it('rejects a stale no-op flight plan instead of returning a receipt for the old mode', () => {
+    const entities = new EntityStore();
+    entities.spawn({ id: 'player', type: 'player', position: [0, 2, 0] });
+    const modes = new ModeRuntime({
+      entities,
+      findSafeLanding: () => [0, 2, 0],
+      changed: () => undefined,
+      prepareCancelIncompatibleActions: () => ({ validate() {}, apply() {} }),
+    });
+    const plan = modes.prepareSetFlight('player', false);
+    expect(plan.success).toBe(true);
+    modes.switchMode('player', { mode: 'creative', creativeHotbar: creativeHotbar() });
+    if (plan.success) expect(() => plan.validate()).toThrow(/stale/i);
+  });
+
+  it('atomically applies safe landing, zero velocity, break cancellation and the prepared interruption', () => {
+    const entities = new EntityStore();
+    entities.spawn({
+      id: 'player',
+      type: 'player',
+      position: [0, 20, 0],
+      physicsVelocity: [1, 2, 3],
+    });
+    let cancellationApplications = 0;
+    let changed = 0;
+    const modes = new ModeRuntime({
+      entities,
+      findSafeLanding: () => [24, 2, 0],
+      assertCanChange: () => undefined,
+      prepareCancelIncompatibleActions: () => ({
+        validate: () => undefined,
+        apply: () => {
+          cancellationApplications += 1;
+        },
+      }),
+      changed: () => {
+        changed += 1;
+      },
+    });
+    expect(
+      modes.switchMode('player', {
+        mode: 'creative',
+        creativeHotbar: creativeHotbar(),
+        flightEnabled: true,
+      }),
+    ).toMatchObject({ success: true });
+    entities.playerStateAccess('player').breakAction = {
+      position: [1, 1, 1],
+      voxel: 3,
+      elapsedSeconds: 0.25,
+      requiredSeconds: 1,
+    };
+    const reference = entities.createReference('player');
+    const before = entities.exportComponentSnapshot();
+    const prepared = modes.prepareSwitchMode('player', { mode: 'survival' });
+    expect(prepared).toMatchObject({ success: true, state: { mode: 'survival' } });
+    expect(entities.exportComponentSnapshot()).toEqual(before);
+    if (!prepared.success) throw new Error(prepared.reason);
+    prepared.validate();
+    expect(prepared.apply()).toMatchObject({ success: true, state: { mode: 'survival' } });
+
+    expect(entities.get('player')).toMatchObject({ position: [24, 2, 0], physicsVelocity: [0, 0, 0] });
+    expect(entities.playerStateAccess('player').breakAction).toBeNull();
+    expect(entities.createReference('player')).toEqual(reference);
+    expect(cancellationApplications).toBe(2);
+    expect(changed).toBe(2);
+  });
+
   it('validates exhausted revisions and sparse catalogs before cancelling actions', () => {
     const entities = new EntityStore();
     entities.spawn({ id: 'player', type: 'player', position: [0, 2, 0] });

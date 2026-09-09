@@ -16,7 +16,11 @@ import type { PreparedEntityMutation } from '../prepared-entity-mutation';
 import type { ActionRuntime } from '../../simulation/action-runtime';
 import type { CombatAutonomyEffects } from '../../simulation/prepared-combat-effects';
 import { createCombatStatePort } from './combat-state-port';
-import { createCombatHostEnvironment, type CombatHostEnvironmentOptions } from './combat-host-environment';
+import {
+  createCombatHostEnvironment,
+  CombatOriginUnavailable,
+  type CombatHostEnvironmentOptions,
+} from './combat-host-environment';
 import {
   COMBAT_REQUEST_OPERATION,
   COMBAT_RESOLVE_OPERATION,
@@ -177,11 +181,9 @@ export class RegisteredCombatRuntime {
       const active = combat.snapshotFor(candidate.actorId).active;
       const start = active
         ? undefined
-        : simulation().actions.prepareStart(
-            { actorId: candidate.actorId, type: 'attack', targetEntityId: candidate.targetId },
-            this.options.now(),
-            { status: 'running' },
-          );
+        : simulation().actions.prepareStart({ actorId: candidate.actorId, type: 'attack' }, this.options.now(), {
+            status: 'running',
+          });
       const plan = combat.prepareRequest({
         actorId: candidate.actorId,
         targetId: candidate.targetId,
@@ -332,15 +334,29 @@ export class RegisteredCombatRuntime {
       if (!pending && !combat.peekLifecycleEvents().length) return;
       let resolved = false;
       if (pending) {
-        try {
-          const binding = this.environment.resolveOrigin(pending.origin, pending.targetId);
-          resolved = this.invoke(binding, pending.actorId, {
+        let binding: ReturnType<typeof this.environment.resolveOrigin> | undefined;
+        if (
+          this.options.entities.resolveReference(pending.actorIdentity) &&
+          this.options.entities.resolveReference(pending.targetIdentity)
+        ) {
+          try {
+            binding = this.environment.resolveOrigin(pending.origin, pending.targetId);
+          } catch (error) {
+            if (!(error instanceof CombatOriginUnavailable)) throw error;
+          }
+        }
+        if (binding) {
+          const result = this.invoke(binding, pending.actorId, {
             operationId: COMBAT_RESOLVE_OPERATION,
             target: { kind: 'entity', entityId: pending.targetId },
             input: { token: pending.token },
-          }).ok;
-        } catch {
-          /* Current policy or identity rejection is settled by the registered clock below. */
+          });
+          resolved = result.ok;
+          if (
+            !result.ok &&
+            !['RULE_REJECTED', 'WORLD_PERMISSION_DENIED', 'MODULE_PERMISSION_DENIED'].includes(result.code)
+          )
+            throw new Error(`Combat resolution failed: ${result.code}: ${result.message}`);
         }
       }
       if (!resolved) {

@@ -1,3 +1,4 @@
+import { projectCombatAction } from '../simulation/combat-action-snapshot';
 import { bodyKindForEntity } from '../../physics/body-registry';
 import { MAX_LOGIC_TERRAIN_CELLS, type LogicObservation, type TerrainWindow } from '../logic/logic-protocol';
 import type { AuthoritySnapshot } from './authority-session';
@@ -16,7 +17,7 @@ type BuildOptions = Readonly<{
   observationSequence: number;
   snapshot: AuthoritySnapshot;
   entities: readonly GameplayEntity[];
-  simulation: Pick<SimulationSnapshot, 'actors' | 'pois' | 'actions'>;
+  simulation: Pick<SimulationSnapshot, 'actors' | 'pois' | 'actions' | 'combat'>;
   items: ItemDefinitionRegistry;
   identityRevision: (entity: GameplayEntity) => number;
   getLoadedVoxel: (x: number, y: number, z: number) => LoadedVoxel | null;
@@ -24,10 +25,14 @@ type BuildOptions = Readonly<{
 
 type Bounds = { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number };
 
-const activeActionFor = (simulation: BuildOptions['simulation'], actor: ActorState) =>
-  simulation.actions.actions.find(
-    (action) => action.actorId === actor.entityId && (action.status === 'pending' || action.status === 'running'),
-  ) ?? null;
+const activeActionFor = (simulation: BuildOptions['simulation'], actor: ActorState) => {
+  const action =
+    simulation.actions.actions.find(
+      (entry) => entry.actorId === actor.entityId && (entry.status === 'pending' || entry.status === 'running'),
+    ) ?? null;
+  const combat = simulation.combat?.combatants.find((entry) => entry.actorId === actor.entityId)?.combat;
+  return projectCombatAction(action, combat);
+};
 
 const terrainBounds = (entities: readonly GameplayEntity[]) => {
   const byChunk = new Map<string, Bounds>();

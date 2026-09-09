@@ -49,3 +49,6 @@ export type { NeedsProfiles, NeedsProfile } from '../gameplay/modules/needs-mode
 export { defineCombatModule } from '../gameplay/modules/combat-module';
 export { defineCombatRulesModule } from '../gameplay/modules/combat-rules-module';
 export * from '../gameplay/modules/combat-model';
+
+export { defineInventoryActionsModule } from '../gameplay/modules/inventory-actions-module';
+export * from '../gameplay/modules/inventory-action-model';

@@ -1,4 +1,5 @@
 import type { WorldComposition } from '../../composition/contracts';
+import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
 import { createRegisteredOperationRuntime } from '../../composition/registered-operations';
 import type {
   RegisteredActorOperationBinding,
@@ -11,6 +12,7 @@ import type { WorldResourceAuthorizer } from '../../harness/world-authorization'
 import type { CoreClone } from '../../../runtime/platform-ports';
 import type { EntityStore } from '../entity-store';
 import { COMBAT_ACTOR_COMPONENT, COMBAT_WORLD_COMPONENT } from './combat-model';
+import { INVENTORY_ACTOR_COMPONENT, INVENTORY_ITEM_COMPONENT } from './inventory-action-model';
 import { NEEDS_COMPONENT } from './needs-model';
 import { MODE_COMPONENT } from './mode-module';
 import { RULESET_COMPONENT } from './ruleset-module';
@@ -37,6 +39,7 @@ export class GameplayModuleRuntime {
       entities: EntityStore;
       clone: CoreClone;
       inventory: RegisteredStatePort;
+      inventoryActions?: RegisteredStatePort;
       mode: RegisteredStatePort;
       ruleset: RegisteredStatePort;
       needs: RegisteredStatePort;
@@ -66,6 +69,11 @@ export class GameplayModuleRuntime {
     if (!composition) throw new Error('Registered operations require a composed world.');
     const participant = (component: string) => {
       if (component === 'seedlands:inventory') return this.options.inventory;
+      if (
+        (component === INVENTORY_ACTOR_COMPONENT || component === INVENTORY_ITEM_COMPONENT) &&
+        this.options.inventoryActions
+      )
+        return this.options.inventoryActions;
       if ((component === COMBAT_ACTOR_COMPONENT || component === COMBAT_WORLD_COMPONENT) && this.options.combat)
         return this.options.combat;
       if (component === NEEDS_COMPONENT) return this.options.needs;
@@ -138,6 +146,18 @@ export class GameplayModuleRuntime {
     } finally {
       execution.dispose();
     }
+  }
+
+  invokeActor(authority: ModuleActorAuthority | undefined, actorId: string, request: RegisteredOperationRequest) {
+    const actor = this.options.entities.get(actorId);
+    const binding = actor && authority?.forActor(actorId, actor.type);
+    if (!binding)
+      return {
+        ok: false as const,
+        code: 'ACTOR_AUTHORITY_UNAVAILABLE',
+        message: 'Gameplay actor authority is unavailable.',
+      };
+    return this.invoke(binding.authorizer, { principalId: binding.principalId, originalActorId: actorId }, request);
   }
 
   flushQueued() {

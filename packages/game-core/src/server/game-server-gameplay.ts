@@ -259,10 +259,10 @@ export abstract class GameServerGameplayFacade {
     return this.gameplay.simulation.interruptAction(actorId, reason);
   }
   getActorAction(actorId: string) {
-    return this.gameplay.simulation.actions.forActor(actorId);
+    return this.gameplay.simulation.actionForActor(actorId);
   }
   getAction(actionId: string) {
-    return this.gameplay.simulation.actions.get(actionId);
+    return this.gameplay.simulation.actionById(actionId);
   }
   observeActor(actorId: string, range?: number) {
     return this.gameplay.simulation.observe(actorId, range);

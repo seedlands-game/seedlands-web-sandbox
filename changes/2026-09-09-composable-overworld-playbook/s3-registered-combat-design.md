@@ -36,3 +36,9 @@ Browser player 和 Headless player 用同一稳定 subject、不同当前 alias�
 - `gameplay-registered-combat.test.ts` 覆盖移除 provider、玩家/NPC 真伤害、after 拒绝零写入、resolve 拒绝零伤害、死亡掉落、跨别名恢复，以及撤销来源后取消玩家 Action。
 - 本轮可执行 RED：真实消费缺失、临时 restore 缺 origin port、恢复取消后玩家 Action 残留、空 Combat 消耗最后一个 revision；均保留 `/tmp/seedlands-s3-*` 局部日志。局部组合/恢复/Headless 回归 24 文件 149 用例通过；基础准出和 Browser 结果另行记录。
 - 仍须在 S3 收口前复核：连击更换目标时 Action 与 Combat 目标身份的 owner/恢复一致性；Mode/Inventory 的取消操作是否全部完成注册事务迁移；外部脚本拒绝/恢复的真实入口证据。此记录不代表 S3 完成。
+
+## Action 与 Combat 的目标归属修复
+
+实际 RED 已复现：木剑首击杀死原 NPC、缓冲第二个 NPC、进入第二段 windup 后保存；恢复使 Action 因原目标缺失失败，但 Combat 仍在进行。修复后注册 Combat 创建仅绑定 actor 的生命周期 Action，当前/缓冲目标及其身份只由 Combat 保存；命令查询与逻辑观察从相同 Combat owner 派生目标。恢复时 V3 Combat 的 active Action 必须以 actor+actionId 一一匹配；旧 V3 保存的重复 Action target 字段先作结构校验再规范化移除，不授予任何目标权限。旧 V1/V2 非注册 Combat 继续既有目标校验。
+
+决定性回归覆盖新快照和带重复目标字段的旧 V3，两者恢复后都保留相同 running Action，并只向第二个目标结算第二击。未通过本切片完整 static/build/Browser 前，不更新上一检查点证据。

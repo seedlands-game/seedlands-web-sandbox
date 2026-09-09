@@ -349,7 +349,7 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
           ? [runtime.server.getAction(query.actionId)].filter((value) => value !== null)
           : query.entityId
             ? [runtime.server.getActorAction(query.entityId)].filter((value) => value !== null)
-            : runtime.server.simulationSnapshot().actions.actions;
+            : runtime.server.simulationSnapshot().actions.actions.map((action) => runtime.server.getAction(action.id)!);
         return { actions };
       },
     );

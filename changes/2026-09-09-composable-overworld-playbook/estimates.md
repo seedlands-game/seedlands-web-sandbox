@@ -133,3 +133,11 @@ Needs 检查点准出后，prepared Combat request（含 zero-windup）分配最
 冻结新的 48 小时 delegation envelope，旧 hash 保持不变。纯 Combat module/规则/codec 候选子任务分配最多 3 agent 小时，累计已列 child 上限 39 小时；root 负责真实 host owner、来源和产品入口。实际活跃工时、tokens、credits/API 费用继续 unknown，不以累计派发上限代替消耗。
 
 真实注册 Combat 消费接线冻结后，再分配一次最多 2 agent 小时的 Sol/xhigh 只读正确性复核，累计 child 分配上限 41 小时，共享已冻结的 48 小时 envelope。该数字仍不是实际工时；根任务串行负责 static、build 与 Browser 验证。
+
+### S3 Mode 原子接线追加分配（2026-09-10）
+
+剩余实际消费者只读侦察分配 Luna/medium 0.5 小时，已返回；Mode prepared owner 分配 Sol/high 3 小时，合同 `prepared-mode.json` 的 SHA-256 为 `e0b13c395a288a2bafffc1cf271904a6f45cd4bd82582000b380dc8cb56cd6b2`。48 小时父 envelope 下累计分配上限 44.5 小时；这是分配上限，不是实耗。未刷新账户额度，不推算实际 credits。
+
+Inventory 纯注册候选实施追加 Sol/high 2.5 小时，合同 SHA-256 `86fde386188b54ac0f497bef63eef265108583f1163db09b7e03dc88bc2622ca`；累计分配上限变为 47/48 小时。仅模型/模块/自身测试互斥路径，root 继续 host owner 与真实调用。
+
+库存与 Mode 消费者冻结后，分配 Sol/xhigh 只读复核最多 0.75 agent 小时，合同 SHA-256 `73b6133e1ef33f11237630843cab610963a746a6b94aeee4e5edefd69813f4fa`。累计 child 上限 47.75/48 小时；未刷新费用或额度，实际消耗仍 unknown。
