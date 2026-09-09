@@ -27,6 +27,7 @@ export type PhysicsInput = Readonly<{
   wish: Readonly<{ x: number; z: number }>;
   jumpPressed: boolean;
   verticalIntent: -1 | 0 | 1;
+  controlledFlight?: Readonly<{ verticalSpeed: number }>;
   externalAcceleration?: Vec3;
 }>;
 

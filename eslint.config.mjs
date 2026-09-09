@@ -287,6 +287,7 @@ export default tseslint.config(
     ignores: [
       'coverage/**',
       '**/dist/**',
+      'apps/web/public/packs/**',
       'harness/results/**',
       'midscene_run/**',
       'node_modules/**',

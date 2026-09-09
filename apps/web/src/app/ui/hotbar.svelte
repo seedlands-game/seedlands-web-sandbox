@@ -1,12 +1,16 @@
 <script lang="ts">
-  import type { HudState } from './ui-contracts';
+  import type { ActorMode, HudState } from './ui-contracts';
   import GameSlot from './primitives/game-slot.svelte';
 
-  let { slots, selected, onselect }: { slots: HudState['hotbar']; selected: number; onselect: (slot: number) => void } =
-    $props();
+  let {
+    slots,
+    selected,
+    mode,
+    onselect,
+  }: { slots: HudState['hotbar']; selected: number; mode: ActorMode; onselect: (slot: number) => void } = $props();
 </script>
 
-<ol id="hotbar" aria-label="快捷栏">
+<ol id="hotbar" aria-label={mode === 'creative' ? '创造快捷栏' : '生存快捷栏'}>
   {#each slots as slot (slot.slot)}
     <li>
       <GameSlot

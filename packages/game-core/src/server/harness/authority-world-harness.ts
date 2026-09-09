@@ -229,7 +229,11 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
               ? {}
               : { expectedCommitSequence: commandOptions.expectedCommitSequence }),
           },
-          () => current.runtime.executeCommand(source, command),
+          () =>
+            current.runtime.executeCommand(source, command, {
+              authorizer: this.options.authorization,
+              principalId: this.options.principalId,
+            }),
         );
         const receipt = await (this.options.complete ? this.options.complete(operation) : operation);
         if (receipt.status !== 'executed')

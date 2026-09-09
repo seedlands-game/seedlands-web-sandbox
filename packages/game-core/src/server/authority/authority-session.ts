@@ -1,3 +1,4 @@
+import { createMovementInputGuard, projectMovementBodies } from './actor-movement-projection';
 import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { clearAuthorityHorizontalVelocity } from './authority-input-neutralization';
 import {
@@ -28,6 +29,7 @@ import type {
 } from './authority-session-types';
 import { VoxelCollisionWorld, type LoadedVoxelSource } from './voxel-collision-world';
 import { bodyActiveChunkKeys } from './authority-physics-active-chunks';
+import { bodyStateForAuthorityEntity } from './creative-physics';
 import {
   selectAuthorityPhysicsInput,
   worldItemAttraction,
@@ -53,15 +55,6 @@ type AuthoritySessionOptions = Readonly<{
   initialCommitSequence?: number;
   measureNow?: () => number;
 }>;
-
-const toBodyState = (entity: AuthorityEntity): BodyState => ({
-  position: { x: entity.position[0], y: entity.position[1], z: entity.position[2] },
-  velocity: {
-    x: entity.physicsVelocity?.[0] ?? 0,
-    y: entity.physicsVelocity?.[1] ?? 0,
-    z: entity.physicsVelocity?.[2] ?? 0,
-  },
-});
 
 const MAX_RECOVERY_QUEUE = 512;
 const MAX_RECOVERY_RESULTS = 32;
@@ -122,6 +115,7 @@ export class AuthoritySession {
   }
 
   receiveInput(command: InputCommand): SequenceDecision {
+    if (!this.movementInput.accept(command)) return 'invalid';
     if (!this.playerBindingCurrent) {
       this.input.clear();
       return 'wrong-epoch';
@@ -251,6 +245,7 @@ export class AuthoritySession {
   }
 
   private stepPhysics(dt: number) {
+    this.movementInput.synchronize();
     this.collisionWorld.beginStep();
     this.processRecoveryQueue();
     if (!this.playerBindingCurrent) this.input.clear();
@@ -280,7 +275,12 @@ export class AuthoritySession {
         this.physicsTick,
         this.options.server.resolveEntityReference,
       );
-      const initialState = toBodyState(entity);
+      const modeState = this.options.server.getActorModeState?.(entity.id);
+      const authorizedPhysicsInput =
+        modeState?.mode === 'creative' && modeState.flight.enabled
+          ? { ...physicsInput, controlledFlight: { verticalSpeed: config.maxHorizontalSpeed ?? 4.5 } }
+          : physicsInput;
+      const initialState = bodyStateForAuthorityEntity(entity);
       const trackPickupCursor =
         entity.type === 'world-item' &&
         (this.pickupTargetCursors.has(entity.id) || this.pickupTargetCursors.size < MAX_TRACKED_PICKUP_CURSORS);
@@ -324,7 +324,7 @@ export class AuthoritySession {
                 z: (attraction.z - initialState.velocity.z) / dt,
               },
             }
-          : physicsInput,
+          : authorizedPhysicsInput,
         world: this.collisionWorld,
         dt,
       });
@@ -435,7 +435,7 @@ export class AuthoritySession {
         });
         continue;
       }
-      const state = toBodyState(entity);
+      const state = bodyStateForAuthorityEntity(entity);
       const config = this.options.bodyConfigFor(entity);
       if (!this.overlapsStatic(state, config)) {
         this.recordRecovery({
@@ -488,7 +488,7 @@ export class AuthoritySession {
         id: entity.id,
         type: entity.type,
         ...(entity.archetype ? { archetype: entity.archetype } : {}),
-        body: toBodyState(entity),
+        body: bodyStateForAuthorityEntity(entity),
         grounded: false,
         contacts: [],
       });
@@ -505,9 +505,11 @@ export class AuthoritySession {
       throw new RangeError('World clock rate must be finite and within 0..24 hours per second.');
   }
 
+  private readonly movementInput = createMovementInputGuard(
+    () => this.options.server.getActorModeState?.(this.options.playerId),
+    () => this.input.clear(),
+  );
   private snapshot(): AuthoritySnapshot {
-    const player = this.bodies.get(this.options.playerId);
-    if (!player) throw new Error(`Authority player is missing: ${this.options.playerId}`);
     return {
       kind: 'snapshot',
       protocolVersion: 1,
@@ -519,8 +521,7 @@ export class AuthoritySession {
       activeTimeMs: this.activeTimeMs,
       integratedPhysicsTimeMs: this.integratedPhysicsTimeMs,
       physicsDebtMs: this.physicsDebtMs,
-      player,
-      entities: [...this.bodies.values()],
+      ...projectMovementBodies(this.options, this.bodies),
       chunkRevisions: this.collisionWorld.revisionVector(),
       worldRevision: this.options.server.worldRevision,
       worldMutationCount: this.options.server.mutationCount,

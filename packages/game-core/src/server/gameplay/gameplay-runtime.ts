@@ -1,6 +1,18 @@
-import { playerOccupiesVoxelShape } from './player-occupancy';
+import { ActorVitalsRuntime } from './modules/actor-vitals-runtime';
+import { ModeRuntime } from './modules/mode-runtime';
+import { createModeStatePort } from './modules/mode-state-port';
+import { GameplayModuleRuntime } from './modules/gameplay-module-runtime';
+import { findSafeModeLanding } from '../authority/creative-physics';
+import type { WorldResourceAuthorizer } from '../harness/world-authorization';
+import type { RegisteredOperationBinding, RegisteredOperationRequest } from '../composition/operation-contracts';
+import { ActorInventoryRuntime } from './modules/actor-inventory-runtime';
+import { createInventoryStatePort } from './modules/inventory-state-port';
+import { resolveGameplayComposition } from '../composition/gameplay-composition';
+import type { WorldComposition } from '../composition/contracts';
+import { advancePlayerNeeds } from './modules/needs-runtime';
+import { BlockInteractionRuntime } from './modules/block-interaction-runtime';
 import { traceVoxelRay } from './voxel-ray';
-import { Voxel } from '../../world/voxel';
+import { Voxel, CHUNK_SIZE, chunkKey } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
 import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
 import {
@@ -10,14 +22,13 @@ import {
   type EntityUpdate,
   type GameplayEntity,
 } from './entity-store';
-import { getItemCapability, listItemDefinitions, type ItemStack } from './item-registry';
+import type { ItemStack } from './item-registry';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import type { ActorComponentAccess } from './ecs-actor-components';
-import { craftRecipe, listCraftableRecipes, listRecipes } from './recipe-registry';
-import { getVoxelGameplayDefinition } from './voxel-gameplay';
+import { type GameplayContent } from './gameplay-content';
 import * as GameplaySnapshot from './gameplay-snapshot';
-import { advanceGameplayClock } from './gameplay-clock';
-import { clonePosition, positionsInRange, voxelCenter } from './gameplay-geometry';
+import { advanceGameplayClock, assertGameplayAdvance } from './gameplay-clock';
+import { clonePosition, positionsInRange } from './gameplay-geometry';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { CombatSnapshot, MeleeDefinition } from './combat-runtime';
 import { applyCombatDamage, isCombatantAvailable, validateCombatHit } from './gameplay-combat';
@@ -31,19 +42,23 @@ export type {
 } from './gameplay-snapshot';
 
 type Position = [number, number, number];
-type GameplayCallbacks = {
+export type GameplayCallbacks = {
   getVoxel: (position: Position) => number | undefined;
   editVoxel: (actorId: string, position: Position, voxel: number) => WorldCommitResult;
   getWorldTime: () => number;
   platform: CorePlatformPorts;
+  content?: GameplayContent;
+  composition?: WorldComposition;
+  allowLegacyCompositionMigration?: boolean;
   meleeDefinitions?: readonly MeleeDefinition[];
 };
 type Failure = { success: false; reason: string };
-type Success<Data extends object = Record<never, never>> = { success: true } & Data;
-export type GameplayResult<Data extends object = Record<never, never>> = Success<Data> | Failure;
+export type GameplayResult<Data extends object = Record<never, never>> = ({ success: true } & Data) | Failure;
 
 export class GameplayRuntime {
-  readonly entities = new EntityStore();
+  readonly content: GameplayContent;
+  readonly inventoryState: ReturnType<typeof createInventoryStatePort>;
+  readonly entities: EntityStore;
   readonly simulation: AutonomyRuntime;
   private readonly players = new Map<string, PlayerState>();
   private time = 0;
@@ -51,15 +66,91 @@ export class GameplayRuntime {
   private persistedRevision = 0;
   private inventoryOperationCount = 0;
   private eventCount = 0;
+  private readonly compositionGuard;
+  private readonly inventoryActions;
+  private readonly modes;
+  private readonly vitals;
+  private readonly modules;
+  private readonly blocks;
 
   constructor(private readonly callbacks: GameplayCallbacks) {
+    const resolved = resolveGameplayComposition(callbacks);
+    this.content = resolved.content;
+    this.compositionGuard = resolved.guard;
+    this.entities = new EntityStore(this.content.items);
+    this.inventoryState = createInventoryStatePort({
+      entities: this.entities,
+      items: this.content.items,
+      revision: () => this.revision,
+      changed: () => this.touch(),
+    });
+    this.inventoryActions = new ActorInventoryRuntime({
+      actor: (id) => this.inventoryActor(id),
+      recipes: this.content.recipes,
+      cancelCombat: (id, reason) => this.simulation.cancelCombat(id, reason),
+      changed: (operation) => {
+        if (operation) this.inventoryOperationCount++;
+        this.touch();
+      },
+    });
+    this.vitals = new ActorVitalsRuntime({
+      player: (id) => this.player(id),
+      killPlayer: (player) => this.killPlayer(player),
+      touch: () => this.touch(),
+      entities: this.entities,
+    });
+    this.modes = new ModeRuntime({
+      entities: this.entities,
+      findSafeLanding: (id) =>
+        findSafeModeLanding(this.entities.get(id)!, {
+          getLoadedVoxel: (x, y, z) => {
+            const voxel = callbacks.getVoxel([x, y, z]);
+            return voxel === undefined
+              ? null
+              : {
+                  voxel,
+                  chunkKey: chunkKey(
+                    Math.floor(x / CHUNK_SIZE),
+                    Math.floor(y / CHUNK_SIZE),
+                    Math.floor(z / CHUNK_SIZE),
+                  ),
+                  revision: this.revision,
+                };
+          },
+        }),
+      cancelIncompatibleActions: (id, reason) => {
+        this.simulation.interruptAction(id, reason);
+        const player = this.players.get(id);
+        if (player) player.breakAction = null;
+      },
+      changed: () => this.touch(),
+    });
+    this.blocks = new BlockInteractionRuntime({
+      player: (id) => this.player(id),
+      entity: (id) => this.entities.get(id),
+      getVoxel: callbacks.getVoxel,
+      editVoxel: callbacks.editVoxel,
+      items: this.content.items,
+      changed: (inventoryOperation) => {
+        if (inventoryOperation) this.inventoryOperationCount++;
+        this.touch();
+      },
+      spawnDrop: (position, stack) => void this.spawnWorldItem(position, stack),
+    });
+    this.modules = new GameplayModuleRuntime({
+      composition: callbacks.composition,
+      entities: this.entities,
+      clone: callbacks.platform.clone,
+      inventory: this.inventoryState,
+      mode: createModeStatePort(this.entities, this.modes, () => this.revision),
+    });
     this.simulation = new AutonomyRuntime({
       entities: this.entities,
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: callbacks.getWorldTime,
       isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
       clone: callbacks.platform.clone,
-      meleeDefinitions: callbacks.meleeDefinitions,
+      meleeDefinitions: this.content.meleeDefinitions,
       combat: {
         actorAvailable: (id) =>
           isCombatantAvailable(this.entities, (playerId) => this.players.get(playerId)?.lifecycle === 'alive', id),
@@ -79,11 +170,27 @@ export class GameplayRuntime {
         applyDamage: (actorId, targetId, damage) => this.applyCombatDamage(actorId, targetId, damage),
       },
     });
-    for (const item of listItemDefinitions()) {
-      const melee = getItemCapability(item.id, 'melee');
-      if (melee && !this.simulation.combat.hasDefinition(melee.definitionId))
-        throw new TypeError(`Item ${item.id} references unknown melee definition: ${melee.definitionId}`);
-    }
+  }
+
+  get resources() {
+    return this.callbacks.composition?.resources ?? [];
+  }
+  getActorModeState(id: string) {
+    const entity = this.entities.get(id);
+    return entity && entity.type !== 'world-item' ? this.modes.stateFor(id) : null;
+  }
+  bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredOperationBinding) {
+    return this.modules.bind(authorizer, source);
+  }
+  invokeModuleOperation(
+    authorizer: WorldResourceAuthorizer,
+    source: Omit<RegisteredOperationBinding, 'moduleId'>,
+    request: RegisteredOperationRequest,
+  ) {
+    return this.modules.invoke(authorizer, source, request);
+  }
+  dispose(): void {
+    this.modules.dispose();
   }
 
   get gameplayTime(): number {
@@ -165,94 +272,39 @@ export class GameplayRuntime {
   }
 
   getInventory(id: string) {
-    const player = this.inventoryActor(id);
-    return { slots: player.inventory.snapshot(), selectedSlot: player.selectedSlot };
+    return this.inventoryActions.snapshot(id);
   }
-
-  giveItem(id: string, stack: ItemStack): GameplayResult<{ inventory: ReturnType<GameplayRuntime['getInventory']> }> {
-    const player = this.inventoryActor(id);
-    if (!player.inventory.add(stack)) return { success: false, reason: 'inventory-full' };
-    this.inventoryOperationCount += 1;
-    this.touch();
-    return { success: true, inventory: this.getInventory(id) };
+  giveItem(id: string, stack: ItemStack) {
+    return this.inventoryActions.give(id, stack);
   }
-
-  removeItem(id: string, stack: ItemStack): GameplayResult {
-    if (!this.inventoryActor(id).inventory.remove(stack)) return { success: false, reason: 'missing-items' };
-    this.inventoryOperationCount += 1;
-    this.touch();
-    return { success: true };
+  removeItem(id: string, stack: ItemStack) {
+    return this.inventoryActions.remove(id, stack);
   }
-
-  selectHotbarSlot(id: string, slot: number): GameplayResult {
-    const player = this.inventoryActor(id);
-    const previous = player.selectedSlot;
-    if (!player.selectSlot(slot)) return { success: false, reason: 'invalid-slot' };
-    if (slot !== previous) this.simulation.cancelCombat(id, 'slot-changed');
-    this.touch();
-    return { success: true };
+  selectHotbarSlot(id: string, slot: number) {
+    return this.getActorModeState(id)?.mode === 'creative'
+      ? this.modes.selectCreativeSlot(id, slot)
+      : this.inventoryActions.select(id, slot);
   }
-
-  moveInventorySlot(id: string, source: number, target: number): GameplayResult {
-    const player = this.inventoryActor(id);
-    const active = this.requireAlive(player);
-    if (active) return active;
-    if (!player.inventory.moveStack(source, target)) return { success: false, reason: 'cannot-move-item' };
-    if (source === player.selectedSlot || target === player.selectedSlot)
-      this.simulation.cancelCombat(id, 'slot-changed');
-    this.inventoryOperationCount++;
-    this.touch();
-    return { success: true };
+  moveInventorySlot(id: string, source: number, target: number) {
+    return this.inventoryActions.move(id, source, target);
   }
-
-  craft(id: string, recipeId: string): ReturnType<typeof craftRecipe> | { success: false; reason: 'player-dead' } {
-    const player = this.inventoryActor(id);
-    if (player.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
-    const result = craftRecipe(player.inventory, recipeId);
-    if (result.success) {
-      this.inventoryOperationCount += 1;
-      this.touch();
-    }
-    return result;
+  craft(id: string, recipeId: string) {
+    return this.inventoryActions.craft(id, recipeId);
   }
-
   listCraftable(id: string) {
-    return listCraftableRecipes(this.inventoryActor(id).inventory);
+    return this.inventoryActions.listCraftable(id);
   }
 
   listRecipes() {
-    return listRecipes();
+    return this.content.recipes.list();
   }
 
-  beginBreak(id: string, position: Position): GameplayResult<{ requiredSeconds: number }> {
-    const player = this.player(id);
-    const active = this.requireAlive(player);
-    if (active) return active;
-    const entity = this.entities.get(id)!;
-    if (!positionsInRange(entity.position, voxelCenter(position), 5)) return { success: false, reason: 'out-of-range' };
-    const voxel = this.callbacks.getVoxel(position);
-    if (voxel === undefined) return { success: false, reason: 'chunk-unavailable' };
-    const definition = getVoxelGameplayDefinition(voxel);
-    if (definition.hardnessSeconds === null) return { success: false, reason: 'unbreakable' };
-    const selected = player.inventory.slot(player.selectedSlot);
-    const mine = selected ? getItemCapability(selected.itemId, 'mine') : undefined;
-    const multiplier = mine?.tool === definition.preferredTool ? mine.multiplier : 1;
-    const requiredSeconds = Number((definition.hardnessSeconds / multiplier).toFixed(6));
-    const current = player.breakAction;
-    player.breakAction =
-      current && current.voxel === voxel && current.position.every((value, index) => value === position[index])
-        ? current
-        : { position: clonePosition(position), voxel, elapsedSeconds: 0, requiredSeconds };
-    this.touch();
-    return { success: true, requiredSeconds };
+  beginBreak(id: string, position: Position): GameplayResult<{ requiredSeconds: number; commit?: WorldCommitResult }> {
+    return this.blocks.beginBreak(id, position);
   }
 
   cancelBreak(id: string): GameplayResult {
-    const player = this.player(id);
-    if (!player.breakAction) return { success: true };
-    player.breakAction = null;
-    this.touch();
-    return { success: true };
+    return this.blocks.cancelBreak(id);
   }
 
   pickupItem(playerId: string, entityId: string): GameplayResult {
@@ -286,7 +338,7 @@ export class GameplayRuntime {
     if (slot === player.selectedSlot) this.simulation.cancelCombat(playerId, 'slot-changed');
     this.inventoryOperationCount += 1;
     const entity = this.spawnWorldItem(clonePosition(this.entities.get(playerId)!.position), {
-      itemId: stack.itemId,
+      ...stack,
       count,
     });
     this.touch();
@@ -294,26 +346,7 @@ export class GameplayRuntime {
   }
 
   placeVoxel(id: string, position: Position): GameplayResult<{ commit: WorldCommitResult }> {
-    const player = this.player(id);
-    const active = this.requireAlive(player);
-    if (active) return active;
-    const entity = this.entities.get(id)!;
-    if (!positionsInRange(entity.position, voxelCenter(position), 5)) return { success: false, reason: 'out-of-range' };
-    const currentVoxel = this.callbacks.getVoxel(position);
-    if (currentVoxel === undefined) return { success: false, reason: 'chunk-unavailable' };
-    if (!getVoxelGameplayDefinition(currentVoxel).replaceable) return { success: false, reason: 'target-occupied' };
-    const selected = player.inventory.slot(player.selectedSlot);
-    if (!selected) return { success: false, reason: 'no-selected-item' };
-    const place = getItemCapability(selected.itemId, 'place');
-    if (!place) return { success: false, reason: 'item-not-placeable' };
-    if (playerOccupiesVoxelShape(entity.position, position, place.voxel))
-      return { success: false, reason: 'player-collision' };
-    const commit = this.callbacks.editVoxel(id, position, place.voxel);
-    if (!commit.committed) return { success: false, reason: 'world-not-changed' };
-    player.inventory.removeFromSlot(player.selectedSlot, 1);
-    this.inventoryOperationCount += 1;
-    this.touch();
-    return { success: true, commit };
+    return this.blocks.placeVoxel(id, position);
   }
 
   useSelectedItem(id: string): GameplayResult {
@@ -328,7 +361,7 @@ export class GameplayRuntime {
       return { success: false, reason: 'invalid-slot' };
     const selected = player.inventory.slot(slot);
     if (!selected) return { success: false, reason: 'no-selected-item' };
-    const consume = getItemCapability(selected.itemId, 'consume');
+    const consume = this.content.items.capability(selected.itemId, 'consume');
     if (!consume) return { success: false, reason: 'item-not-usable' };
     if (player.hungerMeaning === 'satiety' ? player.hunger >= player.maxHunger : player.hunger <= 0)
       return { success: false, reason: 'hunger-full' };
@@ -350,7 +383,7 @@ export class GameplayRuntime {
     const active = this.requireAlive(player);
     if (active) return active;
     const selected = player.inventory.slot(player.selectedSlot);
-    const melee = selected ? getItemCapability(selected.itemId, 'melee') : undefined;
+    const melee = selected ? this.content.items.capability(selected.itemId, 'melee') : undefined;
     const result = this.simulation.requestCombat(playerId, targetId, melee?.definitionId ?? 'unarmed');
     if (!result.success) return result;
     this.touch();
@@ -365,41 +398,22 @@ export class GameplayRuntime {
     this.touch();
   }
 
-  applyDamage(_actorId: string, playerId: string, amount: number, _cause: string): GameplayResult {
-    const player = this.player(playerId);
-    if (!Number.isFinite(amount) || amount <= 0) return { success: false, reason: 'invalid-damage' };
-    if (player.lifecycle === 'dead') return { success: false, reason: 'player-dead' };
-    player.health = Math.max(0, player.health - amount);
-    if (player.health === 0) this.killPlayer(player);
-    this.touch();
-    return { success: true };
+  applyDamage(actorId: string, playerId: string, amount: number, cause: string) {
+    return this.vitals.applyDamage(actorId, playerId, amount, cause);
   }
-
-  healPlayer(playerId: string, amount: number): GameplayResult {
-    const player = this.player(playerId);
-    if (player.lifecycle === 'dead') return { success: false, reason: 'player-dead' };
-    if (!Number.isFinite(amount) || amount <= 0) return { success: false, reason: 'invalid-heal' };
-    player.health = Math.min(player.maxHealth, player.health + amount);
-    this.touch();
-    return { success: true };
+  healPlayer(playerId: string, amount: number) {
+    return this.vitals.healPlayer(playerId, amount);
   }
-
-  setHungerForDebug(playerId: string, hunger: number): void {
-    if (!Number.isFinite(hunger) || hunger < 0 || hunger > 20) throw new TypeError('Hunger must be between 0 and 20.');
-    this.player(playerId).hunger = hunger;
-    this.touch();
+  setHungerForDebug(playerId: string, hunger: number) {
+    this.vitals.setHungerForDebug(playerId, hunger);
   }
-
-  respawnPlayer(playerId: string): GameplayResult {
-    const player = this.player(playerId);
-    if (player.lifecycle !== 'dead') return { success: false, reason: 'player-alive' };
-    player.respawn();
-    this.entities.move(playerId, player.spawnPosition);
-    this.touch();
-    return { success: true };
+  respawnPlayer(playerId: string) {
+    return this.vitals.respawnPlayer(playerId);
   }
 
   advanceRules(seconds: number): { commits: WorldCommitResult[] } {
+    assertGameplayAdvance(seconds);
+    this.modules.flushQueued();
     const commits: WorldCommitResult[] = [];
     advanceGameplayClock(seconds, (step) => {
       this.time += step;
@@ -411,13 +425,15 @@ export class GameplayRuntime {
   }
 
   createSnapshot(): GameplaySnapshot.GameplaySnapshotV4 {
-    return GameplaySnapshot.createGameplaySnapshotV4(
+    const snapshot = GameplaySnapshot.createGameplaySnapshotV4(
       this.revision,
       this.time,
       this.callbacks.getWorldTime(),
       this.entities.exportComponentSnapshot(),
       this.simulation.snapshot(),
     );
+    if (this.compositionGuard) snapshot.composition = this.compositionGuard.snapshot();
+    return snapshot;
   }
 
   metrics() {
@@ -439,11 +455,15 @@ export class GameplayRuntime {
   }
 
   restoreSnapshot(raw: unknown): { version: 1 | 2 | 3 | 4; worldTime?: number } {
-    return GameplaySnapshot.restoreGameplayRuntimeSnapshot(raw, {
+    this.compositionGuard?.validateGameplay(raw);
+    if (!this.compositionGuard && raw && typeof raw === 'object' && 'composition' in raw)
+      throw new TypeError('Gameplay composition requires a matching composed host.');
+    const restored = GameplaySnapshot.restoreGameplayRuntimeSnapshot(raw, {
       getVoxel: (x, y, z) => this.callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: this.callbacks.getWorldTime,
       clone: this.callbacks.platform.clone,
-      meleeDefinitions: this.callbacks.meleeDefinitions,
+      items: this.content.items,
+      meleeDefinitions: this.content.meleeDefinitions,
       entities: this.entities,
       simulation: this.simulation,
       players: this.players,
@@ -453,6 +473,8 @@ export class GameplayRuntime {
         this.persistedRevision = revision;
       },
     });
+    this.modules.clearBindings();
+    return restored;
   }
 
   markPersisted(revision: number): void {
@@ -461,49 +483,8 @@ export class GameplayRuntime {
 
   private advancePlayer(player: PlayerState, seconds: number, commits: WorldCommitResult[]): void {
     if (player.lifecycle !== 'alive') return;
-    this.advanceBreak(player, seconds, commits);
-    player.hungerAccumulator += seconds;
-    while (player.hungerAccumulator >= 120) {
-      player.hungerAccumulator -= 120;
-      player.hunger = Math.max(0, player.hunger - 1);
-    }
-    if (player.hunger >= 16 && player.health < player.maxHealth) {
-      player.healingAccumulator += seconds;
-      while (player.healingAccumulator >= 10 && player.hunger >= 16 && player.health < player.maxHealth) {
-        player.healingAccumulator -= 10;
-        player.health += 1;
-        player.hunger -= 1;
-      }
-    } else player.healingAccumulator = 0;
-    if (player.hunger === 0) {
-      player.starvationAccumulator += seconds;
-      while (player.starvationAccumulator >= 15 && player.lifecycle === 'alive') {
-        player.starvationAccumulator -= 15;
-        player.health = Math.max(0, player.health - 1);
-        if (player.health === 0) this.killPlayer(player);
-      }
-    } else player.starvationAccumulator = 0;
-  }
-
-  private advanceBreak(player: PlayerState, seconds: number, commits: WorldCommitResult[]): void {
-    const action = player.breakAction;
-    if (!action) return;
-    const entity = this.entities.get(player.entityId)!;
-    const currentVoxel = this.callbacks.getVoxel(action.position);
-    if (currentVoxel === undefined) return;
-    if (currentVoxel !== action.voxel || !positionsInRange(entity.position, voxelCenter(action.position), 5)) {
-      player.breakAction = null;
-      return;
-    }
-    action.elapsedSeconds += seconds;
-    player.breakAction = action;
-    if (action.elapsedSeconds + Number.EPSILON < action.requiredSeconds) return;
-    player.breakAction = null;
-    const definition = getVoxelGameplayDefinition(action.voxel);
-    const commit = this.callbacks.editVoxel(player.entityId, action.position, Voxel.Air);
-    if (!commit.committed) return;
-    commits.push(commit);
-    if (definition.drop) this.spawnWorldItem(voxelCenter(action.position), { ...definition.drop });
+    this.blocks.advanceBreak(player.entityId, seconds, commits);
+    if (player.mode === 'survival') advancePlayerNeeds(player, seconds, () => this.killPlayer(player));
   }
 
   private killPlayer(player: PlayerState): void {
@@ -525,6 +506,7 @@ export class GameplayRuntime {
   }
 
   private applyCombatDamage(actorId: string, targetId: string, amount: number): number | null {
+    if (this.getActorModeState(targetId)?.mode === 'creative') return 0;
     return applyCombatDamage(
       {
         entities: this.entities,

@@ -17,12 +17,19 @@ export type AuthorityPickupTarget = Readonly<{
   position: [number, number, number];
 }>;
 
+export type AuthorityActorModeState = Readonly<{
+  mode: 'survival' | 'creative';
+  modeRevision?: number;
+  flight: Readonly<{ enabled: boolean; revision?: number }>;
+}>;
+
 export type AuthorityServerPort = {
   readonly worldRevision: number;
   readonly mutationCount: number;
   readonly worldTime: number;
   readonly fluidDiagnostics?: FluidAuthorityDiagnostics;
   getEntity: (id: string) => AuthorityEntity | null;
+  getActorModeState?: (id: string) => AuthorityActorModeState | null;
   createEntityReference?: (id: string) => EntityLifetimeReference | null;
   resolveEntityReference?: (reference: EntityLifetimeReference) => boolean;
   queryEntities: () => AuthorityEntity[];
@@ -46,11 +53,14 @@ export type LogicIntent = Readonly<{
   expiresAtPhysicsTick: number;
 }>;
 
+export type AuthorityMovementSnapshot = Readonly<{ revision: string; flightSpeed: number | null }>;
+
 export type AuthorityBodySnapshot = Readonly<{
   id: string;
   type: AuthorityEntity['type'];
   archetype?: AuthorityEntity['archetype'];
   body: BodyState;
+  movement?: AuthorityMovementSnapshot;
   grounded: boolean;
   contacts: readonly Contact[];
 }>;

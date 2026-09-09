@@ -63,7 +63,7 @@ const validateInvocationData = (
   visit(value, 0, true);
 };
 
-const snapshotInvocationInput = (
+export const snapshotInvocationInput = (
   value: ModuleInvocationValue | undefined,
   clone: CoreClone,
 ): ModuleInvocationValue | undefined => {

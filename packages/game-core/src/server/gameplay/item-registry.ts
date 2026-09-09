@@ -1,4 +1,11 @@
+import { overworldItems } from './playbooks/overworld/items';
 import { Voxel } from '../../world/voxel';
+import {
+  normalizeItemStack,
+  type ItemDurabilityDefinition,
+  type ItemInstanceState,
+  type ItemStackNormalizationOptions,
+} from './item-instance';
 
 export const ItemIds = Object.freeze({
   DirtBlock: 'dirt-block',
@@ -14,8 +21,8 @@ export const ItemIds = Object.freeze({
   WoodSword: 'wood-sword',
 } as const);
 
-export type ItemId = (typeof ItemIds)[keyof typeof ItemIds];
-export type ItemStack = { itemId: ItemId; count: number };
+export type ItemId = string;
+export type ItemStack = { itemId: ItemId; count: number; instance?: ItemInstanceState };
 export type PlaceItemCapability = Readonly<{ type: 'place'; voxel: number }>;
 export type ConsumeItemCapability = Readonly<{ type: 'consume'; hungerRestore: number }>;
 export type MineItemCapability = Readonly<{ type: 'mine'; tool: 'axe' | 'pickaxe'; multiplier: number }>;
@@ -29,6 +36,7 @@ export type ItemDefinition = Readonly<{
   name: string;
   itemType: 'block' | 'resource' | 'food' | 'tool';
   stackLimit: number;
+  durability?: ItemDurabilityDefinition;
   capabilities: readonly ItemCapability[];
   /** Compatibility projections for existing presentation consumers. */
   placesVoxel?: number;
@@ -45,15 +53,38 @@ export type ItemDefinitionInput = Omit<
 
 export type ItemDefinitionRegistry = Readonly<{
   get: (id: string) => ItemDefinition | undefined;
+  require: (id: string) => ItemDefinition;
+  has: (id: string) => boolean;
   list: () => readonly ItemDefinition[];
+  capability: <Type extends ItemCapabilityType>(id: string, type: Type) => ItemCapabilityOf<Type> | undefined;
+  normalizeStack: (value: unknown, options?: ItemStackNormalizationOptions) => ItemStack;
+  assertStack: (stack: { itemId: string; count: number }) => asserts stack is ItemStack;
 }>;
 
+const ITEM_IDENTITY = /^[a-z0-9][a-z0-9._-]*(?::[a-z0-9][a-z0-9._/-]*)?$/;
+
+export const isItemId = (value: unknown): value is ItemId => typeof value === 'string' && ITEM_IDENTITY.test(value);
+
 const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
-  if (!input.id.trim() || !input.name.trim()) throw new TypeError('Item identity must not be empty.');
+  if (!isItemId(input.id) || !input.name.trim()) throw new TypeError(`Item identity is invalid: ${String(input.id)}`);
   if (!['block', 'resource', 'food', 'tool'].includes(input.itemType))
     throw new TypeError(`Item type is invalid: ${input.id}`);
   if (!Number.isSafeInteger(input.stackLimit) || input.stackLimit <= 0)
     throw new TypeError(`Item stack limit is invalid: ${input.id}`);
+  if (input.durability !== undefined) {
+    if (
+      typeof input.durability !== 'object' ||
+      input.durability === null ||
+      Array.isArray(input.durability) ||
+      Object.keys(input.durability).length !== 1 ||
+      !Object.hasOwn(input.durability, 'max') ||
+      input.itemType !== 'tool' ||
+      input.stackLimit !== 1 ||
+      !Number.isSafeInteger(input.durability.max) ||
+      input.durability.max <= 0
+    )
+      throw new TypeError(`Item durability definition is invalid: ${input.id}`);
+  }
   const seen = new Set<ItemCapabilityType>();
   const capabilities = input.capabilities.map((source) => {
     if (!['place', 'consume', 'mine', 'melee'].includes(source.type))
@@ -75,6 +106,7 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
   const mine = capabilities.find((value): value is MineItemCapability => value.type === 'mine');
   return Object.freeze({
     ...input,
+    ...(input.durability ? { durability: Object.freeze({ max: input.durability.max }) } : {}),
     capabilities: Object.freeze(capabilities),
     ...(place ? { placesVoxel: place.voxel } : {}),
     ...(consume ? { hungerRestore: consume.hungerRestore } : {}),
@@ -98,110 +130,42 @@ export function createItemDefinitionRegistry(
     registered.set(input.id, definition);
   }
   const values = Object.freeze([...registered.values()]);
-  return Object.freeze({ get: (id: string) => registered.get(id), list: () => values });
+  const require = (id: string) => {
+    const definition = registered.get(id);
+    if (!definition) throw new RangeError(`Unknown item: ${String(id)}`);
+    return definition;
+  };
+  const capability = <Type extends ItemCapabilityType>(id: string, type: Type) =>
+    require(id).capabilities.find((candidate): candidate is ItemCapabilityOf<Type> => candidate.type === type);
+  const registry: ItemDefinitionRegistry = Object.freeze({
+    get: (id: string) => registered.get(id),
+    require,
+    has: (id: string) => registered.has(id),
+    list: () => values,
+    capability,
+    normalizeStack: (value: unknown, options?: ItemStackNormalizationOptions) =>
+      normalizeItemStack(registry, value, options),
+    assertStack: (stack: { itemId: string; count: number }): asserts stack is ItemStack => {
+      normalizeItemStack(registry, stack);
+    },
+  });
+  return registry;
 }
 
-const definitions: Readonly<Record<ItemId, ItemDefinition>> = Object.freeze({
-  [ItemIds.GlowstoneBlock]: defineItem({
-    id: ItemIds.GlowstoneBlock,
-    name: '辉光石',
-    itemType: 'block',
-    stackLimit: 64,
-    capabilities: [{ type: 'place', voxel: Voxel.Glowstone }],
-  }),
-  [ItemIds.Lantern]: defineItem({
-    id: ItemIds.Lantern,
-    name: '灯笼',
-    itemType: 'block',
-    stackLimit: 64,
-    capabilities: [{ type: 'place', voxel: Voxel.Lantern }],
-  }),
-  [ItemIds.DirtBlock]: defineItem({
-    id: ItemIds.DirtBlock,
-    name: '泥土块',
-    itemType: 'block',
-    stackLimit: 64,
-    capabilities: [{ type: 'place', voxel: Voxel.Dirt }],
-  }),
-  [ItemIds.StoneBlock]: defineItem({
-    id: ItemIds.StoneBlock,
-    name: '石块',
-    itemType: 'block',
-    stackLimit: 64,
-    capabilities: [{ type: 'place', voxel: Voxel.Stone }],
-  }),
-  [ItemIds.WoodBlock]: defineItem({
-    id: ItemIds.WoodBlock,
-    name: '原木',
-    itemType: 'block',
-    stackLimit: 64,
-    capabilities: [{ type: 'place', voxel: Voxel.Wood }],
-  }),
-  [ItemIds.SandBlock]: defineItem({
-    id: ItemIds.SandBlock,
-    name: '沙块',
-    itemType: 'block',
-    stackLimit: 64,
-    capabilities: [{ type: 'place', voxel: Voxel.Sand }],
-  }),
-  [ItemIds.Berry]: defineItem({
-    id: ItemIds.Berry,
-    name: '浆果',
-    itemType: 'food',
-    stackLimit: 64,
-    capabilities: [{ type: 'consume', hungerRestore: 4 }],
-  }),
-  [ItemIds.Plank]: defineItem({
-    id: ItemIds.Plank,
-    name: '木板',
-    itemType: 'resource',
-    stackLimit: 64,
-    capabilities: [],
-  }),
-  [ItemIds.WoodAxe]: defineItem({
-    id: ItemIds.WoodAxe,
-    name: '木斧',
-    itemType: 'tool',
-    stackLimit: 1,
-    capabilities: [{ type: 'mine', tool: 'axe', multiplier: 3 }],
-  }),
-  [ItemIds.StonePickaxe]: defineItem({
-    id: ItemIds.StonePickaxe,
-    name: '石镐',
-    itemType: 'tool',
-    stackLimit: 1,
-    capabilities: [{ type: 'mine', tool: 'pickaxe', multiplier: 4 }],
-  }),
-  [ItemIds.WoodSword]: defineItem({
-    id: ItemIds.WoodSword,
-    name: '木剑',
-    itemType: 'tool',
-    stackLimit: 1,
-    capabilities: [{ type: 'melee', definitionId: 'wood-sword' }],
-  }),
-});
-
-export const isItemId = (value: unknown): value is ItemId =>
-  typeof value === 'string' && Object.hasOwn(definitions, value);
+export const defaultItemDefinitionRegistry = createItemDefinitionRegistry(overworldItems, (id) => id === 'wood-sword');
 
 export function getItemDefinition(itemId: ItemId | string): ItemDefinition {
-  if (!isItemId(itemId)) throw new RangeError(`Unknown item: ${String(itemId)}`);
-  return definitions[itemId];
+  return defaultItemDefinitionRegistry.require(itemId);
 }
 
 export function getItemCapability<Type extends ItemCapabilityType>(
   itemId: ItemId | string,
   type: Type,
 ): ItemCapabilityOf<Type> | undefined {
-  return getItemDefinition(itemId).capabilities.find(
-    (capability): capability is ItemCapabilityOf<Type> => capability.type === type,
-  );
+  return defaultItemDefinitionRegistry.capability(itemId, type);
 }
 
-export const listItemDefinitions = (): readonly ItemDefinition[] => Object.freeze(Object.values(definitions));
+export const listItemDefinitions = (): readonly ItemDefinition[] => defaultItemDefinitionRegistry.list();
 
-export function assertItemStack(stack: { itemId: string; count: number }): asserts stack is ItemStack {
-  getItemDefinition(stack.itemId);
-  if (!Number.isInteger(stack.count) || stack.count <= 0)
-    throw new TypeError('Item stack count must be a positive integer.');
-}
+export const assertItemStack = (stack: { itemId: string; count: number }): asserts stack is ItemStack =>
+  defaultItemDefinitionRegistry.assertStack(stack);

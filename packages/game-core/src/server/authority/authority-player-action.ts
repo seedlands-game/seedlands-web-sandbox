@@ -26,8 +26,11 @@ export function applyAuthorityPlayerAction(
       return server.craft(playerId, action.recipeId);
     case 'attack':
       return server.attackEntity(playerId, action.targetId);
-    case 'begin-break':
-      return server.beginBreak(playerId, action.position);
+    case 'begin-break': {
+      const result = server.beginBreak(playerId, action.position);
+      if (result.success && result.commit) publishCommit(result.commit);
+      return result;
+    }
     case 'cancel-break':
       return server.cancelBreak(playerId);
     case 'place': {

@@ -1,3 +1,12 @@
+import type { snapshotPackLock, snapshotOperationIdentity } from './composition-identity';
+import type { ModLifecycleDefinition, ModSystemDefinition, LifecycleRegistrations } from './lifecycle-contracts';
+import type { ItemCapability } from '../gameplay/item-registry';
+import type {
+  ModStateDefinition,
+  ModOperationDefinition,
+  ModRuleDefinition,
+  OperationRegistrations,
+} from './operation-contracts';
 import type {
   WorldAuthorizationTarget,
   WorldOperation,
@@ -27,17 +36,29 @@ export type ModItemDefinition = Readonly<{
   id: string;
   name: string;
   stackLimit: number;
+  storageId?: string;
+  itemType?: 'block' | 'resource' | 'food' | 'tool';
+  capabilities?: readonly ItemCapability[];
+  durability?: Readonly<{ max: number }>;
 }>;
 
 export type ModItemAmount = Readonly<{ itemId: string; count: number }>;
 
 export type ModRecipeDefinition = Readonly<{
   id: string;
+  storageId?: string;
   inputs: readonly ModItemAmount[];
   outputs: readonly ModItemAmount[];
 }>;
 
 export type ModRegistrationFacade = Readonly<{
+  readContentDefinitions(): Readonly<{ items: readonly ModItemDefinition[]; recipes: readonly ModRecipeDefinition[] }>;
+  onDefinitionsReady(finalize: () => void): void;
+  registerLifecycle(definition: ModLifecycleDefinition): void;
+  registerSystem(definition: ModSystemDefinition): void;
+  registerState(definition: ModStateDefinition): void;
+  registerOperation(definition: ModOperationDefinition): void;
+  registerRule(definition: ModRuleDefinition): void;
   registerItem(definition: ModItemDefinition): void;
   registerRecipe(definition: ModRecipeDefinition): void;
   provideCapability<Value>(id: string, value: Value): void;
@@ -94,23 +115,32 @@ export type PackDefinition = Readonly<{
   modules: readonly ModModule[];
 }>;
 
-export type WorldDefinitionMap = Readonly<{
-  packs: readonly Readonly<{ id: string; version: string }>[];
-  modules: readonly Readonly<{ id: string; version: string; packId: string }>[];
-  capabilities: readonly Readonly<{ id: string; version: string; moduleId: string }>[];
-  resources: readonly WorldResourceRegistration[];
-}>;
+export type WorldDefinitionMap = ReturnType<typeof snapshotOperationIdentity> &
+  Readonly<{
+    packs: readonly Readonly<{ id: string; version: string }>[];
+    modules: readonly Readonly<{ id: string; version: string; packId: string }>[];
+    capabilities: readonly Readonly<{ id: string; version: string; moduleId: string }>[];
+    resources: readonly WorldResourceRegistration[];
+    items: readonly Readonly<{ id: string; storageId: string }>[];
+    recipes: readonly Readonly<{ id: string; storageId: string }>[];
+    systems: LifecycleRegistrations['systems'];
+    lifecycles: LifecycleRegistrations['lifecycles'];
+  }>;
 
 export type WorldComposition = Readonly<{
+  capability<Value>(id: string): Value;
   playbookId: string;
+  packLock: ReturnType<typeof snapshotPackLock>;
   packOrder: readonly string[];
   moduleOrder: readonly string[];
   definitionMap: WorldDefinitionMap;
   resources: readonly WorldResourceRegistration[];
-  registrations: Readonly<{
-    items: readonly ModItemDefinition[];
-    recipes: readonly ModRecipeDefinition[];
-  }>;
+  registrations: OperationRegistrations &
+    LifecycleRegistrations &
+    Readonly<{
+      items: readonly ModItemDefinition[];
+      recipes: readonly ModRecipeDefinition[];
+    }>;
   moduleBindings: Readonly<
     Record<
       string,

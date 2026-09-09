@@ -1,5 +1,6 @@
+import { executeModeCommand, type ModuleCommandPort } from './module-command';
 import type { GameServer, WorldCommitResult } from '../game-server';
-import { getItemDefinition, listItemDefinitions, type ItemId } from '../gameplay/item-registry';
+import { isItemId, type ItemId } from '../gameplay/item-registry';
 import { listVoxelGameplayDefinitions } from '../gameplay/voxel-gameplay';
 import type { CommandSource, ServerCommand } from './command-contract';
 
@@ -83,8 +84,13 @@ export async function executeGameplayCommand(
   server: GameServer,
   source: CommandSource,
   command: GameplayCommand,
+  moduleOperation?: ModuleCommandPort,
 ): Promise<GameplayCommandPayload> {
   switch (command.type) {
+    case 'set-mode':
+    case 'set-flight':
+    case 'set-creative-slot':
+      return executeModeCommand(source, command, moduleOperation);
     case 'query-player-state': {
       const id = playerId(source, command.entityId);
       return { message: `Player state for ${id}.`, data: { player: server.getPlayerState(id) } };
@@ -109,7 +115,7 @@ export async function executeGameplayCommand(
       };
     }
     case 'query-item-definitions':
-      return { message: 'Item definitions.', data: { items: listItemDefinitions() } };
+      return { message: 'Item definitions.', data: { items: server.itemDefinitions.list() } };
     case 'query-voxel-definitions':
       return { message: 'Voxel gameplay definitions.', data: { voxels: listVoxelGameplayDefinitions() } };
     case 'query-recipes': {
@@ -184,7 +190,7 @@ export async function executeGameplayCommand(
       return { message: `Interrupted action for ${id}.`, data: { interrupted: server.interruptActorAction(id) } };
     }
     case 'give-item': {
-      const definition = getItemDefinition(command.itemId);
+      const definition = server.itemDefinitions.require(command.itemId);
       return mutationPayload(
         `Gave ${command.count} ${definition.id}.`,
         server.giveItem(playerId(source, command.entityId), {
@@ -194,7 +200,7 @@ export async function executeGameplayCommand(
       );
     }
     case 'remove-item': {
-      const definition = getItemDefinition(command.itemId);
+      const definition = server.itemDefinitions.require(command.itemId);
       return mutationPayload(
         `Removed ${command.count} ${definition.id}.`,
         server.removeItem(playerId(source, command.entityId), {
@@ -204,7 +210,7 @@ export async function executeGameplayCommand(
       );
     }
     case 'spawn-world-item': {
-      const definition = getItemDefinition(command.itemId);
+      const definition = server.itemDefinitions.require(command.itemId);
       const entity = server.spawnWorldItem(position(command.position), {
         itemId: definition.id,
         count: positive(command.count, 'Count', true),
@@ -263,4 +269,8 @@ export async function executeGameplayCommand(
   }
 }
 
-export const itemIdFromCommand = (value: string): ItemId => getItemDefinition(value).id;
+export const itemIdFromCommand = (value: string): ItemId => {
+  const normalized = value.toLowerCase();
+  if (!isItemId(normalized)) throw new TypeError(`Invalid item id: ${value}`);
+  return normalized;
+};

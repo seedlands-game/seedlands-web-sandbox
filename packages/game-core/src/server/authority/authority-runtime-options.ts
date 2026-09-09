@@ -1,4 +1,5 @@
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
+import type { WorldComposition } from '../composition/contracts';
 import type { FluidAuthoritySnapshot } from '../fluid/fluid-transaction';
 import type { CanonicalChunkResidencyLimits } from '../chunk-residency';
 import type { ChunkPersistence } from '../persistence/chunk-persistence';
@@ -13,6 +14,8 @@ export type AuthorityRuntimeOptions = Readonly<{
   epoch: string;
   seedText: string;
   platform: CorePlatformPorts;
+  composition?: WorldComposition;
+  allowLegacyCompositionMigration?: boolean;
   persistence?: AuthorityPersistence;
   generatorVersion?: number;
   initialWorldTime: number;

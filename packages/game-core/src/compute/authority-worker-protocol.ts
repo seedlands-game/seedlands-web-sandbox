@@ -1,3 +1,5 @@
+import type { ItemDefinition } from '../server/gameplay/item-registry';
+import type { Recipe } from '../server/gameplay/recipe-registry';
 import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import type { GameplayEntity } from '../server/gameplay/entity-store';
 import type { PlayerSnapshot } from '../server/gameplay/player-state';
@@ -41,6 +43,8 @@ export type AuthorityGameplayMetrics = Readonly<{
 }>;
 
 export type AuthorityGameplayView = Readonly<{
+  items?: readonly ItemDefinition[];
+  recipes?: readonly Recipe[];
   gameplayRevision: number;
   gameplayTime: number;
   player: PlayerSnapshot;

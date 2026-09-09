@@ -6,6 +6,8 @@ import type { EntitySpawn, EntityUpdate, GameplayEntity } from './gameplay/entit
 import type { VoxelEdit, WorldMutationBuffer } from './world-mutation';
 import type { CanonicalChunkResidencyLimits } from './chunk-residency';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
+import type { GameplayContent } from './gameplay/gameplay-content';
+import type { WorldComposition } from './composition/contracts';
 
 export type ServerChunk = ChunkCoord & {
   key: string;
@@ -81,6 +83,9 @@ export type { EntityUpdate };
 export type GameServerOptions = {
   seedText: string;
   platform: CorePlatformPorts;
+  content?: GameplayContent;
+  composition?: WorldComposition;
+  allowLegacyCompositionMigration?: boolean;
   generatorVersion?: number;
   persistence?: ChunkPersistence & Partial<GameplayPersistence>;
   canonicalResidency?: Partial<CanonicalChunkResidencyLimits>;

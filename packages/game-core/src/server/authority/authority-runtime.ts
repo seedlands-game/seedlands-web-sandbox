@@ -1,3 +1,5 @@
+import { projectAuthorityGameplayView } from './authority-gameplay-view';
+import { bindModuleCommandPort, type WorldModuleBinding } from '../commands/module-command';
 import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { TransactionDeduplicator, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
@@ -95,6 +97,7 @@ export class AuthorityRuntime {
         return server.fluidDiagnostics;
       },
       getEntity: (id: string) => server.getEntity(id),
+      getActorModeState: (id: string) => server.getActorModeState(id),
       createEntityReference: (id: string) => server.createEntityReference(id),
       resolveEntityReference: (reference: EntityLifetimeReference) => server.resolveEntityReference(reference) !== null,
       queryEntities: () => server.queryEntities(),
@@ -145,6 +148,8 @@ export class AuthorityRuntime {
       ...(options.onUnknownChunk ? { onUnknownChunk: unknownChunks.request } : {}),
       ...(options.fluidEpoch === undefined ? {} : { fluidEpoch: options.fluidEpoch }),
       platform: options.platform,
+      composition: options.composition,
+      allowLegacyCompositionMigration: options.allowLegacyCompositionMigration,
     });
     server.setWorldTime(options.initialWorldTime);
     await server.restore();
@@ -427,9 +432,10 @@ export class AuthorityRuntime {
     return result;
   }
 
-  async executeCommand(source: CommandSource, command: ServerCommand) {
+  async executeCommand(source: CommandSource, command: ServerCommand, binding?: WorldModuleBinding) {
     const before = this.serverStateVersion();
     const result = await new ServerCommandExecutor(this.server, {
+      moduleOperation: bindModuleCommandPort(this.server, binding),
       now: this.options.platform.now,
       save: () => this.save(),
       advanceSession: createAuthorityAdvanceCommandPort(
@@ -440,6 +446,12 @@ export class AuthorityRuntime {
         this.mutationPreparation.prepareCommand(commandSource, preparedCommand, buffer),
     }).execute(source, command);
     if (result.success && result.commit?.committed) this.recordWorldCommit(result.commit);
+    if (
+      result.success &&
+      source.entityId === this.playerId &&
+      (command.type === 'set-mode' || command.type === 'set-flight')
+    )
+      this.clearPlayerInput();
     if (command.type !== 'advance-gameplay') this.commitIfServerChanged(before);
     return result;
   }
@@ -475,22 +487,7 @@ export class AuthorityRuntime {
   }
 
   view(): AuthorityGameplayView {
-    const entities = this.server
-      .queryEntities()
-      .map((entity) =>
-        entity.type === 'creature' || entity.type === 'npc'
-          ? { ...entity, combat: this.server.getCombatState(entity.id) }
-          : entity,
-      );
-    return {
-      gameplayRevision: this.server.gameplayRevision,
-      gameplayTime: this.server.gameplayTime,
-      player: this.server.getPlayerState(this.playerId),
-      entities,
-      actors: this.server.simulationSnapshot().actors,
-      craftableRecipeIds: this.server.listCraftableRecipes(this.playerId).map((recipe) => recipe.id),
-      metrics: this.server.gameplayMetrics(),
-    };
+    return projectAuthorityGameplayView(this.server, this.playerId);
   }
 
   takeCommits(): WorldCommitResult[] {

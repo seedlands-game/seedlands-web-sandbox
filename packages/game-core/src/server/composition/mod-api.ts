@@ -1,4 +1,5 @@
 export { definePack } from './assembly';
+export type { ModLifecycleDefinition, ModSystemDefinition } from './lifecycle-contracts';
 export type { AuthorizedModuleExecution, ModuleExecutionContext, ModuleInvocationResult } from './authorized-execution';
 export type {
   CapabilityContract,
@@ -18,3 +19,22 @@ export type {
   PackDefinition,
   ProviderSelection,
 } from './contracts';
+
+export type {
+  ModStateAddress,
+  ModStateDefinition,
+  ModCandidateState,
+  ModOperationDefinition,
+  ModRuleDefinition,
+  RegisteredOperationRequest,
+  CommittedOperationFact,
+} from './operation-contracts';
+
+export { defineInventoryModule } from '../gameplay/modules/inventory-module';
+export { defineContentModule } from '../gameplay/modules/content-module';
+export type { MeleeDefinition } from '../gameplay/combat-runtime';
+export { createInventoryCandidate } from '../gameplay/modules/inventory-api';
+export type { ItemDefinitionRegistry, ItemDefinitionInput, ItemStack } from '../gameplay/item-registry';
+export type { Recipe } from '../gameplay/recipe-registry';
+
+export { defineModeModule } from '../gameplay/modules/mode-module';

@@ -2,6 +2,8 @@ import { once } from 'node:events';
 import { start as startRepl } from 'node:repl';
 import { resolve } from 'node:path';
 import { createServer } from 'vite';
+import { buildGameplayPacks } from './build-gameplay-packs.mjs';
+import { loadVerifiedPackArtifacts } from './pack-integrity.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 function optionsFromArgs(args) {
@@ -20,6 +22,8 @@ function optionsFromArgs(args) {
 }
 
 const options = optionsFromArgs(process.argv.slice(2));
+const { lockPath } = await buildGameplayPacks();
+const packArtifacts = await loadVerifiedPackArtifacts(lockPath);
 const moduleRunner = await createServer({
   root,
   appType: 'custom',
@@ -35,6 +39,9 @@ try {
     '/packages/game-core/src/server/harness/world-harness-jsonl.ts',
   );
   const { nodeCorePlatform } = await moduleRunner.ssrLoadModule('/scripts/headless/node-core-platform.ts');
+  const { assembleOverworldPacks } = await moduleRunner.ssrLoadModule(
+    '/packages/game-core/src/server/composition/host-api.ts',
+  );
   const { readBoundedLines, stringifyWorldJson, decodeCheckpointRequest, JSONL_CHECKPOINT_LINE_BYTES } =
     await moduleRunner.ssrLoadModule('/scripts/headless/jsonl-transport.ts');
   const write = async (value) => {
@@ -45,7 +52,11 @@ try {
     requestId,
     result: { ok: false, error: { kind: 'validation', code, message } },
   });
-  session = await HeadlessSession.create({ seedText: options.seed, platform: nodeCorePlatform });
+  session = await HeadlessSession.create({
+    seedText: options.seed,
+    platform: nodeCorePlatform,
+    createComposition: () => assembleOverworldPacks(packArtifacts),
+  });
   await session.world.clock({ kind: 'pause' });
   const interactive = options.repl || Boolean(process.stdin.isTTY && process.stdout.isTTY && !options.json);
   if (interactive) {

@@ -1,7 +1,13 @@
 import type { InventoryAccess, InventorySlot } from './inventory';
 import { EntityStore } from './entity-store';
-import type { PlayerComponentAccess } from './ecs-actor-components';
+import type {
+  ActorFlightComponentV1,
+  ActorModeComponentV1,
+  CreativeCatalogComponentV1,
+  PlayerComponentAccess,
+} from './ecs-actor-components';
 import type { CombatSnapshot } from './combat-runtime';
+import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry } from './item-registry';
 
 export type PlayerLifecycle = 'alive' | 'dead';
 export type BreakAction = {
@@ -27,6 +33,10 @@ export type PlayerSnapshot = {
   healingAccumulator: number;
   starvationAccumulator: number;
   breakAction: BreakAction | null;
+  /** Optional so V1-V4 snapshots written before actor mode components remain readable. */
+  mode?: ActorModeComponentV1;
+  creativeCatalog?: CreativeCatalogComponentV1;
+  flight?: ActorFlightComponentV1;
   /** Optional in the type only so legacy snapshots and fixtures remain readable. Runtime views always provide it. */
   combat?: CombatSnapshot;
 };
@@ -42,10 +52,11 @@ export class PlayerState {
     spawnPosition: [number, number, number],
     snapshot?: Partial<PlayerSnapshot>,
     entities?: EntityStore,
+    items: ItemDefinitionRegistry = entities?.items ?? defaultItemDefinitionRegistry,
   ) {
     if (!entityId.trim() || spawnPosition.length !== 3 || !spawnPosition.every(Number.isFinite))
       throw new TypeError('Player state identity or spawn position is invalid.');
-    const owner = entities ?? new EntityStore();
+    const owner = entities ?? new EntityStore(items);
     if (!entities) owner.spawn({ id: entityId, type: 'player', position: spawnPosition });
     this.state = owner.playerStateAccess(entityId);
     this.state.spawnPosition = [...spawnPosition];
@@ -87,6 +98,22 @@ export class PlayerState {
 
   get selectedSlot(): number {
     return this.state.selectedSlot;
+  }
+
+  get mode() {
+    return this.state.mode;
+  }
+
+  get modeRevision() {
+    return this.state.modeRevision;
+  }
+
+  get creativeCatalog() {
+    return this.state.creativeCatalog;
+  }
+
+  get flight() {
+    return this.state.flight;
   }
 
   set selectedSlot(value: number) {
@@ -148,6 +175,9 @@ export class PlayerState {
       healingAccumulator: this.healingAccumulator,
       starvationAccumulator: this.starvationAccumulator,
       breakAction: this.breakAction ? { ...this.breakAction, position: [...this.breakAction.position] } : null,
+      mode: { version: 1, value: this.mode, revision: this.modeRevision },
+      creativeCatalog: this.creativeCatalog,
+      flight: this.flight,
       ...(combat ? { combat } : {}),
     };
   }
@@ -183,8 +213,16 @@ export class PlayerState {
     this.breakAction = snapshot.breakAction
       ? { ...snapshot.breakAction, position: [...snapshot.breakAction.position] }
       : null;
+    this.state.replaceModeComponents({
+      mode: snapshot.mode,
+      creativeCatalog: snapshot.creativeCatalog,
+      flight: snapshot.flight,
+    });
   }
 }
 
-export const createPlayerState = (entityId: string, spawnPosition: [number, number, number]) =>
-  new PlayerState(entityId, [...spawnPosition]);
+export const createPlayerState = (
+  entityId: string,
+  spawnPosition: [number, number, number],
+  items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
+) => new PlayerState(entityId, [...spawnPosition], undefined, undefined, items);

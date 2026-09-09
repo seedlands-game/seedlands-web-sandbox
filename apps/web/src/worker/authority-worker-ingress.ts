@@ -15,9 +15,12 @@ import {
   playerInputAuthorizationRequest,
   worldEditAuthorizationRequests,
   type WorldAuthorizationRequest,
+  type WorldResourceRegistration,
 } from '@seedlands/game-core/server/harness/world-authorization';
 
 type ActionOwner = (actionId: string) => string | null;
+const isModeCommand = (command: ServerCommand) =>
+  ['set-mode', 'set-flight', 'set-creative-slot'].includes(command.type);
 type Post = (response: AuthorityResponse) => void;
 
 export const rejectStaleAuthorityMessage = (message: AuthorityRequest, epoch: string, post: Post): void => {
@@ -36,46 +39,72 @@ export const rejectStaleAuthorityMessage = (message: AuthorityRequest, epoch: st
 export class BrowserAuthorityIngress {
   private readonly authorization: WorldResourceAuthorizer;
 
-  constructor(private readonly playerId: string) {
-    this.authorization = new WorldResourceAuthorizer({
-      principals: [
-        { id: 'browser-player', boundEntityId: playerId },
-        { id: 'browser-command', boundEntityId: playerId },
-        { id: 'browser-logic' },
-        { id: 'browser-fluid' },
-      ],
-      rules: [
-        {
-          effect: 'allow',
-          principal: { ids: ['browser-player'] },
-          resources: ['world.input', 'world.action', 'world.entity'],
-          operations: ['execute', 'write'],
-          scope: 'self',
-        },
-        {
-          effect: 'allow',
-          principal: { ids: ['browser-player'] },
-          resources: ['world.interaction', 'world.voxel'],
-          operations: ['execute', 'write'],
-          scope: 'any',
-        },
-        { effect: 'allow', principal: { ids: ['browser-command'] }, resources: ['*'], operations: ['*'], scope: 'any' },
-        {
-          effect: 'allow',
-          principal: { ids: ['browser-logic'] },
-          resources: ['world.logic'],
-          operations: ['execute'],
-          scope: 'any',
-        },
-        {
-          effect: 'allow',
-          principal: { ids: ['browser-fluid'] },
-          resources: ['world.fluid'],
-          operations: ['execute', 'control'],
-          scope: 'any',
-        },
-      ],
-    });
+  constructor(
+    private readonly playerId: string,
+    resources: readonly WorldResourceRegistration[] = [],
+  ) {
+    this.authorization = new WorldResourceAuthorizer(
+      {
+        principals: [
+          { id: 'browser-player', boundEntityId: playerId },
+          { id: 'browser-command', boundEntityId: playerId },
+          { id: 'browser-logic' },
+          { id: 'browser-fluid' },
+        ],
+        rules: [
+          {
+            effect: 'allow',
+            principal: { ids: ['browser-player'] },
+            resources: ['world.input', 'world.action', 'world.entity'],
+            operations: ['execute', 'write'],
+            scope: 'self',
+          },
+          {
+            effect: 'allow',
+            principal: { ids: ['browser-player'] },
+            resources: ['world.interaction', 'world.voxel'],
+            operations: ['execute', 'write'],
+            scope: 'any',
+          },
+          {
+            effect: 'allow',
+            principal: { ids: ['browser-player'] },
+            resources: ['seedlands.mode'],
+            operations: ['read', 'write', 'execute'],
+            scope: 'self',
+          },
+          {
+            effect: 'allow',
+            principal: { ids: ['browser-command'] },
+            resources: ['*'],
+            operations: ['*'],
+            scope: 'any',
+          },
+          {
+            effect: 'allow',
+            principal: { ids: ['browser-logic'] },
+            resources: ['world.logic'],
+            operations: ['execute'],
+            scope: 'any',
+          },
+          {
+            effect: 'allow',
+            principal: { ids: ['browser-fluid'] },
+            resources: ['world.fluid'],
+            operations: ['execute', 'control'],
+            scope: 'any',
+          },
+        ],
+      },
+      resources,
+    );
+  }
+
+  commandBinding(command: ServerCommand) {
+    return {
+      authorizer: this.authorization,
+      principalId: isModeCommand(command) ? 'browser-player' : 'browser-command',
+    };
   }
 
   input(command: InputCommand): void {
@@ -107,7 +136,10 @@ export class BrowserAuthorityIngress {
       sourceType: 'local-developer',
       capabilities: ALL_COMMAND_CAPABILITIES,
     };
-    this.authorize('browser-command', commandAuthorizationRequests(source, command, actionOwner));
+    this.authorize(
+      this.commandBinding(command).principalId,
+      commandAuthorizationRequests(source, command, actionOwner),
+    );
     return source;
   }
 

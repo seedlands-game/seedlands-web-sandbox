@@ -24,6 +24,7 @@ import {
 } from '../harness/world-authorization';
 import { HeadlessClockScheduler } from './headless-clock-scheduler';
 import { transactionFailure } from './headless-command-result';
+import type { WorldComposition } from '../composition/contracts';
 import { advanceHeadlessSession, type HeadlessAdvanceResult } from './headless-session-advance';
 
 export type { HeadlessAdvanceResult, HeadlessLaneDelta } from './headless-session-advance';
@@ -33,6 +34,7 @@ export type HeadlessFrequencies = AuthorityFrequencies;
 export type HeadlessSessionOptions = Readonly<{
   seedText: string;
   platform: CorePlatformPorts;
+  createComposition?: () => WorldComposition;
   epoch?: string;
   initialWorldTime?: number;
   frequencies?: HeadlessFrequencies;
@@ -83,6 +85,7 @@ export class HeadlessSession {
     platform: CorePlatformPorts,
     frequencies: HeadlessFrequencies,
     worldHarness: NonNullable<HeadlessSessionOptions['worldHarness']>,
+    private readonly createComposition?: () => WorldComposition,
   ) {
     this.ownerValue = {
       runtime,
@@ -93,7 +96,7 @@ export class HeadlessSession {
     this.source = source;
     this.platform = platform;
     this.frequenciesValue = frequencies;
-    this.worldAuthorization = new WorldResourceAuthorizer(worldHarness.authorization);
+    this.worldAuthorization = new WorldResourceAuthorizer(worldHarness.authorization, runtime.server.gameplayResources);
     this.worldPrincipalId = worldHarness.principalId;
     this.world = new AuthorityWorldHarness({
       platform,
@@ -147,6 +150,7 @@ export class HeadlessSession {
       options.platform,
       frequencies,
       worldHarness,
+      options.createComposition,
     );
     holder.session = session;
     await session.loadEntityChunks();
@@ -165,6 +169,8 @@ export class HeadlessSession {
       epoch,
       seedText: options.seedText,
       platform: options.platform,
+      composition: options.createComposition?.(),
+      allowLegacyCompositionMigration: Boolean(options.createComposition),
       persistence,
       initialWorldTime: options.initialWorldTime ?? 9,
       startTimeMs: 0,
@@ -236,6 +242,7 @@ export class HeadlessSession {
     this.disposed = true;
     this.clock.dispose();
     await this.world.idle();
+    this.runtime.server.disposeGameplay();
   }
 
   private async advanceWith(
@@ -261,6 +268,7 @@ export class HeadlessSession {
       {
         seedText: snapshot.seedText,
         platform: this.platform,
+        createComposition: this.createComposition,
         epoch: nextEpoch,
         initialWorldTime: snapshot.gameplay.worldTime ?? 9,
         frequencies: this.frequenciesValue,
@@ -275,6 +283,7 @@ export class HeadlessSession {
     candidate.clearPlayerInput();
     this.pendingChunkKeys.clear();
     this.loadedChunkKeys.clear();
+    this.runtime.server.disposeGameplay();
     this.persistenceValue = persistence;
     this.ownerValue = {
       runtime: candidate,
@@ -350,7 +359,10 @@ export class HeadlessSession {
         () =>
           parsed.command.type === 'advance-gameplay'
             ? this.executeTick(parsed.command.seconds)
-            : this.runtime.executeCommand(this.source, parsed.command),
+            : this.runtime.executeCommand(this.source, parsed.command, {
+                authorizer: this.worldAuthorization,
+                principalId: this.worldPrincipalId,
+              }),
       ),
     );
     if (receipt.status !== 'executed')

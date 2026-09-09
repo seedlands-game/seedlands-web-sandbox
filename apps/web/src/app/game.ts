@@ -17,7 +17,7 @@ import { createRuntimeHarnessApi, installHarness } from './game-harness';
 import { PLAYER_FEET_OFFSET, PlayerController } from './player/player-controller';
 import { QUALITY_PROFILES, type QualityLevel } from './scene/quality-profile';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
-import type { MapLayer } from './ui/ui-contracts';
+import type { ActorMode, MapLayer, ModeControl } from './ui/ui-contracts';
 import { WorldEnvironment } from './scene/world-environment';
 import { World, waitForInitialWorldReady } from './world/world-runtime';
 import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
@@ -127,20 +127,19 @@ export class Game {
   loadLatestWorldSeed = async () => (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
 
   // prettier-ignore
-  async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode = 'continue') {
-    return this.startSession(seedText, restore, qualityLevel, openMode);
+  async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode = 'continue', actorMode: ActorMode = 'survival') {
+    return this.startSession(seedText, restore, qualityLevel, openMode, actorMode);
   }
 
   // prettier-ignore
-  private async startSession(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode) {
+  private async startSession(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode, actorMode: ActorMode) {
     await this.saveQueue.flush();
     this.disposeRuntime();
     const startAbort = new AbortController();
     this.pendingStartAbort = startAbort;
     const startGeneration = ++this.startGeneration;
     this.paused = false;
-    this.seedText = seedText;
-    this.qualityLevel = qualityLevel;
+    Object.assign(this, { seedText, qualityLevel });
     this.uiSession = this.uiBridge.beginWorldSession(seedText);
     this.hudSequence = this.interactionSequence = this.debugSequence = 0;
     this.uiProjection.reset();
@@ -211,14 +210,12 @@ export class Game {
       computeRuntime.dispose();
       throw new Error('World start was superseded.');
     }
-    this.authority = authority;
-    this.computeRuntime = computeRuntime;
-    this.logicClient = logicClient;
+    Object.assign(this, { authority, computeRuntime, logicClient });
     this.environment.setTime(ready.worldTime);
     if (this.audio) this.worldAudio = new WorldAudio(this.audio, ready.seed);
     this.world = new World(
       authority,
-      this.computeRuntime.meshPort,
+      computeRuntime.meshPort,
       this.app,
       this.visualResources.resolve,
       quality,
@@ -245,6 +242,7 @@ export class Game {
     const initialWorldReady = waitForInitialWorldReady(this.world.waitForInitialVisibleChunk());
     this.world.updateStreaming(this.camera.getPosition());
     this.gameplayClient = this.createGameplay(authority, this.serverPlayerId);
+    if (ready.isNew) await this.gameplayClient.applyInitialActorMode(actorMode);
     this.controller = this.createController(this.camera);
     this.controller.applyAuthoritySnapshot(authority.snapshot ?? ready.snapshot);
     gamePlayer.orientPlayerTowardCamp(this.controller, ready);
@@ -274,6 +272,7 @@ export class Game {
       movePlayer: (target) => this.controller?.movePlayerTo(...target),
       orientPlayer: (yaw, pitch) => this.controller?.setView(yaw, pitch),
       executeCommand: (command) => this.executeGameplayCommand(command),
+      executeModeCommand: (source, command) => authority.executeCommand(source, command),
       onPlayerDamage: (amount) => this.controller?.presentDamage(amount),
       onPresentation: (event) => this.worldAudio?.present(event),
     });
@@ -429,8 +428,9 @@ export class Game {
     window.removeEventListener('pagehide', this.onPageHide);
   }
 
+  // prettier-ignore
   selectHotbarSlot = (slot: number) => this.gameplayClient?.selectHotbarSlot(slot);
-
+  setModeControl = (command: ModeControl) => this.gameplayClient?.executeUiModeCommand(command);
   toggleInventory = () => this.gameplayClient?.toggleInventory();
 
   toggleCollisionDebug = () => this.collisionDebug?.toggle();

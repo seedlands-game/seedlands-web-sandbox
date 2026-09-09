@@ -68,7 +68,7 @@ export class GameServer extends GameServerGameplayFacade {
   private readonly gameplayVoxelReader: (x: number, y: number, z: number) => number | undefined;
 
   constructor(readonly options: GameServerOptions) {
-    super(options.persistence, assertCorePlatformPorts(options.platform));
+    super(options.persistence, assertCorePlatformPorts(options.platform), options.content, options);
     this.seed = normalizeSeed(options.seedText);
     this.generatorVersion = options.generatorVersion ?? GENERATOR_VERSION;
     if (this.generatorVersion !== 2 && this.generatorVersion !== GENERATOR_VERSION)

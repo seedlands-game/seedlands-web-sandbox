@@ -1,3 +1,4 @@
+import type { ModuleCommandPort } from './module-command';
 import { chunkKey } from '../../world/voxel';
 import type { GameServer, WorldCommitResult } from '../game-server';
 import { WorldMutationBuffer, assertMutationCoordinate, assertVoxelValue } from '../world-mutation';
@@ -30,6 +31,7 @@ export type SessionAdvanceCommandResult = Readonly<{
 }>;
 
 type ExecutorOptions = {
+  moduleOperation?: ModuleCommandPort;
   authorize?: (source: CommandSource, command: ServerCommand, category: CommandCategory) => boolean;
   observe?: (observation: CommandObservation) => void;
   now: () => number;
@@ -252,7 +254,7 @@ export class ServerCommandExecutor {
         };
       }
       default:
-        return executeGameplayCommand(this.server, source, command as GameplayCommand);
+        return executeGameplayCommand(this.server, source, command as GameplayCommand, this.options.moduleOperation);
     }
   }
 

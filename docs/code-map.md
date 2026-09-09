@@ -158,3 +158,9 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 - `scripts/pack-integrity.mjs`：本地构建 Pack 在执行入口前的文件与锁摘要检查；不提供任意 URL 市场或恶意代码隔离。
 - `scripts/eslint/pack-api-boundary-rule.mjs` 与 `tests/governance/pack-api-boundary.test.ts`：第一方 Playbook 到内部实现的导入负例门禁。
 - `tests/server/composition/`、`tests/scripts/pack-integrity.test.ts`：装配、授权和真实产物加载合同。当前仍未把整个现有 GameplayRuntime 迁成标准模块；ECS、完整玩法与浏览器旅程状态以[本期合同](../changes/2026-09-09-composable-overworld-playbook/spec.md)为准。
+
+## 可组合玩法内容与执行
+
+`server/gameplay/playbooks/overworld/` 保存默认 Playbook 的物品、配方与版本化旧 ID 映射；只经 `mod-api` 消费标准机制。`server/gameplay/modules/` 保存可复用机制；`server/composition/` 的注册操作、状态提交与逻辑生命周期由宿主绑定权限后执行。旧自由函数在迁移期读取同一份第一方定义，不能另维护内容副本。
+
+`server/gameplay/modules/actor-vitals-runtime.ts` 与 `block-interaction-runtime.ts` 承接原 GameplayRuntime 的生命和方块流程，迁移中的规则 owner 仍以当前 spec 为准。`server/authority/actor-movement-projection.ts` 派生模式/飞行版本并防止旧输入重放；`authority-gameplay-view.ts` 投影实际每世界内容。Browser `worker/pack-loader.ts` 与 Headless 共用构建产物身份，`scripts/build-gameplay-packs.mjs` 生成被忽略的 ESM/manifest/lock。

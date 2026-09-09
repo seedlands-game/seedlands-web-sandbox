@@ -1,5 +1,21 @@
 import type { Inventory, InventoryAccess } from './inventory';
+import type { ItemId } from './item-registry';
 import type { BreakAction, PlayerSnapshot } from './player-state';
+
+export type ActorMode = 'survival' | 'creative';
+export type ActorModeComponentV1 = Readonly<{ version: 1; value: ActorMode; revision: number }>;
+export type CreativeCatalogComponentV1 = Readonly<{
+  version: 1;
+  hotbar: readonly (ItemId | null)[];
+  selectedSlot: number;
+  revision: number;
+}>;
+export type ActorFlightComponentV1 = Readonly<{ version: 1; enabled: boolean; revision: number }>;
+export type ActorModeSnapshotFacets = Readonly<{
+  mode?: ActorModeComponentV1;
+  creativeCatalog?: CreativeCatalogComponentV1;
+  flight?: ActorFlightComponentV1;
+}>;
 
 export type ActorNeeds = {
   hunger: number;
@@ -21,7 +37,12 @@ export type ActorComponentAccess = {
   readonly hotbarSize: number;
   readonly inventory: InventoryAccess;
   readonly controlSource: ActorControlSource;
+  readonly mode: ActorMode;
+  readonly modeRevision: number;
+  readonly creativeCatalog: CreativeCatalogComponentV1;
+  readonly flight: ActorFlightComponentV1;
   selectSlot: (slot: number) => boolean;
+  replaceModeComponents: (facets: ActorModeSnapshotFacets) => void;
 };
 
 export type PlayerComponentAccess = ActorComponentAccess &
@@ -46,6 +67,13 @@ export const createActorComponents = () => ({
   equipment: { selectedSlot: [] as number[], hotbarSize: [] as number[] },
   control: { source: [] as (ActorControlSource | undefined)[] },
   life: { lifecycle: [] as PlayerSnapshot['lifecycle'][] },
+  mode: { value: [] as (ActorMode | undefined)[], revision: [] as number[] },
+  creativeCatalog: {
+    hotbar: [] as (readonly (ItemId | null)[] | undefined)[],
+    selectedSlot: [] as number[],
+    revision: [] as number[],
+  },
+  flight: { enabled: [] as boolean[], revision: [] as number[] },
   player: {
     spawnX: [] as number[],
     spawnY: [] as number[],
@@ -61,6 +89,9 @@ export type ActorComponentSnapshot = Readonly<{
   equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
   lifecycle: PlayerSnapshot['lifecycle'];
   controlSource: ActorControlSource;
+  mode?: ActorModeComponentV1;
+  creativeCatalog?: CreativeCatalogComponentV1;
+  flight?: ActorFlightComponentV1;
   player?: Readonly<{
     spawnPosition: [number, number, number];
     breakAction: BreakAction | null;

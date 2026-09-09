@@ -4,6 +4,8 @@ import { EntityStore, type EntityStoreComponentSnapshot, type GameplayEntity } f
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import type { CoreClone } from '../../runtime/platform-ports';
 import type { MeleeDefinition } from './combat-runtime';
+import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry } from './item-registry';
+import type { CompositionCheckpointIdentity } from '../composition/checkpoint-identity';
 
 type Position = [number, number, number];
 
@@ -36,6 +38,7 @@ export type GameplaySnapshotV3 = Omit<GameplaySnapshotV2, 'version'> & {
 };
 export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySequence' | 'entities' | 'players'> & {
   version: 4;
+  composition?: CompositionCheckpointIdentity;
   entityStore: EntityStoreComponentSnapshot;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
@@ -71,6 +74,7 @@ type GameplaySnapshotValidationOptions = {
   getVoxel: (x: number, y: number, z: number) => number;
   getWorldTime: () => number;
   clone: CoreClone;
+  items?: ItemDefinitionRegistry;
   meleeDefinitions?: readonly MeleeDefinition[];
 };
 
@@ -189,7 +193,7 @@ export function validateGameplaySnapshot(
   if (!Number.isFinite(worldTime) || worldTime < 0 || worldTime >= 24) throw new TypeError('world time is invalid');
 
   const sourceVersion = source.version;
-  const entities = new EntityStore();
+  const entities = new EntityStore(options.items ?? defaultItemDefinitionRegistry);
   const players = new Map<string, PlayerState>();
   const legacyCombatLockouts = new Map<string, number>();
   try {

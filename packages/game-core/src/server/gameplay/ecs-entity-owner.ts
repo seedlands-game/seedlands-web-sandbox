@@ -1,3 +1,4 @@
+import { cloneItemStack } from './item-instance';
 import {
   addComponent,
   addEntity,
@@ -12,7 +13,7 @@ import {
   type EntityId,
   type World,
 } from 'bitecs';
-import type { ItemStack } from './item-registry';
+import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry, type ItemStack } from './item-registry';
 import { createActorComponents } from './ecs-actor-components';
 import {
   initializeActorComponents,
@@ -60,7 +61,11 @@ const createEntityComponents = () => ({
   transform: { x: [] as SlotArray<number>, y: [] as SlotArray<number>, z: [] as SlotArray<number> },
   velocity: { x: [] as SlotArray<number>, y: [] as SlotArray<number>, z: [] as SlotArray<number> },
   health: { current: [] as SlotArray<number>, maximum: [] as SlotArray<number> },
-  itemStack: { itemId: [] as SlotArray<ItemStack['itemId']>, count: [] as SlotArray<number> },
+  itemStack: {
+    itemId: [] as SlotArray<ItemStack['itemId']>,
+    count: [] as SlotArray<number>,
+    durability: [] as SlotArray<number>,
+  },
   actorMetadata: {
     archetype: [] as SlotArray<EcsActorArchetype>,
     persistent: [] as SlotArray<boolean>,
@@ -75,7 +80,7 @@ const clone = (entity: EcsOwnedEntity): EcsOwnedEntity => ({
   ...entity,
   position: [...entity.position],
   ...(entity.physicsVelocity ? { physicsVelocity: [...entity.physicsVelocity] } : {}),
-  ...(entity.stack ? { stack: { ...entity.stack } } : {}),
+  ...(entity.stack ? { stack: cloneItemStack(entity.stack) } : {}),
 });
 
 /** Per-world bitECS owner; recyclable EIDs and component storage stay private. */
@@ -90,7 +95,10 @@ export class EcsEntityOwner {
   private orderSequence = 0;
   private disposed = false;
 
-  constructor(private readonly worldEpoch = 1) {
+  constructor(
+    private readonly worldEpoch = 1,
+    private readonly items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
+  ) {
     if (!Number.isSafeInteger(worldEpoch) || worldEpoch <= 0)
       throw new RangeError('Entity world epoch must be a positive safe integer.');
     this.world = createWorld();
@@ -110,6 +118,7 @@ export class EcsEntityOwner {
 
   private createWithLifetime(entity: EcsOwnedEntity, restoredLifetime?: number): EcsOwnedEntity {
     this.assertAvailable();
+    if (entity.stack) this.items.assertStack(entity.stack);
     if (this.ids.has(entity.id)) throw new Error(`Entity already exists: ${entity.id}`);
     if (this.issued.has(entity.id)) throw new Error(`Entity id was already issued or retired: ${entity.id}`);
     if (restoredLifetime === undefined && this.lifetimeSequence >= Number.MAX_SAFE_INTEGER)
@@ -146,12 +155,13 @@ export class EcsEntityOwner {
     if (entity.stack) {
       components.itemStack.itemId[eid] = entity.stack.itemId;
       components.itemStack.count[eid] = entity.stack.count;
+      components.itemStack.durability[eid] = entity.stack.instance?.durability;
     }
     if (entity.archetype) {
       components.actorMetadata.archetype[eid] = entity.archetype;
       components.actorMetadata.persistent[eid] = entity.persistent ?? true;
     }
-    initializeActorComponents(this.world, this.actors, eid, entity);
+    initializeActorComponents(this.world, this.actors, eid, entity, this.items);
     this.ids.set(entity.id, eid);
     this.issued.add(entity.id);
     return this.project(eid);
@@ -235,7 +245,7 @@ export class EcsEntityOwner {
     if (entity.type === 'world-item') throw new TypeError('World item cannot restore actor components.');
     if ((entity.health === 0) !== (snapshot.lifecycle === 'dead'))
       throw new TypeError('Actor lifecycle does not match entity health.');
-    restoreActorComponentSnapshot(this.actors, eid, snapshot, entity.type === 'player');
+    restoreActorComponentSnapshot(this.actors, eid, snapshot, entity.type === 'player', this.items);
   }
 
   private actorBindings(id: string) {
@@ -331,7 +341,13 @@ export class EcsEntityOwner {
       entity.maxHealth = components.health.maximum[eid]!;
     }
     if (hasComponent(this.world, eid, components.itemStack))
-      entity.stack = { itemId: components.itemStack.itemId[eid]!, count: components.itemStack.count[eid]! };
+      entity.stack = {
+        itemId: components.itemStack.itemId[eid]!,
+        count: components.itemStack.count[eid]!,
+        ...(components.itemStack.durability[eid] === undefined
+          ? {}
+          : { instance: Object.freeze({ durability: components.itemStack.durability[eid]! }) }),
+      };
     if (hasComponent(this.world, eid, components.actorMetadata)) {
       entity.archetype = components.actorMetadata.archetype[eid]!;
       entity.persistent = components.actorMetadata.persistent[eid]!;
@@ -406,6 +422,7 @@ export class EcsEntityOwner {
       this.components.health.maximum,
       this.components.itemStack.itemId,
       this.components.itemStack.count,
+      this.components.itemStack.durability,
       this.components.actorMetadata.archetype,
       this.components.actorMetadata.persistent,
     ])

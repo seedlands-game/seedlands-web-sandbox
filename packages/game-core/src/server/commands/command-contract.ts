@@ -1,3 +1,4 @@
+import type { ModeCommand } from './module-command';
 import type { WorldCommitResult } from '../game-server';
 import type { ActorArchetype } from '../gameplay/entity-store';
 import type { ActorActionType } from '../simulation/action-runtime';
@@ -16,6 +17,7 @@ export type CommandSource = {
 };
 
 export type ServerCommand =
+  | ModeCommand
   | { type: 'set-block'; position: readonly [number, number, number]; voxel: number }
   | {
       type: 'fill';
@@ -150,6 +152,9 @@ export function commandCategory(command: ServerCommand): CommandCategory | null 
     case 'fill':
     case 'teleport':
     case 'time-set':
+    case 'set-mode':
+    case 'set-flight':
+    case 'set-creative-slot':
     case 'select-slot':
     case 'break-voxel':
     case 'cancel-break':

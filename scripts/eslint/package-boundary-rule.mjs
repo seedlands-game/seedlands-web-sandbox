@@ -76,7 +76,7 @@ export function createPackageBoundaryRule(workspaceRoot) {
         const targetName = workspaceName(source);
         if (targetName) {
           const target = packageByName.get(targetName);
-          if (!target || !(targetName in owner.dependencies)) {
+          if (!target || (targetName !== owner.name && !(targetName in owner.dependencies))) {
             context.report({ node, messageId: 'undeclared', data: { owner: owner.name, dependency: targetName } });
             return;
           }

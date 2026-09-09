@@ -393,3 +393,15 @@ describe('per-world Pack assembly', () => {
     expect(create).not.toHaveBeenCalled();
   });
 });
+
+describe('composition checkpoint identity', () => {
+  it('retains frozen verified Pack digests independently of caller-owned receipts', () => {
+    const input = verified(definePack({ id: 'example:lock', version: '1.0.0', kind: 'playbook' }));
+    const composition = assembleWorldPacks([input]);
+    expect(composition.packLock).toEqual([{ id: 'example:lock', version: '1.0.0', integrity: input.integrity }]);
+    const before = JSON.stringify(composition.packLock);
+    (input.integrity as { entryDigest: string }).entryDigest = 'f'.repeat(64);
+    expect(JSON.stringify(composition.packLock)).toBe(before);
+    expect(Object.isFrozen(composition.packLock[0].integrity)).toBe(true);
+  });
+});

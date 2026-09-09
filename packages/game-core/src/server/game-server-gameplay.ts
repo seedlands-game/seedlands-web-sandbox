@@ -1,3 +1,5 @@
+import type { WorldResourceAuthorizer } from './harness/world-authorization';
+import type { RegisteredOperationBinding, RegisteredOperationRequest } from './composition/operation-contracts';
 import type { WorldCommitResult, WorldEditBatch } from './game-server';
 import type {
   ActorArchetype,
@@ -18,6 +20,9 @@ import type { PoiInput, PoiKind } from './simulation/poi-registry';
 import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
+import type { GameplayContent } from './gameplay/gameplay-content';
+import type { GameServerOptions } from './game-server-types';
+import type { ItemDefinitionRegistry } from './gameplay/item-registry';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 
@@ -29,6 +34,8 @@ export abstract class GameServerGameplayFacade {
   protected constructor(
     private readonly gameplayPersistence: Persistence | undefined,
     platform: CorePlatformPorts,
+    content?: GameplayContent,
+    compositionOptions: Pick<GameServerOptions, 'composition' | 'allowLegacyCompositionMigration'> = {},
   ) {
     this.gameplay = new GameplayRuntime({
       getVoxel: (position) => this.readGameplayVoxel(...position),
@@ -39,6 +46,9 @@ export abstract class GameServerGameplayFacade {
         }),
       getWorldTime: () => this.worldTime,
       platform,
+      content,
+      composition: compositionOptions.composition,
+      allowLegacyCompositionMigration: compositionOptions.allowLegacyCompositionMigration,
     });
   }
 
@@ -112,11 +122,33 @@ export abstract class GameServerGameplayFacade {
   queryNearbyEntities(position: [number, number, number], radius: number, filter: EntityQuery = {}): GameplayEntity[] {
     return this.gameplay.queryNearbyEntities(position, radius, filter);
   }
+  getActorModeState(id: string) {
+    return this.gameplay.getActorModeState(id);
+  }
+  bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredOperationBinding) {
+    return this.gameplay.bindModuleOperations(authorizer, source);
+  }
+  invokeModuleOperation(
+    authorizer: WorldResourceAuthorizer,
+    source: Omit<RegisteredOperationBinding, 'moduleId'>,
+    request: RegisteredOperationRequest,
+  ) {
+    return this.gameplay.invokeModuleOperation(authorizer, source, request);
+  }
+  get gameplayResources() {
+    return this.gameplay.resources;
+  }
+  disposeGameplay() {
+    this.gameplay.dispose();
+  }
   getPlayerState(id: string) {
     return this.gameplay.getPlayerState(id);
   }
   getInventory(id: string) {
     return this.gameplay.getInventory(id);
+  }
+  get itemDefinitions(): ItemDefinitionRegistry {
+    return this.gameplay.content.items;
   }
   giveItem(id: string, stack: ItemStack) {
     return this.gameplay.giveItem(id, stack);
@@ -188,6 +220,7 @@ export abstract class GameServerGameplayFacade {
         simulation: this.gameplay.simulation,
         getVoxel: (position) => this.readGameplayVoxel(...position),
         isPlayerAlive: (id) => this.gameplay.getPlayerState(id).lifecycle === 'alive',
+        items: this.gameplay.content.items,
         touch: () => this.gameplay.recordAuthorityMutation(),
       },
       actorId,

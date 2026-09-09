@@ -3,10 +3,13 @@ import type { SlashCommandExecution } from '@seedlands/game-core/server/commands
 import type { QualityLevel } from '../scene/quality-profile';
 import type { GameplayItemPresentation } from './gameplay-ui-projector';
 import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type { ModeCommand } from '@seedlands/game-core/server/commands/module-command';
 
 export type ShellPhase = 'boot' | 'menu' | 'loading' | 'playing' | 'error';
 export type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hydrology';
 export type FeedbackTone = 'info' | 'success' | 'error';
+export type ActorMode = 'survival' | 'creative';
+export type ModeControl = ModeCommand;
 
 export type CommandEntry = {
   input: string;
@@ -34,7 +37,10 @@ export type ShellState = Readonly<{
   gameplay: Readonly<{
     inventoryOpen: boolean;
     lifecycle: 'alive' | 'dead';
+    mode: ActorMode;
+    flightEnabled: boolean;
     inventory: readonly GameplayItemPresentation[];
+    creativeCatalog: readonly GameplayItemPresentation[];
     selectedHotbarSlot: number;
     craftableRecipeIds: readonly string[];
     recipes: readonly Readonly<{
@@ -53,6 +59,8 @@ export type HudState = Readonly<{
   worldClock: string;
   health: Readonly<{ value: number; max: number }>;
   hunger: Readonly<{ value: number; max: number }>;
+  mode: ActorMode;
+  flightEnabled: boolean;
   selectedHotbarSlot: number;
   hotbar: readonly GameplayItemPresentation[];
 }>;
@@ -118,11 +126,14 @@ export type UiMetrics = Readonly<{
 }>;
 
 export type UiActionPort = {
-  startWorld: (seed: string, quality: QualityLevel, openMode?: WorldOpenMode) => Promise<void>;
+  startWorld: (seed: string, quality: QualityLevel, openMode?: WorldOpenMode, actorMode?: ActorMode) => Promise<void>;
   startMeleeShowcase: (quality: QualityLevel) => Promise<void>;
   resetMeleeShowcase: () => Promise<void>;
   triggerMeleeShowcaseDamage: () => Promise<void>;
   selectHotbarSlot: (slot: number) => void;
+  setActorMode: (mode: ActorMode) => void;
+  setFlight: (enabled: boolean) => void;
+  setCreativeSlot: (slot: number, itemId: string | null) => void;
   toggleInventory: () => void;
   closeInventory: () => void;
   craftRecipe: (recipeId: string) => void;

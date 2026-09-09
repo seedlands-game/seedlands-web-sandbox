@@ -1,3 +1,7 @@
+import { createContentRegistration } from './content-registration';
+import { snapshotPackLock, snapshotOperationIdentity } from './composition-identity';
+import { createOperationRegistration } from './operation-registration';
+import { createLifecycleRegistration } from './lifecycle-registration';
 import {
   BUILTIN_WORLD_RESOURCES,
   type WorldOperation,
@@ -7,11 +11,8 @@ import type {
   ArtifactIntegrityReceipt,
   AssembleWorldPackOptions,
   CapabilityContract,
-  ModItemAmount,
-  ModItemDefinition,
   ModModule,
   ModModuleDescriptor,
-  ModRecipeDefinition,
   ModulePermission,
   PackDefinition,
   PackDefinitionInput,
@@ -220,12 +221,6 @@ const permissionIncludes = (approved: readonly ModulePermission[], requested: Mo
       requested.operations.every((operation) => grant.operations.includes(operation)),
   );
 
-const freezeItemAmount = (amount: ModItemAmount, label: string): ModItemAmount => {
-  if (!NAMESPACE_ID.test(amount.itemId)) throw new TypeError(`${label} item id is invalid: ${amount.itemId}`);
-  if (!Number.isSafeInteger(amount.count) || amount.count <= 0) throw new TypeError(`${label} count must be positive.`);
-  return Object.freeze({ ...amount });
-};
-
 /** Defines Pack authoring data without claiming that any artifact bytes were verified. */
 export function definePack(input: PackDefinitionInput): PackDefinition {
   const modules = freezeArray(input.modules ?? []);
@@ -380,9 +375,13 @@ export function assembleWorldPacks(
     });
   }
 
+  const operationRegistration = createOperationRegistration(knownResources);
+  const lifecycleRegistration = createLifecycleRegistration();
   const capabilityValues = new Map<string, unknown>();
-  const items = new Map<string, ModItemDefinition>();
-  const recipes = new Map<string, ModRecipeDefinition>();
+  const contentRegistration = createContentRegistration();
+  const { items, recipes } = contentRegistration;
+  const finalizers: (() => void)[] = [];
+  let definitionsReady = false;
   for (const moduleId of moduleOrder) {
     const module = moduleById.get(moduleId)!.module;
     const provided = new Set((module.descriptor.provides ?? []).map((entry) => entry.id));
@@ -392,27 +391,21 @@ export function assembleWorldPacks(
       if (!registrationOpen) throw new TypeError(`Module registration facade is closed: ${moduleId}`);
     };
     const facade = Object.freeze({
-      registerItem(definition: ModItemDefinition): void {
-        assertRegistrationOpen();
-        assertId(definition.id, 'Item');
-        if (!definition.name.trim()) throw new TypeError(`Item name is required: ${definition.id}`);
-        if (!Number.isSafeInteger(definition.stackLimit) || definition.stackLimit <= 0)
-          throw new TypeError(`Item stack limit is invalid: ${definition.id}`);
-        if (items.has(definition.id)) throw new TypeError(`Duplicate item definition: ${definition.id}`);
-        items.set(definition.id, Object.freeze({ ...definition }));
+      readContentDefinitions() {
+        if (!definitionsReady) throw new TypeError('Content definitions are not ready during registration.');
+        return Object.freeze({
+          items: Object.freeze([...items.values()]),
+          recipes: Object.freeze([...recipes.values()]),
+        });
       },
-      registerRecipe(definition: ModRecipeDefinition): void {
+      onDefinitionsReady(finalize: () => void) {
         assertRegistrationOpen();
-        assertId(definition.id, 'Recipe');
-        if (recipes.has(definition.id)) throw new TypeError(`Duplicate recipe definition: ${definition.id}`);
-        if (definition.inputs.length === 0 || definition.outputs.length === 0)
-          throw new TypeError(`Recipe inputs and outputs are required: ${definition.id}`);
-        const inputs = Object.freeze(definition.inputs.map((entry) => freezeItemAmount(entry, definition.id)));
-        const outputs = Object.freeze(definition.outputs.map((entry) => freezeItemAmount(entry, definition.id)));
-        for (const amount of [...inputs, ...outputs])
-          if (!items.has(amount.itemId)) throw new TypeError(`Recipe references unknown item: ${amount.itemId}`);
-        recipes.set(definition.id, Object.freeze({ id: definition.id, inputs, outputs }));
+        if (typeof finalize !== 'function') throw new TypeError('Definition finalizer must be a function.');
+        finalizers.push(finalize);
       },
+      ...operationRegistration.facade(moduleId, assertRegistrationOpen),
+      ...lifecycleRegistration.facade(moduleId, assertRegistrationOpen),
+      ...contentRegistration.facade(assertRegistrationOpen),
       provideCapability<Value>(id: string, value: Value): void {
         assertRegistrationOpen();
         if (!provided.has(id)) throw new TypeError(`Module ${moduleId} did not declare provided capability: ${id}`);
@@ -438,7 +431,12 @@ export function assembleWorldPacks(
   }
 
   const resources = Object.freeze([...resourceById.values()].sort((a, b) => codeUnitCompare(a.id, b.id)));
+  const registeredOperations = operationRegistration.finish();
+  const registeredLifecycle = lifecycleRegistration.finish(moduleOrder, registeredOperations.operations);
+  definitionsReady = true;
+  for (const finalize of finalizers) finalize();
   const definitionMap = Object.freeze({
+    ...snapshotOperationIdentity(registeredOperations),
     packs: Object.freeze(packOrder.map((id) => Object.freeze({ id, version: packById.get(id)!.manifest.version }))),
     modules: Object.freeze(
       moduleOrder.map((id) => {
@@ -452,14 +450,33 @@ export function assembleWorldPacks(
         .map(([id, provider]) => Object.freeze({ id, version: provider.version, moduleId: provider.moduleId })),
     ),
     resources,
+    items: Object.freeze(
+      [...items.values()]
+        .sort((a, b) => codeUnitCompare(a.id, b.id))
+        .map((item) => Object.freeze({ id: item.id, storageId: item.storageId ?? item.id })),
+    ),
+    recipes: Object.freeze(
+      [...recipes.values()]
+        .sort((a, b) => codeUnitCompare(a.id, b.id))
+        .map((recipe) => Object.freeze({ id: recipe.id, storageId: recipe.storageId ?? recipe.id })),
+    ),
+    systems: registeredLifecycle.systems,
+    lifecycles: registeredLifecycle.lifecycles,
   });
   return Object.freeze({
+    capability<Value>(id: string): Value {
+      if (!capabilityValues.has(id)) throw new TypeError(`World capability is not registered: ${id}`);
+      return capabilityValues.get(id) as Value;
+    },
     playbookId: playbooks[0].manifest.id,
+    packLock: snapshotPackLock(packOrder.map((id) => packById.get(id)!)),
     packOrder,
     moduleOrder,
     definitionMap,
     resources,
     registrations: Object.freeze({
+      ...registeredOperations,
+      ...registeredLifecycle,
       items: Object.freeze([...items.values()].sort((a, b) => codeUnitCompare(a.id, b.id))),
       recipes: Object.freeze([...recipes.values()].sort((a, b) => codeUnitCompare(a.id, b.id))),
     }),

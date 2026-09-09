@@ -1,4 +1,5 @@
-import { assertItemStack, getItemDefinition, type ItemId, type ItemStack } from './item-registry';
+import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry, type ItemStack } from './item-registry';
+import { cloneItemStack, normalizeItemStack, sameItemStackIdentity } from './item-instance';
 
 export type InventorySlot = ItemStack | null;
 
@@ -7,12 +8,16 @@ export type InventoryAccess = Pick<Inventory, keyof Inventory>;
 /** Resolve on every operation so retained handles cannot mutate an entity after removal or restore. */
 export const createInventoryAccess = (resolve: () => Inventory): InventoryAccess =>
   Object.freeze({
+    get items() {
+      return resolve().items;
+    },
     get capacity() {
       return resolve().capacity;
     },
     snapshot: () => resolve().snapshot(),
     slot: (index: number) => resolve().slot(index),
     contains: (stack: ItemStack) => resolve().contains(stack),
+    containsAmount: (itemId: string, count: number) => resolve().containsAmount(itemId, count),
     canAdd: (stack: ItemStack) => resolve().canAdd(stack),
     add: (stack: ItemStack) => resolve().add(stack),
     remove: (stack: ItemStack) => resolve().remove(stack),
@@ -23,7 +28,7 @@ export const createInventoryAccess = (resolve: () => Inventory): InventoryAccess
     clear: () => resolve().clear(),
   });
 
-const cloneSlot = (slot: InventorySlot): InventorySlot => (slot ? { ...slot } : null);
+const cloneSlot = (slot: InventorySlot): InventorySlot => (slot ? cloneItemStack(slot) : null);
 
 export class Inventory {
   private slots: InventorySlot[];
@@ -31,6 +36,7 @@ export class Inventory {
   constructor(
     readonly capacity: number,
     initial?: readonly InventorySlot[],
+    readonly items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
   ) {
     if (!Number.isInteger(capacity) || capacity <= 0)
       throw new TypeError('Inventory capacity must be a positive integer.');
@@ -49,10 +55,20 @@ export class Inventory {
   }
 
   contains(stack: ItemStack): boolean {
-    assertItemStack(stack);
+    const normalized = normalizeItemStack(this.items, stack);
     return (
-      this.slots.reduce((count, slot) => count + (slot?.itemId === stack.itemId ? slot.count : 0), 0) >= stack.count
+      this.slots.reduce(
+        (count, slot) => count + (slot && sameItemStackIdentity(slot, normalized) ? slot.count : 0),
+        0,
+      ) >= normalized.count
     );
+  }
+
+  containsAmount(itemId: string, count: number): boolean {
+    this.items.require(itemId);
+    if (!Number.isSafeInteger(count) || count <= 0)
+      throw new TypeError('Item amount count must be a positive safe integer.');
+    return this.slots.reduce((total, slot) => total + (slot?.itemId === itemId ? slot.count : 0), 0) >= count;
   }
 
   canAdd(stack: ItemStack): boolean {
@@ -68,13 +84,13 @@ export class Inventory {
   }
 
   remove(stack: ItemStack): boolean {
-    assertItemStack(stack);
-    if (!this.contains(stack)) return false;
+    const normalized = normalizeItemStack(this.items, stack);
+    if (!this.contains(normalized)) return false;
     const candidate = this.snapshot();
-    let remaining = stack.count;
+    let remaining = normalized.count;
     for (let index = 0; index < candidate.length && remaining > 0; index += 1) {
       const slot = candidate[index];
-      if (slot?.itemId !== stack.itemId) continue;
+      if (!slot || !sameItemStackIdentity(slot, normalized)) continue;
       const removed = Math.min(slot.count, remaining);
       slot.count -= removed;
       remaining -= removed;
@@ -91,10 +107,12 @@ export class Inventory {
     const source = candidate[sourceIndex];
     if (!source || source.count <= count) return false;
     const target = candidate[targetIndex];
-    const limit = getItemDefinition(source.itemId).stackLimit;
-    if (target && (target.itemId !== source.itemId || target.count + count > limit)) return false;
+    const limit = this.items.require(source.itemId).stackLimit;
+    if (target && (!sameItemStackIdentity(target, source) || target.count + count > limit)) return false;
     source.count -= count;
-    candidate[targetIndex] = target ? { ...target, count: target.count + count } : { itemId: source.itemId, count };
+    candidate[targetIndex] = target
+      ? { ...cloneItemStack(target), count: target.count + count }
+      : { ...cloneItemStack(source), count };
     this.slots = candidate;
     return true;
   }
@@ -105,8 +123,8 @@ export class Inventory {
     const source = candidate[sourceIndex];
     const target = candidate[targetIndex];
     if (!source) return false;
-    if (target?.itemId === source.itemId) {
-      const moved = Math.min(source.count, getItemDefinition(source.itemId).stackLimit - target.count);
+    if (target && sameItemStackIdentity(target, source)) {
+      const moved = Math.min(source.count, this.items.require(source.itemId).stackLimit - target.count);
       if (moved <= 0) return false;
       target.count += moved;
       source.count -= moved;
@@ -124,7 +142,7 @@ export class Inventory {
     const source = this.slots[index];
     if (!source || source.count < count) return false;
     const candidate = this.snapshot();
-    candidate[index] = source.count === count ? null : { ...source, count: source.count - count };
+    candidate[index] = source.count === count ? null : { ...cloneItemStack(source), count: source.count - count };
     this.slots = candidate;
     return true;
   }
@@ -135,17 +153,17 @@ export class Inventory {
   }
 
   clear(): ItemStack[] {
-    const stacks = this.slots.filter((slot): slot is ItemStack => slot !== null).map((slot) => ({ ...slot }));
+    const stacks = this.slots.filter((slot): slot is ItemStack => slot !== null).map(cloneItemStack);
     this.slots = Array.from({ length: this.capacity }, () => null);
     return stacks;
   }
 
   private addTo(candidate: InventorySlot[], stack: ItemStack): boolean {
-    assertItemStack(stack);
-    const limit = getItemDefinition(stack.itemId).stackLimit;
-    let remaining = stack.count;
+    const normalized = normalizeItemStack(this.items, stack);
+    const limit = this.items.require(normalized.itemId).stackLimit;
+    let remaining = normalized.count;
     for (const slot of candidate) {
-      if (slot?.itemId !== stack.itemId || slot.count >= limit) continue;
+      if (!slot || !sameItemStackIdentity(slot, normalized) || slot.count >= limit) continue;
       const added = Math.min(limit - slot.count, remaining);
       slot.count += added;
       remaining -= added;
@@ -154,18 +172,18 @@ export class Inventory {
     for (let index = 0; index < candidate.length && remaining > 0; index += 1) {
       if (candidate[index]) continue;
       const added = Math.min(limit, remaining);
-      candidate[index] = { itemId: stack.itemId, count: added };
+      candidate[index] = { ...cloneItemStack(normalized), count: added };
       remaining -= added;
     }
     return remaining === 0;
   }
 
   private validateSlot(slot: InventorySlot): InventorySlot {
-    if (!slot) return null;
-    assertItemStack(slot);
-    if (slot.count > getItemDefinition(slot.itemId).stackLimit)
-      throw new TypeError(`Item stack exceeds its limit: ${slot.itemId}`);
-    return { itemId: slot.itemId as ItemId, count: slot.count };
+    if (slot === null) return null;
+    const normalized = normalizeItemStack(this.items, slot);
+    if (normalized.count > this.items.require(normalized.itemId).stackLimit)
+      throw new TypeError(`Item stack exceeds its limit: ${normalized.itemId}`);
+    return normalized;
   }
 
   private validIndex(index: number): boolean {

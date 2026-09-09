@@ -1,7 +1,7 @@
 import { traceVoxelRay } from './voxel-ray';
 import { attackTargetPoint } from './gameplay-geometry';
 import type { EntityStore } from './entity-store';
-import { getItemDefinition } from './item-registry';
+import type { ItemDefinitionRegistry } from './item-registry';
 import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
 import {
   ACTOR_ATTACK_DISTANCE,
@@ -20,6 +20,7 @@ export type ActorAuthorityGameplayContext = Readonly<{
   simulation: AutonomyRuntime;
   getVoxel: (position: Position) => number | undefined;
   isPlayerAlive: (id: string) => boolean;
+  items: ItemDefinitionRegistry;
   touch: () => void;
 }>;
 
@@ -58,7 +59,7 @@ function consume(
 ): ActorAuthorityActionResult {
   const actor = context.entities.get(actorId);
   const target = context.entities.get(targetId);
-  const item = target?.stack ? getItemDefinition(target.stack.itemId) : null;
+  const item = target?.stack ? context.items.get(target.stack.itemId) : null;
   if (!actor || target?.type !== 'world-item' || !target.stack || item?.itemType !== 'food')
     return reject('invalid-food');
   if (!inRange(actor.position, target.position, ACTOR_CONSUME_DISTANCE)) return reject('out-of-range');

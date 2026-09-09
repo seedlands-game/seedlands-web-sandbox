@@ -75,6 +75,7 @@ ignore:
   - coverage
   - dist
   - apps/*/dist
+  - apps/web/public/packs
   - harness/results
   - midscene_run
   - node_modules

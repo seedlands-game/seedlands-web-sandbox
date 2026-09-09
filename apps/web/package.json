@@ -7,14 +7,15 @@
     ".": "./src/app/main.ts"
   },
   "scripts": {
-    "build": "pnpm wasm:rust:verify && pnpm ssg:check && pnpm typecheck && vite build",
-    "dev": "vite",
+    "build": "pnpm packs:build && pnpm wasm:rust:verify && pnpm ssg:check && pnpm typecheck && vite build",
+    "dev": "pnpm packs:build && vite",
     "preview": "vite preview",
     "ssg:check": "node scripts/render-prerendered-start-screen.mjs --check",
     "ssg:update": "node scripts/render-prerendered-start-screen.mjs --write",
     "test": "pnpm --dir ../.. exec vitest run tests/app tests/client tests/compute tests/worker tests/server/authority-residency-observability.test.ts tests/server/data-plane-buffer-ownership.test.ts tests/server/wasm-fluid-control-equivalence.test.ts tests/server/wasm-fluid-logic-equivalence.test.ts tests/server/wasm-occupancy-equivalence.test.ts tests/world/data-plane-rust.test.ts tests/world/wasm-codec-equivalence.test.ts tests/world/wasm-halo-equivalence.test.ts tests/world/wasm-mesh-equivalence.test.ts tests/world/wasm-mesh-pack-equivalence.test.ts tests/world/wasm-world-kernel-equivalence.test.ts",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit",
-    "wasm:rust:verify": "node ../../scripts/rust-kernel-artifact.mjs"
+    "wasm:rust:verify": "node ../../scripts/rust-kernel-artifact.mjs",
+    "packs:build": "node ../../scripts/build-gameplay-packs.mjs --out public/packs"
   },
   "dependencies": {
     "@seedlands/game-core": "workspace:*",

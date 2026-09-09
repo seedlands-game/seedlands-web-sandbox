@@ -170,6 +170,7 @@ export function decodeBoundCombatSnapshot(snapshot: CombatRuntimeSnapshotV2, opt
       : null;
     const failure = encodedActive.phase === 'windup' && !target.ok ? target.reason : null;
     if (failure) {
+      assertCombatResultCapacity(resultSequence, 1);
       const cancelled: CombatResultSnapshot = {
         sequence: ++resultSequence,
         actionId: encodedActive.actionId,
@@ -211,6 +212,21 @@ export function decodeBoundCombatSnapshot(snapshot: CombatRuntimeSnapshotV2, opt
     });
   }
   return { combatants: restored, resultSequence, events };
+}
+
+export function assertCombatResultCapacity(sequence: number, count: number): void {
+  if (!Number.isSafeInteger(count) || count < 0 || sequence > Number.MAX_SAFE_INTEGER - count)
+    throw new RangeError('Combat result sequence is exhausted.');
+}
+
+export function combatPendingResultBound(
+  states: Iterable<{ active: { definitionId: string; comboStep: number } | null }>,
+  definitionFor: (id: string) => MeleeDefinition,
+): number {
+  let count = 0;
+  for (const state of states)
+    if (state.active) count += definitionFor(state.active.definitionId).steps.length - state.active.comboStep + 1;
+  return count;
 }
 
 export function validateCombatSnapshot(

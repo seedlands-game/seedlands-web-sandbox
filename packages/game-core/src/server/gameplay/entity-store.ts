@@ -9,7 +9,7 @@ import {
   type EntityLifetimeReference,
 } from './ecs-entity-owner';
 import type { ActorComponentSnapshot } from './ecs-actor-components';
-import { assertItemStack } from './item-registry';
+import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry, type ItemStack } from './item-registry';
 
 export type EntityType = EcsEntityType;
 export type ActorArchetype = EcsActorArchetype;
@@ -24,7 +24,7 @@ export type EntitySpawn = {
   kind?: EntityType | string;
   position: readonly [number, number, number];
   physicsVelocity?: readonly [number, number, number];
-  stack?: { itemId: string; count: number };
+  stack?: ItemStack;
   health?: number;
   maxHealth?: number;
   archetype?: ActorArchetype;
@@ -47,12 +47,16 @@ const bucketCoordinate = (value: number) => Math.floor(value / 8);
 const bucketKey = (position: readonly number[]) => position.map(bucketCoordinate).join(',');
 
 export class EntityStore {
-  private owner = new EcsEntityOwner();
+  private owner: EcsEntityOwner;
   private buckets = new Map<string, Set<string>>();
   private sequence = 0;
   private visitedBucketCount = 0;
   private visitedEntityCount = 0;
   private returnedEntityCount = 0;
+
+  constructor(readonly items: ItemDefinitionRegistry = defaultItemDefinitionRegistry) {
+    this.owner = new EcsEntityOwner(1, items);
+  }
 
   spawn(input: EntitySpawn): GameplayEntity {
     const type = this.entityType(input);
@@ -229,7 +233,7 @@ export class EntityStore {
       actorSnapshots.set(actor.entityId, actor);
     }
 
-    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1);
+    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1, this.items);
     const candidateBuckets = new Map<string, Set<string>>();
     try {
       for (const input of snapshot.entities) {
@@ -280,7 +284,7 @@ export class EntityStore {
       explicitIds.add(input.id);
     }
     const blockedGeneratedIds = new Set([...this.owner.issuedIds(), ...explicitIds]);
-    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1);
+    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1, this.items);
     const candidateBuckets = new Map<string, Set<string>>();
     let candidateSequence = sequence;
     try {
@@ -346,8 +350,7 @@ export class EntityStore {
     } else if (type !== 'player') entity.physicsVelocity = [0, 0, 0];
     if (type === 'world-item') {
       if (!input.stack) throw new TypeError('World item entity requires an item stack.');
-      assertItemStack(input.stack);
-      entity.stack = { ...input.stack };
+      entity.stack = this.items.normalizeStack(input.stack);
     }
     if (type === 'player') {
       const health = input.health ?? 20;

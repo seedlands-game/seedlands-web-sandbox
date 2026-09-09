@@ -1,3 +1,4 @@
+import { overworldMeleeDefinitions as builtInDefinitions } from './playbooks/overworld/combat';
 import {
   entityReferenceExecutionFailure,
   type EntityIdentityPort,
@@ -8,6 +9,8 @@ import {
   encodeBoundCombatSnapshot,
   validateCombatSnapshot,
   validateCombatAllocator,
+  assertCombatResultCapacity,
+  combatPendingResultBound,
   type CombatRuntimeSnapshot,
   type CombatRuntimeSnapshotV2,
 } from './combat-runtime-snapshot';
@@ -97,22 +100,6 @@ export type CombatRuntimeCallbacks = Readonly<{
   applyDamage: (actorId: string, targetId: string, damage: number) => number | null;
 }>;
 
-const step = (damage: number, windupSeconds: number, hitSeconds: number, recoverySeconds: number) =>
-  Object.freeze({ damage, windupSeconds, hitSeconds, recoverySeconds });
-
-const builtInDefinitions: readonly MeleeDefinition[] = [
-  { id: 'unarmed', range: 3, steps: [step(4, 0, 0.01, 0.49)] },
-  {
-    id: 'wood-sword',
-    range: 3,
-    steps: [step(5, 0.18, 0.08, 0.24), step(7, 0.14, 0.08, 0.38)],
-  },
-  {
-    id: 'night-stalker-claw',
-    range: 1.7,
-    steps: [step(2, 0.3, 0.1, 0.6)],
-  },
-];
 const MAX_MELEE_DEFINITIONS = 64;
 const MAX_COMBO_STEPS = 8;
 
@@ -188,6 +175,8 @@ export class CombatRuntime {
     if (!actorId.trim() || !targetId.trim()) return { success: false, reason: 'invalid-target' };
     const definition = this.registry.get(definitionId);
     if (!definition) return { success: false, reason: 'invalid-definition' };
+    if (this.resultSequence > Number.MAX_SAFE_INTEGER - this.pendingResultBound() - definition.steps.length - 1)
+      return { success: false, reason: 'result-sequence-exhausted' };
     if (!this.callbacks.actorAvailable(actorId)) return { success: false, reason: 'invalid-attacker' };
     if (!this.callbacks.targetAvailable(targetId)) return { success: false, reason: 'invalid-target' };
     const actorIdentity = this.identity?.referenceFor(actorId) ?? null;
@@ -261,6 +250,7 @@ export class CombatRuntime {
   advance(seconds: number): void {
     if (!Number.isFinite(seconds) || seconds < 0)
       throw new TypeError('Combat seconds must be non-negative and finite.');
+    assertCombatResultCapacity(this.resultSequence, this.pendingResultBound());
     for (const actorId of [...this.combatants.keys()]) this.advanceActor(actorId, seconds);
   }
 
@@ -272,6 +262,13 @@ export class CombatRuntime {
   }
 
   cancelTarget(targetId: string, reason = 'target-missing', exceptActorId?: string): void {
+    assertCombatResultCapacity(
+      this.resultSequence,
+      [...this.combatants].filter(
+        ([actorId, state]) =>
+          actorId !== exceptActorId && state.active?.targetId === targetId && state.active.phase === 'windup',
+      ).length,
+    );
     for (const [actorId, state] of this.combatants) {
       if (actorId === exceptActorId || state.active?.targetId !== targetId || state.active.phase !== 'windup') continue;
       this.cancel(actorId, state, reason);
@@ -347,6 +344,7 @@ export class CombatRuntime {
         actorIdentity: null,
       });
     }
+    assertCombatResultCapacity(snapshot.resultSequence, [...restored.values()].filter((state) => state.active).length);
     this.combatants.clear();
     restored.forEach((state, actorId) => this.combatants.set(actorId, state));
     this.actionSequence = snapshot.actionSequence;
@@ -427,6 +425,7 @@ export class CombatRuntime {
   private enterHit(actorId: string, state: CombatantState, definition: MeleeDefinition): void {
     const active = state.active;
     if (!active) return;
+    assertCombatResultCapacity(this.resultSequence, this.pendingResultBound());
     const actorIdentityFailure = entityReferenceExecutionFailure(this.identity, state.actorIdentity, actorId, 'actor');
     if (actorIdentityFailure) return this.cancel(actorId, state, actorIdentityFailure);
     const targetIdentityFailure = entityReferenceExecutionFailure(
@@ -456,6 +455,7 @@ export class CombatRuntime {
   private cancel(actorId: string, state: CombatantState, reason: string): void {
     const active = state.active;
     if (!active) return;
+    assertCombatResultCapacity(this.resultSequence, 1);
     state.lockoutSeconds = Math.max(
       state.lockoutSeconds,
       this.remainingSeconds(active, this.requireDefinition(active.definitionId)),
@@ -477,6 +477,10 @@ export class CombatRuntime {
       status: 'cancelled',
       result: cloneResult(state.lastResult),
     });
+  }
+
+  private pendingResultBound(): number {
+    return combatPendingResultBound(this.combatants.values(), (id) => this.requireDefinition(id));
   }
 
   private projectActive(active: InternalActiveCombat, definition: MeleeDefinition): ActiveCombatSnapshot {

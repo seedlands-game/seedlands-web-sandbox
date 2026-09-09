@@ -47,6 +47,7 @@ describe('gameplay host action identity binding', () => {
     const result = applyActorAuthorityAction(
       {
         entities: runtime.entities,
+        items: runtime.content.items,
         simulation: runtime.simulation,
         getVoxel: () => 0,
         isPlayerAlive: () => true,

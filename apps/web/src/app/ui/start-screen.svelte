@@ -2,7 +2,7 @@
   import { onMount, untrack } from 'svelte';
   import type { ApplicationShell } from '../application-shell';
   import type { QualityLevel } from '../scene/quality-profile';
-  import type { ShellState } from './ui-contracts';
+  import type { ActorMode, ShellState } from './ui-contracts';
   import GameButton from './primitives/game-button.svelte';
   import GamePanel from './primitives/game-panel.svelte';
   import GameTextField from './primitives/game-text-field.svelte';
@@ -21,7 +21,7 @@
     shell: ShellState;
     application: ApplicationShell | null;
     assetBase: string;
-    onstart: (seed: string, quality: QualityLevel, openMode: WorldOpenMode) => void;
+    onstart: (seed: string, quality: QualityLevel, openMode: WorldOpenMode, actorMode: ActorMode) => void;
     onstartshowcase: (quality: QualityLevel) => void;
   } = $props();
   let latestSeed = $state('');
@@ -37,6 +37,7 @@
   let seed = $state(untrack(() => shell.seed));
   let quality = $state<QualityLevel>(untrack(() => shell.quality));
   let openMode = $state<WorldOpenMode>('continue');
+  let actorMode = $state<ActorMode>('survival');
   let previousPhase: ShellState['phase'] = untrack(() => shell.phase);
   let seedTouched = $state(untrack(() => Boolean(shell.seed)));
   let qualityTouched = $state(untrack(() => shell.quality !== 'medium'));
@@ -95,6 +96,14 @@
         <option value="new-current">新建或进入新版 v3（保留旧档）</option>
       </select>
     </label>
+    <label class="world-version-choice" for="actor-mode">
+      新世界模式
+      <select id="actor-mode" bind:value={actorMode}>
+        <option value="survival">生存 · 采集、合成与资源消耗</option>
+        <option value="creative">创造 · 内容目录、飞行与即时编辑</option>
+      </select>
+      <small>只作用于首次创建；继续已有世界时保留存档模式。</small>
+    </label>
     {#if shell.initializationError}
       <GameButton id="enter" label={shell.enterLabel} onclick={() => application?.reloadAfterInitializationFailure()}>
         {shell.enterLabel}
@@ -113,7 +122,7 @@
         id="enter"
         label={shell.enterLabel}
         disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
-        onclick={() => onstart(seed, quality, openMode)}
+        onclick={() => onstart(seed, quality, openMode, actorMode)}
       >
         {shell.enterLabel}
       </GameButton>

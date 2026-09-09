@@ -66,7 +66,10 @@ const initialShell = (): ShellState => ({
   gameplay: {
     inventoryOpen: false,
     lifecycle: 'alive',
+    mode: 'survival',
+    flightEnabled: false,
     inventory: [],
+    creativeCatalog: [],
     selectedHotbarSlot: 0,
     craftableRecipeIds: [],
     recipes: [],
@@ -77,6 +80,8 @@ const initialHud = (): HudState => ({
   worldClock: '',
   health: { value: 20, max: 20 },
   hunger: { value: 20, max: 20 },
+  mode: 'survival',
+  flightEnabled: false,
   selectedHotbarSlot: 0,
   hotbar: Array.from({ length: 8 }, (_, slot) => ({ slot, itemId: null, count: 0, name: '空槽位', edible: false })),
 });
