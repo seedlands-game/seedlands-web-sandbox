@@ -124,3 +124,11 @@ Place/Break/clock/finish 已接入真实注册 owner，开发者 give/remove 采
 ### Block 独立复核修复检查点
 
 已修复 V4 挖掘恢复 codec、分帧计时漂移、配置嵌套别名三项 P1 及硬度零值 P2，独立审阅 bounded pass。最终静态 1583/4、build 和原定 Browser 6 项通过。额外旧木剑体验场连续攻击断言失败已保留日志，列入 S6 演示复验，不声明整体准出。详见 s3-block-consumers-checkpoint.md。继续 scripted Logic 实际 principal 与 ground food owner；S3 仍 Implementing。
+
+## S3 Logic / Feeding 接线及木剑重置恢复点（2026-09-10）
+
+- 真实 scripted Logic 保留 Harness principal，逐 actor 检查 world.action execute；Combat 不借自治来源，默认开发者稳定 subject 支持跨宿主 alias/current policy。
+- 地面食物消费已注册并统一预备 ECS needs、world-item、即时 Eat Action 与 Combat/自治效果；旧 pending Eat 在隔离恢复验证中取消，食物/needs 不变。
+- 第一轮冻结消费者树 static 1618 passed / 4 skipped、build 和本 change Browser 6/6 分别通过，基础 gameplay-foundation 2/2 通过。其后独立复核指出 actor execute 未独立检查，已补两条有效 RED 并修复 principal+module 两层授权，最终完整复验待完成。
+- 木剑旧回归再次失败，trace 捕获重置复用 retired EntityId；已改为每次实例 UUID 角色身份、准确清理及重置 Promise 复用，真实 ECS 双次重建 3 项定向测试通过。Browser 旧回归改为等待旧目标消失及新目标齐备，不沿用旧 DOM 瞬态作为成功。最终 Browser 复验未预填。
+- 当前 S3 仍 Implementing；默认方块/生物内容归属、S4 实际工位/成长、S5 替代玩法、S6 完整旅程/PR 仍未交付。没有推送或 PR，也没有新增外部依赖。

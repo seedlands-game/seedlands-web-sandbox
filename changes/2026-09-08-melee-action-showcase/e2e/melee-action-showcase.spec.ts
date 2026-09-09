@@ -14,8 +14,20 @@ async function selectJourneyQuality(page: Page): Promise<void> {
   await expect(page.locator('#quality')).toHaveValue(browserQuality);
 }
 
+async function readShowcaseIds(page: Page): Promise<string[]> {
+  const ids: string[] = [];
+  for (const role of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID]) {
+    const entity = page.locator(`[data-entity-id^="${role}--"]`);
+    await expect(entity).toHaveCount(1);
+    ids.push((await entity.getAttribute('data-entity-id'))!);
+  }
+  return ids;
+}
+
 test('开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈', async ({ page }, info) => {
   test.setTimeout(90_000);
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
   const capture = async (name: string) => {
     const path = info.outputPath(`${name}.png`);
     await page.screenshot({ path });
@@ -29,8 +41,7 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   await expect(page.locator('#melee-showcase-guide')).toBeVisible();
   await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
   await expect(page.locator('#debug')).toContainText(`Seed ${MELEE_SHOWCASE_SEED}`);
-  for (const id of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID])
-    await expect(page.locator(`[data-entity-id="${id}"]`)).toBeAttached();
+  const initialIds = await readShowcaseIds(page);
   await capture('showcase-ready');
 
   await page.getByRole('button', { name: '立即触发玩家受击反馈', exact: true }).click();
@@ -53,7 +64,10 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
     .toBe(true);
 
   await page.getByRole('button', { name: '重新布置体验场', exact: true }).click();
-  for (const id of MELEE_SHOWCASE_DUMMY_IDS) await expect(page.locator(`[data-entity-id="${id}"]`)).toBeAttached();
+  for (const id of initialIds) await expect(page.locator(`[data-entity-id="${id}"]`)).not.toBeAttached();
+  const resetIds = await readShowcaseIds(page);
+  expect(resetIds.every((id) => !initialIds.includes(id))).toBe(true);
+  expect(pageErrors).toEqual([]);
 
   await lockPointer(page);
   await page.evaluate(() => {
@@ -106,7 +120,8 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
       page.evaluate(async (id) => {
         const result = await window.__seedlandsHarness!.executeGameplayCommand({ type: 'query-entity', entityId: id });
         return (result.data as { entity: unknown }).entity;
-      }, MELEE_SHOWCASE_DUMMY_IDS[1]),
+      }, resetIds[1]),
     )
     .toBeNull();
+  expect(pageErrors).toEqual([]);
 });

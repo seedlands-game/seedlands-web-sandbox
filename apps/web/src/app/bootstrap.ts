@@ -73,7 +73,7 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
     const actions: UiActionPort = {
       startWorld: (seed, quality, openMode, actorMode) => application.start(seed, quality, openMode, actorMode),
       startMeleeShowcase: (quality) => application.startMeleeShowcase(quality),
-      resetMeleeShowcase: () => game.prepareMeleeShowcase(),
+      resetMeleeShowcase: () => game.prepareMeleeShowcase().catch(() => undefined),
       triggerMeleeShowcaseDamage: () => game.triggerMeleeShowcaseDamage(),
       selectHotbarSlot: (slot) => game.selectHotbarSlot(slot),
       setActorMode: (mode) => game.setModeControl({ type: 'set-mode', mode }),

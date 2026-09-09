@@ -18,7 +18,7 @@ import type {
 } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
 import type { CommandResult, ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
-import { meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
+import { createMeleeShowcaseIds, meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
 import { executeBrowserModeCommand, type BrowserModeCommandExecutor } from './browser-gameplay-actions';
 import type { ModeCommand } from '@seedlands/game-core/server/commands/module-command';
 import type { ActorMode } from '../ui/ui-contracts';
@@ -49,6 +49,7 @@ type Options = {
 };
 
 export class BrowserGameplay {
+  private showcasePreparation: Promise<void> | null = null;
   private readonly presenter: GameplayEntityPresenter;
   private readonly viewmodel: FirstPersonViewmodel;
   private readonly outline: VoxelTargetOutline;
@@ -76,11 +77,23 @@ export class BrowserGameplay {
     this.aimTarget = target?.inRange ? target : null;
   }
 
-  async prepareMeleeShowcase(): Promise<void> {
+  prepareMeleeShowcase(): Promise<void> {
+    return (this.showcasePreparation ??= this.prepareMeleeShowcaseInstance()
+      .catch((error: unknown) => {
+        this.feedback(error instanceof Error ? error.message : String(error), 'error');
+        throw error;
+      })
+      .finally(() => {
+        this.showcasePreparation = null;
+      }));
+  }
+
+  private async prepareMeleeShowcaseInstance(): Promise<void> {
     const authority = this.options.authority;
     if (authority.gameplay.player.lifecycle === 'dead') await this.executeShowcaseCommand({ type: 'respawn' });
     const existingIds = new Set(authority.gameplay.entities.map((entity) => entity.id));
-    for (const command of meleeShowcaseCommands(existingIds)) await this.executeShowcaseCommand(command);
+    for (const command of meleeShowcaseCommands(existingIds, createMeleeShowcaseIds(crypto.randomUUID())))
+      await this.executeShowcaseCommand(command);
 
     let swordSlot = authority.gameplay.player.inventory.findIndex((slot) => slot?.itemId === 'wood-sword');
     if (swordSlot < 0) {
