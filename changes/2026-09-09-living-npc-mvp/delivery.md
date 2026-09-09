@@ -126,3 +126,5 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 `9803ce9` 的远端CI run `34348976775` 全绿。Wire受影响17测试与宿主55测试通过；Root另补非零head却无尾事件的快照原子拒绝，避免恢复后与严格空页Wire不一致。整合core与host共14文件/60测试GREEN。两项自动审阅发现已修复，完整静态、构建、Browser与冻结独立复核随后执行；认证浏览器的自洽伪造状态仍非类型校验可以鉴别。
 
 第七轮独立复核补充了分页连续性缺口。Root以32条 `[1..31,104]`（不是报告中的连续示例）和零号事件取得2项RED，修复以页尾减长度推导连续区间。初次完整static有一项Headless死亡绑定测试超过5秒；同次构建和Browser并发运行，不能断言超时根因。该文件单独重验4/4通过，未放宽超时或改测试；最终static将独立运行以确认。初次Web/Agent构建与Browser2/2通过（1真实模型用例跳过），无新增provider调用。
+
+第七轮最终生产冻结 `51ab780`：完整static独立执行通过（259文件、1269测试通过、4跳过），独立Web/Agent构建通过，Browser两项2/2通过（真实provider用例跳过）。`round7-final-recheck.md`确认连续分页修复有效，无新具体P0/P1/P2。长期docs baseline不变，本轮只是既定Authority输入和存档合同的边界补全。后续仅交付记录；最新远端SHA的CI和自动复核结果以PR #26及最终交接为准。
