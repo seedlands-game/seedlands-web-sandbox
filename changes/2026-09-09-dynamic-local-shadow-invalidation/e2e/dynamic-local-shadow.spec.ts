@@ -8,6 +8,7 @@ const command = (page: Page, input: ServerCommand) =>
   page.evaluate((value) => window.__seedlandsHarness!.executeGameplayCommand(value) as Promise<CommandResult>, input);
 
 test('局部灯在掉落物移除后重画一次阴影且不依赖方块编辑', async ({ page }, testInfo) => {
+  test.setTimeout(90_000);
   await page.goto('./?harness=1');
   await page.locator('#quality').selectOption('high');
   await page.locator('#seed').fill('dynamic-local-shadow-invalidation');
@@ -61,9 +62,12 @@ test('局部灯在掉落物移除后重画一次阴影且不依赖方块编辑',
   expect(withCaster.worldRevision).toBe(stable.worldRevision);
   await page.locator('#game').screenshot({ path: testInfo.outputPath('with-shadow-caster.png') });
 
-  const beforeRemovalCount = withCaster.visualEffects.shadowUpdateCount;
-  const removed = await command(page, { type: 'despawn-entity', entityId: entityId! });
-  expect(removed.success).toBe(true);
+  const removal = await page.evaluate(async (id) => {
+    const harness = window.__seedlandsHarness!;
+    const result = (await harness.executeGameplayCommand({ type: 'despawn-entity', entityId: id })) as CommandResult;
+    return { success: result.success, shadowUpdateCount: harness.snapshot().visualEffects.shadowUpdateCount };
+  }, entityId!);
+  expect(removal.success).toBe(true);
   await expect
     .poll(async () => {
       const current = await snapshot(page);
@@ -71,7 +75,7 @@ test('局部灯在掉落物移除后重画一次阴影且不依赖方块编辑',
         current &&
         current.gameplay.worldItemCount === stable.gameplay.worldItemCount &&
         current.gameplay.presentedEntityCount === stable.gameplay.presentedEntityCount &&
-        current.visualEffects.shadowUpdateCount > beforeRemovalCount &&
+        current.visualEffects.shadowUpdateCount > removal.shadowUpdateCount &&
         current.visualEffects.shadowStableFrameCount >= 2,
       );
     })

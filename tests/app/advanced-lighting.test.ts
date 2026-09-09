@@ -110,6 +110,18 @@ describe('高级光影预算', () => {
     ).toBe(true);
   });
 
+  it('最后一个投影实体移除时即使体素与灯槽未变也必须清除旧阴影', () => {
+    expect(
+      localShadowNeedsUpdate({
+        previousWorldRevision: 5,
+        worldRevision: 5,
+        previousCasterSignature: '[["drop",7]]',
+        casterSignature: '[]',
+        slotsChanged: false,
+      }),
+    ).toBe(true);
+  });
+
   it('仅把可能进入有阴影局部灯范围的动态实体纳入失效签名', () => {
     const slots = [[0, 10, 0]] as const;
     expect(

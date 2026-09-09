@@ -40,3 +40,17 @@ Agent Server 属于未合并 PR #26，本次只读核查其绑定 SHA；已存�
 ## 独立复核
 
 请求只读 Sol/xhigh 复核当前 base 加完整 diff；有效运行模型没有独立回显，仍记 unknown。结论：同意方案，未发现可证实的 P0/P1/P2。采纳其库存增量、100ms 有界轮询、Pointer Lock 及 artifact run_attempt 建议。reviewer 为静态复核，功能数据由主任务实际运行取得；当前本地构建和所有集成均已完成，余项为发布后 exact-SHA GitHub CI。
+
+## PR #27 合并光影修复的追加交付
+
+原 CI 优化提交 `28f3058` 已在 [run 34335632381](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34335632381) 完成全部检查：Static 7m42s、Chromium 5m01s、build 63s；1168 条逻辑测试和25条浏览器/集成测试通过，4条 opt-in 性能用例仍跳过。相比 main 的10m59s / 8m16s，是不同提交的 hosted CI 观察值，非严格受控 A/B。
+
+用户随后明确要求把 PR #28 的光影修复并入本 PR。已以 `cherry-pick -x` 集成源提交 `25b6119da8954f22288b0d3ec3e7ce47c9ed99a3`，当前本地来源提交为 `a94333c`。修复本身的 spec、RED 与历史验证一并保留。动态阴影回归接入现有 regression，清单由20条增为21条，不增加第五轮 Playwright 启动；测试 TypeScript include 同步，High 场景设90秒上限。
+
+组合本地验证：定向单元测试通过，完整 `VITEST_MAX_WORKERS=2 pnpm verify:static` 1170条通过/4条跳过，world行覆盖率96.89%，`pnpm build` 通过；动态阴影真实浏览器连续两次通过，完整 regression 21/21 通过。最终 exact-SHA GitHub 准出在 PR 描述读回，不能拿旧 `28f3058` 的 green 代替新提交。
+
+长期 docs baseline 已补充：现有浏览器使用 dev server、缺少 production dist 运行验证，历史非默认用例失败债务，以及基于热点日志的三项待实验提速候选。Agent Server 不纳入这次追加范围。当前 green 只保障明确接入的断言，不承诺所有主链路或所有环境无回归。
+
+追加独立复核发现并修复一项假阳性：删除前截图期间的旋转会提前增加 shadow counter。E2E 现于删除命令完成、正式 owner 已应用实体视图后读取基线，后续必须再次增加；增加“最后 caster 移除、世界和灯槽不变”的单元反例。临时把生产失效条件突变为 `casterSignature !== '[]' && previousCasterSignature !== casterSignature`：单元新增用例失败，浏览器在移除后的 predicate 5s 超时（expected true / received false）。生产源已完整恢复；该 RED 证明新的断言能识别这次根因，未用跳过、重试或降低条件恢复 green。恢复实现后定向22/22通过、修正后的浏览器连续2/2通过，测试类型、ESLint和格式检查通过；独立复核已关闭该假阳性问题。最终 CI 结果在 PR 读回。
+
+复核还记录非阻塞成本项：非投影 GLB 目前也被计入 caster signature，附近运动可能请求多余的 shadow update；没有本轮性能数据，不声称造成已测量退化，不为此扩大修复。截图是补充证据，没有像素断言；本用例证明更新请求和后续稳定性，不把它说成所有像素无残影的自动保证。

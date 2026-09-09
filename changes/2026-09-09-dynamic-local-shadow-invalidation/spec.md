@@ -68,3 +68,7 @@ N/A：这是单一浏览器表现链路内的小型缺陷修复，预计传统�
 实现前 RED（2026-09-09）：
 
 - `pnpm exec vitest run tests/app/advanced-lighting.test.ts tests/app/gameplay-entity-presenter.test.ts`：2 个文件中新增的 2 项断言按预期失败，其余 8 项通过。`localShadowNeedsUpdate()` 在 caster revision 从 7 变为 8 时仍返回 `false`；`GameplayEntityPresenter.shadowCasterRevision` 尚不存在，读取得到 `undefined`。这分别锁定了局部灯缓存条件和动态表现 revision 两处缺口。
+
+## 合入 PR #27 的追加验证
+
+用户要求将本修复与 CI 优化一起交接。源提交 `25b6119` 以 cherry-pick 保留来源；E2E 已接入每 PR 的 regression 与 tsconfig.test，High 场景90秒上限不代表性能阈值。独立复核修正了原 E2E 的计数基线：先 await 正式删除命令，再同步读取 counter，后续更新必须超过这个值，避免删除前旋转和截图造成假阳性。新增空 caster 签名失效的单元反例；临时禁用空签名失效的生产突变同时被该单元和移除后的浏览器断言捕获，源文件已恢复。组合准出详见 CI change delivery 与最终 PR exact-SHA 检查；此前的1169测试记录仍是源提交当时证据。
