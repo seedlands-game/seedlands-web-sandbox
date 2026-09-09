@@ -62,6 +62,9 @@ ls:
   changes/2026-09-09-living-npc-mvp/contracts:
     .dir: kebab-case
     .json: kebab-case
+  changes/2026-09-09-npc-behavior-workspace/contracts:
+    .dir: kebab-case
+    .json: kebab-case
   changes/*/midscene:
     .dir: kebab-case
   changes/*/e2e:
