@@ -11,24 +11,25 @@ test('一个浏览器连接承载三位持续生活伙伴，并恢复配对的�
   const transport: unknown[] = [];
   page.on('websocket', (socket) => {
     sockets.push(socket.url());
-    for (const direction of ['framesent', 'framereceived'] as const)
-      socket.on(direction, ({ payload }) => {
-        try {
-          const message = JSON.parse(String(payload));
-          transport.push({
-            direction,
-            kind: message.kind,
-            sequence: message.sequence,
-            channelId: message.channelId,
-            sessionId: message.binding?.sessionId,
-            entityId: message.binding?.entityId,
-            code: message.code,
-            message: message.kind === 'error' ? message.message : undefined,
-          });
-        } catch {
-          /* Preserve only protocol metadata, never auth or model contents. */
-        }
-      });
+    const record = (direction: string, payload: string | Buffer) => {
+      try {
+        const message = JSON.parse(String(payload));
+        transport.push({
+          direction,
+          kind: message.kind,
+          sequence: message.sequence,
+          channelId: message.channelId,
+          sessionId: message.binding?.sessionId,
+          entityId: message.binding?.entityId,
+          code: message.code,
+          message: message.kind === 'error' ? message.message : undefined,
+        });
+      } catch {
+        /* Preserve only protocol metadata, never auth or model contents. */
+      }
+    };
+    socket.on('framesent', ({ payload }) => record('framesent', payload));
+    socket.on('framereceived', ({ payload }) => record('framereceived', payload));
     socket.on('close', () => transport.push({ kind: 'socket-closed' }));
   });
   page.on('pageerror', (error) => errors.push(error.message));
