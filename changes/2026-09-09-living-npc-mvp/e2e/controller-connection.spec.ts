@@ -4,10 +4,24 @@ import { startAgentServer } from '../../../apps/agent-server/src/node/websocket-
 import type { CognitionModel } from '../../../apps/agent-server/src/model-types';
 import type { CharacterObservation } from '../../../packages/game-core/src/runtime/character-control-protocol';
 import { startHarnessWorld, prepareFlatMovement } from '../../../tests/e2e/support/harness';
+import { CognitionRuntime } from '../../../apps/agent-server/src/runtime';
+import type { ControllerClientMessage } from '@seedlands/cognition-protocol';
 
 test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发，断连保持角色', async ({ page, baseURL }, testInfo) => {
   test.setTimeout(120_000);
   const calls: { goal: string; cursor: number }[] = [];
+  const pages: { cursor: number; head: number; count: number }[] = [];
+  class ObservedRuntime extends CognitionRuntime {
+    override receive(message: ControllerClientMessage) {
+      super.receive(message);
+      if (message.kind === 'observe')
+        pages.push({
+          cursor: message.observation.cursor,
+          head: message.observation.character.eventCursor,
+          count: message.observation.events.length,
+        });
+    }
+  }
   const model: CognitionModel = {
     complete: async (request) => {
       const last = request.messages.filter((message) => message.role === 'user').at(-1);
@@ -41,7 +55,12 @@ test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发
       };
     },
   };
-  const host = await startAgentServer({ model, allowedOrigins: [new URL(baseURL!).origin], port: 0 });
+  const host = await startAgentServer({
+    model,
+    allowedOrigins: [new URL(baseURL!).origin],
+    port: 0,
+    createRuntime: (options) => new ObservedRuntime(options),
+  });
   try {
     await page.addInitScript(() => localStorage.setItem('seedlands.quality.v1', 'low'));
     await startHarnessWorld(page, 'companion-controller-connection');
@@ -52,10 +71,29 @@ test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发
     await page.getByRole('button', { name: /结识旅伴/ }).click();
     await page.getByRole('button', { name: '邀请阿岚进入世界' }).click();
     await expect(page.locator('#companion .identity strong')).toHaveText('阿岚');
+    const historyCursor = await page.evaluate(async () => {
+      const world = window.__seedlandsHarness!.world;
+      const list = await world.character({ kind: 'list' });
+      if (!list.ok || list.data.kind !== 'list' || !list.data.characters[0]) throw new Error('Character missing');
+      let cursor = 0;
+      for (let index = 0; index < 70; index += 1) {
+        const reply = await world.character({
+          kind: 'dialogue',
+          entityId: list.data.characters[0].entityId,
+          text: `这是连接前已经留下的第${index + 1}条历史。`,
+        });
+        if (!reply.ok || reply.data.kind !== 'dialogue') throw new Error('History fixture failed');
+        cursor = reply.data.event.cursor;
+      }
+      return cursor;
+    });
     await page.getByRole('button', { name: /思考设置/ }).click();
     await page.getByLabel('本机思考服务', { exact: true }).fill(host.url);
     await page.getByLabel('配对码', { exact: true }).fill(host.pairingToken);
     await page.getByRole('button', { name: '连接', exact: true }).click();
+    await expect.poll(() => pages.some((entry) => entry.cursor >= historyCursor)).toBe(true);
+    expect(pages.length).toBeGreaterThanOrEqual(3);
+    expect(calls).toHaveLength(0);
     await page.getByLabel('和阿岚说句话').fill('先去找些吃的吧。');
     await page.getByRole('button', { name: '说话', exact: true }).click();
     await expect(page.getByTestId('companion-speech')).toContainText('找点吃的', { timeout: 20_000 });
@@ -94,6 +132,8 @@ test('浏览器双向控制经过 Authority 回执，第二轮交谈继续触发
       body: JSON.stringify({
         provider: 'deterministic fixture, not real model evidence',
         calls,
+        pages,
+        historyCursor,
         controlled,
         disconnected,
       }),

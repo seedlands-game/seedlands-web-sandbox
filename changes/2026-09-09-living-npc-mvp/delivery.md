@@ -100,3 +100,7 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 本轮长期docs baseline更新：`living-npc-cognition.md`明确重连历史边界，`developer-world-harness.md`明确互不冲突的玩家交流/调试快捷键；不扩大玩法范围。
 
 第三轮冻结 `db00561`：完整static通过（256文件、1244测试通过，4跳过），独立Web/Agent build通过；两项Browser旅程2/2通过（13.3秒），包括权威时间倍率与重连后的新对话只决定一次。`round3-recheck.md` 对全部受影响源码/测试/E2E独立复核，确认4项P1及首观察初始化衔接解决，未发现新P0/P1/P2。此次之后仅补交付证据；实际模型/人格实测沿用前述样本，未增加provider调用。远端最终准出以PR #26最新SHA为准。
+
+## 历史分页修复
+
+自动审阅 `5153227643` 找出重连基线只覆盖首32条历史的P1。Root 用真实浏览器和70条历史复现：后续页cursor64/70在没有新对话时触发2次决定（期望0）。修复必须冻结首观察中角色完整eventCursor，所有后续历史页保留上下文但不唤醒；分页中途新发生的事件不得被移动的历史上界吞掉。此轮仍不调用真实provider。

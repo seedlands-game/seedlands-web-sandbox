@@ -85,6 +85,7 @@ export class CognitionRuntime {
   private graph: ReturnType<typeof createCognitionGraph> | null;
   private latestObservation: CharacterObservation | null = null;
   private latestEventCursor = -1;
+  private initialHistoryThroughCursor: number | null = null;
   private lastDecisionCursor = -1;
   private hostSequence = 0;
   private pendingIntent: Readonly<{
@@ -149,7 +150,8 @@ export class CognitionRuntime {
       if (!this.latestObservation) {
         this.latestObservation = message.observation;
         this.latestEventCursor = message.observation.cursor;
-        this.lastDecisionCursor = message.observation.cursor;
+        this.initialHistoryThroughCursor = message.observation.character.eventCursor;
+        this.lastDecisionCursor = this.initialHistoryThroughCursor;
         this.context.appendEvents(message.observation.events);
         return;
       }
@@ -160,7 +162,9 @@ export class CognitionRuntime {
         const contextBoundary = this.context.messageCount;
         this.context.appendEvents(freshEvents);
         if (this.pendingIntent) this.pendingContextTail.push(...this.context.extractTail(contextBoundary));
-        for (const event of freshEvents) if (significantEvent(event.type)) this.scheduler.notifyEvent(event.type);
+        for (const event of freshEvents)
+          if (event.cursor > (this.initialHistoryThroughCursor ?? -1) && significantEvent(event.type))
+            this.scheduler.notifyEvent(event.type);
       }
       if (
         this.retryAfterObservation &&
