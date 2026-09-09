@@ -104,7 +104,7 @@ const ready = (): AuthorityReady => ({
 });
 
 describe('Browser Authority world harness', () => {
-  it('refreshes the product collision cache after Authority prepares an initially unknown chunk', async () => {
+  it('validates through Authority before a canonical-free mesh then refreshes the explicit baseline', async () => {
     const worker = new FakeAuthorityWorker();
     const client = new BrowserAuthorityClient(worker, 'world:1');
     const starting = client.start({
@@ -118,23 +118,7 @@ describe('Browser Authority world harness', () => {
     await starting;
 
     const preparing = client.world.prepare({ kind: 'chunk', chunk: [6, 0, 0] });
-    const firstMesh = worker.posts.at(-1) as { requestId: number };
-    worker.emit({
-      kind: 'mesh-prepared',
-      protocolVersion: 1,
-      epoch: 'world:1',
-      requestId: firstMesh.requestId,
-      payload: {
-        key: '6,0,0',
-        cx: 6,
-        cy: 0,
-        cz: 0,
-        chunkRevision: 0,
-        generatorVersion: 3,
-        overlays: [],
-      },
-    });
-    await vi.waitFor(() => expect(worker.posts.at(-1)).toMatchObject({ kind: 'world-harness-rpc', method: 'prepare' }));
+    expect(worker.posts.at(-1)).toMatchObject({ kind: 'world-harness-rpc', method: 'prepare' });
     const harnessRequest = worker.posts.at(-1) as { requestId: number };
     worker.emit({
       kind: 'world-harness-response',
@@ -156,14 +140,12 @@ describe('Browser Authority world harness', () => {
       },
     });
     await vi.waitFor(() => expect(worker.posts.at(-1)).toMatchObject({ kind: 'prepare-mesh', cx: 6, cy: 0, cz: 0 }));
-    const refreshedMesh = worker.posts.at(-1) as { requestId: number };
-    const canonical = new Uint16Array(32 ** 3);
-    canonical[0] = 6;
+    const meshRequest = worker.posts.at(-1) as { requestId: number };
     worker.emit({
       kind: 'mesh-prepared',
       protocolVersion: 1,
       epoch: 'world:1',
-      requestId: refreshedMesh.requestId,
+      requestId: meshRequest.requestId,
       payload: {
         key: '6,0,0',
         cx: 6,
@@ -171,13 +153,57 @@ describe('Browser Authority world harness', () => {
         cz: 0,
         chunkRevision: 0,
         generatorVersion: 3,
-        canonical: canonical.buffer,
         overlays: [],
+      },
+    });
+    await vi.waitFor(() =>
+      expect(worker.posts.at(-1)).toMatchObject({
+        kind: 'request-collision-baseline',
+        key: '6,0,0',
+        minimumRevision: 0,
+      }),
+    );
+    const baselineRequest = worker.posts.at(-1) as { requestId: number };
+    const canonical = new Uint16Array(32 ** 3);
+    canonical[0] = 6;
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: baselineRequest.requestId,
+      ok: true,
+      result: {
+        status: 'available',
+        key: '6,0,0',
+        chunkRevision: 0,
+        canonical: canonical.buffer,
+        fluid: new Uint8Array(32 ** 3).buffer,
       },
     });
 
     await expect(preparing).resolves.toMatchObject({ ok: true });
     expect(client.getVoxel(6 * 32, 0, 0)).toBe(6);
+  });
+
+  it('does not send product preparation I/O for a malformed request', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const preparing = client.world.prepare(null as never);
+    const request = worker.posts.at(-1) as { requestId: number };
+    expect(worker.posts).toHaveLength(1);
+    expect(request).toMatchObject({ kind: 'world-harness-rpc', method: 'prepare' });
+    worker.emit({
+      kind: 'world-harness-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: request.requestId,
+      result: {
+        ok: false,
+        error: { code: 'WORLD_REQUEST_INVALID', message: 'World prepare request is invalid.', kind: 'validation' },
+      },
+    });
+    await expect(preparing).resolves.toMatchObject({ ok: false, error: { code: 'WORLD_REQUEST_INVALID' } });
+    expect(worker.posts).toHaveLength(1);
   });
 
   it('通过稳定 world 代理把开发请求发送到真实 Authority Worker 协议', async () => {

@@ -38,6 +38,10 @@ fluid barrier 的“两个 lease 乱序完成”假设经源码核对撤回：`r
 
 候选 `12f379d8209741476a2fd9f416f3093fee2cfbca` 的首次最终集成：生产 `pnpm build` 通过；浏览器 2 项均失败（跨 seed 的派生 voxel 尚未同步；旧 setVoxelAt 入口被绑定身份拒绝）。根 coverage 为 233 文件通过、3 文件失败、2 文件跳过，1157 测试通过、4 失败、4 跳过：他人查询未拒绝、Fluid 新字段与完整对象断言不一致、两个恢复用例超时。保留日志路径 `/tmp/seedlands-h1h2-ui/{browser-final,static-final,build-final}.log`；修复后必须有新源码对应的新证据，不以重试消除这些失败。
 
+修复提交 `e37b32baebd5ebf61f223be3b1c6c2b47e8cc2fb` 的无重试 Browser 结果为 UI 通过、跨 seed 派生读取仍失败（6→0）。再次源码追踪确认：prepare-mesh 可合法省略未编辑 canonical，二次请求不保证 collision cache 就绪；后续修复改为显式等待 collision baseline，不放宽预期。日志 `browser-repaired.log` 保留。此前定点 mock 强行附带 canonical，不足以证明真实产品协议，这是此轮集成补足的证据缺口。
+
+验证期间受限子进程 pnpm 误判依赖并中断重建；Root 使用 `pnpm install --frozen-lockfile` 恢复，4.9 秒、退出0，锁文件无变化。后续由 Root 统一执行包管理器验证，避免并发依赖目录操作。
+
 ## 准出待办
 
 - 同 fixture 的 Headless ↔ Browser 实际世界/Action/Chunk 与 checkpoint 往返。
