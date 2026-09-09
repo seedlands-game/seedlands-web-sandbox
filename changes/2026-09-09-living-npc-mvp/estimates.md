@@ -39,3 +39,5 @@ GitHub复核增量后：最后一次真实Flash浏览器复验27.2秒通过，li
 第七轮独立复核约0.22 agent小时，最终窄复核见round7-final-recheck.md。Root补连续分页与零号事件回归；static独立执行1269测试通过。仍在原共享池，无新增真实provider调用、购买或reset，实际任务credits不可计量。
 
 外部主线#27同步继续使用原共享池，集成复核成本见main-sync-recheck.md；无新模型调用，任务credits仍unknown。合并引入的主线工作不计作本任务新实现。
+
+第八轮Root计数器恢复审计与复核保持原共享预算池；独立实际成本见round8-recheck.md。1283测试/build/Browser通过，无真实provider新增调用，不购买或使用reset；任务级credits仍unknown。

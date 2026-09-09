@@ -132,3 +132,5 @@ Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 
 主线同步：`3abf70b` 的CI未触发，GitHub读回CONFLICTING；主线已合入 #27 (`baeba09`)。恢复分支 `codex/living-npc-pre-main-sync-3abf70b` 保留同步前状态，合并 `4e39e48` 的唯一人工冲突处理是tsconfig.test.json并集。集成后完整static通过（260文件、1276测试通过、4跳过），Web/Agent build通过，NPC Browser2/2和共享Harness/诊断2/2通过；真实provider用例明确跳过。`main-sync-recheck.md`独立复核确认双方CI/测试/生产边界保留，无集成P0/P1/P2。长期baseline沿用双方现行docs，不重写主线历史。此前未触发CI不记为通过，最终SHA重新等待远端门禁。
 
 第八轮自动复核实际绑定`3abf70b`（review5154415291），发现eventCursor耗尽的快照在下一条事件后越界。最终SHA `9964bed` CI run34353266285全绿，但其自动复核30分钟未触发，不能将旧SHA审核当作最新通过。Root补同类可递增字段审计：角色revision、policyRevision、memory.revision、集合sequence均保留增量空间；集合sequence非负；事件尾从正数连续到head。7项坏快照分别RED后GREEN，完整Authority快照原子不变，随后正常对话/观察/再次保存恢复；与host整合69测试GREEN。无新provider调用，长期路线不变。
+
+第八轮最终生产冻结`2405493`：完整static通过（260文件、1283测试通过、4跳过），Web/Agent构建通过，NPC两项Browser通过，真实模型用例跳过。独立`round8-recheck.md`最终无新具体P0/P1/P2；复核中曾将 -1<0 错读为false的zeroEvent意见已由复核者撤回并记录，未因此更改正确代码。共享Harness在主线集成`4e39e48`两项通过，此后只修改存档非法输入拒绝。后续交付记录不改变生产行为，最新SHA远端门禁与自动审核单独核对。
