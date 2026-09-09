@@ -177,6 +177,8 @@ jobs:
           retention-days: 7
       - name: Run persistent resident integration
         id: npc-behavior
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
         run: pnpm test:npc-behavior
       - name: Preserve persistent resident evidence
         if: ${{ always() && steps.npc-behavior.outcome != 'skipped' }}

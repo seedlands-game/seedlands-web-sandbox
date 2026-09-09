@@ -1,0 +1,95 @@
+{
+  "source": "3f745a522e87c449bb53e8420aabe6dcef949e44",
+  "sequence": "A,A,B,A,B",
+  "axis": "headless shell graphics launch arguments only",
+  "A": "default",
+  "B": "explicit ANGLE SwiftShader",
+  "scope": "CI test host, no production rendering change",
+  "results": [
+    {
+      "arm": "A",
+      "index": 0,
+      "exit": 0,
+      "elapsedSeconds": 52.71,
+      "output": "/tmp/npc-software-host-0-A",
+      "outcomes": {
+        "hash": "20b4bb500994605e03b7f61a9b0350d59bd9efa0e3c0ef28962cb305bce7e989",
+        "feedingEpisodes": 18,
+        "nightDayEpisodes": 3,
+        "patrolArrivals": 194,
+        "modelCalls": 0,
+        "postStartResourceInjection": 0,
+        "treeChanges": 0,
+        "simulatedSeconds": 1800.0000000025295
+      }
+    },
+    {
+      "arm": "A",
+      "index": 1,
+      "exit": 0,
+      "elapsedSeconds": 52.528,
+      "output": "/tmp/npc-software-host-1-A",
+      "outcomes": {
+        "hash": "20b4bb500994605e03b7f61a9b0350d59bd9efa0e3c0ef28962cb305bce7e989",
+        "feedingEpisodes": 18,
+        "nightDayEpisodes": 3,
+        "patrolArrivals": 194,
+        "modelCalls": 0,
+        "postStartResourceInjection": 0,
+        "treeChanges": 0,
+        "simulatedSeconds": 1800.0000000025295
+      }
+    },
+    {
+      "arm": "B",
+      "index": 2,
+      "exit": 0,
+      "elapsedSeconds": 34.8,
+      "output": "/tmp/npc-software-host-2-B",
+      "outcomes": {
+        "hash": "20b4bb500994605e03b7f61a9b0350d59bd9efa0e3c0ef28962cb305bce7e989",
+        "feedingEpisodes": 18,
+        "nightDayEpisodes": 3,
+        "patrolArrivals": 192,
+        "modelCalls": 0,
+        "postStartResourceInjection": 0,
+        "treeChanges": 0,
+        "simulatedSeconds": 1800.0010000025272
+      }
+    },
+    {
+      "arm": "A",
+      "index": 3,
+      "exit": 0,
+      "elapsedSeconds": 53.073,
+      "output": "/tmp/npc-software-host-3-A",
+      "outcomes": {
+        "hash": "20b4bb500994605e03b7f61a9b0350d59bd9efa0e3c0ef28962cb305bce7e989",
+        "feedingEpisodes": 18,
+        "nightDayEpisodes": 3,
+        "patrolArrivals": 197,
+        "modelCalls": 0,
+        "postStartResourceInjection": 0,
+        "treeChanges": 0,
+        "simulatedSeconds": 1800.0009000025061
+      }
+    },
+    {
+      "arm": "B",
+      "index": 4,
+      "exit": 0,
+      "elapsedSeconds": 34.703,
+      "output": "/tmp/npc-software-host-4-B",
+      "outcomes": {
+        "hash": "20b4bb500994605e03b7f61a9b0350d59bd9efa0e3c0ef28962cb305bce7e989",
+        "feedingEpisodes": 18,
+        "nightDayEpisodes": 3,
+        "patrolArrivals": 192,
+        "modelCalls": 0,
+        "postStartResourceInjection": 0,
+        "treeChanges": 0,
+        "simulatedSeconds": 1800.0019000025036
+      }
+    }
+  ]
+}
