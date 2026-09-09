@@ -53,7 +53,9 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
       };
       await world.clock({ kind: 'pause' });
       await prepare({ kind: 'chunk', chunk: [4, 0, 0] });
-      await world.command({ type: 'set-block', position: extra, voxel: lantern });
+      const initialCommand = await world.command({ type: 'set-block', position: extra, voxel: lantern });
+      if (!initialCommand.ok || !initialCommand.data.success)
+        throw new Error(`Initial command failed: ${JSON.stringify(initialCommand)}`);
       const browserCheckpoint = await world.checkpoint({ kind: 'export' });
       if (!browserCheckpoint.ok) throw new Error('Browser pre-restore checkpoint failed.');
 
@@ -64,6 +66,9 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
       const before = await world.identity();
       const restored = await world.checkpoint({ kind: 'restore', snapshot: checkpoint });
       const after = await world.identity();
+      const restoredCommand = await world.command({ type: 'time-get' });
+      if (!restoredCommand.ok || !restoredCommand.data.success)
+        throw new Error(`Restored command failed: ${JSON.stringify(restoredCommand)}`);
       await world.logic({ kind: 'mode', mode: 'scripted' });
       const staleLogic = await world.logic({
         kind: 'submit',

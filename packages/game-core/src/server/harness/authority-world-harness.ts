@@ -221,7 +221,7 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
         const current = this.options.owner();
         const operation = current.runtime.executeTransaction(
           {
-            epoch: current.epoch,
+            epoch: current.runtime.snapshot().epoch,
             issuer: this.options.principalId,
             stream: 'world-harness-command',
             sequence,
