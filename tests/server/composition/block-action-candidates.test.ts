@@ -92,7 +92,15 @@ const actor = (overrides: Partial<BlockActorProjectionV1> = {}): BlockActorProje
 });
 const voxel = (value: number = Voxel.Stone): BlockVoxelProjectionV1 => ({ version: 1, position, voxel: value });
 
-function setup(options: { rules?: boolean; veto?: boolean; actor?: BlockActorProjectionV1; voxel?: number } = {}) {
+function setup(
+  options: {
+    rules?: boolean;
+    veto?: boolean;
+    actor?: BlockActorProjectionV1;
+    voxel?: number;
+    rulesModule?: ModModule;
+  } = {},
+) {
   const contentModule = defineContentModule({
     moduleId: 'test:content',
     items: itemDefinitions,
@@ -100,7 +108,7 @@ function setup(options: { rules?: boolean; veto?: boolean; actor?: BlockActorPro
     meleeDefinitions: [],
   });
   const actions = defineBlockActionsModule();
-  const rules = defineBlockRulesModule({ moduleId: 'test:default-block-rules' });
+  const rules = options.rulesModule ?? defineBlockRulesModule({ moduleId: 'test:default-block-rules' });
   const veto: ModModule = {
     descriptor: {
       id: 'test:block-veto',
@@ -320,6 +328,42 @@ describe('pure Block candidates', () => {
         input: { position },
       }),
     ).toMatchObject({ ok: false, code: 'OPERATION_FAILED' });
+  });
+
+  it('finishes bare-hand stone on the same threshold for fractional and bulk clocks', () => {
+    const initial = breakAction({ elapsedSeconds: 0, requiredSeconds: 2.4 });
+    const advance = (current: BlockBreakActionV1, seconds: number) =>
+      buildBlockAdvanceUpdates([{ reference: actor().reference, breakAction: current }], { seconds })[0]!;
+    let current = initial;
+    for (let frame = 0; frame < 47; frame++) {
+      const update = advance(current, 0.05);
+      expect(update.ready).toBe(false);
+      current = update.next!;
+    }
+    const fractional = advance(current, 0.05);
+    const bulk = [0.8, 0.8, 0.8].reduce((state, seconds) => advance(state, seconds).next!, initial);
+    expect(fractional.next).toEqual(bulk);
+    expect(fractional.ready).toBe(true);
+  });
+
+  it('snapshots nested rule drops before assembly and caller mutation', () => {
+    const drop = { itemId: 'stone-block', count: 1 };
+    const rulesModule = defineBlockRulesModule({
+      moduleId: 'test:default-block-rules',
+      voxelDefinitions: [
+        { voxel: Voxel.Stone, hardnessSeconds: 2.4, preferredTool: 'pickaxe', drop, replaceable: false },
+      ],
+    });
+    drop.itemId = 'dirt-block';
+    drop.count = 2;
+    const world = setup({ rulesModule, actor: actor({ breakAction: breakAction({ elapsedSeconds: 0.4 }) }) });
+    expect(
+      world.actor.invoke({
+        operationId: 'seedlands:block-finish',
+        target: { kind: 'voxel', position },
+        input: { position },
+      }),
+    ).toMatchObject({ ok: true, value: { dropIntent: { stack: { itemId: 'stone-block', count: 1 } } } });
   });
 
   it('supports bounded explicit clock cancellation and rejects duplicates', () => {

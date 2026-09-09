@@ -388,7 +388,10 @@ export function buildBlockAdvanceUpdates(
     if (entry.breakAction === null) continue;
     const previous = validateBlockBreakAction(entry.breakAction);
     const cancelled = cancellations.delete(reference.entityId);
-    const elapsedSeconds = Math.min(previous.requiredSeconds, previous.elapsedSeconds + input.seconds);
+    const elapsedSeconds = Math.min(
+      previous.requiredSeconds,
+      (Math.round(previous.elapsedSeconds * 1e9) + Math.round(input.seconds * 1e9)) / 1e9,
+    );
     const next = cancelled
       ? null
       : validateBlockBreakAction({

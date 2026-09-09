@@ -26,3 +26,13 @@
 ## 接续
 
 S3 继续审查/接通 scripted Logic batch 的真实来源，以及地面食物消费的注册 owner；默认规则与全部实际消费者仍需最终核对。S4 工位/炉体/储物、耐久和木石铁成长实际接线，S5 替代组合/跨宿主，S6 完整输入视听旅程/演示/PR 与 CI 均未完成。
+
+## 独立复核修复（2fcce5c 后续）
+
+只读复核发现并修复三项 P1：V4 恢复的挖掘状态使用较宽 ECS codec、浮点累计导致石块晚一帧完成、Rules 配置的嵌套掉落对象保留调用方别名。另修复 P2：零值或六位量化后为零的硬度在创建 Rules 时即拒绝。恢复先在 detached 校验中使用 canonical Block codec，再安装 live owner；计时使用与 lifecycle 相同的纳秒整数累计；规则创建时严格校验纯数据形状并复制/冻结 drop 和 instance。内容注册表相关语义（物品是否注册、工具倍率派生后的操作输入）仍在当前内容被实际消费时验证。
+
+新增恢复负例核对完整快照、entity reference 和世界不变；48×0.05 与 3×0.8 的纯计算阈值一致，真实 GameplayRuntime 在第 48 帧完成石块且与 bulk advance(2.4) 一致；改变调用方 drop 不改变 finish 候选。有效 RED 保留在 `/tmp/seedlands-s3-block-{restore-codec,time-valid,zero-hardness}-red.log`，配置形状/别名 RED 在 `-time-definition-red.log`（其中早期计时草稿超单 clock 上限，已由 time-valid RED 替代）。定向 3 文件 35 用例通过；最终全量准出结果待后续记录。
+
+独立 reviewer 最终给出 bounded pass：当前 Block 范围无剩余 P0/P1/P2；未运行测试，仅静态回读。最终源码 SHA256：snapshot `8fb5d140378254b254e658e620b71b71c1b4266191b7a38bde0a25b8e1eda94a`，actions `16847428b817f6b463731041b90e7f73c50350238ceb1eb30f4a1fb2b3f0f37c`，rules `3648431dd28be1361646335588fe4a7ebff820ed56a6d7d6ef92d1041cba3627`。回执 outbox 为进程内交付，不承诺崩溃后持久投递；后续 Logic/ground food/S4–S6 不在此结论范围。
+
+本次最终静态 `pnpm verify:static` 通过（303 文件通过/2 跳过，1583 用例通过/4 跳过，全部类型检查通过，Svelte 0/0），随后 build 通过。Browser 分两次串行：组合玩法 4/4（16.4 秒），gameplay-foundation 2/2；同批额外运行旧 melee-action-showcase 用例时，受击反馈和重新布置成功，但第一次连续攻击未观察到「hit + 5 点伤害」，第 84 行等待失败。这项保持未解决，纳入 S6 演示复验，不能称全 Browser 套件通过。日志 `/tmp/seedlands-s3-block-review-final-{static,build,browser,browser-gameplay}.log`；任务服务器已关闭，4173 无监听。原有 6 项目标 Browser 用例本树均通过；额外失败未被重跑掩盖。

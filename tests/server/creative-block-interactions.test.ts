@@ -152,6 +152,25 @@ const expectCommit = (
 };
 
 describe('creative block interactions through GameplayRuntime', () => {
+  it('commits bare-hand stone on frame 48 and agrees with bulk authority advancement', () => {
+    const fractional = createRuntime();
+    const bulk = createRuntime();
+    for (const runtime of [fractional, bulk]) {
+      runtime.world.cells.set(key([1, 1, 0]), Voxel.Stone);
+      expect(runtime.gameplay.beginBreak('player', [1, 1, 0])).toMatchObject({ success: true, requiredSeconds: 2.4 });
+    }
+    for (let frame = 0; frame < 47; frame++) fractional.gameplay.advanceRules(0.05);
+    expect(fractional.world.getVoxel([1, 1, 0])).toBe(Voxel.Stone);
+    fractional.gameplay.advanceRules(0.05);
+    bulk.gameplay.advanceRules(2.4);
+    for (const runtime of [fractional, bulk]) {
+      expect(runtime.world.getVoxel([1, 1, 0])).toBe(Voxel.Air);
+      expect(runtime.gameplay.getPlayerState('player').breakAction).toBeNull();
+      expect(runtime.gameplay.queryEntities({ type: 'world-item' })).toHaveLength(1);
+      expect(runtime.world.revision).toBe(1);
+    }
+  });
+
   it('places from the creative catalog without selecting or consuming survival inventory', () => {
     const { gameplay, world, enterCreative } = createRuntime();
     gameplay.giveItem('player', { itemId: ItemIds.DirtBlock, count: 2 });
@@ -288,5 +307,25 @@ describe('creative block interactions through GameplayRuntime', () => {
     rejectCompletion = false;
     expect(source.gameplay.advanceRules(0).commits).toHaveLength(1);
     expect(source.gameplay.advanceRules(0).commits).toHaveLength(0);
+  });
+  it.each([
+    { requiredSeconds: 0 },
+    { requiredSeconds: 1_000_001 },
+    { elapsedSeconds: 1_000_001 },
+    { voxel: 65_536 },
+    { position: [1.5, 1, 0] as [number, number, number] },
+    { position: [30_000_001, 1, 0] as [number, number, number] },
+  ])('rejects a V4 break outside its registered codec before replacing live owners: %j', (invalid) => {
+    const { gameplay, world } = createRuntime();
+    world.cells.set(key([1, 1, 0]), Voxel.Wood);
+    gameplay.beginBreak('player', [1, 1, 0]);
+    const before = gameplay.createSnapshot();
+    const reference = gameplay.entities.createReference('player')!;
+    const bad = structuredClone(before);
+    Object.assign(bad.entityStore.actors[0].player!.breakAction!, invalid);
+    expect(() => gameplay.restoreSnapshot(bad)).toThrow(/Block break/i);
+    expect(gameplay.createSnapshot()).toEqual(before);
+    expect(gameplay.entities.resolveReference(reference)?.id).toBe('player');
+    expect(world.getVoxel([1, 1, 0])).toBe(Voxel.Wood);
   });
 });

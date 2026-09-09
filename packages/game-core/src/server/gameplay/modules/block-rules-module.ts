@@ -2,6 +2,7 @@ import { positionsInRange, voxelCenter } from '../gameplay-geometry';
 import type { ModCandidateState } from '../../composition/operation-contracts';
 import type { ModModule, ModuleInvocationValue } from '../../composition/contracts';
 import type { ActorModuleExecutionContext } from '../../composition/authorized-execution';
+import { isItemId, type ItemStack } from '../item-registry';
 import type { GameplayContent } from '../gameplay-content';
 import { listVoxelGameplayDefinitions, type VoxelGameplayDefinition } from '../voxel-gameplay';
 import {
@@ -14,6 +15,7 @@ import {
   BLOCK_RULES_CAPABILITY,
   BLOCK_VOXEL_RESOURCE,
   blockActorAddress,
+  blockData,
   blockVoxelAddress,
   validateBlockActorProjection,
   validateBlockBeginEffectiveInput,
@@ -49,12 +51,66 @@ const samePosition = (left: BlockPosition, right: BlockPosition): boolean =>
 
 const sameData = (left: unknown, right: unknown): boolean => JSON.stringify(left) === JSON.stringify(right);
 
+function snapshotDefinition(raw: unknown): VoxelGameplayDefinition {
+  const value = blockData(
+    raw,
+    ['voxel', 'hardnessSeconds', 'preferredTool', 'drop', 'replaceable'],
+    'Block rule definition',
+  );
+  if (typeof value.voxel !== 'number' || !Number.isSafeInteger(value.voxel) || value.voxel < 0 || value.voxel > 65535)
+    throw new TypeError('Block rule voxel is invalid.');
+  if (
+    value.hardnessSeconds !== null &&
+    (typeof value.hardnessSeconds !== 'number' ||
+      !Number.isFinite(value.hardnessSeconds) ||
+      Number(value.hardnessSeconds.toFixed(6)) <= 0 ||
+      value.hardnessSeconds > 1e6)
+  )
+    throw new TypeError('Block rule hardness is invalid.');
+  if (value.preferredTool !== null && value.preferredTool !== 'axe' && value.preferredTool !== 'pickaxe')
+    throw new TypeError('Block rule preferred tool is invalid.');
+  if (typeof value.replaceable !== 'boolean') throw new TypeError('Block rule replaceability is invalid.');
+  let drop: Readonly<ItemStack> | null = null;
+  if (value.drop !== null) {
+    const hasInstance = typeof value.drop === 'object' && value.drop !== null && Object.hasOwn(value.drop, 'instance');
+    const stack = blockData(
+      value.drop,
+      hasInstance ? ['itemId', 'count', 'instance'] : ['itemId', 'count'],
+      'Block rule drop',
+    );
+    if (
+      !isItemId(stack.itemId) ||
+      typeof stack.count !== 'number' ||
+      !Number.isSafeInteger(stack.count) ||
+      stack.count <= 0
+    )
+      throw new TypeError('Block rule drop identity or count is invalid.');
+    let instance: Readonly<{ durability: number }> | undefined;
+    if (hasInstance) {
+      const state = blockData(stack.instance, ['durability'], 'Block rule drop instance');
+      if (typeof state.durability !== 'number' || !Number.isSafeInteger(state.durability) || state.durability <= 0)
+        throw new TypeError('Block rule drop durability is invalid.');
+      instance = Object.freeze({ durability: state.durability });
+    }
+    drop = Object.freeze({ itemId: stack.itemId, count: stack.count, ...(instance ? { instance } : {}) });
+  }
+  return Object.freeze({
+    voxel: value.voxel,
+    hardnessSeconds: value.hardnessSeconds,
+    preferredTool: value.preferredTool,
+    drop,
+    replaceable: value.replaceable,
+  });
+}
+
 export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModModule {
-  if (!options.moduleId?.trim()) throw new TypeError('Block Rules module ID is invalid.');
+  const moduleId = options.moduleId;
+  if (!moduleId?.trim()) throw new TypeError('Block Rules module ID is invalid.');
   const definitions = new Map<number, VoxelGameplayDefinition>();
-  for (const definition of options.voxelDefinitions ?? listVoxelGameplayDefinitions()) {
+  for (const raw of options.voxelDefinitions ?? listVoxelGameplayDefinitions()) {
+    const definition = snapshotDefinition(raw);
     if (definitions.has(definition.voxel)) throw new TypeError(`Duplicate Block rule voxel: ${definition.voxel}`);
-    definitions.set(definition.voxel, Object.freeze({ ...definition }));
+    definitions.set(definition.voxel, definition);
   }
   const definition = (voxel: number) => {
     const value = definitions.get(voxel);
@@ -63,7 +119,7 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
   };
   return Object.freeze({
     descriptor: {
-      id: options.moduleId,
+      id: moduleId,
       version: '1.0.0',
       requires: [
         { id: BLOCK_ACTIONS_CAPABILITY, version: '1.0.0' },
@@ -79,7 +135,7 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
       api.requireCapability(BLOCK_ACTIONS_CAPABILITY);
       const contentCapability = api.requireCapability<GameplayContentCapabilityV1>('seedlands:gameplay-content');
       const content = (): BlockActionContent => contentCapability.resolve();
-      api.provideCapability(BLOCK_RULES_CAPABILITY, Object.freeze({ moduleId: options.moduleId }));
+      api.provideCapability(BLOCK_RULES_CAPABILITY, Object.freeze({ moduleId }));
 
       const current = (context: ActorModuleExecutionContext, state: ModCandidateState) => {
         const target = actorTarget(context);
@@ -185,7 +241,7 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
         ) => ModuleInvocationValue,
       ) => {
         api.registerRule({
-          id: `${options.moduleId}/${kind}-before`,
+          id: `${moduleId}/${kind}-before`,
           operationId,
           stage: 'before',
           apply(context, input, state) {
@@ -194,7 +250,7 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
           },
         });
         api.registerRule({
-          id: `${options.moduleId}/${kind}-after`,
+          id: `${moduleId}/${kind}-after`,
           operationId,
           stage: 'after',
           apply(context, input, state, candidate) {
@@ -218,7 +274,7 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
       register('place', BLOCK_PLACE_OPERATION, derivePlace);
       register('finish', BLOCK_FINISH_OPERATION, deriveFinish);
       api.registerRule({
-        id: `${options.moduleId}/cancel-after`,
+        id: `${moduleId}/cancel-after`,
         operationId: BLOCK_CANCEL_OPERATION,
         stage: 'after',
         apply(context, input, state, candidate) {

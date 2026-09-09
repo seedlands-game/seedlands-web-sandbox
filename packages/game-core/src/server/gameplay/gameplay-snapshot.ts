@@ -1,3 +1,4 @@
+import { validateBlockBreakAction } from './modules/block-action-model';
 import type { CombatOriginRuntimeOptions } from './combat-origin';
 import type { ModuleScheduleSnapshot } from '../composition/lifecycle-contracts';
 import type { WorldRulesetV1 } from './modules/ruleset-module';
@@ -253,6 +254,7 @@ export function validateGameplaySnapshot(
           player.breakAction = null;
           continue;
         }
+        validateBlockBreakAction(action);
         const reference = entities.createReference(player.entityId);
         if (
           action.origin.originalActor.entityId !== player.entityId ||

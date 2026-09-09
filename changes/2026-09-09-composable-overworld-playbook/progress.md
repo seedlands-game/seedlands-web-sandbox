@@ -120,3 +120,7 @@ Combat 纯模块子任务合同 `/tmp/seedlands-s3-handoff/combat-module-candida
 ## S3 方块实际消费者检查点（2026-09-10）
 
 Place/Break/clock/finish 已接入真实注册 owner，开发者 give/remove 采用 prepared ECS。单操作 clock/finish 边界已独立复核；完整消费者审阅仍在进行。冻结 full static 1561 passed /4 skipped、build、Browser 6/6（30.3 秒）分别通过，4173 已释放，见 [方块检查点](s3-block-consumers-checkpoint.md)。先前窗口候选因绕过 clock 规则被新增 RED 否决并删除，失败日志保留。S3 继续 scripted Logic 与地面食物消费接缝，S4–S6 未准出。
+
+### Block 独立复核修复检查点
+
+已修复 V4 挖掘恢复 codec、分帧计时漂移、配置嵌套别名三项 P1 及硬度零值 P2，独立审阅 bounded pass。最终静态 1583/4、build 和原定 Browser 6 项通过。额外旧木剑体验场连续攻击断言失败已保留日志，列入 S6 演示复验，不声明整体准出。详见 s3-block-consumers-checkpoint.md。继续 scripted Logic 实际 principal 与 ground food owner；S3 仍 Implementing。
