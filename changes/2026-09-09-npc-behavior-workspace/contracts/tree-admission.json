@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "id": "npc-tree-admission",
+  "role": "behavior executor admission engineer",
+  "workType": "implementation",
+  "goal": "Implement bounded E admission only in change/experiments/tree-admission. Freeze released Mistreevous version, inspect actual public API and official docs. Prove instance isolation without static registry, injected time/random, persistent RUNNING single action identity, guard preemption/cleanup, reactive priority semantics, rebuilding tree with world-owned skills preserves compatible progress without private hydrate, hot replacement cancels changed branch without replay side effects. Use fake world state, no product source/dependency changes. npm install only isolated /tmp experiment; copy reproducible scripts/manifest/results to owned change folder, never node_modules or bundles. Compare XState only if concrete blocker. Recommend minimum adapter/canonical schema; do not self-build generic BT. Root designs integration in parallel. No browser/performance claims/provider/Git/secret/.env. Report /tmp/npc-tree-admission.md and freeze within .75h.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/spec.md",
+      "purpose": "Explicitly authorized replacement implementation"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/experiments/tree-admission",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No multi-tenant/cloud/edge/Dedicated/LOD/WorldAI",
+      "No secrets or .env read/output, no merge or purchase"
+    ]
+  },
+  "outputs": [
+    "/tmp/npc-tree-admission.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "admission",
+      "check": "Actual candidate results and blockers with fixed version and reproducible raw evidence",
+      "evidence": "/tmp/npc-tree-admission.md"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.75
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/npc-behavior/voxel-sandbox-foundation/changes/2026-09-09-npc-behavior-workspace/contracts/parent.json",
+    "sha256": "c1cee53347f5e930321cf0c909c7bfc243f22b0f07553df219597ec77abe9d06"
+  }
+}
