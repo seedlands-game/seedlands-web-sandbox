@@ -1,0 +1,36 @@
+$ vitest run tests/server/action-history-retention.test.ts
+8:01:07 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/action-history-retention.test.ts (9 tests | 1 failed) 123ms
+     × rejects the same follow goal atomically when arrival left no action and capacity is exhausted 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/action-history-retention.test.ts > bounded action completion history > rejects the same follow goal atomically when arrival left no action and capacity is exhausted
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/server/action-history-retention.test.ts:139:7
+    137|         say: 'I will follow.',
+    138|       }),
+    139|     ).toThrow(/sequence/);
+       |       ^
+    140|     expect(runtime.snapshot()).toEqual(before);
+    141|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  20:01:07
+   Duration  370ms (transform 132ms, setup 0ms, import 159ms, tests 123ms, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.
