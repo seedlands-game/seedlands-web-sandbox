@@ -3,7 +3,7 @@
   "id": "living-npc-round5-recheck",
   "role": "independent world code reviewer",
   "workType": "validation",
-  "goal": "Review round5 Action terminal retention delta from8f80eca to frozen implementation SHA supplied at dispatch. Read ActionRuntime, Autonomy restore/tick/finish consumers, Character actionId lifecycle and combat links. Check bounded recent terminal completion order, active/pinned preservation, old checkpoint full link validation before trim, future ID uniqueness, and sustained follow regression assertions. Root will run static/build/Browser separately. No tests/provider/browser/repo edits/Git/external comments. Report /tmp/living-npc-round5-recheck.md with concrete remaining P0/P1/P2 or none and freeze. .3h originalpool.",
+  "goal": "Review round5 Action terminal retention delta from8f80eca to54d2b2bf83947b23712f4042abe3b139eb55ab43. Read ActionRuntime, Autonomy restore/tick/finish consumers, Character actionId lifecycle and combat links. Check bounded recent terminal completion order, active/pinned preservation, old checkpoint full link validation before trim, future ID uniqueness, and sustained follow regression assertions. Root will run static/build/Browser separately. No tests/provider/browser/repo edits/Git/external comments. Report /tmp/living-npc-round5-recheck.md with concrete remaining P0/P1/P2 or none and freeze. .3h originalpool.",
   "initiatedBy": "agent",
   "context": [
     {

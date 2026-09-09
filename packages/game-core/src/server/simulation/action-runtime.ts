@@ -48,6 +48,7 @@ export class ActionRuntime {
 
   start(input: ActorActionInput, now: number): ActorAction {
     this.validateInput(input, now);
+    if (!Number.isSafeInteger(this.sequence + 1)) throw new RangeError('Action sequence is exhausted.');
     this.interruptActor(input.actorId, now, 'replaced');
     const action: ActorAction = {
       ...input,
@@ -117,7 +118,10 @@ export class ActionRuntime {
     return {
       version: 1,
       sequence: this.sequence,
-      actions: [...this.actions.values()].map((action) => this.clone(action)),
+      actions: [
+        ...[...this.actions.values()].filter((action) => !terminal(action.status)),
+        ...[...this.terminalOrder].map((id) => this.actions.get(id)!),
+      ].map((action) => this.clone(action)),
     };
   }
 
@@ -139,7 +143,7 @@ export class ActionRuntime {
       if (
         !snapshot ||
         snapshot.version !== 1 ||
-        !Number.isInteger(snapshot.sequence) ||
+        !Number.isSafeInteger(snapshot.sequence) ||
         snapshot.sequence < 0 ||
         !Array.isArray(snapshot.actions)
       )
@@ -148,6 +152,12 @@ export class ActionRuntime {
       const current = new Map<string, string>();
       for (const action of snapshot.actions) {
         this.validateAction(action);
+        const sequenceText = /^action-(\d+)$/.exec(action.id)?.[1];
+        if (
+          sequenceText !== undefined &&
+          (!Number.isSafeInteger(Number(sequenceText)) || Number(sequenceText) > snapshot.sequence)
+        )
+          throw new TypeError('action id exceeds snapshot sequence');
         if (actions.has(action.id)) throw new TypeError('duplicate action id');
         actions.set(action.id, this.clone(action));
         if (!terminal(action.status)) {
@@ -161,7 +171,8 @@ export class ActionRuntime {
       current.forEach((id, actorId) => this.currentByActor.set(actorId, id));
       this.sequence = snapshot.sequence;
       this.terminalOrder.clear();
-      // Legacy snapshots are in creation order; retention follows completion time.
+      // Stable ties preserve the completion order serialized by current snapshots.
+      // Legacy snapshots only provide completion time and creation order.
       [...actions.values()]
         .filter((action) => terminal(action.status))
         .sort((a, b) => (a.endedAt ?? a.startedAt) - (b.endedAt ?? b.startedAt))

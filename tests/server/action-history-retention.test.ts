@@ -50,6 +50,47 @@ function churn(actions: ActionRuntime, count: number) {
 }
 
 describe('bounded action completion history', () => {
+  it('atomically rejects a restored sequence below another actor action id', () => {
+    const actions = new ActionRuntime(testCorePlatform.clone);
+    const current = actions.start({ actorId: 'npc', type: 'idle' }, 0);
+    const before = actions.snapshot();
+    expect(() =>
+      actions.restore({ version: 1, sequence: 1, actions: [{ ...current, id: 'action-2', actorId: 'other' }] }),
+    ).toThrow(/sequence/);
+    expect(actions.snapshot()).toEqual(before);
+    expect(actions.start({ actorId: 'other', type: 'idle' }, 1).id).toBe('action-2');
+    expect(actions.forActor('npc')?.id).toBe(current.id);
+  });
+
+  it('rejects exhausted or unsafe action sequences without interrupting the current action', () => {
+    const actions = new ActionRuntime(testCorePlatform.clone);
+    const current = actions.start({ actorId: 'npc', type: 'idle' }, 0);
+    expect(() => actions.restore({ ...actions.snapshot(), sequence: Number.MAX_SAFE_INTEGER + 1 })).toThrow(
+      /Invalid action snapshot/,
+    );
+    actions.restore({ ...actions.snapshot(), sequence: Number.MAX_SAFE_INTEGER });
+    expect(() => actions.start({ actorId: 'npc', type: 'idle' }, 1)).toThrow(/sequence/);
+    expect(actions.forActor('npc')).toEqual(current);
+  });
+
+  it('preserves completion ordering for actions finished in the same tick across restore', () => {
+    const actions = new ActionRuntime(testCorePlatform.clone);
+    const older = actions.start({ actorId: 'npc', type: 'idle' }, 0);
+    const newer = actions.start({ actorId: 'other', type: 'idle' }, 0);
+    actions.succeed(newer.id, 1);
+    actions.succeed(older.id, 1);
+    for (let index = 0; index < 254; index += 1) {
+      const action = actions.start({ actorId: 'other', type: 'idle' }, index + 2);
+      actions.succeed(action.id, index + 2);
+    }
+    const restored = new ActionRuntime(testCorePlatform.clone);
+    restored.restore(actions.snapshot());
+    const next = restored.start({ actorId: 'other', type: 'idle' }, 300);
+    restored.succeed(next.id, 300);
+    expect(restored.get(newer.id)).toBeNull();
+    expect(restored.get(older.id)?.status).toBe('succeeded');
+  });
+
   it('retains active actions and orders a long-running completion by finish time', () => {
     const actions = new ActionRuntime(testCorePlatform.clone);
     const old = actions.start({ actorId: 'npc', type: 'move-to' }, 0);
