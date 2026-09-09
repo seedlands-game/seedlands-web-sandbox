@@ -1,0 +1,86 @@
+$ vitest run tests/server/action-history-retention.test.ts
+7:40:31 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/action-history-retention.test.ts (7 tests | 3 failed) 112ms
+     × atomically rejects a restored sequence below another actor action id 3ms
+     × rejects exhausted or unsafe action sequences without interrupting the current action 0ms
+     × preserves completion ordering for actions finished in the same tick across restore 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/action-history-retention.test.ts > bounded action completion history > atomically rejects a restored sequence below another actor action id
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/server/action-history-retention.test.ts:59:7
+     57|     expect(() =>
+     58|       actions.restore({ version: 1, sequence: 1, actions: [{ ...curren…
+     59|     ).toThrow(/sequence/);
+       |       ^
+     60|     expect(actions.snapshot()).toEqual(before);
+     61|     expect(actions.start({ actorId: 'other', type: 'idle' }, 1).id).to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/server/action-history-retention.test.ts > bounded action completion history > rejects exhausted or unsafe action sequences without interrupting the current action
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ tests/server/action-history-retention.test.ts:68:101
+     66|     const actions = new ActionRuntime(testCorePlatform.clone);
+     67|     const current = actions.start({ actorId: 'npc', type: 'idle' }, 0);
+     68|     expect(() => actions.restore({ ...actions.snapshot(), sequence: Nu…
+       |                                                                                                     ^
+     69|       /Invalid action snapshot/,
+     70|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/server/action-history-retention.test.ts > bounded action completion history > preserves completion ordering for actions finished in the same tick across restore
+AssertionError: expected { Object (actorId, type, ...) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "actorId": "other",
+  "endedAt": 1,
+  "id": "action-2",
+  "path": [],
+  "pathIndex": 0,
+  "repathCount": 0,
+  "startedAt": 0,
+  "status": "succeeded",
+  "type": "idle",
+}
+
+ ❯ tests/server/action-history-retention.test.ts:90:36
+     88|     const next = restored.start({ actorId: 'other', type: 'idle' }, 30…
+     89|     restored.succeed(next.id, 300);
+     90|     expect(restored.get(newer.id)).toBeNull();
+       |                                    ^
+     91|     expect(restored.get(older.id)?.status).toBe('succeeded');
+     92|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 4 passed (7)
+   Start at  19:40:31
+   Duration  354ms (transform 123ms, setup 0ms, import 149ms, tests 112ms, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.
