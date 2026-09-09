@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "id": "living-npc-mvp-parent",
+  "role": "路线与交付负责者",
+  "workType": "design",
+  "goal": "Deliver A1-A3 living NPC with actual model and browser evidence",
+  "initiatedBy": "human",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": ["/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation", "/private/tmp"],
+    "nonGoals": ["No Dedicated/LOD/World AI/custom rules/multimodal", "No merge, no credentials output or modification"]
+  },
+  "outputs": ["Playable NPC", "Real model evidence", "Validated PR"],
+  "execution": {
+    "form": "current-agent",
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "delivery",
+      "check": "V01-V10 pass with explicit evidence boundaries",
+      "evidence": "implementation report and CI"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 64
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": true,
+    "delegate": true
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": ["范围改变或三次同因失败"],
+  "reportFields": ["变更", "验证", "风险", "实际成本"],
+  "parent": null
+}

@@ -24,6 +24,7 @@ export function createPackageBoundaryRule(workspaceRoot) {
   const retiredNodeRoot = normalize(resolve(workspaceRoot, 'apps/node-server'));
   const packageDefinitions = [
     ['@seedlands/web', 'apps/web'],
+    ['@seedlands/agent-server', 'apps/agent-server'],
     ['@seedlands/game-core', 'packages/game-core'],
   ].map(([name, relativeRoot]) => {
     const root = normalize(resolve(workspaceRoot, relativeRoot));

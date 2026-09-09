@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "id": "living-npc-world",
+  "role": "world implementer",
+  "workType": "implementation",
+  "goal": "Implement A1 end to end in core and Authority adapters. Own all packages/game-core/src/server/** except runtime/character-control-protocol.ts owned Root; core compute protocol changes as needed; apps/web/src/worker/authority-worker* and apps/web/src/client/authority/*; focused tests/server and tests/client for your files. Implement generic character control API, persistent Actor profile/goals/inventory/memory/events, restricted observation with stable target refs, continuous goals and normal pickup/eat/movement, flee/interruption/fallback; Headless world.character and Browser world.character parity. Publish minimal API types first and coordinate via root-owned runtime/character-control-protocol.ts, propose exact types to Root early. Root owns actual browser UI/game.ts and Bridge. Character and messages must not encode Agent/provider concepts in core. Do not add no-op simulation or teleport. Reuse existing physics/navigation/Inventory. Ensure older saves migrate and portable checkpoint contains character data. Begin meaningful RED and focused tests. Do not run global formatting, install deps, commit/push/full build/browser; root coordinates. Freeze only after all A1 capabilities tested. Report changed APIs and how UI should create/read/dialogue/control NPC. Need source-like character contract discussed with Root before independent naming.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/worker",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/client/authority",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/server",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/client",
+      "/private/tmp"
+    ],
+    "nonGoals": ["No Dedicated/LOD/World AI/custom rules/multimodal", "No merge, no credentials output or modification"]
+  },
+  "outputs": ["Implementation", "Focused RED/GREEN", "/tmp/living-npc-world-report.md"],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "delivery",
+      "check": "V01-V10 pass with explicit evidence boundaries",
+      "evidence": "implementation report and CI"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 24
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": ["范围改变或三次同因失败"],
+  "reportFields": ["变更", "验证", "风险", "实际成本"],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}
