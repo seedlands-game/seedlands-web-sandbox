@@ -1,0 +1,414 @@
+$ vitest run tests/agent-server/wire-validation.test.ts
+8:34:42 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/agent-server/wire-validation.test.ts (15 tests | 2 failed) 13ms
+     × rejects an inconsistent event page: gapped full page 5ms
+     × rejects an inconsistent event page: zero event cursor 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent-server/wire-validation.test.ts > controller wire validation > rejects an inconsistent event page: gapped full page
+AssertionError: expected { kind: 'observe', …(4) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "binding": {
+    "entityId": "npc-1",
+    "epoch": "epoch-1",
+    "incarnation": "incarnation-1",
+    "policyRevision": 3,
+    "sessionId": "session-1",
+    "worldId": "world-1",
+  },
+  "kind": "observe",
+  "observation": {
+    "character": {
+      "behavior": "idle",
+      "currentGoal": {
+        "goal": {
+          "kind": "idle",
+        },
+        "requestId": "old-goal",
+        "revision": 2,
+        "status": "active",
+      },
+      "entityId": "npc-1",
+      "eventCursor": 104,
+      "hunger": 0.7,
+      "incarnation": "incarnation-1",
+      "inventory": [
+        {
+          "count": 1,
+          "itemId": "berry",
+        },
+      ],
+      "lifecycle": "active",
+      "memory": {
+        "revision": 4,
+        "summary": "Met the player.",
+        "throughCursor": 0,
+      },
+      "policyRevision": 3,
+      "profile": {
+        "name": "Lin",
+        "personality": "Careful and kind",
+        "riskTolerance": 0.25,
+      },
+      "revision": 8,
+    },
+    "cursor": 104,
+    "events": [
+      {
+        "at": 1000,
+        "cursor": 1,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 2000,
+        "cursor": 2,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 3000,
+        "cursor": 3,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 4000,
+        "cursor": 4,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 5000,
+        "cursor": 5,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 6000,
+        "cursor": 6,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 7000,
+        "cursor": 7,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 8000,
+        "cursor": 8,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 9000,
+        "cursor": 9,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 10000,
+        "cursor": 10,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 11000,
+        "cursor": 11,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 12000,
+        "cursor": 12,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 13000,
+        "cursor": 13,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 14000,
+        "cursor": 14,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 15000,
+        "cursor": 15,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 16000,
+        "cursor": 16,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 17000,
+        "cursor": 17,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 18000,
+        "cursor": 18,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 19000,
+        "cursor": 19,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 20000,
+        "cursor": 20,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 21000,
+        "cursor": 21,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 22000,
+        "cursor": 22,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 23000,
+        "cursor": 23,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 24000,
+        "cursor": 24,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 25000,
+        "cursor": 25,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 26000,
+        "cursor": 26,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 27000,
+        "cursor": 27,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 28000,
+        "cursor": 28,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 29000,
+        "cursor": 29,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 30000,
+        "cursor": 30,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 31000,
+        "cursor": 31,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+      {
+        "at": 104000,
+        "cursor": 104,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+    ],
+    "self": {
+      "health": 10,
+      "position": [
+        1,
+        2,
+        3,
+      ],
+    },
+    "visibleEntities": [
+      {
+        "distance": 2,
+        "position": [
+          2,
+          2,
+          3,
+        ],
+        "stack": {
+          "count": 2,
+          "itemId": "berry",
+        },
+        "target": {
+          "kind": "entity",
+          "ref": "drop-1",
+          "revision": 5,
+        },
+        "type": "item-drop",
+      },
+    ],
+    "visiblePois": [],
+  },
+  "protocolVersion": 1,
+  "sequence": 1,
+}
+
+ ❯ tests/agent-server/wire-validation.test.ts:110:7
+    108|         }),
+    109|       }),
+    110|     ).toBeNull();
+       |       ^
+    111|   });
+    112|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/agent-server/wire-validation.test.ts > controller wire validation > rejects an inconsistent event page: zero event cursor
+AssertionError: expected { kind: 'observe', …(4) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "binding": {
+    "entityId": "npc-1",
+    "epoch": "epoch-1",
+    "incarnation": "incarnation-1",
+    "policyRevision": 3,
+    "sessionId": "session-1",
+    "worldId": "world-1",
+  },
+  "kind": "observe",
+  "observation": {
+    "character": {
+      "behavior": "idle",
+      "currentGoal": {
+        "goal": {
+          "kind": "idle",
+        },
+        "requestId": "old-goal",
+        "revision": 2,
+        "status": "active",
+      },
+      "entityId": "npc-1",
+      "eventCursor": 0,
+      "hunger": 0.7,
+      "incarnation": "incarnation-1",
+      "inventory": [
+        {
+          "count": 1,
+          "itemId": "berry",
+        },
+      ],
+      "lifecycle": "active",
+      "memory": {
+        "revision": 4,
+        "summary": "Met the player.",
+        "throughCursor": 0,
+      },
+      "policyRevision": 3,
+      "profile": {
+        "name": "Lin",
+        "personality": "Careful and kind",
+        "riskTolerance": 0.25,
+      },
+      "revision": 8,
+    },
+    "cursor": 0,
+    "events": [
+      {
+        "at": 0,
+        "cursor": 0,
+        "text": "Can you find food?",
+        "type": "dialogue-heard",
+      },
+    ],
+    "self": {
+      "health": 10,
+      "position": [
+        1,
+        2,
+        3,
+      ],
+    },
+    "visibleEntities": [
+      {
+        "distance": 2,
+        "position": [
+          2,
+          2,
+          3,
+        ],
+        "stack": {
+          "count": 2,
+          "itemId": "berry",
+        },
+        "target": {
+          "kind": "entity",
+          "ref": "drop-1",
+          "revision": 5,
+        },
+        "type": "item-drop",
+      },
+    ],
+    "visiblePois": [],
+  },
+  "protocolVersion": 1,
+  "sequence": 1,
+}
+
+ ❯ tests/agent-server/wire-validation.test.ts:110:7
+    108|         }),
+    109|       }),
+    110|     ).toBeNull();
+       |       ^
+    111|   });
+    112|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  20:34:42
+   Duration  225ms (transform 47ms, setup 0ms, import 61ms, tests 13ms, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.

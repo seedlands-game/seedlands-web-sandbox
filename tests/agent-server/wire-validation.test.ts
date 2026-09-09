@@ -81,6 +81,8 @@ describe('controller wire validation', () => {
   });
 
   const invalidPages: ReadonlyArray<readonly [string, number, ReturnType<typeof event>[], number]> = [
+    ['gapped full page', 104, [...Array.from({ length: 31 }, (_, index) => event(index + 1)), event(104)], 104],
+    ['zero event cursor', 0, [event(0)], 0],
     ['missing head', undefined as unknown as number, [event(1)], 1],
     ['negative head', -1, [event(1)], 1],
     ['unsafe head', Number.MAX_VALUE, [event(1)], 1],

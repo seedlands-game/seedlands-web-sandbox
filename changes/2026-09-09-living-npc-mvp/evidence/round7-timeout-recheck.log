@@ -1,0 +1,11 @@
+$ vitest run tests/client/browser-character-authority.test.ts
+8:34:23 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  20:34:23
+   Duration  5.60s (transform 405ms, setup 0ms, import 490ms, tests 5.03s, environment 0ms)
+

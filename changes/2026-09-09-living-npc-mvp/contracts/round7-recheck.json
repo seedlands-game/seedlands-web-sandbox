@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "living-npc-round7-recheck",
+  "role": "independent world code reviewer",
+  "workType": "validation",
+  "goal": "Frozen review9803ce91a802103e99669ffbab4d3b84860b296c..06b4ced522ac09cb75d38ddceb9c3be0dde36fc8 for review5154055758. Check host validates character head/page/events relationships preserving real32page/128retention; bad authenticatedfirstframe BAD_FRAME closes beforebaseline. Core rejects exhausted targetSequence (increment headroom) and positiveeventCursor+emptytail checkpoint atomically, oldworldrealattackstillworks. Root60integratedtestsGREEN, fullstatic/build/Browserongoing. Read allchangedsource/tests+actualAuthoritypage semantics, report concrete residual P0/P1/P2 ornone. Do not claim authenticated internallyconsistent forgedstate provablefalse. No tests/browser/provider/repo/Git/comments. Report /tmp/living-npc-round7-recheck.md andfreeze. .25h originalpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round7-recheck.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "recheck",
+      "check": "Frozen delta fully reviewed; P1 resolution and any residual concrete bugs reported",
+      "evidence": "recheck report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.25
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}
