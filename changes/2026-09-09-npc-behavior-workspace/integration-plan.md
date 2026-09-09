@@ -27,3 +27,7 @@ core 的受限 Character/行为合同由声明exports暴露；世界级 Develope
 一个世界连接复用三个绑定角色；每个角色有独立LangGraph thread/可信workspace key/窗口/journal/scheduler。全局模型供应在LiteLLM闭环，上层模型对象只有flash/pro与标准消息。PG保存文档/窗口、框架checkpoint/store及发布manifest，不拿模型返回值直接覆盖World状态。
 
 Root负责正式跨层合同、Web可玩入口/诊断、长时Browser与总集成；明确世界实现与认知实现的文件所有权后再派发。使用agent-work-routing完整合同，所有实现进入此新worktree，17c1旧任务与试玩进程不改动。
+
+## 跨层草案已进入源码
+
+runtime/behavior-control-protocol.ts定义公开世界数据：树节点selector/sequence/condition/action，条件支持all/any/not组合与registry原子条件，参数只允许标量与标量数组；严格schema/registry校验由世界实现。root内monitor列表只允许发非阻塞rejudge，语义属于同一有效定义，不可占身体。公开runtime为受限角色视图，内部ExecutionLedger不直接暴露。BehaviorUpdateRequest按expectedBehaviorRevision提交目标+定义，不复用身体pose revision。该声明目前仅类型，尚无运行实现或准出声明。
