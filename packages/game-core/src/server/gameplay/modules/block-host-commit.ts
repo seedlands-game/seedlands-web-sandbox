@@ -1,3 +1,4 @@
+import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import { buildBlockActionCandidate, buildBlockAdvanceUpdates } from './block-actions-module';
 import type { WorldComposition, ModuleInvocationValue } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
@@ -151,6 +152,9 @@ export function prepareRegisteredBlockCommit(
   } else if (context.target.kind !== 'voxel' || execution.resource !== BLOCK_VOXEL_RESOURCE) {
     throw new TypeError('Block operation requires a voxel target.');
   }
+  const validateActorExecution = () =>
+    assertActorResourceExecution(options.composition, execution.authorizer, context, BLOCK_ACTOR_RESOURCE);
+  validateActorExecution();
   const target = context.target.kind === 'voxel' ? context.target.position : null;
   expected([blockActorAddress(id), ...(target ? [blockVoxelAddress(target)] : [])]);
   const actor = projections.actor(id);
@@ -170,6 +174,7 @@ export function prepareRegisteredBlockCommit(
       throw new TypeError('Block completion must use the accepted action origin.');
   }
   const validateCondition = () => {
+    validateActorExecution();
     if (target) {
       const entity = options.entities.get(id);
       if (!entity || !positionsInRange(entity.position, voxelCenter([...target]), 5)) throw new Error('out-of-range');

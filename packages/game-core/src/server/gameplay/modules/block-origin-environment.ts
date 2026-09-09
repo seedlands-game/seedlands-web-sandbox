@@ -1,3 +1,4 @@
+import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import type { WorldComposition } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
 import type { RegisteredCommitContext } from '../../composition/operation-contracts';
@@ -44,6 +45,7 @@ export function createBlockOriginEnvironment(
         origin,
         request: { resource: VOXEL_RESOURCE, operation: 'execute', target },
       });
+      assertActorResourceExecution(options.composition, binding.authorizer, rebound.context, ACTOR_RESOURCE);
     } catch (error) {
       if (error instanceof TypeError) throw new BlockOriginUnavailable(error.message);
       throw error;

@@ -1,6 +1,6 @@
 # S3 Logic 与地面食物消费者检查点
 
-状态：实现与当前完整门禁已通过，独立复核收尾中；S3 / S4 / S5 / S6 仍未整体准出。
+状态：实现、当前完整门禁与独立限定范围复核已通过；S3 / S4 / S5 / S6 仍未整体准出。
 
 ## 行为
 
@@ -22,6 +22,6 @@ local-only 日志：`/tmp/seedlands-s3-logic-feeding-review-static.log`、`/tmp/
 
 ## 复核与后续
 
-独立 reviewer 的 Feeding actor execute P1 已有两个 RED / GREEN 修复，最终回读待返回。Root 另记录同类 Inventory pickup / Block 跨资源 actor execute 待核实和修正，不能将此检查点等同完整权限准出。
+独立 reviewer 的 Feeding actor execute P1 已有两个 RED / GREEN 修复，最终回读 bounded pass，无剩余 P0/P1/P2；范围限 Logic/Feeding，未复核体验场或下阶段。Root 后续已复现并修正 Inventory pickup / Block / Combat 的 actor execute 边界，见 [跨目标授权补充](s3-secondary-actor-permissions.md)；不把此前 reviewer 的范围扩大到后续补丁。
 
 长期 docs baseline 更新代码地图，记录实际注册适配与 owner 归属；产品路线和架构责任不变。仍需默认内容归属收尾、S4 实际工位/工具成长、S5 替代 Playbook 与完整跨宿主合同、S6 正常输入旅程及 PR/CI。未推送、未创建 PR、未合并。

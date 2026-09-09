@@ -1,3 +1,4 @@
+import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import type { GameplayModuleRuntime } from './gameplay-module-runtime';
 import type { ModuleSystemAuthority } from './gameplay-module-schedule';
 import type { ModuleInvocationValue } from '../../composition/contracts';
@@ -161,6 +162,7 @@ export class RegisteredCombatRuntime {
       candidate.rulesetRevision !== this.options.rulesetRevision()
     )
       throw new TypeError('Combat candidate execution context mismatch.');
+    assertActorResourceExecution(this.options.composition, execution.authorizer, context, COMBAT_RESOURCE);
     const origin = captureDurableExecutionOrigin({
       composition: this.options.composition,
       authorizer: execution.authorizer,
@@ -172,7 +174,11 @@ export class RegisteredCombatRuntime {
       },
       request: { resource, operation: 'execute', target: context.target },
     });
-    this.environment.resolveOrigin(origin, candidate.targetId);
+    const validateOrigin = () => {
+      assertActorResourceExecution(this.options.composition, execution.authorizer, context, COMBAT_RESOURCE);
+      this.environment.resolveOrigin(origin, candidate.targetId);
+    };
+    validateOrigin();
     if (candidate.kind === 'request') {
       if (candidate.definitionId !== this.environment.projectActor(candidate.actorId).meleeDefinitionId)
         throw new TypeError('Combat equipment selection is stale.');
@@ -197,6 +203,7 @@ export class RegisteredCombatRuntime {
       });
       if (!plan.success) return { ok: false, code: 'COMBAT_REJECTED', reason: plan.reason };
       return this.commit(plan, plan.result, {
+        validateOrigin,
         start,
         effects: {
           started: { actorId: candidate.actorId, targetId: candidate.targetId, replaced: !!start?.replacedAction },
@@ -237,6 +244,7 @@ export class RegisteredCombatRuntime {
       plan,
       { success: true, damage: damage.damage, outcome: reason ? 'miss' : 'hit' },
       {
+        validateOrigin,
         entity: damage.entity,
         effects: {
           deaths: damage.deaths,
@@ -252,6 +260,7 @@ export class RegisteredCombatRuntime {
     combat: PreparedCombatMutation,
     value: ModuleInvocationValue,
     input: Readonly<{
+      validateOrigin?: () => void;
       changesState?: boolean;
       start?: ReturnType<ActionRuntime['prepareStart']>;
       entity?: PreparedEntityMutation | null;
@@ -270,6 +279,7 @@ export class RegisteredCombatRuntime {
       validate: () => {
         if (used || revision !== this.options.revision()) throw new Error('Combat commit revision is stale.');
         if (changesState) this.options.assertCanChange();
+        input.validateOrigin?.();
         input.start?.validate();
         input.entity?.validate();
         effects.validate();
@@ -305,13 +315,14 @@ export class RegisteredCombatRuntime {
       try {
         const origin = validateDurableExecutionOrigin(active.origin);
         if (origin.principalSubject !== principal?.subject) return { success: false, reason: 'combat-origin-mismatch' };
-        rebindDurableExecutionOrigin({
+        const rebound = rebindDurableExecutionOrigin({
           composition: this.options.composition,
           identity: this.environment.identity,
           authorizer: binding.authorizer,
           origin,
           request: { resource: COMBAT_RESOURCE, operation: 'execute', target: { kind: 'entity', entityId: targetId } },
         });
+        assertActorResourceExecution(this.options.composition, binding.authorizer, rebound.context, COMBAT_RESOURCE);
       } catch (error) {
         if (!(error instanceof TypeError)) throw error;
         return { success: false, reason: 'combat-origin-unavailable' };

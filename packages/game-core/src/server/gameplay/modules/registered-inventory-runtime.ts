@@ -1,3 +1,4 @@
+import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import type { ModuleInvocationValue, WorldComposition } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
 import type {
@@ -137,6 +138,9 @@ export class RegisteredInventoryRuntime {
       execution.resource !== (kind === 'pickup' ? INVENTORY_ITEM_RESOURCE : INVENTORY_RESOURCE)
     )
       throw new TypeError('Inventory execution target/resource mismatch.');
+    const validateActorExecution = () =>
+      assertActorResourceExecution(this.options.composition, execution.authorizer, context, INVENTORY_RESOURCE);
+    validateActorExecution();
     const addresses = [inventoryActorAddress(actorId), ...(kind === 'pickup' ? [inventoryItemAddress(targetId)] : [])];
     if (
       observed.length !== addresses.length ||
@@ -200,6 +204,7 @@ export class RegisteredInventoryRuntime {
         validated = false;
         if (used || this.options.revision() !== revision) throw new Error('Prepared Inventory action is stale.');
         this.validateObserved(observed);
+        validateActorExecution();
         this.options.assertCanChange();
         validateGeometry();
         mutation.validate();

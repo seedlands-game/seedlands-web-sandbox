@@ -1,3 +1,4 @@
+import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import type { WorldComposition, ModuleInvocationValue } from '../../composition/contracts';
 import type { ModStateAddress } from '../../composition/operation-contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
@@ -46,13 +47,15 @@ export function createCombatHostEnvironment(options: CombatHostEnvironmentOption
     if (!binding) throw new CombatOriginUnavailable('Combat origin has no current host authority.');
     const rebound = (() => {
       try {
-        return rebindDurableExecutionOrigin({
+        const rebound = rebindDurableExecutionOrigin({
           composition,
           identity,
           authorizer: binding.authorizer,
           origin,
           request: { resource: COMBAT_RESOURCE, operation: 'execute', target: { kind: 'entity', entityId: targetId } },
         });
+        assertActorResourceExecution(composition, binding.authorizer, rebound.context, COMBAT_RESOURCE);
+        return rebound;
       } catch (error) {
         if (error instanceof TypeError) throw new CombatOriginUnavailable(error.message);
         throw error;
