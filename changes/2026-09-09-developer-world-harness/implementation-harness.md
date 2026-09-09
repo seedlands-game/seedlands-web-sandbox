@@ -1,6 +1,6 @@
 # H1/H2 世界 Runtime 实施记录
 
-状态：实现冻结，等待 Root 执行最终 Browser / build / 全量静态验收。固定实现合同 `contracts/world-runtime.json` SHA-256：`db6a7554aad683ed68608239de266f97a02350e70801743d8a34071c527eb9af`。
+状态：子合同实现冻结；Root 已完成最终 Browser / build / 全量静态验收，详见 [总实施记录](implementation-report.md)。固定实现合同 `contracts/world-runtime.json` SHA-256：`db6a7554aad683ed68608239de266f97a02350e70801743d8a34071c527eb9af`。
 
 ## 变更
 
@@ -33,14 +33,14 @@ const frozen = await world.checkpoint({ kind: 'export' });
 - `CI=true corepack pnpm exec vitest run tests/client/browser-authority-client.test.ts tests/server/server-command.test.ts`：2 files / 19 tests 通过，确认既有 Browser Authority 与 slash command 接口兼容。
 - Root 已执行真实 JSONL/CLI 子进程测试：9/9 通过；覆盖 malformed 后继续、1 MiB/96 MiB 增量 framing、单请求背压、U16LE/U8 base64 checkpoint 往返、损坏后继续与 EOF 清理。
 - Root 已执行真实 TTY：多行与 top-level await、持续 world 改块/查询、run 到 tick 400、pause、799383 bytes checkpoint、`.exit` clean 0。
-- `@seedlands/game-core` typecheck、`@seedlands/web` typecheck、`tsconfig.test.json`、`tsconfig.tools.json` 均通过；Web typecheck 仅报告 Root 所有 UI 的既有非阻断 Svelte a11y warning。
+- `@seedlands/game-core` typecheck、`@seedlands/web` typecheck、`tsconfig.test.json`、`tsconfig.tools.json` 均通过；子合同检查时 UI 尚有非阻断 warning；Root 最终检查为 0 error/0 warning。
 - 受影响 core/Headless/Authority/Browser adapter、恢复接线和定点测试 ESLint 通过；新增 owner 拆分后所有受影响生产模块满足有效代码不超过 500 行。`git diff --check` 通过。
 - Browser parity fixture：`e2e/browser-world-parity.spec.ts`。它使用不同 seed 的 Browser target，验证 Headless → Browser 恢复、源 seed 首个新 Chunk、旧 extra Chunk 删除、旧/新 Logic、同 ticks 的 Physics/Gameplay/Fluid lane 和 frontier、Voxel/Actor/Action，并执行 Browser → Headless 往返及恢复后 `run + Pointer Lock + KeyW`。按 Root 协调，本实现者未再次启动 Browser；最终无重试结果由 Root 写入总实施报告。
 
 ## 风险与限制
 
 - 本期支持现有玩家、脚本 Logic 与现有 NPC/Actor 模拟的共享 Authority 能力；没有模型 NPC、模型 provider、长期认知存档、LOD、离线追赶或 World AI 产品能力。
-- Browser 最终 parity、全量 `verify:static`、独立 build 和旧浏览器回归尚由 Root 串行执行；在这些终态证据写入前，不声明 H07 总验收完成。
+- 最终 Browser、根静态和构建证据已由 Root 写入总实施记录；旧完整回归一次 19/20 及后续近战对照均有保留，不声称完整回归 20/20。
 - Fluid barrier 的连续计数依赖当前“最多一个在途 lease”调度不变量；未来若支持并发 Fluid lease，必须改成按 lease sequence 的 pending-through 水位。
 
 ## 实际成本
@@ -48,3 +48,5 @@ const frozen = await world.checkpoint({ kind: 'export' });
 - 外部 SDK 安装、真实模型调用、外部写入：0。
 - 任务级 tokens、credits 和 API 等价费用没有可归因账单，记为 unknown；不从账户共享额度差值推算。
 - 墙钟时间没有独立任务计时器，记为 unknown。实现复用既有 AuthorityRuntime 与 FrozenGameSaveSnapshot，没有新增产品存档版本。
+
+Root 集成补充：canonical completion 解除 prepare queue 等待；ready 只读当前 snapshot；Logic expiry 读当前 session tick；跨宿主精确推进采用同 snapshot restore 生命周期。对应源码、RED/GREEN 和语义边界以总实施记录为准。
