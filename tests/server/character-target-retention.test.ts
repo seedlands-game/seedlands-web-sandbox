@@ -86,3 +86,50 @@ it('atomically rejects a checkpoint with no target reference sequence headroom b
     character: { currentGoal: { status: 'suspended' } },
   });
 });
+
+it.each([
+  'eventCursor',
+  'revision',
+  'policyRevision',
+  'memoryRevision',
+  'zeroEvent',
+  'sequence',
+  'negativeSequence',
+] as const)('atomically rejects invalid character counter %s and preserves later dialogue', async (counter) => {
+  const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
+  const server = new GameServer({ platform: testCorePlatform, seedText: 'character-counter-headroom', persistence });
+  const created = server.character({
+    kind: 'create',
+    profile: { name: 'Lin', personality: 'Cautious' },
+    position: [2, 34.6, 0.5],
+  });
+  if (created.kind !== 'created') throw new Error('Character unavailable');
+  const entityId = created.character.entityId;
+  const before = server.freezeSaveSnapshot(1);
+  const corrupt = testCorePlatform.clone(before);
+  const record = corrupt.gameplay.simulation.characters!.characters[0]!;
+  if (counter === 'sequence' || counter === 'negativeSequence')
+    Object.assign(corrupt.gameplay.simulation.characters!, {
+      sequence: counter === 'sequence' ? Number.MAX_SAFE_INTEGER : -1,
+    });
+  else if (counter === 'memoryRevision') Object.assign(record.memory, { revision: Number.MAX_SAFE_INTEGER });
+  else if (counter === 'zeroEvent' || counter === 'eventCursor') {
+    const cursor = counter === 'zeroEvent' ? 0 : Number.MAX_SAFE_INTEGER;
+    Object.assign(record, {
+      eventCursor: cursor,
+      events: [{ cursor, at: 0, type: 'dialogue-heard', text: 'Hello' }],
+    });
+  } else Object.assign(record, { [counter]: Number.MAX_SAFE_INTEGER });
+  persistence.saveFrozenSnapshot(corrupt);
+  await expect(server.restore(), counter).rejects.toThrow(/snapshot/);
+  expect(server.freezeSaveSnapshot(1), counter).toEqual(before);
+  server.character({ kind: 'dialogue', entityId, text: 'Hello again' });
+  expect(server.character({ kind: 'observe', entityId, sinceCursor: 0 })).toMatchObject({
+    kind: 'observation',
+    observation: { cursor: 1, events: [{ cursor: 1, text: 'Hello again' }] },
+  });
+  const after = server.freezeSaveSnapshot(2);
+  persistence.saveFrozenSnapshot(after);
+  await server.restore();
+  expect(server.freezeSaveSnapshot(2)).toEqual(after);
+});

@@ -124,8 +124,10 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
     !value.incarnation.trim() ||
     !['active', 'deceased'].includes(value.lifecycle) ||
     !Number.isSafeInteger(value.revision) ||
+    !Number.isSafeInteger(value.revision + 1) ||
     value.revision < 0 ||
     !Number.isSafeInteger(value.policyRevision) ||
+    !Number.isSafeInteger(value.policyRevision + 1) ||
     value.policyRevision < 1
   )
     throw new TypeError('Character snapshot identity is invalid.');
@@ -134,6 +136,7 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
   if (value.suspendedGoal) validGoalState(value.suspendedGoal, value.revision);
   if (
     !Number.isSafeInteger(value.eventCursor) ||
+    !Number.isSafeInteger(value.eventCursor + 1) ||
     value.eventCursor < 0 ||
     !Array.isArray(value.events) ||
     value.events.length > CHARACTER_MAX_EVENTS ||
@@ -152,6 +155,7 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
   if (
     !value.memory ||
     !Number.isSafeInteger(value.memory.revision) ||
+    !Number.isSafeInteger(value.memory.revision + 1) ||
     value.memory.revision < 0 ||
     !Number.isSafeInteger(value.memory.throughCursor) ||
     value.memory.throughCursor < 0 ||
@@ -162,10 +166,11 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
   if (value.lastSpeech !== undefined) characterText(value.lastSpeech, 'Character speech', 280);
 
   let previousCursor = value.eventCursor - value.events.length;
+  if (previousCursor < 0) throw new TypeError('Character snapshot event is invalid.');
   for (const event of value.events) {
     if (
       !Number.isSafeInteger(event.cursor) ||
-      event.cursor <= previousCursor ||
+      event.cursor !== previousCursor + 1 ||
       event.cursor > value.eventCursor ||
       !Number.isFinite(event.at) ||
       event.at < 0 ||

@@ -99,3 +99,7 @@ A3：浏览器可直接创建/继续伙伴，展示姓名、目标、行为、�
 第七轮独立复核补充：实际Authority事件编号从1起、每条加1，单页必须连续。即使页尾/head/保留窗均有效，也必须拒绝中间跳号和零号事件；以32条 `[1..31,104]`、head/page=104及零号事件先取得RED，再验证正常历史分页。
 
 主线集成：#27合并后PR显示CONFLICTING，最新SHA没有CI运行。以 `codex/living-npc-pre-main-sync-3abf70b` 保留恢复点，合入 `baeba09`；唯一文本冲突为tsconfig.test.json同时新增E2E目录，必须保留双方include。不修改CI选择/重试/门禁语义，保留主线动态阴影与证据上传调整及本分支Agent gate。验证完整static、build、NPC和Developer Harness浏览器旅程，远端重新确认三个必需checks。
+
+第八轮存档计数边界：自动复核5154415291发现eventCursor可恢复为MAX_SAFE_INTEGER，下一事件越界。检查同一角色存档中后续会递增的revision、policyRevision、memory.revision，一并要求增量空间；纯历史编号仍按原合同校验。事件尾部不得包含零号/负号，必须从正数连续到head，与Wire一致。真实GameServer恢复损坏快照须原子拒绝，再验证对话、观察与重新存档恢复正常；不改变计数格式和产品能力，无新provider调用。
+
+同轮计数审计覆盖角色集合的incarnation sequence：恢复不得接受负数或已耗尽的集合sequence，保持下一次注册身份生成仍在安全整数范围。
