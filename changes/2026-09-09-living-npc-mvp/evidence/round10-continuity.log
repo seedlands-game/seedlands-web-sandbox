@@ -1,0 +1,10 @@
+10:28:00 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  22:28:01
+   Duration  330ms (transform 118ms, setup 0ms, import 460ms, tests 51ms, environment 0ms)
+

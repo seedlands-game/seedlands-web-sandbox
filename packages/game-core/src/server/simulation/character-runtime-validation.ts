@@ -90,7 +90,7 @@ export function validateCharacterGoal(goal: CharacterGoal): void {
   if (
     goal.kind === 'follow' &&
     (!goal.target ||
-      !['entity', 'poi'].includes(goal.target.kind) ||
+      goal.target.kind !== 'entity' ||
       typeof goal.target.ref !== 'string' ||
       !goal.target.ref.trim() ||
       goal.target.ref.length > 256 ||

@@ -63,7 +63,7 @@ export class CharacterRuntime {
     this.goals = new CharacterGoalRuntime(options, {
       record: (record, type, fields) => this.record(record, type, fields),
       reference: (record, kind, targetId) => this.reference(record, kind, targetId),
-      isVisible: (record, targetId) => this.isVisible(record, targetId),
+      isVisible: (record, kind, targetId) => this.isVisible(record, kind, targetId),
       requireEntity: (entityId) => this.requireEntity(entityId),
     });
   }
@@ -406,18 +406,17 @@ export class CharacterRuntime {
       !binding ||
       binding.kind !== kind ||
       binding.revision !== target.revision ||
-      !this.isVisible(record, binding.targetId)
+      !this.isVisible(record, kind, binding.targetId)
     )
       throw new CharacterControlFailure('CHARACTER_TARGET_UNAVAILABLE', 'Character target is unavailable.');
     return binding.targetId;
   }
 
-  private isVisible(record: CharacterRecord, targetId: string): boolean {
+  private isVisible(record: CharacterRecord, kind: TargetBinding['kind'], targetId: string): boolean {
     const observed = this.options.observe(record.entityId);
-    return (
-      observed.visibleEntities.some((entry) => entry.entityId === targetId) ||
-      observed.pois.some((entry) => entry.poiId === targetId)
-    );
+    return kind === 'entity'
+      ? observed.visibleEntities.some((entry) => entry.entityId === targetId)
+      : observed.pois.some((entry) => entry.poiId === targetId);
   }
 
   private protectedTargets(record: CharacterRecord, perception = this.options.observe(record.entityId)) {

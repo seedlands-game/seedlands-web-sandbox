@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "id": "living-npc-round10-observation-triage",
+  "role": "independent world code reviewer",
+  "workType": "validation",
+  "goal": "Independently triage review5155644015 comment3969526942 at frozen b99b4b8: same character revision/cursor body/visible projection changes while Flash thinks can still emit old plan. Read runtime/cognition tools/core applyIntent and goal execution, current docs/spec. Assess concrete violated contract versus intended asynchronous semantic goal: move-to absolute coordinate is not follow, speech has no target recipient, follow resolves live visibility/current body at Authority, physical path checked on execution. Blanket 500ms projection sequence invalidation risks never completing a slow model while moving. Do not accept or dismiss by agreement: report evidence, concrete failing effect and minimal needed fix if valid, otherwise explain why P1 not established and regression boundaries. Root independently investigating, world agent fixes separate namespace collision. No repo writes/tests/browser/provider/Git/comments; only /tmp/living-npc-round10-observation-triage.md. .2h originalpool.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-round10-observation-triage.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-terra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "recheck",
+      "check": "Frozen delta fully reviewed; P1 resolution and any residual concrete bugs reported",
+      "evidence": "recheck report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 0.2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}
