@@ -68,7 +68,8 @@ describe('shared world harness', () => {
     ];
     for (const result of await Promise.all(invalidCalls))
       expect(result).toMatchObject({ ok: false, error: { kind: 'validation' } });
-  });
+    await session.dispose();
+  }, 20_000);
 
   it('rejects malformed Logic mode and batches without mutating mode or consuming the candidate', async () => {
     const session = await HeadlessSession.create({
