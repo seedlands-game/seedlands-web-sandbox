@@ -323,12 +323,7 @@ export class CharacterRuntime {
     }
     const perception = this.options.observe(record.entityId);
     const observedCharacter = this.requireEntity(record.entityId);
-    const protectedTargets = new Set<string>();
-    for (const entry of perception.visibleEntities.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES))
-      if (this.options.entities.get(entry.entityId)) protectedTargets.add(`entity:${entry.entityId}`);
-    for (const entry of perception.pois.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_POIS))
-      if (this.options.poi(entry.poiId)) protectedTargets.add(`poi:${entry.poiId}`);
-    if (record.executionTargetId) protectedTargets.add(`entity:${record.executionTargetId}`);
+    const protectedTargets = this.protectedTargets(record, perception);
     const visibleEntities = perception.visibleEntities
       .slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES)
       .flatMap((entry) => {
@@ -396,17 +391,28 @@ export class CharacterRuntime {
     );
   }
 
+  private protectedTargets(record: CharacterRecord, perception = this.options.observe(record.entityId)) {
+    const protectedTargets = new Set<string>();
+    for (const entry of perception.visibleEntities.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES))
+      if (this.options.entities.get(entry.entityId)) protectedTargets.add(`entity:${entry.entityId}`);
+    for (const entry of perception.pois.slice(0, CHARACTER_OBSERVATION_MAX_VISIBLE_POIS))
+      if (this.options.poi(entry.poiId)) protectedTargets.add(`poi:${entry.poiId}`);
+    if (record.executionTargetId) protectedTargets.add(`entity:${record.executionTargetId}`);
+    return protectedTargets;
+  }
+
   private reference(
     record: CharacterRecord,
     kind: TargetBinding['kind'],
     targetId: string,
-    protectedTargets: ReadonlySet<string> = new Set(),
+    protectedTargets?: ReadonlySet<string>,
   ): CharacterTargetRef {
     let binding = record.targets.find((candidate) => candidate.kind === kind && candidate.targetId === targetId);
     if (!binding) {
       if (record.targetSequence >= Number.MAX_SAFE_INTEGER)
         throw new TypeError('Character target sequence is exhausted.');
       if (record.targets.length >= CHARACTER_MAX_TARGETS) {
+        protectedTargets ??= this.protectedTargets(record);
         const evicted = record.targets.findIndex(
           (candidate) => !protectedTargets.has(`${candidate.kind}:${candidate.targetId}`),
         );
