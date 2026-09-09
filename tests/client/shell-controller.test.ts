@@ -3,7 +3,6 @@ import { ShellController, sanitizeQuality } from '../../apps/web/src/client/shel
 
 const port = () => ({
   start: vi.fn(async () => {}),
-  startRemote: vi.fn(async () => {}),
   leave: vi.fn(async () => {}),
   pause: vi.fn(),
   abortStart: vi.fn(),
@@ -97,26 +96,26 @@ describe('游戏外壳异步状态', () => {
     expect(shell.state).toMatchObject({ phase: 'menu', error: 'Authority启动失联' });
   });
 
-  it('断线会使迟到的保存失败失效，取消连接会终止实际启动', async () => {
+  it('运行故障会使迟到的保存失败失效，取消启动会终止实际启动', async () => {
     const game = port();
     const shell = new ShellController(game);
-    await shell.connectRemote('ws://127.0.0.1:8787/seedlands', 'key', 'medium');
+    await shell.start('oak', 'medium');
     shell.pause();
     let reject!: (error: Error) => void;
     game.leave.mockImplementationOnce(() => new Promise<void>((_resolve, fail) => (reject = fail)));
     const leaving = shell.leave();
-    shell.fail(new Error('Node 已断开'));
+    shell.fail(new Error('Authority 已断开'));
     reject(new Error('旧保存失败'));
     await leaving;
-    expect(shell.state).toMatchObject({ phase: 'menu', error: 'Node 已断开' });
+    expect(shell.state).toMatchObject({ phase: 'menu', error: 'Authority 已断开' });
 
     let resolve!: () => void;
-    game.startRemote.mockImplementationOnce(() => new Promise<void>((done) => (resolve = done)));
-    const connecting = shell.connectRemote('ws://127.0.0.1:8787/seedlands', 'key', 'medium');
+    game.start.mockImplementationOnce(() => new Promise<void>((done) => (resolve = done)));
+    const starting = shell.start('new-oak', 'medium');
     shell.cancelStart();
     expect(game.abortStart).toHaveBeenCalledOnce();
     resolve();
-    await connecting;
+    await starting;
     expect(shell.state.phase).toBe('menu');
   });
 });

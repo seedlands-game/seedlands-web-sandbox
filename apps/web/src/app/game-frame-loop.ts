@@ -2,7 +2,6 @@ import type * as pc from 'playcanvas';
 import type { PerformanceProfile } from '../client/presentation/performance-profile';
 import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
 import type { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
-import type { RemoteAuthorityClient } from '../client/authority/remote-authority-client';
 import type { WorldAudio } from './audio/world-audio';
 import type { BrowserGameplay } from './gameplay/browser-gameplay';
 import type { WaterExperience } from './gameplay/water-experience';
@@ -17,7 +16,7 @@ import type { World } from './world/world-runtime';
 
 type GameFrameBindings = Readonly<{
   app: () => pc.Application | null;
-  authority: () => BrowserAuthorityClient | RemoteAuthorityClient | null;
+  authority: () => BrowserAuthorityClient | null;
   camera: () => pc.Entity | null;
   collisionDebug: () => CollisionDebugRuntime | null;
   controller: () => PlayerController | null;

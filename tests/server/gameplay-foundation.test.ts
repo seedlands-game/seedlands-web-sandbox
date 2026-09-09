@@ -140,6 +140,25 @@ describe('gameplay foundation item contract', () => {
 });
 
 describe('authoritative melee runtime', () => {
+  it('retains hit results after a coalesced advance has left the visible phase', () => {
+    const { runtime } = openWorld();
+    runtime.giveItem('player', { itemId: ItemIds.WoodSword, count: 1 });
+    runtime.attackEntity('player', 'target');
+    runtime.advanceRules(0.3);
+    const first = runtime.getPlayerState('player').combat;
+    expect(first?.active?.phase).toBe('recovery');
+    expect(first?.lastResult).toMatchObject({ comboStep: 0, outcome: 'hit', damage: 5 });
+    expect(runtime.getEntity('target')).toMatchObject({ health: 15 });
+
+    expect(runtime.attackEntity('player', 'target')).toMatchObject({ success: true, buffered: true });
+    runtime.advanceRules(1);
+    const second = runtime.getPlayerState('player').combat;
+    expect(second?.active).toBeNull();
+    expect(second?.lastResult).toMatchObject({ comboStep: 1, outcome: 'hit', damage: 7 });
+    expect(second!.lastResult!.sequence).toBeGreaterThan(first!.lastResult!.sequence);
+    expect(runtime.getEntity('target')).toMatchObject({ health: 8 });
+  });
+
   it('runs wood sword windup, one hit and a buffered second combo step', () => {
     const { runtime } = openWorld();
     runtime.giveItem('player', { itemId: ItemIds.WoodSword, count: 1 });

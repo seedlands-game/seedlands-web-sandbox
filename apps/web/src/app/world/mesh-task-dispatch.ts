@@ -31,38 +31,16 @@ export type WorkerOverlay = Readonly<{
   fluid?: Uint8Array;
 }>;
 
-export type AuthorityCompleteWorkerOverlay = Readonly<{
-  cx: number;
-  cy: number;
-  cz: number;
-  voxels: Uint16Array;
-  fluid: Uint8Array;
-}>;
-
 type WorkerPreparationDiagnostics = AuthorityMeshPayload['preparationDiagnostics'];
 
-export type AuthorityCompleteWorkerInput = Readonly<{
-  inputStrategy: 'authority-complete';
+export type WorkerInput = Readonly<{
   chunkRevision: number;
   generatorVersion: number;
-  haloRevision: string;
-  canonical: Uint16Array;
-  fluid: Uint8Array;
-  overlays: readonly AuthorityCompleteWorkerOverlay[];
+  canonical?: Uint16Array;
+  fluid?: Uint8Array;
+  overlays: readonly WorkerOverlay[];
   preparationDiagnostics?: WorkerPreparationDiagnostics;
 }>;
-
-export type WorkerInput =
-  | Readonly<{
-      inputStrategy?: undefined;
-      chunkRevision: number;
-      generatorVersion: number;
-      canonical?: Uint16Array;
-      fluid?: Uint8Array;
-      overlays: readonly WorkerOverlay[];
-      preparationDiagnostics?: WorkerPreparationDiagnostics;
-    }>
-  | AuthorityCompleteWorkerInput;
 
 export type MeshTaskDispatch = Readonly<{
   task: PendingMeshTask;
@@ -139,16 +117,12 @@ export function createWorkerFirstDispatch(
   seed: number,
   prepared: WorkerInput,
 ): MeshTaskDispatch {
-  const strategy = (prepared as Readonly<{ inputStrategy?: unknown }>).inputStrategy;
-  if (strategy !== undefined && strategy !== 'authority-complete')
-    throw new TypeError('Unknown worker mesh input strategy.');
-  const authorityComplete = prepared.inputStrategy === 'authority-complete';
   const task: PendingMeshTask = {
     taskId: sequence,
     epoch: request.epoch,
     chunkKey: request.chunkKey,
     chunkRevision: prepared.chunkRevision,
-    haloRevision: authorityComplete ? prepared.haloRevision : `worker-input-${sequence}`,
+    haloRevision: `worker-input-${sequence}`,
     traceId: request.traceId,
     seed,
     cx: request.cx,
@@ -181,7 +155,6 @@ export function createWorkerFirstDispatch(
       chunkRevision: task.chunkRevision,
       haloRevision: task.haloRevision,
       generatorVersion: task.generatorVersion,
-      ...(authorityComplete ? { inputStrategy: 'authority-complete' as const } : {}),
       ...(prepared.canonical ? { canonical: prepared.canonical.buffer } : {}),
       ...(prepared.fluid ? { fluid: prepared.fluid.buffer } : {}),
       overlays: prepared.overlays.map((overlay) => ({

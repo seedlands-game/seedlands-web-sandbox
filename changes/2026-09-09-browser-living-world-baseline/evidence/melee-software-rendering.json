@@ -1,0 +1,96 @@
+{
+  "baseHead": "d33da14ce2a6c4f4774137e59b1e0deec645546c",
+  "environment": {
+    "fullChromium": true,
+    "swiftShader": true,
+    "quality": "low",
+    "retries": 0
+  },
+  "baselineTestSha256": "902e95996eba61a2bd93ee9bce11729432df98811e8c2cd8c58eae3fa9b6b8ff",
+  "evidenceScope": "Functional diagnostic feedback extracted from original logs; not performance measurement or proof of exact CI retry state. All runs include uncommitted test diagnostics; variants are stated separately.",
+  "runs": [
+    {
+      "variant": "baseline plus failure diagnostics",
+      "sourceLog": "/tmp/seedlands-pr24-swiftshader.log",
+      "logSha256": "d8a7560648eb5f7094f4e9bb13fdbad1f5352ac395131c16a561e6df9602a8fc",
+      "failureFeedback": [
+        {
+          "combat": "攻击就绪   左键攻击",
+          "feedback": "",
+          "damage": "<div id=\"player-damage-feedback\" role=\"status\" aria-label=\"玩家受击反馈\" class=\"s-6t1u3tP6Cy3k\">受击</div>",
+          "history": [
+            "ready 攻击就绪   左键攻击 体验场已布置：准星已对准中央训练目标，按住左键观察两段反向挥砍。",
+            "windup 蓄力 0.5s  等待衔接窗口 体验场已布置：准星已对准中央训练目标，按住左键观察两段反向挥砍。",
+            "windup 蓄力 0.4s  等待衔接窗口 体验场已布置：准星已对准中央训练目标，按住左键观察两段反向挥砍。",
+            "windup 蓄力 0.4s  等待衔接窗口 等待衔接窗口",
+            "hit 挥击 0.3s  现在按左键衔接 命中 · 5 点伤害",
+            "recovery 收招 0.2s  现在按左键衔接 命中 · 5 点伤害",
+            "recovery 收招 0.1s  现在按左键衔接 命中 · 5 点伤害",
+            "windup 蓄力 0.5s  等待衔接窗口 命中 · 5 点伤害",
+            "windup 蓄力 0.4s  等待衔接窗口 命中 · 5 点伤害",
+            "hit 挥击 0.3s  现在按左键衔接 命中 · 5 点伤害",
+            "recovery 收招 0.8s  已衔接下一击 命中 · 5 点伤害",
+            "recovery 收招 0.8s  已衔接下一击 已衔接下一击",
+            "recovery 收招 0.7s  已衔接下一击 已衔接下一击",
+            "windup 蓄力 · 第 2 击 0.6s  等待攻击就绪 已衔接下一击",
+            "windup 蓄力 · 第 2 击 0.5s  等待攻击就绪 已衔接下一击",
+            "hit 挥击 · 第 2 击 0.5s  等待攻击就绪 命中 · 2 点伤害",
+            "hit 挥击 · 第 2 击 0.4s  等待攻击就绪 命中 · 2 点伤害",
+            "recovery 收招 · 第 2 击 0.4s  等待攻击就绪 命中 · 2 点伤害",
+            "recovery 收招 · 第 2 击 0.3s  等待攻击就绪 命中 · 2 点伤害",
+            "recovery 收招 · 第 2 击 0.2s  等待攻击就绪 命中 · 2 点伤害",
+            "recovery 收招 · 第 2 击 0.1s  等待攻击就绪 命中 · 2 点伤害",
+            "ready 攻击就绪   左键攻击 命中 · 2 点伤害",
+            "ready 攻击就绪   左键攻击 "
+          ]
+        }
+      ],
+      "resultSummary": ["1 failed"]
+    },
+    {
+      "variant": "remove only mid-combo screenshot",
+      "sourceLog": "/tmp/seedlands-pr24-screenshot-ab.log",
+      "logSha256": "0e16b306e54ae0d8a984d0de5358d353ec15d07b02301bca02090b982926d819",
+      "failureFeedback": [
+        {
+          "combat": "攻击就绪   左键攻击",
+          "feedback": "",
+          "damage": "<div id=\"player-damage-feedback\" role=\"status\" aria-label=\"玩家受击反馈\" class=\"s-6t1u3tP6Cy3k\">受击</div>",
+          "history": [
+            "windup 蓄力 0.5s  等待衔接窗口 体验场已布置：准星已对准中央训练目标，按住左键观察两段反向挥砍。",
+            "windup 蓄力 0.4s  等待衔接窗口 体验场已布置：准星已对准中央训练目标，按住左键观察两段反向挥砍。",
+            "windup 蓄力 0.4s  等待衔接窗口 等待衔接窗口",
+            "hit 挥击 0.3s  现在按左键衔接 命中 · 5 点伤害",
+            "recovery 收招 0.2s  现在按左键衔接 命中 · 5 点伤害",
+            "recovery 收招 0.1s  现在按左键衔接 命中 · 5 点伤害",
+            "ready 攻击就绪   左键攻击 命中 · 5 点伤害",
+            "windup 蓄力 0.5s  等待衔接窗口 命中 · 5 点伤害",
+            "windup 蓄力 0.4s  等待衔接窗口 命中 · 5 点伤害",
+            "hit 挥击 0.3s  现在按左键衔接 命中 · 5 点伤害",
+            "recovery 收招 0.8s  已衔接下一击 命中 · 5 点伤害",
+            "recovery 收招 0.8s  已衔接下一击 已衔接下一击",
+            "recovery 收招 0.7s  已衔接下一击 已衔接下一击",
+            "windup 蓄力 · 第 2 击 0.6s  等待攻击就绪 已衔接下一击",
+            "windup 蓄力 · 第 2 击 0.5s  等待攻击就绪 已衔接下一击",
+            "hit 挥击 · 第 2 击 0.5s  等待攻击就绪 命中 · 2 点伤害",
+            "hit 挥击 · 第 2 击 0.4s  等待攻击就绪 命中 · 2 点伤害",
+            "recovery 收招 · 第 2 击 0.4s  等待攻击就绪 命中 · 2 点伤害",
+            "recovery 收招 · 第 2 击 0.3s  等待攻击就绪 命中 · 2 点伤害",
+            "recovery 收招 · 第 2 击 0.2s  等待攻击就绪 命中 · 2 点伤害",
+            "recovery 收招 · 第 2 击 0.1s  等待攻击就绪 命中 · 2 点伤害",
+            "ready 攻击就绪   左键攻击 命中 · 2 点伤害",
+            "ready 攻击就绪   左键攻击 "
+          ]
+        }
+      ],
+      "resultSummary": ["1 failed", "1 passed (30.7s)"]
+    },
+    {
+      "variant": "retain screenshots and require settled scene",
+      "sourceLog": "/tmp/seedlands-pr24-ready-ab.log",
+      "logSha256": "864df9ac7dd6a8164784de2800af43547029c2ee0b7af90066d9ca2c740fc526",
+      "failureFeedback": [],
+      "resultSummary": ["2 passed (25.8s)"]
+    }
+  ]
+}

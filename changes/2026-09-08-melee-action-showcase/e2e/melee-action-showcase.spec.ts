@@ -1,11 +1,18 @@
-import { expect, test } from '@playwright/test';
-import { selectJourneyQuality } from '../../2026-09-08-web-node-playable/e2e/journey-quality';
+import { expect, test, type Page } from '@playwright/test';
 import { lockPointer } from '../../../tests/e2e/support/harness';
 import {
   MELEE_SHOWCASE_DUMMY_IDS,
   MELEE_SHOWCASE_HOSTILE_ID,
   MELEE_SHOWCASE_SEED,
 } from '../../../apps/web/src/app/gameplay/melee-action-showcase';
+
+const browserQuality = process.env.SEEDLANDS_BROWSER_E2E_QUALITY ?? 'medium';
+if (!['low', 'medium', 'high'].includes(browserQuality)) throw new Error('Unknown browser E2E quality.');
+
+async function selectJourneyQuality(page: Page): Promise<void> {
+  await page.selectOption('#quality', browserQuality);
+  await expect(page.locator('#quality')).toHaveValue(browserQuality);
+}
 
 test('开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈', async ({ page }, info) => {
   test.setTimeout(90_000);
