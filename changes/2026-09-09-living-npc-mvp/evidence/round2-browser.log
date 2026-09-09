@@ -1,0 +1,10 @@
+
+Running 2 tests using 1 worker
+
+(node:13098) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+[1/2] [chromium] › changes/2026-09-09-living-npc-mvp/e2e/controller-connection.spec.ts:8:1 › 浏览器双向控制经过 Authority 回执，第二轮交谈继续触发，断连保持角色
+[2/2] [chromium] › changes/2026-09-09-living-npc-mvp/e2e/living-companion.spec.ts:5:1 › 玩家可邀请持久伙伴，真实拾取食用，并以完整 checkpoint 继续
+  2 passed (12.3s)

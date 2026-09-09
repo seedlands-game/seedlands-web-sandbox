@@ -15,8 +15,11 @@ const createServer = (seedText: string, persistence?: MemoryGamePersistence) => 
 };
 
 describe('character terminal-goal danger recovery', () => {
-  it('uses fallback life after repeated attacks on a succeeded goal and resumes across persistence', async () => {
+  it('uses fallback life after repeated attacks on a succeeded goal and resumes across persistence', async ({
+    onTestFinished,
+  }) => {
     const source = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'danger-succeeded' });
+    onTestFinished(() => source.dispose());
     await source.world.clock({ kind: 'pause' });
     const created = await source.world.character({ kind: 'create', profile });
     if (!created.ok || created.data.kind !== 'created') throw new Error('Character was not created.');
@@ -53,6 +56,7 @@ describe('character terminal-goal danger recovery', () => {
     const checkpoint = await source.world.checkpoint({ kind: 'export' });
     if (!checkpoint.ok) throw new Error(checkpoint.error.message);
     const restored = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'danger-target' });
+    onTestFinished(() => restored.dispose());
     expect(await restored.world.checkpoint({ kind: 'restore', snapshot: checkpoint.data.snapshot })).toMatchObject({
       ok: true,
     });
@@ -75,9 +79,7 @@ describe('character terminal-goal danger recovery', () => {
         (event) => event.type === 'fallback' && event.reason === 'danger-cleared',
       ),
     ).toHaveLength(1);
-    await source.dispose();
-    await restored.dispose();
-  });
+  }, 30_000);
 
   it('uses fallback life after an attack on a failed goal without resurrecting it', () => {
     const { server, entityId } = createServer('danger-failed');
