@@ -124,6 +124,7 @@ describe('actor and world system execution are disjoint', () => {
       inventory: port,
       mode: port,
       ruleset: port,
+      needs: port,
     });
     const source = { kind: 'system' as const, moduleId: 'test:clock', principalId: 'scheduler', systemId: 'test:tick' };
     const binding = manager.bindSystem(world.authorizer, source);

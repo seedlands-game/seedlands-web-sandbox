@@ -3,6 +3,8 @@ import {
   defineContentModule,
   defineInventoryModule,
   defineModeModule,
+  defineNeedsModule,
+  defineNeedsRulesModule,
   defineRulesetModule,
 } from '@seedlands/game-core/mod-api';
 import { overworldItems } from './items';
@@ -32,5 +34,19 @@ export const pack = definePack({
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule(),
     defineModeModule(),
+    defineNeedsModule(),
+    defineNeedsRulesModule({
+      moduleId: 'seedlands:overworld-needs-rules',
+      profiles: {
+        satiety: {
+          enabledModes: ['survival'],
+          hungerEverySeconds: 120,
+          hungerDelta: -1,
+          heal: { threshold: 16, everySeconds: 10, amount: 1, hungerCost: 1 },
+          starvation: { threshold: 0, everySeconds: 15, damage: 1 },
+        },
+        deficit: { enabledModes: ['survival'], hungerEverySeconds: 5, hungerDelta: 1 },
+      },
+    }),
   ],
 });

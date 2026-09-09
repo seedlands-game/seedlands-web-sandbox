@@ -10,6 +10,7 @@ import type {
 import type { WorldResourceAuthorizer } from '../../harness/world-authorization';
 import type { CoreClone } from '../../../runtime/platform-ports';
 import type { EntityStore } from '../entity-store';
+import { NEEDS_COMPONENT } from './needs-model';
 import { MODE_COMPONENT } from './mode-module';
 import { RULESET_COMPONENT } from './ruleset-module';
 
@@ -37,6 +38,7 @@ export class GameplayModuleRuntime {
       inventory: RegisteredStatePort;
       mode: RegisteredStatePort;
       ruleset: RegisteredStatePort;
+      needs: RegisteredStatePort;
     }>,
   ) {}
 
@@ -62,6 +64,7 @@ export class GameplayModuleRuntime {
     if (!composition) throw new Error('Registered operations require a composed world.');
     const participant = (component: string) => {
       if (component === 'seedlands:inventory') return this.options.inventory;
+      if (component === NEEDS_COMPONENT) return this.options.needs;
       if (component === MODE_COMPONENT) return this.options.mode;
       if (component === RULESET_COMPONENT) return this.options.ruleset;
       throw new TypeError(`No state owner for ${component}.`);

@@ -51,7 +51,11 @@ const normalizeAddress = (address: ModStateAddress): ModStateAddress => {
           : target.kind === 'world'
             ? Object.freeze({ kind: 'world' })
             : reject('STATE_TARGET_INVALID', 'Unknown state target.');
-  return Object.freeze({ componentId: address.componentId, target: normalized });
+  return Object.freeze({
+    componentId: address.componentId,
+    target: normalized,
+    ...(address.partition === undefined ? {} : { partition: address.partition }),
+  });
 };
 
 export function createRegisteredOperationRuntime(options: RegisteredOperationRuntimeOptions) {
@@ -170,6 +174,15 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
               const address = normalizeAddress(sourceAddress);
               const definition = states.get(address.componentId)?.definition;
               if (!definition) return reject('STATE_UNKNOWN', 'The component codec is not registered.');
+              if (
+                definition.partitions === undefined
+                  ? address.partition !== undefined
+                  : address.target.kind !== 'world' ||
+                    !Number.isSafeInteger(address.partition) ||
+                    address.partition! < 0 ||
+                    address.partition! >= definition.partitions
+              )
+                return reject('STATE_PARTITION_INVALID', 'State partition address is invalid.');
               permit(activeBinding, definition.resource, operation, address.target);
               const key = JSON.stringify(address);
               let current = observed.get(key);
@@ -194,6 +207,9 @@ export function createRegisteredOperationRuntime(options: RegisteredOperationRun
                 const { key, current } = access(address, 'read');
                 const staged = writes.get(key);
                 return copy(staged ? staged.value : current.value);
+              },
+              readOriginal(address: ModStateAddress) {
+                return copy(access(address, 'read').current.value);
               },
               write(address: ModStateAddress, value: ModuleInvocationValue) {
                 const { key, current } = access(address, 'write');

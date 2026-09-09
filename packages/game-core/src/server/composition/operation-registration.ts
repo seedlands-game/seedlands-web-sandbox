@@ -29,6 +29,11 @@ export function createOperationRegistration(resources: ReadonlySet<string>) {
           resource(definition.resource);
           if (!version.test(definition.version) || typeof definition.validate !== 'function')
             throw new TypeError('State codec is invalid.');
+          if (
+            definition.partitions !== undefined &&
+            (!Number.isSafeInteger(definition.partitions) || definition.partitions < 1 || definition.partitions > 128)
+          )
+            throw new TypeError('State partition capacity is invalid.');
           states.set(definition.id, Object.freeze({ moduleId, definition: Object.freeze({ ...definition }) }));
         },
         registerOperation(definition: ModOperationDefinition) {

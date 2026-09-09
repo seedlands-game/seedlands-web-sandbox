@@ -35,7 +35,12 @@ function setup(allow = true) {
     id: 'test:playbook',
     kind: 'playbook',
     version: '1.0.0',
-    modules: [...overworld.modules, module],
+    modules: [
+      ...overworld.modules.filter(
+        (entry) => !['seedlands:needs-module', 'seedlands:overworld-needs-rules'].includes(entry.descriptor.id),
+      ),
+      module,
+    ],
   });
   const composition = assembleWorldPacks(
     [

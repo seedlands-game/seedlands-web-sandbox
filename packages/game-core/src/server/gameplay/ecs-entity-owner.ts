@@ -23,6 +23,7 @@ import {
   installPreparedActorComponentSnapshot,
   prepareActorComponentSnapshot,
   readActorComponentSnapshot,
+  readActorNeeds,
   restoreActorComponentSnapshot,
   type PreparedActorComponentSnapshot,
 } from './ecs-actor-state';
@@ -242,6 +243,12 @@ export class EcsEntityOwner {
   playerStateAccess(id: string) {
     if (this.get(id)?.type !== 'player') throw new RangeError(`Unknown player: ${id}`);
     return createPlayerStateAccess(this.actors, this.actorBindings(id));
+  }
+
+  actorNeedsSnapshot(id: string) {
+    const eid = this.require(id);
+    if (this.project(eid).type === 'world-item') throw new TypeError('World items have no needs.');
+    return readActorNeeds(this.actors, eid);
   }
 
   actorComponentSnapshot(id: string): ActorComponentSnapshot {

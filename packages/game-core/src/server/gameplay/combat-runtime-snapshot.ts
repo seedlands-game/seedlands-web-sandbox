@@ -4,6 +4,13 @@ import {
   type EntityIdentityPort,
   type EntityLifetimeReference,
 } from '../simulation/action-identity';
+import { validateDurableExecutionOrigin, type DurableExecutionOriginV1 } from '../composition/execution-origin';
+import {
+  MAX_COMBAT_FRONTIER_ENTRIES,
+  MAX_COMBAT_PENDING_HITS,
+  validateCombatPendingHit,
+  type CombatPendingHit,
+} from './combat-pending-hit';
 import type {
   ActiveCombatSnapshot,
   CombatLifecycleEvent,
@@ -43,7 +50,30 @@ export type CombatRuntimeSnapshotV2 = Readonly<{
   }>[];
 }>;
 
-export type CombatRuntimeSnapshot = CombatRuntimeSnapshotV1 | CombatRuntimeSnapshotV2;
+export type OriginBoundActiveCombatSnapshot = BoundActiveCombatSnapshot &
+  Readonly<{
+    origin: DurableExecutionOriginV1;
+    bufferedOrigin: DurableExecutionOriginV1 | null;
+  }>;
+
+export type OriginBoundCombatSnapshot = Omit<BoundCombatSnapshot, 'active'> &
+  Readonly<{
+    active: OriginBoundActiveCombatSnapshot | null;
+    pendingHit: CombatPendingHit | null;
+  }>;
+
+export type CombatRuntimeSnapshotV3 = Readonly<{
+  version: 3;
+  actionSequence: number;
+  resultSequence: number;
+  combatants: readonly Readonly<{
+    actorId: string;
+    actorIdentity: EntityLifetimeReference | null;
+    combat: OriginBoundCombatSnapshot;
+  }>[];
+}>;
+
+export type CombatRuntimeSnapshot = CombatRuntimeSnapshotV1 | CombatRuntimeSnapshotV2 | CombatRuntimeSnapshotV3;
 
 export const emptyCombatRuntimeSnapshot = (): CombatRuntimeSnapshotV1 => ({
   version: 1,
@@ -89,9 +119,38 @@ type SnapshotCombatantState = Readonly<{
     targetIdentity: EntityLifetimeReference | null;
     bufferedTargetId: string | null;
     bufferedTargetIdentity: EntityLifetimeReference | null;
+    origin?: DurableExecutionOriginV1 | null;
+    bufferedOrigin?: DurableExecutionOriginV1 | null;
   }> | null;
   actorIdentity: EntityLifetimeReference | null;
+  pendingHit?: CombatPendingHit | null;
 }>;
+
+const encodeBoundCombatant = (
+  actorId: string,
+  state: SnapshotCombatantState,
+  project: (actorId: string) => CombatSnapshot,
+) => {
+  const combat = project(actorId);
+  const active = state.active;
+  if (active && !active.targetIdentity) throw new Error('Active combat target binding is missing.');
+  return {
+    actorId,
+    actorIdentity: state.actorIdentity ? { ...state.actorIdentity } : null,
+    combat: {
+      ...combat,
+      active:
+        active && combat.active
+          ? {
+              ...combat.active,
+              targetIdentity: { ...active.targetIdentity! },
+              bufferedTargetId: active.bufferedTargetId,
+              bufferedTargetIdentity: active.bufferedTargetIdentity ? { ...active.bufferedTargetIdentity } : null,
+            }
+          : null,
+    },
+  };
+};
 
 export function encodeBoundCombatSnapshot(
   actionSequence: number,
@@ -103,31 +162,149 @@ export function encodeBoundCombatSnapshot(
     version: 2,
     actionSequence,
     resultSequence,
-    combatants: [...combatants.entries()].map(([actorId, state]) => {
-      const combat = project(actorId);
-      const active = state.active;
-      if (active && !active.targetIdentity) throw new Error('Active combat target binding is missing.');
+    combatants: [...combatants.entries()].map(([actorId, state]) => encodeBoundCombatant(actorId, state, project)),
+  };
+}
+
+export function encodeOriginCombatSnapshot(
+  actionSequence: number,
+  resultSequence: number,
+  combatants: ReadonlyMap<string, SnapshotCombatantState>,
+  project: (actorId: string) => CombatSnapshot,
+): CombatRuntimeSnapshotV3 {
+  return {
+    version: 3,
+    actionSequence,
+    resultSequence,
+    combatants: [...combatants.entries()].map<CombatRuntimeSnapshotV3['combatants'][number]>(([actorId, state]) => {
+      const entry = encodeBoundCombatant(actorId, state, project);
+      if (!entry.combat.active) {
+        if (state.pendingHit) throw new Error('Terminal combat cannot retain a pending hit.');
+        return { ...entry, combat: { ...entry.combat, active: null, pendingHit: null } };
+      }
+      if (!state.active?.origin) throw new Error('Active combat durable origin is missing.');
+      const origin = validateDurableExecutionOrigin(state.active.origin);
+      const hasBuffered = entry.combat.active.bufferedTargetId !== null;
+      if (hasBuffered !== Boolean(state.active.bufferedOrigin))
+        throw new Error('Active combat buffered durable origin is missing or unexpected.');
       return {
-        actorId,
-        actorIdentity: state.actorIdentity ? { ...state.actorIdentity } : null,
+        ...entry,
         combat: {
-          ...combat,
-          active:
-            active && combat.active
-              ? {
-                  ...combat.active,
-                  targetIdentity: { ...active.targetIdentity! },
-                  bufferedTargetId: active.bufferedTargetId,
-                  bufferedTargetIdentity: active.bufferedTargetIdentity ? { ...active.bufferedTargetIdentity } : null,
-                }
+          ...entry.combat,
+          pendingHit: state.pendingHit ? validateCombatPendingHit(state.pendingHit) : null,
+          active: {
+            ...entry.combat.active,
+            origin,
+            bufferedOrigin: state.active.bufferedOrigin
+              ? validateDurableExecutionOrigin(state.active.bufferedOrigin)
               : null,
+          },
         },
       };
     }),
   };
 }
 
-export function decodeBoundCombatSnapshot(snapshot: CombatRuntimeSnapshotV2, options: DecodeOptions): DecodeResult {
+export function encodeCombatRuntimeSnapshot(
+  actionSequence: number,
+  resultSequence: number,
+  combatants: ReadonlyMap<string, SnapshotCombatantState>,
+  project: (actorId: string) => CombatSnapshot,
+  bound: boolean,
+  requireOrigin: boolean,
+): CombatRuntimeSnapshot {
+  if (requireOrigin || [...combatants.values()].some((state) => state.active?.origin))
+    return encodeOriginCombatSnapshot(actionSequence, resultSequence, combatants, project);
+  if (bound) return encodeBoundCombatSnapshot(actionSequence, resultSequence, combatants, project);
+  return {
+    version: 1,
+    actionSequence,
+    resultSequence,
+    combatants: [...combatants.keys()].map((actorId) => ({ actorId, combat: project(actorId) })),
+  };
+}
+
+const sameReference = (left: EntityLifetimeReference, right: EntityLifetimeReference): boolean =>
+  left.entityId === right.entityId && left.epoch === right.epoch && left.lifetime === right.lifetime;
+
+export function validatePendingCombatEntries(
+  snapshot: CombatRuntimeSnapshotV3,
+  definitionFor: (definitionId: string) => MeleeDefinition,
+): ReadonlyMap<string, CombatPendingHit> {
+  if (snapshot.combatants.length > MAX_COMBAT_FRONTIER_ENTRIES) throw new RangeError('Combat frontier limit exceeded.');
+  const origins = validateOriginCombatEntries(snapshot);
+  const pending = new Map<string, CombatPendingHit>();
+  for (const entry of snapshot.combatants) {
+    const descriptor = Object.getOwnPropertyDescriptor(entry.combat, 'pendingHit');
+    if (!descriptor?.enumerable || !('value' in descriptor))
+      throw new TypeError('Combat pending hit descriptor is invalid.');
+    if (descriptor.value === null) continue;
+    const value = validateCombatPendingHit(descriptor.value);
+    const active = entry.combat.active;
+    const origin = origins.get(entry.actorId)?.origin;
+    const definition = active ? definitionFor(active.definitionId) : null;
+    if (
+      !active ||
+      !entry.actorIdentity ||
+      active.phase !== 'windup' ||
+      active.phaseElapsedSeconds !== active.phaseDurationSeconds ||
+      value.actorId !== entry.actorId ||
+      value.actionId !== active.actionId ||
+      value.definitionId !== active.definitionId ||
+      value.targetId !== active.targetId ||
+      value.comboStep !== active.comboStep ||
+      value.baseDamage !== definition?.steps[active.comboStep]?.damage ||
+      !sameReference(value.actorIdentity, entry.actorIdentity) ||
+      !sameReference(value.targetIdentity, active.targetIdentity) ||
+      !origin ||
+      JSON.stringify(value.origin) !== JSON.stringify(origin) ||
+      (entry.combat.lastResult?.actionId === active.actionId && entry.combat.lastResult.comboStep === active.comboStep)
+    )
+      throw new TypeError('Combat pending hit does not match its active frontier.');
+    pending.set(entry.actorId, value);
+  }
+  if (pending.size > MAX_COMBAT_PENDING_HITS) throw new RangeError('Combat pending hit limit exceeded.');
+  return pending;
+}
+
+export function validateOriginCombatEntries(
+  snapshot: CombatRuntimeSnapshotV3,
+): ReadonlyMap<
+  string,
+  Readonly<{ origin: DurableExecutionOriginV1; bufferedOrigin: DurableExecutionOriginV1 | null }>
+> {
+  const origins = new Map<
+    string,
+    Readonly<{ origin: DurableExecutionOriginV1; bufferedOrigin: DurableExecutionOriginV1 | null }>
+  >();
+  for (const entry of snapshot.combatants) {
+    const active = entry?.combat?.active;
+    if (!active) continue;
+    const originDescriptor = Object.getOwnPropertyDescriptor(active, 'origin');
+    const bufferedOriginDescriptor = Object.getOwnPropertyDescriptor(active, 'bufferedOrigin');
+    if (
+      !originDescriptor?.enumerable ||
+      !('value' in originDescriptor) ||
+      !bufferedOriginDescriptor?.enumerable ||
+      !('value' in bufferedOriginDescriptor)
+    )
+      throw new TypeError('Active combat durable origin descriptors are invalid.');
+    const origin = validateDurableExecutionOrigin(originDescriptor.value);
+    const hasBuffered = typeof active.bufferedTargetId === 'string' && active.bufferedTargetId.trim().length > 0;
+    if (hasBuffered !== (bufferedOriginDescriptor.value !== null))
+      throw new TypeError('Active combat buffered durable origin is invalid.');
+    const bufferedOrigin = bufferedOriginDescriptor.value
+      ? validateDurableExecutionOrigin(bufferedOriginDescriptor.value)
+      : null;
+    origins.set(entry.actorId, Object.freeze({ origin, bufferedOrigin }));
+  }
+  return origins;
+}
+
+export function decodeBoundCombatSnapshot(
+  snapshot: CombatRuntimeSnapshotV2 | CombatRuntimeSnapshotV3,
+  options: DecodeOptions,
+): DecodeResult {
   const restored = new Map<string, RestoredCombatantState>();
   const events: CombatLifecycleEvent[] = [];
   let resultSequence = snapshot.resultSequence;
@@ -307,7 +484,7 @@ function validateBoundActive(active: BoundActiveCombatSnapshot, lastResult: Comb
 export function validateCombatAllocator(snapshot: CombatRuntimeSnapshot): void {
   if (
     !snapshot ||
-    (snapshot.version !== 1 && snapshot.version !== 2) ||
+    (snapshot.version !== 1 && snapshot.version !== 2 && snapshot.version !== 3) ||
     !Number.isSafeInteger(snapshot.actionSequence) ||
     snapshot.actionSequence < 0 ||
     !Number.isSafeInteger(snapshot.resultSequence) ||
@@ -315,6 +492,8 @@ export function validateCombatAllocator(snapshot: CombatRuntimeSnapshot): void {
     !Array.isArray(snapshot.combatants)
   )
     throw new TypeError('Combat snapshot header is invalid.');
+
+  if (snapshot.combatants.length > MAX_COMBAT_FRONTIER_ENTRIES) throw new RangeError('Combat frontier limit exceeded.');
 
   for (const entry of snapshot.combatants) {
     for (const id of [entry?.combat?.active?.actionId, entry?.combat?.lastResult?.actionId]) {

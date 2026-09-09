@@ -80,6 +80,8 @@ type GameplaySnapshotValidationOptions = {
   clone: CoreClone;
   items?: ItemDefinitionRegistry;
   meleeDefinitions?: readonly MeleeDefinition[];
+  registeredNeeds?: boolean;
+  needsPlayerLimit?: number;
 };
 
 const LEGACY_PLAYER_EYE_TO_FEET = 1.6;
@@ -241,6 +243,8 @@ export function validateGameplaySnapshot(
       });
     }
     if (entities.query({ type: 'player' }).length !== players.size) throw new TypeError('player state is missing');
+    if (options.needsPlayerLimit !== undefined && players.size > options.needsPlayerLimit)
+      throw new RangeError('Needs player membership budget exceeded.');
 
     const validator = new AutonomyRuntime({
       entities,
@@ -258,6 +262,16 @@ export function validateGameplaySnapshot(
       entities.exportComponentSnapshot(),
       validator.snapshot(),
     );
+    if (options.registeredNeeds && sourceVersion < 4) {
+      const phase =
+        Math.round((snapshot.simulation.needsAccumulator + snapshot.simulation.stepAccumulator) * 1e9) / 1e9;
+      if (!Number.isFinite(phase) || phase > Number.MAX_SAFE_INTEGER)
+        throw new TypeError('Legacy needs phase is invalid.');
+      const ids = new Set(snapshot.simulation.actors.map((actor) => actor.entityId));
+      for (const actor of snapshot.entityStore.actors)
+        if (ids.has(actor.entityId)) actor.needs.hungerAccumulator = phase;
+      snapshot.simulation.needsAccumulator = 0;
+    }
     return { snapshot, sourceVersion, legacyCombatLockouts };
   } finally {
     entities.dispose();

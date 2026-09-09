@@ -7,8 +7,9 @@ import type {
 } from './authorized-execution';
 import type { ModuleInvocationValue, WorldComposition } from './contracts';
 
-export type ModStateAddress = Readonly<{ componentId: string; target: WorldAuthorizationTarget }>;
+export type ModStateAddress = Readonly<{ componentId: string; target: WorldAuthorizationTarget; partition?: number }>;
 export type ModStateDefinition = Readonly<{
+  partitions?: number;
   id: string;
   version: string;
   resource: string;
@@ -16,6 +17,7 @@ export type ModStateDefinition = Readonly<{
 }>;
 export type ModCandidateState = Readonly<{
   read(address: ModStateAddress): ModuleInvocationValue;
+  readOriginal(address: ModStateAddress): ModuleInvocationValue;
   write(address: ModStateAddress, value: ModuleInvocationValue): void;
 }>;
 type OperationRun<Context extends ModuleExecutionContext> = (

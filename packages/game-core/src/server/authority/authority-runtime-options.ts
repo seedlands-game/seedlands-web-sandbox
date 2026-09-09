@@ -1,3 +1,4 @@
+import type { ModuleSystemAuthority } from '../gameplay/modules/gameplay-module-schedule';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { WorldComposition } from '../composition/contracts';
 import type { FluidAuthoritySnapshot } from '../fluid/fluid-transaction';
@@ -15,6 +16,7 @@ export type AuthorityRuntimeOptions = Readonly<{
   seedText: string;
   platform: CorePlatformPorts;
   composition?: WorldComposition;
+  moduleSystemAuthority?: ModuleSystemAuthority;
   allowLegacyCompositionMigration?: boolean;
   persistence?: AuthorityPersistence;
   generatorVersion?: number;

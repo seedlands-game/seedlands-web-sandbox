@@ -26,7 +26,13 @@ export function snapshotOperationIdentity(registrations: OperationRegistrations)
   return Object.freeze({
     stateCodecs: Object.freeze(
       registrations.states.map(({ moduleId, definition }) =>
-        Object.freeze({ id: definition.id, version: definition.version, resource: definition.resource, moduleId }),
+        Object.freeze({
+          id: definition.id,
+          version: definition.version,
+          resource: definition.resource,
+          moduleId,
+          ...(definition.partitions === undefined ? {} : { partitions: definition.partitions }),
+        }),
       ),
     ),
     operations: Object.freeze(

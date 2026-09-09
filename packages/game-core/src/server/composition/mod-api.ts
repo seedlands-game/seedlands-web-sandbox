@@ -41,3 +41,7 @@ export { defineModeModule } from '../gameplay/modules/mode-module';
 
 export { defineRulesetModule } from '../gameplay/modules/ruleset-module';
 export type { WorldRulesetDefinition, WorldRulesetV1 } from '../gameplay/modules/ruleset-module';
+
+export { defineNeedsModule } from '../gameplay/modules/needs-module';
+export { defineNeedsRulesModule } from '../gameplay/modules/needs-rules-module';
+export type { NeedsProfiles, NeedsProfile } from '../gameplay/modules/needs-model';

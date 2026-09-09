@@ -1,7 +1,11 @@
 /// <reference lib="webworker" />
 
 import { loadBrowserPackArtifacts } from './pack-loader';
-import { assembleOverworldPacks, type VerifiedPackArtifact } from '@seedlands/game-core/server/composition/host-api';
+import {
+  assembleOverworldPacks,
+  createGameplaySystemAuthority,
+  type VerifiedPackArtifact,
+} from '@seedlands/game-core/server/composition/host-api';
 
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import {
@@ -112,6 +116,11 @@ const requestBootstrap = (seed: number, generatorVersion: number) => {
   return promise;
 };
 
+const runtimeComposition = () => {
+  const composition = assembleOverworldPacks(packArtifacts);
+  return { composition, moduleSystemAuthority: createGameplaySystemAuthority(composition) };
+};
+
 const createRuntime = (
   seedText: string,
   generatorVersion: number,
@@ -121,7 +130,7 @@ const createRuntime = (
   candidateFluidEpoch = fluidEpoch,
 ) =>
   AuthorityRuntime.create({
-    composition: assembleOverworldPacks(packArtifacts),
+    ...runtimeComposition(),
     allowLegacyCompositionMigration: true,
     epoch: candidateEpoch,
     seedText,
@@ -193,7 +202,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     openMode: message.openMode,
   });
   runtime = await AuthorityRuntime.create({
-    composition: assembleOverworldPacks(packArtifacts),
+    ...runtimeComposition(),
     allowLegacyCompositionMigration: true,
     epoch,
     seedText: message.seedText,

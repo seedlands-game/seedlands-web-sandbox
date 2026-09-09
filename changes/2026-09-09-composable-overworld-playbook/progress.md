@@ -72,3 +72,20 @@
 - ECS participant child 已归还全部路径，当前无 child 写入。真实 drop/pickup 与放置/挖掘已采用 prepared ECS/World 参与者，定向故障与真实 GameServer 测试通过。正在冻结全量验收，见 [原子检查点](s3-atomic-checkpoint.md)。needs/Combat/致死原子结算与 S4–S6 仍未完成。
 
 - 原子参与者冻结验收：full static 1398 passed / 4 skipped、build、Browser 组合 4/4 与真实采集合成战斗保存旅程 2/2 分别通过；任务 4173 端口已释放。形成下一可运行检查点，S3 仍在实施。
+
+## 生命、动作与注册机制继续点
+
+- 原子检查点已提交 `24ac343`，提交后工作树曾确认干净。当前 root 负责 vitals/needs、Action settlement、Gameplay/Autonomy 与后续注册接线。
+- `s2_action_restore` 正在实施 Combat 当前/缓冲来源和 V3 codec，固定合同 `/tmp/seedlands-s3-handoff/combat-origin.json`，hash `a7aa39ed7895279e32aebcbe565fe7a9d5fdad1d74fd2affb68cfb928575238c`；只拥有 CombatRuntime、combat-runtime-snapshot、新 combat-origin 与自身测试/证据。`ecs_review` 正在只读复核真实 world-target 系统与有界 actor 候选调度接缝，无写权限。
+- root 的普通玩家致死/饥饿死亡已取得 3 个真实 RED 并修复，NPC 掉落耗尽删除实体的 RED 也已修复；相关 3 files / 21 tests GREEN，日志 `/tmp/seedlands-s3-npc-vitals-green.log`。Combat active phase、Action 终态事件的跨 owner 完整原子性仍未完成，不能把 ECS 的通过冒充该结论。
+- ActionRuntime 新 prepared settlements 最多 128 项，先完成所有结果 clone，再安装终态；普通 finish 复用。不可 clone 结果已复现先改状态的旧漏洞。定向测试不得在 child 半成品状态下解释为生产回归：一次 Combat `acceptOrigin` 尚未写完的并发采样失败保留 `/tmp/seedlands-s3-action-settlement-green.log`，待 child 交回后统一复验。
+
+### 注册 Needs 接线进行中
+
+独立机制复核已返回；采用 world system + 5 个各 128 actor 的状态分片，共用一次 ECS 分配预检和提交。已新增 Needs 模型、规则与 host owner 候选，正在接入实际 Gameplay/Autonomy，尚未取得该切片 GREEN。Combat 持久来源子任务已返回，实施者继续 Prepared Combat frontier；其 owned Combat 文件仍由该实施者独占。S3 Implementing，S4–S6 未准出。
+
+### Needs 注册消费者冻结准出
+
+Combat 当前/缓冲来源及 Prepared Combat 子任务均已归还路径；没有写入 child。默认 Needs 已由真实注册系统处理，Browser/Headless 使用显式 system policy；无 Needs 组合关闭隐式玩家/NPC 分支。旧 V3 NPC phase、跨片死亡/掉落失败与 Action 结算定向通过。full static 1433 passed / 4 skipped、build、Browser 组合 4/4 和真实玩法旅程 2/2 分别通过，4173 已释放，见 [Needs 检查点](s3-needs-checkpoint.md)。只读 reviewer 正在复核该冻结切片。下个切口是 prepared attack request（含 zero-windup）与真实 actor-origin / registered damage 消费，S3 仍 Implementing，S4–S6 未准出。
+
+- Needs 检查点最终修复与准出：独立审阅发现并关闭 513 retained actor 恢复 P1，根复核补齐 20Hz phase 精度；最终 full static 1435 passed /4 skipped、build、Browser 6/6 分别通过。独立 bounded pass、43/43 source SHA 匹配，当前无 reviewer 或写入 child 活跃；4173 已释放。准备语义提交后进入 prepared request + registered damage。

@@ -1,3 +1,4 @@
+import { createGameplaySystemAuthority } from '../composition/gameplay-system-authority';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { runWorldComputeTask } from '../../compute/world-compute-task';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
@@ -165,11 +166,13 @@ export class HeadlessSession {
     holder: { session?: HeadlessSession },
     frequencies: HeadlessFrequencies,
   ): Promise<AuthorityRuntime> {
+    const composition = options.createComposition?.();
     return AuthorityRuntime.create({
       epoch,
       seedText: options.seedText,
       platform: options.platform,
-      composition: options.createComposition?.(),
+      composition,
+      moduleSystemAuthority: composition ? createGameplaySystemAuthority(composition) : undefined,
       allowLegacyCompositionMigration: Boolean(options.createComposition),
       persistence,
       initialWorldTime: options.initialWorldTime ?? 9,

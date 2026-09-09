@@ -1,3 +1,5 @@
+import { NEEDS_COMPONENT } from './modules/needs-model';
+import { createNeedsStatePort } from './modules/needs-state-port';
 import { createGameplayModuleSchedule, type ModuleSystemAuthority } from './modules/gameplay-module-schedule';
 import { createWorldRulesetState } from './modules/world-ruleset-state';
 import { ActorVitalsRuntime } from './modules/actor-vitals-runtime';
@@ -11,7 +13,6 @@ import { ActorInventoryRuntime } from './modules/actor-inventory-runtime';
 import { createInventoryStatePort } from './modules/inventory-state-port';
 import { resolveGameplayComposition } from '../composition/gameplay-composition';
 import type { WorldComposition } from '../composition/contracts';
-import { advancePlayerNeeds } from './modules/needs-runtime';
 import { BlockInteractionRuntime } from './modules/block-interaction-runtime';
 import { Voxel, CHUNK_SIZE, chunkKey } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
@@ -26,7 +27,6 @@ import {
 } from './entity-store';
 import type { ItemStack } from './item-registry';
 import { PlayerState, type PlayerSnapshot } from './player-state';
-import type { ActorComponentAccess } from './ecs-actor-components';
 import { type GameplayContent } from './gameplay-content';
 import * as GameplaySnapshot from './gameplay-snapshot';
 import { advanceGameplayClock, assertGameplayAdvance } from './gameplay-clock';
@@ -77,10 +77,16 @@ export class GameplayRuntime {
   private readonly blocks;
   private readonly ruleset;
   private readonly schedule;
+  private readonly needsPlayerLimit;
 
   constructor(private readonly callbacks: GameplayCallbacks) {
     const resolved = resolveGameplayComposition(callbacks);
     this.content = resolved.content;
+    this.needsPlayerLimit = callbacks.composition?.registrations.states.some(
+      ({ definition }) => definition.id === NEEDS_COMPONENT,
+    )
+      ? 128
+      : undefined;
     this.ruleset = createWorldRulesetState(callbacks.composition);
     this.compositionGuard = resolved.guard;
     this.entities = new EntityStore(this.content.items);
@@ -91,7 +97,7 @@ export class GameplayRuntime {
       changed: () => this.touch(),
     });
     this.inventoryActions = new ActorInventoryRuntime({
-      actor: (id) => this.inventoryActor(id),
+      actor: (id) => this.entities.actorStateAccess(id),
       recipes: this.content.recipes,
       entities: this.entities,
       getVoxel: callbacks.getVoxel,
@@ -105,8 +111,12 @@ export class GameplayRuntime {
     });
     this.vitals = new ActorVitalsRuntime({
       player: (id) => this.player(id),
-      killPlayer: (player) => this.killPlayer(player),
-      touch: () => this.touch(),
+      assertCanChange: () => this.assertRevisionCapacity(),
+      assertCanCancelCombat: (id) => this.simulation.assertCanCancelCombat(id),
+      cancelCombat: (id) => {
+        this.simulation.cancelCombat(id, 'attacker-dead');
+      },
+      touch: (event) => this.touch(event),
       entities: this.entities,
     });
     this.modes = new ModeRuntime({
@@ -154,6 +164,14 @@ export class GameplayRuntime {
       clone: callbacks.platform.clone,
       inventory: this.inventoryState,
       ruleset: this.ruleset.port,
+      needs: createNeedsStatePort({
+        entities: this.entities,
+        actorIds: () => [...this.players.keys(), ...this.simulation.actorIds()],
+        revision: () => this.revision,
+        assertCanChange: () => this.assertRevisionCapacity(),
+        changed: () => this.touch(),
+        prepareDeaths: (ids) => this.simulation.prepareDeaths(ids),
+      }),
       mode: createModeStatePort(this.entities, this.modes, () => this.revision),
     });
     this.schedule = callbacks.composition
@@ -161,6 +179,7 @@ export class GameplayRuntime {
       : null;
     this.simulation = new AutonomyRuntime({
       entities: this.entities,
+      registeredNeeds: !!callbacks.composition,
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: callbacks.getWorldTime,
       isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
@@ -225,6 +244,8 @@ export class GameplayRuntime {
   }
 
   spawn(input: EntitySpawn): GameplayEntity {
+    if (input.type === 'player' && this.players.size >= (this.needsPlayerLimit ?? Infinity))
+      throw new RangeError('Needs player membership budget exceeded.');
     const entity = this.entities.spawn(input);
     if (entity.type === 'player')
       this.players.set(entity.id, new PlayerState(entity.id, clonePosition(entity.position), undefined, this.entities));
@@ -339,7 +360,7 @@ export class GameplayRuntime {
   }
 
   useSelectedItem(id: string): GameplayResult {
-    return this.useInventoryItem(id, this.inventoryActor(id).selectedSlot);
+    return this.useInventoryItem(id, this.entities.actorStateAccess(id).selectedSlot);
   }
 
   useInventoryItem(id: string, slot: number): GameplayResult {
@@ -388,9 +409,13 @@ export class GameplayRuntime {
     this.modules.flushQueued();
     const commits: WorldCommitResult[] = [];
     advanceGameplayClock(seconds, (step) => {
-      const elapsed = this.schedule ? this.schedule.advance(step) : step;
-      if (!this.schedule) this.time += elapsed;
-      this.players.forEach((player) => this.advancePlayer(player, elapsed, commits));
+      const canonical = this.schedule?.assertAdvance(step) ?? step;
+      if (this.schedule) this.players.forEach((player) => this.advancePlayer(player, canonical, commits));
+      const elapsed = this.schedule ? this.schedule.advance(canonical) : canonical;
+      if (!this.schedule) {
+        this.time += elapsed;
+        this.players.forEach((player) => this.advancePlayer(player, elapsed, commits));
+      }
       this.simulation.advanceAuthorityRules(elapsed);
     });
     if (seconds > 0) this.touch(false);
@@ -447,6 +472,8 @@ export class GameplayRuntime {
       items: this.content.items,
       meleeDefinitions: this.content.meleeDefinitions,
       entities: this.entities,
+      registeredNeeds: !!this.schedule,
+      needsPlayerLimit: this.needsPlayerLimit,
       simulation: this.simulation,
       players: this.players,
       installMetadata: (gameplayTime, revision) => {
@@ -467,19 +494,7 @@ export class GameplayRuntime {
   private advancePlayer(player: PlayerState, seconds: number, commits: WorldCommitResult[]): void {
     if (player.lifecycle !== 'alive') return;
     this.blocks.advanceBreak(player.entityId, seconds, commits);
-    if (player.mode === 'survival') advancePlayerNeeds(player, seconds, () => this.killPlayer(player));
-  }
-
-  private killPlayer(player: PlayerState): void {
-    player.lifecycle = 'dead';
-    player.breakAction = null;
-    this.simulation.cancelCombat(player.entityId, 'attacker-dead');
-    const position = this.entities.get(player.entityId)!.position;
-    player.inventory.clear().forEach((stack) => this.spawnWorldItem(clonePosition(position), stack));
-  }
-
-  private inventoryActor(id: string): ActorComponentAccess {
-    return this.entities.actorStateAccess(id);
+    if (!this.schedule) this.vitals.advanceNeeds(player.entityId, seconds);
   }
 
   private player(id: string): PlayerState {
@@ -494,11 +509,13 @@ export class GameplayRuntime {
       {
         entities: this.entities,
         playerState: (id) => this.players.get(id),
-        killPlayer: (player) => this.killPlayer(player),
+        damagePlayer: (actor, target, damage) => this.vitals.applyDamage(actor, target, damage, 'combat'),
         recordAttacked: (target, actor) => this.simulation.recordAttacked(target, actor),
         cancelTarget: (target, actor) => this.simulation.cancelCombatTarget(target, 'target-missing', actor),
         unregisterActor: (target) => this.simulation.unregisterActor(target, 'killed'),
-        spawnDrop: (position, stack) => void this.spawnWorldItem(position, stack),
+        actorDeathDrop: (id) => this.simulation.actorDeathDrop(id),
+        assertCanRemoveActor: (target, actor) => this.simulation.assertCanRemoveActor(target, actor),
+        assertCanChange: () => this.assertRevisionCapacity(),
         touch: () => this.touch(),
       },
       actorId,

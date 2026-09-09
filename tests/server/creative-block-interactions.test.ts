@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { assembleOverworldPacks } from '@seedlands/game-core/server/composition/host-api';
+import {
+  assembleOverworldPacks,
+  createGameplaySystemAuthority,
+} from '@seedlands/game-core/server/composition/host-api';
 import { pack } from '../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import { GameplayRuntime, type GameplayResult } from '../../packages/game-core/src/server/gameplay/gameplay-runtime';
 import type { PreparedWorldEdit } from '../../packages/game-core/src/server/prepared-world-edit';
@@ -88,6 +91,7 @@ const createRuntime = () => {
   const composition = assembleOverworldPacks([verifiedPack]);
   const gameplay = new GameplayRuntime({
     composition,
+    moduleSystemAuthority: createGameplaySystemAuthority(composition),
     platform: testCorePlatform,
     getWorldTime: () => 9,
     getVoxel: world.getVoxel,

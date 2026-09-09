@@ -1,6 +1,7 @@
+import { prepareEntityMutation } from './prepared-entity-mutation';
 import type { MeleeDefinition } from './combat-runtime';
 import type { EntityStore } from './entity-store';
-import { attackTargetPoint, clonePosition, distanceSquared } from './gameplay-geometry';
+import { attackTargetPoint, distanceSquared } from './gameplay-geometry';
 import type { ItemStack } from './item-registry';
 import type { PlayerState } from './player-state';
 import { traceVoxelRay } from './voxel-ray';
@@ -48,11 +49,13 @@ export function validateCombatHit(
 type CombatDamageContext = Readonly<{
   entities: EntityStore;
   playerState: (id: string) => PlayerState | undefined;
-  killPlayer: (player: PlayerState) => void;
+  damagePlayer: (actorId: string, targetId: string, damage: number) => unknown;
   recordAttacked: (targetId: string, actorId: string) => void;
   cancelTarget: (targetId: string, actorId: string) => void;
   unregisterActor: (targetId: string) => ItemStack | null;
-  spawnDrop: (position: [number, number, number], stack: ItemStack) => void;
+  actorDeathDrop: (id: string) => ItemStack | null;
+  assertCanRemoveActor: (targetId: string, actorId: string) => void;
+  assertCanChange: () => void;
   touch: () => void;
 }>;
 
@@ -68,20 +71,39 @@ export function applyCombatDamage(
     const player = context.playerState(targetId);
     if (!player || player.lifecycle !== 'alive') return null;
     const before = player.health;
-    player.health = Math.max(0, player.health - amount);
-    if (player.health === 0) context.killPlayer(player);
-    context.touch();
+    context.damagePlayer(actorId, targetId, amount);
     return before - player.health;
   }
   if ((target.type !== 'creature' && target.type !== 'npc') || target.health === undefined) return null;
   const health = Math.max(0, target.health - amount);
-  context.entities.updateWithoutSnapshot(targetId, { health });
-  context.recordAttacked(targetId, actorId);
+  context.assertCanChange();
   if (health === 0) {
+    context.assertCanRemoveActor(targetId, actorId);
+    const drop = context.actorDeathDrop(targetId);
+    const inventory = context.entities.actorComponentSnapshot(targetId).inventory;
+    const stacks = inventory.flatMap((stack) => (stack ? [stack] : []));
+    if (drop) stacks.push(drop);
+    const prepared = prepareEntityMutation(context.entities, {
+      despawns: [context.entities.createReference(targetId)!],
+      spawns: stacks.map((stack) => ({ position: target.position, stack })),
+    });
+    prepared.validate();
+    prepared.apply();
     context.cancelTarget(targetId, actorId);
-    const drop = context.unregisterActor(targetId);
-    context.entities.despawn(targetId);
-    if (drop) context.spawnDrop(clonePosition(target.position), drop);
+    context.unregisterActor(targetId);
+  } else {
+    const prepared = prepareEntityMutation(context.entities, {
+      actors: [
+        {
+          reference: context.entities.createReference(targetId)!,
+          health,
+          components: context.entities.actorComponentSnapshot(targetId),
+        },
+      ],
+    });
+    prepared.validate();
+    prepared.apply();
+    context.recordAttacked(targetId, actorId);
   }
   context.touch();
   return target.health - health;

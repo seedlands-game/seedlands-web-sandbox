@@ -113,3 +113,11 @@ S3 产品接线检查点提交后，按独立机制复核分配生命周期合�
 授权/规则/时钟切片已取得 full static/build 与 Browser 准出。ECS 候选安装、Combat 动作及掉落、方块/流体 sidecar 的失败前置仍需实际协调，不能把已通过的合同当作这些 owner 已完成。S3 活跃规划从正常 12 / 保守 24 上调至正常 18 / 保守 36 小时，等待仍 1 / 2；相对前版未扣实耗的剩余 S3–S6 口径，正常/保守总规划为 45 / 87 小时，保守 ×120% 向上取整为 105 小时。此为实施风险校准，不是已耗值或完成承诺，功能范围不变。
 
 此次 ECS prepared participant 分配最多 2 agent 小时，S3 累计 child 分配上限 24 小时；沿用已冻结 24 小时 delegation envelope，不改写早期 parent hash。未来若再分派应新建 envelope 并计入本次 36 小时规划。实际活跃工时、tokens/credits/API 等价费用与可比额度分母仍 unknown。
+
+S3 原子检查点后启用新的 36 小时 delegation envelope（不修改旧 parent hash），给 Combat 当前/缓冲持久来源分配最多 3 agent 小时，请求 Sol/high。S3 已列 child 上限累计 27 小时，计入同一 36 小时规划，非实际消耗。根任务负责 needs/vitals 原子结算、真实宿主授权与注册机制集成。
+
+注册机制 world-target/bounded actor 接缝再分配一次有界只读复核最多 1 agent 小时，请求 Sol/xhigh；累计已列 child 上限 28 小时，仍共享上述 36 小时 envelope，不是新增整体预算或实际消耗。
+
+Prepared Combat frontier 子切片分配最多 3 agent 小时，请求 Sol/high；累计 child 分配上限 31 小时，仍共享 36 小时 envelope。只读机制复核已返回，根任务继续实际 Needs/Combat 接线；实际消费仍 unknown。
+
+本切片准出前复用一次只读 Sol/xhigh reviewer，最多 1 agent 小时；S3 累计 child 分配上限 32 小时，共享 36 小时 envelope。审阅与静态/构建属于不同证据，真实消费继续 unknown。

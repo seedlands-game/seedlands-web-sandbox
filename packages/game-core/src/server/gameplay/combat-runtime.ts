@@ -7,24 +7,39 @@ import {
 export { createMeleeDefinitionRegistry } from './melee-definition-registry';
 export type { MeleeDefinition, MeleeStepDefinition, MeleeDefinitionRegistry } from './melee-definition-registry';
 import { overworldMeleeDefinitions as builtInDefinitions } from './playbooks/overworld/combat';
+import { entityReferenceExecutionFailure, type EntityIdentityPort } from '../simulation/action-identity';
 import {
-  entityReferenceExecutionFailure,
-  type EntityIdentityPort,
-  type EntityLifetimeReference,
-} from '../simulation/action-identity';
-import {
-  decodeBoundCombatSnapshot,
-  encodeBoundCombatSnapshot,
-  validateCombatSnapshot,
-  validateCombatAllocator,
+  encodeCombatRuntimeSnapshot,
   assertCombatResultCapacity,
   combatPendingResultBound,
   type CombatRuntimeSnapshot,
-  type CombatRuntimeSnapshotV2,
 } from './combat-runtime-snapshot';
+import type { DurableExecutionOriginV1 } from '../composition/execution-origin';
+import { acceptCombatOrigin, combatOriginHitFailure, type CombatOriginRuntimeOptions } from './combat-origin';
+import {
+  acknowledgeCombatLifecycleEvents,
+  capturePreparedCombatFrontier,
+  cloneCombatLifecycleEvents,
+  combatCanBuffer,
+  combatFrontierSignature,
+  combatPhaseDuration,
+  combatRemainingSeconds,
+  listCombatPendingHits,
+  prepareCombatMutation,
+  prepareCombatRuntimeRestore,
+  projectCombatActive,
+  type PreparedCombatantState,
+  type PreparedCombatFrontier,
+  type PreparedCombatMutation,
+  type PreparedCombatMutationInput,
+} from './prepared-combat-mutation';
+import type { CombatPendingHit } from './combat-pending-hit';
 
 export type * from './combat-runtime-snapshot';
 export { emptyCombatRuntimeSnapshot } from './combat-runtime-snapshot';
+export type * from './combat-origin';
+export type * from './combat-pending-hit';
+export type * from './prepared-combat-mutation';
 
 export type CombatPhase = 'windup' | 'hit' | 'recovery';
 export type CombatOutcome = 'hit' | 'miss' | 'cancelled';
@@ -69,24 +84,7 @@ export type CombatLifecycleEvent = Readonly<{
   result: CombatResultSnapshot | null;
 }>;
 
-type InternalActiveCombat = {
-  actionId: string;
-  definitionId: string;
-  targetId: string;
-  comboStep: number;
-  phase: CombatPhase;
-  phaseElapsedSeconds: number;
-  bufferedTargetId: string | null;
-  targetIdentity: EntityLifetimeReference | null;
-  bufferedTargetIdentity: EntityLifetimeReference | null;
-};
-
-type CombatantState = {
-  active: InternalActiveCombat | null;
-  lastResult: CombatResultSnapshot | null;
-  lockoutSeconds: number;
-  actorIdentity: EntityLifetimeReference | null;
-};
+type CombatantState = PreparedCombatantState;
 
 export type CombatRuntimeCallbacks = Readonly<{
   actorAvailable: (actorId: string) => boolean;
@@ -113,18 +111,32 @@ export class CombatRuntime {
   private readonly lifecycleEvents: CombatLifecycleEvent[] = [];
   private actionSequence = 0;
   private resultSequence = 0;
+  private readonly requireOrigin: boolean;
 
   constructor(
     private readonly callbacks: CombatRuntimeCallbacks,
     private readonly registry: MeleeDefinitionRegistry = defaultRegistry,
     private readonly identity?: EntityIdentityPort,
-  ) {}
+    private readonly originOptions: CombatOriginRuntimeOptions = {},
+  ) {
+    this.requireOrigin = originOptions.requireOrigin ?? false;
+    if (this.requireOrigin && !identity)
+      throw new TypeError('Combat requireOrigin mode requires an entity identity port.');
+    if (this.requireOrigin && !originOptions.validationPort)
+      throw new TypeError('Combat requireOrigin mode requires an origin validation port.');
+  }
 
   hasDefinition(id: string): boolean {
     return this.registry.get(id) !== undefined;
   }
 
-  request(actorId: string, targetId: string, definitionId: string, createActionId?: () => string): CombatRequestResult {
+  request(
+    actorId: string,
+    targetId: string,
+    definitionId: string,
+    createActionId?: () => string,
+    origin?: DurableExecutionOriginV1,
+  ): CombatRequestResult {
     if (!actorId.trim() || !targetId.trim()) return { success: false, reason: 'invalid-target' };
     const definition = this.registry.get(definitionId);
     if (!definition) return { success: false, reason: 'invalid-definition' };
@@ -142,20 +154,48 @@ export class CombatRuntime {
       if (existing.bufferedTargetId) return { success: false, reason: 'buffer-full' };
       if (existing.definitionId !== definitionId || existing.comboStep + 1 >= definition.steps.length)
         return { success: false, reason: 'cooldown' };
-      if (!this.canBuffer(existing, definition)) return { success: false, reason: 'combo-window-closed' };
+      if (!combatCanBuffer(existing, definition)) return { success: false, reason: 'combo-window-closed' };
+      const acceptedOrigin = acceptCombatOrigin(
+        origin,
+        actorIdentity,
+        this.requireOrigin,
+        this.originOptions.validationPort,
+        {
+          actorId,
+          targetId,
+          definitionId,
+          comboStep: existing.comboStep + 1,
+        },
+      );
+      if (acceptedOrigin.failure) return { success: false, reason: acceptedOrigin.failure };
       const validation = this.callbacks.validateHit(actorId, targetId, definition);
       if (validation) return { success: false, reason: validation };
       existing.bufferedTargetId = targetId;
       existing.bufferedTargetIdentity = targetIdentity ? { ...targetIdentity } : null;
+      existing.bufferedOrigin = acceptedOrigin.origin;
       return { success: true, actionId: existing.actionId, buffered: true };
     }
     if (currentState && currentState.lockoutSeconds > 0) return { success: false, reason: 'cooldown' };
+    const acceptedOrigin = acceptCombatOrigin(
+      origin,
+      actorIdentity,
+      this.requireOrigin,
+      this.originOptions.validationPort,
+      { actorId, targetId, definitionId, comboStep: 0 },
+    );
+    if (acceptedOrigin.failure) return { success: false, reason: acceptedOrigin.failure };
     const validation = this.callbacks.validateHit(actorId, targetId, definition);
     if (validation) return { success: false, reason: validation };
     if (!createActionId && this.actionSequence >= Number.MAX_SAFE_INTEGER)
       return { success: false, reason: 'action-sequence-exhausted' };
     const actionId = createActionId?.() ?? `combat-${++this.actionSequence}`;
-    const state = currentState ?? { active: null, lastResult: null, lockoutSeconds: 0, actorIdentity: null };
+    const state = currentState ?? {
+      active: null,
+      lastResult: null,
+      lockoutSeconds: 0,
+      actorIdentity: null,
+      pendingHit: null,
+    };
     state.actorIdentity = actorIdentity ? { ...actorIdentity } : null;
     state.active = {
       actionId,
@@ -167,6 +207,8 @@ export class CombatRuntime {
       bufferedTargetId: null,
       targetIdentity: targetIdentity ? { ...targetIdentity } : null,
       bufferedTargetIdentity: null,
+      origin: acceptedOrigin.origin,
+      bufferedOrigin: null,
     };
     this.combatants.set(actorId, state);
     if (definition.steps[0].windupSeconds === 0) this.enterHit(actorId, state, definition);
@@ -241,6 +283,7 @@ export class CombatRuntime {
       lastResult: null,
       lockoutSeconds: 0,
       actorIdentity: null,
+      pendingHit: null,
     };
     if (!state.active) state.lockoutSeconds = Math.max(state.lockoutSeconds, seconds);
     this.combatants.set(actorId, state);
@@ -257,61 +300,74 @@ export class CombatRuntime {
       };
     const definition = this.requireDefinition(active.definitionId);
     return {
-      active: this.projectActive(active, definition),
-      cooldownRemainingSeconds: this.remainingSeconds(active, definition),
+      active: projectCombatActive(active, definition),
+      cooldownRemainingSeconds: combatRemainingSeconds(active, definition),
       lastResult: cloneResult(state?.lastResult ?? null),
     };
   }
 
   snapshot(): CombatRuntimeSnapshot {
-    if (this.identity)
-      return encodeBoundCombatSnapshot(this.actionSequence, this.resultSequence, this.combatants, (actorId) =>
-        this.snapshotFor(actorId),
-      );
-    return {
-      version: 1,
-      actionSequence: this.actionSequence,
-      resultSequence: this.resultSequence,
-      combatants: [...this.combatants.entries()].map(([actorId]) => ({ actorId, combat: this.snapshotFor(actorId) })),
-    };
+    return encodeCombatRuntimeSnapshot(
+      this.actionSequence,
+      this.resultSequence,
+      this.combatants,
+      (actorId) => this.snapshotFor(actorId),
+      Boolean(this.identity),
+      this.requireOrigin,
+    );
   }
 
   restore(raw: unknown): void {
-    const snapshot = raw as CombatRuntimeSnapshot;
-    validateCombatAllocator(snapshot);
-    if (snapshot.version === 2) return this.restoreBoundSnapshot(snapshot);
-    const restored = new Map<string, CombatantState>();
-    for (const entry of snapshot.combatants) {
-      if (!entry?.actorId?.trim() || restored.has(entry.actorId))
-        throw new TypeError('Combat actor is invalid or duplicated.');
-      validateCombatSnapshot(entry.combat, snapshot.resultSequence, (id) => this.requireDefinition(id));
-      restored.set(entry.actorId, {
-        active: entry.combat.active
-          ? {
-              ...entry.combat.active,
-              bufferedTargetId: null,
-              targetIdentity: null,
-              bufferedTargetIdentity: null,
-            }
-          : null,
-        lastResult: cloneResult(entry.combat.lastResult),
-        // An active projection already includes any buffered next step in this value.
-        // Preserve that authority promise even though restore deliberately discards the queued target and cancels the action.
-        lockoutSeconds: entry.combat.cooldownRemainingSeconds,
-        actorIdentity: null,
-      });
-    }
-    assertCombatResultCapacity(snapshot.resultSequence, [...restored.values()].filter((state) => state.active).length);
+    const restored = prepareCombatRuntimeRestore(raw, {
+      identity: this.identity,
+      requireOrigin: this.requireOrigin,
+      origin: this.originOptions,
+      definitionFor: (id) => this.requireDefinition(id),
+    });
     this.combatants.clear();
-    restored.forEach((state, actorId) => this.combatants.set(actorId, state));
-    this.actionSequence = snapshot.actionSequence;
-    this.resultSequence = snapshot.resultSequence;
-    this.lifecycleEvents.length = 0;
-    for (const [actorId, state] of this.combatants) if (state.active) this.cancel(actorId, state, 'restore-cancelled');
+    restored.combatants.forEach((state, actorId) => this.combatants.set(actorId, state));
+    this.actionSequence = restored.actionSequence;
+    this.resultSequence = restored.resultSequence;
+    this.lifecycleEvents.splice(0, this.lifecycleEvents.length, ...restored.lifecycleEvents);
   }
 
   takeLifecycleEvents(): CombatLifecycleEvent[] {
     return this.lifecycleEvents.splice(0);
+  }
+
+  prepareMutation(input: PreparedCombatMutationInput): PreparedCombatMutation {
+    return prepareCombatMutation(
+      {
+        callbacks: this.callbacks,
+        identity: this.identity,
+        requireOrigin: this.requireOrigin,
+        validationPort: this.originOptions.validationPort,
+        capture: () =>
+          capturePreparedCombatFrontier(
+            this.combatants,
+            this.actionSequence,
+            this.resultSequence,
+            this.lifecycleEvents,
+          ),
+        signature: () =>
+          combatFrontierSignature(this.combatants, this.actionSequence, this.resultSequence, this.lifecycleEvents),
+        install: (frontier) => this.installPreparedFrontier(frontier),
+        definitionFor: (id) => this.requireDefinition(id),
+      },
+      input,
+    );
+  }
+
+  peekPendingHits(): readonly CombatPendingHit[] {
+    return listCombatPendingHits(this.combatants.values());
+  }
+
+  peekLifecycleEvents(): readonly CombatLifecycleEvent[] {
+    return Object.freeze(cloneCombatLifecycleEvents(this.lifecycleEvents).map((event) => Object.freeze(event)));
+  }
+
+  acknowledgeLifecycleEvents(count: number): void {
+    acknowledgeCombatLifecycleEvents(this.lifecycleEvents, count);
   }
 
   private advanceActor(actorId: string, seconds: number): void {
@@ -325,6 +381,7 @@ export class CombatRuntime {
         state.lockoutSeconds = round(state.lockoutSeconds - seconds);
         return;
       }
+      if (state.pendingHit) return;
       const actorIdentityFailure = entityReferenceExecutionFailure(
         this.identity,
         state.actorIdentity,
@@ -344,7 +401,7 @@ export class CombatRuntime {
         if (!this.callbacks.targetAvailable(active.targetId)) return this.cancel(actorId, state, 'target-missing');
       }
       const definition = this.requireDefinition(active.definitionId);
-      const duration = this.phaseDuration(active, definition);
+      const duration = combatPhaseDuration(active, definition);
       const untilTransition = round(duration - active.phaseElapsedSeconds);
       if (remaining + Number.EPSILON < untilTransition) {
         active.phaseElapsedSeconds = round(active.phaseElapsedSeconds + remaining);
@@ -360,11 +417,13 @@ export class CombatRuntime {
         active.comboStep += 1;
         active.targetId = active.bufferedTargetId;
         active.targetIdentity = active.bufferedTargetIdentity;
+        active.origin = active.bufferedOrigin;
         active.bufferedTargetId = null;
         active.bufferedTargetIdentity = null;
+        active.bufferedOrigin = null;
         active.phase = 'windup';
         active.phaseElapsedSeconds = 0;
-        if (this.phaseDuration(active, definition) === 0) this.enterHit(actorId, state, definition);
+        if (combatPhaseDuration(active, definition) === 0) this.enterHit(actorId, state, definition);
       } else {
         state.active = null;
         this.lifecycleEvents.push({
@@ -392,6 +451,19 @@ export class CombatRuntime {
       'target',
     );
     if (targetIdentityFailure) return this.cancel(actorId, state, targetIdentityFailure);
+    const originFailure = combatOriginHitFailure(
+      active.origin,
+      state.actorIdentity,
+      this.requireOrigin,
+      this.originOptions.validationPort,
+      {
+        actorId,
+        targetId: active.targetId,
+        definitionId: active.definitionId,
+        comboStep: active.comboStep,
+      },
+    );
+    if (originFailure) return this.cancel(actorId, state, originFailure);
     active.phase = 'hit';
     active.phaseElapsedSeconds = 0;
     const stepDefinition = definition.steps[active.comboStep];
@@ -415,7 +487,7 @@ export class CombatRuntime {
     assertCombatResultCapacity(this.resultSequence, 1);
     state.lockoutSeconds = Math.max(
       state.lockoutSeconds,
-      this.remainingSeconds(active, this.requireDefinition(active.definitionId)),
+      combatRemainingSeconds(active, this.requireDefinition(active.definitionId)),
     );
     state.lastResult = {
       sequence: ++this.resultSequence,
@@ -428,6 +500,7 @@ export class CombatRuntime {
       reason,
     };
     state.active = null;
+    state.pendingHit = null;
     this.lifecycleEvents.push({
       actorId,
       actionId: active.actionId,
@@ -440,56 +513,12 @@ export class CombatRuntime {
     return combatPendingResultBound(this.combatants.values(), (id) => this.requireDefinition(id));
   }
 
-  private projectActive(active: InternalActiveCombat, definition: MeleeDefinition): ActiveCombatSnapshot {
-    return {
-      actionId: active.actionId,
-      definitionId: active.definitionId,
-      targetId: active.targetId,
-      comboStep: active.comboStep,
-      comboLength: definition.steps.length,
-      phase: active.phase,
-      phaseElapsedSeconds: active.phaseElapsedSeconds,
-      phaseDurationSeconds: this.phaseDuration(active, definition),
-      canBuffer: this.canBuffer(active, definition),
-      buffered: active.bufferedTargetId !== null,
-    };
-  }
-
-  private phaseDuration(active: InternalActiveCombat, definition: MeleeDefinition): number {
-    const current = definition.steps[active.comboStep];
-    if (active.phase === 'windup') return current.windupSeconds;
-    if (active.phase === 'hit') return current.hitSeconds;
-    return current.recoverySeconds;
-  }
-
-  private canBuffer(active: InternalActiveCombat, definition: MeleeDefinition): boolean {
-    return active.comboStep + 1 < definition.steps.length && (active.phase === 'hit' || active.phase === 'recovery');
-  }
-
-  private remainingSeconds(active: InternalActiveCombat, definition: MeleeDefinition): number {
-    const current = definition.steps[active.comboStep];
-    const currentRemaining =
-      active.phase === 'windup'
-        ? current.windupSeconds - active.phaseElapsedSeconds + current.hitSeconds + current.recoverySeconds
-        : active.phase === 'hit'
-          ? current.hitSeconds - active.phaseElapsedSeconds + current.recoverySeconds
-          : current.recoverySeconds - active.phaseElapsedSeconds;
-    if (!active.bufferedTargetId) return round(currentRemaining);
-    const next = definition.steps[active.comboStep + 1];
-    return round(currentRemaining + next.windupSeconds + next.hitSeconds + next.recoverySeconds);
-  }
-
-  private restoreBoundSnapshot(snapshot: CombatRuntimeSnapshotV2): void {
-    if (!this.identity) throw new TypeError('Combat snapshot version 2 requires an entity identity port.');
-    const decoded = decodeBoundCombatSnapshot(snapshot, {
-      identity: this.identity,
-      definitionFor: (id) => this.requireDefinition(id),
-    });
+  private installPreparedFrontier(frontier: PreparedCombatFrontier): void {
     this.combatants.clear();
-    decoded.combatants.forEach((state, actorId) => this.combatants.set(actorId, state));
-    this.actionSequence = snapshot.actionSequence;
-    this.resultSequence = decoded.resultSequence;
-    this.lifecycleEvents.splice(0, this.lifecycleEvents.length, ...decoded.events);
+    frontier.combatants.forEach((state, actorId) => this.combatants.set(actorId, state));
+    this.actionSequence = frontier.actionSequence;
+    this.resultSequence = frontier.resultSequence;
+    this.lifecycleEvents.splice(0, this.lifecycleEvents.length, ...frontier.lifecycleEvents);
   }
 
   private requireDefinition(id: string): MeleeDefinition {

@@ -21,3 +21,5 @@ export type {
   ObservedModState,
   ModStateWrite,
 } from './operation-contracts';
+
+export { createGameplaySystemAuthority } from './gameplay-system-authority';

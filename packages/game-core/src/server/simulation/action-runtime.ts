@@ -36,6 +36,14 @@ export type BoundActorActionSnapshot = ActorAction & {
 export type ActionSnapshotV2 = { version: 2; sequence: number; actions: BoundActorActionSnapshot[] };
 export type ActionSnapshot = ActionSnapshotV1 | ActionSnapshotV2;
 
+export type ActionSettlement = Readonly<{
+  id: string;
+  status: Extract<ActorActionStatus, 'succeeded' | 'failed' | 'interrupted'>;
+  now: number;
+  reason?: string;
+  result?: unknown;
+}>;
+
 type ActionBindings = {
   actor: EntityLifetimeReference | null;
   target: EntityLifetimeReference | null;
@@ -216,6 +224,68 @@ export class ActionRuntime {
     }
   }
 
+  prepareSettlements(entries: readonly ActionSettlement[]) {
+    if (!Array.isArray(entries) || entries.length < 1 || entries.length > 128)
+      throw new RangeError('Action settlement must contain between 1 and 128 entries.');
+    const ids = new Set<string>();
+    const shape = (action: ActorAction) => JSON.stringify({ ...action, result: undefined });
+    const candidates = entries.map((entry) => {
+      if (ids.has(entry.id)) throw new TypeError('Duplicate action settlement.');
+      ids.add(entry.id);
+      if (
+        !terminal(entry.status) ||
+        !Number.isFinite(entry.now) ||
+        (entry.reason !== undefined && typeof entry.reason !== 'string')
+      )
+        throw new TypeError('Action settlement fields are invalid.');
+      const action = this.requireActive(entry.id);
+      if (entry.status === 'succeeded') {
+        const failure = entityReferenceExecutionFailure(
+          this.identity,
+          this.bindings.get(entry.id)?.actor ?? null,
+          action.actorId,
+          'actor',
+        );
+        if (failure) throw new Error(`Action settlement actor is invalid: ${failure}`);
+      }
+      const candidate = this.clone(action);
+      candidate.status = entry.status;
+      candidate.endedAt = entry.now;
+      if (entry.reason !== undefined) candidate.reason = entry.reason;
+      if (entry.result !== undefined) candidate.result = this.cloneValue(entry.result);
+      return { action, shape: shape(action), result: action.result, candidate, output: this.clone(candidate) };
+    });
+    let used = false,
+      validated = false;
+    const validate = () => {
+      if (used) throw new Error('Prepared action settlement was already used.');
+      validated = false;
+      for (const entry of candidates)
+        if (
+          this.actions.get(entry.action.id) !== entry.action ||
+          this.currentByActor.get(entry.action.actorId) !== entry.action.id ||
+          shape(entry.action) !== entry.shape ||
+          entry.action.result !== entry.result
+        )
+          throw new Error('Prepared action settlement is stale.');
+      validated = true;
+    };
+    return Object.freeze({
+      results: Object.freeze(candidates.map(({ output }) => output)),
+      validate,
+      apply: () => {
+        if (used) throw new Error('Prepared action settlement was already used.');
+        if (!validated) throw new Error('Prepared action settlement requires validation.');
+        validate();
+        used = true;
+        for (const { candidate } of candidates) {
+          this.actions.set(candidate.id, candidate);
+          this.currentByActor.delete(candidate.actorId);
+        }
+      },
+    });
+  }
+
   private finish(
     id: string,
     status: Extract<ActorActionStatus, 'succeeded' | 'failed' | 'interrupted'>,
@@ -223,13 +293,10 @@ export class ActionRuntime {
     reason?: string,
     result?: unknown,
   ): ActorAction {
-    const action = this.requireActive(id);
-    action.status = status;
-    action.endedAt = now;
-    if (reason) action.reason = reason;
-    if (result !== undefined) action.result = this.cloneValue(result);
-    this.currentByActor.delete(action.actorId);
-    return this.clone(action);
+    const prepared = this.prepareSettlements([{ id, status, now, reason, result }]);
+    prepared.validate();
+    prepared.apply();
+    return prepared.results[0];
   }
 
   private requireActive(id: string): ActorAction {

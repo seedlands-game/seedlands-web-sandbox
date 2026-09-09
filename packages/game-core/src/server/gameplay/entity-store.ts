@@ -12,6 +12,7 @@ import type { ActorComponentSnapshot } from './ecs-actor-components';
 import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry, type ItemStack } from './item-registry';
 import {
   prepareEntityMutationParticipant,
+  prepareEntityMutationSeriesParticipant,
   type PreparedEntityMutation,
   type PreparedEntityMutationInput,
 } from './prepared-entity-mutation';
@@ -192,26 +193,35 @@ export class EntityStore {
   }
 
   /** Reads one actor's complete ECS component state without exporting or scanning the world. */
+  actorNeedsSnapshot(id: string) {
+    return this.owner.actorNeedsSnapshot(id);
+  }
+
   actorComponentSnapshot(id: string): ActorComponentSnapshot {
     return this.owner.actorComponentSnapshot(id);
   }
 
   /** Prepares one bounded host-only EntityStore transaction participant. */
   prepareMutation(input: PreparedEntityMutationInput): PreparedEntityMutation {
-    return prepareEntityMutationParticipant(
-      {
-        owner: this.owner,
-        sequence: this.sequence,
-        isCurrent: (owner, sequence) => this.owner === owner && this.sequence === sequence,
-        prepareWorldItem: (input, id) => this.prepareEntity(input, id, 'world-item'),
-        removeFromBucket: (entity) => this.removeFromBucket(entity, this.buckets),
-        addToBucket: (entity) => this.addToBucket(entity, this.buckets),
-        commitSequence: (sequence) => {
-          this.sequence = sequence;
-        },
+    return prepareEntityMutationParticipant(this.mutationHost(), input);
+  }
+
+  prepareMutationSeries(segments: readonly PreparedEntityMutationInput[]): PreparedEntityMutation {
+    return prepareEntityMutationSeriesParticipant(this.mutationHost(), segments);
+  }
+
+  private mutationHost() {
+    return {
+      owner: this.owner,
+      sequence: this.sequence,
+      isCurrent: (owner: EcsEntityOwner, sequence: number) => this.owner === owner && this.sequence === sequence,
+      prepareWorldItem: (input: EntitySpawn, id: string) => this.prepareEntity(input, id, 'world-item'),
+      removeFromBucket: (entity: GameplayEntity) => this.removeFromBucket(entity, this.buckets),
+      addToBucket: (entity: GameplayEntity) => this.addToBucket(entity, this.buckets),
+      commitSequence: (sequence: number) => {
+        this.sequence = sequence;
       },
-      input,
-    );
+    };
   }
 
   restoreComponentSnapshot(raw: unknown): void {

@@ -46,19 +46,21 @@ export type PreparedEntityMutationHost = Readonly<{
 
 const sameSnapshot = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
 
-export function prepareEntityMutationParticipant(
+function prepareMutation(
   host: PreparedEntityMutationHost,
   input: PreparedEntityMutationInput,
+  maxEntries: number,
 ): PreparedEntityMutation {
   if (!input || typeof input !== 'object') throw new TypeError('Prepared entity mutation input is invalid.');
   const actorInputs = input.actors ?? [];
   const spawnInputs = input.spawns ?? [];
   const despawnInputs = input.despawns ?? [];
-  if (!Array.isArray(actorInputs) || !Array.isArray(spawnInputs) || !Array.isArray(despawnInputs))
-    throw new TypeError('Prepared entity mutation entries must be arrays.');
+  for (const entries of [actorInputs, spawnInputs, despawnInputs])
+    if (!Array.isArray(entries)) throw new TypeError('Prepared entity mutation entries must be arrays.');
   const entryCount = actorInputs.length + spawnInputs.length + despawnInputs.length;
-  if (!Number.isSafeInteger(entryCount) || entryCount < 1 || entryCount > 128)
-    throw new RangeError('Prepared entity mutation must contain between 1 and 128 entries.');
+  if (!Number.isSafeInteger(entryCount) || entryCount < 1 || entryCount > maxEntries)
+    throw new RangeError(`Prepared entity mutation must contain between 1 and ${maxEntries} entries.`);
+  for (const entries of [actorInputs, spawnInputs, despawnInputs]) assertDense(entries);
 
   const capturedOwner = host.owner;
   const capturedEpoch = capturedOwner.epoch;
@@ -210,4 +212,55 @@ export function prepareEntityMutationParticipant(
 /** Host-only entry point. Product composition owns coordination with other prepared participants. */
 export function prepareEntityMutation(store: EntityStore, input: PreparedEntityMutationInput): PreparedEntityMutation {
   return store.prepareMutation(input);
+}
+
+function assertDense(entries: readonly unknown[]): void {
+  if (!Array.isArray(entries)) throw new TypeError('Prepared entity mutation entries must be arrays.');
+  for (let index = 0; index < entries.length; index++) {
+    const descriptor = Object.getOwnPropertyDescriptor(entries, index);
+    if (!descriptor || !('value' in descriptor))
+      throw new TypeError('Prepared entity mutation arrays must be dense data.');
+  }
+}
+
+export function prepareEntityMutationParticipant(
+  host: PreparedEntityMutationHost,
+  input: PreparedEntityMutationInput,
+): PreparedEntityMutation {
+  return prepareMutation(host, input, 128);
+}
+
+export function prepareEntityMutationSeriesParticipant(
+  host: PreparedEntityMutationHost,
+  segments: readonly PreparedEntityMutationInput[],
+): PreparedEntityMutation {
+  if (!Array.isArray(segments) || segments.length < 1 || segments.length > 192)
+    throw new RangeError('Entity mutation series must contain 1..192 segments.');
+  assertDense(segments);
+  const actors: PreparedActorReplacement[] = [],
+    spawns: PreparedWorldItemSpawn[] = [],
+    despawns: EntityLifetimeReference[] = [];
+  for (const segment of segments) {
+    if (!segment || typeof segment !== 'object') throw new TypeError('Entity mutation segment is invalid.');
+    const actorEntries = segment.actors ?? [],
+      spawnEntries = segment.spawns ?? [],
+      despawnEntries = segment.despawns ?? [];
+    for (const entries of [actorEntries, spawnEntries, despawnEntries])
+      if (!Array.isArray(entries)) throw new TypeError('Entity mutation segment arrays are invalid.');
+    const count = actorEntries.length + spawnEntries.length + despawnEntries.length;
+    if (count < 1 || count > 128) throw new RangeError('Entity mutation segment must contain 1..128 entries.');
+    for (const entries of [actorEntries, spawnEntries, despawnEntries]) assertDense(entries);
+    actors.push(...actorEntries);
+    spawns.push(...spawnEntries);
+    despawns.push(...despawnEntries);
+  }
+  return prepareMutation(host, { actors, spawns, despawns }, 192 * 128);
+}
+
+/** All segments share one allocator reservation and one commit frontier. */
+export function prepareEntityMutationSeries(
+  store: EntityStore,
+  segments: readonly PreparedEntityMutationInput[],
+): PreparedEntityMutation {
+  return store.prepareMutationSeries(segments);
 }

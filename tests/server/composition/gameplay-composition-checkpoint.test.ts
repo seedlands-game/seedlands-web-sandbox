@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { assembleOverworldPacks } from '@seedlands/game-core/server/composition/host-api';
+import {
+  assembleOverworldPacks,
+  createGameplaySystemAuthority,
+} from '@seedlands/game-core/server/composition/host-api';
 import { pack } from '../../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import { GameplayRuntime } from '../../../packages/game-core/src/server/gameplay/gameplay-runtime';
 import { testCorePlatform } from '../../support/core-platform';
@@ -18,6 +21,7 @@ function create(digest = 'a') {
   ]);
   return new GameplayRuntime({
     composition,
+    moduleSystemAuthority: createGameplaySystemAuthority(composition),
     platform: testCorePlatform,
     getVoxel: () => 0,
     getWorldTime: () => 12,

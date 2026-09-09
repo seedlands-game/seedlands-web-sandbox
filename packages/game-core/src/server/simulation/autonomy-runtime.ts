@@ -1,3 +1,5 @@
+import { prepareDeathEffects } from './prepared-death-effects';
+import { assertCombatResultCapacity } from '../gameplay/combat-runtime-snapshot';
 import type { EntityStore } from '../gameplay/entity-store';
 import type { ItemStack } from '../gameplay/item-registry';
 import { ActionRuntime, type ActorAction, type ActorActionInput } from './action-runtime';
@@ -38,6 +40,7 @@ type Options = {
   clone: CoreClone;
   combat?: CombatRuntimeCallbacks;
   meleeDefinitions?: readonly MeleeDefinition[];
+  registeredNeeds?: boolean;
 };
 
 export class AutonomyRuntime {
@@ -116,22 +119,61 @@ export class AutonomyRuntime {
     return cloneActor(actor);
   }
 
+  prepareDeaths(ids: readonly string[]) {
+    const effects = prepareDeathEffects({
+      ids,
+      combat: this.combat,
+      actions: this.actions,
+      actors: this.actors,
+      now: this.time,
+    });
+    return {
+      validate: () => effects.validate(),
+      apply: () => {
+        effects.apply();
+        this.actionInterruptionCount += effects.interrupted;
+        this.actionCompletionCount += effects.completed;
+      },
+    };
+  }
+
+  actorDeathDrop(entityId: string): ItemStack | null {
+    const archetype = this.actors.get(entityId)?.archetype;
+    return archetype === 'grazer'
+      ? { itemId: 'berry', count: 2 }
+      : archetype === 'night-stalker'
+        ? { itemId: 'stone-block', count: 1 }
+        : null;
+  }
+
+  assertCanRemoveActor(entityId: string, exceptActorId: string): void {
+    const snapshot = this.combat.snapshot();
+    const affected = snapshot.combatants.filter(
+      ({ actorId, combat }) =>
+        combat.active &&
+        (actorId === entityId ||
+          (actorId !== exceptActorId && combat.active.targetId === entityId && combat.active.phase === 'windup')),
+    );
+    assertCombatResultCapacity(snapshot.resultSequence, affected.length);
+  }
+
   unregisterActor(entityId: string, reason = 'entity-removed'): ItemStack | null {
     const actor = this.actors.get(entityId);
     if (!actor) return null;
+    const drop = this.actorDeathDrop(entityId);
     this.cancelCombat(entityId, reason);
     if (this.actions.interruptActor(entityId, this.time, reason)) this.actionInterruptionCount += 1;
     this.actors.delete(entityId);
-    return actor.archetype === 'grazer'
-      ? { itemId: 'berry', count: 2 }
-      : actor.archetype === 'night-stalker'
-        ? { itemId: 'stone-block', count: 1 }
-        : null;
+    return drop;
   }
 
   getActor(entityId: string): ActorState | null {
     const actor = this.actors.get(entityId);
     return actor ? cloneActor(actor, this.combat.snapshotFor(entityId).cooldownRemainingSeconds) : null;
+  }
+
+  actorIds(): readonly string[] {
+    return [...this.actors.keys()];
   }
 
   queryActors(): ActorState[] {
@@ -227,9 +269,9 @@ export class AutonomyRuntime {
     while (this.stepAccumulator + Number.EPSILON >= STEP_SECONDS) {
       this.stepAccumulator = round(this.stepAccumulator - STEP_SECONDS);
       this.time = round(this.time + STEP_SECONDS);
-      this.needsAccumulator = round(this.needsAccumulator + STEP_SECONDS);
+      if (!this.options.registeredNeeds) this.needsAccumulator = round(this.needsAccumulator + STEP_SECONDS);
       tickAuthorityActorRules(this.authorityRulesContext(), STEP_SECONDS);
-      if (this.needsAccumulator + Number.EPSILON >= 5) {
+      if (!this.options.registeredNeeds && this.needsAccumulator + Number.EPSILON >= 5) {
         this.needsAccumulator = round(this.needsAccumulator - 5);
         this.actors.forEach((actor) => (actor.hunger = round(Math.min(100, actor.hunger + 1))));
       }
@@ -270,6 +312,7 @@ export class AutonomyRuntime {
         !Array.isArray(snapshot.actors)
       )
         throw new TypeError('header is invalid');
+      if (snapshot.actors.length > MAX_RETAINED_ACTORS) throw new RangeError('Autonomous actor limit exceeded.');
       const restored = new Map<string, ActorState>();
       for (const actor of snapshot.actors) {
         this.validateActor(actor);

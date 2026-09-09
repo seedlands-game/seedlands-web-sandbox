@@ -171,3 +171,5 @@ Browser/Headless 从同一 checkpoint 恢复后比较权威事实和显式推进
 - 运行环境与审核读回记录：[evidence.md](evidence.md)。本节不预填通过。
 
 - 后续机制检查点：明确执行种类、Ruleset、规则阶段与实际组合时钟/frontier 接线后，static（1380 passed / 4 skipped）、build 与 Browser 4/4 分别通过；证据与缺口见 [机制检查点](s3-mechanism-checkpoint.md)。默认 needs/combat 和跨 owner 原子提交仍在实施。
+
+最新 S3 中间准出见 [Needs 检查点](s3-needs-checkpoint.md)：注册 Needs 的真实消费者、原子死亡与恢复上限已通过 full static 1435/4、独立审阅和 Browser 6/6。Combat 注册伤害与 Place/Break 仍在实施队列；S3/S4/S5/S6 的阶段状态未变。

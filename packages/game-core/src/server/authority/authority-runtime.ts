@@ -149,6 +149,7 @@ export class AuthorityRuntime {
       ...(options.fluidEpoch === undefined ? {} : { fluidEpoch: options.fluidEpoch }),
       platform: options.platform,
       composition: options.composition,
+      moduleSystemAuthority: options.moduleSystemAuthority,
       allowLegacyCompositionMigration: options.allowLegacyCompositionMigration,
     });
     server.setWorldTime(options.initialWorldTime);

@@ -1,6 +1,10 @@
 import type { PlayerState } from '../player-state';
 
-export function advancePlayerNeeds(player: PlayerState, seconds: number, kill: () => void): void {
+export type PlayerNeedsCandidate = Pick<
+  PlayerState,
+  'health' | 'maxHealth' | 'hunger' | 'lifecycle' | 'hungerAccumulator' | 'healingAccumulator' | 'starvationAccumulator'
+>;
+export function advancePlayerNeeds(player: PlayerNeedsCandidate, seconds: number, kill: () => void): void {
   player.hungerAccumulator += seconds;
   while (player.hungerAccumulator >= 120) {
     player.hungerAccumulator -= 120;
@@ -10,7 +14,7 @@ export function advancePlayerNeeds(player: PlayerState, seconds: number, kill: (
     player.healingAccumulator += seconds;
     while (player.healingAccumulator >= 10 && player.hunger >= 16 && player.health < player.maxHealth) {
       player.healingAccumulator -= 10;
-      player.health += 1;
+      player.health = Math.min(player.maxHealth, player.health + 1);
       player.hunger -= 1;
     }
   } else player.healingAccumulator = 0;

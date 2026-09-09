@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { assembleOverworldPacks } from '@seedlands/game-core/server/composition/host-api';
+import {
+  assembleOverworldPacks,
+  createGameplaySystemAuthority,
+} from '@seedlands/game-core/server/composition/host-api';
 import { pack } from '../../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import { GameplayRuntime } from '../../../packages/game-core/src/server/gameplay/gameplay-runtime';
 import { WorldResourceAuthorizer } from '../../../packages/game-core/src/server/harness/world-authorization';
@@ -14,6 +17,7 @@ function setup(allow = true, floor = true) {
   ]);
   const gameplay = new GameplayRuntime({
     composition,
+    moduleSystemAuthority: createGameplaySystemAuthority(composition),
     platform: testCorePlatform,
     getWorldTime: () => 0,
     getVoxel: ([, y]) => (floor ? (y === 0 ? 3 : 0) : undefined),
