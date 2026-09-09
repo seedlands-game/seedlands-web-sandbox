@@ -331,6 +331,7 @@ export class ContextSession {
         completion,
       };
     } catch {
+      if (signal?.aborted) return { kind: 'none', generation: this.generationValue, error: 'compression-failed' };
       if (this.estimate(this.messagesValue) < this.hardThreshold)
         return { kind: 'none', generation: this.generationValue, error: 'compression-failed' };
       const summary = deterministicSummary(frozenMessages, memory, throughCursor);

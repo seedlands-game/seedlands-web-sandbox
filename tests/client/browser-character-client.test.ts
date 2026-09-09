@@ -71,6 +71,28 @@ describe('Browser character client', () => {
     });
     await expect(observing).resolves.toMatchObject({ ok: false });
 
+    const deciding = port.intent('decision-1', 2, 7, { kind: 'idle' }, 'Wait here.');
+    const decisionRequest = worker.posts.at(-1)!;
+    expect(decisionRequest).toMatchObject({
+      kind: 'bound-character-control',
+      binding,
+      sequence: 2,
+      request: {
+        kind: 'intent',
+        entityId: 'npc-1',
+        requestId: 'decision-1',
+        expectedRevision: 2,
+        expectedCursor: 7,
+        goal: { kind: 'idle' },
+        say: 'Wait here.',
+      },
+    });
+    worker.respond(decisionRequest.requestId as number, {
+      ok: false,
+      error: { code: 'CHARACTER_REVISION_CONFLICT', message: 'stale', kind: 'conflict' },
+    });
+    await expect(deciding).resolves.toMatchObject({ ok: false });
+
     const disposing = port.dispose();
     const disposeRequest = worker.posts.at(-1)!;
     expect(disposeRequest).toMatchObject({ kind: 'unbind-character', binding });

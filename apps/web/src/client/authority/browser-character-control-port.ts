@@ -30,12 +30,13 @@ export function createBoundCharacterControlPort(binding: ControlBinding, send: S
     binding,
     observe: (sinceCursor?: number) =>
       control({ kind: 'observe', entityId: binding.entityId, ...(sinceCursor === undefined ? {} : { sinceCursor }) }),
-    intent: (requestId: string, expectedRevision: number, goal: CharacterGoal, say?: string) =>
+    intent: (requestId: string, expectedRevision: number, expectedCursor: number, goal: CharacterGoal, say?: string) =>
       control({
         kind: 'intent',
         entityId: binding.entityId,
         requestId,
         expectedRevision,
+        expectedCursor,
         goal,
         ...(say === undefined ? {} : { say }),
       }),

@@ -34,6 +34,7 @@ import {
   cloneCharacterGoalState as cloneGoalState,
   sameCharacterGoal as sameGoal,
   validateCharacterGoal,
+  validateCharacterActionLink,
   validateCharacterProfile,
   validateCharacterSnapshotRecord,
 } from './character-runtime-validation';
@@ -218,6 +219,7 @@ export class CharacterRuntime {
     const next = new Map<string, CharacterRecord>();
     for (const value of snapshot.characters) {
       validateCharacterSnapshotRecord(value);
+      validateCharacterActionLink(value, value.actionId ? this.options.action(value.actionId) : null);
       if (
         next.has(value.entityId) ||
         (value.lifecycle === 'active' && !this.options.actor(value.entityId)) ||
@@ -249,9 +251,16 @@ export class CharacterRuntime {
   private applyIntent(record: CharacterRecord, request: Extract<CharacterControlRequest, { kind: 'intent' }>) {
     this.requireActive(record);
     text(request.requestId, 'Character request id', 256);
+    if (
+      request.expectedCursor !== undefined &&
+      (!Number.isSafeInteger(request.expectedCursor) || request.expectedCursor < 0)
+    )
+      throw new TypeError('Character event cursor is invalid.');
     if (record.requestIds.includes(request.requestId)) return this.state(record);
     if (request.expectedRevision !== record.revision)
       throw new CharacterControlFailure('CHARACTER_REVISION_CONFLICT', 'Character revision changed.');
+    if (request.expectedCursor !== undefined && request.expectedCursor !== record.eventCursor)
+      throw new CharacterControlFailure('CHARACTER_REVISION_CONFLICT', 'Character event cursor changed.');
     validateCharacterGoal(request.goal);
     const speech =
       request.say === undefined || request.say === ''

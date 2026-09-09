@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createCognitionGraph, decideWithGraph } from '../../apps/agent-server/src/cognition-graph';
+import { validateToolCall } from '../../apps/agent-server/src/cognition-tools';
 import type { CognitionModel, ModelRequest } from '../../apps/agent-server/src/model-types';
 import { observation } from './fixtures';
 
@@ -137,5 +138,51 @@ describe('cognition graph', () => {
     expect(result.status).toBe('over-budget');
     expect(modelCalls).toBe(1);
     expect(result.messages.filter((message) => message.role === 'tool')).toHaveLength(5);
+  });
+
+  it('rejects a follow intent whose target is a visible point of interest', async () => {
+    const poiObservation = observation({
+      visiblePois: [
+        { target: { kind: 'poi', ref: 'camp', revision: 2 }, type: 'camp', position: [4, 2, 3], distance: 3 },
+      ],
+    });
+    const available = validateToolCall(
+      {
+        id: 'poi-actions',
+        type: 'function',
+        function: { name: 'available_actions', arguments: '{"ref":"camp"}' },
+      },
+      poiObservation,
+    );
+    expect(available.kind).toBe('read');
+    if (available.kind === 'read')
+      expect(JSON.parse(available.result)).toEqual({
+        goals: ['idle', 'forage', 'return-home', 'move-to'],
+      });
+    const model: CognitionModel = {
+      complete: async () => ({
+        message: {
+          role: 'assistant',
+          content: null,
+          tool_calls: [
+            {
+              id: 'poi-follow',
+              type: 'function',
+              function: {
+                name: 'propose_intent',
+                arguments: '{"goal":{"kind":"follow","target":{"kind":"poi","ref":"camp","revision":2}}}',
+              },
+            },
+          ],
+        },
+        finishReason: 'tool_calls',
+        usage: null,
+        latencyMs: 1,
+      }),
+    };
+    const result = await decideWithGraph(createCognitionGraph({ model }), poiObservation, []);
+    expect(result.status).toBe('invalid-tool');
+    expect(result.proposal).toBeUndefined();
+    expect(result.messages).toContainEqual(expect.objectContaining({ role: 'tool', tool_call_id: 'poi-follow' }));
   });
 });

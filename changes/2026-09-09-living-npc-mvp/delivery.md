@@ -59,8 +59,18 @@ Flash 私有 wire history 仅在认知服务内存中。服务重启或重连以
 
 审阅P1修复见 `target-bound-fix.md`；新增非法发言原子拒绝先得到状态被修改的RED，修复后角色focused11/11通过。最终增量独立复核见 `final-recheck.md` 和 `target-retention-recheck.md`。
 
-最终复核补充：`5ee5b05` 修复满引用表受击时淘汰当前 follow 引用的问题。真实 `attackEntity` 回归先得到 `CHARACTER_TARGET_UNAVAILABLE` RED，共享可见/执行目标保留集合后12项角色测试通过；未重新观察，直接复用原引用重试。独立复核无残余具体 P0/P1/P2。受影响的两项 NPC 浏览器旅程再次2/2通过（11.9秒）。
+最终复核补充：`5ee5b05` 修复满引用表受击时淘汰当前 follow 引用的问题。真实 `attackEntity` 回归先得到 `CHARACTER_TARGET_UNAVAILABLE` RED，共享可见/执行目标保留集合后12项角色测试通过；未重新观察，直接复用原引用重试。该轮独立复核无残余具体 P0/P1/P2；随后 GitHub 独立审阅补充的6项另见下文。受影响的两项 NPC 浏览器旅程再次2/2通过（11.9秒）。
 
 前置 Harness PR #25 的 `b1b41cd` 已在 CI run `34330619783` 全绿（静态、构建、Chromium）。本 NPC PR 以 `codex/developer-world-harness` 为 base，待人类合并 #25 后再调整到 main；未自动合并。
 
 最终类型检查发现可选参数被 closure 捕获时 TypeScript 不保留 `??=` 缩窄。`c48be63` 改为局部 `const retainedTargets`，不改变保留算法；全量250个测试文件/1224测试通过（4跳过），独立完整 typecheck 和 Web/Agent build 通过。该词法修正之后的完整静态命令再次记录至本地 release 日志，远端对最终提交重做相同门禁。
+
+## GitHub 复核后的增量修复
+
+`6a24891` 已通过远端完整 CI run `34332643341`，但 GitHub 独立审阅随后给出5项 P1与1项P2。Terra逐项核对均有效，见 `github-review-triage.md`。因此该提交仅作为通过工程门禁的中间候选，不作为最终准出。
+
+Root 先复现 Browser Bridge 丢弃 observedCursor：桥与客户端两项 RED 均失败；把 cursor 经 MessagePort 保留到通用 bound intent 后，5项客户端用例通过。世界层继续验证同 revision 新对话产生的冲突；认知层补暂停/流式输入/预中止/工具种类边界；存档层补 action ownership 联结校验。最终证据在修复冻结后追加。
+
+#25 已由外部合并到 main `01bab28`；其 tree `6d49e5cd2cec333ee69b4dd063cd3b9265f8a0f8` 与已集成的 `b1b41cd` 完全一致，`6a24891` 只补合并祖先关系，生产 tree 与 `9763281` 完全一致。#26 现直接面向 main。
+
+修复冻结：世界侧17项focused通过，Root额外将 foreign action 改为与NPC目标同类型、同位置以单独约束 ownership，并验证双方 action 均不变；该2项复验通过。宿主侧先取得6个RED，修复后5文件28测试通过；包括新事件触发新决定、stale receipt 的 cursor 仍旧时等待更新观察，避免立即重试旧快照。详见 `github-world-fix.md`、`github-host-fix.md`。Root 的 Bridge 5项通过；完整静态、构建、Browser与独立复核在本冻结候选上重新执行。

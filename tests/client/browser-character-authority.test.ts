@@ -75,6 +75,59 @@ describe('Browser character authority', () => {
     await session.dispose();
   });
 
+  it('rejects a bound intent when dialogue advanced its cursor and validates a required cursor before sequence', async () => {
+    const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'browser-stale-dialogue' });
+    const authority = new BrowserCharacterAuthority({
+      runtime: () => session.runtime,
+      worldId: () => 'world-id',
+      worldEpoch: () => 'world:0',
+    });
+    const created = authority.trusted({ kind: 'create', profile });
+    if (!created.ok || created.data.kind !== 'created') throw new Error('Character was not created.');
+    const entityId = created.data.character.entityId;
+    const binding = authority.bind(entityId);
+    const observed = authority.control(binding, 1, { kind: 'observe', entityId });
+    if (!observed.ok || observed.data.kind !== 'observation') throw new Error('Character observation unavailable.');
+    expect(authority.trusted({ kind: 'dialogue', entityId, text: 'Please stop.' })).toMatchObject({ ok: true });
+    expect(
+      authority.control(binding, 2, {
+        kind: 'intent',
+        entityId,
+        requestId: 'stale-dialogue',
+        expectedRevision: 0,
+        expectedCursor: observed.data.observation.cursor,
+        goal: { kind: 'idle' },
+        say: 'Continuing the old plan.',
+      }),
+    ).toMatchObject({ ok: false, error: { code: 'CHARACTER_REVISION_CONFLICT' } });
+    expect(authority.trusted({ kind: 'inspect', entityId })).toMatchObject({
+      ok: true,
+      data: { character: { revision: 0, currentGoal: { goal: { kind: 'forage' } } } },
+    });
+    for (const expectedCursor of [undefined, -1, Number.MAX_SAFE_INTEGER + 1, '0'])
+      expect(
+        authority.control(binding, 3, {
+          kind: 'intent',
+          entityId,
+          requestId: 'missing-cursor',
+          expectedRevision: 0,
+          expectedCursor,
+          goal: { kind: 'idle' },
+        } as never),
+      ).toMatchObject({ ok: false, error: { code: 'WORLD_REQUEST_INVALID' } });
+    expect(
+      authority.control(binding, 3, {
+        kind: 'intent',
+        entityId,
+        requestId: 'fresh-dialogue',
+        expectedRevision: 0,
+        expectedCursor: 1,
+        goal: { kind: 'idle' },
+      }),
+    ).toMatchObject({ ok: true, data: { kind: 'intent' } });
+    await session.dispose();
+  });
+
   it('invalidates an existing binding when its character dies and retains terminal identity', async () => {
     const session = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'browser-character-death' });
     const authority = new BrowserCharacterAuthority({

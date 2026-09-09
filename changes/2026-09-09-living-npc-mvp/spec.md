@@ -59,3 +59,7 @@ A3：浏览器可直接创建/继续伙伴，展示姓名、目标、行为、�
 输入原子性补充：非法 speech 必须在 interrupt/revision/goal/event/requestId 等任何写入之前被拒绝；core/JSONL 入口不能依赖 Browser 和模型工具层的提前校验。记录非法类型与超长字符串的状态不变 RED/GREEN。
 
 引用保留补充：满额目标表受击时仍保留当前可见及执行中的引用；受击后提交原 follow 引用不能因为事件分配而被错误拒绝。以真实 attackEntity 路径取得 RED/GREEN。
+
+### GitHub 增量复核闭环
+
+新增验收：对话在模型请求期间到达时旧 event cursor 的意图不得写入；满上下文压缩期间暂停/恢复不能遗留无法提交的 prepared rotation；模型响应按流累计字节并及时取消，预先 abort 不得发请求；损坏存档的 actionId 不得引用其他 Actor 或不匹配的动作；follow 只接受 entity 引用。每项先取得真实调用路径或受控异步 RED，再修复并保留 GREEN。重估为既有预算内最多3小时实现加0.3小时审阅，不增加 provider 调用预算或长期范围。

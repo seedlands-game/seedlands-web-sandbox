@@ -15,6 +15,7 @@ export type CharacterControllerPort = Readonly<{
   intent: (
     requestId: string,
     revision: number,
+    expectedCursor: number,
     goal: CharacterGoal,
     say?: string,
   ) => Promise<WorldHarnessResult<CharacterControlResult>>;
@@ -203,7 +204,13 @@ export class CharacterControllerBridge {
     }
     const result =
       message.kind === 'intent'
-        ? await this.port.intent(message.requestId, message.observedRevision, message.intent.goal, message.intent.say)
+        ? await this.port.intent(
+            message.requestId,
+            message.observedRevision,
+            message.observedCursor,
+            message.intent.goal,
+            message.intent.say,
+          )
         : await this.port.memory(message.expectedMemoryRevision, message.throughCursor, message.summary);
     if (generation !== this.generation) return;
     const character = result.ok && 'character' in result.data ? result.data.character : null;

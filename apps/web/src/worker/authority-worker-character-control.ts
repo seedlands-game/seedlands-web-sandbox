@@ -91,6 +91,8 @@ export class BrowserCharacterAuthority {
         throw new TypeError('Bound character request is invalid.');
       if (request.entityId !== binding.entityId)
         throw new BoundControlFailure('CHARACTER_BINDING_INVALID', 'Character binding is invalid.');
+      if (request.kind === 'intent' && (!Number.isSafeInteger(request.expectedCursor) || request.expectedCursor < 0))
+        throw new TypeError('Bound character event cursor is invalid.');
       record.lastSequence = sequence;
       return this.success(this.options.runtime().character(request));
     } catch (cause) {

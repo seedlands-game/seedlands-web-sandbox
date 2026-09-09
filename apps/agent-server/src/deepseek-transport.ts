@@ -105,6 +105,47 @@ function retryAfter(response: Response): number | null {
   return Number.isFinite(date) ? Math.max(0, date - Date.now()) : null;
 }
 
+async function cancelBody(body: ReadableStream<Uint8Array> | null): Promise<void> {
+  try {
+    await body?.cancel();
+  } catch {
+    // The response is already being rejected; cancellation is best-effort resource cleanup.
+  }
+}
+
+async function readBoundedBody(response: Response, maxBytes: number): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) return '';
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value.byteLength === 0) continue;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        try {
+          await reader.cancel();
+        } catch {
+          // Keep the bounded-response error stable even if provider stream cleanup fails.
+        }
+        throw new DeepSeekTransportError('invalid-response', 'DeepSeek response exceeded the configured limit');
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 export class DeepSeekChatCompletionsTransport implements CognitionModel {
   private readonly fetchImpl: typeof globalThis.fetch;
   private readonly now: () => number;
@@ -121,10 +162,18 @@ export class DeepSeekChatCompletionsTransport implements CognitionModel {
   async complete(request: ModelRequest): Promise<ModelCompletion> {
     const controller = new AbortController();
     const onAbort = () => controller.abort(request.signal?.reason);
-    request.signal?.addEventListener('abort', onAbort, { once: true });
-    const timeout = setTimeout(() => controller.abort(new Error('deadline exceeded')), this.timeoutMs);
+    let listening = false;
+    if (request.signal?.aborted) onAbort();
+    else if (request.signal) {
+      request.signal.addEventListener('abort', onAbort, { once: true });
+      listening = true;
+      if (request.signal.aborted) onAbort();
+    }
+    let timeout: ReturnType<typeof setTimeout> | null = null;
     const started = this.now();
     try {
+      if (controller.signal.aborted) throw controller.signal.reason ?? new Error('request aborted');
+      timeout = setTimeout(() => controller.abort(new Error('deadline exceeded')), this.timeoutMs);
       const response = await this.fetchImpl(`${this.options.endpoint.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -143,18 +192,17 @@ export class DeepSeekChatCompletionsTransport implements CognitionModel {
       });
       if (!response.ok) {
         const kind = response.status === 429 ? 'rate-limited' : 'http';
-        throw new DeepSeekTransportError(
-          kind,
-          `DeepSeek request failed with status ${response.status}`,
-          retryAfter(response),
-        );
+        const retryAfterMs = retryAfter(response);
+        await cancelBody(response.body);
+        throw new DeepSeekTransportError(kind, `DeepSeek request failed with status ${response.status}`, retryAfterMs);
       }
-      const length = Number(response.headers.get('content-length'));
-      if (Number.isFinite(length) && length > this.maxResponseBytes)
+      const lengthHeader = response.headers.get('content-length');
+      const length = lengthHeader === null ? null : Number(lengthHeader);
+      if (length !== null && Number.isFinite(length) && length > this.maxResponseBytes) {
+        await cancelBody(response.body);
         throw new DeepSeekTransportError('invalid-response', 'DeepSeek response exceeded the configured limit');
-      const body = await response.text();
-      if (Buffer.byteLength(body, 'utf8') > this.maxResponseBytes)
-        throw new DeepSeekTransportError('invalid-response', 'DeepSeek response exceeded the configured limit');
+      }
+      const body = await readBoundedBody(response, this.maxResponseBytes);
       try {
         return parseCompletion(JSON.parse(body), Math.max(0, this.now() - started));
       } catch (error) {
@@ -171,8 +219,8 @@ export class DeepSeekChatCompletionsTransport implements CognitionModel {
         aborted ? 'DeepSeek request timed out' : message,
       );
     } finally {
-      clearTimeout(timeout);
-      request.signal?.removeEventListener('abort', onAbort);
+      if (timeout !== null) clearTimeout(timeout);
+      if (listening) request.signal?.removeEventListener('abort', onAbort);
     }
   }
 }

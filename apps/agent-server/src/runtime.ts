@@ -82,9 +82,15 @@ export class CognitionRuntime {
   private latestEventCursor = -1;
   private lastDecisionCursor = -1;
   private hostSequence = 0;
-  private pendingIntent: Readonly<{ requestId: string; toolCallId: string }> | null = null;
+  private pendingIntent: Readonly<{
+    requestId: string;
+    toolCallId: string;
+    observedCursor: number;
+    observedRevision: number;
+  }> | null = null;
   private pendingMemoryRequestId: string | null = null;
   private pendingContextTail: import('./model-types.js').DeepSeekMessage[] = [];
+  private retryAfterObservation: Readonly<{ cursor: number; revision: number }> | null = null;
   private deferredTrigger = false;
   private paused = false;
   private terminal = false;
@@ -144,6 +150,14 @@ export class CognitionRuntime {
         if (this.pendingIntent) this.pendingContextTail.push(...this.context.extractTail(contextBoundary));
         for (const event of freshEvents) if (significantEvent(event.type)) this.scheduler.notifyEvent(event.type);
       }
+      if (
+        this.retryAfterObservation &&
+        (message.observation.cursor > this.retryAfterObservation.cursor ||
+          message.observation.character.revision !== this.retryAfterObservation.revision)
+      ) {
+        this.retryAfterObservation = null;
+        this.scheduler.notifyEvent('fresh-observation');
+      }
       return;
     }
     if (this.terminal) return;
@@ -180,6 +194,7 @@ export class CognitionRuntime {
     this.pendingIntent = null;
     this.pendingMemoryRequestId = null;
     this.pendingContextTail = [];
+    this.retryAfterObservation = null;
     this.graph = null;
   }
 
@@ -201,6 +216,7 @@ export class CognitionRuntime {
     this.pendingMemoryRequestId = null;
     this.pendingContextTail = [];
     this.deferredTrigger = false;
+    this.retryAfterObservation = null;
     this.context.rejectPreparedRotation();
     this.status('fallback', 'stale');
   }
@@ -230,6 +246,7 @@ export class CognitionRuntime {
       return;
     }
     if (receipt.requestId !== this.pendingIntent?.requestId) return;
+    const pendingIntent = this.pendingIntent;
     this.context.appendMessages([
       {
         role: 'tool',
@@ -246,7 +263,13 @@ export class CognitionRuntime {
     ]);
     this.pendingContextTail = [];
     this.pendingIntent = null;
-    if (this.deferredTrigger) {
+    if (receipt.status === 'rejected' && receipt.reason === 'CHARACTER_REVISION_CONFLICT') {
+      this.retryAfterObservation = {
+        cursor: pendingIntent.observedCursor,
+        revision: pendingIntent.observedRevision,
+      };
+      this.deferredTrigger = false;
+    } else if (this.deferredTrigger) {
       this.deferredTrigger = false;
       this.scheduler.notifyEvent('deferred-event');
     }
@@ -263,6 +286,7 @@ export class CognitionRuntime {
       this.paused ||
       this.pendingIntent ||
       this.pendingMemoryRequestId ||
+      this.retryAfterObservation ||
       !observation ||
       !graph ||
       !this.flashModel ||
@@ -289,7 +313,10 @@ export class CognitionRuntime {
           4096,
           this.abort.signal,
         );
-        if (this.disposed || this.terminal || this.paused) return;
+        if (this.disposed || this.terminal || this.paused) {
+          if (rotation.memory) this.context.rejectPreparedRotation();
+          return;
+        }
         if (rotation.memory) {
           const memoryRequestId = this.requestId();
           this.pendingMemoryRequestId = memoryRequestId;
@@ -303,14 +330,19 @@ export class CognitionRuntime {
       const graphSnapshotLength = this.context.messageCount;
       const graphMessages = [...this.context.messages];
       const result = await decideWithGraph(graph, observation, graphMessages, this.abort.signal);
+      const latestObservation = this.latestObservation;
       if (
         this.disposed ||
         this.terminal ||
         this.paused ||
         this.context.generation !== startingGeneration ||
-        this.latestObservation?.character.revision !== startingRevision
+        !latestObservation ||
+        latestObservation.character.revision !== startingRevision ||
+        latestObservation.cursor !== observation.cursor
       ) {
-        if (!this.terminal) this.status('ready', 'stale');
+        if (!this.disposed && !this.terminal && !this.paused && latestObservation?.cursor !== observation.cursor)
+          this.scheduler.notifyEvent('stale-observation');
+        if (!this.disposed && !this.terminal && !this.paused) this.status('ready', 'stale');
         return;
       }
       const concurrentTail = this.context.extractTail(graphSnapshotLength);
@@ -327,7 +359,12 @@ export class CognitionRuntime {
         return;
       }
       const requestId = this.requestId();
-      this.pendingIntent = { requestId, toolCallId: result.intentToolCallId };
+      this.pendingIntent = {
+        requestId,
+        toolCallId: result.intentToolCallId,
+        observedCursor: observation.cursor,
+        observedRevision: startingRevision,
+      };
       this.pendingContextTail.push(...concurrentTail);
       this.consecutiveFailures = 0;
       this.emit({

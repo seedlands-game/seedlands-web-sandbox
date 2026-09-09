@@ -126,7 +126,7 @@ describe('character bridge lifecycle', () => {
       intent: { goal: { kind: 'forage' } },
     });
     await vi.advanceTimersByTimeAsync(0);
-    expect(port.intent).toHaveBeenCalledWith('r', 1, { kind: 'forage' }, undefined);
+    expect(port.intent).toHaveBeenCalledWith('r', 1, 3, { kind: 'forage' }, undefined);
     expect(socket.sent.at(-1)).toMatchObject({
       kind: 'receipt',
       receipt: { requestId: 'r', status: 'rejected', reason: 'STALE_REVISION' },
