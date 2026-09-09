@@ -94,6 +94,8 @@ export class CharacterRuntime {
     validateCharacterProfile(profile);
     position(homePosition, 'Character home position');
     if (behaviorTree) validateBehavior(behaviorTree.goal, behaviorTree.definition);
+    if (!this.options.canStartAction() && (!behaviorTree || behaviorMayStartAction(behaviorTree.definition)))
+      throw new RangeError('Action sequence is exhausted.');
   }
 
   createdForRequest(id: string, fingerprint: string): CharacterState | null {
@@ -112,7 +114,7 @@ export class CharacterRuntime {
     creation?: CharacterRecord['creation'],
   ): CharacterState {
     if (this.records.has(entityId)) throw new Error(`Character already exists: ${entityId}`);
-    validateCharacterProfile(profile);
+    this.validateRegistration(profile, homePosition, behaviorTree);
     const entity = this.requireEntity(entityId);
     const home = position(homePosition, 'Character home position');
     const policy =

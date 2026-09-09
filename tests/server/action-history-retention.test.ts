@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { executeGameplayCharacterRequest } from '../../packages/game-core/src/server/gameplay/gameplay-character-control';
 import { ActionRuntime, type ActorAction } from '../../packages/game-core/src/server/simulation/action-runtime';
 import { AutonomyRuntime } from '../../packages/game-core/src/server/simulation/autonomy-runtime';
 import { EntityStore } from '../../packages/game-core/src/server/gameplay/entity-store';
@@ -129,6 +130,50 @@ describe('bounded action completion history', () => {
       actionId: before.characters!.characters[0]!.behaviorTree!.skills[0]!.actionId,
       status: 'running',
     });
+  });
+
+  it('rejects exhausted creation before spawn while allowing an action-free policy', () => {
+    const { runtime, entities } = fixture();
+    const snapshot = runtime.snapshot();
+    snapshot.actions.sequence = Number.MAX_SAFE_INTEGER;
+    runtime.restore(snapshot);
+    const before = runtime.snapshot();
+    const spawnAutonomous = vi.fn(() => {
+      throw new Error('Unexpected spawn');
+    });
+    const profile = { name: 'New resident', personality: 'Curious' };
+    for (const behaviorTree of [
+      undefined,
+      {
+        goal: { description: 'Move home' },
+        definition: {
+          version: 1 as const,
+          root: { id: 'move', type: 'action' as const, skill: 'move-to', args: { position: [3, 1, 0] } },
+        },
+      },
+    ]) {
+      expect(() =>
+        executeGameplayCharacterRequest(
+          { entities, simulation: runtime, spawnAutonomous },
+          {
+            kind: 'create',
+            profile,
+            position: [8, 1, 0],
+            behaviorTree,
+          },
+        ),
+      ).toThrow(/sequence/);
+      expect(spawnAutonomous).not.toHaveBeenCalled();
+      expect(runtime.snapshot()).toEqual(before);
+      expect(() => runtime.characters.register('other', profile, [8, 1, 0], behaviorTree)).toThrow(/sequence/);
+      expect(runtime.snapshot()).toEqual(before);
+    }
+    expect(() =>
+      runtime.characters.validateRegistration(profile, [8, 1, 0], {
+        goal: { description: 'Wait without an Authority Action' },
+        definition: { version: 1, root: { id: 'wait', type: 'action', skill: 'wait', args: { seconds: 1 } } },
+      }),
+    ).not.toThrow();
   });
 
   it('rejects the same follow tree atomically when arrival left no action and capacity is exhausted', () => {
