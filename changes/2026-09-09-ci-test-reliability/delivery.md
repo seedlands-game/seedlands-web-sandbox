@@ -54,3 +54,13 @@ Agent Server 属于未合并 PR #26，本次只读核查其绑定 SHA；已存�
 追加独立复核发现并修复一项假阳性：删除前截图期间的旋转会提前增加 shadow counter。E2E 现于删除命令完成、正式 owner 已应用实体视图后读取基线，后续必须再次增加；增加“最后 caster 移除、世界和灯槽不变”的单元反例。临时把生产失效条件突变为 `casterSignature !== '[]' && previousCasterSignature !== casterSignature`：单元新增用例失败，浏览器在移除后的 predicate 5s 超时（expected true / received false）。生产源已完整恢复；该 RED 证明新的断言能识别这次根因，未用跳过、重试或降低条件恢复 green。恢复实现后定向22/22通过、修正后的浏览器连续2/2通过，测试类型、ESLint和格式检查通过；独立复核已关闭该假阳性问题。最终 CI 结果在 PR 读回。
 
 复核还记录非阻塞成本项：非投影 GLB 目前也被计入 caster signature，附近运动可能请求多余的 shadow update；没有本轮性能数据，不声称造成已测量退化，不为此扩大修复。截图是补充证据，没有像素断言；本用例证明更新请求和后续稳定性，不把它说成所有像素无残影的自动保证。
+
+## 首轮组合 CI 失败与修复
+
+`5ca96b6` 的 [run34337900087](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34337900087) Static通过（6m15s，1171条逻辑用例），build通过（60s），Chromium失败（6m25s）：新 shadow initial readiness 失败，旧 edge-support flaky 被门禁拒绝。并非全部通过；其余三个集成命令因前序失败未运行。
+
+- shadow在High软件GPU上已有一盏阴影灯、43个稳定帧，但全世界生成队列还有90个chunk，15秒前置失败。现在就绪条件绑定可见chunk、实际有阴影局部灯及稳定帧，不再等待无关全局队列清空。软件GPU2/2通过，禁用空caster失效仍使移除断言RED。
+- edge-support只搭y56支撑而未定义下方地形，第二次位移采样可能已合法落地。测试现在显式构造y48底板与y49..55空气柱，验证Space窗口权威轨迹不向上、最终50.6落地不穿模并保持15tick稳定。
+- 第一版仅要求tick+2与ack前进，允许空中跳跃的临时突变仍PASS，不能当有效保障。最终改为真实Space至少跨两个浏览器发布帧，并等待超过15个权威tick与ack前进；同一突变在Space窗口断言RED。生产文件已完整恢复，所有临时突变都未提交。
+
+失败显示串行world-play组会因一条用例flaky重跑整组，应作为下一轮隔离和失败成本优化候选；当前不更改该组编排。最终版本软件GPU edge连续3/3、完整浏览器regression21/21通过，类型/Lint/格式通过。最新 exact-SHA CI 终态见 PR 描述，不用旧 green 代替。

@@ -31,10 +31,9 @@ test('局部灯在掉落物移除后重画一次阴影且不依赖方块编辑',
   const stable = await waitForSnapshot(
     page,
     (current) =>
-      current.generationQueue === 0 &&
-      current.meshingQueue === 0 &&
-      current.deferredRemeshes === 0 &&
+      current.renderedChunks > 0 &&
       current.visualEffects.activeLocalLights === 1 &&
+      current.visualEffects.shadowedLocalLights === 1 &&
       current.visualEffects.shadowStableFrameCount >= 2,
   );
 

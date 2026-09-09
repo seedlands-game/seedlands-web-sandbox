@@ -62,4 +62,4 @@ CI 绿色表示当前 SHA 在声明的执行环境中通过指定断言，不能
 2. **减少与断言无关的完整世界启动。** 两个 Headless 测试文件约24次创建，每次支付 safe-spawn、starter chunks、实体 chunk/mesh 初始化成本。优先将非法输入矩阵下沉到已有 validator，保留真实 Harness 路由与错误映射的集成断言；需要独立世界状态的测试继续隔离。共享可变 session 会引入顺序依赖，不采用。若使用只读初始 checkpoint，须验证恢复后的 clock、队列、实体与缓存隔离再测收益。
 3. **减少重复 CLI bootstrap。** `server-headless-cli` 至少七次进程启动。可在同一 JSONL 生命周期中串联兼容的协议断言，把纯语义矩阵放低层；保留真实子进程的 stdin/stdout、退出码、EOF 与失败清理覆盖。不能为了省启动而删掉这些进程边界。
 
-`data-plane-rust` 的固定 workload corpus 同时检查 Rust/TS 等价和输入不变，不能把减少 corpus 或只比 hash 称作无损优化。四个慢文件的时间也不是全部可消除的时间。下一轮先以有限并发作单轴实验，再针对剩余热点优化初始化；通过项共存后仍需组合验证。
+`data-plane-rust` 的固定 workload corpus 同时检查 Rust/TS 等价和输入不变，不能把减少 corpus 或只比 hash 称作无损优化。四个慢文件的时间也不是全部可消除的时间。下一轮先以有限并发作单轴实验，再针对剩余热点优化初始化；通过项共存后仍需组合验证。组合CI还观察到一条edge-support flaky使serial组整组重跑，拆解不必要的串行依赖是失败成本候选；必须先确认各用例和结果汇总独立，不能把失败隐藏为部分PASS。

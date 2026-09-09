@@ -52,3 +52,11 @@ CI 仅拆日志步骤，不增加 runner 或省略任务；类型检查提前，
 这次只实施修复集成与遗漏测试接线；下一轮提速候选根据当前精确 SHA 的实测耗时排序，不无对照地提高并发、删用例或降低覆盖率。主链路保证边界与尚未覆盖的生产构建启动验证单列记录。
 
 独立复核确认光影 E2E 在截图前记录计数会被删除前的旋转帧污染。修正设计：在同一次 page.evaluate 中 await 删除命令（正式 owner 已消费实体视图）后读取计数，后续实体消失且计数必须高于此新基线；再加入签名从非空到空的直接反例。用临时禁用“caster 签名变为空时失效”的生产突变获得 RED，恢复生产实现取得 GREEN，避免以测试成功次数代替根因检出能力。
+
+### Hosted runner 首轮组合失败与修正设计
+
+`5ca96b6` / run34337900087 的 static 和 build通过，Chromium 报一条新 shadow失败与一条既有 edge-support flaky。新 shadow 的15秒前置要求全世界 generation/meshing queue清空；实际局部灯与阴影已稳定43帧，但High视距后台仍有90个待生成chunk。该用例测局部失效，不测全世界生成完成；改为等待实际有阴影的局部灯启用、已有可见chunk和局部shadow稳定，保留High画质与后续所有caster/worldRevision断言。无关后台queue不作为就绪前置。edge-support的第二次位移采样可能已落到底层地形，需要按真实落地/空中状态设计断言，不能靠重试接受flaky。
+
+edge-support修正：保留y56支撑，在下方显式构造y48底板和y49..55空气柱；以权威高度/physicsTick/输入ack确认真实Space窗口，检查既有authority trajectory在此窗口无上升，最后允许落地并验证已知高度50.6与不穿模。保留真实键盘路径，不增加重试。禁用stepBody的grounded跳跃条件应使该浏览器用例RED；原实现及软件GPU重复GREEN后再交接。
+
+首版ack/tick+2仍未检出跳跃突变，保留此失败；最终Space先保持跨2个rAF发布帧，再要求15个权威tick与ack进展，才比较空中轨迹。该版本的相同突变已RED，原生产源已恢复。

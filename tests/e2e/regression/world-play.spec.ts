@@ -1,6 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { Voxel } from '../../../packages/game-core/src/world/voxel';
 import {
+  type HarnessSnapshot,
   clickCanvasCenter,
   fillHarnessWorld,
   lockPointer,
@@ -26,6 +27,33 @@ const stages: Record<string, 'PASS' | 'FAIL'> = {
   persistence: 'FAIL',
 };
 let browserMetrics: Readonly<{ ui: object; gameplay: object }> | undefined;
+
+const waitForAuthorityFall = async (page: Page, before: HarnessSnapshot, requireInputAck = false) => {
+  const sample = await page.waitForFunction(
+    ({ height, tick, ack }) => {
+      const current = window.__seedlandsHarness!.snapshot();
+      return current.serverPlayerPosition[1] < height - 0.25 &&
+        current.authority.physicsTick > tick + (ack === null ? 2 : 15) &&
+        (ack === null || current.authority.acknowledgedInputSequence > ack) &&
+        !current.onGround
+        ? current
+        : null;
+    },
+    {
+      height: before.serverPlayerPosition[1],
+      tick: before.authority.physicsTick,
+      ack: requireInputAck ? before.authority.acknowledgedInputSequence : null,
+    },
+    { timeout: 15_000 },
+  );
+  try {
+    const current = await sample.jsonValue();
+    if (!current) throw new Error('Authority did not provide an airborne falling sample.');
+    return current;
+  } finally {
+    await sample.dispose();
+  }
+};
 
 test.describe.serial('Seedlands deterministic browser regression', () => {
   test.afterAll(async () => {
@@ -79,6 +107,8 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
   test('keeps real edge support and falls only after all supporting voxels are removed', async ({ page }) => {
     await startHarnessWorld(page, 'seedlands-player-collision');
     await prepareCenterExcavation(page);
+    await fillHarnessWorld(page, [-1, 48, -1], [0, 48, 0], Voxel.Stone);
+    await fillHarnessWorld(page, [-1, 49, -1], [0, 55, 0], Voxel.Air);
     const supported = await waitForSnapshot(page, (current) => current.onGround && !current.colliding);
     await expect
       .poll(async () => (await snapshot(page))!.authority.physicsTick)
@@ -90,27 +120,38 @@ test.describe.serial('Seedlands deterministic browser regression', () => {
 
     await lockPointer(page);
     await fillHarnessWorld(page, [-1, 56, -1], [0, 56, 0], 0);
-    const falling = await waitForPlayerMovement(page, {
-      axis: 1,
-      start: supported.player[1],
-      minimumDelta: 0.25,
-      direction: -1,
-    });
+    const falling = await waitForAuthorityFall(page, supported);
     expect(falling.onGround).toBe(false);
     expect(falling.colliding).toBe(false);
     await page.keyboard.down('Space');
     try {
-      const afterSpace = await waitForPlayerMovement(page, {
-        axis: 1,
-        start: falling.player[1],
-        minimumDelta: 0.15,
-        direction: -1,
-      });
+      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const afterSpace = await waitForAuthorityFall(page, falling, true);
       expect(afterSpace.onGround).toBe(false);
       expect(afterSpace.colliding).toBe(false);
+      const samples = afterSpace.trajectory.filter((sample) => sample.physicsTick >= falling.authority.physicsTick);
+      expect(samples.length).toBeGreaterThanOrEqual(2);
+      for (let index = 1; index < samples.length; index += 1)
+        expect(samples[index]!.position[1]).toBeLessThanOrEqual(samples[index - 1]!.position[1] + 0.0001);
     } finally {
       await page.keyboard.up('Space');
     }
+    const landed = await waitForSnapshot(
+      page,
+      (current) => current.onGround && Math.abs(current.serverPlayerPosition[1] - 50.6) < 0.001,
+    );
+    expect(landed.colliding).toBe(false);
+    const trajectory = await page.evaluate(() => window.__seedlandsHarness!.snapshot().trajectory);
+    const descent = trajectory.filter((sample) => sample.physicsTick >= falling.authority.physicsTick);
+    expect(descent.length).toBeGreaterThanOrEqual(2);
+    expect(Math.min(...descent.map((sample) => sample.position[1]))).toBeGreaterThanOrEqual(50.6 - 0.001);
+    await expect
+      .poll(async () => (await snapshot(page))!.authority.physicsTick)
+      .toBeGreaterThan(landed.authority.physicsTick + 15);
+    const settled = (await snapshot(page))!;
+    expect(settled.serverPlayerPosition[1]).toBeCloseTo(50.6, 3);
+    expect(settled.onGround).toBe(true);
+    expect(settled.colliding).toBe(false);
   });
 
   test('walks down a ledge and requires a real jump to return without overlap', async ({ page }) => {
