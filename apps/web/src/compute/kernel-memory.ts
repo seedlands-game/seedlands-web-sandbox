@@ -2,11 +2,25 @@ export const WASM_ARENA_BYTES = 16 * 1024 * 1024;
 
 type NumericExport = (...parameters: number[]) => number;
 
+export type KernelDiagnostics = Readonly<{
+  calls: number;
+  durationMs: number;
+  failures: number;
+  memoryBytes: number;
+  failed: boolean;
+}>;
+
 export class KernelMemory {
   failed = false;
   readonly memory: WebAssembly.Memory;
+  private calls = 0;
+  private durationMs = 0;
+  private failures = 0;
 
-  constructor(private readonly exports: WebAssembly.Exports) {
+  constructor(
+    private readonly exports: WebAssembly.Exports,
+    private readonly now: () => number = () => performance.now(),
+  ) {
     const memory = exports.memory;
     if (
       !(memory instanceof WebAssembly.Memory) ||
@@ -48,12 +62,27 @@ export class KernelMemory {
     if (this.failed) throw new Error('Wasm kernel is disabled after failure.');
     const fn = this.exports[name];
     if (typeof fn !== 'function') throw new TypeError(`Missing Wasm kernel export: ${name}`);
+    const startedAt = this.now();
+    this.calls += 1;
     try {
       return (fn as NumericExport)(...parameters);
     } catch (error) {
       this.failed = true;
+      this.failures += 1;
       throw error;
+    } finally {
+      this.durationMs += Math.max(0, this.now() - startedAt);
     }
+  }
+
+  diagnostics(): KernelDiagnostics {
+    return {
+      calls: this.calls,
+      durationMs: this.durationMs,
+      failures: this.failures,
+      memoryBytes: this.memory.buffer.byteLength,
+      failed: this.failed,
+    };
   }
 
   private validateRange(offset: number, length: number, width: number): void {

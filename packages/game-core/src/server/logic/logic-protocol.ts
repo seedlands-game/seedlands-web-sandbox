@@ -90,6 +90,12 @@ export type LogicWorkerRequest =
       observation: LogicObservation;
     }>
   | Readonly<{
+      kind: 'reset-logic-epoch';
+      protocolVersion: typeof LOGIC_PROTOCOL_VERSION;
+      epoch: string;
+      nextEpoch: string;
+    }>
+  | Readonly<{
       kind: 'block-for-test';
       protocolVersion: typeof LOGIC_PROTOCOL_VERSION;
       epoch: string;

@@ -13,6 +13,7 @@ import type { QualityLevel } from './scene/quality-profile';
 import type { WorldEnvironment } from './scene/world-environment';
 import type { UiWorldSession } from './ui/ui-bridge';
 import type { World } from './world/world-runtime';
+import type { DebugRuntimeInput } from './ui/debug-diagnostics';
 
 type GameFrameBindings = Readonly<{
   app: () => pc.Application | null;
@@ -36,12 +37,14 @@ type GameFrameBindings = Readonly<{
   worldAudio: () => WorldAudio | null;
   nextHudSequence: () => number;
   nextDebugSequence: () => number;
+  diagnostics?: () => DebugRuntimeInput;
 }>;
 
 export class GameFrameLoop {
   private lastFpsSample = performance.now();
   private frames = 0;
   private fps = 0;
+  private fpsSampled = false;
   frameMs = 0;
   private lastFrameTimestamp = performance.now();
 
@@ -53,6 +56,7 @@ export class GameFrameLoop {
     this.lastFrameTimestamp = now;
     this.frames = 0;
     this.fps = 0;
+    this.fpsSampled = false;
     this.frameMs = 0;
   }
 
@@ -80,6 +84,7 @@ export class GameFrameLoop {
     this.frames += 1;
     if (now - this.lastFpsSample > 500) {
       this.fps = (this.frames * 1000) / (now - this.lastFpsSample);
+      this.fpsSampled = true;
       this.frames = 0;
       this.lastFpsSample = now;
     }
@@ -108,10 +113,12 @@ export class GameFrameLoop {
         deviceType: this.bindings.app()?.graphicsDevice.deviceType ?? 'WebGL2',
         seedText: this.bindings.seedText(),
         fps: this.fps,
+        fpsSampled: this.fpsSampled,
         frameMs: this.frameMs,
         nextHudSequence: this.bindings.nextHudSequence,
         nextDebugSequence: this.bindings.nextDebugSequence,
         collisionDebug: collisionDebug?.status ?? null,
+        diagnostics: this.bindings.diagnostics,
       });
     }
     telemetry.endFrame(actualFrameMs);

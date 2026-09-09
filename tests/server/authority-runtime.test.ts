@@ -33,6 +33,36 @@ describe('AuthorityRuntime', () => {
     expect(runtime.wake(nowMs).physicsTick).toBe(1);
   });
 
+  it('ready 在宿主 tick 与暂停推进后只读当前快照，不重新采样启动时刻', async () => {
+    const runtime = await AuthorityRuntime.create({
+      platform: testCorePlatform,
+      epoch: 'world:ready-after-tick',
+      seedText: 'ready-after-tick',
+      initialWorldTime: 9,
+      startTimeMs: 100,
+      initialPlayerBodyPosition: [0.5, 33, 0.5],
+    });
+    runtime.wake(120);
+    const running = runtime.snapshot();
+    expect(runtime.ready().snapshot).toMatchObject(running);
+    runtime.pause(125);
+    const observation = runtime.createLogicObservation();
+    runtime.advancePausedSession(100);
+    const paused = runtime.snapshot();
+    expect(runtime.ready().snapshot).toMatchObject(paused);
+    expect(
+      runtime.receiveLogicIntentBatch({
+        protocolVersion: 1,
+        epoch: observation.epoch,
+        observationSequence: observation.observationSequence,
+        expiresAtPhysicsTick: observation.physicsTick + 1,
+        intents: [],
+      }),
+    ).toBe(false);
+    expect(runtime.sessionTimeMs).toBe(125);
+    expect(runtime.snapshot()).toEqual(paused);
+  });
+
   it('把单次有界持久化加载分项附在对应Mesh准备回执上', async () => {
     const persistence = Object.assign(new MemoryGamePersistence({ clone: testCorePlatform.clone }), {
       ensureNeighborhood: async (): Promise<ChunkPersistenceLoadDiagnostics> => ({

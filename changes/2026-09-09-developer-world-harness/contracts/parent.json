@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "id": "developer-world-harness-parent",
+  "role": "\u8def\u7ebf\u4e0e\u4ea4\u4ed8\u8d1f\u8d23\u8005",
+  "workType": "design",
+  "goal": "Deliver H1/H2 and diagnostics with researched next-stage design",
+  "initiatedBy": "human",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-developer-world-harness/spec.md",
+      "purpose": "Authorized implementation and acceptance contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "\u4e0d\u5b9e\u73b0 Agent MVP",
+      "\u4e0d\u5408\u5e76 PR\u3001\u4e0d\u4fee\u6539\u5bc6\u94a5"
+    ]
+  },
+  "outputs": [
+    "H1/H2 implementation",
+    "Diagnostics UI",
+    "Next-stage design",
+    "Validated PR"
+  ],
+  "execution": {
+    "form": "current-agent",
+    "model": "gpt-6-astra",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "delivery",
+      "check": "\u9000\u5f79\u9a8c\u6536\u5e76\u5b8c\u6210\u8bbe\u8ba1",
+      "evidence": "spec \u548c\u9a8c\u8bc1\u8bb0\u5f55"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 30
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": true,
+    "delegate": true
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": null
+}

@@ -5,12 +5,10 @@ import type { FluidCandidate } from '@seedlands/game-core/server/fluid/fluid-tra
 import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
 import type { VoxelEdit } from '@seedlands/game-core/server/world-mutation';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
-import { chunkKey } from '@seedlands/game-core/world/voxel';
 import type {
   AuthorityAction,
   AuthorityActionResult,
   AuthorityGameplayView,
-  AuthorityMeshPayload,
   AuthorityPlayerPositionResult,
   AuthorityReady,
   AuthorityRequest,
@@ -18,26 +16,16 @@ import type {
   AuthoritySessionControlResult,
 } from '@seedlands/game-core/compute/authority-worker-protocol';
 import type { LogicIntentBatch } from '@seedlands/game-core/server/logic/logic-protocol';
+import type { WorldHarnessPort, WorldPrepareRequest } from '@seedlands/game-core/server/harness/world-harness-contract';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
 import { authorityInputTransitBudgetMs, createAuthorityTransport } from './authority-transport';
-import { acceptAuthorityMeshPreparation } from './authority-mesh-preparation';
-import {
-  AuthorityCollisionBaselineClient,
-  type AuthorityCollisionBaselinePayload,
-} from './authority-collision-baseline-client';
-import {
-  AuthorityCollisionRevisionGuard,
-  consumeTransferredAuthorityCollisionBaseline,
-  publishAuthorityCollisionCommits,
-} from './authority-collision-mirror';
 import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
-import { matchesPreparedVisibilityCanonical, type VisibilityTask } from './authority-prepared-mesh-visibility';
+import type { VisibilityTask } from './authority-prepared-mesh-visibility';
+import { BrowserAuthorityChunkClient } from './browser-authority-chunk-client';
 import type {
   AuthorityClientOptions,
-  AuthorityCachedMesh,
-  AuthorityCachedPreparation,
   AuthoritySaveResult,
   AuthorityStartOptions,
 } from './browser-authority-client-contract';
@@ -47,21 +35,13 @@ const failedClientError = (error: Error) => new Error(`Authority client failed: 
 
 export class BrowserAuthorityClient {
   readonly mode = 'local' as const;
+  readonly world: WorldHarnessPort;
   private requestSequence = 0;
   private readonly transactionSequences = new Map<string, number>();
   private readonly requests: ClientRequestRegistry;
-  private readonly snapshotGate: AuthoritySnapshotGate;
+  private snapshotGate: AuthoritySnapshotGate;
   private readonly bootstrap: AuthorityBootstrapCoordinator;
-  private readonly meshLoads = new Map<string, Promise<void>>();
-  private readonly meshCache = new Map<string, AuthorityCachedMesh>();
-  private readonly collisionRevisions = new AuthorityCollisionRevisionGuard();
-  private readonly collisionBaselines = new AuthorityCollisionBaselineClient(
-    this.meshCache,
-    this.collisionRevisions,
-    (request) => this.request(request) as Promise<AuthorityCollisionBaselinePayload>,
-    { consumeTransferredBuffers: true },
-  );
-  private readonly preparationCache = new Map<string, AuthorityCachedPreparation>();
+  private readonly chunks: BrowserAuthorityChunkClient;
   private readyValue: AuthorityReady | null = null;
   private snapshotValue: AuthoritySnapshot | null = null;
   private gameplayValue: AuthorityGameplayView | null = null;
@@ -69,14 +49,24 @@ export class BrowserAuthorityClient {
   private disposed = false;
   private failureValue: Error | null = null;
   private storageBytesValue = 0;
+  private storageBytesMeasured = false;
   private lastInputDecisionSequence = -1;
+  private runtimeEpochValue: string;
 
   constructor(
     private readonly worker: AuthorityWorkerPort,
     readonly epoch: SessionEpoch,
     private readonly options: AuthorityClientOptions = {},
   ) {
+    this.runtimeEpochValue = epoch;
     this.requests = new ClientRequestRegistry(options.requestTimeoutMs);
+    this.chunks = new BrowserAuthorityChunkClient(
+      epoch,
+      this.requests,
+      (payload, transfer) => this.request(payload, transfer),
+      (message, transfer) => this.post(message, transfer),
+      options,
+    );
     this.readyWait = new ClientReadyWait(options.requestTimeoutMs);
     this.snapshotGate = new AuthoritySnapshotGate(epoch);
     this.bootstrap = new AuthorityBootstrapCoordinator(
@@ -84,6 +74,40 @@ export class BrowserAuthorityClient {
       (request, transfer) => this.post(request, transfer),
       (error) => this.failAll(error),
     );
+    this.world = {
+      identity: () => this.worldRequest('identity'),
+      inspect: (request) => this.worldRequest('inspect', request),
+      prepare: async (request) => {
+        const result = await this.worldRequest('prepare', request);
+        if (result.ok) {
+          try {
+            await this.prepareWorldRequest(request);
+            const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
+            for (const [cx, cy, cz] of chunks)
+              if (!(await this.chunks.refreshCollisionBaseline(cx, cy, cz)))
+                throw new Error(`Authority collision baseline is unavailable: ${cx},${cy},${cz}.`);
+          } catch (error) {
+            return {
+              ok: false,
+              error: {
+                code: 'WORLD_PREPARE_UNAVAILABLE',
+                message: error instanceof Error ? error.message : String(error),
+                kind: 'unavailable',
+              },
+              frontier: result.frontier,
+            };
+          }
+        }
+        return result;
+      },
+      command: (command, options) => this.worldRequest('command', command, options),
+      clock: (request) => this.worldRequest('clock', request),
+      logic: (request) => this.worldRequest('logic', request),
+      actions: (query) => this.worldRequest('actions', query),
+      barrier: (request) => this.worldRequest('barrier', request),
+      trace: (request) => this.worldRequest('trace', request),
+      checkpoint: (request) => this.worldRequest('checkpoint', request),
+    };
     worker.onmessage = (event) => this.receive(event.data);
     worker.onerror = (event) => this.failAll(new Error(event.message || 'Authority Worker failed.'));
   }
@@ -114,6 +138,7 @@ export class BrowserAuthorityClient {
         initialWorldTime: options.initialWorldTime,
         sessionTimeOriginMs: performance.now(),
         frequencies: options.frequencies,
+        developerWorldHarness: options.developerWorldHarness ?? false,
       });
     } catch (error) {
       this.readyWait.reject(error instanceof Error ? error : new Error(String(error)));
@@ -174,6 +199,10 @@ export class BrowserAuthorityClient {
     return this.storageBytesValue;
   }
 
+  get storageBytesMeasurement(): number | null {
+    return this.storageBytesMeasured ? this.storageBytesValue : null;
+  }
+
   get estimatedInputTransitMs(): number {
     return authorityInputTransitBudgetMs(this.options.transportFaults ?? { harnessEnabled: false });
   }
@@ -183,7 +212,7 @@ export class BrowserAuthorityClient {
   }
 
   sendInput(command: InputCommand): void {
-    this.post(command);
+    this.post({ ...command, epoch: this.epoch, runtimeEpoch: this.runtimeEpochValue });
   }
 
   pause(): Promise<{ paused: true }> {
@@ -195,121 +224,38 @@ export class BrowserAuthorityClient {
   }
 
   ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
-    const key = chunkKey(cx, cy, cz);
-    const inFlight = this.meshLoads.get(key);
-    if (inFlight) return inFlight;
-    const requestId = ++this.requestSequence;
-    const baselineLease = this.collisionRevisions.beginBaseline(key);
-    const request = this.requests
-      .create(requestId)
-      .then((value) => {
-        const prepared = acceptAuthorityMeshPreparation(
-          value as AuthorityMeshPayload,
-          key,
-          this.meshCache,
-          this.collisionRevisions,
-          baselineLease,
-        );
-        if (prepared) this.preparationCache.set(key, prepared);
-      })
-      .finally(() => {
-        this.collisionRevisions.finishBaseline(baselineLease);
-        if (this.meshLoads.get(key) === request) this.meshLoads.delete(key);
-      });
-    this.meshLoads.set(key, request);
-    try {
-      this.post({
-        kind: 'prepare-mesh',
-        protocolVersion: PROTOCOL_VERSION,
-        epoch: this.epoch,
-        requestId,
-        cx,
-        cy,
-        cz,
-      });
-    } catch (error) {
-      this.requests.reject(requestId, error instanceof Error ? error : new Error(String(error)));
-    }
-    return request;
+    return this.chunks.ensure(cx, cy, cz, ++this.requestSequence);
   }
 
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
-    const key = chunkKey(cx, cy, cz);
-    this.meshLoads.delete(key);
-    this.meshCache.delete(key);
-    this.collisionRevisions.release(key);
-    this.releasePreparation(cx, cy, cz);
+    this.chunks.release(cx, cy, cz);
   }
 
   releasePreparation(cx: number, cy: number, cz: number): void {
-    const key = chunkKey(cx, cy, cz);
-    this.preparationCache.delete(key);
-    this.post({ kind: 'release-mesh', protocolVersion: PROTOCOL_VERSION, epoch: this.epoch, cx, cy, cz });
+    this.chunks.releasePreparation(cx, cy, cz);
   }
 
   prepareWorkerInput(cx: number, cy: number, cz: number) {
-    const cached = this.preparationCache.get(chunkKey(cx, cy, cz));
-    if (!cached) throw new Error(`Authority worker input is not prepared for ${cx},${cy},${cz}.`);
-    return {
-      chunkRevision: cached.payload.chunkRevision,
-      generatorVersion: cached.payload.generatorVersion,
-      ...(cached.payload.preparationDiagnostics
-        ? { preparationDiagnostics: cached.payload.preparationDiagnostics }
-        : {}),
-      ...(cached.canonical ? { canonical: cached.canonical.slice() } : {}),
-      ...(cached.fluid ? { fluid: cached.fluid.slice() } : {}),
-      overlays: cached.overlays.map((overlay) => ({
-        cx: overlay.cx,
-        cy: overlay.cy,
-        cz: overlay.cz,
-        voxels: overlay.voxels.slice(),
-        ...(overlay.fluid ? { fluid: overlay.fluid.slice() } : {}),
-      })),
-    };
+    return this.chunks.prepareWorkerInput(cx, cy, cz);
   }
 
   async acceptWorkerCanonical(
     task: VisibilityTask,
     result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>,
   ): Promise<boolean> {
-    const prepared = this.preparationCache.get(task.chunkKey);
-    return consumeTransferredAuthorityCollisionBaseline({
-      key: task.chunkKey,
-      chunkRevision: task.chunkRevision,
-      generatorVersion: task.generatorVersion,
-      result,
-      preparedFluid: this.preparationCache.get(task.chunkKey)?.fluid,
-      chunks: this.meshCache,
-      guard: this.collisionRevisions,
-      accept: async () => {
-        const canonical = new Uint16Array(result.canonical!);
-        if (matchesPreparedVisibilityCanonical(task, prepared, canonical)) return true;
-        // A fake/relay transport may hand back the same buffer that backs a
-        // retained preparation. Keep that preparation immutable while collision
-        // commits update the generated canonical mirror below.
-        if (prepared?.canonical?.buffer === canonical.buffer) prepared.canonical = prepared.canonical.slice();
-        // The collision mirror keeps `canonical`; Authority receives a distinct
-        // transfer-owned copy only on the slow admission path.
-        const forAuthority = canonical.slice();
-        const response = (await this.request(
-          { kind: 'accept-generated-chunk', ...task, key: task.chunkKey, canonical: forAuthority.buffer },
-          [forAuthority.buffer],
-        )) as { accepted: boolean };
-        return response.accepted;
-      },
-    });
+    return this.chunks.acceptCanonical(task, result);
   }
 
   getVoxel(x: number, y: number, z: number): number {
-    return this.collisionBaselines.getVoxel(x, y, z);
+    return this.chunks.getVoxel(x, y, z);
   }
 
   getFluidCell(x: number, y: number, z: number): { level: number; source: boolean } | null {
-    return this.collisionBaselines.getFluidCell(x, y, z);
+    return this.chunks.getFluidCell(x, y, z);
   }
 
   getChunkRevision(cx: number, cy: number, cz: number): number | null {
-    return this.collisionBaselines.getChunkRevision(cx, cy, cz);
+    return this.chunks.getChunkRevision(cx, cy, cz);
   }
 
   setFluidActiveChunks(keys: readonly string[]): void {
@@ -354,6 +300,7 @@ export class BrowserAuthorityClient {
   async save(): Promise<AuthoritySaveResult> {
     const result = (await this.request({ kind: 'save-authority' })) as AuthoritySaveResult;
     this.storageBytesValue = result.storageBytes;
+    this.storageBytesMeasured = true;
     return result;
   }
 
@@ -390,9 +337,7 @@ export class BrowserAuthorityClient {
     this.worker.onerror = null;
     this.worker.terminate();
     this.cancelAll(new Error('Authority client was disposed.'));
-    this.meshCache.clear();
-    this.collisionRevisions.clear();
-    this.preparationCache.clear();
+    this.chunks.clear();
   }
 
   private request(
@@ -431,7 +376,10 @@ export class BrowserAuthorityClient {
 
   private post(message: AuthorityRequest, transfer: Transferable[] = []): void {
     if (this.disposed || this.failureValue) return;
-    this.worker.postMessage(message, transfer);
+    this.worker.postMessage(
+      message.kind === 'start-authority' ? message : { ...message, runtimeEpoch: this.runtimeEpochValue },
+      transfer,
+    );
   }
 
   private receive(message: AuthorityResponse): void {
@@ -450,7 +398,7 @@ export class BrowserAuthorityClient {
           return this.failAll(new Error('Authority ready snapshot epoch does not match the active session.'));
         this.readyValue = message.ready;
         if (!readySnapshotRejection) this.snapshotValue = message.ready.snapshot;
-        this.collisionRevisions.initializeCommitDelivery(message.ready.snapshot.worldRevision);
+        this.chunks.initialize(message.ready.snapshot.worldRevision);
         this.updateGameplay(message.ready.gameplay);
         this.readyWait.resolve(message.ready);
         break;
@@ -465,7 +413,7 @@ export class BrowserAuthorityClient {
         this.acceptSnapshot(message.snapshot, message.gameplay, message.commits);
         break;
       case 'authority-commits':
-        return publishAuthorityCollisionCommits(message.commits, this.meshCache, this.options, this.collisionRevisions);
+        return this.chunks.publish(message.commits);
       case 'input-decision':
         if (message.sequence <= this.lastInputDecisionSequence) return;
         this.lastInputDecisionSequence = message.sequence;
@@ -480,7 +428,7 @@ export class BrowserAuthorityClient {
         if (!message.ok) this.requests.reject(message.requestId, new Error(message.error));
         else {
           if (message.gameplay) this.updateGameplay(message.gameplay);
-          publishAuthorityCollisionCommits(message.commits, this.meshCache, this.options, this.collisionRevisions);
+          this.chunks.publish(message.commits);
           this.requests.resolve(message.requestId, message.result);
         }
         break;
@@ -495,6 +443,21 @@ export class BrowserAuthorityClient {
         break;
       case 'logic-observation':
         this.options.onLogicObservation?.(message.observation);
+        break;
+      case 'world-harness-response':
+        if (!this.requests.has(message.requestId)) return;
+        if (message.ready) {
+          this.storageBytesMeasured = false;
+          this.runtimeEpochValue = message.runtimeEpoch ?? message.ready.snapshot.epoch;
+          this.snapshotGate = new AuthoritySnapshotGate(this.runtimeEpochValue);
+          this.chunks.clear();
+          this.readyValue = message.ready;
+          this.snapshotValue = null;
+          this.gameplayValue = null;
+          this.acceptSnapshot(message.ready.snapshot, message.ready.gameplay);
+          this.options.onWorldEpochChanged?.(this.runtimeEpochValue, message.ready);
+        }
+        this.requests.resolve(message.requestId, message.result);
         break;
       case 'authority-fatal':
         this.failAll(new Error(message.error));
@@ -513,17 +476,29 @@ export class BrowserAuthorityClient {
     gameplay?: AuthorityGameplayView,
     commits?: readonly WorldCommitResult[],
   ): void {
-    publishAuthorityCollisionCommits(commits, this.meshCache, this.options, this.collisionRevisions);
+    this.chunks.publish(commits);
     if (gameplay) this.updateGameplay(gameplay);
     if (this.snapshotGate.accept(snapshot)) return;
     this.snapshotValue = snapshot;
-    this.collisionBaselines.synchronize(snapshot.chunkRevisions);
+    this.chunks.synchronize(snapshot);
     this.options.onSnapshot?.(snapshot);
   }
 
   private requireReady(): AuthorityReady {
     if (!this.readyValue) throw new Error('Authority client is not ready.');
     return this.readyValue;
+  }
+
+  private worldRequest<Method extends keyof WorldHarnessPort>(
+    method: Method,
+    ...args: unknown[]
+  ): ReturnType<WorldHarnessPort[Method]> {
+    return this.request({ kind: 'world-harness-rpc', method, args }) as ReturnType<WorldHarnessPort[Method]>;
+  }
+
+  private async prepareWorldRequest(request: WorldPrepareRequest): Promise<void> {
+    const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
+    for (const [cx, cy, cz] of chunks) await this.ensureChunkNeighborhood(cx, cy, cz);
   }
 
   private async controlSession<Paused extends boolean>(paused: Paused): Promise<{ paused: Paused }> {

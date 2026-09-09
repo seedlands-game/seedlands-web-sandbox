@@ -1,5 +1,7 @@
 # 分阶段交付与验收计划
 
+> 2026-09-09 后续修订：H1/H2 实施与用户进一步澄清以[共享世界 Harness](../2026-09-09-developer-world-harness/spec.md)、[认知回路及通用资源设计](../2026-09-09-developer-world-harness/agent-harness-design.md)、[框架实测决策](../2026-09-09-developer-world-harness/framework-decision.md)为准。本文保留上一轮设计证据；OpenAI SDK 优先推荐、core agentState 专属块及按控制者类型授权的提议已被替代，不能继续作为实施约束。
+
 ## 依赖、PR 与停止线
 
 | 阶段                        | 可独立合并的交付                                                                                                               | 前置 / 后置                                                     | 准出与停止线                                                                                                |

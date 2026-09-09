@@ -115,19 +115,23 @@ Explicit initialization arguments override URL values, which override persisted 
 
 Press F4 after entering a world to open the compact debug shell. World commands include `/setblock`, `/fill`, `/tp`, `/time get`, `/time set`, `/seed`, `/save`, `/inspect voxel`, and `/inspect chunk`. Gameplay commands include `/inventory`, `/give`, `/damage`, `/heal`, `/spawnitem`, `/spawn creature`, `/craft`, `/break`, `/cancelbreak`, `/pickup`, `/drop`, `/place`, `/use`, `/attack`, `/respawn`, `/tick`, and `/nearby`. Actor debugging adds `/summon`, `/observe`, `/entity action`, `/entity move`, `/entity stop`, `/path`, and `/poi nearby`; invalid arguments return usage details in the shell. The shell releases pointer lock while open; press Esc to close it. Its log text can be selected and copied with native browser controls, and the input accepts normal paste operations. Use Up and Down to browse the latest 20 submitted commands and return to an unfinished draft.
 
+F3 opens a categorized runtime dashboard for world progress, Worker scheduling, Wasm and memory. Measured, estimated and unavailable values are distinguished; compact layout and scrolling are available. Opening it releases pointer lock without pausing the world.
+
 The same structured command boundary is available without PlayCanvas, Canvas, or the DOM:
 
 ```bash
 pnpm server:headless -- --seed my-debug-world
 ```
 
-The first headless harness uses in-process memory persistence. `/save` exercises both chunk and gameplay snapshot persistence and supports reload tests within the process; it does not create a durable world file after the process exits.
+A TTY opens a persistent JavaScript REPL with `world` and top-level await. Use `.command /seed` for a legacy command and `.exit` to close. Add `--json` for versioned JSONL and slash-command compatibility. The world starts paused and supports explicit stepping, continuous run, and complete checkpoint export/restore. See the [world developer Harness guide](docs/developer-world-harness.md).
+
+Headless uses in-process memory persistence. `/save` exercises both chunk and gameplay snapshot persistence and supports reload tests within the process; it does not create a durable world file after the process exits.
 
 ## Archived Node research
 
 The Node Dedicated Server MVP has been retired from active product code and required checks. Its complete snapshot is tagged `archive/node-dedicated-mvp-2026-09-09`; see the [recovery instructions](docs/change-archive.md#node-dedicated-server-研究归档). Future changes do not promise compatibility or continued builds.
 
-The product now centers on browser single-player worlds. Shared world harness capabilities and one persistent NPC agent are next; see the [product baseline](docs/product-positioning.md). The existing headless command loop remains a developer tool. The enhanced REPL and agent are not implemented yet.
+The product now centers on browser single-player worlds; see the [product baseline](docs/product-positioning.md). The shared world port and persistent REPL are developer tools. Model-driven NPC integration is the next stage.
 
 ## Architecture
 

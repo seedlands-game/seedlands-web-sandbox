@@ -52,6 +52,6 @@
 
 ## 来源与解释优先级
 
-下一阶段的可交付切面、共享 Harness、Agent 协议与权限、恢复合同及验收矩阵见[浏览器单 NPC Agent MVP 设计](../changes/2026-09-09-browser-agent-mvp-design/spec.md)。该设计尚未实施；当前可运行产品能力以代码与对应交付证据为准。
+下一阶段的可交付切面、共享 Harness、Agent 协议与权限、恢复合同及验收矩阵见[浏览器单 NPC Agent MVP 设计](../changes/2026-09-09-browser-agent-mvp-design/spec.md)。H1/H2 的实现与运行证据见[世界开发 Harness](developer-world-harness.md)；下一阶段按[通用权限与认知回路修订](../changes/2026-09-09-developer-world-harness/agent-harness-design.md)和[框架实测决策](../changes/2026-09-09-developer-world-harness/framework-decision.md)推进。Agent MVP 尚未实现，当前能力以对应交付证据为准。
 
 本轮用户明确决策优先于旧路线中“先 Dedicated 再 Agent”的安排。已通过 `read_thread` 阅读 [评估 Node Server 交付边界](thread://01a07cf1-b14e-7630-8f1d-88128cd69104) 与[产品定位分析](https://chatgpt.com/c/6aa02f13-6608-83e8-ab45-0ee41a489c6e) 的可访问文本。本次没有取得后者生成文档附件的独立正文，不声称逐字迁入附件；本页以用户原话、当前任务的正式决策和现行源码为依据。旧助手的市场、性能和成本判断不是已核验事实，也不是新强制约束。

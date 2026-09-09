@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "id": "world-harness-implementation",
+  "role": "H1 H2 world runtime implementer",
+  "workType": "implementation",
+  "goal": "Implement H01-H05 and H07 in the current spec end to end: generic configurable resource authorization shared by commands/player/developer ingress; shared world harness with identity inspections preparation commands clock logic actions barriers trace and portable checkpoint restore; persistent Node REPL and bounded JSONL; real Browser Authority Worker adapter with deterministic clock and parity tests. Start with meaningful RED. Reuse current AuthorityRuntime and save schema. No agent-specific core protocol. Preserve old browser harness APIs and slash CLI. Own core, Headless scripts, browser authority/worker adapters, game-harness.ts and minimal game wiring, tests, package exports/config as required. Root owns UI and docs/research. Do not edit UI files or performance telemetry projection; coordinate exact shared game wiring before edits. Do not run full root coverage/build/browser until root coordination; run focused deterministic tests and typecheck. Do not commit/push/install external model SDK. Report API surface early so root can integrate diagnostics; implementation status must distinguish actual supported parity from future NPC product. Complete all contract capabilities, raise concrete blockers rather than silently narrowing.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-developer-world-harness/spec.md",
+      "purpose": "Authorized implementation and acceptance contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/scripts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/worker",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/client/authority",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/client/persistence",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/app/game-harness.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/app/game.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/package.json",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tsconfig.test.json",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tsconfig.tools.json",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/eslint.config.mjs",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/vitest.config.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/playwright.config.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-developer-world-harness"
+    ],
+    "nonGoals": [
+      "No UI changes, no research/long-term docs/spec/contracts edits",
+      "No LLM NPC implementation or new agent save schema",
+      "No git writes, no secrets, no merge",
+      "No removal of prior acceptance thresholds"
+    ]
+  },
+  "outputs": [
+    "H1 H2 world runtime and REPL",
+    "Focused tests and parity fixture",
+    "implementation-harness.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "harness",
+      "check": "H01-H05 complete with deterministic RED/GREEN and actual browser adapter",
+      "evidence": "implementation-harness.md with commands outcomes limitations"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 12
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-developer-world-harness/contracts/parent.json",
+    "sha256": "c6277b0a3ca22c89de3f30e7197cf0dc6af4f62b616a65da6598b52d35a3cb87"
+  }
+}

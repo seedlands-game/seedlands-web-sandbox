@@ -8,7 +8,7 @@
   import InventoryCrafting from './inventory-crafting.svelte';
   import MacroMap from './macro-map.svelte';
   import GameButton from './primitives/game-button.svelte';
-  import GamePanel from './primitives/game-panel.svelte';
+  import RuntimeDiagnostics from './runtime-diagnostics.svelte';
   import StartScreen from './start-screen.svelte';
   import ShellOverlays from './shell-overlays.svelte';
   import type { ApplicationShell } from '../application-shell';
@@ -105,39 +105,7 @@
     >
       {interaction.feedback?.message ?? ''}
     </div>
-    <GamePanel id="debug" label="运行指标" hidden={!debug.visible}>
-      <div class="debug-metrics">{debug.text}</div>
-      <div class="collision-debug-controls" aria-label="碰撞箱调试">
-        <GameButton
-          id="collision-debug-toggle"
-          label={debug.collisionDebug ? '关闭真实碰撞箱' : '显示真实碰撞箱'}
-          pressed={Boolean(debug.collisionDebug)}
-          onclick={actions.toggleCollisionDebug}
-        >
-          {debug.collisionDebug ? '关闭碰撞箱' : '显示碰撞箱'}
-        </GameButton>
-        <label>
-          <input
-            id="collision-debug-contacts"
-            type="checkbox"
-            checked={debug.collisionDebug?.includeContacts ?? false}
-            disabled={!debug.collisionDebug}
-            onchange={(event) => actions.setCollisionDebugContacts(event.currentTarget.checked)}
-          />
-          接触点与法线
-        </label>
-        <label>
-          <input
-            id="collision-debug-sensors"
-            type="checkbox"
-            checked={debug.collisionDebug?.includeSensors ?? true}
-            disabled={!debug.collisionDebug}
-            onchange={(event) => actions.setCollisionDebugSensors(event.currentTarget.checked)}
-          />
-          拾取与吸附传感器
-        </label>
-      </div>
-    </GamePanel>
+    <RuntimeDiagnostics {debug} {actions} />
     <DebugCommandShell open={shell.commandOpen} {actions} />
     <GameButton id="map-toggle" class="game-panel map-toggle" label="Macro 地图" onclick={actions.toggleMap}>
       Macro 地图

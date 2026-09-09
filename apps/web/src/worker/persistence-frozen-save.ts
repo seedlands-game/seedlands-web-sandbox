@@ -48,6 +48,7 @@ export async function persistFrozenGameSnapshot(options: {
   proceduralChunk: (cx: number, cy: number, cz: number) => Uint16Array;
   normalizeRecord: (value: unknown) => StoredChunkRecord;
   onEncodeCompleted?: (timing: Readonly<{ startedAtMs: number; completedAtMs: number }>) => void;
+  replace?: boolean;
 }) {
   const { config, snapshot } = options;
   const checkpoint = readGameSaveCheckpoint(snapshot)!;
@@ -84,22 +85,36 @@ export async function persistFrozenGameSnapshot(options: {
     const worlds = transaction.objectStore('worlds');
     const chunks = transaction.objectStore('chunks');
     const existingWorld = (await requestResult(worlds.get(config.worldId))) as WorldRecord | undefined;
-    if (!existingWorld) throw new Error('Stored world metadata is missing.');
-    if ((existingWorld.commitSequence ?? 0) > snapshot.commitSequence)
+    if (!existingWorld && !options.replace) throw new Error('Stored world metadata is missing.');
+    if (!options.replace && (existingWorld!.commitSequence ?? 0) > snapshot.commitSequence)
       throw new Error('Refusing to replace a newer frozen game checkpoint.');
+    if (options.replace)
+      chunks.delete(
+        IDBKeyRange.bound(
+          [config.worldId, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY],
+          [config.worldId, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
+        ),
+      );
     for (const record of records) {
-      const existingValue = await requestResult(chunks.get([record.worldId, record.cx, record.cy, record.cz]));
-      if (existingValue !== undefined) {
-        const existing = options.normalizeRecord(existingValue);
-        if (existing.revision > record.revision)
-          throw new Error(`Refusing to replace Chunk ${record.cx},${record.cy},${record.cz} with an older revision.`);
-        if (existing.revision === record.revision && existing.payloadChecksum !== record.payloadChecksum)
-          throw new Error(`Chunk ${record.cx},${record.cy},${record.cz} revision conflicts with stored content.`);
+      if (!options.replace) {
+        const existingValue = await requestResult(chunks.get([record.worldId, record.cx, record.cy, record.cz]));
+        if (existingValue !== undefined) {
+          const existing = options.normalizeRecord(existingValue);
+          if (existing.revision > record.revision)
+            throw new Error(`Refusing to replace Chunk ${record.cx},${record.cy},${record.cz} with an older revision.`);
+          if (existing.revision === record.revision && existing.payloadChecksum !== record.payloadChecksum)
+            throw new Error(`Chunk ${record.cx},${record.cy},${record.cz} revision conflicts with stored content.`);
+        }
       }
       chunks.put(record);
     }
     worlds.put({
-      ...existingWorld,
+      ...(existingWorld ?? {
+        worldId: config.worldId,
+        seedText: config.seedText,
+        generatorVersion: config.generatorVersion,
+        player: null,
+      }),
       gameplaySnapshot: snapshot.gameplay,
       commitSequence: snapshot.commitSequence,
       worldRevision: checkpoint.worldRevision,

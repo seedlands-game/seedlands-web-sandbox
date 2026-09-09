@@ -22,8 +22,10 @@ import { PLAYER_FEET_OFFSET } from './player/player-view-offsets';
 import type { CollisionDebugRuntime } from './player/collision-debug-runtime';
 import type { FluidFeedbackTarget } from './gameplay/fluid-feedback-tracker';
 import type { AuthorityBodySnapshot } from '@seedlands/game-core/server/authority/authority-session-types';
+import type { WorldHarnessPort } from '@seedlands/game-core/server/harness/world-harness-contract';
 
 export type HarnessApi = {
+  world: WorldHarnessPort;
   snapshot: () => HarnessSnapshot;
   lifecycleSnapshot: () => LifecycleSnapshot;
   restartWorld: (seed: string) => Promise<void>;
@@ -66,6 +68,7 @@ export type HarnessApi = {
 };
 
 type RuntimeHarnessBindings = {
+  developerWorld: () => WorldHarnessPort;
   lifecycleSnapshot: () => LifecycleSnapshot;
   restartWorld: (seed: string) => Promise<void>;
   world: () => World | null;
@@ -263,6 +266,8 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
         acceptedCandidateCount: 0,
         rejectedCandidateCount: 0,
         returnedLeaseCount: 0,
+        issuedLeaseCount: 0,
+        settledLeaseCount: 0,
       },
       residency: authoritySnapshot?.diagnostics?.residency ?? null,
       bodies: authorityBodies,
@@ -374,6 +379,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
 
 export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): HarnessApi {
   return {
+    world: bindings.developerWorld(),
     snapshot: () =>
       createHarnessSnapshot({
         world: bindings.world(),

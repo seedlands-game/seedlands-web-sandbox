@@ -83,6 +83,8 @@ describe('fluid transactions', () => {
       acceptedCandidateCount: 0,
       rejectedCandidateCount: 0,
       returnedLeaseCount: 0,
+      issuedLeaseCount: 0,
+      settledLeaseCount: 0,
     });
 
     authority.activate([0, 50, 0]);

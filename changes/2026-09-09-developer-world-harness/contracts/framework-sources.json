@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "id": "framework-source-extraction",
+  "role": "Official framework source extraction",
+  "workType": "extraction",
+  "goal": "Read current official DeepSeek V4 API docs and deepseek-ai/deepseek-harness source/docs, LangChain/LangGraph JS docs and source, and OpenAI Agents JS SDK source/docs. Bounded fact extraction only: exact current package versions/commit date/license, embeddable core loop entry points, custom tool registration, persistent sessions, cancellation and external action accepted-vs-completed break, context compact/rotation hooks, no-shell minimal composition, DeepSeek reasoning/tool protocol compatibility, traces and portable checkpoint ownership. DeepSeek V4 Flash/Pro names/context/output limits and configurable reasoning; include exact source URLs and uncertainty. Important current DeepSeek Harness is real developer preview; inspect authoritative docs rather than assuming coding CLI only. Do not select a framework or develop anything. Write concise Chinese fact matrix with quotations within copyright limits at /tmp/seedlands-harness-framework-sources.md. No key access, no model calls, no npm installs or git checkout writes. Use web and bounded read-only GitHub access. Root independently evaluates recommendation while implementing UI.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-developer-world-harness/spec.md",
+      "purpose": "Authorized implementation and acceptance contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No production changes",
+      "No model API calls, no secrets",
+      "No final framework recommendation or benchmarks"
+    ]
+  },
+  "outputs": [
+    "/tmp/seedlands-harness-framework-sources.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-luna",
+    "effort": "medium"
+  },
+  "acceptance": [
+    {
+      "id": "sources",
+      "check": "Facts from primary sources with URLs dates versions and explicit inaccessible/unknown fields",
+      "evidence": "Chinese report in /tmp"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 2
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "\u8303\u56f4\u6539\u53d8\u6216\u4e09\u6b21\u540c\u56e0\u5931\u8d25"
+  ],
+  "reportFields": [
+    "\u53d8\u66f4",
+    "\u9a8c\u8bc1",
+    "\u98ce\u9669",
+    "\u5b9e\u9645\u6210\u672c"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-developer-world-harness/contracts/parent.json",
+    "sha256": "c6277b0a3ca22c89de3f30e7197cf0dc6af4f62b616a65da6598b52d35a3cb87"
+  }
+}
