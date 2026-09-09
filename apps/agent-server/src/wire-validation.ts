@@ -31,13 +31,14 @@ function validEventPage(events: readonly unknown[], pageCursor: number, headCurs
   if (events.length === 0) return pageCursor === headCursor;
   if (events.length < CHARACTER_OBSERVATION_MAX_EVENTS && pageCursor !== headCursor) return false;
 
-  let previousCursor = -1;
+  let previousCursor = pageCursor - events.length;
+  if (previousCursor < 0) return false;
   for (const event of events) {
     const entry = record(event);
     if (
       !entry ||
       !Number.isSafeInteger(entry.cursor) ||
-      (entry.cursor as number) <= previousCursor ||
+      entry.cursor !== previousCursor + 1 ||
       (entry.cursor as number) > pageCursor ||
       (entry.cursor as number) <= headCursor - CHARACTER_RETAINED_EVENT_LIMIT ||
       (entry.text !== undefined && (typeof entry.text !== 'string' || entry.text.length > 2000)) ||
