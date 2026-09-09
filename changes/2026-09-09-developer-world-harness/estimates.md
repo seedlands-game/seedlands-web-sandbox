@@ -21,3 +21,5 @@
 2026-09-09 复估：独立验收暴露 JSONL framing/typed-array 往返、全目标授权、恢复 fencing/完整替换、barrier ACK 等实际缺口；均为原合同内修复。主任务接管 Node CLI/JSONL，Sol 专注 core/Browser，未扩大到 Agent 实现。Luna 的实际 token/credits 无账单，预算保留 2 小时，不伪造换算；原 654 credits 建议未包含可观测的 Luna 实际值，总额为该估计加 unknown。父合同 acceptance 的旧“退役验收”文字为复制遗漏，实际范围以 goal、spec 和子合同为准，原始合同 hash 保持不改。
 
 本轮可观测起点：Codex 活跃 turn `01a082fb-6911-79c3-a907-8278e61580c0` 于 2026-09-09 05:45:09（Asia/Shanghai）开始。交付时以该时间计算连续墙钟，包含工具与等待，不将其等同各模型活跃工时或收费 token。
+
+2026-09-09 09:03（Asia/Shanghai）本地最终源码准出快照：从 05:45:09 起约 3 小时 18 分钟连续墙钟（含工具/等待）；低于 30 小时建议，后续 PR/CI 另计等待。各模型真实活跃工时、tokens、credits 和 API 等价费用仍为 unknown。账户共享周窗口已用 80%（起点 71%），额外余额仍为 511.183598；账户差值不可归因本任务，未购买/兑换 reset、未进行真实模型调用。最终源码已在原范围内完成，无新增实现阶段预算。
