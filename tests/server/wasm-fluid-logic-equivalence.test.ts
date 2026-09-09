@@ -1,3 +1,4 @@
+import { deepStrictEqual } from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import {
@@ -54,8 +55,8 @@ describe('W07 有序流体候选对等', () => {
         expect(compute(input)).toEqual(expected);
         expect(memory.failed).toBe(false);
         chunks.forEach((chunk, i) => {
-          expect(chunk.voxels).toEqual(before[i][0]);
-          expect(chunk.fluid).toEqual(before[i][1]);
+          deepStrictEqual(chunk.voxels, before[i][0]);
+          deepStrictEqual(chunk.fluid, before[i][1]);
         });
         for (const write of expected.writes) {
           const [x, y, z] = write.position;
