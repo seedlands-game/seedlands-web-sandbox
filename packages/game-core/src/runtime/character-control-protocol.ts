@@ -93,6 +93,7 @@ export type CharacterControlRequest =
       entityId: string;
       requestId: string;
       expectedRevision: number;
+      expectedCursor?: number;
       goal: CharacterGoal;
       say?: string;
     }>

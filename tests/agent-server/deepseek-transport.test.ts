@@ -70,13 +70,23 @@ describe('DeepSeekChatCompletionsTransport', () => {
 
   it('never includes a credential or response body in transport errors', async () => {
     const secret = 'super-secret-test-value';
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(`provider echoed ${secret}`));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
     const transport = new DeepSeekChatCompletionsTransport({
       endpoint: { apiKey: secret, baseUrl: DEFAULT_DEEPSEEK_BASE_URL, keySource: 'DEEPSEEK_API_KEY' },
-      fetch: vi.fn(async () => new Response(`provider echoed ${secret}`, { status: 500 })) as typeof globalThis.fetch,
+      fetch: vi.fn(async () => new Response(body, { status: 500 })) as typeof globalThis.fetch,
     });
     await expect(
       transport.complete({ model: 'model', messages: [{ role: 'user', content: 'hi' }], maxTokens: 10 }),
     ).rejects.toMatchObject({ kind: 'http', message: 'DeepSeek request failed with status 500' });
+    expect(cancelled).toBe(true);
   });
 
   it('requires a matching base URL when reusing the approved MIDSCENE key', () => {
@@ -107,5 +117,75 @@ describe('DeepSeekChatCompletionsTransport', () => {
       .catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(DeepSeekTransportError);
     expect(error).toMatchObject({ kind: 'timeout', message: 'DeepSeek request timed out' });
+  });
+
+  it('cancels a streamed response as soon as its accumulated bytes exceed the limit', async () => {
+    let cancelled = false;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{"first":"1234"'));
+        controller.enqueue(new TextEncoder().encode(',"overflow":"5678"}'));
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const transport = new DeepSeekChatCompletionsTransport({
+      endpoint: { apiKey: 'test-key', baseUrl: DEFAULT_DEEPSEEK_BASE_URL, keySource: 'DEEPSEEK_API_KEY' },
+      maxResponseBytes: 16,
+      fetch: vi.fn(async () => new Response(body, { status: 200 })) as typeof globalThis.fetch,
+    });
+
+    await expect(
+      transport.complete({ model: 'model', messages: [{ role: 'user', content: 'hi' }], maxTokens: 10 }),
+    ).rejects.toMatchObject({ kind: 'invalid-response' });
+    expect(cancelled).toBe(true);
+  });
+
+  it('cancels a body rejected by content-length without reading it', async () => {
+    let cancelled = false;
+    let readerRequested = false;
+    const body = {
+      async cancel() {
+        cancelled = true;
+      },
+      getReader() {
+        readerRequested = true;
+        throw new Error('body must not be read');
+      },
+    } as unknown as ReadableStream<Uint8Array>;
+    const transport = new DeepSeekChatCompletionsTransport({
+      endpoint: { apiKey: 'test-key', baseUrl: DEFAULT_DEEPSEEK_BASE_URL, keySource: 'DEEPSEEK_API_KEY' },
+      maxResponseBytes: 8,
+      fetch: vi.fn(
+        async () => ({ ok: true, status: 200, headers: new Headers({ 'content-length': '9' }), body }) as Response,
+      ) as typeof globalThis.fetch,
+    });
+
+    await expect(
+      transport.complete({ model: 'model', messages: [{ role: 'user', content: 'hi' }], maxTokens: 10 }),
+    ).rejects.toMatchObject({ kind: 'invalid-response' });
+    expect(cancelled).toBe(true);
+    expect(readerRequested).toBe(false);
+  });
+
+  it('does not call fetch for a pre-aborted request signal', async () => {
+    const fetch = vi.fn();
+    const controller = new AbortController();
+    controller.abort(new Error('private cancellation reason'));
+    const transport = new DeepSeekChatCompletionsTransport({
+      endpoint: { apiKey: 'test-key', baseUrl: DEFAULT_DEEPSEEK_BASE_URL, keySource: 'DEEPSEEK_API_KEY' },
+      fetch: fetch as typeof globalThis.fetch,
+    });
+
+    await expect(
+      transport.complete({
+        model: 'model',
+        messages: [{ role: 'user', content: 'hi' }],
+        maxTokens: 10,
+        signal: controller.signal,
+      }),
+    ).rejects.toMatchObject({ kind: 'timeout', message: 'DeepSeek request timed out' });
+    expect(fetch).not.toHaveBeenCalled();
   });
 });

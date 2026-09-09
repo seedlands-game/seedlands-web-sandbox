@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "id": "living-npc-github-world-fix",
+  "role": "world correctness implementer",
+  "workType": "implementation",
+  "goal": "Implement validated GitHub findings at6a24891: (1) generic CharacterControlRequest intent gains optional expectedCursor; core applyIntent rejects supplied invalid/mismatched eventCursor before any mutation using CHARACTER_REVISION_CONFLICT or explicit mapped stale code; bound intent protocol requires expectedCursor and Authority bound handler validates safe nonnegative cursor (Root handles Web port/bridge propagation separately; port intent signature requestId,expectedRevision,expectedCursor,goal,say). (4) restore actionId cross-reference must exist, own entityId and correspond to active goal/execution; validate against restored action store, preserve legitimate action terminal transition and atomic candidate restore. Add meaningful RED/GREEN tests missing/foreign/wrong action and stale dialogue in bound Authority. Avoid assuming all actionIds always running; inspect actual lifecycle. All6findings validated in /tmp/living-npc-github-triage.md or JSON. Chinese fix report /tmp/living-npc-github-world-fix.md with evidence. Root owns spec/docs/Git/globalgates; no edits in Web port/bridge/client tests. Read current spec first. Run only focused direct .bin/vitest tests, no provider/browser/install/fullformat/commit/push. Keep500effective line cap; existingruntime497physical likelyroomnonblank. Freeze files when done.",
+  "initiatedBy": "agent",
+  "context": [
+    {
+      "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/spec.md",
+      "purpose": "Authorized NPC MVP contract"
+    }
+  ],
+  "scope": {
+    "readPaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation",
+      "/Users/chlorinec/.codex/skills/agent-work-routing",
+      "/private/tmp"
+    ],
+    "writePaths": [
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/runtime/character-control-protocol.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/compute/authority-worker-protocol.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/packages/game-core/src/server/simulation",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/apps/web/src/worker/authority-worker-character-control.ts",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/server",
+      "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/tests/client/browser-character-authority.test.ts",
+      "/private/tmp"
+    ],
+    "nonGoals": [
+      "No Dedicated/LOD/World AI/custom rules/multimodal",
+      "No merge, no credentials output or modification"
+    ]
+  },
+  "outputs": [
+    "/tmp/living-npc-github-world-fix.md"
+  ],
+  "execution": {
+    "form": "subagent",
+    "model": "gpt-5.6-sol",
+    "effort": "high"
+  },
+  "acceptance": [
+    {
+      "id": "regression",
+      "check": "Verified findings resolved with meaningful RED/GREEN; no unrelated edits",
+      "evidence": "focused tests and report"
+    }
+  ],
+  "budget": {
+    "maxAttempts": 3,
+    "maxAgentHours": 1.5
+  },
+  "permissions": {
+    "localWrite": true,
+    "externalWrite": false,
+    "delegate": false
+  },
+  "resources": {
+    "exclusiveGroup": null
+  },
+  "escalation": [
+    "范围改变或三次同因失败"
+  ],
+  "reportFields": [
+    "变更",
+    "验证",
+    "风险",
+    "实际成本"
+  ],
+  "parent": {
+    "path": "/Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation/changes/2026-09-09-living-npc-mvp/contracts/parent.json",
+    "sha256": "41527c2e73cfaba4ca86c449074b8f985e6dd7461039329f47cc5de74e620da2"
+  }
+}

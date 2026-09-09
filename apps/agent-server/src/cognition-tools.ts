@@ -84,7 +84,7 @@ export const COGNITION_TOOLS: readonly DeepSeekTool[] = [
                   target: {
                     type: 'object',
                     properties: {
-                      kind: { enum: ['entity', 'poi'] },
+                      kind: { const: 'entity' },
                       ref: { type: 'string', minLength: 1, maxLength: 128 },
                       revision: { type: 'integer', minimum: 0 },
                     },
@@ -150,7 +150,7 @@ function targetRef(value: unknown, observation: CharacterObservation): Character
   const source = record(value);
   if (!source || !exactKeys(source, ['kind', 'ref', 'revision'])) return null;
   if (
-    (source.kind !== 'entity' && source.kind !== 'poi') ||
+    source.kind !== 'entity' ||
     typeof source.ref !== 'string' ||
     !source.ref ||
     source.ref.length > 128 ||
@@ -158,9 +158,9 @@ function targetRef(value: unknown, observation: CharacterObservation): Character
     (source.revision as number) < 0
   )
     return null;
-  const visible = targetByRef(observation, source.ref);
-  if (!visible || visible.target.kind !== source.kind || visible.target.revision !== source.revision) return null;
-  return { kind: source.kind, ref: source.ref, revision: source.revision as number };
+  const visible = observation.visibleEntities.find((entry) => entry.target.ref === source.ref);
+  if (!visible || visible.target.kind !== 'entity' || visible.target.revision !== source.revision) return null;
+  return { kind: 'entity', ref: source.ref, revision: source.revision as number };
 }
 
 function goal(value: unknown, observation: CharacterObservation): CharacterGoal | null {
@@ -194,8 +194,11 @@ function readResult(call: DeepSeekToolCall, args: Record<string, unknown>, obser
   if (call.function.name === 'available_actions') {
     if (!exactKeys(args, ['ref']) || (args.ref !== undefined && typeof args.ref !== 'string'))
       throw new Error('invalid available_actions arguments');
-    if (typeof args.ref === 'string' && !targetByRef(observation, args.ref)) throw new Error('target is not visible');
-    return JSON.stringify({ goals: ['idle', 'forage', 'return-home', 'follow', 'move-to'] });
+    const target = typeof args.ref === 'string' ? targetByRef(observation, args.ref) : undefined;
+    if (typeof args.ref === 'string' && !target) throw new Error('target is not visible');
+    return JSON.stringify({
+      goals: ['idle', 'forage', 'return-home', ...(target?.target.kind === 'poi' ? [] : ['follow']), 'move-to'],
+    });
   }
   if (call.function.name !== 'inspect_visible') throw new Error('unknown read tool');
   if (!exactKeys(args, ['ref', 'fields']) || typeof args.ref !== 'string' || !Array.isArray(args.fields))

@@ -138,7 +138,7 @@ describe('CognitionRuntime', () => {
     runtime.dispose();
   });
 
-  it('preserves a higher-cursor event that arrives during Flash with the same character revision', async () => {
+  it('discards a stale Flash proposal and re-decides with a higher-cursor event at the same revision', async () => {
     const requests: ModelRequest[] = [];
     const sent: ControllerHostMessage[] = [];
     let resolveFirst!: (completion: ModelCompletion) => void;
@@ -191,23 +191,14 @@ describe('CognitionRuntime', () => {
     });
     resolveFirst(intentCompletion('tail-tool-1'));
     await vi.advanceTimersByTimeAsync(0);
-    expect(sent).toContainEqual(expect.objectContaining({ kind: 'intent', requestId: 'tail-request-1' }));
-
-    runtime.receive(
-      receiptMessage(3, {
-        requestId: 'tail-request-1',
-        actionId: 'tail-action-1',
-        status: 'accepted',
-        cursor: 2,
-        revision: 8,
-      }),
-    );
+    expect(sent.some((message) => message.kind === 'intent')).toBe(false);
     await vi.advanceTimersByTimeAsync(250);
     expect(requests).toHaveLength(2);
-    expect(requests[1]?.messages).toContainEqual(
-      expect.objectContaining({ role: 'tool', tool_call_id: 'tail-tool-1' }),
-    );
+    expect(requests[1]?.messages).not.toContainEqual(expect.objectContaining({ tool_call_id: 'tail-tool-1' }));
     expect(requests[1]?.messages.some((message) => message.content?.includes('"cursor":2'))).toBe(true);
+    expect(sent).toContainEqual(
+      expect.objectContaining({ kind: 'intent', requestId: 'tail-request-1', observedCursor: 2 }),
+    );
     runtime.dispose();
   });
 

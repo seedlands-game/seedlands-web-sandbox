@@ -4,6 +4,7 @@ import type {
   CharacterGoalState,
   CharacterProfile,
 } from '../../runtime/character-control-protocol';
+import type { ActorAction } from './action-runtime';
 import {
   createCharacterInventory,
   CHARACTER_INVENTORY_CAPACITY,
@@ -229,4 +230,39 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
     throw new TypeError('Character snapshot execution state is invalid.');
   if (value.lifecycle === 'deceased' && (value.actionId || value.suspendedGoal || value.inventory.some(Boolean)))
     throw new TypeError('Deceased character snapshot retains active execution state.');
+}
+
+const samePosition = (left: readonly number[] | undefined, right: readonly number[]) =>
+  Boolean(left && left.length === right.length && left.every((coordinate, index) => coordinate === right[index]));
+
+export function validateCharacterActionLink(value: CharacterSnapshotRecord, action: ActorAction | null): void {
+  if (!value.actionId) return;
+  const goal = value.currentGoal.goal;
+  if (
+    !action ||
+    action.id !== value.actionId ||
+    action.actorId !== value.entityId ||
+    action.type !== 'move-to' ||
+    value.currentGoal.status !== 'active' ||
+    goal.kind === 'idle'
+  )
+    throw new TypeError('Character snapshot action link is invalid.');
+  if (goal.kind === 'move-to' && !samePosition(action.targetPosition, goal.position))
+    throw new TypeError('Character snapshot move action is inconsistent.');
+  if (goal.kind === 'return-home' && !samePosition(action.targetPosition, value.homePosition))
+    throw new TypeError('Character snapshot return action is inconsistent.');
+  if (goal.kind === 'forage' || goal.kind === 'follow') {
+    if (!value.executionTargetId || action.targetEntityId !== value.executionTargetId)
+      throw new TypeError('Character snapshot target action is inconsistent.');
+  }
+  if (goal.kind === 'follow') {
+    const binding = value.targets.find((target) => target.ref === goal.target.ref);
+    if (
+      !binding ||
+      binding.kind !== 'entity' ||
+      binding.revision !== goal.target.revision ||
+      binding.targetId !== value.executionTargetId
+    )
+      throw new TypeError('Character snapshot follow target is inconsistent.');
+  }
 }

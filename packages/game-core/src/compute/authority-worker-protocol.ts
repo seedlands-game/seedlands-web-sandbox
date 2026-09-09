@@ -15,7 +15,10 @@ import type { CombatSnapshot } from '../server/gameplay/combat-runtime';
 import type { WorldHarnessPort, WorldHarnessResult } from '../server/harness/world-harness-contract';
 import type { CharacterControlRequest, ControlBinding } from '../runtime/character-control-protocol';
 
-export type BoundCharacterControlRequest = Extract<CharacterControlRequest, { kind: 'observe' | 'intent' | 'memory' }>;
+type CharacterIntentRequest = Extract<CharacterControlRequest, { kind: 'intent' }>;
+export type BoundCharacterControlRequest =
+  | Extract<CharacterControlRequest, { kind: 'observe' | 'memory' }>
+  | Readonly<Omit<CharacterIntentRequest, 'expectedCursor'> & { expectedCursor: number }>;
 
 export type GameplayEntityView = GameplayEntity & Readonly<{ combat?: CombatSnapshot }>;
 

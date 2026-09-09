@@ -26,6 +26,7 @@ export type BoundCharacterControlPort = Readonly<{
   intent(
     requestId: string,
     expectedRevision: number,
+    expectedCursor: number,
     goal: CharacterGoal,
     say?: string,
   ): Promise<WorldHarnessResult<CharacterControlResult>>;
