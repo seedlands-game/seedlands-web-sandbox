@@ -32,6 +32,7 @@ import type {
   BrowserPersistenceSaveResult as SaveResult,
   BrowserPersistenceWorkerResponse as WorkerResponse,
 } from './browser-persistence-worker-contract';
+import { prepareFrozenSnapshotWrite, recordFrozenSnapshotWrite } from './browser-frozen-snapshot-write';
 
 export { decodeBrowserWorldSave } from './browser-world-save';
 export type { BrowserWorldSave, SerializedChunkSnapshot } from './browser-world-save';
@@ -44,6 +45,7 @@ const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
 });
 
 export class BrowserChunkPersistence implements ChunkPersistence {
+  seedText: string;
   worldId: string;
   generatorVersion = GENERATOR_VERSION;
   private readonly snapshots = new Map<string, ChunkSnapshot>();
@@ -70,10 +72,8 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     codecs: {},
   };
 
-  private constructor(
-    readonly seedText: string,
-    player: [number, number, number] | null,
-  ) {
+  private constructor(seedText: string, player: [number, number, number] | null) {
+    this.seedText = seedText;
     this.worldId = `seedlands:g${GENERATOR_VERSION}:${seedText}`;
     this.playerValue = player;
     this.worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
@@ -179,33 +179,28 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   async saveFrozenSnapshot(snapshot: FrozenGameSaveSnapshot): Promise<void> {
+    await this.writeFrozenSnapshot('save-frozen', snapshot);
+  }
+
+  async replaceFrozenSnapshot(snapshot: FrozenGameSaveSnapshot): Promise<void> {
+    await this.writeFrozenSnapshot('replace-frozen', snapshot);
+    this.snapshots.clear();
+    this.missing.clear();
+    this.cacheTokens.clear();
+    this.loads.clear();
+    this.seedText = snapshot.seedText;
+    this.generatorVersion = snapshot.generatorVersion;
+    this.worldId = `seedlands:g${snapshot.generatorVersion}:${snapshot.seedText}`;
+  }
+
+  private async writeFrozenSnapshot(
+    kind: 'save-frozen' | 'replace-frozen',
+    snapshot: FrozenGameSaveSnapshot,
+  ): Promise<void> {
     const saveFence = this.loadRegistry.captureSaveFence();
-    const copy = structuredClone(snapshot);
-    const transfers = copy.chunks.flatMap((chunk) => [
-      chunk.voxels.buffer as Transferable,
-      ...(chunk.fluid ? [chunk.fluid.buffer as Transferable] : []),
-    ]);
-    const result = (await this.request(
-      {
-        kind: 'save-frozen',
-        snapshot: {
-          ...copy,
-          chunks: copy.chunks.map((chunk) => ({
-            ...chunk,
-            voxels: chunk.voxels.buffer,
-            ...(chunk.fluid ? { fluid: chunk.fluid.buffer } : {}),
-          })),
-        },
-      },
-      transfers,
-    )) as SaveResult;
-    this.metricsValue.idbPutCount += result.saved.length + 1;
-    this.metricsValue.encodedChunkCount += result.saved.length;
-    this.metricsValue.recordBytes += result.recordBytes;
-    this.metricsValue.encodeMs += result.encodeMs;
-    Object.entries(result.codecs).forEach(([codec, count]) => {
-      this.metricsValue.codecs[codec] = (this.metricsValue.codecs[codec] ?? 0) + count;
-    });
+    const prepared = prepareFrozenSnapshotWrite(snapshot);
+    const result = (await this.request({ kind, ...prepared.message }, prepared.transfers)) as SaveResult;
+    recordFrozenSnapshotWrite(this.metricsValue, result);
     this.applySaveFence(
       snapshot.chunks.map((chunk) => chunk.key),
       saveFence,

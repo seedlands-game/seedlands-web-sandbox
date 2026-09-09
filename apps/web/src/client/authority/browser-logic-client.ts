@@ -32,14 +32,41 @@ export class BrowserLogicClient {
   private blockCompletedCount = 0;
   private observationInFlight = false;
   private pendingObservation: LogicObservation | null = null;
+  private submittedObservationCount = 0;
+  private completedBatchCount = 0;
+  private observationStartedAt: number | null = null;
+  private lastRoundTripMs: number | null = null;
+  private epochValue: string;
 
   constructor(
     private readonly worker: LogicWorkerPort,
-    readonly epoch: string,
+    epoch: string,
     private readonly options: Options = {},
   ) {
+    this.epochValue = epoch;
     worker.onmessage = (event) => this.receive(event.data);
     worker.onerror = (event) => this.fail(new Error(event.message || 'Game Logic Worker failed.'));
+  }
+
+  get epoch(): string {
+    return this.epochValue;
+  }
+
+  rebindEpoch(nextEpoch: string): void {
+    if (!this.ready || this.disposed) throw new Error('Logic client is unavailable.');
+    if (!nextEpoch.trim()) throw new TypeError('Next Logic epoch must not be empty.');
+    if (nextEpoch === this.epochValue) return;
+    const previousEpoch = this.epochValue;
+    this.epochValue = nextEpoch;
+    this.observationInFlight = false;
+    this.pendingObservation = null;
+    this.observationStartedAt = null;
+    this.worker.postMessage({
+      kind: 'reset-logic-epoch',
+      protocolVersion: LOGIC_PROTOCOL_VERSION,
+      epoch: previousEpoch,
+      nextEpoch,
+    });
   }
 
   static create(epoch: string, options: Options = {}) {
@@ -84,13 +111,23 @@ export class BrowserLogicClient {
         occupancy,
       );
       this.observationInFlight = true;
+      this.submittedObservationCount += 1;
+      this.observationStartedAt = performance.now();
     } catch (error) {
       this.fail(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
   get diagnostics() {
-    return { blockStartedCount: this.blockStartedCount, blockCompletedCount: this.blockCompletedCount } as const;
+    return {
+      blockStartedCount: this.blockStartedCount,
+      blockCompletedCount: this.blockCompletedCount,
+      observationInFlight: this.observationInFlight,
+      pendingObservationCount: this.pendingObservation ? 1 : 0,
+      submittedObservationCount: this.submittedObservationCount,
+      completedBatchCount: this.completedBatchCount,
+      lastRoundTripMs: this.lastRoundTripMs,
+    } as const;
   }
 
   get isReady(): boolean {
@@ -154,6 +191,10 @@ export class BrowserLogicClient {
     }
     if (message.kind === 'logic-intents') {
       this.observationInFlight = false;
+      this.completedBatchCount += 1;
+      this.lastRoundTripMs =
+        this.observationStartedAt === null ? null : Math.max(0, performance.now() - this.observationStartedAt);
+      this.observationStartedAt = null;
       this.options.onIntents?.(message.batch);
       const pending = this.pendingObservation;
       this.pendingObservation = null;
@@ -175,6 +216,7 @@ export class BrowserLogicClient {
     this.ready = false;
     this.observationInFlight = false;
     this.pendingObservation = null;
+    this.observationStartedAt = null;
     this.rejectReady?.(error);
     this.resolveReady = null;
     this.rejectReady = null;

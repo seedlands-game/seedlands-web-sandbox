@@ -57,6 +57,8 @@ export type FluidAuthorityDiagnostics = Readonly<{
   acceptedCandidateCount: number;
   rejectedCandidateCount: number;
   returnedLeaseCount: number;
+  issuedLeaseCount?: number;
+  settledLeaseCount?: number;
 }>;
 
 const MIN_ACTIVE_Y = 0;
@@ -330,6 +332,8 @@ export class FluidTransactionAuthority {
       acceptedCandidateCount: this.acceptedCandidateCount,
       rejectedCandidateCount: this.rejectedCandidateCount,
       returnedLeaseCount: this.returnedLeaseCount,
+      issuedLeaseCount: this.nextWorkId - 1,
+      settledLeaseCount: this.acceptedCandidateCount + this.returnedLeaseCount,
     };
   }
 

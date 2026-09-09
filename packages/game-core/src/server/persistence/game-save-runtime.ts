@@ -33,11 +33,20 @@ export class GameSaveRuntime {
   constructor(private readonly options: Options) {}
 
   freeze(commitSequence: number): FrozenGameSaveSnapshot {
+    return this.freezeSelected(commitSequence, (chunk) => chunk.dirty);
+  }
+
+  /** 导出可移植检查点时包含当前 Authority 持有的全部 canonical Chunk，而不只包含脏块。 */
+  freezePortable(commitSequence: number): FrozenGameSaveSnapshot {
+    return this.freezeSelected(commitSequence, () => true);
+  }
+
+  private freezeSelected(commitSequence: number, include: (chunk: ServerChunk) => boolean): FrozenGameSaveSnapshot {
     if (!Number.isSafeInteger(commitSequence) || commitSequence < 0)
       throw new TypeError('Save commit sequence must be a non-negative safe integer.');
     const gameplay = this.options.createGameplaySnapshot();
     const chunks = [...this.options.chunks.values()]
-      .filter((chunk) => chunk.dirty)
+      .filter(include)
       .sort((left, right) => left.key.localeCompare(right.key))
       .map((chunk) => createChunkSnapshot(this.options.seedText, chunk));
     const snapshot: FrozenGameSaveSnapshot = {

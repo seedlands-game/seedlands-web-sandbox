@@ -29,8 +29,6 @@ export class GameplayCommandPermissionError extends Error {}
 const playerId = (source: CommandSource, explicit?: string): string => {
   const id = explicit ?? source.entityId;
   if (!id) throw new TypeError('Gameplay command requires CommandSource.entityId or an explicit entityId.');
-  if ((source.sourceType === 'player' || source.sourceType === 'agent') && id !== source.entityId)
-    throw new GameplayCommandPermissionError('Player and agent sources may only access their own gameplay state.');
   return id;
 };
 
@@ -115,12 +113,8 @@ export async function executeGameplayCommand(
       return { message: `POIs within ${command.radius} of ${id}.`, data: { pois } };
     }
     case 'query-action': {
-      if (command.actionId && source.sourceType !== 'player' && source.sourceType !== 'agent')
-        return { message: `Action ${command.actionId}.`, data: { action: server.getAction(command.actionId) } };
       const id = playerId(source, command.entityId);
       const action = command.actionId ? server.getAction(command.actionId) : server.getActorAction(id);
-      if (action && action.actorId !== id)
-        throw new GameplayCommandPermissionError('Player and agent sources may only access their own actions.');
       return { message: `Action for ${id}.`, data: { action } };
     }
     case 'query-path': {

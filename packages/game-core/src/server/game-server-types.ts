@@ -85,6 +85,7 @@ export type GameServerOptions = {
   persistence?: ChunkPersistence & Partial<GameplayPersistence>;
   canonicalResidency?: Partial<CanonicalChunkResidencyLimits>;
   onUnknownChunk?: (key: string) => void;
+  fluidEpoch?: number;
 };
 export type DerivedMeshSnapshot = {
   key: string;

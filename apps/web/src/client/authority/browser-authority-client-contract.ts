@@ -32,6 +32,7 @@ export type AuthorityClientOptions = Readonly<{
   onAuthorityChunkNeeded?: (key: string) => void;
   onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
   onFatal?: (error: Error) => void;
+  onWorldEpochChanged?: (epoch: string, ready: AuthorityReady) => void;
   requestTimeoutMs?: number;
   transportFaults?: AuthorityTransportFaults;
 }>;
@@ -42,6 +43,7 @@ export type AuthorityStartOptions = Readonly<{
   legacySnapshots: readonly SerializedChunkSnapshot[];
   initialWorldTime: number;
   frequencies: AuthorityReady['frequencies'];
+  developerWorldHarness?: boolean;
 }>;
 
 export type AuthoritySaveResult = Readonly<{

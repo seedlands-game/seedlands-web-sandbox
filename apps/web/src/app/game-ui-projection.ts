@@ -7,6 +7,7 @@ import type { CollisionDebugUiState } from './ui/ui-contracts';
 import type { WorldEnvironment } from './scene/world-environment';
 import type { World } from './world/world-runtime';
 import { projectDebug, projectWorldClock } from './hud-projector';
+import { projectDebugPanel, type DebugRuntimeInput } from './ui/debug-diagnostics';
 
 type Options = Readonly<{
   world: World;
@@ -19,10 +20,12 @@ type Options = Readonly<{
   deviceType: string;
   seedText: string;
   fps: number;
+  fpsSampled?: boolean;
   frameMs: number;
   nextHudSequence: () => number;
   nextDebugSequence: () => number;
   collisionDebug: CollisionDebugUiState | null;
+  diagnostics?: () => DebugRuntimeInput;
 }>;
 
 export function projectCollisionDebugDetails(collision: CollisionDebugUiState): string {
@@ -65,13 +68,36 @@ export class GameUiProjection {
           seedText: options.seedText,
         });
         const collision = options.collisionDebug;
+        const panel = projectDebugPanel({
+          sampledAtMs: now,
+          fps: options.fpsSampled === false ? null : options.fps,
+          frameMs: options.frameMs,
+          seed: options.seedText,
+          position: projection.position,
+          quality: options.qualityLevel,
+          profile: options.performanceProfile.name,
+          device: options.deviceType,
+          worldTime,
+          worldRevision: options.world.transactionDiagnostics.worldRevision,
+          generatorVersion: options.world.generatorVersion,
+          performance: options.world.performanceSummary,
+          chunks: options.world.telemetry,
+          runtime: options.diagnostics?.(),
+          heap:
+            (
+              performance as Performance & {
+                memory?: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number };
+              }
+            ).memory ?? null,
+        });
         return collision
           ? {
               ...projection,
+              panel,
               collisionDebug: collision,
               text: `${projection.text}\n${projectCollisionDebugDetails(collision)}`,
             }
-          : { ...projection, collisionDebug: null };
+          : { ...projection, panel, collisionDebug: null };
       }),
     );
   }

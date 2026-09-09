@@ -5,7 +5,8 @@ import type { PoiKind } from '../simulation/poi-registry';
 
 export type CommandCategory = 'query' | 'mutation' | 'administrative';
 export type CommandCapability = CommandCategory;
-export type CommandSourceType = 'local-developer' | 'player' | 'agent' | 'system';
+/** 仅用于审计来源；授权必须由宿主绑定的 principal/resource 策略决定。 */
+export type CommandSourceType = string;
 
 export type CommandSource = {
   actorId: string;

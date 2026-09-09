@@ -25,4 +25,5 @@ export type AuthorityRuntimeOptions = Readonly<{
   onLogicObservation?: (observation: LogicObservation) => void;
   onUnknownChunk?: (key: string) => void;
   canonicalResidency?: Partial<CanonicalChunkResidencyLimits>;
+  fluidEpoch?: number;
 }>;

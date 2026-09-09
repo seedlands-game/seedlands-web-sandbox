@@ -137,6 +137,18 @@ export class CanonicalChunkResidency {
     return chunks.has(key) || chunks.size < this.limits.hardLimit;
   }
 
+  prepareAdmission(
+    chunks: ReadonlyMap<string, CanonicalResidencyChunk>,
+    key: string,
+    maintain: () => unknown,
+  ): boolean {
+    if (chunks.has(key)) return true;
+    maintain();
+    if (this.canAdmit(chunks, key)) return true;
+    this.recordRejectedAdmission();
+    return false;
+  }
+
   recordRejectedAdmission(): void {
     this.rejectedAdmissionCount += 1;
   }

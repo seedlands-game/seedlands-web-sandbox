@@ -282,14 +282,33 @@ const saveGameplay = async (task: SaveGameplayTask) => {
 const saveFrozen = async (task: SaveFrozenTask, active: ActivePersistenceWorkerTask) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
   const opened = await database();
-  return persistFrozenGameSnapshot({
+  const replacing = task.kind === 'replace-frozen';
+  const nextConfig = replacing
+    ? {
+        ...config,
+        worldId: `seedlands:g${task.snapshot.generatorVersion}:${task.snapshot.seedText}`,
+        seedText: task.snapshot.seedText,
+        generatorVersion: task.snapshot.generatorVersion,
+      }
+    : config;
+  const result = await persistFrozenGameSnapshot({
     database: opened,
-    config,
+    config: nextConfig,
     snapshot: task.snapshot,
-    proceduralChunk,
+    proceduralChunk: (cx, cy, cz) =>
+      proceduralBaseCache.get({
+        seedText: nextConfig.seedText,
+        generatorVersion: nextConfig.generatorVersion,
+        cx,
+        cy,
+        cz,
+      }),
     normalizeRecord,
+    replace: replacing,
     onEncodeCompleted: ({ startedAtMs, completedAtMs }) => recordEncoding(active, startedAtMs, completedAtMs),
   });
+  if (replacing) config = nextConfig;
+  return result;
 };
 
 const markLegacyMigrated = async () => {
@@ -442,12 +461,13 @@ const handle = async (
   if (task.kind === 'load') return load(task);
   if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs, receivedAtEpochMs, mailboxEncodings);
   if (task.kind === 'save') return save(task, active!);
-  if (task.kind === 'save-frozen') return saveFrozen(task, active!);
+  if (task.kind === 'save-frozen' || task.kind === 'replace-frozen') return saveFrozen(task, active!);
   if (task.kind === 'save-metadata') return saveMetadata(task);
   if (task.kind === 'save-gameplay') return saveGameplay(task);
   if (task.kind === 'stats') return stats();
   if (task.kind === 'mark-legacy-migrated') return markLegacyMigrated();
-  return seedCorpus(task);
+  if (task.kind === 'seed-corpus') return seedCorpus(task);
+  throw new Error(`Unsupported persistence task: ${(task as { kind: string }).kind}`);
 };
 
 self.onmessage = (event: MessageEvent<Task>) => {
