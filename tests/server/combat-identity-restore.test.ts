@@ -196,8 +196,7 @@ describe('combat lifetime identity restore', () => {
     const source = new CombatRuntime(callbacks([]), undefined, bound ? host.port : undefined);
     source.request('actor', 'target', 'wood-sword');
     if (terminal) source.advance(2);
-    const malformed = source.snapshot();
-    malformed.actionSequence = 0;
+    const malformed = { ...source.snapshot(), actionSequence: 0 };
     const current = new CombatRuntime(callbacks([]), undefined, bound ? host.port : undefined);
     current.request('actor', 'target', 'wood-sword');
     const before = current.snapshot();

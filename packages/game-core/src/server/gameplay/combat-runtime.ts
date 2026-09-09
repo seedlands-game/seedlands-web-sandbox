@@ -240,15 +240,17 @@ export class CombatRuntime {
         this.cancel(actorId, state, actorFailure);
         return { success: false, reason: actorFailure };
       }
-      const targetFailure = entityReferenceExecutionFailure(
-        this.identity,
-        active.targetIdentity,
-        active.targetId,
-        'target',
-      );
-      if (targetFailure) {
-        this.cancel(actorId, state, targetFailure);
-        return { success: false, reason: targetFailure };
+      if (active.phase === 'windup') {
+        const targetFailure = entityReferenceExecutionFailure(
+          this.identity,
+          active.targetIdentity,
+          active.targetId,
+          'target',
+        );
+        if (targetFailure) {
+          this.cancel(actorId, state, targetFailure);
+          return { success: false, reason: targetFailure };
+        }
       }
     }
     return active?.actionId === actionId
@@ -376,15 +378,16 @@ export class CombatRuntime {
       );
       if (actorIdentityFailure) return this.cancel(actorId, state, actorIdentityFailure);
       if (!this.callbacks.actorAvailable(actorId)) return this.cancel(actorId, state, 'attacker-dead');
-      const targetIdentityFailure = entityReferenceExecutionFailure(
-        this.identity,
-        active.targetIdentity,
-        active.targetId,
-        'target',
-      );
-      if (targetIdentityFailure) return this.cancel(actorId, state, targetIdentityFailure);
-      if (active.phase === 'windup' && !this.callbacks.targetAvailable(active.targetId))
-        return this.cancel(actorId, state, 'target-missing');
+      if (active.phase === 'windup') {
+        const targetIdentityFailure = entityReferenceExecutionFailure(
+          this.identity,
+          active.targetIdentity,
+          active.targetId,
+          'target',
+        );
+        if (targetIdentityFailure) return this.cancel(actorId, state, targetIdentityFailure);
+        if (!this.callbacks.targetAvailable(active.targetId)) return this.cancel(actorId, state, 'target-missing');
+      }
       const definition = this.requireDefinition(active.definitionId);
       const duration = this.phaseDuration(active, definition);
       const untilTransition = round(duration - active.phaseElapsedSeconds);

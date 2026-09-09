@@ -168,11 +168,7 @@ export function decodeBoundCombatSnapshot(snapshot: CombatRuntimeSnapshotV2, opt
           'target',
         )
       : null;
-    const failure = !target.ok
-      ? target.reason
-      : buffered && !buffered.ok
-        ? buffered.reason.replace('restore-target-', 'restore-buffered-target-')
-        : null;
+    const failure = encodedActive.phase === 'windup' && !target.ok ? target.reason : null;
     if (failure) {
       const cancelled: CombatResultSnapshot = {
         sequence: ++resultSequence,
@@ -193,7 +189,6 @@ export function decodeBoundCombatSnapshot(snapshot: CombatRuntimeSnapshotV2, opt
       events.push({ actorId: entry.actorId, actionId: encodedActive.actionId, status: 'cancelled', result: cancelled });
       continue;
     }
-    if (!target.ok || (buffered && !buffered.ok)) throw new Error('Combat restore identity narrowing failed.');
     restored.set(entry.actorId, {
       active: {
         actionId: encodedActive.actionId,
@@ -203,8 +198,12 @@ export function decodeBoundCombatSnapshot(snapshot: CombatRuntimeSnapshotV2, opt
         phase: encodedActive.phase,
         phaseElapsedSeconds: encodedActive.phaseElapsedSeconds,
         bufferedTargetId: encodedActive.bufferedTargetId,
-        targetIdentity: target.reference,
-        bufferedTargetIdentity: buffered?.ok ? buffered.reference : null,
+        targetIdentity: target.ok ? target.reference : { ...encodedActive.targetIdentity },
+        bufferedTargetIdentity: buffered?.ok
+          ? buffered.reference
+          : encodedActive.bufferedTargetIdentity
+            ? { ...encodedActive.bufferedTargetIdentity }
+            : null,
       },
       lastResult: cloneResult(entry.combat.lastResult),
       lockoutSeconds: 0,
