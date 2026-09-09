@@ -1,0 +1,1 @@
+../../../../scripts/harness-browser-profiles.mjs
