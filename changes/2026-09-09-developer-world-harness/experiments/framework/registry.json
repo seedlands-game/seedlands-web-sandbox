@@ -1,0 +1,70 @@
+[
+  {
+    "name": "@langchain/langgraph",
+    "status": 200,
+    "tags": {
+      "alpha": "1.0.0-alpha.1",
+      "next": "1.0.1",
+      "rc": "1.4.15-rc.0",
+      "latest": "1.4.14"
+    },
+    "version": "1.4.14",
+    "license": "MIT",
+    "published": "2026-09-04T18:46:10.765Z"
+  },
+  {
+    "name": "@langchain/deepseek",
+    "status": 200,
+    "tags": {
+      "dev": "1.0.18-dev-1773962633795",
+      "latest": "1.1.11",
+      "rc": "1.1.12-rc.0"
+    },
+    "version": "1.1.11",
+    "license": "MIT",
+    "published": "2026-09-01T04:30:45.655Z"
+  },
+  {
+    "name": "@openai/agents",
+    "status": 200,
+    "tags": {
+      "latest": "0.17.2"
+    },
+    "version": "0.17.2",
+    "license": "MIT",
+    "published": "2026-09-08T15:16:57.712Z"
+  },
+  {
+    "name": "@deepseek-ai/dsh-sdk",
+    "status": 404
+  },
+  {
+    "name": "@deepseek-ai/dsh",
+    "status": 200,
+    "tags": {
+      "next": "0.1.2-rc.1",
+      "latest": "0.1.2-rc.1",
+      "alpha": "0.1.5-alpha.1"
+    },
+    "version": "0.1.2-rc.1",
+    "license": "MIT",
+    "published": "2026-09-03T06:21:52.107Z"
+  },
+  {
+    "name": "@deepseek-ai/dsh-sdk-client",
+    "status": 200,
+    "tags": {
+      "latest": "0.0.1-rc.1",
+      "next": "0.1.2-rc.1",
+      "alpha": "0.1.5-alpha.1"
+    },
+    "version": "0.0.1-rc.1",
+    "license": "BSD-3-Clause",
+    "published": "2026-08-10T19:42:38.107Z",
+    "alpha": {
+      "version": "0.1.5-alpha.1",
+      "license": "MIT",
+      "published": "2026-09-08T15:58:34.695Z"
+    }
+  }
+]

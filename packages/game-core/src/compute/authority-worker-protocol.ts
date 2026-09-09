@@ -12,6 +12,7 @@ import type { WorldOpenMode } from '../runtime/world-version-policy';
 import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-protocol';
 import type { ChunkPersistenceLoadDiagnostics } from '../server/persistence/chunk-persistence';
 import type { CombatSnapshot } from '../server/gameplay/combat-runtime';
+import type { WorldHarnessPort, WorldHarnessResult } from '../server/harness/world-harness-contract';
 
 export type GameplayEntityView = GameplayEntity & Readonly<{ combat?: CombatSnapshot }>;
 
@@ -137,7 +138,7 @@ export type AuthorityTransactionKey = Readonly<{
   expectedCommitSequence?: number;
 }>;
 
-export type AuthorityRequest =
+export type AuthorityRequest = (
   | Readonly<{
       kind: 'start-authority';
       protocolVersion: typeof PROTOCOL_VERSION;
@@ -148,8 +149,9 @@ export type AuthorityRequest =
       initialWorldTime: number;
       sessionTimeOriginMs: number;
       frequencies: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
+      developerWorldHarness?: boolean;
     }>
-  | InputCommand
+  | (Omit<InputCommand, 'epoch'> & Readonly<{ epoch: SessionEpoch; runtimeEpoch: SessionEpoch }>)
   | Readonly<{
       kind: 'pause-authority' | 'resume-authority';
       protocolVersion: typeof PROTOCOL_VERSION;
@@ -289,7 +291,17 @@ export type AuthorityRequest =
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
     }>
-  | Readonly<{ kind: 'dispose-authority'; protocolVersion: typeof PROTOCOL_VERSION; epoch: SessionEpoch }>;
+  | Readonly<{
+      kind: 'world-harness-rpc';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      method: keyof WorldHarnessPort;
+      args: readonly unknown[];
+    }>
+  | Readonly<{ kind: 'dispose-authority'; protocolVersion: typeof PROTOCOL_VERSION; epoch: SessionEpoch }>
+) &
+  Readonly<{ runtimeEpoch?: SessionEpoch }>;
 
 export type AuthorityResponse =
   | Readonly<{
@@ -366,6 +378,15 @@ export type AuthorityResponse =
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
       observation: LogicObservation;
+    }>
+  | Readonly<{
+      kind: 'world-harness-response';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      result: WorldHarnessResult<unknown>;
+      ready?: AuthorityReady;
+      runtimeEpoch?: string;
     }>
   | Readonly<{
       kind: 'authority-fatal';

@@ -7,6 +7,8 @@ import {
 import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
 import { BoundedCostSamples, type CostSampleWindow } from '@seedlands/game-core/runtime/bounded-cost-samples';
 import type { KernelName, WasmArtifactPreference } from '../../compute/wasm-kernel-contract';
+import type { KernelDiagnostics } from '../../compute/kernel-memory';
+import { readKernelDiagnostics, type ComputeWorkerActivity } from './compute-worker-diagnostics';
 
 export type ComputeWorkerPort = {
   onmessage: ((event: MessageEvent<unknown>) => void) | null;
@@ -24,6 +26,7 @@ export type ComputeWorkerResult = Readonly<{
   workerDurationMs?: number;
   result?: unknown;
   error?: string;
+  kernelDiagnostics?: KernelDiagnostics;
 }>;
 
 export type BrowserComputeLane = Exclude<ComputeLane, 'logic'>;
@@ -56,6 +59,13 @@ type WorkerSlot = {
   ready: boolean;
   readyTimer: number | null;
   kernelState: ComputeWorkerKernelDiagnostics | null;
+  activity?: {
+    startedAtMs: number | null;
+    sampledAtMs: number | null;
+    completedTasks: number;
+    lastTaskDurationMs: number | null;
+    kernel: KernelDiagnostics | null;
+  };
 };
 
 type PendingTransfer = { transfer: Transferable[] };
@@ -96,6 +106,7 @@ export type ComputePoolDiagnostics = Readonly<{
   maxQueuedBytes: number;
   workerTaskDuration: Readonly<Record<BrowserComputeLane, CostSampleWindow>>;
   workerKernelStates: readonly ComputeWorkerKernelDiagnostics[];
+  workerActivity?: readonly ComputeWorkerActivity[];
 }>;
 
 const isBrowserComputeTask = (task: ComputeTask): task is BrowserComputeTask => task.lane !== 'logic';
@@ -243,6 +254,21 @@ export class ComputeWorkerPool {
         general: this.workerTaskDuration.general.snapshot(),
       },
       workerKernelStates: this.slots.flatMap((slot) => (slot.kernelState ? [slot.kernelState] : [])),
+      workerActivity: this.slots.map((slot) => ({
+        lane: slot.lane,
+        index: slot.index,
+        status: !slot.worker ? 'unavailable' : !slot.ready ? 'starting' : slot.task ? 'busy' : 'idle',
+        taskId: slot.task?.taskId ?? null,
+        taskCategory: slot.task?.category ?? null,
+        taskAgeMs:
+          slot.task && slot.activity?.startedAtMs != null
+            ? Math.max(0, performance.now() - slot.activity.startedAtMs)
+            : null,
+        sampledAtMs: slot.activity?.sampledAtMs ?? null,
+        completedTasks: slot.activity?.completedTasks ?? 0,
+        lastTaskDurationMs: slot.activity?.lastTaskDurationMs ?? null,
+        kernel: slot.activity?.kernel ? { ...slot.activity.kernel } : null,
+      })),
     };
   }
 
@@ -306,6 +332,7 @@ export class ComputeWorkerPool {
       const task = this.queue.take(slot.lane) as BrowserComputeTask | null;
       if (!task) continue;
       slot.task = task;
+      if (slot.activity) slot.activity.startedAtMs = performance.now();
       const transfer = this.transfers.get(task.taskId)?.transfer ?? [];
       this.transfers.delete(task.taskId);
       try {
@@ -346,6 +373,12 @@ export class ComputeWorkerPool {
       return;
     }
     slot.task = null;
+    if (slot.activity) {
+      slot.activity.sampledAtMs = performance.now();
+      slot.activity.startedAtMs = null;
+      slot.activity.kernel = readKernelDiagnostics(value.kernelDiagnostics);
+      slot.activity.lastTaskDurationMs = value.workerDurationMs ?? null;
+    }
     const cancelled = this.cancelledRunning.delete(task.taskId);
     if (value.epoch !== this.epoch || task.epoch !== this.epoch || cancelled) {
       this.staleResults += 1;
@@ -356,6 +389,9 @@ export class ComputeWorkerPool {
       slot.restartAttempts = 0;
       this.queue.complete(task.taskId);
       this.completedTasks += 1;
+      if (slot.activity) {
+        slot.activity.completedTasks += 1;
+      }
       if (value.workerDurationMs !== undefined) this.workerTaskDuration[task.lane].record(value.workerDurationMs);
       this.options.onResult?.(task, value.result);
     }
@@ -388,6 +424,7 @@ export class ComputeWorkerPool {
     slot.worker = worker;
     slot.ready = !this.options.requireReadyHandshake;
     slot.kernelState = null;
+    slot.activity = { startedAtMs: null, sampledAtMs: null, completedTasks: 0, lastTaskDurationMs: null, kernel: null };
     worker.onmessage = (event) => {
       if (slot.worker === worker) this.receive(slot, event.data);
     };

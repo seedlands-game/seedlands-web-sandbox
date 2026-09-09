@@ -110,8 +110,12 @@ export class World {
     waterLayerId?: number,
   ) {
     const source: MeshTaskSource = {
-      seed: authority.seed,
-      generatorVersion: authority.generatorVersion,
+      get seed() {
+        return authority.seed;
+      },
+      get generatorVersion() {
+        return authority.generatorVersion;
+      },
       beforePrepare: (cx, cy, cz) =>
         prepareStreamingNeighborhood(() => authority.ensureChunkNeighborhood(cx, cy, cz), this.streamingAdmissionRetry),
       releasePrepared: (cx, cy, cz) => authority.releasePreparation(cx, cy, cz),

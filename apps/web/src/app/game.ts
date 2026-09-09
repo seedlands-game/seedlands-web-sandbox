@@ -38,6 +38,10 @@ import { GameFrameLoop } from './game-frame-loop';
 import { GameSaveQueue } from './world/game-save-queue';
 import { startBrowserWorkerSession } from './browser-worker-session';
 import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
+import { releasePointerLock } from './player/pointer-lock';
+import type { AuthorityReady } from '@seedlands/game-core/compute/authority-worker-protocol';
+import { readGameRuntimeDiagnostics } from './experimental/game-runtime-diagnostics';
+import { restoreBrowserPresentation } from './world/browser-world-restore';
 
 export class Game {
   private paused = false;
@@ -111,6 +115,8 @@ export class Game {
       worldAudio: () => this.worldAudio,
       nextHudSequence: () => ++this.hudSequence,
       nextDebugSequence: () => ++this.debugSequence,
+      diagnostics: () =>
+        readGameRuntimeDiagnostics(this.authority, this.logicClient, this.computeRuntime, this.experimentState),
     });
     window.addEventListener('resize', this.onResize);
     window.addEventListener('pagehide', this.onPageHide);
@@ -177,6 +183,7 @@ export class Game {
       // prettier-ignore
       onInputDecision: (decision: { sequence: number; decision: import('@seedlands/game-core/runtime/session-protocol').SequenceDecision; requiresResync: boolean }) =>
         gamePlayer.applyAuthorityInputDecision(this.controller, decision),
+      onWorldRestored: (ready: AuthorityReady) => this.restoreBrowserWorld(ready),
       onFatal: (error: Error) => {
         runtimeControls.reportRuntimeFailure(this.uiSession, ++this.interactionSequence, error);
         this.onRuntimeFailure?.(error);
@@ -237,11 +244,26 @@ export class Game {
     // prettier-ignore
     const initialWorldReady = waitForInitialWorldReady(this.world.waitForInitialVisibleChunk());
     this.world.updateStreaming(this.camera.getPosition());
-    this.gameplayClient = new BrowserGameplay({
+    this.gameplayClient = this.createGameplay(authority, this.serverPlayerId);
+    this.controller = this.createController(this.camera);
+    this.controller.applyAuthoritySnapshot(authority.snapshot ?? ready.snapshot);
+    gamePlayer.orientPlayerTowardCamp(this.controller, ready);
+    this.controller.install();
+    authority.requestLogicObservation();
+    this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
+    await initialWorldReady;
+    if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
+    this.installUiAndHarness();
+    return { seed: ready.seedText };
+  }
+
+  private createGameplay(authority: BrowserAuthorityClient, playerId: string) {
+    if (!this.app || !this.camera || !this.uiSession) throw new Error('Browser presentation is not ready.');
+    return new BrowserGameplay({
       app: this.app,
       camera: this.camera,
       authority,
-      playerId: this.serverPlayerId,
+      playerId,
       bridge: this.uiBridge,
       session: this.uiSession,
       nextHudSequence: () => ++this.hudSequence,
@@ -255,16 +277,14 @@ export class Game {
       onPlayerDamage: (amount) => this.controller?.presentDamage(amount),
       onPresentation: (event) => this.worldAudio?.present(event),
     });
-    this.controller = this.createController(this.camera);
-    this.controller.applyAuthoritySnapshot(authority.snapshot ?? ready.snapshot);
-    gamePlayer.orientPlayerTowardCamp(this.controller, ready);
-    this.controller.install();
-    authority.requestLogicObservation();
-    this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
-    await initialWorldReady;
-    if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
-    this.installUiAndHarness();
-    return { seed: ready.seedText };
+  }
+
+  private restoreBrowserWorld(ready: AuthorityReady) {
+    const authority = this.authority;
+    if (!authority || !this.world || !this.camera || !this.environment) return;
+    // prettier-ignore
+    const restored = restoreBrowserPresentation(ready, { authority, world: this.world, camera: this.camera, environment: this.environment, audio: this.audio, controller: this.controller, gameplay: this.gameplayClient, worldAudio: this.worldAudio, authoritySync: this.authoritySync, commandSource: this.commandSource, createGameplay: (playerId) => this.createGameplay(authority, playerId), createController: () => this.createController(this.camera!) });
+    Object.assign(this, { serverPlayerId: ready.playerId, seedText: ready.seedText, ...restored });
   }
 
   private createController(camera: pc.Entity) {
@@ -333,6 +353,7 @@ export class Game {
     if (!authority) return;
     this.removeHarness = installHarness(
       createRuntimeHarnessApi({
+        developerWorld: () => authority.world,
         lifecycleSnapshot: () => ({ ...this.lifecycle }),
         restartWorld: async (seed) => {
           await this.start(seed, null, this.qualityLevel);
@@ -466,6 +487,10 @@ export class Game {
   }
 
   private publishDebugVisibility(visible: boolean) {
+    if (visible) {
+      this.controller?.releaseInput();
+      releasePointerLock();
+    }
     this.uiBridge.publishDebug({ visible });
   }
 

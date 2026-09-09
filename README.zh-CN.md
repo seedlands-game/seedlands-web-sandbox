@@ -112,19 +112,23 @@ window.__SEEDLANDS_INITIAL_OPTIONS__ = {
 
 进入世界后按 F4 可打开简易 Debug Shell。世界命令包括 `/setblock`、`/fill`、`/tp`、`/time get`、`/time set`、`/seed`、`/save`、`/inspect voxel` 和 `/inspect chunk`。玩法命令包括 `/inventory`、`/give`、`/damage`、`/heal`、`/spawnitem`、`/spawn creature`、`/craft`、`/break`、`/cancelbreak`、`/pickup`、`/drop`、`/place`、`/use`、`/attack`、`/respawn`、`/tick` 和 `/nearby`。Actor 调试另有 `/summon`、`/observe`、`/entity action`、`/entity move`、`/entity stop`、`/path` 与 `/poi nearby`；参数无效时 Shell 会显示用法。Shell 打开时会释放鼠标锁定；按 Esc 关闭。日志文本可以用浏览器原生方式选择和复制，输入框支持正常粘贴；上下方向键可浏览最近 20 条已提交命令，并在回到末尾时恢复未执行草稿。
 
+F3 另提供分类运行诊断面板：世界进度、Worker 调度、Wasm 与内存等，明确区分实测、估算和未知；支持紧凑布局与滚动，打开时释放鼠标但不暂停世界。
+
 同一套结构化命令边界也可以在没有 PlayCanvas、Canvas 或 DOM 的环境中运行：
 
 ```bash
 pnpm server:headless -- --seed my-debug-world
 ```
 
-首版无头 Harness 使用进程内存持久化。`/save` 会真实经过 Chunk 与 gameplay snapshot 的 persistence boundary，并可在同一进程的重载测试中恢复；进程退出后不会生成持久世界文件。
+TTY 进入持续 JavaScript REPL，公开 `world`，支持 top-level await；`.command /seed` 调用旧命令，`.exit` 退出。加 `--json` 使用版本化 JSONL/slash 兼容模式。初始暂停，可显式推进或运行；完整 checkpoint 可导出/恢复。接口与边界见[世界开发 Harness](docs/developer-world-harness.md)。
+
+无头 Harness 使用进程内存持久化。`/save` 会真实经过 Chunk 与 gameplay snapshot 的 persistence boundary，并可在同一进程的重载测试中恢复；进程退出后不会生成持久世界文件。
 
 ## Node 研究归档
 
 Node Dedicated Server 已在完成 MVP 研究后从活跃产品和强制门禁退出。历史版本固定为 `archive/node-dedicated-mvp-2026-09-09`，恢复方式见[归档索引](docs/change-archive.md#node-dedicated-server-研究归档)。后续不承诺兼容或持续编译运行。
 
-当前产品以浏览器单人世界为中心，下一步是共享世界 Harness 和一个持久 NPC Agent。详细边界见[产品定位](docs/product-positioning.md)。Headless 命令循环继续作为开发工具保留；增强 REPL 与 Agent 尚未实现。
+当前产品以浏览器单人世界为中心，详细边界见[产品定位](docs/product-positioning.md)。共享世界端口和持续 REPL 作为开发工具交付；模型 NPC MVP 仍是下一阶段。
 
 ## 架构
 

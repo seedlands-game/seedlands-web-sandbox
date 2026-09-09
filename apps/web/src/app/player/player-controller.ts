@@ -192,7 +192,7 @@ export class PlayerController {
     };
   }
 
-  dispose() {
+  dispose(sendNeutralInput = true) {
     window.onkeydown = null;
     window.onkeyup = null;
     document.onmousemove = null;
@@ -201,7 +201,7 @@ export class PlayerController {
     document.onpointerlockchange = null;
     window.onblur = null;
     document.onvisibilitychange = null;
-    this.sendNeutralInput();
+    if (sendNeutralInput) this.sendNeutralInput();
     this.options.canvas.onclick = null;
     this.options.canvas.oncontextmenu = null;
     this.keys.clear();

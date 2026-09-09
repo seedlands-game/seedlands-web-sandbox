@@ -1,5 +1,7 @@
 # DeveloperWorldHarness 与持续 REPL
 
+> 2026-09-09 后续修订：H1/H2 实施与用户进一步澄清以[共享世界 Harness](../2026-09-09-developer-world-harness/spec.md)、[认知回路及通用资源设计](../2026-09-09-developer-world-harness/agent-harness-design.md)、[框架实测决策](../2026-09-09-developer-world-harness/framework-decision.md)为准。本文保留上一轮设计证据；OpenAI SDK 优先推荐、core agentState 专属块及按控制者类型授权的提议已被替代，不能继续作为实施约束。
+
 ## 两层合同
 
 `DeveloperWorldHarness` 是可信开发端口；Headless 与 Browser 同时实现。`BrowserProductHarness` 组合前者并提供摄像机、Pointer Lock/键鼠、渲染帧、音频、GPU/性能、截图和视觉断言。共享的是世界语义与错误语义，不要求两个宿主返回同一 Worker/渲染诊断字段。

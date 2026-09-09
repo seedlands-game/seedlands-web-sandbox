@@ -1,5 +1,7 @@
 # 架构与复用决策
 
+> 2026-09-09 后续修订：H1/H2 实施与用户进一步澄清以[共享世界 Harness](../2026-09-09-developer-world-harness/spec.md)、[认知回路及通用资源设计](../2026-09-09-developer-world-harness/agent-harness-design.md)、[框架实测决策](../2026-09-09-developer-world-harness/framework-decision.md)为准。本文保留上一轮设计证据；OpenAI SDK 优先推荐、core agentState 专属块及按控制者类型授权的提议已被替代，不能继续作为实施约束。
+
 ## 当前代码核查
 
 本表来自 2026-09-09 源码阅读，属于静态证据，不是产品运行验收。

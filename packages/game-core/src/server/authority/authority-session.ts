@@ -9,7 +9,6 @@ import {
   stepBody,
   type BodyConfig,
   type BodyState,
-  type PhysicsInput,
 } from '../../physics';
 import { WORLD_ITEM_INTERACTION } from '../../physics/body-registry';
 import { ActiveMonotonicClock } from '../../runtime/active-monotonic-clock';
@@ -28,6 +27,7 @@ import type {
 } from './authority-session-types';
 import { VoxelCollisionWorld, type LoadedVoxelSource } from './voxel-collision-world';
 import { bodyActiveChunkKeys } from './authority-physics-active-chunks';
+import { selectAuthorityPhysicsInput, ZERO_AUTHORITY_PHYSICS_INPUT } from './authority-physics-input';
 
 export type * from './authority-session-types';
 
@@ -56,11 +56,6 @@ const toBodyState = (entity: AuthorityEntity): BodyState => ({
   },
 });
 
-const ZERO_PHYSICS_INPUT: PhysicsInput = {
-  wish: { x: 0, z: 0 },
-  jumpPressed: false,
-  verticalIntent: 0,
-};
 const MAX_RECOVERY_QUEUE = 512;
 const MAX_RECOVERY_RESULTS = 32;
 const MAX_RECOVERY_DISTANCE = 8;
@@ -126,6 +121,10 @@ export class AuthoritySession {
     this.stopPlayerHorizontalVelocity();
   }
 
+  clearLogicIntents(): void {
+    this.logicIntents.clear();
+  }
+
   receiveLogicIntents(epoch: string, intents: readonly LogicIntent[]) {
     if (epoch !== this.options.epoch) return false;
     intents.forEach((intent) => {
@@ -152,7 +151,17 @@ export class AuthoritySession {
     const clock = this.clock.sample(nowMs);
     this.activeTimeMs = clock.activeTimeMs;
     if (clock.paused) return this.snapshot();
-    const due = this.scheduler.advanceTo(clock.activeTimeMs);
+    return this.advanceToActiveTime(clock.activeTimeMs);
+  }
+
+  advancePaused(elapsedMs: number): AuthoritySnapshot {
+    const clock = this.clock.advancePaused(elapsedMs);
+    this.activeTimeMs = clock.activeTimeMs;
+    return this.advanceToActiveTime(clock.activeTimeMs);
+  }
+
+  private advanceToActiveTime(activeTimeMs: number): AuthoritySnapshot {
+    const due = this.scheduler.advanceTo(activeTimeMs);
     for (const step of due.physicsSteps) {
       this.physicsTick = step.tick;
       const startedAt = this.options.measureNow?.();
@@ -243,7 +252,13 @@ export class AuthoritySession {
       seen.add(entity.id);
       const config = this.options.bodyConfigFor(entity);
       configs.set(entity.id, config);
-      const physicsInput = this.physicsInput(entity, input);
+      const physicsInput = selectAuthorityPhysicsInput(
+        entity,
+        this.options.playerId,
+        input,
+        this.logicIntents,
+        this.physicsTick,
+      );
       const initialState = toBodyState(entity);
       const trackPickupCursor =
         entity.type === 'world-item' &&
@@ -281,7 +296,7 @@ export class AuthoritySession {
         config: attraction ? { ...config, groundAcceleration: 0, airAcceleration: 0 } : config,
         input: attraction
           ? {
-              ...ZERO_PHYSICS_INPUT,
+              ...ZERO_AUTHORITY_PHYSICS_INPUT,
               externalAcceleration: {
                 x: (attraction.x - initialState.velocity.x) / dt,
                 y: (attraction.y - initialState.velocity.y) / dt,
@@ -458,25 +473,6 @@ export class AuthoritySession {
     this.recoveryResults.push(result);
     if (this.recoveryResults.length > MAX_RECOVERY_RESULTS)
       this.recoveryResults.splice(0, this.recoveryResults.length - MAX_RECOVERY_RESULTS);
-  }
-
-  private physicsInput(
-    entity: AuthorityEntity,
-    playerInput: ReturnType<InputCommandBuffer['consumeForTick']>,
-  ): PhysicsInput {
-    if (entity.id === this.options.playerId) {
-      return {
-        wish: { x: playerInput.state.moveX, z: playerInput.state.moveZ },
-        jumpPressed: playerInput.jumpRequested,
-        verticalIntent: playerInput.state.verticalIntent,
-      };
-    }
-    const intent = this.logicIntents.get(entity.id);
-    if (!intent || intent.expiresAtPhysicsTick < this.physicsTick) {
-      this.logicIntents.delete(entity.id);
-      return { wish: { x: 0, z: 0 }, jumpPressed: false, verticalIntent: 0 };
-    }
-    return { wish: intent.wish, jumpPressed: intent.jumpRequested, verticalIntent: intent.verticalIntent };
   }
 
   private refreshBodies() {

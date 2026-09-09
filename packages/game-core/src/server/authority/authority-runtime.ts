@@ -14,14 +14,14 @@ import type { VoxelEdit } from '../world-mutation';
 import { ServerCommandExecutor } from '../commands/server-command-executor';
 import type { CommandSource, ServerCommand } from '../commands/command-contract';
 import { AuthoritySession, type AuthoritySnapshot, type LogicIntent } from './authority-session';
-import { buildLogicObservation } from './logic-observation-builder';
+import { AuthorityLogicObservationBuilder } from './logic-observation-builder';
 import { LOGIC_PROTOCOL_VERSION, type LogicIntentBatch, type LogicObservation } from '../logic/logic-protocol';
 import { CHUNK_SIZE, chunkKey } from '../../world/voxel';
 import type * as R from './authority-runtime-types';
 import { createAuthorityAdvanceCommandPort } from './authority-command-advance';
 import type { AuthorityTransactionIdentity, AuthorityTransactionReceipt } from './authority-runtime-types';
 import { AuthorityResidencyRuntime, type AuthorityResidencyDiagnostics } from './authority-residency-runtime';
-import { advanceAuthoritySession } from './authority-session-advance';
+import { advanceAuthoritySession, advancePausedAuthoritySession } from './authority-session-advance';
 import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnostics';
 import { AuthorityMutationPreparation, unavailableWorldCommit } from './authority-mutation-preparation';
 import { applyAuthorityPlayerAction, unavailableAuthorityPlayerAction } from './authority-player-action';
@@ -29,6 +29,8 @@ import { queueBodyRecoveriesAfterCommit } from './authority-geometry-recovery';
 import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from './authority-canonical-preparation';
 import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 import type { AuthorityRuntimeOptions } from './authority-runtime-options';
+import { AuthorityLogicCandidates } from './authority-logic-candidates';
+import { acceptLogicIntentBatch } from './authority-logic-intent-acceptance';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -43,12 +45,9 @@ export class AuthorityRuntime {
   private readonly newPlayer: boolean;
   private readonly initialBodyPosition: [number, number, number];
   private pendingCommits: WorldCommitResult[] = [];
-  private logicObservationSequence = 0;
-  private identityRevisionSequence = 0;
   private latestPhysicsTick = 0;
-  private readonly entityIdentities = new Map<string, { signature: string; revision: number }>();
-  private readonly logicObservations = new Map<number, LogicObservation>();
-  private logicObservationRequested = false;
+  private readonly logicCandidates = new AuthorityLogicCandidates();
+  private readonly logicObservationBuilder: AuthorityLogicObservationBuilder;
   private currentTimeMs: number;
   private readonly transactions: TransactionDeduplicator<Promise<AuthorityTransactionReceipt<unknown>>>;
   private readonly residency: AuthorityResidencyRuntime;
@@ -76,6 +75,7 @@ export class AuthorityRuntime {
       (key) => options.onUnknownChunk?.(key),
       (key) => this.mutationPreparation.acceptAvailable(key),
     );
+    this.logicObservationBuilder = new AuthorityLogicObservationBuilder(options.platform.clone, options.epoch, server);
     this.playerId = playerId;
     this.newPlayer = isNew;
     const player = server.getEntity(playerId);
@@ -124,15 +124,12 @@ export class AuthorityRuntime {
       measureNow: options.platform.now,
       requestUnknownChunk: (key) => this.requestUnknownChunk(key),
       requestFluidWork: () => this.requestFluidWork(),
-      publishLogicObservation: (snapshot) => {
-        if (!this.logicObservationRequested) return;
-        this.logicObservationRequested = false;
-        const observation = this.buildLogicObservation(++this.logicObservationSequence, snapshot);
-        this.logicObservations.set(observation.observationSequence, observation);
-        while (this.logicObservations.size > 8)
-          this.logicObservations.delete(this.logicObservations.keys().next().value!);
-        options.onLogicObservation?.(observation);
-      },
+      publishLogicObservation: (snapshot) =>
+        this.logicCandidates.publish(
+          snapshot,
+          (sequence, value) => this.logicObservationBuilder.build(sequence, value),
+          options.onLogicObservation,
+        ),
     });
   }
 
@@ -144,6 +141,7 @@ export class AuthorityRuntime {
       ...(options.persistence ? { persistence: options.persistence } : {}),
       ...(options.canonicalResidency ? { canonicalResidency: options.canonicalResidency } : {}),
       ...(options.onUnknownChunk ? { onUnknownChunk: unknownChunks.request } : {}),
+      ...(options.fluidEpoch === undefined ? {} : { fluidEpoch: options.fluidEpoch }),
       platform: options.platform,
     });
     server.setWorldTime(options.initialWorldTime);
@@ -204,6 +202,10 @@ export class AuthorityRuntime {
     return this.residency.diagnostics;
   }
 
+  get sessionTimeMs(): number {
+    return this.currentTimeMs;
+  }
+
   advanceSession(elapsedMs: number): R.AuthorityAdvanceResult {
     return advanceAuthoritySession({
       elapsedMs,
@@ -211,6 +213,19 @@ export class AuthorityRuntime {
       frequencies: this.frequencies,
       laneTotals: () => this.session.laneTotals,
       wake: (nowMs) => this.wake(nowMs),
+      view: () => this.view(),
+      takeCommits: () => this.takeCommits(),
+    });
+  }
+
+  advancePausedSession(elapsedMs: number): R.AuthorityAdvanceResult {
+    return advancePausedAuthoritySession({
+      elapsedMs,
+      frequencies: this.frequencies,
+      laneTotals: () => this.session.laneTotals,
+      currentSnapshot: () => this.snapshot(),
+      advancePaused: (slice) => this.session.advancePaused(slice),
+      decorate: (snapshot) => withAuthorityResidencyDiagnostics(snapshot, this.residency.diagnostics),
       view: () => this.view(),
       takeCommits: () => this.takeCommits(),
     });
@@ -247,44 +262,52 @@ export class AuthorityRuntime {
 
   receiveLogicIntentBatch(batch: LogicIntentBatch): boolean {
     if (batch.protocolVersion !== LOGIC_PROTOCOL_VERSION || batch.epoch !== this.options.epoch) return false;
-    const observation = this.logicObservations.get(batch.observationSequence);
+    const observation = this.logicCandidates.consume(batch.observationSequence);
     if (!observation || batch.expiresAtPhysicsTick < this.latestPhysicsTick) return false;
-    this.logicObservations.delete(batch.observationSequence);
-    const observedById = new Map(observation.entities.map((entity) => [entity.id, entity] as const));
-    const currentById = new Map(this.server.queryEntities().map((entity) => [entity.id, entity] as const));
-    const maximumPoseStaleness = Math.ceil(this.frequencies.physicsHz * 0.2);
-    const accepted: LogicIntent[] = [];
-    let canonicalChanged = false;
-    for (const intent of batch.intents) {
-      const observed = observedById.get(intent.entityId);
-      const current = currentById.get(intent.entityId);
-      if (
-        !observed ||
-        !current ||
-        observed.identityRevision !== intent.identityRevision ||
-        observed.poseRevision !== intent.observedPoseRevision ||
-        this.identityRevision(current) !== intent.identityRevision ||
-        this.latestPhysicsTick - intent.observedPoseRevision > maximumPoseStaleness ||
-        !this.currentChunkRevisions(intent.readChunkRevisions) ||
-        !this.validLogicIntent(intent)
-      )
-        continue;
-      const action = this.applyLogicAction(intent.entityId, intent.action);
-      canonicalChanged ||= action?.changed ?? false;
-      if (action && !action.accepted) continue;
-      accepted.push({
-        entityId: intent.entityId,
-        wish: { x: intent.wish.x, z: intent.wish.z },
-        jumpRequested: intent.jumpRequested,
-        verticalIntent: intent.verticalIntent,
-        expiresAtPhysicsTick: batch.expiresAtPhysicsTick,
-      });
-    }
+    const { intents, canonicalChanged } = acceptLogicIntentBatch({
+      batch,
+      observation,
+      latestPhysicsTick: this.latestPhysicsTick,
+      physicsHz: this.frequencies.physicsHz,
+      currentEntities: this.server.queryEntities(),
+      identityRevision: (entity) => this.logicObservationBuilder.identityRevision(entity),
+      currentChunkRevisions: (reads) => this.currentChunkRevisions(reads),
+      applyAction: (entityId, action) => this.applyLogicAction(entityId, action),
+      validIntent: (intent) => this.validLogicIntent(intent),
+    });
     if (canonicalChanged) this.session.commitExternalState(false);
-    return this.session.receiveLogicIntents(batch.epoch, accepted);
+    return this.session.receiveLogicIntents(batch.epoch, intents);
   }
 
-  requestLogicObservation = () => void (this.logicObservationRequested = true);
+  createLogicObservation(): LogicObservation {
+    return this.logicCandidates.create(this.snapshot(), (sequence, value) =>
+      this.logicObservationBuilder.build(sequence, value),
+    );
+  }
+
+  invalidateLogicCandidates(): void {
+    this.logicCandidates.invalidate();
+    this.session.clearLogicIntents();
+  }
+
+  get settlementDiagnostics() {
+    const snapshot = this.snapshot();
+    return {
+      physicsSettled: snapshot.physicsDebtMs + 1e-7 < 1_000 / this.frequencies.physicsHz,
+      fluidIssuedWorkCount: this.server.fluidDiagnostics.issuedLeaseCount ?? 0,
+      fluidSettledWorkCount:
+        this.server.fluidDiagnostics.settledLeaseCount ??
+        this.server.fluidDiagnostics.acceptedCandidateCount + this.server.fluidDiagnostics.returnedLeaseCount,
+      logicObservationRequested: this.logicCandidates.requested,
+      logicIssuedObservationSequence: this.logicCandidates.issuedSequence,
+    } as const;
+  }
+
+  hasPendingLogicObservationThrough(sequence: number): boolean {
+    return this.logicCandidates.hasPendingThrough(sequence);
+  }
+
+  requestLogicObservation = () => this.logicCandidates.request();
 
   async executeTransaction<T>(
     identity: AuthorityTransactionIdentity,
@@ -426,6 +449,16 @@ export class AuthorityRuntime {
     return { ...result, storageBytes: this.options.persistence?.metrics?.().recordBytes ?? 0 };
   }
 
+  exportPortableCheckpoint() {
+    return this.server.freezePortableSaveSnapshot(this.session.currentCommitSequence);
+  }
+
+  async persistPortableCheckpoint(snapshot: ReturnType<AuthorityRuntime['exportPortableCheckpoint']>) {
+    const result = await this.server.saveFrozen(snapshot);
+    this.residency.recordSaveSuccess();
+    return result;
+  }
+
   view(): AuthorityGameplayView {
     const entities = this.server
       .queryEntities()
@@ -463,29 +496,6 @@ export class AuthorityRuntime {
     queueBodyRecoveriesAfterCommit(commit, this.server.queryEntities(), (entityId, maxDistance) =>
       this.session.requestBodyRecovery(entityId, 'external-geometry-change', maxDistance),
     );
-  }
-
-  private buildLogicObservation(sequence: number, snapshot: AuthoritySnapshot): LogicObservation {
-    const entities = this.server.queryEntities();
-    return buildLogicObservation({
-      clone: this.options.platform.clone,
-      epoch: this.options.epoch,
-      observationSequence: sequence,
-      snapshot,
-      entities,
-      simulation: this.server.simulationSnapshot(),
-      identityRevision: (entity) => this.identityRevision(entity),
-      getLoadedVoxel: (x, y, z) => this.server.peekLoadedVoxel(x, y, z),
-    });
-  }
-
-  private identityRevision(entity: ReturnType<GameServer['queryEntities']>[number]): number {
-    const signature = `${entity.type}:${entity.archetype ?? ''}:${entity.stack?.itemId ?? ''}`;
-    const current = this.entityIdentities.get(entity.id);
-    if (current?.signature === signature) return current.revision;
-    const revision = ++this.identityRevisionSequence;
-    this.entityIdentities.set(entity.id, { signature, revision });
-    return revision;
   }
 
   private currentChunkRevisions(reads: readonly Readonly<{ key: string; revision: number }>[]): boolean {

@@ -10,20 +10,24 @@ import {
 import { loadWorkerKernels, workerKernelReadyState } from './wasm-kernel-loader';
 import { parseWasmWorkerName } from '../client/compute/wasm-experiment-selection';
 import { worldKernelAdapter } from './world-kernel-adapter';
+import type { KernelMemory } from '../compute/kernel-memory';
 
 const scope = self as DedicatedWorkerGlobalScope;
 const requested = parseWasmWorkerName(scope.name);
+let kernelMemory: KernelMemory | null = null;
 const kernelPromise = loadWorkerKernels({
   artifact: requested.artifact,
   kernels: requested.kernels.filter((name) => ['w02', 'w03', 'w04', 'w05', 'w06'].includes(name)),
 });
 const adapterPromise = kernelPromise.then((state) => {
+  kernelMemory = state.memory;
   Object.assign(scope, { __seedlandsWasm: state });
   scope.postMessage({ kind: 'compute-worker-ready', protocolVersion: 1, ...workerKernelReadyState(state) });
   return worldKernelAdapter(state);
 });
 const yieldTurn = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 const lifecycle = createComputeWorkerEntryLifecycle({
+  kernelDiagnostics: () => kernelMemory?.diagnostics() ?? null,
   postMessage: (message, transfer) => scope.postMessage(message, transfer),
   run: async (task, isCancelled) => {
     const startedAt = performance.now();

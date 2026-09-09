@@ -107,13 +107,45 @@ describe('BrowserLogicClient', () => {
       data: { kind: 'logic-block-started', protocolVersion: LOGIC_PROTOCOL_VERSION, epoch: 'epoch:2', requestId: 1 },
     } as MessageEvent);
     await blocked;
-    expect(client.diagnostics).toEqual({ blockStartedCount: 1, blockCompletedCount: 0 });
+    expect(client.diagnostics).toMatchObject({ blockStartedCount: 1, blockCompletedCount: 0 });
     worker.onmessage?.({
       data: { kind: 'logic-block-finished', protocolVersion: LOGIC_PROTOCOL_VERSION, epoch: 'epoch:2', requestId: 1 },
     } as MessageEvent);
-    expect(client.diagnostics).toEqual({ blockStartedCount: 1, blockCompletedCount: 1 });
+    expect(client.diagnostics).toMatchObject({ blockStartedCount: 1, blockCompletedCount: 1 });
     client.dispose();
     expect(worker.terminated).toBe(true);
     expect(fatal).not.toHaveBeenCalled();
+  });
+
+  it('恢复世界时切换epoch并丢弃旧epoch的迟到batch', async () => {
+    const worker = new FakeWorker();
+    const batches: LogicIntentBatch[] = [];
+    const client = new BrowserLogicClient(worker, 'epoch:old', { onIntents: (batch) => batches.push(batch) });
+    const starting = client.start(false, 60);
+    worker.onmessage?.({
+      data: { kind: 'logic-ready', protocolVersion: LOGIC_PROTOCOL_VERSION, epoch: 'epoch:old' },
+    } as MessageEvent);
+    await starting;
+    client.rebindEpoch('epoch:new');
+    expect(worker.posts.at(-1)).toEqual({
+      kind: 'reset-logic-epoch',
+      protocolVersion: LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:old',
+      nextEpoch: 'epoch:new',
+    });
+    worker.onmessage?.({
+      data: {
+        kind: 'logic-intents',
+        protocolVersion: LOGIC_PROTOCOL_VERSION,
+        batch: {
+          protocolVersion: LOGIC_PROTOCOL_VERSION,
+          epoch: 'epoch:old',
+          observationSequence: 1,
+          expiresAtPhysicsTick: 1,
+          intents: [],
+        },
+      },
+    } as MessageEvent);
+    expect(batches).toEqual([]);
   });
 });

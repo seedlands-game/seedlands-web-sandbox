@@ -25,32 +25,40 @@ const starterEcologySeeds = [
 ] as const;
 
 describe('simulation commands and persistence', () => {
-  it('enforces observer identity while exposing reusable observation, action and POI commands', async () => {
+  it('keeps low-level commands reusable after ingress authorization resolves the observer identity', async () => {
     const server = new GameServer({ platform: testCorePlatform, seedText: 'simulation-command' });
     server.spawnPlayer({ id: 'player', position: [0.5, 1, 0.5] });
     server.spawnAutonomousActor({ id: 'settler', archetype: 'settler', position: [2.5, 1, 0.5] });
     server.registerPoi({ id: 'work', kind: 'work', position: [4.5, 1, 0.5], label: '工作地' });
     const executor = new ServerCommandExecutor(server, { now: testCorePlatform.now });
-    const agent = {
+    const scriptedSource = {
       actorId: 'settler',
-      sourceType: 'agent' as const,
+      sourceType: 'scripted-test',
       entityId: 'settler',
       capabilities: ['query', 'mutation'] as const,
     };
 
-    await expect(executor.execute(agent, { type: 'query-observation' })).resolves.toMatchObject({ success: true });
+    await expect(executor.execute(scriptedSource, { type: 'query-observation' })).resolves.toMatchObject({
+      success: true,
+    });
     await expect(executor.execute(developer, { type: 'query-observation' })).resolves.toMatchObject({
       success: true,
       data: { observation: { observerId: 'player' } },
     });
-    await expect(executor.execute(agent, { type: 'query-observation', entityId: 'player' })).resolves.toMatchObject({
-      success: false,
-      error: { kind: 'permission' },
+    await expect(
+      executor.execute(scriptedSource, { type: 'query-observation', entityId: 'player' }),
+    ).resolves.toMatchObject({
+      success: true,
+      data: { observation: { observerId: 'player' } },
     });
-    const move = await executor.execute(agent, { type: 'start-action', action: 'move-to', position: [4.5, 1, 0.5] });
+    const move = await executor.execute(scriptedSource, {
+      type: 'start-action',
+      action: 'move-to',
+      position: [4.5, 1, 0.5],
+    });
     expect(move).toMatchObject({ success: true, data: { action: { actorId: 'settler', status: 'pending' } } });
-    await expect(executor.execute(agent, { type: 'query-action' })).resolves.toMatchObject({ success: true });
-    await expect(executor.execute(agent, { type: 'query-pois', radius: 10 })).resolves.toMatchObject({
+    await expect(executor.execute(scriptedSource, { type: 'query-action' })).resolves.toMatchObject({ success: true });
+    await expect(executor.execute(scriptedSource, { type: 'query-pois', radius: 10 })).resolves.toMatchObject({
       success: true,
       data: { pois: [expect.objectContaining({ id: 'work' })] },
     });
