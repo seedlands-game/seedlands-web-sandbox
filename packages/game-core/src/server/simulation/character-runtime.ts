@@ -217,6 +217,8 @@ export class CharacterRuntime {
       !snapshot ||
       snapshot.version !== 1 ||
       !Number.isSafeInteger(snapshot.sequence) ||
+      !Number.isSafeInteger(snapshot.sequence + 1) ||
+      snapshot.sequence < 0 ||
       !Array.isArray(snapshot.characters)
     )
       throw new TypeError('Character snapshot header is invalid.');

@@ -1,0 +1,46 @@
+$ vitest run tests/server/character-target-retention.test.ts
+9:22:10 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/character-target-retention.test.ts (7 tests | 5 failed) 242ms
+   × atomically rejects invalid character counter eventCursor and preserves later dialogue 3ms
+   × atomically rejects invalid character counter revision and preserves later dialogue 1ms
+   × atomically rejects invalid character counter policyRevision and preserves later dialogue 0ms
+   × atomically rejects invalid character counter memoryRevision and preserves later dialogue 0ms
+   × atomically rejects invalid character counter zeroEvent and preserves later dialogue 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/character-target-retention.test.ts > atomically rejects invalid character counter eventCursor and preserves later dialogue
+ FAIL  tests/server/character-target-retention.test.ts > atomically rejects invalid character counter revision and preserves later dialogue
+ FAIL  tests/server/character-target-retention.test.ts > atomically rejects invalid character counter policyRevision and preserves later dialogue
+ FAIL  tests/server/character-target-retention.test.ts > atomically rejects invalid character counter memoryRevision and preserves later dialogue
+ FAIL  tests/server/character-target-retention.test.ts > atomically rejects invalid character counter zeroEvent and preserves later dialogue
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ tests/server/character-target-retention.test.ts:106:43
+    104|     } else Object.assign(record, { [counter]: Number.MAX_SAFE_INTEGER …
+    105|     persistence.saveFrozenSnapshot(corrupt);
+    106|     await expect(server.restore(), counter).rejects.toThrow(/snapshot/…
+       |                                           ^
+    107|     expect(server.freezeSaveSnapshot(1), counter).toEqual(before);
+    108|   server.character({ kind: 'dialogue', entityId, text: 'Hello again' }…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 2 passed (7)
+   Start at  21:22:10
+   Duration  554ms (transform 201ms, setup 0ms, import 241ms, tests 242ms, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.

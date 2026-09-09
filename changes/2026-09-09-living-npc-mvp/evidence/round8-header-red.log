@@ -1,0 +1,40 @@
+$ vitest run tests/server/character-target-retention.test.ts
+9:23:10 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/character-target-retention.test.ts (9 tests | 2 failed) 242ms
+   × atomically rejects invalid character counter sequence and preserves later dialogue 2ms
+   × atomically rejects invalid character counter negativeSequence and preserves later dialogue 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/character-target-retention.test.ts > atomically rejects invalid character counter sequence and preserves later dialogue
+ FAIL  tests/server/character-target-retention.test.ts > atomically rejects invalid character counter negativeSequence and preserves later dialogue
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ tests/server/character-target-retention.test.ts:115:43
+    113|     } else Object.assign(record, { [counter]: Number.MAX_SAFE_INTEGER …
+    114|     persistence.saveFrozenSnapshot(corrupt);
+    115|     await expect(server.restore(), counter).rejects.toThrow(/snapshot/…
+       |                                           ^
+    116|     expect(server.freezeSaveSnapshot(1), counter).toEqual(before);
+    117|     server.character({ kind: 'dialogue', entityId, text: 'Hello again'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 7 passed (9)
+   Start at  21:23:10
+   Duration  559ms (transform 208ms, setup 0ms, import 251ms, tests 242ms, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.
