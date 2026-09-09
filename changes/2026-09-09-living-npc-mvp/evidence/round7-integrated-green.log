@@ -1,0 +1,11 @@
+$ vitest run tests/server/character-target-retention.test.ts tests/server/character-control-correctness.test.ts tests/agent-server
+8:27:25 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+
+ Test Files  14 passed (14)
+      Tests  60 passed (60)
+   Start at  20:27:25
+   Duration  1.29s (transform 2.08s, setup 0ms, import 6.06s, tests 1.14s, environment 1ms)
+

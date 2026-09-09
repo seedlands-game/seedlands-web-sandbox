@@ -5,7 +5,7 @@ import {
   startAgentServer,
   type AgentServerHandle,
 } from '../../apps/agent-server/src/node/websocket-host';
-import { binding } from './fixtures';
+import { binding, observation } from './fixtures';
 
 const origin = 'http://127.0.0.1:5173';
 const handles: AgentServerHandle[] = [];
@@ -92,6 +92,41 @@ describe('loopback WebSocket host', () => {
     expect(message).toMatchObject({ kind: 'error', code: 'PAIRING_REJECTED', message: 'pairing rejected' });
     expect(JSON.stringify(message)).not.toContain('correct-token');
     expect(JSON.stringify(message)).not.toContain('wrong-token');
+    await closed(socket);
+  });
+
+  it('rejects an inconsistent first observation after successful authentication', async () => {
+    const handle = await startAgentServer({ model: null, allowedOrigins: [origin], pairingToken: 'pair-test' });
+    handles.push(handle);
+    const socket = await opened(handle.url);
+    const nextMessage = messageQueue(socket);
+    socket.send(
+      JSON.stringify({
+        kind: 'hello',
+        protocolVersion: 1,
+        binding: binding(),
+        sequence: 0,
+        pairingToken: handle.pairingToken,
+      }),
+    );
+    expect(await nextMessage()).toMatchObject({ kind: 'ready' });
+    expect(await nextMessage()).toMatchObject({ kind: 'status', reason: 'missing-key' });
+    socket.send(
+      JSON.stringify({
+        kind: 'observe',
+        protocolVersion: 1,
+        binding: binding(),
+        sequence: 1,
+        observation: observation({
+          character: { ...observation().character, eventCursor: Number.MAX_VALUE },
+        }),
+      }),
+    );
+    const response = await Promise.race([
+      nextMessage(),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 100)),
+    ]);
+    expect(response).toMatchObject({ kind: 'error', code: 'BAD_FRAME' });
     await closed(socket);
   });
 

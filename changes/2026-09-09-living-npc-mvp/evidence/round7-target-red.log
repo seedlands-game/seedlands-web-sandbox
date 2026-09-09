@@ -1,0 +1,38 @@
+$ vitest run tests/server/character-target-retention.test.ts
+8:19:49 PM [vite-plugin-svelte] no Svelte config found at /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation - using default configuration.
+
+ RUN  v4.1.11 /Users/chlorinec/.codex/worktrees/17c1/voxel-sandbox-foundation
+
+ ❯ tests/server/character-target-retention.test.ts (2 tests | 1 failed) 313ms
+   × atomically rejects a checkpoint with no target reference sequence headroom before later combat 127ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/server/character-target-retention.test.ts > atomically rejects a checkpoint with no target reference sequence headroom before later combat
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ tests/server/character-target-retention.test.ts:75:32
+     73|   Object.assign(record, { targetSequence: Number.MAX_SAFE_INTEGER });
+     74|   persistence.saveFrozenSnapshot(corrupt);
+     75|   await expect(server.restore()).rejects.toThrow(/target sequence/);
+       |                                ^
+     76|   expect(server.freezeSaveSnapshot(1)).toEqual(before);
+     77|   server.spawnPlayer({ id: 'attacker', position: [2, 34.6, 1.5] });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  20:19:49
+   Duration  750ms (transform 281ms, setup 0ms, import 336ms, tests 313ms, environment 0ms)
+
+[ELIFECYCLE] Test failed. See above for more details.
