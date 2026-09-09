@@ -9,7 +9,12 @@ import { createCognitionGraph, decideWithGraph } from './cognition-graph.js';
 import { ContextSession, estimateWireTokens, type ContextLimit } from './context-session.js';
 import { DeepSeekTransportError } from './deepseek-transport.js';
 import type { CognitionModel, ModelCompletion, ModelRequest } from './model-types.js';
-import { CognitionScheduler, type CognitionSchedulerOptions, validateFallbackSeconds } from './scheduler.js';
+import {
+  CognitionScheduler,
+  type CognitionSchedulerOptions,
+  type SchedulerDispatch,
+  validateFallbackSeconds,
+} from './scheduler.js';
 
 export type RuntimeOptions = Readonly<{
   binding: ControlBinding;
@@ -276,7 +281,7 @@ export class CognitionRuntime {
     this.status(this.paused ? 'paused' : 'ready');
   }
 
-  private beginDispatch(kind: 'event' | 'fallback'): Readonly<{ dispatched: boolean; completion: Promise<void> }> {
+  private beginDispatch(kind: 'event' | 'fallback'): SchedulerDispatch {
     const observation = this.latestObservation;
     const graph = this.graph;
     if ((this.pendingIntent || this.pendingMemoryRequestId) && kind === 'event') this.deferredTrigger = true;
@@ -290,10 +295,11 @@ export class CognitionRuntime {
       !observation ||
       !graph ||
       !this.flashModel ||
-      Date.now() < this.backoffUntil ||
       (kind === 'fallback' && observation.cursor <= this.lastDecisionCursor)
     )
       return { dispatched: false, completion: Promise.resolve() };
+    const retryAfterMs = this.backoffUntil - Date.now();
+    if (retryAfterMs > 0) return { dispatched: false, completion: Promise.resolve(), retryAfterMs };
     return { dispatched: true, completion: this.runDecision(observation, graph) };
   }
 

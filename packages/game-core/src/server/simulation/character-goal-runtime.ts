@@ -39,11 +39,22 @@ export class CharacterGoalRuntime {
       if (record.suspendedGoal) {
         record.currentGoal = { ...record.suspendedGoal, status: 'active' };
         record.suspendedGoal = undefined;
-        record.revision += 1;
-        this.callbacks.record(record, 'fallback', { reason: 'danger-cleared' });
-        this.start(record);
-        this.options.changed();
+      } else {
+        record.actionId = undefined;
+        record.executionTargetId = undefined;
+        record.stalledSeconds = 0;
+        record.refreshSeconds = 0;
+        record.currentGoal = {
+          revision: record.revision + 1,
+          requestId: 'fallback-life',
+          goal: { kind: 'forage' },
+          status: 'active',
+        };
       }
+      record.revision += 1;
+      this.callbacks.record(record, 'fallback', { reason: 'danger-cleared' });
+      this.start(record);
+      this.options.changed();
       return;
     }
     if (record.currentGoal.status !== 'active') return;
