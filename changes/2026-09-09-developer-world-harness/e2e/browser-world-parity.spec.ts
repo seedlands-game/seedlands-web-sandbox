@@ -43,8 +43,13 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
   const result = await page.evaluate(
     async ({ checkpoint, edited, extra, generated, lantern }) => {
       const world = window.__seedlandsHarness!.world;
+      const prepare = async (request: Parameters<typeof world.prepare>[0]) => {
+        const result = await world.prepare(request);
+        if (!result.ok) throw new Error(`World preparation failed: ${JSON.stringify({ request, result })}`);
+        return result;
+      };
       await world.clock({ kind: 'pause' });
-      await world.prepare({ kind: 'chunk', chunk: [4, 0, 0] });
+      await prepare({ kind: 'chunk', chunk: [4, 0, 0] });
       await world.command({ type: 'set-block', position: extra, voxel: lantern });
       const browserCheckpoint = await world.checkpoint({ kind: 'export' });
       if (!browserCheckpoint.ok) throw new Error('Browser pre-restore checkpoint failed.');
@@ -80,14 +85,14 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
           intents: [],
         },
       });
-      await world.prepare({
+      await prepare({
         kind: 'chunks',
         chunks: [
           [0, 0, 0],
           [4, 0, 0],
         ],
       });
-      await world.prepare({
+      await prepare({
         kind: 'chunk',
         chunk: [Math.floor(generated[0] / 32), Math.floor(generated[1] / 32), Math.floor(generated[2] / 32)],
       });

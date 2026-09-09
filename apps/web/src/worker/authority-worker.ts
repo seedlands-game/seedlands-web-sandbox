@@ -438,7 +438,7 @@ const handle = async (message: AuthorityRequest) => {
     return;
   }
   if (!worldHarness) throw new Error('World Harness is unavailable.');
-  await worldHarness.hostOperation(async () => {
+  const dispatchCurrent = async () => {
     if (message.runtimeEpoch !== runtimeEpoch) {
       if ('requestId' in message && typeof message.requestId === 'number')
         fail(
@@ -449,7 +449,13 @@ const handle = async (message: AuthorityRequest) => {
       return;
     }
     await handleCurrent(message);
-  });
+  };
+  // Canonical completion resolves a prepare operation that may own the command queue.
+  // It stays on this Authority writer and keeps the same epoch/revision validation.
+  if (message.kind === 'accept-generated-chunk') {
+    await dispatchCurrent();
+    worldHarness.notifyProgress();
+  } else await worldHarness.hostOperation(dispatchCurrent);
 };
 
 scope.onmessage = (event: MessageEvent<AuthorityRequest>) => {
