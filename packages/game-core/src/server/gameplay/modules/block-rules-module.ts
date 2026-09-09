@@ -4,7 +4,7 @@ import type { ModModule, ModuleInvocationValue } from '../../composition/contrac
 import type { ActorModuleExecutionContext } from '../../composition/authorized-execution';
 import { isItemId, type ItemStack } from '../item-registry';
 import type { GameplayContent } from '../gameplay-content';
-import { listVoxelGameplayDefinitions, type VoxelGameplayDefinition } from '../voxel-gameplay';
+import type { VoxelGameplayDefinition } from '../voxel-gameplay';
 import {
   BLOCK_ACTIONS_CAPABILITY,
   BLOCK_ACTOR_RESOURCE,
@@ -32,7 +32,12 @@ import { buildBlockActionCandidate } from './block-actions-module';
 type GameplayContentCapabilityV1 = Readonly<{ resolve(): GameplayContent }>;
 export type BlockRulesModuleOptions = Readonly<{
   moduleId: string;
-  voxelDefinitions?: readonly VoxelGameplayDefinition[];
+  voxelDefinitions: readonly VoxelGameplayDefinition[];
+}>;
+
+export type BlockRulesCapabilityV1 = Readonly<{
+  moduleId: string;
+  definitions: readonly VoxelGameplayDefinition[];
 }>;
 
 type ActorTarget = Readonly<{ actorId: string; position: BlockPosition }>;
@@ -107,7 +112,8 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
   const moduleId = options.moduleId;
   if (!moduleId?.trim()) throw new TypeError('Block Rules module ID is invalid.');
   const definitions = new Map<number, VoxelGameplayDefinition>();
-  for (const raw of options.voxelDefinitions ?? listVoxelGameplayDefinitions()) {
+  if (!Array.isArray(options.voxelDefinitions)) throw new TypeError('Block Rules requires explicit voxel definitions.');
+  for (const raw of options.voxelDefinitions) {
     const definition = snapshotDefinition(raw);
     if (definitions.has(definition.voxel)) throw new TypeError(`Duplicate Block rule voxel: ${definition.voxel}`);
     definitions.set(definition.voxel, definition);
@@ -135,7 +141,13 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
       api.requireCapability(BLOCK_ACTIONS_CAPABILITY);
       const contentCapability = api.requireCapability<GameplayContentCapabilityV1>('seedlands:gameplay-content');
       const content = (): BlockActionContent => contentCapability.resolve();
-      api.provideCapability(BLOCK_RULES_CAPABILITY, Object.freeze({ moduleId }));
+      api.provideCapability(
+        BLOCK_RULES_CAPABILITY,
+        Object.freeze({
+          moduleId,
+          definitions: Object.freeze([...definitions.values()]),
+        } satisfies BlockRulesCapabilityV1),
+      );
 
       const current = (context: ActorModuleExecutionContext, state: ModCandidateState) => {
         const target = actorTarget(context);

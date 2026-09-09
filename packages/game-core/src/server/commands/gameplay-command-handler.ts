@@ -3,6 +3,8 @@ import { executeInventoryModuleCommand } from './inventory-module-command';
 import { executeModeCommand, type ModuleCommandPort } from './module-command';
 import type { GameServer, WorldCommitResult } from '../game-server';
 import { isItemId, type ItemId } from '../gameplay/item-registry';
+import { BLOCK_RULES_CAPABILITY } from '../gameplay/modules/block-action-model';
+import type { BlockRulesCapabilityV1 } from '../gameplay/modules/block-rules-module';
 import { listVoxelGameplayDefinitions } from '../gameplay/voxel-gameplay';
 import type { CommandSource, ServerCommand } from './command-contract';
 
@@ -123,7 +125,14 @@ export async function executeGameplayCommand(
     case 'query-item-definitions':
       return { message: 'Item definitions.', data: { items: server.itemDefinitions.list() } };
     case 'query-voxel-definitions':
-      return { message: 'Voxel gameplay definitions.', data: { voxels: listVoxelGameplayDefinitions() } };
+      return {
+        message: 'Voxel gameplay definitions.',
+        data: {
+          voxels: server.options.composition
+            ? server.options.composition.capability<BlockRulesCapabilityV1>(BLOCK_RULES_CAPABILITY).definitions
+            : listVoxelGameplayDefinitions(),
+        },
+      };
     case 'query-recipes': {
       const recipes = command.craftable ? server.listCraftableRecipes(playerId(source)) : server.listRecipes();
       return { message: 'Recipe definitions.', data: { recipes } };

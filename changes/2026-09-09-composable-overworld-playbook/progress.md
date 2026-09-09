@@ -132,3 +132,9 @@ Place/Break/clock/finish 已接入真实注册 owner，开发者 give/remove 采
 - 第一轮冻结消费者树 static 1618 passed / 4 skipped、build 和本 change Browser 6/6 分别通过，基础 gameplay-foundation 2/2 通过。其后独立复核指出 actor execute 未独立检查，已补两条有效 RED 并修复 principal+module 两层授权，最终完整复验待完成。
 - 木剑旧回归再次失败，trace 捕获重置复用 retired EntityId；已改为每次实例 UUID 角色身份、准确清理及重置 Promise 复用，真实 ECS 双次重建 3 项定向测试通过。Browser 旧回归改为等待旧目标消失及新目标齐备，不沿用旧 DOM 瞬态作为成功。最终 Browser 复验未预填。
 - 当前 S3 仍 Implementing；默认方块/生物内容归属、S4 实际工位/成长、S5 替代玩法、S6 完整旅程/PR 仍未交付。没有推送或 PR，也没有新增外部依赖。
+
+## S3 跨目标授权与方块内容检查点
+
+Inventory / Block / Combat 已补原始 actor execute 的调用者与模块检查，延迟采集/命中重新验证，实际撤权反例由 RED 转为 GREEN。默认方块定义已归 Overworld，并由规则 capability 提供实际世界查询，省略 provider 不隐式返回默认内容。完整 static 1632 passed / 4 skipped、build、Browser 12/12 分别通过；任务 4173 端口已释放。准确证据见 [跨目标授权](s3-secondary-actor-permissions.md)与[方块内容](s3-block-content-design.md)。
+
+S3 核心实际消费者已接入；仍需默认内容与替代装配共同验证收尾，阶段保持 Implementing。S4 工位 owner 与工具成长接线继续推进，候选函数通过不代表世界/保存/UI 已完成。没有推送、PR 或合并。

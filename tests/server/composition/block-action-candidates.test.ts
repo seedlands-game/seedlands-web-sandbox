@@ -27,6 +27,7 @@ import {
   defineBlockActionsModule,
 } from '../../../packages/game-core/src/server/gameplay/modules/block-actions-module';
 import { defineBlockRulesModule } from '../../../packages/game-core/src/server/gameplay/modules/block-rules-module';
+import { listVoxelGameplayDefinitions } from '../../../packages/game-core/src/server/gameplay/voxel-gameplay';
 import { Voxel } from '../../../packages/game-core/src/world/voxel';
 
 const itemDefinitions = [
@@ -108,7 +109,9 @@ function setup(
     meleeDefinitions: [],
   });
   const actions = defineBlockActionsModule();
-  const rules = options.rulesModule ?? defineBlockRulesModule({ moduleId: 'test:default-block-rules' });
+  const rules =
+    options.rulesModule ??
+    defineBlockRulesModule({ moduleId: 'test:default-block-rules', voxelDefinitions: listVoxelGameplayDefinitions() });
   const veto: ModModule = {
     descriptor: {
       id: 'test:block-veto',

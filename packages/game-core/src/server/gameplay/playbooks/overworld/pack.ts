@@ -14,6 +14,7 @@ import {
   defineNeedsRulesModule,
   defineRulesetModule,
 } from '@seedlands/game-core/mod-api';
+import { overworldBlocks } from './blocks';
 import { overworldItems } from './items';
 import { overworldRecipes } from './recipes';
 import { overworldMeleeDefinitions } from './combat';
@@ -42,7 +43,7 @@ export const pack = definePack({
     defineInventoryModule(),
     defineInventoryActionsModule(),
     defineBlockActionsModule(),
-    defineBlockRulesModule({ moduleId: 'seedlands:overworld-block-rules' }),
+    defineBlockRulesModule({ moduleId: 'seedlands:overworld-block-rules', voxelDefinitions: overworldBlocks }),
     defineModeModule(),
     defineCombatModule(),
     defineCombatRulesModule({

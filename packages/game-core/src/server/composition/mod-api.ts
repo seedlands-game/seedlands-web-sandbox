@@ -58,6 +58,8 @@ export {
   buildBlockActionCandidate,
   buildBlockAdvanceUpdates,
 } from '../gameplay/modules/block-actions-module';
+export type { VoxelGameplayDefinition } from '../gameplay/voxel-gameplay';
+export type { BlockRulesCapabilityV1 } from '../gameplay/modules/block-rules-module';
 export { defineBlockRulesModule } from '../gameplay/modules/block-rules-module';
 export * from '../gameplay/modules/block-action-model';
 
