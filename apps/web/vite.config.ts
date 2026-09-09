@@ -14,6 +14,7 @@ let developmentServer: ViteDevServer | undefined;
 
 export default defineConfig({
   base,
+  optimizeDeps: { include: ['@seedlands/game-core > mistreevous'] },
   plugins: [
     {
       name: 'seedlands-prerendered-start-screen',

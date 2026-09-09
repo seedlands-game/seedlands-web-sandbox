@@ -11,7 +11,8 @@
 - [x] Factory：真实Pro出生包+浏览器幂等激活通过（一次Pro生成小满，两次激活同一npc-8）
 - [x] 独立审阅问题闭环、最终NPC Browser套件及H1输入恢复回归、可玩环境
 - [x] 最终静态285files/1369tests、build、当前Browser/H1及独立复核
-- [ ] PR与必要CI交接
+- [x] 创建PR #29并跟进首次CI失败，修正loading fixture总预算
+- 远端最终门禁与审核状态见[PR #29](https://github.com/seedlands-game/seedlands-web-sandbox/pull/29)，本文件不作为实时CI状态源。
 
 ## 当前证据
 

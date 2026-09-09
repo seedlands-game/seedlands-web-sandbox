@@ -1,0 +1,32 @@
+{
+  "scope": "功能稳定性，非启动性能基准",
+  "control": "当前配置，冷缓存--force，总测试50s、HUD30s",
+  "candidate": "仅增加optimizeDeps.include核心嵌套mistreevous，其他相同",
+  "seed": "loading-evidence",
+  "port": 4324,
+  "samples": {
+    "control": {
+      "documentRequests": 2,
+      "serverLateDependencies": [
+        "(client) ✨ new dependencies optimized: mistreevous",
+        "(client) ✨ optimized dependencies changed. reloading"
+      ],
+      "result": "failed",
+      "traceSha256": "579cca1c640fff1d40d3d525508f340be004caab60c778e7fc946198641b3668"
+    },
+    "candidate": {
+      "documentRequests": 1,
+      "serverLateDependencies": [],
+      "result": "passed",
+      "traceSha256": "867e8e4125d77975efcc4c2e25e1d9631034d9bd0f43b22a6c1c0519e3746404"
+    }
+  },
+  "combined": {
+    "command": "pnpm test:e2e:regression",
+    "coldCache": true,
+    "passed": 21,
+    "failed": 0,
+    "wallSeconds": 43.1,
+    "timingIsPerformanceClaim": false
+  }
+}
