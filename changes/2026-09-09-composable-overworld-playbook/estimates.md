@@ -141,3 +141,13 @@ Needs 检查点准出后，prepared Combat request（含 zero-windup）分配最
 Inventory 纯注册候选实施追加 Sol/high 2.5 小时，合同 SHA-256 `86fde386188b54ac0f497bef63eef265108583f1163db09b7e03dc88bc2622ca`；累计分配上限变为 47/48 小时。仅模型/模块/自身测试互斥路径，root 继续 host owner 与真实调用。
 
 库存与 Mode 消费者冻结后，分配 Sol/xhigh 只读复核最多 0.75 agent 小时，合同 SHA-256 `73b6133e1ef33f11237630843cab610963a746a6b94aeee4e5edefd69813f4fa`。累计 child 上限 47.75/48 小时；未刷新费用或额度，实际消耗仍 unknown。
+
+## 12. 方块实际消费者与最终 S3 集成重估
+
+库存/Mode 已通过实际消费者准出。剩余方块流程目前仍直接写 breakAction；注册时钟、持久来源和世界最终回执需要同时落入真实 owner，不能以纯候选代替。S3 活跃规划由正常 24 /保守 48 调整为正常 30 /保守 60 小时，等待仍 1 /2。未扣实际消费的 S3–S6 规划相应为 57 /111 小时，保守 ×120% 向上取整为 134 小时；这是风险重估，不是完成承诺或新增功能。实际工时、credits/API 费用和额度分母继续 unknown。
+
+冻结新的 60 小时 delegation envelope，旧合同不修改。纯 Block model/module/rules 与自身测试分配 Sol/high 最多 3 agent 小时，累计已列 child 上限 50.75 小时；root 同步完成开发者库存原子化和世界/来源宿主接缝。该上限不是实际消耗，也不自动创建 Goal。
+
+方块脚本/恢复集成测试追加 Sol/high 最多 1.5 小时，时钟失败边界独立只读复核追加 Sol/xhigh 最多 1 小时；累计 child 分配上限 53.25/60 小时。当前分配不是实际耗时，账户额度及费用仍未刷新。
+
+方块冻结消费者正确性复核追加 Sol/xhigh 最多 0.75 小时，累计 child 分配上限 54/60 小时；合同 hash `e659595fa3954fb307ba5f59ba25d6a42446c20fc7283568e87eb6e638070141`。仅只读，不把静态、Browser 或复核时长推算成模型实际费用。

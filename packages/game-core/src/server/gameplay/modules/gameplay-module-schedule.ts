@@ -73,6 +73,7 @@ export function createGameplayModuleSchedule(
     return units / 1e9;
   };
   return Object.freeze({
+    activate,
     assertAdvance,
     get time() {
       return active ? lifecycle.time : 0;

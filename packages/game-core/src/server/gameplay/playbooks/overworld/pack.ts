@@ -3,6 +3,8 @@ import {
   defineContentModule,
   defineInventoryModule,
   defineInventoryActionsModule,
+  defineBlockActionsModule,
+  defineBlockRulesModule,
   defineModeModule,
   defineNeedsModule,
   defineCombatModule,
@@ -37,6 +39,8 @@ export const pack = definePack({
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule(),
     defineInventoryActionsModule(),
+    defineBlockActionsModule(),
+    defineBlockRulesModule({ moduleId: 'seedlands:overworld-block-rules' }),
     defineModeModule(),
     defineCombatModule(),
     defineCombatRulesModule({

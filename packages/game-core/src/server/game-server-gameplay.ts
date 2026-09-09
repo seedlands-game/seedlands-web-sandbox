@@ -1,3 +1,4 @@
+import type { ModuleInvocationValue } from './composition/contracts';
 import type { PreparedWorldEdit } from './prepared-world-edit';
 import type { WorldResourceAuthorizer } from './harness/world-authorization';
 import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from './composition/operation-contracts';
@@ -131,6 +132,9 @@ export abstract class GameServerGameplayFacade {
   }
   getActorModeState(id: string) {
     return this.gameplay.getActorModeState(id);
+  }
+  acknowledgeBlockCommit(value: ModuleInvocationValue) {
+    return this.gameplay.acknowledgeBlockCommit(value);
   }
   bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
     return this.gameplay.bindModuleOperations(authorizer, source);

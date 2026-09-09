@@ -61,6 +61,7 @@ class FakeVoxelWorld {
     let validated = false;
     return {
       committed: result.committed,
+      result,
       validate: () => {
         if (this.revision !== revision || this.getVoxel(position) !== previous) throw new Error('Stale world edit.');
         validated = true;
@@ -87,14 +88,20 @@ const verifiedPack = {
   },
 };
 
-const createRuntime = () => {
+const createRuntime = (cloneHook?: (value: unknown) => void) => {
   const world = new FakeVoxelWorld();
   const composition = assembleOverworldPacks([verifiedPack]);
   const gameplay = new GameplayRuntime({
     composition,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
     moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' }),
-    platform: testCorePlatform,
+    platform: {
+      ...testCorePlatform,
+      clone: <Value>(value: Value): Value => {
+        cloneHook?.(value);
+        return structuredClone(value);
+      },
+    },
     getWorldTime: () => 9,
     getVoxel: world.getVoxel,
     prepareVoxelEdit: world.prepareVoxelEdit,
@@ -205,7 +212,7 @@ describe('creative block interactions through GameplayRuntime', () => {
     expect(gameplay.getInventory('player').slots[0]).toEqual({ itemId: ItemIds.DirtBlock, count: 2 });
   });
 
-  it('does not remove a survival block or clear its action when the required drop cannot allocate', () => {
+  it('preserves the committed clock frontier without changing break effects when its drop cannot allocate', () => {
     const { gameplay, world } = createRuntime();
     world.cells.set(key([1, 1, 0]), Voxel.Wood);
     gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1 });
@@ -213,10 +220,20 @@ describe('creative block interactions through GameplayRuntime', () => {
     const exhausted = gameplay.createSnapshot();
     exhausted.entityStore.sequence = Number.MAX_SAFE_INTEGER;
     gameplay.restoreSnapshot(exhausted);
-    const before = gameplay.createSnapshot().entityStore;
+    const control = createRuntime();
+    control.world.cells.set(key([1, 1, 0]), Voxel.Wood);
+    control.gameplay.restoreSnapshot(exhausted);
+    control.world.unavailable.add(key([1, 1, 0]));
+    control.gameplay.advanceRules(0.4);
+    const committedClock = control.gameplay.createSnapshot();
     expect(() => gameplay.advanceRules(0.4)).toThrow(/sequence.*exhausted/i);
     expect(world.getVoxel([1, 1, 0])).toBe(Voxel.Wood);
-    expect(gameplay.createSnapshot().entityStore).toEqual(before);
+    const after = gameplay.createSnapshot();
+    expect(after.entityStore).toEqual(committedClock.entityStore);
+    expect(after.moduleSchedule).toEqual(committedClock.moduleSchedule);
+    expect(after.gameplayTime).toBe(0.4);
+    expect(gameplay.getPlayerState('player').breakAction?.elapsedSeconds).toBe(0.4);
+    expect(gameplay.queryEntities({ type: 'world-item' })).toEqual([]);
     expect(world.revision).toBe(0);
   });
 
@@ -239,5 +256,37 @@ describe('creative block interactions through GameplayRuntime', () => {
     expect(gameplay.placeVoxel('player', [2, 1, 0])).toMatchObject({ success: true });
     expect(world.getVoxel([2, 1, 0])).toBe(Voxel.Wood);
     expect(gameplay.getInventory('player').slots[1]).toEqual({ itemId: ItemIds.WoodBlock, count: 1 });
+  });
+  it('saves a ready break after a final clone failure and retries exactly once after restore', () => {
+    let rejectCompletion = true;
+    const source = createRuntime((value) => {
+      if (
+        rejectCompletion &&
+        value &&
+        typeof value === 'object' &&
+        'kind' in value &&
+        value.kind === 'finish' &&
+        'success' in value
+      )
+        throw new Error('transient-finish-clone');
+    });
+    source.world.cells.set(key([1, 1, 0]), Voxel.Wood);
+    source.gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1 });
+    source.gameplay.beginBreak('player', [1, 1, 0]);
+    expect(() => source.gameplay.advanceRules(0.4)).toThrow('transient-finish-clone');
+    const saved = source.gameplay.createSnapshot();
+    expect(saved.gameplayTime).toBe(0.4);
+    expect(source.world.getVoxel([1, 1, 0])).toBe(Voxel.Wood);
+    expect(source.gameplay.queryEntities({ type: 'world-item' })).toEqual([]);
+    const restored = createRuntime();
+    restored.world.cells.set(key([1, 1, 0]), Voxel.Wood);
+    restored.gameplay.restoreSnapshot(saved);
+    expect(restored.gameplay.advanceRules(0).commits).toHaveLength(1);
+    expect(restored.gameplay.advanceRules(0).commits).toHaveLength(0);
+    expect(restored.gameplay.queryEntities({ type: 'world-item' })).toHaveLength(1);
+    expect(restored.world.getVoxel([1, 1, 0])).toBe(Voxel.Air);
+    rejectCompletion = false;
+    expect(source.gameplay.advanceRules(0).commits).toHaveLength(1);
+    expect(source.gameplay.advanceRules(0).commits).toHaveLength(0);
   });
 });

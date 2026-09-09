@@ -87,6 +87,7 @@ export function prepareServerWorldEdit(
   };
   return Object.freeze({
     committed: base.committed,
+    result: base.result,
     validate,
     apply() {
       if (!validated) throw new Error('Prepared world edit requires validation.');

@@ -70,6 +70,19 @@ describe('prepared single voxel participant', () => {
     expect(world.state()).toEqual(control.state());
     expect(() => prepared.apply()).toThrow(/used/i);
   });
+  it('exposes an immutable final receipt before any voxel writes for registered result clone', () => {
+    const world = setup();
+    const before = world.state();
+    const prepared = prepareSingleWorldEdit(world.ports, edit);
+    const receipt = structuredClone(prepared.result);
+    expect(receipt).toMatchObject({ committed: true, worldRevision: 4, structuralChange: { actorId: 'alice' } });
+    expect(() => {
+      prepared.result.structuralChange!.bounds!.min[0] = 99;
+    }).toThrow();
+    expect(world.state()).toEqual(before);
+    prepared.validate();
+    expect(prepared.apply()).toEqual(receipt);
+  });
   it('rejects stale observed world, chunk and voxel before applying', () => {
     for (const change of ['world', 'chunk', 'voxel'] as const) {
       const world = setup();

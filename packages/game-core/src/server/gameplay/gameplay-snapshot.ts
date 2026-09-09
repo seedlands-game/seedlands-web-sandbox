@@ -82,6 +82,7 @@ type GameplaySnapshotValidationOptions = {
   items?: ItemDefinitionRegistry;
   meleeDefinitions?: readonly MeleeDefinition[];
   registeredNeeds?: boolean;
+  registeredBlocks?: boolean;
   combatOriginFor?(entities: EntityStore): CombatOriginRuntimeOptions;
   needsPlayerLimit?: number;
 };
@@ -243,6 +244,22 @@ export function validateGameplaySnapshot(
         if ((source.version === 1 || !source.simulation.combat) && player.attackCooldownSeconds > 0)
           legacyCombatLockouts.set(player.entityId, player.attackCooldownSeconds);
       });
+    }
+    if (options.registeredBlocks) {
+      for (const player of players.values()) {
+        const action = player.breakAction;
+        if (!action) continue;
+        if (sourceVersion < 4 || !action.origin) {
+          player.breakAction = null;
+          continue;
+        }
+        const reference = entities.createReference(player.entityId);
+        if (
+          action.origin.originalActor.entityId !== player.entityId ||
+          action.origin.originalActor.lifetime !== reference?.lifetime
+        )
+          throw new TypeError('Break origin actor lifetime does not match the restored actor.');
+      }
     }
     if (entities.query({ type: 'player' }).length !== players.size) throw new TypeError('player state is missing');
     if (options.needsPlayerLimit !== undefined && players.size > options.needsPlayerLimit)

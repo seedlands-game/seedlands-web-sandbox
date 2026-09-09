@@ -61,7 +61,7 @@ function setup(needs: boolean) {
         {
           effect: 'allow',
           principal: { ids: ['schedule'] },
-          resources: ['seedlands.needs', 'seedlands.ruleset', 'seedlands.combat-clock'],
+          resources: ['seedlands.needs', 'seedlands.ruleset', 'seedlands.combat-clock', 'seedlands.block-clock'],
           operations: ['read', 'write', 'execute'],
           scope: 'any',
         },

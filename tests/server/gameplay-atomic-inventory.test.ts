@@ -26,6 +26,39 @@ describe('actual gameplay inventory entity transactions', () => {
     expect(() => gameplay.dropItem('alice', 0, 1)).toThrow(/sequence.*exhausted/i);
     expect(gameplay.createSnapshot()).toEqual(before);
   });
+  it.each(['give', 'remove'] as const)(
+    'rejects developer %s before changing inventory when gameplay revision is exhausted',
+    (kind) => {
+      const gameplay = setup();
+      const exhausted = gameplay.createSnapshot();
+      exhausted.revision = Number.MAX_SAFE_INTEGER;
+      gameplay.restoreSnapshot(exhausted);
+      const before = gameplay.createSnapshot();
+      expect(() =>
+        kind === 'give'
+          ? gameplay.giveItem('alice', { itemId: 'wood-block', count: 1 })
+          : gameplay.removeItem('alice', { itemId: 'wood-block', count: 1 }),
+      ).toThrow(/revision.*exhausted/i);
+      expect(gameplay.createSnapshot()).toEqual(before);
+    },
+  );
+  it('settles the active Combat Action when developer removal changes the equipped stack', () => {
+    const gameplay = setup();
+    gameplay.giveItem('alice', { itemId: 'wood-sword', count: 1 });
+    gameplay.selectHotbarSlot('alice', 1);
+    gameplay.spawn({
+      id: 'wolf',
+      type: 'creature',
+      archetype: 'night-stalker',
+      position: [0, 1, 1],
+      health: 20,
+      maxHealth: 20,
+    });
+    expect(gameplay.attackEntity('alice', 'wolf').success).toBe(true);
+    expect(gameplay.removeItem('alice', { itemId: 'wood-sword', count: 1 })).toEqual({ success: true });
+    expect(gameplay.getCombatState('alice').active).toBeNull();
+    expect(gameplay.simulation.actionForActor('alice')).toBeNull();
+  });
   it('commits drop and pickup once each while preserving an unrelated entity reference', () => {
     const gameplay = setup();
     gameplay.spawnPlayer({ id: 'bob', position: [2, 1, 0] });

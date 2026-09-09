@@ -52,3 +52,11 @@ export * from '../gameplay/modules/combat-model';
 
 export { defineInventoryActionsModule } from '../gameplay/modules/inventory-actions-module';
 export * from '../gameplay/modules/inventory-action-model';
+
+export {
+  defineBlockActionsModule,
+  buildBlockActionCandidate,
+  buildBlockAdvanceUpdates,
+} from '../gameplay/modules/block-actions-module';
+export { defineBlockRulesModule } from '../gameplay/modules/block-rules-module';
+export * from '../gameplay/modules/block-action-model';

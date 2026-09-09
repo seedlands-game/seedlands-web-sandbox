@@ -1,3 +1,4 @@
+import type { DurableExecutionOriginV1 } from '../composition/execution-origin';
 import type { InventoryAccess, InventorySlot } from './inventory';
 import { EntityStore } from './entity-store';
 import type {
@@ -11,6 +12,7 @@ import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry } from './it
 
 export type PlayerLifecycle = 'alive' | 'dead';
 export type BreakAction = {
+  origin?: DurableExecutionOriginV1;
   position: [number, number, number];
   voxel: number;
   elapsedSeconds: number;

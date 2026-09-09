@@ -12,6 +12,7 @@ import {
   GAMEPLAY_COORDINATE_SCHEMA,
   GAMEPLAY_PHYSICS_SCHEMA,
   legacyPlayerPositionToFeet,
+  validateGameplaySnapshot,
 } from '../../packages/game-core/src/server/gameplay/gameplay-snapshot';
 import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
 import type { PlayerSnapshot } from '../../packages/game-core/src/server/gameplay/player-state';
@@ -290,5 +291,54 @@ describe('legacy gameplay wrapper action migration', () => {
       active: null,
       lastResult: { outcome: 'cancelled', reason: 'restore-cancelled' },
     });
+  });
+});
+
+describe('registered Block break origin migration', () => {
+  const validate = (raw: unknown) =>
+    validateGameplaySnapshot(raw, {
+      ...callbacks,
+      clone: testCorePlatform.clone,
+      registeredBlocks: true,
+    });
+  it.each([1, 2, 3] as const)('cancels source-less V%s in-flight mining without changing input', (version) => {
+    const source = (version === 1 ? v1Fixture : version === 2 ? v2Fixture : v3Fixture)();
+    source.players[0].breakAction = { position: [0, 30, 0], voxel: 3, elapsedSeconds: 0.5, requiredSeconds: 1 };
+    const before = structuredClone(source);
+    const result = validate(source);
+    expect(
+      result.snapshot.entityStore.actors.find((actor) => actor.entityId === 'player')!.player!.breakAction,
+    ).toBeNull();
+    expect(source).toEqual(before);
+  });
+  it('keeps a valid V4 durable origin, cancels missing origin and rejects actor lifetime forgery', () => {
+    const runtime = createCurrentRuntime();
+    const origin = {
+      version: 1 as const,
+      principalSubject: 'test:player',
+      provenance: { packId: 'test:pack', moduleId: 'test:blocks' },
+      originalActor: { entityId: 'player', lifetime: runtime.entities.createReference('player')!.lifetime },
+    };
+    runtime.entities.playerStateAccess('player').breakAction = {
+      position: [0, 30, 0],
+      voxel: 3,
+      elapsedSeconds: 0.5,
+      requiredSeconds: 1,
+      origin,
+    };
+    const source = runtime.createSnapshot();
+    const actor = (snapshot: typeof source) =>
+      snapshot.entityStore.actors.find((actor) => actor.entityId === 'player')!;
+    expect(actor(validate(source).snapshot).player!.breakAction?.origin).toEqual(origin);
+    const missing = structuredClone(source);
+    delete actor(missing).player!.breakAction!.origin;
+    expect(actor(validate(missing).snapshot).player!.breakAction).toBeNull();
+    const bad = structuredClone(source);
+    actor(bad).player!.breakAction!.origin = {
+      ...origin,
+      originalActor: { ...origin.originalActor, lifetime: origin.originalActor.lifetime + 1 },
+    };
+    expect(() => validate(bad)).toThrow(/break.*origin|origin.*actor/i);
+    expect(runtime.createSnapshot()).toEqual(source);
   });
 });

@@ -1,3 +1,4 @@
+import { BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT } from './block-action-model';
 import type { WorldComposition } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
 import { createRegisteredOperationRuntime } from '../../composition/registered-operations';
@@ -44,6 +45,7 @@ export class GameplayModuleRuntime {
       ruleset: RegisteredStatePort;
       needs: RegisteredStatePort;
       combat?: RegisteredStatePort;
+      blocks?: RegisteredStatePort;
     }>,
   ) {}
 
@@ -76,6 +78,11 @@ export class GameplayModuleRuntime {
         return this.options.inventoryActions;
       if ((component === COMBAT_ACTOR_COMPONENT || component === COMBAT_WORLD_COMPONENT) && this.options.combat)
         return this.options.combat;
+      if (
+        [BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT].includes(component) &&
+        this.options.blocks
+      )
+        return this.options.blocks;
       if (component === NEEDS_COMPONENT) return this.options.needs;
       if (component === MODE_COMPONENT) return this.options.mode;
       if (component === RULESET_COMPONENT) return this.options.ruleset;

@@ -1,3 +1,4 @@
+import { executeBlockModuleCommand } from './block-module-command';
 import { executeInventoryModuleCommand } from './inventory-module-command';
 import { executeModeCommand, type ModuleCommandPort } from './module-command';
 import type { GameServer, WorldCommitResult } from '../game-server';
@@ -87,6 +88,8 @@ export async function executeGameplayCommand(
   command: GameplayCommand,
   moduleOperation?: ModuleCommandPort,
 ): Promise<GameplayCommandPayload> {
+  const block = executeBlockModuleCommand(server, source, command, moduleOperation);
+  if (block) return block;
   const inventory = executeInventoryModuleCommand(server, source, command, moduleOperation);
   if (inventory) return inventory;
   switch (command.type) {

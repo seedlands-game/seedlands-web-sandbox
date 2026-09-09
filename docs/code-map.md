@@ -180,3 +180,5 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 `server/gameplay/gameplay-runtime-contracts.ts` 定义玩法宿主注入端口与操作结果，原 `gameplay-runtime.ts` 保留类型重导出以兼容当前调用方。
 
 `server/gameplay/modules/inventory-action-model.ts` 与 `inventory-actions-module.ts` 定义六类纯库存操作候选及 actor/item 资源；`registered-inventory-runtime.ts` 核对当前来源、观察和候选，并预提交 ECS、物品实体及 Combat 取消。`server/commands/inventory-module-command.ts` 保留真实命令调用者的绑定。`mode-state-port.ts` 与 `mode-runtime.ts` 预备模式、落点、速度和不兼容 Action 的统一变更。
+
+`server/gameplay/gameplay-domain-adapters.ts` 将既有库存、生命和未组合方块门面的实例端口集中装配，仍共享同一 ECS/Gameplay owner。`block-actions-module.ts` 与 `block-rules-module.ts` 分开纯方块候选和默认规则；`registered-block-runtime.ts`、`block-state-port.ts`、`block-origin-environment.ts`、`block-host-commit.ts` 负责真实当前来源、投影和世界/库存/掉落预提交。普通命令通过 `server/commands/block-module-command.ts` 保留实际宿主绑定并交付真实世界回执。迁移准出状态继续以本期 change 为准。

@@ -23,6 +23,8 @@ const isModeCommand = (command: ServerCommand) =>
   ['set-mode', 'set-flight', 'set-creative-slot'].includes(command.type);
 const isInventoryCommand = (command: ServerCommand) =>
   ['select-slot', 'pickup-item', 'drop-item', 'use-item', 'craft-recipe'].includes(command.type);
+const isBlockCommand = (command: ServerCommand) =>
+  ['break-voxel', 'cancel-break', 'place-voxel'].includes(command.type);
 type Post = (response: AuthorityResponse) => void;
 
 export const rejectStaleAuthorityMessage = (message: AuthorityRequest, epoch: string, post: Post): void => {
@@ -71,7 +73,7 @@ export class BrowserAuthorityIngress {
           {
             effect: 'allow',
             principal: { ids: ['browser-player'] },
-            resources: ['seedlands.mode', 'seedlands.inventory'],
+            resources: ['seedlands.mode', 'seedlands.inventory', 'seedlands.block-actor'],
             operations: ['read', 'write', 'execute'],
             scope: 'self',
           },
@@ -85,7 +87,7 @@ export class BrowserAuthorityIngress {
           {
             effect: 'allow',
             principal: { ids: ['browser-player'] },
-            resources: ['seedlands.combat', 'seedlands.inventory-item'],
+            resources: ['seedlands.combat', 'seedlands.inventory-item', 'seedlands.block-voxel'],
             operations: ['read', 'execute'],
             scope: 'any',
           },
@@ -120,7 +122,10 @@ export class BrowserAuthorityIngress {
     return {
       authorizer: this.authorization,
       principalId:
-        isModeCommand(command) || isInventoryCommand(command) || command.type === 'attack-entity'
+        isModeCommand(command) ||
+        isInventoryCommand(command) ||
+        isBlockCommand(command) ||
+        command.type === 'attack-entity'
           ? 'browser-player'
           : 'browser-command',
     };

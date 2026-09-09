@@ -70,6 +70,26 @@ describe('EntityStore component checkpoint', () => {
     expect(store.spawn({ type: 'creature', position: [21, 8, 0] }).id).not.toBe(generated.id);
   });
 
+  it('owns a detached durable break origin and rejects malformed saved provenance before restore', () => {
+    const store = populatedStore();
+    const access = store.playerStateAccess('player');
+    const origin = {
+      version: 1 as const,
+      principalSubject: 'test:player',
+      provenance: { packId: 'test:pack', moduleId: 'test:blocks' },
+      originalActor: { entityId: 'player', lifetime: store.createReference('player')!.lifetime },
+    };
+    access.breakAction = { ...access.breakAction!, origin };
+    origin.principalSubject = 'changed-outside';
+    expect(access.breakAction?.origin?.principalSubject).toBe('test:player');
+    const before = store.exportComponentSnapshot();
+    const bad = structuredClone(before);
+    const saved = bad.actors.find((actor) => actor.entityId === 'player')!.player!.breakAction!;
+    Object.assign(saved, { origin: { ...saved.origin, provenance: { packId: '', moduleId: 'test:blocks' } } });
+    expect(() => store.restoreComponentSnapshot(bad)).toThrow(/provenance|pack|origin/i);
+    expect(store.exportComponentSnapshot()).toEqual(before);
+  });
+
   it('rejects malformed component facets before replacing the live owner', () => {
     const store = populatedStore();
     const before = store.exportComponentSnapshot();

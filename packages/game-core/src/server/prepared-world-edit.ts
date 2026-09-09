@@ -11,6 +11,7 @@ type WorldEditPorts = Readonly<{
 }>;
 export type PreparedWorldEdit = Readonly<{
   committed: boolean;
+  result: WorldCommitResult;
   validate(): void;
   apply(): WorldCommitResult;
 }>;
@@ -48,6 +49,7 @@ export function prepareSingleWorldEdit(
     if (!Number.isSafeInteger(revision) || revision < 0 || (changing && revision >= Number.MAX_SAFE_INTEGER))
       throw new RangeError('World edit revision capacity is exhausted or invalid.');
   const result = createSingleWorldEditResult({ actorId, x, y, z, value, worldRevision, chunk });
+  freezeReceipt(result);
   let used = false,
     validated = false;
   const validate = () => {
@@ -67,6 +69,7 @@ export function prepareSingleWorldEdit(
   };
   return Object.freeze({
     committed: result.committed,
+    result,
     validate,
     apply() {
       if (used) throw new Error('Prepared world edit was already used.');
@@ -85,4 +88,11 @@ export function prepareSingleWorldEdit(
       return result;
     },
   });
+}
+
+/** The generated receipt is a small acyclic JSON tree, shared read-only with the caller. */
+function freezeReceipt(value: unknown): void {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return;
+  for (const child of Object.values(value)) freezeReceipt(child);
+  Object.freeze(value);
 }

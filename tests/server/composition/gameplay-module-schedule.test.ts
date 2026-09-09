@@ -43,6 +43,8 @@ function setup(allow = true) {
             'seedlands:overworld-needs-rules',
             'seedlands:combat-module',
             'seedlands:overworld-combat-rules',
+            'seedlands:block-actions-module',
+            'seedlands:overworld-block-rules',
           ].includes(entry.descriptor.id),
       ),
       module,

@@ -1,3 +1,7 @@
+import { createGameplayDomainAdapters } from './gameplay-domain-adapters';
+import type { ModuleInvocationValue } from '../composition/contracts';
+import { RegisteredBlockRuntime } from './modules/registered-block-runtime';
+import { BLOCK_WORLD_COMPONENT } from './modules/block-action-model';
 import type { GameplayCallbacks, GameplayResult, GameplayFailure as Failure } from './gameplay-runtime-contracts';
 export type * from './gameplay-runtime-contracts';
 import { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
@@ -7,17 +11,14 @@ import { NEEDS_COMPONENT } from './modules/needs-model';
 import { createNeedsStatePort } from './modules/needs-state-port';
 import { createGameplayModuleSchedule } from './modules/gameplay-module-schedule';
 import { createWorldRulesetState } from './modules/world-ruleset-state';
-import { ActorVitalsRuntime } from './modules/actor-vitals-runtime';
 import { ModeRuntime } from './modules/mode-runtime';
 import { createModeStatePort } from './modules/mode-state-port';
 import { GameplayModuleRuntime } from './modules/gameplay-module-runtime';
 import { findGameplayModeLanding } from './gameplay-mode-landing';
 import type { WorldResourceAuthorizer } from '../harness/world-authorization';
 import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from '../composition/operation-contracts';
-import { ActorInventoryRuntime } from './modules/actor-inventory-runtime';
 import { createInventoryStatePort } from './modules/inventory-state-port';
 import { resolveGameplayComposition } from '../composition/gameplay-composition';
-import { BlockInteractionRuntime } from './modules/block-interaction-runtime';
 import { Voxel } from '../../world/voxel';
 import type { WorldCommitResult } from '../game-server';
 import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
@@ -56,6 +57,7 @@ export class GameplayRuntime {
   private readonly vitals;
   private readonly modules: GameplayModuleRuntime;
   private readonly blocks;
+  private readonly registeredBlocks;
   private readonly ruleset;
   private readonly schedule;
   private readonly needsPlayerLimit;
@@ -65,7 +67,7 @@ export class GameplayRuntime {
     const resolved = resolveGameplayComposition(callbacks);
     this.content = resolved.content;
     this.needsPlayerLimit = callbacks.composition?.registrations.states.some(
-      ({ definition }) => definition.id === NEEDS_COMPONENT,
+      ({ definition }) => definition.id === NEEDS_COMPONENT || definition.id === BLOCK_WORLD_COMPONENT,
     )
       ? 128
       : undefined;
@@ -80,46 +82,41 @@ export class GameplayRuntime {
       prepareCancellation: (ids) => this.simulation.prepareCancellation(ids, 'slot-changed'),
       changed: () => this.touch(),
     });
-    this.inventoryActions = new ActorInventoryRuntime({
-      actor: (id) => this.entities.actorStateAccess(id),
-      recipes: this.content.recipes,
+    const adapters = createGameplayDomainAdapters({
       entities: this.entities,
-      getVoxel: callbacks.getVoxel,
+      content: this.content,
+      callbacks,
+      player: (id) => this.player(id),
+      simulation: () => this.simulation,
       assertCanChange: () => this.assertRevisionCapacity(),
-      assertCanCancelCombat: (id) => this.simulation.assertCanCancelCombat(id),
-      cancelCombat: (id, reason) => this.simulation.cancelCombat(id, reason),
-      changed: (operation) => {
-        if (operation) this.inventoryOperationCount++;
+      changed: (inventory, event) => {
+        if (inventory) this.inventoryOperationCount++;
+        this.touch(event);
+      },
+    });
+    this.inventoryActions = adapters.inventory;
+    this.vitals = adapters.vitals;
+    this.blocks = adapters.blocks;
+    const registeredPorts = {
+      entities: this.entities,
+      content: this.content,
+      actorAuthority: callbacks.moduleActorAuthority,
+      modules: () => this.modules,
+      simulation: () => this.simulation,
+      getVoxel: callbacks.getVoxel,
+      revision: () => this.revision,
+      assertCanChange: () => this.assertRevisionCapacity(),
+      changed: (inventory = false) => {
+        if (inventory) this.inventoryOperationCount++;
         this.touch();
       },
-    });
+    };
     this.registeredInventory = callbacks.composition
       ? new RegisteredInventoryRuntime({
+          ...registeredPorts,
           composition: callbacks.composition,
-          entities: this.entities,
-          content: this.content,
-          actorAuthority: callbacks.moduleActorAuthority,
-          modules: () => this.modules,
-          simulation: () => this.simulation,
-          getVoxel: callbacks.getVoxel,
-          revision: () => this.revision,
-          assertCanChange: () => this.assertRevisionCapacity(),
-          changed: (operation) => {
-            if (operation) this.inventoryOperationCount++;
-            this.touch();
-          },
         })
       : null;
-    this.vitals = new ActorVitalsRuntime({
-      player: (id) => this.player(id),
-      assertCanChange: () => this.assertRevisionCapacity(),
-      assertCanCancelCombat: (id) => this.simulation.assertCanCancelCombat(id),
-      cancelCombat: (id) => {
-        this.simulation.cancelCombat(id, 'attacker-dead');
-      },
-      touch: (event) => this.touch(event),
-      entities: this.entities,
-    });
     this.modes = new ModeRuntime({
       entities: this.entities,
       findSafeLanding: (id) => findGameplayModeLanding(this.entities.get(id)!, callbacks.getVoxel, this.revision),
@@ -127,39 +124,27 @@ export class GameplayRuntime {
       prepareCancelIncompatibleActions: (id, reason) => this.simulation.prepareInterruption(id, reason),
       changed: () => this.touch(),
     });
-    this.blocks = new BlockInteractionRuntime({
-      player: (id) => this.player(id),
-      entity: (id) => this.entities.get(id),
-      getVoxel: callbacks.getVoxel,
-      prepareVoxelEdit: callbacks.prepareVoxelEdit,
-      entities: this.entities,
-      assertCanChange: () => this.assertRevisionCapacity(),
-      items: this.content.items,
-      changed: (inventoryOperation) => {
-        if (inventoryOperation) this.inventoryOperationCount++;
-        this.touch();
-      },
-    });
     this.registeredCombat = callbacks.composition
       ? new RegisteredCombatRuntime({
+          ...registeredPorts,
           composition: callbacks.composition,
-          entities: this.entities,
-          content: this.content,
-          simulation: () => this.simulation,
-          actorAuthority: callbacks.moduleActorAuthority,
           actorIds: () => [...this.players.keys(), ...this.simulation.actorIds()],
-          getVoxel: callbacks.getVoxel,
-          revision: () => this.revision,
           rulesetRevision: () => this.ruleset.snapshot()?.revision ?? 0,
           now: () => this.gameplayTime,
-          assertCanChange: () => this.assertRevisionCapacity(),
-          changed: () => this.touch(),
-          modules: () => this.modules,
           systemAuthority: callbacks.moduleSystemAuthority,
+        })
+      : null;
+    this.registeredBlocks = callbacks.composition
+      ? new RegisteredBlockRuntime({
+          ...registeredPorts,
+          composition: callbacks.composition,
+          systemAuthority: callbacks.moduleSystemAuthority,
+          prepareVoxelEdit: callbacks.prepareVoxelEdit,
         })
       : null;
     this.modules = new GameplayModuleRuntime({
       combat: this.registeredCombat?.state,
+      blocks: this.registeredBlocks?.state,
       composition: callbacks.composition,
       entities: this.entities,
       clone: callbacks.platform.clone,
@@ -177,9 +162,9 @@ export class GameplayRuntime {
       mode: createModeStatePort(this.entities, this.modes, () => this.revision),
     });
     this.schedule = callbacks.composition
-      ? createGameplayModuleSchedule(callbacks.composition, this.modules, callbacks.moduleSystemAuthority, () =>
-          this.registeredCombat?.drain(),
-        )
+      ? createGameplayModuleSchedule(callbacks.composition, this.modules, callbacks.moduleSystemAuthority, () => {
+          this.registeredCombat?.drain();
+        })
       : null;
     this.simulation = new AutonomyRuntime({
       entities: this.entities,
@@ -214,6 +199,9 @@ export class GameplayRuntime {
   getActorModeState(id: string) {
     const entity = this.entities.get(id);
     return entity && entity.type !== 'world-item' ? this.modes.stateFor(id) : null;
+  }
+  acknowledgeBlockCommit(value: ModuleInvocationValue) {
+    return this.registeredBlocks?.acknowledge(value);
   }
   bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
     return this.modules.bind(authorizer, source);
@@ -352,11 +340,11 @@ export class GameplayRuntime {
   }
 
   beginBreak(id: string, position: Position): GameplayResult<{ requiredSeconds: number; commit?: WorldCommitResult }> {
-    return this.blocks.beginBreak(id, position);
+    return (this.registeredBlocks ?? this.blocks).beginBreak(id, position);
   }
 
   cancelBreak(id: string): GameplayResult {
-    return this.blocks.cancelBreak(id);
+    return (this.registeredBlocks ?? this.blocks).cancelBreak(id);
   }
 
   pickupItem(playerId: string, entityId: string): GameplayResult {
@@ -368,7 +356,7 @@ export class GameplayRuntime {
   }
 
   placeVoxel(id: string, position: Position): GameplayResult<{ commit: WorldCommitResult }> {
-    return this.blocks.placeVoxel(id, position);
+    return (this.registeredBlocks ?? this.blocks).placeVoxel(id, position);
   }
 
   useSelectedItem(id: string): GameplayResult {
@@ -420,7 +408,9 @@ export class GameplayRuntime {
     assertGameplayAdvance(seconds);
     this.schedule?.assertAdvance(seconds);
     if (seconds > 0) this.assertRevisionCapacity();
+    this.schedule?.activate();
     this.modules.flushQueued();
+    this.registeredBlocks?.drain();
     const startingRevision = this.revision;
     const commits: WorldCommitResult[] = [];
     advanceGameplayClock(seconds, (step) => {
@@ -432,8 +422,10 @@ export class GameplayRuntime {
         this.players.forEach((player) => this.advancePlayer(player, elapsed, commits));
       }
       this.simulation.advanceAuthorityRules(elapsed);
+      this.registeredBlocks?.drain();
     });
     if (seconds > 0 && this.revision === startingRevision) this.touch(false);
+    for (const commit of this.registeredBlocks?.takeCommits() ?? []) commits.push(commit);
     return { commits };
   }
 
@@ -491,6 +483,9 @@ export class GameplayRuntime {
       meleeDefinitions: this.content.meleeDefinitions,
       entities: this.entities,
       registeredNeeds: !!this.schedule,
+      registeredBlocks: this.callbacks.composition?.registrations.states.some(
+        ({ definition }) => definition.id === BLOCK_WORLD_COMPONENT,
+      ),
       combatOriginFor: this.registeredCombat ? (entities) => this.registeredCombat!.originFor(entities) : undefined,
       needsPlayerLimit: this.needsPlayerLimit,
       simulation: this.simulation,
@@ -503,6 +498,7 @@ export class GameplayRuntime {
     });
     installSchedule?.();
     this.modules.clearBindings();
+    this.registeredBlocks?.takeCommits();
     return restored;
   }
 
@@ -512,7 +508,7 @@ export class GameplayRuntime {
 
   private advancePlayer(player: PlayerState, seconds: number, commits: WorldCommitResult[]): void {
     if (player.lifecycle !== 'alive') return;
-    this.blocks.advanceBreak(player.entityId, seconds, commits);
+    if (!this.registeredBlocks) this.blocks.advanceBreak(player.entityId, seconds, commits);
     if (!this.schedule) this.vitals.advanceNeeds(player.entityId, seconds);
   }
 

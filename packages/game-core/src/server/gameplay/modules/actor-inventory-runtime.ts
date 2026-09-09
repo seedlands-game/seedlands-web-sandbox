@@ -16,6 +16,7 @@ type Owner = Readonly<{
   assertCanCancelCombat(id: string): void;
   changed(inventoryOperation: boolean): void;
   cancelCombat(id: string, reason: string): void;
+  prepareCancelCombat(id: string): Readonly<{ validate(): void; apply(): void }>;
   recipes: RecipeRegistry;
 }>;
 
@@ -27,14 +28,38 @@ export class ActorInventoryRuntime {
     return { slots: actor.inventory.snapshot(), selectedSlot: actor.selectedSlot };
   }
   give(id: string, stack: ItemStack) {
-    if (!this.owner.actor(id).inventory.add(stack)) return { success: false as const, reason: 'inventory-full' };
-    this.owner.changed(true);
-    return { success: true as const, inventory: this.snapshot(id) };
+    return this.adjust(id, stack, 'give');
   }
   remove(id: string, stack: ItemStack): Result {
-    if (!this.owner.actor(id).inventory.remove(stack)) return { success: false, reason: 'missing-items' };
+    const result = this.adjust(id, stack, 'remove');
+    return result.success ? { success: true } : result;
+  }
+  private adjust(id: string, stack: ItemStack, kind: 'give' | 'remove') {
+    const actor = this.owner.actor(id);
+    const candidate = new Inventory(actor.inventory.capacity, actor.inventory.snapshot(), actor.inventory.items);
+    if (!(kind === 'give' ? candidate.add(stack) : candidate.remove(stack)))
+      return { success: false as const, reason: kind === 'give' ? 'inventory-full' : 'missing-items' };
+    this.owner.assertCanChange();
+    const equippedChanged =
+      JSON.stringify(actor.inventory.slot(actor.selectedSlot)) !== JSON.stringify(candidate.slot(actor.selectedSlot));
+    const cancellation = equippedChanged ? this.owner.prepareCancelCombat(id) : undefined;
+    const slots = candidate.snapshot();
+    const mutation = prepareEntityMutation(this.owner.entities, {
+      actors: [
+        {
+          reference: this.owner.entities.createReference(id)!,
+          health: actor.health,
+          components: { ...this.owner.entities.actorComponentSnapshot(id), inventory: slots },
+        },
+      ],
+    });
+    const result = { success: true as const, inventory: { slots, selectedSlot: actor.selectedSlot } };
+    mutation.validate();
+    cancellation?.validate();
+    mutation.apply();
+    cancellation?.apply();
     this.owner.changed(true);
-    return { success: true };
+    return result;
   }
   select(id: string, slot: number): Result {
     const actor = this.owner.actor(id),

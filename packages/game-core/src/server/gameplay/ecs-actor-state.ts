@@ -1,3 +1,4 @@
+import { validateDurableExecutionOrigin } from '../composition/execution-origin';
 import { addComponents, type World } from 'bitecs';
 import { Inventory, createInventoryAccess } from './inventory';
 import type { ItemDefinitionRegistry } from './item-registry';
@@ -425,7 +426,11 @@ const copyBreakAction = (value: BreakAction | null | undefined): BreakAction | n
     value.requiredSeconds < 0
   )
     throw new TypeError('Invalid player break action component.');
-  return { ...value, position: [...value.position] };
+  return {
+    ...value,
+    position: [...value.position],
+    ...(value.origin === undefined ? {} : { origin: validateDurableExecutionOrigin(value.origin) }),
+  };
 };
 
 export function createPlayerStateAccess(components: Components, binding: ActorAccessBindings): PlayerComponentAccess {
