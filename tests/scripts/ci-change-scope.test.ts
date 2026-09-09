@@ -93,6 +93,23 @@ describe('CI change scope', () => {
     expect(result.stdout).toBe('run_full=true\nreason=invalid-input\n');
   });
 
+  it('keeps the visible CI steps equivalent to the complete static command', () => {
+    const workflow = readFileSync(join(process.cwd(), '.github/workflows/ci.yml'), 'utf8');
+    const scripts = (
+      JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as {
+        scripts: Record<string, string>;
+      }
+    ).scripts;
+    const expected = scripts['verify:static:ci'].split('&&').map((command) => command.trim());
+    const staticJob = workflow.split('  static:\n')[1]?.split('\n  build:')[0];
+    expect(staticJob).toBeDefined();
+    const actual = staticJob!
+      .split('      - name:')
+      .filter((step) => step.includes("if: needs.scope.outputs.run_full == 'true'"))
+      .map((step) => step.match(/run: (.+)/)?.[1]);
+    expect(actual.sort()).toEqual(expected.sort());
+  });
+
   it('executes the protected base revision classifier for pull requests', () => {
     const workflow = readFileSync(join(process.cwd(), '.github/workflows/ci.yml'), 'utf8');
 

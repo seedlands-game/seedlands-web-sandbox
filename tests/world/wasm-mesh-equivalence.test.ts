@@ -1,3 +1,4 @@
+import { deepStrictEqual } from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { createKernelMemory, KernelMemory, WASM_ARENA_BYTES } from '../../apps/web/src/compute/kernel-memory';
@@ -71,11 +72,11 @@ function expectMeshesEqual(actual: Record<number, MeshData>, expected: Record<nu
     expect(left.material).toBe(right.material);
     expect(left.renderCategory).toBe(right.renderCategory);
     expect(left.layout).toBe('float32');
-    expect(left.positions).toEqual(right.positions);
-    expect(left.normals).toEqual(right.normals);
-    expect(left.uvs).toEqual(right.uvs);
-    expect(left.colors).toEqual(right.colors);
-    expect(left.indices).toEqual(right.indices);
+    deepStrictEqual(left.positions, right.positions);
+    deepStrictEqual(left.normals, right.normals);
+    deepStrictEqual(left.uvs, right.uvs);
+    deepStrictEqual(left.colors, right.colors);
+    deepStrictEqual(left.indices, right.indices);
   }
 }
 

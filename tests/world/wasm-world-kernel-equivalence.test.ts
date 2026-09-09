@@ -1,3 +1,4 @@
+import { deepStrictEqual } from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { makeChunk } from '../../packages/game-core/src/world/chunk-generation';
@@ -27,9 +28,9 @@ describe('W02 批量地形填充保留确定性', () => {
             [cx * 32 - 1, cy * 32, cz * 32, 5],
           ];
           const expected = makeChunk(seed, cx, cy, cz, changes, version);
-          expect(generate(seed, cx, cy, cz, changes, version)).toEqual(expected);
+          deepStrictEqual(generate(seed, cx, cy, cz, changes, version), expected);
           expect(memory.failed).toBe(false);
-          expect(makeChunkStaged(seed, cx, cy, cz, changes, version)).toEqual(expected);
+          deepStrictEqual(makeChunkStaged(seed, cx, cy, cz, changes, version), expected);
         }
       }
     }
@@ -42,6 +43,6 @@ describe('W02 批量地形填充保留确定性', () => {
     const memory = await createKernelMemory(bytes);
     memory.failed = true;
     const generate = createChunkKernel(memory);
-    expect(generate(1, 0, 0, 0, [], 3)).toEqual(makeChunk(1, 0, 0, 0, [], 3));
+    deepStrictEqual(generate(1, 0, 0, 0, [], 3), makeChunk(1, 0, 0, 0, [], 3));
   });
 });
