@@ -16,6 +16,7 @@ async function lock(page: Page) {
 }
 const bag = (page: Page) => page.getByRole('grid', { name: '背包槽位', exact: true });
 const item = (page: Page, id: string) => bag(page).locator(`[data-item="${id}"]`);
+const cursor = (page: Page) => page.locator('[data-inventory-cursor]');
 async function inventory(page: Page) {
   await page.keyboard.press('KeyE');
   await expect(page.getByRole('dialog', { name: '背包与合成' })).toBeVisible();
@@ -37,9 +38,15 @@ async function aim(page: Page, x: number, y: number, z: number) {
 }
 async function equip(page: Page, id: string) {
   await inventory(page);
-  await item(page, id).click();
-  const button = page.getByRole('button', { name: '装备到当前快捷栏' });
-  if (await button.isEnabled()) await button.click();
+  const source = item(page, id);
+  await expect(source).toBeVisible();
+  const activeHotbarSlot = bag(page).getByRole('gridcell', { selected: true });
+  const selectedSlot = await activeHotbarSlot.getAttribute('data-slot');
+  expect(selectedSlot).toMatch(/^[0-7]$/);
+  await source.hover();
+  await page.keyboard.press(`Digit${Number(selectedSlot) + 1}`);
+  await expect(activeHotbarSlot).toHaveAttribute('data-item', id);
+  await expect(cursor(page)).toHaveCount(0);
   await close(page);
 }
 async function openStation(page: Page, kind: string, x: number, z: number) {
@@ -51,14 +58,23 @@ async function openStation(page: Page, kind: string, x: number, z: number) {
   await expect(page.locator(`[data-station-kind="${kind}"]`)).toBeVisible();
 }
 async function put(page: Page, id: string, index: number, count = 1) {
+  const source = item(page, id).first();
+  await expect(source).toBeVisible();
+  const sourceAddress = await source.getAttribute('data-inventory-address');
+  expect(sourceAddress).toBeTruthy();
+  await source.click();
+  await expect(cursor(page)).toHaveAttribute('data-item', id);
   for (let attempt = 0; attempt < count; attempt++) {
-    await item(page, id).first().click();
     const target = page.locator(`[data-station-slot="${index}"]`);
     const countLabel = target.locator('strong');
     const previous = (await countLabel.count()) ? Number(await countLabel.textContent()) : 0;
-    await target.click();
+    await target.click({ button: 'right' });
     if (id === 'coal') await expect(page.locator('.station-panel')).toContainText(/剩余燃烧时间 [1-9]/);
     else await expect(target.locator('strong')).toHaveText(String(previous + 1));
+  }
+  if (await cursor(page).count()) {
+    await page.locator(`[data-inventory-address="${sourceAddress}"]`).click();
+    await expect(cursor(page)).toHaveCount(0);
   }
 }
 async function craftStation(page: Page, id: string, name: string, material: string, ring = false) {
@@ -68,8 +84,18 @@ async function craftStation(page: Page, id: string, name: string, material: stri
     await put(page, 'plank', 4);
     await put(page, 'plank', 7);
   }
-  await page.getByRole('button', { name: `工作台合成${name} × 1`, exact: true }).click();
-  await expect(item(page, id)).toBeVisible();
+  const result = page.getByRole('button', { name: `取出 ${name} × 1`, exact: true });
+  await expect(result).toHaveAttribute('data-item', id);
+  await result.click();
+  await expect(cursor(page)).toHaveAttribute('data-item', id);
+  const emptyDestination = bag(page).locator('[data-item="empty"]').first();
+  await expect(emptyDestination).toBeVisible();
+  const destinationAddress = await emptyDestination.getAttribute('data-inventory-address');
+  expect(destinationAddress).toBeTruthy();
+  const destination = bag(page).locator(`[data-inventory-address="${destinationAddress}"]`);
+  await destination.click();
+  await expect(destination).toHaveAttribute('data-item', id);
+  await expect(cursor(page)).toHaveCount(0);
 }
 async function place(page: Page, itemId: string, voxel: number, x: number, z: number) {
   await equip(page, itemId);
@@ -145,7 +171,7 @@ test('正常鼠标和槽位操作完成木石铁成长、箱子与保存重进',
   for (let x = -10; x >= -12; x--) await mine(page, x, 3);
   await openStation(page, 'workbench', 2, 0);
   await craftStation(page, 'stone-pickaxe', '石镐', 'stone-block');
-  await expect(item(page, 'wood-pickaxe')).toContainText('57/60');
+  await expect(item(page, 'wood-pickaxe').locator('.durability')).toHaveAttribute('aria-label', '耐久 57/60');
   await close(page);
   await equip(page, 'stone-pickaxe');
   for (let x = -13; x >= -20; x--) await mine(page, x, 3);
@@ -162,14 +188,24 @@ test('正常鼠标和槽位操作完成木石铁成长、箱子与保存重进',
   await put(page, 'coal', 1);
   await expect(page.locator('[data-station-slot="2"] strong')).toHaveText('3', { timeout: 22000 });
   await page.screenshot({ path: info.outputPath('furnace-iron-output.png') });
-  await page.getByLabel('每次移动整组（默认一个）').check();
-  await page.locator('[data-station-slot="2"]').click();
-  await bag(page).locator('[data-item="empty"]').first().click();
-  await expect(item(page, 'iron-ingot')).toContainText('3');
+  const output = page.locator('[data-station-slot="2"]');
+  await output.click();
+  await expect(cursor(page)).toHaveAttribute('data-item', 'iron-ingot');
+  await expect(cursor(page)).toHaveAttribute('data-count', '3');
+  const emptyOutputDestination = bag(page).locator('[data-item="empty"]').first();
+  await expect(emptyOutputDestination).toBeVisible();
+  const outputDestinationAddress = await emptyOutputDestination.getAttribute('data-inventory-address');
+  expect(outputDestinationAddress).toBeTruthy();
+  const outputDestination = bag(page).locator(`[data-inventory-address="${outputDestinationAddress}"]`);
+  await outputDestination.click();
+  await expect(outputDestination).toHaveAttribute('data-item', 'iron-ingot');
+  await expect(outputDestination).toHaveAttribute('data-count', '3');
+  await expect(cursor(page)).toHaveCount(0);
+  await expect(item(page, 'iron-ingot')).toHaveAttribute('data-count', '3');
   await close(page);
   await openStation(page, 'workbench', 2, 0);
   await craftStation(page, 'iron-pickaxe', '铁镐', 'iron-ingot');
-  await expect(item(page, 'iron-pickaxe')).toContainText('250/250');
+  await expect(item(page, 'iron-pickaxe').locator('.durability')).toHaveAttribute('aria-label', '耐久 250/250');
   await page.locator('.inventory-dialog').evaluate((dialog) => dialog.scrollTo(0, 0));
   await page.screenshot({ path: info.outputPath('iron-pickaxe-complete.png') });
   await close(page);
@@ -179,9 +215,12 @@ test('正常鼠标和槽位操作完成木石铁成长、箱子与保存重进',
   await startHarnessWorld(page, 'browser-overworld-progression', '', browserQuality);
   expect((await snapshot(page))?.quality).toBe(browserQuality);
   await inventory(page);
-  await expect(item(page, 'iron-pickaxe')).toContainText('250/250');
+  await expect(item(page, 'iron-pickaxe').locator('.durability')).toHaveAttribute('aria-label', '耐久 250/250');
   await close(page);
   await openStation(page, 'chest', 0, 0);
-  await expect(page.locator('[data-station-slot="0"]')).toContainText('木镐');
+  const storedPickaxe = page.locator('[data-station-slot="0"]');
+  await expect(storedPickaxe).toHaveAttribute('data-item', 'wood-pickaxe');
+  await expect(storedPickaxe).toHaveAttribute('data-count', '1');
+  await expect(storedPickaxe).toHaveAccessibleName('工位格 1：木镐 × 1 · 耐久 57/60');
   expect(errors).toEqual([]);
 });
