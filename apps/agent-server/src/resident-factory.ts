@@ -3,43 +3,15 @@ import { HumanMessage } from '@langchain/core/messages';
 import type { ResidentBirthPackage, ResidentWorldBinding } from '@seedlands/cognition-protocol';
 import { BEHAVIOR_TREE_AUTHORING_GUIDE } from '@seedlands/game-core/runtime/behavior-control-protocol';
 import { Pool, type PoolClient } from 'pg';
+import { createResidentBirthSchema, parseResidentBirthPackage } from './resident-birth-codec.js';
 
 const MAX_BIRTHS_PER_TIMELINE = 64;
 const MAX_TAGS = 12;
 const DEFAULT_MODEL_TIMEOUT_MS = 315_000;
-const BIRTH_SCHEMA = {
-  type: 'object',
-  properties: {
-    profile: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', minLength: 1, maxLength: 48 },
-        personality: { type: 'string', minLength: 1, maxLength: 400 },
-        background: { type: 'string', maxLength: 800 },
-        riskTolerance: { type: 'number', minimum: 0, maximum: 1 },
-      },
-      required: ['name', 'personality'],
-      additionalProperties: false,
-    },
-    soul: { type: 'string', minLength: 1, maxLength: 4000 },
-    agent: { type: 'string', minLength: 1, maxLength: 4000 },
-    memory: { type: 'string', minLength: 1, maxLength: 4000 },
-    goal: {
-      type: 'object',
-      properties: { description: { type: 'string', minLength: 1, maxLength: 2000 } },
-      required: ['description'],
-    },
-    definition: { type: 'object', description: BEHAVIOR_TREE_AUTHORING_GUIDE },
-  },
-  required: ['profile', 'agent', 'soul', 'memory', 'goal', 'definition'],
-  additionalProperties: false,
-} as const;
+const BIRTH_SCHEMA = createResidentBirthSchema(BEHAVIOR_TREE_AUTHORING_GUIDE);
 
-const object = (value: unknown): value is Record<string, unknown> =>
-  value !== null && typeof value === 'object' && !Array.isArray(value);
 const boundedText = (value: unknown, maximum: number): value is string =>
   typeof value === 'string' && value.trim().length > 0 && new TextEncoder().encode(value).byteLength <= maximum;
-const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 async function hash(value: unknown): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(value)));
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -64,48 +36,6 @@ function validateTags(tags: readonly string[]): readonly string[] {
   });
   if (new Set(result).size !== result.length) throw new TypeError('Birth tags must be unique.');
   return result;
-}
-
-function validateBirth(value: unknown, birthId: string): ResidentBirthPackage {
-  if (!object(value) || !object(value.profile) || !object(value.goal) || !object(value.definition))
-    throw new TypeError('Pro birth package is invalid.');
-  const profile = value.profile;
-  if (!boundedText(profile.name, 192) || !boundedText(profile.personality, 1600))
-    throw new TypeError('Pro birth profile is invalid.');
-  if (
-    profile.background !== undefined &&
-    (typeof profile.background !== 'string' || new TextEncoder().encode(profile.background).byteLength > 3200)
-  )
-    throw new TypeError('Pro birth background is invalid.');
-  if (
-    profile.riskTolerance !== undefined &&
-    (typeof profile.riskTolerance !== 'number' || profile.riskTolerance < 0 || profile.riskTolerance > 1)
-  )
-    throw new TypeError('Pro birth risk tolerance is invalid.');
-  if (
-    !boundedText(value.agent, 4 * 1024) ||
-    !boundedText(value.soul, 4 * 1024) ||
-    !boundedText(value.memory, 16 * 1024) ||
-    !boundedText(value.goal.description, 8 * 1024)
-  )
-    throw new TypeError('Pro birth documents are invalid.');
-  const definition = value.definition;
-  if (
-    definition.version !== 1 ||
-    !object(definition.root) ||
-    new TextEncoder().encode(JSON.stringify(definition)).byteLength > 32 * 1024
-  )
-    throw new TypeError('Pro birth behavior is invalid.');
-  const birth = clone({
-    birthId,
-    profile: profile as ResidentBirthPackage['profile'],
-    agent: value.agent,
-    soul: value.soul,
-    memory: value.memory,
-    goal: value.goal as ResidentBirthPackage['goal'],
-    definition: definition as ResidentBirthPackage['definition'],
-  });
-  return birth as ResidentBirthPackage;
 }
 
 export type ResidentFactoryOptions = Readonly<{
@@ -251,7 +181,7 @@ export class ResidentFactory {
     this.assertAvailable(signal);
     if (existing) {
       if (existing.tagsHash !== tagsHash) throw new Error('Birth request id payload conflict.');
-      return validateBirth(existing.payload, birthId);
+      return parseResidentBirthPackage(existing.payload, birthId);
     }
     const count = await this.count(world);
     this.assertAvailable(signal);
@@ -299,7 +229,7 @@ export class ResidentFactory {
       if (existing) {
         if (existing.tagsHash !== tagsHash) throw new Error('Birth request id payload conflict.');
         await client.query('COMMIT');
-        return validateBirth(existing.payload, birthId);
+        return parseResidentBirthPackage(existing.payload, birthId);
       }
       if ((await this.count(world, client)) >= MAX_BIRTHS_PER_TIMELINE)
         throw new RangeError('Resident factory birth budget exceeded.');
@@ -397,6 +327,6 @@ export class ResidentFactory {
       ],
       { signal, reasoning_effort: 'low' } as never,
     );
-    return validateBirth(parsed, birthId);
+    return parseResidentBirthPackage(parsed, birthId);
   }
 }

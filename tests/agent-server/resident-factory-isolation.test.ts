@@ -3,6 +3,7 @@ import type { ResidentBirthPackage, ResidentWorldBinding } from '@seedlands/cogn
 import type { Pool, PoolClient, QueryResult } from 'pg';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { startResidentServer } from '../../apps/agent-server/src/node/resident-host';
+import { validBirth } from '../../apps/agent-server/src/node/resident-host-validation';
 import { ResidentFactory } from '../../apps/agent-server/src/resident-factory';
 import { WireClient } from './resident-host-fixture';
 import { baselineObservation, waitCapabilities } from './fixtures';
@@ -94,15 +95,103 @@ class FakeFactoryPool {
   }
 }
 
-function model(invoke: (options: { signal?: AbortSignal }) => Promise<ReturnType<typeof birthPayload>>): BaseChatModel {
+function model(
+  invoke: (options: { signal?: AbortSignal }) => Promise<ReturnType<typeof birthPayload>>,
+  onSchema?: (schema: unknown) => void,
+): BaseChatModel {
   return {
-    withStructuredOutput: () => ({
-      invoke: async (_messages: unknown, options: { signal?: AbortSignal }) => invoke(options),
-    }),
+    withStructuredOutput: (schema: unknown) => {
+      onSchema?.(schema);
+      return {
+        invoke: async (_messages: unknown, options: { signal?: AbortSignal }) => invoke(options),
+      };
+    },
   } as unknown as BaseChatModel;
 }
 
 describe('resident Factory isolation', () => {
+  it('keeps the provider schema, Factory validator, and host validator on the same UTF-8 document boundary', async () => {
+    const exact = '😀'.repeat(1024);
+    const oversized = '😀'.repeat(1025);
+    let capturedSchema: unknown;
+    const acceptedPool = new FakeFactoryPool();
+    const accepted = new ResidentFactory({
+      pro: model(
+        async () => ({ ...birthPayload(), agent: exact, soul: exact }),
+        (schema) => {
+          capturedSchema = schema;
+        },
+      ),
+      pool: acceptedPool.asPool(),
+    });
+    const acceptedBirth = await accepted.generate(world, 'exact-documents', ['quiet'], waitCapabilities());
+    expect(acceptedBirth).toMatchObject({
+      birthId: 'exact-documents',
+      agent: exact,
+      soul: exact,
+    });
+    expect(validBirth(acceptedBirth)).toBe(true);
+    expect(capturedSchema).toMatchObject({
+      properties: {
+        agent: { maxLength: 1024, pattern: '\\S' },
+        soul: { maxLength: 1024, pattern: '\\S' },
+        memory: { pattern: '\\S' },
+        goal: { properties: { description: { pattern: '\\S' } } },
+      },
+    });
+
+    for (const field of ['agent', 'soul'] as const) {
+      const rejectedPool = new FakeFactoryPool();
+      const payload = { ...birthPayload(), [field]: oversized };
+      const rejected = new ResidentFactory({
+        pro: model(async () => payload),
+        pool: rejectedPool.asPool(),
+      });
+      await expect(rejected.generate(world, `oversized-${field}`, ['quiet'], waitCapabilities())).rejects.toMatchObject(
+        {
+          name: 'ResidentBirthValidationError',
+          field,
+          reason: 'utf8-bytes',
+          actualBytes: 4100,
+          maximumBytes: 4096,
+        },
+      );
+      expect(validBirth({ birthId: `oversized-${field}`, ...payload })).toBe(false);
+    }
+  });
+
+  it('rejects blank required documents in both the Factory and host without echoing their contents', async () => {
+    const cases = [
+      { field: 'agent', payload: { ...birthPayload(), agent: '   ' }, maximumBytes: 4096 },
+      { field: 'soul', payload: { ...birthPayload(), soul: '   ' }, maximumBytes: 4096 },
+      { field: 'memory', payload: { ...birthPayload(), memory: '   ' }, maximumBytes: 16 * 1024 },
+      {
+        field: 'goal.description',
+        payload: { ...birthPayload(), goal: { description: '   ' } },
+        maximumBytes: 8 * 1024,
+      },
+    ];
+    for (const entry of cases) {
+      const pool = new FakeFactoryPool();
+      const factory = new ResidentFactory({
+        pro: model(async () => entry.payload),
+        pool: pool.asPool(),
+      });
+      const failure: unknown = await factory
+        .generate(world, `blank-${entry.field}`, ['quiet'], waitCapabilities())
+        .catch((error: unknown) => error);
+      expect(failure).toMatchObject({
+        name: 'ResidentBirthValidationError',
+        field: entry.field,
+        reason: 'blank',
+        actualBytes: 3,
+        maximumBytes: entry.maximumBytes,
+      });
+      expect((failure as Error).message).not.toContain('   ');
+      expect(validBirth({ birthId: `blank-${entry.field}`, ...entry.payload })).toBe(false);
+    }
+  });
+
   it('does not hold a transaction while Pro hangs and aborts when its caller leaves', async () => {
     const pool = new FakeFactoryPool();
     let modelSignal: AbortSignal | undefined;

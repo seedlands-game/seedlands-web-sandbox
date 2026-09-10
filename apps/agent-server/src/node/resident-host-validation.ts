@@ -12,6 +12,7 @@ import {
   type ControlBinding,
 } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { PortableWorkspace } from '../workspace/index.js';
+import { isResidentBirthPackage } from '../resident-birth-codec.js';
 import { parseResidentRuntime } from '../resident-runtime-codec.js';
 
 export type PortableManifest = Readonly<{
@@ -104,20 +105,7 @@ export function validCapabilities(value: unknown): value is readonly BehaviorCap
 }
 
 export function validBirth(value: unknown, observation?: CharacterObservation): value is ResidentBirthPackage {
-  if (
-    !object(value) ||
-    !textId(value.birthId) ||
-    !object(value.profile) ||
-    !object(value.goal) ||
-    !object(value.definition) ||
-    !textId(value.profile.name) ||
-    typeof value.profile.personality !== 'string' ||
-    typeof value.agent !== 'string' ||
-    typeof value.soul !== 'string' ||
-    typeof value.memory !== 'string'
-  )
-    return false;
-  if (new TextEncoder().encode(JSON.stringify(value)).byteLength > 64 * 1024) return false;
+  if (!isResidentBirthPackage(value)) return false;
   return (
     !observation ||
     (sameJson(value.profile, observation.character.profile) &&
