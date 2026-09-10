@@ -47,6 +47,7 @@ function entityCollisionChunks(runtime: AuthorityRuntime): readonly (readonly [n
 export class BrowserAuthorityDeterministicAdvance {
   private pendingLogic: PendingLogic | null = null;
   private advancing = false;
+  private settlingDebt = false;
 
   constructor(private readonly options: Options) {}
 
@@ -55,7 +56,7 @@ export class BrowserAuthorityDeterministicAdvance {
   }
 
   publishLogicObservation(observation: LogicObservation): void {
-    if (this.advancing) {
+    if (this.advancing && !this.settlingDebt) {
       if (this.pendingLogic) {
         this.pendingLogic.reject(new Error('Deterministic advance published overlapping Logic observations.'));
         this.options.timers.clear(this.pendingLogic.timeout);
@@ -91,7 +92,6 @@ export class BrowserAuthorityDeterministicAdvance {
       if (pending?.sequence === observation.observationSequence && pending.epoch === observation.epoch) {
         this.pendingLogic = null;
         this.options.timers.clear(pending.timeout);
-        pending.reject(error instanceof Error ? error : new Error(String(error)));
       }
       throw error;
     }
@@ -116,6 +116,8 @@ export class BrowserAuthorityDeterministicAdvance {
   }
 
   async advancePaused(elapsedMs: number, automaticLogic: boolean): Promise<AuthorityAdvanceResult> {
+    if (!Number.isFinite(elapsedMs) || elapsedMs < 0 || elapsedMs > 60_000)
+      throw new RangeError('Authority paused advance must be finite and within 0..60000ms.');
     if (this.advancing) throw new Error('Browser deterministic advance is already running.');
     this.advancing = true;
     const runtime = this.options.runtime();
@@ -124,7 +126,21 @@ export class BrowserAuthorityDeterministicAdvance {
     let remaining = elapsedMs;
     let latest: AuthorityAdvanceResult;
     try {
-      do {
+      const chunks = entityCollisionChunks(runtime);
+      if (chunks.length && !(await runtime.prepareHarnessChunks(chunks)))
+        throw new Error('Browser deterministic advance could not prepare entity collision Chunks.');
+      if (automaticLogic) runtime.requestLogicObservation();
+      this.settlingDebt = true;
+      try {
+        latest = runtime.advancePausedSession(0);
+      } finally {
+        this.settlingDebt = false;
+      }
+      lanes.physicsSteps += latest.lanes.physicsSteps;
+      lanes.gameplayPeriods += latest.lanes.gameplayPeriods;
+      lanes.fluidPeriods += latest.lanes.fluidPeriods;
+      commits.push(...latest.commits);
+      while (remaining > 0) {
         const chunks = entityCollisionChunks(runtime);
         if (chunks.length && !(await runtime.prepareHarnessChunks(chunks)))
           throw new Error('Browser deterministic advance could not prepare entity collision Chunks.');
@@ -139,7 +155,7 @@ export class BrowserAuthorityDeterministicAdvance {
         const pending = this.pendingLogic;
         if (pending) await pending.promise;
         else if (automaticLogic) await this.options.yieldTurn();
-      } while (remaining > 0);
+      }
       return { ...latest, lanes, commits, gameplay: runtime.view() };
     } catch (error) {
       // Revocation belongs to Authority, so a late reply is also rejected by the normal Worker ingress.
@@ -152,6 +168,7 @@ export class BrowserAuthorityDeterministicAdvance {
         this.options.timers.clear(pending.timeout);
         pending.reject(new Error('Browser deterministic advance ended before its Logic response.'));
       }
+      this.settlingDebt = false;
       this.advancing = false;
     }
   }

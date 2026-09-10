@@ -256,6 +256,13 @@ describe('Browser Authority deterministic paused advance', () => {
         .map((message) => message.observation.observationSequence),
     ).toEqual([first.observationSequence, first.observationSequence + 1]);
     expect(results.map(({ sequence }) => sequence)).toEqual([first.observationSequence, second.observationSequence]);
+    expect(results[0]).toEqual({
+      sequence: first.observationSequence,
+      observationPhysicsTick: first.physicsTick,
+      expiresAtPhysicsTick: first.physicsTick + 12,
+      receivedAtPhysicsTick: second.physicsTick,
+      accepted: false,
+    });
     expect(results.at(-1), JSON.stringify(results)).toEqual({
       sequence: second.observationSequence,
       observationPhysicsTick: second.physicsTick,
@@ -265,6 +272,104 @@ describe('Browser Authority deterministic paused advance', () => {
     });
     expect(results.at(-1)!.receivedAtPhysicsTick).toBeLessThanOrEqual(results.at(-1)!.expiresAtPhysicsTick);
     expect(outcome).toBe('resolved');
+  });
+
+  it('settles existing paused debt at elapsed zero without requesting Logic', async () => {
+    const fixture = await movementFixture();
+    const postLogicObservation = vi.fn();
+    const coordinator = new BrowserAuthorityDeterministicAdvance({
+      runtime: () => fixture.runtime,
+      postLogicObservation,
+      yieldTurn: testCorePlatform.yieldTurn,
+      timers: testCorePlatform.timers,
+    });
+    fixture.install(coordinator);
+    const beforeInvalid = fixture.runtime.snapshot();
+    await expect(coordinator.advancePaused(-1, false)).rejects.toThrow('within 0..60000ms');
+    expect(fixture.runtime.snapshot()).toEqual(beforeInvalid);
+    fixture.runtime.resume(0);
+    fixture.runtime.wake(500);
+    fixture.runtime.pause(500);
+    expect(fixture.runtime.snapshot().physicsDebtMs).toBeGreaterThan(200);
+
+    const result = await coordinator.advancePaused(0, false);
+
+    expect(result.lanes.physicsSteps).toBeGreaterThan(0);
+    expect(result.snapshot.physicsDebtMs).toBeLessThan(1_000 / 60);
+    expect(postLogicObservation).not.toHaveBeenCalled();
+    expect(coordinator.isAdvancing).toBe(false);
+  });
+
+  it('cleans the advance state when an exact observation cannot be posted', async () => {
+    const fixture = await movementFixture();
+    const setTimer = vi.fn(testCorePlatform.timers.set);
+    const coordinator = new BrowserAuthorityDeterministicAdvance({
+      runtime: () => fixture.runtime,
+      postLogicObservation: () => {
+        throw new Error('direct-port-failed');
+      },
+      yieldTurn: testCorePlatform.yieldTurn,
+      timers: { set: setTimer, clear: testCorePlatform.timers.clear },
+    });
+    fixture.install(coordinator);
+    fixture.runtime.resume(0);
+    fixture.runtime.wake(500);
+    fixture.runtime.pause(500);
+
+    await expect(coordinator.advancePaused(100, true)).rejects.toThrow('direct-port-failed');
+    expect(setTimer).toHaveBeenCalledOnce();
+    expect(coordinator.isAdvancing).toBe(false);
+    await expect(coordinator.advancePaused(0, false)).resolves.toBeDefined();
+  });
+
+  it('bounds a thrown exact acceptance with the existing response timeout', async () => {
+    const fixture = await movementFixture();
+    let expire: (() => void) | undefined;
+    let attempted!: (error: Error | null) => void;
+    const acceptanceAttempted = new Promise<Error | null>((resolve) => {
+      attempted = resolve;
+    });
+    const receive = vi.spyOn(fixture.runtime, 'receiveLogicIntentBatch').mockImplementation(() => {
+      throw new Error('accept-failed');
+    });
+    const coordinator = new BrowserAuthorityDeterministicAdvance({
+      runtime: () => fixture.runtime,
+      postLogicObservation: (observation) => {
+        queueMicrotask(() => {
+          let acceptanceError: Error | null = null;
+          try {
+            coordinator.acceptLogicIntentBatch(decideLogicIntents(observation, { physicsHz: 60 }));
+          } catch (error) {
+            acceptanceError = error as Error;
+          } finally {
+            attempted(acceptanceError);
+          }
+        });
+      },
+      yieldTurn: testCorePlatform.yieldTurn,
+      timers: {
+        set: (callback) => {
+          expire = callback;
+          return callback;
+        },
+        clear: (handle) => {
+          if (expire === handle) expire = undefined;
+        },
+      },
+    });
+    fixture.install(coordinator);
+
+    const outcome = coordinator.advancePaused(100, true).then(
+      () => 'resolved',
+      (error: Error) => error.message,
+    );
+    const acceptanceError = await acceptanceAttempted;
+    expect(acceptanceError?.message).toBe('accept-failed');
+    expire!();
+
+    await expect(outcome).resolves.toContain('timed out');
+    expect(coordinator.isAdvancing).toBe(false);
+    receive.mockRestore();
   });
 
   it('invalidates a timed-out Logic candidate before failure and admits a fresh advance', async () => {
