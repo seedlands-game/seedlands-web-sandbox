@@ -75,7 +75,14 @@ export class CharacterBehaviorRuntime {
         cycle: record.behaviorTree.cycle,
         activeNodeIds: active,
         skills: record.behaviorTree.skills.map(
-          ({ signature: _signature, targetEntityId: _target, targetPosition: _position, count: _count, ...entry }) => ({
+          ({
+            signature: _signature,
+            targetEntityId: _target,
+            targetPosition: _position,
+            searchOrigin: _origin,
+            count: _count,
+            ...entry
+          }) => ({
             ...entry,
           }),
         ),
@@ -110,6 +117,7 @@ export class CharacterBehaviorRuntime {
       definition: cloneJson(definition),
       cycle: record.behaviorTree.cycle,
       activationSequence: record.behaviorTree.activationSequence,
+      recentThreat: record.behaviorTree.recentThreat,
       skills: record.behaviorTree.skills.filter(compatible),
       monitors: behaviorConditionConsumers(definition)
         .filter((entry) => behaviorConditionContainsDialogue(entry.condition))
@@ -136,6 +144,7 @@ export class CharacterBehaviorRuntime {
     session.delta = seconds;
     session.invoked.clear();
     session.conditionValues.clear();
+    this.skills.observeThreat(record, seconds);
     this.observeMonitors(record, session);
     if (session.tree.getState() === State.SUCCEEDED || session.tree.getState() === State.FAILED) {
       record.behaviorTree.cycle += 1;

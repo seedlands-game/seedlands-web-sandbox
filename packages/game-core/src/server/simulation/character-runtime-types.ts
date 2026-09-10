@@ -19,6 +19,7 @@ export const CHARACTER_MAX_PROFILE_TEXT = 2_000;
 export const CHARACTER_MAX_DIALOGUE_TEXT = 500;
 export const CHARACTER_MAX_SPEECH_TEXT = 280;
 export const CHARACTER_MAX_MEMORY_TEXT = 16_000;
+export const CHARACTER_THREAT_MEMORY_SECONDS = 30;
 
 export type CharacterPositionTuple = [number, number, number];
 export type CharacterTargetBinding = {
@@ -41,6 +42,7 @@ export type CharacterSkillExecution = {
   reason?: string;
   targetEntityId?: string;
   targetPosition?: CharacterPositionTuple;
+  searchOrigin?: CharacterPositionTuple;
   count: number;
 };
 
@@ -52,6 +54,7 @@ export type CharacterBehaviorRecord = {
   activationSequence: number;
   skills: CharacterSkillExecution[];
   monitors: { nodeId: string; matched: boolean; episode: number; version?: number }[];
+  recentThreat?: { position: CharacterPositionTuple; secondsRemaining: number };
 };
 
 export type CharacterRecord = {

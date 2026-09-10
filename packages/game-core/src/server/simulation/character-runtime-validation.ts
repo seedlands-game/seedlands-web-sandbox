@@ -19,6 +19,7 @@ import {
   CHARACTER_MAX_MEMORY_TEXT,
   CHARACTER_MAX_PROFILE_TEXT,
   CHARACTER_MAX_TARGETS,
+  CHARACTER_THREAT_MEMORY_SECONDS,
   type CharacterPositionTuple,
   type CharacterSnapshotRecord,
 } from './character-runtime-types';
@@ -185,6 +186,17 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
   if (value.lastSpeech !== undefined) characterText(value.lastSpeech, 'Character speech', 280);
   if (value.behaviorTree) {
     validateBehavior(value.behaviorTree.goal, value.behaviorTree.definition);
+    const threat = value.behaviorTree.recentThreat;
+    if (threat !== undefined) {
+      if (
+        !threat ||
+        !Number.isFinite(threat.secondsRemaining) ||
+        threat.secondsRemaining <= 0 ||
+        threat.secondsRemaining > CHARACTER_THREAT_MEMORY_SECONDS
+      )
+        throw new TypeError('Character threat memory is invalid.');
+      characterPosition(threat.position, 'Character threat memory position');
+    }
     const actionNodes = new Map(
       behaviorActionNodes(value.behaviorTree.definition).map((node) => [
         node.id,
@@ -206,6 +218,7 @@ export function validateCharacterSnapshotRecord(value: CharacterSnapshotRecord):
       throw new TypeError('Character behavior snapshot is invalid.');
     const nodes = new Set<string>();
     for (const skill of value.behaviorTree.skills) {
+      if (skill.searchOrigin !== undefined) characterPosition(skill.searchOrigin, 'Character search origin');
       const expected = actionNodes.get(skill.nodeId);
       if (
         !skill.nodeId?.trim() ||
