@@ -1,6 +1,7 @@
 import { bodyConfigFor, bodyKindForEntity } from '@seedlands/game-core/physics/body-registry';
 import type { AuthorityRuntime } from '@seedlands/game-core/server/authority/authority-runtime';
 import type { AuthorityAdvanceResult } from '@seedlands/game-core/server/authority/authority-runtime-types';
+import { WORLD_HARNESS_MAX_ADVANCE_MS } from '@seedlands/game-core/server/harness/world-harness-contract';
 import type { LogicIntentBatch, LogicObservation } from '@seedlands/game-core/server/logic/logic-protocol';
 import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
 import { CHUNK_SIZE, floorDiv } from '@seedlands/game-core/world/voxel';
@@ -116,8 +117,8 @@ export class BrowserAuthorityDeterministicAdvance {
   }
 
   async advancePaused(elapsedMs: number, automaticLogic: boolean): Promise<AuthorityAdvanceResult> {
-    if (!Number.isFinite(elapsedMs) || elapsedMs < 0 || elapsedMs > 60_000)
-      throw new RangeError('Authority paused advance must be finite and within 0..60000ms.');
+    if (!Number.isFinite(elapsedMs) || elapsedMs < 0 || elapsedMs > WORLD_HARNESS_MAX_ADVANCE_MS)
+      throw new RangeError(`Authority paused advance must be finite and within 0..${WORLD_HARNESS_MAX_ADVANCE_MS}ms.`);
     if (this.advancing) throw new Error('Browser deterministic advance is already running.');
     this.advancing = true;
     const runtime = this.options.runtime();

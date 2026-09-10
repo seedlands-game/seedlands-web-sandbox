@@ -6,6 +6,8 @@ import {
   type DirectLogicMessage,
 } from '../../apps/web/src/worker/authority-worker-direct-logic-protocol';
 import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
+import type { AuthorityAdvanceResult } from '../../packages/game-core/src/server/authority/authority-runtime-types';
+import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
 import { decideLogicIntents } from '../../packages/game-core/src/server/logic/logic-decision';
 import type { LogicIntentBatch, LogicObservation } from '../../packages/game-core/src/server/logic/logic-protocol';
 import { MemoryGamePersistence } from '../../packages/game-core/src/server/persistence/memory-game-persistence';
@@ -152,6 +154,72 @@ describe('Browser Authority deterministic paused advance', () => {
     expect(decisions).toContain(false);
     expect(decisions).toContain(true);
     expect(fixture.runtime.server.getEntity(fixture.actor.id)?.position[0]).toBeGreaterThan(10.5);
+  });
+
+  it('does not let a prelude or stale reply replace the exact slice wait', async () => {
+    const prelude = { epoch: 'fake-epoch', observationSequence: 1, physicsTick: 4 } as LogicObservation;
+    const exact = { epoch: 'fake-epoch', observationSequence: 2, physicsTick: 20 } as LogicObservation;
+    const commitA = { worldRevision: 1 } as WorldCommitResult;
+    const commitB = { worldRevision: 2 } as WorldCommitResult;
+    const advanceCalls: number[] = [];
+    const received: number[] = [];
+    const setTimer = vi.fn(() => Symbol('timer'));
+    const clearTimer = vi.fn();
+    const postLogicObservation = vi.fn();
+    const runtime = {
+      server: { queryEntities: () => [] },
+      requestLogicObservation: vi.fn(),
+      advancePausedSession: (elapsedMs: number) => {
+        advanceCalls.push(elapsedMs);
+        coordinator.publishLogicObservation(elapsedMs === 0 ? prelude : exact);
+        return {
+          lanes:
+            elapsedMs === 0
+              ? { physicsSteps: 1, gameplayPeriods: 2, fluidPeriods: 3 }
+              : { physicsSteps: 4, gameplayPeriods: 5, fluidPeriods: 6 },
+          commits: elapsedMs === 0 ? [commitA] : [commitB],
+        } as unknown as AuthorityAdvanceResult;
+      },
+      receiveLogicIntentBatch: (batch: LogicIntentBatch) => {
+        received.push(batch.observationSequence);
+        return true;
+      },
+      snapshot: () => ({ physicsTick: 20 }),
+      view: () => ({}),
+      invalidateLogicCandidates: vi.fn(),
+    } as unknown as AuthorityRuntime;
+    const coordinator = new BrowserAuthorityDeterministicAdvance({
+      runtime: () => runtime,
+      postLogicObservation,
+      yieldTurn: testCorePlatform.yieldTurn,
+      timers: { set: setTimer, clear: clearTimer },
+    });
+    const batch = (observation: LogicObservation): LogicIntentBatch => ({
+      protocolVersion: 1,
+      epoch: observation.epoch,
+      observationSequence: observation.observationSequence,
+      expiresAtPhysicsTick: observation.physicsTick + 12,
+      intents: [],
+    });
+
+    const advance = coordinator.advancePaused(100, true);
+    let settled = false;
+    void advance.then(() => (settled = true));
+    expect(advanceCalls).toEqual([0, 100]);
+    expect(setTimer).toHaveBeenCalledOnce();
+    expect(postLogicObservation).toHaveBeenNthCalledWith(1, prelude);
+    expect(postLogicObservation).toHaveBeenNthCalledWith(2, exact);
+    expect(coordinator.acceptLogicIntentBatch(batch(prelude))).toBe(true);
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    expect(clearTimer).not.toHaveBeenCalled();
+    expect(coordinator.acceptLogicIntentBatch(batch(exact))).toBe(true);
+
+    const result = await advance;
+    expect(received).toEqual([1, 2]);
+    expect(clearTimer).toHaveBeenCalledOnce();
+    expect(result.lanes).toEqual({ physicsSteps: 5, gameplayPeriods: 7, fluidPeriods: 9 });
+    expect(result.commits).toEqual([commitA, commitB]);
   });
 
   it('keeps a newly published Logic candidate valid while promoting an older queued response after paused debt', async () => {
