@@ -37,4 +37,17 @@ describe.each([
 
     expect(result.messages.filter((message) => message.ruleId === 'seedlands/pure-runtime')).toHaveLength(0);
   });
+
+  it('类型字段 self 不等于宿主全局，但运行时访问仍被拒绝', async () => {
+    const [result] = await lintSource(
+      `
+        export type Observation = { self: { position: number[] } };
+        export interface Port { self(): void }
+        self.postMessage('forbidden');
+        export const computed = { [self.name]: 1 };
+      `,
+      filePath,
+    );
+    expect(result.messages.filter((message) => message.ruleId === 'seedlands/pure-runtime')).toHaveLength(2);
+  });
 });

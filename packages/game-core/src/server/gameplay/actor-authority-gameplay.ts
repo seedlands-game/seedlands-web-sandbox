@@ -98,6 +98,14 @@ export function applyActorAuthorityAction(
   const actor = context.simulation.getActor(actorId);
   const entity = context.entities.get(actorId);
   if (!actor || !entity || !actor.active) return reject('actor-inactive');
+  const controlSource = context.entities.actorStateAccess(actorId).controlSource;
+  if (controlSource === 'behavior') {
+    if (action.type !== 'start-existing-action') return reject('control-owner-mismatch');
+    const current = context.simulation.actionForActor(actorId);
+    if (!current || current.id !== action.actionId) return reject('action-mismatch');
+    return retainAuthorityAction(context.simulation.authorityRulesContext(), actorId, action.actionId);
+  }
+  if (controlSource !== 'autonomous') return reject('control-owner-mismatch');
   if (action.type === 'move-to') {
     const result = startAuthorityMovement(context.simulation.authorityRulesContext(), actorId, action.target, () =>
       context.simulation.startAction(actorId, { type: 'move-to', targetPosition: action.target }),

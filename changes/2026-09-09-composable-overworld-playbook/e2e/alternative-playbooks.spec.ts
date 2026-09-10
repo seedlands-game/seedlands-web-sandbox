@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { HeadlessSession } from '../../../packages/game-core/src/server/headless/headless-session';
+import type { FrozenGameSaveSnapshot } from '../../../packages/game-core/src/server/persistence/game-save-snapshot';
 import { assembleProductPacks, type VerifiedPackArtifact } from '@seedlands/game-core/server/composition/host-api';
 import { testCorePlatform } from '../../../tests/support/core-platform';
 import { startHarnessWorld, lockPointer, moveHarnessPlayer, setHarnessView } from '../../../tests/e2e/support/harness';
@@ -21,7 +22,7 @@ async function example(page: Page, playbook: 'click-conversion' | 'builder') {
     const artifacts = await loader.loadVerifiedPackArtifacts(lockPath);
     const files = new Map(
       await Promise.all(
-        ['packs.lock.json', `${playbook}.manifest.json`, `${playbook}.mjs`].map(
+        ['packs.lock.json', 'host-admissions.json', `${playbook}.manifest.json`, `${playbook}.mjs`].map(
           async (name) => [name, await readFile(join(output, name))] as const,
         ),
       ),
@@ -98,8 +99,12 @@ test('同一点击转换 ESM 经 Headless→Browser→Headless，实际点击采
     );
     expect(
       await page.evaluate(
-        (snapshot) => window.__seedlandsHarness!.world.checkpoint({ kind: 'restore', snapshot }),
-        exported.data.snapshot,
+        (snapshot) =>
+          window.__seedlandsHarness!.world.checkpoint({
+            kind: 'restore',
+            snapshot: snapshot as FrozenGameSaveSnapshot,
+          }),
+        exported.data.snapshot as unknown,
       ),
     ).toMatchObject({ ok: true });
     await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'run' }));

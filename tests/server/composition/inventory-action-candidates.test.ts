@@ -285,6 +285,31 @@ describe('detached inventory action candidates', () => {
     expect(duplicate.pickupIntent?.reference).toEqual(itemProjection.reference);
     expect({ actorProjection, itemProjection }).toEqual(before);
   });
+
+  it('conserves a scarce world stack when an NPC requests a bounded pickup', () => {
+    const pickedUp = buildInventoryActionCandidate(content, {
+      kind: 'pickup',
+      actor: actor('npc-1', 'npc', { slots: [null, null, null, null] }),
+      item: item('shared-food', { itemId: 'test:berry', count: 2 }),
+      input: { count: 1 },
+    });
+
+    expect(pickedUp.slots[0]).toEqual({ itemId: 'test:berry', count: 1 });
+    expect(pickedUp.pickupIntent).toMatchObject({
+      reference: { entityId: 'shared-food' },
+      stack: { itemId: 'test:berry', count: 1 },
+      remainingCount: 1,
+    });
+    expect(pickedUp.result).toMatchObject({ actorId: 'npc-1', itemId: 'test:berry', count: 1 });
+    expect(() =>
+      buildInventoryActionCandidate(content, {
+        kind: 'pickup',
+        actor: actor('npc-1', 'npc', { slots: [null, null, null, null] }),
+        item: item('shared-food', { itemId: 'test:berry', count: 2 }),
+        input: { count: 3 },
+      }),
+    ).toThrow('missing-items');
+  });
 });
 
 describe('registered inventory action module', () => {

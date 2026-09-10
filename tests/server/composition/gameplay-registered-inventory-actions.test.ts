@@ -18,7 +18,11 @@ function setup(
   } = {},
 ) {
   const modules = [
-    ...pack.modules.filter((module) => withActions || module.descriptor.id !== 'seedlands:inventory-actions-module'),
+    ...pack.modules.filter(
+      (module) =>
+        withActions ||
+        !['seedlands:inventory-actions-module', 'seedlands:behavior-registry-module'].includes(module.descriptor.id),
+    ),
     ...extra,
   ];
   const root = definePack({ id: 'test:inventory-actions', version: '1.0.0', kind: 'playbook', modules });

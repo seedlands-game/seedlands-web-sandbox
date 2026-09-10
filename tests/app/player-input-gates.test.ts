@@ -116,9 +116,12 @@ it('昼夜暂停和加速按键通过Authority回调而非只改本地显示', (
 
   windowStub.onkeydown!({ code: 'KeyP', target: {}, preventDefault: vi.fn() });
   windowStub.onkeydown!({ code: 'KeyT', target: {}, preventDefault: vi.fn() });
+  expect(setSpeed).not.toHaveBeenCalled();
+  windowStub.onkeydown!({ code: 'KeyT', altKey: true, target: {}, preventDefault: vi.fn() });
 
   expect(setPaused).toHaveBeenCalledWith(true);
   expect(setSpeed).toHaveBeenCalledWith(20);
+  expect(setSpeed).toHaveBeenCalledOnce();
 });
 
 it('按住F3再按B切换真实碰撞箱', () => {

@@ -383,7 +383,8 @@ export function assembleWorldPacks(
   const finalizers: (() => void)[] = [];
   let definitionsReady = false;
   for (const moduleId of moduleOrder) {
-    const module = moduleById.get(moduleId)!.module;
+    const binding = moduleById.get(moduleId)!;
+    const module = binding.module;
     const provided = new Set((module.descriptor.provides ?? []).map((entry) => entry.id));
     const required = new Set((module.descriptor.requires ?? []).map((entry) => entry.id));
     let registrationOpen = true;
@@ -391,6 +392,11 @@ export function assembleWorldPacks(
       if (!registrationOpen) throw new TypeError(`Module registration facade is closed: ${moduleId}`);
     };
     const facade = Object.freeze({
+      identity: Object.freeze({
+        moduleId,
+        moduleVersion: module.descriptor.version,
+        packId: binding.packId,
+      }),
       readContentDefinitions() {
         if (!definitionsReady) throw new TypeError('Content definitions are not ready during registration.');
         return Object.freeze({

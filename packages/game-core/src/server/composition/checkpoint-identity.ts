@@ -11,6 +11,12 @@ const INVENTORY_POINTER_PREDECESSOR_OVERWORLD = Object.freeze({
   manifestDigest: '05bc5e57bb6cfd4ed0e2da821f8b6e803bb7e3676453988a131a4b8524c066dd',
   entryDigest: '4a773fe7225f13ef018def0a930b469aa82e558fdebc5172b7ef602ed8e148e2',
 });
+const NPC_COMPOSABLE_PREDECESSOR_OVERWORLD = Object.freeze({
+  manifestDigest: '05bc5e57bb6cfd4ed0e2da821f8b6e803bb7e3676453988a131a4b8524c066dd',
+  entryDigest: '7583373d53f9cb3f2447bf40478eb9f8d817adc80060effa385633ecaacf5e6a',
+});
+const BEHAVIOR_REGISTRY_MODULE = 'seedlands:behavior-registry-module';
+const BEHAVIOR_REGISTRY_CAPABILITY = 'seedlands:behavior-registry';
 
 function canonicalData(input: unknown): string {
   let budget = 1_048_576;
@@ -61,7 +67,7 @@ export function createCompositionCheckpointGuard(composition: WorldComposition, 
     definitionMap: composition.definitionMap,
   };
   const expected = canonicalData(identity);
-  const legacyV4 =
+  const inventoryPointerPredecessor =
     composition.playbookId === 'seedlands:overworld' &&
     identity.packLock.length === 1 &&
     identity.packLock[0]?.id === 'seedlands:overworld' &&
@@ -80,6 +86,33 @@ export function createCompositionCheckpointGuard(composition: WorldComposition, 
           ],
         })
       : null;
+  const admitsNpcComposablePredecessor =
+    composition.playbookId === 'seedlands:overworld' &&
+    identity.packLock.length === 1 &&
+    identity.packLock[0]?.id === 'seedlands:overworld' &&
+    identity.packLock[0].version === '1.0.0' &&
+    identity.definitionMap.modules.some(({ id }) => id === BEHAVIOR_REGISTRY_MODULE) &&
+    identity.definitionMap.capabilities.some(({ id }) => id === BEHAVIOR_REGISTRY_CAPABILITY);
+  const npcComposablePredecessor = admitsNpcComposablePredecessor
+    ? canonicalData({
+        ...identity,
+        packLock: [
+          {
+            ...identity.packLock[0],
+            integrity: {
+              algorithm: 'sha256',
+              ...NPC_COMPOSABLE_PREDECESSOR_OVERWORLD,
+              resources: [],
+            },
+          },
+        ],
+        definitionMap: {
+          ...identity.definitionMap,
+          modules: identity.definitionMap.modules.filter(({ id }) => id !== BEHAVIOR_REGISTRY_MODULE),
+          capabilities: identity.definitionMap.capabilities.filter(({ id }) => id !== BEHAVIOR_REGISTRY_CAPABILITY),
+        },
+      })
+    : null;
   return Object.freeze({
     snapshot: (): CompositionCheckpointIdentity => JSON.parse(expected) as CompositionCheckpointIdentity,
     validateGameplay(raw: unknown) {
@@ -92,7 +125,7 @@ export function createCompositionCheckpointGuard(composition: WorldComposition, 
       }
       if (!('composition' in raw)) throw new TypeError('Gameplay composition identity is missing or incompatible.');
       const actual = canonicalData(raw.composition);
-      if (actual !== expected && actual !== legacyV4)
+      if (actual !== expected && actual !== inventoryPointerPredecessor && actual !== npcComposablePredecessor)
         throw new TypeError('Gameplay composition identity is missing or incompatible.');
     },
   });

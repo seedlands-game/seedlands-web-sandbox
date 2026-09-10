@@ -2,14 +2,18 @@ import {
   LOGIC_PROTOCOL_VERSION,
   type LogicIntentBatch,
   type LogicObservation,
-  type LogicWorkerRequest,
   type LogicWorkerResponse,
 } from '@seedlands/game-core/server/logic/logic-protocol';
+import {
+  DIRECT_LOGIC_PROTOCOL_VERSION,
+  type DirectLogicAttachRequest,
+  type DirectLogicDiagnostics,
+} from '../../worker/authority-worker-direct-logic-protocol';
 
 export type LogicWorkerPort = {
   onmessage: ((event: MessageEvent<LogicWorkerResponse>) => void) | null;
   onerror: ((event: ErrorEvent) => void) | null;
-  postMessage(message: LogicWorkerRequest, transfer?: Transferable[]): void;
+  postMessage(message: unknown, transfer?: Transferable[]): void;
   terminate(): void;
 };
 
@@ -32,11 +36,15 @@ export class BrowserLogicClient {
   private blockCompletedCount = 0;
   private observationInFlight = false;
   private pendingObservation: LogicObservation | null = null;
+  private directPendingObservationCount: 0 | 1 = 0;
   private submittedObservationCount = 0;
+  private receivedBatchCount = 0;
   private completedBatchCount = 0;
+  private rejectedBatchCount = 0;
   private observationStartedAt: number | null = null;
   private lastRoundTripMs: number | null = null;
   private epochValue: string;
+  private directAttached = false;
 
   constructor(
     private readonly worker: LogicWorkerPort,
@@ -52,6 +60,22 @@ export class BrowserLogicClient {
     return this.epochValue;
   }
 
+  attachDirectAuthority(port: MessagePort): void {
+    if (this.disposed || this.ready || this.resolveReady)
+      throw new Error('Direct Logic port must attach before start.');
+    if (this.directAttached) throw new Error('Direct Logic port is already attached.');
+    this.directAttached = true;
+    this.worker.postMessage(
+      {
+        kind: 'attach-direct-logic',
+        protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+        epoch: this.epoch,
+        port,
+      } satisfies DirectLogicAttachRequest,
+      [port],
+    );
+  }
+
   rebindEpoch(nextEpoch: string): void {
     if (!this.ready || this.disposed) throw new Error('Logic client is unavailable.');
     if (!nextEpoch.trim()) throw new TypeError('Next Logic epoch must not be empty.');
@@ -60,13 +84,15 @@ export class BrowserLogicClient {
     this.epochValue = nextEpoch;
     this.observationInFlight = false;
     this.pendingObservation = null;
+    this.directPendingObservationCount = 0;
     this.observationStartedAt = null;
-    this.worker.postMessage({
-      kind: 'reset-logic-epoch',
-      protocolVersion: LOGIC_PROTOCOL_VERSION,
-      epoch: previousEpoch,
-      nextEpoch,
-    });
+    if (!this.directAttached)
+      this.worker.postMessage({
+        kind: 'reset-logic-epoch',
+        protocolVersion: LOGIC_PROTOCOL_VERSION,
+        epoch: previousEpoch,
+        nextEpoch,
+      });
   }
 
   static create(epoch: string, options: Options = {}) {
@@ -95,6 +121,7 @@ export class BrowserLogicClient {
   }
 
   sendObservation(observation: LogicObservation): void {
+    if (this.directAttached) return;
     if (!this.ready || this.disposed || observation.epoch !== this.epoch) return;
     if (this.observationInFlight) {
       this.pendingObservation = observation;
@@ -123,15 +150,32 @@ export class BrowserLogicClient {
       blockStartedCount: this.blockStartedCount,
       blockCompletedCount: this.blockCompletedCount,
       observationInFlight: this.observationInFlight,
-      pendingObservationCount: this.pendingObservation ? 1 : 0,
+      pendingObservationCount: this.directAttached
+        ? this.directPendingObservationCount
+        : this.pendingObservation
+          ? 1
+          : 0,
       submittedObservationCount: this.submittedObservationCount,
+      receivedBatchCount: this.receivedBatchCount,
       completedBatchCount: this.completedBatchCount,
+      rejectedBatchCount: this.rejectedBatchCount,
       lastRoundTripMs: this.lastRoundTripMs,
     } as const;
   }
 
   get isReady(): boolean {
     return this.ready && !this.disposed;
+  }
+
+  acceptDirectDiagnostics(value: DirectLogicDiagnostics): void {
+    if (!this.directAttached || this.disposed || value.epoch !== this.epoch) return;
+    this.observationInFlight = value.observationInFlight;
+    this.directPendingObservationCount = value.pendingObservationCount;
+    this.submittedObservationCount = value.submittedObservationCount;
+    this.receivedBatchCount = value.receivedBatchCount;
+    this.completedBatchCount = value.completedBatchCount;
+    this.rejectedBatchCount = value.rejectedBatchCount;
+    this.lastRoundTripMs = value.lastRoundTripMs;
   }
 
   blockForHarness(ms: number): Promise<void> {
@@ -190,6 +234,7 @@ export class BrowserLogicClient {
       return;
     }
     if (message.kind === 'logic-intents') {
+      if (this.directAttached) return;
       this.observationInFlight = false;
       this.completedBatchCount += 1;
       this.lastRoundTripMs =
@@ -216,6 +261,7 @@ export class BrowserLogicClient {
     this.ready = false;
     this.observationInFlight = false;
     this.pendingObservation = null;
+    this.directPendingObservationCount = 0;
     this.observationStartedAt = null;
     this.rejectReady?.(error);
     this.resolveReady = null;

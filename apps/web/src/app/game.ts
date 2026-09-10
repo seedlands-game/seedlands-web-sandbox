@@ -38,10 +38,10 @@ import { GameFrameLoop } from './game-frame-loop';
 import { GameSaveQueue } from './world/game-save-queue';
 import { startBrowserWorkerSession } from './browser-worker-session';
 import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
-import { releasePointerLock } from './player/pointer-lock';
 import type { AuthorityReady } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { readGameRuntimeDiagnostics } from './experimental/game-runtime-diagnostics';
 import { restoreBrowserPresentation } from './world/browser-world-restore';
+import { CompanionSession } from './gameplay/companion/companion-session';
 
 export class Game {
   private paused = false;
@@ -59,6 +59,11 @@ export class Game {
   private performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(PERFORMANCE_PROFILES.balanced);
   private readonly store = new BrowserWorldStore();
   private authority: BrowserAuthorityClient | null = null;
+  readonly companion = new CompanionSession(
+    () => this.authority,
+    () => this.paused,
+    (paused) => this.setPaused(paused),
+  );
   private computeRuntime: BrowserComputeRuntime | null = null;
   private logicClient: BrowserLogicClient | null = null;
   private serverPlayerId: string | null = null;
@@ -252,6 +257,7 @@ export class Game {
     await initialWorldReady;
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
+    this.companion.start();
     return { seed: ready.seedText };
   }
 
@@ -279,6 +285,7 @@ export class Game {
   }
 
   private restoreBrowserWorld(ready: AuthorityReady) {
+    this.companion.worldRestored(`seedlands:g${ready.generatorVersion}:${ready.seedText}`);
     const authority = this.authority;
     if (!authority || !this.world || !this.camera || !this.environment) return;
     // prettier-ignore
@@ -400,6 +407,7 @@ export class Game {
 
   setPaused(paused: boolean) {
     this.paused = paused;
+    this.companion.setPaused(paused);
     this.controller?.releaseInput();
     const control =
       this.authority?.mode === 'local' ? (paused ? this.authority.pause() : this.authority.resume()) : undefined;
@@ -450,11 +458,7 @@ export class Game {
 
   respawn = () => this.gameplayClient?.respawn();
 
-  toggleCommandShell() {
-    const open = !this.uiBridge.shell.get().commandOpen;
-    if (open) this.controller?.releaseInput();
-    this.uiBridge.publishShell({ commandOpen: open });
-  }
+  toggleCommandShell = () => runtimeControls.toggleCommandShell(this.uiBridge, this.controller);
 
   closeCommandShell = () => this.uiBridge.publishShell({ commandOpen: false });
 
@@ -487,13 +491,8 @@ export class Game {
     return result;
   }
 
-  private publishDebugVisibility(visible: boolean) {
-    if (visible) {
-      this.controller?.releaseInput();
-      releasePointerLock();
-    }
-    this.uiBridge.publishDebug({ visible });
-  }
+  private publishDebugVisibility = (visible: boolean) =>
+    runtimeControls.publishDebugVisibility(this.uiBridge, this.controller, visible);
 
   toggleMap = () => runtimeControls.toggleMap(this.uiBridge, this.world, this.camera, this.controller);
 
@@ -503,6 +502,7 @@ export class Game {
   }
 
   private disposeRuntime() {
+    this.companion.stop();
     this.startGeneration += 1;
     this.worldAudio?.dispose();
     this.worldAudio = null;

@@ -12,6 +12,9 @@ import type { MeleeDefinition } from './combat-runtime';
 import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry } from './item-registry';
 import type { CompositionCheckpointIdentity } from '../composition/checkpoint-identity';
 import type { ActorProfileRegistry } from './actor-profile';
+import type { BehaviorCapabilityRegistry } from '../composition/behavior-capability-registry';
+import type { CharacterActorDomainPort } from '../simulation/character-runtime-types';
+import { validateCharacterSnapshotRecord } from '../simulation/character-runtime-validation';
 
 type Position = [number, number, number];
 
@@ -91,6 +94,7 @@ type GameplaySnapshotValidationOptions = {
   registeredBlocks?: boolean;
   combatOriginFor?(entities: EntityStore): CombatOriginRuntimeOptions;
   needsPlayerLimit?: number;
+  behaviorCapabilities?: BehaviorCapabilityRegistry;
 };
 
 const LEGACY_PLAYER_EYE_TO_FEET = 1.6;
@@ -137,6 +141,78 @@ const migrateLegacyPlayer = (player: PlayerSnapshot, clone: CoreClone): PlayerSn
   ...clone(player),
   spawnPosition: legacyPlayerPositionToFeet(player.spawnPosition),
 });
+
+function migrateLegacyCharacterBodies(
+  snapshot: SimulationSnapshot,
+  entities: EntityStore,
+  items: ItemDefinitionRegistry,
+  capabilities: BehaviorCapabilityRegistry | undefined,
+): void {
+  if (!snapshot.characters) return;
+  if (!capabilities) throw new TypeError('Legacy Character state requires the behavior module.');
+  if (snapshot.characters.version !== 1 && snapshot.characters.version !== 2)
+    throw new TypeError('Legacy Character snapshot version is invalid.');
+  const active = snapshot.characters.characters.filter((character) => character.lifecycle === 'active');
+  if (active.length === 0) return;
+  const componentSnapshot = entities.exportComponentSnapshot();
+  const actors = new Map(componentSnapshot.actors.map((actor) => [actor.entityId, actor]));
+  const autonomous = new Map(snapshot.actors.map((actor) => [actor.entityId, actor]));
+  for (const character of snapshot.characters.characters) {
+    validateCharacterSnapshotRecord(character, capabilities);
+    if (character.lifecycle !== 'active') continue;
+    const entity = entities.get(character.entityId);
+    const actor = actors.get(character.entityId);
+    const legacyActor = autonomous.get(character.entityId);
+    if (!entity || entity.type !== 'npc' || entity.archetype !== 'settler' || !actor || !legacyActor)
+      throw new TypeError(`Legacy Character actor is missing: ${character.entityId}`);
+    if (!character.inventory || character.inventory.length !== 12)
+      throw new TypeError(`Legacy Character inventory is missing: ${character.entityId}`);
+    if (character.hunger === undefined || character.hunger !== legacyActor.hunger)
+      throw new TypeError(`Legacy Character needs do not match simulation state: ${character.entityId}`);
+    const inventory = character.inventory.map((stack) =>
+      stack === null ? null : items.normalizeStack(stack, { migrateLegacyDurability: 'initialize-at-max' }),
+    );
+    actors.set(character.entityId, {
+      ...actor,
+      inventory: [...inventory, ...Array.from({ length: 12 }, () => null)],
+      needs: { ...actor.needs, hunger: character.hunger },
+    });
+  }
+  entities.restoreComponentSnapshot({ ...componentSnapshot, actors: [...actors.values()] });
+}
+
+const validationCharacterDomain = (entities: EntityStore): CharacterActorDomainPort =>
+  Object.freeze({
+    read: (actorId: string) => {
+      const entity = entities.get(actorId);
+      const reference = entities.createReference(actorId);
+      if (!entity || !reference || !['player', 'creature', 'npc'].includes(entity.type)) return null;
+      const actor = entities.actorStateAccess(actorId);
+      return Object.freeze({
+        reference,
+        lifecycle: actor.lifecycle,
+        controlSource: actor.controlSource,
+        controlRevision: actor.controlRevision,
+        health: entity.health!,
+        maxHealth: entity.maxHealth!,
+        needs: Object.freeze({
+          hunger: actor.hunger,
+          maxHunger: actor.maxHunger,
+          hungerMeaning: actor.hungerMeaning,
+        }),
+        inventory: Object.freeze({
+          slots: Object.freeze(actor.inventory.snapshot()),
+          selectedSlot: actor.selectedSlot,
+          revision: actor.inventoryRevision,
+        }),
+      });
+    },
+    invoke: () => ({
+      ok: false as const,
+      code: 'SNAPSHOT_VALIDATION_ONLY',
+      message: 'Registered operations are unavailable while validating a snapshot.',
+    }),
+  });
 
 function validatePlayerSnapshot(player: PlayerSnapshot): void {
   const nonNegative = [
@@ -262,6 +338,7 @@ export function validateGameplaySnapshot(
         if ((source.version === 1 || !source.simulation.combat) && player.attackCooldownSeconds > 0)
           legacyCombatLockouts.set(player.entityId, player.attackCooldownSeconds);
       });
+      migrateLegacyCharacterBodies(simulationSnapshotFor(source), entities, items, options.behaviorCapabilities);
     }
     if (options.registeredBlocks) {
       for (const player of players.values()) {
@@ -293,6 +370,15 @@ export function validateGameplaySnapshot(
       meleeDefinitions: options.meleeDefinitions,
       actorProfiles: options.actorProfiles,
       combatOrigin: options.combatOriginFor?.(entities),
+      ...(options.behaviorCapabilities
+        ? {
+            character: {
+              capabilities: options.behaviorCapabilities,
+              domain: validationCharacterDomain(entities),
+              changed: () => undefined,
+            },
+          }
+        : {}),
     });
     validator.restore(simulationSnapshotFor(source));
     if (options.registeredFeeding) {

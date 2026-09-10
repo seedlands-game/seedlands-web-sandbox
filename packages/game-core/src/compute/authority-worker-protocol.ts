@@ -24,6 +24,14 @@ import type {
   InventoryPointerCommand,
   InventoryPointerStationRef,
 } from '../server/gameplay/modules/inventory-pointer-contract';
+import type { CharacterControlRequest, ControlBinding } from '../runtime/character-control-protocol';
+
+type CharacterIntentRequest = Extract<CharacterControlRequest, { kind: 'intent' }>;
+type CharacterCapabilitiesRequest = Extract<CharacterControlRequest, { kind: 'capabilities' }>;
+export type BoundCharacterControlRequest =
+  | Extract<CharacterControlRequest, { kind: 'observe' | 'memory' | 'behavior' | 'speak' }>
+  | Readonly<Omit<CharacterCapabilitiesRequest, 'entityId'> & { entityId: string }>
+  | Readonly<Omit<CharacterIntentRequest, 'expectedCursor'> & { expectedCursor: number }>;
 
 export type GameplayEntityView = GameplayEntity & Readonly<{ combat?: CombatSnapshot }>;
 
@@ -352,6 +360,36 @@ export type AuthorityRequest = (
       requestId: number;
       method: keyof WorldHarnessPort;
       args: readonly unknown[];
+    }>
+  | Readonly<{
+      kind: 'character-control';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      request: CharacterControlRequest;
+    }>
+  | Readonly<{
+      kind: 'bind-character';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      entityId: string;
+    }>
+  | Readonly<{
+      kind: 'bound-character-control';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      binding: ControlBinding;
+      sequence: number;
+      request: BoundCharacterControlRequest;
+    }>
+  | Readonly<{
+      kind: 'unbind-character';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      binding: ControlBinding;
     }>
   | Readonly<{ kind: 'dispose-authority'; protocolVersion: typeof PROTOCOL_VERSION; epoch: SessionEpoch }>
 ) &

@@ -1,13 +1,15 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   assembleOverworldPacks,
+  createGameplayActorAuthority,
   createGameplaySystemAuthority,
 } from '@seedlands/game-core/server/composition/host-api';
 import { pack } from '../../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import { GameplayRuntime } from '../../../packages/game-core/src/server/gameplay/gameplay-runtime';
 import { testCorePlatform } from '../../support/core-platform';
 
-function create(digest = 'a', entryDigest = 'b'.repeat(64)) {
+function create(digest = 'a', entryDigest = 'b'.repeat(64), allowLegacyCompositionMigration = false) {
   const composition = assembleOverworldPacks([
     {
       ...pack,
@@ -21,7 +23,9 @@ function create(digest = 'a', entryDigest = 'b'.repeat(64)) {
   ]);
   return new GameplayRuntime({
     composition,
+    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' }),
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
+    allowLegacyCompositionMigration,
     platform: testCorePlatform,
     getVoxel: () => 0,
     getWorldTime: () => 12,
@@ -95,6 +99,99 @@ describe('gameplay composition checkpoint', () => {
     altered.composition.packLock[0]!.integrity.entryDigest = `0${altered.composition.packLock[0]!.integrity.entryDigest.slice(1)}`;
     const before = target.createSnapshot();
     expect(() => target.restoreSnapshot(altered)).toThrow(/composition/i);
+    expect(target.createSnapshot()).toEqual(before);
+  });
+
+  it('restores the exact main 6c7124a V4 fixture without losing actor state', () => {
+    const fixtureRoot = new URL('../../../changes/2026-09-10-npc-composable-baseline/fixtures/', import.meta.url);
+    const composition = JSON.parse(readFileSync(new URL('main-composition.json', fixtureRoot), 'utf8')) as {
+      identity: unknown;
+    };
+    const fixture = JSON.parse(readFileSync(new URL('main-gameplay.json', fixtureRoot), 'utf8')) as {
+      gameplay: Record<string, unknown>;
+    };
+    const saved = { ...fixture.gameplay, composition: composition.identity };
+    const target = create('c');
+
+    expect(target.restoreSnapshot(saved)).toEqual({ version: 4, worldTime: 12 });
+    expect(target.getInventory('main-player').slots.slice(0, 2)).toEqual([
+      { itemId: 'berry', count: 3 },
+      { itemId: 'wood-axe', count: 1, instance: { durability: 41 } },
+    ]);
+    expect(target.getInventory('main-settler').slots[0]).toEqual({ itemId: 'plank', count: 9 });
+    expect(target.entities.actorStateAccess('main-settler').controlSource).toBe('autonomous');
+
+    const altered = structuredClone(saved) as {
+      composition: { definitionMap: { operations: Array<{ id: string }> } };
+    };
+    altered.composition.definitionMap.operations.pop();
+    const before = target.createSnapshot();
+    expect(() => target.restoreSnapshot(altered)).toThrow(/composition/i);
+    expect(target.createSnapshot()).toEqual(before);
+  });
+
+  it('migrates a legacy Character V2 body into the ECS actor owner with 24 slots', () => {
+    const source = create();
+    const created = source.character({
+      kind: 'create',
+      profile: { name: '旧旅者', personality: '谨慎而节俭。' },
+      position: [2.5, 2, 0.5],
+    });
+    if (created.kind !== 'created') throw new Error('Character fixture was not created.');
+    const entityId = created.character.entityId;
+    source.giveItem(entityId, { itemId: 'berry', count: 3 });
+    source.giveItem(entityId, { itemId: 'wood-axe', count: 1, instance: { durability: 41 } });
+    const current = source.createSnapshot();
+    const actor = current.entityStore.actors.find((entry) => entry.entityId === entityId);
+    if (!actor?.character) throw new Error('Character component fixture is missing.');
+    const legacy = {
+      version: 3 as const,
+      revision: current.revision,
+      gameplayTime: current.gameplayTime,
+      entitySequence: current.entityStore.sequence,
+      entities: current.entityStore.entities,
+      players: [],
+      worldTime: current.worldTime,
+      coordinateSchema: current.coordinateSchema,
+      physicsSchema: current.physicsSchema,
+      simulation: {
+        ...current.simulation,
+        characters: {
+          version: 2 as const,
+          sequence: 1,
+          characters: [
+            {
+              ...actor.character,
+              inventory: actor.inventory.slice(0, 12),
+              hunger: actor.needs.hunger,
+            },
+          ],
+        },
+      },
+    };
+    const target = create('c', 'b'.repeat(64), true);
+
+    expect(target.restoreSnapshot(legacy)).toEqual({ version: 3, worldTime: 12 });
+    const migrated = target.createSnapshot().entityStore.actors.find((entry) => entry.entityId === entityId);
+    expect(migrated).toMatchObject({
+      controlSource: 'behavior',
+      character: { incarnation: actor.character.incarnation },
+    });
+    expect(migrated?.inventory).toHaveLength(24);
+    expect(migrated?.inventory.slice(0, 2)).toEqual([
+      { itemId: 'berry', count: 3 },
+      { itemId: 'wood-axe', count: 1, instance: { durability: 41 } },
+    ]);
+    expect(migrated?.inventory.slice(12)).toEqual(Array.from({ length: 12 }, () => null));
+    expect(target.character({ kind: 'inspect', entityId })).toMatchObject({
+      kind: 'state',
+      character: { lifecycle: 'active', inventory: expect.any(Array) },
+    });
+
+    const altered = structuredClone(legacy);
+    altered.simulation.characters.characters[0]!.hunger += 1;
+    const before = target.createSnapshot();
+    expect(() => target.restoreSnapshot(altered)).toThrow(/needs do not match/i);
     expect(target.createSnapshot()).toEqual(before);
   });
 });

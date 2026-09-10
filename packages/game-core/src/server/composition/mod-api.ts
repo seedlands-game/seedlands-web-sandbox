@@ -1,4 +1,15 @@
 export { definePack } from './assembly';
+export type {
+  BehaviorArguments,
+  BehaviorCapability,
+  BehaviorCapabilityReference,
+  BehaviorCondition,
+  BehaviorDefinition,
+  BehaviorGoal,
+  BehaviorJson,
+  BehaviorNode,
+  BehaviorSkillCheckpoint,
+} from '../../runtime/behavior-control-protocol';
 export type { ModLifecycleDefinition, ModSystemDefinition } from './lifecycle-contracts';
 export type { AuthorizedModuleExecution, ModuleExecutionContext, ModuleInvocationResult } from './authorized-execution';
 export type {
@@ -18,7 +29,27 @@ export type {
   PackManifest,
   PackDefinition,
   ProviderSelection,
+  ModRegistrationIdentity,
 } from './contracts';
+
+export { BEHAVIOR_REGISTRY_CAPABILITY } from './behavior-capability-registry';
+export type {
+  BehaviorActorSnapshot,
+  BehaviorCapabilityRegistry,
+  BehaviorConditionContext,
+  BehaviorConditionProviderDefinition,
+  BehaviorProviderContext,
+  BehaviorProviderDefinition,
+  BehaviorProviderOrigin,
+  BehaviorRuntimeContext,
+  BehaviorSkillProviderDefinition,
+  BehaviorSkillProviderResult,
+} from './behavior-capability-registry';
+export {
+  defineBehaviorCapabilityModule,
+  defineBehaviorRegistryModule,
+} from '../gameplay/modules/behavior-registry-module';
+export type { BehaviorCapabilityModuleInput } from '../gameplay/modules/behavior-registry-module';
 
 export type {
   ModStateAddress,

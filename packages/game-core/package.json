@@ -26,6 +26,7 @@
     "node": ">=22.12.0"
   },
   "dependencies": {
-    "bitecs": "0.4.0"
+    "bitecs": "0.4.0",
+    "mistreevous": "4.3.1"
   }
 }

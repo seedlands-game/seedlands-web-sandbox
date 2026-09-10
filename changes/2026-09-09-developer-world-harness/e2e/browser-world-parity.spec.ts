@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { assembleOverworldPacks, type VerifiedPackArtifact } from '@seedlands/game-core/server/composition/host-api';
 import { expect, test } from '@playwright/test';
 import { HeadlessSession } from '../../../packages/game-core/src/server/headless/headless-session';
+import type { FrozenGameSaveSnapshot } from '../../../packages/game-core/src/server/persistence/game-save-snapshot';
 import { baseVoxel, normalizeSeed, Voxel } from '../../../packages/game-core/src/world/voxel';
 import { testCorePlatform } from '../../../tests/support/core-platform';
 import { lockPointer, snapshot, startHarnessWorld } from '../../../tests/e2e/support/harness';
@@ -76,7 +77,7 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
       if (!oldObservation.ok || !('observation' in oldObservation.data))
         throw new Error('Old observation unavailable.');
       const before = await world.identity();
-      const restored = await world.checkpoint({ kind: 'restore', snapshot: checkpoint });
+      const restored = await world.checkpoint({ kind: 'restore', snapshot: checkpoint as FrozenGameSaveSnapshot });
       const after = await world.identity();
       const restoredCommand = await world.command({ type: 'time-get' });
       if (!restoredCommand.ok || !restoredCommand.data.success)
@@ -145,7 +146,7 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
         actor,
         actions,
         advanced,
-        roundTripCheckpoint: roundTripCheckpoint.data.snapshot,
+        roundTripCheckpoint: roundTripCheckpoint.data.snapshot as unknown,
         roundTripAdvance,
         roundTripVoxel,
         roundTripActor,
@@ -153,7 +154,8 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
       };
     },
     {
-      checkpoint: exported.data.snapshot,
+      // The recursive behavior-state schema is validated by the receiving checkpoint codec.
+      checkpoint: exported.data.snapshot as unknown,
       edited: EDITED,
       extra: EXTRA,
       generated: GENERATED.position,
@@ -196,7 +198,7 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
     seedText: 'browser-round-trip-target',
     createComposition,
   });
-  await roundTrip.world.checkpoint({ kind: 'restore', snapshot: result.roundTripCheckpoint });
+  await roundTrip.world.checkpoint({ kind: 'restore', snapshot: result.roundTripCheckpoint as FrozenGameSaveSnapshot });
   await roundTrip.world.logic({ kind: 'mode', mode: 'scripted' });
   const roundTripAdvance = await roundTrip.world.clock({ kind: 'advance', elapsedMs: 100 });
   const roundTripVoxel = await roundTrip.world.inspect({ kind: 'voxel', position: EDITED });

@@ -29,6 +29,14 @@ const isRepeatableOutbound = (message: unknown) => {
   return kind === 'input' || kind === 'pause-authority' || kind === 'resume-authority' || 'transaction' in message;
 };
 
+const isDirectPortAttachment = (message: unknown) =>
+  Boolean(
+    message &&
+    typeof message === 'object' &&
+    'kind' in message &&
+    (message as { kind: unknown }).kind === 'attach-direct-logic',
+  );
+
 export function createAuthorityTransport<Message>(
   raw: AuthorityTransportPort<Message>,
   options: AuthorityTransportFaults,
@@ -97,6 +105,10 @@ export function createAuthorityTransport<Message>(
     },
     postMessage(message, transfer = []) {
       if (disposed) return;
+      if (transfer.length > 0 && isDirectPortAttachment(message)) {
+        send(message, transfer);
+        return;
+      }
       let queuedMessage = message;
       let queuedTransfer = transfer;
       if (hasFault(options) && transfer.length > 0) {
