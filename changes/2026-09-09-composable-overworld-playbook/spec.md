@@ -187,3 +187,11 @@ PR #30 首轮 Chromium 检查因加载用例 flaky 失败；本机强制清空 V
 ### S6 木剑体验场准备状态等待
 
 run34424066455 的基线、Harness 与资产通过，木剑集成在等待 guide 的默认5s处两次失败。原始 trace 无脚本异常；失败 snapshot 显示世界已运行、持剑且仍在布置。guide 只在真实 prepareMeleeShowcase 全部命令和玩家移动完成后发布。该测试不承担准备耗时性能合同：只将该可观察完成状态的等待改为30s，与现有世界准备失败边界同量级；整场90s、全部受击/连招/重置断言、retry/flaky规则保持。Linux CI 原失败为RED；本机系统Chrome+SwiftShader完整旅程与新HEAD CI为后续证据，缺少本机同版本Playwright Chromium不冒称同环境。
+
+### S6 新旅程 CI 状态与输入复核
+
+run34424933483 当前 static/build通过；新增Browser 7pass/3fail。root负责成长旅程，独立reviewer只读定位创造快捷栏重复计数及恢复后伤害不符。成长测试未读取已在CI声明的low质量变量，实际仍使用medium；先以runtime snapshot质量断言取得RED，再给共享start helper增加可选显式quality参数（原调用默认不变），仅成长旅程传入当前请求质量，并断言实际snapshot。保持所有正常采集/建造/工位/耐久/保存断言，先验证请求配置真正生效，不能把此前env存在称为low已执行。
+
+创造快捷栏失败已定位为测试错误：默认目录第5槽已有wood，点击wood只替换当前第1槽，允许重复材料；全栏唯一性不是产品合同。改为验证选中槽的实际item/pressed，并核对其余槽保持creativeDefaults原值；不引入生产去重，也不放宽等待。
+
+恢复后脚本攻击的测试两宿主原先使用不同推进表面，且Browser丢弃clock结构化结果。复核合同统一为：两侧restore后显式scripted，通过公开world.clock精确推进300ms，确认18次physics/6次gameplay/9次fluid并保留health18/20断言；拒绝策略仅补clock/logic control，不授予Combat执行权。Browser返回命中状态与双方状态用于失败诊断。CI已有health20为RED，本机原始与CI gameplay子树探针均通过，尚不能断言生产根因；不延长攻击时长、不修改生产Combat或掩盖Linux差异。

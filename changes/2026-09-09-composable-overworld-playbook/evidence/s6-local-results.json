@@ -43,12 +43,13 @@
       "rawLogSha256": "d19fa4f82e669cabd25e3f45808a0ea8ea239c0ab1dcdb82e6996d65c3478288"
     },
     {
-      "kind": "development-composable-low-quality",
+      "kind": "development-composable-requested-low",
       "status": "passed",
       "passed": 10,
       "skipped": 0,
       "rawLog": "/tmp/seedlands-s6-browser-dev-composable.log",
-      "rawLogSha256": "a674a61b0fc91ed3273771abd00fa7e35a6c75fc5efdb8b955bc22a4a6c3d4ab"
+      "rawLogSha256": "a674a61b0fc91ed3273771abd00fa7e35a6c75fc5efdb8b955bc22a4a6c3d4ab",
+      "qualityCorrection": "low env was not consumed by these helpers; actual default was medium. Do not treat this run as low acceptance."
     }
   ],
   "limitations": ["No performance claim", "No subjective audio or mobile device acceptance", "Remote CI pending"],
@@ -90,5 +91,55 @@
         "sha256": "32efa0e54423e9c06784785cc2285a280e08129604f71378b67ab108939261d6"
       }
     ]
+  },
+  "progressionQualityFix": {
+    "red": "expected low, runtime snapshot medium",
+    "actualGreen": "low",
+    "environment": "system Chrome with SwiftShader; not Linux hosted Chromium",
+    "passed": 1,
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-quality-red.log",
+        "sha256": "9664d48bace27c0c8a6bdb02235965ca8bae2f18ff01862a2d120937b42d9953"
+      },
+      {
+        "path": "/tmp/seedlands-s6-quality-green2.log",
+        "sha256": "5697f1a01d66a6a2677fff9fb56e06bc1209897a478438f598a27c569feff988"
+      }
+    ]
+  },
+  "ciFixtureCorrections": {
+    "base": "7e0e330a36d87381e7f4d692d8dc6e6220464cfd",
+    "environment": "system Chrome + SwiftShader; progression actual low, other new scenarios default medium",
+    "wholeSuiteBeforeFinalOriginAssertions": {
+      "passed": 10,
+      "duration": "2.2m"
+    },
+    "remoteGreen": false,
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-creative-slots-green.log",
+        "sha256": "8a296fece4d2b1d5b698cff29b2ef2ea3865c6c05f33a3ab24311bf9e03c5dda"
+      },
+      {
+        "path": "/tmp/seedlands-s6-logic-public-clock.log",
+        "sha256": "fc463d54b099c825f012c16668c0ea4f2b62a2c555a5a59e04927a3ad3ae4d3a"
+      },
+      {
+        "path": "/tmp/seedlands-s6-composable-fixed.log",
+        "sha256": "d4b80d0620089a421fb0f1654c61ce52bf461eed4a75b087675a0e19fe1e254e"
+      },
+      {
+        "path": "/tmp/seedlands-s6-logic-origin-final.log",
+        "sha256": "c0d0c46c77fe727f49ed291eda1c94dadb98cd1988ff314d8449f4619f96c419"
+      }
+    ],
+    "finalOriginAssertions": {
+      "passed": 2,
+      "duration": "15.9s",
+      "types": "passed",
+      "eslint": "passed",
+      "review": "no_remaining_findings"
+    }
   }
 }

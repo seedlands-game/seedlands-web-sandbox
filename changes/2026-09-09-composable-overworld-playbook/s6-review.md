@@ -89,6 +89,12 @@ reviewer 核对六份 root 日志尾部及 SHA-256，与 `evidence/s6-local-resu
 
 同一 reviewer 对 `64057c2` 后木剑 E2E 第41行的唯一改动复核无 findings，文件 SHA-256 `3de48d9bef071c56a629b6518346d112fda798b0b818736740fd2e35efd5c53c`。guide 仅在真实体验场命令、装备、移动和朝向完成后发布，失败不会发布；该等待不是任意 sleep。原5s改30s，整场90s和随后持剑、Seed、新 lifetime、扣血/声音、重置、5/7点连击与死亡断言保留。没有墙钟性能合同，仍需 Linux 新 HEAD CI 证明，不把本机 Chrome 当其结果。
 
+## 后续三项 CI 夹具 delta 复核
+
+同一 reviewer 对 `7e0e330` 后共享 helper、成长、创造与脚本来源四文件只读复核。quality为第4个可选参数，旧2/3参数调用不变；成长两次进入均验证实际quality；创造验证当前槽及完整hotbar，允许目录重复。恢复后scripted只清Logic候选/intent，不取消已恢复Combat；拒绝策略补clock/logic control不扩大Combat权限。初审P2指出Browser仅看health可误认来源，已补hit阶段、durable subject/originalActor、lastResult damage/target和hunter身份，最终回读无剩余 findings。
+
+最终SHA-256：helper `4d44f4679897b07a807d18f3ef9ad199e5b2b9d45d87900291d6f471e72a0ddc`；成长 `3a0002007e10a6d25080667a4521b21bb85d4f869e47cfeafbc186a6ddfb53ed`；创造 `8f70be4030f996a89a0deb7182ac130051087b2e0572b5272c65319e38aba5d4`；脚本 `695f4fdd19fcca71783d9662fe77ccd81c5c1d81714840c40063f880967b9523`。reviewer未运行测试；root最终脚本2/2、完整套件补来源断言前10/10、types/ESLint通过。Linux CI来源差异没有由本机探针定位为生产根因，需新runner证明。
+
 ## 独立审阅 Findings
 
 最终 `7c9561d` 在已审阅范围内，未发现剩余可证实的 P0/P1/P2 问题。

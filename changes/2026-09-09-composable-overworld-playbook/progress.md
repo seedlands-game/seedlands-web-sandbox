@@ -160,3 +160,7 @@ PR #30 已创建为 ready for review，head 2c21f2f 无冲突。首次 CI 的旧
 首轮 static 还发现两个长旅程 timeout（5.324s/225.263s），已依据 runner 数据修改单用例资源预算，工作量与全部断言未变，独立 delta 无 findings，serial 定向 3/3 PASS。中间 run34423560880 已请求取消，避免重复执行已知旧预算；接下来 push 新 SHA 全量 CI。冷启动与预算修复分开提交、分开保留证据。
 
 64057c2 的 Browser 已通过原冷启动/全基线、Harness、资产，木剑准备guide默认5s不足而失败。依据实际trace与完成状态发布位置，改为30s状态等待、保留整场90s及所有断言；独立复核无发现，系统Chrome SwiftShader完整旅程1/1 PASS。Linux CI继续验证；未使用本机缺失的Playwright Chromium冒称等同。
+
+run34424933483（7e0e330）static/build SUCCESS；Browser既有26项通过，新玩法7/10，三项失败正在修复。创造唯一计数已按选中槽与checkpoint修正；成长明确消费并断言low质量；Logic两宿主统一公开clock300与restore后scripted，增加clock/命中诊断，未修改生产源码。定向创造2/2、实际low成长1/1、Logic2/2均PASS，完整10项复验和独立delta审阅进行中；之后push并继续全部CI。npmjs项目源与记忆已保存，未修改全局源。
+
+最终来源断言定向2/2 PASS（15.9s），test TypeScript与受影响ESLint通过，独立delta回读无剩余findings。完整新玩法10/10与最终增强断言分别记录；本轮只改测试/证据，下一步当前HEAD全量CI。

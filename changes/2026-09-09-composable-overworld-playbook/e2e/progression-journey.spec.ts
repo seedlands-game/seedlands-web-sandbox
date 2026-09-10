@@ -99,11 +99,16 @@ async function mine(page: Page, x: number, voxel: number) {
   await page.keyboard.up('KeyW');
 }
 
+const browserQuality = process.env.SEEDLANDS_BROWSER_E2E_QUALITY ?? 'medium';
+if (browserQuality !== 'low' && browserQuality !== 'medium' && browserQuality !== 'high')
+  throw new Error('Unknown browser E2E quality.');
+
 test('正常鼠标和槽位操作完成木石铁成长、箱子与保存重进', async ({ page }, info) => {
   test.setTimeout(240_000);
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await startHarnessWorld(page, 'browser-overworld-progression');
+  await startHarnessWorld(page, 'browser-overworld-progression', '', browserQuality);
+  expect((await snapshot(page))?.quality).toBe(browserQuality);
   // 有限原料与固定可采区域；后续不调用 give/craft/place/break 等开发者操作。
   await page.evaluate(async () => {
     const h = window.__seedlandsHarness!;
@@ -171,7 +176,8 @@ test('正常鼠标和槽位操作完成木石铁成长、箱子与保存重进',
   await openStation(page, 'chest', 0, 0);
   await put(page, 'wood-pickaxe', 0);
   await page.evaluate(() => window.__seedlandsHarness!.flushSave());
-  await startHarnessWorld(page, 'browser-overworld-progression');
+  await startHarnessWorld(page, 'browser-overworld-progression', '', browserQuality);
+  expect((await snapshot(page))?.quality).toBe(browserQuality);
   await inventory(page);
   await expect(item(page, 'iron-pickaxe')).toContainText('250/250');
   await close(page);

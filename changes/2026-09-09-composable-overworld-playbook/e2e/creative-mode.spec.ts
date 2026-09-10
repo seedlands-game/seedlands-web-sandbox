@@ -29,7 +29,12 @@ test('真实目录、数字键、Space/Shift 飞行、安全切换与检查点�
   await expect(page.locator('#actor-mode-status')).toHaveText('创造模式');
   const creativeDefaults = await actorState(page);
   await page.locator('#creative-catalog button[data-item="wood-block"]').click();
-  await expect(page.locator('#hotbar [data-item="wood-block"]')).toHaveCount(1);
+  const selectedWood = page.locator('#hotbar li').first().locator('button[data-item="wood-block"]');
+  await expect(selectedWood).toHaveAttribute('aria-pressed', 'true');
+  expect((await actorState(page)).creativeCatalog).toMatchObject({
+    hotbar: ['wood-block', ...creativeDefaults.creativeCatalog!.hotbar.slice(1)],
+    selectedSlot: 0,
+  });
   await page.getByRole('button', { name: '关闭背包', exact: true }).click();
   await page.keyboard.press('Digit2');
   await page.keyboard.press('KeyE');

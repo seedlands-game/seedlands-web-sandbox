@@ -90,13 +90,20 @@ test('Browser 脚本攻击保留开发者来源，并在 Headless 换 alias 恢�
           ? policy
           : {
               principals: policy.principals,
-              rules: [{ effect: 'allow', resources: ['world.checkpoint'], operations: ['restore'], scope: 'any' }],
+              rules: [
+                { effect: 'allow', resources: ['world.checkpoint'], operations: ['restore'], scope: 'any' },
+                { effect: 'allow', resources: ['world.clock', 'world.logic'], operations: ['control'], scope: 'any' },
+              ],
             },
       },
     });
     try {
       expect(await session.world.checkpoint({ kind: 'restore', snapshot: saved.checkpoint })).toMatchObject({
         ok: true,
+      });
+      expect(await session.world.logic({ kind: 'mode', mode: 'scripted' })).toMatchObject({
+        ok: true,
+        data: { mode: 'scripted' },
       });
       const active = session.runtime.server
         .simulationSnapshot()
@@ -106,7 +113,10 @@ test('Browser 脚本攻击保留开发者来源，并在 Headless 换 alias 恢�
           origin: { principalSubject: DEVELOPER_WORLD_SUBJECT, originalActor: { entityId: 'scripted-hunter' } },
         });
       else expect(active).toBeNull();
-      session.runtime.server.advanceGameplayRules(0.3);
+      expect(await session.world.clock({ kind: 'advance', elapsedMs: 300 })).toMatchObject({
+        ok: true,
+        data: { lanes: { physicsSteps: 18, gameplayPeriods: 6, fluidPeriods: 9 } },
+      });
       expect(session.runtime.server.getEntity(saved.playerId)!.health).toBe(saved.health! - (allowed ? 2 : 0));
     } finally {
       await session.dispose();
@@ -117,12 +127,37 @@ test('Browser 脚本攻击保留开发者来源，并在 Headless 换 alias 恢�
       const world = window.__seedlandsHarness!.world;
       const restored = await world.checkpoint({ kind: 'restore', snapshot: checkpoint });
       if (!restored.ok) throw new Error(JSON.stringify(restored));
-      await world.clock({ kind: 'advance', elapsedMs: 300 });
-      return world.inspect({ kind: 'entity', entityId: playerId });
+      const mode = await world.logic({ kind: 'mode', mode: 'scripted' });
+      const advanced = await world.clock({ kind: 'advance', elapsedMs: 300 });
+      const exported = await world.checkpoint({ kind: 'export' });
+      const combat = exported.ok
+        ? exported.data.snapshot?.gameplay?.simulation.combat?.combatants.find(
+            (entry) => entry.actorId === 'scripted-hunter',
+          )?.combat
+        : null;
+      return {
+        mode,
+        clock: advanced.ok ? { ok: true, lanes: advanced.data.lanes } : advanced,
+        combat,
+        hunter: await world.inspect({ kind: 'entity', entityId: 'scripted-hunter' }),
+        player: await world.inspect({ kind: 'entity', entityId: playerId }),
+      };
     },
     { checkpoint: saved.checkpoint, playerId: saved.playerId },
   );
-  expect(browser).toMatchObject({ ok: true, data: { entity: { health: saved.health! - 2 } } });
+  expect(browser).toMatchObject({
+    mode: { ok: true, data: { mode: 'scripted' } },
+    clock: { ok: true, lanes: { physicsSteps: 18, gameplayPeriods: 6, fluidPeriods: 9 } },
+    combat: {
+      active: {
+        phase: 'hit',
+        origin: { principalSubject: DEVELOPER_WORLD_SUBJECT, originalActor: { entityId: 'scripted-hunter' } },
+      },
+      lastResult: { outcome: 'hit', damage: 2, targetId: saved.playerId },
+    },
+    hunter: { ok: true, data: { entity: { id: 'scripted-hunter' } } },
+    player: { ok: true, data: { entity: { health: saved.health! - 2 } } },
+  });
 });
 
 test('Browser 未启用 Developer World Harness 时拒绝脚本 Logic RPC', async ({ page }) => {

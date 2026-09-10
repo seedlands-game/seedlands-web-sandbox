@@ -38,7 +38,7 @@ S4/S5 实现提交 `d05206b`，主干 #27 同步提交 `27bf75d`，V4 Wasm 构�
 
 CI 增加独立的 `pnpm test:composable-gameplay` 步骤及 always evidence 上传，沿用已有 Chromium job/权限/20min 上限，不改变既有回归全集、flaky 硬失败或重试策略。该步骤显式保护本 change 的 10 项需求场景，不将它们迁入长期基线。远端结果待 PR 当前 HEAD 读回。
 
-新 CI 步骤的同名命令和低画质配置在本机 dev 服务复验 10/10 通过（1.8min，`/tmp/seedlands-s6-browser-dev-composable.log`）；Playwright 所有者自动停止服务，4173 再次读回释放。文档中的两种独立 Headless CLI 也实际启动并在 stdin EOF 正常退出，未留下服务。正式 Git rename 已保证 `examples/readme.md` 在大小写敏感的 Linux checkout 中使用相同文件名。
+新 CI 步骤的同名命令在本机 dev 服务复验 10/10 通过（该次仅请求低画质，实际仍为默认 medium，见后续更正）（1.8min，`/tmp/seedlands-s6-browser-dev-composable.log`）；Playwright 所有者自动停止服务，4173 再次读回释放。文档中的两种独立 Headless CLI 也实际启动并在 stdin EOF 正常退出，未留下服务。正式 Git rename 已保证 `examples/readme.md` 在大小写敏感的 Linux checkout 中使用相同文件名。
 
 ## 模型视觉补充
 
@@ -63,3 +63,17 @@ CI 增加独立的 `pnpm test:composable-gameplay` 步骤及 always evidence 上
 run `34424066455`（head64057c2）的基线21项、Harness和资产集成均通过，木剑 guide 准备等待在默认5s两次失败，新增玩法步骤因此未执行。原始记录 `/tmp/seedlands-s6-ci-browser3-clean.log` 与 `melee-34424066455-1` artifact；快照显示HUD运行，retry持剑且无脚本异常，体验场未完成。只将该真实完成状态等待改30s，整场90s和后续全部战斗断言不变。独立 delta 无 findings。
 
 本机同版本 Playwright Chromium 未安装，启动失败明确记为环境缺口（`/tmp/seedlands-s6-melee-swift-red.log`），不是产品RED。使用已安装系统Chrome+SwiftShader、low和同basePath，改前完整旅程1/1（15.7s），改后1/1（15.1s，`/tmp/seedlands-s6-melee-ready-green.log`）；不冒称Linux相同环境。任务端口4173已释放。远端新HEAD仍须全量CI。
+
+## 新玩法首轮完整 CI 状态修复
+
+head7e0e330 run34424933483：Static verification 与 Production build通过，Chromium既有21项、Harness2、资产2、木剑1通过；新增7pass/3fail。失败为creative快捷栏wood元素预期1实2、developer Logic恢复后血量预期18实20，以及成长240s超时，均保留原失败，不改为通过。原日志 `/tmp/seedlands-s6-ci-browser4-clean.log`，完整artifact `composable-34424933483-1`。
+
+质量记录更正：先前 `SEEDLANDS_BROWSER_E2E_QUALITY=low` 只存在于env，新场景helper并未消费；因此前文“同配置low”应读为“请求low、实际默认medium”，不能将请求当实际值。新snapshot断言实际RED为low/medium不符。仅成长旅程向startHarnessWorld传可选quality，旧调用默认不变，首次进入和重进均检查实际snapshot；完整业务断言保留。第一次局部实现缺少expect导入，在Browser执行中暴露后补齐；随后tsc/ESLint与系统Chrome+SwiftShader实际low完整成长1/1 PASS（1.7m，`/tmp/seedlands-s6-quality-green2.log`）。这不证明Linux新HEAD已通过。
+
+创造快捷栏第5槽默认已有wood，点击目录替换第1槽后允许重复；原全栏唯一计数不符合合同，改为当前槽内容/选中状态与完整快捷栏checkpoint核验。系统Chrome+SwiftShader两项创造旅程2/2 PASS（26.5s），未改变产品行为。
+
+脚本攻击已修正测试的双宿主执行不对称：都在restore后设scripted，再通过公共clock推进精确300ms，并检查18/6/9周期与原18/20血量。拒绝策略只开放clock/logic control，仍拒绝Combat。Browser附带小型战斗诊断结果；不保留本机临时CI子树注入或额外50ms探针。定向两项2/2 PASS（16.0s）；CI原始恢复差异尚待目标runner复验，不能把本机PASS当已定位生产根因。原CI gameplay子树在本机同seed夹具复现也PASS，但trace缺少chunk typedarray字节，故不是完整CI checkpoint replay。
+
+上述夹具修复后的完整新玩法本机复验10/10 PASS（2.2min，系统Chrome+SwiftShader；成长实际low，其余默认medium）。独立reviewer随后指出只检查血量仍可能误认攻击来源，最终断言补上开发者subject、原始hunter、hit阶段与damage2/targetId以及hunter inspect。新增断言需另定向复验，不把补断言前的10/10当最终字节已测。
+
+最终来源断言定向2/2 PASS（15.9s），test TypeScript与受影响ESLint通过，独立delta回读无剩余findings。完整新玩法10/10与最终增强断言分别记录；本轮只改测试/证据，下一步当前HEAD全量CI。
