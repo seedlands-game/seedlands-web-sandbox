@@ -51,10 +51,12 @@
       "rawLogSha256": "a674a61b0fc91ed3273771abd00fa7e35a6c75fc5efdb8b955bc22a4a6c3d4ab"
     }
   ],
-  "limitations": [
-    "No performance claim",
-    "No subjective audio or mobile device acceptance",
-    "Independent review and remote CI pending"
-  ],
-  "ownedPort4173Released": true
+  "limitations": ["No performance claim", "No subjective audio or mobile device acceptance", "Remote CI pending"],
+  "ownedPort4173Released": true,
+  "independentReview": {
+    "head": "7c9561d94f315cbf5a4dfd8412d6fca244d576c4",
+    "result": "no_remaining_findings_in_reviewed_scope",
+    "coverage": "S4/S5 and final integration deep review; S1-S3 scoped reviews plus final key-path checks",
+    "report": "../s6-review.md"
+  }
 }

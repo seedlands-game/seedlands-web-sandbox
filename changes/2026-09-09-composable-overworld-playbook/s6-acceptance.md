@@ -14,13 +14,11 @@ S4/S5 实现提交 `d05206b`，主干 #27 同步提交 `27bf75d`，V4 Wasm 构�
 
 ## 独立审阅
 
-独立 reviewer 对冻结 `61901d3` 与 base `baeba09` 按项目 Code Review Skill 执行；后续修复通过精确 commit delta 回读。合同 SHA-256 `c4ab1a73db2535711bb234dc35eda81a3faf40cb117e85f5fd599ff06277572e`，S6 共享 12h 中分配最多 4h，只读、无外部写入。完整审阅尚未返回，不预填结论。
+独立 reviewer 对冻结 `61901d3` 与 base `baeba09` 按项目 Code Review Skill 执行；后续修复通过精确 commit delta 回读。合同 SHA-256 `c4ab1a73db2535711bb234dc35eda81a3faf40cb117e85f5fd599ff06277572e`，S6 共享 12h 中分配最多 4h，只读、无外部写入。最终报告已返回：已覆盖范围没有剩余可证实的 P0/P1/P2，准确覆盖与限制见 [独立审阅](s6-review.md)。S1–S3 使用既有 scoped review 加最终关键接缝复查，不声称本轮全量逐行重审。
 
-## 待完成
+## 当前剩余
 
-- 修复后的完整 static 与独立 build。
-- 当前源码的生产 Browser 成长、生存 HUD、独立样例和跨宿主；dev Browser 全部受影响既有回归。
-- 独立审阅回读、T01–T14 对照、可复现演示以及 PR/最新 CI/mergeability。
+本地实施、证据、演示与独立审阅已闭合；剩余 PR 当前 HEAD 的必要 CI 与 mergeability 读回。
 
 ## 修复后的完整本地准出
 

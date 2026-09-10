@@ -152,3 +152,5 @@ S3 核心实际消费者已接入；仍需默认内容与替代装配共同验�
 根正在提交 CI 新场景步骤和验收文档，生产源码未变。S6 独立 reviewer `s6_final_review` 对 61901d3 全分支及 50ff14c 修复 delta 持续只读审阅；修复 delta 已初步确认闭合，完整报告待返回。之后按具体 findings 修复/复验，再 push/创建 PR 并跟进当前 HEAD 必要 CI 和 mergeability。尚无 PR、不自动合并，heartbeat 未停止。
 
 Midscene 补充视觉旅程已运行通过 1/1（3 处 aiAssert，39.474s），未读取 .env，生产预览已退出；来源和边界见 S6 记录。当前剩余独立审阅及远端 PR/CI，不重复已通过的 runtime 测试，除非新 findings 触发源码修复。
+
+独立审阅已闭合，准确范围与历史切片账本见 s6-review.md；无剩余可证实 findings。主干仍为 baeba09，remote 三项 required check 与 strict base 规则已读回。准备提交最终审阅记录并 push 创建 PR；CI 结果尚未产生。
