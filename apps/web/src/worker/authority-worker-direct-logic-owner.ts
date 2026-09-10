@@ -24,8 +24,16 @@ type Options = Readonly<{
   fatal: (error: Error) => void;
 }>;
 
+type QueuedAcceptance = Readonly<{
+  advance: BrowserAuthorityDeterministicAdvance;
+  epoch: string;
+  run: () => boolean;
+  cancel: () => void;
+}>;
+
 export class AuthorityWorkerDirectLogicOwner {
   private link: AuthorityWorkerDirectLogic | null = null;
+  private queuedAcceptance: QueuedAcceptance | null = null;
 
   constructor(private readonly options: Options) {}
 
@@ -46,15 +54,23 @@ export class AuthorityWorkerDirectLogicOwner {
   }
 
   publish(observation: LogicObservation, fallback: () => void): void {
-    if (this.link) this.link.publish(observation);
-    else fallback();
+    if (!this.link) {
+      fallback();
+      return;
+    }
+    const queued = this.queuedAcceptance;
+    const { advance } = this.options.state();
+    if (queued && queued.advance === advance && advance.isAdvancing && observation.epoch === queued.epoch) queued.run();
+    this.link.publish(observation);
   }
 
   rebindEpoch(nextEpoch: string): void {
+    this.cancelQueuedAcceptance();
     this.link?.rebindEpoch(nextEpoch);
   }
 
   close(): void {
+    this.cancelQueuedAcceptance();
     this.link?.close();
     this.link = null;
   }
@@ -78,6 +94,58 @@ export class AuthorityWorkerDirectLogicOwner {
       if (!advance.isAdvancing) runtime.requestLogicObservation();
       return accepted;
     };
-    return advance.isAdvancing ? accept() : harness.hostOperation(accept);
+    return advance.isAdvancing ? accept() : this.queueAcceptance(harness, advance, batch.epoch, accept);
+  }
+
+  private queueAcceptance(
+    harness: AuthorityWorldHarness,
+    advance: BrowserAuthorityDeterministicAdvance,
+    epoch: string,
+    accept: () => boolean,
+  ): Promise<boolean> {
+    if (this.queuedAcceptance) return Promise.resolve(false);
+    let resolveCompletion!: (accepted: boolean) => void;
+    let rejectCompletion!: (error: unknown) => void;
+    const completion = new Promise<boolean>((resolve, reject) => {
+      resolveCompletion = resolve;
+      rejectCompletion = reject;
+    });
+    let settled = false;
+    let accepted = false;
+    const clear = () => {
+      if (this.queuedAcceptance === queued) this.queuedAcceptance = null;
+    };
+    const run = () => {
+      if (settled) return accepted;
+      settled = true;
+      clear();
+      try {
+        accepted = accept();
+        resolveCompletion(accepted);
+        return accepted;
+      } catch (error) {
+        rejectCompletion(error);
+        throw error;
+      }
+    };
+    const cancel = () => {
+      if (settled) return;
+      settled = true;
+      clear();
+      resolveCompletion(false);
+    };
+    const queued: QueuedAcceptance = { advance, epoch, run, cancel };
+    this.queuedAcceptance = queued;
+    void harness.hostOperation(run).catch((error: unknown) => {
+      if (settled) return;
+      settled = true;
+      clear();
+      rejectCompletion(error);
+    });
+    return completion;
+  }
+
+  private cancelQueuedAcceptance(): void {
+    this.queuedAcceptance?.cancel();
   }
 }

@@ -81,6 +81,26 @@ const flush = async () => {
   await Promise.resolve();
 };
 
+class PromiseTailHarness {
+  private tail: Promise<unknown> = Promise.resolve();
+  readonly notifyProgress = vi.fn();
+
+  acceptsAutomaticLogic = () => true;
+
+  hostOperation<Result>(operation: () => Result | Promise<Result>): Promise<Result> {
+    const result = this.tail.then(operation);
+    this.tail = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }
+
+  idle(): Promise<unknown> {
+    return this.tail;
+  }
+}
+
 describe('AuthorityWorkerDirectLogic', () => {
   it('直接转移派生占用缓冲且仅保留最新待处理观察', async () => {
     const port = new FakePort();
@@ -237,6 +257,186 @@ describe('Game Logic Worker direct endpoint', () => {
 });
 
 describe('AuthorityWorkerDirectLogicOwner', () => {
+  it('推进已排队但尚未开始时提升旧回执，释放新推进观察且排队闭包不重复执行', async () => {
+    const harness = new PromiseTailHarness();
+    const ingressLogic = vi.fn();
+    const acceptLogic = vi.fn(() => false);
+    const runtime = { requestLogicObservation: vi.fn() };
+    let advancing = false;
+    const advance = {
+      get isAdvancing() {
+        return advancing;
+      },
+      acceptLogicIntentBatch: acceptLogic,
+    };
+    const state = { runtime, harness, ingress: { logic: ingressLogic }, advance };
+    const port = new FakePort();
+    const owner = new AuthorityWorkerDirectLogicOwner({
+      state: () => state as never,
+      now: () => 0,
+      diagnostics: vi.fn(),
+      fatal: vi.fn(),
+    });
+    owner.attach({
+      kind: 'attach-direct-logic',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:1',
+      port: port as unknown as MessagePort,
+    });
+    owner.publish(observation('epoch:1', 1), vi.fn());
+
+    let postedDuringAdvance = false;
+    let promotedByWrongEpoch = false;
+    const queuedAdvance = harness.hostOperation(async () => {
+      advancing = true;
+      owner.publish(observation('epoch:other', 2), vi.fn());
+      await flush();
+      promotedByWrongEpoch = acceptLogic.mock.calls.length > 0;
+      owner.publish(observation('epoch:1', 2), vi.fn());
+      await flush();
+      postedDuringAdvance = port.posts.length === 2;
+      advancing = false;
+    });
+    port.emit(directBatch('epoch:1', 1));
+
+    await queuedAdvance;
+    await harness.idle();
+    await flush();
+    owner.close();
+
+    expect(postedDuringAdvance).toBe(true);
+    expect(promotedByWrongEpoch).toBe(false);
+    expect(acceptLogic).toHaveBeenCalledTimes(1);
+    expect(ingressLogic).toHaveBeenCalledTimes(1);
+    expect(runtime.requestLogicObservation).not.toHaveBeenCalled();
+  });
+
+  it('关闭时使排队旧回执失效，后续队列释放也不执行副作用', async () => {
+    const harness = new PromiseTailHarness();
+    let release!: () => void;
+    const blocked = new Promise<void>((resolve) => (release = resolve));
+    void harness.hostOperation(() => blocked);
+    const ingressLogic = vi.fn();
+    const acceptLogic = vi.fn(() => true);
+    const state = {
+      runtime: { requestLogicObservation: vi.fn() },
+      harness,
+      ingress: { logic: ingressLogic },
+      advance: { isAdvancing: false, acceptLogicIntentBatch: acceptLogic },
+    };
+    const port = new FakePort();
+    const owner = new AuthorityWorkerDirectLogicOwner({
+      state: () => state as never,
+      now: () => 0,
+      diagnostics: vi.fn(),
+      fatal: vi.fn(),
+    });
+    owner.attach({
+      kind: 'attach-direct-logic',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:1',
+      port: port as unknown as MessagePort,
+    });
+    owner.publish(observation('epoch:1', 1), vi.fn());
+    port.emit(directBatch('epoch:1', 1));
+    owner.close();
+
+    release();
+    await harness.idle();
+    await flush();
+
+    expect(acceptLogic).not.toHaveBeenCalled();
+    expect(ingressLogic).not.toHaveBeenCalled();
+  });
+
+  it('epoch重绑取消旧排队回执，队列释放后只接受新epoch', async () => {
+    const harness = new PromiseTailHarness();
+    let release!: () => void;
+    const blocked = new Promise<void>((resolve) => (release = resolve));
+    void harness.hostOperation(() => blocked);
+    const ingressLogic = vi.fn();
+    const acceptLogic = vi.fn(() => true);
+    const runtime = { requestLogicObservation: vi.fn() };
+    const state = {
+      runtime,
+      harness,
+      ingress: { logic: ingressLogic },
+      advance: { isAdvancing: false, acceptLogicIntentBatch: acceptLogic },
+    };
+    const port = new FakePort();
+    const owner = new AuthorityWorkerDirectLogicOwner({
+      state: () => state as never,
+      now: () => 0,
+      diagnostics: vi.fn(),
+      fatal: vi.fn(),
+    });
+    owner.attach({
+      kind: 'attach-direct-logic',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:old',
+      port: port as unknown as MessagePort,
+    });
+    owner.publish(observation('epoch:old', 1), vi.fn());
+    port.emit(directBatch('epoch:old', 1));
+    owner.rebindEpoch('epoch:new');
+    owner.publish(observation('epoch:new', 1), vi.fn());
+    port.emit(directBatch('epoch:new', 1));
+
+    release();
+    await harness.idle();
+    await flush();
+    owner.close();
+
+    expect(acceptLogic).toHaveBeenCalledTimes(1);
+    expect(acceptLogic).toHaveBeenCalledWith(expect.objectContaining({ epoch: 'epoch:new' }));
+    expect(ingressLogic).toHaveBeenCalledTimes(1);
+    expect(runtime.requestLogicObservation).toHaveBeenCalledTimes(1);
+  });
+
+  it('checkpoint类操作占用队列且未推进时不提升排队回执', async () => {
+    const harness = new PromiseTailHarness();
+    let release!: () => void;
+    const blocked = new Promise<void>((resolve) => (release = resolve));
+    void harness.hostOperation(() => blocked);
+    const ingressLogic = vi.fn();
+    const acceptLogic = vi.fn(() => true);
+    const state = {
+      runtime: { requestLogicObservation: vi.fn() },
+      harness,
+      ingress: { logic: ingressLogic },
+      advance: { isAdvancing: false, acceptLogicIntentBatch: acceptLogic },
+    };
+    const port = new FakePort();
+    const owner = new AuthorityWorkerDirectLogicOwner({
+      state: () => state as never,
+      now: () => 0,
+      diagnostics: vi.fn(),
+      fatal: vi.fn(),
+    });
+    owner.attach({
+      kind: 'attach-direct-logic',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      epoch: 'epoch:1',
+      port: port as unknown as MessagePort,
+    });
+    owner.publish(observation('epoch:1', 1), vi.fn());
+    port.emit(directBatch('epoch:1', 1));
+    owner.publish(observation('epoch:1', 2), vi.fn());
+    await flush();
+
+    expect(port.posts).toHaveLength(1);
+    expect(acceptLogic).not.toHaveBeenCalled();
+
+    release();
+    await harness.idle();
+    await flush();
+    owner.close();
+
+    expect(port.posts).toHaveLength(2);
+    expect(acceptLogic).toHaveBeenCalledTimes(1);
+    expect(ingressLogic).toHaveBeenCalledTimes(1);
+  });
+
   it('排队等待期间Authority owner被替换时拒绝旧batch且不触碰新世界', async () => {
     let runQueued!: () => void;
     const ingressLogic = vi.fn();
