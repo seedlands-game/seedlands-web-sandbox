@@ -38,7 +38,7 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   await page.getByRole('button', { name: '木剑动作体验场', exact: true }).click();
   const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });
   if (await continueDespiteWarning.isVisible()) await continueDespiteWarning.click();
-  await expect(page.locator('#melee-showcase-guide')).toBeVisible();
+  await expect(page.locator('#melee-showcase-guide')).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
   await expect(page.locator('#debug')).toContainText(`Seed ${MELEE_SHOWCASE_SEED}`);
   const initialIds = await readShowcaseIds(page);

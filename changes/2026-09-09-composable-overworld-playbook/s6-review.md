@@ -85,6 +85,10 @@ reviewer 核对六份 root 日志尾部及 SHA-256，与 `evidence/s6-local-resu
 
 同一 reviewer 对 `43d26a0` 后两个测试文件只读复核，无 P0/P1/P2。`alternative-playbooks.test.ts` SHA-256 `2a0e085a33d340a7e755081623c273434fe42200e5d4833e938abc3191732979`，`overworld-survival-days.test.ts` SHA-256 `178ddab43d6910e60eaf7640d59591f681117013c188649f4f78c85549fdd68b`。文件没有计时性能断言；仅把默认 5s 改为 15s、两日 120s 改为 360s。CI 实测 5.324s/4.279s 与 225.263s，预算有据；20min job 总限未改。两日仍完整执行 25 次采集、24 次建造、20 个昼夜阶段及最多 20 次攻击，断言不变。root 定向 serial 运行和最终 CI 仍是必须证据，不能由旧 timeout 没有 assertion mismatch 推导后续断言通过。
 
+## 后续木剑准备状态等待复核
+
+同一 reviewer 对 `64057c2` 后木剑 E2E 第41行的唯一改动复核无 findings，文件 SHA-256 `3de48d9bef071c56a629b6518346d112fda798b0b818736740fd2e35efd5c53c`。guide 仅在真实体验场命令、装备、移动和朝向完成后发布，失败不会发布；该等待不是任意 sleep。原5s改30s，整场90s和随后持剑、Seed、新 lifetime、扣血/声音、重置、5/7点连击与死亡断言保留。没有墙钟性能合同，仍需 Linux 新 HEAD CI 证明，不把本机 Chrome 当其结果。
+
 ## 独立审阅 Findings
 
 最终 `7c9561d` 在已审阅范围内，未发现剩余可证实的 P0/P1/P2 问题。

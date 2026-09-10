@@ -183,3 +183,7 @@ PR #30 首轮 Chromium 检查因加载用例 flaky 失败；本机强制清空 V
 ### S6 Headless 旅程执行预算修正
 
 首轮 CI static 完整结果为 1757 passed/2 failed/4 skipped；失败仅为新增长旅程的单用例超时：点击转换 5324ms 超过默认 5000ms，两日生存 225263ms 超过 120000ms，未出现业务断言失败。合同中的两日生存为逻辑覆盖，不是墙钟性能门槛。将两个独立 Headless 样例统一给予 15000ms，每日推进完整保留的两日旅程给予 360000ms；不改变模拟 ticks、断言、coverage、retry、suite 范围或 CI 20min 总时限。对应 RED 为原 runner 失败；serial coverage 定向复验和新 HEAD 全量 CI 为 GREEN 门。
+
+### S6 木剑体验场准备状态等待
+
+run34424066455 的基线、Harness 与资产通过，木剑集成在等待 guide 的默认5s处两次失败。原始 trace 无脚本异常；失败 snapshot 显示世界已运行、持剑且仍在布置。guide 只在真实 prepareMeleeShowcase 全部命令和玩家移动完成后发布。该测试不承担准备耗时性能合同：只将该可观察完成状态的等待改为30s，与现有世界准备失败边界同量级；整场90s、全部受击/连招/重置断言、retry/flaky规则保持。Linux CI 原失败为RED；本机系统Chrome+SwiftShader完整旅程与新HEAD CI为后续证据，缺少本机同版本Playwright Chromium不冒称同环境。

@@ -59,3 +59,7 @@ CI 增加独立的 `pnpm test:composable-gameplay` 步骤及 always evidence 上
 首轮 static 后续完整日志补充：1757 passed/2 timeout/4 skipped，858.77s；新点击样例 5324ms > 5000ms，两日生存 225263ms > 120000ms，未报告业务断言失败。依据实际 runner 数据，只给两个 Headless 样例 15s、完整两日 360s，不改变循环、assertion 或全量 coverage/20min job 门禁；独立 delta 复核无发现。定向 serial V8 coverage 诊断 2 files/3 tests PASS，89.01s（`/tmp/seedlands-s6-journey-budget-green.log`）。该子集运行显式不应用全世界覆盖率阈值，58.3% 只用于诊断，不计全量 coverage 准出；完整 CI 仍执行原 80% world 门槛。
 
 `43d26a0` 的中间 CI run `34423560880` 因等待预算修复而取消，不能计绿色；新 SHA 将重新执行全部 required checks。
+
+run `34424066455`（head64057c2）的基线21项、Harness和资产集成均通过，木剑 guide 准备等待在默认5s两次失败，新增玩法步骤因此未执行。原始记录 `/tmp/seedlands-s6-ci-browser3-clean.log` 与 `melee-34424066455-1` artifact；快照显示HUD运行，retry持剑且无脚本异常，体验场未完成。只将该真实完成状态等待改30s，整场90s和后续全部战斗断言不变。独立 delta 无 findings。
+
+本机同版本 Playwright Chromium 未安装，启动失败明确记为环境缺口（`/tmp/seedlands-s6-melee-swift-red.log`），不是产品RED。使用已安装系统Chrome+SwiftShader、low和同basePath，改前完整旅程1/1（15.7s），改后1/1（15.1s，`/tmp/seedlands-s6-melee-ready-green.log`）；不冒称Linux相同环境。任务端口4173已释放。远端新HEAD仍须全量CI。
