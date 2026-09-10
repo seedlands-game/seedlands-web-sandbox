@@ -42,6 +42,30 @@ export type ResidentAgentOptions = Readonly<{
 
 const MEMORY_READ_FILE_SCHEMA = residentToolDefinition('read_file').schema;
 const assertActive = (signal?: AbortSignal): void => signal?.throwIfAborted();
+type ResidentEventPage = Awaited<ReturnType<PersistentNpcWorkspace['readRecentEvents']>>;
+type ResidentWatermarks = Awaited<ReturnType<PersistentNpcWorkspace['getWatermarks']>>;
+
+function pendingEventInput(watermarks: ResidentWatermarks, pending: ResidentEventPage) {
+  const includedThrough = pending.hasMore
+    ? (pending.events.at(-1)?.cursor ?? watermarks.includedThrough)
+    : Math.max(
+        watermarks.includedThrough,
+        ...pending.coverage.map((entry) => Math.max(entry.returnedThrough, entry.lostRange?.to ?? 0)),
+        pending.events.at(-1)?.cursor ?? 0,
+      );
+  const message =
+    pending.events.length || pending.coverage.length
+      ? new HumanMessage({
+          id: `events:${watermarks.includedThrough}:${includedThrough}`,
+          content: JSON.stringify({
+            kind: 'authorized_event_pages',
+            coverage: pending.coverage,
+            events: pending.events,
+          }),
+        })
+      : undefined;
+  return { includedThrough, message };
+}
 
 const MEMORY_SCHEMA = {
   type: 'object',
@@ -110,10 +134,15 @@ export class ResidentAgent {
     const messages = this.options.workspace.restoreMessages(
       journal.filter((entry) => entry.windowId === window.windowId),
     );
-    const recent = await this.options.workspace.readRecentEvents(this.options.binding, { limit: 32 });
+    const watermarks = await this.options.workspace.getWatermarks(this.options.binding);
+    const recent = await this.options.workspace.readRecentEvents(this.options.binding, {
+      after: watermarks.includedThrough,
+      limit: 32,
+    });
+    const eventInput = pendingEventInput(watermarks, recent);
     return assessResidentRequest(
       await this.systemPrefix(),
-      [...messages, new HumanMessage(JSON.stringify(recent)), message],
+      [...messages, ...(eventInput.message ? [eventInput.message] : []), message],
       RESIDENT_TOOL_REGISTRY,
     );
   }
@@ -186,24 +215,7 @@ export class ResidentAgent {
       limit: 32,
     });
     assertActive(input.signal);
-    const includedThrough = pending.hasMore
-      ? (pending.events.at(-1)?.cursor ?? watermarks.includedThrough)
-      : Math.max(
-          watermarks.includedThrough,
-          ...pending.coverage.map((entry) => Math.max(entry.returnedThrough, entry.lostRange?.to ?? 0)),
-          pending.events.at(-1)?.cursor ?? 0,
-        );
-    const eventMessage =
-      pending.events.length || pending.coverage.length
-        ? new HumanMessage({
-            id: `events:${watermarks.includedThrough}:${includedThrough}`,
-            content: JSON.stringify({
-              kind: 'authorized_event_pages',
-              coverage: pending.coverage,
-              events: pending.events,
-            }),
-          })
-        : undefined;
+    const { includedThrough, message: eventMessage } = pendingEventInput(watermarks, pending);
     const inputMessages = eventMessage ? [eventMessage, message] : [message];
     await this.options.workspace.appendMessages(
       this.options.binding,
