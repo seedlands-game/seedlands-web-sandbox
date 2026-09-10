@@ -251,11 +251,22 @@
 - 独立复核补出旧行恢复缺口：修复前直接构造stored id缺失/旧provider两行，新增2项均FAIL；恢复时在派生StoredMessage中采用已有messageId列后6/6 PASS，原row/摘要不变。`message-identity/legacy-red.json`、`legacy-green.json`留存，Sol/xhigh确认新写与旧行身份P1均闭合；不会删除旧档中已经存在的重复历史。
 - 预检事件frontier新增2项RED均FAIL→2PASS：已included大事件不再作为新输入重算，pending事件/coverage与invoke实际入账wrapper一致。`event-budget/red.json`、`green.json`、`related-green.json`保留，相关agent/cancellation/finalization共24PASS；Agent/test类型及相关lint/format通过。纯编码helper共享原hasMore/lostRange算法，原取消await复验保留；独立复核无新P0/P1。长期NPC文档同步消息身份和预算合同。实际观察中的当前事件、保守估算的部分原生/标准AI字段仍有有界开销，不宣称任意两轮必定0Pro或模型费用下降。
 
-| 阶段 | 状态    | 本change证据                               |
-| ---- | ------- | ------------------------------------------ |
-| S0   | DONE    | 独立分支、spec和初版估算                   |
-| S1   | DONE    | 公共能力/可选模块与单一 ECS owner 纵切通过 |
-| S2   | DONE    | 存档及Agent旧行为定向回归收口              |
-| S3   | DONE    | 三身体/三认知/扩展Pack纵切通过             |
-| S4   | RUNNING | 首轮全coverage与真实模型已运行，仍有缺口   |
-| S5   | NOT_RUN | 尚未推送或创建PR                           |
+### 2026-09-11 约06:19 当前冻结基线与准出暂停
+
+- 实现冻结`4efcdbe603b6e7bbbce06ba6950ba990457f1a91`，完整static PASS：417文件2159项PASS、2文件4项既有SKIP，coverage 791.62s、world行96.96%，完整类型/Svelte 0 errors/0 warnings；Web/Agent build PASS。原始日志`final-4efcdbe-static.log`、`final-4efcdbe-build.log`，不是性能收益证据。
+- 同SHA浏览器8组全部code0：main六组52/52、NPC默认8/8（5项显式opt-in/另跑SKIP）、生产preview 1/1。`final-4efcdbe-browser-results.json`逐组记录；最后两组于06:17:39/06:17:56结束，无重试或降低门禁。
+- 三人共同生活181组×3样本，全程active/health20/tree revision1；补给/昼夜恢复/巡逻分别14/2/86、17/3/214、14/2/214，初始食物256、追加/模型/换树均0、errors=[]。末态hunger deficit为92/52/92，仍在觅食执行中；这只证明1800模拟秒的有限旅程，不宣称无限资源或永久健康。
+- 独立只读核对camp附件：保存时npc7 wood-block×1、技能running/preparing约1秒，原世界与恢复世界各推进2秒均plank×4，后续6×10秒仍4；另外两人持续active/health20并真实消费。AppV2三workspace与Actor绑定、来源timeline一致，world/cognition/pair三摘要独立重算一致；同次真实PG断言证明源/恢复各3binding、SOUL对应角色且journal含工具回执。截图仅佐证，不替代状态/PG断言。
+- 本SHA真实T11于05:46–05:48 FAIL：15Flash（13有finishedAt标记）/1Pro，累计85Flash/12Pro逻辑请求、7Flash无该标记，实际provider计费/重试/token/费用unknown。三人均已分别改树和回应，最后health20/revision2；原0Pro断言在断开前失败，精确断线及离线到达窗口NOT_RUN。15个Flash请求中均无重复tool_call_id；不再把此失败归因于已修复的消息身份问题。
+- Pro请求可归因于npc9的compact_memory，仅提供read_file/propose_memory_update；其首轮6次Flash响应、6个唯一工具与29868-byte reasoning均在现有合同内。独立裁决为合法策略触发压缩，但仍违反T11预算验收；未取得触发前exact assessment/pending/observation，不能用75KB压缩请求冒充精确Flash估算。压缩发布未在此次失败测试中完成验证。其他两项真实Flash/Pro用例在ca3曾PASS，本SHA未重跑，旧证据不冒充当前准出。
+- 已向用户提出明确取舍：允许此旅程最多1次实际Pro压缩调用，并补发布/权限/总预算证据，或保留0Pro硬门槛后继续收敛上下文。未确认前保持原spec/断言，不重抽模型、不推送、不创建PR。人类活人感复核与远端CI同样未完成；当前不是Delivered。
+- 06:18 live fetch：origin/main仍`6c7124a6f41e9069b07b7dd39593cd2ea2de5907`，main-ahead0/feature-ahead46；原checkout main仍干净且未修改。所有本轮验证服务已退出，47831/47832/47833/47840/8787无监听；用户原`seedlands-cognition-pg`容器保留（已停止），无凭据持久化或全局配置变更。实现worktree和原始证据保留，供确认后继续。
+
+| 阶段 | 状态    | 本change证据                                        |
+| ---- | ------- | --------------------------------------------------- |
+| S0   | DONE    | 独立分支、spec和初版估算                            |
+| S1   | DONE    | 公共能力/可选模块与单一 ECS owner 纵切通过          |
+| S2   | DONE    | 存档及Agent旧行为定向回归收口                       |
+| S3   | DONE    | 三身体/三认知/扩展Pack纵切通过                      |
+| S4   | BLOCKED | 最新确定性门禁通过；T11预算FAIL，等待用户确认取舍   |
+| S5   | NOT_RUN | 尚未推送或创建PR，远端CI/人类审核与合并不冒充已完成 |
