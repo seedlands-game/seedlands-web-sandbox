@@ -248,6 +248,7 @@
 
 - 新身份测试4项1PASS/3FAIL → 4PASS，原始`message-identity/red.json`与`green.json`保留。SQL adapter是mock，但调用真实生产workspace序列化/恢复和LangGraph reducer；不称其为真实PG RED。相关Agent与persistent-workspace合计22项PASS，其中既有persistent-workspace使用真实PG；Agent/test类型、相关lint/format均PASS。
 - `ResidentTurnJournal.append`通过公开`_updateId`同步消息及LangChain构造字段；workspace统一写入canonical row id，保障绕过turn journal的正常调用。无constructor id、已有constructor id替换、StoredMessage恢复、最终状态再次入账、不同toolcall和中断补回执均覆盖；未按tool_call_id删历史。下一冻结仍须真实三人格与完整门禁，不能从定向GREEN推定0Pro。
+- 独立复核补出旧行恢复缺口：修复前直接构造stored id缺失/旧provider两行，新增2项均FAIL；恢复时在派生StoredMessage中采用已有messageId列后6/6 PASS，原row/摘要不变。`message-identity/legacy-red.json`、`legacy-green.json`留存，Sol/xhigh确认新写与旧行身份P1均闭合；不会删除旧档中已经存在的重复历史。
 
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |

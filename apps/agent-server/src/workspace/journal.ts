@@ -212,5 +212,10 @@ export async function getWorkspaceJournal(
 }
 
 export function restoreWorkspaceMessages(messages: readonly JournalMessage[]): BaseMessage[] {
-  return mapStoredMessagesToChatMessages(messages.map((entry) => entry.storedMessage));
+  return mapStoredMessagesToChatMessages(
+    messages.map((entry) => ({
+      ...entry.storedMessage,
+      data: { ...entry.storedMessage.data, id: entry.messageId },
+    })),
+  );
 }

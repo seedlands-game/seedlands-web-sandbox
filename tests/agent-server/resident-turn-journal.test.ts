@@ -3,6 +3,7 @@ import { addMessages } from '@langchain/langgraph';
 import type { Pool } from 'pg';
 import { describe, expect, it, vi } from 'vitest';
 import { ResidentTurnJournal } from '../../apps/agent-server/src/resident-turn-journal';
+import { hashJson } from '../../apps/agent-server/src/workspace/codec';
 import { appendWorkspaceMessages, restoreWorkspaceMessages } from '../../apps/agent-server/src/workspace/journal';
 import type { PersistentNpcWorkspace } from '../../apps/agent-server/src/workspace/postgres';
 import type {
@@ -107,6 +108,33 @@ describe('resident turn journal message identity', () => {
     expect(stored?.messageId).toBe(message.id);
     expect(storedId(stored!)).toBe(message.id);
     expect(mapStoredMessagesToChatMessages([stored!.storedMessage])[0]?.id).toBe(message.id);
+  });
+
+  it.each([undefined, 'old-provider-id'])('restores legacy row identity with stored id %s', async (legacyId) => {
+    const fixture = workspaceFixture();
+    const canonicalId = 'legacy-turn:tool:call-1';
+    const storedMessage = new ToolMessage({
+      ...(legacyId ? { id: legacyId } : {}),
+      tool_call_id: 'call-1',
+      content: 'original receipt',
+    }).toDict();
+    const row: JournalMessage = {
+      seq: 1,
+      messageId: canonicalId,
+      windowId: 'window-1',
+      storedMessage,
+      contentHash: await hashJson(storedMessage),
+      worldEventRange: null,
+      createdAt: '2026-09-11T00:00:00.000Z',
+    };
+    const original = JSON.stringify(row);
+    const restored = restoreWorkspaceMessages([row]);
+    expect(restored[0]?.id).toBe(canonicalId);
+    expect(restored[0]?.toDict().data.id).toBe(canonicalId);
+    expect(JSON.stringify(row)).toBe(original);
+    const journal = new ResidentTurnJournal(fixture.workspace, binding, restored);
+    await journal.append(addMessages([], restored));
+    expect(fixture.durable).toHaveLength(0);
   });
 
   it('keeps distinct tool calls and persists only the missing interrupted receipt', async () => {
