@@ -213,6 +213,15 @@
 - 同SHA重点Browser `debt-0b6d5f8`三项全部PASS（单NPC三昼夜、threat脱险觅食、三NPC有限食物1800模拟秒），03:36–03:41:51，命令退出0，无重试或改断言。此前`5f6e01c`两个FAIL保留；此轮关闭其运行时缺口，不替代下一冻结全量static/build/main/NPC/production/真实模型。
 - Sol/xhigh独立delta审阅无新增P0/P1，新freshness P1静态闭合，累计唯一13项P1闭合。P2的60000ms常量复用，以及prelude自发观察无等待/三lane与commits精确聚合的低成本测试补强正在aux收尾；原真实Runtime反例不改。RED/GREEN原始日志复制到本worktree，SHA256分别`c3873d10d9bfe385f936b010219f69d877ec4d31fa23ce5e28cc2257e77263ac`、`1ff84178d4bbc2bf140e9123ddaf28d6c827d4ea58417ed45151bf33c476635d`。
 
+### 2026-09-11 约04:22 最终机制准出与真实模型新增边界
+
+- 冻结`cb6f1866755bd66437c2b46cd64be40dfc2a8319`完整static PASS：411文件2131项PASS、2文件4项既有SKIP，coverage 784.27s，world行96.96%，全类型/Svelte通过；Web/Agent build PASS。main六组52/52、NPC默认8/8（另5SKIP）、生产NPC 1/1 PASS。`final-cb6f186-browser-results.json`逐组绑定同SHA；NPC保留trace，7.2min，无重试。
+- 当前三角色原始181组样本：补给16/16/14、夜休恢复均2轮、巡逻207/175/210；末态均active、health20、tree revision1，初始食物256、资源追加/模型/换树均0。独立Pack运行中1木材→4木板，原世界和RUNNING恢复后再推进仍4，另两角色继续消费。应用V2含3workspace、world/cognition/pair三hash重算一致，源/恢复timeline真实PG bindings各3由同次直接DB断言证明；截图不代替数据库或幂等断言。
+- 当前trace的console 404均定位到`/favicon.ico`；main原HTML未声明icon且base公共资源无favicon，本change未改该入口。不是NPC/Pack资源失败，不声称全console为空；旧focused两条无URL的记录仍不可追认。`final-cb6f186-npc-network-errors.jsonl`保留当前来源。
+- 真实批次`final-cb6f186-real`：三人格任务FAIL，断线计数13→14；Flash行为调整/Pro压缩及其出生流程PASS；独立Pro出生FAIL，文档校验拒绝。三角色第14次是npc9同一turn的工具回执续步，开始于上一响应结束99ms后且未完成；当前记录没有click/server close时间，不能证明已在真正关闭之后。测试原计数在click前，UI disconnected也不等远端关闭。
+- 独立检查发现另外的真实取消缺口：retirement延后dispose，channel/agent的数据库preflight与manifest等待后缺少取消复验，已abort信号仍可进入fetch wrapper。已授权受控RED/GREEN和局部修复；模型请求计数不等于provider实际收到请求，第14次可能在已取消signal下进入wrapper。Pro出生的具体非法字段未被旧产物记录，另查schema与UTF-8文档合同，不放宽校验或盲重跑。
+- 本批新增17Flash（15有完成标记）/4Pro逻辑请求，累计55Flash/7Pro；Pro响应有usage元数据但整轮Flash/token/重试计费仍不完整，不伪造总成本。网关容器`915b0381bd327a47dbd156c7463b4868ae1dc29cacb3582cef64f4459c0d7e7e`已删除，原PG保留。全部运行已结束，当前无新PR。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

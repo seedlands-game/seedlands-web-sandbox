@@ -76,3 +76,9 @@
 已用约7小时37分墙钟、剩余约4小时23分。完整static/build/main与production已通过；新Browser欠账freshness缺口已有确定性真实Runtime RED，尚待修复、完整复验、真实模型和PR/CI。该修正仍属于原D5时钟及新鲜度合同，无新增玩法或权限。
 
 剩余正常2–3小时、保守3.5小时，保守×120%=4.2小时，窗口余量很小；若再出现外部或CI失败，以实际终态交接，不降低门禁。剩余传统约1–2PD、Agent活跃约2–4小时为低置信规划。真实请求保持38Flash/3Pro未增加，成本、token、credits和额度分母仍unknown。
+
+### 最终真实模型边界后重估（约04:22 UTC+8）
+
+已用约8小时32分、剩余约3小时28分。完整static/build/main/NPC/production同SHA通过，真实模型一组通过、两个边界失败，尚有取消修复、出生合同诊断、复验及PR/CI。剩余正常约2小时、保守3小时，保守×120%=3.6小时已稍超余量；不为时间删门禁或放宽出生校验。剩余传统约1–2PD、Agent活跃约2–4小时为低置信规划。
+
+累计55Flash/7Pro逻辑请求；本轮Pro有局部usage元数据，但未取得完整provider重试/Flash用量，分模型总token、credits、API费用和当前额度分母仍unknown。继续仅用已批准环境中的provider pair，不购买/兑换额度。
