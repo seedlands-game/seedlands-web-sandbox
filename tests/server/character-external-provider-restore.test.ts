@@ -15,6 +15,8 @@ const MODULE_VERSION = '1.2.0';
 const CAPABILITY_ID = 'example:continue-after-restore';
 const CAPABILITY_VERSION = '1.0.0';
 
+// Four invalid candidates and one valid restore each build and validate a complete world;
+// use the same bounded coverage budget as the other Character integration regressions.
 it('restores an external running capability whose module and capability versions differ without replaying start', async () => {
   let starts = 0;
   let continues = 0;
@@ -132,4 +134,4 @@ it('restores an external running capability whose module and capability versions
   } finally {
     await session.dispose();
   }
-});
+}, 30_000);

@@ -177,6 +177,12 @@
 - Sol/xhigh独立复核同意T11给予连续完整白昼60秒，最多660模拟秒，保留420s墙钟和18Flash；要求pause/paused、前后时刻边界、跨夜清零、调用数不增加与原到达/存活/hash/cursor断言。新增每角色截图切换到对应伙伴并收起设置，避免设置面板遮住已验收内容。待冻结后只重跑三角色，不重复已通过Flash/Pro。
 - Flash/Pro实际读回：树rev2，断线后tick989→1122且运行patrol；记忆window-1→window-2、MEMORY revision2；两个真实出生场景均重复激活返回同实体。当前累计已发起27Flash/3Pro逻辑请求，网关自身重试次数与计费token未知，不能视为provider计费请求数。专用网关和测试PG均已清理，保留用户原数据库。
 
+### 2026-09-11 约01:58 恢复集成用例预算修正
+
+- `61b00484dfc7dcbf1099aa5b18222439ec21bc71`完整coverage保留唯一RED：external-provider-restore触及Vitest默认5000ms（实际报告5101ms）；410文件2118项PASS，1项FAIL，2文件4项既有skip，787.38s。此前权限夹具与本次night replay已通过。该串行批次在static失败后停止，后续build/browser/真实模型均未执行，不冒充全量准出。
+- 此用例包含一次Headless初始化、4个坏档与1个合法档各自完整候选Authority构建/验证，以及多次完整快照导出；不是轻量codec检查。仅为此新增集成用例显式设置30s硬上限，与已有Character runtime/review/threat回归一致；不改任何拒绝、完整快照、start/continue断言，不改全局/CI/E2E/模型超时，不加重试。
+- Sol/xhigh只读复核同意；若30s仍在串行coverage超时，不继续扩时，重新定位挂起或隔离问题。定向正常Vitest 1项PASS（test2.88s，总4.12s，`provider-restore-budget-green.log`）；这不是coverage证据，完整静态仍待新SHA。生产源码未变化。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |
