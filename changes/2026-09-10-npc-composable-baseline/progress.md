@@ -193,6 +193,12 @@
 - `4407d52`完整static FAIL：410文件2118项PASS、1项FAIL、2文件4项既有SKIP，818.55s；format/lint/paths通过，后置typecheck未运行。唯一失败为新三昼夜test在186.632s触及180s。保留日志`final-4407d52-static.log`；宿主背景负载仅为观察，未证实因果、不停止无关进程。
 - 独立复核确认180s不是spec性能门槛；360次5秒Authority推进与完整事件排空保留。仅此test设240s防挂起预算（失败耗时×120%约224s后取整），不改1800模拟秒、采样、断言、coverage、CI超时或retry；若240s仍超时不继续扩大。先同口径定向coverage，再完整static，尚未准出。
 
+### 2026-09-11 约02:39 队列环修正与带覆盖率定向证据
+
+- aux `999a5aa74cb77ab84faec0a535a5ad73cc45f585`无冲突集成为`798871d1a53159c665565480b4a4274d2e835043`。受控Promise-tail RED中9项有3项失败，分别是推进内新观察未发出、close后旧回执执行、rebind后旧新回执都执行；GREEN9/9。原identity/grant/freshness检查保留，非advance不提升，旧拒绝回执也释放link，后续排队callback无重复副作用。
+- 独立Sol/xhigh精确复核该delta无新P0/P1，追加队列环P1静态闭合；同epoch/非法epoch重绑提前取消合法回执的P2正在最小补证。publish实际在slice尾部稳定点，可位于advancePausedSession内部；旧回执仍按当前tick/候选校验，不要求新增slice前hook，不宣称性能优化。
+- `4e53826124e03f327fe69a09d7188a1bb3488bc0`仅world-behavior-a的同口径coverage运行：1文件7项全部PASS，测试体195.31s、总196.52s，未触及240s；日志`three-day-coverage-4e53826.log`。只选该文件使全局world行覆盖率58.42%低于原80%，因此命令退出1；没有关闭或降低阈值，不把定向断言通过说成完整coverage准出。最终全static待下一冻结SHA。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |
