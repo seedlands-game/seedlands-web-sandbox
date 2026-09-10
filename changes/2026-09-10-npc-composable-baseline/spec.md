@@ -51,6 +51,7 @@
 ### D3 可发现能力合同
 
 - 每世界冻结的注册目录，由 Module 声明能力 ID、版本、provider、condition/skill 类型、参数约束、描述、执行器和必要恢复状态校验。外部模型只收到可序列化描述，绝不收到函数或 ECS 内部句柄。
+- core与Agent共用严格descriptor/catalog codec；冻结后的目录JSON UTF-8总量最多32KiB，超限拒绝发布。Resident v2帧仍最多128KiB；分别验证满目录hello、实际Overworld+camp目录加最大预期中文观察的无出生bind、默认出生加初始观察bind，不承诺所有字段独立最大值可同时装入单帧。
 - 同一注册源驱动能力枚举、树安装校验和执行分发；禁止运行时另外维护与实际 provider 脱节的固定 allowlist/switch。
 - 提供对现有标准技能名称的版本化兼容映射；新能力使用 namespace ID。重复、缺失依赖、未知版本/provider 在启动或安装阶段明确失败。
 - 参数/返回值保持有界 JSON 数据；实体/过程引用必须具有明确类型及世界/角色生命周期校验，不因模型给出字符串就授予目标访问。

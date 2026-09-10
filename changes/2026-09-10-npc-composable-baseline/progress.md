@@ -157,6 +157,12 @@
 - 外部独立版本恢复正常提交`8bfbf31`，完整拒绝后快照相等补证`a84684d`；三处明确夹具调整`3f4679e`保留全部拒绝/无副作用/frontier断言。完整Agent/type与最终全static仍待最新code准出。
 - 能力descriptor共享codec aux `92c7fdc505a55bd9a51890806074e40bae7852eb`无冲突集成为`6c216781a5f8f76dbaf1cc7ed1c15c44cc4b048c`。独立复核字段语义分叉已闭合；仍补最终catalog总UTF-8限额及128KiB Resident帧负载证明，不扩大为chunking协议，不宣称各独立字段最大值任意组合均可连接。
 
+### 2026-09-11 约01:00 最后协议边界修正
+
+- 共享descriptor后的完整真实PG Agent suite留下原始RED：`shared-codec-agent-suite.log`中130项通过、同身份并发出生1项失败，模型调用2次而非1次。根因是数据库预检在进程内去重位安装前让出执行，另一个请求可跨过首次完成和去重清理。`5a55709284a27c1c407c8e95292749f0a2a06ead`将共享执行位同步安装于首次DB等待前；确定性延迟第二次pool COUNT复现，原真实PG测试未放宽。`factory-lease-agent-suite.log`完整28文件132项PASS；只保证同进程去重，不宣称分布式模型恰好一次。
+- 聚合catalog修复aux `2c9165a958c82dbaa2ea62056ce419c026a93a43`已无冲突集成为`fdac5ec`。core冻结发布和Agent wire共用32KiB UTF-8总量门禁；真实registry exact-limit通过，+1 byte拒绝。实际Resident v2帧实测分别为满目录hello33,917B、Overworld+camp目录与最大预期中文观察无出生bind87,701B、默认出生+初始观察bind12,360B，均小于128KiB；不保证满birth/history/catalog任意组合。
+- 定向6文件34项、core/Agent/test类型和格式lint由实施者通过，最终完整static/build/browser/真实模型仍待冻结重跑。长线文档同步了目录总量、纯字节helper归属和Factory去重边界。独立原main仍未修改，无PR、无自动合并。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |
