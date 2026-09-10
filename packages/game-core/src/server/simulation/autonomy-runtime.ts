@@ -11,7 +11,6 @@ import {
   MAX_RETAINED_ACTORS,
   STEP_SECONDS,
   cloneActor,
-  rangeByArchetype,
   roundSimulation as round,
   type ActorRegistration,
   type ActorState,
@@ -24,10 +23,12 @@ import { resolveActionTarget, updateActorActive } from './autonomy-helpers';
 import { tickAuthorityActorRules, type ActorAuthorityRulesContext } from './actor-authority-rules';
 import type { CoreClone } from '../../runtime/platform-ports';
 import type { EntityIdentityPort } from './action-identity';
+import { createLegacyActorProfileRegistry, type ActorProfileRegistry } from '../gameplay/actor-profile';
 import {
   CombatRuntime,
   createMeleeDefinitionRegistry,
   emptyCombatRuntimeSnapshot,
+  listMeleeDefinitions,
   type CombatRequestResult,
   type CombatRuntimeCallbacks,
   type CombatSnapshot,
@@ -48,6 +49,8 @@ type Options = {
   registeredCombat?: boolean;
   combatOrigin?: CombatOriginRuntimeOptions;
   registeredCombatRequest?: (actorId: string, targetId: string, existingActionId?: string) => CombatRequestResult;
+  actorProfiles?: ActorProfileRegistry;
+  enforceActorProfiles?: boolean;
 };
 
 export class AutonomyRuntime {
@@ -70,8 +73,12 @@ export class AutonomyRuntime {
   private actionCompletionCount = 0;
   private actionFailureCount = 0;
   private actionInterruptionCount = 0;
+  private readonly actorProfiles: ActorProfileRegistry;
 
   constructor(private readonly options: Options) {
+    this.actorProfiles =
+      options.actorProfiles ??
+      createLegacyActorProfileRegistry(options.entities.items, options.meleeDefinitions ?? listMeleeDefinitions());
     const identity: EntityIdentityPort = {
       referenceFor: (entityId) => options.entities.createReference(entityId),
       resolve: (reference) => options.entities.resolveReference(reference)?.id ?? null,
@@ -107,13 +114,19 @@ export class AutonomyRuntime {
     const entity = this.options.entities.get(entityId);
     if (!entity || entity.archetype !== input.archetype || !['creature', 'npc'].includes(entity.type))
       throw new TypeError('Actor registration does not match a canonical autonomous entity.');
+    const profile = this.actorProfiles.require(input.archetype);
+    if (
+      this.options.enforceActorProfiles &&
+      (entity.type !== profile.entityType || entity.maxHealth !== profile.maxHealth)
+    )
+      throw new TypeError('Actor entity does not match its world profile.');
     const hunger = input.hunger ?? 0;
     if (!Number.isFinite(hunger) || hunger < 0 || hunger > 100) throw new TypeError('Actor hunger is invalid.');
     const actor: ActorState = {
       entityId,
       archetype: input.archetype,
       hunger,
-      behavior: 'idle',
+      behavior: profile.initialBehavior ?? 'idle',
       targetEntityId: null,
       homePoiId: input.homePoiId ?? null,
       workPoiId: input.workPoiId ?? null,
@@ -193,11 +206,8 @@ export class AutonomyRuntime {
 
   actorDeathDrop(entityId: string): ItemStack | null {
     const archetype = this.actors.get(entityId)?.archetype;
-    return archetype === 'grazer'
-      ? { itemId: 'berry', count: 2 }
-      : archetype === 'night-stalker'
-        ? { itemId: 'stone-block', count: 1 }
-        : null;
+    const drop = archetype ? this.actorProfiles.get(archetype)?.deathDrop : undefined;
+    return drop ? this.options.entities.items.normalizeStack(drop) : null;
   }
 
   assertCanRemoveActor(entityId: string, exceptActorId: string): void {
@@ -323,7 +333,10 @@ export class AutonomyRuntime {
   observe(actorId: string, range?: number): PerceptionSnapshot {
     const actor = this.actors.get(actorId);
     if (!actor && !this.options.entities.get(actorId)) throw new RangeError(`Unknown observer: ${actorId}`);
-    return this.perception.observe(actorId, range ?? (actor ? rangeByArchetype[actor.archetype] : 10));
+    return this.perception.observe(
+      actorId,
+      range ?? (actor ? this.actorProfiles.require(actor.archetype).navigation.perceptionRange : 10),
+    );
   }
 
   recordAttacked(entityId: string, attackerId: string): void {
@@ -391,6 +404,7 @@ export class AutonomyRuntime {
       const restored = new Map<string, ActorState>();
       for (const actor of snapshot.actors) {
         this.validateActor(actor);
+        this.actorProfiles.require(actor.archetype);
         const entity = this.options.entities.get(actor.entityId);
         if (!entity || entity.archetype !== actor.archetype) throw new TypeError('actor entity is missing');
         if (restored.has(actor.entityId)) throw new TypeError('duplicate actor id');

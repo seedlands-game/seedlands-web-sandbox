@@ -48,6 +48,7 @@ describe('gameplay host action identity binding', () => {
       {
         entities: runtime.entities,
         items: runtime.content.items,
+        actorProfiles: runtime.content.actorProfiles,
         simulation: runtime.simulation,
         getVoxel: () => 0,
         isPlayerAlive: () => true,

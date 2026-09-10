@@ -1,5 +1,6 @@
 import { makeChunk, type WorldChange } from '@seedlands/game-core/world/chunk-generation';
 import { macroAt, type MacroBiome } from '@seedlands/game-core/world/macro-world';
+import { oreVoxel } from '@seedlands/game-core/world/ore-generation';
 import { GENERATOR_VERSION, hash2 } from '@seedlands/game-core/world/voxel';
 import type { KernelMemory } from './kernel-memory';
 
@@ -35,15 +36,40 @@ export function prepareColumns(
     }
 }
 
-export function columnVoxel(columns: Int32Array, grid: number, x: number, wy: number, z: number): number {
+export function columnVoxel(
+  columns: Int32Array,
+  grid: number,
+  x: number,
+  wy: number,
+  z: number,
+  seed = 0,
+  worldX = x,
+  worldZ = z,
+  generatorVersion = 3,
+): number {
   const column = (x + 3 + grid * (z + 3)) * COLUMN_WORDS;
   const height = columns[column];
   const kind = columns[column + 1];
   const waterLevel = columns[column + 2];
   if (wy > height && wy <= waterLevel) return 8;
   if (wy <= height) {
-    if (wy === height) return kind === 3 ? 6 : kind === 4 ? 7 : kind === 2 ? 3 : 1;
-    return wy > height - 4 ? (kind === 3 ? 6 : kind === 2 ? 3 : 2) : 3;
+    const base =
+      wy === height
+        ? kind === 3
+          ? 6
+          : kind === 4
+            ? 7
+            : kind === 2
+              ? 3
+              : 1
+        : wy > height - 4
+          ? kind === 3
+            ? 6
+            : kind === 2
+              ? 3
+              : 2
+          : 3;
+    return oreVoxel(seed, worldX, wy, worldZ, height, base, generatorVersion);
   }
   for (let tx = x; tx <= x + 6; tx += 1)
     for (let tz = z; tz <= z + 6; tz += 1) {
@@ -58,10 +84,29 @@ export function columnVoxel(columns: Int32Array, grid: number, x: number, wy: nu
   return 0;
 }
 
-function fillChunk(columns: Int32Array, oy: number, output: Uint16Array): void {
+function fillChunk(
+  columns: Int32Array,
+  seed: number,
+  ox: number,
+  oy: number,
+  oz: number,
+  generatorVersion: number,
+  output: Uint16Array,
+): void {
   for (let z = 0; z < 32; z += 1)
     for (let x = 0; x < 32; x += 1)
-      for (let y = 0; y < 32; y += 1) output[x + 32 * (z + 32 * y)] = columnVoxel(columns, GRID, x, oy + y, z);
+      for (let y = 0; y < 32; y += 1)
+        output[x + 32 * (z + 32 * y)] = columnVoxel(
+          columns,
+          GRID,
+          x,
+          oy + y,
+          z,
+          seed,
+          ox + x,
+          oz + z,
+          generatorVersion,
+        );
 }
 
 function applyChanges(output: Uint16Array, cx: number, cy: number, cz: number, changes: WorldChange[]): void {
@@ -74,7 +119,7 @@ export const makeChunkStaged: typeof makeChunk = (seed, cx, cy, cz, changes, ver
   const columns = new Int32Array(GRID * GRID * COLUMN_WORDS);
   prepareColumns(seed, cx * 32, cz * 32, version, columns);
   const output = new Uint16Array(32 ** 3);
-  fillChunk(columns, cy * 32, output);
+  fillChunk(columns, seed, cx * 32, cy * 32, cz * 32, version, output);
   applyChanges(output, cx, cy, cz, changes);
   return output;
 };
@@ -86,7 +131,7 @@ export function createChunkKernel(kernel: KernelMemory): typeof makeChunk {
     try {
       const input = kernel.u32(INPUT_OFFSET, GRID * GRID * COLUMN_WORDS);
       prepareColumns(seed, cx * 32, cz * 32, version, new Int32Array(input.buffer, input.byteOffset, input.length));
-      if (kernel.invoke('fill_chunk', INPUT_OFFSET, OUTPUT_OFFSET, cy * 32) !== 0)
+      if (kernel.invoke('fill_chunk', INPUT_OFFSET, OUTPUT_OFFSET, cy * 32, seed, cx * 32, cz * 32, version) !== 0)
         throw new Error('Chunk kernel rejected the batch.');
       const output = kernel.u16(OUTPUT_OFFSET, 32 ** 3).slice();
       applyChanges(output, cx, cy, cz, changes);

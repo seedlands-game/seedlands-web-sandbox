@@ -20,6 +20,7 @@
         name={slot.name}
         itemId={slot.itemId}
         count={slot.count}
+        durability={slot.durability}
         onclick={() => onselect(slot.slot)}
       />
     </li>

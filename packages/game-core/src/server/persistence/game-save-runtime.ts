@@ -48,7 +48,7 @@ export class GameSaveRuntime {
     const chunks = [...this.options.chunks.values()]
       .filter(include)
       .sort((left, right) => left.key.localeCompare(right.key))
-      .map((chunk) => createChunkSnapshot(this.options.seedText, chunk));
+      .map((chunk) => createChunkSnapshot(this.options.seedText, chunk, this.options.generatorVersion));
     const snapshot: FrozenGameSaveSnapshot = {
       version: GAME_SAVE_SCHEMA_VERSION,
       commitSequence,
@@ -82,7 +82,9 @@ export class GameSaveRuntime {
     if (!dirty.length || !this.options.persistence) return [];
     if (this.hasGameplayPort())
       throw new Error('Atomic frozen game persistence is required instead of a standalone Chunk flush.');
-    const snapshots = dirty.map((chunk) => createChunkSnapshot(this.options.seedText, chunk));
+    const snapshots = dirty.map((chunk) =>
+      createChunkSnapshot(this.options.seedText, chunk, this.options.generatorVersion),
+    );
     await this.options.persistence.saveSnapshots(snapshots);
     this.acknowledgeChunks(snapshots);
     return snapshots.map((snapshot) => snapshot.key);

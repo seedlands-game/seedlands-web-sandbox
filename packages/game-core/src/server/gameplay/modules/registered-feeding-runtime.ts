@@ -1,3 +1,4 @@
+import { isActorEntityType } from '../ecs-actor-state';
 import type { WorldComposition, ModuleInvocationValue } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
 import type {
@@ -74,7 +75,7 @@ export class RegisteredFeedingRuntime {
   private actor(id: string) {
     const entity = this.options.entities.get(id);
     const reference = this.options.entities.createReference(id);
-    if (!entity || !reference || entity.type === 'world-item') throw new Error('unknown-actor');
+    if (!entity || !reference || !isActorEntityType(entity.type)) throw new Error('unknown-actor');
     const state = this.options.entities.actorStateAccess(id);
     const actor = this.options.simulation().getActor(id);
     return validateFeedingActorProjection({

@@ -5,6 +5,7 @@ import { copyAuthorityActionReference } from './network-action-reference-copy';
 import { canonicalReferenceInteger } from './network-reference-integer';
 
 const reasonsByAction = {
+  station: ['stale-station', 'station-rejected', 'chunk-unavailable'],
   'select-hotbar': ['invalid-slot'],
   'cancel-break': [],
   respawn: ['player-alive'],
@@ -111,6 +112,7 @@ function outcome(action: AuthorityAction, value: unknown): ActionOutcomeReferenc
       if (commit.committed !== true) throw new TypeError('Successful placement requires a committed world change.');
       return { success: true, worldRevision: number(commit.worldRevision, 'place worldRevision') };
     }
+    case 'station':
     case 'select-hotbar':
     case 'cancel-break':
     case 'respawn':

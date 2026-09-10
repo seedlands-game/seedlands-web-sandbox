@@ -1,3 +1,5 @@
+import { gameplayEntityMetrics } from './gameplay-entity-metrics';
+import { isActorEntityType } from './ecs-actor-state';
 import type { WorldModuleBinding } from '../commands/module-command';
 import { createGameplayDomainAdapters } from './gameplay-domain-adapters';
 import type { ModuleInvocationValue } from '../composition/contracts';
@@ -38,6 +40,9 @@ import { advanceGameplayClock, assertGameplayAdvance } from './gameplay-clock';
 import { clonePosition } from './gameplay-geometry';
 import type { CombatSnapshot } from './combat-runtime';
 import { createGameplayCombatCallbacks } from './gameplay-combat-callbacks';
+import { resolveProfiledActorSpawn } from './profiled-actor-spawn';
+import { optionalRegisteredCombatRequest } from './optional-registered-combat-request';
+import { requestProfiledPlayerCombat } from './profiled-player-combat';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -75,7 +80,7 @@ export class GameplayRuntime {
       : undefined;
     this.ruleset = createWorldRulesetState(callbacks.composition);
     this.compositionGuard = resolved.guard;
-    this.entities = new EntityStore(this.content.items);
+    this.entities = new EntityStore(this.content.items, this.content.stations?.codec);
     this.inventoryState = createInventoryStatePort({
       entities: this.entities,
       items: this.content.items,
@@ -115,6 +120,7 @@ export class GameplayRuntime {
     };
     const registered = createGameplayRegisteredAdapters({
       ...registeredPorts,
+      getLoadedVoxel: callbacks.getLoadedVoxel ?? (() => undefined),
       composition: callbacks.composition,
       actorIds: () => [...this.players.keys(), ...this.simulation.actorIds()],
       rulesetRevision: () => this.ruleset.snapshot()?.revision ?? 0,
@@ -137,6 +143,8 @@ export class GameplayRuntime {
       combat: this.registeredCombat?.state,
       blocks: this.registeredBlocks?.state,
       feeding: this.registeredFeeding?.state,
+      forage: registered.forage?.state,
+      stations: registered.stations?.state,
       composition: callbacks.composition,
       entities: this.entities,
       clone: callbacks.platform.clone,
@@ -158,18 +166,20 @@ export class GameplayRuntime {
           this.registeredCombat?.drain();
         })
       : null;
+    const registeredCombat = this.registeredCombat;
     this.simulation = new AutonomyRuntime({
       entities: this.entities,
       registeredNeeds: !!callbacks.composition,
       registeredCombat: !!callbacks.composition,
       combatOrigin: this.registeredCombat?.environment.originOptions,
-      registeredCombatRequest: (actorId, targetId, existingActionId) =>
-        this.registeredCombat!.request(actorId, targetId, existingActionId),
+      ...optionalRegisteredCombatRequest(registeredCombat),
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: callbacks.getWorldTime,
       isPlayerAlive: (id) => this.players.get(id)?.lifecycle === 'alive',
       clone: callbacks.platform.clone,
       meleeDefinitions: this.content.meleeDefinitions,
+      actorProfiles: this.content.actorProfiles,
+      enforceActorProfiles: !!callbacks.composition,
       combat: createGameplayCombatCallbacks({
         entities: this.entities,
         players: this.players,
@@ -190,7 +200,7 @@ export class GameplayRuntime {
   }
   getActorModeState(id: string) {
     const entity = this.entities.get(id);
-    return entity && entity.type !== 'world-item' ? this.modes.stateFor(id) : null;
+    return entity && isActorEntityType(entity.type) ? this.modes.stateFor(id) : null;
   }
   acknowledgeBlockCommit(value: ModuleInvocationValue) {
     return this.registeredBlocks?.acknowledge(value);
@@ -207,6 +217,9 @@ export class GameplayRuntime {
     const result = this.modules.invoke(authorizer, source, request);
     if (result.ok && operationId === COMBAT_REQUEST_OPERATION) this.registeredCombat?.drain();
     return result;
+  }
+  invokeActorModuleOperation(actorId: string, request: RegisteredOperationRequest) {
+    return this.modules.invokeActor(this.callbacks.moduleActorAuthority, actorId, request);
   }
   dispose(): void {
     try {
@@ -229,9 +242,11 @@ export class GameplayRuntime {
   }
 
   spawn(input: EntitySpawn): GameplayEntity {
+    if (input.type === 'station' || input.kind === 'station')
+      throw new TypeError('Station creation requires a Block transaction.');
     if (input.type === 'player' && this.players.size >= (this.needsPlayerLimit ?? Infinity))
       throw new RangeError('Needs player membership budget exceeded.');
-    const entity = this.entities.spawn(input);
+    const entity = this.entities.spawn(resolveProfiledActorSpawn(input, this.content.actorProfiles));
     if (entity.type === 'player')
       this.players.set(entity.id, new PlayerState(entity.id, clonePosition(entity.position), undefined, this.entities));
     if (input.archetype) this.simulation.registerActor(entity.id, { archetype: input.archetype });
@@ -248,7 +263,9 @@ export class GameplayRuntime {
   }
 
   spawnAutonomous(input: EntitySpawn, registration: ActorRegistration): GameplayEntity {
-    const entity = this.entities.spawn(input);
+    const entity = this.entities.spawn(
+      resolveProfiledActorSpawn(input, this.content.actorProfiles, registration.archetype),
+    );
     this.simulation.registerActor(entity.id, registration);
     this.touch();
     return entity;
@@ -324,7 +341,7 @@ export class GameplayRuntime {
     return (this.registeredInventory ?? this.inventoryActions).craft(id, recipeId);
   }
   listCraftable(id: string) {
-    return this.inventoryActions.listCraftable(id);
+    return (this.registeredInventory ?? this.inventoryActions).listCraftable(id);
   }
 
   listRecipes() {
@@ -364,7 +381,7 @@ export class GameplayRuntime {
     return (actorId: string, targetId: string, existingActionId?: string) =>
       this.registeredFeeding!.request(actorId, targetId, existingActionId, binding);
   }
-  bindActorCombat(binding: WorldModuleBinding) {
+  bindActorCombat(binding?: WorldModuleBinding) {
     if (!this.registeredCombat) throw new Error('Registered Combat is unavailable.');
     return (actorId: string, targetId: string, existingActionId?: string) =>
       this.registeredCombat!.request(actorId, targetId, existingActionId, binding);
@@ -378,16 +395,7 @@ export class GameplayRuntime {
     const active = this.requireAlive(player);
     if (active) return active;
     if (this.registeredCombat) return this.registeredCombat.request(playerId, targetId);
-    const selected = player.inventory.slot(player.selectedSlot);
-    const melee = selected ? this.content.items.capability(selected.itemId, 'melee') : undefined;
-    const result = this.simulation.requestCombat(playerId, targetId, melee?.definitionId ?? 'unarmed');
-    if (!result.success) return result;
-    this.touch();
-    const resolved = this.simulation.combatSnapshotFor(playerId).lastResult;
-    return {
-      ...result,
-      ...(resolved?.actionId === result.actionId && resolved.outcome === 'hit' ? { damage: resolved.damage } : {}),
-    };
+    return requestProfiledPlayerCombat(playerId, targetId, player, this.content, this.simulation, () => this.touch());
   }
 
   recordAuthorityMutation(): void {
@@ -433,11 +441,11 @@ export class GameplayRuntime {
   }
 
   createSnapshot(): GameplaySnapshot.GameplaySnapshotV4 {
+    this.modules.prepareSnapshot();
+    this.registeredCombat?.drain();
+    this.modules.prepareSnapshot();
+    this.registeredCombat?.drain();
     const moduleSchedule = this.schedule?.snapshot();
-    this.modules.prepareSnapshot();
-    this.registeredCombat?.drain();
-    this.modules.prepareSnapshot();
-    this.registeredCombat?.drain();
     const snapshot = GameplaySnapshot.createGameplaySnapshotV4(
       this.revision,
       this.gameplayTime,
@@ -453,16 +461,8 @@ export class GameplayRuntime {
   }
 
   metrics() {
-    const entities = this.entities.query();
-    const spatial = this.entities.metrics();
     return {
-      entityCount: entities.length,
-      worldItemCount: entities.filter((entity) => entity.type === 'world-item').length,
-      creatureCount: entities.filter((entity) => entity.type === 'creature').length,
-      npcCount: entities.filter((entity) => entity.type === 'npc').length,
-      nearbyVisitedBucketCount: spatial.visitedBucketCount,
-      nearbyCandidateCount: spatial.visitedEntityCount,
-      nearbyReturnedCount: spatial.returnedEntityCount,
+      ...gameplayEntityMetrics(this.entities),
       inventoryOperationCount: this.inventoryOperationCount,
       gameplayEventCount: this.eventCount,
       snapshotBytes: this.callbacks.platform.utf8.encode(JSON.stringify(this.createSnapshot())).byteLength,
@@ -483,7 +483,9 @@ export class GameplayRuntime {
       getWorldTime: this.callbacks.getWorldTime,
       clone: this.callbacks.platform.clone,
       items: this.content.items,
+      stationCodec: this.content.stations?.codec,
       meleeDefinitions: this.content.meleeDefinitions,
+      actorProfiles: this.content.actorProfiles,
       entities: this.entities,
       registeredNeeds: !!this.schedule,
       registeredFeeding: !!this.callbacks.composition,

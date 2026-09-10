@@ -14,6 +14,10 @@ export function assembleOverworldPacks(artifacts: readonly VerifiedPackArtifact[
   return assembleWorldPacks(artifacts, {
     approvedPermissions: {
       'seedlands:overworld': [
+        { resource: 'seedlands.station', operations: ['read', 'execute'] },
+        { resource: 'seedlands.station-actor', operations: ['read', 'execute'] },
+        { resource: 'seedlands.forage-clock', operations: ['read', 'execute'] },
+        { resource: 'seedlands.furnace-clock', operations: ['read', 'execute'] },
         { resource: 'seedlands.inventory', operations: ['read', 'write', 'execute'] },
         { resource: 'seedlands.feeding-actor', operations: ['read', 'execute'] },
         { resource: 'seedlands.feeding-item', operations: ['read', 'execute'] },

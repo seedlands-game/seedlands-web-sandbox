@@ -62,6 +62,11 @@ fn material(id: u32, axis: i32, positive: bool) -> u32 {
         8 => 10,
         9 => 11,
         10 => 12,
+        11 => 14,
+        12 => 15,
+        13 => 16,
+        14 => 17,
+        15 => 18,
         _ => 255,
     }
 }
@@ -356,4 +361,18 @@ pub fn mesh_describe(
         return Err(MeshError::Capacity);
     }
     Ok(descriptor_pass(halo, fluid, mask, output, true) * RECORD_BYTES)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::material;
+
+    #[test]
+    fn progression_voxels_keep_their_frozen_material_ids() {
+        assert_eq!(material(11, 0, true), 14);
+        assert_eq!(material(12, 1, false), 15);
+        assert_eq!(material(13, 2, true), 16);
+        assert_eq!(material(14, 0, false), 17);
+        assert_eq!(material(15, 1, true), 18);
+    }
 }

@@ -1,3 +1,4 @@
+import { cloneItemStack, sameItemStackIdentity } from '../item-instance';
 import { Inventory, type InventorySlot } from '../inventory';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
 
@@ -51,8 +52,8 @@ export function createFurnaceDefinitions(input: FurnaceDefinitionInput): Furnace
       throw new TypeError(`Duplicate furnace recipe input: ${source.input.itemId}`);
     const recipe = Object.freeze({
       id: source.id,
-      input: Object.freeze({ ...source.input }),
-      output: Object.freeze({ ...source.output }),
+      input: Object.freeze(input.items.normalizeStack(source.input)),
+      output: Object.freeze(input.items.normalizeStack(source.output)),
       durationSeconds,
     });
     recipes.set(recipe.id, recipe);
@@ -106,7 +107,7 @@ export function validateFurnaceSnapshot(raw: unknown, definitions: FurnaceDefini
   const active = source.activeRecipeId === null ? null : definitions.recipe(source.activeRecipeId);
   if (source.activeRecipeId !== null && !active)
     throw new TypeError(`Unknown furnace active recipe: ${source.activeRecipeId}`);
-  if (active && (!input || input.itemId !== active.input.itemId || input.count < active.input.count))
+  if (active && (!input || !sameItemStackIdentity(input, active.input) || input.count < active.input.count))
     throw new TypeError('Furnace active recipe does not match its input.');
   if (active && round(source.progressSeconds!) >= active.durationSeconds)
     throw new TypeError('Furnace progress exceeds its active recipe duration.');
@@ -136,7 +137,7 @@ export function advanceFurnaceCandidate(
   let transitions = 0;
   while (transitions++ < 512) {
     const recipe = state.input ? definitions.recipeForInput(state.input.itemId) : undefined;
-    if (!recipe || state.input!.count < recipe.input.count) {
+    if (!recipe || !sameItemStackIdentity(state.input!, recipe.input) || state.input!.count < recipe.input.count) {
       state.activeRecipeId = null;
       state.progressSeconds = 0;
       break;
@@ -202,7 +203,7 @@ const round = (value: number) => Math.round(value * 1_000_000) / 1_000_000;
 function canAcceptOutput(output: InventorySlot, added: Readonly<ItemStack>, items: ItemDefinitionRegistry): boolean {
   return (
     output === null ||
-    (output.itemId === added.itemId && output.count + added.count <= items.require(added.itemId).stackLimit)
+    (sameItemStackIdentity(output, added) && output.count + added.count <= items.require(added.itemId).stackLimit)
   );
 }
 
@@ -211,5 +212,5 @@ function decrement(stack: ItemStack, count: number): InventorySlot {
 }
 
 function increment(output: InventorySlot, added: Readonly<ItemStack>): ItemStack {
-  return output ? { ...output, count: output.count + added.count } : { ...added };
+  return output ? { ...output, count: output.count + added.count } : cloneItemStack(added);
 }

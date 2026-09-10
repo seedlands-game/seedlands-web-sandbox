@@ -4,13 +4,13 @@ import { createKernelMemory } from '../../apps/web/src/compute/kernel-memory';
 import { createHaloKernel, createHaloStaged } from '../../apps/web/src/compute/halo-kernel';
 import { createProceduralMeshInput, makeChunk } from '../../packages/game-core/src/world/mesh';
 
-describe('W03 halo 与修订哈希对等', () => {
+describe.each(['scalar', 'simd'])('W03 halo 与修订哈希对等 (%s)', (artifact) => {
   it('已知、未知和混合邻块，两版生成器和负坐标逐字节相同', async () => {
     const memory = await createKernelMemory(
-      await readFile(new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url)),
+      await readFile(new URL(`../../apps/web/src/generated/wasm/rust-kernels-${artifact}.wasm`, import.meta.url)),
     );
     const prepare = createHaloKernel(memory);
-    for (const version of [2, 3])
+    for (const version of [2, 3, 4])
       for (const cy of [-1, 0, 1])
         for (const cx of [-1, 0]) {
           const canonical = makeChunk(1837, cx, cy, 0, [], version);

@@ -106,6 +106,7 @@ describe('玩法事务只读取已加载权威Chunk', () => {
         {
           entities: gameplay.entities,
           items: gameplay.content.items,
+          actorProfiles: gameplay.content.actorProfiles,
           simulation: gameplay.simulation,
           getVoxel: () => undefined,
           isPlayerAlive: () => true,

@@ -1,3 +1,4 @@
+import { createMiningToolUseCandidate } from './mining-tool-policy';
 import { positionsInRange, voxelCenter } from '../gameplay-geometry';
 import type { ModCandidateState } from '../../composition/operation-contracts';
 import type { ModModule, ModuleInvocationValue } from '../../composition/contracts';
@@ -57,9 +58,10 @@ const samePosition = (left: BlockPosition, right: BlockPosition): boolean =>
 const sameData = (left: unknown, right: unknown): boolean => JSON.stringify(left) === JSON.stringify(right);
 
 function snapshotDefinition(raw: unknown): VoxelGameplayDefinition {
+  const hasTier = typeof raw === 'object' && raw !== null && Object.hasOwn(raw, 'minimumTier');
   const value = blockData(
     raw,
-    ['voxel', 'hardnessSeconds', 'preferredTool', 'drop', 'replaceable'],
+    ['voxel', 'hardnessSeconds', 'preferredTool', 'drop', 'replaceable', ...(hasTier ? ['minimumTier'] : [])],
     'Block rule definition',
   );
   if (typeof value.voxel !== 'number' || !Number.isSafeInteger(value.voxel) || value.voxel < 0 || value.voxel > 65535)
@@ -74,6 +76,14 @@ function snapshotDefinition(raw: unknown): VoxelGameplayDefinition {
     throw new TypeError('Block rule hardness is invalid.');
   if (value.preferredTool !== null && value.preferredTool !== 'axe' && value.preferredTool !== 'pickaxe')
     throw new TypeError('Block rule preferred tool is invalid.');
+  if (
+    hasTier &&
+    (typeof value.minimumTier !== 'number' ||
+      !Number.isSafeInteger(value.minimumTier) ||
+      value.minimumTier < 0 ||
+      (value.minimumTier > 0 && value.preferredTool === null))
+  )
+    throw new TypeError('Block rule minimum tool tier is invalid.');
   if (typeof value.replaceable !== 'boolean') throw new TypeError('Block rule replaceability is invalid.');
   let drop: Readonly<ItemStack> | null = null;
   if (value.drop !== null) {
@@ -101,6 +111,7 @@ function snapshotDefinition(raw: unknown): VoxelGameplayDefinition {
   }
   return Object.freeze({
     voxel: value.voxel,
+    ...(hasTier ? { minimumTier: value.minimumTier as number } : {}),
     hardnessSeconds: value.hardnessSeconds,
     preferredTool: value.preferredTool,
     drop,
@@ -185,8 +196,10 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
             modeRevision: actor.mode.revision,
           });
         const selected = actor.slots[actor.equipment.selectedSlot];
-        const mine = selected ? content().items.capability(selected.itemId, 'mine') : undefined;
-        const multiplier = mine?.tool === gameplay.preferredTool ? mine.multiplier : 1;
+        const { multiplier } = createMiningToolUseCandidate(content().items, selected, {
+          preferredTool: gameplay.preferredTool,
+          minimumTier: gameplay.minimumTier ?? 0,
+        });
         return Object.freeze({
           position: voxel.position,
           expectedVoxel: voxel.voxel,
@@ -234,10 +247,25 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
           throw new Error('no-break-action');
         const gameplay = definition(voxel.voxel);
         const creative = actor.mode.value === 'creative';
+        let toolWear: 0 | 1 = 0;
+        if (!creative) {
+          const selected = actor.slots[actor.equipment.selectedSlot];
+          const policy = createMiningToolUseCandidate(content().items, selected, {
+            preferredTool: gameplay.preferredTool,
+            minimumTier: gameplay.minimumTier ?? 0,
+          });
+          if (
+            gameplay.hardnessSeconds === null ||
+            Number((gameplay.hardnessSeconds / policy.multiplier).toFixed(6)) !== actor.breakAction.requiredSeconds
+          )
+            throw new Error('mining-tool-changed');
+          toolWear = sameData(selected, policy.nextStack) ? 0 : 1;
+        }
         return Object.freeze({
           position: voxel.position,
           expectedVoxel: voxel.voxel,
           creative,
+          toolWear,
           drop: creative || gameplay.drop === null ? null : content().items.normalizeStack(gameplay.drop),
           modeRevision: actor.mode.revision,
         });

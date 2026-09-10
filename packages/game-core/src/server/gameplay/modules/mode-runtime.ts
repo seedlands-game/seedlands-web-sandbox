@@ -1,3 +1,4 @@
+import { isActorEntityType } from '../ecs-actor-state';
 import { validateActorModeFacets } from '../ecs-actor-state';
 import type {
   ActorComponentSnapshot,
@@ -104,7 +105,7 @@ export class ModeRuntime {
   prepareSwitchMode(actorId: string, request: ModeSwitchRequest): PreparedModeRuntimeResult {
     if (request.mode !== 'creative' && request.mode !== 'survival') throw new TypeError('Unknown actor mode.');
     const entity = this.options.entities.get(actorId);
-    if (!entity || entity.type === 'world-item') return { success: false, reason: 'unknown-actor' };
+    if (!entity || !isActorEntityType(entity.type)) return { success: false, reason: 'unknown-actor' };
     const actor = this.options.entities.actorStateAccess(actorId);
     if (actor.mode === request.mode) return { success: false, reason: 'already-in-mode' };
 
@@ -327,7 +328,7 @@ export class ModeRuntime {
 
   private actorEntity(actorId: string) {
     const entity = this.options.entities.get(actorId);
-    return entity && entity.type !== 'world-item' ? entity : null;
+    return entity && isActorEntityType(entity.type) ? entity : null;
   }
 
   private actor(actorId: string) {

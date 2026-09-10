@@ -14,7 +14,11 @@ import {
   legacyPlayerPositionToFeet,
   validateGameplaySnapshot,
 } from '../../packages/game-core/src/server/gameplay/gameplay-snapshot';
-import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
+import {
+  createItemDefinitionRegistry,
+  listItemDefinitions,
+  ItemIds,
+} from '../../packages/game-core/src/server/gameplay/item-registry';
 import type { PlayerSnapshot } from '../../packages/game-core/src/server/gameplay/player-state';
 
 const callbacks = {
@@ -156,7 +160,7 @@ describe('GameplaySnapshot V1-V4 坐标、组件与物理迁移', () => {
       version: 4,
       coordinateSchema: { version: 1, units: 'voxel', entityOrigin: 'body-feet-center' },
       physicsSchema: { version: 1, bodyRegistryVersion: 1 },
-      entityStore: { version: 1 },
+      entityStore: { version: 2 },
     });
     expect(snapshot).not.toHaveProperty('players');
     expect(snapshot.entityStore.entities.find((entity) => entity.id === 'player')?.position).toEqual([1, 38.4, -2]);
@@ -342,3 +346,49 @@ describe('registered Block break origin migration', () => {
     expect(runtime.createSnapshot()).toEqual(source);
   });
 });
+
+const durableItems = () =>
+  createItemDefinitionRegistry(
+    listItemDefinitions().map((item) =>
+      item.id === ItemIds.StonePickaxe ? { ...item, durability: { max: 12 } } : item,
+    ),
+    () => true,
+  );
+const durableFixture = (factory: () => GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3) => {
+  const source = factory();
+  source.players[0].inventory[0] = { itemId: ItemIds.StonePickaxe, count: 1 };
+  source.entities.find((entity) => entity.type === 'world-item')!.stack = { itemId: ItemIds.StonePickaxe, count: 1 };
+  return source;
+};
+it.each([v1Fixture, v2Fixture, v3Fixture])('initializes legacy tool durability once in %s', (factory) => {
+  const source = durableFixture(factory);
+  const before = structuredClone(source);
+  const options = { ...callbacks, clone: testCorePlatform.clone, items: durableItems() };
+  const migrated = validateGameplaySnapshot(source, options);
+  expect(migrated.sourceVersion).toBe(source.version);
+  expect(
+    migrated.snapshot.entityStore.actors.find((actor) => actor.entityId === 'player')!.inventory[0]?.instance,
+  ).toEqual({ durability: 12 });
+  expect(
+    migrated.snapshot.entityStore.entities.find((entity) => entity.type === 'world-item')!.stack?.instance,
+  ).toEqual({ durability: 12 });
+  expect(source).toEqual(before);
+  const saved = structuredClone(migrated.snapshot);
+  saved.entityStore.actors.find((actor) => actor.entityId === 'player')!.inventory[0]!.instance = { durability: 3 };
+  const again = validateGameplaySnapshot(saved, options);
+  expect(
+    again.snapshot.entityStore.actors.find((actor) => actor.entityId === 'player')!.inventory[0]?.instance,
+  ).toEqual({ durability: 3 });
+  delete saved.entityStore.actors.find((actor) => actor.entityId === 'player')!.inventory[0]!.instance;
+  expect(() => validateGameplaySnapshot(saved, options)).toThrow(/durability|instance/i);
+});
+it.each([{ count: 2 }, { count: 1, instance: { durability: 0 } }, { count: 1, instance: { durability: 13 } }])(
+  'does not repair invalid legacy durable stacks: %j',
+  (invalid) => {
+    const source = durableFixture(v3Fixture);
+    source.players[0].inventory[0] = { itemId: ItemIds.StonePickaxe, ...invalid };
+    expect(() =>
+      validateGameplaySnapshot(source, { ...callbacks, clone: testCorePlatform.clone, items: durableItems() }),
+    ).toThrow();
+  },
+);

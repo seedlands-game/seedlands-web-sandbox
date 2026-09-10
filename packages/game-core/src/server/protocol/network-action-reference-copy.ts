@@ -2,6 +2,7 @@ import type { AuthorityAction } from '../../compute/authority-worker-protocol';
 import { canonicalReferenceInteger } from './network-reference-integer';
 
 const actionTypes = new Set<AuthorityAction['type']>([
+  'station',
   'select-hotbar',
   'craft',
   'attack',
@@ -53,6 +54,31 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
   const type = source.type;
   if (typeof type !== 'string' || !isAuthorityActionType(type)) throw new TypeError('Unsupported public action.');
   switch (type) {
+    case 'station': {
+      const ref = record(source.reference);
+      const reference = {
+        entityId: text(ref.entityId, 'entityId'),
+        epoch: nonNegativeSafeInteger(ref.epoch, 'epoch'),
+        lifetime: nonNegativeSafeInteger(ref.lifetime, 'lifetime'),
+      };
+      if (!reference.epoch || !reference.lifetime) throw new TypeError('Invalid station reference.');
+      const base = {
+        type,
+        reference,
+        expectedStationRevision: nonNegativeSafeInteger(source.expectedStationRevision, 'stationRevision'),
+      };
+      if (source.kind === 'craft') return { ...base, kind: 'craft', recipeId: text(source.recipeId, 'recipeId') };
+      if (source.kind !== 'transfer' || (source.from !== 'actor' && source.from !== 'station'))
+        throw new TypeError('Invalid station transfer.');
+      return {
+        ...base,
+        kind: 'transfer',
+        from: source.from,
+        actorSlot: nonNegativeSafeInteger(source.actorSlot, 'actorSlot'),
+        stationSlot: nonNegativeSafeInteger(source.stationSlot, 'stationSlot'),
+        ...(source.count === undefined ? {} : { count: nonNegativeSafeInteger(source.count, 'count') }),
+      };
+    }
     case 'cancel-break':
     case 'respawn':
       return { type };

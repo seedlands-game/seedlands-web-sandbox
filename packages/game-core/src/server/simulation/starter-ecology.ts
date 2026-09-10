@@ -3,6 +3,9 @@ import type { ActorArchetype } from '../gameplay/entity-store';
 import type { VoxelEdit } from '../world-mutation';
 import type { ActorRegistration } from './actor-state';
 import type { PoiInput } from './poi-registry';
+import type { ItemStack } from '../gameplay/item-registry';
+import type { StarterEcologyConfiguration } from '../gameplay/actor-profile';
+import { overworldStarterEcology } from '../gameplay/playbooks/overworld/actors';
 
 type Position = [number, number, number];
 type StarterActor = {
@@ -16,6 +19,7 @@ export type StarterEcology = {
   pois: PoiInput[];
   actors: StarterActor[];
   foodPosition: Position;
+  initialItem: ItemStack;
   campEdits: VoxelEdit[];
   naturalEdits: VoxelEdit[];
 };
@@ -24,6 +28,7 @@ export function createStarterEcology(
   seed: number,
   center: readonly [number, number, number],
   findSurface: (x: number, z: number, nearY: number) => Position,
+  configuration: StarterEcologyConfiguration = overworldStarterEcology,
 ): StarterEcology {
   const direction = seed % 2 === 0 ? 1 : -1;
   const token = Math.abs(seed).toString(36);
@@ -70,27 +75,22 @@ export function createStarterEcology(
   return {
     version: 1,
     pois: [home, work, food, marker, lair],
-    actors: [
-      {
-        id: `starter-grazer-${token}`,
-        archetype: 'grazer',
-        position: point(4, 2),
-        registration: { hunger: 65 },
-      },
-      {
-        id: `starter-stalker-${token}`,
-        archetype: 'night-stalker',
-        position: lair.position,
-        registration: { homePoiId: lair.id },
-      },
-      {
-        id: `starter-settler-${token}`,
-        archetype: 'settler',
-        position: camp,
-        registration: { hunger: 20, homePoiId: home.id, workPoiId: work.id, foodPoiId: food.id },
-      },
-    ],
+    actors: configuration.actors.map((actor): StarterActor => {
+      const registration =
+        actor.slot === 'predator'
+          ? { homePoiId: lair.id }
+          : actor.slot === 'resident'
+            ? { homePoiId: home.id, workPoiId: work.id, foodPoiId: food.id }
+            : {};
+      return {
+        id: `${actor.idPrefix}-${token}`,
+        archetype: actor.archetype,
+        position: actor.slot === 'forager' ? point(4, 2) : actor.slot === 'predator' ? lair.position : camp,
+        registration: { ...registration, ...(actor.hunger !== undefined ? { hunger: actor.hunger } : {}) },
+      };
+    }),
     foodPosition: point(5, 2),
+    initialItem: configuration.initialItem,
     campEdits,
     naturalEdits,
   };

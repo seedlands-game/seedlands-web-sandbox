@@ -9,6 +9,7 @@ import type { MeleeDefinition } from './combat-runtime';
 type Position = [number, number, number];
 export type GameplayCallbacks = {
   getVoxel: (position: Position) => number | undefined;
+  getLoadedVoxel?: (position: Position) => number | undefined;
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
   getWorldTime: () => number;
   platform: CorePlatformPorts;

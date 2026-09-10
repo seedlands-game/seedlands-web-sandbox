@@ -124,7 +124,7 @@ describe('GameplaySnapshot V4 component codec', () => {
     const reference = runtime.entities.createReference('settler')!;
     const snapshot = runtime.createSnapshot();
 
-    expect(snapshot).toMatchObject({ version: 4, entityStore: { version: 1 } });
+    expect(snapshot).toMatchObject({ version: 4, entityStore: { version: 2 } });
     expect(snapshot).not.toHaveProperty('players');
     expect(runtime.restoreSnapshot(snapshot)).toEqual({ version: 4, worldTime: 9 });
     expect(runtime.entities.createReference('settler')).toMatchObject({ lifetime: reference.lifetime });

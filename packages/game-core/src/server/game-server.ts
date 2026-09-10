@@ -1,9 +1,16 @@
+import { restoreServerChunk } from './server-chunk-restore';
+import { StationWorldResidency } from './station-world-residency';
+import {
+  assertNoRawStationEdits,
+  assertStationCheckpointIntegrity,
+  assertStationChunkIntegrity,
+} from './station-world-integrity';
 import { makeChunk } from '../world/mesh';
-import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey, normalizeSeed, Voxel } from '../world/voxel';
+import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey, normalizeSeed, Voxel, MAX_VOXEL_ID } from '../world/voxel';
 import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayFacade } from './game-server-gameplay';
-import { createStarterEcology } from './simulation/starter-ecology';
+import { initializeStarterEcologyBootstrap } from './starter-ecology-bootstrap';
 import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
 import { commitServerWorldEdit, prepareServerWorldEdit } from './world-edit-runtime';
 import type { FluidCell } from './fluid/fluid-cell';
@@ -15,7 +22,6 @@ import * as FluidSidecars from './fluid/fluid-edit-sidecars';
 import { commitFluidCandidate } from './fluid/fluid-candidate-commit';
 import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
-import { findDryStarterSurface } from './starter-surface';
 import { peekLoadedVoxel } from './loaded-voxel-reader';
 import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
 import type { FrozenGameSaveSnapshot } from './persistence/game-save-snapshot';
@@ -65,16 +71,18 @@ export class GameServer extends GameServerGameplayFacade {
   private readonly fluidWindow = new FluidActiveWindow();
   private readonly saves: GameSaveRuntime;
   private readonly canonicalResidency: CanonicalChunkResidency;
+  private readonly stationResidency: StationWorldResidency;
   private readonly gameplayVoxelReader: (x: number, y: number, z: number) => number | undefined;
 
   constructor(readonly options: GameServerOptions) {
     super(options.persistence, assertCorePlatformPorts(options.platform), options.content, options);
     this.seed = normalizeSeed(options.seedText);
     this.generatorVersion = options.generatorVersion ?? GENERATOR_VERSION;
-    if (this.generatorVersion !== 2 && this.generatorVersion !== GENERATOR_VERSION)
+    if (this.generatorVersion !== 2 && this.generatorVersion !== 3 && this.generatorVersion !== GENERATOR_VERSION)
       throw new Error(`Unsupported generator version ${this.generatorVersion}.`);
     this.persistence = options.persistence;
     this.canonicalResidency = new CanonicalChunkResidency(options.canonicalResidency);
+    this.stationResidency = new StationWorldResidency(this.gameplay.entities, this.canonicalResidency);
     this.gameplayVoxelReader = options.onUnknownChunk
       ? createLoadedGameplayVoxelReader(this.chunks, options.onUnknownChunk)
       : this.getVoxel;
@@ -106,8 +114,13 @@ export class GameServer extends GameServerGameplayFacade {
   override async restore(): Promise<void> {
     const checkpoint = readGameSaveCheckpoint(await this.persistence?.loadGameCheckpoint?.());
     await super.restore();
+    await this.stationResidency.restore(this.persistence, (...at) => this.getChunk(...at));
     this.restoredSequence = checkpoint?.commitSequence ?? 0;
     this.revision = checkpoint?.worldRevision ?? 0;
+  }
+
+  validateStationCheckpoint(snapshot: FrozenGameSaveSnapshot): void {
+    assertStationCheckpointIntegrity(snapshot, this.gameplay.content.stations?.codec);
   }
 
   get restoredCommitSequence(): number {
@@ -135,6 +148,7 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   maintainCanonicalResidency(): number {
+    this.stationResidency.refresh();
     return maintainCanonicalChunks(this.canonicalResidency, this.chunks, ({ key, chunk, accessEpoch, revision }) =>
       this.saves.evictChunkIfCurrent(key, chunk as ServerChunk, accessEpoch, revision),
     );
@@ -174,19 +188,7 @@ export class GameServer extends GameServerGameplayFacade {
     const snapshot = this.persistence?.loadSnapshot(key);
     const restored = snapshot && this.isValidSnapshot(snapshot, key, cx, cy, cz);
     const chunk: ServerChunk = restored
-      ? {
-          key,
-          cx,
-          cy,
-          cz,
-          voxels: snapshot.voxels,
-          revision: snapshot.revision,
-          persistedRevision: snapshot.revision,
-          dirty: false,
-          materialized: true,
-          accessEpoch: ++this.accessSequence,
-          fluid: snapshot.fluid?.slice() ?? legacyFluid(snapshot.voxels),
-        }
+      ? restoreServerChunk(snapshot, ++this.accessSequence)
       : {
           key,
           cx,
@@ -201,6 +203,7 @@ export class GameServer extends GameServerGameplayFacade {
           fluid: new Uint8Array(CHUNK_SIZE ** 3),
         };
     if (!restored) chunk.fluid = legacyFluid(chunk.voxels);
+    assertStationChunkIntegrity(chunk, this.gameplay.content.stations?.codec, this.gameplay.entities);
     this.chunks.set(key, chunk);
     this.persistence?.evictSnapshot?.(key);
     if (this.fluidWindow.allowsKey(key)) this.fluidChunkActivations.schedule(chunk);
@@ -238,6 +241,10 @@ export class GameServer extends GameServerGameplayFacade {
     return readLoadedCollisionBaseline(this.chunks, key, minimumRevision);
   }
 
+  protected override readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined {
+    return this.peekLoadedVoxel(x, y, z)?.voxel;
+  }
+
   protected override readGameplayVoxel(x: number, y: number, z: number): number | undefined {
     return this.gameplayVoxelReader(x, y, z);
   }
@@ -255,7 +262,7 @@ export class GameServer extends GameServerGameplayFacade {
       result.generatorVersion !== this.generatorVersion ||
       result.key !== chunkKey(result.cx, result.cy, result.cz) ||
       result.canonical.length !== CHUNK_SIZE ** 3 ||
-      !result.canonical.every((value) => value >= Voxel.Air && value <= Voxel.Lantern)
+      !result.canonical.every((value) => value >= Voxel.Air && value <= MAX_VOXEL_ID)
     )
       return false;
     const current = this.chunks.get(result.key);
@@ -264,6 +271,15 @@ export class GameServer extends GameServerGameplayFacade {
       return current.voxels.every((value, index) => value === result.canonical[index]);
     }
     if (result.chunkRevision !== 0) return false;
+    try {
+      assertStationChunkIntegrity(
+        { ...result, voxels: result.canonical },
+        this.gameplay.content.stations?.codec,
+        this.gameplay.entities,
+      );
+    } catch {
+      return false;
+    }
     if (!this.prepareCanonicalAdmission(result.key)) return false;
     const accepted: ServerChunk = {
       key: result.key,
@@ -286,10 +302,14 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   edit(x: number, y: number, z: number, value: number, actorId = 'system'): WorldCommitResult {
-    assertMutationCoordinate(x);
-    assertMutationCoordinate(y);
-    assertMutationCoordinate(z);
+    [x, y, z].forEach(assertMutationCoordinate);
     assertVoxelValue(value);
+    assertNoRawStationEdits(
+      { actorId, edits: [{ x, y, z, value }] },
+      this.gameplay.content.stations?.codec,
+      this.gameplay.entities,
+      this.getVoxel,
+    );
     const previous = this.getVoxel(x, y, z);
     const previousFluid = previous === Voxel.Water ? this.fluidChunks.cell(x, y, z, true) : null;
     const result = this.commitSingleEdit(actorId, x, y, z, value);
@@ -347,6 +367,7 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   editBatch(batch: WorldEditBatch): WorldCommitResult {
+    assertNoRawStationEdits(batch, this.gameplay.content.stations?.codec, this.gameplay.entities, this.getVoxel);
     return commitServerWorldEdit(this.worldEditOptions(), batch);
   }
 
@@ -430,6 +451,7 @@ export class GameServer extends GameServerGameplayFacade {
   }
 
   async evictChunk(cx: number, cy: number, cz: number): Promise<boolean> {
+    this.stationResidency.refresh();
     if (this.canonicalResidency.isPinned(chunkKey(cx, cy, cz))) return false;
     return this.saves.evictChunk(cx, cy, cz);
   }
@@ -460,23 +482,7 @@ export class GameServer extends GameServerGameplayFacade {
     center: [number, number, number],
     getVoxel: (x: number, y: number, z: number) => number,
   ) {
-    const current = this.simulationSnapshot();
-    if (this.restoredGameplayVersion !== null || current.starterEcologyVersion > 0 || current.actors.length > 0)
-      return { initialized: false as const, actorIds: [] as string[] };
-    const layout = createStarterEcology(this.seed, center, (x, z) =>
-      findDryStarterSurface(this.seed, this.generatorVersion, x, z, getVoxel),
-    );
-    for (const edit of [...layout.campEdits, ...layout.naturalEdits]) getVoxel(edit.x, edit.y, edit.z);
-    const naturalEdits = layout.naturalEdits.filter((edit) => getVoxel(edit.x, edit.y, edit.z) === Voxel.Air);
-    layout.pois.forEach((poi) => this.registerPoi(poi));
-    const actors = layout.actors.map((actor) => this.spawnAutonomousActor(actor));
-    this.spawnWorldItem(layout.foodPosition, { itemId: 'berry', count: 1 });
-    const commit = this.editBatch({
-      actorId: 'starter-ecology-v1',
-      edits: [...layout.campEdits, ...naturalEdits],
-    });
-    this.gameplay.simulation.starterEcologyVersion = layout.version;
-    return { initialized: true as const, actorIds: actors.map((actor) => actor.id), commit };
+    return initializeStarterEcologyBootstrap(this, center, getVoxel);
   }
 
   private isValidSnapshot(snapshot: ChunkSnapshot, key: string, cx: number, cy: number, cz: number): boolean {
@@ -511,19 +517,8 @@ export class GameServer extends GameServerGameplayFacade {
     if (!snapshot) return undefined;
     if (!this.isValidSnapshot(snapshot, key, cx, cy, cz))
       throw new Error(`Persisted canonical Chunk is invalid for ${key}.`);
-    const restored: ServerChunk = {
-      key,
-      cx,
-      cy,
-      cz,
-      voxels: snapshot.voxels,
-      revision: snapshot.revision,
-      persistedRevision: snapshot.revision,
-      dirty: false,
-      materialized: true,
-      accessEpoch: ++this.accessSequence,
-      fluid: snapshot.fluid?.slice() ?? legacyFluid(snapshot.voxels),
-    };
+    const restored = restoreServerChunk(snapshot, ++this.accessSequence);
+    assertStationChunkIntegrity(restored, this.gameplay.content.stations?.codec, this.gameplay.entities);
     this.chunks.set(key, restored);
     this.persistence?.evictSnapshot?.(key);
     this.fluidChunkActivations.schedule(restored);

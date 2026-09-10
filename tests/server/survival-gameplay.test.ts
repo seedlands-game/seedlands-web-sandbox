@@ -31,7 +31,7 @@ describe('resource loop', () => {
 
   it('applies preferred tool speed and cancels stale, changed, distant or released targets', () => {
     const server = createPlayerServer();
-    server.giveItem('player-1', { itemId: ItemIds.WoodAxe, count: 1 });
+    server.giveItem('player-1', { itemId: ItemIds.WoodAxe, count: 1, instance: { durability: 60 } });
     server.selectHotbarSlot('player-1', 0);
     server.edit(1, 33, 0, Voxel.Wood, 'fixture');
 
@@ -59,7 +59,7 @@ describe('resource loop', () => {
     expect(server.getInventory('player-1').slots[0]).toEqual({ itemId: ItemIds.WoodBlock, count: 2 });
     expect(server.getEntity(item.id)).toBeNull();
 
-    server.giveItem('player-1', { itemId: ItemIds.WoodAxe, count: 23 });
+    server.giveItem('player-1', { itemId: ItemIds.WoodSword, count: 23 });
     const blocked = server.spawnWorldItem([1, 34.6, 0.5], { itemId: ItemIds.StoneBlock, count: 1 });
     expect(server.pickupItem('player-1', blocked.id)).toMatchObject({ success: false, reason: 'inventory-full' });
     expect(server.getEntity(blocked.id)).not.toBeNull();
@@ -104,7 +104,11 @@ describe('crafting and survival rules', () => {
     server.giveItem('player-1', { itemId: ItemIds.WoodBlock, count: 1 });
     expect(server.craft('player-1', 'planks')).toMatchObject({ success: true });
     expect(server.craft('player-1', 'wood-axe')).toMatchObject({ success: true });
-    expect(server.getInventory('player-1').slots).toContainEqual({ itemId: ItemIds.WoodAxe, count: 1 });
+    expect(server.getInventory('player-1').slots).toContainEqual({
+      itemId: ItemIds.WoodAxe,
+      count: 1,
+      instance: { durability: 60 },
+    });
   });
 
   it('makes long and sliced gameplay ticks produce identical hunger, healing and starvation', () => {

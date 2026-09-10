@@ -1,3 +1,4 @@
+import { STATION_RESOURCE } from './station-action-model';
 import type { ModModule, ModuleInvocationValue } from '../../composition/contracts';
 import type { GameplayContent } from '../gameplay-content';
 import { Voxel } from '../../../world/voxel';
@@ -69,12 +70,13 @@ const targetPosition = (target: unknown) => {
   return validateBlockPosition(value.position, 'Block authorization target');
 };
 
-export function defineBlockActionsModule(): ModModule {
+export function defineBlockActionsModule(options: Readonly<{ stations?: boolean }> = {}): ModModule {
   return Object.freeze({
     descriptor: {
       id: 'seedlands:block-actions-module',
       version: '1.0.0',
       requires: [
+        ...(options.stations ? [{ id: 'seedlands:station-actions', version: '1.0.0' }] : []),
         { id: 'seedlands:items', version: '1.0.0' },
         { id: 'seedlands:gameplay-content', version: '1.0.0' },
       ],
@@ -85,6 +87,7 @@ export function defineBlockActionsModule(): ModModule {
         { id: BLOCK_CLOCK_RESOURCE, operations: ['read', 'execute'] },
       ],
       permissions: [
+        ...(options.stations ? [{ resource: STATION_RESOURCE, operations: ['execute' as const] }] : []),
         { resource: BLOCK_ACTOR_RESOURCE, operations: ['read', 'execute'] },
         { resource: BLOCK_VOXEL_RESOURCE, operations: ['read', 'execute'] },
         { resource: BLOCK_CLOCK_RESOURCE, operations: ['read', 'execute'] },
@@ -356,6 +359,21 @@ export function buildBlockActionCandidate(
   if (actor.mode.revision !== effective.modeRevision || (actor.mode.value === 'creative') !== effective.creative)
     fail('block-mode-changed');
   if (current.elapsedSeconds + Number.EPSILON < current.requiredSeconds) fail('break-not-ready');
+  if (effective.toolWear === 1) {
+    const slot = actor.equipment.selectedSlot;
+    const selected = inventory.slot(slot);
+    if (!selected?.instance || !content.items.capability(selected.itemId, 'mine'))
+      throw new Error('invalid-mining-tool-wear');
+    const next = inventory.snapshot();
+    next[slot] =
+      selected.instance.durability === 1
+        ? null
+        : {
+            ...selected,
+            instance: { durability: selected.instance.durability - 1 },
+          };
+    inventory.replace(next);
+  }
   const dropIntent = effective.drop
     ? { position: target.position.map((value) => value + 0.5) as [number, number, number], stack: effective.drop }
     : undefined;

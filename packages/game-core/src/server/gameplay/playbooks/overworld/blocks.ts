@@ -33,6 +33,7 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
   },
   [3]: {
     voxel: 3,
+    minimumTier: 1,
     hardnessSeconds: 2.4,
     preferredTool: 'pickaxe',
     drop: { itemId: 'stone-block', count: 1 },
@@ -61,6 +62,43 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
   },
   [7]: { voxel: 7, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: false },
   [8]: { voxel: 8, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: true },
+  [11]: {
+    voxel: 11,
+    hardnessSeconds: 1.2,
+    preferredTool: 'axe',
+    drop: { itemId: 'workbench', count: 1 },
+    replaceable: false,
+  },
+  [12]: {
+    voxel: 12,
+    hardnessSeconds: 1.2,
+    preferredTool: 'axe',
+    drop: { itemId: 'chest', count: 1 },
+    replaceable: false,
+  },
+  [13]: {
+    voxel: 13,
+    hardnessSeconds: 2.4,
+    preferredTool: 'pickaxe',
+    drop: { itemId: 'furnace', count: 1 },
+    replaceable: false,
+  },
+  [14]: {
+    voxel: 14,
+    hardnessSeconds: 2.8,
+    preferredTool: 'pickaxe',
+    minimumTier: 1,
+    drop: { itemId: 'coal', count: 1 },
+    replaceable: false,
+  },
+  [15]: {
+    voxel: 15,
+    hardnessSeconds: 3.2,
+    preferredTool: 'pickaxe',
+    minimumTier: 2,
+    drop: { itemId: 'raw-iron', count: 1 },
+    replaceable: false,
+  },
 });
 
 export const overworldBlocks: readonly VoxelGameplayDefinition[] = Object.freeze(

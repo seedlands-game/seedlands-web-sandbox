@@ -32,21 +32,24 @@ const source = {
 const customServer = () => new GameServer({ seedText: 'custom-content', platform: testCorePlatform, content });
 
 const authoritySnapshot = (server: GameServer): AuthoritySnapshot => {
-  const bodies = server.queryEntities().map((entity) => ({
-    id: entity.id,
-    type: entity.type,
-    ...(entity.archetype ? { archetype: entity.archetype } : {}),
-    body: {
-      position: { x: entity.position[0], y: entity.position[1], z: entity.position[2] },
-      velocity: {
-        x: entity.physicsVelocity?.[0] ?? 0,
-        y: entity.physicsVelocity?.[1] ?? 0,
-        z: entity.physicsVelocity?.[2] ?? 0,
+  const bodies = server.queryEntities().map((entity) => {
+    if (entity.type === 'station') throw new Error('Station cannot enter authority body fixture.');
+    return {
+      id: entity.id,
+      type: entity.type,
+      ...(entity.archetype ? { archetype: entity.archetype } : {}),
+      body: {
+        position: { x: entity.position[0], y: entity.position[1], z: entity.position[2] },
+        velocity: {
+          x: entity.physicsVelocity?.[0] ?? 0,
+          y: entity.physicsVelocity?.[1] ?? 0,
+          z: entity.physicsVelocity?.[2] ?? 0,
+        },
       },
-    },
-    grounded: false,
-    contacts: [],
-  }));
+      grounded: false,
+      contacts: [],
+    };
+  });
   return {
     kind: 'snapshot',
     protocolVersion: 1,

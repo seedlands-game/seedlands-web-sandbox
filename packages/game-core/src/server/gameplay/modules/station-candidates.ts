@@ -1,3 +1,4 @@
+import { sameItemStackIdentity } from '../item-instance';
 import { Inventory, type InventorySlot } from '../inventory';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
 
@@ -43,7 +44,7 @@ export function matchesShapedStationRecipe(
   return recipe.pattern.every((ingredient, index) => {
     const slot = candidate[index];
     if (ingredient === null) return slot === null;
-    return slot !== null && slot.itemId === ingredient.itemId && slot.count >= ingredient.count;
+    return slot !== null && sameItemStackIdentity(slot, ingredient) && slot.count >= ingredient.count;
   });
 }
 
@@ -96,7 +97,7 @@ function validateOutputs(outputs: readonly Readonly<ItemStack>[], items: ItemDef
 
 function totals(grid: StationGrid): Map<string, number> {
   const result = new Map<string, number>();
-  for (const slot of grid) if (slot) result.set(slot.itemId, (result.get(slot.itemId) ?? 0) + slot.count);
+  for (const slot of grid) if (slot) result.set(stackKey(slot), (result.get(stackKey(slot)) ?? 0) + slot.count);
   return result;
 }
 
@@ -104,7 +105,7 @@ function ingredientTotals(inputs: readonly Readonly<ItemStack>[], items: ItemDef
   const result = new Map<string, number>();
   for (const stack of inputs) {
     items.assertStack(stack);
-    result.set(stack.itemId, (result.get(stack.itemId) ?? 0) + stack.count);
+    result.set(stackKey(stack), (result.get(stackKey(stack)) ?? 0) + stack.count);
   }
   return result;
 }
@@ -126,10 +127,14 @@ function consumeShapeless(
   for (let index = 0; index < grid.length; index += 1) {
     const slot = grid[index];
     if (!slot) continue;
-    const remaining = required.get(slot.itemId) ?? 0;
+    const remaining = required.get(stackKey(slot)) ?? 0;
     if (remaining === 0) continue;
     const consumed = Math.min(slot.count, remaining);
-    required.set(slot.itemId, remaining - consumed);
+    required.set(stackKey(slot), remaining - consumed);
     grid[index] = slot.count === consumed ? null : { ...slot, count: slot.count - consumed };
   }
+}
+
+function stackKey(stack: Readonly<ItemStack>): string {
+  return JSON.stringify([stack.itemId, stack.instance?.durability ?? null]);
 }

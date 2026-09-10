@@ -1,3 +1,4 @@
+import type { ModuleInvocationValue } from '../composition/contracts';
 import type {
   AuthorityAction,
   AuthorityActionResult,
@@ -20,6 +21,26 @@ export function applyAuthorityPlayerAction(
   publishCommit: (commit: WorldCommitResult) => void,
 ): unknown {
   switch (action.type) {
+    case 'station': {
+      if (!server.resolveEntityReference(action.reference)) return { success: false, reason: 'stale-station' };
+      const { reference, kind, expectedStationRevision } = action;
+      const input: ModuleInvocationValue =
+        kind === 'craft'
+          ? { expectedStationRevision, recipeId: action.recipeId }
+          : {
+              expectedStationRevision,
+              from: action.from,
+              actorSlot: action.actorSlot,
+              stationSlot: action.stationSlot,
+              ...(action.count === undefined ? {} : { count: action.count }),
+            };
+      const result = server.invokeActorModuleOperation(playerId, {
+        operationId: kind === 'craft' ? 'seedlands:station-craft' : 'seedlands:station-transfer',
+        target: { kind: 'entity', entityId: reference.entityId },
+        input,
+      });
+      return result.ok ? result.value : { success: false, reason: 'station-rejected', message: result.message };
+    }
     case 'select-hotbar':
       return server.selectHotbarSlot(playerId, action.slot);
     case 'craft':

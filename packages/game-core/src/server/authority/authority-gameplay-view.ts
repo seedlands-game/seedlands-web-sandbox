@@ -16,6 +16,8 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     entities,
     actors: server.simulationSnapshot().actors,
     items: server.itemDefinitions.list(),
+    nearbyStations: server.getNearbyStations(playerId),
+    stationRecipes: server.listStationRecipes(),
     recipes: server.listRecipes(),
     craftableRecipeIds: server.listCraftableRecipes(playerId).map((recipe) => recipe.id),
     metrics: server.gameplayMetrics(),

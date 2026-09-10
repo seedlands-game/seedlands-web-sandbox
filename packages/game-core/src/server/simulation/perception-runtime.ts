@@ -162,7 +162,12 @@ export class PerceptionRuntime {
   }
 
   private isFood(observer: GameplayEntity, candidate: GameplayEntity): boolean {
-    return observer.archetype === 'grazer' && candidate.type === 'world-item' && candidate.stack?.itemId === 'berry';
+    return (
+      observer.archetype === 'grazer' &&
+      candidate.type === 'world-item' &&
+      candidate.stack !== undefined &&
+      this.options.entities.items.get(candidate.stack.itemId)?.itemType === 'food'
+    );
   }
 
   private hasLineOfSight(from: readonly number[], to: readonly number[]): boolean {

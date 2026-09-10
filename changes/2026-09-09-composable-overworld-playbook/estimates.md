@@ -157,3 +157,23 @@ S3 脚本 Logic 接线复用 Sol/xhigh 独立 reviewer 作默认开发者身份�
 地面食物纯机制与规则委派 Sol/high，4h 上限；合同 `feeding-pure.json` SHA `41d226611348742917d32c86b96e0388b3b9fb649ba7e2dd8020d3f2dbd4fd0e`。只拥有三个新模块文件与候选测试，root 持有 ECS/Action/host/Pack 写入。累计子任务分配上限 58.5/60h；actual tokens、credits、API-equivalent 与额度占比仍 unknown，不据此宣称实际花费。
 
 Logic 与 Feeding 实际消费者冻结复核分配 Sol/xhigh 只读最多 1.5h，合同 `logic-feeding-review.json` SHA `c152a7ee8d39bd8553ad41b733181221592dabd6a1df010905bf9648dc00be7e`。累计 child 分配上限 60/60h；后续委派前须重估，当前并非实际小时消耗报告。root 验证、Browser 与未完 S3–S6 按既有阶段规划继续，实际计费 unknown。
+
+S4 工位实际 owner 接线先分配一次 Sol/xhigh 只读方案复核，上限 1h，合同 SHA `d32bde0a90143f222392ec2df272adfb8ad92d375fa2f34c758d893c4cd44886`。加上已有两个纯候选实施各 3h，S4 累计 child 分配上限为 7/18h，使用独立 S4 parent envelope，不占用已耗尽的 S3 派发额度。S4 阶段正常 10 / 保守 18 活跃小时及 2 / 4 等待小时暂不变；具体 owner 风险返回后重新校准。实际费用、模型 token 和活跃工时均 unknown。
+
+S4 矿物采集品质/耐久纯策略委派 Sol/high，3h 上限；合同 SHA `b092738dedcd45eca162725385b27e512153600abb1e17312d8fc357c78c6028`，仅 item registry、新纯 helper 与自身测试。S4 累计 child 分配上限 10/18h；root 继续真实 Block、工位 owner 和内容/保存集成，不能把纯 helper GREEN 计作旅程准出。运行时实际模型计费映射未回显，实际消费仍 unknown。
+
+S4 配方实例注册与实际合成追加 Sol/high 最多 3h，复用已交回矿具策略路径的 worker。合同 SHA `4ef2bcfab68aff0cad95e864dcee75f60c27cab3f1067c194a0151997a1d2cb1`；五个互斥路径，S4 累计 child 上限 13/18h。实际成本未回显，仍不以分配上限推算消耗；后续 owner 大切片前重估。
+
+## 13. S4 工位 owner 接线重估
+
+只读复核确认：station 必须扩展 ECS 类型、prepared participant、snapshot V2、动态查询隔离、Block 生命周期与 checkpoint 双向完整性；纯候选不能替代这些集成。S4 活跃规划由正常 10 / 保守 18h 调整为 20 / 36h，等待仍 2 / 4h。沿既有未扣实耗口径，S3–S6 正常 / 保守规划变为 67 / 129h，保守 ×120% 向上取整 155h。是实现风险校准，不是完成承诺；功能范围未扩大，实际消费与额度占比仍 unknown。
+
+冻结新的 S4 36h parent envelope，不修改旧 hash。ECS station owner / prepared mutation 子任务分配 Sol/high 最多 5h；加已列 13h，累计 child 上限 18/36h。root 同步负责旧存档工具实例迁移和随后真实模块/世界接线，公开内容与 UI 另行收敛。
+
+S4 追加互斥生成/材质子任务：Sol/high，规划上限 6 AI 工时；本阶段 child 上限累计 24/36（此前 18 + 本次 6）。该数字是调度上限，不是实际耗时或已消耗额度；实际 credits/API 等价费用仍 unknown。父 envelope 与总体 67/129 小时规划不变。
+
+S4 可再生食物的独立 ECS drop/lifecycle 子任务：Sol/high，规划上限4工时，累计 child 上限 28/36；实际消费仍 unknown。无新模型或全局配置改动。
+
+S4 工位事务/持久化只读独立复核：Sol/xhigh 最多 2h，child 上限累计 30/36。root 并行完成 Headless 成长旅程，复核不扩大写入范围。以上均为规划上限，实际消费 unknown。
+
+S4 剩余 actor profile / 可选开局生态边界追加 Sol/high 最多 6h，累计 child 分配上限 36/36h。用于消除完整生存与后续替代 Playbook 的隐式第一方数据；实际消耗仍 unknown。版本二合同 SHA `b05dc23e08a4fdf5459bc26ea881d71d8bcc846a227ddfd0d9d580c132d644a8` 明确 root 保留 crafting、Web 与 S5 示例路径。再次委派前需重估，不把分配上限称为实耗。

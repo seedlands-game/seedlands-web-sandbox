@@ -7,12 +7,15 @@ import { loadVerifiedPackArtifacts } from './pack-integrity.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 function optionsFromArgs(args) {
-  const options = { seed: 'seedlands-headless', json: false, repl: false };
+  const options = { seed: 'seedlands-headless', json: false, repl: false, playbook: 'overworld' };
   for (let index = 0; index < args.length; index += 1) {
     if (args[index] === '--') continue;
     if (args[index] === '--seed') {
       if (!args[index + 1]) throw new Error('--seed requires a value.');
       options.seed = args[++index];
+    } else if (args[index] === '--playbook') {
+      if (!args[index + 1]) throw new Error('--playbook requires a value.');
+      options.playbook = args[++index];
     } else if (args[index] === '--json') options.json = true;
     else if (args[index] === '--repl') options.repl = true;
     else throw new Error(`Unknown option: ${args[index]}`);
@@ -22,7 +25,7 @@ function optionsFromArgs(args) {
 }
 
 const options = optionsFromArgs(process.argv.slice(2));
-const { lockPath } = await buildGameplayPacks();
+const { lockPath } = await buildGameplayPacks(undefined, options.playbook);
 const packArtifacts = await loadVerifiedPackArtifacts(lockPath);
 const moduleRunner = await createServer({
   root,
@@ -39,7 +42,7 @@ try {
     '/packages/game-core/src/server/harness/world-harness-jsonl.ts',
   );
   const { nodeCorePlatform } = await moduleRunner.ssrLoadModule('/scripts/headless/node-core-platform.ts');
-  const { assembleOverworldPacks } = await moduleRunner.ssrLoadModule(
+  const { assembleProductPacks } = await moduleRunner.ssrLoadModule(
     '/packages/game-core/src/server/composition/host-api.ts',
   );
   const { readBoundedLines, stringifyWorldJson, decodeCheckpointRequest, JSONL_CHECKPOINT_LINE_BYTES } =
@@ -55,7 +58,7 @@ try {
   session = await HeadlessSession.create({
     seedText: options.seed,
     platform: nodeCorePlatform,
-    createComposition: () => assembleOverworldPacks(packArtifacts),
+    createComposition: () => assembleProductPacks(packArtifacts),
   });
   await session.world.clock({ kind: 'pause' });
   const interactive = options.repl || Boolean(process.stdin.isTTY && process.stdout.isTTY && !options.json);

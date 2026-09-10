@@ -34,8 +34,11 @@ const items = () =>
   ]);
 
 describe('item durability definitions and normalization', () => {
-  it('keeps default Overworld definitions state-less and validates bounded durable tools', () => {
-    expect(defaultItemDefinitionRegistry.list().every((item) => item.durability === undefined)).toBe(true);
+  it('defines Overworld mining durability and validates bounded custom durable tools', () => {
+    expect(defaultItemDefinitionRegistry.require('wood-pickaxe').durability).toEqual({ max: 60 });
+    expect(defaultItemDefinitionRegistry.require('stone-pickaxe').durability).toEqual({ max: 132 });
+    expect(defaultItemDefinitionRegistry.require('iron-pickaxe').durability).toEqual({ max: 250 });
+    expect(defaultItemDefinitionRegistry.require('wood-sword').durability).toBeUndefined();
     expect(items().require('test:hammer')).toMatchObject({ durability: { max: 100 }, stackLimit: 1 });
 
     for (const invalid of [0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1]) {

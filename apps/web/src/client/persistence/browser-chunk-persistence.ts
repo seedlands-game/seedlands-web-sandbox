@@ -9,7 +9,7 @@ import {
   readGameSaveCheckpoint,
   type GameSaveCheckpoint,
 } from '@seedlands/game-core/server/persistence/game-save-checkpoint';
-import { GENERATOR_VERSION, Voxel, chunkKey } from '@seedlands/game-core/world/voxel';
+import { GENERATOR_VERSION, Voxel, chunkKey, MAX_VOXEL_ID } from '@seedlands/game-core/world/voxel';
 import { prepareBrowserLoadResult, type PreparedBrowserLoadResult } from './browser-persistence-load';
 import {
   parseBrowserPersistenceLoadBatchResult,
@@ -122,7 +122,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
           !Number.isInteger(snapshot.revision) ||
           snapshot.revision < 0 ||
           snapshot.voxels.length !== 32 ** 3 ||
-          !snapshot.voxels.every((voxel) => Number.isInteger(voxel) && voxel >= Voxel.Air && voxel <= Voxel.Lantern)
+          !snapshot.voxels.every((voxel) => Number.isInteger(voxel) && voxel >= Voxel.Air && voxel <= MAX_VOXEL_ID)
         )
           throw new Error(`Legacy Chunk snapshot is invalid for ${snapshot.key}.`);
       const snapshots: ChunkSnapshot[] = options.legacySnapshots.map(({ voxels, fluid, ...snapshot }) => ({

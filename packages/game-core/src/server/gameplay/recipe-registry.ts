@@ -32,11 +32,11 @@ export function createRecipeRegistry(
       const seen = new Set<string>();
       return Object.freeze(
         stacks.map((stack) => {
-          items.assertStack(stack);
-          if (seen.has(stack.itemId))
-            throw new TypeError(`Duplicate ${side} item in recipe ${source.id}: ${stack.itemId}`);
-          seen.add(stack.itemId);
-          return Object.freeze({ ...stack });
+          const normalized = items.normalizeStack(stack);
+          if (seen.has(normalized.itemId))
+            throw new TypeError(`Duplicate ${side} item in recipe ${source.id}: ${normalized.itemId}`);
+          seen.add(normalized.itemId);
+          return Object.freeze(normalized);
         }),
       );
     };

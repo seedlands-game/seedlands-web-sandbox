@@ -1,3 +1,4 @@
+import { prepareHeadlessCheckpointCandidate } from './headless-checkpoint-candidate';
 import { createHeadlessGameplayAuthorities, headlessModuleCommandBinding } from './headless-gameplay-authority';
 import { resolveHeadlessWorldHarness } from './headless-gameplay-authority';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
@@ -34,6 +35,7 @@ export type HeadlessFrequencies = AuthorityFrequencies;
 
 export type HeadlessSessionOptions = Readonly<{
   seedText: string;
+  generatorVersion?: number;
   platform: CorePlatformPorts;
   createComposition?: () => WorldComposition;
   epoch?: string;
@@ -170,6 +172,7 @@ export class HeadlessSession {
     return AuthorityRuntime.create({
       epoch,
       seedText: options.seedText,
+      generatorVersion: options.generatorVersion,
       platform: options.platform,
       composition,
       ...createHeadlessGameplayAuthorities(
@@ -266,24 +269,17 @@ export class HeadlessSession {
   }
 
   private async restoreCheckpoint(snapshot: FrozenGameSaveSnapshot): Promise<void> {
-    const persistence = new MemoryGamePersistence({ clone: this.platform.clone });
-    persistence.saveFrozenSnapshot(snapshot);
-    const nextEpoch = `${this.epoch}:restore:${snapshot.commitSequence}:${snapshot.worldRevision}`;
-    const holder = { session: this };
-    const candidate = await HeadlessSession.createRuntime(
+    const { candidate, persistence, nextEpoch } = await prepareHeadlessCheckpointCandidate(
+      snapshot,
       {
-        seedText: snapshot.seedText,
         platform: this.platform,
         createComposition: this.createComposition,
         worldHarness: this.customWorldHarness,
-        epoch: nextEpoch,
-        initialWorldTime: snapshot.gameplay.worldTime ?? 9,
+        epoch: this.epoch,
         frequencies: this.frequenciesValue,
       },
-      persistence,
-      nextEpoch,
-      holder,
-      this.frequenciesValue,
+      (options, persistence, epoch) =>
+        HeadlessSession.createRuntime(options, persistence, epoch, { session: this }, this.frequenciesValue),
     );
     candidate.commitHostActivation();
     candidate.pause(candidate.sessionTimeMs);

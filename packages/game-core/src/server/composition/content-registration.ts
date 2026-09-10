@@ -8,7 +8,11 @@ const assertId = (id: string, kind: string) => {
 const freezeItemAmount = (amount: ModItemAmount, label: string): ModItemAmount => {
   if (!NAMESPACE_ID.test(amount.itemId)) throw new TypeError(`${label} item id is invalid: ${amount.itemId}`);
   if (!Number.isSafeInteger(amount.count) || amount.count <= 0) throw new TypeError(`${label} count must be positive.`);
-  return Object.freeze({ ...amount });
+  return Object.freeze({
+    itemId: amount.itemId,
+    count: amount.count,
+    ...(amount.instance !== undefined ? { instance: Object.freeze({ ...amount.instance }) } : {}),
+  });
 };
 
 export function createContentRegistration() {

@@ -1,3 +1,4 @@
+import { isActorEntityType } from '../ecs-actor-state';
 import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import type { WorldComposition, ModuleInvocationValue } from '../../composition/contracts';
 import type { ModStateAddress } from '../../composition/operation-contracts';
@@ -90,10 +91,17 @@ export function createCombatHostEnvironment(options: CombatHostEnvironmentOption
   const projectActor = (id: string) => {
     const entity = entities.get(id),
       reference = entities.createReference(id);
-    if (!entity || !reference || entity.type === 'world-item') throw new TypeError('Combat actor is unavailable.');
+    if (!entity || !reference || !isActorEntityType(entity.type)) throw new TypeError('Combat actor is unavailable.');
     const access = entities.actorStateAccess(id);
     const selected = access.inventory.slot(access.selectedSlot);
     const melee = selected ? options.content.items.capability(selected.itemId, 'melee') : undefined;
+    const definitionId =
+      entity.type === 'player'
+        ? (melee?.definitionId ?? options.content.actorProfiles.defaultPlayerMeleeDefinitionId)
+        : entity.archetype
+          ? options.content.actorProfiles.get(entity.archetype)?.meleeDefinitionId
+          : undefined;
+    if (!definitionId) throw new TypeError('Combat actor has no configured melee definition.');
     const pending = options
       .simulation()
       .combat.peekPendingHits()
@@ -106,12 +114,7 @@ export function createCombatHostEnvironment(options: CombatHostEnvironmentOption
       maxHealth: access.maxHealth,
       lifecycle: access.lifecycle,
       mode: { value: access.mode, revision: access.modeRevision },
-      meleeDefinitionId:
-        entity.type === 'player'
-          ? (melee?.definitionId ?? 'unarmed')
-          : entity.archetype === 'night-stalker'
-            ? 'night-stalker-claw'
-            : 'unarmed',
+      meleeDefinitionId: definitionId,
       combat: options.simulation().combat.snapshotFor(id),
       pending: pending ? { token: pending.token, targetId: pending.targetId, baseDamage: pending.baseDamage } : null,
     });

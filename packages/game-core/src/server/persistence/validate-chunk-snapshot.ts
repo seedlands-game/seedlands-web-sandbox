@@ -1,4 +1,4 @@
-import { CHUNK_SIZE, Voxel } from '../../world/voxel';
+import { CHUNK_SIZE, Voxel, MAX_VOXEL_ID } from '../../world/voxel';
 import type { ChunkSnapshot } from './chunk-persistence';
 
 export function isValidChunkSnapshot(
@@ -19,6 +19,6 @@ export function isValidChunkSnapshot(
       (snapshot.fluidVersion === 1 &&
         snapshot.fluid.length === CHUNK_SIZE ** 3 &&
         snapshot.fluid.every((value) => value === 0 || ((value & 0x0f) >= 1 && (value & 0x0f) <= 8)))) &&
-    snapshot.voxels.every((value) => value >= Voxel.Air && value <= Voxel.Lantern)
+    snapshot.voxels.every((value) => value >= Voxel.Air && value <= MAX_VOXEL_ID)
   );
 }

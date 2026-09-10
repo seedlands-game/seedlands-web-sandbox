@@ -14,6 +14,14 @@ export const ItemIds = Object.freeze({
   SandBlock: 'sand-block',
   Berry: 'berry',
   Plank: 'plank',
+  Workbench: 'workbench',
+  Chest: 'chest',
+  Furnace: 'furnace',
+  Coal: 'coal',
+  RawIron: 'raw-iron',
+  IronIngot: 'iron-ingot',
+  WoodPickaxe: 'wood-pickaxe',
+  IronPickaxe: 'iron-pickaxe',
   WoodAxe: 'wood-axe',
   StonePickaxe: 'stone-pickaxe',
   GlowstoneBlock: 'glowstone-block',
@@ -25,7 +33,13 @@ export type ItemId = string;
 export type ItemStack = { itemId: ItemId; count: number; instance?: ItemInstanceState };
 export type PlaceItemCapability = Readonly<{ type: 'place'; voxel: number }>;
 export type ConsumeItemCapability = Readonly<{ type: 'consume'; hungerRestore: number }>;
-export type MineItemCapability = Readonly<{ type: 'mine'; tool: 'axe' | 'pickaxe'; multiplier: number }>;
+export type MineItemCapability = Readonly<{
+  type: 'mine';
+  tool: 'axe' | 'pickaxe';
+  multiplier: number;
+  /** Omitted legacy tiers are interpreted as tier zero by mining policy. */
+  tier?: number;
+}>;
 export type MeleeItemCapability = Readonly<{ type: 'melee'; definitionId: string }>;
 export type ItemCapability = PlaceItemCapability | ConsumeItemCapability | MineItemCapability | MeleeItemCapability;
 export type ItemCapabilityType = ItemCapability['type'];
@@ -95,7 +109,14 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
       throw new TypeError(`Place capability is invalid: ${input.id}`);
     if (source.type === 'consume' && (!Number.isFinite(source.hungerRestore) || source.hungerRestore <= 0))
       throw new TypeError(`Consume capability is invalid: ${input.id}`);
-    if (source.type === 'mine' && (!Number.isFinite(source.multiplier) || source.multiplier <= 1))
+    if (source.type === 'mine' && source.tool !== 'axe' && source.tool !== 'pickaxe')
+      throw new TypeError(`Mine capability is invalid: ${input.id}`);
+    if (
+      source.type === 'mine' &&
+      (!Number.isFinite(source.multiplier) ||
+        source.multiplier <= 1 ||
+        (source.tier !== undefined && (!Number.isSafeInteger(source.tier) || source.tier < 0)))
+    )
       throw new TypeError(`Mine capability is invalid: ${input.id}`);
     if (source.type === 'melee' && !source.definitionId.trim())
       throw new TypeError(`Melee capability is invalid: ${input.id}`);

@@ -1,3 +1,4 @@
+import type { ItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 import * as pc from 'playcanvas';
 import type { GameplayEntityView } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { damageFlash, movementPose } from '../../client/presentation/entity-presentation-motion';
@@ -35,7 +36,10 @@ export class GameplayEntityPresenter {
   private readonly assetsLease: GameplayModelAssetsLease;
   private readonly bindings: NonNullable<AppearanceProject['animationBindings']>;
 
-  constructor(private readonly app: pc.Application) {
+  constructor(
+    private readonly app: pc.Application,
+    private readonly resolveItem?: (id: string) => ItemDefinition | null,
+  ) {
     this.assetsLease = acquireGameplayModelAssets(app);
     this.bindings = getAppearanceAnimationBindings(app);
   }
@@ -128,7 +132,14 @@ export class GameplayEntityPresenter {
     // movementPose's yaw defines local -Z as forward. Keep authored facial layout independent of that shared contract.
     if (entity.type !== 'world-item') visual.setLocalEulerAngles(0, 180, 0);
     node.addChild(visual);
-    if (entity.type === 'world-item') this.assets.addItem(visual, entity.stack?.itemId ?? '', 1);
+    if (entity.type === 'world-item')
+      this.assets.addItem(
+        visual,
+        entity.stack?.itemId ?? '',
+        1,
+        undefined,
+        this.resolveItem?.(entity.stack?.itemId ?? ''),
+      );
     else if (entity.archetype === 'grazer') addBuiltinActorModel(this.assets, visual, 'grazer');
     else if (entity.archetype === 'night-stalker') addBuiltinActorModel(this.assets, visual, 'stalker');
     else if (entity.archetype === 'settler') addBuiltinActorModel(this.assets, visual, 'settler');

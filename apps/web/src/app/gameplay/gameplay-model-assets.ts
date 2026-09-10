@@ -13,7 +13,7 @@ import { builtinTerrainTextures, terrainMaterials } from '../../client/presentat
 import { Voxel, type FaceMaterialId } from '@seedlands/game-core/world/voxel';
 
 import { createPixelMaterial, createPixelMesh, addPixelNode } from './pixel-model-resource';
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { getItemDefinition, type ItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 import { acceptsPixelItem } from '../../client/presentation/asset-adapters';
 import { getAppearanceResources, hasAppearanceBinding } from './appearance-runtime';
 
@@ -138,8 +138,16 @@ export class GameplayModelAssets {
     return part;
   }
 
-  addItem(parent: pc.Entity, itemId: string, scale = 1, resolvedAssets?: readonly Asset[]): void {
-    const item = getItemDefinition(itemId);
+  addItem(
+    parent: pc.Entity,
+    itemId: string,
+    scale = 1,
+    resolvedAssets?: readonly Asset[],
+    worldItem?: ItemDefinition | null,
+  ): void {
+    if (worldItem === null || (worldItem && worldItem.id !== itemId))
+      throw new TypeError('World item definition is unavailable or mismatched.');
+    const item = worldItem ?? getItemDefinition(itemId);
     const modelId = `builtin:model:${itemId}`;
     const currentAssets = this.toolAssets(modelId, resolvedAssets);
     const currentTool = this.toolDefinition(itemId, currentAssets);

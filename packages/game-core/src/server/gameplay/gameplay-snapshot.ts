@@ -1,3 +1,4 @@
+import type { StationStateCodec } from './ecs-station-state';
 import { validateBlockBreakAction } from './modules/block-action-model';
 import type { CombatOriginRuntimeOptions } from './combat-origin';
 import type { ModuleScheduleSnapshot } from '../composition/lifecycle-contracts';
@@ -10,6 +11,7 @@ import type { CoreClone } from '../../runtime/platform-ports';
 import type { MeleeDefinition } from './combat-runtime';
 import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry } from './item-registry';
 import type { CompositionCheckpointIdentity } from '../composition/checkpoint-identity';
+import type { ActorProfileRegistry } from './actor-profile';
 
 type Position = [number, number, number];
 
@@ -81,7 +83,9 @@ type GameplaySnapshotValidationOptions = {
   getWorldTime: () => number;
   clone: CoreClone;
   items?: ItemDefinitionRegistry;
+  stationCodec?: StationStateCodec;
   meleeDefinitions?: readonly MeleeDefinition[];
+  actorProfiles?: ActorProfileRegistry;
   registeredNeeds?: boolean;
   registeredFeeding?: boolean;
   registeredBlocks?: boolean;
@@ -204,7 +208,8 @@ export function validateGameplaySnapshot(
   if (!Number.isFinite(worldTime) || worldTime < 0 || worldTime >= 24) throw new TypeError('world time is invalid');
 
   const sourceVersion = source.version;
-  const entities = new EntityStore(options.items ?? defaultItemDefinitionRegistry);
+  const items = options.items ?? defaultItemDefinitionRegistry;
+  const entities = new EntityStore(items, options.stationCodec);
   const players = new Map<string, PlayerState>();
   const legacyCombatLockouts = new Map<string, number>();
   try {
@@ -233,6 +238,17 @@ export function validateGameplaySnapshot(
         sourceVersion === 3
           ? options.clone(source.players)
           : source.players.map((player) => migrateLegacyPlayer(player, options.clone));
+      // Only V1-V3 may omit tool instances; the normalized V4 output is strict thereafter.
+      for (const entity of migratedEntities) {
+        if (entity.type === 'world-item' && entity.stack)
+          entity.stack = items.normalizeStack(entity.stack, { migrateLegacyDurability: 'initialize-at-max' });
+      }
+      for (const player of migratedPlayers) {
+        if (!Array.isArray(player.inventory)) throw new TypeError('Legacy player inventory is invalid.');
+        player.inventory = player.inventory.map((stack) =>
+          stack === null ? null : items.normalizeStack(stack, { migrateLegacyDurability: 'initialize-at-max' }),
+        );
+      }
       entities.restore(migratedEntities, source.entitySequence);
       migratedPlayers.forEach((player) => {
         validatePlayerSnapshot(player);
@@ -275,6 +291,7 @@ export function validateGameplaySnapshot(
       isPlayerAlive: (id) => players.get(id)?.lifecycle === 'alive',
       clone: options.clone,
       meleeDefinitions: options.meleeDefinitions,
+      actorProfiles: options.actorProfiles,
       combatOrigin: options.combatOriginFor?.(entities),
     });
     validator.restore(simulationSnapshotFor(source));

@@ -90,6 +90,7 @@ export class AuthorityMutationPreparation {
     const keys = new Set<string>();
     if (action.type === 'place' || action.type === 'begin-break')
       this.addVoxelTarget(keys, playerId, action.position, 5);
+    if (action.type === 'station') this.addEntitySegment(keys, playerId, action.reference.entityId, 5);
     if (action.type === 'attack') this.addEntitySegment(keys, playerId, action.targetId, 3);
     return this.prepareKeys(keys);
   }

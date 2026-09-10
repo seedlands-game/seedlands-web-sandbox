@@ -1,3 +1,4 @@
+import { BrowserStations, type StationUiCommand } from './browser-stations';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
 import type { VoxelTarget } from '../../client/presentation/voxel-target';
@@ -57,13 +58,15 @@ export class BrowserGameplay {
   private aimTarget: VoxelTarget | null = null;
   private gestureSeconds = 0;
   private inventoryOpen = false;
+  readonly stations: BrowserStations;
   private previousProjection: GameplayUiProjection | undefined;
   private previousHealth: number | null = null;
   private lastCombatResultSequence: number | null = null;
   private breakProjectionElapsedSeconds = Number.POSITIVE_INFINITY;
 
   constructor(private readonly options: Options) {
-    this.presenter = new GameplayEntityPresenter(options.app);
+    this.stations = new BrowserStations(() => options.authority.gameplay);
+    this.presenter = new GameplayEntityPresenter(options.app, (id) => this.itemDefinition(id) ?? null);
     this.viewmodel = new FirstPersonViewmodel(options.app, options.camera);
     this.outline = new VoxelTargetOutline(options.app);
     this.breakOverlay = new VoxelBreakOverlay(options.app);
@@ -140,7 +143,7 @@ export class BrowserGameplay {
       state.mode?.value === 'creative'
         ? (state.creativeCatalog?.hotbar[state.creativeCatalog.selectedSlot] ?? null)
         : (state.inventory[state.selectedSlot]?.itemId ?? null);
-    this.viewmodel.setHeldItem(heldItem);
+    this.viewmodel.setHeldItem(heldItem, heldItem ? (this.itemDefinition(heldItem) ?? null) : undefined);
     this.viewmodel.setCombatAction(state.combat?.active ?? null);
     this.viewmodel.setVisible(!this.blocksInput);
     if (!this.gestureSeconds) this.viewmodel.setAction(state.breakAction ? 'mine' : 'idle');
@@ -202,6 +205,8 @@ export class BrowserGameplay {
           creativeCatalog: player.creativeCatalog,
           flight: player.flight,
         },
+        station: this.inventoryOpen ? this.stations.current() : null,
+        stationRecipes: view.stationRecipes,
         items: view.items,
         recipes: view.recipes,
         inventoryOpen: this.inventoryOpen,
@@ -290,6 +295,7 @@ export class BrowserGameplay {
 
   toggleInventory(): void {
     if (this.options.authority.gameplay.player.lifecycle === 'dead') return;
+    this.stations.clear();
     this.inventoryOpen = !this.inventoryOpen;
     if (this.inventoryOpen) this.options.releaseInput();
     this.refresh();
@@ -298,6 +304,7 @@ export class BrowserGameplay {
   closeInventory(): void {
     if (!this.inventoryOpen) return;
     this.inventoryOpen = false;
+    this.stations.clear();
     this.refresh();
   }
 
@@ -400,7 +407,25 @@ export class BrowserGameplay {
     });
   }
 
+  stationAction(command: StationUiCommand): void {
+    const action = this.stations.action(command);
+    if (!action) return this.feedback('工位已不可达，请重新打开', 'error');
+    void this.action(action, (result) => {
+      this.feedback(
+        result.success ? '工位已更新' : '操作未完成：工位已变化、材料不匹配或目标格已满',
+        result.success ? 'success' : 'error',
+      );
+      if (result.success) this.options.queueSave();
+    });
+  }
+
   useHeldItem(): boolean {
+    if (this.aimTarget && this.stations.open(this.aimTarget.position)) {
+      this.inventoryOpen = true;
+      this.options.releaseInput();
+      this.refresh();
+      return true;
+    }
     const player = this.options.authority.gameplay.player;
     if (player.mode?.value === 'creative') return false;
     const stack = player.inventory[player.selectedSlot];

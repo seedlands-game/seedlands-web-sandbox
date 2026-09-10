@@ -1,3 +1,4 @@
+import { isActorEntityType } from './ecs-actor-state';
 import type { EntityStore } from './entity-store';
 import type { ItemStack } from './item-registry';
 import { prepareEntityMutation } from './prepared-entity-mutation';
@@ -15,7 +16,7 @@ export function prepareCombatDamage(
     throw new TypeError('Combat damage must be finite and non-negative.');
   const target = options.entities.get(options.targetId);
   const reference = options.entities.createReference(options.targetId);
-  if (!target || !reference || target.type === 'world-item' || target.health === undefined || target.health <= 0)
+  if (!target || !reference || !isActorEntityType(target.type) || target.health === undefined || target.health <= 0)
     throw new Error('Combat target is unavailable.');
   const health = Math.max(0, target.health - options.damage);
   const damage = target.health - health;

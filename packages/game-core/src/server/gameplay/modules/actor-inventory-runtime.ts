@@ -44,12 +44,17 @@ export class ActorInventoryRuntime {
       JSON.stringify(actor.inventory.slot(actor.selectedSlot)) !== JSON.stringify(candidate.slot(actor.selectedSlot));
     const cancellation = equippedChanged ? this.owner.prepareCancelCombat(id) : undefined;
     const slots = candidate.snapshot();
+    const components = this.owner.entities.actorComponentSnapshot(id);
     const mutation = prepareEntityMutation(this.owner.entities, {
       actors: [
         {
           reference: this.owner.entities.createReference(id)!,
           health: actor.health,
-          components: { ...this.owner.entities.actorComponentSnapshot(id), inventory: slots },
+          components: {
+            ...components,
+            inventory: slots,
+            ...(equippedChanged && components.player ? { player: { ...components.player, breakAction: null } } : {}),
+          },
         },
       ],
     });

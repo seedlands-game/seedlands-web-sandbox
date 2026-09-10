@@ -64,6 +64,7 @@ const initialShell = (): ShellState => ({
   commandStatusState: 'idle',
   experience: null,
   gameplay: {
+    station: null,
     inventoryOpen: false,
     lifecycle: 'alive',
     mode: 'survival',

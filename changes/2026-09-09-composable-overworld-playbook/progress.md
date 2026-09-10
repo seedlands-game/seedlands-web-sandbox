@@ -138,3 +138,9 @@ Place/Break/clock/finish 已接入真实注册 owner，开发者 give/remove 采
 Inventory / Block / Combat 已补原始 actor execute 的调用者与模块检查，延迟采集/命中重新验证，实际撤权反例由 RED 转为 GREEN。默认方块定义已归 Overworld，并由规则 capability 提供实际世界查询，省略 provider 不隐式返回默认内容。完整 static 1632 passed / 4 skipped、build、Browser 12/12 分别通过；任务 4173 端口已释放。准确证据见 [跨目标授权](s3-secondary-actor-permissions.md)与[方块内容](s3-block-content-design.md)。
 
 S3 核心实际消费者已接入；仍需默认内容与替代装配共同验证收尾，阶段保持 Implementing。S4 工位 owner 与工具成长接线继续推进，候选函数通过不代表世界/保存/UI 已完成。没有推送、PR 或合并。
+
+## S4 / S5 集成冻结准备（2026-09-10）
+
+工位 ECS/保存/驻留、木石铁耐久与 V4 矿物、可再生食物、实际 UI 成长已实现；成长生产 Browser 1/1、两日 Headless 1/1 与静态中间检查 1733/4 分别通过。角色配置与可选生态正在最后收尾，独立点击转换/纯建造 Headless 2/2 已通过，当前世界独立物品模型回归 20/20。详细失败与证据见 S4 工位记录和 S5 provider 记录。
+
+最新主干已读取到 `baeba09`（#27，CI 与动态阴影）；将先保存当前实现提交，再同步此已合并基线并重跑最终 static、build、Browser。新增跨宿主与生存 HUD 浏览器场景尚未运行，不预填准出。S6 还需固定提交独立审阅、完整 T01–T14 映射与 PR/CI 读回。自动续跑保持，未停止目标。

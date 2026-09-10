@@ -52,7 +52,7 @@ const itemDefinitions = [
     name: 'Pickaxe',
     itemType: 'tool' as const,
     stackLimit: 1,
-    capabilities: [{ type: 'mine' as const, tool: 'pickaxe' as const, multiplier: 6 }],
+    capabilities: [{ type: 'mine' as const, tool: 'pickaxe' as const, tier: 1, multiplier: 6 }],
   },
 ] as const;
 const content = createGameplayContent({

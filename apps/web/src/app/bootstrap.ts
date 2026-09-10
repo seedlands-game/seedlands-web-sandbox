@@ -81,6 +81,7 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
       setCreativeSlot: (slot, itemId) => game.setModeControl({ type: 'set-creative-slot', slot, itemId }),
       toggleInventory: () => game.toggleInventory(),
       closeInventory: () => game.closeInventory(),
+      stationAction: (command) => game.stationAction(command),
       craftRecipe: (recipeId) => game.craftRecipe(recipeId),
       moveInventorySlot: (source, target) => game.moveInventorySlot(source, target),
       useInventoryItem: (slot) => game.useInventoryItem(slot),

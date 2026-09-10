@@ -27,3 +27,5 @@ export type {
 export { createGameplaySystemAuthority } from './gameplay-system-authority';
 
 export { createGameplayActorAuthority, type ModuleActorAuthority } from './gameplay-actor-authority';
+
+export { assembleProductPacks } from './product-playbooks';

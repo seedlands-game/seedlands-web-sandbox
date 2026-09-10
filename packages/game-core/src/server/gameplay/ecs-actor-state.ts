@@ -19,6 +19,11 @@ import type { BreakAction } from './player-state';
 type Components = ReturnType<typeof createActorComponents>;
 const CREATIVE_HOTBAR_SIZE = 8;
 
+export const isActorEntityType = (
+  type: GameplayEntity['type'],
+): type is Extract<GameplayEntity['type'], 'player' | 'creature' | 'npc'> =>
+  type === 'player' || type === 'creature' || type === 'npc';
+
 const defaultModeFacets = () => ({
   mode: { version: 1 as const, value: 'survival' as const, revision: 0 },
   creativeCatalog: {
@@ -37,7 +42,7 @@ export function initializeActorComponents(
   entity: GameplayEntity,
   items: ItemDefinitionRegistry,
 ): void {
-  if (entity.type === 'world-item') return;
+  if (!isActorEntityType(entity.type)) return;
   const player = entity.type === 'player';
   addComponents(
     world,

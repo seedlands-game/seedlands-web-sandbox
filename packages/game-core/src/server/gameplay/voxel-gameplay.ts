@@ -4,6 +4,7 @@ import { overworldBlocks } from './playbooks/overworld/blocks';
 export type VoxelGameplayDefinition = Readonly<{
   voxel: number;
   hardnessSeconds: number | null;
+  minimumTier?: number;
   preferredTool: 'axe' | 'pickaxe' | null;
   drop: Readonly<ItemStack> | null;
   replaceable: boolean;

@@ -1,6 +1,7 @@
 import type { WorldComposition } from './contracts';
 import { WorldResourceAuthorizer } from '../harness/world-authorization';
 import type { ModuleSystemAuthority } from '../gameplay/modules/gameplay-module-schedule';
+import { FORAGE_RESOURCE } from '../gameplay/modules/forage-model';
 
 /** Explicit product host policy; module permission requests never add grants here. */
 export function createGameplaySystemAuthority(composition: WorldComposition): ModuleSystemAuthority {
@@ -14,7 +15,12 @@ export function createGameplaySystemAuthority(composition: WorldComposition): Mo
           {
             effect: 'allow',
             principal: { ids: [principalId] },
-            resources: ['seedlands.needs', 'seedlands.combat-clock', 'seedlands.block-clock'],
+            resources: [
+              'seedlands.needs',
+              'seedlands.combat-clock',
+              'seedlands.block-clock',
+              'seedlands.furnace-clock',
+            ],
             operations: ['read', 'write', 'execute'],
             scope: 'any',
           },
@@ -23,6 +29,13 @@ export function createGameplaySystemAuthority(composition: WorldComposition): Mo
             principal: { ids: [principalId] },
             resources: ['seedlands.ruleset'],
             operations: ['read'],
+            scope: 'any',
+          },
+          {
+            effect: 'allow',
+            principal: { ids: [principalId] },
+            resources: [FORAGE_RESOURCE],
+            operations: ['read', 'execute'],
             scope: 'any',
           },
         ],

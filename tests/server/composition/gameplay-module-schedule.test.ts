@@ -39,6 +39,8 @@ function setup(allow = true) {
       ...overworld.modules.filter(
         (entry) =>
           ![
+            'seedlands:station-actions-module',
+            'seedlands:forage-module',
             'seedlands:feeding-actions-module',
             'seedlands:overworld-feeding-rules',
             'seedlands:needs-module',

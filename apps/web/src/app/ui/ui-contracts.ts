@@ -1,3 +1,5 @@
+import type { StationUiCommand } from '../gameplay/browser-stations';
+import type { StationUiPresentation } from './station-ui-projector';
 import type { CombatUiProjection } from './combat-ui-projector';
 import type { SlashCommandExecution } from '@seedlands/game-core/server/commands/slash-command-parser';
 import type { QualityLevel } from '../scene/quality-profile';
@@ -10,6 +12,7 @@ export type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hyd
 export type FeedbackTone = 'info' | 'success' | 'error';
 export type ActorMode = 'survival' | 'creative';
 export type ModeControl = ModeCommand;
+export type StationControl = StationUiCommand;
 
 export type CommandEntry = {
   input: string;
@@ -35,6 +38,7 @@ export type ShellState = Readonly<{
   commandStatusState: 'idle' | 'running' | 'success' | 'error';
   experience: 'melee-showcase' | null;
   gameplay: Readonly<{
+    station?: StationUiPresentation | null;
     inventoryOpen: boolean;
     lifecycle: 'alive' | 'dead';
     mode: ActorMode;
@@ -137,6 +141,7 @@ export type UiActionPort = {
   toggleInventory: () => void;
   closeInventory: () => void;
   craftRecipe: (recipeId: string) => void;
+  stationAction: (command: StationUiCommand) => void;
   moveInventorySlot: (source: number, target: number) => void;
   useInventoryItem: (slot: number) => void;
   respawn: () => void;

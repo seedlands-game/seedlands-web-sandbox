@@ -10,11 +10,15 @@ export const packApiBoundaryRule = {
   create(context) {
     const filename = context.filename.replaceAll('\\', '/');
     const marker = '/server/gameplay/playbooks/';
+    const examples = '/changes/2026-09-09-composable-overworld-playbook/examples/';
     const offset = filename.indexOf(marker);
-    if (offset < 0) return {};
+    const exampleOffset = filename.indexOf(examples);
+    if (offset < 0 && exampleOffset < 0) return {};
     const base = filename.slice(0, offset + marker.length);
-    const ownDirectory = filename.slice(base.length).split('/')[0];
-    const root = path.resolve(base, ownDirectory);
+    const root =
+      exampleOffset >= 0
+        ? path.resolve(filename.slice(0, exampleOffset + examples.length))
+        : path.resolve(base, filename.slice(base.length).split('/')[0]);
     const allowed = (source) => {
       if (typeof source !== 'string') return false;
       if (source === '@seedlands/game-core/mod-api') return true;

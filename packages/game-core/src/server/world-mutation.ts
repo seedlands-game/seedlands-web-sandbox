@@ -1,4 +1,4 @@
-import { CHUNK_SIZE, Voxel, floorDiv } from '../world/voxel';
+import { CHUNK_SIZE, Voxel, floorDiv, MAX_VOXEL_ID } from '../world/voxel';
 
 export type VoxelEdit = { x: number; y: number; z: number; value: number };
 export type WorldMutationBufferOptions = {
@@ -25,7 +25,7 @@ export function assertMutationCoordinate(value: number): void {
 }
 
 export function assertVoxelValue(value: number): void {
-  if (!Number.isInteger(value) || value < Voxel.Air || value > Voxel.Lantern)
+  if (!Number.isInteger(value) || value < Voxel.Air || value > MAX_VOXEL_ID)
     throw new RangeError(`Mutation voxel must be a registered voxel id, received ${String(value)}.`);
 }
 

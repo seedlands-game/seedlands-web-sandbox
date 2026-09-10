@@ -1,3 +1,4 @@
+import { prepareBlockStationEffects } from './block-station-effects';
 import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import { buildBlockActionCandidate, buildBlockAdvanceUpdates } from './block-actions-module';
 import type { WorldComposition, ModuleInvocationValue } from '../../composition/contracts';
@@ -189,6 +190,10 @@ export function prepareRegisteredBlockCommit(
     }
   };
   validateCondition();
+  const stationEffects = prepareBlockStationEffects(
+    { ...options, authorizer: execution.authorizer, context },
+    candidate.voxelEdit ?? undefined,
+  );
   const components = options.entities.actorComponentSnapshot(id);
   const world = candidate.voxelEdit
     ? options.prepareVoxelEdit(id, [...candidate.voxelEdit.position], candidate.voxelEdit.toVoxel)
@@ -197,6 +202,7 @@ export function prepareRegisteredBlockCommit(
   const inventoryChanged = !same(actor.slots, candidate.slots);
   const changed = Boolean(world) || inventoryChanged || !same(actor.breakAction, nextBreak);
   const mutation = prepareEntityMutation(options.entities, {
+    ...stationEffects.input,
     actors: [
       {
         reference: candidate.actorReference,
@@ -208,9 +214,17 @@ export function prepareRegisteredBlockCommit(
         },
       },
     ],
-    spawns: candidate.dropIntent
-      ? [{ position: [...candidate.dropIntent.position], stack: candidate.dropIntent.stack }]
-      : [],
+    spawns: [
+      ...(candidate.dropIntent
+        ? [
+            {
+              position: [...candidate.dropIntent.position] as [number, number, number],
+              stack: candidate.dropIntent.stack,
+            },
+          ]
+        : []),
+      ...stationEffects.drops,
+    ],
   });
   const equippedChanged = !same(
     actor.slots[actor.equipment.selectedSlot],
@@ -219,6 +233,7 @@ export function prepareRegisteredBlockCommit(
   const cancellation = equippedChanged ? options.simulation().prepareCancellation([id], 'slot-changed') : undefined;
   const receipt = world ? prepareReceipt(world.result) : undefined;
   const parts: Participant[] = [
+    { validate: stationEffects.validate, apply() {} },
     mutation,
     ...(cancellation ? [cancellation] : []),
     ...(world ? [world] : []),

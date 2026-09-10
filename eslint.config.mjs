@@ -385,7 +385,10 @@ export default tseslint.config(
     rules: { 'seedlands/server-purity': 'error' },
   },
   {
-    files: ['packages/game-core/src/server/gameplay/playbooks/**/*.ts'],
+    files: [
+      'packages/game-core/src/server/gameplay/playbooks/**/*.ts',
+      'changes/2026-09-09-composable-overworld-playbook/examples/**/*.ts',
+    ],
     plugins: { seedlands },
     rules: { 'seedlands/pack-api-boundary': 'error' },
   },

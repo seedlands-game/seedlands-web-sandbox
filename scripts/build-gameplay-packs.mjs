@@ -9,10 +9,20 @@ import { loadVerifiedPackArtifacts } from './pack-integrity.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
-export async function buildGameplayPacks(outputDirectory = resolve(root, 'dist/packs')) {
+const playbooks = {
+  overworld: 'packages/game-core/src/server/gameplay/playbooks/overworld/pack.ts',
+  'click-conversion': 'changes/2026-09-09-composable-overworld-playbook/examples/click-conversion.ts',
+  builder: 'changes/2026-09-09-composable-overworld-playbook/examples/builder.ts',
+};
+
+export async function buildGameplayPacks(
+  outputDirectory = resolve(root, 'dist/packs'),
+  playbook = process.env.SEEDLANDS_PLAYBOOK ?? 'overworld',
+) {
+  if (!Object.hasOwn(playbooks, playbook)) throw new TypeError(`Unknown local Playbook: ${playbook}`);
   const result = await build({
     absWorkingDir: root,
-    entryPoints: ['packages/game-core/src/server/gameplay/playbooks/overworld/pack.ts'],
+    entryPoints: [playbooks[playbook]],
     bundle: true,
     write: false,
     format: 'esm',
@@ -24,7 +34,8 @@ export async function buildGameplayPacks(outputDirectory = resolve(root, 'dist/p
   const entryBytes = result.outputFiles[0].contents;
   const namespace = await import(`data:text/javascript;base64,${Buffer.from(entryBytes).toString('base64')}`);
   const manifest = namespace.pack?.manifest;
-  if (!manifest || manifest.entry !== 'overworld.mjs') throw new TypeError('Built Overworld Pack manifest is invalid.');
+  if (!manifest || manifest.entry !== `${playbook}.mjs` || manifest.id !== `seedlands:${playbook}`)
+    throw new TypeError('Built Playbook manifest is invalid.');
   const manifestBytes = Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`);
   const lock = {
     schemaVersion: 1,
@@ -32,7 +43,7 @@ export async function buildGameplayPacks(outputDirectory = resolve(root, 'dist/p
       {
         id: manifest.id,
         version: manifest.version,
-        manifest: { path: 'overworld.manifest.json', sha256: digest(manifestBytes) },
+        manifest: { path: `${playbook}.manifest.json`, sha256: digest(manifestBytes) },
         entry: { path: manifest.entry, sha256: digest(entryBytes) },
         resources: [],
       },
@@ -40,7 +51,7 @@ export async function buildGameplayPacks(outputDirectory = resolve(root, 'dist/p
   };
   await mkdir(outputDirectory, { recursive: true });
   await writeFile(resolve(outputDirectory, manifest.entry), entryBytes);
-  await writeFile(resolve(outputDirectory, 'overworld.manifest.json'), manifestBytes);
+  await writeFile(resolve(outputDirectory, `${playbook}.manifest.json`), manifestBytes);
   const lockPath = resolve(outputDirectory, 'packs.lock.json');
   await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
   await loadVerifiedPackArtifacts(lockPath);
@@ -49,7 +60,11 @@ export async function buildGameplayPacks(outputDirectory = resolve(root, 'dist/p
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const index = process.argv.indexOf('--out');
-  buildGameplayPacks(index < 0 ? undefined : resolve(process.argv[index + 1]))
+  const selected = process.argv.indexOf('--playbook');
+  buildGameplayPacks(
+    index < 0 ? undefined : resolve(process.argv[index + 1]),
+    selected < 0 ? undefined : process.argv[selected + 1],
+  )
     .then(({ lockPath }) => {
       process.stdout.write(`${JSON.stringify({ ok: true, lockPath })}\n`);
     })

@@ -1,3 +1,6 @@
+import type { EntityLifetimeReference } from '../server/gameplay/entity-store';
+import type { StationComponentV1 } from '../server/gameplay/ecs-station-state';
+import type { StationRecipe } from '../server/gameplay/modules/station-candidates';
 import type { ItemDefinition } from '../server/gameplay/item-registry';
 import type { Recipe } from '../server/gameplay/recipe-registry';
 import type { AuthoritySnapshot } from '../server/authority/authority-session';
@@ -42,7 +45,26 @@ export type AuthorityGameplayMetrics = Readonly<{
   simulationTime: number;
 }>;
 
+export type AuthorityStationView = Readonly<{
+  reference: EntityLifetimeReference;
+  position: readonly [number, number, number];
+  component: StationComponentV1;
+  craftableRecipeIds: readonly string[];
+  furnaceRecipeDuration?: number;
+}>;
+export type AuthorityStationAction = Readonly<{
+  type: 'station';
+  reference: EntityLifetimeReference;
+  expectedStationRevision: number;
+}> &
+  (
+    | Readonly<{ kind: 'craft'; recipeId: string }>
+    | Readonly<{ kind: 'transfer'; from: 'actor' | 'station'; actorSlot: number; stationSlot: number; count?: number }>
+  );
+
 export type AuthorityGameplayView = Readonly<{
+  nearbyStations?: readonly AuthorityStationView[];
+  stationRecipes?: readonly StationRecipe[];
   items?: readonly ItemDefinition[];
   recipes?: readonly Recipe[];
   gameplayRevision: number;
@@ -108,6 +130,7 @@ export type AuthorityBootstrapGeneration = Readonly<{
 }>;
 
 export type AuthorityAction =
+  | AuthorityStationAction
   | Readonly<{ type: 'select-hotbar'; slot: number }>
   | Readonly<{ type: 'craft'; recipeId: string }>
   | Readonly<{ type: 'attack'; targetId: string }>

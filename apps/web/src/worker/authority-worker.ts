@@ -2,7 +2,7 @@
 
 import { loadBrowserPackArtifacts } from './pack-loader';
 import {
-  assembleOverworldPacks,
+  assembleProductPacks,
   createGameplaySystemAuthority,
   createGameplayActorAuthority,
   type VerifiedPackArtifact,
@@ -119,7 +119,7 @@ const requestBootstrap = (seed: number, generatorVersion: number) => {
 };
 
 const runtimeComposition = () => {
-  const composition = assembleOverworldPacks(packArtifacts);
+  const composition = assembleProductPacks(packArtifacts);
   return {
     composition,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
@@ -186,6 +186,12 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
     nextRuntimeEpoch,
     nextFluidEpoch,
   );
+  try {
+    candidate.server.validateStationCheckpoint(snapshot);
+  } catch (error) {
+    candidate.server.disposeGameplay();
+    throw error;
+  }
   await currentPersistence.replaceFrozenSnapshot(snapshot);
   candidatePersistence.replace(currentPersistence);
   candidate.commitHostActivation();

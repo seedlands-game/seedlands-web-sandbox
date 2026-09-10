@@ -109,6 +109,15 @@ Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通�
 | Headless 世界开发与验证    | [server-headless.mjs](../scripts/server-headless.mjs)、[headless-session.ts](../packages/game-core/src/server/headless/headless-session.ts)                                                                                                                                                                                                  | [无浏览器会话](../tests/server/headless-session.test.ts)；持续 REPL / JSONL 与共享 world 端口；H1/H2 验收见 [change](../changes/2026-09-09-developer-world-harness/spec.md)   |
 | 调试、性能与边界门禁       | [game-harness.ts](../apps/web/src/app/game-harness.ts)、[performance-telemetry.ts](../apps/web/src/client/presentation/performance-telemetry.ts)、[eslint.config.mjs](../eslint.config.mjs)                                                                                                                                                  | [governance](../tests/governance/)、[浏览器性能样本](../tests/e2e/benchmark/initial-world.spec.ts)                                                                            |
 
+## 主世界工位、矿石与可再生食物
+
+- [ecs-station-state.ts](../packages/game-core/src/server/gameplay/ecs-station-state.ts) 与 [entity-store.ts](../packages/game-core/src/server/gameplay/entity-store.ts) 拥有工作台、箱子和熔炉的组件、身份与快照；[prepared-entity-mutation.ts](../packages/game-core/src/server/gameplay/prepared-entity-mutation.ts) 原子提交库存、工位、掉落和销毁。
+- [station-actions-module.ts](../packages/game-core/src/server/gameplay/modules/station-actions-module.ts) 注册公开操作和炉体时钟；[registered-station-runtime.ts](../packages/game-core/src/server/gameplay/modules/registered-station-runtime.ts) 适配实际 ECS owner、权限和最终校验；[block-station-effects.ts](../packages/game-core/src/server/gameplay/modules/block-station-effects.ts) 连接正常放置/采集。第一方配方位于 [overworld/stations.ts](../packages/game-core/src/server/gameplay/playbooks/overworld/stations.ts)。
+- [station-world-integrity.ts](../packages/game-core/src/server/station-world-integrity.ts) 校验体素/组件一致性，[station-world-residency.ts](../packages/game-core/src/server/station-world-residency.ts) 复用既有 canonical pin；[server-chunk-restore.ts](../packages/game-core/src/server/server-chunk-restore.ts) 统一持久化 chunk 准入构造。[headless-checkpoint-candidate.ts](../packages/game-core/src/server/headless/headless-checkpoint-candidate.ts) 在替换 owner 前准备并验证恢复候选。
+- [station-player-view.ts](../packages/game-core/src/server/gameplay/station-player-view.ts) 只投影玩家已获授权且可达的工位；[browser-stations.ts](../apps/web/src/app/gameplay/browser-stations.ts) 保存界面选择身份；[station-panel.svelte](../apps/web/src/app/ui/station-panel.svelte) 与 [station-ui-projector.ts](../apps/web/src/app/ui/station-ui-projector.ts) 显示权威槽位、配方和进度。
+- [ore-generation.ts](../packages/game-core/src/world/ore-generation.ts) 定义 V4 煤/铁矿石 hash，TS 与 Rust 使用同一规则并保留 V2/V3；[asset-progression-sources.ts](../apps/web/src/client/presentation/asset-progression-sources.ts) 提供成长物品的内置像素素材。
+- [forage-module.ts](../packages/game-core/src/server/gameplay/modules/forage-module.ts) 通过已有逻辑时钟注册可再生食物；[registered-forage-runtime.ts](../packages/game-core/src/server/gameplay/modules/registered-forage-runtime.ts) 只观察已载入体素并提交 ECS 掉落，不生成远处地形。[gameplay-entity-metrics.ts](../packages/game-core/src/server/gameplay/gameplay-entity-metrics.ts) 保持动态实体指标与静态工位分离。
+
 ## 阅读依赖时的注意点
 
 当前不存在一张“目录只向下依赖”的完整 DAG。例如：
@@ -186,3 +195,5 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 `server/gameplay/gameplay-registered-adapters.ts` 装配 Inventory、Combat、Block 与 Feeding 的注册宿主端口。`modules/feeding-model.ts`、`feeding-actions-module.ts` 与 `feeding-rules-module.ts` 分开纯投影候选、操作和显式默认规则；`registered-feeding-runtime.ts` 统一 ECS needs、world-item 与 `simulation/prepared-feeding-effects.ts` 的即时 Eat/Combat/自治效果。脚本 Logic 由 AuthorityWorldHarness 将实际主体绑定送达 AuthorityRuntime 和这些 owner，默认开发者主体在宿主间稳定，别名和授权仍由当前宿主决定。
 
 `server/composition/secondary-resource-authorization.ts` 检查跨资源操作对原始角色资源的调用者及模块 execute 授权；Inventory、Block、Combat 即时提交及延迟来源重绑定共享该检查，不把主目标执行授权扩展为角色写入权。
+
+`server/gameplay/modules/crafting-provider.ts` 定义冻结的匹配输入、槽位扣料计划与共享库存事务；`recipe-crafting-module.ts` 通过同一 capability 分别准入标准和自定义匹配器。`server/composition/product-playbooks.ts` 对三个仓库内产品示例施加独立宿主权限；当前替代 Pack 源在 `changes/2026-09-09-composable-overworld-playbook/examples/`，仅消费公开 mod-api。`scripts/build-gameplay-packs.mjs` 按明确示例名构建锁定 ESM，Browser 和 Headless 读取同一产物合同。

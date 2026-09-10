@@ -4,17 +4,31 @@
   import GameTextField from './primitives/game-text-field.svelte';
   import type { ShellState, UiActionPort } from './ui-contracts';
   import ItemIcon from './primitives/item-icon.svelte';
+  import StationPanel from './station-panel.svelte';
   import CreativeCatalog from './creative-catalog.svelte';
 
   let { gameplay, actions }: { gameplay: ShellState['gameplay']; actions: UiActionPort } = $props();
   let filter = $state('');
   let pickedSlot = $state<number | null>(null);
+  let pickedStation = $state<{ slot: number; count?: number } | null>(null);
   const pickedItem = $derived(pickedSlot === null ? null : gameplay.inventory[pickedSlot]);
   const edible = $derived(pickedItem?.edible ?? false);
   $effect(() => {
     if (!gameplay.inventoryOpen) pickedSlot = null;
+    if (!gameplay.inventoryOpen || !gameplay.station) pickedStation = null;
   });
   function pickSlot(slot: number) {
+    if (pickedStation && gameplay.station) {
+      actions.stationAction({
+        kind: 'transfer',
+        from: 'station',
+        actorSlot: slot,
+        stationSlot: pickedStation.slot,
+        count: pickedStation.count,
+      });
+      pickedStation = null;
+      return;
+    }
     if (pickedSlot === null) {
       if (gameplay.inventory[slot].itemId) pickedSlot = slot;
     } else {
@@ -65,12 +79,19 @@
       </div>
       <CreativeCatalog {gameplay} {actions} />
     {:else}
-      <GameTextField id="recipe-filter" label="筛选配方" bind:value={filter} placeholder="输入物品名" />
+      {#if !gameplay.station}<GameTextField
+          id="recipe-filter"
+          label="筛选配方"
+          bind:value={filter}
+          placeholder="输入物品名"
+        />{/if}
       <div class="inventory-selection" role="status" aria-label="背包操作提示">
         <p>
-          {pickedItem?.itemId
-            ? `已选 ${pickedItem.name}：点击目标格移动、合并或交换。`
-            : '点击物品，再点击目标格移动。前八格是快捷栏。'}
+          {pickedStation
+            ? '已选工位物品：点击背包目标格取出。'
+            : pickedItem?.itemId
+              ? `已选 ${pickedItem.name}：点击目标格移动、合并或交换。`
+              : '点击物品，再点击目标格移动。前八格是快捷栏。'}
         </p>
         <div class="inventory-actions">
           <GameButton
@@ -107,38 +128,64 @@
               <ItemIcon itemId={slot.itemId} />
               <span class="inventory-item-name">{slot.itemId ? slot.name : ''}</span>
               <small>{slot.slot + 1}</small>
+              {#if slot.durability}<small class="item-durability"
+                  >耐久 {slot.durability.current}/{slot.durability.max}</small
+                >{/if}
               {#if slot.count > 0}<strong>{slot.count}</strong>{/if}
             </button>
           {/each}
         </div>
-        <section class="recipe-list" aria-label="合成配方">
-          <h3>合成配方</h3>
-          <div role="list" aria-label="合成配方">
-            {#each visibleRecipes as recipe (recipe.id)}
-              <div role="listitem" class:available={recipe.craftable}>
-                <div>
-                  <strong>{recipe.name}</strong>
-                  <small>{recipe.requirements} → {recipe.result}</small>
+        {#if gameplay.station}
+          <StationPanel
+            station={gameplay.station}
+            {actions}
+            actorSlot={pickedSlot}
+            selectedSlot={pickedStation?.slot ?? null}
+            onpick={(slot, count) => {
+              pickedStation = { slot, count };
+              pickedSlot = null;
+            }}
+            onused={() => {
+              pickedSlot = null;
+              pickedStation = null;
+            }}
+          />
+        {:else}
+          <section class="recipe-list" aria-label="合成配方">
+            <h3>合成配方</h3>
+            <div role="list" aria-label="合成配方">
+              {#each visibleRecipes as recipe (recipe.id)}
+                <div role="listitem" class:available={recipe.craftable}>
+                  <div>
+                    <strong>{recipe.name}</strong>
+                    <small>{recipe.requirements} → {recipe.result}</small>
+                  </div>
+                  <GameButton
+                    label={`${recipe.craftable ? '合成' : '缺少材料'} ${recipe.name}`}
+                    disabled={!recipe.craftable}
+                    onclick={() => actions.craftRecipe(recipe.id)}
+                  >
+                    {recipe.craftable ? '合成' : '缺材料'}
+                  </GameButton>
                 </div>
-                <GameButton
-                  label={`${recipe.craftable ? '合成' : '缺少材料'} ${recipe.name}`}
-                  disabled={!recipe.craftable}
-                  onclick={() => actions.craftRecipe(recipe.id)}
-                >
-                  {recipe.craftable ? '合成' : '缺材料'}
-                </GameButton>
-              </div>
-            {:else}
-              <p>没有符合筛选条件的配方。</p>
-            {/each}
-          </div>
-        </section>
+              {:else}
+                <p>没有符合筛选条件的配方。</p>
+              {/each}
+            </div>
+          </section>
+        {/if}
       </div>
     {/if}
   </div>
 </GameOverlay>
 
 <style>
+  :global(#inventory-crafting .inventory-grid small.item-durability) {
+    position: static;
+    font-size: 9px;
+    line-height: 11px;
+    color: #b3e4c0;
+  }
   .mode-actions {
     display: flex;
     flex-wrap: wrap;

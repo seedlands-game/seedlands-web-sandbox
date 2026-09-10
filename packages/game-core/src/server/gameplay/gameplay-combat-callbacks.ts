@@ -1,3 +1,4 @@
+import { isActorEntityType } from './ecs-actor-state';
 import type { EntityStore } from './entity-store';
 import type { PlayerState } from './player-state';
 import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
@@ -26,12 +27,8 @@ export function createGameplayCombatCallbacks(
     validateHit: (actorId, targetId, definition) =>
       validateCombatHit({ entities, getVoxel: options.getVoxel, isPlayerAlive }, actorId, targetId, definition),
     applyDamage(actorId, targetId, amount) {
-      if (
-        entities.get(targetId)?.type !== 'world-item' &&
-        entities.get(targetId) &&
-        entities.actorStateAccess(targetId).mode === 'creative'
-      )
-        return 0;
+      const target = entities.get(targetId);
+      if (target && isActorEntityType(target.type) && entities.actorStateAccess(targetId).mode === 'creative') return 0;
       return applyCombatDamage(
         {
           entities,

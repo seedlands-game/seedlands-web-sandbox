@@ -1,3 +1,5 @@
+import { FURNACE_WORLD_COMPONENT } from './furnace-world-model';
+import { STATION_ACTOR_COMPONENT, STATION_INSTANCE_COMPONENT } from './station-action-model';
 import { FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT } from './feeding-model';
 import { BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT } from './block-action-model';
 import type { WorldComposition } from '../../composition/contracts';
@@ -18,6 +20,7 @@ import { INVENTORY_ACTOR_COMPONENT, INVENTORY_ITEM_COMPONENT } from './inventory
 import { NEEDS_COMPONENT } from './needs-model';
 import { MODE_COMPONENT } from './mode-module';
 import { RULESET_COMPONENT } from './ruleset-module';
+import { FORAGE_WORLD_COMPONENT } from './forage-model';
 
 /** The host owns lifetime validation and routes only admitted atomic participants. */
 export class GameplayModuleRuntime {
@@ -48,6 +51,8 @@ export class GameplayModuleRuntime {
       combat?: RegisteredStatePort;
       blocks?: RegisteredStatePort;
       feeding?: RegisteredStatePort;
+      forage?: RegisteredStatePort;
+      stations?: RegisteredStatePort;
     }>,
   ) {}
 
@@ -87,6 +92,12 @@ export class GameplayModuleRuntime {
         return this.options.blocks;
       if ([FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT].includes(component) && this.options.feeding)
         return this.options.feeding;
+      if (component === FORAGE_WORLD_COMPONENT && this.options.forage) return this.options.forage;
+      if (
+        [STATION_ACTOR_COMPONENT, STATION_INSTANCE_COMPONENT, FURNACE_WORLD_COMPONENT].includes(component) &&
+        this.options.stations
+      )
+        return this.options.stations;
       if (component === NEEDS_COMPONENT) return this.options.needs;
       if (component === MODE_COMPONENT) return this.options.mode;
       if (component === RULESET_COMPONENT) return this.options.ruleset;

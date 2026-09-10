@@ -2,7 +2,7 @@ import { FaceMaterial, type FaceMaterialId } from '@seedlands/game-core/world/vo
 import type { RenderCategory } from '@seedlands/game-core/world/mesh';
 export type { RenderCategory } from '@seedlands/game-core/world/mesh';
 
-export const MATERIAL_LAYER_COUNT = 13;
+export const MATERIAL_LAYER_COUNT = 18;
 
 export const FINAL_RENDER_PIPELINE = {
   drawUnit: 'chunk-render-category',

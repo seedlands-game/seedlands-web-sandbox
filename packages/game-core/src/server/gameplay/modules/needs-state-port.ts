@@ -1,3 +1,4 @@
+import { isActorEntityType } from '../ecs-actor-state';
 import type { EntityStore } from '../entity-store';
 import type { RegisteredStatePort, ModStateAddress } from '../../composition/operation-contracts';
 import {
@@ -43,7 +44,7 @@ export function createNeedsStatePort(
     if (
       !entity ||
       !reference ||
-      entity.type === 'world-item' ||
+      !isActorEntityType(entity.type) ||
       entity.health === undefined ||
       entity.maxHealth === undefined
     )

@@ -1,3 +1,4 @@
+import { projectNearbyStations } from './gameplay/station-player-view';
 import type { WorldModuleBinding } from './commands/module-command';
 import type { ModuleInvocationValue } from './composition/contracts';
 import type { PreparedWorldEdit } from './prepared-world-edit';
@@ -38,13 +39,14 @@ export abstract class GameServerGameplayFacade {
     private readonly gameplayPersistence: Persistence | undefined,
     platform: CorePlatformPorts,
     content?: GameplayContent,
-    compositionOptions: Pick<
+    private readonly compositionOptions: Pick<
       GameServerOptions,
       'composition' | 'allowLegacyCompositionMigration' | 'moduleSystemAuthority' | 'moduleActorAuthority'
     > = {},
   ) {
     this.gameplay = new GameplayRuntime({
       getVoxel: (position) => this.readGameplayVoxel(...position),
+      getLoadedVoxel: (position) => this.readLoadedGameplayVoxel(...position),
       prepareVoxelEdit: (actorId, position, voxel) => this.prepareVoxelEdit(actorId, position, voxel),
       getWorldTime: () => this.worldTime,
       platform,
@@ -65,6 +67,8 @@ export abstract class GameServerGameplayFacade {
     voxel: number,
   ): PreparedWorldEdit;
   abstract setWorldTime(hours: number): number;
+
+  protected abstract readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined;
 
   protected readGameplayVoxel(x: number, y: number, z: number): number | undefined {
     return this.getVoxel(x, y, z);
@@ -90,16 +94,15 @@ export abstract class GameServerGameplayFacade {
     position: [number, number, number];
     registration?: Omit<ActorRegistration, 'archetype'>;
   }): GameplayEntity {
-    const type = input.archetype === 'settler' ? 'npc' : 'creature';
-    const maxHealth = input.archetype === 'night-stalker' ? 16 : input.archetype === 'settler' ? 20 : 12;
+    const profile = this.gameplay.content.actorProfiles.require(input.archetype);
     return this.gameplay.spawnAutonomous(
       {
         id: input.id,
-        type,
+        type: profile.entityType,
         archetype: input.archetype,
         position: input.position,
-        health: maxHealth,
-        maxHealth,
+        health: profile.maxHealth,
+        maxHealth: profile.maxHealth,
         persistent: true,
       },
       { archetype: input.archetype, ...input.registration },
@@ -147,6 +150,17 @@ export abstract class GameServerGameplayFacade {
   ) {
     return this.gameplay.invokeModuleOperation(authorizer, source, request);
   }
+  invokeActorModuleOperation(actorId: string, request: RegisteredOperationRequest) {
+    return this.gameplay.invokeActorModuleOperation(actorId, request);
+  }
+  getNearbyStations(playerId: string) {
+    return projectNearbyStations(this.gameplay, playerId, this.compositionOptions.moduleActorAuthority, (x, y, z) =>
+      this.readGameplayVoxel(x, y, z),
+    );
+  }
+  listStationRecipes() {
+    return this.gameplay.content.stations?.listRecipes() ?? [];
+  }
   get hasGameplayComposition() {
     return this.gameplay.hasComposition;
   }
@@ -164,6 +178,9 @@ export abstract class GameServerGameplayFacade {
   }
   get itemDefinitions(): ItemDefinitionRegistry {
     return this.gameplay.content.items;
+  }
+  get gameplayContent(): GameplayContent {
+    return this.gameplay.content;
   }
   giveItem(id: string, stack: ItemStack) {
     return this.gameplay.giveItem(id, stack);
@@ -236,9 +253,10 @@ export abstract class GameServerGameplayFacade {
         getVoxel: (position) => this.readGameplayVoxel(...position),
         isPlayerAlive: (id) => this.gameplay.getPlayerState(id).lifecycle === 'alive',
         items: this.gameplay.content.items,
+        actorProfiles: this.gameplay.content.actorProfiles,
         touch: () => this.gameplay.recordAuthorityMutation(),
         ...(this.hasGameplayComposition ? { consumeWorldItem: this.gameplay.bindFeeding(binding) } : {}),
-        ...(binding && this.hasGameplayComposition
+        ...(this.hasGameplayComposition
           ? {
               requestCombat: this.gameplay.bindActorCombat(binding),
             }
@@ -297,6 +315,9 @@ export abstract class GameServerGameplayFacade {
   }
   simulationSnapshot() {
     return this.gameplay.simulation.snapshot();
+  }
+  updateStarterEcologyVersion(version: number): void {
+    this.gameplay.simulation.starterEcologyVersion = version;
   }
   simulationMetrics() {
     return this.gameplay.simulation.metrics();

@@ -152,17 +152,18 @@ const expectCommit = (
 };
 
 describe('creative block interactions through GameplayRuntime', () => {
-  it('commits bare-hand stone on frame 48 and agrees with bulk authority advancement', () => {
+  it('commits wood-pickaxe stone on frame 24 and agrees with bulk authority advancement', () => {
     const fractional = createRuntime();
     const bulk = createRuntime();
     for (const runtime of [fractional, bulk]) {
+      runtime.gameplay.giveItem('player', { itemId: ItemIds.WoodPickaxe, count: 1, instance: { durability: 60 } });
       runtime.world.cells.set(key([1, 1, 0]), Voxel.Stone);
-      expect(runtime.gameplay.beginBreak('player', [1, 1, 0])).toMatchObject({ success: true, requiredSeconds: 2.4 });
+      expect(runtime.gameplay.beginBreak('player', [1, 1, 0])).toMatchObject({ success: true, requiredSeconds: 1.2 });
     }
-    for (let frame = 0; frame < 47; frame++) fractional.gameplay.advanceRules(0.05);
+    for (let frame = 0; frame < 23; frame++) fractional.gameplay.advanceRules(0.05);
     expect(fractional.world.getVoxel([1, 1, 0])).toBe(Voxel.Stone);
     fractional.gameplay.advanceRules(0.05);
-    bulk.gameplay.advanceRules(2.4);
+    bulk.gameplay.advanceRules(1.2);
     for (const runtime of [fractional, bulk]) {
       expect(runtime.world.getVoxel([1, 1, 0])).toBe(Voxel.Air);
       expect(runtime.gameplay.getPlayerState('player').breakAction).toBeNull();
@@ -234,7 +235,7 @@ describe('creative block interactions through GameplayRuntime', () => {
   it('preserves the committed clock frontier without changing break effects when its drop cannot allocate', () => {
     const { gameplay, world } = createRuntime();
     world.cells.set(key([1, 1, 0]), Voxel.Wood);
-    gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1 });
+    gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1, instance: { durability: 60 } });
     gameplay.beginBreak('player', [1, 1, 0]);
     const exhausted = gameplay.createSnapshot();
     exhausted.entityStore.sequence = Number.MAX_SAFE_INTEGER;
@@ -258,7 +259,7 @@ describe('creative block interactions through GameplayRuntime', () => {
 
   it('retains survival break timing, tool multiplier, drops and placement consumption', () => {
     const { gameplay, world } = createRuntime();
-    gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1 });
+    gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1, instance: { durability: 60 } });
     gameplay.giveItem('player', { itemId: ItemIds.WoodBlock, count: 2 });
     world.cells.set(key([1, 1, 0]), Voxel.Wood);
 
@@ -290,7 +291,7 @@ describe('creative block interactions through GameplayRuntime', () => {
         throw new Error('transient-finish-clone');
     });
     source.world.cells.set(key([1, 1, 0]), Voxel.Wood);
-    source.gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1 });
+    source.gameplay.giveItem('player', { itemId: ItemIds.WoodAxe, count: 1, instance: { durability: 60 } });
     source.gameplay.beginBreak('player', [1, 1, 0]);
     expect(() => source.gameplay.advanceRules(0.4)).toThrow('transient-finish-clone');
     const saved = source.gameplay.createSnapshot();

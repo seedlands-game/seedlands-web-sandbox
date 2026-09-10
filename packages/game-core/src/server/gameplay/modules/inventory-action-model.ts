@@ -3,7 +3,7 @@ import { createInventoryCandidate } from './inventory-api';
 import type { InventorySlot } from '../inventory';
 import type { GameplayContent } from '../gameplay-content';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
-import { craftRecipe } from '../recipe-registry';
+import { applyCraftingMatch, shapelessCraftingProvider } from './crafting-provider';
 
 export const INVENTORY_ACTIONS_CAPABILITY = 'seedlands:inventory-actions';
 export const INVENTORY_ACTOR_COMPONENT = 'seedlands:inventory-actor';
@@ -117,7 +117,7 @@ export type InventoryActionsCapabilityV1 = Readonly<{
   pickupOperationId: typeof INVENTORY_PICKUP_OPERATION;
 }>;
 
-export type InventoryActionContent = Readonly<Pick<GameplayContent, 'items' | 'recipes'>>;
+export type InventoryActionContent = Readonly<Pick<GameplayContent, 'items' | 'recipes' | 'crafting'>>;
 export type InventoryActionCandidateRequest =
   | Readonly<{ kind: 'select'; actor: unknown; input: unknown }>
   | Readonly<{ kind: 'move'; actor: unknown; input: unknown }>
@@ -417,7 +417,13 @@ export function buildInventoryActionCandidate(
     }
     case 'craft': {
       const args = validateInventoryCraftInput(request.input);
-      const crafted = craftRecipe(inventory, args.recipeId, content.recipes);
+      const crafted = applyCraftingMatch(
+        inventory,
+        args.recipeId,
+        content.recipes,
+        content.crafting === undefined ? shapelessCraftingProvider : content.crafting,
+        actor.equipment.selectedSlot,
+      );
       if (!crafted.success) fail(crafted.reason);
       return candidate({ kind: request.kind, actor, args, inventory, result: { recipeId: args.recipeId } });
     }

@@ -96,11 +96,17 @@ export class AuthorityRuntime {
       get fluidDiagnostics() {
         return server.fluidDiagnostics;
       },
-      getEntity: (id: string) => server.getEntity(id),
+      getEntity: (id: string) => {
+        const entity = server.getEntity(id);
+        return !entity || entity.type === 'station' ? null : { ...entity, type: entity.type };
+      },
       getActorModeState: (id: string) => server.getActorModeState(id),
       createEntityReference: (id: string) => server.createEntityReference(id),
       resolveEntityReference: (reference: EntityLifetimeReference) => server.resolveEntityReference(reference) !== null,
-      queryEntities: () => server.queryEntities(),
+      queryEntities: () =>
+        server
+          .queryEntities()
+          .flatMap((entity) => (entity.type === 'station' ? [] : [{ ...entity, type: entity.type }])),
       updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) =>
         server.updateEntityWithoutSnapshot(id, update),
       advanceGameplayRules: (seconds: number) => {
@@ -167,7 +173,7 @@ export class AuthorityRuntime {
         for (const chunk of bootstrap.starterChunks)
           if (!server.acceptWorkerCanonical(chunk)) throw new Error(`Authority拒绝新世界生态Chunk：${chunk.key}。`);
         const ecology = server.initializeStarterEcologyFromLoadedWorld(bodyPosition);
-        if (!ecology.initialized) throw new Error('新世界生态初始化未执行。');
+        if (ecology.configured && !ecology.initialized) throw new Error('新世界生态初始化未执行。');
       }
       player = server.spawnPlayer({ position: bodyPosition });
     }

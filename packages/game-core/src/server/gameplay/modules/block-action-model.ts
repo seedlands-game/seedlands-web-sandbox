@@ -115,6 +115,7 @@ export type BlockPlaceEffectiveInputV1 = Readonly<{
   modeRevision: number;
 }>;
 export type BlockFinishEffectiveInputV1 = Readonly<{
+  toolWear?: 0 | 1;
   position: BlockPosition;
   expectedVoxel: number;
   creative: boolean;
@@ -414,11 +415,14 @@ export function validateBlockFinishEffectiveInput(
   raw: unknown,
   items: ItemDefinitionRegistry,
 ): BlockFinishEffectiveInputV1 {
+  const hasWear = typeof raw === 'object' && raw !== null && Object.hasOwn(raw, 'toolWear');
   const value = blockData(
     raw,
-    ['position', 'expectedVoxel', 'creative', 'drop', 'modeRevision'],
+    ['position', 'expectedVoxel', 'creative', 'drop', 'modeRevision', ...(hasWear ? ['toolWear'] : [])],
     'Block finish effective input',
   );
+  if (hasWear && ((value.toolWear !== 0 && value.toolWear !== 1) || (value.creative === true && value.toolWear !== 0)))
+    throw new TypeError('Block finish tool wear is invalid.');
   if (
     !voxelId(value.expectedVoxel) ||
     typeof value.creative !== 'boolean' ||
@@ -430,6 +434,7 @@ export function validateBlockFinishEffectiveInput(
     position: validateBlockPosition(value.position),
     expectedVoxel: value.expectedVoxel,
     creative: value.creative,
+    ...(hasWear ? { toolWear: value.toolWear as 0 | 1 } : {}),
     drop: value.drop === null ? null : cloneBlockStack(items, value.drop, false),
     modeRevision: value.modeRevision,
   });

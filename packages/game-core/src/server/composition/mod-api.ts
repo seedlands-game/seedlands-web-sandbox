@@ -33,6 +33,25 @@ export type {
 export { defineInventoryModule } from '../gameplay/modules/inventory-module';
 export { defineContentModule } from '../gameplay/modules/content-module';
 export type { MeleeDefinition } from '../gameplay/combat-runtime';
+export type {
+  ActorNavigationProfile,
+  ActorProfile,
+  ActorProfileInput,
+  ActorProfileRegistry,
+  AutonomousActorEntityType,
+  StarterEcologyActorInput,
+  StarterEcologyActorSlot,
+  StarterEcologyConfiguration,
+  StarterEcologyConfigurationInput,
+} from '../gameplay/actor-profile';
+export type { ActorArchetype } from '../gameplay/entity-store';
+export type { ActorBehavior } from '../simulation/actor-state';
+export { defineCraftingProviderModule, defineRecipeCraftingModule } from '../gameplay/modules/recipe-crafting-module';
+export type {
+  CraftingConsumptionV1,
+  CraftingMatchRequestV1,
+  CraftingProviderV1,
+} from '../gameplay/modules/crafting-provider';
 export { createInventoryCandidate } from '../gameplay/modules/inventory-api';
 export type { ItemDefinitionRegistry, ItemDefinitionInput, ItemStack } from '../gameplay/item-registry';
 export type { Recipe } from '../gameplay/recipe-registry';
@@ -66,3 +85,20 @@ export * from '../gameplay/modules/block-action-model';
 export { defineFeedingActionsModule } from '../gameplay/modules/feeding-actions-module';
 export { defineFeedingRulesModule } from '../gameplay/modules/feeding-rules-module';
 export * from '../gameplay/modules/feeding-model';
+
+export { createMiningToolUseCandidate } from '../gameplay/modules/mining-tool-policy';
+export type { MiningToolRequirement, MiningToolUseCandidate } from '../gameplay/modules/mining-tool-policy';
+
+export type { StationContent, StationContentInput } from '../gameplay/station-content';
+export type { StationDefinition, StationKind, StationComponentV1 } from '../gameplay/ecs-station-state';
+export type {
+  StationRecipe,
+  ShapedStationRecipe,
+  ShapelessStationRecipe,
+} from '../gameplay/modules/station-candidates';
+export type { FurnaceRecipe, FurnaceFuel, FurnaceSnapshotV1 } from '../gameplay/modules/furnace-candidates';
+
+export { defineStationActionsModule } from '../gameplay/modules/station-actions-module';
+
+export { defineForageModule } from '../gameplay/modules/forage-module';
+export type { ForageModuleConfiguration } from '../gameplay/modules/forage-model';

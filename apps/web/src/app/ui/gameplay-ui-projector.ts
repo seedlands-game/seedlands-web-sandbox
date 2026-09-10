@@ -1,3 +1,6 @@
+import { projectStationUi, type StationUiPresentation } from './station-ui-projector';
+import type { AuthorityStationView } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { StationRecipe } from '@seedlands/game-core/mod-api';
 import { projectCombatUi, type CombatUiProjection } from './combat-ui-projector';
 import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
 import {
@@ -14,9 +17,12 @@ export type GameplayItemPresentation = Readonly<{
   count: number;
   name: string;
   edible: boolean;
+  durability?: Readonly<{ current: number; max: number }>;
 }>;
 
 export type GameplayUiSource = Readonly<{
+  station?: AuthorityStationView | null;
+  stationRecipes?: readonly StationRecipe[];
   revision: number;
   items?: readonly ItemDefinition[];
   recipes?: readonly Recipe[];
@@ -26,7 +32,11 @@ export type GameplayUiSource = Readonly<{
     health: number;
     hunger: number;
     selectedHotbarSlot: number;
-    inventory: readonly (Readonly<{ itemId: string; count: number }> | null)[];
+    inventory: readonly (Readonly<{
+      itemId: string;
+      count: number;
+      instance?: Readonly<{ durability: number }>;
+    }> | null)[];
     mode?: Readonly<{ version: 1; value: ActorMode; revision: number }>;
     creativeCatalog?: Readonly<{
       version: 1;
@@ -58,6 +68,7 @@ export type GameplayUiProjection = Readonly<{
   }>;
   shell: Readonly<{
     gameplay: Readonly<{
+      station: StationUiPresentation | null;
       inventoryOpen: boolean;
       lifecycle: 'alive' | 'dead';
       mode: ActorMode;
@@ -102,6 +113,9 @@ const projectInventory = (
     const stack = inventory[slot];
     return stack
       ? {
+          ...(stack.instance && requireItem(stack.itemId).durability
+            ? { durability: { current: stack.instance.durability, max: requireItem(stack.itemId).durability!.max } }
+            : {}),
           slot,
           itemId: stack.itemId,
           count: stack.count,
@@ -153,6 +167,12 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
   const shell = reuse(
     {
       gameplay: {
+        station: projectStationUi(
+          source.station,
+          source.stationRecipes ?? [],
+          (input, length) => projectInventory(input, length, items.require),
+          (id) => items.require(id).name,
+        ),
         inventoryOpen: source.inventoryOpen,
         lifecycle: source.player.lifecycle,
         mode,

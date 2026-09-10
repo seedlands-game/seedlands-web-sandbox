@@ -1,3 +1,4 @@
+import { isActorEntityType } from '../ecs-actor-state';
 import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import type { ModuleInvocationValue, WorldComposition } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
@@ -73,7 +74,7 @@ export class RegisteredInventoryRuntime {
   }
   private actor(id: string) {
     const entity = this.options.entities.get(id);
-    if (!entity || entity.type === 'world-item') throw new Error('unknown-actor');
+    if (!entity || !isActorEntityType(entity.type)) throw new Error('unknown-actor');
     const actor = this.options.entities.actorStateAccess(id);
     return validateInventoryActorProjection(
       {
@@ -184,6 +185,7 @@ export class RegisteredInventoryRuntime {
             inventory: [...candidate.slots],
             equipment: candidate.equipment,
             needs: { ...components.needs, hunger: candidate.hunger.hunger },
+            ...(equippedChanged && components.player ? { player: { ...components.player, breakAction: null } } : {}),
           },
         },
       ],
@@ -255,6 +257,21 @@ export class RegisteredInventoryRuntime {
   }
   pickup(id: string, entityId: string) {
     return this.simple(id, 'pickup', undefined, entityId);
+  }
+  listCraftable(id: string) {
+    if (
+      !this.options.composition.definitionMap.capabilities.some((entry) => entry.id === 'seedlands:inventory-actions')
+    )
+      return [];
+    const actor = this.actor(id);
+    return this.options.content.recipes.list().filter((recipe) => {
+      try {
+        buildInventoryActionCandidate(this.options.content, { kind: 'craft', actor, input: { recipeId: recipe.id } });
+        return true;
+      } catch {
+        return false;
+      }
+    });
   }
   craft(id: string, recipeId: string) {
     const result = this.invoke(id, 'craft', { recipeId });

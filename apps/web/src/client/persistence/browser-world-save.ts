@@ -20,7 +20,9 @@ export function decodeBrowserWorldSave(raw: string | null): BrowserWorldSave | n
     const record = value as Record<string, unknown>;
     if (
       typeof record.seed !== 'string' ||
-      (record.generatorVersion !== GENERATOR_VERSION && record.generatorVersion !== LEGACY_GENERATOR_VERSION) ||
+      (record.generatorVersion !== GENERATOR_VERSION &&
+        record.generatorVersion !== 3 &&
+        record.generatorVersion !== LEGACY_GENERATOR_VERSION) ||
       !Array.isArray(record.player) ||
       record.player.length !== 3 ||
       !record.player.every(Number.isFinite) ||

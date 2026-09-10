@@ -17,7 +17,7 @@ import { createRuntimeHarnessApi, installHarness } from './game-harness';
 import { PLAYER_FEET_OFFSET, PlayerController } from './player/player-controller';
 import { QUALITY_PROFILES, type QualityLevel } from './scene/quality-profile';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
-import type { ActorMode, MapLayer, ModeControl } from './ui/ui-contracts';
+import type { ActorMode, MapLayer, ModeControl, StationControl } from './ui/ui-contracts';
 import { WorldEnvironment } from './scene/world-environment';
 import { World, waitForInitialWorldReady } from './world/world-runtime';
 import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
@@ -440,6 +440,8 @@ export class Game {
   setCollisionDebugSensors = (enabled: boolean) => this.collisionDebug?.setDetails({ sensors: enabled });
 
   closeInventory = () => this.gameplayClient?.closeInventory();
+
+  stationAction = (command: StationControl) => this.gameplayClient?.stationAction(command);
 
   craftRecipe = (recipeId: string) => this.gameplayClient?.craftRecipe(recipeId);
 

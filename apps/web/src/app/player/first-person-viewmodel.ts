@@ -1,3 +1,4 @@
+import type { ItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
 import { combatViewmodelPose } from '../../client/presentation/combat-viewmodel-pose';
 import * as pc from 'playcanvas';
@@ -71,7 +72,7 @@ export class FirstPersonViewmodel {
     this.applyLayer(this.root);
   }
 
-  setHeldItem(itemId: string | null): void {
+  setHeldItem(itemId: string | null, definition?: ItemDefinition | null): void {
     if (itemId === this.heldItem && !this.releaseDraft) return;
     this.releaseDraft?.();
     this.releaseDraft = null;
@@ -81,7 +82,7 @@ export class FirstPersonViewmodel {
     if (this.action === 'mine') this.setAction('idle');
     while (this.item.children.length) this.item.children[0].destroy();
     if (itemId) {
-      this.assets.addItem(this.item, itemId, 0.55);
+      this.assets.addItem(this.item, itemId, 0.55, undefined, definition);
       this.applyLayer(this.item);
     }
   }

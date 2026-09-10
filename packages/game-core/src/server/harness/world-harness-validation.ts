@@ -1,4 +1,4 @@
-import { CHUNK_SIZE, chunkKey, Voxel } from '../../world/voxel';
+import { CHUNK_SIZE, chunkKey, Voxel, MAX_VOXEL_ID } from '../../world/voxel';
 import { GAME_SAVE_SCHEMA_VERSION, type FrozenGameSaveSnapshot } from '../persistence/game-save-snapshot';
 import {
   WORLD_HARNESS_MAX_CHECKPOINT_BYTES,
@@ -53,7 +53,7 @@ export function validatePortableCheckpoint(value: unknown): FrozenGameSaveSnapsh
       chunk.revision < 0 ||
       !(chunk.voxels instanceof Uint16Array) ||
       chunk.voxels.length !== CHUNK_SIZE ** 3 ||
-      !chunk.voxels.every((voxel: number) => voxel >= Voxel.Air && voxel <= Voxel.Lantern) ||
+      !chunk.voxels.every((voxel: number) => voxel >= Voxel.Air && voxel <= MAX_VOXEL_ID) ||
       (chunk.fluid !== undefined && (!(chunk.fluid instanceof Uint8Array) || chunk.fluid.length !== CHUNK_SIZE ** 3))
     )
       throw new TypeError(`Checkpoint chunk is invalid: ${String(chunk?.key)}`);

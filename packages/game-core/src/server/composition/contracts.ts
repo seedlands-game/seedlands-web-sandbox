@@ -1,6 +1,7 @@
 import type { snapshotPackLock, snapshotOperationIdentity } from './composition-identity';
 import type { ModLifecycleDefinition, ModSystemDefinition, LifecycleRegistrations } from './lifecycle-contracts';
 import type { ItemCapability } from '../gameplay/item-registry';
+import type { ItemInstanceState } from '../gameplay/item-instance';
 import type {
   ModStateDefinition,
   ModOperationDefinition,
@@ -42,7 +43,11 @@ export type ModItemDefinition = Readonly<{
   durability?: Readonly<{ max: number }>;
 }>;
 
-export type ModItemAmount = Readonly<{ itemId: string; count: number }>;
+export type ModItemAmount = Readonly<{
+  itemId: string;
+  count: number;
+  instance?: ItemInstanceState;
+}>;
 
 export type ModRecipeDefinition = Readonly<{
   id: string;

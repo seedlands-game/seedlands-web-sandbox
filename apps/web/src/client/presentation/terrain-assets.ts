@@ -27,6 +27,11 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Glowstone, '辉光石', ['aa703a', 'e2a752', '7d5433', 'f6d68a']],
   [FaceMaterial.LanternFrame, '灯笼框架', ['865b37', 'b88c4f', '583f2c', 'd1a76a']],
   [FaceMaterial.LanternGlow, '灯笼灯芯', ['d49c4d', 'ebbe68', 'ab7538', 'ffe4a1']],
+  [FaceMaterial.Workbench, '工作台', ['76502f', 'a97843', '4e3527', 'd2a361']],
+  [FaceMaterial.Chest, '箱子', ['815127', 'b97835', '55351f', 'e2b85f']],
+  [FaceMaterial.Furnace, '熔炉', ['59605e', '7a827f', '343a3a', 'b05f32']],
+  [FaceMaterial.CoalOre, '煤矿石', ['687170', '858d8a', '252a2b', 'a0a59a']],
+  [FaceMaterial.IronOre, '铁矿石', ['747b78', '949b96', '9c694d', 'c28b68']],
 ];
 
 // First-party pixel sources are deterministic and independent of atlas layout.
@@ -43,6 +48,23 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     if (face === FaceMaterial.Water) index = (y + Math.floor(x / 4)) % 7 === 0 ? 4 : noise < 10 ? 2 : 1;
     if (face === FaceMaterial.LanternFrame) index = x < 2 || x > 13 || y < 2 || y > 13 ? 3 : 2;
     if (face === FaceMaterial.LanternGlow) index = x > 3 && x < 12 && y > 2 && y < 13 ? 4 : 1;
+    if (face === FaceMaterial.Workbench)
+      index = x % 8 === 0 || y % 8 === 0 ? 3 : (x + 2 * y) % 11 < 3 ? 4 : (Math.floor(x / 4) + y) % 3 === 0 ? 2 : 1;
+    if (face === FaceMaterial.Chest)
+      index =
+        x < 2 || x > 13 || y < 2 || y > 13 || y === 7
+          ? 3
+          : x >= 6 && x <= 9 && y >= 6 && y <= 9
+            ? 4
+            : noise < 12
+              ? 2
+              : 1;
+    if (face === FaceMaterial.Furnace)
+      index = x < 2 || x > 13 || y < 2 || y > 13 ? 3 : y > 9 && x > 3 && x < 12 ? 4 : (x + y * 3) % 9 < 2 ? 2 : 1;
+    if (face === FaceMaterial.CoalOre)
+      index = (x * 3 + y * 5 + x * y) % 17 < 4 ? 3 : noise < 9 ? 2 : noise > 31 ? 4 : 1;
+    if (face === FaceMaterial.IronOre)
+      index = (x * 5 + y * 3 + x * y) % 19 < 5 ? ((x + y) % 3 === 0 ? 4 : 3) : noise < 9 ? 2 : 1;
     return index;
   });
   return {
