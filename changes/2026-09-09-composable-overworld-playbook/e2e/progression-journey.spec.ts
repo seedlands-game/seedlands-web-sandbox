@@ -77,13 +77,30 @@ async function put(page: Page, id: string, index: number, count = 1) {
     await expect(cursor(page)).toHaveCount(0);
   }
 }
+async function putPattern(page: Page, id: string, indices: readonly number[]) {
+  const source = item(page, id).first();
+  await expect(source).toBeVisible();
+  const sourceAddress = await source.getAttribute('data-inventory-address');
+  expect(sourceAddress).toBeTruthy();
+  await source.click();
+  await expect(cursor(page)).toHaveAttribute('data-item', id);
+  for (const index of indices) {
+    const target = page.locator(`[data-station-slot="${index}"]`);
+    const countLabel = target.locator('strong');
+    const previous = (await countLabel.count()) ? Number(await countLabel.textContent()) : 0;
+    await target.click({ button: 'right' });
+    await expect(target.locator('strong')).toHaveText(String(previous + 1));
+  }
+  if (await cursor(page).count()) {
+    await page.locator(`[data-inventory-address="${sourceAddress}"]`).click();
+    await expect(cursor(page)).toHaveCount(0);
+  }
+}
 async function craftStation(page: Page, id: string, name: string, material: string, ring = false) {
   const pattern = ring ? [0, 1, 2, 3, 5, 6, 7, 8] : [0, 1, 2];
-  for (const index of pattern) await put(page, material, index);
-  if (!ring) {
-    await put(page, 'plank', 4);
-    await put(page, 'plank', 7);
-  }
+  const placements = new Map<string, number[]>([[material, pattern]]);
+  if (!ring) placements.set('plank', [...(placements.get('plank') ?? []), 4, 7]);
+  for (const [itemId, indices] of placements) await putPattern(page, itemId, indices);
   const result = page.getByRole('button', { name: `取出 ${name} × 1`, exact: true });
   await expect(result).toHaveAttribute('data-item', id);
   await result.click();
@@ -140,6 +157,7 @@ test('正常鼠标和槽位操作完成木石铁成长、箱子与保存重进',
     const h = window.__seedlandsHarness!;
     await h.world.logic({ kind: 'mode', mode: 'scripted' });
     await h.fillWorld({ from: [-26, 59, -2], to: [5, 59, 4], voxel: 3 });
+    await h.fillWorld({ from: [-26, 59, -2], to: [5, 59, -1], voxel: 0 });
     await h.fillWorld({ from: [-26, 60, -2], to: [5, 64, 4], voxel: 0 });
     for (let x = -2; x >= -9; x--) await h.setVoxelAt(x, 60, 0, 4);
     for (let x = -10; x >= -20; x--) await h.setVoxelAt(x, 60, 0, 3);
