@@ -6,6 +6,7 @@ import { Pool, type PoolClient } from 'pg';
 
 const MAX_BIRTHS_PER_TIMELINE = 64;
 const MAX_TAGS = 12;
+const DEFAULT_MODEL_TIMEOUT_MS = 315_000;
 const BIRTH_SCHEMA = {
   type: 'object',
   properties: {
@@ -112,25 +113,74 @@ export type ResidentFactoryOptions = Readonly<{
   pool: Pool;
   schema?: string;
   ownsPool?: boolean;
+  modelTimeoutMs?: number;
 }>;
+
+type InFlightBirth = {
+  readonly tagsHash: string;
+  readonly controller: AbortController;
+  readonly promise: Promise<ResidentBirthPackage>;
+  consumers: number;
+  settled: boolean;
+};
+
+function abortReason(signal: AbortSignal): Error {
+  return signal.reason instanceof Error ? signal.reason : new Error('Resident birth generation aborted.');
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) throw abortReason(signal);
+}
+
+async function waitWithSignal<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
+  throwIfAborted(signal);
+  if (!signal) return await promise;
+  return await new Promise<T>((resolve, reject) => {
+    const cleanup = () => signal.removeEventListener('abort', aborted);
+    const aborted = () => {
+      cleanup();
+      reject(abortReason(signal));
+    };
+    signal.addEventListener('abort', aborted, { once: true });
+    promise.then(
+      (value) => {
+        cleanup();
+        resolve(value);
+      },
+      (error: unknown) => {
+        cleanup();
+        reject(error);
+      },
+    );
+  });
+}
 
 /** Pro-only, PG-idempotent birth generator. Authority validates and activates the returned tree. */
 export class ResidentFactory {
   private readonly schema: string;
   private readonly ownsPool: boolean;
+  private readonly modelTimeoutMs: number;
+  private readonly inFlight = new Map<string, InFlightBirth>();
+  private closed = false;
 
   constructor(private readonly options: ResidentFactoryOptions) {
     this.schema = schemaSql(options.schema ?? 'npc_factory');
     this.ownsPool = options.ownsPool ?? false;
+    this.modelTimeoutMs = options.modelTimeoutMs ?? DEFAULT_MODEL_TIMEOUT_MS;
+    if (!Number.isSafeInteger(this.modelTimeoutMs) || this.modelTimeoutMs < 1 || this.modelTimeoutMs > 330_000)
+      throw new Error('Invalid resident factory model timeout');
   }
 
-  static open(options: Readonly<{ pro: BaseChatModel; connectionString: string; schema?: string }>): ResidentFactory {
+  static open(
+    options: Readonly<{ pro: BaseChatModel; connectionString: string; schema?: string; modelTimeoutMs?: number }>,
+  ): ResidentFactory {
     if (!options.connectionString) throw new Error('resident factory connectionString is required');
     return new ResidentFactory({
       pro: options.pro,
       pool: new Pool({ connectionString: options.connectionString, max: 2 }),
       schema: options.schema,
       ownsPool: true,
+      modelTimeoutMs: options.modelTimeoutMs,
     });
   }
 
@@ -146,6 +196,10 @@ export class ResidentFactory {
   }
 
   async close(): Promise<void> {
+    this.closed = true;
+    const active = [...this.inFlight.values()];
+    for (const operation of active) operation.controller.abort(new Error('Resident factory closed.'));
+    await Promise.allSettled(active.map((operation) => operation.promise));
     if (this.ownsPool) await this.options.pool.end();
   }
 
@@ -156,34 +210,95 @@ export class ResidentFactory {
     capabilities: unknown,
     signal?: AbortSignal,
   ): Promise<ResidentBirthPackage> {
+    this.assertAvailable(signal);
     validateWorld(world);
     if (!boundedText(birthId, 160)) throw new TypeError('Birth request id is invalid.');
     const tags = validateTags(rawTags);
     const tagsHash = await hash({ tags, capabilities });
+    const key = JSON.stringify([world.worldId, world.timelineId, birthId]);
+    this.assertAvailable(signal);
+    const existing = await this.read(world, birthId);
+    this.assertAvailable(signal);
+    if (existing) {
+      if (existing.tagsHash !== tagsHash) throw new Error('Birth request id payload conflict.');
+      return validateBirth(existing.payload, birthId);
+    }
+    let operation = this.inFlight.get(key);
+    if (operation) return await this.consume(operation, tagsHash, signal);
+    const count = await this.count(world);
+    this.assertAvailable(signal);
+    if (count >= MAX_BIRTHS_PER_TIMELINE) throw new RangeError('Resident factory birth budget exceeded.');
+    operation = this.inFlight.get(key);
+    if (operation) return await this.consume(operation, tagsHash, signal);
+    if (!operation) {
+      const controller = new AbortController();
+      const work = this.generateAndPersist(world, birthId, tags, tagsHash, capabilities, controller.signal);
+      const created: InFlightBirth = {
+        tagsHash,
+        controller,
+        consumers: 0,
+        settled: false,
+        promise: work.finally(() => {
+          created.settled = true;
+          if (this.inFlight.get(key) === created) this.inFlight.delete(key);
+        }),
+      };
+      operation = created;
+      this.inFlight.set(key, operation);
+    }
+    return await this.consume(operation, tagsHash, signal);
+  }
+
+  private async consume(
+    operation: InFlightBirth,
+    tagsHash: string,
+    signal?: AbortSignal,
+  ): Promise<ResidentBirthPackage> {
+    if (operation.tagsHash !== tagsHash) throw new Error('Birth request id payload conflict.');
+    operation.consumers++;
+    try {
+      return await waitWithSignal(operation.promise, signal);
+    } finally {
+      operation.consumers--;
+      if (operation.consumers === 0 && !operation.settled)
+        operation.controller.abort(new Error('Resident birth request no longer has a consumer.'));
+    }
+  }
+
+  private async generateAndPersist(
+    world: ResidentWorldBinding,
+    birthId: string,
+    tags: readonly string[],
+    tagsHash: string,
+    capabilities: unknown,
+    signal: AbortSignal,
+  ): Promise<ResidentBirthPackage> {
+    const generated = await this.createWithDeadline(tags, capabilities, birthId, signal);
+    this.assertAvailable(signal);
     const client = await this.options.pool.connect();
     try {
+      this.assertAvailable(signal);
       await client.query('BEGIN');
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [
         JSON.stringify([world.worldId, world.timelineId]),
       ]);
+      this.assertAvailable(signal);
       const existing = await this.read(world, birthId, client);
+      this.assertAvailable(signal);
       if (existing) {
         if (existing.tagsHash !== tagsHash) throw new Error('Birth request id payload conflict.');
         await client.query('COMMIT');
         return validateBirth(existing.payload, birthId);
       }
-      const count = await client.query<{ count: string }>(
-        `SELECT count(*)::text AS count FROM ${this.schema}.birth_packages WHERE world_id=$1 AND timeline_id=$2`,
-        [world.worldId, world.timelineId],
-      );
-      if (Number(count.rows[0]?.count ?? 0) >= MAX_BIRTHS_PER_TIMELINE)
+      if ((await this.count(world, client)) >= MAX_BIRTHS_PER_TIMELINE)
         throw new RangeError('Resident factory birth budget exceeded.');
-      const generated = await this.create(tags, capabilities, birthId, signal);
+      this.assertAvailable(signal);
       await client.query(
         `INSERT INTO ${this.schema}.birth_packages(world_id,timeline_id,birth_id,tags_hash,payload)
          VALUES ($1,$2,$3,$4,$5::jsonb)`,
         [world.worldId, world.timelineId, birthId, tagsHash, JSON.stringify(generated)],
       );
+      this.assertAvailable(signal);
       await client.query('COMMIT');
       return generated;
     } catch (error) {
@@ -202,6 +317,42 @@ export class ResidentFactory {
     );
     const row = result.rows[0];
     return row ? { tagsHash: row.tags_hash, payload: row.payload } : null;
+  }
+
+  private async count(world: ResidentWorldBinding, client?: PoolClient): Promise<number> {
+    const queryable = client ?? this.options.pool;
+    const count = await queryable.query<{ count: string }>(
+      `SELECT count(*)::text AS count FROM ${this.schema}.birth_packages WHERE world_id=$1 AND timeline_id=$2`,
+      [world.worldId, world.timelineId],
+    );
+    return Number(count.rows[0]?.count ?? 0);
+  }
+
+  private assertAvailable(signal?: AbortSignal): void {
+    if (this.closed) throw new Error('Resident factory is closed.');
+    throwIfAborted(signal);
+  }
+
+  private async createWithDeadline(
+    tags: readonly string[],
+    capabilities: unknown,
+    birthId: string,
+    callerSignal: AbortSignal,
+  ): Promise<ResidentBirthPackage> {
+    const controller = new AbortController();
+    const abortFromCaller = () => controller.abort(callerSignal.reason);
+    callerSignal.addEventListener('abort', abortFromCaller, { once: true });
+    const timeout = setTimeout(
+      () => controller.abort(new Error('Resident birth model timed out.')),
+      this.modelTimeoutMs,
+    );
+    if (callerSignal.aborted) controller.abort(callerSignal.reason);
+    try {
+      return await waitWithSignal(this.create(tags, capabilities, birthId, controller.signal), controller.signal);
+    } finally {
+      clearTimeout(timeout);
+      callerSignal.removeEventListener('abort', abortFromCaller);
+    }
   }
 
   private async create(

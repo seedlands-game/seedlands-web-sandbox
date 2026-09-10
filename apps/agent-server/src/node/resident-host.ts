@@ -37,6 +37,7 @@ import {
   type PortableManifest,
 } from './resident-host-validation.js';
 import { ResidentChannelRetirement } from './resident-channel-retirement.js';
+import { ResidentHostBirths } from './resident-host-births.js';
 
 export async function startResidentServer(options: ResidentServerOptions) {
   const pairingToken = options.pairingToken ?? randomBytes(32).toString('base64url');
@@ -76,6 +77,13 @@ export async function startResidentServer(options: ResidentServerOptions) {
       socket.send(frame);
       return true;
     };
+    const births = new ResidentHostBirths({
+      factory,
+      world: () => world,
+      capabilities: () => authoringCapabilities,
+      closed: () => closed,
+      send,
+    });
     const error = (code: string, message: string, requestId?: string, channelId?: string) =>
       send({ kind: 'error', code, message, requestId, channelId });
     const reject = (message: string) => {
@@ -109,6 +117,7 @@ export async function startResidentServer(options: ResidentServerOptions) {
       if (closed) return;
       closed = true;
       clearTimeout(authTimer);
+      births.dispose();
       for (const channel of channels.values()) void retirements.retire(channel.resident).catch(() => undefined);
       for (const entry of pending.values()) {
         clearTimeout(entry.timer);
@@ -153,15 +162,7 @@ export async function startResidentServer(options: ResidentServerOptions) {
         return;
       }
       if (message.kind === 'birth') {
-        if (!factory || !textId(message.requestId) || !Array.isArray(message.tags))
-          return error('FACTORY_UNAVAILABLE', '出生服务暂不可用', message.requestId);
-        try {
-          const birth = await factory.generate(world, message.requestId, message.tags, authoringCapabilities);
-          if (!validBirth(birth)) throw new Error('generated birth failed validation');
-          send({ kind: 'birth-package', requestId: message.requestId, birth });
-        } catch {
-          error('BIRTH_REJECTED', '出生资料生成失败', message.requestId);
-        }
+        births.start(message);
         return;
       }
       if (message.kind === 'checkpoint-export') {

@@ -230,6 +230,18 @@ describe('gateway BaseChatModel', () => {
     expect(attempts).toBe(1);
   });
 
+  it('cancels an unread non-success response body without logging provider content', async () => {
+    const cancel = vi.fn();
+    const model = createGatewayChatModel({
+      tier: 'flash',
+      baseUrl: 'http://127.0.0.1:9/v1',
+      apiKey: 'fake-local',
+      fetch: async () => new Response(new ReadableStream<Uint8Array>({ cancel }), { status: 503 }),
+    });
+    await expect(model.invoke([new HumanMessage('hello')])).rejects.toThrow('HTTP 503');
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
   it('passes cancellation to the single fetch attempt', async () => {
     let seenSignal: AbortSignal | null | undefined;
     const fakeFetch = vi.fn<typeof fetch>(async (_input, init) => {

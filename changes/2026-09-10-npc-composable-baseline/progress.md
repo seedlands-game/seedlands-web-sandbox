@@ -126,6 +126,14 @@
 - 追加RED：180000字节reasoning通过网关后因原始字段多份复制无法journal。首次修正遗漏BaseChatModel自动把llmOutput合并进response_metadata，150000正例仍在实际PG写入失败；现按框架最终StoredMessage编码校验512KiB-1KiB。180000和150000拒绝，120000输入产生>480000但<524288字节的实际消息，赋最终请求ID后PG append/readback完整。2文件21项PASS，`gateway-journal-{red,green,green-2}.log`完整保留，不放宽journal限额。Root owned lint与test TypeScript再次通过。
 - 标准settler缺少meleeDefinition导致攻击技能固定拒绝，确认旧Agent的unarmed意图在registered combat分支未生效。批准B在标准Actor内容层显式unarmed并复验真正攻击和精确旧snapshot迁移；不越过combat operation或修改伤害规则。A Factory隔离实施进行中。
 
+### 2026-09-10 约23:55 Factory准出及应用V2浏览器往返
+
+- root恢复补丁正常hooks冻结 `f04fe69d2209b0d4c67d9e509236e143fb81007d`；独立审阅36路径+追加10路径：此前journal、pair、codec、paused、portable、gateway批次主体和三个终端缺口静态闭合，新delta无P0/P1。能力两项及Factory尚未包含在该审阅SHA，旧v1 wildcard仍是已披露P2。
+- A Factory初版3/3 RED后，事务外模型、短事务幂等重读/预算复核、同identity共享/取消引用计数、closed latch、每个异步准入后检查与INSERT后COMMIT前取消均已落；Host最多3个独立birth，不阻塞clock/checkpoint/其他角色，dispose取消并拒绝晚回。纯mock/wire7项PASS，实际PG原组11项和新增生命周期1项PASS；后者查询pg_stat_activity/pg_locks确认挂起时无事务或advisory lock，abort后0记录、同birth重试1记录。
+- 模型deadline按已有网关60/300秒合同分别设65/305秒，Factory315秒，在Browser330秒之前失败；不把Pro随意截为120秒。非2xx响应另有取消未读body的RED→GREEN，15项网关回归通过，不读取或记录provider错误正文。
+- 当前工作树 `pnpm build` Web/Agent PASS（`review-integration-build.log`），Web/Svelte类型0错误0警告。该dist下真实浏览器+隔离PG V2配对往返1/1 PASS 22.0s，`app-pair-browser-working/`：版本2、pairHash存在、3workspaces、内外timeline匹配、browser errors=[]，截图已查看。它是集成工作树证据，非最终SHA准出。
+- 最后完整Agent串行27文件127项PASS（44.91s，`agent-review-full.log`）；所有测试容器与47832端口清理，仅用户原PG exited容器及数据卷保留。能力分支预计10–15分钟内交回，下一步冻结合并后全量验证和真实模型。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

@@ -167,7 +167,10 @@ export class GatewayChatModel extends BaseChatModel {
         }),
         signal: controller?.signal ?? options?.signal,
       });
-      if (!response.ok) throw new Error(`gateway request failed with HTTP ${response.status}`);
+      if (!response.ok) {
+        await response.body?.cancel().catch(() => undefined);
+        throw new Error(`gateway request failed with HTTP ${response.status}`);
+      }
       raw = await readGatewayResponse(response);
     } finally {
       if (timeout !== undefined) clearTimeout(timeout);

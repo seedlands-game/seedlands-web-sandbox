@@ -35,13 +35,22 @@ const baseUrl = gatewayUrl(process.env.SEEDLANDS_MODEL_GATEWAY_URL);
 const gatewayToken = process.env.SEEDLANDS_MODEL_GATEWAY_TOKEN?.trim();
 if (Boolean(baseUrl) !== Boolean(gatewayToken))
   throw new Error('SEEDLANDS_MODEL_GATEWAY_URL and SEEDLANDS_MODEL_GATEWAY_TOKEN must be configured together');
-const flash = baseUrl && gatewayToken ? createGatewayChatModel({ tier: 'flash', baseUrl, apiKey: gatewayToken }) : null;
-const pro = baseUrl && gatewayToken ? createGatewayChatModel({ tier: 'pro', baseUrl, apiKey: gatewayToken }) : null;
+const flashTimeoutMs = 65_000;
+const proTimeoutMs = 305_000;
+const factoryTimeoutMs = 315_000;
+const flash =
+  baseUrl && gatewayToken
+    ? createGatewayChatModel({ tier: 'flash', baseUrl, apiKey: gatewayToken, timeoutMs: flashTimeoutMs })
+    : null;
+const pro =
+  baseUrl && gatewayToken
+    ? createGatewayChatModel({ tier: 'pro', baseUrl, apiKey: gatewayToken, timeoutMs: proTimeoutMs })
+    : null;
 
 const workspace = PersistentNpcWorkspace.open({ connectionString });
 await workspace.setup();
 const framework = await createPostgresFrameworkPersistence(connectionString);
-const factory = pro ? ResidentFactory.open({ pro, connectionString }) : null;
+const factory = pro ? ResidentFactory.open({ pro, connectionString, modelTimeoutMs: factoryTimeoutMs }) : null;
 if (factory) await factory.setup();
 const handle = await startResidentServer({
   workspace,
