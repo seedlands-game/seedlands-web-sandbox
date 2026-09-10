@@ -87,8 +87,8 @@
     background: #233b3b;
   }
   .catalog-grid :global(.item-icon) {
-    width: 34px;
-    height: 34px;
+    width: 46px;
+    height: 46px;
     image-rendering: pixelated;
   }
   .catalog-grid small {

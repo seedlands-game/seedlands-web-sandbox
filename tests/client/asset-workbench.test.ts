@@ -76,6 +76,6 @@ it('总厚度与共享原生源解释一致，编辑副本不会改变内置图�
   const definition = resolvePixelModel(model, builtinAssets);
   const mesh = buildToolMesh({ ...definition, thicknessPixels: 4 });
   const depth = mesh.positions.filter((_, i) => i % 3 === 2);
-  expect(Math.max(...depth) - Math.min(...depth)).toBe(4 / 16);
+  expect(Math.max(...depth) - Math.min(...depth)).toBe(4 / (definition.pixelsPerUnit ?? 16));
   expect(binding.iconId).toBe(model.type === 'extruded-pixel-model' ? model.payload.textureId : '');
 });

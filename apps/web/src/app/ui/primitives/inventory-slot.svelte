@@ -67,7 +67,7 @@
     width: 100%;
     height: 58px;
     min-width: 0;
-    padding: 7px;
+    padding: 5px;
     display: grid;
     place-items: center;
     color: #f0e5ce;
@@ -96,8 +96,12 @@
     border-color: #a9e1c4;
   }
   .item-slot :global(.item-icon) {
-    width: 34px;
-    height: 34px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 46px;
+    height: 46px;
     image-rendering: pixelated;
     pointer-events: none;
     -webkit-user-drag: none;
@@ -138,8 +142,8 @@
       padding: 3px;
     }
     .item-slot :global(.item-icon) {
-      width: 28px;
-      height: 28px;
+      width: 38px;
+      height: 38px;
     }
   }
 </style>

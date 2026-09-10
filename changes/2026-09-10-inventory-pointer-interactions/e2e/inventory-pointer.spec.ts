@@ -1,3 +1,4 @@
+import { expectCenteredItemIcons } from '../../../tests/e2e/support/item-icon-centering';
 import { expect, test, type Page } from '@playwright/test';
 import { startHarnessWorld, lockPointer, moveHarnessPlayer, setHarnessView } from '../../../tests/e2e/support/harness';
 
@@ -14,6 +15,9 @@ async function prepare(page: Page, seed: string, count = 9, query = '') {
   }, count);
   await page.keyboard.press('KeyE');
   await expect(page.getByRole('dialog', { name: '背包与合成', exact: true })).toBeVisible();
+  // Command acknowledgement is not proof that the rendered inventory fixture is ready.
+  await expect(bagSlot(page, 0)).toHaveAttribute('data-item', 'plank');
+  await expect(bagSlot(page, 0)).toHaveAttribute('data-count', String(count));
 }
 
 test('右键拆半、单放与关闭归还均来自真实鼠标输入', async ({ page }) => {
@@ -133,6 +137,14 @@ test('工作台右拖铺料、结果取出与保存重进', async ({ page }, inf
   await expect(page.locator('[data-craft-result]')).toHaveAttribute('data-item', 'wood-pickaxe');
   await bagSlot(page, 0).click();
   await expect(page.locator('[data-inventory-cursor]')).toHaveCount(0);
+  for (const viewport of [
+    { width: 1280, height: 720 },
+    { width: 720, height: 960 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expectCenteredItemIcons(page.locator('[data-craft-result] img, [data-station-slot] img'));
+  }
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.screenshot({ path: info.outputPath('workbench-ready.png') });
   await page.locator('[data-craft-result]').click();
   await expect(page.locator('[data-inventory-cursor]')).toHaveAttribute('data-item', 'wood-pickaxe');

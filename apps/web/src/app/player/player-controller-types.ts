@@ -29,6 +29,7 @@ export type PlayerControllerOptions = {
   onBeginBreak: (position: [number, number, number]) => void;
   onCancelBreak: () => void;
   onPlace: (position: [number, number, number]) => void;
+  onUseTarget: (position: [number, number, number]) => boolean;
   isUiBlockingInput: () => boolean;
   onUseHeldItem: () => boolean;
   onCloseUi: () => void;

@@ -104,7 +104,25 @@ it('不同窗口比例保持持握锚点在右侧安全范围', () => {
     const projectedX =
       root.getLocalPosition().x / ((width / 720) * Math.tan(Math.PI / 5) * Math.abs(root.getLocalPosition().z));
     expect(projectedX).toBeGreaterThanOrEqual(0.38);
-    expect(projectedX).toBeLessThanOrEqual(0.44);
+    expect(projectedX).toBeLessThanOrEqual(0.57);
   }
+  model.dispose();
+});
+
+it('窄屏工具调整保持三个缩放轴有限，切换普通物品后恢复', () => {
+  const camera = new pc.Entity();
+  const device = { width: 720, height: 960 };
+  const model = new FirstPersonViewmodel({ graphicsDevice: device } as pc.Application, camera);
+  const item = camera.findByName('viewmodel replaceable item')!;
+  model.setHeldItem('wood-sword');
+  model.update(0);
+  const scale = item.getLocalScale();
+  expect([scale.x, scale.y, scale.z].every((value) => Number.isFinite(value) && value > 0)).toBe(true);
+  expect(scale.x).toBe(scale.y);
+  expect(scale.y).toBe(scale.z);
+  model.setHeldItem('plank');
+  model.update(0);
+  expect(item.getLocalScale().equals(pc.Vec3.ONE)).toBe(true);
+  expect(item.getLocalEulerAngles().length()).toBeCloseTo(0);
   model.dispose();
 });

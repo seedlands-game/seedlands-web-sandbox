@@ -88,7 +88,6 @@ export function buildStationActionCandidate(
     station = validateStationProjection(request.station, content),
     input = record(request.input);
   if (actor.lifecycle !== 'alive') throw new Error('actor-dead');
-  if (actor.mode === 'creative') throw new Error('creative-station-inventory-forbidden');
   if (
     !integer(input.expectedStationRevision, 0, Number.MAX_SAFE_INTEGER) ||
     input.expectedStationRevision !== station.component.revision

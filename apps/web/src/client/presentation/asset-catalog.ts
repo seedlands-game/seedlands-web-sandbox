@@ -1,4 +1,5 @@
 import { progressionItemAssets } from './asset-progression-sources';
+import { legacyPixelAssets } from './legacy-item-assets';
 import type { Asset, ItemAssetBinding } from './asset-types';
 import { nativeToolAssets } from './asset-tool-sources';
 import { builtinVisualAssets } from './visual-asset-catalog';
@@ -28,7 +29,18 @@ const items = [
   ['wood-pickaxe', '木镐'],
   ['iron-pickaxe', '铁镐'],
 ] as const;
-const imageNames = ['dirt-block', 'stone-block', 'wood-block', 'sand-block', 'berry', 'plank', 'lantern'] as const;
+const imageNames = [
+  'dirt-block',
+  'stone-block',
+  'wood-block',
+  'sand-block',
+  'berry',
+  'plank',
+  'lantern',
+  'workbench',
+  'chest',
+  'furnace',
+] as const;
 
 const itemMaterials: Record<string, string[]> = {
   'dirt-block': ['dirt'],
@@ -42,6 +54,7 @@ const itemMaterials: Record<string, string[]> = {
 };
 export const builtinAssets: Asset[] = [
   ...nativeItemAssets,
+  ...legacyPixelAssets,
   ...builtinVisualAssets,
   ...imageNames.map((id): Asset => ({
     id: `builtin:image:${id}`,
@@ -73,12 +86,17 @@ export const builtinAssets: Asset[] = [
       },
     })),
 ];
-export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]) => ({
-  itemId,
-  name,
-  modelId: `builtin:model:${itemId}`,
-  iconId: nativeItemAssets.some((asset) => asset.id === `builtin:texture:${itemId}`)
-    ? `builtin:texture:${itemId}`
-    : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
-}));
+export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]) => {
+  const modelId = `builtin:model:${itemId}`;
+  const model = nativeItemAssets.find((asset) => asset.id === modelId);
+  return {
+    itemId,
+    name,
+    modelId,
+    iconId:
+      model?.type === 'extruded-pixel-model'
+        ? model.payload.textureId
+        : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
+  };
+});
 export const builtinBinding = (itemId: string) => builtinItemBindings.find((b) => b.itemId === itemId);

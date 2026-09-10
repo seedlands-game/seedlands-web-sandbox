@@ -183,8 +183,12 @@
     font: 700 14px monospace;
   }
   .craft-result :global(.item-icon) {
-    width: 42px;
-    height: 42px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 56px;
+    height: 56px;
     image-rendering: pixelated;
   }
   .smelting {

@@ -20,6 +20,7 @@
   let pointer = $state({ x: 0, y: 0 });
   let closing = $state(false);
   const cursor = $derived(gameplay.cursor ?? null);
+  const usesInventoryPointer = $derived(gameplay.mode === 'survival' || Boolean(gameplay.station));
   const food = $derived(foodSlot === null ? null : gameplay.inventory[foodSlot]);
   const visibleRecipes = $derived(
     gameplay.recipes.filter((recipe) => recipe.name.toLowerCase().includes(filter.trim().toLowerCase())),
@@ -115,14 +116,14 @@
     gestures.enter(slot);
   }
   function release(event: PointerEvent) {
-    if (!gameplay.inventoryOpen || gameplay.mode !== 'survival' || (event.button !== 0 && event.button !== 2)) return;
+    if (!gameplay.inventoryOpen || !usesInventoryPointer || (event.button !== 0 && event.button !== 2)) return;
     const element = document.elementFromPoint(event.clientX, event.clientY);
     gestures.end(slotUnderPointer(event), !element?.closest('.inventory-dialog'));
   }
   function outsidePress(event: PointerEvent) {
     if (
       !gameplay.inventoryOpen ||
-      gameplay.mode !== 'survival' ||
+      !usesInventoryPointer ||
       closing ||
       !cursor ||
       (event.button !== 0 && event.button !== 2)
@@ -146,8 +147,7 @@
     closing = true;
     gestures.cancel();
     await gestures.settled();
-    if (gameplay.mode === 'creative' || (await actions.inventoryPointer({ kind: 'close' })))
-      await actions.setActorMode(value);
+    if (!usesInventoryPointer || (await actions.inventoryPointer({ kind: 'close' }))) await actions.setActorMode(value);
     await tick();
     closing = false;
   }
@@ -189,14 +189,14 @@
 
 <GameOverlay
   id="inventory-crafting"
-  label={gameplay.mode === 'creative' ? '创造内容目录' : '背包与合成'}
+  label={gameplay.station?.name ?? (gameplay.mode === 'creative' ? '创造内容目录' : '背包与合成')}
   open={gameplay.inventoryOpen}
 >
   <div class="inventory-dialog" class:holding={Boolean(cursor)} aria-busy={closing}>
     <header>
       <div>
         <small id="actor-mode-status" role="status">{gameplay.mode === 'creative' ? '创造模式' : '生存模式'}</small>
-        <h2>{gameplay.mode === 'creative' ? '创造内容目录' : (gameplay.station?.name ?? '背包')}</h2>
+        <h2>{gameplay.station?.name ?? (gameplay.mode === 'creative' ? '创造内容目录' : '背包')}</h2>
       </div>
       <div class="mode-actions">
         {#if gameplay.mode === 'creative'}
@@ -211,7 +211,7 @@
         <GameButton label="关闭背包" disabled={closing} onclick={close}>关闭 <kbd>E</kbd></GameButton>
       </div>
     </header>
-    {#if gameplay.mode === 'creative'}
+    {#if gameplay.mode === 'creative' && !gameplay.station}
       <CreativeCatalog {gameplay} {actions} />
     {:else}
       <div class="survival-layout" class:with-recipes={!gameplay.station}>
@@ -308,7 +308,7 @@
     {/if}
   </div>
 </GameOverlay>
-{#if gameplay.inventoryOpen && gameplay.mode === 'survival' && cursor}
+{#if gameplay.inventoryOpen && usesInventoryPointer && cursor}
   <div
     class="inventory-cursor"
     data-inventory-cursor

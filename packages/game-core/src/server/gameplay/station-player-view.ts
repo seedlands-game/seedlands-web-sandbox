@@ -19,7 +19,7 @@ export function projectNearbyStations(
   if (!entity || entity.type !== 'player' || !runtime.content.stations) return [];
   const actor = runtime.entities.actorStateAccess(playerId);
   const binding = authority?.forActor(playerId, 'player');
-  if (!binding || actor.lifecycle !== 'alive' || actor.mode !== 'survival') return [];
+  if (!binding || actor.lifecycle !== 'alive') return [];
   const eye: [number, number, number] = [entity.position[0], entity.position[1] + 1.6, entity.position[2]];
   return runtime.entities.queryStations().flatMap((station) => {
     const component = runtime.entities.stationSnapshot(station.id)!;

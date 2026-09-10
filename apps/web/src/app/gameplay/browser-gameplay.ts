@@ -418,13 +418,17 @@ export class BrowserGameplay {
     });
   }
 
-  useHeldItem(): boolean {
-    if (this.aimTarget && this.stations.open(this.aimTarget.position)) {
+  useTarget(position: [number, number, number]): boolean {
+    if (this.stations.open(position)) {
       this.inventoryOpen = true;
       this.options.releaseInput();
       this.refresh();
       return true;
     }
+    return false;
+  }
+
+  useHeldItem(): boolean {
     const player = this.options.authority.gameplay.player;
     if (player.mode?.value === 'creative') return false;
     const stack = player.inventory[player.selectedSlot];

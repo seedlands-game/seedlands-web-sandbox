@@ -82,7 +82,7 @@ it('prepares exact count transfer without changing source and rejects stale revi
     }),
   ).toThrow(/count/);
 });
-it('crafts into actor inventory and rejects creative use', () => {
+it('crafts into actor inventory in both supported actor modes', () => {
   const s = station();
   const component = { ...s.component, grid: [{ itemId: 'test:wood', count: 2 }, ...Array(8).fill(null)] };
   const result = buildStationActionCandidate(content, {
@@ -93,14 +93,14 @@ it('crafts into actor inventory and rejects creative use', () => {
   });
   expect(result.slots[0]?.count).toBe(5);
   expect(result.station).toMatchObject({ revision: 1, grid: Array(9).fill(null) });
-  expect(() =>
+  expect(
     buildStationActionCandidate(content, {
       kind: 'craft',
       actor: { ...actor(), mode: 'creative' },
       station: { ...s, component },
       input: { expectedStationRevision: 0, recipeId: 'test:wood' },
     }),
-  ).toThrow(/creative/);
+  ).toMatchObject({ result: { success: true }, slots: [{ itemId: 'test:wood', count: 5 }, null] });
 });
 it('rejects input into furnace output and clears removed active input progress without refunding fuel', () => {
   const s = station('furnace');

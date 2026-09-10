@@ -1,0 +1,173 @@
+[
+  {
+    "item": "coal",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "raw-iron",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "iron-ingot",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "dirt-block",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "stone-block",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "wood-block",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "sand-block",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "berry",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "plank",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "glowstone-block",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "lantern",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "wood-pickaxe",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "stone-pickaxe",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "iron-pickaxe",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "wood-axe",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "wood-sword",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "workbench",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "chest",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  },
+  {
+    "item": "furnace",
+    "width": 512,
+    "imageBox": 46,
+    "slotHeight": 58,
+    "cornerAlpha": 0,
+    "extent": 0.87890625,
+    "inside": true
+  }
+]

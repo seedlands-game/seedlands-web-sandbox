@@ -258,6 +258,7 @@ export async function executeGameplayCommand(
         server.giveItem(playerId(source, command.entityId), {
           itemId: definition.id,
           count: positive(command.count, 'Count', true),
+          ...(definition.durability ? { instance: { durability: definition.durability.max } } : {}),
         }),
       );
     }

@@ -10,6 +10,7 @@ import type { PreparedWorldEdit } from '../../packages/game-core/src/server/prep
 import type { WorldCommitResult } from '../../packages/game-core/src/server/game-server-types';
 import { WorldResourceAuthorizer } from '../../packages/game-core/src/server/harness/world-authorization';
 import { ItemIds } from '../../packages/game-core/src/server/gameplay/item-registry';
+import { projectNearbyStations } from '../../packages/game-core/src/server/gameplay/station-player-view';
 import { Voxel } from '../../packages/game-core/src/world/voxel';
 import { testCorePlatform } from '../support/core-platform';
 
@@ -91,10 +92,11 @@ const verifiedPack = {
 const createRuntime = (cloneHook?: (value: unknown) => void) => {
   const world = new FakeVoxelWorld();
   const composition = assembleOverworldPacks([verifiedPack]);
+  const actorAuthority = createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' });
   const gameplay = new GameplayRuntime({
     composition,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
-    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' }),
+    moduleActorAuthority: actorAuthority,
     platform: {
       ...testCorePlatform,
       clone: <Value>(value: Value): Value => {
@@ -140,7 +142,7 @@ const createRuntime = (cloneHook?: (value: unknown) => void) => {
       target: { kind: 'entity', entityId: 'player' },
       input: { mode: 'creative' },
     });
-  return { gameplay, world, enterCreative };
+  return { gameplay, world, actorAuthority, enterCreative };
 };
 
 const expectCommit = (
@@ -184,6 +186,35 @@ describe('creative block interactions through GameplayRuntime', () => {
 
     expect(world.getVoxel([2, 1, 0])).toBe(Voxel.Stone);
     expect(gameplay.getInventory('player')).toEqual(survivalInventory);
+  });
+
+  it('creates and restores the formal station entity when creative placement uses a station item', () => {
+    const source = createRuntime();
+    expect(source.enterCreative()).toMatchObject({ ok: true });
+    expect(source.gameplay.selectHotbarSlot('player', 7)).toMatchObject({ success: true });
+
+    expect(source.gameplay.placeVoxel('player', [2, 1, 0])).toMatchObject({
+      success: true,
+      commit: { committed: true },
+    });
+    expect(source.world.getVoxel([2, 1, 0])).toBe(Voxel.Chest);
+    const station = source.gameplay.entities.stationAt([2, 1, 0]);
+    expect(station).toMatchObject({ type: 'station', position: [2, 1, 0] });
+    expect(source.gameplay.entities.stationSnapshot(station!.id)).toMatchObject({ kind: 'chest', voxel: Voxel.Chest });
+    expect(
+      projectNearbyStations(source.gameplay, 'player', source.actorAuthority, (x, y, z) =>
+        source.world.getVoxel([x, y, z]),
+      ),
+    ).toEqual([
+      expect.objectContaining({ position: [2, 1, 0], component: expect.objectContaining({ kind: 'chest' }) }),
+    ]);
+
+    const saved = source.gameplay.createSnapshot();
+    const restored = createRuntime();
+    restored.world.cells.set(key([2, 1, 0]), Voxel.Chest);
+    restored.gameplay.restoreSnapshot(saved);
+    expect(restored.gameplay.entities.stationAt([2, 1, 0])).toEqual(station);
+    expect(restored.gameplay.createSnapshot()).toEqual(saved);
   });
 
   it('breaks immediately, returns the actual commit and creates no survival drop', () => {
