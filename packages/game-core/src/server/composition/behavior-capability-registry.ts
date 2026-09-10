@@ -15,6 +15,7 @@ import {
   type BehaviorOperationRequirement,
   type BehaviorSkillCheckpoint,
 } from '../../runtime/behavior-control-protocol';
+import { assertBehaviorCapabilityDescriptor } from '../../runtime/behavior-capability-descriptor';
 import type { ModDefinitionCatalog, ModRegistrationIdentity } from './contracts';
 import type { RegisteredOperationRequest, RegisteredOperationResult } from './operation-contracts';
 import {
@@ -333,6 +334,7 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
           ? { state: Object.freeze({ version: definition.state.version, maximumBytes: definition.state.maximumBytes }) }
           : {}),
       });
+      assertBehaviorCapabilityDescriptor(descriptor);
       providers.set(
         key,
         Object.freeze({

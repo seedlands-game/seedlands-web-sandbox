@@ -4,6 +4,7 @@ import type {
   BehaviorCapability,
   BehaviorJson,
 } from '../../runtime/behavior-control-protocol';
+import { behaviorArgumentRuleIssue } from '../../runtime/behavior-capability-descriptor';
 
 const MAX_JSON_DEPTH = 16;
 const MAX_JSON_NODES = 2_048;
@@ -61,16 +62,13 @@ export function assertBehaviorJson(value: unknown, label: string): asserts value
 }
 
 export function validateBehaviorArgumentRule(rule: BehaviorArgumentRule, label: string): void {
-  if (!behaviorObject(rule) || !['number', 'string', 'boolean', 'position', 'entity-reference'].includes(rule.type))
-    throw new TypeError(`${label} argument schema is invalid.`);
-  if (rule.minimum !== undefined && (!Number.isFinite(rule.minimum) || rule.type === 'boolean'))
-    throw new TypeError(`${label} minimum is invalid.`);
-  if (rule.maximum !== undefined && (!Number.isFinite(rule.maximum) || rule.type === 'boolean'))
-    throw new TypeError(`${label} maximum is invalid.`);
-  if (rule.minimum !== undefined && rule.maximum !== undefined && rule.minimum > rule.maximum)
-    throw new TypeError(`${label} bounds are invalid.`);
-  if (rule.values && (rule.type !== 'string' || !rule.values.length || rule.values.some((entry) => !entry)))
-    throw new TypeError(`${label} values are invalid.`);
+  const issue = behaviorArgumentRuleIssue(rule);
+  if (!issue) return;
+  if (issue === 'minimum') throw new TypeError(`${label} minimum is invalid.`);
+  if (issue === 'maximum') throw new TypeError(`${label} maximum is invalid.`);
+  if (issue === 'bounds') throw new TypeError(`${label} bounds are invalid.`);
+  if (issue === 'values') throw new TypeError(`${label} values are invalid.`);
+  throw new TypeError(`${label} argument schema is invalid.`);
 }
 
 export function validateBehaviorArguments(capability: BehaviorCapability, raw: unknown): BehaviorArguments {

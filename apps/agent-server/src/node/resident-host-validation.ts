@@ -4,15 +4,8 @@ import {
   type ResidentBirthPackage,
   type ResidentWorldBinding,
 } from '@seedlands/cognition-protocol';
-import {
-  BEHAVIOR_MAX_CAPABILITY_STATE_BYTES,
-  BEHAVIOR_MAX_CAPABILITIES,
-  BEHAVIOR_MAX_OPERATION_ID_LENGTH,
-  BEHAVIOR_MAX_REQUIRED_OPERATIONS,
-  type BehaviorArgumentRule,
-  type BehaviorCapability,
-  type BehaviorOperationRequirement,
-} from '@seedlands/game-core/runtime/behavior-control-protocol';
+import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import { isBehaviorCapabilityCatalog } from '@seedlands/game-core/runtime/behavior-capability-descriptor';
 import {
   CHARACTER_OBSERVATION_MAX_EVENTS,
   type CharacterObservation,
@@ -106,69 +99,8 @@ export function observationMatches(value: unknown, binding: ControlBinding): val
   return value.events.length === 0 || previous === value.eventCoverage.returnedThrough;
 }
 
-function validArgumentRule(value: unknown): value is BehaviorArgumentRule {
-  if (!object(value) || !['number', 'string', 'boolean', 'position', 'entity-reference'].includes(String(value.type)))
-    return false;
-  if (value.required !== undefined && typeof value.required !== 'boolean') return false;
-  if (value.minimum !== undefined && !Number.isFinite(value.minimum)) return false;
-  if (value.maximum !== undefined && !Number.isFinite(value.maximum)) return false;
-  if (value.integer !== undefined && typeof value.integer !== 'boolean') return false;
-  return (
-    value.values === undefined ||
-    (Array.isArray(value.values) && value.values.length <= 128 && value.values.every((entry) => textId(entry)))
-  );
-}
-
-function validOperationRequirements(value: unknown): value is readonly BehaviorOperationRequirement[] {
-  if (!Array.isArray(value) || value.length > BEHAVIOR_MAX_REQUIRED_OPERATIONS) return false;
-  const operations = new Set<string>();
-  for (const requirement of value) {
-    if (
-      !object(requirement) ||
-      typeof requirement.operationId !== 'string' ||
-      requirement.operationId.length > BEHAVIOR_MAX_OPERATION_ID_LENGTH ||
-      !/^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/.test(requirement.operationId) ||
-      (requirement.authorization !== 'self' && requirement.authorization !== 'any') ||
-      operations.has(requirement.operationId)
-    )
-      return false;
-    operations.add(requirement.operationId);
-  }
-  return true;
-}
-
 export function validCapabilities(value: unknown): value is readonly BehaviorCapability[] {
-  if (!Array.isArray(value) || value.length > BEHAVIOR_MAX_CAPABILITIES) return false;
-  const identities = new Set<string>();
-  for (const entry of value) {
-    if (
-      !object(entry) ||
-      !textId(entry.id) ||
-      entry.name !== entry.id ||
-      !textId(entry.version) ||
-      !object(entry.provider) ||
-      !textId(entry.provider.moduleId) ||
-      !textId(entry.provider.version) ||
-      (entry.kind !== 'condition' && entry.kind !== 'skill') ||
-      typeof entry.description !== 'string' ||
-      entry.description.length > 1000 ||
-      !object(entry.arguments) ||
-      !Object.entries(entry.arguments).every(([name, rule]) => textId(name) && validArgumentRule(rule)) ||
-      !validOperationRequirements(entry.requiredOperations) ||
-      (entry.kind === 'condition' && entry.requiredOperations.length !== 0) ||
-      (entry.kind === 'skill') !== (entry.state !== undefined) ||
-      (entry.state !== undefined &&
-        (!object(entry.state) ||
-          !textId(entry.state.version) ||
-          !Number.isSafeInteger(entry.state.maximumBytes) ||
-          (entry.state.maximumBytes as number) < 1 ||
-          (entry.state.maximumBytes as number) > BEHAVIOR_MAX_CAPABILITY_STATE_BYTES))
-    )
-      return false;
-    if (identities.has(entry.id)) return false;
-    identities.add(entry.id);
-  }
-  return true;
+  return isBehaviorCapabilityCatalog(value);
 }
 
 export function validBirth(value: unknown, observation?: CharacterObservation): value is ResidentBirthPackage {
