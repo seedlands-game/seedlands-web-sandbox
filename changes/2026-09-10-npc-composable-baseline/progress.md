@@ -206,6 +206,13 @@
 - 本次threat失败有明确新证据：observation19在physicsTick88被Authority拒绝，不再是循环等待超时；三角色首advance同样失败，初始activeTime约1.3182s而tick54仅结算900ms，留下约418ms欠账。`940bcc3`只补完整回执的诊断重跑2PASS不能关闭原失败；`23d9101`补观察tick/当前tick/expiry的错误上下文，未改接受语义。
 - 真实AuthorityRuntime + DirectLogic owner + Promise-tail队列的受控RED稳定复现：seq1 observedTick4/expiry16/receiveTick20拒绝，seq2 observedTick20/expiry32/receiveTick36仍拒绝；5项中4PASS/1FAIL，105ms。原始日志`authority-worker-debt-red.log`留存，非浏览器偶然失败推断。独立审阅确认这是队列提升之后的另一项Browser freshness P1；正在实现先结算欠账、再逐100ms exact-await，原TTL、权限、epoch和回执候选检查不变。
 
+### 2026-09-11 约03:42 欠账修复的真实浏览器闭环
+
+- aux真实Runtime RED `ad55c6a`及修复`4b3e59e`无冲突集成为`ed518bf`、`0b6d5f8079354a52d12ba08b39c4e1a6f53b6657`。单文件8/8 PASS，Web/test类型和两文件lint/format通过；先结算全部到期lanes，随后逐100ms exact-await，旧回执仍因TTL拒绝，新回执期限内接受。
+- exact post抛错时清pending引用和timer、抛原错误，不再拒绝无人等待的局部Promise；accept抛错仍由接收路径保留根因/fatal，clock以既有5秒超时结束，不宣称clock直接返回accept根错误。非法elapsed在副作用前拒绝。
+- 同SHA重点Browser `debt-0b6d5f8`三项全部PASS（单NPC三昼夜、threat脱险觅食、三NPC有限食物1800模拟秒），03:36–03:41:51，命令退出0，无重试或改断言。此前`5f6e01c`两个FAIL保留；此轮关闭其运行时缺口，不替代下一冻结全量static/build/main/NPC/production/真实模型。
+- Sol/xhigh独立delta审阅无新增P0/P1，新freshness P1静态闭合，累计唯一13项P1闭合。P2的60000ms常量复用，以及prelude自发观察无等待/三lane与commits精确聚合的低成本测试补强正在aux收尾；原真实Runtime反例不改。RED/GREEN原始日志复制到本worktree，SHA256分别`c3873d10d9bfe385f936b010219f69d877ec4d31fa23ce5e28cc2257e77263ac`、`1ff84178d4bbc2bf140e9123ddaf28d6c827d4ea58417ed45151bf33c476635d`。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |
