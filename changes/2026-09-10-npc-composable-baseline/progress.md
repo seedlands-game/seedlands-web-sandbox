@@ -169,6 +169,14 @@
 - 唯一失败为`secondary-actor-permissions`的pickup/module：夹具去掉inventory operation owner的execute，却保留依赖该操作的标准行为provider，freeze正确拒绝，未到原执行层权限断言。夹具明确不装配无关behavior模块；不补权限、不改生产，全部7项执行拒绝/完整快照/实体引用/延迟撤权断言保留。该suite与行为准入负例定向2文件14项PASS（`secondary-grant-fixture-green.log`）；需新SHA重新完整准出。
 - Sol/xhigh最终只读审阅绑定main `6c7124a`→`79cb53a`，295路径风险归类，高风险链逐行覆盖；累计唯一11项P1均闭合，0开放P0/P1。Factory的后续重开归原项、descriptor字段与总量归同一项，不重复计数。保留1项P2：私有Agent包通配exports仍可显式访问旧v1子路径，当前v2入口不受影响，留给独立归档清理。未逐行覆盖锁文件、社区元数据、纯样式、历史文档、生成fixture及部分低风险E2E；源码review不替代当前运行证据。
 
+### 2026-09-11 约01:40 真实模型结果与日程窗口反例
+
+- `14ae71f79eb14422e43179d790293d556bd94b6d`生产Web/Agent构建PASS。真实批次`final-14ae71-real`三角色FAIL（5.8min，14个Flash请求，13个有完成标记），另两项Flash/Pro PASS（3.5min，2Flash+3Pro）。三角色均rev2、不同目标/对白、errors=[]，到达为[true,true,false]，原始轨迹和失败上下文保留，不算T11通过。
+- npc-9在事件323.7才接受新树，首个rev2样本world22.48、night/resting、无camp动作；额外60秒结束world0.884，仍未获得白昼任务执行机会。首个模型请求记录约32.6k reasoning字符而无content/tool calls，疑似输出预算耗尽（无finish_reason，仅推断）；后续先发言、再由新轮成功改树，无schema/权限拒绝证据。不把窗口修正描述为模型时延已解决。
+- aux无模型实际树重放`be80a46`已集成为`63e13ee`：晚间60秒仅休息、正常推进到06:00后60秒内真实camp-move与camp-wait成功；定向1项PASS（20.87s），类型/lint/format通过。没有调用模型、途中资源注入或重新改树。此夹具只证明日程窗口因果，不复制整段真实三角色历史。
+- Sol/xhigh独立复核同意T11给予连续完整白昼60秒，最多660模拟秒，保留420s墙钟和18Flash；要求pause/paused、前后时刻边界、跨夜清零、调用数不增加与原到达/存活/hash/cursor断言。新增每角色截图切换到对应伙伴并收起设置，避免设置面板遮住已验收内容。待冻结后只重跑三角色，不重复已通过Flash/Pro。
+- Flash/Pro实际读回：树rev2，断线后tick989→1122且运行patrol；记忆window-1→window-2、MEMORY revision2；两个真实出生场景均重复激活返回同实体。当前累计已发起27Flash/3Pro逻辑请求，网关自身重试次数与计费token未知，不能视为provider计费请求数。专用网关和测试PG均已清理，保留用户原数据库。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

@@ -11,6 +11,7 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   const journeys: unknown[] = [];
+  const executionWindow = { installedWorldTime: 0, elapsedSeconds: 0, daylightSeconds: 0, callsBeforeDisconnect: 0 };
   try {
     const first = await startLifeScene(page);
     const profiles = [
@@ -123,37 +124,67 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
       expect(definitionHash(sample.observation)).not.toBe(definitionHash(before[index].observation));
     });
     expect(new Set(installed.map((sample) => sample.observation.character.behaviorTree.goal.description)).size).toBe(3);
+    executionWindow.installedWorldTime = installed[0].worldTime;
+    executionWindow.callsBeforeDisconnect = runtime.calls.length;
     await page.getByRole('button', { name: '断开', exact: true }).click();
-    await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
+    await expect(page.locator('#companion .connection')).toHaveText('按当前行为树生活 · 未连接模型');
+    expect(await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }))).toMatchObject({
+      ok: true,
+    });
     const cursors = installed.map((sample) => sample.observation.cursor);
-    for (let second = 0; second < 60; second++) {
+    const paused = await captureJourney(cursors);
+    paused.forEach((sample) => expect(sample.paused).toBe(true));
+    let previousWorldTime = paused[0].worldTime;
+    const isDay = (hours: number) => hours >= 6 && hours < 18;
+    // The scene advances 0.04 world-hours per simulation second. A late accepted tree
+    // gets one bounded day cycle plus the original 60-second daytime action opportunity.
+    for (let second = 0; second < 660 && executionWindow.daylightSeconds < 60; second++) {
       expect(
         await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'advance', elapsedMs: 1000 })),
       ).toMatchObject({ ok: true });
       const current = await captureJourney(cursors);
       current.forEach((sample, index) => {
+        expect(sample.paused).toBe(true);
+        expect(sample.observation.gap).not.toBe(true);
+        expect(sample.observation.cursor).toBeGreaterThanOrEqual(cursors[index]);
         cursors[index] = sample.observation.cursor;
         expect(sample.observation.character.lifecycle).toBe('active');
         expect(definitionHash(sample.observation)).toBe(definitionHash(installed[index].observation));
       });
+      executionWindow.elapsedSeconds++;
+      executionWindow.daylightSeconds =
+        isDay(previousWorldTime) && isDay(current[0].worldTime) ? executionWindow.daylightSeconds + 1 : 0;
+      previousWorldTime = current[0].worldTime;
+      expect(runtime.calls).toHaveLength(executionWindow.callsBeforeDisconnect);
     }
+    expect(executionWindow.daylightSeconds).toBe(60);
     expect(reached).toEqual([true, true, true]);
     expect(runtime.proCalls).toHaveLength(0);
     expect(runtime.calls.length).toBeLessThanOrEqual(18);
     expect(new Set(runtime.calls.map((call) => call.actorId)).size).toBe(3);
-    for (const character of characters) {
+    await page.getByRole('button', { name: '思考设置' }).click();
+    await expect(page.locator('#companion-url')).toBeHidden();
+    for (const [index, character] of characters.entries()) {
+      await page
+        .getByRole('navigation', { name: '选择伙伴' })
+        .getByRole('button', { name: character.profile.name, exact: true })
+        .click();
+      await expect(page.locator('#companion')).toContainText(
+        installed[index].observation.character.behaviorTree.goal.description,
+      );
       await faceLifeCharacter(page, character.entityId);
       await page.screenshot({ path: info.outputPath(`real-resident-${character.entityId}.png`) });
     }
     expect(errors).toEqual([]);
     await info.attach('real-three-outcomes', {
-      body: JSON.stringify({ before, installed, reached }),
+      body: JSON.stringify({ before, installed, reached, executionWindow }),
       contentType: 'application/json',
     });
   } finally {
     writeFileSync(info.outputPath('real-three-world-journey.json'), JSON.stringify(journeys));
     writeFileSync(info.outputPath('real-three-model-calls.json'), JSON.stringify(runtime.calls));
     writeFileSync(info.outputPath('real-three-errors.json'), JSON.stringify(errors));
+    writeFileSync(info.outputPath('real-three-execution-window.json'), JSON.stringify(executionWindow));
     await runtime.close();
   }
 });
