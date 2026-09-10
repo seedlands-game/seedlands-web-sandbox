@@ -1,5 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { BrowserAuthorityDeterministicAdvance } from '../../apps/web/src/worker/authority-worker-deterministic-advance';
+import { AuthorityWorkerDirectLogicOwner } from '../../apps/web/src/worker/authority-worker-direct-logic-owner';
+import {
+  DIRECT_LOGIC_PROTOCOL_VERSION,
+  type DirectLogicMessage,
+} from '../../apps/web/src/worker/authority-worker-direct-logic-protocol';
 import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
 import { decideLogicIntents } from '../../packages/game-core/src/server/logic/logic-decision';
 import type { LogicIntentBatch, LogicObservation } from '../../packages/game-core/src/server/logic/logic-protocol';
@@ -12,6 +17,51 @@ const flatChunk = () => {
   for (let z = 0; z < 32; z += 1) for (let x = 0; x < 32; x += 1) canonical[voxelIndex(x, 0, z)] = Voxel.Stone;
   return canonical;
 };
+
+class PromiseTailHarness {
+  private tail: Promise<unknown> = Promise.resolve();
+
+  acceptsAutomaticLogic = () => true;
+  notifyProgress = vi.fn();
+
+  hostOperation<Result>(operation: () => Result | Promise<Result>): Promise<Result> {
+    const result = this.tail.then(operation);
+    this.tail = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  }
+
+  idle(): Promise<unknown> {
+    return this.tail;
+  }
+}
+
+class FakeDirectPort {
+  onmessage: ((event: MessageEvent<unknown>) => void) | null = null;
+  onmessageerror: (() => void) | null = null;
+  readonly posts: DirectLogicMessage[] = [];
+  onPost: ((message: DirectLogicMessage) => void) | null = null;
+
+  postMessage(message: DirectLogicMessage) {
+    this.posts.push(message);
+    this.onPost?.(message);
+  }
+
+  start() {}
+  close() {}
+
+  emit(message: DirectLogicMessage) {
+    this.onmessage?.({ data: message } as MessageEvent<unknown>);
+  }
+}
+
+const batchMessage = (observation: LogicObservation): DirectLogicMessage => ({
+  kind: 'direct-logic-intents',
+  protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+  batch: decideLogicIntents(observation, { physicsHz: 60 }),
+});
 
 async function movementFixture() {
   let coordinator: BrowserAuthorityDeterministicAdvance | null = null;
@@ -102,6 +152,119 @@ describe('Browser Authority deterministic paused advance', () => {
     expect(decisions).toContain(false);
     expect(decisions).toContain(true);
     expect(fixture.runtime.server.getEntity(fixture.actor.id)?.position[0]).toBeGreaterThan(10.5);
+  });
+
+  it('keeps a newly published Logic candidate valid while promoting an older queued response after paused debt', async () => {
+    const fixture = await movementFixture();
+    const harness = new PromiseTailHarness();
+    const port = new FakeDirectPort();
+    const results: {
+      sequence: number;
+      observationPhysicsTick: number;
+      expiresAtPhysicsTick: number;
+      receivedAtPhysicsTick: number;
+      accepted: boolean;
+    }[] = [];
+    const receive = fixture.runtime.receiveLogicIntentBatch.bind(fixture.runtime);
+    vi.spyOn(fixture.runtime, 'receiveLogicIntentBatch').mockImplementation((candidate, binding) => {
+      const accepted = receive(candidate, binding);
+      results.push({
+        sequence: candidate.observationSequence,
+        observationPhysicsTick:
+          fixture.observations.find((observation) => observation.observationSequence === candidate.observationSequence)
+            ?.physicsTick ?? -1,
+        expiresAtPhysicsTick: candidate.expiresAtPhysicsTick,
+        receivedAtPhysicsTick: fixture.runtime.snapshot().physicsTick,
+        accepted,
+      });
+      return accepted;
+    });
+    let expire: (() => void) | undefined;
+    const ingress = { logic: vi.fn() } as never;
+    const coordinator = new BrowserAuthorityDeterministicAdvance({
+      runtime: () => fixture.runtime,
+      postLogicObservation: (observation) => owner.publish(observation, () => {}),
+      yieldTurn: testCorePlatform.yieldTurn,
+      timers: {
+        set: (callback) => {
+          expire = callback;
+          return callback;
+        },
+        clear: (handle) => {
+          if (expire === handle) expire = undefined;
+        },
+      },
+    });
+    const owner = new AuthorityWorkerDirectLogicOwner({
+      state: () => ({
+        runtime: fixture.runtime,
+        harness: harness as never,
+        ingress,
+        advance: coordinator,
+      }),
+      now: () => 0,
+      diagnostics: vi.fn(),
+      fatal: vi.fn(),
+    });
+    fixture.install(coordinator);
+    owner.attach({
+      kind: 'attach-direct-logic',
+      protocolVersion: DIRECT_LOGIC_PROTOCOL_VERSION,
+      epoch: fixture.runtime.snapshot().epoch,
+      port: port as unknown as MessagePort,
+    });
+
+    fixture.runtime.resume(0);
+    fixture.runtime.requestLogicObservation();
+    fixture.runtime.wake(500);
+    fixture.runtime.pause(500);
+    expect(fixture.runtime.snapshot().physicsDebtMs).toBeGreaterThan(200);
+    const first = fixture.observations.at(-1)!;
+    expect(port.posts).toHaveLength(1);
+    let resolveNextObservation!: (observation: LogicObservation) => void;
+    const nextObservation = new Promise<LogicObservation>((resolve) => {
+      resolveNextObservation = resolve;
+    });
+    port.onPost = (message) => {
+      if (message.kind !== 'direct-logic-observation') return;
+      resolveNextObservation(message.observation);
+      queueMicrotask(() => port.emit(batchMessage(message.observation)));
+    };
+
+    const advance = harness.hostOperation(() => coordinator.advancePaused(100, true));
+    let settled = false;
+    void advance.then(
+      () => (settled = true),
+      () => (settled = true),
+    );
+    port.emit(batchMessage(first));
+    const second = await nextObservation;
+    await Promise.resolve();
+    await Promise.resolve();
+    if (!settled) await testCorePlatform.yieldTurn();
+    if (!settled) expire?.();
+    const outcome = await advance.then(
+      () => 'resolved',
+      (error: Error) => error.message,
+    );
+    await harness.idle();
+    owner.close();
+
+    expect(
+      port.posts
+        .filter((message) => message.kind === 'direct-logic-observation')
+        .map((message) => message.observation.observationSequence),
+    ).toEqual([first.observationSequence, first.observationSequence + 1]);
+    expect(results.map(({ sequence }) => sequence)).toEqual([first.observationSequence, second.observationSequence]);
+    expect(results.at(-1), JSON.stringify(results)).toEqual({
+      sequence: second.observationSequence,
+      observationPhysicsTick: second.physicsTick,
+      expiresAtPhysicsTick: second.physicsTick + 12,
+      receivedAtPhysicsTick: expect.any(Number),
+      accepted: true,
+    });
+    expect(results.at(-1)!.receivedAtPhysicsTick).toBeLessThanOrEqual(results.at(-1)!.expiresAtPhysicsTick);
+    expect(outcome).toBe('resolved');
   });
 
   it('invalidates a timed-out Logic candidate before failure and admits a fresh advance', async () => {
