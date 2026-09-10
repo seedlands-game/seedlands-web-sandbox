@@ -23,6 +23,12 @@ type AnimatedEntity = {
   hurtSequence: number;
 };
 
+export type GameplayShadowCaster = Readonly<{
+  id: string;
+  revision: number;
+  position: readonly [number, number, number];
+}>;
+
 export class GameplayEntityPresenter {
   private presentationTime = 0;
   private readonly presented = new Map<string, pc.Entity>();
@@ -33,6 +39,8 @@ export class GameplayEntityPresenter {
   private readonly damageMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
   private readonly damageMaterialResources = new Set<pc.StandardMaterial>();
   private readonly animated = new Map<string, AnimatedEntity>();
+  private readonly movingShadowCasters = new Map<string, boolean>();
+  private readonly shadowCasterRevisions = new Map<string, number>();
   private readonly assetsLease: GameplayModelAssetsLease;
   private readonly bindings: NonNullable<AppearanceProject['animationBindings']>;
 
@@ -55,9 +63,14 @@ export class GameplayEntityPresenter {
       this.previousPositions.delete(id);
       this.health.delete(id);
       this.hurtUntil.delete(id);
+      this.movingShadowCasters.delete(id);
+      this.shadowCasterRevisions.delete(id);
       this.releaseAnimated(id);
     });
-    entities.forEach((entity) => this.updateEntity(entity, this.presentationTime, dt));
+    entities.forEach((entity) => {
+      if (this.updateEntity(entity, this.presentationTime, dt))
+        this.shadowCasterRevisions.set(entity.id, (this.shadowCasterRevisions.get(entity.id) ?? 0) + 1);
+    });
   }
 
   dispose(): void {
@@ -66,6 +79,8 @@ export class GameplayEntityPresenter {
     this.previousPositions.clear();
     this.health.clear();
     this.hurtUntil.clear();
+    this.movingShadowCasters.clear();
+    this.shadowCasterRevisions.clear();
     for (const id of this.animated.keys()) this.releaseAnimated(id);
     this.damageMaterialResources.forEach((material) => material.destroy());
     this.damageMaterialResources.clear();
@@ -78,8 +93,19 @@ export class GameplayEntityPresenter {
     return position ? [position.x, position.y, position.z] : null;
   }
 
-  private updateEntity(entity: GameplayEntityView, time: number, dt: number): void {
-    const node = this.presented.get(entity.id) ?? this.create(entity);
+  get shadowCasters(): readonly GameplayShadowCaster[] {
+    return [...this.presented].map(([id, node]) => {
+      const position = node.getPosition();
+      return { id, revision: this.shadowCasterRevisions.get(id) ?? 0, position: [position.x, position.y, position.z] };
+    });
+  }
+
+  private updateEntity(entity: GameplayEntityView, time: number, dt: number): boolean {
+    const existing = this.presented.get(entity.id);
+    const node = existing ?? this.create(entity);
+    const beforePosition = node.getPosition().clone();
+    const beforeRotation = node.getEulerAngles().clone();
+    const beforeScale = node.getLocalScale().clone();
     const previous = this.previousPositions.get(entity.id);
     const snap = !previous || Math.hypot(...entity.position.map((value, axis) => value - previous[axis])) > 4;
     let position = snap
@@ -118,12 +144,24 @@ export class GameplayEntityPresenter {
         part.setLocalEulerAngles(pose.stride * (part.name.includes('left') ? 1 : -1), 0, 0);
     });
     this.previousPositions.set(entity.id, position);
+    const moving =
+      previous !== undefined && Math.hypot(...position.map((value, axis) => value - previous[axis])) > 0.001;
     this.animated.get(entity.id)?.controller?.update({
-      moving: previous !== undefined && Math.hypot(...position.map((value, axis) => value - previous[axis])) > 0.001,
+      moving,
       activeAction: entity.combat?.active ?? null,
       hurtSequence:
         time < (this.hurtUntil.get(entity.id) ?? 0) ? (this.animated.get(entity.id)?.hurtSequence ?? null) : null,
     });
+    const wasMoving = this.movingShadowCasters.get(entity.id) ?? false;
+    this.movingShadowCasters.set(entity.id, moving);
+    return (
+      existing === undefined ||
+      !beforePosition.equals(node.getPosition()) ||
+      !beforeRotation.equals(node.getEulerAngles()) ||
+      !beforeScale.equals(node.getLocalScale()) ||
+      moving ||
+      wasMoving !== moving
+    );
   }
 
   private create(entity: GameplayEntityView): pc.Entity {
@@ -185,6 +223,7 @@ export class GameplayEntityPresenter {
       this.registerDamageMaterials(lease.entity);
       state.lease = lease;
       state.controller = createModelAnimationController(clips, lease.playback);
+      this.shadowCasterRevisions.set(entityId, (this.shadowCasterRevisions.get(entityId) ?? 0) + 1);
     } catch {
       // A missing or newly replaced local model keeps the existing built-in actor presentation.
     }

@@ -61,6 +61,10 @@ export const LIGHTING_QUALITY_BUDGETS: Record<QualityLevel, LightingQualityBudge
 };
 
 export type VoxelPosition = readonly [number, number, number];
+export type LocalShadowCaster = Readonly<{ id: string; revision: number; position: VoxelPosition }>;
+
+export const LOCAL_LIGHT_RANGE = 8;
+const LOCAL_SHADOW_CASTER_MARGIN = 2;
 
 const samePosition = (left: VoxelPosition, right: VoxelPosition) =>
   left[0] === right[0] && left[1] === right[1] && left[2] === right[2];
@@ -78,9 +82,39 @@ export function reconcileLocalLightSlots(
 export function localShadowNeedsUpdate({
   previousWorldRevision,
   worldRevision,
+  previousCasterSignature,
+  casterSignature,
   slotsChanged,
-}: Readonly<{ previousWorldRevision: number; worldRevision: number; slotsChanged: boolean }>): boolean {
-  return slotsChanged || previousWorldRevision !== worldRevision;
+}: Readonly<{
+  previousWorldRevision: number;
+  worldRevision: number;
+  previousCasterSignature: string;
+  casterSignature: string;
+  slotsChanged: boolean;
+}>): boolean {
+  return slotsChanged || previousWorldRevision !== worldRevision || previousCasterSignature !== casterSignature;
+}
+
+export function localShadowCasterSignature(
+  lightSlots: readonly VoxelPosition[],
+  shadowedLightLimit: number,
+  casters: readonly LocalShadowCaster[],
+): string {
+  const rangeSquared = (LOCAL_LIGHT_RANGE + LOCAL_SHADOW_CASTER_MARGIN) ** 2;
+  const shadowedSlots = lightSlots.slice(0, shadowedLightLimit);
+  return JSON.stringify(
+    casters
+      .filter((caster) =>
+        shadowedSlots.some((slot) => {
+          const dx = caster.position[0] - (slot[0] + 0.5);
+          const dy = caster.position[1] - (slot[1] + 0.46);
+          const dz = caster.position[2] - (slot[2] + 0.5);
+          return dx * dx + dy * dy + dz * dz <= rangeSquared;
+        }),
+      )
+      .map(({ id, revision }) => [id, revision] as const)
+      .sort(([left], [right]) => left.localeCompare(right)),
+  );
 }
 
 export function selectNearestLanterns(

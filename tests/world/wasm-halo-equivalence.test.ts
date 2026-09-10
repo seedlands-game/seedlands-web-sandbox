@@ -1,3 +1,4 @@
+import { deepStrictEqual } from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 import { createKernelMemory } from '../../apps/web/src/compute/kernel-memory';
@@ -29,11 +30,11 @@ describe.each(['scalar', 'simd'])('W03 halo 与修订哈希对等 (%s)', (artifa
           };
           const original = createProceduralMeshInput(options);
           for (const result of [prepare(options), createHaloStaged(options)]) {
-            expect(result.halo).toEqual(original.halo);
-            expect(result.fluidHalo).toEqual(original.fluidHalo);
+            deepStrictEqual(result.halo, original.halo);
+            deepStrictEqual(result.fluidHalo, original.fluidHalo);
             expect(result.haloRevision).toBe(original.haloRevision);
             expect(result.canonical).toBe(canonical);
-            expect(result.fluid).toEqual(original.fluid);
+            deepStrictEqual(result.fluid, original.fluid);
             expect(result.proceduralVoxelSamples).toBe(original.proceduralVoxelSamples);
           }
           expect(memory.failed).toBe(false);

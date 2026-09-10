@@ -443,6 +443,10 @@ export class BrowserGameplay {
     return this.options.authority.gameplay.entities.filter((entity) => entity.type !== 'player').length;
   }
 
+  get shadowCasters() {
+    return this.presenter.shadowCasters;
+  }
+
   get presentationSnapshot() {
     return { breakingOverlay: this.breakOverlay.snapshot, viewmodel: this.viewmodel.snapshot } as const;
   }
