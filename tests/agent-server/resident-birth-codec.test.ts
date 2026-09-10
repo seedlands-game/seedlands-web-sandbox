@@ -5,6 +5,7 @@ import {
   parseResidentBirthPackage,
   RESIDENT_BIRTH_LIMITS,
 } from '../../apps/agent-server/src/resident-birth-codec';
+import { validBirth } from '../../apps/agent-server/src/node/resident-host-validation';
 import { baselineObservation } from './fixtures';
 
 const birthPayload = () => {
@@ -59,5 +60,21 @@ describe('resident birth codec', () => {
     });
     expect((failure as Error).message).not.toContain('😀');
     expect(isResidentBirthPackage({ birthId: 'birth-oversized', ...birthPayload(), soul: oversized })).toBe(false);
+  });
+
+  it('rejects the original host object when unknown top-level data pushes it past the package limit', () => {
+    const smallExtra = { birthId: 'birth-with-small-extra', ...birthPayload(), unrecognized: 'x' };
+    expect(Buffer.byteLength(JSON.stringify(smallExtra), 'utf8')).toBeLessThan(RESIDENT_BIRTH_LIMITS.packageBytes);
+    expect(isResidentBirthPackage(smallExtra)).toBe(false);
+    expect(validBirth(smallExtra)).toBe(false);
+
+    const value = {
+      birthId: 'birth-with-extra',
+      ...birthPayload(),
+      unrecognized: 'x'.repeat(64 * 1024),
+    };
+    expect(Buffer.byteLength(JSON.stringify(value), 'utf8')).toBeGreaterThan(RESIDENT_BIRTH_LIMITS.packageBytes);
+    expect(isResidentBirthPackage(value)).toBe(false);
+    expect(validBirth(value)).toBe(false);
   });
 });

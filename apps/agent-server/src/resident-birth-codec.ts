@@ -3,6 +3,7 @@ import type { ResidentBirthPackage } from '@seedlands/cognition-protocol';
 const UTF8_MAX_BYTES_PER_CODE_POINT = 4;
 const NON_BLANK_PATTERN = '\\S';
 const encoder = new TextEncoder();
+const RESIDENT_BIRTH_KEYS = Object.freeze(['birthId', 'profile', 'agent', 'soul', 'memory', 'goal', 'definition']);
 
 export const RESIDENT_BIRTH_LIMITS = Object.freeze({
   birthIdCharacters: 160,
@@ -50,6 +51,8 @@ export class ResidentBirthValidationError extends TypeError {
 const object = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 const utf8Bytes = (value: string): number => encoder.encode(value).byteLength;
+const exactKeys = (value: Record<string, unknown>, keys: readonly string[]): boolean =>
+  Object.keys(value).length === keys.length && keys.every((key) => Object.hasOwn(value, key));
 
 function requiredText(value: unknown, field: string, maximumBytes: number): string {
   if (typeof value !== 'string') throw new ResidentBirthValidationError(field, 'type');
@@ -161,8 +164,9 @@ export function parseResidentBirthPackage(value: unknown, birthId: string): Resi
 }
 
 export function isResidentBirthPackage(value: unknown): value is ResidentBirthPackage {
-  if (!object(value) || typeof value.birthId !== 'string') return false;
+  if (!object(value) || !exactKeys(value, RESIDENT_BIRTH_KEYS) || typeof value.birthId !== 'string') return false;
   try {
+    if (utf8Bytes(JSON.stringify(value)) > RESIDENT_BIRTH_LIMITS.packageBytes) return false;
     parseResidentBirthPackage(value, value.birthId);
     return true;
   } catch {
