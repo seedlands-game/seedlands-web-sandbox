@@ -183,3 +183,7 @@ S4 剩余 actor profile / 可选开局生态边界追加 Sol/high 最多 6h，�
 S4/S5 实现已完成局部验收，进入当前合同的最终验证。S6 沿原规划正常 6 / 保守 12 活跃小时、3 / 6 工具等待小时；保守含一次 20% 缓冲为 22h，不扩大功能范围。实际活跃工时与按阶段归因的 tokens、credits/API 等价仍 unknown；不能用子任务上限或测试耗时反推。已只读刷新账户状态，未报告额度阻塞；不把账户共享百分比当本 change 消费，不使用 reset。
 
 为精确冻结集成分配独立 Sol/xhigh reviewer 最多 4h，计入 S6 12h 共享 envelope（4/12），不占用已分配完的 S3/S4 envelope。该职责仅只读源码/测试和已有证据，覆盖前阶段边界在最终组合下的正确性；root 串行执行全量 static、build、Browser 和 PR/CI 读回。最终交付回填可得的真实时间/结果，计费不可得继续明确 unknown。
+
+### S6 CI 旅程资源预算校准
+
+run34428303866的Chromium固定流程约9m39s（包含除成长两个240s以外的步骤）；成长功能旅程单次上限480s，保留一次失败取trace及flaky硬拒绝。两次最坏8min加新增版本场景/上传余量，Chromium job需30min有界预算，较原20min最多增加10min工具运行；static仍20min。不改required checks或权限，不减少测试、不增加retry，不宣称运行时加速；S6原3/6h工具等待规划暂能覆盖。实际付费runner/credits与按模型费用不可得，记unknown；完整版本修复本地测试阶段107.39s（1764/4）和Browser版本15.0s为可得实测，不能换算为agent活跃工时。

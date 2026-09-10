@@ -104,7 +104,7 @@ if (browserQuality !== 'low' && browserQuality !== 'medium' && browserQuality !=
   throw new Error('Unknown browser E2E quality.');
 
 test('正常鼠标和槽位操作完成木石铁成长、箱子与保存重进', async ({ page }, info) => {
-  test.setTimeout(240_000);
+  test.setTimeout(480_000);
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await startHarnessWorld(page, 'browser-overworld-progression', '', browserQuality);

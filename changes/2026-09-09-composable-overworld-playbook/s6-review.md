@@ -101,6 +101,12 @@ reviewer 核对六份 root 日志尾部及 SHA-256，与 `evidence/s6-local-resu
 
 最终文件SHA-256：UI `d72debee59955c94c126923ca31805e6d57400d9b5afa41a4dbac2321e3e02d6`；HTML `e0a1582900e1cc0dc813f1b01ec8872abf48f4976c41df517dbe7d8ea0da1cdd`；policy `284411c05cfccae9fc57f1bad1f74f20f93b997990fbe98329e3046fa7d4eec4`；policy test `8c906d3185192ccd9dd00cf6e898bf182a5fcf2d19f467face1788c675a58655`；Browser test `00a43e314ab62799e7e2a71f4b6bec9555f2578541ddc79bd4370a375044684d`。自动审阅P1的当前修复已独立回读，远端最新HEAD与review thread状态仍由root最后核对。
 
+## 成长旅程及 CI 资源预算 delta 复核
+
+同一reviewer只读确认：480s只扩大整场功能旅程预算，业务操作与单动作等待不变。最初仍保留20min job存在P2：不能容纳一次480s失败后的完整retry/trace；已将Chromium job设30min。依据run34428303866固定约9m39s、两次最坏16m及新版本四场约1m，另有约3m20s上传/抖动空间。static20min、required check名称/聚合/权限、retry1与failOnFlaky均保持。最终四文件delta无P0/P1/P2，未运行测试；新HEAD CI必须实际通过。
+
+最终CI SHA-256 `295c87e48f1d7e572090c88345d165b661ae92f34dc29c26f7038235e94da8bc`；成长测试 `bcb155676df3857b43cb829cc85447fc5c74bd4fd341ba5716d5d663792b9c7a`。不是性能优化或实际费用结论，旧timeout没有assertion失败不证明未执行步骤通过。
+
 ## 独立审阅 Findings
 
 最终 `7c9561d` 在已审阅范围内，未发现剩余可证实的 P0/P1/P2 问题。

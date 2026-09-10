@@ -85,3 +85,11 @@ head7e0e330 run34424933483：Static verification 与 Production build通过，Ch
 选择策略RED 4failed/5passed，GREEN9/9；真实Browser四项15.0s：分别v2/v3/v4打开保存只改目标worldId，其他记录完整不变；缺失v2显示明确错误且所有记录不变。最初Browser夹具未等待hydrate，早期select被初始默认值覆盖；改为与既有helper相同的networkidle后通过，原失败留在`/tmp/seedlands-s6-version-browser.log`。GREEN为`/tmp/seedlands-s6-version-browser3.log`。独立最终delta无findings，完整static1764passed/4skipped、330passed/2skipped files、Svelte0/0/types通过（107.39s测试阶段）；build独立执行中。
 
 精确版本修复的独立生产build已PASS（`/tmp/seedlands-s6-build-version.log`），没有新增依赖或变更存档格式。
+
+## 新玩法第二轮 CI 与成长预算
+
+run34428303866、head3cdb4de：Static verification1759/4、Production build均SUCCESS；Browser基线21、Harness2、资产2、木剑1通过，新玩法9/10。创造与完整durable-origin断言已在Linux通过。唯一失败为成长整体240s耗尽，首次装煤L156、retry制作炉体L147，均在正常槽位操作、已完成之前采集/工具/矿物断言；raw日志`/tmp/seedlands-s6-ci-browser5-clean.log`、artifact`composable-34428303866-1`。两次失败保持失败，不以本机PASS代替。
+
+经独立预算复核，整场上限480s配套Chromium job30min，保留完整一次失败取trace、flaky拒绝与全部测试。当前生产源码1e1b492的本地新玩法含版本四场14/14 PASS（2.4min，`/tmp/seedlands-s6-browser14.log`）；CI预算相关现有治理测试12/12 PASS。最终远端准出仍待新HEAD。
+
+原retry trace已实际读取：272个Browser协议调用完成，末段普通鼠标/查询调用约0.6–0.9s、末次槽位点击2.165s；未见pageError，最终失败为locator.count遇整场240s截止。test trace中的11次采集expect.poll中间不匹配均继续至后续工位步骤，不是最终失败。支持累计旅程时间不足的诊断，不宣称不存在其他缺陷。版本改动后的既有Browser基线21/21 PASS（1.4min，系统Chrome+SwiftShader，`/tmp/seedlands-s6-regression-version.log`）；任务服务退出，历史loading截图恢复原已交付字节。

@@ -199,3 +199,7 @@ run34424933483 当前 static/build通过；新增Browser 7pass/3fail。root负�
 ### S6 精确旧世界版本选择修复
 
 PR自动审阅发现当前生成器V4与入口V2/V3旧文案不一致，同seed并存V2/V3时continue-legacy实际选V3。修复合同：UI明确选择继续V2或V3，沿现有WorldOpenMode通道传精确版本；缺少指定版本时明确失败，不创建或改写其他版本。new-current文案由实际GENERATOR_VERSION生成。默认continue及内部continue-legacy既有行为保持，新增模式不改世界/存档格式。先补选择策略RED，再验证真实UI/Worker打开并保存目标worldId、同seed其他版本存档保持；更新预渲染入口，完整static/build和最新PR CI重新准出。
+
+### S6 完整成长旅程的 runner 预算
+
+run34428303866已验证实际low质量，新增场景9/10通过，成长原始及retry分别在装煤和制作炉体的正常槽位操作处耗尽240s整体时限，之前采集/木石工具/矿物断言通过。该用例不是性能门槛；总预算设480s，为当前已完成多数流程加剩余冶炼、铁镐、箱子保存重进留出有界资源。保留全部业务步骤、数据量、单动作断言等待和retry/flaky硬失败。独立复核指出原20min job无法容纳480s失败后的完整retry/trace，因此Chromium job上限改30min；static仍20min，required checks和权限不变。该预算覆盖实测约9m39s固定流程、两次8min最坏成长、新增版本场景与上传缓冲，不把资源上限称作性能改善。原失败/trace保留，新HEAD全量CI是GREEN证据；不由旧timeout没有assertion失败推定后续未执行步骤通过，也不声明性能改善。

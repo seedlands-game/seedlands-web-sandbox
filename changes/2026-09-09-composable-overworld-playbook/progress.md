@@ -168,3 +168,7 @@ run34424933483（7e0e330）static/build SUCCESS；Browser既有26项通过，新
 PR读回发现自动审阅P1：V4下旧UI的明确v2实际取最大旧版。新增精确v2/v3选择、当前版本动态文案和预渲染，缺失版本拒绝；policy RED4fail→9pass，Browser4/4证明目标保存及非目标存档不变，独立审阅无剩余findings。完整本地static1764/4通过，独立build进行中；run34428303866的旧head3cdb4de static/build已PASS，Browser尚未终态。目标继续，未合并，heartbeat保持。
 
 精确版本修复的独立生产build已PASS（`/tmp/seedlands-s6-build-version.log`），没有新增依赖或变更存档格式。
+
+run34428303866已终态：static/build通过，新Browser9/10；仅成长240s整体预算不足，创造和来源修复均由Linux证明。精确版本修复已提交1e1b492，本地全玩法14/14与CI配置治理12/12通过。成长480s配套Chromium30min以保留完整retry/trace，独立delta无剩余findings；基线21项本机复验进行中，之后两提交一并push继续CI。
+
+最新既有Browser基线21/21 PASS（1.4min），原成长retry trace已读取，确认正常命令持续推进至整场deadline，无pageError；预算与完整retry资源修正获独立回读。准备push版本修复与旅程预算两个语义commit，继续远端验收。

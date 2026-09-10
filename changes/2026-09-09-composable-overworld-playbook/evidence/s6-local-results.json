@@ -115,7 +115,13 @@
       "passed": 10,
       "duration": "2.2m"
     },
-    "remoteGreen": false,
+    "remoteGreen": {
+      "run": 34428303866,
+      "creative": "passed",
+      "developerLogicOrigin": "passed",
+      "progression": "overall_240s_timeout_twice",
+      "wholeSuite": "9 passed / 1 failed"
+    },
     "logs": [
       {
         "path": "/tmp/seedlands-s6-creative-slots-green.log",
@@ -171,5 +177,27 @@
         "sha256": "db6f04ba933889b1e2f295f61de157632a200323453be30a866fa33036cccf3c"
       }
     ]
+  },
+  "extendedBrowserAcceptance": {
+    "source": "1e1b492b538ee04541a46bd98a501cc96758910a",
+    "passed": 14,
+    "duration": "2.4m",
+    "quality": "progression low; other composable scenarios default medium; version selection low",
+    "ciGovernanceTests": 12,
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-browser14.log",
+        "sha256": "771d27fdc47307748cb9e91e6d54f8a85324957595a5840cf8da15cd836f869c"
+      },
+      {
+        "path": "/tmp/seedlands-s6-ci-budget-check.log",
+        "sha256": "890682446b5a1ebebdacd88712f73ae22a552b965246347e190bba2a06ebbb3a"
+      },
+      {
+        "path": "/tmp/seedlands-s6-regression-version.log",
+        "sha256": "81f59a8a2ffa0f69a09ec7e7a9d3e22f35a73779157758fc7578c51852597ae8"
+      }
+    ],
+    "regressionPassed": 21
   }
 }
