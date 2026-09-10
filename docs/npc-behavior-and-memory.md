@@ -21,7 +21,11 @@
 
 作者通过 `@seedlands/game-core/mod-api` 注册带命名空间的能力，而不是给 NPC 内核加一个玩法分支。能力包括条件和技能：描述与有界参数供编排，回调供实际执行，持续技能还要声明状态版本、大小上限及 start / continue / cancel 语义。
 
-每世界装配后目录冻结。世界级目录用于作者和出生配方；绑定 NPC 的目录由当前 Actor 身份、生命及行为控制资格过滤。目录并非权限票据：每次操作仍检查原始 Actor、epoch/lifetime、provider 版本、目标引用、宿主许可和当前规则。条件返回 false 与未准入能力是不同事实。
+能力ID跨condition/skill全局唯一；公开与wire描述都必须包含有界 `requiredOperations`。技能声明operation ID及self/any授权范围，条件为空数组。装配从冻结定义核对操作存在和provider模块的host-approved执行许可；声明不能自行授予权限，provider也不能调用未声明的operation或扩张scope。
+
+每世界装配后目录冻结。世界级目录用于作者和出生配方；绑定 NPC 的目录还按当前 Actor 身份、生命、行为控制资格及操作授权过滤。发现、安装、继续和恢复共用准入；出生先用候选NPC身份验证，再实际绑定Actor，不先创建身体来试权限。目录并非永久权限票据：每次操作仍检查原始 Actor、epoch/lifetime、provider 版本、真实目标引用、宿主许可和当前规则。条件返回 false 与未准入能力是不同事实。
+
+标准居民的徒手近战由Overworld Actor内容声明 `meleeDefinitionId: 'unarmed'`，行为技能调用已注册combat operation；不在树执行器中另行造成伤害。
 
 扩展需要独立的宿主准入：`host-admissions.json` 固定 Pack 的 id、version、完整产物摘要和允许权限。Pack manifest 只请求能力，不能自授予权限；没有准入、摘要不符或多余准入均拒绝。它是可信产品部署配置，不是任意外部 JavaScript 的安全沙箱。
 

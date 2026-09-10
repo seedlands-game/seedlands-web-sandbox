@@ -134,6 +134,13 @@
 - 当前工作树 `pnpm build` Web/Agent PASS（`review-integration-build.log`），Web/Svelte类型0错误0警告。该dist下真实浏览器+隔离PG V2配对往返1/1 PASS 22.0s，`app-pair-browser-working/`：版本2、pairHash存在、3workspaces、内外timeline匹配、browser errors=[]，截图已查看。它是集成工作树证据，非最终SHA准出。
 - 最后完整Agent串行27文件127项PASS（44.91s，`agent-review-full.log`）；所有测试容器与47832端口清理，仅用户原PG exited容器及数据卷保留。能力分支预计10–15分钟内交回，下一步冻结合并后全量验证和真实模型。
 
+### 2026-09-10 约23:58 能力准入集成冻结
+
+- Factory阶段正常hooks提交 `e5a419a5bf100a6f1e8308d82fe1266079d85c4d`，11文件；独立delta复核中。随后将隔离能力分支commit `c0c1a17eb75b55e0962136cc34f3aa53b389e8ea` cherry-pick为 `596d352173239bfbf462d778792619a1f6ae7838`，32文件，无冲突。host-validation自动合并后已确认新的requiredOperations与root的调度codec/shared history限额同时保留。
+- B requiredOperations成为public/wire必填合同，装配校验冻结operation+grant，全局capability ID唯一；目录/安装/出生/执行/恢复使用同源Actor准入，运行时撤权重新拒绝。出生/更新/恢复的坏权限用完整snapshot不变证明原子性。标准攻击走registered combat并真实扣血，settler内容显式unarmed，没有旁路伤害。
+- B精确main6c V4及旧Character V1/V2迁移7/7；admission/registry/runtime/wire28/28、control/correctness14/14、threat/review10/10、action-history10/10、client/public-pack6/6、camp/product/wire20/20。分组有交集，不相加为唯一测试总数。子工作树已clean，未push；实际依赖产物仍需root build重建，不能沿用旧Pack摘要。
+- 生产写入ownership已全部归还。补公开合同与code-map后冻结全量准出；下一阶段单一生产代码SHA运行verify:static/build、main全部浏览器、NPC确定性与真实模型，再据结果创建main PR。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

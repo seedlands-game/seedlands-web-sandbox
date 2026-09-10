@@ -208,6 +208,7 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 
 - `server/composition/behavior-capability-registry.ts` 拥有每世界冻结的能力目录、provider/参数/持续状态合同；`server/gameplay/modules/behavior-registry-module.ts` 提供可选标准模块。作者只通过 `mod-api` 注册与编排，示例和长期边界见 [NPC 行为与认知](npc-behavior-and-memory.md)。
 - `behavior-capability-validation.ts` 负责有界JSON和参数合同，`behavior-capability-dispatch.ts` 将冻结provider绑定到只读Actor上下文与受限操作端口；能力目录、执行和恢复仍由同一registry注册源驱动。
+- `behavior-capability-admission.ts` 校验requiredOperations和host-approved模块操作许可；`character-behavior-admission.ts` 在安装/候选出生/恢复阶段使用同源Actor准入，`character-behavior-operation.ts` 为标准身体技能构造领域操作请求。真实目标和规则仍由既有权威operation执行链校验。
 - `server/simulation/character-runtime.ts` 组合绑定 Actor 的行为控制，`character-behavior-runtime.ts` 推进树，`character-behavior-skills.ts` 处理标准生活动作；身体数据仍由 `ecs-actor-components.ts` / `ecs-actor-state.ts` 持有。`gameplay-character-control.ts` 处理角色请求与出生，`gameplay-character-domain.ts` 将 provider 权限绑定到既有领域操作，不另建库存和 needs owner。
 - `character-navigation.ts` 从当前角色的局部感知与共享身体形状构造实体避障约束，`ground-navigator.ts` 在既有有界地面寻路中消费该约束；最终位移与碰撞仍由权威物理推进，不移动或禁用障碍物。
 - `character-snapshot-runtime.ts` 验证并恢复行为组件与墓碑，`autonomy-snapshot-validation.ts` 处理动作/自主状态检查，`gameplay-runtime-checkpoint.ts` 负责 Gameplay 候选恢复与迁移边界；它们不拥有独立的权威身体状态。
