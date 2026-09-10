@@ -45,6 +45,7 @@ function setup(allow = true) {
             'seedlands:overworld-feeding-rules',
             'seedlands:needs-module',
             'seedlands:overworld-needs-rules',
+            'seedlands:behavior-registry-module',
             'seedlands:combat-module',
             'seedlands:overworld-combat-rules',
             'seedlands:block-actions-module',

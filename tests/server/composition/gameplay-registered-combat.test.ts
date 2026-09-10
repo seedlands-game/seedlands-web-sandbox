@@ -18,7 +18,10 @@ function setup(
 ) {
   const modules = pack.modules.filter(
     (module) =>
-      withCombat || !['seedlands:combat-module', 'seedlands:overworld-combat-rules'].includes(module.descriptor.id),
+      withCombat ||
+      !['seedlands:behavior-registry-module', 'seedlands:combat-module', 'seedlands:overworld-combat-rules'].includes(
+        module.descriptor.id,
+      ),
   );
   modules.push(...extra);
   const selected = definePack({ id: 'test:no-combat', version: '1.0.0', kind: 'playbook', modules });
