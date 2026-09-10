@@ -3,24 +3,14 @@ import { ResidentBridge } from '../../apps/web/src/client/character/resident-bri
 import type { BoundCharacterControlPort } from '../../apps/web/src/client/authority/browser-authority-client-contract';
 import type { CharacterObservation } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { ResidentStatus } from '@seedlands/cognition-protocol';
-import {
-  BEHAVIOR_REGISTRY_CAPABILITY,
-  defineBehaviorRegistryModule,
-  definePack,
-  type BehaviorCapabilityRegistry,
-} from '@seedlands/game-core/mod-api';
-import { assembleWorldPacks } from '@seedlands/game-core/server/composition/host-api';
+import { BEHAVIOR_REGISTRY_CAPABILITY, type BehaviorCapabilityRegistry } from '@seedlands/game-core/mod-api';
+import { assembleOverworldPacks } from '@seedlands/game-core/server/composition/host-api';
+import { pack as overworld } from '../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
 
-const behaviorPack = definePack({
-  id: 'seedlands:resident-bridge-test',
-  version: '1.0.0',
-  kind: 'playbook',
-  modules: [defineBehaviorRegistryModule()],
-});
-const currentCapabilities = assembleWorldPacks([
+const currentCapabilities = assembleOverworldPacks([
   {
-    ...behaviorPack,
+    ...overworld,
     integrity: {
       algorithm: 'sha256',
       manifestDigest: 'a'.repeat(64),

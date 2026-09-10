@@ -77,6 +77,7 @@ export const pack = definePack({
           description:
             'Spend a short time preparing, then craft my own wood into planks through normal world rules. Fails without materials.',
           arguments: { seconds: { type: 'number', required: true, minimum: 1, maximum: 10 } },
+          requiredOperations: [{ operationId: 'seedlands:inventory-craft', authorization: 'self' }],
           state: { version: '1.0.0', maximumBytes: 128, validate: validState },
           start(_context, args) {
             return { status: 'running', phase: 'preparing', state: { remainingSeconds: Number(args.seconds) } };

@@ -68,7 +68,10 @@ export function executeGameplayCharacterRequest(
     ? characterPosition(request.position)
     : defaultCharacterPosition(options, player?.position);
   const home = request.homePosition ? characterPosition(request.homePosition) : requested;
-  characters.validateRegistration(request.profile, home, request.behaviorTree);
+  characters.validateRegistration(request.profile, home, request.behaviorTree, {
+    entityId: 'seedlands:pending-character',
+    kind: 'npc',
+  });
   const entity = options.spawnAutonomous(
     {
       type: 'npc',

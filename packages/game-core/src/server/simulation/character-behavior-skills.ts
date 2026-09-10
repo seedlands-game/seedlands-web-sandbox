@@ -15,6 +15,7 @@ import type {
   CharacterSkillExecution,
 } from './character-runtime-types';
 import { CHARACTER_THREAT_MEMORY_SECONDS } from './character-runtime-types';
+import { requestBehaviorCombat } from './character-behavior-operation';
 
 const REPLAN_SECONDS = 1;
 const THREAT_CLEARANCE = 12;
@@ -137,7 +138,7 @@ export class CharacterBehaviorSkills {
           if (!this.threat(record)) this.finish(record, execution, 'succeeded');
           break;
         case 'attack-threat':
-          this.attack(record, execution);
+          this.attack(record, execution, port);
           break;
         case 'flee-threat':
           this.flee(record, execution, args);
@@ -334,13 +335,16 @@ export class CharacterBehaviorSkills {
     );
   }
 
-  private attack(record: CharacterRecord, execution: CharacterSkillExecution): void {
+  private attack(
+    record: CharacterRecord,
+    execution: CharacterSkillExecution,
+    port: Pick<BehaviorProviderContext, 'invoke'>,
+  ): void {
     const threat = this.threat(record);
     if (!threat) return this.finish(record, execution, 'succeeded');
     if (!execution.actionId) {
-      const result = this.options.requestCombat(record.entityId, threat.id);
-      if (!result.success || !result.actionId)
-        return this.finish(record, execution, 'failed', result.reason ?? 'combat-rejected');
+      const result = requestBehaviorCombat(port, threat.id);
+      if (!result.success) return this.finish(record, execution, 'failed', result.reason);
       execution.actionId = result.actionId;
       execution.targetEntityId = threat.id;
       execution.phase = 'attacking';

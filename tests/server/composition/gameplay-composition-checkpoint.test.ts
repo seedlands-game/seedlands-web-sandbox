@@ -130,7 +130,7 @@ describe('gameplay composition checkpoint', () => {
     expect(target.createSnapshot()).toEqual(before);
   });
 
-  it('migrates a legacy Character V2 body into the ECS actor owner with 24 slots', () => {
+  it('migrates legacy Character V1/V2 bodies into the ECS actor owner with 24 slots', () => {
     const source = create();
     const created = source.character({
       kind: 'create',
@@ -187,6 +187,32 @@ describe('gameplay composition checkpoint', () => {
       kind: 'state',
       character: { lifecycle: 'active', inventory: expect.any(Array) },
     });
+
+    const legacyV1Characters = legacy.simulation.characters.characters.map((character) => {
+      const migrated = structuredClone(character) as Omit<typeof character, 'behaviorTree'> & {
+        behaviorTree?: unknown;
+      };
+      delete migrated.behaviorTree;
+      return migrated;
+    });
+    const legacyV1 = {
+      ...legacy,
+      simulation: {
+        ...legacy.simulation,
+        characters: { ...legacy.simulation.characters, version: 1 as const, characters: legacyV1Characters },
+      },
+    };
+    const v1Target = create('c', 'b'.repeat(64), true);
+    expect(v1Target.restoreSnapshot(legacyV1)).toEqual({ version: 3, worldTime: 12 });
+    const v1Migrated = v1Target.createSnapshot().entityStore.actors.find((entry) => entry.entityId === entityId);
+    expect(v1Migrated).toMatchObject({
+      controlSource: 'behavior',
+      character: { incarnation: actor.character.incarnation, behaviorTree: { revision: 1 } },
+    });
+    expect(v1Migrated?.inventory.slice(0, 2)).toEqual([
+      { itemId: 'berry', count: 3 },
+      { itemId: 'wood-axe', count: 1, instance: { durability: 41 } },
+    ]);
 
     const altered = structuredClone(legacy);
     altered.simulation.characters.characters[0]!.hunger += 1;

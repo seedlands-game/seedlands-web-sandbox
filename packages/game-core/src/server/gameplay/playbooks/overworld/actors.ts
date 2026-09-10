@@ -21,6 +21,7 @@ export const overworldActorProfiles: readonly ActorProfileInput[] = [
     entityType: 'npc',
     maxHealth: 20,
     navigation: { speed: 1.4, perceptionRange: 10 },
+    meleeDefinitionId: 'unarmed',
   },
 ];
 

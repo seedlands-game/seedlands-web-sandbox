@@ -11,6 +11,12 @@ describe('controller wire validation', () => {
     expect(wait).toBeDefined();
     expect(validCapabilities([wait])).toBe(true);
     expect(validCapabilities([{ kind: 'skill', name: 'wait', description: 'legacy', arguments: {} }])).toBe(false);
+    expect(validCapabilities([{ ...wait!, requiredOperations: undefined }])).toBe(false);
+    expect(
+      validCapabilities([
+        { ...wait!, requiredOperations: [{ operationId: 'seedlands:unknown', authorization: 'actor' }] },
+      ]),
+    ).toBe(false);
     expect(validCapabilities([{ ...wait!, name: 'legacy-alias' }])).toBe(false);
     expect(validCapabilities([{ ...wait!, provider: { ...wait!.provider, moduleId: '' } }])).toBe(false);
     expect(validCapabilities([wait!, { ...wait!, version: '2.0.0' }])).toBe(false);

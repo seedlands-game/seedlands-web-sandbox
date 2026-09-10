@@ -3,29 +3,24 @@ import { describe, expect, it } from 'vitest';
 import {
   BEHAVIOR_REGISTRY_CAPABILITY,
   defineBehaviorCapabilityModule,
-  defineBehaviorRegistryModule,
   definePack,
   type BehaviorCapabilityRegistry,
   type ModModule,
   type ModuleInvocationValue,
 } from '@seedlands/game-core/mod-api';
-import { assembleWorldPacks, createRegisteredOperationRuntime } from '@seedlands/game-core/server/composition/host-api';
+import {
+  assembleWorldPacks,
+  createRegisteredOperationRuntime,
+  OVERWORLD_PRODUCT_PERMISSIONS,
+} from '@seedlands/game-core/server/composition/host-api';
+import { pack as overworld } from '../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import type { BehaviorRuntimeContext } from '../../packages/game-core/src/server/composition/behavior-capability-registry';
 import { HeadlessSession } from '../../packages/game-core/src/server/headless/headless-session';
 import { WorldResourceAuthorizer } from '../../packages/game-core/src/server/harness/world-authorization';
 import { characterActorSnapshot } from '../support/character-gameplay';
 import { testCorePlatform } from '../support/core-platform';
 import { createFaultyBehaviorComposition } from '../support/faulty-behavior-composition';
-
-const verified = (definition: ReturnType<typeof definePack>) => ({
-  ...definition,
-  integrity: {
-    algorithm: 'sha256' as const,
-    manifestDigest: 'a'.repeat(64),
-    entryDigest: 'b'.repeat(64),
-    resources: [],
-  },
-});
+import { undeclaredOperationBehavior, verifiedBehaviorPack } from '../support/behavior-capability-fixtures';
 
 describe('per-world behavior capability registry', () => {
   it('lets an external Pack install and run a continuing skill through its real registered operation', () => {
@@ -99,6 +94,7 @@ describe('per-world behavior capability registry', () => {
           version: '1.0.0',
           description: 'Increment a counter on two separate simulation steps.',
           arguments: { amount: { type: 'number', required: true, minimum: 1, maximum: 4, integer: true } },
+          requiredOperations: [{ operationId: 'example:increment-counter', authorization: 'self' }],
           state: {
             version: '1.0.0',
             maximumBytes: 128,
@@ -138,6 +134,7 @@ describe('per-world behavior capability registry', () => {
           version: '1.0.0',
           description: 'Negative fixture for unresolved raw target ids.',
           arguments: { targetRef: { type: 'entity-reference', required: true } },
+          requiredOperations: [{ operationId: 'example:increment-counter', authorization: 'any' }],
           state: { version: '1.0.0', maximumBytes: 32 },
           start(context) {
             const result = context.invoke({
@@ -149,25 +146,20 @@ describe('per-world behavior capability registry', () => {
           },
           continue: () => ({ status: 'failed', reason: 'unexpected-continue' }),
         },
+        undeclaredOperationBehavior(),
       ],
-    });
-    const root = definePack({
-      id: 'example:playbook',
-      version: '1.0.0',
-      kind: 'playbook',
-      modules: [defineBehaviorRegistryModule(), counter],
     });
     const extension = definePack({
       id: 'example:behavior-pack',
       version: '1.0.0',
       kind: 'extension',
-      dependencies: [{ id: 'example:playbook', version: '1.0.0' }],
-      modules: [behavior],
+      dependencies: [{ id: 'seedlands:overworld', version: '1.0.0' }],
+      modules: [counter, behavior],
     });
-    const composition = assembleWorldPacks([verified(root), verified(extension)], {
+    const composition = assembleWorldPacks([verifiedBehaviorPack(overworld), verifiedBehaviorPack(extension)], {
       approvedPermissions: {
-        'example:playbook': counter.descriptor.permissions!,
-        'example:behavior-pack': behavior.descriptor.permissions!,
+        'seedlands:overworld': OVERWORLD_PRODUCT_PERMISSIONS,
+        'example:behavior-pack': [...counter.descriptor.permissions!, ...behavior.descriptor.permissions!],
       },
     });
     const registry = composition.capability<BehaviorCapabilityRegistry>(BEHAVIOR_REGISTRY_CAPABILITY);
@@ -246,6 +238,7 @@ describe('per-world behavior capability registry', () => {
       deltaSeconds: 0.1,
       elapsedSeconds: 0.1,
       resolveTarget: () => null,
+      allows: () => true,
       standard: {
         evaluate: () => false,
         start: () => ({ status: 'failed', reason: 'not-standard' }),
@@ -276,12 +269,20 @@ describe('per-world behavior capability registry', () => {
         return execution.invoke(request);
       },
     } satisfies BehaviorRuntimeContext;
-    expect(registry.catalogForActor(context.actor, context.actorState)).toBe(registry.catalog());
+    expect(registry.catalogForActor(context.actor, context.actorState, () => true)).toEqual(registry.catalog());
     expect(
-      registry.catalogForActor({ ...context.actor, lifetime: context.actor.lifetime + 1 }, context.actorState),
+      registry.catalogForActor(
+        { ...context.actor, lifetime: context.actor.lifetime + 1 },
+        context.actorState,
+        () => true,
+      ),
     ).toEqual([]);
-    expect(registry.catalogForActor(context.actor, { ...context.actorState, lifecycle: 'dead' })).toEqual([]);
-    expect(registry.catalogForActor(context.actor, { ...context.actorState, controlSource: 'player' })).toEqual([]);
+    expect(registry.catalogForActor(context.actor, { ...context.actorState, lifecycle: 'dead' }, () => true)).toEqual(
+      [],
+    );
+    expect(
+      registry.catalogForActor(context.actor, { ...context.actorState, controlSource: 'player' }, () => true),
+    ).toEqual([]);
     expect(registry.evaluate('example:counter-ready', context, {})).toBe(true);
     expect(() => registry.evaluate('example:condition-throws', context, {})).toThrow(/condition exploded/);
     expect(() => registry.evaluate('example:condition-non-boolean', context, {})).toThrow(/non-boolean/);
@@ -295,6 +296,13 @@ describe('per-world behavior capability registry', () => {
       status: 'failed',
       reason: 'BEHAVIOR_TARGET_UNRESOLVED',
     });
+    expect(registry.start('example:undeclared-operation', context, {})).toMatchObject({
+      status: 'failed',
+      reason: 'BEHAVIOR_OPERATION_UNDECLARED',
+    });
+    expect(() => registry.start('example:increment-twice', { ...context, allows: () => false }, { amount: 2 })).toThrow(
+      /capability is unavailable/i,
+    );
     const started = registry.start('example:increment-twice', context, { amount: 2 });
     expect(started).toMatchObject({ status: 'running', state: { completed: 1 } });
     if (started.status !== 'running') throw new Error('expected running skill');
@@ -313,13 +321,9 @@ describe('per-world behavior capability registry', () => {
   });
 
   it('rejects unknown capabilities, invalid arguments and incompatible restored provider state', () => {
-    const root = definePack({
-      id: 'example:playbook',
-      version: '1.0.0',
-      kind: 'playbook',
-      modules: [defineBehaviorRegistryModule()],
+    const composition = assembleWorldPacks([verifiedBehaviorPack(overworld)], {
+      approvedPermissions: { 'seedlands:overworld': OVERWORLD_PRODUCT_PERMISSIONS },
     });
-    const composition = assembleWorldPacks([verified(root)]);
     const registry = composition.capability<BehaviorCapabilityRegistry>(BEHAVIOR_REGISTRY_CAPABILITY);
     const standardCalls: string[] = [];
     const standardContext = {
@@ -336,6 +340,7 @@ describe('per-world behavior capability registry', () => {
       deltaSeconds: 0.1,
       elapsedSeconds: 0.1,
       resolveTarget: () => null,
+      allows: () => true,
       invoke: () => ({ ok: false as const, code: 'UNEXPECTED', message: 'unexpected' }),
       standard: {
         evaluate: () => false,

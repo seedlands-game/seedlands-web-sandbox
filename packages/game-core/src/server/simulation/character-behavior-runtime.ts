@@ -15,6 +15,8 @@ import type {
   CharacterSkillExecution,
 } from './character-runtime-types';
 import { CharacterBehaviorSkills, type BehaviorCallbacks } from './character-behavior-skills';
+import { validateActorBehavior } from './character-behavior-admission';
+export { createBehaviorRecord } from './character-behavior-admission';
 import {
   behaviorActionNodes,
   behaviorActionArgs,
@@ -39,27 +41,6 @@ import {
 type TreeSession = BehaviorTreeSession<BehaviourTree>;
 
 const cloneJson = <Value>(value: Value): Value => JSON.parse(JSON.stringify(value)) as Value;
-
-export function createBehaviorRecord(
-  goal: CharacterBehaviorRecord['goal'],
-  definition: BehaviorDefinition,
-  registry: CharacterRuntimeOptions['capabilities'],
-  revision = 1,
-  dialogueCursor = 0,
-): CharacterBehaviorRecord {
-  validateBehavior(goal, definition, registry);
-  return {
-    revision,
-    goal: cloneJson(goal),
-    definition: cloneJson(definition),
-    cycle: 0,
-    activationSequence: 0,
-    skills: [],
-    monitors: behaviorConditionConsumers(definition)
-      .filter((entry) => behaviorConditionContainsDialogue(entry.condition))
-      .map((entry) => ({ nodeId: entry.id, matched: false, episode: 0, version: dialogueCursor })),
-  };
-}
 
 export class CharacterBehaviorRuntime {
   private readonly sessions = new Map<string, TreeSession>();
@@ -113,6 +94,7 @@ export class CharacterBehaviorRuntime {
 
   install(record: CharacterRecord, goal: CharacterBehaviorRecord['goal'], definition: BehaviorDefinition): void {
     validateBehavior(goal, definition, this.options.capabilities);
+    validateActorBehavior(this.options, record.entityId, definition);
     const previousContexts = behaviorActionContexts(record.behaviorTree.definition);
     const nextContexts = behaviorActionContexts(definition);
     const nextSignatures = new Map(
@@ -177,6 +159,8 @@ export class CharacterBehaviorRuntime {
 
   rebuildAfterRestore(record: CharacterRecord): void {
     validateBehavior(record.behaviorTree.goal, record.behaviorTree.definition, this.options.capabilities);
+    if (record.lifecycle === 'active')
+      validateActorBehavior(this.options, record.entityId, record.behaviorTree.definition);
     const valid = new Map(
       behaviorActionNodes(record.behaviorTree.definition).map((node) => [
         node.id,
@@ -330,6 +314,7 @@ export class CharacterBehaviorRuntime {
         return targetId ? this.options.entities.createReference(targetId) : null;
       },
       invoke: (origin, request) => this.options.domain.invoke(record.entityId, origin, request),
+      allows: (capability) => this.options.domain.allowsCapability(record.entityId, capability),
       standard: Object.freeze({
         evaluate: (id: string, args: BehaviorArguments) => this.skills.evaluate(record, id, args, dialogueAfterCursor),
         start: (

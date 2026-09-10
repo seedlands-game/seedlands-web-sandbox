@@ -5,6 +5,7 @@ export const BEHAVIOR_MAX_DEPTH = 12;
 export const BEHAVIOR_MAX_BYTES = 32 * 1024;
 export const BEHAVIOR_MAX_CAPABILITIES = 256;
 export const BEHAVIOR_MAX_CAPABILITY_STATE_BYTES = 8 * 1024;
+export const BEHAVIOR_MAX_REQUIRED_OPERATIONS = 16;
 
 /** Public authoring guide shared by world tools and external policy editors. */
 export const BEHAVIOR_TREE_AUTHORING_GUIDE = `A definition is {version:1,root:Node,monitors?:Monitor[]}.
@@ -101,6 +102,11 @@ export type BehaviorCapabilityReference = Readonly<{
   version: string;
   provider: BehaviorCapabilityProvider;
 }>;
+export type BehaviorOperationRequirement = Readonly<{
+  operationId: string;
+  /** `any` is only a catalog preflight; every concrete target is re-authorized during dispatch. */
+  authorization: 'self' | 'any';
+}>;
 /** Serializable, bounded catalog entry. Provider callbacks never cross this boundary. */
 export type BehaviorCapability = Readonly<{
   id: string;
@@ -111,6 +117,7 @@ export type BehaviorCapability = Readonly<{
   kind: 'condition' | 'skill';
   description: string;
   arguments: Readonly<Record<string, BehaviorArgumentRule>>;
+  requiredOperations: readonly BehaviorOperationRequirement[];
   state?: Readonly<{ version: string; maximumBytes: number }>;
 }>;
 

@@ -1,12 +1,8 @@
 import { createLifeBehavior } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
-import {
-  BEHAVIOR_REGISTRY_CAPABILITY,
-  defineBehaviorRegistryModule,
-  definePack,
-  type BehaviorCapabilityRegistry,
-} from '@seedlands/game-core/mod-api';
-import { assembleWorldPacks } from '@seedlands/game-core/server/composition/host-api';
+import { BEHAVIOR_REGISTRY_CAPABILITY, type BehaviorCapabilityRegistry } from '@seedlands/game-core/mod-api';
+import { assembleOverworldPacks } from '@seedlands/game-core/server/composition/host-api';
+import { pack as overworld } from '../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 import type {
   CharacterEvent,
   CharacterObservation,
@@ -29,15 +25,9 @@ export const binding = (overrides: Partial<ControlBinding> = {}): ControlBinding
   };
 };
 
-const behaviorPack = definePack({
-  id: 'seedlands:agent-test-playbook',
-  version: '1.0.0',
-  kind: 'playbook',
-  modules: [defineBehaviorRegistryModule()],
-});
-const behaviorComposition = assembleWorldPacks([
+const behaviorComposition = assembleOverworldPacks([
   {
-    ...behaviorPack,
+    ...overworld,
     integrity: {
       algorithm: 'sha256',
       manifestDigest: 'a'.repeat(64),

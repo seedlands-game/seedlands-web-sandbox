@@ -1,4 +1,5 @@
 import type { CapabilityContract, ModModule, ModulePermission } from '../../composition/contracts';
+import type { BehaviorOperationRequirement } from '../../../runtime/behavior-control-protocol';
 import {
   BEHAVIOR_REGISTRY_CAPABILITY,
   STANDARD_BEHAVIOR_PROVIDER_MODULE_ID,
@@ -7,6 +8,8 @@ import {
   type BehaviorProviderDefinition,
   type BehaviorStandardDispatcher,
 } from '../../composition/behavior-capability-registry';
+import { COMBAT_REQUEST_OPERATION } from './combat-model';
+import { INVENTORY_CONSUME_OPERATION, INVENTORY_PICKUP_OPERATION } from './inventory-action-model';
 
 export type BehaviorCapabilityModuleInput = Readonly<{
   id: string;
@@ -25,12 +28,14 @@ const standardSkill = (
   id: string,
   description: string,
   args: BehaviorProviderDefinition['arguments'],
+  requiredOperations: readonly BehaviorOperationRequirement[] = [],
 ): BehaviorProviderDefinition => ({
   id,
   version: '1.0.0',
   kind: 'skill',
   description,
   arguments: args,
+  requiredOperations,
   state: { version: '1.0.0', maximumBytes: 512 },
   start: (context, input) => standard(context).start(id, input, context),
   continue: (context, input, state) => standard(context).continue(id, input, state, context),
@@ -156,7 +161,21 @@ const standardCapabilities: readonly BehaviorProviderDefinition[] = [
         { text: { type: 'string', required: true, maximum: 280 } },
       ],
     ] as const
-  ).map(([id, description, args]): BehaviorProviderDefinition => standardSkill(id, description, args)),
+  ).map(([id, description, args]): BehaviorProviderDefinition =>
+    standardSkill(
+      id,
+      description,
+      args,
+      id === 'satisfy-hunger'
+        ? [
+            { operationId: INVENTORY_CONSUME_OPERATION, authorization: 'self' },
+            { operationId: INVENTORY_PICKUP_OPERATION, authorization: 'any' },
+          ]
+        : id === 'attack-threat'
+          ? [{ operationId: COMBAT_REQUEST_OPERATION, authorization: 'any' }]
+          : [],
+    ),
+  ),
 ];
 
 /** Standard module owns the single aggregation facade; other modules extend it through composition requires. */
@@ -174,7 +193,7 @@ export function defineBehaviorRegistryModule(
       const registry = createBehaviorCapabilityRegistry();
       for (const capability of standardCapabilities) registry.register(api.identity, capability);
       api.provideCapability(BEHAVIOR_REGISTRY_CAPABILITY, registry);
-      api.onDefinitionsReady(() => registry.freeze());
+      api.onDefinitionsReady((definitions) => registry.freeze(definitions));
     },
   } satisfies ModModule);
 }

@@ -4,7 +4,12 @@ import type {
   CharacterMemory,
   CharacterProfile,
 } from '../../runtime/character-control-protocol';
-import type { BehaviorDefinition, BehaviorGoal, BehaviorSkillStatus } from '../../runtime/behavior-control-protocol';
+import type {
+  BehaviorCapability,
+  BehaviorDefinition,
+  BehaviorGoal,
+  BehaviorSkillStatus,
+} from '../../runtime/behavior-control-protocol';
 import type { BehaviorCapabilityRegistry } from '../composition/behavior-capability-registry';
 import type { RegisteredOperationRequest, RegisteredOperationResult } from '../composition/operation-contracts';
 import type { EntityStore } from '../gameplay/entity-store';
@@ -156,6 +161,7 @@ export type CharacterActorDomainView = Readonly<{
 /** Restricted body/operation facade. Invocation is always rebound to the supplied actor by the host. */
 export type CharacterActorDomainPort = Readonly<{
   read(actorId: string): CharacterActorDomainView | null;
+  allowsCapability(actorId: string, capability: BehaviorCapability, candidateKind?: 'npc' | 'creature'): boolean;
   invoke(
     actorId: string,
     origin: Readonly<{ moduleId: string; providerId: string; providerVersion: string }>,

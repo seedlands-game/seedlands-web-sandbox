@@ -132,4 +132,59 @@ describe('world-owned character behavior', () => {
       await session.dispose();
     }
   }, 30_000);
+
+  it('dispatches standard combat through its declared registered operation and applies damage', async () => {
+    const session = await HeadlessSession.create({
+      platform: testCorePlatform,
+      seedText: 'behavior-registered-combat',
+      createComposition,
+    });
+    try {
+      await session.world.clock({ kind: 'pause' });
+      for (const command of [
+        { type: 'fill', from: [-4, 56, -4], to: [4, 56, 4], voxel: 3 },
+        { type: 'fill', from: [-4, 57, -4], to: [4, 60, 4], voxel: 0 },
+        { type: 'teleport', position: [2, 58.6, 0.5] },
+      ] as const)
+        expect(await session.world.command(command)).toMatchObject({ ok: true, data: { success: true } });
+      const created = await session.world.character({
+        kind: 'create',
+        profile,
+        position: [0.5, 57, 0.5],
+        behaviorTree: {
+          goal: { description: 'Defend against the visible threat.' },
+          definition: { version: 1, root: { id: 'defend', type: 'action', skill: 'attack-threat' } },
+        },
+      });
+      if (!created.ok || created.data.kind !== 'created') throw new Error('Character was not created.');
+      expect(
+        session.runtime.server.attackEntity(session.runtime.playerId, created.data.character.entityId),
+      ).toMatchObject({ success: true });
+      await session.world.clock({ kind: 'advance', elapsedMs: 100 });
+      const inspected = await session.world.character({ kind: 'inspect', entityId: created.data.character.entityId });
+      expect(inspected).toMatchObject({
+        ok: true,
+        data: {
+          character: {
+            behaviorTree: {
+              runtime: {
+                skills: [
+                  expect.objectContaining({
+                    skill: 'attack-threat',
+                    status: 'running',
+                    phase: 'attacking',
+                    actionId: expect.any(String),
+                  }),
+                ],
+              },
+            },
+          },
+        },
+      });
+      await session.world.clock({ kind: 'advance', elapsedMs: 100 });
+      expect(session.runtime.server.getPlayerState(session.runtime.playerId).health).toBeLessThan(20);
+    } finally {
+      await session.dispose();
+    }
+  }, 30_000);
 });

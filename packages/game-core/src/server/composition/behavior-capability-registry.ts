@@ -12,9 +12,10 @@ import {
   type BehaviorDefinition,
   type BehaviorJson,
   type BehaviorNode,
+  type BehaviorOperationRequirement,
   type BehaviorSkillCheckpoint,
 } from '../../runtime/behavior-control-protocol';
-import type { ModRegistrationIdentity } from './contracts';
+import type { ModDefinitionCatalog, ModRegistrationIdentity } from './contracts';
 import type { RegisteredOperationRequest, RegisteredOperationResult } from './operation-contracts';
 import {
   behaviorJsonBytes,
@@ -31,6 +32,11 @@ import {
   validateBehaviorProviderState,
   type RegisteredBehaviorProvider,
 } from './behavior-capability-dispatch';
+import {
+  assertBehaviorProviderAdmission,
+  snapshotBehaviorOperationRequirements,
+  validateBehaviorOperationRequirements,
+} from './behavior-capability-admission';
 
 export const BEHAVIOR_REGISTRY_CAPABILITY = 'seedlands:behavior-registry',
   STANDARD_BEHAVIOR_PROVIDER_MODULE_ID = 'seedlands:behavior-registry-module';
@@ -76,6 +82,7 @@ export type BehaviorRuntimeContext = BehaviorConditionContext &
   Readonly<{
     invoke(origin: BehaviorProviderOrigin, request: RegisteredOperationRequest): RegisteredOperationResult;
     resolveTarget(reference: string): Readonly<{ entityId: string; epoch: number; lifetime: number }> | null;
+    allows(capability: BehaviorCapability): boolean;
     standard: BehaviorStandardDispatcher;
   }>;
 
@@ -120,6 +127,7 @@ export type BehaviorStandardDispatcher = Readonly<{
 export type BehaviorSkillProviderDefinition = CapabilityBase &
   Readonly<{
     kind: 'skill';
+    requiredOperations: readonly BehaviorOperationRequirement[];
     state: Readonly<{ version: string; maximumBytes: number; validate?(value: BehaviorJson): boolean }>;
     start(context: BehaviorProviderContext, args: BehaviorArguments): BehaviorSkillProviderResult;
     continue(
@@ -138,15 +146,20 @@ export type BehaviorProviderDefinition = BehaviorConditionProviderDefinition | B
 
 export type BehaviorCapabilityRegistry = Readonly<{
   register(identity: ModRegistrationIdentity, definition: BehaviorProviderDefinition): void;
-  freeze(): void;
+  freeze(definitions: ModDefinitionCatalog): void;
   /** World-level authoring catalog. It does not establish authority for an actor execution. */
   catalog(): readonly BehaviorCapability[];
   /** Actor-bound executable catalog. A stale, dead, or non-behavior binding discovers no capabilities. */
   catalogForActor(
     binding: Readonly<{ entityId: string; epoch: number; lifetime: number }>,
     actorState: BehaviorActorSnapshot | null,
+    allowed: (capability: BehaviorCapability) => boolean,
   ): readonly BehaviorCapability[];
   validateDefinition(definition: BehaviorDefinition): void;
+  validateDefinitionForActor(
+    definition: BehaviorDefinition,
+    allowed: (capability: BehaviorCapability) => boolean,
+  ): void;
   evaluate(id: string, context: BehaviorRuntimeContext, args?: BehaviorArguments): boolean;
   start(id: string, context: BehaviorRuntimeContext, args?: BehaviorArguments): BehaviorSkillProviderResult;
   continue(
@@ -176,6 +189,7 @@ const providerKey = (kind: BehaviorProviderDefinition['kind'], id: string) => `$
 
 export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
   const providers = new Map<string, RegisteredProvider>();
+  const capabilityIds = new Set<string>();
   let frozen = false;
   let catalog: readonly BehaviorCapability[] = Object.freeze([]);
 
@@ -186,11 +200,22 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
     return provider;
   };
 
-  const validateCondition = (condition: BehaviorCondition, depth: number, count: { value: number }): void => {
+  const assertAvailable = (provider: RegisteredProvider, allowed?: (capability: BehaviorCapability) => boolean) => {
+    if (allowed && !allowed(provider.descriptor))
+      throw new TypeError(`Behavior capability is unavailable for this actor: ${provider.descriptor.id}`);
+  };
+
+  const validateCondition = (
+    condition: BehaviorCondition,
+    depth: number,
+    count: { value: number },
+    allowed?: (capability: BehaviorCapability) => boolean,
+  ): void => {
     if (!behaviorObject(condition) || depth > BEHAVIOR_MAX_DEPTH || ++count.value > BEHAVIOR_MAX_NODES)
       throw new TypeError('Behavior condition is invalid or too deep.');
     if ('name' in condition) {
       const provider = requireProvider('condition', String(condition.name));
+      assertAvailable(provider, allowed);
       validateBehaviorArguments(provider.descriptor, condition.args);
       return;
     }
@@ -204,25 +229,53 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
             : null;
     if (!entries || !Array.isArray(entries) || entries.length === 0)
       throw new TypeError('Behavior condition expression is invalid.');
-    entries.forEach((entry) => validateCondition(entry, depth + 1, count));
+    entries.forEach((entry) => validateCondition(entry, depth + 1, count, allowed));
   };
 
-  const validateNode = (node: BehaviorNode, depth: number, count: { value: number }, ids: Set<string>): void => {
+  const validateNode = (
+    node: BehaviorNode,
+    depth: number,
+    count: { value: number },
+    ids: Set<string>,
+    allowed?: (capability: BehaviorCapability) => boolean,
+  ): void => {
     if (!behaviorObject(node) || depth > BEHAVIOR_MAX_DEPTH || ++count.value > BEHAVIOR_MAX_NODES)
       throw new TypeError('Behavior tree is invalid or too large.');
     if (typeof node.id !== 'string' || !IDENTIFIER.test(node.id)) throw new TypeError('Behavior node id is invalid.');
     if (ids.has(node.id)) throw new TypeError('Behavior node ids must be unique.');
     ids.add(node.id);
-    if ('guard' in node && node.guard) validateCondition(node.guard, depth + 1, count);
+    if ('guard' in node && node.guard) validateCondition(node.guard, depth + 1, count, allowed);
     if (node.type === 'selector' || node.type === 'sequence') {
       if (!Array.isArray(node.children) || !node.children.length)
         throw new TypeError('Behavior composite must have children.');
-      node.children.forEach((child) => validateNode(child, depth + 1, count, ids));
-    } else if (node.type === 'condition') validateCondition(node.condition, depth + 1, count);
+      node.children.forEach((child) => validateNode(child, depth + 1, count, ids, allowed));
+    } else if (node.type === 'condition') validateCondition(node.condition, depth + 1, count, allowed);
     else if (node.type === 'action') {
       const provider = requireProvider('skill', String(node.skill));
+      assertAvailable(provider, allowed);
       validateBehaviorArguments(provider.descriptor, node.args);
     } else throw new TypeError('Behavior node type is invalid.');
+  };
+
+  const validateDefinition = (
+    definition: BehaviorDefinition,
+    allowed?: (capability: BehaviorCapability) => boolean,
+  ): void => {
+    if (
+      !behaviorObject(definition) ||
+      definition.version !== BEHAVIOR_SCHEMA_VERSION ||
+      behaviorJsonBytes(definition) > BEHAVIOR_MAX_BYTES
+    )
+      throw new TypeError('Behavior definition header is invalid or too large.');
+    const ids = new Set<string>();
+    const count = { value: 0 };
+    validateNode(definition.root, 1, count, ids, allowed);
+    for (const monitor of definition.monitors ?? []) {
+      if (!IDENTIFIER.test(monitor.id) || ids.has(monitor.id) || !monitor.reason.trim() || monitor.reason.length > 256)
+        throw new TypeError('Behavior monitor is invalid or duplicated.');
+      ids.add(monitor.id);
+      validateCondition(monitor.condition, 1, count, allowed);
+    }
   };
 
   const registry: BehaviorCapabilityRegistry = Object.freeze({
@@ -250,6 +303,7 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
       if (definition.kind === 'condition' && typeof definition.evaluate !== 'function')
         throw new TypeError('Behavior condition evaluator is required.');
       if (definition.kind === 'skill') {
+        validateBehaviorOperationRequirements(definition.requiredOperations, definition.id);
         if (
           typeof definition.start !== 'function' ||
           typeof definition.continue !== 'function' ||
@@ -261,7 +315,8 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
           throw new TypeError('Behavior skill state contract is invalid.');
       }
       const key = providerKey(definition.kind, definition.id);
-      if (providers.has(key)) throw new TypeError(`Duplicate behavior capability: ${definition.id}`);
+      if (providers.has(key) || capabilityIds.has(definition.id))
+        throw new TypeError(`Duplicate behavior capability: ${definition.id}`);
       const descriptor: BehaviorCapability = Object.freeze({
         id: definition.id,
         name: definition.id,
@@ -270,6 +325,10 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
         provider: Object.freeze({ moduleId: identity.moduleId, version: identity.moduleVersion }),
         description: definition.description,
         arguments: frozenBehaviorValue(definition.arguments),
+        requiredOperations:
+          definition.kind === 'skill'
+            ? snapshotBehaviorOperationRequirements(definition.requiredOperations)
+            : Object.freeze([]),
         ...(definition.kind === 'skill'
           ? { state: Object.freeze({ version: definition.state.version, maximumBytes: definition.state.maximumBytes }) }
           : {}),
@@ -282,9 +341,12 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
           descriptor,
         }),
       );
+      capabilityIds.add(definition.id);
     },
-    freeze() {
+    freeze(definitions) {
       if (frozen) throw new TypeError('Behavior capability registry is already frozen.');
+      for (const provider of providers.values())
+        assertBehaviorProviderAdmission(definitions, provider.identity, provider.descriptor);
       catalog = Object.freeze(
         [...providers.values()]
           .map((entry) => frozenBehaviorValue(entry.descriptor))
@@ -298,7 +360,7 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
       if (!frozen) throw new TypeError('Behavior capability registry is not frozen.');
       return catalog;
     },
-    catalogForActor(binding, actorState) {
+    catalogForActor(binding, actorState, allowed) {
       if (!frozen) throw new TypeError('Behavior capability registry is not frozen.');
       if (
         !actorState ||
@@ -309,34 +371,20 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
         actorState.reference.lifetime !== binding.lifetime
       )
         return Object.freeze([]);
-      return catalog;
+      return Object.freeze(catalog.filter(allowed));
     },
     validateDefinition(definition) {
-      if (
-        !behaviorObject(definition) ||
-        definition.version !== BEHAVIOR_SCHEMA_VERSION ||
-        behaviorJsonBytes(definition) > BEHAVIOR_MAX_BYTES
-      )
-        throw new TypeError('Behavior definition header is invalid or too large.');
-      const ids = new Set<string>();
-      const count = { value: 0 };
-      validateNode(definition.root, 1, count, ids);
-      for (const monitor of definition.monitors ?? []) {
-        if (
-          !IDENTIFIER.test(monitor.id) ||
-          ids.has(monitor.id) ||
-          !monitor.reason.trim() ||
-          monitor.reason.length > 256
-        )
-          throw new TypeError('Behavior monitor is invalid or duplicated.');
-        ids.add(monitor.id);
-        validateCondition(monitor.condition, 1, count);
-      }
+      validateDefinition(definition);
+    },
+    validateDefinitionForActor(definition, allowed) {
+      if (typeof allowed !== 'function') throw new TypeError('Behavior actor capability gate is required.');
+      validateDefinition(definition, allowed);
     },
     evaluate(id, context, args) {
       const provider = requireProvider('condition', id);
       if (provider.definition.kind !== 'condition') throw new TypeError(`Behavior condition is not registered: ${id}`);
       assertBehaviorProviderContext(context);
+      assertAvailable(provider, context.allows);
       const readonlyContext: BehaviorConditionContext = Object.freeze({
         actor: context.actor,
         actorState: context.actorState,
@@ -358,6 +406,7 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
       const provider = requireProvider('skill', id);
       if (provider.definition.kind !== 'skill') throw new TypeError(`Behavior skill is not registered: ${id}`);
       assertBehaviorProviderContext(context);
+      assertAvailable(provider, context.allows);
       return normalizeBehaviorProviderResult(
         provider,
         provider.definition.start(
@@ -370,6 +419,7 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
       const provider = requireProvider('skill', id);
       if (provider.definition.kind !== 'skill') throw new TypeError(`Behavior skill is not registered: ${id}`);
       assertBehaviorProviderContext(context);
+      assertAvailable(provider, context.allows);
       validateBehaviorProviderState(provider, state);
       return normalizeBehaviorProviderResult(
         provider,
@@ -384,6 +434,7 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
       const provider = requireProvider('skill', id);
       if (provider.definition.kind !== 'skill') throw new TypeError(`Behavior skill is not registered: ${id}`);
       assertBehaviorProviderContext(context);
+      assertAvailable(provider, context.allows);
       validateBehaviorProviderState(provider, state);
       if (!provider.definition.cancel) return Object.freeze({ status: 'cancelled', phase: 'cancelled' });
       return normalizeBehaviorProviderResult(

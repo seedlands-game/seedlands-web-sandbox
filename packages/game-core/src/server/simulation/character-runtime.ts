@@ -9,11 +9,11 @@ import type {
   CharacterTargetRef,
   CharacterBehaviorInput,
 } from '../../runtime/character-control-protocol';
-import { createLifeBehavior } from '../../runtime/character-control-protocol';
 import type { BehaviorActorSnapshot } from '../composition/behavior-capability-registry';
 import type { BehaviorJson } from '../../runtime/behavior-control-protocol';
 import type { GameplayEntity } from '../gameplay/entity-store';
-import { CharacterBehaviorRuntime, createBehaviorRecord } from './character-behavior-runtime';
+import { CharacterBehaviorRuntime } from './character-behavior-runtime';
+import { characterBehaviorPolicy, createBehaviorRecord, validateActorBehavior } from './character-behavior-admission';
 import {
   behaviorDefinitionForLegacyGoal,
   behaviorMayStartAction,
@@ -97,12 +97,15 @@ export class CharacterRuntime {
     profile: CharacterProfile,
     homePosition: readonly number[],
     behaviorTree?: CharacterBehaviorInput,
+    candidate?: Readonly<{ entityId: string; kind: 'npc' | 'creature' }>,
   ): void {
     if (!Number.isSafeInteger(this.sequence + 1)) throw new RangeError('Character sequence is exhausted.');
     validateCharacterProfile(profile);
-    position(homePosition, 'Character home position');
-    if (behaviorTree) validateBehavior(behaviorTree.goal, behaviorTree.definition, this.options.capabilities);
-    if (!this.options.canStartAction() && (!behaviorTree || behaviorMayStartAction(behaviorTree.definition)))
+    const home = position(homePosition, 'Character home position');
+    const policy = characterBehaviorPolicy(home, behaviorTree);
+    validateBehavior(policy.goal, policy.definition, this.options.capabilities);
+    if (candidate) validateActorBehavior(this.options, candidate.entityId, policy.definition, candidate.kind);
+    if (!this.options.canStartAction() && behaviorMayStartAction(policy.definition))
       throw new RangeError('Action sequence is exhausted.');
   }
 
@@ -128,15 +131,8 @@ export class CharacterRuntime {
     if (!body || (body.controlSource !== 'autonomous' && body.controlSource !== 'none'))
       throw new CharacterControlFailure('CHARACTER_CONTROL_CONFLICT', 'Actor already has another control owner.');
     const home = position(homePosition, 'Character home position');
-    const policy =
-      behaviorTree ??
-      createLifeBehavior({
-        homePosition: home,
-        patrolPositions: [
-          [home[0] + 3, home[1], home[2]],
-          [home[0], home[1], home[2] + 3],
-        ],
-      });
+    const policy = characterBehaviorPolicy(home, behaviorTree);
+    validateActorBehavior(this.options, entityId, policy.definition);
     const record: CharacterRecord = {
       version: 1,
       ...(creation ? { creation: { ...creation } } : {}),
@@ -203,7 +199,11 @@ export class CharacterRuntime {
       const binding = actorBinding ?? body?.reference ?? { entityId: request.entityId, epoch: 0, lifetime: 0 };
       return {
         kind: 'capabilities',
-        capabilities: this.options.capabilities.catalogForActor(binding, this.behaviorActorSnapshot(body)),
+        capabilities: this.options.capabilities.catalogForActor(
+          binding,
+          this.behaviorActorSnapshot(body),
+          (capability) => this.options.domain.allowsCapability(request.entityId!, capability),
+        ),
       };
     }
     if (request.kind === 'list')

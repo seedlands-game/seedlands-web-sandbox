@@ -182,18 +182,18 @@ export class GameplayRuntime {
           this.registeredCombat?.drain();
         })
       : null;
-    const behaviorCapabilities = callbacks.composition?.definitionMap.capabilities.some(
+    this.behaviorCapabilities = callbacks.composition?.definitionMap.capabilities.some(
       ({ id }) => id === BEHAVIOR_REGISTRY_CAPABILITY,
     )
       ? callbacks.composition.capability<BehaviorCapabilityRegistry>(BEHAVIOR_REGISTRY_CAPABILITY)
       : null;
-    this.behaviorCapabilities = behaviorCapabilities;
     const characterDomain =
-      behaviorCapabilities && callbacks.composition
+      this.behaviorCapabilities && callbacks.composition
         ? createGameplayCharacterDomain({
-            capabilities: behaviorCapabilities,
+            capabilities: this.behaviorCapabilities,
             composition: callbacks.composition,
             entities: this.entities,
+            actorAuthority: callbacks.moduleActorAuthority,
             invokeActor: (actorId, request) =>
               this.modules.invokeActor(callbacks.moduleActorAuthority, actorId, request),
           })
@@ -212,10 +212,10 @@ export class GameplayRuntime {
       meleeDefinitions: this.content.meleeDefinitions,
       actorProfiles: this.content.actorProfiles,
       enforceActorProfiles: !!callbacks.composition,
-      ...(behaviorCapabilities && characterDomain
+      ...(this.behaviorCapabilities && characterDomain
         ? {
             character: {
-              capabilities: behaviorCapabilities,
+              capabilities: this.behaviorCapabilities,
               domain: characterDomain,
               changed: () => this.touch(),
             },

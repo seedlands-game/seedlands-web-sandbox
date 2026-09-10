@@ -13,6 +13,7 @@ import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry } from './it
 import type { CompositionCheckpointIdentity } from '../composition/checkpoint-identity';
 import type { ActorProfileRegistry } from './actor-profile';
 import type { BehaviorCapabilityRegistry } from '../composition/behavior-capability-registry';
+import type { BehaviorCapability } from '../../runtime/behavior-control-protocol';
 import type { CharacterActorDomainPort } from '../simulation/character-runtime-types';
 import { validateCharacterSnapshotRecord } from '../simulation/character-runtime-validation';
 
@@ -95,6 +96,7 @@ type GameplaySnapshotValidationOptions = {
   combatOriginFor?(entities: EntityStore): CombatOriginRuntimeOptions;
   needsPlayerLimit?: number;
   behaviorCapabilities?: BehaviorCapabilityRegistry;
+  allowsBehaviorCapability?(actorId: string, kind: 'npc' | 'creature', capability: BehaviorCapability): boolean;
 };
 
 const LEGACY_PLAYER_EYE_TO_FEET = 1.6;
@@ -181,7 +183,10 @@ function migrateLegacyCharacterBodies(
   entities.restoreComponentSnapshot({ ...componentSnapshot, actors: [...actors.values()] });
 }
 
-const validationCharacterDomain = (entities: EntityStore): CharacterActorDomainPort =>
+const validationCharacterDomain = (
+  entities: EntityStore,
+  allowsCapability: NonNullable<GameplaySnapshotValidationOptions['allowsBehaviorCapability']>,
+): CharacterActorDomainPort =>
   Object.freeze({
     read: (actorId: string) => {
       const entity = entities.get(actorId);
@@ -207,6 +212,7 @@ const validationCharacterDomain = (entities: EntityStore): CharacterActorDomainP
         }),
       });
     },
+    allowsCapability: (actorId, capability, kind) => allowsCapability(actorId, kind ?? 'npc', capability),
     invoke: () => ({
       ok: false as const,
       code: 'SNAPSHOT_VALIDATION_ONLY',
@@ -374,7 +380,7 @@ export function validateGameplaySnapshot(
         ? {
             character: {
               capabilities: options.behaviorCapabilities,
-              domain: validationCharacterDomain(entities),
+              domain: validationCharacterDomain(entities, options.allowsBehaviorCapability ?? (() => false)),
               changed: () => undefined,
             },
           }

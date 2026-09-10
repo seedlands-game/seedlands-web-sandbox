@@ -13,6 +13,7 @@ import type {
   CapabilityContract,
   ModModule,
   ModModuleDescriptor,
+  ModDefinitionCatalog,
   ModulePermission,
   PackDefinition,
   PackDefinitionInput,
@@ -380,7 +381,7 @@ export function assembleWorldPacks(
   const capabilityValues = new Map<string, unknown>();
   const contentRegistration = createContentRegistration();
   const { items, recipes } = contentRegistration;
-  const finalizers: (() => void)[] = [];
+  const finalizers: ((definitions: ModDefinitionCatalog) => void)[] = [];
   let definitionsReady = false;
   for (const moduleId of moduleOrder) {
     const binding = moduleById.get(moduleId)!;
@@ -404,7 +405,7 @@ export function assembleWorldPacks(
           recipes: Object.freeze([...recipes.values()]),
         });
       },
-      onDefinitionsReady(finalize: () => void) {
+      onDefinitionsReady(finalize: (definitions: ModDefinitionCatalog) => void) {
         assertRegistrationOpen();
         if (typeof finalize !== 'function') throw new TypeError('Definition finalizer must be a function.');
         finalizers.push(finalize);
@@ -439,8 +440,25 @@ export function assembleWorldPacks(
   const resources = Object.freeze([...resourceById.values()].sort((a, b) => codeUnitCompare(a.id, b.id)));
   const registeredOperations = operationRegistration.finish();
   const registeredLifecycle = lifecycleRegistration.finish(moduleOrder, registeredOperations.operations);
+  const definitionCatalog: ModDefinitionCatalog = Object.freeze({
+    operation(id: string) {
+      const operation = registeredOperations.operations.find((entry) => entry.definition.id === id);
+      return operation
+        ? Object.freeze({
+            id,
+            moduleId: operation.moduleId,
+            resource: operation.definition.resource,
+            executionKind: operation.definition.executionKind ?? 'actor',
+          })
+        : null;
+    },
+    module(id: string) {
+      const binding = moduleBindings[id];
+      return binding ? Object.freeze({ packId: binding.packId, permissions: binding.permissions }) : null;
+    },
+  });
   definitionsReady = true;
-  for (const finalize of finalizers) finalize();
+  for (const finalize of finalizers) finalize(definitionCatalog);
   const definitionMap = Object.freeze({
     ...snapshotOperationIdentity(registeredOperations),
     packs: Object.freeze(packOrder.map((id) => Object.freeze({ id, version: packById.get(id)!.manifest.version }))),

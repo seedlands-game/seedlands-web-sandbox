@@ -58,6 +58,7 @@ function fixture() {
             },
           };
         },
+        allowsCapability: () => true,
         invoke: () => ({
           ok: false,
           code: 'TEST_DOMAIN_FORBIDDEN',

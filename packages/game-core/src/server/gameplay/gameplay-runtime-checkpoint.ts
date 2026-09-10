@@ -13,6 +13,7 @@ import type { createGameplayModuleSchedule } from './modules/gameplay-module-sch
 import type { createWorldRulesetState } from './modules/world-ruleset-state';
 import { BLOCK_WORLD_COMPONENT } from './modules/block-action-model';
 import { Voxel } from '../../world/voxel';
+import { allowsGameplayBehaviorCapability } from './gameplay-character-domain';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -82,6 +83,21 @@ export class GameplayRuntimeCheckpoint {
         : undefined,
       needsPlayerLimit: this.options.needsPlayerLimit,
       ...(this.options.behaviorCapabilities ? { behaviorCapabilities: this.options.behaviorCapabilities } : {}),
+      ...(this.options.behaviorCapabilities && callbacks.composition
+        ? {
+            allowsBehaviorCapability: (actorId, kind, capability) =>
+              allowsGameplayBehaviorCapability(
+                {
+                  composition: callbacks.composition!,
+                  capabilities: this.options.behaviorCapabilities!,
+                  actorAuthority: callbacks.moduleActorAuthority,
+                },
+                actorId,
+                kind,
+                capability,
+              ),
+          }
+        : {}),
       simulation: this.options.simulation,
       players: this.options.players,
       installMetadata: this.options.installMetadata,

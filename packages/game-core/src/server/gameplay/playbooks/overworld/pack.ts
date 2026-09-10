@@ -91,6 +91,7 @@ export const pack = definePack({
       permissions: [
         { resource: 'seedlands.inventory', operations: ['execute'] },
         { resource: 'seedlands.inventory-item', operations: ['execute'] },
+        { resource: 'seedlands.combat', operations: ['execute'] },
       ],
     }),
     defineStationActionsModule(),

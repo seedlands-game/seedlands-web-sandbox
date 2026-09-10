@@ -8,6 +8,7 @@ export type {
   BehaviorGoal,
   BehaviorJson,
   BehaviorNode,
+  BehaviorOperationRequirement,
   BehaviorSkillCheckpoint,
 } from '../../runtime/behavior-control-protocol';
 export type { ModLifecycleDefinition, ModSystemDefinition } from './lifecycle-contracts';
@@ -20,6 +21,7 @@ export type {
   ModModuleDescriptor,
   ModRecipeDefinition,
   ModRegistrationFacade,
+  ModDefinitionCatalog,
   ModuleInvocation,
   ModuleInvocationValue,
   ModulePermission,

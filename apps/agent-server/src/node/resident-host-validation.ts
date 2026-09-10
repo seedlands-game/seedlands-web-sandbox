@@ -7,8 +7,10 @@ import {
 import {
   BEHAVIOR_MAX_CAPABILITY_STATE_BYTES,
   BEHAVIOR_MAX_CAPABILITIES,
+  BEHAVIOR_MAX_REQUIRED_OPERATIONS,
   type BehaviorArgumentRule,
   type BehaviorCapability,
+  type BehaviorOperationRequirement,
 } from '@seedlands/game-core/runtime/behavior-control-protocol';
 import {
   CHARACTER_OBSERVATION_MAX_EVENTS,
@@ -116,6 +118,23 @@ function validArgumentRule(value: unknown): value is BehaviorArgumentRule {
   );
 }
 
+function validOperationRequirements(value: unknown): value is readonly BehaviorOperationRequirement[] {
+  if (!Array.isArray(value) || value.length > BEHAVIOR_MAX_REQUIRED_OPERATIONS) return false;
+  const operations = new Set<string>();
+  for (const requirement of value) {
+    if (
+      !object(requirement) ||
+      !textId(requirement.operationId) ||
+      !/^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/.test(requirement.operationId) ||
+      (requirement.authorization !== 'self' && requirement.authorization !== 'any') ||
+      operations.has(requirement.operationId)
+    )
+      return false;
+    operations.add(requirement.operationId);
+  }
+  return true;
+}
+
 export function validCapabilities(value: unknown): value is readonly BehaviorCapability[] {
   if (!Array.isArray(value) || value.length > BEHAVIOR_MAX_CAPABILITIES) return false;
   const identities = new Set<string>();
@@ -133,6 +152,9 @@ export function validCapabilities(value: unknown): value is readonly BehaviorCap
       entry.description.length > 1000 ||
       !object(entry.arguments) ||
       !Object.entries(entry.arguments).every(([name, rule]) => textId(name) && validArgumentRule(rule)) ||
+      !validOperationRequirements(entry.requiredOperations) ||
+      (entry.kind === 'condition' && entry.requiredOperations.length !== 0) ||
+      (entry.kind === 'skill') !== (entry.state !== undefined) ||
       (entry.state !== undefined &&
         (!object(entry.state) ||
           !textId(entry.state.version) ||

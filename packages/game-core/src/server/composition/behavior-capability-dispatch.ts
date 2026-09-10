@@ -11,6 +11,7 @@ import {
   behaviorObject,
   frozenBehaviorValue,
 } from './behavior-capability-validation';
+import { snapshotBehaviorOperationRequirements } from './behavior-capability-admission';
 import type {
   BehaviorProviderContext,
   BehaviorProviderDefinition,
@@ -36,6 +37,7 @@ export const snapshotBehaviorProvider = (definition: BehaviorProviderDefinition)
   return Object.freeze({
     ...base,
     kind: definition.kind,
+    requiredOperations: snapshotBehaviorOperationRequirements(definition.requiredOperations),
     state: Object.freeze({ ...definition.state }),
     start: definition.start,
     continue: definition.continue,
@@ -62,6 +64,7 @@ export function assertBehaviorProviderContext(context: BehaviorRuntimeContext): 
     context.elapsedSeconds < 0 ||
     typeof context.invoke !== 'function' ||
     typeof context.resolveTarget !== 'function' ||
+    typeof context.allows !== 'function' ||
     !behaviorObject(context.standard)
   )
     throw new TypeError('Behavior provider context is invalid.');
@@ -90,6 +93,21 @@ export function createBehaviorProviderContext(
     elapsedSeconds: context.elapsedSeconds,
     resolveTarget,
     invoke: (request: RegisteredOperationRequest) => {
+      const requirement =
+        provider.definition.kind === 'skill'
+          ? provider.definition.requiredOperations.find(({ operationId }) => operationId === request.operationId)
+          : undefined;
+      const authorized =
+        requirement?.authorization === 'any' ||
+        (requirement?.authorization === 'self' &&
+          request.target.kind === 'entity' &&
+          request.target.entityId === context.actor.entityId);
+      if (!authorized)
+        return Object.freeze({
+          ok: false as const,
+          code: 'BEHAVIOR_OPERATION_UNDECLARED',
+          message: 'Behavior provider did not declare this operation and target scope.',
+        });
       if (
         request.target.kind === 'entity' &&
         request.target.entityId !== context.actor.entityId &&
