@@ -9,6 +9,8 @@ export class ResidentChannelRetirement {
   private readonly pending = new Map<string, Promise<void>>();
 
   retire(channel: ResidentChannel): Promise<void> {
+    // Cancellation is immediate; only the final durable write is serialized with an older incarnation.
+    channel.dispose();
     const key = identityKey(channel.identity);
     const prior = this.pending.get(key) ?? Promise.resolve();
     const completion = prior

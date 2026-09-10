@@ -1,6 +1,7 @@
-import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { WebSocket } from 'ws';
 import { createResidentListener, listenResident } from './resident-host-listener.js';
+import { matchesResidentPairingToken } from './resident-host-listener.js';
 import type {
   HostPayload,
   ChannelState,
@@ -9,7 +10,7 @@ import type {
   ImportTransfer,
   ResidentServerOptions,
 } from './resident-host-types.js';
-export type { ResidentServerOptions } from './resident-host-types.js';
+export type { ResidentConnectionLifecycle, ResidentServerOptions } from './resident-host-types.js';
 import {
   RESIDENT_FRAME_MAX_BYTES,
   RESIDENT_MAX_CHARACTERS,
@@ -38,6 +39,11 @@ import {
 } from './resident-host-validation.js';
 import { ResidentChannelRetirement } from './resident-channel-retirement.js';
 import { ResidentHostBirths } from './resident-host-births.js';
+import {
+  pruneResidentTransfers,
+  rejectResidentPending,
+  ResidentConnectionLifecycleOwner,
+} from './resident-connection-lifecycle.js';
 
 export async function startResidentServer(options: ResidentServerOptions) {
   const pairingToken = options.pairingToken ?? randomBytes(32).toString('base64url');
@@ -50,6 +56,8 @@ export async function startResidentServer(options: ResidentServerOptions) {
   const owners = new Set<() => void>();
   const retirements = new ResidentChannelRetirement();
   ws.on('connection', (socket) => {
+    const connectionId = randomBytes(16).toString('hex');
+    const lifecycle = new ResidentConnectionLifecycleOwner(connectionId, options.onConnectionLifecycle);
     sockets.add(socket);
     let world: ResidentWorldBinding | null = null;
     let authoringCapabilities: readonly BehaviorCapability[] | null = null;
@@ -62,11 +70,7 @@ export async function startResidentServer(options: ResidentServerOptions) {
     const pending = new Map<string, Pending>();
     const exports = new Map<string, ExportTransfer>();
     const imports = new Map<string, ImportTransfer>();
-    const pruneTransfers = () => {
-      const now = Date.now();
-      for (const [id, transfer] of exports) if (transfer.expiresAt <= now) exports.delete(id);
-      for (const [id, transfer] of imports) if (transfer.expiresAt <= now) imports.delete(id);
-    };
+    const retire = (channel: ResidentChannel): Promise<void> => lifecycle.track(retirements.retire(channel));
     const send = (payload: HostPayload) => {
       if (closed || socket.readyState !== WebSocket.OPEN) return false;
       const frame = JSON.stringify({ ...payload, protocolVersion: RESIDENT_PROTOCOL_VERSION, sequence: sequence++ });
@@ -94,7 +98,7 @@ export async function startResidentServer(options: ResidentServerOptions) {
       const channel = channels.get(channelId);
       if (channel) {
         channels.delete(channelId);
-        void retirements.retire(channel.resident).catch(() => undefined);
+        void retire(channel.resident).catch(() => undefined);
       }
       error('BAD_CHANNEL_FRAME', message, requestId, channelId);
     };
@@ -118,22 +122,19 @@ export async function startResidentServer(options: ResidentServerOptions) {
       closed = true;
       clearTimeout(authTimer);
       births.dispose();
-      for (const channel of channels.values()) void retirements.retire(channel.resident).catch(() => undefined);
-      for (const entry of pending.values()) {
-        clearTimeout(entry.timer);
-        entry.reject(new Error('world disconnected'));
-      }
+      for (const channel of channels.values()) retire(channel.resident);
+      rejectResidentPending(pending, 'world disconnected');
       channels.clear();
-      pending.clear();
       exports.clear();
       imports.clear();
       sockets.delete(socket);
       owners.delete(dispose);
+      lifecycle.retire(world, inbound);
     };
     owners.add(dispose);
 
     const receive = async (message: ResidentClientMessage) => {
-      pruneTransfers();
+      pruneResidentTransfers(exports, imports);
       if (!world) {
         if (
           message.kind !== 'hello' ||
@@ -145,12 +146,11 @@ export async function startResidentServer(options: ResidentServerOptions) {
           message.pairingToken.length > 512
         )
           return reject('pairing required');
-        const token = Buffer.from(message.pairingToken);
-        const expected = Buffer.from(pairingToken);
-        if (token.length !== expected.length || !timingSafeEqual(token, expected)) return reject('pairing rejected');
+        if (!matchesResidentPairingToken(message.pairingToken, pairingToken)) return reject('pairing rejected');
         world = { ...message.world };
         authoringCapabilities = structuredClone(message.authoringCapabilities);
         clearTimeout(authTimer);
+        lifecycle.authenticated(world);
         send({ kind: 'ready', world, modelAvailable: Boolean(options.flash && options.pro) });
         return;
       }
@@ -370,14 +370,14 @@ export async function startResidentServer(options: ResidentServerOptions) {
         try {
           const status = await resident.initialize();
           if (closed || channels.get(channelId) !== channel) {
-            await retirements.retire(resident);
+            await retire(resident);
             return;
           }
           channel.ready = true;
           send({ kind: 'bound', channelId, binding, status });
         } catch {
           channels.delete(channelId);
-          await retirements.retire(resident).catch(() => undefined);
+          await retire(resident).catch(() => undefined);
           error('WORKSPACE_UNAVAILABLE', '角色工作区暂不可用', undefined, channelId);
         }
         return;
@@ -394,7 +394,7 @@ export async function startResidentServer(options: ResidentServerOptions) {
         );
       if (message.kind === 'unbind') {
         channels.delete(message.channelId);
-        await retirements.retire(channel.resident);
+        await retire(channel.resident);
         for (const [id, entry] of pending)
           if (entry.channelId === message.channelId) {
             clearTimeout(entry.timer);

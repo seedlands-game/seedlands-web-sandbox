@@ -1,6 +1,13 @@
 import { createServer, type Server } from 'node:http';
+import { timingSafeEqual } from 'node:crypto';
 import { WebSocketServer, type WebSocket } from 'ws';
 import { RESIDENT_FRAME_MAX_BYTES } from '@seedlands/cognition-protocol';
+
+export function matchesResidentPairingToken(value: string, pairingToken: string): boolean {
+  const token = Buffer.from(value);
+  const expected = Buffer.from(pairingToken);
+  return token.length === expected.length && timingSafeEqual(token, expected);
+}
 
 export function createResidentListener(allowedOrigins: readonly string[], sockets: ReadonlySet<WebSocket>) {
   if (!allowedOrigins.length) throw new Error('Exact browser Origins are required');

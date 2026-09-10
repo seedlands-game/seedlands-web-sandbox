@@ -161,13 +161,16 @@ export class ResidentChannel {
           payload: event,
         })),
       });
+      if (this.disposed) return;
       if (observation.character.behaviorTree.revision !== this.behaviorRevision) {
         const current = await this.options.workspace.readFile(this.identity, '/behavior/current.json', 'system');
+        if (this.disposed) return;
         await this.options.workspace.projectBehavior(
           this.identity,
           current.revision,
           observation.character.behaviorTree,
         );
+        if (this.disposed) return;
         this.behaviorRevision = observation.character.behaviorTree.revision;
       }
       this.observation = clone(observation);
@@ -268,25 +271,30 @@ export class ResidentChannel {
 
   private prepareAdmission(trigger: ResidentTrigger): Promise<void> {
     if (this.maintenance) return this.maintenance;
+    let maintenanceAbort: AbortController | null = null;
     const maintenance = (async () => {
       await this.ingestion;
       if (!this.agent || this.disposed || this.paused) return;
       const input = this.turnInput(trigger, clone(this.observation));
       const assessment = await this.agent.assessNextTurnBudget(input);
+      if (!this.agent || this.disposed || this.paused) return;
       this.estimatedTokens = assessment.estimatedTotalTokens;
       const budget = assessment.status;
       if (budget !== 'ready') {
         this.phase = 'compressing';
         this.message = '正在整理经历，身体继续当前生活';
         await this.publish();
+        if (!this.agent || this.disposed || this.paused) return;
         const abort = new AbortController();
+        maintenanceAbort = abort;
         this.abort = abort;
         const timeout = setTimeout(() => abort.abort(), 300_000);
         const result = await this.agent
           .compactMemory({ hardLimitReached: budget === 'suspend', signal: abort.signal })
           .finally(() => clearTimeout(timeout));
         if (result.status === 'published') this.compactions++;
-        else {
+        if (this.disposed || this.paused || abort.signal.aborted) return;
+        if (result.status !== 'published') {
           this.phase = 'blocked';
           this.message =
             budget === 'suspend' ? '记忆达到上限，旧经历与当前行为保留' : '记忆整理暂未完成，旧经历与当前行为保留';
@@ -296,7 +304,7 @@ export class ResidentChannel {
       this.needsBudgetCheck = false;
       this.phase = 'living';
     })().finally(async () => {
-      this.abort = null;
+      if (maintenanceAbort && this.abort === maintenanceAbort) this.abort = null;
       this.maintenance = null;
       if (!this.disposed && this.phase !== 'blocked') this.scheduler?.unblock();
       await this.persistAndPublish();
@@ -318,6 +326,7 @@ export class ResidentChannel {
       this.phase = 'thinking';
       this.message = '正在思考，身体继续当前生活';
       await this.persistAndPublish();
+      if (this.disposed || this.paused || abort.signal.aborted) return;
       const input = this.turnInput(trigger, observation);
       await this.agent.invokeTurn({ requestId: input.id, message: input, signal: abort.signal });
       this.message = '本轮思考完成，继续自己的生活';
@@ -352,7 +361,9 @@ export class ResidentChannel {
   }
 
   private async publish(): Promise<void> {
-    if (!this.disposed) this.options.status(await this.snapshot());
+    if (this.disposed) return;
+    const status = await this.snapshot();
+    if (!this.disposed) this.options.status(status);
   }
 
   private async persistAndPublish(): Promise<void> {

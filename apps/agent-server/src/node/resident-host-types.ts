@@ -1,5 +1,5 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import type { ResidentClientMessage, ResidentHostMessage } from '@seedlands/cognition-protocol';
+import type { ResidentClientMessage, ResidentHostMessage, ResidentWorldBinding } from '@seedlands/cognition-protocol';
 import type { ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { ResidentChannel } from '../resident-channel.js';
 import type { ResidentFactory } from '../resident-factory.js';
@@ -26,6 +26,12 @@ export type ImportTransfer = {
   byteLength: number;
 };
 
+export type ResidentConnectionLifecycle = Readonly<{
+  phase: 'authenticated' | 'closed' | 'retired' | 'retirement-failed';
+  connectionId: string;
+  world: ResidentWorldBinding | null;
+}>;
+
 export type ResidentServerOptions = Readonly<{
   workspace: PersistentNpcWorkspace;
   framework: FrameworkPersistence;
@@ -36,4 +42,5 @@ export type ResidentServerOptions = Readonly<{
   port?: number;
   pairingToken?: string;
   transferTtlMs?: number;
+  onConnectionLifecycle?(event: ResidentConnectionLifecycle): void;
 }>;

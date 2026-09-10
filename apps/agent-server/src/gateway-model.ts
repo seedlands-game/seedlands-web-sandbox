@@ -137,6 +137,7 @@ export class GatewayChatModel extends BaseChatModel {
     options?: this['ParsedCallOptions'],
     _runManager?: CallbackManagerForLLMRun,
   ): Promise<ChatResult> {
+    options?.signal?.throwIfAborted();
     const fetchImplementation = this.options.fetch ?? globalThis.fetch;
     const controller = this.options.timeoutMs === undefined ? undefined : new AbortController();
     const abortFromCaller = () => controller?.abort(options?.signal?.reason);

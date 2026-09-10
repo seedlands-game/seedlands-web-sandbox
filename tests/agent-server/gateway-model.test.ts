@@ -242,7 +242,7 @@ describe('gateway BaseChatModel', () => {
     expect(cancel).toHaveBeenCalledOnce();
   });
 
-  it('passes cancellation to the single fetch attempt', async () => {
+  it('does not start a fetch attempt after cancellation', async () => {
     let seenSignal: AbortSignal | null | undefined;
     const fakeFetch = vi.fn<typeof fetch>(async (_input, init) => {
       seenSignal = init?.signal;
@@ -257,7 +257,7 @@ describe('gateway BaseChatModel', () => {
       fetch: fakeFetch,
     });
     await expect(model.invoke([new HumanMessage('compact')], { signal: controller.signal })).rejects.toThrow();
-    expect(seenSignal).toBe(controller.signal);
-    expect(fakeFetch).toHaveBeenCalledTimes(1);
+    expect(seenSignal).toBeUndefined();
+    expect(fakeFetch).not.toHaveBeenCalled();
   });
 });

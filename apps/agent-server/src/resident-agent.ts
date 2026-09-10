@@ -41,6 +41,7 @@ export type ResidentAgentOptions = Readonly<{
 }>;
 
 const MEMORY_READ_FILE_SCHEMA = residentToolDefinition('read_file').schema;
+const assertActive = (signal?: AbortSignal): void => signal?.throwIfAborted();
 
 const MEMORY_SCHEMA = {
   type: 'object',
@@ -151,19 +152,25 @@ export class ResidentAgent {
   async invokeTurn(
     input: Readonly<{ requestId?: string; message: HumanMessage; signal?: AbortSignal }>,
   ): Promise<readonly BaseMessage[]> {
-    if (await this.options.workspace.isCognitionSuspended(this.options.binding))
-      throw new Error('cognition is suspended at the hard context limit');
-    if ((await this.assessNextTurnBudget(input.message)).status === 'suspend')
-      throw new Error('model request exceeds context budget');
+    assertActive(input.signal);
+    const suspended = await this.options.workspace.isCognitionSuspended(this.options.binding);
+    assertActive(input.signal);
+    if (suspended) throw new Error('cognition is suspended at the hard context limit');
+    const budget = await this.assessNextTurnBudget(input.message);
+    assertActive(input.signal);
+    if (budget.status === 'suspend') throw new Error('model request exceeds context budget');
     const requestId = input.requestId ?? crypto.randomUUID();
-    if (await this.options.workspace.getRequestReceipt(this.options.binding, requestId))
-      throw new Error('logical request already has an immutable terminal receipt');
+    const receipt = await this.options.workspace.getRequestReceipt(this.options.binding, requestId);
+    assertActive(input.signal);
+    if (receipt) throw new Error('logical request already has an immutable terminal receipt');
     const message = input.message.id
       ? input.message
       : new HumanMessage({ ...input.message.toDict().data, id: `${requestId}:input` });
     const prefix = await this.systemPrefix();
+    assertActive(input.signal);
     const tools = this.residentTools();
     const window = await this.options.workspace.getActiveWindow(this.options.binding);
+    assertActive(input.signal);
     const existing = this.options.workspace.restoreMessages(
       (await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId })).filter(
         (entry) => entry.windowId === window.windowId,
@@ -171,11 +178,14 @@ export class ResidentAgent {
     );
     const turnJournal = new ResidentTurnJournal(this.options.workspace, this.options.binding, existing);
     await turnJournal.closeInterruptedTools(existing);
+    assertActive(input.signal);
     const watermarks = await this.options.workspace.getWatermarks(this.options.binding);
+    assertActive(input.signal);
     const pending = await this.options.workspace.readRecentEvents(this.options.binding, {
       after: watermarks.includedThrough,
       limit: 32,
     });
+    assertActive(input.signal);
     const includedThrough = pending.hasMore
       ? (pending.events.at(-1)?.cursor ?? watermarks.includedThrough)
       : Math.max(
@@ -205,9 +215,11 @@ export class ResidentAgent {
           : {}),
       })),
     );
+    assertActive(input.signal);
     const persistedWindow = (
       await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId })
     ).filter((entry) => entry.windowId === window.windowId);
+    assertActive(input.signal);
     const invokeMessages = this.options.workspace.restoreMessages(persistedWindow);
     turnJournal.adopt(invokeMessages);
     let modelStep = 0;
@@ -222,6 +234,7 @@ export class ResidentAgent {
     const manifestMiddleware = createMiddleware({
       name: 'persistent-request-manifest',
       wrapToolCall: async (request, handler) => {
+        assertActive(input.signal);
         const id = request.toolCall.id;
         if (!id || admittedTools.get(id) !== request.toolCall.name || consumedTools.has(id))
           throw new Error('tool call has no unused round admission');
@@ -230,14 +243,18 @@ export class ResidentAgent {
         if (!('tool_call_id' in result)) throw new Error('unexpected non-message tool result');
         result.id = `${requestId}:tool:${request.toolCall.id}`;
         await turnJournal.append([result]);
+        assertActive(input.signal);
         return result;
       },
       wrapModelCall: async (request, handler) => {
+        assertActive(input.signal);
         if (++modelStep > RESIDENT_MAX_MODEL_STEPS) throw new Error('model step budget exhausted');
         if (assessResidentRequest(prefix, request.messages, toolSchema).status === 'suspend')
           throw new Error('model request exceeds context budget');
         await turnJournal.append(request.messages);
+        assertActive(input.signal);
         const journal = await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId });
+        assertActive(input.signal);
         await this.options.workspace.recordRequestManifest(this.options.binding, {
           requestId: `${requestId}:model:${modelStep}`,
           logicalModel: 'flash',
@@ -252,7 +269,9 @@ export class ResidentAgent {
           toolSchemaRevision: this.options.toolSchemaRevision,
           modelConfigurationRevision: this.options.modelConfigurationRevision,
         });
+        assertActive(input.signal);
         const result = await handler(request);
+        assertActive(input.signal);
         const calls = result.tool_calls ?? [];
         if (admittedTools.size + calls.length > RESIDENT_MAX_TOOL_CALLS) throw new Error('tool call budget exhausted');
         const proposals = calls.filter((call) => call.name === 'propose_behavior_update').length;
@@ -269,6 +288,7 @@ export class ResidentAgent {
         proposalCount += proposals;
         result.id = `${requestId}:model:${modelStep}`;
         await turnJournal.append([result]);
+        assertActive(input.signal);
         return result;
       },
     });
@@ -282,10 +302,12 @@ export class ResidentAgent {
     });
     let result;
     try {
+      assertActive(input.signal);
       result = await agent.invoke(
         { messages: invokeMessages },
         { ...residentAgentConfig(this.options.binding, window.windowId), signal: input.signal },
       );
+      assertActive(input.signal);
     } catch (error) {
       const interrupted = this.options.workspace.restoreMessages(
         (await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId })).filter(
@@ -309,27 +331,35 @@ export class ResidentAgent {
     }
     const generated = messages.slice(Math.max(0, inputIndex + 1));
     await turnJournal.append(generated);
+    assertActive(input.signal);
     await this.options.workspace.recordRequestReceipt(this.options.binding, requestId, {
       status: 'completed',
       generatedMessages: generated.length,
     });
+    assertActive(input.signal);
     if (includedThrough > watermarks.includedThrough)
       await this.options.workspace.markIncluded(this.options.binding, includedThrough);
+    assertActive(input.signal);
     return generated;
   }
 
   async compactMemory(
     input: Readonly<{ requestId?: string; hardLimitReached: boolean; signal?: AbortSignal }>,
   ): Promise<Readonly<{ status: 'published' | 'failed'; error?: string }>> {
+    assertActive(input.signal);
     const requestId = input.requestId ?? crypto.randomUUID();
     const prior = await this.options.workspace.getRequestReceipt(this.options.binding, requestId);
+    assertActive(input.signal);
     if (prior) return { status: prior.status === 'published' ? 'published' : 'failed' };
     const frozen = await this.options.workspace.freezeForCompaction(this.options.binding);
+    assertActive(input.signal);
     let published = false;
     const memoryTool = tool(
       async (candidate: MemoryDraft) => {
+        assertActive(input.signal);
         const result = await this.options.workspace.publishCompaction(this.options.binding, candidate);
         published = true;
+        assertActive(input.signal);
         return JSON.stringify({ status: 'published', ...result });
       },
       {
@@ -340,8 +370,12 @@ export class ResidentAgent {
       },
     );
     const readTool = tool(
-      async (entry: { path: string }) =>
-        JSON.stringify(await this.options.workspace.readFile(this.options.binding, entry.path, 'memory-editor')),
+      async (entry: { path: string }) => {
+        assertActive(input.signal);
+        const result = await this.options.workspace.readFile(this.options.binding, entry.path, 'memory-editor');
+        assertActive(input.signal);
+        return JSON.stringify(result);
+      },
       {
         name: 'read_file',
         description: 'Read AGENT, SOUL, MEMORY, or current Authority behavior. Archive paths are inaccessible.',
@@ -361,6 +395,7 @@ export class ResidentAgent {
       const manifestMiddleware = createMiddleware({
         name: 'persistent-compaction-request-manifest',
         wrapModelCall: async (request, handler) => {
+          assertActive(input.signal);
           if (++modelStep > RESIDENT_MAX_MODEL_STEPS) throw new Error('compaction model step budget exhausted');
           if (assessResidentRequest(prefix, request.messages, toolSchema).status === 'suspend')
             throw new Error('compaction request exceeds context budget');
@@ -378,6 +413,7 @@ export class ResidentAgent {
             toolSchemaRevision: `${this.options.toolSchemaRevision}:memory`,
             modelConfigurationRevision: this.options.modelConfigurationRevision,
           });
+          assertActive(input.signal);
           return handler(request);
         },
       });
@@ -415,6 +451,7 @@ export class ResidentAgent {
           signal: input.signal,
         },
       );
+      assertActive(input.signal);
       if (!published) throw new Error('pro model did not publish a memory candidate');
       await this.options.workspace.recordRequestReceipt(this.options.binding, requestId, {
         status: 'published',
