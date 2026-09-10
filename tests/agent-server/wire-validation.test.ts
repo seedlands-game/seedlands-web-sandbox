@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { BEHAVIOR_MAX_OPERATION_ID_LENGTH } from '@seedlands/game-core/runtime/behavior-control-protocol';
 import { CHARACTER_OBSERVATION_MAX_EVENTS } from '@seedlands/game-core/runtime/character-control-protocol';
 import { CONTROLLER_FRAME_MAX_BYTES } from '@seedlands/cognition-protocol';
 import { parseControllerClientMessage } from '../../apps/agent-server/src/wire-validation';
@@ -20,6 +21,13 @@ describe('controller wire validation', () => {
     expect(validCapabilities([{ ...wait!, name: 'legacy-alias' }])).toBe(false);
     expect(validCapabilities([{ ...wait!, provider: { ...wait!.provider, moduleId: '' } }])).toBe(false);
     expect(validCapabilities([wait!, { ...wait!, version: '2.0.0' }])).toBe(false);
+    const operationId = `example:${'x'.repeat(BEHAVIOR_MAX_OPERATION_ID_LENGTH - 'example:'.length)}`;
+    expect(validCapabilities([{ ...wait!, requiredOperations: [{ operationId, authorization: 'self' }] }])).toBe(true);
+    expect(
+      validCapabilities([
+        { ...wait!, requiredOperations: [{ operationId: `${operationId}x`, authorization: 'self' }] },
+      ]),
+    ).toBe(false);
   });
 
   it('accepts the maximum intended Chinese observation under the shared UTF-8 frame budget', () => {

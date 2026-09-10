@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { BEHAVIOR_MAX_OPERATION_ID_LENGTH } from '@seedlands/game-core/runtime/behavior-control-protocol';
 import {
   BEHAVIOR_REGISTRY_CAPABILITY,
   defineBehaviorCapabilityModule,
@@ -24,6 +25,8 @@ import { WorldResourceAuthorizer } from '../../packages/game-core/src/server/har
 import { verifiedBehaviorPack } from '../support/behavior-capability-fixtures';
 import { testCorePlatform } from '../support/core-platform';
 
+const operationIdAtLimit = `example:${'x'.repeat(BEHAVIOR_MAX_OPERATION_ID_LENGTH - 'example:'.length)}`;
+
 const operationModule: ModModule = {
   descriptor: {
     id: 'example:operation-module',
@@ -43,6 +46,11 @@ const operationModule: ModModule = {
       resource: 'example.work',
       run: () => ({ completed: true }),
     });
+    api.registerOperation({
+      id: operationIdAtLimit,
+      resource: 'example.work',
+      run: () => ({ completed: true }),
+    });
   },
 };
 
@@ -59,7 +67,17 @@ const requiredSkill = (operationId = 'example:work') =>
     continue: () => ({ status: 'failed', reason: 'unexpected' }),
   }) as unknown as BehaviorProviderDefinition;
 
-const compositionWith = (capabilities: readonly BehaviorProviderDefinition[], grantBehavior: boolean) => {
+const compositionWith = (
+  capabilities: readonly BehaviorProviderDefinition[],
+  grantBehavior: boolean,
+  grantOperationOwner = true,
+) => {
+  const operations = grantOperationOwner
+    ? operationModule
+    : {
+        ...operationModule,
+        descriptor: { ...operationModule.descriptor, permissions: [] },
+      };
   const behavior = defineBehaviorCapabilityModule({
     id: 'example:behavior-module',
     version: '1.0.0',
@@ -71,13 +89,13 @@ const compositionWith = (capabilities: readonly BehaviorProviderDefinition[], gr
     version: '1.0.0',
     kind: 'extension',
     dependencies: [{ id: 'seedlands:overworld', version: '1.0.0' }],
-    modules: [operationModule, behavior],
+    modules: [operations, behavior],
   });
   return assembleWorldPacks([verifiedBehaviorPack(overworld), verifiedBehaviorPack(extension)], {
     approvedPermissions: {
       'seedlands:overworld': OVERWORLD_PRODUCT_PERMISSIONS,
       'example:behavior-pack': [
-        ...operationModule.descriptor.permissions!,
+        ...(grantOperationOwner ? operationModule.descriptor.permissions! : []),
         ...(grantBehavior ? behavior.descriptor.permissions! : []),
       ],
     },
@@ -103,10 +121,27 @@ const permissiveActorAuthority = (resources: ReturnType<typeof compositionWith>[
 };
 
 describe('behavior capability admission', () => {
-  it('rejects missing operation definitions and missing frozen provider grants before publishing a catalog', () => {
+  it('rejects missing definitions or frozen owner/provider grants before publishing a catalog', () => {
     expect(() => compositionWith([requiredSkill('example:missing')], true)).toThrow(/required operation|missing/i);
     expect(() => compositionWith([requiredSkill()], false)).toThrow(/required operation|permission|grant/i);
+    expect(() => compositionWith([requiredSkill()], true, false)).toThrow(/operation owner|permission|grant/i);
     expect(() => compositionWith([requiredSkill('example:system-work')], true)).toThrow(/actor-executable/i);
+  });
+
+  it('publishes a 160-character required operation id but rejects 161 characters in the core contract', () => {
+    const composition = compositionWith([requiredSkill(operationIdAtLimit)], true);
+    const registry = composition.capability<BehaviorCapabilityRegistry>(BEHAVIOR_REGISTRY_CAPABILITY);
+    expect(registry.catalog()).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'example:required-skill',
+          requiredOperations: [{ operationId: operationIdAtLimit, authorization: 'self' }],
+        }),
+      ]),
+    );
+    expect(() => compositionWith([requiredSkill(`${operationIdAtLimit}x`)], true)).toThrow(
+      /required operation is invalid/i,
+    );
   });
 
   it('uses one global capability id namespace across conditions and skills', () => {

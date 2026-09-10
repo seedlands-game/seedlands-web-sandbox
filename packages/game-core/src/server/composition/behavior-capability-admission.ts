@@ -1,4 +1,5 @@
 import {
+  BEHAVIOR_MAX_OPERATION_ID_LENGTH,
   BEHAVIOR_MAX_REQUIRED_OPERATIONS,
   type BehaviorCapability,
   type BehaviorOperationRequirement,
@@ -17,6 +18,7 @@ export function validateBehaviorOperationRequirements(
       !requirement ||
       typeof requirement !== 'object' ||
       typeof (requirement as BehaviorOperationRequirement).operationId !== 'string' ||
+      (requirement as BehaviorOperationRequirement).operationId.length > BEHAVIOR_MAX_OPERATION_ID_LENGTH ||
       !/^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/.test((requirement as BehaviorOperationRequirement).operationId) ||
       !['self', 'any'].includes((requirement as BehaviorOperationRequirement).authorization)
     )
@@ -38,8 +40,8 @@ export function assertBehaviorProviderAdmission(
   identity: ModRegistrationIdentity,
   capability: BehaviorCapability,
 ): void {
-  const binding = definitions.module(identity.moduleId);
-  if (!binding) throw new TypeError(`Behavior provider module is missing: ${identity.moduleId}`);
+  const provider = definitions.module(identity.moduleId);
+  if (!provider) throw new TypeError(`Behavior provider module is missing: ${identity.moduleId}`);
   for (const requirement of capability.requiredOperations) {
     const operation = definitions.operation(requirement.operationId);
     if (!operation)
@@ -48,8 +50,17 @@ export function assertBehaviorProviderAdmission(
       throw new TypeError(
         `Behavior ${capability.id} required operation is not actor-executable: ${requirement.operationId}`,
       );
+    const owner = definitions.module(operation.moduleId);
     if (
-      !binding.permissions.some(
+      !owner?.permissions.some(
+        (permission) => permission.resource === operation.resource && permission.operations.includes('execute'),
+      )
+    )
+      throw new TypeError(
+        `Behavior ${capability.id} required operation owner has no execute permission: ${requirement.operationId}`,
+      );
+    if (
+      !provider.permissions.some(
         (permission) => permission.resource === operation.resource && permission.operations.includes('execute'),
       )
     )

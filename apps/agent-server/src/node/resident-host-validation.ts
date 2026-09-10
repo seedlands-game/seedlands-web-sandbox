@@ -7,6 +7,7 @@ import {
 import {
   BEHAVIOR_MAX_CAPABILITY_STATE_BYTES,
   BEHAVIOR_MAX_CAPABILITIES,
+  BEHAVIOR_MAX_OPERATION_ID_LENGTH,
   BEHAVIOR_MAX_REQUIRED_OPERATIONS,
   type BehaviorArgumentRule,
   type BehaviorCapability,
@@ -124,7 +125,8 @@ function validOperationRequirements(value: unknown): value is readonly BehaviorO
   for (const requirement of value) {
     if (
       !object(requirement) ||
-      !textId(requirement.operationId) ||
+      typeof requirement.operationId !== 'string' ||
+      requirement.operationId.length > BEHAVIOR_MAX_OPERATION_ID_LENGTH ||
       !/^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/.test(requirement.operationId) ||
       (requirement.authorization !== 'self' && requirement.authorization !== 'any') ||
       operations.has(requirement.operationId)
