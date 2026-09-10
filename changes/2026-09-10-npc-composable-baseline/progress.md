@@ -163,6 +163,12 @@
 - 聚合catalog修复aux `2c9165a958c82dbaa2ea62056ce419c026a93a43`已无冲突集成为`fdac5ec`。core冻结发布和Agent wire共用32KiB UTF-8总量门禁；真实registry exact-limit通过，+1 byte拒绝。实际Resident v2帧实测分别为满目录hello33,917B、Overworld+camp目录与最大预期中文观察无出生bind87,701B、默认出生+初始观察bind12,360B，均小于128KiB；不保证满birth/history/catalog任意组合。
 - 定向6文件34项、core/Agent/test类型和格式lint由实施者通过，最终完整static/build/browser/真实模型仍待冻结重跑。长线文档同步了目录总量、纯字节helper归属和Factory去重边界。独立原main仍未修改，无PR、无自动合并。
 
+### 2026-09-11 约01:14 完整覆盖率新反例与夹具修正
+
+- 冻结`79cb53a7d46a20360520b354627da21a8c800a13`的完整静态在coverage失败：409文件2117项PASS，1文件1项FAIL，2文件4项既有skip；753.44s，日志`final-catalog-static.log`。format/lint/paths通过，后置typecheck尚未执行，不称完整静态通过。
+- 唯一失败为`secondary-actor-permissions`的pickup/module：夹具去掉inventory operation owner的execute，却保留依赖该操作的标准行为provider，freeze正确拒绝，未到原执行层权限断言。夹具明确不装配无关behavior模块；不补权限、不改生产，全部7项执行拒绝/完整快照/实体引用/延迟撤权断言保留。该suite与行为准入负例定向2文件14项PASS（`secondary-grant-fixture-green.log`）；需新SHA重新完整准出。
+- Sol/xhigh最终只读审阅绑定main `6c7124a`→`79cb53a`，295路径风险归类，高风险链逐行覆盖；累计唯一11项P1均闭合，0开放P0/P1。Factory的后续重开归原项、descriptor字段与总量归同一项，不重复计数。保留1项P2：私有Agent包通配exports仍可显式访问旧v1子路径，当前v2入口不受影响，留给独立归档清理。未逐行覆盖锁文件、社区元数据、纯样式、历史文档、生成fixture及部分低风险E2E；源码review不替代当前运行证据。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |
