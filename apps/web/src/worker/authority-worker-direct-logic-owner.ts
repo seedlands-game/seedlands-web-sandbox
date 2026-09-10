@@ -65,8 +65,14 @@ export class AuthorityWorkerDirectLogicOwner {
   }
 
   rebindEpoch(nextEpoch: string): void {
+    if (!this.link) return;
+    const queued = this.queuedAcceptance;
+    if (!nextEpoch.trim() || queued?.epoch === nextEpoch) {
+      this.link.rebindEpoch(nextEpoch);
+      return;
+    }
     this.cancelQueuedAcceptance();
-    this.link?.rebindEpoch(nextEpoch);
+    this.link.rebindEpoch(nextEpoch);
   }
 
   close(): void {
