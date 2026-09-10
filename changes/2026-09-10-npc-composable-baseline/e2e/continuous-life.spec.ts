@@ -166,8 +166,13 @@ test('固定初始资源、零模型、零换树的60分钟浏览器生活', asy
 test('浏览器确定性推进三个昼夜，固定树重复完成补给休息与巡逻', async ({ page }, testInfo) => {
   test.setTimeout(240000);
   const character = await startLifeScene(page);
-  await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
+  const pause = await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
+  expect(pause, `Pause before deterministic advance: ${JSON.stringify(pause)}`).toMatchObject({
+    ok: true,
+    data: { paused: true },
+  });
   const first = await lifeSample(page, character.entityId, 0);
+  expect(first.paused).toBe(true);
   const hash = definitionHash(first.observation);
   const evidence = new LifeEvidence();
   const samples = [first];
@@ -178,7 +183,9 @@ test('浏览器确定性推进三个昼夜，固定树重复完成补给休息�
       const receipt = await page.evaluate(() =>
         window.__seedlandsHarness!.world.clock({ kind: 'advance', elapsedMs: 10000 }),
       );
-      expect(receipt, `Advance at ${seconds} simulated seconds`).toMatchObject({ ok: true });
+      expect(receipt, `Advance at ${seconds} simulated seconds: ${JSON.stringify(receipt)}`).toMatchObject({
+        ok: true,
+      });
       const sample = await lifeSample(page, character.entityId, cursor);
       cursor = sample.observation.cursor;
       samples.push(sample);

@@ -15,7 +15,8 @@ test('断开模型时，NPC 脱险后在安全侧找到食物，不在感知边�
   const birth = createLifeBehavior({ homePosition: [-1.5, 57, 0.5], patrolPositions: [[1.5, 57, 0.5]] });
   const id = await page.evaluate(async (behaviorTree) => {
     const world = window.__seedlandsHarness!.world;
-    await world.clock({ kind: 'pause' });
+    const pause = await world.clock({ kind: 'pause' });
+    if (!pause.ok || !pause.data.paused) throw new Error(`Clock pause failed: ${JSON.stringify(pause)}`);
     const nearby = await world.command({ type: 'query-nearby', radius: 128 });
     if (!nearby.ok || !nearby.data.success) throw new Error('No entities');
     for (const entity of (nearby.data.data as { entities: { id: string; type: string }[] }).entities)
@@ -52,7 +53,7 @@ test('断开模型时，NPC 脱险后在安全侧找到食物，不在感知边�
         async ({ entityId, sinceCursor }) => {
           const harness = window.__seedlandsHarness!;
           const advanced = await harness.world.clock({ kind: 'advance', elapsedMs: 1_000 });
-          if (!advanced.ok) throw new Error('Clock advance failed');
+          if (!advanced.ok) throw new Error(`Clock advance failed: ${JSON.stringify(advanced)}`);
           const observed = await harness.world.character({ kind: 'observe', entityId, sinceCursor });
           if (!observed.ok || observed.data.kind !== 'observation') throw new Error('No observation');
           return observed.data.observation;
