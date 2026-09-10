@@ -125,4 +125,4 @@ it('两日正常采集建造、树叶再生食物、庇护阻挡普通 NPC 攻�
   } finally {
     await session.dispose();
   }
-}, 120000);
+}, 360000);

@@ -179,3 +179,7 @@ Browser/Headless 从同一 checkpoint 恢复后比较权威事实和显式推进
 ### S6 远端冷启动修复合同
 
 PR #30 首轮 Chromium 检查因加载用例 flaky 失败；本机强制清空 Vite 优化缓存后确认首次世界启动才发现 `bitecs`，日志出现 `optimized dependencies changed. reloading`，UI 回到初始 Seed。既有加载 E2E 为实际 RED。修复只在 Web dev 构建配置显式预扫描 core 的该传递依赖；不新增依赖，不改变生产行为、超时、重试或 flaky 拒绝规则。冷启动四项加载 E2E、当前完整 static/build 和新 HEAD CI 验证；保留原失败与新结果，不声明性能收益。
+
+### S6 Headless 旅程执行预算修正
+
+首轮 CI static 完整结果为 1757 passed/2 failed/4 skipped；失败仅为新增长旅程的单用例超时：点击转换 5324ms 超过默认 5000ms，两日生存 225263ms 超过 120000ms，未出现业务断言失败。合同中的两日生存为逻辑覆盖，不是墙钟性能门槛。将两个独立 Headless 样例统一给予 15000ms，每日推进完整保留的两日旅程给予 360000ms；不改变模拟 ticks、断言、coverage、retry、suite 范围或 CI 20min 总时限。对应 RED 为原 runner 失败；serial coverage 定向复验和新 HEAD 全量 CI 为 GREEN 门。

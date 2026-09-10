@@ -63,7 +63,7 @@ it('独立点击转换 Pack 只匹配选中槽，真实正常输入消费与产�
   } finally {
     await session.dispose();
   }
-});
+}, 15000);
 
 it('无 Combat/Needs/合成/生态的建造 Playbook 可正常创建、拒绝合成并切换创造模式', async () => {
   const session = await HeadlessSession.create({
@@ -92,4 +92,4 @@ it('无 Combat/Needs/合成/生态的建造 Playbook 可正常创建、拒绝合
   } finally {
     await session.dispose();
   }
-});
+}, 15000);

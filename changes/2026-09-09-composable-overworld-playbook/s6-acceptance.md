@@ -55,3 +55,7 @@ CI 增加独立的 `pnpm test:composable-gameplay` 步骤及 always evidence 上
 修复仅在 Web 的 optimizeDeps.include 写入 `@seedlands/game-core > bitecs`，让现有正式传递依赖在首次扫描时解析；没有增加依赖或放宽 timeout/retry/flaky 门禁。相同强制冷启动四项 E2E 4/4 通过（6.2s），`/tmp/seedlands-s6-cold-green.log` 与 `/tmp/seedlands-s6-cold-vite-green.log` 记录不再 late optimize/reload。独立 reviewer delta 复核无发现。配置改变后的完整 static/build 及远端新 HEAD 结果继续读回，尚未预填。
 
 该冷启动配置的最终本地复验：完整 static 330 files /1759 passed/4 skipped、Svelte 0/0 与全部 types，通过；独立 build 通过。日志 `/tmp/seedlands-s6-static3.log`、`/tmp/seedlands-s6-build2.log`。配置字节与独立 delta reviewer SHA-256 一致，任务 4173 服务已停止。
+
+首轮 static 后续完整日志补充：1757 passed/2 timeout/4 skipped，858.77s；新点击样例 5324ms > 5000ms，两日生存 225263ms > 120000ms，未报告业务断言失败。依据实际 runner 数据，只给两个 Headless 样例 15s、完整两日 360s，不改变循环、assertion 或全量 coverage/20min job 门禁；独立 delta 复核无发现。定向 serial V8 coverage 诊断 2 files/3 tests PASS，89.01s（`/tmp/seedlands-s6-journey-budget-green.log`）。该子集运行显式不应用全世界覆盖率阈值，58.3% 只用于诊断，不计全量 coverage 准出；完整 CI 仍执行原 80% world 门槛。
+
+`43d26a0` 的中间 CI run `34423560880` 因等待预算修复而取消，不能计绿色；新 SHA 将重新执行全部 required checks。
