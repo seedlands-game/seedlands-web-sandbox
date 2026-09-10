@@ -1,3 +1,8 @@
+import type { EntityLifetimeReference } from '../server/gameplay/entity-store';
+import type { StationComponentV1 } from '../server/gameplay/ecs-station-state';
+import type { StationRecipe } from '../server/gameplay/modules/station-candidates';
+import type { ItemDefinition } from '../server/gameplay/item-registry';
+import type { Recipe } from '../server/gameplay/recipe-registry';
 import type { AuthoritySnapshot } from '../server/authority/authority-session';
 import type { GameplayEntity } from '../server/gameplay/entity-store';
 import type { PlayerSnapshot } from '../server/gameplay/player-state';
@@ -13,6 +18,12 @@ import type { LogicIntentBatch, LogicObservation } from '../server/logic/logic-p
 import type { ChunkPersistenceLoadDiagnostics } from '../server/persistence/chunk-persistence';
 import type { CombatSnapshot } from '../server/gameplay/combat-runtime';
 import type { WorldHarnessPort, WorldHarnessResult } from '../server/harness/world-harness-contract';
+import type { InventorySlot } from '../server/gameplay/inventory';
+import type {
+  InventoryCursorV1,
+  InventoryPointerCommand,
+  InventoryPointerStationRef,
+} from '../server/gameplay/modules/inventory-pointer-contract';
 
 export type GameplayEntityView = GameplayEntity & Readonly<{ combat?: CombatSnapshot }>;
 
@@ -40,7 +51,48 @@ export type AuthorityGameplayMetrics = Readonly<{
   simulationTime: number;
 }>;
 
+export type AuthorityStationView = Readonly<{
+  reference: EntityLifetimeReference;
+  position: readonly [number, number, number];
+  component: StationComponentV1;
+  /** Recipes whose input grid matches, independent of bag or cursor capacity. */
+  matchedRecipeIds: readonly string[];
+  craftableRecipeIds: readonly string[];
+  furnaceRecipeDuration?: number;
+  /** null accepts any registered item; [] is read-only. */
+  acceptedItemIdsBySlot?: readonly (readonly string[] | null)[];
+}>;
+export type AuthorityInventoryView = Readonly<{
+  version: 1;
+  actor: EntityLifetimeReference;
+  revision: number;
+  slots: readonly InventorySlot[];
+  hotbarSize: number;
+  cursor: InventoryCursorV1;
+}>;
+export type AuthorityInventoryPointerAction = Readonly<{
+  type: 'inventory-pointer';
+  actor: EntityLifetimeReference;
+  expectedInventoryRevision: number;
+  station?: InventoryPointerStationRef;
+  command: InventoryPointerCommand;
+}>;
+export type AuthorityStationAction = Readonly<{
+  type: 'station';
+  reference: EntityLifetimeReference;
+  expectedStationRevision: number;
+}> &
+  (
+    | Readonly<{ kind: 'craft'; recipeId: string }>
+    | Readonly<{ kind: 'transfer'; from: 'actor' | 'station'; actorSlot: number; stationSlot: number; count?: number }>
+  );
+
 export type AuthorityGameplayView = Readonly<{
+  nearbyStations?: readonly AuthorityStationView[];
+  stationRecipes?: readonly StationRecipe[];
+  items?: readonly ItemDefinition[];
+  recipes?: readonly Recipe[];
+  inventory: AuthorityInventoryView;
   gameplayRevision: number;
   gameplayTime: number;
   player: PlayerSnapshot;
@@ -104,6 +156,8 @@ export type AuthorityBootstrapGeneration = Readonly<{
 }>;
 
 export type AuthorityAction =
+  | AuthorityStationAction
+  | AuthorityInventoryPointerAction
   | Readonly<{ type: 'select-hotbar'; slot: number }>
   | Readonly<{ type: 'craft'; recipeId: string }>
   | Readonly<{ type: 'attack'; targetId: string }>

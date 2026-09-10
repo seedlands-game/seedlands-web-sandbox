@@ -1,3 +1,5 @@
+import { createMovementInputGuard, projectMovementBodies } from './actor-movement-projection';
+import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { clearAuthorityHorizontalVelocity } from './authority-input-neutralization';
 import {
   bodyWorldAabb,
@@ -27,7 +29,14 @@ import type {
 } from './authority-session-types';
 import { VoxelCollisionWorld, type LoadedVoxelSource } from './voxel-collision-world';
 import { bodyActiveChunkKeys } from './authority-physics-active-chunks';
-import { selectAuthorityPhysicsInput, ZERO_AUTHORITY_PHYSICS_INPUT } from './authority-physics-input';
+import { bodyStateForAuthorityEntity } from './creative-physics';
+import {
+  selectAuthorityPhysicsInput,
+  worldItemAttraction,
+  ZERO_AUTHORITY_PHYSICS_INPUT,
+  acceptBoundPhysicsIntents,
+  isAuthorityPlayerBindingCurrent,
+} from './authority-physics-input';
 
 export type * from './authority-session-types';
 
@@ -46,15 +55,6 @@ type AuthoritySessionOptions = Readonly<{
   initialCommitSequence?: number;
   measureNow?: () => number;
 }>;
-
-const toBodyState = (entity: AuthorityEntity): BodyState => ({
-  position: { x: entity.position[0], y: entity.position[1], z: entity.position[2] },
-  velocity: {
-    x: entity.physicsVelocity?.[0] ?? 0,
-    y: entity.physicsVelocity?.[1] ?? 0,
-    z: entity.physicsVelocity?.[2] ?? 0,
-  },
-});
 
 const MAX_RECOVERY_QUEUE = 512;
 const MAX_RECOVERY_RESULTS = 32;
@@ -78,6 +78,7 @@ export class AuthoritySession {
   private readonly physicsCost = new BoundedCostSamples();
   private readonly scheduler: MultiRateScheduler;
   private readonly input: InputCommandBuffer;
+  private readonly playerReference: EntityLifetimeReference | null;
   private readonly collisionWorld: VoxelCollisionWorld;
   private readonly bodies = new Map<string, AuthorityBodySnapshot>();
   private readonly logicIntents = new Map<string, LogicIntent>();
@@ -103,12 +104,22 @@ export class AuthoritySession {
     this.clock = new ActiveMonotonicClock(options.startTimeMs);
     this.scheduler = new MultiRateScheduler({ ...options.frequencies, maxPhysicsCatchUpSteps: 4 });
     this.input = new InputCommandBuffer(options.epoch, 'player-input');
+    this.playerReference = options.server.createEntityReference?.(options.playerId) ?? null;
     this.collisionWorld = new VoxelCollisionWorld(options.voxelSource, options.requestUnknownChunk);
     this.refreshBodies();
     for (const id of this.bodies.keys()) this.requestBodyRecovery(id, 'initialization', 2);
   }
 
+  get playerBindingCurrent(): boolean {
+    return isAuthorityPlayerBindingCurrent(this.playerReference, this.options.server);
+  }
+
   receiveInput(command: InputCommand): SequenceDecision {
+    if (!this.movementInput.accept(command)) return 'invalid';
+    if (!this.playerBindingCurrent) {
+      this.input.clear();
+      return 'wrong-epoch';
+    }
     return this.input.push(command);
   }
 
@@ -127,10 +138,12 @@ export class AuthoritySession {
 
   receiveLogicIntents(epoch: string, intents: readonly LogicIntent[]) {
     if (epoch !== this.options.epoch) return false;
-    intents.forEach((intent) => {
-      if (intent.expiresAtPhysicsTick >= this.physicsTick) this.logicIntents.set(intent.entityId, intent);
-    });
-    return true;
+    return acceptBoundPhysicsIntents(
+      this.logicIntents,
+      intents,
+      this.physicsTick,
+      this.options.server.resolveEntityReference,
+    );
   }
 
   requestBodyRecovery(entityId: string, reason: BodyRecoveryReason, maxDistance: number): boolean {
@@ -232,8 +245,10 @@ export class AuthoritySession {
   }
 
   private stepPhysics(dt: number) {
+    this.movementInput.synchronize();
     this.collisionWorld.beginStep();
     this.processRecoveryQueue();
+    if (!this.playerBindingCurrent) this.input.clear();
     const input = this.input.consumeForTick(this.physicsTick);
     const entities = this.options.server.queryEntities().sort((left, right) => left.id.localeCompare(right.id));
     const pickupTargets = [...(this.options.server.queryPickupTargets?.() ?? [])].sort((left, right) =>
@@ -258,8 +273,14 @@ export class AuthoritySession {
         input,
         this.logicIntents,
         this.physicsTick,
+        this.options.server.resolveEntityReference,
       );
-      const initialState = toBodyState(entity);
+      const modeState = this.options.server.getActorModeState?.(entity.id);
+      const authorizedPhysicsInput =
+        modeState?.mode === 'creative' && modeState.flight.enabled
+          ? { ...physicsInput, controlledFlight: { verticalSpeed: config.maxHorizontalSpeed ?? 4.5 } }
+          : physicsInput;
+      const initialState = bodyStateForAuthorityEntity(entity);
       const trackPickupCursor =
         entity.type === 'world-item' &&
         (this.pickupTargetCursors.has(entity.id) || this.pickupTargetCursors.size < MAX_TRACKED_PICKUP_CURSORS);
@@ -290,7 +311,7 @@ export class AuthoritySession {
           );
       }
       if (target) selectedTargets.set(entity.id, target.id);
-      const attraction = target ? this.itemAttraction(initialState, target.position) : null;
+      const attraction = target ? worldItemAttraction(initialState, target.position) : null;
       const result = stepBody({
         state: initialState,
         config: attraction ? { ...config, groundAcceleration: 0, airAcceleration: 0 } : config,
@@ -303,7 +324,7 @@ export class AuthoritySession {
                 z: (attraction.z - initialState.velocity.z) / dt,
               },
             }
-          : physicsInput,
+          : authorizedPhysicsInput,
         world: this.collisionWorld,
         dt,
       });
@@ -355,21 +376,6 @@ export class AuthoritySession {
     if (snapshot.body === body) return snapshot;
     const probe = probeBodyContacts({ state: body, config, world: this.collisionWorld });
     return { ...snapshot, body, grounded: probe.grounded, contacts: probe.contacts };
-  }
-
-  private itemAttraction(state: BodyState, target: BodyState['position']): BodyState['velocity'] | null {
-    const delta = {
-      x: target.x - state.position.x,
-      y: target.y - state.position.y,
-      z: target.z - state.position.z,
-    };
-    const distance = Math.hypot(delta.x, delta.y, delta.z);
-    if (distance <= Number.EPSILON) return null;
-    return {
-      x: (delta.x / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
-      y: (delta.y / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
-      z: (delta.z / distance) * WORLD_ITEM_INTERACTION.attractionSpeed,
-    };
   }
 
   private processPickups(selectedTargets: ReadonlyMap<string, string>): void {
@@ -429,7 +435,7 @@ export class AuthoritySession {
         });
         continue;
       }
-      const state = toBodyState(entity);
+      const state = bodyStateForAuthorityEntity(entity);
       const config = this.options.bodyConfigFor(entity);
       if (!this.overlapsStatic(state, config)) {
         this.recordRecovery({
@@ -482,7 +488,7 @@ export class AuthoritySession {
         id: entity.id,
         type: entity.type,
         ...(entity.archetype ? { archetype: entity.archetype } : {}),
-        body: toBodyState(entity),
+        body: bodyStateForAuthorityEntity(entity),
         grounded: false,
         contacts: [],
       });
@@ -499,9 +505,11 @@ export class AuthoritySession {
       throw new RangeError('World clock rate must be finite and within 0..24 hours per second.');
   }
 
+  private readonly movementInput = createMovementInputGuard(
+    () => this.options.server.getActorModeState?.(this.options.playerId),
+    () => this.input.clear(),
+  );
   private snapshot(): AuthoritySnapshot {
-    const player = this.bodies.get(this.options.playerId);
-    if (!player) throw new Error(`Authority player is missing: ${this.options.playerId}`);
     return {
       kind: 'snapshot',
       protocolVersion: 1,
@@ -513,8 +521,7 @@ export class AuthoritySession {
       activeTimeMs: this.activeTimeMs,
       integratedPhysicsTimeMs: this.integratedPhysicsTimeMs,
       physicsDebtMs: this.physicsDebtMs,
-      player,
-      entities: [...this.bodies.values()],
+      ...projectMovementBodies(this.options, this.bodies),
       chunkRevisions: this.collisionWorld.revisionVector(),
       worldRevision: this.options.server.worldRevision,
       worldMutationCount: this.options.server.mutationCount,

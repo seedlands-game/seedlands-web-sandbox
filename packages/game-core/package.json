@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
+    "./mod-api": "./src/server/composition/mod-api.ts",
+    "./server/composition/host-api": "./src/server/composition/host-api.ts",
     "./physics/*": "./src/physics/*.ts",
     "./runtime/*": "./src/runtime/*.ts",
     "./server/*": "./src/server/*.ts",
@@ -22,5 +24,8 @@
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "bitecs": "0.4.0"
   }
 }

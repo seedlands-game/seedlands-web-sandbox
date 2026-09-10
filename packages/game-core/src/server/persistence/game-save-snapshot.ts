@@ -1,4 +1,4 @@
-import type { GameplaySnapshotV3 } from '../gameplay/gameplay-runtime';
+import type { GameplaySnapshotV4 } from '../gameplay/gameplay-runtime';
 import type { ChunkSnapshot } from './chunk-persistence';
 import type { CoreClone } from '../../runtime/platform-ports';
 
@@ -14,9 +14,9 @@ export type FrozenGameSaveSnapshot = Readonly<{
   seedText: string;
   generatorVersion: number;
   worldRevision: number;
-  physicsSchema: GameplaySnapshotV3['physicsSchema'];
+  physicsSchema: GameplaySnapshotV4['physicsSchema'];
   fluidSchema: typeof GAME_SAVE_FLUID_SCHEMA;
-  gameplay: GameplaySnapshotV3;
+  gameplay: GameplaySnapshotV4;
   chunks: readonly ChunkSnapshot[];
 }>;
 

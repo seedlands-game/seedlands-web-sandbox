@@ -1,7 +1,9 @@
 import type { AuthorityAction } from '../../compute/authority-worker-protocol';
 import { canonicalReferenceInteger } from './network-reference-integer';
+import { validateInventoryPointerInput } from '../gameplay/modules/inventory-pointer-contract';
 
 const actionTypes = new Set<AuthorityAction['type']>([
+  'station',
   'select-hotbar',
   'craft',
   'attack',
@@ -11,6 +13,7 @@ const actionTypes = new Set<AuthorityAction['type']>([
   'respawn',
   'move-inventory',
   'use-inventory',
+  'inventory-pointer',
 ]);
 const isAuthorityActionType = (value: string): value is AuthorityAction['type'] =>
   actionTypes.has(value as AuthorityAction['type']);
@@ -53,6 +56,40 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
   const type = source.type;
   if (typeof type !== 'string' || !isAuthorityActionType(type)) throw new TypeError('Unsupported public action.');
   switch (type) {
+    case 'inventory-pointer': {
+      const input = {
+        actor: source.actor,
+        expectedInventoryRevision: source.expectedInventoryRevision,
+        ...(source.station === undefined ? {} : { station: source.station }),
+        command: source.command,
+      };
+      return { type, ...validateInventoryPointerInput(input) };
+    }
+    case 'station': {
+      const ref = record(source.reference);
+      const reference = {
+        entityId: text(ref.entityId, 'entityId'),
+        epoch: nonNegativeSafeInteger(ref.epoch, 'epoch'),
+        lifetime: nonNegativeSafeInteger(ref.lifetime, 'lifetime'),
+      };
+      if (!reference.epoch || !reference.lifetime) throw new TypeError('Invalid station reference.');
+      const base = {
+        type,
+        reference,
+        expectedStationRevision: nonNegativeSafeInteger(source.expectedStationRevision, 'stationRevision'),
+      };
+      if (source.kind === 'craft') return { ...base, kind: 'craft', recipeId: text(source.recipeId, 'recipeId') };
+      if (source.kind !== 'transfer' || (source.from !== 'actor' && source.from !== 'station'))
+        throw new TypeError('Invalid station transfer.');
+      return {
+        ...base,
+        kind: 'transfer',
+        from: source.from,
+        actorSlot: nonNegativeSafeInteger(source.actorSlot, 'actorSlot'),
+        stationSlot: nonNegativeSafeInteger(source.stationSlot, 'stationSlot'),
+        ...(source.count === undefined ? {} : { count: nonNegativeSafeInteger(source.count, 'count') }),
+      };
+    }
     case 'cancel-break':
     case 'respawn':
       return { type };

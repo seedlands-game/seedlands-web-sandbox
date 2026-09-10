@@ -19,12 +19,16 @@ describe('统一资产目录与有界适配', () => {
       expect(binding.name).toBe(listItemDefinitions().find((item) => item.id === binding.itemId)?.name);
       expect(builtinAssets.some((a) => a.id === binding.iconId)).toBe(true);
       expect(builtinAssets.some((a) => a.id === binding.modelId)).toBe(true);
+      if (builtinAssets.find((a) => a.id === binding.modelId)?.type === 'extruded-pixel-model')
+        expect(acceptsPixelItem(listItemDefinitions().find((item) => item.id === binding.itemId)!)).toBe(true);
     }
     expect(assetAdapter('image-texture').editable).toBe(false);
     expect(assetAdapter('builtin-item-model').editable).toBe(false);
     expect(assetAdapter('extruded-pixel-model').editable).toBe(true);
     for (const item of listItemDefinitions()) {
-      expect(acceptsPixelItem(item)).toBe(item.itemType === 'tool' && item.placesVoxel === undefined);
+      expect(acceptsPixelItem(item)).toBe(
+        ['tool', 'resource'].includes(item.itemType) && item.placesVoxel === undefined,
+      );
     }
     expect(acceptsPixelItem({ id: 'wood-axe', itemType: 'tool', placesVoxel: 1 })).toBe(false);
     expect(acceptsPixelItem({ id: 'custom-tool', itemType: 'tool' })).toBe(true);
@@ -72,6 +76,6 @@ it('总厚度与共享原生源解释一致，编辑副本不会改变内置图�
   const definition = resolvePixelModel(model, builtinAssets);
   const mesh = buildToolMesh({ ...definition, thicknessPixels: 4 });
   const depth = mesh.positions.filter((_, i) => i % 3 === 2);
-  expect(Math.max(...depth) - Math.min(...depth)).toBe(4 / 16);
+  expect(Math.max(...depth) - Math.min(...depth)).toBe(4 / (definition.pixelsPerUnit ?? 16));
   expect(binding.iconId).toBe(model.type === 'extruded-pixel-model' ? model.payload.textureId : '');
 });

@@ -42,6 +42,11 @@ const assertValid = (state: BodyState, config: BodyConfig, input: PhysicsInput, 
     throw new RangeError('物理步需要有限的姿态、碰撞箱和正 dt。');
   if (!Number.isFinite(input.wish.x) || !Number.isFinite(input.wish.z) || ![-1, 0, 1].includes(input.verticalIntent))
     throw new RangeError('移动意图必须是有限数值。');
+  if (
+    input.controlledFlight &&
+    (!Number.isFinite(input.controlledFlight.verticalSpeed) || input.controlledFlight.verticalSpeed <= 0)
+  )
+    throw new RangeError('受控飞行速度必须是正有限数值。');
   if (input.externalAcceleration && !finiteVec3(input.externalAcceleration))
     throw new RangeError('外部加速度必须是有限向量。');
 };
@@ -227,6 +232,7 @@ const integrateVelocity = (
       y: velocity.y + input.verticalIntent * (config.swimAcceleration ?? 12) * medium.submersion * dt,
     };
   }
+  if (input.controlledFlight) return { ...velocity, y: input.verticalIntent * input.controlledFlight.verticalSpeed };
   const maxFall = config.terminalVelocity ?? 24;
   velocity = { ...velocity, y: Math.max(-maxFall, velocity.y - gravity * (1 - buoyancy * medium.submersion) * dt) };
   if (surfaceJump)

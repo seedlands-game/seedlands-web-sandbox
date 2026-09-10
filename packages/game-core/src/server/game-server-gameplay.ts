@@ -1,5 +1,18 @@
+import { projectNearbyStations } from './gameplay/station-player-view';
+import type { WorldModuleBinding } from './commands/module-command';
+import type { ModuleInvocationValue } from './composition/contracts';
+import type { PreparedWorldEdit } from './prepared-world-edit';
+import type { WorldResourceAuthorizer } from './harness/world-authorization';
+import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from './composition/operation-contracts';
 import type { WorldCommitResult, WorldEditBatch } from './game-server';
-import type { ActorArchetype, EntityQuery, EntitySpawn, EntityUpdate, GameplayEntity } from './gameplay/entity-store';
+import type {
+  ActorArchetype,
+  EntityQuery,
+  EntitySpawn,
+  EntityUpdate,
+  GameplayEntity,
+  EntityLifetimeReference,
+} from './gameplay/entity-store';
 import { GameplayRuntime } from './gameplay/gameplay-runtime';
 import { legacyPlayerPositionToFeet } from './gameplay/gameplay-snapshot';
 import type { ItemStack } from './gameplay/item-registry';
@@ -11,34 +24,52 @@ import type { PoiInput, PoiKind } from './simulation/poi-registry';
 import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
+import type { GameplayContent } from './gameplay/gameplay-content';
+import type { GameServerOptions } from './game-server-types';
+import type { ItemDefinitionRegistry } from './gameplay/item-registry';
+import type { InventoryPointerInputV1 } from './gameplay/modules/inventory-pointer-contract';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 
 export abstract class GameServerGameplayFacade {
   protected readonly gameplay: GameplayRuntime;
   private readonly legacyEntityIds = new Set<string>();
-  private restoredVersion: 1 | 2 | 3 | null = null;
+  private restoredVersion: 1 | 2 | 3 | 4 | null = null;
 
   protected constructor(
     private readonly gameplayPersistence: Persistence | undefined,
     platform: CorePlatformPorts,
+    content?: GameplayContent,
+    private readonly compositionOptions: Pick<
+      GameServerOptions,
+      'composition' | 'allowLegacyCompositionMigration' | 'moduleSystemAuthority' | 'moduleActorAuthority'
+    > = {},
   ) {
     this.gameplay = new GameplayRuntime({
       getVoxel: (position) => this.readGameplayVoxel(...position),
-      editVoxel: (actorId, position, voxel) =>
-        this.editBatch({
-          actorId,
-          edits: [{ x: position[0], y: position[1], z: position[2], value: voxel }],
-        }),
+      getLoadedVoxel: (position) => this.readLoadedGameplayVoxel(...position),
+      prepareVoxelEdit: (actorId, position, voxel) => this.prepareVoxelEdit(actorId, position, voxel),
       getWorldTime: () => this.worldTime,
       platform,
+      content,
+      composition: compositionOptions.composition,
+      moduleSystemAuthority: compositionOptions.moduleSystemAuthority,
+      moduleActorAuthority: compositionOptions.moduleActorAuthority,
+      allowLegacyCompositionMigration: compositionOptions.allowLegacyCompositionMigration,
     });
   }
 
   abstract get worldTime(): number;
   abstract getVoxel(x: number, y: number, z: number): number;
   abstract editBatch(batch: WorldEditBatch): WorldCommitResult;
+  abstract prepareVoxelEdit(
+    actorId: string,
+    position: readonly [number, number, number],
+    voxel: number,
+  ): PreparedWorldEdit;
   abstract setWorldTime(hours: number): number;
+
+  protected abstract readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined;
 
   protected readGameplayVoxel(x: number, y: number, z: number): number | undefined {
     return this.getVoxel(x, y, z);
@@ -64,16 +95,15 @@ export abstract class GameServerGameplayFacade {
     position: [number, number, number];
     registration?: Omit<ActorRegistration, 'archetype'>;
   }): GameplayEntity {
-    const type = input.archetype === 'settler' ? 'npc' : 'creature';
-    const maxHealth = input.archetype === 'night-stalker' ? 16 : input.archetype === 'settler' ? 20 : 12;
+    const profile = this.gameplay.content.actorProfiles.require(input.archetype);
     return this.gameplay.spawnAutonomous(
       {
         id: input.id,
-        type,
+        type: profile.entityType,
         archetype: input.archetype,
         position: input.position,
-        health: maxHealth,
-        maxHealth,
+        health: profile.maxHealth,
+        maxHealth: profile.maxHealth,
         persistent: true,
       },
       { archetype: input.archetype, ...input.registration },
@@ -82,6 +112,12 @@ export abstract class GameServerGameplayFacade {
   getEntity(id: string): GameplayEntity | null {
     const entity = this.gameplay.getEntity(id);
     return entity && this.legacyEntityIds.has(id) ? this.legacyEntity(entity) : entity;
+  }
+  createEntityReference(id: string): EntityLifetimeReference | null {
+    return this.gameplay.entities.createReference(id);
+  }
+  resolveEntityReference(reference: EntityLifetimeReference): GameplayEntity | null {
+    return this.gameplay.entities.resolveReference(reference);
   }
   updateEntity(id: string, update: EntityUpdate): GameplayEntity {
     const entity = this.gameplay.updateEntity(id, update);
@@ -99,11 +135,56 @@ export abstract class GameServerGameplayFacade {
   queryNearbyEntities(position: [number, number, number], radius: number, filter: EntityQuery = {}): GameplayEntity[] {
     return this.gameplay.queryNearbyEntities(position, radius, filter);
   }
+  getActorModeState(id: string) {
+    return this.gameplay.getActorModeState(id);
+  }
+  acknowledgeBlockCommit(value: ModuleInvocationValue) {
+    return this.gameplay.acknowledgeBlockCommit(value);
+  }
+  bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
+    return this.gameplay.bindModuleOperations(authorizer, source);
+  }
+  invokeModuleOperation(
+    authorizer: WorldResourceAuthorizer,
+    source: Omit<RegisteredActorOperationBinding, 'moduleId'>,
+    request: RegisteredOperationRequest,
+  ) {
+    return this.gameplay.invokeModuleOperation(authorizer, source, request);
+  }
+  invokeActorModuleOperation(actorId: string, request: RegisteredOperationRequest) {
+    return this.gameplay.invokeActorModuleOperation(actorId, request);
+  }
+  getNearbyStations(playerId: string) {
+    return projectNearbyStations(this.gameplay, playerId, this.compositionOptions.moduleActorAuthority, (x, y, z) =>
+      this.readGameplayVoxel(x, y, z),
+    );
+  }
+  listStationRecipes() {
+    return this.gameplay.content.stations?.listRecipes() ?? [];
+  }
+  get hasGameplayComposition() {
+    return this.gameplay.hasComposition;
+  }
+  get gameplayResources() {
+    return this.gameplay.resources;
+  }
+  disposeGameplay() {
+    this.gameplay.dispose();
+  }
   getPlayerState(id: string) {
     return this.gameplay.getPlayerState(id);
   }
   getInventory(id: string) {
     return this.gameplay.getInventory(id);
+  }
+  getInventoryPointerView(id: string) {
+    return this.gameplay.getInventoryPointerView(id);
+  }
+  get itemDefinitions(): ItemDefinitionRegistry {
+    return this.gameplay.content.items;
+  }
+  get gameplayContent(): GameplayContent {
+    return this.gameplay.content;
   }
   giveItem(id: string, stack: ItemStack) {
     return this.gameplay.giveItem(id, stack);
@@ -116,6 +197,9 @@ export abstract class GameServerGameplayFacade {
   }
   moveInventorySlot(id: string, source: number, target: number) {
     return this.gameplay.moveInventorySlot(id, source, target);
+  }
+  inventoryPointer(id: string, input: InventoryPointerInputV1) {
+    return this.gameplay.inventoryPointer(id, input);
   }
   useInventoryItem(id: string, slot: number) {
     return this.gameplay.useInventoryItem(id, slot);
@@ -168,14 +252,22 @@ export abstract class GameServerGameplayFacade {
   advanceGameplayRules(seconds: number) {
     return this.gameplay.advanceRules(seconds);
   }
-  applyActorAuthorityAction(actorId: string, action: ActorAuthorityAction) {
+  applyActorAuthorityAction(actorId: string, action: ActorAuthorityAction, binding?: WorldModuleBinding) {
     return applyActorAction(
       {
         entities: this.gameplay.entities,
         simulation: this.gameplay.simulation,
         getVoxel: (position) => this.readGameplayVoxel(...position),
         isPlayerAlive: (id) => this.gameplay.getPlayerState(id).lifecycle === 'alive',
+        items: this.gameplay.content.items,
+        actorProfiles: this.gameplay.content.actorProfiles,
         touch: () => this.gameplay.recordAuthorityMutation(),
+        ...(this.hasGameplayComposition ? { consumeWorldItem: this.gameplay.bindFeeding(binding) } : {}),
+        ...(this.hasGameplayComposition
+          ? {
+              requestCombat: this.gameplay.bindActorCombat(binding),
+            }
+          : {}),
       },
       actorId,
       action,
@@ -203,10 +295,10 @@ export abstract class GameServerGameplayFacade {
     return this.gameplay.simulation.interruptAction(actorId, reason);
   }
   getActorAction(actorId: string) {
-    return this.gameplay.simulation.actions.forActor(actorId);
+    return this.gameplay.simulation.actionForActor(actorId);
   }
   getAction(actionId: string) {
-    return this.gameplay.simulation.actions.get(actionId);
+    return this.gameplay.simulation.actionById(actionId);
   }
   observeActor(actorId: string, range?: number) {
     return this.gameplay.simulation.observe(actorId, range);
@@ -230,6 +322,9 @@ export abstract class GameServerGameplayFacade {
   }
   simulationSnapshot() {
     return this.gameplay.simulation.snapshot();
+  }
+  updateStarterEcologyVersion(version: number): void {
+    this.gameplay.simulation.starterEcologyVersion = version;
   }
   simulationMetrics() {
     return this.gameplay.simulation.metrics();

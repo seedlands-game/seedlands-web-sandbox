@@ -15,7 +15,7 @@ export function buildToolMesh(definition: ToolModel) {
     normals: number[] = [],
     colors: number[] = [],
     indices: number[] = [];
-  const unit = 1 / 16;
+  const unit = 1 / (definition.pixelsPerUnit ?? 16);
   const occupied = (column: number, row: number) => {
     const pixel = definition.pixels[row]?.[column];
     return pixel !== undefined && pixel !== '.';
@@ -34,13 +34,20 @@ export function buildToolMesh(definition: ToolModel) {
     }
     indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
   };
+  // Merge only coplanar, identically colored front/back runs. Side silhouettes stay exact.
   definition.pixels.forEach((row, y) => {
-    [...row].forEach((pixel, x) => {
-      if (pixel === '.') return;
+    for (let x = 0; x < row.length;) {
+      const pixel = row[x];
+      if (pixel === '.') {
+        x++;
+        continue;
+      }
       const color = definition.palette[pixel];
       if (!color) throw new RangeError(`Missing tool palette entry: ${pixel}`);
+      let end = x + 1;
+      while (end < row.length && row[end] === pixel) end++;
       const left = (x - definition.grip[0]) * unit;
-      const right = left + unit;
+      const right = (end - definition.grip[0]) * unit;
       const top = (definition.grip[1] - y) * unit;
       const bottom = top - unit;
       const front = ((definition.thicknessPixels ?? 2) * unit) / 2,
@@ -65,6 +72,20 @@ export function buildToolMesh(definition: ToolModel) {
         [0, 0, -1],
         color,
       );
+      x = end;
+    }
+  });
+  definition.pixels.forEach((row, y) => {
+    [...row].forEach((pixel, x) => {
+      if (pixel === '.') return;
+      const color = definition.palette[pixel];
+      if (!color) throw new RangeError(`Missing tool palette entry: ${pixel}`);
+      const left = (x - definition.grip[0]) * unit;
+      const right = left + unit;
+      const top = (definition.grip[1] - y) * unit;
+      const bottom = top - unit;
+      const front = ((definition.thicknessPixels ?? 2) * unit) / 2,
+        back = -front;
       if (!occupied(x - 1, y))
         face(
           [

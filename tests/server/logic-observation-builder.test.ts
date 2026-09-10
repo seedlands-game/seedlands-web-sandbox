@@ -1,3 +1,4 @@
+import { defaultItemDefinitionRegistry } from '../../packages/game-core/src/server/gameplay/item-registry';
 import { testCorePlatform } from '../support/core-platform';
 import * as voxelModel from '../../packages/game-core/src/world/voxel-model';
 import { describe, expect, it, vi } from 'vitest';
@@ -56,6 +57,7 @@ describe('buildLogicObservation', () => {
     const boxes = vi.spyOn(voxelModel, 'collisionBoxesForVoxel');
     const observation = buildLogicObservation({
       clone: testCorePlatform.clone,
+      items: defaultItemDefinitionRegistry,
       epoch: 'epoch:logic',
       observationSequence: 3,
       snapshot: snapshot(),
@@ -111,6 +113,7 @@ describe('buildLogicObservation', () => {
   it('任一格尚未加载时省略整个窗口，Logic据此保守hold', () => {
     const observation = buildLogicObservation({
       clone: testCorePlatform.clone,
+      items: defaultItemDefinitionRegistry,
       epoch: 'epoch:logic',
       observationSequence: 1,
       snapshot: snapshot(),

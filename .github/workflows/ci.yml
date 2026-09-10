@@ -130,7 +130,7 @@ jobs:
 
   e2e-regression:
     name: Chromium regression
-    timeout-minutes: 20
+    timeout-minutes: 30
     needs: scope
     if: needs.scope.result == 'success' && needs.scope.outputs.run_full == 'true'
     runs-on: ubuntu-24.04
@@ -198,6 +198,40 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: melee-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Run inventory and creative visual acceptance
+        id: inventory-creative-visual
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
+          SEEDLANDS_BROWSER_E2E_QUALITY: low
+        run: pnpm test:inventory-creative-visual
+      - name: Preserve inventory and creative visual evidence
+        if: ${{ always() && (steps.inventory-creative-visual.outcome == 'success' || steps.inventory-creative-visual.outcome == 'failure') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: inventory-creative-visual-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Run composable gameplay acceptance
+        id: composable
+        env:
+          SEEDLANDS_BROWSER_E2E_QUALITY: low
+        run: pnpm test:composable-gameplay
+      - name: Preserve composable gameplay evidence
+        if: ${{ always() && (steps.composable.outcome == 'success' || steps.composable.outcome == 'failure') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: composable-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             test-results/
             playwright-report/

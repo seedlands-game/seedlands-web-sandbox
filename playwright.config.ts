@@ -40,7 +40,7 @@ export default defineConfig({
       : {}),
   },
   webServer: {
-    command: `pnpm --filter @seedlands/web exec vite --host 127.0.0.1 --port ${e2ePort}`,
+    command: `pnpm --filter @seedlands/web dev --host 127.0.0.1 --port ${e2ePort}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

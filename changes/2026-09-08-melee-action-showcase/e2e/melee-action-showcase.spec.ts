@@ -14,23 +14,35 @@ async function selectJourneyQuality(page: Page): Promise<void> {
   await expect(page.locator('#quality')).toHaveValue(browserQuality);
 }
 
+async function readShowcaseIds(page: Page): Promise<string[]> {
+  const ids: string[] = [];
+  for (const role of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID]) {
+    const entity = page.locator(`[data-entity-id^="${role}--"]`);
+    await expect(entity).toHaveCount(1);
+    ids.push((await entity.getAttribute('data-entity-id'))!);
+  }
+  return ids;
+}
+
 test('开始页一键进入木剑动作体验场并串联攻击与玩家受击反馈', async ({ page }, info) => {
   test.setTimeout(90_000);
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
   const capture = async (name: string) => {
     const path = info.outputPath(`${name}.png`);
     await page.screenshot({ path });
     await info.attach(name, { path, contentType: 'image/png' });
   };
-  await page.goto('./?harness=1');
+  await page.goto('./?harness=1', { waitUntil: 'networkidle' });
   await selectJourneyQuality(page);
   await page.getByRole('button', { name: '木剑动作体验场', exact: true }).click();
   const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });
   if (await continueDespiteWarning.isVisible()) await continueDespiteWarning.click();
-  await expect(page.locator('#melee-showcase-guide')).toBeVisible();
+  await expect(page.locator('#melee-showcase-guide')).toBeVisible({ timeout: 30_000 });
+  expect(await page.evaluate(() => window.__seedlandsHarness!.snapshot().quality)).toBe(browserQuality);
   await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
   await expect(page.locator('#debug')).toContainText(`Seed ${MELEE_SHOWCASE_SEED}`);
-  for (const id of [...MELEE_SHOWCASE_DUMMY_IDS, MELEE_SHOWCASE_HOSTILE_ID])
-    await expect(page.locator(`[data-entity-id="${id}"]`)).toBeAttached();
+  const initialIds = await readShowcaseIds(page);
   await capture('showcase-ready');
 
   await page.getByRole('button', { name: '立即触发玩家受击反馈', exact: true }).click();
@@ -53,8 +65,22 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
     .toBe(true);
 
   await page.getByRole('button', { name: '重新布置体验场', exact: true }).click();
-  for (const id of MELEE_SHOWCASE_DUMMY_IDS) await expect(page.locator(`[data-entity-id="${id}"]`)).toBeAttached();
+  for (const id of initialIds) await expect(page.locator(`[data-entity-id="${id}"]`)).not.toBeAttached();
+  const resetIds = await readShowcaseIds(page);
+  expect(resetIds.every((id) => !initialIds.includes(id))).toBe(true);
+  expect(pageErrors).toEqual([]);
 
+  expect(await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }))).toMatchObject({
+    ok: true,
+  });
+  const advance = async (elapsedMs: number) => {
+    expect(
+      await page.evaluate(
+        (elapsedMs) => window.__seedlandsHarness!.world.clock({ kind: 'advance', elapsedMs }),
+        elapsedMs,
+      ),
+    ).toMatchObject({ ok: true });
+  };
   await lockPointer(page);
   await page.evaluate(() => {
     const target = window as Window & {
@@ -71,24 +97,33 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   });
   await page.mouse.down();
   try {
+    await expect(page.locator('#combat-status')).toHaveAttribute('data-phase', 'windup');
+    await advance(200);
+    await expect(page.locator('#combat-status')).toHaveAttribute('data-phase', 'hit');
     await expect
       .poll(
         () =>
           page.evaluate(() =>
-            ((window as Window & { __showcaseCombatEvidence?: string[] }).__showcaseCombatEvidence ?? []).some(
-              (text) => text.includes('hit') && text.includes('5 点伤害'),
+            ((window as Window & { __showcaseCombatEvidence?: string[] }).__showcaseCombatEvidence ?? []).some((text) =>
+              text.includes('5 点伤害'),
             ),
           ),
         { intervals: [16, 16, 32] },
       )
       .toBe(true);
     await capture('combo-first-swing');
+    await expect(page.locator('#combat-status')).toContainText('已衔接下一击');
+    await advance(350);
+    await expect(page.locator('#combat-status')).toContainText('第 2 击');
+    await expect(page.locator('#combat-status')).toHaveAttribute('data-phase', 'windup');
+    await advance(100);
+    await expect(page.locator('#combat-status')).toHaveAttribute('data-phase', 'hit');
     await expect
       .poll(
         () =>
           page.evaluate(() =>
-            ((window as Window & { __showcaseCombatEvidence?: string[] }).__showcaseCombatEvidence ?? []).some(
-              (text) => text.includes('第 2 击') && text.includes('7 点伤害'),
+            ((window as Window & { __showcaseCombatEvidence?: string[] }).__showcaseCombatEvidence ?? []).some((text) =>
+              text.includes('7 点伤害'),
             ),
           ),
         { intervals: [16, 16, 32] },
@@ -97,6 +132,9 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
     await capture('combo-reverse-swing');
   } finally {
     await page.mouse.up();
+    expect(await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'run' }))).toMatchObject({
+      ok: true,
+    });
     await page.evaluate(() =>
       (window as Window & { __showcaseCombatObserver?: MutationObserver }).__showcaseCombatObserver?.disconnect(),
     );
@@ -106,7 +144,8 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
       page.evaluate(async (id) => {
         const result = await window.__seedlandsHarness!.executeGameplayCommand({ type: 'query-entity', entityId: id });
         return (result.data as { entity: unknown }).entity;
-      }, MELEE_SHOWCASE_DUMMY_IDS[1]),
+      }, resetIds[1]),
     )
     .toBeNull();
+  expect(pageErrors).toEqual([]);
 });

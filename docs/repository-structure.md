@@ -81,3 +81,13 @@ Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟�
 ## 维护责任
 
 新增一级模块、移动地图中的入口、改变状态所有者或运行链路时，在同一个 change 中更新代码地图；只有目录规则发生变化时才修改本规范。交付快照应列出迁移范围和验证结果。历史 change 继续作为当时的合同和证据，不追随每次目录调整重写。
+
+## 可组合玩法新增职责
+
+`packages/game-core/src/server/composition/` 负责每世界装配、描述符校验、注册与宿主授权接线。作者公开入口为 `@seedlands/game-core/mod-api`；宿主工厂与内部实现不是模组 API。标准机制的内部实现归 `server/gameplay/modules/`，第一方 Pack/Playbook 按包归 `server/gameplay/playbooks/<pack>/`；本期只在存在消费者时创建目录。
+
+Playbook 代码只能从显式 `mod-api` 或自己的包目录导入。`seedlands/pack-api-boundary` 对静态 import/re-export、动态 import、require 与 import type 做正反例检查；无法静态定位的导入拒绝。这里约束的是仓库内受检源码，不是恶意 JavaScript 沙箱，也不自动给任意外部源码加隔离。跨 Pack 能力通过注册合同消费，不导入另一 Pack 的私有文件。
+
+发布 Pack 的字节/路径/摘要校验属于 `scripts/pack-integrity.mjs` 工程适配；core 只校验已接收描述的业务合同，不加入 Node 文件系统或摘要计算依赖。ECS 准入实验与未批准的适配方案保留在当前 change，不因实验通过就增加生产依赖。
+
+实体 ECS 适配留在 `packages/game-core/src/server/gameplay/`：`ecs-entity-owner.ts` 拥有 per-world bitECS 实例；`ecs-actor-components.ts` / `ecs-actor-state.ts` 拥有 actor 组件和受身份绑定的访问门面。`EntityStore` 负责兼容 API 与派生空间索引，不能保留第二份权威实体数据。Action 身份合同归 `server/simulation/action-identity.ts`，战斗快照编解码归 `server/gameplay/combat-runtime-snapshot.ts`。

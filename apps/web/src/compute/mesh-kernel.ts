@@ -83,7 +83,7 @@ export function createMeshKernelInput({
     return (
       overrides.get(`${wx},${wy},${wz}`) ??
       outside?.(wx, wy, wz) ??
-      baseVoxel(seed, wx, wy, wz, queryMacro(wx, wz), queryMacro)
+      baseVoxel(seed, wx, wy, wz, queryMacro(wx, wz), queryMacro, generatorVersion)
     );
   };
   const sampleFluid = (x: number, y: number, z: number): number => {
@@ -200,7 +200,7 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
       const dimension = descriptors[offset + 2];
       const back = descriptors[offset + 3] === 1;
       if (
-        (descriptors[offset + 1] !== 0xff && (descriptors[offset + 1] < 1 || descriptors[offset + 1] > 13)) ||
+        (descriptors[offset + 1] !== 0xff && (descriptors[offset + 1] < 1 || descriptors[offset + 1] > 18)) ||
         dimension > 2 ||
         descriptors[offset + 3] > 1 ||
         descriptors[offset + 4] > 32 ||

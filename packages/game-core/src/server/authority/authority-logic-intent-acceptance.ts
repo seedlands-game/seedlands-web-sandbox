@@ -1,4 +1,6 @@
-import type { GameplayEntity } from '../gameplay/entity-store';
+import type { GameServer } from '../game-server';
+import type { WorldModuleBinding } from '../commands/module-command';
+import type { GameplayEntity, EntityLifetimeReference } from '../gameplay/entity-store';
 import type { LogicIntentBatch, LogicObservation } from '../logic/logic-protocol';
 import type { LogicIntent } from './authority-session';
 
@@ -10,6 +12,7 @@ type Options = Readonly<{
   physicsHz: number;
   currentEntities: readonly GameplayEntity[];
   identityRevision: (entity: GameplayEntity) => number;
+  referenceFor: (id: string) => EntityLifetimeReference | null;
   currentChunkRevisions: (reads: Intent['readChunkRevisions']) => boolean;
   applyAction: (entityId: string, action: Intent['action']) => { accepted: boolean; changed: boolean } | null;
   validIntent: (intent: Intent) => boolean;
@@ -38,11 +41,24 @@ export function acceptLogicIntentBatch(options: Options): {
       !options.validIntent(intent)
     )
       continue;
+    const reference = options.referenceFor(intent.entityId);
+    if (!reference) continue;
+    if (intent.action && 'targetId' in intent.action) {
+      const observedTarget = observedById.get(intent.action.targetId);
+      const currentTarget = currentById.get(intent.action.targetId);
+      if (
+        !observedTarget ||
+        !currentTarget ||
+        options.identityRevision(currentTarget) !== observedTarget.identityRevision
+      )
+        continue;
+    }
     const action = options.applyAction(intent.entityId, intent.action);
     canonicalChanged ||= action?.changed ?? false;
     if (action && !action.accepted) continue;
     intents.push({
       entityId: intent.entityId,
+      entityReference: reference,
       wish: { x: intent.wish.x, z: intent.wish.z },
       jumpRequested: intent.jumpRequested,
       verticalIntent: intent.verticalIntent,
@@ -50,4 +66,32 @@ export function acceptLogicIntentBatch(options: Options): {
     });
   }
   return { intents, canonicalChanged };
+}
+
+export function isValidLogicIntent(intent: Intent): boolean {
+  if (!Number.isFinite(intent.wish.x) || !Number.isFinite(intent.wish.z) || ![-1, 0, 1].includes(intent.verticalIntent))
+    return false;
+  const action = intent.action;
+  if (!action) return true;
+  if (action.type === 'move-to') return action.target.length === 3 && action.target.every(Number.isFinite);
+  if (action.type === 'start-existing-action') return Boolean(action.actionId.trim());
+  return Boolean(action.targetId.trim());
+}
+
+export function applyBoundLogicAction(
+  server: GameServer,
+  entityId: string,
+  action: Intent['action'],
+  binding?: WorldModuleBinding,
+) {
+  if (
+    binding &&
+    !binding.authorizer.authorize(binding.principalId, {
+      resource: 'world.action',
+      operation: 'execute',
+      target: { kind: 'entity', entityId },
+    }).allowed
+  )
+    return { accepted: false, changed: false };
+  return action ? server.applyActorAuthorityAction(entityId, action, binding) : null;
 }

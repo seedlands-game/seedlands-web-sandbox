@@ -77,7 +77,7 @@
   {shell}
   {application}
   {assetBase}
-  onstart={(seed, quality, openMode) => void actions?.startWorld(seed, quality, openMode)}
+  onstart={(seed, quality, openMode, actorMode) => void actions?.startWorld(seed, quality, openMode, actorMode)}
   onstartshowcase={(quality) => void actions?.startMeleeShowcase(quality)}
 />
 
@@ -110,19 +110,36 @@
     <GameButton id="map-toggle" class="game-panel map-toggle" label="Macro 地图" onclick={actions.toggleMap}>
       Macro 地图
     </GameButton>
+    {#if hud.mode === 'creative'}
+      <GameButton
+        id="flight-toggle"
+        class="game-panel flight-toggle"
+        label={hud.flightEnabled ? '关闭飞行' : '开启飞行'}
+        onclick={() => actions.setFlight(!hud.flightEnabled)}
+      >
+        {hud.flightEnabled ? '飞行开启' : '开启飞行'}
+      </GameButton>
+    {/if}
     <MacroMap {shell} {actions} />
     <InventoryCrafting gameplay={shell.gameplay} {actions} />
     <DeathOverlay dead={shell.gameplay.lifecycle === 'dead'} {actions} />
     {#if hud.visible && debug.visible}<PresentedEntities entities={interaction.presentedEntities} />{/if}
     <div id="help" class="game-panel">
-      WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–8 快捷栏 · E 背包 · M 地图 · F3 指标 · F3+B 碰撞箱 · F4 命令
+      {hud.mode === 'creative'
+        ? 'WASD 移动 · Space 上升 · Shift 下降 · 左/右键编辑 · 1–8 创造快捷栏 · E 内容目录 · M 地图'
+        : 'WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–8 快捷栏 · E 背包 · M 地图 · F3 指标 · F3+B 碰撞箱 · F4 命令'}
     </div>
     <div id="survival-deck">
       <div id="held-item-name">
         {hud.hotbar[hud.selectedHotbarSlot]?.itemId ? hud.hotbar[hud.selectedHotbarSlot].name : ''}
       </div>
       <SurvivalHud {hud} damage={interaction.gesture?.kind === 'damage' ? interaction.gesture : null} />
-      <Hotbar slots={hud.hotbar} selected={hud.selectedHotbarSlot} onselect={actions.selectHotbarSlot} />
+      <Hotbar
+        slots={hud.hotbar}
+        selected={hud.selectedHotbarSlot}
+        mode={hud.mode}
+        onselect={actions.selectHotbarSlot}
+      />
     </div>
   </section>
 
@@ -137,3 +154,22 @@
     </div>
   {/if}
 {/if}
+
+<style>
+  :global(#ui #flight-toggle) {
+    position: absolute;
+    top: 64px;
+    right: 140px;
+    width: auto;
+    min-height: 32px;
+    padding: 5px 12px;
+    pointer-events: auto;
+  }
+  @media (max-width: 720px) {
+    :global(#ui #flight-toggle) {
+      top: 52px;
+      right: 110px;
+      font-size: 11px;
+    }
+  }
+</style>

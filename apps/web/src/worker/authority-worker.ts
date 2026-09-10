@@ -1,5 +1,13 @@
 /// <reference lib="webworker" />
 
+import { loadBrowserPackArtifacts } from './pack-loader';
+import {
+  assembleProductPacks,
+  createGameplaySystemAuthority,
+  createGameplayActorAuthority,
+  type VerifiedPackArtifact,
+} from '@seedlands/game-core/server/composition/host-api';
+
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import {
   AuthorityRuntime,
@@ -28,6 +36,8 @@ import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } 
 
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
+let packArtifacts: readonly VerifiedPackArtifact[] = [];
+let developerPolicy: ReturnType<typeof developmentWorldAuthorizationPolicy> | undefined;
 let persistence: BrowserChunkPersistence | null = null;
 let worldHarness: AuthorityWorldHarness | null = null;
 let worldEpoch = '';
@@ -108,6 +118,20 @@ const requestBootstrap = (seed: number, generatorVersion: number) => {
   return promise;
 };
 
+const runtimeComposition = () => {
+  const composition = assembleProductPacks(packArtifacts);
+  return {
+    composition,
+    moduleSystemAuthority: createGameplaySystemAuthority(composition),
+    moduleActorAuthority: createGameplayActorAuthority(composition.resources, {
+      playerAlias: 'browser-player',
+      scriptAuthorization: developerPolicy
+        ? new WorldResourceAuthorizer(developerPolicy, composition.resources)
+        : undefined,
+    }),
+  };
+};
+
 const createRuntime = (
   seedText: string,
   generatorVersion: number,
@@ -117,6 +141,8 @@ const createRuntime = (
   candidateFluidEpoch = fluidEpoch,
 ) =>
   AuthorityRuntime.create({
+    ...runtimeComposition(),
+    allowLegacyCompositionMigration: true,
     epoch: candidateEpoch,
     seedText,
     generatorVersion,
@@ -160,13 +186,20 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
     nextRuntimeEpoch,
     nextFluidEpoch,
   );
+  try {
+    candidate.server.validateStationCheckpoint(snapshot);
+  } catch (error) {
+    candidate.server.disposeGameplay();
+    throw error;
+  }
   await currentPersistence.replaceFrozenSnapshot(snapshot);
   candidatePersistence.replace(currentPersistence);
   candidate.commitHostActivation();
   candidate.pause(candidate.sessionTimeMs);
   candidate.clearPlayerInput();
+  runtime?.server.disposeGameplay();
   runtime = candidate;
-  ingress = new BrowserAuthorityIngress(candidate.playerId);
+  ingress = new BrowserAuthorityIngress(candidate.playerId, candidate.server.gameplayResources);
   worldRestoreSequence = nextRestoreSequence;
   runtimeEpoch = nextRuntimeEpoch;
   fluidEpoch = nextFluidEpoch;
@@ -175,6 +208,9 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
 
 const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority' }>) => {
   if (runtime || persistence) throw new Error('Authority Worker already owns a running session.');
+  packArtifacts = await loadBrowserPackArtifacts(
+    new URL(`${import.meta.env.BASE_URL}packs/packs.lock.json`, location.origin),
+  );
   epoch = message.epoch;
   runtimeEpoch = epoch;
   fluidEpoch = 1;
@@ -182,7 +218,12 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     legacySnapshots: message.legacySnapshots as readonly SerializedChunkSnapshot[],
     openMode: message.openMode,
   });
+  developerPolicy = message.developerWorldHarness
+    ? developmentWorldAuthorizationPolicy('browser-developer')
+    : undefined;
   runtime = await AuthorityRuntime.create({
+    ...runtimeComposition(),
+    allowLegacyCompositionMigration: true,
     epoch,
     seedText: message.seedText,
     generatorVersion: persistence.generatorVersion,
@@ -206,13 +247,11 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   });
   worldEpoch = `${epoch}:world:0`;
   const principalId = 'browser-developer';
-  const policy = message.developerWorldHarness
-    ? developmentWorldAuthorizationPolicy(principalId, runtime.playerId)
-    : { principals: [{ id: principalId, boundEntityId: runtime.playerId }], rules: [] };
+  const policy = developerPolicy ?? { principals: [{ id: principalId, boundEntityId: runtime.playerId }], rules: [] };
   worldHarness = new AuthorityWorldHarness({
     platform: browserCorePlatform,
     principalId,
-    authorization: new WorldResourceAuthorizer(policy),
+    authorization: new WorldResourceAuthorizer(policy, runtime.server.gameplayResources),
     owner: (): AuthorityWorldOwner => ({ runtime: runtime!, epoch: worldEpoch, worldId: persistence!.worldId }),
     prepareChunk: async ([cx, cy, cz]) => {
       if (!(await runtime!.prepareHarnessChunks([[cx, cy, cz]])))
@@ -221,8 +260,9 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     advance: async (elapsedMs) => runtime!.advancePausedSession(elapsedMs),
     restore: restoreWorld,
     clockNow: browserCorePlatform.now,
+    moduleCommandBinding: (command) => ingress!.commandBinding(command),
   });
-  ingress = new BrowserAuthorityIngress(runtime.playerId);
+  ingress = new BrowserAuthorityIngress(runtime.playerId, runtime.server.gameplayResources);
   post({ kind: 'authority-ready', protocolVersion: PROTOCOL_VERSION, epoch, ready: runtime.ready() });
   interval = setInterval(tick, 8);
 };
@@ -343,7 +383,7 @@ const handleCurrent = async (message: AuthorityRequest) => {
         (actionId) => current.server.getAction(actionId)?.actorId ?? null,
       );
       await transact(message, async () => ({
-        result: await current.executeCommand(commandSource, message.command),
+        result: await current.executeCommand(commandSource, message.command, ingress!.commandBinding(message.command)),
         gameplay: current.view(),
         commits: current.takeCommits(),
       }));
@@ -433,6 +473,7 @@ const handle = async (message: AuthorityRequest) => {
     pendingBootstrap = null;
     worldHarness = null;
     ingress = null;
+    runtime?.server.disposeGameplay();
     runtime = null;
     scope.close();
     return;

@@ -1,0 +1,26 @@
+{
+  "sourceSha": "50ff14c2d1a3c62cafbb3b85e18b789e33d10e9c",
+  "environment": "production preview, system Chrome, 1280x960",
+  "modelConnectivity": "passed",
+  "summary": {
+    "total": 1,
+    "successful": 1,
+    "failed": 0,
+    "partialFailed": 0,
+    "notExecuted": 0,
+    "totalDuration": 39474,
+    "generatedAt": "9/10/2026, 8:27:03 AM"
+  },
+  "results": [
+    {
+      "success": true,
+      "resultType": "success",
+      "duration": 39474
+    }
+  ],
+  "assertions": ["三维世界、准星和快捷栏可见", "背包槽位、配方和中文可辨认", "创造目录名称、图标和选择入口可見"],
+  "limitations": [
+    "Visual assertions supplement deterministic input/state tests",
+    "No performance or subjective audio claim"
+  ]
+}

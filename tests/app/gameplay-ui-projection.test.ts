@@ -11,7 +11,7 @@ const snapshot = () => ({
     inventory: [
       { itemId: 'dirt-block', count: 5 },
       null,
-      { itemId: 'wood-axe', count: 1 },
+      { itemId: 'wood-axe', count: 1, instance: { durability: 59 } },
       ...Array.from({ length: 21 }, () => null),
     ],
   },
@@ -31,6 +31,7 @@ describe('gameplay retained UI projection', () => {
       selectedHotbarSlot: 2,
     });
     expect(projected.hud.hotbar).toHaveLength(8);
+    expect(projected.hud.hotbar[2].durability).toEqual({ current: 59, max: 60 });
     expect(projected.interaction).toMatchObject({
       target: { kind: 'voxel', id: '0,33,-2', label: '原木' },
       breaking: { progress: 0.5, label: '原木' },
@@ -48,6 +49,7 @@ describe('gameplay retained UI projection', () => {
       expect.objectContaining({ id: 'stone-pickaxe', name: '石镐', craftable: false }),
       expect.objectContaining({ id: 'wood-sword', name: '木剑', craftable: false }),
       expect.objectContaining({ id: 'lantern', name: '灯笼', craftable: false }),
+      expect.objectContaining({ id: 'workbench', name: '工作台', craftable: false }),
     ]);
   });
 

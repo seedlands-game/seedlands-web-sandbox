@@ -1,0 +1,65 @@
+{
+  "retrievedAt": "2026-09-09",
+  "name": "koota",
+  "version": "0.6.6",
+  "license": "ISC",
+  "licenseSha256": "4aca3373f1677ae2cba83e44f30b313992fbce6727ce2e172907d56ac43b0137",
+  "runtimeDependencies": {},
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "@types/react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  },
+  "tarball": "https://registry.npmjs.org/koota/-/koota-0.6.6.tgz",
+  "integrity": "sha512-Fn8lSooH3u9TIP+eAMugFrOju40Ec70+sB7x1eZBB3H0Lki2hyIbFAodk3NDB/RIRzoMs54O4422BVN6SbtWfw==",
+  "declaredEntry": "./dist/index.js",
+  "experiment": {
+    "candidate": "koota",
+    "version": "0.6.6",
+    "result": "PASS",
+    "checks": [
+      "two-world-isolation",
+      "projection-copy",
+      "component-owner",
+      "stable-id-tombstone",
+      "stale-action",
+      "fresh-recycled-components",
+      "existing-physics-180-steps",
+      "existing-spatial-consumer",
+      "checkpoint-roundtrip",
+      "epoch-invalidation",
+      "dispose-isolation",
+      "browser-bundle",
+      "types-without-platform-ambient"
+    ],
+    "initialIds": [1, 268435457],
+    "oldId": 1,
+    "replacementId": 1048577,
+    "prototypeAdded": [
+      "add",
+      "remove",
+      "has",
+      "destroy",
+      "changed",
+      "get",
+      "set",
+      "targetsFor",
+      "targetFor",
+      "id",
+      "generation",
+      "isAlive"
+    ],
+    "globalSymbolsAdded": [],
+    "runtimeInputCount": 2,
+    "runtimeBytes": 103541,
+    "limits": ["isolated-adapter-only", "no-product-migration", "no-performance-claim", "no-browser-product-acceptance"]
+  },
+  "experimentSha256": "7efec91aedde039c9d318ecdbe1206e109ef7149b2ab22547705d2c0d79f9abe"
+}

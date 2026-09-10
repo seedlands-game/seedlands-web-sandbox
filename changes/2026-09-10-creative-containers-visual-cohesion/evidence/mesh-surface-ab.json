@@ -1,0 +1,50 @@
+[
+  {
+    "id": "builtin:model:wood-sword",
+    "controlTriangles": 828,
+    "candidateTriangles": 640,
+    "surfaceAndColorEquivalent": true
+  },
+  {
+    "id": "builtin:model:wood-axe",
+    "controlTriangles": 1200,
+    "candidateTriangles": 756,
+    "surfaceAndColorEquivalent": true
+  },
+  {
+    "id": "builtin:model:stone-pickaxe",
+    "controlTriangles": 1340,
+    "candidateTriangles": 872,
+    "surfaceAndColorEquivalent": true
+  },
+  {
+    "id": "builtin:model:wood-pickaxe",
+    "controlTriangles": 1340,
+    "candidateTriangles": 856,
+    "surfaceAndColorEquivalent": true
+  },
+  {
+    "id": "builtin:model:iron-pickaxe",
+    "controlTriangles": 1340,
+    "candidateTriangles": 856,
+    "surfaceAndColorEquivalent": true
+  },
+  {
+    "id": "builtin:model:coal",
+    "controlTriangles": 1816,
+    "candidateTriangles": 576,
+    "surfaceAndColorEquivalent": true
+  },
+  {
+    "id": "builtin:model:raw-iron",
+    "controlTriangles": 1816,
+    "candidateTriangles": 616,
+    "surfaceAndColorEquivalent": true
+  },
+  {
+    "id": "builtin:model:iron-ingot",
+    "controlTriangles": 1264,
+    "candidateTriangles": 304,
+    "surfaceAndColorEquivalent": true
+  }
+]

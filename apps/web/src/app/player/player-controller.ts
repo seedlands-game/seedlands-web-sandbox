@@ -17,6 +17,7 @@ import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/au
 import { PlayerDebugTimeKeys } from './player-debug-time-keys';
 import { bodyOverlapsWorld } from './player-collision-query';
 import { playerDamageCameraOffset } from '../../client/presentation/player-damage-feedback';
+import { performSecondaryInteraction } from './secondary-interaction';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
@@ -121,6 +122,7 @@ export class PlayerController {
   install() {
     const { canvas } = this.options;
     window.onkeydown = (event) => {
+      if (event.defaultPrevented) return;
       if (this.options.isPaused?.()) {
         this.stopMining();
         return;
@@ -185,7 +187,8 @@ export class PlayerController {
         void canvas.requestPointerLock();
       }
       if (event.button === 0) this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.startMining());
-      if (event.button === 2) this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(true));
+      if (event.button === 2)
+        this.options.telemetry.withSpan('input', 'PointerInteraction', () => this.interact(true, event.shiftKey));
     };
     document.onmouseup = (event) => {
       if (event.button === 0) this.stopMining();
@@ -449,15 +452,21 @@ export class PlayerController {
     });
   }
 
-  private interact(place: boolean) {
+  private interact(place: boolean, bypassTarget = false) {
     this.attempts += 1;
-    if (place && this.options.onUseHeldItem()) return;
     const target = this.aimTarget;
-    if (!target) return this.options.onFeedback('距离过远', 'error');
     if (place) {
-      if (!target.adjacent) return this.options.onFeedback('无法放置', 'error');
-      this.options.onPlace(target.adjacent);
+      performSecondaryInteraction({
+        target,
+        bypassTarget,
+        useTarget: this.options.onUseTarget,
+        useHeldItem: this.options.onUseHeldItem,
+        place: this.options.onPlace,
+        feedback: this.options.onFeedback,
+      });
+      return;
     }
+    if (!target) this.options.onFeedback('距离过远', 'error');
   }
 
   private startMining() {

@@ -2,6 +2,7 @@ import { ShellController, sanitizeQuality, type ShellQuality } from '../client/s
 import type { GlobalAudio } from './audio/global-audio';
 import type { Game } from './game';
 import type { UiBridge } from './ui/ui-bridge';
+import type { ActorMode } from './ui/ui-contracts';
 import { isUserPointerUnlock } from './player/pointer-lock';
 import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
 import {
@@ -27,6 +28,7 @@ type PendingStart = Readonly<{
   seed: string;
   quality: ShellQuality;
   openMode: WorldOpenMode;
+  actorMode: ActorMode;
   experience: 'melee-showcase' | null;
 }>;
 
@@ -51,6 +53,7 @@ export class ApplicationShell {
   private readonly preflight: (generalWorkerCount: 1 | 2) => Promise<ClientCapabilityState>;
   private pendingStart: PendingStart | null = null;
   private startingExperience: PendingStart['experience'] = null;
+  private startingActorMode: ActorMode = 'survival';
   private performanceWarningAccepted = false;
   private startGeneration = 0;
 
@@ -86,13 +89,17 @@ export class ApplicationShell {
       start: async (seed, quality, openMode) => {
         const generation = ++this.startGeneration;
         const experience = this.startingExperience;
+        const actorMode = this.startingActorMode;
         this.startingExperience = null;
+        this.startingActorMode = 'survival';
         await audio.unlock();
         if (generation !== this.startGeneration) return;
         const restore = game.loadSavedSession();
         bridge.publishShell({ phase: 'loading', seed, quality, enterLabel: '正在唤醒世界…', experience: null });
         try {
-          await game.start(seed, restore?.seed === seed ? restore : null, quality, openMode);
+          const saved = restore?.seed === seed ? restore : null;
+          if (actorMode === 'survival') await game.start(seed, saved, quality, openMode);
+          else await game.start(seed, saved, quality, openMode, actorMode);
           if (generation === this.startGeneration && experience === 'melee-showcase') await game.prepareMeleeShowcase();
         } catch (error) {
           if (generation === this.startGeneration) {
@@ -174,30 +181,37 @@ export class ApplicationShell {
     location.reload();
   }
 
-  async start(seedInput: string, quality: ShellQuality, openMode: WorldOpenMode = 'continue') {
-    return this.requestStart(seedInput, quality, openMode, null);
+  async start(
+    seedInput: string,
+    quality: ShellQuality,
+    openMode: WorldOpenMode = 'continue',
+    actorMode: ActorMode = 'survival',
+  ) {
+    return this.requestStart(seedInput, quality, openMode, actorMode, null);
   }
 
   async startMeleeShowcase(quality: ShellQuality) {
-    return this.requestStart(MELEE_SHOWCASE_SEED, quality, 'new-current', 'melee-showcase');
+    return this.requestStart(MELEE_SHOWCASE_SEED, quality, 'new-current', 'survival', 'melee-showcase');
   }
 
   private async requestStart(
     seedInput: string,
     quality: ShellQuality,
     openMode: WorldOpenMode,
+    actorMode: ActorMode,
     experience: PendingStart['experience'],
   ) {
     this.setQuality(quality);
     const seed = seedInput.trim() || `world-${Math.random().toString(36).slice(2, 10)}`;
     if (this.capabilities.workerSupport !== 'supported') throw new Error('当前浏览器不支持运行游戏所需的 Web Worker。');
     if (this.capabilities.lowCoreWarning && !this.performanceWarningAccepted) {
-      this.pendingStart = { seed, quality, openMode, experience };
+      this.pendingStart = { seed, quality, openMode, actorMode, experience };
       this.performanceWarningOpen = true;
       this.publish();
       return;
     }
     this.startingExperience = experience;
+    this.startingActorMode = actorMode;
     await this.controller.start(seed, quality, openMode);
   }
 
@@ -209,6 +223,7 @@ export class ApplicationShell {
     this.publish();
     if (pending) {
       this.startingExperience = pending.experience;
+      this.startingActorMode = pending.actorMode;
       await this.controller.start(pending.seed, pending.quality, pending.openMode);
     }
   }
@@ -216,6 +231,7 @@ export class ApplicationShell {
   cancelPerformanceWarning() {
     this.pendingStart = null;
     this.startingExperience = null;
+    this.startingActorMode = 'survival';
     this.performanceWarningOpen = false;
     this.publish();
   }
@@ -277,6 +293,7 @@ export class ApplicationShell {
   dispose() {
     this.pendingStart = null;
     this.startingExperience = null;
+    this.startingActorMode = 'survival';
     this.performanceWarningOpen = false;
     this.disposers
       .splice(0)

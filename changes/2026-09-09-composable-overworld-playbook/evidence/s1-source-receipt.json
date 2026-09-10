@@ -1,0 +1,80 @@
+{
+  "baseCommit": "01bab28ace506685f39c1d4a86fec541cbbf2f1b",
+  "scope": "S1 final implementation and deterministic tests; ECS admission bound separately",
+  "files": [
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "a303a3ba74ebac74094e62d818957457958f094d46fc25ab8cf8a1517de59b66"
+    },
+    {
+      "path": "packages/game-core/package.json",
+      "sha256": "5df7a92c73932dfb34a7d60e594a8bddcfc394912961549dd85feb60ed9bd50d"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/assembly.ts",
+      "sha256": "2262aec49a5d44abe190380747f732254b97f506eb25d21a741624fec4579247"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/authorized-execution.ts",
+      "sha256": "424cf0e198caaa39bdb45725b12036c419220650dc8bfd11041d2c2076083fe5"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/contracts.ts",
+      "sha256": "41335a88e5a9542022a73f40893ea31492691cb8f01db6c4908aee10683e3e9f"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/host-api.ts",
+      "sha256": "fb8658ea69a55da28329273f1d6cddec2c01fdaaa8af78b9addde592b33af4b1"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/mod-api.ts",
+      "sha256": "a650ac5d5d515afb1684d061f4a4e1d62bd940c513d2adcce505a17e829cded9"
+    },
+    {
+      "path": "packages/game-core/src/server/harness/world-authorization.ts",
+      "sha256": "b5dfcbabe27f7f91f94e56102dec00cbad4340beb5a5fc0fca225dfc2d781e2e"
+    },
+    {
+      "path": "scripts/eslint/pack-api-boundary-rule.mjs",
+      "sha256": "a728bc1fb4559bffb80c18e92ce82584e305a698626d5691efc88613e3225b69"
+    },
+    {
+      "path": "scripts/pack-integrity.mjs",
+      "sha256": "2f4d0ce0f8796366495897f75af4592c0f46373a69a3d07cfeed4b8a235dc769"
+    },
+    {
+      "path": "tests/governance/pack-api-boundary.test.ts",
+      "sha256": "f2694de4382db6c654f28d46ba07a7d502c4f71363f4c190c1117d1af6095fbb"
+    },
+    {
+      "path": "tests/governance/pack-api-consumer.test.ts",
+      "sha256": "c1691188ff102e21baf3a10f8a8fb27e7fa70b3fa5987e454cbb45722266b59c"
+    },
+    {
+      "path": "tests/scripts/pack-integrity.test.ts",
+      "sha256": "6f9bc530fe8287578c84471c81174995f3a2e0e00ea1fb36d16bf09265a15268"
+    },
+    {
+      "path": "tests/server/composition/mod-authorization.test.ts",
+      "sha256": "cdc95acc45a7720c418c7c9fb9553dfaeacb8a41ecdbb5cd4617e453d8b1d899"
+    },
+    {
+      "path": "tests/server/composition/world-pack-assembly.test.ts",
+      "sha256": "a37c5964b96de81388fd1d23f19b061a45dc36647c4b72925a5076a1801ac755"
+    }
+  ],
+  "validation": {
+    "pnpm verify:static": {
+      "exitCode": 0,
+      "passedTestFiles": 241,
+      "skippedTestFiles": 2,
+      "passedTests": 1213,
+      "skippedTests": 4
+    },
+    "pnpm build": {
+      "exitCode": 0
+    },
+    "independentReview": "bounded pass; static review, tests run by parent"
+  },
+  "notProductAcceptance": true
+}

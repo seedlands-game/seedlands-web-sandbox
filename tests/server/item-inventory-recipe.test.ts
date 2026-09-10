@@ -54,11 +54,11 @@ describe('inventory', () => {
 
   it('keeps add and remove atomic when capacity or quantity is insufficient', () => {
     const inventory = new Inventory(24);
-    expect(inventory.add({ itemId: ItemIds.WoodAxe, count: 24 })).toBe(true);
+    expect(inventory.add({ itemId: ItemIds.WoodSword, count: 24 })).toBe(true);
     expect(inventory.snapshot().filter(Boolean)).toHaveLength(24);
     const full = inventory.snapshot();
     expect(inventory.add({ itemId: ItemIds.DirtBlock, count: 1 })).toBe(false);
-    expect(inventory.remove({ itemId: ItemIds.WoodAxe, count: 25 })).toBe(false);
+    expect(inventory.remove({ itemId: ItemIds.WoodSword, count: 25 })).toBe(false);
     expect(inventory.snapshot()).toEqual(full);
   });
 });
@@ -87,7 +87,7 @@ describe('recipe runtime', () => {
     expect(inventory.snapshot()).toEqual(beforeMissing);
 
     const full = new Inventory(24);
-    full.add({ itemId: ItemIds.WoodAxe, count: 23 });
+    full.add({ itemId: ItemIds.WoodSword, count: 23 });
     full.add({ itemId: ItemIds.WoodBlock, count: 64 });
     const beforeFull = full.snapshot();
     expect(craftRecipe(full, 'planks')).toMatchObject({ success: false, reason: 'no-output-capacity' });

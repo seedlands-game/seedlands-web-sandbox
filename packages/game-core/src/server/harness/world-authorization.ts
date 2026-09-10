@@ -3,23 +3,28 @@ import type { AuthorityAction } from '../../compute/authority-worker-protocol';
 import type { InputCommand } from '../../runtime/session-protocol';
 import type { VoxelEdit } from '../world-mutation';
 
-export type WorldResource =
-  | 'world.identity'
-  | 'world.voxel'
-  | 'world.chunk'
-  | 'world.entity'
-  | 'world.actor'
-  | 'world.prepare'
-  | 'world.command'
-  | 'world.clock'
-  | 'world.logic'
-  | 'world.action'
-  | 'world.interaction'
-  | 'world.input'
-  | 'world.fluid'
-  | 'world.barrier'
-  | 'world.trace'
-  | 'world.checkpoint';
+export const BUILTIN_WORLD_RESOURCES = Object.freeze([
+  'world.identity',
+  'world.voxel',
+  'world.chunk',
+  'world.entity',
+  'world.actor',
+  'world.prepare',
+  'world.command',
+  'world.clock',
+  'world.logic',
+  'world.action',
+  'world.interaction',
+  'world.input',
+  'world.fluid',
+  'world.barrier',
+  'world.trace',
+  'world.checkpoint',
+] as const);
+
+export type BuiltinWorldResource = (typeof BUILTIN_WORLD_RESOURCES)[number];
+/** Module resources remain strings at the request boundary and must be present in the authorizer catalog. */
+export type WorldResource = string;
 
 export type WorldOperation = 'read' | 'execute' | 'write' | 'control' | 'export' | 'restore';
 
@@ -35,8 +40,16 @@ export type WorldAuthorizationRequest = Readonly<{
   target: WorldAuthorizationTarget;
 }>;
 
+export type WorldResourceRegistration = Readonly<{
+  id: WorldResource;
+  operations: readonly WorldOperation[];
+}>;
+
 export type WorldPrincipal = Readonly<{
   id: string;
+  kind?: 'actor' | 'system';
+  /** Stable host-neutral identity. Required only when an execution origin must survive this host session. */
+  subject?: string;
   labels?: readonly string[];
   boundEntityId?: string;
 }>;
@@ -56,8 +69,25 @@ export type WorldAuthorizationPolicy = Readonly<{
 
 export type WorldAuthorizationDecision = Readonly<
   | { allowed: true; principal: WorldPrincipal }
-  | { allowed: false; code: 'WORLD_PRINCIPAL_UNKNOWN' | 'WORLD_PERMISSION_DENIED'; message: string }
+  | {
+      allowed: false;
+      code:
+        | 'WORLD_RESOURCE_UNKNOWN'
+        | 'WORLD_OPERATION_UNREGISTERED'
+        | 'WORLD_PRINCIPAL_UNKNOWN'
+        | 'WORLD_PERMISSION_DENIED';
+      message: string;
+    }
 >;
+
+const ALL_WORLD_OPERATIONS: readonly WorldOperation[] = Object.freeze([
+  'read',
+  'execute',
+  'write',
+  'control',
+  'export',
+  'restore',
+]);
 
 const targetWithinSelf = (principal: WorldPrincipal, target: WorldAuthorizationTarget): boolean =>
   target.kind === 'entity' && Boolean(principal.boundEntityId) && target.entityId === principal.boundEntityId;
@@ -86,25 +116,97 @@ const ruleMatches = (
  */
 export class WorldResourceAuthorizer {
   private readonly principals: ReadonlyMap<string, WorldPrincipal>;
+  private readonly principalsBySubject: ReadonlyMap<string, WorldPrincipal>;
+  private readonly resources: ReadonlyMap<WorldResource, ReadonlySet<WorldOperation>>;
+  private readonly rules: readonly WorldAuthorizationRule[];
 
-  constructor(private readonly policy: WorldAuthorizationPolicy) {
+  constructor(policy: WorldAuthorizationPolicy, moduleResources: readonly WorldResourceRegistration[] = []) {
     const principals = new Map<string, WorldPrincipal>();
+    const principalsBySubject = new Map<string, WorldPrincipal>();
     for (const principal of policy.principals) {
+      if (principal.kind !== undefined && principal.kind !== 'actor' && principal.kind !== 'system')
+        throw new TypeError('World principal kind is invalid.');
+      if (principal.kind === 'system' && principal.boundEntityId !== undefined)
+        throw new TypeError('System principal cannot be bound to an actor.');
       if (!principal.id.trim()) throw new TypeError('World principal id must not be empty.');
       if (principals.has(principal.id)) throw new TypeError(`Duplicate world principal: ${principal.id}`);
-      principals.set(
-        principal.id,
-        Object.freeze({ ...principal, labels: Object.freeze([...(principal.labels ?? [])]) }),
-      );
+      if (
+        principal.subject !== undefined &&
+        (typeof principal.subject !== 'string' ||
+          principal.subject.length === 0 ||
+          principal.subject.length > 256 ||
+          principal.subject.trim() !== principal.subject)
+      )
+        throw new TypeError(`World principal subject is invalid: ${principal.id}`);
+      if (principal.subject !== undefined && principalsBySubject.has(principal.subject))
+        throw new TypeError(`Duplicate world principal subject: ${principal.subject}`);
+      const frozen = Object.freeze({ ...principal, labels: Object.freeze([...(principal.labels ?? [])]) });
+      principals.set(principal.id, frozen);
+      if (frozen.subject !== undefined) principalsBySubject.set(frozen.subject, frozen);
     }
     this.principals = principals;
+    this.principalsBySubject = principalsBySubject;
+    this.rules = Object.freeze(
+      policy.rules.map((rule) =>
+        Object.freeze({
+          effect: rule.effect,
+          ...(rule.principal
+            ? {
+                principal: Object.freeze({
+                  ...(rule.principal.ids ? { ids: Object.freeze([...rule.principal.ids]) } : {}),
+                  ...(rule.principal.labels ? { labels: Object.freeze([...rule.principal.labels]) } : {}),
+                }),
+              }
+            : {}),
+          resources: Object.freeze([...rule.resources]),
+          operations: Object.freeze([...rule.operations]),
+          ...(rule.scope ? { scope: rule.scope } : {}),
+        }),
+      ),
+    );
+    const resources = new Map<WorldResource, ReadonlySet<WorldOperation>>(
+      BUILTIN_WORLD_RESOURCES.map((id) => [id, new Set(ALL_WORLD_OPERATIONS)]),
+    );
+    for (const resource of moduleResources) {
+      if (!resource.id.trim()) throw new TypeError('World resource id must not be empty.');
+      if (resources.has(resource.id)) throw new TypeError(`Duplicate world resource: ${resource.id}`);
+      if (resource.operations.length === 0)
+        throw new TypeError(`World resource operations must not be empty: ${resource.id}`);
+      const operations = new Set<WorldOperation>();
+      for (const operation of resource.operations) {
+        if (!ALL_WORLD_OPERATIONS.includes(operation))
+          throw new TypeError(`Invalid world resource operation: ${resource.id}/${operation}`);
+        if (operations.has(operation))
+          throw new TypeError(`Duplicate world resource operation: ${resource.id}/${operation}`);
+        operations.add(operation);
+      }
+      resources.set(resource.id, operations);
+    }
+    this.resources = resources;
   }
 
   principal(id: string): WorldPrincipal | null {
     return this.principals.get(id) ?? null;
   }
 
+  principalForSubject(subject: string): WorldPrincipal | null {
+    return this.principalsBySubject.get(subject) ?? null;
+  }
+
   authorize(principalId: string, request: WorldAuthorizationRequest): WorldAuthorizationDecision {
+    const operations = this.resources.get(request.resource);
+    if (!operations)
+      return {
+        allowed: false,
+        code: 'WORLD_RESOURCE_UNKNOWN',
+        message: `Unknown world resource: ${request.resource || '<empty>'}.`,
+      };
+    if (!operations.has(request.operation))
+      return {
+        allowed: false,
+        code: 'WORLD_OPERATION_UNREGISTERED',
+        message: `World resource operation is not registered: ${request.resource}/${request.operation}.`,
+      };
     const principal = this.principals.get(principalId);
     if (!principal)
       return {
@@ -112,7 +214,7 @@ export class WorldResourceAuthorizer {
         code: 'WORLD_PRINCIPAL_UNKNOWN',
         message: `Unknown world principal: ${principalId || '<empty>'}.`,
       };
-    const matching = this.policy.rules.filter((rule) => ruleMatches(principal, rule, request));
+    const matching = this.rules.filter((rule) => ruleMatches(principal, rule, request));
     if (matching.some((rule) => rule.effect === 'deny'))
       return { allowed: false, code: 'WORLD_PERMISSION_DENIED', message: 'World resource access was denied.' };
     if (matching.some((rule) => rule.effect === 'allow')) return { allowed: true, principal };
@@ -180,6 +282,9 @@ export const COMMAND_RESOURCE_DIRECTORY = {
   'query-pois': { resource: 'world.actor', operation: 'read', target: world },
   'query-action': { resource: 'world.action', operation: 'read', target: explicitOrOwnEntity },
   'query-path': { resource: 'world.actor', operation: 'read', target: world },
+  'set-mode': { resource: 'seedlands.mode', operation: 'execute', target: ownEntity },
+  'set-flight': { resource: 'seedlands.mode', operation: 'execute', target: ownEntity },
+  'set-creative-slot': { resource: 'seedlands.mode', operation: 'execute', target: ownEntity },
   'select-slot': { resource: 'world.action', operation: 'execute', target: ownEntity },
   'break-voxel': { resource: 'world.action', operation: 'execute', target: ownEntity },
   'cancel-break': { resource: 'world.action', operation: 'execute', target: ownEntity },
@@ -303,12 +408,22 @@ export const playerActionAuthorizationRequests = (
   return requests;
 };
 
+export const DEVELOPER_WORLD_SUBJECT = 'seedlands:developer-world-harness';
+
 export function developmentWorldAuthorizationPolicy(
   principalId: string,
   boundEntityId?: string,
 ): WorldAuthorizationPolicy {
   return {
-    principals: [{ id: principalId, labels: ['trusted-developer'], ...(boundEntityId ? { boundEntityId } : {}) }],
+    principals: [
+      {
+        id: principalId,
+        kind: 'actor',
+        subject: DEVELOPER_WORLD_SUBJECT,
+        labels: ['trusted-developer'],
+        ...(boundEntityId ? { boundEntityId } : {}),
+      },
+    ],
     rules: [
       {
         effect: 'allow',

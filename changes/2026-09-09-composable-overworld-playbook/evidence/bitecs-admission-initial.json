@@ -1,0 +1,42 @@
+{
+  "retrievedAt": "2026-09-09",
+  "name": "bitecs",
+  "version": "0.4.0",
+  "license": "MPL-2.0",
+  "licenseSha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5",
+  "runtimeDependencies": {},
+  "peerDependencies": {},
+  "peerDependenciesMeta": {},
+  "tarball": "https://registry.npmjs.org/bitecs/-/bitecs-0.4.0.tgz",
+  "integrity": "sha512-ho6Zop/L79DRTnBAfakPpGPuX7y0+lAjX06CpaAW+5tnAc7BH3L3RlSrWAXAqwnQGDZ10GsoxaxyTTsddlun3g==",
+  "declaredEntry": "./dist/core/index.min.mjs",
+  "experiment": {
+    "candidate": "bitecs",
+    "version": "0.4.0",
+    "result": "PASS",
+    "checks": [
+      "two-world-isolation",
+      "projection-copy",
+      "component-owner",
+      "stable-id-tombstone",
+      "stale-action",
+      "fresh-recycled-components",
+      "existing-physics-180-steps",
+      "existing-spatial-consumer",
+      "checkpoint-roundtrip",
+      "epoch-invalidation",
+      "dispose-isolation",
+      "browser-bundle",
+      "types-without-platform-ambient"
+    ],
+    "initialIds": [1, 1],
+    "oldId": 1,
+    "replacementId": 1,
+    "prototypeAdded": [],
+    "globalSymbolsAdded": ["bitecs-global-wildcard", "bitecs-global-isa"],
+    "runtimeInputCount": 1,
+    "runtimeBytes": 22117,
+    "limits": ["isolated-adapter-only", "no-product-migration", "no-performance-claim", "no-browser-product-acceptance"]
+  },
+  "experimentSha256": "7efec91aedde039c9d318ecdbe1206e109ef7149b2ab22547705d2c0d79f9abe"
+}

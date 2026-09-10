@@ -1,0 +1,346 @@
+[
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "inventory": [
+      {
+        "item": "coal",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "raw-iron",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "iron-ingot",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "dirt-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "stone-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "sand-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "berry",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "plank",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "glowstone-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "lantern",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "stone-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "iron-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-axe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-sword",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "workbench",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "chest",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "furnace",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      }
+    ],
+    "hotbar": [
+      {
+        "item": "wood-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "stone-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "iron-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-axe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-sword",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "workbench",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "chest",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "furnace",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 720,
+      "height": 960
+    },
+    "inventory": [
+      {
+        "item": "coal",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "raw-iron",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "iron-ingot",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "dirt-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "stone-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "sand-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "berry",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "plank",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "glowstone-block",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "lantern",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "stone-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "iron-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-axe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-sword",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "workbench",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "chest",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "furnace",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      }
+    ],
+    "hotbar": [
+      {
+        "item": "wood-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "stone-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0.0078125
+      },
+      {
+        "item": "iron-pickaxe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "wood-axe",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0.0078125
+      },
+      {
+        "item": "wood-sword",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0.0078125
+      },
+      {
+        "item": "workbench",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0
+      },
+      {
+        "item": "chest",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0.0078125
+      },
+      {
+        "item": "furnace",
+        "visible": true,
+        "offsetX": 0,
+        "offsetY": 0.0078125
+      }
+    ]
+  }
+]

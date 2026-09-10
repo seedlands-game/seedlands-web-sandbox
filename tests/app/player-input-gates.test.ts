@@ -193,7 +193,7 @@ it('窗口失焦通过生产控制器立即发送递增序号的全零输入', (
     physicsHz: 60,
     authority: {
       epoch: 'world:1',
-      snapshot: () => ({ physicsTick: 20 }),
+      snapshot: () => ({ physicsTick: 20, player: { movement: { revision: 'creative:1:true:1', flightSpeed: 8 } } }),
       sendInput,
     },
     getEnvironment: () => null,
@@ -211,6 +211,7 @@ it('窗口失焦通过生产控制器立即发送递增序号的全零输入', (
       epoch: 'world:1',
       sequence: 0,
       targetPhysicsTick: 22,
+      movementRevision: 'creative:1:true:1',
       state: { moveX: 0, moveZ: 0, verticalIntent: 0, jumpHeld: false },
       edges: { jumpPressed: false },
     }),

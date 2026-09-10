@@ -3,8 +3,11 @@ import type { AuthorityAction } from '../../compute/authority-worker-protocol';
 import { NETWORK_REFERENCE_PROJECTION_VERSION } from './network-reference-projection-types';
 import { copyAuthorityActionReference } from './network-action-reference-copy';
 import { canonicalReferenceInteger } from './network-reference-integer';
+import { INVENTORY_POINTER_FAILURE_REASONS } from '../gameplay/modules/inventory-pointer-contract';
 
 const reasonsByAction = {
+  'inventory-pointer': INVENTORY_POINTER_FAILURE_REASONS,
+  station: ['stale-station', 'station-rejected', 'chunk-unavailable'],
   'select-hotbar': ['invalid-slot'],
   'cancel-break': [],
   respawn: ['player-alive'],
@@ -111,6 +114,8 @@ function outcome(action: AuthorityAction, value: unknown): ActionOutcomeReferenc
       if (commit.committed !== true) throw new TypeError('Successful placement requires a committed world change.');
       return { success: true, worldRevision: number(commit.worldRevision, 'place worldRevision') };
     }
+    case 'station':
+    case 'inventory-pointer':
     case 'select-hotbar':
     case 'cancel-break':
     case 'respawn':

@@ -1,8 +1,18 @@
-import { Inventory, type InventorySlot } from './inventory';
+import type { DurableExecutionOriginV1 } from '../composition/execution-origin';
+import type { InventoryAccess, InventorySlot } from './inventory';
+import { EntityStore } from './entity-store';
+import type {
+  ActorFlightComponentV1,
+  ActorModeComponentV1,
+  CreativeCatalogComponentV1,
+  PlayerComponentAccess,
+} from './ecs-actor-components';
 import type { CombatSnapshot } from './combat-runtime';
+import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry } from './item-registry';
 
 export type PlayerLifecycle = 'alive' | 'dead';
 export type BreakAction = {
+  origin?: DurableExecutionOriginV1;
   position: [number, number, number];
   voxel: number;
   elapsedSeconds: number;
@@ -25,33 +35,123 @@ export type PlayerSnapshot = {
   healingAccumulator: number;
   starvationAccumulator: number;
   breakAction: BreakAction | null;
+  /** Optional so V1-V4 snapshots written before actor mode components remain readable. */
+  mode?: ActorModeComponentV1;
+  creativeCatalog?: CreativeCatalogComponentV1;
+  flight?: ActorFlightComponentV1;
   /** Optional in the type only so legacy snapshots and fixtures remain readable. Runtime views always provide it. */
   combat?: CombatSnapshot;
 };
 
 export class PlayerState {
-  readonly inventory: Inventory;
+  private readonly state: PlayerComponentAccess;
   readonly maxHealth = 20 as const;
   readonly maxHunger = 20 as const;
   readonly hotbarSize = 8 as const;
-  health = 20;
-  hunger = 20;
-  lifecycle: PlayerLifecycle = 'alive';
-  selectedSlot = 0;
-  hungerAccumulator = 0;
-  healingAccumulator = 0;
-  starvationAccumulator = 0;
-  breakAction: BreakAction | null = null;
 
   constructor(
     readonly entityId: string,
-    readonly spawnPosition: [number, number, number],
+    spawnPosition: [number, number, number],
     snapshot?: Partial<PlayerSnapshot>,
+    entities?: EntityStore,
+    items: ItemDefinitionRegistry = entities?.items ?? defaultItemDefinitionRegistry,
   ) {
     if (!entityId.trim() || spawnPosition.length !== 3 || !spawnPosition.every(Number.isFinite))
       throw new TypeError('Player state identity or spawn position is invalid.');
-    this.inventory = new Inventory(24, snapshot?.inventory);
+    const owner = entities ?? new EntityStore(items);
+    if (!entities) owner.spawn({ id: entityId, type: 'player', position: spawnPosition });
+    this.state = owner.playerStateAccess(entityId);
+    this.state.spawnPosition = [...spawnPosition];
+    if (snapshot?.inventory) this.inventory.replace(snapshot.inventory);
     if (snapshot) this.restoreFields(snapshot);
+  }
+
+  get inventory(): InventoryAccess {
+    return this.state.inventory;
+  }
+
+  get spawnPosition(): [number, number, number] {
+    return this.state.spawnPosition;
+  }
+
+  get health(): number {
+    return this.state.health;
+  }
+
+  set health(value: number) {
+    this.state.health = value;
+  }
+
+  get hunger(): number {
+    return this.state.hunger;
+  }
+
+  set hunger(value: number) {
+    this.state.hunger = value;
+  }
+
+  get lifecycle(): PlayerLifecycle {
+    return this.state.lifecycle;
+  }
+
+  set lifecycle(value: PlayerLifecycle) {
+    this.state.lifecycle = value;
+  }
+
+  get selectedSlot(): number {
+    return this.state.selectedSlot;
+  }
+
+  get mode() {
+    return this.state.mode;
+  }
+
+  get modeRevision() {
+    return this.state.modeRevision;
+  }
+
+  get creativeCatalog() {
+    return this.state.creativeCatalog;
+  }
+
+  get flight() {
+    return this.state.flight;
+  }
+
+  set selectedSlot(value: number) {
+    this.state.selectedSlot = value;
+  }
+
+  get hungerAccumulator(): number {
+    return this.state.hungerAccumulator;
+  }
+
+  set hungerAccumulator(value: number) {
+    this.state.hungerAccumulator = value;
+  }
+
+  get healingAccumulator(): number {
+    return this.state.healingAccumulator;
+  }
+
+  set healingAccumulator(value: number) {
+    this.state.healingAccumulator = value;
+  }
+
+  get starvationAccumulator(): number {
+    return this.state.starvationAccumulator;
+  }
+
+  set starvationAccumulator(value: number) {
+    this.state.starvationAccumulator = value;
+  }
+
+  get breakAction(): BreakAction | null {
+    return this.state.breakAction;
+  }
+
+  set breakAction(value: BreakAction | null) {
+    this.state.breakAction = value;
   }
 
   selectSlot(slot: number): boolean {
@@ -77,6 +177,9 @@ export class PlayerState {
       healingAccumulator: this.healingAccumulator,
       starvationAccumulator: this.starvationAccumulator,
       breakAction: this.breakAction ? { ...this.breakAction, position: [...this.breakAction.position] } : null,
+      mode: { version: 1, value: this.mode, revision: this.modeRevision },
+      creativeCatalog: this.creativeCatalog,
+      flight: this.flight,
       ...(combat ? { combat } : {}),
     };
   }
@@ -112,8 +215,16 @@ export class PlayerState {
     this.breakAction = snapshot.breakAction
       ? { ...snapshot.breakAction, position: [...snapshot.breakAction.position] }
       : null;
+    this.state.replaceModeComponents({
+      mode: snapshot.mode,
+      creativeCatalog: snapshot.creativeCatalog,
+      flight: snapshot.flight,
+    });
   }
 }
 
-export const createPlayerState = (entityId: string, spawnPosition: [number, number, number]) =>
-  new PlayerState(entityId, [...spawnPosition]);
+export const createPlayerState = (
+  entityId: string,
+  spawnPosition: [number, number, number],
+  items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
+) => new PlayerState(entityId, [...spawnPosition], undefined, undefined, items);

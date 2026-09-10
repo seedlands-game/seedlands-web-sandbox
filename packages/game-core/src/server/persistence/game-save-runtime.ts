@@ -1,5 +1,5 @@
 import { chunkKey } from '../../world/voxel';
-import type { GameplaySnapshotV3 } from '../gameplay/gameplay-runtime';
+import type { GameplaySnapshotV4 } from '../gameplay/gameplay-runtime';
 import type { ServerChunk } from '../game-server-types';
 import type { ChunkPersistence } from './chunk-persistence';
 import { createChunkSnapshot } from './create-chunk-snapshot';
@@ -20,7 +20,7 @@ type Options = {
   persistence?: Persistence;
   chunks: Map<string, ServerChunk>;
   getWorldRevision: () => number;
-  createGameplaySnapshot: () => GameplaySnapshotV3;
+  createGameplaySnapshot: () => GameplaySnapshotV4;
   markGameplayPersisted: (revision: number) => void;
   clone: CoreClone;
 };
@@ -48,7 +48,7 @@ export class GameSaveRuntime {
     const chunks = [...this.options.chunks.values()]
       .filter(include)
       .sort((left, right) => left.key.localeCompare(right.key))
-      .map((chunk) => createChunkSnapshot(this.options.seedText, chunk));
+      .map((chunk) => createChunkSnapshot(this.options.seedText, chunk, this.options.generatorVersion));
     const snapshot: FrozenGameSaveSnapshot = {
       version: GAME_SAVE_SCHEMA_VERSION,
       commitSequence,
@@ -82,7 +82,9 @@ export class GameSaveRuntime {
     if (!dirty.length || !this.options.persistence) return [];
     if (this.hasGameplayPort())
       throw new Error('Atomic frozen game persistence is required instead of a standalone Chunk flush.');
-    const snapshots = dirty.map((chunk) => createChunkSnapshot(this.options.seedText, chunk));
+    const snapshots = dirty.map((chunk) =>
+      createChunkSnapshot(this.options.seedText, chunk, this.options.generatorVersion),
+    );
     await this.options.persistence.saveSnapshots(snapshots);
     this.acknowledgeChunks(snapshots);
     return snapshots.map((snapshot) => snapshot.key);

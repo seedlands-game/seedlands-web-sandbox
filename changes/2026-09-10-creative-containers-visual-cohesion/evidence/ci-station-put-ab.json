@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-10T10:55:02Z",
+  "scope": "Playwright helper interaction cost for one eight-slot furnace recipe",
+  "environment": {
+    "platform": "macOS arm64",
+    "browser": "Google Chrome 152.0.7977.83",
+    "playwright": "1.62.1",
+    "quality": "low",
+    "workers": 1,
+    "resourceReservation": true
+  },
+  "sequence": ["A", "A", "A", "B", "B", "A"],
+  "variants": {
+    "A": "For every recipe slot, pick up the same material stack, right-click one item, then return the cursor stack.",
+    "B": "Pick up the material stack once, right-click one item into each recipe slot, then return the cursor stack once."
+  },
+  "samples": [
+    {
+      "sample": 1,
+      "phase": "AA",
+      "recipe": "furnace",
+      "variant": "A",
+      "trustedClicks": 24,
+      "milliseconds": 1591,
+      "resultVisible": true,
+      "stationSlotCounts": [1, 1, 1, 1, 1, 1, 1, 1],
+      "remainingInventory": {
+        "itemId": "stone-block",
+        "count": 8
+      },
+      "cursorEmpty": true
+    },
+    {
+      "sample": 2,
+      "phase": "AA",
+      "recipe": "furnace",
+      "variant": "A",
+      "trustedClicks": 24,
+      "milliseconds": 1598,
+      "resultVisible": true,
+      "stationSlotCounts": [1, 1, 1, 1, 1, 1, 1, 1],
+      "remainingInventory": {
+        "itemId": "stone-block",
+        "count": 8
+      },
+      "cursorEmpty": true
+    },
+    {
+      "sample": 3,
+      "phase": "ABBA",
+      "recipe": "furnace",
+      "variant": "A",
+      "trustedClicks": 24,
+      "milliseconds": 1599,
+      "resultVisible": true,
+      "stationSlotCounts": [1, 1, 1, 1, 1, 1, 1, 1],
+      "remainingInventory": {
+        "itemId": "stone-block",
+        "count": 8
+      },
+      "cursorEmpty": true
+    },
+    {
+      "sample": 4,
+      "phase": "ABBA",
+      "recipe": "furnace",
+      "variant": "B",
+      "trustedClicks": 10,
+      "milliseconds": 667,
+      "resultVisible": true,
+      "stationSlotCounts": [1, 1, 1, 1, 1, 1, 1, 1],
+      "remainingInventory": {
+        "itemId": "stone-block",
+        "count": 8
+      },
+      "cursorEmpty": true
+    },
+    {
+      "sample": 5,
+      "phase": "ABBA",
+      "recipe": "furnace",
+      "variant": "B",
+      "trustedClicks": 10,
+      "milliseconds": 667,
+      "resultVisible": true,
+      "stationSlotCounts": [1, 1, 1, 1, 1, 1, 1, 1],
+      "remainingInventory": {
+        "itemId": "stone-block",
+        "count": 8
+      },
+      "cursorEmpty": true
+    },
+    {
+      "sample": 6,
+      "phase": "ABBA",
+      "recipe": "furnace",
+      "variant": "A",
+      "trustedClicks": 24,
+      "milliseconds": 1580,
+      "resultVisible": true,
+      "stationSlotCounts": [1, 1, 1, 1, 1, 1, 1, 1],
+      "remainingInventory": {
+        "itemId": "stone-block",
+        "count": 8
+      },
+      "cursorEmpty": true
+    }
+  ],
+  "mechanicalFullJourneyCraftClickCounts": {
+    "recipeSlots": 31,
+    "materialGroups": 7,
+    "A": 93,
+    "B": 45
+  },
+  "interpretationBoundary": "This controlled sample verifies equivalent UI outcomes and fewer helper clicks. It does not measure product performance or prove the full journey fits its CI timeout."
+}

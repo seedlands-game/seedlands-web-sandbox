@@ -1,3 +1,6 @@
+import { projectAuthorityGameplayView } from './authority-gameplay-view';
+import { bindModuleCommandPort, type WorldModuleBinding } from '../commands/module-command';
+import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { TransactionDeduplicator, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type {
@@ -30,7 +33,7 @@ import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from '.
 import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 import type { AuthorityRuntimeOptions } from './authority-runtime-options';
 import { AuthorityLogicCandidates } from './authority-logic-candidates';
-import { acceptLogicIntentBatch } from './authority-logic-intent-acceptance';
+import { acceptLogicIntentBatch, isValidLogicIntent, applyBoundLogicAction } from './authority-logic-intent-acceptance';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -93,8 +96,17 @@ export class AuthorityRuntime {
       get fluidDiagnostics() {
         return server.fluidDiagnostics;
       },
-      getEntity: (id: string) => server.getEntity(id),
-      queryEntities: () => server.queryEntities(),
+      getEntity: (id: string) => {
+        const entity = server.getEntity(id);
+        return !entity || entity.type === 'station' ? null : { ...entity, type: entity.type };
+      },
+      getActorModeState: (id: string) => server.getActorModeState(id),
+      createEntityReference: (id: string) => server.createEntityReference(id),
+      resolveEntityReference: (reference: EntityLifetimeReference) => server.resolveEntityReference(reference) !== null,
+      queryEntities: () =>
+        server
+          .queryEntities()
+          .flatMap((entity) => (entity.type === 'station' ? [] : [{ ...entity, type: entity.type }])),
       updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) =>
         server.updateEntityWithoutSnapshot(id, update),
       advanceGameplayRules: (seconds: number) => {
@@ -142,6 +154,10 @@ export class AuthorityRuntime {
       ...(options.onUnknownChunk ? { onUnknownChunk: unknownChunks.request } : {}),
       ...(options.fluidEpoch === undefined ? {} : { fluidEpoch: options.fluidEpoch }),
       platform: options.platform,
+      composition: options.composition,
+      moduleSystemAuthority: options.moduleSystemAuthority,
+      moduleActorAuthority: options.moduleActorAuthority,
+      allowLegacyCompositionMigration: options.allowLegacyCompositionMigration,
     });
     server.setWorldTime(options.initialWorldTime);
     await server.restore();
@@ -157,7 +173,7 @@ export class AuthorityRuntime {
         for (const chunk of bootstrap.starterChunks)
           if (!server.acceptWorkerCanonical(chunk)) throw new Error(`Authority拒绝新世界生态Chunk：${chunk.key}。`);
         const ecology = server.initializeStarterEcologyFromLoadedWorld(bodyPosition);
-        if (!ecology.initialized) throw new Error('新世界生态初始化未执行。');
+        if (ecology.configured && !ecology.initialized) throw new Error('新世界生态初始化未执行。');
       }
       player = server.spawnPlayer({ position: bodyPosition });
     }
@@ -255,7 +271,7 @@ export class AuthorityRuntime {
     return this.session.receiveLogicIntents(epoch, intents);
   }
 
-  receiveLogicIntentBatch(batch: LogicIntentBatch): boolean {
+  receiveLogicIntentBatch(batch: LogicIntentBatch, binding?: WorldModuleBinding): boolean {
     if (batch.protocolVersion !== LOGIC_PROTOCOL_VERSION || batch.epoch !== this.options.epoch) return false;
     const latestPhysicsTick = this.session.currentSnapshot.physicsTick;
     const observation = this.logicCandidates.consume(batch.observationSequence);
@@ -267,9 +283,10 @@ export class AuthorityRuntime {
       physicsHz: this.frequencies.physicsHz,
       currentEntities: this.server.queryEntities(),
       identityRevision: (entity) => this.logicObservationBuilder.identityRevision(entity),
+      referenceFor: (id) => this.server.createEntityReference(id),
       currentChunkRevisions: (reads) => this.currentChunkRevisions(reads),
-      applyAction: (entityId, action) => this.applyLogicAction(entityId, action),
-      validIntent: (intent) => this.validLogicIntent(intent),
+      applyAction: (entityId, action) => applyBoundLogicAction(this.server, entityId, action, binding),
+      validIntent: isValidLogicIntent,
     });
     if (canonicalChanged) this.session.commitExternalState(false);
     return this.session.receiveLogicIntents(batch.epoch, intents);
@@ -393,8 +410,19 @@ export class AuthorityRuntime {
 
   async performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
     const submittedAction = this.options.platform.clone(action);
+    const target =
+      submittedAction.type === 'attack' ? this.server.createEntityReference(submittedAction.targetId) : null;
+    const rejectStale = (reason: string): AuthorityActionResult => ({
+      submittedAction,
+      result: { success: false, reason },
+      gameplay: this.view(),
+      commits: [],
+    });
+    if (!this.session.playerBindingCurrent) return rejectStale('stale-control-binding');
     if (!(await this.mutationPreparation.prepareAction(submittedAction, this.playerId)))
       return unavailableAuthorityPlayerAction(submittedAction, this.view());
+    if (!this.session.playerBindingCurrent) return rejectStale('stale-control-binding');
+    if (target && !this.server.resolveEntityReference(target)) return rejectStale('stale-target-lifetime');
     const before = this.serverStateVersion();
     const result = applyAuthorityPlayerAction(this.server, this.playerId, submittedAction, (commit) =>
       this.recordWorldCommit(commit),
@@ -412,9 +440,10 @@ export class AuthorityRuntime {
     return result;
   }
 
-  async executeCommand(source: CommandSource, command: ServerCommand) {
+  async executeCommand(source: CommandSource, command: ServerCommand, binding?: WorldModuleBinding) {
     const before = this.serverStateVersion();
     const result = await new ServerCommandExecutor(this.server, {
+      moduleOperation: bindModuleCommandPort(this.server, binding),
       now: this.options.platform.now,
       save: () => this.save(),
       advanceSession: createAuthorityAdvanceCommandPort(
@@ -425,6 +454,12 @@ export class AuthorityRuntime {
         this.mutationPreparation.prepareCommand(commandSource, preparedCommand, buffer),
     }).execute(source, command);
     if (result.success && result.commit?.committed) this.recordWorldCommit(result.commit);
+    if (
+      result.success &&
+      source.entityId === this.playerId &&
+      (command.type === 'set-mode' || command.type === 'set-flight')
+    )
+      this.clearPlayerInput();
     if (command.type !== 'advance-gameplay') this.commitIfServerChanged(before);
     return result;
   }
@@ -460,22 +495,7 @@ export class AuthorityRuntime {
   }
 
   view(): AuthorityGameplayView {
-    const entities = this.server
-      .queryEntities()
-      .map((entity) =>
-        entity.type === 'creature' || entity.type === 'npc'
-          ? { ...entity, combat: this.server.getCombatState(entity.id) }
-          : entity,
-      );
-    return {
-      gameplayRevision: this.server.gameplayRevision,
-      gameplayTime: this.server.gameplayTime,
-      player: this.server.getPlayerState(this.playerId),
-      entities,
-      actors: this.server.simulationSnapshot().actors,
-      craftableRecipeIds: this.server.listCraftableRecipes(this.playerId).map((recipe) => recipe.id),
-      metrics: this.server.gameplayMetrics(),
-    };
+    return projectAuthorityGameplayView(this.server, this.playerId);
   }
 
   takeCommits(): WorldCommitResult[] {
@@ -507,24 +527,6 @@ export class AuthorityRuntime {
         revision
       );
     });
-  }
-
-  private applyLogicAction(entityId: string, action: LogicIntentBatch['intents'][number]['action']) {
-    return action ? this.server.applyActorAuthorityAction(entityId, action) : null;
-  }
-
-  private validLogicIntent(intent: LogicIntentBatch['intents'][number]): boolean {
-    if (
-      !Number.isFinite(intent.wish.x) ||
-      !Number.isFinite(intent.wish.z) ||
-      ![-1, 0, 1].includes(intent.verticalIntent)
-    )
-      return false;
-    const action = intent.action;
-    if (!action) return true;
-    if (action.type === 'move-to') return action.target.length === 3 && action.target.every(Number.isFinite);
-    if (action.type === 'start-existing-action') return Boolean(action.actionId.trim());
-    return Boolean(action.targetId.trim());
   }
 
   private serverStateVersion() {

@@ -1,3 +1,4 @@
+import { getItemDefinition, type ItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
 import { combatViewmodelPose } from '../../client/presentation/combat-viewmodel-pose';
 import * as pc from 'playcanvas';
@@ -26,6 +27,7 @@ export class FirstPersonViewmodel {
   private action: HeldAction = 'idle';
   private actionSeconds = 0;
   private heldItem: string | null = null;
+  private heldTool = false;
   private combat: CombatSnapshot['active'] = null;
   private pose = { shoulder: 0, elbow: 0, wrist: 0 };
   private releasePose = { shoulder: 0, elbow: 0, wrist: 0 };
@@ -71,24 +73,29 @@ export class FirstPersonViewmodel {
     this.applyLayer(this.root);
   }
 
-  setHeldItem(itemId: string | null): void {
+  setHeldItem(itemId: string | null, definition?: ItemDefinition | null): void {
     if (itemId === this.heldItem && !this.releaseDraft) return;
     this.releaseDraft?.();
     this.releaseDraft = null;
     this.heldItem = itemId;
+    this.heldTool = false;
     // Inventory may empty before a successful place/eat gesture is presented.
     // Only the continuous mining action belongs to the previous held item.
     if (this.action === 'mine') this.setAction('idle');
     while (this.item.children.length) this.item.children[0].destroy();
     if (itemId) {
-      this.assets.addItem(this.item, itemId, 0.55);
+      const itemDefinition = definition ?? getItemDefinition(itemId);
+      this.heldTool = itemDefinition.itemType === 'tool';
+      const scale = this.heldTool ? 0.95 : 0.55;
+      this.assets.addItem(this.item, itemId, scale, undefined, definition);
       this.applyLayer(this.item);
     }
   }
 
   setHeldDefinition(definition: ToolModel): void {
     this.setHeldItem(null);
-    this.releaseDraft = createDraftPixelResource(this.app, this.item, definition, 0.55);
+    this.heldTool = true;
+    this.releaseDraft = createDraftPixelResource(this.app, this.item, definition, 0.95);
     this.applyLayer(this.item);
   }
 
@@ -118,6 +125,10 @@ export class FirstPersonViewmodel {
     this.root.setLocalPosition(layout.position.x, layout.position.y, layout.position.z);
     this.root.setLocalScale(layout.scale, layout.scale, layout.scale);
     if (this.viewmodelCamera?.camera) this.viewmodelCamera.camera.fov = fov;
+    const narrowTool = this.heldTool && this.app.graphicsDevice.width < this.app.graphicsDevice.height;
+    const itemScale = narrowTool ? 0.79 : 1;
+    this.item.setLocalScale(itemScale, itemScale, itemScale);
+    this.item.setLocalEulerAngles(0, 0, narrowTool ? -16 : 0);
     const authoritativePose = combatViewmodelPose(this.combat);
     const pose = { ...(authoritativePose ?? viewmodelPose(this.action, this.actionSeconds)) };
     if (!authoritativePose && this.action === 'idle') {

@@ -67,6 +67,7 @@ export function createGamePlayerController(options: Options): PlayerController {
     onBeginBreak: (position) => gameplay()?.beginBreak(position),
     onCancelBreak: () => gameplay()?.cancelBreak(),
     onPlace: (position) => gameplay()?.place(position),
+    onUseTarget: (position) => gameplay()?.useTarget(position) ?? false,
     onUseHeldItem: () => gameplay()?.useHeldItem() ?? false,
     isUiBlockingInput: () =>
       Boolean(

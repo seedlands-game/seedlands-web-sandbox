@@ -1,10 +1,13 @@
+import { BrowserInventoryPointer } from './browser-inventory-pointer';
+import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
+import { BrowserStations } from './browser-stations';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
 import type { VoxelTarget } from '../../client/presentation/voxel-target';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
 import { entityHitDistance } from '../../client/presentation/entity-hit-volume';
 import type * as pc from 'playcanvas';
-import { getItemCapability, getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
 import { voxelNames } from '@seedlands/game-core/world/voxel';
 import { GameplayEntityPresenter } from './gameplay-entity-presenter';
 import { projectGameplayUi, type GameplayUiProjection } from '../ui/gameplay-ui-projector';
@@ -18,7 +21,10 @@ import type {
 } from '@seedlands/game-core/compute/authority-worker-protocol';
 import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
 import type { CommandResult, ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
-import { meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
+import { createMeleeShowcaseIds, meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
+import { executeBrowserModeCommand, type BrowserModeCommandExecutor } from './browser-gameplay-actions';
+import type { ModeCommand } from '@seedlands/game-core/server/commands/module-command';
+import type { ActorMode } from '../ui/ui-contracts';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
   gameplay: AuthorityGameplayView;
@@ -40,11 +46,13 @@ type Options = {
   movePlayer: (position: [number, number, number]) => void | Promise<void>;
   orientPlayer: (yaw: number, pitch: number) => void;
   executeCommand: (command: ServerCommand) => Promise<CommandResult>;
+  executeModeCommand: BrowserModeCommandExecutor;
   onPlayerDamage?: (amount: number) => void;
   onPresentation?: (event: GameplayPresentationEvent) => void;
 };
 
 export class BrowserGameplay {
+  private showcasePreparation: Promise<void> | null = null;
   private readonly presenter: GameplayEntityPresenter;
   private readonly viewmodel: FirstPersonViewmodel;
   private readonly outline: VoxelTargetOutline;
@@ -52,13 +60,26 @@ export class BrowserGameplay {
   private aimTarget: VoxelTarget | null = null;
   private gestureSeconds = 0;
   private inventoryOpen = false;
+  private inventoryClosing = false;
+  readonly stations: BrowserStations;
+  private readonly inventoryPointerClient: BrowserInventoryPointer;
   private previousProjection: GameplayUiProjection | undefined;
   private previousHealth: number | null = null;
   private lastCombatResultSequence: number | null = null;
   private breakProjectionElapsedSeconds = Number.POSITIVE_INFINITY;
 
   constructor(private readonly options: Options) {
-    this.presenter = new GameplayEntityPresenter(options.app);
+    this.stations = new BrowserStations(() => options.authority.gameplay);
+    this.inventoryPointerClient = new BrowserInventoryPointer({
+      view: () => options.authority.gameplay,
+      station: () => this.stations.current(),
+      perform: (action) => options.authority.performAction(action),
+      changed: options.queueSave,
+      refresh: () => this.refresh(),
+      succeeded: (message) => this.feedback(message, 'success'),
+      failed: (message) => this.feedback(message, 'error'),
+    });
+    this.presenter = new GameplayEntityPresenter(options.app, (id) => this.itemDefinition(id) ?? null);
     this.viewmodel = new FirstPersonViewmodel(options.app, options.camera);
     this.outline = new VoxelTargetOutline(options.app);
     this.breakOverlay = new VoxelBreakOverlay(options.app);
@@ -72,11 +93,23 @@ export class BrowserGameplay {
     this.aimTarget = target?.inRange ? target : null;
   }
 
-  async prepareMeleeShowcase(): Promise<void> {
+  prepareMeleeShowcase(): Promise<void> {
+    return (this.showcasePreparation ??= this.prepareMeleeShowcaseInstance()
+      .catch((error: unknown) => {
+        this.feedback(error instanceof Error ? error.message : String(error), 'error');
+        throw error;
+      })
+      .finally(() => {
+        this.showcasePreparation = null;
+      }));
+  }
+
+  private async prepareMeleeShowcaseInstance(): Promise<void> {
     const authority = this.options.authority;
     if (authority.gameplay.player.lifecycle === 'dead') await this.executeShowcaseCommand({ type: 'respawn' });
     const existingIds = new Set(authority.gameplay.entities.map((entity) => entity.id));
-    for (const command of meleeShowcaseCommands(existingIds)) await this.executeShowcaseCommand(command);
+    for (const command of meleeShowcaseCommands(existingIds, createMeleeShowcaseIds(crypto.randomUUID())))
+      await this.executeShowcaseCommand(command);
 
     let swordSlot = authority.gameplay.player.inventory.findIndex((slot) => slot?.itemId === 'wood-sword');
     if (swordSlot < 0) {
@@ -119,7 +152,11 @@ export class BrowserGameplay {
     this.outline.update(this.blocksInput ? null : this.aimTarget);
     this.gestureSeconds = Math.max(0, this.gestureSeconds - seconds);
     const state = this.options.authority.gameplay.player;
-    this.viewmodel.setHeldItem(state.inventory[state.selectedSlot]?.itemId ?? null);
+    const heldItem =
+      state.mode?.value === 'creative'
+        ? (state.creativeCatalog?.hotbar[state.creativeCatalog.selectedSlot] ?? null)
+        : (state.inventory[state.selectedSlot]?.itemId ?? null);
+    this.viewmodel.setHeldItem(heldItem, heldItem ? (this.itemDefinition(heldItem) ?? null) : undefined);
     this.viewmodel.setCombatAction(state.combat?.active ?? null);
     this.viewmodel.setVisible(!this.blocksInput);
     if (!this.gestureSeconds) this.viewmodel.setAction(state.breakAction ? 'mine' : 'idle');
@@ -170,6 +207,8 @@ export class BrowserGameplay {
     const projection = projectGameplayUi(
       {
         revision: view.gameplayRevision,
+        cursor: view.inventory?.cursor,
+        inventoryIdentity: JSON.stringify(view.inventory?.actor),
         player: {
           combat: player.combat,
           lifecycle: player.lifecycle,
@@ -177,7 +216,14 @@ export class BrowserGameplay {
           hunger: player.hunger,
           selectedHotbarSlot: player.selectedSlot,
           inventory: player.inventory,
+          mode: player.mode,
+          creativeCatalog: player.creativeCatalog,
+          flight: player.flight,
         },
+        station: this.inventoryOpen ? this.stations.current() : null,
+        stationRecipes: view.stationRecipes,
+        items: view.items,
+        recipes: view.recipes,
         inventoryOpen: this.inventoryOpen,
         craftableRecipeIds: view.craftableRecipeIds,
         target:
@@ -207,7 +253,7 @@ export class BrowserGameplay {
         ...(actorStates.get(entity.id) ? { behavior: actorStates.get(entity.id)!.behavior } : {}),
         label:
           entity.type === 'world-item' && entity.stack
-            ? `${getItemDefinition(entity.stack.itemId).name}掉落物`
+            ? `${this.itemDefinition(entity.stack.itemId)?.name ?? entity.stack.itemId}掉落物`
             : entity.archetype === 'grazer'
               ? '温顺林鹿'
               : entity.archetype === 'night-stalker'
@@ -220,31 +266,81 @@ export class BrowserGameplay {
   }
 
   selectHotbarSlot(slot: number): void {
+    const player = this.options.authority.gameplay.player;
+    if (player.mode?.value === 'creative') {
+      this.setCreativeSlot(slot, player.creativeCatalog?.hotbar[slot] ?? null);
+      return;
+    }
     void this.action({ type: 'select-hotbar', slot }, (result) => {
       if (!result.success) this.feedback('快捷栏槽位无效', 'error');
     });
   }
 
+  setActorMode(mode: ActorMode): Promise<void> {
+    return this.runModeCommand(
+      { type: 'set-mode', mode },
+      mode === 'creative' ? '已切换创造模式 · 飞行已开启' : '已安全落地并切换生存模式',
+    );
+  }
+
+  setFlight(enabled: boolean): Promise<void> {
+    return this.runModeCommand(
+      { type: 'set-flight', enabled },
+      enabled ? '飞行已开启 · Space 上升，Shift 下降' : '飞行已关闭',
+    );
+  }
+
+  setCreativeSlot(slot: number, itemId: string | null): Promise<void> {
+    return this.runModeCommand(
+      { type: 'set-creative-slot', slot, itemId },
+      itemId ? `创造快捷栏 ${slot + 1} 已更新` : `创造快捷栏 ${slot + 1} 已清空`,
+    );
+  }
+
+  executeUiModeCommand(command: ModeCommand): Promise<void> {
+    if (command.type === 'set-mode') return this.setActorMode(command.mode);
+    if (command.type === 'set-flight') return this.setFlight(command.enabled);
+    return this.setCreativeSlot(command.slot, command.itemId);
+  }
+
+  async applyInitialActorMode(mode: ActorMode): Promise<void> {
+    if (mode === 'survival') return;
+    await this.runModeCommand({ type: 'set-mode', mode }, '', true);
+  }
+
   toggleInventory(): void {
     if (this.options.authority.gameplay.player.lifecycle === 'dead') return;
-    this.inventoryOpen = !this.inventoryOpen;
+    if (this.inventoryOpen) {
+      void this.closeInventory();
+      return;
+    }
+    this.stations.clear();
+    this.inventoryOpen = true;
     if (this.inventoryOpen) this.options.releaseInput();
     this.refresh();
   }
 
-  closeInventory(): void {
-    if (!this.inventoryOpen) return;
-    this.inventoryOpen = false;
-    this.refresh();
+  async closeInventory(): Promise<void> {
+    if (!this.inventoryOpen || this.inventoryClosing) return;
+    this.inventoryClosing = true;
+    try {
+      if (!(await this.inventoryPointerClient.send({ kind: 'close' }))) return;
+      this.inventoryOpen = false;
+      this.stations.clear();
+      this.refresh();
+    } finally {
+      this.inventoryClosing = false;
+    }
+  }
+
+  inventoryPointer(command: InventoryUiCommand): Promise<boolean> {
+    if (!this.inventoryOpen || this.inventoryClosing) return Promise.resolve(false);
+    return this.inventoryPointerClient.send(command);
   }
 
   craftRecipe(recipeId: string): void {
-    void this.action({ type: 'craft', recipeId }, (result) => {
-      this.feedback(result.success ? '合成完成' : `合成失败 · ${result.reason}`, result.success ? 'success' : 'error');
-      if (result.success) {
-        this.options.queueSave();
-        this.present({ kind: 'craft' });
-      }
+    void this.inventoryPointerClient.craft(recipeId).then((ok) => {
+      if (ok) this.present({ kind: 'craft' });
     });
   }
 
@@ -316,31 +412,28 @@ export class BrowserGameplay {
     });
   }
 
-  moveInventorySlot(source: number, target: number): void {
-    void this.action({ type: 'move-inventory', source, target }, (result) => {
-      this.feedback(
-        result.success ? '物品已移动' : '无法移动：请检查目标槽位是否已满',
-        result.success ? 'success' : 'error',
-      );
-      if (result.success) this.options.queueSave();
+  useInventoryItem(slot: number): void {
+    void this.inventoryPointerClient.useItem(slot).then((ok) => {
+      if (ok) this.present({ kind: 'eat' });
     });
   }
 
-  useInventoryItem(slot: number): void {
-    void this.action({ type: 'use-inventory', slot }, (result) => {
-      const reason = !result.success && result.reason === 'hunger-full' ? '你现在不饿' : '这个物品暂时无法使用';
-      this.feedback(result.success ? '食用 · 恢复饥饿' : reason, result.success ? 'success' : 'error');
-      if (result.success) {
-        this.present({ kind: 'eat' });
-        this.options.queueSave();
-      }
-    });
+  useTarget(position: [number, number, number]): boolean {
+    if (this.stations.open(position)) {
+      this.inventoryOpen = true;
+      this.options.releaseInput();
+      this.refresh();
+      return true;
+    }
+    return false;
   }
 
   useHeldItem(): boolean {
     const player = this.options.authority.gameplay.player;
+    if (player.mode?.value === 'creative') return false;
     const stack = player.inventory[player.selectedSlot];
-    if (!stack || !getItemCapability(stack.itemId, 'consume')) return false;
+    if (!stack || !this.itemDefinition(stack.itemId)?.capabilities.some((capability) => capability.type === 'consume'))
+      return false;
     this.useInventoryItem(player.selectedSlot);
     return true;
   }
@@ -366,6 +459,7 @@ export class BrowserGameplay {
   }
 
   dispose(): void {
+    this.inventoryPointerClient.dispose();
     this.presenter.dispose();
     this.breakOverlay.destroy();
     this.viewmodel.dispose();
@@ -388,6 +482,11 @@ export class BrowserGameplay {
     else this.feedback('攻击已取消', 'info');
   }
 
+  private itemDefinition(itemId: string) {
+    const definitions = this.options.authority.gameplay.items;
+    return definitions ? definitions.find((definition) => definition.id === itemId) : getItemDefinition(itemId);
+  }
+
   private present(event: GameplayPresentationEvent): void {
     this.options.onPresentation?.(event);
     const kind = event.kind;
@@ -406,6 +505,20 @@ export class BrowserGameplay {
   private feedback(message: string, tone: 'info' | 'success' | 'error'): void {
     if (tone === 'error') this.present({ kind: 'rejected' });
     this.options.session.publishFeedback(this.options.nextInteractionSequence(), { message, tone, durationMs: 1_400 });
+  }
+
+  private async runModeCommand(command: ModeCommand, successMessage: string, propagate = false): Promise<void> {
+    try {
+      await executeBrowserModeCommand(this.options.executeModeCommand, this.options.playerId, command);
+      this.refresh();
+      this.options.queueSave();
+      if (successMessage) this.feedback(successMessage, 'success');
+    } catch (error) {
+      const raw = error instanceof Error ? error.message : String(error);
+      const message = /safe landing/i.test(raw) ? '无法切回生存：当前位置没有安全落脚点。' : raw;
+      if (propagate) throw new Error(message, { cause: error });
+      this.feedback(message, 'error');
+    }
   }
 
   private async action(
