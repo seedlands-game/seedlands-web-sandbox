@@ -21,7 +21,7 @@
 
 作者通过 `@seedlands/game-core/mod-api` 注册带命名空间的能力，而不是给 NPC 内核加一个玩法分支。能力包括条件和技能：描述与有界参数供编排，回调供实际执行，持续技能还要声明状态版本、大小上限及 start / continue / cancel 语义。
 
-能力ID跨condition/skill全局唯一；公开与wire描述都必须包含有界 `requiredOperations`。技能声明operation ID及self/any授权范围，条件为空数组。装配从冻结定义核对操作存在和provider模块的host-approved执行许可；声明不能自行授予权限，provider也不能调用未声明的operation或扩张scope。
+能力ID跨condition/skill全局唯一；公开与wire描述都必须包含有界 `requiredOperations`。技能声明operation ID及self/any授权范围，条件为空数组；operation ID使用共同的ASCII namespace与160字符上限。装配从冻结定义核对操作存在，以及operation owner与behavior provider双方的host-approved执行许可；声明不能自行授予权限，provider也不能调用未声明的operation或扩张scope。
 
 每世界装配后目录冻结。世界级目录用于作者和出生配方；绑定 NPC 的目录还按当前 Actor 身份、生命、行为控制资格及操作授权过滤。发现、安装、继续和恢复共用准入；出生先用候选NPC身份验证，再实际绑定Actor，不先创建身体来试权限。目录并非永久权限票据：每次操作仍检查原始 Actor、epoch/lifetime、provider 版本、真实目标引用、宿主许可和当前规则。条件返回 false 与未准入能力是不同事实。
 
@@ -34,6 +34,8 @@
 ## 存档与恢复
 
 世界存档持有可恢复的身体和行为状态：稳定 Actor 身份、定义/行为修订、当前节点与技能状态、provider/state 版本和已有动作关联。物理运行引用在恢复后绑定新 epoch，旧消息不得重新控制新身体。继续、取消、失败和终态需要分别验证，尤其不能在恢复时重复提交已经生效的消耗或产出。
+
+技能版本与所属模块版本可独立演进。现有ledger字段 `providerVersion` 表示能力版本，不是模块版本；恢复先核对能力、module ID和state版本，再从冻结registry取得模块checkpoint身份并验证state。模块版本与产物身份仍由严格composition identity校验，不因字段名称混用而误拒绝合法持续技能，也不忽略坏版本。
 
 活体行为的唯一持久状态在 `entityStore.actors[].character`。身体移除后，`simulation.characterTombstones` 最多保留128条已故角色的身份、人格、行为和事件记录，不包含另一份库存、饥饿或身体；恢复不能凭墓碑重新生成活体。旧 `simulation.characters` 只作为旧存档迁移输入。
 

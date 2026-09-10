@@ -58,7 +58,7 @@
 - 已准入玩法回调抛异常或返回非法类型时，故障局限于对应角色/能力，并有可观察诊断；不能打断同世界其他角色的 tick，也不能令出生请求留下部分提交。只读状态查询不补写事件或改变序号。
 - 同一角色/节点 activation 的重复提交幂等；恢复从已提交回执及状态继续，禁止重放副作用。
 - 能力目录按宿主权限与 Actor 适用性过滤；列出不代表获准，执行时重新验证原始角色、目标、provider、规则及身份。
-- 每个能力具有全局唯一 ID 和必填有界 `requiredOperations`；skill声明operation ID及self/any授权范围，condition必须为空。装配检查operation与host grant，绑定目录、安装、出生/恢复预检及执行共用准入；provider不得调用未声明操作或越过声明范围。声明本身不授予权限。
+- 每个能力具有全局唯一 ID 和必填有界 `requiredOperations`；skill声明operation ID及self/any授权范围，condition必须为空。operation ID采用core/wire共享的ASCII namespace与160字符上限。装配检查operation owner与behavior provider双方的host-approved execute grant，绑定目录、安装、出生/恢复预检及执行共用准入；provider不得调用未声明操作或越过声明范围。声明本身不授予权限。
 - 新模块自带能力声明和行为配方；Playbook 选择/配置，不获得额外权限。第三方仅导入 mod-api，不导入 GameServer、CharacterRuntime 或内部 ECS store。
 - 状态/事务适配只开放本期准入的参与者合同；不提供任意内存写入或假想的万能跨 owner 事务。
 

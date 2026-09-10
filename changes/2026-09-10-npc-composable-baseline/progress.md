@@ -141,6 +141,13 @@
 - B精确main6c V4及旧Character V1/V2迁移7/7；admission/registry/runtime/wire28/28、control/correctness14/14、threat/review10/10、action-history10/10、client/public-pack6/6、camp/product/wire20/20。分组有交集，不相加为唯一测试总数。子工作树已clean，未push；实际依赖产物仍需root build重建，不能沿用旧Pack摘要。
 - 生产写入ownership已全部归还。补公开合同与code-map后冻结全量准出；下一阶段单一生产代码SHA运行verify:static/build、main全部浏览器、NPC确定性与真实模型，再据结果创建main PR。
 
+### 2026-09-11 约00:20 冻结复验与插件边界复核
+
+- `0841b9e45d7bc2294431f02c431f45422d25ce9a` 正常hooks补Factory的BEGIN完成后取消复验；确定性阻塞BEGIN→close→release只执行BEGIN/ROLLBACK，无advisory lock、INSERT或残留事务。root正确路径的main组合检查点与Factory定向2文件13项PASS。
+- 该SHA完整 `VITEST_MAX_WORKERS=1 pnpm verify:static` 为FAIL：格式/lint/路径通过，coverage阶段403文件2101项PASS、3文件6项FAIL、2文件4项既有SKIP，763.41s；后续typecheck因串联失败未执行。`final-0841-static.log`保留原始结果。两套裁剪overworld夹具删除Combat/Needs却仍选标准behavior；无melee测试使用现在显式unarmed的settler。只修夹具的明确前提，原无fallback、无副作用、调度frontier和禁止攻击断言不变，待复验。
+- 独立复核追加三项真实插件边界：required operation owner缺execute而provider有execute时目录假可用；core无限长required operation ID与wire 160上限不一致；capability version与module version不同时运行中技能无法原样恢复。前两项aux `2f83792b3207635505f192de9d7f3008cad4e173`已无冲突集成为`d9fa71d259b5f703eb963b396eaa7fc7cbe6d7d5`，23项准入/wire与31项公共Pack/迁移定向通过；恢复项仍在独立RED/GREEN实施。
+- 原本地main继续clean、origin/main live fetch仍6c7124a6。集成全量测试期间未混入aux修改；当前没有新PR、不报告最终准出。下一冻结需包含剩余恢复修复与明确夹具，再重跑静态、构建、全浏览器和真实模型。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

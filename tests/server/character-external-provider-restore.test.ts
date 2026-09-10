@@ -108,6 +108,7 @@ it('restores an external running capability whose module and capability versions
       mutate(skill);
       expect(await session.world.checkpoint({ kind: 'restore', snapshot: corrupted })).toMatchObject({ ok: false });
       expect({ starts, continues }).toEqual({ starts: 1, continues: 0 });
+      expect(await session.world.checkpoint({ kind: 'export' })).toEqual(checkpoint);
     }
 
     expect(await session.world.checkpoint({ kind: 'restore', snapshot: checkpoint.data.snapshot })).toMatchObject({
