@@ -217,5 +217,6 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 - `apps/agent-server/src/resident-agent.ts` / `resident-factory.ts` 分别处理常驻认知和出生配方，`workspace/` 拥有 PG 记忆与认知分支，`node/resident-host.ts` 处理 loopback 会话。`client/persistence/application-checkpoint.ts` / `cognition-timeline.ts` 将世界与认知 checkpoint 配对。
 - `apps/agent-server/src/gateway-response.ts` 在构造模型消息前限制实际响应流及工具字段；`resident-request-budget.ts` / `resident-agent.ts` 拥有每逻辑轮工具批次准入。`resident-runtime-codec.ts` 是调度初始化与认知导入共用的恢复校验；`workspace/content-codec.ts` 保持普通写入和portable导入内容限额一致。`packages/cognition-protocol/src/checkpoint-protocol.ts` 提供中立认知清单头合同，应用V2的pairHash不替代PG内部语义校验。
 - `apps/agent-server/src/node/resident-host-births.ts` 管理同socket最多三个独立、可取消的出生请求，避免模型等待进入控制消息串行链；Factory在事务外生成，短事务只负责幂等重读、预算复核与提交。
+- `apps/agent-server/src/resident-birth-codec.ts` 统一出生模型schema、Factory解析与Host文档边界；`node/resident-connection-lifecycle.ts` 汇聚连接关闭后的通道持久化尾部和已入队消息，诊断回调不能控制取消。其retired不承诺共享Factory/provider工作已完成，出生资格在closed时同步撤销。模型实际dispatch前仍由Channel/Agent/Gateway各自复验取消资格。
 - `apps/web/src/app/gameplay/companion/` 组合产品角色会话，`companion-panel.svelte` / `character-behavior-panel.svelte` 只显示角色和行为树。`scripts/model-gateway/` 是独立工程适配，上游凭据不进入 core、Pack 或浏览器。
 - `apps/web/src/worker/authority-worker-runtime-lifecycle.ts` 收拢 Worker runtime 的初始化/释放与同一 owner 的接线；`authority-worker-direct-logic*.ts` 维护 Authority→Logic 的直接通道和候选新鲜度。控制消息和测试时钟走各自边界，不因认知网络等待而阻塞身体模拟。

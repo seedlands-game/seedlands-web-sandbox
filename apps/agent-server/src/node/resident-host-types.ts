@@ -26,6 +26,10 @@ export type ImportTransfer = {
   byteLength: number;
 };
 
+/**
+ * closed revokes channel and birth execution eligibility synchronously.
+ * retired covers this socket's queued inbound work and channel shutdowns, not shared Factory/provider work.
+ */
 export type ResidentConnectionLifecycle = Readonly<{
   phase: 'authenticated' | 'closed' | 'retired' | 'retirement-failed';
   connectionId: string;

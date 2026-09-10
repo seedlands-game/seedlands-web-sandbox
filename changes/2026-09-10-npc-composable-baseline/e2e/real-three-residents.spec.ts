@@ -11,7 +11,20 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   const journeys: unknown[] = [];
-  const executionWindow = { installedWorldTime: 0, elapsedSeconds: 0, daylightSeconds: 0, callsBeforeDisconnect: 0 };
+  const executionWindow = {
+    installedWorldTime: 0,
+    elapsedSeconds: 0,
+    daylightSeconds: 0,
+    callsBeforeClick: 0,
+    callsAtTransportClose: 0,
+    callsAtServerClose: 0,
+    callsAfterRetirement: 0,
+    transitionCalls: 0,
+    clickStartedAt: 0,
+    transportClosedAt: 0,
+    serverClosedAt: 0,
+    retiredAt: 0,
+  };
   try {
     const first = await startLifeScene(page);
     const profiles = [
@@ -55,7 +68,12 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
     await page.getByRole('button', { name: '思考设置' }).click();
     await page.locator('#companion-url').fill(runtime.host.url);
     await page.locator('#companion-token').fill(runtime.host.pairingToken);
+    const socketCreated = page.waitForEvent('websocket', {
+      predicate: (socket) => new URL(socket.url()).href === new URL(runtime.host.url).href,
+      timeout: 15000,
+    });
     await page.getByRole('button', { name: '连接', exact: true }).click();
+    const residentSocket = await socketCreated;
     await expect(page.locator('#companion .connection')).toHaveText('思考服务已连接');
     const destinations = [
       [-4.5, 57, -4.5],
@@ -125,8 +143,37 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
     });
     expect(new Set(installed.map((sample) => sample.observation.character.behaviorTree.goal.description)).size).toBe(3);
     executionWindow.installedWorldTime = installed[0].worldTime;
-    executionWindow.callsBeforeDisconnect = runtime.calls.length;
-    await page.getByRole('button', { name: '断开', exact: true }).click();
+    expect(runtime.proCalls).toHaveLength(0);
+    const authenticated = runtime.connectionEvents.filter((event) => event.phase === 'authenticated');
+    expect(authenticated).toHaveLength(1);
+    const connection = authenticated[0];
+    expect(connection.world).not.toBeNull();
+    const identity = await page.evaluate(() => window.__seedlandsHarness!.world.identity());
+    if (!identity.ok) throw new Error('Disconnect world identity unavailable');
+    expect(connection.world).toMatchObject({ worldId: identity.data.worldId, epoch: identity.data.epoch });
+    executionWindow.callsBeforeClick = runtime.calls.length;
+    executionWindow.clickStartedAt = Date.now();
+    const [transportClose, retirement] = await Promise.all([
+      residentSocket
+        .waitForEvent('close', { timeout: 15000 })
+        .then(() => ({ at: Date.now(), calls: runtime.calls.length })),
+      runtime.waitForRetirement(connection.connectionId),
+      page.getByRole('button', { name: '断开', exact: true }).click(),
+    ]);
+    const serverClose = runtime.connectionEvents.find(
+      (event) => event.connectionId === connection.connectionId && event.phase === 'closed',
+    );
+    expect(serverClose).toBeDefined();
+    executionWindow.callsAtTransportClose = transportClose.calls;
+    executionWindow.callsAtServerClose = serverClose!.flashCalls;
+    executionWindow.callsAfterRetirement = retirement.flashCalls;
+    executionWindow.transitionCalls = transportClose.calls - executionWindow.callsBeforeClick;
+    executionWindow.transportClosedAt = transportClose.at;
+    executionWindow.serverClosedAt = serverClose!.at;
+    executionWindow.retiredAt = retirement.at;
+    expect(transportClose.calls).toBe(serverClose!.flashCalls);
+    expect(retirement.flashCalls).toBe(serverClose!.flashCalls);
+    expect(runtime.calls).toHaveLength(retirement.flashCalls);
     await expect(page.locator('#companion .connection')).toHaveText('按当前行为树生活 · 未连接模型');
     expect(await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }))).toMatchObject({
       ok: true,
@@ -155,7 +202,7 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
       executionWindow.daylightSeconds =
         isDay(previousWorldTime) && isDay(current[0].worldTime) ? executionWindow.daylightSeconds + 1 : 0;
       previousWorldTime = current[0].worldTime;
-      expect(runtime.calls).toHaveLength(executionWindow.callsBeforeDisconnect);
+      expect(runtime.calls).toHaveLength(executionWindow.callsAfterRetirement);
     }
     expect(executionWindow.daylightSeconds).toBe(60);
     expect(reached).toEqual([true, true, true]);
@@ -185,6 +232,7 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
     writeFileSync(info.outputPath('real-three-model-calls.json'), JSON.stringify(runtime.calls));
     writeFileSync(info.outputPath('real-three-errors.json'), JSON.stringify(errors));
     writeFileSync(info.outputPath('real-three-execution-window.json'), JSON.stringify(executionWindow));
+    writeFileSync(info.outputPath('real-three-connection-events.json'), JSON.stringify(runtime.connectionEvents));
     await runtime.close();
   }
 });

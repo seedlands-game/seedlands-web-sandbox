@@ -2,9 +2,45 @@ import { spawnSync } from 'node:child_process';
 import { createServer } from 'node:net';
 import { createGatewayChatModel } from '../../../apps/agent-server/src/gateway-model';
 import { ResidentFactory } from '../../../apps/agent-server/src/resident-factory';
-import { startResidentServer } from '../../../apps/agent-server/src/node/resident-host';
+import { startResidentServer, type ResidentServerOptions } from '../../../apps/agent-server/src/node/resident-host';
 import { PersistentNpcWorkspace, createPostgresFrameworkPersistence } from '../../../apps/agent-server/src/workspace';
 import type { CharacterObservation } from '@seedlands/game-core/runtime/character-control-protocol';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+
+function birthDocumentDiagnostics(value: unknown) {
+  if (!isRecord(value) || !Array.isArray(value.choices)) return undefined;
+  const choice: unknown = value.choices[0];
+  if (!isRecord(choice) || !isRecord(choice.message) || !Array.isArray(choice.message.tool_calls)) return undefined;
+  for (const call of choice.message.tool_calls as unknown[]) {
+    if (!isRecord(call) || !isRecord(call.function) || call.function.name !== 'create_resident_birth_package') continue;
+    if (typeof call.function.arguments !== 'string') return { parsed: false };
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(call.function.arguments);
+    } catch {
+      return { parsed: false };
+    }
+    if (!isRecord(parsed)) return { parsed: false };
+    const documents = {
+      agent: parsed.agent,
+      soul: parsed.soul,
+      memory: parsed.memory,
+      goal: isRecord(parsed.goal) ? parsed.goal.description : undefined,
+    };
+    return {
+      parsed: true,
+      fields: Object.entries(documents).map(([field, content]) => ({
+        field,
+        type: typeof content,
+        utf8Bytes: typeof content === 'string' ? Buffer.byteLength(content, 'utf8') : null,
+        nonWhitespace: typeof content === 'string' && content.trim().length > 0,
+      })),
+    };
+  }
+  return undefined;
+}
 
 export async function startBrowserResidentFixture(origin: string, real = false, maximumFlashCalls = 6) {
   if (![6, 18].includes(maximumFlashCalls)) throw new Error('Unapproved real-model fixture budget');
@@ -68,6 +104,31 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
     const framework = await createPostgresFrameworkPersistence(connectionString);
     resources.push(() => framework.close());
     const calls: { actorId: string; startedAt: number; finishedAt?: number; kind: string; request: unknown }[] = [];
+    type ConnectionEvent = Parameters<NonNullable<ResidentServerOptions['onConnectionLifecycle']>>[0] & {
+      at: number;
+      flashCalls: number;
+    };
+    const connectionEvents: ConnectionEvent[] = [];
+    const connectionWaiters = new Set<() => void>();
+    const waitForRetirement = (connectionId: string): Promise<ConnectionEvent> =>
+      new Promise((resolve, reject) => {
+        const finish = (error?: Error, event?: ConnectionEvent) => {
+          clearTimeout(timer);
+          connectionWaiters.delete(check);
+          if (error) reject(error);
+          else resolve(event!);
+        };
+        const check = () => {
+          const event = connectionEvents.find(
+            (entry) => entry.connectionId === connectionId && ['retired', 'retirement-failed'].includes(entry.phase),
+          );
+          if (event?.phase === 'retirement-failed') finish(new Error('Resident connection retirement failed'));
+          else if (event) finish(undefined, event);
+        };
+        const timer = setTimeout(() => finish(new Error('Resident connection retirement timed out')), 15_000);
+        connectionWaiters.add(check);
+        check();
+      });
     const flash = createGatewayChatModel({
       tier: 'flash',
       baseUrl: real ? process.env.SEEDLANDS_MODEL_GATEWAY_URL! : 'http://127.0.0.1:9/v1',
@@ -172,6 +233,7 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
           toolCount: output.choices?.[0]?.message?.tool_calls?.length ?? 0,
           contentLength: output.choices?.[0]?.message?.content?.length ?? 0,
           reasoningLength: output.choices?.[0]?.message?.reasoning_content?.length ?? 0,
+          birthDocuments: birthDocumentDiagnostics(output),
         };
         return response;
       },
@@ -187,6 +249,10 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
       factory,
       allowedOrigins: [origin],
       port: 0,
+      onConnectionLifecycle: (event) => {
+        connectionEvents.push({ ...event, at: Date.now(), flashCalls: calls.length });
+        for (const check of connectionWaiters) check();
+      },
     });
     resources.push(() => host.close());
     return {
@@ -198,6 +264,8 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
       flash,
       factory,
       framework,
+      connectionEvents,
+      waitForRetirement,
       close,
     };
   } catch (error) {
