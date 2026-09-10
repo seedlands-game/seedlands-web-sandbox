@@ -8,6 +8,7 @@ export type InputCommand = Readonly<{
   stream: string;
   sequence: number;
   targetPhysicsTick: number;
+  movementRevision?: string;
   issuedAtMs: number;
   state: Readonly<{
     moveX: number;

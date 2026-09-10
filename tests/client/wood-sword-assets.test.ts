@@ -15,8 +15,8 @@ describe('木剑同源资产接入', () => {
     const definition = resolvePixelModel(model, builtinAssets);
     expect(toolModelDefinition('wood-sword')).toEqual(definition);
     expect(buildToolMesh(definition).indices.length).toBeGreaterThan(36);
-    expect(definition.pixels).toHaveLength(16);
-    expect(definition.pixels.every((row) => row.length === 16)).toBe(true);
+    expect(definition.pixels).toHaveLength(32);
+    expect(definition.pixels.every((row) => row.length === 32)).toBe(true);
   });
 
   it('像素工具准入按物品类别而非两个旧物品名称', () => {

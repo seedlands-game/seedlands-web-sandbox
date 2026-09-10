@@ -1,5 +1,5 @@
 import { Voxel } from '../../world/voxel';
-import { getItemDefinition } from '../gameplay/item-registry';
+import { isItemId } from '../gameplay/item-registry';
 import type {
   CommandParseFailure,
   CommandParseResult,
@@ -46,11 +46,9 @@ function voxel(token: string): number {
 }
 
 function item(token: string): string {
-  try {
-    return getItemDefinition(token.toLowerCase()).id;
-  } catch {
-    throw new ParseProblem(`Unsupported item: ${token}.`);
-  }
+  const normalized = token.toLowerCase();
+  if (!isItemId(normalized)) throw new ParseProblem(`Invalid item id: ${token}.`);
+  return normalized;
 }
 
 function actorArchetype(token: string): 'grazer' | 'night-stalker' | 'settler' {
@@ -62,6 +60,20 @@ function actorArchetype(token: string): 'grazer' | 'night-stalker' | 'settler' {
 function parseTokens(tokens: string[]): ServerCommand {
   const name = tokens[0].toLowerCase();
   switch (name) {
+    case '/gamemode':
+      exact(tokens, 2, '/gamemode survival|creative');
+      if (tokens[1] !== 'survival' && tokens[1] !== 'creative') throw new ParseProblem('Unknown actor mode.');
+      return { type: 'set-mode', mode: tokens[1] };
+    case '/fly':
+      exact(tokens, 2, '/fly on|off');
+      if (tokens[1] !== 'on' && tokens[1] !== 'off') throw new ParseProblem('Flight requires on or off.');
+      return { type: 'set-flight', enabled: tokens[1] === 'on' };
+    case '/creative-slot': {
+      exact(tokens, 3, '/creative-slot <0..7> <item|empty>');
+      const slot = integer(tokens[1], 'slot');
+      if (slot < 0 || slot > 7) throw new ParseProblem('Creative slot must be 0..7.');
+      return { type: 'set-creative-slot', slot, itemId: tokens[2] === 'empty' ? null : item(tokens[2]) };
+    }
     case '/setblock':
       exact(tokens, 5, '/setblock <x> <y> <z> <voxel>');
       return {

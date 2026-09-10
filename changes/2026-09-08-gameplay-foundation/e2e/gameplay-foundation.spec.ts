@@ -173,11 +173,13 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
   await page.mouse.up();
   await walkToDrop(page, 'wood-block', woodBefore);
   panel = await inventory(page);
-  await expect(panel.getByRole('gridcell', { name: '原木 1', exact: true })).toBeVisible();
+  await expect(panel.getByRole('gridcell', { name: '原木 × 1', exact: true })).toBeVisible();
   await panel.getByRole('button', { name: '合成 木板', exact: true }).click();
   await panel.getByRole('button', { name: '合成 木剑', exact: true }).click();
-  await panel.getByRole('gridcell', { name: '木剑 1', exact: true }).click();
-  await panel.getByRole('button', { name: '装备到当前快捷栏' }).click();
+  await panel.getByRole('gridcell', { name: '木剑 × 1', exact: true }).click();
+  const activeHotbarSlot = panel.getByRole('gridcell', { selected: true });
+  await activeHotbarSlot.click();
+  await expect(activeHotbarSlot).toHaveAttribute('data-item', 'wood-sword');
   await closeInventory(page);
   await expect(page.getByRole('img', { name: '手持 木剑', exact: true })).toBeAttached();
   await expect(page.locator('#combat-status')).toContainText('就绪');
@@ -223,14 +225,14 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
   await expect(page.getByRole('button', { name: '复活', exact: true })).toBeHidden();
   await walkToDrop(page, 'stone-block', stoneBefore);
   panel = await inventory(page);
-  await expect(panel.getByRole('gridcell', { name: '石块 1', exact: true })).toBeVisible();
-  await expect(panel.getByRole('gridcell', { name: '木剑 1', exact: true })).toBeVisible();
+  await expect(panel.getByRole('gridcell', { name: '石块 × 1', exact: true })).toBeVisible();
+  await expect(panel.getByRole('gridcell', { name: '木剑 × 1', exact: true })).toBeVisible();
   await page.evaluate(() => window.__seedlandsHarness!.flushSave());
   if (!process.env.CI) await page.screenshot({ path: info.outputPath('wood-sword-loot.png') });
   await startHarnessWorld(page, 'wood-sword-journey');
   panel = await inventory(page);
-  await expect(panel.getByRole('gridcell', { name: '木剑 1', exact: true })).toBeVisible();
-  await expect(panel.getByRole('gridcell', { name: '石块 1', exact: true })).toBeVisible();
+  await expect(panel.getByRole('gridcell', { name: '木剑 × 1', exact: true })).toBeVisible();
+  await expect(panel.getByRole('gridcell', { name: '石块 × 1', exact: true })).toBeVisible();
   await expect(enemy).toHaveCount(0);
   expect(errors).toEqual([]);
 });
@@ -238,14 +240,22 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
 test('真实连续攻击输入进入第二段连招，HUD仅按权威结果显示命中', async ({ page }, info) => {
   await startHarnessWorld(page, 'wood-sword-combo');
   await prepareFlatMovement(page);
+  const logic = await page.evaluate(() => window.__seedlandsHarness!.world.logic({ kind: 'mode', mode: 'scripted' }));
+  expect(logic).toMatchObject({ ok: true, data: { mode: 'scripted' } });
   await command(page, { type: 'give-item', itemId: 'wood-sword', count: 1 });
   await lockGameplayPointer(page);
   await setHarnessView(page, 0, -8);
-  // 主动靠近玩家的目标避免在慢速 CI 的工具往返期间自行游荡出准星。
-  const created = await command(page, { type: 'spawn-actor', archetype: 'night-stalker', position: [0.5, 57, -2] });
+  // 固定 20HP 目标隔离真实连续输入与 HUD；自主游走不属于本用例的验证范围。
+  const created = await command(page, { type: 'spawn-actor', archetype: 'settler', position: [0.5, 57, -2] });
   expect(created.success).toBe(true);
   const entityId = (created.data?.entity as { id: string }).id;
   await expect(page.locator(`[data-entity-id="${entityId}"]`)).toBeAttached();
+  await expect
+    .poll(() => command(page, { type: 'query-entity', entityId }))
+    .toMatchObject({
+      success: true,
+      data: { entity: { archetype: 'settler', health: 20, maxHealth: 20 } },
+    });
   // DOM 观察在输入之前安装，保留短暂阶段；断言不依赖 Node 轮询恰好命中数百毫秒窗口。
   await page.evaluate(() => {
     const target = window as Window & { __combatEvidence?: string[]; __combatObserver?: MutationObserver };

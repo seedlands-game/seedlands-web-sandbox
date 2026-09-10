@@ -1,0 +1,133 @@
+{
+  "retrievedAt": "2026-09-09",
+  "name": "koota",
+  "version": "0.6.6",
+  "license": "ISC",
+  "licenseSha256": "4aca3373f1677ae2cba83e44f30b313992fbce6727ce2e172907d56ac43b0137",
+  "runtimeDependencies": {},
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "@types/react": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "@types/react": {
+      "optional": true
+    }
+  },
+  "tarball": "https://registry.npmjs.org/koota/-/koota-0.6.6.tgz",
+  "integrity": "sha512-Fn8lSooH3u9TIP+eAMugFrOju40Ec70+sB7x1eZBB3H0Lki2hyIbFAodk3NDB/RIRzoMs54O4422BVN6SbtWfw==",
+  "declaredEntry": "./dist/index.js",
+  "experiment": {
+    "candidate": "koota",
+    "runReceipt": {
+      "schemaVersion": 1,
+      "command": "node changes/2026-09-09-composable-overworld-playbook/experiments/ecs-admission.mjs koota <isolated-pnpm-project>",
+      "exitCode": 0,
+      "node": "24.20.0",
+      "pnpm": "11.25.0",
+      "typescript": "5.9.3",
+      "esbuild": "0.28.2",
+      "experimentSha256": "1b76b553c13b1ee26fc988e3e118c61da50f3ce37bde067ad447c6df3f70be8c",
+      "isolatedManifestSha256": "362d0b615c46c8e13ed62e2633a4cafc44e53ecded8aaa1fb1da2874c5bb9d51",
+      "isolatedLockSha256": "339a29c0e7a4f3102a7f57f9fb732be0be0cb713008292f09efa5cd51b70b4fa",
+      "runtimeInputs": [
+        {
+          "path": "dist/chunk-ZWIGMIL4.js",
+          "sha256": "bbc3fef6a0258031714bb9cca84dabec2fc6fd484ecf1360d092ea6d15903091"
+        },
+        {
+          "path": "dist/index.js",
+          "sha256": "96299ec950fece9ffe1f345670514dfb22c8994bd3ff8b84eba0ab4a3cd9b9cd"
+        }
+      ],
+      "controlInputs": [
+        {
+          "path": "packages/game-core/src/physics/body-registry.ts",
+          "sha256": "d9a0d9e82b51192356674dd38d3a594ddb451541a23310b60e9d210543773b9c"
+        },
+        {
+          "path": "packages/game-core/src/physics/geometry.ts",
+          "sha256": "c174d00de46d652717f525b3df65cd2985e7215546f77acddeabc51d2968511b"
+        },
+        {
+          "path": "packages/game-core/src/physics/index.ts",
+          "sha256": "61314c16d74ec8a2013a713bcef71e57e90969372b4b2a5c88703b997d210ec3"
+        },
+        {
+          "path": "packages/game-core/src/physics/reachability.ts",
+          "sha256": "8c5ab5d7e097d64ab635f8c58e4b3d1d22bb12644f16b75a0f03504a73c5d148"
+        },
+        {
+          "path": "packages/game-core/src/physics/recovery.ts",
+          "sha256": "894d15072e53c5e01a0407f42a16ddc4ba81303d01ee0892f13e5d413662cf26"
+        },
+        {
+          "path": "packages/game-core/src/physics/step-body.ts",
+          "sha256": "4ba02c1c88aae9e5102c420a14e574928b012bd096cf699d68cba85412935de4"
+        },
+        {
+          "path": "packages/game-core/src/server/gameplay/entity-store.ts",
+          "sha256": "c95b7b246b02019489e4113251fc692d639e91b6ea4cbb43f37a24c469e1d836"
+        },
+        {
+          "path": "packages/game-core/src/server/gameplay/item-registry.ts",
+          "sha256": "006ed034be4f310945cc0011392c71fa209c8bc079bee2419bcd86267cdb6a09"
+        },
+        {
+          "path": "packages/game-core/src/world/macro-world.ts",
+          "sha256": "4f8ebb717651535f8a0d18a090ee5bfa204eda5b106052227d09c8c23edb4c22"
+        },
+        {
+          "path": "packages/game-core/src/world/voxel.ts",
+          "sha256": "1fdcf286b05c6da5def8aa2bb1283be50927b4b4be5e5a28a1fdd0f3fc2d3222"
+        }
+      ]
+    },
+    "version": "0.6.6",
+    "result": "PASS",
+    "checks": [
+      "two-world-isolation",
+      "projection-copy",
+      "component-owner",
+      "stable-id-tombstone",
+      "stale-action",
+      "fresh-recycled-components",
+      "existing-physics-180-steps",
+      "ecs-driven-derived-spatial-index",
+      "prewarmed-query-recycle-exact-membership",
+      "component-remove-readd-query-membership",
+      "checkpoint-roundtrip",
+      "epoch-invalidation",
+      "dispose-isolation",
+      "browser-bundle",
+      "types-without-platform-ambient"
+    ],
+    "entityReusePolicy": "library generation + stable-id + epoch",
+    "initialIds": [1, 268435457],
+    "oldId": 1,
+    "replacementId": 1048577,
+    "prototypeAdded": [
+      "add",
+      "remove",
+      "has",
+      "destroy",
+      "changed",
+      "get",
+      "set",
+      "targetsFor",
+      "targetFor",
+      "id",
+      "generation",
+      "isAlive"
+    ],
+    "globalSymbolsAdded": [],
+    "runtimeInputCount": 2,
+    "runtimeBytes": 103541,
+    "limits": ["isolated-adapter-only", "no-product-migration", "no-performance-claim", "no-browser-product-acceptance"]
+  },
+  "experimentSha256": "1b76b553c13b1ee26fc988e3e118c61da50f3ce37bde067ad447c6df3f70be8c",
+  "artifactReceipt": "koota-artifact-receipt.json"
+}

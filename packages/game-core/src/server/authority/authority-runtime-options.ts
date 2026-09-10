@@ -1,4 +1,7 @@
+import type { ModuleActorAuthority } from '../composition/gameplay-actor-authority';
+import type { ModuleSystemAuthority } from '../gameplay/modules/gameplay-module-schedule';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
+import type { WorldComposition } from '../composition/contracts';
 import type { FluidAuthoritySnapshot } from '../fluid/fluid-transaction';
 import type { CanonicalChunkResidencyLimits } from '../chunk-residency';
 import type { ChunkPersistence } from '../persistence/chunk-persistence';
@@ -13,6 +16,10 @@ export type AuthorityRuntimeOptions = Readonly<{
   epoch: string;
   seedText: string;
   platform: CorePlatformPorts;
+  composition?: WorldComposition;
+  moduleSystemAuthority?: ModuleSystemAuthority;
+  moduleActorAuthority?: ModuleActorAuthority;
+  allowLegacyCompositionMigration?: boolean;
   persistence?: AuthorityPersistence;
   generatorVersion?: number;
   initialWorldTime: number;

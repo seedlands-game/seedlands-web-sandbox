@@ -108,4 +108,12 @@ describe('Web 与 game-core workspace 边界', () => {
       ),
     ).toEqual([]);
   });
+
+  it('允许通过自身声明的 export 导入，同时拒绝自身未导出的路径', async () => {
+    const filePath = 'packages/game-core/src/server/gameplay/playbooks/overworld/probe.ts';
+    expect(
+      await lintPackageBoundary("import type { ModModule } from '@seedlands/game-core/mod-api';", filePath),
+    ).toEqual([]);
+    expect(await lintPackageBoundary("import '@seedlands/game-core/internal/private';", filePath)).toHaveLength(1);
+  });
 });

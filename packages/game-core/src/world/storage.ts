@@ -13,7 +13,11 @@ export function decodeWorldSave(raw: string | null): SavedWorld | null {
     const saved: unknown = JSON.parse(raw ?? 'null');
     if (!saved || typeof saved !== 'object') return null;
     const record = saved as Record<string, unknown>;
-    if (typeof record.seed !== 'string' || record.generatorVersion !== GENERATOR_VERSION) return null;
+    if (
+      typeof record.seed !== 'string' ||
+      (record.generatorVersion !== 2 && record.generatorVersion !== 3 && record.generatorVersion !== GENERATOR_VERSION)
+    )
+      return null;
     if (!Array.isArray(record.player) || record.player.length !== 3 || !record.player.every(Number.isFinite))
       return null;
     if (!Array.isArray(record.changes)) return null;

@@ -22,6 +22,7 @@ export type PixelModel = AssetRecord<
   {
     textureId: string;
     thicknessPixels: number;
+    pixelsPerUnit?: number;
     grip: [number, number];
     generatorVersion: 1;
   }
@@ -44,6 +45,7 @@ export type ToolModel = Readonly<{
   palette: Readonly<Record<string, readonly [number, number, number]>>;
   grip: readonly [number, number];
   thicknessPixels?: number;
+  pixelsPerUnit?: number;
 }>;
 
 export type MaterialAsset = AssetRecord<

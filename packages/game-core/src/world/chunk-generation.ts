@@ -29,7 +29,7 @@ export function makeChunk(
     for (let x = 0; x < CHUNK_SIZE; x += 1) {
       const context = queryMacro(ox + x, oz + z);
       for (let y = 0; y < CHUNK_SIZE; y += 1)
-        data[voxelIndex(x, y, z)] = baseVoxel(seed, ox + x, oy + y, oz + z, context, queryMacro);
+        data[voxelIndex(x, y, z)] = baseVoxel(seed, ox + x, oy + y, oz + z, context, queryMacro, generatorVersion);
     }
   for (const [x, y, z, value] of changes) {
     if (Math.floor(x / CHUNK_SIZE) === cx && Math.floor(y / CHUNK_SIZE) === cy && Math.floor(z / CHUNK_SIZE) === cz) {

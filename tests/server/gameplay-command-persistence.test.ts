@@ -111,7 +111,7 @@ describe('gameplay command boundary', () => {
       success: true,
       command: { type: 'spawn-world-item', itemId: ItemIds.Berry, count: 2, position: [1, 34, 0] },
     });
-    expect(parseSlashCommand('/give unknown 1')).toMatchObject({ success: false, error: { kind: 'parse' } });
+    expect(parseSlashCommand('/give invalid::item 1')).toMatchObject({ success: false, error: { kind: 'parse' } });
   });
 });
 

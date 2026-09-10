@@ -5,14 +5,14 @@ import { makeChunk } from '../../packages/game-core/src/world/chunk-generation';
 import { createKernelMemory } from '../../apps/web/src/compute/kernel-memory';
 import { createChunkKernel, makeChunkStaged } from '../../apps/web/src/compute/chunk-kernel';
 
-describe('W02 批量地形填充保留确定性', () => {
+describe.each(['scalar', 'simd'])('W02 批量地形填充保留确定性 (%s)', (artifact) => {
   it('生成器版本、负坐标、边界及树冠与原算法逐字节一致', async () => {
     const bytes = await readFile(
-      new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url),
+      new URL(`../../apps/web/src/generated/wasm/rust-kernels-${artifact}.wasm`, import.meta.url),
     );
     const memory = await createKernelMemory(bytes);
     const generate = createChunkKernel(memory);
-    for (const version of [2, 3]) {
+    for (const version of [2, 3, 4]) {
       for (const seed of [0, 1, 0xffffffff, 18374655]) {
         for (const [cx, cy, cz] of [
           [0, 0, 0],
@@ -38,7 +38,7 @@ describe('W02 批量地形填充保留确定性', () => {
 
   it('内核失败整块回退，保留输入和编辑顺序', async () => {
     const bytes = await readFile(
-      new URL('../../apps/web/src/generated/wasm/rust-kernels-scalar.wasm', import.meta.url),
+      new URL(`../../apps/web/src/generated/wasm/rust-kernels-${artifact}.wasm`, import.meta.url),
     );
     const memory = await createKernelMemory(bytes);
     memory.failed = true;

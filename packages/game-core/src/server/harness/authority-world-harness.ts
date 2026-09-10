@@ -1,3 +1,4 @@
+import type { WorldModuleBinding } from '../commands/module-command';
 import type { ServerCommand } from '../commands/command-contract';
 import type { AuthorityRuntime } from '../authority/authority-runtime';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
@@ -32,6 +33,7 @@ import { WorldBarrierRuntime } from './world-barrier-runtime';
 import { WorldCheckpointRuntime, WorldOperationFailure, WorldTraceRuntime } from './world-harness-state';
 import {
   authorizationRequest,
+  worldFrontierFor,
   commandSourceForPrincipal,
   inspectAuthorizationRequest,
 } from './world-harness-operations';
@@ -55,6 +57,7 @@ export type AuthorityWorldHarnessOptions = Readonly<{
   restore: (snapshot: FrozenGameSaveSnapshot) => Promise<void>;
   complete?: <Result>(operation: Promise<Result>) => Promise<Result>;
   clockNow?: () => number;
+  moduleCommandBinding?: (command: ServerCommand) => WorldModuleBinding;
 }>;
 
 type Operation = Readonly<{
@@ -229,7 +232,15 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
               ? {}
               : { expectedCommitSequence: commandOptions.expectedCommitSequence }),
           },
-          () => current.runtime.executeCommand(source, command),
+          () =>
+            current.runtime.executeCommand(
+              source,
+              command,
+              this.options.moduleCommandBinding?.(command) ?? {
+                authorizer: this.options.authorization,
+                principalId: this.options.principalId,
+              },
+            ),
         );
         const receipt = await (this.options.complete ? this.options.complete(operation) : operation);
         if (receipt.status !== 'executed')
@@ -317,7 +328,13 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
             'Scripted Logic submission requires scripted mode.',
             'conflict',
           );
-        return { accepted: runtime.receiveLogicIntentBatch(request.batch), mode: this.logicModeValue };
+        return {
+          accepted: runtime.receiveLogicIntentBatch(request.batch, {
+            authorizer: this.options.authorization,
+            principalId: this.options.principalId,
+          }),
+          mode: this.logicModeValue,
+        };
       },
     );
   }
@@ -339,7 +356,7 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
           ? [runtime.server.getAction(query.actionId)].filter((value) => value !== null)
           : query.entityId
             ? [runtime.server.getActorAction(query.entityId)].filter((value) => value !== null)
-            : runtime.server.simulationSnapshot().actions.actions;
+            : runtime.server.simulationSnapshot().actions.actions.map((action) => runtime.server.getAction(action.id)!);
         return { actions };
       },
     );
@@ -482,17 +499,7 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
   }
 
   private frontier(): WorldFrontier {
-    const owner = this.options.owner();
-    const snapshot = owner.runtime.snapshot();
-    return {
-      worldId: owner.worldId,
-      epoch: owner.epoch,
-      worldRevision: snapshot.worldRevision,
-      commitSequence: snapshot.commitSequence,
-      physicsTick: snapshot.physicsTick,
-      fluidWorkSequence: owner.runtime.settlementDiagnostics.fluidIssuedWorkCount,
-      logicObservationSequence: owner.runtime.settlementDiagnostics.logicIssuedObservationSequence,
-    };
+    return worldFrontierFor(this.options.owner());
   }
 
   private safeFrontier(): WorldFrontier | null {

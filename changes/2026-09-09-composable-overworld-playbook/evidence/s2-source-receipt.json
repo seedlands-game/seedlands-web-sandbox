@@ -1,0 +1,162 @@
+{
+  "stage": "S2",
+  "baseCommit": "2e858980401a05e583deb4ed1b144b2bc599b268",
+  "files": [
+    {
+      "path": ".npmrc",
+      "sha256": "2cf058fb6be87079ea4417bba0ce6fd82c2d214a5683d11bee1dd6da4317ddd0"
+    },
+    {
+      "path": "packages/game-core/package.json",
+      "sha256": "b7d2e51b37f02ba5ec4fa6c4678e98c53b64d7caf7e9dead1d5f6af9c2c03b9b"
+    },
+    {
+      "path": "packages/game-core/src/server/authority/authority-logic-intent-acceptance.ts",
+      "sha256": "a2935afecdc450f8aeb7321014c5dc9603979dde9876611fdb52d958ae183d83"
+    },
+    {
+      "path": "packages/game-core/src/server/authority/authority-physics-input.ts",
+      "sha256": "9e4555149b8b117f2d1235448b7220a8446146eb549d0d661bd0182b884f5c6d"
+    },
+    {
+      "path": "packages/game-core/src/server/authority/authority-runtime.ts",
+      "sha256": "1924a7cb0f4716e88d17902028520b576d765ce1859b58f74fbf592be07f2a5e"
+    },
+    {
+      "path": "packages/game-core/src/server/authority/authority-session-types.ts",
+      "sha256": "72f03059e2cb52e54f52ac614c7beb9c3b31366c30a7f1e899cfb5b6f68a2ac2"
+    },
+    {
+      "path": "packages/game-core/src/server/authority/authority-session.ts",
+      "sha256": "a0dc6cdf266472ef0e80e8be69686ffce34788bef600c3d3ab60a53f4657462b"
+    },
+    {
+      "path": "packages/game-core/src/server/authority/logic-observation-builder.ts",
+      "sha256": "2235cd2ed44ee090acd60c76fe82921f3c851c32e52bbd362604cab83f2f2192"
+    },
+    {
+      "path": "packages/game-core/src/server/game-server-gameplay.ts",
+      "sha256": "058c3612873fa2352dd7c700ddcea8c0b7aedd13ec7c32ed96c8fc6a68bcfadb"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/combat-runtime-snapshot.ts",
+      "sha256": "cc31d4855123038ef2c8d345dcda58295aa5b4d85ef7c6cf8d24139b629d534e"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/combat-runtime.ts",
+      "sha256": "9b0e33dfc37a487d376e7212bd6964deabe10e16dae6380169ce58fe14c3a796"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/ecs-actor-components.ts",
+      "sha256": "11e5560568c5ea12fa96171f431b38f235b5329649f82d8f21d9f4c96d25c25e"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/ecs-actor-state.ts",
+      "sha256": "6a5a9a5e4f073d5fff0b49403127807a8194a77b1c8660030a32bcca52586b74"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/ecs-entity-owner.ts",
+      "sha256": "a88d94a288f5b556cbcdaf6498f5cce1f2c54a589cee62ca30dd4d2a61ebb585"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "sha256": "7e3b4b1c7bc9012c4cb8884b95675fbe97174d252dd1c31835a7f7810abc6bb3"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/gameplay-runtime.ts",
+      "sha256": "b313b0981775a14a6dbf933e6678572ef53d0085932e93f389a097a1e854a09e"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/gameplay-snapshot.ts",
+      "sha256": "3b5ca3c2492c34d3eaf72aeb92c5faf92c2678fbdec669f3b8995823e84b845c"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/inventory.ts",
+      "sha256": "a5df1009ba4c411c32d4d56320a2dac424a26263cbd1f387a2a17448e8807507"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/player-state.ts",
+      "sha256": "2a0bc57403d2f5d57900f738fb31947e58afecd9d0b470b3daee48e6ae26dd1d"
+    },
+    {
+      "path": "packages/game-core/src/server/gameplay/recipe-registry.ts",
+      "sha256": "ee0e5cd5a36d64cdb6f27443b932f61c796e2a1870d21adedb926d1279fc5702"
+    },
+    {
+      "path": "packages/game-core/src/server/persistence/game-save-runtime.ts",
+      "sha256": "989b13adcdc7e91fb8bc746c9c3b78059435c707233d3dc331e19145ad5b9b1f"
+    },
+    {
+      "path": "packages/game-core/src/server/persistence/game-save-snapshot.ts",
+      "sha256": "5206c2cc33e10dbe2fac32d1656f7ae473b1331ecfec79886b2758b529a681a4"
+    },
+    {
+      "path": "packages/game-core/src/server/simulation/action-identity.ts",
+      "sha256": "5f409419b3fd2b4cb451745c0a07fca375039d2c8cbc8089e81563de14ad950e"
+    },
+    {
+      "path": "packages/game-core/src/server/simulation/action-runtime.ts",
+      "sha256": "6cbf8f63ffe60643a95bf90a911600fbccaf6590a812d6c093e00d4da55e122a"
+    },
+    {
+      "path": "packages/game-core/src/server/simulation/actor-authority-rules.ts",
+      "sha256": "1c1d5085d48fcce1a78c8b6f5b6bfde2668d67edd56d553d584f75a58117d8dd"
+    },
+    {
+      "path": "packages/game-core/src/server/simulation/autonomy-runtime.ts",
+      "sha256": "2681f0ca91be350cbfdb1461df25a52f66f172faabc01331fe0819c46b790df1"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "6edf03f307bfd1e7624d57f8049704926ed0010d9b2710deaeb8715ad2afc099"
+    },
+    {
+      "path": "tests/server/action-identity-restore.test.ts",
+      "sha256": "9970d9fe78c1552f6533672e5f7e20cac42be05290532bf6bd3e1c4d6d9e9a31"
+    },
+    {
+      "path": "tests/server/actor-components-integration.test.ts",
+      "sha256": "6175c2cec6dad60ae2e330bb12b233ad14dd4b96a6aaa2bbcd1dc03fb37d0486"
+    },
+    {
+      "path": "tests/server/authority-entity-lifetime.test.ts",
+      "sha256": "24752a41296c7acc2b8ad3c291c8653499759ef0ca3a2560a8399b00acb124d4"
+    },
+    {
+      "path": "tests/server/authority-logic-lifetime-acceptance.test.ts",
+      "sha256": "e392776cc45ab68ff52505223338ac9da884680ebbfed8e3e832fca11114319a"
+    },
+    {
+      "path": "tests/server/combat-identity-restore.test.ts",
+      "sha256": "5b091aaf4933440da08a94ae1563c610f9e3441513873ad2da04deaa90d8cfcb"
+    },
+    {
+      "path": "tests/server/ecs-component-snapshot.test.ts",
+      "sha256": "049ca750a4ac3d94e353f8aac4281803e5f1b0678ee9e37bd61a371f92a8c4ff"
+    },
+    {
+      "path": "tests/server/ecs-entity-owner.test.ts",
+      "sha256": "a0d05489a458b081d034e88c1f7c5b2be400f1c647cab53e6faaf3257997ec35"
+    },
+    {
+      "path": "tests/server/entity-store.test.ts",
+      "sha256": "e7714d093353ac28dd5901cd8ed0d05b79b81d3d027c9969291a0edc9a1850ce"
+    },
+    {
+      "path": "tests/server/game-save-persistence.test.ts",
+      "sha256": "6dde87e552c02fad0ea9264c3b12377372f217d2b32a0a9117b23417a819d781"
+    },
+    {
+      "path": "tests/server/gameplay-action-identity.test.ts",
+      "sha256": "2c9c2c847c21b9620a50cd790025d0d51a965b07960faaa40f1a968dc1e0121c"
+    },
+    {
+      "path": "tests/server/gameplay-foundation.test.ts",
+      "sha256": "de1a5f4b6cef16e0634bd44103a41f101eb6ebde2a2cce53c96c53004be4c5f3"
+    },
+    {
+      "path": "tests/server/gameplay-snapshot-migration.test.ts",
+      "sha256": "51a4681a34021554cfb28b97ce945873379aa456d7778e71ed49281dd0010725"
+    }
+  ]
+}

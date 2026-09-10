@@ -18,6 +18,29 @@ export function commitSingleWorldEdit(options: {
 }): WorldCommitResult {
   const { actorId, x, y, z, value } = options;
   const chunk = options.getChunk(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
+  const result = createSingleWorldEditResult({ actorId, x, y, z, value, worldRevision: options.worldRevision, chunk });
+  if (!result.committed) return result;
+  const index = voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE));
+  chunk.voxels[index] = value;
+  chunk.revision += 1;
+  chunk.dirty = true;
+  chunk.materialized = true;
+  options.setWorldRevision(result.worldRevision);
+  options.addMutationCount(1);
+  return result;
+}
+
+/** Pure candidate result shared by immediate and prepared host edits. */
+export function createSingleWorldEditResult(options: {
+  actorId: string;
+  x: number;
+  y: number;
+  z: number;
+  value: number;
+  worldRevision: number;
+  chunk: ServerChunk;
+}): WorldCommitResult {
+  const { actorId, x, y, z, value, chunk } = options;
   const index = voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE));
   if (chunk.voxels[index] === value)
     return {
@@ -41,12 +64,6 @@ export function commitSingleWorldEdit(options: {
     bounds: { min: [x, y, z], max: [x, y, z] },
   };
   const previousRevision = chunk.revision;
-  chunk.voxels[index] = value;
-  chunk.revision += 1;
-  chunk.dirty = true;
-  chunk.materialized = true;
-  options.setWorldRevision(worldRevision);
-  options.addMutationCount(1);
   return {
     committed: true,
     worldRevision,
@@ -56,7 +73,7 @@ export function commitSingleWorldEdit(options: {
       {
         key: chunk.key,
         previousRevision,
-        revision: chunk.revision,
+        revision: chunk.revision + 1,
         cells: [{ index, voxel: value, fluid: value === Voxel.Water ? 0x88 : 0 }],
       },
     ],

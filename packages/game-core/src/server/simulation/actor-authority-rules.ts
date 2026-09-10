@@ -84,6 +84,7 @@ export function executeAuthorityConsume(
   if (existingActionId && (!existing || existing.id !== existingActionId || existing.type !== 'eat'))
     return reject('action-mismatch');
   const action = existing ?? start();
+  context.actions.markRunning(action.id, []);
   if (!consume()) {
     context.finishFailure(action.id, 'food-missing');
     return { accepted: false, changed: true, reason: 'food-missing' };

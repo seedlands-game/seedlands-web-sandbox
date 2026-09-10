@@ -153,6 +153,7 @@ describe('AuthorityRuntime', () => {
     const runtime = await AuthorityRuntime.create({
       platform: testCorePlatform,
       epoch: 'world:mesh-pressure',
+      generatorVersion: 3,
       seedText,
       persistence,
       initialWorldTime: 9,

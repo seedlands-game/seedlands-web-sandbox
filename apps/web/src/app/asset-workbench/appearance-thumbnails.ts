@@ -19,6 +19,7 @@ export async function renderAppearanceThumbnails(
       if (!asset) throw new Error(`无法生成缩略图：${id}`);
       await scene.show(asset, assets, 'model', 'nearest', 1);
       scene.reset();
+      scene.frameThumbnail();
       thumbnails[id] = await scene.capturePng();
     }
     return thumbnails;

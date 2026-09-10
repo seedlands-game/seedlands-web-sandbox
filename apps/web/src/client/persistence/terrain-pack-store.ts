@@ -15,7 +15,7 @@ function decode(value: unknown): TerrainPack {
     !Number.isSafeInteger(pack.contentRevision) ||
     (pack.contentRevision ?? -1) < 0 ||
     !Array.isArray(pack.overrides) ||
-    pack.overrides.length > 13
+    pack.overrides.length > 18
   )
     throw new Error('地形资源包格式不受支持');
   const ids = new Set<number>();

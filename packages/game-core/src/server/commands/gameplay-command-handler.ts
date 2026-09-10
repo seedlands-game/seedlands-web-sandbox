@@ -1,5 +1,10 @@
+import { executeBlockModuleCommand } from './block-module-command';
+import { executeInventoryModuleCommand } from './inventory-module-command';
+import { executeModeCommand, type ModuleCommandPort } from './module-command';
 import type { GameServer, WorldCommitResult } from '../game-server';
-import { getItemDefinition, listItemDefinitions, type ItemId } from '../gameplay/item-registry';
+import { isItemId, type ItemId } from '../gameplay/item-registry';
+import { BLOCK_RULES_CAPABILITY } from '../gameplay/modules/block-action-model';
+import type { BlockRulesCapabilityV1 } from '../gameplay/modules/block-rules-module';
 import { listVoxelGameplayDefinitions } from '../gameplay/voxel-gameplay';
 import type { CommandSource, ServerCommand } from './command-contract';
 
@@ -83,8 +88,17 @@ export async function executeGameplayCommand(
   server: GameServer,
   source: CommandSource,
   command: GameplayCommand,
+  moduleOperation?: ModuleCommandPort,
 ): Promise<GameplayCommandPayload> {
+  const block = executeBlockModuleCommand(server, source, command, moduleOperation);
+  if (block) return block;
+  const inventory = executeInventoryModuleCommand(server, source, command, moduleOperation);
+  if (inventory) return inventory;
   switch (command.type) {
+    case 'set-mode':
+    case 'set-flight':
+    case 'set-creative-slot':
+      return executeModeCommand(source, command, moduleOperation);
     case 'query-player-state': {
       const id = playerId(source, command.entityId);
       return { message: `Player state for ${id}.`, data: { player: server.getPlayerState(id) } };
@@ -109,9 +123,16 @@ export async function executeGameplayCommand(
       };
     }
     case 'query-item-definitions':
-      return { message: 'Item definitions.', data: { items: listItemDefinitions() } };
+      return { message: 'Item definitions.', data: { items: server.itemDefinitions.list() } };
     case 'query-voxel-definitions':
-      return { message: 'Voxel gameplay definitions.', data: { voxels: listVoxelGameplayDefinitions() } };
+      return {
+        message: 'Voxel gameplay definitions.',
+        data: {
+          voxels: server.options.composition
+            ? server.options.composition.capability<BlockRulesCapabilityV1>(BLOCK_RULES_CAPABILITY).definitions
+            : listVoxelGameplayDefinitions(),
+        },
+      };
     case 'query-recipes': {
       const recipes = command.craftable ? server.listCraftableRecipes(playerId(source)) : server.listRecipes();
       return { message: 'Recipe definitions.', data: { recipes } };
@@ -143,8 +164,23 @@ export async function executeGameplayCommand(
       const path = server.queryNavigationPath(id, boundedQueryTarget(entity.position, command.position));
       return { message: `Navigation path for ${id}.`, data: { path } };
     }
-    case 'select-slot':
+    case 'select-slot': {
+      const state = server.getActorModeState(playerId(source));
+      if (server.hasGameplayComposition && state?.mode === 'creative') {
+        if (!Number.isSafeInteger(command.slot) || command.slot < 0 || command.slot >= 8)
+          throw new TypeError('Creative slot is invalid.');
+        return executeModeCommand(
+          source,
+          {
+            type: 'set-creative-slot',
+            slot: command.slot,
+            itemId: state.creativeCatalog.hotbar[command.slot],
+          },
+          moduleOperation,
+        );
+      }
       return mutationPayload('Selected hotbar slot.', server.selectHotbarSlot(playerId(source), command.slot));
+    }
     case 'break-voxel':
       return mutationPayload(
         'Started breaking voxel.',
@@ -165,12 +201,44 @@ export async function executeGameplayCommand(
       return mutationPayload('Used selected item.', server.useSelectedItem(playerId(source)));
     case 'craft-recipe':
       return mutationPayload('Crafted recipe.', server.craft(playerId(source), command.recipeId));
-    case 'attack-entity':
-      return mutationPayload('Attacked entity.', server.attackEntity(playerId(source), command.entityId));
+    case 'attack-entity': {
+      if (!server.hasGameplayComposition)
+        return mutationPayload('Attacked entity.', server.attackEntity(playerId(source), command.entityId));
+      if (!moduleOperation) throw new Error('Combat requires a host-authorized module binding.');
+      const result = moduleOperation(playerId(source), {
+        operationId: 'seedlands:request-combat',
+        target: { kind: 'entity', entityId: command.entityId },
+        input: { targetId: command.entityId },
+      });
+      if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
+      return { message: 'Attacked entity.', data: result.value };
+    }
     case 'respawn':
       return mutationPayload('Respawned player.', server.respawnPlayer(playerId(source)));
     case 'start-action': {
       const id = playerId(source, command.entityId);
+      if (command.action === 'eat' && server.hasGameplayComposition) {
+        if (!moduleOperation || !command.targetEntityId)
+          throw new Error('Feeding requires a host-authorized module binding and target.');
+        const result = moduleOperation(id, {
+          operationId: 'seedlands:consume-world-item',
+          target: { kind: 'entity', entityId: command.targetEntityId },
+        });
+        if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
+        return { message: `Completed Eat action for ${id}.`, data: result.value };
+      }
+      if (command.action === 'attack' && server.hasGameplayComposition) {
+        if (!moduleOperation || !command.targetEntityId)
+          throw new Error('Combat requires a host-authorized module binding and target.');
+        const result = moduleOperation(id, {
+          operationId: 'seedlands:request-combat',
+          target: { kind: 'entity', entityId: command.targetEntityId },
+          input: { targetId: command.targetEntityId },
+        });
+        if (!result.ok) throw new Error(`${result.code}: ${result.message}`);
+        const action = server.getActorAction(id);
+        return { message: `Started Combat action ${action?.id} for ${id}.`, data: { action } };
+      }
       const action = server.startActorAction(id, {
         type: command.action,
         ...(command.position ? { targetPosition: position(command.position) } : {}),
@@ -184,17 +252,18 @@ export async function executeGameplayCommand(
       return { message: `Interrupted action for ${id}.`, data: { interrupted: server.interruptActorAction(id) } };
     }
     case 'give-item': {
-      const definition = getItemDefinition(command.itemId);
+      const definition = server.itemDefinitions.require(command.itemId);
       return mutationPayload(
         `Gave ${command.count} ${definition.id}.`,
         server.giveItem(playerId(source, command.entityId), {
           itemId: definition.id,
           count: positive(command.count, 'Count', true),
+          ...(definition.durability ? { instance: { durability: definition.durability.max } } : {}),
         }),
       );
     }
     case 'remove-item': {
-      const definition = getItemDefinition(command.itemId);
+      const definition = server.itemDefinitions.require(command.itemId);
       return mutationPayload(
         `Removed ${command.count} ${definition.id}.`,
         server.removeItem(playerId(source, command.entityId), {
@@ -204,7 +273,7 @@ export async function executeGameplayCommand(
       );
     }
     case 'spawn-world-item': {
-      const definition = getItemDefinition(command.itemId);
+      const definition = server.itemDefinitions.require(command.itemId);
       const entity = server.spawnWorldItem(position(command.position), {
         itemId: definition.id,
         count: positive(command.count, 'Count', true),
@@ -263,4 +332,8 @@ export async function executeGameplayCommand(
   }
 }
 
-export const itemIdFromCommand = (value: string): ItemId => getItemDefinition(value).id;
+export const itemIdFromCommand = (value: string): ItemId => {
+  const normalized = value.toLowerCase();
+  if (!isItemId(normalized)) throw new TypeError(`Invalid item id: ${value}`);
+  return normalized;
+};

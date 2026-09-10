@@ -134,7 +134,7 @@ export function createProceduralMeshInput({
         )
       ];
     proceduralVoxelSamples += 1;
-    return baseVoxel(seed, x, y, z, queryMacro(x, z), queryMacro);
+    return baseVoxel(seed, x, y, z, queryMacro(x, z), queryMacro, generatorVersion);
   };
   const halo = new Uint16Array(MESH_HALO_SIZE ** 3);
   const canonicalFluid = fluid?.slice() ?? Uint8Array.from(canonical, (voxel) => (voxel === Voxel.Water ? 0x88 : 0));
@@ -243,7 +243,7 @@ export function meshChunk({
     return (
       overrides.get(`${wx},${wy},${wz}`) ??
       outside?.(wx, wy, wz) ??
-      baseVoxel(seed, wx, wy, wz, queryMacro(wx, wz), queryMacro)
+      baseVoxel(seed, wx, wy, wz, queryMacro(wx, wz), queryMacro, generatorVersion)
     );
   };
   const sampleFluid = (x: number, y: number, z: number): number => {

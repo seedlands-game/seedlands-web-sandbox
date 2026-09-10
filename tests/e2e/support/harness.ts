@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export type HarnessSnapshot = {
   frameMs: number;
@@ -234,8 +234,17 @@ type HarnessWindow = Window & {
   };
 };
 
-export async function startHarnessWorld(page: Page, seed: string, query = ''): Promise<void> {
+export async function startHarnessWorld(
+  page: Page,
+  seed: string,
+  query = '',
+  quality?: HarnessSnapshot['quality'],
+): Promise<void> {
   await page.goto(`./?harness=1${query}`, { waitUntil: 'networkidle' });
+  if (quality) {
+    await page.locator('#quality').selectOption(quality);
+    await expect(page.locator('#quality')).toHaveValue(quality);
+  }
   await page.locator('#seed').fill(seed);
   await page.getByRole('button', { name: '进入世界' }).click();
   const continueDespiteWarning = page.getByRole('button', { name: '仍然进入' });

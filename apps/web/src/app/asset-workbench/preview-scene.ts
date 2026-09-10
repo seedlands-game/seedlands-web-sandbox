@@ -1,4 +1,6 @@
 import * as pc from 'playcanvas';
+import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { builtinItemBindings } from '../../client/presentation/asset-catalog';
 import { GameplayModelAssets } from '../gameplay/gameplay-model-assets';
 import { setAppearanceResources } from '../gameplay/appearance-runtime';
 import type { AppearanceProject } from '../../client/presentation/appearance-project';
@@ -41,7 +43,12 @@ export class PreviewScene {
     private fixedSize?: number,
   ) {
     this.app = new pc.Application(canvas, {
-      graphicsDeviceOptions: { deviceTypes: [pc.DEVICETYPE_WEBGL2], antialias: true, preserveDrawingBuffer: true },
+      graphicsDeviceOptions: {
+        deviceTypes: [pc.DEVICETYPE_WEBGL2],
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+      },
     });
     if (this.app.graphicsDevice.deviceType !== 'webgl2') {
       this.app.destroy();
@@ -80,6 +87,8 @@ export class PreviewScene {
     );
   }
   private clear() {
+    this.pivot.setLocalPosition(0, 0, 0);
+    this.pivot.setLocalEulerAngles(0, 0, 0);
     this.viewmodel?.dispose();
     this.viewmodel = null;
     this.release?.();
@@ -101,7 +110,7 @@ export class PreviewScene {
     try {
       if (asset.type === 'extruded-pixel-model') {
         const definition = resolvePixelModel(asset, all);
-        distance = Math.max(2.4, (definition.pixels.length / 16) * 2.4);
+        distance = Math.max(2.4, (definition.pixels.length / (definition.pixelsPerUnit ?? 16)) * 2.4);
         if (mode === 'held') {
           viewmodel = new FirstPersonViewmodel(this.app, this.camera, sceneAssets);
           viewmodel.setVisible(false);
@@ -231,6 +240,51 @@ export class PreviewScene {
     if (changed) this.reset();
     this.updateCamera();
   }
+  /** Frame the visible model, not its authoring canvas or grip, for readable inventory icons. */
+  frameThumbnail() {
+    const binding = builtinItemBindings.find((entry) => entry.modelId === this.shownAssetId);
+    const tool = binding && getItemDefinition(binding.itemId).itemType === 'tool';
+    if (tool) this.pivot.setLocalEulerAngles(0, 0, -35);
+    const meshes = (this.pivot.findComponents('render') as pc.RenderComponent[]).flatMap(
+      (component) => component.meshInstances,
+    );
+    if (!meshes.length) throw new Error('缩略图模型没有可见网格');
+    const bounds = meshes[0].aabb.clone();
+    for (const mesh of meshes.slice(1)) bounds.add(mesh.aabb);
+    this.pivot.setLocalPosition(-bounds.center.x, 0.15 - bounds.center.y, -bounds.center.z);
+    const view = this.camera.getWorldTransform().clone().invert();
+    const points: pc.Vec3[] = [];
+    for (const mesh of meshes) {
+      const positions: number[] = [];
+      mesh.mesh.getPositions(positions);
+      const transform = mesh.node.getWorldTransform();
+      for (let index = 0; index < positions.length; index += 3) {
+        const point = new pc.Vec3(positions[index], positions[index + 1], positions[index + 2]);
+        transform.transformPoint(point, point);
+        view.transformPoint(point, point);
+        points.push(point);
+      }
+    }
+    if (points.length === 0) throw new Error('缩略图模型没有可见像素或顶点');
+    // Orthographic GUI framing keeps thin tools and deep blocks equally legible.
+    let left = Infinity,
+      right = -Infinity,
+      bottom = Infinity,
+      top = -Infinity;
+    for (const point of points) {
+      left = Math.min(left, point.x);
+      right = Math.max(right, point.x);
+      bottom = Math.min(bottom, point.y);
+      top = Math.max(top, point.y);
+    }
+    const centerX = (left + right) / 2;
+    const centerY = (bottom + top) / 2;
+    this.pivot.translate(this.camera.right.clone().mulScalar(-centerX).add(this.camera.up.clone().mulScalar(-centerY)));
+    this.camera.camera!.projection = pc.PROJECTION_ORTHOGRAPHIC;
+    this.camera.camera!.orthoHeight = Math.max(right - left, top - bottom) / (2 * 0.88);
+    this.distance = Math.max(0.1, bounds.halfExtents.length() * 3);
+    this.updateCamera();
+  }
   async capturePng(): Promise<string> {
     return new Promise((resolve, reject) => {
       const capture = () => {
@@ -266,6 +320,7 @@ export class PreviewScene {
     this.updateCamera();
   }
   reset() {
+    this.camera.camera!.projection = pc.PROJECTION_PERSPECTIVE;
     this.yaw = 25;
     this.pitch = 12;
     this.distance = this.initialDistance;

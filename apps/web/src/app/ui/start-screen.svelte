@@ -2,11 +2,12 @@
   import { onMount, untrack } from 'svelte';
   import type { ApplicationShell } from '../application-shell';
   import type { QualityLevel } from '../scene/quality-profile';
-  import type { ShellState } from './ui-contracts';
+  import type { ActorMode, ShellState } from './ui-contracts';
   import GameButton from './primitives/game-button.svelte';
   import GamePanel from './primitives/game-panel.svelte';
   import GameTextField from './primitives/game-text-field.svelte';
   import SeedlandsMark from './primitives/seedlands-mark.svelte';
+  import { GENERATOR_VERSION } from '@seedlands/game-core/world/voxel';
   import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
   import type { WorkerSupport } from '../client-capability-preflight';
   import WorldLoading from './world-loading.svelte';
@@ -21,7 +22,7 @@
     shell: ShellState;
     application: ApplicationShell | null;
     assetBase: string;
-    onstart: (seed: string, quality: QualityLevel, openMode: WorldOpenMode) => void;
+    onstart: (seed: string, quality: QualityLevel, openMode: WorldOpenMode, actorMode: ActorMode) => void;
     onstartshowcase: (quality: QualityLevel) => void;
   } = $props();
   let latestSeed = $state('');
@@ -37,6 +38,7 @@
   let seed = $state(untrack(() => shell.seed));
   let quality = $state<QualityLevel>(untrack(() => shell.quality));
   let openMode = $state<WorldOpenMode>('continue');
+  let actorMode = $state<ActorMode>('survival');
   let previousPhase: ShellState['phase'] = untrack(() => shell.phase);
   let seedTouched = $state(untrack(() => Boolean(shell.seed)));
   let qualityTouched = $state(untrack(() => shell.quality !== 'medium'));
@@ -91,9 +93,18 @@
       世界版本
       <select id="world-version-mode" bind:value={openMode}>
         <option value="continue">默认继续（优先已有新版）</option>
-        <option value="continue-legacy">明确继续旧版 v2</option>
-        <option value="new-current">新建或进入新版 v3（保留旧档）</option>
+        <option value="continue-v2">明确继续旧版 v2</option>
+        <option value="continue-v3">明确继续旧版 v3</option>
+        <option value="new-current">新建或进入新版 v{GENERATOR_VERSION}（保留旧档）</option>
       </select>
+    </label>
+    <label class="world-version-choice" for="actor-mode">
+      新世界模式
+      <select id="actor-mode" bind:value={actorMode}>
+        <option value="survival">生存 · 采集、合成与资源消耗</option>
+        <option value="creative">创造 · 内容目录、飞行与即时编辑</option>
+      </select>
+      <small>只作用于首次创建；继续已有世界时保留存档模式。</small>
     </label>
     {#if shell.initializationError}
       <GameButton id="enter" label={shell.enterLabel} onclick={() => application?.reloadAfterInitializationFailure()}>
@@ -113,7 +124,7 @@
         id="enter"
         label={shell.enterLabel}
         disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
-        onclick={() => onstart(seed, quality, openMode)}
+        onclick={() => onstart(seed, quality, openMode, actorMode)}
       >
         {shell.enterLabel}
       </GameButton>
@@ -137,6 +148,6 @@
     {#if workerSupport === 'unsupported'}
       <p class="start-error" role="alert">当前浏览器不支持运行游戏所需的 Web Worker，无法进入世界。</p>
     {/if}
-    <small>旧版河岸不会自动改变；版本选择可继续 v2，也可为同名 Seed 保留旧档并进入 v3。</small>
+    <small>旧版世界不会自动改变；可明确继续 v2 / v3，或保留旧档并进入同名 Seed 的 v{GENERATOR_VERSION} 世界。</small>
   {/if}
 </GamePanel>

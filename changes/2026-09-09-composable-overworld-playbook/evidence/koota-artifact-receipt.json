@@ -1,0 +1,91 @@
+{
+  "name": "koota",
+  "version": "0.6.6",
+  "upstreamMetadataUrl": "https://registry.npmjs.org/koota/0.6.6",
+  "verifiedArchiveUrl": "https://registry.npmjs.org/koota/-/koota-0.6.6.tgz",
+  "configuredPnpmRegistryOrigin": "redacted: configured registry differs from the public npm origin",
+  "actualInstallTransport": "unknown: original pnpm log reports store reuse/download but no per-package transport URL",
+  "actualArchiveSha256": "16c00c0209499cd29ff43586d0cb73b46fe4c88d89495f17a7349a5a4f4f5f61",
+  "actualArchiveIntegrity": "sha512-Fn8lSooH3u9TIP+eAMugFrOju40Ec70+sB7x1eZBB3H0Lki2hyIbFAodk3NDB/RIRzoMs54O4422BVN6SbtWfw==",
+  "declaredArchiveIntegrity": "sha512-Fn8lSooH3u9TIP+eAMugFrOju40Ec70+sB7x1eZBB3H0Lki2hyIbFAodk3NDB/RIRzoMs54O4422BVN6SbtWfw==",
+  "installedFilesMatchVerifiedArchive": true,
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "4aca3373f1677ae2cba83e44f30b313992fbce6727ce2e172907d56ac43b0137"
+    },
+    {
+      "path": "README.md",
+      "sha256": "ee302e16207914c84f812960852cab26ef80bffdf037bd7acd37883567a0d243"
+    },
+    {
+      "path": "dist/chunk-ZWIGMIL4.js",
+      "sha256": "bbc3fef6a0258031714bb9cca84dabec2fc6fd484ecf1360d092ea6d15903091"
+    },
+    {
+      "path": "dist/index.cjs",
+      "sha256": "802bf3a8c2c40d0d0307f3d240ace00e0757d8c8178176b18fbfe1c9cd282789"
+    },
+    {
+      "path": "dist/index.d.cts",
+      "sha256": "115e801559efe9ac9073232b72d70d49d8d1dd73d543f759afd632d0ad0226a0"
+    },
+    {
+      "path": "dist/index.d.ts",
+      "sha256": "c689be9c66fce6a73063425354e08072ec6f8aaed56142827d11ea5c59d40372"
+    },
+    {
+      "path": "dist/index.js",
+      "sha256": "96299ec950fece9ffe1f345670514dfb22c8994bd3ff8b84eba0ab4a3cd9b9cd"
+    },
+    {
+      "path": "dist/react.cjs",
+      "sha256": "40c2c518d593c0ee6e137cb3e4e2307f2f03c0e3dbad9e4b27b82a07752f9aec"
+    },
+    {
+      "path": "dist/react.d.cts",
+      "sha256": "6f8caa77b35a29e0fa2140947f13314eff64612da21e4b3deadb5c47347f084f"
+    },
+    {
+      "path": "dist/react.d.ts",
+      "sha256": "1ef5e7a13013953ef97afdb0c00b757901b3e2deff16cc9959d24b2aada7f282"
+    },
+    {
+      "path": "dist/react.js",
+      "sha256": "620cf97614ebd97f4fda6917f13a4afad7a312451273a7846e1a193d4a7b1d14"
+    },
+    {
+      "path": "dist/types-DONaXEhM.d.cts",
+      "sha256": "6347ab3b8b98849be07f61d9282d47c8bf4b2db91ef8f6b7efa38896aceea5cc"
+    },
+    {
+      "path": "dist/types-DONaXEhM.d.ts",
+      "sha256": "6347ab3b8b98849be07f61d9282d47c8bf4b2db91ef8f6b7efa38896aceea5cc"
+    },
+    {
+      "path": "package.json",
+      "sha256": "e3711a164e65f93373539b1251aa2fa357b33e3b928b41441dd63d6004e4e957"
+    },
+    {
+      "path": "react/index.cjs",
+      "sha256": "40c2c518d593c0ee6e137cb3e4e2307f2f03c0e3dbad9e4b27b82a07752f9aec"
+    },
+    {
+      "path": "react/index.d.cts",
+      "sha256": "f470bdaa29c68260105c52764613c90e7589b8fee085ff081fb47b8f02c50139"
+    },
+    {
+      "path": "react/index.d.ts",
+      "sha256": "394f99bafea944a86386eb4321a9438f349331d33f80a21f5fbb59c2d1d70914"
+    },
+    {
+      "path": "react/index.js",
+      "sha256": "1d88d6a6994ab0c29ace854e49b7545d2ff42ab6522bdc81e5847ec43806051f"
+    }
+  ],
+  "isolatedManifestSha256": "362d0b615c46c8e13ed62e2633a4cafc44e53ecded8aaa1fb1da2874c5bb9d51",
+  "isolatedLockSha256": "339a29c0e7a4f3102a7f57f9fb732be0be0cb713008292f09efa5cd51b70b4fa",
+  "verificationCommand": "python3 experiments/verify-ecs-artifacts.py <isolated-pnpm-project> <output-directory>",
+  "python": "3.11.12",
+  "exitCode": 0
+}

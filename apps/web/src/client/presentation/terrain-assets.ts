@@ -27,6 +27,11 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Glowstone, '辉光石', ['aa703a', 'e2a752', '7d5433', 'f6d68a']],
   [FaceMaterial.LanternFrame, '灯笼框架', ['865b37', 'b88c4f', '583f2c', 'd1a76a']],
   [FaceMaterial.LanternGlow, '灯笼灯芯', ['d49c4d', 'ebbe68', 'ab7538', 'ffe4a1']],
+  [FaceMaterial.Workbench, '工作台', ['986239', 'bd884d', '68442f', 'e1b76d']],
+  [FaceMaterial.Chest, '箱子', ['986239', 'bd884d', '68442f', 'ebc774', '35474b', 'c18b41']],
+  [FaceMaterial.Furnace, '熔炉', ['617477', '93a4a0', '35474b', 'd3863e', '242f32', 'ebc774']],
+  [FaceMaterial.CoalOre, '煤矿石', ['687170', '858d8a', '252a2b', 'a0a59a']],
+  [FaceMaterial.IronOre, '铁矿石', ['747b78', '949b96', '9c694d', 'c28b68']],
 ];
 
 // First-party pixel sources are deterministic and independent of atlas layout.
@@ -43,6 +48,41 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     if (face === FaceMaterial.Water) index = (y + Math.floor(x / 4)) % 7 === 0 ? 4 : noise < 10 ? 2 : 1;
     if (face === FaceMaterial.LanternFrame) index = x < 2 || x > 13 || y < 2 || y > 13 ? 3 : 2;
     if (face === FaceMaterial.LanternGlow) index = x > 3 && x < 12 && y > 2 && y < 13 ? 4 : 1;
+    if (face === FaceMaterial.Workbench) {
+      // Inlaid cutting grid over directional timber; a readable edge rather than random checks.
+      index = y % 5 === 0 ? 3 : (x + y * 3) % 13 === 0 ? 2 : 1;
+      if (x === 0 || x === 15 || y === 0 || y === 15) index = 3;
+      if (x === 1 || y === 1) index = 4;
+      if (x >= 3 && x <= 12 && y >= 3 && y <= 12) index = x % 4 === 0 || y % 4 === 0 ? 3 : 2;
+      if ((x === 2 || x === 13) && (y === 2 || y === 13)) index = 4;
+    }
+    if (face === FaceMaterial.Chest) {
+      index = y % 4 === 0 ? 3 : (x * 3 + y) % 17 < 2 ? 2 : 1;
+      if (x === 1 || x === 14) index = 5;
+      if (y === 1 || y === 14) index = 3;
+      if (y === 6) index = 3;
+      if (y === 5) index = 2;
+      if ((x === 1 || x === 14) && (y === 2 || y === 13)) index = 6;
+      if (x >= 6 && x <= 9 && y >= 5 && y <= 9) index = x === 6 || y === 9 ? 6 : 4;
+      if (x === 8 && (y === 7 || y === 8)) index = 5;
+    }
+    if (face === FaceMaterial.Furnace) {
+      const seam = y % 5 === 0 || (x + (Math.floor(y / 5) % 2) * 4) % 8 === 0;
+      index = seam ? 3 : y % 5 === 1 ? 2 : 1;
+      if (x >= 3 && x <= 12 && y >= 5 && y <= 12) index = 3;
+      if (x >= 4 && x <= 11 && y >= 6 && y <= 11) index = 5;
+      if (x >= 5 && x <= 10 && y === 11) index = x % 3 === 0 ? 6 : 4;
+      if ((x === 6 || x === 9) && y === 10) index = 4;
+    }
+    if (face === FaceMaterial.CoalOre || face === FaceMaterial.IronOre) {
+      const clusters = [
+        [4, 4],
+        [11, 6],
+        [7, 12],
+      ];
+      const ore = clusters.some(([cx, cy]) => Math.abs(x - cx) + Math.abs(y - cy) < 3);
+      index = ore ? (face === FaceMaterial.IronOre && (x + y) % 3 === 0 ? 4 : 3) : noise < 7 ? 2 : 1;
+    }
     return index;
   });
   return {
@@ -50,7 +90,7 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     name: `${name}贴图`,
     source: 'builtin',
     type: 'pixel-texture',
-    revision: 1,
+    revision: face >= FaceMaterial.Workbench ? 2 : 1,
     payload: { width: 16, height: 16, palette: palette(colors), pixels },
   };
 });

@@ -2,9 +2,9 @@ use crate::{valid, disjoint};
 use world_kernels::{codec, generation};
 const CELLS: usize = 32768;
 #[no_mangle]
-pub extern "C" fn fill_chunk(input: usize, output: usize, oy: i32) -> i32 {
+pub extern "C" fn fill_chunk(input: usize, output: usize, oy: i32, seed: i32, ox: i32, oz: i32, generator_version: i32) -> i32 {
     if !valid(input,38*38*4,4) || !valid(output,CELLS,2) || !disjoint(input,38*38*16,output,CELLS*2) || oy > i32::MAX - 32 { return -1; }
-    unsafe { generation::fill_chunk(core::slice::from_raw_parts(input as *const i32,38*38*4), core::slice::from_raw_parts_mut(output as *mut u16,CELLS),oy); }
+    unsafe { generation::fill_chunk_versioned(core::slice::from_raw_parts(input as *const i32,38*38*4), core::slice::from_raw_parts_mut(output as *mut u16,CELLS), seed as u32, ox, oy, oz, generator_version as u32); }
     0
 }
 #[no_mangle]
@@ -38,10 +38,10 @@ pub extern "C" fn encode_palette(input: usize, output: usize, capacity: usize) -
 }
 
 #[no_mangle]
-pub extern "C" fn fill_halo(columns: usize, known: usize, halo: usize, fluid: usize, oy: i32) -> f64 {
+pub extern "C" fn fill_halo(columns: usize, known: usize, halo: usize, fluid: usize, oy: i32, seed: i32, ox: i32, oz: i32, generator_version: i32) -> f64 {
     const N: usize = 34*34*34;
     if !valid(columns,40*40*4,4) || !valid(known,N,4) || !valid(halo,N,2) || !valid(fluid,N,1) || oy > i32::MAX - 34 { return -1.0; }
     let buffers=[(columns,40*40*16),(known,N*4),(halo,N*2),(fluid,N)];
     for a in 0..4 { for b in a+1..4 { if !disjoint(buffers[a].0,buffers[a].1,buffers[b].0,buffers[b].1) {return -1.0;} } }
-    unsafe { generation::fill_halo(core::slice::from_raw_parts(columns as *const i32,40*40*4),core::slice::from_raw_parts(known as *const u32,N),core::slice::from_raw_parts_mut(halo as *mut u16,N),core::slice::from_raw_parts_mut(fluid as *mut u8,N),oy) as f64 }
+    unsafe { generation::fill_halo_versioned(core::slice::from_raw_parts(columns as *const i32,40*40*4),core::slice::from_raw_parts(known as *const u32,N),core::slice::from_raw_parts_mut(halo as *mut u16,N),core::slice::from_raw_parts_mut(fluid as *mut u8,N), seed as u32, ox, oy, oz, generator_version as u32) as f64 }
 }

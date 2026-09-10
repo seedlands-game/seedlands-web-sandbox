@@ -3,6 +3,30 @@ import { describe, expect, it } from 'vitest';
 import { ActionRuntime } from '../../packages/game-core/src/server/simulation/action-runtime';
 
 describe('asynchronous actor actions', () => {
+  it('prepares an instant completed action and replacement before any live history changes', () => {
+    const actions = new ActionRuntime(testCorePlatform.clone);
+    const old = actions.start({ actorId: 'actor', type: 'idle' }, 0);
+    const before = actions.snapshot();
+    const result = { consumedEntityId: 'food', count: 1 };
+    const plan = actions.prepareStart({ actorId: 'actor', type: 'eat', targetEntityId: 'food' }, 1, {
+      status: 'succeeded',
+      result,
+    });
+    result.count = 9;
+    expect(actions.snapshot()).toEqual(before);
+    plan.validate();
+    plan.apply();
+    expect(actions.forActor('actor')).toBeNull();
+    expect(actions.get(old.id)).toMatchObject({ status: 'interrupted', reason: 'replaced' });
+    expect(actions.get(plan.action.id)).toMatchObject({
+      status: 'succeeded',
+      startedAt: 1,
+      endedAt: 1,
+      result: { consumedEntityId: 'food', count: 1 },
+    });
+    expect(() => plan.apply()).toThrow(/used/i);
+  });
+
   it('moves through pending, running and succeeded states using stable ids', () => {
     const actions = new ActionRuntime(testCorePlatform.clone);
     const accepted = actions.start({ actorId: 'actor-1', type: 'move-to', targetPosition: [4.5, 1, 0.5] }, 10);
@@ -40,4 +64,24 @@ describe('asynchronous actor actions', () => {
       /Invalid action snapshot/,
     );
   });
+  it.each(['allocator', 'negative-index', 'oversized-index', 'negative-repath'] as const)(
+    'atomically rejects invalid saved action invariants: %s',
+    (kind) => {
+      const source = new ActionRuntime(testCorePlatform.clone);
+      source.start({ actorId: 'source', type: 'idle' }, 0);
+      const malformed = source.snapshot();
+      if (kind === 'allocator') malformed.sequence = 0;
+      if (kind === 'negative-index') malformed.actions[0].pathIndex = -1;
+      if (kind === 'oversized-index') malformed.actions[0].pathIndex = 1;
+      if (kind === 'negative-repath') malformed.actions[0].repathCount = -1;
+      const current = new ActionRuntime(testCorePlatform.clone);
+      current.start({ actorId: 'current', type: 'idle' }, 0);
+      const before = current.snapshot();
+      expect(() => current.restore(malformed)).toThrow(/Invalid action snapshot/);
+      expect(current.snapshot()).toEqual(before);
+      const next = current.start({ actorId: 'next', type: 'idle' }, 1);
+      expect(next.id).toBe('action-2');
+      expect(current.forActor('current')?.actorId).toBe('current');
+    },
+  );
 });

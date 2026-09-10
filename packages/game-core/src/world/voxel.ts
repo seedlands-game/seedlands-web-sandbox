@@ -1,7 +1,8 @@
-import { CURRENT_MACRO_GENERATOR_VERSION, macroAt, type MacroBiome, type MacroContext } from './macro-world';
+import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
+import { oreVoxel } from './ore-generation';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = CURRENT_MACRO_GENERATOR_VERSION;
+export const GENERATOR_VERSION = 4;
 export const LEGACY_GENERATOR_VERSION = 2;
 export type ChunkCoord = { cx: number; cy: number; cz: number };
 
@@ -17,9 +18,15 @@ export const Voxel = {
   Water: 8,
   Glowstone: 9,
   Lantern: 10,
+  Workbench: 11,
+  Chest: 12,
+  Furnace: 13,
+  CoalOre: 14,
+  IronOre: 15,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
+export const MAX_VOXEL_ID = Voxel.IronOre;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -35,6 +42,11 @@ export const FaceMaterial = {
   Glowstone: 11,
   LanternFrame: 12,
   LanternGlow: 13,
+  Workbench: 14,
+  Chest: 15,
+  Furnace: 16,
+  CoalOre: 17,
+  IronOre: 18,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -53,6 +65,11 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Glowstone]: 'glowstone',
   [FaceMaterial.LanternFrame]: 'lantern-frame',
   [FaceMaterial.LanternGlow]: 'lantern-glow',
+  [FaceMaterial.Workbench]: 'workbench',
+  [FaceMaterial.Chest]: 'chest',
+  [FaceMaterial.Furnace]: 'furnace',
+  [FaceMaterial.CoalOre]: 'coal-ore',
+  [FaceMaterial.IronOre]: 'iron-ore',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -66,6 +83,11 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Water]: '水',
   [Voxel.Glowstone]: '辉光石',
   [Voxel.Lantern]: '灯笼',
+  [Voxel.Workbench]: '工作台',
+  [Voxel.Chest]: '箱子',
+  [Voxel.Furnace]: '熔炉',
+  [Voxel.CoalOre]: '煤矿石',
+  [Voxel.IronOre]: '铁矿石',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -79,6 +101,11 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Water]: [0.12, 0.4, 0.72],
   [Voxel.Glowstone]: [1, 0.58, 0.18],
   [Voxel.Lantern]: [0.86, 0.58, 0.22],
+  [Voxel.Workbench]: [0.52, 0.31, 0.14],
+  [Voxel.Chest]: [0.58, 0.36, 0.15],
+  [Voxel.Furnace]: [0.34, 0.36, 0.37],
+  [Voxel.CoalOre]: [0.2, 0.22, 0.22],
+  [Voxel.IronOre]: [0.55, 0.43, 0.35],
 };
 
 export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
@@ -103,6 +130,11 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Water]: FaceMaterial.Water,
       [Voxel.Glowstone]: FaceMaterial.Glowstone,
       [Voxel.Lantern]: FaceMaterial.LanternFrame,
+      [Voxel.Workbench]: FaceMaterial.Workbench,
+      [Voxel.Chest]: FaceMaterial.Chest,
+      [Voxel.Furnace]: FaceMaterial.Furnace,
+      [Voxel.CoalOre]: FaceMaterial.CoalOre,
+      [Voxel.IronOre]: FaceMaterial.IronOre,
     } as Record<number, FaceMaterialId>
   )[id];
 }
@@ -156,22 +188,21 @@ export function baseVoxel(
   z: number,
   context = macroAt(seed, x, z, GENERATOR_VERSION),
   queryMacro = (qx: number, qz: number) => macroAt(seed, qx, qz, GENERATOR_VERSION),
+  generatorVersion = GENERATOR_VERSION,
 ): VoxelId {
   const h = context.terrainHeight;
   const kind = context.biome;
   if (context.hydrology.water && context.hydrology.waterLevel !== null && y > h && y <= context.hydrology.waterLevel)
     return Voxel.Water;
   if (y <= h) {
-    if (y === h)
-      return kind === 'dry'
-        ? Voxel.Sand
-        : kind === 'cold'
-          ? Voxel.Snow
-          : kind === 'mountain'
-            ? Voxel.Stone
-            : Voxel.Grass;
-    if (y > h - 4) return kind === 'dry' ? Voxel.Sand : kind === 'mountain' ? Voxel.Stone : Voxel.Dirt;
-    return Voxel.Stone;
+    if (y === h) {
+      const surface =
+        kind === 'dry' ? Voxel.Sand : kind === 'cold' ? Voxel.Snow : kind === 'mountain' ? Voxel.Stone : Voxel.Grass;
+      return oreVoxel(seed, x, y, z, h, surface, generatorVersion);
+    }
+    const underground =
+      y > h - 4 ? (kind === 'dry' ? Voxel.Sand : kind === 'mountain' ? Voxel.Stone : Voxel.Dirt) : Voxel.Stone;
+    return oreVoxel(seed, x, y, z, h, underground, generatorVersion);
   }
   // A feature can be sampled locally from nearby deterministic anchor points.
   for (let tx = x - 3; tx <= x + 3; tx += 1)

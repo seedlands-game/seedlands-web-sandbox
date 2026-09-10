@@ -55,6 +55,14 @@ const ready = (): AuthorityReady => ({
     paused: false,
   },
   gameplay: {
+    inventory: {
+      version: 1 as const,
+      actor: { entityId: 'player-1', epoch: 1, lifetime: 1 },
+      revision: 0,
+      slots: [],
+      hotbarSize: 8,
+      cursor: { version: 1 as const, revision: 0, stack: null, origin: null },
+    },
     gameplayRevision: 1,
     gameplayTime: 0,
     player: {

@@ -12,3 +12,5 @@ wasm/**/_build/
 
 changes/*/experiments/*.wasm
 crates/target/
+
+apps/web/public/packs/

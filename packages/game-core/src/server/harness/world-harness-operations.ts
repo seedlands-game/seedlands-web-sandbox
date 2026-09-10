@@ -1,3 +1,5 @@
+import type { AuthorityWorldOwner } from './authority-world-harness';
+import type { WorldFrontier } from './world-harness-contract';
 import { ALL_COMMAND_CAPABILITIES, type CommandSource } from '../commands/command-contract';
 import type { AuthorityRuntime } from '../authority/authority-runtime';
 import { CHUNK_SIZE, floorDiv } from '../../world/voxel';
@@ -37,3 +39,16 @@ export const inspectAuthorizationRequest = (request: WorldInspectRequest): World
 
 export const chunkForVoxel = (position: readonly [number, number, number]): readonly [number, number, number] =>
   position.map((coordinate) => floorDiv(coordinate, CHUNK_SIZE)) as [number, number, number];
+
+export function worldFrontierFor(owner: AuthorityWorldOwner): WorldFrontier {
+  const snapshot = owner.runtime.snapshot();
+  return {
+    worldId: owner.worldId,
+    epoch: owner.epoch,
+    worldRevision: snapshot.worldRevision,
+    commitSequence: snapshot.commitSequence,
+    physicsTick: snapshot.physicsTick,
+    fluidWorkSequence: owner.runtime.settlementDiagnostics.fluidIssuedWorkCount,
+    logicObservationSequence: owner.runtime.settlementDiagnostics.logicIssuedObservationSequence,
+  };
+}

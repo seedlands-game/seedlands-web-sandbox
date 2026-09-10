@@ -18,8 +18,11 @@ const integer = (value: unknown, min: number, max: number): number =>
 const string = (value: unknown): string =>
   typeof value === 'string' && value.trim().length > 0 && value.length <= 120 ? value : fail('名称或标识无效');
 
-export function validateNativeAssets(input: unknown, allowBuiltin = false): NativeAsset[] {
-  if (!Array.isArray(input) || input.length > 128) fail('资产数量超限');
+export function validateNativeAssets(input: unknown, allowBuiltin = false, builtinAllowance = 0): NativeAsset[] {
+  // Only internal project merging supplies the trusted catalogue allowance.
+  // External packages retain the original 128-user-asset limit.
+  const limit = 128 + (allowBuiltin ? integer(builtinAllowance, 0, Number.MAX_SAFE_INTEGER - 128) : 0);
+  if (!Array.isArray(input) || input.length > limit) fail('资产数量超限');
   const assets: NativeAsset[] = (input as unknown[]).map((entry) => {
     const a = record(entry);
     keys(a, ['id', 'name', 'revision', 'source', 'type', 'payload']);
@@ -46,7 +49,7 @@ export function validateNativeAssets(input: unknown, allowBuiltin = false): Nati
       return { ...base, type: 'pixel-texture', payload: { width, height, palette, pixels } };
     }
     if (a.type !== 'extruded-pixel-model') fail('暂不支持该资产类型导入');
-    keys(p, ['textureId', 'thicknessPixels', 'grip', 'generatorVersion']);
+    keys(p, ['textureId', 'thicknessPixels', 'pixelsPerUnit', 'grip', 'generatorVersion']);
     if (p.generatorVersion !== 1) fail('不支持该生成器版本');
     if (
       !Array.isArray(p.grip) ||
@@ -60,6 +63,7 @@ export function validateNativeAssets(input: unknown, allowBuiltin = false): Nati
       payload: {
         textureId: string(p.textureId),
         thicknessPixels: integer(p.thicknessPixels, 1, 8),
+        ...(p.pixelsPerUnit === undefined ? {} : { pixelsPerUnit: integer(p.pixelsPerUnit, 16, 64) }),
         grip: [...(p.grip as [number, number])],
         generatorVersion: 1,
       },
@@ -126,5 +130,6 @@ export function resolvePixelModel(asset: Asset, assets: readonly Asset[]): ToolM
     palette: Object.fromEntries(palette.map((color, i) => [symbols[i], color])),
     grip: asset.payload.grip,
     thicknessPixels: asset.payload.thicknessPixels,
+    ...(asset.payload.pixelsPerUnit === undefined ? {} : { pixelsPerUnit: asset.payload.pixelsPerUnit }),
   };
 }

@@ -19,7 +19,11 @@ export type PredictionAuthorityState = Readonly<{
   physicsTick: number;
   acknowledgedInputSequence: number;
   inputResyncRequired: boolean;
-  player: Readonly<{ body: BodyState; grounded: boolean }>;
+  player: Readonly<{
+    body: BodyState;
+    grounded: boolean;
+    movement?: Readonly<{ revision: string; flightSpeed: number | null }>;
+  }>;
   chunkRevisions: Readonly<Record<string, number>>;
 }>;
 
@@ -44,6 +48,7 @@ export class LocalPlayerPrediction {
   private readonly inputStream: PlayerInputStream;
   private readonly prediction: PredictionBuffer;
   private accumulator = 0;
+  private movementRevision: string | undefined;
   private bodyValue: BodyState | null = null;
   private offsetValue: Vec3 = cloneVector(ZERO);
   private groundedValue = false;
@@ -90,20 +95,25 @@ export class LocalPlayerPrediction {
   advance(request: LocalPredictionAdvance): Readonly<{ commands: InputCommand[]; body: BodyState }> {
     if (!Number.isFinite(request.elapsedSeconds) || request.elapsedSeconds < 0)
       throw new RangeError('Prediction elapsed seconds must be non-negative and finite.');
+    this.synchronizeMovement(request.snapshot);
     this.bodyValue ??= cloneBody(request.snapshot.player.body);
     const stepSeconds = 1 / this.physicsHz;
     this.accumulator = Math.min(stepSeconds * 4, this.accumulator + request.elapsedSeconds);
     const commands: InputCommand[] = [];
     while (this.accumulator + Number.EPSILON >= stepSeconds) {
       this.accumulator -= stepSeconds;
-      const command = this.inputStream.sample({
+      const sample = this.inputStream.sample({
         physicsTick: request.snapshot.physicsTick,
         issuedAtMs: request.issuedAtMs,
         forward: request.forward,
         right: request.right,
         keys: request.keys,
       });
-      if (!command) continue;
+      if (!sample) continue;
+      const command = {
+        ...sample,
+        ...(request.snapshot.player.movement ? { movementRevision: request.snapshot.player.movement.revision } : {}),
+      };
       const result = stepBody({
         state: this.bodyValue,
         config: bodyConfigFor('player'),
@@ -111,6 +121,9 @@ export class LocalPlayerPrediction {
           wish: { x: command.state.moveX, z: command.state.moveZ },
           jumpPressed: command.state.jumpHeld || command.edges.jumpPressed,
           verticalIntent: command.state.verticalIntent,
+          ...(request.snapshot.player.movement?.flightSpeed
+            ? { controlledFlight: { verticalSpeed: request.snapshot.player.movement.flightSpeed } }
+            : {}),
         },
         world: request.world,
         dt: stepSeconds,
@@ -133,6 +146,7 @@ export class LocalPlayerPrediction {
     snapshot: PredictionAuthorityState,
     world: RevisionedPredictionWorld,
   ): PredictionReconciliationResult {
+    this.synchronizeMovement(snapshot);
     const result = this.prediction.reconcile({
       acknowledgedInputSequence: snapshot.acknowledgedInputSequence,
       authoritativeBody: snapshot.player.body,
@@ -152,6 +166,9 @@ export class LocalPlayerPrediction {
             wish: { x: command.state.moveX, z: command.state.moveZ },
             jumpPressed: command.state.jumpHeld || command.edges.jumpPressed,
             verticalIntent: command.state.verticalIntent,
+            ...(snapshot.player.movement?.flightSpeed
+              ? { controlledFlight: { verticalSpeed: snapshot.player.movement.flightSpeed } }
+              : {}),
           },
           world,
           dt: 1 / this.physicsHz,
@@ -202,7 +219,10 @@ export class LocalPlayerPrediction {
     this.prediction.clear('input-interrupted');
     this.accumulator = 0;
     this.offsetValue = cloneVector(ZERO);
-    return this.inputStream.release(snapshot.physicsTick, issuedAtMs);
+    return {
+      ...this.inputStream.release(snapshot.physicsTick, issuedAtMs),
+      ...(snapshot.player.movement ? { movementRevision: snapshot.player.movement.revision } : {}),
+    };
   }
 
   reset(): void {
@@ -220,6 +240,15 @@ export class LocalPlayerPrediction {
     this.bodyValue = cloneBody(snapshot.player.body);
     this.offsetValue = cloneVector(ZERO);
     this.accumulator = 0;
+  }
+
+  private synchronizeMovement(snapshot: PredictionAuthorityState) {
+    const revision = snapshot.player.movement?.revision;
+    if (this.movementRevision !== undefined && revision !== this.movementRevision) {
+      this.resynchronize(snapshot);
+      this.recordReset('movement-mode-changed');
+    }
+    this.movementRevision = revision;
   }
 
   private recordReset(reason: string): void {

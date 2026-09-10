@@ -13,7 +13,7 @@ export function resolveViewmodelLayout({
   const safeHeight = Math.max(1, height);
   const aspect = safeWidth / safeHeight;
   const verticalTangent = Math.tan((Math.max(35, Math.min(100, fov)) * Math.PI) / 360);
-  const normalizedAnchorX = aspect < 1 ? 0.38 : aspect > 2 ? 0.42 : 0.44;
+  const normalizedAnchorX = aspect < 1 ? 0.57 : aspect > 2 ? 0.42 : 0.44;
   const z = -1.3;
   return {
     normalizedAnchorX,

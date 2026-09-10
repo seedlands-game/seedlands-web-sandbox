@@ -4,7 +4,7 @@ import { buildToolMesh, toolModelDefinition } from '../../apps/web/src/client/pr
 describe('体素工具共享资产', () => {
   it('相邻像素只输出外表面，面朝外且有真实厚度', () => {
     const mesh = buildToolMesh({ pixels: ['aa'], palette: { a: [120, 80, 40] }, grip: [0, 0] });
-    expect(mesh.indices.length / 6).toBe(10);
+    expect(mesh.indices.length / 6).toBe(8);
     expect(new Set(mesh.positions.filter((_, index) => index % 3 === 2)).size).toBe(2);
     expect(mesh.colors.length).toBe((mesh.positions.length / 3) * 4);
     expect(mesh.colors[0]).toBeCloseTo(0.18782, 4);
@@ -26,8 +26,8 @@ describe('体素工具共享资产', () => {
     expect(toolModelDefinition('berry')).toBeNull();
     expect(toolModelDefinition('constructor')).toBeNull();
     for (const definition of [axe, pick]) {
-      expect(definition.pixels).toHaveLength(16);
-      expect(definition.pixels.every((row) => row.length === 16)).toBe(true);
+      expect(definition.pixels).toHaveLength(32);
+      expect(definition.pixels.every((row) => row.length === 32)).toBe(true);
       const mesh = buildToolMesh(definition);
       expect(mesh.indices.length / 3).toBeGreaterThan(100);
       expect(mesh.indices.length / 3).toBeLessThan(1000);

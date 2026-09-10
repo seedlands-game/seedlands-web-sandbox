@@ -4,7 +4,16 @@ export type ItemVisualKind =
   | Readonly<{ kind: 'voxel-block'; faces: 6 }>
   | Readonly<{ kind: 'lantern' | 'berry-cluster' | 'plank' | 'wood-axe' | 'stone-pickaxe' }>;
 
-const blockItems = new Set(['dirt-block', 'stone-block', 'wood-block', 'sand-block', 'glowstone-block']);
+const blockItems = new Set([
+  'dirt-block',
+  'stone-block',
+  'wood-block',
+  'sand-block',
+  'glowstone-block',
+  'workbench',
+  'chest',
+  'furnace',
+]);
 
 export function itemVisualKind(itemId: string): ItemVisualKind {
   if (blockItems.has(itemId)) return { kind: 'voxel-block', faces: 6 };
@@ -12,7 +21,7 @@ export function itemVisualKind(itemId: string): ItemVisualKind {
   if (itemId === 'berry') return { kind: 'berry-cluster' };
   if (itemId === 'plank') return { kind: 'plank' };
   if (itemId === 'wood-axe') return { kind: 'wood-axe' };
-  if (itemId === 'stone-pickaxe') return { kind: 'stone-pickaxe' };
+  if (['stone-pickaxe', 'wood-pickaxe', 'iron-pickaxe'].includes(itemId)) return { kind: 'stone-pickaxe' };
   return { kind: 'plank' };
 }
 

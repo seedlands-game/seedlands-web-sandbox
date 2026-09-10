@@ -1,0 +1,77 @@
+{
+  "baseCommit": "01bab28ace506685f39c1d4a86fec541cbbf2f1b",
+  "scope": "S1 implementation and deterministic tests; ECS admission bound separately",
+  "files": [
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "a303a3ba74ebac74094e62d818957457958f094d46fc25ab8cf8a1517de59b66"
+    },
+    {
+      "path": "packages/game-core/package.json",
+      "sha256": "5df7a92c73932dfb34a7d60e594a8bddcfc394912961549dd85feb60ed9bd50d"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/assembly.ts",
+      "sha256": "9fcc50e76060dbce76113b306e1aca9a523364978808777a21b486c0d6f8f4b0"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/authorized-execution.ts",
+      "sha256": "26af2558ff496d7e380ca52384c947cfa4b473d81f794f5db55434a2a80cdea2"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/contracts.ts",
+      "sha256": "42da7c093eca4abbbe3a8294bb027446b1af98fdabf198a8c95a9177f9ac115c"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/host-api.ts",
+      "sha256": "fb8658ea69a55da28329273f1d6cddec2c01fdaaa8af78b9addde592b33af4b1"
+    },
+    {
+      "path": "packages/game-core/src/server/composition/mod-api.ts",
+      "sha256": "6876aba1cdf042b6205a87a9a17d7cc49d82935e7b754448eb2b2ebfe593e610"
+    },
+    {
+      "path": "packages/game-core/src/server/harness/world-authorization.ts",
+      "sha256": "b5dfcbabe27f7f91f94e56102dec00cbad4340beb5a5fc0fca225dfc2d781e2e"
+    },
+    {
+      "path": "scripts/eslint/pack-api-boundary-rule.mjs",
+      "sha256": "a728bc1fb4559bffb80c18e92ce82584e305a698626d5691efc88613e3225b69"
+    },
+    {
+      "path": "scripts/pack-integrity.mjs",
+      "sha256": "42b0f2f875293fa38e89af1618e822c634f00ff74e682e5cf42316d3bb18ab17"
+    },
+    {
+      "path": "tests/governance/pack-api-boundary.test.ts",
+      "sha256": "f2694de4382db6c654f28d46ba07a7d502c4f71363f4c190c1117d1af6095fbb"
+    },
+    {
+      "path": "tests/governance/pack-api-consumer.test.ts",
+      "sha256": "c1691188ff102e21baf3a10f8a8fb27e7fa70b3fa5987e454cbb45722266b59c"
+    },
+    {
+      "path": "tests/scripts/pack-integrity.test.ts",
+      "sha256": "6d86f0a779bc149ed3157a66663092a64850c8c71a5d36e94700bc342a5b4950"
+    },
+    {
+      "path": "tests/server/composition/mod-authorization.test.ts",
+      "sha256": "f5ed984c94f706d12ad5d5cbfcd52ae63236f4a3cc68544b773089ef6b212efe"
+    },
+    {
+      "path": "tests/server/composition/world-pack-assembly.test.ts",
+      "sha256": "ce6b4aec3579be5101865015c2562fd72e5d00ab9dd858a30950dd1fb5ffa948"
+    }
+  ],
+  "validation": {
+    "pnpm verify:static": {
+      "exitCode": 0,
+      "passedTests": 1205,
+      "skippedTests": 4
+    },
+    "pnpm build": {
+      "exitCode": 0
+    }
+  },
+  "notProductAcceptance": true
+}

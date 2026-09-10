@@ -1,0 +1,266 @@
+{
+  "sourceSha": "50ff14c2d1a3c62cafbb3b85e18b789e33d10e9c",
+  "base": "baeba09",
+  "checks": [
+    {
+      "kind": "static",
+      "status": "passed",
+      "passed": 1759,
+      "skipped": 4,
+      "rawLog": "/tmp/seedlands-s6-static2.log",
+      "rawLogSha256": "733a072026ce46281e9367d2e3e7918a967f7bc4ed73903212dbabac21210ea5"
+    },
+    {
+      "kind": "build",
+      "status": "passed",
+      "passed": null,
+      "skipped": null,
+      "rawLog": "/tmp/seedlands-s6-build1.log",
+      "rawLogSha256": "f3888286d398c478f73bac1255d510bda140c2c0d5089f5642ef8dd7a28815e1"
+    },
+    {
+      "kind": "production-browser",
+      "status": "passed",
+      "passed": 10,
+      "skipped": 0,
+      "rawLog": "/tmp/seedlands-s6-browser-prod1.log",
+      "rawLogSha256": "eaf57e53cdc626cddc46973b7028cae9fc99b4ea631c5a7f4ffa04b2bd2fb7ff"
+    },
+    {
+      "kind": "development-regression",
+      "status": "passed",
+      "passed": 21,
+      "skipped": 0,
+      "rawLog": "/tmp/seedlands-s6-browser-dev-regression1.log",
+      "rawLogSha256": "7bbb11daa7dde53fb286ffe6872190329297351c52b13d051329c4caf2634858"
+    },
+    {
+      "kind": "development-integrations",
+      "status": "passed",
+      "passed": 5,
+      "skipped": 0,
+      "rawLog": "/tmp/seedlands-s6-browser-dev-integrations1.log",
+      "rawLogSha256": "d19fa4f82e669cabd25e3f45808a0ea8ea239c0ab1dcdb82e6996d65c3478288"
+    },
+    {
+      "kind": "development-composable-requested-low",
+      "status": "passed",
+      "passed": 10,
+      "skipped": 0,
+      "rawLog": "/tmp/seedlands-s6-browser-dev-composable.log",
+      "rawLogSha256": "a674a61b0fc91ed3273771abd00fa7e35a6c75fc5efdb8b955bc22a4a6c3d4ab",
+      "qualityCorrection": "low env was not consumed by these helpers; actual default was medium. Do not treat this run as low acceptance."
+    }
+  ],
+  "limitations": ["No performance claim", "No subjective audio or mobile device acceptance"],
+  "ownedPort4173Released": true,
+  "independentReview": {
+    "head": "7c9561d94f315cbf5a4dfd8412d6fca244d576c4",
+    "result": "no_remaining_findings_in_reviewed_scope",
+    "coverage": "S4/S5 and final integration deep review; S1-S3 scoped reviews plus final key-path checks",
+    "report": "../s6-review.md"
+  },
+  "devOptimizerFix": {
+    "base": "2c21f2f375795ca25a1adf0017dd5de46ec656ea",
+    "configSha256": "b52b085e246ffee8571976b39433519a907556d0f5595cae9a2e3d5b64f99187",
+    "review": "no_findings",
+    "coldLoadingTests": "4 passed",
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-cold-red.log",
+        "sha256": "e61328dc88f731a769e8c7ea2d818b50663a004c7792ee13d37b65f8f3dd8786"
+      },
+      {
+        "path": "/tmp/seedlands-s6-cold-vite-red.log",
+        "sha256": "c79c46235eb59a02ff508aa6708df8ea57964b96c4ece73a6194e1aca7ef28ec"
+      },
+      {
+        "path": "/tmp/seedlands-s6-cold-green.log",
+        "sha256": "dd585fece582715e20a5435f74844b16bfcdba1d1257c5108bb244581e71d1d8"
+      },
+      {
+        "path": "/tmp/seedlands-s6-cold-vite-green.log",
+        "sha256": "518f4cbb6030c2c6efb819921d6603c709e2fa74f7256a7836877cb93843384b"
+      },
+      {
+        "path": "/tmp/seedlands-s6-static3.log",
+        "sha256": "0a2bbd14d20f2fffc27dc6818f12cb966662096fa91573f3521cdccc7c523b8f"
+      },
+      {
+        "path": "/tmp/seedlands-s6-build2.log",
+        "sha256": "32efa0e54423e9c06784785cc2285a280e08129604f71378b67ab108939261d6"
+      }
+    ]
+  },
+  "progressionQualityFix": {
+    "red": "expected low, runtime snapshot medium",
+    "actualGreen": "low",
+    "environment": "system Chrome with SwiftShader; not Linux hosted Chromium",
+    "passed": 1,
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-quality-red.log",
+        "sha256": "9664d48bace27c0c8a6bdb02235965ca8bae2f18ff01862a2d120937b42d9953"
+      },
+      {
+        "path": "/tmp/seedlands-s6-quality-green2.log",
+        "sha256": "5697f1a01d66a6a2677fff9fb56e06bc1209897a478438f598a27c569feff988"
+      }
+    ]
+  },
+  "ciFixtureCorrections": {
+    "base": "7e0e330a36d87381e7f4d692d8dc6e6220464cfd",
+    "environment": "system Chrome + SwiftShader; progression actual low, other new scenarios default medium",
+    "wholeSuiteBeforeFinalOriginAssertions": {
+      "passed": 10,
+      "duration": "2.2m"
+    },
+    "remoteGreen": {
+      "run": 34428303866,
+      "creative": "passed",
+      "developerLogicOrigin": "passed",
+      "progression": "overall_240s_timeout_twice",
+      "wholeSuite": "9 passed / 1 failed"
+    },
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-creative-slots-green.log",
+        "sha256": "8a296fece4d2b1d5b698cff29b2ef2ea3865c6c05f33a3ab24311bf9e03c5dda"
+      },
+      {
+        "path": "/tmp/seedlands-s6-logic-public-clock.log",
+        "sha256": "fc463d54b099c825f012c16668c0ea4f2b62a2c555a5a59e04927a3ad3ae4d3a"
+      },
+      {
+        "path": "/tmp/seedlands-s6-composable-fixed.log",
+        "sha256": "d4b80d0620089a421fb0f1654c61ce52bf461eed4a75b087675a0e19fe1e254e"
+      },
+      {
+        "path": "/tmp/seedlands-s6-logic-origin-final.log",
+        "sha256": "c0d0c46c77fe727f49ed291eda1c94dadb98cd1988ff314d8449f4619f96c419"
+      }
+    ],
+    "finalOriginAssertions": {
+      "passed": 2,
+      "duration": "15.9s",
+      "types": "passed",
+      "eslint": "passed",
+      "review": "no_remaining_findings"
+    }
+  },
+  "exactWorldVersionFix": {
+    "unitPassed": 9,
+    "browserPassed": 4,
+    "staticPassed": 1764,
+    "staticSkipped": 4,
+    "build": "passed",
+    "review": "no_findings",
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-version-red.log",
+        "sha256": "a08b9987191db7b2a09b7fd02860af37abb1c598656872b7e181a3b885cdea64"
+      },
+      {
+        "path": "/tmp/seedlands-s6-version-green.log",
+        "sha256": "7b7d82c539e047c4a015af197a9c2c7d2f2c3c872189f7b69bb3cd2c0dac2336"
+      },
+      {
+        "path": "/tmp/seedlands-s6-version-browser3.log",
+        "sha256": "38a50c6a2c80aa6cc7dc0d7187fafd44bbc983358ab7d401358b8e5a90782737"
+      },
+      {
+        "path": "/tmp/seedlands-s6-static-version.log",
+        "sha256": "f0e28bf2082eaa2732d631316f56a1f9955db5c015da8eddd3c54a1d9da5d80e"
+      },
+      {
+        "path": "/tmp/seedlands-s6-build-version.log",
+        "sha256": "db6f04ba933889b1e2f295f61de157632a200323453be30a866fa33036cccf3c"
+      }
+    ]
+  },
+  "extendedBrowserAcceptance": {
+    "source": "1e1b492b538ee04541a46bd98a501cc96758910a",
+    "passed": 14,
+    "duration": "2.4m",
+    "quality": "progression low; other composable scenarios default medium; version selection low",
+    "ciGovernanceTests": 12,
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-browser14.log",
+        "sha256": "771d27fdc47307748cb9e91e6d54f8a85324957595a5840cf8da15cd836f869c"
+      },
+      {
+        "path": "/tmp/seedlands-s6-ci-budget-check.log",
+        "sha256": "890682446b5a1ebebdacd88712f73ae22a552b965246347e190bba2a06ebbb3a"
+      },
+      {
+        "path": "/tmp/seedlands-s6-regression-version.log",
+        "sha256": "81f59a8a2ffa0f69a09ec7e7a9d3e22f35a73779157758fc7578c51852597ae8"
+      }
+    ],
+    "regressionPassed": 21
+  },
+  "deterministicMeleeObservation": {
+    "failedRun": 34430089585,
+    "failure": "first failed, retry passed; rejected as flaky",
+    "actualFailedQuality": "low / benchmark",
+    "change": "real held input plus public clock stage observation, no production combat change",
+    "testSha256": "a0f3893aac4cb7a89d52e3b88b0cc36c56bca9098ac314b5d9f093c0b137ddd6",
+    "localPassed": 1,
+    "duration": "15.0s",
+    "types": "passed",
+    "eslint": "passed",
+    "review": "no_findings",
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-melee-clock.log",
+        "sha256": "4e4048dd9cb72e9a5a4074ca8bc928548590a4adc9cbd1e0c80e30823e83fdd4"
+      },
+      {
+        "path": "/tmp/seedlands-s6-ci-browser6-clean.log",
+        "sha256": "210c6e7e90f9538296034f9df4da84aa70f1b7c692c14cbe0dd82c9ea97b416a"
+      }
+    ]
+  },
+  "remoteAcceptance": {
+    "head": "559afcee01154b31b98ceabf8fb27d5a7adbcc77",
+    "base": "baeba098af506f0184b9344c04b9555f9750c20f",
+    "runId": 34431253030,
+    "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34431253030",
+    "conclusion": "success",
+    "requiredChecks": {
+      "Static verification": "success",
+      "Production build": "success",
+      "Chromium regression": "success"
+    },
+    "static": {
+      "passed": 1764,
+      "skipped": 4
+    },
+    "browser": {
+      "regression": 21,
+      "worldHarness": 2,
+      "assets": 2,
+      "melee": 1,
+      "composable": 14,
+      "flaky": 0
+    },
+    "pr": {
+      "number": 30,
+      "isDraft": false,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "CLEAN",
+      "unresolvedReviewThreads": 0
+    },
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-ci-browser7-clean.log",
+        "sha256": "a367d17fe5ba9b7596a29323fa91d4dcfaccb48ae75d1bef52d8b90d7f6a789b"
+      },
+      {
+        "path": "/tmp/seedlands-s6-ci-static7-clean.log",
+        "sha256": "70c07f1a8305a0b37edb303f1e94be1f0793308692079df095008e2edf39dd2c"
+      }
+    ]
+  }
+}

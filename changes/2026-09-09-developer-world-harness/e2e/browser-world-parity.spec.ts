@@ -1,3 +1,6 @@
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { assembleOverworldPacks, type VerifiedPackArtifact } from '@seedlands/game-core/server/composition/host-api';
 import { expect, test } from '@playwright/test';
 import { HeadlessSession } from '../../../packages/game-core/src/server/headless/headless-session';
 import { baseVoxel, normalizeSeed, Voxel } from '../../../packages/game-core/src/world/voxel';
@@ -23,7 +26,12 @@ const GENERATED = (() => {
 
 test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确定 parity', async ({ page }) => {
   test.setTimeout(90_000);
-  const source = await HeadlessSession.create({ platform: testCorePlatform, seedText: SEED });
+  const loader = (await import(pathToFileURL(resolve('scripts/pack-integrity.mjs')).href)) as {
+    loadVerifiedPackArtifacts(path: string): Promise<readonly VerifiedPackArtifact[]>;
+  };
+  const artifacts = await loader.loadVerifiedPackArtifacts(resolve('apps/web/public/packs/packs.lock.json'));
+  const createComposition = () => assembleOverworldPacks(artifacts);
+  const source = await HeadlessSession.create({ platform: testCorePlatform, seedText: SEED, createComposition });
   await source.world.clock({ kind: 'pause' });
   await source.world.prepare({ kind: 'chunk', chunk: [0, 0, 0] });
   await source.world.command({ type: 'set-block', position: EDITED, voxel: Voxel.Wood });
@@ -32,7 +40,11 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
   const exported = await source.world.checkpoint({ kind: 'export' });
   if (!exported.ok || !exported.data.snapshot) throw new Error('Headless checkpoint export failed.');
 
-  const control = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'parity-control-target' });
+  const control = await HeadlessSession.create({
+    platform: testCorePlatform,
+    seedText: 'parity-control-target',
+    createComposition,
+  });
   await control.world.checkpoint({ kind: 'restore', snapshot: exported.data.snapshot });
   await control.world.logic({ kind: 'mode', mode: 'scripted' });
   const controlAdvance = await control.world.clock({ kind: 'advance', elapsedMs: 1_000 });
@@ -179,7 +191,11 @@ test('Headless checkpoint 在真实 Browser Authority Worker 恢复并保持确�
   expect(GENERATED.source).not.toBe(GENERATED.target);
   expect(result.derivedVoxel).toBe(GENERATED.source);
 
-  const roundTrip = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'browser-round-trip-target' });
+  const roundTrip = await HeadlessSession.create({
+    platform: testCorePlatform,
+    seedText: 'browser-round-trip-target',
+    createComposition,
+  });
   await roundTrip.world.checkpoint({ kind: 'restore', snapshot: result.roundTripCheckpoint });
   await roundTrip.world.logic({ kind: 'mode', mode: 'scripted' });
   const roundTripAdvance = await roundTrip.world.clock({ kind: 'advance', elapsedMs: 100 });

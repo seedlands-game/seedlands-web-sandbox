@@ -6,7 +6,13 @@ import {
   type StoredChunkRecord,
   validateStoredFluid,
 } from '@seedlands/game-core/world/chunk-snapshot-codec';
-import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, normalizeSeed } from '@seedlands/game-core/world/voxel';
+import {
+  GENERATOR_VERSION,
+  LEGACY_GENERATOR_VERSION,
+  Voxel,
+  normalizeSeed,
+  MAX_VOXEL_ID,
+} from '@seedlands/game-core/world/voxel';
 import { selectWorldGeneratorVersion } from '@seedlands/game-core/runtime/world-version-policy';
 import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
@@ -126,7 +132,10 @@ const initialize = async (task: InitTask) => {
   const store = transaction.objectStore('worlds');
   const records = (await requestResult(store.getAll())) as WorldRecord[];
   const supportedRecords = records.filter(
-    (record) => record.generatorVersion === GENERATOR_VERSION || record.generatorVersion === LEGACY_GENERATOR_VERSION,
+    (record) =>
+      record.generatorVersion === GENERATOR_VERSION ||
+      record.generatorVersion === 3 ||
+      record.generatorVersion === LEGACY_GENERATOR_VERSION,
   );
   const generatorVersion = selectWorldGeneratorVersion(
     supportedRecords,
@@ -134,13 +143,13 @@ const initialize = async (task: InitTask) => {
     GENERATOR_VERSION,
     task.openMode,
   );
-  if (generatorVersion !== GENERATOR_VERSION && generatorVersion !== LEGACY_GENERATOR_VERSION)
+  if (generatorVersion !== GENERATOR_VERSION && generatorVersion !== 3 && generatorVersion !== LEGACY_GENERATOR_VERSION)
     throw new Error(`Stored world uses unsupported generator version ${generatorVersion}.`);
   const worldId = `seedlands:g${generatorVersion}:${task.seedText}`;
   config = { databaseName: task.databaseName, worldId, seedText: task.seedText, generatorVersion };
   const existing = records.find((record) => record.worldId === worldId);
   if (task.openMode === 'continue-legacy' && generatorVersion === GENERATOR_VERSION)
-    throw new Error('这个 Seed 没有可继续的旧版 v2 世界。');
+    throw new Error('这个 Seed 没有可继续的旧版世界。');
   if (existing && (existing.seedText !== task.seedText || existing.generatorVersion !== generatorVersion))
     throw new Error('Stored world metadata is incompatible with the requested seed or generator.');
   if (!existing)
@@ -185,7 +194,7 @@ const decodeLoadResult = (task: PersistenceLoadCoordinate, value: unknown) => {
     proceduralVoxels,
   });
   const fluid = validateStoredFluid(record);
-  if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= Voxel.Lantern))
+  if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= MAX_VOXEL_ID))
     throw new Error('Stored Chunk contains a voxel outside the current schema.');
   return {
     status: 'found' as const,
@@ -333,7 +342,10 @@ const latestWorld = async (task: LatestWorldTask) => {
     await done;
     const latest = worlds
       .filter(
-        (world) => world.generatorVersion === GENERATOR_VERSION || world.generatorVersion === LEGACY_GENERATOR_VERSION,
+        (world) =>
+          world.generatorVersion === GENERATOR_VERSION ||
+          world.generatorVersion === 3 ||
+          world.generatorVersion === LEGACY_GENERATOR_VERSION,
       )
       .sort((left, right) => right.updatedAt - left.updatedAt)[0];
     return latest ? { seedText: latest.seedText } : null;

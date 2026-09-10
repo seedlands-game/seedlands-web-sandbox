@@ -1,4 +1,5 @@
 import { builtinAssets } from './asset-catalog';
+import { legacyItemAssets } from './legacy-item-assets';
 import type { Asset, ImageTexture, MaterialAsset, NativeAsset } from './asset-types';
 import { validateNativeAssets } from './asset-package';
 import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
@@ -21,7 +22,7 @@ export type AppearanceProject = {
 };
 
 const MAX_PROJECT_ASSETS = 128;
-const MAX_RESOLVED_ASSETS = 256;
+const MAX_RESOLVED_ASSETS = builtinAssets.length + MAX_PROJECT_ASSETS;
 const MAX_DATA_URL_BYTES = 2 * 1024 * 1024;
 const id = (value: unknown, label = '资产标识'): string => {
   if (typeof value !== 'string' || !value.trim() || value.length > 120) throw new Error(`${label}无效`);
@@ -112,6 +113,16 @@ function mergeAssets(overrides: readonly Asset[]): Asset[] {
     if (original && original.type !== asset.type) throw new Error('内置资产覆盖必须保持资产类型');
     byId.set(asset.id, asset);
   }
+  // Old texture-only overrides retain their original grip, depth and 16px density.
+  // Explicit model or new detail-texture overrides always win; never rewrite the project.
+  for (const legacy of legacyItemAssets) {
+    if (legacy.type !== 'extruded-pixel-model' || overrides.some((asset) => asset.id === legacy.id)) continue;
+    const current = byId.get(legacy.id);
+    if (current?.type !== 'extruded-pixel-model' || overrides.some((asset) => asset.id === current.payload.textureId))
+      continue;
+    if (overrides.some((asset) => asset.id === legacy.payload.textureId && asset.type === 'pixel-texture'))
+      byId.set(legacy.id, legacy);
+  }
   const merged = [
     ...builtinAssets.map((asset) => byId.get(asset.id)!),
     ...overrides.filter((asset) => !builtinAssets.some((builtin) => builtin.id === asset.id)),
@@ -171,7 +182,13 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
       .filter((entry) => entry.type === 'pixel-texture' || entry.type === 'extruded-pixel-model')
       .map((entry) => entry.value as NativeAsset),
   ).filter((asset): asset is NativeAsset => asset.type === 'pixel-texture' || asset.type === 'extruded-pixel-model');
-  const checkedNative = new Map(validateNativeAssets(mergedNative, true).map((asset) => [asset.id, asset]));
+  const checkedNative = new Map(
+    validateNativeAssets(
+      mergedNative,
+      true,
+      builtinAssets.filter((asset) => asset.type === 'pixel-texture' || asset.type === 'extruded-pixel-model').length,
+    ).map((asset) => [asset.id, asset]),
+  );
   const assets = preliminary.map(({ type, value: entry }): Asset => {
     if (type === 'pixel-texture' || type === 'extruded-pixel-model') return checkedNative.get(id(entry.id))!;
     return type === 'material' ? validateMaterial(entry) : validateImage(entry);

@@ -4,6 +4,8 @@
 
 普通代码修改先读本文件、相关源码和当前 spec；移动文件再读[代码地图](docs/code-map.md)和[目录规范](docs/repository-structure.md)；架构或路线决策才读[长期对齐](docs/living-world-alignment.md)；追溯已归档历史才读[归档索引](docs/change-archive.md)。运行命令只以 `package.json` 为准。
 
+涉及小内核、标准模块、模组 Pack、Playbook、Ruleset 或玩法 API 时，先对照[可组合玩法架构](docs/composable-gameplay-architecture.md)。该文档是责任与概念基线，不表示功能已实现；具体实施、范围和审核继续由当前 change spec 冻结。
+
 方案、spec、评审和交付记录使用简体中文。README、CONTRIBUTING、SECURITY、CODE_OF_CONDUCT、ASSETS、TRADEMARKS 与 `.github/` 社区入口可用英文主文和中文镜像。不得读取、输出或提交 `.env` 或密钥；`node_modules/`、`dist/`、`midscene_run/` 等依赖和运行产物不得提交，但可在验证中读取。
 
 ## 不变量与源码归属

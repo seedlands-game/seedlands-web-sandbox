@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "23e93e2df0ca2bb713e1815d8f232532d5e36e28",
+  "textures": {
+    "builtin:texture:wood-sword": "683b6f840d8a899ffcbec9017f0387717e679cbb59170cef894c507bc005646f",
+    "builtin:texture:wood-axe": "e1bb98876afe3f0609a553e4e7d0ad5889a90263d9c438c49d65443f6939d39b",
+    "builtin:texture:stone-pickaxe": "d8b02079e88c93f185f175c3bbf46afc2e84ed815b23c7381e28d4333206908e",
+    "builtin:texture:wood-pickaxe": "3558b72613bd028329dd6aec646b0b6a2586b4c518b81445752c2d828f3734c4",
+    "builtin:texture:iron-pickaxe": "eefca090983c4f7e61a32c00817319d28a8530cb298365414db8672d28e67b5e",
+    "builtin:texture:coal": "c821388c10af2ca32db7be9bad1278083f26d8dac8bb3cca545647ae19096c8a",
+    "builtin:texture:raw-iron": "e0698aa343e46095cfdb45579e54905450e4df81ca017243294a9ddbc9171224",
+    "builtin:texture:iron-ingot": "b32405cae79e3a94dde674d6a0d32198bf5f869c7c89507ca84a91633f2b08be",
+    "builtin:texture:workbench": "05a7d9b0d834941fc24edcf5267dcc095213fb2aeb0ec3a61c450824f353de92",
+    "builtin:texture:chest": "82a42df747682d214c254568b683f3012b21688f3f6d1951d09c77b711430f53",
+    "builtin:texture:furnace": "40478709cffb8e13103c5e7f9a71c447b82b6c800acfd08e8debe5783e18dc73"
+  }
+}

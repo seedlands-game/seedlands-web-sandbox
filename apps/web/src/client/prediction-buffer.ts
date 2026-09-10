@@ -40,6 +40,7 @@ const cloneInput = (value: InputCommand): InputCommand => ({
   stream: value.stream,
   sequence: value.sequence,
   targetPhysicsTick: value.targetPhysicsTick,
+  ...(value.movementRevision === undefined ? {} : { movementRevision: value.movementRevision }),
   issuedAtMs: value.issuedAtMs,
   state: {
     moveX: value.state.moveX,

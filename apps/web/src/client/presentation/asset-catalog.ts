@@ -1,7 +1,11 @@
+import { progressionItemAssets } from './asset-progression-sources';
+import { legacyPixelAssets } from './legacy-item-assets';
 import type { Asset, ItemAssetBinding } from './asset-types';
 import { nativeToolAssets } from './asset-tool-sources';
 import { builtinVisualAssets } from './visual-asset-catalog';
 import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+
+const nativeItemAssets = [...nativeToolAssets, ...progressionItemAssets];
 
 // Explicit first-party bindings. Coverage against the authoritative item registry is tested.
 const items = [
@@ -16,8 +20,27 @@ const items = [
   ['stone-pickaxe', '石镐'],
   ['glowstone-block', '辉光石'],
   ['lantern', '灯笼'],
+  ['workbench', '工作台'],
+  ['chest', '箱子'],
+  ['furnace', '炉体'],
+  ['coal', '煤'],
+  ['raw-iron', '粗铁'],
+  ['iron-ingot', '铁锭'],
+  ['wood-pickaxe', '木镐'],
+  ['iron-pickaxe', '铁镐'],
 ] as const;
-const imageNames = ['dirt-block', 'stone-block', 'wood-block', 'sand-block', 'berry', 'plank', 'lantern'] as const;
+const imageNames = [
+  'dirt-block',
+  'stone-block',
+  'wood-block',
+  'sand-block',
+  'berry',
+  'plank',
+  'lantern',
+  'workbench',
+  'chest',
+  'furnace',
+] as const;
 
 const itemMaterials: Record<string, string[]> = {
   'dirt-block': ['dirt'],
@@ -30,7 +53,8 @@ const itemMaterials: Record<string, string[]> = {
   lantern: ['glow', 'brass'],
 };
 export const builtinAssets: Asset[] = [
-  ...nativeToolAssets,
+  ...nativeItemAssets,
+  ...legacyPixelAssets,
   ...builtinVisualAssets,
   ...imageNames.map((id): Asset => ({
     id: `builtin:image:${id}`,
@@ -41,7 +65,7 @@ export const builtinAssets: Asset[] = [
     payload: { path: `assets/item-thumbnails/${id}.png` },
   })),
   ...items
-    .filter(([id]) => !nativeToolAssets.some((asset) => asset.id === `builtin:model:${id}`))
+    .filter(([id]) => !nativeItemAssets.some((asset) => asset.id === `builtin:model:${id}`))
     .map(([id, name]): Asset => ({
       id: `builtin:model:${id}`,
       name,
@@ -62,12 +86,17 @@ export const builtinAssets: Asset[] = [
       },
     })),
 ];
-export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]) => ({
-  itemId,
-  name,
-  modelId: `builtin:model:${itemId}`,
-  iconId: nativeToolAssets.some((asset) => asset.id === `builtin:texture:${itemId}`)
-    ? `builtin:texture:${itemId}`
-    : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
-}));
+export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]) => {
+  const modelId = `builtin:model:${itemId}`;
+  const model = nativeItemAssets.find((asset) => asset.id === modelId);
+  return {
+    itemId,
+    name,
+    modelId,
+    iconId:
+      model?.type === 'extruded-pixel-model'
+        ? model.payload.textureId
+        : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
+  };
+});
 export const builtinBinding = (itemId: string) => builtinItemBindings.find((b) => b.itemId === itemId);

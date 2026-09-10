@@ -117,6 +117,24 @@ vi.mock('playcanvas', () => {
 });
 
 describe('玩法物品共享网格资源', () => {
+  it('使用当前世界定义渲染独立命名空间方块，不查询默认物品表', async () => {
+    const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
+    const pc = await import('playcanvas');
+    const assets = new GameplayModelAssets({ graphicsDevice: {} } as never);
+    const parent = new pc.Entity('sample');
+    assets.addItem(parent, 'sample:stone', 1, undefined, {
+      id: 'sample:stone',
+      name: '独立石块',
+      itemType: 'block',
+      stackLimit: 64,
+      capabilities: [{ type: 'place', voxel: 3 }],
+      placesVoxel: 3,
+    });
+    expect(parent.children).toHaveLength(1);
+    expect(firstChild(parent).render.meshInstances.length).toBeGreaterThan(0);
+    expect(() => assets.addItem(parent, 'sample:missing', 1, undefined, null)).toThrow(/world item/i);
+    assets.dispose();
+  });
   it('灯笼每个实例只挂两个材质组，并复用缓存的两份 Mesh', async () => {
     const { GameplayModelAssets } = await import('../../apps/web/src/app/gameplay/gameplay-model-assets');
     const pc = await import('playcanvas');

@@ -9,7 +9,7 @@ describe('第一人称模型安全布局', () => {
   ])('在 %d×%d 下保持于右下安全区且远离近裁剪面', (width, height) => {
     const layout = resolveViewmodelLayout({ width, height, fov: 72 });
     expect(layout.normalizedAnchorX).toBeGreaterThan(0.3);
-    expect(layout.normalizedAnchorX).toBeLessThanOrEqual(0.48);
+    expect(layout.normalizedAnchorX).toBeLessThanOrEqual(0.57);
     expect(layout.position.y).toBeLessThan(-0.2);
     expect(layout.position.z).toBeLessThanOrEqual(-1.2);
     expect(layout.scale).toBeGreaterThan(0);

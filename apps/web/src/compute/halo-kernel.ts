@@ -61,7 +61,20 @@ export function createHaloStaged(options: ProceduralMeshInput): ProceduralMeshIn
       for (let x = 0; x < 34; x += 1) {
         const index = x + 34 * (z + 34 * y);
         const packed = known[index];
-        const value = packed === 0xffffffff ? columnVoxel(columns, 40, x, options.cy * 32 + y - 1, z) : packed & 65535;
+        const value =
+          packed === 0xffffffff
+            ? columnVoxel(
+                columns,
+                40,
+                x,
+                options.cy * 32 + y - 1,
+                z,
+                options.seed,
+                options.cx * 32 - 1 + x,
+                options.cz * 32 - 1 + z,
+                options.generatorVersion ?? GENERATOR_VERSION,
+              )
+            : packed & 65535;
         halo[index] = value;
         fluidHalo[index] = packed === 0xffffffff ? (value === 8 ? 0x88 : 0) : packed >>> 16;
         revision = Math.imul(revision ^ value, 16777619);
@@ -80,7 +93,19 @@ export function createHaloKernel(kernel: KernelMemory): typeof createProceduralM
       const rawColumns = kernel.u32(COLUMNS, 40 * 40 * 4);
       const columns = new Int32Array(rawColumns.buffer, rawColumns.byteOffset, rawColumns.length);
       const prepared = prepare(options, columns, kernel.u32(KNOWN, COUNT));
-      const revision = kernel.invoke('fill_halo', COLUMNS, KNOWN, HALO, FLUID, options.cy * 32 - 1) >>> 0;
+      const revision =
+        kernel.invoke(
+          'fill_halo',
+          COLUMNS,
+          KNOWN,
+          HALO,
+          FLUID,
+          options.cy * 32 - 1,
+          options.seed,
+          options.cx * 32 - 1,
+          options.cz * 32 - 1,
+          options.generatorVersion ?? GENERATOR_VERSION,
+        ) >>> 0;
       return {
         ...prepared,
         halo: kernel.u16(HALO, COUNT).slice(),

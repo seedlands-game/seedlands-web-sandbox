@@ -71,15 +71,20 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
       generalWorkerCount: sessionConfig.generalWorkerCount,
     });
     const actions: UiActionPort = {
-      startWorld: (seed, quality, openMode) => application.start(seed, quality, openMode),
+      startWorld: (seed, quality, openMode, actorMode) => application.start(seed, quality, openMode, actorMode),
       startMeleeShowcase: (quality) => application.startMeleeShowcase(quality),
-      resetMeleeShowcase: () => game.prepareMeleeShowcase(),
+      resetMeleeShowcase: () => game.prepareMeleeShowcase().catch(() => undefined),
       triggerMeleeShowcaseDamage: () => game.triggerMeleeShowcaseDamage(),
       selectHotbarSlot: (slot) => game.selectHotbarSlot(slot),
+      setActorMode: async (mode) => {
+        await game.setModeControl({ type: 'set-mode', mode });
+      },
+      setFlight: (enabled) => game.setModeControl({ type: 'set-flight', enabled }),
+      setCreativeSlot: (slot, itemId) => game.setModeControl({ type: 'set-creative-slot', slot, itemId }),
       toggleInventory: () => game.toggleInventory(),
       closeInventory: () => game.closeInventory(),
+      inventoryPointer: (command) => game.inventoryPointer(command),
       craftRecipe: (recipeId) => game.craftRecipe(recipeId),
-      moveInventorySlot: (source, target) => game.moveInventorySlot(source, target),
       useInventoryItem: (slot) => game.useInventoryItem(slot),
       respawn: () => game.respawn(),
       toggleMap: () => game.toggleMap(),

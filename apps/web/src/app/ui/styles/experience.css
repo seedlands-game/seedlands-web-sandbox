@@ -82,7 +82,7 @@
   height: var(--slot-size);
   min-height: 38px;
   min-width: 0;
-  padding: 4px 3px 9px;
+  padding: 4px;
   border: 2px solid transparent;
   border-radius: 0;
   background:
@@ -100,8 +100,10 @@
     0 0 10px #eaba5480;
 }
 #hotbar .slot-swatch {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 4px;
+  width: auto;
+  height: auto;
   box-shadow: none;
 }
 #hotbar .item-icon {

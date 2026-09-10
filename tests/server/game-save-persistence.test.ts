@@ -88,7 +88,7 @@ describe('GameServer 一致冻结保存', () => {
     const frozen = server.freezeSaveSnapshot(3);
     const chunk = frozen.chunks[0];
     const index = voxelIndex(0, 20, 0);
-    const frozenPlayer = frozen.gameplay.entities.find((entity) => entity.id === 'player');
+    const frozenPlayer = frozen.gameplay.entityStore.entities.find((entity) => entity.id === 'player');
 
     server.edit(0, 20, 0, Voxel.Air);
     server.updateEntity('player', { position: [9, 40, 9] });
@@ -104,10 +104,10 @@ describe('GameServer 一致冻结保存', () => {
     spawnState(server);
     const frozen = server.freezeSaveSnapshot(4);
     const mutable = frozen as unknown as {
-      gameplay: { entities: Array<{ position: [number, number, number] }> };
+      gameplay: { entityStore: { entities: Array<{ position: [number, number, number] }> } };
       chunks: ChunkSnapshot[];
     };
-    mutable.gameplay.entities[0].position[1] = 999;
+    mutable.gameplay.entityStore.entities[0].position[1] = 999;
     mutable.chunks[0].voxels[voxelIndex(0, 20, 0)] = Voxel.Sand;
 
     await server.saveFrozen(frozen);
