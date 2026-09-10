@@ -148,6 +148,15 @@
 - 独立复核追加三项真实插件边界：required operation owner缺execute而provider有execute时目录假可用；core无限长required operation ID与wire 160上限不一致；capability version与module version不同时运行中技能无法原样恢复。前两项aux `2f83792b3207635505f192de9d7f3008cad4e173`已无冲突集成为`d9fa71d259b5f703eb963b396eaa7fc7cbe6d7d5`，23项准入/wire与31项公共Pack/迁移定向通过；恢复项仍在独立RED/GREEN实施。
 - 原本地main继续clean、origin/main live fetch仍6c7124a6。集成全量测试期间未混入aux修改；当前没有新PR、不报告最终准出。下一冻结需包含剩余恢复修复与明确夹具，再重跑静态、构建、全浏览器和真实模型。
 
+### 2026-09-11 约00:40 完整候选浏览器通过
+
+- `3f4679e13b92bdc231e524a14c94f022f5352383` 冻结构建Web/Agent PASS，`final-3f4679-build.log`；在同SHA串行执行main全部六个脚本，21+2+2+1+12+14=52/52 PASS。`candidate-3f4679-browser-results.json`记录每段身份/时间/退出码，未重试或放宽断言。本机系统Chrome+SwiftShader，仍不冒充远端CI Chromium。
+- 同SHA NPC默认8/8 PASS（6.8min），生产Worker独立1/1 PASS（16.5s）。五个默认skip分别是三真实模型、60min实时时长诊断和另行通过的production入口；不能把skip算通过。默认包含独立ESM Pack、单角色三昼夜、主线程隔离、provider故障、真实PG三角色配对恢复、威胁折返和三角色1800模拟秒。
+- 三角色原始JSON读回：补给16/16/15次、夜休→白昼均2轮、巡逻到达157/202/202；初始世界食物256份，途中资源注入0、模型调用0、换树0、errors=[]。既有模型首次11 Flash/0 Pro的失败记录仍保留，真实模型尚未复跑。
+- 人工查看camp截图发现运行中图先于UI发布，仅Authority sample已是新技能，不能声称图已证明该状态。补DOM等待新revision、sample:prepare-planks/preparing与三个伙伴按钮，不改生产或固定sleep。工作树production定向1/1 PASS（17.8s，`camp-ui-ready.log`），新截图实际可见版本2、preparing与阿岚/青禾/小满三入口；原真实产物与回档不复制断言保留。
+- 外部独立版本恢复正常提交`8bfbf31`，完整拒绝后快照相等补证`a84684d`；三处明确夹具调整`3f4679e`保留全部拒绝/无副作用/frontier断言。完整Agent/type与最终全static仍待最新code准出。
+- 能力descriptor共享codec aux `92c7fdc505a55bd9a51890806074e40bae7852eb`无冲突集成为`6c216781a5f8f76dbaf1cc7ed1c15c44cc4b048c`。独立复核字段语义分叉已闭合；仍补最终catalog总UTF-8限额及128KiB Resident帧负载证明，不扩大为chunking协议，不宣称各独立字段最大值任意组合均可连接。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

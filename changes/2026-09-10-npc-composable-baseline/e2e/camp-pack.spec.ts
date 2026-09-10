@@ -97,6 +97,18 @@ test('浏览器加载独立扩展 Pack：伙伴发现新能力并正常加工，
       ]),
     );
     await faceLifeCharacter(page, first.entityId);
+    const inspector = page.getByTestId('character-behavior');
+    await expect(inspector.locator('summary').first()).toContainText(
+      `版本 ${running.observation.character.behaviorTree.revision}`,
+    );
+    await expect(inspector.locator('.activity')).toBeVisible();
+    await expect(inspector.locator('.activity')).toContainText('sample:prepare-planks');
+    await expect(inspector.locator('.activity')).toContainText('preparing');
+    await expect(page.getByRole('navigation', { name: '选择伙伴' }).getByRole('button')).toHaveText([
+      '阿岚',
+      '青禾',
+      '小满',
+    ]);
     await page.screenshot({ path: info.outputPath('extension-skill-running.png') });
     // Keep typed checkpoint buffers inside the browser; Playwright JSON transport is not a save codec.
     const saved = await page.evaluateHandle(async (): Promise<unknown> => {
