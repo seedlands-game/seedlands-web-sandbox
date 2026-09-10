@@ -54,6 +54,45 @@ vi.mock('../../apps/web/src/client/character/resident-bridge', () => ({
 }));
 afterEach(() => vi.unstubAllGlobals());
 
+it.each(['rejected', 'disconnected'])('keeps local and Resident paused when checkpoint resume is %s', async (mode) => {
+  vi.stubGlobal('localStorage', { getItem: () => null, setItem: () => undefined, removeItem: () => undefined });
+  controls.pausedStates.length = 0;
+  const world = await HeadlessSession.create({ platform: testCorePlatform, seedText: 'checkpoint-run-failure' });
+  try {
+    const authorityWorld = new Proxy(world.world, {
+      get(port, property) {
+        if (property === 'clock')
+          return async (request: Parameters<typeof world.world.clock>[0]) => {
+            if (request.kind !== 'run') return port.clock(request);
+            if (mode === 'disconnected') throw new Error('authority disconnected');
+            return { ok: false, error: { code: 'WORLD_REQUEST_INVALID', message: 'run rejected' } };
+          };
+        return Reflect.get(port, property);
+      },
+    });
+    const changes: boolean[] = [];
+    const session = new CompanionSession(
+      () => ({
+        world: authorityWorld,
+        character: (request) => world.world.character(request),
+        bindCharacter: async () => {
+          throw new Error('no actors');
+        },
+      }),
+      () => false,
+      (paused) => changes.push(paused),
+    );
+    await session.exportCheckpoint();
+    expect(session.get().error).toContain('保持暂停');
+    expect(changes.at(-1)).toBe(true);
+    expect(controls.pausedStates.at(-1)).toBe(true);
+    expect(await world.world.clock({ kind: 'status' })).toMatchObject({ ok: true, data: { paused: true } });
+    session.stop();
+  } finally {
+    await world.dispose();
+  }
+});
+
 const residentCheckpoint = (worldId: string, timelineId: string, marker = 'saved') =>
   JSON.stringify({
     format: 'seedlands-resident-cognition',

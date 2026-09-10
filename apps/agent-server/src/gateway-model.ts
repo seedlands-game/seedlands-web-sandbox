@@ -4,10 +4,11 @@ import {
   type BaseChatModelParams,
   type BindToolsInput,
 } from '@langchain/core/language_models/chat_models';
-import { AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
+import { AIMessageChunk, mapChatMessagesToStoredMessages, type BaseMessage } from '@langchain/core/messages';
 import type { ChatResult } from '@langchain/core/outputs';
 import { convertToOpenAITool } from '@langchain/core/utils/function_calling';
 import { ChatOpenAI } from '@langchain/openai';
+import { JOURNAL_MESSAGE_UTF8_LIMIT } from './workspace/types.js';
 import {
   boundedText,
   GATEWAY_MAX_TOOL_CALLS,
@@ -194,6 +195,13 @@ export class GatewayChatModel extends BaseChatModel {
     });
     // Non-streaming responses must keep strict JSON failures; chunk construction resets this field.
     aiMessage.invalid_tool_calls = parsedToolCalls.invalid;
+    // BaseChatModel merges llmOutput into response_metadata after _generate; include that final copy now.
+    aiMessage.response_metadata.gateway_raw_response = raw;
+    // Opaque/raw fields are intentionally lossless duplicates. Budget the actual durable representation,
+    // including a small allowance for the resident's later request-scoped id and storage encoding.
+    const stored = mapChatMessagesToStoredMessages([aiMessage])[0];
+    if (new TextEncoder().encode(JSON.stringify(stored)).byteLength > JOURNAL_MESSAGE_UTF8_LIMIT - 1024)
+      throw new Error('gateway message exceeds durable journal byte limit');
     return {
       generations: [{ text: typeof content === 'string' ? content : JSON.stringify(content), message: aiMessage }],
       llmOutput: { gateway_raw_response: raw },

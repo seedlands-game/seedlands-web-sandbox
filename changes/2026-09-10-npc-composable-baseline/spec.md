@@ -82,6 +82,7 @@
 - 复用 Agent 线 Authority/Logic 直接通道的已验证语义，并适配新 Worker/Actor 协议；main 的位姿/身份/时效检查不得丢失。生产构建入口独立验证。
 - 伙伴 UI 可观察当前目标、运行分支、活动阶段、真实库存/需求、最近已提交事件、认知状态与失败原因；不把模型文本当世界事实。
 - 生产网关响应按实际流字节限制1MiB，单消息最多8个唯一工具调用、ID/name/arguments和content/reasoning有界；保留限额内provider原始字段。每逻辑轮最多8次模型请求、8个工具、3次行为提案；下一工具批次超剩余额度时整批在Authority副作用之前拒绝，不撤销先前已提交的回执。
+- 网关还须按LangChain最终StoredMessage（含框架合并的llmOutput）验证512KiB journal上限并预留1KiB编码/请求ID余量；1MiB只是传输上限，不保证任意该尺寸内容可持久消费。重连清除旧session admission latch后仍经过正常durable context gate；无模型、已死亡及未完成journal恢复不可解除阻塞。checkpoint恢复run失败时本地和Resident保持暂停并提示重试，不报告虚假的运行状态。
 - 出生生成必须有服务端超时和连接取消，外部模型等待不持PG事务/锁、不阻塞同WS其他角色的绑定/时钟/检查点；出生预算、幂等结果、失败重试及晚到结果隔离须有可执行反例。
 
 ## Given/When/Then 与测试设计

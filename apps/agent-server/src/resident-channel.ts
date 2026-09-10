@@ -133,6 +133,9 @@ export class ResidentChannel {
     }
     await this.receive(observation);
     if (recovered) this.scheduler.activateRecovered();
+    // The old session's admission latch is not a permanent prohibition. Recheck durable budget on the next wake.
+    if (this.agent && observation.character.lifecycle === 'active' && !this.scheduler.needsRecovery())
+      this.scheduler.unblock();
     await this.persist();
     return this.snapshot();
   }

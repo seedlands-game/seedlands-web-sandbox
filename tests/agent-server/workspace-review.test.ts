@@ -1,7 +1,8 @@
 import { createServer } from 'node:net';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, mapChatMessagesToStoredMessages, ToolMessage } from '@langchain/core/messages';
+import { createGatewayChatModel } from '../../apps/agent-server/src/gateway-model';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   PersistentNpcWorkspace,
@@ -215,6 +216,43 @@ describePostgres('persistent workspace independent-review corrections with actua
       await expect(workspace.getRuntimeMetadata(target)).rejects.toThrow('does not exist');
     }
     expect((await workspace.exportPortable(source)).documents).toEqual(portable.documents);
+  });
+
+  it('admits gateway messages only when their full lossless representation can enter the actual journal', async () => {
+    const target = await initialized('gateway-journal');
+    const makeModel = (length: number) =>
+      createGatewayChatModel({
+        tier: 'flash',
+        baseUrl: 'http://127.0.0.1:9/v1',
+        apiKey: 'fake-local',
+        fetch: async () =>
+          new Response(
+            JSON.stringify({
+              id: 'bounded-large-reasoning',
+              choices: [
+                {
+                  message: {
+                    role: 'assistant',
+                    content: 'done',
+                    reasoning_content: 'x'.repeat(length),
+                  },
+                },
+              ],
+            }),
+          ),
+      });
+    await expect(makeModel(180000).invoke([new HumanMessage('reason')])).rejects.toThrow('journal');
+    await expect(makeModel(150000).invoke([new HumanMessage('reason')])).rejects.toThrow('journal');
+    expect(await workspace.getJournal(target)).toEqual([]);
+    const accepted = await makeModel(120000).invoke([new HumanMessage('reason')]);
+    accepted.id = 'r'.repeat(160) + ':model:8';
+    const storedBytes = Buffer.byteLength(JSON.stringify(mapChatMessagesToStoredMessages([accepted])[0]), 'utf8');
+    expect(storedBytes).toBeGreaterThan(480000);
+    expect(storedBytes).toBeLessThan(512 * 1024);
+    await workspace.appendMessages(target, [{ idempotencyKey: 'large-message', message: accepted }]);
+    const restored = workspace.restoreMessages(await workspace.getJournal(target));
+    expect(restored).toHaveLength(1);
+    expect(restored[0]!.additional_kwargs).toEqual(accepted.additional_kwargs);
   });
 
   it('rejects missing journal messages and disconnected window history before reserving an import target', async () => {

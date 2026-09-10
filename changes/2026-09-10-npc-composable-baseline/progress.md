@@ -119,6 +119,13 @@
 - 内容限额实际PG RED：重算hash的超大AGENT仍可导入。抽出普通初始化/压缩/runtime写入与portable共用codec；不存储的token估算不伪造反推。第一次GREEN组因双重非法MEMORY的错误优先级变化失败并导致后续fixture冻结，已保持原错误优先级，原断言不改。第二次3文件15项PASS（`portable-content-green-2.log`），源文档不变、坏目标未占用。
 - C应用V2配对及pause失败恢复定向通过，仍核对seed身份不能比core更窄。A正在处理Factory无响应时持事务及单WS阻塞；B能力准入预计还需约45–60分钟。当前尚无最终冻结/PR，不把工作树定向结果冒充全量准出。
 
+### 2026-09-10 约23:45 终端边界追加验证
+
+- `ad3cfdcfab4477565bb35260cc56dfbfe7d12b24` 已正常hooks提交32文件，原本地main仍clean；最新fetch的origin/main仍6c7124a6，新分支无PR。该提交delta独立复核进行中，未把工作树后续补丁算进冻结结论。
+- 追加RED：权威run !ok/throw后本地错误恢复为run；savedBlocked=true新会话永久无dispatch。现run失败保持本地/Resident暂停并给重试错误；新Channel完成journal恢复、active角色观察后清除旧session latch，下一轮仍正常检查durable预算。dead/未恢复/无模型仍block。实际WS+PG/应用6项合计2文件13项PASS，`resume-admission-{red,green}.log`。
+- 追加RED：180000字节reasoning通过网关后因原始字段多份复制无法journal。首次修正遗漏BaseChatModel自动把llmOutput合并进response_metadata，150000正例仍在实际PG写入失败；现按框架最终StoredMessage编码校验512KiB-1KiB。180000和150000拒绝，120000输入产生>480000但<524288字节的实际消息，赋最终请求ID后PG append/readback完整。2文件21项PASS，`gateway-journal-{red,green,green-2}.log`完整保留，不放宽journal限额。Root owned lint与test TypeScript再次通过。
+- 标准settler缺少meleeDefinition导致攻击技能固定拒绝，确认旧Agent的unarmed意图在registered combat分支未生效。批准B在标准Actor内容层显式unarmed并复验真正攻击和精确旧snapshot迁移；不越过combat operation或修改伤害规则。A Factory隔离实施进行中。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

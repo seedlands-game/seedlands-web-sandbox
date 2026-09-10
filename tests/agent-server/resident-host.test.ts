@@ -12,7 +12,14 @@ import {
   type WorkspaceBinding,
 } from '../../apps/agent-server/src/workspace';
 import { baselineObservation, event, waitCapabilities } from './fixtures';
-import { actor, residentTextResponse, startHostDatabase, WireClient } from './resident-host-fixture';
+import {
+  actor,
+  residentBirthFixture,
+  residentRecoveryVariants,
+  residentTextResponse,
+  startHostDatabase,
+  WireClient,
+} from './resident-host-fixture';
 import type { ResidentHostMessage, ResidentWorldBinding } from '@seedlands/cognition-protocol';
 
 const dockerAvailable =
@@ -66,15 +73,7 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
       withStructuredOutput: () => ({
         invoke: async () => {
           birthCalls++;
-          const current = baselineObservation().character;
-          return {
-            profile: { name: '新居民', personality: '稳重好奇', riskTolerance: 0.3 },
-            agent: '喜欢先观察再行动。',
-            soul: '尊重同伴。',
-            memory: '刚来到世界。',
-            goal: current.behaviorTree.goal,
-            definition: current.behaviorTree.definition,
-          };
+          return residentBirthFixture();
         },
       }),
     } as unknown as BaseChatModel;
@@ -399,13 +398,13 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
     expect(await workspace.listBindings(target.worldId, target.timelineId)).toHaveLength(5);
   }, 30_000);
 
-  it.each([false, true])(
-    'reconciles persisted paused=%s with the current world, recovers once and drains before rebinding',
-    async (savedPaused) => {
+  it.each(residentRecoveryVariants)(
+    'reconciles saved %j with current admission, recovers once and drains before rebinding',
+    async ({ savedPaused, savedBlocked }) => {
       await client?.close();
       const priorModelAborts = modelAbortCount;
       const world = {
-        worldId: `recovery-world-${savedPaused}`,
+        worldId: `recovery-world-${savedPaused}-${savedBlocked}`,
         timelineId: 'recovery-timeline',
         epoch: 'recovery-epoch-1',
       };
@@ -451,7 +450,7 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
             fallbackSeconds: 60,
             remainingMs: 0,
             paused: savedPaused,
-            blocked: false,
+            blocked: savedBlocked,
             inFlight: true,
             pendingReasons: ['interrupted dialogue'],
             episodes: [['dialogue', 1]],

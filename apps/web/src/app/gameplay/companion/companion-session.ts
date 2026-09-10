@@ -389,12 +389,18 @@ export class CompanionSession {
     }
   }
   private async restoreCheckpointPause(world: WorldHarnessPort, paused: boolean): Promise<void> {
-    try {
-      if (!paused) await world.clock({ kind: 'run' });
-    } finally {
-      this.changePause(paused);
-      this.controller.setPaused(paused);
+    if (!paused) {
+      try {
+        const result = await world.clock({ kind: 'run' });
+        if (!result.ok) throw new Error('world resume rejected');
+      } catch (error) {
+        this.changePause(true);
+        this.controller.setPaused(true);
+        throw new Error('世界暂时无法继续，已保持暂停；请重试继续世界', { cause: error });
+      }
     }
+    this.changePause(paused);
+    this.controller.setPaused(paused);
   }
   exportCheckpoint = () =>
     this.run(async (authority) => {

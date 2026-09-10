@@ -6,6 +6,24 @@ import { baselineObservation, binding as makeBinding } from './fixtures';
 import type { CharacterObservation, ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { ResidentHostMessage } from '@seedlands/cognition-protocol';
 
+export const residentRecoveryVariants = [
+  { savedPaused: false, savedBlocked: false },
+  { savedPaused: true, savedBlocked: false },
+  { savedPaused: false, savedBlocked: true },
+] as const;
+
+export function residentBirthFixture() {
+  const current = baselineObservation().character;
+  return {
+    profile: { name: '新居民', personality: '稳重好奇', riskTolerance: 0.3 },
+    agent: '喜欢先观察再行动。',
+    soul: '尊重同伴。',
+    memory: '刚来到世界。',
+    goal: current.behaviorTree.goal,
+    definition: current.behaviorTree.definition,
+  };
+}
+
 export function residentTextResponse(id: string, content: string): Response {
   return new Response(
     JSON.stringify({
