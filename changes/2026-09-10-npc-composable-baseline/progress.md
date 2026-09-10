@@ -222,6 +222,21 @@
 - 独立检查发现另外的真实取消缺口：retirement延后dispose，channel/agent的数据库preflight与manifest等待后缺少取消复验，已abort信号仍可进入fetch wrapper。已授权受控RED/GREEN和局部修复；模型请求计数不等于provider实际收到请求，第14次可能在已取消signal下进入wrapper。Pro出生的具体非法字段未被旧产物记录，另查schema与UTF-8文档合同，不放宽校验或盲重跑。
 - 本批新增17Flash（15有完成标记）/4Pro逻辑请求，累计55Flash/7Pro；Pro响应有usage元数据但整轮Flash/token/重试计费仍不完整，不伪造总成本。网关容器`915b0381bd327a47dbd156c7463b4868ae1dc29cacb3582cef64f4459c0d7e7e`已删除，原PG保留。全部运行已结束，当前无新PR。
 
+### 2026-09-11 约04:46 取消边界与出生合同收口
+
+- `ac44439`引入同源出生codec：agent/soul provider上限1024码点，运行时仍为4096 UTF-8 bytes，四必填文档拒绝纯空白。新增诊断仅记录字段类型、字节数和是否非空白，不记录出生正文。旧Pro拒绝具体字段仍未知，不用schema缺口追认旧失败原因。独立复核发现Host只校验canonical重建包会漏原始顶层extra，`4fc479c`恢复原始64KiB与精确顶层keys；Factory原始输出同样须拒绝extra，后续补证中。
+- aux `6912771`集成为`e844a78`：retirement同步dispose，Channel/Agent在preflight/manifest await后、实际模型dispatch前复验取消，pre-aborted gateway零fetch。组合保留已有整批8工具/3提案预算与出生取消，不退回旧逐工具计数；三处文本冲突按双方owner语义合并。集成定向取消/gateway 21项、Agent整批预算11项PASS；aux真实PG host/rebind 6项PASS。
+- `43fd4fd`把T11断开验收绑定精确Browser WebSocket和同一已认证world/epoch的server connection；记录click、transport close、server close、retirement计数与时刻，过渡调用计入原18次总预算。retired仅保证该连接queued inbound与channel shutdown收敛，不承诺共享Factory/provider已完成；此三角色用例无Pro/birth请求。
+- aux `0865531`集成为`0f1de68`：真实WS消息先入队、close后释放前序读取，旧实现仍启动import 1次；入口guard后0次。真实PG portable校验中close，旧实现校验完成后写入目标；commit前closed复验后不启动batch且目标为空。两文件8项GREEN，RED/GREEN JSON保留。已进入atomic batch的操作允许在retired前成功/回滚收敛，不声称取消已提交事务。
+- 独立复核又指出普通invoke成功后的终态durable receipt/watermark之间不应被abort截断；正补终态尾部阻塞/断连反例。当前仅为修复阶段，未运行新的真实模型，也未发布PR；`cb6f186`全量绿色不冒充当前源码准出。
+
+### 2026-09-11 约04:55 最终尾部反例完成
+
+- `4831170`完成出生raw/stored分形态校验：模型输出精确6字段，存储包精确7字段且birthId一致；非法模型extra在PG连接前拒绝。定向18项PASS，独立复核确认原始包限额与字段P1闭合。组合5文件48项PASS，test类型/相关lint通过。
+- aux `291f9ac`集成为`b086bb5`，4个确定性RED全部GREEN：input journal提交后取消能记录failed receipt；真实socket在completed receipt提交后关闭，release前retired尚未发生，release后included watermark一致；markIncluded已提交不再抛AbortError；freeze已提交则执行既有失败收尾。相关20项PASS，原始4FAIL与GREEN JSON已复制留存。
+- 整批工具admission、每次实际模型/工具handler边界的取消检查保留；仅把已落盘输入之后的准备纳入失败收尾，并保证成功轮次终态完整。发布后的压缩仍按published标记记录成功，不以取消声称撤销。最后组合回归与独立delta复核后冻结全量。
+- `b086bb5`最终组合7文件53项PASS（包含真实PG迟到导入），test TypeScript与相关lint通过。Sol/xhigh复核确认上述birth/queued-import/cancellation/durable-tail P1均闭合，无新P0/P1；原有私有v1通配入口P2与真实模型作者质量限制继续披露。进入同SHA全量重验，不追加功能。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

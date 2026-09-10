@@ -82,3 +82,9 @@
 已用约8小时32分、剩余约3小时28分。完整static/build/main/NPC/production同SHA通过，真实模型一组通过、两个边界失败，尚有取消修复、出生合同诊断、复验及PR/CI。剩余正常约2小时、保守3小时，保守×120%=3.6小时已稍超余量；不为时间删门禁或放宽出生校验。剩余传统约1–2PD、Agent活跃约2–4小时为低置信规划。
 
 累计55Flash/7Pro逻辑请求；本轮Pro有局部usage元数据，但未取得完整provider重试/Flash用量，分模型总token、credits、API费用和当前额度分母仍unknown。继续仅用已批准环境中的provider pair，不购买/兑换额度。
+
+### 取消及持久化边界闭合后重估（约04:55 UTC+8）
+
+已用约9小时5分、剩余约2小时55分。受控取消、出生schema/raw envelope、queued import及durable尾部反例已完成修正；仍需最新SHA完整static/build/browser/真实模型、PR/CI与交付读回。剩余正常约1.5–2小时、保守2.5小时，保守×120%=3小时略超窗口；无新功能范围，不因此缩减测试或发布失败候选。
+
+上述时间是关键路径规划，不是性能收益或计费工时。剩余传统约1–2PD、Agent活跃约2–3小时为低置信估计；实际总token、credits、费用及额度占比仍unknown。真实调用保持55Flash/7Pro，未为修复触发额外模型尝试。

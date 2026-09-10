@@ -88,6 +88,7 @@
 - 网关还须按LangChain最终StoredMessage（含框架合并的llmOutput）验证512KiB journal上限并预留1KiB编码/请求ID余量；1MiB只是传输上限，不保证任意该尺寸内容可持久消费。重连清除旧session admission latch后仍经过正常durable context gate；无模型、已死亡及未完成journal恢复不可解除阻塞。checkpoint恢复run失败时本地和Resident保持暂停并提示重试，不报告虚假的运行状态。
 - 出生生成必须有服务端超时和连接取消，外部模型等待不持PG事务/锁、不阻塞同WS其他角色的绑定/时钟/检查点；出生预算、幂等结果、失败重试及晚到结果隔离须有可执行反例。
 - 普通认知与压缩在通道关闭时同步撤销执行资格；旧通道的持久化尾部仍按identity串行，但不能因此延后取消。数据库准备、请求manifest等异步边界结束后、每次模型实际dispatch前均须重验取消，已取消signal不得进入fetch。以阻塞preflight/manifest后关闭再释放的零dispatch反例验证，不只测试已经在请求中的abort。
+- 取消阻止下一模型或世界操作，不截断已开始的持久化终态：输入journal已落盘的中断须记录失败回执；已冻结的压缩窗口须发布成功或执行既有失败收尾；已成功轮次的completed receipt与included watermark完整收敛。以提交后阻塞、真实close再释放的反例验证retirement会等待尾部，不把中断误报为新的成功，也不撤销已提交事务。
 - 出生生成schema与Factory/Host须使用同源文档约束：agent/soul运行时各≤4096 UTF-8 bytes，provider schema取最坏每码点4 bytes的保守字符上限1024；memory/goal保留既有字节边界，必填文档禁止纯空白。初始MEMORY应如实说明尚无经历，不能用空文档或虚构事实满足合同。拒绝反馈只包含具体字段、类别和尺寸元数据，不泄露正文；不截断或自动补写非法输出。
 
 ## Given/When/Then 与测试设计
