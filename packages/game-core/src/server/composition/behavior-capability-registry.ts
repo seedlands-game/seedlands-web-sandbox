@@ -15,7 +15,10 @@ import {
   type BehaviorOperationRequirement,
   type BehaviorSkillCheckpoint,
 } from '../../runtime/behavior-control-protocol';
-import { assertBehaviorCapabilityDescriptor } from '../../runtime/behavior-capability-descriptor';
+import {
+  assertBehaviorCapabilityDescriptor,
+  isBehaviorCapabilityCatalog,
+} from '../../runtime/behavior-capability-descriptor';
 import type { ModDefinitionCatalog, ModRegistrationIdentity } from './contracts';
 import type { RegisteredOperationRequest, RegisteredOperationResult } from './operation-contracts';
 import {
@@ -349,13 +352,15 @@ export function createBehaviorCapabilityRegistry(): BehaviorCapabilityRegistry {
       if (frozen) throw new TypeError('Behavior capability registry is already frozen.');
       for (const provider of providers.values())
         assertBehaviorProviderAdmission(definitions, provider.identity, provider.descriptor);
-      catalog = Object.freeze(
+      const candidate = Object.freeze(
         [...providers.values()]
           .map((entry) => frozenBehaviorValue(entry.descriptor))
           .sort((left, right) =>
             left.kind === right.kind ? left.id.localeCompare(right.id) : left.kind.localeCompare(right.kind),
           ),
       );
+      if (!isBehaviorCapabilityCatalog(candidate)) throw new RangeError('Behavior capability catalog is invalid.');
+      catalog = candidate;
       frozen = true;
     },
     catalog() {

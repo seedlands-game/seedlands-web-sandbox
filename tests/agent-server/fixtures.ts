@@ -1,4 +1,7 @@
-import { createLifeBehavior } from '@seedlands/game-core/runtime/character-control-protocol';
+import {
+  CHARACTER_OBSERVATION_MAX_EVENTS,
+  createLifeBehavior,
+} from '@seedlands/game-core/runtime/character-control-protocol';
 import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
 import { BEHAVIOR_REGISTRY_CAPABILITY, type BehaviorCapabilityRegistry } from '@seedlands/game-core/mod-api';
 import { assembleOverworldPacks } from '@seedlands/game-core/server/composition/host-api';
@@ -36,7 +39,7 @@ const behaviorComposition = assembleOverworldPacks([
     },
   },
 ]);
-const behaviorCatalog = behaviorComposition
+export const behaviorCatalog = behaviorComposition
   .capability<BehaviorCapabilityRegistry>(BEHAVIOR_REGISTRY_CAPABILITY)
   .catalog();
 
@@ -99,5 +102,28 @@ export const baselineObservation = (): CharacterObservation => {
     character: { ...current.character, eventCursor: 0 },
     events: [],
     cursor: 0,
+  });
+};
+
+export const maximumIntendedChineseObservation = (): CharacterObservation => {
+  const events = Array.from({ length: CHARACTER_OBSERVATION_MAX_EVENTS }, (_, index) => ({
+    ...event(index + 1),
+    text: '界'.repeat(280),
+  }));
+  const current = observation();
+  return observation({
+    character: {
+      ...current.character,
+      eventCursor: events.length,
+      memory: { revision: 4, throughCursor: 0, summary: '忆'.repeat(16_000) },
+    },
+    events,
+    cursor: events.length,
+    eventCoverage: {
+      requestedAfter: 0,
+      through: events.length,
+      returnedThrough: events.length,
+      hasMore: false,
+    },
   });
 };

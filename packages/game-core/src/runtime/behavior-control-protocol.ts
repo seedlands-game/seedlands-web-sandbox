@@ -9,6 +9,7 @@ export const BEHAVIOR_MAX_REQUIRED_OPERATIONS = 16;
 export const BEHAVIOR_MAX_DESCRIPTOR_TEXT_LENGTH = 160;
 export const BEHAVIOR_MAX_OPERATION_ID_LENGTH = BEHAVIOR_MAX_DESCRIPTOR_TEXT_LENGTH;
 export const BEHAVIOR_MAX_ARGUMENT_VALUES = 128;
+export const BEHAVIOR_MAX_CATALOG_BYTES = 32 * 1024;
 
 /** Public authoring guide shared by world tools and external policy editors. */
 export const BEHAVIOR_TREE_AUTHORING_GUIDE = `A definition is {version:1,root:Node,monitors?:Monitor[]}.

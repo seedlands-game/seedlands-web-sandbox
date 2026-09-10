@@ -1,5 +1,6 @@
 import {
   BEHAVIOR_MAX_ARGUMENT_VALUES,
+  BEHAVIOR_MAX_CATALOG_BYTES,
   BEHAVIOR_MAX_CAPABILITIES,
   BEHAVIOR_MAX_CAPABILITY_STATE_BYTES,
   BEHAVIOR_MAX_DESCRIPTOR_TEXT_LENGTH,
@@ -9,6 +10,7 @@ import {
   type BehaviorCapability,
   type BehaviorOperationRequirement,
 } from './behavior-control-protocol';
+import { boundedBehaviorJsonArrayBytes } from './behavior-json';
 
 const IDENTIFIER = /^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$/;
 const NAMESPACE_ID = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
@@ -17,6 +19,8 @@ const EXACT_VERSION =
 
 const object = (value: unknown): value is Readonly<Record<string, unknown>> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
+const onlyKeys = (value: Readonly<Record<string, unknown>>, keys: readonly string[]): boolean =>
+  Object.keys(value).every((key) => keys.includes(key));
 const boundedText = (value: unknown): value is string =>
   typeof value === 'string' && value.length > 0 && value.length <= BEHAVIOR_MAX_DESCRIPTOR_TEXT_LENGTH;
 const exactVersion = (value: unknown): value is string => boundedText(value) && EXACT_VERSION.test(value);
@@ -26,7 +30,9 @@ export type BehaviorArgumentRuleIssue = 'schema' | 'minimum' | 'maximum' | 'boun
 export function behaviorArgumentRuleIssue(value: unknown): BehaviorArgumentRuleIssue | null {
   if (
     !object(value) ||
-    !['number', 'string', 'boolean', 'position', 'entity-reference'].includes(String(value.type)) ||
+    !onlyKeys(value, ['type', 'required', 'minimum', 'maximum', 'integer', 'values']) ||
+    typeof value.type !== 'string' ||
+    !['number', 'string', 'boolean', 'position', 'entity-reference'].includes(value.type) ||
     (value.required !== undefined && typeof value.required !== 'boolean') ||
     (value.integer !== undefined && typeof value.integer !== 'boolean')
   )
@@ -56,6 +62,7 @@ const validRequiredOperations = (value: unknown): value is readonly BehaviorOper
   return value.every((entry) => {
     if (
       !object(entry) ||
+      !onlyKeys(entry, ['operationId', 'authorization']) ||
       typeof entry.operationId !== 'string' ||
       entry.operationId.length > BEHAVIOR_MAX_OPERATION_ID_LENGTH ||
       !NAMESPACE_ID.test(entry.operationId) ||
@@ -71,11 +78,23 @@ const validRequiredOperations = (value: unknown): value is readonly BehaviorOper
 export function isBehaviorCapabilityDescriptor(value: unknown): value is BehaviorCapability {
   if (
     !object(value) ||
+    !onlyKeys(value, [
+      'id',
+      'name',
+      'version',
+      'provider',
+      'kind',
+      'description',
+      'arguments',
+      'requiredOperations',
+      'state',
+    ]) ||
     typeof value.id !== 'string' ||
     !IDENTIFIER.test(value.id) ||
     value.name !== value.id ||
     !exactVersion(value.version) ||
     !object(value.provider) ||
+    !onlyKeys(value.provider, ['moduleId', 'version']) ||
     !boundedText(value.provider.moduleId) ||
     !NAMESPACE_ID.test(value.provider.moduleId) ||
     !exactVersion(value.provider.version) ||
@@ -91,9 +110,10 @@ export function isBehaviorCapabilityDescriptor(value: unknown): value is Behavio
     !validRequiredOperations(value.requiredOperations)
   )
     return false;
-  if (value.kind === 'condition') return value.requiredOperations.length === 0 && value.state === undefined;
+  if (value.kind === 'condition') return value.requiredOperations.length === 0 && !Object.hasOwn(value, 'state');
   return (
     object(value.state) &&
+    onlyKeys(value.state, ['version', 'maximumBytes']) &&
     exactVersion(value.state.version) &&
     Number.isSafeInteger(value.state.maximumBytes) &&
     Number(value.state.maximumBytes) >= 2 &&
@@ -104,11 +124,19 @@ export function isBehaviorCapabilityDescriptor(value: unknown): value is Behavio
 export function isBehaviorCapabilityCatalog(value: unknown): value is readonly BehaviorCapability[] {
   if (!Array.isArray(value) || value.length > BEHAVIOR_MAX_CAPABILITIES) return false;
   const ids = new Set<string>();
-  return value.every((entry) => {
-    if (!isBehaviorCapabilityDescriptor(entry) || ids.has(entry.id)) return false;
-    ids.add(entry.id);
-    return true;
-  });
+  if (
+    !value.every((entry) => {
+      if (!isBehaviorCapabilityDescriptor(entry) || ids.has(entry.id)) return false;
+      ids.add(entry.id);
+      return true;
+    })
+  )
+    return false;
+  try {
+    return boundedBehaviorJsonArrayBytes(value, BEHAVIOR_MAX_CATALOG_BYTES) <= BEHAVIOR_MAX_CATALOG_BYTES;
+  } catch {
+    return false;
+  }
 }
 
 export function assertBehaviorCapabilityDescriptor(value: unknown): asserts value is BehaviorCapability {

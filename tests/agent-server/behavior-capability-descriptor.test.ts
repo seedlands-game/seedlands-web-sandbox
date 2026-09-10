@@ -106,6 +106,7 @@ describe('shared behavior capability descriptor boundary', () => {
       { type: 'number', integer: 1 },
       { type: 'number', minimum: 2, maximum: 1 },
       { type: 'boolean', minimum: 0 },
+      { type: 'string', extra: true },
     ]) {
       const rule = Array.isArray(invalidRule) ? { type: 'string', values: invalidRule } : invalidRule;
       const capability = skill({ arguments: { choice: rule as never } });
@@ -119,5 +120,6 @@ describe('shared behavior capability descriptor boundary', () => {
         ]),
       ).toBe(false);
     }
+    expect(validCapabilities([{ ...descriptor, extra: true }])).toBe(false);
   });
 });

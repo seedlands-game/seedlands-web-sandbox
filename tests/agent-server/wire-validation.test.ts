@@ -4,7 +4,7 @@ import { CHARACTER_OBSERVATION_MAX_EVENTS } from '@seedlands/game-core/runtime/c
 import { CONTROLLER_FRAME_MAX_BYTES } from '@seedlands/cognition-protocol';
 import { parseControllerClientMessage } from '../../apps/agent-server/src/wire-validation';
 import { validCapabilities } from '../../apps/agent-server/src/node/resident-host-validation';
-import { binding, event, observation, waitCapabilities } from './fixtures';
+import { binding, event, maximumIntendedChineseObservation, observation, waitCapabilities } from './fixtures';
 
 describe('controller wire validation', () => {
   it('accepts the current world capability identity and rejects legacy or mismatched descriptors', () => {
@@ -31,24 +31,12 @@ describe('controller wire validation', () => {
   });
 
   it('accepts the maximum intended Chinese observation under the shared UTF-8 frame budget', () => {
-    const events = Array.from({ length: CHARACTER_OBSERVATION_MAX_EVENTS }, (_, index) => ({
-      ...event(index + 1),
-      text: '界'.repeat(280),
-    }));
     const message = {
       kind: 'observe',
       protocolVersion: 1,
       binding: binding(),
       sequence: 1,
-      observation: observation({
-        character: {
-          ...observation().character,
-          eventCursor: CHARACTER_OBSERVATION_MAX_EVENTS,
-          memory: { revision: 4, throughCursor: 0, summary: '忆'.repeat(16_000) },
-        },
-        events,
-        cursor: CHARACTER_OBSERVATION_MAX_EVENTS,
-      }),
+      observation: maximumIntendedChineseObservation(),
     };
     expect(Buffer.byteLength(JSON.stringify(message), 'utf8')).toBeLessThan(CONTROLLER_FRAME_MAX_BYTES);
     expect(parseControllerClientMessage(message)).not.toBeNull();

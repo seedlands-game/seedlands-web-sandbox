@@ -5,6 +5,7 @@ import type {
   BehaviorJson,
 } from '../../runtime/behavior-control-protocol';
 import { behaviorArgumentRuleIssue } from '../../runtime/behavior-capability-descriptor';
+export { behaviorJsonBytes, behaviorUtf8Bytes } from '../../runtime/behavior-json';
 
 const MAX_JSON_DEPTH = 16;
 const MAX_JSON_NODES = 2_048;
@@ -12,16 +13,6 @@ const MAX_JSON_NODES = 2_048;
 export const behaviorObject = (value: unknown): value is Readonly<Record<string, unknown>> =>
   Boolean(value && typeof value === 'object' && !Array.isArray(value));
 
-export const behaviorUtf8Bytes = (text: string): number => {
-  let total = 0;
-  for (const character of text) {
-    const code = character.codePointAt(0)!;
-    total += code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4;
-  }
-  return total;
-};
-
-export const behaviorJsonBytes = (value: unknown): number => behaviorUtf8Bytes(JSON.stringify(value));
 export const cloneBehaviorValue = <Value>(value: Value): Value => JSON.parse(JSON.stringify(value)) as Value;
 
 const freezeBehaviorValue = (value: unknown): void => {
