@@ -20,4 +20,4 @@ pnpm preview --host 127.0.0.1 --port 4173
 
 API 候选：`defineCraftingProviderModule({ moduleId, provider: { version: 1, match } })` 声明匹配 capability；`defineContentModule({ craftingProvider: true, ... })` 显式依赖它。`match` 获得冻结的配方、槽位和选中索引，返回 `{ slot, count }[]` 或 `null`。共享事务严格验证实例和总消耗，并在完整产出有容量时统一提交。匹配器不得依赖时间、随机数、外部可变状态或副作用；Host 在同一观察上重新验证候选，变化的候选会被拒绝。
 
-状态：示例实现中，最终宿主/Browser/跨宿主证据见同 change 的 S5 交付记录；本说明不表示已经准出。
+状态：两个样例已通过真实 Headless 与生产 Browser 验收，点击转换已通过 Headless→Browser→Headless 往返。整体独立审阅与 PR/CI 状态见 [S6 验收](../s6-acceptance.md)。

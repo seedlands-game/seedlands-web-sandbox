@@ -197,3 +197,5 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 `server/composition/secondary-resource-authorization.ts` 检查跨资源操作对原始角色资源的调用者及模块 execute 授权；Inventory、Block、Combat 即时提交及延迟来源重绑定共享该检查，不把主目标执行授权扩展为角色写入权。
 
 `server/gameplay/modules/crafting-provider.ts` 定义冻结的匹配输入、槽位扣料计划与共享库存事务；`recipe-crafting-module.ts` 通过同一 capability 分别准入标准和自定义匹配器。`server/composition/product-playbooks.ts` 对三个仓库内产品示例施加独立宿主权限；当前替代 Pack 源在 `changes/2026-09-09-composable-overworld-playbook/examples/`，仅消费公开 mod-api。`scripts/build-gameplay-packs.mjs` 按明确示例名构建锁定 ESM，Browser 和 Headless 读取同一产物合同。
+
+`server/gameplay/actor-profile.ts` 校验并冻结每世界角色档案、玩家默认近战及可选初始生态；第一方数值归 `playbooks/overworld/actors.ts`。`server/starter-ecology-bootstrap.ts` 仅在装配声明生态时准备已有营地/角色/食物布局，组合世界缺失该配置不会隐式生成默认内容。角色生命、掉落、感知食物和模型表现分别沿权威档案与当前世界物品定义解析。

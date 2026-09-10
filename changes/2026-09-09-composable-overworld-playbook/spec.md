@@ -144,10 +144,10 @@ Browser/Headless 从同一 checkpoint 恢复后比较权威事实和显式推进
 | S0   | 长期架构文档、范围/测试合同、成本、基线与审核摘要            | 精确 hash 已获批准；供应链前置与文档格式已通过                 |
 | S1   | 每世界装配、注册 facade、manifest/摘要、资源授权扩展与负例   | 基础接缝与集成门禁通过；独立审阅通过；真实玩法消费者在后续阶段 |
 | S2   | ECS 准入与组件 owner 迁移、物品/库存、旧 facade 和存档 codec | ECS owner/存档迁移已提交；独立审阅修复已完成                   |
-| S3   | 现有玩法移入第一方模块/Playbook，Ruleset、生存/创造及迁移    | Implementing                                                   |
-| S4   | 工作台/冶炼/储物、木石铁成长、食物/昼夜/建造完整循环         | 成长 Browser 和两日 Headless 通过，最终集成门禁待复验          |
-| S5   | 替代模块/Playbook、跨宿主与错误恢复；API 候选说明            | Implementing                                                   |
-| S6   | 全量门禁、真实输入/视听、独立审阅、演示与 PR 准出            | Not started                                                    |
+| S3   | 现有玩法移入第一方模块/Playbook，Ruleset、生存/创造及迁移    | 实现和本地门禁通过，独立集成审阅中                             |
+| S4   | 工作台/冶炼/储物、木石铁成长、食物/昼夜/建造完整循环         | 完整本地 static/build 与成长/两日生存通过                      |
+| S5   | 替代模块/Playbook、跨宿主与错误恢复；API 候选说明            | 独立 ESM 与双向跨宿主、本地门禁通过                            |
+| S6   | 全量门禁、真实输入/视听、独立审阅、演示与 PR 准出            | 本地门禁通过；独立审阅与远端 PR/CI 进行中                      |
 
 阶段实施均保持可运行，语义 commit 分离装配、owner 迁移、玩法产品化和验收。不得把 S1 完成当整个目标交付。现有工作树独立；不读取或合并其他活动分支作为实施前置。后续同步 main 只处理已合并变更，若实质改变合同须重审。
 
@@ -173,3 +173,5 @@ Browser/Headless 从同一 checkpoint 恢复后比较权威事实和显式推进
 - 后续机制检查点：明确执行种类、Ruleset、规则阶段与实际组合时钟/frontier 接线后，static（1380 passed / 4 skipped）、build 与 Browser 4/4 分别通过；证据与缺口见 [机制检查点](s3-mechanism-checkpoint.md)。默认 needs/combat 和跨 owner 原子提交仍在实施。
 
 最新 S3 中间准出见 [Needs 检查点](s3-needs-checkpoint.md)：注册 Needs 的真实消费者、原子死亡与恢复上限已通过 full static 1435/4、独立审阅和 Browser 6/6。Combat 注册伤害与 Place/Break 仍在实施队列；S3/S4/S5/S6 的阶段状态未变。
+
+当前完整集成准出见 [S6 验收](s6-acceptance.md) 和 [T01–T14 映射](acceptance-map.md)：`50ff14c` 的 static 1759 passed / 4 skipped、独立 build、生产 Browser 10/10、dev 基线 21/21 及资产/木剑/Harness 5/5 分别通过。S3–S5 的实际实现已闭合，整体仍 Implementing，等待独立审阅和当前 PR/CI 准出；此前段落保留为阶段历史，不代表当前缺口。长期 docs baseline 增补代码地图中的工位 owner、可选角色配置、每世界 provider 与样例入口；候选 API 的实际边界见 [API 说明](api-candidate.md)，未扩展长期愿景或声明性能收益。

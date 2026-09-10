@@ -20,3 +20,13 @@
 - 替代 Playbook 的构建与运行见 [examples](examples/readme.md)，公开接口边界见 [API 候选](api-candidate.md)。
 
 自动成长旅程只布置有限可采原料与站立区域；工具、工位及材料产出均来自正常输入和事务，不直接发放成品。两日 Headless 的 NPC 攻击是脚本驱动正常动作；Browser 生存反馈用受控开发者伤害触发死亡 HUD，两个证据覆盖不同边界。最终通过与失败记录以交付快照为准。
+
+## 当前生产运行截图
+
+同一次 `50ff14c` 生产 Browser 验收的原始帧，完整链路由实际输入/权威状态断言支持，截图只辅助观察。
+
+![普通采集制作完成铁镐，保留木石工具剩余耐久](evidence/s6-iron-pickaxe.png)
+
+![独立点击转换 Playbook 产出自己的石块物品](evidence/s6-alternative-crafting.png)
+
+![死亡提示解释掉落与复活后找回](evidence/s6-death-recovery.png)

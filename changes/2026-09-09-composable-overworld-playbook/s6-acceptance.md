@@ -21,3 +21,23 @@ S4/S5 实现提交 `d05206b`，主干 #27 同步提交 `27bf75d`，V4 Wasm 构�
 - 修复后的完整 static 与独立 build。
 - 当前源码的生产 Browser 成长、生存 HUD、独立样例和跨宿主；dev Browser 全部受影响既有回归。
 - 独立审阅回读、T01–T14 对照、可复现演示以及 PR/最新 CI/mergeability。
+
+## 修复后的完整本地准出
+
+冻结源码 `50ff14c2d1a3c62cafbb3b85e18b789e33d10e9c`：
+
+| 门禁                                                 | 结果                                                           | 记录                                              |
+| ---------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------- |
+| `pnpm verify:static`                                 | 330 文件、1759 passed、4 skipped；Svelte 0/0、全部类型检查通过 | `/tmp/seedlands-s6-static2.log`                   |
+| `pnpm build`                                         | source/artifact fingerprints、Pack 构建与生产 bundle 通过      | `/tmp/seedlands-s6-build1.log`                    |
+| 生产 preview，change 全部 E2E                        | 10/10，1.7min                                                  | `/tmp/seedlands-s6-browser-prod1.log`             |
+| dev，既有完整 regression                             | 21/21，43.9s                                                   | `/tmp/seedlands-s6-browser-dev-regression1.log`   |
+| dev，木剑体验场、PR15 模型资产、#25 双向 parity/诊断 | 5/5，14.8s                                                     | `/tmp/seedlands-s6-browser-dev-integrations1.log` |
+
+独立点击转换使用真实构建和校验的 ESM 字节，普通 Headless 采集后经 Browser 选中槽合成、真实右键放置，再还原至 Headless 核对库存/地形。建造样例没有 Combat/Needs/生态也能开局、使用创造目录。工位成长截图核对铁镐 250/250、木镐 57/60、石镐 120/132，图标解码正常；死亡提示说明掉落与复活后找回路径。36 项浏览器断言全部通过，没有 pageerror；启动日志有浏览器默认 favicon 404，不影响 Pack/世界资源。
+
+运行产物分别保存在 `/tmp/seedlands-s6-prod1-artifacts`、`/tmp/seedlands-s6-dev-regression1-artifacts`、`/tmp/seedlands-s6-dev-integrations1-artifacts`，不把旧截图当当前结果。两份历史外观快照测试在 dev 环境通过；它们动态导入源码，先前在 preview 的失败没有当成产品缺陷。测试产生的历史 loading 截图已恢复原版本。所有本任务 dev/preview 已停止，4173 端口确认释放。
+
+CI 增加独立的 `pnpm test:composable-gameplay` 步骤及 always evidence 上传，沿用已有 Chromium job/权限/20min 上限，不改变既有回归全集、flaky 硬失败或重试策略。该步骤显式保护本 change 的 10 项需求场景，不将它们迁入长期基线。远端结果待 PR 当前 HEAD 读回。
+
+新 CI 步骤的同名命令和低画质配置在本机 dev 服务复验 10/10 通过（1.8min，`/tmp/seedlands-s6-browser-dev-composable.log`）；Playwright 所有者自动停止服务，4173 再次读回释放。两份 README 中的独立 Headless CLI 也实际启动并在 stdin EOF 正常退出，未留下服务。正式 Git rename 已保证 `examples/readme.md` 在大小写敏感的 Linux checkout 中使用相同文件名。
