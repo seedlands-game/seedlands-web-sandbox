@@ -3,7 +3,7 @@
 ## Status
 
 - 类型：Breaking（公开合同、ECS/领域所有权、存档、生成及跨模块迁移）。
-- 状态：Implementing / S6；ECS 补充合同已批准，自主推进到 S6。2026-09-09 用户明确批准 `40daf17358a3fb5a86d08ea25aecbf6896922274f16a68d02c557bb38139bb53`；批准原文见 [spec 原始字节](evidence/spec-approved.txt) 与 [附件原始字节](evidence/architecture-approved.txt)。此后格式修正和状态更新不改变规范范围；ECS 补充合同 ae661e8e916f9286bf84f84ed382cb97f512a12b23aeb5cc9a09050c7c1b7816 随后获用户明确批准，允许安装与实施；常规问题记录并自主修复，重大阻塞再上报。
+- 状态：Delivered / S6 技术准出；ECS 补充合同已批准，自主推进到 S6。2026-09-09 用户明确批准 `40daf17358a3fb5a86d08ea25aecbf6896922274f16a68d02c557bb38139bb53`；批准原文见 [spec 原始字节](evidence/spec-approved.txt) 与 [附件原始字节](evidence/architecture-approved.txt)。此后格式修正和状态更新不改变规范范围；ECS 补充合同 ae661e8e916f9286bf84f84ed382cb97f512a12b23aeb5cc9a09050c7c1b7816 随后获用户明确批准，允许安装与实施；常规问题记录并自主修复，重大阻塞再上报。
 - 独立基线：`01bab28ace506685f39c1d4a86fec541cbbf2f1b`，包含已合并的 [PR #25](https://github.com/seedlands-game/seedlands-web-sandbox/pull/25)。
 - 功能分支：`codex/composable-overworld-playbook`；目标分支 `main`。
 - 不依赖 `codex/living-npc-mvp` 或其他未合入实现，不等待另一对话交付。本 change 自己完成必要的角色组件、模块授权接线与测试。
@@ -139,15 +139,15 @@ Browser/Headless 从同一 checkpoint 恢复后比较权威事实和显式推进
 
 ## Plan and task status
 
-| 阶段 | 产物/退出条件                                                | 状态                                                           |
-| ---- | ------------------------------------------------------------ | -------------------------------------------------------------- |
-| S0   | 长期架构文档、范围/测试合同、成本、基线与审核摘要            | 精确 hash 已获批准；供应链前置与文档格式已通过                 |
-| S1   | 每世界装配、注册 facade、manifest/摘要、资源授权扩展与负例   | 基础接缝与集成门禁通过；独立审阅通过；真实玩法消费者在后续阶段 |
-| S2   | ECS 准入与组件 owner 迁移、物品/库存、旧 facade 和存档 codec | ECS owner/存档迁移已提交；独立审阅修复已完成                   |
-| S3   | 现有玩法移入第一方模块/Playbook，Ruleset、生存/创造及迁移    | 实现、本地门禁与独立集成审阅闭合                               |
-| S4   | 工作台/冶炼/储物、木石铁成长、食物/昼夜/建造完整循环         | 完整本地 static/build 与成长/两日生存通过                      |
-| S5   | 替代模块/Playbook、跨宿主与错误恢复；API 候选说明            | 独立 ESM 与双向跨宿主、本地门禁通过                            |
-| S6   | 全量门禁、真实输入/视听、独立审阅、演示与 PR 准出            | 本地门禁与独立审阅闭合；远端 PR/CI 准出中                      |
+| 阶段 | 产物/退出条件                                                | 状态                                                   |
+| ---- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| S0   | 长期架构文档、范围/测试合同、成本、基线与审核摘要            | 精确 hash 已获批准；供应链前置与文档格式已通过         |
+| S1   | 每世界装配、注册 facade、manifest/摘要、资源授权扩展与负例   | 接缝与实际消费者闭合；独立审阅和最终集成门禁通过       |
+| S2   | ECS 准入与组件 owner 迁移、物品/库存、旧 facade 和存档 codec | ECS owner/存档迁移已提交；独立审阅修复已完成           |
+| S3   | 现有玩法移入第一方模块/Playbook，Ruleset、生存/创造及迁移    | 实现、本地门禁与独立集成审阅闭合                       |
+| S4   | 工作台/冶炼/储物、木石铁成长、食物/昼夜/建造完整循环         | 完整本地 static/build 与成长/两日生存通过              |
+| S5   | 替代模块/Playbook、跨宿主与错误恢复；API 候选说明            | 独立 ESM 与双向跨宿主、本地门禁通过                    |
+| S6   | 全量门禁、真实输入/视听、独立审阅、演示与 PR 准出            | S6 技术准出完成；PR ready、CI 全绿、无冲突，待人类审核 |
 
 阶段实施均保持可运行，语义 commit 分离装配、owner 迁移、玩法产品化和验收。不得把 S1 完成当整个目标交付。现有工作树独立；不读取或合并其他活动分支作为实施前置。后续同步 main 只处理已合并变更，若实质改变合同须重审。
 
@@ -163,6 +163,10 @@ Browser/Headless 从同一 checkpoint 恢复后比较权威事实和显式推进
 - 性能不是本期保留理由，无受控 A/B 不声明更快；如新增性能目标另按性能窗口与预注册实验验收。
 
 ## Delivery Snapshot
+
+**最终准出（2026-09-10）：Delivered / S6。** 实现与测试冻结 `559afcee01154b31b98ceabf8fb27d5a7adbcc77`，base `baeba098af506f0184b9344c04b9555f9750c20f`。[完整CI](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34431253030) 三项required checks均SUCCESS：static1764passed/4skipped、独立Production build、Chromium基线21/Harness2/资产2/木剑1/本change14全部通过，没有flaky。PR #30已ready for review，读回MERGEABLE/CLEAN，自动审阅P1已修复、独立回读且线程resolved；无剩余未处理技术finding。人类审核和合并未代办，也未发布站点。
+
+本地、生产Browser、模型视觉、独立审阅范围与实际远端证据分别记录在[S6验收](s6-acceptance.md)、[验收映射](acceptance-map.md)、[审阅报告](s6-review.md)、[体验步骤](demo.md)。候选API边界及高级整合包/World AI等非目标保持。长期docs baseline已更新架构知识、导航与代码地图，原因是当前实现形成可复用职责与入口；最后的版本选择/测试资源修复只更新当前spec/证据，通用源码事实不再复制进长期文档。以下快照段落是阶段历史，不能覆盖此最终状态。后续纯交付文档提交仍跟进PR最新HEAD必要CI，最终交棒以其checks再次读回为准。
 
 - 长期 docs baseline：已新增架构知识文档，并在玩法路线/长期对齐/AGENTS 导航链接；原因是本轮已明确跨 change 的私域分层与交付语义；代码地图/目录规范补充已实现 S1 入口与作者/宿主边界。
 - 文档与实现区分：知识文档记录目标责任，不声称现有源码已满足。

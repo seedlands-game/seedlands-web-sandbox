@@ -52,7 +52,7 @@
       "qualityCorrection": "low env was not consumed by these helpers; actual default was medium. Do not treat this run as low acceptance."
     }
   ],
-  "limitations": ["No performance claim", "No subjective audio or mobile device acceptance", "Remote CI pending"],
+  "limitations": ["No performance claim", "No subjective audio or mobile device acceptance"],
   "ownedPort4173Released": true,
   "independentReview": {
     "head": "7c9561d94f315cbf5a4dfd8412d6fca244d576c4",
@@ -219,6 +219,47 @@
       {
         "path": "/tmp/seedlands-s6-ci-browser6-clean.log",
         "sha256": "210c6e7e90f9538296034f9df4da84aa70f1b7c692c14cbe0dd82c9ea97b416a"
+      }
+    ]
+  },
+  "remoteAcceptance": {
+    "head": "559afcee01154b31b98ceabf8fb27d5a7adbcc77",
+    "base": "baeba098af506f0184b9344c04b9555f9750c20f",
+    "runId": 34431253030,
+    "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34431253030",
+    "conclusion": "success",
+    "requiredChecks": {
+      "Static verification": "success",
+      "Production build": "success",
+      "Chromium regression": "success"
+    },
+    "static": {
+      "passed": 1764,
+      "skipped": 4
+    },
+    "browser": {
+      "regression": 21,
+      "worldHarness": 2,
+      "assets": 2,
+      "melee": 1,
+      "composable": 14,
+      "flaky": 0
+    },
+    "pr": {
+      "number": 30,
+      "isDraft": false,
+      "mergeable": "MERGEABLE",
+      "mergeStateStatus": "CLEAN",
+      "unresolvedReviewThreads": 0
+    },
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-ci-browser7-clean.log",
+        "sha256": "a367d17fe5ba9b7596a29323fa91d4dcfaccb48ae75d1bef52d8b90d7f6a789b"
+      },
+      {
+        "path": "/tmp/seedlands-s6-ci-static7-clean.log",
+        "sha256": "70c07f1a8305a0b37edb303f1e94be1f0793308692079df095008e2edf39dd2c"
       }
     ]
   }

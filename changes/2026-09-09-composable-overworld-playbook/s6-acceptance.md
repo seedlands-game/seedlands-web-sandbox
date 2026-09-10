@@ -1,6 +1,6 @@
 # S6 最终集成验收记录
 
-状态：Implementing。不是完成声明；最新源码与下列每轮证据分别绑定。
+状态：Delivered / S6 技术准出。最终实现/测试 `559afcee01154b31b98ceabf8fb27d5a7adbcc77` 已通过[完整远端CI](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34431253030)；以下记录保留每轮真实失败与修复。纯交付文档提交后的最新HEAD检查仍由根任务持续读回。
 
 ## 冻结与主干
 
@@ -18,7 +18,7 @@ S4/S5 实现提交 `d05206b`，主干 #27 同步提交 `27bf75d`，V4 Wasm 构�
 
 ## 当前剩余
 
-本地实施、证据、演示与独立审阅已闭合；剩余 PR 当前 HEAD 的必要 CI 与 mergeability 读回。
+本地实施、证据、演示、独立审阅及远端技术准出均已闭合。人类审核和合并仍待完成；不自动批准、合并或发布。
 
 ## 修复后的完整本地准出
 
@@ -32,7 +32,7 @@ S4/S5 实现提交 `d05206b`，主干 #27 同步提交 `27bf75d`，V4 Wasm 构�
 | dev，既有完整 regression                             | 21/21，43.9s                                                   | `/tmp/seedlands-s6-browser-dev-regression1.log`   |
 | dev，木剑体验场、PR15 模型资产、#25 双向 parity/诊断 | 5/5，14.8s                                                     | `/tmp/seedlands-s6-browser-dev-integrations1.log` |
 
-独立点击转换使用真实构建和校验的 ESM 字节，普通 Headless 采集后经 Browser 选中槽合成、真实右键放置，再还原至 Headless 核对库存/地形。建造样例没有 Combat/Needs/生态也能开局、使用创造目录。工位成长截图核对铁镐 250/250、木镐 57/60、石镐 120/132，图标解码正常；死亡提示说明掉落与复活后找回路径。36 项浏览器断言全部通过，没有 pageerror；启动日志有浏览器默认 favicon 404，不影响 Pack/世界资源。
+独立点击转换使用真实构建和校验的 ESM 字节，普通 Headless 采集后经 Browser 选中槽合成、真实右键放置，再还原至 Headless 核对库存/地形。建造样例没有 Combat/Needs/生态也能开局、使用创造目录。工位成长截图核对铁镐 250/250、木镐 57/60、石镐 120/132，图标解码正常；死亡提示说明掉落与复活后找回路径。36 项浏览器用例全部通过，没有 pageerror；启动日志有浏览器默认 favicon 404，不影响 Pack/世界资源。
 
 运行产物分别保存在 `/tmp/seedlands-s6-prod1-artifacts`、`/tmp/seedlands-s6-dev-regression1-artifacts`、`/tmp/seedlands-s6-dev-integrations1-artifacts`，不把旧截图当当前结果。两份历史外观快照测试在 dev 环境通过；它们动态导入源码，先前在 preview 的失败没有当成产品缺陷。测试产生的历史 loading 截图已恢复原版本。所有本任务 dev/preview 已停止，4173 端口确认释放。
 
@@ -99,3 +99,9 @@ run34428303866、head3cdb4de：Static verification1759/4、Production build均SU
 run34430089585、head32ed578：旧基线21/Harness2/资产2通过，木剑first失败而retry通过，被failOnFlakyTests正确拒绝，新14项未执行。原日志`/tmp/seedlands-s6-ci-browser6-clean.log`、artifact`melee-34430089585-1`已读取；失败截图/context为low/benchmark、2.69FPS、p95约918ms，首击5点已显示。原测试将80ms hit/combo HUD与独立1.4s interaction伤害提示耦合到同一MutationObserver字符串，低FPS下不稳定。
 
 仅改测试观察：网络空闲后操作入口、断言真实quality；在combo中以公开clock暂停/推进200、350、100ms，保留真实持续按鼠标输入、正式buffer完成状态、两段phase、独立5/7反馈、截图与指定目标死亡，finally释放输入/恢复clock。没有新Combat命令或生产改动、没有增retry，90s仍保留。独立delta无findings；本机系统Chrome+SwiftShader实际low1/1 PASS15.0s，types/ESLint通过。当前HEAD仍须远端完整CI，不能把该flake的retry通过计作健康。
+
+## 最终全量远端准出
+
+冻结head `559afcee01154b31b98ceabf8fb27d5a7adbcc77`，run[34431253030](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34431253030) terminal SUCCESS。Static1764passed/4skipped、330passed/2skipped files，coverage步骤847.94s；Production build独立通过。Browser基线21（3.7m）、Harness2（49.2s）、资产2（27.5s）、木剑1（24.5s）、新玩法14（9.8m）全部首次通过，无flaky。成长用例两相邻测试开始日志间隔约395.6s，包含其执行/用例交接开销，不能当精确性能采样；完整旅程在480s预算内完成，末尾铁镐/箱子/保存重进断言实际执行通过。原失败与成功均保留，不以预算扩大会推导产品更快。
+
+PR #30读回head一致、base baeba09、isDraft=false、MERGEABLE、CLEAN；存档版本选择P1的修复提交1e1b492已独立复核，review thread PRRT_kwDOUNKo2c6g5H2R为resolved，无未决线程。当前源码/测试对应所有required checks已GREEN。此交付快照只改文档/证据，后续PR最新HEAD仍继续核对，完成后停止S6续跑。没有自动merge、GitHub Pages部署或权限放宽。日志摘要指纹见evidence/s6-local-results.json；原CI artifact由run链接访问。
