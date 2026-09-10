@@ -287,6 +287,25 @@ export function behaviorExecutionProviderCompatible(
   );
 }
 
+export function assertBehaviorExecutionProviderRestorable(
+  registry: BehaviorCapabilityRegistry,
+  execution: CharacterSkillExecution,
+): void {
+  if (
+    !execution.providerId ||
+    !execution.providerModuleId ||
+    !execution.providerVersion ||
+    !execution.stateVersion ||
+    execution.providerState === undefined ||
+    !behaviorExecutionProviderCompatible(registry, execution)
+  )
+    throw new TypeError('Character behavior ledger provider is incompatible.');
+  const checkpoint = registry.checkpoint(execution.providerId, execution.providerState);
+  if (checkpoint.state.version !== execution.stateVersion)
+    throw new TypeError('Character behavior ledger provider state version is incompatible.');
+  registry.assertRestorable(checkpoint);
+}
+
 export function restoreBehaviorProviderIdentity(
   registry: BehaviorCapabilityRegistry,
   execution: CharacterSkillExecution,

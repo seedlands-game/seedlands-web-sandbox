@@ -7,6 +7,7 @@ import type {
 import type { ActorAction } from './action-runtime';
 import type { BehaviorCapabilityRegistry } from '../composition/behavior-capability-registry';
 import {
+  assertBehaviorExecutionProviderRestorable,
   behaviorActionNodes,
   behaviorActionSignature,
   behaviorConditionConsumers,
@@ -277,11 +278,7 @@ export function validateCharacterSnapshotRecord(
         skill.stateVersion !== undefined &&
         skill.providerState !== undefined
       )
-        capabilities.assertRestorable({
-          capabilityId: skill.providerId,
-          provider: { moduleId: skill.providerModuleId, version: skill.providerVersion },
-          state: { version: skill.stateVersion, value: skill.providerState },
-        });
+        assertBehaviorExecutionProviderRestorable(capabilities, skill);
       nodes.add(skill.nodeId);
     }
     const conditionConsumers = new Map(

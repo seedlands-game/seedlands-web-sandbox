@@ -25,6 +25,7 @@ import {
   behaviorConditionConsumers,
   behaviorConditionContainsDialogue,
   behaviorConditionFailureReason,
+  assertBehaviorExecutionProviderRestorable,
   behaviorExecutionProviderCompatible,
   behaviorMilestoneState,
   behaviorMovementSkill,
@@ -175,11 +176,7 @@ export class CharacterBehaviorRuntime {
       if (execution.status === 'running') {
         if (execution.providerState === undefined || !execution.stateVersion)
           throw new TypeError('Running behavior ledger provider state is missing.');
-        this.options.capabilities.assertRestorable({
-          capabilityId: execution.providerId!,
-          provider: { moduleId: execution.providerModuleId!, version: execution.providerVersion! },
-          state: { version: execution.stateVersion, value: execution.providerState },
-        });
+        assertBehaviorExecutionProviderRestorable(this.options.capabilities, execution);
       }
       if (execution.actionId) {
         const action = this.options.action(execution.actionId);
