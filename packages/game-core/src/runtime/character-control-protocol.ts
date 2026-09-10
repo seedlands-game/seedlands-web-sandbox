@@ -180,10 +180,15 @@ export function createLifeBehavior(options: LifeBehaviorOptions): CharacterBehav
           {
             id: 'threat-response',
             type: 'sequence',
-            guard: { name: 'threat-visible' },
+            ...(threatSkill === 'flee-threat' ? {} : { guard: { name: 'threat-visible' } }),
             children: [
               { id: 'threat-check', type: 'condition', condition: { name: 'threat-visible' } },
-              { id: 'threat-action', type: 'action', skill: threatSkill, guard: { name: 'threat-visible' } },
+              {
+                id: 'threat-action',
+                type: 'action',
+                skill: threatSkill,
+                ...(threatSkill === 'flee-threat' ? {} : { guard: { name: 'threat-visible' } }),
+              },
             ],
           },
           {
@@ -196,7 +201,12 @@ export function createLifeBehavior(options: LifeBehaviorOptions): CharacterBehav
                 type: 'condition',
                 condition: { name: 'hunger-at-least', args: { value: hungerStart } },
               },
-              { id: 'hunger-action', type: 'action', skill: 'satisfy-hunger', args: { satisfiedAt: hungerSatisfied } },
+              {
+                id: 'hunger-action',
+                type: 'action',
+                skill: 'satisfy-hunger',
+                args: { satisfiedAt: hungerSatisfied, avoidThreats: true },
+              },
             ],
           },
           {
@@ -210,14 +220,19 @@ export function createLifeBehavior(options: LifeBehaviorOptions): CharacterBehav
             },
             children: [
               { id: 'night-check', type: 'condition', condition: { name: 'is-night' } },
-              { id: 'night-action', type: 'action', skill: 'rest-at-home', args: { position: options.homePosition } },
+              {
+                id: 'night-action',
+                type: 'action',
+                skill: 'rest-at-home',
+                args: { position: options.homePosition, avoidThreats: true },
+              },
             ],
           },
           {
             id: 'day-patrol',
             type: 'action',
             skill: 'patrol',
-            args: { positions: options.patrolPositions.flat() },
+            args: { positions: options.patrolPositions.flat(), avoidThreats: true },
             guard: {
               all: [
                 { not: { name: 'threat-visible' } },
