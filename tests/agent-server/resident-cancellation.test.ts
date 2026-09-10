@@ -1,4 +1,5 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
+import { createHash } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import { createGatewayChatModel } from '../../apps/agent-server/src/gateway-model';
 import { createResidentAgent, HumanMessage } from '../../apps/agent-server/src/resident-agent';
@@ -389,7 +390,7 @@ describe('resident cancellation boundaries', () => {
 
   it('reports retirement failure without exposing its error through the diagnostic callback', async () => {
     const events: ResidentConnectionLifecycle[] = [];
-    const lifecycle = new ResidentConnectionLifecycleOwner('connection-1', (event) => events.push(event));
+    const lifecycle = new ResidentConnectionLifecycleOwner((event) => events.push(event), 'connection-1');
     const world = { worldId: 'world-1', timelineId: 'timeline-1', epoch: 'epoch-1' };
     lifecycle.authenticated(world);
     lifecycle.track(Promise.reject(new Error('private durable failure')));
@@ -401,5 +402,67 @@ describe('resident cancellation boundaries', () => {
       { phase: 'closed', connectionId: 'connection-1', world },
       { phase: 'retirement-failed', connectionId: 'connection-1', world },
     ]);
+  });
+
+  it('does not start a queued import after its authenticated socket closes', async () => {
+    const fake = cancellationWorkspace();
+    const exportEntered = deferred();
+    const exportGate = deferred();
+    fake.workspace.listBindings = async () => {
+      exportEntered.resolve();
+      await exportGate.promise;
+      return [];
+    };
+    const importPortableBatch = vi.fn(async () => undefined);
+    fake.workspace.importPortableBatch = importPortableBatch;
+    const lifecycle: ResidentConnectionLifecycle[] = [];
+    const host = await startResidentServer({
+      workspace: fake.workspace,
+      framework: framework(),
+      flash: null,
+      pro: null,
+      allowedOrigins: ['http://127.0.0.1:5173'],
+      pairingToken: 'queued-inbound-token',
+      onConnectionLifecycle: (entry) => lifecycle.push(entry),
+    });
+    const client = await WireClient.connect(host.url, 'http://127.0.0.1:5173');
+    try {
+      const world = { worldId: 'world-1', timelineId: 'timeline-1', epoch: 'epoch-1' };
+      client.send({ kind: 'hello', pairingToken: host.pairingToken, world, authoringCapabilities: waitCapabilities() });
+      await client.wait('ready');
+      client.send({ kind: 'clock', paused: true });
+      client.send({ kind: 'checkpoint-export', requestId: 'blocked-export' });
+      const bytes = Buffer.from(
+        JSON.stringify({
+          format: 'seedlands-resident-cognition',
+          version: 1,
+          source: { ...world, timelineId: 'source-timeline', epoch: 'source-epoch' },
+          workspaces: [],
+        }),
+      );
+      client.send({
+        kind: 'checkpoint-import',
+        requestId: 'queued-import',
+        transferId: 'queued-import-transfer',
+        part: 0,
+        parts: 1,
+        content: bytes.toString('base64'),
+        sha256: createHash('sha256').update(bytes).digest('hex'),
+      });
+      const pong = new Promise<void>((resolve) => client.socket.once('pong', () => resolve()));
+      client.socket.ping();
+      await Promise.all([exportEntered.promise, pong]);
+
+      await client.close();
+      await vi.waitFor(() => expect(lifecycle.some((entry) => entry.phase === 'closed')).toBe(true));
+      exportGate.resolve();
+      await vi.waitFor(() => expect(lifecycle.some((entry) => entry.phase === 'retired')).toBe(true));
+
+      expect(importPortableBatch).not.toHaveBeenCalled();
+    } finally {
+      exportGate.resolve();
+      await client.close();
+      await host.close();
+    }
   });
 });

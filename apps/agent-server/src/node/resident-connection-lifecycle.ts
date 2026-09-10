@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import type { ResidentWorldBinding } from '@seedlands/cognition-protocol';
 import type { ExportTransfer, ImportTransfer, Pending, ResidentConnectionLifecycle } from './resident-host-types.js';
 
@@ -20,13 +21,19 @@ export function rejectResidentPending(pending: Map<string, Pending>, message: st
   pending.clear();
 }
 
+export function residentTransferTtl(value = 120_000): number {
+  if (!Number.isSafeInteger(value) || value < 1000 || value > 600_000)
+    throw new Error('Invalid checkpoint transfer TTL');
+  return value;
+}
+
 export class ResidentConnectionLifecycleOwner {
   private readonly retirements = new Set<Promise<void>>();
   private closed = false;
 
   constructor(
-    private readonly connectionId: string,
     private readonly observer: Observer,
+    private readonly connectionId = randomBytes(16).toString('hex'),
   ) {}
 
   authenticated(world: ResidentWorldBinding): void {

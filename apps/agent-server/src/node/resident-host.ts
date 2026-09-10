@@ -42,22 +42,20 @@ import { ResidentHostBirths } from './resident-host-births.js';
 import {
   pruneResidentTransfers,
   rejectResidentPending,
+  residentTransferTtl,
   ResidentConnectionLifecycleOwner,
 } from './resident-connection-lifecycle.js';
 
 export async function startResidentServer(options: ResidentServerOptions) {
   const pairingToken = options.pairingToken ?? randomBytes(32).toString('base64url');
-  const transferTtlMs = options.transferTtlMs ?? 120_000;
-  if (!Number.isSafeInteger(transferTtlMs) || transferTtlMs < 1000 || transferTtlMs > 600_000)
-    throw new Error('Invalid checkpoint transfer TTL');
+  const transferTtlMs = residentTransferTtl(options.transferTtlMs);
   const factory = options.factory ?? null;
   const sockets = new Set<WebSocket>();
   const { server, ws } = createResidentListener(options.allowedOrigins, sockets);
   const owners = new Set<() => void>();
   const retirements = new ResidentChannelRetirement();
   ws.on('connection', (socket) => {
-    const connectionId = randomBytes(16).toString('hex');
-    const lifecycle = new ResidentConnectionLifecycleOwner(connectionId, options.onConnectionLifecycle);
+    const lifecycle = new ResidentConnectionLifecycleOwner(options.onConnectionLifecycle);
     sockets.add(socket);
     let world: ResidentWorldBinding | null = null;
     let authoringCapabilities: readonly BehaviorCapability[] | null = null;
@@ -134,6 +132,7 @@ export async function startResidentServer(options: ResidentServerOptions) {
     owners.add(dispose);
 
     const receive = async (message: ResidentClientMessage) => {
+      if (closed) return;
       pruneResidentTransfers(exports, imports);
       if (!world) {
         if (
@@ -280,6 +279,7 @@ export async function startResidentServer(options: ResidentServerOptions) {
             throw new Error('checkpoint digest mismatch');
           const manifest = parseManifest(payload, world);
           await Promise.all(manifest.workspaces.map((portable) => validatePortableWorkspace(portable)));
+          if (closed) return;
           const targetScope = { worldId: world.worldId, timelineId: world.timelineId };
           await options.workspace.importPortableBatch(
             targetScope,
