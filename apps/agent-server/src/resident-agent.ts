@@ -215,99 +215,98 @@ export class ResidentAgent {
           : {}),
       })),
     );
-    assertActive(input.signal);
-    const persistedWindow = (
-      await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId })
-    ).filter((entry) => entry.windowId === window.windowId);
-    assertActive(input.signal);
-    const invokeMessages = this.options.workspace.restoreMessages(persistedWindow);
-    turnJournal.adopt(invokeMessages);
-    let modelStep = 0;
-    let proposalCount = 0;
-    const admittedTools = new Map<string, string>();
-    const consumedTools = new Set<string>();
-    const toolSchema = tools.map((entry) => ({
-      name: entry.name,
-      description: entry.description,
-      schema: entry.schema,
-    }));
-    const manifestMiddleware = createMiddleware({
-      name: 'persistent-request-manifest',
-      wrapToolCall: async (request, handler) => {
-        assertActive(input.signal);
-        const id = request.toolCall.id;
-        if (!id || admittedTools.get(id) !== request.toolCall.name || consumedTools.has(id))
-          throw new Error('tool call has no unused round admission');
-        consumedTools.add(id);
-        const result = await handler(request);
-        if (!('tool_call_id' in result)) throw new Error('unexpected non-message tool result');
-        result.id = `${requestId}:tool:${request.toolCall.id}`;
-        await turnJournal.append([result]);
-        assertActive(input.signal);
-        return result;
-      },
-      wrapModelCall: async (request, handler) => {
-        assertActive(input.signal);
-        if (++modelStep > RESIDENT_MAX_MODEL_STEPS) throw new Error('model step budget exhausted');
-        if (assessResidentRequest(prefix, request.messages, toolSchema).status === 'suspend')
-          throw new Error('model request exceeds context budget');
-        await turnJournal.append(request.messages);
-        assertActive(input.signal);
-        const journal = await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId });
-        assertActive(input.signal);
-        await this.options.workspace.recordRequestManifest(this.options.binding, {
-          requestId: `${requestId}:model:${modelStep}`,
-          logicalModel: 'flash',
-          throughJournalSeq: journal.at(-1)?.seq ?? 0,
-          requestPayload: {
-            messages: request.messages.map((entry) => entry.toDict()),
-            systemMessage: request.systemMessage.toDict(),
-            toolChoice: request.toolChoice,
-          },
-          systemPrefix: prefix,
-          toolSchema,
-          toolSchemaRevision: this.options.toolSchemaRevision,
-          modelConfigurationRevision: this.options.modelConfigurationRevision,
-        });
-        assertActive(input.signal);
-        const result = await handler(request);
-        assertActive(input.signal);
-        const calls = result.tool_calls ?? [];
-        if (admittedTools.size + calls.length > RESIDENT_MAX_TOOL_CALLS) throw new Error('tool call budget exhausted');
-        const proposals = calls.filter((call) => call.name === 'propose_behavior_update').length;
-        if (proposalCount + proposals > RESIDENT_MAX_BEHAVIOR_PROPOSALS)
-          throw new Error('behavior proposal budget exhausted');
-        const ids = new Set<string>();
-        for (const call of calls) {
-          if (!call.id || ids.has(call.id) || admittedTools.has(call.id))
-            throw new Error('tool call identity is duplicated or missing');
-          ids.add(call.id);
-        }
-        // Reserve the complete response before LangChain may concurrently execute any tool in it.
-        for (const call of calls) admittedTools.set(call.id!, call.name);
-        proposalCount += proposals;
-        result.id = `${requestId}:model:${modelStep}`;
-        await turnJournal.append([result]);
-        assertActive(input.signal);
-        return result;
-      },
-    });
-    const agent = createAgent({
-      model: this.options.flashModel,
-      tools,
-      systemPrompt: prefix,
-      checkpointer: this.options.checkpointer,
-      store: this.options.store,
-      middleware: [manifestMiddleware],
-    });
     let result;
     try {
       assertActive(input.signal);
+      const persistedWindow = (
+        await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId })
+      ).filter((entry) => entry.windowId === window.windowId);
+      assertActive(input.signal);
+      const invokeMessages = this.options.workspace.restoreMessages(persistedWindow);
+      turnJournal.adopt(invokeMessages);
+      let modelStep = 0;
+      let proposalCount = 0;
+      const admittedTools = new Map<string, string>();
+      const consumedTools = new Set<string>();
+      const toolSchema = tools.map((entry) => ({
+        name: entry.name,
+        description: entry.description,
+        schema: entry.schema,
+      }));
+      const manifestMiddleware = createMiddleware({
+        name: 'persistent-request-manifest',
+        wrapToolCall: async (request, handler) => {
+          assertActive(input.signal);
+          const id = request.toolCall.id;
+          if (!id || admittedTools.get(id) !== request.toolCall.name || consumedTools.has(id))
+            throw new Error('tool call has no unused round admission');
+          consumedTools.add(id);
+          const result = await handler(request);
+          if (!('tool_call_id' in result)) throw new Error('unexpected non-message tool result');
+          result.id = `${requestId}:tool:${request.toolCall.id}`;
+          await turnJournal.append([result]);
+          assertActive(input.signal);
+          return result;
+        },
+        wrapModelCall: async (request, handler) => {
+          assertActive(input.signal);
+          if (++modelStep > RESIDENT_MAX_MODEL_STEPS) throw new Error('model step budget exhausted');
+          if (assessResidentRequest(prefix, request.messages, toolSchema).status === 'suspend')
+            throw new Error('model request exceeds context budget');
+          await turnJournal.append(request.messages);
+          assertActive(input.signal);
+          const journal = await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId });
+          assertActive(input.signal);
+          await this.options.workspace.recordRequestManifest(this.options.binding, {
+            requestId: `${requestId}:model:${modelStep}`,
+            logicalModel: 'flash',
+            throughJournalSeq: journal.at(-1)?.seq ?? 0,
+            requestPayload: {
+              messages: request.messages.map((entry) => entry.toDict()),
+              systemMessage: request.systemMessage.toDict(),
+              toolChoice: request.toolChoice,
+            },
+            systemPrefix: prefix,
+            toolSchema,
+            toolSchemaRevision: this.options.toolSchemaRevision,
+            modelConfigurationRevision: this.options.modelConfigurationRevision,
+          });
+          assertActive(input.signal);
+          const result = await handler(request);
+          assertActive(input.signal);
+          const calls = result.tool_calls ?? [];
+          if (admittedTools.size + calls.length > RESIDENT_MAX_TOOL_CALLS)
+            throw new Error('tool call budget exhausted');
+          const proposals = calls.filter((call) => call.name === 'propose_behavior_update').length;
+          if (proposalCount + proposals > RESIDENT_MAX_BEHAVIOR_PROPOSALS)
+            throw new Error('behavior proposal budget exhausted');
+          const ids = new Set<string>();
+          for (const call of calls) {
+            if (!call.id || ids.has(call.id) || admittedTools.has(call.id))
+              throw new Error('tool call identity is duplicated or missing');
+            ids.add(call.id);
+          }
+          // Reserve the complete response before LangChain may concurrently execute any tool in it.
+          for (const call of calls) admittedTools.set(call.id!, call.name);
+          proposalCount += proposals;
+          result.id = `${requestId}:model:${modelStep}`;
+          await turnJournal.append([result]);
+          assertActive(input.signal);
+          return result;
+        },
+      });
+      const agent = createAgent({
+        model: this.options.flashModel,
+        tools,
+        systemPrompt: prefix,
+        checkpointer: this.options.checkpointer,
+        store: this.options.store,
+        middleware: [manifestMiddleware],
+      });
       result = await agent.invoke(
         { messages: invokeMessages },
         { ...residentAgentConfig(this.options.binding, window.windowId), signal: input.signal },
       );
-      assertActive(input.signal);
     } catch (error) {
       const interrupted = this.options.workspace.restoreMessages(
         (await this.options.workspace.getJournal(this.options.binding, { windowId: window.windowId })).filter(
@@ -331,15 +330,12 @@ export class ResidentAgent {
     }
     const generated = messages.slice(Math.max(0, inputIndex + 1));
     await turnJournal.append(generated);
-    assertActive(input.signal);
     await this.options.workspace.recordRequestReceipt(this.options.binding, requestId, {
       status: 'completed',
       generatedMessages: generated.length,
     });
-    assertActive(input.signal);
     if (includedThrough > watermarks.includedThrough)
       await this.options.workspace.markIncluded(this.options.binding, includedThrough);
-    assertActive(input.signal);
     return generated;
   }
 
@@ -352,39 +348,39 @@ export class ResidentAgent {
     assertActive(input.signal);
     if (prior) return { status: prior.status === 'published' ? 'published' : 'failed' };
     const frozen = await this.options.workspace.freezeForCompaction(this.options.binding);
-    assertActive(input.signal);
     let published = false;
-    const memoryTool = tool(
-      async (candidate: MemoryDraft) => {
-        assertActive(input.signal);
-        const result = await this.options.workspace.publishCompaction(this.options.binding, candidate);
-        published = true;
-        assertActive(input.signal);
-        return JSON.stringify({ status: 'published', ...result });
-      },
-      {
-        name: 'propose_memory_update',
-        returnDirect: true,
-        description: 'Publish a bounded memory derived only from the supplied frozen window.',
-        schema: MEMORY_SCHEMA,
-      },
-    );
-    const readTool = tool(
-      async (entry: { path: string }) => {
-        assertActive(input.signal);
-        const result = await this.options.workspace.readFile(this.options.binding, entry.path, 'memory-editor');
-        assertActive(input.signal);
-        return JSON.stringify(result);
-      },
-      {
-        name: 'read_file',
-        description: 'Read AGENT, SOUL, MEMORY, or current Authority behavior. Archive paths are inaccessible.',
-        schema: MEMORY_READ_FILE_SCHEMA,
-      },
-    );
-    const prefix =
-      'You are the authorized Pro memory editor. Use only the current MEMORY and supplied frozen window. Cite sources and call propose_memory_update once. Do not retrieve archives or propose behavior.';
     try {
+      assertActive(input.signal);
+      const memoryTool = tool(
+        async (candidate: MemoryDraft) => {
+          assertActive(input.signal);
+          const result = await this.options.workspace.publishCompaction(this.options.binding, candidate);
+          published = true;
+          assertActive(input.signal);
+          return JSON.stringify({ status: 'published', ...result });
+        },
+        {
+          name: 'propose_memory_update',
+          returnDirect: true,
+          description: 'Publish a bounded memory derived only from the supplied frozen window.',
+          schema: MEMORY_SCHEMA,
+        },
+      );
+      const readTool = tool(
+        async (entry: { path: string }) => {
+          assertActive(input.signal);
+          const result = await this.options.workspace.readFile(this.options.binding, entry.path, 'memory-editor');
+          assertActive(input.signal);
+          return JSON.stringify(result);
+        },
+        {
+          name: 'read_file',
+          description: 'Read AGENT, SOUL, MEMORY, or current Authority behavior. Archive paths are inaccessible.',
+          schema: MEMORY_READ_FILE_SCHEMA,
+        },
+      );
+      const prefix =
+        'You are the authorized Pro memory editor. Use only the current MEMORY and supplied frozen window. Cite sources and call propose_memory_update once. Do not retrieve archives or propose behavior.';
       const compactionTools = [readTool, memoryTool];
       const toolSchema = compactionTools.map((entry) => ({
         name: entry.name,
