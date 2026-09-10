@@ -195,3 +195,7 @@ run34424933483 当前 static/build通过；新增Browser 7pass/3fail。root负�
 创造快捷栏失败已定位为测试错误：默认目录第5槽已有wood，点击wood只替换当前第1槽，允许重复材料；全栏唯一性不是产品合同。改为验证选中槽的实际item/pressed，并核对其余槽保持creativeDefaults原值；不引入生产去重，也不放宽等待。
 
 恢复后脚本攻击的测试两宿主原先使用不同推进表面，且Browser丢弃clock结构化结果。复核合同统一为：两侧restore后显式scripted，通过公开world.clock精确推进300ms，确认18次physics/6次gameplay/9次fluid并保留health18/20断言；拒绝策略仅补clock/logic control，不授予Combat执行权。Browser返回命中状态与双方状态用于失败诊断。CI已有health20为RED，本机原始与CI gameplay子树探针均通过，尚不能断言生产根因；不延长攻击时长、不修改生产Combat或掩盖Linux差异。
+
+### S6 精确旧世界版本选择修复
+
+PR自动审阅发现当前生成器V4与入口V2/V3旧文案不一致，同seed并存V2/V3时continue-legacy实际选V3。修复合同：UI明确选择继续V2或V3，沿现有WorldOpenMode通道传精确版本；缺少指定版本时明确失败，不创建或改写其他版本。new-current文案由实际GENERATOR_VERSION生成。默认continue及内部continue-legacy既有行为保持，新增模式不改世界/存档格式。先补选择策略RED，再验证真实UI/Worker打开并保存目标worldId、同seed其他版本存档保持；更新预渲染入口，完整static/build和最新PR CI重新准出。

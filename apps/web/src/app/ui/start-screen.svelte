@@ -7,6 +7,7 @@
   import GamePanel from './primitives/game-panel.svelte';
   import GameTextField from './primitives/game-text-field.svelte';
   import SeedlandsMark from './primitives/seedlands-mark.svelte';
+  import { GENERATOR_VERSION } from '@seedlands/game-core/world/voxel';
   import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
   import type { WorkerSupport } from '../client-capability-preflight';
   import WorldLoading from './world-loading.svelte';
@@ -92,8 +93,9 @@
       世界版本
       <select id="world-version-mode" bind:value={openMode}>
         <option value="continue">默认继续（优先已有新版）</option>
-        <option value="continue-legacy">明确继续旧版 v2</option>
-        <option value="new-current">新建或进入新版 v3（保留旧档）</option>
+        <option value="continue-v2">明确继续旧版 v2</option>
+        <option value="continue-v3">明确继续旧版 v3</option>
+        <option value="new-current">新建或进入新版 v{GENERATOR_VERSION}（保留旧档）</option>
       </select>
     </label>
     <label class="world-version-choice" for="actor-mode">
@@ -146,6 +148,6 @@
     {#if workerSupport === 'unsupported'}
       <p class="start-error" role="alert">当前浏览器不支持运行游戏所需的 Web Worker，无法进入世界。</p>
     {/if}
-    <small>旧版河岸不会自动改变；版本选择可继续 v2，也可为同名 Seed 保留旧档并进入 v3。</small>
+    <small>旧版世界不会自动改变；可明确继续 v2 / v3，或保留旧档并进入同名 Seed 的 v{GENERATOR_VERSION} 世界。</small>
   {/if}
 </GamePanel>

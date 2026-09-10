@@ -164,3 +164,7 @@ PR #30 已创建为 ready for review，head 2c21f2f 无冲突。首次 CI 的旧
 run34424933483（7e0e330）static/build SUCCESS；Browser既有26项通过，新玩法7/10，三项失败正在修复。创造唯一计数已按选中槽与checkpoint修正；成长明确消费并断言low质量；Logic两宿主统一公开clock300与restore后scripted，增加clock/命中诊断，未修改生产源码。定向创造2/2、实际low成长1/1、Logic2/2均PASS，完整10项复验和独立delta审阅进行中；之后push并继续全部CI。npmjs项目源与记忆已保存，未修改全局源。
 
 最终来源断言定向2/2 PASS（15.9s），test TypeScript与受影响ESLint通过，独立delta回读无剩余findings。完整新玩法10/10与最终增强断言分别记录；本轮只改测试/证据，下一步当前HEAD全量CI。
+
+PR读回发现自动审阅P1：V4下旧UI的明确v2实际取最大旧版。新增精确v2/v3选择、当前版本动态文案和预渲染，缺失版本拒绝；policy RED4fail→9pass，Browser4/4证明目标保存及非目标存档不变，独立审阅无剩余findings。完整本地static1764/4通过，独立build进行中；run34428303866的旧head3cdb4de static/build已PASS，Browser尚未终态。目标继续，未合并，heartbeat保持。
+
+精确版本修复的独立生产build已PASS（`/tmp/seedlands-s6-build-version.log`），没有新增依赖或变更存档格式。

@@ -141,5 +141,35 @@
       "eslint": "passed",
       "review": "no_remaining_findings"
     }
+  },
+  "exactWorldVersionFix": {
+    "unitPassed": 9,
+    "browserPassed": 4,
+    "staticPassed": 1764,
+    "staticSkipped": 4,
+    "build": "passed",
+    "review": "no_findings",
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-version-red.log",
+        "sha256": "a08b9987191db7b2a09b7fd02860af37abb1c598656872b7e181a3b885cdea64"
+      },
+      {
+        "path": "/tmp/seedlands-s6-version-green.log",
+        "sha256": "7b7d82c539e047c4a015af197a9c2c7d2f2c3c872189f7b69bb3cd2c0dac2336"
+      },
+      {
+        "path": "/tmp/seedlands-s6-version-browser3.log",
+        "sha256": "38a50c6a2c80aa6cc7dc0d7187fafd44bbc983358ab7d401358b8e5a90782737"
+      },
+      {
+        "path": "/tmp/seedlands-s6-static-version.log",
+        "sha256": "f0e28bf2082eaa2732d631316f56a1f9955db5c015da8eddd3c54a1d9da5d80e"
+      },
+      {
+        "path": "/tmp/seedlands-s6-build-version.log",
+        "sha256": "db6f04ba933889b1e2f295f61de157632a200323453be30a866fa33036cccf3c"
+      }
+    ]
   }
 }

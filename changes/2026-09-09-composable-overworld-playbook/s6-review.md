@@ -95,6 +95,12 @@ reviewer 核对六份 root 日志尾部及 SHA-256，与 `evidence/s6-local-resu
 
 最终SHA-256：helper `4d44f4679897b07a807d18f3ef9ad199e5b2b9d45d87900291d6f471e72a0ddc`；成长 `3a0002007e10a6d25080667a4521b21bb85d4f869e47cfeafbc186a6ddfb53ed`；创造 `8f70be4030f996a89a0deb7182ac130051087b2e0572b5272c65319e38aba5d4`；脚本 `695f4fdd19fcca71783d9662fe77ccd81c5c1d81714840c40063f880967b9523`。reviewer未运行测试；root最终脚本2/2、完整套件补来源断言前10/10、types/ESLint通过。Linux CI来源差异没有由本机探针定位为生产根因，需新runner证明。
 
+## 精确存档版本选择 delta 复核
+
+同一 reviewer 对 `3cdb4de` 后策略、UI、生成HTML、测试和spec六文件只读复核，无P0/P1/P2。精确模式缺失即在持久化worldId/put前抛错；默认continue及内部continue-legacy保持；现有协议直接传递。UI与预渲染一致提供v2/v3，当前版/footer动态v4。Browser覆盖精确版本、保存目标、非目标world records不变及缺失v2拒绝；缺失v3由同分支单元测试覆盖。未独立运行测试，也未向非目标chunks写哨兵；相邻路由统一从config.worldId派生，当前diff不修改chunk路由，无具体finding。
+
+最终文件SHA-256：UI `d72debee59955c94c126923ca31805e6d57400d9b5afa41a4dbac2321e3e02d6`；HTML `e0a1582900e1cc0dc813f1b01ec8872abf48f4976c41df517dbe7d8ea0da1cdd`；policy `284411c05cfccae9fc57f1bad1f74f20f93b997990fbe98329e3046fa7d4eec4`；policy test `8c906d3185192ccd9dd00cf6e898bf182a5fcf2d19f467face1788c675a58655`；Browser test `00a43e314ab62799e7e2a71f4b6bec9555f2578541ddc79bd4370a375044684d`。自动审阅P1的当前修复已独立回读，远端最新HEAD与review thread状态仍由root最后核对。
+
 ## 独立审阅 Findings
 
 最终 `7c9561d` 在已审阅范围内，未发现剩余可证实的 P0/P1/P2 问题。

@@ -77,3 +77,11 @@ head7e0e330 run34424933483：Static verification 与 Production build通过，Ch
 上述夹具修复后的完整新玩法本机复验10/10 PASS（2.2min，系统Chrome+SwiftShader；成长实际low，其余默认medium）。独立reviewer随后指出只检查血量仍可能误认攻击来源，最终断言补上开发者subject、原始hunter、hit阶段与damage2/targetId以及hunter inspect。新增断言需另定向复验，不把补断言前的10/10当最终字节已测。
 
 最终来源断言定向2/2 PASS（15.9s），test TypeScript与受影响ESLint通过，独立delta回读无剩余findings。完整新玩法10/10与最终增强断言分别记录；本轮只改测试/证据，下一步当前HEAD全量CI。
+
+## PR 精确存档版本选择修复
+
+自动审阅P1指出V4发布后旧UI承诺v2却使用“最大旧版”策略，同seed并存v2/v3时会打开v3。纯策略新增精确v2/v3模式，指定版本不存在即明确失败；UI沿既有协议传递精确模式，当前版标签与footer使用实际GENERATOR_VERSION，预渲染同步。默认continue和内部continue-legacy既有行为保持，不改存档格式。旧Delivered fluid用例保留其当时v3历史证据，本change新增多版本现实回归，不静默改写旧结果。
+
+选择策略RED 4failed/5passed，GREEN9/9；真实Browser四项15.0s：分别v2/v3/v4打开保存只改目标worldId，其他记录完整不变；缺失v2显示明确错误且所有记录不变。最初Browser夹具未等待hydrate，早期select被初始默认值覆盖；改为与既有helper相同的networkidle后通过，原失败留在`/tmp/seedlands-s6-version-browser.log`。GREEN为`/tmp/seedlands-s6-version-browser3.log`。独立最终delta无findings，完整static1764passed/4skipped、330passed/2skipped files、Svelte0/0/types通过（107.39s测试阶段）；build独立执行中。
+
+精确版本修复的独立生产build已PASS（`/tmp/seedlands-s6-build-version.log`），没有新增依赖或变更存档格式。
