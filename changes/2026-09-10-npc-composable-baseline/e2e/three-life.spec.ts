@@ -10,7 +10,8 @@ test('同一组合世界三位伙伴以有限共享食物跨昼夜连续生活18
   page.on('websocket', (socket) => sockets.push(new URL(socket.url()).host));
   page.on('pageerror', (error) => errors.push(error.message));
   const first = await startLifeScene(page);
-  await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
+  const paused = await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
+  expect(paused, JSON.stringify(paused)).toMatchObject({ ok: true, data: { paused: true } });
   const newcomers = [
     { name: '青禾', personality: '沉稳勤快，喜欢巡视食物附近，入夜回家休息。', position: [-2.5, 57, 0.5] as const },
     { name: '小满', personality: '好奇但谨慎，照看营地，珍惜有限的食物。', position: [0.5, 57, -3.5] as const },
@@ -60,9 +61,10 @@ test('同一组合世界三位伙伴以有限共享食物跨昼夜连续生活18
   let nextPlayerMeal = lifeScene.playerFood.useEverySimulatedSeconds;
   try {
     for (let seconds = 0; seconds < 1800; seconds += 10) {
-      expect(
-        await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'advance', elapsedMs: 10000 })),
-      ).toMatchObject({ ok: true });
+      const advanced = await page.evaluate(() =>
+        window.__seedlandsHarness!.world.clock({ kind: 'advance', elapsedMs: 10000 }),
+      );
+      expect(advanced, `Advance at ${seconds} seconds: ${JSON.stringify(advanced)}`).toMatchObject({ ok: true });
       const current = await Promise.all(
         characters.map((character, index) => lifeSample(page, character.entityId, cursors[index])),
       );
