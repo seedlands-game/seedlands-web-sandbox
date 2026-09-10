@@ -27,6 +27,7 @@ import type { CorePlatformPorts } from '../runtime/platform-ports';
 import type { GameplayContent } from './gameplay/gameplay-content';
 import type { GameServerOptions } from './game-server-types';
 import type { ItemDefinitionRegistry } from './gameplay/item-registry';
+import type { InventoryPointerInputV1 } from './gameplay/modules/inventory-pointer-contract';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 
@@ -176,6 +177,9 @@ export abstract class GameServerGameplayFacade {
   getInventory(id: string) {
     return this.gameplay.getInventory(id);
   }
+  getInventoryPointerView(id: string) {
+    return this.gameplay.getInventoryPointerView(id);
+  }
   get itemDefinitions(): ItemDefinitionRegistry {
     return this.gameplay.content.items;
   }
@@ -193,6 +197,9 @@ export abstract class GameServerGameplayFacade {
   }
   moveInventorySlot(id: string, source: number, target: number) {
     return this.gameplay.moveInventorySlot(id, source, target);
+  }
+  inventoryPointer(id: string, input: InventoryPointerInputV1) {
+    return this.gameplay.inventoryPointer(id, input);
   }
   useInventoryItem(id: string, slot: number) {
     return this.gameplay.useInventoryItem(id, slot);

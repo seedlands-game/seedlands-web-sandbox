@@ -1,4 +1,8 @@
-import { createStationCraftCandidate } from './modules/station-candidates';
+import {
+  createStationCraftCandidate,
+  matchesShapedStationRecipe,
+  matchesShapelessStationRecipe,
+} from './modules/station-candidates';
 import type { AuthorityStationView } from '../../compute/authority-worker-protocol';
 import type { GameplayRuntime } from './gameplay-runtime';
 import type { ModuleActorAuthority } from '../composition/gameplay-actor-authority';
@@ -30,26 +34,44 @@ export function projectNearbyStations(
       traceVoxelRay(eye, center, getVoxel) !== 'clear'
     )
       return [];
+    const matchedRecipes =
+      component.kind === 'workbench'
+        ? runtime.content
+            .stations!.listRecipes()
+            .filter((recipe) =>
+              recipe.kind === 'shaped'
+                ? matchesShapedStationRecipe(component.grid, recipe, runtime.content.items)
+                : matchesShapelessStationRecipe(component.grid, recipe, runtime.content.items),
+            )
+        : [];
     return [
       {
         reference: runtime.entities.createReference(station.id)!,
         position: station.position,
         component,
-        craftableRecipeIds:
-          component.kind === 'workbench'
-            ? runtime.content
-                .stations!.listRecipes()
-                .filter(
-                  (recipe) =>
-                    createStationCraftCandidate({
-                      grid: component.grid,
-                      output: actor.inventory.snapshot(),
-                      recipe,
-                      items: runtime.content.items,
-                    }).success,
-                )
-                .map((recipe) => recipe.id)
-            : [],
+        matchedRecipeIds: matchedRecipes.map((recipe) => recipe.id),
+        craftableRecipeIds: matchedRecipes
+          .filter(
+            (recipe) =>
+              createStationCraftCandidate({
+                grid: component.kind === 'workbench' ? component.grid : [],
+                output: actor.inventory.snapshot(),
+                recipe,
+                items: runtime.content.items,
+              }).success,
+          )
+          .map((recipe) => recipe.id),
+        acceptedItemIdsBySlot:
+          component.kind === 'furnace'
+            ? [
+                runtime.content.stations!.codec.furnace.listRecipes().map((recipe) => recipe.input.itemId),
+                runtime.content.stations!.codec.furnace.listFuels().map((fuel) => fuel.itemId),
+                [],
+              ]
+            : Array.from(
+                { length: component.kind === 'workbench' ? component.grid.length : component.slots.length },
+                () => null,
+              ),
         ...(component.kind === 'furnace'
           ? {
               furnaceRecipeDuration: runtime.content.stations!.codec.furnace.recipe(

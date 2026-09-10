@@ -10,6 +10,8 @@ import type {
 } from '../ecs-actor-components';
 import type { EntityStore } from '../entity-store';
 import type { ItemId } from '../item-registry';
+import type { ItemStack } from '../item-registry';
+import { settleInventoryCursor } from './inventory-cursor-settlement';
 
 type Position = [number, number, number];
 type CompleteModeFacets = Required<ActorModeSnapshotFacets>;
@@ -144,11 +146,23 @@ export class ModeRuntime {
 
     const facets = validateActorModeFacets({ mode, creativeCatalog: catalog, flight }, this.options.entities.items);
     const snapshot = this.options.entities.actorComponentSnapshot(actorId);
-    return this.prepare(actorId, entity.health!, this.modeComponents(snapshot, facets, true), facets, {
-      cancel: true,
-      position: landing,
-      physicsVelocity: [0, 0, 0],
-    });
+    const settled = settleInventoryCursor(this.options.entities.items, snapshot.inventory, snapshot.inventoryCursor);
+    return this.prepare(
+      actorId,
+      entity.health!,
+      this.modeComponents(
+        { ...snapshot, inventory: [...settled.slots], inventoryCursor: settled.cursor },
+        facets,
+        true,
+      ),
+      facets,
+      {
+        cancel: true,
+        position: landing,
+        physicsVelocity: [0, 0, 0],
+        drops: settled.dropIntents,
+      },
+    );
   }
 
   switchMode(actorId: string, request: ModeSwitchRequest): ModeRuntimeResult {
@@ -230,11 +244,13 @@ export class ModeRuntime {
       cancel?: boolean;
       position?: Position;
       physicsVelocity?: Position;
+      drops?: readonly Readonly<ItemStack>[];
     }> = {},
   ): PreparedModeRuntimeResult {
     this.options.assertCanChange?.(actorId);
     const reference = this.options.entities.createReference(actorId);
     if (!reference) return { success: false, reason: 'unknown-actor' };
+    const currentPosition = this.options.entities.get(actorId)!.position;
     const entityPlan = this.options.entities.prepareMutation({
       actors: [
         {
@@ -245,6 +261,7 @@ export class ModeRuntime {
           ...(spatial.physicsVelocity ? { physicsVelocity: spatial.physicsVelocity } : {}),
         },
       ],
+      spawns: spatial.drops?.map((stack) => ({ position: currentPosition, stack: { ...stack } })),
     });
     const cancellation = spatial.cancel ? this.prepareCancellation(actorId) : noParticipant;
     const state = frozenState(facets);

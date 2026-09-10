@@ -121,6 +121,7 @@ export class PlayerController {
   install() {
     const { canvas } = this.options;
     window.onkeydown = (event) => {
+      if (event.defaultPrevented) return;
       if (this.options.isPaused?.()) {
         this.stopMining();
         return;

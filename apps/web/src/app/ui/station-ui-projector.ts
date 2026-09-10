@@ -10,12 +10,14 @@ export type StationUiPresentation = Readonly<{
   slots: readonly GameplayItemPresentation[];
   progress: number;
   fuelSeconds: number;
+  acceptedItemIdsBySlot?: readonly (readonly string[] | null)[];
   recipes: readonly Readonly<{
     id: string;
     name: string;
     pattern: readonly GameplayItemPresentation[];
+    output: GameplayItemPresentation | null;
     requirements: string;
-    craftable: boolean;
+    matchesGrid: boolean;
   }>[];
 }>;
 export function projectStationUi(
@@ -35,6 +37,7 @@ export function projectStationUi(
   return {
     id: station.reference.entityId,
     revision: state.revision,
+    acceptedItemIdsBySlot: station.acceptedItemIdsBySlot,
     kind: state.kind,
     name: state.kind === 'workbench' ? '工作台' : state.kind === 'chest' ? '箱子' : '熔炉',
     slots: slots(inventory, inventory.length),
@@ -45,13 +48,14 @@ export function projectStationUi(
         ? []
         : recipes.map((recipe) => ({
             id: recipe.id,
+            output: slots(recipe.outputs, recipe.outputs.length)[0] ?? null,
             name: recipe.outputs.map((item) => `${name(item.itemId)} × ${item.count}`).join(' + '),
             pattern: recipe.kind === 'shaped' ? slots(recipe.pattern, 9) : [],
             requirements:
               recipe.kind === 'shapeless'
                 ? recipe.inputs.map((item) => `${name(item.itemId)} × ${item.count}`).join(' + ')
                 : '按图放入工作台',
-            craftable: station.craftableRecipeIds.includes(recipe.id),
+            matchesGrid: station.matchedRecipeIds.includes(recipe.id),
           })),
   };
 }

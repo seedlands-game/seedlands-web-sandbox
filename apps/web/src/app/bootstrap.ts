@@ -76,14 +76,15 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
       resetMeleeShowcase: () => game.prepareMeleeShowcase().catch(() => undefined),
       triggerMeleeShowcaseDamage: () => game.triggerMeleeShowcaseDamage(),
       selectHotbarSlot: (slot) => game.selectHotbarSlot(slot),
-      setActorMode: (mode) => game.setModeControl({ type: 'set-mode', mode }),
+      setActorMode: async (mode) => {
+        await game.setModeControl({ type: 'set-mode', mode });
+      },
       setFlight: (enabled) => game.setModeControl({ type: 'set-flight', enabled }),
       setCreativeSlot: (slot, itemId) => game.setModeControl({ type: 'set-creative-slot', slot, itemId }),
       toggleInventory: () => game.toggleInventory(),
       closeInventory: () => game.closeInventory(),
-      stationAction: (command) => game.stationAction(command),
+      inventoryPointer: (command) => game.inventoryPointer(command),
       craftRecipe: (recipeId) => game.craftRecipe(recipeId),
-      moveInventorySlot: (source, target) => game.moveInventorySlot(source, target),
       useInventoryItem: (slot) => game.useInventoryItem(slot),
       respawn: () => game.respawn(),
       toggleMap: () => game.toggleMap(),

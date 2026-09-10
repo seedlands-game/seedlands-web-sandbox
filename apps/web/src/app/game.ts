@@ -17,7 +17,7 @@ import { createRuntimeHarnessApi, installHarness } from './game-harness';
 import { PLAYER_FEET_OFFSET, PlayerController } from './player/player-controller';
 import { QUALITY_PROFILES, type QualityLevel } from './scene/quality-profile';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
-import type { ActorMode, MapLayer, ModeControl, StationControl } from './ui/ui-contracts';
+import type { ActorMode, InventoryControl, MapLayer, ModeControl } from './ui/ui-contracts';
 import { WorldEnvironment } from './scene/world-environment';
 import { World, waitForInitialWorldReady } from './world/world-runtime';
 import { AdvancedVisualEffects } from './scene/advanced-visual-effects';
@@ -441,11 +441,10 @@ export class Game {
 
   closeInventory = () => this.gameplayClient?.closeInventory();
 
-  stationAction = (command: StationControl) => this.gameplayClient?.stationAction(command);
+  inventoryPointer = (command: InventoryControl) =>
+    this.gameplayClient?.inventoryPointer(command) ?? Promise.resolve(false);
 
   craftRecipe = (recipeId: string) => this.gameplayClient?.craftRecipe(recipeId);
-
-  moveInventorySlot = (source: number, target: number) => this.gameplayClient?.moveInventorySlot(source, target);
 
   useInventoryItem = (slot: number) => this.gameplayClient?.useInventoryItem(slot);
 

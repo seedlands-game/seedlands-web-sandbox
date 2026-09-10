@@ -7,14 +7,14 @@ import { pack } from '../../../packages/game-core/src/server/gameplay/playbooks/
 import { GameplayRuntime } from '../../../packages/game-core/src/server/gameplay/gameplay-runtime';
 import { testCorePlatform } from '../../support/core-platform';
 
-function create(digest = 'a') {
+function create(digest = 'a', entryDigest = 'b'.repeat(64)) {
   const composition = assembleOverworldPacks([
     {
       ...pack,
       integrity: {
         algorithm: 'sha256',
-        manifestDigest: digest.repeat(64),
-        entryDigest: 'b'.repeat(64),
+        manifestDigest: digest.length === 1 ? digest.repeat(64) : digest,
+        entryDigest,
         resources: [],
       },
     },
@@ -68,4 +68,33 @@ describe('gameplay composition checkpoint', () => {
       expect(target.entities.resolveReference(reference)?.id).toBe('current');
     },
   );
+
+  it('migrates only the exact pre-pointer overworld V4 Pack identity', () => {
+    const source = create(
+      '05bc5e57bb6cfd4ed0e2da821f8b6e803bb7e3676453988a131a4b8524c066dd',
+      '4a773fe7225f13ef018def0a930b469aa82e558fdebc5172b7ef602ed8e148e2',
+    );
+    source.spawnPlayer({ id: 'saved', position: [0, 2, 0] });
+    source.giveItem('saved', { itemId: 'plank', count: 9 });
+    const saved = source.createSnapshot();
+    const legacyActor = saved.entityStore.actors.find((actor) => actor.entityId === 'saved')! as {
+      inventoryRevision?: number;
+      inventoryCursor?: unknown;
+    };
+    delete legacyActor.inventoryRevision;
+    delete legacyActor.inventoryCursor;
+    const target = create('c');
+
+    expect(target.restoreSnapshot(saved)).toEqual({ version: 4, worldTime: 12 });
+    expect(target.getInventory('saved').slots[0]).toEqual({ itemId: 'plank', count: 9 });
+    expect(target.getInventoryPointerView('saved')).toMatchObject({ revision: 0, cursor: { stack: null } });
+
+    const altered = structuredClone(saved) as typeof saved & {
+      composition: { packLock: Array<{ integrity: { entryDigest: string } }> };
+    };
+    altered.composition.packLock[0]!.integrity.entryDigest = `0${altered.composition.packLock[0]!.integrity.entryDigest.slice(1)}`;
+    const before = target.createSnapshot();
+    expect(() => target.restoreSnapshot(altered)).toThrow(/composition/i);
+    expect(target.createSnapshot()).toEqual(before);
+  });
 });

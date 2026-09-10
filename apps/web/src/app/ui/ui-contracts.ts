@@ -1,4 +1,4 @@
-import type { StationUiCommand } from '../gameplay/browser-stations';
+import type { InventoryUiCommand } from './inventory-pointer-gestures';
 import type { StationUiPresentation } from './station-ui-projector';
 import type { CombatUiProjection } from './combat-ui-projector';
 import type { SlashCommandExecution } from '@seedlands/game-core/server/commands/slash-command-parser';
@@ -12,7 +12,7 @@ export type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hyd
 export type FeedbackTone = 'info' | 'success' | 'error';
 export type ActorMode = 'survival' | 'creative';
 export type ModeControl = ModeCommand;
-export type StationControl = StationUiCommand;
+export type InventoryControl = InventoryUiCommand;
 
 export type CommandEntry = {
   input: string;
@@ -40,6 +40,8 @@ export type ShellState = Readonly<{
   gameplay: Readonly<{
     station?: StationUiPresentation | null;
     inventoryOpen: boolean;
+    cursor?: GameplayItemPresentation | null;
+    inventoryIdentity?: string;
     lifecycle: 'alive' | 'dead';
     mode: ActorMode;
     flightEnabled: boolean;
@@ -135,14 +137,13 @@ export type UiActionPort = {
   resetMeleeShowcase: () => Promise<void>;
   triggerMeleeShowcaseDamage: () => Promise<void>;
   selectHotbarSlot: (slot: number) => void;
-  setActorMode: (mode: ActorMode) => void;
+  setActorMode: (mode: ActorMode) => Promise<void>;
   setFlight: (enabled: boolean) => void;
   setCreativeSlot: (slot: number, itemId: string | null) => void;
   toggleInventory: () => void;
   closeInventory: () => void;
   craftRecipe: (recipeId: string) => void;
-  stationAction: (command: StationUiCommand) => void;
-  moveInventorySlot: (source: number, target: number) => void;
+  inventoryPointer: (command: InventoryUiCommand) => Promise<boolean>;
   useInventoryItem: (slot: number) => void;
   respawn: () => void;
   toggleMap: () => void;

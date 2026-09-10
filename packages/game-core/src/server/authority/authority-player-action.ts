@@ -21,6 +21,17 @@ export function applyAuthorityPlayerAction(
   publishCommit: (commit: WorldCommitResult) => void,
 ): unknown {
   switch (action.type) {
+    case 'inventory-pointer': {
+      const actor = server.resolveEntityReference(action.actor);
+      if (!actor || actor.id !== playerId) return { success: false, reason: 'actor-reference-stale' };
+      const result = server.inventoryPointer(playerId, {
+        actor: action.actor,
+        expectedInventoryRevision: action.expectedInventoryRevision,
+        ...(action.station ? { station: action.station } : {}),
+        command: action.command,
+      });
+      return result.success ? { success: true, ...(result.value ? { value: result.value } : {}) } : result;
+    }
     case 'station': {
       if (!server.resolveEntityReference(action.reference)) return { success: false, reason: 'stale-station' };
       const { reference, kind, expectedStationRevision } = action;

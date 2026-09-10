@@ -2,7 +2,14 @@ import { testCorePlatform } from '../support/core-platform';
 import { describe, expect, it } from 'vitest';
 import { AuthorityRuntime } from '../../packages/game-core/src/server/authority/authority-runtime';
 import { projectActionReceiptReference } from '../../packages/game-core/src/server/protocol/network-action-reference';
+import { copyAuthorityActionReference } from '../../packages/game-core/src/server/protocol/network-action-reference-copy';
 import type { AuthorityAction } from '../../packages/game-core/src/compute/authority-worker-protocol';
+import {
+  assembleOverworldPacks,
+  createGameplayActorAuthority,
+  createGameplaySystemAuthority,
+} from '@seedlands/game-core/server/composition/host-api';
+import { pack } from '../../packages/game-core/src/server/gameplay/playbooks/overworld/pack';
 
 const makeRuntime = () =>
   AuthorityRuntime.create({
@@ -19,8 +26,85 @@ const identity = (runtime: AuthorityRuntime, sequence: number) => ({
   stream: 'player-actions',
   sequence,
 });
+const makeComposedRuntime = () => {
+  const composition = assembleOverworldPacks([
+    {
+      ...pack,
+      integrity: {
+        algorithm: 'sha256' as const,
+        manifestDigest: 'a'.repeat(64),
+        entryDigest: 'b'.repeat(64),
+        resources: [],
+      },
+    },
+  ]);
+  return AuthorityRuntime.create({
+    platform: testCorePlatform,
+    epoch: 'action-reference-test',
+    seedText: 'action-reference-world',
+    initialWorldTime: 8,
+    startTimeMs: 0,
+    initialPlayerBodyPosition: [0.5, 33, 0.5],
+    composition,
+    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'human' }),
+    moduleSystemAuthority: createGameplaySystemAuthority(composition),
+  });
+};
 
 describe('公开动作回执参考投影', () => {
+  it('replays one inventory pointer receipt without applying the owned cursor twice', async () => {
+    const runtime = await makeComposedRuntime();
+    runtime.server.giveItem(runtime.playerId, { itemId: 'plank', count: 9 });
+    const inventory = runtime.server.getInventoryPointerView(runtime.playerId);
+    const action: AuthorityAction = {
+      type: 'inventory-pointer',
+      actor: inventory.actor,
+      expectedInventoryRevision: inventory.revision,
+      command: { kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 2 },
+    };
+    const id = identity(runtime, 0);
+    const first = await runtime.executeTransaction(id, () => runtime.performAction(action));
+    const repeated = await runtime.executeTransaction(id, () => {
+      throw new Error('inventory pointer replay must not execute');
+    });
+    expect(repeated).toBe(first);
+    expect(runtime.server.getInventoryPointerView(runtime.playerId)).toMatchObject({
+      revision: inventory.revision + 1,
+      cursor: { stack: { itemId: 'plank', count: 5 } },
+    });
+    expect(runtime.server.getInventory(runtime.playerId).slots[0]).toEqual({ itemId: 'plank', count: 4 });
+  });
+
+  it('projects a real empty-slot pointer rejection as a bounded public failure', async () => {
+    const runtime = await makeComposedRuntime();
+    const inventory = runtime.server.getInventoryPointerView(runtime.playerId);
+    const action: AuthorityAction = {
+      type: 'inventory-pointer',
+      actor: inventory.actor,
+      expectedInventoryRevision: inventory.revision,
+      command: { kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 },
+    };
+    const receipt = await runtime.executeTransaction(identity(runtime, 0), () => runtime.performAction(action));
+    if (receipt.status !== 'executed') throw new Error('fixture transaction was not executed');
+    expect(receipt).toMatchObject({
+      status: 'executed',
+      result: { result: { success: false, reason: 'empty-source-slot' } },
+    });
+    const projected = projectActionReceiptReference(action, receipt, identity(runtime, 0));
+    expect(projected).toMatchObject({
+      status: 'executed',
+      action,
+      outcome: { success: false, reason: 'empty-source-slot' },
+    });
+    if (projected.status !== 'executed') throw new Error('fixture projection was not executed');
+    expect(copyAuthorityActionReference(projected.action)).toEqual(action);
+    const forged = {
+      ...receipt,
+      result: { ...receipt.result, result: { success: false, reason: 'private-module-failure' } },
+    };
+    expect(() => projectActionReceiptReference(action, forged, identity(runtime, 0))).toThrow(/reason/);
+  });
+
   it('从真实权威事务区分成功与业务失败，排除整个gameplay/内部结果', async () => {
     const runtime = await makeRuntime();
     const action: AuthorityAction = { type: 'select-hotbar', slot: 2 };

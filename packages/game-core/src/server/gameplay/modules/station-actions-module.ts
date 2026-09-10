@@ -24,6 +24,7 @@ import {
   validateStationProjection,
   buildStationActionCandidate,
 } from './station-action-model';
+import { buildInventoryPointerCandidate } from './inventory-pointer-model';
 
 export function defineStationActionsModule(): ModModule {
   return Object.freeze({
@@ -126,15 +127,20 @@ export function defineStationActionsModule(): ModModule {
           run(context, input, state) {
             if (context.kind !== 'actor' || context.target.kind !== 'entity')
               throw new TypeError('Station interaction requires an actor and station entity.');
-            const candidate = buildStationActionCandidate(content(), {
-              kind,
-              actor: state.read(stationActorAddress(context.originalActorId)),
-              station: state.read(stationInstanceAddress(context.target.entityId)),
-              input,
-            });
+            const actor = state.read(stationActorAddress(context.originalActorId));
+            const station = state.read(stationInstanceAddress(context.target.entityId));
+            const pointer =
+              input !== null && typeof input === 'object' && !Array.isArray(input) && Object.hasOwn(input, 'command');
+            const candidate = pointer
+              ? buildInventoryPointerCandidate(content(), { actor: actor as never, station: station as never, input })
+              : buildStationActionCandidate(content(), { kind, actor, station, input });
+            if (pointer && (candidate as { result: { kind: string } }).result.kind !== 'pointer')
+              throw new TypeError('Station pointer candidate kind is invalid.');
+            if (pointer && ((input as { command: { kind: string } }).command.kind === 'craft') !== (kind === 'craft'))
+              throw new TypeError('Station pointer operation kind is invalid.');
             if (
               candidate.actorReference.entityId !== context.originalActorId ||
-              candidate.stationReference.entityId !== context.target.entityId
+              candidate.stationReference?.entityId !== context.target.entityId
             )
               throw new TypeError('Station projection identity mismatch.');
             return candidate;

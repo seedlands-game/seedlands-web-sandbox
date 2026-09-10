@@ -4,6 +4,7 @@ import type { InventorySlot } from '../inventory';
 import type { GameplayContent } from '../gameplay-content';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
 import { applyCraftingMatch, shapelessCraftingProvider } from './crafting-provider';
+import { validateInventoryCursor, type InventoryCursorV1 } from './inventory-pointer-contract';
 
 export const INVENTORY_ACTIONS_CAPABILITY = 'seedlands:inventory-actions';
 export const INVENTORY_ACTOR_COMPONENT = 'seedlands:inventory-actor';
@@ -37,6 +38,8 @@ export type InventoryActorProjectionV1 = Readonly<{
   equipment: InventoryEquipmentProjection;
   lifecycle: 'alive' | 'dead';
   needs: InventoryNeedsProjection;
+  inventoryRevision: number;
+  cursor: InventoryCursorV1;
 }>;
 export type InventoryWorldItemProjectionV1 = Readonly<{
   version: 1;
@@ -219,7 +222,7 @@ export function validateInventoryActorProjection(
 ): InventoryActorProjectionV1 {
   const value = actionData(
     raw,
-    ['version', 'reference', 'kind', 'slots', 'equipment', 'lifecycle', 'needs'],
+    ['version', 'reference', 'kind', 'slots', 'equipment', 'lifecycle', 'needs', 'inventoryRevision', 'cursor'],
     'Inventory actor projection',
   );
   const reference = validateReference(value.reference, 'Inventory actor');
@@ -254,6 +257,10 @@ export function validateInventoryActorProjection(
     !['satiety', 'deficit'].includes(String(needs.meaning))
   )
     throw new TypeError('Inventory needs projection is invalid.');
+  const inventoryRevision = value.inventoryRevision === undefined ? 0 : value.inventoryRevision;
+  if (!safeInteger(inventoryRevision, 0, Number.MAX_SAFE_INTEGER))
+    throw new TypeError('Inventory actor revision is invalid.');
+  const cursor = validateInventoryCursor(value.cursor, items);
   return Object.freeze({
     version: 1,
     reference,
@@ -266,6 +273,8 @@ export function validateInventoryActorProjection(
       maxHunger: needs.maxHunger,
       meaning: needs.meaning as InventoryNeedsProjection['meaning'],
     }),
+    inventoryRevision,
+    cursor,
   });
 }
 

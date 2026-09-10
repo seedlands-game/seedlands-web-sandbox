@@ -39,6 +39,7 @@ import {
   validateStationProjection,
   buildStationActionCandidate,
 } from './station-action-model';
+import { buildInventoryPointerCandidate, type InventoryPointerInputV1 } from './inventory-pointer-model';
 
 type Options = Readonly<{
   composition: WorldComposition;
@@ -89,6 +90,8 @@ export class RegisteredStationRuntime {
         equipment: { selectedSlot: actor.selectedSlot, hotbarSize: actor.hotbarSize },
         lifecycle: actor.lifecycle,
         needs: { hunger: actor.hunger, maxHunger: actor.maxHunger, meaning: actor.hungerMeaning },
+        inventoryRevision: actor.inventoryRevision,
+        cursor: actor.inventoryCursor,
         mode: actor.mode,
       },
       this.options.content,
@@ -181,6 +184,13 @@ export class RegisteredStationRuntime {
     authorize();
     const actor = this.actor(actorId),
       station = this.station(stationId);
+    if (
+      execution.effectiveInput !== null &&
+      typeof execution.effectiveInput === 'object' &&
+      !Array.isArray(execution.effectiveInput) &&
+      Object.hasOwn(execution.effectiveInput, 'command')
+    )
+      return this.preparePointer(observed, execution, actor, station, authorize);
     const candidate = buildStationActionCandidate(this.options.content, {
       kind,
       actor,
@@ -257,6 +267,108 @@ export class RegisteredStationRuntime {
         mutation.apply();
         cancellation?.apply();
         this.options.changed(true);
+        used = true;
+      },
+    };
+  }
+  private preparePointer(
+    observed: readonly ObservedModState[],
+    execution: RegisteredCommitContext,
+    actor: ReturnType<RegisteredStationRuntime['actor']>,
+    station: ReturnType<RegisteredStationRuntime['station']>,
+    authorize: () => void,
+  ): PreparedRegisteredCommit {
+    const candidate = buildInventoryPointerCandidate(this.options.content, {
+      actor,
+      station,
+      input: execution.effectiveInput,
+    });
+    if (!same(candidate, execution.candidateValue))
+      throw new TypeError('Station pointer candidate differs from authoritative state.');
+    const command = (execution.effectiveInput as unknown as InventoryPointerInputV1).command;
+    if ((command.kind === 'craft') !== (execution.operationId === STATION_CRAFT_OPERATION))
+      throw new TypeError('Station pointer operation kind is invalid.');
+    const actorId = actor.reference.entityId;
+    const stationId = station.reference.entityId;
+    const geometry = () => {
+      const current = this.options.entities.get(actorId),
+        target = this.options.entities.get(stationId);
+      if (
+        !current ||
+        !target ||
+        !this.options.entities.resolveReference(candidate.actorReference) ||
+        !candidate.stationReference ||
+        !this.options.entities.resolveReference(candidate.stationReference)
+      )
+        throw new Error('stale-station-reference');
+      const position = [...target.position] as [number, number, number];
+      if (this.options.getVoxel(position) !== station.component.voxel) throw new Error('station-voxel-mismatch');
+      const eye: [number, number, number] = [current.position[0], current.position[1] + 1.6, current.position[2]],
+        center: [number, number, number] = [position[0] + 0.5, position[1] + 0.5, position[2] + 0.5];
+      if (!positionsInRange(eye, center, 4.5)) throw new Error('out-of-range');
+      const sight = traceVoxelRay(eye, center, (x, y, z) => this.options.getVoxel([x, y, z]));
+      if (sight !== 'clear') throw new Error(sight === 'unavailable' ? 'chunk-unavailable' : 'blocked');
+    };
+    geometry();
+    const nextStation = candidate.station;
+    if (
+      nextStation &&
+      furnaceActive(nextStation, this.options.content) &&
+      !furnaceActive(station.component, this.options.content) &&
+      this.activeFurnaces().length >= FURNACE_PARTITIONS * FURNACE_PARTITION_SIZE
+    )
+      throw new RangeError('Active furnace capacity exceeded.');
+    const components = this.options.entities.actorComponentSnapshot(actorId);
+    const changedTool = !same(actor.slots[actor.equipment.selectedSlot], candidate.slots[actor.equipment.selectedSlot]);
+    const cancellation = changedTool
+      ? this.options.simulation().prepareCancellation([actorId], 'slot-changed')
+      : undefined;
+    const stationChanged = !!nextStation && nextStation.revision !== station.component.revision;
+    const mutation = candidate.changed
+      ? prepareEntityMutation(this.options.entities, {
+          actors: [
+            {
+              reference: candidate.actorReference,
+              health: this.options.entities.actorStateAccess(actorId).health,
+              components: {
+                ...components,
+                inventory: [...candidate.slots],
+                inventoryRevision: candidate.inventoryRevision,
+                inventoryCursor: candidate.cursor,
+                ...(changedTool && components.player ? { player: { ...components.player, breakAction: null } } : {}),
+              },
+            },
+          ],
+          ...(stationChanged ? { stations: [{ reference: candidate.stationReference!, snapshot: nextStation! }] } : {}),
+          spawns: candidate.dropIntents.map((stack) => ({
+            position: this.options.entities.get(actorId)!.position,
+            stack: { ...stack },
+          })),
+        })
+      : undefined;
+    const revision = this.options.revision();
+    let used = false,
+      validated = false;
+    return {
+      ok: true,
+      revision: revision + Number(candidate.changed),
+      value: candidate.result,
+      validate: () => {
+        validated = false;
+        if (used || this.options.revision() !== revision) throw new Error('Prepared station pointer action is stale.');
+        this.validateObserved(observed);
+        authorize();
+        geometry();
+        if (candidate.changed) this.options.assertCanChange();
+        mutation?.validate();
+        cancellation?.validate();
+        validated = true;
+      },
+      apply: () => {
+        if (used || !validated) throw new Error('Station pointer commit requires validation.');
+        mutation?.apply();
+        cancellation?.apply();
+        if (candidate.changed) this.options.changed(true);
         used = true;
       },
     };

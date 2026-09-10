@@ -153,11 +153,23 @@ function prepareMutation(
       throw new TypeError('Prepared actor health is invalid.');
     if ((candidate.health === 0) !== (candidate.components.lifecycle === 'dead'))
       throw new TypeError('Prepared actor health and lifecycle do not match.');
+    const previous = capturedOwner.actorComponentSnapshot(entity.id);
+    const interactionChanged = !sameSnapshot(
+      [previous.inventory, previous.inventoryCursor],
+      [candidate.components.inventory, candidate.components.inventoryCursor],
+    );
+    const previousInventoryRevision = previous.inventoryRevision ?? 0;
+    if (interactionChanged && previousInventoryRevision >= Number.MAX_SAFE_INTEGER)
+      throw new RangeError('Actor inventory revision is exhausted.');
+    const components: ActorComponentSnapshot = {
+      ...candidate.components,
+      inventoryRevision: previousInventoryRevision + Number(interactionChanged),
+    };
     return Object.freeze({
       id: entity.id,
       entity,
       health: candidate.health,
-      components: capturedOwner.prepareActorComponentSnapshot(entity.id, candidate.components),
+      components: capturedOwner.prepareActorComponentSnapshot(entity.id, components),
       position: copyPosition(candidate.position, 'position'),
       physicsVelocity: copyPosition(candidate.physicsVelocity, 'physics velocity'),
     });

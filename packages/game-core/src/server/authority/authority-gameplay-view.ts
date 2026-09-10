@@ -2,6 +2,7 @@ import type { GameServer } from '../game-server';
 import type { AuthorityGameplayView } from '../../compute/authority-worker-protocol';
 
 export function projectAuthorityGameplayView(server: GameServer, playerId: string): AuthorityGameplayView {
+  const inventory = server.getInventoryPointerView(playerId);
   const entities = server
     .queryEntities()
     .map((entity) =>
@@ -19,6 +20,7 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     nearbyStations: server.getNearbyStations(playerId),
     stationRecipes: server.listStationRecipes(),
     recipes: server.listRecipes(),
+    inventory,
     craftableRecipeIds: server.listCraftableRecipes(playerId).map((recipe) => recipe.id),
     metrics: server.gameplayMetrics(),
   };

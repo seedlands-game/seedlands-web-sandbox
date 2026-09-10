@@ -1,172 +1,253 @@
 <script lang="ts">
   import type { StationUiPresentation } from './station-ui-projector';
-  import type { UiActionPort } from './ui-contracts';
+  import type { GameplayItemPresentation } from './gameplay-ui-projector';
+  import type { InventoryUiSlot } from './inventory-pointer-gestures';
+  import InventorySlot from './primitives/inventory-slot.svelte';
   import ItemIcon from './primitives/item-icon.svelte';
-  import GameButton from './primitives/game-button.svelte';
   let {
     station,
-    actions,
-    actorSlot,
-    selectedSlot,
-    onpick,
-    onused,
+    cursor,
+    previews,
+    onpress,
+    onenter,
+    onactivate,
+    oncraft,
   }: {
     station: StationUiPresentation;
-    actions: UiActionPort;
-    actorSlot: number | null;
-    selectedSlot: number | null;
-    onpick: (slot: number, count?: number) => void;
-    onused: () => void;
+    cursor: GameplayItemPresentation | null;
+    previews: ReadonlyMap<string, number>;
+    onpress: (event: PointerEvent, address: InventoryUiSlot) => void;
+    onenter: (address: InventoryUiSlot) => void;
+    onactivate: (address: InventoryUiSlot) => void;
+    oncraft: (batch: boolean) => void;
   } = $props();
-  let wholeStack = $state(false);
-  function pick(slot: number) {
-    const count = wholeStack ? undefined : 1;
-    if (actorSlot === null) onpick(slot, count);
-    else {
-      actions.stationAction({ kind: 'transfer', from: 'actor', actorSlot, stationSlot: slot, count });
-      onused();
-    }
-  }
+  const result = $derived(station.recipes.find((recipe) => recipe.matchesGrid));
 </script>
 
 <section class="station-panel" aria-label={`${station.name}操作`} data-station-kind={station.kind}>
   <h3>{station.name}</h3>
-  <p>先选背包物品，再点工位格放入；先选工位物品，再点背包格取出。</p>
-  <label class="transfer-size"><input type="checkbox" bind:checked={wholeStack} /> 每次移动整组（默认一个）</label>
-  <div class="station-grid" class:chest={station.kind === 'chest'} role="grid" aria-label={`${station.name}槽位`}>
-    {#each station.slots as slot (slot.slot)}
-      <button
-        type="button"
-        role="gridcell"
-        class:selected={selectedSlot === slot.slot}
-        aria-selected={selectedSlot === slot.slot}
-        aria-label={`${station.kind === 'furnace' ? ['原料', '燃料', '产出'][slot.slot] : `工位格 ${slot.slot + 1}`}：${slot.name} ${slot.count}`}
-        data-station-slot={slot.slot}
-        data-item={slot.itemId ?? 'empty'}
-        onclick={() => pick(slot.slot)}
-      >
-        {#if station.kind === 'furnace'}<small>{['原料', '燃料', '产出'][slot.slot]}</small>{/if}
-        <ItemIcon itemId={slot.itemId} /><span>{slot.itemId ? slot.name : '空'}</span>
-        {#if slot.count}<strong>{slot.count}</strong>{/if}
-      </button>
-    {/each}
-  </div>
-  {#if station.kind === 'furnace'}
-    <label class="smelting">冶炼进度 <progress value={station.progress} max="1"></progress></label>
-    <p role="status">剩余燃烧时间 {station.fuelSeconds.toFixed(1)} 秒 · 放入粗铁和煤炭或原木</p>
-  {/if}
-  {#if station.kind === 'workbench'}
-    <h4>工作台配方</h4>
-    <div class="station-recipes">
-      {#each station.recipes as recipe (recipe.id)}
-        <article>
-          <strong>{recipe.name}</strong>
-          {#if recipe.pattern.length}
-            <div class="recipe-pattern" aria-label={`${recipe.name}摆放图`}>
-              {#each recipe.pattern as slot (slot.slot)}<span title={slot.name}><ItemIcon itemId={slot.itemId} /></span
-                >{/each}
-            </div>
-          {/if}
-          <small>{recipe.requirements}</small>
-          <GameButton
-            label={`工作台合成${recipe.name}`}
-            disabled={!recipe.craftable}
-            onclick={() => actions.stationAction({ kind: 'craft', recipeId: recipe.id })}>合成</GameButton
-          >
-        </article>
+  <div class="station-working-area">
+    <div
+      class="station-grid"
+      class:chest={station.kind === 'chest'}
+      class:furnace={station.kind === 'furnace'}
+      role="grid"
+      aria-label={`${station.name}槽位`}
+    >
+      {#each station.slots as item (item.slot)}
+        <div class="station-cell">
+          {#if station.kind === 'furnace'}<small>{['原料', '燃料', '产出'][item.slot]}</small>{/if}
+          <InventorySlot
+            {item}
+            address={{ kind: 'station', slot: item.slot }}
+            label={station.kind === 'furnace' ? ['原料', '燃料', '产出'][item.slot] : `工位格 ${item.slot + 1}`}
+            preview={previews.get(`station:${item.slot}`)}
+            previewItem={cursor}
+            {onpress}
+            {onenter}
+            {onactivate}
+          />
+        </div>
       {/each}
     </div>
+    {#if station.kind === 'workbench'}
+      <span class="craft-arrow" aria-hidden="true">→</span>
+      <div class="result-wrap">
+        <small>合成结果</small>
+        <button
+          type="button"
+          class="craft-result"
+          data-craft-result
+          data-item={result?.output?.itemId ?? 'empty'}
+          aria-label={result ? `取出 ${result.name}` : '合成结果：请按配方摆放材料'}
+          disabled={!result}
+          title="点击取出一份 · Shift 点击尽可能合成"
+          oncontextmenu={(event) => event.preventDefault()}
+          onpointerdown={(event) => {
+            if (event.button === 2) {
+              event.preventDefault();
+              oncraft(event.shiftKey);
+            }
+          }}
+          onclick={(event) => oncraft(event.shiftKey)}
+        >
+          <ItemIcon itemId={result?.output?.itemId ?? null} />
+          {#if result?.output}<strong>{result.output.count}</strong>{/if}
+        </button>
+        <span>{result?.name ?? '摆放材料后取出'}</span>
+      </div>
+    {/if}
+  </div>
+  {#if station.kind === 'furnace'}
+    <div class="smelting">
+      <label>冶炼进度 <progress value={station.progress} max="1"></progress></label><span
+        >剩余燃烧时间 {station.fuelSeconds.toFixed(1)} 秒</span
+      >
+    </div>
+  {/if}
+  {#if station.kind === 'workbench'}
+    <details class="station-recipe-book">
+      <summary>配方手册 <span>查看摆放图</span></summary>
+      <div class="station-recipes">
+        {#each station.recipes as recipe (recipe.id)}
+          <article>
+            <strong>{recipe.name}</strong>
+            {#if recipe.pattern.length}<div class="recipe-pattern" aria-label={`${recipe.name}摆放图`}>
+                {#each recipe.pattern as item (item.slot)}<span title={item.name}
+                    ><ItemIcon itemId={item.itemId} /></span
+                  >{/each}
+              </div>{/if}
+            <small>{recipe.requirements}</small>
+          </article>
+        {/each}
+      </div>
+    </details>
   {/if}
 </section>
 
 <style>
-  .transfer-size {
+  .station-panel {
+    padding: 0 0 16px;
+    border-bottom: 1px solid #83704b60;
+  }
+  h3 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    color: #e6d3ad;
+  }
+  .station-working-area {
     display: flex;
     align-items: center;
-    gap: 6px;
-  }
-  :global(#ui .inventory-dialog .transfer-size input[type='checkbox']) {
-    width: 16px;
-    height: 16px;
-    min-height: 16px;
-    padding: 0;
-    margin-right: 6px;
-  }
-  .station-panel {
-    margin-top: 1rem;
-    border-top: 1px solid #ffffff30;
-    padding-top: 1rem;
-  }
-  .station-panel p,
-  .transfer-size {
-    font-size: 0.85rem;
+    justify-content: center;
+    gap: 24px;
   }
   .station-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 90px));
-    gap: 6px;
-    margin: 12px 0;
+    grid-template-columns: repeat(3, 58px);
+    gap: 5px;
   }
   .station-grid.chest {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    width: 100%;
   }
-  .station-grid button {
-    color: inherit;
-    background: #1b252bcc;
-    border: 1px solid #ffffff35;
-    border-radius: 6px;
-    min-height: 72px;
-    padding: 5px;
-    cursor: pointer;
+  .station-grid.furnace {
+    gap: 22px;
+  }
+  .station-cell {
+    min-width: 0;
+  }
+  .station-cell > small {
+    display: block;
+    margin-bottom: 7px;
+    text-align: center;
+    font-size: 11px;
+    color: #afa78e;
+  }
+  .craft-arrow {
+    font-size: 36px;
+    color: #c1ae83;
+  }
+  .result-wrap {
     display: flex;
     flex-direction: column;
+    gap: 9px;
     align-items: center;
+    width: 116px;
+    color: #bcae8e;
+    font-size: 11px;
   }
-  .station-grid button.selected {
-    outline: 2px solid #ffd36d;
+  .result-wrap .craft-result {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 72px;
+    height: 72px;
+    padding: 10px;
+    border: 2px solid #baa477;
+    background: #26302a;
+    border-radius: 3px;
+    cursor: pointer;
   }
-  .station-grid button :global(img) {
-    width: 26px;
-    height: 26px;
+  .craft-result:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .craft-result:hover:enabled {
+    background: #42553c;
+    border-color: #e4d399;
+  }
+  .craft-result strong {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font: 700 14px monospace;
+  }
+  .craft-result :global(.item-icon) {
+    width: 42px;
+    height: 42px;
     image-rendering: pixelated;
-  }
-  .station-grid button span {
-    font-size: 0.75rem;
   }
   .smelting {
     display: flex;
-    gap: 1rem;
-    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 14px;
+    color: #c3b28d;
+    font-size: 11px;
+  }
+  .smelting progress {
+    width: 90px;
+    vertical-align: middle;
+    accent-color: #d7a94c;
+  }
+  .station-recipe-book {
+    margin-top: 14px;
+    font-size: 12px;
+  }
+  summary {
+    cursor: pointer;
+    color: #dfccaa;
+  }
+  summary span {
+    margin-left: 8px;
+    color: #9c9989;
+    font-size: 10px;
   }
   .station-recipes {
     display: flex;
-    gap: 12px;
     overflow-x: auto;
-    padding-bottom: 8px;
+    gap: 12px;
+    padding: 12px 0 4px;
   }
-  .station-recipes article {
+  article {
+    flex: 0 0 130px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    flex: 0 0 140px;
-    border: 1px solid #ffffff20;
-    padding: 10px;
-    border-radius: 8px;
+    border: 1px solid #77624370;
+    padding: 8px;
+  }
+  article strong {
+    font-size: 11px;
+  }
+  article small {
+    font-size: 10px;
+    color: #b2aa98;
   }
   .recipe-pattern {
     display: grid;
-    grid-template-columns: repeat(3, 24px);
+    grid-template-columns: repeat(3, 23px);
     gap: 2px;
   }
   .recipe-pattern span {
-    width: 24px;
-    height: 24px;
-    background: #ffffff15;
+    width: 23px;
+    height: 23px;
+    background: #ffffff10;
   }
-  .recipe-pattern :global(img) {
-    width: 24px;
-    height: 24px;
+  .recipe-pattern :global(.item-icon) {
+    width: 23px;
+    height: 23px;
     image-rendering: pixelated;
   }
 </style>

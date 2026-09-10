@@ -21,6 +21,7 @@ import {
   validateInventoryWorldItemProjection,
   type InventoryActionKind,
 } from './inventory-action-model';
+import { buildInventoryPointerCandidate } from './inventory-pointer-model';
 
 type GameplayContentCapabilityV1 = Readonly<{ resolve(): GameplayContent }>;
 
@@ -111,11 +112,15 @@ export function defineInventoryActionsModule(): ModModule {
             const boundActorId = actorId(context);
             if (entityTarget(context.target) !== boundActorId)
               throw new TypeError('Inventory target must match the bound actor.');
-            const result = buildInventoryActionCandidate(content(), {
-              kind: operation.kind,
-              actor: state.read(inventoryActorAddress(boundActorId)),
-              input,
-            });
+            const actor = state.read(inventoryActorAddress(boundActorId));
+            const result =
+              operation.kind === 'move' &&
+              input !== null &&
+              typeof input === 'object' &&
+              !Array.isArray(input) &&
+              Object.hasOwn(input, 'command')
+                ? buildInventoryPointerCandidate(content(), { actor: actor as never, input })
+                : buildInventoryActionCandidate(content(), { kind: operation.kind, actor, input });
             if (result.actorId !== boundActorId)
               throw new TypeError('Inventory actor projection does not match the bound actor.');
             return result;

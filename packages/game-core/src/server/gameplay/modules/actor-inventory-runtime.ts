@@ -77,16 +77,48 @@ export class ActorInventoryRuntime {
   move(id: string, source: number, target: number): Result {
     const actor = this.owner.actor(id);
     if (actor.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
-    if (!actor.inventory.moveStack(source, target)) return { success: false, reason: 'cannot-move-item' };
-    if (source === actor.selectedSlot || target === actor.selectedSlot) this.owner.cancelCombat(id, 'slot-changed');
+    const candidate = new Inventory(actor.inventory.capacity, actor.inventory.snapshot(), actor.inventory.items);
+    if (!candidate.moveStack(source, target)) return { success: false, reason: 'cannot-move-item' };
+    this.owner.assertCanChange();
+    const equippedChanged = source === actor.selectedSlot || target === actor.selectedSlot;
+    const cancellation = equippedChanged ? this.owner.prepareCancelCombat(id) : undefined;
+    const components = this.owner.entities.actorComponentSnapshot(id);
+    const mutation = prepareEntityMutation(this.owner.entities, {
+      actors: [
+        {
+          reference: this.owner.entities.createReference(id)!,
+          health: actor.health,
+          components: { ...components, inventory: candidate.snapshot() },
+        },
+      ],
+    });
+    mutation.validate();
+    cancellation?.validate();
+    mutation.apply();
+    cancellation?.apply();
     this.owner.changed(true);
     return { success: true };
   }
   craft(id: string, recipeId: string): ReturnType<typeof craftRecipe> | { success: false; reason: 'player-dead' } {
     const actor = this.owner.actor(id);
     if (actor.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
-    const result = craftRecipe(actor.inventory, recipeId, this.owner.recipes);
-    if (result.success) this.owner.changed(true);
+    const candidate = new Inventory(actor.inventory.capacity, actor.inventory.snapshot(), actor.inventory.items);
+    const result = craftRecipe(candidate, recipeId, this.owner.recipes);
+    if (!result.success) return result;
+    this.owner.assertCanChange();
+    const components = this.owner.entities.actorComponentSnapshot(id);
+    const mutation = prepareEntityMutation(this.owner.entities, {
+      actors: [
+        {
+          reference: this.owner.entities.createReference(id)!,
+          health: actor.health,
+          components: { ...components, inventory: candidate.snapshot() },
+        },
+      ],
+    });
+    mutation.validate();
+    mutation.apply();
+    this.owner.changed(true);
     return result;
   }
   drop(id: string, slot: number, count: number) {
@@ -158,11 +190,29 @@ export class ActorInventoryRuntime {
     if (!consume) return { success: false, reason: 'item-not-usable' };
     if (actor.hungerMeaning === 'satiety' ? actor.hunger >= actor.maxHunger : actor.hunger <= 0)
       return { success: false, reason: 'hunger-full' };
-    actor.inventory.removeFromSlot(slot, 1);
-    actor.hunger =
+    const candidate = new Inventory(actor.inventory.capacity, actor.inventory.snapshot(), actor.inventory.items);
+    candidate.removeFromSlot(slot, 1);
+    const hunger =
       actor.hungerMeaning === 'satiety'
         ? Math.min(actor.maxHunger, actor.hunger + consume.hungerRestore)
         : Math.max(0, actor.hunger - consume.hungerRestore);
+    this.owner.assertCanChange();
+    const components = this.owner.entities.actorComponentSnapshot(id);
+    const mutation = prepareEntityMutation(this.owner.entities, {
+      actors: [
+        {
+          reference: this.owner.entities.createReference(id)!,
+          health: actor.health,
+          components: {
+            ...components,
+            inventory: candidate.snapshot(),
+            needs: { ...components.needs, hunger },
+          },
+        },
+      ],
+    });
+    mutation.validate();
+    mutation.apply();
     this.owner.changed(true);
     return { success: true };
   }

@@ -15,6 +15,11 @@ import {
   type createActorComponents,
 } from './ecs-actor-components';
 import type { BreakAction } from './player-state';
+import {
+  emptyInventoryCursor,
+  validateInventoryCursor,
+  type InventoryCursorV1,
+} from './modules/inventory-pointer-contract';
 
 type Components = ReturnType<typeof createActorComponents>;
 const CREATIVE_HOTBAR_SIZE = 8;
@@ -63,6 +68,8 @@ export function initializeActorComponents(
   components.needs.healingAccumulator[eid] = 0;
   components.needs.starvationAccumulator[eid] = 0;
   components.inventory.value[eid] = new Inventory(24, undefined, items);
+  components.inventory.revision[eid] = 0;
+  components.inventory.cursor[eid] = emptyInventoryCursor();
   components.equipment.selectedSlot[eid] = 0;
   components.equipment.hotbarSize[eid] = 8;
   components.control.source[eid] = player ? 'player' : 'autonomous';
@@ -112,6 +119,8 @@ export function readActorComponentSnapshot(
     entityId,
     needs: readActorNeeds(components, eid),
     inventory: inventory.snapshot(),
+    inventoryRevision: components.inventory.revision[eid]!,
+    inventoryCursor: validateInventoryCursor(components.inventory.cursor[eid], inventory.items),
     equipment: {
       selectedSlot: components.equipment.selectedSlot[eid]!,
       hotbarSize: components.equipment.hotbarSize[eid]!,
@@ -140,6 +149,8 @@ export type PreparedActorComponentSnapshot = Readonly<{
   entityId: string;
   needs: ActorNeeds;
   inventory: Inventory;
+  inventoryRevision: number;
+  inventoryCursor: InventoryCursorV1;
   equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
   lifecycle: ActorComponentSnapshot['lifecycle'];
   controlSource: ActorComponentSnapshot['controlSource'];
@@ -187,6 +198,12 @@ export function prepareActorComponentSnapshot(
     throw new TypeError('Actor inventory snapshot is invalid.');
 
   const inventory = new Inventory(24, snapshot.inventory, items);
+  const inventoryRevision = snapshot.inventoryRevision ?? 0;
+  if (!Number.isSafeInteger(inventoryRevision) || inventoryRevision < 0)
+    throw new TypeError('Actor inventory revision is invalid.');
+  const inventoryCursor = validateInventoryCursor(snapshot.inventoryCursor, items);
+  if (inventoryCursor.origin?.kind === 'inventory' && inventoryCursor.origin.slot >= inventory.capacity)
+    throw new TypeError('Actor inventory cursor origin is invalid.');
   const modeFacets = validateActorModeFacets(snapshot, items);
   let preparedPlayer: PreparedActorComponentSnapshot['player'] = null;
   if (snapshot.player) {
@@ -205,6 +222,8 @@ export function prepareActorComponentSnapshot(
     entityId: snapshot.entityId,
     needs: Object.freeze({ ...needs }),
     inventory,
+    inventoryRevision,
+    inventoryCursor,
     equipment: Object.freeze({ ...snapshot.equipment }),
     lifecycle: snapshot.lifecycle,
     controlSource: snapshot.controlSource,
@@ -233,6 +252,8 @@ export function installPreparedActorComponentSnapshot(
   components.needs.healingAccumulator[eid] = needs.healingAccumulator;
   components.needs.starvationAccumulator[eid] = needs.starvationAccumulator;
   components.inventory.value[eid] = prepared.inventory;
+  components.inventory.revision[eid] = prepared.inventoryRevision;
+  components.inventory.cursor[eid] = prepared.inventoryCursor;
   components.equipment.selectedSlot[eid] = prepared.equipment.selectedSlot;
   components.equipment.hotbarSize[eid] = prepared.equipment.hotbarSize;
   components.life.lifecycle[eid] = prepared.lifecycle;
@@ -390,6 +411,13 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
       binding.resolve();
       return inventory;
     },
+    get inventoryRevision() {
+      return components.inventory.revision[binding.resolve()]!;
+    },
+    get inventoryCursor() {
+      const eid = binding.resolve();
+      return validateInventoryCursor(components.inventory.cursor[eid], inventory.items);
+    },
     get controlSource() {
       return components.control.source[binding.resolve()]!;
     },
@@ -414,6 +442,12 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
     replaceModeComponents(facets: ActorModeSnapshotFacets) {
       const eid = binding.resolve();
       writeModeFacets(components, eid, validateActorModeFacets(facets, inventory.items));
+    },
+    replaceInventoryInteraction(revision: number, cursor: InventoryCursorV1) {
+      if (!Number.isSafeInteger(revision) || revision < 0) throw new TypeError('Invalid actor inventory revision.');
+      const eid = binding.resolve();
+      components.inventory.revision[eid] = revision;
+      components.inventory.cursor[eid] = validateInventoryCursor(cursor, inventory.items);
     },
   });
 }

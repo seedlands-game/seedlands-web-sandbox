@@ -28,6 +28,7 @@ import {
   validateInventoryWorldItemProjection,
   type InventoryActionKind,
 } from './inventory-action-model';
+import { buildInventoryPointerCandidate, type InventoryPointerInputV1 } from './inventory-pointer-model';
 
 type Options = Readonly<{
   composition: WorldComposition;
@@ -85,6 +86,8 @@ export class RegisteredInventoryRuntime {
         equipment: { selectedSlot: actor.selectedSlot, hotbarSize: actor.hotbarSize },
         lifecycle: actor.lifecycle,
         needs: { hunger: actor.hunger, maxHunger: actor.maxHunger, meaning: actor.hungerMeaning },
+        inventoryRevision: actor.inventoryRevision,
+        cursor: actor.inventoryCursor,
       },
       this.options.content.items,
     );
@@ -149,6 +152,14 @@ export class RegisteredInventoryRuntime {
     )
       throw new TypeError('Inventory transaction observation scope mismatch.');
     const actor = this.actor(actorId);
+    if (
+      kind === 'move' &&
+      execution.effectiveInput !== null &&
+      typeof execution.effectiveInput === 'object' &&
+      !Array.isArray(execution.effectiveInput) &&
+      Object.hasOwn(execution.effectiveInput, 'command')
+    )
+      return this.preparePointer(observed, execution, actor, validateActorExecution);
     const candidate = buildInventoryActionCandidate(
       this.options.content,
       kind === 'pickup'
@@ -222,6 +233,72 @@ export class RegisteredInventoryRuntime {
       },
     };
   }
+  private preparePointer(
+    observed: readonly ObservedModState[],
+    execution: RegisteredCommitContext,
+    actor: ReturnType<RegisteredInventoryRuntime['actor']>,
+    authorize: () => void,
+  ): PreparedRegisteredCommit {
+    const candidate = buildInventoryPointerCandidate(this.options.content, {
+      actor,
+      input: execution.effectiveInput,
+    });
+    if (!same(candidate, execution.candidateValue))
+      throw new TypeError('Inventory pointer candidate does not match current state and effective input.');
+    const actorId = actor.reference.entityId;
+    const components = this.options.entities.actorComponentSnapshot(actorId);
+    const changedTool = !same(actor.slots[actor.equipment.selectedSlot], candidate.slots[actor.equipment.selectedSlot]);
+    const cancellation = changedTool
+      ? this.options.simulation().prepareCancellation([actorId], 'slot-changed')
+      : undefined;
+    const mutation = candidate.changed
+      ? prepareEntityMutation(this.options.entities, {
+          actors: [
+            {
+              reference: candidate.actorReference,
+              health: this.options.entities.actorStateAccess(actorId).health,
+              components: {
+                ...components,
+                inventory: [...candidate.slots],
+                inventoryRevision: candidate.inventoryRevision,
+                inventoryCursor: candidate.cursor,
+                ...(changedTool && components.player ? { player: { ...components.player, breakAction: null } } : {}),
+              },
+            },
+          ],
+          spawns: candidate.dropIntents.map((stack) => ({
+            position: this.options.entities.get(actorId)!.position,
+            stack: { ...stack },
+          })),
+        })
+      : undefined;
+    const revision = this.options.revision();
+    let validated = false,
+      used = false;
+    return {
+      ok: true,
+      revision: revision + Number(candidate.changed),
+      value: candidate.result,
+      validate: () => {
+        validated = false;
+        if (used || this.options.revision() !== revision)
+          throw new Error('Prepared Inventory pointer action is stale.');
+        this.validateObserved(observed);
+        authorize();
+        if (candidate.changed) this.options.assertCanChange();
+        mutation?.validate();
+        cancellation?.validate();
+        validated = true;
+      },
+      apply: () => {
+        if (used || !validated) throw new Error('Prepared Inventory pointer action requires validation.');
+        mutation?.apply();
+        cancellation?.apply();
+        if (candidate.changed) this.options.changed(true);
+        used = true;
+      },
+    };
+  }
   private invoke(
     actorId: string,
     kind: InventoryActionKind,
@@ -251,6 +328,10 @@ export class RegisteredInventoryRuntime {
   }
   move(id: string, source: number, target: number) {
     return this.simple(id, 'move', { source, target });
+  }
+  pointer(id: string, input: InventoryPointerInputV1) {
+    const result = this.invoke(id, 'move', input as unknown as ModuleInvocationValue);
+    return result.success ? { success: true as const, value: result.value } : result;
   }
   consume(id: string, slot: number) {
     return this.simple(id, 'consume', { slot });

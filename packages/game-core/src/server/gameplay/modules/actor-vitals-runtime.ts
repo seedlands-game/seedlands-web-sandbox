@@ -4,6 +4,7 @@ import type { EntityStore } from '../entity-store';
 import type { ActorComponentSnapshot } from '../ecs-actor-components';
 import { prepareEntityMutation } from '../prepared-entity-mutation';
 import { advancePlayerNeeds } from './needs-runtime';
+import { emptyInventoryCursor } from './inventory-pointer-contract';
 
 export class ActorVitalsRuntime {
   constructor(
@@ -55,14 +56,18 @@ export class ActorVitalsRuntime {
     const entity = this.options.entities.get(id)!;
     this.options.assertCanChange();
     if (dead) this.options.assertCanCancelCombat(id);
+    const cursorStack = components.inventoryCursor?.stack;
     const spawns = dead
-      ? components.inventory.flatMap((stack) => (stack ? [{ position: entity.position, stack }] : []))
+      ? [...components.inventory, cursorStack].flatMap((stack) => (stack ? [{ position: entity.position, stack }] : []))
       : [];
     const candidate = dead
       ? {
           ...components,
           lifecycle: 'dead' as const,
           inventory: components.inventory.map(() => null),
+          inventoryCursor: cursorStack
+            ? { ...emptyInventoryCursor(), revision: (components.inventoryCursor?.revision ?? 0) + 1 }
+            : components.inventoryCursor,
           player: { ...components.player!, breakAction: null },
         }
       : components;

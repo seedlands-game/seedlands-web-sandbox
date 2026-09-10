@@ -7,6 +7,11 @@ export type CompositionCheckpointIdentity = Readonly<{
   definitionMap: WorldDefinitionMap;
 }>;
 
+const INVENTORY_POINTER_PREDECESSOR_OVERWORLD = Object.freeze({
+  manifestDigest: '05bc5e57bb6cfd4ed0e2da821f8b6e803bb7e3676453988a131a4b8524c066dd',
+  entryDigest: '4a773fe7225f13ef018def0a930b469aa82e558fdebc5172b7ef602ed8e148e2',
+});
+
 function canonicalData(input: unknown): string {
   let budget = 1_048_576;
   const active = new Set<object>();
@@ -56,6 +61,25 @@ export function createCompositionCheckpointGuard(composition: WorldComposition, 
     definitionMap: composition.definitionMap,
   };
   const expected = canonicalData(identity);
+  const legacyV4 =
+    composition.playbookId === 'seedlands:overworld' &&
+    identity.packLock.length === 1 &&
+    identity.packLock[0]?.id === 'seedlands:overworld' &&
+    identity.packLock[0].version === '1.0.0'
+      ? canonicalData({
+          ...identity,
+          packLock: [
+            {
+              ...identity.packLock[0],
+              integrity: {
+                algorithm: 'sha256',
+                ...INVENTORY_POINTER_PREDECESSOR_OVERWORLD,
+                resources: [],
+              },
+            },
+          ],
+        })
+      : null;
   return Object.freeze({
     snapshot: (): CompositionCheckpointIdentity => JSON.parse(expected) as CompositionCheckpointIdentity,
     validateGameplay(raw: unknown) {
@@ -66,7 +90,9 @@ export function createCompositionCheckpointGuard(composition: WorldComposition, 
           throw new TypeError('Composition does not admit legacy gameplay migration.');
         return;
       }
-      if (!('composition' in raw) || canonicalData(raw.composition) !== expected)
+      if (!('composition' in raw)) throw new TypeError('Gameplay composition identity is missing or incompatible.');
+      const actual = canonicalData(raw.composition);
+      if (actual !== expected && actual !== legacyV4)
         throw new TypeError('Gameplay composition identity is missing or incompatible.');
     },
   });

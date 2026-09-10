@@ -38,6 +38,8 @@ const actor = () => ({
   equipment: { selectedSlot: 0, hotbarSize: 2 },
   lifecycle: 'alive',
   needs: { hunger: 20, maxHunger: 20, meaning: 'satiety' },
+  inventoryRevision: 0,
+  cursor: { version: 1, revision: 0, stack: null, origin: null },
   mode: 'survival',
 });
 const station = (kind: 'workbench' | 'furnace' = 'workbench') => ({

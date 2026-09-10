@@ -1,4 +1,6 @@
-import { BrowserStations, type StationUiCommand } from './browser-stations';
+import { BrowserInventoryPointer } from './browser-inventory-pointer';
+import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
+import { BrowserStations } from './browser-stations';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
 import type { VoxelTarget } from '../../client/presentation/voxel-target';
@@ -58,7 +60,9 @@ export class BrowserGameplay {
   private aimTarget: VoxelTarget | null = null;
   private gestureSeconds = 0;
   private inventoryOpen = false;
+  private inventoryClosing = false;
   readonly stations: BrowserStations;
+  private readonly inventoryPointerClient: BrowserInventoryPointer;
   private previousProjection: GameplayUiProjection | undefined;
   private previousHealth: number | null = null;
   private lastCombatResultSequence: number | null = null;
@@ -66,6 +70,15 @@ export class BrowserGameplay {
 
   constructor(private readonly options: Options) {
     this.stations = new BrowserStations(() => options.authority.gameplay);
+    this.inventoryPointerClient = new BrowserInventoryPointer({
+      view: () => options.authority.gameplay,
+      station: () => this.stations.current(),
+      perform: (action) => options.authority.performAction(action),
+      changed: options.queueSave,
+      refresh: () => this.refresh(),
+      succeeded: (message) => this.feedback(message, 'success'),
+      failed: (message) => this.feedback(message, 'error'),
+    });
     this.presenter = new GameplayEntityPresenter(options.app, (id) => this.itemDefinition(id) ?? null);
     this.viewmodel = new FirstPersonViewmodel(options.app, options.camera);
     this.outline = new VoxelTargetOutline(options.app);
@@ -194,6 +207,8 @@ export class BrowserGameplay {
     const projection = projectGameplayUi(
       {
         revision: view.gameplayRevision,
+        cursor: view.inventory?.cursor,
+        inventoryIdentity: JSON.stringify(view.inventory?.actor),
         player: {
           combat: player.combat,
           lifecycle: player.lifecycle,
@@ -261,31 +276,31 @@ export class BrowserGameplay {
     });
   }
 
-  setActorMode(mode: ActorMode): void {
-    void this.runModeCommand(
+  setActorMode(mode: ActorMode): Promise<void> {
+    return this.runModeCommand(
       { type: 'set-mode', mode },
       mode === 'creative' ? '已切换创造模式 · 飞行已开启' : '已安全落地并切换生存模式',
     );
   }
 
-  setFlight(enabled: boolean): void {
-    void this.runModeCommand(
+  setFlight(enabled: boolean): Promise<void> {
+    return this.runModeCommand(
       { type: 'set-flight', enabled },
       enabled ? '飞行已开启 · Space 上升，Shift 下降' : '飞行已关闭',
     );
   }
 
-  setCreativeSlot(slot: number, itemId: string | null): void {
-    void this.runModeCommand(
+  setCreativeSlot(slot: number, itemId: string | null): Promise<void> {
+    return this.runModeCommand(
       { type: 'set-creative-slot', slot, itemId },
       itemId ? `创造快捷栏 ${slot + 1} 已更新` : `创造快捷栏 ${slot + 1} 已清空`,
     );
   }
 
-  executeUiModeCommand(command: ModeCommand): void {
-    if (command.type === 'set-mode') this.setActorMode(command.mode);
-    else if (command.type === 'set-flight') this.setFlight(command.enabled);
-    else this.setCreativeSlot(command.slot, command.itemId);
+  executeUiModeCommand(command: ModeCommand): Promise<void> {
+    if (command.type === 'set-mode') return this.setActorMode(command.mode);
+    if (command.type === 'set-flight') return this.setFlight(command.enabled);
+    return this.setCreativeSlot(command.slot, command.itemId);
   }
 
   async applyInitialActorMode(mode: ActorMode): Promise<void> {
@@ -295,26 +310,37 @@ export class BrowserGameplay {
 
   toggleInventory(): void {
     if (this.options.authority.gameplay.player.lifecycle === 'dead') return;
+    if (this.inventoryOpen) {
+      void this.closeInventory();
+      return;
+    }
     this.stations.clear();
-    this.inventoryOpen = !this.inventoryOpen;
+    this.inventoryOpen = true;
     if (this.inventoryOpen) this.options.releaseInput();
     this.refresh();
   }
 
-  closeInventory(): void {
-    if (!this.inventoryOpen) return;
-    this.inventoryOpen = false;
-    this.stations.clear();
-    this.refresh();
+  async closeInventory(): Promise<void> {
+    if (!this.inventoryOpen || this.inventoryClosing) return;
+    this.inventoryClosing = true;
+    try {
+      if (!(await this.inventoryPointerClient.send({ kind: 'close' }))) return;
+      this.inventoryOpen = false;
+      this.stations.clear();
+      this.refresh();
+    } finally {
+      this.inventoryClosing = false;
+    }
+  }
+
+  inventoryPointer(command: InventoryUiCommand): Promise<boolean> {
+    if (!this.inventoryOpen || this.inventoryClosing) return Promise.resolve(false);
+    return this.inventoryPointerClient.send(command);
   }
 
   craftRecipe(recipeId: string): void {
-    void this.action({ type: 'craft', recipeId }, (result) => {
-      this.feedback(result.success ? '合成完成' : `合成失败 · ${result.reason}`, result.success ? 'success' : 'error');
-      if (result.success) {
-        this.options.queueSave();
-        this.present({ kind: 'craft' });
-      }
+    void this.inventoryPointerClient.craft(recipeId).then((ok) => {
+      if (ok) this.present({ kind: 'craft' });
     });
   }
 
@@ -386,36 +412,9 @@ export class BrowserGameplay {
     });
   }
 
-  moveInventorySlot(source: number, target: number): void {
-    void this.action({ type: 'move-inventory', source, target }, (result) => {
-      this.feedback(
-        result.success ? '物品已移动' : '无法移动：请检查目标槽位是否已满',
-        result.success ? 'success' : 'error',
-      );
-      if (result.success) this.options.queueSave();
-    });
-  }
-
   useInventoryItem(slot: number): void {
-    void this.action({ type: 'use-inventory', slot }, (result) => {
-      const reason = !result.success && result.reason === 'hunger-full' ? '你现在不饿' : '这个物品暂时无法使用';
-      this.feedback(result.success ? '食用 · 恢复饥饿' : reason, result.success ? 'success' : 'error');
-      if (result.success) {
-        this.present({ kind: 'eat' });
-        this.options.queueSave();
-      }
-    });
-  }
-
-  stationAction(command: StationUiCommand): void {
-    const action = this.stations.action(command);
-    if (!action) return this.feedback('工位已不可达，请重新打开', 'error');
-    void this.action(action, (result) => {
-      this.feedback(
-        result.success ? '工位已更新' : '操作未完成：工位已变化、材料不匹配或目标格已满',
-        result.success ? 'success' : 'error',
-      );
-      if (result.success) this.options.queueSave();
+    void this.inventoryPointerClient.useItem(slot).then((ok) => {
+      if (ok) this.present({ kind: 'eat' });
     });
   }
 
@@ -456,6 +455,7 @@ export class BrowserGameplay {
   }
 
   dispose(): void {
+    this.inventoryPointerClient.dispose();
     this.presenter.dispose();
     this.breakOverlay.destroy();
     this.viewmodel.dispose();

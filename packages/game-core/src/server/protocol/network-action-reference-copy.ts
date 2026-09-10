@@ -1,5 +1,6 @@
 import type { AuthorityAction } from '../../compute/authority-worker-protocol';
 import { canonicalReferenceInteger } from './network-reference-integer';
+import { validateInventoryPointerInput } from '../gameplay/modules/inventory-pointer-contract';
 
 const actionTypes = new Set<AuthorityAction['type']>([
   'station',
@@ -12,6 +13,7 @@ const actionTypes = new Set<AuthorityAction['type']>([
   'respawn',
   'move-inventory',
   'use-inventory',
+  'inventory-pointer',
 ]);
 const isAuthorityActionType = (value: string): value is AuthorityAction['type'] =>
   actionTypes.has(value as AuthorityAction['type']);
@@ -54,6 +56,15 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
   const type = source.type;
   if (typeof type !== 'string' || !isAuthorityActionType(type)) throw new TypeError('Unsupported public action.');
   switch (type) {
+    case 'inventory-pointer': {
+      const input = {
+        actor: source.actor,
+        expectedInventoryRevision: source.expectedInventoryRevision,
+        ...(source.station === undefined ? {} : { station: source.station }),
+        command: source.command,
+      };
+      return { type, ...validateInventoryPointerInput(input) };
+    }
     case 'station': {
       const ref = record(source.reference);
       const reference = {

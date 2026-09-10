@@ -1,6 +1,7 @@
 import type { Inventory, InventoryAccess } from './inventory';
 import type { ItemId } from './item-registry';
 import type { BreakAction, PlayerSnapshot } from './player-state';
+import type { InventoryCursorV1 } from './modules/inventory-pointer-contract';
 
 export type ActorMode = 'survival' | 'creative';
 export type ActorModeComponentV1 = Readonly<{ version: 1; value: ActorMode; revision: number }>;
@@ -36,6 +37,8 @@ export type ActorComponentAccess = {
   selectedSlot: number;
   readonly hotbarSize: number;
   readonly inventory: InventoryAccess;
+  readonly inventoryRevision: number;
+  readonly inventoryCursor: InventoryCursorV1;
   readonly controlSource: ActorControlSource;
   readonly mode: ActorMode;
   readonly modeRevision: number;
@@ -43,6 +46,7 @@ export type ActorComponentAccess = {
   readonly flight: ActorFlightComponentV1;
   selectSlot: (slot: number) => boolean;
   replaceModeComponents: (facets: ActorModeSnapshotFacets) => void;
+  replaceInventoryInteraction: (revision: number, cursor: InventoryCursorV1) => void;
 };
 
 export type PlayerComponentAccess = ActorComponentAccess &
@@ -63,7 +67,11 @@ export const createActorComponents = () => ({
     healingAccumulator: [] as number[],
     starvationAccumulator: [] as number[],
   },
-  inventory: { value: [] as (Inventory | undefined)[] },
+  inventory: {
+    value: [] as (Inventory | undefined)[],
+    revision: [] as number[],
+    cursor: [] as (InventoryCursorV1 | undefined)[],
+  },
   equipment: { selectedSlot: [] as number[], hotbarSize: [] as number[] },
   control: { source: [] as (ActorControlSource | undefined)[] },
   life: { lifecycle: [] as PlayerSnapshot['lifecycle'][] },
@@ -86,6 +94,9 @@ export type ActorComponentSnapshot = Readonly<{
   entityId: string;
   needs: ActorNeeds;
   inventory: import('./inventory').InventorySlot[];
+  /** Added after the original V4 snapshot; omitted snapshots migrate to zero and an empty cursor. */
+  inventoryRevision?: number;
+  inventoryCursor?: InventoryCursorV1;
   equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
   lifecycle: PlayerSnapshot['lifecycle'];
   controlSource: ActorControlSource;

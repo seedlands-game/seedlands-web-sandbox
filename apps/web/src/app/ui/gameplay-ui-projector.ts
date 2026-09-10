@@ -17,6 +17,7 @@ export type GameplayItemPresentation = Readonly<{
   count: number;
   name: string;
   edible: boolean;
+  stackLimit?: number;
   durability?: Readonly<{ current: number; max: number }>;
 }>;
 
@@ -24,6 +25,8 @@ export type GameplayUiSource = Readonly<{
   station?: AuthorityStationView | null;
   stationRecipes?: readonly StationRecipe[];
   revision: number;
+  inventoryIdentity?: string;
+  cursor?: Readonly<{ stack: GameplayUiSource['player']['inventory'][number] }>;
   items?: readonly ItemDefinition[];
   recipes?: readonly Recipe[];
   player: Readonly<{
@@ -70,6 +73,8 @@ export type GameplayUiProjection = Readonly<{
     gameplay: Readonly<{
       station: StationUiPresentation | null;
       inventoryOpen: boolean;
+      cursor: GameplayItemPresentation | null;
+      inventoryIdentity: string;
       lifecycle: 'alive' | 'dead';
       mode: ActorMode;
       flightEnabled: boolean;
@@ -119,6 +124,7 @@ const projectInventory = (
           slot,
           itemId: stack.itemId,
           count: stack.count,
+          stackLimit: requireItem(stack.itemId).stackLimit,
           name: requireItem(stack.itemId).name,
           edible: requireItem(stack.itemId).capabilities.some((capability) => capability.type === 'consume'),
         }
@@ -174,6 +180,8 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
           (id) => items.require(id).name,
         ),
         inventoryOpen: source.inventoryOpen,
+        inventoryIdentity: source.inventoryIdentity ?? '',
+        cursor: source.cursor?.stack ? projectInventory([source.cursor.stack], 1, items.require)[0] : null,
         lifecycle: source.player.lifecycle,
         mode,
         flightEnabled,

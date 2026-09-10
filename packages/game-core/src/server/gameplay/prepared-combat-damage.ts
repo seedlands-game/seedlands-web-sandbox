@@ -2,6 +2,7 @@ import { isActorEntityType } from './ecs-actor-state';
 import type { EntityStore } from './entity-store';
 import type { ItemStack } from './item-registry';
 import { prepareEntityMutation } from './prepared-entity-mutation';
+import { emptyInventoryCursor } from './modules/inventory-pointer-contract';
 
 /** Policy already selected the amount; this owner only prepares health, inventory and drops. */
 export function prepareCombatDamage(
@@ -24,7 +25,8 @@ export function prepareCombatDamage(
   const components = options.entities.actorComponentSnapshot(target.id);
   const deaths = health === 0 ? [target.id] : [];
   const removals = health === 0 && target.type !== 'player' ? [target.id] : [];
-  const stacks = health === 0 ? components.inventory.flatMap((stack) => (stack ? [stack] : [])) : [];
+  const cursorStack = components.inventoryCursor?.stack;
+  const stacks = health === 0 ? [...components.inventory, cursorStack].flatMap((stack) => (stack ? [stack] : [])) : [];
   if (removals.length) {
     const drop = options.actorDeathDrop(target.id);
     if (drop) stacks.push(drop);
@@ -35,6 +37,9 @@ export function prepareCombatDamage(
           ...components,
           lifecycle: 'dead' as const,
           inventory: components.inventory.map(() => null),
+          inventoryCursor: cursorStack
+            ? { ...emptyInventoryCursor(), revision: (components.inventoryCursor?.revision ?? 0) + 1 }
+            : components.inventoryCursor,
           player: { ...components.player!, breakAction: null },
         }
       : components;

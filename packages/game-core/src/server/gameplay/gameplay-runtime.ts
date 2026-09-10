@@ -43,6 +43,9 @@ import { createGameplayCombatCallbacks } from './gameplay-combat-callbacks';
 import { resolveProfiledActorSpawn } from './profiled-actor-spawn';
 import { optionalRegisteredCombatRequest } from './optional-registered-combat-request';
 import { requestProfiledPlayerCombat } from './profiled-player-combat';
+import type { InventoryPointerInputV1 } from './modules/inventory-pointer-contract';
+import { executeInventoryPointer, projectInventoryPointerView } from './gameplay-inventory-pointer';
+import * as RuntimeLifecycle from './gameplay-runtime-lifecycle';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -199,8 +202,7 @@ export class GameplayRuntime {
     return this.callbacks.composition?.resources ?? [];
   }
   getActorModeState(id: string) {
-    const entity = this.entities.get(id);
-    return entity && isActorEntityType(entity.type) ? this.modes.stateFor(id) : null;
+    return isActorEntityType(this.entities.get(id)?.type ?? 'world-item') ? this.modes.stateFor(id) : null;
   }
   acknowledgeBlockCommit(value: ModuleInvocationValue) {
     return this.registeredBlocks?.acknowledge(value);
@@ -222,11 +224,7 @@ export class GameplayRuntime {
     return this.modules.invokeActor(this.callbacks.moduleActorAuthority, actorId, request);
   }
   dispose(): void {
-    try {
-      this.schedule?.dispose();
-    } finally {
-      this.modules.dispose();
-    }
+    RuntimeLifecycle.disposeGameplayRuntime(this.schedule, this.modules);
   }
 
   get gameplayTime(): number {
@@ -287,14 +285,7 @@ export class GameplayRuntime {
   }
 
   despawnEntity(id: string): boolean {
-    this.simulation.cancelCombat(id, 'entity-removed');
-    this.simulation.cancelCombatTarget(id);
-    this.simulation.unregisterActor(id);
-    const removed = this.entities.despawn(id);
-    if (!removed) return false;
-    this.players.delete(id);
-    this.touch();
-    return true;
+    return RuntimeLifecycle.despawnGameplayEntity(id, this.simulation, this.entities, this.players, () => this.touch());
   }
 
   queryEntities(filter: EntityQuery = {}): GameplayEntity[] {
@@ -316,6 +307,9 @@ export class GameplayRuntime {
   getInventory(id: string) {
     return this.inventoryActions.snapshot(id);
   }
+  getInventoryPointerView(id: string) {
+    return projectInventoryPointerView(this.entities, id);
+  }
   giveItem(id: string, stack: ItemStack) {
     return this.inventoryActions.give(id, stack);
   }
@@ -336,6 +330,15 @@ export class GameplayRuntime {
   }
   moveInventorySlot(id: string, source: number, target: number) {
     return (this.registeredInventory ?? this.inventoryActions).move(id, source, target);
+  }
+  inventoryPointer(id: string, input: InventoryPointerInputV1) {
+    return executeInventoryPointer(
+      id,
+      input,
+      this.registeredInventory ?? undefined,
+      this.modules,
+      this.callbacks.moduleActorAuthority,
+    );
   }
   craft(id: string, recipeId: string) {
     return (this.registeredInventory ?? this.inventoryActions).craft(id, recipeId);
@@ -377,14 +380,10 @@ export class GameplayRuntime {
   }
 
   bindFeeding(binding?: WorldModuleBinding) {
-    if (!this.registeredFeeding) throw new Error('Registered Feeding is unavailable.');
-    return (actorId: string, targetId: string, existingActionId?: string) =>
-      this.registeredFeeding!.request(actorId, targetId, existingActionId, binding);
+    return RuntimeLifecycle.bindRegisteredActorRequest(this.registeredFeeding, 'Feeding', binding);
   }
   bindActorCombat(binding?: WorldModuleBinding) {
-    if (!this.registeredCombat) throw new Error('Registered Combat is unavailable.');
-    return (actorId: string, targetId: string, existingActionId?: string) =>
-      this.registeredCombat!.request(actorId, targetId, existingActionId, binding);
+    return RuntimeLifecycle.bindRegisteredActorRequest(this.registeredCombat, 'Combat', binding);
   }
 
   attackEntity(
@@ -513,9 +512,9 @@ export class GameplayRuntime {
   }
 
   private advancePlayer(player: PlayerState, seconds: number, commits: WorldCommitResult[]): void {
-    if (player.lifecycle !== 'alive') return;
-    if (!this.registeredBlocks) this.blocks.advanceBreak(player.entityId, seconds, commits);
-    if (!this.schedule) this.vitals.advanceNeeds(player.entityId, seconds);
+    if (player.lifecycle === 'alive' && !this.registeredBlocks)
+      this.blocks.advanceBreak(player.entityId, seconds, commits);
+    if (player.lifecycle === 'alive' && !this.schedule) this.vitals.advanceNeeds(player.entityId, seconds);
   }
 
   private player(id: string): PlayerState {

@@ -57,7 +57,7 @@ Try **mosslight-68** for a wooded riverbank, or **living-world-autonomy** for a 
 
 Hold the left mouse button to harvest a nearby tree, then approach its falling drops to attract and collect them. Press **E** to turn logs into planks and make a wooden axe. Leaves provide berries. Dig a staircase for stone, leaving a route to jump back out; make a stone pickaxe and a lantern, then build a small lit shelter. Grazer and settler routines run locally, and night stalkers become dangerous after dark. Eat selected berries with right click, or select food in the inventory and use its Eat button. Save and exit through the pause menu, then continue from the main menu.
 
-Inventory slots support two-click moves, merges, and swaps. The first eight slots are the hotbar. Current recipes are one log → four planks; three planks → wooden axe; two planks + three stone → stone pickaxe; two planks + one stone → lantern.
+Inventory and station slots support click-to-pick/place and direct dragging. Left click picks up a stack, merges, or swaps; right click takes half or places one. While holding items, left drag distributes evenly and right drag places one per slot. Shift-click transfers quickly, double-click collects matching items, and hovering a slot while pressing 1–8 swaps with the hotbar. Arrange workbench ingredients in its 3×3 grid and click the result to craft, or Shift-click to craft as many as fit. Closing returns held items; clicking outside the panel drops them. The eight-slot hotbar has its own row, and personal recipes remain available beside the inventory.
 
 ## Controls
 
