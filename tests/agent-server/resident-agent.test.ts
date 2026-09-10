@@ -364,4 +364,67 @@ describe('resident round budgets and partial journal', () => {
     expect(world.proposeBehavior).toHaveBeenCalledTimes(3);
     expect(calls).toBeLessThanOrEqual(8);
   });
+
+  it('rejects an oversized speech batch before any Authority side effect', async () => {
+    const { agent, world } = setup(
+      async () =>
+        new Response(
+          JSON.stringify({
+            choices: [
+              {
+                message: {
+                  role: 'assistant',
+                  content: null,
+                  tool_calls: Array.from({ length: 9 }, (_, index) => ({
+                    id: `speak-${index}`,
+                    type: 'function',
+                    function: {
+                      name: 'speak',
+                      arguments: JSON.stringify({ requestId: `speech-${index}`, text: 'hello' }),
+                    },
+                  })),
+                },
+              },
+            ],
+          }),
+        ),
+    );
+    await expect(
+      agent.invokeTurn({ requestId: 'oversize-speech', message: new HumanMessage('speak') }),
+    ).rejects.toThrow();
+    expect(world.speak).not.toHaveBeenCalled();
+  });
+
+  it('preflights the whole next batch against the remaining per-round tool budget', async () => {
+    let requests = 0;
+    const { agent, world } = setup(async () => {
+      requests++;
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                role: 'assistant',
+                content: null,
+                tool_calls: Array.from({ length: requests === 1 ? 7 : 2 }, (_, index) => ({
+                  id: `call-${requests}-${index}`,
+                  type: 'function',
+                  function: {
+                    name: requests === 1 ? 'observe_self' : 'speak',
+                    arguments: JSON.stringify(requests === 1 ? {} : { requestId: `speech-${index}`, text: 'hello' }),
+                  },
+                })),
+              },
+            },
+          ],
+        }),
+      );
+    });
+    await expect(
+      agent.invokeTurn({ requestId: 'round-tool-budget', message: new HumanMessage('observe then speak') }),
+    ).rejects.toThrow('tool call budget');
+    expect(requests).toBe(2);
+    expect(world.observe).toHaveBeenCalledTimes(7);
+    expect(world.speak).not.toHaveBeenCalled();
+  });
 });

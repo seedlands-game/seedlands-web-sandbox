@@ -3,6 +3,7 @@ import { assessContextBudget } from './workspace/types.js';
 
 export const RESIDENT_MAX_MODEL_STEPS = 8;
 export const RESIDENT_MAX_BEHAVIOR_PROPOSALS = 3;
+export const RESIDENT_MAX_TOOL_CALLS = 8;
 export const RESIDENT_OUTPUT_TOKEN_RESERVE = 8192;
 
 /** UTF-8 bytes are a conservative token bound, not a claimed tokenizer measurement. */

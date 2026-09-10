@@ -111,6 +111,14 @@
 - P2旧v1宿主仍可通过private workspace wildcard子路径访问：README改为如实说明，旧回归不代表resident v2准出；本切片不额外归档历史或收紧所有exports。
 - 独立审阅继续发现应用world/cognition仅各自校验hash，缺整体配对及内外source身份检查；resident调度恢复对未知wrapper静默默认、坏深层codec可能先import后失败。两项尚未修复：需分别新增跨合法档案互换反例、恢复前codec拒绝与未决回合连续性反例；新应用格式的完整配对不等于签名或分布式原子事务，通用workspace历史metadata与resident codec须分层，不删旧记忆迎合校验。
 
+### 2026-09-10 约23:32 第二轮协议与恢复修正
+
+- 独立审阅已结束，精确范围base6c7124a6→de329a9：P0=0、P1=9、P2=2；270路径完成inventory，核心/认知/存档高风险链语义深读，但旧v1、表现胶水及全部测试未逐行通读。不把该报告说成新修复SHA已准出。前三项root修复及能力两项、应用配对一项之外，新增调度codec/暂停重连、模型边界、portable内容限额、Factory故障隔离缺口均进入本轮合同。
+- runtime codec实际WS+PG RED：未知wrapper被接受；暂停快照重连RED：等不到logicalRounds8。现在严格校验版本、布尔、时间、去重队列/episode，导入前检查；初始化空metadata兼容PG bigint字符串。当前世界为run时显式resume。true/false两种恢复继续保留修复工具回执一次及重绑取消断言。
+- 网关及单轮工具新增9个RED，后gateway/Agent/codec/host/scheduler 5文件38项PASS（`gateway-codec-green.log`）；每批先整体准入，超额9次发言、上一批7次观察后再发2次发言均无该批Authority副作用。未调用真实provider。
+- 内容限额实际PG RED：重算hash的超大AGENT仍可导入。抽出普通初始化/压缩/runtime写入与portable共用codec；不存储的token估算不伪造反推。第一次GREEN组因双重非法MEMORY的错误优先级变化失败并导致后续fixture冻结，已保持原错误优先级，原断言不改。第二次3文件15项PASS（`portable-content-green-2.log`），源文档不变、坏目标未占用。
+- C应用V2配对及pause失败恢复定向通过，仍核对seed身份不能比core更窄。A正在处理Factory无响应时持事务及单WS阻塞；B能力准入预计还需约45–60分钟。当前尚无最终冻结/PR，不把工作树定向结果冒充全量准出。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

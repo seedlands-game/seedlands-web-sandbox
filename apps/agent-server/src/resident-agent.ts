@@ -8,6 +8,7 @@ import {
   assessResidentRequest,
   RESIDENT_MAX_MODEL_STEPS,
   RESIDENT_MAX_BEHAVIOR_PROPOSALS,
+  RESIDENT_MAX_TOOL_CALLS,
 } from './resident-request-budget.js';
 import { ResidentTurnJournal } from './resident-turn-journal.js';
 import { HumanMessage, type BaseMessage } from '@langchain/core/messages';
@@ -211,6 +212,8 @@ export class ResidentAgent {
     turnJournal.adopt(invokeMessages);
     let modelStep = 0;
     let proposalCount = 0;
+    const admittedTools = new Map<string, string>();
+    const consumedTools = new Set<string>();
     const toolSchema = tools.map((entry) => ({
       name: entry.name,
       description: entry.description,
@@ -219,8 +222,10 @@ export class ResidentAgent {
     const manifestMiddleware = createMiddleware({
       name: 'persistent-request-manifest',
       wrapToolCall: async (request, handler) => {
-        if (request.toolCall.name === 'propose_behavior_update' && ++proposalCount > RESIDENT_MAX_BEHAVIOR_PROPOSALS)
-          throw new Error('behavior proposal budget exhausted');
+        const id = request.toolCall.id;
+        if (!id || admittedTools.get(id) !== request.toolCall.name || consumedTools.has(id))
+          throw new Error('tool call has no unused round admission');
+        consumedTools.add(id);
         const result = await handler(request);
         if (!('tool_call_id' in result)) throw new Error('unexpected non-message tool result');
         result.id = `${requestId}:tool:${request.toolCall.id}`;
@@ -248,6 +253,20 @@ export class ResidentAgent {
           modelConfigurationRevision: this.options.modelConfigurationRevision,
         });
         const result = await handler(request);
+        const calls = result.tool_calls ?? [];
+        if (admittedTools.size + calls.length > RESIDENT_MAX_TOOL_CALLS) throw new Error('tool call budget exhausted');
+        const proposals = calls.filter((call) => call.name === 'propose_behavior_update').length;
+        if (proposalCount + proposals > RESIDENT_MAX_BEHAVIOR_PROPOSALS)
+          throw new Error('behavior proposal budget exhausted');
+        const ids = new Set<string>();
+        for (const call of calls) {
+          if (!call.id || ids.has(call.id) || admittedTools.has(call.id))
+            throw new Error('tool call identity is duplicated or missing');
+          ids.add(call.id);
+        }
+        // Reserve the complete response before LangChain may concurrently execute any tool in it.
+        for (const call of calls) admittedTools.set(call.id!, call.name);
+        proposalCount += proposals;
         result.id = `${requestId}:model:${modelStep}`;
         await turnJournal.append([result]);
         return result;

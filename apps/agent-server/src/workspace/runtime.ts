@@ -1,5 +1,6 @@
 import type { Pool } from 'pg';
 import { createWorkspaceNamespace } from './namespace.js';
+import { serializeRuntimeSnapshot } from './content-codec.js';
 import type {
   CognitionRuntimeMetadata,
   EventPageCoverage,
@@ -7,8 +8,6 @@ import type {
   Watermarks,
   WorkspaceBinding,
 } from './types.js';
-
-const RUNTIME_SNAPSHOT_UTF8_LIMIT = 64 * 1024;
 
 function integer(value: string | number): number {
   return typeof value === 'number' ? value : Number.parseInt(value, 10);
@@ -173,9 +172,7 @@ export async function setWorkspaceRuntimeMetadata(
   if (!Number.isSafeInteger(input.logicalRounds) || input.logicalRounds < 0)
     throw new Error('invalid logical round count');
   if (!Number.isSafeInteger(input.compactions) || input.compactions < 0) throw new Error('invalid compaction count');
-  const snapshot = JSON.stringify(input.snapshot);
-  if (new TextEncoder().encode(snapshot).byteLength > RUNTIME_SNAPSHOT_UTF8_LIMIT)
-    throw new Error('runtime metadata snapshot exceeds 64 KiB');
+  const snapshot = serializeRuntimeSnapshot(input.snapshot);
   const result = await pool.query<{
     revision: number;
     snapshot: Record<string, unknown>;

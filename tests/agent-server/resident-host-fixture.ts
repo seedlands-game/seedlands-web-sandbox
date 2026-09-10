@@ -6,6 +6,18 @@ import { baselineObservation, binding as makeBinding } from './fixtures';
 import type { CharacterObservation, ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { ResidentHostMessage } from '@seedlands/cognition-protocol';
 
+export function residentTextResponse(id: string, content: string): Response {
+  return new Response(
+    JSON.stringify({
+      id,
+      model: 'flash',
+      choices: [{ index: 0, finish_reason: 'stop', message: { role: 'assistant', content } }],
+      usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+    }),
+    { status: 200, headers: { 'content-type': 'application/json' } },
+  );
+}
+
 export async function freePort(): Promise<number> {
   const server = createServer();
   await new Promise<void>((resolve, reject) => server.once('error', reject).listen(0, '127.0.0.1', resolve));

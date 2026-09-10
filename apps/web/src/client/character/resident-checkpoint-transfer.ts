@@ -1,9 +1,45 @@
-import { RESIDENT_TRANSFER_CHUNK_BYTES, RESIDENT_TRANSFER_MAX_BYTES } from '@seedlands/cognition-protocol';
+import {
+  RESIDENT_CHECKPOINT_FORMAT,
+  RESIDENT_CHECKPOINT_VERSION,
+  RESIDENT_HISTORY_MAX,
+  RESIDENT_TRANSFER_CHUNK_BYTES,
+  RESIDENT_TRANSFER_MAX_BYTES,
+  type ResidentCheckpointManifest,
+  type ResidentWorldBinding,
+} from '@seedlands/cognition-protocol';
 import type { ResidentBridge } from './resident-bridge';
 
 export async function checkpointHash(bytes: Uint8Array): Promise<string> {
   const hash = await crypto.subtle.digest('SHA-256', new Uint8Array(bytes));
   return [...new Uint8Array(hash)].map((value) => value.toString(16).padStart(2, '0')).join('');
+}
+const record = (value: unknown): value is Record<string, unknown> =>
+  value !== null && typeof value === 'object' && !Array.isArray(value);
+const textId = (value: unknown): value is string =>
+  typeof value === 'string' && value.length > 0 && value.length <= 160;
+
+/** Reads only the bounded portable envelope; the Agent host remains the workspace semantic validator. */
+export function inspectResidentCheckpoint(content: string): Readonly<{ source: ResidentWorldBinding }> {
+  const bytes = new TextEncoder().encode(content);
+  if (bytes.length < 1 || bytes.length > RESIDENT_TRANSFER_MAX_BYTES) throw new Error('认知存档超出大小限制');
+  let value: unknown;
+  try {
+    value = JSON.parse(content);
+  } catch {
+    throw new Error('认知存档清单无效');
+  }
+  if (
+    !record(value) ||
+    value.format !== RESIDENT_CHECKPOINT_FORMAT ||
+    value.version !== RESIDENT_CHECKPOINT_VERSION ||
+    !record(value.source) ||
+    !['worldId', 'timelineId', 'epoch'].every((key) => textId((value.source as Record<string, unknown>)[key])) ||
+    !Array.isArray(value.workspaces) ||
+    value.workspaces.length > RESIDENT_HISTORY_MAX
+  )
+    throw new Error('认知存档清单无效');
+  const manifest = value as unknown as ResidentCheckpointManifest;
+  return { source: { ...manifest.source } };
 }
 const encodePart = (bytes: Uint8Array): string => {
   let text = '';

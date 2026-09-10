@@ -12,7 +12,7 @@ import {
   type WorkspaceBinding,
 } from '../../apps/agent-server/src/workspace';
 import { baselineObservation, event, waitCapabilities } from './fixtures';
-import { actor, startHostDatabase, WireClient } from './resident-host-fixture';
+import { actor, residentTextResponse, startHostDatabase, WireClient } from './resident-host-fixture';
 import type { ResidentHostMessage, ResidentWorldBinding } from '@seedlands/cognition-protocol';
 
 const dockerAvailable =
@@ -59,15 +59,7 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
             else init?.signal?.addEventListener('abort', abort, { once: true });
           });
         }
-        return new Response(
-          JSON.stringify({
-            id: `host-fake-${modelCalls}`,
-            model: 'flash',
-            choices: [{ index: 0, finish_reason: 'stop', message: { role: 'assistant', content: '继续生活。' } }],
-            usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
-          }),
-          { status: 200, headers: { 'content-type': 'application/json' } },
-        );
+        return residentTextResponse(`host-fake-${modelCalls}`, '继续生活。');
       },
     });
     const birthModel = {
@@ -407,109 +399,118 @@ describePostgres('resident v2 host with actual WebSocket and PostgreSQL', () => 
     expect(await workspace.listBindings(target.worldId, target.timelineId)).toHaveLength(5);
   }, 30_000);
 
-  it('recovers an interrupted scheduler before admission and drains the old channel before rebinding', async () => {
-    await client?.close();
-    const world = { worldId: 'recovery-world', timelineId: 'recovery-timeline', epoch: 'recovery-epoch-1' };
-    const fixture = actor(9, world.epoch);
-    const current = { ...fixture, binding: { ...fixture.binding, worldId: world.worldId } };
-    const identity: WorkspaceBinding = {
-      worldId: world.worldId,
-      timelineId: world.timelineId,
-      actorId: current.binding.entityId,
-      incarnation: current.binding.incarnation,
-    };
-    await workspace.initializeNpc(identity, {
-      agent: 'recovery agent',
-      soul: 'recovery soul',
-      memory: 'recovery memory',
-      memoryEstimatedTokens: 4,
-      behavior: current.observation.character.behaviorTree,
-      templateVersion: 'recovery-v1',
-    });
-    await workspace.appendMessages(identity, [
-      {
-        idempotencyKey: 'interrupted-ai',
-        message: new AIMessage({
-          id: 'interrupted-ai',
-          content: '',
-          tool_calls: [
-            {
-              id: 'open-tool-call',
-              name: 'speak',
-              args: { requestId: 'speech-1', text: 'hello' },
-              type: 'tool_call',
-            },
-          ],
-        }),
-      },
-    ]);
-    await workspace.setRuntimeMetadata(identity, {
-      expectedRevision: 1,
-      snapshot: {
-        version: 1,
-        scheduler: {
-          version: 1,
-          fallbackSeconds: 60,
-          remainingMs: 0,
-          paused: false,
-          blocked: false,
-          inFlight: true,
-          pendingReasons: ['interrupted dialogue'],
-          episodes: [['dialogue', 1]],
+  it.each([false, true])(
+    'reconciles persisted paused=%s with the current world, recovers once and drains before rebinding',
+    async (savedPaused) => {
+      await client?.close();
+      const priorModelAborts = modelAbortCount;
+      const world = {
+        worldId: `recovery-world-${savedPaused}`,
+        timelineId: 'recovery-timeline',
+        epoch: 'recovery-epoch-1',
+      };
+      const fixture = actor(9, world.epoch);
+      const current = { ...fixture, binding: { ...fixture.binding, worldId: world.worldId } };
+      const identity: WorkspaceBinding = {
+        worldId: world.worldId,
+        timelineId: world.timelineId,
+        actorId: current.binding.entityId,
+        incarnation: current.binding.incarnation,
+      };
+      await workspace.initializeNpc(identity, {
+        agent: 'recovery agent',
+        soul: 'recovery soul',
+        memory: 'recovery memory',
+        memoryEstimatedTokens: 4,
+        behavior: current.observation.character.behaviorTree,
+        templateVersion: 'recovery-v1',
+      });
+      await workspace.appendMessages(identity, [
+        {
+          idempotencyKey: 'interrupted-ai',
+          message: new AIMessage({
+            id: 'interrupted-ai',
+            content: '',
+            tool_calls: [
+              {
+                id: 'open-tool-call',
+                name: 'speak',
+                args: { requestId: 'speech-1', text: 'hello' },
+                type: 'tool_call',
+              },
+            ],
+          }),
         },
-      },
-      logicalRounds: 7,
-      compactions: 0,
-    });
-    const capabilities = waitCapabilities();
-    blockNextModel = true;
-    client = await WireClient.connect(handle.url, origin);
-    client.send({ kind: 'hello', pairingToken: token, world, authoringCapabilities: capabilities });
-    await client.wait('ready');
-    client.send({ kind: 'bind', ...current, capabilities });
-    await expect(client.wait('bound')).resolves.toMatchObject({ channelId: current.binding.sessionId });
-    const recovered = workspace.restoreMessages(await workspace.getJournal(identity));
-    expect(recovered).toContainEqual(
-      expect.objectContaining({
-        id: 'interrupted:open-tool-call',
-        tool_call_id: 'open-tool-call',
-        content: expect.stringContaining('unknown'),
-      }),
-    );
-    await expect(
-      client.wait(
-        'status',
-        (message) =>
-          message.kind === 'status' &&
-          message.channelId === current.binding.sessionId &&
-          message.status.logicalRounds === 8,
-      ),
-    ).resolves.toMatchObject({ kind: 'status' });
-    await expect.poll(() => blockNextModel, { timeout: 5_000 }).toBe(false);
-    expect(blockedMessages).toContainEqual(
-      expect.objectContaining({
-        role: 'tool',
-        tool_call_id: 'open-tool-call',
-        content: expect.stringContaining('unknown'),
-      }),
-    );
-    await expect(workspace.getRuntimeMetadata(identity)).resolves.toMatchObject({
-      logicalRounds: 8,
-      snapshot: { scheduler: { inFlight: true, blocked: false } },
-    });
+      ]);
+      await workspace.setRuntimeMetadata(identity, {
+        expectedRevision: 1,
+        snapshot: {
+          version: 1,
+          scheduler: {
+            version: 1,
+            fallbackSeconds: 60,
+            remainingMs: 0,
+            paused: savedPaused,
+            blocked: false,
+            inFlight: true,
+            pendingReasons: ['interrupted dialogue'],
+            episodes: [['dialogue', 1]],
+          },
+        },
+        logicalRounds: 7,
+        compactions: 0,
+      });
+      const capabilities = waitCapabilities();
+      blockNextModel = true;
+      client = await WireClient.connect(handle.url, origin);
+      client.send({ kind: 'hello', pairingToken: token, world, authoringCapabilities: capabilities });
+      await client.wait('ready');
+      client.send({ kind: 'bind', ...current, capabilities });
+      await expect(client.wait('bound')).resolves.toMatchObject({ channelId: current.binding.sessionId });
+      const recovered = workspace.restoreMessages(await workspace.getJournal(identity));
+      expect(recovered).toContainEqual(
+        expect.objectContaining({
+          id: 'interrupted:open-tool-call',
+          tool_call_id: 'open-tool-call',
+          content: expect.stringContaining('unknown'),
+        }),
+      );
+      await expect(
+        client.wait(
+          'status',
+          (message) =>
+            message.kind === 'status' &&
+            message.channelId === current.binding.sessionId &&
+            message.status.logicalRounds === 8,
+        ),
+      ).resolves.toMatchObject({ kind: 'status' });
+      await expect.poll(() => blockNextModel, { timeout: 5_000 }).toBe(false);
+      expect(blockedMessages).toContainEqual(
+        expect.objectContaining({
+          role: 'tool',
+          tool_call_id: 'open-tool-call',
+          content: expect.stringContaining('unknown'),
+        }),
+      );
+      await expect(workspace.getRuntimeMetadata(identity)).resolves.toMatchObject({
+        logicalRounds: 8,
+        snapshot: { scheduler: { inFlight: true, blocked: false } },
+      });
 
-    client.send({ kind: 'configure', channelId: current.binding.sessionId, fallbackSeconds: 120 });
-    await client.close();
-    client = await WireClient.connect(handle.url, origin);
-    const nextWorld = { ...world, epoch: 'recovery-epoch-2' };
-    const reboundFixture = actor(9, nextWorld.epoch);
-    const rebound = { ...reboundFixture, binding: { ...reboundFixture.binding, worldId: nextWorld.worldId } };
-    client.send({ kind: 'hello', pairingToken: token, world: nextWorld, authoringCapabilities: capabilities });
-    await client.wait('ready');
-    client.send({ kind: 'bind', ...rebound, capabilities });
-    await expect(client.wait('bound')).resolves.toMatchObject({ channelId: rebound.binding.sessionId });
-    expect(modelAbortCount).toBe(1);
-    const afterRebind = workspace.restoreMessages(await workspace.getJournal(identity));
-    expect(afterRebind.filter((message) => message.id === 'interrupted:open-tool-call')).toHaveLength(1);
-  }, 30_000);
+      client.send({ kind: 'configure', channelId: current.binding.sessionId, fallbackSeconds: 120 });
+      await client.close();
+      client = await WireClient.connect(handle.url, origin);
+      const nextWorld = { ...world, epoch: 'recovery-epoch-2' };
+      const reboundFixture = actor(9, nextWorld.epoch);
+      const rebound = { ...reboundFixture, binding: { ...reboundFixture.binding, worldId: nextWorld.worldId } };
+      client.send({ kind: 'hello', pairingToken: token, world: nextWorld, authoringCapabilities: capabilities });
+      await client.wait('ready');
+      client.send({ kind: 'bind', ...rebound, capabilities });
+      await expect(client.wait('bound')).resolves.toMatchObject({ channelId: rebound.binding.sessionId });
+      expect(modelAbortCount).toBe(priorModelAborts + 1);
+      const afterRebind = workspace.restoreMessages(await workspace.getJournal(identity));
+      expect(afterRebind.filter((message) => message.id === 'interrupted:open-tool-call')).toHaveLength(1);
+    },
+    30_000,
+  );
 });

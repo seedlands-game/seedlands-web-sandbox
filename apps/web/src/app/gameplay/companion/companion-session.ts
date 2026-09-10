@@ -12,6 +12,7 @@ import {
   captureApplicationCheckpoint,
   decodeApplicationCheckpoint,
   encodeApplicationCheckpoint,
+  applicationCheckpointWorldId,
 } from '../../../client/persistence/application-checkpoint';
 import {
   exportResidentCheckpoint,
@@ -372,18 +373,36 @@ export class CompanionSession {
     this.statuses.clear();
     this.publish({ cognition: null, document: null });
   };
+  private async pauseForCheckpoint(world: WorldHarnessPort): Promise<boolean> {
+    const before = await world.clock({ kind: 'status' });
+    if (!before.ok) throw new Error('世界时钟不可用');
+    this.changePause(true);
+    try {
+      const paused = await world.clock({ kind: 'pause' });
+      if (!paused.ok) throw new Error('世界无法暂停');
+      this.controller.setPaused(true);
+      return before.data.paused;
+    } catch (error) {
+      this.changePause(before.data.paused);
+      this.controller.setPaused(before.data.paused);
+      throw error;
+    }
+  }
+  private async restoreCheckpointPause(world: WorldHarnessPort, paused: boolean): Promise<void> {
+    try {
+      if (!paused) await world.clock({ kind: 'run' });
+    } finally {
+      this.changePause(paused);
+      this.controller.setPaused(paused);
+    }
+  }
   exportCheckpoint = () =>
     this.run(async (authority) => {
       if (!authority.world) throw new Error('世界存档接口不可用');
       if (this.recoveryBlocked) throw new Error('请先完成原存档的伙伴记忆恢复');
       if (this.worldId && this.timelines.hasMemory(this.worldId) && !this.connected)
         throw new Error('这个世界已有伙伴记忆，请连接思考服务后一起保存。');
-      const before = await authority.world.clock({ kind: 'status' });
-      if (!before.ok) throw new Error('世界时钟不可用');
-      this.changePause(true);
-      const paused = await authority.world.clock({ kind: 'pause' });
-      if (!paused.ok) throw new Error('世界无法暂停');
-      this.controller.setPaused(true);
+      const wasPaused = await this.pauseForCheckpoint(authority.world);
       try {
         const checkpoint = await captureApplicationCheckpoint(
           authority.world,
@@ -396,9 +415,7 @@ export class CompanionSession {
         if (this.value.download) URL.revokeObjectURL(this.value.download.url);
         this.publish({ download: { url, filename: `seedlands-${Date.now()}.json` } });
       } finally {
-        if (!before.data.paused) await authority.world.clock({ kind: 'run' });
-        this.changePause(before.data.paused);
-        this.controller.setPaused(before.data.paused);
+        await this.restoreCheckpointPause(authority.world, wasPaused);
       }
     });
   importCheckpoint = (file: File) =>
@@ -408,38 +425,44 @@ export class CompanionSession {
       if (checkpoint.cognition !== null && !this.connectionSettings)
         throw new Error('这份存档包含伙伴记忆，请先连接本机思考服务');
       const settings = this.connectionSettings;
-      this.changePause(true);
-      const paused = await authority.world.clock({ kind: 'pause' });
-      if (!paused.ok) throw new Error('世界无法暂停');
-      this.controller.setPaused(true);
-      const restoreWorldId = `seedlands:g${checkpoint.world.generatorVersion}:${checkpoint.world.seedText}`;
-      const alreadyPending = this.timelines.requiresRestore(restoreWorldId);
-      if (checkpoint.cognition !== null) this.timelines.beginRestore(restoreWorldId);
-      this.restoringCheckpoint = true;
-      let result;
+      const wasPaused = await this.pauseForCheckpoint(authority.world);
+      let keepPaused = false;
       try {
-        result = await authority.world.checkpoint({ kind: 'restore', snapshot: checkpoint.world });
-      } finally {
-        this.restoringCheckpoint = false;
-      }
-      if (!result.ok) {
-        if (!alreadyPending) this.timelines.finishRestore(restoreWorldId);
-        throw new Error('世界存档恢复失败，原世界保持不变');
-      }
-      this.worldRestored(restoreWorldId);
-      this.pendingCognition = checkpoint.cognition;
-      if (checkpoint.cognition === null) this.timelines.finishRestore(restoreWorldId);
-      const listed = await authority.character({ kind: 'list' });
-      if (listed.ok && listed.data.kind === 'list')
+        const restoreWorldId = applicationCheckpointWorldId(checkpoint.world);
+        const alreadyPending = this.timelines.requiresRestore(restoreWorldId);
+        if (checkpoint.cognition !== null) this.timelines.beginRestore(restoreWorldId);
+        this.restoringCheckpoint = true;
+        let result;
+        try {
+          result = await authority.world.checkpoint({ kind: 'restore', snapshot: checkpoint.world });
+        } catch (error) {
+          if (!alreadyPending) this.timelines.finishRestore(restoreWorldId);
+          throw error;
+        } finally {
+          this.restoringCheckpoint = false;
+        }
+        if (!result.ok) {
+          if (!alreadyPending) this.timelines.finishRestore(restoreWorldId);
+          throw new Error('世界存档恢复失败，原世界保持不变');
+        }
+        keepPaused = true;
+        this.worldRestored(restoreWorldId);
+        this.pendingCognition = checkpoint.cognition;
+        if (checkpoint.cognition === null) this.timelines.finishRestore(restoreWorldId);
+        const listed = await authority.character({ kind: 'list' });
+        if (listed.ok && listed.data.kind === 'list')
+          this.publish({
+            characters: listed.data.characters,
+            character: listed.data.characters[0] ?? null,
+            observation: null,
+          });
         this.publish({
-          characters: listed.data.characters,
-          character: listed.data.characters[0] ?? null,
-          observation: null,
+          notice: checkpoint.cognition ? '世界已恢复并暂停；正在恢复对应的伙伴记忆。' : '世界已恢复并暂停。',
         });
-      this.publish({
-        notice: checkpoint.cognition ? '世界已恢复并暂停；正在恢复对应的伙伴记忆。' : '世界已恢复并暂停。',
-      });
-      if (checkpoint.cognition !== null && settings) await this.connectTo(authority, settings.url, settings.token);
+        if (checkpoint.cognition !== null && settings) await this.connectTo(authority, settings.url, settings.token);
+      } finally {
+        if (!keepPaused) await this.restoreCheckpointPause(authority.world, wasPaused);
+      }
     });
   resumeWorld = () =>
     this.run(async (authority) => {

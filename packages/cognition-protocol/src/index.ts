@@ -5,6 +5,7 @@ import type {
   ControllerReceipt,
 } from '@seedlands/game-core/runtime/character-control-protocol';
 export * from './resident-protocol';
+export * from './checkpoint-protocol';
 
 export const CONTROLLER_FRAME_MAX_BYTES = 128 * 1024;
 

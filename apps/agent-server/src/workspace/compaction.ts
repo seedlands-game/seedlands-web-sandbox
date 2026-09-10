@@ -1,9 +1,8 @@
 import type { StoredMessage } from '@langchain/core/messages';
 import type { Pool, PoolClient } from 'pg';
 import { createWorkspaceNamespace } from './namespace.js';
+import { validateMemoryDraft } from './content-codec.js';
 import {
-  MEMORY_TOKEN_LIMIT,
-  MEMORY_UTF8_LIMIT,
   type FrozenCompaction,
   type JournalMessage,
   type MemoryDraft,
@@ -111,15 +110,7 @@ export async function publishWorkspaceCompaction(
   binding: WorkspaceBinding,
   draft: MemoryDraft,
 ): Promise<Readonly<{ commitId: string; memoryRevision: number; windowId: string }>> {
-  const bytes = new TextEncoder().encode(draft.content).byteLength;
-  if (!draft.content.trim()) throw new Error('memory draft is empty');
-  if (
-    !Number.isInteger(draft.estimatedTokens) ||
-    draft.estimatedTokens < 0 ||
-    draft.estimatedTokens > MEMORY_TOKEN_LIMIT
-  )
-    throw new Error('memory token estimate exceeds limit');
-  if (bytes > MEMORY_UTF8_LIMIT) throw new Error('memory UTF-8 size exceeds limit');
+  const bytes = validateMemoryDraft(draft.content, draft.estimatedTokens);
   if (draft.sources.length === 0) throw new Error('memory draft must cite frozen-window sources');
   const namespace = createWorkspaceNamespace(binding);
   const client = await pool.connect();

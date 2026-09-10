@@ -1,4 +1,5 @@
 import { createServer } from 'node:net';
+import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -185,6 +186,35 @@ describePostgres('persistent workspace independent-review corrections with actua
       await expect(workspace.importPortable(target, damaged)).rejects.toThrow(/portable workspace/u);
       await expect(workspace.getRuntimeMetadata(target)).rejects.toThrow('does not exist');
     }
+  });
+
+  it('replays write-time content limits before importing checksum-valid documents or runtime snapshots', async () => {
+    const source = await initialized('portable-content');
+    const portable = await workspace.exportPortable(source);
+    const corruptions: readonly ((copy: MutablePortableWorkspace) => void)[] = [
+      ...[
+        ['/AGENT.md', 'x'.repeat(32769)],
+        ['/SOUL.md', 'x'.repeat(4097)],
+        ['/MEMORY.md', 'x'.repeat(16385)],
+        ['/MEMORY.md', '   '],
+      ].map(([path, content]) => (copy: MutablePortableWorkspace) => {
+        const row = copy.documents.find((entry) => entry.path === path)!;
+        Object.assign(row, {
+          content,
+          utf8_bytes: new TextEncoder().encode(content).byteLength,
+          content_hash: `sha256:${createHash('sha256').update(JSON.stringify(content)).digest('hex')}`,
+        });
+      }),
+      (copy) => Object.assign(copy.runtimeMetadata, { snapshot: { padding: 'x'.repeat(65536) } }),
+    ];
+    for (const corrupt of corruptions) {
+      const damaged = structuredClone(portable) as MutablePortableWorkspace;
+      corrupt(damaged);
+      const target = binding(`portable-content-target-${++sequence}`);
+      await expect(workspace.importPortable(target, damaged)).rejects.toThrow(/limit|empty|64 KiB/u);
+      await expect(workspace.getRuntimeMetadata(target)).rejects.toThrow('does not exist');
+    }
+    expect((await workspace.exportPortable(source)).documents).toEqual(portable.documents);
   });
 
   it('rejects missing journal messages and disconnected window history before reserving an import target', async () => {

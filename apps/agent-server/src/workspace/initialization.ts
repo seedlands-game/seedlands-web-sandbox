@@ -1,12 +1,7 @@
 import type { Pool } from 'pg';
 import { createWorkspaceNamespace, normalizeWorkspaceBinding } from './namespace.js';
-import {
-  MEMORY_TOKEN_LIMIT,
-  MEMORY_UTF8_LIMIT,
-  type InitializeNpcInput,
-  type WorkspaceBinding,
-  type WorkspaceFilePath,
-} from './types.js';
+import { validateMemoryDraft, validateWorkspaceDocument } from './content-codec.js';
+import { type InitializeNpcInput, type WorkspaceBinding, type WorkspaceFilePath } from './types.js';
 
 async function contentHash(content: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(content)));
@@ -19,17 +14,9 @@ export async function initializeWorkspace(
   binding: WorkspaceBinding,
   input: InitializeNpcInput,
 ): Promise<void> {
-  const memoryBytes = new TextEncoder().encode(input.memory).byteLength;
-  if (!input.memory.trim()) throw new Error('memory draft is empty');
-  if (
-    !Number.isInteger(input.memoryEstimatedTokens) ||
-    input.memoryEstimatedTokens < 0 ||
-    input.memoryEstimatedTokens > MEMORY_TOKEN_LIMIT
-  )
-    throw new Error('memory token estimate exceeds limit');
-  if (memoryBytes > MEMORY_UTF8_LIMIT) throw new Error('memory UTF-8 size exceeds limit');
-  if (new TextEncoder().encode(input.agent).byteLength > 32 * 1024) throw new Error('AGENT UTF-8 size exceeds limit');
-  if (new TextEncoder().encode(input.soul).byteLength > 4 * 1024) throw new Error('SOUL UTF-8 size exceeds limit');
+  validateMemoryDraft(input.memory, input.memoryEstimatedTokens);
+  validateWorkspaceDocument('/AGENT.md', input.agent);
+  validateWorkspaceDocument('/SOUL.md', input.soul);
   const trusted = normalizeWorkspaceBinding(binding);
   const namespace = createWorkspaceNamespace(trusted);
   const client = await pool.connect();

@@ -1,15 +1,7 @@
+import { parseResidentSchedule, type ResidentScheduleSnapshot } from './resident-runtime-codec.js';
+export type { ResidentScheduleSnapshot } from './resident-runtime-codec.js';
 export type ResidentWake = Readonly<{ source: string; episode: number; reason: string }>;
 export type ResidentTrigger = Readonly<{ kind: 'event' | 'fallback'; reasons: readonly string[] }>;
-export type ResidentScheduleSnapshot = Readonly<{
-  version: 1;
-  fallbackSeconds: number;
-  remainingMs: number;
-  paused: boolean;
-  blocked: boolean;
-  inFlight: boolean;
-  pendingReasons: readonly string[];
-  episodes: readonly (readonly [string, number])[];
-}>;
 type Clock = Readonly<{
   now(): number;
   set(callback: () => void, delayMs: number): ReturnType<typeof setTimeout>;
@@ -56,16 +48,7 @@ export class ResidentScheduler {
     this.fallbackMs = validatePeriod(options.restored?.fallbackSeconds ?? options.fallbackSeconds ?? 180);
     this.dueAt = this.clock.now() + this.fallbackMs;
     if (options.restored) {
-      const saved = options.restored;
-      if (
-        saved.version !== 1 ||
-        !Number.isFinite(saved.remainingMs) ||
-        saved.remainingMs < 0 ||
-        saved.remainingMs > this.fallbackMs ||
-        saved.pendingReasons.length > 32 ||
-        saved.episodes.length > 128
-      )
-        throw new TypeError('Invalid wake schedule snapshot');
+      const saved = parseResidentSchedule(options.restored);
       this.paused = saved.paused;
       this.restoredBlocked = saved.blocked;
       this.recoveryRequired = saved.inFlight;

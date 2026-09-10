@@ -43,6 +43,71 @@ describe('gateway BaseChatModel', () => {
     await Promise.all(servers.splice(0).map((server) => new Promise<void>((resolve) => server.close(() => resolve()))));
   });
 
+  it.each([
+    [
+      'too many tools',
+      {
+        tool_calls: Array.from({ length: 9 }, (_, index) => ({
+          id: `call-${index}`,
+          type: 'function',
+          function: { name: 'speak', arguments: '{}' },
+        })),
+      },
+    ],
+    [
+      'oversized arguments',
+      {
+        tool_calls: [
+          {
+            id: 'call-1',
+            type: 'function',
+            function: { name: 'speak', arguments: JSON.stringify({ text: '字'.repeat(6000) }) },
+          },
+        ],
+      },
+    ],
+    [
+      'duplicate calls',
+      { tool_calls: [responseBody.choices[0]!.message.tool_calls[0], responseBody.choices[0]!.message.tool_calls[0]] },
+    ],
+    ['invalid role', { role: 'user' }],
+    ['invalid content', { content: { injected: true } }],
+    ['oversized content', { content: '字'.repeat(30000) }],
+  ])('rejects the entire unsafe message: %s', async (_name, fields) => {
+    const model = createGatewayChatModel({
+      tier: 'flash',
+      baseUrl: 'http://127.0.0.1:9/v1',
+      apiKey: 'fake-local',
+      fetch: async () =>
+        new Response(JSON.stringify({ choices: [{ message: { ...responseBody.choices[0]!.message, ...fields } }] })),
+    });
+    await expect(model.invoke([new HumanMessage('hello')])).rejects.toThrow();
+  });
+
+  it('bounds a streamed response without Content-Length and cancels before consuming the remainder', async () => {
+    const cancel = vi.fn();
+    let pulls = 0;
+    const model = createGatewayChatModel({
+      tier: 'flash',
+      baseUrl: 'http://127.0.0.1:9/v1',
+      apiKey: 'fake-local',
+      fetch: async () =>
+        new Response(
+          new ReadableStream<Uint8Array>({
+            pull(controller) {
+              pulls++;
+              controller.enqueue(new TextEncoder().encode(pulls === 1 ? '{"padding":"' : 'x'.repeat(300000)));
+              if (pulls === 20) controller.close();
+            },
+            cancel,
+          }),
+        ),
+    });
+    await expect(model.invoke([new HumanMessage('hello')])).rejects.toThrow('limit');
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(pulls).toBeLessThan(10);
+  });
+
   it('records the concrete standard ChatOpenAI opaque loss that requires the thin adapter', async () => {
     const gateway = await mockGateway();
     servers.push(gateway.server);

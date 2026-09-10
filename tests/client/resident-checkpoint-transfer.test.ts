@@ -4,10 +4,37 @@ import {
   checkpointHash,
   exportResidentCheckpoint,
   importResidentCheckpoint,
+  inspectResidentCheckpoint,
 } from '../../apps/web/src/client/character/resident-checkpoint-transfer';
-import { RESIDENT_TRANSFER_CHUNK_BYTES } from '@seedlands/cognition-protocol';
+import { RESIDENT_HISTORY_MAX, RESIDENT_TRANSFER_CHUNK_BYTES } from '@seedlands/cognition-protocol';
 
 describe('resident checkpoint transfer', () => {
+  it('reads only a bounded real manifest header and rejects unknown sources', () => {
+    const source = { worldId: 'world-a', timelineId: 'timeline-a', epoch: 'epoch-a' };
+    expect(
+      inspectResidentCheckpoint(
+        JSON.stringify({
+          format: 'seedlands-resident-cognition',
+          version: 1,
+          source,
+          workspaces: [{ deferred: true }],
+        }),
+      ),
+    ).toEqual({ source });
+    for (const invalid of [
+      '',
+      JSON.stringify({ source }),
+      JSON.stringify({ format: 'seedlands-resident-cognition', version: 1, source: {}, workspaces: [] }),
+      JSON.stringify({
+        format: 'seedlands-resident-cognition',
+        version: 1,
+        source,
+        workspaces: Array.from({ length: RESIDENT_HISTORY_MAX + 1 }, () => null),
+      }),
+    ])
+      expect(() => inspectResidentCheckpoint(invalid)).toThrow(/认知存档/u);
+  });
+
   it('round-trips multibyte JSON across the chunk boundary and rejects reordered or corrupt responses', async () => {
     const content = JSON.stringify({ memory: '一起寻找浆果。'.repeat(10000) });
     const bytes = new TextEncoder().encode(content);

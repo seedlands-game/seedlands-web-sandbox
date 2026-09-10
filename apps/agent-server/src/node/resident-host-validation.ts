@@ -1,5 +1,6 @@
 import {
   RESIDENT_TRANSFER_CHUNK_BYTES,
+  RESIDENT_HISTORY_MAX,
   type ResidentBirthPackage,
   type ResidentWorldBinding,
 } from '@seedlands/cognition-protocol';
@@ -15,6 +16,7 @@ import {
   type ControlBinding,
 } from '@seedlands/game-core/runtime/character-control-protocol';
 import type { PortableWorkspace } from '../workspace/index.js';
+import { parseResidentRuntime } from '../resident-runtime-codec.js';
 
 export type PortableManifest = Readonly<{
   format: 'seedlands-resident-cognition';
@@ -22,7 +24,6 @@ export type PortableManifest = Readonly<{
   source: ResidentWorldBinding;
   workspaces: readonly PortableWorkspace[];
 }>;
-const RESIDENT_HISTORY_MAX = 1024;
 export const RESIDENT_HELLO_KEYS = Object.freeze([
   'kind',
   'protocolVersion',
@@ -219,6 +220,17 @@ export function parseManifest(bytes: Buffer, target: ResidentWorldBinding): Port
     const key = JSON.stringify([binding.actorId, binding.incarnation]);
     if (identities.has(key)) throw new Error('checkpoint actor binding is duplicated');
     identities.add(key);
+    if (!object(portable.runtimeMetadata) || !Array.isArray(portable.journal))
+      throw new Error('checkpoint resident runtime metadata is invalid');
+    parseResidentRuntime(
+      portable.runtimeMetadata.snapshot,
+      {
+        revision: portable.runtimeMetadata.revision,
+        logicalRounds: portable.runtimeMetadata.logical_rounds,
+        compactions: portable.runtimeMetadata.compactions,
+      },
+      portable.journal.length === 0,
+    );
   }
   return raw as unknown as PortableManifest;
 }

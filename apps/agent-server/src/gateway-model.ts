@@ -8,6 +8,13 @@ import { AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
 import type { ChatResult } from '@langchain/core/outputs';
 import { convertToOpenAITool } from '@langchain/core/utils/function_calling';
 import { ChatOpenAI } from '@langchain/openai';
+import {
+  boundedText,
+  GATEWAY_MAX_TOOL_CALLS,
+  GATEWAY_TOOL_ARGUMENT_BYTES,
+  object,
+  readGatewayResponse,
+} from './gateway-response.js';
 
 export type GatewayModelTier = 'flash' | 'pro';
 
@@ -56,16 +63,24 @@ function wireMessage(message: BaseMessage): Readonly<Record<string, unknown>> {
 function responseToolCalls(message: Record<string, unknown>) {
   const valid: { id: string; name: string; args: Record<string, unknown>; type: 'tool_call' }[] = [];
   const invalid: { id?: string; name?: string; args?: string; error?: string; type: 'invalid_tool_call' }[] = [];
-  if (!Array.isArray(message.tool_calls)) return { valid, invalid };
+  if (message.tool_calls === undefined) return { valid, invalid };
+  if (!Array.isArray(message.tool_calls) || message.tool_calls.length > GATEWAY_MAX_TOOL_CALLS)
+    throw new Error('gateway tool call count exceeds limit or has invalid type');
+  const ids = new Set<string>();
   for (const value of message.tool_calls) {
-    if (!value || typeof value !== 'object') continue;
-    const call = value as { id?: unknown; function?: { name?: unknown; arguments?: unknown } };
+    const call = object(value) ? value : {};
     if (
-      typeof call.id !== 'string' ||
-      typeof call.function?.name !== 'string' ||
-      typeof call.function.arguments !== 'string'
+      call.type !== 'function' ||
+      !boundedText(call.id, 128) ||
+      !call.id ||
+      ids.has(call.id) ||
+      !object(call.function) ||
+      !boundedText(call.function.name, 64) ||
+      !call.function.name ||
+      !boundedText(call.function.arguments, GATEWAY_TOOL_ARGUMENT_BYTES)
     )
-      continue;
+      throw new Error('gateway tool call exceeds limit or has invalid fields');
+    ids.add(call.id);
     try {
       const parsed = JSON.parse(call.function.arguments) as unknown;
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
@@ -152,7 +167,7 @@ export class GatewayChatModel extends BaseChatModel {
         signal: controller?.signal ?? options?.signal,
       });
       if (!response.ok) throw new Error(`gateway request failed with HTTP ${response.status}`);
-      raw = (await response.json()) as Record<string, unknown>;
+      raw = await readGatewayResponse(response);
     } finally {
       if (timeout !== undefined) clearTimeout(timeout);
       options?.signal?.removeEventListener('abort', abortFromCaller);

@@ -58,6 +58,7 @@
 - 已准入玩法回调抛异常或返回非法类型时，故障局限于对应角色/能力，并有可观察诊断；不能打断同世界其他角色的 tick，也不能令出生请求留下部分提交。只读状态查询不补写事件或改变序号。
 - 同一角色/节点 activation 的重复提交幂等；恢复从已提交回执及状态继续，禁止重放副作用。
 - 能力目录按宿主权限与 Actor 适用性过滤；列出不代表获准，执行时重新验证原始角色、目标、provider、规则及身份。
+- 每个能力具有全局唯一 ID 和必填有界 `requiredOperations`；skill声明operation ID及self/any授权范围，condition必须为空。装配检查operation与host grant，绑定目录、安装、出生/恢复预检及执行共用准入；provider不得调用未声明操作或越过声明范围。声明本身不授予权限。
 - 新模块自带能力声明和行为配方；Playbook 选择/配置，不获得额外权限。第三方仅导入 mod-api，不导入 GameServer、CharacterRuntime 或内部 ECS store。
 - 状态/事务适配只开放本期准入的参与者合同；不提供任意内存写入或假想的万能跨 owner 事务。
 
@@ -70,6 +71,9 @@
 - 恢复先在候选 owner 验证组件、包、角色/目标、树版本、技能 codec 及操作链接，再替换当前世界。失败保持原世界与当前记忆可用，不局部安装。
 - Action 终态有界保留，未解除的行为链接不得被提前裁剪；技能恢复不得重复消费、伤害、发言或创造产物。
 - 世界与 PG 仍由应用配对清单协调，包含各自 hash/检查点身份；恢复使用新 timeline，晚到结果不能污染新世界。不声称分布式原子事务。
+- 应用清单升级V2，以pairHash绑定createdAt、worldHash、cognitionHash和sourceTimeline；检查认知清单来源world/timeline。V1应用清单明确拒绝，不猜测配对；这不影响core世界V1–V4迁移。摘要只检测损坏/直接错配，不是签名，不能阻止重算摘要的任意篡改。
+- PG导入在预留目标namespace之前验证完整journal序号与window/MEMORY链、正常写入同源的文档/metadata尺寸及resident scheduler codec。未知非空runtime版本、丢失pending/in-flight状态及非法字段拒绝；只有revision1、零回合/压缩且空journal才允许显式未初始化状态。通用workspace历史metadata保持独立于resident调度合同。
+- 暂停存档重连后以当前世界时钟调和调度状态；中断回合先修复journal，再激活，保持剩余时间、去重episodes和未决队列。暂停/恢复请求失败必须恢复原本地暂停状态。
 
 ### D5 浏览器与认知接入
 
@@ -77,6 +81,8 @@
 - 改树时验证当前绑定、行为 revision 和能力版本；无效提议有可读回执并保持旧树。受控 provider 负责确定性CI，真实模型单独显式运行。
 - 复用 Agent 线 Authority/Logic 直接通道的已验证语义，并适配新 Worker/Actor 协议；main 的位姿/身份/时效检查不得丢失。生产构建入口独立验证。
 - 伙伴 UI 可观察当前目标、运行分支、活动阶段、真实库存/需求、最近已提交事件、认知状态与失败原因；不把模型文本当世界事实。
+- 生产网关响应按实际流字节限制1MiB，单消息最多8个唯一工具调用、ID/name/arguments和content/reasoning有界；保留限额内provider原始字段。每逻辑轮最多8次模型请求、8个工具、3次行为提案；下一工具批次超剩余额度时整批在Authority副作用之前拒绝，不撤销先前已提交的回执。
+- 出生生成必须有服务端超时和连接取消，外部模型等待不持PG事务/锁、不阻塞同WS其他角色的绑定/时钟/检查点；出生预算、幂等结果、失败重试及晚到结果隔离须有可执行反例。
 
 ## Given/When/Then 与测试设计
 

@@ -10,7 +10,8 @@ import {
   type ResidentAgent,
   type ResidentWorldPort,
 } from './resident-agent.js';
-import { ResidentScheduler, type ResidentScheduleSnapshot, type ResidentTrigger } from './resident-scheduler.js';
+import { ResidentScheduler, type ResidentTrigger } from './resident-scheduler.js';
+import { parseResidentRuntime, type ResidentRuntimeSnapshot } from './resident-runtime-codec.js';
 import type { FrameworkPersistence, PersistentNpcWorkspace, WorkspaceBinding } from './workspace/index.js';
 
 export type ResidentChannelOptions = Readonly<{
@@ -28,15 +29,7 @@ export type ResidentChannelOptions = Readonly<{
   status(status: ResidentStatus): void;
 }>;
 
-type RuntimeSnapshot = Readonly<{ version: 1; scheduler: ResidentScheduleSnapshot }>;
-const object = (value: unknown): value is Record<string, unknown> =>
-  value !== null && typeof value === 'object' && !Array.isArray(value);
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
-
-function restoredSchedule(value: Readonly<Record<string, unknown>>): ResidentScheduleSnapshot | undefined {
-  if (!object(value) || value.version !== 1 || !object(value.scheduler)) return undefined;
-  return clone(value.scheduler) as unknown as ResidentScheduleSnapshot;
-}
 
 /** One independent resident transaction. Supply concurrency belongs exclusively to the model gateway. */
 export class ResidentChannel {
@@ -111,7 +104,7 @@ export class ResidentChannel {
         modelConfigurationRevision: 'gateway-flash-pro-v1',
       });
     this.scheduler = new ResidentScheduler({
-      restored: restoredSchedule(metadata.snapshot),
+      restored: parseResidentRuntime(metadata.snapshot, metadata),
       dispatch: (trigger) => this.admit(trigger),
       onError: () => {
         this.phase = 'blocked';
@@ -132,6 +125,7 @@ export class ResidentChannel {
       }
     }
     if (this.paused) this.scheduler.pause();
+    else this.scheduler.resume();
     if (!this.agent) {
       this.scheduler.block();
       this.phase = 'blocked';
@@ -345,7 +339,7 @@ export class ResidentChannel {
         if (!this.scheduler || (this.disposed && !force)) return;
         const metadata = await this.options.workspace.setRuntimeMetadata(this.identity, {
           expectedRevision: this.metadataRevision,
-          snapshot: { version: 1, scheduler: this.scheduler.snapshot() } satisfies RuntimeSnapshot,
+          snapshot: { version: 1, scheduler: this.scheduler.snapshot() } satisfies ResidentRuntimeSnapshot,
           logicalRounds: this.logicalRounds,
           compactions: this.compactions,
         });

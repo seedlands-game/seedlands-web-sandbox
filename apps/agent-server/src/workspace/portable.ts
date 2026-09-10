@@ -1,5 +1,6 @@
 import type { Pool } from 'pg';
 import { createWorkspaceNamespace, normalizeWorkspaceBinding } from './namespace.js';
+import { serializeRuntimeSnapshot, validateWorkspaceDocument } from './content-codec.js';
 import {
   JOURNAL_MESSAGE_UTF8_LIMIT,
   JOURNAL_WINDOW_MESSAGE_LIMIT,
@@ -108,6 +109,7 @@ export async function validatePortableWorkspace(portable: PortableWorkspace): Pr
     if (!['/AGENT.md', '/SOUL.md', '/MEMORY.md', '/behavior/current.json'].includes(path))
       portableError('document path is invalid');
     if (typeof document.content !== 'string') portableError('document content is invalid');
+    validateWorkspaceDocument(path, document.content);
     if ((await hashPortableValue(document.content)) !== document.content_hash)
       throw new Error('portable workspace document checksum mismatch');
     if (new TextEncoder().encode(document.content).byteLength !== integerField(document, 'utf8_bytes'))
@@ -250,6 +252,7 @@ export async function validatePortableWorkspace(portable: PortableWorkspace): Pr
   integerField(portable.runtimeMetadata, 'logical_rounds');
   integerField(portable.runtimeMetadata, 'compactions');
   if (!object(portable.runtimeMetadata.snapshot)) portableError('runtime metadata snapshot is invalid');
+  serializeRuntimeSnapshot(portable.runtimeMetadata.snapshot);
 
   const blobRefs = new Set<string>();
   for (const blob of portable.blobs) {
