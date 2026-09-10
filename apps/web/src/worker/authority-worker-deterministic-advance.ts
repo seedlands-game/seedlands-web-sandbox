@@ -11,6 +11,7 @@ const LOGIC_RESPONSE_TIMEOUT_MS = 5_000;
 type PendingLogic = {
   epoch: string;
   sequence: number;
+  physicsTick: number;
   promise: Promise<void>;
   resolve: () => void;
   reject: (error: Error) => void;
@@ -76,6 +77,7 @@ export class BrowserAuthorityDeterministicAdvance {
       this.pendingLogic = {
         epoch: observation.epoch,
         sequence: observation.observationSequence,
+        physicsTick: observation.physicsTick,
         promise,
         resolve,
         reject,
@@ -102,7 +104,14 @@ export class BrowserAuthorityDeterministicAdvance {
     this.pendingLogic = null;
     this.options.timers.clear(pending.timeout);
     if (accepted) pending.resolve();
-    else pending.reject(new Error(`Authority rejected Logic response for observation ${batch.observationSequence}.`));
+    else
+      pending.reject(
+        new Error(
+          `Authority rejected Logic response for observation ${batch.observationSequence}: ` +
+            `observed tick ${pending.physicsTick}, current tick ${this.options.runtime().snapshot().physicsTick}, ` +
+            `expires at tick ${batch.expiresAtPhysicsTick}.`,
+        ),
+      );
     return accepted;
   }
 
