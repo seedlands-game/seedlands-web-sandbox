@@ -17,10 +17,11 @@ export class ResidentTurnJournal {
   }
   async append(messages: readonly BaseMessage[]): Promise<void> {
     for (const message of messages) {
-      if (!message.id) message.id = crypto.randomUUID();
-      if (this.saved.has(message.id)) continue;
-      await this.workspace.appendMessages(this.binding, [{ idempotencyKey: `message:${message.id}`, message }]);
-      this.saved.add(message.id);
+      const id = message.id?.length ? message.id : crypto.randomUUID();
+      message._updateId(id);
+      if (this.saved.has(id)) continue;
+      await this.workspace.appendMessages(this.binding, [{ idempotencyKey: `message:${id}`, message }]);
+      this.saved.add(id);
     }
   }
   async closeInterruptedTools(messages: readonly BaseMessage[]): Promise<void> {

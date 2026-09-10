@@ -94,7 +94,7 @@ export async function appendWorkspaceMessages(
       const id = entry.message.id?.length ? entry.message.id : `${state.current_window_id}:${next}`;
       const serialized = mapChatMessagesToStoredMessages([entry.message])[0];
       if (!serialized) throw new Error('message serialization failed');
-      const stored: StoredMessage = entry.message.id ? serialized : { ...serialized, data: { ...serialized.data, id } };
+      const stored: StoredMessage = { ...serialized, data: { ...serialized.data, id } };
       const storedJson = JSON.stringify(stored);
       const storedBytes = Buffer.byteLength(storedJson, 'utf8');
       if (storedBytes > JOURNAL_MESSAGE_UTF8_LIMIT) throw new Error('journal message UTF-8 size exceeds limit');

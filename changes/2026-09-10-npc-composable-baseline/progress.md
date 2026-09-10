@@ -237,6 +237,18 @@
 - 整批工具admission、每次实际模型/工具handler边界的取消检查保留；仅把已落盘输入之后的准备纳入失败收尾，并保证成功轮次终态完整。发布后的压缩仍按published标记记录成功，不以取消声称撤销。最后组合回归与独立delta复核后冻结全量。
 - `b086bb5`最终组合7文件53项PASS（包含真实PG迟到导入），test TypeScript与相关lint通过。Sol/xhigh复核确认上述birth/queued-import/cancellation/durable-tail P1均闭合，无新P0/P1；原有私有v1通配入口P2与真实模型作者质量限制继续披露。进入同SHA全量重验，不追加功能。
 
+### 2026-09-11 约05:38 同 SHA 全量通过与消息身份缺口
+
+- `ca3ab5a22490f427a6efc8d321c7ebf35b5fd81a`完整static PASS：415文件2151项PASS、2文件4项既有SKIP，coverage 786.83s，world行96.96%；全类型/Svelte通过。Web/Agent build PASS；main六组52/52、NPC默认8/8（5SKIP）、生产1/1 PASS。各浏览器组同SHA，日志前缀`final-ca3ab5a`，无重试。
+- 三NPC默认1800模拟秒181组样本全员active/health20/revision1；补给14/17/14、夜休恢复2/3/2、巡逻86/214/214，初始256食物、追加/模型/换树均0。扩展Pack的RUNNING回档加工均为4木板且后续不重复；应用V2三workspace的world/cognition/pair摘要独立重算一致，同次真实PG断言证明源/恢复各3binding。
+- 真实三人格用例FAIL：12Flash均有完成标记，但断开前已发起1Pro，违反原0Pro边界；此次尚未到达新断连断言，不能声称其通过。独立Flash/压缩/出生两项PASS，另3Flash（2有完成标记）/3Pro；出生四必填字段合法且元数据诊断已留存。本批15Flash/4Pro，累计70Flash/11Pro逻辑请求；累计5Flash无完成标记，provider实际计费/重试/token和费用unknown。专用网关已删除。
+- 已从真实call11确认4个同tool_call_id、同内容hash的工具回执各重复一次，额外19410序列化bytes。独立代码核对：直接赋BaseMessage.id不保证进入LangChain的lc_kwargs，StoredMessage恢复丢ID后LangGraph重新分配，最终状态被再次入账。正在按spec取得真实serializer/reducer RED并修canonical身份；不删除历史或放宽预算。reasoning在wire与估算各保留一份，预算估计是保守UTF8边界，不能把wire bytes等同精确估算。旧失败未存Pro请求/触发Actor，尚不能证明去重后必定0Pro；仅补失败诊断，不盲重试。
+
+### 2026-09-11 约05:40 消息身份确定性修复
+
+- 新身份测试4项1PASS/3FAIL → 4PASS，原始`message-identity/red.json`与`green.json`保留。SQL adapter是mock，但调用真实生产workspace序列化/恢复和LangGraph reducer；不称其为真实PG RED。相关Agent与persistent-workspace合计22项PASS，其中既有persistent-workspace使用真实PG；Agent/test类型、相关lint/format均PASS。
+- `ResidentTurnJournal.append`通过公开`_updateId`同步消息及LangChain构造字段；workspace统一写入canonical row id，保障绕过turn journal的正常调用。无constructor id、已有constructor id替换、StoredMessage恢复、最终状态再次入账、不同toolcall和中断补回执均覆盖；未按tool_call_id删历史。下一冻结仍须真实三人格与完整门禁，不能从定向GREEN推定0Pro。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

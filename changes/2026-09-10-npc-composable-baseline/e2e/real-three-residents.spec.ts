@@ -230,6 +230,7 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
   } finally {
     writeFileSync(info.outputPath('real-three-world-journey.json'), JSON.stringify(journeys));
     writeFileSync(info.outputPath('real-three-model-calls.json'), JSON.stringify(runtime.calls));
+    writeFileSync(info.outputPath('real-three-pro-calls.json'), JSON.stringify(runtime.proCalls));
     writeFileSync(info.outputPath('real-three-errors.json'), JSON.stringify(errors));
     writeFileSync(info.outputPath('real-three-execution-window.json'), JSON.stringify(executionWindow));
     writeFileSync(info.outputPath('real-three-connection-events.json'), JSON.stringify(runtime.connectionEvents));

@@ -120,6 +120,10 @@ T11 的断线边界绑定真实连接：点击前记录计数，等待精确Resi
 
 ## 验收与交接
 
+消息入账身份合同：中间模型/工具消息的 canonical ID 必须在内存、LangChain StoredMessage 和恢复后的消息中一致。同一轮最终状态再次入账不得复制已记录回执；不同 tool_call_id 的合法调用与中断恢复回执仍须完整保留。先用真实 LangChain 序列化/恢复与 LangGraph reducer 取得 ID 丢失、重复入账的确定性 RED，再修正身份同步；不得删除历史、过滤 reasoning 或放宽压缩预算来满足 T11。
+
+下一轮事件预算预检须与实际输入采用同一 includedThrough frontier 及 authorized_event_pages 形态，不能把已纳入journal的事件再次作为新事件计算。保留观察与授权事件两类实际输入、完整事件覆盖信息、原UTF-8保守估算/阈值与输出预留；以已纳入大事件和尚未纳入事件的反例验证，不以估算较小证明模型成本下降。
+
 - 当前main基线同步、无未解决文本或语义冲突；所有角色状态只有一个owner；公共模块依赖正反例通过。
 - `pnpm verify:static` 与 `pnpm build` 分别通过；可用已有CI串行入口定位资源争用，不能放宽错误、覆盖率、重试或flaky拒绝。
 - 当前main实际CI清单和受影响Agent测试全部保留并复验；本change T01–T12分别记录PASS/FAIL/NOT_RUN，不把缺项算通过。
