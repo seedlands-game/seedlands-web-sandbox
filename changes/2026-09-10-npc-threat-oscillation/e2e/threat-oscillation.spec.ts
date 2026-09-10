@@ -7,7 +7,7 @@ test('断开模型时，NPC 脱险后在安全侧找到食物，不在感知边�
   test.setTimeout(90_000);
   const sockets: string[] = [];
   const errors: string[] = [];
-  page.on('websocket', (socket) => sockets.push(socket.url()));
+  page.on('websocket', (socket) => sockets.push(new URL(socket.url()).origin));
   page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(() => localStorage.setItem('seedlands.quality.v1', 'low'));
   await startHarnessWorld(page, 'npc-threat-edge-browser');
