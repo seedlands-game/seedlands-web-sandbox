@@ -183,6 +183,16 @@
 - 此用例包含一次Headless初始化、4个坏档与1个合法档各自完整候选Authority构建/验证，以及多次完整快照导出；不是轻量codec检查。仅为此新增集成用例显式设置30s硬上限，与已有Character runtime/review/threat回归一致；不改任何拒绝、完整快照、start/continue断言，不改全局/CI/E2E/模型超时，不加重试。
 - Sol/xhigh只读复核同意；若30s仍在串行coverage超时，不继续扩时，重新定位挂起或隔离问题。定向正常Vitest 1项PASS（test2.88s，总4.12s，`provider-restore-budget-green.log`）；这不是coverage证据，完整静态仍待新SHA。生产源码未变化。
 
+### 2026-09-11 约02:33 冻结证据与调度竞态
+
+- `4407d5242b7094e98478006116879965a18b6dae` Web/Agent build PASS，main浏览器52/52、生产冒烟1/1 PASS；NPC默认6/8 PASS、2 FAIL、5 SKIP（3真实模型、1实际60min长跑、1另跑production）。两失败在首个确定性advance，原测试丢失error详情；continuous已读回paused=true。`dd1f767`仅补pause/advance完整回执，原生产时钟定向2/2 PASS（2.0min），未复现，不能据此关闭原失败。
+- 独立确认一个可执行时序缺口：advance已入Harness队列但尚未active时，旧DirectLogic回执排到advance后；新观察又被旧in-flight阻挡，形成队列循环等待。新增P1进入受控顺序RED与Browser owner-only修复；不增加5s响应超时、不放宽身份或权限、不全局绕过restore/checkpoint队列。原两次失败因缺error不能追认必为此因。
+- 同`4407d52`真实三角色1项PASS（2.5min），11Flash全部有完成标记、0Pro，3/3以真实身体到达，连续60完整白昼、断线后无新模型调用、errors=[]。累计38Flash/3Pro逻辑请求；两个早期Flash无完成标记，provider重试/计费请求、token和费用unknown。专用网关已清理。三张角色截图目标/身体一致，生命占位符来自选择后UI观察尚未刷新，582个实际观察health均20，不将截图占位符当生命值。
+- 真实生成树有明确质量限制：npc-8巡逻path-budget-exhausted后进入无guard永久hold；饥饿monitor正常通知但按公开合同不抢占RUNNING。T11有界任务PASS不证明该生成树长期健康；不因作者遗漏guard就修改解释器语义或禁用合法驻守。默认T04三角色1800秒独立PASS：补给16/16/15、夜休转白昼各2轮、巡逻179/152/238，初始食物256、注入/模型/换树均0、errors=[]。
+- camp独立ESM Pack的真实加工、运行中回档与4木板不重复由通过的浏览器断言证明；截图只佐证preparing→patrol和库存显示。应用V2实际PG源/恢复各3binding，3workspace与Actor身份配对、worldHash/cognitionHash/pairHash重算一致；恢复截图不代替数据库行数或摘要证据。
+- `4407d52`完整static FAIL：410文件2118项PASS、1项FAIL、2文件4项既有SKIP，818.55s；format/lint/paths通过，后置typecheck未运行。唯一失败为新三昼夜test在186.632s触及180s。保留日志`final-4407d52-static.log`；宿主背景负载仅为观察，未证实因果、不停止无关进程。
+- 独立复核确认180s不是spec性能门槛；360次5秒Authority推进与完整事件排空保留。仅此test设240s防挂起预算（失败耗时×120%约224s后取整），不改1800模拟秒、采样、断言、coverage、CI超时或retry；若240s仍超时不继续扩大。先同口径定向coverage，再完整static，尚未准出。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

@@ -304,5 +304,6 @@ describe('Stage A world behavior', () => {
       data: { character: { lifecycle: 'active', behaviorTree: { revision: 1 } } },
     });
     await session.dispose();
-  }, 180_000);
+    // 360 Authority advances plus complete event draining under coverage; this is a hang budget, not a performance metric.
+  }, 240_000);
 });
