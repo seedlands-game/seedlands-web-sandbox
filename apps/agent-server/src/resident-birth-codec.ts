@@ -3,7 +3,8 @@ import type { ResidentBirthPackage } from '@seedlands/cognition-protocol';
 const UTF8_MAX_BYTES_PER_CODE_POINT = 4;
 const NON_BLANK_PATTERN = '\\S';
 const encoder = new TextEncoder();
-const RESIDENT_BIRTH_KEYS = Object.freeze(['birthId', 'profile', 'agent', 'soul', 'memory', 'goal', 'definition']);
+const RESIDENT_BIRTH_MODEL_KEYS = Object.freeze(['profile', 'agent', 'soul', 'memory', 'goal', 'definition']);
+const RESIDENT_BIRTH_KEYS = Object.freeze(['birthId', ...RESIDENT_BIRTH_MODEL_KEYS]);
 
 export const RESIDENT_BIRTH_LIMITS = Object.freeze({
   birthIdCharacters: 160,
@@ -24,6 +25,7 @@ export const RESIDENT_BIRTH_LIMITS = Object.freeze({
 });
 
 export type ResidentBirthValidationReason = 'type' | 'blank' | 'utf8-bytes';
+export type ResidentBirthInputKind = 'model-output' | 'stored-package';
 
 export class ResidentBirthValidationError extends TypeError {
   readonly field: string;
@@ -66,6 +68,18 @@ function requiredText(value: unknown, field: string, maximumBytes: number): stri
 function assertBirthId(value: string): void {
   if (value.length === 0 || value.length > RESIDENT_BIRTH_LIMITS.birthIdCharacters)
     throw new TypeError('Birth request id is invalid.');
+}
+
+function assertTopLevelEnvelope(
+  value: Record<string, unknown>,
+  birthId: string,
+  inputKind: ResidentBirthInputKind,
+): void {
+  const keys = inputKind === 'model-output' ? RESIDENT_BIRTH_MODEL_KEYS : RESIDENT_BIRTH_KEYS;
+  if (!exactKeys(value, keys))
+    throw new TypeError(`Pro birth ${inputKind.replace('-', ' ')} has invalid top-level keys.`);
+  if (inputKind === 'stored-package' && value.birthId !== birthId)
+    throw new TypeError('Stored resident birth id does not match requested birth id.');
 }
 
 export function createResidentBirthSchema(definitionGuide: string) {
@@ -112,10 +126,16 @@ export function createResidentBirthSchema(definitionGuide: string) {
   } as const;
 }
 
-/** Parses untrusted structured model output without retaining rejected document contents. */
-export function parseResidentBirthPackage(value: unknown, birthId: string): ResidentBirthPackage {
+/** Parses an exact untrusted model or storage envelope without retaining rejected document contents. */
+export function parseResidentBirthPackage(
+  value: unknown,
+  birthId: string,
+  inputKind: ResidentBirthInputKind,
+): ResidentBirthPackage {
   assertBirthId(birthId);
-  if (!object(value) || !object(value.profile) || !object(value.goal) || !object(value.definition))
+  if (!object(value)) throw new TypeError('Pro birth package is invalid.');
+  assertTopLevelEnvelope(value, birthId, inputKind);
+  if (!object(value.profile) || !object(value.goal) || !object(value.definition))
     throw new TypeError('Pro birth package is invalid.');
   const profile = value.profile;
   requiredText(profile.name, 'profile.name', RESIDENT_BIRTH_LIMITS.profileNameBytes);
@@ -167,7 +187,7 @@ export function isResidentBirthPackage(value: unknown): value is ResidentBirthPa
   if (!object(value) || !exactKeys(value, RESIDENT_BIRTH_KEYS) || typeof value.birthId !== 'string') return false;
   try {
     if (utf8Bytes(JSON.stringify(value)) > RESIDENT_BIRTH_LIMITS.packageBytes) return false;
-    parseResidentBirthPackage(value, value.birthId);
+    parseResidentBirthPackage(value, value.birthId, 'stored-package');
     return true;
   } catch {
     return false;

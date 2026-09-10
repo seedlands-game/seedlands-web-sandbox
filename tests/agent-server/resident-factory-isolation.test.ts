@@ -192,6 +192,20 @@ describe('resident Factory isolation', () => {
     }
   });
 
+  it('rejects unknown provider fields before opening a persistence transaction', async () => {
+    const pool = new FakeFactoryPool();
+    const factory = new ResidentFactory({
+      pro: model(async () => ({ ...birthPayload(), unrecognized: 'discarded' })),
+      pool: pool.asPool(),
+    });
+
+    await expect(factory.generate(world, 'provider-extra', ['quiet'], waitCapabilities())).rejects.toThrow(
+      'model output has invalid top-level keys',
+    );
+    expect(pool.connectCount).toBe(0);
+    expect(pool.rows.size).toBe(0);
+  });
+
   it('does not hold a transaction while Pro hangs and aborts when its caller leaves', async () => {
     const pool = new FakeFactoryPool();
     let modelSignal: AbortSignal | undefined;

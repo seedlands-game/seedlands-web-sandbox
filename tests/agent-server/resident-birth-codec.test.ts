@@ -41,13 +41,17 @@ describe('resident birth codec', () => {
 
   it('accepts exactly 4 KiB and rejects the next Unicode code point with metadata but no document text', () => {
     const exact = '😀'.repeat(1024);
-    const accepted = parseResidentBirthPackage({ ...birthPayload(), agent: exact, soul: exact }, 'birth-exact');
+    const accepted = parseResidentBirthPackage(
+      { ...birthPayload(), agent: exact, soul: exact },
+      'birth-exact',
+      'model-output',
+    );
     expect(isResidentBirthPackage(accepted)).toBe(true);
 
     const oversized = '😀'.repeat(1025);
     let failure: unknown;
     try {
-      parseResidentBirthPackage({ ...birthPayload(), soul: oversized }, 'birth-oversized');
+      parseResidentBirthPackage({ ...birthPayload(), soul: oversized }, 'birth-oversized', 'model-output');
     } catch (error) {
       failure = error;
     }
@@ -76,5 +80,23 @@ describe('resident birth codec', () => {
     expect(Buffer.byteLength(JSON.stringify(value), 'utf8')).toBeGreaterThan(RESIDENT_BIRTH_LIMITS.packageBytes);
     expect(isResidentBirthPackage(value)).toBe(false);
     expect(validBirth(value)).toBe(false);
+  });
+
+  it('rejects unknown provider keys instead of silently canonicalizing them away', () => {
+    expect(() =>
+      parseResidentBirthPackage({ ...birthPayload(), unrecognized: 'discarded' }, 'provider-extra', 'model-output'),
+    ).toThrow('model output has invalid top-level keys');
+  });
+
+  it('distinguishes exact model and stored envelopes and preserves stored identity', () => {
+    expect(() =>
+      parseResidentBirthPackage({ birthId: 'provider-id', ...birthPayload() }, 'provider-id', 'model-output'),
+    ).toThrow('model output has invalid top-level keys');
+
+    const stored = { birthId: 'stored-id', ...birthPayload() };
+    expect(parseResidentBirthPackage(stored, 'stored-id', 'stored-package')).toEqual(stored);
+    expect(() => parseResidentBirthPackage(stored, 'different-id', 'stored-package')).toThrow(
+      'Stored resident birth id does not match requested birth id',
+    );
   });
 });

@@ -181,7 +181,7 @@ export class ResidentFactory {
     this.assertAvailable(signal);
     if (existing) {
       if (existing.tagsHash !== tagsHash) throw new Error('Birth request id payload conflict.');
-      return parseResidentBirthPackage(existing.payload, birthId);
+      return parseResidentBirthPackage(existing.payload, birthId, 'stored-package');
     }
     const count = await this.count(world);
     this.assertAvailable(signal);
@@ -229,7 +229,7 @@ export class ResidentFactory {
       if (existing) {
         if (existing.tagsHash !== tagsHash) throw new Error('Birth request id payload conflict.');
         await client.query('COMMIT');
-        return parseResidentBirthPackage(existing.payload, birthId);
+        return parseResidentBirthPackage(existing.payload, birthId, 'stored-package');
       }
       if ((await this.count(world, client)) >= MAX_BIRTHS_PER_TIMELINE)
         throw new RangeError('Resident factory birth budget exceeded.');
@@ -327,6 +327,6 @@ export class ResidentFactory {
       ],
       { signal, reasoning_effort: 'low' } as never,
     );
-    return parseResidentBirthPackage(parsed, birthId);
+    return parseResidentBirthPackage(parsed, birthId, 'model-output');
   }
 }
