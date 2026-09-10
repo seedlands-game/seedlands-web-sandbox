@@ -3,7 +3,7 @@
 ## Status
 
 - 类型：Breaking（公开合同、ECS/领域所有权、存档、生成及跨模块迁移）。
-- 状态：Implementing / S3；ECS 补充合同已批准，自主推进到 S6。2026-09-09 用户明确批准 `40daf17358a3fb5a86d08ea25aecbf6896922274f16a68d02c557bb38139bb53`；批准原文见 [spec 原始字节](evidence/spec-approved.txt) 与 [附件原始字节](evidence/architecture-approved.txt)。此后格式修正和状态更新不改变规范范围；ECS 补充合同 ae661e8e916f9286bf84f84ed382cb97f512a12b23aeb5cc9a09050c7c1b7816 随后获用户明确批准，允许安装与实施；常规问题记录并自主修复，重大阻塞再上报。
+- 状态：Implementing / S6；ECS 补充合同已批准，自主推进到 S6。2026-09-09 用户明确批准 `40daf17358a3fb5a86d08ea25aecbf6896922274f16a68d02c557bb38139bb53`；批准原文见 [spec 原始字节](evidence/spec-approved.txt) 与 [附件原始字节](evidence/architecture-approved.txt)。此后格式修正和状态更新不改变规范范围；ECS 补充合同 ae661e8e916f9286bf84f84ed382cb97f512a12b23aeb5cc9a09050c7c1b7816 随后获用户明确批准，允许安装与实施；常规问题记录并自主修复，重大阻塞再上报。
 - 独立基线：`01bab28ace506685f39c1d4a86fec541cbbf2f1b`，包含已合并的 [PR #25](https://github.com/seedlands-game/seedlands-web-sandbox/pull/25)。
 - 功能分支：`codex/composable-overworld-playbook`；目标分支 `main`。
 - 不依赖 `codex/living-npc-mvp` 或其他未合入实现，不等待另一对话交付。本 change 自己完成必要的角色组件、模块授权接线与测试。

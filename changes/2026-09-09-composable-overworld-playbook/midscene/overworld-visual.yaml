@@ -1,0 +1,24 @@
+page:
+  url: ${SEEDLANDS_VISUAL_URL}
+  viewportWidth: 1280
+  viewportHeight: 960
+
+agent:
+  testId: seedlands-composable-overworld-visual
+  groupName: Composable Overworld visual acceptance
+  generateReport: true
+  autoPrintReportMsg: false
+  replanningCycleLimit: 8
+
+tasks:
+  - name: 从实际世界入口观察背包和创造目录
+    flow:
+      - ai: 在世界 Seed 输入框填入 midscene-overworld-s6，然后点击进入世界。如果出现仍然进入提示，就点击仍然进入。
+      - aiWaitFor: 已进入正常运行的三维体素世界，底部有物品快捷栏。
+      - aiAssert: 页面显示三维体素地形、中心准星和底部物品快捷栏，没有错误页或覆盖整个场景的加载遮罩。
+      - ai: 按 E 打开背包。
+      - aiWaitFor: 背包与合成面板已经打开。
+      - aiAssert: 背包面板的槽位网格和合成配方区域可见，按钮及中文文字可辨认，面板没有被裁切到无法操作。
+      - ai: 点击背包面板右上方的切换创造按钮。
+      - aiWaitFor: 背包面板显示创造模式和物品目录。
+      - aiAssert: 创造物品目录显示带名称和图标的多个方块或工具，以及当前快捷栏的物品选择入口；这不是一片空白区域。

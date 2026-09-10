@@ -40,4 +40,10 @@ S4/S5 实现提交 `d05206b`，主干 #27 同步提交 `27bf75d`，V4 Wasm 构�
 
 CI 增加独立的 `pnpm test:composable-gameplay` 步骤及 always evidence 上传，沿用已有 Chromium job/权限/20min 上限，不改变既有回归全集、flaky 硬失败或重试策略。该步骤显式保护本 change 的 10 项需求场景，不将它们迁入长期基线。远端结果待 PR 当前 HEAD 读回。
 
-新 CI 步骤的同名命令和低画质配置在本机 dev 服务复验 10/10 通过（1.8min，`/tmp/seedlands-s6-browser-dev-composable.log`）；Playwright 所有者自动停止服务，4173 再次读回释放。两份 README 中的独立 Headless CLI 也实际启动并在 stdin EOF 正常退出，未留下服务。正式 Git rename 已保证 `examples/readme.md` 在大小写敏感的 Linux checkout 中使用相同文件名。
+新 CI 步骤的同名命令和低画质配置在本机 dev 服务复验 10/10 通过（1.8min，`/tmp/seedlands-s6-browser-dev-composable.log`）；Playwright 所有者自动停止服务，4173 再次读回释放。文档中的两种独立 Headless CLI 也实际启动并在 stdin EOF 正常退出，未留下服务。正式 Git rename 已保证 `examples/readme.md` 在大小写敏感的 Linux checkout 中使用相同文件名。
+
+## 模型视觉补充
+
+`midscene/overworld-visual.yaml` 通过实际入口、E 背包与创造模式按钮运行；生产预览的同一实现 `50ff14c`，Chrome 1280×960。模型连通校验通过；单场景 1/1、三处 aiAssert 全部通过（39.474s），没有失败或未执行步骤。分别观察三维地形/准星/快捷栏、背包槽位/配方/中文可辨认、创造目录图标/名称/选择入口。结构化结果见 `evidence/s6-midscene-results.json`，原报告留在本机 `/tmp/seedlands-s6-midscene/midscene_run/report/`。
+
+该运行复用现有依赖与进程中的模型配置；从独立临时目录执行，未读取仓库 .env、未写入或展示凭据。预览服务已退出，4173 再次确认释放。模型视觉补充不替代成长、权限与保存的权威状态测试，也不构成主观听感或性能结论。

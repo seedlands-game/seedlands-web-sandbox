@@ -145,8 +145,10 @@ S3 核心实际消费者已接入；仍需默认内容与替代装配共同验�
 
 最新主干已读取到 `baeba09`（#27，CI 与动态阴影）；将先保存当前实现提交，再同步此已合并基线并重跑最终 static、build、Browser。新增跨宿主与生存 HUD 浏览器场景尚未运行，不预填准出。S6 还需固定提交独立审阅、完整 T01–T14 映射与 PR/CI 读回。自动续跑保持，未停止目标。
 
-## S6 当前恢复点（2026-09-10 08:18）
+## S6 当前恢复点（2026-09-10）
 
 生产实现当前 SHA `50ff14c`：full static 1759/4、build、生产 Browser 10/10、dev regression 21/21、资产/木剑/#25 5/5 全部通过，CI 同配置 dev 新场景另复验 10/10。最后一个 Combat 无近战目标被错误拒绝的问题已修复并补真实 owner 正反例。完整对照见 acceptance-map.md，演示与原始截图见 demo.md。所有任务服务停止，4173 已释放。
 
 根正在提交 CI 新场景步骤和验收文档，生产源码未变。S6 独立 reviewer `s6_final_review` 对 61901d3 全分支及 50ff14c 修复 delta 持续只读审阅；修复 delta 已初步确认闭合，完整报告待返回。之后按具体 findings 修复/复验，再 push/创建 PR 并跟进当前 HEAD 必要 CI 和 mergeability。尚无 PR、不自动合并，heartbeat 未停止。
+
+Midscene 补充视觉旅程已运行通过 1/1（3 处 aiAssert，39.474s），未读取 .env，生产预览已退出；来源和边界见 S6 记录。当前剩余独立审阅及远端 PR/CI，不重复已通过的 runtime 测试，除非新 findings 触发源码修复。
