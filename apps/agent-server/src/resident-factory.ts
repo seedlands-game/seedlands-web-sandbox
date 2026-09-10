@@ -217,36 +217,46 @@ export class ResidentFactory {
     const tagsHash = await hash({ tags, capabilities });
     const key = JSON.stringify([world.worldId, world.timelineId, birthId]);
     this.assertAvailable(signal);
+    let operation = this.inFlight.get(key);
+    if (operation) return await this.consume(operation, tagsHash, signal);
+    const controller = new AbortController();
+    const work = Promise.resolve().then(() =>
+      this.generateClaimed(world, birthId, tags, tagsHash, capabilities, controller.signal),
+    );
+    const created: InFlightBirth = {
+      tagsHash,
+      controller,
+      consumers: 0,
+      settled: false,
+      promise: work.finally(() => {
+        created.settled = true;
+        if (this.inFlight.get(key) === created) this.inFlight.delete(key);
+      }),
+    };
+    operation = created;
+    this.inFlight.set(key, operation);
+    return await this.consume(operation, tagsHash, signal);
+  }
+
+  private async generateClaimed(
+    world: ResidentWorldBinding,
+    birthId: string,
+    tags: readonly string[],
+    tagsHash: string,
+    capabilities: unknown,
+    signal: AbortSignal,
+  ): Promise<ResidentBirthPackage> {
+    this.assertAvailable(signal);
     const existing = await this.read(world, birthId);
     this.assertAvailable(signal);
     if (existing) {
       if (existing.tagsHash !== tagsHash) throw new Error('Birth request id payload conflict.');
       return validateBirth(existing.payload, birthId);
     }
-    let operation = this.inFlight.get(key);
-    if (operation) return await this.consume(operation, tagsHash, signal);
     const count = await this.count(world);
     this.assertAvailable(signal);
     if (count >= MAX_BIRTHS_PER_TIMELINE) throw new RangeError('Resident factory birth budget exceeded.');
-    operation = this.inFlight.get(key);
-    if (operation) return await this.consume(operation, tagsHash, signal);
-    if (!operation) {
-      const controller = new AbortController();
-      const work = this.generateAndPersist(world, birthId, tags, tagsHash, capabilities, controller.signal);
-      const created: InFlightBirth = {
-        tagsHash,
-        controller,
-        consumers: 0,
-        settled: false,
-        promise: work.finally(() => {
-          created.settled = true;
-          if (this.inFlight.get(key) === created) this.inFlight.delete(key);
-        }),
-      };
-      operation = created;
-      this.inFlight.set(key, operation);
-    }
-    return await this.consume(operation, tagsHash, signal);
+    return await this.generateAndPersist(world, birthId, tags, tagsHash, capabilities, signal);
   }
 
   private async consume(

@@ -26,13 +26,14 @@ function birthPackage(birthId: string): ResidentBirthPackage {
 }
 
 type StoredBirth = { tagsHash: string; payload: unknown };
+type QueryScope = 'pool' | 'client';
 
 class FakeFactoryPool {
   readonly rows = new Map<string, StoredBirth>();
   connectCount = 0;
   activeTransactions = 0;
   readonly clientQueries: string[] = [];
-  queryHook: ((sql: string) => Promise<void>) | undefined;
+  queryHook: ((sql: string, scope: QueryScope) => Promise<void>) | undefined;
 
   private key(parameters: readonly unknown[]): string {
     return JSON.stringify(parameters.slice(0, 3));
@@ -45,8 +46,9 @@ class FakeFactoryPool {
   private async execute<Row extends Record<string, unknown>>(
     sql: string,
     parameters: readonly unknown[] = [],
+    scope: QueryScope,
   ): Promise<QueryResult<Row>> {
-    await this.queryHook?.(sql);
+    await this.queryHook?.(sql, scope);
     if (sql.includes('SELECT tags_hash,payload')) {
       const stored = this.rows.get(this.key(parameters));
       return this.result(stored ? ([{ tags_hash: stored.tagsHash, payload: stored.payload }] as unknown as Row[]) : []);
@@ -72,7 +74,7 @@ class FakeFactoryPool {
   readonly query = async <Row extends Record<string, unknown>>(
     sql: string,
     parameters?: readonly unknown[],
-  ): Promise<QueryResult<Row>> => this.execute<Row>(sql, parameters);
+  ): Promise<QueryResult<Row>> => this.execute<Row>(sql, parameters, 'pool');
 
   readonly connect = async (): Promise<PoolClient> => {
     this.connectCount++;
@@ -81,7 +83,7 @@ class FakeFactoryPool {
         this.clientQueries.push(sql);
         if (sql === 'BEGIN') this.activeTransactions++;
         if (sql === 'COMMIT' || sql === 'ROLLBACK') this.activeTransactions--;
-        return this.execute<Row>(sql, parameters);
+        return this.execute<Row>(sql, parameters, 'client');
       },
       release: () => undefined,
     } as unknown as PoolClient;
@@ -171,6 +173,39 @@ describe('resident Factory isolation', () => {
     expect(calls).toBe(1);
   });
 
+  it('claims an identity before asynchronous preflight can outlive a completed duplicate', async () => {
+    const digest = vi.spyOn(crypto.subtle, 'digest').mockResolvedValue(new Uint8Array(32).buffer as ArrayBuffer);
+    const pool = new FakeFactoryPool();
+    let releaseSecondCount!: () => void;
+    const secondCountBlocked = new Promise<void>((resolve) => {
+      releaseSecondCount = resolve;
+    });
+    let countQueries = 0;
+    pool.queryHook = async (sql, scope) => {
+      if (scope !== 'pool' || !sql.includes('SELECT count(*)') || ++countQueries !== 2) return;
+      await secondCountBlocked;
+    };
+    let calls = 0;
+    const factory = new ResidentFactory({
+      pro: model(async () => {
+        calls++;
+        return birthPayload();
+      }),
+      pool: pool.asPool(),
+    });
+    try {
+      const first = factory.generate(world, 'preflight-race', ['quiet'], waitCapabilities());
+      const duplicate = factory.generate(world, 'preflight-race', ['quiet'], waitCapabilities());
+      await expect(Promise.race([first, duplicate])).resolves.toMatchObject({ birthId: 'preflight-race' });
+      releaseSecondCount();
+      await expect(Promise.all([first, duplicate])).resolves.toHaveLength(2);
+      expect(calls).toBe(1);
+      expect(countQueries).toBe(1);
+    } finally {
+      digest.mockRestore();
+    }
+  });
+
   it('rejects an exhausted timeline before calling Pro', async () => {
     const pool = new FakeFactoryPool();
     for (let index = 0; index < 64; index++) {
@@ -214,9 +249,10 @@ describe('resident Factory isolation', () => {
     });
     const generated = factory.generate(world, 'close-race', ['quiet'], waitCapabilities());
     await vi.waitFor(() => expect(reading).toBe(true));
-    await factory.close();
+    const closing = factory.close();
     releaseRead();
     await expect(generated).rejects.toThrow('closed');
+    await closing;
     expect(calls).toBe(0);
     expect(pool.connectCount).toBe(0);
   });
