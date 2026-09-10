@@ -177,3 +177,9 @@ S4 可再生食物的独立 ECS drop/lifecycle 子任务：Sol/high，规划上�
 S4 工位事务/持久化只读独立复核：Sol/xhigh 最多 2h，child 上限累计 30/36。root 并行完成 Headless 成长旅程，复核不扩大写入范围。以上均为规划上限，实际消费 unknown。
 
 S4 剩余 actor profile / 可选开局生态边界追加 Sol/high 最多 6h，累计 child 分配上限 36/36h。用于消除完整生存与后续替代 Playbook 的隐式第一方数据；实际消耗仍 unknown。版本二合同 SHA `b05dc23e08a4fdf5459bc26ea881d71d8bcc846a227ddfd0d9d580c132d644a8` 明确 root 保留 crafting、Web 与 S5 示例路径。再次委派前需重估，不把分配上限称为实耗。
+
+## 14. S6 冻结集成与独立审阅
+
+S4/S5 实现已完成局部验收，进入当前合同的最终验证。S6 沿原规划正常 6 / 保守 12 活跃小时、3 / 6 工具等待小时；保守含一次 20% 缓冲为 22h，不扩大功能范围。实际活跃工时与按阶段归因的 tokens、credits/API 等价仍 unknown；不能用子任务上限或测试耗时反推。已只读刷新账户状态，未报告额度阻塞；不把账户共享百分比当本 change 消费，不使用 reset。
+
+为精确冻结集成分配独立 Sol/xhigh reviewer 最多 4h，计入 S6 12h 共享 envelope（4/12），不占用已分配完的 S3/S4 envelope。该职责仅只读源码/测试和已有证据，覆盖前阶段边界在最终组合下的正确性；root 串行执行全量 static、build、Browser 和 PR/CI 读回。最终交付回填可得的真实时间/结果，计费不可得继续明确 unknown。
