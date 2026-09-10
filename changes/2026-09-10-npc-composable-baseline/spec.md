@@ -82,6 +82,7 @@
 - 改树时验证当前绑定、行为 revision 和能力版本；无效提议有可读回执并保持旧树。受控 provider 负责确定性CI，真实模型单独显式运行。
 - 复用 Agent 线 Authority/Logic 直接通道的已验证语义，并适配新 Worker/Actor 协议；main 的位姿/身份/时效检查不得丢失。生产构建入口独立验证。
 - 确定性advance已排队但尚未启动时到达的旧Logic回执，不得与该advance形成相互等待。只可在同一advance、同epoch的稳定观察发布点一次性处理已排队回执，仍执行当前权限、候选时效与身份检查；普通checkpoint/restore继续串行。关闭、有效epoch切换和owner替换须拒绝晚回，重复或非法重绑不提前丢弃合法回执。
+- 暂停前累积的到期lane欠账须先结算，再进入逐slice等待新Logic回执的阶段；结算期间的观察仍经普通通道和原时效校验，不成为确定性等待条件。旧过期回执不得清除新sequence的等待，已欠physics/gameplay/fluid步数与commits全部计入advance结果；不扩大TTL或丢弃欠账。以真实AuthorityRuntime、超过TTL的初始physics debt及受控Promise-tail回包顺序取得RED/GREEN，并覆盖零时长和关闭自动Logic的边界。
 - 伙伴 UI 可观察当前目标、运行分支、活动阶段、真实库存/需求、最近已提交事件、认知状态与失败原因；不把模型文本当世界事实。
 - 生产网关响应按实际流字节限制1MiB，单消息最多8个唯一工具调用、ID/name/arguments和content/reasoning有界；保留限额内provider原始字段。每逻辑轮最多8次模型请求、8个工具、3次行为提案；下一工具批次超剩余额度时整批在Authority副作用之前拒绝，不撤销先前已提交的回执。
 - 网关还须按LangChain最终StoredMessage（含框架合并的llmOutput）验证512KiB journal上限并预留1KiB编码/请求ID余量；1MiB只是传输上限，不保证任意该尺寸内容可持久消费。重连清除旧session admission latch后仍经过正常durable context gate；无模型、已死亡及未完成journal恢复不可解除阻塞。checkpoint恢复run失败时本地和Resident保持暂停并提示重试，不报告虚假的运行状态。

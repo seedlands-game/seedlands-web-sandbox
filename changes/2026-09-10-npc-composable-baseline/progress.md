@@ -199,6 +199,13 @@
 - 独立Sol/xhigh精确复核该delta无新P0/P1，追加队列环P1静态闭合；同epoch/非法epoch重绑提前取消合法回执的P2正在最小补证。publish实际在slice尾部稳定点，可位于advancePausedSession内部；旧回执仍按当前tick/候选校验，不要求新增slice前hook，不宣称性能优化。
 - `4e53826124e03f327fe69a09d7188a1bb3488bc0`仅world-behavior-a的同口径coverage运行：1文件7项全部PASS，测试体195.31s、总196.52s，未触及240s；日志`three-day-coverage-4e53826.log`。只选该文件使全局world行覆盖率58.42%低于原80%，因此命令退出1；没有关闭或降低阈值，不把定向断言通过说成完整coverage准出。最终全static待下一冻结SHA。
 
+### 2026-09-11 约03:27 完整静态通过与独立欠账反例
+
+- 冻结`5f6e01c999cf33028580000f8352e57ea31bb506`完整static PASS：411文件2126项PASS，2文件4项既有SKIP，coverage 789.54s，world行覆盖率96.96%；格式、lint、路径、各层TypeScript与Svelte均通过。Web/Agent build PASS；main六组52/52、生产NPC 1/1 PASS。日志前缀`final-5f6e01c`。NPC默认6PASS/2FAIL/5SKIP，串联真实模型未执行，不宣称全量准出。
+- 同epoch/非法empty重绑的队列取消P2经12项受控测试2FAIL→12PASS，aux `63dc144`集成为`5f6e01c`；原始RED/GREEN日志已复制到本worktree并核对SHA256。独立delta审阅无新P0/P1/P2，旧v1 wildcard可达限制仍保留。
+- 本次threat失败有明确新证据：observation19在physicsTick88被Authority拒绝，不再是循环等待超时；三角色首advance同样失败，初始activeTime约1.3182s而tick54仅结算900ms，留下约418ms欠账。`940bcc3`只补完整回执的诊断重跑2PASS不能关闭原失败；`23d9101`补观察tick/当前tick/expiry的错误上下文，未改接受语义。
+- 真实AuthorityRuntime + DirectLogic owner + Promise-tail队列的受控RED稳定复现：seq1 observedTick4/expiry16/receiveTick20拒绝，seq2 observedTick20/expiry32/receiveTick36仍拒绝；5项中4PASS/1FAIL，105ms。原始日志`authority-worker-debt-red.log`留存，非浏览器偶然失败推断。独立审阅确认这是队列提升之后的另一项Browser freshness P1；正在实现先结算欠账、再逐100ms exact-await，原TTL、权限、epoch和回执候选检查不变。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |
