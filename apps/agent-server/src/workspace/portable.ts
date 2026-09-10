@@ -189,6 +189,31 @@ export async function validatePortableWorkspace(portable: PortableWorkspace): Pr
   }
   if (integerField(portable.state, 'next_journal_seq', 1) !== greatestJournalSeq + 1)
     portableError('next journal sequence is inconsistent');
+  // Journal rows are never pruned by compaction; unlike world events, this schema has no lost-range record.
+  if (journalSequences.size !== greatestJournalSeq) portableError('journal sequence has a missing message');
+  const orderedWindows = [...windows.values()].sort(
+    (left, right) => integerField(left, 'memory_revision', 1) - integerField(right, 'memory_revision', 1),
+  );
+  let previousThrough = 0;
+  for (const [index, window] of orderedWindows.entries()) {
+    const id = textField(window, 'window_id');
+    const startsAfter = integerField(window, 'starts_after_journal_seq');
+    const through =
+      window.status === 'active' ? greatestJournalSeq : integerField(window, 'frozen_through_journal_seq');
+    if (integerField(window, 'memory_revision', 1) !== index + 1 || startsAfter !== previousThrough)
+      portableError('window history is not a continuous chain');
+    if (
+      through > greatestJournalSeq ||
+      through < startsAfter ||
+      (journalByWindow.get(id)?.rows ?? 0) !== through - startsAfter
+    )
+      portableError('window journal coverage is incomplete');
+    if (index === orderedWindows.length - 1 ? id !== currentWindowId : window.status !== 'sealed')
+      portableError('current window is not the end of its history');
+    previousThrough = through;
+  }
+  if (previousThrough !== greatestJournalSeq || memoryRevisions.size !== orderedWindows.length)
+    portableError('window history and memory revisions are inconsistent');
 
   const received = integerField(portable.state, 'received_through');
   const included = integerField(portable.state, 'included_through');

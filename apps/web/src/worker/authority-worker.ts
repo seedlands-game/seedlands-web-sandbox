@@ -214,7 +214,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   worldEpoch = `${epoch}:world:0`;
   const principalId = message.developerWorldHarness ? 'browser-developer' : 'browser-world-owner';
   const policy = message.developerWorldHarness
-    ? developmentWorldAuthorizationPolicy(principalId, runtime.playerId)
+    ? developerPolicy!
     : browserWorldOwnerPolicy(principalId, runtime.playerId);
   deterministicAdvance = new BrowserAuthorityDeterministicAdvance({
     runtime: () => runtime!,

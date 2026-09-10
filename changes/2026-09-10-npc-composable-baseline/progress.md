@@ -94,6 +94,23 @@
 - 主线资产集成与近战体验的固定production Chrome验收3/3 PASS（28.4s）。原main run `34471130876` 读回成功：Chromium job19m41s、Static job15m32s；这些是旧SHA/远端环境的预算线索，不是本change性能对照或准出。
 - 下一步：建立正常hooks本地提交并冻结base/head做一次独立语义审阅；绑定提交运行全量静态/构建、全部main浏览器清单及T01–T12，最后才按授权推送新PR。当前仍无PR、无最终全量准出。
 
+### 2026-09-10 约22:56 冻结提交验收及审阅修正
+
+- 正常hooks提交 `de329a95299ea79f725e158f57139210a6dcd0b0`，原本地main和冻结工作树均读回干净。该SHA的 `VITEST_MAX_WORKERS=1 pnpm verify:static` 完整PASS：402文件、2068测试通过，2文件/4测试既有跳过，世界行覆盖率96.96%；coverage总721.07s，原180s三昼夜用例通过。随后 `pnpm build` Web/Agent分别PASS。
+- 同SHA本机Chrome：main regression 20/21 PASS；Harness 2/2、资产2/2、近战1/1、库存/创造视觉12/12 PASS；composable 12/14 PASS。原始日志为 `frozen-static-first.log`、`frozen-build-first.log`、`frozen-main-regression.log`、`frozen-main-remaining.log`，对应目录保留失败trace。未启用测试重试，未放宽超时；本机Chrome不等价于远端CI Chromium身份。
+- 三项Browser RED分别处理：开发者Logic的Worker接线将原本无Actor绑定的developer policy错误改为player-bound，修复应复用装配时同一developer policy，不能放宽originalActor检查；创造目录测试在异步close尚未完成时连续发Digit2/E，修复应等待菜单真实隐藏，保留槽位/飞行/恢复断言；木剑旅程首击后生物按base/head相同规则逃跑，测试未追赶，继续核对真实攻击距离与回执，不通过取消逃跑或增加点击预算掩盖问题。
+- 独立Sol/xhigh审阅绑定上述base/head进行中。P1-1：能力缺少依赖operation的声明，Actor目录未按host grant/Actor权限过滤；P1-2：registry按kind+id而wire按id去重导致合法组合在连接时失败。修正合同为必填有界requiredOperations（self/any scope）、host装配校验、Actor目录/安装/执行同源准入、标准combat也经provider operation；capability id全局唯一且装配时拒绝跨kind重复。实施在另一个隔离修复worktree，保持当前验收树无混入修改。
+- P1-3：portable记忆仅验证journal序号唯一与最大值，未拒绝中间消息缺失/窗口历史分叉。修复前新增实际PostgreSQL RED，要求坏档在目标namespace预留前拒绝、合法多窗口往返及后续追加保持连续；不对允许lostRange的世界事件强加journal规则。
+- 上述缺口尚未修复或复验完毕，不标Delivered、不推送PR。下一提交需复核delta并重跑受影响与最终全量门禁。
+
+### 2026-09-10 约23:08 首批审阅修正
+
+- Worker developer policy复用装配时同一未绑定Actor的开发者身份，普通Browser owner仍player-bound；不改originalActor校验。木剑旧轨迹敌我水平3.48m超过权威3m，HUD有超距反馈，不能推断七次拒绝各有独立回执。测试增加真实KeyW追随、按当前权威距离≤2.5m才点击，仍8次尝试/90s/击败-拾取-存档全部原断言。首版helper的浏览器async轮询提前返回另有RED，已改显式等待/读取，失败trace保留。
+- 木剑、developer启用/禁用和创造模式两项同组复验5/5 PASS（30.4s），`review-world-fixes-final/`；木剑另定向1/1 PASS（15.0s），`review-world-fixes-wood-2/`。Web类型0错误0警告；拥有文件的格式、lint和diff检查通过。这是当前修正工作树证据，待新SHA统一冻结。
+- portable连续性先真实PG RED（损坏档被接受），后补完整journal序号、window区间覆盖、从初始到当前的revision链与MEMORY对应。删除Human/AI/Tool消息、分叉window、缺初始window的坏档均在预留namespace前拒绝；合法两窗口往返并追加至seq6/next7。workspace-review/batch-import/persistent 3文件14项PASS，`portable-continuity-{red,green}.log`；Agent和test TypeScript通过。未改变世界事件lostRange合同。
+- P2旧v1宿主仍可通过private workspace wildcard子路径访问：README改为如实说明，旧回归不代表resident v2准出；本切片不额外归档历史或收紧所有exports。
+- 独立审阅继续发现应用world/cognition仅各自校验hash，缺整体配对及内外source身份检查；resident调度恢复对未知wrapper静默默认、坏深层codec可能先import后失败。两项尚未修复：需分别新增跨合法档案互换反例、恢复前codec拒绝与未决回合连续性反例；新应用格式的完整配对不等于签名或分布式原子事务，通用workspace历史metadata与resident codec须分层，不删旧记忆迎合校验。
+
 | 阶段 | 状态    | 本change证据                               |
 | ---- | ------- | ------------------------------------------ |
 | S0   | DONE    | 独立分支、spec和初版估算                   |

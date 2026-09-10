@@ -1,6 +1,6 @@
 import { createServer } from 'node:net';
 import { spawnSync } from 'node:child_process';
-import { HumanMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   PersistentNpcWorkspace,
@@ -185,6 +185,78 @@ describePostgres('persistent workspace independent-review corrections with actua
       await expect(workspace.importPortable(target, damaged)).rejects.toThrow(/portable workspace/u);
       await expect(workspace.getRuntimeMetadata(target)).rejects.toThrow('does not exist');
     }
+  });
+
+  it('rejects missing journal messages and disconnected window history before reserving an import target', async () => {
+    const source = await initialized('portable-continuity');
+    await workspace.appendMessages(source, [
+      { idempotencyKey: 'question', message: new HumanMessage('What happened at camp?') },
+      {
+        idempotencyKey: 'decision',
+        message: new AIMessage({
+          content: '',
+          tool_calls: [{ id: 'camp-look', name: 'observe_self', args: {} }],
+        }),
+      },
+      { idempotencyKey: 'receipt', message: new ToolMessage({ tool_call_id: 'camp-look', content: 'Camp is quiet.' }) },
+      { idempotencyKey: 'answer', message: new AIMessage('I saw a quiet camp.') },
+    ]);
+    const frozen = await workspace.freezeForCompaction(source);
+    await workspace.publishCompaction(source, {
+      expectedMemoryRevision: frozen.memoryRevision,
+      frozenWindowId: frozen.windowId,
+      throughJournalSeq: frozen.throughJournalSeq,
+      content: 'The camp was quiet.',
+      estimatedTokens: 5,
+      sources: [{ journalSeq: 4, kind: 'resident-decision' }],
+    });
+    await workspace.appendMessages(source, [
+      { idempotencyKey: 'next-question', message: new HumanMessage('And now?') },
+    ]);
+    const portable = await workspace.exportPortable(source);
+    const corruptions: readonly ((copy: MutablePortableWorkspace) => void)[] = [
+      ...[1, 2, 3].map((missing) => (copy: MutablePortableWorkspace) => {
+        copy.journal = copy.journal.filter((row) => Number(row.seq) !== missing);
+      }),
+      (copy) => {
+        const first = copy.windows.find((row) => row.status === 'sealed')!;
+        copy.windows = [...copy.windows, { ...first, window_id: 'forked-window' }];
+        copy.compactionCommits = [
+          ...copy.compactionCommits,
+          {
+            ...copy.compactionCommits[0],
+            commit_id: 'forked-commit',
+            frozen_window_id: 'forked-window',
+            sources: [{ journalSeq: 0, kind: 'prior-memory' }],
+          },
+        ];
+      },
+      (copy) => {
+        const current = copy.windows.find((row) => row.window_id === copy.state.current_window_id)!;
+        copy.windows = [{ ...current, starts_after_journal_seq: 0 }];
+        copy.compactionCommits = [];
+        copy.journal = copy.journal.map((row) => ({ ...row, window_id: current.window_id }));
+      },
+    ];
+    for (const corrupt of corruptions) {
+      const damaged = structuredClone(portable) as MutablePortableWorkspace;
+      corrupt(damaged);
+      const target = binding(`portable-continuity-target-${++sequence}`);
+      await expect(workspace.importPortable(target, damaged)).rejects.toThrow(/portable workspace/u);
+      await expect(workspace.getRuntimeMetadata(target)).rejects.toThrow('does not exist');
+    }
+    const target = binding(`portable-continuity-valid-${++sequence}`);
+    await workspace.importPortable(target, portable);
+    const restored = await workspace.exportPortable(target);
+    expect(restored.journal.map((row) => Number(row.seq)).sort((left, right) => left - right)).toEqual([1, 2, 3, 4, 5]);
+    await workspace.appendMessages(target, [
+      { idempotencyKey: 'after-restore', message: new HumanMessage('Continue.') },
+    ]);
+    const continued = await workspace.exportPortable(target);
+    expect(Number(continued.state.next_journal_seq)).toBe(7);
+    expect(continued.journal.map((row) => Number(row.seq)).sort((left, right) => left - right)).toEqual([
+      1, 2, 3, 4, 5, 6,
+    ]);
   });
 
   it('allows exact manifest and receipt retries but rejects changed immutable evidence across restart', async () => {

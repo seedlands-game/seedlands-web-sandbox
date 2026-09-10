@@ -36,6 +36,7 @@ test('真实目录、数字键、Space/Shift 飞行、安全切换与检查点�
     selectedSlot: 0,
   });
   await page.getByRole('button', { name: '关闭背包', exact: true }).click();
+  await expect(page.locator('#inventory-crafting')).toBeHidden();
   await page.keyboard.press('Digit2');
   await page.keyboard.press('KeyE');
   await page.locator('#creative-catalog button[data-item="stone-block"]').click();
@@ -45,6 +46,7 @@ test('真实目录、数字键、Space/Shift 飞行、安全切换与检查点�
   );
   await page.screenshot({ path: testInfo.outputPath('creative-catalog.png') });
   await page.getByRole('button', { name: '关闭背包', exact: true }).click();
+  await expect(page.locator('#inventory-crafting')).toBeHidden();
   await expect(page.locator('#creative-vitals-inactive')).toBeVisible();
   await expect(page.locator('#flight-toggle')).toHaveCSS('position', 'absolute');
   const flightBox = (await page.locator('#flight-toggle').boundingBox())!;
@@ -84,6 +86,7 @@ test('真实目录、数字键、Space/Shift 飞行、安全切换与检查点�
   await page.getByRole('button', { name: '切换创造模式', exact: true }).click();
   await expect(page.locator('#actor-mode-status')).toHaveText('创造模式');
   await page.getByRole('button', { name: '关闭背包', exact: true }).click();
+  await expect(page.locator('#inventory-crafting')).toBeHidden();
   await page.locator('#flight-toggle').click();
   await expect(page.locator('#flight-toggle')).toHaveAttribute('aria-label', '开启飞行');
   const saved = await actorState(page);
