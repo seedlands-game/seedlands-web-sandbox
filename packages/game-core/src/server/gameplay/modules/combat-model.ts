@@ -23,7 +23,7 @@ export type CombatActorProjectionV1 = Readonly<{
   maxHealth: number;
   lifecycle: 'alive' | 'dead';
   mode: CombatModeProjection;
-  meleeDefinitionId: string;
+  meleeDefinitionId: string | null;
   combat: CombatSnapshot;
   pending: CombatPendingProjection | null;
 }>;
@@ -223,7 +223,7 @@ export function validateCombatActorProjection(raw: unknown): CombatActorProjecti
     (value.health === 0) !== (value.lifecycle === 'dead') ||
     !['survival', 'creative'].includes(String(mode.value)) ||
     !safeRevision(mode.revision) ||
-    !identity(value.meleeDefinitionId)
+    (value.meleeDefinitionId !== null && !identity(value.meleeDefinitionId))
   )
     throw new TypeError('Combat actor projection is invalid.');
   let pending: CombatPendingProjection | null = null;

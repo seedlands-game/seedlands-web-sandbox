@@ -101,7 +101,6 @@ export function createCombatHostEnvironment(options: CombatHostEnvironmentOption
         : entity.archetype
           ? options.content.actorProfiles.get(entity.archetype)?.meleeDefinitionId
           : undefined;
-    if (!definitionId) throw new TypeError('Combat actor has no configured melee definition.');
     const pending = options
       .simulation()
       .combat.peekPendingHits()
@@ -114,7 +113,7 @@ export function createCombatHostEnvironment(options: CombatHostEnvironmentOption
       maxHealth: access.maxHealth,
       lifecycle: access.lifecycle,
       mode: { value: access.mode, revision: access.modeRevision },
-      meleeDefinitionId: definitionId,
+      meleeDefinitionId: definitionId ?? null,
       combat: options.simulation().combat.snapshotFor(id),
       pending: pending ? { token: pending.token, targetId: pending.targetId, baseDamage: pending.baseDamage } : null,
     });

@@ -93,6 +93,7 @@ export function defineCombatModule(): ModModule {
           const target = validateCombatActorProjection(state.read(combatActorAddress(targetId)));
           if (actor.reference.entityId !== actorId || target.reference.entityId !== targetId)
             throw new TypeError('Combat actor projection identity is invalid.');
+          if (actor.meleeDefinitionId === null) throw new TypeError('Combat actor has no configured melee definition.');
           if (actor.lifecycle !== 'alive' || target.lifecycle !== 'alive')
             throw new TypeError('Combat requires living actor projections.');
           return Object.freeze({

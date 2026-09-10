@@ -160,6 +160,20 @@ describe('actual registered Inventory action consumers', () => {
     expect(world.dropItem('alice', 0, 1).success).toBe(false);
     expect(world.createSnapshot()).toEqual(before);
   });
+  it('actors without a melee profile remain damageable but cannot initiate attacks', () => {
+    const { world } = setup();
+    const before = world.createSnapshot();
+    expect(world.simulation.requestActorCombat('bob', 'alice', 'unarmed')).toMatchObject({
+      success: false,
+      reason: 'Combat actor has no configured melee definition.',
+    });
+    expect(world.createSnapshot()).toEqual(before);
+    world.giveItem('alice', { itemId: 'wood-sword', count: 1 });
+    expect(world.attackEntity('alice', 'bob').success).toBe(true);
+    world.advanceRules(0.3);
+    expect(world.entities.get('bob')?.health).toBeLessThan(20);
+    expect(world.entities.get('alice')?.health).toBe(20);
+  });
   it('crafts, moves and consumes through the same ECS owner, and a changed weapon cancels Combat', () => {
     const { world } = setup();
     world.giveItem('alice', { itemId: 'wood-block', count: 1 });
