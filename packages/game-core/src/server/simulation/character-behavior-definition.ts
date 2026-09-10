@@ -48,7 +48,7 @@ const capabilities = [
   {
     name: 'flee-threat',
     kind: 'skill',
-    description: 'Move away from the closest visible threat.',
+    description: 'Commit to a fixed retreat from the closest visible threat, then finish at that destination.',
     arguments: {
       distance: { type: 'number', minimum: 2, maximum: 24 },
       maxReplans: { type: 'number', minimum: 0, maximum: 64 },
@@ -59,17 +59,20 @@ const capabilities = [
   {
     name: 'satisfy-hunger',
     kind: 'skill',
-    description: 'Collect and eat visible food until satisfied.',
+    description:
+      'Collect and eat visible food until satisfied. Avoid recently observed threats by default; false permits risk.',
     arguments: {
       satisfiedAt: { type: 'number', minimum: 0, maximum: 100 },
+      avoidThreats: { type: 'boolean' },
       maxReplans: { type: 'number', minimum: 0, maximum: 64 },
     },
   },
   {
     name: 'rest-at-home',
     kind: 'skill',
-    description: 'Return home and rest until daylight.',
-    arguments: { position: { type: 'position', required: true } },
+    description:
+      'Return home and rest until daylight. With avoidThreats, wait if the route crosses a recently observed threat.',
+    arguments: { position: { type: 'position', required: true }, avoidThreats: { type: 'boolean' } },
   },
   {
     name: 'patrol',
@@ -77,6 +80,7 @@ const capabilities = [
     description: 'Visit configured positions continuously.',
     arguments: {
       positions: { type: 'position', required: true },
+      avoidThreats: { type: 'boolean' },
       maxReplans: { type: 'number', minimum: 0, maximum: 64 },
     },
   },

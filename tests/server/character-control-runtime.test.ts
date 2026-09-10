@@ -408,7 +408,18 @@ describe('character control runtime', () => {
     expect(Math.abs((fled?.position[0] ?? 0) - player.position[0])).toBeGreaterThan(
       Math.abs((before?.position[0] ?? 0) - player.position[0]),
     );
-    await session.world.clock({ kind: 'advance', elapsedMs: 2_500 });
+    // The default tree now completes its committed retreat instead of cancelling exactly at the damage timer.
+    for (let step = 0; step < 20; step += 1) {
+      expect(await session.world.clock({ kind: 'advance', elapsedMs: 500 })).toMatchObject({ ok: true });
+      const state = await session.world.character({ kind: 'inspect', entityId });
+      if (!state.ok || state.data.kind !== 'state') throw new Error('Character state unavailable.');
+      if (
+        !state.data.character.behaviorTree.runtime.skills.some(
+          (skill) => skill.skill === 'flee-threat' && skill.status === 'running',
+        )
+      )
+        break;
+    }
     const resumed = await session.world.character({ kind: 'observe', entityId, sinceCursor: 0 });
     expect(resumed).toMatchObject({
       ok: true,

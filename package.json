@@ -62,7 +62,7 @@
     "build:agent": "pnpm --filter @seedlands/agent-server build",
     "agent:dev": "pnpm build:agent && pnpm --filter @seedlands/agent-server start",
     "test:living-npc": "playwright test changes/2026-09-09-living-npc-mvp/e2e",
-    "test:npc-behavior": "playwright test changes/2026-09-09-npc-behavior-workspace/e2e"
+    "test:npc-behavior": "playwright test changes/2026-09-09-npc-behavior-workspace/e2e changes/2026-09-10-npc-threat-oscillation/e2e"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",

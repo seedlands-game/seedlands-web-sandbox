@@ -9,8 +9,10 @@ import type {
   CharacterRuntimeOptions,
   CharacterSkillExecution,
 } from './character-runtime-types';
+import { CHARACTER_THREAT_MEMORY_SECONDS } from './character-runtime-types';
 const ARRIVAL = 1.25;
 const REPLAN_SECONDS = 1;
+const THREAT_CLEARANCE = 12;
 export type BehaviorCallbacks = Readonly<{
   record: (
     record: CharacterRecord,
@@ -29,6 +31,20 @@ export class CharacterBehaviorSkills {
     private readonly options: CharacterRuntimeOptions,
     private readonly callbacks: BehaviorCallbacks,
   ) {}
+  observeThreat(record: CharacterRecord, seconds: number): void {
+    const memory = record.behaviorTree.recentThreat;
+    if (memory) {
+      memory.secondsRemaining -= seconds;
+      if (memory.secondsRemaining <= 0) record.behaviorTree.recentThreat = undefined;
+    }
+    const observed = this.options.observe(record.entityId).threats[0];
+    const threat = observed ? this.options.entities.get(observed.entityId) : null;
+    if (threat)
+      record.behaviorTree.recentThreat = {
+        position: [...threat.position],
+        secondsRemaining: CHARACTER_THREAT_MEMORY_SECONDS,
+      };
+  }
   stepSkill(record: CharacterRecord, execution: CharacterSkillExecution, args: Record<string, unknown>): void {
     const actor = this.options.actor(record.entityId);
     const entity = this.options.entities.get(record.entityId);
@@ -79,6 +95,7 @@ export class CharacterBehaviorSkills {
     args: Record<string, unknown>,
   ): void {
     const actor = this.options.actor(record.entityId)!;
+    const avoidThreats = args.avoidThreats !== false;
     const satisfiedAt = numberArg(args, 'satisfiedAt', 20);
     if (actor.hunger <= satisfiedAt) return this.finish(record, execution, 'succeeded');
     const inventory = record.inventory.snapshot();
@@ -98,12 +115,33 @@ export class CharacterBehaviorSkills {
       return;
     }
     let target = execution.targetEntityId ? this.options.entities.get(execution.targetEntityId) : null;
-    if (!target?.stack || !getItemCapability(target.stack.itemId, 'consume')) target = this.nearestFood(record);
+    if (
+      !target?.stack ||
+      !getItemCapability(target.stack.itemId, 'consume') ||
+      (avoidThreats && !this.safePosition(record, target.position))
+    )
+      target = this.nearestFood(record, avoidThreats);
     if (!target) {
-      const home = record.homePosition;
+      execution.targetEntityId = undefined;
+      const body = this.options.entities.get(record.entityId)!;
+      if (!execution.searchOrigin) {
+        const threat = avoidThreats ? record.behaviorTree.recentThreat : undefined;
+        if (threat) {
+          const dx = body.position[0] - threat.position[0];
+          const dz = body.position[2] - threat.position[2];
+          const length = Math.hypot(dx, dz);
+          execution.searchOrigin = [
+            body.position[0] + (length ? dx / length : -1) * 4,
+            body.position[1],
+            body.position[2] + (length ? dz / length : 0) * 4,
+          ];
+        } else execution.searchOrigin = [...record.homePosition];
+      }
+      const home = execution.searchOrigin;
       return this.patrol(record, execution, {
         positions: [home[0] + 3, home[1], home[2], home[0], home[1], home[2] + 3, home[0] - 3, home[1], home[2]],
         maxReplans: args.maxReplans ?? 16,
+        avoidThreats,
       });
     }
     execution.targetEntityId = target.id;
@@ -124,23 +162,27 @@ export class CharacterBehaviorSkills {
       });
       return;
     }
-    this.move(record, execution, target.position, numberArg(args, 'maxReplans', 16), target.id);
+    this.move(record, execution, target.position, numberArg(args, 'maxReplans', 16), target.id, avoidThreats);
   }
 
   private rest(record: CharacterRecord, execution: CharacterSkillExecution, args: Record<string, unknown>): void {
     if (this.isDay()) return this.finish(record, execution, 'succeeded');
     const home = pos(args.position);
+    if (args.avoidThreats === true && !this.safePosition(record, home)) return this.waitForSafety(record, execution);
     if (distance(this.options.entities.get(record.entityId)!.position, home) <= ARRIVAL) {
       if (execution.actionId) this.completeAction(execution, { position: home });
       execution.phase = 'resting';
       return;
     }
-    this.move(record, execution, home, 16);
+    this.move(record, execution, home, 16, undefined, args.avoidThreats === true);
   }
 
   private patrol(record: CharacterRecord, execution: CharacterSkillExecution, args: Record<string, unknown>): void {
     const flat = args.positions as readonly number[];
-    const positions = Array.from({ length: flat.length / 3 }, (_, index) => pos(flat.slice(index * 3, index * 3 + 3)));
+    const positions = Array.from({ length: flat.length / 3 }, (_, index) =>
+      pos(flat.slice(index * 3, index * 3 + 3)),
+    ).filter((target) => args.avoidThreats !== true || this.safePosition(record, target));
+    if (!positions.length) return this.waitForSafety(record, execution);
     const target = positions[execution.count % positions.length];
     if (distance(this.options.entities.get(record.entityId)!.position, target) <= ARRIVAL) {
       const actionId = execution.actionId;
@@ -156,7 +198,7 @@ export class CharacterBehaviorSkills {
       });
       return;
     }
-    this.move(record, execution, target, numberArg(args, 'maxReplans', 16));
+    this.move(record, execution, target, numberArg(args, 'maxReplans', 16), undefined, args.avoidThreats === true);
   }
 
   private wander(record: CharacterRecord, execution: CharacterSkillExecution, args: Record<string, unknown>): void {
@@ -190,18 +232,25 @@ export class CharacterBehaviorSkills {
   }
 
   private flee(record: CharacterRecord, execution: CharacterSkillExecution, args: Record<string, unknown>): void {
+    const maxReplans = numberArg(args, 'maxReplans', 16);
+    if (execution.targetPosition)
+      return this.move(record, execution, execution.targetPosition, maxReplans, execution.targetEntityId);
     const threat = this.threat(record);
     if (!threat) return this.finish(record, execution, 'succeeded');
     const body = this.options.entities.get(record.entityId)!;
     const dx = body.position[0] - threat.position[0];
     const dz = body.position[2] - threat.position[2];
-    const length = Math.hypot(dx, dz) || 1;
+    const length = Math.hypot(dx, dz);
     const span = numberArg(args, 'distance', 6);
     this.move(
       record,
       execution,
-      [body.position[0] + (dx / length) * span, body.position[1], body.position[2] + (dz / length) * span],
-      numberArg(args, 'maxReplans', 16),
+      [
+        body.position[0] + (length ? dx / length : -1) * span,
+        body.position[1],
+        body.position[2] + (length ? dz / length : 0) * span,
+      ],
+      maxReplans,
       threat.id,
     );
   }
@@ -231,8 +280,10 @@ export class CharacterBehaviorSkills {
     target: CharacterPositionTuple,
     maxReplans: number,
     targetEntityId?: string,
+    avoidThreats = false,
   ): void {
     const entity = this.options.entities.get(record.entityId)!;
+    if (avoidThreats && !this.safePosition(record, target)) return this.waitForSafety(record, execution);
     if (distance(entity.position, target) <= ARRIVAL) {
       if (execution.actionId) this.completeAction(execution, { position: target });
       return this.finish(record, execution, 'succeeded');
@@ -248,6 +299,8 @@ export class CharacterBehaviorSkills {
     const changed = !execution.targetPosition || distance(execution.targetPosition, target) > 0.25;
     const due = execution.elapsedSeconds >= (execution.replanCount + 1) * REPLAN_SECONDS;
     if (existing && !changed) {
+      if (avoidThreats && !this.safePath(record, [entity.position, ...existing.path.slice(existing.pathIndex)]))
+        return this.waitForSafety(record, execution);
       this.advanceWaypoint(existing, entity);
       existing = this.options.action(existing.id);
       const progressing = distance(entity.position, record.lastPosition) > 0.05;
@@ -261,6 +314,9 @@ export class CharacterBehaviorSkills {
       if (execution.replanCount >= maxReplans) this.finish(record, execution, 'failed', `path-${plan.status}`);
       return;
     }
+    // ActionRuntime starts at waypoint 1; waypoint 0 is the snapped start cell, not an executed segment.
+    if (avoidThreats && !this.safePath(record, [entity.position, ...plan.path.slice(1)]))
+      return this.waitForSafety(record, execution);
     if (existing) this.options.updateActionPath(existing.id, plan.path, ++execution.replanCount, target);
     else {
       if (!this.options.canStartAction()) return this.finish(record, execution, 'failed', 'action-sequence-exhausted');
@@ -348,14 +404,61 @@ export class CharacterBehaviorSkills {
     });
   }
 
-  private nearestFood(record: CharacterRecord): GameplayEntity | null {
+  private safePosition(record: CharacterRecord, position: readonly number[]): boolean {
+    const memory = record.behaviorTree.recentThreat;
+    return !memory || distance(memory.position, position) >= THREAT_CLEARANCE;
+  }
+
+  private safePath(record: CharacterRecord, path: readonly CharacterPositionTuple[]): boolean {
+    const memory = record.behaviorTree.recentThreat;
+    if (!memory || !path.length) return true;
+    // Allow outward travel when starting inside the remembered radius, but not a shortcut back through it.
+    const clearance = Math.min(THREAT_CLEARANCE, distance(path[0], memory.position)) - 0.1;
+    for (let index = 1; index < path.length; index += 1) {
+      const start = path[index - 1];
+      const end = path[index];
+      const delta = end.map((coordinate, axis) => coordinate - start[axis]);
+      const squared = delta.reduce((sum, coordinate) => sum + coordinate * coordinate, 0);
+      const along = squared
+        ? Math.max(
+            0,
+            Math.min(
+              1,
+              delta.reduce((sum, coordinate, axis) => sum + coordinate * (memory.position[axis] - start[axis]), 0) /
+                squared,
+            ),
+          )
+        : 0;
+      if (
+        distance(
+          memory.position,
+          start.map((coordinate, axis) => coordinate + delta[axis] * along),
+        ) < clearance
+      )
+        return false;
+    }
+    return true;
+  }
+
+  private waitForSafety(record: CharacterRecord, execution: CharacterSkillExecution): void {
+    if (execution.actionId) this.options.interruptAction(record.entityId, 'remembered-threat');
+    execution.actionId = undefined;
+    execution.targetPosition = undefined;
+    execution.phase = 'waiting-for-safety';
+  }
+
+  private nearestFood(record: CharacterRecord, avoidThreats: boolean): GameplayEntity | null {
     const body = this.options.entities.get(record.entityId)!;
     return (
       this.options
         .observe(record.entityId)
         .visibleEntities.map((entry) => this.options.entities.get(entry.entityId))
         .filter((entry): entry is GameplayEntity =>
-          Boolean(entry?.stack && getItemCapability(entry.stack.itemId, 'consume')),
+          Boolean(
+            entry?.stack &&
+            getItemCapability(entry.stack.itemId, 'consume') &&
+            (!avoidThreats || this.safePosition(record, entry.position)),
+          ),
         )
         .sort(
           (a, b) =>
