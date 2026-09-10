@@ -203,3 +203,7 @@ PR自动审阅发现当前生成器V4与入口V2/V3旧文案不一致，同seed�
 ### S6 完整成长旅程的 runner 预算
 
 run34428303866已验证实际low质量，新增场景9/10通过，成长原始及retry分别在装煤和制作炉体的正常槽位操作处耗尽240s整体时限，之前采集/木石工具/矿物断言通过。该用例不是性能门槛；总预算设480s，为当前已完成多数流程加剩余冶炼、铁镐、箱子保存重进留出有界资源。保留全部业务步骤、数据量、单动作断言等待和retry/flaky硬失败。独立复核指出原20min job无法容纳480s失败后的完整retry/trace，因此Chromium job上限改30min；static仍20min，required checks和权限不变。该预算覆盖实测约9m39s固定流程、两次8min最坏成长、新增版本场景与上传缓冲，不把资源上限称作性能改善。原失败/trace保留，新HEAD全量CI是GREEN证据；不由旧timeout没有assertion失败推定后续未执行步骤通过，也不声明性能改善。
+
+### S6 木剑短阶段的确定性观察
+
+run34430089585在旧木剑场发生first失败/retry通过，flaky硬拒绝；新玩法未执行。失败截图与context确认low/benchmark、约2.69FPS、帧p95约918ms。原断言要求HUD第2击和独立interaction伤害7在同一次MutationObserver文字中同时出现，而武器hit仅80ms、伤害提示独立1.4s；不是稳定的同帧合同。修复限定测试：等待入口hydration并断言实际quality；保留真实pointer-lock和持续mouse.down，由正式PlayerController产生首击与buffer，在combo片段使用已存在public world.clock pause/advance观察确定阶段、暂停截图，分别确认5/7反馈、两段动作和目标死亡，finally释放鼠标并恢复clock。不得直接调用Combat action、伪造伤害、改变生产阶段时长、加retry或略过flaky；仍保留90s整场上限。原CI失败与软件渲染实测仅作诊断，不声称产品性能改善。

@@ -199,5 +199,27 @@
       }
     ],
     "regressionPassed": 21
+  },
+  "deterministicMeleeObservation": {
+    "failedRun": 34430089585,
+    "failure": "first failed, retry passed; rejected as flaky",
+    "actualFailedQuality": "low / benchmark",
+    "change": "real held input plus public clock stage observation, no production combat change",
+    "testSha256": "a0f3893aac4cb7a89d52e3b88b0cc36c56bca9098ac314b5d9f093c0b137ddd6",
+    "localPassed": 1,
+    "duration": "15.0s",
+    "types": "passed",
+    "eslint": "passed",
+    "review": "no_findings",
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-melee-clock.log",
+        "sha256": "4e4048dd9cb72e9a5a4074ca8bc928548590a4adc9cbd1e0c80e30823e83fdd4"
+      },
+      {
+        "path": "/tmp/seedlands-s6-ci-browser6-clean.log",
+        "sha256": "210c6e7e90f9538296034f9df4da84aa70f1b7c692c14cbe0dd82c9ea97b416a"
+      }
+    ]
   }
 }

@@ -107,6 +107,12 @@ reviewer 核对六份 root 日志尾部及 SHA-256，与 `evidence/s6-local-resu
 
 最终CI SHA-256 `295c87e48f1d7e572090c88345d165b661ae92f34dc29c26f7038235e94da8bc`；成长测试 `bcb155676df3857b43cb829cc85447fc5c74bd4fd341ba5716d5d663792b9c7a`。不是性能优化或实际费用结论，旧timeout没有assertion失败不证明未执行步骤通过。
 
+## 木剑确定阶段观察 delta 复核
+
+同一reviewer回读原flake证据及测试，确认runtime实际low、约2.69FPS；同DOM字符串耦合不是稳定合同。新测试以真实pointer-lock/mouse.down为唯一攻击和续击来源，等待“已衔接下一击”证明正式held-input写入buffer；clock200ms停在首击hit约20ms，随后350ms停在第二windup约50ms，再100ms停在第二hit约10ms，与木剑定义一致。Authority维持真实阶段直到DOM/截图观察，独立5/7反馈与特定重置目标死亡构成同一旅程关联，无需新调试接口。finally mouseup/run/disconnect，独立页面隔离；pause后的前置失败会销毁页面，不跨用例污染。最终无P0/P1/P2，未自行运行测试。
+
+最终测试SHA-256 `a0f3893aac4cb7a89d52e3b88b0cc36c56bca9098ac314b5d9f093c0b137ddd6`；root系统Chrome+SwiftShader/实际low定向1/1 PASS15.0s、test types与ESLint通过。原free-running截图与flake保留；受控观察不声称低FPS流畅性或生产性能改进。
+
 ## 独立审阅 Findings
 
 最终 `7c9561d` 在已审阅范围内，未发现剩余可证实的 P0/P1/P2 问题。

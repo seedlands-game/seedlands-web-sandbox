@@ -172,3 +172,5 @@ PR读回发现自动审阅P1：V4下旧UI的明确v2实际取最大旧版。新�
 run34428303866已终态：static/build通过，新Browser9/10；仅成长240s整体预算不足，创造和来源修复均由Linux证明。精确版本修复已提交1e1b492，本地全玩法14/14与CI配置治理12/12通过。成长480s配套Chromium30min以保留完整retry/trace，独立delta无剩余findings；基线21项本机复验进行中，之后两提交一并push继续CI。
 
 最新既有Browser基线21/21 PASS（1.4min），原成长retry trace已读取，确认正常命令持续推进至整场deadline，无pageError；预算与完整retry资源修正获独立回读。准备push版本修复与旅程预算两个语义commit，继续远端验收。
+
+run34430089585的木剑旧回归flaky阻止新玩法；artifact实际low2.69FPS。已改确定阶段观察，真实held-input与buffer/两段phase/5+7/死亡全保留，公开clock控制观察并finally恢复；定向1/1和types/ESLint通过，独立审阅无findings。生产源码仍1e1b492，准备提交测试修复后push重新跟进完整CI。

@@ -93,3 +93,9 @@ run34428303866、head3cdb4de：Static verification1759/4、Production build均SU
 经独立预算复核，整场上限480s配套Chromium job30min，保留完整一次失败取trace、flaky拒绝与全部测试。当前生产源码1e1b492的本地新玩法含版本四场14/14 PASS（2.4min，`/tmp/seedlands-s6-browser14.log`）；CI预算相关现有治理测试12/12 PASS。最终远端准出仍待新HEAD。
 
 原retry trace已实际读取：272个Browser协议调用完成，末段普通鼠标/查询调用约0.6–0.9s、末次槽位点击2.165s；未见pageError，最终失败为locator.count遇整场240s截止。test trace中的11次采集expect.poll中间不匹配均继续至后续工位步骤，不是最终失败。支持累计旅程时间不足的诊断，不宣称不存在其他缺陷。版本改动后的既有Browser基线21/21 PASS（1.4min，系统Chrome+SwiftShader，`/tmp/seedlands-s6-regression-version.log`）；任务服务退出，历史loading截图恢复原已交付字节。
+
+## 木剑短阶段观察的 flaky 修复
+
+run34430089585、head32ed578：旧基线21/Harness2/资产2通过，木剑first失败而retry通过，被failOnFlakyTests正确拒绝，新14项未执行。原日志`/tmp/seedlands-s6-ci-browser6-clean.log`、artifact`melee-34430089585-1`已读取；失败截图/context为low/benchmark、2.69FPS、p95约918ms，首击5点已显示。原测试将80ms hit/combo HUD与独立1.4s interaction伤害提示耦合到同一MutationObserver字符串，低FPS下不稳定。
+
+仅改测试观察：网络空闲后操作入口、断言真实quality；在combo中以公开clock暂停/推进200、350、100ms，保留真实持续按鼠标输入、正式buffer完成状态、两段phase、独立5/7反馈、截图与指定目标死亡，finally释放输入/恢复clock。没有新Combat命令或生产改动、没有增retry，90s仍保留。独立delta无findings；本机系统Chrome+SwiftShader实际low1/1 PASS15.0s，types/ESLint通过。当前HEAD仍须远端完整CI，不能把该flake的retry通过计作健康。
