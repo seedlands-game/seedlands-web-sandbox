@@ -31,6 +31,7 @@ class FakeFactoryPool {
   readonly rows = new Map<string, StoredBirth>();
   connectCount = 0;
   activeTransactions = 0;
+  readonly clientQueries: string[] = [];
   queryHook: ((sql: string) => Promise<void>) | undefined;
 
   private key(parameters: readonly unknown[]): string {
@@ -77,6 +78,7 @@ class FakeFactoryPool {
     this.connectCount++;
     return {
       query: async <Row extends Record<string, unknown>>(sql: string, parameters?: readonly unknown[]) => {
+        this.clientQueries.push(sql);
         if (sql === 'BEGIN') this.activeTransactions++;
         if (sql === 'COMMIT' || sql === 'ROLLBACK') this.activeTransactions--;
         return this.execute<Row>(sql, parameters);
@@ -217,6 +219,34 @@ describe('resident Factory isolation', () => {
     await expect(generated).rejects.toThrow('closed');
     expect(calls).toBe(0);
     expect(pool.connectCount).toBe(0);
+  });
+
+  it('rolls back without locking or inserting when close races BEGIN I/O', async () => {
+    const pool = new FakeFactoryPool();
+    let releaseBegin!: () => void;
+    const beginBlocked = new Promise<void>((resolve) => {
+      releaseBegin = resolve;
+    });
+    let began = false;
+    pool.queryHook = async (sql) => {
+      if (sql !== 'BEGIN') return;
+      began = true;
+      await beginBlocked;
+    };
+    const factory = new ResidentFactory({
+      pro: model(async () => birthPayload()),
+      pool: pool.asPool(),
+    });
+    const generated = factory.generate(world, 'begin-race', ['quiet'], waitCapabilities());
+    await vi.waitFor(() => expect(began).toBe(true));
+    expect(pool.activeTransactions).toBe(1);
+    const closing = factory.close();
+    releaseBegin();
+    await expect(generated).rejects.toThrow('closed');
+    await closing;
+    expect(pool.clientQueries).toEqual(['BEGIN', 'ROLLBACK']);
+    expect(pool.activeTransactions).toBe(0);
+    expect(pool.rows.size).toBe(0);
   });
 });
 

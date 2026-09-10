@@ -279,6 +279,7 @@ export class ResidentFactory {
     try {
       this.assertAvailable(signal);
       await client.query('BEGIN');
+      this.assertAvailable(signal);
       await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', [
         JSON.stringify([world.worldId, world.timelineId]),
       ]);
