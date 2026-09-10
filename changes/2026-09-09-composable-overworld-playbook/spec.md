@@ -175,3 +175,7 @@ Browser/Headless 从同一 checkpoint 恢复后比较权威事实和显式推进
 最新 S3 中间准出见 [Needs 检查点](s3-needs-checkpoint.md)：注册 Needs 的真实消费者、原子死亡与恢复上限已通过 full static 1435/4、独立审阅和 Browser 6/6。Combat 注册伤害与 Place/Break 仍在实施队列；S3/S4/S5/S6 的阶段状态未变。
 
 当前完整集成准出见 [S6 验收](s6-acceptance.md) 和 [T01–T14 映射](acceptance-map.md)：`50ff14c` 的 static 1759 passed / 4 skipped、独立 build、生产 Browser 10/10、dev 基线 21/21 及资产/木剑/Harness 5/5 分别通过。S3–S5 的实际实现已闭合，整体仍 Implementing，独立审阅已闭合，等待当前 PR/CI 准出；此前段落保留为阶段历史，不代表当前缺口。长期 docs baseline 增补代码地图中的工位 owner、可选角色配置、每世界 provider 与样例入口；候选 API 的实际边界见 [API 说明](api-candidate.md)，未扩展长期愿景或声明性能收益。
+
+### S6 远端冷启动修复合同
+
+PR #30 首轮 Chromium 检查因加载用例 flaky 失败；本机强制清空 Vite 优化缓存后确认首次世界启动才发现 `bitecs`，日志出现 `optimized dependencies changed. reloading`，UI 回到初始 Seed。既有加载 E2E 为实际 RED。修复只在 Web dev 构建配置显式预扫描 core 的该传递依赖；不新增依赖，不改变生产行为、超时、重试或 flaky 拒绝规则。冷启动四项加载 E2E、当前完整 static/build 和新 HEAD CI 验证；保留原失败与新结果，不声明性能收益。

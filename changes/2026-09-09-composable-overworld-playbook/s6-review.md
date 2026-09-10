@@ -77,6 +77,10 @@ reviewer 核对六份 root 日志尾部及 SHA-256，与 `evidence/s6-local-resu
 2. GameServer.edit/editBatch、工位联合提交及 checkpoint：ECS 和 voxel 双向一致性的关键位置。
 3. Browser restore epoch 与 definitions 传播：结合真实操作核对资源销毁、恢复和自定义模型。
 
+## 后续冷启动配置 delta 复核
+
+同一 reviewer 在原预算内只读复核 `2c21f2f` 后的 `apps/web/vite.config.ts:16-20`，文件 SHA-256 `b52b085e246ffee8571976b39433519a907556d0f5595cae9a2e3d5b64f99187`。未发现 P0/P1/P2。当前 Vite 7.3.6 的实际源码支持 `>` 嵌套依赖解析；Web 正式依赖 core，core 正式依赖 bitecs 0.4.0，预扫描准确指向该依赖，不扩大 Web 依赖或 core 责任。optimizer 属于 dev 路径，不改 Rollup 生产输出、协议或测试拒绝规则。reviewer 未运行测试，配置字节和 root 冷启动 RED/GREEN 另行核验。
+
 ## 独立审阅 Findings
 
 最终 `7c9561d` 在已审阅范围内，未发现剩余可证实的 P0/P1/P2 问题。

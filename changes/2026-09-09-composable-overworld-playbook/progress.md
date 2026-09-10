@@ -154,3 +154,5 @@ S3 核心实际消费者已接入；仍需默认内容与替代装配共同验�
 Midscene 补充视觉旅程已运行通过 1/1（3 处 aiAssert，39.474s），未读取 .env，生产预览已退出；来源和边界见 S6 记录。当前剩余独立审阅及远端 PR/CI，不重复已通过的 runtime 测试，除非新 findings 触发源码修复。
 
 独立审阅已闭合，准确范围与历史切片账本见 s6-review.md；无剩余可证实 findings。主干仍为 baeba09，remote 三项 required check 与 strict base 规则已读回。准备提交最终审阅记录并 push 创建 PR；CI 结果尚未产生。
+
+PR #30 已创建为 ready for review，head 2c21f2f 无冲突。首次 CI 的旧 loading 用例发生 flaky，已按失败处理；本机强制冷 Vite 缓存复现进入世界后才发现 bitecs、整页刷新。预扫描 core 正式传递依赖的修复已有 4/4 冷启动 GREEN 和独立 delta 无 findings。完整本地 static/build 在重跑，之后 push 新 SHA 并继续 CI；目标未停止，未合并。

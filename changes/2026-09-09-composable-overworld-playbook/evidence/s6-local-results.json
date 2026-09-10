@@ -58,5 +58,37 @@
     "result": "no_remaining_findings_in_reviewed_scope",
     "coverage": "S4/S5 and final integration deep review; S1-S3 scoped reviews plus final key-path checks",
     "report": "../s6-review.md"
+  },
+  "devOptimizerFix": {
+    "base": "2c21f2f375795ca25a1adf0017dd5de46ec656ea",
+    "configSha256": "b52b085e246ffee8571976b39433519a907556d0f5595cae9a2e3d5b64f99187",
+    "review": "no_findings",
+    "coldLoadingTests": "4 passed",
+    "logs": [
+      {
+        "path": "/tmp/seedlands-s6-cold-red.log",
+        "sha256": "e61328dc88f731a769e8c7ea2d818b50663a004c7792ee13d37b65f8f3dd8786"
+      },
+      {
+        "path": "/tmp/seedlands-s6-cold-vite-red.log",
+        "sha256": "c79c46235eb59a02ff508aa6708df8ea57964b96c4ece73a6194e1aca7ef28ec"
+      },
+      {
+        "path": "/tmp/seedlands-s6-cold-green.log",
+        "sha256": "dd585fece582715e20a5435f74844b16bfcdba1d1257c5108bb244581e71d1d8"
+      },
+      {
+        "path": "/tmp/seedlands-s6-cold-vite-green.log",
+        "sha256": "518f4cbb6030c2c6efb819921d6603c709e2fa74f7256a7836877cb93843384b"
+      },
+      {
+        "path": "/tmp/seedlands-s6-static3.log",
+        "sha256": "0a2bbd14d20f2fffc27dc6818f12cb966662096fa91573f3521cdccc7c523b8f"
+      },
+      {
+        "path": "/tmp/seedlands-s6-build2.log",
+        "sha256": "32efa0e54423e9c06784785cc2285a280e08129604f71378b67ab108939261d6"
+      }
+    ]
   }
 }

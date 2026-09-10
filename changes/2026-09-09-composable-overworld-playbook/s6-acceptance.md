@@ -45,3 +45,13 @@ CI 增加独立的 `pnpm test:composable-gameplay` 步骤及 always evidence 上
 `midscene/overworld-visual.yaml` 通过实际入口、E 背包与创造模式按钮运行；生产预览的同一实现 `50ff14c`，Chrome 1280×960。模型连通校验通过；单场景 1/1、三处 aiAssert 全部通过（39.474s），没有失败或未执行步骤。分别观察三维地形/准星/快捷栏、背包槽位/配方/中文可辨认、创造目录图标/名称/选择入口。结构化结果见 `evidence/s6-midscene-results.json`，原报告留在本机 `/tmp/seedlands-s6-midscene/midscene_run/report/`。
 
 该运行复用现有依赖与进程中的模型配置；从独立临时目录执行，未读取仓库 .env、未写入或展示凭据。预览服务已退出，4173 再次确认释放。模型视觉补充不替代成长、权限与保存的权威状态测试，也不构成主观听感或性能结论。
+
+## PR 首轮 CI 与冷启动修复
+
+[PR #30](https://github.com/seedlands-game/seedlands-web-sandbox/pull/30) 首轮 head `2c21f2f`，run `34422614222`：Production build 通过；Chromium 基线 20 passed/1 flaky，被既有 failOnFlakyTests 拒绝，后续玩法步骤未执行。失败用例为旧 loading UI，首次进入后 HUD 隐藏、Seed 回到空值；不能把 retry PASS 当整体通过。
+
+原 job 日志 `/tmp/seedlands-s6-ci-browser-job1-clean.log`；GitHub artifact `regression-34422614222-1` 保存失败 context 和 retry trace。本机 Vite `--force` 冷启动真实复现 3 passed/1 failed，`/tmp/seedlands-s6-cold-vite-red.log` 明确在首次 world Worker 导入时才发现 bitecs 并整页 reloading。
+
+修复仅在 Web 的 optimizeDeps.include 写入 `@seedlands/game-core > bitecs`，让现有正式传递依赖在首次扫描时解析；没有增加依赖或放宽 timeout/retry/flaky 门禁。相同强制冷启动四项 E2E 4/4 通过（6.2s），`/tmp/seedlands-s6-cold-green.log` 与 `/tmp/seedlands-s6-cold-vite-green.log` 记录不再 late optimize/reload。独立 reviewer delta 复核无发现。配置改变后的完整 static/build 及远端新 HEAD 结果继续读回，尚未预填。
+
+该冷启动配置的最终本地复验：完整 static 330 files /1759 passed/4 skipped、Svelte 0/0 与全部 types，通过；独立 build 通过。日志 `/tmp/seedlands-s6-static3.log`、`/tmp/seedlands-s6-build2.log`。配置字节与独立 delta reviewer SHA-256 一致，任务 4173 服务已停止。
