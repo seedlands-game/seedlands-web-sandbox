@@ -111,6 +111,7 @@
 | T14 | 背包持物时恢复同一世界 checkpoint，随后立即按 E            | restore 回执前同步发布新 gameplay 的关闭投影；首个 E 打开新背包且持物仍可继续拖放，不被旧 UI capture 状态吞掉。单元测试＋现有 Playwright。  |
 | T15 | GitHub hosted runner 执行完整 Static verification          | 保留单 worker、完整测试集、隔离与 coverage 门槛；job 资源上限允许当前全量套件正常终止，超时不冒充断言失败或性能验收。远端 required check。  |
 | T16 | hosted runner 完整执行确定性三昼夜与后续 NPC 浏览器组      | 保留 1800 秒模拟量、逐段断言、单 worker、retry/fail-on-flaky 与后续生产 Worker 验收；单测与 job 资源上限覆盖实际运行。远端 required check。 |
+| T17 | 慢 runner 完成近战体验场受击证据后再重置                   | 观察到真实受击与 HUD 状态后立即暂停权威时钟，夜行兽不在截图/音频取证时继续杀死玩家；重置及后续显式推进战斗断言保持原样。Playwright。        |
 
 “活人感”准出不是哲学判断：必须同时具有持续目标、身体结果、个体差异、环境响应、记忆连续和可解释失败。确定性 fixture 证明机制，不单独证明真实模型效果；人类体验复核单列，不伪装为机器通过。
 

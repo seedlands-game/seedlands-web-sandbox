@@ -316,3 +316,9 @@
 - Static coverage从04:59:30运行至05:27:33，取消前持续通过且已完成277/422文件，无断言失败；按当前runner进度的线性上界约43分钟。将Static上限调整为60分钟，保留单worker、完整测试集、隔离和coverage门槛。
 - Chromium在05:17:28进入13项NPC组；“确定性推进三个昼夜”保留1800秒模拟量与逐段状态断言，但初次及证据retry均触发240秒单测上限，之后继续执行到第8项时被job上限取消。新增T16：仅将该用例资源上限调整为10分钟，并将Chromium job上限调整为60分钟；按前52项约19分钟、该用例最坏两次各10分钟及剩余步骤估算仍留有余量，不增加retry、不放宽fail-on-flaky、不删浏览器/生产入口验收。
 - 定向三昼夜用例保持1800秒模拟量、原断言与零retry，本机1.8分钟PASS；候选格式、路径和diff检查通过。新SHA仍须由三项required checks重新验收。长期docs baseline不更新，理由同上：既有文档已经定义超时的资源语义与不可放宽项。
+
+### 2026-09-11 约13:45 近战取证竞态修复
+
+- 第三轮head `188dce773c6d2bbc86eb71c9d28ac31a128b7b37`的Production build 1分11秒通过；Chromium主回归、Harness与资源段通过，但近战段初次在“重新布置体验场”点击等待90秒超时，retry通过后被`failOnFlakyTests`判红。日志证明初次失败时`#death-overlay`拦截按钮：受击`-2`已成功且HUD已显示后，用例仍在截图/轮询音频，夜间敌人继续攻击直至玩家死亡。
+- 新增T17：在受击/HUD可观察后立即通过正常Harness暂停权威时钟，再保留原截图、音频、重置以及显式`advance`的两段挥砍/伤害断言。该修复不隐藏death overlay、不force click、不增加retry，也不削减敌人或战斗覆盖；长期docs baseline不更新，因为这是该历史浏览器旅程的具体时序修复。
+- 修复后近战真实Playwright用例零retry连续3/3 PASS（35.9秒）；定向格式、ESLint、路径与diff检查通过。仍以新远端SHA的完整required checks为最终证据。
