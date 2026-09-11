@@ -1,4 +1,4 @@
-import type { FrozenGameSaveSnapshot } from '@seedlands/game-core/server/persistence/game-save-snapshot';
+import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
 import type { BrowserPersistenceMetrics } from './browser-persistence-metrics';
 import type { BrowserPersistenceSaveResult } from './browser-persistence-worker-contract';
 

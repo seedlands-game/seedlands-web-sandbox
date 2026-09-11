@@ -8,7 +8,7 @@ import {
   voxelAppearanceMetalnessGlsl,
   voxelAppearanceEmissionGlsl,
 } from '../shaders/voxel-appearance-chunks';
-import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '@seedlands/game-core/world/voxel';
+import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type { MeshPart } from '../app-contracts';
 import type { QualityProfile } from './quality-profile';
 import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeline';

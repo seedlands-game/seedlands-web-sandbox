@@ -147,25 +147,33 @@ Players, creatures, and dropped items share registered collision shapes and swep
 
 ```text
 apps/web/          Browser product, Vite/SSG, PlayCanvas, Svelte, and browser Workers
-packages/game-core/ Platform-independent world, physics, runtime, server, and pure compute
-tests/             Unit, architecture, and long-lived browser regression tests
+packages/kernel/   Pure execution, state and registration guarantees
+packages/stdlib/   Composable world and gameplay mechanisms
+packages/eslint-plugin/ Architecture lint rules and independent tests
+playbooks/classic/ Classic content and gameplay composition
+apps/web/tests/    Web unit tests, integration contracts and the canonical Classic journey
+packages/*/tests/  Package-owned contract tests
 crates/            Pure Rust kernels and browser Wasm adapters
 changes/           Change contracts and their delivery-specific evidence
 scripts/           Workspace harness and engineering scripts
 ```
 
-The workspace uses one lockfile. Web consumes declared `@seedlands/game-core` exports. Core has no DOM, WebWorker, or Node ambient types and does not depend on product adapters; platform capabilities use narrow instance ports. Package boundaries still reject Web/Node cross-dependencies and reverse core dependencies. Product dependencies belong to their package; root development dependencies support engineering and integration tests.
+The workspace uses one lockfile. Web consumes declared `@seedlands/stdlib` exports. Core has no DOM, WebWorker, or Node ambient types and does not depend on product adapters; platform capabilities use narrow instance ports. Package boundaries still reject Web/Node cross-dependencies and reverse core dependencies. Product dependencies belong to their package; root development dependencies support engineering and integration tests.
 
 ## Verification
 
 ```bash
-pnpm test
-pnpm verify:static
+pnpm harness:plan --base <base-sha>
+pnpm verify:affected --base <base-sha>
 pnpm build
-pnpm test:e2e:regression
+pnpm harness:classic
+# Full maintained baseline, including world coverage:
+pnpm verify:all
+# Independently maintained lint rules:
+pnpm --filter @seedlands/eslint-plugin test
 ```
 
-These commands provide different evidence. Unit tests cover deterministic logic; static verification covers formatting, linting, path rules, coverage, and TypeScript; the production build proves bundling; Playwright covers deterministic browser behaviour. Visual semantics are evaluated separately with change-scoped Midscene flows.
+The impact plan explains selected contracts and consumers. `verify:static` is an alias for affected verification; a missing base falls back to the complete maintained test set. `verify:all` adds world coverage, one production build and the single Classic journey. ESLint rule tests run through their own package config. Builds bind source, lockfile and artifact hashes; Classic uses those exact bytes. Browser assertions, visual observations and timing samples remain distinct evidence. See [Harness contracts](docs/harness-contracts.md).
 
 The general computation Worker enables measured Rust kernels for chunk filling, halo, mesh descriptors, and mesh packing. Packing uses standard SIMD128 when supported, with scalar and optimized TypeScript fallbacks. Fluid, authority, logic, and persistence remain TypeScript by default. Each enabled Worker owns its own Wasm instance; shared memory and cross-origin isolation are not required. Rust 1.88.0 and the Wasm target are pinned in `crates/rust-toolchain.toml`; `pnpm wasm:rust:build` rebuilds the two production artifacts, and the normal production build verifies their source and binary hashes. `pnpm rust:check` enforces the pure-core boundary. The superseded MoonBit implementation and toolchain have been removed; its frozen measurements remain available in the [result snapshot](changes/2026-09-07-remove-moonbit-toolchain/moonbit-results.md). See the [adoption decision and measurements](changes/2026-09-07-data-plane-adoption/adoption-plan.md).
 

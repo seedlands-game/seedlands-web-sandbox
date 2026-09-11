@@ -1,21 +1,21 @@
-import type { AuthorityRuntime } from '@seedlands/game-core/server/authority/authority-runtime';
-import type { BoundCharacterControlRequest } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
+import type { BoundCharacterControlRequest } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type {
   CharacterControlRequest,
   CharacterControlResult,
   CharacterState,
   ControlBinding,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
 import type {
   WorldFrontier,
   WorldHarnessError,
   WorldHarnessResult,
-} from '@seedlands/game-core/server/harness/world-harness-contract';
+} from '@seedlands/stdlib/server/harness/world-harness-contract';
 import {
   WorldResourceAuthorizer,
   type WorldAuthorizationRule,
-} from '@seedlands/game-core/server/harness/world-authorization';
-import { characterHarnessOperation } from '@seedlands/game-core/server/harness/world-harness-operations';
+} from '@seedlands/stdlib/server/harness/world-authorization';
+import { characterHarnessOperation } from '@seedlands/stdlib/server/harness/world-harness-operations';
 
 const DIALOGUE_RANGE = 10;
 

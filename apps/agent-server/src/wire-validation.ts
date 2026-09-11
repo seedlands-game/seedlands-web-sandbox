@@ -1,10 +1,10 @@
-import type { CharacterObservation, ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { CharacterObservation, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { ControllerClientMessage } from '@seedlands/cognition-protocol';
 import {
   CHARACTER_OBSERVATION_MAX_EVENTS,
   CHARACTER_OBSERVATION_MAX_VISIBLE_ENTITIES,
   CHARACTER_OBSERVATION_MAX_VISIBLE_POIS,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
 
 const record = (value: unknown): Record<string, unknown> | null =>
   value !== null && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : null;

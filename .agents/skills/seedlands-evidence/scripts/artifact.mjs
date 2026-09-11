@@ -1,0 +1,1 @@
+../../../../scripts/harness/artifact.mjs

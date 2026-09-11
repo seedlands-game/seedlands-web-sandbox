@@ -7,6 +7,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@seedlands/game-core": "workspace:*"
+    "@seedlands/stdlib": "workspace:*"
   }
 }

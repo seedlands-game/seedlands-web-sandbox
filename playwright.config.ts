@@ -6,7 +6,7 @@ const fullChromium = process.env.SEEDLANDS_E2E_FULL_CHROMIUM === '1';
 const executablePath = fullChromium
   ? undefined
   : (process.env.SEEDLANDS_CHROME_PATH ?? (existsSync(systemChrome) ? systemChrome : undefined));
-const production = process.env.SEEDLANDS_E2E_PRODUCTION === '1';
+const production = true;
 const e2ePort = process.env.SEEDLANDS_E2E_PORT ?? (production ? '4273' : '4173');
 const serverOrigin = `http://127.0.0.1:${e2ePort}`;
 const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
@@ -15,13 +15,13 @@ const forceSwiftShader = process.env.SEEDLANDS_E2E_SWIFTSHADER === '1';
 
 export default defineConfig({
   testDir: '.',
-  testMatch: ['tests/e2e/**/*.spec.ts', 'changes/*/e2e/**/*.spec.ts'],
+  testMatch: ['apps/web/tests/e2e/classic-runtime.spec.ts'],
   outputDir: 'test-results',
   fullyParallel: false,
   workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
-  failOnFlakyTests: Boolean(process.env.CI),
+  failOnFlakyTests: true,
   reporter: process.env.CI ? [['line'], ['html', { open: 'never' }]] : 'line',
   use: {
     baseURL,

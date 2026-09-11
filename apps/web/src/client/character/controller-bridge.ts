@@ -3,9 +3,9 @@ import type {
   CharacterControlResult,
   CharacterGoal,
   ControlBinding,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { ControllerClientMessage, ControllerHostMessage, ControllerUsage } from '@seedlands/cognition-protocol';
-import type { WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
+import type { WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
 import { validateControllerHostMessage, validateControllerUrl } from './controller-bridge-validation';
 
 export type CharacterControllerPort = Readonly<{

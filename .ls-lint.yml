@@ -22,10 +22,18 @@ ls:
   packages/*/src:
     .dir: kebab-case
     .ts: kebab-case
-  tests:
+  apps/*/tests:
     .dir: kebab-case
     .test.ts: kebab-case
     .spec.ts: kebab-case
+  packages/*/tests:
+    .dir: kebab-case
+    .test.ts: kebab-case
+    .spec.ts: kebab-case
+  playbooks/*:
+    .dir: kebab-case
+    .json: kebab-case
+    .ts: kebab-case
   scripts:
     .dir: kebab-case
     .mjs: kebab-case
@@ -38,6 +46,13 @@ ls:
     .md: kebab-case
   changes/2026-09-07-agent-routing-contracts/skill/agent-work-routing:
     .md: regex:(SKILL|[a-z0-9]+(-[a-z0-9]+)*)
+  changes/2026-09-11-kernel-modules-playbooks-harness:
+    .dir: kebab-case
+    .md: kebab-case
+    .json: kebab-case
+  playbooks/*/tests:
+    .dir: kebab-case
+    .test.ts: kebab-case
   changes/*/experiments:
     .dir: kebab-case
     .rs: kebab-case
@@ -92,4 +107,5 @@ ignore:
   - apps/*/node_modules
   - apps/web/node_modules
   - packages/*/node_modules
+  - playbooks/*/node_modules
   - crates/target

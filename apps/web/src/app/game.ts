@@ -4,12 +4,12 @@ import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
 import { WaterExperience } from './gameplay/water-experience';
 import { BrowserChunkPersistence } from '../client/persistence/browser-chunk-persistence';
-import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/presentation/performance-profile';
 // prettier-ignore
-import { executeSlashCommand, type CommandExecutorPort, type SlashCommandExecution } from '@seedlands/game-core/server/commands/slash-command-parser';
+import { executeSlashCommand, type CommandExecutorPort, type SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
 // prettier-ignore
-import { ALL_COMMAND_CAPABILITIES, type CommandSource, type ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
+import { ALL_COMMAND_CAPABILITIES, type CommandSource, type ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import type { LifecycleSnapshot, RestoredSession } from './app-contracts';
 import { BrowserGameplay } from './gameplay/browser-gameplay';
 import { BrowserWorldStore } from './world/browser-world-store';
@@ -38,7 +38,7 @@ import { GameFrameLoop } from './game-frame-loop';
 import { GameSaveQueue } from './world/game-save-queue';
 import { startBrowserWorkerSession } from './browser-worker-session';
 import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
-import type { AuthorityReady } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { readGameRuntimeDiagnostics } from './experimental/game-runtime-diagnostics';
 import { restoreBrowserPresentation } from './world/browser-world-restore';
 import { CompanionSession } from './gameplay/companion/companion-session';
@@ -175,17 +175,17 @@ export class Game {
     const { harnessEnabled, generalWorkerCount, physicsHz, authorityTransportFaults } = sessionConfig;
     this.performanceProfile = applySessionWorkerBudget(this.performanceProfile, generalWorkerCount);
     const clientOptions = {
-      onSnapshot: (snapshot: import('@seedlands/game-core/server/authority/authority-session').AuthoritySnapshot) =>
+      onSnapshot: (snapshot: import('@seedlands/stdlib/server/authority/authority-session').AuthoritySnapshot) =>
         this.authoritySync.receive(snapshot),
-      onGameplay: (view: import('@seedlands/game-core/compute/authority-worker-protocol').AuthorityGameplayView) => {
+      onGameplay: (view: import('@seedlands/stdlib/server/protocol/authority-worker-protocol').AuthorityGameplayView) => {
         this.gameplayClient?.refresh();
         if (view.player.lifecycle === 'dead') this.controller?.releaseInput();
       },
-      onCommit: (commit: import('@seedlands/game-core/server/game-server-types').WorldCommitResult) =>
+      onCommit: (commit: import('@seedlands/stdlib/server/game-server-types').WorldCommitResult) =>
         this.world?.consumeServerCommit(commit),
       onUnknownChunk: (key: string) => runtimeControls.requestAuthorityChunk(this.world, key),
       // prettier-ignore
-      onInputDecision: (decision: { sequence: number; decision: import('@seedlands/game-core/runtime/session-protocol').SequenceDecision; requiresResync: boolean }) =>
+      onInputDecision: (decision: { sequence: number; decision: import('@seedlands/stdlib/runtime/session-protocol').SequenceDecision; requiresResync: boolean }) =>
         gamePlayer.applyAuthorityInputDecision(this.controller, decision),
       onWorldRestored: (ready: AuthorityReady) => this.restoreBrowserWorld(ready),
       onFatal: (error: Error) => {

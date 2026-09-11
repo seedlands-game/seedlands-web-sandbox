@@ -1,70 +1,68 @@
 # CI 测试边界与核心保障
 
-CI 绿色表示当前 SHA 在声明的执行环境中通过指定断言，不能证明没有缺陷。运行入口以 `package.json` 为准；GitHub 要求的 check 名保持 `Static verification`、`Production build`、`Chromium regression`。仓库 ruleset 在 2026-09-09 的读回确认这三项 required 且要求同步最新 base；本 change 不修改保护规则。
+CI 绿色表示当前 `headSha` 在已声明环境中通过被计划选中的断言，不能证明没有缺陷。运行入口以根 `package.json` 为准；GitHub required check 名保持 `Static verification`、`Production build`、`Chromium regression`。本 change 不修改 ruleset、权限或分支保护。
 
-## 每个 PR 的保护范围
+Harness 的 owner、计划、执行回执和生产产物字段见 [Harness 合同](harness-contracts.md)。
 
-| 层级                              | 当前保护                                                                                                                                                                 | 不能由此推导                                                                                          |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| 格式、Lint、类型和路径            | 源码约束、声明 API、依赖方向、生成起始页一致性                                                                                                                           | 业务正确、运行时接线正确                                                                              |
-| Vitest 全量 + world 行覆盖率 ≥80% | seed/生成器、体素/网格、存档、Authority/物理/玩法/协议/Worker 适配的已声明不变量；真实 Wasm 与 TS 对等及输入不变                                                         | 80% 并非全仓覆盖率；server/client/UI/Agent Server 不受该数值门槛保护，Wasm 内部 Rust 行覆盖率也未测量 |
-| Production build                  | 声明的生产产物可以构建                                                                                                                                                   | 产物可启动、路由/Worker/资源在部署路径正常                                                            |
-| Chromium regression               | 真实加载、Pointer Lock 移动/跳跃/碰撞、生产编辑与存档重进、streaming、地图、背包/合成/战斗、跨 Headless/Browser checkpoint、诊断、动态实体移除后的局部阴影失效等显式测试 | 所有浏览器/GPU/输入设备、视觉流畅、声音体验、公网和真实模型服务                                       |
+## 三个 required check
 
-文档白名单 PR 只跑格式和路径检查；可执行 change/skill、配置、测试和未知路径仍跑完整 CI。classifier 从受保护的 base tree 读取；异常 fail closed。不要把 docs-only 的跳过重型检查写成核心功能重新验证通过。
+| Check               | 实际责任                                                                                            | 不能由此推导                                                          |
+| ------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Static verification | 校验计划身份，执行格式、路径、Lint、类型和受影响 owner 的 Vitest 合同；非文档变更同时检查生成起始页 | 未选中的 owner 已在当前 SHA 重跑；浏览器或产品行为正确                |
+| Production build    | 对 `productionBuild: true` 的计划执行一次 `pnpm build`，生成带身份回执的 `apps/web/dist`            | 产物已在浏览器运行；部署或外部服务可用                                |
+| Chromium regression | 下载 build job 的同一份 `dist`，由 `pnpm harness:classic` 校验身份并运行唯一 Classic 生产旅程       | 其他浏览器、实体 GPU、音频主观体验、WAN、真实模型或所有玩法排列均通过 |
 
-现有 `changes/*/e2e` 是显式接入的需求证据，仍有历史维护债务。归档或更改其产品 API 前，必须决定移除已退出产品的用例，或经独立 Sol/xhigh 评审提炼为 `tests/e2e` 长期基线；不能因为路径在 changes 下就认为 CI 不再执行。测试选择清单必须与 package scripts 一起维护。
+`documentationOnly: true` 可明确跳过 Production build 和 Chromium 的运行步骤，但三个 required check 仍产生可读结果。scope 失败、计划无效、产物缺失或上游 job 失败必须让对应 check 失败，不能借 job-level skip 变绿。
 
-## GitHub hosted CI 能跑什么
+## Base / Head 影响计划
 
-| 场景                                                             | 执行方式 / 验收边界                                                                                                                                               |
-| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 纯逻辑、世界确定性、协议、非法输入、旧 epoch/sequence、取消/释放 | Vitest，固定 seed/时钟，完整字段断言；相同输入与当前生产实现比较                                                                                                  |
-| Node ↔ 浏览器 WebSocket                                          | 同一 runner 启动仅监听 loopback 的 Node 服务，真实 Chromium WebSocket；模型响应使用确定性 fixture，端口动态分配、ready 等待、finally 关闭；不需要互联网或模型密钥 |
-| 已打包 Node 入口                                                 | build 后 spawn 独立进程，外部客户端 handshake/ready，SIGTERM 退出并确认端口释放；进程内 import 测试不覆盖此边界                                                   |
-| 浏览器 Worker、IndexedDB、Pointer Lock、WebGL2 功能              | Playwright 单 worker，按可观察状态等待；确需软件 GPU 的场景显式配置 SwiftShader，结果只声明此环境的功能正确性                                                     |
-| 真实外部模型/凭据/服务                                           | 单独、显式 opt-in 验收，报告模型/超时/费用/失败；普通 PR 不依赖秘密或远端服务可用性                                                                               |
-| FPS、首屏绝对时延、CPU/GPU/RSS 性能收益                          | 固定设备、性能窗口、A/A 与交错 A/B；共享 hosted runner 的耗时可诊断，但不能与开发机绝对阈值混比                                                                   |
-| 实体 GPU 驱动、音频主观体验、移动端手势、WAN/部署                | 专用环境或人工/设备验证。软件 Chromium green 不等价于这些环境通过                                                                                                 |
+PR 固定 GitHub base SHA 为 `baseSha`、实际 checkout 的 PR head SHA 为 `headSha`。若 base tree 已有 `scripts/harness/plan.mjs`，CI 从 base commit 解出完整 `scripts/harness/` 到临时目录，连接当前安装依赖后运行该可信 planner；planner 同时读取 base/head 的 registry、文件与依赖图。候选分支不能仅靠修改自己的 selector 或 registry 降低验证范围。
 
-超时是资源上限，不是性能验收阈值。容量、队列长度、复制字节、状态机不变量属于确定性断言，即便测试名含 performance 也不能整体排除。当前两份显式 opt-in 性能文件中的 skipped 项不能计为通过。
+scope 与 static job 都获取完整 Git 历史：static runner 会独立重建 base/head 的必要集合并拒绝缩减计划；仅下载计划而浅检出 head 无法完成这次复核。
 
-## TDD 的可靠性要求
+若 base 尚无 selector，这是一次明确的 `missing-base-selector` bootstrap：CI 使用 head planner 的 `--all`，并硬校验结果为 `full-new`、需要生产构建和 Classic、且至少选中一个实际合同。main push 始终使用 `--all` 生成 `full-new`；仍保留实际 before/head 和诊断，缺失可靠 before 不会降级为空计划。
 
-新增功能先让预期行为在正确边界得到可执行 RED，再通过真实 owner 路径完成 GREEN。修复竞态时，RED 必须能通过控制消息顺序、旧 epoch、取消、延迟和队列上限触发，不能只在快机器上运行 happy path。使用 fake clock 验证逻辑定时，用真实浏览器验证输入与线程接线，两者相互补充。
+普通 PR 使用 `affected` 模式。计划同时考虑两侧 owner、删除、移动、type-only/barrel 消费、声明的动态 capability、构建配置和反向消费者闭包。以下情况进入 `full-new`：
 
-核心功能至少拥有：规则级成功/失败断言、模块边界真实交互断言，以及一条用户可观察的浏览器旅程。重点是启动→进入世界、输入→Authority→可见反馈、编辑→保存→重进，以及角色生命周期/动作/战斗。不要用大量 UI 旅程重复证明已经由逻辑测试覆盖的排列组合，也不要只测 mock 的调用次数。
+- selector、runner、registry、包边界、根构建、锁文件、CI、AGENTS、Evidence Skill 或 Harness 合同变化；
+- 缺失/无效 base 或 head registry、未知路径、无可靠 diff、未解析依赖；
+- 显式 `--all`。
 
-异步回归还须核对因果边界：就绪条件只绑定被测对象；夹具显式定义会影响结论的环境；计数基线与正式 owner 的完成边界对应。输入 ack 前进可能确认的是旧输入，计数增长也可能来自前置动画，须结合目标操作对应的状态、轨迹或结果判断。具体帧数/tick 数由用例设计决定，不作为通用规范。
+`full-new` 表示完整的当前有效合同基线，不重新执行 `changes/*/e2e` 历史矩阵。缺 owner、选中 pattern 无匹配、base 必需测试在 head 消失、计划身份不等于 checkout，或非文档计划得到 `No effective tests selected` 时必须 BLOCKED。
 
-覆盖率之外必须问：如果去掉校验、重放旧消息、丢弃保存、跳过输入释放或调用错误的 Worker/打包入口，这些测试会失败吗？优先为这些具体故障增加反例；不能承诺 TDD 或一个覆盖率数字保证整个程序健壮。关键回归按风险做定向故障反例，反例仍通过时先修正测试；不为每个 PR 引入全仓 mutation testing。
+## 测试 owner 与执行位置
 
-## 执行成本与失败定位
+| Owner                         | 独立入口                                  | 责任                                                                                          |
+| ----------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `@seedlands/kernel`           | `packages/kernel/vitest.config.ts`        | 无默认玩法的状态、注册、事务、执行与恢复合同                                                  |
+| `@seedlands/stdlib`           | `packages/stdlib/vitest.config.ts`        | world、physics、runtime、compute、server 与标准模块合同；world 行覆盖率映射到迁移后的真实目录 |
+| `@seedlands/playbook-classic` | `playbooks/classic/vitest.config.ts`      | 内容身份、Pack 装配和 Classic 选择，不启动第二个浏览器                                        |
+| `@seedlands/eslint-plugin`    | `packages/eslint-plugin/vitest.config.ts` | 包方向、公开 exports、纯逻辑、UI/Authority 目录等静态反例；不依赖根 ESLint/Vitest 配置        |
+| Web / Agent / integration     | 各 app 的 `vitest.config.ts`              | 客户端、宿主、协议和跨 owner 的非浏览器集成                                                   |
 
-- 静态 job 的生成、格式、Lint、路径、类型和全量覆盖率分别显示耗时；类型错误提前反馈。所有既有门禁保留，不默认关闭 Vitest 隔离或放大并发。
-- 大型 TypedArray 对等使用原生 strict deep equality 时仍覆盖全部 corpus/所有元素/类型/有效视图；保留小结构和语义断言。不要用抽样、只比长度或 hash 降低成本。
-- 浏览器重试一次用于取得 trace，CI `failOnFlakyTests` 使重试通过仍然失败；不得把 flaky 当作健康通过。失败应修复时序或产品原因，而非增加 retries。
-- 浏览器测试默认自行启动严格端口的服务，端口被占则失败，不复用同端口的其他项目。可用 `SEEDLANDS_E2E_PORT` 选择空闲测试端口；只有已核对目标是当前源码的本地开发者才显式设 `SEEDLANDS_E2E_REUSE_SERVER=1`。CI 与生产 preview 始终禁用复用。
-- 每轮 Playwright 结束后立即上传独立名称的报告，防止下一条命令覆盖前一轮错误上下文。trace 和截图用于定位，不当作性能采样。
-- 优化先读取 step/test 耗时和失败记录；本机受控对照与新 SHA 的远端 CI 状态分别记录，不能把不同机器的 before/after 当严格 A/B。
+Runner 按计划中的 concrete test files 分组到所属 package config，拒绝跨根路径、空匹配、todo、pending 和未实际执行的 selected file。测试应位于 owner 包或明确 integration owner；`changes/` 保存需求合同与证据，不再是活跃测试运行目录。
 
-## 当前已知缺口与下一步
+Web 的 engineering/architecture 合同会启动独立的编译器或全源 Lint，因此与运行时测试分进程顺序执行，避免把子进程负载叠在功能用例的固定超时上。运行时组保持 world coverage；工程组仍用 Web 配置，ESLint 组仍走独立插件包。本地每组最多 2 个 Vitest worker，CI 最多 1 个；此分组不缩减计划选中的文件，也不放宽测试超时。
 
-2026-09-09 的核查只讨论当时主线产品；NPC 可组合基线新增的保障与实际准出见[本期 change](../changes/2026-09-10-npc-composable-baseline/spec.md)。
+## 唯一 Classic 线路
 
-- 常规浏览器回归仍通过 Vite dev server 运行。NPC 基线为浏览器 job 增加独立 `build:web` + `test:npc-production`：在 preview 端口启动实际 `dist`，检查打包 Authority Worker、NPC 状态与 checkpoint 恢复和真实玩家移动。它不复用开发服务器；断言范围仍不是所有生产路由/部署方式。两次构建和对应浏览器证据分开保存，不将 dev regression 冒充生产 smoke。
-- Agent 确定性/协议/PG 测试进入 Vitest，`bundled-entrypoint.test.ts` 另经根 `build:agent` 构建后启动真实 Node 子进程，完成 PostgreSQL + WebSocket ready、SIGTERM 与端口释放。Docker 不可用时相关 PG 用例显示 skipped，不能计为通过；真实模型仍只在显式 opt-in 运行，普通 CI 不传上游密钥。
-- `test:npc-behavior` 保留断网生活、威胁边界、三角色有限食物、三个认知通道、世界/PG checkpoint 配对和独立扩展 Pack 的需求测试。1800 秒是模拟时间；可选真实墙钟长跑和外部模型用例的 skipped 不等于准出。
-- 光影修复是测试口径遗漏的具体例子：旧 gate 没有验证“动态实体移除、体素 revision 不变时清掉阴影”。本次把该用例接入每 PR regression，并以禁用移除失效的突变确认它会失败；它验证 shadow update 请求而非逐像素视觉效果，仍不能推导所有材质、动画、灯位和 GPU 下的像素都正确。
-- 覆盖率门槛仅约束 world 行覆盖率；核心规则、存档、输入、Worker/Authority 新鲜度和资源释放仍需要可触发的故障反例。每次线上/人工发现的核心缺陷，应补到能捕获根因的最低层，并保留少量跨层主旅程。
-- 光影源 change 记录了两条不在默认 CI 清单中的历史采集/碰撞用例在未改动 main 上也失败；它们仍是需独立定位的基线债务，不将未执行用例计为通过。
+全仓长期维护一个 Playwright spec：`apps/web/tests/e2e/classic-runtime.spec.ts`。`playwright.config.ts` 只匹配该文件；根 package scripts、CI 和 Evidence Skill 不直接列历史 spec，也不增加第二个 `playwright test` 调用。唯一启动实现使用生产 `dist` 的 preview、严格端口、一个 browser context 与版本化 Classic scenario。
 
-### 提速候选（尚未实施，须先对照）
+build job 只执行一次 `pnpm build`。`apps/web/dist/harness-artifact.json` 记录 source、lock 与每个产物文件的摘要；Chromium job 下载该 artifact 到相同路径，`pnpm harness:classic` 在启动前后调用 `verifyArtifact`。重新构建、缺 receipt、source/lock 不一致或任一字节变化都失败。
 
-依据 [28f3058 的 CI run](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34335632381)，Vitest 367.97s 中测试体合计312.85s；`world-harness-session` 62.467s、`headless-session` 49.982s、`data-plane-rust` 26.755s、`server-headless-cli` 24.401s，四文件合计约占总墙钟44.5%。这些是既有 SHA 的热点定位，不能当成后续组合提交的性能结果。
+真实操作通过 Playwright 输入进入产品；Harness 只观察正式完成边界，不能代挖掘、代移动、途中补给或直接修状态。输入 ack、全局计数增加、HTTP 200 或单张截图不能独立证明目标动作完成。保存恢复、Worker/Wasm/backend、资源加载与 stale epoch 必须对齐本次 run id、source SHA 和目标操作状态。
 
-1. **测单 worker 与两个 worker。** 保持测试全集、进程隔离、coverage 和断言不变；在同类 runner 上 A/A 后交错 A/B，同时记录墙钟、CPU/RSS、失败与 flaky。当前命令强制 `--maxWorkers=1`，文件间并行可能缩短关键路径，但 Headless、Wasm 和 CLI 子进程争用也可能抵消收益。禁止直接承诺两倍速度或关闭隔离。
-2. **减少与断言无关的完整世界启动。** 两个 Headless 测试文件约24次创建，每次支付 safe-spawn、starter chunks、实体 chunk/mesh 初始化成本。优先将非法输入矩阵下沉到已有 validator，保留真实 Harness 路由与错误映射的集成断言；需要独立世界状态的测试继续隔离。共享可变 session 会引入顺序依赖，不采用。若使用只读初始 checkpoint，须验证恢复后的 clock、队列、实体与缓存隔离再测收益。
-3. **减少重复 CLI bootstrap。** `server-headless-cli` 至少七次进程启动。可在同一 JSONL 生命周期中串联兼容的协议断言，把纯语义矩阵放低层；保留真实子进程的 stdin/stdout、退出码、EOF 与失败清理覆盖。不能为了省启动而删掉这些进程边界。
+## TDD 与证据边界
 
-`data-plane-rust` 的固定 workload corpus 同时检查 Rust/TS 等价和输入不变，不能把减少 corpus 或只比 hash 称作无损优化。四个慢文件的时间也不是全部可消除的时间。下一轮先以有限并发作单轴实验，再针对剩余热点优化初始化；通过项共存后仍需组合验证。组合CI还观察到一条edge-support flaky使serial组整组重跑，拆解不必要的串行依赖是失败成本候选；必须先确认各用例和结果汇总独立，不能把失败隐藏为部分PASS。
+新增功能先在实际 owner 的最低充分边界取得可执行 RED，再让生产路径 GREEN。纯规则、非法输入、旧 epoch/sequence、取消与资源释放优先固定 seed/clock 的 Vitest；输入、Worker、IndexedDB、Pointer Lock、WebGL2 和生产资源接线进入 Classic。真实模型、PG、WAN、实体 GPU、移动端手势和音频主观体验是显式 opt-in 或专用环境证据。
+
+关键回归要有能触发故障的反例。删除校验、重放旧消息、丢弃保存、调用错误 Worker、删除 selected test 或增加第二条 Playwright 线路时，至少一项门禁应失败。覆盖率数字不替代这些反例；子集覆盖率不得标作全仓覆盖。
+
+浏览器重试一次只用于取得 trace，`failOnFlakyTests` 使重试通过仍然失败。超时是资源上限，不是性能阈值。FPS、CPU/GPU/RSS 或“更快”结论必须进入独占性能窗口，以 A/A 和交错 A/B 取证；hosted runner 时长只能用于诊断。
+
+## 失败与证据保留
+
+- scope、static、build、Chromium 各自保留精确失败；下游不得在上游失败时以 skipped 冒充成功。
+- Harness 结果写入 `harness/results/<runId>/result.json`，记录 stage、plan、steps、artifact 与 Classic receipt；失败步骤同样保留。
+- CI 上传计划、生产 `dist` 和浏览器/Harness 报告。计划与产物均绑定 `headSha`，浏览器只消费 build job 上传的字节。
+- skipped、todo、pending、flaky 或外部依赖不可用不能计作 PASS。环境/身份/数据缺口标注 BLOCKED，并保留下一项可执行诊断。

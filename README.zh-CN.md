@@ -140,14 +140,17 @@ Node Dedicated Server 已在完成 MVP 研究后从活跃产品和强制门禁�
 
 ```text
 apps/web/          浏览器产品、Vite/SSG、PlayCanvas、Svelte 与浏览器 Worker
-packages/game-core/ 平台无关的世界、物理、运行时、服务端与纯计算
-tests/             单元、架构与长期浏览器回归测试
+packages/kernel/   实例隔离、执行时钟、事务和状态生命周期
+packages/stdlib/   显式注册的世界、物理、玩法与计算机制
+playbooks/classic/ Classic 产品内容与普通 Pack
+packages/eslint-plugin/  独立 ESLint 规则与规则测试
+apps/web/tests/    Web 单元、跨模块集成与唯一 Classic 浏览器回归
 crates/            纯 Rust 计算内核与浏览器 Wasm 适配层
 changes/           变更合同及所属的交付证据
 scripts/           workspace Harness 与工程脚本
 ```
 
-workspace 使用一个 lockfile。Web 经 `@seedlands/game-core` 声明的 exports 消费逻辑；core 不获得 DOM、WebWorker 或 Node ambient types，也不依赖产品适配。平台能力通过窄实例端口注入。包边界继续拒绝 Web/Node 互依和 core 反向依赖；产品依赖由所属包声明，根开发依赖支持工程和整合测试。
+workspace 使用一个 lockfile。Web 经 `@seedlands/stdlib` 声明的 exports 消费逻辑；core 不获得 DOM、WebWorker 或 Node ambient types，也不依赖产品适配。平台能力通过窄实例端口注入。包边界继续拒绝 Web/Node 互依和 core 反向依赖；产品依赖由所属包声明，根开发依赖支持工程和整合测试。
 
 浏览器默认运行五个后台 Worker：权威状态与固定步长物理、游戏逻辑、流体计算、通用计算和持久化各一个。可选第二个通用计算 Worker，此时总数为六个。渲染与本地玩家预测留在主线程。物理、玩法与流体分别使用独立频率和有界追赶，耗时逻辑与网格计算不驱动物理时钟；通信使用带版本的消息与可转移缓冲，不要求共享内存。
 
@@ -159,7 +162,7 @@ workspace 使用一个 lockfile。Web 经 `@seedlands/game-core` 声明的 expor
 pnpm test
 pnpm verify:static
 pnpm build
-pnpm test:e2e:regression
+pnpm harness:classic
 ```
 
 General 计算 Worker 默认启用实测采纳的 Rust Chunk填充、halo、mesh描述符和网格打包；打包在能力可用时使用标准SIMD128，保留标量与优化 TypeScript 回退。Fluid、Authority、Logic、Persistence 默认仍用 TypeScript。每个启用 Worker 独立持有 Wasm 实例，不要求共享内存或跨源隔离。`crates/rust-toolchain.toml` 固定 Rust 1.88.0 与 Wasm 目标；`pnpm wasm:rust:build` 重建两种生产产物，常规生产构建校验源码与二进制 hash；`pnpm rust:check` 约束纯 core 边界。已淘汰的 MoonBit 实现和工具链不再保留，冻结测量仍可在[结果快照](changes/2026-09-07-remove-moonbit-toolchain/moonbit-results.md)中审阅。采纳原因和实际收益见[本轮方案](changes/2026-09-07-data-plane-adoption/adoption-plan.md)。

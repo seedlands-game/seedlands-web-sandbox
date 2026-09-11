@@ -4,8 +4,8 @@ import type {
   CharacterControlResult,
   CharacterObservation,
   CharacterState,
-} from '@seedlands/game-core/runtime/character-control-protocol';
-import type { WorldHarnessPort, WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
+import type { WorldHarnessPort, WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
 import type { ResidentBirthPackage, ResidentDocumentPath, ResidentStatus } from '@seedlands/cognition-protocol';
 import type { BoundCharacterControlPort } from '../../../client/authority/browser-authority-client-contract';
 import {

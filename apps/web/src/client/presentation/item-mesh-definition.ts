@@ -1,5 +1,5 @@
-import { faceMaterialFor, type FaceMaterialId } from '@seedlands/game-core/world/voxel';
-import { modelBoxesForVoxel, type LocalBox } from '@seedlands/game-core/world/voxel-model';
+import { faceMaterialFor, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { modelBoxesForVoxel, type LocalBox } from '@seedlands/stdlib/world/voxel-model';
 
 export type ItemMeshGroup = Readonly<{
   material: FaceMaterialId;

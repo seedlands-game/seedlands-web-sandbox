@@ -1,6 +1,6 @@
-import type { LogicIntentBatch, LogicObservation } from '@seedlands/game-core/server/logic/logic-protocol';
-import type { AuthorityRuntime } from '@seedlands/game-core/server/authority/authority-runtime';
-import type { AuthorityWorldHarness } from '@seedlands/game-core/server/harness/authority-world-harness';
+import type { LogicIntentBatch, LogicObservation } from '@seedlands/stdlib/server/logic/logic-protocol';
+import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
+import type { AuthorityWorldHarness } from '@seedlands/stdlib/server/harness/authority-world-harness';
 import type { BrowserAuthorityIngress } from './authority-worker-ingress';
 import type { BrowserAuthorityDeterministicAdvance } from './authority-worker-deterministic-advance';
 import { AuthorityWorkerDirectLogic } from './authority-worker-direct-logic';

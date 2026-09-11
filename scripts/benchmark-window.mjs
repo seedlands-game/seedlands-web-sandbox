@@ -6,9 +6,18 @@ import { mkdir, readFile, rename, rm, rmdir, writeFile } from 'node:fs/promises'
 import { freemem, loadavg, totalmem } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { measurementSummary } from './harness/performance-window-proof.mjs';
 
 export const defaultLockDirectory = '/tmp/seedlands-benchmark-reservation';
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const delay = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+async function writeReceipt(evidencePath, receipt) {
+  await mkdir(path.dirname(evidencePath), { recursive: true });
+  const temporary = `${evidencePath}.${receipt.windowId}.tmp`;
+  await writeFile(temporary, `${JSON.stringify(receipt, null, 2)}\n`, { mode: 0o600 });
+  await rename(temporary, evidencePath);
+}
 
 async function readOwner(lockDirectory) {
   try {
@@ -123,9 +132,18 @@ export async function runReservedCommand({
   waitTimeoutMs,
   pollMs,
   ownerThread,
-  evidencePath = process.env.SEEDLANDS_RESERVATION_EVIDENCE,
+  evidencePath,
+  rootDirectory = repositoryRoot,
 } = {}) {
   if (!command) throw new Error('缺少性能命令');
+  const windowId = process.env.SEEDLANDS_RESERVATION_RUN ?? randomUUID();
+  const receiptPath =
+    evidencePath ??
+    process.env.SEEDLANDS_RESERVATION_EVIDENCE ??
+    `harness/results/performance-windows/${windowId}.json`;
+  const declarationPath = `${receiptPath}.measurement.json`;
+  const absoluteReceiptPath = path.resolve(rootDirectory, receiptPath);
+  const acquiredAt = new Date().toISOString();
   const controller = new AbortController();
   let receivedSignal = null;
   const handlers = new Map();
@@ -145,14 +163,30 @@ export async function runReservedCommand({
       waitTimeoutMs,
       pollMs,
       ownerThread,
+      runId: windowId,
       signal: controller.signal,
     });
   } catch (error) {
     for (const [name, handler] of handlers) process.off(name, handler);
-    if (error.code === 'CANCELLED') return { exitCode: receivedSignal === 'SIGINT' ? 130 : 143 };
+    const exitCode =
+      error.code === 'CANCELLED' ? (receivedSignal === 'SIGINT' ? 130 : 143) : error.code === 'TIMEOUT' ? 75 : 1;
+    await writeReceipt(absoluteReceiptPath, {
+      schemaVersion: 1,
+      kind: 'seedlands-performance-window',
+      status: 'FAIL',
+      windowId,
+      ownerThread: ownerThread ?? process.env.CODEX_THREAD_ID ?? 'unknown',
+      startedAt: acquiredAt,
+      endedAt: new Date().toISOString(),
+      exitCode,
+      error: error instanceof Error ? error.message : String(error),
+      measurement: { status: 'NOT_RECORDED' },
+      samples: [],
+    });
+    if (error.code === 'CANCELLED') return { exitCode, windowId, evidencePath: receiptPath };
     if (error.code === 'TIMEOUT') {
       process.stderr.write(`${error.message}\n`);
-      return { exitCode: 75 };
+      return { exitCode, windowId, evidencePath: receiptPath };
     }
     throw error;
   }
@@ -169,7 +203,13 @@ export async function runReservedCommand({
   const timer = setInterval(sample, 5000);
   const child = spawn(command, args, {
     stdio: 'inherit',
-    env: process.env,
+    env: {
+      ...process.env,
+      SEEDLANDS_PERFORMANCE_WINDOW_RESERVED: '1',
+      SEEDLANDS_PERFORMANCE_WINDOW_ID: windowId,
+      SEEDLANDS_PERFORMANCE_WINDOW_EVIDENCE: receiptPath,
+      SEEDLANDS_PERFORMANCE_MEASUREMENT_DECLARATION: declarationPath,
+    },
     detached: process.platform !== 'win32',
   });
   for (const [name, previous] of handlers) {
@@ -189,31 +229,35 @@ export async function runReservedCommand({
   clearInterval(timer);
   sample();
   try {
-    await cleanProcessGroup(child.pid);
+    if (Number.isSafeInteger(child.pid)) await cleanProcessGroup(child.pid);
   } finally {
     await reservation.release();
     for (const [name, handler] of handlers) process.off(name, handler);
   }
-  if (evidencePath) {
-    await writeFile(
-      evidencePath,
-      `${JSON.stringify(
-        {
-          ...reservation.owner,
-          waitedMs: reservation.waitedMs,
-          endedAt: new Date().toISOString(),
-          exitCode: outcome.code,
-          signal: outcome.signal ?? receivedSignal,
-          samples,
-        },
-        null,
-        2,
-      )}\n`,
-    );
+  let measurement = { status: 'NOT_RECORDED' };
+  try {
+    measurement = measurementSummary(declarationPath, { rootDirectory });
+  } catch (error) {
+    if (!String(error).includes('missing or unreadable'))
+      measurement = { status: 'INVALID', error: error instanceof Error ? error.message : String(error) };
   }
+  const exitCode = outcome.code ?? { SIGINT: 130, SIGTERM: 143 }[outcome.signal ?? receivedSignal] ?? 1;
+  await writeReceipt(absoluteReceiptPath, {
+    schemaVersion: 1,
+    kind: 'seedlands-performance-window',
+    status: exitCode === 0 && !outcome.error ? 'PASS' : 'FAIL',
+    ...reservation.owner,
+    windowId,
+    evidencePath: receiptPath,
+    waitedMs: reservation.waitedMs,
+    endedAt: new Date().toISOString(),
+    exitCode,
+    signal: outcome.signal ?? receivedSignal,
+    measurement,
+    samples,
+  });
   if (outcome.error) process.stderr.write(`${String(outcome.error)}\n`);
-  const signalCode = { SIGINT: 130, SIGTERM: 143 }[outcome.signal ?? receivedSignal];
-  return { exitCode: outcome.code ?? signalCode ?? 1 };
+  return { exitCode, windowId, evidencePath: receiptPath };
 }
 
 function parseArguments(argv) {

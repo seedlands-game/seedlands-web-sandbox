@@ -1,4 +1,4 @@
-import type { LogicIntentBatch, LogicObservation } from '@seedlands/game-core/server/logic/logic-protocol';
+import type { LogicIntentBatch, LogicObservation } from '@seedlands/stdlib/server/logic/logic-protocol';
 import {
   DIRECT_LOGIC_PROTOCOL_VERSION,
   type DirectLogicDiagnostics,

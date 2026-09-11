@@ -4,11 +4,11 @@ import {
   createGameplaySystemAuthority,
   type ProductExtensionAdmission,
   type VerifiedPackArtifact,
-} from '@seedlands/game-core/server/composition/host-api';
+} from '@seedlands/stdlib/server/composition/host-api';
 import {
   WorldResourceAuthorizer,
   type WorldAuthorizationPolicy,
-} from '@seedlands/game-core/server/harness/world-authorization';
+} from '@seedlands/stdlib/server/harness/world-authorization';
 export function createBrowserAuthorityComposition(
   artifacts: readonly VerifiedPackArtifact[],
   approvedExtensions: readonly ProductExtensionAdmission[],

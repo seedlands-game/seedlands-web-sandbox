@@ -5,7 +5,7 @@ import {
   resolveExperimentalClientOptions,
   type ExperimentalClientOptions,
 } from '../client/experimental-client-options';
-import { GENERATOR_VERSION } from '@seedlands/game-core/world/voxel';
+import { GENERATOR_VERSION } from '@seedlands/stdlib/world/voxel';
 import { ApplicationShell } from './application-shell';
 import { GlobalAudio } from './audio/global-audio';
 import { installAudioHarness } from './audio/audio-harness';

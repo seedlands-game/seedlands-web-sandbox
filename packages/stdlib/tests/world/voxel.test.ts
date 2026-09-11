@@ -1,0 +1,74 @@
+import { describe, expect, it } from 'vitest';
+import {
+  CHUNK_SIZE,
+  Voxel,
+  baseVoxel,
+  chunkKey,
+  floorDiv,
+  isSolid,
+  faceMaterialFor,
+  mod,
+  normalizeSeed,
+  remeshChunkKeysForEdit,
+  voxelIndex,
+} from '../../src/world/voxel';
+
+describe('voxel coordinates and registry', () => {
+  it('keeps the chunk size and occupancy contract stable', () => {
+    expect(CHUNK_SIZE).toBe(32);
+    expect(isSolid(Voxel.Air)).toBe(false);
+    expect(isSolid(Voxel.Stone)).toBe(true);
+  });
+
+  it('保留辉光石数值并为灯笼追加稳定数值且不改变生成', () => {
+    expect(Voxel.Glowstone).toBe(9);
+    expect(Voxel.Lantern).toBe(10);
+    expect(isSolid(Voxel.Lantern)).toBe(true);
+    expect(faceMaterialFor(Voxel.Glowstone, 0, true)).toBe(11);
+    expect(faceMaterialFor(Voxel.Lantern, 0, true)).toBe(12);
+    const seed = normalizeSeed('lantern-is-edit-only');
+    for (let x = -12; x <= 12; x += 3)
+      for (let y = 0; y <= 42; y += 3)
+        for (let z = -12; z <= 12; z += 3) expect(baseVoxel(seed, x, y, z)).not.toBe(Voxel.Lantern);
+  });
+
+  it.each([-65, -33, -32, -1, 0, 1, 31, 32, 65])('round-trips world coordinate %i through its chunk', (coordinate) => {
+    const chunk = floorDiv(coordinate, CHUNK_SIZE);
+    const local = mod(coordinate, CHUNK_SIZE);
+
+    expect(local).toBeGreaterThanOrEqual(0);
+    expect(local).toBeLessThan(CHUNK_SIZE);
+    expect(chunk * CHUNK_SIZE + local).toBe(coordinate);
+  });
+
+  it('keeps voxel indices and signed chunk keys stable', () => {
+    expect(voxelIndex(0, 0, 0)).toBe(0);
+    expect(voxelIndex(31, 31, 31)).toBe(CHUNK_SIZE ** 3 - 1);
+    expect(chunkKey(-1, 0, 2)).toBe('-1,0,2');
+  });
+
+  it('invalidates diagonal chunk neighbors when AO samples cross an edited corner', () => {
+    expect(remeshChunkKeysForEdit(31, 31, 31).sort()).toEqual(
+      ['0,0,0', '0,0,1', '0,1,0', '0,1,1', '1,0,0', '1,0,1', '1,1,0', '1,1,1'].sort(),
+    );
+    expect(remeshChunkKeysForEdit(-32, 8, -32).sort()).toEqual(['-1,0,-1', '-1,0,-2', '-2,0,-1', '-2,0,-2'].sort());
+    expect(remeshChunkKeysForEdit(8, 8, 8)).toEqual(['0,0,0']);
+  });
+});
+
+describe('procedural voxel generation', () => {
+  it('normalizes seeds deterministically', () => {
+    expect(normalizeSeed('seedlands')).toBe(normalizeSeed('seedlands'));
+    expect(normalizeSeed('seedlands-a')).not.toBe(normalizeSeed('seedlands-b'));
+  });
+
+  it('is independent of sampling order', () => {
+    const seed = normalizeSeed('vitest-determinism');
+    const points = Array.from({ length: 49 }, (_, index) => [index - 24, (index * 11) % 40, 24 - index] as const);
+    const firstPass = new Map(points.map(([x, y, z]) => [`${x},${y},${z}`, baseVoxel(seed, x, y, z)]));
+
+    for (const [x, y, z] of [...points].reverse()) {
+      expect(baseVoxel(seed, x, y, z)).toBe(firstPass.get(`${x},${y},${z}`));
+    }
+  });
+});

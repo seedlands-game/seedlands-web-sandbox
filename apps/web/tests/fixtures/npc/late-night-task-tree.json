@@ -1,0 +1,142 @@
+{
+  "goal": {
+    "kind": "life-safety-with-camp-watch",
+    "description": "安全生活并替朋友照看营地：有威胁先避险；饿了吃到不饿；白天先走到营地 [-3.5,57,4.5] 驻守至少 30 秒，再继续巡逻；夜里回 [0.5,57,-3.5] 休息。",
+    "milestones": [
+      {
+        "id": "fed",
+        "description": "Hunger was satisfied.",
+        "condition": { "name": "hunger-at-most", "args": { "value": 20 } }
+      },
+      {
+        "id": "camp",
+        "description": "Reached the camp post.",
+        "condition": { "name": "at-position", "args": { "position": [-3.5, 57, 4.5], "radius": 2 } }
+      },
+      {
+        "id": "camp-waited",
+        "description": "Stood watch at camp for the agreed 30 seconds.",
+        "condition": {
+          "all": [
+            { "name": "at-position", "args": { "position": [-3.5, 57, 4.5], "radius": 2 } },
+            { "not": { "name": "is-night" } }
+          ]
+        }
+      },
+      {
+        "id": "home",
+        "description": "Reached home.",
+        "condition": { "name": "at-position", "args": { "position": [0.5, 57, -3.5], "radius": 1.5 } }
+      },
+      {
+        "id": "day",
+        "description": "Daylight returned.",
+        "condition": { "name": "is-day" }
+      }
+    ]
+  },
+  "definition": {
+    "version": 1,
+    "root": {
+      "id": "life",
+      "type": "selector",
+      "children": [
+        {
+          "id": "threat-response",
+          "type": "sequence",
+          "children": [
+            { "id": "threat-check", "type": "condition", "condition": { "name": "threat-visible" } },
+            {
+              "id": "threat-action",
+              "type": "action",
+              "skill": "flee-threat",
+              "args": { "distance": 8, "maxReplans": 4 }
+            }
+          ]
+        },
+        {
+          "id": "hunger",
+          "type": "sequence",
+          "guard": { "not": { "name": "threat-visible" } },
+          "children": [
+            {
+              "id": "hunger-check",
+              "type": "condition",
+              "condition": { "name": "hunger-at-least", "args": { "value": 40 } }
+            },
+            {
+              "id": "hunger-action",
+              "type": "action",
+              "skill": "satisfy-hunger",
+              "args": { "satisfiedAt": 20, "avoidThreats": true, "maxReplans": 6 }
+            }
+          ]
+        },
+        {
+          "id": "night-rest",
+          "type": "sequence",
+          "guard": {
+            "all": [
+              { "not": { "name": "threat-visible" } },
+              { "not": { "name": "hunger-at-least", "args": { "value": 40 } } }
+            ]
+          },
+          "children": [
+            { "id": "night-check", "type": "condition", "condition": { "name": "is-night" } },
+            {
+              "id": "night-action",
+              "type": "action",
+              "skill": "rest-at-home",
+              "args": { "position": [0.5, 57, -3.5], "avoidThreats": true }
+            }
+          ]
+        },
+        {
+          "id": "camp-watch",
+          "type": "sequence",
+          "guard": {
+            "all": [
+              { "not": { "name": "threat-visible" } },
+              { "not": { "name": "hunger-at-least", "args": { "value": 40 } } },
+              { "name": "is-day" }
+            ]
+          },
+          "children": [
+            {
+              "id": "camp-move",
+              "type": "action",
+              "skill": "move-to",
+              "args": { "position": [-3.5, 57, 4.5], "maxReplans": 6 }
+            },
+            { "id": "camp-wait", "type": "action", "skill": "wait", "args": { "seconds": 30 } },
+            {
+              "id": "day-patrol",
+              "type": "action",
+              "skill": "patrol",
+              "args": {
+                "positions": [-4.5, 57, -4.5, 4.5, 57, -7.5],
+                "avoidThreats": true,
+                "maxReplans": 6
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "monitors": [
+      { "id": "danger-monitor", "condition": { "name": "threat-visible" }, "reason": "threat-changed" },
+      {
+        "id": "hunger-monitor",
+        "condition": { "name": "hunger-at-least", "args": { "value": 40 } },
+        "reason": "hunger-threshold"
+      },
+      { "id": "night-monitor", "condition": { "name": "is-night" }, "reason": "daylight-changed" },
+      { "id": "day-monitor", "condition": { "name": "is-day" }, "reason": "daylight-changed" },
+      {
+        "id": "dialogue-monitor",
+        "condition": { "name": "dialogue-received" },
+        "reason": "dialogue-received"
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { HumanMessage } from '@langchain/core/messages';
 import type { ResidentBirthPackage, ResidentWorldBinding } from '@seedlands/cognition-protocol';
-import { BEHAVIOR_TREE_AUTHORING_GUIDE } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import { BEHAVIOR_TREE_AUTHORING_GUIDE } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 import { Pool, type PoolClient } from 'pg';
 import { createResidentBirthSchema, parseResidentBirthPackage } from './resident-birth-codec.js';
 

@@ -1,5 +1,6 @@
 import { BrowserChunkPersistence, type ChunkPersistenceCorpusSummary } from './browser-chunk-persistence';
-import { Voxel, chunkKey } from '@seedlands/game-core/world/voxel';
+import { Voxel, chunkKey } from '@seedlands/stdlib/world/voxel';
+import { classicWorldgenIdentity } from '@seedlands/playbook-classic/worldgen';
 
 export type ChunkPersistenceLoadScenario = ChunkPersistenceCorpusSummary & {
   database: string;
@@ -29,7 +30,10 @@ export async function seedBrowserChunkPersistenceCorpus(
   seedText: string,
   chunkCount: number,
 ): Promise<ChunkPersistenceCorpusSummary> {
-  const persistence = await BrowserChunkPersistence.open(seedText, { databaseName: database });
+  const persistence = await BrowserChunkPersistence.open(seedText, {
+    databaseName: database,
+    provider: classicWorldgenIdentity,
+  });
   try {
     return await persistence.seedCorpus(chunkCount);
   } finally {
@@ -43,7 +47,10 @@ export async function runBrowserChunkPersistenceLoadScenario(
   activeChunkCount: number,
 ): Promise<ChunkPersistenceLoadScenario> {
   benchmarkSessions.get(database)?.dispose();
-  const persistence = await BrowserChunkPersistence.open(seedText, { databaseName: database });
+  const persistence = await BrowserChunkPersistence.open(seedText, {
+    databaseName: database,
+    provider: classicWorldgenIdentity,
+  });
   const summary = persistence.corpusSummary;
   if (!summary) {
     persistence.dispose();

@@ -47,12 +47,12 @@ pnpm build
 For browser-visible or interaction changes, also run:
 
 ```bash
-pnpm test:e2e:regression
+pnpm harness:classic
 ```
 
 Playwright uses port 4173 by default. Set `SEEDLANDS_E2E_PORT` when another worktree is already using that port; `SEEDLANDS_BASE_PATH` remains available for repository-subpath checks.
 
-Place delivery-specific Playwright tests under the active change's `e2e/` directory and Midscene YAML under its `midscene/` directory. Unit tests, static checks, builds, Playwright, performance samples, and visual-semantic checks are distinct evidence; report their actual results separately.
+Keep unit and contract tests inside the owning workspace. Cross-module integration tests belong in `apps/web/tests/integration/`; extend the single production journey at `apps/web/tests/e2e/classic-runtime.spec.ts` for browser coverage. ESLint rule tests run independently in `packages/eslint-plugin`. Historical changes retain provenance and evidence but are not active runtime dependencies. Unit tests, static checks, builds, Playwright, performance samples, and visual-semantic checks are distinct evidence; report their actual results separately.
 
 ## Commits and pull requests
 

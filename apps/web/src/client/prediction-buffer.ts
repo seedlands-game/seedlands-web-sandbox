@@ -1,5 +1,5 @@
-import type { BodyState, Vec3 } from '@seedlands/game-core/physics';
-import type { InputCommand } from '@seedlands/game-core/runtime/session-protocol';
+import type { BodyState, Vec3 } from '@seedlands/stdlib/physics';
+import type { InputCommand } from '@seedlands/stdlib/runtime/session-protocol';
 
 export type PredictionFrame = Readonly<{
   sequence: number;

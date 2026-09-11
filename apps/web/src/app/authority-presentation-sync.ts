@@ -1,4 +1,4 @@
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
 import type { HarnessSnapshot } from './app-contracts';
 import type { PlayerController } from './player/player-controller';
 import { PLAYER_FEET_OFFSET } from './player/player-view-offsets';

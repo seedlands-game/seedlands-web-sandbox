@@ -1,5 +1,5 @@
-import { decodeCompactMeshData, type MeshData } from '@seedlands/game-core/world/mesh';
-import { CHUNK_SIZE } from '@seedlands/game-core/world/voxel';
+import { decodeCompactMeshData, type MeshData } from '@seedlands/stdlib/world/mesh';
+import { CHUNK_SIZE } from '@seedlands/stdlib/world/voxel';
 
 const EPSILON = 1e-5;
 const RETAINED_PATCH = 0;

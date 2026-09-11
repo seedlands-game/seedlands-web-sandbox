@@ -2,7 +2,7 @@
 
 ## 先读什么
 
-普通代码修改先读本文件、相关源码和当前 spec；移动文件再读[代码地图](docs/code-map.md)和[目录规范](docs/repository-structure.md)；架构或路线决策才读[长期对齐](docs/living-world-alignment.md)；追溯已归档历史才读[归档索引](docs/change-archive.md)。运行命令只以 `package.json` 为准。
+普通代码修改先读本文件、相关源码和当前 spec；移动文件再读[代码地图](docs/code-map.md)和[目录规范](docs/repository-structure.md)；修改测试选择、Harness 或 CI 再读[CI 测试边界](docs/ci-testing.md)和[Harness 合同](docs/harness-contracts.md)；架构或路线决策才读[长期对齐](docs/living-world-alignment.md)；追溯已归档历史才读[归档索引](docs/change-archive.md)。运行命令只以 `package.json` 为准。
 
 涉及小内核、标准模块、模组 Pack、Playbook、Ruleset 或玩法 API 时，先对照[可组合玩法架构](docs/composable-gameplay-architecture.md)。该文档是责任与概念基线，不表示功能已实现；具体实施、范围和审核继续由当前 change spec 冻结。
 
@@ -11,10 +11,10 @@
 ## 不变量与源码归属
 
 - 基础世界由 `seed + generatorVersion` 唯一确定；体素保持紧凑数值；编辑只经 `World.edit()`；渲染是 Chunk Mesh，不是逐体素 Entity。
-- `packages/game-core` 拥有权威世界、规则、存档、协议、世界/物理/运行时和纯计算任务；`apps/web` 拥有客户端适配、预测、派生镜像、浏览器组合、Worker 入口、PlayCanvas 与 Svelte。Node Dedicated 产品已归档，当前 workspace 不包含 Node 游戏宿主。
-- core 保持纯逻辑，不依赖 DOM、WebWorker、PlayCanvas、Node builtin/ambient types 或产品 app 包。平台 clone、UTF-8、取消、计时与调度能力通过只读实例端口注入，不使用可重配全局。
+- `packages/kernel` 拥有所有合法世界共同需要的确定性状态、注册、事务、事件、调度、授权、版本与窄平台端口；不拥有默认物品、规则、角色、行为或 Playbook。`packages/stdlib` 拥有第一方可选 world、physics、runtime、compute 与 gameplay 模块；`playbooks/classic` 是当前唯一真实第一方组合根。`apps/web` 拥有客户端适配、预测、派生镜像、浏览器 Worker、PlayCanvas 与 Svelte；`apps/agent-server` 拥有认知服务宿主。Node Dedicated 产品已归档。
+- Kernel 保持纯逻辑，不依赖 DOM、WebWorker、PlayCanvas、Node builtin/ambient types、stdlib、Playbook 或产品 app 包。stdlib 只依赖 Kernel 的声明 exports；Playbook 只依赖 Kernel/stdlib 的声明 exports；app 只能消费其 manifest 已声明的公开包入口。平台 clone、UTF-8、取消、计时与调度能力通过只读实例端口注入，不使用可重配全局。
 - 新 app/client 文件先按[目录规范](docs/repository-structure.md)选择 `apps/web/src` 的既有职责目录。顶层仅保留已审阅的组合入口；ESLint 负责拒绝 client→app 反向依赖和未归属的顶层文件。`apps/web/src/app/player-view-offsets.ts`、`apps/web/src/client/performance-telemetry.ts` 仅为两个 Delivered change 的冻结路径兼容入口；新代码不得使用，待对应历史 change 归档后删除。
-- Headless 开发宿主的 Node builtin/I/O 只进入 `scripts/` 工程适配；不得进入 core 或 Web。Web 和开发宿主经 core 的声明 exports 消费通用逻辑，禁止跨包相对路径、core 反向依赖、Web/Node 互依和未声明依赖。Node Dedicated 已归档退出；后续 core、Gameplay、ECS、存档和协议不承担其兼容或持续测试义务。
+- Headless 开发宿主的 Node builtin/I/O 只进入 `scripts/` 工程适配；不得进入 Kernel、stdlib 纯逻辑目录或 Web。禁止跨包相对路径、Kernel 反向依赖、Web/Agent 互导、未声明依赖和未导出 subpath。Node Dedicated 已归档退出；后续 Kernel、Gameplay、ECS、存档和协议不承担其兼容或持续测试义务。
 - 移动入口或职责时更新代码地图；不要预建 `engine`、`plugins`、`shared` 等抽象。
 
 ## 当前产品方向
@@ -50,7 +50,7 @@
 
 Breaking / Exploration 的用户 hash 审核只授权其合同中的实现，不自行扩大到发布、其他外部写入、权限变更或不可逆操作。Agile 变更可在已授权范围内自行完成。本用户已长期授权：验收完成后可将功能分支推送至已配置 `origin`，并以目标分支为 base 创建或更新 PR 交给人类审核；用户指定 `local-only`、不发 PR 或其他范围时优先。不得自动合并、绕过分支保护或扩大安全权限。每次 Delivery Snapshot 要说明长期 docs baseline 是否更新及原因；清楚的源码和通用教程不重复抄入上下文。
 
-实施后运行受影响的确定性检查和构建；`pnpm verify:static` 与 `pnpm build` 是分别的基础证据。UI、输入和视觉按当前 spec 选择 Playwright、Midscene 或手工补充，不能互相替代。完成的 change 在明确功能分支创建只含该 change 的语义化本地 commit，并按已授权的 PR 交接规则推进。
+实施后先生成 base/head 影响计划并运行 `pnpm verify:affected --plan <plan.json>`；跨层、selector/registry/构建治理变化或无法可靠分类时运行 `pnpm verify:all`。Kernel、stdlib、Classic 与 ESLint 插件使用各自的 Vitest config；`changes/` 不再是活跃测试目录。生产构建与唯一 Classic 浏览器旅程是独立证据，CI 的 Chromium job 只能下载 build job 的同一 `apps/web/dist` 后运行 `pnpm harness:classic`，不得重建或直接列历史 E2E。UI、输入和视觉按当前 spec 选择 Playwright、Midscene 或手工补充，不能互相替代。完成的 change 在明确功能分支创建只含该 change 的语义化本地 commit，并按已授权的 PR 交接规则推进。
 
 默认按任务复杂度选择执行形式、模型和分工，具体路由见[协作与模型路由](docs/collaboration-routing.md)；优先使用已安装的全局 `agent-work-routing` skill，未安装时使用本 change 的版本化源。这不要求每个任务使用多个 agent，人类直接选择的模型不受重路由。
 
@@ -62,6 +62,7 @@ Breaking / Exploration 的用户 hash 审核只授权其合同中的实现，不
 
 - [目录规范](docs/repository-structure.md)：文件职责、当前布局、静态边界和归档位置。
 - [开发治理](docs/development-governance.md)：SDD、E2E 生命周期、证据边界和准出记录。
+- [Harness 合同](docs/harness-contracts.md)：owner registry、base/head 计划、runner stage 与生产产物身份。
 - [协作与模型路由](docs/collaboration-routing.md)：初始模型选择、分工、独立评审和成本观测。
 - [性能执行窗口](docs/performance-execution.md)：机器级阻塞锁、固定验收职责、取消和进程清理。
 - [上下文沉淀](docs/context-engineering.md)：哪些决策应写 docs 或晋升为 skill。

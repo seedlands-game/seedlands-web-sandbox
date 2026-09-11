@@ -4,10 +4,12 @@ import { createWorkerFirstDispatch, type MeshDispatchRequest, type MeshTaskDispa
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
 import type { PerformanceProfile } from '../../client/presentation/performance-profile';
 import { recordMeshPreparationDiagnostics } from './mesh-preparation-telemetry';
+import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 
 type CommonMeshTaskSource = {
   seed: number;
   generatorVersion: number;
+  provider?: KernelWorldgenProviderIdentity;
   beforePrepare?: (cx: number, cy: number, cz: number) => Promise<void>;
   releasePrepared?: (cx: number, cy: number, cz: number) => void;
 };
@@ -40,7 +42,10 @@ function prepareSourceWorkerInput(
   cy: number,
   cz: number,
 ): Readonly<{ input: WorkerInput }> {
-  return { input: source.prepareWorkerInput(cx, cy, cz) };
+  const input = source.prepareWorkerInput(cx, cy, cz);
+  const provider = input.provider ?? source.provider;
+  if (!provider) throw new Error('Worker mesh generation requires an explicit world-generation provider.');
+  return { input: { ...input, provider } };
 }
 
 export function prepareSourceWorkerDispatch(

@@ -2,7 +2,7 @@ import type {
   ChunkRecordCodec,
   CreateStoredChunkRecordInput,
   StoredChunkRecord,
-} from '@seedlands/game-core/world/chunk-snapshot-codec';
+} from '@seedlands/stdlib/world/chunk-snapshot-codec';
 import { KernelMemory } from './kernel-memory';
 
 export const CODEC_VOXEL_COUNT = 32 ** 3;
