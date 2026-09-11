@@ -109,6 +109,7 @@
 | T12 | 完整新构建与正常输入                                       | 玩法成长、库存/工位、创造、战斗、存档重进与伙伴共存；生产Worker/资源可加载。Playwright，必要视觉语义补充。                                  |
 | T13 | 合法的精确 IPv6 回环模型网关 URL                           | `http://[::1]:<port>/<path>` 与既有 IPv4/localhost 一样通过入口校验；非回环、凭据、query、fragment 仍拒绝。定向单元测试。                   |
 | T14 | 背包持物时恢复同一世界 checkpoint，随后立即按 E            | restore 回执前同步发布新 gameplay 的关闭投影；首个 E 打开新背包且持物仍可继续拖放，不被旧 UI capture 状态吞掉。单元测试＋现有 Playwright。  |
+| T15 | GitHub hosted runner 执行完整 Static verification          | 保留单 worker、完整测试集、隔离与 coverage 门槛；job 资源上限允许当前全量套件正常终止，超时不冒充断言失败或性能验收。远端 required check。  |
 
 “活人感”准出不是哲学判断：必须同时具有持续目标、身体结果、个体差异、环境响应、记忆连续和可解释失败。确定性 fixture 证明机制，不单独证明真实模型效果；人类体验复核单列，不伪装为机器通过。
 

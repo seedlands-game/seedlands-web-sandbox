@@ -303,3 +303,9 @@
 - 新增T13纯URL反例在helper不存在时RED；入口校验抽为Node局部`readLoopbackGatewayUrl`并接受`[::1]`，继续拒绝非回环、凭据、query与非HTTP协议。定向两文件6项PASS，未读取或写入模型/数据库凭据。
 - `pnpm verify:static:ci`按远端单worker拓扑完整PASS：420文件通过、2文件跳过，2182项通过、4项既有跳过；coverage 791.66秒，world行96.96%，后置全类型/Svelte通过。`pnpm build`独立PASS。普通并发`pnpm verify:static`曾让`character-night-install-replay`在全机竞争下超过45秒；同测试定向coverage测试体32.32秒通过，CI单worker全量亦通过，不把前者隐去或当作产品失败。
 - 当前仅为未提交候选；push后的新SHA、required checks、review thread与mergeability必须再次live读回。长期docs baseline不更新：本次只闭合当前change的入口校验和restore UI新鲜度，没有新增跨change架构或产品方向。
+
+### 2026-09-11 约12:55 Static CI 资源上限修复
+
+- 首个修复提交 `870fe6d95505629d3f878e5d1364271156a0d990` 推送后，PR head与提交一致，IPv6 Codex review thread已resolve并读回；Production build 1分17秒通过，Chromium已独立通过原失败的背包/创造/视觉段。
+- Static verification job `103148353113`的生成、格式、Lint、路径、全类型均通过；coverage从04:35:48持续运行至04:53:47，期间测试文件继续通过且无断言失败，最终由job的20分钟总上限强制取消。结合本地同单worker全量791.66秒PASS，新增T15并将Static资源上限调整为30分钟；不改变测试全集、worker、隔离、coverage门槛或断言，也不把hosted runner墙钟当性能收益。
+- 新提交仍须由最新远端SHA重跑三项required checks并读回mergeability。长期docs baseline不更新：`docs/ci-testing.md`已明确“超时是资源上限，不是性能验收阈值”，本次仅调整该既有策略的当前容量值。
