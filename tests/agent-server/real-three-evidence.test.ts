@@ -31,11 +31,11 @@ const task = {
 const prefix = 'You are the authorized Pro memory editor. Use only the current MEMORY and supplied frozen window.';
 const toolNames = ['read_file', 'propose_memory_update'] as const;
 
-const storedMessages = () =>
+const storedMessages = (actorId = 'npc-2') =>
   [
     {
       type: 'human',
-      data: { content: JSON.stringify({ observation: { actorId: 'npc-2' } }), additional_kwargs: {} },
+      data: { content: JSON.stringify({ observation: { actorId } }), additional_kwargs: {} },
     },
     {
       type: 'ai',
@@ -112,6 +112,7 @@ function portable(actorId: string, compacted = false): PortableWorkspace {
       received_through: 4,
       included_through: 4,
       compacted_through: compacted ? 4 : 0,
+      cognition_suspended: false,
     },
     documents: [
       {
@@ -228,6 +229,48 @@ const mutate = (change: (workspace: PortableWorkspace) => void): readonly Portab
   return copy;
 };
 
+function withPrepared(change?: (workspace: PortableWorkspace) => void): readonly PortableWorkspace[] {
+  const copy = structuredClone(workspaces()) as PortableWorkspace[];
+  const prepared = copy[2]!;
+  const namespace = String(prepared.state.namespace);
+  Object.assign(prepared, {
+    manifests: [
+      {
+        namespace,
+        request_id: 'prepared-compaction:model:1',
+        logical_model: 'pro',
+        through_journal_seq: 3,
+        request_payload_ref: 'prepared-request',
+        prefix_ref: 'prepared-prefix',
+        tool_schema_ref: 'prepared-tools',
+      },
+    ],
+    receipts: [
+      {
+        namespace,
+        request_id: 'prepared-compaction',
+        outcome: { status: 'failed', reason: 'model dispatch budget exhausted' },
+      },
+    ],
+    blobs: [
+      {
+        content_hash: 'prepared-request',
+        payload: {
+          messages: storedMessages('npc-3'),
+          systemMessage: {
+            type: 'system',
+            data: { content: [{ type: 'text', text: prefix }], additional_kwargs: {} },
+          },
+        },
+      },
+      { content_hash: 'prepared-prefix', payload: prefix },
+      { content_hash: 'prepared-tools', payload: toolNames.map((name) => ({ name })) },
+    ],
+  });
+  change?.(prepared);
+  return copy;
+}
+
 describe('real-three compaction evidence', () => {
   it('enforces the model dispatch cap before fetch', () => {
     expect(() => assertModelDispatchBudget(0, 1)).not.toThrow();
@@ -262,6 +305,7 @@ describe('real-three compaction evidence', () => {
       manifestCount: 0,
       receiptCount: 0,
       commitCount: 0,
+      preparedNotDispatched: [],
     });
     expect(() => validateRealThreeCompaction([], workspaces())).toThrow('without a Pro call');
     const manifested = structuredClone([
@@ -289,7 +333,39 @@ describe('real-three compaction evidence', () => {
       sourceCount: 1,
       runtimeCompactions: 1,
       memoryContentHash: 'sha256:remembered-camp-task',
+      preparedNotDispatched: [],
     });
+  });
+
+  it('reports a separately bound manifest rejected before its model dispatch', () => {
+    expect(validateRealThreeCompaction([proCall()], withPrepared())).toMatchObject({
+      proCalls: 1,
+      manifestCount: 2,
+      receiptCount: 2,
+      commitCount: 1,
+      actorId: 'npc-2',
+      preparedNotDispatched: [{ actorId: 'npc-3', modelStep: 1, status: 'failed-budget-exhausted' }],
+    });
+  });
+
+  it('rejects ambiguous or non-terminal prepared manifests', () => {
+    const corruptions: readonly ((workspace: PortableWorkspace) => void)[] = [
+      (entry) =>
+        Object.assign(entry.receipts[0]!.outcome as Record<string, unknown>, { reason: 'provider unavailable' }),
+      (entry) => Object.assign(entry, { receipts: [] }),
+      (entry) => Object.assign(entry.state, { cognition_suspended: true }),
+      (entry) => Object.assign(entry.windows[0]!, { status: 'frozen' }),
+      (entry) => Object.assign(entry.receipts[0]!.outcome as Record<string, unknown>, { status: 'published' }),
+      (entry) => {
+        const payload = entry.blobs.find((blob) => blob.content_hash === 'prepared-request')!.payload as {
+          messages: { data: { content: string } }[];
+        };
+        payload.messages[0]!.data.content = JSON.stringify({ observation: { actorId: 'npc-2' } });
+      },
+      (entry) => Object.assign(entry, { compactionCommits: [{ commit_id: 'unexpected' }] }),
+    ];
+    for (const corrupt of corruptions)
+      expect(() => validateRealThreeCompaction([proCall()], withPrepared(corrupt))).toThrowError();
   });
 
   it('rejects a pre-existing memory lineage on an otherwise untouched resident', () => {

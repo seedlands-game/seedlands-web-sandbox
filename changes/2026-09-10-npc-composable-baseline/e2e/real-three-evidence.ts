@@ -22,6 +22,11 @@ export type RealThreeCompactionEvidence = Readonly<{
   sourceCount?: number;
   runtimeCompactions?: number;
   memoryContentHash?: string;
+  preparedNotDispatched?: readonly Readonly<{
+    actorId: string;
+    modelStep: number;
+    status: 'failed-budget-exhausted';
+  }>[];
 }>;
 
 type JsonRecord = Record<string, unknown>;
@@ -194,7 +199,6 @@ function assertFreshDefaultWorkspace(workspace: PortableWorkspace): void {
     integer(workspace.state.memory_revision, 'default workspace memory revision', 1) !== 1 ||
     canonical(memoryRevisions(workspace)) !== canonical([1]) ||
     workspace.compactionCommits.length !== 0 ||
-    workspace.manifests.some((entry) => entry.logical_model === 'pro') ||
     integer(workspace.runtimeMetadata.compactions, 'default runtime compactions') !== 0
   )
     fail('non-compacted workspace is not on the fresh revision-1 lineage');
@@ -206,6 +210,40 @@ function assertFreshDefaultWorkspace(workspace: PortableWorkspace): void {
     integer(workspace.windows[0]!.memory_revision, 'default window memory revision', 1) !== 1
   )
     fail('non-compacted workspace does not have one fresh active window');
+}
+
+function manifestRequestIdentity(manifest: Readonly<Record<string, unknown>>) {
+  const value = text(manifest.request_id, 'manifest request id');
+  const match = /^(.*):model:(\d+)$/u.exec(value);
+  if (!match?.[1]) fail('manifest request id has no model step identity');
+  return { requestId: match[1], modelStep: integer(match[2], 'manifest model step', 1) };
+}
+
+function assertManifestMatchesWire(
+  workspace: PortableWorkspace,
+  manifest: Readonly<Record<string, unknown>>,
+  messages: readonly unknown[],
+  wireTask: JsonRecord,
+  wirePrefix: string,
+): void {
+  if (integer(manifest.through_journal_seq, 'manifest journal frontier') !== wireTask.throughJournalSeq)
+    fail('Pro manifest journal frontier does not match the request');
+  const payload = object(blob(workspace, manifest.request_payload_ref, 'request payload'), 'request payload');
+  const storedMessages = array(payload.messages, 'manifest messages');
+  const last = object(storedMessages.at(-1), 'manifest last message');
+  if (last.type !== 'human') fail('manifest request does not end with a Human message');
+  const task = parsedJson(object(last.data, 'manifest Human data').content, 'manifest compact_memory message');
+  if (canonical(task) !== canonical(wireTask)) fail('wire and manifest compact_memory payloads differ');
+  const system = object(payload.systemMessage, 'manifest system message');
+  const storedPrefix = messageText(object(system.data, 'manifest system data').content, 'manifest system content');
+  const savedPrefix = text(blob(workspace, manifest.prefix_ref, 'system prefix'), 'saved system prefix');
+  if (storedPrefix !== savedPrefix || wirePrefix !== savedPrefix) fail('wire and manifest system prefixes differ');
+  const projected = [
+    storedWireMessage(system, 'manifest system message'),
+    ...storedMessages.map((message, index) => storedWireMessage(message, `manifest messages[${index}]`)),
+  ];
+  if (canonical(projected) !== canonical(messages)) fail('wire messages do not match the durable manifest');
+  assertOnlyMemoryTools(blob(workspace, manifest.tool_schema_ref, 'tool schema'), false);
 }
 
 export function assertModelDispatchBudget(currentCalls: number, maximumCalls: number): void {
@@ -250,7 +288,13 @@ export function validateRealThreeCompaction(
     if (allCommits.length !== 0) fail('a compaction was published without a Pro call');
     if (allManifests.length !== 0) fail('a Pro manifest was persisted without a dispatched Pro call');
     workspaces.forEach(assertFreshDefaultWorkspace);
-    return { proCalls: 0, manifestCount: 0, receiptCount: 0, commitCount: 0 };
+    return {
+      proCalls: 0,
+      manifestCount: 0,
+      receiptCount: 0,
+      commitCount: 0,
+      preparedNotDispatched: [],
+    };
   }
 
   const call = calls[0]!;
@@ -276,40 +320,20 @@ export function validateRealThreeCompaction(
   assertTask(wireTask);
 
   const manifests = allManifests;
-  if (manifests.length !== 1) fail('wire request does not have exactly one durable Pro manifest');
-  const { workspace, manifest } = manifests[0]!;
+  const matching = manifests.filter(({ workspace, manifest }) => {
+    try {
+      assertManifestMatchesWire(workspace, manifest, messages, wireTask, wirePrefix);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+  if (matching.length !== 1) fail('wire request does not match exactly one durable Pro manifest');
+  const { workspace, manifest } = matching[0]!;
   const namespace = text(workspace.state.namespace, 'workspace namespace');
   if (manifest.namespace !== namespace) fail('Pro manifest is not bound to its workspace namespace');
-  if (integer(manifest.through_journal_seq, 'manifest journal frontier') !== wireTask.throughJournalSeq)
-    fail('Pro manifest journal frontier does not match the request');
-  const manifestPayload = object(blob(workspace, manifest.request_payload_ref, 'request payload'), 'request payload');
-  const manifestMessages = array(manifestPayload.messages, 'manifest messages');
-  const storedLast = object(manifestMessages.at(-1), 'manifest last message');
-  if (storedLast.type !== 'human') fail('manifest request does not end with a Human message');
-  const manifestTask = parsedJson(
-    object(storedLast.data, 'manifest Human data').content,
-    'manifest compact_memory message',
-  );
-  if (canonical(manifestTask) !== canonical(wireTask)) fail('wire and manifest compact_memory payloads differ');
-  const storedSystem = object(manifestPayload.systemMessage, 'manifest system message');
-  const storedPrefix = messageText(
-    object(storedSystem.data, 'manifest system data').content,
-    'manifest system content',
-  );
-  const savedPrefix = text(blob(workspace, manifest.prefix_ref, 'system prefix'), 'saved system prefix');
-  if (storedPrefix !== savedPrefix || wirePrefix !== savedPrefix) fail('wire and manifest system prefixes differ');
-  const projectedMessages = [
-    storedWireMessage(storedSystem, 'manifest system message'),
-    ...manifestMessages.map((message, index) => storedWireMessage(message, `manifest messages[${index}]`)),
-  ];
-  if (canonical(projectedMessages) !== canonical(messages))
-    fail('wire messages do not match the complete durable manifest message sequence');
-  assertOnlyMemoryTools(blob(workspace, manifest.tool_schema_ref, 'tool schema'), false);
-
-  const manifestRequestId = text(manifest.request_id, 'manifest request id');
-  if (!manifestRequestId.endsWith(':model:1')) fail('single Pro manifest is not model step 1');
-  const requestId = manifestRequestId.slice(0, -':model:1'.length);
-  if (!requestId) fail('manifest request id has no durable receipt identity');
+  const { requestId, modelStep } = manifestRequestIdentity(manifest);
+  if (modelStep !== 1) fail('dispatched Pro manifest is not model step 1');
   const receipts = workspace.receipts.filter((receipt) => receipt.request_id === requestId);
   if (receipts.length !== 1) fail('published compaction receipt is missing or duplicated');
   const outcome = object(receipts[0]!.outcome, 'published receipt');
@@ -401,6 +425,30 @@ export function validateRealThreeCompaction(
   if (!citedJournal) fail('compaction must cite at least one frozen journal message');
   if (canonical(memoryRevisions(workspace)) !== canonical([1, 2]) || workspace.windows.length !== 2)
     fail('compacted workspace has a pre-existing or incomplete memory lineage');
+  const preparedNotDispatched = manifests
+    .filter((entry) => entry !== matching[0])
+    .map(({ workspace: preparedWorkspace, manifest: preparedManifest }) => {
+      const preparedNamespace = text(preparedWorkspace.state.namespace, 'prepared workspace namespace');
+      if (preparedManifest.namespace !== preparedNamespace || preparedWorkspace === workspace)
+        fail('prepared Pro manifest is not isolated from the published compaction');
+      const preparedIdentity = manifestRequestIdentity(preparedManifest);
+      if (preparedIdentity.requestId === requestId) fail('prepared Pro manifest reused the published request identity');
+      const terminal = preparedWorkspace.receipts.filter(
+        (receipt) => receipt.request_id === preparedIdentity.requestId,
+      );
+      if (terminal.length !== 1) fail('prepared Pro manifest has no unique terminal receipt');
+      const preparedOutcome = object(terminal[0]!.outcome, 'prepared Pro receipt');
+      if (preparedOutcome.status !== 'failed' || preparedOutcome.reason !== 'model dispatch budget exhausted')
+        fail('prepared Pro manifest did not fail at the model dispatch budget');
+      if (preparedWorkspace.state.cognition_suspended !== false)
+        fail('prepared Pro workspace remained suspended after dispatch rejection');
+      assertFreshDefaultWorkspace(preparedWorkspace);
+      return {
+        actorId: preparedWorkspace.binding.actorId,
+        modelStep: preparedIdentity.modelStep,
+        status: 'failed-budget-exhausted' as const,
+      };
+    });
   workspaces.filter((entry) => entry !== workspace).forEach(assertFreshDefaultWorkspace);
   const runtimeCompactions = integer(workspace.runtimeMetadata.compactions, 'published runtime compactions');
   if (runtimeCompactions !== 1) fail('published actor runtime compaction count did not settle to one');
@@ -408,7 +456,7 @@ export function validateRealThreeCompaction(
   return {
     proCalls: 1,
     manifestCount: manifests.length,
-    receiptCount: receipts.length,
+    receiptCount: receipts.length + preparedNotDispatched.length,
     commitCount: allCommits.length,
     actorId: workspace.binding.actorId,
     frozenWindowId,
@@ -420,5 +468,6 @@ export function validateRealThreeCompaction(
     sourceCount: sources.length,
     runtimeCompactions,
     memoryContentHash,
+    preparedNotDispatched,
   };
 }

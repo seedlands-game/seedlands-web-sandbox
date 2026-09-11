@@ -277,3 +277,14 @@
 - 仍在独立worktree，原main未动；live fetch后origin/main没有新增提交，main-ahead0/feature-ahead47，故无需重写或合并历史。新PR不存在；目标main要求Static verification、Production build、Chromium regression，strict latest base与review thread resolution仍有效。
 - 当前只修改change验收与fixture，先做纯校验器RED/GREEN和独立复核，再运行一次当前真实旅程、确定性检查与PR/CI。之前06:19的T11失败保留为历史证据，不改写为通过。
 - 新纯证据校验器先取得3个正向合同RED，最终15项GREEN，日志在`real-three-evidence/`。完整wire历史与持久manifest投影相同，关联唯一Actor/receipt/commit/窗口、fresh MEMORY 1→2及runtime compactions=1；其余两位保持0次压缩。双tier断线计数反例、错绑定/窗口/revision/来源、未发布/未收敛与2次调用均被拒绝。新增Pro/记忆artifact只保存元数据与归因摘要，完整Portable和Pro请求仅内存校验。
+
+### 2026-09-11 约10:55 批准后的真实运行与交接边界
+
+- `d2d36b2a31e86656cdd53a2cddaf786dd6136d09`独立增量审阅覆盖七个差异文件及发布/协议邻接路径，无新增P0/P1。生产apps/packages/scripts/lockfile与`4efcdbe`完全相同；10:32构建与类型检查通过，10:56另冻结构建读回。完整旧static/61项Browser仍按4ef身份记录，不冒充新验收版本结果。
+- T11 `approved-pro-three` 于10:46:19–10:50:39 FAIL，实际15Flash（14有headers完成标记）/1Pro（HTTP200，toolCount1）。三人末态health20；npc7/npc9已分别改树至revision2并回应，npc8仍revision1且无speech，180秒等待失败。未到达发布校验器、精确UI断线或连续白昼到达段，不能称新T11通过。
+- 一次仅元数据的live PG读取观察到npc7 window2/revision2、其他两人window1/revision1、1笔compaction commit、2份Pro prepared manifest。该读回不是完整发布校验：manifest在fetch之前写入，不能把2份准备记录说成2次实际发送；后续PG由fixture正常删除，不伪造缺失的receipt/HTTP细节。验收器正在修正prepared/actual混计的假阴性，但不据此重抽真实模型。
+- `approved-pro-flash-pro` 于10:50:39–10:54:51 2/2 PASS：真实Flash改树/断线身体执行；PG压缩window1/MEMORY1→window2/MEMORY2且published；出生包经浏览器幂等激活。本组2Flash（1有headers标记）/3Pro。所有本次专用网关/PG由fixture清理。
+- 本批合计17Flash/4Pro，累计102Flash/16Pro逻辑网关dispatch；累计9Flash无headers标记。上游重试、计费请求与总token/credits/API费用仍unknown。T11的Pro单个响应报告26207 total tokens仅是该响应usage，不是全部任务成本。
+- 用户已明确push/PR，因此在确定性门禁结束后创建Draft PR保留独立基线，T11仍为OPEN/FAIL，不标Delivered/Ready，不自动合并。下次复现必须先补非敏感Flash HTTP/outcome与持久化失败回执诊断；原样重跑没有新增归因价值。
+- 独立artifact核对确认npc8两次请求均收到正确东侧任务和本人观察，239组样本有对应dialogue-heard事件；首轮历史保留29757-byte reasoning，但正文0 bytes、工具0、refusal null，属于已确认模型no-op。第二轮仅headers标记而无后续输出，仍不能确定HTTP/provider/codec结果。没有证据证明ECS或任务投递整体失效；生产目前允许reasoning-only消息并将该轮记为completed，此响应/失败可观察性合同应先补确定性反例再做下一轮有信息的复现。
+- prepared/actual验收器修正后17项GREEN，类型/lint/format通过，独立复核无P0/P1：实际wire唯一对应完整manifest；其余准备记录必须有精确budget失败回执、没有发布、fresh active窗口且未suspended。增量此次未在实现前单独执行RED，明确记录流程偏差，不伪造历史；基础helper原始3项RED保留。没有因此再调用真实模型。

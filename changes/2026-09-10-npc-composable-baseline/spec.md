@@ -118,6 +118,8 @@ T11 的断线边界绑定真实连接：点击前记录计数，等待精确Resi
 
 本上限计数边界是Resident/Agent→真实网关的HTTP dispatch，不是一次逻辑压缩可包含任意多轮请求。生产网关既有内部重试策略不变；未采集到上游attempt/计费权威数据，因此不能声明provider计费次数≤1。PG portable只在测试进程内作校验，新增artifact仅保存归因摘要与诊断，不保存整份认知档。
 
+manifest先于实际fetch持久化，不能将prepared条数作为调用数。每个实际wire必须唯一匹配完整manifest；其余准备记录只有在对应请求以fixture budget exhausted失败、没有发布/commit、窗口回到active且未suspended时才允许单列preparedNotDispatched。同base已发布、无终态回执、硬限额冻结或匹配歧义均拒绝，不能静默忽略未匹配记录。
+
 真实模型作者质量单列：历史候选曾通过有界任务，不保证任意合法生成树长期健康，也不代替最新候选准出。`4407d52`的npc-8在巡逻失败后进入无guard永久hold，后续饥饿monitor正常通知但不抢占；该行为符合公开执行语义，却不是健康生活策略。默认维护树的T04长期回归不能替该生成树背书；本期不为绕过此质量限制改变selector/monitor语义或禁止合法驻守。
 
 最小纵向切片先跑T02/T03/T06/T08，再铺开三角色与全部回归。每阶段先取得对应可执行RED，之后GREEN；已有源码缺口仅记初始观察，不冒充执行过的RED。新需求用例归本change，显式接入CI；不静默修改Delivered历史断言来掩盖差异。
@@ -150,17 +152,17 @@ T11 的断线边界绑定真实连接：点击前记录计数，等待精确Resi
 
 ## Delivery Snapshot
 
-当前为Implementing，用户批准后S4恢复复验，不是Delivered。下表为批准前的实现及测试冻结SHA `4efcdbe603b6e7bbbce06ba6950ba990457f1a91`；新验收代码尚待运行，不把旧结果冒充新合同通过。
+当前为Implementing，不是Delivered。确定性完整冻结证据来自`4efcdbe603b6e7bbbce06ba6950ba990457f1a91`；批准后真实模型与验收增量冻结于`d2d36b2a31e86656cdd53a2cddaf786dd6136d09`，两者生产apps/packages/scripts/lockfile相同，不把旧结果冒充新合同通过。
 
-| 范围                                              | 当前证据与状态                                                                      |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| T01–T10 机制、权限、迁移、三身体/三认知和扩展能力 | 确定性单元/集成及Browser通过；完整static 417文件2159项PASS，4项既有SKIP             |
-| T12 主线玩法及生产入口                            | Web/Agent build PASS，主线Browser 52/52、NPC默认8/8、production 1/1 PASS            |
-| T11 真实三人格                                    | FAIL：15Flash/1Pro，原0Pro门槛未满足；三人已改树和回应，精确断线/离线到达窗口未运行 |
-| 真实Flash/Pro独立补充                             | ca3历史两项PASS；最新实现未重跑，不作当前准出证明                                   |
-| 独立审阅                                          | 已发现实施P1闭合；T11产品/成本门槛仍需取舍，人类活人感复核NOT_RUN                   |
-| 新main PR与远端CI                                 | NOT_RUN；没有推送、创建PR、批准或合并                                               |
+| 范围                                              | 当前证据与状态                                                                        |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| T01–T10 机制、权限、迁移、三身体/三认知和扩展能力 | 确定性单元/集成及Browser通过；完整static 417文件2159项PASS，4项既有SKIP               |
+| T12 主线玩法及生产入口                            | Web/Agent build PASS，主线Browser 52/52、NPC默认8/8、production 1/1 PASS              |
+| T11 真实三人格                                    | d2仍FAIL：15Flash/1Pro满足新预算，但npc8未改树/回应；新增发布校验及断线/离线段NOT_RUN |
+| 真实Flash/Pro独立补充                             | d2两项PASS：Flash改树/断线身体，Pro发布MEMORY1→2及出生幂等激活                        |
+| 独立审阅                                          | 已发现实施P1闭合；d2增量复核通过；实际运行另发现prepared/dispatch验收假阴性需修正     |
+| 新main PR与远端CI                                 | NOT_RUN；没有推送、创建PR、批准或合并                                                 |
 
-批准前主阻塞：一次完全合法的NPC逻辑轮已可触发记忆压缩，违反原0Pro验收。用户已批准最多1次实际网关Pro dispatch，当前补齐可归因发布、权限及总预算证据后复验；不会重抽模型直到通过。详细原始证据、残余限制与恢复点见[progress.md](progress.md)。
+批准前0Pro阻塞已由用户明确授权最多1次实际网关Pro dispatch取代。新运行的主缺口是npc8未改树/回应：两次Flash请求仅记录headers标记，无完整HTTP/provider/codec outcome，不能归因于某一层或宣称三人格完成。没有重抽模型；先修复prepared manifest与actual dispatch混计的验收假阴性、完成确定性门禁后，按用户push/PR授权创建Draft并披露T11 OPEN。详细证据、残余限制与恢复点见[progress.md](progress.md)。
 
 长期docs baseline已更新：公共能力与可组合架构、代码地图/目录归属、世界/认知存档、Harness/CI与NPC运行说明。原因是这些跨change合同无法只靠局部实现稳定重建；没有将尚未通过的真实旅程写成成功案例。原checkout/main未修改，独立worktree与证据保留，验证服务已停止，用户PG容器保留。实际工作量及不可取得的token/费用明确列于[estimates.md](estimates.md)。
