@@ -309,3 +309,10 @@
 - 首个修复提交 `870fe6d95505629d3f878e5d1364271156a0d990` 推送后，PR head与提交一致，IPv6 Codex review thread已resolve并读回；Production build 1分17秒通过，Chromium已独立通过原失败的背包/创造/视觉段。
 - Static verification job `103148353113`的生成、格式、Lint、路径、全类型均通过；coverage从04:35:48持续运行至04:53:47，期间测试文件继续通过且无断言失败，最终由job的20分钟总上限强制取消。结合本地同单worker全量791.66秒PASS，新增T15并将Static资源上限调整为30分钟；不改变测试全集、worker、隔离、coverage门槛或断言，也不把hosted runner墙钟当性能收益。
 - 新提交仍须由最新远端SHA重跑三项required checks并读回mergeability。长期docs baseline不更新：`docs/ci-testing.md`已明确“超时是资源上限，不是性能验收阈值”，本次仅调整该既有策略的当前容量值。
+
+### 2026-09-11 约13:31 Hosted runner 实际容量修复
+
+- 第二轮head `8c7fe841fb30c80275e3fd5b75edfb429acaa40d`的Production build 1分15秒通过；Chromium前52项（主回归、Harness、资源、近战、背包/创造、可组合玩法）全部通过，其中原失败背包组再次12/12通过。Static与Chromium最终均在30分17秒被job上限取消。
+- Static coverage从04:59:30运行至05:27:33，取消前持续通过且已完成277/422文件，无断言失败；按当前runner进度的线性上界约43分钟。将Static上限调整为60分钟，保留单worker、完整测试集、隔离和coverage门槛。
+- Chromium在05:17:28进入13项NPC组；“确定性推进三个昼夜”保留1800秒模拟量与逐段状态断言，但初次及证据retry均触发240秒单测上限，之后继续执行到第8项时被job上限取消。新增T16：仅将该用例资源上限调整为10分钟，并将Chromium job上限调整为60分钟；按前52项约19分钟、该用例最坏两次各10分钟及剩余步骤估算仍留有余量，不增加retry、不放宽fail-on-flaky、不删浏览器/生产入口验收。
+- 定向三昼夜用例保持1800秒模拟量、原断言与零retry，本机1.8分钟PASS；候选格式、路径和diff检查通过。新SHA仍须由三项required checks重新验收。长期docs baseline不更新，理由同上：既有文档已经定义超时的资源语义与不可放宽项。

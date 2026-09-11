@@ -52,7 +52,7 @@ jobs:
 
   static:
     name: Static verification
-    timeout-minutes: 30
+    timeout-minutes: 60
     needs: scope
     if: ${{ always() }}
     runs-on: ubuntu-24.04
@@ -132,7 +132,7 @@ jobs:
 
   e2e-regression:
     name: Chromium regression
-    timeout-minutes: 30
+    timeout-minutes: 60
     needs: scope
     if: needs.scope.result == 'success' && needs.scope.outputs.run_full == 'true'
     runs-on: ubuntu-24.04

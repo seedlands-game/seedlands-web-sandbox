@@ -164,7 +164,7 @@ test('固定初始资源、零模型、零换树的60分钟浏览器生活', asy
 });
 
 test('浏览器确定性推进三个昼夜，固定树重复完成补给休息与巡逻', async ({ page }, testInfo) => {
-  test.setTimeout(240000);
+  test.setTimeout(600000);
   const character = await startLifeScene(page);
   const pause = await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }));
   expect(pause, `Pause before deterministic advance: ${JSON.stringify(pause)}`).toMatchObject({
