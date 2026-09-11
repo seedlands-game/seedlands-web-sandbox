@@ -3,14 +3,19 @@ import { expect, test } from '@playwright/test';
 import { CHARACTER_ARRIVAL_RADIUS, createLifeBehavior } from '@seedlands/game-core/runtime/character-control-protocol';
 import { definitionHash, faceLifeCharacter, lifeSample, startLifeScene } from './support';
 import { startBrowserResidentFixture } from './resident-support';
+import { assertNoModelDispatchAfterClose, validateRealThreeCompaction } from './real-three-evidence';
+import type { PortableWorkspace } from '../../../apps/agent-server/src/workspace/types';
 
 test('真实模型让三种人格分别回应玩家任务，改树后以真实身体到达各自工作地点', async ({ page, baseURL }, info) => {
-  test.skip(process.env.SEEDLANDS_NPC_REAL_THREE !== '1', '显式真实三角色验收，最多18个Flash调用，不调用Pro');
+  test.skip(process.env.SEEDLANDS_NPC_REAL_THREE !== '1', '显式真实三角色验收，最多18个Flash和1个Pro实际调用');
   test.setTimeout(420000);
-  const runtime = await startBrowserResidentFixture(new URL(baseURL!).origin, true, 18);
+  const runtime = await startBrowserResidentFixture(new URL(baseURL!).origin, true, 18, 1);
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   const journeys: unknown[] = [];
+  let memoryEvidence: readonly PortableWorkspace[] = [];
+  let memorySummary: ReturnType<typeof validateRealThreeCompaction> | undefined;
+  let memoryValidationError: string | undefined;
   const executionWindow = {
     installedWorldTime: 0,
     elapsedSeconds: 0,
@@ -20,6 +25,11 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
     callsAtServerClose: 0,
     callsAfterRetirement: 0,
     transitionCalls: 0,
+    proCallsBeforeClick: 0,
+    proCallsAtTransportClose: 0,
+    proCallsAtServerClose: 0,
+    proCallsAfterRetirement: 0,
+    transitionProCalls: 0,
     clickStartedAt: 0,
     transportClosedAt: 0,
     serverClosedAt: 0,
@@ -137,26 +147,58 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
         })
         .not.toBe('');
     }
+    const identity = await page.evaluate(() => window.__seedlandsHarness!.world.identity());
+    if (!identity.ok) throw new Error('Disconnect world identity unavailable');
+    const timelineId = await page.evaluate(
+      (worldId) => localStorage.getItem(`seedlands.cognition.timeline:${worldId}`),
+      identity.data.worldId,
+    );
+    if (!timelineId) throw new Error('Resident timeline unavailable');
+    const bindings = await runtime.workspace.listBindings(identity.data.worldId, timelineId);
+    expect(bindings.map((binding) => binding.actorId).sort()).toEqual(
+      characters.map((character) => character.entityId).sort(),
+    );
+    const readMemoryEvidence = async () => {
+      memoryEvidence = await Promise.all(bindings.map((binding) => runtime.workspace.exportPortable(binding)));
+      memorySummary = validateRealThreeCompaction(runtime.proCalls, memoryEvidence);
+      memoryValidationError = undefined;
+      return memorySummary;
+    };
+    // Observe normal automatic compaction, if any; never invoke a compactor or pause cognition to manufacture proof.
+    await expect
+      .poll(
+        async () => {
+          await captureJourney();
+          try {
+            await readMemoryEvidence();
+            return true;
+          } catch (error) {
+            memoryValidationError = error instanceof Error ? error.message : 'Compaction evidence unavailable';
+            return false;
+          }
+        },
+        { timeout: 305000, intervals: [1000], message: 'Automatic Pro compaction must be durably published' },
+      )
+      .toBe(true);
     const installed = await captureJourney();
     installed.forEach((sample, index) => {
       expect(definitionHash(sample.observation)).not.toBe(definitionHash(before[index].observation));
     });
     expect(new Set(installed.map((sample) => sample.observation.character.behaviorTree.goal.description)).size).toBe(3);
     executionWindow.installedWorldTime = installed[0].worldTime;
-    expect(runtime.proCalls).toHaveLength(0);
+    expect(runtime.proCalls.length).toBeLessThanOrEqual(1);
     const authenticated = runtime.connectionEvents.filter((event) => event.phase === 'authenticated');
     expect(authenticated).toHaveLength(1);
     const connection = authenticated[0];
     expect(connection.world).not.toBeNull();
-    const identity = await page.evaluate(() => window.__seedlandsHarness!.world.identity());
-    if (!identity.ok) throw new Error('Disconnect world identity unavailable');
     expect(connection.world).toMatchObject({ worldId: identity.data.worldId, epoch: identity.data.epoch });
     executionWindow.callsBeforeClick = runtime.calls.length;
+    executionWindow.proCallsBeforeClick = runtime.proCalls.length;
     executionWindow.clickStartedAt = Date.now();
     const [transportClose, retirement] = await Promise.all([
       residentSocket
         .waitForEvent('close', { timeout: 15000 })
-        .then(() => ({ at: Date.now(), calls: runtime.calls.length })),
+        .then(() => ({ at: Date.now(), calls: runtime.calls.length, proCalls: runtime.proCalls.length })),
       runtime.waitForRetirement(connection.connectionId),
       page.getByRole('button', { name: '断开', exact: true }).click(),
     ]);
@@ -168,12 +210,27 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
     executionWindow.callsAtServerClose = serverClose!.flashCalls;
     executionWindow.callsAfterRetirement = retirement.flashCalls;
     executionWindow.transitionCalls = transportClose.calls - executionWindow.callsBeforeClick;
+    executionWindow.proCallsAtTransportClose = transportClose.proCalls;
+    executionWindow.proCallsAtServerClose = serverClose!.proCalls;
+    executionWindow.proCallsAfterRetirement = retirement.proCalls;
+    executionWindow.transitionProCalls = transportClose.proCalls - executionWindow.proCallsBeforeClick;
     executionWindow.transportClosedAt = transportClose.at;
     executionWindow.serverClosedAt = serverClose!.at;
     executionWindow.retiredAt = retirement.at;
     expect(transportClose.calls).toBe(serverClose!.flashCalls);
     expect(retirement.flashCalls).toBe(serverClose!.flashCalls);
     expect(runtime.calls).toHaveLength(retirement.flashCalls);
+    expect(transportClose.proCalls).toBe(serverClose!.proCalls);
+    expect(retirement.proCalls).toBe(serverClose!.proCalls);
+    expect(runtime.proCalls).toHaveLength(retirement.proCalls);
+    assertNoModelDispatchAfterClose([
+      { flashCalls: transportClose.calls, proCalls: transportClose.proCalls },
+      serverClose!,
+      retirement,
+      { flashCalls: runtime.calls.length, proCalls: runtime.proCalls.length },
+    ]);
+    // Also catches a compaction that starts between the pre-click readback and actual socket close.
+    await readMemoryEvidence();
     await expect(page.locator('#companion .connection')).toHaveText('按当前行为树生活 · 未连接模型');
     expect(await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }))).toMatchObject({
       ok: true,
@@ -196,17 +253,27 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
         expect(sample.observation.cursor).toBeGreaterThanOrEqual(cursors[index]);
         cursors[index] = sample.observation.cursor;
         expect(sample.observation.character.lifecycle).toBe('active');
+        expect(sample.observation.self.health).toBeGreaterThan(0);
         expect(definitionHash(sample.observation)).toBe(definitionHash(installed[index].observation));
+        expect(sample.observation.character.behaviorTree.revision).toBe(
+          installed[index].observation.character.behaviorTree.revision,
+        );
       });
       executionWindow.elapsedSeconds++;
       executionWindow.daylightSeconds =
         isDay(previousWorldTime) && isDay(current[0].worldTime) ? executionWindow.daylightSeconds + 1 : 0;
       previousWorldTime = current[0].worldTime;
       expect(runtime.calls).toHaveLength(executionWindow.callsAfterRetirement);
+      expect(runtime.proCalls).toHaveLength(executionWindow.proCallsAfterRetirement);
+      assertNoModelDispatchAfterClose([
+        retirement,
+        { flashCalls: runtime.calls.length, proCalls: runtime.proCalls.length },
+      ]);
     }
     expect(executionWindow.daylightSeconds).toBe(60);
     expect(reached).toEqual([true, true, true]);
-    expect(runtime.proCalls).toHaveLength(0);
+    expect(runtime.proCalls.length).toBeLessThanOrEqual(1);
+    await readMemoryEvidence();
     expect(runtime.calls.length).toBeLessThanOrEqual(18);
     expect(new Set(runtime.calls.map((call) => call.actorId)).size).toBe(3);
     await page.getByRole('button', { name: '思考设置' }).click();
@@ -230,7 +297,20 @@ test('真实模型让三种人格分别回应玩家任务，改树后以真实�
   } finally {
     writeFileSync(info.outputPath('real-three-world-journey.json'), JSON.stringify(journeys));
     writeFileSync(info.outputPath('real-three-model-calls.json'), JSON.stringify(runtime.calls));
-    writeFileSync(info.outputPath('real-three-pro-calls.json'), JSON.stringify(runtime.proCalls));
+    writeFileSync(
+      info.outputPath('real-three-pro-calls.json'),
+      JSON.stringify(
+        runtime.proCalls.map((call) => ({
+          startedAt: call.startedAt,
+          finishedAt: call.finishedAt,
+          response: call.response,
+        })),
+      ),
+    );
+    writeFileSync(
+      info.outputPath('real-three-memory-evidence.json'),
+      JSON.stringify({ summary: memorySummary, validationError: memoryValidationError }),
+    );
     writeFileSync(info.outputPath('real-three-errors.json'), JSON.stringify(errors));
     writeFileSync(info.outputPath('real-three-execution-window.json'), JSON.stringify(executionWindow));
     writeFileSync(info.outputPath('real-three-connection-events.json'), JSON.stringify(runtime.connectionEvents));

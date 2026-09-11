@@ -5,6 +5,7 @@ import { ResidentFactory } from '../../../apps/agent-server/src/resident-factory
 import { startResidentServer, type ResidentServerOptions } from '../../../apps/agent-server/src/node/resident-host';
 import { PersistentNpcWorkspace, createPostgresFrameworkPersistence } from '../../../apps/agent-server/src/workspace';
 import type { CharacterObservation } from '@seedlands/game-core/runtime/character-control-protocol';
+import { assertModelDispatchBudget } from './real-three-evidence';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -42,8 +43,14 @@ function birthDocumentDiagnostics(value: unknown) {
   return undefined;
 }
 
-export async function startBrowserResidentFixture(origin: string, real = false, maximumFlashCalls = 6) {
+export async function startBrowserResidentFixture(
+  origin: string,
+  real = false,
+  maximumFlashCalls = 6,
+  maximumProCalls = 4,
+) {
   if (![6, 18].includes(maximumFlashCalls)) throw new Error('Unapproved real-model fixture budget');
+  if (![1, 4].includes(maximumProCalls)) throw new Error('Unapproved real-model Pro fixture budget');
   const probe = createServer();
   await new Promise<void>((resolve) => probe.listen(0, '127.0.0.1', resolve));
   const address = probe.address();
@@ -107,6 +114,7 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
     type ConnectionEvent = Parameters<NonNullable<ResidentServerOptions['onConnectionLifecycle']>>[0] & {
       at: number;
       flashCalls: number;
+      proCalls: number;
     };
     const connectionEvents: ConnectionEvent[] = [];
     const connectionWaiters = new Set<() => void>();
@@ -157,7 +165,7 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
           kind: last?.role === 'tool' ? 'complete' : 'decision',
           request,
         };
-        if (real && calls.length >= maximumFlashCalls) throw new Error('Real Flash validation budget exhausted');
+        if (real) assertModelDispatchBudget(calls.length, maximumFlashCalls);
         calls.push(call);
         if (real) {
           const result = await globalThis.fetch(_url, init);
@@ -213,7 +221,7 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
         );
       },
     });
-    const proCalls: Record<string, unknown>[] = [];
+    const proCalls: { request: unknown; startedAt: number; finishedAt?: number; response?: unknown }[] = [];
     const pro = createGatewayChatModel({
       tier: 'pro',
       baseUrl: real ? process.env.SEEDLANDS_MODEL_GATEWAY_URL! : 'http://127.0.0.1:9/v1',
@@ -221,8 +229,11 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
       timeoutMs: 305000,
       fetch: async (url, init) => {
         if (!real) throw new Error('Mock fixture does not authorize Pro compaction');
-        if (proCalls.length >= 4) throw new Error('Real Pro validation budget exhausted');
-        const record: Record<string, unknown> = { request: JSON.parse(String(init?.body)) };
+        assertModelDispatchBudget(proCalls.length, maximumProCalls);
+        const record: (typeof proCalls)[number] = {
+          request: JSON.parse(String(init?.body)),
+          startedAt: Date.now(),
+        };
         proCalls.push(record);
         const response = await globalThis.fetch(url, init);
         const output = await response.clone().json();
@@ -235,6 +246,7 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
           reasoningLength: output.choices?.[0]?.message?.reasoning_content?.length ?? 0,
           birthDocuments: birthDocumentDiagnostics(output),
         };
+        record.finishedAt = Date.now();
         return response;
       },
     });
@@ -250,7 +262,7 @@ export async function startBrowserResidentFixture(origin: string, real = false, 
       allowedOrigins: [origin],
       port: 0,
       onConnectionLifecycle: (event) => {
-        connectionEvents.push({ ...event, at: Date.now(), flashCalls: calls.length });
+        connectionEvents.push({ ...event, at: Date.now(), flashCalls: calls.length, proCalls: proCalls.length });
         for (const check of connectionWaiters) check();
       },
     });

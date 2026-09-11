@@ -268,5 +268,12 @@
 | S1   | DONE    | 公共能力/可选模块与单一 ECS owner 纵切通过          |
 | S2   | DONE    | 存档及Agent旧行为定向回归收口                       |
 | S3   | DONE    | 三身体/三认知/扩展Pack纵切通过                      |
-| S4   | BLOCKED | 最新确定性门禁通过；T11预算FAIL，等待用户确认取舍   |
+| S4   | RUNNING | 用户已批准最多1次实际Pro，补验收证据并复验中        |
 | S5   | NOT_RUN | 尚未推送或创建PR，远端CI/人类审核与合并不冒充已完成 |
+
+### 2026-09-11 约10:35 用户批准后的续行
+
+- 用户明确「允许一次，然后 push 上去，发一个 pr」，据此更新T11合同：最多1次实际Pro自动压缩，第二次fetch前拒绝；持久化发布、受限工具、角色/窗口/来源与断线后双tier零新增须补证。生产预算/模型/阈值不变，不手动触发压缩，不自动重抽真实模型。
+- 仍在独立worktree，原main未动；live fetch后origin/main没有新增提交，main-ahead0/feature-ahead47，故无需重写或合并历史。新PR不存在；目标main要求Static verification、Production build、Chromium regression，strict latest base与review thread resolution仍有效。
+- 当前只修改change验收与fixture，先做纯校验器RED/GREEN和独立复核，再运行一次当前真实旅程、确定性检查与PR/CI。之前06:19的T11失败保留为历史证据，不改写为通过。
+- 新纯证据校验器先取得3个正向合同RED，最终15项GREEN，日志在`real-three-evidence/`。完整wire历史与持久manifest投影相同，关联唯一Actor/receipt/commit/窗口、fresh MEMORY 1→2及runtime compactions=1；其余两位保持0次压缩。双tier断线计数反例、错绑定/窗口/revision/来源、未发布/未收敛与2次调用均被拒绝。新增Pro/记忆artifact只保存元数据与归因摘要，完整Portable和Pro请求仅内存校验。
