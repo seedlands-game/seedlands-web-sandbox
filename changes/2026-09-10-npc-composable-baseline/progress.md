@@ -295,3 +295,11 @@
 - 同SHA八组Browser全部PASS：主线21、Harness2、资源2、近战1、背包创造12、可组合14，共52；NPC默认8（5项明确opt-in/另跑SKIP）、生产preview1，共61项通过。最后NPC组11:23:23–11:30:47，生产入口11:30:47–11:31:05，未重试。跳过的真实T11不算通过，仍引用d2真实FAIL。
 - live fetch后origin/main仍`6c7124a`，main-ahead0/feature-ahead49；无现有同head/base PR。所有本次验证命令已退出，Docker无运行容器；原PG保留。将最后文档快照单独提交后push并创建Draft，最新远端head/checks以PR实际读回为准，不把本地绿色说成远端已完成。
 - 长期docs baseline本轮不再扩张：此次增量仅收紧本change的验收归因和记录实际缺口，生产行为与已维护的NPC/能力/存档长期合同不变。整个change继续Implementing，人类“活人感”复核与T11后续诊断未完成。
+
+### 2026-09-11 约12:29 PR #32 准出修复
+
+- live冻结PR #32为main `6c7124a6f41e9069b07b7dd39593cd2ea2de5907`→head `d22b1bf68604209dc572114fbbde5e6486fde624`，merge-base等于main；GitHub判定无文本冲突但`BLOCKED`。run `34558982849`的Production build通过，Static verification因并发job失败被取消，Chromium regression 11/12失败；另有1条未解决Codex P2，指出WHATWG URL把IPv6回环hostname表示为`[::1]`而入口只接受`::1`。
+- Chromium artifact与retry trace证明checkpoint restore存在UI新鲜度竞态：新`BrowserGameplay`已重建为背包关闭，但restore回执返回前未同步发布其投影，旧UI仍为背包打开；紧接的首个E被旧Svelte capture监听器当作关闭操作拦截，随后帧刷新隐藏面板。新增T14单元反例在修复前因replacement `refresh`为0次失败；同步刷新后通过，原真实Playwright用例连续3/3通过，完整背包/创造/视觉组12/12通过且无retry。
+- 新增T13纯URL反例在helper不存在时RED；入口校验抽为Node局部`readLoopbackGatewayUrl`并接受`[::1]`，继续拒绝非回环、凭据、query与非HTTP协议。定向两文件6项PASS，未读取或写入模型/数据库凭据。
+- `pnpm verify:static:ci`按远端单worker拓扑完整PASS：420文件通过、2文件跳过，2182项通过、4项既有跳过；coverage 791.66秒，world行96.96%，后置全类型/Svelte通过。`pnpm build`独立PASS。普通并发`pnpm verify:static`曾让`character-night-install-replay`在全机竞争下超过45秒；同测试定向coverage测试体32.32秒通过，CI单worker全量亦通过，不把前者隐去或当作产品失败。
+- 当前仅为未提交候选；push后的新SHA、required checks、review thread与mergeability必须再次live读回。长期docs baseline不更新：本次只闭合当前change的入口校验和restore UI新鲜度，没有新增跨change架构或产品方向。

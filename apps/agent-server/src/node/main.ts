@@ -1,6 +1,7 @@
 import { createGatewayChatModel } from '../gateway-model.js';
 import { ResidentFactory } from '../resident-factory.js';
 import { createPostgresFrameworkPersistence, PersistentNpcWorkspace } from '../workspace/index.js';
+import { readLoopbackGatewayUrl } from './loopback-gateway-url.js';
 import { startResidentServer } from './resident-host.js';
 
 function parsePort(raw: string | undefined): number {
@@ -10,28 +11,13 @@ function parsePort(raw: string | undefined): number {
   return port;
 }
 
-function gatewayUrl(raw: string | undefined): string | null {
-  if (!raw?.trim()) return null;
-  const value = new URL(raw);
-  if (
-    !['http:', 'https:'].includes(value.protocol) ||
-    !['127.0.0.1', 'localhost', '::1'].includes(value.hostname) ||
-    value.username ||
-    value.password ||
-    value.search ||
-    value.hash
-  )
-    throw new Error('SEEDLANDS_MODEL_GATEWAY_URL must be an exact loopback gateway URL');
-  return value.toString().replace(/\/$/u, '');
-}
-
 const origins = (process.env.SEEDLANDS_ALLOWED_ORIGINS ?? 'http://localhost:5173,http://127.0.0.1:5173')
   .split(',')
   .map((entry) => entry.trim())
   .filter(Boolean);
 const connectionString = process.env.SEEDLANDS_COGNITION_DATABASE_URL?.trim();
 if (!connectionString) throw new Error('SEEDLANDS_COGNITION_DATABASE_URL is required');
-const baseUrl = gatewayUrl(process.env.SEEDLANDS_MODEL_GATEWAY_URL);
+const baseUrl = readLoopbackGatewayUrl(process.env.SEEDLANDS_MODEL_GATEWAY_URL);
 const gatewayToken = process.env.SEEDLANDS_MODEL_GATEWAY_TOKEN?.trim();
 if (Boolean(baseUrl) !== Boolean(gatewayToken))
   throw new Error('SEEDLANDS_MODEL_GATEWAY_URL and SEEDLANDS_MODEL_GATEWAY_TOKEN must be configured together');
