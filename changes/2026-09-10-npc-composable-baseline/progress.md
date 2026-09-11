@@ -322,3 +322,12 @@
 - 第三轮head `188dce773c6d2bbc86eb71c9d28ac31a128b7b37`的Production build 1分11秒通过；Chromium主回归、Harness与资源段通过，但近战段初次在“重新布置体验场”点击等待90秒超时，retry通过后被`failOnFlakyTests`判红。日志证明初次失败时`#death-overlay`拦截按钮：受击`-2`已成功且HUD已显示后，用例仍在截图/轮询音频，夜间敌人继续攻击直至玩家死亡。
 - 新增T17：在受击/HUD可观察后立即通过正常Harness暂停权威时钟，再保留原截图、音频、重置以及显式`advance`的两段挥砍/伤害断言。该修复不隐藏death overlay、不force click、不增加retry，也不削减敌人或战斗覆盖；长期docs baseline不更新，因为这是该历史浏览器旅程的具体时序修复。
 - 修复后近战真实Playwright用例零retry连续3/3 PASS（35.9秒）；定向格式、ESLint、路径与diff检查通过。仍以新远端SHA的完整required checks为最终证据。
+
+### 2026-09-11 约14:21 Hosted coverage 用例预算修复
+
+- 最新head `fc3a17c9e837af5252cc9edd098b60ab5bf28c62` 的Production build 1分07秒通过；Chromium已通过主回归、Harness、资源、近战、背包/创造和可组合玩法，仍在NPC组执行。近战与checkpoint旧失败均未retry，证明T14/T17远端闭合。
+- Static verification的生成、格式、Lint、路径与全类型均通过；完整coverage共418文件/2182项通过、2文件/2项仅因各自防挂起预算失败、2文件/4项既有SKIP。`character-night-install-replay`触及45秒，静态三昼夜行为触及240秒；没有逻辑断言或覆盖率门槛失败。
+- 新增T18：晚间安装重放仅把防挂起预算调整为120秒；三昼夜静态用例与同负载Browser用例一致调整为600秒。保留完整Authority初始化、逐步推进、事件排空、1800秒模拟量、原断言、单worker与coverage，不增加retry。历史同口径三昼夜定向coverage测试体195.31秒PASS，本地晚间重放定向coverage测试体32.32秒PASS；hosted runner实测已超过原上限，资源预算不作为性能收益声明。
+- 长期docs baseline不更新：`docs/ci-testing.md`已定义超时是资源保护而非性能门槛，本次只修正两个既有重计算用例在hosted coverage下的容量值。新SHA仍须完整重跑三项required checks并读回mergeability。
+- 同一run的Chromium前12个NPC条目中7项执行PASS、5项真实模型按设计SKIP；唯一失败为`three-life`三伙伴1800秒用例触及360秒。首轮已推进到最后一张1790秒截图，retry在Authority推进中触顶，均无业务断言失败。新增T19并仅将该多角色重计算用例防挂起预算调整为600秒；三位角色、180次推进、逐次资源守恒/事件证据、三张截图与全部末态断言保持不变，不增加retry。
+- 修正后本地单worker两份Vitest共8/8 PASS（171.85秒）；三伙伴Playwright按hosted低质量/SwiftShader配置、零retry单次PASS（4.0分钟）。格式、ESLint、路径与diff检查通过；这些定向结果不替代下一远端SHA的完整Static/Chromium required checks。

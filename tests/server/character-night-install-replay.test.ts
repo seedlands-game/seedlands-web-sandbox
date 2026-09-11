@@ -137,4 +137,5 @@ it('keeps a late-night task resting, then reaches camp in its next daylight oppo
   } finally {
     await session.dispose();
   }
-}, 45_000);
+  // Full Authority setup plus daylight replay under coverage; this is a hang budget, not a performance metric.
+}, 120_000);

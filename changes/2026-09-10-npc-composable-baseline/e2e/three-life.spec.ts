@@ -4,7 +4,8 @@ import { createLifeBehavior } from '@seedlands/game-core/runtime/character-contr
 import { definitionHash, faceLifeCharacter, LifeEvidence, lifeSample, lifeScene, startLifeScene } from './support';
 
 test('同一组合世界三位伙伴以有限共享食物跨昼夜连续生活1800模拟秒', async ({ page }, testInfo) => {
-  test.setTimeout(360000);
+  // Three Authorities, event drains, resource checks, and evidence screenshots; this is a hang budget, not a performance metric.
+  test.setTimeout(600_000);
   const sockets: string[] = [];
   const errors: string[] = [];
   page.on('websocket', (socket) => sockets.push(new URL(socket.url()).host));
