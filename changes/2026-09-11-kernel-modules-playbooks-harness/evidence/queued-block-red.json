@@ -1,0 +1,7 @@
+{
+  "fault": "omit queuedFlushBound from Block pendingOperationUpperBound, reproducing the reviewed old formula",
+  "command": "pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/migration-authority-capacity-sources.test.ts -t \"bounds queued Block begins\"",
+  "exitCode": 1,
+  "restoredSourceSha256": "ec150eb559b342b81e1fd9b9af05119213d17c88c4d418e3226b97c907fe2c86",
+  "sourceRestoredExactly": true
+}

@@ -1,0 +1,669 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+  "entry": "packages/game-core/src/server/composition/assembly.ts",
+  "boundary": "Generic Pack assembly must not transitively depend on concrete gameplay or behavior.",
+  "evidenceLevel": "static dependency characterization; not the final architecture gate or bare-kernel runtime proof",
+  "reachableFiles": 242,
+  "forbiddenCount": 139,
+  "forbidden": [
+    "packages/game-core/src/server/simulation/action-identity.ts",
+    "packages/game-core/src/server/gameplay/entity-store.ts",
+    "packages/game-core/src/server/gameplay/ecs-entity-owner.ts",
+    "packages/game-core/src/server/gameplay/item-registry.ts",
+    "packages/game-core/src/server/gameplay/playbooks/overworld/items.ts",
+    "packages/game-core/src/server/gameplay/modules/behavior-registry-module.ts",
+    "packages/game-core/src/server/gameplay/modules/combat-model.ts",
+    "packages/game-core/src/server/gameplay/combat-runtime.ts",
+    "packages/game-core/src/server/gameplay/melee-definition-registry.ts",
+    "packages/game-core/src/server/gameplay/playbooks/overworld/combat.ts",
+    "packages/game-core/src/server/gameplay/combat-runtime-snapshot.ts",
+    "packages/game-core/src/server/gameplay/combat-pending-hit.ts",
+    "packages/game-core/src/server/gameplay/combat-origin.ts",
+    "packages/game-core/src/server/gameplay/prepared-combat-mutation.ts",
+    "packages/game-core/src/server/gameplay/combat-request-candidate.ts",
+    "packages/game-core/src/server/gameplay/modules/inventory-action-model.ts",
+    "packages/game-core/src/server/gameplay/modules/inventory-api.ts",
+    "packages/game-core/src/server/gameplay/inventory.ts",
+    "packages/game-core/src/server/gameplay/item-instance.ts",
+    "packages/game-core/src/server/gameplay/gameplay-content.ts",
+    "packages/game-core/src/server/gameplay/modules/crafting-provider.ts",
+    "packages/game-core/src/server/gameplay/recipe-registry.ts",
+    "packages/game-core/src/server/gameplay/playbooks/overworld/recipes.ts",
+    "packages/game-core/src/server/gameplay/station-content.ts",
+    "packages/game-core/src/server/gameplay/ecs-station-state.ts",
+    "packages/game-core/src/server/gameplay/modules/furnace-candidates.ts",
+    "packages/game-core/src/server/gameplay/modules/station-candidates.ts",
+    "packages/game-core/src/server/gameplay/actor-profile.ts",
+    "packages/game-core/src/server/simulation/actor-state.ts",
+    "packages/game-core/src/server/simulation/action-runtime.ts",
+    "packages/game-core/src/server/simulation/ground-navigator.ts",
+    "packages/game-core/src/server/simulation/poi-registry.ts",
+    "packages/game-core/src/server/simulation/character-runtime-types.ts",
+    "packages/game-core/src/server/gameplay/ecs-actor-components.ts",
+    "packages/game-core/src/server/gameplay/player-state.ts",
+    "packages/game-core/src/server/gameplay/modules/inventory-pointer-contract.ts",
+    "packages/game-core/src/server/simulation/perception-runtime.ts",
+    "packages/game-core/src/server/gameplay/playbooks/overworld/actors.ts",
+    "packages/game-core/src/server/gameplay/modules/inventory-module.ts",
+    "packages/game-core/src/server/gameplay/modules/content-module.ts",
+    "packages/game-core/src/server/gameplay/modules/recipe-crafting-module.ts",
+    "packages/game-core/src/server/gameplay/modules/mode-module.ts",
+    "packages/game-core/src/server/gameplay/ecs-actor-state.ts",
+    "packages/game-core/src/server/simulation/character-runtime-validation.ts",
+    "packages/game-core/src/server/simulation/character-behavior-definition.ts",
+    "packages/game-core/src/server/gameplay/ecs-actor-mode-state.ts",
+    "packages/game-core/src/server/gameplay/modules/ruleset-module.ts",
+    "packages/game-core/src/server/gameplay/modules/needs-module.ts",
+    "packages/game-core/src/server/gameplay/modules/needs-model.ts",
+    "packages/game-core/src/server/gameplay/modules/needs-rules-module.ts",
+    "packages/game-core/src/server/gameplay/modules/combat-module.ts",
+    "packages/game-core/src/server/gameplay/modules/combat-rules-module.ts",
+    "packages/game-core/src/server/gameplay/modules/inventory-actions-module.ts",
+    "packages/game-core/src/server/gameplay/modules/inventory-pointer-model.ts",
+    "packages/game-core/src/server/gameplay/modules/inventory-cursor-settlement.ts",
+    "packages/game-core/src/server/gameplay/modules/block-actions-module.ts",
+    "packages/game-core/src/server/gameplay/modules/station-action-model.ts",
+    "packages/game-core/src/server/gameplay/modules/block-action-model.ts",
+    "packages/game-core/src/server/gameplay/voxel-gameplay.ts",
+    "packages/game-core/src/server/gameplay/playbooks/overworld/blocks.ts",
+    "packages/game-core/src/server/gameplay/modules/block-rules-module.ts",
+    "packages/game-core/src/server/gameplay/modules/mining-tool-policy.ts",
+    "packages/game-core/src/server/gameplay/gameplay-geometry.ts",
+    "packages/game-core/src/server/gameplay/modules/feeding-actions-module.ts",
+    "packages/game-core/src/server/gameplay/modules/feeding-model.ts",
+    "packages/game-core/src/server/gameplay/modules/feeding-rules-module.ts",
+    "packages/game-core/src/server/gameplay/modules/station-actions-module.ts",
+    "packages/game-core/src/server/gameplay/modules/furnace-world-model.ts",
+    "packages/game-core/src/server/gameplay/modules/forage-module.ts",
+    "packages/game-core/src/server/gameplay/modules/forage-model.ts",
+    "packages/game-core/src/server/gameplay/ecs-component-storage.ts",
+    "packages/game-core/src/server/gameplay/ecs-entity-components.ts",
+    "packages/game-core/src/server/gameplay/prepared-entity-mutation.ts",
+    "packages/game-core/src/server/gameplay/entity-spatial-buckets.ts",
+    "packages/game-core/src/server/gameplay/modules/gameplay-module-schedule.ts",
+    "packages/game-core/src/server/gameplay/modules/gameplay-module-runtime.ts",
+    "packages/game-core/src/server/gameplay/gameplay-runtime.ts",
+    "packages/game-core/src/server/gameplay/gameplay-entity-metrics.ts",
+    "packages/game-core/src/server/gameplay/gameplay-domain-adapters.ts",
+    "packages/game-core/src/server/gameplay/modules/actor-inventory-runtime.ts",
+    "packages/game-core/src/server/gameplay/voxel-ray.ts",
+    "packages/game-core/src/server/gameplay/modules/actor-vitals-runtime.ts",
+    "packages/game-core/src/server/gameplay/modules/needs-runtime.ts",
+    "packages/game-core/src/server/gameplay/modules/block-interaction-runtime.ts",
+    "packages/game-core/src/server/gameplay/player-occupancy.ts",
+    "packages/game-core/src/server/gameplay/gameplay-runtime-contracts.ts",
+    "packages/game-core/src/server/gameplay/gameplay-snapshot.ts",
+    "packages/game-core/src/server/simulation/autonomy-runtime.ts",
+    "packages/game-core/src/server/simulation/combat-action-snapshot.ts",
+    "packages/game-core/src/server/simulation/prepared-combat-effects.ts",
+    "packages/game-core/src/server/simulation/autonomy-helpers.ts",
+    "packages/game-core/src/server/simulation/character-runtime.ts",
+    "packages/game-core/src/server/simulation/character-observation-runtime.ts",
+    "packages/game-core/src/server/simulation/character-behavior-runtime.ts",
+    "packages/game-core/src/server/simulation/character-behavior-skills.ts",
+    "packages/game-core/src/server/gameplay/modules/behavior-navigation-policy.ts",
+    "packages/game-core/src/server/simulation/character-behavior-operation.ts",
+    "packages/game-core/src/server/simulation/character-behavior-admission.ts",
+    "packages/game-core/src/server/simulation/character-snapshot-runtime.ts",
+    "packages/game-core/src/server/simulation/actor-authority-rules.ts",
+    "packages/game-core/src/server/simulation/autonomy-snapshot-validation.ts",
+    "packages/game-core/src/server/simulation/character-navigation.ts",
+    "packages/game-core/src/server/simulation/autonomy-prepared-effects.ts",
+    "packages/game-core/src/server/simulation/prepared-death-effects.ts",
+    "packages/game-core/src/server/gameplay/gameplay-registered-adapters.ts",
+    "packages/game-core/src/server/gameplay/modules/registered-station-runtime.ts",
+    "packages/game-core/src/server/gameplay/modules/registered-inventory-runtime.ts",
+    "packages/game-core/src/server/gameplay/modules/registered-combat-runtime.ts",
+    "packages/game-core/src/server/gameplay/prepared-combat-damage.ts",
+    "packages/game-core/src/server/gameplay/modules/combat-state-port.ts",
+    "packages/game-core/src/server/gameplay/modules/combat-host-environment.ts",
+    "packages/game-core/src/server/gameplay/gameplay-combat.ts",
+    "packages/game-core/src/server/gameplay/modules/registered-block-runtime.ts",
+    "packages/game-core/src/server/gameplay/modules/block-origin-environment.ts",
+    "packages/game-core/src/server/gameplay/modules/block-state-port.ts",
+    "packages/game-core/src/server/gameplay/modules/block-host-commit.ts",
+    "packages/game-core/src/server/gameplay/modules/block-station-effects.ts",
+    "packages/game-core/src/server/gameplay/modules/registered-feeding-runtime.ts",
+    "packages/game-core/src/server/simulation/prepared-feeding-effects.ts",
+    "packages/game-core/src/server/gameplay/modules/registered-forage-runtime.ts",
+    "packages/game-core/src/server/gameplay/modules/needs-state-port.ts",
+    "packages/game-core/src/server/gameplay/modules/world-ruleset-state.ts",
+    "packages/game-core/src/server/gameplay/modules/mode-runtime.ts",
+    "packages/game-core/src/server/gameplay/modules/mode-state-port.ts",
+    "packages/game-core/src/server/gameplay/gameplay-mode-landing.ts",
+    "packages/game-core/src/server/gameplay/modules/inventory-state-port.ts",
+    "packages/game-core/src/server/gameplay/gameplay-combat-callbacks.ts",
+    "packages/game-core/src/server/gameplay/profiled-actor-spawn.ts",
+    "packages/game-core/src/server/gameplay/optional-registered-combat-request.ts",
+    "packages/game-core/src/server/gameplay/profiled-player-combat.ts",
+    "packages/game-core/src/server/gameplay/gameplay-inventory-pointer.ts",
+    "packages/game-core/src/server/gameplay/gameplay-runtime-lifecycle.ts",
+    "packages/game-core/src/server/gameplay/gameplay-clock.ts",
+    "packages/game-core/src/server/gameplay/gameplay-character-control.ts",
+    "packages/game-core/src/server/gameplay/gameplay-character-domain.ts",
+    "packages/game-core/src/server/gameplay/gameplay-runtime-checkpoint.ts",
+    "packages/game-core/src/server/gameplay/station-player-view.ts",
+    "packages/game-core/src/server/gameplay/actor-authority-gameplay.ts",
+    "packages/game-core/src/server/simulation/starter-ecology.ts"
+  ],
+  "enteringEdges": [
+    {
+      "from": "packages/game-core/src/server/composition/execution-origin.ts",
+      "to": "packages/game-core/src/server/simulation/action-identity.ts",
+      "line": 10
+    },
+    {
+      "from": "packages/game-core/src/server/composition/gameplay-actor-authority.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/behavior-registry-module.ts",
+      "line": 50
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/behavior-registry-module.ts",
+      "line": 54
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/inventory-module.ts",
+      "line": 66
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/content-module.ts",
+      "line": 67
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/combat-runtime.ts",
+      "line": 68
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/actor-profile.ts",
+      "line": 69
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 80
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/simulation/actor-state.ts",
+      "line": 81
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/recipe-crafting-module.ts",
+      "line": 82
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/crafting-provider.ts",
+      "line": 83
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/inventory-api.ts",
+      "line": 88
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/item-registry.ts",
+      "line": 89
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/recipe-registry.ts",
+      "line": 90
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/mode-module.ts",
+      "line": 92
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/ruleset-module.ts",
+      "line": 94
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/ruleset-module.ts",
+      "line": 95
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/needs-module.ts",
+      "line": 97
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/needs-rules-module.ts",
+      "line": 98
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/needs-model.ts",
+      "line": 99
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/combat-module.ts",
+      "line": 101
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/combat-rules-module.ts",
+      "line": 102
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/combat-model.ts",
+      "line": 103
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/inventory-actions-module.ts",
+      "line": 105
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/inventory-action-model.ts",
+      "line": 106
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/block-actions-module.ts",
+      "line": 108
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/voxel-gameplay.ts",
+      "line": 113
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/block-rules-module.ts",
+      "line": 114
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/block-rules-module.ts",
+      "line": 115
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/block-action-model.ts",
+      "line": 116
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/feeding-actions-module.ts",
+      "line": 118
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/feeding-rules-module.ts",
+      "line": 119
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/feeding-model.ts",
+      "line": 120
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/mining-tool-policy.ts",
+      "line": 122
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/mining-tool-policy.ts",
+      "line": 123
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/station-content.ts",
+      "line": 125
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/ecs-station-state.ts",
+      "line": 126
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/station-candidates.ts",
+      "line": 127
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/furnace-candidates.ts",
+      "line": 132
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/station-actions-module.ts",
+      "line": 134
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/forage-module.ts",
+      "line": 136
+    },
+    {
+      "from": "packages/game-core/src/server/composition/mod-api.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/forage-model.ts",
+      "line": 137
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-types.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/gameplay-module-schedule.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/server/persistence/gameplay-persistence.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-runtime.ts",
+      "line": 1
+    },
+    {
+      "from": "packages/game-core/src/server/authority/authority-session-types.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 1
+    },
+    {
+      "from": "packages/game-core/src/server/composition/gameplay-composition.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-content.ts",
+      "line": 3
+    },
+    {
+      "from": "packages/game-core/src/server/composition/gameplay-composition.ts",
+      "to": "packages/game-core/src/server/gameplay/combat-runtime.ts",
+      "line": 4
+    },
+    {
+      "from": "packages/game-core/src/server/persistence/game-save-snapshot.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-runtime.ts",
+      "line": 1
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-types.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 7
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-types.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-content.ts",
+      "line": 11
+    },
+    {
+      "from": "packages/game-core/src/server/station-world-residency.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/server/station-world-integrity.ts",
+      "to": "packages/game-core/src/server/gameplay/ecs-station-state.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/server/station-world-integrity.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 3
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/station-player-view.ts",
+      "line": 1
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 1
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/ecs-station-state.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/station-candidates.ts",
+      "line": 3
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/item-registry.ts",
+      "line": 4
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/recipe-registry.ts",
+      "line": 5
+    },
+    {
+      "from": "packages/game-core/src/server/authority/authority-session.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/server/authority/authority-physics-input.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 1
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 7
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/player-state.ts",
+      "line": 8
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/simulation/actor-state.ts",
+      "line": 9
+    },
+    {
+      "from": "packages/game-core/src/server/logic/logic-protocol.ts",
+      "to": "packages/game-core/src/server/simulation/action-runtime.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/server/logic/logic-protocol.ts",
+      "to": "packages/game-core/src/server/simulation/actor-state.ts",
+      "line": 3
+    },
+    {
+      "from": "packages/game-core/src/server/logic/logic-protocol.ts",
+      "to": "packages/game-core/src/server/simulation/poi-registry.ts",
+      "line": 4
+    },
+    {
+      "from": "packages/game-core/src/server/logic/logic-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/ecs-actor-components.ts",
+      "line": 5
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/combat-runtime.ts",
+      "line": 19
+    },
+    {
+      "from": "packages/game-core/src/server/harness/world-harness-contract.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 5
+    },
+    {
+      "from": "packages/game-core/src/server/harness/world-harness-contract.ts",
+      "to": "packages/game-core/src/server/simulation/actor-state.ts",
+      "line": 8
+    },
+    {
+      "from": "packages/game-core/src/server/harness/world-harness-contract.ts",
+      "to": "packages/game-core/src/server/simulation/action-runtime.ts",
+      "line": 9
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/inventory.ts",
+      "line": 21
+    },
+    {
+      "from": "packages/game-core/src/compute/authority-worker-protocol.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/inventory-pointer-contract.ts",
+      "line": 22
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 8
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-runtime.ts",
+      "line": 16
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-snapshot.ts",
+      "line": 17
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/item-registry.ts",
+      "line": 18
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/simulation/action-runtime.ts",
+      "line": 19
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/simulation/autonomy-runtime.ts",
+      "line": 20
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/simulation/actor-authority-rules.ts",
+      "line": 21
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/actor-authority-gameplay.ts",
+      "line": 22
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/simulation/poi-registry.ts",
+      "line": 23
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-content.ts",
+      "line": 27
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/item-registry.ts",
+      "line": 29
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/modules/inventory-pointer-contract.ts",
+      "line": 30
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/ecs-actor-state.ts",
+      "line": 32
+    },
+    {
+      "from": "packages/game-core/src/server/game-server-gameplay.ts",
+      "to": "packages/game-core/src/server/gameplay/ecs-actor-components.ts",
+      "line": 33
+    },
+    {
+      "from": "packages/game-core/src/server/starter-ecology-bootstrap.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 1
+    },
+    {
+      "from": "packages/game-core/src/server/starter-ecology-bootstrap.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-content.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/server/starter-ecology-bootstrap.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 3
+    },
+    {
+      "from": "packages/game-core/src/server/starter-ecology-bootstrap.ts",
+      "to": "packages/game-core/src/server/gameplay/item-registry.ts",
+      "line": 4
+    },
+    {
+      "from": "packages/game-core/src/server/starter-ecology-bootstrap.ts",
+      "to": "packages/game-core/src/server/simulation/actor-state.ts",
+      "line": 7
+    },
+    {
+      "from": "packages/game-core/src/server/starter-ecology-bootstrap.ts",
+      "to": "packages/game-core/src/server/simulation/poi-registry.ts",
+      "line": 8
+    },
+    {
+      "from": "packages/game-core/src/server/starter-ecology-bootstrap.ts",
+      "to": "packages/game-core/src/server/simulation/actor-state.ts",
+      "line": 9
+    },
+    {
+      "from": "packages/game-core/src/server/starter-ecology-bootstrap.ts",
+      "to": "packages/game-core/src/server/simulation/starter-ecology.ts",
+      "line": 10
+    },
+    {
+      "from": "packages/game-core/src/server/persistence/game-save-runtime.ts",
+      "to": "packages/game-core/src/server/gameplay/gameplay-runtime.ts",
+      "line": 2
+    },
+    {
+      "from": "packages/game-core/src/server/commands/command-contract.ts",
+      "to": "packages/game-core/src/server/gameplay/entity-store.ts",
+      "line": 3
+    },
+    {
+      "from": "packages/game-core/src/server/commands/command-contract.ts",
+      "to": "packages/game-core/src/server/simulation/action-runtime.ts",
+      "line": 4
+    },
+    {
+      "from": "packages/game-core/src/server/commands/command-contract.ts",
+      "to": "packages/game-core/src/server/simulation/poi-registry.ts",
+      "line": 5
+    },
+    {
+      "from": "packages/game-core/src/server/composition/contracts.ts",
+      "to": "packages/game-core/src/server/gameplay/item-registry.ts",
+      "line": 3
+    },
+    {
+      "from": "packages/game-core/src/server/composition/contracts.ts",
+      "to": "packages/game-core/src/server/gameplay/item-instance.ts",
+      "line": 4
+    }
+  ],
+  "unresolved": [],
+  "status": "RED"
+}

@@ -1,0 +1,15 @@
+{
+  "reason": "Base pure-world fixtures explicitly select the same standard generator; missing-provider negative fixtures are authored separately.",
+  "files": [
+    "packages/stdlib/tests/server/authority-checkpoint-restore.test.ts",
+    "packages/stdlib/tests/server/authority-only-advancement.test.ts",
+    "packages/stdlib/tests/server/chunk-residency.test.ts",
+    "packages/stdlib/tests/server/game-server.test.ts",
+    "packages/stdlib/tests/server/safe-spawn.test.ts",
+    "packages/stdlib/tests/server/server-command.test.ts",
+    "packages/stdlib/tests/server/voxel-fluid-runtime.test.ts",
+    "packages/stdlib/tests/server/world-collision-delta.test.ts",
+    "packages/stdlib/tests/server/world-mutation-transaction.test.ts",
+    "packages/stdlib/benchmarks/world-mutation.test.ts"
+  ]
+}
