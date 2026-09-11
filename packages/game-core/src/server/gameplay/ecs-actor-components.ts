@@ -2,6 +2,7 @@ import type { Inventory, InventoryAccess } from './inventory';
 import type { ItemId } from './item-registry';
 import type { BreakAction, PlayerSnapshot } from './player-state';
 import type { InventoryCursorV1 } from './modules/inventory-pointer-contract';
+import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
 
 export type ActorMode = 'survival' | 'creative';
 export type ActorModeComponentV1 = Readonly<{ version: 1; value: ActorMode; revision: number }>;
@@ -40,6 +41,7 @@ export type ActorComponentAccess = {
   readonly inventoryRevision: number;
   readonly inventoryCursor: InventoryCursorV1;
   readonly controlSource: ActorControlSource;
+  readonly controlRevision: number;
   readonly mode: ActorMode;
   readonly modeRevision: number;
   readonly creativeCatalog: CreativeCatalogComponentV1;
@@ -47,6 +49,7 @@ export type ActorComponentAccess = {
   selectSlot: (slot: number) => boolean;
   replaceModeComponents: (facets: ActorModeSnapshotFacets) => void;
   replaceInventoryInteraction: (revision: number, cursor: InventoryCursorV1) => void;
+  replaceControl: (source: ActorControlSource, expectedRevision?: number) => number;
 };
 
 export type PlayerComponentAccess = ActorComponentAccess &
@@ -55,7 +58,7 @@ export type PlayerComponentAccess = ActorComponentAccess &
     'spawnPosition' | 'hungerAccumulator' | 'healingAccumulator' | 'starvationAccumulator' | 'breakAction'
   >;
 
-export type ActorControlSource = 'player' | 'autonomous' | 'none';
+export type ActorControlSource = 'player' | 'autonomous' | 'behavior' | 'none';
 
 /** Every owner constructs these stores; none of the component references are shared between worlds. */
 export const createActorComponents = () => ({
@@ -73,7 +76,8 @@ export const createActorComponents = () => ({
     cursor: [] as (InventoryCursorV1 | undefined)[],
   },
   equipment: { selectedSlot: [] as number[], hotbarSize: [] as number[] },
-  control: { source: [] as (ActorControlSource | undefined)[] },
+  control: { source: [] as (ActorControlSource | undefined)[], revision: [] as number[] },
+  behavior: { value: [] as (CharacterComponentStateV1 | undefined)[] },
   life: { lifecycle: [] as PlayerSnapshot['lifecycle'][] },
   mode: { value: [] as (ActorMode | undefined)[], revision: [] as number[] },
   creativeCatalog: {
@@ -100,6 +104,10 @@ export type ActorComponentSnapshot = Readonly<{
   equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
   lifecycle: PlayerSnapshot['lifecycle'];
   controlSource: ActorControlSource;
+  /** Added with behavior control; omitted snapshots migrate to revision zero. */
+  controlRevision?: number;
+  /** Optional behavior state owned by the same ECS actor snapshot frontier. */
+  character?: CharacterComponentStateV1;
   mode?: ActorModeComponentV1;
   creativeCatalog?: CreativeCatalogComponentV1;
   flight?: ActorFlightComponentV1;

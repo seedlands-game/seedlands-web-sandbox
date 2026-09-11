@@ -64,7 +64,11 @@ describe('Web 与 game-core workspace 边界', () => {
   });
 
   it('各包提供独立类型检查、构建和测试入口', async () => {
-    for (const packagePath of ['apps/web/package.json', 'packages/game-core/package.json']) {
+    for (const packagePath of [
+      'apps/web/package.json',
+      'apps/agent-server/package.json',
+      'packages/game-core/package.json',
+    ]) {
       const manifest = await readJson<PackageManifest>(packagePath);
       expect(manifest.scripts?.typecheck, packagePath).toBeTruthy();
       expect(manifest.scripts?.build, packagePath).toBeTruthy();
@@ -115,5 +119,36 @@ describe('Web 与 game-core workspace 边界', () => {
       await lintPackageBoundary("import type { ModModule } from '@seedlands/game-core/mod-api';", filePath),
     ).toEqual([]);
     expect(await lintPackageBoundary("import '@seedlands/game-core/internal/private';", filePath)).toHaveLength(1);
+  });
+
+  it('Agent 服务可消费纯协议，但不能导入 Web 产品实现', async () => {
+    const filePath = 'apps/agent-server/src/package-probe.ts';
+    expect(
+      await lintPackageBoundary(
+        "import '@langchain/langgraph'; import 'ws'; import '@seedlands/game-core/runtime/character-control-protocol';",
+        filePath,
+      ),
+    ).toEqual([]);
+    expect(
+      await lintPackageBoundary("import '@seedlands/web'; import '../../web/src/app/game';", filePath),
+    ).toHaveLength(2);
+    expect(
+      await lintPackageBoundary("import '@seedlands/agent-server';", 'apps/web/src/client/package-probe.ts'),
+    ).toHaveLength(1);
+    expect(
+      await lintPackageBoundary("import '@seedlands/agent-server';", 'packages/game-core/src/runtime/package-probe.ts'),
+    ).toHaveLength(1);
+  });
+
+  it('认知协议可由两个产品消费，但不能反向进入 core', async () => {
+    for (const filePath of ['apps/web/src/client/package-probe.ts', 'apps/agent-server/src/package-probe.ts']) {
+      expect(await lintPackageBoundary("import '@seedlands/cognition-protocol';", filePath)).toEqual([]);
+    }
+    expect(
+      await lintPackageBoundary(
+        "import '@seedlands/cognition-protocol';",
+        'packages/game-core/src/runtime/package-probe.ts',
+      ),
+    ).toHaveLength(1);
   });
 });

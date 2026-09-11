@@ -17,6 +17,7 @@ import {
   defineNeedsRulesModule,
   defineRulesetModule,
   defineRecipeCraftingModule,
+  defineBehaviorRegistryModule,
 } from '@seedlands/game-core/mod-api';
 import { overworldBlocks } from './blocks';
 import { overworldItems } from './items';
@@ -86,6 +87,13 @@ export const pack = definePack({
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule(),
     defineInventoryActionsModule(),
+    defineBehaviorRegistryModule({
+      permissions: [
+        { resource: 'seedlands.inventory', operations: ['execute'] },
+        { resource: 'seedlands.inventory-item', operations: ['execute'] },
+        { resource: 'seedlands.combat', operations: ['execute'] },
+      ],
+    }),
     defineStationActionsModule(),
     defineForageModule({ sourceVoxel: 5, drop: { itemId: 'berry', count: 1 }, intervalSeconds: 120 }),
     defineBlockActionsModule({ stations: true }),

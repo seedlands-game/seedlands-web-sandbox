@@ -16,7 +16,16 @@ import type {
   AuthoritySessionControlResult,
 } from '@seedlands/game-core/compute/authority-worker-protocol';
 import type { LogicIntentBatch } from '@seedlands/game-core/server/logic/logic-protocol';
-import type { WorldHarnessPort, WorldPrepareRequest } from '@seedlands/game-core/server/harness/world-harness-contract';
+import type {
+  WorldHarnessPort,
+  WorldHarnessResult,
+  WorldPrepareRequest,
+} from '@seedlands/game-core/server/harness/world-harness-contract';
+import type {
+  CharacterControlRequest,
+  CharacterControlResult,
+  ControlBinding,
+} from '@seedlands/game-core/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
@@ -24,18 +33,25 @@ import { authorityInputTransitBudgetMs, createAuthorityTransport } from './autho
 import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
 import type { VisibilityTask } from './authority-prepared-mesh-visibility';
 import { BrowserAuthorityChunkClient } from './browser-authority-chunk-client';
+import { createBoundCharacterControlPort } from './browser-character-control-port';
 import type {
   AuthorityClientOptions,
+  BoundCharacterControlPort,
   AuthoritySaveResult,
   AuthorityStartOptions,
 } from './browser-authority-client-contract';
+import {
+  BrowserAuthorityDirectLogic,
+  clientFailure,
+  type DirectLogicDiagnostics,
+} from './browser-authority-direct-logic';
+import { createBrowserAuthorityWorldPort } from './browser-authority-world-port';
 export type AuthorityWorkerPort = import('./browser-authority-client-contract').AuthorityWorkerPort;
-
-const failedClientError = (error: Error) => new Error(`Authority client failed: ${error.message}`, { cause: error });
 
 export class BrowserAuthorityClient {
   readonly mode = 'local' as const;
   readonly world: WorldHarnessPort;
+  readonly estimatedInputTransitMs: number;
   private requestSequence = 0;
   private readonly transactionSequences = new Map<string, number>();
   private readonly requests: ClientRequestRegistry;
@@ -52,6 +68,7 @@ export class BrowserAuthorityClient {
   private storageBytesMeasured = false;
   private lastInputDecisionSequence = -1;
   private runtimeEpochValue: string;
+  private readonly directLogic: BrowserAuthorityDirectLogic;
 
   constructor(
     private readonly worker: AuthorityWorkerPort,
@@ -59,6 +76,8 @@ export class BrowserAuthorityClient {
     private readonly options: AuthorityClientOptions = {},
   ) {
     this.runtimeEpochValue = epoch;
+    this.directLogic = new BrowserAuthorityDirectLogic(worker, epoch);
+    this.estimatedInputTransitMs = authorityInputTransitBudgetMs(options.transportFaults ?? { harnessEnabled: false });
     this.requests = new ClientRequestRegistry(options.requestTimeoutMs);
     this.chunks = new BrowserAuthorityChunkClient(
       epoch,
@@ -74,40 +93,16 @@ export class BrowserAuthorityClient {
       (request, transfer) => this.post(request, transfer),
       (error) => this.failAll(error),
     );
-    this.world = {
-      identity: () => this.worldRequest('identity'),
-      inspect: (request) => this.worldRequest('inspect', request),
-      prepare: async (request) => {
-        const result = await this.worldRequest('prepare', request);
-        if (result.ok) {
-          try {
-            await this.prepareWorldRequest(request);
-            const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
-            for (const [cx, cy, cz] of chunks)
-              if (!(await this.chunks.refreshCollisionBaseline(cx, cy, cz)))
-                throw new Error(`Authority collision baseline is unavailable: ${cx},${cy},${cz}.`);
-          } catch (error) {
-            return {
-              ok: false,
-              error: {
-                code: 'WORLD_PREPARE_UNAVAILABLE',
-                message: error instanceof Error ? error.message : String(error),
-                kind: 'unavailable',
-              },
-              frontier: result.frontier,
-            };
-          }
-        }
-        return result;
+    this.world = createBrowserAuthorityWorldPort(
+      (method, ...args) => this.worldRequest(method, ...args),
+      async (request) => {
+        await this.prepareWorldRequest(request);
+        const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
+        for (const [cx, cy, cz] of chunks)
+          if (!(await this.chunks.refreshCollisionBaseline(cx, cy, cz)))
+            throw new Error(`Authority collision baseline is unavailable: ${cx},${cy},${cz}.`);
       },
-      command: (command, options) => this.worldRequest('command', command, options),
-      clock: (request) => this.worldRequest('clock', request),
-      logic: (request) => this.worldRequest('logic', request),
-      actions: (query) => this.worldRequest('actions', query),
-      barrier: (request) => this.worldRequest('barrier', request),
-      trace: (request) => this.worldRequest('trace', request),
-      checkpoint: (request) => this.worldRequest('checkpoint', request),
-    };
+    );
     worker.onmessage = (event) => this.receive(event.data);
     worker.onerror = (event) => this.failAll(new Error(event.message || 'Authority Worker failed.'));
   }
@@ -121,9 +116,13 @@ export class BrowserAuthorityClient {
     );
   }
 
+  attachDirectLogic(port: MessagePort, diagnostics: (value: DirectLogicDiagnostics) => void): void {
+    this.directLogic.attach(port, diagnostics, this.disposed || this.readyWait.pending || this.readyValue !== null);
+  }
+
   start(options: AuthorityStartOptions): Promise<AuthorityReady> {
     if (this.disposed) return Promise.reject(new Error('Authority client is disposed.'));
-    if (this.failureValue) return Promise.reject(failedClientError(this.failureValue));
+    if (this.failureValue) return Promise.reject(clientFailure(this.failureValue));
     if (this.readyWait.pending || this.readyValue)
       return Promise.reject(new Error('Authority client already started.'));
     const ready = this.readyWait.start();
@@ -201,10 +200,6 @@ export class BrowserAuthorityClient {
 
   get storageBytesMeasurement(): number | null {
     return this.storageBytesMeasured ? this.storageBytesValue : null;
-  }
-
-  get estimatedInputTransitMs(): number {
-    return authorityInputTransitBudgetMs(this.options.transportFaults ?? { harnessEnabled: false });
   }
 
   get snapshotRejections() {
@@ -285,6 +280,15 @@ export class BrowserAuthorityClient {
     return this.request({ kind: 'gameplay-action', action }, [], 'gameplay-action') as Promise<AuthorityActionResult>;
   }
 
+  character(request: CharacterControlRequest): Promise<WorldHarnessResult<CharacterControlResult>> {
+    return this.request({ kind: 'character-control', request }) as Promise<WorldHarnessResult<CharacterControlResult>>;
+  }
+
+  async bindCharacter(entityId: string): Promise<BoundCharacterControlPort> {
+    const binding = (await this.request({ kind: 'bind-character', entityId })) as ControlBinding;
+    return createBoundCharacterControlPort(binding, (request) => this.request(request));
+  }
+
   executeCommand(source: CommandSource, command: ServerCommand): Promise<CommandResult> {
     return this.request({ kind: 'server-command', source, command }, [], 'server-command') as Promise<CommandResult>;
   }
@@ -336,6 +340,7 @@ export class BrowserAuthorityClient {
     this.worker.onmessage = null;
     this.worker.onerror = null;
     this.worker.terminate();
+    this.directLogic.close();
     this.cancelAll(new Error('Authority client was disposed.'));
     this.chunks.clear();
   }
@@ -346,7 +351,7 @@ export class BrowserAuthorityClient {
     transactionStream?: string,
   ): Promise<unknown> {
     if (this.disposed) return Promise.reject(new Error('Authority client is disposed.'));
-    if (this.failureValue) return Promise.reject(failedClientError(this.failureValue));
+    if (this.failureValue) return Promise.reject(clientFailure(this.failureValue));
     const requestId = ++this.requestSequence;
     const promise = this.requests.create(requestId);
     const transaction = transactionStream
@@ -382,7 +387,8 @@ export class BrowserAuthorityClient {
     );
   }
 
-  private receive(message: AuthorityResponse): void {
+  private receive(message: AuthorityResponse | DirectLogicDiagnostics): void {
+    if (this.directLogic.receive(message, this.runtimeEpochValue, this.disposed)) return;
     if (
       this.disposed ||
       this.failureValue ||

@@ -63,6 +63,12 @@ ls:
     .dir: kebab-case
     .ts: kebab-case
     .md: kebab-case
+  changes/2026-09-10-npc-composable-baseline/examples:
+    .dir: kebab-case
+    .ts: kebab-case
+  changes/2026-09-10-npc-composable-baseline/fixtures:
+    .dir: kebab-case
+    .json: kebab-case
   changes/*/midscene:
     .dir: kebab-case
   changes/*/e2e:
@@ -85,5 +91,5 @@ ignore:
   - node_modules
   - apps/*/node_modules
   - apps/web/node_modules
-  - packages/game-core/node_modules
+  - packages/*/node_modules
   - crates/target

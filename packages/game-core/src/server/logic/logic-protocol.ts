@@ -2,6 +2,7 @@ import type { BodyKind } from '../../physics/body-registry';
 import type { ActorAction } from '../simulation/action-runtime';
 import type { ActorState } from '../simulation/actor-state';
 import type { PoiSnapshot } from '../simulation/poi-registry';
+import type { ActorControlSource } from '../gameplay/ecs-actor-components';
 
 export const LOGIC_PROTOCOL_VERSION = 1 as const;
 export const LOGIC_INTENT_TTL_MS = 200;
@@ -45,6 +46,8 @@ export type LogicObservation = Readonly<{
       state: ActorState;
       identityRevision: number;
       activeAction: ActorActionSnapshot | null;
+      /** Authority-derived ECS owner; omitted only by legacy test/protocol fixtures. */
+      controlSource?: ActorControlSource;
     }>[];
     pois: PoiSnapshot;
     terrainWindows: readonly TerrainWindow[];

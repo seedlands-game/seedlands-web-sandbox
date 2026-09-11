@@ -49,6 +49,9 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   const damage = page.locator('#player-damage-feedback.visible');
   await expect(damage).toContainText('受击 -2', { timeout: 15_000 });
   await expect(page.locator('#survival-vitals.damaged')).toBeVisible();
+  expect(await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }))).toMatchObject({
+    ok: true,
+  });
   await expect.poll(() => page.evaluate(() => window.__seedlandsHarness!.playerDamageFeedback().active)).toBe(true);
   await capture('player-damaged');
   await expect
@@ -70,9 +73,6 @@ test('开始页一键进入木剑动作体验场并串联攻击与玩家受击�
   expect(resetIds.every((id) => !initialIds.includes(id))).toBe(true);
   expect(pageErrors).toEqual([]);
 
-  expect(await page.evaluate(() => window.__seedlandsHarness!.world.clock({ kind: 'pause' }))).toMatchObject({
-    ok: true,
-  });
   const advance = async (elapsedMs: number) => {
     expect(
       await page.evaluate(

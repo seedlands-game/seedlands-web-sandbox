@@ -39,6 +39,7 @@ export function restoreBrowserPresentation(ready: AuthorityReady, bindings: Rest
   const controller = bindings.createController();
   controller.applyAuthoritySnapshot(ready.snapshot);
   controller.install();
+  gameplayClient.refresh();
   const commandSource = bindings.commandSource ? { ...bindings.commandSource, entityId: ready.playerId } : null;
   bindings.world.updateStreaming(bindings.camera.getPosition());
   return { controller, gameplayClient, worldAudio, commandSource };

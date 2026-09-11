@@ -18,6 +18,7 @@
     "packs:build": "node ../../scripts/build-gameplay-packs.mjs --out public/packs"
   },
   "dependencies": {
+    "@seedlands/cognition-protocol": "workspace:*",
     "@seedlands/game-core": "workspace:*",
     "playcanvas": "^2.21.4",
     "svelte": "^5.57.0",

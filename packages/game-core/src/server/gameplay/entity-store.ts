@@ -9,6 +9,7 @@ import {
   type EntityLifetimeReference,
 } from './ecs-entity-owner';
 import type { ActorComponentSnapshot } from './ecs-actor-components';
+import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
 import { isActorEntityType } from './ecs-actor-state';
 import {
   collectStationSnapshots,
@@ -24,6 +25,7 @@ import {
   type PreparedEntityMutation,
   type PreparedEntityMutationInput,
 } from './prepared-entity-mutation';
+import { addEntityToBucket, removeEntityFromBucket } from './entity-spatial-buckets';
 
 export type EntityType = EcsEntityType;
 export type ActorArchetype = EcsActorArchetype;
@@ -64,7 +66,6 @@ export type EntityStoreComponentSnapshotV2 = Omit<EntityStoreComponentSnapshotV1
 export type EntityStoreComponentSnapshot = EntityStoreComponentSnapshotV1 | EntityStoreComponentSnapshotV2;
 
 const bucketCoordinate = (value: number) => Math.floor(value / 8);
-const bucketKey = (position: readonly number[]) => position.map(bucketCoordinate).join(',');
 
 export class EntityStore {
   private owner: EcsEntityOwner;
@@ -95,7 +96,7 @@ export class EntityStore {
         ? this.owner.createStation(entity, this.stationCodec!.create(id, input.station!.kind))
         : this.owner.create(entity);
     this.sequence = nextSequence;
-    this.addToBucket(created, this.buckets);
+    addEntityToBucket(created, this.buckets);
     return created;
   }
 
@@ -142,7 +143,7 @@ export class EntityStore {
   despawn(id: string): boolean {
     const entity = this.owner.get(id);
     if (!entity) return false;
-    this.removeFromBucket(entity, this.buckets);
+    removeEntityFromBucket(entity, this.buckets);
     return this.owner.destroy(id);
   }
 
@@ -233,6 +234,18 @@ export class EntityStore {
     return this.owner.actorComponentSnapshot(id);
   }
 
+  bindActorCharacterComponent(id: string): CharacterComponentStateV1 | null {
+    return this.owner.bindActorCharacterComponent(id);
+  }
+
+  installActorCharacterComponent(
+    id: string,
+    value: CharacterComponentStateV1 | null,
+    expectedControlRevision?: number,
+  ): CharacterComponentStateV1 | null {
+    return this.owner.installActorCharacterComponent(id, value, expectedControlRevision);
+  }
+
   /** Prepares one bounded host-only EntityStore transaction participant. */
   prepareMutation(input: PreparedEntityMutationInput): PreparedEntityMutation {
     return prepareEntityMutationParticipant(this.mutationHost(), input);
@@ -255,8 +268,8 @@ export class EntityStore {
         const entity = this.prepareEntity({ ...input, type: 'station', station: { kind: input.kind } }, id, 'station');
         return Object.freeze({ entity, station: this.stationCodec!.create(id, input.kind) });
       },
-      removeFromBucket: (entity: GameplayEntity) => this.removeFromBucket(entity, this.buckets),
-      addToBucket: (entity: GameplayEntity) => this.addToBucket(entity, this.buckets),
+      removeFromBucket: (entity: GameplayEntity) => removeEntityFromBucket(entity, this.buckets),
+      addToBucket: (entity: GameplayEntity) => addEntityToBucket(entity, this.buckets),
       commitSequence: (sequence: number) => {
         this.sequence = sequence;
       },
@@ -340,7 +353,7 @@ export class EntityStore {
                   })(),
               )
             : candidateOwner.createRestored(entity, lifetime);
-        this.addToBucket(created, candidateBuckets);
+        addEntityToBucket(created, candidateBuckets);
       }
       if (identities.size !== snapshot.entities.length)
         throw new TypeError('Entity identity snapshot set does not match canonical entities.');
@@ -403,7 +416,7 @@ export class EntityStore {
           type === 'station'
             ? candidateOwner.createStation(entity, this.stationCodec!.create(id, input.station!.kind))
             : candidateOwner.create(entity);
-        this.addToBucket(created, candidateBuckets);
+        addEntityToBucket(created, candidateBuckets);
         candidateSequence = nextSequence;
       }
     } catch (error) {
@@ -514,27 +527,11 @@ export class EntityStore {
     return { id, sequence: nextSequence };
   }
 
-  private addToBucket(entity: GameplayEntity, buckets: Map<string, Set<string>>): void {
-    if (entity.type === 'station') return;
-    const key = bucketKey(entity.position);
-    const bucket = buckets.get(key) ?? new Set<string>();
-    bucket.add(entity.id);
-    buckets.set(key, bucket);
-  }
-
-  private removeFromBucket(entity: GameplayEntity, buckets: Map<string, Set<string>>): void {
-    if (entity.type === 'station') return;
-    const key = bucketKey(entity.position);
-    const bucket = buckets.get(key);
-    bucket?.delete(entity.id);
-    if (bucket?.size === 0) buckets.delete(key);
-  }
-
   private moveEntity(entity: GameplayEntity, position: readonly [number, number, number]): void {
     this.assertPosition(position);
-    this.removeFromBucket(entity, this.buckets);
+    removeEntityFromBucket(entity, this.buckets);
     this.owner.setPosition(entity.id, [...position]);
-    this.addToBucket(this.owner.get(entity.id)!, this.buckets);
+    addEntityToBucket(this.owner.get(entity.id)!, this.buckets);
   }
 
   private assertPosition(position: readonly number[]): asserts position is Position {

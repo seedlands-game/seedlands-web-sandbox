@@ -1,10 +1,10 @@
 # 世界开发 Harness
 
-当前实现与验收状态见 [H1/H2 change](../changes/2026-09-09-developer-world-harness/spec.md)。共享世界端口服务于可信开发；模型角色不会获得此端口的全局权限。下一阶段的认知回路、频率、工具、上下文和框架选择见[单角色认知方案](../changes/2026-09-09-developer-world-harness/agent-harness-design.md)。
+基础世界端口的实现与验收状态见 [H1/H2 change](../changes/2026-09-09-developer-world-harness/spec.md)。共享世界端口服务于可信开发；模型角色不会获得此端口的全局权限。当前行为组件、受限角色观察与独立认知接线见 [NPC 行为与认知](npc-behavior-and-memory.md)；旧[单角色认知方案](../changes/2026-09-09-developer-world-harness/agent-harness-design.md)仅作来源。
 
 ## 两层能力
 
-`WorldHarnessPort` 是 Headless 与 Browser 共用的 DeveloperWorldHarness 合同。身份、权威查询、场景构造、命令、模拟时间、Logic、Action、屏障、trace、checkpoint 都从 Authority 执行，返回 `{ok, data/error, frontier}`。frontier 包含世界、epoch、revision、提交序列和物理 tick；不要把主线程镜像当权威查询。
+`WorldHarnessPort` 是 Headless 与 Browser 共用的 DeveloperWorldHarness 合同。身份、权威查询、场景构造、命令、模拟时间、Logic、Action、Character、屏障、trace、checkpoint 都从 Authority 执行，返回 `{ok, data/error, frontier}`。frontier 包含世界、epoch、revision、提交序列和物理 tick；不要把主线程镜像当权威查询。
 
 BrowserProductHarness 保留 `window.__seedlandsHarness` 的玩家输入、摄像机、画面、音频与性能方法；其 `.world` 是共享世界端口。纯呈现能力不会搬进 Headless。Headless 与浏览器各自创建独立世界，只有 checkpoint 数据可转移，不共享可变 runtime。
 
@@ -60,7 +60,7 @@ JSONL checkpoint 的 Uint16 体素数组采用 `u16le-base64`，Uint8 流体数�
 
 ## Logic、Action、屏障与 trace
 
-使用 `world.logic({kind:'mode', mode:'scripted'})` 关闭自动算法候选竞争，再通过 `observe` 取得当前 Logic 观察、`submit` 提交批次。切回 automatic 或恢复后旧候选失效。这里是开发观察，不是模型角色的局部感知接口。现有 query-observation/query-pois/query-path 也属于全局开发查询，不能仅凭 self Actor 读取权限使用；A1 会提供真正受感知范围约束的投影。
+使用 `world.logic({kind:'mode', mode:'scripted'})` 关闭自动算法候选竞争，再通过 `observe` 取得当前 Logic 观察、`submit` 提交批次。切回 automatic 或恢复后旧候选失效。这里是开发观察，不是模型角色的局部感知接口。现有 query-observation/query-pois/query-path 也属于全局开发查询，不能仅凭 self Actor 读取权限使用；角色认知只消费 Character 投影的局部可见实体、目标引用、有界事件和当前身体状态。
 
 `world.actions({entityId})` / `{actionId}` 查询真实动作；组合参数必须与实际 owner 一致。成功、失败、中断来自执行器，不能由调用脚本直接宣称成功。`world.barrier({kind,frontier,timeoutMs})` 绑定有限 frontier：committed、settled 和 checkpoint ACK 分开，超时/旧 epoch 是明确错误；不用 sleep 推断完成。
 
@@ -70,7 +70,7 @@ JSONL checkpoint 的 Uint16 体素数组采用 `u16le-base64`，Uint8 流体数�
 
 宿主配置 principal 与策略，请求不能自己设角色。身份标签只是配置选择器，授权由资源、操作和 scope 决定；未知身份/资源默认拒绝。命令目录必须穷尽并从真实命令目标派生授权，多目标命令逐项检查，不能授权 self 后返回任意他人 action。
 
-权限配置不改变世界规则。允许执行拾取/攻击等交互，不等于允许瞬移、直接 patch 体素或获取隐藏信息。当前开发 inspect 是全局工具；面向普通 Actor 的字段投影、感知目标引用和认知资源在 A1 增加，不能提前对模型开放整个开发端口。
+权限配置不改变世界规则。允许执行拾取/攻击等交互，不等于允许瞬移、直接 patch 体素或获取隐藏信息。开发 inspect 仍是全局工具，不能对模型开放整个开发端口。可信开发者可用 `world.character(...)` 构造和诊断角色；Resident 使用绑定单一身体的端口，不能自己选择 principal 或跳过当前 Actor/目标身份检查。
 
 ## F3 运行诊断
 

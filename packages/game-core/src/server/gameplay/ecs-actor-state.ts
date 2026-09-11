@@ -6,11 +6,8 @@ import type { GameplayEntity } from './entity-store';
 import {
   type ActorComponentAccess,
   type ActorComponentSnapshot,
-  type ActorFlightComponentV1,
-  type ActorModeComponentV1,
   type ActorModeSnapshotFacets,
   type ActorNeeds,
-  type CreativeCatalogComponentV1,
   type PlayerComponentAccess,
   type createActorComponents,
 } from './ecs-actor-components';
@@ -20,25 +17,28 @@ import {
   validateInventoryCursor,
   type InventoryCursorV1,
 } from './modules/inventory-pointer-contract';
+import {
+  cloneCharacterComponentState,
+  validateCharacterComponentState,
+} from '../simulation/character-runtime-validation';
+import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
+import {
+  defaultActorModeFacets,
+  readActorCreativeCatalog,
+  readActorFlight,
+  readActorMode,
+  validateActorModeFacets,
+  writeActorModeFacets,
+  type CompleteModeFacets,
+} from './ecs-actor-mode-state';
+export { validateActorModeFacets } from './ecs-actor-mode-state';
 
 type Components = ReturnType<typeof createActorComponents>;
-const CREATIVE_HOTBAR_SIZE = 8;
 
 export const isActorEntityType = (
   type: GameplayEntity['type'],
 ): type is Extract<GameplayEntity['type'], 'player' | 'creature' | 'npc'> =>
   type === 'player' || type === 'creature' || type === 'npc';
-
-const defaultModeFacets = () => ({
-  mode: { version: 1 as const, value: 'survival' as const, revision: 0 },
-  creativeCatalog: {
-    version: 1 as const,
-    hotbar: Object.freeze(Array.from({ length: CREATIVE_HOTBAR_SIZE }, () => null)),
-    selectedSlot: 0,
-    revision: 0,
-  },
-  flight: { version: 1 as const, enabled: false, revision: 0 },
-});
 
 export function initializeActorComponents(
   world: World,
@@ -56,6 +56,7 @@ export function initializeActorComponents(
     components.inventory,
     components.equipment,
     components.control,
+    components.behavior,
     components.life,
     components.mode,
     components.creativeCatalog,
@@ -73,8 +74,10 @@ export function initializeActorComponents(
   components.equipment.selectedSlot[eid] = 0;
   components.equipment.hotbarSize[eid] = 8;
   components.control.source[eid] = player ? 'player' : 'autonomous';
+  components.control.revision[eid] = 0;
+  components.behavior.value[eid] = undefined;
   components.life.lifecycle[eid] = entity.health === 0 ? 'dead' : 'alive';
-  writeModeFacets(components, eid, defaultModeFacets());
+  writeActorModeFacets(components, eid, defaultActorModeFacets());
   if (player) {
     addComponents(world, eid, components.player);
     [components.player.spawnX[eid], components.player.spawnY[eid], components.player.spawnZ[eid]] = entity.position;
@@ -127,9 +130,13 @@ export function readActorComponentSnapshot(
     },
     lifecycle: components.life.lifecycle[eid]!,
     controlSource: components.control.source[eid]!,
-    mode: readMode(components, eid),
-    creativeCatalog: readCreativeCatalog(components, eid),
-    flight: readFlight(components, eid),
+    controlRevision: components.control.revision[eid]!,
+    ...(components.behavior.value[eid]
+      ? { character: cloneCharacterComponentState(components.behavior.value[eid]!) }
+      : {}),
+    mode: readActorMode(components, eid),
+    creativeCatalog: readActorCreativeCatalog(components, eid),
+    flight: readActorFlight(components, eid),
     ...(player
       ? {
           player: {
@@ -154,6 +161,8 @@ export type PreparedActorComponentSnapshot = Readonly<{
   equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
   lifecycle: ActorComponentSnapshot['lifecycle'];
   controlSource: ActorComponentSnapshot['controlSource'];
+  controlRevision: number;
+  character: CharacterComponentStateV1 | null;
   modeFacets: CompleteModeFacets;
   player: Readonly<{ spawnPosition: [number, number, number]; breakAction: BreakAction | null }> | null;
 }>;
@@ -191,8 +200,16 @@ export function prepareActorComponentSnapshot(
     throw new TypeError('Actor equipment snapshot is invalid.');
   if (snapshot.lifecycle !== 'alive' && snapshot.lifecycle !== 'dead')
     throw new TypeError('Actor lifecycle snapshot is invalid.');
-  if (!['player', 'autonomous', 'none'].includes(snapshot.controlSource))
+  if (!['player', 'autonomous', 'behavior', 'none'].includes(snapshot.controlSource))
     throw new TypeError('Actor control snapshot is invalid.');
+  const controlRevision = snapshot.controlRevision ?? 0;
+  if (!Number.isSafeInteger(controlRevision) || controlRevision < 0)
+    throw new TypeError('Actor control revision is invalid.');
+  const character = snapshot.character ? validateCharacterComponentState(snapshot.character) : null;
+  if ((snapshot.controlSource === 'behavior') !== Boolean(character))
+    throw new TypeError('Actor behavior state and control source must be installed together.');
+  if (character && (player || character.entityId !== snapshot.entityId || character.lifecycle !== 'active'))
+    throw new TypeError('Actor behavior component identity is invalid.');
   if (player !== Boolean(snapshot.player)) throw new TypeError('Player component snapshot membership is invalid.');
   if (!Array.isArray(snapshot.inventory) || snapshot.inventory.length !== 24)
     throw new TypeError('Actor inventory snapshot is invalid.');
@@ -227,6 +244,8 @@ export function prepareActorComponentSnapshot(
     equipment: Object.freeze({ ...snapshot.equipment }),
     lifecycle: snapshot.lifecycle,
     controlSource: snapshot.controlSource,
+    controlRevision,
+    character,
     modeFacets: Object.freeze({
       mode: Object.freeze({ ...modeFacets.mode }),
       creativeCatalog: Object.freeze({
@@ -243,7 +262,11 @@ export function installPreparedActorComponentSnapshot(
   components: Components,
   eid: number,
   prepared: PreparedActorComponentSnapshot,
+  preserveCharacterBinding = false,
 ): void {
+  const boundCharacter = components.behavior.value[eid];
+  if (preserveCharacterBinding && JSON.stringify(boundCharacter ?? null) !== JSON.stringify(prepared.character))
+    throw new Error('Prepared actor mutation changed the Character behavior component.');
   const { needs } = prepared;
   components.needs.hunger[eid] = needs.hunger;
   components.needs.maxHunger[eid] = needs.maxHunger;
@@ -258,7 +281,10 @@ export function installPreparedActorComponentSnapshot(
   components.equipment.hotbarSize[eid] = prepared.equipment.hotbarSize;
   components.life.lifecycle[eid] = prepared.lifecycle;
   components.control.source[eid] = prepared.controlSource;
-  writeModeFacets(components, eid, prepared.modeFacets);
+  components.control.revision[eid] = prepared.controlRevision;
+  if (!preserveCharacterBinding)
+    components.behavior.value[eid] = prepared.character ? cloneCharacterComponentState(prepared.character) : undefined;
+  writeActorModeFacets(components, eid, prepared.modeFacets);
   if (prepared.player) {
     components.player.spawnX[eid] = prepared.player.spawnPosition[0];
     components.player.spawnY[eid] = prepared.player.spawnPosition[1];
@@ -284,77 +310,6 @@ export type ActorAccessBindings = Readonly<{
   health: () => Readonly<{ health: number; maxHealth: number }>;
   setHealth: (value: number) => void;
 }>;
-
-type CompleteModeFacets = Readonly<{
-  mode: ActorModeComponentV1;
-  creativeCatalog: CreativeCatalogComponentV1;
-  flight: ActorFlightComponentV1;
-}>;
-
-const validRevision = (value: number) => Number.isSafeInteger(value) && value >= 0;
-
-export function validateActorModeFacets(
-  facets: ActorModeSnapshotFacets,
-  items: ItemDefinitionRegistry,
-): CompleteModeFacets {
-  const supplied = [facets.mode, facets.creativeCatalog, facets.flight].filter((value) => value !== undefined).length;
-  if (supplied === 0) return defaultModeFacets();
-  if (supplied !== 3) throw new TypeError('Actor mode component snapshots must be supplied together.');
-  const mode = facets.mode!;
-  const catalog = facets.creativeCatalog!;
-  const flight = facets.flight!;
-  if (mode.version !== 1 || !['survival', 'creative'].includes(mode.value) || !validRevision(mode.revision))
-    throw new TypeError('Actor mode component snapshot is invalid.');
-  if (
-    catalog.version !== 1 ||
-    !Array.isArray(catalog.hotbar) ||
-    catalog.hotbar.length !== CREATIVE_HOTBAR_SIZE ||
-    !Number.isSafeInteger(catalog.selectedSlot) ||
-    catalog.selectedSlot < 0 ||
-    catalog.selectedSlot >= CREATIVE_HOTBAR_SIZE ||
-    !validRevision(catalog.revision) ||
-    [...catalog.hotbar].some((itemId) => itemId !== null && (typeof itemId !== 'string' || !items.has(itemId)))
-  )
-    throw new TypeError('Creative catalog component snapshot is invalid.');
-  if (flight.version !== 1 || typeof flight.enabled !== 'boolean' || !validRevision(flight.revision))
-    throw new TypeError('Actor flight component snapshot is invalid.');
-  if (mode.value === 'survival' && flight.enabled)
-    throw new TypeError('Survival actor cannot have creative flight enabled.');
-  return {
-    mode: { ...mode },
-    creativeCatalog: { ...catalog, hotbar: Object.freeze([...catalog.hotbar]) },
-    flight: { ...flight },
-  };
-}
-
-const readMode = (components: Components, eid: number): ActorModeComponentV1 => ({
-  version: 1,
-  value: components.mode.value[eid]!,
-  revision: components.mode.revision[eid]!,
-});
-
-const readCreativeCatalog = (components: Components, eid: number): CreativeCatalogComponentV1 => ({
-  version: 1,
-  hotbar: Object.freeze([...(components.creativeCatalog.hotbar[eid] ?? [])]),
-  selectedSlot: components.creativeCatalog.selectedSlot[eid]!,
-  revision: components.creativeCatalog.revision[eid]!,
-});
-
-const readFlight = (components: Components, eid: number): ActorFlightComponentV1 => ({
-  version: 1,
-  enabled: components.flight.enabled[eid]!,
-  revision: components.flight.revision[eid]!,
-});
-
-function writeModeFacets(components: Components, eid: number, facets: CompleteModeFacets): void {
-  components.mode.value[eid] = facets.mode.value;
-  components.mode.revision[eid] = facets.mode.revision;
-  components.creativeCatalog.hotbar[eid] = Object.freeze([...facets.creativeCatalog.hotbar]);
-  components.creativeCatalog.selectedSlot[eid] = facets.creativeCatalog.selectedSlot;
-  components.creativeCatalog.revision[eid] = facets.creativeCatalog.revision;
-  components.flight.enabled[eid] = facets.flight.enabled;
-  components.flight.revision[eid] = facets.flight.revision;
-}
 
 /** The bound resolver checks epoch and lifetime on each read/write, including retained inventory handles. */
 export function createActorStateAccess(components: Components, binding: ActorAccessBindings): ActorComponentAccess {
@@ -421,6 +376,9 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
     get controlSource() {
       return components.control.source[binding.resolve()]!;
     },
+    get controlRevision() {
+      return components.control.revision[binding.resolve()]!;
+    },
     get mode() {
       return components.mode.value[binding.resolve()]!;
     },
@@ -428,10 +386,10 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
       return components.mode.revision[binding.resolve()]!;
     },
     get creativeCatalog() {
-      return readCreativeCatalog(components, binding.resolve());
+      return readActorCreativeCatalog(components, binding.resolve());
     },
     get flight() {
-      return readFlight(components, binding.resolve());
+      return readActorFlight(components, binding.resolve());
     },
     selectSlot(value: number) {
       const eid = binding.resolve();
@@ -441,7 +399,7 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
     },
     replaceModeComponents(facets: ActorModeSnapshotFacets) {
       const eid = binding.resolve();
-      writeModeFacets(components, eid, validateActorModeFacets(facets, inventory.items));
+      writeActorModeFacets(components, eid, validateActorModeFacets(facets, inventory.items));
     },
     replaceInventoryInteraction(revision: number, cursor: InventoryCursorV1) {
       if (!Number.isSafeInteger(revision) || revision < 0) throw new TypeError('Invalid actor inventory revision.');
@@ -449,7 +407,43 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
       components.inventory.revision[eid] = revision;
       components.inventory.cursor[eid] = validateInventoryCursor(cursor, inventory.items);
     },
+    replaceControl(source: import('./ecs-actor-components').ActorControlSource, expectedRevision?: number) {
+      const eid = binding.resolve();
+      const revision = components.control.revision[eid]!;
+      if (expectedRevision !== undefined && expectedRevision !== revision)
+        throw new Error('Actor control revision changed.');
+      if (revision >= Number.MAX_SAFE_INTEGER) throw new RangeError('Actor control revision is exhausted.');
+      components.control.source[eid] = source;
+      return (components.control.revision[eid] = revision + 1);
+    },
   });
+}
+
+export function readActorCharacterComponent(components: Components, eid: number): CharacterComponentStateV1 | null {
+  const value = components.behavior.value[eid];
+  return value ? cloneCharacterComponentState(value) : null;
+}
+
+/** Runtime-only binding to the ECS-owned object; callers must not retain it beyond this world lifetime. */
+export function bindActorCharacterComponent(components: Components, eid: number): CharacterComponentStateV1 | null {
+  return components.behavior.value[eid] ?? null;
+}
+
+export function installActorCharacterComponent(
+  components: Components,
+  eid: number,
+  value: CharacterComponentStateV1 | null,
+  expectedControlRevision?: number,
+): CharacterComponentStateV1 | null {
+  const revision = components.control.revision[eid]!;
+  if (expectedControlRevision !== undefined && expectedControlRevision !== revision)
+    throw new Error('Actor control revision changed.');
+  if (revision >= Number.MAX_SAFE_INTEGER) throw new RangeError('Actor control revision is exhausted.');
+  const prepared = value ? validateCharacterComponentState(value) : null;
+  components.behavior.value[eid] = prepared ?? undefined;
+  components.control.source[eid] = prepared ? 'behavior' : 'none';
+  components.control.revision[eid] = revision + 1;
+  return prepared ? components.behavior.value[eid]! : null;
 }
 
 const copyBreakAction = (value: BreakAction | null | undefined): BreakAction | null => {

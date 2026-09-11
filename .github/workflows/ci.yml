@@ -52,7 +52,7 @@ jobs:
 
   static:
     name: Static verification
-    timeout-minutes: 20
+    timeout-minutes: 60
     needs: scope
     if: ${{ always() }}
     runs-on: ubuntu-24.04
@@ -121,6 +121,8 @@ jobs:
         run: pnpm --filter @seedlands/game-core build
       - name: Build Web Pages artifact
         run: pnpm --filter @seedlands/web build
+      - name: Build Agent service
+        run: pnpm --filter @seedlands/agent-server build
       - name: Upload Pages artifact
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
@@ -130,7 +132,7 @@ jobs:
 
   e2e-regression:
     name: Chromium regression
-    timeout-minutes: 30
+    timeout-minutes: 60
     needs: scope
     if: needs.scope.result == 'success' && needs.scope.outputs.run_full == 'true'
     runs-on: ubuntu-24.04
@@ -232,6 +234,40 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: composable-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Run composed NPC and resident acceptance
+        id: npc
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_BROWSER_E2E_QUALITY: low
+        run: pnpm test:npc-behavior
+      - name: Preserve NPC and resident evidence
+        if: ${{ always() && (steps.npc.outcome == 'success' || steps.npc.outcome == 'failure') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: npc-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Build and exercise production NPC Worker entry
+        id: npc-production
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_BROWSER_E2E_QUALITY: low
+        run: pnpm build:web && pnpm test:npc-production
+      - name: Preserve production NPC evidence
+        if: ${{ always() && (steps.npc-production.outcome == 'success' || steps.npc-production.outcome == 'failure') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: npc-production-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
             test-results/
             playwright-report/

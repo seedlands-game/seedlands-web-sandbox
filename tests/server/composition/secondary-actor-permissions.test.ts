@@ -16,21 +16,24 @@ function setup(
 ) {
   const moduleId =
     resource === 'seedlands.inventory' ? 'seedlands:inventory-actions-module' : 'seedlands:block-actions-module';
-  const modules = pack.modules.map((module) =>
-    module.descriptor.id === moduleId && denial === 'module'
-      ? {
-          ...module,
-          descriptor: {
-            ...module.descriptor,
-            permissions: module.descriptor.permissions?.map((permission) =>
-              permission.resource === resource
-                ? { ...permission, operations: permission.operations.filter((operation) => operation !== 'execute') }
-                : permission,
-            ),
-          },
-        }
-      : module,
-  );
+  // This partial composition tests operation permissions, not dependent behavior providers.
+  const modules = pack.modules
+    .filter((module) => module.descriptor.id !== 'seedlands:behavior-registry-module')
+    .map((module) =>
+      module.descriptor.id === moduleId && denial === 'module'
+        ? {
+            ...module,
+            descriptor: {
+              ...module.descriptor,
+              permissions: module.descriptor.permissions?.map((permission) =>
+                permission.resource === resource
+                  ? { ...permission, operations: permission.operations.filter((operation) => operation !== 'execute') }
+                  : permission,
+              ),
+            },
+          }
+        : module,
+    );
   const root = definePack({ id: 'test:secondary-grants', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(
     [

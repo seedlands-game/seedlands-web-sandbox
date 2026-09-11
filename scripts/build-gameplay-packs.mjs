@@ -54,6 +54,11 @@ export async function buildGameplayPacks(
   await writeFile(resolve(outputDirectory, `${playbook}.manifest.json`), manifestBytes);
   const lockPath = resolve(outputDirectory, 'packs.lock.json');
   await writeFile(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
+  // Product deployment policy is separate from untrusted Pack permission requests.
+  await writeFile(
+    resolve(outputDirectory, 'host-admissions.json'),
+    `${JSON.stringify({ schemaVersion: 1, extensions: [] }, null, 2)}\n`,
+  );
   await loadVerifiedPackArtifacts(lockPath);
   return Object.freeze({ lockPath, lock });
 }

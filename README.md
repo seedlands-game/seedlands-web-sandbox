@@ -51,6 +51,8 @@ pnpm preview
 
 No private `.env` file is required to run or build the sandbox.
 
+The optional NPC cognition service starts with `pnpm agent:dev` and requires an explicitly configured PostgreSQL connection. Real model calls additionally require a local model gateway. The browser and installed local life behavior trees run without a model service. See [NPC behavior and cognition](docs/npc-behavior-and-memory.md) for configuration, gameplay capabilities, and checkpoint boundaries.
+
 ## Your first journey
 
 Try **mosslight-68** for a wooded riverbank, or **living-world-autonomy** for a clearer starter camp in dry terrain. The menu's recommended-start button fills the seed without starting a world. Entering an existing seed continues its saved progress.
@@ -182,7 +184,7 @@ The browser is a product platform in its own right. The open engine supports fut
 - Water uses bounded voxel levels and one nearby planar reflection surface. Simulation pauses outside the active streaming window; pressure, buoyancy and ocean waves are not implemented.
 - There are no caves, propagated voxel lighting, mobile touch controls, floating origin, or distant-world LOD yet.
 - Browser persistence favours a simple prototype deployment rather than large-world storage.
-- No AgentServer or LLM service is required or connected. Creature and settler behaviour is a bounded deterministic foundation; there is no dialogue, trading, reproduction, crowd avoidance, or full ecology simulation yet.
+- Agent Server is an optional cognition service, not a dedicated world server. NPC dialogue and behavior updates can use it; local behavior remains bounded, with no social simulation, trading, reproduction, crowd avoidance, or full ecology yet. Real model availability is verified separately from world logic.
 - The browser MVP renders and permits normal building at y=0–63; the bottom layer is retained as a foundation and cannot be mined through normal controls. Attempts outside this range show a message and keep the selected item. Core world coordinates and stored data remain unrestricted by this presentation limit.
 - The main JavaScript bundle is large and has not yet been split into lazy-loaded runtime chunks.
 

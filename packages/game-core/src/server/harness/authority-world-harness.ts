@@ -13,7 +13,6 @@ import {
   type WorldClockRequest,
   type WorldCommandOptions,
   type WorldFrontier,
-  type WorldHarnessError,
   type WorldHarnessPort,
   type WorldHarnessResult,
   type WorldIdentity,
@@ -36,8 +35,10 @@ import {
   worldFrontierFor,
   commandSourceForPrincipal,
   inspectAuthorizationRequest,
+  characterHarnessOperation,
 } from './world-harness-operations';
 import { worldHarnessError } from './world-harness-errors';
+import type { CharacterControlRequest } from '../../runtime/character-control-protocol';
 
 export { validatePortableCheckpoint } from './world-harness-validation';
 export { chunkForVoxel } from './world-harness-operations';
@@ -64,12 +65,6 @@ type Operation = Readonly<{
   name: string;
   authorization: WorldAuthorizationRequest | readonly WorldAuthorizationRequest[];
 }>;
-
-const error = (code: string, message: string, kind: WorldHarnessError['kind']): WorldHarnessError => ({
-  code,
-  message,
-  kind,
-});
 
 export class AuthorityWorldHarness implements WorldHarnessPort {
   private readonly traces = new WorldTraceRuntime();
@@ -362,6 +357,13 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
     );
   }
 
+  character(request: CharacterControlRequest) {
+    return this.run(
+      () => characterHarnessOperation(request),
+      async () => this.options.owner().runtime.character(request),
+    );
+  }
+
   barrier(request: WorldBarrierRequest) {
     return Promise.resolve().then(
       async (): Promise<WorldHarnessResult<{ reached: true; kind: WorldBarrierRequest['kind'] }>> => {
@@ -446,7 +448,7 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
           const decision = this.options.authorization.authorize(this.options.principalId, request);
           if (!decision.allowed) {
             const frontier = this.frontier();
-            const failure = error(decision.code, decision.message, 'permission');
+            const failure = worldHarnessError(new WorldOperationFailure(decision.code, decision.message, 'permission'));
             this.record(operation.name, false, frontier, failure.code);
             return { ok: false as const, error: failure, frontier };
           }

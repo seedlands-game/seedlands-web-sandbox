@@ -1,8 +1,18 @@
 import type { EntityStore, GameplayEntity } from '../gameplay/entity-store';
 import type { ActionRuntime, ActorAction, ActorActionInput, ActorActionType } from './action-runtime';
-import { ACTIVE_RADIUS_SQUARED, simulationDistanceSquared, type ActorState } from './actor-state';
+import type { ActorProfileRegistry } from '../gameplay/actor-profile';
+import {
+  ACTIVE_RADIUS_SQUARED,
+  MAX_RETAINED_ACTORS,
+  cloneActor,
+  simulationDistanceSquared,
+  type ActorRegistration,
+  type ActorState,
+} from './actor-state';
 import type { NavigationPosition } from './ground-navigator';
 import type { PoiRegistry } from './poi-registry';
+import type { CharacterRuntime } from './character-runtime';
+import type { SimulationSnapshot } from './actor-state';
 
 export function resolveActionTarget(
   action: ActorAction,
@@ -57,6 +67,79 @@ export function updateActorActive(
           simulationDistanceSquared(entity.position, player.position) <= ACTIVE_RADIUS_SQUARED,
       ),
   );
+}
+
+export function bindActorNeeds(actor: ActorState, entities: EntityStore): void {
+  const state = entities.actorStateAccess(actor.entityId);
+  state.hunger = actor.hunger;
+  Object.defineProperty(actor, 'hunger', {
+    enumerable: true,
+    configurable: true,
+    get: () => state.hunger,
+    set: (value: number) => {
+      state.hunger = value;
+    },
+  });
+}
+
+export function registerAutonomyActor(
+  entityId: string,
+  input: ActorRegistration,
+  options: Readonly<{
+    actors: Map<string, ActorState>;
+    entities: EntityStore;
+    profiles: ActorProfileRegistry;
+    enforceProfiles?: boolean;
+    isPlayerAlive(id: string): boolean;
+  }>,
+): ActorState {
+  if (options.actors.size >= MAX_RETAINED_ACTORS) throw new Error('Autonomous actor limit reached.');
+  if (options.actors.has(entityId)) throw new Error(`Actor already registered: ${entityId}`);
+  const entity = options.entities.get(entityId);
+  if (!entity || entity.archetype !== input.archetype || !['creature', 'npc'].includes(entity.type))
+    throw new TypeError('Actor registration does not match a canonical autonomous entity.');
+  const profile = options.profiles.require(input.archetype);
+  if (options.enforceProfiles && (entity.type !== profile.entityType || entity.maxHealth !== profile.maxHealth))
+    throw new TypeError('Actor entity does not match its world profile.');
+  const hunger = input.hunger ?? 0;
+  if (!Number.isFinite(hunger) || hunger < 0 || hunger > 100) throw new TypeError('Actor hunger is invalid.');
+  const actor: ActorState = {
+    entityId,
+    archetype: input.archetype,
+    hunger,
+    behavior: profile.initialBehavior ?? 'idle',
+    targetEntityId: null,
+    homePoiId: input.homePoiId ?? null,
+    workPoiId: input.workPoiId ?? null,
+    foodPoiId: input.foodPoiId ?? null,
+    active: false,
+    wanderIndex: 0,
+  };
+  bindActorNeeds(actor, options.entities);
+  options.actors.set(entityId, actor);
+  updateActorActive(actor, options.entities, options.isPlayerAlive);
+  return cloneActor(actor);
+}
+
+export function restoreAutonomyCharacters(
+  characters: CharacterRuntime | null,
+  snapshot: SimulationSnapshot,
+  entities: EntityStore,
+): void {
+  if (!characters) {
+    if (
+      snapshot.characters ||
+      snapshot.characterTombstones ||
+      entities.query({ type: 'npc' }).some((entity) => Boolean(entities.bindActorCharacterComponent(entity.id)))
+    )
+      throw new TypeError('Character state requires the behavior module.');
+    return;
+  }
+  if (snapshot.characters && snapshot.characterTombstones)
+    throw new TypeError('Legacy Character state cannot include Character tombstones.');
+  if (snapshot.characters) return characters.restore(snapshot.characters);
+  characters.restoreFromComponents();
+  if (snapshot.characterTombstones) characters.restoreTombstones(snapshot.characterTombstones);
 }
 
 export function ensureActorAction(

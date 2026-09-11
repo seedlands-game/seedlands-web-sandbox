@@ -16,7 +16,7 @@ export default defineConfig({
   base,
   optimizeDeps: {
     // The authority Worker first imports ECS when entering a world, after the HTML dependency scan.
-    include: ['@seedlands/game-core > bitecs'],
+    include: ['@seedlands/game-core > bitecs', '@seedlands/game-core > mistreevous'],
   },
   plugins: [
     {

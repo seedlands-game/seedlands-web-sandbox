@@ -13,6 +13,8 @@ export type DebugRuntimeInput = Readonly<{
     pendingObservationCount?: number;
     submittedObservationCount?: number;
     completedBatchCount?: number;
+    receivedBatchCount?: number;
+    rejectedBatchCount?: number;
     lastRoundTripMs?: number | null;
   }> | null;
   authorityReady: boolean;
@@ -172,16 +174,27 @@ export function projectDebugPanel(input: DebugPanelInput): DebugPanel {
           runtime?.logic?.observationInFlight == null
             ? null
             : `${runtime.logic.observationInFlight ? 1 : 0} / ${runtime.logic.pendingObservationCount ?? '—'}`,
-          'LogicClient 合并队列',
+          'Authority 端单执行 / 最新待处理观察',
         ),
         metric(
           'Logic 观察 / 回执',
           runtime?.logic?.submittedObservationCount == null
             ? null
             : `${runtime.logic.submittedObservationCount} / ${runtime.logic.completedBatchCount ?? '—'}`,
-          'LogicClient 当前会话',
+          'Authority / Logic 直接通道当前会话',
         ),
-        ms('Logic 最近往返', runtime?.logic?.lastRoundTripMs, '主线程→Logic Worker→主线程，包含排队'),
+        metric(
+          'Logic 收到 / 拒绝',
+          runtime?.logic?.receivedBatchCount == null
+            ? null
+            : `${runtime.logic.receivedBatchCount} / ${runtime.logic.rejectedBatchCount ?? '—'}`,
+          '包括旧 epoch、重复序列与 Authority 拒绝；不等同于模型调用',
+        ),
+        ms(
+          'Logic 最近往返',
+          runtime?.logic?.lastRoundTripMs,
+          'Authority Worker→Logic Worker→Authority，包含排队与接纳',
+        ),
         ms(
           '物理成本 p95',
           costs?.count

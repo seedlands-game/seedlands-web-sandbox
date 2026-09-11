@@ -44,14 +44,17 @@ CI 绿色表示当前 SHA 在声明的执行环境中通过指定断言，不能
 - 静态 job 的生成、格式、Lint、路径、类型和全量覆盖率分别显示耗时；类型错误提前反馈。所有既有门禁保留，不默认关闭 Vitest 隔离或放大并发。
 - 大型 TypedArray 对等使用原生 strict deep equality 时仍覆盖全部 corpus/所有元素/类型/有效视图；保留小结构和语义断言。不要用抽样、只比长度或 hash 降低成本。
 - 浏览器重试一次用于取得 trace，CI `failOnFlakyTests` 使重试通过仍然失败；不得把 flaky 当作健康通过。失败应修复时序或产品原因，而非增加 retries。
+- 浏览器测试默认自行启动严格端口的服务，端口被占则失败，不复用同端口的其他项目。可用 `SEEDLANDS_E2E_PORT` 选择空闲测试端口；只有已核对目标是当前源码的本地开发者才显式设 `SEEDLANDS_E2E_REUSE_SERVER=1`。CI 与生产 preview 始终禁用复用。
 - 每轮 Playwright 结束后立即上传独立名称的报告，防止下一条命令覆盖前一轮错误上下文。trace 和截图用于定位，不当作性能采样。
 - 优化先读取 step/test 耗时和失败记录；本机受控对照与新 SHA 的远端 CI 状态分别记录，不能把不同机器的 before/after 当严格 A/B。
 
 ## 当前已知缺口与下一步
 
-2026-09-09 的核查只讨论已进入当前主线的产品；Agent Server 暂不纳入本轮保障结论。
+2026-09-09 的核查只讨论当时主线产品；NPC 可组合基线新增的保障与实际准出见[本期 change](../changes/2026-09-10-npc-composable-baseline/spec.md)。
 
-- 浏览器 job 通过 `playwright.config.ts` 启动 Vite dev server；Production build 在独立 job 完成，浏览器 job 未下载或启动该产物。因此当前 green 不证明生产 `dist` 的入口、Worker URL 和资源路径运行正确。下一条高价值保障是复用构建 artifact，增加最小生产启动→进入世界→编辑/保存重进 smoke；不能把当前开发服务 regression 直接称作该保障。
+- 常规浏览器回归仍通过 Vite dev server 运行。NPC 基线为浏览器 job 增加独立 `build:web` + `test:npc-production`：在 preview 端口启动实际 `dist`，检查打包 Authority Worker、NPC 状态与 checkpoint 恢复和真实玩家移动。它不复用开发服务器；断言范围仍不是所有生产路由/部署方式。两次构建和对应浏览器证据分开保存，不将 dev regression 冒充生产 smoke。
+- Agent 确定性/协议/PG 测试进入 Vitest，`bundled-entrypoint.test.ts` 另经根 `build:agent` 构建后启动真实 Node 子进程，完成 PostgreSQL + WebSocket ready、SIGTERM 与端口释放。Docker 不可用时相关 PG 用例显示 skipped，不能计为通过；真实模型仍只在显式 opt-in 运行，普通 CI 不传上游密钥。
+- `test:npc-behavior` 保留断网生活、威胁边界、三角色有限食物、三个认知通道、世界/PG checkpoint 配对和独立扩展 Pack 的需求测试。1800 秒是模拟时间；可选真实墙钟长跑和外部模型用例的 skipped 不等于准出。
 - 光影修复是测试口径遗漏的具体例子：旧 gate 没有验证“动态实体移除、体素 revision 不变时清掉阴影”。本次把该用例接入每 PR regression，并以禁用移除失效的突变确认它会失败；它验证 shadow update 请求而非逐像素视觉效果，仍不能推导所有材质、动画、灯位和 GPU 下的像素都正确。
 - 覆盖率门槛仅约束 world 行覆盖率；核心规则、存档、输入、Worker/Authority 新鲜度和资源释放仍需要可触发的故障反例。每次线上/人工发现的核心缺陷，应补到能捕获根因的最低层，并保留少量跨层主旅程。
 - 光影源 change 记录了两条不在默认 CI 清单中的历史采集/碰撞用例在未改动 main 上也失败；它们仍是需独立定位的基线债务，不将未执行用例计为通过。

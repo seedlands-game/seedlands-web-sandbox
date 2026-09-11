@@ -203,7 +203,12 @@ export class RegisteredInventoryRuntime {
       spawns: candidate.dropIntent
         ? [{ position: this.options.entities.get(actorId)!.position, stack: candidate.dropIntent.stack }]
         : [],
-      despawns: candidate.pickupIntent ? [candidate.pickupIntent.reference] : [],
+      worldItems:
+        candidate.pickupIntent && candidate.pickupIntent.remainingCount > 0
+          ? [{ reference: candidate.pickupIntent.reference, count: candidate.pickupIntent.remainingCount }]
+          : [],
+      despawns:
+        candidate.pickupIntent && candidate.pickupIntent.remainingCount === 0 ? [candidate.pickupIntent.reference] : [],
     });
     const value = { ...candidate.result, ...(candidate.dropIntent ? { entityId: mutation.spawnIds[0] } : {}) };
     const revision = this.options.revision();

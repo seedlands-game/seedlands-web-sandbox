@@ -1,6 +1,5 @@
-import { prepareCombatActionSnapshot, projectCombatAction } from './combat-action-snapshot';
-import { prepareDeathEffects } from './prepared-death-effects';
-import { prepareCombatEffects, type CombatAutonomyEffects } from './prepared-combat-effects';
+import { projectCombatAction } from './combat-action-snapshot';
+import type { CombatAutonomyEffects } from './prepared-combat-effects';
 import type { PreparedCombatMutation } from '../gameplay/prepared-combat-mutation';
 import type { CombatOriginRuntimeOptions } from '../gameplay/combat-origin';
 import { assertCombatResultCapacity } from '../gameplay/combat-runtime-snapshot';
@@ -19,7 +18,13 @@ import {
 import { GroundNavigator } from './ground-navigator';
 import { PerceptionRuntime, type PerceptionSnapshot } from './perception-runtime';
 import { PoiRegistry, type PoiInput } from './poi-registry';
-import { resolveActionTarget, updateActorActive } from './autonomy-helpers';
+import {
+  bindActorNeeds,
+  registerAutonomyActor,
+  resolveActionTarget,
+  restoreAutonomyCharacters,
+  updateActorActive,
+} from './autonomy-helpers';
 import { tickAuthorityActorRules, type ActorAuthorityRulesContext } from './actor-authority-rules';
 import type { CoreClone } from '../../runtime/platform-ports';
 import type { EntityIdentityPort } from './action-identity';
@@ -34,6 +39,16 @@ import {
   type CombatSnapshot,
   type MeleeDefinition,
 } from '../gameplay/combat-runtime';
+import { CharacterRuntime } from './character-runtime';
+import type { CharacterActorDomainPort } from './character-runtime-types';
+import type { BehaviorCapabilityRegistry } from '../composition/behavior-capability-registry';
+import { prepareAutonomySnapshot } from './autonomy-snapshot-validation';
+import { createCharacterNavigationConstraint } from './character-navigation';
+import {
+  createPreparedAutonomyCancellation,
+  createPreparedAutonomyCombatEffects,
+  createPreparedAutonomyDeaths,
+} from './autonomy-prepared-effects';
 
 export type { ActorBehavior, ActorRegistration, ActorState, SimulationSnapshot } from './actor-state';
 
@@ -51,6 +66,11 @@ type Options = {
   registeredCombatRequest?: (actorId: string, targetId: string, existingActionId?: string) => CombatRequestResult;
   actorProfiles?: ActorProfileRegistry;
   enforceActorProfiles?: boolean;
+  character?: Readonly<{
+    capabilities: BehaviorCapabilityRegistry;
+    domain: CharacterActorDomainPort;
+    changed: () => void;
+  }>;
 };
 
 export class AutonomyRuntime {
@@ -59,6 +79,7 @@ export class AutonomyRuntime {
   readonly navigator: GroundNavigator;
   readonly perception: PerceptionRuntime;
   readonly combat: CombatRuntime;
+  readonly characters: CharacterRuntime | null;
   private readonly actors = new Map<string, ActorState>();
   private time = 0;
   private stepAccumulator = 0;
@@ -87,7 +108,7 @@ export class AutonomyRuntime {
         return current?.lifetime === reference.lifetime ? current : null;
       },
     };
-    this.actions = new ActionRuntime(options.clone, identity);
+    this.actions = new ActionRuntime(options.clone, identity, () => this.characters?.retainedActionIds() ?? []);
     this.navigator = new GroundNavigator(options.getVoxel);
     this.perception = new PerceptionRuntime({
       entities: options.entities,
@@ -106,77 +127,73 @@ export class AutonomyRuntime {
       identity,
       options.combatOrigin,
     );
+    this.characters = options.character
+      ? new CharacterRuntime({
+          entities: options.entities,
+          capabilities: options.character.capabilities,
+          domain: options.character.domain,
+          now: () => this.time,
+          actor: (entityId) => this.actors.get(entityId) ?? null,
+          observe: (entityId) => this.observe(entityId),
+          poi: (id) => this.pois.get(id),
+          action: (id) => this.actions.get(id),
+          canStartAction: () => this.actions.canStart(),
+          startAction: (actorId, input) => this.startCharacterAction(actorId, input),
+          markActionRunning: (actionId, path) => this.actions.markRunning(actionId, path),
+          setActionPathIndex: (actionId, pathIndex) => this.actions.setPathIndex(actionId, pathIndex),
+          updateActionPath: (actionId, path, repathCount, target) =>
+            this.actions.updatePath(actionId, path, repathCount, target),
+          plan: (actorId, start, target) =>
+            this.navigator.plan(start, target, {
+              constraint: createCharacterNavigationConstraint({
+                actorId,
+                target,
+                perception: this.observe(actorId),
+                resolveEntity: (id) => this.options.entities.get(id),
+              }),
+            }),
+          interruptAction: (actorId, reason) => this.interruptAction(actorId, reason),
+          failAction: (actionId, reason) => this.finishFailure(actionId, reason),
+          succeedAction: (actionId, result) => this.finishSuccess(actionId, result),
+          clearDanger: (entityId) => {
+            const actor = this.actors.get(entityId);
+            if (!actor) return;
+            this.interruptAction(entityId, 'danger-cleared');
+            actor.behavior = 'idle';
+            actor.targetEntityId = null;
+          },
+          worldTime: () => options.getWorldTime(),
+          requestCombat: (actorId, targetId, existingActionId) =>
+            this.requestCharacterCombat(actorId, targetId, existingActionId),
+          changed: options.character.changed,
+        })
+      : null;
   }
 
   registerActor(entityId: string, input: ActorRegistration): ActorState {
+    this.validateActorRegistration(input);
+    return registerAutonomyActor(entityId, input, {
+      actors: this.actors,
+      entities: this.options.entities,
+      profiles: this.actorProfiles,
+      enforceProfiles: this.options.enforceActorProfiles,
+      isPlayerAlive: this.options.isPlayerAlive,
+    });
+  }
+
+  validateActorRegistration(input: ActorRegistration): void {
     if (this.actors.size >= MAX_RETAINED_ACTORS) throw new Error('Autonomous actor limit reached.');
-    if (this.actors.has(entityId)) throw new Error(`Actor already registered: ${entityId}`);
-    const entity = this.options.entities.get(entityId);
-    if (!entity || entity.archetype !== input.archetype || !['creature', 'npc'].includes(entity.type))
-      throw new TypeError('Actor registration does not match a canonical autonomous entity.');
-    const profile = this.actorProfiles.require(input.archetype);
-    if (
-      this.options.enforceActorProfiles &&
-      (entity.type !== profile.entityType || entity.maxHealth !== profile.maxHealth)
-    )
-      throw new TypeError('Actor entity does not match its world profile.');
+    this.actorProfiles.require(input.archetype);
     const hunger = input.hunger ?? 0;
     if (!Number.isFinite(hunger) || hunger < 0 || hunger > 100) throw new TypeError('Actor hunger is invalid.');
-    const actor: ActorState = {
-      entityId,
-      archetype: input.archetype,
-      hunger,
-      behavior: profile.initialBehavior ?? 'idle',
-      targetEntityId: null,
-      homePoiId: input.homePoiId ?? null,
-      workPoiId: input.workPoiId ?? null,
-      foodPoiId: input.foodPoiId ?? null,
-      active: false,
-      wanderIndex: 0,
-    };
-    this.bindActorNeeds(actor);
-    this.actors.set(entityId, actor);
-    updateActorActive(actor, this.options.entities, this.options.isPlayerAlive);
-    return cloneActor(actor);
   }
 
   prepareDeaths(ids: readonly string[]) {
-    const effects = prepareDeathEffects({
-      ids,
-      combat: this.combat,
-      actions: this.actions,
-      perception: this.perception,
-      actors: this.actors,
-      now: this.time,
-    });
-    return {
-      validate: () => effects.validate(),
-      apply: () => {
-        effects.apply();
-        this.actionInterruptionCount += effects.interrupted;
-        this.actionCompletionCount += effects.completed;
-      },
-    };
+    return createPreparedAutonomyDeaths(ids, this.preparedEffectsOptions());
   }
 
   prepareCombatEffects(combatPlan: PreparedCombatMutation, input: CombatAutonomyEffects = {}) {
-    const effects = prepareCombatEffects({
-      ...input,
-      combatPlan,
-      combat: this.combat,
-      actions: this.actions,
-      actors: this.actors,
-      perception: this.perception,
-      now: this.time,
-    });
-    return {
-      validate: () => effects.validate(),
-      apply: () => {
-        effects.apply();
-        this.actionInterruptionCount += effects.interrupted;
-        this.actionCompletionCount += effects.completed;
-      },
-    };
+    return createPreparedAutonomyCombatEffects(combatPlan, input, this.preparedEffectsOptions());
   }
 
   prepareInterruption(actorId: string, reason: string) {
@@ -184,20 +201,9 @@ export class AutonomyRuntime {
   }
 
   prepareCancellation(actorIds: readonly string[], reason: string, interruptActions = false) {
-    const combat = this.combat.prepareMutation({ cancelActorIds: actorIds, actorCancellationReason: reason });
-    const effects = this.prepareCombatEffects(combat, {
-      interruptions: interruptActions ? actorIds.map((actorId) => ({ actorId, reason })) : [],
-    });
-    return {
-      validate: () => {
-        combat.validate();
-        effects.validate();
-      },
-      apply: () => {
-        combat.apply();
-        effects.apply();
-      },
-    };
+    return createPreparedAutonomyCancellation(actorIds, reason, interruptActions, this.combat, (combat, input) =>
+      this.prepareCombatEffects(combat, input),
+    );
   }
 
   get usesRegisteredCombat(): boolean {
@@ -225,6 +231,7 @@ export class AutonomyRuntime {
     const actor = this.actors.get(entityId);
     if (!actor) return null;
     const drop = this.actorDeathDrop(entityId);
+    this.characters?.unregister(entityId, reason);
     this.cancelCombat(entityId, reason);
     if (this.actions.interruptActor(entityId, this.time, reason)) this.actionInterruptionCount += 1;
     this.actors.delete(entityId);
@@ -259,7 +266,10 @@ export class AutonomyRuntime {
     targetId: string,
     definitionId: string,
     existingActionId?: string,
+    controlSource: 'autonomous' | 'behavior' = 'autonomous',
   ): CombatRequestResult {
+    if (this.options.entities.actorStateAccess(actorId).controlSource !== controlSource)
+      return { success: false, reason: 'control-owner-mismatch' };
     if (this.options.registeredCombat)
       return (
         this.options.registeredCombatRequest?.(actorId, targetId, existingActionId) ?? {
@@ -271,7 +281,10 @@ export class AutonomyRuntime {
     if (!actor) return { success: false, reason: 'invalid-attacker' };
     if (existingActionId) return this.combat.retain(actorId, existingActionId);
     const result = this.combat.request(actorId, targetId, definitionId, () => {
-      const action = this.startAction(actorId, { type: 'attack', targetEntityId: targetId });
+      const action =
+        controlSource === 'behavior'
+          ? this.startCharacterAction(actorId, { type: 'attack', targetEntityId: targetId })
+          : this.startAction(actorId, { type: 'attack', targetEntityId: targetId });
       this.actions.markRunning(action.id, []);
       return action.id;
     });
@@ -319,8 +332,24 @@ export class AutonomyRuntime {
 
   startAction(actorId: string, input: Omit<ActorActionInput, 'actorId'>): ActorAction {
     if (!this.actors.has(actorId)) throw new RangeError(`Unknown autonomous actor: ${actorId}`);
+    if (this.options.entities.actorStateAccess(actorId).controlSource !== 'autonomous')
+      throw new Error('Autonomous control does not own this actor.');
     this.interruptAction(actorId, 'replaced');
     return this.actions.start({ ...input, actorId }, this.time);
+  }
+
+  startCharacterAction(actorId: string, input: Omit<ActorActionInput, 'actorId'>): ActorAction {
+    if (!this.characters?.has(actorId)) throw new RangeError(`Unknown Character actor: ${actorId}`);
+    if (this.options.entities.actorStateAccess(actorId).controlSource !== 'behavior')
+      throw new Error('Behavior control does not own this actor.');
+    this.interruptAction(actorId, 'replaced');
+    return this.actions.start({ ...input, actorId }, this.time);
+  }
+
+  requestCharacterCombat(actorId: string, targetId: string, existingActionId?: string): CombatRequestResult {
+    if (!this.characters?.has(actorId) || this.options.entities.actorStateAccess(actorId).controlSource !== 'behavior')
+      return { success: false, reason: 'control-owner-mismatch' };
+    return this.requestActorCombat(actorId, targetId, 'unarmed', existingActionId, 'behavior');
   }
 
   interruptAction(actorId: string, reason = 'stopped'): boolean {
@@ -342,9 +371,12 @@ export class AutonomyRuntime {
   recordAttacked(entityId: string, attackerId: string): void {
     const actor = this.actors.get(entityId);
     if (!actor) return;
-    actor.behavior = 'flee';
-    actor.targetEntityId = attackerId;
     this.perception.record(entityId, { type: 'attacked', subjectId: attackerId });
+    if (!this.characters?.has(entityId)) {
+      actor.behavior = 'flee';
+      actor.targetEntityId = attackerId;
+    }
+    this.characters?.recordAttacked(entityId, attackerId);
   }
 
   advanceAuthorityRules(seconds: number): void {
@@ -359,6 +391,8 @@ export class AutonomyRuntime {
       this.time = round(this.time + STEP_SECONDS);
       if (!this.options.registeredNeeds) this.needsAccumulator = round(this.needsAccumulator + STEP_SECONDS);
       tickAuthorityActorRules(this.authorityRulesContext(), STEP_SECONDS);
+      this.characters?.advance(STEP_SECONDS);
+      this.actions.pruneHistory();
       if (!this.options.registeredNeeds && this.needsAccumulator + Number.EPSILON >= 5) {
         this.needsAccumulator = round(this.needsAccumulator - 5);
         this.actors.forEach((actor) => (actor.hunger = round(Math.min(100, actor.hunger + 1))));
@@ -367,6 +401,7 @@ export class AutonomyRuntime {
   }
 
   snapshot(): SimulationSnapshot {
+    const tombstones = this.characters?.tombstoneSnapshot();
     return {
       version: 1,
       time: this.time,
@@ -379,43 +414,22 @@ export class AutonomyRuntime {
       pois: this.pois.snapshot(),
       actions: this.actions.snapshot(),
       combat: this.combat.snapshot(),
+      ...(tombstones?.characters.length ? { characterTombstones: tombstones } : {}),
     };
   }
 
   restore(raw: unknown): void {
     try {
-      const snapshot = raw as SimulationSnapshot;
-      if (
-        !snapshot ||
-        snapshot.version !== 1 ||
-        ![
-          snapshot.time,
-          snapshot.stepAccumulator,
-          snapshot.needsAccumulator,
-          snapshot.perceptionAccumulator,
-          snapshot.behaviorAccumulator,
-        ].every((value) => Number.isFinite(value) && value >= 0) ||
-        !Number.isInteger(snapshot.starterEcologyVersion) ||
-        snapshot.starterEcologyVersion < 0 ||
-        !Array.isArray(snapshot.actors)
-      )
-        throw new TypeError('header is invalid');
-      if (snapshot.actors.length > MAX_RETAINED_ACTORS) throw new RangeError('Autonomous actor limit exceeded.');
-      const restored = new Map<string, ActorState>();
-      for (const actor of snapshot.actors) {
-        this.validateActor(actor);
-        this.actorProfiles.require(actor.archetype);
-        const entity = this.options.entities.get(actor.entityId);
-        if (!entity || entity.archetype !== actor.archetype) throw new TypeError('actor entity is missing');
-        if (restored.has(actor.entityId)) throw new TypeError('duplicate actor id');
-        restored.set(actor.entityId, cloneActor(actor));
-      }
-      const actions = prepareCombatActionSnapshot(snapshot, new Set(restored.keys()));
+      const {
+        snapshot,
+        actors: restored,
+        actions,
+      } = prepareAutonomySnapshot(raw, this.options.entities, this.actorProfiles);
       this.pois.restore(snapshot.pois);
-      this.actions.restore(actions);
+      this.actions.restore(actions, { deferPruning: true });
       this.actors.clear();
       restored.forEach((actor, id) => {
-        this.bindActorNeeds(actor);
+        bindActorNeeds(actor, this.options.entities);
         this.actors.set(id, actor);
       });
       this.time = snapshot.time;
@@ -425,6 +439,8 @@ export class AutonomyRuntime {
       this.behaviorAccumulator = snapshot.behaviorAccumulator;
       this.starterVersion = snapshot.starterEcologyVersion;
       this.combat.restore(snapshot.combat ?? emptyCombatRuntimeSnapshot());
+      restoreAutonomyCharacters(this.characters, snapshot, this.options.entities);
+      this.actions.pruneHistory();
       if (!snapshot.combat) {
         for (const actorId of restored.keys()) {
           const action = this.actions.forActor(actorId);
@@ -475,17 +491,19 @@ export class AutonomyRuntime {
     };
   }
 
-  private bindActorNeeds(actor: ActorState): void {
-    const state = this.options.entities.actorStateAccess(actor.entityId);
-    state.hunger = actor.hunger;
-    Object.defineProperty(actor, 'hunger', {
-      enumerable: true,
-      configurable: true,
-      get: () => state.hunger,
-      set: (value: number) => {
-        state.hunger = value;
+  private preparedEffectsOptions() {
+    return {
+      combat: this.combat,
+      actions: this.actions,
+      actors: this.actors,
+      perception: this.perception,
+      characters: this.characters,
+      now: this.time,
+      counted: (interrupted: number, completed: number) => {
+        this.actionInterruptionCount += interrupted;
+        this.actionCompletionCount += completed;
       },
-    });
+    };
   }
 
   private finishSuccess(id: string, result?: unknown): void {
@@ -500,20 +518,6 @@ export class AutonomyRuntime {
     this.perception.record(this.actions.get(id)!.actorId, { type: 'action-failed', subjectId: id });
   }
 
-  private validateActor(actor: ActorState): void {
-    if (
-      !actor.entityId?.trim() ||
-      !['grazer', 'night-stalker', 'settler'].includes(actor.archetype) ||
-      !Number.isFinite(actor.hunger) ||
-      actor.hunger < 0 ||
-      actor.hunger > 100 ||
-      (actor.attackCooldownSeconds !== undefined &&
-        (!Number.isFinite(actor.attackCooldownSeconds) || actor.attackCooldownSeconds < 0)) ||
-      !Number.isInteger(actor.wanderIndex)
-    )
-      throw new TypeError('actor fields are invalid');
-  }
-
   private reconcileCombatEvents(): void {
     for (const event of this.combat.takeLifecycleEvents()) {
       const actor = this.actors.get(event.actorId);
@@ -524,7 +528,7 @@ export class AutonomyRuntime {
             this.actionInterruptionCount += 1;
         } else this.finishSuccess(event.actionId, event.result ?? undefined);
       }
-      if (actor) {
+      if (actor && !this.characters?.has(event.actorId)) {
         actor.behavior = 'idle';
         actor.targetEntityId = null;
       }

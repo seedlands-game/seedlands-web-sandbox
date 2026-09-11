@@ -6,6 +6,7 @@
   },
   "include": [
     "tests",
+    "changes/2026-09-10-npc-composable-baseline/e2e",
     "changes/2026-09-08-node-monorepo/e2e",
     "changes/2026-09-08-pr15-main-sync/e2e",
     "changes/2026-09-08-gameplay-foundation/e2e",

@@ -266,9 +266,12 @@ describe('legacy gameplay wrapper action migration', () => {
         targetEntityId: 'removed-food',
       });
       expect(restored.simulation.actions.get(active.id)).toMatchObject({ status: 'running', pathIndex: 1 });
-      expect(restored.simulation.actions.snapshot()).toMatchObject({
-        version: 2,
-        actions: [{}, { actorIdentity: { entityId: 'settler' }, targetIdentity: { entityId: 'world-item-1' } }],
+      const migrated = restored.simulation.actions.snapshot();
+      expect(migrated.version).toBe(2);
+      expect(migrated.actions).toHaveLength(2);
+      expect(migrated.actions.find((action) => action.id === active.id)).toMatchObject({
+        actorIdentity: { entityId: 'settler' },
+        targetIdentity: { entityId: 'world-item-1' },
       });
       snapshot.entities = snapshot.entities.filter((entity) => entity.id !== 'world-item-1');
       restored.restoreSnapshot(snapshot);

@@ -71,6 +71,7 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
       generalWorkerCount: sessionConfig.generalWorkerCount,
     });
     const actions: UiActionPort = {
+      companion: game.companion,
       startWorld: (seed, quality, openMode, actorMode) => application.start(seed, quality, openMode, actorMode),
       startMeleeShowcase: (quality) => application.startMeleeShowcase(quality),
       resetMeleeShowcase: () => game.prepareMeleeShowcase().catch(() => undefined),

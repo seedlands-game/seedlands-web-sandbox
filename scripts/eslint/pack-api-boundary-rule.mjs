@@ -10,13 +10,16 @@ export const packApiBoundaryRule = {
   create(context) {
     const filename = context.filename.replaceAll('\\', '/');
     const marker = '/server/gameplay/playbooks/';
-    const examples = '/changes/2026-09-09-composable-overworld-playbook/examples/';
+    const examples = [
+      '/changes/2026-09-09-composable-overworld-playbook/examples/',
+      '/changes/2026-09-10-npc-composable-baseline/examples/',
+    ].find((prefix) => filename.includes(prefix));
     const offset = filename.indexOf(marker);
-    const exampleOffset = filename.indexOf(examples);
+    const exampleOffset = examples ? filename.indexOf(examples) : -1;
     if (offset < 0 && exampleOffset < 0) return {};
     const base = filename.slice(0, offset + marker.length);
     const root =
-      exampleOffset >= 0
+      examples && exampleOffset >= 0
         ? path.resolve(filename.slice(0, exampleOffset + examples.length))
         : path.resolve(base, filename.slice(base.length).split('/')[0]);
     const allowed = (source) => {

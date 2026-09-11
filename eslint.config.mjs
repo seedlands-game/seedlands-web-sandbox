@@ -70,6 +70,12 @@ const purityRule = (forbiddenImport, extraGlobals = []) => ({
       Identifier(node) {
         if (!forbiddenRuntimeGlobals.has(node.name) && !extraGlobals.includes(node.name)) return;
         if (node.parent.type === 'Property' && node.parent.key === node && !node.parent.computed) return;
+        if (
+          (node.parent.type === 'TSPropertySignature' || node.parent.type === 'TSMethodSignature') &&
+          node.parent.key === node &&
+          !node.parent.computed
+        )
+          return;
         if (node.parent.type === 'MemberExpression' && node.parent.property === node && !node.parent.computed) return;
         context.report({ node, messageId: 'forbidden', data: { dependency: node.name } });
       },
@@ -388,6 +394,7 @@ export default tseslint.config(
     files: [
       'packages/game-core/src/server/gameplay/playbooks/**/*.ts',
       'changes/2026-09-09-composable-overworld-playbook/examples/**/*.ts',
+      'changes/2026-09-10-npc-composable-baseline/examples/**/*.ts',
     ],
     plugins: { seedlands },
     rules: { 'seedlands/pack-api-boundary': 'error' },

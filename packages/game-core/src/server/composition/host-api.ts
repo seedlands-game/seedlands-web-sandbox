@@ -10,7 +10,11 @@ export type {
 } from './contracts';
 export { createRegisteredOperationRuntime } from './registered-operations';
 export { createModuleLifecycle } from './module-lifecycle';
-export { gameplayContentForComposition, assembleOverworldPacks } from './gameplay-composition';
+export {
+  gameplayContentForComposition,
+  assembleOverworldPacks,
+  OVERWORLD_PRODUCT_PERMISSIONS,
+} from './gameplay-composition';
 export type { ModuleScheduleSnapshot } from './lifecycle-contracts';
 export type {
   RegisteredStatePort,
@@ -28,4 +32,5 @@ export { createGameplaySystemAuthority } from './gameplay-system-authority';
 
 export { createGameplayActorAuthority, type ModuleActorAuthority } from './gameplay-actor-authority';
 
-export { assembleProductPacks } from './product-playbooks';
+export { assembleProductPacks, ALTERNATIVE_PRODUCT_PERMISSIONS } from './product-playbooks';
+export type { AssembleProductPackOptions, ProductExtensionAdmission } from './product-playbooks';

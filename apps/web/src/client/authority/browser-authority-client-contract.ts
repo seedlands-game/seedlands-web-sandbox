@@ -13,6 +13,36 @@ import type { SerializedChunkSnapshot } from '../persistence/browser-chunk-persi
 import type { AuthorityTransportFaults } from './authority-transport';
 import type { provideAuthorityBootstrap } from './authority-bootstrap-client';
 import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type {
+  CharacterControlResult,
+  CharacterGoal,
+  ControlBinding,
+} from '@seedlands/game-core/runtime/character-control-protocol';
+import type { WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
+import type { BehaviorUpdateRequest } from '@seedlands/game-core/runtime/behavior-control-protocol';
+
+export type BoundCharacterControlPort = Readonly<{
+  binding: ControlBinding;
+  capabilities(): Promise<WorldHarnessResult<CharacterControlResult>>;
+  observe(sinceCursor?: number, throughCursor?: number): Promise<WorldHarnessResult<CharacterControlResult>>;
+  speak(requestId: string, text: string): Promise<WorldHarnessResult<CharacterControlResult>>;
+  behavior(
+    request: Omit<BehaviorUpdateRequest, 'kind' | 'entityId'>,
+  ): Promise<WorldHarnessResult<CharacterControlResult>>;
+  intent(
+    requestId: string,
+    expectedRevision: number,
+    expectedCursor: number,
+    goal: CharacterGoal,
+    say?: string,
+  ): Promise<WorldHarnessResult<CharacterControlResult>>;
+  memory(
+    expectedMemoryRevision: number,
+    throughCursor: number,
+    summary: string,
+  ): Promise<WorldHarnessResult<CharacterControlResult>>;
+  dispose(): Promise<void>;
+}>;
 
 export type AuthorityWorkerPort = {
   onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null;

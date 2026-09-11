@@ -1,5 +1,6 @@
 import type { AuthorityInitialWorldBootstrap } from '@seedlands/game-core/server/authority/authority-runtime';
-import type { AuthorityRequest } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { AuthorityRequest, AuthorityResponse } from '@seedlands/game-core/compute/authority-worker-protocol';
+import { PROTOCOL_VERSION } from '@seedlands/game-core/runtime/session-protocol';
 
 export const decodeAuthorityBootstrapResult = (
   message: Extract<AuthorityRequest, { kind: 'authority-bootstrap-result' }>,
@@ -18,3 +19,49 @@ export const decodeAuthorityBootstrapResult = (
     })),
   };
 };
+
+type BootstrapResult = Extract<AuthorityRequest, { kind: 'authority-bootstrap-result' }>;
+
+export class AuthorityWorkerBootstrap {
+  private sequence = 0;
+  private pending: {
+    requestId: number;
+    resolve: (bootstrap: AuthorityInitialWorldBootstrap) => void;
+    reject: (error: Error) => void;
+  } | null = null;
+
+  constructor(private readonly post: (message: AuthorityResponse) => void) {}
+
+  request(epoch: string, seed: number, generatorVersion: number): Promise<AuthorityInitialWorldBootstrap> {
+    if (this.pending) return Promise.reject(new Error('Authority bootstrap generation is already pending.'));
+    const requestId = ++this.sequence;
+    const promise = new Promise<AuthorityInitialWorldBootstrap>((resolve, reject) => {
+      this.pending = { requestId, resolve, reject };
+    });
+    this.post({
+      kind: 'authority-bootstrap-needed',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch,
+      requestId,
+      seed,
+      generatorVersion,
+    });
+    return promise;
+  }
+
+  receive(epoch: string, message: BootstrapResult): void {
+    if (message.epoch !== epoch || !this.pending || message.requestId !== this.pending.requestId) return;
+    const pending = this.pending;
+    this.pending = null;
+    try {
+      pending.resolve(decodeAuthorityBootstrapResult(message));
+    } catch (error) {
+      pending.reject(error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+
+  close(): void {
+    this.pending?.reject(new Error('Authority Worker was disposed during bootstrap.'));
+    this.pending = null;
+  }
+}

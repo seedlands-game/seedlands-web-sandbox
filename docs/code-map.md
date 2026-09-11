@@ -2,7 +2,7 @@
 
 本页回答“从哪里开始读、某项行为由谁负责”。目录归属见[仓库结构规范](repository-structure.md)，宏观取舍见[长期目标与路线图](living-world-alignment.md)，运行方式与当前能力见 [README](../README.zh-CN.md)。
 
-核对日期：2026-09-09；活跃产品为 Web 与 game-core，Node Dedicated 已归档退出。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
+核对日期：2026-09-10；世界产品为 Web 与 game-core，独立 Agent Server 通过受限角色协议接入，Node Dedicated 仍归档退出。这是人工核对的导航，不是自动生成的完整依赖图；后续移动入口或改变职责时应同步维护。
 
 首屏由 [prerender-entry.ts](../apps/web/src/app/ui/prerender-entry.ts) 在开发请求或构建前调用同一个 `AppRoot` 生成，浏览器入口随后对该 DOM 做严格 hydration；生成与注入脚本位于 `apps/web/scripts/prerendered-start-screen.*`。
 
@@ -27,12 +27,14 @@
 
 ```text
 apps/
+  agent-server/           @seedlands/agent-server：认知、模型、PG 工作区与 Node 连接宿主
   web/                    @seedlands/web：浏览器产品、Vite 配置与公开资产
     src/app/              浏览器组合、输入、PlayCanvas 表现、streaming 与 Svelte UI
     src/client/           客户端协议适配、预测、镜像、持久化与表现计算
     src/compute/          浏览器 Wasm kernel 与内存适配
     src/worker/           浏览器 Worker 入口、传输与生命周期适配
 packages/
+  cognition-protocol/     @seedlands/cognition-protocol：Web/Agent 共享认知传输合同
   game-core/              @seedlands/game-core：无 DOM/WebWorker/Node ambient 的共享逻辑
     src/server/           权威世界、规则、协议、存档与 Headless 开发会话
     src/compute/          纯计算任务、完整 Authority 输入门禁
@@ -85,7 +87,7 @@ Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通�
 
 - **`World`** 定义在 [app/world/world-runtime.ts](../apps/web/src/app/world/world-runtime.ts)，是浏览器侧 streaming、编辑请求与网格协调入口。它不拥有另一套权威体素世界。
 - **`GameServer`** 持有权威 Chunk 与玩法状态，`editBatch()` 进入事务提交路径。浏览器编辑经 World / Authority 端口到达这里；不要直接改渲染副本。
-- **`AuthorityRuntime` / `AuthoritySession`** 组合权威服务并安排时间、输入和物理推进。浏览器实例由 Authority Worker 持有；无浏览器会话复用同一核心。
+- **`AuthorityRuntime` / `AuthoritySession`** 组合权威服务并安排时间、输入和物理推进。浏览器实例由 Authority Worker 持有；无浏览器会话复用同一核心。[authority-state-version.ts](../packages/game-core/src/server/authority/authority-state-version.ts) 只捕获和比较状态版本，不取得提交权。
 - **`packages/game-core/src/world/`** 是纯世界算法与数据，不等于 `World` 类；[storage.ts](../packages/game-core/src/world/storage.ts) 是存档编解码，不是游戏服务实例。
 - **`client`** 是客户端角色，不保证所有文件都不依赖浏览器；其中有 Worker 创建与持久化适配。类型引用也不等于运行时状态所有权。
 - **`apps/web/src/worker`** 是浏览器执行入口与传输适配；复用的纯计算实现在 `packages/game-core/src/compute`。
@@ -201,3 +203,20 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 `server/gameplay/modules/crafting-provider.ts` 定义冻结的匹配输入、槽位扣料计划与共享库存事务；`recipe-crafting-module.ts` 通过同一 capability 分别准入标准和自定义匹配器。`server/composition/product-playbooks.ts` 对三个仓库内产品示例施加独立宿主权限；当前替代 Pack 源在 `changes/2026-09-09-composable-overworld-playbook/examples/`，仅消费公开 mod-api。`scripts/build-gameplay-packs.mjs` 按明确示例名构建锁定 ESM，Browser 和 Headless 读取同一产物合同。
 
 `server/gameplay/actor-profile.ts` 校验并冻结每世界角色档案、玩家默认近战及可选初始生态；第一方数值归 `playbooks/overworld/actors.ts`。`server/starter-ecology-bootstrap.ts` 仅在装配声明生态时准备已有营地/角色/食物布局，组合世界缺失该配置不会隐式生成默认内容。角色生命、掉落、感知食物和模型表现分别沿权威档案与当前世界物品定义解析。
+
+## NPC 行为与认知接缝
+
+- `server/composition/behavior-capability-registry.ts` 拥有每世界冻结的能力目录、provider/参数/持续状态合同；`server/gameplay/modules/behavior-registry-module.ts` 提供可选标准模块。作者只通过 `mod-api` 注册与编排，示例和长期边界见 [NPC 行为与认知](npc-behavior-and-memory.md)。
+- `behavior-capability-validation.ts` 负责有界JSON和参数合同，`behavior-capability-dispatch.ts` 将冻结provider绑定到只读Actor上下文与受限操作端口；能力目录、执行和恢复仍由同一registry注册源驱动。
+- `behavior-capability-admission.ts` 校验requiredOperations和host-approved模块操作许可；`character-behavior-admission.ts` 在安装/候选出生/恢复阶段使用同源Actor准入，`character-behavior-operation.ts` 为标准身体技能构造领域操作请求。真实目标和规则仍由既有权威operation执行链校验。
+- `server/simulation/character-runtime.ts` 组合绑定 Actor 的行为控制，`character-behavior-runtime.ts` 推进树，`character-behavior-skills.ts` 处理标准生活动作；身体数据仍由 `ecs-actor-components.ts` / `ecs-actor-state.ts` 持有。`gameplay-character-control.ts` 处理角色请求与出生，`gameplay-character-domain.ts` 将 provider 权限绑定到既有领域操作，不另建库存和 needs owner。
+- `character-navigation.ts` 从当前角色的局部感知与共享身体形状构造实体避障约束，`ground-navigator.ts` 在既有有界地面寻路中消费该约束；最终位移与碰撞仍由权威物理推进，不移动或禁用障碍物。
+- `character-snapshot-runtime.ts` 验证并恢复行为组件与墓碑，`autonomy-snapshot-validation.ts` 处理动作/自主状态检查，`gameplay-runtime-checkpoint.ts` 负责 Gameplay 候选恢复与迁移边界；它们不拥有独立的权威身体状态。
+- `ecs-entity-components.ts` / `ecs-component-storage.ts` 管理既有bitECS列及槽清理，`ecs-actor-mode-state.ts` 负责Actor模式组件访问，`entity-spatial-buckets.ts` 维护现有局部空间索引。`autonomy-prepared-effects.ts` 保持既有候选Action效果的准备/提交边界；`character-observation-runtime.ts` 与validation/types辅助文件分别负责局部观察、校验与数据合同。
+- `runtime/character-control-protocol.ts` / `behavior-control-protocol.ts` 是无模型角色协议；`behavior-capability-descriptor.ts` 是core注册与Agent wire共用的纯能力描述与32KiB目录总量校验，`behavior-json.ts` 提供无平台依赖的UTF-8/JSON字节计数。`AuthorityWorldHarness` 提供可信开发入口，Web 的 `browser-character-control-port.ts` 和 `client/character/` 提供绑定角色接线。Agent 不获得全局 Harness。
+- `apps/agent-server/src/resident-agent.ts` / `resident-factory.ts` 分别处理常驻认知和出生配方，`workspace/` 拥有 PG 记忆与认知分支，`node/resident-host.ts` 处理 loopback 会话。`client/persistence/application-checkpoint.ts` / `cognition-timeline.ts` 将世界与认知 checkpoint 配对。
+- `apps/agent-server/src/gateway-response.ts` 在构造模型消息前限制实际响应流及工具字段；`resident-request-budget.ts` / `resident-agent.ts` 拥有每逻辑轮工具批次准入。`resident-runtime-codec.ts` 是调度初始化与认知导入共用的恢复校验；`workspace/content-codec.ts` 保持普通写入和portable导入内容限额一致。`packages/cognition-protocol/src/checkpoint-protocol.ts` 提供中立认知清单头合同，应用V2的pairHash不替代PG内部语义校验。
+- `apps/agent-server/src/node/resident-host-births.ts` 管理同socket最多三个独立、可取消的出生请求，避免模型等待进入控制消息串行链；Factory在事务外生成，短事务只负责幂等重读、预算复核与提交。
+- `apps/agent-server/src/resident-birth-codec.ts` 统一出生模型schema、Factory解析与Host文档边界；`node/resident-connection-lifecycle.ts` 汇聚连接关闭后的通道持久化尾部和已入队消息，诊断回调不能控制取消。其retired不承诺共享Factory/provider工作已完成，出生资格在closed时同步撤销。模型实际dispatch前仍由Channel/Agent/Gateway各自复验取消资格。
+- `apps/web/src/app/gameplay/companion/` 组合产品角色会话，`companion-panel.svelte` / `character-behavior-panel.svelte` 只显示角色和行为树。`scripts/model-gateway/` 是独立工程适配，上游凭据不进入 core、Pack 或浏览器。
+- `apps/web/src/worker/authority-worker-runtime-lifecycle.ts` 收拢 Worker runtime 的初始化/释放与同一 owner 的接线；`authority-worker-direct-logic*.ts` 维护 Authority→Logic 的直接通道和候选新鲜度。控制消息和测试时钟走各自边界，不因认知网络等待而阻塞身体模拟。
