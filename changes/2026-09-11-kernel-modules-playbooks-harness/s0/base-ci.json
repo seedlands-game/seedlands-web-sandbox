@@ -1,0 +1,32 @@
+{
+  "conclusion": "failure",
+  "headSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+  "jobs": [
+    {
+      "conclusion": "success",
+      "name": "Select CI scope",
+      "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34572838751/job/103178521626"
+    },
+    {
+      "conclusion": "success",
+      "name": "Static verification",
+      "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34572838751/job/103178556865"
+    },
+    {
+      "conclusion": "failure",
+      "name": "Chromium regression",
+      "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34572838751/job/103178556873"
+    },
+    {
+      "conclusion": "success",
+      "name": "Production build",
+      "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34572838751/job/103178556950"
+    },
+    {
+      "conclusion": "skipped",
+      "name": "Deploy GitHub Pages",
+      "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34572838751/job/103186903666"
+    }
+  ],
+  "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/34572838751"
+}

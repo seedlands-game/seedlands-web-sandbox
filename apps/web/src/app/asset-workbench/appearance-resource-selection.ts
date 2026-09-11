@@ -1,4 +1,4 @@
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import type { Asset, MaterialAsset, PixelTexture } from '../../client/presentation/asset-types';
 import type { GlbModelStats, StoredGlb } from '../../client/presentation/glb-model';
 import { inspectStoredGlb } from '../../client/persistence/glb-model-store';
@@ -60,5 +60,7 @@ export function focusedPixelTexture(
 export function canMakeMaterialsPrivate(asset: Asset | undefined): boolean {
   if (!asset || asset.id === 'builtin:model:lantern') return false;
   if (asset.type === 'builtin-actor-model' || asset.type === 'builtin-arm-model') return true;
-  return asset.type === 'builtin-item-model' && getItemDefinition(asset.payload.itemId).placesVoxel === undefined;
+  return (
+    asset.type === 'builtin-item-model' && requireClassicItemDefinition(asset.payload.itemId).placesVoxel === undefined
+  );
 }

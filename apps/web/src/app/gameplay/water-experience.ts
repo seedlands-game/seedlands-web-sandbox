@@ -1,7 +1,7 @@
 import type * as pc from 'playcanvas';
-import { macroAt } from '@seedlands/game-core/world/macro-world';
-import { sampleWaterFlowDirection } from '@seedlands/game-core/world/water-flow-direction';
-import type { WaterImmersionSnapshot } from '@seedlands/game-core/world/water-immersion';
+import { macroAt } from '@seedlands/stdlib/world/macro-world';
+import { sampleWaterFlowDirection } from '@seedlands/stdlib/world/water-flow-direction';
+import type { WaterImmersionSnapshot } from '@seedlands/stdlib/world/water-immersion';
 import { UnderwaterVisualEffects } from '../scene/underwater-visual-effects';
 import type { WorldEnvironment } from '../scene/world-environment';
 import type { World } from '../world/world-runtime';

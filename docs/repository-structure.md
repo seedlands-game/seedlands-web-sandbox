@@ -12,32 +12,37 @@
 
 ## 顶层归属
 
-| 位置                           | 应放什么                                         | 归属提醒                                               |
-| ------------------------------ | ------------------------------------------------ | ------------------------------------------------------ |
-| 根目录                         | workspace 编排、共享检查配置及社区入口文档       | 产品运行依赖归所属包；根 devDependencies 是共享工具    |
-| `apps/web/`                    | 浏览器产品、Vite/SSG、公开资产与 Web 入口        | 可依赖 game-core；不得依赖 node-server                 |
-| `apps/agent-server/`           | 独立 Node 认知服务、模型调用与 PostgreSQL 工作区 | 可依赖 core/cognition 协议；不依赖 Web，不拥有世界身体 |
-| `packages/game-core/`          | 跨端权威规则、协议、世界、物理与纯计算           | 不依赖 apps 或平台 ambient；能力通过窄实例端口注入     |
-| `packages/cognition-protocol/` | Web 与 Agent 的版本化认知传输合同                | 纯数据协议，不引入数据库、模型或平台实现               |
-| `tests/`                       | 单元测试、架构门禁、长期浏览器基线               | 通常按被测模块归属组织；需求 E2E 遵守 change 生命周期  |
-| `changes/<日期>-<名称>/`       | Active 或未归档的变更合同、需求测试与证据        | 历史路径按交付时保留，不为追随当前目录而静默改写       |
-| `archives/changes/`            | 明确 Delivered change 的可恢复 ZIP               | manifest 保存原路径和 SHA-256；恢复方式见归档索引      |
-| `docs/`                        | 多次变更共用的目标、路线、代码导航和约定         | 不复制 README 的运行说明，不替代具体 spec              |
-| `scripts/`                     | 工程任务、证据汇总和启动包装                     | 产品规则留在所属源码模块                               |
-| `apps/web/public/assets/`      | 通过静态 URL 加载的图片等公开资源                | 资产来源与许可见 [ASSETS](../ASSETS.md)                |
-| `harness/baseline.json`        | 版本化基线                                       | 与忽略的 `harness/results/` 运行产物区分               |
+| 位置                                         | 应放什么                                         | 归属提醒                                                 |
+| -------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------- |
+| 根目录                                       | workspace 编排、共享检查配置及社区入口文档       | 产品运行依赖归所属包；根 devDependencies 是共享工具      |
+| `apps/web/`                                  | 浏览器产品、Vite/SSG、公开资产与 Web 入口        | 可依赖 Kernel、stdlib 与 Classic 的公开 exports          |
+| `apps/agent-server/`                         | 独立 Node 认知服务、模型调用与 PostgreSQL 工作区 | 可依赖 stdlib/cognition 协议；不依赖 Web，不拥有世界身体 |
+| `packages/kernel/`                           | 单一执行、时钟、事务与状态生命周期 owner         | 不含游戏内容、行为树或平台实现                           |
+| `playbooks/classic/`                         | Classic 产品 Pack 与内容                         | 仅使用公共模块 API                                       |
+| `packages/eslint-plugin/`                    | 规则、共享配置与独立规则测试                     | 不进入游戏测试项目                                       |
+| `packages/stdlib/`                           | 跨端权威规则、协议、世界、物理与纯计算           | 不依赖 apps 或平台 ambient；能力通过窄实例端口注入       |
+| `packages/cognition-protocol/`               | Web 与 Agent 的版本化认知传输合同                | 纯数据协议，不引入数据库、模型或平台实现                 |
+| `packages/*/tests/`、`apps/*/tests/`         | 所属包的单元与合同测试                           | 根目录不放测试；ESLint 插件独立维护与执行                |
+| `apps/web/tests/integration/`                | 跨模块、宿主、架构与工程集成                     | 按合同注册到 Harness                                     |
+| `apps/web/tests/e2e/classic-runtime.spec.ts` | 唯一 Classic 生产线路                            | 功能与 runtime benchmark 共用                            |
+| `changes/<日期>-<名称>/`                     | Active 或未归档的变更合同、需求测试与证据        | 历史路径按交付时保留，不为追随当前目录而静默改写         |
+| `archives/changes/`                          | 明确 Delivered change 的可恢复 ZIP               | manifest 保存原路径和 SHA-256；恢复方式见归档索引        |
+| `docs/`                                      | 多次变更共用的目标、路线、代码导航和约定         | 不复制 README 的运行说明，不替代具体 spec                |
+| `scripts/`                                   | 工程任务、证据汇总和启动包装                     | 产品规则留在所属源码模块                                 |
+| `apps/web/public/assets/`                    | 通过静态 URL 加载的图片等公开资源                | 资产来源与许可见 [ASSETS](../ASSETS.md)                  |
+| `harness/baselines/<owner>/<scenario>/`      | 版本化基线                                       | 与忽略的 `harness/results/` 运行产物区分                 |
 
 `node_modules/`、`dist/`、`coverage/`、`midscene_run/`、`playwright-report/`、`test-results/` 和 `harness/results/` 是依赖或运行产物；不作为源码组织的一部分，不因目录整理而提交它们。密钥规则继续以 AGENTS 为准。
 
 ## 新增源码的归属顺序
 
 1. **先找已有功能所有者。** 在代码地图中定位同类行为及调用链。权威规则放服务端领域模块；客户端快照和碰撞镜像是派生数据，不另建一套真值。
-2. **再区分算法与平台适配。** 世界算法放 `packages/game-core/src/world`，共享物理解算放 core 的 `physics`，通用时钟和调度放 core 的 `runtime`。浏览器装配、输入、PlayCanvas、Svelte、客户端适配和浏览器 Worker 在 `apps/web/src`；Headless 开发宿主的 Node builtin/I/O 位于 `scripts/`，不进入 core/Web。Agent 的 Node 网络/数据库适配在 `apps/agent-server`，不复用退役产品目录。
+2. **再区分算法与平台适配。** 世界算法放 `packages/stdlib/src/world`，共享物理解算放 core 的 `physics`，通用时钟和调度放 core 的 `runtime`。浏览器装配、输入、PlayCanvas、Svelte、客户端适配和浏览器 Worker 在 `apps/web/src`；Headless 开发宿主的 Node builtin/I/O 位于 `scripts/`，不进入 core/Web。Agent 的 Node 网络/数据库适配在 `apps/agent-server`，不复用退役产品目录。
 3. **把同一职责的辅助文件放在一起。** 接口类型、策略和局部工具靠近实际所有者。不要因为文件短就平铺到上层，也不要为了满足行数规则拆成无语义的编号片段。
 4. **出现稳定文件簇时建立领域子目录。** 以生命周期、状态或功能为单位，能用一句话说明该目录负责什么。移动已有文件属于独立迁移工作；当前已有 app/client 的职责目录应优先复用。
-5. **确有跨端复用时进入 core。** 先指出 Web 与 Headless 的实际调用方及稳定契约，经 `@seedlands/game-core` 的声明 subpath export 使用；不要通过相对文件路径绕过包边界，也不预建包罗万象的 `shared`、`common` 或 `utils`。
+5. **确有跨端复用时进入 core。** 先指出 Web 与 Headless 的实际调用方及稳定契约，经 `@seedlands/stdlib` 的声明 subpath export 使用；不要通过相对文件路径绕过包边界，也不预建包罗万象的 `shared`、`common` 或 `utils`。
 
-纯 `world-compute-task.ts` 与完整 Authority 输入门禁位于 `packages/game-core/src/compute`；浏览器 Worker 启动、消息与 Wasm adapter 位于 `apps/web/src/worker` 和 `apps/web/src/compute`。
+世界任务装配 `world-compute-task.ts` 位于 `packages/stdlib/src/server/compute`，完整 Authority 输入门禁位于 `packages/stdlib/src/server/protocol`；浏览器 Worker 启动、消息与 Wasm adapter 位于 `apps/web/src/worker` 和 `apps/web/src/compute`。
 
 Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟；Node 专属 Dedicated Worker、文件存储、世界 WebSocket 与生命周期仅在[归档 tag](change-archive.md#node-dedicated-server-研究归档)保留。当前不存在 Node 隔离构建门禁。Node 工程运行时的存在不等于 Node 世界产品重新进入 workspace。
 
@@ -46,22 +51,22 @@ Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟�
 - 新文件和目录使用有语义的 kebab-case。文件名应指出对象或职责，例如 `authority-snapshot-gate.ts`，不要使用 `helper2.ts`。
 - 局部契约靠近使用模块；真正的跨端协议需要明确版本、所有者和消费者。不要把所有类型倒进一个顶层 `types.ts`。
 - 不为每层目录自动添加 `index.ts` 重导出。只有需要明确公共入口时才使用；现有 `physics/index.ts` 是入口示例，目录分组本身不要求增加公共 API。
-- 新单元测试按实现所有者归入 `tests/<领域>/`。测试位置变化应跟随正式迁移，现存跨目录测试不因规范发布被判为错误。
-- `tests/e2e/` 只承载已准入的长期基线；单次需求的 Playwright / Midscene 留在所属 `changes/<change-id>/e2e/` 与 `midscene/`。本规范不改变准入评审和证据要求。
+- 新单元测试归入实现所属 workspace 的 `tests/`，各包维护自己的 Vitest 配置和 test 脚本；ESLint 规则与其测试归 `packages/eslint-plugin`，不进入根 Vitest 项目集合。
+- 跨模块与完整产品回归归 `apps/web/tests/integration/`、`apps/web/tests/e2e/`。唯一活跃 Playwright spec 是 `classic-runtime.spec.ts`；需求变更扩充同一线路的阶段断言，历史 change 仅保留合同、断言去向和证据，不成为运行依赖。
 - `apps/web/src/app/ui/styles/start-screen.css` 是启动页与运行期共享的首屏样式单一来源，由 Web `index.html` 在 module script 前直接加载；不要在运行期 CSS 中再维护一套启动页几何。
 - `apps/web/src/app/ui/generated/prerendered-start-screen.html` 是 `AppRoot` 的确定性 SSR 生成物，不手工编辑；修改首屏组件后运行 `pnpm ssg:update`，`pnpm ssg:check` 会拒绝陈旧生成物。
 
 ## 哪些已有自动检查
 
-| 规则                                      | 当前执行来源                                                                                                                                                         | 覆盖边界                                                                                 |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| 命名                                      | [.ls-lint.yml](../.ls-lint.yml)                                                                                                                                      | 检查配置中列出的源码、测试、脚本和 change 模式；不等于所有文件后缀和目录职责均已覆盖     |
-| 格式                                      | [.prettierrc.json](../.prettierrc.json)                                                                                                                              | 统一格式；没有模块归属判断                                                               |
-| 单文件规模                                | [ESLint](../eslint.config.mjs)、[测试](../tests/governance/module-size-eslint.test.ts)                                                                               | 受配置覆盖的代码最多 500 个有效行，忽略空行与注释；不能用原始行数或 CSS 行数直接判断违规 |
-| 世界纯逻辑、服务端及 runtime/physics 边界 | [ESLint](../eslint.config.mjs)、[世界边界测试](../tests/governance/world-purity-eslint.test.ts)、[运行时边界测试](../tests/governance/runtime-purity-eslint.test.ts) | 已配置的导入模式与全局对象限制；并非任意间接依赖的完整证明                               |
-| 权威所有权与 UI 表现边界                  | [所有权测试](../tests/governance/authority-ownership-eslint.test.ts)、[UI 测试](../tests/governance/ui-presentation-boundary-eslint.test.ts)                         | 浏览器权威实例和 UI 写入的已定义约束                                                     |
-| app/client 文件归属                       | [ESLint](../eslint.config.mjs)、[归属测试](../tests/governance/client-app-boundary-eslint.test.ts)                                                                   | client 不导入 app；app/client 顶层只允许显式组合入口，其他文件必须进入职责目录           |
-| workspace 包边界                          | [ESLint](../eslint.config.mjs)、[包边界测试](../tests/governance/monorepo-package-boundaries.test.ts)                                                                | 拒绝跨包相对路径、反向/互相依赖、未声明依赖和未导出的 core subpath                       |
+| 规则                                      | 当前执行来源                                                                                                                                                                                 | 覆盖边界                                                                                 |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 命名                                      | [.ls-lint.yml](../.ls-lint.yml)                                                                                                                                                              | 检查配置中列出的源码、测试、脚本和 change 模式；不等于所有文件后缀和目录职责均已覆盖     |
+| 格式                                      | [.prettierrc.json](../.prettierrc.json)                                                                                                                                                      | 统一格式；没有模块归属判断                                                               |
+| 单文件规模                                | [ESLint](../eslint.config.mjs)、[测试](../packages/eslint-plugin/tests/module-size-eslint.test.ts)                                                                                           | 受配置覆盖的代码最多 500 个有效行，忽略空行与注释；不能用原始行数或 CSS 行数直接判断违规 |
+| 世界纯逻辑、服务端及 runtime/physics 边界 | [ESLint](../eslint.config.mjs)、[世界边界测试](../packages/eslint-plugin/tests/world-purity-eslint.test.ts)、[运行时边界测试](../packages/eslint-plugin/tests/runtime-purity-eslint.test.ts) | 已配置的导入模式与全局对象限制；并非任意间接依赖的完整证明                               |
+| 权威所有权与 UI 表现边界                  | [所有权测试](../packages/eslint-plugin/tests/authority-ownership-eslint.test.ts)、[UI 测试](../packages/eslint-plugin/tests/ui-presentation-boundary-eslint.test.ts)                         | 浏览器权威实例和 UI 写入的已定义约束                                                     |
+| app/client 文件归属                       | [ESLint](../eslint.config.mjs)、[归属测试](../packages/eslint-plugin/tests/client-app-boundary-eslint.test.ts)                                                                               | client 不导入 app；app/client 顶层只允许显式组合入口，其他文件必须进入职责目录           |
+| workspace 包边界                          | [ESLint](../eslint.config.mjs)、[包边界测试](../packages/eslint-plugin/tests/monorepo-package-boundaries.test.ts)                                                                            | 拒绝跨包相对路径、反向/互相依赖、未声明依赖和未导出的 core subpath                       |
 
 目录粒度仍是评审取舍，不等于完整依赖 DAG。后续强化边界必须先补规则的正反例测试并遵守 SDD，不能把文档目标写成已经验证的能力。
 
@@ -87,10 +92,14 @@ Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟�
 
 ## 可组合玩法新增职责
 
-`packages/game-core/src/server/composition/` 负责每世界装配、描述符校验、注册与宿主授权接线。作者公开入口为 `@seedlands/game-core/mod-api`；宿主工厂与内部实现不是模组 API。标准机制的内部实现归 `server/gameplay/modules/`，第一方 Pack/Playbook 按包归 `server/gameplay/playbooks/<pack>/`；本期只在存在消费者时创建目录。
+`packages/stdlib/src/server/composition/` 负责每世界装配、描述符校验、注册与宿主授权接线。作者公开入口为 `@seedlands/stdlib/mod-api`；宿主工厂与内部实现不是模组 API。标准机制的内部实现归 `server/gameplay/modules/`，第一方 Pack/Playbook 按包归 `playbooks/<pack>/`；本期只在存在消费者时创建目录。
 
 Playbook 代码只能从显式 `mod-api` 或自己的包目录导入。`seedlands/pack-api-boundary` 对静态 import/re-export、动态 import、require 与 import type 做正反例检查；无法静态定位的导入拒绝。这里约束的是仓库内受检源码，不是恶意 JavaScript 沙箱，也不自动给任意外部源码加隔离。跨 Pack 能力通过注册合同消费，不导入另一 Pack 的私有文件。
 
 发布 Pack 的字节/路径/摘要校验属于 `scripts/pack-integrity.mjs` 工程适配；core 只校验已接收描述的业务合同，不加入 Node 文件系统或摘要计算依赖。ECS 准入实验与未批准的适配方案保留在当前 change，不因实验通过就增加生产依赖。
 
-实体 ECS 适配留在 `packages/game-core/src/server/gameplay/`：`ecs-entity-owner.ts` 拥有 per-world bitECS 实例；`ecs-actor-components.ts` / `ecs-actor-state.ts` 拥有 actor 组件和受身份绑定的访问门面。`EntityStore` 负责兼容 API 与派生空间索引，不能保留第二份权威实体数据。Action 身份合同归 `server/simulation/action-identity.ts`，战斗快照编解码归 `server/gameplay/combat-runtime-snapshot.ts`。
+实体 ECS 适配留在 `packages/stdlib/src/server/gameplay/`：`ecs-entity-owner.ts` 拥有 per-world bitECS 实例；`ecs-actor-components.ts` / `ecs-actor-state.ts` 拥有 actor 组件和受身份绑定的访问门面。`EntityStore` 负责兼容 API 与派生空间索引，不能保留第二份权威实体数据。Action 身份合同归 `server/simulation/action-identity.ts`，战斗快照编解码归 `server/gameplay/combat-runtime-snapshot.ts`。
+
+## Kernel 与玩法包
+
+`packages/kernel` 持有通用实例运行、状态和注册保证；`packages/stdlib` 提供可复用机制；`playbooks/classic` 显式装配当前内容与规则。Classic 的存档身份继续使用 `seedlands:overworld`，包目录改名不改写已持久化标识。Modern/Isekai 尚无实现，不创建空 workspace 包。测试/构建选择与产物身份见[Harness 合同](harness-contracts.md)。

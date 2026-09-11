@@ -2,7 +2,7 @@ import type {
   AuthorityGameplayView,
   AuthorityStationAction,
   AuthorityStationView,
-} from '@seedlands/game-core/compute/authority-worker-protocol';
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 export type StationUiCommand =
   | Readonly<{ kind: 'craft'; recipeId: string }>

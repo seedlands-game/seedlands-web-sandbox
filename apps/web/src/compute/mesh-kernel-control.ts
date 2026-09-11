@@ -1,6 +1,6 @@
 import { emitMeshDescriptors, MESH_KERNEL_WINDOW_SIZE, meshKernelWindowIndex } from './mesh-kernel';
-import type { MeshData } from '@seedlands/game-core/world/mesh';
-import { Voxel, faceMaterialFor } from '@seedlands/game-core/world/voxel';
+import type { MeshData } from '@seedlands/stdlib/world/mesh';
+import { Voxel, faceMaterialFor } from '@seedlands/stdlib/world/voxel';
 
 const CHUNK_SIZE = 32;
 const RECORD_BYTES = 16;

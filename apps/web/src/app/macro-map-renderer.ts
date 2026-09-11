@@ -1,4 +1,4 @@
-import { macroAt, type MacroBiome } from '@seedlands/game-core/world/macro-world';
+import { macroAt, type MacroBiome } from '@seedlands/stdlib/world/macro-world';
 import type { MapLayer } from './ui/ui-contracts';
 
 type RenderOptions = {

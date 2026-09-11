@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-const directory = resolve(import.meta.dirname, '../changes/2026-09-07-data-plane-adoption/evidence');
+const directory = resolve(import.meta.dirname, '../harness/results/adoption');
 const average = (values) => values.reduce((s, v) => s + v, 0) / values.length;
 const percentile = (values, q) => {
   const a = [...values].sort((x, y) => x - y);

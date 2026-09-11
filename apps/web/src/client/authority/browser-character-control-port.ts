@@ -1,12 +1,12 @@
-import type { BoundCharacterControlRequest } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { BoundCharacterControlRequest } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type {
   CharacterControlResult,
   CharacterGoal,
   ControlBinding,
-} from '@seedlands/game-core/runtime/character-control-protocol';
-import type { WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
+import type { WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
 import type { BoundCharacterControlPort } from './browser-authority-client-contract';
-import type { BehaviorUpdateRequest } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import type { BehaviorUpdateRequest } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 
 type CharacterAuthorityRequest =
   | Readonly<{

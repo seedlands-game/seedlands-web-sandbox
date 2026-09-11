@@ -1,12 +1,14 @@
-import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import type { FrozenSaveTaskSnapshot } from './persistence-frozen-save';
 import type { PersistenceLoadCoordinate } from './persistence-load-batch';
+import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 
 export type PersistenceWorkerConfig = {
   databaseName: string;
   worldId: string;
   seedText: string;
   generatorVersion: number;
+  provider: KernelWorldgenProviderIdentity;
 };
 export type PersistenceInitTask = {
   kind: 'init';
@@ -77,6 +79,7 @@ export type PersistenceWorldRecord = {
   worldId: string;
   seedText: string;
   generatorVersion: number;
+  provider: KernelWorldgenProviderIdentity;
   player: [number, number, number] | null;
   gameplaySnapshot?: unknown;
   corpusSummary?: PersistenceCorpusSummary;

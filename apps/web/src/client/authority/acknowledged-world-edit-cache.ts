@@ -1,6 +1,6 @@
-import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
-import type { VoxelEdit } from '@seedlands/game-core/server/world-mutation';
-import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/game-core/world/voxel';
+import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
+import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
+import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/stdlib/world/voxel';
 
 export type MutableAcknowledgedChunk = {
   canonical: Uint16Array;

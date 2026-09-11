@@ -1,4 +1,4 @@
-import { Voxel } from '@seedlands/game-core/world/voxel';
+import { Voxel } from '@seedlands/stdlib/world/voxel';
 import type { SfxKey, SurfaceSound } from './audio-types';
 
 export type GameplayPresentationEvent =

@@ -1,7 +1,8 @@
 import { createMeshTaskSnapshot } from '../../client/compute/mesh-task-snapshot';
-import type { AuthorityMeshPayload } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { AuthorityMeshPayload } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { PendingMeshTask } from '../app-contracts';
 import type { MeshRequestPriority } from './mesh-request-priority';
+import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 
 export type MeshDispatchRequest = Readonly<{
   traceId: string;
@@ -36,6 +37,7 @@ type WorkerPreparationDiagnostics = AuthorityMeshPayload['preparationDiagnostics
 export type WorkerInput = Readonly<{
   chunkRevision: number;
   generatorVersion: number;
+  provider?: KernelWorldgenProviderIdentity;
   canonical?: Uint16Array;
   fluid?: Uint8Array;
   overlays: readonly WorkerOverlay[];
@@ -58,6 +60,7 @@ export function createMainSnapshotDispatch(
   request: MeshDispatchRequest,
   seed: number,
   generatorVersion: number,
+  provider: KernelWorldgenProviderIdentity,
   snapshot: MainSnapshot,
 ): MeshTaskDispatch {
   const snapshotTask = createMeshTaskSnapshot({
@@ -97,6 +100,8 @@ export function createMainSnapshotDispatch(
       cz: task.cz,
       chunkRevision: task.chunkRevision,
       haloRevision: task.haloRevision,
+      generatorVersion: task.generatorVersion,
+      provider,
       canonical: snapshotTask.canonical.buffer,
       halo: snapshotTask.halo.buffer,
       fluid: snapshotTask.fluid!.buffer,
@@ -117,6 +122,7 @@ export function createWorkerFirstDispatch(
   seed: number,
   prepared: WorkerInput,
 ): MeshTaskDispatch {
+  if (!prepared.provider) throw new Error('Worker mesh generation requires an explicit world-generation provider.');
   const task: PendingMeshTask = {
     taskId: sequence,
     epoch: request.epoch,
@@ -155,6 +161,7 @@ export function createWorkerFirstDispatch(
       chunkRevision: task.chunkRevision,
       haloRevision: task.haloRevision,
       generatorVersion: task.generatorVersion,
+      provider: prepared.provider,
       ...(prepared.canonical ? { canonical: prepared.canonical.buffer } : {}),
       ...(prepared.fluid ? { fluid: prepared.fluid.buffer } : {}),
       overlays: prepared.overlays.map((overlay) => ({

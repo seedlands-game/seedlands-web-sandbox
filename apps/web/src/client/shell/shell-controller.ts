@@ -1,5 +1,5 @@
 export type ShellQuality = 'low' | 'medium' | 'high';
-import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 export type ApplicationShellState = Readonly<{
   phase: 'menu' | 'loading' | 'playing' | 'paused' | 'saving';
   seed: string;

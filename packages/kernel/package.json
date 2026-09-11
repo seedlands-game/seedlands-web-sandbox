@@ -1,0 +1,26 @@
+{
+  "name": "@seedlands/kernel",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./execution": "./src/execution/index.ts",
+    "./mod-api": "./src/registry/mod-api.ts",
+    "./runtime": "./src/runtime/index.ts",
+    "./spatial": "./src/spatial/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "test": "pnpm --dir ../.. exec vitest run --config packages/kernel/vitest.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:watch": "pnpm --dir ../.. exec vitest --config packages/kernel/vitest.config.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

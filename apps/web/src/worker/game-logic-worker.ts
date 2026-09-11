@@ -1,11 +1,11 @@
 /// <reference lib="webworker" />
 
-import { decideLogicIntents } from '@seedlands/game-core/server/logic/logic-decision';
+import { decideLogicIntents } from '@seedlands/stdlib/server/logic/logic-decision';
 import {
   LOGIC_PROTOCOL_VERSION,
   type LogicWorkerRequest,
   type LogicWorkerResponse,
-} from '@seedlands/game-core/server/logic/logic-protocol';
+} from '@seedlands/stdlib/server/logic/logic-protocol';
 import {
   DIRECT_LOGIC_PROTOCOL_VERSION,
   type DirectLogicAttachRequest,

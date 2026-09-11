@@ -1,5 +1,5 @@
-import type { AuthorityStationView } from '@seedlands/game-core/compute/authority-worker-protocol';
-import type { StationRecipe } from '@seedlands/game-core/mod-api';
+import type { AuthorityStationView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { StationRecipe } from '@seedlands/stdlib/mod-api';
 import type { GameplayItemPresentation, GameplayUiSource } from './gameplay-ui-projector';
 
 export type StationUiPresentation = Readonly<{

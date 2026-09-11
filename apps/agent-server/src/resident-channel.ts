@@ -1,7 +1,7 @@
 import { HumanMessage } from '@langchain/core/messages';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import type { CharacterObservation, ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
-import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import type { CharacterObservation, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
+import type { BehaviorCapability } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 import type { ResidentBirthPackage, ResidentStatus, ResidentWorldBinding } from '@seedlands/cognition-protocol';
 import {
   createResidentAgent,

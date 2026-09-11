@@ -80,13 +80,13 @@
 
 ## E2E 生命周期
 
-`tests/e2e/` 只放长期核心基线；`changes/<change>/e2e/` 和 `midscene/` 保存当次需求证据。`pnpm test:e2e`、`pnpm harness:e2e` 与 `pnpm harness` 只执行基线；当前需求由显式 change 路径运行。
+根目录不放测试。各 workspace 的单元/合同测试由自身 Vitest 配置维护，ESLint 插件另有独立包与测试入口。跨模块、宿主、工程和架构集成归 `apps/web/tests/integration/`；唯一活跃浏览器线路是 `apps/web/tests/e2e/classic-runtime.spec.ts`。`pnpm harness:classic` 与 runtime benchmark 共用此线路和生产产物。`changes/<change>/` 保存合同、断言去向和当次证据，历史 E2E 源仅作追溯，不再按 change 路径启动。
 
-- **Active**：合同和需求用例由当前 change 维护、显式执行。
+- **Active**：当前 change 冻结合同，活跃断言进入对应 owner 的测试或唯一 Classic 线路，经影响计划执行。
 - **Delivered**：用例随 spec 保留为当次证据，不承诺随未来 API 变化维护。
 - **Archived**：spec 和用例一起冻结在 ZIP 中；复用时由新 change 重新定义预期。
 
-需求用例进入长期基线前，必须有实施者之外的高智能模型独立评审，覆盖长期价值、重复度、确定性、成本与维护负担；当前项目路由为 Sol/xhigh，并在 spec 记录请求的模型/effort 与结论。缺少或不通过时 fail closed，继续保留在 change。基线提炼后的目标、旅程或成本发生实质变化时原评审失效；基线提炼后要去重，并在 Delivery Snapshot 区分当前保护和历史证据。
+需求用例进入长期基线前，必须有实施者之外的高智能模型独立评审，覆盖长期价值、重复度、确定性、成本与维护负担；当前项目路由为 Sol/xhigh，并在 spec 记录请求的模型/effort 与结论。缺少或不通过时 fail closed，记录仍缺验收；不把历史用例自动纳入默认入口，也不以删除用例冒充完成。基线提炼后的目标、旅程或成本发生实质变化时原评审失效；基线提炼后要去重，并在 Delivery Snapshot 区分当前保护和历史证据。
 
 ## 证据边界
 
@@ -98,8 +98,8 @@ Vitest 证明纯逻辑、数据、算法和确定性不变量；Playwright 证�
 
 性能证据由 `seedlands-performance-validator`（默认 `Terra/high`）按[性能执行窗口](performance-execution.md)协调。采样命令必须持有机器级阻塞窗口；普通功能测试、等待时的负载、并发采样和未关联的历史结果都不构成当前性能证据。
 
-`?harness=1` 只能通过生产 `World.edit()`、Store 或 streaming 路径构造确定状态，不替代真实 Pointer Lock 输入。`packages/game-core/src/world/**` 的 V8 行覆盖率不低于 80%；静态、构建、浏览器、Harness 和手工游玩要在 spec 中分别陈述真实结果。
+`?harness=1` 只能通过生产 `World.edit()`、Store 或 streaming 路径构造确定状态，不替代真实 Pointer Lock 输入。`packages/stdlib/src/world/**` 的 V8 行覆盖率不低于 80%；静态、构建、浏览器、Harness 和手工游玩要在 spec 中分别陈述真实结果。
 
 ## 交付
 
-确认在明确功能分支后，只暂存本 change 的文件，使用语义化本地 commit；按已授权的 PR 交接推送、创建或更新 PR，并持续跟进本 change 相关 CI 与合并冲突。最新 HEAD 的必要 CI 通过、无合并冲突且 PR 为 `ready for review` 时可交棒；人类审核仍待完成，单个 `MERGEABLE` 字段不代表所有门禁通过。CI 失败只修复本 change 相关原因后复验；状态无变化时不重复通知。历史 evidence 不因目录/API 演进而静默改写。具体源码职责与可执行 ESLint 规则见[目录规范](repository-structure.md)。
+确认在明确功能分支后，只暂存本 change 的文件，使用语义化本地 commit；按已授权的 PR 交接推送、创建或更新 PR，读回远端 SHA、source/target、URL 与当前 gate 快照后即交棒。人类审核仍待完成，尚未结束的 CI 如实记录；单个 `MERGEABLE` 字段不代表所有门禁通过。后续 CI、合并冲突和 readiness 由用户单独发起，不在原实现任务中常驻等待或自动修复。历史 evidence 不因目录/API 演进而静默改写。具体源码职责与可执行 ESLint 规则见[目录规范](repository-structure.md)。

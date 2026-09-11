@@ -1,10 +1,10 @@
 // prettier-ignore
-import type { CommandResult, CommandSource, ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
-import type { FluidCandidate } from '@seedlands/game-core/server/fluid/fluid-transaction';
-import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
-import type { VoxelEdit } from '@seedlands/game-core/server/world-mutation';
-import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
+import type { CommandResult, CommandSource, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
+import type { FluidCandidate } from '@seedlands/stdlib/server/fluid/fluid-transaction';
+import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
+import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
+import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
 import type {
   AuthorityAction,
   AuthorityActionResult,
@@ -14,18 +14,18 @@ import type {
   AuthorityRequest,
   AuthorityResponse,
   AuthoritySessionControlResult,
-} from '@seedlands/game-core/compute/authority-worker-protocol';
-import type { LogicIntentBatch } from '@seedlands/game-core/server/logic/logic-protocol';
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { LogicIntentBatch } from '@seedlands/stdlib/server/logic/logic-protocol';
 import type {
   WorldHarnessPort,
   WorldHarnessResult,
   WorldPrepareRequest,
-} from '@seedlands/game-core/server/harness/world-harness-contract';
+} from '@seedlands/stdlib/server/harness/world-harness-contract';
 import type {
   CharacterControlRequest,
   CharacterControlResult,
   ControlBinding,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
@@ -174,6 +174,12 @@ export class BrowserAuthorityClient {
     return this.requireReady().generatorVersion;
   }
 
+  get worldgenProvider(): NonNullable<AuthorityReady['worldgenProvider']> {
+    const provider = this.requireReady().worldgenProvider;
+    if (!provider) throw new Error('Authority omitted its world-generation provider.');
+    return provider;
+  }
+
   get worldTime(): number {
     return this.snapshotValue?.worldTime ?? this.requireReady().worldTime;
   }
@@ -236,7 +242,11 @@ export class BrowserAuthorityClient {
 
   async acceptWorkerCanonical(
     task: VisibilityTask,
-    result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>,
+    result: Readonly<{
+      canonical?: ArrayBuffer;
+      generatorVersion?: number;
+      provider?: import('@seedlands/kernel/spatial').KernelWorldgenProviderIdentity;
+    }>,
   ): Promise<boolean> {
     return this.chunks.acceptCanonical(task, result);
   }

@@ -14,8 +14,8 @@ List only checks actually run and their result.
 - [ ] Focused unit tests
 - [ ] `pnpm verify:static`
 - [ ] `pnpm build`
-- [ ] `pnpm test:e2e:regression` when browser behavior is affected
-- [ ] Change-scoped Playwright or Midscene evidence when required
+- [ ] `pnpm harness:classic` against the stamped production artifact when browser behavior is affected
+- [ ] Owner-scoped contracts and explicit browser coverage gaps recorded in the change
 
 ## Risk and licensing
 

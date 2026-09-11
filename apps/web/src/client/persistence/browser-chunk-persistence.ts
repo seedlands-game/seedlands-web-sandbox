@@ -2,14 +2,14 @@ import type {
   ChunkPersistence,
   ChunkPersistenceLoadDiagnostics,
   ChunkSnapshot,
-} from '@seedlands/game-core/server/persistence/chunk-persistence';
-import type { GameplaySnapshot } from '@seedlands/game-core/server/gameplay/gameplay-runtime';
-import type { FrozenGameSaveSnapshot } from '@seedlands/game-core/server/persistence/game-save-snapshot';
+} from '@seedlands/stdlib/server/persistence/chunk-persistence';
+import type { GameplaySnapshot } from '@seedlands/stdlib/server/gameplay/gameplay-runtime';
+import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
 import {
   readGameSaveCheckpoint,
   type GameSaveCheckpoint,
-} from '@seedlands/game-core/server/persistence/game-save-checkpoint';
-import { GENERATOR_VERSION, Voxel, chunkKey, MAX_VOXEL_ID } from '@seedlands/game-core/world/voxel';
+} from '@seedlands/stdlib/server/persistence/game-save-checkpoint';
+import { GENERATOR_VERSION, Voxel, chunkKey, MAX_VOXEL_ID } from '@seedlands/stdlib/world/voxel';
 import { prepareBrowserLoadResult, type PreparedBrowserLoadResult } from './browser-persistence-load';
 import {
   parseBrowserPersistenceLoadBatchResult,
@@ -20,19 +20,24 @@ import {
   type BrowserPersistenceLoadToken,
   type BrowserPersistenceNeighborhoodLease,
 } from './browser-persistence-load-registry';
-import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import type { SerializedChunkSnapshot } from './browser-world-save';
 import {
   prepareBrowserPersistenceNeighborhood,
   type BrowserPersistenceLoadCoordinate,
 } from './browser-persistence-neighborhood';
-import type { BrowserPersistenceMetrics, ChunkPersistenceCorpusSummary } from './browser-persistence-metrics';
+import {
+  createBrowserPersistenceMetrics,
+  type BrowserPersistenceMetrics,
+  type ChunkPersistenceCorpusSummary,
+} from './browser-persistence-metrics';
 import type {
   BrowserPersistenceInitResult as InitResult,
   BrowserPersistenceSaveResult as SaveResult,
   BrowserPersistenceWorkerResponse as WorkerResponse,
 } from './browser-persistence-worker-contract';
 import { prepareFrozenSnapshotWrite, recordFrozenSnapshotWrite } from './browser-frozen-snapshot-write';
+import { assertWorldgenProviderIdentity, type KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 
 export { decodeBrowserWorldSave } from './browser-world-save';
 export type { BrowserWorldSave, SerializedChunkSnapshot } from './browser-world-save';
@@ -48,6 +53,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   seedText: string;
   worldId: string;
   generatorVersion = GENERATOR_VERSION;
+  worldgenProvider: KernelWorldgenProviderIdentity | null;
   private readonly snapshots = new Map<string, ChunkSnapshot>();
   private readonly missing = new Set<string>();
   private readonly cacheTokens = new Map<string, BrowserPersistenceLoadToken>();
@@ -60,22 +66,17 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   private requestSequence = 0;
   private disposed = false;
   private corpusSummaryValue: ChunkPersistenceCorpusSummary | null = null;
-  private metricsValue: BrowserPersistenceMetrics = {
-    idbGetCount: 0,
-    loadTransactionCount: 0,
-    idbPutCount: 0,
-    encodedChunkCount: 0,
-    decodedChunkCount: 0,
-    recordBytes: 0,
-    encodeMs: 0,
-    decodeSamplesMs: [],
-    codecs: {},
-  };
+  private metricsValue: BrowserPersistenceMetrics = createBrowserPersistenceMetrics();
 
-  private constructor(seedText: string, player: [number, number, number] | null) {
+  private constructor(
+    seedText: string,
+    player: [number, number, number] | null,
+    provider: KernelWorldgenProviderIdentity | null,
+  ) {
     this.seedText = seedText;
     this.worldId = `seedlands:g${GENERATOR_VERSION}:${seedText}`;
     this.playerValue = player;
+    this.worldgenProvider = provider;
     this.worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
       const response = event.data;
       const pending = this.pending.get(response.requestId);
@@ -97,18 +98,28 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       databaseName?: string;
       legacySnapshots?: readonly SerializedChunkSnapshot[];
       openMode?: WorldOpenMode;
-    } = {},
+      provider: KernelWorldgenProviderIdentity;
+    },
   ): Promise<BrowserChunkPersistence> {
-    const persistence = new BrowserChunkPersistence(seedText, null);
-    const initialized = (await persistence.request({
-      kind: 'init',
-      databaseName: options.databaseName ?? 'seedlands-chunks-v1',
-      worldId: persistence.worldId,
-      seedText,
-      openMode: options.openMode ?? 'continue',
-    })) as InitResult;
+    const persistence = new BrowserChunkPersistence(seedText, null, options.provider);
+    let initialized: InitResult;
+    try {
+      initialized = (await persistence.request({
+        kind: 'init',
+        databaseName: options.databaseName ?? 'seedlands-chunks-v1',
+        worldId: persistence.worldId,
+        seedText,
+        openMode: options.openMode ?? 'continue',
+        provider: options.provider,
+      })) as InitResult;
+      assertWorldgenProviderIdentity(options.provider, initialized.provider, initialized.generatorVersion);
+    } catch (error) {
+      persistence.dispose();
+      throw error;
+    }
     persistence.worldId = initialized.worldId;
     persistence.generatorVersion = initialized.generatorVersion;
+    persistence.worldgenProvider = initialized.provider;
     persistence.playerValue = initialized.player;
     persistence.gameplaySnapshotValue = initialized.gameplaySnapshot;
     persistence.checkpointValue = readGameSaveCheckpoint(initialized.checkpoint);
@@ -148,7 +159,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   static async latestWorld(databaseName = 'seedlands-chunks-v1'): Promise<{ seedText: string } | null> {
-    const persistence = new BrowserChunkPersistence('', null);
+    const persistence = new BrowserChunkPersistence('', null, null);
     try {
       return (await persistence.request({ kind: 'latest-world', databaseName })) as { seedText: string } | null;
     } finally {
@@ -501,17 +512,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   }
 
   resetMetrics(): void {
-    this.metricsValue = {
-      idbGetCount: 0,
-      loadTransactionCount: 0,
-      idbPutCount: 0,
-      encodedChunkCount: 0,
-      decodedChunkCount: 0,
-      recordBytes: 0,
-      encodeMs: 0,
-      decodeSamplesMs: [],
-      codecs: {},
-    };
+    this.metricsValue = createBrowserPersistenceMetrics();
   }
 
   dispose(): void {

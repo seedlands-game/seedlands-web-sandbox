@@ -4,13 +4,13 @@ import {
   type ResidentBirthPackage,
   type ResidentWorldBinding,
 } from '@seedlands/cognition-protocol';
-import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
-import { isBehaviorCapabilityCatalog } from '@seedlands/game-core/runtime/behavior-capability-descriptor';
+import type { BehaviorCapability } from '@seedlands/stdlib/runtime/behavior-control-protocol';
+import { isBehaviorCapabilityCatalog } from '@seedlands/stdlib/runtime/behavior-capability-descriptor';
 import {
   CHARACTER_OBSERVATION_MAX_EVENTS,
   type CharacterObservation,
   type ControlBinding,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { PortableWorkspace } from '../workspace/index.js';
 import { isResidentBirthPackage } from '../resident-birth-codec.js';
 import { parseResidentRuntime } from '../resident-runtime-codec.js';

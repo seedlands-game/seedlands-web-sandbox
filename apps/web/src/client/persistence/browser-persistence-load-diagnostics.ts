@@ -1,4 +1,4 @@
-import type { ChunkPersistenceLoadDiagnostics } from '@seedlands/game-core/server/persistence/chunk-persistence';
+import type { ChunkPersistenceLoadDiagnostics } from '@seedlands/stdlib/server/persistence/chunk-persistence';
 
 export type BrowserPersistenceLoadBatchResult = Readonly<{
   entries: readonly unknown[];

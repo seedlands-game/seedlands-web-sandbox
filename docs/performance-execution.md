@@ -26,6 +26,8 @@ node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- <command> [args...
 - 信号清理是本机尽力边界；`SIGKILL`、系统崩溃或权限异常仍可能留下锁。未知遗留锁不自动回收，应由人核对 owner 和进程后处理。
 - `SEEDLANDS_RESERVATION_EVIDENCE` 继续写入 owner、等待时间、退出状态和机器采样，不能把它当成应用指标本身。
 
+窗口成功持锁后才向子进程设置 `SEEDLANDS_PERFORMANCE_WINDOW_RESERVED=1`。局部测量入口在缺少该标记时拒绝执行，Classic 未预约的采样只记诊断，不能生成可接受的基线候选。
+
 窗口只保证这些命令不在同一锁下并发，不能消除操作系统和其他进程噪声。普通功能测试、历史浏览器结果或一次“机器看起来空闲”不能冒充有效性能证据；spec 仍需分别记录 benchmark、静态、构建和功能结果。
 
 窗口也不决定候选是否值得采用。优化与技术选型必须先按[开发治理](development-governance.md#优化与技术选型实验)固定独立分项、A/A 噪声、A/B identity、主指标、否决项和组合端到端门禁；预约记录只证明资源串行，不能替代这些实验合同或用户可感知收益。

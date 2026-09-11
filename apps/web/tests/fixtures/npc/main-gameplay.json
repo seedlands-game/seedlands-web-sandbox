@@ -1,0 +1,281 @@
+{
+  "sourceSha": "6c7124a6f41e9069b07b7dd39593cd2ea2de5907",
+  "compositionFixture": "main-composition.json",
+  "gameplay": {
+    "version": 4,
+    "revision": 8,
+    "gameplayTime": 2.5,
+    "worldTime": 12,
+    "entityStore": {
+      "version": 2,
+      "sequence": 0,
+      "lifetimeHighWater": 2,
+      "issuedIds": ["main-player", "main-settler"],
+      "entities": [
+        {
+          "id": "main-player",
+          "type": "player",
+          "kind": "player",
+          "lifecycle": "active",
+          "position": [0, 2, 0],
+          "health": 20,
+          "maxHealth": 20
+        },
+        {
+          "id": "main-settler",
+          "type": "npc",
+          "kind": "npc",
+          "lifecycle": "active",
+          "position": [2, 2, 0],
+          "physicsVelocity": [0, 0, 0],
+          "health": 20,
+          "maxHealth": 20,
+          "archetype": "settler",
+          "persistent": true
+        }
+      ],
+      "identities": [
+        {
+          "entityId": "main-player",
+          "lifetime": 1
+        },
+        {
+          "entityId": "main-settler",
+          "lifetime": 2
+        }
+      ],
+      "actors": [
+        {
+          "entityId": "main-player",
+          "needs": {
+            "hunger": 20,
+            "maxHunger": 20,
+            "hungerMeaning": "satiety",
+            "hungerAccumulator": 2.5,
+            "healingAccumulator": 0,
+            "starvationAccumulator": 0
+          },
+          "inventory": [
+            {
+              "itemId": "berry",
+              "count": 3
+            },
+            {
+              "itemId": "wood-axe",
+              "count": 1,
+              "instance": {
+                "durability": 41
+              }
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "inventoryRevision": 2,
+          "inventoryCursor": {
+            "version": 1,
+            "revision": 0,
+            "stack": null,
+            "origin": null
+          },
+          "equipment": {
+            "selectedSlot": 0,
+            "hotbarSize": 8
+          },
+          "lifecycle": "alive",
+          "controlSource": "player",
+          "mode": {
+            "version": 1,
+            "value": "survival",
+            "revision": 0
+          },
+          "creativeCatalog": {
+            "version": 1,
+            "hotbar": [null, null, null, null, null, null, null, null],
+            "selectedSlot": 0,
+            "revision": 0
+          },
+          "flight": {
+            "version": 1,
+            "enabled": false,
+            "revision": 0
+          },
+          "player": {
+            "spawnPosition": [0, 2, 0],
+            "breakAction": null
+          }
+        },
+        {
+          "entityId": "main-settler",
+          "needs": {
+            "hunger": 0,
+            "maxHunger": 100,
+            "hungerMeaning": "deficit",
+            "hungerAccumulator": 2.5,
+            "healingAccumulator": 0,
+            "starvationAccumulator": 0
+          },
+          "inventory": [
+            {
+              "itemId": "plank",
+              "count": 9
+            },
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          "inventoryRevision": 1,
+          "inventoryCursor": {
+            "version": 1,
+            "revision": 0,
+            "stack": null,
+            "origin": null
+          },
+          "equipment": {
+            "selectedSlot": 0,
+            "hotbarSize": 8
+          },
+          "lifecycle": "alive",
+          "controlSource": "autonomous",
+          "mode": {
+            "version": 1,
+            "value": "survival",
+            "revision": 0
+          },
+          "creativeCatalog": {
+            "version": 1,
+            "hotbar": [null, null, null, null, null, null, null, null],
+            "selectedSlot": 0,
+            "revision": 0
+          },
+          "flight": {
+            "version": 1,
+            "enabled": false,
+            "revision": 0
+          }
+        }
+      ],
+      "stations": []
+    },
+    "simulation": {
+      "version": 1,
+      "time": 2.5,
+      "stepAccumulator": 0,
+      "needsAccumulator": 0,
+      "perceptionAccumulator": 0,
+      "behaviorAccumulator": 0,
+      "starterEcologyVersion": 0,
+      "actors": [
+        {
+          "entityId": "main-settler",
+          "archetype": "settler",
+          "hunger": 0,
+          "behavior": "idle",
+          "targetEntityId": null,
+          "homePoiId": null,
+          "workPoiId": null,
+          "foodPoiId": null,
+          "active": true,
+          "wanderIndex": 0,
+          "attackCooldownSeconds": 0
+        }
+      ],
+      "pois": {
+        "version": 1,
+        "sequence": 0,
+        "pois": []
+      },
+      "actions": {
+        "version": 2,
+        "sequence": 0,
+        "actions": []
+      },
+      "combat": {
+        "version": 3,
+        "actionSequence": 0,
+        "resultSequence": 0,
+        "combatants": []
+      }
+    },
+    "coordinateSchema": {
+      "version": 1,
+      "units": "voxel",
+      "entityOrigin": "body-feet-center"
+    },
+    "physicsSchema": {
+      "version": 1,
+      "bodyRegistryVersion": 1
+    },
+    "ruleset": {
+      "version": 1,
+      "definitionId": "seedlands:overworld-rules",
+      "definitionVersion": "1.0.0",
+      "revision": 0
+    },
+    "moduleSchedule": {
+      "version": 1,
+      "time": 2.5,
+      "systems": [
+        {
+          "id": "seedlands:block-system",
+          "remainder": 0
+        },
+        {
+          "id": "seedlands:combat-system",
+          "remainder": 0
+        },
+        {
+          "id": "seedlands:forage-system",
+          "remainder": 2.5
+        },
+        {
+          "id": "seedlands:furnace-system",
+          "remainder": 0
+        },
+        {
+          "id": "seedlands:needs-system",
+          "remainder": 0
+        }
+      ]
+    }
+  }
+}

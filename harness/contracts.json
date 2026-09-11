@@ -1,0 +1,342 @@
+{
+  "schemaVersion": 1,
+  "owners": [
+    {
+      "id": "kernel",
+      "paths": ["packages/kernel/**"],
+      "contracts": [
+        {
+          "id": "kernel",
+          "kind": "contract",
+          "files": ["packages/kernel/tests/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [],
+      "classic": true
+    },
+    {
+      "id": "stdlib-runtime",
+      "paths": ["packages/stdlib/src/runtime/**", "packages/stdlib/tests/runtime/**"],
+      "contracts": [
+        {
+          "id": "stdlib-runtime",
+          "kind": "contract",
+          "files": ["packages/stdlib/tests/runtime/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "kernel",
+          "kind": "required"
+        }
+      ],
+      "classic": true
+    },
+    {
+      "id": "stdlib-world",
+      "paths": ["packages/stdlib/src/world/**", "packages/stdlib/tests/world/**", "packages/stdlib/tests/*.test.ts"],
+      "contracts": [
+        {
+          "id": "stdlib-world",
+          "kind": "contract",
+          "files": ["packages/stdlib/tests/world/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "kernel",
+          "kind": "required"
+        }
+      ],
+      "classic": true,
+      "localBenchmarks": ["mesh", "chunk-codec"]
+    },
+    {
+      "id": "stdlib-physics",
+      "paths": ["packages/stdlib/src/physics/**", "packages/stdlib/tests/physics/**"],
+      "contracts": [
+        {
+          "id": "stdlib-physics",
+          "kind": "contract",
+          "files": ["packages/stdlib/tests/physics/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "kernel",
+          "kind": "required"
+        }
+      ],
+      "classic": true
+    },
+    {
+      "id": "stdlib-compute",
+      "paths": ["packages/stdlib/src/compute/**", "packages/stdlib/tests/compute/**"],
+      "contracts": [
+        {
+          "id": "stdlib-compute",
+          "kind": "integration",
+          "files": ["apps/web/tests/integration/runtime/compute/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "kernel",
+          "kind": "required"
+        }
+      ],
+      "classic": true
+    },
+    {
+      "id": "stdlib-server",
+      "paths": [
+        "packages/stdlib/src/server/**",
+        "packages/stdlib/tests/server/**",
+        "packages/stdlib/package.json",
+        "packages/stdlib/*.json",
+        "packages/stdlib/*.ts",
+        "packages/stdlib/src/index.ts",
+        "packages/stdlib/tests/support/**",
+        "packages/stdlib/benchmarks/**"
+      ],
+      "contracts": [
+        {
+          "id": "stdlib-server",
+          "kind": "contract",
+          "files": ["packages/stdlib/tests/server/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "kernel",
+          "kind": "required"
+        }
+      ],
+      "classic": true,
+      "localBenchmarks": ["world-mutation"]
+    },
+    {
+      "id": "classic",
+      "paths": ["playbooks/classic/**"],
+      "contracts": [
+        {
+          "id": "classic",
+          "kind": "contract",
+          "files": ["playbooks/classic/tests/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "stdlib-server",
+          "kind": "required"
+        },
+        {
+          "owner": "stdlib-world",
+          "kind": "required"
+        }
+      ],
+      "classic": true
+    },
+    {
+      "id": "cognition",
+      "paths": ["packages/cognition-protocol/**"],
+      "contracts": [
+        {
+          "id": "cognition",
+          "kind": "contract",
+          "files": ["apps/agent-server/tests/wire-validation.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "stdlib-server",
+          "kind": "required"
+        }
+      ],
+      "classic": false
+    },
+    {
+      "id": "web",
+      "paths": [
+        "apps/web/src/**",
+        "apps/web/public/**",
+        "apps/web/scripts/**",
+        "apps/web/*.json",
+        "apps/web/*.ts",
+        "apps/web/*.html",
+        "apps/web/*.js",
+        "apps/web/tests/unit/**"
+      ],
+      "contracts": [
+        {
+          "id": "web",
+          "kind": "contract",
+          "files": ["apps/web/tests/unit/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "kernel",
+          "kind": "required"
+        },
+        {
+          "owner": "stdlib-server",
+          "kind": "required"
+        },
+        {
+          "owner": "stdlib-world",
+          "kind": "required"
+        },
+        {
+          "owner": "classic",
+          "kind": "required"
+        },
+        {
+          "owner": "cognition",
+          "kind": "required"
+        }
+      ],
+      "classic": true,
+      "dynamicPaths": ["apps/web/src/worker/pack-loader.ts", "apps/web/scripts/render-prerendered-start-screen.mjs"],
+      "dynamicReason": "Verified Pack URLs resolve first-party Classic artifacts; the SSG temporary bundle is built from this Web owner. Required workspace dependencies above define the build and capability closure."
+    },
+    {
+      "id": "agent-server",
+      "paths": ["apps/agent-server/**"],
+      "contracts": [
+        {
+          "id": "agent-server",
+          "kind": "contract",
+          "files": ["apps/agent-server/tests/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "cognition",
+          "kind": "required"
+        },
+        {
+          "owner": "stdlib-server",
+          "kind": "required"
+        }
+      ],
+      "classic": false
+    },
+    {
+      "id": "integration",
+      "paths": [
+        "apps/web/tests/integration/runtime/**",
+        "apps/web/tests/fixtures/**",
+        "apps/web/tests/support/**",
+        "apps/web/tests/e2e/**"
+      ],
+      "contracts": [
+        {
+          "id": "integration",
+          "kind": "integration",
+          "files": ["apps/web/tests/integration/runtime/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "web",
+          "kind": "required"
+        },
+        {
+          "owner": "agent-server",
+          "kind": "required"
+        },
+        {
+          "owner": "classic",
+          "kind": "required"
+        },
+        {
+          "owner": "engineering",
+          "kind": "build"
+        }
+      ],
+      "classic": true,
+      "dynamicPaths": ["apps/web/tests/fixtures/packs/camp-pack.ts"],
+      "dynamicReason": "The fixture independently bundles its owned camp Pack and invokes registered engineering build/admission helpers."
+    },
+    {
+      "id": "engineering",
+      "paths": [
+        "scripts/**",
+        "harness/**",
+        "crates/**",
+        "wasm/**",
+        "apps/web/tests/integration/engineering/**",
+        "apps/web/tests/integration/architecture/**",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "*config*",
+        ".github/**",
+        ".ls-lint.yml",
+        ".npmrc",
+        ".prettier*",
+        ".husky/**",
+        ".gitignore",
+        "tsconfig*.json"
+      ],
+      "contracts": [
+        {
+          "id": "engineering",
+          "kind": "integration",
+          "files": [
+            "apps/web/tests/integration/engineering/**/*.test.ts",
+            "apps/web/tests/integration/architecture/**/*.test.ts"
+          ]
+        }
+      ],
+      "dependencies": [
+        {
+          "owner": "classic",
+          "kind": "build"
+        },
+        {
+          "owner": "web",
+          "kind": "build"
+        },
+        {
+          "owner": "stdlib-world",
+          "kind": "build"
+        },
+        {
+          "owner": "stdlib-server",
+          "kind": "build"
+        }
+      ],
+      "classic": true,
+      "dynamicPaths": [
+        "scripts/harness/local-benchmark.mjs",
+        "scripts/build-gameplay-packs.mjs",
+        "scripts/pack-integrity.mjs",
+        "scripts/assets/render-item-thumbnails.mjs"
+      ],
+      "dynamicReason": "Versioned engineering commands execute bundles of the declared Classic, stdlib and Web inputs; no source owner is inferred from an unverified external import."
+    },
+    {
+      "id": "eslint-plugin",
+      "paths": ["packages/eslint-plugin/**"],
+      "contracts": [
+        {
+          "id": "eslint-plugin",
+          "kind": "contract",
+          "files": ["packages/eslint-plugin/tests/**/*.test.ts"]
+        }
+      ],
+      "dependencies": [],
+      "classic": false
+    },
+    {
+      "id": "documentation",
+      "paths": ["docs/**", "changes/**", "archives/**", "*.md", ".agents/**", "LICENSE*", "NOTICE*"],
+      "contracts": [],
+      "dependencies": [],
+      "classic": false,
+      "documentation": true
+    }
+  ]
+}

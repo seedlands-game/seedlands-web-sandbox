@@ -1,7 +1,7 @@
-import type { FluidCandidate } from '@seedlands/game-core/server/fluid/fluid-transaction';
-import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
-import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
-import type { AuthorityCommitMessage } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { FluidCandidate } from '@seedlands/stdlib/server/fluid/fluid-transaction';
+import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
+import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
+import type { AuthorityCommitMessage } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 type PendingCommitSource = Readonly<{
   takeCommits(): WorldCommitResult[];

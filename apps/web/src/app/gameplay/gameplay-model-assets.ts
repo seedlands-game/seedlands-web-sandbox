@@ -10,10 +10,11 @@ import { toolModelDefinition } from '../../client/presentation/voxel-tool-model'
 import { resolvePixelModel } from '../../client/presentation/asset-package';
 import { itemMeshDefinition, type ItemMeshGroup } from '../../client/presentation/item-mesh-definition';
 import { builtinTerrainTextures, terrainMaterials } from '../../client/presentation/terrain-assets';
-import { Voxel, type FaceMaterialId } from '@seedlands/game-core/world/voxel';
+import { Voxel, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 
 import { createPixelMaterial, createPixelMesh, addPixelNode } from './pixel-model-resource';
-import { getItemDefinition, type ItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
+import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import { acceptsPixelItem } from '../../client/presentation/asset-adapters';
 import { getAppearanceResources, hasAppearanceBinding } from './appearance-runtime';
 
@@ -147,7 +148,7 @@ export class GameplayModelAssets {
   ): void {
     if (worldItem === null || (worldItem && worldItem.id !== itemId))
       throw new TypeError('World item definition is unavailable or mismatched.');
-    const item = worldItem ?? getItemDefinition(itemId);
+    const item = worldItem ?? requireClassicItemDefinition(itemId);
     const modelId = `builtin:model:${itemId}`;
     const currentAssets = this.toolAssets(modelId, resolvedAssets);
     const currentTool = this.toolDefinition(itemId, currentAssets);

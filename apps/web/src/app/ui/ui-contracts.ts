@@ -1,11 +1,11 @@
 import type { InventoryUiCommand } from './inventory-pointer-gestures';
 import type { StationUiPresentation } from './station-ui-projector';
 import type { CombatUiProjection } from './combat-ui-projector';
-import type { SlashCommandExecution } from '@seedlands/game-core/server/commands/slash-command-parser';
+import type { SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
 import type { QualityLevel } from '../scene/quality-profile';
 import type { GameplayItemPresentation } from './gameplay-ui-projector';
-import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
-import type { ModeCommand } from '@seedlands/game-core/server/commands/module-command';
+import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
+import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 
 export type ShellPhase = 'boot' | 'menu' | 'loading' | 'playing' | 'error';
 export type MapLayer = 'elevation' | 'biome' | 'temperature' | 'humidity' | 'hydrology';

@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import { Voxel } from '@seedlands/game-core/world/voxel';
+import { Voxel } from '@seedlands/stdlib/world/voxel';
 import type { World } from '../world/world-runtime';
 import type { VoxelMaterials } from './voxel-materials';
 import type { LightingQualityBudget } from './advanced-lighting-budget';

@@ -1,4 +1,4 @@
-import { BEHAVIOR_TREE_AUTHORING_GUIDE } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import { BEHAVIOR_TREE_AUTHORING_GUIDE } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 
 export const RESIDENT_TOOL_REGISTRY = [
   {

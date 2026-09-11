@@ -1,4 +1,4 @@
-import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '@seedlands/game-core/world/voxel';
+import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type { PixelTexture, Rgb } from './asset-types';
 
 export type TerrainMaterial = {

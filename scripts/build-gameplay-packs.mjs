@@ -10,9 +10,9 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
 const playbooks = {
-  overworld: 'packages/game-core/src/server/gameplay/playbooks/overworld/pack.ts',
-  'click-conversion': 'changes/2026-09-09-composable-overworld-playbook/examples/click-conversion.ts',
-  builder: 'changes/2026-09-09-composable-overworld-playbook/examples/builder.ts',
+  overworld: 'playbooks/classic/src/pack.ts',
+  'click-conversion': 'apps/web/tests/fixtures/packs/builder/click-conversion.ts',
+  builder: 'apps/web/tests/fixtures/packs/builder/builder.ts',
 };
 
 export async function buildGameplayPacks(

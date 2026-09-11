@@ -3,9 +3,9 @@ import {
   createCollisionDebugBatch,
   type CollisionDebugBatch,
 } from '../../client/presentation/collision-debug-projection';
-import { bodyKindForEntity, bodySensorsFor } from '@seedlands/game-core/physics/body-registry';
-import type { BodyState } from '@seedlands/game-core/physics';
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
+import { bodyKindForEntity, bodySensorsFor } from '@seedlands/stdlib/physics/body-registry';
+import type { BodyState } from '@seedlands/stdlib/physics';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
 import { CollisionDebugRenderer } from './collision-debug-renderer';
 import type * as pc from 'playcanvas';
 

@@ -1,8 +1,17 @@
-import type { FluidAuthoritySnapshot, FluidCandidate } from '@seedlands/game-core/server/fluid/fluid-transaction';
-import type { ComputeLane, ComputeTask } from '@seedlands/game-core/runtime/compute-task-queue';
-import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
-import type { GeneratedCanonicalChunk, InitialWorldBootstrap } from '@seedlands/game-core/compute/world-compute-task';
-import { CHUNK_SIZE } from '@seedlands/game-core/world/voxel';
+import type { FluidAuthoritySnapshot, FluidCandidate } from '@seedlands/stdlib/server/fluid/fluid-transaction';
+import type { ComputeLane, ComputeTask } from '@seedlands/stdlib/runtime/compute-task-queue';
+import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
+import type {
+  GeneratedCanonicalChunk,
+  InitialWorldBootstrap,
+} from '@seedlands/stdlib/server/compute/world-compute-task';
+import { CHUNK_SIZE, chunkKey } from '@seedlands/stdlib/world/voxel';
+import type { StarterEcologyConfiguration } from '@seedlands/stdlib/server/gameplay/actor-profile';
+import {
+  assertWorldgenProviderIdentity,
+  type KernelWorldgenProviderIdentity,
+  worldgenProviderIdentityKey,
+} from '@seedlands/kernel/spatial';
 import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool';
 import { wasmExperimentWorkerName } from './wasm-experiment-selection';
 import type { WasmWorkerSelection } from '../../compute/wasm-kernel-contract';
@@ -42,14 +51,30 @@ export class BrowserComputeRuntime {
   readonly meshPort: MeshWorkerPort;
   private readonly pool: ComputeWorkerPool;
   private readonly originalMeshTaskIds = new Map<number, number>();
+  private readonly meshProviders = new Map<
+    number,
+    Readonly<{ provider: KernelWorldgenProviderIdentity; generatorVersion: number }>
+  >();
   private readonly fluidWorkIds = new Map<number, string>();
   private readonly spawnRequests = new Map<
     number,
-    { resolve: (bootstrap: InitialWorldBootstrap) => void; reject: (error: Error) => void }
+    {
+      generatorVersion: number;
+      provider: KernelWorldgenProviderIdentity;
+      resolve: (bootstrap: InitialWorldBootstrap) => void;
+      reject: (error: Error) => void;
+    }
   >();
   private readonly canonicalRequests = new Map<
     number,
-    { key: string; resolve: (chunk: GeneratedCanonicalChunk) => void; reject: (error: Error) => void }
+    {
+      key: string;
+      coordinate: readonly [number, number, number];
+      generatorVersion: number;
+      provider: KernelWorldgenProviderIdentity;
+      resolve: (chunk: GeneratedCanonicalChunk) => void;
+      reject: (error: Error) => void;
+    }
   >();
   private readonly canonicalByKey = new Map<string, Promise<GeneratedCanonicalChunk>>();
   private taskSequence = 0;
@@ -76,6 +101,7 @@ export class BrowserComputeRuntime {
         const error = new Error(`Compute task ended: ${reason}`);
         const meshId = this.originalMeshTaskIds.get(taskId);
         this.originalMeshTaskIds.delete(taskId);
+        this.meshProviders.delete(taskId);
         if (meshId !== undefined) this.meshFailure(meshId, error);
         const workId = this.fluidWorkIds.get(taskId);
         this.fluidWorkIds.delete(taskId);
@@ -120,11 +146,17 @@ export class BrowserComputeRuntime {
     return false;
   }
 
-  findSafeSpawn(seed: number, generatorVersion: number): Promise<InitialWorldBootstrap> {
+  findSafeSpawn(
+    seed: number,
+    generatorVersion: number,
+    provider: KernelWorldgenProviderIdentity,
+    starterEcology: StarterEcologyConfiguration | null,
+  ): Promise<InitialWorldBootstrap> {
     if (this.disposed) return Promise.reject(new Error('Compute runtime is disposed.'));
+    const providerKey = worldgenProviderIdentityKey(provider);
     const taskId = ++this.taskSequence;
     const promise = new Promise<InitialWorldBootstrap>((resolve, reject) =>
-      this.spawnRequests.set(taskId, { resolve, reject }),
+      this.spawnRequests.set(taskId, { generatorVersion, provider, resolve, reject }),
     );
     const result = this.pool.enqueue({
       protocolVersion: PROTOCOL_VERSION,
@@ -134,19 +166,26 @@ export class BrowserComputeRuntime {
       category: 'chunk-generation',
       priority: 'interaction',
       key: 'initial-safe-spawn',
-      revision: `${seed}:${generatorVersion}`,
+      revision: `${seed}:${generatorVersion}:${providerKey}`,
       dependencies: [],
       estimatedBytes: 0,
-      payload: { kind: 'find-safe-spawn', seed, generatorVersion },
+      payload: { kind: 'find-safe-spawn', seed, generatorVersion, provider, starterEcology },
     });
     if (result.status === 'queued' || result.status === 'merged') return promise;
     this.spawnRequests.delete(taskId);
     return Promise.reject(new Error(`Safe spawn compute enqueue failed: ${result.status}`));
   }
 
-  generateCanonicalChunk(seed: number, generatorVersion: number, key: string): Promise<GeneratedCanonicalChunk> {
+  generateCanonicalChunk(
+    seed: number,
+    generatorVersion: number,
+    provider: KernelWorldgenProviderIdentity,
+    key: string,
+  ): Promise<GeneratedCanonicalChunk> {
     if (this.disposed) return Promise.reject(new Error('Compute runtime is disposed.'));
-    const existing = this.canonicalByKey.get(key);
+    const providerKey = worldgenProviderIdentityKey(provider);
+    const canonicalCacheKey = `${seed}:${generatorVersion}:${providerKey}:${key}`;
+    const existing = this.canonicalByKey.get(canonicalCacheKey);
     if (existing) return existing;
     const coordinates = key.split(',').map(Number);
     if (coordinates.length !== 3 || !coordinates.every(Number.isInteger))
@@ -154,11 +193,18 @@ export class BrowserComputeRuntime {
     const [cx, cy, cz] = coordinates as [number, number, number];
     const taskId = ++this.taskSequence;
     const promise = new Promise<GeneratedCanonicalChunk>((resolve, reject) =>
-      this.canonicalRequests.set(taskId, { key, resolve, reject }),
+      this.canonicalRequests.set(taskId, {
+        key,
+        coordinate: [cx, cy, cz],
+        generatorVersion,
+        provider,
+        resolve,
+        reject,
+      }),
     );
-    this.canonicalByKey.set(key, promise);
+    this.canonicalByKey.set(canonicalCacheKey, promise);
     const cleanup = () => {
-      if (this.canonicalByKey.get(key) === promise) this.canonicalByKey.delete(key);
+      if (this.canonicalByKey.get(canonicalCacheKey) === promise) this.canonicalByKey.delete(canonicalCacheKey);
     };
     void promise.then(cleanup, cleanup);
     const result = this.pool.enqueue({
@@ -169,14 +215,14 @@ export class BrowserComputeRuntime {
       category: 'chunk-generation',
       priority: 'interaction',
       key: `canonical:${key}`,
-      revision: `${seed}:${generatorVersion}`,
+      revision: `${seed}:${generatorVersion}:${providerKey}`,
       dependencies: [],
       estimatedBytes: 0,
-      payload: { kind: 'generate-canonical', seed, generatorVersion, key, cx, cy, cz },
+      payload: { kind: 'generate-canonical', seed, generatorVersion, provider, key, cx, cy, cz },
     });
     if (result.status === 'queued' || result.status === 'merged') return promise;
     this.canonicalRequests.delete(taskId);
-    this.canonicalByKey.delete(key);
+    this.canonicalByKey.delete(canonicalCacheKey);
     return Promise.reject(new Error(`Canonical compute enqueue failed: ${result.status}`));
   }
 
@@ -187,6 +233,7 @@ export class BrowserComputeRuntime {
     this.meshPort.onmessage = null;
     this.meshPort.onerror = null;
     this.originalMeshTaskIds.clear();
+    this.meshProviders.clear();
     this.fluidWorkIds.clear();
     this.spawnRequests.forEach(({ reject }) => reject(new Error('Compute runtime was disposed.')));
     this.spawnRequests.clear();
@@ -204,11 +251,17 @@ export class BrowserComputeRuntime {
       return;
     }
     const key = message.chunkKey;
-    const revision = `${String(message.chunkRevision)}:${String(message.haloRevision)}`;
+    if (!Number.isSafeInteger(message.generatorVersion) || message.provider === undefined)
+      throw new TypeError('Mesh compute message requires a world-generation provider identity.');
+    const provider = message.provider as KernelWorldgenProviderIdentity;
+    const generatorVersion = message.generatorVersion as number;
+    const providerRevision = worldgenProviderIdentityKey(provider);
+    const revision = `${String(message.chunkRevision)}:${String(message.haloRevision)}:${providerRevision}`;
     if (!Number.isSafeInteger(originalTaskId) || typeof key !== 'string')
       throw new TypeError('Mesh compute message identity is invalid.');
     const taskId = ++this.taskSequence;
     this.originalMeshTaskIds.set(taskId, originalTaskId as number);
+    this.meshProviders.set(taskId, { provider, generatorVersion });
     const result = this.pool.enqueue(
       {
         protocolVersion: PROTOCOL_VERSION,
@@ -231,6 +284,7 @@ export class BrowserComputeRuntime {
     );
     if (result.status === 'queued' || result.status === 'merged') return;
     this.originalMeshTaskIds.delete(taskId);
+    this.meshProviders.delete(taskId);
     this.meshFailure(originalTaskId as number, new Error(`Mesh compute enqueue failed: ${result.status}`));
   }
 
@@ -245,9 +299,26 @@ export class BrowserComputeRuntime {
         value.playerBodyPosition.length !== 3 ||
         !value.playerBodyPosition.every(Number.isFinite) ||
         !Array.isArray(value.starterChunks)
-      )
+      ) {
         spawn.reject(new Error('Safe spawn compute result is invalid.'));
-      else spawn.resolve(value as InitialWorldBootstrap);
+        return;
+      }
+      try {
+        for (const chunk of value.starterChunks) {
+          assertWorldgenProviderIdentity(spawn.provider, chunk.provider, spawn.generatorVersion);
+          if (
+            chunk.generatorVersion !== spawn.generatorVersion ||
+            chunk.chunkRevision !== 0 ||
+            chunk.key !== chunkKey(chunk.cx, chunk.cy, chunk.cz) ||
+            !(chunk.canonical instanceof ArrayBuffer) ||
+            chunk.canonical.byteLength !== CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT
+          )
+            throw new Error('Safe spawn chunk identity is invalid.');
+        }
+        spawn.resolve(value as InitialWorldBootstrap);
+      } catch (error) {
+        spawn.reject(error instanceof Error ? error : new Error(String(error)));
+      }
       return;
     }
     const canonical = this.canonicalRequests.get(task.taskId);
@@ -257,16 +328,23 @@ export class BrowserComputeRuntime {
       if (
         value.kind !== 'canonical-result' ||
         value.key !== canonical.key ||
-        !Number.isInteger(value.cx) ||
-        !Number.isInteger(value.cy) ||
-        !Number.isInteger(value.cz) ||
+        value.cx !== canonical.coordinate[0] ||
+        value.cy !== canonical.coordinate[1] ||
+        value.cz !== canonical.coordinate[2] ||
         value.chunkRevision !== 0 ||
-        !Number.isInteger(value.generatorVersion) ||
+        value.generatorVersion !== canonical.generatorVersion ||
         !(value.voxels instanceof ArrayBuffer) ||
         value.voxels.byteLength !== CHUNK_SIZE ** 3 * Uint16Array.BYTES_PER_ELEMENT
-      )
+      ) {
         canonical.reject(new Error('Canonical compute result is invalid.'));
-      else canonical.resolve(value as GeneratedCanonicalChunk);
+        return;
+      }
+      try {
+        assertWorldgenProviderIdentity(canonical.provider, value.provider!, canonical.generatorVersion);
+        canonical.resolve(value as GeneratedCanonicalChunk);
+      } catch (error) {
+        canonical.reject(error instanceof Error ? error : new Error(String(error)));
+      }
       return;
     }
     if (task.category === 'fluid') {
@@ -276,8 +354,22 @@ export class BrowserComputeRuntime {
     }
     const originalTaskId = this.originalMeshTaskIds.get(task.taskId);
     this.originalMeshTaskIds.delete(task.taskId);
+    const meshProvider = this.meshProviders.get(task.taskId);
+    this.meshProviders.delete(task.taskId);
     if (originalTaskId === undefined) return;
-    this.meshPort.onmessage?.({ data: { ...(result as object), taskId: originalTaskId } } as MessageEvent<unknown>);
+    try {
+      if (!meshProvider) throw new Error('Mesh compute request provider identity is unavailable.');
+      const value = result as Readonly<{
+        provider: KernelWorldgenProviderIdentity;
+        generatorVersion: number;
+      }>;
+      if (value.generatorVersion !== meshProvider.generatorVersion)
+        throw new Error('Mesh compute result generator version is invalid.');
+      assertWorldgenProviderIdentity(meshProvider.provider, value.provider, meshProvider.generatorVersion);
+      this.meshPort.onmessage?.({ data: { ...(result as object), taskId: originalTaskId } } as MessageEvent<unknown>);
+    } catch (error) {
+      this.meshFailure(originalTaskId, error instanceof Error ? error : new Error(String(error)));
+    }
   }
 
   private meshFailure(taskId: number, error: Error) {
@@ -304,6 +396,7 @@ export class BrowserComputeRuntime {
     }
     const originalTaskId = this.originalMeshTaskIds.get(task.taskId);
     this.originalMeshTaskIds.delete(task.taskId);
+    this.meshProviders.delete(task.taskId);
     if (originalTaskId !== undefined) this.meshFailure(originalTaskId, error);
   }
 
