@@ -262,14 +262,14 @@
 - 已向用户提出明确取舍：允许此旅程最多1次实际Pro压缩调用，并补发布/权限/总预算证据，或保留0Pro硬门槛后继续收敛上下文。未确认前保持原spec/断言，不重抽模型、不推送、不创建PR。人类活人感复核与远端CI同样未完成；当前不是Delivered。
 - 06:18 live fetch：origin/main仍`6c7124a6f41e9069b07b7dd39593cd2ea2de5907`，main-ahead0/feature-ahead46；原checkout main仍干净且未修改。所有本轮验证服务已退出，47831/47832/47833/47840/8787无监听；用户原`seedlands-cognition-pg`容器保留（已停止），无凭据持久化或全局配置变更。实现worktree和原始证据保留，供确认后继续。
 
-| 阶段 | 状态    | 本change证据                                        |
-| ---- | ------- | --------------------------------------------------- |
-| S0   | DONE    | 独立分支、spec和初版估算                            |
-| S1   | DONE    | 公共能力/可选模块与单一 ECS owner 纵切通过          |
-| S2   | DONE    | 存档及Agent旧行为定向回归收口                       |
-| S3   | DONE    | 三身体/三认知/扩展Pack纵切通过                      |
-| S4   | RUNNING | 用户已批准最多1次实际Pro，补验收证据并复验中        |
-| S5   | NOT_RUN | 尚未推送或创建PR，远端CI/人类审核与合并不冒充已完成 |
+| 阶段 | 状态    | 本change证据                                 |
+| ---- | ------- | -------------------------------------------- |
+| S0   | DONE    | 独立分支、spec和初版估算                     |
+| S1   | DONE    | 公共能力/可选模块与单一 ECS owner 纵切通过   |
+| S2   | DONE    | 存档及Agent旧行为定向回归收口                |
+| S3   | DONE    | 三身体/三认知/扩展Pack纵切通过               |
+| S4   | OPEN    | 确定性全量通过；T11仍FAIL，停止真实模型重抽  |
+| S5   | RUNNING | Draft交接；远端CI/人类审核与合并不冒充已完成 |
 
 ### 2026-09-11 约10:35 用户批准后的续行
 
@@ -288,3 +288,10 @@
 - 用户已明确push/PR，因此在确定性门禁结束后创建Draft PR保留独立基线，T11仍为OPEN/FAIL，不标Delivered/Ready，不自动合并。下次复现必须先补非敏感Flash HTTP/outcome与持久化失败回执诊断；原样重跑没有新增归因价值。
 - 独立artifact核对确认npc8两次请求均收到正确东侧任务和本人观察，239组样本有对应dialogue-heard事件；首轮历史保留29757-byte reasoning，但正文0 bytes、工具0、refusal null，属于已确认模型no-op。第二轮仅headers标记而无后续输出，仍不能确定HTTP/provider/codec结果。没有证据证明ECS或任务投递整体失效；生产目前允许reasoning-only消息并将该轮记为completed，此响应/失败可观察性合同应先补确定性反例再做下一轮有信息的复现。
 - prepared/actual验收器修正后17项GREEN，类型/lint/format通过，独立复核无P0/P1：实际wire唯一对应完整manifest；其余准备记录必须有精确budget失败回执、没有发布、fresh active窗口且未suspended。增量此次未在实现前单独执行RED，明确记录流程偏差，不伪造历史；基础helper原始3项RED保留。没有因此再调用真实模型。
+
+### 2026-09-11 约11:32 最终确定性门禁与Draft交接
+
+- 冻结`e312c4148901203f0bb8580e726702d6cb64c359`，完整`VITEST_MAX_WORKERS=1 pnpm verify:static` PASS：418文件2176项PASS、2文件4项既有SKIP，coverage阶段787.30秒，world行96.96%（800/825），全类型/Svelte 0 errors与0 warnings。`pnpm build`独立PASS，Web与Agent均构建；日志前缀`approved-final`。
+- 同SHA八组Browser全部PASS：主线21、Harness2、资源2、近战1、背包创造12、可组合14，共52；NPC默认8（5项明确opt-in/另跑SKIP）、生产preview1，共61项通过。最后NPC组11:23:23–11:30:47，生产入口11:30:47–11:31:05，未重试。跳过的真实T11不算通过，仍引用d2真实FAIL。
+- live fetch后origin/main仍`6c7124a`，main-ahead0/feature-ahead49；无现有同head/base PR。所有本次验证命令已退出，Docker无运行容器；原PG保留。将最后文档快照单独提交后push并创建Draft，最新远端head/checks以PR实际读回为准，不把本地绿色说成远端已完成。
+- 长期docs baseline本轮不再扩张：此次增量仅收紧本change的验收归因和记录实际缺口，生产行为与已维护的NPC/能力/存档长期合同不变。整个change继续Implementing，人类“活人感”复核与T11后续诊断未完成。

@@ -152,17 +152,17 @@ manifest先于实际fetch持久化，不能将prepared条数作为调用数。�
 
 ## Delivery Snapshot
 
-当前为Implementing，不是Delivered。确定性完整冻结证据来自`4efcdbe603b6e7bbbce06ba6950ba990457f1a91`；批准后真实模型与验收增量冻结于`d2d36b2a31e86656cdd53a2cddaf786dd6136d09`，两者生产apps/packages/scripts/lockfile相同，不把旧结果冒充新合同通过。
+当前为Implementing，不是Delivered。最新确定性完整冻结证据来自`e312c4148901203f0bb8580e726702d6cb64c359`；批准后真实模型冻结于`d2d36b2a31e86656cdd53a2cddaf786dd6136d09`，两者生产apps/packages/scripts/lockfile相同，后续仅修改验收器与文档，不把确定性结果冒充T11通过。
 
 | 范围                                              | 当前证据与状态                                                                        |
 | ------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| T01–T10 机制、权限、迁移、三身体/三认知和扩展能力 | 确定性单元/集成及Browser通过；完整static 417文件2159项PASS，4项既有SKIP               |
+| T01–T10 机制、权限、迁移、三身体/三认知和扩展能力 | e312完整static 418文件2176项PASS、4项既有SKIP；world行96.96%，全部类型/格式/lint通过  |
 | T12 主线玩法及生产入口                            | Web/Agent build PASS，主线Browser 52/52、NPC默认8/8、production 1/1 PASS              |
 | T11 真实三人格                                    | d2仍FAIL：15Flash/1Pro满足新预算，但npc8未改树/回应；新增发布校验及断线/离线段NOT_RUN |
 | 真实Flash/Pro独立补充                             | d2两项PASS：Flash改树/断线身体，Pro发布MEMORY1→2及出生幂等激活                        |
-| 独立审阅                                          | 已发现实施P1闭合；d2增量复核通过；实际运行另发现prepared/dispatch验收假阴性需修正     |
-| 新main PR与远端CI                                 | NOT_RUN；没有推送、创建PR、批准或合并                                                 |
+| 独立审阅                                          | 已发现实施P1闭合；d2与e312增量复核通过；prepared/dispatch验收假阴性已修正             |
+| 新main PR与远端CI                                 | Draft交接中；准确head/必要CI按PR即时读回，不自动批准或合并                            |
 
-批准前0Pro阻塞已由用户明确授权最多1次实际网关Pro dispatch取代。新运行的主缺口是npc8未改树/回应：两次Flash请求仅记录headers标记，无完整HTTP/provider/codec outcome，不能归因于某一层或宣称三人格完成。没有重抽模型；先修复prepared manifest与actual dispatch混计的验收假阴性、完成确定性门禁后，按用户push/PR授权创建Draft并披露T11 OPEN。详细证据、残余限制与恢复点见[progress.md](progress.md)。
+批准前0Pro阻塞已由用户明确授权最多1次实际网关Pro dispatch取代。新运行的主缺口是npc8未改树/回应：已确认正确任务进入世界和请求，首轮为reasoning-only、空正文、零工具的模型no-op；第二轮没有完整HTTP/provider/codec outcome。没有重抽模型；prepared/actual验收假阴性已修正，确定性全量通过后按用户push/PR授权交接Draft并披露T11 OPEN。不能宣称真实三人格完成。详细证据、残余限制与恢复点见[progress.md](progress.md)。
 
 长期docs baseline已更新：公共能力与可组合架构、代码地图/目录归属、世界/认知存档、Harness/CI与NPC运行说明。原因是这些跨change合同无法只靠局部实现稳定重建；没有将尚未通过的真实旅程写成成功案例。原checkout/main未修改，独立worktree与证据保留，验证服务已停止，用户PG容器保留。实际工作量及不可取得的token/费用明确列于[estimates.md](estimates.md)。

@@ -110,3 +110,7 @@
 ### 有界真实运行后（约10:55 UTC+8）
 
 续行约28分钟，T11预算满足但npc8未改树/回应，停止真实模型重抽；独立Flash/Pro补充2项通过。新增17Flash/4Pro，累计102Flash/16Pro网关dispatch、9Flash无headers标记；总token/credits/计费/API费用未知。剩余仅验收器口径修正、确定性门禁、Draft PR与CI，正常0.75–1小时，保守1.5小时×120%=1.8小时；传统约0.1–0.25PD、Agent活跃0.5–1小时为低置信规划，不把Draft PR或CI绿色等同T11准出。
+
+### 最终确定性准出（约11:32 UTC+8）
+
+本次续行约65分钟，完整static/build/61项Browser已通过；累计真实dispatch保持102Flash/16Pro，未重抽。剩余Draft PR与远端CI预计正常20–35分钟、保守45分钟×120%=54分钟（排队/平台失败不可保证）；传统剩余<0.1PD、Agent活跃约0.25小时仅为规划。实际分模型token、credits、API费用与额度分母仍unknown，等待时间不冒充计费工时；T11缺口保留，不计为闭环交付。
