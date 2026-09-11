@@ -28,6 +28,9 @@ import type { GameplayContent } from './gameplay/gameplay-content';
 import type { GameServerOptions } from './game-server-types';
 import type { ItemDefinitionRegistry } from './gameplay/item-registry';
 import type { InventoryPointerInputV1 } from './gameplay/modules/inventory-pointer-contract';
+import type { CharacterActorBinding, CharacterControlRequest } from '../runtime/character-control-protocol';
+import { isActorEntityType } from './gameplay/ecs-actor-state';
+import type { ActorControlSource } from './gameplay/ecs-actor-components';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 
@@ -108,6 +111,9 @@ export abstract class GameServerGameplayFacade {
       },
       { archetype: input.archetype, ...input.registration },
     );
+  }
+  character(request: CharacterControlRequest, actorBinding?: CharacterActorBinding) {
+    return this.gameplay.character(request, actorBinding);
   }
   getEntity(id: string): GameplayEntity | null {
     const entity = this.gameplay.getEntity(id);
@@ -287,6 +293,11 @@ export abstract class GameServerGameplayFacade {
   }
   getActorState(id: string) {
     return this.gameplay.simulation.getActor(id);
+  }
+
+  getActorControlSource(id: string): ActorControlSource | null {
+    const entity = this.gameplay.getEntity(id);
+    return entity && isActorEntityType(entity.type) ? this.gameplay.entities.actorStateAccess(id).controlSource : null;
   }
   startActorAction(actorId: string, input: Omit<ActorActionInput, 'actorId'>) {
     return this.gameplay.simulation.startAction(actorId, input);

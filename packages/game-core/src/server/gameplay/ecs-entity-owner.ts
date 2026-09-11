@@ -1,4 +1,3 @@
-import { cloneItemStack } from './item-instance';
 import {
   addComponent,
   addEntity,
@@ -25,16 +24,27 @@ import {
   readActorComponentSnapshot,
   readActorNeeds,
   restoreActorComponentSnapshot,
+  bindActorCharacterComponent,
+  installActorCharacterComponent,
   isActorEntityType,
   type PreparedActorComponentSnapshot,
 } from './ecs-actor-state';
 import type { ActorComponentSnapshot } from './ecs-actor-components';
+import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
 import {
   EcsStationStateOwner,
   type PreparedStationComponentSnapshot,
   type StationComponentV1,
   type StationStateCodec,
 } from './ecs-station-state';
+import { clearComponentSlot } from './ecs-component-storage';
+import {
+  createEntityComponents,
+  ecsEntityType,
+  ecsEntityTypeComponent,
+  projectEcsEntity,
+  type EntityComponents,
+} from './ecs-entity-components';
 
 export type EcsEntityType = 'player' | 'world-item' | 'creature' | 'npc' | 'station';
 export type EcsActorArchetype = 'grazer' | 'night-stalker' | 'settler';
@@ -66,38 +76,6 @@ export type PreparedActorSpatialReplacement = Readonly<{
   position?: EcsPosition;
   physicsVelocity?: EcsPosition;
 }>;
-
-type SlotArray<Value> = Array<Value | undefined>;
-type EntityComponents = ReturnType<typeof createEntityComponents>;
-
-const createEntityComponents = () => ({
-  identity: { id: [] as SlotArray<string>, lifetime: [] as SlotArray<number>, order: [] as SlotArray<number> },
-  lifecycle: { active: [] as SlotArray<number> },
-  transform: { x: [] as SlotArray<number>, y: [] as SlotArray<number>, z: [] as SlotArray<number> },
-  velocity: { x: [] as SlotArray<number>, y: [] as SlotArray<number>, z: [] as SlotArray<number> },
-  health: { current: [] as SlotArray<number>, maximum: [] as SlotArray<number> },
-  itemStack: {
-    itemId: [] as SlotArray<ItemStack['itemId']>,
-    count: [] as SlotArray<number>,
-    durability: [] as SlotArray<number>,
-  },
-  actorMetadata: {
-    archetype: [] as SlotArray<EcsActorArchetype>,
-    persistent: [] as SlotArray<boolean>,
-  },
-  player: {},
-  worldItem: {},
-  creature: {},
-  npc: {},
-  station: {},
-});
-
-const clone = (entity: EcsOwnedEntity): EcsOwnedEntity => ({
-  ...entity,
-  position: [...entity.position],
-  ...(entity.physicsVelocity ? { physicsVelocity: [...entity.physicsVelocity] } : {}),
-  ...(entity.stack ? { stack: cloneItemStack(entity.stack) } : {}),
-});
 
 /** Per-world bitECS owner; recyclable EIDs and component storage stay private. */
 export class EcsEntityOwner {
@@ -316,6 +294,23 @@ export class EcsEntityOwner {
     return readActorComponentSnapshot(this.actors, eid, id, entity.type === 'player');
   }
 
+  bindActorCharacterComponent(id: string): CharacterComponentStateV1 | null {
+    const eid = this.require(id);
+    if (!isActorEntityType(this.project(eid).type)) throw new TypeError(`Entity is not an actor: ${id}`);
+    return bindActorCharacterComponent(this.actors, eid);
+  }
+
+  installActorCharacterComponent(
+    id: string,
+    value: CharacterComponentStateV1 | null,
+    expectedControlRevision?: number,
+  ): CharacterComponentStateV1 | null {
+    const eid = this.require(id);
+    const entity = this.project(eid);
+    if (entity.type !== 'npc') throw new TypeError(`Entity cannot own Character behavior: ${id}`);
+    return installActorCharacterComponent(this.actors, eid, value, expectedControlRevision);
+  }
+
   prepareActorComponentSnapshot(id: string, snapshot: ActorComponentSnapshot): PreparedActorComponentSnapshot {
     const eid = this.require(id);
     const entity = this.project(eid);
@@ -337,7 +332,7 @@ export class EcsEntityOwner {
       this.writePosition(this.components.velocity, eid, spatial.physicsVelocity);
     }
     this.components.health.current[eid] = health;
-    installPreparedActorComponentSnapshot(this.actors, eid, prepared);
+    installPreparedActorComponentSnapshot(this.actors, eid, prepared, true);
   }
 
   restoreActorComponentSnapshot(snapshot: ActorComponentSnapshot): void {
@@ -451,51 +446,15 @@ export class EcsEntityOwner {
   }
 
   private project(eid: EntityId): EcsOwnedEntity {
-    const components = this.components;
-    const type = this.typeOf(eid);
-    const entity: EcsOwnedEntity = {
-      id: components.identity.id[eid]!,
-      type,
-      kind: type,
-      lifecycle: 'active',
-      position: this.readPosition(components.transform, eid),
-    };
-    if (hasComponent(this.world, eid, components.velocity))
-      entity.physicsVelocity = this.readPosition(components.velocity, eid);
-    if (hasComponent(this.world, eid, components.health)) {
-      entity.health = components.health.current[eid]!;
-      entity.maxHealth = components.health.maximum[eid]!;
-    }
-    if (hasComponent(this.world, eid, components.itemStack))
-      entity.stack = {
-        itemId: components.itemStack.itemId[eid]!,
-        count: components.itemStack.count[eid]!,
-        ...(components.itemStack.durability[eid] === undefined
-          ? {}
-          : { instance: Object.freeze({ durability: components.itemStack.durability[eid]! }) }),
-      };
-    if (hasComponent(this.world, eid, components.actorMetadata)) {
-      entity.archetype = components.actorMetadata.archetype[eid]!;
-      entity.persistent = components.actorMetadata.persistent[eid]!;
-    }
-    return clone(entity);
+    return projectEcsEntity(this.world, this.components, eid);
   }
 
   private typeOf(eid: EntityId): EcsEntityType {
-    if (hasComponent(this.world, eid, this.components.player)) return 'player';
-    if (hasComponent(this.world, eid, this.components.worldItem)) return 'world-item';
-    if (hasComponent(this.world, eid, this.components.creature)) return 'creature';
-    if (hasComponent(this.world, eid, this.components.npc)) return 'npc';
-    if (hasComponent(this.world, eid, this.components.station)) return 'station';
-    throw new Error('Entity type component is missing.');
+    return ecsEntityType(this.world, this.components, eid);
   }
 
   private typeComponent(type: EcsEntityType): object {
-    if (type === 'player') return this.components.player;
-    if (type === 'world-item') return this.components.worldItem;
-    if (type === 'creature') return this.components.creature;
-    if (type === 'npc') return this.components.npc;
-    return this.components.station;
+    return ecsEntityTypeComponent(this.components, type);
   }
 
   private resolve(id: string): EntityId | null {
@@ -516,13 +475,6 @@ export class EcsEntityOwner {
     return id !== undefined && this.ids.get(id) === eid;
   }
 
-  private readPosition(
-    component: EntityComponents['transform'] | EntityComponents['velocity'],
-    eid: EntityId,
-  ): EcsPosition {
-    return [component.x[eid]!, component.y[eid]!, component.z[eid]!];
-  }
-
   private writePosition(
     component: EntityComponents['transform'] | EntityComponents['velocity'],
     eid: EntityId,
@@ -536,7 +488,7 @@ export class EcsEntityOwner {
   private clearSlot(eid: EntityId): void {
     clearActorComponents(this.actors, eid);
     this.stations.clear(eid);
-    for (const component of [
+    clearComponentSlot(eid, [
       this.components.identity.id,
       this.components.identity.lifetime,
       this.components.identity.order,
@@ -554,8 +506,7 @@ export class EcsEntityOwner {
       this.components.itemStack.durability,
       this.components.actorMetadata.archetype,
       this.components.actorMetadata.persistent,
-    ])
-      delete component[eid];
+    ]);
   }
 
   private assertAvailable = (): void => {

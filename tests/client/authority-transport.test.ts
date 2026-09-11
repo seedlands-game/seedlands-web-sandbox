@@ -9,9 +9,11 @@ class RawPort implements AuthorityTransportPort {
   onmessage: ((event: MessageEvent<unknown>) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
   posts: unknown[] = [];
+  transfers: Transferable[][] = [];
   terminated = false;
-  postMessage(message: unknown) {
+  postMessage(message: unknown, transfer: Transferable[] = []) {
     this.posts.push(message);
+    this.transfers.push(transfer);
   }
   terminate() {
     this.terminated = true;
@@ -148,6 +150,25 @@ describe('Authority 受控传输', () => {
     vi.advanceTimersByTime(50);
 
     expect((raw.posts[0] as { occupancy: Uint8Array }).occupancy).toEqual(new Uint8Array([7, 8, 9]));
+    vi.useRealTimers();
+  });
+
+  it('MessagePort初始化附件绕过故障延迟并保持唯一transfer', () => {
+    vi.useFakeTimers();
+    const raw = new RawPort();
+    const transport = createAuthorityTransport(raw, {
+      harnessEnabled: true,
+      latencyMs: 150,
+      duplicateOutbound: true,
+    });
+    const port = {} as MessagePort;
+    const attachment = { kind: 'attach-direct-logic', port };
+    transport.postMessage(attachment, [port]);
+
+    expect(raw.posts).toEqual([attachment]);
+    expect(raw.transfers).toEqual([[port]]);
+    vi.runAllTimers();
+    expect(raw.posts).toHaveLength(1);
     vi.useRealTimers();
   });
 });

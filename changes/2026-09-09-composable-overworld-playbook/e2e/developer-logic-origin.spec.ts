@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { HeadlessSession } from '../../../packages/game-core/src/server/headless/headless-session';
+import type { FrozenGameSaveSnapshot } from '../../../packages/game-core/src/server/persistence/game-save-snapshot';
 import { assembleOverworldPacks, type VerifiedPackArtifact } from '@seedlands/game-core/server/composition/host-api';
 import {
   DEVELOPER_WORLD_SUBJECT,
@@ -125,7 +126,7 @@ test('Browser 脚本攻击保留开发者来源，并在 Headless 换 alias 恢�
   const browser = await page.evaluate(
     async ({ checkpoint, playerId }) => {
       const world = window.__seedlandsHarness!.world;
-      const restored = await world.checkpoint({ kind: 'restore', snapshot: checkpoint });
+      const restored = await world.checkpoint({ kind: 'restore', snapshot: checkpoint as FrozenGameSaveSnapshot });
       if (!restored.ok) throw new Error(JSON.stringify(restored));
       const mode = await world.logic({ kind: 'mode', mode: 'scripted' });
       const advanced = await world.clock({ kind: 'advance', elapsedMs: 300 });
@@ -143,7 +144,7 @@ test('Browser 脚本攻击保留开发者来源，并在 Headless 换 alias 恢�
         player: await world.inspect({ kind: 'entity', entityId: playerId }),
       };
     },
-    { checkpoint: saved.checkpoint, playerId: saved.playerId },
+    { checkpoint: saved.checkpoint as unknown, playerId: saved.playerId },
   );
   expect(browser).toMatchObject({
     mode: { ok: true, data: { mode: 'scripted' } },

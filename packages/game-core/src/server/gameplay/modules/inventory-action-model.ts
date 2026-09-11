@@ -54,7 +54,7 @@ export type InventoryMoveArgs = Readonly<{ source: number; target: number }>;
 export type InventoryConsumeArgs = Readonly<{ slot: number }>;
 export type InventoryCraftArgs = Readonly<{ recipeId: string }>;
 export type InventoryDropArgs = Readonly<{ slot: number; count: number }>;
-export type InventoryPickupArgs = Readonly<Record<never, never>>;
+export type InventoryPickupArgs = Readonly<{ count?: number }>;
 export type InventoryActionArgs =
   | InventorySelectArgs
   | InventoryMoveArgs
@@ -68,6 +68,7 @@ export type InventoryPickupIntentV1 = Readonly<{
   reference: EntityLifetimeReference;
   position: readonly [number, number, number];
   stack: Readonly<ItemStack>;
+  remainingCount: number;
 }>;
 export type InventoryActionPublicResultV1 = Readonly<{
   version: 1;
@@ -327,8 +328,10 @@ export function validateInventoryDropInput(raw: unknown): InventoryDropArgs {
   return Object.freeze({ slot: value.slot, count: value.count });
 }
 export function validateInventoryPickupInput(raw: unknown): InventoryPickupArgs {
-  if (raw !== undefined) throw new TypeError('Inventory pickup input must be omitted.');
-  return Object.freeze({});
+  if (raw === undefined) return Object.freeze({});
+  const value = actionData(raw, ['count'], 'Inventory pickup input');
+  if (!safeInteger(value.count, 1, MAX_ACTION_COUNT)) throw new TypeError('Inventory pickup count is invalid.');
+  return Object.freeze({ count: value.count });
 }
 
 function fail(reason: string): never {
@@ -455,11 +458,15 @@ export function buildInventoryActionCandidate(
       const args = validateInventoryPickupInput(request.input);
       const item = validateInventoryWorldItemProjection(request.item, content.items);
       if (item.reference.entityId === actor.reference.entityId) fail('invalid-item');
-      if (!inventory.add(item.stack)) fail('inventory-full');
+      const count = args.count ?? item.stack.count;
+      if (count > item.stack.count) fail('missing-items');
+      const stack = freezeStack({ ...item.stack, count });
+      if (!inventory.add(stack)) fail('inventory-full');
       const pickupIntent = Object.freeze({
         reference: item.reference,
         position: item.position,
-        stack: item.stack,
+        stack,
+        remainingCount: item.stack.count - count,
       });
       return candidate({
         kind: request.kind,
@@ -467,7 +474,7 @@ export function buildInventoryActionCandidate(
         args,
         inventory,
         pickupIntent,
-        result: { itemId: item.stack.itemId, count: item.stack.count },
+        result: { itemId: item.stack.itemId, count },
       });
     }
   }

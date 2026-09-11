@@ -2,9 +2,16 @@ import type { ActorArchetype } from '../gameplay/entity-store';
 import type { ActionRuntime } from './action-runtime';
 import type { PoiSnapshot } from './poi-registry';
 import type { CombatRuntimeSnapshot } from '../gameplay/combat-runtime';
+import type { CharacterGoal } from '../../runtime/character-control-protocol';
+import type { CharacterSnapshot } from './character-runtime-types';
 
 export type ActorBehavior =
   'idle' | 'wander' | 'seek-food' | 'flee' | 'chase' | 'attack' | 'routine-home' | 'routine-work';
+
+export type ActorPersistentGoal = Readonly<{
+  kind: CharacterGoal['kind'];
+  status: 'active' | 'suspended';
+}>;
 
 export type ActorState = {
   entityId: string;
@@ -19,6 +26,10 @@ export type ActorState = {
   /** Legacy projection; the combat runtime is the only mutable cooldown owner. */
   attackCooldownSeconds?: number;
   wanderIndex: number;
+  /** Derived from the ECS behavior component; never serialized as a second owner. */
+  persistentGoal?: ActorPersistentGoal;
+  /** Derived marker that behavior control owns this actor's decisions. */
+  behaviorTreeOwned?: true;
 };
 
 export type ActorRegistration = {
@@ -41,6 +52,10 @@ export type SimulationSnapshot = {
   pois: PoiSnapshot;
   actions: ReturnType<ActionRuntime['snapshot']>;
   combat?: CombatRuntimeSnapshot;
+  /** Legacy Agent-line owner; migrated into ECS actor behavior components and never emitted by new snapshots. */
+  characters?: CharacterSnapshot;
+  /** Bounded terminal history for Character entities whose ECS bodies were removed. */
+  characterTombstones?: CharacterSnapshot;
 };
 
 export const MAX_RETAINED_ACTORS = 512;
@@ -59,6 +74,8 @@ export const rangeByArchetype: Readonly<Record<ActorArchetype, number>> = {
 export const cloneActor = (actor: ActorState, attackCooldownSeconds?: number): ActorState => {
   const cloned = { ...actor };
   delete cloned.attackCooldownSeconds;
+  delete cloned.persistentGoal;
+  delete cloned.behaviorTreeOwned;
   return attackCooldownSeconds === undefined ? cloned : { ...cloned, attackCooldownSeconds };
 };
 export const roundSimulation = (value: number) => Math.round(value * 1_000_000) / 1_000_000;

@@ -34,6 +34,16 @@ import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 import type { AuthorityRuntimeOptions } from './authority-runtime-options';
 import { AuthorityLogicCandidates } from './authority-logic-candidates';
 import { acceptLogicIntentBatch, isValidLogicIntent, applyBoundLogicAction } from './authority-logic-intent-acceptance';
+import type {
+  CharacterActorBinding,
+  CharacterControlRequest,
+  CharacterControlResult,
+} from '../../runtime/character-control-protocol';
+import {
+  authorityStateChanged,
+  captureAuthorityStateVersion,
+  type AuthorityStateVersion,
+} from './authority-state-version';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -251,7 +261,7 @@ export class AuthorityRuntime {
   }
 
   clearPlayerInput(): void {
-    const before = this.serverStateVersion();
+    const before = captureAuthorityStateVersion(this.server);
     this.session.clearPlayerInput();
     this.server.cancelBreak(this.playerId);
     this.commitIfServerChanged(before);
@@ -353,7 +363,7 @@ export class AuthorityRuntime {
   }
 
   pause(nowMs: number): void {
-    const before = this.serverStateVersion();
+    const before = captureAuthorityStateVersion(this.server);
     this.session.pause(nowMs);
     this.currentTimeMs = nowMs;
     this.commitIfServerChanged(before);
@@ -423,7 +433,7 @@ export class AuthorityRuntime {
       return unavailableAuthorityPlayerAction(submittedAction, this.view());
     if (!this.session.playerBindingCurrent) return rejectStale('stale-control-binding');
     if (target && !this.server.resolveEntityReference(target)) return rejectStale('stale-target-lifetime');
-    const before = this.serverStateVersion();
+    const before = captureAuthorityStateVersion(this.server);
     const result = applyAuthorityPlayerAction(this.server, this.playerId, submittedAction, (commit) =>
       this.recordWorldCommit(commit),
     );
@@ -441,7 +451,7 @@ export class AuthorityRuntime {
   }
 
   async executeCommand(source: CommandSource, command: ServerCommand, binding?: WorldModuleBinding) {
-    const before = this.serverStateVersion();
+    const before = captureAuthorityStateVersion(this.server);
     const result = await new ServerCommandExecutor(this.server, {
       moduleOperation: bindModuleCommandPort(this.server, binding),
       now: this.options.platform.now,
@@ -461,6 +471,13 @@ export class AuthorityRuntime {
     )
       this.clearPlayerInput();
     if (command.type !== 'advance-gameplay') this.commitIfServerChanged(before);
+    return result;
+  }
+
+  character(request: CharacterControlRequest, actorBinding?: CharacterActorBinding): CharacterControlResult {
+    const before = captureAuthorityStateVersion(this.server);
+    const result = this.server.character(request, actorBinding);
+    this.commitIfServerChanged(before);
     return result;
   }
 
@@ -529,20 +546,7 @@ export class AuthorityRuntime {
     });
   }
 
-  private serverStateVersion() {
-    return {
-      gameplayRevision: this.server.gameplayRevision,
-      worldRevision: this.server.worldRevision,
-      worldTime: this.server.worldTime,
-    };
-  }
-
-  private commitIfServerChanged(before: ReturnType<AuthorityRuntime['serverStateVersion']>) {
-    if (
-      before.gameplayRevision !== this.server.gameplayRevision ||
-      before.worldRevision !== this.server.worldRevision ||
-      before.worldTime !== this.server.worldTime
-    )
-      this.session.commitExternalState();
+  private commitIfServerChanged(before: AuthorityStateVersion) {
+    if (authorityStateChanged(before, this.server)) this.session.commitExternalState();
   }
 }

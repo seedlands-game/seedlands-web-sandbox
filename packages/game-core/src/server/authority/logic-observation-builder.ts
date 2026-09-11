@@ -8,6 +8,7 @@ import type { ItemDefinitionRegistry } from '../gameplay/item-registry';
 import { CHUNK_SIZE, chunkKey, floorDiv, isSolid } from '../../world/voxel';
 import type { CoreClone } from '../../runtime/platform-ports';
 import type { GameServer } from '../game-server';
+import type { ActorControlSource } from '../gameplay/ecs-actor-components';
 
 type LoadedVoxel = Readonly<{ voxel: number; chunkKey: string; revision: number }>;
 
@@ -20,6 +21,7 @@ type BuildOptions = Readonly<{
   simulation: Pick<SimulationSnapshot, 'actors' | 'pois' | 'actions' | 'combat'>;
   items: ItemDefinitionRegistry;
   identityRevision: (entity: GameplayEntity) => number;
+  controlSource?: (entityId: string) => ActorControlSource;
   getLoadedVoxel: (x: number, y: number, z: number) => LoadedVoxel | null;
 }>;
 
@@ -37,38 +39,37 @@ const activeActionFor = (simulation: BuildOptions['simulation'], actor: ActorSta
 const terrainBounds = (entities: readonly GameplayEntity[]) => {
   const byChunk = new Map<string, Bounds>();
   entities.forEach((entity) => {
-    const cx = floorDiv(entity.position[0], CHUNK_SIZE);
-    const cy = floorDiv(entity.position[1], CHUNK_SIZE);
-    const cz = floorDiv(entity.position[2], CHUNK_SIZE);
-    const key = chunkKey(cx, cy, cz);
-    const chunkMinX = cx * CHUNK_SIZE;
-    const chunkMinY = cy * CHUNK_SIZE;
-    const chunkMinZ = cz * CHUNK_SIZE;
     const x = Math.floor(entity.position[0]);
     const y = Math.floor(entity.position[1]);
     const z = Math.floor(entity.position[2]);
-    const next = {
-      minX: Math.max(chunkMinX, x - 8),
-      maxX: Math.min(chunkMinX + CHUNK_SIZE - 1, x + 8),
-      minY: Math.max(chunkMinY, y - 2),
-      maxY: Math.min(chunkMinY + CHUNK_SIZE - 1, y + 4),
-      minZ: Math.max(chunkMinZ, z - 8),
-      maxZ: Math.min(chunkMinZ + CHUNK_SIZE - 1, z + 8),
-    };
-    const current = byChunk.get(key);
-    byChunk.set(
-      key,
-      current
-        ? {
-            minX: Math.min(current.minX, next.minX),
-            maxX: Math.max(current.maxX, next.maxX),
-            minY: Math.min(current.minY, next.minY),
-            maxY: Math.max(current.maxY, next.maxY),
-            minZ: Math.min(current.minZ, next.minZ),
-            maxZ: Math.max(current.maxZ, next.maxZ),
-          }
-        : next,
-    );
+    const extent = { minX: x - 8, maxX: x + 8, minY: y - 2, maxY: y + 4, minZ: z - 8, maxZ: z + 8 };
+    for (let cy = floorDiv(extent.minY, CHUNK_SIZE); cy <= floorDiv(extent.maxY, CHUNK_SIZE); cy += 1)
+      for (let cz = floorDiv(extent.minZ, CHUNK_SIZE); cz <= floorDiv(extent.maxZ, CHUNK_SIZE); cz += 1)
+        for (let cx = floorDiv(extent.minX, CHUNK_SIZE); cx <= floorDiv(extent.maxX, CHUNK_SIZE); cx += 1) {
+          const key = chunkKey(cx, cy, cz);
+          const next = {
+            minX: Math.max(cx * CHUNK_SIZE, extent.minX),
+            maxX: Math.min((cx + 1) * CHUNK_SIZE - 1, extent.maxX),
+            minY: Math.max(cy * CHUNK_SIZE, extent.minY),
+            maxY: Math.min((cy + 1) * CHUNK_SIZE - 1, extent.maxY),
+            minZ: Math.max(cz * CHUNK_SIZE, extent.minZ),
+            maxZ: Math.min((cz + 1) * CHUNK_SIZE - 1, extent.maxZ),
+          };
+          const current = byChunk.get(key);
+          byChunk.set(
+            key,
+            current
+              ? {
+                  minX: Math.min(current.minX, next.minX),
+                  maxX: Math.max(current.maxX, next.maxX),
+                  minY: Math.min(current.minY, next.minY),
+                  maxY: Math.max(current.maxY, next.maxY),
+                  minZ: Math.min(current.minZ, next.minZ),
+                  maxZ: Math.max(current.maxZ, next.maxZ),
+                }
+              : next,
+          );
+        }
   });
   return [...byChunk.entries()].sort(([left], [right]) => left.localeCompare(right));
 };
@@ -163,6 +164,7 @@ export function buildLogicObservation(options: BuildOptions): LogicObservation {
         state: options.clone(actor),
         identityRevision: identityById.get(actor.entityId) ?? 0,
         activeAction: activeActionFor(options.simulation, actor),
+        controlSource: options.controlSource?.(actor.entityId) ?? 'autonomous',
       })),
       pois: options.clone(options.simulation.pois),
       terrainWindows,
@@ -192,6 +194,7 @@ export class AuthorityLogicObservationBuilder {
       simulation: this.server.simulationSnapshot(),
       items: this.server.itemDefinitions,
       identityRevision: (entity) => this.identityRevision(entity),
+      controlSource: (entityId) => this.server.getActorControlSource(entityId) ?? 'none',
       getLoadedVoxel: (x, y, z) => this.server.peekLoadedVoxel(x, y, z),
     });
   }

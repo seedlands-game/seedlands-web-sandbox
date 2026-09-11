@@ -3,6 +3,7 @@ import type { AuthorityRuntime } from '@seedlands/game-core/server/authority/aut
 import type { AuthorityRequest, AuthorityResponse } from '@seedlands/game-core/compute/authority-worker-protocol';
 
 type Post = (message: AuthorityResponse) => void;
+export const authorityErrorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 type TransactionMessage = Extract<
   AuthorityRequest,
   {
@@ -49,7 +50,7 @@ export const postAuthorityFailure = (post: Post, epoch: string, requestId: numbe
     epoch,
     requestId,
     ok: false,
-    error: error instanceof Error ? error.message : String(error),
+    error: authorityErrorText(error),
   });
 
 export async function transactAuthorityRequest(

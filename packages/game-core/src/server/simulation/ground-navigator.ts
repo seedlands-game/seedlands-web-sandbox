@@ -4,6 +4,12 @@ export type NavigationPosition = [number, number, number];
 export type NavigationResult =
   | { status: 'reached'; path: NavigationPosition[]; expandedNodes: number }
   | { status: 'unreachable' | 'budget-exhausted'; expandedNodes: number };
+export type NavigationConstraint = Readonly<{
+  blocksNode: (position: NavigationPosition) => boolean;
+  blocksEdge: (from: NavigationPosition, to: NavigationPosition) => boolean;
+  allowsBlockedNodeTransition?: (from: NavigationPosition, to: NavigationPosition) => boolean;
+}>;
+export type NavigationOptions = Readonly<{ maxExpanded?: number; constraint?: NavigationConstraint }>;
 
 type Node = { x: number; y: number; z: number; g: number; f: number; parent: string | null };
 const key = (x: number, y: number, z: number) => `${x},${y},${z}`;
@@ -15,7 +21,7 @@ export class GroundNavigator {
   plan(
     startPosition: readonly [number, number, number],
     targetPosition: readonly [number, number, number],
-    options: { maxExpanded?: number } = {},
+    options: NavigationOptions = {},
   ): NavigationResult {
     const maxExpanded = options.maxExpanded ?? 384;
     if (!Number.isInteger(maxExpanded) || maxExpanded <= 0) throw new TypeError('Navigation budget must be positive.');
@@ -38,7 +44,7 @@ export class GroundNavigator {
       expandedNodes += 1;
       if (currentKey === targetKey)
         return { status: 'reached', path: this.reconstruct(current, visited), expandedNodes };
-      for (const next of this.neighbors(current)) {
+      for (const next of this.neighbors(current, options.constraint)) {
         const nextKey = key(next.x, next.y, next.z);
         if (visited.has(nextKey)) continue;
         const g = current.g + 1 + Math.abs(next.y - current.y) * 0.25;
@@ -66,8 +72,12 @@ export class GroundNavigator {
     return null;
   }
 
-  private neighbors(current: Pick<Node, 'x' | 'y' | 'z'>): Array<Pick<Node, 'x' | 'y' | 'z'>> {
+  private neighbors(
+    current: Pick<Node, 'x' | 'y' | 'z'>,
+    constraint?: NavigationConstraint,
+  ): Array<Pick<Node, 'x' | 'y' | 'z'>> {
     const result: Array<Pick<Node, 'x' | 'y' | 'z'>> = [];
+    const from = position(current);
     for (const [dx, dz] of [
       [1, 0],
       [-1, 0],
@@ -77,6 +87,12 @@ export class GroundNavigator {
       for (const dy of [0, 1, -1]) {
         const candidate = { x: current.x + dx, y: current.y + dy, z: current.z + dz };
         if (!this.walkable(candidate.x, candidate.y, candidate.z)) continue;
+        const to = position(candidate);
+        if (
+          constraint?.blocksEdge(from, to) ||
+          (constraint?.blocksNode(to) && !constraint.allowsBlockedNodeTransition?.(from, to))
+        )
+          continue;
         result.push(candidate);
         break;
       }

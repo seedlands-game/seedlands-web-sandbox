@@ -33,8 +33,10 @@ describe('Pack public API boundary', () => {
   });
 });
 
-it('applies the same public facade boundary to standalone Playbook examples', async () => {
-  const target = 'changes/2026-09-09-composable-overworld-playbook/examples/probe.ts';
+it.each([
+  'changes/2026-09-09-composable-overworld-playbook/examples/probe.ts',
+  'changes/2026-09-10-npc-composable-baseline/examples/probe.ts',
+])('applies the same public facade boundary to standalone Pack example %s', async (target) => {
   expect(await boundaryMessages("export * from '@seedlands/game-core/server/game-server';", target)).toHaveLength(1);
   expect(await boundaryMessages("export * from '../internal';", target)).toHaveLength(1);
   expect(await boundaryMessages("export * from './building-content';", target)).toHaveLength(0);

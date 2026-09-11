@@ -147,6 +147,34 @@ async function walkToDrop(page: Page, itemId: string, baselineCount: number) {
   }
 }
 
+async function walkIntoMeleeRange(page: Page, entityId: string) {
+  await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe('game');
+  await page.keyboard.down('KeyW');
+  try {
+    for (let sample = 0; sample < 50; sample++) {
+      const queried = await command(page, { type: 'query-entity', entityId });
+      const entity = queried.data?.entity as { position: [number, number, number] } | null;
+      if (!entity) return;
+      const current = (await snapshot(page))!;
+      const [cameraX, cameraY, cameraZ] = current.player;
+      const dx = entity.position[0] - cameraX;
+      const dy = entity.position[1] + 0.9 - cameraY;
+      const dz = entity.position[2] - cameraZ;
+      await setHarnessView(
+        page,
+        (Math.atan2(-dx, -dz) * 180) / Math.PI,
+        (Math.atan2(dy, Math.hypot(dx, dz)) * 180) / Math.PI,
+      );
+      const [playerX, , playerZ] = current.serverPlayerPosition;
+      if (Math.hypot(entity.position[0] - playerX, entity.position[2] - playerZ) <= 2.5) return;
+      await page.waitForTimeout(100);
+    }
+    throw new Error(`Player did not reach melee range of ${entityId}.`);
+  } finally {
+    await page.keyboard.up('KeyW');
+  }
+}
+
 test('木剑通过真实采集合成与输入战斗，拾取后保存重进', async ({ page }, info) => {
   test.setTimeout(90_000);
   const errors: string[] = [];
@@ -195,6 +223,7 @@ test('木剑通过真实采集合成与输入战斗，拾取后保存重进', as
   const enemyId = (created.data?.entity as { id: string }).id;
   const enemy = page.locator(`[data-entity-id="${enemyId}"]`);
   for (let attempt = 0; attempt < 8; attempt++) {
+    await walkIntoMeleeRange(page, enemyId);
     const queried = await command(page, { type: 'query-entity', entityId: enemyId });
     const entity = queried.data?.entity as { position: [number, number, number]; health: number } | null;
     if (!entity) break;

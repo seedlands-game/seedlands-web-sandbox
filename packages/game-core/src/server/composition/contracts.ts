@@ -56,9 +56,24 @@ export type ModRecipeDefinition = Readonly<{
   outputs: readonly ModItemAmount[];
 }>;
 
+/** Frozen assembly identity for the module currently receiving the facade. */
+export type ModRegistrationIdentity = Readonly<{
+  moduleId: string;
+  moduleVersion: string;
+  packId: string;
+}>;
+
+export type ModDefinitionCatalog = Readonly<{
+  operation(
+    id: string,
+  ): Readonly<{ id: string; moduleId: string; resource: string; executionKind: 'actor' | 'system' }> | null;
+  module(id: string): Readonly<{ packId: string; permissions: readonly ModulePermission[] }> | null;
+}>;
+
 export type ModRegistrationFacade = Readonly<{
+  readonly identity: ModRegistrationIdentity;
   readContentDefinitions(): Readonly<{ items: readonly ModItemDefinition[]; recipes: readonly ModRecipeDefinition[] }>;
-  onDefinitionsReady(finalize: () => void): void;
+  onDefinitionsReady(finalize: (definitions: ModDefinitionCatalog) => void): void;
   registerLifecycle(definition: ModLifecycleDefinition): void;
   registerSystem(definition: ModSystemDefinition): void;
   registerState(definition: ModStateDefinition): void;

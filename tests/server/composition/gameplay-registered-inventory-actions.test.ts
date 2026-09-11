@@ -18,7 +18,11 @@ function setup(
   } = {},
 ) {
   const modules = [
-    ...pack.modules.filter((module) => withActions || module.descriptor.id !== 'seedlands:inventory-actions-module'),
+    ...pack.modules.filter(
+      (module) =>
+        withActions ||
+        !['seedlands:inventory-actions-module', 'seedlands:behavior-registry-module'].includes(module.descriptor.id),
+    ),
     ...extra,
   ];
   const root = definePack({ id: 'test:inventory-actions', version: '1.0.0', kind: 'playbook', modules });
@@ -162,16 +166,23 @@ describe('actual registered Inventory action consumers', () => {
   });
   it('actors without a melee profile remain damageable but cannot initiate attacks', () => {
     const { world } = setup();
+    const noncombatant = world.spawn({
+      id: 'noncombatant',
+      type: 'creature',
+      archetype: 'grazer',
+      position: [0, 0, -1],
+    });
+    if (noncombatant.health === undefined) throw new Error('Expected a profiled noncombatant.');
     const before = world.createSnapshot();
-    expect(world.simulation.requestActorCombat('bob', 'alice', 'unarmed')).toMatchObject({
+    expect(world.simulation.requestActorCombat('noncombatant', 'alice', 'unarmed')).toMatchObject({
       success: false,
       reason: 'Combat actor has no configured melee definition.',
     });
     expect(world.createSnapshot()).toEqual(before);
     world.giveItem('alice', { itemId: 'wood-sword', count: 1 });
-    expect(world.attackEntity('alice', 'bob').success).toBe(true);
+    expect(world.attackEntity('alice', 'noncombatant').success).toBe(true);
     world.advanceRules(0.3);
-    expect(world.entities.get('bob')?.health).toBeLessThan(20);
+    expect(world.entities.get('noncombatant')?.health).toBeLessThan(noncombatant.health);
     expect(world.entities.get('alice')?.health).toBe(20);
   });
   it('crafts, moves and consumes through the same ECS owner, and a changed weapon cancels Combat', () => {

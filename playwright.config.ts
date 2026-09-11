@@ -6,7 +6,8 @@ const fullChromium = process.env.SEEDLANDS_E2E_FULL_CHROMIUM === '1';
 const executablePath = fullChromium
   ? undefined
   : (process.env.SEEDLANDS_CHROME_PATH ?? (existsSync(systemChrome) ? systemChrome : undefined));
-const e2ePort = process.env.SEEDLANDS_E2E_PORT ?? '4173';
+const production = process.env.SEEDLANDS_E2E_PRODUCTION === '1';
+const e2ePort = process.env.SEEDLANDS_E2E_PORT ?? (production ? '4273' : '4173');
 const serverOrigin = `http://127.0.0.1:${e2ePort}`;
 const basePath = process.env.SEEDLANDS_BASE_PATH ?? '/';
 const baseURL = new URL(basePath, `${serverOrigin}/`).href;
@@ -40,9 +41,9 @@ export default defineConfig({
       : {}),
   },
   webServer: {
-    command: `pnpm --filter @seedlands/web dev --host 127.0.0.1 --port ${e2ePort}`,
+    command: `pnpm --filter @seedlands/web ${production ? 'preview' : 'dev'} --host 127.0.0.1 --port ${e2ePort} --strictPort`,
     url: baseURL,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env.CI && !production && process.env.SEEDLANDS_E2E_REUSE_SERVER === '1',
     timeout: 30_000,
   },
   projects: [{ name: 'chromium' }],

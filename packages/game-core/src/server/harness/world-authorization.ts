@@ -9,6 +9,7 @@ export const BUILTIN_WORLD_RESOURCES = Object.freeze([
   'world.chunk',
   'world.entity',
   'world.actor',
+  'world.character',
   'world.prepare',
   'world.command',
   'world.clock',
