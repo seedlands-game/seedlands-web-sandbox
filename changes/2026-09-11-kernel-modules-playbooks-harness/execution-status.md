@@ -2,7 +2,7 @@
 
 2026-09-11，用户明确回复“批准”，授权实施 spec SHA-256 `c1d8ef071a3a48db32ee4750b7771df0dc934baada55567fb880da9e56f8041e`。批准稿保持原字节；其中 Proposed/等待审批标题是冻结时状态，本文件记录实时实施状态。用户随后明确要求 ESLint 独立包/独立测试、根目录不放测试、集成及全流程回归归 Web，见 scope-amendment.md。
 
-当前：**Implementing；尚未达到验收、提交和 PR 准出。**
+当前：**Implementing；已有本地合同和实施提交，尚未达到完整验收和 PR 准出。**
 
 - S0：保存 c18a890 的基础世界/物品/行为 checkpoint、工位在途 checkpoint、真实 PG 认知配对 checkpoint；原始压缩字节和摘要保持不变。CI 基线为 Chromium 有失败，不宣称旧基线全绿。
 - S1/S2：game-core 源已拆迁至 Kernel/stdlib/Classic；中性注册分面、GameServer 组合式 host、细分内容 capability 和 executable provider 已接入。独立风险复核发现恢复时 shared EntityStore 分叉、事务提交段可部分失败、旧存档布尔放行三个硬缺口，正在完成候选发布与精确身份修复，不能以移动目录或局部绿测替代架构合同。
@@ -73,3 +73,17 @@
 队列Block旧公式真实故障注入RED：实际提交196次而上界144。源码按字节恢复，新公式容量来源5/5 GREEN；主owner已直接复核共享64限额与同轮settlement预算，最后P1闭合。测试夹具准备失败未计为真实RED。
 
 接下来先创建本地实施提交固定source SHA，再构建与执行唯一Classic/runtime测量线路；完整浏览器验收、基线候选与PR仍未完成，不标Delivered。
+
+## 2026-09-12 00:08 检查点
+
+本地提交 `c8ce4a4` 和 `697c7ae25f3654329105b8d01226dc2b95390c82` 已经正常 hooks 创建，尚未 push。后者 sourceDigest `94e9b5c2a6daddc0119753b9599f6d54d550d8135096e1c93160c9a1b06ee203` 与最终 static 输入相同；生产 build artifactDigest `0e3ef8e14dc763a931eee85df6e1a1df0c167e9f036c02b6f9cd709dc3bbaabf`。
+
+Local mesh run `mesh-db3a6578-cab7-448c-a146-7e0ba969af0b` 在窗口 `815ffee9-348f-4427-b325-78ffaad40007` 完成10样本，已生成未接受候选 SHA-256 `70ae0d88e158852a956ac3fb68c9d5c87660f5fae599b197bc05457ef249102d`。旧混合基线不可比，不宣称收益。
+
+Runtime run `2026-09-11t15-38-01-978z-d51aa333` 的窗口 `663e8228-42ef-42c3-8ffe-632c0e6ebcac` FAIL；C0–C3 PASS、C4 NPC自主活动未完成、C5未执行，无runtime候选。NPC存活，动作在玩家C4前进之前已replan-limit；同位置Headless诊断可正常觅食与巡逻，正在读回Browser Logic状态。新增诊断仅增加C3/C4只读观察和结构化失败附件，未改动作或验收断言，类型与lint通过，已重新构建后执行一次线路。
+
+## 用户要求停止并推送（2026-09-12）
+
+用户明确要求“push吧 token没了 停止”，因此停止实施和追加验证，按当前成果提交并推送供人类审核，不标Delivered。正式诊断 run `2026-09-11t16-04-41-114z-e0862a3f` 的C4仍失败：NPC active=true、behavior owner、running move-to和有效路径，但速度0。随后临时有界日志诊断 run `2026-09-11t16-11-42-168z-646faf04` 意外完成C0–C5 PASS；该运行包含临时诊断源码，不能证明撤掉诊断后的最终源码稳定通过，也不能据此关闭此前间歇失败。临时生产日志与测试console监听已按原字节恢复，只保留正式只读Logic附件。停止后不再构建、测试或采样。
+
+剩余：NPC间歇活动失败的唯一根因、无临时诊断的最终Classic复验、runtime有效性能候选。最后构建产物含临时诊断且已过期，不作为当前可用发布产物。已有static 444 files /2295 tests与697c7ae生产build证据保留；最新4个只读E2E诊断文件有类型和scoped lint证据，不冒充完整static复验。

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import {
   adjustPitchToTarget,
   attackWithRealMouse,
@@ -15,6 +15,7 @@ import {
   prepareInitialState,
   snapshot,
   startClassicWorld,
+  voxelAt,
   waitForSnapshot,
   walkTo,
   type CharacterObservation,
@@ -27,12 +28,14 @@ import { aimAtVoxelWithRealMouse } from './classic-support/aim';
 import {
   attachClassicEvidence,
   attachClassicFailure,
+  observeBrowserRuntime,
   requireAllClassicStages,
   type ClassicStage as Stage,
   type ClassicStageResult as StageResult,
 } from './classic-support/evidence';
 import { classicScenario, type Point } from './classic-support/scenario';
 import { checkpointCharacter, checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';
+import { captureNpcLogicObservation, type ClassicLogicObservationEvidence } from './classic-support/logic';
 import {
   completedNpcActivity,
   equipFromInventory,
@@ -48,37 +51,23 @@ const stageSamples: Partial<Record<Stage, ClassicSnapshot>> = {};
 const benchmarkMode = process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1';
 let evidenceWritten = false;
 let restoreEvidence: Readonly<Record<string, unknown>> | undefined;
-
-const voxelAt = (page: Page, target: Point) =>
-  page.evaluate(
-    (target) => (window as unknown as ClassicWindow).__seedlandsHarness?.getVoxelAt?.(...target) ?? null,
-    target,
-  );
+const logicEvidence: ClassicLogicObservationEvidence[] = [];
 
 test.afterEach(async ({ page }, testInfo) => {
   if (evidenceWritten) return;
   const current = page.isClosed() ? null : await snapshot(page).catch(() => null);
-  await attachClassicFailure(testInfo, stageResults, current, benchmarkMode, restoreEvidence);
+  await attachClassicFailure(testInfo, stageResults, current, benchmarkMode, restoreEvidence, logicEvidence);
 });
 
 test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
   test.setTimeout(480_000);
   evidenceWritten = false;
   restoreEvidence = undefined;
+  logicEvidence.length = 0;
   for (const stage of Object.keys(stageResults) as Stage[]) delete stageResults[stage];
   for (const stage of Object.keys(stageSamples) as Stage[]) delete stageSamples[stage];
 
-  const pageErrors: string[] = [];
-  const failedResponses: string[] = [];
-  const assets: string[] = [];
-  const workers: string[] = [];
-  page.on('pageerror', (error) => pageErrors.push(error.message));
-  page.on('worker', (worker) => workers.push(new URL(worker.url()).pathname));
-  page.on('response', (response) => {
-    const path = new URL(response.url()).pathname;
-    if (/\.(?:js|mjs|wasm)$/.test(path)) assets.push(path);
-    if (response.status() >= 400) failedResponses.push(`${response.status()} ${path}`);
-  });
+  const { pageErrors, failedResponses, assets, workers } = observeBrowserRuntime(page);
 
   await test.step('C0 启动固定 Classic 生产世界并冻结初态', async () => {
     await startClassicWorld(page, classicScenario);
@@ -294,6 +283,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
         'Right click placed gathered wood with a consumed mesh commit; inventory food raised hunger; held real mouse input buffered and completed the wood-sword second combo hit before defeating the fixed creature; a crafted workbench was placed, opened through the station runtime, then dismantled and recovered through real actions.',
     };
     stageSamples.C3 = (await snapshot(page))!;
+    logicEvidence.push(await captureNpcLogicObservation(page, prepared.npcId, 'C3-complete'));
   });
 
   let npcBeforeSave!: CharacterObservation;
@@ -314,6 +304,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     );
     expect(returnChunkNamesBeforeTraverse.size).toBeGreaterThan(0);
     const observationBeforeTraverse = await characterObservation(page, prepared.npcId, npcInitial.cursor);
+    logicEvidence.push(await captureNpcLogicObservation(page, prepared.npcId, 'C4-before-traverse'));
     await walkTo(page, classicScenario.route.farTurnaround, { jump: true, timeout: 90_000 });
     const far = await waitForSnapshot(
       page,
@@ -357,10 +348,12 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     ).toBe(true);
     npcBeforeSave = await characterObservation(page, prepared.npcId, observationBeforeTraverse.cursor);
     const completed = completedNpcActivity([npcInitial, observationBeforeTraverse, npcBeforeSave], 0);
-    if (!completed)
+    if (!completed) {
+      logicEvidence.push(await captureNpcLogicObservation(page, prepared.npcId, 'C4-activity-check-failed'));
       throw new Error(
         `No matching NPC activity completion: ${JSON.stringify({ initial: npcInitial, before: observationBeforeTraverse, after: npcBeforeSave })}`,
       );
+    }
     expect(npcBeforeSave.gap).not.toBe(true);
     expect(npcBeforeSave.self.position).not.toEqual(npcInitial.self.position);
     stageResults.C4 = {

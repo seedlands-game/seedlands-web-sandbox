@@ -136,6 +136,12 @@ export type ClassicWindow = Window & { __seedlandsHarness?: HarnessApi };
 export const snapshot = (page: Page) =>
   page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness?.snapshot() ?? null);
 
+export const voxelAt = (page: Page, target: Point) =>
+  page.evaluate(
+    (target) => (window as unknown as ClassicWindow).__seedlandsHarness?.getVoxelAt?.(...target) ?? null,
+    target,
+  );
+
 export async function waitForSnapshot(
   page: Page,
   predicate: (value: ClassicSnapshot) => boolean,
