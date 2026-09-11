@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { BehaviorNode, CharacterBehaviorState } from '@seedlands/game-core/runtime/behavior-control-protocol';
+  import type { BehaviorNode, CharacterBehaviorState } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 
   let { behavior }: { behavior: CharacterBehaviorState } = $props();
 

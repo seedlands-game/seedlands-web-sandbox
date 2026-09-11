@@ -1,4 +1,4 @@
-import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
+import type { CombatSnapshot } from '@seedlands/stdlib/server/gameplay/combat-runtime';
 
 export type CombatUiProjection = Readonly<{
   phase: 'ready' | 'cooldown' | 'windup' | 'hit' | 'recovery';

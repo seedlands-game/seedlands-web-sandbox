@@ -1,5 +1,6 @@
-import { getItemDefinition, type ItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
-import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
+import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
+import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
+import type { CombatSnapshot } from '@seedlands/stdlib/server/gameplay/combat-runtime';
 import { combatViewmodelPose } from '../../client/presentation/combat-viewmodel-pose';
 import * as pc from 'playcanvas';
 import { type HeldAction, viewmodelPose } from '../../client/presentation/gameplay-model-definition';
@@ -84,7 +85,7 @@ export class FirstPersonViewmodel {
     if (this.action === 'mine') this.setAction('idle');
     while (this.item.children.length) this.item.children[0].destroy();
     if (itemId) {
-      const itemDefinition = definition ?? getItemDefinition(itemId);
+      const itemDefinition = definition ?? requireClassicItemDefinition(itemId);
       this.heldTool = itemDefinition.itemType === 'tool';
       const scale = this.heldTool ? 0.95 : 0.55;
       this.assets.addItem(this.item, itemId, scale, undefined, definition);

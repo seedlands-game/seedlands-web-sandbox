@@ -36,14 +36,14 @@ const moduleRunner = await createServer({
 let session;
 try {
   const { HeadlessSession } = await moduleRunner.ssrLoadModule(
-    '/packages/game-core/src/server/headless/headless-session.ts',
+    '/packages/stdlib/src/server/headless/headless-session.ts',
   );
   const { dispatchWorldHarnessRpc, WORLD_HARNESS_JSONL_MAX_LINE_BYTES } = await moduleRunner.ssrLoadModule(
-    '/packages/game-core/src/server/harness/world-harness-jsonl.ts',
+    '/packages/stdlib/src/server/harness/world-harness-jsonl.ts',
   );
   const { nodeCorePlatform } = await moduleRunner.ssrLoadModule('/scripts/headless/node-core-platform.ts');
   const { assembleProductPacks } = await moduleRunner.ssrLoadModule(
-    '/packages/game-core/src/server/composition/host-api.ts',
+    '/packages/stdlib/src/server/composition/host-api.ts',
   );
   const { readBoundedLines, stringifyWorldJson, decodeCheckpointRequest, JSONL_CHECKPOINT_LINE_BYTES } =
     await moduleRunner.ssrLoadModule('/scripts/headless/jsonl-transport.ts');

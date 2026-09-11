@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - playbooks/*
 
 allowBuilds:
   '@ffmpeg-installer/darwin-arm64': true

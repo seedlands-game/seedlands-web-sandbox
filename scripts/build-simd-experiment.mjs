@@ -3,7 +3,7 @@ import { copyFileSync, mkdirSync, readFileSync, readdirSync, writeFileSync } fro
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
-const output = resolve(root, process.env.SEEDLANDS_RUST_OUTPUT ?? 'changes/2026-09-06-data-plane-simd-policy/evidence');
+const output = resolve(root, process.env.SEEDLANDS_RUST_OUTPUT ?? 'harness/results/rust-build');
 mkdirSync(output, { recursive: true });
 const sources = {};
 for (const relative of [

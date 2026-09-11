@@ -12,7 +12,8 @@
     "build": "pnpm exec esbuild src/node/main.ts --bundle --platform=node --format=esm --external:@langchain/* --external:ws --external:pg --external:langchain --external:deepagents --outfile=dist/main.js",
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "pnpm --dir ../.. exec vitest run tests/agent-server"
+    "test": "pnpm --dir ../.. exec vitest run --config apps/agent-server/vitest.config.ts",
+    "test:watch": "pnpm --dir ../.. exec vitest --config apps/agent-server/vitest.config.ts"
   },
   "dependencies": {
     "@langchain/core": "1.2.9",
@@ -20,7 +21,7 @@
     "@langchain/langgraph-checkpoint-postgres": "1.0.5",
     "@langchain/openai": "1.5.11",
     "@seedlands/cognition-protocol": "workspace:*",
-    "@seedlands/game-core": "workspace:*",
+    "@seedlands/stdlib": "workspace:*",
     "deepagents": "1.13.3",
     "langchain": "1.5.10",
     "pg": "8.23.0",

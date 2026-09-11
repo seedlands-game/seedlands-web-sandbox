@@ -20,7 +20,7 @@ import {
   type ResidentClientMessage,
   type ResidentWorldBinding,
 } from '@seedlands/cognition-protocol';
-import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import type { BehaviorCapability } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 import { ResidentChannel } from '../resident-channel.js';
 import { validatePortableWorkspace } from '../workspace/index.js';
 import {

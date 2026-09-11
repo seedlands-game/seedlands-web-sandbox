@@ -1,5 +1,5 @@
-import type { CommandResult, CommandSource } from '@seedlands/game-core/server/commands/command-contract';
-import type { ModeCommand } from '@seedlands/game-core/server/commands/module-command';
+import type { CommandResult, CommandSource } from '@seedlands/stdlib/server/commands/command-contract';
+import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 
 export type BrowserModeCommandExecutor = (source: CommandSource, command: ModeCommand) => Promise<CommandResult>;
 

@@ -1,4 +1,4 @@
-import type { CorePlatformPorts } from '@seedlands/game-core/runtime/platform-ports';
+import type { CorePlatformPorts } from '@seedlands/stdlib/runtime/platform-ports';
 import { performance } from 'node:perf_hooks';
 import { setTimeout as yieldTimeout } from 'node:timers/promises';
 

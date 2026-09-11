@@ -1,5 +1,5 @@
 import { decodeBrowserWorldSave } from '../../client/persistence/browser-chunk-persistence';
-import { decodeWorldSave } from '@seedlands/game-core/world/storage';
+import { decodeWorldSave } from '@seedlands/stdlib/world/storage';
 import type { RestoredSession } from '../app-contracts';
 
 const STORAGE_KEY = 'seedlands-world-v2';

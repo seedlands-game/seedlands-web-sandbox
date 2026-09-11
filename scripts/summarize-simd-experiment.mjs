@@ -11,12 +11,12 @@ const server = await createServer({
 let pairedBootstrap;
 try {
   ({ pairedBootstrap } = await server.ssrLoadModule(
-    resolve(import.meta.dirname, '../changes/2026-09-07-data-plane-adoption/e2e/ab-statistics.ts'),
+    resolve(import.meta.dirname, '../apps/web/tests/support/performance/ab-statistics.ts'),
   ));
 } finally {
   await server.close();
 }
-const directory = resolve(import.meta.dirname, '../changes/2026-09-06-data-plane-simd-policy/evidence');
+const directory = resolve(import.meta.dirname, '../harness/results/simd');
 const names = [
   'occupancy-32768',
   'uv-32768',

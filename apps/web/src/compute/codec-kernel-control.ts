@@ -1,6 +1,6 @@
 import { KernelMemory, WASM_ARENA_BYTES } from './kernel-memory';
 import { CodecKernel, encodeStoredChunkRecord } from './codec-kernel';
-import type { CreateStoredChunkRecordInput, StoredChunkRecord } from '@seedlands/game-core/world/chunk-snapshot-codec';
+import type { CreateStoredChunkRecordInput, StoredChunkRecord } from '@seedlands/stdlib/world/chunk-snapshot-codec';
 
 const INPUT_OFFSET = 64;
 const VOXEL_COUNT = 32 ** 3;

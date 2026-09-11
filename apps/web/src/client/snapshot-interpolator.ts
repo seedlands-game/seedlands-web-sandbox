@@ -1,4 +1,4 @@
-import type { Vec3 } from '@seedlands/game-core/physics';
+import type { Vec3 } from '@seedlands/stdlib/physics';
 
 export type InterpolationSnapshot = Readonly<{
   epoch: string;

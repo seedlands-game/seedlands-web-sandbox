@@ -2,9 +2,9 @@ import {
   createStoredChunkRecord,
   storedChunkRecordBytes,
   type StoredChunkRecord,
-} from '@seedlands/game-core/world/chunk-snapshot-codec';
-import type { FrozenGameSaveSnapshot } from '@seedlands/game-core/server/persistence/game-save-snapshot';
-import { readGameSaveCheckpoint } from '@seedlands/game-core/server/persistence/game-save-checkpoint';
+} from '@seedlands/stdlib/world/chunk-snapshot-codec';
+import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
+import { readGameSaveCheckpoint } from '@seedlands/stdlib/server/persistence/game-save-checkpoint';
 import { browserCorePlatform } from '../platform/core-platform';
 
 export type FrozenSaveTaskSnapshot = Omit<FrozenGameSaveSnapshot, 'chunks'> & {

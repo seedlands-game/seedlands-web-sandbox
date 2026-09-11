@@ -12,6 +12,7 @@ description: Run or review Seedlands CI, Harness, browser evidence, and performa
 ## 按需读取
 
 - CI、测试选择、重试或回归保障：读[CI 测试边界](references/ci-testing.md)，尤其是 TDD、已知缺口与执行成本。
+- Owner、base/head 计划、runner stage 或生产产物身份：读[Harness 合同](references/harness-contracts.md)。
 - 需求用例生命周期、RED/GREEN 或交付身份：读[开发治理](references/development-governance.md)的相关章节。
 - 性能结论：先按开发治理固定对照，再读[性能执行窗口](references/performance-execution.md)取得独占采样窗口。普通功能测试和诊断 readback 不充当性能样本。
 - 修改本 skill 或沉淀经验：读[上下文沉淀](references/context-engineering.md)，沿用现有资源和职责。
@@ -26,16 +27,21 @@ description: Run or review Seedlands CI, Harness, browser evidence, and performa
 ## 浏览器与性能证据
 
 - 同次浏览器结果关联 run id 与 source SHA，不把旧运行产物当作当前证据。
+- 浏览器只走 `apps/web/tests/e2e/classic-runtime.spec.ts`：从生产 build 下载并校验同一份 `apps/web/dist`，不直接调用历史 `changes/*/e2e`、不在 Chromium job 重建，也不新开 Playwright/Puppeteer/Midscene 旁路线。
 - 浏览器性能采样与诊断 readback 分开。`readPixels`、截图分析和 Midscene 可解释视觉连续性，但其耗时不是帧成本证据。
 - 视觉运动或连续行为从同一真实输入流程检查多张原始帧，包含早/中状态和相关转头。单张截图或 Harness 布尔值不足以支撑视觉语义结论。
 - Worker 或 streaming 改动需要真实浏览器基线。移动文件后逐项检查 `new URL(...worker...)` 和动态 import；dev server 通过与生产产物可运行分别取证。
 
 ## 包内脚本与运行位置
 
-优先从仓库根目录使用 `package.json` 中的既有命令。脚本入口在包内可读、可调用：
+优先从仓库根目录使用 `package.json` 中的既有命令。PR 先冻结 `baseSha` 与实际 checkout 的 `headSha`；base 有 selector 时使用 base tree 的完整 `scripts/harness/` 生成计划，缺失时仅允许显式 `missing-base-selector` 的 `--all` bootstrap。未知路径、无 owner、空匹配、selected test 未执行、计划/source 不一致都 fail closed。
 
-- [浏览器 Harness](scripts/run-playwright-harness.mjs)：运行长期浏览器基线，关联 run id/source SHA；`--aggregate` 继续聚合，`--baseline` 仅在当前任务授权更新基线时使用。
-- [Harness 聚合](scripts/run-harness.mjs)：消费同次浏览器结果和仓库源码/构建产物；其 `harness-*` helper 与 runtime entry 同样位于本包 `scripts/`。
+- [影响计划](scripts/plan.mjs)：对应 `pnpm harness:plan --root "$PWD" --base <base> --head <head> --out <path>`；普通变更输出 affected，策略/构建/未知范围与 `--all` 输出 full-new。
+- [Harness runner](scripts/run.mjs)：对应 `verify:affected`、`verify:all`、`test`、`harness:classic` 与 `bench:runtime`。它按 owner 的独立 Vitest config 执行具体 selected files，并只从 canonical Playwright config 启动浏览器。
+- [生产产物](scripts/artifact.mjs)：`pnpm build` 生成 `harness-artifact.json`；Classic 在启动前后校验 `sourceSha`、source/lock/artifact digest 与所有 dist bytes。
+- `scripts/run-playwright-harness.mjs` 仅为 `harness:classic` 兼容别名；`scripts/run-harness.mjs` 仅为 `stdlib-world` 局部 benchmark 兼容别名。它们不再拥有历史浏览器列表、aggregate 或 baseline 写入语义。
 - [性能窗口入口](scripts/with-benchmark-reservation.mjs)：调用包内 `benchmark-window.mjs` 实现，支持等待上限、独立测试锁和退出码传播。用法见性能执行窗口。
 
-`references/` 与 `scripts/` 采用仓库内相对软链接，源文件仍在根 `docs/` 与 `scripts/` 单点维护。读取链接文档的后续相对引用时，先解析真实源路径，再以原文档目录为基准。完整 checkout 可迁移；运行依赖本仓库的源码、package scripts、锁文件对应依赖与按需生成的产物。单独分发本包需解引用资源并携带运行依赖，软链接本身不提供独立运行环境。
+Harness baseline、scenario 或阈值更新只有在当前任务明确授权且带 identity/diff 时执行；普通 affected、Classic 或诊断运行不得自动改绿基线。
+
+`references/` 与 `scripts/` 采用仓库内相对软链接，源文件仍在根 `docs/` 与 `scripts/harness/` 单点维护。读取链接文档的后续相对引用时，先解析真实源路径，再以原文档目录为基准。完整 checkout 可迁移；运行依赖本仓库的源码、package scripts、锁文件对应依赖与按需生成的产物。单独分发本包需解引用资源并携带运行依赖，软链接本身不提供独立运行环境。

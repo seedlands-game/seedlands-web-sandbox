@@ -3,7 +3,7 @@ import { legacyPixelAssets } from './legacy-item-assets';
 import type { Asset, ItemAssetBinding } from './asset-types';
 import { nativeToolAssets } from './asset-tool-sources';
 import { builtinVisualAssets } from './visual-asset-catalog';
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { requireClassicItemDefinition } from './classic-item-registry';
 
 const nativeItemAssets = [...nativeToolAssets, ...progressionItemAssets];
 
@@ -75,7 +75,7 @@ export const builtinAssets: Asset[] = [
       payload: {
         itemId: id,
         materialIds: (() => {
-          const voxel = getItemDefinition(id).placesVoxel;
+          const voxel = requireClassicItemDefinition(id).placesVoxel;
           const placed = builtinVisualAssets.find(
             (asset) => asset.type === 'builtin-voxel-model' && asset.payload.voxelId === voxel,
           );

@@ -1,4 +1,4 @@
-import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
+import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
 
 export type PlayerInputKeys = Readonly<{
   forward: boolean;

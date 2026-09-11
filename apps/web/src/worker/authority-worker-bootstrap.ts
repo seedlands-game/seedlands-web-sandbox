@@ -1,6 +1,8 @@
-import type { AuthorityInitialWorldBootstrap } from '@seedlands/game-core/server/authority/authority-runtime';
-import type { AuthorityRequest, AuthorityResponse } from '@seedlands/game-core/compute/authority-worker-protocol';
-import { PROTOCOL_VERSION } from '@seedlands/game-core/runtime/session-protocol';
+import type { AuthorityInitialWorldBootstrap } from '@seedlands/stdlib/server/authority/authority-runtime';
+import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
+import type { StarterEcologyConfiguration } from '@seedlands/stdlib/server/gameplay/actor-profile';
+import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 
 export const decodeAuthorityBootstrapResult = (
   message: Extract<AuthorityRequest, { kind: 'authority-bootstrap-result' }>,
@@ -32,7 +34,13 @@ export class AuthorityWorkerBootstrap {
 
   constructor(private readonly post: (message: AuthorityResponse) => void) {}
 
-  request(epoch: string, seed: number, generatorVersion: number): Promise<AuthorityInitialWorldBootstrap> {
+  request(
+    epoch: string,
+    seed: number,
+    generatorVersion: number,
+    provider: KernelWorldgenProviderIdentity,
+    starterEcology: StarterEcologyConfiguration | null,
+  ): Promise<AuthorityInitialWorldBootstrap> {
     if (this.pending) return Promise.reject(new Error('Authority bootstrap generation is already pending.'));
     const requestId = ++this.sequence;
     const promise = new Promise<AuthorityInitialWorldBootstrap>((resolve, reject) => {
@@ -45,6 +53,8 @@ export class AuthorityWorkerBootstrap {
       requestId,
       seed,
       generatorVersion,
+      provider,
+      starterEcology,
     });
     return promise;
   }

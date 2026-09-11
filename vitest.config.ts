@@ -1,22 +1,22 @@
 import { defineConfig } from 'vitest/config';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
 
+// Workspace convenience runner. Rule tests have an independent package entrypoint.
 export default defineConfig({
-  plugins: [svelte()],
   test: {
-    include: ['tests/**/*.test.ts'],
-    environment: 'node',
-    globals: false,
+    projects: [
+      'packages/kernel/vitest.config.ts',
+      'packages/stdlib/vitest.config.ts',
+      'apps/web/vitest.config.ts',
+      'apps/agent-server/vitest.config.ts',
+      'playbooks/classic/vitest.config.ts',
+    ],
     passWithNoTests: false,
     allowOnly: false,
     coverage: {
       provider: 'v8',
-      all: true,
-      include: ['packages/game-core/src/world/**/*.ts'],
+      include: ['packages/stdlib/src/world/**/*.ts'],
       reporter: ['text', 'json-summary', 'lcov'],
-      thresholds: {
-        lines: 80,
-      },
+      thresholds: { lines: 80 },
     },
   },
 });

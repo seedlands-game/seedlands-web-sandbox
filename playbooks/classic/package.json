@@ -1,0 +1,31 @@
+{
+  "name": "@seedlands/playbook-classic",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/pack.ts",
+    "./content/actors": "./src/actors.ts",
+    "./content/blocks": "./src/blocks.ts",
+    "./content/combat": "./src/combat.ts",
+    "./content/items": "./src/items.ts",
+    "./content/recipes": "./src/recipes.ts",
+    "./content/stations": "./src/stations.ts",
+    "./worldgen": "./src/worldgen.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "pnpm --dir ../.. exec vitest run --config playbooks/classic/vitest.config.ts",
+    "test:watch": "pnpm --dir ../.. exec vitest --config playbooks/classic/vitest.config.ts"
+  },
+  "dependencies": {
+    "@seedlands/stdlib": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

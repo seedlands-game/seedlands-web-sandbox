@@ -2,20 +2,22 @@ import { createChunkKernel, makeChunkStaged } from '../compute/chunk-kernel';
 import { createHaloKernel, createHaloStaged } from '../compute/halo-kernel';
 import { createMeshKernelInput, runMeshDescriptorKernel } from '../compute/mesh-kernel';
 import { createMeshPackKernel, runMeshPackKernel } from '../compute/mesh-pack-kernel';
-import { meshChunk } from '@seedlands/game-core/world/mesh';
-import { batchCompactMeshData } from '@seedlands/game-core/world/mesh-batching';
-import type { WorldComputeKernels } from '@seedlands/game-core/compute/world-compute-task';
+import { meshChunk } from '@seedlands/stdlib/world/mesh';
+import { batchCompactMeshData } from '@seedlands/stdlib/world/mesh-batching';
+import type { WorldComputeKernels } from '@seedlands/stdlib/server/compute/world-compute-task';
 import type { WorkerKernelState } from './wasm-kernel-loader';
+import { createWorldgenProviderRegistry } from '@seedlands/kernel/spatial';
+import { createClassicWorldgenProvider } from '@seedlands/playbook-classic/worldgen';
 
 export function worldKernelAdapter(state: WorkerKernelState): WorldComputeKernels {
   const { memory, selected } = state;
+  const generateChunk = memory && selected.includes('w02') ? createChunkKernel(memory) : makeChunkStaged;
   const kernels: WorldComputeKernels = {
-    makeChunk: makeChunkStaged,
+    providers: createWorldgenProviderRegistry([createClassicWorldgenProvider(generateChunk)]),
     prepareHalo: createHaloStaged,
     now: () => performance.now(),
   };
   if (!memory) return kernels;
-  if (selected.includes('w02')) kernels.makeChunk = createChunkKernel(memory);
   if (selected.includes('w03')) kernels.prepareHalo = createHaloKernel(memory);
   if (selected.includes('w04') || selected.includes('w05'))
     kernels.meshChunk = (options) => {

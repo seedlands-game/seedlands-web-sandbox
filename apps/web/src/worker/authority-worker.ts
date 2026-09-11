@@ -2,38 +2,35 @@
 
 import { browserWorldOwnerPolicy } from './authority-worker-world-policy';
 import { loadBrowserProductAssembly } from './pack-loader';
-import {
-  type ProductExtensionAdmission,
-  type VerifiedPackArtifact,
-} from '@seedlands/game-core/server/composition/host-api';
+import type { ProductExtensionAdmission, VerifiedPackArtifact } from '@seedlands/stdlib/server/composition/host-api';
 
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
-import { AuthorityRuntime } from '@seedlands/game-core/server/authority/authority-runtime';
-import { PROTOCOL_VERSION } from '@seedlands/game-core/runtime/session-protocol';
-import type { AuthorityRequest, AuthorityResponse } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
+import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
+import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { commitFluidCandidateAndPublish } from './authority-commit-publisher';
 import { browserCorePlatform } from '../platform/core-platform';
-import { MemoryGamePersistence } from '@seedlands/game-core/server/persistence/memory-game-persistence';
-import type { FrozenGameSaveSnapshot } from '@seedlands/game-core/server/persistence/game-save-snapshot';
+import { MemoryGamePersistence } from '@seedlands/stdlib/server/persistence/memory-game-persistence';
+import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
 import {
   AuthorityWorldHarness,
   type AuthorityWorldOwner,
-} from '@seedlands/game-core/server/harness/authority-world-harness';
+} from '@seedlands/stdlib/server/harness/authority-world-harness';
 import {
   WorldResourceAuthorizer,
   developmentWorldAuthorizationPolicy,
-} from '@seedlands/game-core/server/harness/world-authorization';
-import { dispatchWorldHarnessRpc } from '@seedlands/game-core/server/harness/world-harness-jsonl';
+} from '@seedlands/stdlib/server/harness/world-authorization';
+import { dispatchWorldHarnessRpc } from '@seedlands/stdlib/server/harness/world-harness-jsonl';
 import { BrowserAuthorityIngress, rejectStaleAuthorityMessage } from './authority-worker-ingress';
 import { SwitchableAuthorityPersistence } from './authority-worker-persistence';
-import type { AuthorityPersistence } from '@seedlands/game-core/server/authority/authority-runtime-options';
 import { AuthorityWorkerBootstrap } from './authority-worker-bootstrap';
 import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } from './authority-worker-response';
 import { BrowserCharacterAuthority } from './authority-worker-character-control';
 import { BrowserAuthorityDeterministicAdvance } from './authority-worker-deterministic-advance';
 import { AuthorityWorkerDirectLogicOwner } from './authority-worker-direct-logic-owner';
 import type { DirectLogicAttachRequest } from './authority-worker-direct-logic-protocol';
-import { createBrowserAuthorityComposition, disposeBrowserAuthorityWorker } from './authority-worker-runtime-lifecycle';
+import { disposeBrowserAuthorityWorker } from './authority-worker-runtime-lifecycle';
+import { createBrowserAuthorityRuntime, prepareBrowserAuthorityWorldgen } from './authority-worldgen-runtime';
 
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
@@ -45,13 +42,13 @@ let worldHarness: AuthorityWorldHarness | null = null;
 let worldEpoch = '';
 let worldRestoreSequence = 0;
 let interval: ReturnType<typeof setInterval> | null = null;
-let epoch = '';
-let runtimeEpoch = '';
+let epoch = '',
+  runtimeEpoch = '';
 let fluidEpoch = 1;
 let ingress: BrowserAuthorityIngress | null = null;
 let characterAuthority: BrowserCharacterAuthority | null = null;
-let lastSnapshotPublishedAt = Number.NEGATIVE_INFINITY;
-let lastGameplayPublishedAt = Number.NEGATIVE_INFINITY;
+let lastSnapshotPublishedAt = Number.NEGATIVE_INFINITY,
+  lastGameplayPublishedAt = Number.NEGATIVE_INFINITY;
 let tickQueued = false;
 let deterministicAdvance: BrowserAuthorityDeterministicAdvance | null = null;
 
@@ -109,33 +106,6 @@ const tick = () => {
     .finally(() => (tickQueued = false));
 };
 
-const createRuntime = (
-  seedText: string,
-  generatorVersion: number,
-  initialWorldTime: number,
-  runtimePersistence: AuthorityPersistence,
-  candidateEpoch = runtimeEpoch,
-  candidateFluidEpoch = fluidEpoch,
-) =>
-  AuthorityRuntime.create({
-    ...createBrowserAuthorityComposition(packArtifacts, approvedExtensions, developerPolicy),
-    allowLegacyCompositionMigration: true,
-    epoch: candidateEpoch,
-    seedText,
-    generatorVersion,
-    persistence: runtimePersistence,
-    initialWorldTime,
-    frequencies: runtime?.frequencies ?? { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
-    startTimeMs: 0,
-    startClock: browserCorePlatform.now,
-    platform: browserCorePlatform,
-    fluidEpoch: candidateFluidEpoch,
-    findInitialWorldBootstrap: (seed, generatorVersion) => bootstrap.request(epoch, seed, generatorVersion),
-    onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
-    onLogicObservation: publishLogicObservation,
-    onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
-  });
-
 const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
   const currentPersistence = persistence!;
   const temporary = new MemoryGamePersistence({ clone: browserCorePlatform.clone });
@@ -144,14 +114,21 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
   const nextRestoreSequence = worldRestoreSequence + 1;
   const nextRuntimeEpoch = `${epoch}:runtime:${nextRestoreSequence}`;
   const nextFluidEpoch = fluidEpoch + 1;
-  const candidate = await createRuntime(
-    snapshot.seedText,
-    snapshot.generatorVersion,
-    snapshot.gameplay.worldTime ?? 9,
-    candidatePersistence,
-    nextRuntimeEpoch,
-    nextFluidEpoch,
-  );
+  const prepared = prepareBrowserAuthorityWorldgen(packArtifacts, approvedExtensions, developerPolicy);
+  const candidate = await createBrowserAuthorityRuntime(prepared, {
+    epoch: nextRuntimeEpoch,
+    seedText: snapshot.seedText,
+    generatorVersion: snapshot.generatorVersion,
+    persistence: candidatePersistence,
+    initialWorldTime: snapshot.gameplay.worldTime ?? 9,
+    frequencies: runtime?.frequencies ?? { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
+    fluidEpoch: nextFluidEpoch,
+    findInitialWorldBootstrap: (seed, generatorVersion) =>
+      bootstrap.request(epoch, seed, generatorVersion, prepared.worldgenProvider.identity, prepared.starterEcology),
+    onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
+    onLogicObservation: publishLogicObservation,
+    onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
+  });
   try {
     candidate.server.validateStationCheckpoint(snapshot);
   } catch (error) {
@@ -186,27 +163,25 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   epoch = message.epoch;
   runtimeEpoch = epoch;
   fluidEpoch = 1;
-  persistence = await BrowserChunkPersistence.open(message.seedText, {
-    legacySnapshots: message.legacySnapshots as readonly SerializedChunkSnapshot[],
-    openMode: message.openMode,
-  });
   developerPolicy = message.developerWorldHarness
     ? developmentWorldAuthorizationPolicy('browser-developer')
     : undefined;
-  runtime = await AuthorityRuntime.create({
-    ...createBrowserAuthorityComposition(packArtifacts, approvedExtensions, developerPolicy),
-    allowLegacyCompositionMigration: true,
+  const prepared = prepareBrowserAuthorityWorldgen(packArtifacts, approvedExtensions, developerPolicy);
+  persistence = await BrowserChunkPersistence.open(message.seedText, {
+    legacySnapshots: message.legacySnapshots as readonly SerializedChunkSnapshot[],
+    openMode: message.openMode,
+    provider: prepared.worldgenProvider.identity,
+  });
+  runtime = await createBrowserAuthorityRuntime(prepared, {
     epoch,
     seedText: message.seedText,
     generatorVersion: persistence.generatorVersion,
     persistence,
     initialWorldTime: message.initialWorldTime,
     frequencies: message.frequencies,
-    startTimeMs: 0,
-    startClock: browserCorePlatform.now,
-    platform: browserCorePlatform,
     fluidEpoch,
-    findInitialWorldBootstrap: (seed, generatorVersion) => bootstrap.request(epoch, seed, generatorVersion),
+    findInitialWorldBootstrap: (seed, generatorVersion) =>
+      bootstrap.request(epoch, seed, generatorVersion, prepared.worldgenProvider.identity, prepared.starterEcology),
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
     onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
@@ -328,6 +303,7 @@ const handleCurrent = async (message: AuthorityRequest) => {
           cz: message.cz,
           chunkRevision: message.chunkRevision,
           generatorVersion: message.generatorVersion,
+          ...(message.provider ? { provider: message.provider } : {}),
           canonical: new Uint16Array(message.canonical),
         }),
       });

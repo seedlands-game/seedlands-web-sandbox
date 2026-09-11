@@ -1,8 +1,8 @@
 import * as pc from 'playcanvas';
 import type { Asset, PixelTexture } from '../../client/presentation/asset-types';
-import { meshChunk } from '@seedlands/game-core/world/mesh';
-import { batchMeshData } from '@seedlands/game-core/world/mesh-batching';
-import { CHUNK_SIZE, voxelIndex, type FaceMaterialId } from '@seedlands/game-core/world/voxel';
+import { meshChunk } from '@seedlands/stdlib/world/mesh';
+import { batchMeshData } from '@seedlands/stdlib/world/mesh-batching';
+import { CHUNK_SIZE, voxelIndex, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import { createVoxelMaterials } from '../scene/voxel-materials';
 import { QUALITY_PROFILES } from '../scene/quality-profile';
 import { renderCategoryForFaceMaterial } from '../scene/voxel-render-pipeline';

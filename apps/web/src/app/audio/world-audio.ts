@@ -1,6 +1,6 @@
 import type * as pc from 'playcanvas';
 import { CreatureAmbience } from '../../client/audio/creature-ambience';
-import { macroAt } from '@seedlands/game-core/world/macro-world';
+import { macroAt } from '@seedlands/stdlib/world/macro-world';
 import type { World } from '../world/world-runtime';
 import { FootstepTracker, MusicCueScheduler } from '../../client/audio/audio-policy';
 import { audioRandom, type MusicContext, type SfxKey } from '../../client/audio/audio-types';
@@ -11,8 +11,8 @@ import {
 } from '../../client/audio/gameplay-audio-events';
 import type { GlobalAudio } from './global-audio';
 import { WaterAudioPolicy } from '../../client/audio/water-audio-policy';
-import type { WaterImmersionSnapshot } from '@seedlands/game-core/world/water-immersion';
-import { Voxel } from '@seedlands/game-core/world/voxel';
+import type { WaterImmersionSnapshot } from '@seedlands/stdlib/world/water-immersion';
+import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
 
 export class WorldAudio {

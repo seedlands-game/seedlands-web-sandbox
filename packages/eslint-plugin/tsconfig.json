@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "strict": true,
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "types": ["node", "vitest/globals"],
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.mjs", "tests/**/*.ts", "vitest.config.ts"]
+}
