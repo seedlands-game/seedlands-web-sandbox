@@ -1,0 +1,27 @@
+11:32:56 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/fa24/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/fa24/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/migration-authority-capacity-sources.test.ts (5 tests | 1 failed | 4 skipped) 390ms
+     × bounds queued Block begins that are settled during the same advance 389ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/migration-authority-capacity-sources.test.ts > Authority Gameplay commit capacity sources > bounds queued Block begins that are settled during the same advance
+AssertionError: expected 196 to be less than or equal to 144
+ ❯ apps/web/tests/integration/runtime/migration-authority-capacity-sources.test.ts:128:44
+    126|     server.advanceGameplayRules(1.2);
+    127|
+    128|     expect(server.commitSequence - before).toBeLessThanOrEqual(upperBo…
+       |                                            ^
+    129|     expect(targets.filter((position) => server.getVoxel(...position) !…
+    130|     executions.forEach((execution) => execution.dispose());
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 skipped (5)
+   Start at  23:32:56
+   Duration  1.51s (transform 821ms, setup 0ms, import 1.02s, tests 390ms, environment 0ms)
+

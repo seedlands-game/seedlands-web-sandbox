@@ -1,0 +1,56 @@
+{
+  "baseSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+  "capturedAt": "2026-09-11T08:02:41.496Z",
+  "fixture": "base-checkpoint.json.gz",
+  "fixtureSha256": "f8ef2fbdad68a16fdcd2e5bea59b0fd96cdcc76ee697daf7f0dea6bff86329cc",
+  "uncompressedSha256": "c6f431f19bc45e5405d6991b1a6560bdebb62ac5b086011e70c701719600d0aa",
+  "bytes": 15291,
+  "identity": {
+    "protocolVersion": 1,
+    "worldId": "seedlands:g4:kernel-migration-c18a890-v1",
+    "epoch": "headless:kernel-migration-c18a890-v1",
+    "seed": 1669992306,
+    "seedText": "kernel-migration-c18a890-v1",
+    "generatorVersion": 4,
+    "playerId": "player-2",
+    "runtime": "authority",
+    "supported": {
+      "player": true,
+      "scriptedLogic": true,
+      "existingNpcSimulation": true
+    }
+  },
+  "entityId": "npc-3",
+  "packLock": {
+    "schemaVersion": 1,
+    "packs": [
+      {
+        "id": "seedlands:overworld",
+        "version": "1.0.0",
+        "manifest": {
+          "path": "overworld.manifest.json",
+          "sha256": "e3c199e87d101672c1635d481771972edbf39deb43c336063ab3753d0b01bb89"
+        },
+        "entry": {
+          "path": "overworld.mjs",
+          "sha256": "924d61fc72f253c85e191caa79f1c7ff51f83bc6237ad613a7c0c5595c2c169f"
+        },
+        "resources": []
+      }
+    ]
+  },
+  "lockfileSha256": "9c98dae17dee73c9b7d14ee4c433b57723b4c77a8086c547aeb52f611c16d580",
+  "verified": [
+    "base export/decode/restore",
+    "edited voxel",
+    "inventory and durability",
+    "running hold",
+    "speech exactly once"
+  ],
+  "notVerified": [
+    "station in-flight output",
+    "paired cognition/PG checkpoint",
+    "migrated architecture restore",
+    "browser C0-C5"
+  ]
+}
