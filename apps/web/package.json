@@ -20,7 +20,7 @@
   "dependencies": {
     "@seedlands/cognition-protocol": "workspace:*",
     "@seedlands/game-core": "workspace:*",
-    "playcanvas": "^2.21.4",
+    "playcanvas": "^2.22.1",
     "svelte": "^5.57.0",
     "tone": "^15.1.22"
   },
