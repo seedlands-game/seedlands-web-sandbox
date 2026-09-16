@@ -4,5 +4,6 @@
     "lib": ["ES2022", "DOM", "WebWorker"],
     "types": ["node", "vite/client"]
   },
-  "include": ["packages/kernel/tests", "packages/stdlib/tests"]
+  "include": ["packages/*/tests", "apps/*/tests", "playbooks/*/tests", "packages/*/benchmarks"],
+  "exclude": ["packages/eslint-plugin"]
 }

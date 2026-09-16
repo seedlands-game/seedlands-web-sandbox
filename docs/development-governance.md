@@ -80,7 +80,7 @@
 
 ## E2E 生命周期
 
-根目录不放测试。各 workspace 的单元/合同测试由自身 Vitest 配置维护，ESLint 插件另有独立包与静态规则测试入口。跨模块、宿主、工程和架构集成归 `apps/web/tests/integration/`。2026-09-16 架构冻结阶段只运行 Kernel 与 stdlib 的确定性行为测试；Classic 浏览器线路、runtime benchmark 和跨层验收在后续 Draft PR 暂存，当前没有活跃 E2E。`changes/<change>/` 保存合同、断言去向和当次证据，历史 E2E 源仅作追溯，不再按 change 路径启动。
+根目录不放测试。各 workspace 的单元/合同测试由自身 Vitest 配置维护，ESLint 插件另有独立包与测试入口。跨模块、宿主、工程和架构集成归 `apps/web/tests/integration/`；唯一活跃浏览器线路是 `apps/web/tests/e2e/classic-runtime.spec.ts`。`pnpm harness:classic` 与 runtime benchmark 共用此线路和生产产物。`changes/<change>/` 保存合同、断言去向和当次证据，历史 E2E 源仅作追溯，不再按 change 路径启动。
 
 - **Active**：当前 change 冻结合同，活跃断言进入对应 owner 的测试或唯一 Classic 线路，经影响计划执行。
 - **Delivered**：用例随 spec 保留为当次证据，不承诺随未来 API 变化维护。

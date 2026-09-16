@@ -1,0 +1,1831 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "runId": "2026-09-11t15-18-56-226z-dee595cc",
+  "startedAt": "2026-09-11T15:18:56.227Z",
+  "finishedAt": "2026-09-11T15:32:17.809Z",
+  "identity": {
+    "sourceSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+    "sourceDigest": "94e9b5c2a6daddc0119753b9599f6d54d550d8135096e1c93160c9a1b06ee203",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+  },
+  "planMode": "full-new",
+  "worktreeDigest": "ccb594f67f627d89f7fb30f9a79b82f291378ea6d17710d25b2312e7e5d0cb0f",
+  "planHash": "5966a73dd90d58efcb44438a30eeda9fc0402e16f59337538f0190ed2d4cf6a2",
+  "configHash": "a2c128cb94ca2b1450555b2b03e16fddc844603040def3701caf268fe89138c6",
+  "reports": {
+    "runtime.json": {
+      "sha256": "95a883ebebc2318c49b8fa0fee02253d4f5a3d65480aa4770482c32b07a96d3d",
+      "numTotalTestSuites": 798,
+      "numPassedTestSuites": 798,
+      "numFailedTestSuites": 0,
+      "numTotalTests": 2122,
+      "numPassedTests": 2122,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "files": [
+        {
+          "path": "packages/kernel/tests/kernel-events.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/kernel/tests/kernel-object-isolation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/kernel/tests/kernel-runtime-state-isolation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/kernel/tests/kernel-world.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "playbooks/classic/tests/content.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/backoff-recovery.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/behavior-capability-descriptor.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/behavior-capability-frame-budget.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/budget.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/bundled-entrypoint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/cognition-graph.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/context-session.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/deepseek-transport.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/gateway-model.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/github-host-fix.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/loopback-gateway-url.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/observation-plan-continuity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/persistent-workspace.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/real-three-evidence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-agent-finalization-cancellation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-agent.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-birth-codec.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-cancellation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-checkpoint-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-event-budget.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-factory-isolation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-factory-pg-isolation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-factory.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-host-duplicate.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-host-import-cancellation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-host-wire-breaking.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-host.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-scheduler.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/resident-turn-journal.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/round3-host-fix.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/round4-history.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/scheduler.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/websocket-host.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/wire-validation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/workspace-batch-import.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/agent-server/tests/workspace-review.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/physics/reachability.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/physics/step-body.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/runtime/active-clock.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/runtime/bounded-cost-samples.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/runtime/multi-rate-scheduler.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/runtime/session-protocol.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/action-identity-restore.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/action-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-baseline-capture.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-canonical-preparation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-checkpoint-restore.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-collision-baseline.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-entity-physics.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-input-neutralization.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-kernel-capacity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-mutation-preparation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-only-advancement.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-pause-frontier.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-physics-cost.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-session.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/authority-world-clock.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/behavior-provider-capacity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/chunk-residency.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/chunk-save-coordinator.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/creative-authority-physics.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/data-plane-fluid-lease.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/data-plane-navigation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/ecs-entity-owner.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/fluid-transaction.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/furnace-candidates.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/game-server.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/gameplay-body-geometry.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/gameplay-station-snapshot.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/ground-navigation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/headless-jsonl-transport.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/inventory-pointer-model.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/item-instance-owner.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/legacy-generator-save.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-action-request-reference.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-codecs.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-gameplay-consumer-reference.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-message-semantics.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-playable-protocol.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-baseline-budget.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-baseline-publication.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-baseline-reassembly-concurrency.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-baseline-reassembly.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-baseline.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-bootstrap-presentation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-input.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-integer-zero.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-interest-control.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-pose.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/network-reference-world-commit-presentation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/player-occupancy.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/prepared-action-settlement.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/safe-spawn.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/server-command.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/server-headless-cli.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/station-action-model.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/station-candidates.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/station-content.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/station-instance-identity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/voxel-fluid-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/world-collision-delta.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/world-mutation-transaction.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/world-resource-authorization.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/chunk-snapshot-codec.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/data-plane-codec.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/data-plane-mesh-capacity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/macro-river-v3.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/macro-world.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/mesh.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/storage.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/voxel-model.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/voxel.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/water-flow-direction.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/water-immersion.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/world/water-mesh.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/logic/logic-decision.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/stdlib/tests/server/logic/logic-terrain.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/migration-authority-capacity-sources.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/migration-authority-kernel-frontier.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/migration-checkpoint-compatibility.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/migration-kernel-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/migration-paired-cognition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/migration-provider-execution.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/migration-save-frontier.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/ore-generation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/voxel-progression.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/advanced-lighting.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/appearance-editor.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/application-shell.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/asset-editor-state.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/break-overlay-pattern.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/break-overlay.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/browser-session-config.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/browser-world-restore.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/builtin-actor-models.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/character-behavior-panel.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/chunk-resource-repository.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/client-capability-preflight.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/collision-debug-renderer.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/collision-debug-ui.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/combat-ui-projection.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/command-history.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/companion-session.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/damage-tint-material.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/debug-diagnostics.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/first-person-viewmodel.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/fluid-feedback-tracker.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/game-companion-pause.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/gameplay-entity-presenter.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/gameplay-model-assets.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/gameplay-ui-projection.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/glb-model-resource.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/item-visual-compatibility.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/mesh-preparation-telemetry.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/mesh-supersession-order.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/mesh-task-priority-fairness.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/mesh-task-scheduler-retry.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/mesh-task-scheduler.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/playcanvas-water-transition-adapter.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/playcanvas-water-transition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/player-collision-query.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/player-input-gates.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/player-view-offsets.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/prerendered-start-screen.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/reference-audio-lifecycle.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/reflection-projection.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/scene-bootstrap.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/sun-shadow-stability.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/ui-bridge.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/voxel-render-pipeline.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/water-mesh-transition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/water-reflection-plane.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/water-surface-transition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/world-authority-boundary.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/world-authority-commit-routing.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/world-entry-view.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/world-fluid-commit.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/world-space-sun.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/app/world-streaming-admission-retry.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/authority-commit-publisher.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/compute-worker-entry-lifecycle.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/compute-worker-task.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/data-plane-adapter.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/data-plane-defaults.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/data-plane-rust-loader.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/game-logic-worker.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/persistence-load-batch.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/persistence-worker-timing.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/procedural-chunk-base-cache.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/wasm-kernel-lifecycle.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/wasm-loader-fallback.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/worker/wasm-world-task-integration.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/acknowledged-world-edit-cache.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/actor-model-definitions.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/appearance-capacity-compatibility.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/appearance-catalog.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/appearance-project.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/asset-workbench.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/audio-composition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/audio-policy.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/authority-collision-mirror-client.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/authority-collision-mirror.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/authority-input-transport-integration.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/authority-session-control-state.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/authority-transport.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/authority-worker-deterministic-advance.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/authority-worker-direct-logic.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-authority-bootstrap.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-authority-client.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-authority-teleport.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-authority-world-harness.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-character-client.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-chunk-persistence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-compute-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-inventory-pointer.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-logic-client.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/browser-persistence-load-registry.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/character-controller-bridge.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/cognition-timeline.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/collision-debug-projection.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/combat-viewmodel-pose.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/compute-task-queue.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/compute-worker-diagnostics.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/compute-worker-pool.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/creative-container-input.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/creative-flight-prediction.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/creative-mode-ui.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/creative-station-ui.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/creature-ambience.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/entity-hit-volume.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/entity-presentation-motion.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/experimental-client-options.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/gameplay-audio-events.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/gameplay-model-definition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/glb-model.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/inventory-pointer-gestures.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/item-mesh-definition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/leaf-opacity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/legacy-station-assets.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/legacy-tool-appearance.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/local-player-prediction.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/mesh-task-snapshot.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/pack-loader.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/performance-profile.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/performance-telemetry.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/pixel-asset-scale.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/player-damage-feedback.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/player-input-stream.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/prediction-buffer.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/release-build.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/render-experiment.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/resident-bridge.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/resident-checkpoint-transfer.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/shell-controller.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/snapshot-interpolator.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/texture-pack.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/viewmodel-layout.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/visual-asset-catalog.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/voxel-target.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/voxel-tool-model.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/water-audio-policy.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/wood-sword-assets.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/unit/client/world-version-policy.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/client/application-checkpoint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/client/browser-character-authority.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/app/companion-checkpoint-recovery.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/app/melee-action-showcase.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/compute/kernel-diagnostics.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/compute/simd-kernel-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/compute/simd-pack-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/physics/body-registry.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/action-history-retention.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/actor-components-integration.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/actor-mode-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/authority-actor-rules.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/authority-entity-lifetime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/authority-game-server-port.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/authority-logic-lifetime-acceptance.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/authority-residency-observability.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/authority-starter-ecology.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/autonomy-restore-capacity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/behavior-capability-admission.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/behavior-capability-catalog-budget.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/behavior-capability-registry.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-behavior-review.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-behavior-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-body-obstacle.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-control-correctness.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-control-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-creation-atomicity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-creation-idempotency.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-danger-recovery.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-ecs-ownership.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-external-provider-restore.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-follow-perception.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-logic-goal-ownership.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-night-install-replay.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-resource-competition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-target-namespace.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-target-retention.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/character-threat-oscillation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/combat-durable-origin.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/combat-identity-restore.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/combat-lethal-recovery.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/combat-result-exhaustion.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/creative-block-interactions.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/data-plane-buffer-ownership.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/data-plane-entity-store.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/developer-tool-give-command.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/ecs-component-snapshot.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/ecs-station-state.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/entity-player-runtime.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/entity-store.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/fluid-interactive-priority.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/game-save-persistence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-action-identity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-atomic-inventory.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-atomic-vitals.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-command-persistence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-content-consumers.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-content-integration.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-foundation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-snapshot-migration.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/gameplay-unknown-chunk.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/headless-session.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/inventory-interaction.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/item-instance-inventory.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/item-inventory-recipe.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/lantern-gameplay.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/logic-observation-builder.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/network-action-reference.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/poi-perception.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-action-start.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-combat-damage.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-combat-effects.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-combat-frontier.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-combat-request.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-entity-mutation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-entity-series.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-feeding-effects.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-perception-records.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-station-mutation.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/prepared-world-edit.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/simulation-command-persistence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/survival-gameplay.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/wasm-fluid-control-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/wasm-fluid-logic-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/wasm-occupancy-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/world-action-retention.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/world-behavior-a.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/world-harness-session.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/world/data-plane-rust.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/world/wasm-codec-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/world/wasm-halo-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/world/wasm-mesh-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/world/wasm-mesh-pack-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/world/wasm-world-kernel-equivalence.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/actor-profile-closure.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/alternative-playbooks.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/block-action-candidates.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/block-content-ownership.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/block-rules-definition.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/block-script-host.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/combat-module-candidates.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/combat-script-host.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/crafting-provider.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/execution-kinds.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/execution-origin.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/feeding-candidates.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-actor-authority.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-block-stations.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-composition-checkpoint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-mining-progression.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-module-schedule.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-prepared-mode.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-block-actions.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-combat.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-feeding.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-forage.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-inventory-actions.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-inventory.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-mode.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-stations.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/inventory-action-candidates.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/logic-script-host.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/mining-tool-policy.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/mod-authorization.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/mode-command-host.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/module-lifecycle.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/npc-camp-pack.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/overworld-progression-journey.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/overworld-survival-days.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/partitioned-state.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/prepared-host-commit.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/product-extension-admission.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/recipe-instance-content.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/registered-content.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/registered-operations.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/rule-stages.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/secondary-actor-permissions.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/world-pack-assembly.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/runtime/server/composition/world-ruleset.test.ts",
+          "status": "passed"
+        }
+      ]
+    },
+    "packages-eslint-plugin.json": {
+      "sha256": "6e4f5b382418fe36d3976a08f1b0b94d5f6efbcf10348e573a9add2d324700fe",
+      "numTotalTestSuites": 24,
+      "numPassedTestSuites": 24,
+      "numFailedTestSuites": 0,
+      "numTotalTests": 66,
+      "numPassedTests": 66,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "files": [
+        {
+          "path": "packages/eslint-plugin/tests/authority-ownership-eslint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/client-app-boundary-eslint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/kernel-purity-eslint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/module-size-eslint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/monorepo-package-boundaries.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/node-runtime-boundary-eslint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/pack-api-boundary.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/runtime-purity-eslint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/ui-presentation-boundary-eslint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/wasm-boundary-eslint.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "packages/eslint-plugin/tests/world-purity-eslint.test.ts",
+          "status": "passed"
+        }
+      ]
+    },
+    "web-engineering.json": {
+      "sha256": "1252cb98d62fc0dbe57d3681041b6c564885df8863f61b684383b80e0279c504",
+      "numTotalTestSuites": 35,
+      "numPassedTestSuites": 35,
+      "numFailedTestSuites": 0,
+      "numTotalTests": 107,
+      "numPassedTests": 107,
+      "numFailedTests": 0,
+      "numPendingTests": 0,
+      "files": [
+        {
+          "path": "apps/web/tests/integration/architecture/active-contract-governance.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/data-plane-policy.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/e2e-server-ownership.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/exclusive-benchmark.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/legacy-wasm-removal.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/node-product-retirement.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/pack-api-consumer.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/rust-kernel-boundary.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/sdd-testing-governance.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/svelte-ui-boundary.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/architecture/wasm-ab-statistics.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/change-archive.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/ci-change-scope.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/harness-artifact.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/harness-browser-profiles.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/harness-classic-receipt.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/harness-impact-plan.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/harness-runner.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/pack-integrity.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/performance-baseline-window.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/performance-window.test.ts",
+          "status": "passed"
+        },
+        {
+          "path": "apps/web/tests/integration/engineering/seedlands-evidence-skill.test.ts",
+          "status": "passed"
+        }
+      ]
+    }
+  },
+  "boundary": "Dirty tree based on c18a890; subsequent implementation commit content must be compared by sourceDigest. No browser or performance claim."
+}

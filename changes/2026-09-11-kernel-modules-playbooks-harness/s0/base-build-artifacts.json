@@ -1,0 +1,359 @@
+{
+  "baseSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+  "command": "pnpm build",
+  "exitCode": 0,
+  "scope": "baseline production artifacts, not runtime acceptance",
+  "lockfileSha256": "9c98dae17dee73c9b7d14ee4c433b57723b4c77a8086c547aeb52f611c16d580",
+  "artifacts": [
+    {
+      "path": "apps/agent-server/dist/main.js",
+      "bytes": 192450,
+      "sha256": "bc7b3b16aa9994ad1900b344a0002c7df1a7d79f4590696c9a56458a3ea496db"
+    },
+    {
+      "path": "apps/web/dist/.vite/manifest.json",
+      "bytes": 3066,
+      "sha256": "3a03177d2b6530bf19ab88a0dc58a8e21ea26411ba798d5323bfcc359fbb7d09"
+    },
+    {
+      "path": "apps/web/dist/asset-workbench.html",
+      "bytes": 999,
+      "sha256": "1e28e1347e8bebfe25f79f586f3a533f1599d387f19b65c920788105f5e2553c"
+    },
+    {
+      "path": "apps/web/dist/assets/assets-BN_ItC_-.js",
+      "bytes": 58930,
+      "sha256": "2e9dcc63304c1ee58ca20060ef9545aff4bf22b3b8311c317380796f24032617"
+    },
+    {
+      "path": "apps/web/dist/assets/assets-D5PBeSxB.css",
+      "bytes": 18364,
+      "sha256": "ab99288f11482c449c223f4693c1eb3ae604ee75f581ce1883e2445f5f8c4c2d"
+    },
+    {
+      "path": "apps/web/dist/assets/authority-worker-qBxX8wuA.js",
+      "bytes": 749497,
+      "sha256": "f7124fe40c377556e633d7f2906c45d6fbe24343959a655d1cc32d1fa47a8c47"
+    },
+    {
+      "path": "apps/web/dist/assets/bootstrap-BmWe1pT6.css",
+      "bytes": 48699,
+      "sha256": "820e51333e7d506cb1b98d1b265cc8b82f80e49ea8ad3b0b0719ecebece1f39c"
+    },
+    {
+      "path": "apps/web/dist/assets/bootstrap-QsgKjLuf.js",
+      "bytes": 415214,
+      "sha256": "c02017bed6812093e19f9570afb32ae4f08d0d020baec8afe4899ff6b5c37c05"
+    },
+    {
+      "path": "apps/web/dist/assets/capability-probe-worker-Ck8l_HX8.js",
+      "bytes": 135,
+      "sha256": "cf442f58decbfac8e8f4e538f8d3443969a2d655af10db45ea185639c80ddbd3"
+    },
+    {
+      "path": "apps/web/dist/assets/chunk-persistence-benchmark-BkGMT2vo.js",
+      "bytes": 1966,
+      "sha256": "2b75bc97c853d840aef28f182c053531a0f3a10f0f46639617663751b12496cd"
+    },
+    {
+      "path": "apps/web/dist/assets/fluid-compute-worker-ztEY4CVU.js",
+      "bytes": 11609,
+      "sha256": "b9ddc7414f80061a0e198bd4b8025f6e3eb9b05a5fa5ea8024415b35d9e54e97"
+    },
+    {
+      "path": "apps/web/dist/assets/game-BDJalSam.js",
+      "bytes": 957,
+      "sha256": "54cebf283f3c86595afdaf2054843c51eef8803477b26f8d9ad6f6a97a8d3e2b"
+    },
+    {
+      "path": "apps/web/dist/assets/game-CdZPaJkk.css",
+      "bytes": 5738,
+      "sha256": "f4bae76d18204f01feea72771804c4a472e28845db33b330eb0c4c9735a1de45"
+    },
+    {
+      "path": "apps/web/dist/assets/game-logic-worker-DMRWPEAl.js",
+      "bytes": 16484,
+      "sha256": "59f9ce1084259bd235a4c7f5f6ca5501925a0cedcd38327083d8eeb3d75f1592"
+    },
+    {
+      "path": "apps/web/dist/assets/glb-model-resource-C1vvjMB9.js",
+      "bytes": 119732,
+      "sha256": "92631e74422bf4206e82951fcdba169eedfd46dec9505b7321f87146ef22c11f"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/berry.png",
+      "bytes": 30474,
+      "sha256": "c7d4931d33d6078ec15a619b1d81fea1ed94355d9511db4ccf0978b39dac723a"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/chest.png",
+      "bytes": 22208,
+      "sha256": "e07f9ad47f1b40da55ec1ab107068037221cee28bf606cce1e66f3f09faea06b"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/coal.png",
+      "bytes": 17538,
+      "sha256": "ad9d4cd7fc2292d059d48464e3d015d06f3e59be02e191254826f8db1f7860ef"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/dirt-block.png",
+      "bytes": 21702,
+      "sha256": "cf2ef7159cfc3231c20a82fef23d34ec138d74a12884708f47968881f566efa4"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/furnace.png",
+      "bytes": 18536,
+      "sha256": "417e69636c6c220b7c028ee9a6cdbb0772d872f265529ea5e9e1f779e6804424"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/glowstone-block.png",
+      "bytes": 20976,
+      "sha256": "f09b88b21dfb34f42d4270ccb3aad2b70838ed03136eac00e8127f7a06d8e5ae"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/iron-ingot.png",
+      "bytes": 16941,
+      "sha256": "2d257c3fac0edd73418c5420fc4562e590dace463fc3cf2d427fe67c2590e439"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/iron-pickaxe.png",
+      "bytes": 34284,
+      "sha256": "28426d3fe72976d7392b3718f8426c38b7557e8a35e939b1f05d8b30256c1de6"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/lantern.png",
+      "bytes": 13901,
+      "sha256": "7185749c773a65bf185fec086fa4a38102840827f1be530f3d46589acb5fe73c"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/plank.png",
+      "bytes": 18578,
+      "sha256": "efe4b5b02e382c8fc444a66a26a9ec12e4b0a0e7772fc555027ed45c6406c466"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/raw-iron.png",
+      "bytes": 18315,
+      "sha256": "d27bb62013e8324b62f94170f03ece7fe8cd431992d94cb957dfdeaa82fc1099"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/sand-block.png",
+      "bytes": 21938,
+      "sha256": "b7ed41f413d575cd0465b00ddcc30094ff88b9eba1bf33c994aba968453df592"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/stone-block.png",
+      "bytes": 21423,
+      "sha256": "a757883915f8db41d1af2d43e17cd286071233af24a788537378d57498a9088d"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/stone-pickaxe.png",
+      "bytes": 34566,
+      "sha256": "2920c244fe0a43e215b02d72734596ae8b5488dd0087798c5d7a30d3dc2553e8"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/wood-axe.png",
+      "bytes": 32873,
+      "sha256": "570dc0a036ce2bb950e8c276b5350aca881afb55007b8674cc1eb54d6aa59961"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/wood-block.png",
+      "bytes": 14908,
+      "sha256": "c74b006a9300fb5e850fa8f18465f84d8129541593a5e7b432bd747bf03b509f"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/wood-pickaxe.png",
+      "bytes": 33963,
+      "sha256": "e51f13c249478d8547062d3654d9c658aed0fd1f4237b02ae8ac0325909566e8"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/wood-sword.png",
+      "bytes": 25293,
+      "sha256": "a87636836168489a95412d501e889f015b234ebfa9b98cb51f8d9f9e405ddd54"
+    },
+    {
+      "path": "apps/web/dist/assets/item-thumbnails/workbench.png",
+      "bytes": 18656,
+      "sha256": "cb2f3059511ed44251a92e6eb57e60b4d360a59f3dc1b07804b9bfffcb94f0c2"
+    },
+    {
+      "path": "apps/web/dist/assets/items/berry.png",
+      "bytes": 9154,
+      "sha256": "2e4eaab574183963b0b504a05e5ce4101d3fd7d22eaa7be2f3e6dceefc5682a7"
+    },
+    {
+      "path": "apps/web/dist/assets/items/dirt-block.png",
+      "bytes": 5483,
+      "sha256": "96507ac9c67262f72f5bb5f1c8c4374496e42f3a22ecee708dee82228afc54ec"
+    },
+    {
+      "path": "apps/web/dist/assets/items/lantern.png",
+      "bytes": 11125,
+      "sha256": "3c5c8f24b61cc48432cbc1620a4429eee1fb68342a145c402ce3ebd66358404c"
+    },
+    {
+      "path": "apps/web/dist/assets/items/plank.png",
+      "bytes": 7579,
+      "sha256": "4daae9681ab7ad46993ebbea29a47c01320b4672e77996b85476321f08437cc7"
+    },
+    {
+      "path": "apps/web/dist/assets/items/sand-block.png",
+      "bytes": 12535,
+      "sha256": "dbda04e28c0842fd1b0bf64d47c8fe1d43aff75dfa3d57eea926fc5eff8bda1b"
+    },
+    {
+      "path": "apps/web/dist/assets/items/stone-block.png",
+      "bytes": 13348,
+      "sha256": "390b2d8626649e76658968817259dc648d38a598f907bc6bb6672097afec3d17"
+    },
+    {
+      "path": "apps/web/dist/assets/items/stone-pickaxe.png",
+      "bytes": 15483,
+      "sha256": "42f5bea8038c8d942c749a0feecef68b104416cdb5a7c7df340f260dfd399a93"
+    },
+    {
+      "path": "apps/web/dist/assets/items/wood-axe.png",
+      "bytes": 15185,
+      "sha256": "a85107a4d53639c68fe5839f9323c5b15eb26a32e0285d64ff4c8aca825729d1"
+    },
+    {
+      "path": "apps/web/dist/assets/items/wood-block.png",
+      "bytes": 14013,
+      "sha256": "3f9c6ca3fba24804d2c4cd1701ed53e8c1960e0225dd410caadcd885db90043e"
+    },
+    {
+      "path": "apps/web/dist/assets/modulepreload-polyfill-B5Qt9EMX.js",
+      "bytes": 711,
+      "sha256": "d2a32840421496e872ade591618d2fa5c33797605d1aec04301717e5a90757d0"
+    },
+    {
+      "path": "apps/web/dist/assets/persistence-worker-Buvq69cR.js",
+      "bytes": 30092,
+      "sha256": "e86cd9147b45b733b1f427899cc250efdb9ecfcb28b73a0e89ed21319bd92c5b"
+    },
+    {
+      "path": "apps/web/dist/assets/preload-helper-BXl3LOEh.js",
+      "bytes": 1110,
+      "sha256": "d887044e7c17fd90344fc4f74f53cac686584daf2a458ab2136d36f1946e9ab6"
+    },
+    {
+      "path": "apps/web/dist/assets/rust-kernels-scalar-CLU8pnyd.wasm",
+      "bytes": 23250,
+      "sha256": "c71876a142ce9ca95556e802f41a1ddaf4de017a3199f4e6e09bfdba66cbbcd4"
+    },
+    {
+      "path": "apps/web/dist/assets/rust-kernels-simd-Cm8GCA92.wasm",
+      "bytes": 24812,
+      "sha256": "6c27efb40b89e7d4602fe5767cc8f2e5d562d582302ecf4c8e430d1f2c42ab1b"
+    },
+    {
+      "path": "apps/web/dist/assets/samples/brass-trail-lantern.glb",
+      "bytes": 14452,
+      "sha256": "c480f979f19a72066da28015e0d96cb6103c411dacdc7a1557e4fef22110ac65"
+    },
+    {
+      "path": "apps/web/dist/assets/samples/static-crate.glb",
+      "bytes": 1848,
+      "sha256": "0398a0ec5d10a5e81fcbe92bf2e3ae925012e07a8172fe6eb9d98a337dd89040"
+    },
+    {
+      "path": "apps/web/dist/assets/ui/arcane-crest.png",
+      "bytes": 794695,
+      "sha256": "6adf5ab3bf693170ec6930ea7a1a9127bec1c396786a54de1d82fb95d9de1b70"
+    },
+    {
+      "path": "apps/web/dist/assets/ui/health-heart.png",
+      "bytes": 1070524,
+      "sha256": "420d5d7259def81ba52b862a1dc16216c5b6770916175f8123f84fc8c3ba4d98"
+    },
+    {
+      "path": "apps/web/dist/assets/ui/hunger-drumstick.png",
+      "bytes": 1137361,
+      "sha256": "e9aea4d225e0e11483c79b951104a51d155b37c3a3cf8ac6b6b8a74ca0790964"
+    },
+    {
+      "path": "apps/web/dist/assets/ui/obsidian-brass-panel.png",
+      "bytes": 2119538,
+      "sha256": "2503ddff8c1777f07fea8928019e8c22028aa97a22128c07f3cd6836901c79a3"
+    },
+    {
+      "path": "apps/web/dist/assets/ui/obsidian-hotbar-slot.png",
+      "bytes": 2007893,
+      "sha256": "2d48dd9b581396c8e5e7c769c95c780bce383922ff10d4ca9d97ee8cee39a910"
+    },
+    {
+      "path": "apps/web/dist/assets/vendor-common-C-HJGUI9.js",
+      "bytes": 103558,
+      "sha256": "2e1d6b756bc7041222dec0e600ba40e47d52bdf19c7009543a4334cb2aa9df36"
+    },
+    {
+      "path": "apps/web/dist/assets/vendor-playcanvas-CBjUh44E.js",
+      "bytes": 1999391,
+      "sha256": "1119914915634ad3e3988fe5f8d5cc25d041ea27230df249efc34d0c487fd00e"
+    },
+    {
+      "path": "apps/web/dist/assets/vendor-svelte-DuLpWegy.js",
+      "bytes": 46618,
+      "sha256": "2258acff69382e564b1a3fbf88d4626657e0d5b4674de12d39c58ebfd74aadbc"
+    },
+    {
+      "path": "apps/web/dist/assets/vendor-tone-BY9rJNPW.js",
+      "bytes": 131702,
+      "sha256": "3ea160e19a73040c74a9947207976b985195ed725bbe49a00c9bb3768f3ef676"
+    },
+    {
+      "path": "apps/web/dist/assets/voxel-atlas.webp",
+      "bytes": 67232,
+      "sha256": "0736ddf633567ecb04d33b8a5bc3f761667c965763319101922ff340c342cf5f"
+    },
+    {
+      "path": "apps/web/dist/assets/voxels/grass.png",
+      "bytes": 70966,
+      "sha256": "64db3ffee93a6ea531b9de460920f384bac05b54682e8c470d3ec636a0b4cb62"
+    },
+    {
+      "path": "apps/web/dist/assets/voxels/leaves.png",
+      "bytes": 64952,
+      "sha256": "f2ea8303470223c5e47a9d537df83daf4dc686946092cd66d6932f97300f44dd"
+    },
+    {
+      "path": "apps/web/dist/assets/voxels/snow.png",
+      "bytes": 51648,
+      "sha256": "da52f0bed759f991b953c26151b77b15950f50fd8025fcc11de25364feeac7e1"
+    },
+    {
+      "path": "apps/web/dist/assets/world-worker-BFCy_4DW.js",
+      "bytes": 41959,
+      "sha256": "4a149e6e819d6c50d389a8f7b072bec487d1f1ffd24a0760b7a27bedf4285198"
+    },
+    {
+      "path": "apps/web/dist/index.html",
+      "bytes": 4455,
+      "sha256": "811dea28d5cd4b6bdb430fb04ae6325d96c6158e25f26f02f0b7c1f8202a8cb2"
+    },
+    {
+      "path": "apps/web/dist/models/voxel-settler-animated.glb",
+      "bytes": 47428,
+      "sha256": "6b29f4432ed05c15d94bd0446e692465a3c5ac96116011b4469a5f45c1146925"
+    },
+    {
+      "path": "apps/web/dist/packs/host-admissions.json",
+      "bytes": 45,
+      "sha256": "44afb65bc1357c75841f9f59eedb256a4cfa63cca10bc34c356f7c4b8c2e7b21"
+    },
+    {
+      "path": "apps/web/dist/packs/overworld.manifest.json",
+      "bytes": 13502,
+      "sha256": "e3c199e87d101672c1635d481771972edbf39deb43c336063ab3753d0b01bb89"
+    },
+    {
+      "path": "apps/web/dist/packs/overworld.mjs",
+      "bytes": 285136,
+      "sha256": "924d61fc72f253c85e191caa79f1c7ff51f83bc6237ad613a7c0c5595c2c169f"
+    },
+    {
+      "path": "apps/web/dist/packs/packs.lock.json",
+      "bytes": 439,
+      "sha256": "7cb2e91732b6678bcbdeca9db5190a448922b90d21f80be84591cf0ee06445b6"
+    }
+  ]
+}
