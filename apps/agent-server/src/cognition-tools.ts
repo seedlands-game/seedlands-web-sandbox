@@ -2,7 +2,7 @@ import type {
   CharacterGoal,
   CharacterObservation,
   CharacterTargetRef,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { DeepSeekTool, DeepSeekToolCall } from './model-types.js';
 
 export const COGNITION_TOOLS: readonly DeepSeekTool[] = [

@@ -7,8 +7,8 @@ import type { VoxelTarget } from '../../client/presentation/voxel-target';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
 import { entityHitDistance } from '../../client/presentation/entity-hit-volume';
 import type * as pc from 'playcanvas';
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
-import { voxelNames } from '@seedlands/game-core/world/voxel';
+import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
+import { voxelNames } from '@seedlands/stdlib/world/voxel';
 import { GameplayEntityPresenter } from './gameplay-entity-presenter';
 import { projectGameplayUi, type GameplayUiProjection } from '../ui/gameplay-ui-projector';
 import type { UiBridge, UiWorldSession } from '../ui/ui-bridge';
@@ -18,12 +18,12 @@ import type {
   AuthorityAction,
   AuthorityActionResult,
   AuthorityGameplayView,
-} from '@seedlands/game-core/compute/authority-worker-protocol';
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
-import type { CommandResult, ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
+import type { CommandResult, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import { createMeleeShowcaseIds, meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
 import { executeBrowserModeCommand, type BrowserModeCommandExecutor } from './browser-gameplay-actions';
-import type { ModeCommand } from '@seedlands/game-core/server/commands/module-command';
+import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 import type { ActorMode } from '../ui/ui-contracts';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
@@ -484,7 +484,9 @@ export class BrowserGameplay {
 
   private itemDefinition(itemId: string) {
     const definitions = this.options.authority.gameplay.items;
-    return definitions ? definitions.find((definition) => definition.id === itemId) : getItemDefinition(itemId);
+    return definitions
+      ? definitions.find((definition) => definition.id === itemId)
+      : requireClassicItemDefinition(itemId);
   }
 
   private present(event: GameplayPresentationEvent): void {

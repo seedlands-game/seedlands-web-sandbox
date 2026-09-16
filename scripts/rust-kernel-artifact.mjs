@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 const root = resolve(import.meta.dirname, '..');
-const evidence = resolve(root, 'changes/2026-09-07-data-plane-adoption/evidence');
+const evidence = resolve(root, 'harness/results/rust-build');
 const output = resolve(root, 'apps/web/src/generated/wasm');
 const hash = (path) =>
   createHash('sha256')

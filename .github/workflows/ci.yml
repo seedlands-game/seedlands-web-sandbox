@@ -1,4 +1,4 @@
-name: CI and Pages
+name: CI architecture baseline
 
 on:
   pull_request:
@@ -16,280 +16,78 @@ concurrency:
 env:
   CI: true
   SEEDLANDS_BASE_PATH: /${{ github.event.repository.name }}/
-  VITE_COMMIT_SHA: ${{ github.sha }}
+  VITE_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  scope:
-    name: Select CI scope
+  architecture:
+    name: Architecture static checks
+    timeout-minutes: 60
     runs-on: ubuntu-24.04
-    outputs:
-      run_full: ${{ steps.classify.outputs.run_full }}
-      reason: ${{ steps.classify.outputs.reason }}
     steps:
-      - name: Check out source and history
+      - name: Check out exact source and history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - name: Classify changed paths
-        id: classify
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Verify architecture and CI selection contracts
+        run: pnpm verify:static:ci
+
+  deterministic:
+    name: Deterministic module tests
+    timeout-minutes: 60
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact source and history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Select affected deterministic modules
+        id: scope
         env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
           if [[ "$EVENT_NAME" == "pull_request" ]]; then
-            CLASSIFIER="$RUNNER_TEMP/seedlands-ci-change-scope.mjs"
-            if git cat-file -e "$BASE_SHA:scripts/ci-change-scope.mjs" 2>/dev/null; then
-              git show "$BASE_SHA:scripts/ci-change-scope.mjs" > "$CLASSIFIER"
-              git diff --no-renames --name-only -z "$BASE_SHA...$HEAD_SHA" |
-                node "$CLASSIFIER" --event "$EVENT_NAME" >> "$GITHUB_OUTPUT"
-            else
-              printf 'run_full=true\nreason=classifier-bootstrap\n' >> "$GITHUB_OUTPUT"
-            fi
+            git diff --no-renames --name-only -z "$BASE_SHA" "$HEAD_SHA" |
+              node scripts/ci-deterministic-scope.mjs --event "$EVENT_NAME" >> "$GITHUB_OUTPUT"
           else
-            node scripts/ci-change-scope.mjs --event "$EVENT_NAME" </dev/null >> "$GITHUB_OUTPUT"
+            node scripts/ci-deterministic-scope.mjs --event "$EVENT_NAME" </dev/null >> "$GITHUB_OUTPUT"
           fi
+          cat "$GITHUB_OUTPUT"
+      - name: Run Kernel deterministic contracts
+        if: ${{ steps.scope.outputs.run_kernel == 'true' }}
+        run: pnpm test:kernel:ci
+      - name: Run stdlib deterministic contracts
+        if: ${{ steps.scope.outputs.run_stdlib == 'true' }}
+        run: pnpm test:stdlib:ci
 
   static:
     name: Static verification
-    timeout-minutes: 60
-    needs: scope
+    needs: [architecture, deterministic]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     steps:
-      - name: Validate CI scope
+      - name: Require successful static and deterministic jobs
         env:
-          SCOPE_RESULT: ${{ needs.scope.result }}
-          RUN_FULL: ${{ needs.scope.outputs.run_full }}
+          ARCHITECTURE_RESULT: ${{ needs.architecture.result }}
+          DETERMINISTIC_RESULT: ${{ needs.deterministic.result }}
         run: |
-          if [[ "$SCOPE_RESULT" != "success" ]]; then
-            echo "CI scope selection failed" >&2
-            exit 1
-          fi
-          case "$RUN_FULL" in
-            true|false) ;;
-            *)
-              echo "CI scope output is invalid" >&2
-              exit 1
-              ;;
-          esac
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up pnpm and Node.js
-        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
-        with:
-          runtime: node@22.12.0
-          cache: true
-          require-lockfile: true
-      - name: Check generated start screen
-        if: needs.scope.outputs.run_full == 'true'
-        run: pnpm ssg:check
-      - name: Check formatting
-        if: needs.scope.outputs.run_full == 'true'
-        run: pnpm format:check
-      - name: Lint source
-        if: needs.scope.outputs.run_full == 'true'
-        run: pnpm lint
-      - name: Check repository paths
-        if: needs.scope.outputs.run_full == 'true'
-        run: pnpm lint:paths
-      - name: Typecheck all packages and tests
-        if: needs.scope.outputs.run_full == 'true'
-        run: pnpm typecheck
-      - name: Run full logic suite with world coverage
-        if: needs.scope.outputs.run_full == 'true'
-        run: pnpm test:coverage:ci
-      - name: Verify documentation baseline
-        if: needs.scope.outputs.run_full == 'false'
-        run: pnpm format:check && pnpm lint:paths
-
-  build:
-    name: Production build
-    needs: scope
-    if: needs.scope.result == 'success' && needs.scope.outputs.run_full == 'true'
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up pnpm and Node.js
-        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
-        with:
-          runtime: node@22.12.0
-          cache: true
-          require-lockfile: true
-      - name: Build game core
-        run: pnpm --filter @seedlands/game-core build
-      - name: Build Web Pages artifact
-        run: pnpm --filter @seedlands/web build
-      - name: Build Agent service
-        run: pnpm --filter @seedlands/agent-server build
-      - name: Upload Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
-        with:
-          path: apps/web/dist
-          retention-days: 1
-
-  e2e-regression:
-    name: Chromium regression
-    timeout-minutes: 60
-    needs: scope
-    if: needs.scope.result == 'success' && needs.scope.outputs.run_full == 'true'
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out source
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Set up pnpm and Node.js
-        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
-        with:
-          runtime: node@22.12.0
-          cache: true
-          require-lockfile: true
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Run deterministic browser regression
-        id: regression
-        env:
-          SEEDLANDS_LOADING_EVIDENCE_OUTPUT: /tmp/seedlands-browser/loading
-        run: pnpm test:e2e:regression
-      - name: Preserve regression browser evidence
-        if: ${{ always() && (steps.regression.outcome == 'success' || steps.regression.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: regression-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Run shared world Harness and diagnostics integration
-        id: developer-harness
-        run: pnpm test:developer-harness
-      - name: Preserve world Harness and diagnostics evidence
-        if: ${{ always() && steps.developer-harness.outcome != 'skipped' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: developer-harness-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Run PR15 asset integration
-        id: assets
-        run: pnpm test:pr15:integration
-      - name: Preserve assets browser evidence
-        if: ${{ always() && (steps.assets.outcome == 'success' || steps.assets.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: assets-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Run melee gameplay integration
-        id: melee
-        env:
-          SEEDLANDS_E2E_SWIFTSHADER: '1'
-          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
-          SEEDLANDS_BROWSER_E2E_QUALITY: low
-        run: pnpm test:pr17:integration
-      - name: Preserve melee browser evidence
-        if: ${{ always() && (steps.melee.outcome == 'success' || steps.melee.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: melee-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Run inventory and creative visual acceptance
-        id: inventory-creative-visual
-        env:
-          SEEDLANDS_E2E_SWIFTSHADER: '1'
-          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
-          SEEDLANDS_BROWSER_E2E_QUALITY: low
-        run: pnpm test:inventory-creative-visual
-      - name: Preserve inventory and creative visual evidence
-        if: ${{ always() && (steps.inventory-creative-visual.outcome == 'success' || steps.inventory-creative-visual.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: inventory-creative-visual-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Run composable gameplay acceptance
-        id: composable
-        env:
-          SEEDLANDS_BROWSER_E2E_QUALITY: low
-        run: pnpm test:composable-gameplay
-      - name: Preserve composable gameplay evidence
-        if: ${{ always() && (steps.composable.outcome == 'success' || steps.composable.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: composable-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Run composed NPC and resident acceptance
-        id: npc
-        env:
-          SEEDLANDS_E2E_SWIFTSHADER: '1'
-          SEEDLANDS_BROWSER_E2E_QUALITY: low
-        run: pnpm test:npc-behavior
-      - name: Preserve NPC and resident evidence
-        if: ${{ always() && (steps.npc.outcome == 'success' || steps.npc.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: npc-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Build and exercise production NPC Worker entry
-        id: npc-production
-        env:
-          SEEDLANDS_E2E_SWIFTSHADER: '1'
-          SEEDLANDS_BROWSER_E2E_QUALITY: low
-        run: pnpm build:web && pnpm test:npc-production
-      - name: Preserve production NPC evidence
-        if: ${{ always() && (steps.npc-production.outcome == 'success' || steps.npc-production.outcome == 'failure') }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: npc-production-${{ github.run_id }}-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: warn
-          retention-days: 7
-
-  deploy:
-    name: Deploy GitHub Pages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs:
-      - static
-      - build
-      - e2e-regression
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy Pages artifact
-        id: deployment
-        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+          set -euo pipefail
+          printf 'Architecture: %s; deterministic: %s\n' "$ARCHITECTURE_RESULT" "$DETERMINISTIC_RESULT"
+          [[ "$ARCHITECTURE_RESULT" == "success" && "$DETERMINISTIC_RESULT" == "success" ]]

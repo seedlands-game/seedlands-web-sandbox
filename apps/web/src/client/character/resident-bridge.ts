@@ -9,7 +9,7 @@ import {
   type ResidentStatus,
   type ResidentWorldBinding,
 } from '@seedlands/cognition-protocol';
-import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import type { BehaviorCapability } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 import type { BoundCharacterControlPort } from '../authority/browser-authority-client-contract';
 import { validateControllerUrl } from './controller-bridge-validation';
 

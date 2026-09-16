@@ -1,4 +1,4 @@
-import type { CorePlatformPorts } from '@seedlands/game-core/runtime/platform-ports';
+import type { CorePlatformPorts } from '@seedlands/stdlib/runtime/platform-ports';
 
 const encoder = new TextEncoder();
 const fatalDecoder = new TextDecoder('utf-8', { fatal: true });

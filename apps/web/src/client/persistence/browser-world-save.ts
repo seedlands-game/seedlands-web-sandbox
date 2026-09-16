@@ -1,5 +1,5 @@
-import type { ChunkSnapshot } from '@seedlands/game-core/server/persistence/chunk-persistence';
-import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION } from '@seedlands/game-core/world/voxel';
+import type { ChunkSnapshot } from '@seedlands/stdlib/server/persistence/chunk-persistence';
+import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION } from '@seedlands/stdlib/world/voxel';
 
 export type SerializedChunkSnapshot = Omit<ChunkSnapshot, 'voxels' | 'fluid'> & {
   voxels: number[];

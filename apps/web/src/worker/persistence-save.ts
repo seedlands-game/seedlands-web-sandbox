@@ -2,7 +2,7 @@ import {
   createStoredChunkRecord,
   storedChunkRecordBytes,
   type StoredChunkRecord,
-} from '@seedlands/game-core/world/chunk-snapshot-codec';
+} from '@seedlands/stdlib/world/chunk-snapshot-codec';
 import type { PersistenceSaveTask } from './persistence-worker-protocol';
 import { browserCorePlatform } from '../platform/core-platform';
 

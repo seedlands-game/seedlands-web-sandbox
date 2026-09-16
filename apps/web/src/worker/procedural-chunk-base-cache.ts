@@ -1,6 +1,7 @@
 export type ProceduralChunkIdentity = Readonly<{
   seedText: string;
   generatorVersion: number;
+  providerIdentity: string;
   cx: number;
   cy: number;
   cz: number;
@@ -9,8 +10,8 @@ export type ProceduralChunkIdentity = Readonly<{
 const MAX_ENTRY_COUNT = 64;
 const MAX_BYTE_LENGTH = 4 * 1_024 * 1_024;
 
-const identityKey = ({ seedText, generatorVersion, cx, cy, cz }: ProceduralChunkIdentity) =>
-  JSON.stringify([seedText, generatorVersion, cx, cy, cz]);
+const identityKey = ({ seedText, generatorVersion, providerIdentity, cx, cy, cz }: ProceduralChunkIdentity) =>
+  JSON.stringify([seedText, generatorVersion, providerIdentity, cx, cy, cz]);
 
 export class ProceduralChunkBaseCache {
   private readonly entries = new Map<string, Uint16Array>();

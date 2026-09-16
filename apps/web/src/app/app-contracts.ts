@@ -1,5 +1,5 @@
-import type { MeshData } from '@seedlands/game-core/world/mesh';
-import type { WorldChange } from '@seedlands/game-core/world/storage';
+import type { MeshData } from '@seedlands/stdlib/world/mesh';
+import type { WorldChange } from '@seedlands/stdlib/world/storage';
 import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { MeshTaskIdentity } from '../client/compute/mesh-task-snapshot';
 import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
@@ -9,11 +9,12 @@ import type { UiMetrics } from './ui/ui-contracts';
 import type { VisualEffectsSnapshot } from './scene/advanced-visual-effects';
 import type { FluidFeedbackSummary } from './gameplay/fluid-feedback-tracker';
 import type { WaterMeshTransitionSnapshot } from './scene/water-mesh-transition';
-import type { CostSampleWindow } from '@seedlands/game-core/runtime/bounded-cost-samples';
+import type { CostSampleWindow } from '@seedlands/stdlib/runtime/bounded-cost-samples';
 import type { CollisionDebugRendererDiagnostics } from './player/collision-debug-renderer';
 import type { ComputePoolDiagnostics } from '../client/compute/compute-worker-pool';
-import type { FluidAuthorityDiagnostics } from '@seedlands/game-core/server/fluid/fluid-transaction';
-import type { AuthorityResidencyDiagnostics } from '@seedlands/game-core/server/authority/authority-residency-runtime';
+import type { FluidAuthorityDiagnostics } from '@seedlands/stdlib/server/fluid/fluid-transaction';
+import type { AuthorityResidencyDiagnostics } from '@seedlands/stdlib/server/authority/authority-residency-runtime';
+import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 
 export type MeshPart = MeshData;
 
@@ -36,6 +37,7 @@ export type WorkerResult = {
   macroContextCount?: number;
   canonical?: ArrayBuffer;
   generatorVersion?: number;
+  provider?: KernelWorldgenProviderIdentity;
   meshes: MeshPart[];
 };
 

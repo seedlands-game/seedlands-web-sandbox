@@ -1,4 +1,4 @@
-import type { MeshData, RenderCategory } from '@seedlands/game-core/world/mesh';
+import type { MeshData, RenderCategory } from '@seedlands/stdlib/world/mesh';
 import { KernelMemory } from './kernel-memory';
 
 export const MESH_PACK_INPUT_OFFSET = 64;

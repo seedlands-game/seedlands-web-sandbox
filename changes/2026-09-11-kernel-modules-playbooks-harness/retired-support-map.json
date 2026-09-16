@@ -1,0 +1,32 @@
+{
+  "reason": "No active imports remain; canonical route owns classic-support. Original helpers are retained for frozen historical checkout only.",
+  "files": {
+    "apps/web/tests/e2e/support/chunk-persistence-harness.ts": "changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/support/chunk-persistence-harness.ts",
+    "apps/web/tests/e2e/support/result.ts": "changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/support/result.ts",
+    "apps/web/tests/e2e/support/harness.ts": "changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/support/harness.ts",
+    "apps/web/tests/e2e/support/item-icon-centering.ts": "changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/support/item-icon-centering.ts"
+  },
+  "baseSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+  "originals": [
+    {
+      "from": "tests/e2e/support/chunk-persistence-harness.ts",
+      "to": "changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/support/chunk-persistence-harness.ts",
+      "sha256": "c55e43400424326b280b53e6409c4f3524698d9e0420a1b1f9482add196e9f4a"
+    },
+    {
+      "from": "tests/e2e/support/result.ts",
+      "to": "changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/support/result.ts",
+      "sha256": "093b7be290bcac37c140590991772b37609de1c2999c78e32e226e078b203dab"
+    },
+    {
+      "from": "tests/e2e/support/harness.ts",
+      "to": "changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/support/harness.ts",
+      "sha256": "4d44f4679897b07a807d18f3ef9ad199e5b2b9d45d87900291d6f471e72a0ddc"
+    },
+    {
+      "from": "tests/e2e/support/item-icon-centering.ts",
+      "to": "changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/support/item-icon-centering.ts",
+      "sha256": "b699e679bca81fea894f2ddff4b10924acfad102ada5d80b6524b061e1ebe2c1"
+    }
+  ]
+}

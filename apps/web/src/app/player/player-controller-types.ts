@@ -3,8 +3,8 @@ import type { PerformanceTelemetry } from '../../client/presentation/performance
 import type { VoxelTarget } from '../../client/presentation/voxel-target';
 import type { WorldEnvironment } from '../scene/world-environment';
 import type { World } from '../world/world-runtime';
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
-import type { InputCommand, SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
+import type { InputCommand, SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
 
 export type PlayerControllerOptions = {
   camera: pc.Entity;

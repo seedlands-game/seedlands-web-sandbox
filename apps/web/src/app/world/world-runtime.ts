@@ -1,10 +1,11 @@
 import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
-import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/game-core/world/voxel';
-import type { WorldChange } from '@seedlands/game-core/world/storage';
-import type { WorldCommitResult, WorldEditBatch } from '@seedlands/game-core/server/game-server-types';
-import type { AuthorityGameplayView } from '@seedlands/game-core/compute/authority-worker-protocol';
-import { resolveFillCommand, type FillCommand } from '@seedlands/game-core/server/commands/fill-command';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
+import type { WorldChange } from '@seedlands/stdlib/world/storage';
+import type { WorldCommitResult, WorldEditBatch } from '@seedlands/stdlib/server/game-server-types';
+import type { AuthorityGameplayView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import { resolveFillCommand, type FillCommand } from '@seedlands/stdlib/server/commands/fill-command';
 import type { PerformanceProfile } from '../../client/presentation/performance-profile';
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
 import type { MeshPart, PendingMeshTask, PerformanceSummary, StreamingVariant } from '../app-contracts';
@@ -44,6 +45,7 @@ export type WorldAuthorityPort = Readonly<{
   seedText: string;
   seed: number;
   generatorVersion: number;
+  worldgenProvider: KernelWorldgenProviderIdentity;
   mutationCount: number;
   worldRevision: number;
   worldTime: number;
@@ -60,13 +62,18 @@ export type WorldAuthorityPort = Readonly<{
   ): {
     chunkRevision: number;
     generatorVersion: number;
+    provider?: KernelWorldgenProviderIdentity;
     canonical?: Uint16Array;
     fluid?: Uint8Array;
     overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
   };
   acceptWorkerCanonical(
     task: PendingMeshTask,
-    result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>,
+    result: Readonly<{
+      canonical?: ArrayBuffer;
+      generatorVersion?: number;
+      provider?: KernelWorldgenProviderIdentity;
+    }>,
   ): boolean | Promise<boolean>;
   getVoxel(x: number, y: number, z: number): number;
   getFluidCell(x: number, y: number, z: number): { level: number; source: boolean } | null;
@@ -115,6 +122,9 @@ export class World {
       },
       get generatorVersion() {
         return authority.generatorVersion;
+      },
+      get provider() {
+        return authority.worldgenProvider;
       },
       beforePrepare: (cx, cy, cz) =>
         prepareStreamingNeighborhood(() => authority.ensureChunkNeighborhood(cx, cy, cz), this.streamingAdmissionRetry),

@@ -1,19 +1,19 @@
 import * as pc from 'playcanvas';
-import { Voxel } from '@seedlands/game-core/world/voxel';
+import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../../client/presentation/voxel-target';
 import {
   DRY_WATER_IMMERSION,
   sampleWaterImmersion,
   type WaterImmersionSnapshot,
-} from '@seedlands/game-core/world/water-immersion';
+} from '@seedlands/stdlib/world/water-immersion';
 import type { PlayerControllerOptions } from './player-controller-types';
 import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 import { LocalPlayerPrediction } from '../../client/local-player-prediction';
-import { bodyConfigFor } from '@seedlands/game-core/physics';
-import { VoxelCollisionWorld } from '@seedlands/game-core/server/authority/voxel-collision-world';
-import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/game-core/world/voxel';
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
+import { bodyConfigFor } from '@seedlands/stdlib/physics';
+import { VoxelCollisionWorld } from '@seedlands/stdlib/server/authority/voxel-collision-world';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
 import { PlayerDebugTimeKeys } from './player-debug-time-keys';
 import { bodyOverlapsWorld } from './player-collision-query';
 import { playerDamageCameraOffset } from '../../client/presentation/player-damage-feedback';

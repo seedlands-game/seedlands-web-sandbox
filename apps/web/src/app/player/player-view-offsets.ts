@@ -1,4 +1,4 @@
-import { bodyConfigFor } from '@seedlands/game-core/physics/body-registry';
+import { bodyConfigFor } from '@seedlands/stdlib/physics/body-registry';
 
 const PLAYER_BODY_HEIGHT = bodyConfigFor('player').localAabb.max.y - bodyConfigFor('player').localAabb.min.y;
 export const PLAYER_HEAD_OFFSET = 0.2;

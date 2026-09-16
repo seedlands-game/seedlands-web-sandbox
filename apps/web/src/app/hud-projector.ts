@@ -1,6 +1,6 @@
 import type * as pc from 'playcanvas';
-import { macroAt } from '@seedlands/game-core/world/macro-world';
-import { GENERATOR_VERSION, floorDiv } from '@seedlands/game-core/world/voxel';
+import { macroAt } from '@seedlands/stdlib/world/macro-world';
+import { GENERATOR_VERSION, floorDiv } from '@seedlands/stdlib/world/voxel';
 import type { PerformanceProfile } from '../client/presentation/performance-profile';
 import { PLAYER_FEET_OFFSET } from './player/player-controller';
 import { QUALITY_PROFILES, type QualityLevel } from './scene/quality-profile';

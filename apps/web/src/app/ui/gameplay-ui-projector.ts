@@ -1,14 +1,14 @@
 import { projectStationUi, type StationUiPresentation } from './station-ui-projector';
-import type { AuthorityStationView } from '@seedlands/game-core/compute/authority-worker-protocol';
-import type { StationRecipe } from '@seedlands/game-core/mod-api';
+import type { AuthorityStationView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { StationRecipe } from '@seedlands/stdlib/mod-api';
 import { projectCombatUi, type CombatUiProjection } from './combat-ui-projector';
-import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
+import type { CombatSnapshot } from '@seedlands/stdlib/server/gameplay/combat-runtime';
+import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
+import type { Recipe } from '@seedlands/stdlib/server/gameplay/recipe-registry';
 import {
-  getItemDefinition,
-  listItemDefinitions,
-  type ItemDefinition,
-} from '@seedlands/game-core/server/gameplay/item-registry';
-import { listRecipes, type Recipe } from '@seedlands/game-core/server/gameplay/recipe-registry';
+  listClassicItemDefinitions,
+  requireClassicItemDefinition,
+} from '../../client/presentation/classic-item-registry';
 import type { ActorMode } from './ui-contracts';
 
 export type GameplayItemPresentation = Readonly<{
@@ -97,7 +97,7 @@ const equal = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.s
 const reuse = <Value>(next: Value, previous?: Value): Value => (previous && equal(next, previous) ? previous : next);
 
 const itemResolver = (definitions?: readonly ItemDefinition[]) => {
-  if (!definitions) return { list: listItemDefinitions, require: getItemDefinition };
+  if (!definitions) return { list: listClassicItemDefinitions, require: requireClassicItemDefinition };
   const byId = new Map(definitions.map((definition) => [definition.id, definition] as const));
   return {
     list: () => definitions,
@@ -133,7 +133,7 @@ const projectInventory = (
 
 export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayUiProjection): GameplayUiProjection {
   const items = itemResolver(source.items);
-  const recipes = source.recipes ?? listRecipes();
+  const recipes = source.recipes ?? [];
   const inventory = projectInventory(source.player.inventory, 24, items.require);
   const mode = source.player.mode?.value ?? 'survival';
   const flightEnabled = mode === 'creative' && Boolean(source.player.flight?.enabled);

@@ -1,13 +1,13 @@
-import type { InputCommand } from '@seedlands/game-core/runtime/session-protocol';
-import { PROTOCOL_VERSION } from '@seedlands/game-core/runtime/session-protocol';
+import type { InputCommand } from '@seedlands/stdlib/runtime/session-protocol';
+import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
 import {
   ALL_COMMAND_CAPABILITIES,
   type CommandSource,
   type ServerCommand,
-} from '@seedlands/game-core/server/commands/command-contract';
-import type { AuthorityAction } from '@seedlands/game-core/compute/authority-worker-protocol';
-import type { AuthorityRequest, AuthorityResponse } from '@seedlands/game-core/compute/authority-worker-protocol';
-import type { VoxelEdit } from '@seedlands/game-core/server/world-mutation';
+} from '@seedlands/stdlib/server/commands/command-contract';
+import type { AuthorityAction } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
 import {
   WorldResourceAuthorizer,
   commandAuthorizationRequests,
@@ -16,7 +16,7 @@ import {
   worldEditAuthorizationRequests,
   type WorldAuthorizationRequest,
   type WorldResourceRegistration,
-} from '@seedlands/game-core/server/harness/world-authorization';
+} from '@seedlands/stdlib/server/harness/world-authorization';
 
 type ActionOwner = (actionId: string) => string | null;
 const isModeCommand = (command: ServerCommand) =>

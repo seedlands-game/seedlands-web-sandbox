@@ -1,5 +1,5 @@
 import { isCurrentMeshTask } from '../../client/compute/mesh-task-snapshot';
-import { chunkKey } from '@seedlands/game-core/world/voxel';
+import { chunkKey } from '@seedlands/stdlib/world/voxel';
 import type { PendingMeshTask, StreamingVariant, WorkerResult } from '../app-contracts';
 import { createMainSnapshotDispatch, type MeshTaskDispatch } from './mesh-task-dispatch';
 import { acceptSourceMeshResult, prepareSourceWorkerDispatch, type MeshTaskSchedulerOptions } from './mesh-task-source';
@@ -336,6 +336,8 @@ export class MeshTaskScheduler {
     const span = this.options.telemetry.beginSpan('streaming', 'HaloSnapshot', 'main', request.traceId);
     const snapshot = this.options.source.prepareMainSnapshot(request.cx, request.cy, request.cz);
     this.options.telemetry.endSpan(span);
+    const provider = this.options.source.provider;
+    if (!provider) throw new Error('Main-snapshot meshing requires an explicit world-generation provider.');
     this.postDispatch(
       request,
       createMainSnapshotDispatch(
@@ -343,6 +345,7 @@ export class MeshTaskScheduler {
         request,
         this.options.source.seed,
         this.options.source.generatorVersion,
+        provider,
         snapshot,
       ),
     );

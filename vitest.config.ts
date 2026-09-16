@@ -1,22 +1,17 @@
 import { defineConfig } from 'vitest/config';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
 
+// Workspace convenience runner for the architecture freeze. Cross-layer and
+// Classic behavior tests remain deferred until the Playbook is complete.
 export default defineConfig({
-  plugins: [svelte()],
   test: {
-    include: ['tests/**/*.test.ts'],
-    environment: 'node',
-    globals: false,
+    projects: ['packages/kernel/vitest.config.ts', 'packages/stdlib/vitest.config.ts'],
     passWithNoTests: false,
     allowOnly: false,
     coverage: {
       provider: 'v8',
-      all: true,
-      include: ['packages/game-core/src/world/**/*.ts'],
+      include: ['packages/stdlib/src/world/**/*.ts'],
       reporter: ['text', 'json-summary', 'lcov'],
-      thresholds: {
-        lines: 80,
-      },
+      thresholds: { lines: 80 },
     },
   },
 });

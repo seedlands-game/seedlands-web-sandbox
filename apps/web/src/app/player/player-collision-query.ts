@@ -1,5 +1,5 @@
-import { bodyWorldAabb, type BodyConfig, type BodyState, type PhysicsWorld } from '@seedlands/game-core/physics';
-import { overlapDepth } from '@seedlands/game-core/physics/geometry';
+import { bodyWorldAabb, type BodyConfig, type BodyState, type PhysicsWorld } from '@seedlands/stdlib/physics';
+import { overlapDepth } from '@seedlands/stdlib/physics/geometry';
 
 export function bodyOverlapsWorld(body: BodyState, config: BodyConfig, world: PhysicsWorld): boolean {
   const bounds = bodyWorldAabb(body, config);

@@ -1,4 +1,17 @@
 {
   "files": [],
-  "references": [{ "path": "packages/game-core" }, { "path": "apps/web" }]
+  "references": [
+    {
+      "path": "packages/kernel"
+    },
+    {
+      "path": "packages/stdlib"
+    },
+    {
+      "path": "playbooks/classic"
+    },
+    {
+      "path": "apps/web"
+    }
+  ]
 }

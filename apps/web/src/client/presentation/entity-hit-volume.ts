@@ -1,4 +1,4 @@
-import { bodyConfigFor } from '@seedlands/game-core/physics/body-registry';
+import { bodyConfigFor } from '@seedlands/stdlib/physics/body-registry';
 
 type Point = readonly [number, number, number];
 

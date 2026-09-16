@@ -318,4 +318,4 @@ export function publishAuthorityCollisionCommits<Commit extends AuthorityCollisi
     callbacks.onCommit?.(commit);
   }
 }
-import { legacyFluid } from '@seedlands/game-core/server/fluid/fluid-cell-state';
+import { legacyFluid } from '@seedlands/stdlib/server/fluid/fluid-cell-state';

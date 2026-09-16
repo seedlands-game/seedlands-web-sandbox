@@ -1,6 +1,6 @@
 import type * as pc from 'playcanvas';
-import type { AuthorityReady } from '@seedlands/game-core/compute/authority-worker-protocol';
-import type { CommandSource } from '@seedlands/game-core/server/commands/command-contract';
+import type { AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { CommandSource } from '@seedlands/stdlib/server/commands/command-contract';
 import type { BrowserAuthorityClient } from '../../client/authority/browser-authority-client';
 import type { GlobalAudio } from '../audio/global-audio';
 import { WorldAudio } from '../audio/world-audio';

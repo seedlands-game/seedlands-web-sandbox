@@ -1,4 +1,4 @@
-import type { CharacterEvent, CharacterMemory } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { CharacterEvent, CharacterMemory } from '@seedlands/stdlib/runtime/character-control-protocol';
 import { PRO_MODEL } from './config.js';
 import type { CognitionModel, DeepSeekMessage, ModelCompletion } from './model-types.js';
 

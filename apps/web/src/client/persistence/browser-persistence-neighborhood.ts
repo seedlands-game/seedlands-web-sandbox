@@ -1,4 +1,4 @@
-import { chunkKey } from '@seedlands/game-core/world/voxel';
+import { chunkKey } from '@seedlands/stdlib/world/voxel';
 
 export type BrowserPersistenceLoadCoordinate = Readonly<{ cx: number; cy: number; cz: number }>;
 

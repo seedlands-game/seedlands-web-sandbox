@@ -5,8 +5,8 @@ import {
   type BodyState,
   type PhysicsWorld,
   type Vec3,
-} from '@seedlands/game-core/physics';
-import type { InputCommand, SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
+} from '@seedlands/stdlib/physics';
+import type { InputCommand, SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
 import { PlayerInputStream, type PlayerInputKeys } from './player-input-stream';
 import { PredictionBuffer, type PredictionReconciliationResult } from './prediction-buffer';
 

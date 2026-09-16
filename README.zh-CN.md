@@ -140,14 +140,17 @@ Node Dedicated Server 已在完成 MVP 研究后从活跃产品和强制门禁�
 
 ```text
 apps/web/          浏览器产品、Vite/SSG、PlayCanvas、Svelte 与浏览器 Worker
-packages/game-core/ 平台无关的世界、物理、运行时、服务端与纯计算
-tests/             单元、架构与长期浏览器回归测试
+packages/kernel/   实例隔离、执行时钟、事务和状态生命周期
+packages/stdlib/   显式注册的世界、物理、玩法与计算机制
+playbooks/classic/ Classic 产品内容与普通 Pack
+packages/eslint-plugin/  独立 ESLint 规则与规则测试
+apps/web/tests/    Web 单元与跨模块测试归属；本次不运行玩法验收
 crates/            纯 Rust 计算内核与浏览器 Wasm 适配层
 changes/           变更合同及所属的交付证据
-scripts/           workspace Harness 与工程脚本
+scripts/           工程脚本与 Headless 开发宿主
 ```
 
-workspace 使用一个 lockfile。Web 经 `@seedlands/game-core` 声明的 exports 消费逻辑；core 不获得 DOM、WebWorker 或 Node ambient types，也不依赖产品适配。平台能力通过窄实例端口注入。包边界继续拒绝 Web/Node 互依和 core 反向依赖；产品依赖由所属包声明，根开发依赖支持工程和整合测试。
+workspace 使用一个 lockfile。Web 经 `@seedlands/stdlib` 声明的 exports 消费逻辑；core 不获得 DOM、WebWorker 或 Node ambient types，也不依赖产品适配。平台能力通过窄实例端口注入。包边界继续拒绝 Web/Node 互依和 core 反向依赖；产品依赖由所属包声明，根开发依赖支持工程和整合测试。
 
 浏览器默认运行五个后台 Worker：权威状态与固定步长物理、游戏逻辑、流体计算、通用计算和持久化各一个。可选第二个通用计算 Worker，此时总数为六个。渲染与本地玩家预测留在主线程。物理、玩法与流体分别使用独立频率和有界追赶，耗时逻辑与网格计算不驱动物理时钟；通信使用带版本的消息与可转移缓冲，不要求共享内存。
 
@@ -158,13 +161,14 @@ workspace 使用一个 lockfile。Web 经 `@seedlands/game-core` 声明的 expor
 ```bash
 pnpm test
 pnpm verify:static
-pnpm build
-pnpm test:e2e:regression
+pnpm test:eslint
 ```
+
+当前 #33 仅冻结 Kernel/stdlib 确定性测试和架构静态边界。`pnpm build` 可作单独的编译诊断，不属于本阶段产品验收；Classic、跨层、浏览器与性能 Harness 暂存于后续 Draft PR。现行 GitHub 主分支保护仍要求生产构建与 Chromium，故本阶段不能仅凭上述命令宣称 PR 可合入。
 
 General 计算 Worker 默认启用实测采纳的 Rust Chunk填充、halo、mesh描述符和网格打包；打包在能力可用时使用标准SIMD128，保留标量与优化 TypeScript 回退。Fluid、Authority、Logic、Persistence 默认仍用 TypeScript。每个启用 Worker 独立持有 Wasm 实例，不要求共享内存或跨源隔离。`crates/rust-toolchain.toml` 固定 Rust 1.88.0 与 Wasm 目标；`pnpm wasm:rust:build` 重建两种生产产物，常规生产构建校验源码与二进制 hash；`pnpm rust:check` 约束纯 core 边界。已淘汰的 MoonBit 实现和工具链不再保留，冻结测量仍可在[结果快照](changes/2026-09-07-remove-moonbit-toolchain/moonbit-results.md)中审阅。采纳原因和实际收益见[本轮方案](changes/2026-09-07-data-plane-adoption/adoption-plan.md)。
 
-这些命令提供不同证据：单元测试覆盖确定性逻辑；静态验证覆盖格式、lint、路径规则、覆盖率和 TypeScript；生产构建证明 bundling；Playwright 覆盖确定性浏览器行为。视觉语义由 change 所属的 Midscene 流程独立评估。
+这些命令分别覆盖 Kernel/stdlib 局部确定性逻辑、格式/Lint/路径/TypeScript 和静态架构规则；不证明 Classic 可玩、产品接线、浏览器行为或视觉语义。
 
 架构 lint 还将 JavaScript 与 TypeScript 模块限制为不超过 500 行有效代码（不计空行与注释），避免职责重新堆积为单体文件。
 

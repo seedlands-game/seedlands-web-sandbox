@@ -1,5 +1,5 @@
 import { Annotation, END, START, StateGraph } from '@langchain/langgraph';
-import type { CharacterObservation } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { CharacterObservation } from '@seedlands/stdlib/runtime/character-control-protocol';
 import { FLASH_MODEL } from './config.js';
 import { COGNITION_TOOLS, validateToolCall, type IntentProposal } from './cognition-tools.js';
 import type { CognitionModel, DeepSeekMessage, DeepSeekToolCall, ModelCompletion } from './model-types.js';

@@ -1,7 +1,7 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { createServer, type IncomingMessage, type Server } from 'node:http';
 import { isIP } from 'node:net';
-import type { ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { ControllerHostMessage } from '@seedlands/cognition-protocol';
 import { CONTROLLER_FRAME_MAX_BYTES } from '@seedlands/cognition-protocol';
 import { WebSocket, WebSocketServer, type RawData } from 'ws';

@@ -1,5 +1,5 @@
-import type { PackManifest, ModModule } from '@seedlands/game-core/mod-api';
-import type { ProductExtensionAdmission, VerifiedPackArtifact } from '@seedlands/game-core/server/composition/host-api';
+import type { PackManifest, ModModule } from '@seedlands/stdlib/mod-api';
+import type { ProductExtensionAdmission, VerifiedPackArtifact } from '@seedlands/stdlib/server/composition/host-api';
 
 type FileLock = Readonly<{ path: string; sha256: string }>;
 const object = (value: unknown): value is Record<string, unknown> =>

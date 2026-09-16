@@ -2,7 +2,7 @@ import { builtinAssets } from './asset-catalog';
 import { legacyItemAssets } from './legacy-item-assets';
 import type { Asset, ImageTexture, MaterialAsset, NativeAsset } from './asset-types';
 import { validateNativeAssets } from './asset-package';
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { requireClassicItemDefinition } from './classic-item-registry';
 
 export const appearanceAnimationTargets = ['grazer', 'night-stalker', 'settler'] as const;
 export const modelAnimationRoles = ['idle', 'move', 'attack', 'hurt'] as const;
@@ -213,7 +213,8 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
     if (!model || !('materialIds' in model.payload)) throw new Error('材质绑定模型不存在或不支持材质槽');
     if (
       model.type === 'builtin-voxel-model' ||
-      (model.type === 'builtin-item-model' && getItemDefinition(model.payload.itemId).placesVoxel !== undefined)
+      (model.type === 'builtin-item-model' &&
+        requireClassicItemDefinition(model.payload.itemId).placesVoxel !== undefined)
     )
       throw new Error('方块外观使用共享面材质，不能应用对象专用绑定');
     const slots = object(binding, '材质绑定');

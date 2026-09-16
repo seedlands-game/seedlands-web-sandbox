@@ -1,4 +1,4 @@
-import type { ChunkPersistenceLoadDiagnostics } from '@seedlands/game-core/server/persistence/chunk-persistence';
+import type { ChunkPersistenceLoadDiagnostics } from '@seedlands/stdlib/server/persistence/chunk-persistence';
 import type { PersistenceLoadCoordinate } from './persistence-load-batch';
 
 type LoadEntry = Readonly<{ status: 'missing' }> | Readonly<{ status: 'found'; codec: string }>;

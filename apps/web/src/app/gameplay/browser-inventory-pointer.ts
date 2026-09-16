@@ -3,7 +3,7 @@ import type {
   AuthorityActionResult,
   AuthorityGameplayView,
   AuthorityStationView,
-} from '@seedlands/game-core/compute/authority-worker-protocol';
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
 
 type Options = {

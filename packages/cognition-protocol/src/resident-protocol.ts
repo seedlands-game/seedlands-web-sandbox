@@ -3,14 +3,14 @@ import type {
   CharacterObservation,
   CharacterProfile,
   ControlBinding,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
 import type {
   BehaviorCapability,
   BehaviorDefinition,
   BehaviorGoal,
   BehaviorUpdateRequest,
-} from '@seedlands/game-core/runtime/behavior-control-protocol';
-import type { WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
+} from '@seedlands/stdlib/runtime/behavior-control-protocol';
+import type { WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
 
 export const RESIDENT_PROTOCOL_VERSION = 2 as const;
 export const RESIDENT_FRAME_MAX_BYTES = 128 * 1024;

@@ -1,25 +1,25 @@
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
-import type { FluidAuthoritySnapshot } from '@seedlands/game-core/server/fluid/fluid-transaction';
-import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
-import type { LogicObservation } from '@seedlands/game-core/server/logic/logic-protocol';
-import type { SequenceDecision } from '@seedlands/game-core/runtime/session-protocol';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
+import type { FluidAuthoritySnapshot } from '@seedlands/stdlib/server/fluid/fluid-transaction';
+import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
+import type { LogicObservation } from '@seedlands/stdlib/server/logic/logic-protocol';
+import type { SequenceDecision } from '@seedlands/stdlib/runtime/session-protocol';
 import type {
   AuthorityGameplayView,
   AuthorityMeshPayload,
   AuthorityReady,
   AuthorityResponse,
-} from '@seedlands/game-core/compute/authority-worker-protocol';
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { SerializedChunkSnapshot } from '../persistence/browser-chunk-persistence';
 import type { AuthorityTransportFaults } from './authority-transport';
 import type { provideAuthorityBootstrap } from './authority-bootstrap-client';
-import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import type {
   CharacterControlResult,
   CharacterGoal,
   ControlBinding,
-} from '@seedlands/game-core/runtime/character-control-protocol';
-import type { WorldHarnessResult } from '@seedlands/game-core/server/harness/world-harness-contract';
-import type { BehaviorUpdateRequest } from '@seedlands/game-core/runtime/behavior-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
+import type { WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
+import type { BehaviorUpdateRequest } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 
 export type BoundCharacterControlPort = Readonly<{
   binding: ControlBinding;

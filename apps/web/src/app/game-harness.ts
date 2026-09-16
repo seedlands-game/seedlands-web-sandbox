@@ -5,9 +5,9 @@ import type { BrowserLogicClient } from '../client/authority/browser-logic-clien
 import type * as pc from 'playcanvas';
 import type { ChunkPersistenceLoadScenario } from '../client/persistence/chunk-persistence-benchmark';
 import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
-import type { FillCommand } from '@seedlands/game-core/server/commands/fill-command';
-import type { CommandResult, ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
-import { Voxel } from '@seedlands/game-core/world/voxel';
+import type { FillCommand } from '@seedlands/stdlib/server/commands/fill-command';
+import type { CommandResult, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
+import { Voxel } from '@seedlands/stdlib/world/voxel';
 import type { HarnessSnapshot, LifecycleSnapshot, StreamingVariant } from './app-contracts';
 import type { PlayerController } from './player/player-controller';
 import type { QualityLevel } from './scene/quality-profile';
@@ -21,8 +21,8 @@ import type { UnderwaterVisualEffects } from './scene/underwater-visual-effects'
 import { PLAYER_FEET_OFFSET } from './player/player-view-offsets';
 import type { CollisionDebugRuntime } from './player/collision-debug-runtime';
 import type { FluidFeedbackTarget } from './gameplay/fluid-feedback-tracker';
-import type { AuthorityBodySnapshot } from '@seedlands/game-core/server/authority/authority-session-types';
-import type { WorldHarnessPort } from '@seedlands/game-core/server/harness/world-harness-contract';
+import type { AuthorityBodySnapshot } from '@seedlands/stdlib/server/authority/authority-session-types';
+import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-harness-contract';
 
 export type HarnessApi = {
   world: WorldHarnessPort;

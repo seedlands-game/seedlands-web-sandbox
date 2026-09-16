@@ -1,4 +1,4 @@
-import type { WorldHarnessPort, WorldPrepareRequest } from '@seedlands/game-core/server/harness/world-harness-contract';
+import type { WorldHarnessPort, WorldPrepareRequest } from '@seedlands/stdlib/server/harness/world-harness-contract';
 
 type Request = <Method extends keyof WorldHarnessPort>(
   method: Method,

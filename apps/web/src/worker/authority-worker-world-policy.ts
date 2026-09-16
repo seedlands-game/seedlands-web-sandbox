@@ -1,4 +1,4 @@
-import type { WorldAuthorizationPolicy } from '@seedlands/game-core/server/harness/world-authorization';
+import type { WorldAuthorizationPolicy } from '@seedlands/stdlib/server/harness/world-authorization';
 
 /** The local world owner may save/restore and pause its world; resident bindings remain self-scoped elsewhere. */
 export function browserWorldOwnerPolicy(principalId: string, playerId: string): WorldAuthorizationPolicy {

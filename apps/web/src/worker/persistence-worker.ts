@@ -1,24 +1,16 @@
-import { makeChunk } from '@seedlands/game-core/world/mesh';
 import {
   createStoredChunkRecord,
   decodeStoredChunkRecord,
   storedChunkRecordBytes,
   type StoredChunkRecord,
   validateStoredFluid,
-} from '@seedlands/game-core/world/chunk-snapshot-codec';
-import {
-  GENERATOR_VERSION,
-  LEGACY_GENERATOR_VERSION,
-  Voxel,
-  normalizeSeed,
-  MAX_VOXEL_ID,
-} from '@seedlands/game-core/world/voxel';
-import { selectWorldGeneratorVersion } from '@seedlands/game-core/runtime/world-version-policy';
+} from '@seedlands/stdlib/world/chunk-snapshot-codec';
+import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, MAX_VOXEL_ID } from '@seedlands/stdlib/world/voxel';
+import { selectWorldGeneratorVersion } from '@seedlands/stdlib/runtime/world-version-policy';
 import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 import { loadPersistenceBatch } from './persistence-load-many';
 import { persistChunkSnapshots } from './persistence-save';
-import { ProceduralChunkBaseCache } from './procedural-chunk-base-cache';
 import { browserCorePlatform } from '../platform/core-platform';
 import type {
   PersistenceCorpusSummary as CorpusSummary,
@@ -38,6 +30,13 @@ import type {
   PersistenceWorldRecord as WorldRecord,
 } from './persistence-worker-protocol';
 import { describePersistenceMailboxEncoding, type PersistenceWorkerEncoding } from './persistence-worker-timing';
+import { assertWorldgenProviderIdentity, worldgenProviderIdentityKey } from '@seedlands/kernel/spatial';
+import {
+  openPersistenceDatabase as openDatabase,
+  persistenceTransactionDone as transactionDone,
+  requestPersistenceResult as requestResult,
+} from './persistence-indexeddb';
+import { createPersistenceWorldgenCache, persistenceWorldgenProviders } from './persistence-worldgen-cache';
 
 let config: WorkerConfig | null = null;
 let databasePromise: Promise<IDBDatabase> | null = null;
@@ -48,9 +47,7 @@ type ActivePersistenceWorkerTask = {
   encoding?: PersistenceWorkerEncoding;
 };
 let activeTask: ActivePersistenceWorkerTask | undefined;
-const proceduralBaseCache = new ProceduralChunkBaseCache(({ seedText, generatorVersion, cx, cy, cz }) =>
-  makeChunk(normalizeSeed(seedText), cx, cy, cz, [], generatorVersion),
-);
+const proceduralBaseCache = createPersistenceWorldgenCache(() => config, persistenceWorldgenProviders);
 
 const recordEncoding = (task: ActivePersistenceWorkerTask, startedAtMs: number, completedAtMs: number) => {
   task.encoding = {
@@ -59,32 +56,6 @@ const recordEncoding = (task: ActivePersistenceWorkerTask, startedAtMs: number, 
     encodeCompletedAtEpochMs: performance.timeOrigin + completedAtMs,
   };
 };
-
-const requestResult = <T>(request: IDBRequest<T>) =>
-  new Promise<T>((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error('IndexedDB request failed.'));
-  });
-
-const transactionDone = (transaction: IDBTransaction) =>
-  new Promise<void>((resolve, reject) => {
-    transaction.oncomplete = () => resolve();
-    transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB transaction aborted.'));
-    transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB transaction failed.'));
-  });
-
-const openDatabase = (databaseName: string) =>
-  new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(databaseName, 1);
-    request.onupgradeneeded = () => {
-      const database = request.result;
-      if (!database.objectStoreNames.contains('worlds')) database.createObjectStore('worlds', { keyPath: 'worldId' });
-      if (!database.objectStoreNames.contains('chunks'))
-        database.createObjectStore('chunks', { keyPath: ['worldId', 'cx', 'cy', 'cz'] });
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error ?? new Error('Could not open the Chunk persistence database.'));
-  });
 
 const database = () => {
   if (!config || !databasePromise) throw new Error('Persistence worker is not initialized.');
@@ -96,6 +67,7 @@ const proceduralChunk = (cx: number, cy: number, cz: number) => {
   return proceduralBaseCache.get({
     seedText: config.seedText,
     generatorVersion: config.generatorVersion,
+    providerIdentity: worldgenProviderIdentityKey(config.provider),
     cx,
     cy,
     cz,
@@ -131,12 +103,22 @@ const initialize = async (task: InitTask) => {
   const done = transactionDone(transaction);
   const store = transaction.objectStore('worlds');
   const records = (await requestResult(store.getAll())) as WorldRecord[];
-  const supportedRecords = records.filter(
-    (record) =>
-      record.generatorVersion === GENERATOR_VERSION ||
-      record.generatorVersion === 3 ||
-      record.generatorVersion === LEGACY_GENERATOR_VERSION,
-  );
+  const supportedRecords = records.filter((record) => {
+    if (
+      record.generatorVersion !== GENERATOR_VERSION &&
+      record.generatorVersion !== 3 &&
+      record.generatorVersion !== LEGACY_GENERATOR_VERSION
+    )
+      return false;
+    const storedProvider = (record as Partial<WorldRecord>).provider;
+    if (!storedProvider) return false;
+    try {
+      assertWorldgenProviderIdentity(task.provider, storedProvider, record.generatorVersion);
+      return true;
+    } catch {
+      return false;
+    }
+  });
   const generatorVersion = selectWorldGeneratorVersion(
     supportedRecords,
     task.seedText,
@@ -145,18 +127,31 @@ const initialize = async (task: InitTask) => {
   );
   if (generatorVersion !== GENERATOR_VERSION && generatorVersion !== 3 && generatorVersion !== LEGACY_GENERATOR_VERSION)
     throw new Error(`Stored world uses unsupported generator version ${generatorVersion}.`);
+  const provider = persistenceWorldgenProviders.resolve(task.provider, generatorVersion);
   const worldId = `seedlands:g${generatorVersion}:${task.seedText}`;
-  config = { databaseName: task.databaseName, worldId, seedText: task.seedText, generatorVersion };
+  config = {
+    databaseName: task.databaseName,
+    worldId,
+    seedText: task.seedText,
+    generatorVersion,
+    provider: provider.identity,
+  };
   const existing = records.find((record) => record.worldId === worldId);
   if (task.openMode === 'continue-legacy' && generatorVersion === GENERATOR_VERSION)
     throw new Error('这个 Seed 没有可继续的旧版世界。');
   if (existing && (existing.seedText !== task.seedText || existing.generatorVersion !== generatorVersion))
     throw new Error('Stored world metadata is incompatible with the requested seed or generator.');
+  if (existing) {
+    const storedProvider = (existing as Partial<WorldRecord>).provider;
+    if (!storedProvider) throw new Error('Stored world has no world-generation provider identity.');
+    assertWorldgenProviderIdentity(provider.identity, storedProvider, generatorVersion);
+  }
   if (!existing)
     store.put({
       worldId,
       seedText: task.seedText,
       generatorVersion,
+      provider: provider.identity,
       player: null,
       updatedAt: Date.now(),
     } satisfies WorldRecord);
@@ -164,6 +159,7 @@ const initialize = async (task: InitTask) => {
   return {
     worldId,
     generatorVersion,
+    provider: provider.identity,
     player: existing?.player ?? null,
     gameplaySnapshot: existing?.gameplaySnapshot ?? null,
     checkpoint: existing
@@ -268,6 +264,7 @@ const saveMetadata = async (task: SaveMetadataTask) => {
     worldId: config.worldId,
     seedText: config.seedText,
     generatorVersion: config.generatorVersion,
+    provider: config.provider,
     player: task.player,
     updatedAt: Date.now(),
   } satisfies WorldRecord);
@@ -308,6 +305,7 @@ const saveFrozen = async (task: SaveFrozenTask, active: ActivePersistenceWorkerT
       proceduralBaseCache.get({
         seedText: nextConfig.seedText,
         generatorVersion: nextConfig.generatorVersion,
+        providerIdentity: worldgenProviderIdentityKey(nextConfig.provider),
         cx,
         cy,
         cz,
@@ -453,6 +451,7 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
     worldId: config.worldId,
     seedText: config.seedText,
     generatorVersion: config.generatorVersion,
+    provider: config.provider,
     player: null,
     corpusSummary: summary,
     updatedAt: Date.now(),

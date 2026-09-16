@@ -1,5 +1,5 @@
 import type { ResidentBirthPackage, ResidentWorldBinding } from '@seedlands/cognition-protocol';
-import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import type { BehaviorCapability } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 import type { ResidentFactory } from '../resident-factory.js';
 import type { HostPayload } from './resident-host-types.js';
 import { textId, validBirth } from './resident-host-validation.js';

@@ -2,7 +2,7 @@ import type {
   CharacterObservation,
   ControlBinding,
   ControllerReceipt,
-} from '@seedlands/game-core/runtime/character-control-protocol';
+} from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { ControllerClientMessage, ControllerHostMessage } from '@seedlands/cognition-protocol';
 import { CognitionBudget, type BudgetReservation } from './budget.js';
 import { createCognitionGraph, decideWithGraph } from './cognition-graph.js';

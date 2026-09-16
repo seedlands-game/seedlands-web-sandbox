@@ -3,7 +3,7 @@ import {
   type LogicIntentBatch,
   type LogicObservation,
   type LogicWorkerResponse,
-} from '@seedlands/game-core/server/logic/logic-protocol';
+} from '@seedlands/stdlib/server/logic/logic-protocol';
 import {
   DIRECT_LOGIC_PROTOCOL_VERSION,
   type DirectLogicAttachRequest,

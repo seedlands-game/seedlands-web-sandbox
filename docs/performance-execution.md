@@ -1,16 +1,16 @@
 # 性能执行窗口
 
-浏览器 benchmark、Harness 性能采样和其他竞争 CPU/内存的证据任务统一通过机器级阻塞窗口执行。固定职责标识为 `seedlands-performance-validator`，默认使用 `Terra/high` 做一次独立验收；跨请求反复复用时才考虑经用户授权建立独立任务。
+本页保留后续浏览器 benchmark 和 Harness 性能采样的独占窗口设计。2026-09-16 架构冻结阶段不执行性能验收，以下脚本暂存在后续 Draft PR，当前 checkout 中不可调用。恢复前须重新审核源码、窗口和测量合同，不得把旧样本用作当前收益证据。固定职责标识为 `seedlands-performance-validator`，跨请求反复复用时才考虑经用户授权建立独立任务。
 
 ## 调用
 
-旧入口保持可用并改为等待窗口：
+待恢复的旧入口：
 
 ```text
 node scripts/with-benchmark-reservation.mjs <command> [args...]
 ```
 
-新入口支持显式等待上限：
+待恢复的新入口支持显式等待上限：
 
 ```text
 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- <command> [args...]
@@ -25,6 +25,8 @@ node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- <command> [args...
 - 持有者把命令放入独立进程组。命令成功、失败或收到信号后，先终止仍存活的派生子孙，再核对 `pid + runId` 并只释放自己的锁。
 - 信号清理是本机尽力边界；`SIGKILL`、系统崩溃或权限异常仍可能留下锁。未知遗留锁不自动回收，应由人核对 owner 和进程后处理。
 - `SEEDLANDS_RESERVATION_EVIDENCE` 继续写入 owner、等待时间、退出状态和机器采样，不能把它当成应用指标本身。
+
+窗口成功持锁后才向子进程设置 `SEEDLANDS_PERFORMANCE_WINDOW_RESERVED=1`。局部测量入口在缺少该标记时拒绝执行，Classic 未预约的采样只记诊断，不能生成可接受的基线候选。
 
 窗口只保证这些命令不在同一锁下并发，不能消除操作系统和其他进程噪声。普通功能测试、历史浏览器结果或一次“机器看起来空闲”不能冒充有效性能证据；spec 仍需分别记录 benchmark、静态、构建和功能结果。
 

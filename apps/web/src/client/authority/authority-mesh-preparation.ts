@@ -1,5 +1,5 @@
-import type { AuthorityMeshPayload } from '@seedlands/game-core/compute/authority-worker-protocol';
-import { legacyFluid } from '@seedlands/game-core/server/fluid/fluid-cell-state';
+import type { AuthorityMeshPayload } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import { legacyFluid } from '@seedlands/stdlib/server/fluid/fluid-cell-state';
 import type { AuthorityCachedMesh, AuthorityCachedPreparation } from './browser-authority-client-contract';
 import {
   cacheAuthorityCollisionBaseline,

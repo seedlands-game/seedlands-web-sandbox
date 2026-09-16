@@ -40,7 +40,7 @@ Playbook：锁定 Pack/模块 + 选择有效 Ruleset + 初始化玩法
 小内核与基础服务：身份 / ECS基础 / 体素 / 调度 / 授权 / 事务 / 保存
 ```
 
-这是逻辑职责，不是预定文件夹或包依赖图。当前 `packages/game-core` 同时容纳若干层，物理包名不自动使里面所有功能成为不可替换内核。边界先由 owner、公共 facade、负例测试确定，稳定职责簇出现后再拆包。
+这些逻辑职责通过 `packages/kernel`、`packages/stdlib` 与 `playbooks/classic` 分包承接。Kernel 提供运行保证；标准库提供机制；Classic 是显式组合根。物理目录本身不构成隔离证明，公开 exports、每世界 owner、缺省装配负例与恢复原子性共同约束边界。
 
 ### 3.1 什么进入内核
 
@@ -191,3 +191,7 @@ Playbook 可以选择 provider、配置、规则顺序与许可覆盖；不能�
 - [现有详细路线](playbook-roadmap.md)的 D07–D18、D26–D29 和架构/API/装配章节提供先前依据；本文进一步明确这些概念，旧源码盘点和历史验收仍按原 SHA 保留。
 - [长期对齐](living-world-alignment.md)与[产品定位](product-positioning.md)继续决定产品和宿主方向；本文不改变 WebGL2、单权威、Node 退役、当前无 LOD/离线追赶的约束。
 - #25 合并后的[世界 Harness](developer-world-harness.md)可复用；独立开发不等于复制其权限/事务/时钟，也不意味着等待其他未合入能力。
+
+当前中性 `KernelWorld` 将事件保存为待消费队列：默认容量 4096，实例可配置为 1–65536；容量随 checkpoint 保存，恢复不能以较小容量截断已有事件。事务在暂存每个事件之前检查剩余容量，超限拒绝整个候选，不发布组件变化。消费者以当前 epoch 和已处理 sequence 调用 `acknowledgeEvents`，成功移除事件会推进同一 Kernel 提交序号，重复确认幂等；旧 epoch 或超出已提交 frontier 的确认拒绝。读取和保存只包含未确认事件，不保留无界历史，也不静默丢弃事件。
+
+`KernelWorld` 的实体 lifetime 使用每世界单调高水位；删除实体不回收代际号，高水位进入 checkpoint 并验证不低于存活实体的 lifetime。相同稳定 ID 在删除、重建或恢复后不会重用旧代际；不需要永久保留逐 ID 删除墓碑。

@@ -1,4 +1,4 @@
-import { isSolid } from '@seedlands/game-core/world/voxel';
+import { isSolid } from '@seedlands/stdlib/world/voxel';
 
 type Point = [number, number, number];
 export type VoxelTarget = {

@@ -1,0 +1,137 @@
+{
+  "copies": [
+    {
+      "from": "changes/2026-09-07-data-plane-adoption/e2e/workload-corpus.ts",
+      "to": "apps/web/tests/support/performance/workload-corpus.ts",
+      "sourceSha256": "b275f94710ccb650231a2d9bd62838eaf1568f8844689ec21591310a9ddacfdb",
+      "targetSha256": "a0c7309f90d1f6f78f545c3279c94e4046875c6b5d891f006b6f4f096cbd751f"
+    },
+    {
+      "from": "changes/2026-09-07-data-plane-adoption/e2e/ab-statistics.ts",
+      "to": "apps/web/tests/support/performance/ab-statistics.ts",
+      "sourceSha256": "a19634dfbb182b291bba9f292e548d2520975804a5b4ee20321430ab2cadad87",
+      "targetSha256": "a19634dfbb182b291bba9f292e548d2520975804a5b4ee20321430ab2cadad87"
+    },
+    {
+      "from": "changes/2026-09-06-stable-sun-and-break-drop/e2e/sun-shadow-sampling.ts",
+      "to": "apps/web/tests/support/performance/sun-shadow-sampling.ts",
+      "sourceSha256": "cc97cb62862bec14deab149a3fee0d314ca96272ba126c382ca14d56b28e118f",
+      "targetSha256": "cc97cb62862bec14deab149a3fee0d314ca96272ba126c382ca14d56b28e118f"
+    },
+    {
+      "from": "changes/2026-09-05-voxel-rendering-pipeline-experiments/experiment-contract.ts",
+      "to": "apps/web/tests/support/performance/render-experiment-contract.ts",
+      "sourceSha256": "225b0ed5338c743da65c232b440a622eb609e1df0727c19224f228992d784b6f",
+      "targetSha256": "225b0ed5338c743da65c232b440a622eb609e1df0727c19224f228992d784b6f"
+    },
+    {
+      "from": "changes/2026-09-10-npc-composable-baseline/e2e/real-three-evidence.ts",
+      "to": "apps/agent-server/tests/support/real-three-evidence.ts",
+      "sourceSha256": "7d310f919f209849ac393fedbdf9fd06c83af570ef91d44954ef8a5bb06be7de",
+      "targetSha256": "f5020c932581eece0c82c2d46cf44e80c092d1097f2a5bfbe1ab41fa9264cd7d"
+    },
+    {
+      "from": "changes/2026-09-10-npc-composable-baseline/e2e/camp-pack.ts",
+      "to": "apps/web/tests/fixtures/packs/camp-pack.ts",
+      "sourceSha256": "5ce4010ea92d9af1f61cd1375014db215c7ef48e6d2d9d1bef9ea044d5e4f787",
+      "targetSha256": "933ee0003d557c592208b2b572a5c8b6e83d10db4cd769cfa2bdb7ee0be47f70"
+    },
+    {
+      "from": "changes/2026-09-04-world-mutation-transaction/performance-baseline.json",
+      "to": "harness/baselines/world-mutation/c18a890.json",
+      "sourceSha256": "cb246f82b2b9a66463bca51d0198c666519e21348b28795fb3885da7d730f429",
+      "targetSha256": "cb246f82b2b9a66463bca51d0198c666519e21348b28795fb3885da7d730f429"
+    },
+    {
+      "from": "changes/2026-09-10-npc-composable-baseline/fixtures/late-night-task-tree.json",
+      "to": "apps/web/tests/fixtures/npc/late-night-task-tree.json",
+      "sourceSha256": "2bc48bcb0328669c85e5a3c7732d33fb84533878a66247bf98d38bf0fc0624a5",
+      "targetSha256": "2bc48bcb0328669c85e5a3c7732d33fb84533878a66247bf98d38bf0fc0624a5"
+    },
+    {
+      "from": "changes/2026-09-10-npc-composable-baseline/fixtures/life-scene.json",
+      "to": "apps/web/tests/fixtures/npc/life-scene.json",
+      "sourceSha256": "aeba364ac677196c21ecdb84167f84a750cfdbb9e06894f9959c14492d5e95c9",
+      "targetSha256": "aeba364ac677196c21ecdb84167f84a750cfdbb9e06894f9959c14492d5e95c9"
+    },
+    {
+      "from": "changes/2026-09-10-npc-composable-baseline/fixtures/main-composition.json",
+      "to": "apps/web/tests/fixtures/npc/main-composition.json",
+      "sourceSha256": "e6f1bbad5ccbd80243989a05b7db7dc7279e9cda1297bc0ff67a9b203f2b68ee",
+      "targetSha256": "e6f1bbad5ccbd80243989a05b7db7dc7279e9cda1297bc0ff67a9b203f2b68ee"
+    },
+    {
+      "from": "changes/2026-09-10-npc-composable-baseline/fixtures/main-gameplay.json",
+      "to": "apps/web/tests/fixtures/npc/main-gameplay.json",
+      "sourceSha256": "2af6409c7f80a97785768cb9937e2112a243c893fbef40a7f89caf362fcc9c58",
+      "targetSha256": "2af6409c7f80a97785768cb9937e2112a243c893fbef40a7f89caf362fcc9c58"
+    }
+  ],
+  "moves": {
+    "packages/stdlib/tests/compute/kernel-diagnostics.test.ts": "apps/web/tests/integration/runtime/compute/kernel-diagnostics.test.ts",
+    "packages/stdlib/tests/compute/simd-kernel-equivalence.test.ts": "apps/web/tests/integration/runtime/compute/simd-kernel-equivalence.test.ts",
+    "packages/stdlib/tests/compute/simd-pack-equivalence.test.ts": "apps/web/tests/integration/runtime/compute/simd-pack-equivalence.test.ts",
+    "packages/stdlib/tests/ore-generation.test.ts": "apps/web/tests/integration/runtime/ore-generation.test.ts",
+    "packages/stdlib/tests/physics/body-registry.test.ts": "apps/web/tests/integration/runtime/physics/body-registry.test.ts",
+    "packages/stdlib/tests/server/authority-residency-observability.test.ts": "apps/web/tests/integration/runtime/server/authority-residency-observability.test.ts",
+    "packages/stdlib/tests/server/behavior-capability-catalog-budget.test.ts": "apps/web/tests/integration/runtime/server/behavior-capability-catalog-budget.test.ts",
+    "packages/stdlib/tests/server/composition/actor-profile-closure.test.ts": "apps/web/tests/integration/runtime/server/composition/actor-profile-closure.test.ts",
+    "packages/stdlib/tests/server/composition/alternative-playbooks.test.ts": "apps/web/tests/integration/runtime/server/composition/alternative-playbooks.test.ts",
+    "packages/stdlib/tests/server/composition/block-action-candidates.test.ts": "apps/web/tests/integration/runtime/server/composition/block-action-candidates.test.ts",
+    "packages/stdlib/tests/server/composition/block-content-ownership.test.ts": "apps/web/tests/integration/runtime/server/composition/block-content-ownership.test.ts",
+    "packages/stdlib/tests/server/composition/block-rules-definition.test.ts": "apps/web/tests/integration/runtime/server/composition/block-rules-definition.test.ts",
+    "packages/stdlib/tests/server/composition/block-script-host.test.ts": "apps/web/tests/integration/runtime/server/composition/block-script-host.test.ts",
+    "packages/stdlib/tests/server/composition/combat-module-candidates.test.ts": "apps/web/tests/integration/runtime/server/composition/combat-module-candidates.test.ts",
+    "packages/stdlib/tests/server/composition/combat-script-host.test.ts": "apps/web/tests/integration/runtime/server/composition/combat-script-host.test.ts",
+    "packages/stdlib/tests/server/composition/crafting-provider.test.ts": "apps/web/tests/integration/runtime/server/composition/crafting-provider.test.ts",
+    "packages/stdlib/tests/server/composition/execution-kinds.test.ts": "apps/web/tests/integration/runtime/server/composition/execution-kinds.test.ts",
+    "packages/stdlib/tests/server/composition/execution-origin.test.ts": "apps/web/tests/integration/runtime/server/composition/execution-origin.test.ts",
+    "packages/stdlib/tests/server/composition/feeding-candidates.test.ts": "apps/web/tests/integration/runtime/server/composition/feeding-candidates.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-actor-authority.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-actor-authority.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-block-stations.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-block-stations.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-composition-checkpoint.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-composition-checkpoint.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-inventory-pointer.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-mining-progression.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-mining-progression.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-module-schedule.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-module-schedule.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-prepared-mode.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-prepared-mode.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-block-actions.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-block-actions.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-combat.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-combat.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-feeding.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-feeding.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-forage.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-forage.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-inventory-actions.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-inventory-actions.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-inventory.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-inventory.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-mode.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-mode.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-needs.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts",
+    "packages/stdlib/tests/server/composition/gameplay-registered-stations.test.ts": "apps/web/tests/integration/runtime/server/composition/gameplay-registered-stations.test.ts",
+    "packages/stdlib/tests/server/composition/inventory-action-candidates.test.ts": "apps/web/tests/integration/runtime/server/composition/inventory-action-candidates.test.ts",
+    "packages/stdlib/tests/server/composition/logic-script-host.test.ts": "apps/web/tests/integration/runtime/server/composition/logic-script-host.test.ts",
+    "packages/stdlib/tests/server/composition/mining-tool-policy.test.ts": "apps/web/tests/integration/runtime/server/composition/mining-tool-policy.test.ts",
+    "packages/stdlib/tests/server/composition/mod-authorization.test.ts": "apps/web/tests/integration/runtime/server/composition/mod-authorization.test.ts",
+    "packages/stdlib/tests/server/composition/mode-command-host.test.ts": "apps/web/tests/integration/runtime/server/composition/mode-command-host.test.ts",
+    "packages/stdlib/tests/server/composition/module-lifecycle.test.ts": "apps/web/tests/integration/runtime/server/composition/module-lifecycle.test.ts",
+    "packages/stdlib/tests/server/composition/npc-camp-pack.test.ts": "apps/web/tests/integration/runtime/server/composition/npc-camp-pack.test.ts",
+    "packages/stdlib/tests/server/composition/overworld-progression-journey.test.ts": "apps/web/tests/integration/runtime/server/composition/overworld-progression-journey.test.ts",
+    "packages/stdlib/tests/server/composition/overworld-survival-days.test.ts": "apps/web/tests/integration/runtime/server/composition/overworld-survival-days.test.ts",
+    "packages/stdlib/tests/server/composition/partitioned-state.test.ts": "apps/web/tests/integration/runtime/server/composition/partitioned-state.test.ts",
+    "packages/stdlib/tests/server/composition/prepared-host-commit.test.ts": "apps/web/tests/integration/runtime/server/composition/prepared-host-commit.test.ts",
+    "packages/stdlib/tests/server/composition/product-extension-admission.test.ts": "apps/web/tests/integration/runtime/server/composition/product-extension-admission.test.ts",
+    "packages/stdlib/tests/server/composition/recipe-instance-content.test.ts": "apps/web/tests/integration/runtime/server/composition/recipe-instance-content.test.ts",
+    "packages/stdlib/tests/server/composition/registered-content.test.ts": "apps/web/tests/integration/runtime/server/composition/registered-content.test.ts",
+    "packages/stdlib/tests/server/composition/registered-operations.test.ts": "apps/web/tests/integration/runtime/server/composition/registered-operations.test.ts",
+    "packages/stdlib/tests/server/composition/rule-stages.test.ts": "apps/web/tests/integration/runtime/server/composition/rule-stages.test.ts",
+    "packages/stdlib/tests/server/composition/secondary-actor-permissions.test.ts": "apps/web/tests/integration/runtime/server/composition/secondary-actor-permissions.test.ts",
+    "packages/stdlib/tests/server/composition/world-pack-assembly.test.ts": "apps/web/tests/integration/runtime/server/composition/world-pack-assembly.test.ts",
+    "packages/stdlib/tests/server/composition/world-ruleset.test.ts": "apps/web/tests/integration/runtime/server/composition/world-ruleset.test.ts",
+    "packages/stdlib/tests/server/data-plane-buffer-ownership.test.ts": "apps/web/tests/integration/runtime/server/data-plane-buffer-ownership.test.ts",
+    "packages/stdlib/tests/server/wasm-fluid-control-equivalence.test.ts": "apps/web/tests/integration/runtime/server/wasm-fluid-control-equivalence.test.ts",
+    "packages/stdlib/tests/server/wasm-fluid-logic-equivalence.test.ts": "apps/web/tests/integration/runtime/server/wasm-fluid-logic-equivalence.test.ts",
+    "packages/stdlib/tests/server/wasm-occupancy-equivalence.test.ts": "apps/web/tests/integration/runtime/server/wasm-occupancy-equivalence.test.ts",
+    "packages/stdlib/tests/voxel-progression.test.ts": "apps/web/tests/integration/runtime/voxel-progression.test.ts",
+    "packages/stdlib/tests/world/data-plane-rust.test.ts": "apps/web/tests/integration/runtime/world/data-plane-rust.test.ts",
+    "packages/stdlib/tests/world/wasm-codec-equivalence.test.ts": "apps/web/tests/integration/runtime/world/wasm-codec-equivalence.test.ts",
+    "packages/stdlib/tests/world/wasm-halo-equivalence.test.ts": "apps/web/tests/integration/runtime/world/wasm-halo-equivalence.test.ts",
+    "packages/stdlib/tests/world/wasm-mesh-equivalence.test.ts": "apps/web/tests/integration/runtime/world/wasm-mesh-equivalence.test.ts",
+    "packages/stdlib/tests/world/wasm-mesh-pack-equivalence.test.ts": "apps/web/tests/integration/runtime/world/wasm-mesh-pack-equivalence.test.ts",
+    "packages/stdlib/tests/world/wasm-world-kernel-equivalence.test.ts": "apps/web/tests/integration/runtime/world/wasm-world-kernel-equivalence.test.ts"
+  }
+}

@@ -1,7 +1,7 @@
 import type { Asset, MaterialAsset } from './asset-types';
 import { builtinItemBindings } from './asset-catalog';
 import { assetDependencies } from './asset-adapters';
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { requireClassicItemDefinition } from './classic-item-registry';
 
 export type AppearanceContext = { name: string; assetId: string; mode: 'model' | 'held' };
 export type AppearanceObject = { id: string; name: string; contexts: AppearanceContext[] };
@@ -19,7 +19,7 @@ export function appearanceObjects(assets: readonly Asset[]): AppearanceObject[] 
     if (!assets.some((asset) => asset.id === binding.modelId)) continue;
     used.add(binding.modelId);
     const contexts: AppearanceContext[] = [{ name: '模型', assetId: binding.modelId, mode: 'model' }];
-    const voxel = getItemDefinition(binding.itemId).placesVoxel;
+    const voxel = requireClassicItemDefinition(binding.itemId).placesVoxel;
     const placedId = `seedlands:model/voxel/${voxel}`;
     if (voxel !== undefined && assets.some((asset) => asset.id === placedId)) {
       used.add(placedId);

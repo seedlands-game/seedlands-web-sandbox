@@ -6,7 +6,7 @@ import type { WorldEnvironment } from '../scene/world-environment';
 import type { World } from '../world/world-runtime';
 import type { BrowserGameplay } from '../gameplay/browser-gameplay';
 import { PlayerController } from './player-controller';
-import type { AuthorityReady } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 type Options = Readonly<{
   camera: pc.Entity;

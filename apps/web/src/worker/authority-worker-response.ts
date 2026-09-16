@@ -1,6 +1,6 @@
-import { PROTOCOL_VERSION } from '@seedlands/game-core/runtime/session-protocol';
-import type { AuthorityRuntime } from '@seedlands/game-core/server/authority/authority-runtime';
-import type { AuthorityRequest, AuthorityResponse } from '@seedlands/game-core/compute/authority-worker-protocol';
+import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
+import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
+import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 type Post = (message: AuthorityResponse) => void;
 export const authorityErrorText = (error: unknown) => (error instanceof Error ? error.message : String(error));

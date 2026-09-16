@@ -1,5 +1,5 @@
-import type { ChunkSnapshot } from '@seedlands/game-core/server/persistence/chunk-persistence';
-import { CHUNK_SIZE, chunkKey } from '@seedlands/game-core/world/voxel';
+import type { ChunkSnapshot } from '@seedlands/stdlib/server/persistence/chunk-persistence';
+import { CHUNK_SIZE, chunkKey } from '@seedlands/stdlib/world/voxel';
 
 type LoadResult =
   | { status: 'missing' }

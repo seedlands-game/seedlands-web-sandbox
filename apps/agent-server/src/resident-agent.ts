@@ -17,7 +17,7 @@ import { createAgent, createMiddleware, tool } from 'langchain';
 import { residentAgentConfig } from './workspace/framework.js';
 import type { PersistentNpcWorkspace } from './workspace/postgres.js';
 import type { MemoryDraft, WorkspaceBinding } from './workspace/types.js';
-import type { BehaviorCapability } from '@seedlands/game-core/runtime/behavior-control-protocol';
+import type { BehaviorCapability } from '@seedlands/stdlib/runtime/behavior-control-protocol';
 
 export { AIMessage, HumanMessage, ToolMessage } from '@langchain/core/messages';
 

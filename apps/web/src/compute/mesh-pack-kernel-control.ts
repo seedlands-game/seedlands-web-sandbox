@@ -1,4 +1,4 @@
-import type { MeshData } from '@seedlands/game-core/world/mesh';
+import type { MeshData } from '@seedlands/stdlib/world/mesh';
 import { KernelMemory, WASM_ARENA_BYTES } from './kernel-memory';
 import { MeshPackKernel, runMeshPackKernel } from './mesh-pack-kernel';
 
