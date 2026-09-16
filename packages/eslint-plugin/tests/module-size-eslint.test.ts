@@ -14,7 +14,7 @@ const governedPaths = [
   'packages/stdlib/src/world/module-size-probe.ts',
   'apps/web/tests/integration/module-size-probe.test.ts',
   'scripts/module-size-probe.mjs',
-  'changes/2026-09-04-app-module-boundaries/e2e/module-size-probe.spec.ts',
+  'changes/2026-09-08-example/e2e/module-size-probe.spec.ts',
   'playwright.config.ts',
 ] as const;
 

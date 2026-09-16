@@ -72,11 +72,11 @@
 
 计划共存且影响同一目标路径的分项通过后，必须以当前已接受栈为 control 做组合端到端 A/B。组合回归时按预注册的最大消融次数执行有界消融；没有单因素对照只能称关联警讯，不能指定唯一根因。只优化确定性硬预算且不与其他候选共存的分项，可以用 exact A/B 加语义和回归门禁单独准入，但不得扩张成未测的产品收益。主指标未通过预注册判定式、尾延迟/资源/正确性任一否决项失败、维护成本抵消收益时，默认保留更简单的 A。负结果、`NOT_RUN` 和 `ABANDONED` 都是有效交付；未采用的生产开关、依赖和死分支应移除，保留可复现实验、结论与重开条件。
 
-优化通过只证明绑定 source、环境、负载和证据边界内的收益，不是永久豁免。后续改动若改变关键路径、功能集合、依赖、平台或基线身份，必须重跑相关 A/B；新增功能成本不能靠更新 baseline 隐藏，旧数据也不能重新归因给新提交。历史做法与反例见[本次优化实验回顾](../changes/2026-09-08-ambiguity-clarification-governance/optimization-retrospective.md)。
+优化通过只证明绑定 source、环境、负载和证据边界内的收益，不是永久豁免。后续改动若改变关键路径、功能集合、依赖、平台或基线身份，必须重跑相关 A/B；新增功能成本不能靠更新 baseline 隐藏，旧数据也不能重新归因给新提交。历史做法与反例见[本次优化实验回顾](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-08-ambiguity-clarification-governance/optimization-retrospective.md)。
 
 审核本身不自动授权超出合同的发布、其他外部写入、权限变更或删除。项目默认交接由本用户长期授权：验收后的 change 可将功能分支推送至已配置 `origin`，并以目标分支为 base 创建或更新 PR；用户指定 `local-only`、不发 PR 或其他范围时优先。不得自动合并或绕过分支保护。`Scope`、`Decisions`、`Behaviour`、`Test Design` 或 `Acceptance` 的实质变化会使原 hash 审核失效，必须重新审核。每次准出记录 docs baseline 是否更新：跨 change 的难重建规则更新 docs；只影响局部行为时写明不更新理由。
 
-大规模 change 在派发前必须给出双口径估算：传统 PD，以及分模型 agent 工时、按 24 小时连续执行的关键路径、credits/API 等价和当前额度占比。估算包含上下文、协调、验收与返工，20% buffer 只计一次；无法取得的数字写 `unknown`，credits、token、API 价格和订阅额度不得混作同一单位。只有用户明确要求时才创建 goal。格式可参考[本次估算](../changes/2026-09-07-agent-routing-contracts/estimates.md)，但费率与额度必须按当时状态核对。
+大规模 change 在派发前必须给出双口径估算：传统 PD，以及分模型 agent 工时、按 24 小时连续执行的关键路径、credits/API 等价和当前额度占比。估算包含上下文、协调、验收与返工，20% buffer 只计一次；无法取得的数字写 `unknown`，credits、token、API 价格和订阅额度不得混作同一单位。只有用户明确要求时才创建 goal。格式可参考[本次估算](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-07-agent-routing-contracts/estimates.md)，但费率与额度必须按当时状态核对。
 
 ## E2E 生命周期
 

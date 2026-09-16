@@ -54,4 +54,4 @@
 5. 在真实 Browser 游戏复查库存与持握；保存同场景前后图，并说明投影或布局是否变化。自动测试不代替最终美术验收。
 6. 执行基础静态检查和构建、独立审阅，关闭临时验证服务；记录最新代码和 CI 的对应关系。
 
-本规范的首次实施及证据见 [创造容器与视觉一致性 change](../changes/2026-09-10-creative-containers-visual-cohesion/spec.md)。后续资产偏离以上标准时，须在对应 change 说明原因和实际验收结果。
+本规范的首次实施及证据见 [创造容器与视觉一致性 change](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-10-creative-containers-visual-cohesion/spec.md)。后续资产偏离以上标准时，须在对应 change 说明原因和实际验收结果。

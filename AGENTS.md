@@ -50,9 +50,9 @@
 
 Breaking / Exploration 的用户 hash 审核只授权其合同中的实现，不自行扩大到发布、其他外部写入、权限变更或不可逆操作。Agile 变更可在已授权范围内自行完成。本用户已长期授权：验收完成后可将功能分支推送至已配置 `origin`，并以目标分支为 base 创建或更新 PR 交给人类审核；用户指定 `local-only`、不发 PR 或其他范围时优先。不得自动合并、绕过分支保护或扩大安全权限。每次 Delivery Snapshot 要说明长期 docs baseline 是否更新及原因；清楚的源码和通用教程不重复抄入上下文。
 
-本次架构拆分冻结以 [阶段验收修订](changes/2026-09-11-kernel-modules-playbooks-harness/phase-gate-amendment.md) 为准：行为测试只执行 Kernel 与 stdlib 的确定性测试；生产源码类型、公开入口、包依赖方向和 ESLint 边界规则另作静态检查。Classic、Web/Agent 玩法行为、跨层集成、浏览器端到端与性能证据暂缓，不得把未执行项写成通过。未来恢复产品验证须另行修订 spec 和 CI，原 Harness 设计不再是当前可执行入口。UI、输入和视觉按届时 spec 选择 Playwright、Midscene 或手工补充，不能互相替代。完成的 change 在明确功能分支创建只含该 change 的语义化本地 commit，并按已授权的 PR 交接规则推进。
+本次架构拆分冻结以 [CI 测试边界](docs/ci-testing.md#2026-09-16-架构冻结阶段) 为当前入口，历史[阶段验收修订](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-11-kernel-modules-playbooks-harness/phase-gate-amendment.md)随基线归档：行为测试只执行 Kernel 与 stdlib 的确定性测试；生产源码类型、公开入口、包依赖方向和 ESLint 边界规则另作静态检查。Classic、Web/Agent 玩法行为、跨层集成、浏览器端到端与性能证据暂缓，不得把未执行项写成通过。未来恢复产品验证须另行修订 spec 和 CI，原 Harness 设计不再是当前可执行入口。UI、输入和视觉按届时 spec 选择 Playwright、Midscene 或手工补充，不能互相替代。完成的 change 在明确功能分支创建只含该 change 的语义化本地 commit，并按已授权的 PR 交接规则推进。
 
-默认按任务复杂度选择执行形式、模型和分工，具体路由见[协作与模型路由](docs/collaboration-routing.md)；优先使用已安装的全局 `agent-work-routing` skill，未安装时使用本 change 的版本化源。这不要求每个任务使用多个 agent，人类直接选择的模型不受重路由。
+默认按任务复杂度选择执行形式、模型和分工，具体路由见[协作与模型路由](docs/collaboration-routing.md)；优先使用已安装的全局 `token-efficiency-routing` skill，未安装时以该长期文档为回退。历史版本化源随基线归档。这不要求每个任务使用多个 agent，人类直接选择的模型不受重路由。
 
 有效性能采样必须经[性能执行窗口](docs/performance-execution.md)串行取得；普通功能测试、并发 agent 的机器负载或历史结果不能冒充当前性能证据。
 

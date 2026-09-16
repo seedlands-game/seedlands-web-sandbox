@@ -48,6 +48,6 @@ pnpm agent:dev
 
 窗口总预算128000、软阈112000，当前以 UTF-8 字节的保守 token 上界预检；不把它当作供应商精确 token 数。MEMORY 同时受4000估计 tokens和16KiB约束。完整封存窗口仅供系统审计，人物和 Pro 都不能检索已遗忘的会话。
 
-运行 `pnpm --filter @seedlands/agent-server test` 验证实际临时 PG/WS 与标准工具；`pnpm test:npc-behavior` 验证浏览器。真实模型和60分钟旅程需要显式选择，避免普通测试产生费用或长等待。实际交付证据见[当前 change](../../changes/2026-09-10-npc-composable-baseline/spec.md)。
+运行 `pnpm --filter @seedlands/agent-server test` 验证实际临时 PG/WS 与标准工具；`pnpm test:npc-behavior` 验证浏览器。真实模型和60分钟旅程需要显式选择，避免普通测试产生费用或长等待。该阶段的范围和未闭合验收见[冻结的 NPC change](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-10-npc-composable-baseline/spec.md)及其执行记录；不把归档视为产品准出。
 
 旧 v1 单目标宿主/测试仍保留给未归档历史 change 复验。根入口不重导出旧宿主，启动命令也不运行它；但当前私有 workspace 包的通配子路径仍允许显式导入旧实现，因此不能把它称为已移除的接口。当前主产品使用 resident v2，其 PG/多角色/浏览器准出须单独核验，旧 v1 测试通过不能替代。旧子路径的收紧和历史归档留待明确的接口清理变更。

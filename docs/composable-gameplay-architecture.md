@@ -2,7 +2,7 @@
 
 > 更新：2026-09-09。状态：用户确认的长期架构方向；不是已实现能力清单，也不是已发布的稳定 API v1。
 >
-> 本文统一“模块、模组、Playbook、Ruleset”及其所有权。具体功能、源码路径和验收由各 change 冻结。[第一期合同](../changes/2026-09-09-composable-overworld-playbook/spec.md)以已合并 #25 的主干为基线，独立交付，不依赖其他活动分支。
+> 本文统一“模块、模组、Playbook、Ruleset”及其所有权。具体功能、源码路径和验收由各 change 冻结。[第一期合同](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-composable-overworld-playbook/spec.md)以已合并 #25 的主干为基线，独立交付，不依赖其他活动分支。
 
 ## 1. 目的与适用边界
 
@@ -173,7 +173,7 @@ Playbook 可以选择 provider、配置、规则顺序与许可覆盖；不能�
 
 第一期：可组合玩法架构与第一方主世界 Playbook。迁出现有玩法，补齐基础探索、采集、合成/基础冶炼、库存/储物、食物/昼夜、生物战斗、建造、死亡/复活、保存及工具品质成长；生存/创造和替代机制样例验证合同。
 
-具体内容级别、模式切换、生成/存档迁移和验收由[第一期 spec](../changes/2026-09-09-composable-overworld-playbook/spec.md)冻结，不用“完整主世界”暗指原版所有系统。复杂红石、多维度、现代整合包光影与内容全量、工业/策略/RPG 等均非本期。
+具体内容级别、模式切换、生成/存档迁移和验收由[第一期 spec](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-composable-overworld-playbook/spec.md)冻结，不用“完整主世界”暗指原版所有系统。复杂红石、多维度、现代整合包光影与内容全量、工业/策略/RPG 等均非本期。
 
 基础玩法无特权后门＋差异样例通过，才将真实使用的 API 候选提升为稳定边界；不能只把目录搬走就宣布插件化完成。长期规划仍见[玩法路线](playbook-roadmap.md)，视觉上限参照另行建立。
 
