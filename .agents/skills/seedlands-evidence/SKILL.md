@@ -7,7 +7,7 @@ description: Run or review Seedlands CI, Harness, browser evidence, and performa
 
 当 change 触及浏览器行为、Worker 接线、Harness 输出、性能声明或 CI 测试口径时使用；只需定向单元测试的纯逻辑改动不使用。
 
-先读当前 change spec，确定要证明的行为和证据边界；Vitest、构建、Playwright、Midscene、Harness 与手工检查各自证明不同层级。2026-09-16 的 #33 架构冻结阶段只运行 Kernel/stdlib 确定性行为测试和架构静态检查；下文浏览器、性能及原 Harness 流程是后续待恢复的证据要求，不是当前入口。
+先读当前 change spec，确定要证明的行为和证据边界；Vitest、构建、Playwright、Midscene、Harness 与手工检查各自证明不同层级。
 
 ## 按需读取
 
@@ -34,10 +34,14 @@ description: Run or review Seedlands CI, Harness, browser evidence, and performa
 
 ## 包内脚本与运行位置
 
-优先从仓库根目录使用 `package.json` 中的既有命令。当前 `pnpm test` 只执行 Kernel/stdlib 确定性测试，`pnpm test:eslint` 验证静态边界正反例，`pnpm verify:static:ci` 执行格式、Lint、生产和测试类型及 ESLint 规则；CI 再按受影响包选择 Kernel/stdlib 测试。PR 应冻结实际 base/head SHA，并记录被选择或未执行的检查。不存在本阶段可调用的 `harness:plan`、`verify:affected`、`harness:classic` 或 baseline 接受命令。
+优先从仓库根目录使用 `package.json` 中的既有命令。PR 先冻结 `baseSha` 与实际 checkout 的 `headSha`；base 有 selector 时使用 base tree 的完整 `scripts/harness/` 生成计划，缺失时仅允许显式 `missing-base-selector` 的 `--all` bootstrap。未知路径、无 owner、空匹配、selected test 未执行、计划/source 不一致都 fail closed。
 
-未来恢复浏览器与性能证据时，先从后续 Draft PR 取回原 Harness 和 [Harness 合同](references/harness-contracts.md)，按届时源码重新审核 selector、运行回执和产物身份。旧 `spawnSync git ENOBUFS` 不能当作瞬时故障直接重试。
+- [影响计划](scripts/plan.mjs)：对应 `pnpm harness:plan --root "$PWD" --base <base> --head <head> --out <path>`；普通变更输出 affected，策略/构建/未知范围与 `--all` 输出 full-new。
+- [Harness runner](scripts/run.mjs)：对应 `verify:affected`、`verify:all`、`test`、`harness:classic` 与 `bench:runtime`。它按 owner 的独立 Vitest config 执行具体 selected files，并只从 canonical Playwright config 启动浏览器。
+- [生产产物](scripts/artifact.mjs)：`pnpm build` 生成 `harness-artifact.json`；Classic 在启动前后校验 `sourceSha`、source/lock/artifact digest 与所有 dist bytes。
+- `scripts/run-playwright-harness.mjs` 仅为 `harness:classic` 兼容别名；`scripts/run-harness.mjs` 仅为 `stdlib-world` 局部 benchmark 兼容别名。它们不再拥有历史浏览器列表、aggregate 或 baseline 写入语义。
+- [性能窗口入口](scripts/with-benchmark-reservation.mjs)：调用包内 `benchmark-window.mjs` 实现，支持等待上限、独立测试锁和退出码传播。用法见性能执行窗口。
 
 Harness baseline、scenario 或阈值更新只有在当前任务明确授权且带 identity/diff 时执行；普通 affected、Classic 或诊断运行不得自动改绿基线。
 
-`references/` 与保留的 `scripts/` 采用仓库内相对软链接；读取链接文档的后续相对引用时，先解析真实源路径，再以原文档目录为基准。后续恢复 Harness 时须同时恢复脚本和链接，避免把断链的 Skill 当作可执行入口。
+`references/` 与 `scripts/` 采用仓库内相对软链接，源文件仍在根 `docs/` 与 `scripts/harness/` 单点维护。读取链接文档的后续相对引用时，先解析真实源路径，再以原文档目录为基准。完整 checkout 可迁移；运行依赖本仓库的源码、package scripts、锁文件对应依赖与按需生成的产物。单独分发本包需解引用资源并携带运行依赖，软链接本身不提供独立运行环境。

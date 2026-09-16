@@ -1,0 +1,57 @@
+{
+  "baseSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+  "capturedAt": "2026-09-11T08:24:01.176Z",
+  "fixture": "paired-cognition-checkpoint.json.gz",
+  "fixtureSha256": "c9d937c5b961f1aaea6e306f98f60a4cca6cc6a9cf6442135732b8df3f8e7d04",
+  "uncompressedSha256": "78583ed9ffcf59dd039e7bab6b8938fae2b1401d845c77b391816f0badb99503",
+  "bytes": 1251,
+  "source": {
+    "worldId": "seedlands:g4:kernel-migration-c18a890-station-v1",
+    "timelineId": "s0-c18a890-paired-source",
+    "epoch": "headless:kernel-migration-c18a890-station-v1"
+  },
+  "recoveredTarget": {
+    "worldId": "seedlands:g4:kernel-migration-c18a890-station-v1",
+    "timelineId": "s0-c18a890-paired-recovered",
+    "epoch": "s0-paired-recovery-epoch"
+  },
+  "binding": {
+    "worldId": "seedlands:g4:kernel-migration-c18a890-station-v1",
+    "timelineId": "s0-c18a890-paired-recovered",
+    "actorId": "s0-cognition-resident",
+    "incarnation": "s0-life-1"
+  },
+  "stationFixture": "station-checkpoint.json.gz",
+  "stationFixtureSha256": "077d1e0a1dabb71e89bb67281caf05aadadf7e7fc08b4c8c691c23f487b3332e",
+  "packLock": {
+    "schemaVersion": 1,
+    "packs": [
+      {
+        "id": "seedlands:overworld",
+        "version": "1.0.0",
+        "manifest": {
+          "path": "overworld.manifest.json",
+          "sha256": "e3c199e87d101672c1635d481771972edbf39deb43c336063ab3753d0b01bb89"
+        },
+        "entry": {
+          "path": "overworld.mjs",
+          "sha256": "924d61fc72f253c85e191caa79f1c7ff51f83bc6237ad613a7c0c5595c2c169f"
+        },
+        "resources": []
+      }
+    ]
+  },
+  "environment": {
+    "postgres": "temporary Docker container",
+    "dockerServerVersion": "29.4.0",
+    "modelCalls": 0
+  },
+  "verified": [
+    "actual PostgreSQL workspace initialized in an owned temporary container",
+    "actual resident WebSocket pairing exports a paused deterministic cognition checkpoint",
+    "actual resident WebSocket import restores the in-flight scheduler into a distinct timeline",
+    "target namespace contains exactly the paired resident binding",
+    "replaying the import is rejected before duplicate workspace state is written"
+  ],
+  "notVerified": ["migrated architecture restore", "browser C0-C5", "external model behavior"]
+}

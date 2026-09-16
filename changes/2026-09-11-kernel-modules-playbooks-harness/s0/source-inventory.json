@@ -1,0 +1,31 @@
+{
+  "baseSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+  "sourceDocumentSha256": "12c88e065b0cc711a9c3a403574888152547073bd489a6b6b412d964253bd9e1",
+  "trackedFileCounts": {
+    "apps/agent-server/src": 46,
+    "apps/web/src": 309,
+    "packages/cognition-protocol/package.json": 1,
+    "packages/cognition-protocol/src": 3,
+    "packages/game-core/src": 322,
+    "tests/agent-server": 39,
+    "tests/app": 55,
+    "tests/client": 73,
+    "tests/compute": 3,
+    "tests/e2e": 7,
+    "tests/governance": 20,
+    "tests/ore-generation.test.ts": 1,
+    "tests/physics": 3,
+    "tests/runtime": 4,
+    "tests/scripts": 5,
+    "tests/server": 191,
+    "tests/support": 5,
+    "tests/voxel-progression.test.ts": 1,
+    "tests/worker": 13,
+    "tests/world": 19
+  },
+  "scope": "tracked path census, not a reviewed per-file ownership approval",
+  "coreFiles": 322,
+  "probeStatus": "RED",
+  "probeReachableFiles": 242,
+  "probeForbiddenCount": 139
+}

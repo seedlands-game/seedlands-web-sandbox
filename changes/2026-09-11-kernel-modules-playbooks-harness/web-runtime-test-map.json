@@ -1,0 +1,6 @@
+{
+  "apps/web/tests/unit/app/companion-checkpoint-recovery.test.ts": "apps/web/tests/integration/runtime/app/companion-checkpoint-recovery.test.ts",
+  "apps/web/tests/unit/app/melee-action-showcase.test.ts": "apps/web/tests/integration/runtime/app/melee-action-showcase.test.ts",
+  "apps/web/tests/unit/client/application-checkpoint.test.ts": "apps/web/tests/integration/runtime/client/application-checkpoint.test.ts",
+  "apps/web/tests/unit/client/browser-character-authority.test.ts": "apps/web/tests/integration/runtime/client/browser-character-authority.test.ts"
+}

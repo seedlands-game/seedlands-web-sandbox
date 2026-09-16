@@ -1,0 +1,4 @@
+{
+  "tests/server/world-mutation-performance.test.ts": "packages/stdlib/benchmarks/world-mutation.test.ts",
+  "tests/world/chunk-snapshot-codec-performance.test.ts": "packages/stdlib/benchmarks/chunk-snapshot-codec.test.ts"
+}
