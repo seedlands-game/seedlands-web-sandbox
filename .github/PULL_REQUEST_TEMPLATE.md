@@ -14,8 +14,8 @@ List only checks actually run and their result.
 - [ ] Focused unit tests
 - [ ] `pnpm verify:static`
 - [ ] `pnpm build`
-- [ ] `pnpm harness:classic` against the stamped production artifact when browser behavior is affected
-- [ ] Owner-scoped contracts and explicit browser coverage gaps recorded in the change
+- [ ] Kernel/stdlib deterministic tests where affected; static package-boundary checks
+- [ ] Deferred Classic/browser/product evidence and merge-blocking required checks recorded explicitly
 
 ## Risk and licensing
 
