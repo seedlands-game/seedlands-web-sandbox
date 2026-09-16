@@ -14,8 +14,8 @@ List only checks actually run and their result.
 - [ ] Focused unit tests
 - [ ] `pnpm verify:static`
 - [ ] `pnpm build`
-- [ ] `pnpm test:e2e:regression` when browser behavior is affected
-- [ ] Change-scoped Playwright or Midscene evidence when required
+- [ ] Kernel/stdlib deterministic tests where affected; static package-boundary checks
+- [ ] Deferred Classic/browser/product evidence and merge-blocking required checks recorded explicitly
 
 ## Risk and licensing
 

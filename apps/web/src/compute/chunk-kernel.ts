@@ -1,7 +1,7 @@
-import { makeChunk, type WorldChange } from '@seedlands/game-core/world/chunk-generation';
-import { macroAt, type MacroBiome } from '@seedlands/game-core/world/macro-world';
-import { oreVoxel } from '@seedlands/game-core/world/ore-generation';
-import { GENERATOR_VERSION, hash2 } from '@seedlands/game-core/world/voxel';
+import type { makeChunk, WorldChange } from '@seedlands/stdlib/world/chunk-generation';
+import { macroAt, type MacroBiome } from '@seedlands/stdlib/world/macro-world';
+import { oreVoxel } from '@seedlands/stdlib/world/ore-generation';
+import { GENERATOR_VERSION, hash2 } from '@seedlands/stdlib/world/voxel';
 import type { KernelMemory } from './kernel-memory';
 
 const INPUT_OFFSET = 64;
@@ -126,8 +126,9 @@ export const makeChunkStaged: typeof makeChunk = (seed, cx, cy, cz, changes, ver
 
 export function createChunkKernel(kernel: KernelMemory): typeof makeChunk {
   return (seed, cx, cy, cz, changes, version = GENERATOR_VERSION) => {
-    if (kernel.failed || ![cx, cy, cz].every((value) => Number.isInteger(value) && Math.abs(value) < 2 ** 25))
-      return makeChunk(seed, cx, cy, cz, changes, version);
+    if (kernel.failed) throw new Error('The selected world-generation Kernel is unavailable.');
+    if (![cx, cy, cz].every((value) => Number.isInteger(value) && Math.abs(value) < 2 ** 25))
+      throw new RangeError('World-generation Chunk coordinates are outside the Kernel execution range.');
     try {
       const input = kernel.u32(INPUT_OFFSET, GRID * GRID * COLUMN_WORDS);
       prepareColumns(seed, cx * 32, cz * 32, version, new Int32Array(input.buffer, input.byteOffset, input.length));
@@ -136,9 +137,9 @@ export function createChunkKernel(kernel: KernelMemory): typeof makeChunk {
       const output = kernel.u16(OUTPUT_OFFSET, 32 ** 3).slice();
       applyChanges(output, cx, cy, cz, changes);
       return output;
-    } catch {
+    } catch (error) {
       kernel.failed = true;
-      return makeChunk(seed, cx, cy, cz, changes, version);
+      throw new Error('The selected world-generation Kernel failed.', { cause: error });
     }
   };
 }

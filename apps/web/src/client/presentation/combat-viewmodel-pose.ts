@@ -1,4 +1,4 @@
-import type { CombatSnapshot } from '@seedlands/game-core/server/gameplay/combat-runtime';
+import type { CombatSnapshot } from '@seedlands/stdlib/server/gameplay/combat-runtime';
 
 type Pose = Readonly<{ shoulder: number; elbow: number; wrist: number }>;
 const rest: Pose = { shoulder: 0, elbow: 0, wrist: 0 };

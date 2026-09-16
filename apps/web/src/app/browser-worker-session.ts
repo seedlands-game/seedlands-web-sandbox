@@ -1,13 +1,13 @@
 import { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
 import { BrowserComputeRuntime } from '../client/compute/browser-compute-runtime';
 import { BrowserLogicClient } from '../client/authority/browser-logic-client';
-import { createSessionEpoch, type SequenceDecision } from '@seedlands/game-core/runtime/session-protocol';
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
-import type { FluidAuthoritySnapshot } from '@seedlands/game-core/server/fluid/fluid-transaction';
-import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
+import { createSessionEpoch, type SequenceDecision } from '@seedlands/stdlib/runtime/session-protocol';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
+import type { FluidAuthoritySnapshot } from '@seedlands/stdlib/server/fluid/fluid-transaction';
+import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
 import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
-import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
-import type { AuthorityGameplayView } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
+import type { AuthorityGameplayView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { AuthorityTransportFaults } from '../client/authority/authority-transport';
 import type { WasmWorkerSelection } from '../compute/wasm-kernel-contract';
 
@@ -63,7 +63,15 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     if (generatingAuthorityChunks.get(key) === generation) return;
     generatingAuthorityChunks.set(key, generation);
     void compute
-      .generateCanonicalChunk(ready.seed, ready.generatorVersion, key)
+      .generateCanonicalChunk(
+        ready.seed,
+        ready.generatorVersion,
+        ready.worldgenProvider ??
+          (() => {
+            throw new Error('Authority omitted its world-generation provider.');
+          })(),
+        key,
+      )
       .then((chunk) => {
         if (generation !== authorityGeneration) return false;
         return authority.acceptWorkerCanonical(
@@ -75,7 +83,7 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
             chunkRevision: chunk.chunkRevision,
             generatorVersion: chunk.generatorVersion,
           },
-          { canonical: chunk.voxels, generatorVersion: chunk.generatorVersion },
+          { canonical: chunk.voxels, generatorVersion: chunk.generatorVersion, provider: chunk.provider },
         );
       })
       .catch(() => false)
@@ -91,7 +99,8 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     },
     onCommit: options.onCommit,
     onFluidWork: (snapshot: FluidAuthoritySnapshot) => compute.enqueueFluid(snapshot),
-    onBootstrapGeneration: ({ seed, generatorVersion }) => compute.findSafeSpawn(seed, generatorVersion),
+    onBootstrapGeneration: ({ seed, generatorVersion, provider, starterEcology }) =>
+      compute.findSafeSpawn(seed, generatorVersion, provider, starterEcology),
     onAuthorityChunkNeeded: generateAuthorityChunk,
     onUnknownChunk: options.onUnknownChunk,
     onInputDecision: options.onInputDecision,

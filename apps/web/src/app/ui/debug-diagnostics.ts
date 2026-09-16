@@ -1,4 +1,4 @@
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
 import type { ComputePoolDiagnostics } from '../../client/compute/compute-worker-pool';
 import type { HarnessSnapshot, PerformanceSummary } from '../app-contracts';
 

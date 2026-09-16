@@ -3,9 +3,9 @@ import {
   type ComputeLane,
   type ComputeTask,
   type ComputeQueueResult,
-} from '@seedlands/game-core/runtime/compute-task-queue';
-import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
-import { BoundedCostSamples, type CostSampleWindow } from '@seedlands/game-core/runtime/bounded-cost-samples';
+} from '@seedlands/stdlib/runtime/compute-task-queue';
+import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
+import { BoundedCostSamples, type CostSampleWindow } from '@seedlands/stdlib/runtime/bounded-cost-samples';
 import type { KernelName, WasmArtifactPreference } from '../../compute/wasm-kernel-contract';
 import type { KernelDiagnostics } from '../../compute/kernel-memory';
 import { readKernelDiagnostics, type ComputeWorkerActivity } from './compute-worker-diagnostics';

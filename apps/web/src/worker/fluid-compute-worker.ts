@@ -1,9 +1,6 @@
 /// <reference lib="webworker" />
 
-import {
-  consumeFluidCandidate,
-  type FluidAuthoritySnapshot,
-} from '@seedlands/game-core/server/fluid/fluid-transaction';
+import { consumeFluidCandidate, type FluidAuthoritySnapshot } from '@seedlands/stdlib/server/fluid/fluid-transaction';
 import type { ComputeWorkerRequest } from './compute-worker-protocol';
 import { createComputeWorkerEntryLifecycle } from './compute-worker-entry-lifecycle';
 import { loadWorkerKernels, workerKernelReadyState } from './wasm-kernel-loader';

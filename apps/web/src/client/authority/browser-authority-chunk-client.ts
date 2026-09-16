@@ -1,8 +1,11 @@
-import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/game-core/runtime/session-protocol';
-import type { AuthorityMeshPayload, AuthorityRequest } from '@seedlands/game-core/compute/authority-worker-protocol';
-import type { AuthoritySnapshot } from '@seedlands/game-core/server/authority/authority-session';
-import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
-import { chunkKey } from '@seedlands/game-core/world/voxel';
+import { PROTOCOL_VERSION, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
+import type {
+  AuthorityMeshPayload,
+  AuthorityRequest,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
+import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
+import { chunkKey } from '@seedlands/stdlib/world/voxel';
 import type { ClientRequestRegistry } from '../client-request-registry';
 import { acceptAuthorityMeshPreparation } from './authority-mesh-preparation';
 import { AuthorityCollisionBaselineClient } from './authority-collision-baseline-client';
@@ -90,9 +93,12 @@ export class BrowserAuthorityChunkClient {
   prepareWorkerInput(cx: number, cy: number, cz: number) {
     const cached = this.preparations.get(chunkKey(cx, cy, cz));
     if (!cached) throw new Error(`Authority worker input is not prepared for ${cx},${cy},${cz}.`);
+    if (!cached.payload.provider)
+      throw new Error(`Authority worker input has no world-generation provider for ${cx},${cy},${cz}.`);
     return {
       chunkRevision: cached.payload.chunkRevision,
       generatorVersion: cached.payload.generatorVersion,
+      provider: cached.payload.provider,
       ...(cached.payload.preparationDiagnostics
         ? { preparationDiagnostics: cached.payload.preparationDiagnostics }
         : {}),
@@ -110,7 +116,11 @@ export class BrowserAuthorityChunkClient {
 
   acceptCanonical(
     task: VisibilityTask,
-    result: Readonly<{ canonical?: ArrayBuffer; generatorVersion?: number }>,
+    result: Readonly<{
+      canonical?: ArrayBuffer;
+      generatorVersion?: number;
+      provider?: AuthorityMeshPayload['provider'];
+    }>,
   ): Promise<boolean> {
     const prepared = this.preparations.get(task.chunkKey);
     return consumeTransferredAuthorityCollisionBaseline({
@@ -127,7 +137,13 @@ export class BrowserAuthorityChunkClient {
         if (prepared?.canonical?.buffer === canonical.buffer) prepared.canonical = prepared.canonical.slice();
         const forAuthority = canonical.slice();
         const response = (await this.request(
-          { kind: 'accept-generated-chunk', ...task, key: task.chunkKey, canonical: forAuthority.buffer },
+          {
+            kind: 'accept-generated-chunk',
+            ...task,
+            key: task.chunkKey,
+            ...(result.provider ? { provider: result.provider } : {}),
+            canonical: forAuthority.buffer,
+          },
           [forAuthority.buffer],
         )) as { accepted: boolean };
         return response.accepted;

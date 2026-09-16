@@ -1,4 +1,4 @@
-import type { CharacterGoal, ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { CharacterGoal, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { ControllerHostMessage } from '@seedlands/cognition-protocol';
 const object = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);

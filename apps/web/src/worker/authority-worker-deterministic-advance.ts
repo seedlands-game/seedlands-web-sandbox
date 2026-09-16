@@ -1,10 +1,10 @@
-import { bodyConfigFor, bodyKindForEntity } from '@seedlands/game-core/physics/body-registry';
-import type { AuthorityRuntime } from '@seedlands/game-core/server/authority/authority-runtime';
-import type { AuthorityAdvanceResult } from '@seedlands/game-core/server/authority/authority-runtime-types';
-import { WORLD_HARNESS_MAX_ADVANCE_MS } from '@seedlands/game-core/server/harness/world-harness-contract';
-import type { LogicIntentBatch, LogicObservation } from '@seedlands/game-core/server/logic/logic-protocol';
-import type { WorldCommitResult } from '@seedlands/game-core/server/game-server-types';
-import { CHUNK_SIZE, floorDiv } from '@seedlands/game-core/world/voxel';
+import { bodyConfigFor, bodyKindForEntity } from '@seedlands/stdlib/physics/body-registry';
+import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
+import type { AuthorityAdvanceResult } from '@seedlands/stdlib/server/authority/authority-runtime-types';
+import { WORLD_HARNESS_MAX_ADVANCE_MS } from '@seedlands/stdlib/server/harness/world-harness-contract';
+import type { LogicIntentBatch, LogicObservation } from '@seedlands/stdlib/server/logic/logic-protocol';
+import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
+import { CHUNK_SIZE, floorDiv } from '@seedlands/stdlib/world/voxel';
 
 const ADVANCE_SLICE_MS = 100;
 const LOGIC_RESPONSE_TIMEOUT_MS = 5_000;

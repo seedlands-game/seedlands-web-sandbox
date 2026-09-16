@@ -1,18 +1,9 @@
 import { KernelMemory } from './kernel-memory';
-import { meshHaloIndex, type MeshData, type MeshOptions } from '@seedlands/game-core/world/mesh';
-import { macroAt, type MacroContext } from '@seedlands/game-core/world/macro-world';
-import { renderCategoryForMaterial } from '@seedlands/game-core/world/mesh-render-category';
-import { modelBoxesForVoxel } from '@seedlands/game-core/world/voxel-model';
-import { shapeWaterFace } from '@seedlands/game-core/world/water-mesh-height';
-import {
-  CHUNK_SIZE,
-  GENERATOR_VERSION,
-  Voxel,
-  baseVoxel,
-  chunkKey,
-  voxelIndex,
-  type FaceMaterialId,
-} from '@seedlands/game-core/world/voxel';
+import { meshHaloIndex, type MeshData, type MeshOptions } from '@seedlands/stdlib/world/mesh';
+import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
+import { modelBoxesForVoxel } from '@seedlands/stdlib/world/voxel-model';
+import { shapeWaterFace } from '@seedlands/stdlib/world/water-mesh-height';
+import { CHUNK_SIZE, Voxel, voxelIndex, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 
 const ARENA_START = 64;
 export const MESH_KERNEL_WINDOW_SIZE = CHUNK_SIZE + 4;
@@ -49,7 +40,6 @@ export type MeshKernelInput = Record<'window', Uint16Array> & { fluidWindow: Uin
  * 描述符核读取，保持零值以避免无用的 `baseVoxel`/宏观地形查询。
  */
 export function createMeshKernelInput({
-  seed,
   cx,
   cy,
   cz,
@@ -59,19 +49,8 @@ export function createMeshKernelInput({
   halo,
   fluid,
   fluidHalo,
-  generatorVersion = GENERATOR_VERSION,
 }: MeshOptions): MeshKernelInput {
   const overrides = new Map(changes.map(([x, y, z, value]) => [`${x},${y},${z}`, value]));
-  const macroCache = new Map<string, MacroContext>();
-  const queryMacro = (x: number, z: number) => {
-    const key = chunkKey(x, 0, z);
-    let context = macroCache.get(key);
-    if (!context) {
-      context = macroAt(seed, x, z, generatorVersion);
-      macroCache.set(key, context);
-    }
-    return context;
-  };
   const sample = (x: number, y: number, z: number): number => {
     if (x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE)
       return data[voxelIndex(x, y, z)];
@@ -80,11 +59,10 @@ export function createMeshKernelInput({
     const wz = cz * CHUNK_SIZE + z;
     if (halo && x >= -1 && y >= -1 && z >= -1 && x <= CHUNK_SIZE && y <= CHUNK_SIZE && z <= CHUNK_SIZE)
       return halo[meshHaloIndex(x, y, z)];
-    return (
-      overrides.get(`${wx},${wy},${wz}`) ??
-      outside?.(wx, wy, wz) ??
-      baseVoxel(seed, wx, wy, wz, queryMacro(wx, wz), queryMacro, generatorVersion)
-    );
+    const value = overrides.get(`${wx},${wy},${wz}`) ?? outside?.(wx, wy, wz);
+    if (value === undefined)
+      throw new Error('Mesh Kernel input requires an explicit outside-voxel provider beyond its halo.');
+    return value;
   };
   const sampleFluid = (x: number, y: number, z: number): number => {
     if (x >= 0 && y >= 0 && z >= 0 && x < CHUNK_SIZE && y < CHUNK_SIZE && z < CHUNK_SIZE)

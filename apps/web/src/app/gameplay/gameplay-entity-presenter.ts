@@ -1,6 +1,6 @@
-import type { ItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
 import * as pc from 'playcanvas';
-import type { GameplayEntityView } from '@seedlands/game-core/compute/authority-worker-protocol';
+import type { GameplayEntityView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { damageFlash, movementPose } from '../../client/presentation/entity-presentation-motion';
 import type { AppearanceAnimationBinding, AppearanceProject } from '../../client/presentation/appearance-project';
 import { addBuiltinActorModel } from './builtin-actor-models';

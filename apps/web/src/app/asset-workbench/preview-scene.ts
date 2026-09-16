@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import { getItemDefinition } from '@seedlands/game-core/server/gameplay/item-registry';
+import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import { builtinItemBindings } from '../../client/presentation/asset-catalog';
 import { GameplayModelAssets } from '../gameplay/gameplay-model-assets';
 import { setAppearanceResources } from '../gameplay/appearance-runtime';
@@ -243,7 +243,7 @@ export class PreviewScene {
   /** Frame the visible model, not its authoring canvas or grip, for readable inventory icons. */
   frameThumbnail() {
     const binding = builtinItemBindings.find((entry) => entry.modelId === this.shownAssetId);
-    const tool = binding && getItemDefinition(binding.itemId).itemType === 'tool';
+    const tool = binding && requireClassicItemDefinition(binding.itemId).itemType === 'tool';
     if (tool) this.pivot.setLocalEulerAngles(0, 0, -35);
     const meshes = (this.pivot.findComponents('render') as pc.RenderComponent[]).flatMap(
       (component) => component.meshInstances,

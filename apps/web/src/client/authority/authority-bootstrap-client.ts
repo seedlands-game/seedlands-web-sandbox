@@ -2,10 +2,12 @@ import type {
   AuthorityBootstrapGeneration,
   AuthorityRequest,
   AuthorityResponse,
-} from '@seedlands/game-core/compute/authority-worker-protocol';
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 type BootstrapRequest = Extract<AuthorityResponse, { kind: 'authority-bootstrap-needed' }>;
-type GenerateBootstrap = (request: { seed: number; generatorVersion: number }) => Promise<AuthorityBootstrapGeneration>;
+type GenerateBootstrap = (
+  request: Pick<BootstrapRequest, 'seed' | 'generatorVersion' | 'provider' | 'starterEcology'>,
+) => Promise<AuthorityBootstrapGeneration>;
 type PostBootstrap = (message: AuthorityRequest, transfer: Transferable[]) => void;
 
 export async function provideAuthorityBootstrap(
@@ -14,7 +16,12 @@ export async function provideAuthorityBootstrap(
   post: PostBootstrap,
 ): Promise<void> {
   if (!generate) throw new Error('Authority requested safe spawn generation without a compute provider.');
-  const bootstrap = await generate({ seed: message.seed, generatorVersion: message.generatorVersion });
+  const bootstrap = await generate({
+    seed: message.seed,
+    generatorVersion: message.generatorVersion,
+    provider: message.provider,
+    starterEcology: message.starterEcology,
+  });
   post(
     {
       kind: 'authority-bootstrap-result',

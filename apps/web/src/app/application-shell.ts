@@ -4,7 +4,7 @@ import type { Game } from './game';
 import type { UiBridge } from './ui/ui-bridge';
 import type { ActorMode } from './ui/ui-contracts';
 import { isUserPointerUnlock } from './player/pointer-lock';
-import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import {
   persistExperimentalClientOptions,
   readStoredExperimentalClientOptions,

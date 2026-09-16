@@ -1,5 +1,5 @@
-import { Voxel, voxelNames, faceMaterialFor } from '@seedlands/game-core/world/voxel';
-import { modelBoxesForVoxel } from '@seedlands/game-core/world/voxel-model';
+import { Voxel, voxelNames, faceMaterialFor } from '@seedlands/stdlib/world/voxel';
+import { modelBoxesForVoxel } from '@seedlands/stdlib/world/voxel-model';
 import type { Asset, MaterialAsset } from './asset-types';
 import { builtinTerrainTextures, terrainMaterials } from './terrain-assets';
 import { builtinModelTextures, modelMaterialDefinitions } from './model-material-definitions';

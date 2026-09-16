@@ -1,5 +1,5 @@
 import type { ComputeWorkerResult } from '../client/compute/compute-worker-pool';
-import type { ComputeTask } from '@seedlands/game-core/runtime/compute-task-queue';
+import type { ComputeTask } from '@seedlands/stdlib/runtime/compute-task-queue';
 
 export type RunComputeTask = Readonly<{ kind: 'run-compute-task'; task: ComputeTask }>;
 export type CancelComputeTask = Readonly<{

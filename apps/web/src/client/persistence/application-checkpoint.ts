@@ -1,5 +1,5 @@
-import type { FrozenGameSaveSnapshot } from '@seedlands/game-core/server/persistence/game-save-snapshot';
-import type { WorldHarnessPort } from '@seedlands/game-core/server/harness/world-harness-contract';
+import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
+import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-harness-contract';
 import { checkpointHash, inspectResidentCheckpoint } from '../character/resident-checkpoint-transfer';
 
 export type ApplicationCheckpoint = Readonly<{

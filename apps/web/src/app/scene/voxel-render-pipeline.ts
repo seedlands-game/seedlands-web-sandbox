@@ -1,6 +1,6 @@
-import { FaceMaterial, type FaceMaterialId } from '@seedlands/game-core/world/voxel';
-import type { RenderCategory } from '@seedlands/game-core/world/mesh';
-export type { RenderCategory } from '@seedlands/game-core/world/mesh';
+import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import type { RenderCategory } from '@seedlands/stdlib/world/mesh';
+export type { RenderCategory } from '@seedlands/stdlib/world/mesh';
 
 export const MATERIAL_LAYER_COUNT = 18;
 

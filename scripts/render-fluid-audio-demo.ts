@@ -64,9 +64,7 @@ mixEvent(output, 'water-exit', 4.85, 106, 1.25);
 const peak = output.reduce((maximum, sample) => Math.max(maximum, Math.abs(sample)), 0);
 if (peak > 0) for (let index = 0; index < output.length; index += 1) output[index] *= 0.9 / peak;
 
-const outputPath = resolve(
-  process.argv[2] ?? 'changes/2026-09-05-fluid-experience-repair/evidence/fluid-audio-demo.wav',
-);
+const outputPath = resolve(process.argv[2] ?? 'harness/results/fluid-audio-demo.wav');
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, encodeWave(output));
 console.info(`已导出 ${outputPath}：0.35s 入水，1.25s 涉水，2.15s 划水，3.05–4.03s 水下低通划水，4.85s 出水。`);

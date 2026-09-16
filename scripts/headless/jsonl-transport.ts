@@ -1,4 +1,4 @@
-import { CHUNK_SIZE } from '@seedlands/game-core/world/voxel';
+import { CHUNK_SIZE } from '@seedlands/stdlib/world/voxel';
 
 export const JSONL_CHECKPOINT_LINE_BYTES = 96 * 1024 * 1024;
 

@@ -1,5 +1,5 @@
 import * as pc from 'playcanvas';
-import { CHUNK_SIZE } from '@seedlands/game-core/world/voxel';
+import { CHUNK_SIZE } from '@seedlands/stdlib/world/voxel';
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
 import type { MeshPart, PendingMeshTask } from '../app-contracts';
 import type { ChunkResourceAdapter, ChunkSummary } from './chunk-resource-repository';

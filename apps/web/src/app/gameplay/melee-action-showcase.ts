@@ -1,4 +1,4 @@
-import type { ServerCommand } from '@seedlands/game-core/server/commands/command-contract';
+import type { ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 
 export const MELEE_SHOWCASE_SEED = 'wood-sword-action-stage-v1';
 export const MELEE_SHOWCASE_DUMMY_IDS = Object.freeze([

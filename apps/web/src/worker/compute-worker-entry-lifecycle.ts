@@ -1,5 +1,5 @@
-import { PROTOCOL_VERSION } from '@seedlands/game-core/runtime/session-protocol';
-import type { ComputeTask } from '@seedlands/game-core/runtime/compute-task-queue';
+import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
+import type { ComputeTask } from '@seedlands/stdlib/runtime/compute-task-queue';
 import type { ComputeWorkerRequest } from './compute-worker-protocol';
 import type { KernelDiagnostics } from '../compute/kernel-memory';
 

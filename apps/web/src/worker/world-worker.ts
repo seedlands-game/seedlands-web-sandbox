@@ -6,7 +6,7 @@ import {
   runWorldComputeTask,
   worldComputeTransfers,
   type WorldComputePayload,
-} from '@seedlands/game-core/compute/world-compute-task';
+} from '@seedlands/stdlib/server/compute/world-compute-task';
 import { loadWorkerKernels, workerKernelReadyState } from './wasm-kernel-loader';
 import { parseWasmWorkerName } from '../client/compute/wasm-experiment-selection';
 import { worldKernelAdapter } from './world-kernel-adapter';

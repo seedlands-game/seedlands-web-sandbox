@@ -1,4 +1,4 @@
-import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/game-core/world/voxel';
+import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/stdlib/world/voxel';
 import {
   cacheAuthorityCollisionBaseline,
   type AuthorityCollisionCachedChunk,

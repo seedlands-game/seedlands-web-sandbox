@@ -1,6 +1,6 @@
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import type { ResidentClientMessage, ResidentHostMessage, ResidentWorldBinding } from '@seedlands/cognition-protocol';
-import type { ControlBinding } from '@seedlands/game-core/runtime/character-control-protocol';
+import type { ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { ResidentChannel } from '../resident-channel.js';
 import type { ResidentFactory } from '../resident-factory.js';
 import type { FrameworkPersistence, PersistentNpcWorkspace } from '../workspace/index.js';

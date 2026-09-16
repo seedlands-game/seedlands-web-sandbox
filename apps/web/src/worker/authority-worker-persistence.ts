@@ -1,7 +1,7 @@
-import type { AuthorityPersistence } from '@seedlands/game-core/server/authority/authority-runtime-options';
-import type { ChunkSnapshot } from '@seedlands/game-core/server/persistence/chunk-persistence';
-import type { GameplaySnapshot } from '@seedlands/game-core/server/gameplay/gameplay-runtime';
-import type { FrozenGameSaveSnapshot } from '@seedlands/game-core/server/persistence/game-save-snapshot';
+import type { AuthorityPersistence } from '@seedlands/stdlib/server/authority/authority-runtime-options';
+import type { ChunkSnapshot } from '@seedlands/stdlib/server/persistence/chunk-persistence';
+import type { GameplaySnapshot } from '@seedlands/stdlib/server/gameplay/gameplay-runtime';
+import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
 
 /** Keeps an already validated runtime alive while its durable backing store is atomically replaced. */
 export class SwitchableAuthorityPersistence implements AuthorityPersistence {

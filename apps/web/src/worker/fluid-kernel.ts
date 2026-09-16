@@ -2,9 +2,9 @@ import {
   computeFluidCandidate,
   type FluidCandidate,
   type FluidPosition,
-} from '@seedlands/game-core/server/fluid/fluid-transaction';
+} from '@seedlands/stdlib/server/fluid/fluid-transaction';
 import type { KernelMemory } from '../compute/kernel-memory';
-import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/game-core/world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/stdlib/world/voxel';
 
 const WRITES = 4 * 1024 * 1024;
 const NEXT = 5 * 1024 * 1024;

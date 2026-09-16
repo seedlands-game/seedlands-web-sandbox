@@ -7,8 +7,8 @@
   import GamePanel from './primitives/game-panel.svelte';
   import GameTextField from './primitives/game-text-field.svelte';
   import SeedlandsMark from './primitives/seedlands-mark.svelte';
-  import { GENERATOR_VERSION } from '@seedlands/game-core/world/voxel';
-  import type { WorldOpenMode } from '@seedlands/game-core/runtime/world-version-policy';
+  import { GENERATOR_VERSION } from '@seedlands/stdlib/world/voxel';
+  import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
   import type { WorkerSupport } from '../client-capability-preflight';
   import WorldLoading from './world-loading.svelte';
 
