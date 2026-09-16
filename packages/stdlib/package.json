@@ -88,7 +88,7 @@
     "mistreevous": "4.3.1"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.11"
   },
   "engines": {
