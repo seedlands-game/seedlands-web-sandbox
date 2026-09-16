@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 
 const usage = `用法：
   node scripts/change-archive.mjs [--root <仓库>] archive <archives/changes/*.zip> <changes/<change>> [...]
+  node scripts/change-archive.mjs [--root <仓库>] freeze <完整基线 SHA> <archives/changes/*.zip>
   node scripts/change-archive.mjs [--root <仓库>] verify <archives/changes/*.zip>
   node scripts/change-archive.mjs [--root <仓库>] extract <archives/changes/*.zip> <恢复目录>`;
 
@@ -88,9 +89,10 @@ const findReferences = async (root, sourcePath) => {
   return matches;
 };
 
-const manifestFor = async (root, sources) => ({
+const manifestFor = async (root, sources, metadata = {}) => ({
   version: 1,
   createdAt: new Date().toISOString(),
+  ...metadata,
   entries: (
     await Promise.all(
       (
@@ -138,6 +140,11 @@ const verify = (archive) => {
   if (!existsSync(archive)) fail(`找不到 ZIP：${archive}`);
   const entries = readArchiveEntries(archive);
   const manifest = readManifest(archive);
+  if (
+    manifest.kind === 'baseline-freeze' &&
+    (typeof manifest.baselineSha !== 'string' || !/^[a-f0-9]{40}$/.test(manifest.baselineSha))
+  )
+    fail(`ZIP 基线身份无效：${archive}`);
   const manifestPaths = new Set();
   for (const entry of manifest.entries) {
     const path = entry?.path;
@@ -188,30 +195,14 @@ const extract = async (root, archive, destination) => {
   }
 };
 
-const archive = async (root, archiveArg, sourceArgs) => {
-  if (sourceArgs.length === 0) fail('至少指定一个 change。');
-  const target = relativeInside(root, archiveArg, 'archives');
-  if (!target.path.startsWith('archives/changes/') || !target.path.endsWith('.zip'))
-    fail(`归档目标必须是 archives/changes 下的 ZIP：${archiveArg}`);
-  if (existsSync(target.absolute)) fail(`拒绝覆盖已存在的 ZIP：${target.path}`);
-  const sources = sourceArgs.map((arg) => relativeInside(root, arg, 'changes'));
-  if (new Set(sources.map((source) => source.path)).size !== sources.length) fail('归档 change 不能重复。');
-  for (const source of sources) {
-    if (!existsSync(source.absolute)) fail(`找不到 change：${source.path}`);
-    await rejectSymlinkAncestors(root, source.absolute);
-    if ((await lstat(source.absolute)).isSymbolicLink()) fail(`归档不接受符号链接：${source.path}`);
-    if (!(await isDelivered(source))) fail(`只可归档明确 Delivered 的 change：${source.path}`);
-    const references = await findReferences(root, source.path);
-    if (references.length > 0) fail(`运行入口仍引用 ${source.path}：${references.join(', ')}`);
-  }
-
+const archiveBundle = async (root, target, sources, metadata = {}) => {
   await rejectSymlinkAncestors(root, target.absolute);
   await mkdir(resolve(target.absolute, '..'), { recursive: true });
   const temporary = await mkdtemp(join(tmpdir(), 'seedlands-change-archive-'));
   let verifiedArchive = false;
   try {
     const manifestPath = join(temporary, 'manifest.json');
-    await writeFile(manifestPath, `${JSON.stringify(await manifestFor(root, sources), null, 2)}\n`);
+    await writeFile(manifestPath, `${JSON.stringify(await manifestFor(root, sources, metadata), null, 2)}\n`);
     execFileSync('zip', ['-q', '-j', target.absolute, manifestPath]);
     execFileSync('zip', ['-q', '-r', '-D', target.absolute, ...sources.map((source) => source.path)], { cwd: root });
     verify(target.absolute);
@@ -226,6 +217,66 @@ const archive = async (root, archiveArg, sourceArgs) => {
   }
 };
 
+const archiveTarget = (root, archiveArg) => {
+  const target = relativeInside(root, archiveArg, 'archives');
+  if (!target.path.startsWith('archives/changes/') || !target.path.endsWith('.zip'))
+    fail(`归档目标必须是 archives/changes 下的 ZIP：${archiveArg}`);
+  if (existsSync(target.absolute)) fail(`拒绝覆盖已存在的 ZIP：${target.path}`);
+  return target;
+};
+
+const archive = async (root, archiveArg, sourceArgs) => {
+  if (sourceArgs.length === 0) fail('至少指定一个 change。');
+  const target = archiveTarget(root, archiveArg);
+  const sources = sourceArgs.map((arg) => relativeInside(root, arg, 'changes'));
+  if (new Set(sources.map((source) => source.path)).size !== sources.length) fail('归档 change 不能重复。');
+  for (const source of sources) {
+    if (!existsSync(source.absolute)) fail(`找不到 change：${source.path}`);
+    await rejectSymlinkAncestors(root, source.absolute);
+    if ((await lstat(source.absolute)).isSymbolicLink()) fail(`归档不接受符号链接：${source.path}`);
+    if (!(await isDelivered(source))) fail(`只可归档明确 Delivered 的 change：${source.path}`);
+    const references = await findReferences(root, source.path);
+    if (references.length > 0) fail(`运行入口仍引用 ${source.path}：${references.join(', ')}`);
+  }
+
+  return archiveBundle(root, target, sources);
+};
+
+const freeze = async (root, baselineSha, archiveArg) => {
+  if (!/^[a-f0-9]{40}$/.test(baselineSha)) fail('基线必须是完整 40 位提交 SHA。');
+  const git = (...args) => execFileSync('git', ['-C', root, ...args], { encoding: 'utf8' }).trimEnd();
+  if ((await realpath(git('rev-parse', '--show-toplevel'))) !== (await realpath(root)))
+    fail('冻结根目录必须是 Git 工作树根。');
+  if (git('rev-parse', 'HEAD') !== baselineSha) fail('当前 HEAD 与冻结基线 SHA 不同。');
+  const target = archiveTarget(root, archiveArg);
+  const names = git('ls-tree', '-d', '--name-only', `${baselineSha}:changes`).split('\n').filter(Boolean);
+  if (names.length === 0) fail('冻结基线没有 change 目录。');
+  const sources = names.map((name) => relativeInside(root, `changes/${name}`, 'changes'));
+  const baselineFiles = new Set(
+    git('ls-tree', '-r', '--name-only', baselineSha, '--', 'changes/').split('\n').filter(Boolean),
+  );
+
+  for (const source of sources) {
+    if (!existsSync(source.absolute)) fail(`冻结源目录不存在：${source.path}`);
+    await rejectSymlinkAncestors(root, source.absolute);
+    if (!(await lstat(source.absolute)).isDirectory()) fail(`冻结源不是目录：${source.path}`);
+    const currentFiles = (await filesIn(root, source.absolute)).map((file) => posix(relative(root, file)));
+    const expectedFiles = currentFiles.filter((file) => baselineFiles.has(file));
+    if (currentFiles.length !== expectedFiles.length) fail(`冻结源包含基线外文件：${source.path}`);
+    const sourcePrefix = `${source.path}/`;
+    if (currentFiles.length !== [...baselineFiles].filter((file) => file.startsWith(sourcePrefix)).length)
+      fail(`冻结源缺少基线文件：${source.path}`);
+    try {
+      execFileSync('git', ['-C', root, 'diff', '--quiet', baselineSha, '--', source.path]);
+    } catch {
+      fail(`冻结源与基线字节不同：${source.path}`);
+    }
+    const references = await findReferences(root, source.path);
+    if (references.length > 0) fail(`运行入口仍引用 ${source.path}：${references.join(', ')}`);
+  }
+  return archiveBundle(root, target, sources, { kind: 'baseline-freeze', baselineSha });
+};
+
 const main = async () => {
   const args = process.argv.slice(2);
   let root = resolve(import.meta.dirname, '..');
@@ -237,6 +288,10 @@ const main = async () => {
   const [command, archiveArg, ...sources] = args;
   if (command === 'archive' && archiveArg) {
     process.stdout.write(`${await archive(root, archiveArg, sources)}\n`);
+    return;
+  }
+  if (command === 'freeze' && archiveArg && sources.length === 1) {
+    process.stdout.write(`${await freeze(root, archiveArg, sources[0])}\n`);
     return;
   }
   if (command === 'verify' && archiveArg && sources.length === 0) {
