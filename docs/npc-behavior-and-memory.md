@@ -1,6 +1,6 @@
 # NPC 行为、玩法能力与认知
 
-本页描述 [NPC 可组合基线 change](../changes/2026-09-10-npc-composable-baseline/spec.md) 的分层合同。准出状态、实际用例与尚未验证的范围以该 change 的执行记录为准，不把架构说明当作运行验收。
+本页描述 [NPC 可组合基线 change](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-10-npc-composable-baseline/spec.md) 的分层合同。准出状态、实际用例与尚未验证的范围以该 change 的执行记录为准，不把架构说明当作运行验收。
 
 ## 谁拥有状态
 

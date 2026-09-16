@@ -8,7 +8,7 @@
 
 > 2026-09-07 玩法路线补充：详见[玩法路线详细基线](playbook-roadmap.md)与[ECS 研究附录](ecs-animation-research.md)。这一条线独立于大模型，先提取并打磨基础生存/创造 playbook，再经差异样例稳定 API v1，随后扩展异世界。下文历史实现证据仍保留原核查版本。
 >
-> 2026-09-09 玩法架构确认：小内核＋标准机制库＋可编程玩法，模块为引擎识别单元、Pack 为交付单元，Playbook 为唯一组合根，Ruleset 定义规则但不另建权威。详见[架构知识基线](composable-gameplay-architecture.md)和[第一期合同](../changes/2026-09-09-composable-overworld-playbook/spec.md)。本期验证基础主世界循环、工具成长及生存/创造；现代整合包质量参照另行建立，不进入本期。复用已合入主干能力，独立于其他活动分支推进。
+> 2026-09-09 玩法架构确认：小内核＋标准机制库＋可编程玩法，模块为引擎识别单元、Pack 为交付单元，Playbook 为唯一组合根，Ruleset 定义规则但不另建权威。详见[架构知识基线](composable-gameplay-architecture.md)和[第一期合同](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-composable-overworld-playbook/spec.md)。本期验证基础主世界循环、工具成长及生存/创造；现代整合包质量参照另行建立，不进入本期。复用已合入主干能力，独立于其他活动分支推进。
 >
 > **文档状态：现行长期对齐基线。** 已取得的用户原话、历史方案和仓库证据足以支持长期目标、关键选型与两路演进。2026-09-06 用户允许在材料足够时停止补读，本次据此结束全量检索。尚未读取的历史中段、项目来源和附件保留在[来源覆盖说明](living-world-sources.md)中，仅在具体任务依赖它们时查证；不声称已读完 Project，也不把缺失细节当作已确认规则。
 
@@ -25,7 +25,7 @@
 
 两条路线最终在同一个真实世界会合：Agent 通过正式能力参与插件定义的玩法，玩家可以进入、观察和改变这个世界。下一步价值在于证明这条闭环；具体协议、插件 API、模型供应商和集群形态仍应由相应 change 给出证据。
 
-2026-09-09 H1/H2 修订：[共享开发端口与诊断](developer-world-harness.md)提供下一阶段底座。底层协议只认识主体、资源、操作与作用域，玩家/模型/API/脚本标签不决定权限。认知宿主下一阶段采用 LangGraph 显式回路与 DeepSeek V4 薄协议适配，依据[候选比较和 mock wire 实验](../changes/2026-09-09-developer-world-harness/framework-decision.md)；不代表已通过真实模型验证。
+2026-09-09 H1/H2 修订：[共享开发端口与诊断](developer-world-harness.md)提供下一阶段底座。底层协议只认识主体、资源、操作与作用域，玩家/模型/API/脚本标签不决定权限。认知宿主下一阶段采用 LangGraph 显式回路与 DeepSeek V4 薄协议适配，依据[候选比较和 mock wire 实验](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-developer-world-harness/framework-decision.md)；不代表已通过真实模型验证。
 
 ## 二、长期价值与完成态
 
@@ -153,7 +153,7 @@ EaglerPorts 与 Java/WASM 讨论属于同期平台边界探索，不能把“曾
 
 ### 4.1 当前基点与历史证据
 
-2026-09-09 核对 origin/main 为 `ec77fdd667458ec93ea426dbf81a142ac6028f91`，Node 可玩 MVP 已通过 PR #17 合并。用户确认完成 MVP 验证；该版本固定为 `archive/node-dedicated-mvp-2026-09-09`，本轮不重复宣称验证归档宿主。退役与浏览器回归看[退役 change](../changes/2026-09-09-browser-living-world-baseline/spec.md)。以下 2026-09-06 数字仍是历史快照。
+2026-09-09 核对 origin/main 为 `ec77fdd667458ec93ea426dbf81a142ac6028f91`，Node 可玩 MVP 已通过 PR #17 合并。用户确认完成 MVP 验证；该版本固定为 `archive/node-dedicated-mvp-2026-09-09`，本轮不重复宣称验证归档宿主。退役与浏览器回归看[退役 change](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-browser-living-world-baseline/spec.md)。以下 2026-09-06 数字仍是历史快照。
 
 2026-09-06 通过 `git ls-remote origin refs/heads/main` 只读确认远端 main 为 **`3938eed27793cd342558165d061792ab9f12dd2a`**，提交主题为“交付可玩沙盒 MVP 与统一物理及独立循环 (#7)”。[S1]
 
@@ -177,9 +177,9 @@ EaglerPorts 与 Java/WASM 讨论属于同期平台边界探索，不能把“曾
 ### 4.2 当前证据入口
 
 - [当前能力与操作](../README.zh-CN.md)：唯一面向运行和现有能力的说明。
-- [可玩 MVP 父合同](../changes/2026-09-05-playable-world-mvp/spec.md)：总体范围、阶段修订与历史证据。
-- [算法生物与 NPC](../changes/2026-09-05-creature-npc-algorithmic-foundation/spec.md)：模型接入前的确定性底座。
-- [独立循环与统一物理合同](../changes/2026-09-06-independent-loops-unified-physics/spec.md)、[执行记录](../changes/2026-09-06-independent-loops-unified-physics/execution.md)：联合阅读，避免只读旧阶段文字。
+- [可玩 MVP 父合同](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-05-playable-world-mvp/spec.md)：总体范围、阶段修订与历史证据。
+- [算法生物与 NPC](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-05-creature-npc-algorithmic-foundation/spec.md)：模型接入前的确定性底座。
+- [独立循环与统一物理合同](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-06-independent-loops-unified-physics/spec.md)、[执行记录](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-06-independent-loops-unified-physics/execution.md)：联合阅读，避免只读旧阶段文字。
 - [Headless 实现](../packages/stdlib/src/server/headless/headless-session.ts)、[权威运行时](../packages/stdlib/src/server/authority/authority-runtime.ts)：本次核对的实际实现边界。
 
 ## 五、两条并行路线
@@ -196,7 +196,7 @@ EaglerPorts 与 Java/WASM 讨论属于同期平台边界探索，不能把“曾
 | 后续 Simulation LOD          | 精度切换与离线追赶能否保持因果？       | 保持身份、资源、时序和后果，补算有界，旧意图失效；不以 LLM 自由编写历史代替模拟                                              |
 | 后续 World AI                | 个体以外的世界目标如何作用？           | 聚落/区域/事件与预算独立，通过规则与信息传播影响个体，宏观知识不泄漏给 NPC                                                   |
 
-H1/H2 的下一阶段拆成 A1 普通 Actor 与执行/感知资源、A2 认知框架与 Bridge、A3 玩家可玩的单 NPC 闭环；具体准出见[认知方案路线表](../changes/2026-09-09-developer-world-harness/agent-harness-design.md#6-接下来按什么顺序交付)。
+H1/H2 的下一阶段拆成 A1 普通 Actor 与执行/感知资源、A2 认知框架与 Bridge、A3 玩家可玩的单 NPC 闭环；具体准出见[认知方案路线表](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-developer-world-harness/agent-harness-design.md#6-接下来按什么顺序交付)。
 
 Node Dedicated 从活跃代码和门禁归档退出；Node 文件存储、专属 Worker、世界 WebSocket 与生命周期均无持续维护义务。研究成果不要求后续接口兼容。首期 Agent Server 可在本机用 Node 运行认知服务，但不拥有游戏世界，不意味着复活 Dedicated 产品。
 

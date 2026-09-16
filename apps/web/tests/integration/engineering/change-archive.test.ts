@@ -59,11 +59,81 @@ const createDuplicateManifestArchive = async (root: string) => {
 const run = (root: string, ...args: string[]) =>
   execFileSync(process.execPath, [script, '--root', root, ...args], { encoding: 'utf8' });
 
+const commitFixture = (root: string) => {
+  execFileSync('git', ['init', '-q', root]);
+  execFileSync('git', ['-C', root, 'add', 'changes']);
+  execFileSync('git', [
+    '-C',
+    root,
+    '-c',
+    'user.name=Archive Test',
+    '-c',
+    'user.email=archive@example.invalid',
+    'commit',
+    '-qm',
+    'baseline',
+  ]);
+  return execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+};
+
 afterEach(async () => {
   await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
 
 describe('change archive tool', () => {
+  it('freezes every committed change at an exact baseline without relabeling historical status', async () => {
+    const root = await createFixture('Active');
+    const first = 'changes/2026-09-01-example';
+    const second = 'changes/2026-09-02-proposed';
+    await mkdir(join(root, second), { recursive: true });
+    await writeFile(join(root, second, 'spec.md'), '# Historical proposal\n\n状态：Proposed\n');
+    const firstSpec = await readFile(join(root, first, 'spec.md'));
+    const baselineSha = commitFixture(root);
+    const future = 'changes/2026-09-03-future';
+    await mkdir(join(root, future), { recursive: true });
+    await writeFile(join(root, future, 'spec.md'), '状态：Active\n');
+
+    run(root, 'freeze', baselineSha, 'archives/changes/baseline.zip');
+    expect(() => run(root, 'verify', 'archives/changes/baseline.zip')).not.toThrow();
+    expect(await readFile(join(root, first, 'spec.md')).catch(() => null)).toBeNull();
+    expect(await readFile(join(root, second, 'spec.md')).catch(() => null)).toBeNull();
+    expect(await readFile(join(root, future, 'spec.md'), 'utf8')).toBe('状态：Active\n');
+    run(root, 'extract', 'archives/changes/baseline.zip', 'restored/baseline');
+    expect(await readFile(join(root, 'restored/baseline', first, 'spec.md'))).toEqual(firstSpec);
+  });
+
+  it('rejects a changed baseline source or an extra source file without deleting it', async () => {
+    const dirtyRoot = await createFixture('Proposed');
+    const baselineSha = commitFixture(dirtyRoot);
+    const specPath = join(dirtyRoot, 'changes/2026-09-01-example/spec.md');
+    await writeFile(specPath, '# changed\n');
+    expect(() => run(dirtyRoot, 'freeze', baselineSha, 'archives/changes/dirty.zip')).toThrow();
+    expect(await readFile(specPath, 'utf8')).toBe('# changed\n');
+
+    const extraRoot = await createFixture('Proposed');
+    const extraSha = commitFixture(extraRoot);
+    const extraPath = join(extraRoot, 'changes/2026-09-01-example/extra.txt');
+    await writeFile(extraPath, 'not in baseline\n');
+    expect(() => run(extraRoot, 'freeze', extraSha, 'archives/changes/extra.zip')).toThrow();
+    expect(await readFile(extraPath, 'utf8')).toBe('not in baseline\n');
+  });
+
+  it('rejects a different HEAD or an active script reference during baseline freeze', async () => {
+    const wrongHeadRoot = await createFixture('Proposed');
+    commitFixture(wrongHeadRoot);
+    expect(() => run(wrongHeadRoot, 'freeze', '0'.repeat(40), 'archives/changes/wrong-head.zip')).toThrow();
+    expect(await readFile(join(wrongHeadRoot, 'changes/2026-09-01-example/spec.md'), 'utf8')).toContain('Proposed');
+
+    const referencedRoot = await createFixture('Proposed');
+    const baselineSha = commitFixture(referencedRoot);
+    await writeFile(
+      join(referencedRoot, 'package.json'),
+      '{"scripts":{"smoke":"changes/2026-09-01-example/e2e/example.spec.ts"}}\n',
+    );
+    expect(() => run(referencedRoot, 'freeze', baselineSha, 'archives/changes/referenced-freeze.zip')).toThrow();
+    expect(await readFile(join(referencedRoot, 'changes/2026-09-01-example/spec.md'), 'utf8')).toContain('Proposed');
+  });
+
   it('round-trips a delivered change with path and hash verification before removal', async () => {
     const root = await createFixture();
     const archive = 'archives/changes/first-batch.zip';

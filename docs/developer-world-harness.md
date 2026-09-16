@@ -1,6 +1,6 @@
 # 世界开发 Harness
 
-基础世界端口的实现与验收状态见 [H1/H2 change](../changes/2026-09-09-developer-world-harness/spec.md)。共享世界端口服务于可信开发；模型角色不会获得此端口的全局权限。当前行为组件、受限角色观察与独立认知接线见 [NPC 行为与认知](npc-behavior-and-memory.md)；旧[单角色认知方案](../changes/2026-09-09-developer-world-harness/agent-harness-design.md)仅作来源。
+基础世界端口的实现与验收状态见 [H1/H2 change](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-developer-world-harness/spec.md)。共享世界端口服务于可信开发；模型角色不会获得此端口的全局权限。当前行为组件、受限角色观察与独立认知接线见 [NPC 行为与认知](npc-behavior-and-memory.md)；旧[单角色认知方案](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-developer-world-harness/agent-harness-design.md)仅作来源。
 
 ## 两层能力
 
