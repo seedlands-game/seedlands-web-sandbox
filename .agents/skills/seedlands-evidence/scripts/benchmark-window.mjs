@@ -1,1 +1,0 @@
-../../../../scripts/benchmark-window.mjs

@@ -1,16 +1,16 @@
 # 性能执行窗口
 
-浏览器 benchmark、Harness 性能采样和其他竞争 CPU/内存的证据任务统一通过机器级阻塞窗口执行。固定职责标识为 `seedlands-performance-validator`，默认使用 `Terra/high` 做一次独立验收；跨请求反复复用时才考虑经用户授权建立独立任务。
+本页保留后续浏览器 benchmark 和 Harness 性能采样的独占窗口设计。2026-09-16 架构冻结阶段不执行性能验收，以下脚本暂存在后续 Draft PR，当前 checkout 中不可调用。恢复前须重新审核源码、窗口和测量合同，不得把旧样本用作当前收益证据。固定职责标识为 `seedlands-performance-validator`，跨请求反复复用时才考虑经用户授权建立独立任务。
 
 ## 调用
 
-旧入口保持可用并改为等待窗口：
+待恢复的旧入口：
 
 ```text
 node scripts/with-benchmark-reservation.mjs <command> [args...]
 ```
 
-新入口支持显式等待上限：
+待恢复的新入口支持显式等待上限：
 
 ```text
 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- <command> [args...]

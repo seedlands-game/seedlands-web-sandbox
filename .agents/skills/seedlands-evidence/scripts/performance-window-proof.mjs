@@ -1,1 +1,0 @@
-../../../../scripts/harness/performance-window-proof.mjs

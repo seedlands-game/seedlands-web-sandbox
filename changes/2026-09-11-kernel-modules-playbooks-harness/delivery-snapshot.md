@@ -36,3 +36,11 @@
 ## 停止交接
 
 用户因额度要求立即停止并push，后续不自动继续。无临时日志的Classic run `2026-09-11t16-04-41-114z-e0862a3f` C4失败；有临时有界日志的run `2026-09-11t16-11-42-168z-646faf04` C0–C5 PASS。日志代码已撤掉，未再验证最终源码，因此将NPC活动问题保持为未闭合，不能宣布稳定通过。停止时只读诊断与文档补充另行提交，PR以Draft交接；本地最新dist已过期，须重新build。
+
+## 2026-09-16 阶段合同与拆分交接
+
+本节覆盖上文当时的实施口径；原记录保留为历史证据，不代表当前门禁。用户批准的 [阶段验收修订](phase-gate-amendment.md) 要求 #33 完成 Kernel／stdlib／Classic 的完整生产架构分层，但只运行 Kernel 与 stdlib 确定性行为测试。Classic 内容行为、Web/Agent 集成、唯一浏览器线路、性能和原 Harness 运行证据转入新的 Draft PR 暂存；原始文件可从 `77857ca98fa1ec5e2618dea9cea815ada29e2b56` 找回。现有 Web/Agent 旧测试的包归属迁移仍留在 #33，但不执行、不计作本期行为 PASS。
+
+在拆分后的本地工作树执行：`pnpm verify:static:ci` 为 exit 0，含格式、路径、Lint、Kernel／stdlib／Classic／ESLint／Web／Agent 生产类型、Kernel/stdlib 测试类型和 ESLint 插件 11 文件／66 条静态规则测试；`pnpm test:deterministic:ci` 为 exit 0，Kernel 4 文件／28 条、stdlib 82 文件／530 条。静态包方向另核对 `Kernel → 无仓内游戏包`、`stdlib → Kernel`、`Classic → stdlib`，活跃源码中未发现 `@seedlands/game-core` 或反向引用。上述结果只针对最终提交前的当前源码树；PR 推送后须读回远端 SHA，不能把它们外推为 Classic 产品可玩或全部测试通过。
+
+未执行：Classic、Web/Agent 玩法行为、跨层集成、生产 build、Chromium、视觉、性能、真实模型/PG。主分支保护仍要求 `Production build` 与 `Chromium regression`，本次 CI 有意不运行也不造空绿，因此 #33 即使静态检查通过仍为 Draft/BLOCKED。没有改 ruleset、权限或部署；需要人类决定后续门禁迁移。长期 docs baseline 已更新代码地图、目录规范、CI 测试边界、Harness 延期说明和 Evidence Skill，原因是当前可执行入口及证据责任发生变化，未重写原 spec 或旧运行结论。

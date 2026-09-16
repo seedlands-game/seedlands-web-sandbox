@@ -12,25 +12,25 @@
 
 ## 顶层归属
 
-| 位置                                         | 应放什么                                         | 归属提醒                                                 |
-| -------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------- |
-| 根目录                                       | workspace 编排、共享检查配置及社区入口文档       | 产品运行依赖归所属包；根 devDependencies 是共享工具      |
-| `apps/web/`                                  | 浏览器产品、Vite/SSG、公开资产与 Web 入口        | 可依赖 Kernel、stdlib 与 Classic 的公开 exports          |
-| `apps/agent-server/`                         | 独立 Node 认知服务、模型调用与 PostgreSQL 工作区 | 可依赖 stdlib/cognition 协议；不依赖 Web，不拥有世界身体 |
-| `packages/kernel/`                           | 单一执行、时钟、事务与状态生命周期 owner         | 不含游戏内容、行为树或平台实现                           |
-| `playbooks/classic/`                         | Classic 产品 Pack 与内容                         | 仅使用公共模块 API                                       |
-| `packages/eslint-plugin/`                    | 规则、共享配置与独立规则测试                     | 不进入游戏测试项目                                       |
-| `packages/stdlib/`                           | 跨端权威规则、协议、世界、物理与纯计算           | 不依赖 apps 或平台 ambient；能力通过窄实例端口注入       |
-| `packages/cognition-protocol/`               | Web 与 Agent 的版本化认知传输合同                | 纯数据协议，不引入数据库、模型或平台实现                 |
-| `packages/*/tests/`、`apps/*/tests/`         | 所属包的单元与合同测试                           | 根目录不放测试；ESLint 插件独立维护与执行                |
-| `apps/web/tests/integration/`                | 跨模块、宿主、架构与工程集成                     | 按合同注册到 Harness                                     |
-| `apps/web/tests/e2e/classic-runtime.spec.ts` | 唯一 Classic 生产线路                            | 功能与 runtime benchmark 共用                            |
-| `changes/<日期>-<名称>/`                     | Active 或未归档的变更合同、需求测试与证据        | 历史路径按交付时保留，不为追随当前目录而静默改写         |
-| `archives/changes/`                          | 明确 Delivered change 的可恢复 ZIP               | manifest 保存原路径和 SHA-256；恢复方式见归档索引        |
-| `docs/`                                      | 多次变更共用的目标、路线、代码导航和约定         | 不复制 README 的运行说明，不替代具体 spec                |
-| `scripts/`                                   | 工程任务、证据汇总和启动包装                     | 产品规则留在所属源码模块                                 |
-| `apps/web/public/assets/`                    | 通过静态 URL 加载的图片等公开资源                | 资产来源与许可见 [ASSETS](../ASSETS.md)                  |
-| `harness/baselines/<owner>/<scenario>/`      | 版本化基线                                       | 与忽略的 `harness/results/` 运行产物区分                 |
+| 位置                                    | 应放什么                                         | 归属提醒                                                 |
+| --------------------------------------- | ------------------------------------------------ | -------------------------------------------------------- |
+| 根目录                                  | workspace 编排、共享检查配置及社区入口文档       | 产品运行依赖归所属包；根 devDependencies 是共享工具      |
+| `apps/web/`                             | 浏览器产品、Vite/SSG、公开资产与 Web 入口        | 可依赖 Kernel、stdlib 与 Classic 的公开 exports          |
+| `apps/agent-server/`                    | 独立 Node 认知服务、模型调用与 PostgreSQL 工作区 | 可依赖 stdlib/cognition 协议；不依赖 Web，不拥有世界身体 |
+| `packages/kernel/`                      | 单一执行、时钟、事务与状态生命周期 owner         | 不含游戏内容、行为树或平台实现                           |
+| `playbooks/classic/`                    | Classic 产品 Pack 与内容                         | 仅使用公共模块 API                                       |
+| `packages/eslint-plugin/`               | 规则、共享配置与独立规则测试                     | 不进入游戏测试项目                                       |
+| `packages/stdlib/`                      | 跨端权威规则、协议、世界、物理与纯计算           | 不依赖 apps 或平台 ambient；能力通过窄实例端口注入       |
+| `packages/cognition-protocol/`          | Web 与 Agent 的版本化认知传输合同                | 纯数据协议，不引入数据库、模型或平台实现                 |
+| `packages/*/tests/`、`apps/*/tests/`    | 所属包的单元与合同测试                           | 根目录不放测试；ESLint 插件独立维护与执行                |
+| `apps/web/tests/integration/`           | 跨模块、宿主、架构与工程集成                     | 按合同注册到 Harness                                     |
+| `apps/web/tests/e2e/`                   | 后续 Classic 生产线路的预留归属                  | 当前架构冻结不含活跃 E2E，源码暂存于后续 Draft PR        |
+| `changes/<日期>-<名称>/`                | Active 或未归档的变更合同、需求测试与证据        | 历史路径按交付时保留，不为追随当前目录而静默改写         |
+| `archives/changes/`                     | 明确 Delivered change 的可恢复 ZIP               | manifest 保存原路径和 SHA-256；恢复方式见归档索引        |
+| `docs/`                                 | 多次变更共用的目标、路线、代码导航和约定         | 不复制 README 的运行说明，不替代具体 spec                |
+| `scripts/`                              | 工程任务、证据汇总和启动包装                     | 产品规则留在所属源码模块                                 |
+| `apps/web/public/assets/`               | 通过静态 URL 加载的图片等公开资源                | 资产来源与许可见 [ASSETS](../ASSETS.md)                  |
+| `harness/baselines/<owner>/<scenario>/` | 后续运行验收的版本化基线归属                     | 当前架构冻结不维护新的性能或运行基线                     |
 
 `node_modules/`、`dist/`、`coverage/`、`midscene_run/`、`playwright-report/`、`test-results/` 和 `harness/results/` 是依赖或运行产物；不作为源码组织的一部分，不因目录整理而提交它们。密钥规则继续以 AGENTS 为准。
 
@@ -52,7 +52,7 @@ Headless 是工程宿主，复用 core 中的 Authority、世界规则与模拟�
 - 局部契约靠近使用模块；真正的跨端协议需要明确版本、所有者和消费者。不要把所有类型倒进一个顶层 `types.ts`。
 - 不为每层目录自动添加 `index.ts` 重导出。只有需要明确公共入口时才使用；现有 `physics/index.ts` 是入口示例，目录分组本身不要求增加公共 API。
 - 新单元测试归入实现所属 workspace 的 `tests/`，各包维护自己的 Vitest 配置和 test 脚本；ESLint 规则与其测试归 `packages/eslint-plugin`，不进入根 Vitest 项目集合。
-- 跨模块与完整产品回归归 `apps/web/tests/integration/`、`apps/web/tests/e2e/`。唯一活跃 Playwright spec 是 `classic-runtime.spec.ts`；需求变更扩充同一线路的阶段断言，历史 change 仅保留合同、断言去向和证据，不成为运行依赖。
+- 跨模块与完整产品回归将归 `apps/web/tests/integration/`、`apps/web/tests/e2e/`；当前只保留既有测试的归属迁移，不执行这些行为测试。Classic Playwright 线路及性能验收在后续 Draft PR 暂存，恢复时重新冻结 spec、产物和运行证据。
 - `apps/web/src/app/ui/styles/start-screen.css` 是启动页与运行期共享的首屏样式单一来源，由 Web `index.html` 在 module script 前直接加载；不要在运行期 CSS 中再维护一套启动页几何。
 - `apps/web/src/app/ui/generated/prerendered-start-screen.html` 是 `AppRoot` 的确定性 SSR 生成物，不手工编辑；修改首屏组件后运行 `pnpm ssg:update`，`pnpm ssg:check` 会拒绝陈旧生成物。
 

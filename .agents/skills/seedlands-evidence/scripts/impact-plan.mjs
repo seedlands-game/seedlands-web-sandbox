@@ -1,1 +1,0 @@
-../../../../scripts/harness/impact-plan.mjs

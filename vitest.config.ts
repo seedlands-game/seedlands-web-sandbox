@@ -1,15 +1,10 @@
 import { defineConfig } from 'vitest/config';
 
-// Workspace convenience runner. Rule tests have an independent package entrypoint.
+// Workspace convenience runner for the architecture freeze. Cross-layer and
+// Classic behavior tests remain deferred until the Playbook is complete.
 export default defineConfig({
   test: {
-    projects: [
-      'packages/kernel/vitest.config.ts',
-      'packages/stdlib/vitest.config.ts',
-      'apps/web/vitest.config.ts',
-      'apps/agent-server/vitest.config.ts',
-      'playbooks/classic/vitest.config.ts',
-    ],
+    projects: ['packages/kernel/vitest.config.ts', 'packages/stdlib/vitest.config.ts'],
     passWithNoTests: false,
     allowOnly: false,
     coverage: {

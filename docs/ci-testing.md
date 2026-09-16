@@ -1,10 +1,16 @@
 # CI 测试边界与核心保障
 
-CI 绿色表示当前 `headSha` 在已声明环境中通过被计划选中的断言，不能证明没有缺陷。运行入口以根 `package.json` 为准；GitHub required check 名保持 `Static verification`、`Production build`、`Chromium regression`。本 change 不修改 ruleset、权限或分支保护。
+CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查，不能证明没有缺陷。运行入口以根 `package.json` 为准。
 
-Harness 的 owner、计划、执行回执和生产产物字段见 [Harness 合同](harness-contracts.md)。
+## 2026-09-16 架构冻结阶段
 
-## 三个 required check
+本阶段 `Static verification` 检查代码格式、路径、Lint、生产源码与工具类型、公开包边界的静态规则，以及 Kernel/stdlib 两包确定性行为测试。Classic、Web/Agent 行为、跨层集成、生产构建、Chromium E2E 和性能测量均不执行；不以跳过项冒充 PASS。测试选择只能在这两个行为 owner 内缩小，不能跳过静态架构边界。
+
+GitHub `main` 的现行分支保护仍要求 `Static verification`、`Production build`、`Chromium regression`。本阶段 CI 不产生后两项，因而 #33 在保护规则更新或恢复这两项真实验证前仍是 Draft/BLOCKED；不得用空运行的同名 job 制造绿灯。本 change 不修改 ruleset、权限或分支保护。后续恢复产品验收须重新审核 SDD、命令、证据和保护规则。
+
+以下章节保留原完整 Harness 设计，供后续 Draft PR 恢复时审查；其中 `harness:*`、`verify:affected`、`verify:all` 命令及路径不是本阶段的可执行入口。原设计的字段详见 [Harness 合同](harness-contracts.md)。
+
+## 延期设计：三个 required check
 
 | Check               | 实际责任                                                                                            | 不能由此推导                                                          |
 | ------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -14,7 +20,7 @@ Harness 的 owner、计划、执行回执和生产产物字段见 [Harness 合�
 
 `documentationOnly: true` 可明确跳过 Production build 和 Chromium 的运行步骤，但三个 required check 仍产生可读结果。scope 失败、计划无效、产物缺失或上游 job 失败必须让对应 check 失败，不能借 job-level skip 变绿。
 
-## Base / Head 影响计划
+## 延期设计：Base / Head 影响计划
 
 PR 固定 GitHub base SHA 为 `baseSha`、实际 checkout 的 PR head SHA 为 `headSha`。若 base tree 已有 `scripts/harness/plan.mjs`，CI 从 base commit 解出完整 `scripts/harness/` 到临时目录，连接当前安装依赖后运行该可信 planner；planner 同时读取 base/head 的 registry、文件与依赖图。候选分支不能仅靠修改自己的 selector 或 registry 降低验证范围。
 
@@ -30,7 +36,7 @@ scope 与 static job 都获取完整 Git 历史：static runner 会独立重建 
 
 `full-new` 表示完整的当前有效合同基线，不重新执行 `changes/*/e2e` 历史矩阵。缺 owner、选中 pattern 无匹配、base 必需测试在 head 消失、计划身份不等于 checkout，或非文档计划得到 `No effective tests selected` 时必须 BLOCKED。
 
-## 测试 owner 与执行位置
+## 延期设计：测试 owner 与执行位置
 
 | Owner                         | 独立入口                                  | 责任                                                                                          |
 | ----------------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------- |
@@ -44,7 +50,7 @@ Runner 按计划中的 concrete test files 分组到所属 package config，拒�
 
 Web 的 engineering/architecture 合同会启动独立的编译器或全源 Lint，因此与运行时测试分进程顺序执行，避免把子进程负载叠在功能用例的固定超时上。运行时组保持 world coverage；工程组仍用 Web 配置，ESLint 组仍走独立插件包。本地每组最多 2 个 Vitest worker，CI 最多 1 个；此分组不缩减计划选中的文件，也不放宽测试超时。
 
-## 唯一 Classic 线路
+## 延期设计：唯一 Classic 线路
 
 全仓长期维护一个 Playwright spec：`apps/web/tests/e2e/classic-runtime.spec.ts`。`playwright.config.ts` 只匹配该文件；根 package scripts、CI 和 Evidence Skill 不直接列历史 spec，也不增加第二个 `playwright test` 调用。唯一启动实现使用生产 `dist` 的 preview、严格端口、一个 browser context 与版本化 Classic scenario。
 
@@ -52,7 +58,7 @@ build job 只执行一次 `pnpm build`。`apps/web/dist/harness-artifact.json` �
 
 真实操作通过 Playwright 输入进入产品；Harness 只观察正式完成边界，不能代挖掘、代移动、途中补给或直接修状态。输入 ack、全局计数增加、HTTP 200 或单张截图不能独立证明目标动作完成。保存恢复、Worker/Wasm/backend、资源加载与 stale epoch 必须对齐本次 run id、source SHA 和目标操作状态。
 
-## TDD 与证据边界
+## 延期设计：TDD 与证据边界
 
 新增功能先在实际 owner 的最低充分边界取得可执行 RED，再让生产路径 GREEN。纯规则、非法输入、旧 epoch/sequence、取消与资源释放优先固定 seed/clock 的 Vitest；输入、Worker、IndexedDB、Pointer Lock、WebGL2 和生产资源接线进入 Classic。真实模型、PG、WAN、实体 GPU、移动端手势和音频主观体验是显式 opt-in 或专用环境证据。
 
@@ -60,7 +66,7 @@ build job 只执行一次 `pnpm build`。`apps/web/dist/harness-artifact.json` �
 
 浏览器重试一次只用于取得 trace，`failOnFlakyTests` 使重试通过仍然失败。超时是资源上限，不是性能阈值。FPS、CPU/GPU/RSS 或“更快”结论必须进入独占性能窗口，以 A/A 和交错 A/B 取证；hosted runner 时长只能用于诊断。
 
-## 失败与证据保留
+## 延期设计：失败与证据保留
 
 - scope、static、build、Chromium 各自保留精确失败；下游不得在上游失败时以 skipped 冒充成功。
 - Harness 结果写入 `harness/results/<runId>/result.json`，记录 stage、plan、steps、artifact 与 Classic receipt；失败步骤同样保留。
