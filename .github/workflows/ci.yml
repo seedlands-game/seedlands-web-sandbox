@@ -19,8 +19,8 @@ env:
   VITE_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  static:
-    name: Static verification
+  architecture:
+    name: Architecture static checks
     timeout-minutes: 60
     runs-on: ubuntu-24.04
     steps:
@@ -35,30 +35,59 @@ jobs:
           runtime: node@22.12.0
           cache: true
           require-lockfile: true
-      - name: Verify architecture and deterministic module contracts
+      - name: Verify architecture and CI selection contracts
         run: pnpm verify:static:ci
-      - name: Run affected deterministic module contracts
+
+  deterministic:
+    name: Deterministic module tests
+    timeout-minutes: 60
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact source and history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Select affected deterministic modules
+        id: scope
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
-          if [[ "$EVENT_NAME" != "pull_request" ]]; then
-            pnpm test:deterministic:ci
-            exit 0
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            git diff --no-renames --name-only -z "$BASE_SHA" "$HEAD_SHA" |
+              node scripts/ci-deterministic-scope.mjs --event "$EVENT_NAME" >> "$GITHUB_OUTPUT"
+          else
+            node scripts/ci-deterministic-scope.mjs --event "$EVENT_NAME" </dev/null >> "$GITHUB_OUTPUT"
           fi
-          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
-          if grep -Eq '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|vitest\.config\.ts|tsconfig[^/]*\.json|eslint\.config\.mjs|\.github/workflows/ci\.yml|packages/eslint-plugin/)' <<<"$changed"; then
-            pnpm test:deterministic:ci
-            exit 0
-          fi
-          if grep -q '^packages/kernel/' <<<"$changed"; then
-            pnpm test:kernel:ci
-          fi
-          if grep -q '^packages/stdlib/' <<<"$changed"; then
-            pnpm test:stdlib:ci
-          fi
-          if ! grep -Eq '^packages/(kernel|stdlib)/' <<<"$changed"; then
-            echo 'No Kernel/stdlib source or test changes; deterministic behavior tests not selected.'
-          fi
+          cat "$GITHUB_OUTPUT"
+      - name: Run Kernel deterministic contracts
+        if: ${{ steps.scope.outputs.run_kernel == 'true' }}
+        run: pnpm test:kernel:ci
+      - name: Run stdlib deterministic contracts
+        if: ${{ steps.scope.outputs.run_stdlib == 'true' }}
+        run: pnpm test:stdlib:ci
+
+  static:
+    name: Static verification
+    needs: [architecture, deterministic]
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require successful static and deterministic jobs
+        env:
+          ARCHITECTURE_RESULT: ${{ needs.architecture.result }}
+          DETERMINISTIC_RESULT: ${{ needs.deterministic.result }}
+        run: |
+          set -euo pipefail
+          printf 'Architecture: %s; deterministic: %s\n' "$ARCHITECTURE_RESULT" "$DETERMINISTIC_RESULT"
+          [[ "$ARCHITECTURE_RESULT" == "success" && "$DETERMINISTIC_RESULT" == "success" ]]
