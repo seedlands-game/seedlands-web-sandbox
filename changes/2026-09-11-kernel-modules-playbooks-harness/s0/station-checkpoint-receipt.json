@@ -1,0 +1,82 @@
+{
+  "baseSha": "c18a890c7f97f76421e13565ec628d8c50a942da",
+  "capturedAt": "2026-09-11T08:20:00.498Z",
+  "fixture": "station-checkpoint.json.gz",
+  "fixtureSha256": "077d1e0a1dabb71e89bb67281caf05aadadf7e7fc08b4c8c691c23f487b3332e",
+  "uncompressedSha256": "b3309b56966ffc05ddc8ba6a1bdacc22f5a4e540e9df749f6deda1b3c0c8efa8",
+  "bytes": 15710,
+  "identity": {
+    "protocolVersion": 1,
+    "worldId": "seedlands:g4:kernel-migration-c18a890-station-v1",
+    "epoch": "headless:kernel-migration-c18a890-station-v1",
+    "seed": 3022099221,
+    "seedText": "kernel-migration-c18a890-station-v1",
+    "generatorVersion": 4,
+    "playerId": "player-2",
+    "runtime": "authority",
+    "supported": {
+      "player": true,
+      "scriptedLogic": true,
+      "existingNpcSimulation": true
+    }
+  },
+  "station": {
+    "reference": {
+      "entityId": "station-3",
+      "epoch": 1,
+      "lifetime": 6
+    },
+    "position": [2, 30, 2],
+    "initial": {
+      "version": 1,
+      "input": {
+        "itemId": "raw-iron",
+        "count": 1
+      },
+      "fuel": null,
+      "output": null,
+      "activeRecipeId": "smelt-iron",
+      "remainingFuelSeconds": 18,
+      "progressSeconds": 2
+    },
+    "afterReload": {
+      "version": 1,
+      "input": null,
+      "fuel": null,
+      "output": {
+        "itemId": "iron-ingot",
+        "count": 1
+      },
+      "activeRecipeId": null,
+      "remainingFuelSeconds": 15,
+      "progressSeconds": 0
+    }
+  },
+  "packLock": {
+    "schemaVersion": 1,
+    "packs": [
+      {
+        "id": "seedlands:overworld",
+        "version": "1.0.0",
+        "manifest": {
+          "path": "overworld.manifest.json",
+          "sha256": "e3c199e87d101672c1635d481771972edbf39deb43c336063ab3753d0b01bb89"
+        },
+        "entry": {
+          "path": "overworld.mjs",
+          "sha256": "924d61fc72f253c85e191caa79f1c7ff51f83bc6237ad613a7c0c5595c2c169f"
+        },
+        "resources": []
+      }
+    ]
+  },
+  "baseLockfileSha256": "9c98dae17dee73c9b7d14ee4c433b57723b4c77a8086c547aeb52f611c16d580",
+  "verified": [
+    "production Overworld Pack furnace created through authorized developer-host block command",
+    "raw-iron and coal consumed once into a real furnace owner",
+    "in-flight furnace checkpoint export and public restore",
+    "reload completes exactly one iron-ingot without replaying fuel or input consumption",
+    "post-completion advance retains one output"
+  ],
+  "notVerified": ["migrated architecture restore", "paired cognition/PG checkpoint", "browser C0-C5"]
+}

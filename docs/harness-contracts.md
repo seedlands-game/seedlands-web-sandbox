@@ -1,6 +1,6 @@
 # Harness 合同
 
-本页保留原 `harness/contracts.json`、`scripts/harness/plan.mjs`、`scripts/harness/run.mjs` 与 `apps/web/dist/harness-artifact.json` 的设计合同，**不是 2026-09-16 架构冻结阶段的可执行入口**。相应代码和运行证据暂存于后续 Draft PR；当前命令以根 `package.json` 和 [CI 测试边界](ci-testing.md) 为准。下文描述的是待 Classic 完成后重新审核、恢复的设计，不表示已实现或已验收。
+本页定义 `harness/contracts.json`、`scripts/harness/plan.mjs`、`scripts/harness/run.mjs` 与 `apps/web/dist/harness-artifact.json` 之间的机器合同。它描述当前可执行入口；change 目录中的历史报告不是运行依赖。
 
 ## Owner registry
 

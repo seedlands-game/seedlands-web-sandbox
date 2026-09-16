@@ -1,4 +1,4 @@
-name: CI architecture baseline
+name: CI and Pages
 
 on:
   pull_request:
@@ -19,10 +19,16 @@ env:
   VITE_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
-  static:
-    name: Static verification
-    timeout-minutes: 60
+  scope:
+    name: Select CI scope
     runs-on: ubuntu-24.04
+    outputs:
+      bootstrap: ${{ steps.plan.outputs.bootstrap }}
+      classic_required: ${{ steps.metadata.outputs.classic_required }}
+      documentation_only: ${{ steps.metadata.outputs.documentation_only }}
+      head_sha: ${{ steps.metadata.outputs.head_sha }}
+      mode: ${{ steps.metadata.outputs.mode }}
+      production_build: ${{ steps.metadata.outputs.production_build }}
     steps:
       - name: Check out exact source and history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -35,30 +41,236 @@ jobs:
           runtime: node@22.12.0
           cache: true
           require-lockfile: true
-      - name: Verify architecture and deterministic module contracts
-        run: pnpm verify:static:ci
-      - name: Run affected deterministic module contracts
+      - name: Create trusted base and head plan
+        id: plan
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           EVENT_NAME: ${{ github.event_name }}
+          HARNESS_PLAN_PATH: ${{ runner.temp }}/harness-plan.json
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           set -euo pipefail
-          if [[ "$EVENT_NAME" != "pull_request" ]]; then
-            pnpm test:deterministic:ci
-            exit 0
+          if [[ "$EVENT_NAME" == "pull_request" ]] && git cat-file -e "$BASE_SHA:scripts/harness/plan.mjs" 2>/dev/null; then
+            TRUSTED_POLICY_ROOT="$RUNNER_TEMP/seedlands-base-policy"
+            mkdir -p "$TRUSTED_POLICY_ROOT"
+            git archive "$BASE_SHA" scripts/harness | tar -x -C "$TRUSTED_POLICY_ROOT"
+            ln -s "$GITHUB_WORKSPACE/node_modules" "$TRUSTED_POLICY_ROOT/node_modules"
+            node "$TRUSTED_POLICY_ROOT/scripts/harness/plan.mjs" --root "$GITHUB_WORKSPACE" --base "$BASE_SHA" --head "$HEAD_SHA" --out "$HARNESS_PLAN_PATH"
+            printf 'bootstrap=false\n' >> "$GITHUB_OUTPUT"
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
+            node scripts/harness/plan.mjs --root "$GITHUB_WORKSPACE" --base "$BASE_SHA" --head "$HEAD_SHA" --all --out "$HARNESS_PLAN_PATH"
+            HARNESS_PLAN_PATH="$HARNESS_PLAN_PATH" node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const path = process.env.HARNESS_PLAN_PATH;
+          const plan = JSON.parse(readFileSync(path, 'utf8'));
+          if (
+            plan.status !== 'READY' ||
+            plan.mode !== 'full-new' ||
+            !plan.classic?.required ||
+            !plan.productionBuild ||
+            plan.documentationOnly ||
+            !(plan.selectedContracts?.length || plan.selectedIntegrations?.length)
+          ) throw new Error('The missing-base-selector bootstrap must select the complete new baseline.');
+          plan.bootstrap = { reason: 'missing-base-selector', trustedBaseSelector: false };
+          plan.fallbackReasons = [...new Set([...(plan.fallbackReasons ?? []), 'missing-base-selector'])];
+          writeFileSync(path, `${JSON.stringify(plan, null, 2)}\n`);
+          NODE
+            printf 'bootstrap=true\n' >> "$GITHUB_OUTPUT"
+          else
+            node scripts/harness/plan.mjs --root "$GITHUB_WORKSPACE" --base "$BASE_SHA" --head "$HEAD_SHA" --all --out "$HARNESS_PLAN_PATH"
+            printf 'bootstrap=false\n' >> "$GITHUB_OUTPUT"
           fi
-          changed=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA")
-          if grep -Eq '^(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|vitest\.config\.ts|tsconfig[^/]*\.json|eslint\.config\.mjs|\.github/workflows/ci\.yml|packages/eslint-plugin/)' <<<"$changed"; then
-            pnpm test:deterministic:ci
-            exit 0
+      - name: Validate plan identity and outputs
+        id: metadata
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          HARNESS_PLAN_PATH: ${{ runner.temp }}/harness-plan.json
+        run: |
+          node --input-type=module <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const plan = JSON.parse(readFileSync(process.env.HARNESS_PLAN_PATH, 'utf8'));
+          if (plan.status !== 'READY') throw new Error(`Harness selection is ${plan.status}: ${(plan.errors ?? []).join('; ')}`);
+          if (plan.headSha !== process.env.EXPECTED_HEAD_SHA) throw new Error('Harness plan headSha does not identify the checked-out source.');
+          if (!['affected', 'full-new'].includes(plan.mode)) throw new Error(`Invalid Harness plan mode: ${plan.mode}`);
+          for (const key of ['documentationOnly', 'productionBuild'])
+            if (typeof plan[key] !== 'boolean') throw new Error(`Harness plan lacks ${key}.`);
+          if (typeof plan.classic?.required !== 'boolean') throw new Error('Harness plan lacks classic.required.');
+          appendFileSync(process.env.GITHUB_OUTPUT, [
+            `classic_required=${plan.classic.required}`,
+            `documentation_only=${plan.documentationOnly}`,
+            `head_sha=${plan.headSha}`,
+            `mode=${plan.mode}`,
+            `production_build=${plan.productionBuild}`,
+            '',
+          ].join('\n'));
+          NODE
+      - name: Upload immutable Harness plan
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: harness-plan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/harness-plan.json
+          if-no-files-found: error
+          retention-days: 7
+
+  static:
+    name: Static verification
+    timeout-minutes: 60
+    needs: scope
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require successful scope selection
+        env:
+          SCOPE_RESULT: ${{ needs.scope.result }}
+        run: |
+          if [[ "$SCOPE_RESULT" != "success" ]]; then
+            echo "Harness scope selection failed" >&2
+            exit 1
           fi
-          if grep -q '^packages/kernel/' <<<"$changed"; then
-            pnpm test:kernel:ci
+      - name: Check out exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.scope.outputs.head_sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Download Harness plan
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: harness-plan-${{ github.run_id }}-${{ github.run_attempt }}
+          path: harness/ci
+      - name: Run selected static and contract verification
+        run: pnpm verify:affected --plan "$GITHUB_WORKSPACE/harness/ci/harness-plan.json"
+
+  build:
+    name: Production build
+    needs: scope
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require successful scope selection
+        env:
+          SCOPE_RESULT: ${{ needs.scope.result }}
+        run: |
+          if [[ "$SCOPE_RESULT" != "success" ]]; then
+            echo "Harness scope selection failed" >&2
+            exit 1
           fi
-          if grep -q '^packages/stdlib/' <<<"$changed"; then
-            pnpm test:stdlib:ci
+      - name: Check out exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.scope.outputs.head_sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Build one identified production artifact
+        if: needs.scope.outputs.production_build == 'true'
+        run: pnpm build
+      - name: Require the artifact identity receipt
+        if: needs.scope.outputs.production_build == 'true'
+        run: test -f apps/web/dist/harness-artifact.json
+      - name: Upload production Web bytes
+        if: needs.scope.outputs.production_build == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: production-web-${{ github.run_id }}-${{ github.run_attempt }}
+          path: apps/web/dist
+          if-no-files-found: error
+          retention-days: 1
+      - name: Record documentation-only build skip
+        if: needs.scope.outputs.production_build != 'true'
+        run: echo "Production build was not selected because the validated plan is documentationOnly."
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.scope.outputs.production_build == 'true'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: apps/web/dist
+          retention-days: 1
+
+  e2e-regression:
+    name: Chromium regression
+    timeout-minutes: 60
+    needs:
+      - scope
+      - build
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require successful scope and build jobs
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+          SCOPE_RESULT: ${{ needs.scope.result }}
+        run: |
+          if [[ "$SCOPE_RESULT" != "success" || "$BUILD_RESULT" != "success" ]]; then
+            echo "Harness scope selection or production build failed" >&2
+            exit 1
           fi
-          if ! grep -Eq '^packages/(kernel|stdlib)/' <<<"$changed"; then
-            echo 'No Kernel/stdlib source or test changes; deterministic behavior tests not selected.'
-          fi
+      - name: Check out exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.scope.outputs.head_sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Download identified production Web bytes
+        if: needs.scope.outputs.classic_required == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: production-web-${{ github.run_id }}-${{ github.run_attempt }}
+          path: apps/web/dist
+      - name: Install Chromium
+        if: needs.scope.outputs.classic_required == 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run canonical Classic production journey
+        id: classic
+        if: needs.scope.outputs.classic_required == 'true'
+        env:
+          SEEDLANDS_BROWSER_E2E_QUALITY: low
+          SEEDLANDS_E2E_SOURCE_SHA: ${{ needs.scope.outputs.head_sha }}
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+          SEEDLANDS_E2E_FULL_CHROMIUM: '1'
+        run: pnpm harness:classic
+      - name: Record unselected Chromium scope
+        if: needs.scope.outputs.classic_required != 'true'
+        run: echo "Chromium was not selected by the validated affected plan."
+      - name: Preserve canonical browser and Harness evidence
+        if: ${{ always() && steps.classic.outcome != 'skipped' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: classic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            harness/results/
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
+
+  deploy:
+    name: Deploy GitHub Pages
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs:
+      - static
+      - build
+      - e2e-regression
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
