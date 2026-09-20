@@ -57,7 +57,7 @@ describe('S4 voxel progression palette', () => {
 
   it('assigns stable IDs and complete full-cube materials to the five new voxels', () => {
     expect(GENERATOR_VERSION).toBe(4);
-    expect(MAX_VOXEL_ID).toBe(Voxel.IronOre);
+    expect(MAX_VOXEL_ID).toBe(Voxel.Planks);
     expect([Voxel.Workbench, Voxel.Chest, Voxel.Furnace, Voxel.CoalOre, Voxel.IronOre]).toEqual([11, 12, 13, 14, 15]);
     expect([
       FaceMaterial.Workbench,
@@ -73,9 +73,9 @@ describe('S4 voxel progression palette', () => {
       faceMaterialFor(Voxel.CoalOre, 0, false),
       faceMaterialFor(Voxel.IronOre, 1, false),
     ]).toEqual([14, 15, 16, 17, 18]);
-    expect(MATERIAL_LAYER_COUNT).toBe(18);
-    expect(terrainMaterials).toHaveLength(18);
-    expect(builtinTerrainTextures).toHaveLength(18);
+    expect(MATERIAL_LAYER_COUNT).toBe(19);
+    expect(terrainMaterials).toHaveLength(19);
+    expect(builtinTerrainTextures).toHaveLength(19);
     for (const [material, textureName] of [
       [FaceMaterial.Workbench, 'workbench'],
       [FaceMaterial.Chest, 'chest'],
@@ -88,7 +88,7 @@ describe('S4 voxel progression palette', () => {
       expect(terrainMaterials.find((candidate) => candidate.faceMaterial === material)?.textureId).toBe(texture?.id);
     }
     const signatures = builtinTerrainTextures
-      .slice(-5)
+      .filter((texture) => /\/(workbench|chest|furnace|coal-ore|iron-ore)$/.test(texture.id))
       .map((texture) => createHash('sha256').update(Uint8Array.from(texture.payload.pixels)).digest('hex'));
     expect(new Set(signatures).size).toBe(5);
   });

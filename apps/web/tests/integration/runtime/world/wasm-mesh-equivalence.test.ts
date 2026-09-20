@@ -157,13 +157,14 @@ describe('W04/W05 Wasm mesh descriptors', () => {
 
   it('keeps empty, solid, checkerboard, water stair and lantern material ordering exact', async () => {
     const kernel = await createKernelMemory(await readFile(wasmPath));
-    for (const kind of ['empty', 'solid', 'checkerboard', 'water-stair', 'lantern'] as const) {
+    for (const kind of ['empty', 'solid', 'checkerboard', 'water-stair', 'lantern', 'planks'] as const) {
       const input = withHalo((data, fluid) => {
         for (let y = 0; y < 32; y += 1)
           for (let z = 0; z < 32; z += 1)
             for (let x = 0; x < 32; x += 1) {
               const index = voxelIndex(x, y, z);
               if (kind === 'solid') data[index] = Voxel.Stone;
+              if (kind === 'planks' && y === 4) data[index] = Voxel.Planks;
               if (kind === 'checkerboard') data[index] = (x + y + z) % 2 ? Voxel.Stone : Voxel.Air;
               if (kind === 'water-stair' && y === 4) {
                 data[index] = Voxel.Water;

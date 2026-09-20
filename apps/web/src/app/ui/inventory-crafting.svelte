@@ -3,7 +3,7 @@
   import { SvelteMap } from 'svelte/reactivity';
   import GameButton from './primitives/game-button.svelte';
   import GameOverlay from './primitives/game-overlay.svelte';
-  import GameTextField from './primitives/game-text-field.svelte';
+  import PersonalRecipes from './personal-recipes.svelte';
   import ItemIcon from './primitives/item-icon.svelte';
   import InventorySlot from './primitives/inventory-slot.svelte';
   import StationPanel from './station-panel.svelte';
@@ -12,7 +12,7 @@
   import type { ShellState, UiActionPort, ActorMode } from './ui-contracts';
 
   let { gameplay, actions }: { gameplay: ShellState['gameplay']; actions: UiActionPort } = $props();
-  let filter = $state('');
+  const hotbarSize = $derived(gameplay.hotbarSize ?? 8);
   let hovered = $state<InventoryUiSlot | null>(null);
   let foodSlot = $state<number | null>(null);
   let dragSlots = $state<readonly InventoryUiSlot[]>([]);
@@ -22,9 +22,6 @@
   const cursor = $derived(gameplay.cursor ?? null);
   const usesInventoryPointer = $derived(gameplay.mode === 'survival' || Boolean(gameplay.station));
   const food = $derived(foodSlot === null ? null : gameplay.inventory[foodSlot]);
-  const visibleRecipes = $derived(
-    gameplay.recipes.filter((recipe) => recipe.name.toLowerCase().includes(filter.trim().toLowerCase())),
-  );
   const gestures = new InventoryPointerGestures(
     () => Boolean(gameplay.cursor?.itemId),
     async (command) => {
@@ -158,7 +155,14 @@
       event.preventDefault();
       event.stopPropagation();
       void close();
-    } else if (!input && hovered && !cursor && !dragSlots.length && /^Digit[1-8]$/.test(event.code)) {
+    } else if (
+      !input &&
+      hovered &&
+      !cursor &&
+      !dragSlots.length &&
+      /^Digit[1-9]$/.test(event.code) &&
+      Number(event.code[5]) <= hotbarSize
+    ) {
       event.preventDefault();
       event.stopPropagation();
       gestures.command({ kind: 'hotbar', slot: { ...hovered }, hotbarSlot: Number(event.code[5]) - 1 });
@@ -192,7 +196,12 @@
   label={gameplay.station?.name ?? (gameplay.mode === 'creative' ? '创造内容目录' : '背包与合成')}
   open={gameplay.inventoryOpen}
 >
-  <div class="inventory-dialog" class:holding={Boolean(cursor)} aria-busy={closing}>
+  <div
+    class="inventory-dialog"
+    class:holding={Boolean(cursor)}
+    aria-busy={closing}
+    style:--inventory-columns={hotbarSize}
+  >
     <header>
       <div>
         <small id="actor-mode-status" role="status">{gameplay.mode === 'creative' ? '创造模式' : '生存模式'}</small>
@@ -233,7 +242,7 @@
           <div role="grid" aria-label="背包槽位" class="bag-slots">
             <h3>背包</h3>
             <div class="slot-grid">
-              {#each gameplay.inventory.slice(8) as item (item.slot)}
+              {#each gameplay.inventory.slice(hotbarSize) as item (item.slot)}
                 <InventorySlot
                   {item}
                   address={{ kind: 'inventory', slot: item.slot }}
@@ -245,9 +254,9 @@
                 />
               {/each}
             </div>
-            <h3 class="hotbar-label">快捷栏 <span>悬停格子按 1–8 交换</span></h3>
+            <h3 class="hotbar-label">快捷栏 <span>悬停格子按 1–{hotbarSize} 交换</span></h3>
             <div class="slot-grid hotbar-grid">
-              {#each gameplay.inventory.slice(0, 8) as item (item.slot)}
+              {#each gameplay.inventory.slice(0, hotbarSize) as item (item.slot)}
                 <InventorySlot
                   {item}
                   address={{ kind: 'inventory', slot: item.slot }}
@@ -282,22 +291,7 @@
           </div>
         </main>
         {#if !gameplay.station}
-          <aside class="personal-recipes" aria-label="合成配方">
-            <h3>快捷合成</h3>
-            <GameTextField id="recipe-filter" label="筛选配方" bind:value={filter} placeholder="搜索配方" />
-            <div role="list" aria-label="合成配方">
-              {#each visibleRecipes as recipe (recipe.id)}
-                <div role="listitem" class:available={recipe.craftable}>
-                  <strong>{recipe.name}</strong><small>{recipe.requirements} → {recipe.result}</small>
-                  <GameButton
-                    label={`${recipe.craftable ? '合成' : '缺少材料'} ${recipe.name}`}
-                    disabled={!recipe.craftable || Boolean(cursor)}
-                    onclick={() => actions.craftRecipe(recipe.id)}>{recipe.craftable ? '合成' : '缺材料'}</GameButton
-                  >
-                </div>
-              {:else}<p>没有符合条件的配方。</p>{/each}
-            </div>
-          </aside>
+          <PersonalRecipes recipes={gameplay.recipes} holding={Boolean(cursor)} oncraft={actions.craftRecipe} />
         {/if}
       </div>
       <footer class="inventory-help">
@@ -390,7 +384,7 @@
   }
   .slot-grid {
     display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--inventory-columns, 8), minmax(0, 1fr));
     gap: 5px;
   }
   .bag-slots > .hotbar-label {
@@ -416,41 +410,6 @@
     min-height: 25px;
     padding: 3px 10px;
     font-size: 10px;
-  }
-  .personal-recipes {
-    border-left: 1px solid #79633f60;
-    padding-left: 18px;
-  }
-  .personal-recipes h3 {
-    margin-bottom: 12px;
-  }
-  .personal-recipes :global(input) {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .personal-recipes [role='list'] {
-    max-height: 267px;
-    overflow: auto;
-    margin-top: 10px;
-  }
-  .personal-recipes [role='listitem'] {
-    padding: 9px 0;
-    border-bottom: 1px solid #ffffff10;
-    display: grid;
-    gap: 6px;
-  }
-  .personal-recipes strong {
-    font-size: 12px;
-  }
-  .personal-recipes small {
-    font-size: 10px;
-    color: #a9a794;
-  }
-  .personal-recipes :global(.game-button) {
-    width: 100%;
-    padding: 4px;
-    min-height: 25px;
-    font-size: 11px;
   }
   .inventory-help {
     margin-top: 10px;
@@ -495,13 +454,6 @@
   @media (max-width: 720px) {
     .survival-layout.with-recipes {
       grid-template-columns: 1fr;
-    }
-    .personal-recipes {
-      border: 0;
-      padding: 0;
-    }
-    .personal-recipes [role='list'] {
-      max-height: 120px;
     }
   }
 </style>

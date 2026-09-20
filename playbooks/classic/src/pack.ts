@@ -91,7 +91,7 @@ export const pack = definePack({
     }),
     defineRecipeCraftingModule(),
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
-    defineInventoryModule(),
+    defineInventoryModule({ playerLayout: { capacity: 36, hotbarSize: 9 } }),
     defineInventoryActionsModule(),
     defineBehaviorRegistryModule({
       permissions: [
@@ -122,11 +122,9 @@ export const pack = definePack({
       moduleId: 'seedlands:overworld-needs-rules',
       profiles: {
         satiety: {
-          enabledModes: ['survival'],
+          enabledModes: [],
           hungerEverySeconds: 120,
-          hungerDelta: -1,
-          heal: { threshold: 16, everySeconds: 10, amount: 1, hungerCost: 1 },
-          starvation: { threshold: 0, everySeconds: 15, damage: 1 },
+          hungerDelta: 0,
         },
         deficit: { enabledModes: ['survival'], hungerEverySeconds: 5, hungerDelta: 1 },
       },

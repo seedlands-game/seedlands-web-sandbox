@@ -86,6 +86,7 @@ export class RegisteredInventoryRuntime {
         equipment: { selectedSlot: actor.selectedSlot, hotbarSize: actor.hotbarSize },
         lifecycle: actor.lifecycle,
         needs: { hunger: actor.hunger, maxHunger: actor.maxHunger, meaning: actor.hungerMeaning },
+        vitals: { health: actor.health, maxHealth: actor.maxHealth },
         inventoryRevision: actor.inventoryRevision,
         cursor: actor.inventoryCursor,
       },
@@ -190,7 +191,7 @@ export class RegisteredInventoryRuntime {
       actors: [
         {
           reference: candidate.actorReference,
-          health: this.options.entities.actorStateAccess(actorId).health,
+          health: candidate.health ?? this.options.entities.actorStateAccess(actorId).health,
           components: {
             ...components,
             inventory: [...candidate.slots],

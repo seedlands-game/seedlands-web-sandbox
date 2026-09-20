@@ -371,6 +371,7 @@ export class AuthorityRuntime {
   resume(nowMs: number): void {
     this.session.resume(nowMs);
     this.currentTimeMs = nowMs;
+    this.requestLogicObservation();
   }
 
   async prepareMesh(cx: number, cy: number, cz: number): Promise<AuthorityMeshPayload> {

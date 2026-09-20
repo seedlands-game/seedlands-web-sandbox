@@ -74,6 +74,7 @@ export class GameplayRuntimeCheckpoint {
       clone: callbacks.platform.clone,
       items: this.options.content.items,
       stationCodec: this.options.content.stations?.codec,
+      playerLayout: this.options.entities.playerLayout,
       meleeDefinitions: this.options.content.meleeDefinitions,
       actorProfiles: this.options.content.actorProfiles,
       entities: this.options.entities,

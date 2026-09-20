@@ -91,6 +91,13 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'coal', count: 1 },
     replaceable: false,
   },
+  [16]: {
+    voxel: 16,
+    hardnessSeconds: 1.2,
+    preferredTool: 'axe',
+    drop: { itemId: 'plank', count: 1 },
+    replaceable: false,
+  },
   [15]: {
     voxel: 15,
     hardnessSeconds: 3.2,

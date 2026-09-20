@@ -16,10 +16,7 @@
     const timer = setTimeout(() => (damaged = false), 420);
     return () => clearTimeout(timer);
   });
-  const rows = $derived([
-    { name: '生命', state: hud.health, icon: 'health-heart' },
-    { name: '饥饿', state: hud.hunger, icon: 'hunger-drumstick' },
-  ]);
+  const rows = $derived([{ name: '生命', state: hud.health, icon: 'health-heart' }]);
 </script>
 
 <section
@@ -29,7 +26,7 @@
   data-damage={damage?.amount ?? 0}
 >
   {#if hud.mode === 'creative'}
-    <div id="creative-vitals-inactive" role="status">创造模式 · 生命与饥饿不消耗</div>
+    <div id="creative-vitals-inactive" role="status">创造模式 · 不受伤害</div>
   {:else}
     {#each rows as row (row.name)}
       <div

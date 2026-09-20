@@ -69,9 +69,9 @@ function parseTokens(tokens: string[]): ServerCommand {
       if (tokens[1] !== 'on' && tokens[1] !== 'off') throw new ParseProblem('Flight requires on or off.');
       return { type: 'set-flight', enabled: tokens[1] === 'on' };
     case '/creative-slot': {
-      exact(tokens, 3, '/creative-slot <0..7> <item|empty>');
+      exact(tokens, 3, '/creative-slot <0..8> <item|empty>');
       const slot = integer(tokens[1], 'slot');
-      if (slot < 0 || slot > 7) throw new ParseProblem('Creative slot must be 0..7.');
+      if (slot < 0 || slot > 8) throw new ParseProblem('Creative slot must be 0..8.');
       return { type: 'set-creative-slot', slot, itemId: tokens[2] === 'empty' ? null : item(tokens[2]) };
     }
     case '/setblock':

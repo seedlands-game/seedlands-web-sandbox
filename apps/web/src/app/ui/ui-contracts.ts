@@ -48,6 +48,7 @@ export type ShellState = Readonly<{
     inventory: readonly GameplayItemPresentation[];
     creativeCatalog: readonly GameplayItemPresentation[];
     selectedHotbarSlot: number;
+    hotbarSize?: number;
     craftableRecipeIds: readonly string[];
     recipes: readonly Readonly<{
       id: string;

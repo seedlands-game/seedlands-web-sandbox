@@ -15,6 +15,7 @@ const items = [
   ['sand-block', '沙块'],
   ['berry', '浆果'],
   ['plank', '木板'],
+  ['stick', '木棍'],
   ['wood-axe', '木斧'],
   ['wood-sword', '木剑'],
   ['stone-pickaxe', '石镐'],

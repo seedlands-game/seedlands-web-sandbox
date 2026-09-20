@@ -2,7 +2,7 @@ import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel
 import type { RenderCategory } from '@seedlands/stdlib/world/mesh';
 export type { RenderCategory } from '@seedlands/stdlib/world/mesh';
 
-export const MATERIAL_LAYER_COUNT = 18;
+export const MATERIAL_LAYER_COUNT = Math.max(...Object.values(FaceMaterial));
 
 export const FINAL_RENDER_PIPELINE = {
   drawUnit: 'chunk-render-category',

@@ -2,6 +2,10 @@
 
 CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查，不能证明没有缺陷。运行入口以根 `package.json` 为准。
 
+## 2026-09-20 Classic 初版恢复
+
+本轮用户授权恢复产品施工与验收。当前 change 为 changes/2026-09-20-classic-playable-first-edition/spec.md；新增命令以 package.json 为准。复用 #36 的 artifact 和唯一 Classic 线路，先恢复有限资源成长/存档 Headless 及 production Chromium。使用单 worker/headless/静音，运行结果绑定产物摘要；不是性能测量，也不代表 Beta 全量内容已完成。下述 09-16 冻结描述历史基线；Kernel/stdlib 和静态检查仍持续执行。CI 新增 Classic headless contracts、Production build、Chromium regression，产品作业本阶段全量执行；浏览器下载同次 build 的含隐藏文件 dist 并校验身份，不重新构建。远端实际运行状态见本 change 证据。tsconfig.classic-tests.json 检查当前恢复的用例和浏览器配置，远端保护仍保持现状。
+
 ## 2026-09-16 架构冻结阶段
 
 本阶段 `Static verification` 检查代码格式、路径、Lint、生产源码与工具类型、公开包边界的静态规则，以及 Kernel/stdlib 两包确定性行为测试。Classic、Web/Agent 行为、跨层集成、生产构建、Chromium E2E 和性能测量均不执行；不以跳过项冒充 PASS。测试选择只能在这两个行为 owner 内缩小，不能跳过静态架构边界。
