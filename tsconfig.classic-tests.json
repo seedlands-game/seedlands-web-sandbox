@@ -6,6 +6,7 @@
     "apps/web/tests/integration/runtime/server/composition/classic-food-health.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-plank-building.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-stick-crafting.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/overworld-progression-journey.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/overworld-progression-journey.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-material-smelting.test.ts"
   ]
 }

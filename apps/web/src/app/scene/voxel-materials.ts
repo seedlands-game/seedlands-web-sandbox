@@ -171,10 +171,9 @@ export async function createVoxelMaterials(
       material.opacityMapChannel = 'a';
       material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('opacityPS', voxelArrayOpacityGlsl);
       material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('opacityPS', voxelArrayOpacityWgsl);
-      material.setParameter(
-        'uOpacityVoxelLayer',
-        category === 'cutout' ? FaceMaterial.Leaves - 1 : FaceMaterial.Water - 1,
-      );
+      // Retain the per-face material layer in depth/shadow alpha passes too.
+      material.opacityVertexColor = true;
+      material.opacityVertexColorChannel = 'a';
     }
     if (category === 'cutout') {
       material.alphaTest = mix(0.34, 0.5, quality.vegetationDensity);

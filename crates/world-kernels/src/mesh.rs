@@ -28,13 +28,14 @@ fn greedy(id: u32) -> bool {
 }
 
 fn occludes(id: u32) -> bool {
-    id != 0 && id != 8 && id != 10
+    id != 0 && id != 8 && id != 10 && id != 18
 }
 
 fn visible(source: u32, target: u32) -> bool {
     if !greedy(source) {
         return false;
     }
+    if source == 18 && target == 18 { return false; }
     if source == 8 {
         target == 0 || (target != 8 && !occludes(target))
     } else {
@@ -68,6 +69,8 @@ fn material(id: u32, axis: i32, positive: bool) -> u32 {
         14 => 17,
         15 => 18,
         16 => 19,
+        17 => 20,
+        18 => 21,
         _ => 255,
     }
 }

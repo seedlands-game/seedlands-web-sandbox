@@ -49,3 +49,11 @@
 ## 阶段交付快照
 
 S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚未执行。已实现木板方块/原创纹理、木棍材料、36/9库存与模式/命令/指针全路径、食物回血和Logic恢复运行。仍非全量Minecraft：S2–S7内容/环境/全部生物/农业/运输等缺项留在coverage.json；精确Beta食物/耐久/快捷合成差异继续留账。长期docs更新CI边界与代码地图，架构/产品方向不变。此前peer没有提交代码或RED，本轮所有新实现与修复由本会话完成；其驻留假设已用本次实际证据推翻。
+
+## S2a 建材与冶炼阶段
+
+- 圆石掉落与玻璃遮挡先RED；新材料候选、燃料、半程恢复、正式Authority取得→冶炼→玻璃建造→保存恢复GREEN。当前test:classic:headless为5 files/5 tests，全部PASS；已有铁器成长按10秒冶炼新合同通过。
+- 玻璃/木板网格2 tests通过；Rust/TS/control含玻璃混合场景6 tests通过；原始材质/资源和模型11 tests通过。物品图标缺失PNG先RED，改为注册像素生成SVG后图标兼容3 tests通过。材质透明度与表面参数现在消费同一面材质ID，21层完整。
+- 完整生产C0–C5+玻璃放置PASS，runId 386c123e-bf47-4cff-b018-ba660518f34e，约1.9分钟，sourceDigest d6fad5e596eee3088d57cd0395d8dcf7d39e637c3d24639e9da904bbfa983335，artifactDigest 0796bb4e507309fc17e0882749fe0206e70922825a93bbd96c0ebc6870b585f3。HeadlessChrome153/macOS/WebGL2，页面异常/失败响应为空。九槽同一行几何断言通过；截图观察玻璃纹理和后方工作台均可见。单张最终图不作为运动或性能证据。
+- 截图发现快捷栏仍为8列导致第9槽换行；改为读取slots.length后再次生产验证通过。玻璃第一次检查预期顶部，实际Shift右键命中侧面，修正坐标后通过；原始失败保留在harness/results。
+- S2a verify:static:ci PASS。新增生产路径和文件未改变Kernel责任；长期docs baseline无需新增架构决策，代码地图沿用当前owner。全量S2/S3/S4–S7仍未完成。

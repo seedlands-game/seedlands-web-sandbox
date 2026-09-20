@@ -1,4 +1,4 @@
-import { craftAndEquipBuildingPlanks } from './classic-support/crafting';
+import { craftAndEquipBuildingPlanks, placeGlassAfterRestore } from './classic-support/crafting';
 import { expect, test } from '@playwright/test';
 import { expectPresentedDrop } from './classic-support/drops';
 import {
@@ -478,6 +478,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     routeTrace = { traceEvents: [...preRestoreTrace.traceEvents, ...postRestoreTrace.traceEvents] };
     sampleCompletedAt = new Date().toISOString();
   });
+
+  await test.step('重开后真实创造目录放置玻璃并保留画面', () => placeGlassAfterRestore(page, testInfo));
 
   const final = (await snapshot(page))!;
   await attachClassicEvidence(testInfo, {

@@ -105,6 +105,9 @@ it('Headless 玩家从有限原料采集，经工作台、石镐、冶炼到铁�
     for (let x = -2; x >= -9; x--) edits.push({ x, y: 60, z: 0, value: Voxel.Wood });
     for (let x = -10; x >= -20; x--) edits.push({ x, y: 60, z: 0, value: Voxel.Stone });
     edits.push({ x: -21, y: 60, z: 0, value: Voxel.CoalOre });
+    edits.push({ x: -25, y: 60, z: 0, value: Voxel.Wood });
+    edits.push({ x: -26, y: 60, z: 0, value: Voxel.Sand });
+    edits.push({ x: -1, y: 60, z: 0, value: Voxel.Stone });
     for (let x = -22; x >= -24; x--) edits.push({ x, y: 60, z: 0, value: Voxel.IronOre });
     expect(server().editBatch({ actorId: 'finite-resource-fixture', edits }).committed).toBe(true);
     expect(bag().filter(Boolean)).toEqual([]);
@@ -131,8 +134,8 @@ it('Headless 玩家从有限原料采集，经工作台、石镐、冶炼到铁�
     await place('chest', [2, 60, -1]);
     await put('furnace', 'raw-iron', 0, 3);
     await put('furnace', 'coal', 1);
-    await clock(2.5);
-    expect(station('furnace').component).toMatchObject({ furnace: { progressSeconds: 2.5, output: null } });
+    await clock(5);
+    expect(station('furnace').component).toMatchObject({ furnace: { progressSeconds: 5, output: null } });
     const saved = await session.world.checkpoint({ kind: 'export' });
     if (!saved.ok || !saved.data.snapshot) throw new Error('Checkpoint export failed');
     const before = session;
@@ -145,7 +148,7 @@ it('Headless 玩家从有限原料采集，经工作台、石镐、冶炼到铁�
       ok: true,
     });
     before.dispose();
-    await clock(12.5);
+    await clock(25);
     expect(station('furnace').component).toMatchObject({
       furnace: { input: null, output: { itemId: 'iron-ingot', count: 3 } },
     });
@@ -166,6 +169,37 @@ it('Headless 玩家从有限原料采集，经工作台、石镐、冶炼到铁�
       ],
     });
     expect(bag().filter((entry) => entry?.itemId === 'iron-ingot')).toEqual([]);
+    await mine(-25, Voxel.Wood);
+    await mine(-26, Voxel.Sand);
+    await mine(-1, Voxel.Stone, 'iron-pickaxe');
+    await move([0.5, 60, 0.5]);
+    for (const [input, output] of [
+      ['wood-block', 'charcoal'],
+      ['sand-block', 'glass'],
+      ['cobblestone', 'stone-block'],
+    ] as const) {
+      await put('furnace', input, 0);
+      await clock(10);
+      expect(station('furnace').component).toMatchObject({
+        furnace: { input: null, output: { itemId: output, count: 1 } },
+      });
+      await stationAction('furnace', {
+        kind: 'transfer',
+        from: 'station',
+        actorSlot: bag().findIndex((entry) => entry === null),
+        stationSlot: 2,
+        count: 1,
+      });
+      expect(bag()[slot(output)]?.count).toBe(1);
+    }
+    await place('glass', [1, 60, 1]);
+    const built = await session.world.checkpoint({ kind: 'export' });
+    if (!built.ok || !built.data.snapshot) throw new Error('Missing material build save');
+    expect(await session.world.checkpoint({ kind: 'restore', snapshot: built.data.snapshot })).toMatchObject({
+      ok: true,
+    });
+    expect(server().getVoxel(1, 60, 1)).toBe(Voxel.Glass);
+    expect(bag().filter((entry) => entry?.itemId === 'glass')).toEqual([]);
   } finally {
     session.dispose();
   }

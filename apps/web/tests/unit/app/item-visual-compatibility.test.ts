@@ -56,3 +56,10 @@ it('全透明模型明确拒绝取景，不能将 NaN 写入相机或场景', ()
   expect(translate).not.toHaveBeenCalled();
   expect([camera.getPosition().x, camera.getPosition().y, camera.getPosition().z].every(Number.isFinite)).toBe(true);
 });
+
+it('新增物品图标使用已注册像素，不请求不存在的静态PNG', () => {
+  setAppearanceImages(createEmptyAppearanceProject());
+  for (const id of ['stick', 'charcoal', 'cobblestone', 'glass']) {
+    expect(itemIconUrl(id, '/')).toMatch(/^data:image\/svg\+xml,/);
+  }
+});

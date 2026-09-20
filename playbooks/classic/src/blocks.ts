@@ -36,7 +36,7 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     minimumTier: 1,
     hardnessSeconds: 2.4,
     preferredTool: 'pickaxe',
-    drop: { itemId: 'stone-block', count: 1 },
+    drop: { itemId: 'cobblestone', count: 1 },
     replaceable: false,
   },
   [4]: {
@@ -91,6 +91,15 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'coal', count: 1 },
     replaceable: false,
   },
+  [17]: {
+    voxel: 17,
+    hardnessSeconds: 2,
+    preferredTool: 'pickaxe',
+    minimumTier: 1,
+    drop: { itemId: 'cobblestone', count: 1 },
+    replaceable: false,
+  },
+  [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,
     hardnessSeconds: 1.2,
