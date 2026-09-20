@@ -156,7 +156,7 @@ export class PlayerController {
         return;
       }
       this.keys.add(event.code);
-      if (/^Digit[1-8]$/.test(event.code)) {
+      if (/^Digit[1-9]$/.test(event.code)) {
         this.options.onSelectHotbarSlot(Number(event.code[5]) - 1);
         if (this.miningHeld) this.cancelActiveMining();
       }
@@ -167,7 +167,7 @@ export class PlayerController {
     };
     canvas.oncontextmenu = (event) => event.preventDefault();
     canvas.onclick = () => {
-      if (!this.interactionBlocked) void canvas.requestPointerLock();
+      if (!this.interactionBlocked && document.pointerLockElement !== canvas) void canvas.requestPointerLock();
     };
     document.onmousemove = (event) => {
       if (document.pointerLockElement === canvas) {

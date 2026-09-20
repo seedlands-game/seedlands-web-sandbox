@@ -1,3 +1,4 @@
+import { freezePlayerInventoryLayout, type PlayerInventoryLayout } from './inventory-layout';
 import {
   EcsEntityOwner,
   type EcsActorArchetype,
@@ -75,13 +76,17 @@ export class EntityStore {
   private visitedEntityCount = 0;
   private returnedEntityCount = 0;
 
+  readonly playerLayout: PlayerInventoryLayout;
+
   constructor(
     readonly items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
     readonly stationCodec?: StationStateCodec,
+    playerLayout?: PlayerInventoryLayout,
   ) {
+    this.playerLayout = freezePlayerInventoryLayout(playerLayout);
     if (stationCodec && stationCodec.items !== items)
       throw new TypeError('EntityStore and station codec item registries must match.');
-    this.owner = new EcsEntityOwner(1, items, stationCodec);
+    this.owner = new EcsEntityOwner(1, items, stationCodec, this.playerLayout);
   }
 
   spawn(input: EntitySpawn): GameplayEntity {
@@ -326,7 +331,7 @@ export class EntityStore {
 
     const stationSnapshots = collectStationSnapshots(snapshot.version === 2 ? snapshot.stations : []);
 
-    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1, this.items, this.stationCodec);
+    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1, this.items, this.stationCodec, this.playerLayout);
     const candidateBuckets = new Map<string, Set<string>>();
     try {
       for (const input of snapshot.entities) {
@@ -396,7 +401,7 @@ export class EntityStore {
       explicitIds.add(input.id);
     }
     const blockedGeneratedIds = new Set([...this.owner.issuedIds(), ...explicitIds]);
-    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1, this.items, this.stationCodec);
+    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1, this.items, this.stationCodec, this.playerLayout);
     const candidateBuckets = new Map<string, Set<string>>();
     let candidateSequence = sequence;
     try {

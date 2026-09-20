@@ -23,10 +23,11 @@ export const Voxel = {
   Furnace: 13,
   CoalOre: 14,
   IronOre: 15,
+  Planks: 16,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.IronOre;
+export const MAX_VOXEL_ID = Voxel.Planks;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -47,6 +48,7 @@ export const FaceMaterial = {
   Furnace: 16,
   CoalOre: 17,
   IronOre: 18,
+  Planks: 19,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -70,6 +72,7 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Furnace]: 'furnace',
   [FaceMaterial.CoalOre]: 'coal-ore',
   [FaceMaterial.IronOre]: 'iron-ore',
+  [FaceMaterial.Planks]: 'planks',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -88,6 +91,7 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Furnace]: '熔炉',
   [Voxel.CoalOre]: '煤矿石',
   [Voxel.IronOre]: '铁矿石',
+  [Voxel.Planks]: '木板',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -106,6 +110,7 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Furnace]: [0.34, 0.36, 0.37],
   [Voxel.CoalOre]: [0.2, 0.22, 0.22],
   [Voxel.IronOre]: [0.55, 0.43, 0.35],
+  [Voxel.Planks]: [0.67, 0.47, 0.27],
 };
 
 export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
@@ -135,6 +140,7 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Furnace]: FaceMaterial.Furnace,
       [Voxel.CoalOre]: FaceMaterial.CoalOre,
       [Voxel.IronOre]: FaceMaterial.IronOre,
+      [Voxel.Planks]: FaceMaterial.Planks,
     } as Record<number, FaceMaterialId>
   )[id];
 }

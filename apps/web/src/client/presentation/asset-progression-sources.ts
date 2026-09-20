@@ -1,6 +1,7 @@
 import { pixelItemAssets } from './pixel-item-art';
 
 export const progressionItemAssets = [
+  ...pixelItemAssets('stick', '木棍', 'stick'),
   ...pixelItemAssets('wood-pickaxe', '木镐', 'pickaxe'),
   ...pixelItemAssets('iron-pickaxe', '铁镐', 'pickaxe', 'iron'),
   ...pixelItemAssets('coal', '煤', 'coal'),

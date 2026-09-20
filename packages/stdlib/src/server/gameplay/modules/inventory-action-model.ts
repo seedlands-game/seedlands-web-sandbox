@@ -1,3 +1,4 @@
+import { foodEffect, type FoodVitals } from './food-effect';
 import type { EntityLifetimeReference } from '../../simulation/action-identity';
 import { createInventoryCandidate } from './inventory-api';
 import type { InventorySlot } from '../inventory';
@@ -38,6 +39,7 @@ export type InventoryActorProjectionV1 = Readonly<{
   equipment: InventoryEquipmentProjection;
   lifecycle: 'alive' | 'dead';
   needs: InventoryNeedsProjection;
+  vitals?: FoodVitals;
   inventoryRevision: number;
   cursor: InventoryCursorV1;
 }>;
@@ -91,6 +93,7 @@ type InventoryActionCandidateBase<Kind extends InventoryActionKind, Args extends
   slots: readonly InventorySlot[];
   equipment: InventoryEquipmentProjection;
   hunger: InventoryNeedsProjection;
+  health?: number;
   dropIntent: InventoryDropIntentV1 | null;
   pickupIntent: InventoryPickupIntentV1 | null;
   result: InventoryActionPublicResultV1;
@@ -223,7 +226,18 @@ export function validateInventoryActorProjection(
 ): InventoryActorProjectionV1 {
   const value = actionData(
     raw,
-    ['version', 'reference', 'kind', 'slots', 'equipment', 'lifecycle', 'needs', 'inventoryRevision', 'cursor'],
+    [
+      'version',
+      'reference',
+      'kind',
+      'slots',
+      'equipment',
+      'lifecycle',
+      'needs',
+      'inventoryRevision',
+      'cursor',
+      ...(raw && typeof raw === 'object' && Object.hasOwn(raw, 'vitals') ? ['vitals'] : []),
+    ],
     'Inventory actor projection',
   );
   const reference = validateReference(value.reference, 'Inventory actor');
@@ -258,6 +272,13 @@ export function validateInventoryActorProjection(
     !['satiety', 'deficit'].includes(String(needs.meaning))
   )
     throw new TypeError('Inventory needs projection is invalid.');
+  const vitals =
+    value.vitals === undefined ? undefined : actionData(value.vitals, ['health', 'maxHealth'], 'Food vitals');
+  if (
+    vitals &&
+    (!finite(vitals.maxHealth, Number.EPSILON, MAX_NEEDS_VALUE) || !finite(vitals.health, 0, vitals.maxHealth))
+  )
+    throw new TypeError('Inventory vitals projection is invalid.');
   const inventoryRevision = value.inventoryRevision === undefined ? 0 : value.inventoryRevision;
   if (!safeInteger(inventoryRevision, 0, Number.MAX_SAFE_INTEGER))
     throw new TypeError('Inventory actor revision is invalid.');
@@ -274,6 +295,9 @@ export function validateInventoryActorProjection(
       maxHunger: needs.maxHunger,
       meaning: needs.meaning as InventoryNeedsProjection['meaning'],
     }),
+    ...(vitals
+      ? { vitals: Object.freeze({ health: vitals.health as number, maxHealth: vitals.maxHealth as number }) }
+      : {}),
     inventoryRevision,
     cursor,
   });
@@ -349,6 +373,7 @@ function candidate<Kind extends InventoryActionKind, Args extends InventoryActio
   args: Args;
   inventory: ReturnType<typeof createInventoryCandidate>;
   hunger?: number;
+  health?: number;
   dropIntent?: InventoryDropIntentV1;
   pickupIntent?: InventoryPickupIntentV1;
   result?: Partial<Pick<InventoryActionPublicResultV1, 'itemId' | 'count' | 'recipeId'>>;
@@ -379,6 +404,7 @@ function candidate<Kind extends InventoryActionKind, Args extends InventoryActio
       hotbarSize: input.actor.equipment.hotbarSize,
     }),
     hunger,
+    ...(input.health === undefined ? {} : { health: input.health }),
     dropIntent: input.dropIntent ?? null,
     pickupIntent: input.pickupIntent ?? null,
     result,
@@ -411,19 +437,14 @@ export function buildInventoryActionCandidate(
       if (!selected) fail('no-selected-item');
       const consume = content.items.capability(selected.itemId, 'consume');
       if (!consume) fail('item-not-usable');
-      if (actor.needs.meaning === 'satiety' ? actor.needs.hunger >= actor.needs.maxHunger : actor.needs.hunger <= 0)
-        fail('hunger-full');
+      const effect = foodEffect(consume, actor.needs, actor.vitals);
       if (!inventory.removeFromSlot(args.slot, 1)) fail('missing-items');
-      const hunger =
-        actor.needs.meaning === 'satiety'
-          ? Math.min(actor.needs.maxHunger, actor.needs.hunger + consume.hungerRestore)
-          : Math.max(0, actor.needs.hunger - consume.hungerRestore);
       return candidate({
         kind: request.kind,
         actor,
         args,
         inventory,
-        hunger,
+        ...effect,
         result: { itemId: selected.itemId, count: 1 },
       });
     }

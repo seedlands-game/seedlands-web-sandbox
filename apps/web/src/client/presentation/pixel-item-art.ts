@@ -222,9 +222,14 @@ function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'i
   return sprite.pixels;
 }
 
-function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot') {
+function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot' | 'stick') {
   const sprite = new Sprite();
-  if (kind === 'iron-ingot') {
+  if (kind === 'stick') {
+    for (let i = 5; i < 26; i++) {
+      sprite.rect(i, 30 - i, 4, 4, 2);
+      sprite.rect(i, 30 - i, 2, 2, i % 4 === 0 ? 3 : 5);
+    }
+  } else if (kind === 'iron-ingot') {
     sprite.polygon(
       [
         [10, 10],
@@ -322,7 +327,7 @@ function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot') {
 export function pixelItemAssets(
   id: string,
   name: string,
-  kind: 'pickaxe' | 'axe' | 'sword' | 'coal' | 'raw-iron' | 'iron-ingot',
+  kind: 'pickaxe' | 'axe' | 'sword' | 'coal' | 'raw-iron' | 'iron-ingot' | 'stick',
   material: 'wood' | 'stone' | 'iron' = 'wood',
 ): NativeAsset[] {
   const textureId = `builtin:texture:${id}:detail`;

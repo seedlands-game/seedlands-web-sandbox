@@ -83,11 +83,11 @@ export function defineModeModule(): ModModule {
                 const initial = items
                   .list()
                   .filter((item) => item.capabilities.some((capability) => capability.type === 'place'))
-                  .slice(0, 8)
+                  .slice(0, creativeCatalog.hotbar.length)
                   .map((item) => item.id);
                 const hotbar = creativeCatalog.hotbar.some((id) => id !== null)
                   ? creativeCatalog.hotbar
-                  : Array.from({ length: 8 }, (_, index) => initial[index] ?? null);
+                  : Array.from({ length: creativeCatalog.hotbar.length }, (_, index) => initial[index] ?? null);
                 creativeCatalog = { ...creativeCatalog, hotbar, revision: creativeCatalog.revision + 1 };
               }
             } else {
@@ -104,7 +104,7 @@ export function defineModeModule(): ModModule {
                   typeof args.slot !== 'number' ||
                   !Number.isSafeInteger(args.slot) ||
                   args.slot < 0 ||
-                  args.slot >= 8 ||
+                  args.slot >= creativeCatalog.hotbar.length ||
                   (args.itemId !== null && (typeof args.itemId !== 'string' || !items.has(args.itemId)))
                 )
                   throw new TypeError('Creative catalog selection is invalid.');

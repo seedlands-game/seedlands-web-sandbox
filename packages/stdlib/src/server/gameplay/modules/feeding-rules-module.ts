@@ -125,7 +125,7 @@ function derive(
   if (!food) throw new Error('invalid-food');
   return Object.freeze({
     existingActionId,
-    hungerRestore: policy.restore === 'full' ? missing : food.hungerRestore,
+    hungerRestore: policy.restore === 'full' ? missing : (food.hungerRestore ?? 0),
   });
 }
 

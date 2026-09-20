@@ -3,8 +3,9 @@ import { meshHaloIndex, type MeshData, type MeshOptions } from '@seedlands/stdli
 import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
 import { modelBoxesForVoxel } from '@seedlands/stdlib/world/voxel-model';
 import { shapeWaterFace } from '@seedlands/stdlib/world/water-mesh-height';
-import { CHUNK_SIZE, Voxel, voxelIndex, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 
+const MATERIAL_IDS = new Set<number>(Object.values(FaceMaterial));
 const ARENA_START = 64;
 export const MESH_KERNEL_WINDOW_SIZE = CHUNK_SIZE + 4;
 const WINDOW_CELL_COUNT = MESH_KERNEL_WINDOW_SIZE ** 3;
@@ -178,7 +179,7 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
       const dimension = descriptors[offset + 2];
       const back = descriptors[offset + 3] === 1;
       if (
-        (descriptors[offset + 1] !== 0xff && (descriptors[offset + 1] < 1 || descriptors[offset + 1] > 18)) ||
+        !MATERIAL_IDS.has(descriptors[offset + 1]) ||
         dimension > 2 ||
         descriptors[offset + 3] > 1 ||
         descriptors[offset + 4] > 32 ||

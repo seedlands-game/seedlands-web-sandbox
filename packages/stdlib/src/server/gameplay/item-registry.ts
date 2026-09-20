@@ -31,7 +31,7 @@ export const ItemIds = Object.freeze({
 export type ItemId = string;
 export type ItemStack = { itemId: ItemId; count: number; instance?: ItemInstanceState };
 export type PlaceItemCapability = Readonly<{ type: 'place'; voxel: number }>;
-export type ConsumeItemCapability = Readonly<{ type: 'consume'; hungerRestore: number }>;
+export type ConsumeItemCapability = Readonly<{ type: 'consume'; hungerRestore?: number; healthRestore?: number }>;
 export type MineItemCapability = Readonly<{
   type: 'mine';
   tool: 'axe' | 'pickaxe';
@@ -106,8 +106,11 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
     seen.add(source.type);
     if (source.type === 'place' && (!Number.isSafeInteger(source.voxel) || source.voxel <= Voxel.Air))
       throw new TypeError(`Place capability is invalid: ${input.id}`);
-    if (source.type === 'consume' && (!Number.isFinite(source.hungerRestore) || source.hungerRestore <= 0))
-      throw new TypeError(`Consume capability is invalid: ${input.id}`);
+    if (source.type === 'consume') {
+      const amounts = [source.hungerRestore, source.healthRestore].filter((value) => value !== undefined);
+      if (!amounts.length || amounts.some((value) => !Number.isFinite(value) || value! <= 0))
+        throw new TypeError(`Consume capability is invalid: ${input.id}`);
+    }
     if (source.type === 'mine' && source.tool !== 'axe' && source.tool !== 'pickaxe')
       throw new TypeError(`Mine capability is invalid: ${input.id}`);
     if (

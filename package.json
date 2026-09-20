@@ -18,9 +18,9 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @seedlands/web dev",
-    "build": "pnpm build:web",
+    "build": "node scripts/harness/artifact.mjs --build",
     "build:web": "pnpm --filter @seedlands/web build",
-    "typecheck": "pnpm --filter @seedlands/kernel typecheck && pnpm --filter @seedlands/stdlib typecheck && pnpm --filter @seedlands/playbook-classic typecheck && pnpm --filter @seedlands/eslint-plugin typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/agent-server typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit",
+    "typecheck": "pnpm --filter @seedlands/kernel typecheck && pnpm --filter @seedlands/stdlib typecheck && pnpm --filter @seedlands/playbook-classic typecheck && pnpm --filter @seedlands/eslint-plugin typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/agent-server typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit && tsc -p tsconfig.classic-tests.json --noEmit",
     "lint": "eslint .",
     "lint:paths": "ls-lint",
     "format": "prettier --write .",
@@ -51,7 +51,12 @@
     "build:agent": "pnpm --filter @seedlands/agent-server build",
     "agent:dev": "pnpm build:agent && pnpm --filter @seedlands/agent-server start",
     "test:all": "pnpm test:deterministic",
-    "test:eslint": "pnpm --filter @seedlands/eslint-plugin test"
+    "test:eslint": "pnpm --filter @seedlands/eslint-plugin test",
+    "harness:classic": "node scripts/harness/classic.mjs",
+    "harness:artifact": "node scripts/harness/artifact.mjs",
+    "test:classic:headless": "pnpm --filter @seedlands/web test apps/web/tests/integration/runtime/server/composition/overworld-progression-journey.test.ts apps/web/tests/integration/runtime/server/composition/classic-food-health.test.ts apps/web/tests/integration/runtime/server/composition/classic-plank-building.test.ts apps/web/tests/integration/runtime/server/composition/classic-stick-crafting.test.ts --maxWorkers=1",
+    "harness:browser:install": "playwright install --no-shell chromium",
+    "typecheck:classic": "tsc -p tsconfig.classic-tests.json --noEmit"
   },
   "dependencies": {},
   "devDependencies": {

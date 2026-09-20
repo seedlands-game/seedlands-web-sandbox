@@ -1,3 +1,4 @@
+import { foodEffect } from './food-effect';
 import { prepareEntityMutation } from '../prepared-entity-mutation';
 import type { EntityStore } from '../entity-store';
 import { Inventory } from '../inventory';
@@ -188,25 +189,29 @@ export class ActorInventoryRuntime {
     if (!selected) return { success: false, reason: 'no-selected-item' };
     const consume = actor.inventory.items.capability(selected.itemId, 'consume');
     if (!consume) return { success: false, reason: 'item-not-usable' };
-    if (actor.hungerMeaning === 'satiety' ? actor.hunger >= actor.maxHunger : actor.hunger <= 0)
-      return { success: false, reason: 'hunger-full' };
+    let effect;
+    try {
+      effect = foodEffect(
+        consume,
+        { hunger: actor.hunger, maxHunger: actor.maxHunger, meaning: actor.hungerMeaning },
+        actor,
+      );
+    } catch (error) {
+      return { success: false, reason: error instanceof Error ? error.message : 'invalid-food' };
+    }
     const candidate = new Inventory(actor.inventory.capacity, actor.inventory.snapshot(), actor.inventory.items);
     candidate.removeFromSlot(slot, 1);
-    const hunger =
-      actor.hungerMeaning === 'satiety'
-        ? Math.min(actor.maxHunger, actor.hunger + consume.hungerRestore)
-        : Math.max(0, actor.hunger - consume.hungerRestore);
     this.owner.assertCanChange();
     const components = this.owner.entities.actorComponentSnapshot(id);
     const mutation = prepareEntityMutation(this.owner.entities, {
       actors: [
         {
           reference: this.owner.entities.createReference(id)!,
-          health: actor.health,
+          health: effect.health ?? actor.health,
           components: {
             ...components,
             inventory: candidate.snapshot(),
-            needs: { ...components.needs, hunger },
+            needs: { ...components.needs, hunger: effect.hunger },
           },
         },
       ],

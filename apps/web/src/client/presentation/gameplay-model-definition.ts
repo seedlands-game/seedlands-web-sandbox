@@ -13,13 +13,13 @@ const blockItems = new Set([
   'workbench',
   'chest',
   'furnace',
+  'plank',
 ]);
 
 export function itemVisualKind(itemId: string): ItemVisualKind {
   if (blockItems.has(itemId)) return { kind: 'voxel-block', faces: 6 };
   if (itemId === 'lantern') return { kind: 'lantern' };
   if (itemId === 'berry') return { kind: 'berry-cluster' };
-  if (itemId === 'plank') return { kind: 'plank' };
   if (itemId === 'wood-axe') return { kind: 'wood-axe' };
   if (['stone-pickaxe', 'wood-pickaxe', 'iron-pickaxe'].includes(itemId)) return { kind: 'stone-pickaxe' };
   return { kind: 'plank' };

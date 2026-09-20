@@ -109,6 +109,8 @@ export class ModeRuntime {
     const entity = this.options.entities.get(actorId);
     if (!entity || !isActorEntityType(entity.type)) return { success: false, reason: 'unknown-actor' };
     const actor = this.options.entities.actorStateAccess(actorId);
+    if (request.mode === 'creative' && request.creativeHotbar.length !== actor.hotbarSize)
+      return { success: false, reason: 'invalid-catalog' };
     if (actor.mode === request.mode) return { success: false, reason: 'already-in-mode' };
 
     const current = this.project(actor);
@@ -174,6 +176,7 @@ export class ModeRuntime {
     hotbar: readonly (ItemId | null)[],
     selectedSlot = 0,
   ): PreparedModeRuntimeResult {
+    if (hotbar.length !== this.actor(actorId)?.hotbarSize) return { success: false, reason: 'invalid-catalog' };
     const validated = this.catalog(hotbar, selectedSlot);
     if (!validated) return { success: false, reason: 'invalid-catalog' };
     const entity = this.actorEntity(actorId);
@@ -206,7 +209,8 @@ export class ModeRuntime {
     if (!actor) return { success: false, reason: 'unknown-actor' };
     const current = this.project(actor);
     if (current.mode !== 'creative') return { success: false, reason: 'creative-required' };
-    if (!Number.isSafeInteger(slot) || slot < 0 || slot >= 8) return { success: false, reason: 'invalid-catalog' };
+    if (!Number.isSafeInteger(slot) || slot < 0 || slot >= current.creativeCatalog.hotbar.length)
+      return { success: false, reason: 'invalid-catalog' };
     if (current.creativeCatalog.selectedSlot === slot) return { success: true, state: current };
     return this.setCreativeCatalog(actorId, current.creativeCatalog.hotbar, slot);
   }
@@ -369,7 +373,8 @@ export class ModeRuntime {
   private catalog(hotbar: readonly (ItemId | null)[], selectedSlot: number) {
     if (
       !Array.isArray(hotbar) ||
-      hotbar.length !== 8 ||
+      hotbar.length < 1 ||
+      hotbar.length > 9 ||
       !Number.isSafeInteger(selectedSlot) ||
       selectedSlot < 0 ||
       selectedSlot >= hotbar.length ||

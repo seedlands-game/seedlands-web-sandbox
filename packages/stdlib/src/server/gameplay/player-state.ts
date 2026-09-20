@@ -29,7 +29,7 @@ export type PlayerSnapshot = {
   lifecycle: PlayerLifecycle;
   inventory: InventorySlot[];
   selectedSlot: number;
-  hotbarSize: 8;
+  hotbarSize: number;
   attackCooldownSeconds: number;
   hungerAccumulator: number;
   healingAccumulator: number;
@@ -47,7 +47,9 @@ export class PlayerState {
   private readonly state: PlayerComponentAccess;
   readonly maxHealth = 20 as const;
   readonly maxHunger = 20 as const;
-  readonly hotbarSize = 8 as const;
+  get hotbarSize(): number {
+    return this.state.hotbarSize;
+  }
 
   constructor(
     readonly entityId: string,

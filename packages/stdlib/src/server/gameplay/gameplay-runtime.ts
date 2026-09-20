@@ -24,13 +24,8 @@ import { createInventoryStatePort } from './modules/inventory-state-port';
 import { resolveGameplayComposition } from '../composition/gameplay-composition';
 import type { WorldCommitResult } from '../game-server';
 import { AutonomyRuntime, type ActorRegistration } from '../simulation/autonomy-runtime';
-import {
-  EntityStore,
-  type EntityQuery,
-  type EntitySpawn,
-  type EntityUpdate,
-  type GameplayEntity,
-} from './entity-store';
+import { EntityStore } from './entity-store';
+import type { EntityQuery, EntitySpawn, EntityUpdate, GameplayEntity } from './entity-store';
 import type { ItemStack } from './item-registry';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import { type GameplayContent } from './gameplay-content';
@@ -367,7 +362,8 @@ export class GameplayRuntime {
     const state = this.getActorModeState(id);
     if (state?.mode !== 'creative') return (this.registeredInventory ?? this.inventoryActions).select(id, slot);
     if (!this.compositionGuard) return this.modes.selectCreativeSlot(id, slot);
-    if (!Number.isSafeInteger(slot) || slot < 0 || slot >= 8) return { success: false, reason: 'invalid-slot' };
+    const size = state.creativeCatalog.hotbar.length;
+    if (!Number.isSafeInteger(slot) || slot < 0 || slot >= size) return { success: false, reason: 'invalid-slot' };
     const result = this.modules.invokeActor(this.callbacks.moduleActorAuthority, id, {
       operationId: 'seedlands:set-creative-catalog',
       target: { kind: 'entity', entityId: id },

@@ -67,6 +67,7 @@ fn material(id: u32, axis: i32, positive: bool) -> u32 {
         13 => 16,
         14 => 17,
         15 => 18,
+        16 => 19,
         _ => 255,
     }
 }
@@ -374,5 +375,6 @@ mod tests {
         assert_eq!(material(13, 2, true), 16);
         assert_eq!(material(14, 0, false), 17);
         assert_eq!(material(15, 1, true), 18);
+        assert_eq!(material(16, 2, false), 19);
     }
 }

@@ -191,3 +191,22 @@ describe('inventory pointer candidate', () => {
     expect(furnace.component.furnace.output).toBeNull();
   });
 });
+
+it('9槽布局可从背包末格交换到第9槽，旧8槽布局仍拒绝同一目标', () => {
+  const source = {
+    ...actor(),
+    slots: [...Array(35).fill(null), { itemId: 'test:wood', count: 3 }],
+    equipment: { selectedSlot: 0, hotbarSize: 9 },
+  };
+  const command = { kind: 'hotbar' as const, slot: { kind: 'inventory' as const, slot: 35 }, hotbarSlot: 8 };
+  const next = buildInventoryPointerCandidate(content, { actor: source, input: input(command) });
+  expect(next.slots[8]).toEqual({ itemId: 'test:wood', count: 3 });
+  expect(next.slots[35]).toBeNull();
+  expect(source.slots[35]).toEqual({ itemId: 'test:wood', count: 3 });
+  expect(() =>
+    buildInventoryPointerCandidate(content, {
+      actor: actor(),
+      input: input({ ...command, slot: { kind: 'inventory', slot: 0 } }),
+    }),
+  ).toThrow('invalid-hotbar-slot');
+});

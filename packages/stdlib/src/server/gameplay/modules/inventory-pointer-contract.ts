@@ -265,7 +265,7 @@ export function validateInventoryPointerInput(raw: unknown): InventoryPointerInp
     case 'hotbar':
       if (
         Object.keys(source).some((key) => !['kind', 'slot', 'hotbarSlot'].includes(key)) ||
-        !integer(source.hotbarSlot, 0, 7)
+        !integer(source.hotbarSlot, 0, 8)
       )
         throw new TypeError('Inventory pointer hotbar command is invalid.');
       command = Object.freeze({ kind: source.kind, slot: slotRef(source.slot), hotbarSlot: source.hotbarSlot });

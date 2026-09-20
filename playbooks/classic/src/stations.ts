@@ -3,7 +3,7 @@ const stack = (itemId: string, count = 1): ItemStack => ({ itemId, count });
 const pickaxe = (id: string, material: string, durability: number): StationRecipe => ({
   kind: 'shaped',
   id,
-  pattern: [stack(material), stack(material), stack(material), null, stack('plank'), null, null, stack('plank'), null],
+  pattern: [stack(material), stack(material), stack(material), null, stack('stick'), null, null, stack('stick'), null],
   outputs: [{ itemId: id, count: 1, instance: { durability } }],
 });
 const ring = (id: string, material: string): StationRecipe => ({

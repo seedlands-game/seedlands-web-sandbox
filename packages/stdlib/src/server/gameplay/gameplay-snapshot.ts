@@ -1,3 +1,4 @@
+import type { PlayerInventoryLayout } from './inventory-layout';
 import type { StationStateCodec } from './ecs-station-state';
 import { validateBlockBreakAction } from './modules/block-action-model';
 import type { CombatOriginRuntimeOptions } from './combat-origin';
@@ -100,6 +101,7 @@ type GameplaySnapshotValidationOptions = {
   clone: CoreClone;
   items?: ItemDefinitionRegistry;
   stationCodec?: StationStateCodec;
+  playerLayout?: PlayerInventoryLayout;
   meleeDefinitions?: readonly MeleeDefinition[];
   actorProfiles?: ActorProfileRegistry;
   registeredNeeds?: boolean;
@@ -316,7 +318,7 @@ export function validateGameplaySnapshot(
 
   const sourceVersion = source.version;
   const items = options.items ?? defaultItemDefinitionRegistry;
-  const entities = new EntityStore(items, options.stationCodec);
+  const entities = new EntityStore(items, options.stationCodec, options.playerLayout);
   const players = new Map<string, PlayerState>();
   const legacyCombatLockouts = new Map<string, number>();
   try {

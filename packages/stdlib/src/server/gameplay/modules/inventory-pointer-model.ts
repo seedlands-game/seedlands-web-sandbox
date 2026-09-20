@@ -443,6 +443,7 @@ export function buildInventoryPointerCandidate(
       collect(content, state, input.command);
       break;
     case 'hotbar':
+      if (input.command.hotbarSlot >= actor.equipment.hotbarSize) throw new Error('invalid-hotbar-slot');
       hotbar(content, state, input.command);
       break;
     case 'craft':

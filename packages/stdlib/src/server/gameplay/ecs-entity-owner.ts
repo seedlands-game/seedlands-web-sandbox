@@ -1,3 +1,4 @@
+import { DEFAULT_PLAYER_INVENTORY_LAYOUT, type PlayerInventoryLayout } from './inventory-layout';
 import {
   addComponent,
   addEntity,
@@ -94,6 +95,7 @@ export class EcsEntityOwner {
     private readonly worldEpoch = 1,
     private readonly items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
     stationCodec?: StationStateCodec,
+    private readonly playerLayout: PlayerInventoryLayout = DEFAULT_PLAYER_INVENTORY_LAYOUT,
   ) {
     if (!Number.isSafeInteger(worldEpoch) || worldEpoch <= 0)
       throw new RangeError('Entity world epoch must be a positive safe integer.');
@@ -199,7 +201,7 @@ export class EcsEntityOwner {
       components.actorMetadata.archetype[eid] = entity.archetype;
       components.actorMetadata.persistent[eid] = entity.persistent ?? true;
     }
-    initializeActorComponents(this.world, this.actors, eid, entity, this.items);
+    initializeActorComponents(this.world, this.actors, eid, entity, this.items, this.playerLayout);
     if (station) this.stations.initialize(eid, station);
     this.ids.set(entity.id, eid);
     this.issued.add(entity.id);
@@ -315,7 +317,12 @@ export class EcsEntityOwner {
     const eid = this.require(id);
     const entity = this.project(eid);
     if (!isActorEntityType(entity.type)) throw new TypeError(`Entity does not have actor components: ${id}`);
-    return prepareActorComponentSnapshot(snapshot, entity.type === 'player', this.items);
+    if (
+      snapshot.inventory.length !== this.actors.inventory.value[eid]?.capacity ||
+      snapshot.equipment.hotbarSize !== this.actors.equipment.hotbarSize[eid]
+    )
+      throw new TypeError('Actor mutation cannot change inventory layout.');
+    return prepareActorComponentSnapshot(snapshot, entity.type === 'player', this.items, this.playerLayout);
   }
 
   installPreparedActorReplacement(
@@ -341,7 +348,7 @@ export class EcsEntityOwner {
     if (!isActorEntityType(entity.type)) throw new TypeError('Entity cannot restore actor components.');
     if ((entity.health === 0) !== (snapshot.lifecycle === 'dead'))
       throw new TypeError('Actor lifecycle does not match entity health.');
-    restoreActorComponentSnapshot(this.actors, eid, snapshot, entity.type === 'player', this.items);
+    restoreActorComponentSnapshot(this.actors, eid, snapshot, entity.type === 'player', this.items, this.playerLayout);
   }
 
   stationSnapshot(id: string): StationComponentV1 {

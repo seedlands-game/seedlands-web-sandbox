@@ -35,6 +35,7 @@ export type GameplayUiSource = Readonly<{
     health: number;
     hunger: number;
     selectedHotbarSlot: number;
+    hotbarSize?: number;
     inventory: readonly (Readonly<{
       itemId: string;
       count: number;
@@ -81,6 +82,7 @@ export type GameplayUiProjection = Readonly<{
       inventory: readonly GameplayItemPresentation[];
       creativeCatalog: readonly GameplayItemPresentation[];
       selectedHotbarSlot: number;
+      hotbarSize: number;
       craftableRecipeIds: readonly string[];
       recipes: readonly Readonly<{
         id: string;
@@ -134,23 +136,27 @@ const projectInventory = (
 export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayUiProjection): GameplayUiProjection {
   const items = itemResolver(source.items);
   const recipes = source.recipes ?? [];
-  const inventory = projectInventory(source.player.inventory, 24, items.require);
+  const inventory = projectInventory(source.player.inventory, source.player.inventory.length, items.require);
+  const hotbarSize = source.player.hotbarSize ?? 8;
   const mode = source.player.mode?.value ?? 'survival';
   const flightEnabled = mode === 'creative' && Boolean(source.player.flight?.enabled);
-  const creativeHotbar = Array.from({ length: 8 }, (_, slot) => {
-    const itemId = source.player.creativeCatalog?.hotbar[slot] ?? null;
-    const definition = itemId ? items.require(itemId) : null;
-    return {
-      slot,
-      itemId,
-      count: 0,
-      name: definition?.name ?? '空槽位',
-      edible: Boolean(definition?.capabilities.some((capability) => capability.type === 'consume')),
-    };
-  });
+  const creativeHotbar = Array.from(
+    { length: source.player.creativeCatalog?.hotbar.length ?? hotbarSize },
+    (_, slot) => {
+      const itemId = source.player.creativeCatalog?.hotbar[slot] ?? null;
+      const definition = itemId ? items.require(itemId) : null;
+      return {
+        slot,
+        itemId,
+        count: 0,
+        name: definition?.name ?? '空槽位',
+        edible: Boolean(definition?.capabilities.some((capability) => capability.type === 'consume')),
+      };
+    },
+  );
   const selectedHotbarSlot =
     mode === 'creative' ? (source.player.creativeCatalog?.selectedSlot ?? 0) : source.player.selectedHotbarSlot;
-  const hotbar = mode === 'creative' ? creativeHotbar : inventory.slice(0, 8);
+  const hotbar = mode === 'creative' ? creativeHotbar : inventory.slice(0, hotbarSize);
   const hud = reuse(
     {
       combat: projectCombatUi(source.player.combat),
@@ -194,6 +200,7 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
           edible: definition.capabilities.some((capability) => capability.type === 'consume'),
         })),
         selectedHotbarSlot,
+        hotbarSize,
         craftableRecipeIds: [...source.craftableRecipeIds],
         recipes: recipes.map((recipe) => ({
           id: recipe.id,

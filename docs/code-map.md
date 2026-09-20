@@ -233,3 +233,10 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 ## 职责化 Harness 入口
 
 本次架构冻结只执行 Kernel 与 stdlib 的确定性行为测试，并通过类型、公开入口及独立 `packages/eslint-plugin` 的规则测试检查静态边界。Web 的 `tests/integration/` 保留跨包、工程与架构断言的归属，但不作为本期行为门禁；Classic 浏览器线路、产物身份与性能 Harness 暂存在后续 Draft PR，不能由本期局部测试推导产品可玩。
+
+## Classic 初版续作（2026-09-21）
+
+- apps/web/src/app/ui/personal-recipes.svelte 拥有背包快捷配方的筛选、展示与意图回传；库存游标与格子手势仍由 inventory-crafting.svelte 持有。
+- packages/stdlib/src/server/gameplay/inventory-layout.ts 持有每世界玩家布局校验与旧24/8存档准入；Classic 选择36/9，ECS、模式和UI消费同一实际布局。
+- scripts/harness/artifact.mjs 绑定生产源码/锁文件/产物摘要，classic.mjs 执行唯一 apps/web/tests/e2e/classic-runtime.spec.ts；classic-support/crafting.ts 包含真实配方和第9快捷槽输入步骤。
+- 当前恢复的 Classic 与生产 CI 边界见 docs/ci-testing.md，上述历史冻结说明不代替本轮实际执行回执。

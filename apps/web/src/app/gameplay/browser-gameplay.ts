@@ -215,6 +215,7 @@ export class BrowserGameplay {
           health: player.health,
           hunger: player.hunger,
           selectedHotbarSlot: player.selectedSlot,
+          hotbarSize: player.hotbarSize,
           inventory: player.inventory,
           mode: player.mode,
           creativeCatalog: player.creativeCatalog,

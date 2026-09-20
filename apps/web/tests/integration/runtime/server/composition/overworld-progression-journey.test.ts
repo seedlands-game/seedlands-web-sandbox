@@ -110,6 +110,8 @@ it('Headless 玩家从有限原料采集，经工作台、石镐、冶炼到铁�
     expect(bag().filter(Boolean)).toEqual([]);
     for (let x = -2; x >= -9; x--) await mine(x, Voxel.Wood);
     for (let index = 0; index < 8; index++) await action({ type: 'craft', recipeId: 'planks' });
+    await action({ type: 'craft', recipeId: 'sticks' });
+    await action({ type: 'craft', recipeId: 'sticks' });
     await action({ type: 'craft', recipeId: 'workbench' });
     await move([0.5, 60, 0.5]);
     await place('workbench', [2, 60, 0]);
