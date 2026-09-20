@@ -1,0 +1,997 @@
+{
+  "schemaVersion": 1,
+  "referenceCaseSetVersion": 16,
+  "sourceCaseCount": 522,
+  "caseCount": 38,
+  "status": "CANDIDATE_ONLY_NOT_APPROVED",
+  "cases": [
+    {
+      "caseId": "B-023",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D54"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-054"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-023 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 B-054 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L615"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-027",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D30"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-066", "E-Minecart"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-027 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 B-066、E-Minecart 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L619"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-028",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D31"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-066", "E-Minecart"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-028 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 B-066、E-Minecart 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L620"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-029",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D56"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-029 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L621"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-033",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D55"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-033 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L625"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-034",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "INTERNAL_EXCLUDED_STATE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": ["B-029", "B-033"],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-034 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L626"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-036",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "INTERNAL_EXCLUDED_STATE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": ["B-029", "B-033"],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-036 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L628"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-055",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "RETAINED_MATERIAL_PLACEMENT_DISABLED",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331", "B-073", "B-074", "B-025", "R-D05", "R-D48", "R-D49"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "普通生存取得红石粉 I-331，在允许放置的地面上持有该物品。",
+        "trigger": "右键尝试铺设红石线。",
+        "expectedUnreachable": "不生成 B-055，不消耗 I-331；其非电路配方用途保持可用。"
+      },
+      "positiveControl": "至少验证 I-331、B-073、B-074、B-025、R-D05、R-D48、R-D49 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L647"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-069",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D45"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-069 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L661"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-070",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D52"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-070 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L662"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-071",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": ["I-330"],
+        "retainedBoundaryCaseIds": ["B-064"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-071 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 B-064 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L663"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-072",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D53"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-072 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L664"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-075",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "INTERNAL_EXCLUDED_STATE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": ["B-076"],
+        "retainedBoundaryCaseIds": ["B-050"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-075 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 B-050 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L667"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-076",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D46"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-050"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-076 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 B-050 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L668"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-077",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D51"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-077 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L669"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-087",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "OTHER_DIMENSIONS",
+      "pathKind": "OTHER_DIMENSION_INACCESSIBLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-049", "B-051", "I-259", "E-PigZombie"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建仅有主世界的普通单人生存世界，禁止命令、创意背包或导入修改存档。",
+        "trigger": "遍历合法生成、掉落、合成和交易路径；具体有限路径集待审核。",
+        "expectedUnreachable": "不得取得或自然生成 B-087；保留的主世界派生态不能误删。"
+      },
+      "positiveControl": "至少验证 B-049、B-051、I-259、E-PigZombie 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L679"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-088",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "OTHER_DIMENSIONS",
+      "pathKind": "OTHER_DIMENSION_INACCESSIBLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-049", "B-051", "I-259", "E-PigZombie"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建仅有主世界的普通单人生存世界，禁止命令、创意背包或导入修改存档。",
+        "trigger": "遍历合法生成、掉落、合成和交易路径；具体有限路径集待审核。",
+        "expectedUnreachable": "不得取得或自然生成 B-088；保留的主世界派生态不能误删。"
+      },
+      "positiveControl": "至少验证 B-049、B-051、I-259、E-PigZombie 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L680"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-089",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "OTHER_DIMENSIONS",
+      "pathKind": "OTHER_DIMENSION_INACCESSIBLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D10"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-049", "B-051", "I-259", "E-PigZombie"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建仅有主世界的普通单人生存世界，禁止命令、创意背包或导入修改存档。",
+        "trigger": "遍历合法生成、掉落、合成和交易路径；具体有限路径集待审核。",
+        "expectedUnreachable": "不得取得或自然生成 B-089；保留的主世界派生态不能误删。"
+      },
+      "positiveControl": "至少验证 B-049、B-051、I-259、E-PigZombie 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L681"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-090",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "OTHER_DIMENSIONS",
+      "pathKind": "PORTAL_CREATION_DISABLED",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-049", "B-051", "I-259"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "用保留的黑曜石 B-049、打火石 I-259 和火 B-051 建立完整主世界框架。",
+        "trigger": "点燃框架并观察方块及维度入口。",
+        "expectedUnreachable": "不生成 B-090，也不能进入另一维度；普通可燃目标仍可被点燃。"
+      },
+      "positiveControl": "至少验证 B-049、B-051、I-259 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L682"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-093",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "INTERNAL_EXCLUDED_STATE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": ["I-356"],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-093 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L685"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "B-094",
+      "kind": "block",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "INTERNAL_EXCLUDED_STATE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": ["I-356"],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 B-094 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/blocks.md",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/Block.java#L686"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "I-330",
+      "kind": "item",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D20"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-064"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 I-330 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 B-064 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/items.md",
+        "https://wiki.retromc.org/index.php?title=B1.7.3_data_values&oldid=9822"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "I-348",
+      "kind": "item",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "OTHER_DIMENSIONS",
+      "pathKind": "OTHER_DIMENSION_INACCESSIBLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": ["B-089"],
+        "retainedBoundaryCaseIds": ["B-049", "B-051", "I-259", "E-PigZombie"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建仅有主世界的普通单人生存世界，禁止命令、创意背包或导入修改存档。",
+        "trigger": "遍历合法生成、掉落、合成和交易路径；具体有限路径集待审核。",
+        "expectedUnreachable": "不得取得或自然生成 I-348；保留的主世界派生态不能误删。"
+      },
+      "positiveControl": "至少验证 B-049、B-051、I-259、E-PigZombie 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/items.md",
+        "https://wiki.retromc.org/index.php?title=B1.7.3_data_values&oldid=9822"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "I-356",
+      "kind": "item",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "EXCLUDED_PRODUCT_UNOBTAINABLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": ["R-D47"],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建普通单人生存世界，保留可用的非电路输入材料；具体初态待固定。",
+        "trigger": "尝试原版直接合成、放置、掉落或内部状态转移中的相应路径。",
+        "expectedUnreachable": "不得得到 I-356 的被排方块/物品/状态。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://raw.githubusercontent.com/OfficialPixelBrush/beta-wiki/8bcc41aee34334c2b916e7b500abe6853b4fd704/general/items.md",
+        "https://wiki.retromc.org/index.php?title=B1.7.3_data_values&oldid=9822"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "E-Ghast",
+      "kind": "entity",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "OTHER_DIMENSIONS",
+      "pathKind": "OTHER_DIMENSION_INACCESSIBLE",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": null,
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["E-PigZombie"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "新建仅有主世界的普通单人生存世界，禁止命令、创意背包或导入修改存档。",
+        "trigger": "遍历合法生成、掉落、合成和交易路径；具体有限路径集待审核。",
+        "expectedUnreachable": "不得取得或自然生成 E-Ghast；保留的主世界派生态不能误删。"
+      },
+      "positiveControl": "至少验证 E-PigZombie 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/EntityList.java#L95",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/EntityGhast.java"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D10",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "OTHER_DIMENSIONS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-089",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-049", "B-051", "I-259", "E-PigZombie"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D10 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 B-049、B-051、I-259、E-PigZombie 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L33",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D20",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "I-330",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-064"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D20 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 B-064 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L43",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D30",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-027",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-066", "E-Minecart"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D30 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 B-066、E-Minecart 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L53",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D31",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-028",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-066", "E-Minecart"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D31 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 B-066、E-Minecart 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L54",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D45",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-069",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D45 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L68",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D46",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-076",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-050"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D46 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 B-050 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L69",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D47",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "I-356",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D47 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L70",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D51",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-077",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D51 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L74",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D52",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-070",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D52 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L75",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D53",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-072",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D53 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L76",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D54",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-023",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["B-054"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D54 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 B-054 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L77",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D55",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-033",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D55 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L78",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    },
+    {
+      "caseId": "R-D56",
+      "kind": "crafting",
+      "candidateStatus": "EXCLUSION_DEPENDENCY_CANDIDATE_NOT_APPROVED",
+      "decisionCause": "REDSTONE_CIRCUITS",
+      "pathKind": "DISABLED_CRAFTING_OUTPUT",
+      "reason": "本项目明确排除该功能或其依赖链；不宣称原版没有此身份或行为。",
+      "closure": {
+        "outputCaseId": "B-029",
+        "producerRecipeIds": [],
+        "dependencyCaseIds": [],
+        "retainedBoundaryCaseIds": ["I-331"]
+      },
+      "ordinarySurvivalNegative": {
+        "setup": "同版本普通生存背包和已登记的精确配方输入；逐格形状、数量与元数据待固定。",
+        "trigger": "在允许的 2×2 或 3×3 网格摆出该被排配方并尝试取产物。",
+        "expectedUnreachable": "不得取得 R-D56 的被排产物，且材料不得因虚构输出而消耗；还须排除命中其他保留配方。"
+      },
+      "positiveControl": "至少验证 I-331 的被保留玩法不受本排除影响；具体输入/输出待固定。",
+      "sourceLinks": [
+        "spec.md#排除依赖的默认裁决供整份合同审核",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/CraftingManager.java#L79",
+        "https://github.com/jacobo-mc/mc_b1.7.3_release/blob/740c583901e1ff1150e9ef37e37dab5bc0e4f807/1.7.3-LTS/src/minecraft/net/minecraft/src/ShapedRecipes.java#L22-L75"
+      ],
+      "unresolved": "逐案来源/依赖闭包、有限取得路径、夹具与用户范围裁决尚未审核；不得升为 REFERENCE_READY。"
+    }
+  ]
+}

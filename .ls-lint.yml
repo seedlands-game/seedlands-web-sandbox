@@ -41,6 +41,9 @@ ls:
   changes/*:
     .dir: regex:\d{4}-\d{2}-\d{2}-[a-z0-9]+(-[a-z0-9]+)*
     .md: kebab-case
+  # Frozen reference entry, covered by contract-snapshot.json.
+  changes/2026-09-16-classic-beta173-parity:
+    .md: regex:(START-HERE|[a-z0-9]+(-[a-z0-9]+)*)
   changes/2026-09-07-agent-routing-contracts:
     .dir: kebab-case
     .md: kebab-case
