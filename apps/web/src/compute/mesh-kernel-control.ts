@@ -23,12 +23,15 @@ const sample = (voxelWindow: Uint16Array, x: number, y: number, z: number) =>
   voxelWindow[meshKernelWindowIndex(x, y, z)];
 const sampleFluid = (fluid: Uint8Array, x: number, y: number, z: number) => fluid[meshKernelWindowIndex(x, y, z)];
 const isGreedyVoxel = (voxel: number) => voxel !== Voxel.Air && voxel !== Voxel.Lantern;
-const occludes = (voxel: number) => voxel !== Voxel.Air && voxel !== Voxel.Water && voxel !== Voxel.Lantern;
+const occludes = (voxel: number) =>
+  voxel !== Voxel.Air && voxel !== Voxel.Water && voxel !== Voxel.Lantern && voxel !== Voxel.Glass;
 const visible = (source: number, target: number) =>
   isGreedyVoxel(source) &&
-  (source === Voxel.Water
-    ? target === Voxel.Air || (target !== Voxel.Water && !occludes(target))
-    : target === Voxel.Air || target === Voxel.Water || !occludes(target));
+  (source === Voxel.Glass && target === Voxel.Glass
+    ? false
+    : source === Voxel.Water
+      ? target === Voxel.Air || (target !== Voxel.Water && !occludes(target))
+      : target === Voxel.Air || target === Voxel.Water || !occludes(target));
 const heightCode = (voxelWindow: Uint16Array, fluid: Uint8Array, x: number, y: number, z: number) => {
   if (sample(voxelWindow, x, y + 1, z) === Voxel.Water) return 9;
   const level = Math.max(1, Math.min(8, sampleFluid(fluid, x, y, z) & 0x0f));

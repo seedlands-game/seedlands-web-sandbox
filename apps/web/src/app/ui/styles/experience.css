@@ -63,7 +63,7 @@
   transform: none;
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--hotbar-columns, 8), minmax(0, 1fr));
   gap: 4px;
   padding: 5px;
   border-width: 5px;

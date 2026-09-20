@@ -57,7 +57,7 @@ describe('S4 voxel progression palette', () => {
 
   it('assigns stable IDs and complete full-cube materials to the five new voxels', () => {
     expect(GENERATOR_VERSION).toBe(4);
-    expect(MAX_VOXEL_ID).toBe(Voxel.Planks);
+    expect(MAX_VOXEL_ID).toBe(Voxel.Glass);
     expect([Voxel.Workbench, Voxel.Chest, Voxel.Furnace, Voxel.CoalOre, Voxel.IronOre]).toEqual([11, 12, 13, 14, 15]);
     expect([
       FaceMaterial.Workbench,
@@ -73,9 +73,9 @@ describe('S4 voxel progression palette', () => {
       faceMaterialFor(Voxel.CoalOre, 0, false),
       faceMaterialFor(Voxel.IronOre, 1, false),
     ]).toEqual([14, 15, 16, 17, 18]);
-    expect(MATERIAL_LAYER_COUNT).toBe(19);
-    expect(terrainMaterials).toHaveLength(19);
-    expect(builtinTerrainTextures).toHaveLength(19);
+    expect(MATERIAL_LAYER_COUNT).toBe(21);
+    expect(terrainMaterials).toHaveLength(21);
+    expect(builtinTerrainTextures).toHaveLength(21);
     for (const [material, textureName] of [
       [FaceMaterial.Workbench, 'workbench'],
       [FaceMaterial.Chest, 'chest'],

@@ -15,7 +15,7 @@ export const overworldRecipes: readonly Recipe[] = [
     id: 'stone-pickaxe',
     inputs: [
       { itemId: 'stick', count: 2 },
-      { itemId: 'stone-block', count: 3 },
+      { itemId: 'cobblestone', count: 3 },
     ],
     outputs: [{ itemId: 'stone-pickaxe', count: 1, instance: { durability: 132 } }],
   },

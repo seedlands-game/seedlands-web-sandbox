@@ -30,14 +30,22 @@ export const overworldStations: StationContentInput = {
   ],
   recipes: [
     pickaxe('wood-pickaxe', 'plank', 60),
-    pickaxe('stone-pickaxe', 'stone-block', 132),
+    pickaxe('stone-pickaxe', 'cobblestone', 132),
     pickaxe('iron-pickaxe', 'iron-ingot', 250),
     ring('chest', 'plank'),
-    ring('furnace', 'stone-block'),
+    ring('furnace', 'cobblestone'),
   ],
-  furnaceRecipes: [{ id: 'smelt-iron', input: stack('raw-iron'), output: stack('iron-ingot'), durationSeconds: 5 }],
+  furnaceRecipes: [
+    { id: 'smelt-iron', input: stack('raw-iron'), output: stack('iron-ingot'), durationSeconds: 10 },
+    { id: 'smelt-stone', input: stack('cobblestone'), output: stack('stone-block'), durationSeconds: 10 },
+    { id: 'smelt-glass', input: stack('sand-block'), output: stack('glass'), durationSeconds: 10 },
+    { id: 'smelt-charcoal', input: stack('wood-block'), output: stack('charcoal'), durationSeconds: 10 },
+  ],
   fuels: [
-    { itemId: 'coal', burnSeconds: 20 },
-    { itemId: 'wood-block', burnSeconds: 8 },
+    { itemId: 'coal', burnSeconds: 80 },
+    { itemId: 'charcoal', burnSeconds: 80 },
+    { itemId: 'wood-block', burnSeconds: 15 },
+    { itemId: 'plank', burnSeconds: 15 },
+    { itemId: 'stick', burnSeconds: 5 },
   ],
 };

@@ -61,10 +61,13 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Cobblestone"
+      "execution": "HEADLESS_PASS",
+      "name": "Cobblestone",
+      "seedlandsVoxelId": 17,
+      "source": "playbooks/classic/src/blocks.ts",
+      "note": "S2a圆石取得/冶炼或玻璃建造/保存已实现；玻璃真实浏览器画面通过，非全量Beta细节等价。"
     },
     {
       "caseId": "B-005",
@@ -246,10 +249,13 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Glass"
+      "execution": "HEADLESS_AND_BROWSER_PASS",
+      "name": "Glass",
+      "seedlandsVoxelId": 18,
+      "source": "playbooks/classic/src/blocks.ts",
+      "note": "S2a圆石取得/冶炼或玻璃建造/保存已实现；玻璃真实浏览器画面通过，非全量Beta细节等价。"
     },
     {
       "caseId": "B-021",
@@ -1130,7 +1136,8 @@
       "execution": "NOT_RUN",
       "name": "Coal",
       "seedlandsItemId": "coal",
-      "source": "playbooks/classic/src/items.ts"
+      "source": "playbooks/classic/src/items.ts",
+      "note": "煤与木炭均可作80秒燃料，木炭由原木烧制；材料守恒与半程恢复通过，原版元数据映射仍分离storageId。"
     },
     {
       "caseId": "I-264",

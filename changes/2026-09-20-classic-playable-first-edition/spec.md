@@ -59,7 +59,7 @@
 
 ## S0 CI 恢复合同
 
-每个 PR/main push 保留现行静态与 Kernel/stdlib 选择器，另执行明确的 Classic Headless 四项合同、一次 Production build，再让 Chromium job 下载同一 apps/web/dist（含隐藏 manifest）并校验前后身份。产品任务本阶段全量执行，不引入可降低覆盖的 selector。固定实际 checkout SHA；浏览器安装来自锁定 Playwright，使用 channel=chromium/headless/mute-audio/1 worker。上游失败不得伪装成功，不新增部署或权限。新增 tsconfig.classic-tests.json 检查当前唯一 E2E、配置与四项 Headless 合同。CI 自身未远端执行前记 NOT_RUN。
+每个 PR/main push 保留现行静态与 Kernel/stdlib 选择器，另执行明确的 Classic Headless 五项合同、一次 Production build，再让 Chromium job 下载同一 apps/web/dist（含隐藏 manifest）并校验前后身份。产品任务本阶段全量执行，不引入可降低覆盖的 selector。固定实际 checkout SHA；浏览器安装来自锁定 Playwright，使用 channel=chromium/headless/mute-audio/1 worker。上游失败不得伪装成功，不新增部署或权限。新增 tsconfig.classic-tests.json 检查当前唯一 E2E、配置与五项 Headless 合同。CI 自身未远端执行前记 NOT_RUN。
 
 原09-16设计目录带contract-snapshot.json逐字节摘要（交接时已有27处漂移，不能称为通过快照），作为本轮对照原文保留，不格式化重写它的冻结文件。现有七个格式差异文件按精确路径加入.prettierignore（沿用旧冻结合同的做法），只为该目录保留START-HERE.md名称例外；生产/测试源码检查范围不变。本轮新spec与实现仍遵守格式和命名规则。
 

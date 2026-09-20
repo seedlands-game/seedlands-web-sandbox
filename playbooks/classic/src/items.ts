@@ -58,6 +58,9 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
     stackLimit: 64,
     capabilities: [{ type: 'place', voxel: 16 }],
   },
+  { id: 'cobblestone', name: '圆石', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 17 }] },
+  { id: 'glass', name: '玻璃', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 18 }] },
+  { id: 'charcoal', name: '木炭', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'stick', name: '木棍', itemType: 'resource', stackLimit: 64, capabilities: [] },
   {
     id: 'wood-axe',
@@ -87,7 +90,7 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
   { id: 'chest', name: '箱子', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 12 }] },
   { id: 'furnace', name: '炉体', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 13 }] },
   { id: 'coal', name: '煤', itemType: 'resource', stackLimit: 64, capabilities: [] },
-  { id: 'raw-iron', name: '粗铁', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'raw-iron', name: '铁矿石', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 15 }] },
   { id: 'iron-ingot', name: '铁锭', itemType: 'resource', stackLimit: 64, capabilities: [] },
   {
     id: 'wood-pickaxe',

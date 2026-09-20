@@ -14,10 +14,10 @@ export const voxelArrayOpacityGlsl = /* glsl */ `
 uniform highp sampler2DArray texture_voxelArray;
 uniform float material_opacity;
 uniform float material_alphaDitherScale;
-uniform float uOpacityVoxelLayer;
 
 void getOpacity() {
-    vec3 voxelUv = vec3({STD_OPACITY_TEXTURE_UV}, uOpacityVoxelLayer);
+    float voxelLayer = floor(vVertexColor.a * 255.0 + 0.5);
+    vec3 voxelUv = vec3({STD_OPACITY_TEXTURE_UV}, voxelLayer);
     dAlpha = material_opacity * texture(texture_voxelArray, voxelUv).a;
 }
 `;
@@ -87,10 +87,9 @@ var texture_voxelArray: texture_2d_array<f32>;
 var texture_voxelArraySampler: sampler;
 uniform material_opacity: f32;
 uniform material_alphaDitherScale: f32;
-uniform uOpacityVoxelLayer: f32;
 
 fn getOpacity() {
     let voxelUv: vec2f = {STD_OPACITY_TEXTURE_UV};
-    dAlpha = uniform.material_opacity * textureSampleBias(texture_voxelArray, texture_voxelArraySampler, voxelUv, i32(uniform.uOpacityVoxelLayer), uniform.textureBias).a;
+    dAlpha = uniform.material_opacity * textureSampleBias(texture_voxelArray, texture_voxelArraySampler, voxelUv, i32(round(vVertexColor.a * 255.0)), uniform.textureBias).a;
 }
 `;

@@ -10,7 +10,7 @@
   }: { slots: HudState['hotbar']; selected: number; mode: ActorMode; onselect: (slot: number) => void } = $props();
 </script>
 
-<ol id="hotbar" aria-label={mode === 'creative' ? '创造快捷栏' : '生存快捷栏'}>
+<ol id="hotbar" style:--hotbar-columns={slots.length} aria-label={mode === 'creative' ? '创造快捷栏' : '生存快捷栏'}>
   {#each slots as slot (slot.slot)}
     <li>
       <GameSlot

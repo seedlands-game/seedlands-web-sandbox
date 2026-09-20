@@ -33,6 +33,8 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.CoalOre, '煤矿石', ['687170', '858d8a', '252a2b', 'a0a59a']],
   [FaceMaterial.IronOre, '铁矿石', ['747b78', '949b96', '9c694d', 'c28b68']],
   [FaceMaterial.Planks, '木板', ['aa794a', 'bf905e', '725033', 'd2a675']],
+  [FaceMaterial.Cobblestone, '圆石', ['65706d', '87928a', '424c4a', 'a8afa3']],
+  [FaceMaterial.Glass, '玻璃', ['accbd0', 'd4edf0', '8aafb8', 'edfafa']],
 ];
 
 // First-party pixel sources are deterministic and independent of atlas layout.
@@ -48,6 +50,14 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     if (face === FaceMaterial.Planks) {
       const row = Math.floor(y / 4);
       index = y % 4 === 0 || (x + row * 7) % 16 === 0 ? 3 : y % 4 === 1 ? 4 : noise < 8 ? 2 : 1;
+    }
+    if (face === FaceMaterial.Cobblestone) {
+      const row = Math.floor(y / 5);
+      index = y % 5 === 0 || (x + row * 3) % 7 === 0 ? 3 : y % 5 === 1 ? 4 : noise < 12 ? 2 : 1;
+    }
+    if (face === FaceMaterial.Glass) {
+      index =
+        x === 0 || y === 0 || x === 15 || y === 15 ? 1 : (x + y === 10 || x + y === 13) && x > 2 && x < 11 ? 2 : 0;
     }
     if (face === FaceMaterial.Leaves && noise < 8) index = 0;
     if (face === FaceMaterial.Water) index = (y + Math.floor(x / 4)) % 7 === 0 ? 4 : noise < 10 ? 2 : 1;
@@ -105,7 +115,11 @@ export const terrainMaterials: TerrainMaterial[] = sources.map(([faceMaterial, n
   faceMaterial,
   textureId: builtinTerrainTextures[i].id,
   renderMode:
-    faceMaterial === FaceMaterial.Leaves ? 'cutout' : faceMaterial === FaceMaterial.Water ? 'transparent' : 'opaque',
+    faceMaterial === FaceMaterial.Leaves || faceMaterial === FaceMaterial.Glass
+      ? 'cutout'
+      : faceMaterial === FaceMaterial.Water
+        ? 'transparent'
+        : 'opaque',
   emissiveIntensity:
     faceMaterial === FaceMaterial.Glowstone ? 1.15 : faceMaterial === FaceMaterial.LanternGlow ? 1.4 : 0,
 }));

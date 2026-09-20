@@ -5,7 +5,7 @@ export type RenderCategory = 'opaque' | 'cutout' | 'emissive' | 'transparent';
 export const renderCategoryForMaterial = (material: FaceMaterialId): RenderCategory =>
   material === FaceMaterial.Water
     ? 'transparent'
-    : material === FaceMaterial.Leaves
+    : material === FaceMaterial.Leaves || material === FaceMaterial.Glass
       ? 'cutout'
       : material === FaceMaterial.LanternGlow
         ? 'emissive'

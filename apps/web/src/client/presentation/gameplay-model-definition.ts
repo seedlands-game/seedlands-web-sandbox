@@ -14,6 +14,9 @@ const blockItems = new Set([
   'chest',
   'furnace',
   'plank',
+  'cobblestone',
+  'glass',
+  'raw-iron',
 ]);
 
 export function itemVisualKind(itemId: string): ItemVisualKind {
