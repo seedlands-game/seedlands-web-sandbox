@@ -16,14 +16,14 @@
     "test:watch": "pnpm --dir ../.. exec vitest --config apps/agent-server/vitest.config.ts"
   },
   "dependencies": {
-    "@langchain/core": "1.2.9",
-    "@langchain/langgraph": "1.4.14",
+    "@langchain/core": "1.2.11",
+    "@langchain/langgraph": "1.4.15",
     "@langchain/langgraph-checkpoint-postgres": "1.0.5",
-    "@langchain/openai": "1.5.11",
+    "@langchain/openai": "1.5.13",
     "@seedlands/cognition-protocol": "workspace:*",
     "@seedlands/stdlib": "workspace:*",
-    "deepagents": "1.13.3",
-    "langchain": "1.5.10",
+    "deepagents": "1.13.5",
+    "langchain": "1.5.11",
     "pg": "8.23.0",
     "ws": "^8.18.3"
   },

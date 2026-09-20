@@ -23,7 +23,7 @@
     "@seedlands/kernel": "workspace:*",
     "@seedlands/playbook-classic": "workspace:*",
     "@seedlands/stdlib": "workspace:*",
-    "playcanvas": "^2.21.4",
+    "playcanvas": "^2.22.2",
     "svelte": "^5.57.0",
     "tone": "^15.1.22"
   },
