@@ -113,6 +113,23 @@ export const overworldRecipes: readonly Recipe[] = [
     outputs: [{ itemId: 'furnace-minecart', count: 1 }],
   },
   { id: 'boat', inputs: [{ itemId: 'plank', count: 5 }], outputs: [{ itemId: 'boat', count: 1 }] },
+  {
+    id: 'bow',
+    inputs: [
+      { itemId: 'stick', count: 3 },
+      { itemId: 'string', count: 3 },
+    ],
+    outputs: [{ itemId: 'bow', count: 1, instance: { durability: 384 } }],
+  },
+  {
+    id: 'arrows',
+    inputs: [
+      { itemId: 'flint', count: 1 },
+      { itemId: 'stick', count: 1 },
+      { itemId: 'feather', count: 1 },
+    ],
+    outputs: [{ itemId: 'arrow', count: 4 }],
+  },
   { id: 'sticks', inputs: [{ itemId: 'plank', count: 2 }], outputs: [{ itemId: 'stick', count: 4 }] },
   {
     id: 'wood-axe',

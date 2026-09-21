@@ -46,6 +46,8 @@
     "./server/gameplay/inventory": "./src/server/gameplay/inventory.ts",
     "./server/gameplay/item-registry": "./src/server/gameplay/item-registry.ts",
     "./server/gameplay/player-state": "./src/server/gameplay/player-state.ts",
+    "./server/gameplay/projectile-runtime": "./src/server/gameplay/projectile-runtime.ts",
+    "./server/gameplay/ranged-action": "./src/server/gameplay/ranged-action.ts",
     "./server/gameplay/recipe-registry": "./src/server/gameplay/recipe-registry.ts",
     "./server/harness/authority-world-harness": "./src/server/harness/authority-world-harness.ts",
     "./server/harness/world-authorization": "./src/server/harness/world-authorization.ts",

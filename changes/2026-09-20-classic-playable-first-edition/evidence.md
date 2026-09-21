@@ -132,3 +132,11 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：新增 bowl/bucket/shears/minecart/boat 与 chest-minecart/furnace-minecart（含皮革资源已在 S4a），工作台配方：碗 3 木板出 4、桶 3 铁锭、剪刀 2 铁锭带耐久 238、矿车 5 铁锭、船 5 木板；矿车+箱子/熔炉升级为变体。新增 utility-sprite 原创像素图标并接入 asset 目录。
 - 定向：utility-items 2、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 14 files/25 tests PASS。coverage 将 I-281/325/328/333/342/343/359 标 HEADLESS_PASS。矿车轨道物理/骑乘、桶的流体拾取放置、剪毛交互未实现（S6b/环境流体阶段）。verify:static:ci PASS。
 - S6a 完整浏览器旅程 PASS：runId 8c3d212b-41d1-49fa-8eda-81b3d9c681b7，C0–C5 全 PASS，约 1.9 分钟，sourceSha ccd2e7daed593d9438c989b94818740eb7f90a36，artifactDigest bdc8fc7130d02adb55448999c9f5310dbb86a9640e9e70fbdd85db5b7a79136e，HeadlessChrome/153、mute-audio，pageErrors/failedResponses 为空。首帧曾偶发暂停面板拦截（85.5>0.65）单例失败，第二次连续通过，原失败保留。新增运输/实用物品未使既有旅程回归。
+
+## S4b 弓箭与权威投射物（部分完成）
+
+- RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。
+- GREEN：弓/箭/线/羽毛/燧石、配方及原创像素资源接入；ranged 内容注册校验弹药闭包和正数参数。正式 fireSelectedRangedItem 缺箭保持库存与投射物不变，成功扣 1 箭和 1 弓耐久并生成稳定 projectile id。
+- projectile-runtime 定向证明归一化速度、稳定顺序、连续线段最早命中、同距体素遮挡优先、actor 命中只伤害一次、寿命销毁，以及 checkpoint 恢复后位置/剩余寿命延续且 id 高水位不重用。classic-projectiles 5 tests + asset-workbench 4 tests PASS。
+- pnpm test:classic:headless PASS：15 files / 30 tests，含有限资源成长和保存。pnpm verify:static:ci 第一次在 5 个新增文件格式检查失败；格式化后第二次触发 pixel-item-art 504>500 行边界；拆出 utility kind 判定后最终 PASS（Svelte 0 errors/warnings、ESLint 66 tests、CI selection 8 tests）。
+- 当前只记 PARTIAL_IMPLEMENTED / HEADLESS_PASS：尚未把 projectile owner 纳入 GameplayRuntime 总快照与浏览器输入/表现/音频，也未完成自然材料掉落。问题保留并继续在 S4/S7 收口。
