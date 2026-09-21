@@ -1363,10 +1363,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bowl"
+      "execution": "HEADLESS_PASS",
+      "name": "Bowl",
+      "note": "S6a实用与运输：碗/桶/剪刀/矿车/船及箱子/熔炉矿车变体注册并按材料合成（碗3木板出4、桶3铁锭、剪刀2铁锭带耐久、矿车5铁锭、船5木板、矿车+箱子/熔炉升级），headless定向测试通过。矿车轨道物理/骑乘/流体桶交互未实现。"
     },
     {
       "caseId": "I-282",
@@ -1837,10 +1838,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bucket"
+      "execution": "HEADLESS_PASS",
+      "name": "Bucket",
+      "note": "S6a实用与运输：碗/桶/剪刀/矿车/船及箱子/熔炉矿车变体注册并按材料合成（碗3木板出4、桶3铁锭、剪刀2铁锭带耐久、矿车5铁锭、船5木板、矿车+箱子/熔炉升级），headless定向测试通过。矿车轨道物理/骑乘/流体桶交互未实现。"
     },
     {
       "caseId": "I-326",
@@ -1867,10 +1869,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Minecart"
+      "execution": "HEADLESS_PASS",
+      "name": "Minecart",
+      "note": "S6a实用与运输：碗/桶/剪刀/矿车/船及箱子/熔炉矿车变体注册并按材料合成（碗3木板出4、桶3铁锭、剪刀2铁锭带耐久、矿车5铁锭、船5木板、矿车+箱子/熔炉升级），headless定向测试通过。矿车轨道物理/骑乘/流体桶交互未实现。"
     },
     {
       "caseId": "I-329",
@@ -1918,10 +1921,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Boat"
+      "execution": "HEADLESS_PASS",
+      "name": "Boat",
+      "note": "S6a实用与运输：碗/桶/剪刀/矿车/船及箱子/熔炉矿车变体注册并按材料合成（碗3木板出4、桶3铁锭、剪刀2铁锭带耐久、矿车5铁锭、船5木板、矿车+箱子/熔炉升级），headless定向测试通过。矿车轨道物理/骑乘/流体桶交互未实现。"
     },
     {
       "caseId": "I-334",
@@ -2009,20 +2013,22 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Chest Minecart"
+      "execution": "HEADLESS_PASS",
+      "name": "Chest Minecart",
+      "note": "S6a实用与运输：碗/桶/剪刀/矿车/船及箱子/熔炉矿车变体注册并按材料合成（碗3木板出4、桶3铁锭、剪刀2铁锭带耐久、矿车5铁锭、船5木板、矿车+箱子/熔炉升级），headless定向测试通过。矿车轨道物理/骑乘/流体桶交互未实现。"
     },
     {
       "caseId": "I-343",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Furnace Minecart"
+      "execution": "HEADLESS_PASS",
+      "name": "Furnace Minecart",
+      "note": "S6a实用与运输：碗/桶/剪刀/矿车/船及箱子/熔炉矿车变体注册并按材料合成（碗3木板出4、桶3铁锭、剪刀2铁锭带耐久、矿车5铁锭、船5木板、矿车+箱子/熔炉升级），headless定向测试通过。矿车轨道物理/骑乘/流体桶交互未实现。"
     },
     {
       "caseId": "I-344",
@@ -2183,10 +2189,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Shears"
+      "execution": "HEADLESS_PASS",
+      "name": "Shears",
+      "note": "S6a实用与运输：碗/桶/剪刀/矿车/船及箱子/熔炉矿车变体注册并按材料合成（碗3木板出4、桶3铁锭、剪刀2铁锭带耐久、矿车5铁锭、船5木板、矿车+箱子/熔炉升级），headless定向测试通过。矿车轨道物理/骑乘/流体桶交互未实现。"
     },
     {
       "caseId": "I-2256",

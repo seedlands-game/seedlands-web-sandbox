@@ -15,6 +15,7 @@
     "apps/web/tests/integration/runtime/server/composition/classic-food-chain.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-hoe-farmland.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-crop-growth.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-utility-items.test.ts"
   ]
 }
