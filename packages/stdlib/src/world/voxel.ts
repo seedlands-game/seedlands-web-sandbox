@@ -416,7 +416,7 @@ export function baseVoxel(
   const dungeon = dungeonFor(seed, x, z, generatorVersion);
   if (dungeon) {
     const generated = dungeonVoxel(dungeon, x, y, z);
-    if (generated !== null) return generated as VoxelId;
+    if (generated !== null) return geologyVoxel(seed, x, y, z, context, generated as VoxelId, generatorVersion);
   }
   if (context.hydrology.water && context.hydrology.waterLevel !== null && y > h && y <= context.hydrology.waterLevel)
     return geologyVoxel(seed, x, y, z, context, Voxel.Water, generatorVersion);

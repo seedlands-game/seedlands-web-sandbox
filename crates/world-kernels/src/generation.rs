@@ -196,7 +196,17 @@ fn column_voxel(
     let kind = columns[(column + 1) as usize];
     let water_level = i64::from(columns[(column + 2) as usize]);
     if let Some(voxel) = dungeon_voxel(seed, world_x, y, world_z, generator_version) {
-        return voxel;
+        return geology_voxel(
+            seed,
+            world_x,
+            y,
+            world_z,
+            height,
+            kind,
+            water_level,
+            voxel,
+            generator_version,
+        );
     }
     if y > height && y <= water_level {
         return geology_voxel(
