@@ -34,7 +34,7 @@ export type PlaceItemCapability = Readonly<{ type: 'place'; voxel: number }>;
 export type ConsumeItemCapability = Readonly<{ type: 'consume'; hungerRestore?: number; healthRestore?: number }>;
 export type MineItemCapability = Readonly<{
   type: 'mine';
-  tool: 'axe' | 'pickaxe';
+  tool: 'axe' | 'pickaxe' | 'shovel';
   multiplier: number;
   /** Omitted legacy tiers are interpreted as tier zero by mining policy. */
   tier?: number;
@@ -53,7 +53,7 @@ export type ItemDefinition = Readonly<{
   capabilities: readonly ItemCapability[];
   /** Compatibility projections for existing presentation consumers. */
   placesVoxel?: number;
-  toolKind?: 'axe' | 'pickaxe';
+  toolKind?: 'axe' | 'pickaxe' | 'shovel';
   hungerRestore?: number;
 }>;
 
@@ -111,7 +111,7 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
       if (!amounts.length || amounts.some((value) => !Number.isFinite(value) || value! <= 0))
         throw new TypeError(`Consume capability is invalid: ${input.id}`);
     }
-    if (source.type === 'mine' && source.tool !== 'axe' && source.tool !== 'pickaxe')
+    if (source.type === 'mine' && source.tool !== 'axe' && source.tool !== 'pickaxe' && source.tool !== 'shovel')
       throw new TypeError(`Mine capability is invalid: ${input.id}`);
     if (
       source.type === 'mine' &&

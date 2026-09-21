@@ -81,6 +81,11 @@ it('新增物品图标使用已注册像素，不请求不存在的静态PNG', (
     'iron-sword',
     'gold-sword',
     'diamond-sword',
+    'wood-shovel',
+    'stone-shovel',
+    'iron-shovel',
+    'gold-shovel',
+    'diamond-shovel',
   ]) {
     expect(itemIconUrl(id, '/')).toMatch(/^data:image\/svg\+xml,/);
   }

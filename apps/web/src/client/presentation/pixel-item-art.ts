@@ -66,7 +66,7 @@ function handle(sprite: Sprite) {
   sprite.rect(14, 27, 3, 1, 14);
 }
 
-function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond') {
+function tool(kind: 'pickaxe' | 'axe' | 'sword' | 'shovel', material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond') {
   const sprite = new Sprite();
   const [dark, base, light, edge] =
     material === 'wood'
@@ -173,6 +173,38 @@ function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'i
         sprite.rect(9, 5, 3, 1, 8);
         sprite.put(20, 6, 7);
       }
+    } else if (kind === 'shovel') {
+      // Compact scoop head on the shared handle; a readable spade silhouette.
+      sprite.polygon(
+        [
+          [11, 2],
+          [21, 2],
+          [23, 5],
+          [23, 13],
+          [20, 16],
+          [12, 16],
+          [9, 13],
+          [9, 5],
+        ],
+        1,
+      );
+      sprite.polygon(
+        [
+          [12, 3],
+          [20, 3],
+          [22, 6],
+          [22, 12],
+          [19, 15],
+          [13, 15],
+          [10, 12],
+          [10, 6],
+        ],
+        base,
+      );
+      sprite.rect(12, 4, 8, 1, edge);
+      sprite.rect(11, 5, 2, 8, light);
+      sprite.rect(19, 5, 2, 8, dark);
+      sprite.rect(13, 13, 6, 1, dark);
     } else {
       sprite.polygon(
         [
@@ -390,7 +422,8 @@ function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot' | 'gold-ingot' | 'dia
 export function pixelItemAssets(
   id: string,
   name: string,
-  kind: 'pickaxe' | 'axe' | 'sword' | 'coal' | 'raw-iron' | 'iron-ingot' | 'gold-ingot' | 'diamond' | 'stick',
+  kind:
+    'pickaxe' | 'axe' | 'sword' | 'shovel' | 'coal' | 'raw-iron' | 'iron-ingot' | 'gold-ingot' | 'diamond' | 'stick',
   material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond' = 'wood',
 ): NativeAsset[] {
   const textureId = `builtin:texture:${id}:detail`;
@@ -405,7 +438,10 @@ export function pixelItemAssets(
         width: 32,
         height: 32,
         palette: palette.map((color) => [...color]),
-        pixels: kind === 'axe' || kind === 'sword' || kind === 'pickaxe' ? tool(kind, material) : resource(kind),
+        pixels:
+          kind === 'axe' || kind === 'sword' || kind === 'pickaxe' || kind === 'shovel'
+            ? tool(kind, material)
+            : resource(kind),
       },
     },
     {

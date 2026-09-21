@@ -80,3 +80,10 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：新增体素 Sandstone=24、StoneBricks=25 与材质 27/28（MATERIAL_LAYER_COUNT 28、terrainMaterials/textures 28）；4 沙→1 砂岩、4 石→4 石砖工作台合成，镐 tier1 采集掉落自身。voxel-progression、voxel-render-pipeline、wasm mesh/halo/world-kernel 逐字节一致复跑 PASS，Rust generation/mesh 指纹重建校验通过。
 - test:classic:headless 现 8 files/11 tests PASS。生产构建 PASS：sourceSha bf71b4ec262caa4387fc165881988e5e57d34dd8，sourceDigest dd8d9f81b39ba77cc2250612ea22a1c48ed2dd0f7aa921e4df241a9a2dfc8154，artifactDigest c6e08a97e6ad005ec49cab87935560263a13f6af6ff271786feeda9537a4d058。coverage 将 B-024 砂岩标 HEADLESS_PASS。石砖属新增 Seedlands 建材（Beta 无 4 石→4 石砖直合成配方），砖块 B-045（红砖/黏土链）与半砖/楼梯变体仍未实现。
 - 28 层材质版本完整浏览器旅程 PASS：runId b34d8a54-1422-4847-a1bc-899ae29316c5，C0–C5 全 PASS，约 1.9 分钟，sourceSha a025660d729f12d220edaac871b15fac8739b865，sourceDigest 57ea728ed757c018aaa885c4f4a41013d35ac2d4b1d99e79a94473798cb867ca，artifactDigest c6e08a97e6ad005ec49cab87935560263a13f6af6ff271786feeda9537a4d058，HeadlessChrome/153、mute-audio，pageErrors/failedResponses 为空。新增砂岩/石砖体素与 28 层材质未使既有采集/建造/NPC/保存旅程回归；本轮首帧曾偶发暂停面板拦截（85.5>0.65 超时）单例失败，第二次运行连续通过，保留原失败于 test-results。verify:static:ci PASS。
+
+## S2e 铲工具族与软方块偏好
+
+- RED：classic-shovel-tools.test.ts 断言 shovel 工具族存在与软方块 preferredTool='shovel'，`tool !== 'shovel'` 与旧 preferredTool 校验失败 2/2。
+- 实现后 GREEN：MineItemCapability.tool 与 VoxelGameplayDefinition.preferredTool 扩充 'shovel'，mining-tool-policy 与 block-rules-module 接受该工具；新增木/石/铁/金/钻石铲（tier1/2/3/1/4，倍率2/4/6/12/8，耐久60/132/250/32/1561），1 材料+2 木棍合成，原创像素铲头模型。泥土(1)/草(2)/沙(6)偏好 shovel 且徒手仍可挖（倍率1），铁铲给倍率6，铲对石类不满足门槛。
+- 定向：shovel-tools 2 + tool-matrix 3 GREEN；mining-tool-policy 20 + block-rules-definition 17 + item-visual-compatibility 3（图标扩至含 5 铲）复跑 PASS；combat 19 + content-consumers 4 无回归。
+- test:classic:headless 现 9 files/13 tests PASS。铲工具族未做浏览器专项手势，软方块采集加速纯逻辑证明；泥土/草/沙徒手可挖保持向后兼容，未改既有旅程。
