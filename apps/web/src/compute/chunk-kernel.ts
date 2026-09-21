@@ -1,6 +1,7 @@
 import type { makeChunk, WorldChange } from '@seedlands/stdlib/world/chunk-generation';
 import { macroAt, type MacroBiome } from '@seedlands/stdlib/world/macro-world';
 import { oreVoxel } from '@seedlands/stdlib/world/ore-generation';
+import { caveAir } from '@seedlands/stdlib/world/cave-generation';
 import { GENERATOR_VERSION, hash2 } from '@seedlands/stdlib/world/voxel';
 import type { KernelMemory } from './kernel-memory';
 
@@ -69,6 +70,7 @@ export function columnVoxel(
               ? 3
               : 2
           : 3;
+    if (caveAir(seed, worldX, wy, worldZ, height, generatorVersion)) return 0;
     return oreVoxel(seed, worldX, wy, worldZ, height, base, generatorVersion);
   }
   for (let tx = x; tx <= x + 6; tx += 1)

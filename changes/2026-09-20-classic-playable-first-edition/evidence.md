@@ -107,3 +107,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - RED：classic-crop-growth.test.ts 断言小麦种子内容、种植/分阶段生长/收割存在，crop-growth-policy 缺失导入失败。
 - 实现后 GREEN：新增 wheat-seeds 内容与像素图标；crop-growth-policy 定义八阶段确定性状态机——种子只种耕地(Voxel.Farmland)，按 secondsPerStage 分阶段生长且累计余量、封顶成熟阶段 7；成熟收割产 wheat+wheat-seeds，未成熟只回收种子，非法阶段/非耕地明确拒绝。
 - 定向：crop-growth 3、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 现 12 files/20 tests PASS。coverage 将 B-059 小麦作物、I-295 种子、I-296 小麦、M23-02 生长机制标 HEADLESS_PASS。作物尚未接入体素渲染与浏览器真实耕作/播种/收割手势，自然种子掉落（破坏草）未接；这些留待后续 S5c 与体素作物阶段。verify:static:ci PASS。
+
+## S3a V6 洞穴雕刻
+
+- RED：cave-generation.test.ts 断言 generatorVersion 6 掏空气穴、V5 字节冻结、v7 拒绝，caveAir 缺失导入失败。
+- 实现后 GREEN：新增 cave-generation.ts 确定性洞穴——V6 起在地表 4 格以下按 2x2x2 分组双哈希场相交掏空为 Air；V2–V5 逐字节冻结（V5 深层 chunk SHA-256 23048253… 不变）。GENERATOR_VERSION→6，SUPPORTED 扩到 [2..6]，Classic worldgen identity 升 6.0.0/g2-g6。Rust generation.rs 同步 cave_air 并在 column_voxel 掏空，TS/Rust/staged 三路逐字节一致。
+- 定向：cave-generation 4、precious-ore 2、legacy-generator-save 5（含 V6）、wasm world-kernel 4 + halo 2 + mesh 6、voxel-progression 4 复跑 PASS，Rust 指纹重建校验通过；test:classic:headless 12 files/20 tests PASS（scenario 升 V6）。coverage 将 M03-02 洞穴机制标 HEADLESS_PASS。洞穴连通性度量、地牢与液体填充留待 S3b。

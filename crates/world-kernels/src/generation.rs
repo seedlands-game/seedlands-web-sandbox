@@ -2,6 +2,7 @@ const COAL_ORE_SALT: u32 = 0x434f_414c;
 const IRON_ORE_SALT: u32 = 0x4952_4f4e;
 const GOLD_ORE_SALT: u32 = 0x474f_4c44;
 const DIAMOND_ORE_SALT: u32 = 0x4449_414d;
+const CAVE_SALT: u32 = 0x4341_5645;
 
 // Frozen unsigned 32-bit mix shared byte-for-byte with game-core/ore-generation.ts.
 // Coordinates are 2x2x2 group coordinates, represented with two's-complement u32 lanes.
@@ -15,6 +16,24 @@ fn ore_hash(seed: u32, group_x: i32, group_y: i32, group_z: i32, salt: u32) -> u
     hash = (hash ^ (hash >> 16)).wrapping_mul(0x7feb_352d);
     hash = (hash ^ (hash >> 15)).wrapping_mul(0x846c_a68b);
     hash ^ (hash >> 16)
+}
+
+// Deterministic cave carving shared byte-for-byte with world/cave-generation.ts.
+#[inline(always)]
+fn cave_air(seed: u32, x: i32, y: i64, z: i32, height: i64, generator_version: u32) -> bool {
+    if generator_version < 6 || y < 0 {
+        return false;
+    }
+    let depth = height - y;
+    if depth < 4 {
+        return false;
+    }
+    let gx = x.div_euclid(2);
+    let gy = (y.div_euclid(2)) as i32;
+    let gz = z.div_euclid(2);
+    let primary = ore_hash(seed, gx, gy, gz, CAVE_SALT) % 1000;
+    let secondary = ore_hash(seed ^ 0x5bd1_e995, gx, gy, gz, CAVE_SALT) % 1000;
+    primary < 96 && secondary < 420
 }
 
 #[inline(always)]
@@ -80,6 +99,9 @@ fn column_voxel(
         } else {
             3
         };
+        if cave_air(seed, world_x, y, world_z, height, generator_version) {
+            return 0;
+        }
         return ore_voxel(seed, world_x, y, world_z, height, base, generator_version);
     }
     let mut tx = x;

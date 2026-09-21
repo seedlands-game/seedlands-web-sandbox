@@ -56,7 +56,7 @@ describe('S4 voxel progression palette', () => {
   });
 
   it('assigns stable IDs and complete full-cube materials to the five new voxels', () => {
-    expect(GENERATOR_VERSION).toBe(5);
+    expect(GENERATOR_VERSION).toBe(6);
     expect(MAX_VOXEL_ID).toBe(Voxel.Farmland);
     expect([Voxel.Workbench, Voxel.Chest, Voxel.Furnace, Voxel.CoalOre, Voxel.IronOre]).toEqual([11, 12, 13, 14, 15]);
     expect([
@@ -94,7 +94,7 @@ describe('S4 voxel progression palette', () => {
   });
 
   it('keeps the staged path byte-identical for versions 2, 3, and 4', () => {
-    for (const version of [2, 3, 4, 5])
+    for (const version of [2, 3, 4, 5, 6])
       for (const [cx, cy, cz] of [
         [0, 0, 0],
         [-2, -1, 3],
