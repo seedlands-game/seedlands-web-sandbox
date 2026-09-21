@@ -25,6 +25,7 @@ import {
   type AuthorityKernelState,
 } from '../authority/authority-kernel-state';
 import { DifficultyRuntime, type DifficultyCheckpoint } from './difficulty-runtime';
+import { EnvironmentRuntime, type EnvironmentCheckpoint } from './environment-runtime';
 
 type Position = [number, number, number];
 
@@ -63,6 +64,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   entityStore: EntityStoreComponentSnapshot;
   authoritySession?: AuthorityKernelState;
   difficulty?: DifficultyCheckpoint;
+  environment?: EnvironmentCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -79,6 +81,7 @@ export const createGameplaySnapshotV4 = (
   simulation: SimulationSnapshot,
   authoritySession?: AuthorityKernelState,
   difficulty?: DifficultyCheckpoint,
+  environment?: EnvironmentCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -90,6 +93,7 @@ export const createGameplaySnapshotV4 = (
     ? { authoritySession: decodeAuthorityKernelState(encodeAuthorityKernelState(authoritySession)) }
     : {}),
   ...(difficulty ? { difficulty: new DifficultyRuntime(difficulty).checkpoint() } : {}),
+  ...(environment ? { environment: new EnvironmentRuntime(environment.seed, environment).checkpoint() } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 

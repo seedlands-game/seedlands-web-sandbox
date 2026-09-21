@@ -90,6 +90,7 @@ class GameServerWorld {
       options.content,
       options,
       {
+        seed: () => this.seed,
         worldTime: () => this.kernelState.worldTime,
         getVoxel: (x, y, z) => this.getVoxel(x, y, z),
         editBatch: (batch) => this.editBatch(batch),

@@ -182,3 +182,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - Rust fluid kernel 同步相同 kind/decay/reaction，并重建 scalar/SIMD artifact；含随机 lava/水邻接的 TS↔Rust 逐字段对等 1 test PASS，Water/Lava Authority 36 tests PASS，verify:static:ci PASS。全仓 rustfmt 会改动既有 codec/generation/mesh/tests，本轮仅格式化修改的 fluid.rs；这不是功能失败。
 - M10-02 仍保留 PARTIAL：传播与混合已接线，但独立较慢 cadence、桶交互、燃烧伤害和 Lava 专用液面视觉仍待后续。
 - S3d 桶续作：新增 fluid-container capability；空桶只拾取 level8+source 的 Water/Lava，换成 water-bucket/lava-bucket；满桶只在 replaceable 目标放 source 并换回空桶。BlockInteractionRuntime 复用距离校验、临时 Inventory 和 PreparedWorldEdit，双方先验证再提交。流动 level7 拒绝且世界/库存逐值不变。classic-fluid-buckets 3 tests、全仓 typecheck 与 verify:static:ci PASS。修复遗漏的 GameServer.edit/getFluidCell/chunk activation water-only 分支。
+
+## S3e 天气、火与 TNT（部分完成）
+
+- EnvironmentRuntime 按 world seed + tick 确定 clear/rain/thunder 转换与持续时间，保存 weather/tick、火列表、TNT稳定id高水位和在途引信。火每4 tick至多向一个邻格扩散，仅空气且邻近Wood/Leaves/Planks/TNT可点燃；雨/雷且露天时熄灭。
+- TNT 到期产生坐标稳定的有界球形候选，GameplayRuntime coordinator 经唯一 editBatch 清除可破坏方块；对玩家按距离衰减伤害并写击退 velocity，环境中途 snapshot 恢复后继续引信。Fire=29/TNT=30、材质32/33与原创纹理接入，TNT 以5火药+4沙合成。
+- classic-environment 3 + gameplay snapshot migration 22 tests PASS，全仓 typecheck PASS。当前只记 PARTIAL：点火物品/浏览器交互、链爆、非玩家实体爆炸伤害、跨 owner 原子提交、雷击落点与雪仍待实现。

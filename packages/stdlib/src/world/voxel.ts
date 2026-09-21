@@ -40,10 +40,12 @@ export const Voxel = {
   Farmland: 26,
   Lava: 27,
   Obsidian: 28,
+  Fire: 29,
+  Tnt: 30,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.Obsidian;
+export const MAX_VOXEL_ID = Voxel.Tnt;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -77,6 +79,8 @@ export const FaceMaterial = {
   Farmland: 29,
   Lava: 30,
   Obsidian: 31,
+  Fire: 32,
+  Tnt: 33,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -113,6 +117,8 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Farmland]: 'farmland',
   [FaceMaterial.Lava]: 'lava',
   [FaceMaterial.Obsidian]: 'obsidian',
+  [FaceMaterial.Fire]: 'fire',
+  [FaceMaterial.Tnt]: 'tnt',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -144,6 +150,8 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Farmland]: '耕地',
   [Voxel.Lava]: '熔岩',
   [Voxel.Obsidian]: '黑曜石',
+  [Voxel.Fire]: '火',
+  [Voxel.Tnt]: 'TNT',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -175,9 +183,11 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Farmland]: [0.3, 0.19, 0.11],
   [Voxel.Lava]: [0.95, 0.24, 0.04],
   [Voxel.Obsidian]: [0.12, 0.08, 0.18],
+  [Voxel.Fire]: [1, 0.35, 0.04],
+  [Voxel.Tnt]: [0.72, 0.12, 0.08],
 };
 
-export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water && id !== Voxel.Lava;
+export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water && id !== Voxel.Lava && id !== Voxel.Fire;
 export const isRenderable = (id: number) => id !== Voxel.Air;
 
 export const floorDiv = (n: number, d: number) => Math.floor(n / d);
@@ -217,6 +227,8 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Farmland]: FaceMaterial.Farmland,
       [Voxel.Lava]: FaceMaterial.Lava,
       [Voxel.Obsidian]: FaceMaterial.Obsidian,
+      [Voxel.Fire]: FaceMaterial.Fire,
+      [Voxel.Tnt]: FaceMaterial.Tnt,
     } as Record<number, FaceMaterialId>
   )[id];
 }
