@@ -1,4 +1,3 @@
-import { gameplayEntityMetrics } from './gameplay-entity-metrics';
 import { isActorEntityType } from './ecs-actor-state';
 import type { WorldModuleBinding } from '../commands/module-command';
 import { createGameplayDomainAdapters } from './gameplay-domain-adapters';
@@ -56,8 +55,11 @@ import {
   type AuthorityKernelExecutionPort,
 } from '../authority/authority-kernel-state';
 import { commitGameplayDynamicBatch } from './gameplay-dynamic-batch';
+import { selectGameplayHotbarSlot } from './gameplay-inventory-selection';
 import { DifficultyRuntime, type Difficulty } from './difficulty-runtime';
 import { applySurvivalDamage, changeDifficulty, equipArmor, useSelectedBed } from './gameplay-survival-settings';
+import { EnvironmentRuntime } from './environment-runtime';
+import { advanceGameplayWithEnvironment } from './gameplay-environment-coordinator';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -69,6 +71,7 @@ export class GameplayRuntime {
   readonly kernelRuntime: KernelRuntime;
   readonly authorityExecution: AuthorityKernelExecutionPort;
   readonly difficulty = new DifficultyRuntime();
+  readonly environment: EnvironmentRuntime;
   private readonly players = new Map<string, PlayerState>();
   private persistedRevision = 0;
   private inventoryOperationCount = 0;
@@ -92,6 +95,7 @@ export class GameplayRuntime {
   constructor(private readonly callbacks: GameplayCallbacks) {
     const resolved = resolveGameplayComposition(callbacks);
     this.content = resolved.content;
+    this.environment = new EnvironmentRuntime(callbacks.environmentSeed ?? 0);
     const kernel = createGameplayKernelRuntime(this.content, callbacks.composition, callbacks.worldId);
     this.kernelRuntime = kernel.runtime;
     this.kernelState = kernel.runtime.stateOwner;
@@ -223,6 +227,7 @@ export class GameplayRuntime {
       players: this.players,
       authorityState: kernel.authority,
       difficulty: this.difficulty,
+      environment: this.environment,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);
@@ -259,10 +264,10 @@ export class GameplayRuntime {
   invokeActorModuleOperation(actorId: string, request: RegisteredOperationRequest) {
     return this.modules.invokeActor(this.callbacks.moduleActorAuthority, actorId, request);
   }
-  dispose(): void {
+  dispose = (): void => {
     RuntimeLifecycle.disposeGameplayRuntime(this.schedule, this.modules);
     this.kernelRuntime.dispose();
-  }
+  };
 
   get gameplayTime(): number {
     return this.kernelState.gameplayTime;
@@ -290,13 +295,10 @@ export class GameplayRuntime {
     return entity;
   }
 
-  spawnPlayer(input: { id?: string; position: Position }): GameplayEntity {
-    return this.spawn({ ...input, type: 'player' });
-  }
-
-  spawnWorldItem(position: Position, stack: ItemStack): GameplayEntity {
-    return this.spawn({ type: 'world-item', position, stack });
-  }
+  spawnPlayer = (input: { id?: string; position: Position }): GameplayEntity =>
+    this.spawn({ ...input, type: 'player' });
+  spawnWorldItem = (position: Position, stack: ItemStack): GameplayEntity =>
+    this.spawn({ type: 'world-item', position, stack });
 
   spawnAutonomous(input: EntitySpawn, registration: ActorRegistration): GameplayEntity {
     return RuntimeLifecycle.spawnGameplayAutonomous(input, registration, {
@@ -311,9 +313,7 @@ export class GameplayRuntime {
     return executeGameplayCharacterRequest(this, request, actorBinding);
   }
 
-  getEntity(id: string): GameplayEntity | null {
-    return this.entities.get(id);
-  }
+  getEntity = (id: string): GameplayEntity | null => this.entities.get(id);
 
   updateEntity(id: string, update: EntityUpdate): GameplayEntity {
     const entity = this.entities.update(id, update);
@@ -334,21 +334,13 @@ export class GameplayRuntime {
     return RuntimeLifecycle.despawnGameplayEntity(id, this.simulation, this.entities, this.players, () => this.touch());
   }
 
-  queryEntities(filter: EntityQuery = {}): GameplayEntity[] {
-    return this.entities.query(filter);
-  }
+  queryEntities = (filter: EntityQuery = {}): GameplayEntity[] => this.entities.query(filter);
+  queryNearbyEntities = (position: Position, radius: number, filter: EntityQuery = {}): GameplayEntity[] =>
+    this.entities.queryNearby(position, radius, filter);
 
-  queryNearbyEntities(position: Position, radius: number, filter: EntityQuery = {}): GameplayEntity[] {
-    return this.entities.queryNearby(position, radius, filter);
-  }
+  getPlayerState = (id: string): PlayerSnapshot => this.player(id).snapshot(this.simulation.combatSnapshotFor(id));
 
-  getPlayerState(id: string): PlayerSnapshot {
-    return this.player(id).snapshot(this.simulation.combatSnapshotFor(id));
-  }
-
-  getCombatState(id: string): CombatSnapshot {
-    return this.simulation.combatSnapshotFor(id);
-  }
+  getCombatState = (id: string): CombatSnapshot => this.simulation.combatSnapshotFor(id);
 
   getInventory = (id: string) => this.inventoryActions.snapshot(id);
   getInventoryPointerView = (id: string) => projectInventoryPointerView(this.entities, id);
@@ -356,16 +348,14 @@ export class GameplayRuntime {
   removeItem = (id: string, stack: ItemStack) => this.inventoryActions.remove(id, stack);
   selectHotbarSlot(id: string, slot: number) {
     const state = this.getActorModeState(id);
-    if (state?.mode !== 'creative') return (this.registeredInventory ?? this.inventoryActions).select(id, slot);
-    if (!this.compositionGuard) return this.modes.selectCreativeSlot(id, slot);
-    const size = state.creativeCatalog.hotbar.length;
-    if (!Number.isSafeInteger(slot) || slot < 0 || slot >= size) return { success: false, reason: 'invalid-slot' };
-    const result = this.modules.invokeActor(this.callbacks.moduleActorAuthority, id, {
-      operationId: 'seedlands:set-creative-catalog',
-      target: { kind: 'entity', entityId: id },
-      input: { slot, itemId: state.creativeCatalog.hotbar[slot] },
+    return selectGameplayHotbarSlot(id, slot, {
+      modeState: state,
+      inventory: this.registeredInventory ?? this.inventoryActions,
+      hasCompositionGuard: !!this.compositionGuard,
+      modes: this.modes,
+      modules: this.modules,
+      actorAuthority: this.callbacks.moduleActorAuthority,
     });
-    return result.ok ? { success: true } : { success: false, reason: result.message };
   }
   moveInventorySlot = (id: string, source: number, target: number) =>
     (this.registeredInventory ?? this.inventoryActions).move(id, source, target);
@@ -381,7 +371,6 @@ export class GameplayRuntime {
   craft = (id: string, recipeId: string) => (this.registeredInventory ?? this.inventoryActions).craft(id, recipeId);
   listCraftable = (id: string) => (this.registeredInventory ?? this.inventoryActions).listCraftable(id);
   listRecipes = () => this.content.recipes.list();
-
   beginBreak(id: string, position: Position): GameplayResult<{ requiredSeconds: number; commit?: WorldCommitResult }> {
     return (this.registeredBlocks ?? this.blocks).beginBreak(id, position);
   }
@@ -429,9 +418,7 @@ export class GameplayRuntime {
     return requestProfiledPlayerCombat(playerId, targetId, player, this.content, this.simulation, () => this.touch());
   }
 
-  recordAuthorityMutation(): void {
-    this.touch();
-  }
+  recordAuthorityMutation = (): void => this.touch();
 
   applyDamage = (actorId: string, playerId: string, amount: number, cause: string) =>
     applySurvivalDamage(
@@ -456,67 +443,75 @@ export class GameplayRuntime {
     );
   setSpawnFromSelectedBed = (playerId: string, bedPosition: Position) =>
     useSelectedBed(this.player(playerId), bedPosition, this.callbacks, () => this.touch());
+  igniteEnvironment = (position: Position, seconds?: number) => this.environment.ignite(position, seconds);
+  primeEnvironmentTnt = (position: Position, fuseSeconds?: number, power?: number) =>
+    this.environment.primeTnt(position, fuseSeconds, power);
   healPlayer = (playerId: string, amount: number) => this.vitals.healPlayer(playerId, amount);
   setHungerForDebug = (playerId: string, hunger: number) => this.vitals.setHungerForDebug(playerId, hunger);
   respawnPlayer = (playerId: string) => this.vitals.respawnPlayer(playerId);
 
   advanceRules(seconds: number): { commits: WorldCommitResult[] } {
-    try {
-      return RuntimeLifecycle.advanceGameplayRules(seconds, {
-        schedule: this.schedule,
-        modules: this.modules,
-        blocks: this.registeredBlocks,
-        players: this.players,
-        simulation: this.simulation,
-        revision: () => this.kernelState.gameplayRevision,
-        advancePlayer: (player, elapsed, commits) => this.advancePlayer(player, elapsed, commits),
-        advanceUnscheduled: (elapsed) =>
-          this.kernelState.synchronizeGameplayTime(this.kernelState.epoch, this.kernelState.gameplayTime + elapsed),
-        touchWithoutEvent: () => this.touch(false),
-        assertRevisionCapacity: () => this.assertRevisionCapacity(),
-      });
-    } finally {
-      if (this.schedule) this.kernelState.synchronizeGameplayTime(this.kernelState.epoch, this.schedule.time);
-    }
+    return advanceGameplayWithEnvironment(seconds, {
+      schedule: this.schedule,
+      modules: this.modules,
+      blocks: this.registeredBlocks,
+      players: this.players,
+      simulation: this.simulation,
+      revision: () => this.kernelState.gameplayRevision,
+      advancePlayer: (player, elapsed, commits) =>
+        RuntimeLifecycle.advanceGameplayPlayer(
+          player,
+          elapsed,
+          commits,
+          this.blocks,
+          this.vitals,
+          this.registeredBlocks,
+          this.schedule,
+        ),
+      advanceUnscheduled: (elapsed) =>
+        this.kernelState.synchronizeGameplayTime(this.kernelState.epoch, this.kernelState.gameplayTime + elapsed),
+      touchWithoutEvent: () => this.touch(false),
+      assertRevisionCapacity: () => this.assertRevisionCapacity(),
+      environment: this.environment,
+      callbacks: this.callbacks,
+      voxels: this.content.voxelGameplay,
+      entities: this.entities,
+      damage: (source, target, amount, cause) => this.applyDamage(source, target, amount, cause),
+      synchronizeSchedule: () => {
+        if (this.schedule) this.kernelState.synchronizeGameplayTime(this.kernelState.epoch, this.schedule.time);
+      },
+    });
   }
 
   advanceCommitUpperBound(seconds: number): number {
-    const queued = this.modules.queuedOperationCount();
-    const scheduled = this.schedule?.previewCommitUpperBound(seconds) ?? 0;
-    const legacyPlayers = this.schedule ? 0 : Math.ceil(seconds) * this.players.size * 2;
-    const blockOperations = this.registeredBlocks?.pendingOperationUpperBound(this.modules.queuedFlushBound()) ?? 0;
-    const combatOperations = this.registeredCombat?.pendingOperationUpperBound(scheduled) ?? 0;
-    const registeredOperations = queued + scheduled + blockOperations + combatOperations;
-    return Math.max(1, legacyPlayers + this.simulation.advanceCommitUpperBound(seconds, registeredOperations));
+    return RuntimeLifecycle.gameplayAdvanceCommitUpperBound(seconds, {
+      schedule: this.schedule,
+      modules: this.modules,
+      players: this.players,
+      blocks: this.registeredBlocks,
+      combat: this.registeredCombat,
+      simulation: this.simulation,
+    });
   }
 
-  createSnapshot(): GameplaySnapshot.GameplaySnapshotV4 {
-    return this.checkpoint.create(() => this.kernelState.gameplayRevision, this.gameplayTime);
-  }
+  createSnapshot = (): GameplaySnapshot.GameplaySnapshotV4 =>
+    this.checkpoint.create(() => this.kernelState.gameplayRevision, this.gameplayTime);
 
   metrics() {
-    return {
-      ...gameplayEntityMetrics(this.entities),
-      inventoryOperationCount: this.inventoryOperationCount,
-      gameplayEventCount: this.eventCount,
-      snapshotBytes: this.callbacks.platform.utf8.encode(JSON.stringify(this.createSnapshot())).byteLength,
-      ...this.simulation.metrics(),
-    };
+    const bytes = this.callbacks.platform.utf8.encode(JSON.stringify(this.createSnapshot())).byteLength;
+    return RuntimeLifecycle.gameplayMetrics(
+      this.entities,
+      this.inventoryOperationCount,
+      this.eventCount,
+      bytes,
+      this.simulation,
+    );
   }
 
-  restoreSnapshot(raw: unknown): { version: 1 | 2 | 3 | 4; worldTime?: number } {
-    return this.checkpoint.restore(raw);
-  }
-
-  markPersisted(revision: number): void {
+  restoreSnapshot = (raw: unknown): { version: 1 | 2 | 3 | 4; worldTime?: number } => this.checkpoint.restore(raw);
+  markPersisted = (revision: number): void => {
     this.persistedRevision = Math.max(this.persistedRevision, revision);
-  }
-
-  private advancePlayer(player: PlayerState, seconds: number, commits: WorldCommitResult[]): void {
-    if (player.lifecycle === 'alive' && !this.registeredBlocks)
-      this.blocks.advanceBreak(player.entityId, seconds, commits);
-    if (player.lifecycle === 'alive' && !this.schedule) this.vitals.advanceNeeds(player.entityId, seconds);
-  }
+  };
 
   private player(id: string): PlayerState {
     const player = this.players.get(id);

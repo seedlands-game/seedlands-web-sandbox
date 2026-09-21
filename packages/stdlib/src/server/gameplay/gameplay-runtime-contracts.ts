@@ -2,6 +2,7 @@ import type { ModuleActorAuthority } from '../composition/gameplay-actor-authori
 import type { ModuleSystemAuthority } from './modules/gameplay-module-schedule';
 import type { WorldComposition } from '../composition/contracts';
 import type { PreparedWorldEdit } from '../prepared-world-edit';
+import type { WorldEditBatch, WorldCommitResult } from '../game-server-types';
 import type { GameplayContent } from './gameplay-content';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { MeleeDefinition } from './combat-runtime';
@@ -14,6 +15,8 @@ export type GameplayCallbacks = {
   getLoadedVoxel?: (position: Position) => number | undefined;
   getFluidCell?: (position: Position) => FluidCell | null;
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
+  editBatch?: (batch: WorldEditBatch) => WorldCommitResult;
+  environmentSeed?: number;
   getWorldTime: () => number;
   platform: CorePlatformPorts;
   content?: GameplayContent;

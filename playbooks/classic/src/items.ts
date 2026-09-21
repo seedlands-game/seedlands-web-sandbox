@@ -378,6 +378,7 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
     capabilities: [{ type: 'fluid-container', fluid: 'lava' }],
   },
   { id: 'obsidian', name: '黑曜石', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 28 }] },
+  { id: 'tnt', name: 'TNT', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 30 }] },
   { id: 'arrow', name: '箭', itemType: 'resource', stackLimit: 64, capabilities: [] },
   {
     id: 'bow',

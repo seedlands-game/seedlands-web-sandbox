@@ -37,6 +37,7 @@ import type { FluidCell } from './fluid/fluid-cell';
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 
 export type GameServerGameplayWorldPort = Readonly<{
+  seed(): number;
   worldTime(): number;
   getVoxel(x: number, y: number, z: number): number;
   editBatch(batch: WorldEditBatch): WorldCommitResult;
@@ -84,6 +85,8 @@ export class GameServerGameplayHost {
       getLoadedVoxel: (position) => this.world.readLoadedGameplayVoxel(...position),
       getFluidCell: (position) => this.world.readFluidCell(...position),
       prepareVoxelEdit: (actorId, position, voxel) => this.world.prepareVoxelEdit(actorId, position, voxel),
+      editBatch: (batch) => this.world.editBatch(batch),
+      environmentSeed: this.world.seed(),
       getWorldTime: () => this.world.worldTime(),
       platform: this.platform,
       content: this.content,

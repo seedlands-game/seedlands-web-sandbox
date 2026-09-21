@@ -92,3 +92,9 @@ Classic 的鸡、牛、猪、羊、鱿鱼、狼、僵尸、骷髅、蜘蛛、苦
 ## S3d 熔岩与流体混合合同
 
 追加稳定 Voxel.Lava 与 Voxel.Obsidian，不重排旧 palette，旧 generatorVersion 字节不变。流体种类由 voxel id 表示，既有 Uint8 sidecar 继续只保存 source bit 与 level 1–8，因此旧水存档无需迁移。水与熔岩接触的候选按坐标稳定排序：熔岩源变黑曜石，流动熔岩变圆石；同一批多邻居不能重复写。传播与混合必须使用 Authority read-set/expected cell 校验，旧 epoch、stale chunk 或未知边界不提交。
+
+## S3e 天气、火与爆炸合同
+
+环境状态由每世界实例 owner 持有并随 gameplay checkpoint 保存：天气为 clear/rain/thunder、剩余秒数、revision 与逻辑 tick；转移只使用 seed+tick 哈希。火记录位置、剩余寿命与传播 tick，只有 Classic 标记的可燃方块邻位可被点燃，雨且可见天空时熄灭。TNT 记录稳定 id、位置、引信与威力；到期按坐标稳定产生有界球形方块候选和距离衰减的实体伤害/击退。
+
+环境 advance 只产候选，不直接写 Chunk；GameServer 经 editBatch/正式伤害入口提交。未知 Chunk 延迟，方块 revision 变化使候选失效，不跨过 World.edit。连续点燃/链爆有单 tick 上限，失败不部分提交。

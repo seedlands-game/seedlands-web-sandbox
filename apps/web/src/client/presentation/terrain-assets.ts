@@ -45,6 +45,8 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Farmland, '耕地', ['4d3722', '5c4026', '3a2917', '6f4f2e']],
   [FaceMaterial.Lava, '熔岩', ['c43d12', 'f06b18', '8e2510', 'ffb12e']],
   [FaceMaterial.Obsidian, '黑曜石', ['171121', '292039', '0b0810', '49305c']],
+  [FaceMaterial.Fire, '火焰', ['9e250b', 'e94b12', 'ff8b1a', 'ffd34e']],
+  [FaceMaterial.Tnt, 'TNT', ['9c1717', 'd22b22', 'eee1c0', '292929']],
 ];
 
 // First-party pixel sources are deterministic and independent of atlas layout.
@@ -72,6 +74,7 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     if (face === FaceMaterial.Leaves && noise < 8) index = 0;
     if (face === FaceMaterial.Water) index = (y + Math.floor(x / 4)) % 7 === 0 ? 4 : noise < 10 ? 2 : 1;
     if (face === FaceMaterial.Lava) index = (y + Math.floor(x / 3)) % 5 === 0 ? 4 : noise < 12 ? 2 : 1;
+    if (face === FaceMaterial.Fire) index = y > 13 - Math.abs(x - 8) ? 0 : noise < 12 ? 4 : 2;
     if (face === FaceMaterial.LanternFrame) index = x < 2 || x > 13 || y < 2 || y > 13 ? 3 : 2;
     if (face === FaceMaterial.LanternGlow) index = x > 3 && x < 12 && y > 2 && y < 13 ? 4 : 1;
     if (face === FaceMaterial.Workbench) {

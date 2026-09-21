@@ -122,6 +122,14 @@ export const overworldRecipes: readonly Recipe[] = [
     outputs: [{ itemId: 'bed', count: 1 }],
   },
   {
+    id: 'tnt',
+    inputs: [
+      { itemId: 'gunpowder', count: 5 },
+      { itemId: 'sand-block', count: 4 },
+    ],
+    outputs: [{ itemId: 'tnt', count: 1 }],
+  },
+  {
     id: 'bow',
     inputs: [
       { itemId: 'stick', count: 3 },

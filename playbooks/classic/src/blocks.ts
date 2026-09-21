@@ -171,6 +171,14 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'obsidian', count: 1 },
     replaceable: false,
   },
+  [29]: { voxel: 29, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: true },
+  [30]: {
+    voxel: 30,
+    hardnessSeconds: 0.01,
+    preferredTool: null,
+    drop: { itemId: 'tnt', count: 1 },
+    replaceable: false,
+  },
   [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,

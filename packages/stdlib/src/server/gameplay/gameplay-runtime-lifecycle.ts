@@ -7,6 +7,7 @@ import type { ActorRegistration, AutonomyRuntime } from '../simulation/autonomy-
 import { resolveProfiledActorSpawn } from './profiled-actor-spawn';
 import type { WorldCommitResult } from '../game-server-types';
 import { advanceGameplayClock, assertGameplayAdvance } from './gameplay-clock';
+import { gameplayEntityMetrics } from './gameplay-entity-metrics';
 
 type Disposable = Readonly<{ dispose(): void }>;
 type ActorRequestRuntime<Result> = Readonly<{
@@ -106,6 +107,55 @@ export function advanceGameplayRules(
   commits.push(...(options.blocks?.takeCommits() ?? []));
   return { commits };
 }
+
+export function gameplayAdvanceCommitUpperBound(
+  seconds: number,
+  options: Readonly<{
+    schedule: { previewCommitUpperBound(seconds: number): number } | null;
+    modules: { queuedOperationCount(): number; queuedFlushBound(): number };
+    players: ReadonlyMap<string, PlayerState>;
+    blocks: { pendingOperationUpperBound(bound: number): number } | null;
+    combat: { pendingOperationUpperBound(bound: number): number } | null;
+    simulation: AutonomyRuntime;
+  }>,
+) {
+  const queued = options.modules.queuedOperationCount();
+  const scheduled = options.schedule?.previewCommitUpperBound(seconds) ?? 0;
+  const legacyPlayers = options.schedule ? 0 : Math.ceil(seconds) * options.players.size * 2;
+  const blocks = options.blocks?.pendingOperationUpperBound(options.modules.queuedFlushBound()) ?? 0;
+  const combat = options.combat?.pendingOperationUpperBound(scheduled) ?? 0;
+  return Math.max(
+    1,
+    legacyPlayers + options.simulation.advanceCommitUpperBound(seconds, queued + scheduled + blocks + combat),
+  );
+}
+
+export const advanceGameplayPlayer = (
+  player: PlayerState,
+  seconds: number,
+  commits: WorldCommitResult[],
+  blocks: { advanceBreak(id: string, seconds: number, commits: WorldCommitResult[]): void },
+  vitals: { advanceNeeds(id: string, seconds: number): void },
+  registeredBlocks: unknown,
+  schedule: unknown,
+) => {
+  if (player.lifecycle === 'alive' && !registeredBlocks) blocks.advanceBreak(player.entityId, seconds, commits);
+  if (player.lifecycle === 'alive' && !schedule) vitals.advanceNeeds(player.entityId, seconds);
+};
+
+export const gameplayMetrics = (
+  entities: EntityStore,
+  inventoryOperationCount: number,
+  gameplayEventCount: number,
+  snapshotBytes: number,
+  simulation: AutonomyRuntime,
+) => ({
+  ...gameplayEntityMetrics(entities),
+  inventoryOperationCount,
+  gameplayEventCount,
+  snapshotBytes,
+  ...simulation.metrics(),
+});
 
 export function bindRegisteredActorRequest<Result>(
   runtime: ActorRequestRuntime<Result> | null,
