@@ -15,12 +15,13 @@ import {
   type WorldCommitReference,
 } from './network-reference-projection-types';
 import { canonicalReferenceInteger } from './network-reference-integer';
+import { ACTOR_ARCHETYPES } from '../gameplay/ecs-entity-owner';
 
 export { NETWORK_REFERENCE_PROJECTION_VERSION } from './network-reference-projection-types';
 export type * from './network-reference-projection-types';
 
 const MAX_COLLISION_CELL_INDEX = CHUNK_SIZE ** 3;
-const allowedArchetypes = new Set(['grazer', 'night-stalker', 'settler']);
+const allowedArchetypes = new Set<string>(ACTOR_ARCHETYPES);
 const isPresentationEntityType = (value: string): value is GameplayEntityReference['type'] =>
   value === 'world-item' || value === 'creature' || value === 'npc';
 

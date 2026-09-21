@@ -1,4 +1,5 @@
 import type { ActorBehavior } from '../simulation/actor-state';
+import { ACTOR_ARCHETYPES } from './ecs-entity-owner';
 import type { ActorArchetype, EntityType } from './entity-store';
 import type { ItemDefinitionRegistry, ItemStack } from './item-registry';
 import type { MeleeDefinition } from './melee-definition-registry';
@@ -13,6 +14,7 @@ export type ActorProfileInput = Readonly<{
   initialBehavior?: ActorBehavior;
   meleeDefinitionId?: string;
   deathDrop?: ItemStack;
+  disposition?: 'passive' | 'neutral' | 'hostile';
 }>;
 export type ActorProfile = ActorProfileInput;
 
@@ -38,7 +40,6 @@ export type ActorProfileRegistry = Readonly<{
   starterEcology: StarterEcologyConfiguration | null;
 }>;
 
-const ARCHETYPES: readonly ActorArchetype[] = ['grazer', 'night-stalker', 'settler'];
 const BEHAVIORS: readonly ActorBehavior[] = [
   'idle',
   'wander',
@@ -72,7 +73,7 @@ export function createActorProfileRegistry(
   const melee = new Set(meleeDefinitions.map(({ id }) => id));
   const profiles = new Map<ActorArchetype, ActorProfile>();
   for (const input of inputs) {
-    if (!ARCHETYPES.includes(input.archetype) || profiles.has(input.archetype))
+    if (!ACTOR_ARCHETYPES.includes(input.archetype) || profiles.has(input.archetype))
       throw new TypeError(`Duplicate or invalid actor profile: ${String(input.archetype)}`);
     if (input.entityType !== 'creature' && input.entityType !== 'npc')
       throw new TypeError(`Actor profile entity type is invalid: ${input.archetype}`);
@@ -96,6 +97,7 @@ export function createActorProfileRegistry(
         ...(input.initialBehavior !== undefined ? { initialBehavior: input.initialBehavior } : {}),
         ...(input.meleeDefinitionId !== undefined ? { meleeDefinitionId: input.meleeDefinitionId } : {}),
         ...(deathDrop ? { deathDrop } : {}),
+        ...(input.disposition ? { disposition: input.disposition } : {}),
       }),
     );
   }

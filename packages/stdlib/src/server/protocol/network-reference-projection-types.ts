@@ -68,11 +68,12 @@ export type GameplayPlayerReference = {
   breakAction: GameplayBreakActionReference;
   combat?: GameplayCombatReference;
 };
+import type { EcsActorArchetype } from '../gameplay/ecs-entity-owner';
 export type GameplayEntityReference = {
   id: string;
   type: 'world-item' | 'creature' | 'npc';
   position: [number, number, number];
-  archetype?: 'grazer' | 'night-stalker' | 'settler';
+  archetype?: EcsActorArchetype;
   stack?: { itemId: string; count: number };
   health?: number;
   maxHealth?: number;

@@ -350,6 +350,12 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
   { id: 'string', name: '线', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'feather', name: '羽毛', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'flint', name: '燧石', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'wool', name: '羊毛', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'ink-sac', name: '墨囊', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'rotten-flesh', name: '腐肉', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'bone', name: '骨头', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'gunpowder', name: '火药', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'slimeball', name: '黏液球', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'arrow', name: '箭', itemType: 'resource', stackLimit: 64, capabilities: [] },
   {
     id: 'bow',

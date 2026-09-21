@@ -88,7 +88,7 @@ export type InteractionState = Readonly<{
     id: string;
     type: 'world-item' | 'creature' | 'npc';
     label: string;
-    archetype?: 'grazer' | 'night-stalker' | 'settler';
+    archetype?: import('@seedlands/stdlib/server/gameplay/entity-store').ActorArchetype;
     behavior?: string;
     position: readonly [number, number, number];
   }>[];

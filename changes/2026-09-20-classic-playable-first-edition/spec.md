@@ -74,3 +74,9 @@ Classic 新增弓、箭、线、羽毛、燧石及其取得/合成入口；弓�
 推进使用固定逻辑步长和稳定 id 顺序。每步先求从旧位置到新位置的连续线段，取最早的体素或存活 actor 命中；同距离时体素遮挡优先，不能穿墙伤害。actor 命中只经正式 vitals/armor 伤害入口提交一次，随后销毁；体素命中、超出寿命或离开有界世界同样销毁。非法方向、非有限数值、自己命中、无箭、旧 revision 与重复发射均拒绝且不扣物品/耐久。
 
 checkpoint 在同一 gameplay frontier 保存 projectile 高水位和全部在途投射物；恢复后继续推进，不重复扣箭或伤害，旧 projectile id 不重用。RED 覆盖缺箭原子拒绝、命中/遮挡/超时、稳定顺序、护甲减伤以及中途 checkpoint 恢复；GREEN 后再接 Classic pack、物品资源、Headless 合同和唯一浏览器回归。未实现浏览器瞄准/动画/音效时只记 Headless 部分完成，不把弓箭条目标为完整产品 PASS。
+
+## S4c 主世界物种 profile 合同
+
+Classic 的鸡、牛、猪、羊、鱿鱼、狼、僵尸、骷髅、蜘蛛、苦力怕与史莱姆使用独立稳定 archetype，不借用 grazer/night-stalker 名称伪装。stdlib 的 profile 显式声明 disposition（passive/neutral/hostile）、生命、导航、感知、初始行为、近战定义和掉落；协议、保存、命令与身体几何消费同一受支持 archetype 集合。旧 grazer/night-stalker/settler 身份继续可恢复。
+
+每个物种至少验证注册闭包、合法生成、差异生命/体型/掉落和被动或敌对观察；没有独立状态机的物种（苦力怕爆炸、骷髅远程、史莱姆分裂、狼驯服、羊剪毛、鱿鱼水生）只能记 PARTIAL_IMPLEMENTED，后续对应机制完成前不得写完整 PASS。

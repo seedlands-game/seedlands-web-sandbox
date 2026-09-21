@@ -12,7 +12,13 @@ export type UtilitySpriteKind =
   | 'arrow'
   | 'string'
   | 'feather'
-  | 'flint';
+  | 'flint'
+  | 'wool'
+  | 'ink-sac'
+  | 'rotten-flesh'
+  | 'bone'
+  | 'gunpowder'
+  | 'slimeball';
 
 const utilityKinds: readonly string[] = [
   'bowl',
@@ -27,6 +33,12 @@ const utilityKinds: readonly string[] = [
   'string',
   'feather',
   'flint',
+  'wool',
+  'ink-sac',
+  'rotten-flesh',
+  'bone',
+  'gunpowder',
+  'slimeball',
 ];
 export const isUtilitySpriteKind = (kind: string): kind is UtilitySpriteKind => utilityKinds.includes(kind);
 
@@ -199,6 +211,39 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
       ],
       9,
     );
+    return sprite.pixels;
+  }
+  if (kind === 'wool') {
+    sprite.rect(7, 8, 18, 17, 10);
+    sprite.rect(9, 6, 6, 4, 11);
+    sprite.rect(17, 7, 7, 4, 9);
+    sprite.rect(10, 23, 12, 4, 9);
+    return sprite.pixels;
+  }
+  if (kind === 'bone') {
+    line(sprite, 8, 24, 24, 8, 10);
+    line(sprite, 9, 25, 25, 9, 11);
+    sprite.rect(5, 23, 6, 5, 9);
+    sprite.rect(22, 5, 6, 5, 9);
+    return sprite.pixels;
+  }
+  if (kind === 'ink-sac' || kind === 'rotten-flesh' || kind === 'gunpowder' || kind === 'slimeball') {
+    const colors =
+      kind === 'ink-sac' ? [1, 15] : kind === 'rotten-flesh' ? [3, 5] : kind === 'gunpowder' ? [7, 9] : [18, 19];
+    sprite.polygon(
+      [
+        [8, 9],
+        [18, 5],
+        [25, 11],
+        [27, 21],
+        [20, 27],
+        [9, 24],
+        [5, 16],
+      ],
+      colors[0],
+    );
+    sprite.rect(11, 10, 10, 4, colors[1]);
+    sprite.rect(9, 17, 7, 5, colors[1]);
     return sprite.pixels;
   }
   // minecart family: an iron cart, tinted body for variants.

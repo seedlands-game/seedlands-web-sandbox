@@ -205,7 +205,7 @@ export class GameplayEntityPresenter {
     state: AnimatedEntity,
   ): Promise<void> {
     try {
-      const binding = this.bindings[target];
+      const binding = (this.bindings as Partial<Record<string, AppearanceAnimationBinding>>)[target];
       if (!binding || state.abort.signal.aborted) return;
       const blob = getAppearanceModelBlob(this.app, binding.modelId);
       if (!blob) return;

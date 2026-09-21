@@ -240,11 +240,20 @@ describe('per-world actor profile closure', () => {
   it('keeps Overworld actor profiles and starter ecology explicit', () => {
     const composition = assemble(overworldPack);
     const profiles = composition.capability<ActorProfileRegistry>('seedlands:actor-profiles');
-    expect(profiles.list()).toMatchObject([
-      { archetype: 'grazer', entityType: 'creature', maxHealth: 12 },
-      { archetype: 'night-stalker', entityType: 'creature', maxHealth: 16, meleeDefinitionId: 'night-stalker-claw' },
-      { archetype: 'settler', entityType: 'npc', maxHealth: 20 },
-    ]);
+    expect(profiles.list()).toEqual(
+      expect.arrayContaining(
+        [
+          { archetype: 'grazer', entityType: 'creature', maxHealth: 12 },
+          {
+            archetype: 'night-stalker',
+            entityType: 'creature',
+            maxHealth: 16,
+            meleeDefinitionId: 'night-stalker-claw',
+          },
+          { archetype: 'settler', entityType: 'npc', maxHealth: 20 },
+        ].map((profile) => expect.objectContaining(profile)),
+      ),
+    );
     expect(profiles.defaultPlayerMeleeDefinitionId).toBe('unarmed');
     expect(profiles.starterEcology?.initialItem).toEqual({ itemId: 'berry', count: 1 });
 

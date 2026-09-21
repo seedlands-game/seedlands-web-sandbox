@@ -35,4 +35,8 @@ export const overworldMeleeDefinitions: readonly MeleeDefinition[] = [
     range: 1.7,
     steps: [step(2, 0.3, 0.1, 0.6)],
   },
+  { id: 'zombie-claw', range: 1.5, steps: [step(3, 0.3, 0.1, 0.7)] },
+  { id: 'spider-bite', range: 1.6, steps: [step(2, 0.2, 0.1, 0.5)] },
+  { id: 'creeper-bump', range: 1.4, steps: [step(1, 0.4, 0.1, 0.8)] },
+  { id: 'slime-bump', range: 1.2, steps: [step(2, 0.25, 0.1, 0.65)] },
 ];
