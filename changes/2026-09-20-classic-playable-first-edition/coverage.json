@@ -1119,12 +1119,13 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "MISSING",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Apple",
       "seedlandsItemId": null,
-      "source": "playbooks/classic/src/items.ts"
+      "source": "playbooks/classic/src/items.ts",
+      "note": "S2f食物链：苹果/面包/生熟猪排/生熟鱼为可消费food，healthRestore分级并按满血/满饥饿规则结算；生猪排/生鱼经熔炉冶炼得熟食，headless定向测试通过。非全量Beta饱食度机制。"
     },
     {
       "caseId": "I-261",
@@ -1522,10 +1523,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bread"
+      "execution": "HEADLESS_PASS",
+      "name": "Bread",
+      "note": "S2f食物链：苹果/面包/生熟猪排/生熟鱼为可消费food，healthRestore分级并按满血/满饥饿规则结算；生猪排/生鱼经熔炉冶炼得熟食，headless定向测试通过。非全量Beta饱食度机制。"
     },
     {
       "caseId": "I-298",
@@ -1746,20 +1748,22 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Porkchop"
+      "execution": "HEADLESS_PASS",
+      "name": "Porkchop",
+      "note": "S2f食物链：苹果/面包/生熟猪排/生熟鱼为可消费food，healthRestore分级并按满血/满饥饿规则结算；生猪排/生鱼经熔炉冶炼得熟食，headless定向测试通过。非全量Beta饱食度机制。"
     },
     {
       "caseId": "I-320",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Cooked Porkchop"
+      "execution": "HEADLESS_PASS",
+      "name": "Cooked Porkchop",
+      "note": "S2f食物链：苹果/面包/生熟猪排/生熟鱼为可消费food，healthRestore分级并按满血/满饥饿规则结算；生猪排/生鱼经熔炉冶炼得熟食，headless定向测试通过。非全量Beta饱食度机制。"
     },
     {
       "caseId": "I-321",
@@ -2048,20 +2052,22 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Fish"
+      "execution": "HEADLESS_PASS",
+      "name": "Fish",
+      "note": "S2f食物链：苹果/面包/生熟猪排/生熟鱼为可消费food，healthRestore分级并按满血/满饥饿规则结算；生猪排/生鱼经熔炉冶炼得熟食，headless定向测试通过。非全量Beta饱食度机制。"
     },
     {
       "caseId": "I-350",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Cooked Fish"
+      "execution": "HEADLESS_PASS",
+      "name": "Cooked Fish",
+      "note": "S2f食物链：苹果/面包/生熟猪排/生熟鱼为可消费food，healthRestore分级并按满血/满饥饿规则结算；生猪排/生鱼经熔炉冶炼得熟食，headless定向测试通过。非全量Beta饱食度机制。"
     },
     {
       "caseId": "I-351",
@@ -4060,20 +4066,22 @@
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 生猪肉 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 生猪肉 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2f食物链：苹果/面包/生熟猪排/生熟鱼为可消费food，healthRestore分级并按满血/满饥饿规则结算；生猪排/生鱼经熔炉冶炼得熟食，headless定向测试通过。非全量Beta饱食度机制。"
     },
     {
       "caseId": "R-S08",
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 生鱼 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 生鱼 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2f食物链：苹果/面包/生熟猪排/生熟鱼为可消费food，healthRestore分级并按满血/满饥饿规则结算；生猪排/生鱼经熔炉冶炼得熟食，headless定向测试通过。非全量Beta饱食度机制。"
     },
     {
       "caseId": "R-S09",

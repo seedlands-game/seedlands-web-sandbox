@@ -25,6 +25,13 @@ const items = [
   ['diamond-block', '钻石块'],
   ['gold-ingot', '金锭'],
   ['diamond', '钻石'],
+  ['apple', '苹果'],
+  ['bread', '面包'],
+  ['raw-porkchop', '生猪排'],
+  ['cooked-porkchop', '熟猪排'],
+  ['raw-fish', '生鱼'],
+  ['cooked-fish', '熟鱼'],
+  ['wheat', '小麦'],
   ['sandstone', '砂岩'],
   ['stone-bricks', '石砖'],
   ['gold-pickaxe', '金镐'],
@@ -124,19 +131,21 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
     iconId:
       model?.type === 'extruded-pixel-model'
         ? model.payload.textureId
-        : [
-              'cobblestone',
-              'glass',
-              'gold-ore',
-              'diamond-ore',
-              'iron-block',
-              'gold-block',
-              'diamond-block',
-              'sandstone',
-              'stone-bricks',
-            ].includes(itemId)
-          ? 'seedlands:texture/terrain/' + itemId
-          : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
+        : itemId === 'raw-iron'
+          ? 'seedlands:texture/terrain/iron-ore'
+          : [
+                'cobblestone',
+                'glass',
+                'gold-ore',
+                'diamond-ore',
+                'iron-block',
+                'gold-block',
+                'diamond-block',
+                'sandstone',
+                'stone-bricks',
+              ].includes(itemId)
+            ? 'seedlands:texture/terrain/' + itemId
+            : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
   };
 });
 export const builtinBinding = (itemId: string) => builtinItemBindings.find((b) => b.itemId === itemId);
