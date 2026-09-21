@@ -206,3 +206,10 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - Sapling/TallGrass/Flower/Mushroom/SugarCane/Cactus 使用稳定 voxel 31–36、材质34–39与原创纹理；树苗成长检查下方土/草及5×7×5全部已加载空域，通过一次 editBatch 生成树干/树冠，阻挡或未知格零写入。
 - vegetation/legacy/cave/ore 14 tests、TS/staged/Rust/Wasm/mesh/resource 20 tests、tree batch 1 test PASS；verify:static:ci PASS。当前只记 PARTIAL：红/棕蘑菇未拆分，花色、甘蔗严格水边、仙人掌伤害、叶衰减与浏览器植物专属画面仍待实现。
 - V7 首次 production 浏览器运行两次在 C0 后失败：deterministic advance 无法准备实体碰撞 Chunks；trace 显示 Generator v7 已加载，但 general worker failedTasks=78 且 Wasm memory failed=true。根因为 Rust mesh material 映射停在 voxel26，新植物31–36产生material255；非实心植物修复不足以解决该 worker 错误。同步 Rust mesh 的27–36材质与遮挡规则、重建Wasm后，绑定 `6c24aa6681da8f148f7ea20a49b33062fc2452b3` 的 production build PASS（artifact `5fc7c6bd6f9e71b571f6a948c5cdf40b91d7db1115293a5d9abf0f0219216a4f`），唯一 Chromium C0–C5 PASS，runId `3964161a-cc8f-4ac7-9ce1-97408edd0f9a`。该回归证明 V7 不再阻塞生产旅程，不替代植物专属视觉验收。
+
+## S3i V8 地牢、刷怪笼与战利品
+
+- V8 按 64×64 region 和 seed 稳定选择地下房间，生成圆石边界、单入口、Spawner 与 DungeonChest 两个追加体素；V2–V7 保持旧路径。TS baseVoxel、staged kernel 与 Rust scalar/SIMD 同步，worldgen identity 升 8.0.0/g2-g8。
+- 首轮 Classic 组合回归 20/21 files、51/52 tests，通过项含完整成长旅程；`classic-food-health` 在 bootstrap 拒绝生态 Chunk。根因是程序生成直接使用 station Chest voxel，违反 station voxel 必须有 entity 的完整性门禁。未放宽门禁，改用独立不可采集 DungeonChest voxel 后该用例单测恢复 PASS。
+- 刷怪笼仅在显式传入的已加载 Spawner 上累计冷却，要求非 peaceful、玩家 16 格内、光照不高于 7、hostile 未达 16；每 20 秒生成稳定 id 的配置物种。DungeonChest 在 6 格内首次按 seed+dungeon id+index 发放有界 loot，开启后幂等拒绝；冷却、激活高水位与已开启集合进入 Environment checkpoint，旧 checkpoint 缺字段迁移为空状态。补齐 saddle 内容。
+- 验证：stdlib 地牢/旧生成兼容 4 files / 15 tests PASS；Wasm world/halo 与 palette 3 files / 10 tests PASS；bootstrap 修复后 food-health PASS；地牢运行态与环境恢复 2 files / 5 tests PASS；`typecheck:classic`、Rust source/artifact fingerprint、`git diff --check` PASS。V8 production build/浏览器专属视觉尚待阶段收口，不在此处声明 PASS。

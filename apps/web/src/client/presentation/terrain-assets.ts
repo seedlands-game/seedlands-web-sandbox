@@ -53,6 +53,8 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Mushroom, '蘑菇', ['7e302a', 'b94f3f', 'e2d2ad', '594032']],
   [FaceMaterial.SugarCane, '甘蔗', ['477d39', '71a950', 'a0cc6d', '335f31']],
   [FaceMaterial.Cactus, '仙人掌', ['286a38', '3e8a49', '6aac59', '174e2c']],
+  [FaceMaterial.Spawner, '刷怪笼', ['202629', '384348', '0d1113', '5b676c', '7b2c36']],
+  [FaceMaterial.DungeonChest, '地牢战利品箱', ['61401f', '93612c', '302214', 'd29a45', 'b7c3c5']],
 ];
 const plantMaterials = new Set<number>([
   FaceMaterial.Sapling,
@@ -147,6 +149,14 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     if (face === FaceMaterial.Farmland) {
       // Tilled soil: furrowed rows with a moist top rim.
       index = y < 2 ? 4 : y % 4 === 0 ? 3 : noise < 8 ? 2 : 1;
+    }
+    if (face === FaceMaterial.Spawner) {
+      const frame = x < 2 || x > 13 || y < 2 || y > 13 || x % 5 === 0 || y % 5 === 0;
+      index = frame ? (noise < 12 ? 2 : 1) : (x + y) % 7 === 0 ? 5 : 3;
+    }
+    if (face === FaceMaterial.DungeonChest) {
+      index = y === 6 || x === 1 || x === 14 ? 3 : noise < 8 ? 2 : 1;
+      if (x >= 6 && x <= 9 && y >= 5 && y <= 9) index = x === 6 || y === 9 ? 5 : 4;
     }
     return index;
   });

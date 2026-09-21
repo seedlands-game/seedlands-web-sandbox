@@ -9,6 +9,8 @@ export type EnvironmentCheckpoint = Readonly<{
   fires: readonly Readonly<{ position: EnvironmentPosition; remainingSeconds: number }>[];
   tnt: readonly Readonly<{ id: number; position: EnvironmentPosition; fuseSeconds: number; power: number }>[];
   nextTntId: number;
+  dungeonSpawners?: readonly Readonly<{ id: string; elapsedSeconds: number; activations: number }>[];
+  openedDungeonChests?: readonly string[];
 }>;
 export type EnvironmentEffects = Readonly<{
   extinguished: readonly EnvironmentPosition[];
@@ -35,6 +37,8 @@ export class EnvironmentRuntime {
   #nextTntId = 1;
   readonly #fires = new Map<string, { position: EnvironmentPosition; remainingSeconds: number }>();
   readonly #tnt = new Map<number, { id: number; position: EnvironmentPosition; fuseSeconds: number; power: number }>();
+  readonly #dungeonSpawners = new Map<string, { elapsedSeconds: number; activations: number }>();
+  readonly #openedDungeonChests = new Set<string>();
   constructor(
     readonly seed: number,
     checkpoint?: EnvironmentCheckpoint,
@@ -59,6 +63,29 @@ export class EnvironmentRuntime {
       throw new TypeError('Weather is invalid.');
     this.#weather = weather;
     this.#weatherSeconds = seconds;
+  }
+  advanceDungeonSpawner(id: string, seconds: number, intervalSeconds = 20) {
+    if (!id.trim() || ![seconds, intervalSeconds].every((value) => Number.isFinite(value) && value > 0))
+      throw new TypeError('Dungeon spawner advance is invalid.');
+    const state = this.#dungeonSpawners.get(id) ?? { elapsedSeconds: 0, activations: 0 };
+    state.elapsedSeconds += seconds;
+    if (state.elapsedSeconds < intervalSeconds) {
+      this.#dungeonSpawners.set(id, state);
+      return null;
+    }
+    state.elapsedSeconds %= intervalSeconds;
+    state.activations += 1;
+    this.#dungeonSpawners.set(id, state);
+    return state.activations;
+  }
+  isDungeonChestOpened(id: string) {
+    if (!id.trim()) throw new TypeError('Dungeon chest identity is invalid.');
+    return this.#openedDungeonChests.has(id);
+  }
+  markDungeonChestOpened(id: string) {
+    if (this.isDungeonChestOpened(id)) return false;
+    this.#openedDungeonChests.add(id);
+    return true;
   }
   advance(
     seconds: number,
@@ -131,6 +158,12 @@ export class EnvironmentRuntime {
       fires: Object.freeze([...this.#fires.values()].map((x) => Object.freeze({ ...x }))),
       tnt: Object.freeze([...this.#tnt.values()].map((x) => Object.freeze({ ...x }))),
       nextTntId: this.#nextTntId,
+      dungeonSpawners: Object.freeze(
+        [...this.#dungeonSpawners]
+          .sort(([left], [right]) => left.localeCompare(right))
+          .map(([id, state]) => Object.freeze({ id, ...state })),
+      ),
+      openedDungeonChests: Object.freeze([...this.#openedDungeonChests].sort()),
     });
   }
   restore(value: EnvironmentCheckpoint) {
@@ -150,11 +183,30 @@ export class EnvironmentRuntime {
     this.#nextTntId = value.nextTntId;
     this.#fires.clear();
     this.#tnt.clear();
+    this.#dungeonSpawners.clear();
+    this.#openedDungeonChests.clear();
     for (const fire of value.fires) this.ignite(fire.position, fire.remainingSeconds);
     for (const tnt of value.tnt) {
       if (tnt.id >= this.#nextTntId || this.#tnt.has(tnt.id))
         throw new TypeError('TNT checkpoint identity is invalid.');
       this.#tnt.set(tnt.id, { ...tnt, position: position(tnt.position) });
+    }
+    for (const state of value.dungeonSpawners ?? []) {
+      if (
+        !state.id?.trim() ||
+        this.#dungeonSpawners.has(state.id) ||
+        !Number.isFinite(state.elapsedSeconds) ||
+        state.elapsedSeconds < 0 ||
+        !Number.isSafeInteger(state.activations) ||
+        state.activations < 0
+      )
+        throw new TypeError('Dungeon spawner checkpoint is invalid.');
+      this.#dungeonSpawners.set(state.id, { elapsedSeconds: state.elapsedSeconds, activations: state.activations });
+    }
+    for (const id of value.openedDungeonChests ?? []) {
+      if (typeof id !== 'string' || !id.trim() || this.#openedDungeonChests.has(id))
+        throw new TypeError('Dungeon chest checkpoint is invalid.');
+      this.#openedDungeonChests.add(id);
     }
   }
 }

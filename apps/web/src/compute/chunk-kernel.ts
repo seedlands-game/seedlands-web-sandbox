@@ -2,6 +2,7 @@ import type { makeChunk, WorldChange } from '@seedlands/stdlib/world/chunk-gener
 import { macroAt, type MacroBiome } from '@seedlands/stdlib/world/macro-world';
 import { oreVoxel } from '@seedlands/stdlib/world/ore-generation';
 import { caveAir } from '@seedlands/stdlib/world/cave-generation';
+import { dungeonFor, dungeonVoxel } from '@seedlands/stdlib/world/dungeon-generation';
 import { GENERATOR_VERSION, hash2 } from '@seedlands/stdlib/world/voxel';
 import type { KernelMemory } from './kernel-memory';
 
@@ -52,6 +53,11 @@ export function columnVoxel(
   const height = columns[column];
   const kind = columns[column + 1];
   const waterLevel = columns[column + 2];
+  const dungeon = dungeonFor(seed, worldX, worldZ, generatorVersion);
+  if (dungeon) {
+    const generated = dungeonVoxel(dungeon, worldX, wy, worldZ);
+    if (generated !== null) return generated;
+  }
   if (wy > height && wy <= waterLevel) return 8;
   if (wy <= height) {
     const base =

@@ -13,6 +13,14 @@ it('天气、火扩散/雨熄灭与恢复由 seed/tick 确定', () => {
   expect(env.advance(1, { flammable: () => true, skyVisible: () => true }).extinguished).toEqual([[0, 1, 0]]);
   const restored = new EnvironmentRuntime(42, env.checkpoint());
   expect(restored.checkpoint()).toEqual(env.checkpoint());
+  const legacy = env.checkpoint();
+  const migrated = new EnvironmentRuntime(42, {
+    ...legacy,
+    dungeonSpawners: undefined,
+    openedDungeonChests: undefined,
+  });
+  expect(migrated.checkpoint().dungeonSpawners).toEqual([]);
+  expect(migrated.checkpoint().openedDungeonChests).toEqual([]);
 });
 
 it('GameplayRuntime 通过 World.edit 批次提交火与爆炸并恢复环境状态', () => {
