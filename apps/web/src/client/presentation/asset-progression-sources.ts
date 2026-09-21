@@ -36,4 +36,5 @@ export const progressionItemAssets = [
   ...pixelItemAssets('raw-fish', '生鱼', 'raw-fish'),
   ...pixelItemAssets('cooked-fish', '熟鱼', 'cooked-fish'),
   ...pixelItemAssets('wheat', '小麦', 'wheat'),
+  ...pixelItemAssets('wheat-seeds', '小麦种子', 'wheat-seeds'),
 ];

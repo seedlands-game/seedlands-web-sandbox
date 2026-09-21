@@ -675,10 +675,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Wheat"
+      "execution": "HEADLESS_PASS",
+      "name": "Wheat",
+      "note": "S5b作物生长：小麦种子只种耕地，八阶段确定性生长（余量累计、封顶成熟），成熟收割产小麦+种子、未成熟只回种子；headless定向测试通过。浏览器耕作手势与自然种子掉落未接。"
     },
     {
       "caseId": "B-060",
@@ -1511,20 +1512,22 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Seeds"
+      "execution": "HEADLESS_PASS",
+      "name": "Seeds",
+      "note": "S5b作物生长：小麦种子只种耕地，八阶段确定性生长（余量累计、封顶成熟），成熟收割产小麦+种子、未成熟只回种子；headless定向测试通过。浏览器耕作手势与自然种子掉落未接。"
     },
     {
       "caseId": "I-296",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Wheat"
+      "execution": "HEADLESS_PASS",
+      "name": "Wheat",
+      "note": "S5b作物生长：小麦种子只种耕地，八阶段确定性生长（余量累计、封顶成熟），成熟收割产小麦+种子、未成熟只回种子；headless定向测试通过。浏览器耕作手势与自然种子掉落未接。"
     },
     {
       "caseId": "I-297",
@@ -4906,10 +4909,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S5",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：耕地水化/退化、小麦生长/收割；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：耕地水化/退化、小麦生长/收割；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S5b作物生长：小麦种子只种耕地，八阶段确定性生长（余量累计、封顶成熟），成熟收割产小麦+种子、未成熟只回种子；headless定向测试通过。浏览器耕作手势与自然种子掉落未接。"
     },
     {
       "caseId": "M23-03",

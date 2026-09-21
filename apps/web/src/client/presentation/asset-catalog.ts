@@ -32,6 +32,7 @@ const items = [
   ['raw-fish', '生鱼'],
   ['cooked-fish', '熟鱼'],
   ['wheat', '小麦'],
+  ['wheat-seeds', '小麦种子'],
   ['sandstone', '砂岩'],
   ['stone-bricks', '石砖'],
   ['gold-pickaxe', '金镐'],

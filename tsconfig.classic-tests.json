@@ -13,6 +13,7 @@
     "apps/web/tests/integration/runtime/server/composition/classic-building-blocks.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-shovel-tools.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-food-chain.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/classic-hoe-farmland.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/classic-hoe-farmland.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-crop-growth.test.ts"
   ]
 }
