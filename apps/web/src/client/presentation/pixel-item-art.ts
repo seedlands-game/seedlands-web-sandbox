@@ -1,6 +1,7 @@
 import type { NativeAsset } from './asset-types';
 import { palette, Sprite } from './pixel-sprite';
 import { foodSprite, type FoodSpriteKind } from './food-sprite';
+import { armorSprite, type ArmorSpriteKind } from './armor-sprite';
 
 function handle(sprite: Sprite) {
   sprite.rect(13, 7, 5, 23, 1);
@@ -447,10 +448,12 @@ export function pixelItemAssets(
     | 'raw-fish'
     | 'cooked-fish'
     | 'wheat'
-    | 'wheat-seeds',
+    | 'wheat-seeds'
+    | ArmorSpriteKind,
   material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond' = 'wood',
 ): NativeAsset[] {
   const textureId = `builtin:texture:${id}:detail`;
+  const armorMaterial = material === 'wood' || material === 'stone' ? 'leather' : material;
   return [
     {
       id: textureId,
@@ -465,7 +468,12 @@ export function pixelItemAssets(
         pixels:
           kind === 'axe' || kind === 'sword' || kind === 'pickaxe' || kind === 'shovel' || kind === 'hoe'
             ? tool(kind, material)
-            : resource(kind),
+            : kind === 'armor-helmet' ||
+                kind === 'armor-chestplate' ||
+                kind === 'armor-leggings' ||
+                kind === 'armor-boots'
+              ? armorSprite(kind, armorMaterial)
+              : resource(kind),
       },
     },
     {

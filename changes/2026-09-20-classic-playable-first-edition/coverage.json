@@ -1545,40 +1545,44 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Leather Cap"
+      "execution": "HEADLESS_PASS",
+      "name": "Leather Cap",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-299",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Leather Tunic"
+      "execution": "HEADLESS_PASS",
+      "name": "Leather Tunic",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-300",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Leather Pants"
+      "execution": "HEADLESS_PASS",
+      "name": "Leather Pants",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-301",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Leather Boots"
+      "execution": "HEADLESS_PASS",
+      "name": "Leather Boots",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-302",
@@ -1629,120 +1633,132 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Iron Helmet"
+      "execution": "HEADLESS_PASS",
+      "name": "Iron Helmet",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-307",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Iron Chestplate"
+      "execution": "HEADLESS_PASS",
+      "name": "Iron Chestplate",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-308",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Iron Leggings"
+      "execution": "HEADLESS_PASS",
+      "name": "Iron Leggings",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-309",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Iron Boots"
+      "execution": "HEADLESS_PASS",
+      "name": "Iron Boots",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-310",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Helmet"
+      "execution": "HEADLESS_PASS",
+      "name": "Diamond Helmet",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-311",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Chestplate"
+      "execution": "HEADLESS_PASS",
+      "name": "Diamond Chestplate",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-312",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Leggings"
+      "execution": "HEADLESS_PASS",
+      "name": "Diamond Leggings",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-313",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Boots"
+      "execution": "HEADLESS_PASS",
+      "name": "Diamond Boots",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-314",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Helmet"
+      "execution": "HEADLESS_PASS",
+      "name": "Gold Helmet",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-315",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Chestplate"
+      "execution": "HEADLESS_PASS",
+      "name": "Gold Chestplate",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-316",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Leggings"
+      "execution": "HEADLESS_PASS",
+      "name": "Gold Leggings",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-317",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Boots"
+      "execution": "HEADLESS_PASS",
+      "name": "Gold Boots",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-318",
@@ -1912,10 +1928,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Leather"
+      "execution": "HEADLESS_PASS",
+      "name": "Leather",
+      "note": "S4a护甲：皮/铁/金/钻石四套头盔胸甲护腿靴带 armor 能力与点数/耐久，工作台按 5/8/7/4 材料合成；armor-policy 每点减伤4%封顶20点、不为负、空甲不减；headless定向测试通过。护甲穿戴槽UI与战斗结算接线未做。"
     },
     {
       "caseId": "I-335",

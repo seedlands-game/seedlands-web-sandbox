@@ -59,11 +59,27 @@ const hoeTools: readonly Recipe[] = shovelTiers.map(([tier, material, durability
   outputs: [{ itemId: tier + '-hoe', count: 1, instance: { durability } }],
 }));
 
+const armorTiers: readonly [string, string, number][] = [
+  ['leather', 'leather', 55],
+  ['iron', 'iron-ingot', 165],
+  ['gold', 'gold-ingot', 77],
+  ['diamond', 'diamond', 363],
+];
+const armorPieceCost: Record<string, number> = { helmet: 5, chestplate: 8, leggings: 7, boots: 4 };
+const armorRecipes: readonly Recipe[] = armorTiers.flatMap(([tier, material, durability]) =>
+  Object.entries(armorPieceCost).map(([slot, count]) => ({
+    id: `${tier}-${slot}`,
+    inputs: [{ itemId: material, count }],
+    outputs: [{ itemId: `${tier}-${slot}`, count: 1, instance: { durability } }],
+  })),
+);
+
 export const overworldRecipes: readonly Recipe[] = [
   ...resourceBlocks,
   ...meleeTools,
   ...shovelTools,
   ...hoeTools,
+  ...armorRecipes,
   { id: 'sandstone', inputs: [{ itemId: 'sand-block', count: 4 }], outputs: [{ itemId: 'sandstone', count: 1 }] },
   {
     id: 'stone-bricks',

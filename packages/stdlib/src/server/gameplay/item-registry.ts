@@ -41,15 +41,25 @@ export type MineItemCapability = Readonly<{
 }>;
 export type MeleeItemCapability = Readonly<{ type: 'melee'; definitionId: string }>;
 export type TillItemCapability = Readonly<{ type: 'till' }>;
+export type ArmorItemCapability = Readonly<{
+  type: 'armor';
+  slot: 'helmet' | 'chestplate' | 'leggings' | 'boots';
+  points: number;
+}>;
 export type ItemCapability =
-  PlaceItemCapability | ConsumeItemCapability | MineItemCapability | MeleeItemCapability | TillItemCapability;
+  | PlaceItemCapability
+  | ConsumeItemCapability
+  | MineItemCapability
+  | MeleeItemCapability
+  | TillItemCapability
+  | ArmorItemCapability;
 export type ItemCapabilityType = ItemCapability['type'];
 export type ItemCapabilityOf<Type extends ItemCapabilityType> = Extract<ItemCapability, { type: Type }>;
 
 export type ItemDefinition = Readonly<{
   id: ItemId;
   name: string;
-  itemType: 'block' | 'resource' | 'food' | 'tool';
+  itemType: 'block' | 'resource' | 'food' | 'tool' | 'armor';
   stackLimit: number;
   durability?: ItemDurabilityDefinition;
   capabilities: readonly ItemCapability[];
@@ -82,7 +92,7 @@ export const isItemId = (value: unknown): value is ItemId => typeof value === 's
 
 const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
   if (!isItemId(input.id) || !input.name.trim()) throw new TypeError(`Item identity is invalid: ${String(input.id)}`);
-  if (!['block', 'resource', 'food', 'tool'].includes(input.itemType))
+  if (!['block', 'resource', 'food', 'tool', 'armor'].includes(input.itemType))
     throw new TypeError(`Item type is invalid: ${input.id}`);
   if (!Number.isSafeInteger(input.stackLimit) || input.stackLimit <= 0)
     throw new TypeError(`Item stack limit is invalid: ${input.id}`);
@@ -93,7 +103,7 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
       Array.isArray(input.durability) ||
       Object.keys(input.durability).length !== 1 ||
       !Object.hasOwn(input.durability, 'max') ||
-      input.itemType !== 'tool' ||
+      (input.itemType !== 'tool' && input.itemType !== 'armor') ||
       input.stackLimit !== 1 ||
       !Number.isSafeInteger(input.durability.max) ||
       input.durability.max <= 0
@@ -102,7 +112,7 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
   }
   const seen = new Set<ItemCapabilityType>();
   const capabilities = input.capabilities.map((source) => {
-    if (!['place', 'consume', 'mine', 'melee', 'till'].includes(source.type))
+    if (!['place', 'consume', 'mine', 'melee', 'till', 'armor'].includes(source.type))
       throw new TypeError(`Item capability is invalid: ${input.id}`);
     if (seen.has(source.type)) throw new TypeError(`Duplicate ${source.type} capability: ${input.id}`);
     seen.add(source.type);
@@ -124,6 +134,13 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
       throw new TypeError(`Mine capability is invalid: ${input.id}`);
     if (source.type === 'melee' && !source.definitionId.trim())
       throw new TypeError(`Melee capability is invalid: ${input.id}`);
+    if (
+      source.type === 'armor' &&
+      (!['helmet', 'chestplate', 'leggings', 'boots'].includes(source.slot) ||
+        !Number.isSafeInteger(source.points) ||
+        source.points <= 0)
+    )
+      throw new TypeError(`Armor capability is invalid: ${input.id}`);
     return Object.freeze({ ...source });
   });
   const place = capabilities.find((value): value is PlaceItemCapability => value.type === 'place');
