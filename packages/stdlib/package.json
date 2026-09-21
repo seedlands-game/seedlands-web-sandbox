@@ -52,6 +52,7 @@
     "./server/gameplay/bed-action": "./src/server/gameplay/bed-action.ts",
     "./server/gameplay/armor-equipment": "./src/server/gameplay/armor-equipment.ts",
     "./server/gameplay/spawn-policy": "./src/server/gameplay/spawn-policy.ts",
+    "./server/fluid/fluid-reaction": "./src/server/fluid/fluid-reaction.ts",
     "./server/gameplay/recipe-registry": "./src/server/gameplay/recipe-registry.ts",
     "./server/harness/authority-world-harness": "./src/server/harness/authority-world-harness.ts",
     "./server/harness/world-authorization": "./src/server/harness/world-authorization.ts",

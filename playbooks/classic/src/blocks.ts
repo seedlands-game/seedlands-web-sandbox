@@ -162,6 +162,15 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'dirt-block', count: 1 },
     replaceable: false,
   },
+  [27]: { voxel: 27, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: true },
+  [28]: {
+    voxel: 28,
+    hardnessSeconds: 10,
+    preferredTool: 'pickaxe',
+    minimumTier: 4,
+    drop: { itemId: 'obsidian', count: 1 },
+    replaceable: false,
+  },
   [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,

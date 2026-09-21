@@ -38,10 +38,12 @@ export const Voxel = {
   Sandstone: 24,
   StoneBricks: 25,
   Farmland: 26,
+  Lava: 27,
+  Obsidian: 28,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.Farmland;
+export const MAX_VOXEL_ID = Voxel.Obsidian;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -73,6 +75,8 @@ export const FaceMaterial = {
   Sandstone: 27,
   StoneBricks: 28,
   Farmland: 29,
+  Lava: 30,
+  Obsidian: 31,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -107,6 +111,8 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Sandstone]: 'sandstone',
   [FaceMaterial.StoneBricks]: 'stone-bricks',
   [FaceMaterial.Farmland]: 'farmland',
+  [FaceMaterial.Lava]: 'lava',
+  [FaceMaterial.Obsidian]: 'obsidian',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -136,6 +142,8 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Sandstone]: '砂岩',
   [Voxel.StoneBricks]: '石砖',
   [Voxel.Farmland]: '耕地',
+  [Voxel.Lava]: '熔岩',
+  [Voxel.Obsidian]: '黑曜石',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -165,9 +173,11 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Sandstone]: [0.83, 0.76, 0.55],
   [Voxel.StoneBricks]: [0.5, 0.52, 0.54],
   [Voxel.Farmland]: [0.3, 0.19, 0.11],
+  [Voxel.Lava]: [0.95, 0.24, 0.04],
+  [Voxel.Obsidian]: [0.12, 0.08, 0.18],
 };
 
-export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
+export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water && id !== Voxel.Lava;
 export const isRenderable = (id: number) => id !== Voxel.Air;
 
 export const floorDiv = (n: number, d: number) => Math.floor(n / d);
@@ -205,6 +215,8 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Sandstone]: FaceMaterial.Sandstone,
       [Voxel.StoneBricks]: FaceMaterial.StoneBricks,
       [Voxel.Farmland]: FaceMaterial.Farmland,
+      [Voxel.Lava]: FaceMaterial.Lava,
+      [Voxel.Obsidian]: FaceMaterial.Obsidian,
     } as Record<number, FaceMaterialId>
   )[id];
 }
