@@ -3,6 +3,14 @@ const IRON_ORE_SALT: u32 = 0x4952_4f4e;
 const GOLD_ORE_SALT: u32 = 0x474f_4c44;
 const DIAMOND_ORE_SALT: u32 = 0x4449_414d;
 const CAVE_SALT: u32 = 0x4341_5645;
+const VEGETATION_SALT: u32 = 0x0056_4547;
+
+#[inline(always)]
+fn hash2(seed: u32, x: i32, z: i32) -> f64 {
+    let mut h = seed ^ (x as u32).wrapping_mul(374_761_393) ^ (z as u32).wrapping_mul(668_265_263);
+    h = (h ^ (h >> 13)).wrapping_mul(1_274_126_177);
+    ((h ^ (h >> 16)) as f64) / 4_294_967_296.0
+}
 
 // Frozen unsigned 32-bit mix shared byte-for-byte with game-core/ore-generation.ts.
 // Coordinates are 2x2x2 group coordinates, represented with two's-complement u32 lanes.
@@ -142,6 +150,24 @@ fn column_voxel(
             tz += 1;
         }
         tx += 1;
+    }
+    if generator_version >= 7 && y == height + 1 && water_level == i64::from(i32::MIN) {
+        let roll = hash2(seed ^ VEGETATION_SALT, world_x, world_z);
+        if kind == 3 {
+            return if roll > 0.992 { 36 } else { 0 };
+        }
+        if kind == 5 {
+            return if roll > 0.94 { 35 } else { 0 };
+        }
+        if kind == 1 && roll > 0.985 {
+            return 34;
+        }
+        if (kind == 0 || kind == 1) && roll > 0.965 {
+            return 33;
+        }
+        if kind != 2 && kind != 4 && roll > 0.82 {
+            return 32;
+        }
     }
     0
 }

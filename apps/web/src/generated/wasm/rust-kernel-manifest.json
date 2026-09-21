@@ -14,7 +14,7 @@
     "crates/world-kernels/Cargo.toml": "2046dc427bc326a3e8ac5acca4a0d6e94677191efab58c1646f856046c2ffcd7",
     "crates/world-kernels/src/codec.rs": "c921ad41a9638dfd40f815099f76cdc9824dbe7cef9d05c2c807b2fddbcdeec4",
     "crates/world-kernels/src/fluid.rs": "434e1fabbc0d6542af34537471f14d2e2462aa2c9cd374c515e39d1923302e9f",
-    "crates/world-kernels/src/generation.rs": "666e181eeb29553befadebc15cc8c8ea06cc9f2182d2a603474ed3ad74fbc9c5",
+    "crates/world-kernels/src/generation.rs": "63f0205be255783d114e06f3db8ab161fd84994ed6a77570b55e44d82671528e",
     "crates/world-kernels/src/lib.rs": "ff32bf9a94f91f0d6121121b5771cd66eb8078a1a60f57f0915b19e3efb2eb0e",
     "crates/world-kernels/src/mesh.rs": "fca0a6165148c5315a6fa2116b6b9b31af6e37fd22ff51a6c09364f312b44f18",
     "crates/world-kernels/src/pack.rs": "92b4a7da0b2dfaf71d6d3a3d260966a0323267c79ab3e23518ce965ef469b460",
@@ -24,13 +24,13 @@
     "scripts/link-wasm-kernels.mjs": "8b4a17970e5bc1220f28643508a55a40c653554490a7a4836e0be530737e460e"
   },
   "scalar": {
-    "bytes": 24492,
-    "sha256": "c68dafe6d8bf670cd52d13a2218203134e643879147ad619b68e21e7aa5a62de",
+    "bytes": 25129,
+    "sha256": "e7b3ec9fecbb71a48e0586e36252b470e10383c9742ab3ed0c1f3f35233d3238",
     "flags": "-C linker=/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=-simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
   },
   "simd": {
-    "bytes": 26054,
-    "sha256": "3bd6ac565b055fd2769c822e4838c84a12bbe3dd4a19653a9d17842481fad2e0",
+    "bytes": 26691,
+    "sha256": "a3c61ec113d6db189e68702fed82a1e4d494461a1262a3b6bb8e9805e8d4b5ee",
     "flags": "-C linker=/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=+simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
   }
 }

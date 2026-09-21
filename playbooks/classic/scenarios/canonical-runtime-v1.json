@@ -5,7 +5,7 @@
   "playbookVersion": "1.0.0",
   "referenceMinecraftVersion": "unfrozen",
   "seed": "classic-canonical-runtime-v1",
-  "generatorVersion": 6,
+  "generatorVersion": 7,
   "quality": "low",
   "runtime": {
     "renderer": "webgl2",

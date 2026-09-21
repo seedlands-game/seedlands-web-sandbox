@@ -47,7 +47,20 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Obsidian, '黑曜石', ['171121', '292039', '0b0810', '49305c']],
   [FaceMaterial.Fire, '火焰', ['9e250b', 'e94b12', 'ff8b1a', 'ffd34e']],
   [FaceMaterial.Tnt, 'TNT', ['9c1717', 'd22b22', 'eee1c0', '292929']],
+  [FaceMaterial.Sapling, '树苗', ['255c28', '3e8140', '6eaa4c', '9b6d3b']],
+  [FaceMaterial.TallGrass, '高草', ['2d672d', '4c8d3b', '76aa51', '1f5025']],
+  [FaceMaterial.Flower, '花', ['c32935', 'f05a65', 'f1d35c', '3e7b34']],
+  [FaceMaterial.Mushroom, '蘑菇', ['7e302a', 'b94f3f', 'e2d2ad', '594032']],
+  [FaceMaterial.SugarCane, '甘蔗', ['477d39', '71a950', 'a0cc6d', '335f31']],
+  [FaceMaterial.Cactus, '仙人掌', ['286a38', '3e8a49', '6aac59', '174e2c']],
 ];
+const plantMaterials = new Set<number>([
+  FaceMaterial.Sapling,
+  FaceMaterial.TallGrass,
+  FaceMaterial.Flower,
+  FaceMaterial.Mushroom,
+  FaceMaterial.SugarCane,
+]);
 
 // First-party pixel sources are deterministic and independent of atlas layout.
 export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, colors]) => {
@@ -75,6 +88,7 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     if (face === FaceMaterial.Water) index = (y + Math.floor(x / 4)) % 7 === 0 ? 4 : noise < 10 ? 2 : 1;
     if (face === FaceMaterial.Lava) index = (y + Math.floor(x / 3)) % 5 === 0 ? 4 : noise < 12 ? 2 : 1;
     if (face === FaceMaterial.Fire) index = y > 13 - Math.abs(x - 8) ? 0 : noise < 12 ? 4 : 2;
+    if (plantMaterials.has(face)) index = (x + y + noise) % 4 === 0 ? 0 : noise < 12 ? 2 : 1;
     if (face === FaceMaterial.LanternFrame) index = x < 2 || x > 13 || y < 2 || y > 13 ? 3 : 2;
     if (face === FaceMaterial.LanternGlow) index = x > 3 && x < 12 && y > 2 && y < 13 ? 4 : 1;
     if (face === FaceMaterial.Workbench) {

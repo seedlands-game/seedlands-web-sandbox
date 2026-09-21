@@ -10,7 +10,7 @@ export const testWorldgenProvider: KernelWorldgenProviderIdentity = Object.freez
   id: 'test:worldgen',
   implementationVersion: '1.0.0',
   configurationIdentity: 'test',
-  supportedGeneratorVersions: Object.freeze([2, 3, 4, 5, 6]),
+  supportedGeneratorVersions: Object.freeze([2, 3, 4, 5, 6, 7]),
   artifactIdentity: 'test:fixture@1',
 });
 

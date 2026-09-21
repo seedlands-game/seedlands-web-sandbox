@@ -379,6 +379,11 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
   },
   { id: 'obsidian', name: '黑曜石', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 28 }] },
   { id: 'tnt', name: 'TNT', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 30 }] },
+  { id: 'sapling', name: '树苗', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 31 }] },
+  { id: 'flower', name: '花', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 33 }] },
+  { id: 'mushroom', name: '蘑菇', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 34 }] },
+  { id: 'sugar-cane', name: '甘蔗', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 35 }] },
+  { id: 'cactus', name: '仙人掌', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 36 }] },
   { id: 'arrow', name: '箭', itemType: 'resource', stackLimit: 64, capabilities: [] },
   {
     id: 'bow',

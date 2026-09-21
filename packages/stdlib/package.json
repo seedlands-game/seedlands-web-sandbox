@@ -82,6 +82,7 @@
     "./world/provider-mesh-input": "./src/world/provider-mesh-input.ts",
     "./world/storage": "./src/world/storage.ts",
     "./world/voxel": "./src/world/voxel.ts",
+    "./world/vegetation": "./src/world/vegetation.ts",
     "./world/voxel-model": "./src/world/voxel-model.ts",
     "./world/water-flow-direction": "./src/world/water-flow-direction.ts",
     "./world/water-immersion": "./src/world/water-immersion.ts",

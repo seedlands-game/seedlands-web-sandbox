@@ -1,11 +1,12 @@
 import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
 import { oreVoxel } from './ore-generation';
 import { caveAir } from './cave-generation';
+import { vegetationAt } from './vegetation';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 6;
+export const GENERATOR_VERSION = 7;
 export const LEGACY_GENERATOR_VERSION = 2;
-export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6]);
+export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7]);
 export const isSupportedGeneratorVersion = (value: unknown): value is number =>
   typeof value === 'number' && SUPPORTED_GENERATOR_VERSIONS.includes(value);
 export type ChunkCoord = { cx: number; cy: number; cz: number };
@@ -42,10 +43,16 @@ export const Voxel = {
   Obsidian: 28,
   Fire: 29,
   Tnt: 30,
+  Sapling: 31,
+  TallGrass: 32,
+  Flower: 33,
+  Mushroom: 34,
+  SugarCane: 35,
+  Cactus: 36,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.Tnt;
+export const MAX_VOXEL_ID = Voxel.Cactus;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -81,6 +88,12 @@ export const FaceMaterial = {
   Obsidian: 31,
   Fire: 32,
   Tnt: 33,
+  Sapling: 34,
+  TallGrass: 35,
+  Flower: 36,
+  Mushroom: 37,
+  SugarCane: 38,
+  Cactus: 39,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -119,6 +132,12 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Obsidian]: 'obsidian',
   [FaceMaterial.Fire]: 'fire',
   [FaceMaterial.Tnt]: 'tnt',
+  [FaceMaterial.Sapling]: 'sapling',
+  [FaceMaterial.TallGrass]: 'tall-grass',
+  [FaceMaterial.Flower]: 'flower',
+  [FaceMaterial.Mushroom]: 'mushroom',
+  [FaceMaterial.SugarCane]: 'sugar-cane',
+  [FaceMaterial.Cactus]: 'cactus',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -152,6 +171,12 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Obsidian]: '黑曜石',
   [Voxel.Fire]: '火',
   [Voxel.Tnt]: 'TNT',
+  [Voxel.Sapling]: '树苗',
+  [Voxel.TallGrass]: '高草',
+  [Voxel.Flower]: '花',
+  [Voxel.Mushroom]: '蘑菇',
+  [Voxel.SugarCane]: '甘蔗',
+  [Voxel.Cactus]: '仙人掌',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -185,6 +210,12 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Obsidian]: [0.12, 0.08, 0.18],
   [Voxel.Fire]: [1, 0.35, 0.04],
   [Voxel.Tnt]: [0.72, 0.12, 0.08],
+  [Voxel.Sapling]: [0.2, 0.55, 0.16],
+  [Voxel.TallGrass]: [0.28, 0.65, 0.22],
+  [Voxel.Flower]: [0.85, 0.25, 0.3],
+  [Voxel.Mushroom]: [0.45, 0.2, 0.15],
+  [Voxel.SugarCane]: [0.45, 0.75, 0.3],
+  [Voxel.Cactus]: [0.18, 0.55, 0.28],
 };
 
 export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water && id !== Voxel.Lava && id !== Voxel.Fire;
@@ -229,6 +260,12 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Obsidian]: FaceMaterial.Obsidian,
       [Voxel.Fire]: FaceMaterial.Fire,
       [Voxel.Tnt]: FaceMaterial.Tnt,
+      [Voxel.Sapling]: FaceMaterial.Sapling,
+      [Voxel.TallGrass]: FaceMaterial.TallGrass,
+      [Voxel.Flower]: FaceMaterial.Flower,
+      [Voxel.Mushroom]: FaceMaterial.Mushroom,
+      [Voxel.SugarCane]: FaceMaterial.SugarCane,
+      [Voxel.Cactus]: FaceMaterial.Cactus,
     } as Record<number, FaceMaterialId>
   )[id];
 }
@@ -310,5 +347,9 @@ export function baseVoxel(
         dz = Math.abs(z - tz);
       if (dx <= 2 && dz <= 2 && y >= th + 3 && y <= th + 6 && (dx + dz < 4 || y >= th + 5)) return Voxel.Leaves;
     }
+  if (generatorVersion >= 7) {
+    const vegetation = vegetationAt(seed, x, y, z, context);
+    if (vegetation !== null) return vegetation as VoxelId;
+  }
   return Voxel.Air;
 }

@@ -12,7 +12,7 @@ describe.each(['scalar', 'simd'])('W03 halo 与修订哈希对等 (%s)', (artifa
       await readFile(new URL(`../../../../src/generated/wasm/rust-kernels-${artifact}.wasm`, import.meta.url)),
     );
     const prepare = createHaloKernel(memory);
-    for (const version of [2, 3, 4, 5, 6])
+    for (const version of [2, 3, 4, 5, 6, 7])
       for (const cy of [-1, 0, 1])
         for (const cx of [-1, 0]) {
           const canonical = makeChunk(1837, cx, cy, 0, [], version);

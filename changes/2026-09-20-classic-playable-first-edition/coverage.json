@@ -87,9 +87,9 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Sapling"
     },
     {
@@ -373,9 +373,9 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Tall Grass"
     },
     {
@@ -456,9 +456,9 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Brown Mushroom"
     },
     {
@@ -912,9 +912,9 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Cactus"
     },
     {
@@ -932,9 +932,9 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Sugar Cane"
     },
     {
@@ -4193,9 +4193,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：世界创建参数、seed 文本/数字转化、随机源；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4203,9 +4203,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：generatorVersion 与原版噪声/随机调用次序兼容；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4213,9 +4213,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：创世/出生/世界时间初态与旧档迁移/拒绝；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4223,9 +4223,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：地形密度、噪声层、区块/高度截断；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4265,9 +4265,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：群系采样、温湿度/降水边界；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4275,9 +4275,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：树种、树冠、树苗长树及空间冲突；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4285,9 +4285,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：花/草/蘑菇/甘蔗/仙人掌自然分布；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4325,9 +4325,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：主世界出生点选取和安全重试；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4958,9 +4958,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S5",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：树苗、草/菌、甘蔗/仙人掌、叶衰减；记录正例、失败例、tick 和 owner 状态。"
     },
     {
