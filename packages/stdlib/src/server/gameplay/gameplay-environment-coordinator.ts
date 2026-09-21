@@ -4,7 +4,7 @@ import type { GameplayCallbacks, GameplayResult } from './gameplay-runtime-contr
 import type { EnvironmentRuntime } from './environment-runtime';
 import type { VoxelGameplayRegistry } from './voxel-gameplay';
 import type { EntityStore } from './entity-store';
-import { advanceGameplayRules } from './gameplay-runtime-lifecycle';
+import { advanceGameplayRules, gameplayAdvanceCommitUpperBound } from './gameplay-runtime-lifecycle';
 
 export function advanceGameplayEnvironment(
   environment: EnvironmentRuntime,
@@ -13,6 +13,7 @@ export function advanceGameplayEnvironment(
   voxels: VoxelGameplayRegistry,
   entities?: EntityStore,
   damage?: (sourceId: string, targetId: string, amount: number, cause: string) => GameplayResult,
+  despawn?: (entityId: string) => boolean,
 ): WorldCommitResult[] {
   const effects = environment.advance(seconds, {
     flammable: ([x, y, z]) => {
@@ -34,6 +35,7 @@ export function advanceGameplayEnvironment(
     },
   });
   const explosionPositions = new Map<string, readonly [number, number, number]>();
+  for (const effect of effects.explosions) if (effect.sourceEntityId) despawn?.(effect.sourceEntityId);
   for (const effect of effects.explosions)
     for (const at of effect.blocks) {
       const voxel = callbacks.getVoxel([...at]);
@@ -82,6 +84,7 @@ export function advanceGameplayWithEnvironment(
       voxels: VoxelGameplayRegistry;
       entities: EntityStore;
       damage(source: string, target: string, amount: number, cause: string): GameplayResult;
+      despawn(entityId: string): boolean;
       synchronizeSchedule(): void;
     }>,
 ) {
@@ -94,9 +97,32 @@ export function advanceGameplayWithEnvironment(
       options.voxels,
       options.entities,
       options.damage,
+      options.despawn,
     );
     return { commits: [...result.commits, ...environment] };
   } finally {
     options.synchronizeSchedule();
   }
 }
+
+export const createGameplayEnvironmentAdvancer = (
+  options: Parameters<typeof advanceGameplayRules>[1] &
+    Parameters<typeof gameplayAdvanceCommitUpperBound>[1] &
+    Readonly<{
+      environment: EnvironmentRuntime;
+      callbacks: GameplayCallbacks;
+      voxels: VoxelGameplayRegistry;
+      entities: EntityStore;
+      damage(source: string, target: string, amount: number, cause: string): GameplayResult;
+      despawn(entityId: string): boolean;
+      synchronizeSchedule(): void;
+      afterAdvance(seconds: number): void;
+    }>,
+) => ({
+  advance(seconds: number) {
+    const result = advanceGameplayWithEnvironment(seconds, options);
+    options.afterAdvance(seconds);
+    return result;
+  },
+  commitUpperBound: (seconds: number) => gameplayAdvanceCommitUpperBound(seconds, options),
+});

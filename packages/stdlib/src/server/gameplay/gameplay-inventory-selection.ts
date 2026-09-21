@@ -26,3 +26,24 @@ export function selectGameplayHotbarSlot(
   });
   return result.ok ? { success: true } : { success: false, reason: result.message };
 }
+
+export const createGameplayHotbarSelection =
+  (
+    options: Readonly<{
+      state(id: string): ReturnType<ModeRuntime['stateFor']> | null;
+      inventory: { select(id: string, slot: number): { success: boolean; reason?: string } };
+      hasCompositionGuard: boolean;
+      modes: ModeRuntime;
+      modules: GameplayModuleRuntime;
+      actorAuthority?: ModuleActorAuthority;
+    }>,
+  ) =>
+  (id: string, slot: number) =>
+    selectGameplayHotbarSlot(id, slot, {
+      modeState: options.state(id),
+      inventory: options.inventory,
+      hasCompositionGuard: options.hasCompositionGuard,
+      modes: options.modes,
+      modules: options.modules,
+      actorAuthority: options.actorAuthority,
+    });

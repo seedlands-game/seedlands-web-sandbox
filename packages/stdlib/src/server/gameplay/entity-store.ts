@@ -449,6 +449,8 @@ export class EntityStore {
     return this.owner.createReference(id);
   }
 
+  validateCreateCapacity = (count: number): void => this.owner.validateCreateCapacity(count);
+
   resolveReference(reference: EntityLifetimeReference): GameplayEntity | null {
     return this.owner.resolveReference(reference);
   }

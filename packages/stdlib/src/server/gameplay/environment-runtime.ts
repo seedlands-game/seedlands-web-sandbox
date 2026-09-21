@@ -7,7 +7,13 @@ export type EnvironmentCheckpoint = Readonly<{
   weather: WeatherKind;
   weatherSeconds: number;
   fires: readonly Readonly<{ position: EnvironmentPosition; remainingSeconds: number }>[];
-  tnt: readonly Readonly<{ id: number; position: EnvironmentPosition; fuseSeconds: number; power: number }>[];
+  tnt: readonly Readonly<{
+    id: number;
+    position: EnvironmentPosition;
+    fuseSeconds: number;
+    power: number;
+    sourceEntityId?: string;
+  }>[];
   nextTntId: number;
   dungeonSpawners?: readonly Readonly<{ id: string; elapsedSeconds: number; activations: number }>[];
   openedDungeonChests?: readonly string[];
@@ -21,6 +27,7 @@ export type EnvironmentEffects = Readonly<{
     id: number;
     position: EnvironmentPosition;
     power: number;
+    sourceEntityId?: string;
     blocks: readonly EnvironmentPosition[];
   }>[];
 }>;
@@ -38,7 +45,10 @@ export class EnvironmentRuntime {
   #weatherSeconds = 300;
   #nextTntId = 1;
   readonly #fires = new Map<string, { position: EnvironmentPosition; remainingSeconds: number }>();
-  readonly #tnt = new Map<number, { id: number; position: EnvironmentPosition; fuseSeconds: number; power: number }>();
+  readonly #tnt = new Map<
+    number,
+    { id: number; position: EnvironmentPosition; fuseSeconds: number; power: number; sourceEntityId?: string }
+  >();
   readonly #dungeonSpawners = new Map<string, { elapsedSeconds: number; activations: number }>();
   readonly #openedDungeonChests = new Set<string>();
   #naturalSpawnSeconds = 0;
@@ -55,10 +65,19 @@ export class EnvironmentRuntime {
     const p = position(at);
     this.#fires.set(key(p), { position: p, remainingSeconds: seconds });
   }
-  primeTnt(at: EnvironmentPosition, fuseSeconds = 4, power = 4) {
+  primeTnt(at: EnvironmentPosition, fuseSeconds = 4, power = 4, sourceEntityId?: string) {
     if (![fuseSeconds, power].every((v) => Number.isFinite(v) && v > 0))
       throw new TypeError('TNT parameters are invalid.');
-    const value = { id: this.#nextTntId++, position: position(at), fuseSeconds, power };
+    if (sourceEntityId !== undefined && !sourceEntityId.trim()) throw new TypeError('TNT source entity is invalid.');
+    if (sourceEntityId && [...this.#tnt.values()].some((value) => value.sourceEntityId === sourceEntityId))
+      throw new Error('TNT source entity is already primed.');
+    const value = {
+      id: this.#nextTntId++,
+      position: position(at),
+      fuseSeconds,
+      power,
+      ...(sourceEntityId ? { sourceEntityId } : {}),
+    };
     this.#tnt.set(value.id, value);
     return Object.freeze({ ...value });
   }
@@ -155,7 +174,13 @@ export class EnvironmentRuntime {
           for (let z = -r; z <= r; z++)
             if (x * x + y * y + z * z <= tnt.power * tnt.power)
               blocks.push(position([tnt.position[0] + x, tnt.position[1] + y, tnt.position[2] + z]));
-      explosions.push({ id, position: tnt.position, power: tnt.power, blocks });
+      explosions.push({
+        id,
+        position: tnt.position,
+        power: tnt.power,
+        blocks,
+        ...(tnt.sourceEntityId ? { sourceEntityId: tnt.sourceEntityId } : {}),
+      });
     }
     return Object.freeze({
       extinguished: Object.freeze(extinguished),
