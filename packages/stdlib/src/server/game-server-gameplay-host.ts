@@ -300,6 +300,12 @@ export class GameServerGameplayHost {
   get structures() {
     return this.gameplay.structures;
   }
+  get finalEntities() {
+    return this.gameplay.finalEntities;
+  }
+  get specialDamage() {
+    return this.gameplay.specialDamage;
+  }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
   }

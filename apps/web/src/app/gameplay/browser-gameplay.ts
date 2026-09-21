@@ -248,7 +248,7 @@ export class BrowserGameplay {
       ...projection.interaction,
       presentedEntities: entities.map((entity) => ({
         id: entity.id,
-        type: entity.type as 'world-item' | 'creature' | 'npc',
+        type: entity.type as 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting',
         position: [...entity.position] as [number, number, number],
         ...(entity.archetype ? { archetype: entity.archetype } : {}),
         ...(actorStates.get(entity.id) ? { behavior: actorStates.get(entity.id)!.behavior } : {}),

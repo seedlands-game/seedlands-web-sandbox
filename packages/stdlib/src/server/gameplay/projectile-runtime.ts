@@ -24,6 +24,10 @@ const positive = (value: number, name: string) => {
   if (!Number.isFinite(value) || value <= 0) throw new TypeError('Projectile ' + name + ' must be positive.');
   return value;
 };
+const nonNegative = (value: number, name: string) => {
+  if (!Number.isFinite(value) || value < 0) throw new TypeError('Projectile ' + name + ' must not be negative.');
+  return value;
+};
 const normalized = (value: ProjectileVector) => {
   const checked = vector(value, 'direction');
   const length = Math.hypot(checked.x, checked.y, checked.z);
@@ -60,7 +64,7 @@ export class ProjectileRuntime {
           ...state,
           position: vector(state.position, 'position'),
           velocity: vector(state.velocity, 'velocity'),
-          damage: positive(state.damage, 'damage'),
+          damage: nonNegative(state.damage, 'damage'),
           remainingSeconds: positive(state.remainingSeconds, 'lifetime'),
         }),
       );
@@ -84,7 +88,7 @@ export class ProjectileRuntime {
       ownerId: input.ownerId,
       position: vector(input.position, 'position'),
       velocity: Object.freeze({ x: direction.x * speed, y: direction.y * speed, z: direction.z * speed }),
-      damage: positive(input.damage, 'damage'),
+      damage: nonNegative(input.damage, 'damage'),
       remainingSeconds: positive(input.lifetimeSeconds, 'lifetime'),
     });
     this.#projectiles.set(state.id, state);
@@ -105,7 +109,7 @@ export class ProjectileRuntime {
         continue;
       }
       if (actor?.targetId) {
-        if (actor.targetId !== state.ownerId)
+        if (actor.targetId !== state.ownerId && state.damage > 0)
           this.#environment.applyDamage(state.ownerId, actor.targetId, state.damage);
         this.#projectiles.delete(state.id);
         continue;

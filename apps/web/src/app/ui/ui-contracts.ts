@@ -86,7 +86,7 @@ export type InteractionState = Readonly<{
   breaking: Readonly<{ progress: number; label: string }> | null;
   presentedEntities: readonly Readonly<{
     id: string;
-    type: 'world-item' | 'creature' | 'npc';
+    type: 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting';
     label: string;
     archetype?: import('@seedlands/stdlib/server/gameplay/entity-store').ActorArchetype;
     behavior?: string;

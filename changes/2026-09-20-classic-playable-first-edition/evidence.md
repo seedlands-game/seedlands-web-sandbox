@@ -287,3 +287,11 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 首轮 Classic 组合回归 20/21 files、51/52 tests，通过项含完整成长旅程；`classic-food-health` 在 bootstrap 拒绝生态 Chunk。根因是程序生成直接使用 station Chest voxel，违反 station voxel 必须有 entity 的完整性门禁。未放宽门禁，改用独立不可采集 DungeonChest voxel 后该用例单测恢复 PASS。
 - 刷怪笼仅在显式传入的已加载 Spawner 上累计冷却，要求非 peaceful、玩家 16 格内、光照不高于 7、hostile 未达 16；每 20 秒生成稳定 id 的配置物种。DungeonChest 在 6 格内首次按 seed+dungeon id+index 发放有界 loot，开启后幂等拒绝；冷却、激活高水位与已开启集合进入 Environment checkpoint，旧 checkpoint 缺字段迁移为空状态。补齐 saddle 内容。
 - 验证：stdlib 地牢/旧生成兼容 4 files / 15 tests PASS；Wasm world/halo 与 palette 3 files / 10 tests PASS；bootstrap 修复后 food-health PASS；地牢运行态与环境恢复 2 files / 5 tests PASS；`typecheck:classic`、Rust source/artifact fingerprint、`git diff --check` PASS。V8 production build/浏览器专属视觉尚待阶段收口，不在此处声明 PASS。
+
+## S4h 最终实体、闪电与特殊伤害
+
+- RED：`classic-final-entities` 初始 3/3 因 `finalEntities` 未接入失败；首轮 GREEN 后 2/3 通过，下落方块以终点取整导致穿透支撑格。改为从旧高度到候选高度逐格扫描后修复。
+- FallingSand/Painting 使用独立 `falling-block` / `painting` ECS type，并进入 authority、网络语义、reference projection、浏览器呈现类型和 body registry 闭包。下落方块先经 `editBatch` 清除匹配源格，落地成功才清退实体；Painting 消耗选中物品，支撑失效以 prepared mutation 同时清退并生成掉落。两者专属载荷及 ECS identity 随 Gameplay V4 checkpoint 恢复。
+- Lightning 只接受 thunder、已加载且露天的位置；Environment 保存稳定短寿命事件并点火，附近玩家/生物走正式 combat/vitals damage owner，猪在批量容量与所有 replacement id 预检后转换为 `pig-zombie`。多猪唯一 ID、晴天/遮挡负例和 checkpoint 恢复已验证。Snowball 复用唯一 ProjectileRuntime，以真实零伤害弹道消费选中物品；独立击退/浏览器表现尚未完成，覆盖保持 PARTIAL。
+- SpecialDamageRuntime 统一 `sunlight/drowning/cactus/fire/fall` 来源到正式 damage owner，验证五类来源、跌落三格阈值、非正数与死亡目标拒绝；环境自动触发时机尚未接，M22-04 保持 PARTIAL。最终实体与特殊伤害 2 files / 7 tests PASS；snapshot/entity owner 4 files / 35 tests、authority/protocol 4 files / 36 tests PASS。
+- 静态门禁失败记录：首次为 `gameplay-snapshot.ts` 格式；第二次为 entity-store/gameplay-runtime 超 500 行；拆出 entity identity 与 gameplay revision capacity 后，第三次因误删两个既有 `validateCreateCapacity` 调用所需代理而类型失败，恢复窄代理后 `verify:static:ci` PASS。stdlib 全量首轮 94/95 files、569/570 tests，唯一失败是旧 slash-command 仍把正式 Lava 当非法；更新为 Lava 正例和 unknown-voxel 负例后定向 8/8、全量 95 files / 570 tests PASS。

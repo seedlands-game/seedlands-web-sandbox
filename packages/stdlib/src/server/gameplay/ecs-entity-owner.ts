@@ -48,7 +48,7 @@ import {
   type EntityComponents,
 } from './ecs-entity-components';
 
-export type EcsEntityType = 'player' | 'world-item' | 'creature' | 'npc' | 'station';
+export type EcsEntityType = 'player' | 'world-item' | 'creature' | 'npc' | 'station' | 'falling-block' | 'painting';
 export const ACTOR_ARCHETYPES = [
   'grazer',
   'night-stalker',
@@ -56,6 +56,7 @@ export const ACTOR_ARCHETYPES = [
   'chicken',
   'cow',
   'pig',
+  'pig-zombie',
   'sheep',
   'squid',
   'wolf',
@@ -458,6 +459,12 @@ export class EcsEntityOwner {
     if (!Number.isSafeInteger(count) || count < 0) throw new TypeError('Entity create capacity is invalid.');
     if (this.lifetimeSequence > Number.MAX_SAFE_INTEGER - count || this.orderSequence > Number.MAX_SAFE_INTEGER - count)
       throw new RangeError('Entity lifetime or order capacity is exhausted.');
+  }
+
+  validateCreateIdentities(count: number, ids: readonly string[]): void {
+    this.validateCreateCapacity(count);
+    for (const id of ids)
+      if (this.get(id) || this.isIssued(id)) throw new Error(`Entity identity is unavailable: ${id}`);
   }
 
   identitySnapshots(): EntityLifetimeSnapshot[] {

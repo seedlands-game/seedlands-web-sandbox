@@ -22,6 +22,7 @@ import type { LifeSkillsRuntime } from './life-skills-runtime';
 import type { VehicleRuntime } from './vehicle-runtime';
 import type { NavigationItemsRuntime } from './navigation-items-runtime';
 import type { CropRuntime } from './crop-runtime';
+import type { FinalEntitiesRuntime } from './final-entities-runtime';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -44,6 +45,7 @@ type Options = Readonly<{
   vehicles: VehicleRuntime;
   navigationItems: NavigationItemsRuntime;
   crops: CropRuntime;
+  finalEntities: FinalEntitiesRuntime;
   needsPlayerLimit?: number;
   installMetadata(gameplayTime: number, revision: number): void;
 }>;
@@ -71,6 +73,7 @@ export class GameplayRuntimeCheckpoint {
       this.options.vehicles.checkpoint(),
       this.options.navigationItems.checkpoint(),
       this.options.crops.checkpoint(),
+      this.options.finalEntities.checkpoint(),
     );
     if (this.options.compositionGuard) snapshot.composition = this.options.compositionGuard.snapshot();
     const ruleset = this.options.ruleset.snapshot();
@@ -159,6 +162,11 @@ export class GameplayRuntimeCheckpoint {
     this.options.crops.restore(
       raw && typeof raw === 'object' && 'crops' in raw
         ? (raw.crops as import('./crop-runtime').CropCheckpoint)
+        : undefined,
+    );
+    this.options.finalEntities.restore(
+      raw && typeof raw === 'object' && 'finalEntities' in raw
+        ? (raw.finalEntities as import('./final-entities-runtime').FinalEntitiesCheckpoint)
         : undefined,
     );
     installSchedule?.();

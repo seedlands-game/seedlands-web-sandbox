@@ -28,6 +28,7 @@ import {
   type PreparedEntityMutationInput,
 } from './prepared-entity-mutation';
 import { addEntityToBucket, removeEntityFromBucket } from './entity-spatial-buckets';
+import { entityIdentityFor } from './entity-identity';
 
 export type EntityType = EcsEntityType;
 export type ActorArchetype = EcsActorArchetype;
@@ -92,7 +93,7 @@ export class EntityStore {
 
   spawn(input: EntitySpawn): GameplayEntity {
     const type = this.entityType(input);
-    const { id, sequence: nextSequence } = this.identityFor(this.owner, input, type, this.sequence);
+    const { id, sequence: nextSequence } = entityIdentityFor(this.owner, input, type, this.sequence);
     if (!id.trim()) throw new TypeError('Entity id must not be empty.');
     if (this.owner.get(id)) throw new Error(`Entity already exists: ${id}`);
     if (this.owner.isIssued(id)) throw new Error(`Entity id was already issued or retired: ${id}`);
@@ -408,7 +409,7 @@ export class EntityStore {
     try {
       for (const input of entities) {
         const type = this.entityType(input);
-        const { id, sequence: nextSequence } = this.identityFor(
+        const { id, sequence: nextSequence } = entityIdentityFor(
           candidateOwner,
           input,
           type,
@@ -449,6 +450,8 @@ export class EntityStore {
     return this.owner.createReference(id);
   }
 
+  validateCreateIdentities = (count: number, ids: readonly string[]): void =>
+    this.owner.validateCreateIdentities(count, ids);
   validateCreateCapacity = (count: number): void => this.owner.validateCreateCapacity(count);
 
   resolveReference(reference: EntityLifetimeReference): GameplayEntity | null {
@@ -470,7 +473,7 @@ export class EntityStore {
     if (input.physicsVelocity) {
       this.assertPosition(input.physicsVelocity);
       entity.physicsVelocity = [...input.physicsVelocity];
-    } else if (type !== 'player' && type !== 'station') entity.physicsVelocity = [0, 0, 0];
+    } else if (type !== 'player' && type !== 'station' && type !== 'painting') entity.physicsVelocity = [0, 0, 0];
     if (type === 'station') {
       validateStationEntityInput(input, this.stationCodec);
     } else if (input.station !== undefined) throw new TypeError('Station state requires a station entity.');
@@ -512,27 +515,9 @@ export class EntityStore {
 
   private entityType(input: EntitySpawn): EntityType {
     const type = input.type ?? input.kind;
-    if (type !== 'player' && type !== 'world-item' && type !== 'creature' && type !== 'npc' && type !== 'station')
+    if (!['player', 'world-item', 'creature', 'npc', 'station', 'falling-block', 'painting'].includes(type as string))
       throw new TypeError(`Unsupported entity type: ${String(type)}`);
-    return type;
-  }
-
-  private identityFor(
-    owner: EcsEntityOwner,
-    input: EntitySpawn,
-    type: EntityType,
-    sequence: number,
-    blockedGeneratedIds: ReadonlySet<string> = new Set(),
-  ): { id: string; sequence: number } {
-    if (input.id !== undefined) return { id: input.id, sequence };
-    let nextSequence = sequence;
-    let id: string;
-    do {
-      nextSequence += 1;
-      if (!Number.isSafeInteger(nextSequence)) throw new RangeError('Entity sequence is exhausted.');
-      id = `${type}-${nextSequence}`;
-    } while (owner.isIssued(id) || blockedGeneratedIds.has(id));
-    return { id, sequence: nextSequence };
+    return type as EntityType;
   }
 
   private moveEntity(entity: GameplayEntity, position: readonly [number, number, number]): void {

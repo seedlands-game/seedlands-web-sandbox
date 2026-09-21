@@ -23,7 +23,11 @@ export type * from './network-reference-projection-types';
 const MAX_COLLISION_CELL_INDEX = CHUNK_SIZE ** 3;
 const allowedArchetypes = new Set<string>(ACTOR_ARCHETYPES);
 const isPresentationEntityType = (value: string): value is GameplayEntityReference['type'] =>
-  value === 'world-item' || value === 'creature' || value === 'npc';
+  value === 'world-item' ||
+  value === 'creature' ||
+  value === 'npc' ||
+  value === 'falling-block' ||
+  value === 'painting';
 
 const assertFinite = (value: number, field: string) => {
   if (!Number.isFinite(value)) throw new TypeError(`${field} must be finite.`);

@@ -60,6 +60,7 @@ import { EnvironmentRuntime } from './environment-runtime';
 import { createGameplayEnvironmentAdvancer } from './gameplay-environment-coordinator';
 import type { ProjectileVector } from './projectile-runtime';
 import { createGameplayWorldSystems } from './gameplay-world-systems';
+import { assertGameplayRevisionCapacity } from './gameplay-revision-capacity';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -99,6 +100,8 @@ export class GameplayRuntime {
   readonly navigationItems;
   readonly crops;
   readonly structures;
+  readonly finalEntities;
+  readonly specialDamage;
   private readonly selectHotbar;
   private readonly requestPlayerCombat;
   private readonly advanceWorldRules;
@@ -244,6 +247,8 @@ export class GameplayRuntime {
     this.navigationItems = systems.navigationItems;
     this.crops = systems.crops;
     this.structures = systems.structures;
+    this.finalEntities = systems.finalEntities;
+    this.specialDamage = systems.specialDamage;
     this.selectHotbar = createGameplayHotbarSelection({
       state: (id) => this.getActorModeState(id),
       inventory: this.registeredInventory ?? this.inventoryActions,
@@ -295,6 +300,7 @@ export class GameplayRuntime {
         this.lifeSkills.advance(seconds);
         this.vehicles.advance(seconds);
         this.crops.advance(seconds);
+        this.finalEntities.advance(seconds);
         this.environmentQueries.advanceNaturalSpawns(seconds);
       },
     });
@@ -319,6 +325,7 @@ export class GameplayRuntime {
       vehicles: this.vehicles,
       navigationItems: this.navigationItems,
       crops: this.crops,
+      finalEntities: this.finalEntities,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);
@@ -505,13 +512,7 @@ export class GameplayRuntime {
   markPersisted = (revision: number): void =>
     void (this.persistedRevision = Math.max(this.persistedRevision, revision));
   private player = (id: string): PlayerState => RuntimeLifecycle.requireGameplayPlayer(this.players, id);
-  private assertRevisionCapacity(): void {
-    if (
-      !Number.isSafeInteger(this.kernelState.gameplayRevision) ||
-      this.kernelState.gameplayRevision >= Number.MAX_SAFE_INTEGER
-    )
-      throw new RangeError('Gameplay revision capacity is exhausted.');
-  }
+  private assertRevisionCapacity = (): void => assertGameplayRevisionCapacity(this.kernelState.gameplayRevision);
   private touch(event = true): void {
     this.kernelState.commitGameplay(this.kernelState.epoch);
     if (event) this.eventCount += 1;

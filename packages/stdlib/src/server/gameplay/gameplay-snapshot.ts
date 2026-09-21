@@ -31,6 +31,7 @@ import { validateVehicleCheckpoint, type VehicleCheckpoint } from './vehicle-run
 import { navigationCheckpointFromSnapshot, validateNavigationItemsCheckpoint } from './navigation-items-runtime';
 import type { NavigationItemsCheckpoint } from './navigation-items-runtime';
 import { validateCropCheckpoint, type CropCheckpoint } from './crop-runtime';
+import { validateFinalEntitiesCheckpoint, type FinalEntitiesCheckpoint } from './final-entities-runtime';
 export { legacyPlayerPositionToFeet } from './legacy-gameplay-position';
 import { migrateLegacyEntity, migrateLegacyPlayer } from './legacy-gameplay-position';
 
@@ -77,6 +78,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   vehicles?: VehicleCheckpoint;
   navigationItems?: NavigationItemsCheckpoint;
   crops?: CropCheckpoint;
+  finalEntities?: FinalEntitiesCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -99,6 +101,7 @@ export const createGameplaySnapshotV4 = (
   vehicles?: VehicleCheckpoint,
   navigationItems?: NavigationItemsCheckpoint,
   crops?: CropCheckpoint,
+  finalEntities?: FinalEntitiesCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -123,6 +126,7 @@ export const createGameplaySnapshotV4 = (
   ...(vehicles ? { vehicles: validateVehicleCheckpoint(vehicles) } : {}),
   ...(navigationItems ? { navigationItems: validateNavigationItemsCheckpoint(navigationItems) } : {}),
   ...(crops ? { crops: validateCropCheckpoint(crops) } : {}),
+  ...(finalEntities ? { finalEntities: validateFinalEntitiesCheckpoint(finalEntities) } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 
@@ -450,6 +454,7 @@ export function validateGameplaySnapshot(
       source.version === 4 && source.vehicles ? validateVehicleCheckpoint(source.vehicles) : undefined,
       navigationCheckpointFromSnapshot(source, entities),
       source.version === 4 && source.crops ? validateCropCheckpoint(source.crops) : undefined,
+      source.version === 4 && source.finalEntities ? validateFinalEntitiesCheckpoint(source.finalEntities) : undefined,
     );
     if (options.registeredNeeds && sourceVersion < 4) {
       const phase =
