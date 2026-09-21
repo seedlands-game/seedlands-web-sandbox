@@ -99,7 +99,8 @@ describe('registered inventory pointer owner', () => {
 
   it('crafts a real station result into an origin-free cursor and closes it into the bag', () => {
     const { world, pointer } = setup();
-    world.giveItem('alice', { itemId: 'plank', count: 5 });
+    world.giveItem('alice', { itemId: 'plank', count: 3 });
+    world.giveItem('alice', { itemId: 'stick', count: 2 });
     expect(pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 })).toMatchObject({
       success: true,
     });
@@ -108,8 +109,17 @@ describe('registered inventory pointer owner', () => {
         {
           kind: 'distribute',
           button: 2,
-          targets: [0, 1, 2, 4, 7].map((slot) => ({ kind: 'station' as const, slot })),
+          targets: [0, 1, 2].map((slot) => ({ kind: 'station' as const, slot })),
         },
+        true,
+      ),
+    ).toMatchObject({ success: true });
+    expect(pointer({ kind: 'click', slot: { kind: 'inventory', slot: 1 }, button: 0 })).toMatchObject({
+      success: true,
+    });
+    expect(
+      pointer(
+        { kind: 'distribute', button: 2, targets: [4, 7].map((slot) => ({ kind: 'station' as const, slot })) },
         true,
       ),
     ).toMatchObject({ success: true });
@@ -146,15 +156,23 @@ describe('registered inventory pointer owner', () => {
     expect(workbench(first.world).grid[0]).toEqual({ itemId: 'plank', count: 2 });
 
     const batch = setup();
-    batch.world.giveItem('alice', { itemId: 'plank', count: 10 });
+    batch.world.giveItem('alice', { itemId: 'plank', count: 6 });
+    batch.world.giveItem('alice', { itemId: 'stick', count: 4 });
     batch.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 });
     expect(
       batch.pointer(
         {
           kind: 'distribute',
           button: 0,
-          targets: [0, 1, 2, 4, 7].map((slot) => ({ kind: 'station' as const, slot })),
+          targets: [0, 1, 2].map((slot) => ({ kind: 'station' as const, slot })),
         },
+        true,
+      ),
+    ).toMatchObject({ success: true });
+    batch.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 1 }, button: 0 });
+    expect(
+      batch.pointer(
+        { kind: 'distribute', button: 0, targets: [4, 7].map((slot) => ({ kind: 'station' as const, slot })) },
         true,
       ),
     ).toMatchObject({ success: true });
@@ -174,14 +192,20 @@ describe('registered inventory pointer owner', () => {
       )[0]!;
 
     const emptyCursor = setup();
-    emptyCursor.world.giveItem('alice', { itemId: 'plank', count: 5 });
+    emptyCursor.world.giveItem('alice', { itemId: 'plank', count: 3 });
+    emptyCursor.world.giveItem('alice', { itemId: 'stick', count: 2 });
     emptyCursor.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 });
     emptyCursor.pointer(
       {
         kind: 'distribute',
         button: 2,
-        targets: [0, 1, 2, 4, 7].map((slot) => ({ kind: 'station' as const, slot })),
+        targets: [0, 1, 2].map((slot) => ({ kind: 'station' as const, slot })),
       },
+      true,
+    );
+    emptyCursor.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 1 }, button: 0 });
+    emptyCursor.pointer(
+      { kind: 'distribute', button: 2, targets: [4, 7].map((slot) => ({ kind: 'station' as const, slot })) },
       true,
     );
     expect(emptyCursor.world.giveItem('alice', { itemId: 'wood-block', count: 24 * 64 })).toMatchObject({
@@ -189,7 +213,7 @@ describe('registered inventory pointer owner', () => {
     });
     expect(projected(emptyCursor)).toMatchObject({
       matchedRecipeIds: ['wood-pickaxe'],
-      craftableRecipeIds: [],
+      craftableRecipeIds: ['wood-pickaxe'],
     });
     expect(emptyCursor.pointer({ kind: 'craft', batch: false }, true)).toMatchObject({ success: true });
     expect(emptyCursor.world.getInventoryPointerView('alice').cursor.stack).toMatchObject({
@@ -211,7 +235,7 @@ describe('registered inventory pointer owner', () => {
     compatibleCursor.world.giveItem('alice', { itemId: 'chest', count: 1 });
     compatibleCursor.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 });
     compatibleCursor.world.giveItem('alice', { itemId: 'wood-block', count: 24 * 64 });
-    expect(projected(compatibleCursor)).toMatchObject({ matchedRecipeIds: ['chest'], craftableRecipeIds: [] });
+    expect(projected(compatibleCursor)).toMatchObject({ matchedRecipeIds: ['chest'], craftableRecipeIds: ['chest'] });
     expect(compatibleCursor.pointer({ kind: 'craft', batch: false }, true)).toMatchObject({ success: true });
     expect(compatibleCursor.world.getInventoryPointerView('alice').cursor.stack).toEqual({ itemId: 'chest', count: 2 });
   });
