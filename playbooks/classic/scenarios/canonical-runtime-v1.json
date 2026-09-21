@@ -5,7 +5,7 @@
   "playbookVersion": "1.0.0",
   "referenceMinecraftVersion": "unfrozen",
   "seed": "classic-canonical-runtime-v1",
-  "generatorVersion": 8,
+  "generatorVersion": 10,
   "quality": "low",
   "runtime": {
     "renderer": "webgl2",
@@ -38,7 +38,7 @@
     }
   },
   "route": {
-    "chunkCrossing": [32.2, 0.5],
+    "chunkCrossing": [33, 0.5],
     "buildTarget": [52, 60, 0],
     "stationTarget": [75, 60, 0],
     "hostileApproach": [54, 0.5],

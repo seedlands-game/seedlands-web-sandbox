@@ -16,6 +16,7 @@ type Options = Readonly<{
   getWorld: () => World | null;
   getEnvironment: () => WorldEnvironment | null;
   isPaused: () => boolean;
+  mouseSensitivity?: Readonly<{ value: number }>;
   uiBridge: UiBridge;
   getGameplay: () => BrowserGameplay | null;
   getUiSession: () => UiWorldSession | null;
@@ -53,6 +54,7 @@ export function createGamePlayerController(options: Options): PlayerController {
     getWorld: options.getWorld,
     getEnvironment: options.getEnvironment,
     isPaused: options.isPaused,
+    mouseSensitivity: options.mouseSensitivity,
     onToggleMap: options.actions.toggleMap,
     onToggleDebug: options.actions.toggleDebug,
     onToggleCollisionDebug: options.actions.toggleCollisionDebug,

@@ -81,6 +81,8 @@ const initialHud = (): HudState => ({
   worldClock: '',
   health: { value: 20, max: 20 },
   hunger: { value: 20, max: 20 },
+  armor: { value: 0, max: 20 },
+  oxygen: { value: 20, max: 20, visible: false },
   mode: 'survival',
   flightEnabled: false,
   selectedHotbarSlot: 0,

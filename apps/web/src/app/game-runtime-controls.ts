@@ -1,9 +1,75 @@
+import type * as pc from 'playcanvas';
 import { releasePointerLock } from './player/pointer-lock';
 import type { MapLayer } from './ui/ui-contracts';
 import type { BrowserAuthorityClient } from '../client/authority/browser-authority-client';
 import type { UiBridge, UiWorldSession } from './ui/ui-bridge';
 import type { WorldEnvironment } from './scene/world-environment';
 import type { World } from './world/world-runtime';
+import type { WorldAudio } from './audio/world-audio';
+import type { CompanionSession } from './gameplay/companion/companion-session';
+import type { PlayerController } from './player/player-controller';
+import type { ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
+import type { CommandResult } from '@seedlands/stdlib/server/commands/command-contract';
+
+export function consumeBrowserCommand(
+  command: ServerCommand,
+  result: Extract<CommandResult, { success: true }>,
+  options: Readonly<{
+    queueSave(): void;
+    playerId: string | null;
+    playerPosition(): readonly [number, number, number] | null;
+    movePlayer(position: readonly [number, number, number]): void;
+    setEnvironmentTime(): void;
+    refreshGameplay(): void;
+  }>,
+) {
+  if (result.commit) options.queueSave();
+  if (command.type === 'teleport' && options.playerId) {
+    const position = options.playerPosition();
+    if (position) options.movePlayer(position);
+  }
+  if (command.type === 'time-set') options.setEnvironmentTime();
+  options.refreshGameplay();
+}
+
+export async function executeBrowserCommand(
+  executor: { execute(source: unknown, command: ServerCommand): Promise<CommandResult> } | null,
+  source: unknown,
+  command: ServerCommand,
+  consume: (command: ServerCommand, result: Extract<CommandResult, { success: true }>) => void,
+) {
+  if (!executor || !source) throw new Error('Gameplay command runtime is unavailable.');
+  const result = await executor.execute(source, command);
+  if (result.success) consume(command, result);
+  return result;
+}
+
+export function setGamePaused(
+  paused: boolean,
+  options: Readonly<{
+    companion: CompanionSession;
+    controller: PlayerController | null;
+    authority: BrowserAuthorityClient | null;
+    gameplay: { setSuspended(value: boolean): void } | null;
+    audio: WorldAudio | null;
+    camera: pc.Entity | null;
+    world: World | null;
+  }>,
+) {
+  options.companion.setPaused(paused);
+  options.controller?.releaseInput();
+  const control =
+    options.authority?.mode === 'local' ? (paused ? options.authority.pause() : options.authority.resume()) : undefined;
+  void control?.catch(() => undefined);
+  options.gameplay?.setSuspended(paused);
+  options.audio?.updateWorld(
+    options.camera,
+    options.world,
+    options.controller?.onGround ?? false,
+    paused,
+    options.controller?.waterImmersion,
+  );
+}
 
 export async function setAuthorityWorldClockPaused(
   environment: WorldEnvironment | null,

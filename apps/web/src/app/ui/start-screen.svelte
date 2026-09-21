@@ -27,11 +27,15 @@
   } = $props();
   let latestSeed = $state('');
   let error = $state('');
+  let worldManagementError = $state('');
+  let worlds = $state<ApplicationShell['worlds']>([]);
   let workerSupport = $state<WorkerSupport>('checking');
   onMount(() =>
     application?.subscribe(() => {
       latestSeed = application.latestSeed;
       error = application.controller.state.error;
+      worldManagementError = application.worldManagementError;
+      worlds = application.worlds;
       workerSupport = application.capabilities.workerSupport;
     }),
   );
@@ -70,6 +74,30 @@
         disabled={workerSupport !== 'supported'}
         onclick={() => void application?.continueWorld()}>继续世界 <small>{latestSeed}</small></GameButton
       >
+    {/if}
+    {#if worldManagementError}<p class="start-error" role="alert">
+        {worldManagementError}
+      </p>{/if}
+    {#if worlds.length}
+      <div class="saved-worlds" aria-label="已保存世界">
+        {#each worlds as world (world.worldId)}
+          <div class="saved-world">
+            <GameButton
+              label={`选择世界 ${world.seedText} v${world.generatorVersion}`}
+              onclick={() => {
+                application?.selectWorld(world.seedText);
+                seed = world.seedText;
+              }}
+            >
+              {world.seedText} <small>v{world.generatorVersion}</small>
+            </GameButton>
+            <GameButton
+              label={`删除世界 ${world.seedText} v${world.generatorVersion}`}
+              onclick={() => void application?.deleteWorld(world.worldId)}>删除</GameButton
+            >
+          </div>
+        {/each}
+      </div>
     {/if}
     <div class="start-fields">
       <GameTextField

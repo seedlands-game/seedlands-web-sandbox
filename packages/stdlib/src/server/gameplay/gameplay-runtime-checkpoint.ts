@@ -23,6 +23,7 @@ import type { VehicleRuntime } from './vehicle-runtime';
 import type { NavigationItemsRuntime } from './navigation-items-runtime';
 import type { CropRuntime } from './crop-runtime';
 import type { FinalEntitiesRuntime } from './final-entities-runtime';
+import type { GameplayProgressRuntime } from './gameplay-progress-runtime';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -46,6 +47,7 @@ type Options = Readonly<{
   navigationItems: NavigationItemsRuntime;
   crops: CropRuntime;
   finalEntities: FinalEntitiesRuntime;
+  progress: GameplayProgressRuntime;
   needsPlayerLimit?: number;
   installMetadata(gameplayTime: number, revision: number): void;
 }>;
@@ -74,6 +76,7 @@ export class GameplayRuntimeCheckpoint {
       this.options.navigationItems.checkpoint(),
       this.options.crops.checkpoint(),
       this.options.finalEntities.checkpoint(),
+      this.options.progress.checkpoint(),
     );
     if (this.options.compositionGuard) snapshot.composition = this.options.compositionGuard.snapshot();
     const ruleset = this.options.ruleset.snapshot();
@@ -167,6 +170,11 @@ export class GameplayRuntimeCheckpoint {
     this.options.finalEntities.restore(
       raw && typeof raw === 'object' && 'finalEntities' in raw
         ? (raw.finalEntities as import('./final-entities-runtime').FinalEntitiesCheckpoint)
+        : undefined,
+    );
+    this.options.progress.restore(
+      raw && typeof raw === 'object' && 'progress' in raw
+        ? (raw.progress as import('./gameplay-progress-runtime').GameplayProgressCheckpoint)
         : undefined,
     );
     installSchedule?.();

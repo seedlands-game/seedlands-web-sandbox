@@ -18,6 +18,8 @@
     experimentsRequireRefresh: application.experimentsRequireRefresh,
     capabilities: application.capabilities,
     performanceWarningOpen: application.performanceWarningOpen,
+    mouseSensitivity: application.mouseSensitivity,
+    difficulty: application.difficulty,
   });
   let view = $state(initial());
   const readAudio = () => application.audio.snapshot();
@@ -124,6 +126,36 @@
               >
             </select>
           </label>
+          <label class="volume-control" for="mouse-sensitivity">
+            <span>鼠标灵敏度<output>{Math.round(view.mouseSensitivity * 100)}</output></span>
+            <input
+              id="mouse-sensitivity"
+              type="range"
+              min="0.03"
+              max="0.5"
+              step="0.01"
+              value={view.mouseSensitivity}
+              oninput={(event) => application.setMouseSensitivity(Number(event.currentTarget.value))}
+            />
+          </label>
+          {#if view.difficulty}
+            <label for="settings-difficulty"
+              >难度
+              <select
+                id="settings-difficulty"
+                value={view.difficulty.value}
+                onchange={(event) =>
+                  void application.setDifficulty(
+                    event.currentTarget
+                      .value as import('@seedlands/stdlib/server/gameplay/difficulty-runtime').Difficulty,
+                  )}
+              >
+                <option value="peaceful">和平</option><option value="easy">简单</option><option value="normal"
+                  >普通</option
+                ><option value="hard">困难</option>
+              </select>
+            </label>
+          {/if}
         </div>
         <div class="reference-music experimental-settings" aria-label="实验性性能">
           <h3>实验性性能</h3>

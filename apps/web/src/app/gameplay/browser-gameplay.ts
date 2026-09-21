@@ -57,12 +57,14 @@ export class BrowserGameplay {
   private readonly viewmodel: FirstPersonViewmodel;
   private readonly outline: VoxelTargetOutline;
   private readonly breakOverlay: VoxelBreakOverlay;
+  // prettier-ignore
   private aimTarget: VoxelTarget | null = null;
   private gestureSeconds = 0;
   private inventoryOpen = false;
   private inventoryClosing = false;
   readonly stations: BrowserStations;
   private readonly inventoryPointerClient: BrowserInventoryPointer;
+  // prettier-ignore
   private previousProjection: GameplayUiProjection | undefined;
   private previousHealth: number | null = null;
   private lastCombatResultSequence: number | null = null;
@@ -227,6 +229,9 @@ export class BrowserGameplay {
         recipes: view.recipes,
         inventoryOpen: this.inventoryOpen,
         craftableRecipeIds: view.craftableRecipeIds,
+        progress: view.progress,
+        armorPoints: view.armorPoints,
+        oxygen: { value: 20, max: 20, visible: false },
         target:
           this.aimTarget && !this.blocksInput
             ? {

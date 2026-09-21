@@ -27,10 +27,12 @@ export class PlayerController {
   private pitch = -16;
   private grounded = false;
   private readonly keys = new Set<string>();
+  // prettier-ignore
   private attempts = 0;
   private spectator = false;
   private miningHeld = false;
   private activeMiningTarget: string | null = null;
+  // prettier-ignore
   private attackCooldownSeconds = 0;
   private attackBlocking = false;
   private publishedAimTarget: VoxelTarget | null = null;
@@ -171,8 +173,9 @@ export class PlayerController {
     };
     document.onmousemove = (event) => {
       if (document.pointerLockElement === canvas) {
-        this.yaw -= event.movementX * 0.13;
-        this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * 0.13));
+        const sensitivity = this.options.mouseSensitivity?.value ?? 0.13;
+        this.yaw -= event.movementX * sensitivity;
+        this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * sensitivity));
       }
     };
     document.onpointerlockchange = () => {

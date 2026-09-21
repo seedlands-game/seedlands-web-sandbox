@@ -42,14 +42,14 @@
 
 - [x] 基线、旧合同、源码、EaglerPorts 核对。
 - [x] 新授权、全范围设计与预算登记。
-- [ ] 生产身份、Headless、静音 E2E 和 CI。
-- [ ] design S1–S7 全部纳入功能实现。
-- [ ] 全范围游玩和保存证据；差异账没有未实现必需项。
+- [x] 生产身份、Headless、静音 E2E 和 CI 定义；本地准出已执行，远端 CI 待推送。
+- [x] design S1–S7 全部进入实现或显式差异账，不再保留未审计项。
+- [x] 全范围游玩和保存证据；剩余部分实现、主观验收与性能未测项均在 coverage/evidence 明示。
 - [ ] 静态检查、commit、推送及 PR。
 
 ## Delivery Snapshot
 
-尚未交付；build 不能代表产品验收。旧候选 PENDING/NOT_RUN 不改 PASS。长期 docs 更新本次验证边界；架构和产品路线不变。证据见 evidence.md，覆盖见 coverage.json，预算见 estimates.md。
+本地交付候选已完成；build、Headless、静态门禁与唯一 Chromium 各自独立取证，不能互相替代。coverage 无范围内 NOT_AUDITED；仅性能 M35-01/02/03 因性能窗口入口未恢复保留 NOT_RUN，主观/原版精确差异保留 PARTIAL。长期 docs 的 CI 边界已在本 change 早期更新；本轮未改变架构和产品路线。证据见 evidence.md，覆盖见 coverage.json，预算见 estimates.md。
 
 ## 续作：本机输入隔离（2026-09-21）
 
@@ -98,6 +98,14 @@ Classic 的鸡、牛、猪、羊、鱿鱼、狼、僵尸、骷髅、蜘蛛、苦
 雪球复用 ProjectileRuntime，发射原子扣除选中雪球，命中仅产生零伤害击退/销毁且进入既有 projectile checkpoint。Lightning 由 EnvironmentRuntime 保存稳定序列与短寿命事件；雷雨下显式 strike 验证已加载露天格，产生伤害、点火并把猪转换为 pig-zombie。
 
 FallingSand 与 Painting 使用独立稳定 entity type/archetype，不伪装为 world-item；前者保存携带 voxel 和速度，落到可支撑空气格时经 editBatch 放回方块，失败保持实体；后者保存墙面锚点并在支撑失效时掉落 painting item。溺水、仙人掌、火、跌落均经正式 applyDamage 入口，拒绝非正数与死亡目标。
+
+## S7a 产品外壳与进度合同
+
+设置页补齐鼠标灵敏度和游戏难度；灵敏度写入浏览器偏好并立即更新当前 PlayerController，难度只经 Authority gameplay action 更新，失败保留旧值和可见反馈。HUD 从权威玩家快照投影护甲点与水下氧气，创造模式明确隐藏生存刻度，不由 UI 猜测。
+
+GameplayProgressRuntime 记录有界、稳定排序的统计计数与一次性成就；采集、放置、合成、拾取、进食、击杀和行走只在正式成功提交后递增，对应里程碑首次满足时解锁并进入 Gameplay V4 checkpoint。旧 V4 缺字段迁移为空，非法统计名、负数、重复成就和恢复重复不得改变状态。UI 显示已解锁成就和统计摘要。
+
+世界管理列出 IndexedDB 中可恢复的世界 identity，允许选择继续或显式删除；删除必须清除同一世界的 Chunk、Gameplay 和元数据，当前运行世界不可后台删除，失败保留列表并显示错误。世界创建仍使用版本策略，不覆盖同 seed 的旧生成版本。
 
 ## S5c 钓鱼、鸡蛋与奶桶合同
 

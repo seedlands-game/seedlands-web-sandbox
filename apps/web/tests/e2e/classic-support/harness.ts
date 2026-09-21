@@ -24,6 +24,7 @@ export type CharacterObservation = Readonly<{
   cursor: number;
   gap?: boolean;
 }>;
+// prettier-ignore
 export type ClassicSnapshot = Readonly<{
   player: Point;
   streamCenter: readonly [number, number];
@@ -150,18 +151,20 @@ export async function waitForSnapshot(
   predicate: (value: ClassicSnapshot) => boolean,
   timeout = 20_000,
 ): Promise<ClassicSnapshot> {
+  // Capture the exact object that satisfied the predicate; the live harness snapshot keeps changing.
+  let matched: ClassicSnapshot | null = null;
   await expect
     .poll(
       async () => {
         const current = await snapshot(page);
-        return current ? predicate(current) : false;
+        if (!current || !predicate(current)) return false;
+        matched = structuredClone(current);
+        return true;
       },
       { timeout, intervals: [16, 32, 64, 100] },
     )
     .toBe(true);
-  const current = await snapshot(page);
-  if (!current) throw new Error('Classic Harness snapshot disappeared after satisfying its condition.');
-  return current;
+  return matched!;
 }
 
 export async function startClassicWorld(page: Page, scenario: ClassicScenario): Promise<void> {

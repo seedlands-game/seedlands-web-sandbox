@@ -14,6 +14,7 @@ const actionTypes = new Set<AuthorityAction['type']>([
   'move-inventory',
   'use-inventory',
   'inventory-pointer',
+  'set-difficulty',
 ]);
 const isAuthorityActionType = (value: string): value is AuthorityAction['type'] =>
   actionTypes.has(value as AuthorityAction['type']);
@@ -109,5 +110,13 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
     case 'begin-break':
     case 'place':
       return { type, position: position(source.position) };
+    case 'set-difficulty':
+      if (!['peaceful', 'easy', 'normal', 'hard'].includes(source.value as string))
+        throw new TypeError('Invalid difficulty.');
+      return {
+        type,
+        value: source.value as import('../gameplay/difficulty-runtime').Difficulty,
+        expectedRevision: nonNegativeSafeInteger(source.expectedRevision, 'difficultyRevision'),
+      };
   }
 }

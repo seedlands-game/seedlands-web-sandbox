@@ -234,6 +234,7 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
     'begin-break': ['position'],
     place: ['position'],
     'move-inventory': ['source', 'target'],
+    'set-difficulty': ['value', 'expectedRevision'],
   } as const;
   if (
     !Object.hasOwn(actionKeys, value.type) ||
@@ -245,6 +246,10 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
   if (value.type === 'craft') return isNonEmptyString(value.recipeId);
   if (value.type === 'attack') return isNonEmptyString(value.targetId);
   if (value.type === 'begin-break' || value.type === 'place') return isPosition(value.position);
+  if (value.type === 'set-difficulty')
+    return (
+      ['peaceful', 'easy', 'normal', 'hard'].includes(value.value as string) && isSafeInteger(value.expectedRevision)
+    );
   return value.type === 'move-inventory' && isSafeInteger(value.source) && isSafeInteger(value.target);
 };
 

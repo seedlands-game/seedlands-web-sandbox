@@ -4378,9 +4378,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S0",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：官方版本与字节码身份、注册表提取；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4388,9 +4388,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S0",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：固定 Seedlands Harness 环境、场景/输入/状态证据合同；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4398,9 +4398,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S0",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：方块/物品/实体元数据、掉落、配方、可获得性总账；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4408,9 +4408,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S0",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：例外、版权隔离、reference case 版本化；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4663,9 +4663,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：鼠标按住、准星、裂纹/破坏反馈节奏；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4673,9 +4673,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：放置合法性、相邻更新与面/朝向；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4786,9 +4786,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：原版亮度曲线与材质最终感知对照；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4890,9 +4890,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：第一人称镜头、摆臂/视角 bob、鼠标灵敏度；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5030,9 +5030,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：燃烧态方块/光/声音与存档恢复；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5040,9 +5040,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：单/双箱合并拆分与容器权限/库存；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5061,9 +5061,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：告示牌文本、画悬挂/掉落、唱片机播放；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5265,9 +5265,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：物品 atlas、动画/透明/高 DPI 管线与 QA；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5385,9 +5385,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：主菜单、世界创建/删除/选择与返回；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5395,9 +5395,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：选项：控制、视频、音量、难度与即时生效；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5405,9 +5405,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：暂停、失焦、重进、失败/等待反馈；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5415,9 +5415,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：版本特征的键鼠快捷键与手感；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5425,9 +5425,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：成就条件、触发、通知和世界/玩家记录；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5435,9 +5435,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：统计计数、显示与存档恢复；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5445,9 +5445,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：HUD 生命/护甲/氧气/快捷栏、准星/提示；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5455,9 +5455,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：背包/工作台/熔炉/箱子/死亡界面；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5465,9 +5465,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：字体、像素网格、对比/布局、各分辨率缩放；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5475,9 +5475,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：材质造型语言/色板/原创资产生产标准；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5485,9 +5485,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：atlas、逐方块变体、透明/动画/粒子；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5495,9 +5495,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：世界光照/雾/天空/破坏粒子感知校准；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5505,9 +5505,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：风格盲测、资产出处/许可与返工；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5515,9 +5515,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：低多边形实体 rig/动画系统与状态机；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5525,9 +5525,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：跨实体动作复用、装备/姿态组合与统一校准；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5535,9 +5535,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：第一人称手/持物、命中/伤害/死亡反馈；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5545,9 +5545,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：音频事件/方块材质声/空间与混音总线；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5555,9 +5555,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：独立原创采集/生成：步行、挖掘、放置、环境；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5565,9 +5565,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：生物/战斗/交互/天气/UI 声及映射；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5575,9 +5575,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：音乐/唱片/静默节奏、动态触发与盲测返工；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5585,9 +5585,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：世界/实体/物品/随机源一致快照；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5595,9 +5595,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：中断/崩溃恢复、写入原子性和腐坏拒绝；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5605,9 +5605,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：版本身份、资源摘要与加载错误反馈；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5615,9 +5615,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：原版事件轨迹/黄金 fixture 与复现脚本；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5625,9 +5625,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：Kernel/stdlib/Classic 确定性行为矩阵；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5635,9 +5635,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：Browser 单人旅程、输入/存档 E2E；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5645,9 +5645,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：视觉/音频对照、人审/盲测、缺口回归；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5655,7 +5655,7 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
       "execution": "NOT_RUN",
       "name": "以固定 seed/初态/输入验证：基准场景/低配机/指标/正确性停止线；记录正例、失败例、tick 和 owner 状态。"
@@ -5665,7 +5665,7 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
       "execution": "NOT_RUN",
       "name": "以固定 seed/初态/输入验证：区块/光照/液体/AI/渲染热点测量与 A/A；记录正例、失败例、tick 和 owner 状态。"
@@ -5675,7 +5675,7 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
       "execution": "NOT_RUN",
       "name": "以固定 seed/初态/输入验证：不改规则前提下优化、逐项 A/B 与组合验收；记录正例、失败例、tick 和 owner 状态。"
@@ -5685,9 +5685,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_AND_BROWSER_PASS",
       "name": "以固定 seed/初态/输入验证：阶段集成与跨模块缺陷定位/修复；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5695,9 +5695,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：设计/代码/玩法评审与安全/版权核查；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5705,9 +5705,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：文档、分阶段交付、PR/门禁与最终差距表；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -5715,9 +5715,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S7",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PROJECT_CONTRACT_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：不确定性与原版边缘反例追补；记录正例、失败例、tick 和 owner 状态。"
     }
   ],

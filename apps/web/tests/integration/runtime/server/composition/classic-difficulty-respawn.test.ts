@@ -10,6 +10,7 @@ import {
   classicOptions,
 } from '../../../../fixtures/classic/content';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { applyAuthorityPlayerAction } from '../../../../../../../packages/stdlib/src/server/authority/authority-player-action';
 
 const world = () => {
   const runtime = new GameplayRuntime({
@@ -96,4 +97,28 @@ it('GameplayRuntime 持久化难度，peaceful 清退敌对生物并从床边复
   restored.applyDamage('test', 'player', 20, 'test');
   expect(restored.respawnPlayer('player')).toEqual({ success: true });
   expect(restored.getEntity('player')?.position).toEqual([5.5, 11, 5.5]);
+});
+
+it('浏览器难度 action 经 Authority 校验 revision 并投影当前状态', () => {
+  const runtime = new (class {
+    readonly gameplay = world();
+    readonly progress = this.gameplay.progress;
+    setDifficulty = this.gameplay.setDifficulty;
+  })();
+  expect(
+    applyAuthorityPlayerAction(
+      runtime as never,
+      'player',
+      { type: 'set-difficulty', value: 'hard', expectedRevision: 0 },
+      () => {},
+    ),
+  ).toMatchObject({ success: true, checkpoint: { value: 'hard', revision: 1 } });
+  expect(
+    applyAuthorityPlayerAction(
+      runtime as never,
+      'player',
+      { type: 'set-difficulty', value: 'easy', expectedRevision: 0 },
+      () => {},
+    ),
+  ).toEqual({ success: false, reason: 'stale-revision' });
 });

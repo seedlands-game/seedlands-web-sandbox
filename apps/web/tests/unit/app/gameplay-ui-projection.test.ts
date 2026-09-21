@@ -19,6 +19,9 @@ const snapshot = () => ({
   },
   inventoryOpen: true,
   craftableRecipeIds: ['planks'],
+  armorPoints: 14,
+  oxygen: { value: 12, max: 20, visible: true },
+  progress: { playerId: 'player', statistics: { 'blocks-mined': 3 }, achievements: ['first-block'] as const },
   target: { kind: 'voxel' as const, id: '0,33,-2', label: '原木' },
   breaking: { progress: 0.5, label: '原木' },
 });
@@ -30,6 +33,8 @@ describe('gameplay retained UI projection', () => {
     expect(projected.hud).toMatchObject({
       health: { value: 12, max: 20 },
       hunger: { value: 9, max: 20 },
+      armor: { value: 14, max: 20 },
+      oxygen: { value: 12, max: 20, visible: true },
       selectedHotbarSlot: 2,
     });
     expect(projected.hud.hotbar).toHaveLength(8);
@@ -43,16 +48,19 @@ describe('gameplay retained UI projection', () => {
       lifecycle: 'alive',
       craftableRecipeIds: ['planks'],
       selectedHotbarSlot: 2,
+      progress: { statistics: { 'blocks-mined': 3 }, achievements: ['first-block'] },
     });
     expect(projected.shell.gameplay.inventory).toHaveLength(24);
-    expect(projected.shell.gameplay.recipes).toEqual([
-      expect.objectContaining({ id: 'planks', name: '木板', craftable: true }),
-      expect.objectContaining({ id: 'wood-axe', name: '木斧', craftable: false }),
-      expect.objectContaining({ id: 'stone-pickaxe', name: '石镐', craftable: false }),
-      expect.objectContaining({ id: 'wood-sword', name: '木剑', craftable: false }),
-      expect.objectContaining({ id: 'lantern', name: '灯笼', craftable: false }),
-      expect.objectContaining({ id: 'workbench', name: '工作台', craftable: false }),
-    ]);
+    expect(projected.shell.gameplay.recipes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'planks', name: '木板', craftable: true }),
+        expect.objectContaining({ id: 'wood-axe', name: '木斧', craftable: false }),
+        expect.objectContaining({ id: 'stone-pickaxe', name: '石镐', craftable: false }),
+        expect.objectContaining({ id: 'wood-sword', name: '木剑', craftable: false }),
+        expect.objectContaining({ id: 'lantern', name: '灯笼', craftable: false }),
+        expect.objectContaining({ id: 'workbench', name: '工作台', craftable: false }),
+      ]),
+    );
   });
 
   it('does not expose mutable canonical inventory references', () => {

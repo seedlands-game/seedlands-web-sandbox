@@ -33,6 +33,7 @@ import { isActorEntityType } from './gameplay/ecs-actor-state';
 import type { ActorControlSource } from './gameplay/ecs-actor-components';
 import type { KernelStateOwner } from '@seedlands/kernel/execution';
 import type { FluidCell } from './fluid/fluid-cell';
+import { armorPoints } from './gameplay/armor-equipment';
 import type { ProjectileVector } from './gameplay/projectile-runtime';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
@@ -303,6 +304,15 @@ export class GameServerGameplayHost {
   get finalEntities() {
     return this.gameplay.finalEntities;
   }
+  get progress() {
+    return this.gameplay.progress;
+  }
+  get gameplayDifficulty() {
+    return this.gameplay.difficulty.checkpoint();
+  }
+  getPlayerArmorPoints(playerId: string) {
+    return armorPoints(this.gameplay.entities.actorStateAccess(playerId), this.gameplay.content.items);
+  }
   get specialDamage() {
     return this.gameplay.specialDamage;
   }
@@ -314,6 +324,9 @@ export class GameServerGameplayHost {
   }
   applyDamage(actorId: string, playerId: string, amount: number, cause: string) {
     return this.gameplay.applyDamage(actorId, playerId, amount, cause);
+  }
+  setDifficulty(value: import('./gameplay/difficulty-runtime').Difficulty, expectedRevision?: number) {
+    return this.gameplay.setDifficulty(value, expectedRevision);
   }
   healPlayer(playerId: string, amount: number) {
     return this.gameplay.healPlayer(playerId, amount);

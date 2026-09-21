@@ -57,6 +57,25 @@ it('只在Authority明确作废输入队列时重同步预测', () => {
   expect(resynchronizeInput).toHaveBeenCalledOnce();
 });
 
+it('鼠标灵敏度即时改变真实 Pointer Lock 转向幅度', () => {
+  const canvas = {};
+  const documentStub = {
+    pointerLockElement: canvas,
+    onmousemove: null as null | ((event: { movementX: number; movementY: number }) => void),
+  };
+  vi.stubGlobal('window', {});
+  vi.stubGlobal('document', documentStub);
+  const mouseSensitivity = { value: 0.25 };
+  const controller = new PlayerController({
+    canvas,
+    physicsHz: 60,
+    mouseSensitivity,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  controller.install();
+  documentStub.onmousemove?.({ movementX: 4, movementY: 2 });
+  expect(controller.viewAngles).toEqual([-1, -16.5]);
+});
+
 it('昼夜时钟暂停仍能操作，游戏暂停和界面阻挡才阻止世界交互', () => {
   const options = {
     physicsHz: 60,
