@@ -71,6 +71,26 @@ export const progressionItemAssets = [
   ...pixelItemAssets('map', '地图', 'map'),
   ...(
     [
+      'white',
+      'orange',
+      'magenta',
+      'light-blue',
+      'yellow',
+      'lime',
+      'pink',
+      'gray',
+      'light-gray',
+      'cyan',
+      'purple',
+      'blue',
+      'brown',
+      'green',
+      'red',
+      'black',
+    ] as const
+  ).flatMap((color) => pixelItemAssets(`${color}-wool`, `${color} wool`, 'wool')),
+  ...(
+    [
       'flint-and-steel',
       'mushroom-stew',
       'painting',

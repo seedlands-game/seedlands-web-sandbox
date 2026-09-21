@@ -2759,20 +2759,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 砂岩半砖 ← 砂岩；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 砂岩半砖 ← 砂岩；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-D16",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木半砖 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木半砖 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-D17",
@@ -3824,300 +3826,330 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 蘑菇煲 ← 红/棕蘑菇+碗；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 蘑菇煲 ← 红/棕蘑菇+碗；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H56",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 曲奇 ← 小麦+可可豆；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 曲奇 ← 小麦+可可豆；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H57",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 蒲公英黄 ← 蒲公英；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 蒲公英黄 ← 蒲公英；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H58",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 玫瑰红 ← 玫瑰；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 玫瑰红 ← 玫瑰；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H59",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 骨粉 ← 骨头；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 骨粉 ← 骨头；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H60",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 橙色染料 ← 红+黄；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 橙色染料 ← 红+黄；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H61",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 黄绿色染料 ← 绿+白；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 黄绿色染料 ← 绿+白；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H62",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 浅蓝染料 ← 蓝+白；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 浅蓝染料 ← 蓝+白；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H63",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 青色染料 ← 蓝+绿；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 青色染料 ← 蓝+绿；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H64",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 紫色染料 ← 蓝+红；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 紫色染料 ← 蓝+红；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H65",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 品红染料 ← 紫+粉；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 品红染料 ← 紫+粉；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H66",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 粉色染料 ← 红+白；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 粉色染料 ← 红+白；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H67",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 灰色染料 ← 黑+白；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 灰色染料 ← 黑+白；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H68",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 浅灰染料 ← 灰+白；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 浅灰染料 ← 灰+白；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H69",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：白色 ← 羊毛+骨粉；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：白色 ← 羊毛+骨粉；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H70",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：橙色 ← 羊毛+橙染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：橙色 ← 羊毛+橙染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H71",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：品红 ← 羊毛+品红染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：品红 ← 羊毛+品红染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H72",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：浅蓝 ← 羊毛+浅蓝染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：浅蓝 ← 羊毛+浅蓝染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H73",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：黄色 ← 羊毛+黄染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：黄色 ← 羊毛+黄染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H74",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：黄绿 ← 羊毛+黄绿染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：黄绿 ← 羊毛+黄绿染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H75",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：粉色 ← 羊毛+粉染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：粉色 ← 羊毛+粉染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H76",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：灰色 ← 羊毛+灰染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：灰色 ← 羊毛+灰染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H77",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：浅灰 ← 羊毛+浅灰染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：浅灰 ← 羊毛+浅灰染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H78",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：青色 ← 羊毛+青染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：青色 ← 羊毛+青染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H79",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：紫色 ← 羊毛+紫染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：紫色 ← 羊毛+紫染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H80",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：蓝色 ← 羊毛+青金石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：蓝色 ← 羊毛+青金石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H81",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：棕色 ← 羊毛+可可豆；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：棕色 ← 羊毛+可可豆；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H82",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：绿色 ← 羊毛+仙人掌绿；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：绿色 ← 羊毛+仙人掌绿；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H83",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：红色 ← 羊毛+红染料；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：红色 ← 羊毛+红染料；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H84",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：黑色 ← 羊毛+墨囊；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛：黑色 ← 羊毛+墨囊；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H85",
@@ -4146,30 +4178,33 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 浅灰染料 ← 墨囊+2 骨粉；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 浅灰染料 ← 墨囊+2 骨粉；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H88",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 品红染料 ← 蓝+红+粉；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 品红染料 ← 蓝+红+粉；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H89",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 品红染料 ← 蓝+2 红+白；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 品红染料 ← 蓝+2 红+白；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-H90",
@@ -4308,20 +4343,22 @@
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 仙人掌 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 仙人掌 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "R-S10",
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 钻石矿石 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 钻石矿石 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2i 最终配方/冶炼闭包或此前已验证 owner 覆盖；当前 RecipeRegistry 无形状、颜色羊毛为物品而非独立体素元数据，故只记 PARTIAL。"
     },
     {
       "caseId": "M01-01",

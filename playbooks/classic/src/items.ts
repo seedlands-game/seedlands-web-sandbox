@@ -1,11 +1,13 @@
 import type { ItemDefinitionInput } from '@seedlands/stdlib/mod-api';
 import { portableItems } from './portable-items';
 import { remainingBlockItems } from './remaining-block-items';
+import { recipeClosureItems } from './recipe-closure-items';
 
 /** Version 1 storage IDs and voxel palette preserve supported save inputs. */
 export const overworldItems: readonly ItemDefinitionInput[] = [
   ...portableItems,
   ...remainingBlockItems,
+  ...recipeClosureItems,
   ...(
     [
       ['white', '白色'],
@@ -451,22 +453,6 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
     stackLimit: 64,
     capabilities: [{ type: 'place', voxel: 48 }],
   },
-  ...(
-    [
-      ['slab', '半砖', 49],
-      ['wood-stairs', '木楼梯', 50],
-      ['cobblestone-stairs', '圆石楼梯', 51],
-      ['ladder', '梯子', 53],
-      ['torch', '火把', 54],
-      ['fence', '栅栏', 57],
-    ] as const
-  ).map(([id, name, voxel]) => ({
-    id,
-    name,
-    itemType: 'block' as const,
-    stackLimit: 64,
-    capabilities: [{ type: 'place' as const, voxel }],
-  })),
   { id: 'arrow', name: '箭', itemType: 'resource', stackLimit: 64, capabilities: [] },
   {
     id: 'bow',
