@@ -64,6 +64,7 @@ import { EnvironmentRuntime } from './environment-runtime';
 import { advanceGameplayWithEnvironment } from './gameplay-environment-coordinator';
 import type { ProjectileVector } from './projectile-runtime';
 import { createGameplayProjectileOwner } from './gameplay-projectile-environment';
+import { shearSheep, tameWolf, toggleWolfSitting } from './species-interactions';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -78,6 +79,7 @@ export class GameplayRuntime {
   readonly environment: EnvironmentRuntime;
   readonly environmentQueries: GameplayEnvironmentFacade;
   readonly projectiles;
+  private readonly speciesContext = () => ({ entities: this.entities, changed: () => this.touch() });
   private readonly players = new Map<string, PlayerState>();
   private persistedRevision = 0;
   private inventoryOperationCount = 0;
@@ -387,9 +389,11 @@ export class GameplayRuntime {
   placeVoxel = (id: string, position: Position) => (this.registeredBlocks ?? this.blocks).placeVoxel(id, position);
   useFluidContainer = (id: string, position: Position) => this.blocks.useFluidContainer(id, position);
 
-  useSelectedItem = (id: string): GameplayResult =>
-    this.useInventoryItem(id, this.entities.actorStateAccess(id).selectedSlot);
+  useSelectedItem = (id: string) => this.useInventoryItem(id, this.entities.actorStateAccess(id).selectedSlot);
   fireSelectedRangedItem = (id: string, direction: ProjectileVector) => this.projectiles.fireSelected(id, direction);
+  shearSheep = (playerId: string, sheepId: string) => shearSheep(this.speciesContext(), playerId, sheepId);
+  tameWolf = (playerId: string, wolfId: string) => tameWolf(this.speciesContext(), playerId, wolfId);
+  toggleWolfSitting = (playerId: string, wolfId: string) => toggleWolfSitting(this.speciesContext(), playerId, wolfId);
 
   useInventoryItem(id: string, slot: number): GameplayResult {
     return (this.registeredInventory ?? this.inventoryActions).consume(id, slot);

@@ -4,6 +4,7 @@ import type { ItemId } from './item-registry';
 import type { BreakAction, PlayerSnapshot } from './player-state';
 import type { InventoryCursorV1 } from './modules/inventory-pointer-contract';
 import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
+import type { SpeciesStateV1 } from './species-state';
 
 export type ActorMode = 'survival' | 'creative';
 export type ActorModeComponentV1 = Readonly<{ version: 1; value: ActorMode; revision: number }>;
@@ -49,6 +50,8 @@ export type ActorComponentAccess = {
   readonly modeRevision: number;
   readonly creativeCatalog: CreativeCatalogComponentV1;
   readonly flight: ActorFlightComponentV1;
+  readonly species: SpeciesStateV1 | null;
+  replaceSpecies: (state: SpeciesStateV1 | null) => void;
   selectSlot: (slot: number) => boolean;
   replaceModeComponents: (facets: ActorModeSnapshotFacets) => void;
   replaceInventoryInteraction: (revision: number, cursor: InventoryCursorV1) => void;
@@ -93,6 +96,7 @@ export const createActorComponents = () => ({
     revision: [] as number[],
   },
   flight: { enabled: [] as boolean[], revision: [] as number[] },
+  species: { value: [] as (SpeciesStateV1 | undefined)[] },
   player: {
     spawnX: [] as number[],
     spawnY: [] as number[],
@@ -118,6 +122,7 @@ export type ActorComponentSnapshot = Readonly<{
   mode?: ActorModeComponentV1;
   creativeCatalog?: CreativeCatalogComponentV1;
   flight?: ActorFlightComponentV1;
+  species?: SpeciesStateV1;
   player?: Readonly<{
     spawnPosition: [number, number, number];
     breakAction: BreakAction | null;
