@@ -45,7 +45,7 @@
 - [x] 生产身份、Headless、静音 E2E 和 CI 定义；本地准出已执行，远端 CI 待推送。
 - [x] design S1–S7 全部进入实现或显式差异账，不再保留未审计项。
 - [x] 全范围游玩和保存证据；剩余部分实现、主观验收与性能未测项均在 coverage/evidence 明示。
-- [ ] 静态检查、commit、推送及 PR。
+- [x] 静态检查、commit、推送及 PR。
 
 ## Delivery Snapshot
 
