@@ -64,7 +64,7 @@ import { EnvironmentRuntime } from './environment-runtime';
 import { advanceGameplayWithEnvironment } from './gameplay-environment-coordinator';
 import type { ProjectileVector } from './projectile-runtime';
 import { createGameplayProjectileOwner } from './gameplay-projectile-environment';
-import { shearSheep, tameWolf, toggleWolfSitting } from './species-interactions';
+import { dyeSheep, regrowSheepWool, shearSheep, tameWolf, toggleWolfSitting } from './species-interactions';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -79,6 +79,8 @@ export class GameplayRuntime {
   readonly environment: EnvironmentRuntime;
   readonly environmentQueries: GameplayEnvironmentFacade;
   readonly projectiles;
+  readonly hasComposition;
+  readonly resources;
   private readonly speciesContext = () => ({ entities: this.entities, changed: () => this.touch() });
   private readonly players = new Map<string, PlayerState>();
   private persistedRevision = 0;
@@ -101,6 +103,8 @@ export class GameplayRuntime {
   private readonly checkpoint: GameplayRuntimeCheckpoint;
 
   constructor(private readonly callbacks: GameplayCallbacks) {
+    this.hasComposition = !!callbacks.composition;
+    this.resources = callbacks.composition?.resources ?? [];
     const resolved = resolveGameplayComposition(callbacks);
     this.content = resolved.content;
     this.environment = new EnvironmentRuntime(callbacks.environmentSeed ?? 0);
@@ -256,15 +260,8 @@ export class GameplayRuntime {
     });
   }
 
-  get hasComposition() {
-    return !!this.callbacks.composition;
-  }
-  get resources() {
-    return this.callbacks.composition?.resources ?? [];
-  }
-  getActorModeState(id: string) {
-    return isActorEntityType(this.entities.get(id)?.type ?? 'world-item') ? this.modes.stateFor(id) : null;
-  }
+  getActorModeState = (id: string) =>
+    isActorEntityType(this.entities.get(id)?.type ?? 'world-item') ? this.modes.stateFor(id) : null;
   acknowledgeBlockCommit = (value: ModuleInvocationValue) => this.registeredBlocks?.acknowledge(value);
   bindModuleOperations = (authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) =>
     this.modules.bind(authorizer, source);
@@ -394,6 +391,8 @@ export class GameplayRuntime {
   shearSheep = (playerId: string, sheepId: string) => shearSheep(this.speciesContext(), playerId, sheepId);
   tameWolf = (playerId: string, wolfId: string) => tameWolf(this.speciesContext(), playerId, wolfId);
   toggleWolfSitting = (playerId: string, wolfId: string) => toggleWolfSitting(this.speciesContext(), playerId, wolfId);
+  dyeSheep = (playerId: string, sheepId: string) => dyeSheep(this.speciesContext(), playerId, sheepId);
+  regrowSheepWool = (sheepId: string) => regrowSheepWool(this.speciesContext(), sheepId);
 
   useInventoryItem(id: string, slot: number): GameplayResult {
     return (this.registeredInventory ?? this.inventoryActions).consume(id, slot);

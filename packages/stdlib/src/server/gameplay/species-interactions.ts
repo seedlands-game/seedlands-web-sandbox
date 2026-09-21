@@ -1,6 +1,6 @@
 import { Inventory } from './inventory';
 import type { EntityStore } from './entity-store';
-import { defaultSpeciesState } from './species-state';
+import { defaultSpeciesState, WOOL_COLORS, type WoolColor } from './species-state';
 
 type Context = Readonly<{ entities: EntityStore; changed(): void }>;
 const inRange = (left: readonly number[], right: readonly number[]) =>
@@ -102,4 +102,43 @@ export function toggleWolfSitting(context: Context, playerId: string, wolfId: st
   );
   commit(context, playerId, inventory, wolfId, { ...current, sitting: !current.sitting });
   return { success: true as const, sitting: !current.sitting };
+}
+
+export function dyeSheep(context: Context, playerId: string, sheepId: string) {
+  const actor = selected(context, playerId),
+    sheep = context.entities.get(sheepId);
+  const current = sheep?.archetype === 'sheep' ? context.entities.actorStateAccess(sheepId).species : null;
+  if (!actor || !sheep || !current || !inRange(actor.player.position, sheep.position))
+    return { success: false as const, reason: 'invalid-target' };
+  const color = actor.stack?.itemId.endsWith('-dye') ? (actor.stack.itemId.slice(0, -4) as WoolColor) : null;
+  if (!color || !WOOL_COLORS.includes(color)) return { success: false as const, reason: 'requires-dye' };
+  if (current.woolColor === color) return { success: false as const, reason: 'same-color' };
+  const inventory = new Inventory(
+    actor.state.inventory.capacity,
+    actor.state.inventory.snapshot(),
+    actor.state.inventory.items,
+  );
+  inventory.removeFromSlot(actor.state.selectedSlot, 1);
+  commit(context, playerId, inventory, sheepId, { ...current, woolColor: color });
+  return { success: true as const, color };
+}
+
+export function regrowSheepWool(context: Context, sheepId: string) {
+  const sheep = context.entities.get(sheepId);
+  const current = sheep?.archetype === 'sheep' ? context.entities.actorStateAccess(sheepId).species : null;
+  if (!sheep || !current || !current.sheared) return { success: false as const, reason: 'not-sheared' };
+  const snapshot = context.entities.actorComponentSnapshot(sheepId);
+  const prepared = context.entities.prepareMutation({
+    actors: [
+      {
+        reference: context.entities.createReference(sheepId)!,
+        health: sheep.health!,
+        components: { ...snapshot, species: { ...current, sheared: false } },
+      },
+    ],
+  });
+  prepared.validate();
+  prepared.apply();
+  context.changed();
+  return { success: true as const };
 }

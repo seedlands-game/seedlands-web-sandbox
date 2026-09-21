@@ -2,6 +2,32 @@ import type { ItemDefinitionInput } from '@seedlands/stdlib/mod-api';
 
 /** Version 1 storage IDs and voxel palette preserve supported save inputs. */
 export const overworldItems: readonly ItemDefinitionInput[] = [
+  ...(
+    [
+      ['white', '白色'],
+      ['orange', '橙色'],
+      ['magenta', '品红色'],
+      ['light-blue', '淡蓝色'],
+      ['yellow', '黄色'],
+      ['lime', '黄绿色'],
+      ['pink', '粉红色'],
+      ['gray', '灰色'],
+      ['light-gray', '淡灰色'],
+      ['cyan', '青色'],
+      ['purple', '紫色'],
+      ['blue', '蓝色'],
+      ['brown', '棕色'],
+      ['green', '绿色'],
+      ['red', '红色'],
+      ['black', '黑色'],
+    ] as const
+  ).map(([id, name]) => ({
+    id: `${id}-dye`,
+    name: `${name}染料`,
+    itemType: 'resource' as const,
+    stackLimit: 64,
+    capabilities: [],
+  })),
   {
     id: 'glowstone-block',
     name: '辉光石',

@@ -4,11 +4,13 @@ import type { Asset, ItemAssetBinding } from './asset-types';
 import { nativeToolAssets } from './asset-tool-sources';
 import { builtinVisualAssets } from './visual-asset-catalog';
 import { requireClassicItemDefinition } from './classic-item-registry';
+import { dyeItemNames } from './dye-item-assets';
 
 const nativeItemAssets = [...nativeToolAssets, ...progressionItemAssets];
 
 // Explicit first-party bindings. Coverage against the authoritative item registry is tested.
 const items = [
+  ...dyeItemNames,
   ['dirt-block', '泥土块'],
   ['stone-block', '石块'],
   ['wood-block', '原木'],
@@ -54,6 +56,7 @@ const items = [
   ['gunpowder', '火药'],
   ['slimeball', '黏液球'],
   ['bed', '床'],
+  ['saddle', '鞍'],
   ['lava-bucket', '熔岩桶'],
   ['obsidian', '黑曜石'],
   ['tnt', 'TNT'],
