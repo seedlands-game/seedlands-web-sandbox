@@ -178,3 +178,6 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 追加稳定 Voxel.Lava=27、Voxel.Obsidian=28 与 FaceMaterial 30/31；旧 0–26 palette 和 generatorVersion 2–6 生成字节不变。Lava 当前为 emissive 全格材质，Obsidian 为不透明方块；黑曜石需 diamond tier 镐并掉落自身。新增 lava-bucket/obsidian 内容与原创资源。
 - fluidReaction 以 voxel id 判定种类，复用既有 sidecar source bit/level：水接 lava source 生成 Obsidian，水接流动 lava 生成 Cobblestone，输入顺序无关。fluid reaction 2 + mesh/chunk codec 23 + voxel/Wasm/resource 14 tests PASS。
 - 当前只记 PARTIAL_IMPLEMENTED：Lava 尚未进入 FluidTransactionAuthority 传播/冷却节奏，混合尚未作为 read-set 候选提交，桶拾取/放置未接，Lava 液面仍是全格材质。
+- 续作已将 FluidTransaction 的 cell/place/suppliedLevel 参数化为 Water/Lava kind：水水平衰减1，熔岩水平衰减2，垂直流保持8；异种水平邻接时 lava source→Obsidian、flowing lava→Cobblestone。candidate validator 只允许 Air/Water/Lava/合法混合产物，world edit、chunk load 与 sidecar source/remove 均激活两种流体。
+- Rust fluid kernel 同步相同 kind/decay/reaction，并重建 scalar/SIMD artifact；含随机 lava/水邻接的 TS↔Rust 逐字段对等 1 test PASS，Water/Lava Authority 36 tests PASS，verify:static:ci PASS。全仓 rustfmt 会改动既有 codec/generation/mesh/tests，本轮仅格式化修改的 fluid.rs；这不是功能失败。
+- M10-02 仍保留 PARTIAL：传播与混合已接线，但独立较慢 cadence、桶交互、燃烧伤害和 Lava 专用液面视觉仍待后续。

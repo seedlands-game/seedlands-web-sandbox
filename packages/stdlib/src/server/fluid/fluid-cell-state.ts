@@ -4,7 +4,8 @@ import type { ServerChunk } from '../game-server-types';
 import type { FluidCell } from './fluid-cell';
 
 export const legacyFluid = (voxels: Uint16Array): Uint8Array =>
-  Uint8Array.from(voxels, (voxel) => (voxel === Voxel.Water ? 0x88 : 0));
+  Uint8Array.from(voxels, (voxel) => (isFluidVoxel(voxel) ? 0x88 : 0));
+export const isFluidVoxel = (voxel: number) => voxel === Voxel.Water || voxel === Voxel.Lava;
 
 export const hasAdjacentWater = (
   getVoxel: (x: number, y: number, z: number) => number | undefined,
@@ -18,6 +19,20 @@ export const hasAdjacentWater = (
   getVoxel(x, y + 1, z) === Voxel.Water ||
   getVoxel(x, y, z - 1) === Voxel.Water ||
   getVoxel(x, y, z + 1) === Voxel.Water;
+export const hasAdjacentFluid = (
+  getVoxel: (x: number, y: number, z: number) => number | undefined,
+  x: number,
+  y: number,
+  z: number,
+) =>
+  [
+    getVoxel(x - 1, y, z),
+    getVoxel(x + 1, y, z),
+    getVoxel(x, y - 1, z),
+    getVoxel(x, y + 1, z),
+    getVoxel(x, y, z - 1),
+    getVoxel(x, y, z + 1),
+  ].some((voxel) => voxel !== undefined && isFluidVoxel(voxel));
 
 export function restoredFluidPositions(chunk: ServerChunk): Array<[number, number, number]> {
   const positions: Array<[number, number, number]> = [];
@@ -41,7 +56,7 @@ export function loadedWaterPositions(chunk: ServerChunk): Array<[number, number,
   for (let y = 0; y < CHUNK_SIZE; y += 1)
     for (let z = 0; z < CHUNK_SIZE; z += 1)
       for (let x = 0; x < CHUNK_SIZE; x += 1)
-        if (chunk.voxels[voxelIndex(x, y, z)] === Voxel.Water)
+        if (isFluidVoxel(chunk.voxels[voxelIndex(x, y, z)]))
           positions.push([chunk.cx * CHUNK_SIZE + x, chunk.cy * CHUNK_SIZE + y, chunk.cz * CHUNK_SIZE + z]);
   return positions;
 }
@@ -88,7 +103,7 @@ export function activateLoadedFluid(
         [minX + a, minY + b, minZ + CHUNK_SIZE],
       ];
       candidates.forEach((position) => {
-        if (access.peekVoxel(...position) === Voxel.Water) activate(position);
+        if (isFluidVoxel(access.peekVoxel(...position) ?? Voxel.Air)) activate(position);
       });
     }
 }

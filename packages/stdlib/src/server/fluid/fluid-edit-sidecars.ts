@@ -1,6 +1,6 @@
-import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '../../world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../../world/voxel';
 import type { ServerChunk, WorldEditBatch } from '../game-server-types';
-import { hasAdjacentWater } from './fluid-cell-state';
+import { hasAdjacentFluid, isFluidVoxel } from './fluid-cell-state';
 import type { FluidCellValue, FluidChunkSnapshot, FluidPosition } from './fluid-transaction';
 import type { FluidCell } from './fluid-cell';
 
@@ -50,7 +50,7 @@ export function captureBatchFluidState(
     const key = `${x},${y},${z}`;
     if (previous.has(key)) return;
     const voxel = callbacks.getVoxel(x, y, z);
-    previous.set(key, { x, y, z, voxel, cell: voxel === Voxel.Water ? callbacks.getCell(x, y, z) : null });
+    previous.set(key, { x, y, z, voxel, cell: isFluidVoxel(voxel) ? callbacks.getCell(x, y, z) : null });
   };
   batch.edits?.forEach((edit) => remember(edit.x, edit.y, edit.z));
   batch.buffers?.forEach((buffer) => buffer.forEach((x, y, z) => remember(x, y, z)));
@@ -72,13 +72,13 @@ export function commitBatchFluidSidecars(
     const value = callbacks.getVoxel(state.x, state.y, state.z);
     if (value === state.voxel) continue;
     callbacks.includeEditedPosition(state.x, state.y, state.z);
-    callbacks.writeCell(state.x, state.y, state.z, value === Voxel.Water ? { level: 8, source: true } : null);
+    callbacks.writeCell(state.x, state.y, state.z, isFluidVoxel(value) ? { level: 8, source: true } : null);
     if (
-      state.voxel === Voxel.Water ||
-      value === Voxel.Water ||
-      hasAdjacentWater(callbacks.peekVoxel, state.x, state.y, state.z)
+      isFluidVoxel(state.voxel) ||
+      isFluidVoxel(value) ||
+      hasAdjacentFluid(callbacks.peekVoxel, state.x, state.y, state.z)
     )
       callbacks.activate([state.x, state.y, state.z]);
-    if (state.cell?.source && value !== Voxel.Water) callbacks.removeSource([state.x, state.y, state.z]);
+    if (state.cell?.source && !isFluidVoxel(value)) callbacks.removeSource([state.x, state.y, state.z]);
   }
 }
