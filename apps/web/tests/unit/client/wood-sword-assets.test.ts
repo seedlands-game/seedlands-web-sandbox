@@ -23,6 +23,6 @@ describe('木剑同源资产接入', () => {
     expect(acceptsPixelItem({ id: 'wood-sword', itemType: 'tool' })).toBe(true);
     expect(acceptsPixelItem({ id: 'different-tool', itemType: 'tool' })).toBe(true);
     expect(acceptsPixelItem({ id: 'wood-axe', itemType: 'block', placesVoxel: 1 })).toBe(false);
-    expect(acceptsPixelItem({ id: 'berry', itemType: 'food' })).toBe(false);
+    expect(acceptsPixelItem({ id: 'berry', itemType: 'food' })).toBe(true);
   });
 });

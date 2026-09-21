@@ -20,6 +20,10 @@ export function applyAuthorityPlayerAction(
   action: AuthorityAction,
   publishCommit: (commit: WorldCommitResult) => void,
 ): unknown {
+  const record = (result: unknown, statistic: import('../gameplay/gameplay-progress-runtime').GameplayStatistic) => {
+    if ((result as { success?: boolean })?.success) server.progress.record(playerId, statistic, 1);
+    return result;
+  };
   switch (action.type) {
     case 'inventory-pointer': {
       const actor = server.resolveEntityReference(action.actor);
@@ -55,7 +59,7 @@ export function applyAuthorityPlayerAction(
     case 'select-hotbar':
       return server.selectHotbarSlot(playerId, action.slot);
     case 'craft':
-      return server.craft(playerId, action.recipeId);
+      return record(server.craft(playerId, action.recipeId), 'items-crafted');
     case 'attack':
       return server.attackEntity(playerId, action.targetId);
     case 'begin-break': {
@@ -69,13 +73,15 @@ export function applyAuthorityPlayerAction(
       const result = server.placeVoxel(playerId, action.position);
       const commit = (result as { commit?: WorldCommitResult }).commit;
       if (commit) publishCommit(commit);
-      return result;
+      return record(result, 'blocks-placed');
     }
     case 'respawn':
       return server.respawnPlayer(playerId);
     case 'move-inventory':
       return server.moveInventorySlot(playerId, action.source, action.target);
     case 'use-inventory':
-      return server.useInventoryItem(playerId, action.slot);
+      return record(server.useInventoryItem(playerId, action.slot), 'items-consumed');
+    case 'set-difficulty':
+      return server.setDifficulty(action.value, action.expectedRevision);
   }
 }

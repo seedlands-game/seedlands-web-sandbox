@@ -52,6 +52,9 @@ export type GameplayUiSource = Readonly<{
   }>;
   inventoryOpen: boolean;
   craftableRecipeIds: readonly string[];
+  progress?: import('@seedlands/stdlib/server/gameplay/gameplay-progress-runtime').GameplayProgressCheckpoint['players'][number];
+  armorPoints?: number;
+  oxygen?: Readonly<{ value: number; max: number; visible: boolean }>;
   target: Readonly<{ kind: 'voxel' | 'entity'; id: string; label: string; voxel?: number }> | null;
   breaking: Readonly<{ progress: number; label: string }> | null;
 }>;
@@ -61,6 +64,8 @@ export type GameplayUiProjection = Readonly<{
     combat: CombatUiProjection;
     health: Readonly<{ value: number; max: 20 }>;
     hunger: Readonly<{ value: number; max: 20 }>;
+    armor: Readonly<{ value: number; max: 20 }>;
+    oxygen: Readonly<{ value: number; max: number; visible: boolean }>;
     mode: ActorMode;
     flightEnabled: boolean;
     selectedHotbarSlot: number;
@@ -162,6 +167,8 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
       combat: projectCombatUi(source.player.combat),
       health: { value: source.player.health, max: 20 as const },
       hunger: { value: source.player.hunger, max: 20 as const },
+      armor: { value: source.armorPoints ?? 0, max: 20 as const },
+      oxygen: source.oxygen ?? { value: 20, max: 20, visible: false },
       mode,
       flightEnabled,
       selectedHotbarSlot,
@@ -211,6 +218,7 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
           result: recipe.outputs.map((stack) => `${items.require(stack.itemId).name} × ${stack.count}`).join(' + '),
           craftable: source.craftableRecipeIds.includes(recipe.id),
         })),
+        ...(source.progress ? { progress: source.progress } : {}),
       },
     },
     previous?.shell,

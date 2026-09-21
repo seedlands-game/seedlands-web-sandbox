@@ -35,6 +35,7 @@ const reasonsByAction = {
   ],
   'move-inventory': ['player-dead', 'cannot-move-item'],
   'use-inventory': ['player-dead', 'invalid-slot', 'no-selected-item', 'item-not-usable', 'hunger-full'],
+  'set-difficulty': ['stale-revision'],
 } as const satisfies Record<AuthorityAction['type'], readonly string[]>;
 type ActionFailureReason = (typeof reasonsByAction)[AuthorityAction['type']][number];
 type ActionOutcomeReference =
@@ -121,6 +122,7 @@ function outcome(action: AuthorityAction, value: unknown): ActionOutcomeReferenc
     case 'respawn':
     case 'move-inventory':
     case 'use-inventory':
+    case 'set-difficulty':
       return { success: true };
     default:
       throw new TypeError('Unsupported public action.');

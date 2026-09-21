@@ -41,6 +41,8 @@ const createGame = () =>
   ({
     onRuntimeFailure: null,
     loadLatestWorldSeed: vi.fn(async () => null),
+    listWorlds: vi.fn(async () => []),
+    deleteWorld: vi.fn(async () => ({ deleted: true })),
     loadSavedSession: vi.fn(() => null),
     start: vi.fn(async () => undefined),
     prepareMeleeShowcase: vi.fn(async () => undefined),
@@ -48,6 +50,9 @@ const createGame = () =>
     leaveWorld: vi.fn(async () => undefined),
     setPaused: vi.fn(),
     releaseInput: vi.fn(),
+    setMouseSensitivity: vi.fn(),
+    setDifficulty: vi.fn(async () => undefined),
+    difficulty: { version: 1, value: 'normal', revision: 0 },
   }) as unknown as Game;
 
 const createAudio = () => ({ unlock: vi.fn(async () => true) }) as unknown as GlobalAudio;
@@ -131,6 +136,53 @@ describe('ApplicationShell experiment and capability gates', () => {
     releaseResource();
     await initializing;
     expect(bridge.shell.get().phase).toBe('menu');
+    application.dispose();
+  });
+
+  it('鼠标灵敏度持久化并即时下发，难度经世界正式入口更新', async () => {
+    const game = createGame();
+    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
+      preflight: async () => capability(),
+    });
+    application.setMouseSensitivity(0.25);
+    expect(game.setMouseSensitivity).toHaveBeenCalledWith(0.25);
+    expect(storage.getItem('seedlands.mouse-sensitivity.v1')).toBe('0.25');
+    await application.setDifficulty('hard');
+    expect(game.setDifficulty).toHaveBeenCalledWith('hard');
+    application.dispose();
+  });
+
+  it('菜单列出、选择并删除世界，运行中拒绝删除', async () => {
+    const game = createGame();
+    game.listWorlds.mockResolvedValue([
+      { worldId: 'seedlands:g10:oak', seedText: 'oak', generatorVersion: 10, updatedAt: 2 },
+    ]);
+    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+    expect(application.worlds).toHaveLength(1);
+    application.selectWorld('oak');
+    await application.deleteWorld('seedlands:g10:oak');
+    expect(game.deleteWorld).toHaveBeenCalledWith('seedlands:g10:oak');
+    await application.start('oak', 'medium');
+    await expect(application.deleteWorld('seedlands:g10:oak')).rejects.toThrow(/主菜单/);
+    application.dispose();
+  });
+
+  it('世界删除失败保留目录并暴露可见错误', async () => {
+    const game = createGame();
+    game.listWorlds.mockResolvedValue([
+      { worldId: 'seedlands:g10:oak', seedText: 'oak', generatorVersion: 10, updatedAt: 2 },
+    ]);
+    game.deleteWorld.mockRejectedValueOnce(new Error('删除事务失败'));
+    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+    await expect(application.deleteWorld('seedlands:g10:oak')).resolves.toBe(false);
+    expect(application.worlds).toHaveLength(1);
+    expect(application.worldManagementError).toBe('删除事务失败');
     application.dispose();
   });
 

@@ -16,6 +16,8 @@ import type {
   PersistenceCorpusSummary as CorpusSummary,
   PersistenceInitTask as InitTask,
   PersistenceLatestWorldTask as LatestWorldTask,
+  PersistenceListWorldsTask as ListWorldsTask,
+  PersistenceDeleteWorldTask as DeleteWorldTask,
   PersistenceLoadBatchTask as LoadBatchTask,
   PersistenceLoadTask as LoadTask,
   PersistenceSaveFrozenTask as SaveFrozenTask,
@@ -37,6 +39,7 @@ import {
   requestPersistenceResult as requestResult,
 } from './persistence-indexeddb';
 import { createPersistenceWorldgenCache, persistenceWorldgenProviders } from './persistence-worldgen-cache';
+import { deleteStoredWorld, listStoredWorlds, worldChunkRange } from './persistence-world-directory';
 
 let config: WorkerConfig | null = null;
 let databasePromise: Promise<IDBDatabase> | null = null;
@@ -324,6 +327,14 @@ const latestWorld = async (task: LatestWorldTask) => {
   }
 };
 
+const listWorlds = async (task: ListWorldsTask) => {
+  return listStoredWorlds(task.databaseName);
+};
+
+const deleteWorld = async (task: DeleteWorldTask) => {
+  return deleteStoredWorld(task.databaseName, task.worldId);
+};
+
 const stats = async () => {
   if (!config) throw new Error('Persistence worker is not initialized.');
   const opened = await database();
@@ -341,12 +352,6 @@ const stats = async () => {
   await done;
   return { storedChunkCount: count };
 };
-
-const worldChunkRange = (worldId: string) =>
-  IDBKeyRange.bound(
-    [worldId, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY],
-    [worldId, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
-  );
 
 const corpusVoxels = (index: number, count: number) => {
   const procedural = proceduralChunk(index, 0, 0);
@@ -440,6 +445,8 @@ const handle = async (
   active?: ActivePersistenceWorkerTask,
 ): Promise<unknown> => {
   if (task.kind === 'latest-world') return latestWorld(task);
+  if (task.kind === 'list-worlds') return listWorlds(task);
+  if (task.kind === 'delete-world') return deleteWorld(task);
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
   if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs, receivedAtEpochMs, mailboxEncodings);

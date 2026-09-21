@@ -23,6 +23,7 @@ import {
 import { MELEE_SHOWCASE_SEED } from './gameplay/melee-action-showcase';
 
 const QUALITY_KEY = 'seedlands.quality.v1';
+const SENSITIVITY_KEY = 'seedlands.mouse-sensitivity.v1';
 
 type PendingStart = Readonly<{
   seed: string;
@@ -41,7 +42,10 @@ type ApplicationShellOptions = Readonly<{
 export class ApplicationShell {
   readonly controller: ShellController;
   quality: ShellQuality = 'medium';
+  mouseSensitivity = 0.13;
   latestSeed = '';
+  worlds: readonly Readonly<{ worldId: string; seedText: string; generatorVersion: number; updatedAt: number }>[] = [];
+  worldManagementError = '';
   panel: 'settings' | 'guide' | null = null;
   readonly appliedExperiments: ResolvedExperimentalClientOptions;
   pendingExperiments: ExperimentalClientOptions;
@@ -82,6 +86,9 @@ export class ApplicationShell {
     };
     try {
       this.quality = sanitizeQuality(localStorage.getItem(QUALITY_KEY));
+      const sensitivity = Number(localStorage.getItem(SENSITIVITY_KEY));
+      if (Number.isFinite(sensitivity) && sensitivity >= 0.03 && sensitivity <= 0.5)
+        this.mouseSensitivity = sensitivity;
     } catch {
       /* 使用默认。 */
     }
@@ -240,6 +247,26 @@ export class ApplicationShell {
     return this.start(this.latestSeed, this.quality);
   }
 
+  selectWorld(seed: string) {
+    if (this.controller.state.phase !== 'menu') return;
+    this.latestSeed = seed;
+    this.publish();
+  }
+
+  async deleteWorld(worldId: string) {
+    if (this.controller.state.phase !== 'menu') throw new Error('只能在主菜单删除世界。');
+    try {
+      await this.game.deleteWorld(worldId);
+      this.worldManagementError = '';
+      await this.refresh();
+      return true;
+    } catch (error) {
+      this.worldManagementError = error instanceof Error ? error.message : '世界删除失败。';
+      this.publish();
+      return false;
+    }
+  }
+
   openPanel(panel: 'settings' | 'guide') {
     this.controller.pause();
     this.panel = panel;
@@ -259,6 +286,27 @@ export class ApplicationShell {
       /* 本次仍生效。 */
     }
     this.publish();
+  }
+
+  setMouseSensitivity(value: number) {
+    if (!Number.isFinite(value) || value < 0.03 || value > 0.5) return;
+    this.mouseSensitivity = value;
+    this.game.setMouseSensitivity(value);
+    try {
+      localStorage.setItem(SENSITIVITY_KEY, String(value));
+    } catch {
+      /* 本次仍生效。 */
+    }
+    this.publish();
+  }
+
+  async setDifficulty(value: import('@seedlands/stdlib/server/gameplay/difficulty-runtime').Difficulty) {
+    await this.game.setDifficulty(value);
+    this.publish();
+  }
+
+  get difficulty() {
+    return this.game.difficulty;
   }
 
   setExperiment<Field extends ExperimentalOptionField>(field: Field, value: ExperimentalClientOptions[Field]) {
@@ -304,8 +352,11 @@ export class ApplicationShell {
 
   private async refresh() {
     try {
-      this.latestSeed = (await this.game.loadLatestWorldSeed()) ?? this.game.loadSavedSession()?.seed ?? '';
+      this.worlds = await this.game.listWorlds();
+      this.latestSeed =
+        this.worlds[0]?.seedText ?? (await this.game.loadLatestWorldSeed()) ?? this.game.loadSavedSession()?.seed ?? '';
     } catch {
+      this.worlds = [];
       this.latestSeed = this.game.loadSavedSession()?.seed ?? '';
     }
     this.publish();

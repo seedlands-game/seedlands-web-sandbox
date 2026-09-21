@@ -109,6 +109,9 @@ export type AuthorityGameplayView = Readonly<{
   entities: readonly GameplayEntityView[];
   actors: readonly ActorState[];
   craftableRecipeIds: readonly string[];
+  progress?: import('../gameplay/gameplay-progress-runtime').GameplayProgressCheckpoint['players'][number];
+  difficulty?: import('../gameplay/difficulty-runtime').DifficultyCheckpoint;
+  armorPoints?: number;
   metrics: AuthorityGameplayMetrics;
 }>;
 
@@ -179,7 +182,12 @@ export type AuthorityAction =
   | Readonly<{ type: 'place'; position: [number, number, number] }>
   | Readonly<{ type: 'respawn' }>
   | Readonly<{ type: 'move-inventory'; source: number; target: number }>
-  | Readonly<{ type: 'use-inventory'; slot: number }>;
+  | Readonly<{ type: 'use-inventory'; slot: number }>
+  | Readonly<{
+      type: 'set-difficulty';
+      value: import('../gameplay/difficulty-runtime').Difficulty;
+      expectedRevision: number;
+    }>;
 
 export type AuthorityActionResult = Readonly<{
   /** 当前 Authority 总会提供；可选仅兼容历史本地 fixture。网络投影必须验证存在。 */

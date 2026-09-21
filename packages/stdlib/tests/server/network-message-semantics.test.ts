@@ -31,6 +31,22 @@ describe('public network message semantics', () => {
       }),
     ).toBe(false);
     expect(isPublicInboundMessage({ ...action, capabilities: ['mutation'] })).toBe(false);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 10,
+        action: { type: 'set-difficulty', value: 'hard', expectedRevision: 0 },
+      }),
+    ).toBe(true);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 11,
+        action: { type: 'set-difficulty', value: 'nightmare', expectedRevision: 0 },
+      }),
+    ).toBe(false);
     expect(isPublicInboundMessage({ ...action, action: { type: 'set-block', position: [0, 0, 0], voxel: 1 } })).toBe(
       false,
     );

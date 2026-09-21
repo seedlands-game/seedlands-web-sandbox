@@ -3,11 +3,10 @@ import * as sceneBootstrap from './scene/scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
 import { WaterExperience } from './gameplay/water-experience';
-import { BrowserChunkPersistence } from '../client/persistence/browser-chunk-persistence';
 import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/presentation/performance-profile';
 // prettier-ignore
-import { executeSlashCommand, type CommandExecutorPort, type SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
+import type { CommandExecutorPort, SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
 // prettier-ignore
 import { ALL_COMMAND_CAPABILITIES, type CommandSource, type ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import type { LifecycleSnapshot, RestoredSession } from './app-contracts';
@@ -42,6 +41,11 @@ import type { AuthorityReady } from '@seedlands/stdlib/server/protocol/authority
 import { readGameRuntimeDiagnostics } from './experimental/game-runtime-diagnostics';
 import { restoreBrowserPresentation } from './world/browser-world-restore';
 import { CompanionSession } from './gameplay/companion/companion-session';
+import { gameDifficulty, setGameDifficulty, setGameMouseSensitivity } from './player/game-user-settings';
+import { deleteBrowserWorld, latestBrowserWorldSeed, listBrowserWorlds } from './world/browser-world-directory';
+import { executeGameSlashCommand } from './gameplay/game-command-runtime';
+import { createGameCommandConsumer } from './gameplay/game-command-consumer';
+import { disposeGameOwnedResources } from './world/game-runtime-disposal';
 
 export class Game {
   private paused = false;
@@ -90,6 +94,9 @@ export class Game {
   onRuntimeFailure: ((error: Error) => void) | null = null;
   private readonly onResize = () => this.app?.resizeCanvas();
   private readonly onPageHide = () => void this.saveQueue.flush().catch(() => undefined);
+  private readonly mouseSensitivity = { value: 0.13 };
+  // prettier-ignore
+  private readonly commandConsumer = createGameCommandConsumer({ queueSave: () => this.saveQueue.queue(), playerId: () => this.serverPlayerId, authority: () => this.authority, controller: () => this.controller, world: () => this.world, environment: () => this.environment, gameplay: () => this.gameplayClient });
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -128,8 +135,15 @@ export class Game {
   }
 
   loadSavedSession = () => this.store.load();
-
-  loadLatestWorldSeed = async () => (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
+  loadLatestWorldSeed = latestBrowserWorldSeed;
+  listWorlds = listBrowserWorlds;
+  deleteWorld = deleteBrowserWorld;
+  setMouseSensitivity = (value: number) => setGameMouseSensitivity(this.mouseSensitivity, value);
+  setDifficulty = (value: import('@seedlands/stdlib/server/gameplay/difficulty-runtime').Difficulty) =>
+    setGameDifficulty(this.authority, this.gameplayClient, value, () => this.saveQueue.queue());
+  get difficulty() {
+    return gameDifficulty(this.authority);
+  }
 
   // prettier-ignore
   async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode = 'continue', actorMode: ActorMode = 'survival') {
@@ -304,6 +318,7 @@ export class Game {
       getWorld: () => this.world,
       getEnvironment: () => this.environment,
       isPaused: () => this.paused,
+      mouseSensitivity: this.mouseSensitivity,
       uiBridge: this.uiBridge,
       getGameplay: () => this.gameplayClient,
       getUiSession: () => this.uiSession,
@@ -393,28 +408,25 @@ export class Game {
   }
 
   async executeCommand(input: string): Promise<SlashCommandExecution> {
-    if (!this.commandExecutor || !this.commandSource) throw new Error('服务端命令入口尚未就绪。');
-    const execution = await executeSlashCommand(this.commandExecutor, this.commandSource, input);
-    if (execution.command && execution.result.success) this.consumeBrowserCommand(execution.command, execution.result);
-    return execution;
+    return executeGameSlashCommand(this.commandExecutor, this.commandSource, input, this.commandConsumer);
   }
 
   prepareMeleeShowcase = async () => void (await this.gameplayClient?.prepareMeleeShowcase());
-
   triggerMeleeShowcaseDamage = async () => void (await this.gameplayClient?.triggerMeleeShowcaseDamage());
 
   releaseInput = () => this.controller?.releaseInput();
 
   setPaused(paused: boolean) {
     this.paused = paused;
-    this.companion.setPaused(paused);
-    this.controller?.releaseInput();
-    const control =
-      this.authority?.mode === 'local' ? (paused ? this.authority.pause() : this.authority.resume()) : undefined;
-    void control?.catch(() => undefined);
-    this.gameplayClient?.setSuspended(paused);
-    // prettier-ignore
-    this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, paused, this.controller?.waterImmersion);
+    runtimeControls.setGamePaused(paused, {
+      companion: this.companion,
+      controller: this.controller,
+      authority: this.authority,
+      gameplay: this.gameplayClient,
+      audio: this.worldAudio,
+      camera: this.camera,
+      world: this.world,
+    });
   }
 
   async leaveWorld() {
@@ -444,7 +456,6 @@ export class Game {
   toggleCollisionDebug = () => this.collisionDebug?.toggle();
 
   setCollisionDebugContacts = (enabled: boolean) => this.collisionDebug?.setDetails({ contacts: enabled });
-
   setCollisionDebugSensors = (enabled: boolean) => this.collisionDebug?.setDetails({ sensors: enabled });
 
   closeInventory = () => this.gameplayClient?.closeInventory();
@@ -461,34 +472,17 @@ export class Game {
   toggleCommandShell = () => runtimeControls.toggleCommandShell(this.uiBridge, this.controller);
 
   closeCommandShell = () => this.uiBridge.publishShell({ commandOpen: false });
-
   closeMap = () => this.uiBridge.publishShell({ mapOpen: false });
 
   setMapLayer = (layer: MapLayer) => runtimeControls.setMapLayer(this.uiBridge, layer);
 
-  private consumeBrowserCommand(
-    command: ServerCommand,
-    result: Extract<SlashCommandExecution['result'], { success: true }>,
-  ) {
-    if (result.commit) this.saveQueue.queue();
-    if (command.type === 'teleport' && this.serverPlayerId) {
-      const entity = this.authority?.gameplay.entities.find((candidate) => candidate.id === this.serverPlayerId);
-      if (entity)
-        void this.controller?.movePlayerTo(
-          entity.position[0],
-          entity.position[1] + PLAYER_FEET_OFFSET,
-          entity.position[2],
-        );
-    }
-    if (command.type === 'time-set' && this.world && this.environment) this.environment.setTime(this.world.worldTime);
-    this.gameplayClient?.refresh();
-  }
-
   private async executeGameplayCommand(command: ServerCommand) {
-    if (!this.commandExecutor || !this.commandSource) throw new Error('Gameplay command runtime is unavailable.');
-    const result = await this.commandExecutor.execute(this.commandSource, command);
-    if (result.success) this.consumeBrowserCommand(command, result);
-    return result;
+    return runtimeControls.executeBrowserCommand(
+      this.commandExecutor,
+      this.commandSource,
+      command,
+      this.commandConsumer,
+    );
   }
 
   private publishDebugVisibility = (visible: boolean) =>
@@ -504,45 +498,13 @@ export class Game {
   private disposeRuntime() {
     this.companion.stop();
     this.startGeneration += 1;
-    this.worldAudio?.dispose();
-    this.worldAudio = null;
-    this.uiSession?.dispose();
-    this.uiSession = null;
-    this.commandExecutor = null;
-    this.commandSource = null;
     this.removeHarness?.();
-    this.removeHarness = null;
-    this.controller?.dispose();
-    this.controller = null;
-    this.collisionDebug?.dispose();
-    this.collisionDebug = null;
-    this.gameplayClient?.dispose();
-    this.gameplayClient = null;
     this.uiBridge.publishShell({ commandOpen: false, mapOpen: false });
     if (this.world) {
-      this.world.dispose();
       this.lifecycle.disposedWorlds += 1;
     }
-    this.world = null;
-    this.logicClient?.dispose();
-    this.logicClient = null;
-    this.authority?.dispose();
-    this.authority = null;
-    this.computeRuntime?.dispose();
-    this.computeRuntime = null;
-    this.authoritySync.clear();
-    this.visualEffects?.destroy();
-    this.visualEffects = null;
-    this.waterExperience?.destroy();
-    this.waterExperience = null;
-    this.environment?.destroy();
-    this.environment = null;
-    this.visualResources?.destroy();
-    this.visualResources = null;
-    this.app?.destroy();
-    this.app = null;
-    this.experimentState.clearRenderer();
-    this.camera = null;
+    // prettier-ignore
+    disposeGameOwnedResources({ disposable: [this.worldAudio, this.uiSession, this.controller, this.collisionDebug, this.gameplayClient, this.world, this.logicClient, this.authority, this.computeRuntime], destroyable: [this.visualEffects, this.waterExperience, this.environment, this.visualResources, this.app], clear: () => { this.authoritySync.clear(); this.experimentState.clearRenderer(); }, target: this, fields: ['worldAudio', 'uiSession', 'commandExecutor', 'commandSource', 'removeHarness', 'controller', 'collisionDebug', 'gameplayClient', 'world', 'logicClient', 'authority', 'computeRuntime', 'visualEffects', 'waterExperience', 'environment', 'visualResources', 'app', 'camera'] });
     this.serverPlayerId = null;
   }
 }

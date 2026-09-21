@@ -61,6 +61,7 @@ import { createGameplayEnvironmentAdvancer } from './gameplay-environment-coordi
 import type { ProjectileVector } from './projectile-runtime';
 import { createGameplayWorldSystems } from './gameplay-world-systems';
 import { assertGameplayRevisionCapacity } from './gameplay-revision-capacity';
+import { GameplayProgressRuntime } from './gameplay-progress-runtime';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -102,6 +103,7 @@ export class GameplayRuntime {
   readonly structures;
   readonly finalEntities;
   readonly specialDamage;
+  readonly progress;
   private readonly selectHotbar;
   private readonly requestPlayerCombat;
   private readonly advanceWorldRules;
@@ -111,6 +113,7 @@ export class GameplayRuntime {
     this.content = resolved.content;
     this.environment = new EnvironmentRuntime(callbacks.environmentSeed ?? 0);
     this.environmentQueries = new GameplayEnvironmentFacade(this, callbacks);
+    this.progress = new GameplayProgressRuntime(() => this.touch());
     const kernel = createGameplayKernelRuntime(this.content, callbacks.composition, callbacks.worldId);
     this.kernelRuntime = kernel.runtime;
     this.kernelState = kernel.runtime.stateOwner;
@@ -326,6 +329,7 @@ export class GameplayRuntime {
       navigationItems: this.navigationItems,
       crops: this.crops,
       finalEntities: this.finalEntities,
+      progress: this.progress,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);
@@ -458,11 +462,7 @@ export class GameplayRuntime {
     return RuntimeLifecycle.bindRegisteredActorRequest(this.registeredCombat, 'Combat', binding);
   }
 
-  attackEntity = (
-    playerId: string,
-    targetId: string,
-  ): GameplayResult<{ actionId: string; buffered: boolean; damage?: number }> =>
-    this.requestPlayerCombat(playerId, targetId);
+  attackEntity = (playerId: string, targetId: string) => this.requestPlayerCombat(playerId, targetId);
 
   recordAuthorityMutation = (): void => this.touch();
 

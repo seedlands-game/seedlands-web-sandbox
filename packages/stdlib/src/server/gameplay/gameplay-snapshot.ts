@@ -32,6 +32,7 @@ import { navigationCheckpointFromSnapshot, validateNavigationItemsCheckpoint } f
 import type { NavigationItemsCheckpoint } from './navigation-items-runtime';
 import { validateCropCheckpoint, type CropCheckpoint } from './crop-runtime';
 import { validateFinalEntitiesCheckpoint, type FinalEntitiesCheckpoint } from './final-entities-runtime';
+import { validateGameplayProgressCheckpoint, type GameplayProgressCheckpoint } from './gameplay-progress-runtime';
 export { legacyPlayerPositionToFeet } from './legacy-gameplay-position';
 import { migrateLegacyEntity, migrateLegacyPlayer } from './legacy-gameplay-position';
 
@@ -79,6 +80,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   navigationItems?: NavigationItemsCheckpoint;
   crops?: CropCheckpoint;
   finalEntities?: FinalEntitiesCheckpoint;
+  progress?: GameplayProgressCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -102,6 +104,7 @@ export const createGameplaySnapshotV4 = (
   navigationItems?: NavigationItemsCheckpoint,
   crops?: CropCheckpoint,
   finalEntities?: FinalEntitiesCheckpoint,
+  progress?: GameplayProgressCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -127,6 +130,7 @@ export const createGameplaySnapshotV4 = (
   ...(navigationItems ? { navigationItems: validateNavigationItemsCheckpoint(navigationItems) } : {}),
   ...(crops ? { crops: validateCropCheckpoint(crops) } : {}),
   ...(finalEntities ? { finalEntities: validateFinalEntitiesCheckpoint(finalEntities) } : {}),
+  ...(progress ? { progress: validateGameplayProgressCheckpoint(progress) } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 
@@ -455,6 +459,7 @@ export function validateGameplaySnapshot(
       navigationCheckpointFromSnapshot(source, entities),
       source.version === 4 && source.crops ? validateCropCheckpoint(source.crops) : undefined,
       source.version === 4 && source.finalEntities ? validateFinalEntitiesCheckpoint(source.finalEntities) : undefined,
+      source.version === 4 && source.progress ? validateGameplayProgressCheckpoint(source.progress) : undefined,
     );
     if (options.registeredNeeds && sourceVersion < 4) {
       const phase =

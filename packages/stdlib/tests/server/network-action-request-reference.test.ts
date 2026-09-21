@@ -12,10 +12,11 @@ const actions: readonly AuthorityAction[] = [
   { type: 'respawn' },
   { type: 'move-inventory', source: 0, target: Number.MAX_SAFE_INTEGER },
   { type: 'use-inventory', slot: Number.MAX_SAFE_INTEGER },
+  { type: 'set-difficulty', value: 'hard', expectedRevision: 2 },
 ];
 
 describe('动作请求参考投影', () => {
-  it('投影九种真实 Host 参数，复制动作且不携带客户端身份', () => {
+  it('投影十种真实 Host 参数，复制动作且不携带客户端身份', () => {
     for (const [sequence, action] of actions.entries()) {
       const projected = projectActionRequestReference(action, sequence);
       expect(projected).toEqual({

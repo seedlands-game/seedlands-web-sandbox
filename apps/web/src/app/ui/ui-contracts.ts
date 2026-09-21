@@ -57,6 +57,7 @@ export type ShellState = Readonly<{
       result: string;
       craftable: boolean;
     }>[];
+    progress?: import('@seedlands/stdlib/server/gameplay/gameplay-progress-runtime').GameplayProgressCheckpoint['players'][number];
   }>;
 }>;
 
@@ -66,6 +67,8 @@ export type HudState = Readonly<{
   worldClock: string;
   health: Readonly<{ value: number; max: number }>;
   hunger: Readonly<{ value: number; max: number }>;
+  armor: Readonly<{ value: number; max: number }>;
+  oxygen: Readonly<{ value: number; max: number; visible: boolean }>;
   mode: ActorMode;
   flightEnabled: boolean;
   selectedHotbarSlot: number;

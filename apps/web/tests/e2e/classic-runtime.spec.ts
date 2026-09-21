@@ -29,6 +29,7 @@ import {
   type ClassicWindow,
   type ClassicSnapshot,
 } from './classic-support/harness';
+import { configureClassicSettings, deleteClassicWorld, requireHeadlessClassic } from './classic-support/settings';
 import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironment } from './classic-support/identity';
 import { aimAtVoxelWithRealMouse } from './classic-support/aim';
 import {
@@ -52,19 +53,17 @@ import {
   traceEpoch,
 } from './classic-support/journey';
 
+// prettier-ignore
 const stageResults: Partial<Record<Stage, StageResult>> = {};
 const stageSamples: Partial<Record<Stage, ClassicSnapshot>> = {};
+// prettier-ignore
 const benchmarkMode = process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1';
 let evidenceWritten = false;
 let restoreEvidence: Readonly<Record<string, unknown>> | undefined;
 const logicEvidence: ClassicLogicObservationEvidence[] = [];
 
 test.beforeAll(async ({ headless, launchOptions }) => {
-  if (!headless || launchOptions.headless === false) {
-    throw new Error(
-      'Classic acceptance requires bundled Chromium in headless mode; native browser windows are forbidden.',
-    );
-  }
+  requireHeadlessClassic(headless, launchOptions);
 });
 
 test.afterEach(async ({ page }, testInfo) => {
@@ -83,12 +82,13 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   for (const stage of Object.keys(stageSamples) as Stage[]) delete stageSamples[stage];
 
   const { pageErrors, failedResponses, assets, workers } = observeBrowserRuntime(page);
-
   await test.step('C0 启动固定 Classic 生产世界并冻结初态', async () => {
     await startClassicWorld(page, classicScenario);
   });
+  // prettier-ignore
   const prepared = await prepareInitialState(page, classicScenario);
   const npcInitial = await characterObservation(page, prepared.npcId);
+  // prettier-ignore
   const artifact = await browserArtifact(page);
   const packLock = await browserPackLock(page);
   const composition = await compositionIdentity(page);
@@ -158,6 +158,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   };
   stageSamples.C0 = baseline;
 
+  await configureClassicSettings(page);
   await test.step('C1 Pointer Lock、真实转向/移动/跳跃并跨越 Chunk', async () => {
     await lockPointer(page);
     const beforeTurn = (await snapshot(page))!;
@@ -484,10 +485,10 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   });
 
   await test.step('重开后真实创造目录放置玻璃并保留画面', () => placeGlassAfterRestore(page, testInfo));
-
   await test.step('V5金钻资源目录与真实钻石块建造', () => replaceGlassWithDiamondBlock(page, testInfo));
 
   const final = (await snapshot(page))!;
+  await deleteClassicWorld(page, classicScenario.seed, classicScenario.generatorVersion);
   await attachClassicEvidence(testInfo, {
     scenario: classicScenario,
     stages: stageResults,

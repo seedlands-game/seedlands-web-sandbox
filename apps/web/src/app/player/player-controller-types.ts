@@ -45,4 +45,5 @@ export type PlayerControllerOptions = {
   };
   physicsHz: 30 | 60 | 120;
   estimatedInputTransitMs?: number;
+  mouseSensitivity?: Readonly<{ value: number }>;
 };

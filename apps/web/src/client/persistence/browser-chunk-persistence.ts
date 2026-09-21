@@ -38,6 +38,7 @@ import type {
 } from './browser-persistence-worker-contract';
 import { prepareFrozenSnapshotWrite, recordFrozenSnapshotWrite } from './browser-frozen-snapshot-write';
 import { assertWorldgenProviderIdentity, type KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import { requestWorldDirectory, type StoredWorldSummary } from './browser-world-directory';
 
 export { decodeBrowserWorldSave } from './browser-world-save';
 export type { BrowserWorldSave, SerializedChunkSnapshot } from './browser-world-save';
@@ -166,6 +167,11 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       persistence.dispose();
     }
   }
+
+  static listWorlds = (databaseName = 'seedlands-chunks-v1') =>
+    requestWorldDirectory<readonly StoredWorldSummary[]>({ kind: 'list-worlds', databaseName });
+  static deleteWorld = (worldId: string, databaseName = 'seedlands-chunks-v1') =>
+    requestWorldDirectory<{ deleted: true; worldId: string }>({ kind: 'delete-world', databaseName, worldId });
 
   private playerValue: [number, number, number] | null = null;
   private gameplaySnapshotValue: unknown = null;
