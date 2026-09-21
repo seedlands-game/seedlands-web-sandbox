@@ -125,3 +125,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：ItemCapability 增加 'armor'（slot+points），itemType 扩含 'armor' 且允许护甲耐久；新增皮/铁/金/钻石四套头盔胸甲护腿靴（16 件+皮革资源），点数按 Beta 布局（钻石胸甲 8 等），工作台按 5/8/7/4 材料合成带耐久。armor-policy 每点减伤 4%、封顶 20 点（80%）、不为负、空甲不减、非法输入拒绝。新增 armor-sprite 原创像素图标，acceptsPixelItem/contracts.itemType 扩含 armor。
 - 定向：classic-armor 3、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 13 files/23 tests PASS。coverage 将 I-298..301/306..317/334 共 17 项标 HEADLESS_PASS。护甲穿戴槽 UI 与战斗结算实际接线（把 armorDamageReduction 挂到 melee applyDamage）留待 S4b；未做浏览器穿戴专项。verify:static:ci PASS。
 - S4a 完整浏览器旅程 PASS：runId c4911daa-f303-48f8-a361-480010b238be，C0–C5 全 PASS，约 1.9 分钟，sourceSha 3b70e5b16cbafb0286ecede55d62d087c8a5278a，artifactDigest 914d7f76f922090bf8eaf2a333de489a2775c73b21ca7442242d67d7c62237e5，HeadlessChrome/153、mute-audio，pageErrors/failedResponses 为空。新增 17 件护甲物品与像素图标未使既有旅程回归。
+
+## S6a 实用与运输物品
+
+- RED：classic-utility-items.test.ts 断言碗/桶/剪刀/矿车/船与矿车变体存在并可合成，物品缺失失败。
+- 实现后 GREEN：新增 bowl/bucket/shears/minecart/boat 与 chest-minecart/furnace-minecart（含皮革资源已在 S4a），工作台配方：碗 3 木板出 4、桶 3 铁锭、剪刀 2 铁锭带耐久 238、矿车 5 铁锭、船 5 木板；矿车+箱子/熔炉升级为变体。新增 utility-sprite 原创像素图标并接入 asset 目录。
+- 定向：utility-items 2、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 14 files/25 tests PASS。coverage 将 I-281/325/328/333/342/343/359 标 HEADLESS_PASS。矿车轨道物理/骑乘、桶的流体拾取放置、剪毛交互未实现（S6b/环境流体阶段）。verify:static:ci PASS。

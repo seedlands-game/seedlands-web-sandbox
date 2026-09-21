@@ -88,6 +88,31 @@ export const overworldRecipes: readonly Recipe[] = [
   },
   { id: 'planks', inputs: [{ itemId: 'wood-block', count: 1 }], outputs: [{ itemId: 'plank', count: 4 }] },
   { id: 'bread', inputs: [{ itemId: 'wheat', count: 3 }], outputs: [{ itemId: 'bread', count: 1 }] },
+  { id: 'bowl', inputs: [{ itemId: 'plank', count: 3 }], outputs: [{ itemId: 'bowl', count: 4 }] },
+  { id: 'bucket', inputs: [{ itemId: 'iron-ingot', count: 3 }], outputs: [{ itemId: 'bucket', count: 1 }] },
+  {
+    id: 'shears',
+    inputs: [{ itemId: 'iron-ingot', count: 2 }],
+    outputs: [{ itemId: 'shears', count: 1, instance: { durability: 238 } }],
+  },
+  { id: 'minecart', inputs: [{ itemId: 'iron-ingot', count: 5 }], outputs: [{ itemId: 'minecart', count: 1 }] },
+  {
+    id: 'chest-minecart',
+    inputs: [
+      { itemId: 'minecart', count: 1 },
+      { itemId: 'chest', count: 1 },
+    ],
+    outputs: [{ itemId: 'chest-minecart', count: 1 }],
+  },
+  {
+    id: 'furnace-minecart',
+    inputs: [
+      { itemId: 'minecart', count: 1 },
+      { itemId: 'furnace', count: 1 },
+    ],
+    outputs: [{ itemId: 'furnace-minecart', count: 1 }],
+  },
+  { id: 'boat', inputs: [{ itemId: 'plank', count: 5 }], outputs: [{ itemId: 'boat', count: 1 }] },
   { id: 'sticks', inputs: [{ itemId: 'plank', count: 2 }], outputs: [{ itemId: 'stick', count: 4 }] },
   {
     id: 'wood-axe',

@@ -340,6 +340,13 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
     capabilities: [{ type: 'mine', tool: 'pickaxe', tier: 3, multiplier: 6 }],
   },
   { id: 'leather', name: '皮革', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'bowl', name: '碗', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'bucket', name: '桶', itemType: 'resource', stackLimit: 16, capabilities: [] },
+  { id: 'shears', name: '剪刀', itemType: 'tool', stackLimit: 1, durability: { max: 238 }, capabilities: [] },
+  { id: 'minecart', name: '矿车', itemType: 'resource', stackLimit: 1, capabilities: [] },
+  { id: 'chest-minecart', name: '运输矿车', itemType: 'resource', stackLimit: 1, capabilities: [] },
+  { id: 'furnace-minecart', name: '动力矿车', itemType: 'resource', stackLimit: 1, capabilities: [] },
+  { id: 'boat', name: '船', itemType: 'resource', stackLimit: 1, capabilities: [] },
   ...(
     [
       ['leather', '皮革', 'leather', 55, { helmet: 1, chestplate: 3, leggings: 2, boots: 1 }],
