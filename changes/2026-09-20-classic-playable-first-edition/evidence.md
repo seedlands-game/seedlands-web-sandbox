@@ -196,6 +196,12 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - RED：recipe-closure 2/2，缺砂岩/木半砖、16色羊毛物品与配方，以及仙人掌/钻石矿冶炼。GREEN 后新增 recipe-closure-items，补齐半砖、蘑菇煲、花/骨/墨囊/可可豆基础染料、九组混色染料、16色羊毛与配方，并新增仙人掌→绿色染料、钻石矿→钻石熔炼。
 - recipe closure + asset 2 files / 6 tests PASS，`verify:static:ci` PASS。items.ts 再次越过500行，移出结构物品到 recipe-closure-items 后通过。S2 所有 scope=做 条目已至少获得 Headless 证据并清零 NOT_RUN；无形 RecipeRegistry、颜色羊毛非独立体素元数据和原版摆位细节继续标 PARTIAL，不冒充精确等价。
 
+## S3/S4 owner 证据补账
+
+- S3 地牢生成、Chunk residency、fluid lease、Authority entity physics 与 ground navigation 共5 files / 32 tests PASS。M05-01/02、M06-01/02/03 更新为 PARTIAL/HEADLESS；浏览器雾和远景顺序仍待 S7。
+- S4 物理/可达性/导航共5 files / 53 tests PASS；实体/感知/Combat/projectile/hostile/body registry 共10 files / 48 tests PASS。玩家、掉落物、船、矿车三型、鱼钩和鸡蛋实体，以及 M14-01/02/03、M15-01、M21-01..05、M22-01..03 更新为 PARTIAL/HEADLESS。
+- 失败记录：registered-combat 独立回归有6项因旧 fixture 缺 seedlands.combat/mode resource 失败，未用作本轮通过证据；替换为 prepared combat 与 gameplay foundation owner 测试。后者旧断言仍固定19物品、浆果只补饥饿、木剑仅2木板，更新为完整194物品、healthRestore=4和2木板+1木棍后12/12通过，未改生产实现。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。

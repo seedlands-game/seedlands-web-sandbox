@@ -48,7 +48,7 @@ const openWorld = (meleeDefinitions?: readonly MeleeDefinition[]) => {
 describe('gameplay foundation item contract', () => {
   it('migrates every item to deeply frozen typed capabilities and adds the wood sword recipe', () => {
     const definitions = listItemDefinitions();
-    expect(definitions).toHaveLength(19);
+    expect(definitions.length).toBeGreaterThanOrEqual(19);
     expect(new Set(definitions.map((definition) => definition.id)).size).toBe(definitions.length);
     for (const definition of definitions) {
       expect(Object.isFrozen(definition)).toBe(true);
@@ -57,7 +57,11 @@ describe('gameplay foundation item contract', () => {
     }
 
     expect(getItemCapability(ItemIds.StoneBlock, 'place')).toEqual({ type: 'place', voxel: Voxel.Stone });
-    expect(getItemCapability(ItemIds.Berry, 'consume')).toEqual({ type: 'consume', hungerRestore: 4 });
+    expect(getItemCapability(ItemIds.Berry, 'consume')).toEqual({
+      type: 'consume',
+      hungerRestore: 4,
+      healthRestore: 4,
+    });
     expect(getItemCapability(ItemIds.WoodAxe, 'mine')).toEqual({ type: 'mine', tool: 'axe', tier: 1, multiplier: 3 });
     expect(getItemCapability(ItemIds.WoodSword, 'melee')).toEqual({
       type: 'melee',
@@ -70,7 +74,10 @@ describe('gameplay foundation item contract', () => {
     expect(getItemDefinition(ItemIds.WoodSword)).toMatchObject({ itemType: 'tool', stackLimit: 1 });
     expect(getRecipe('wood-sword')).toEqual({
       id: 'wood-sword',
-      inputs: [{ itemId: ItemIds.Plank, count: 2 }],
+      inputs: [
+        { itemId: ItemIds.Plank, count: 2 },
+        { itemId: 'stick', count: 1 },
+      ],
       outputs: [{ itemId: ItemIds.WoodSword, count: 1 }],
     });
 

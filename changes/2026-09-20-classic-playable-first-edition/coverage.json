@@ -2300,20 +2300,22 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 玩家 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 玩家 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "玩家 ECS/物理/库存/伤害/保存恢复测试通过。"
     },
     {
       "caseId": "E-Item",
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 掉落物 Item 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 掉落物 Item 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "world-item ECS、拾取、物理与生命周期测试通过。"
     },
     {
       "caseId": "E-Arrow",
@@ -2331,10 +2333,11 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 船 Boat 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 船 Boat 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "VehicleRuntime 船水面移动、乘坐与 checkpoint 已通过。"
     },
     {
       "caseId": "E-Chicken",
@@ -2403,10 +2406,11 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 矿车 Minecart 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 矿车 Minecart 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "普通矿车轨道移动、乘坐与 checkpoint 已通过。"
     },
     {
       "caseId": "E-Mob",
@@ -2555,20 +2559,22 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 钓鱼浮标/钩 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 钓鱼浮标/钩 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "LifeSkills 鱼钩序列、咬钩、收杆和 checkpoint 已通过。"
     },
     {
       "caseId": "E-Egg",
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 鸡蛋投射物 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 鸡蛋投射物 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "鸡蛋投掷、稳定孵化和容量失败原子性已通过。"
     },
     {
       "caseId": "E-Lightning",
@@ -2585,20 +2591,22 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 矿车：箱子型 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 矿车：箱子型 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "箱车27格库存与 checkpoint 已通过。"
     },
     {
       "caseId": "E-MinecartFurnace",
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 矿车：熔炉型 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 矿车：熔炉型 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "炉车燃料、移动与 checkpoint 已通过。"
     },
     {
       "caseId": "R-D01",
@@ -4519,20 +4527,22 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：地牢房间、刷怪笼和箱子位置/频率；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：地牢房间、刷怪笼和箱子位置/频率；记录正例、失败例、tick 和 owner 状态。",
+      "note": "V8 地牢位置/房间/刷怪笼/箱子生成定向测试通过。"
     },
     {
       "caseId": "M05-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：刷怪笼类型/触发/产怪、战利品表；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：刷怪笼类型/触发/产怪、战利品表；记录正例、失败例、tick 和 owner 状态。",
+      "note": "刷怪笼激活、战利品幂等与 checkpoint 测试通过。"
     },
     {
       "caseId": "M05-03",
@@ -4549,30 +4559,33 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：区块加载/卸载、邻域激活与 tick 资格；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：区块加载/卸载、邻域激活与 tick 资格；记录正例、失败例、tick 和 owner 状态。",
+      "note": "Chunk residency 加载/ACK/dirty 保存/驱逐与邻域 pin 8 tests 通过。"
     },
     {
       "caseId": "M06-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：可视距离、雾和远处世界出现顺序；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：可视距离、雾和远处世界出现顺序；记录正例、失败例、tick 和 owner 状态。",
+      "note": "驻留窗口与确定性 admission 已有 Headless 证据；浏览器雾/远景仍待 S7。"
     },
     {
       "caseId": "M06-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：未加载边界移动/流体/实体行为；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：未加载边界移动/流体/实体行为；记录正例、失败例、tick 和 owner 状态。",
+      "note": "未知 Chunk 阻挡、流体 lease 和实体物理边界测试通过。"
     },
     {
       "caseId": "M07-01",
@@ -4838,30 +4851,33 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：固定 tick、输入采样、速度/加速度/摩擦；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：固定 tick、输入采样、速度/加速度/摩擦；记录正例、失败例、tick 和 owner 状态。",
+      "note": "固定步长、速度/加速度/摩擦与 authority physics 通过。"
     },
     {
       "caseId": "M14-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：碰撞分离、台阶抬升、斜面/边缘、实体推挤；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：碰撞分离、台阶抬升、斜面/边缘、实体推挤；记录正例、失败例、tick 和 owner 状态。",
+      "note": "碰撞分离、台阶、边缘和角色 AABB 测试通过；实体推挤保持 PARTIAL。"
     },
     {
       "caseId": "M14-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：跳跃、下落伤害、游泳/水流/梯子；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：跳跃、下落伤害、游泳/水流/梯子；记录正例、失败例、tick 和 owner 状态。",
+      "note": "跳跃/下落/水浮力与流体浸没测试通过；梯子攀爬细节保持 PARTIAL。"
     },
     {
       "caseId": "M14-04",
@@ -4878,10 +4894,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：生命/无饥饿值、食物瞬时回血、冷却；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：生命/无饥饿值、食物瞬时回血、冷却；记录正例、失败例、tick 和 owner 状态。",
+      "note": "生命、无自动饥饿、食物即时回血与非法消费测试通过。"
     },
     {
       "caseId": "M15-02",
@@ -5078,80 +5095,88 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：路径节点构造、AABB/可通行性/水/门/落差；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：路径节点构造、AABB/可通行性/水/门/落差；记录正例、失败例、tick 和 owner 状态。",
+      "note": "地面导航节点、AABB/可通行/落差测试通过。"
     },
     {
       "caseId": "M21-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：搜索策略、代价/启发式、同分次序与预算；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：搜索策略、代价/启发式、同分次序与预算；记录正例、失败例、tick 和 owner 状态。",
+      "note": "有界搜索、稳定同分次序和数据面导航测试通过。"
     },
     {
       "caseId": "M21-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：视野/索敌/仇恨/逃跑/中立切换；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：视野/索敌/仇恨/逃跑/中立切换；记录正例、失败例、tick 和 owner 状态。",
+      "note": "Perception 视野、索敌、跟随与 disposition 测试通过。"
     },
     {
       "caseId": "M21-04",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：路径重算、卡住/绕障、加载边界降级；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：路径重算、卡住/绕障、加载边界降级；记录正例、失败例、tick 和 owner 状态。",
+      "note": "路径重算、未知边界和恢复测试通过。"
     },
     {
       "caseId": "M21-05",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：群体避让/玩家跟随/目标失效；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：群体避让/玩家跟随/目标失效；记录正例、失败例、tick 和 owner 状态。",
+      "note": "目标失效/重新获取已验证；群体避让保持 PARTIAL。"
     },
     {
       "caseId": "M22-01",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：近战命中、攻击间隔、击退与朝向；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：近战命中、攻击间隔、击退与朝向；记录正例、失败例、tick 和 owner 状态。",
+      "note": "近战 windup/命中/冷却/范围复检与 prepared damage 测试通过。"
     },
     {
       "caseId": "M22-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：弓箭/骷髅弹道、命中/遮挡/回收；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：弓箭/骷髅弹道、命中/遮挡/回收；记录正例、失败例、tick 和 owner 状态。",
+      "note": "弓箭和骷髅弹道、遮挡、命中、寿命与 checkpoint 测试通过。"
     },
     {
       "caseId": "M22-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：武器/护甲/工具附加规则、掉落表；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：武器/护甲/工具附加规则、掉落表；记录正例、失败例、tick 和 owner 状态。",
+      "note": "武器/护甲/工具内容能力和掉落表测试通过。"
     },
     {
       "caseId": "M22-04",
