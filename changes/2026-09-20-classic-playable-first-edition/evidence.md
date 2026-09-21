@@ -149,3 +149,10 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 数据驱动 AI：PerceptionRuntime 和 Logic Worker 按 profile disposition 判断敌我；zombie 夜间攻击玩家、cow 遇敌移动避让正反例通过。新增 wool/ink-sac/rotten-flesh/bone/gunpowder/slimeball 内容与原创像素资源。
 - 定向回归：Classic profile/生成/资源 12 tests、stdlib 网络协议/身体 36 tests、logic-decision 9 tests PASS；全仓 typecheck PASS；test:classic:headless 16 files / 32 tests PASS；verify:static:ci PASS（Svelte 0/0、ESLint 66、CI selection 8）。
 - 失败记录：静态门禁先拒绝 physics→server/gameplay 反向依赖，已改为 physics 自有配置 key 校验；测试类型随后拒绝私有 gameplay facade，已改用公开 queryEntities/simulationSnapshot。各物种专属机制和模型仍未实现，因此实体项只可记 PARTIAL_IMPLEMENTED。
+
+## S4d 难度、床与重生点（部分完成）
+
+- DifficultyRuntime 提供 peaceful/easy/normal/hard、0/0.5/1/1.5 伤害倍率、单调 revision、旧 revision 拒绝与 checkpoint；V4 gameplay snapshot 用可选字段兼容旧快照，缺省 normal。GameplayRuntime 对 hostile 伤害应用倍率，切 peaceful 按稳定 ID 清退 hostile actor 并取消其现有状态，保留 passive/neutral。
+- 床以3木板+3羊毛合成并有原创像素资源；选中床后只接受安全空气落点，将床边位置写入既有 ECS spawnPosition，死亡后正式 respawn 移动到该点，快照迁移 22 tests 与组合行为 5 tests PASS。
+- test:classic:headless 17 files / 37 tests PASS；verify:static:ci 最终 PASS。失败记录：utility-sprite 联合类型分号语法错误由 Prettier 捕获；gameplay-runtime 超 500 行门禁触发，未加豁免，改为抽取 gameplay-survival-settings 并收敛现有 facade。
+- 当前只记部分完成：床双格放置/夜间睡眠跳时、难度 UI、出生保护与护甲穿戴结算仍待后续。

@@ -80,3 +80,7 @@ checkpoint 在同一 gameplay frontier 保存 projectile 高水位和全部在�
 Classic 的鸡、牛、猪、羊、鱿鱼、狼、僵尸、骷髅、蜘蛛、苦力怕与史莱姆使用独立稳定 archetype，不借用 grazer/night-stalker 名称伪装。stdlib 的 profile 显式声明 disposition（passive/neutral/hostile）、生命、导航、感知、初始行为、近战定义和掉落；协议、保存、命令与身体几何消费同一受支持 archetype 集合。旧 grazer/night-stalker/settler 身份继续可恢复。
 
 每个物种至少验证注册闭包、合法生成、差异生命/体型/掉落和被动或敌对观察；没有独立状态机的物种（苦力怕爆炸、骷髅远程、史莱姆分裂、狼驯服、羊剪毛、鱿鱼水生）只能记 PARTIAL_IMPLEMENTED，后续对应机制完成前不得写完整 PASS。
+
+## S4d 难度与重生点合同
+
+难度是每世界权威状态，取 peaceful/easy/normal/hard，带单调 revision 并进入 checkpoint；非法值和旧 revision 拒绝。敌对伤害按 0/0.5/1/1.5 倍率结算，和平模式切换候选列出并清退所有未被驯服的 hostile actor，不能残留在途攻击。床使用只允许存活生存玩家在安全位置更新其既有 ECS spawnPosition；失败不移动玩家、不扣床。死亡后仍经正式 respawn 使用该点，保存恢复不丢失。

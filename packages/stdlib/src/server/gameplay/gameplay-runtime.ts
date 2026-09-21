@@ -56,6 +56,8 @@ import {
   type AuthorityKernelExecutionPort,
 } from '../authority/authority-kernel-state';
 import { commitGameplayDynamicBatch } from './gameplay-dynamic-batch';
+import { DifficultyRuntime, type Difficulty } from './difficulty-runtime';
+import { applyDifficultyDamage, changeDifficulty, useSelectedBed } from './gameplay-survival-settings';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -66,6 +68,7 @@ export class GameplayRuntime {
   readonly kernelState: KernelStateOwner;
   readonly kernelRuntime: KernelRuntime;
   readonly authorityExecution: AuthorityKernelExecutionPort;
+  readonly difficulty = new DifficultyRuntime();
   private readonly players = new Map<string, PlayerState>();
   private persistedRevision = 0;
   private inventoryOperationCount = 0;
@@ -219,6 +222,7 @@ export class GameplayRuntime {
       simulation: this.simulation,
       players: this.players,
       authorityState: kernel.authority,
+      difficulty: this.difficulty,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);
@@ -346,18 +350,10 @@ export class GameplayRuntime {
     return this.simulation.combatSnapshotFor(id);
   }
 
-  getInventory(id: string) {
-    return this.inventoryActions.snapshot(id);
-  }
-  getInventoryPointerView(id: string) {
-    return projectInventoryPointerView(this.entities, id);
-  }
-  giveItem(id: string, stack: ItemStack) {
-    return this.inventoryActions.give(id, stack);
-  }
-  removeItem(id: string, stack: ItemStack) {
-    return this.inventoryActions.remove(id, stack);
-  }
+  getInventory = (id: string) => this.inventoryActions.snapshot(id);
+  getInventoryPointerView = (id: string) => projectInventoryPointerView(this.entities, id);
+  giveItem = (id: string, stack: ItemStack) => this.inventoryActions.give(id, stack);
+  removeItem = (id: string, stack: ItemStack) => this.inventoryActions.remove(id, stack);
   selectHotbarSlot(id: string, slot: number) {
     const state = this.getActorModeState(id);
     if (state?.mode !== 'creative') return (this.registeredInventory ?? this.inventoryActions).select(id, slot);
@@ -371,9 +367,8 @@ export class GameplayRuntime {
     });
     return result.ok ? { success: true } : { success: false, reason: result.message };
   }
-  moveInventorySlot(id: string, source: number, target: number) {
-    return (this.registeredInventory ?? this.inventoryActions).move(id, source, target);
-  }
+  moveInventorySlot = (id: string, source: number, target: number) =>
+    (this.registeredInventory ?? this.inventoryActions).move(id, source, target);
   inventoryPointer(id: string, input: InventoryPointerInputV1) {
     return executeInventoryPointer(
       id,
@@ -383,16 +378,9 @@ export class GameplayRuntime {
       this.callbacks.moduleActorAuthority,
     );
   }
-  craft(id: string, recipeId: string) {
-    return (this.registeredInventory ?? this.inventoryActions).craft(id, recipeId);
-  }
-  listCraftable(id: string) {
-    return (this.registeredInventory ?? this.inventoryActions).listCraftable(id);
-  }
-
-  listRecipes() {
-    return this.content.recipes.list();
-  }
+  craft = (id: string, recipeId: string) => (this.registeredInventory ?? this.inventoryActions).craft(id, recipeId);
+  listCraftable = (id: string) => (this.registeredInventory ?? this.inventoryActions).listCraftable(id);
+  listRecipes = () => this.content.recipes.list();
 
   beginBreak(id: string, position: Position): GameplayResult<{ requiredSeconds: number; commit?: WorldCommitResult }> {
     return (this.registeredBlocks ?? this.blocks).beginBreak(id, position);
@@ -444,9 +432,21 @@ export class GameplayRuntime {
     this.touch();
   }
 
-  applyDamage(actorId: string, playerId: string, amount: number, cause: string) {
-    return this.vitals.applyDamage(actorId, playerId, amount, cause);
-  }
+  applyDamage = (actorId: string, playerId: string, amount: number, cause: string) =>
+    applyDifficultyDamage(this.difficulty, this.simulation, actorId, amount, (adjusted) =>
+      this.vitals.applyDamage(actorId, playerId, adjusted, cause),
+    );
+  setDifficulty = (value: Difficulty, expectedRevision?: number) =>
+    changeDifficulty(
+      this.difficulty,
+      this.simulation,
+      value,
+      expectedRevision,
+      (id) => this.despawnEntity(id),
+      () => this.touch(),
+    );
+  setSpawnFromSelectedBed = (playerId: string, bedPosition: Position) =>
+    useSelectedBed(this.player(playerId), bedPosition, this.callbacks, () => this.touch());
   healPlayer(playerId: string, amount: number) {
     return this.vitals.healPlayer(playerId, amount);
   }

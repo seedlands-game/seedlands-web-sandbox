@@ -2153,10 +2153,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bed"
+      "execution": "HEADLESS_PASS",
+      "name": "Bed",
+      "note": "S4d：3木板+3羊毛合成床；选中床可在安全点设置ECS重生位置并随V4快照恢复。双格放置、睡眠跳夜和浏览器交互未完成。"
     },
     {
       "caseId": "I-356",
@@ -3103,10 +3104,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 床 ← 木板+羊毛；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 床 ← 木板+羊毛；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S4d 当前无序配方以3木板+3羊毛守恒合成床；Beta精确3×3形状、镜像和平移仍待工位配方阶段。"
     },
     {
       "caseId": "R-H01",
@@ -4671,9 +4673,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：死亡掉落、重生点、床/出生保护；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4681,9 +4683,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：难度切换、和平模式与状态重置；记录正例、失败例、tick 和 owner 状态。"
     },
     {

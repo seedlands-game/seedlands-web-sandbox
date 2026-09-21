@@ -24,6 +24,7 @@ import {
   installAuthorityKernelState,
   type AuthorityKernelState,
 } from '../authority/authority-kernel-state';
+import { DifficultyRuntime, type DifficultyCheckpoint } from './difficulty-runtime';
 
 type Position = [number, number, number];
 
@@ -61,6 +62,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   moduleSchedule?: ModuleScheduleSnapshot;
   entityStore: EntityStoreComponentSnapshot;
   authoritySession?: AuthorityKernelState;
+  difficulty?: DifficultyCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -76,6 +78,7 @@ export const createGameplaySnapshotV4 = (
   entityStore: EntityStoreComponentSnapshot,
   simulation: SimulationSnapshot,
   authoritySession?: AuthorityKernelState,
+  difficulty?: DifficultyCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -86,6 +89,7 @@ export const createGameplaySnapshotV4 = (
   ...(authoritySession
     ? { authoritySession: decodeAuthorityKernelState(encodeAuthorityKernelState(authoritySession)) }
     : {}),
+  ...(difficulty ? { difficulty: new DifficultyRuntime(difficulty).checkpoint() } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 
@@ -432,6 +436,7 @@ export function validateGameplaySnapshot(
       source.version === 4
         ? decodeAuthorityKernelState(source.authoritySession as import('@seedlands/kernel').KernelValue | undefined)
         : createAuthorityKernelState(),
+      source.version === 4 ? new DifficultyRuntime(source.difficulty).checkpoint() : undefined,
     );
     if (options.registeredNeeds && sourceVersion < 4) {
       const phase =
