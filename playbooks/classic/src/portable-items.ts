@@ -22,8 +22,8 @@ export const portableItems: readonly ItemDefinitionInput[] = [
     stackLimit: 1,
     capabilities: [{ type: 'consume', healthRestore: 10, hungerRestore: 10 }],
   },
-  { id: 'sign', name: '告示牌', itemType: 'resource', stackLimit: 16, capabilities: [] },
-  { id: 'wooden-door', name: '木门', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'sign', name: '告示牌', itemType: 'block', stackLimit: 16, capabilities: [{ type: 'place', voxel: 56 }] },
+  { id: 'wooden-door', name: '木门', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 52 }] },
   { id: 'snowball', name: '雪球', itemType: 'resource', stackLimit: 16, capabilities: [] },
   { id: 'brick', name: '红砖', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'clay', name: '黏土', itemType: 'resource', stackLimit: 64, capabilities: [] },
@@ -32,9 +32,9 @@ export const portableItems: readonly ItemDefinitionInput[] = [
   {
     id: 'cake',
     name: '蛋糕',
-    itemType: 'food',
+    itemType: 'block',
     stackLimit: 1,
-    capabilities: [{ type: 'consume', healthRestore: 6, hungerRestore: 6 }],
+    capabilities: [{ type: 'place', voxel: 58 }],
   },
   {
     id: 'cookie',

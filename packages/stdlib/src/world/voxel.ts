@@ -63,10 +63,20 @@ export const Voxel = {
   Ice: 46,
   SnowBlock: 47,
   LapisBlock: 48,
+  Slab: 49,
+  WoodStairs: 50,
+  CobblestoneStairs: 51,
+  WoodenDoor: 52,
+  Ladder: 53,
+  Torch: 54,
+  Bed: 55,
+  Sign: 56,
+  Fence: 57,
+  Cake: 58,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.LapisBlock;
+export const MAX_VOXEL_ID = Voxel.Cake;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -120,63 +130,19 @@ export const FaceMaterial = {
   Ice: 49,
   SnowBlock: 50,
   LapisBlock: 51,
+  Slab: 52,
+  WoodStairs: 53,
+  CobblestoneStairs: 54,
+  WoodenDoor: 55,
+  Ladder: 56,
+  Torch: 57,
+  Bed: 58,
+  Sign: 59,
+  Fence: 60,
+  Cake: 61,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
-
-export const faceMaterialNames: Record<number, string> = {
-  [FaceMaterial.GrassTop]: 'grass-top',
-  [FaceMaterial.GrassSide]: 'grass-side',
-  [FaceMaterial.Dirt]: 'dirt',
-  [FaceMaterial.Stone]: 'stone',
-  [FaceMaterial.Sand]: 'sand',
-  [FaceMaterial.WoodSide]: 'wood-side',
-  [FaceMaterial.WoodEnd]: 'wood-end',
-  [FaceMaterial.Leaves]: 'leaves',
-  [FaceMaterial.Snow]: 'snow',
-  [FaceMaterial.Water]: 'water',
-  [FaceMaterial.Glowstone]: 'glowstone',
-  [FaceMaterial.LanternFrame]: 'lantern-frame',
-  [FaceMaterial.LanternGlow]: 'lantern-glow',
-  [FaceMaterial.Workbench]: 'workbench',
-  [FaceMaterial.Chest]: 'chest',
-  [FaceMaterial.Furnace]: 'furnace',
-  [FaceMaterial.CoalOre]: 'coal-ore',
-  [FaceMaterial.IronOre]: 'iron-ore',
-  [FaceMaterial.Planks]: 'planks',
-  [FaceMaterial.Cobblestone]: 'cobblestone',
-  [FaceMaterial.Glass]: 'glass',
-  [FaceMaterial.DiamondBlock]: 'diamond-block',
-  [FaceMaterial.GoldBlock]: 'gold-block',
-  [FaceMaterial.IronBlock]: 'iron-block',
-  [FaceMaterial.DiamondOre]: 'diamond-ore',
-  [FaceMaterial.GoldOre]: 'gold-ore',
-  [FaceMaterial.Sandstone]: 'sandstone',
-  [FaceMaterial.StoneBricks]: 'stone-bricks',
-  [FaceMaterial.Farmland]: 'farmland',
-  [FaceMaterial.Lava]: 'lava',
-  [FaceMaterial.Obsidian]: 'obsidian',
-  [FaceMaterial.Fire]: 'fire',
-  [FaceMaterial.Tnt]: 'tnt',
-  [FaceMaterial.Sapling]: 'sapling',
-  [FaceMaterial.TallGrass]: 'tall-grass',
-  [FaceMaterial.Flower]: 'flower',
-  [FaceMaterial.Mushroom]: 'mushroom',
-  [FaceMaterial.SugarCane]: 'sugar-cane',
-  [FaceMaterial.Cactus]: 'cactus',
-  [FaceMaterial.Spawner]: 'spawner',
-  [FaceMaterial.DungeonChest]: 'dungeon-chest',
-  [FaceMaterial.Rail]: 'rail',
-  [FaceMaterial.PoweredRail]: 'powered-rail',
-  [FaceMaterial.DetectorRail]: 'detector-rail',
-  [FaceMaterial.Bedrock]: 'bedrock',
-  [FaceMaterial.Gravel]: 'gravel',
-  [FaceMaterial.LapisOre]: 'lapis-ore',
-  [FaceMaterial.Clay]: 'clay',
-  [FaceMaterial.Ice]: 'ice',
-  [FaceMaterial.SnowBlock]: 'snow-block',
-  [FaceMaterial.LapisBlock]: 'lapis-block',
-};
 
 export const voxelNames: Record<number, string> = {
   [Voxel.Grass]: '草方块',
@@ -227,6 +193,16 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Ice]: '冰',
   [Voxel.SnowBlock]: '雪块',
   [Voxel.LapisBlock]: '青金石块',
+  [Voxel.Slab]: '半砖',
+  [Voxel.WoodStairs]: '木楼梯',
+  [Voxel.CobblestoneStairs]: '圆石楼梯',
+  [Voxel.WoodenDoor]: '木门',
+  [Voxel.Ladder]: '梯子',
+  [Voxel.Torch]: '火把',
+  [Voxel.Bed]: '床',
+  [Voxel.Sign]: '告示牌',
+  [Voxel.Fence]: '栅栏',
+  [Voxel.Cake]: '蛋糕',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -278,6 +254,16 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Ice]: [0.55, 0.78, 0.9],
   [Voxel.SnowBlock]: [0.92, 0.96, 1],
   [Voxel.LapisBlock]: [0.12, 0.24, 0.72],
+  [Voxel.Slab]: [0.46, 0.48, 0.5],
+  [Voxel.WoodStairs]: [0.62, 0.42, 0.23],
+  [Voxel.CobblestoneStairs]: [0.4, 0.43, 0.43],
+  [Voxel.WoodenDoor]: [0.55, 0.34, 0.16],
+  [Voxel.Ladder]: [0.64, 0.43, 0.2],
+  [Voxel.Torch]: [0.95, 0.62, 0.18],
+  [Voxel.Bed]: [0.72, 0.15, 0.12],
+  [Voxel.Sign]: [0.68, 0.48, 0.25],
+  [Voxel.Fence]: [0.55, 0.35, 0.17],
+  [Voxel.Cake]: [0.9, 0.82, 0.72],
 };
 
 const nonSolid = new Set<number>([
@@ -293,6 +279,9 @@ const nonSolid = new Set<number>([
   Voxel.Rail,
   Voxel.PoweredRail,
   Voxel.DetectorRail,
+  Voxel.Ladder,
+  Voxel.Torch,
+  Voxel.Sign,
 ]);
 export const isSolid = (id: number) => !nonSolid.has(id);
 export const isTargetable = (id: number) =>
@@ -356,6 +345,16 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Ice]: FaceMaterial.Ice,
       [Voxel.SnowBlock]: FaceMaterial.SnowBlock,
       [Voxel.LapisBlock]: FaceMaterial.LapisBlock,
+      [Voxel.Slab]: FaceMaterial.Slab,
+      [Voxel.WoodStairs]: FaceMaterial.WoodStairs,
+      [Voxel.CobblestoneStairs]: FaceMaterial.CobblestoneStairs,
+      [Voxel.WoodenDoor]: FaceMaterial.WoodenDoor,
+      [Voxel.Ladder]: FaceMaterial.Ladder,
+      [Voxel.Torch]: FaceMaterial.Torch,
+      [Voxel.Bed]: FaceMaterial.Bed,
+      [Voxel.Sign]: FaceMaterial.Sign,
+      [Voxel.Fence]: FaceMaterial.Fence,
+      [Voxel.Cake]: FaceMaterial.Cake,
     } as Record<number, FaceMaterialId>
   )[id];
 }

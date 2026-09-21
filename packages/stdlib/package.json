@@ -89,6 +89,7 @@
     "./world/vegetation": "./src/world/vegetation.ts",
     "./world/dungeon-generation": "./src/world/dungeon-generation.ts",
     "./world/geology": "./src/world/geology.ts",
+    "./world/face-material-names": "./src/world/face-material-names.ts",
     "./world/voxel-model": "./src/world/voxel-model.ts",
     "./world/water-flow-direction": "./src/world/water-flow-direction.ts",
     "./world/water-immersion": "./src/world/water-immersion.ts",

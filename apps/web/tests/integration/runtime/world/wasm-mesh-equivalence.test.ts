@@ -181,7 +181,8 @@ describe('W04/W05 Wasm mesh descriptors', () => {
                 data[index] = Voxel.Water;
                 fluid[index] = 0x80 | ((x % 8) + 1);
               }
-              if (kind === 'lantern' && x < 2 && y < 2 && z < 2) data[index] = Voxel.Lantern;
+              if (kind === 'lantern' && x < 2 && y < 2 && z < 2)
+                data[index] = [Voxel.Lantern, Voxel.Rail, Voxel.Slab, Voxel.WoodStairs, Voxel.Fence][x + z * 2];
             }
       });
       const actual = runMeshDescriptorKernel(kernel, input.input.window, input.input.fluidWindow);

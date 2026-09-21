@@ -98,6 +98,12 @@ const items = [
   ['ice', '冰'],
   ['snow-block', '雪块'],
   ['lapis-block', '青金石块'],
+  ['slab', '半砖'],
+  ['wood-stairs', '木楼梯'],
+  ['cobblestone-stairs', '圆石楼梯'],
+  ['ladder', '梯子'],
+  ['torch', '火把'],
+  ['fence', '栅栏'],
   ['leather-helmet', '皮革头盔'],
   ['leather-chestplate', '皮革胸甲'],
   ['leather-leggings', '皮革护腿'],
@@ -198,19 +204,29 @@ export const builtinAssets: Asset[] = [
         itemId: id,
         materialIds: (() => {
           const voxel = requireClassicItemDefinition(id).placesVoxel;
-          const placed = builtinVisualAssets.find(
-            (asset) => asset.type === 'builtin-voxel-model' && asset.payload.voxelId === voxel,
-          );
+          const placed =
+            voxel === undefined
+              ? undefined
+              : builtinVisualAssets.find(
+                  (asset) => asset.type === 'builtin-voxel-model' && asset.payload.voxelId === voxel,
+                );
           return placed?.type === 'builtin-voxel-model'
             ? placed.payload.materialIds
-            : itemMaterials[id].map((key) => `seedlands:material/model/${key}`);
+            : (
+                itemMaterials[id] ??
+                (() => {
+                  throw new Error(`Missing builtin item material mapping: ${id}`);
+                })()
+              ).map((key) => `seedlands:material/model/${key}`);
         })(),
       },
     })),
 ];
 export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]) => {
   const modelId = `builtin:model:${itemId}`;
-  const model = nativeItemAssets.find((asset) => asset.id === modelId);
+  const definition = requireClassicItemDefinition(itemId);
+  const model =
+    definition.placesVoxel === undefined ? nativeItemAssets.find((asset) => asset.id === modelId) : undefined;
   return {
     itemId,
     name,
@@ -248,6 +264,16 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
                   'ice',
                   'snow-block',
                   'lapis-block',
+                  'slab',
+                  'wood-stairs',
+                  'cobblestone-stairs',
+                  'wooden-door',
+                  'ladder',
+                  'torch',
+                  'bed',
+                  'sign',
+                  'fence',
+                  'cake',
                 ].includes(itemId)
               ? 'seedlands:texture/terrain/' + itemId
               : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,

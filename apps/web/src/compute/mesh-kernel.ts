@@ -129,8 +129,8 @@ function append(
   else quad.i.push(start, start + 1, start + 2, start, start + 2, start + 3);
 }
 
-function appendModel(result: Record<number, RawMesh>, x: number, y: number, z: number): void {
-  for (const box of modelBoxesForVoxel(Voxel.Lantern)) {
+function appendModel(result: Record<number, RawMesh>, voxel: number, x: number, y: number, z: number): void {
+  for (const box of modelBoxesForVoxel(voxel)) {
     for (let dimension = 0; dimension < 3; dimension += 1) {
       const u = (dimension + 1) % 3;
       const v = (dimension + 2) % 3;
@@ -227,9 +227,16 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
       descriptors[offset + 1] < 32 &&
       descriptors[offset + 2] < 32 &&
       descriptors[offset + 3] < 32 &&
-      descriptors.slice(offset + 4, offset + DESCRIPTOR_BYTES).every((value) => value === 0)
+      modelBoxesForVoxel(descriptors[offset + 4]).length > 0 &&
+      descriptors.slice(offset + 5, offset + DESCRIPTOR_BYTES).every((value) => value === 0)
     )
-      appendModel(result, descriptors[offset + 1], descriptors[offset + 2], descriptors[offset + 3]);
+      appendModel(
+        result,
+        descriptors[offset + 4],
+        descriptors[offset + 1],
+        descriptors[offset + 2],
+        descriptors[offset + 3],
+      );
     else throw new Error('Wasm mesh descriptor contains an unknown record kind.');
   }
   return Object.fromEntries(

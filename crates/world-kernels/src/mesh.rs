@@ -24,11 +24,15 @@ fn sample_fluid(fluid: &[u8], x: i32, y: i32, z: i32) -> u32 {
 }
 
 fn greedy(id: u32) -> bool {
-    id != 0 && id != 10
+    id != 0 && !is_model(id)
+}
+
+fn is_model(id: u32) -> bool {
+    id == 10 || (39..=41).contains(&id) || (49..=58).contains(&id)
 }
 
 fn occludes(id: u32) -> bool {
-    !matches!(id, 0 | 8 | 10 | 18 | 27 | 29 | 31 | 32 | 33 | 34 | 35 | 46)
+    !matches!(id, 0 | 8 | 18 | 27 | 29 | 31 | 32 | 33 | 34 | 35 | 46) && !is_model(id)
 }
 
 fn visible(source: u32, target: u32) -> bool {
@@ -248,13 +252,14 @@ fn write_quad(
     output[offset + 12..offset + RECORD_BYTES].fill(0);
 }
 
-fn write_lantern(output: &mut [u8], count: i32, x: i32, y: i32, z: i32) {
+fn write_model(output: &mut [u8], count: i32, x: i32, y: i32, z: i32, voxel: u32) {
     let offset = count as usize * RECORD_BYTES;
     output[offset] = 1;
     output[offset + 1] = x as u8;
     output[offset + 2] = y as u8;
     output[offset + 3] = z as u8;
-    output[offset + 4..offset + RECORD_BYTES].fill(0);
+    output[offset + 4] = voxel as u8;
+    output[offset + 5..offset + RECORD_BYTES].fill(0);
 }
 
 fn coordinates(axis: i32, slice: i32, i: i32, j: i32) -> (i32, i32, i32) {
@@ -406,9 +411,10 @@ fn descriptor_pass(
     for y in 0..32 {
         for z in 0..32 {
             for x in 0..32 {
-                if sample(halo, x, y, z) == 10 {
+                let voxel = sample(halo, x, y, z);
+                if is_model(voxel) {
                     if write {
-                        write_lantern(output, count, x, y, z);
+                        write_model(output, count, x, y, z, voxel);
                     }
                     count += 1;
                 }
