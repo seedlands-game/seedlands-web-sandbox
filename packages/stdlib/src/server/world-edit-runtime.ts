@@ -1,9 +1,9 @@
-import { Voxel, chunkKey, floorDiv, CHUNK_SIZE, mod, voxelIndex } from '../world/voxel';
+import { chunkKey, floorDiv, CHUNK_SIZE, mod, voxelIndex } from '../world/voxel';
 import type { ServerChunk, WorldCommitResult, WorldEditBatch } from './game-server-types';
 import { commitWorldEditBatch } from './world-transaction-commit';
 import { prepareSingleWorldEdit, type PreparedWorldEdit } from './prepared-world-edit';
 import * as FluidSidecars from './fluid/fluid-edit-sidecars';
-import { hasAdjacentWater } from './fluid/fluid-cell-state';
+import { hasAdjacentFluid, isFluidVoxel } from './fluid/fluid-cell-state';
 import type { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import type { FluidActiveWindow } from './fluid/fluid-active-window';
 import type { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
@@ -74,8 +74,8 @@ export function prepareServerWorldEdit(
     [x, y, z + 1],
   ] as const;
   const observed = neighbors.map((at) => peek(...at));
-  const activate = previousVoxel === Voxel.Water || value === Voxel.Water || hasAdjacentWater(peek, x, y, z);
-  const removeSource = previousVoxel === Voxel.Water && (previousFluid & 0x80) !== 0 && value !== Voxel.Water;
+  const activate = isFluidVoxel(previousVoxel) || isFluidVoxel(value) || hasAdjacentFluid(peek, x, y, z);
+  const removeSource = isFluidVoxel(previousVoxel) && (previousFluid & 0x80) !== 0 && !isFluidVoxel(value);
   const priority = options.priorityForBatch({ actorId, edits: [{ x, y, z, value }] });
   let validated = false;
   const validate = () => {

@@ -37,7 +37,15 @@ fn cave_air(seed: u32, x: i32, y: i64, z: i32, height: i64, generator_version: u
 }
 
 #[inline(always)]
-fn ore_voxel(seed: u32, x: i32, y: i64, z: i32, height: i64, base: u32, generator_version: u32) -> u32 {
+fn ore_voxel(
+    seed: u32,
+    x: i32,
+    y: i64,
+    z: i32,
+    height: i64,
+    base: u32,
+    generator_version: u32,
+) -> u32 {
     if generator_version < 4 || base != 3 {
         return base;
     }
@@ -46,8 +54,18 @@ fn ore_voxel(seed: u32, x: i32, y: i64, z: i32, height: i64, base: u32, generato
     let group_z = z.div_euclid(2);
     let depth = height - y;
     if generator_version >= 5 && y >= 0 {
-        if y < 16 && depth >= 12 && ore_hash(seed, group_x, group_y, group_z, DIAMOND_ORE_SALT) % 997 < 8 { return 20; }
-        if y < 32 && depth >= 8 && ore_hash(seed, group_x, group_y, group_z, GOLD_ORE_SALT) % 997 < 24 { return 19; }
+        if y < 16
+            && depth >= 12
+            && ore_hash(seed, group_x, group_y, group_z, DIAMOND_ORE_SALT) % 997 < 8
+        {
+            return 20;
+        }
+        if y < 32
+            && depth >= 8
+            && ore_hash(seed, group_x, group_y, group_z, GOLD_ORE_SALT) % 997 < 24
+        {
+            return 19;
+        }
     }
     if depth >= 8 && ore_hash(seed, group_x, group_y, group_z, IRON_ORE_SALT) % 97 < 6 {
         return 15;
@@ -143,22 +161,32 @@ pub fn fill_chunk_versioned(
 ) {
     assert_eq!(columns.len(), 38 * 38 * 4);
     assert_eq!(output.len(), 32 * 32 * 32);
-    for z in 0..32 { for x in 0..32 { for y in 0..32 {
-        output[(x + 32 * (z + 32 * y)) as usize] = column_voxel(
-            columns,
-            38,
-            x,
-            i64::from(oy) + i64::from(y),
-            z,
-            seed,
-            ox.wrapping_add(x),
-            oz.wrapping_add(z),
-            generator_version,
-        ) as u16;
-    }}}
+    for z in 0..32 {
+        for x in 0..32 {
+            for y in 0..32 {
+                output[(x + 32 * (z + 32 * y)) as usize] = column_voxel(
+                    columns,
+                    38,
+                    x,
+                    i64::from(oy) + i64::from(y),
+                    z,
+                    seed,
+                    ox.wrapping_add(x),
+                    oz.wrapping_add(z),
+                    generator_version,
+                ) as u16;
+            }
+        }
+    }
 }
 
-pub fn fill_halo(columns: &[i32], known: &[u32], halo: &mut [u16], fluid: &mut [u8], oy: i32) -> u32 {
+pub fn fill_halo(
+    columns: &[i32],
+    known: &[u32],
+    halo: &mut [u16],
+    fluid: &mut [u8],
+    oy: i32,
+) -> u32 {
     fill_halo_versioned(columns, known, halo, fluid, 0, 0, oy, 0, 3)
 }
 
@@ -173,29 +201,45 @@ pub fn fill_halo_versioned(
     oz: i32,
     generator_version: u32,
 ) -> u32 {
-    assert_eq!(columns.len(),40*40*4);
-    assert_eq!(known.len(),34*34*34); assert_eq!(halo.len(),known.len()); assert_eq!(fluid.len(),known.len());
+    assert_eq!(columns.len(), 40 * 40 * 4);
+    assert_eq!(known.len(), 34 * 34 * 34);
+    assert_eq!(halo.len(), known.len());
+    assert_eq!(fluid.len(), known.len());
     let mut revision = 2166136261u32;
-    for y in 0..34 { for z in 0..34 { for x in 0..34 {
-        let index=(x+34*(z+34*y)) as usize;
-        let packed=known[index];
-        let value=if packed==u32::MAX {
-            column_voxel(
-                columns,
-                40,
-                x,
-                i64::from(oy)+i64::from(y),
-                z,
-                seed,
-                ox.wrapping_add(x),
-                oz.wrapping_add(z),
-                generator_version,
-            ) as u16
-        } else {packed as u16};
-        halo[index]=value;
-        fluid[index]=if packed==u32::MAX {if value==8 {0x88} else {0}} else {(packed>>16) as u8};
-        revision=(revision ^ value as u32).wrapping_mul(16777619);
-    }}}
+    for y in 0..34 {
+        for z in 0..34 {
+            for x in 0..34 {
+                let index = (x + 34 * (z + 34 * y)) as usize;
+                let packed = known[index];
+                let value = if packed == u32::MAX {
+                    column_voxel(
+                        columns,
+                        40,
+                        x,
+                        i64::from(oy) + i64::from(y),
+                        z,
+                        seed,
+                        ox.wrapping_add(x),
+                        oz.wrapping_add(z),
+                        generator_version,
+                    ) as u16
+                } else {
+                    packed as u16
+                };
+                halo[index] = value;
+                fluid[index] = if packed == u32::MAX {
+                    if value == 8 || value == 27 {
+                        0x88
+                    } else {
+                        0
+                    }
+                } else {
+                    (packed >> 16) as u8
+                };
+                revision = (revision ^ value as u32).wrapping_mul(16777619);
+            }
+        }
+    }
     revision
 }
 
@@ -208,7 +252,10 @@ mod tests {
         assert_eq!(ore_hash(0, 0, 0, 0, COAL_ORE_SALT), 686_038_650);
         assert_eq!(ore_hash(1837, 4, -9, 12, COAL_ORE_SALT), 2_132_735_606);
         assert_eq!(ore_hash(u32::MAX, -1, -1, -1, IRON_ORE_SALT), 2_792_393_888);
-        assert_eq!(ore_hash(0x8000_0000, -1_234_567, 765_432, -42, IRON_ORE_SALT), 3_339_286_873);
+        assert_eq!(
+            ore_hash(0x8000_0000, -1_234_567, 765_432, -42, IRON_ORE_SALT),
+            3_339_286_873
+        );
     }
 
     #[test]
@@ -246,15 +293,7 @@ mod tests {
         let mut halo = [0u16; N];
         let mut fluid = [0u8; N];
         let revision = fill_halo_versioned(
-            &columns,
-            &known,
-            &mut halo,
-            &mut fluid,
-            1837,
-            -33,
-            -33,
-            -1,
-            4,
+            &columns, &known, &mut halo, &mut fluid, 1837, -33, -33, -1, 4,
         );
         assert_eq!(halo[0], 12);
         assert_eq!(fluid[0], 5);

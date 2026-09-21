@@ -27,7 +27,8 @@ const isCandidatePosition = (position: FluidPosition) =>
 
 const isPropagationCellValue = (voxel: number, fluid: number) =>
   (voxel === Voxel.Air && fluid === 0) ||
-  (voxel === Voxel.Water && Number.isSafeInteger(fluid) && fluid >= 1 && fluid <= 8);
+  ((voxel === Voxel.Water || voxel === Voxel.Lava) && Number.isSafeInteger(fluid) && fluid >= 1 && fluid <= 8) ||
+  ((voxel === Voxel.Cobblestone || voxel === Voxel.Obsidian) && fluid === 0);
 
 const isBoundedUniquePositions = (
   positions: readonly FluidPosition[],
