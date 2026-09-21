@@ -32,10 +32,13 @@ export const overworldStations: StationContentInput = {
     pickaxe('wood-pickaxe', 'plank', 60),
     pickaxe('stone-pickaxe', 'cobblestone', 132),
     pickaxe('iron-pickaxe', 'iron-ingot', 250),
+    pickaxe('gold-pickaxe', 'gold-ingot', 32),
+    pickaxe('diamond-pickaxe', 'diamond', 1561),
     ring('chest', 'plank'),
     ring('furnace', 'cobblestone'),
   ],
   furnaceRecipes: [
+    { id: 'smelt-gold', input: stack('gold-ore'), output: stack('gold-ingot'), durationSeconds: 10 },
     { id: 'smelt-iron', input: stack('raw-iron'), output: stack('iron-ingot'), durationSeconds: 10 },
     { id: 'smelt-stone', input: stack('cobblestone'), output: stack('stone-block'), durationSeconds: 10 },
     { id: 'smelt-glass', input: stack('sand-block'), output: stack('glass'), durationSeconds: 10 },

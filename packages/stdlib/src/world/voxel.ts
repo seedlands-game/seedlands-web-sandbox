@@ -2,8 +2,11 @@ import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
 import { oreVoxel } from './ore-generation';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 4;
+export const GENERATOR_VERSION = 5;
 export const LEGACY_GENERATOR_VERSION = 2;
+export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5]);
+export const isSupportedGeneratorVersion = (value: unknown): value is number =>
+  typeof value === 'number' && SUPPORTED_GENERATOR_VERSIONS.includes(value);
 export type ChunkCoord = { cx: number; cy: number; cz: number };
 
 export const Voxel = {
@@ -26,10 +29,15 @@ export const Voxel = {
   Planks: 16,
   Cobblestone: 17,
   Glass: 18,
+  GoldOre: 19,
+  DiamondOre: 20,
+  IronBlock: 21,
+  GoldBlock: 22,
+  DiamondBlock: 23,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.Glass;
+export const MAX_VOXEL_ID = Voxel.DiamondBlock;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -53,6 +61,11 @@ export const FaceMaterial = {
   Planks: 19,
   Cobblestone: 20,
   Glass: 21,
+  GoldOre: 22,
+  DiamondOre: 23,
+  IronBlock: 24,
+  GoldBlock: 25,
+  DiamondBlock: 26,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -79,6 +92,11 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Planks]: 'planks',
   [FaceMaterial.Cobblestone]: 'cobblestone',
   [FaceMaterial.Glass]: 'glass',
+  [FaceMaterial.DiamondBlock]: 'diamond-block',
+  [FaceMaterial.GoldBlock]: 'gold-block',
+  [FaceMaterial.IronBlock]: 'iron-block',
+  [FaceMaterial.DiamondOre]: 'diamond-ore',
+  [FaceMaterial.GoldOre]: 'gold-ore',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -100,6 +118,11 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Planks]: '木板',
   [Voxel.Cobblestone]: '圆石',
   [Voxel.Glass]: '玻璃',
+  [Voxel.DiamondBlock]: '钻石块',
+  [Voxel.GoldBlock]: '金块',
+  [Voxel.IronBlock]: '铁块',
+  [Voxel.DiamondOre]: '钻石矿石',
+  [Voxel.GoldOre]: '金矿石',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -121,6 +144,11 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Planks]: [0.67, 0.47, 0.27],
   [Voxel.Cobblestone]: [0.42, 0.45, 0.45],
   [Voxel.Glass]: [0.72, 0.88, 0.9],
+  [Voxel.DiamondBlock]: [0.28, 0.8, 0.81],
+  [Voxel.GoldBlock]: [0.9, 0.72, 0.24],
+  [Voxel.IronBlock]: [0.75, 0.8, 0.77],
+  [Voxel.DiamondOre]: [0.3, 0.68, 0.7],
+  [Voxel.GoldOre]: [0.6, 0.53, 0.25],
 };
 
 export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
@@ -153,6 +181,11 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Planks]: FaceMaterial.Planks,
       [Voxel.Cobblestone]: FaceMaterial.Cobblestone,
       [Voxel.Glass]: FaceMaterial.Glass,
+      [Voxel.DiamondBlock]: FaceMaterial.DiamondBlock,
+      [Voxel.GoldBlock]: FaceMaterial.GoldBlock,
+      [Voxel.IronBlock]: FaceMaterial.IronBlock,
+      [Voxel.DiamondOre]: FaceMaterial.DiamondOre,
+      [Voxel.GoldOre]: FaceMaterial.GoldOre,
     } as Record<number, FaceMaterialId>
   )[id];
 }

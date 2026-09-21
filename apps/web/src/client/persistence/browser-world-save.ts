@@ -1,5 +1,5 @@
 import type { ChunkSnapshot } from '@seedlands/stdlib/server/persistence/chunk-persistence';
-import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION } from '@seedlands/stdlib/world/voxel';
+import { isSupportedGeneratorVersion } from '@seedlands/stdlib/world/voxel';
 
 export type SerializedChunkSnapshot = Omit<ChunkSnapshot, 'voxels' | 'fluid'> & {
   voxels: number[];
@@ -20,9 +20,7 @@ export function decodeBrowserWorldSave(raw: string | null): BrowserWorldSave | n
     const record = value as Record<string, unknown>;
     if (
       typeof record.seed !== 'string' ||
-      (record.generatorVersion !== GENERATOR_VERSION &&
-        record.generatorVersion !== 3 &&
-        record.generatorVersion !== LEGACY_GENERATOR_VERSION) ||
+      !isSupportedGeneratorVersion(record.generatorVersion) ||
       !Array.isArray(record.player) ||
       record.player.length !== 3 ||
       !record.player.every(Number.isFinite) ||

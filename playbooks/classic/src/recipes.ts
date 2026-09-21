@@ -1,6 +1,16 @@
 import type { Recipe } from '@seedlands/stdlib/mod-api';
 
+const resourceBlocks: readonly Recipe[] = [
+  ['iron-ingot', 'iron-block'],
+  ['gold-ingot', 'gold-block'],
+  ['diamond', 'diamond-block'],
+].flatMap(([material, block]) => [
+  { id: block, inputs: [{ itemId: material, count: 9 }], outputs: [{ itemId: block, count: 1 }] },
+  { id: block + '-unpack', inputs: [{ itemId: block, count: 1 }], outputs: [{ itemId: material, count: 9 }] },
+]);
+
 export const overworldRecipes: readonly Recipe[] = [
+  ...resourceBlocks,
   { id: 'planks', inputs: [{ itemId: 'wood-block', count: 1 }], outputs: [{ itemId: 'plank', count: 4 }] },
   { id: 'sticks', inputs: [{ itemId: 'plank', count: 2 }], outputs: [{ itemId: 'stick', count: 4 }] },
   {

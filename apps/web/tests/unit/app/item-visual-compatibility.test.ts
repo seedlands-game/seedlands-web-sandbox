@@ -59,7 +59,21 @@ it('全透明模型明确拒绝取景，不能将 NaN 写入相机或场景', ()
 
 it('新增物品图标使用已注册像素，不请求不存在的静态PNG', () => {
   setAppearanceImages(createEmptyAppearanceProject());
-  for (const id of ['stick', 'charcoal', 'cobblestone', 'glass']) {
+  for (const id of [
+    'stick',
+    'charcoal',
+    'cobblestone',
+    'glass',
+    'gold-ore',
+    'diamond-ore',
+    'iron-block',
+    'gold-block',
+    'diamond-block',
+    'gold-ingot',
+    'diamond',
+    'gold-pickaxe',
+    'diamond-pickaxe',
+  ]) {
     expect(itemIconUrl(id, '/')).toMatch(/^data:image\/svg\+xml,/);
   }
 });

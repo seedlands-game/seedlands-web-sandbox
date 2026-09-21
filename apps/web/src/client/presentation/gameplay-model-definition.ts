@@ -17,6 +17,11 @@ const blockItems = new Set([
   'cobblestone',
   'glass',
   'raw-iron',
+  'gold-ore',
+  'diamond-ore',
+  'iron-block',
+  'gold-block',
+  'diamond-block',
 ]);
 
 export function itemVisualKind(itemId: string): ItemVisualKind {
@@ -24,7 +29,8 @@ export function itemVisualKind(itemId: string): ItemVisualKind {
   if (itemId === 'lantern') return { kind: 'lantern' };
   if (itemId === 'berry') return { kind: 'berry-cluster' };
   if (itemId === 'wood-axe') return { kind: 'wood-axe' };
-  if (['stone-pickaxe', 'wood-pickaxe', 'iron-pickaxe'].includes(itemId)) return { kind: 'stone-pickaxe' };
+  if (['stone-pickaxe', 'wood-pickaxe', 'iron-pickaxe', 'gold-pickaxe', 'diamond-pickaxe'].includes(itemId))
+    return { kind: 'stone-pickaxe' };
   return { kind: 'plank' };
 }
 

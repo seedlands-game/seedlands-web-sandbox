@@ -1,5 +1,7 @@
 const COAL_ORE_SALT: u32 = 0x434f_414c;
 const IRON_ORE_SALT: u32 = 0x4952_4f4e;
+const GOLD_ORE_SALT: u32 = 0x474f_4c44;
+const DIAMOND_ORE_SALT: u32 = 0x4449_414d;
 
 // Frozen unsigned 32-bit mix shared byte-for-byte with game-core/ore-generation.ts.
 // Coordinates are 2x2x2 group coordinates, represented with two's-complement u32 lanes.
@@ -24,6 +26,10 @@ fn ore_voxel(seed: u32, x: i32, y: i64, z: i32, height: i64, base: u32, generato
     let group_y = (y.div_euclid(2)) as i32;
     let group_z = z.div_euclid(2);
     let depth = height - y;
+    if generator_version >= 5 && y >= 0 {
+        if y < 16 && depth >= 12 && ore_hash(seed, group_x, group_y, group_z, DIAMOND_ORE_SALT) % 997 < 8 { return 20; }
+        if y < 32 && depth >= 8 && ore_hash(seed, group_x, group_y, group_z, GOLD_ORE_SALT) % 997 < 24 { return 19; }
+    }
     if depth >= 8 && ore_hash(seed, group_x, group_y, group_z, IRON_ORE_SALT) % 97 < 6 {
         return 15;
     }

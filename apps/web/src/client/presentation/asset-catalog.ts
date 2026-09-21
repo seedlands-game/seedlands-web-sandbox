@@ -18,6 +18,15 @@ const items = [
   ['cobblestone', '圆石'],
   ['glass', '玻璃'],
   ['charcoal', '木炭'],
+  ['gold-ore', '金矿石'],
+  ['diamond-ore', '钻石矿石'],
+  ['iron-block', '铁块'],
+  ['gold-block', '金块'],
+  ['diamond-block', '钻石块'],
+  ['gold-ingot', '金锭'],
+  ['diamond', '钻石'],
+  ['gold-pickaxe', '金镐'],
+  ['diamond-pickaxe', '钻石镐'],
   ['stick', '木棍'],
   ['wood-axe', '木斧'],
   ['wood-sword', '木剑'],
@@ -100,7 +109,9 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
     iconId:
       model?.type === 'extruded-pixel-model'
         ? model.payload.textureId
-        : ['cobblestone', 'glass'].includes(itemId)
+        : ['cobblestone', 'glass', 'gold-ore', 'diamond-ore', 'iron-block', 'gold-block', 'diamond-block'].includes(
+              itemId,
+            )
           ? 'seedlands:texture/terrain/' + itemId
           : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
   };

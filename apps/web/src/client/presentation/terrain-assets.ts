@@ -35,6 +35,11 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Planks, '木板', ['aa794a', 'bf905e', '725033', 'd2a675']],
   [FaceMaterial.Cobblestone, '圆石', ['65706d', '87928a', '424c4a', 'a8afa3']],
   [FaceMaterial.Glass, '玻璃', ['accbd0', 'd4edf0', '8aafb8', 'edfafa']],
+  [FaceMaterial.GoldOre, '金矿石', ['687170', '858d8a', 'bf9330', 'f3d677']],
+  [FaceMaterial.DiamondOre, '钻石矿石', ['687170', '858d8a', '399da5', '9ce6db']],
+  [FaceMaterial.IronBlock, '铁块', ['a5b3b1', 'c7d5d0', '728a89', 'e3e9dc']],
+  [FaceMaterial.GoldBlock, '金块', ['c89e3f', 'e5c65f', '99702c', 'ffe59c']],
+  [FaceMaterial.DiamondBlock, '钻石块', ['39a4ab', '6fced0', '20747e', 'b7efe6']],
 ];
 
 // First-party pixel sources are deterministic and independent of atlas layout.
@@ -89,14 +94,21 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
       if (x >= 5 && x <= 10 && y === 11) index = x % 3 === 0 ? 6 : 4;
       if ((x === 6 || x === 9) && y === 10) index = 4;
     }
-    if (face === FaceMaterial.CoalOre || face === FaceMaterial.IronOre) {
+    if (
+      [FaceMaterial.CoalOre, FaceMaterial.IronOre, FaceMaterial.GoldOre, FaceMaterial.DiamondOre].includes(
+        face as 17 | 18 | 22 | 23,
+      )
+    ) {
       const clusters = [
         [4, 4],
         [11, 6],
         [7, 12],
       ];
       const ore = clusters.some(([cx, cy]) => Math.abs(x - cx) + Math.abs(y - cy) < 3);
-      index = ore ? (face === FaceMaterial.IronOre && (x + y) % 3 === 0 ? 4 : 3) : noise < 7 ? 2 : 1;
+      index = ore ? (face !== FaceMaterial.CoalOre && (x + y) % 3 === 0 ? 4 : 3) : noise < 7 ? 2 : 1;
+    }
+    if ([FaceMaterial.IronBlock, FaceMaterial.GoldBlock, FaceMaterial.DiamondBlock].includes(face as 24 | 25 | 26)) {
+      index = x === 0 || y === 15 ? 3 : x === 15 || y === 0 ? 4 : (x + y) % 13 === 0 ? 2 : 1;
     }
     return index;
   });

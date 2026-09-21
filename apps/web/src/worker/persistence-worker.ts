@@ -5,8 +5,8 @@ import {
   type StoredChunkRecord,
   validateStoredFluid,
 } from '@seedlands/stdlib/world/chunk-snapshot-codec';
-import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, MAX_VOXEL_ID } from '@seedlands/stdlib/world/voxel';
-import { selectWorldGeneratorVersion } from '@seedlands/stdlib/runtime/world-version-policy';
+import { GENERATOR_VERSION, isSupportedGeneratorVersion, Voxel, MAX_VOXEL_ID } from '@seedlands/stdlib/world/voxel';
+import { selectStoredWorldVersion } from '../client/persistence/stored-world-selection';
 import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 import { loadPersistenceBatch } from './persistence-load-many';
@@ -103,30 +103,7 @@ const initialize = async (task: InitTask) => {
   const done = transactionDone(transaction);
   const store = transaction.objectStore('worlds');
   const records = (await requestResult(store.getAll())) as WorldRecord[];
-  const supportedRecords = records.filter((record) => {
-    if (
-      record.generatorVersion !== GENERATOR_VERSION &&
-      record.generatorVersion !== 3 &&
-      record.generatorVersion !== LEGACY_GENERATOR_VERSION
-    )
-      return false;
-    const storedProvider = (record as Partial<WorldRecord>).provider;
-    if (!storedProvider) return false;
-    try {
-      assertWorldgenProviderIdentity(task.provider, storedProvider, record.generatorVersion);
-      return true;
-    } catch {
-      return false;
-    }
-  });
-  const generatorVersion = selectWorldGeneratorVersion(
-    supportedRecords,
-    task.seedText,
-    GENERATOR_VERSION,
-    task.openMode,
-  );
-  if (generatorVersion !== GENERATOR_VERSION && generatorVersion !== 3 && generatorVersion !== LEGACY_GENERATOR_VERSION)
-    throw new Error(`Stored world uses unsupported generator version ${generatorVersion}.`);
+  const generatorVersion = selectStoredWorldVersion(records, task.seedText, task.provider, task.openMode);
   const provider = persistenceWorldgenProviders.resolve(task.provider, generatorVersion);
   const worldId = `seedlands:g${generatorVersion}:${task.seedText}`;
   config = {
@@ -339,12 +316,7 @@ const latestWorld = async (task: LatestWorldTask) => {
     const worlds = (await requestResult(transaction.objectStore('worlds').getAll())) as WorldRecord[];
     await done;
     const latest = worlds
-      .filter(
-        (world) =>
-          world.generatorVersion === GENERATOR_VERSION ||
-          world.generatorVersion === 3 ||
-          world.generatorVersion === LEGACY_GENERATOR_VERSION,
-      )
+      .filter((world) => isSupportedGeneratorVersion(world.generatorVersion))
       .sort((left, right) => right.updatedAt - left.updatedAt)[0];
     return latest ? { seedText: latest.seedText } : null;
   } finally {
