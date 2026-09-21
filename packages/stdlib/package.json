@@ -48,6 +48,8 @@
     "./server/gameplay/player-state": "./src/server/gameplay/player-state.ts",
     "./server/gameplay/projectile-runtime": "./src/server/gameplay/projectile-runtime.ts",
     "./server/gameplay/ranged-action": "./src/server/gameplay/ranged-action.ts",
+    "./server/gameplay/rail-runtime": "./src/server/gameplay/rail-runtime.ts",
+    "./server/gameplay/vehicle-runtime": "./src/server/gameplay/vehicle-runtime.ts",
     "./server/gameplay/difficulty-runtime": "./src/server/gameplay/difficulty-runtime.ts",
     "./server/gameplay/bed-action": "./src/server/gameplay/bed-action.ts",
     "./server/gameplay/armor-equipment": "./src/server/gameplay/armor-equipment.ts",

@@ -140,6 +140,12 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 定向：utility-items 2、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 14 files/25 tests PASS。coverage 将 I-281/325/328/333/342/343/359 标 HEADLESS_PASS。矿车轨道物理/骑乘、桶的流体拾取放置、剪毛交互未实现（S6b/环境流体阶段）。verify:static:ci PASS。
 - S6a 完整浏览器旅程 PASS：runId 8c3d212b-41d1-49fa-8eda-81b3d9c681b7，C0–C5 全 PASS，约 1.9 分钟，sourceSha ccd2e7daed593d9438c989b94818740eb7f90a36，artifactDigest bdc8fc7130d02adb55448999c9f5310dbb86a9640e9e70fbdd85db5b7a79136e，HeadlessChrome/153、mute-audio，pageErrors/failedResponses 为空。首帧曾偶发暂停面板拦截（85.5>0.65）单例失败，第二次连续通过，原失败保留。新增运输/实用物品未使既有旅程回归。
 
+## S6b 轨道与载具状态
+
+- 追加 Rail/PoweredRail/DetectorRail 体素39–41和材质42–44，不改 V8 程序生成；轨道为可选择非实心方块，Web/Rust mesh 材质闭包和三种原创轨道纹理已接入。连接解析只读已加载相邻轨道，支持东西/南北与四向一格坡道。
+- VehicleRuntime 保存 minecart/chest-minecart/furnace-minecart/boat 的位置、速度、方向、燃料、唯一乘员和箱车27格库存；动力轨/燃料加速、普通轨摩擦、DetectorRail 占用、船水面、上下车安全点与玩家位置同步均有确定性入口。鞍猪原子扣鞍并复用同一乘坐记录。
+- Rust source/artifact fingerprint PASS；vehicle/palette/asset/snapshot 4 files / 34 tests PASS；Wasm mesh/world 等价 2 files / 10 tests PASS；`verify:static:ci` PASS。浏览器载具模型、真实驾驶输入与碰撞反馈留待 S7，不在本段宣称视觉完成。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。

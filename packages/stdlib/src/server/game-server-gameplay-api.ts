@@ -54,6 +54,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'dyeSheep',
   'regrowSheepWool',
   'lifeSkills',
+  'vehicles',
   'attackEntity',
   'getCombatState',
   'applyDamage',

@@ -97,6 +97,10 @@ Classic 的鸡、牛、猪、羊、鱿鱼、狼、僵尸、骷髅、蜘蛛、苦
 
 钓鱼竿是有耐久的非堆叠工具；玩家只可在已加载水面投出一个鱼钩，咬钩时刻由 world seed、玩家 id 和 cast sequence 决定，推进与剩余等待进入 gameplay checkpoint。提前收杆只回收鱼钩，咬钩后收杆原子发放生鱼并扣 1 耐久；背包满时保持可收杆状态，不吞奖励。鸡蛋投掷原子扣 1 个鸡蛋并推进稳定序列，按固定 1/8 判定在目标已加载可站立位置孵化鸡；失败不扣物品。空桶对五格内存活奶牛使用时原子替换为奶桶；奶桶使用后恢复空桶。
 
+## S6b 轨道与载具合同
+
+Rail、PoweredRail、DetectorRail 使用追加稳定体素，不改变 V8 程序生成输出；连接形态只由已加载水平邻居和一格坡度决定，未知邻格不猜测。VehicleRuntime 拥有 minecart/chest-minecart/furnace-minecart/boat 的位置、速度、朝向、乘员、燃料与箱车库存，按固定步长推进并进入 gameplay checkpoint。矿车只沿解析轨道移动，动力轨补能、普通轨摩擦；船只在已加载水面移动并受水阻力。上下车验证距离、唯一乘员和安全落点；鞍猪复用 SpeciesState.saddled，玩家乘坐引用与猪实体位置同步，失败不扣鞍。
+
 ## S3d 熔岩与流体混合合同
 
 追加稳定 Voxel.Lava 与 Voxel.Obsidian，不重排旧 palette，旧 generatorVersion 字节不变。流体种类由 voxel id 表示，既有 Uint8 sidecar 继续只保存 source bit 与 level 1–8，因此旧水存档无需迁移。水与熔岩接触的候选按坐标稳定排序：熔岩源变黑曜石，流动熔岩变圆石；同一批多邻居不能重复写。传播与混合必须使用 Authority read-set/expected cell 校验，旧 epoch、stale chunk 或未知边界不提交。

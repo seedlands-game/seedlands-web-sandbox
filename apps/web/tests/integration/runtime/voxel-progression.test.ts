@@ -57,7 +57,7 @@ describe('S4 voxel progression palette', () => {
 
   it('assigns stable IDs and complete materials to the expanded voxel palette', () => {
     expect(GENERATOR_VERSION).toBe(8);
-    expect(MAX_VOXEL_ID).toBe(Voxel.DungeonChest);
+    expect(MAX_VOXEL_ID).toBe(Voxel.DetectorRail);
     expect([Voxel.Farmland, Voxel.Lava, Voxel.Obsidian, Voxel.Fire, Voxel.Tnt]).toEqual([26, 27, 28, 29, 30]);
     expect([Voxel.Workbench, Voxel.Chest, Voxel.Furnace, Voxel.CoalOre, Voxel.IronOre]).toEqual([11, 12, 13, 14, 15]);
     expect([
@@ -91,9 +91,10 @@ describe('S4 voxel progression palette', () => {
     ]).toEqual([34, 35, 36, 37, 38, 39]);
     expect(FaceMaterial.Spawner).toBe(40);
     expect(FaceMaterial.DungeonChest).toBe(41);
-    expect(MATERIAL_LAYER_COUNT).toBe(41);
-    expect(terrainMaterials).toHaveLength(41);
-    expect(builtinTerrainTextures).toHaveLength(41);
+    expect(FaceMaterial.DetectorRail).toBe(44);
+    expect(MATERIAL_LAYER_COUNT).toBe(44);
+    expect(terrainMaterials).toHaveLength(44);
+    expect(builtinTerrainTextures).toHaveLength(44);
     for (const [material, textureName] of [
       [FaceMaterial.Workbench, 'workbench'],
       [FaceMaterial.Chest, 'chest'],
@@ -136,6 +137,9 @@ describe('S4 voxel progression palette', () => {
       [Voxel.StoneBricks, FaceMaterial.StoneBricks],
       [Voxel.Spawner, FaceMaterial.Spawner],
       [Voxel.DungeonChest, FaceMaterial.DungeonChest],
+      [Voxel.Rail, FaceMaterial.Rail],
+      [Voxel.PoweredRail, FaceMaterial.PoweredRail],
+      [Voxel.DetectorRail, FaceMaterial.DetectorRail],
     ] as const;
     for (const [voxel, material] of expected) {
       const data = new Uint16Array(32 ** 3);

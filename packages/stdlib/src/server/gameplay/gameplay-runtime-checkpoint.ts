@@ -19,6 +19,7 @@ import type { DifficultyRuntime } from './difficulty-runtime';
 import type { EnvironmentRuntime } from './environment-runtime';
 import type { ProjectileRuntime } from './projectile-runtime';
 import type { LifeSkillsRuntime } from './life-skills-runtime';
+import type { VehicleRuntime } from './vehicle-runtime';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -38,6 +39,7 @@ type Options = Readonly<{
   environment: EnvironmentRuntime;
   projectiles: ProjectileRuntime;
   lifeSkills: LifeSkillsRuntime;
+  vehicles: VehicleRuntime;
   needsPlayerLimit?: number;
   installMetadata(gameplayTime: number, revision: number): void;
 }>;
@@ -62,6 +64,7 @@ export class GameplayRuntimeCheckpoint {
       this.options.environment.checkpoint(),
       this.options.projectiles.checkpoint(),
       this.options.lifeSkills.checkpoint(),
+      this.options.vehicles.checkpoint(),
     );
     if (this.options.compositionGuard) snapshot.composition = this.options.compositionGuard.snapshot();
     const ruleset = this.options.ruleset.snapshot();
@@ -135,6 +138,11 @@ export class GameplayRuntimeCheckpoint {
     this.options.lifeSkills.restore(
       raw && typeof raw === 'object' && 'lifeSkills' in raw
         ? (raw.lifeSkills as import('./life-skills-runtime').LifeSkillsCheckpoint)
+        : undefined,
+    );
+    this.options.vehicles.restore(
+      raw && typeof raw === 'object' && 'vehicles' in raw
+        ? (raw.vehicles as import('./vehicle-runtime').VehicleCheckpoint)
         : undefined,
     );
     installSchedule?.();

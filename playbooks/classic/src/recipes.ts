@@ -97,6 +97,30 @@ export const overworldRecipes: readonly Recipe[] = [
   },
   { id: 'minecart', inputs: [{ itemId: 'iron-ingot', count: 5 }], outputs: [{ itemId: 'minecart', count: 1 }] },
   {
+    id: 'rails',
+    inputs: [
+      { itemId: 'iron-ingot', count: 6 },
+      { itemId: 'stick', count: 1 },
+    ],
+    outputs: [{ itemId: 'rail', count: 16 }],
+  },
+  {
+    id: 'powered-rails',
+    inputs: [
+      { itemId: 'gold-ingot', count: 6 },
+      { itemId: 'stick', count: 1 },
+    ],
+    outputs: [{ itemId: 'powered-rail', count: 6 }],
+  },
+  {
+    id: 'detector-rails',
+    inputs: [
+      { itemId: 'iron-ingot', count: 6 },
+      { itemId: 'stone-block', count: 1 },
+    ],
+    outputs: [{ itemId: 'detector-rail', count: 6 }],
+  },
+  {
     id: 'chest-minecart',
     inputs: [
       { itemId: 'minecart', count: 1 },

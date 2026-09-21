@@ -287,6 +287,9 @@ export class GameServerGameplayHost {
   get lifeSkills() {
     return this.gameplay.lifeSkills;
   }
+  get vehicles() {
+    return this.gameplay.vehicles;
+  }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
   }
