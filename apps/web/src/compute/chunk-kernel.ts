@@ -83,6 +83,14 @@ export function columnVoxel(
       if (dx === 0 && dz === 0 && wy > th && wy <= th + 4) return 4;
       if (dx <= 2 && dz <= 2 && wy >= th + 3 && wy <= th + 6 && (dx + dz < 4 || wy >= th + 5)) return 5;
     }
+  if (generatorVersion >= 7 && wy === height + 1 && waterLevel === -2147483648) {
+    const roll = hash2(seed ^ 0x564547, worldX, worldZ);
+    if (kind === 3) return roll > 0.992 ? 36 : 0;
+    if (kind === 5) return roll > 0.94 ? 35 : 0;
+    if (kind === 1 && roll > 0.985) return 34;
+    if ((kind === 0 || kind === 1) && roll > 0.965) return 33;
+    if (kind !== 2 && kind !== 4 && roll > 0.82) return 32;
+  }
   return 0;
 }
 

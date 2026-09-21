@@ -194,3 +194,14 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - LightSampler 由 worldTime 确定0–15天空光，逐格检查至世界顶的已加载遮挡；未知格返回 null。Glowstone/Lantern/Fire/Lava 在半径15内按 Manhattan 距离衰减取最大方块光；无缓存，因此方块变化后下一次查询立即生效。
 - GameplayEnvironmentFacade 组合 lightAt 与 attemptNaturalSpawn。后者消费 world seed、tick、biomeAt、权威光照、玩家距离、难度与当前类别数量，成功后经 spawnAutonomous 写入实体和 simulation snapshot；暗处 hostile 成功、peaceful 拒绝。Classic 候选表保留在 playbook，不使 stdlib 反向依赖。
 - lighting 2 + spawning 3 + world-space-sun/advanced-lighting 6 tests PASS；静态门禁通过。M11-01..04 与 M20-01/02 仍记 PARTIAL：方块光是有界按需扫描而非增量光场，自然刷新周期与群组偏移尚未接，天气视觉和月亮表现待 S7。
+
+## S3g 既有地形、群系与出生证据补账
+
+- 当前 HEAD 复跑 voxel、macro-world、macro-river-v3、cave、ore distribution、precious ore、safe-spawn、legacy generator save，共8文件43 tests PASS。覆盖 seed 文本归一化、查询顺序无关、不同 seed 区分、V2–V6 版本兼容/未来版本拒绝、连续地形与温湿度、六类 biome、跨Chunk河流、洞穴/矿深度、干燥安全出生与山地/树冠/水域重试。
+- M02-01/02/03、M03-01、M04-01、M05-03 更新为 PARTIAL_IMPLEMENTED + HEADLESS_PASS；不宣称 Java Beta 随机调用次序等价。基岩/黏土/海床、树苗成长、花草蘑菇甘蔗仙人掌、冰雪组合、地牢/刷怪笼仍保持 NOT_RUN。
+
+## S3h V7 植被与树苗成长（部分完成）
+
+- V7 在V6地形之上以 seed/坐标哈希按 biome 追加 TallGrass/Flower/Mushroom/SugarCane/Cactus；V2–V6原始字节继续冻结。TS baseVoxel、staged chunk kernel、Rust scalar/SIMD 同步，Classic worldgen identity 升7.0.0/g2-g7，场景与保存支持版本扩至7。
+- Sapling/TallGrass/Flower/Mushroom/SugarCane/Cactus 使用稳定 voxel 31–36、材质34–39与原创纹理；树苗成长检查下方土/草及5×7×5全部已加载空域，通过一次 editBatch 生成树干/树冠，阻挡或未知格零写入。
+- vegetation/legacy/cave/ore 14 tests、TS/staged/Rust/Wasm/mesh/resource 20 tests、tree batch 1 test PASS；verify:static:ci PASS。当前只记 PARTIAL：红/棕蘑菇未拆分，花色、甘蔗严格水边、仙人掌伤害、叶衰减与浏览器植物专属画面仍待实现。
