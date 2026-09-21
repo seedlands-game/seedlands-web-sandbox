@@ -133,9 +133,9 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Lava (Flowing)"
     },
     {
@@ -143,9 +143,9 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Lava (Still)"
     },
     {
@@ -562,9 +562,9 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Obsidian"
     },
     {
@@ -1864,9 +1864,9 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Lava Bucket"
     },
     {
@@ -4463,9 +4463,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：水源/流动级别、坡度、更新次序；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4473,9 +4473,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：熔岩流速/冷却、水-熔岩组合产物；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4483,9 +4483,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：液体碰撞/浮力/窒息/燃烧与桶取放；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4493,9 +4493,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：加载边界和复杂洞穴里的传播/终止；记录正例、失败例、tick 和 owner 状态。"
     },
     {

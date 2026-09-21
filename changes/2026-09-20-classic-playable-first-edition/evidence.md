@@ -167,3 +167,14 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 
 - spawn-policy 以 seed/tick/position 哈希、亮度、距玩家、难度、群系和类别上限筛选并按权重稳定选择；hostile 在 peaceful 禁止且要求低光，passive 要求日间亮度，24 格内与达到上限拒绝。非持久且未驯服实体仅在玩家 128 格外允许清退。
 - classic-spawning 2 tests PASS，覆盖同输入稳定、hostile/passive 分流、peaceful/距离/上限负例及 persistent/tamed 豁免。当前 GameplayRuntime 缺统一光照/群系查询端口，未接自然刷新循环；M20 三项只记 PARTIAL_IMPLEMENTED / HEADLESS_PASS，待 S3 环境补端口后收口。
+
+## S3c 既有水流证据补账
+
+- 复核现有 owner 后确认水源标志0x80、流级1–8、向下/水平传播、源移除回缩、固定顺序、有界 frontier、lease失败回收、跨Chunk一跳依赖与未知邻区延迟、chunk fluid sidecar保存/恢复均已有生产实现。
+- 定向复跑 fluid-transaction 21、voxel-fluid-runtime 14、chunk-snapshot-codec 7、water-mesh 6、water-immersion 5、water-flow-direction 2，共6文件55 tests PASS。M10-01/M10-04升级 IMPLEMENTED+HEADLESS_PASS；M10-03仅 PARTIAL_IMPLEMENTED，因为桶取放、窒息、熔岩燃烧仍缺。
+
+## S3d 熔岩与混合基础（部分完成）
+
+- 追加稳定 Voxel.Lava=27、Voxel.Obsidian=28 与 FaceMaterial 30/31；旧 0–26 palette 和 generatorVersion 2–6 生成字节不变。Lava 当前为 emissive 全格材质，Obsidian 为不透明方块；黑曜石需 diamond tier 镐并掉落自身。新增 lava-bucket/obsidian 内容与原创资源。
+- fluidReaction 以 voxel id 判定种类，复用既有 sidecar source bit/level：水接 lava source 生成 Obsidian，水接流动 lava 生成 Cobblestone，输入顺序无关。fluid reaction 2 + mesh/chunk codec 23 + voxel/Wasm/resource 14 tests PASS。
+- 当前只记 PARTIAL_IMPLEMENTED：Lava 尚未进入 FluidTransactionAuthority 传播/冷却节奏，混合尚未作为 read-set 候选提交，桶拾取/放置未接，Lava 液面仍是全格材质。

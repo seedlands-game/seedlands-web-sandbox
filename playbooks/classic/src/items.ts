@@ -357,6 +357,8 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
   { id: 'gunpowder', name: '火药', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'slimeball', name: '黏液球', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'bed', name: '床', itemType: 'resource', stackLimit: 1, capabilities: [] },
+  { id: 'lava-bucket', name: '熔岩桶', itemType: 'resource', stackLimit: 1, capabilities: [] },
+  { id: 'obsidian', name: '黑曜石', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 28 }] },
   { id: 'arrow', name: '箭', itemType: 'resource', stackLimit: 64, capabilities: [] },
   {
     id: 'bow',
