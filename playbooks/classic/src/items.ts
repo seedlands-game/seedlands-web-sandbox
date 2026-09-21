@@ -79,6 +79,14 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
   },
   { id: 'gold-ingot', name: '金锭', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'diamond', name: '钻石', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'sandstone', name: '砂岩', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 24 }] },
+  {
+    id: 'stone-bricks',
+    name: '石砖',
+    itemType: 'block',
+    stackLimit: 64,
+    capabilities: [{ type: 'place', voxel: 25 }],
+  },
   {
     id: 'gold-pickaxe',
     name: '金镐',

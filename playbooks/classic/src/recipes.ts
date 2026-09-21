@@ -38,6 +38,12 @@ const meleeTools: readonly Recipe[] = toolTiers.flatMap(([tier, material]) => [
 export const overworldRecipes: readonly Recipe[] = [
   ...resourceBlocks,
   ...meleeTools,
+  { id: 'sandstone', inputs: [{ itemId: 'sand-block', count: 4 }], outputs: [{ itemId: 'sandstone', count: 1 }] },
+  {
+    id: 'stone-bricks',
+    inputs: [{ itemId: 'stone-block', count: 4 }],
+    outputs: [{ itemId: 'stone-bricks', count: 4 }],
+  },
   { id: 'planks', inputs: [{ itemId: 'wood-block', count: 1 }], outputs: [{ itemId: 'plank', count: 4 }] },
   { id: 'sticks', inputs: [{ itemId: 'plank', count: 2 }], outputs: [{ itemId: 'stick', count: 4 }] },
   {
