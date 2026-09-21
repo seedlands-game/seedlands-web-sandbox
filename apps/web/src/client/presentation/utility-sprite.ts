@@ -27,7 +27,23 @@ export type UtilitySpriteKind =
   | 'redstone-dust'
   | 'compass'
   | 'clock'
-  | 'map';
+  | 'map'
+  | 'flint-and-steel'
+  | 'mushroom-stew'
+  | 'painting'
+  | 'golden-apple'
+  | 'sign'
+  | 'wooden-door'
+  | 'snowball'
+  | 'brick'
+  | 'clay'
+  | 'book'
+  | 'sugar'
+  | 'cake'
+  | 'cookie'
+  | 'cocoa-beans'
+  | 'record-13'
+  | 'record-cat';
 
 const utilityKinds: readonly string[] = [
   'bowl',
@@ -57,6 +73,22 @@ const utilityKinds: readonly string[] = [
   'compass',
   'clock',
   'map',
+  'flint-and-steel',
+  'mushroom-stew',
+  'painting',
+  'golden-apple',
+  'sign',
+  'wooden-door',
+  'snowball',
+  'brick',
+  'clay',
+  'book',
+  'sugar',
+  'cake',
+  'cookie',
+  'cocoa-beans',
+  'record-13',
+  'record-cat',
 ];
 export const isUtilitySpriteKind = (kind: string): kind is UtilitySpriteKind => utilityKinds.includes(kind);
 
@@ -348,6 +380,51 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
       kind === 'clock' ? 13 : 10,
     );
     line(sprite, 16, 16, kind === 'clock' ? 22 : 16, kind === 'clock' ? 16 : 7, kind === 'clock' ? 3 : 16);
+    return sprite.pixels;
+  }
+  if (kind === 'snowball' || kind === 'clay' || kind === 'sugar' || kind === 'cocoa-beans') {
+    const color = kind === 'snowball' || kind === 'sugar' ? 10 : kind === 'clay' ? 9 : 3;
+    sprite.polygon(
+      [
+        [16, 5],
+        [24, 9],
+        [28, 17],
+        [23, 25],
+        [14, 28],
+        [6, 22],
+        [5, 13],
+        [10, 7],
+      ],
+      color,
+    );
+    sprite.rect(11, 9, 7, 4, 11);
+    return sprite.pixels;
+  }
+  if (kind === 'book' || kind === 'painting' || kind === 'sign' || kind === 'wooden-door') {
+    sprite.rect(6, 5, 20, 23, kind === 'book' ? 16 : 3);
+    sprite.rect(9, 8, 14, 17, kind === 'painting' ? 2 : 4);
+    return sprite.pixels;
+  }
+  if (kind === 'record-13' || kind === 'record-cat') {
+    sprite.rect(5, 5, 22, 22, 1);
+    sprite.rect(9, 9, 14, 14, kind === 'record-cat' ? 18 : 13);
+    sprite.rect(14, 14, 4, 4, 1);
+    return sprite.pixels;
+  }
+  if (kind === 'flint-and-steel') {
+    line(sprite, 7, 25, 23, 7, 9);
+    sprite.rect(6, 20, 8, 7, 7);
+    return sprite.pixels;
+  }
+  if (kind === 'brick') {
+    sprite.rect(6, 9, 20, 15, 16);
+    sprite.rect(8, 7, 16, 3, 17);
+    return sprite.pixels;
+  }
+  if (kind === 'mushroom-stew' || kind === 'cake' || kind === 'cookie' || kind === 'golden-apple') {
+    const color = kind === 'golden-apple' ? 13 : kind === 'cake' ? 10 : kind === 'cookie' ? 3 : 4;
+    sprite.rect(7, 10, 18, 15, color);
+    sprite.rect(10, 7, 12, 4, 11);
     return sprite.pixels;
   }
   if (kind === 'ink-sac' || kind === 'rotten-flesh' || kind === 'gunpowder' || kind === 'slimeball') {

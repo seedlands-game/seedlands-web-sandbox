@@ -157,6 +157,11 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - RED：classic-crop-runtime 3/3 因 `world.crops` 缺失失败。GREEN 后 CropRuntime 成为每世界 owner：选中种子只在已加载耕地及上方空气种植并原子扣种；重复/未知位置零提交。seed+tick+坐标稳定抽样只推进已加载、水化作物，成熟封顶；收割先在临时背包验证全部产物容量，再提交库存并移除作物。
 - crop runtime/pure growth/snapshot migration 共3 files / 28 tests PASS，覆盖阶段7成熟、保存恢复与非法请求。checkpoint 为 V4 可选字段，旧档恢复为空。`verify:static:ci` 两次先后因 gameplay-snapshot、gameplay-runtime 增长越过500行失败；未加豁免，分别抽出 legacy 坐标迁移并压缩既有 facade，最终静态门禁 PASS。作物网格模型、自然草种掉落和浏览器手势仍留 S7。
 
+## S2g 便携内容与配方闭包
+
+- RED：portable-content 2/2 因 flint-and-steel 等物品和 book 等配方缺失失败。GREEN 后补齐打火石、蘑菇煲、画、金苹果、告示牌、木门、雪球、红砖、黏土、书、糖、蛋糕、曲奇、可可豆和两张唱片；全部进入 Classic registry 与原创像素资产目录。
+- 补齐纸、书、羊毛、画、金苹果、告示牌、木门、糖、蛋糕、曲奇和打火石材料配方；cookie 实际合成验证材料扣除、8个输出和缺料不提交。portable/asset/visual 共3 files / 9 tests PASS，`verify:static:ci` PASS。首次静态检查因 items.ts 507行失败，拆出 portable-items.ts 后通过，未加豁免。RecipeRegistry 仍是无形配方，故覆盖项只记 PARTIAL/HEADLESS，不宣称原版网格摆位等价。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。

@@ -1113,10 +1113,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Flint and Steel"
+      "execution": "HEADLESS_PASS",
+      "name": "Flint and Steel",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-260",
@@ -1376,10 +1377,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Mushroom Stew"
+      "execution": "HEADLESS_PASS",
+      "name": "Mushroom Stew",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-283",
@@ -1452,10 +1454,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gunpowder"
+      "execution": "HEADLESS_PASS",
+      "name": "Gunpowder",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-290",
@@ -1803,40 +1806,44 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Painting"
+      "execution": "HEADLESS_PASS",
+      "name": "Painting",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-322",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Golden Apple"
+      "execution": "HEADLESS_PASS",
+      "name": "Golden Apple",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-323",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Sign"
+      "execution": "HEADLESS_PASS",
+      "name": "Sign",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-324",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Wooden Door"
+      "execution": "HEADLESS_PASS",
+      "name": "Wooden Door",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-325",
@@ -1887,10 +1894,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Saddle"
+      "execution": "HEADLESS_PASS",
+      "name": "Saddle",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-330",
@@ -1908,20 +1916,22 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Redstone"
+      "execution": "HEADLESS_PASS",
+      "name": "Redstone",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-332",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Snowball"
+      "execution": "HEADLESS_PASS",
+      "name": "Snowball",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-333",
@@ -1950,70 +1960,77 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Milk Bucket"
+      "execution": "HEADLESS_PASS",
+      "name": "Milk Bucket",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-336",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Brick"
+      "execution": "HEADLESS_PASS",
+      "name": "Brick",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-337",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Clay"
+      "execution": "HEADLESS_PASS",
+      "name": "Clay",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-338",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Sugarcane"
+      "execution": "HEADLESS_PASS",
+      "name": "Sugarcane",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-339",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Paper"
+      "execution": "HEADLESS_PASS",
+      "name": "Paper",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-340",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Book"
+      "execution": "HEADLESS_PASS",
+      "name": "Book",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-341",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Slime"
+      "execution": "HEADLESS_PASS",
+      "name": "Slime",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-342",
@@ -2042,10 +2059,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Egg"
+      "execution": "HEADLESS_PASS",
+      "name": "Egg",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-345",
@@ -2063,10 +2081,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Fishing Rod"
+      "execution": "HEADLESS_PASS",
+      "name": "Fishing Rod",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-347",
@@ -2117,40 +2136,44 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Dye"
+      "execution": "HEADLESS_PASS",
+      "name": "Dye",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-352",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bone"
+      "execution": "HEADLESS_PASS",
+      "name": "Bone",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-353",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Sugar"
+      "execution": "HEADLESS_PASS",
+      "name": "Sugar",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-354",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Cake"
+      "execution": "HEADLESS_PASS",
+      "name": "Cake",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-355",
@@ -2179,10 +2202,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Cookie"
+      "execution": "HEADLESS_PASS",
+      "name": "Cookie",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-358",
@@ -2211,20 +2235,22 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Record (13)"
+      "execution": "HEADLESS_PASS",
+      "name": "Record (13)",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "I-2257",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Record (cat)"
+      "execution": "HEADLESS_PASS",
+      "name": "Record (cat)",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "E-Player",
@@ -2536,20 +2562,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 纸 ← 甘蔗；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 纸 ← 甘蔗；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D02",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 书 ← 纸；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 书 ← 纸；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D03",
@@ -2637,20 +2665,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛 ← 线；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 羊毛 ← 线；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D12",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 TNT ← 火药+沙；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 TNT ← 火药+沙；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D13",
@@ -2707,10 +2737,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木门 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木门 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D19",
@@ -2738,30 +2769,33 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 告示牌 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 告示牌 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D22",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 蛋糕 ← 奶+糖+蛋+小麦；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 蛋糕 ← 奶+糖+蛋+小麦；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D23",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 糖 ← 甘蔗；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 糖 ← 甘蔗；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D24",
@@ -2808,20 +2842,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 碗 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 碗 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D29",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁轨 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁轨 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D30",
@@ -2850,10 +2886,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 矿车 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 矿车 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D33",
@@ -2870,60 +2907,66 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 箱子矿车 ← 箱子+矿车；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 箱子矿车 ← 箱子+矿车；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D35",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 熔炉矿车 ← 熔炉+矿车；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 熔炉矿车 ← 熔炉+矿车；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D36",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 船 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 船 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D37",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 桶 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 桶 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D38",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 打火石 ← 铁锭+燧石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 打火石 ← 铁锭+燧石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D39",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 面包 ← 小麦；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 面包 ← 小麦；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D40",
@@ -2940,10 +2983,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钓鱼竿 ← 木棍+线；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钓鱼竿 ← 木棍+线；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D42",
@@ -2960,20 +3004,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 画 ← 木棍+羊毛；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 画 ← 木棍+羊毛；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D44",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金苹果 ← 苹果+金块；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金苹果 ← 苹果+金块；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D45",
@@ -3013,30 +3059,33 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 时钟 ← 金锭+红石粉；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 时钟 ← 金锭+红石粉；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D49",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 指南针 ← 铁锭+红石粉；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 指南针 ← 铁锭+红石粉；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D50",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 地图 ← 纸+指南针；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 地图 ← 纸+指南针；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-D51",
@@ -3370,20 +3419,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 弓 ← 木棍+线；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 弓 ← 木棍+线；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-H27",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 箭 ← 燧石+木棍+羽毛；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 箭 ← 燧石+木棍+羽毛；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-H28",
@@ -3630,30 +3681,33 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 工作台 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 工作台 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-H53",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 箱子 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 箱子 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-H54",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 熔炉 ← 圆石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 熔炉 ← 圆石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-H55",
@@ -3960,20 +4014,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 砂岩 ← 4 沙；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 砂岩 ← 4 沙；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-H86",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 剪刀 ← 2 铁锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 剪刀 ← 2 铁锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
     },
     {
       "caseId": "R-H87",

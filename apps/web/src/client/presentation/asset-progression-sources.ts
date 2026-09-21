@@ -70,6 +70,26 @@ export const progressionItemAssets = [
   ...pixelItemAssets('compass', '指南针', 'compass'),
   ...pixelItemAssets('clock', '时钟', 'clock'),
   ...pixelItemAssets('map', '地图', 'map'),
+  ...(
+    [
+      'flint-and-steel',
+      'mushroom-stew',
+      'painting',
+      'golden-apple',
+      'sign',
+      'wooden-door',
+      'snowball',
+      'brick',
+      'clay',
+      'book',
+      'sugar',
+      'cake',
+      'cookie',
+      'cocoa-beans',
+      'record-13',
+      'record-cat',
+    ] as const
+  ).flatMap((id) => pixelItemAssets(id, id, id)),
   ...(['leather', 'iron', 'gold', 'diamond'] as const).flatMap((tier) => {
     const material = tier === 'leather' ? 'wood' : tier;
     const label: Record<string, string> = { leather: '皮革', iron: '铁', gold: '金', diamond: '钻石' };
