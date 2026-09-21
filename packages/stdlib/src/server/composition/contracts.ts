@@ -38,7 +38,7 @@ export type ModItemDefinition = Readonly<{
   name: string;
   stackLimit: number;
   storageId?: string;
-  itemType?: 'block' | 'resource' | 'food' | 'tool';
+  itemType?: 'block' | 'resource' | 'food' | 'tool' | 'armor';
   capabilities?: readonly ItemCapability[];
   durability?: Readonly<{ max: number }>;
 }>;

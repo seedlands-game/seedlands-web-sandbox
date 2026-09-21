@@ -339,4 +339,29 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
     durability: { max: 250 },
     capabilities: [{ type: 'mine', tool: 'pickaxe', tier: 3, multiplier: 6 }],
   },
+  { id: 'leather', name: '皮革', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  ...(
+    [
+      ['leather', '皮革', 'leather', 55, { helmet: 1, chestplate: 3, leggings: 2, boots: 1 }],
+      ['iron', '铁', 'iron-ingot', 165, { helmet: 2, chestplate: 6, leggings: 5, boots: 2 }],
+      ['gold', '金', 'gold-ingot', 77, { helmet: 2, chestplate: 5, leggings: 3, boots: 1 }],
+      ['diamond', '钻石', 'diamond', 363, { helmet: 3, chestplate: 8, leggings: 6, boots: 3 }],
+    ] as const
+  ).flatMap(([tier, tierName, , durability, points]) =>
+    (
+      [
+        ['helmet', '头盔'],
+        ['chestplate', '胸甲'],
+        ['leggings', '护腿'],
+        ['boots', '靴子'],
+      ] as const
+    ).map(([slot, slotName]) => ({
+      id: `${tier}-${slot}`,
+      name: `${tierName}${slotName}`,
+      itemType: 'armor' as const,
+      stackLimit: 1,
+      durability: { max: durability },
+      capabilities: [{ type: 'armor' as const, slot, points: points[slot] }],
+    })),
+  ),
 ];

@@ -118,3 +118,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 ## S3b 矿脉分布度量
 
 - ore-vein-distribution.test.ts 以固定 seed 扫描表征既有 V5 矿脉：确认深度门槛（钻石 y<16 且表下≥12、金 y<32 且表下≥8、铁表下≥8、煤表下≥4）、生成次序（钻石/金优先于铁再煤）、稀有度递减（diamond<gold<iron<coal），浅层无矿；同参数 V5 与 V6 oreVoxel 输出一致（V6 洞穴不改矿脉分布）。3 tests PASS。coverage 将 M03-03 矿脉机制标 HEADLESS_PASS。这是对既有生成的确定性度量，非新算法；矿脉聚簇形态与真实 Beta 矿脉大小分布未逐一对齐。
+
+## S4a 护甲与伤害减免
+
+- RED：classic-armor.test.ts 断言护甲物品/armor 能力/armorDamageReduction 存在，itemType 'armor'/capability 缺失失败。
+- 实现后 GREEN：ItemCapability 增加 'armor'（slot+points），itemType 扩含 'armor' 且允许护甲耐久；新增皮/铁/金/钻石四套头盔胸甲护腿靴（16 件+皮革资源），点数按 Beta 布局（钻石胸甲 8 等），工作台按 5/8/7/4 材料合成带耐久。armor-policy 每点减伤 4%、封顶 20 点（80%）、不为负、空甲不减、非法输入拒绝。新增 armor-sprite 原创像素图标，acceptsPixelItem/contracts.itemType 扩含 armor。
+- 定向：classic-armor 3、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 13 files/23 tests PASS。coverage 将 I-298..301/306..317/334 共 17 项标 HEADLESS_PASS。护甲穿戴槽 UI 与战斗结算实际接线（把 armorDamageReduction 挂到 melee applyDamage）留待 S4b；未做浏览器穿戴专项。verify:static:ci PASS。
