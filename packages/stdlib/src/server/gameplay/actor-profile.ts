@@ -15,6 +15,8 @@ export type ActorProfileInput = Readonly<{
   meleeDefinitionId?: string;
   deathDrop?: ItemStack;
   disposition?: 'passive' | 'neutral' | 'hostile';
+  spawnWeight?: number;
+  spawnBiomes?: readonly string[];
 }>;
 export type ActorProfile = ActorProfileInput;
 
@@ -83,6 +85,8 @@ export function createActorProfileRegistry(
       throw new TypeError(`Actor profile behavior is invalid: ${input.archetype}`);
     if (input.meleeDefinitionId !== undefined && !melee.has(input.meleeDefinitionId))
       throw new TypeError(`Actor profile references unknown melee definition: ${input.meleeDefinitionId}`);
+    if (input.spawnWeight !== undefined && (!Number.isSafeInteger(input.spawnWeight) || input.spawnWeight <= 0))
+      throw new TypeError('Actor profile spawn weight is invalid: ' + input.archetype);
     const deathDrop = input.deathDrop ? freezeStack(items, input.deathDrop) : undefined;
     profiles.set(
       input.archetype,
@@ -98,6 +102,8 @@ export function createActorProfileRegistry(
         ...(input.meleeDefinitionId !== undefined ? { meleeDefinitionId: input.meleeDefinitionId } : {}),
         ...(deathDrop ? { deathDrop } : {}),
         ...(input.disposition ? { disposition: input.disposition } : {}),
+        ...(input.spawnWeight ? { spawnWeight: input.spawnWeight } : {}),
+        ...(input.spawnBiomes ? { spawnBiomes: Object.freeze([...input.spawnBiomes]) } : {}),
       }),
     );
   }

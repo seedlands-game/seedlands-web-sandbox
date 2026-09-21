@@ -56,6 +56,8 @@ import {
 } from '../authority/authority-kernel-state';
 import { commitGameplayDynamicBatch } from './gameplay-dynamic-batch';
 import { selectGameplayHotbarSlot } from './gameplay-inventory-selection';
+import { GameplayEnvironmentFacade } from './gameplay-environment-facade';
+import { gameplayRuntimeMetrics } from './gameplay-runtime-metrics';
 import { DifficultyRuntime, type Difficulty } from './difficulty-runtime';
 import { applySurvivalDamage, changeDifficulty, equipArmor, useSelectedBed } from './gameplay-survival-settings';
 import { EnvironmentRuntime } from './environment-runtime';
@@ -72,6 +74,7 @@ export class GameplayRuntime {
   readonly authorityExecution: AuthorityKernelExecutionPort;
   readonly difficulty = new DifficultyRuntime();
   readonly environment: EnvironmentRuntime;
+  readonly environmentQueries: GameplayEnvironmentFacade;
   private readonly players = new Map<string, PlayerState>();
   private persistedRevision = 0;
   private inventoryOperationCount = 0;
@@ -96,6 +99,7 @@ export class GameplayRuntime {
     const resolved = resolveGameplayComposition(callbacks);
     this.content = resolved.content;
     this.environment = new EnvironmentRuntime(callbacks.environmentSeed ?? 0);
+    this.environmentQueries = new GameplayEnvironmentFacade(this, callbacks);
     const kernel = createGameplayKernelRuntime(this.content, callbacks.composition, callbacks.worldId);
     this.kernelRuntime = kernel.runtime;
     this.kernelState = kernel.runtime.stateOwner;
@@ -272,11 +276,9 @@ export class GameplayRuntime {
   get gameplayTime(): number {
     return this.kernelState.gameplayTime;
   }
-
   get gameplayRevision(): number {
     return this.kernelState.gameplayRevision;
   }
-
   get persistedGameplayRevision(): number {
     return this.persistedRevision;
   }
@@ -499,13 +501,7 @@ export class GameplayRuntime {
 
   metrics() {
     const bytes = this.callbacks.platform.utf8.encode(JSON.stringify(this.createSnapshot())).byteLength;
-    return RuntimeLifecycle.gameplayMetrics(
-      this.entities,
-      this.inventoryOperationCount,
-      this.eventCount,
-      bytes,
-      this.simulation,
-    );
+    return gameplayRuntimeMetrics(this.entities, this.simulation, this.inventoryOperationCount, this.eventCount, bytes);
   }
 
   restoreSnapshot = (raw: unknown): { version: 1 | 2 | 3 | 4; worldTime?: number } => this.checkpoint.restore(raw);

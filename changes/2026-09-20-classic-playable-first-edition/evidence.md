@@ -188,3 +188,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - EnvironmentRuntime 按 world seed + tick 确定 clear/rain/thunder 转换与持续时间，保存 weather/tick、火列表、TNT稳定id高水位和在途引信。火每4 tick至多向一个邻格扩散，仅空气且邻近Wood/Leaves/Planks/TNT可点燃；雨/雷且露天时熄灭。
 - TNT 到期产生坐标稳定的有界球形候选，GameplayRuntime coordinator 经唯一 editBatch 清除可破坏方块；对玩家按距离衰减伤害并写击退 velocity，环境中途 snapshot 恢复后继续引信。Fire=29/TNT=30、材质32/33与原创纹理接入，TNT 以5火药+4沙合成。
 - classic-environment 3 + gameplay snapshot migration 22 tests PASS，全仓 typecheck PASS。当前只记 PARTIAL：点火物品/浏览器交互、链爆、非玩家实体爆炸伤害、跨 owner 原子提交、雷击落点与雪仍待实现。
+
+## S3f 权威光照查询与自然刷怪入口（部分完成）
+
+- LightSampler 由 worldTime 确定0–15天空光，逐格检查至世界顶的已加载遮挡；未知格返回 null。Glowstone/Lantern/Fire/Lava 在半径15内按 Manhattan 距离衰减取最大方块光；无缓存，因此方块变化后下一次查询立即生效。
+- GameplayEnvironmentFacade 组合 lightAt 与 attemptNaturalSpawn。后者消费 world seed、tick、biomeAt、权威光照、玩家距离、难度与当前类别数量，成功后经 spawnAutonomous 写入实体和 simulation snapshot；暗处 hostile 成功、peaceful 拒绝。Classic 候选表保留在 playbook，不使 stdlib 反向依赖。
+- lighting 2 + spawning 3 + world-space-sun/advanced-lighting 6 tests PASS；静态门禁通过。M11-01..04 与 M20-01/02 仍记 PARTIAL：方块光是有界按需扫描而非增量光场，自然刷新周期与群组偏移尚未接，天气视觉和月亮表现待 S7。

@@ -22,6 +22,7 @@
     "apps/web/tests/integration/runtime/server/composition/classic-difficulty-respawn.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-spawning.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-fluid-buckets.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/classic-environment.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/classic-environment.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-lighting.test.ts"
   ]
 }
