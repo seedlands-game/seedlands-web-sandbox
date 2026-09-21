@@ -1,4 +1,5 @@
-import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../world/voxel';
+import { isFluidVoxel } from './fluid/fluid-cell-state';
 import type { ServerChunk, WorldCommitResult } from './game-server-types';
 import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
 import { createSingleWorldEditResult } from './single-world-edit';
@@ -78,7 +79,7 @@ export function prepareSingleWorldEdit(
       used = true;
       if (result.committed) {
         chunk.voxels[index] = value;
-        chunk.fluid[index] = value === Voxel.Water ? 0x88 : 0;
+        chunk.fluid[index] = isFluidVoxel(value) ? 0x88 : 0;
         chunk.revision = chunkRevision + 1;
         chunk.dirty = true;
         chunk.materialized = true;
