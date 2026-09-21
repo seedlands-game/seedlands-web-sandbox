@@ -150,6 +150,7 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 数据驱动 AI：PerceptionRuntime 和 Logic Worker 按 profile disposition 判断敌我；zombie 夜间攻击玩家、cow 遇敌移动避让正反例通过。新增 wool/ink-sac/rotten-flesh/bone/gunpowder/slimeball 内容与原创像素资源。
 - 定向回归：Classic profile/生成/资源 12 tests、stdlib 网络协议/身体 36 tests、logic-decision 9 tests PASS；全仓 typecheck PASS；test:classic:headless 16 files / 32 tests PASS；verify:static:ci PASS（Svelte 0/0、ESLint 66、CI selection 8）。
 - 失败记录：静态门禁先拒绝 physics→server/gameplay 反向依赖，已改为 physics 自有配置 key 校验；测试类型随后拒绝私有 gameplay facade，已改用公开 queryEntities/simulationSnapshot。各物种专属机制和模型仍未实现，因此实体项只可记 PARTIAL_IMPLEMENTED。
+- S4c/S5 动物状态续作：ECS actor component 增加可选 SpeciesStateV1，保存羊已剪/毛色、狼主人/坐下/驯服尝试、猪鞍和史莱姆尺寸；旧 snapshot 按 archetype 迁移默认状态。剪羊毛以一个 prepared mutation 同时扣剪刀耐久、发放 2 羊毛并置已剪；无剪刀、重复剪和满库存零提交。狼每次稳定尝试消耗一根骨头，成功后只有主人可切换坐下。迁移/ECS/交互 3 files / 29 tests PASS。染料物品与染色操作、羊毛再生仍未实现，M25-03 保持 PARTIAL。
 
 ## S4d 难度、床与重生点（部分完成）
 

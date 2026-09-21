@@ -269,6 +269,15 @@ export class GameServerGameplayHost {
   fireSelectedRangedItem(id: string, direction: ProjectileVector) {
     return this.gameplay.fireSelectedRangedItem(id, direction);
   }
+  shearSheep(playerId: string, sheepId: string) {
+    return this.gameplay.shearSheep(playerId, sheepId);
+  }
+  tameWolf(playerId: string, wolfId: string) {
+    return this.gameplay.tameWolf(playerId, wolfId);
+  }
+  toggleWolfSitting(playerId: string, wolfId: string) {
+    return this.gameplay.toggleWolfSitting(playerId, wolfId);
+  }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
   }

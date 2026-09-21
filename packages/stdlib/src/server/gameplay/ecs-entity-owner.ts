@@ -39,6 +39,7 @@ import {
   type StationStateCodec,
 } from './ecs-station-state';
 import { clearComponentSlot } from './ecs-component-storage';
+import { defaultSpeciesState } from './species-state';
 import {
   createEntityComponents,
   ecsEntityType,
@@ -340,7 +341,14 @@ export class EcsEntityOwner {
       snapshot.equipment.hotbarSize !== this.actors.equipment.hotbarSize[eid]
     )
       throw new TypeError('Actor mutation cannot change inventory layout.');
-    return prepareActorComponentSnapshot(snapshot, entity.type === 'player', this.items, this.playerLayout);
+    return prepareActorComponentSnapshot(
+      snapshot.species || !entity.archetype
+        ? snapshot
+        : { ...snapshot, species: defaultSpeciesState(entity.archetype) ?? undefined },
+      entity.type === 'player',
+      this.items,
+      this.playerLayout,
+    );
   }
 
   installPreparedActorReplacement(
@@ -366,7 +374,16 @@ export class EcsEntityOwner {
     if (!isActorEntityType(entity.type)) throw new TypeError('Entity cannot restore actor components.');
     if ((entity.health === 0) !== (snapshot.lifecycle === 'dead'))
       throw new TypeError('Actor lifecycle does not match entity health.');
-    restoreActorComponentSnapshot(this.actors, eid, snapshot, entity.type === 'player', this.items, this.playerLayout);
+    restoreActorComponentSnapshot(
+      this.actors,
+      eid,
+      snapshot.species || !entity.archetype
+        ? snapshot
+        : { ...snapshot, species: defaultSpeciesState(entity.archetype) ?? undefined },
+      entity.type === 'player',
+      this.items,
+      this.playerLayout,
+    );
   }
 
   stationSnapshot(id: string): StationComponentV1 {

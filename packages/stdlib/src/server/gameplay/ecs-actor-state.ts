@@ -18,6 +18,7 @@ import {
 } from './ecs-actor-components';
 import type { BreakAction } from './player-state';
 import { copyBreakAction } from './player-break-action-codec';
+import { createPlayerComponentAccess } from './player-component-access';
 import {
   emptyArmorEquipment,
   normalizeArmorEquipment,
@@ -35,6 +36,12 @@ import {
   validateCharacterComponentState,
 } from '../simulation/character-runtime-validation';
 import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
+import {
+  createSpeciesStateAccess,
+  defaultSpeciesState,
+  validateSpeciesState,
+  type SpeciesStateV1,
+} from './species-state';
 import {
   defaultActorModeFacets,
   readActorCreativeCatalog,
@@ -94,6 +101,7 @@ export function initializeActorComponents(
   components.behavior.value[eid] = undefined;
   components.life.lifecycle[eid] = entity.health === 0 ? 'dead' : 'alive';
   writeActorModeFacets(components, eid, defaultActorModeFacets(layout.hotbarSize));
+  components.species.value[eid] = defaultSpeciesState(entity.archetype) ?? undefined;
   if (player) {
     addComponents(world, eid, components.player);
     [components.player.spawnX[eid], components.player.spawnY[eid], components.player.spawnZ[eid]] = entity.position;
@@ -154,6 +162,7 @@ export function readActorComponentSnapshot(
     mode: readActorMode(components, eid),
     creativeCatalog: readActorCreativeCatalog(components, eid),
     flight: readActorFlight(components, eid),
+    ...(components.species.value[eid] ? { species: validateSpeciesState(components.species.value[eid])! } : {}),
     ...(player
       ? {
           player: {
@@ -180,6 +189,7 @@ export type PreparedActorComponentSnapshot = Readonly<{
   controlSource: ActorComponentSnapshot['controlSource'];
   controlRevision: number;
   character: CharacterComponentStateV1 | null;
+  species: SpeciesStateV1 | null;
   modeFacets: CompleteModeFacets;
   player: Readonly<{ spawnPosition: [number, number, number]; breakAction: BreakAction | null }> | null;
 }>;
@@ -215,6 +225,7 @@ export function prepareActorComponentSnapshot(
   if (!Number.isSafeInteger(controlRevision) || controlRevision < 0)
     throw new TypeError('Actor control revision is invalid.');
   const character = snapshot.character ? validateCharacterComponentState(snapshot.character) : null;
+  const species = validateSpeciesState(snapshot.species);
   if ((snapshot.controlSource === 'behavior') !== Boolean(character))
     throw new TypeError('Actor behavior state and control source must be installed together.');
   if (character && (player || character.entityId !== snapshot.entityId || character.lifecycle !== 'active'))
@@ -257,6 +268,7 @@ export function prepareActorComponentSnapshot(
     controlSource: snapshot.controlSource,
     controlRevision,
     character,
+    species,
     modeFacets: Object.freeze({
       mode: Object.freeze({ ...modeFacets.mode }),
       creativeCatalog: Object.freeze({
@@ -296,6 +308,7 @@ export function installPreparedActorComponentSnapshot(
   components.control.revision[eid] = prepared.controlRevision;
   if (!preserveCharacterBinding)
     components.behavior.value[eid] = prepared.character ? cloneCharacterComponentState(prepared.character) : undefined;
+  components.species.value[eid] = prepared.species ?? undefined;
   writeActorModeFacets(components, eid, prepared.modeFacets);
   if (prepared.player) {
     components.player.spawnX[eid] = prepared.player.spawnPosition[0];
@@ -414,6 +427,10 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
     get flight() {
       return readActorFlight(components, binding.resolve());
     },
+    ...createSpeciesStateAccess(
+      () => components.species.value[binding.resolve()],
+      (value) => (components.species.value[binding.resolve()] = value),
+    ),
     selectSlot(value: number) {
       const eid = binding.resolve();
       if (!selectedSlot(components, eid, value)) return false;
@@ -471,41 +488,7 @@ export function installActorCharacterComponent(
 
 export function createPlayerStateAccess(components: Components, binding: ActorAccessBindings): PlayerComponentAccess {
   const actor = createActorStateAccess(components, binding);
-  const player = {
-    get spawnPosition(): [number, number, number] {
-      const eid = binding.resolve();
-      return [components.player.spawnX[eid]!, components.player.spawnY[eid]!, components.player.spawnZ[eid]!];
-    },
-    set spawnPosition(value: [number, number, number]) {
-      if (value.length !== 3 || !value.every(Number.isFinite)) throw new TypeError('Invalid player spawn position.');
-      const eid = binding.resolve();
-      [components.player.spawnX[eid], components.player.spawnY[eid], components.player.spawnZ[eid]] = value;
-    },
-    get hungerAccumulator() {
-      return components.needs.hungerAccumulator[binding.resolve()]!;
-    },
-    set hungerAccumulator(value: number) {
-      components.needs.hungerAccumulator[binding.resolve()] = within(value, Infinity, 'hunger accumulator');
-    },
-    get healingAccumulator() {
-      return components.needs.healingAccumulator[binding.resolve()]!;
-    },
-    set healingAccumulator(value: number) {
-      components.needs.healingAccumulator[binding.resolve()] = within(value, Infinity, 'healing accumulator');
-    },
-    get starvationAccumulator() {
-      return components.needs.starvationAccumulator[binding.resolve()]!;
-    },
-    set starvationAccumulator(value: number) {
-      components.needs.starvationAccumulator[binding.resolve()] = within(value, Infinity, 'starvation accumulator');
-    },
-    get breakAction() {
-      return copyBreakAction(components.player.breakAction[binding.resolve()]);
-    },
-    set breakAction(value: BreakAction | null) {
-      components.player.breakAction[binding.resolve()] = copyBreakAction(value);
-    },
-  };
+  const player = createPlayerComponentAccess(components, binding);
   // Copy descriptors, not values: all access remains bound to the single ECS owner.
   return Object.freeze(
     Object.defineProperties(player, Object.getOwnPropertyDescriptors(actor)),
