@@ -11,6 +11,8 @@ export type EnvironmentCheckpoint = Readonly<{
   nextTntId: number;
   dungeonSpawners?: readonly Readonly<{ id: string; elapsedSeconds: number; activations: number }>[];
   openedDungeonChests?: readonly string[];
+  naturalSpawnSeconds?: number;
+  naturalSpawnTick?: number;
 }>;
 export type EnvironmentEffects = Readonly<{
   extinguished: readonly EnvironmentPosition[];
@@ -39,6 +41,8 @@ export class EnvironmentRuntime {
   readonly #tnt = new Map<number, { id: number; position: EnvironmentPosition; fuseSeconds: number; power: number }>();
   readonly #dungeonSpawners = new Map<string, { elapsedSeconds: number; activations: number }>();
   readonly #openedDungeonChests = new Set<string>();
+  #naturalSpawnSeconds = 0;
+  #naturalSpawnTick = 0;
   constructor(
     readonly seed: number,
     checkpoint?: EnvironmentCheckpoint,
@@ -86,6 +90,17 @@ export class EnvironmentRuntime {
     if (this.isDungeonChestOpened(id)) return false;
     this.#openedDungeonChests.add(id);
     return true;
+  }
+  advanceNaturalSpawnClock(seconds: number, intervalSeconds = 20): readonly number[] {
+    if (![seconds, intervalSeconds].every((value) => Number.isFinite(value) && value > 0))
+      throw new TypeError('Natural spawn advance is invalid.');
+    this.#naturalSpawnSeconds += seconds;
+    const ticks: number[] = [];
+    while (this.#naturalSpawnSeconds >= intervalSeconds) {
+      this.#naturalSpawnSeconds -= intervalSeconds;
+      ticks.push(++this.#naturalSpawnTick);
+    }
+    return Object.freeze(ticks);
   }
   advance(
     seconds: number,
@@ -164,6 +179,8 @@ export class EnvironmentRuntime {
           .map(([id, state]) => Object.freeze({ id, ...state })),
       ),
       openedDungeonChests: Object.freeze([...this.#openedDungeonChests].sort()),
+      naturalSpawnSeconds: this.#naturalSpawnSeconds,
+      naturalSpawnTick: this.#naturalSpawnTick,
     });
   }
   restore(value: EnvironmentCheckpoint) {
@@ -185,6 +202,18 @@ export class EnvironmentRuntime {
     this.#tnt.clear();
     this.#dungeonSpawners.clear();
     this.#openedDungeonChests.clear();
+    if (
+      value.naturalSpawnSeconds !== undefined &&
+      (!Number.isFinite(value.naturalSpawnSeconds) || value.naturalSpawnSeconds < 0 || value.naturalSpawnSeconds >= 20)
+    )
+      throw new TypeError('Natural spawn checkpoint phase is invalid.');
+    if (
+      value.naturalSpawnTick !== undefined &&
+      (!Number.isSafeInteger(value.naturalSpawnTick) || value.naturalSpawnTick < 0)
+    )
+      throw new TypeError('Natural spawn checkpoint tick is invalid.');
+    this.#naturalSpawnSeconds = value.naturalSpawnSeconds ?? 0;
+    this.#naturalSpawnTick = value.naturalSpawnTick ?? 0;
     for (const fire of value.fires) this.ignite(fire.position, fire.remainingSeconds);
     for (const tnt of value.tnt) {
       if (tnt.id >= this.#nextTntId || this.#tnt.has(tnt.id))
