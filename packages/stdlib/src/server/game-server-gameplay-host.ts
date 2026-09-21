@@ -195,10 +195,10 @@ export class GameServerGameplayHost {
     return this.gameplay.content.stations?.listRecipes() ?? [];
   }
   get hasGameplayComposition() {
-    return this.gameplay.hasComposition;
+    return !!this.compositionOptions.composition;
   }
   get gameplayResources() {
-    return this.gameplay.resources;
+    return this.compositionOptions.composition?.resources ?? [];
   }
   disposeGameplay() {
     this.gameplay.dispose();
@@ -270,19 +270,19 @@ export class GameServerGameplayHost {
     return this.gameplay.fireSelectedRangedItem(id, direction);
   }
   shearSheep(playerId: string, sheepId: string) {
-    return this.gameplay.shearSheep(playerId, sheepId);
+    return this.gameplay.speciesInteractions.shear(playerId, sheepId);
   }
   tameWolf(playerId: string, wolfId: string) {
-    return this.gameplay.tameWolf(playerId, wolfId);
+    return this.gameplay.speciesInteractions.tame(playerId, wolfId);
   }
   toggleWolfSitting(playerId: string, wolfId: string) {
-    return this.gameplay.toggleWolfSitting(playerId, wolfId);
+    return this.gameplay.speciesInteractions.toggleSitting(playerId, wolfId);
   }
   dyeSheep(playerId: string, sheepId: string) {
-    return this.gameplay.dyeSheep(playerId, sheepId);
+    return this.gameplay.speciesInteractions.dye(playerId, sheepId);
   }
   regrowSheepWool(sheepId: string) {
-    return this.gameplay.regrowSheepWool(sheepId);
+    return this.gameplay.speciesInteractions.regrowWool(sheepId);
   }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
