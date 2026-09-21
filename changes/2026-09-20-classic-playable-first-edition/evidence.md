@@ -131,3 +131,4 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - RED：classic-utility-items.test.ts 断言碗/桶/剪刀/矿车/船与矿车变体存在并可合成，物品缺失失败。
 - 实现后 GREEN：新增 bowl/bucket/shears/minecart/boat 与 chest-minecart/furnace-minecart（含皮革资源已在 S4a），工作台配方：碗 3 木板出 4、桶 3 铁锭、剪刀 2 铁锭带耐久 238、矿车 5 铁锭、船 5 木板；矿车+箱子/熔炉升级为变体。新增 utility-sprite 原创像素图标并接入 asset 目录。
 - 定向：utility-items 2、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 14 files/25 tests PASS。coverage 将 I-281/325/328/333/342/343/359 标 HEADLESS_PASS。矿车轨道物理/骑乘、桶的流体拾取放置、剪毛交互未实现（S6b/环境流体阶段）。verify:static:ci PASS。
+- S6a 完整浏览器旅程 PASS：runId 8c3d212b-41d1-49fa-8eda-81b3d9c681b7，C0–C5 全 PASS，约 1.9 分钟，sourceSha ccd2e7daed593d9438c989b94818740eb7f90a36，artifactDigest bdc8fc7130d02adb55448999c9f5310dbb86a9640e9e70fbdd85db5b7a79136e，HeadlessChrome/153、mute-audio，pageErrors/failedResponses 为空。首帧曾偶发暂停面板拦截（85.5>0.65）单例失败，第二次连续通过，原失败保留。新增运输/实用物品未使既有旅程回归。
