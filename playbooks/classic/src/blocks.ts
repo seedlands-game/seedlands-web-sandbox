@@ -20,14 +20,14 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
   [1]: {
     voxel: 1,
     hardnessSeconds: 0.35,
-    preferredTool: null,
+    preferredTool: 'shovel',
     drop: { itemId: 'dirt-block', count: 1 },
     replaceable: false,
   },
   [2]: {
     voxel: 2,
     hardnessSeconds: 0.35,
-    preferredTool: null,
+    preferredTool: 'shovel',
     drop: { itemId: 'dirt-block', count: 1 },
     replaceable: false,
   },
@@ -56,7 +56,7 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
   [6]: {
     voxel: 6,
     hardnessSeconds: 0.3,
-    preferredTool: null,
+    preferredTool: 'shovel',
     drop: { itemId: 'sand-block', count: 1 },
     replaceable: false,
   },

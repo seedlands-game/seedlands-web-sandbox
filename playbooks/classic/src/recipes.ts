@@ -35,9 +35,26 @@ const meleeTools: readonly Recipe[] = toolTiers.flatMap(([tier, material]) => [
   },
 ]);
 
+const shovelTiers: readonly [string, string, number][] = [
+  ['wood', 'plank', 60],
+  ['stone', 'cobblestone', 132],
+  ['iron', 'iron-ingot', 250],
+  ['gold', 'gold-ingot', 32],
+  ['diamond', 'diamond', 1561],
+];
+const shovelTools: readonly Recipe[] = shovelTiers.map(([tier, material, durability]) => ({
+  id: tier + '-shovel',
+  inputs: [
+    { itemId: material, count: 1 },
+    { itemId: 'stick', count: 2 },
+  ],
+  outputs: [{ itemId: tier + '-shovel', count: 1, instance: { durability } }],
+}));
+
 export const overworldRecipes: readonly Recipe[] = [
   ...resourceBlocks,
   ...meleeTools,
+  ...shovelTools,
   { id: 'sandstone', inputs: [{ itemId: 'sand-block', count: 4 }], outputs: [{ itemId: 'sandstone', count: 1 }] },
   {
     id: 'stone-bricks',

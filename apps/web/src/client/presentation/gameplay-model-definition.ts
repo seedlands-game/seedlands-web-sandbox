@@ -33,6 +33,24 @@ export function itemVisualKind(itemId: string): ItemVisualKind {
   if (itemId === 'wood-axe') return { kind: 'wood-axe' };
   if (['stone-pickaxe', 'wood-pickaxe', 'iron-pickaxe', 'gold-pickaxe', 'diamond-pickaxe'].includes(itemId))
     return { kind: 'stone-pickaxe' };
+  if (
+    [
+      'wood-shovel',
+      'stone-shovel',
+      'iron-shovel',
+      'gold-shovel',
+      'diamond-shovel',
+      'stone-axe',
+      'iron-axe',
+      'gold-axe',
+      'diamond-axe',
+      'stone-sword',
+      'iron-sword',
+      'gold-sword',
+      'diamond-sword',
+    ].includes(itemId)
+  )
+    return { kind: 'stone-pickaxe' };
   return { kind: 'plank' };
 }
 

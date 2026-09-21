@@ -1075,10 +1075,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Iron Shovel"
+      "execution": "HEADLESS_PASS",
+      "name": "Iron Shovel",
+      "note": "S2e铲工具族：木/石/铁/金/钻石铲由木棍+材料合成，shovel采集能力/tier/耐久分级；泥土/草/沙偏好shovel且徒手可挖，headless定向测试通过。非全量Beta方块清单。"
     },
     {
       "caseId": "I-257",
@@ -1220,10 +1221,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Wooden Shovel"
+      "execution": "HEADLESS_PASS",
+      "name": "Wooden Shovel",
+      "note": "S2e铲工具族：木/石/铁/金/钻石铲由木棍+材料合成，shovel采集能力/tier/耐久分级；泥土/草/沙偏好shovel且徒手可挖，headless定向测试通过。非全量Beta方块清单。"
     },
     {
       "caseId": "I-270",
@@ -1265,10 +1267,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Stone Shovel"
+      "execution": "HEADLESS_PASS",
+      "name": "Stone Shovel",
+      "note": "S2e铲工具族：木/石/铁/金/钻石铲由木棍+材料合成，shovel采集能力/tier/耐久分级；泥土/草/沙偏好shovel且徒手可挖，headless定向测试通过。非全量Beta方块清单。"
     },
     {
       "caseId": "I-274",
@@ -1309,10 +1312,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Shovel"
+      "execution": "HEADLESS_PASS",
+      "name": "Diamond Shovel",
+      "note": "S2e铲工具族：木/石/铁/金/钻石铲由木棍+材料合成，shovel采集能力/tier/耐久分级；泥土/草/沙偏好shovel且徒手可挖，headless定向测试通过。非全量Beta方块清单。"
     },
     {
       "caseId": "I-278",
@@ -1385,10 +1389,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Shovel"
+      "execution": "HEADLESS_PASS",
+      "name": "Gold Shovel",
+      "note": "S2e铲工具族：木/石/铁/金/钻石铲由木棍+材料合成，shovel采集能力/tier/耐久分级；泥土/草/沙偏好shovel且徒手可挖，headless定向测试通过。非全量Beta方块清单。"
     },
     {
       "caseId": "I-285",
