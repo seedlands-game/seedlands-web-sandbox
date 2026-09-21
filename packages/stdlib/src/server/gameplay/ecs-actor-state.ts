@@ -4,7 +4,6 @@ import {
   validateSavedEquipment,
   type PlayerInventoryLayout,
 } from './inventory-layout';
-import { validateDurableExecutionOrigin } from '../composition/execution-origin';
 import { addComponents, type World } from 'bitecs';
 import { Inventory, createInventoryAccess } from './inventory';
 import type { ItemDefinitionRegistry } from './item-registry';
@@ -18,6 +17,14 @@ import {
   type createActorComponents,
 } from './ecs-actor-components';
 import type { BreakAction } from './player-state';
+import { copyBreakAction } from './player-break-action-codec';
+import {
+  emptyArmorEquipment,
+  normalizeArmorEquipment,
+  readActorArmor,
+  writeActorArmor,
+  type ArmorEquipment,
+} from './ecs-actor-armor-state';
 import {
   emptyInventoryCursor,
   validateInventoryCursor,
@@ -81,6 +88,7 @@ export function initializeActorComponents(
   components.inventory.cursor[eid] = emptyInventoryCursor();
   components.equipment.selectedSlot[eid] = 0;
   components.equipment.hotbarSize[eid] = layout.hotbarSize;
+  components.equipment.armor[eid] = emptyArmorEquipment();
   components.control.source[eid] = player ? 'player' : 'autonomous';
   components.control.revision[eid] = 0;
   components.behavior.value[eid] = undefined;
@@ -135,6 +143,7 @@ export function readActorComponentSnapshot(
     equipment: {
       selectedSlot: components.equipment.selectedSlot[eid]!,
       hotbarSize: components.equipment.hotbarSize[eid]!,
+      armor: readActorArmor(components, eid),
     },
     lifecycle: components.life.lifecycle[eid]!,
     controlSource: components.control.source[eid]!,
@@ -166,7 +175,7 @@ export type PreparedActorComponentSnapshot = Readonly<{
   inventory: Inventory;
   inventoryRevision: number;
   inventoryCursor: InventoryCursorV1;
-  equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
+  equipment: Readonly<{ selectedSlot: number; hotbarSize: number; armor: ArmorEquipment }>;
   lifecycle: ActorComponentSnapshot['lifecycle'];
   controlSource: ActorComponentSnapshot['controlSource'];
   controlRevision: number;
@@ -214,6 +223,7 @@ export function prepareActorComponentSnapshot(
   validateSavedInventoryLayout(snapshot.inventory, snapshot.equipment.hotbarSize, player, playerLayout);
 
   const inventory = new Inventory(snapshot.inventory.length, snapshot.inventory, items);
+  const armor = normalizeArmorEquipment(items, snapshot.equipment.armor);
   const inventoryRevision = snapshot.inventoryRevision ?? 0;
   if (!Number.isSafeInteger(inventoryRevision) || inventoryRevision < 0)
     throw new TypeError('Actor inventory revision is invalid.');
@@ -242,7 +252,7 @@ export function prepareActorComponentSnapshot(
     inventory,
     inventoryRevision,
     inventoryCursor,
-    equipment: Object.freeze({ ...snapshot.equipment }),
+    equipment: Object.freeze({ ...snapshot.equipment, armor: Object.freeze(armor) }),
     lifecycle: snapshot.lifecycle,
     controlSource: snapshot.controlSource,
     controlRevision,
@@ -280,6 +290,7 @@ export function installPreparedActorComponentSnapshot(
   components.inventory.cursor[eid] = prepared.inventoryCursor;
   components.equipment.selectedSlot[eid] = prepared.equipment.selectedSlot;
   components.equipment.hotbarSize[eid] = prepared.equipment.hotbarSize;
+  components.equipment.armor[eid] = { ...prepared.equipment.armor! };
   components.life.lifecycle[eid] = prepared.lifecycle;
   components.control.source[eid] = prepared.controlSource;
   components.control.revision[eid] = prepared.controlRevision;
@@ -379,6 +390,12 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
       const eid = binding.resolve();
       return validateInventoryCursor(components.inventory.cursor[eid], inventory.items);
     },
+    get armor() {
+      return readActorArmor(components, binding.resolve());
+    },
+    replaceArmor(value) {
+      writeActorArmor(components, binding.resolve(), inventory.items, value);
+    },
     get controlSource() {
       return components.control.source[binding.resolve()]!;
     },
@@ -451,26 +468,6 @@ export function installActorCharacterComponent(
   components.control.revision[eid] = revision + 1;
   return prepared ? components.behavior.value[eid]! : null;
 }
-
-const copyBreakAction = (value: BreakAction | null | undefined): BreakAction | null => {
-  if (value === null || value === undefined) return null;
-  if (
-    value.position.length !== 3 ||
-    !value.position.every(Number.isFinite) ||
-    !Number.isInteger(value.voxel) ||
-    value.voxel < 0 ||
-    !Number.isFinite(value.elapsedSeconds) ||
-    value.elapsedSeconds < 0 ||
-    !Number.isFinite(value.requiredSeconds) ||
-    value.requiredSeconds < 0
-  )
-    throw new TypeError('Invalid player break action component.');
-  return {
-    ...value,
-    position: [...value.position],
-    ...(value.origin === undefined ? {} : { origin: validateDurableExecutionOrigin(value.origin) }),
-  };
-};
 
 export function createPlayerStateAccess(components: Components, binding: ActorAccessBindings): PlayerComponentAccess {
   const actor = createActorStateAccess(components, binding);

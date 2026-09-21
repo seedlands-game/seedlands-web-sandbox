@@ -57,7 +57,7 @@ import {
 } from '../authority/authority-kernel-state';
 import { commitGameplayDynamicBatch } from './gameplay-dynamic-batch';
 import { DifficultyRuntime, type Difficulty } from './difficulty-runtime';
-import { applyDifficultyDamage, changeDifficulty, useSelectedBed } from './gameplay-survival-settings';
+import { applySurvivalDamage, changeDifficulty, equipArmor, useSelectedBed } from './gameplay-survival-settings';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -433,9 +433,17 @@ export class GameplayRuntime {
   }
 
   applyDamage = (actorId: string, playerId: string, amount: number, cause: string) =>
-    applyDifficultyDamage(this.difficulty, this.simulation, actorId, amount, (adjusted) =>
-      this.vitals.applyDamage(actorId, playerId, adjusted, cause),
+    applySurvivalDamage(
+      this.difficulty,
+      this.simulation,
+      this.entities.actorStateAccess(playerId),
+      this.content.items,
+      actorId,
+      amount,
+      (adjusted) => this.vitals.applyDamage(actorId, playerId, adjusted, cause),
     );
+  equipSelectedArmor = (playerId: string) =>
+    equipArmor(this.entities.actorStateAccess(playerId), this.content.items, () => this.touch());
   setDifficulty = (value: Difficulty, expectedRevision?: number) =>
     changeDifficulty(
       this.difficulty,
@@ -447,15 +455,9 @@ export class GameplayRuntime {
     );
   setSpawnFromSelectedBed = (playerId: string, bedPosition: Position) =>
     useSelectedBed(this.player(playerId), bedPosition, this.callbacks, () => this.touch());
-  healPlayer(playerId: string, amount: number) {
-    return this.vitals.healPlayer(playerId, amount);
-  }
-  setHungerForDebug(playerId: string, hunger: number) {
-    this.vitals.setHungerForDebug(playerId, hunger);
-  }
-  respawnPlayer(playerId: string) {
-    return this.vitals.respawnPlayer(playerId);
-  }
+  healPlayer = (playerId: string, amount: number) => this.vitals.healPlayer(playerId, amount);
+  setHungerForDebug = (playerId: string, hunger: number) => this.vitals.setHungerForDebug(playerId, hunger);
+  respawnPlayer = (playerId: string) => this.vitals.respawnPlayer(playerId);
 
   advanceRules(seconds: number): { commits: WorldCommitResult[] } {
     try {

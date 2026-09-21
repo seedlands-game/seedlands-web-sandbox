@@ -156,3 +156,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 床以3木板+3羊毛合成并有原创像素资源；选中床后只接受安全空气落点，将床边位置写入既有 ECS spawnPosition，死亡后正式 respawn 移动到该点，快照迁移 22 tests 与组合行为 5 tests PASS。
 - test:classic:headless 17 files / 37 tests PASS；verify:static:ci 最终 PASS。失败记录：utility-sprite 联合类型分号语法错误由 Prettier 捕获；gameplay-runtime 超 500 行门禁触发，未加豁免，改为抽取 gameplay-survival-settings 并收敛现有 facade。
 - 当前只记部分完成：床双格放置/夜间睡眠跳时、难度 UI、出生保护与护甲穿戴结算仍待后续。
+
+## S4e 装备槽与护甲正式结算
+
+- ECS equipment 扩展四个 armor slot；旧 V4 缺字段恢复为空甲，新快照保存完整耐久实例。选中护甲与对应槽原子交换，护甲点进入 GameplayRuntime 正式伤害路径，成功受伤后各装备扣 1 耐久，归零移除。
+- 铁胸甲 6 点把 10 点伤害降到 7.6，snapshot 恢复后继续扣耐久并破损；创造模式免伤不磨损，非法伤害沿用旧失败结果，死亡目标拒绝重复伤害且护甲不变。armor 6 tests + snapshot migration 22 tests PASS；test:classic:headless 17 files / 39 tests PASS。
+- 静态门禁曾拒绝 ecs-actor-state 与 gameplay-runtime 超 500 行；通过抽取 ecs-actor-armor-state、player-break-action-codec、gameplay-survival-settings 和收敛 facade 解决，未增加豁免；verify:static:ci 最终 PASS。无敌帧、击退和装备 UI 仍留待 S4/S7。
