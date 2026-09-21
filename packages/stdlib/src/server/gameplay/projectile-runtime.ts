@@ -121,6 +121,12 @@ export class ProjectileRuntime {
   checkpoint(): ProjectileCheckpoint {
     return Object.freeze({ version: 1, nextId: this.#nextId, projectiles: this.list() });
   }
+  restore(checkpoint?: ProjectileCheckpoint): void {
+    const restored = new ProjectileRuntime(this.#environment, checkpoint);
+    this.#nextId = restored.#nextId;
+    this.#projectiles.clear();
+    for (const state of restored.#projectiles.values()) this.#projectiles.set(state.id, state);
+  }
 }
 export const createProjectileRuntime = (environment: ProjectileEnvironment, checkpoint?: ProjectileCheckpoint) =>
   new ProjectileRuntime(environment, checkpoint);

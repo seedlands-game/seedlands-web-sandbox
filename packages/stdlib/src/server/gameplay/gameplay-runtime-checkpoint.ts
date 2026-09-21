@@ -17,6 +17,7 @@ import { allowsGameplayBehaviorCapability } from './gameplay-character-domain';
 import type { AuthorityKernelState } from '../authority/authority-kernel-state';
 import type { DifficultyRuntime } from './difficulty-runtime';
 import type { EnvironmentRuntime } from './environment-runtime';
+import type { ProjectileRuntime } from './projectile-runtime';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -34,6 +35,7 @@ type Options = Readonly<{
   authorityState: AuthorityKernelState;
   difficulty: DifficultyRuntime;
   environment: EnvironmentRuntime;
+  projectiles: ProjectileRuntime;
   needsPlayerLimit?: number;
   installMetadata(gameplayTime: number, revision: number): void;
 }>;
@@ -56,6 +58,7 @@ export class GameplayRuntimeCheckpoint {
       this.options.authorityState,
       this.options.difficulty.checkpoint(),
       this.options.environment.checkpoint(),
+      this.options.projectiles.checkpoint(),
     );
     if (this.options.compositionGuard) snapshot.composition = this.options.compositionGuard.snapshot();
     const ruleset = this.options.ruleset.snapshot();
@@ -121,6 +124,11 @@ export class GameplayRuntimeCheckpoint {
     );
     if (raw && typeof raw === 'object' && 'environment' in raw && raw.environment)
       this.options.environment.restore(raw.environment as import('./environment-runtime').EnvironmentCheckpoint);
+    this.options.projectiles.restore(
+      raw && typeof raw === 'object' && 'projectiles' in raw
+        ? (raw.projectiles as import('./projectile-runtime').ProjectileCheckpoint)
+        : undefined,
+    );
     installSchedule?.();
     this.options.modules.clearBindings();
     this.options.registeredBlocks?.takeCommits();

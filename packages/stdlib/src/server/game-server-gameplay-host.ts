@@ -33,6 +33,7 @@ import { isActorEntityType } from './gameplay/ecs-actor-state';
 import type { ActorControlSource } from './gameplay/ecs-actor-components';
 import type { KernelStateOwner } from '@seedlands/kernel/execution';
 import type { FluidCell } from './fluid/fluid-cell';
+import type { ProjectileVector } from './gameplay/projectile-runtime';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 
@@ -264,6 +265,9 @@ export class GameServerGameplayHost {
   }
   useSelectedItem(id: string) {
     return this.gameplay.useSelectedItem(id);
+  }
+  fireSelectedRangedItem(id: string, direction: ProjectileVector) {
+    return this.gameplay.fireSelectedRangedItem(id, direction);
   }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
