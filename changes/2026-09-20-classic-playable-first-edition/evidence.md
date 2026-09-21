@@ -180,6 +180,11 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 工作台指针最初3项失败：旧夹具仍把5木板摆成木镐，与现行3木板+2木棍 shaped 配方不符；修正投料后2项恢复。剩余投影断言把“满包但空/兼容游标可接产物”误写为不可合成，改为 craftable 后8/8通过。未改生产配方或 owner。
 - 据此 M08-01/02/03、M16-01/02/03、M17-01/02/03、M18-01/02、M19-02、M24-01/02/03 升为 PARTIAL_IMPLEMENTED / HEADLESS_PASS；仍缺的破坏视觉反馈、蛋糕桶余物、燃烧态音画、双箱与睡眠跳夜继续保留。
 
+## S1c 多格结构、睡眠与点火
+
+- RED：classic-structure-interactions 3/3 因 StructureInteractionRuntime 缺失失败。GREEN 后门与床先验证玩家、距离、两个已加载可替换目标和自身碰撞，再经一次 editBatch 写入，成功后扣选中物品；夜间床使用写安全重生点并经注入 world-time 端口跳到清晨；白天拒绝。打火石只对已加载空气登记 Environment 火并扣一耐久。
+- structure/difficulty/environment 共3 files / 11 tests PASS；`verify:static:ci` PASS。GameplayRuntime 再次超过500行，抽出 requireGameplayPlayer 并收敛 facade 后通过，未加豁免。M09-02/03 与 M19-02 更新为 PARTIAL/HEADLESS；画/牌跨格、门开合朝向和完整 use 优先级仍未完成。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。

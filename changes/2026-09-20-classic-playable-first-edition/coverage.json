@@ -4536,20 +4536,22 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：门/床/画/牌跨格占位、失败回滚；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：门/床/画/牌跨格占位、失败回滚；记录正例、失败例、tick 和 owner 状态。",
+      "note": "StructureInteractionRuntime 已验证门/床两个目标格预检、一次 editBatch 与成功后扣物品；画/牌跨格和方向状态仍缺。"
     },
     {
       "caseId": "M09-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：使用键对方块/物品的优先级与失败反馈；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：使用键对方块/物品的优先级与失败反馈；记录正例、失败例、tick 和 owner 状态。",
+      "note": "床睡眠与打火石使用具有距离、选中物品、白天/目标失败反馈；完整使用键优先级留 S7。"
     },
     {
       "caseId": "M10-01",
@@ -4900,7 +4902,7 @@
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
       "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：床睡眠、白天/夜晚限制、重生点；记录正例、失败例、tick 和 owner 状态。",
-      "note": "床设置安全重生点、快照恢复与死亡复活已验证；睡眠跳夜和双格床仍缺。"
+      "note": "床双格放置、夜间限制、跳到清晨、安全重生点与恢复均已验证。"
     },
     {
       "caseId": "M19-03",

@@ -125,6 +125,12 @@ Rail、PoweredRail、DetectorRail 使用追加稳定体素，不改变 V8 程序
 
 TS mesher 与浏览器模型路径消费同一 modelBoxesForVoxel；Rust descriptor kernel 对所有模型方块输出通用 model record，不仅硬编码灯笼。RED 覆盖各结构的非整格 AABB、碰撞/遮挡和 mesh 材质闭包；Web/Rust 描述符必须逐字节等价。
 
+## S1c 多格结构与使用交互合同
+
+StructureInteractionRuntime 只接受存活玩家五格内的已加载位置。门和床同时验证两个目标格可替换、玩家不占用，并以一次 editBatch 提交；成功后才扣选中物品，任何失败保持世界和库存。床使用只在主世界夜间允许，将重生点设到安全床边并通过宿主 world-time 端口跳到清晨；白天或不安全位置零提交。
+
+打火石只在已加载空气格点火，成功扣一耐久并登记 Environment 火；错误物品、未知格、非空气或耐久不足均不改变状态。当前单值 voxel 暂不表达门开合/朝向、床头尾和牌文本，保持 PARTIAL 并在差异账记录。
+
 ## S3d 熔岩与流体混合合同
 
 追加稳定 Voxel.Lava 与 Voxel.Obsidian，不重排旧 palette，旧 generatorVersion 字节不变。流体种类由 voxel id 表示，既有 Uint8 sidecar 继续只保存 source bit 与 level 1–8，因此旧水存档无需迁移。水与熔岩接触的候选按坐标稳定排序：熔岩源变黑曜石，流动熔岩变圆石；同一批多邻居不能重复写。传播与混合必须使用 Authority read-set/expected cell 校验，旧 epoch、stale chunk 或未知边界不提交。

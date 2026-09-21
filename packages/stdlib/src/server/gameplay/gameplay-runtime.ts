@@ -98,6 +98,7 @@ export class GameplayRuntime {
   readonly vehicles;
   readonly navigationItems;
   readonly crops;
+  readonly structures;
   private readonly selectHotbar;
   private readonly requestPlayerCombat;
   private readonly advanceWorldRules;
@@ -242,6 +243,7 @@ export class GameplayRuntime {
     this.vehicles = systems.vehicles;
     this.navigationItems = systems.navigationItems;
     this.crops = systems.crops;
+    this.structures = systems.structures;
     this.selectHotbar = createGameplayHotbarSelection({
       state: (id) => this.getActorModeState(id),
       inventory: this.registeredInventory ?? this.inventoryActions,
@@ -486,12 +488,9 @@ export class GameplayRuntime {
   healPlayer = (playerId: string, amount: number) => this.vitals.healPlayer(playerId, amount);
   setHungerForDebug = (playerId: string, hunger: number) => this.vitals.setHungerForDebug(playerId, hunger);
   respawnPlayer = (playerId: string) => this.vitals.respawnPlayer(playerId);
-
   advanceRules = (seconds: number): { commits: WorldCommitResult[] } => this.advanceWorldRules.advance(seconds);
   advanceCommitUpperBound = (seconds: number): number => this.advanceWorldRules.commitUpperBound(seconds);
-
   createSnapshot = () => this.checkpoint.create(() => this.kernelState.gameplayRevision, this.gameplayTime);
-
   metrics() {
     return collectGameplayRuntimeMetrics({
       entities: this.entities,
@@ -502,17 +501,10 @@ export class GameplayRuntime {
       snapshot: this.createSnapshot,
     });
   }
-
   restoreSnapshot = (raw: unknown) => this.checkpoint.restore(raw);
   markPersisted = (revision: number): void =>
     void (this.persistedRevision = Math.max(this.persistedRevision, revision));
-
-  private player(id: string): PlayerState {
-    const player = this.players.get(id);
-    if (!player) throw new RangeError(`Unknown player: ${id}`);
-    return player;
-  }
-
+  private player = (id: string): PlayerState => RuntimeLifecycle.requireGameplayPlayer(this.players, id);
   private assertRevisionCapacity(): void {
     if (
       !Number.isSafeInteger(this.kernelState.gameplayRevision) ||
@@ -520,7 +512,6 @@ export class GameplayRuntime {
     )
       throw new RangeError('Gameplay revision capacity is exhausted.');
   }
-
   private touch(event = true): void {
     this.kernelState.commitGameplay(this.kernelState.epoch);
     if (event) this.eventCount += 1;
