@@ -91,6 +91,7 @@ export class GameServerGameplayHost {
       environmentSeed: this.world.seed(),
       biomeAt: ([x, , z]) => this.world.biomeAt(x, z),
       getWorldTime: () => this.world.worldTime(),
+      setWorldTime: (hours) => this.world.setWorldTime(hours),
       platform: this.platform,
       content: this.content,
       composition: this.compositionOptions.composition,
@@ -295,6 +296,9 @@ export class GameServerGameplayHost {
   }
   get crops() {
     return this.gameplay.crops;
+  }
+  get structures() {
+    return this.gameplay.structures;
   }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);

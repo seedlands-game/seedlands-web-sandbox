@@ -19,6 +19,7 @@ export type GameplayCallbacks = {
   environmentSeed?: number;
   biomeAt?: (position: Position) => string;
   getWorldTime: () => number;
+  setWorldTime?: (hours: number) => number;
   platform: CorePlatformPorts;
   content?: GameplayContent;
   composition?: WorldComposition;

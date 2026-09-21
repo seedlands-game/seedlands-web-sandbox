@@ -13,6 +13,12 @@ type ActorRequestRuntime<Result> = Readonly<{
   request(actorId: string, targetId: string, existingActionId?: string, binding?: WorldModuleBinding): Result;
 }>;
 
+export function requireGameplayPlayer(players: ReadonlyMap<string, PlayerState>, id: string): PlayerState {
+  const player = players.get(id);
+  if (!player) throw new RangeError(`Unknown player: ${id}`);
+  return player;
+}
+
 export function disposeGameplayRuntime(schedule: Disposable | null, modules: Disposable): void {
   try {
     schedule?.dispose();
