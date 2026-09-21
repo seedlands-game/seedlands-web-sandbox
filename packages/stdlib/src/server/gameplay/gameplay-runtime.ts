@@ -28,9 +28,7 @@ import type { EntityQuery, EntitySpawn, EntityUpdate, GameplayEntity } from './e
 import type { ItemStack } from './item-registry';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import { type GameplayContent } from './gameplay-content';
-import { clonePosition } from './gameplay-geometry';
 import type { CombatSnapshot } from './combat-runtime';
-import { resolveProfiledActorSpawn } from './profiled-actor-spawn';
 import { createPlayerCombatRequest } from './profiled-player-combat';
 import type { InventoryPointerInputV1 } from './modules/inventory-pointer-contract';
 import { executeInventoryPointer, projectInventoryPointerView } from './gameplay-inventory-pointer';
@@ -62,8 +60,7 @@ import { applySurvivalDamage, changeDifficulty, equipArmor, useSelectedBed } fro
 import { EnvironmentRuntime } from './environment-runtime';
 import { createGameplayEnvironmentAdvancer } from './gameplay-environment-coordinator';
 import type { ProjectileVector } from './projectile-runtime';
-import { createGameplayProjectileOwner } from './gameplay-projectile-environment';
-import { createGameplaySpeciesFacade } from './gameplay-species-facade';
+import { createGameplayWorldSystems } from './gameplay-world-systems';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -98,6 +95,7 @@ export class GameplayRuntime {
   private readonly registeredCombat: RegisteredCombatRuntime | null;
   private readonly checkpoint: GameplayRuntimeCheckpoint;
   readonly speciesInteractions;
+  readonly lifeSkills;
   private readonly selectHotbar;
   private readonly requestPlayerCombat;
   private readonly advanceWorldRules;
@@ -223,24 +221,22 @@ export class GameplayRuntime {
       changed: () => this.touch(),
       simulation: () => this.simulation,
     });
-    this.projectiles = createGameplayProjectileOwner({
+    const systems = createGameplayWorldSystems({
+      callbacks,
+      content: this.content,
       entities: this.entities,
       players: this.players,
       simulation: () => this.simulation,
       vitals: this.vitals,
-      content: this.content,
-      getVoxel: callbacks.getLoadedVoxel ?? callbacks.getVoxel,
-      assertCanChange: () => this.assertRevisionCapacity(),
-      changed: () => this.touch(),
-    });
-    this.speciesInteractions = createGameplaySpeciesFacade({
-      entities: this.entities,
-      projectiles: this.projectiles,
       environment: this.environment,
+      assertCanChange: () => this.assertRevisionCapacity(),
       changed: () => this.touch(),
       despawn: (id) => this.despawnEntity(id),
       spawn: (input, registration) => this.spawnAutonomous(input, registration),
     });
+    this.projectiles = systems.projectiles;
+    this.speciesInteractions = systems.speciesInteractions;
+    this.lifeSkills = systems.lifeSkills;
     this.selectHotbar = createGameplayHotbarSelection({
       state: (id) => this.getActorModeState(id),
       inventory: this.registeredInventory ?? this.inventoryActions,
@@ -289,6 +285,7 @@ export class GameplayRuntime {
       },
       afterAdvance: (seconds) => {
         this.projectiles.advance(seconds);
+        this.lifeSkills.advance(seconds);
         this.environmentQueries.advanceNaturalSpawns(seconds);
       },
     });
@@ -309,6 +306,7 @@ export class GameplayRuntime {
       difficulty: this.difficulty,
       environment: this.environment,
       projectiles: this.projectiles,
+      lifeSkills: this.lifeSkills,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);
@@ -349,19 +347,15 @@ export class GameplayRuntime {
     return this.persistedRevision;
   }
 
-  spawn(input: EntitySpawn): GameplayEntity {
-    if (input.type === 'station' || input.kind === 'station')
-      throw new TypeError('Station creation requires a Block transaction.');
-    if (input.type === 'player' && this.players.size >= (this.needsPlayerLimit ?? Infinity))
-      throw new RangeError('Needs player membership budget exceeded.');
-    if (input.archetype) this.simulation.validateActorRegistration({ archetype: input.archetype });
-    const entity = this.entities.spawn(resolveProfiledActorSpawn(input, this.content.actorProfiles));
-    if (entity.type === 'player')
-      this.players.set(entity.id, new PlayerState(entity.id, clonePosition(entity.position), undefined, this.entities));
-    if (input.archetype) this.simulation.registerActor(entity.id, { archetype: input.archetype });
-    this.touch();
-    return entity;
-  }
+  spawn = (input: EntitySpawn): GameplayEntity =>
+    RuntimeLifecycle.spawnGameplayEntity(input, {
+      entities: this.entities,
+      profiles: this.content.actorProfiles,
+      simulation: this.simulation,
+      players: this.players,
+      playerLimit: this.needsPlayerLimit,
+      changed: () => this.touch(),
+    });
 
   spawnPlayer = (input: { id?: string; position: Position }): GameplayEntity =>
     this.spawn({ ...input, type: 'player' });

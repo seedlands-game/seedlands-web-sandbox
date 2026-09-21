@@ -1,6 +1,6 @@
 import type { WorldModuleBinding } from '../commands/module-command';
 import type { EntityStore } from './entity-store';
-import type { PlayerState } from './player-state';
+import { PlayerState } from './player-state';
 import type { EntitySpawn, GameplayEntity } from './entity-store';
 import type { ActorProfileRegistry } from './actor-profile';
 import type { ActorRegistration, AutonomyRuntime } from '../simulation/autonomy-runtime';
@@ -60,6 +60,30 @@ export function spawnGameplayAutonomous(
     options.entities.despawn(entity.id);
     throw error;
   }
+  options.changed();
+  return entity;
+}
+
+export function spawnGameplayEntity(
+  input: EntitySpawn,
+  options: Readonly<{
+    entities: EntityStore;
+    profiles: ActorProfileRegistry;
+    simulation: AutonomyRuntime;
+    players: Map<string, PlayerState>;
+    playerLimit?: number;
+    changed(): void;
+  }>,
+): GameplayEntity {
+  if (input.type === 'station' || input.kind === 'station')
+    throw new TypeError('Station creation requires a Block transaction.');
+  if (input.type === 'player' && options.players.size >= (options.playerLimit ?? Infinity))
+    throw new RangeError('Needs player membership budget exceeded.');
+  if (input.archetype) options.simulation.validateActorRegistration({ archetype: input.archetype });
+  const entity = options.entities.spawn(resolveProfiledActorSpawn(input, options.profiles));
+  if (entity.type === 'player')
+    options.players.set(entity.id, new PlayerState(entity.id, [...entity.position], undefined, options.entities));
+  if (input.archetype) options.simulation.registerActor(entity.id, { archetype: input.archetype });
   options.changed();
   return entity;
 }

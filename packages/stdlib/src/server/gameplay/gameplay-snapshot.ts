@@ -27,6 +27,7 @@ import {
 import { DifficultyRuntime, type DifficultyCheckpoint } from './difficulty-runtime';
 import { EnvironmentRuntime, type EnvironmentCheckpoint } from './environment-runtime';
 import { createProjectileRuntime, type ProjectileCheckpoint } from './projectile-runtime';
+import { validateLifeSkillsCheckpoint, type LifeSkillsCheckpoint } from './life-skills-runtime';
 
 type Position = [number, number, number];
 
@@ -67,6 +68,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   difficulty?: DifficultyCheckpoint;
   environment?: EnvironmentCheckpoint;
   projectiles?: ProjectileCheckpoint;
+  lifeSkills?: LifeSkillsCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -85,6 +87,7 @@ export const createGameplaySnapshotV4 = (
   difficulty?: DifficultyCheckpoint,
   environment?: EnvironmentCheckpoint,
   projectiles?: ProjectileCheckpoint,
+  lifeSkills?: LifeSkillsCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -105,6 +108,7 @@ export const createGameplaySnapshotV4 = (
         ).checkpoint(),
       }
     : {}),
+  ...(lifeSkills ? { lifeSkills: validateLifeSkillsCheckpoint(lifeSkills) } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 

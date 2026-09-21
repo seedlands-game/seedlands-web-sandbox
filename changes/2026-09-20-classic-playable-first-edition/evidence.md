@@ -108,6 +108,13 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：新增 wheat-seeds 内容与像素图标；crop-growth-policy 定义八阶段确定性状态机——种子只种耕地(Voxel.Farmland)，按 secondsPerStage 分阶段生长且累计余量、封顶成熟阶段 7；成熟收割产 wheat+wheat-seeds，未成熟只回收种子，非法阶段/非耕地明确拒绝。
 - 定向：crop-growth 3、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 现 12 files/20 tests PASS。coverage 将 B-059 小麦作物、I-295 种子、I-296 小麦、M23-02 生长机制标 HEADLESS_PASS。作物尚未接入体素渲染与浏览器真实耕作/播种/收割手势，自然种子掉落（破坏草）未接；这些留待后续 S5c 与体素作物阶段。verify:static:ci PASS。
 
+## S5c 钓鱼、鸡蛋与奶桶
+
+- LifeSkillsRuntime 保存鱼钩序列、位置、剩余等待和咬钩状态；水面与八格距离由已加载 voxel 验证，收杆成功才发放生鱼并扣钓鱼竿耐久，背包满或换杆不吞奖励。
+- 鸡蛋只投向已加载、上方空气且下方可站立的位置，稳定每第八次孵化鸡并在生成容量/ID 冲突前不扣物品。奶牛五格内把选中空桶替换为奶桶，饮用后恢复空桶。新增 fishing-rod/egg/milk-bucket 与配方、原创像素资源。
+- life-skills、asset-workbench、snapshot migration 共 3 files / 28 tests PASS；通用 snapshot 使用纯 validator 校验 LifeSkills checkpoint，旧 V4 缺字段迁移为空状态。浏览器抛竿/浮标表现仍待 S7。
+- 提交前复验：`verify:static:ci` PASS（Prettier、路径、ESLint、全仓 typecheck、ESLint 66、CI selector 8）；LifeSkills/资产/迁移 28 tests PASS。实现前曾发现 lifecycle 文件把 PlayerState 错作 type-only import，导致创建玩家抛 ReferenceError，已改回运行时 import并保留失败记录。
+
 ## S3a V6 洞穴雕刻
 
 - RED：cave-generation.test.ts 断言 generatorVersion 6 掏空气穴、V5 字节冻结、v7 拒绝，caveAir 缺失导入失败。
@@ -152,6 +159,7 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 失败记录：静态门禁先拒绝 physics→server/gameplay 反向依赖，已改为 physics 自有配置 key 校验；测试类型随后拒绝私有 gameplay facade，已改用公开 queryEntities/simulationSnapshot。各物种专属机制和模型仍未实现，因此实体项只可记 PARTIAL_IMPLEMENTED。
 - S4c/S5 动物状态续作：ECS actor component 增加可选 SpeciesStateV1，保存羊已剪/毛色、狼主人/坐下/驯服尝试、猪鞍和史莱姆尺寸；旧 snapshot 按 archetype 迁移默认状态。剪羊毛以一个 prepared mutation 同时扣剪刀耐久、发放 2 羊毛并置已剪；无剪刀、重复剪和满库存零提交。狼每次稳定尝试消耗一根骨头，成功后只有主人可切换坐下。迁移/ECS/交互 3 files / 29 tests PASS。染料物品与染色操作、羊毛再生仍未实现，M25-03 保持 PARTIAL。
 - M25-03 续作：补齐 16 色染料内容与原创像素资源，羊染色原子扣除选中染料并保存 woolColor；显式吃草入口只对已剪羊恢复羊毛，颜色不丢失。资产闭包同时发现 S3i loot 中的 saddle 缺表现绑定，补齐原创鞍图标。animal interactions 3 tests 与 asset-workbench 4 tests PASS；自然吃草 AI 尚未接入，因此该项仍记 PARTIAL。
+- S4g 敌对机制续作：骷髅由权威位置向目标发射同一 ProjectileRuntime 弹道；苦力怕通过带 sourceEntityId 的 Environment TNT 保存引信并在爆炸时清退源实体，重复点燃拒绝；尺寸4/2史莱姆清退前验证子 ID 与实体容量，再生成两个稳定下一尺寸实体，尺寸状态进入 ECS snapshot。hostile mechanics、environment 与 snapshot migration 3 files / 27 tests PASS。自动 AI 触发这些专属动作仍待调度层接线。
 
 ## S4d 难度、床与重生点（部分完成）
 
