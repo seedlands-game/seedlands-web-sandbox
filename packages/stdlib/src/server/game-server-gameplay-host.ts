@@ -284,6 +284,9 @@ export class GameServerGameplayHost {
   regrowSheepWool(sheepId: string) {
     return this.gameplay.speciesInteractions.regrowWool(sheepId);
   }
+  get lifeSkills() {
+    return this.gameplay.lifeSkills;
+  }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
   }

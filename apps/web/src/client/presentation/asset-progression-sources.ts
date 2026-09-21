@@ -61,6 +61,9 @@ export const progressionItemAssets = [
   ...pixelItemAssets('slimeball', '黏液球', 'slimeball'),
   ...pixelItemAssets('bed', '床', 'bed'),
   ...pixelItemAssets('saddle', '鞍', 'saddle'),
+  ...pixelItemAssets('milk-bucket', '奶桶', 'bucket'),
+  ...pixelItemAssets('egg', '鸡蛋', 'egg'),
+  ...pixelItemAssets('fishing-rod', '钓鱼竿', 'fishing-rod'),
   ...pixelItemAssets('lava-bucket', '熔岩桶', 'bucket'),
   ...(['leather', 'iron', 'gold', 'diamond'] as const).flatMap((tier) => {
     const material = tier === 'leather' ? 'wood' : tier;

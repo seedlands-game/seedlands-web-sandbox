@@ -53,6 +53,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'toggleWolfSitting',
   'dyeSheep',
   'regrowSheepWool',
+  'lifeSkills',
   'attackEntity',
   'getCombatState',
   'applyDamage',

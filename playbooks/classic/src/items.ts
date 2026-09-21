@@ -397,6 +397,9 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
   { id: 'slimeball', name: '黏液球', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'bed', name: '床', itemType: 'resource', stackLimit: 1, capabilities: [] },
   { id: 'saddle', name: '鞍', itemType: 'resource', stackLimit: 1, capabilities: [] },
+  { id: 'milk-bucket', name: '奶桶', itemType: 'food', stackLimit: 1, capabilities: [] },
+  { id: 'egg', name: '鸡蛋', itemType: 'resource', stackLimit: 16, capabilities: [] },
+  { id: 'fishing-rod', name: '钓鱼竿', itemType: 'tool', stackLimit: 1, durability: { max: 65 }, capabilities: [] },
   {
     id: 'lava-bucket',
     name: '熔岩桶',
