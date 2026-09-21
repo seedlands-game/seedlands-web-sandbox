@@ -1,4 +1,44 @@
 import type { Recipe } from '@seedlands/stdlib/mod-api';
+import { woolColors } from './recipe-closure-items';
+
+const dyeRecipes: readonly Recipe[] = [
+  ['yellow', 'flower'],
+  ['red', 'red-flower'],
+  ['white', 'bone'],
+  ['black', 'ink-sac'],
+  ['brown', 'cocoa-beans'],
+].map(([color, source]) => ({
+  id: `${color}-dye`,
+  inputs: [{ itemId: source, count: 1 }],
+  outputs: [{ itemId: `${color}-dye`, count: color === 'white' ? 3 : 1 }],
+}));
+const mixes: readonly [string, string, string][] = [
+  ['orange', 'red-dye', 'yellow-dye'],
+  ['lime', 'green-dye', 'white-dye'],
+  ['light-blue', 'blue-dye', 'white-dye'],
+  ['cyan', 'blue-dye', 'green-dye'],
+  ['purple', 'blue-dye', 'red-dye'],
+  ['magenta', 'purple-dye', 'pink-dye'],
+  ['pink', 'red-dye', 'white-dye'],
+  ['gray', 'black-dye', 'white-dye'],
+  ['light-gray', 'gray-dye', 'white-dye'],
+];
+const mixedDyes: readonly Recipe[] = mixes.map(([color, left, right]) => ({
+  id: `${color}-dye`,
+  inputs: [
+    { itemId: left, count: 1 },
+    { itemId: right, count: 1 },
+  ],
+  outputs: [{ itemId: `${color}-dye`, count: 2 }],
+}));
+const coloredWool: readonly Recipe[] = woolColors.map((color) => ({
+  id: `${color}-wool`,
+  inputs: [
+    { itemId: 'wool', count: 1 },
+    { itemId: `${color}-dye`, count: 1 },
+  ],
+  outputs: [{ itemId: `${color}-wool`, count: 1 }],
+}));
 
 const resourceBlocks: readonly Recipe[] = [
   ['iron-ingot', 'iron-block'],
@@ -80,6 +120,9 @@ export const overworldRecipes: readonly Recipe[] = [
   ...shovelTools,
   ...hoeTools,
   ...armorRecipes,
+  ...dyeRecipes,
+  ...mixedDyes,
+  ...coloredWool,
   { id: 'sandstone', inputs: [{ itemId: 'sand-block', count: 4 }], outputs: [{ itemId: 'sandstone', count: 1 }] },
   {
     id: 'stone-bricks',
@@ -90,6 +133,21 @@ export const overworldRecipes: readonly Recipe[] = [
   { id: 'snow-block', inputs: [{ itemId: 'snowball', count: 4 }], outputs: [{ itemId: 'snow-block', count: 1 }] },
   { id: 'lapis-block', inputs: [{ itemId: 'blue-dye', count: 9 }], outputs: [{ itemId: 'lapis-block', count: 1 }] },
   { id: 'slab', inputs: [{ itemId: 'stone-block', count: 3 }], outputs: [{ itemId: 'slab', count: 6 }] },
+  {
+    id: 'sandstone-slab',
+    inputs: [{ itemId: 'sandstone', count: 3 }],
+    outputs: [{ itemId: 'sandstone-slab', count: 6 }],
+  },
+  { id: 'wood-slab', inputs: [{ itemId: 'plank', count: 3 }], outputs: [{ itemId: 'wood-slab', count: 6 }] },
+  {
+    id: 'mushroom-stew',
+    inputs: [
+      { itemId: 'mushroom', count: 1 },
+      { itemId: 'red-mushroom', count: 1 },
+      { itemId: 'bowl', count: 1 },
+    ],
+    outputs: [{ itemId: 'mushroom-stew', count: 1 }],
+  },
   { id: 'wood-stairs', inputs: [{ itemId: 'plank', count: 6 }], outputs: [{ itemId: 'wood-stairs', count: 4 }] },
   {
     id: 'cobblestone-stairs',

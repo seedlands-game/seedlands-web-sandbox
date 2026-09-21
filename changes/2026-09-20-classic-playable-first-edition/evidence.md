@@ -191,6 +191,11 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - V10 只在低层深石生成红石矿，V9 不生成；V2–V9 兼容版本继续支持。stdlib V9冻结/V10红石/洞穴/矿物/旧存档4 files / 18 tests PASS；Web TS/staged/Rust/Wasm/palette/content/asset 6 files / 22 tests PASS；Rust fingerprint 与 `verify:static:ci` PASS。
 - 问题记录：FaceMaterial 补丁曾重复键，清理后通过；wool-block 和 JackOLantern 的自动纹理名与稳定 item id 不一致，分别增加显式路由/兼容名。voxel.ts 与 items.ts 超500行后抽出 remaining-voxel-presentation 和 remaining-block-items，未加豁免。音符盒/唱片机/活板门/发光矿状态机仍只记 PARTIAL。
 
+## S2i 配方矩阵收口
+
+- RED：recipe-closure 2/2，缺砂岩/木半砖、16色羊毛物品与配方，以及仙人掌/钻石矿冶炼。GREEN 后新增 recipe-closure-items，补齐半砖、蘑菇煲、花/骨/墨囊/可可豆基础染料、九组混色染料、16色羊毛与配方，并新增仙人掌→绿色染料、钻石矿→钻石熔炼。
+- recipe closure + asset 2 files / 6 tests PASS，`verify:static:ci` PASS。items.ts 再次越过500行，移出结构物品到 recipe-closure-items 后通过。S2 所有 scope=做 条目已至少获得 Headless 证据并清零 NOT_RUN；无形 RecipeRegistry、颜色羊毛非独立体素元数据和原版摆位细节继续标 PARTIAL，不冒充精确等价。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。
