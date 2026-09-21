@@ -19,7 +19,8 @@ export type UtilitySpriteKind =
   | 'bone'
   | 'gunpowder'
   | 'slimeball'
-  | 'bed';
+  | 'bed'
+  | 'saddle';
 
 const utilityKinds: readonly string[] = [
   'bowl',
@@ -41,6 +42,7 @@ const utilityKinds: readonly string[] = [
   'gunpowder',
   'slimeball',
   'bed',
+  'saddle',
 ];
 export const isUtilitySpriteKind = (kind: string): kind is UtilitySpriteKind => utilityKinds.includes(kind);
 
@@ -235,6 +237,24 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     sprite.rect(5, 16, 22, 6, 17);
     sprite.rect(6, 23, 3, 5, 3);
     sprite.rect(23, 23, 3, 5, 3);
+    return sprite.pixels;
+  }
+  if (kind === 'saddle') {
+    sprite.polygon(
+      [
+        [7, 11],
+        [13, 6],
+        [24, 8],
+        [27, 15],
+        [22, 23],
+        [10, 22],
+        [5, 17],
+      ],
+      3,
+    );
+    sprite.rect(10, 10, 13, 8, 4);
+    sprite.rect(7, 17, 5, 9, 2);
+    sprite.rect(21, 17, 4, 8, 2);
     return sprite.pixels;
   }
   if (kind === 'ink-sac' || kind === 'rotten-flesh' || kind === 'gunpowder' || kind === 'slimeball') {

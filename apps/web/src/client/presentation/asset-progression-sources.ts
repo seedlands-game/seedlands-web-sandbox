@@ -1,6 +1,8 @@
 import { pixelItemAssets } from './pixel-item-art';
+import { dyeItemAssets } from './dye-item-assets';
 
 export const progressionItemAssets = [
+  ...dyeItemAssets,
   ...pixelItemAssets('gold-pickaxe', '金镐', 'pickaxe', 'gold'),
   ...pixelItemAssets('diamond-pickaxe', '钻石镐', 'pickaxe', 'diamond'),
   ...pixelItemAssets('stone-axe', '石斧', 'axe', 'stone'),
@@ -58,6 +60,7 @@ export const progressionItemAssets = [
   ...pixelItemAssets('gunpowder', '火药', 'gunpowder'),
   ...pixelItemAssets('slimeball', '黏液球', 'slimeball'),
   ...pixelItemAssets('bed', '床', 'bed'),
+  ...pixelItemAssets('saddle', '鞍', 'saddle'),
   ...pixelItemAssets('lava-bucket', '熔岩桶', 'bucket'),
   ...(['leather', 'iron', 'gold', 'diamond'] as const).flatMap((tier) => {
     const material = tier === 'leather' ? 'wood' : tier;
