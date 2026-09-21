@@ -18,6 +18,7 @@
     "apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-utility-items.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-projectiles.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/classic-species.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/classic-species.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-difficulty-respawn.test.ts"
   ]
 }

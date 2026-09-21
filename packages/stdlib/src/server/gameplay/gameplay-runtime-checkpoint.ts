@@ -15,6 +15,7 @@ import { BLOCK_WORLD_COMPONENT } from './modules/block-action-model';
 import { Voxel } from '../../world/voxel';
 import { allowsGameplayBehaviorCapability } from './gameplay-character-domain';
 import type { AuthorityKernelState } from '../authority/authority-kernel-state';
+import type { DifficultyRuntime } from './difficulty-runtime';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -30,6 +31,7 @@ type Options = Readonly<{
   simulation: AutonomyRuntime;
   players: Map<string, PlayerState>;
   authorityState: AuthorityKernelState;
+  difficulty: DifficultyRuntime;
   needsPlayerLimit?: number;
   installMetadata(gameplayTime: number, revision: number): void;
 }>;
@@ -50,6 +52,7 @@ export class GameplayRuntimeCheckpoint {
       this.options.entities.exportComponentSnapshot(),
       this.options.simulation.snapshot(),
       this.options.authorityState,
+      this.options.difficulty.checkpoint(),
     );
     if (this.options.compositionGuard) snapshot.composition = this.options.compositionGuard.snapshot();
     const ruleset = this.options.ruleset.snapshot();
@@ -108,6 +111,11 @@ export class GameplayRuntimeCheckpoint {
       authorityState: this.options.authorityState,
       installMetadata: this.options.installMetadata,
     });
+    this.options.difficulty.restore(
+      raw && typeof raw === 'object' && 'difficulty' in raw
+        ? (raw.difficulty as import('./difficulty-runtime').DifficultyCheckpoint)
+        : undefined,
+    );
     installSchedule?.();
     this.options.modules.clearBindings();
     this.options.registeredBlocks?.takeCommits();

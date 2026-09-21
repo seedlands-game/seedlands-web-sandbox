@@ -52,6 +52,7 @@ const items = [
   ['bone', '骨头'],
   ['gunpowder', '火药'],
   ['slimeball', '黏液球'],
+  ['bed', '床'],
   ['leather-helmet', '皮革头盔'],
   ['leather-chestplate', '皮革胸甲'],
   ['leather-leggings', '皮革护腿'],

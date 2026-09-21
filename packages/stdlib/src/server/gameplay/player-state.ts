@@ -194,6 +194,18 @@ export class PlayerState {
     this.hungerAccumulator = this.healingAccumulator = this.starvationAccumulator = 0;
   }
 
+  setSpawnPosition(position: [number, number, number]): boolean {
+    if (
+      position.length !== 3 ||
+      !position.every(Number.isFinite) ||
+      this.lifecycle !== 'alive' ||
+      this.mode !== 'survival'
+    )
+      return false;
+    this.state.spawnPosition = [...position];
+    return true;
+  }
+
   private restoreFields(snapshot: Partial<PlayerSnapshot>): void {
     const numeric = [snapshot.health, snapshot.hunger, snapshot.selectedSlot, snapshot.attackCooldownSeconds].filter(
       (value) => value !== undefined,
