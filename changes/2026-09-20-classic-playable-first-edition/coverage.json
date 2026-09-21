@@ -4940,10 +4940,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S5",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：random tick 抽样、顺序、区块激活；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：random tick 抽样、顺序、区块激活；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S5d 作物 owner 以 seed+tick+坐标稳定抽样，只推进已加载且水化的登记作物；完整通用方块 random tick 尚未实现。"
     },
     {
       "caseId": "M23-02",
@@ -5011,70 +5012,77 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S5",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：钓鱼概率、鱼钩生命周期/反馈；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：钓鱼概率、鱼钩生命周期/反馈；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S5c 已验证确定性咬钩、单钩生命周期、距离/水面失败、背包容量、鱼获和耐久及 checkpoint；浏览器浮标表现待 S7。"
     },
     {
       "caseId": "M25-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S5",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：鸡蛋投掷/孵化、奶桶/桶余物；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：鸡蛋投掷/孵化、奶桶/桶余物；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S5c 已验证每八次稳定孵化、加载/落点/容量失败原子性、奶牛距离与奶桶返空桶；飞行表现待 S7。"
     },
     {
       "caseId": "M25-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S5",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：剪羊毛、染色羊、狼驯服/坐下/恢复；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：剪羊毛、染色羊、狼驯服/坐下/恢复；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S4c/S5 已验证 SpeciesState 保存、剪毛/染色/吃草再生、驯狼与主人坐下控制；自然吃草 AI 待后续。"
     },
     {
       "caseId": "M26-01",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S6",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：普通铁轨形态、连接/转弯/坡道；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：普通铁轨形态、连接/转弯/坡道；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S6b 已验证直轨与四向一格坡道、未知邻格拒绝；弯轨模型细节留待优化。"
     },
     {
       "caseId": "M26-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S6",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：矿车加速/摩擦/碰撞/乘坐与变体；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：矿车加速/摩擦/碰撞/乘坐与变体；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S6b 已验证动力轨加速、普通轨摩擦、探测轨、箱车27格与炉车燃料；实体间碰撞反馈待 S7。"
     },
     {
       "caseId": "M26-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S6",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：船浮力/转向/破坏、猪鞍骑乘；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：船浮力/转向/破坏、猪鞍骑乘；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S6b 已验证船水面部署/阻力和鞍猪原子扣鞍/位置同步；破坏掉落与浏览器驾驶待 S7。"
     },
     {
       "caseId": "M26-04",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S6",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：进入/离开载具、实体/物品状态保存；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：进入/离开载具、实体/物品状态保存；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S6b 已验证唯一乘员、距离、安全下车、乘员同步及 vehicle checkpoint/rider 校验；浏览器交互待 S7。"
     },
     {
       "caseId": "M27-01",

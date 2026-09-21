@@ -30,6 +30,7 @@ import { validateLifeSkillsCheckpoint, type LifeSkillsCheckpoint } from './life-
 import { validateVehicleCheckpoint, type VehicleCheckpoint } from './vehicle-runtime';
 import { navigationCheckpointFromSnapshot, validateNavigationItemsCheckpoint } from './navigation-items-runtime';
 import type { NavigationItemsCheckpoint } from './navigation-items-runtime';
+import { validateCropCheckpoint, type CropCheckpoint } from './crop-runtime';
 export { legacyPlayerPositionToFeet } from './legacy-gameplay-position';
 import { migrateLegacyEntity, migrateLegacyPlayer } from './legacy-gameplay-position';
 
@@ -75,6 +76,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   lifeSkills?: LifeSkillsCheckpoint;
   vehicles?: VehicleCheckpoint;
   navigationItems?: NavigationItemsCheckpoint;
+  crops?: CropCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -96,6 +98,7 @@ export const createGameplaySnapshotV4 = (
   lifeSkills?: LifeSkillsCheckpoint,
   vehicles?: VehicleCheckpoint,
   navigationItems?: NavigationItemsCheckpoint,
+  crops?: CropCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -119,6 +122,7 @@ export const createGameplaySnapshotV4 = (
   ...(lifeSkills ? { lifeSkills: validateLifeSkillsCheckpoint(lifeSkills) } : {}),
   ...(vehicles ? { vehicles: validateVehicleCheckpoint(vehicles) } : {}),
   ...(navigationItems ? { navigationItems: validateNavigationItemsCheckpoint(navigationItems) } : {}),
+  ...(crops ? { crops: validateCropCheckpoint(crops) } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 
@@ -162,11 +166,7 @@ const emptySimulation = (): SimulationSnapshot => ({
 export const simulationSnapshotFor = (snapshot: GameplaySnapshot): SimulationSnapshot =>
   snapshot.version === 1 ? emptySimulation() : snapshot.simulation;
 
-/**
- * Validates the common envelope before composition-specific participants inspect
- * their own checkpoint projections. This preserves failure atomicity and keeps a
- * malformed outer snapshot from being misreported as a module schedule failure.
- */
+/** Validates the envelope before composition-specific checkpoint projections. */
 export function validateGameplaySnapshotHeader(raw: unknown): asserts raw is GameplaySnapshot {
   const source = raw as Partial<GameplaySnapshot> | null;
   if (
@@ -449,6 +449,7 @@ export function validateGameplaySnapshot(
       source.version === 4 && source.lifeSkills ? validateLifeSkillsCheckpoint(source.lifeSkills) : undefined,
       source.version === 4 && source.vehicles ? validateVehicleCheckpoint(source.vehicles) : undefined,
       navigationCheckpointFromSnapshot(source, entities),
+      source.version === 4 && source.crops ? validateCropCheckpoint(source.crops) : undefined,
     );
     if (options.registeredNeeds && sourceVersion < 4) {
       const phase =

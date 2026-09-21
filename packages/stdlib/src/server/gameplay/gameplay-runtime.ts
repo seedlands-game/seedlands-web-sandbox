@@ -28,7 +28,6 @@ import type { EntityQuery, EntitySpawn, EntityUpdate, GameplayEntity } from './e
 import type { ItemStack } from './item-registry';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import { type GameplayContent } from './gameplay-content';
-import type { CombatSnapshot } from './combat-runtime';
 import { createPlayerCombatRequest } from './profiled-player-combat';
 import type { InventoryPointerInputV1 } from './modules/inventory-pointer-contract';
 import { executeInventoryPointer, projectInventoryPointerView } from './gameplay-inventory-pointer';
@@ -98,6 +97,7 @@ export class GameplayRuntime {
   readonly lifeSkills;
   readonly vehicles;
   readonly navigationItems;
+  readonly crops;
   private readonly selectHotbar;
   private readonly requestPlayerCombat;
   private readonly advanceWorldRules;
@@ -241,6 +241,7 @@ export class GameplayRuntime {
     this.lifeSkills = systems.lifeSkills;
     this.vehicles = systems.vehicles;
     this.navigationItems = systems.navigationItems;
+    this.crops = systems.crops;
     this.selectHotbar = createGameplayHotbarSelection({
       state: (id) => this.getActorModeState(id),
       inventory: this.registeredInventory ?? this.inventoryActions,
@@ -291,6 +292,7 @@ export class GameplayRuntime {
         this.projectiles.advance(seconds);
         this.lifeSkills.advance(seconds);
         this.vehicles.advance(seconds);
+        this.crops.advance(seconds);
         this.environmentQueries.advanceNaturalSpawns(seconds);
       },
     });
@@ -314,6 +316,7 @@ export class GameplayRuntime {
       lifeSkills: this.lifeSkills,
       vehicles: this.vehicles,
       navigationItems: this.navigationItems,
+      crops: this.crops,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);
@@ -389,10 +392,8 @@ export class GameplayRuntime {
     return entity;
   }
 
-  updateEntityWithoutSnapshot = (id: string, update: EntityUpdate): void => {
-    this.entities.updateWithoutSnapshot(id, update);
-    this.touch(false);
-  };
+  updateEntityWithoutSnapshot = (id: string, update: EntityUpdate): void =>
+    void (this.entities.updateWithoutSnapshot(id, update), this.touch(false));
   updateEntitiesWithoutSnapshot = (updates: readonly Readonly<{ id: string; update: EntityUpdate }>[]): void =>
     commitGameplayDynamicBatch(this.entities, this.kernelState, updates);
   despawnEntity = (id: string): boolean =>
@@ -404,7 +405,7 @@ export class GameplayRuntime {
 
   getPlayerState = (id: string): PlayerSnapshot => this.player(id).snapshot(this.simulation.combatSnapshotFor(id));
 
-  getCombatState = (id: string): CombatSnapshot => this.simulation.combatSnapshotFor(id);
+  getCombatState = (id: string) => this.simulation.combatSnapshotFor(id);
 
   getInventory = (id: string) => this.inventoryActions.snapshot(id);
   getInventoryPointerView = (id: string) => projectInventoryPointerView(this.entities, id);
@@ -434,12 +435,12 @@ export class GameplayRuntime {
   placeVoxel = (id: string, position: Position) => (this.registeredBlocks ?? this.blocks).placeVoxel(id, position);
   useFluidContainer = (id: string, position: Position) => this.blocks.useFluidContainer(id, position);
 
-  useSelectedItem = (id: string) => this.useInventoryItem(id, this.entities.actorStateAccess(id).selectedSlot);
+  useSelectedItem = (id: string) =>
+    (this.registeredInventory ?? this.inventoryActions).consume(id, this.entities.actorStateAccess(id).selectedSlot);
   fireSelectedRangedItem = (id: string, direction: ProjectileVector) => this.projectiles.fireSelected(id, direction);
 
-  useInventoryItem(id: string, slot: number): GameplayResult {
-    return (this.registeredInventory ?? this.inventoryActions).consume(id, slot);
-  }
+  useInventoryItem = (id: string, slot: number): GameplayResult =>
+    (this.registeredInventory ?? this.inventoryActions).consume(id, slot);
 
   bindFeeding(binding?: WorldModuleBinding) {
     return RuntimeLifecycle.bindRegisteredActorRequest(this.registeredFeeding, 'Feeding', binding);
@@ -503,9 +504,8 @@ export class GameplayRuntime {
   }
 
   restoreSnapshot = (raw: unknown) => this.checkpoint.restore(raw);
-  markPersisted = (revision: number): void => {
-    this.persistedRevision = Math.max(this.persistedRevision, revision);
-  };
+  markPersisted = (revision: number): void =>
+    void (this.persistedRevision = Math.max(this.persistedRevision, revision));
 
   private player(id: string): PlayerState {
     const player = this.players.get(id);
