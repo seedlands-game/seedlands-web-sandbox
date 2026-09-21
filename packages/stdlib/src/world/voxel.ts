@@ -3,11 +3,12 @@ import { oreVoxel } from './ore-generation';
 import { caveAir } from './cave-generation';
 import { vegetationAt } from './vegetation';
 import { dungeonFor, dungeonVoxel } from './dungeon-generation';
+import { geologyVoxel } from './geology';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 8;
+export const GENERATOR_VERSION = 9;
 export const LEGACY_GENERATOR_VERSION = 2;
-export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7, 8]);
+export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9]);
 export const isSupportedGeneratorVersion = (value: unknown): value is number =>
   typeof value === 'number' && SUPPORTED_GENERATOR_VERSIONS.includes(value);
 export type ChunkCoord = { cx: number; cy: number; cz: number };
@@ -55,10 +56,17 @@ export const Voxel = {
   Rail: 39,
   PoweredRail: 40,
   DetectorRail: 41,
+  Bedrock: 42,
+  Gravel: 43,
+  LapisOre: 44,
+  Clay: 45,
+  Ice: 46,
+  SnowBlock: 47,
+  LapisBlock: 48,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.DetectorRail;
+export const MAX_VOXEL_ID = Voxel.LapisBlock;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -105,6 +113,13 @@ export const FaceMaterial = {
   Rail: 42,
   PoweredRail: 43,
   DetectorRail: 44,
+  Bedrock: 45,
+  Gravel: 46,
+  LapisOre: 47,
+  Clay: 48,
+  Ice: 49,
+  SnowBlock: 50,
+  LapisBlock: 51,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -154,6 +169,13 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Rail]: 'rail',
   [FaceMaterial.PoweredRail]: 'powered-rail',
   [FaceMaterial.DetectorRail]: 'detector-rail',
+  [FaceMaterial.Bedrock]: 'bedrock',
+  [FaceMaterial.Gravel]: 'gravel',
+  [FaceMaterial.LapisOre]: 'lapis-ore',
+  [FaceMaterial.Clay]: 'clay',
+  [FaceMaterial.Ice]: 'ice',
+  [FaceMaterial.SnowBlock]: 'snow-block',
+  [FaceMaterial.LapisBlock]: 'lapis-block',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -198,6 +220,13 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Rail]: '铁轨',
   [Voxel.PoweredRail]: '动力铁轨',
   [Voxel.DetectorRail]: '探测铁轨',
+  [Voxel.Bedrock]: '基岩',
+  [Voxel.Gravel]: '砂砾',
+  [Voxel.LapisOre]: '青金石矿',
+  [Voxel.Clay]: '黏土块',
+  [Voxel.Ice]: '冰',
+  [Voxel.SnowBlock]: '雪块',
+  [Voxel.LapisBlock]: '青金石块',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -242,6 +271,13 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Rail]: [0.5, 0.45, 0.34],
   [Voxel.PoweredRail]: [0.72, 0.48, 0.12],
   [Voxel.DetectorRail]: [0.62, 0.35, 0.16],
+  [Voxel.Bedrock]: [0.15, 0.16, 0.17],
+  [Voxel.Gravel]: [0.48, 0.46, 0.44],
+  [Voxel.LapisOre]: [0.18, 0.28, 0.64],
+  [Voxel.Clay]: [0.55, 0.6, 0.63],
+  [Voxel.Ice]: [0.55, 0.78, 0.9],
+  [Voxel.SnowBlock]: [0.92, 0.96, 1],
+  [Voxel.LapisBlock]: [0.12, 0.24, 0.72],
 };
 
 const nonSolid = new Set<number>([
@@ -313,6 +349,13 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Rail]: FaceMaterial.Rail,
       [Voxel.PoweredRail]: FaceMaterial.PoweredRail,
       [Voxel.DetectorRail]: FaceMaterial.DetectorRail,
+      [Voxel.Bedrock]: FaceMaterial.Bedrock,
+      [Voxel.Gravel]: FaceMaterial.Gravel,
+      [Voxel.LapisOre]: FaceMaterial.LapisOre,
+      [Voxel.Clay]: FaceMaterial.Clay,
+      [Voxel.Ice]: FaceMaterial.Ice,
+      [Voxel.SnowBlock]: FaceMaterial.SnowBlock,
+      [Voxel.LapisBlock]: FaceMaterial.LapisBlock,
     } as Record<number, FaceMaterialId>
   )[id];
 }
@@ -376,17 +419,27 @@ export function baseVoxel(
     if (generated !== null) return generated as VoxelId;
   }
   if (context.hydrology.water && context.hydrology.waterLevel !== null && y > h && y <= context.hydrology.waterLevel)
-    return Voxel.Water;
+    return geologyVoxel(seed, x, y, z, context, Voxel.Water, generatorVersion);
   if (y <= h) {
     if (y === h) {
       const surface =
         kind === 'dry' ? Voxel.Sand : kind === 'cold' ? Voxel.Snow : kind === 'mountain' ? Voxel.Stone : Voxel.Grass;
-      return oreVoxel(seed, x, y, z, h, surface, generatorVersion);
+      return geologyVoxel(
+        seed,
+        x,
+        y,
+        z,
+        context,
+        oreVoxel(seed, x, y, z, h, surface, generatorVersion),
+        generatorVersion,
+      );
     }
     const underground =
       y > h - 4 ? (kind === 'dry' ? Voxel.Sand : kind === 'mountain' ? Voxel.Stone : Voxel.Dirt) : Voxel.Stone;
-    if (caveAir(seed, x, y, z, h, generatorVersion)) return Voxel.Air;
-    return oreVoxel(seed, x, y, z, h, underground, generatorVersion);
+    const generated = caveAir(seed, x, y, z, h, generatorVersion)
+      ? Voxel.Air
+      : oreVoxel(seed, x, y, z, h, underground, generatorVersion);
+    return geologyVoxel(seed, x, y, z, context, generated, generatorVersion);
   }
   // A feature can be sampled locally from nearby deterministic anchor points.
   for (let tx = x - 3; tx <= x + 3; tx += 1)

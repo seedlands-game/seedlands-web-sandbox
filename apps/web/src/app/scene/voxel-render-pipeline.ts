@@ -18,7 +18,7 @@ export type RenderPipelineSnapshot = Omit<typeof FINAL_RENDER_PIPELINE, 'backend
 
 export function renderCategoryForFaceMaterial(material: FaceMaterialId): RenderCategory {
   if (material === FaceMaterial.Leaves || material === FaceMaterial.Glass) return 'cutout';
-  if (material === FaceMaterial.Water) return 'transparent';
+  if (material === FaceMaterial.Water || material === FaceMaterial.Ice) return 'transparent';
   if (material === FaceMaterial.LanternGlow) return 'emissive';
   return 'opaque';
 }

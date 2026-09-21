@@ -97,10 +97,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bedrock"
+      "execution": "HEADLESS_PASS",
+      "name": "Bedrock",
+      "note": "V9 最低五层确定性基岩，方块规则不可采集；V2–V8 字节冻结。"
     },
     {
       "caseId": "B-008",
@@ -166,10 +167,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gravel"
+      "execution": "HEADLESS_PASS",
+      "name": "Gravel",
+      "note": "V9 地下石层确定性砂砾，铲采集/放置与材质闭包已验证；下落实体另记。"
     },
     {
       "caseId": "B-014",
@@ -265,20 +267,22 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Lapis Lazuli Ore"
+      "execution": "HEADLESS_PASS",
+      "name": "Lapis Lazuli Ore",
+      "note": "V9 低层青金石矿、铁级镐门槛和蓝色染料掉落已验证。"
     },
     {
       "caseId": "B-022",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Lapis Lazuli Block"
+      "execution": "HEADLESS_PASS",
+      "name": "Lapis Lazuli Block",
+      "note": "青金石块追加稳定体素、材质、放置物品及9:1压缩/拆解配方已验证。"
     },
     {
       "caseId": "B-023",
@@ -892,20 +896,22 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Ice"
+      "execution": "HEADLESS_PASS",
+      "name": "Ice",
+      "note": "V9 寒冷群系水面结冰、透明材质与无掉落规则已验证；滑动系数待物理专项。"
     },
     {
       "caseId": "B-080",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Snow Block"
+      "execution": "HEADLESS_PASS",
+      "name": "Snow Block",
+      "note": "V9 寒冷群系雪下层、铲采集雪球和四雪球合成已验证。"
     },
     {
       "caseId": "B-081",
@@ -922,10 +928,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Clay"
+      "execution": "HEADLESS_PASS",
+      "name": "Clay",
+      "note": "V9 水域浅层黏土、铲采集4黏土、黏土块配方和烧砖配方已验证。"
     },
     {
       "caseId": "B-083",
@@ -4314,10 +4321,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：基岩、表土、沙/砂岩/黏土/海床分层；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：基岩、表土、沙/砂岩/黏土/海床分层；记录正例、失败例、tick 和 owner 状态。",
+      "note": "V9 新增基岩、砂砾与水域浅层黏土，V8 固定 SHA 保持；砂岩沿用既有干燥群系。"
     },
     {
       "caseId": "M04-01",
@@ -4354,10 +4362,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：积雪/冰面生成与地形组合；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：积雪/冰面生成与地形组合；记录正例、失败例、tick 和 owner 状态。",
+      "note": "V9 寒冷群系水面冰与积雪下雪块通过确定性纯函数及三路生成等价验证。"
     },
     {
       "caseId": "M05-01",

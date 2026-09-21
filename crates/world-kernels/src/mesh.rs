@@ -28,14 +28,14 @@ fn greedy(id: u32) -> bool {
 }
 
 fn occludes(id: u32) -> bool {
-    !matches!(id, 0 | 8 | 10 | 18 | 27 | 29 | 31 | 32 | 33 | 34 | 35)
+    !matches!(id, 0 | 8 | 10 | 18 | 27 | 29 | 31 | 32 | 33 | 34 | 35 | 46)
 }
 
 fn visible(source: u32, target: u32) -> bool {
     if !greedy(source) {
         return false;
     }
-    if source == 18 && target == 18 {
+    if (source == 18 && target == 18) || (source == 46 && target == 46) {
         return false;
     }
     if source == 8 {
@@ -100,6 +100,13 @@ fn material(id: u32, axis: i32, positive: bool) -> u32 {
         39 => 42,
         40 => 43,
         41 => 44,
+        42 => 45,
+        43 => 46,
+        44 => 47,
+        45 => 48,
+        46 => 49,
+        47 => 50,
+        48 => 51,
         _ => 255,
     }
 }

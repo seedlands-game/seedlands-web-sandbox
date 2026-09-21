@@ -4,6 +4,7 @@ import { oreVoxel } from '@seedlands/stdlib/world/ore-generation';
 import { caveAir } from '@seedlands/stdlib/world/cave-generation';
 import { dungeonFor, dungeonVoxel } from '@seedlands/stdlib/world/dungeon-generation';
 import { GENERATOR_VERSION, hash2 } from '@seedlands/stdlib/world/voxel';
+import { geologyVoxelFromColumn } from '@seedlands/stdlib/world/geology';
 import type { KernelMemory } from './kernel-memory';
 
 const INPUT_OFFSET = 64;
@@ -58,7 +59,10 @@ export function columnVoxel(
     const generated = dungeonVoxel(dungeon, worldX, wy, worldZ);
     if (generated !== null) return generated;
   }
-  if (wy > height && wy <= waterLevel) return 8;
+  const biome = (['plains', 'forest', 'mountain', 'dry', 'cold', 'wet'] as const)[kind];
+  const water = waterLevel === -2147483648 ? null : waterLevel;
+  if (wy > height && wy <= waterLevel)
+    return geologyVoxelFromColumn(seed, worldX, wy, worldZ, height, biome, water, 8, generatorVersion);
   if (wy <= height) {
     const base =
       wy === height
@@ -76,8 +80,10 @@ export function columnVoxel(
               ? 3
               : 2
           : 3;
-    if (caveAir(seed, worldX, wy, worldZ, height, generatorVersion)) return 0;
-    return oreVoxel(seed, worldX, wy, worldZ, height, base, generatorVersion);
+    const generated = caveAir(seed, worldX, wy, worldZ, height, generatorVersion)
+      ? 0
+      : oreVoxel(seed, worldX, wy, worldZ, height, base, generatorVersion);
+    return geologyVoxelFromColumn(seed, worldX, wy, worldZ, height, biome, water, generated, generatorVersion);
   }
   for (let tx = x; tx <= x + 6; tx += 1)
     for (let tz = z; tz <= z + 6; tz += 1) {

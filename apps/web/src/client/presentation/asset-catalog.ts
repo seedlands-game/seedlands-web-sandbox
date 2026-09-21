@@ -92,6 +92,12 @@ const items = [
   ['cocoa-beans', '可可豆'],
   ['record-13', '唱片 13'],
   ['record-cat', '唱片 Cat'],
+  ['gravel', '砂砾'],
+  ['lapis-ore', '青金石矿石'],
+  ['clay-block', '黏土块'],
+  ['ice', '冰'],
+  ['snow-block', '雪块'],
+  ['lapis-block', '青金石块'],
   ['leather-helmet', '皮革头盔'],
   ['leather-chestplate', '皮革胸甲'],
   ['leather-leggings', '皮革护腿'],
@@ -214,29 +220,37 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
         ? model.payload.textureId
         : itemId === 'raw-iron'
           ? 'seedlands:texture/terrain/iron-ore'
-          : [
-                'cobblestone',
-                'glass',
-                'gold-ore',
-                'diamond-ore',
-                'iron-block',
-                'gold-block',
-                'diamond-block',
-                'sandstone',
-                'stone-bricks',
-                'obsidian',
-                'tnt',
-                'sapling',
-                'flower',
-                'mushroom',
-                'sugar-cane',
-                'cactus',
-                'rail',
-                'powered-rail',
-                'detector-rail',
-              ].includes(itemId)
-            ? 'seedlands:texture/terrain/' + itemId
-            : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
+          : itemId === 'clay-block'
+            ? 'seedlands:texture/terrain/clay'
+            : [
+                  'cobblestone',
+                  'glass',
+                  'gold-ore',
+                  'diamond-ore',
+                  'iron-block',
+                  'gold-block',
+                  'diamond-block',
+                  'sandstone',
+                  'stone-bricks',
+                  'obsidian',
+                  'tnt',
+                  'sapling',
+                  'flower',
+                  'mushroom',
+                  'sugar-cane',
+                  'cactus',
+                  'rail',
+                  'powered-rail',
+                  'detector-rail',
+                  'gravel',
+                  'lapis-ore',
+                  'clay-block',
+                  'ice',
+                  'snow-block',
+                  'lapis-block',
+                ].includes(itemId)
+              ? 'seedlands:texture/terrain/' + itemId
+              : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
   };
 });
 export const builtinBinding = (itemId: string) => builtinItemBindings.find((b) => b.itemId === itemId);
