@@ -20,6 +20,10 @@ const colors = [
   '4d5757',
   '94705c',
   'c59470',
+  '20616b',
+  '399da5',
+  '7edbd5',
+  'c8fff0',
 ];
 const palette: Rgb[] = colors.map(
   (hex) => [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)) as Rgb,
@@ -62,10 +66,18 @@ function handle(sprite: Sprite) {
   sprite.rect(14, 27, 3, 1, 14);
 }
 
-function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'iron') {
+function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond') {
   const sprite = new Sprite();
   const [dark, base, light, edge] =
-    material === 'wood' ? [2, 3, 4, 5] : material === 'stone' ? [7, 8, 9, 10] : [7, 9, 10, 11];
+    material === 'wood'
+      ? [2, 3, 4, 5]
+      : material === 'stone'
+        ? [7, 8, 9, 10]
+        : material === 'gold'
+          ? [12, 13, 14, 6]
+          : material === 'diamond'
+            ? [18, 19, 20, 21]
+            : [7, 9, 10, 11];
   if (kind === 'sword') {
     sprite.polygon(
       [
@@ -222,14 +234,61 @@ function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'i
   return sprite.pixels;
 }
 
-function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot' | 'stick') {
+function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot' | 'gold-ingot' | 'diamond' | 'stick') {
   const sprite = new Sprite();
-  if (kind === 'stick') {
+  if (kind === 'diamond') {
+    sprite.polygon(
+      [
+        [10, 5],
+        [23, 5],
+        [29, 13],
+        [16, 28],
+        [3, 13],
+      ],
+      18,
+    );
+    sprite.polygon(
+      [
+        [11, 7],
+        [21, 7],
+        [26, 13],
+        [16, 25],
+        [6, 13],
+      ],
+      19,
+    );
+    sprite.polygon(
+      [
+        [11, 7],
+        [16, 7],
+        [10, 13],
+        [6, 13],
+      ],
+      21,
+    );
+    sprite.polygon(
+      [
+        [16, 7],
+        [21, 7],
+        [26, 13],
+        [21, 13],
+      ],
+      20,
+    );
+    sprite.polygon(
+      [
+        [11, 14],
+        [21, 14],
+        [16, 24],
+      ],
+      20,
+    );
+  } else if (kind === 'stick') {
     for (let i = 5; i < 26; i++) {
       sprite.rect(i, 30 - i, 4, 4, 2);
       sprite.rect(i, 30 - i, 2, 2, i % 4 === 0 ? 3 : 5);
     }
-  } else if (kind === 'iron-ingot') {
+  } else if (kind === 'iron-ingot' || kind === 'gold-ingot') {
     sprite.polygon(
       [
         [10, 10],
@@ -321,14 +380,18 @@ function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot' | 'stick') {
       sprite.rect(15, 21, 5, 2, 17);
     }
   }
+  if (kind === 'gold-ingot') {
+    const gold: Record<number, number> = { 7: 12, 8: 13, 9: 14, 10: 14, 11: 6 };
+    return sprite.pixels.map((color) => gold[color] ?? color);
+  }
   return sprite.pixels;
 }
 
 export function pixelItemAssets(
   id: string,
   name: string,
-  kind: 'pickaxe' | 'axe' | 'sword' | 'coal' | 'raw-iron' | 'iron-ingot' | 'stick',
-  material: 'wood' | 'stone' | 'iron' = 'wood',
+  kind: 'pickaxe' | 'axe' | 'sword' | 'coal' | 'raw-iron' | 'iron-ingot' | 'gold-ingot' | 'diamond' | 'stick',
+  material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond' = 'wood',
 ): NativeAsset[] {
   const textureId = `builtin:texture:${id}:detail`;
   return [

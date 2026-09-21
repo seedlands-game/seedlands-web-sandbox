@@ -176,10 +176,13 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Ore"
+      "execution": "HEADLESS_AND_BROWSER_PASS",
+      "name": "Gold Ore",
+      "seedlandsVoxelId": 19,
+      "source": "playbooks/classic/src/blocks.ts",
+      "note": "S2b已实现；真实浏览器创造目录图标可见并放置钻石块(voxel23)重开后保留。非全量Beta细节等价。"
     },
     {
       "caseId": "B-015",
@@ -470,20 +473,26 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Block"
+      "execution": "HEADLESS_PASS",
+      "name": "Gold Block",
+      "seedlandsVoxelId": 22,
+      "source": "playbooks/classic/src/blocks.ts",
+      "note": "S2b金钻矿V5天然生成/铁镐门槛/冶炼/资源块压缩拆回与保存守恒已实现；有限材料成长Headless通过。非全量Beta细节等价。"
     },
     {
       "caseId": "B-042",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Iron Block"
+      "execution": "HEADLESS_PASS",
+      "name": "Iron Block",
+      "seedlandsVoxelId": 21,
+      "source": "playbooks/classic/src/blocks.ts",
+      "note": "S2b金钻矿V5天然生成/铁镐门槛/冶炼/资源块压缩拆回与保存守恒已实现；有限材料成长Headless通过。非全量Beta细节等价。"
     },
     {
       "caseId": "B-043",
@@ -624,20 +633,26 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Ore"
+      "execution": "HEADLESS_AND_BROWSER_PASS",
+      "name": "Diamond Ore",
+      "seedlandsVoxelId": 20,
+      "source": "playbooks/classic/src/blocks.ts",
+      "note": "S2b已实现；真实浏览器创造目录图标可见并放置钻石块(voxel23)重开后保留。非全量Beta细节等价。"
     },
     {
       "caseId": "B-057",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Block"
+      "execution": "HEADLESS_AND_BROWSER_PASS",
+      "name": "Diamond Block",
+      "seedlandsVoxelId": 23,
+      "source": "playbooks/classic/src/blocks.ts",
+      "note": "S2b已实现；真实浏览器创造目录图标可见并放置钻石块(voxel23)重开后保留。非全量Beta细节等价。"
     },
     {
       "caseId": "B-058",
@@ -1144,10 +1159,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond"
+      "execution": "HEADLESS_AND_BROWSER_PASS",
+      "name": "Diamond",
+      "note": "S2b已实现；真实浏览器创造目录图标可见并放置钻石块(voxel23)重开后保留。非全量Beta细节等价。"
     },
     {
       "caseId": "I-265",
@@ -1166,10 +1182,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold"
+      "execution": "HEADLESS_AND_BROWSER_PASS",
+      "name": "Gold",
+      "note": "S2b已实现；真实浏览器创造目录图标可见并放置钻石块(voxel23)重开后保留。非全量Beta细节等价。"
     },
     {
       "caseId": "I-267",
@@ -1294,10 +1311,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Pickaxe"
+      "execution": "HEADLESS_PASS",
+      "name": "Diamond Pickaxe",
+      "note": "S2b金钻矿V5天然生成/铁镐门槛/冶炼/资源块压缩拆回与保存守恒已实现；有限材料成长Headless通过。非全量Beta细节等价。"
     },
     {
       "caseId": "I-279",
@@ -1367,10 +1385,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Pickaxe"
+      "execution": "HEADLESS_PASS",
+      "name": "Gold Pickaxe",
+      "note": "S2b金钻矿V5天然生成/铁镐门槛/冶炼/资源块压缩拆回与保存守恒已实现；有限材料成长Headless通过。非全量Beta细节等价。"
     },
     {
       "caseId": "I-286",

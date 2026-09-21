@@ -76,3 +76,47 @@ export async function placeGlassAfterRestore(page: Page, testInfo: TestInfo): Pr
   );
   await testInfo.attach('glass-built-after-restore', { body: await page.screenshot(), contentType: 'image/png' });
 }
+
+export async function replaceGlassWithDiamondBlock(page: Page, testInfo: TestInfo): Promise<void> {
+  const glass: Point = [
+    classicScenario.route.stationTarget[0] - 1,
+    classicScenario.route.stationTarget[1],
+    classicScenario.route.stationTarget[2],
+  ];
+  await aimAtVoxelWithRealMouse(page, glass);
+  await clickCanvasCenter(page, 'left');
+  await expect.poll(() => voxelAt(page, glass)).toBe(0);
+  await page.keyboard.press('KeyE');
+  const catalog = page.getByRole('dialog', { name: '创造内容目录' });
+  await expect(catalog).toBeVisible();
+  for (const name of ['金矿石', '钻石矿石', '铁块', '金块', '钻石块', '金锭', '钻石', '金镐', '钻石镐']) {
+    const button = catalog.getByRole('button', { name: new RegExp('^将' + name + '放入创造快捷栏 ') });
+    await button.scrollIntoViewIfNeeded();
+    await expect(button).toBeVisible();
+    await expect
+      .poll(() => button.locator('img').evaluate((node) => (node as HTMLImageElement).naturalWidth))
+      .toBeGreaterThan(0);
+  }
+  await catalog.getByRole('button', { name: /^将钻石块放入创造快捷栏 / }).click();
+  await closeInventory(page);
+  await aimAtVoxelWithRealMouse(page, classicScenario.route.stationTarget);
+  const before = (await snapshot(page))!;
+  await page.keyboard.down('ShiftLeft');
+  try {
+    await clickCanvasCenter(page, 'right');
+  } finally {
+    await page.keyboard.up('ShiftLeft');
+  }
+  await expect.poll(() => voxelAt(page, glass)).toBe(23);
+  await waitForSnapshot(
+    page,
+    (value) =>
+      value.worldRevision > before.worldRevision &&
+      value.remeshSchedulingCount > before.remeshSchedulingCount &&
+      value.lastCommitMeshChunkCount > 0,
+  );
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  );
+  await testInfo.attach('diamond-block-after-restore', { body: await page.screenshot(), contentType: 'image/png' });
+}

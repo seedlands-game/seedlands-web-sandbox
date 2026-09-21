@@ -4,7 +4,7 @@ import { MemoryGamePersistence } from '../../src/server/persistence/memory-game-
 import { testCorePlatform } from '../support/core-platform';
 import { testWorldgenExecutableProvider } from '../support/worldgen';
 
-it.each([2, 3, 4])('preserves generator %i on dirty chunks and portable save/reopen', async (generatorVersion) => {
+it.each([2, 3, 4, 5])('preserves generator %i on dirty chunks and portable save/reopen', async (generatorVersion) => {
   const persistence = new MemoryGamePersistence({ clone: structuredClone });
   const options = {
     seedText: 'legacy-generator-save',

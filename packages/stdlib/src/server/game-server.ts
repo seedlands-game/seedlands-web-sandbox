@@ -5,7 +5,7 @@ import {
   assertStationCheckpointIntegrity,
   assertStationChunkIntegrity,
 } from './station-world-integrity';
-import { GENERATOR_VERSION, chunkKey, normalizeSeed, Voxel } from '../world/voxel';
+import { GENERATOR_VERSION, SUPPORTED_GENERATOR_VERSIONS, chunkKey, normalizeSeed, Voxel } from '../world/voxel';
 import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayHost } from './game-server-gameplay-host';
@@ -81,7 +81,7 @@ class GameServerWorld {
     this.generatorVersion = options.generatorVersion ?? GENERATOR_VERSION;
     this.worldgenRuntime = options.worldgenProvider;
     this.worldgenProvider = options.worldgenProvider?.identity;
-    if (this.generatorVersion !== 2 && this.generatorVersion !== 3 && this.generatorVersion !== GENERATOR_VERSION)
+    if (!SUPPORTED_GENERATOR_VERSIONS.includes(this.generatorVersion))
       throw new Error(`Unsupported generator version ${this.generatorVersion}.`);
     this.persistence = options.persistence;
     this.gameplayHost = new GameServerGameplayHost(

@@ -53,7 +53,7 @@
 
 ## 续作：本机输入隔离（2026-09-21）
 
-用户实测此前 Chromium Pointer Lock 抢占本机鼠标，作为观察 RED。唯一 Classic 线路固定使用锁定 Playwright 版本配套的 完整 Chromium 的新 headless 模式；不再自动选择系统 Chrome，固定 channel=chromium，不允许 headed/executablePath/PWDEBUG 覆盖。仍通过真实 Pointer Lock 与 Playwright 输入检验游戏行为，不 mock requestPointerLock，不把纯逻辑控制替代为键鼠证据。测试开始前校验生效选项；失败和成功后均释放页面锁。单浏览器、静音、单 worker继续生效。原版 Minecraft 不启动。
+用户实测此前 Chromium Pointer Lock 抢占本机鼠标，作为观察 RED。当前 macOS 验收使用系统 Chrome 强制 headless，CI使用锁定Playwright配套Chromium headless；禁止headed/PWDEBUG和外部可执行路径覆盖。此前专用Headless Shell缺Pointer Lock，配套151在macOS触发锁限流，均有失败记录，系统Chrome153已通过。输入继续走真实页面Pointer Lock和Playwright键鼠，退出释放锁。单浏览器/静音/单worker运行，不启动原版Minecraft。
 
 验收：选项违规在启动产品旅程前明确失败；正常线路记录 Headless userAgent、Pointer Lock 生效、转向与移动结果，并完成原有 C0–C5 断言。用户鼠标没有被抢占属于用户可观察项，自动化只证明使用配套 Chromium 的无窗口模式及真实页面输入路径。
 

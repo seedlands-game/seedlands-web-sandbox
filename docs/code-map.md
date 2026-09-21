@@ -240,3 +240,5 @@ PR17 与近战集成时，地图开关和图层切换的浏览器控制委托给
 - packages/stdlib/src/server/gameplay/inventory-layout.ts 持有每世界玩家布局校验与旧24/8存档准入；Classic 选择36/9，ECS、模式和UI消费同一实际布局。
 - scripts/harness/artifact.mjs 绑定生产源码/锁文件/产物摘要，classic.mjs 执行唯一 apps/web/tests/e2e/classic-runtime.spec.ts；classic-support/crafting.ts 包含真实配方和第9快捷槽输入步骤。
 - 当前恢复的 Classic 与生产 CI 边界见 docs/ci-testing.md，上述历史冻结说明不代替本轮实际执行回执。
+
+V5金钻矿沿用 world/ore-generation.ts 与 Rust generation.rs 的分组hash，在 generatorVersion=5 时追加金/钻石矿；旧版本字节保留。apps/web/src/client/persistence/stored-world-selection.ts 对选中的存档验证版本与provider身份，拒绝不兼容继续，不把旧记录过滤成新世界。矿物、工具、资源块配方仍归Classic内容文件。

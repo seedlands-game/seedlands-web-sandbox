@@ -57,3 +57,12 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 完整生产C0–C5+玻璃放置PASS，runId 386c123e-bf47-4cff-b018-ba660518f34e，约1.9分钟，sourceDigest d6fad5e596eee3088d57cd0395d8dcf7d39e637c3d24639e9da904bbfa983335，artifactDigest 0796bb4e507309fc17e0882749fe0206e70922825a93bbd96c0ebc6870b585f3。HeadlessChrome153/macOS/WebGL2，页面异常/失败响应为空。九槽同一行几何断言通过；截图观察玻璃纹理和后方工作台均可见。单张最终图不作为运动或性能证据。
 - 截图发现快捷栏仍为8列导致第9槽换行；改为读取slots.length后再次生产验证通过。玻璃第一次检查预期顶部，实际Shift右键命中侧面，修正坐标后通过；原始失败保留在harness/results。
 - S2a verify:static:ci PASS。新增生产路径和文件未改变Kernel责任；长期docs baseline无需新增架构决策，代码地图沿用当前owner。全量S2/S3/S4–S7仍未完成。
+
+## S2b 金钻矿与工具（实施中）
+
+- RED：V5没有自然金矿/钻石、保存拒绝V5；金钻内容缺失和资源块压缩失败。V4固定深层chunk控制SHA-256 23048253e362d35e6375ad051512dcaf09e6aa883cec953e1fee8916aa3a997a 已在增加V5前通过（实际固定值以precious-ore-generation.test.ts为准）。
+- 生成/旧存档定向6 tests PASS；金钻门槛/金镐拒绝高阶矿/耗尽移除/资源守恒与资源注册3 tests PASS。正式6个Classic合同7 tests PASS，有限材料从木石铁取得12钻石/12金矿并冶炼制作工具/资源块、保存恢复和拆回守恒；玻璃遮挡工位通过真实挖碎无掉落解除。
+- 旧存档provider选择新回归从缺实现RED到2 tests PASS，另浏览器持久化18 tests PASS；继续不兼容身份报错，明确新建模式可另建V5。未实现跨Pack迁移，不宣称旧安装存档自动兼容。
+- S2b 定向回归复跑 PASS：precious-ore-generation 2 + legacy-generator-save 4、classic-precious-tools 2、stored-world-selection 2、overworld-progression-journey 1（Headless 从有限原料到铁器+金钻工具与建造，含储物与半程恢复，29.8s）；wasm world-kernel 4 + mesh 6 + halo 2 + voxel-progression 4（四生成版本逐字节一致 16 tests）；item-visual-compatibility 3 + voxel-render-pipeline 2。
+- V5 完整生产旅程 PASS：runId 89cca217-24b4-4058-87e7-ba3b5037fd20，C0–C5 全 PASS，约 1.9 分钟，新增第 8 步“V5金钻资源目录与真实钻石块建造”通过——真实拆玻璃后 Shift 右键放置 voxel 23（钻石块），并核对创造目录中金矿石/钻石矿石/铁块/金块/钻石块/金锭/钻石/金镐/钻石镐图标 naturalWidth>0。scenario.generatorVersion=5，sourceSha 638f389011c7c8666d59fdadace2d44a131629b0，sourceDigest bd8368f116269f1e93e84dbd1cbeaf45ca0b1baa73d78ba93854d9551be4c400，artifactDigest 89ad9cd97b6ebd35f68dc2517cf6977f8805c41cbc526d5fa5a90306999bb08a。HeadlessChrome/153、960×540、mute-audio，pageErrors/failedResponses 为空。
+- S2b verify:static:ci PASS（格式含新增 stored-world-selection 测试、路径、Lint、全仓 typecheck、ESLint 边界 66 tests、CI 选择 8 tests）。全量 S3/S4–S7 环境、全部生物、农业、运输仍未完成。
