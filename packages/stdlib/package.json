@@ -63,6 +63,7 @@
     "./server/world-mutation": "./src/server/world-mutation.ts",
     "./world/chunk-generation": "./src/world/chunk-generation.ts",
     "./world/chunk-snapshot-codec": "./src/world/chunk-snapshot-codec.ts",
+    "./world/cave-generation": "./src/world/cave-generation.ts",
     "./world/macro-world": "./src/world/macro-world.ts",
     "./world/mesh": "./src/world/mesh.ts",
     "./world/mesh-batching": "./src/world/mesh-batching.ts",

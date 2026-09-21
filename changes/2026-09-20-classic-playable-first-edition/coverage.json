@@ -4199,10 +4199,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：洞穴雕刻、连通/液体填充；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：洞穴雕刻、连通/液体填充；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S3a V6洞穴：generatorVersion=6在地表4格以下确定性掏空气穴(2x2x2分组双场相交)，V2-V5字节冻结、TS/Rust/staged逐字节一致；洞穴连通/液体填充未实现。"
     },
     {
       "caseId": "M03-03",

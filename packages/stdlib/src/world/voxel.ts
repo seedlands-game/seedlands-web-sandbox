@@ -1,10 +1,11 @@
 import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
 import { oreVoxel } from './ore-generation';
+import { caveAir } from './cave-generation';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 5;
+export const GENERATOR_VERSION = 6;
 export const LEGACY_GENERATOR_VERSION = 2;
-export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5]);
+export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6]);
 export const isSupportedGeneratorVersion = (value: unknown): value is number =>
   typeof value === 'number' && SUPPORTED_GENERATOR_VERSIONS.includes(value);
 export type ChunkCoord = { cx: number; cy: number; cz: number };
@@ -271,6 +272,7 @@ export function baseVoxel(
     }
     const underground =
       y > h - 4 ? (kind === 'dry' ? Voxel.Sand : kind === 'mountain' ? Voxel.Stone : Voxel.Dirt) : Voxel.Stone;
+    if (caveAir(seed, x, y, z, h, generatorVersion)) return Voxel.Air;
     return oreVoxel(seed, x, y, z, h, underground, generatorVersion);
   }
   // A feature can be sampled locally from nearby deterministic anchor points.
