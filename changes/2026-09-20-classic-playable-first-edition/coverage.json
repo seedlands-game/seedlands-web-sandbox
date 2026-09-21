@@ -1136,20 +1136,22 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bow"
+      "execution": "HEADLESS_PASS",
+      "name": "Bow",
+      "note": "S4b弓箭：弓带ranged能力与384耐久，3木棍+3线合成；正式事务缺箭原子拒绝，成功扣箭和耐久并生成权威投射物。浏览器瞄准/表现/音效尚未接入。"
     },
     {
       "caseId": "I-262",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Arrow"
+      "execution": "HEADLESS_PASS",
+      "name": "Arrow",
+      "note": "S4b弓箭：燧石+木棍+羽毛合成4箭；权威投射物按连续线段选择最早命中、同距体素优先、命中仅伤害一次并销毁。"
     },
     {
       "caseId": "I-263",
@@ -1428,20 +1430,22 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "String"
+      "execution": "HEADLESS_PASS",
+      "name": "String",
+      "note": "S4b弓箭材料：内容与原创像素资源已注册，用于弓配方；自然掉落链待蜘蛛阶段。"
     },
     {
       "caseId": "I-288",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Feather"
+      "execution": "HEADLESS_PASS",
+      "name": "Feather",
+      "note": "S4b弓箭材料：内容与原创像素资源已注册，用于箭配方；自然掉落链待鸡阶段。"
     },
     {
       "caseId": "I-289",
@@ -1766,10 +1770,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Flint"
+      "execution": "HEADLESS_PASS",
+      "name": "Flint",
+      "note": "S4b弓箭材料：内容与原创像素资源已注册，用于箭配方；砂砾自然掉落链待方块阶段。"
     },
     {
       "caseId": "I-319",
@@ -2240,10 +2245,11 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 箭 Arrow 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 箭 Arrow 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "S4b权威投射物：稳定ID、有限位置/速度、连续线段命中、体素遮挡、一次伤害、寿命销毁及在途checkpoint恢复已通过Headless；尚未接GameplayRuntime总快照和浏览器表现。"
     },
     {
       "caseId": "E-Boat",

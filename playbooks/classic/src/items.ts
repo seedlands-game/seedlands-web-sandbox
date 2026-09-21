@@ -347,6 +347,18 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
   { id: 'chest-minecart', name: '运输矿车', itemType: 'resource', stackLimit: 1, capabilities: [] },
   { id: 'furnace-minecart', name: '动力矿车', itemType: 'resource', stackLimit: 1, capabilities: [] },
   { id: 'boat', name: '船', itemType: 'resource', stackLimit: 1, capabilities: [] },
+  { id: 'string', name: '线', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'feather', name: '羽毛', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'flint', name: '燧石', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'arrow', name: '箭', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  {
+    id: 'bow',
+    name: '弓',
+    itemType: 'tool',
+    stackLimit: 1,
+    durability: { max: 384 },
+    capabilities: [{ type: 'ranged', ammunitionItemId: 'arrow', damage: 4, speed: 16, lifetimeSeconds: 5 }],
+  },
   ...(
     [
       ['leather', '皮革', 'leather', 55, { helmet: 1, chestplate: 3, leggings: 2, boots: 1 }],

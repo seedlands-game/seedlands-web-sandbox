@@ -66,3 +66,11 @@
 ## S0 Logic 恢复运行
 
 真实C4显示NPC有效路径与terrain窗口完整、驱逐计数为0，但Logic提交计数停在夹具的确定性推进。BrowserAuthorityDeterministicAdvance在推进中接收最后回执时不安排下一次观察，恢复clock run也未启动观察请求。AuthorityRuntime.resume必须重新请求一次Logic观察，让后续回执驱动链继续；不更改地形驻留、过期意图检查或控制owner。回归覆盖暂停推进耗尽最后请求后resume的新观察及真实NPC移动/完成。
+
+## S4b 弓箭与权威投射物合同
+
+Classic 新增弓、箭、线、羽毛、燧石及其取得/合成入口；弓是不可堆叠耐久物品，发射必须持有弓与至少一支箭。投射物由 stdlib 每世界实例 owner 持有，记录稳定 projectile id、发射者、位置、速度、伤害、剩余寿命和逻辑 tick；客户端只提交发射意图和表现已提交快照，不负责命中或伤害。
+
+推进使用固定逻辑步长和稳定 id 顺序。每步先求从旧位置到新位置的连续线段，取最早的体素或存活 actor 命中；同距离时体素遮挡优先，不能穿墙伤害。actor 命中只经正式 vitals/armor 伤害入口提交一次，随后销毁；体素命中、超出寿命或离开有界世界同样销毁。非法方向、非有限数值、自己命中、无箭、旧 revision 与重复发射均拒绝且不扣物品/耐久。
+
+checkpoint 在同一 gameplay frontier 保存 projectile 高水位和全部在途投射物；恢复后继续推进，不重复扣箭或伤害，旧 projectile id 不重用。RED 覆盖缺箭原子拒绝、命中/遮挡/超时、稳定顺序、护甲减伤以及中途 checkpoint 恢复；GREEN 后再接 Classic pack、物品资源、Headless 合同和唯一浏览器回归。未实现浏览器瞄准/动画/音效时只记 Headless 部分完成，不把弓箭条目标为完整产品 PASS。

@@ -2,7 +2,7 @@ import type { NativeAsset } from './asset-types';
 import { palette, Sprite } from './pixel-sprite';
 import { foodSprite, type FoodSpriteKind } from './food-sprite';
 import { armorSprite, type ArmorSpriteKind } from './armor-sprite';
-import { utilitySprite, type UtilitySpriteKind } from './utility-sprite';
+import { isUtilitySpriteKind, utilitySprite, type UtilitySpriteKind } from './utility-sprite';
 
 function handle(sprite: Sprite) {
   sprite.rect(13, 7, 5, 23, 1);
@@ -457,7 +457,6 @@ export function pixelItemAssets(
   const textureId = `builtin:texture:${id}:detail`;
   const armorMaterial = material === 'wood' || material === 'stone' ? 'leather' : material;
   const armorKinds = ['armor-helmet', 'armor-chestplate', 'armor-leggings', 'armor-boots'];
-  const utilityKinds = ['bowl', 'bucket', 'shears', 'minecart', 'chest-minecart', 'furnace-minecart', 'boat'];
   return [
     {
       id: textureId,
@@ -474,8 +473,8 @@ export function pixelItemAssets(
             ? tool(kind, material)
             : armorKinds.includes(kind)
               ? armorSprite(kind as ArmorSpriteKind, armorMaterial)
-              : utilityKinds.includes(kind)
-                ? utilitySprite(kind as UtilitySpriteKind)
+              : isUtilitySpriteKind(kind)
+                ? utilitySprite(kind)
                 : resource(kind as Parameters<typeof resource>[0]),
       },
     },

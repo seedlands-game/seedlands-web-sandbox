@@ -46,13 +46,21 @@ export type ArmorItemCapability = Readonly<{
   slot: 'helmet' | 'chestplate' | 'leggings' | 'boots';
   points: number;
 }>;
+export type RangedItemCapability = Readonly<{
+  type: 'ranged';
+  ammunitionItemId: string;
+  damage: number;
+  speed: number;
+  lifetimeSeconds: number;
+}>;
 export type ItemCapability =
   | PlaceItemCapability
   | ConsumeItemCapability
   | MineItemCapability
   | MeleeItemCapability
   | TillItemCapability
-  | ArmorItemCapability;
+  | ArmorItemCapability
+  | RangedItemCapability;
 export type ItemCapabilityType = ItemCapability['type'];
 export type ItemCapabilityOf<Type extends ItemCapabilityType> = Extract<ItemCapability, { type: Type }>;
 
@@ -112,7 +120,7 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
   }
   const seen = new Set<ItemCapabilityType>();
   const capabilities = input.capabilities.map((source) => {
-    if (!['place', 'consume', 'mine', 'melee', 'till', 'armor'].includes(source.type))
+    if (!['place', 'consume', 'mine', 'melee', 'till', 'armor', 'ranged'].includes(source.type))
       throw new TypeError(`Item capability is invalid: ${input.id}`);
     if (seen.has(source.type)) throw new TypeError(`Duplicate ${source.type} capability: ${input.id}`);
     seen.add(source.type);
@@ -141,6 +149,17 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
         source.points <= 0)
     )
       throw new TypeError(`Armor capability is invalid: ${input.id}`);
+    if (
+      source.type === 'ranged' &&
+      (!isItemId(source.ammunitionItemId) ||
+        !Number.isFinite(source.damage) ||
+        source.damage <= 0 ||
+        !Number.isFinite(source.speed) ||
+        source.speed <= 0 ||
+        !Number.isFinite(source.lifetimeSeconds) ||
+        source.lifetimeSeconds <= 0)
+    )
+      throw new TypeError('Ranged capability is invalid: ' + input.id);
     return Object.freeze({ ...source });
   });
   const place = capabilities.find((value): value is PlaceItemCapability => value.type === 'place');
@@ -170,6 +189,13 @@ export function createItemDefinitionRegistry(
     if (melee && (!meleeDefinitionExists || !meleeDefinitionExists(melee.definitionId)))
       throw new TypeError(`Item ${input.id} references unknown melee definition: ${melee.definitionId}`);
     registered.set(input.id, definition);
+  }
+  for (const definition of registered.values()) {
+    const ranged = definition.capabilities.find(
+      (candidate): candidate is RangedItemCapability => candidate.type === 'ranged',
+    );
+    if (ranged && !registered.has(ranged.ammunitionItemId))
+      throw new TypeError('Item ' + definition.id + ' references unknown ammunition: ' + ranged.ammunitionItemId);
   }
   const values = Object.freeze([...registered.values()]);
   const require = (id: string) => {
