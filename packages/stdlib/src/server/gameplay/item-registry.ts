@@ -40,7 +40,9 @@ export type MineItemCapability = Readonly<{
   tier?: number;
 }>;
 export type MeleeItemCapability = Readonly<{ type: 'melee'; definitionId: string }>;
-export type ItemCapability = PlaceItemCapability | ConsumeItemCapability | MineItemCapability | MeleeItemCapability;
+export type TillItemCapability = Readonly<{ type: 'till' }>;
+export type ItemCapability =
+  PlaceItemCapability | ConsumeItemCapability | MineItemCapability | MeleeItemCapability | TillItemCapability;
 export type ItemCapabilityType = ItemCapability['type'];
 export type ItemCapabilityOf<Type extends ItemCapabilityType> = Extract<ItemCapability, { type: Type }>;
 
@@ -100,7 +102,7 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
   }
   const seen = new Set<ItemCapabilityType>();
   const capabilities = input.capabilities.map((source) => {
-    if (!['place', 'consume', 'mine', 'melee'].includes(source.type))
+    if (!['place', 'consume', 'mine', 'melee', 'till'].includes(source.type))
       throw new TypeError(`Item capability is invalid: ${input.id}`);
     if (seen.has(source.type)) throw new TypeError(`Duplicate ${source.type} capability: ${input.id}`);
     seen.add(source.type);

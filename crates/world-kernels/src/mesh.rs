@@ -78,6 +78,7 @@ fn material(id: u32, axis: i32, positive: bool) -> u32 {
         23 => 26,
         24 => 27,
         25 => 28,
+        26 => 29,
         _ => 255,
     }
 }

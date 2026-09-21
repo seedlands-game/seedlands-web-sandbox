@@ -155,6 +155,13 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'stone-bricks', count: 1 },
     replaceable: false,
   },
+  [26]: {
+    voxel: 26,
+    hardnessSeconds: 0.6,
+    preferredTool: 'shovel',
+    drop: { itemId: 'dirt-block', count: 1 },
+    replaceable: false,
+  },
   [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,

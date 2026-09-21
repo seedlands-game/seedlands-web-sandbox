@@ -48,6 +48,11 @@ export function itemVisualKind(itemId: string): ItemVisualKind {
       'iron-sword',
       'gold-sword',
       'diamond-sword',
+      'wood-hoe',
+      'stone-hoe',
+      'iron-hoe',
+      'gold-hoe',
+      'diamond-hoe',
     ].includes(itemId)
   )
     return { kind: 'stone-pickaxe' };

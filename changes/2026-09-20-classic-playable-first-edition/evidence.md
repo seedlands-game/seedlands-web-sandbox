@@ -94,3 +94,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：新增 food 物品 apple/bread/raw-porkchop/cooked-porkchop/raw-fish/cooked-fish 与 wheat 资源，healthRestore 分级（苹果4/面包5/熟猪排8/熟鱼5），受伤进食按 maxHealth 夹取、满血满饥饿拒绝；熔炉新增 cook-porkchop/cook-fish 配方（生→熟），面包由 3 小麦合成。acceptsPixelItem 扩含 'food'，新增原创像素图标（苹果/面包/肉排/鱼/小麦），raw-iron 图标改用 iron-ore 地形贴图修正缺失绑定。
 - 定向：food-chain 2、asset-workbench 4、item-visual-compatibility 3、gameplay-content-consumers 4 复跑 PASS；test:classic:headless 现 10 files/15 tests PASS。coverage 将 I-260/297/319/320/349/350 与 R-S07/R-S08 标 HEADLESS_PASS。饱食度/饥饿自然消耗仍关闭（Classic 保留），未做浏览器进食专项；金苹果/蛋糕/蘑菇煮等复合食物与农业生长链未实现。
 - S2f 完整浏览器旅程 PASS：runId 1995e310-9323-40c4-a2c4-0112754c4daa，C0–C5 全 PASS，约 2.0 分钟，sourceSha bc0673ac3ffef25cc8f3268f911d41040dd7c0fb，sourceDigest df8f604be564654aed535331901bc05384cbbfd705d3285281f89d6e8e8e8f61，artifactDigest 90dbe9dd44b3fb8343342a968a3546e20844073b00048d05263d2a90a3112eb9，HeadlessChrome/153、mute-audio，pageErrors/failedResponses 为空。新增食物物品与像素图标未使既有采集/建造/进食/NPC/保存旅程回归。verify:static:ci PASS（含新增 food-sprite/pixel-sprite 拆分，pixel-item-art 回落 500 行内）。
+
+## S5a 锄工具族与耕地
+
+- RED：classic-hoe-farmland.test.ts 断言锄工具族与 till 能力/Farmland 体素存在，`capability('till')` 与 Voxel.Farmland 缺失失败。
+- 实现后 GREEN：ItemCapability 增加 'till' 类型；新增木/石/铁/金/钻石锄（2 材料+2 木棍合成，耐久 60/132/250/32/1561），新增体素 Farmland=26 与材质 29（MATERIAL_LAYER_COUNT 29、terrainMaterials/textures 29）。till-policy 把泥土/草转耕地并耗 1 耐久、耐久归零移除，对石类与非锄工具明确拒绝。锄头像素刃模型、图标与 blockItems/farmland 地形贴图接入。
+- 定向：hoe-farmland 2、voxel-progression 4、item-visual-compatibility 3、asset-workbench 4、wasm-mesh-equivalence 6 复跑 PASS，Rust generation/mesh 指纹重建校验通过；test:classic:headless 现 11 files/17 tests PASS。coverage 将 B-060 耕地与 I-290..294 锄标 HEADLESS_PASS。作物种子/生长/收割状态机与浏览器耕作手势未实现，留待 S5b。

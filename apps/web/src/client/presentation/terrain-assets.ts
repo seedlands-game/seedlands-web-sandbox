@@ -42,6 +42,7 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.DiamondBlock, '钻石块', ['39a4ab', '6fced0', '20747e', 'b7efe6']],
   [FaceMaterial.Sandstone, '砂岩', ['c9b988', 'ddd0a0', 'a89966', 'efe6c2']],
   [FaceMaterial.StoneBricks, '石砖', ['6b7074', '858c90', '4c5155', 'a3aab0']],
+  [FaceMaterial.Farmland, '耕地', ['4d3722', '5c4026', '3a2917', '6f4f2e']],
 ];
 
 // First-party pixel sources are deterministic and independent of atlas layout.
@@ -122,6 +123,10 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
       const row = Math.floor(y / 4);
       const seam = y % 4 === 0 || (x + (row % 2) * 4) % 8 === 0;
       index = seam ? 3 : y % 4 === 1 ? 4 : noise < 9 ? 2 : 1;
+    }
+    if (face === FaceMaterial.Farmland) {
+      // Tilled soil: furrowed rows with a moist top rim.
+      index = y < 2 ? 4 : y % 4 === 0 ? 3 : noise < 8 ? 2 : 1;
     }
     return index;
   });
