@@ -65,3 +65,32 @@ it('只有非持久且未驯服实体在128格外清退', () => {
   expect(shouldDespawnActor({ persistent: true }, 999)).toBe(false);
   expect(shouldDespawnActor({ tamed: true }, 999)).toBe(false);
 });
+
+it('规则时钟每20秒只在已加载候选列周期刷新并恢复相位', () => {
+  const createWorld = () => {
+    const world = new GameplayRuntime({
+      ...classicOptions(),
+      platform: testCorePlatform,
+      environmentSeed: 42,
+      getWorldTime: () => 0,
+      getVoxel: ([, y]) => (y < 1 ? Voxel.Stone : Voxel.Air),
+      getLoadedVoxel: ([, y]) => (y < 1 ? Voxel.Stone : Voxel.Air),
+      biomeAt: () => 'plains',
+      prepareVoxelEdit: () => {
+        throw new Error('unexpected');
+      },
+    });
+    world.spawnPlayer({ id: 'player', position: [0, 1, 0] });
+    return world;
+  };
+  const first = createWorld();
+  first.advanceRules(19);
+  expect(first.simulation.queryActors()).toHaveLength(0);
+  const restored = createWorld();
+  restored.restoreSnapshot(first.createSnapshot());
+  restored.advanceRules(1);
+  expect(restored.simulation.queryActors()).toHaveLength(1);
+  expect(restored.content.actorProfiles.require(restored.simulation.queryActors()[0].archetype).disposition).toBe(
+    'hostile',
+  );
+});

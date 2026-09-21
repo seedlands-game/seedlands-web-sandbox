@@ -168,6 +168,7 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 
 - spawn-policy 以 seed/tick/position 哈希、亮度、距玩家、难度、群系和类别上限筛选并按权重稳定选择；hostile 在 peaceful 禁止且要求低光，passive 要求日间亮度，24 格内与达到上限拒绝。非持久且未驯服实体仅在玩家 128 格外允许清退。
 - classic-spawning 2 tests PASS，覆盖同输入稳定、hostile/passive 分流、peaceful/距离/上限负例及 persistent/tamed 豁免。当前 GameplayRuntime 缺统一光照/群系查询端口，未接自然刷新循环；M20 三项只记 PARTIAL_IMPLEMENTED / HEADLESS_PASS，待 S3 环境补端口后收口。
+- S4f 续作：Classic actor profile 现携带权重和群系，Gameplay 规则时钟每 20 秒从 seed/tick/player 派生排序候选列，仅通过 `getLoadedVoxel` 检查完整地表列后调用既有光照/难度/距离/类别上限策略；未提供加载查询的宿主不启用且不扫描世界。刷新相位和 tick 进入 Environment checkpoint，旧快照缺字段迁移为空；取整后候选半径收紧为 26–32，保证欧氏距离不越过 24 格门禁。classic-spawning 4 tests PASS，含 19 秒保存、恢复后 1 秒生成。
 
 ## S3c 既有水流证据补账
 

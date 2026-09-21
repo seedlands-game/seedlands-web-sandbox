@@ -476,6 +476,7 @@ export class GameplayRuntime {
       },
     });
     this.projectiles.advance(seconds);
+    this.environmentQueries.advanceNaturalSpawns(seconds);
     return result;
   }
 

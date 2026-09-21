@@ -7,6 +7,7 @@ import { saplingGrowthEdits } from '../../world/vegetation';
 import { dungeonLoot } from '../../world/dungeon-generation';
 import { Voxel } from '../../world/voxel';
 import type { EcsActorArchetype } from './ecs-entity-owner';
+import { isSolid } from '../../world/voxel';
 
 type Position = [number, number, number];
 export class GameplayEnvironmentFacade {
@@ -72,6 +73,45 @@ export class GameplayEnvironmentFacade {
     }
     this.runtime.environment.markDungeonChestOpened(chestId);
     return { success: true as const, loot };
+  }
+  advanceNaturalSpawns(seconds: number) {
+    if (!this.callbacks.getLoadedVoxel || !this.callbacks.biomeAt) return Object.freeze([]);
+    const candidates: SpawnCandidate[] = this.runtime.content.actorProfiles.list().flatMap((profile) =>
+      profile.disposition && profile.spawnWeight
+        ? [
+            {
+              archetype: profile.archetype,
+              disposition: profile.disposition,
+              weight: profile.spawnWeight,
+              biomes: profile.spawnBiomes,
+            },
+          ]
+        : [],
+    );
+    const spawned = [];
+    for (const tick of this.runtime.environment.advanceNaturalSpawnClock(seconds))
+      for (const player of this.runtime.queryEntities({ type: 'player' }).sort((a, b) => a.id.localeCompare(b.id))) {
+        const h = Math.imul((this.callbacks.environmentSeed ?? 0) ^ tick ^ player.id.length, 0x45d9f3b) >>> 0;
+        const radius = 26 + (h % 7),
+          angle = (((h >>> 8) % 360) * Math.PI) / 180;
+        const x = Math.floor(player.position[0] + Math.cos(angle) * radius);
+        const z = Math.floor(player.position[2] + Math.sin(angle) * radius);
+        let position: Position | null = null;
+        for (let y = Math.floor(player.position[1]) + 8; y >= Math.floor(player.position[1]) - 16; y--) {
+          const below = this.callbacks.getLoadedVoxel([x, y - 1, z]);
+          const feet = this.callbacks.getLoadedVoxel([x, y, z]);
+          const head = this.callbacks.getLoadedVoxel([x, y + 1, z]);
+          if (below === undefined || feet === undefined || head === undefined) break;
+          if (isSolid(below) && feet === Voxel.Air && head === Voxel.Air) {
+            position = [x, y, z];
+            break;
+          }
+        }
+        if (!position) continue;
+        const result = this.attemptNaturalSpawn(candidates, position, tick);
+        if (result.success) spawned.push(result.entity);
+      }
+    return Object.freeze(spawned);
   }
   growSapling(position: Position) {
     const edits = saplingGrowthEdits(position, (x, y, z) =>
