@@ -114,3 +114,7 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：新增 cave-generation.ts 确定性洞穴——V6 起在地表 4 格以下按 2x2x2 分组双哈希场相交掏空为 Air；V2–V5 逐字节冻结（V5 深层 chunk SHA-256 23048253… 不变）。GENERATOR_VERSION→6，SUPPORTED 扩到 [2..6]，Classic worldgen identity 升 6.0.0/g2-g6。Rust generation.rs 同步 cave_air 并在 column_voxel 掏空，TS/Rust/staged 三路逐字节一致。
 - 定向：cave-generation 4、precious-ore 2、legacy-generator-save 5（含 V6）、wasm world-kernel 4 + halo 2 + mesh 6、voxel-progression 4 复跑 PASS，Rust 指纹重建校验通过；test:classic:headless 12 files/20 tests PASS（scenario 升 V6）。coverage 将 M03-02 洞穴机制标 HEADLESS_PASS。洞穴连通性度量、地牢与液体填充留待 S3b。
 - S3a 完整浏览器旅程 PASS（V6 世界）：runId e1e06e29-90b7-4d64-8bd2-d68170890d55，scenario.generatorVersion=6，C0–C5 全 PASS，约 2.0 分钟，sourceSha e2e6e2416e3d2a3f17118f591d09cfafbe82618a，sourceDigest ae72b97a8f2eadf24e2077e84534b03a47d8cf67692a33865b30b8cee3a4726c，artifactDigest cce57b42cfe4f4109fade2aa4922258066228295bab22ee5cdf3a90e68559867，HeadlessChrome/153、mute-audio，pageErrors/failedResponses 为空。V6 洞穴与首屏 v6 标签未使既有采集/建造/NPC/保存旅程回归。verify:static:ci PASS。
+
+## S3b 矿脉分布度量
+
+- ore-vein-distribution.test.ts 以固定 seed 扫描表征既有 V5 矿脉：确认深度门槛（钻石 y<16 且表下≥12、金 y<32 且表下≥8、铁表下≥8、煤表下≥4）、生成次序（钻石/金优先于铁再煤）、稀有度递减（diamond<gold<iron<coal），浅层无矿；同参数 V5 与 V6 oreVoxel 输出一致（V6 洞穴不改矿脉分布）。3 tests PASS。coverage 将 M03-03 矿脉机制标 HEADLESS_PASS。这是对既有生成的确定性度量，非新算法；矿脉聚簇形态与真实 Beta 矿脉大小分布未逐一对齐。

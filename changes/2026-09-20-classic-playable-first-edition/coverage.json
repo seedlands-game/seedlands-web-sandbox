@@ -4210,10 +4210,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：矿脉种类、深度、密度、生成次序；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：矿脉种类、深度、密度、生成次序；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S3b矿脉分布度量：固定 seed 扫描确认深度门槛（钻石y<16&表下≥12、金y<32&表下≥8、铁≥8、煤≥4）、生成次序（钻>金>铁>煤）与稀有度递减，V5/V6 oreVoxel 一致（洞穴不改矿脉）；这是对既有 V5 生成的表征度量，非新算法。"
     },
     {
       "caseId": "M03-04",
