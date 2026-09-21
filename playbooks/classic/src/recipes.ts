@@ -50,11 +50,20 @@ const shovelTools: readonly Recipe[] = shovelTiers.map(([tier, material, durabil
   ],
   outputs: [{ itemId: tier + '-shovel', count: 1, instance: { durability } }],
 }));
+const hoeTools: readonly Recipe[] = shovelTiers.map(([tier, material, durability]) => ({
+  id: tier + '-hoe',
+  inputs: [
+    { itemId: material, count: 2 },
+    { itemId: 'stick', count: 2 },
+  ],
+  outputs: [{ itemId: tier + '-hoe', count: 1, instance: { durability } }],
+}));
 
 export const overworldRecipes: readonly Recipe[] = [
   ...resourceBlocks,
   ...meleeTools,
   ...shovelTools,
+  ...hoeTools,
   { id: 'sandstone', inputs: [{ itemId: 'sand-block', count: 4 }], outputs: [{ itemId: 'sandstone', count: 1 }] },
   {
     id: 'stone-bricks',

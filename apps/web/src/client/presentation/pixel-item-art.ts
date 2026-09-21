@@ -15,7 +15,10 @@ function handle(sprite: Sprite) {
   sprite.rect(14, 27, 3, 1, 14);
 }
 
-function tool(kind: 'pickaxe' | 'axe' | 'sword' | 'shovel', material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond') {
+function tool(
+  kind: 'pickaxe' | 'axe' | 'sword' | 'shovel' | 'hoe',
+  material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond',
+) {
   const sprite = new Sprite();
   const [dark, base, light, edge] =
     material === 'wood'
@@ -154,6 +157,33 @@ function tool(kind: 'pickaxe' | 'axe' | 'sword' | 'shovel', material: 'wood' | '
       sprite.rect(11, 5, 2, 8, light);
       sprite.rect(19, 5, 2, 8, dark);
       sprite.rect(13, 13, 6, 1, dark);
+    } else if (kind === 'hoe') {
+      // Angled blade on the shared handle: a right-angle head atop the shaft.
+      sprite.polygon(
+        [
+          [7, 3],
+          [21, 3],
+          [21, 8],
+          [16, 8],
+          [16, 6],
+          [7, 6],
+        ],
+        1,
+      );
+      sprite.polygon(
+        [
+          [8, 4],
+          [20, 4],
+          [20, 7],
+          [15, 7],
+          [15, 5],
+          [8, 5],
+        ],
+        base,
+      );
+      sprite.rect(8, 4, 12, 1, edge);
+      sprite.rect(8, 5, 1, 2, light);
+      sprite.rect(19, 5, 1, 2, dark);
     } else {
       sprite.polygon(
         [
@@ -401,6 +431,7 @@ export function pixelItemAssets(
     | 'axe'
     | 'sword'
     | 'shovel'
+    | 'hoe'
     | 'coal'
     | 'raw-iron'
     | 'iron-ingot'
@@ -429,7 +460,7 @@ export function pixelItemAssets(
         height: 32,
         palette: palette.map((color) => [...color]),
         pixels:
-          kind === 'axe' || kind === 'sword' || kind === 'pickaxe' || kind === 'shovel'
+          kind === 'axe' || kind === 'sword' || kind === 'pickaxe' || kind === 'shovel' || kind === 'hoe'
             ? tool(kind, material)
             : resource(kind),
       },

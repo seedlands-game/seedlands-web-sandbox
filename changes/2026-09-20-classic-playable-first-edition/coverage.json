@@ -685,10 +685,13 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Farmland"
+      "execution": "HEADLESS_PASS",
+      "name": "Farmland",
+      "note": "S5a锄工具族与耕地：木/石/铁/金/钻石锄由2材料2木棍合成，till能力把泥土/草转耕地(voxel26)并耗耐久，对石类/非锄拒绝；headless定向测试通过。作物生长链未实现。",
+      "seedlandsVoxelId": 26,
+      "source": "playbooks/classic/src/blocks.ts"
     },
     {
       "caseId": "B-061",
@@ -1453,50 +1456,55 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Wooden Hoe"
+      "execution": "HEADLESS_PASS",
+      "name": "Wooden Hoe",
+      "note": "S5a锄工具族与耕地：木/石/铁/金/钻石锄由2材料2木棍合成，till能力把泥土/草转耕地(voxel26)并耗耐久，对石类/非锄拒绝；headless定向测试通过。作物生长链未实现。"
     },
     {
       "caseId": "I-291",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Stone Hoe"
+      "execution": "HEADLESS_PASS",
+      "name": "Stone Hoe",
+      "note": "S5a锄工具族与耕地：木/石/铁/金/钻石锄由2材料2木棍合成，till能力把泥土/草转耕地(voxel26)并耗耐久，对石类/非锄拒绝；headless定向测试通过。作物生长链未实现。"
     },
     {
       "caseId": "I-292",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Iron Hoe"
+      "execution": "HEADLESS_PASS",
+      "name": "Iron Hoe",
+      "note": "S5a锄工具族与耕地：木/石/铁/金/钻石锄由2材料2木棍合成，till能力把泥土/草转耕地(voxel26)并耗耐久，对石类/非锄拒绝；headless定向测试通过。作物生长链未实现。"
     },
     {
       "caseId": "I-293",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Diamond Hoe"
+      "execution": "HEADLESS_PASS",
+      "name": "Diamond Hoe",
+      "note": "S5a锄工具族与耕地：木/石/铁/金/钻石锄由2材料2木棍合成，till能力把泥土/草转耕地(voxel26)并耗耐久，对石类/非锄拒绝；headless定向测试通过。作物生长链未实现。"
     },
     {
       "caseId": "I-294",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Gold Hoe"
+      "execution": "HEADLESS_PASS",
+      "name": "Gold Hoe",
+      "note": "S5a锄工具族与耕地：木/石/铁/金/钻石锄由2材料2木棍合成，till能力把泥土/草转耕地(voxel26)并耗耐久，对石类/非锄拒绝；headless定向测试通过。作物生长链未实现。"
     },
     {
       "caseId": "I-295",
