@@ -162,3 +162,8 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - ECS equipment 扩展四个 armor slot；旧 V4 缺字段恢复为空甲，新快照保存完整耐久实例。选中护甲与对应槽原子交换，护甲点进入 GameplayRuntime 正式伤害路径，成功受伤后各装备扣 1 耐久，归零移除。
 - 铁胸甲 6 点把 10 点伤害降到 7.6，snapshot 恢复后继续扣耐久并破损；创造模式免伤不磨损，非法伤害沿用旧失败结果，死亡目标拒绝重复伤害且护甲不变。armor 6 tests + snapshot migration 22 tests PASS；test:classic:headless 17 files / 39 tests PASS。
 - 静态门禁曾拒绝 ecs-actor-state 与 gameplay-runtime 超 500 行；通过抽取 ecs-actor-armor-state、player-break-action-codec、gameplay-survival-settings 和收敛 facade 解决，未增加豁免；verify:static:ci 最终 PASS。无敌帧、击退和装备 UI 仍留待 S4/S7。
+
+## S4f 确定性刷怪策略（部分完成）
+
+- spawn-policy 以 seed/tick/position 哈希、亮度、距玩家、难度、群系和类别上限筛选并按权重稳定选择；hostile 在 peaceful 禁止且要求低光，passive 要求日间亮度，24 格内与达到上限拒绝。非持久且未驯服实体仅在玩家 128 格外允许清退。
+- classic-spawning 2 tests PASS，覆盖同输入稳定、hostile/passive 分流、peaceful/距离/上限负例及 persistent/tamed 豁免。当前 GameplayRuntime 缺统一光照/群系查询端口，未接自然刷新循环；M20 三项只记 PARTIAL_IMPLEMENTED / HEADLESS_PASS，待 S3 环境补端口后收口。

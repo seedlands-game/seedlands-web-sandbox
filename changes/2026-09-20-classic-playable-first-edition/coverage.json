@@ -4814,9 +4814,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：被动/敌对刷怪条件：亮度、距离、群系、难度；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4824,9 +4824,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：物种权重、群组、数量上限与刷新节奏；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4834,9 +4834,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：消失/持久化、已驯服例外、区块睡眠；记录正例、失败例、tick 和 owner 状态。"
     },
     {
