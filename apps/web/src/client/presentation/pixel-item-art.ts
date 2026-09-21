@@ -259,7 +259,8 @@ function resource(
     | 'cooked-porkchop'
     | 'raw-fish'
     | 'cooked-fish'
-    | 'wheat',
+    | 'wheat'
+    | 'wheat-seeds',
 ) {
   if (
     kind === 'apple' ||
@@ -268,7 +269,8 @@ function resource(
     kind === 'cooked-porkchop' ||
     kind === 'raw-fish' ||
     kind === 'cooked-fish' ||
-    kind === 'wheat'
+    kind === 'wheat' ||
+    kind === 'wheat-seeds'
   )
     return foodSprite(kind satisfies FoodSpriteKind);
   const sprite = new Sprite();
@@ -444,7 +446,8 @@ export function pixelItemAssets(
     | 'cooked-porkchop'
     | 'raw-fish'
     | 'cooked-fish'
-    | 'wheat',
+    | 'wheat'
+    | 'wheat-seeds',
   material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond' = 'wood',
 ): NativeAsset[] {
   const textureId = `builtin:texture:${id}:detail`;

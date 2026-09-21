@@ -1,7 +1,7 @@
 import { Sprite } from './pixel-sprite';
 
 export type FoodSpriteKind =
-  'apple' | 'bread' | 'raw-porkchop' | 'cooked-porkchop' | 'raw-fish' | 'cooked-fish' | 'wheat';
+  'apple' | 'bread' | 'raw-porkchop' | 'cooked-porkchop' | 'raw-fish' | 'cooked-fish' | 'wheat' | 'wheat-seeds';
 
 /** First-party 32px food sprites; palette indices match the shared item ramp. */
 export function foodSprite(kind: FoodSpriteKind): number[] {
@@ -129,6 +129,22 @@ export function foodSprite(kind: FoodSpriteKind): number[] {
     );
     sprite.put(11, 15, 1);
     sprite.rect(14, 14, 6, 1, 11);
+    return sprite.pixels;
+  }
+  if (kind === 'wheat-seeds') {
+    // Scattered seed grains with husk flecks.
+    for (const [x, y] of [
+      [10, 12],
+      [15, 9],
+      [20, 13],
+      [13, 18],
+      [19, 19],
+      [16, 15],
+    ] as const) {
+      sprite.rect(x, y, 3, 2, 6);
+      sprite.put(x, y, 14);
+      sprite.put(x + 2, y + 1, 3);
+    }
     return sprite.pixels;
   }
   // wheat

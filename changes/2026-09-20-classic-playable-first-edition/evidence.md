@@ -101,3 +101,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：ItemCapability 增加 'till' 类型；新增木/石/铁/金/钻石锄（2 材料+2 木棍合成，耐久 60/132/250/32/1561），新增体素 Farmland=26 与材质 29（MATERIAL_LAYER_COUNT 29、terrainMaterials/textures 29）。till-policy 把泥土/草转耕地并耗 1 耐久、耐久归零移除，对石类与非锄工具明确拒绝。锄头像素刃模型、图标与 blockItems/farmland 地形贴图接入。
 - 定向：hoe-farmland 2、voxel-progression 4、item-visual-compatibility 3、asset-workbench 4、wasm-mesh-equivalence 6 复跑 PASS，Rust generation/mesh 指纹重建校验通过；test:classic:headless 现 11 files/17 tests PASS。coverage 将 B-060 耕地与 I-290..294 锄标 HEADLESS_PASS。作物种子/生长/收割状态机与浏览器耕作手势未实现，留待 S5b。
 - S5a 完整浏览器旅程 PASS：runId 690309ae-2580-4909-9b27-5d49d9902541，C0–C5 全 PASS，约 1.9 分钟，sourceSha 447c027a57d202c4b70cc7a85a89bba220d5fad8，sourceDigest 131a49da841ca29aae30a8a9dccef41277bcd53a8e29412fb337c46207a281e2，artifactDigest db6ef1f933e07ad7e97c99bde9f09f8ff72c49313d382eee6e6445b635244214，HeadlessChrome/153、mute-audio，pageErrors/failedResponses 为空。新增锄工具族与耕地体素、29 层材质未使既有旅程回归。verify:static:ci PASS。
+
+## S5b 作物种植与生长收割
+
+- RED：classic-crop-growth.test.ts 断言小麦种子内容、种植/分阶段生长/收割存在，crop-growth-policy 缺失导入失败。
+- 实现后 GREEN：新增 wheat-seeds 内容与像素图标；crop-growth-policy 定义八阶段确定性状态机——种子只种耕地(Voxel.Farmland)，按 secondsPerStage 分阶段生长且累计余量、封顶成熟阶段 7；成熟收割产 wheat+wheat-seeds，未成熟只回收种子，非法阶段/非耕地明确拒绝。
+- 定向：crop-growth 3、asset-workbench 4、item-visual-compatibility 3 复跑 PASS；test:classic:headless 现 12 files/20 tests PASS。coverage 将 B-059 小麦作物、I-295 种子、I-296 小麦、M23-02 生长机制标 HEADLESS_PASS。作物尚未接入体素渲染与浏览器真实耕作/播种/收割手势，自然种子掉落（破坏草）未接；这些留待后续 S5c 与体素作物阶段。verify:static:ci PASS。

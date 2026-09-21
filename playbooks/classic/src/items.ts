@@ -94,6 +94,7 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
     capabilities: [{ type: 'consume', healthRestore: 5, hungerRestore: 5 }],
   },
   { id: 'wheat', name: '小麦', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  { id: 'wheat-seeds', name: '小麦种子', itemType: 'resource', stackLimit: 64, capabilities: [] },
   {
     id: 'plank',
     name: '木板',
