@@ -89,6 +89,23 @@ export const overworldRecipes: readonly Recipe[] = [
   { id: 'clay-block', inputs: [{ itemId: 'clay', count: 4 }], outputs: [{ itemId: 'clay-block', count: 1 }] },
   { id: 'snow-block', inputs: [{ itemId: 'snowball', count: 4 }], outputs: [{ itemId: 'snow-block', count: 1 }] },
   { id: 'lapis-block', inputs: [{ itemId: 'blue-dye', count: 9 }], outputs: [{ itemId: 'lapis-block', count: 1 }] },
+  { id: 'slab', inputs: [{ itemId: 'stone-block', count: 3 }], outputs: [{ itemId: 'slab', count: 6 }] },
+  { id: 'wood-stairs', inputs: [{ itemId: 'plank', count: 6 }], outputs: [{ itemId: 'wood-stairs', count: 4 }] },
+  {
+    id: 'cobblestone-stairs',
+    inputs: [{ itemId: 'cobblestone', count: 6 }],
+    outputs: [{ itemId: 'cobblestone-stairs', count: 4 }],
+  },
+  { id: 'ladder', inputs: [{ itemId: 'stick', count: 7 }], outputs: [{ itemId: 'ladder', count: 3 }] },
+  {
+    id: 'torch',
+    inputs: [
+      { itemId: 'coal', count: 1 },
+      { itemId: 'stick', count: 1 },
+    ],
+    outputs: [{ itemId: 'torch', count: 4 }],
+  },
+  { id: 'fence', inputs: [{ itemId: 'stick', count: 6 }], outputs: [{ itemId: 'fence', count: 2 }] },
   {
     id: 'lapis-block-unpack',
     inputs: [{ itemId: 'lapis-block', count: 1 }],

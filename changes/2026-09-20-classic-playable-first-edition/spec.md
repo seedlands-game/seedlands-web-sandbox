@@ -119,6 +119,12 @@ Rail、PoweredRail、DetectorRail 使用追加稳定体素，不改变 V8 程序
 
 补齐纸、书、羊毛、画、金苹果、告示牌、木门、糖、蛋糕与曲奇的资源守恒配方。当前 RecipeRegistry 只表达无形状材料集合，因此只声明材料/数量/输出正确和失败不消耗，不宣称镜像、平移或错误摆位等有形配方等价；该差异保留在覆盖账。唱片、鞍、雪球、红石、黏土等战利品或自然取得物不伪造合成配方。
 
+## S1a 非整格结构方块合同
+
+半砖、木/圆石楼梯、木门、梯子、火把、床、告示牌、栅栏和蛋糕使用追加稳定 voxel id，不改变 V9 生成。每种方块由共享 voxel-model 提供有界局部模型盒与碰撞盒；薄片、立柱和半高方块不得遮挡整面。默认无元数据方向时使用稳定朝向，当前单值 voxel 存储无法表达门上下半、开合或旋转状态，这些状态化细节不宣称完成。
+
+TS mesher 与浏览器模型路径消费同一 modelBoxesForVoxel；Rust descriptor kernel 对所有模型方块输出通用 model record，不仅硬编码灯笼。RED 覆盖各结构的非整格 AABB、碰撞/遮挡和 mesh 材质闭包；Web/Rust 描述符必须逐字节等价。
+
 ## S3d 熔岩与流体混合合同
 
 追加稳定 Voxel.Lava 与 Voxel.Obsidian，不重排旧 palette，旧 generatorVersion 字节不变。流体种类由 voxel id 表示，既有 Uint8 sidecar 继续只保存 source bit 与 level 1–8，因此旧水存档无需迁移。水与熔岩接触的候选按坐标稳定排序：熔岩源变黑曜石，流动熔岩变圆石；同一批多邻居不能重复写。传播与混合必须使用 Authority read-set/expected cell 校验，旧 epoch、stale chunk 或未知边界不提交。

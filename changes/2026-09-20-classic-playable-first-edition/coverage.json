@@ -506,20 +506,22 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Double Slab"
+      "execution": "HEADLESS_PASS",
+      "name": "Double Slab",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-044",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Slab"
+      "execution": "HEADLESS_PASS",
+      "name": "Slab",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-045",
@@ -606,10 +608,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Wooden Stairs"
+      "execution": "HEADLESS_PASS",
+      "name": "Wooden Stairs",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-054",
@@ -729,60 +732,66 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Sign (standing)"
+      "execution": "HEADLESS_PASS",
+      "name": "Sign (standing)",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-064",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Wooden Door"
+      "execution": "HEADLESS_PASS",
+      "name": "Wooden Door",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-065",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Ladder"
+      "execution": "HEADLESS_PASS",
+      "name": "Ladder",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-066",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Rail"
+      "execution": "HEADLESS_PASS",
+      "name": "Rail",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-067",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Cobblestone Stairs"
+      "execution": "HEADLESS_PASS",
+      "name": "Cobblestone Stairs",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-068",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Sign (wall)"
+      "execution": "HEADLESS_PASS",
+      "name": "Sign (wall)",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-069",
@@ -959,10 +968,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Fence"
+      "execution": "HEADLESS_PASS",
+      "name": "Fence",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-086",
@@ -1033,10 +1043,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Cake"
+      "execution": "HEADLESS_PASS",
+      "name": "Cake",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "B-093",
@@ -1839,7 +1850,7 @@
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
       "execution": "HEADLESS_PASS",
       "name": "Sign",
-      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "I-324",
@@ -1850,7 +1861,7 @@
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
       "execution": "HEADLESS_PASS",
       "name": "Wooden Door",
-      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "I-325",
@@ -2180,7 +2191,7 @@
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
       "execution": "HEADLESS_PASS",
       "name": "Cake",
-      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "I-355",
@@ -2694,20 +2705,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 圆石半砖 ← 圆石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 圆石半砖 ← 圆石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D14",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 石半砖 ← 石头；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 石半砖 ← 石头；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D15",
@@ -2734,10 +2747,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 梯子 ← 木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 梯子 ← 木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D18",
@@ -2748,7 +2762,7 @@
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
       "execution": "HEADLESS_PASS",
       "name": "按登记输入在 2×2 或 3×3 网格合成 木门 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
-      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D19",
@@ -2780,7 +2794,7 @@
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
       "execution": "HEADLESS_PASS",
       "name": "按登记输入在 2×2 或 3×3 网格合成 告示牌 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。",
-      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D22",
@@ -2791,7 +2805,7 @@
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
       "execution": "HEADLESS_PASS",
       "name": "按登记输入在 2×2 或 3×3 网格合成 蛋糕 ← 奶+糖+蛋+小麦；检查产出、消耗、镜像/平移和错误排列。",
-      "note": "Classic 内容/配方注册、资源守恒或对应运行时行为已由当前定向测试覆盖；有形配方摆位与专属浏览器表现仍按差异账保留。"
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D23",
@@ -2829,10 +2843,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 火把 ← 煤炭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 火把 ← 煤炭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D27",
@@ -2980,10 +2995,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木楼梯 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木楼梯 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D41",
@@ -3001,10 +3017,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 圆石楼梯 ← 圆石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 圆石楼梯 ← 圆石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "R-D43",
@@ -4433,30 +4450,33 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：非整格 AABB、选择/破坏射线与遮挡；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：非整格 AABB、选择/破坏射线与遮挡；记录正例、失败例、tick 和 owner 状态。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "M07-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：楼梯、半砖、门、床、牌、轨碰撞/朝向；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：楼梯、半砖、门、床、牌、轨碰撞/朝向；记录正例、失败例、tick 和 owner 状态。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "M07-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：透明、透光、液体、树叶与面剔除规则；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：透明、透光、液体、树叶与面剔除规则；记录正例、失败例、tick 和 owner 状态。",
+      "note": "追加稳定结构体素与共享局部模型/碰撞盒已接入，TS 与 Rust/Wasm 通用模型描述符等价通过；方向、开合、多格和专属交互仍按差异账保留。"
     },
     {
       "caseId": "M08-01",

@@ -9,6 +9,41 @@ export type VoxelModelBox = LocalBox & Readonly<{ material: FaceMaterialId }>;
 
 const FULL_BOX: LocalBox = { min: [0, 0, 0], max: [1, 1, 1] };
 const LANTERN_COLLISION: LocalBox = { min: [0.25, 0, 0.25], max: [0.75, 0.94, 0.75] };
+const box = (min: LocalBox['min'], max: LocalBox['max'], material: FaceMaterialId): VoxelModelBox => ({
+  min,
+  max,
+  material,
+});
+const models = new Map<number, readonly VoxelModelBox[]>([
+  [Voxel.Rail, [box([0, 0, 0], [1, 0.08, 1], FaceMaterial.Rail)]],
+  [Voxel.PoweredRail, [box([0, 0, 0], [1, 0.08, 1], FaceMaterial.PoweredRail)]],
+  [Voxel.DetectorRail, [box([0, 0, 0], [1, 0.08, 1], FaceMaterial.DetectorRail)]],
+  [Voxel.Slab, [box([0, 0, 0], [1, 0.5, 1], FaceMaterial.Slab)]],
+  [
+    Voxel.WoodStairs,
+    [box([0, 0, 0], [1, 0.5, 1], FaceMaterial.WoodStairs), box([0, 0.5, 0.5], [1, 1, 1], FaceMaterial.WoodStairs)],
+  ],
+  [
+    Voxel.CobblestoneStairs,
+    [
+      box([0, 0, 0], [1, 0.5, 1], FaceMaterial.CobblestoneStairs),
+      box([0, 0.5, 0.5], [1, 1, 1], FaceMaterial.CobblestoneStairs),
+    ],
+  ],
+  [Voxel.WoodenDoor, [box([0, 0, 0.44], [1, 1, 0.56], FaceMaterial.WoodenDoor)]],
+  [Voxel.Ladder, [box([0, 0, 0.88], [1, 1, 1], FaceMaterial.Ladder)]],
+  [Voxel.Torch, [box([0.43, 0, 0.43], [0.57, 0.72, 0.57], FaceMaterial.Torch)]],
+  [Voxel.Bed, [box([0, 0, 0], [1, 0.56, 1], FaceMaterial.Bed)]],
+  [
+    Voxel.Sign,
+    [
+      box([0.08, 0.48, 0.45], [0.92, 0.95, 0.55], FaceMaterial.Sign),
+      box([0.46, 0, 0.46], [0.54, 0.5, 0.54], FaceMaterial.Sign),
+    ],
+  ],
+  [Voxel.Fence, [box([0.38, 0, 0.38], [0.62, 1, 0.62], FaceMaterial.Fence)]],
+  [Voxel.Cake, [box([0.06, 0, 0.06], [0.94, 0.5, 0.94], FaceMaterial.Cake)]],
+]);
 
 const lanternModel: readonly VoxelModelBox[] = [
   { min: [0.22, 0, 0.22], max: [0.78, 0.12, 0.78], material: FaceMaterial.LanternFrame },
@@ -24,14 +59,19 @@ const lanternModel: readonly VoxelModelBox[] = [
 ] as const;
 
 export function modelBoxesForVoxel(voxel: number): readonly VoxelModelBox[] {
-  return voxel === Voxel.Lantern ? lanternModel : [];
+  return voxel === Voxel.Lantern ? lanternModel : (models.get(voxel) ?? []);
 }
 
 export function collisionBoxesForVoxel(voxel: number): readonly LocalBox[] {
   if (!isSolid(voxel)) return [];
-  return voxel === Voxel.Lantern ? [LANTERN_COLLISION] : [FULL_BOX];
+  if (voxel === Voxel.Ladder || voxel === Voxel.Torch || voxel === Voxel.Sign) return [];
+  return voxel === Voxel.Lantern
+    ? [LANTERN_COLLISION]
+    : (models.get(voxel)?.map(({ min, max }) => ({ min, max })) ?? [FULL_BOX]);
 }
 
 export function voxelOccludesFullFace(voxel: number): boolean {
-  return isSolid(voxel) && voxel !== Voxel.Lantern && voxel !== Voxel.Glass && voxel !== Voxel.Ice;
+  return (
+    isSolid(voxel) && voxel !== Voxel.Lantern && voxel !== Voxel.Glass && voxel !== Voxel.Ice && !models.has(voxel)
+  );
 }

@@ -22,7 +22,7 @@ describe('统一资产目录与有界适配', () => {
     expect(assetAdapter('builtin-item-model').editable).toBe(false);
     expect(assetAdapter('extruded-pixel-model').editable).toBe(true);
     for (const item of listItemDefinitions()) {
-      expect(acceptsPixelItem(item)).toBe(
+      expect(acceptsPixelItem(item), item.id).toBe(
         ['tool', 'resource', 'food', 'armor'].includes(item.itemType) && item.placesVoxel === undefined,
       );
     }

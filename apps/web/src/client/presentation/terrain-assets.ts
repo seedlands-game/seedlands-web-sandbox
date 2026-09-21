@@ -1,4 +1,5 @@
-import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { faceMaterialNames } from '@seedlands/stdlib/world/face-material-names';
 import type { PixelTexture, Rgb } from './asset-types';
 
 export type TerrainMaterial = {
@@ -65,6 +66,16 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Ice, '冰', ['7fb4ce', 'afd7e6', '558ca9', 'd9f0f5']],
   [FaceMaterial.SnowBlock, '雪块', ['dbe7e5', 'f4f8f4', 'bdcfcc', 'ffffff']],
   [FaceMaterial.LapisBlock, '青金石块', ['17349a', '2854ca', '0b1d65', '5e82df']],
+  [FaceMaterial.Slab, '半砖', ['737c7b', '8a9290', '5d6667', 'a0a59a']],
+  [FaceMaterial.WoodStairs, '木楼梯', ['aa794a', 'bf905e', '725033', 'd2a675']],
+  [FaceMaterial.CobblestoneStairs, '圆石楼梯', ['65706d', '87928a', '424c4a', 'a8afa3']],
+  [FaceMaterial.WoodenDoor, '木门', ['75461f', 'a36b32', '4e2e18', 'cf9954']],
+  [FaceMaterial.Ladder, '梯子', ['805326', 'b78343', '553416', 'd2a568']],
+  [FaceMaterial.Torch, '火把', ['8b5526', 'f59c32', 'ffd266', '5b351b']],
+  [FaceMaterial.Bed, '床', ['9d2424', 'd94a42', 'eee5d0', '6c1b1b']],
+  [FaceMaterial.Sign, '告示牌', ['98703e', 'c79858', '65431f', 'e0bd77']],
+  [FaceMaterial.Fence, '栅栏', ['7d532a', 'ae7d42', '513317', 'd0a061']],
+  [FaceMaterial.Cake, '蛋糕', ['d4b58c', 'f3e2c3', '9b5f42', 'ffffff']],
 ];
 const plantMaterials = new Set<number>([
   FaceMaterial.Sapling,

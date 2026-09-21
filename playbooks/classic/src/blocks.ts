@@ -283,6 +283,25 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'lapis-block', count: 1 },
     replaceable: false,
   },
+  ...Object.fromEntries(
+    (
+      [
+        [49, 'slab'],
+        [50, 'wood-stairs'],
+        [51, 'cobblestone-stairs'],
+        [52, 'wooden-door'],
+        [53, 'ladder'],
+        [54, 'torch'],
+        [55, 'bed'],
+        [56, 'sign'],
+        [57, 'fence'],
+        [58, 'cake'],
+      ] as const
+    ).map(([voxel, itemId]) => [
+      voxel,
+      { voxel, hardnessSeconds: 0.7, preferredTool: null, drop: { itemId, count: 1 }, replaceable: false },
+    ]),
+  ),
   [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,
