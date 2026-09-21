@@ -73,6 +73,14 @@ it('新增物品图标使用已注册像素，不请求不存在的静态PNG', (
     'diamond',
     'gold-pickaxe',
     'diamond-pickaxe',
+    'stone-axe',
+    'iron-axe',
+    'gold-axe',
+    'diamond-axe',
+    'stone-sword',
+    'iron-sword',
+    'gold-sword',
+    'diamond-sword',
   ]) {
     expect(itemIconUrl(id, '/')).toMatch(/^data:image\/svg\+xml,/);
   }

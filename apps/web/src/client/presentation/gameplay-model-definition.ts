@@ -2,7 +2,7 @@ export type HeldAction = 'idle' | 'mine' | 'attack' | 'place' | 'eat';
 
 export type ItemVisualKind =
   | Readonly<{ kind: 'voxel-block'; faces: 6 }>
-  | Readonly<{ kind: 'lantern' | 'berry-cluster' | 'plank' | 'wood-axe' | 'stone-pickaxe' }>;
+  | Readonly<{ kind: 'lantern' | 'berry-cluster' | 'plank' | 'wood-axe' | 'stone-pickaxe' | 'wood-sword' }>;
 
 const blockItems = new Set([
   'dirt-block',

@@ -9,8 +9,35 @@ const resourceBlocks: readonly Recipe[] = [
   { id: block + '-unpack', inputs: [{ itemId: block, count: 1 }], outputs: [{ itemId: material, count: 9 }] },
 ]);
 
+const toolTiers: readonly [string, string][] = [
+  ['stone', 'cobblestone'],
+  ['iron', 'iron-ingot'],
+  ['gold', 'gold-ingot'],
+  ['diamond', 'diamond'],
+];
+const toolDurability: Record<string, number> = { stone: 132, iron: 250, gold: 32, diamond: 1561 };
+const meleeTools: readonly Recipe[] = toolTiers.flatMap(([tier, material]) => [
+  {
+    id: tier + '-axe',
+    inputs: [
+      { itemId: material, count: 3 },
+      { itemId: 'stick', count: 2 },
+    ],
+    outputs: [{ itemId: tier + '-axe', count: 1, instance: { durability: toolDurability[tier] } }],
+  },
+  {
+    id: tier + '-sword',
+    inputs: [
+      { itemId: material, count: 2 },
+      { itemId: 'stick', count: 1 },
+    ],
+    outputs: [{ itemId: tier + '-sword', count: 1, instance: { durability: toolDurability[tier] } }],
+  },
+]);
+
 export const overworldRecipes: readonly Recipe[] = [
   ...resourceBlocks,
+  ...meleeTools,
   { id: 'planks', inputs: [{ itemId: 'wood-block', count: 1 }], outputs: [{ itemId: 'plank', count: 4 }] },
   { id: 'sticks', inputs: [{ itemId: 'plank', count: 2 }], outputs: [{ itemId: 'stick', count: 4 }] },
   {

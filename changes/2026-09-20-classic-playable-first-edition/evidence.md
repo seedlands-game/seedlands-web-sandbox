@@ -66,3 +66,10 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - S2b 定向回归复跑 PASS：precious-ore-generation 2 + legacy-generator-save 4、classic-precious-tools 2、stored-world-selection 2、overworld-progression-journey 1（Headless 从有限原料到铁器+金钻工具与建造，含储物与半程恢复，29.8s）；wasm world-kernel 4 + mesh 6 + halo 2 + voxel-progression 4（四生成版本逐字节一致 16 tests）；item-visual-compatibility 3 + voxel-render-pipeline 2。
 - V5 完整生产旅程 PASS：runId 89cca217-24b4-4058-87e7-ba3b5037fd20，C0–C5 全 PASS，约 1.9 分钟，新增第 8 步“V5金钻资源目录与真实钻石块建造”通过——真实拆玻璃后 Shift 右键放置 voxel 23（钻石块），并核对创造目录中金矿石/钻石矿石/铁块/金块/钻石块/金锭/钻石/金镐/钻石镐图标 naturalWidth>0。scenario.generatorVersion=5，sourceSha 638f389011c7c8666d59fdadace2d44a131629b0，sourceDigest bd8368f116269f1e93e84dbd1cbeaf45ca0b1baa73d78ba93854d9551be4c400，artifactDigest 89ad9cd97b6ebd35f68dc2517cf6977f8805c41cbc526d5fa5a90306999bb08a。HeadlessChrome/153、960×540、mute-audio，pageErrors/failedResponses 为空。
 - S2b verify:static:ci PASS（格式含新增 stored-world-selection 测试、路径、Lint、全仓 typecheck、ESLint 边界 66 tests、CI 选择 8 tests）。全量 S3/S4–S7 环境、全部生物、农业、运输仍未完成。
+
+## S2c 工具矩阵（斧/剑分级）
+
+- RED：classic-tool-matrix.test.ts 断言 stone/iron/gold/diamond 斧与剑存在，`Unknown item: diamond-axe` 失败 3/3。
+- 实现后 GREEN：斧（tier2/3/1/4，multiplier4/6/12/8，耐久132/250/32/1561）由 3 材料+2 木棍工作台合成，剑（melee 分级伤害 6/7/5/8 与二段 +2）由 2 材料+1 木棍合成；工具矩阵 3 tests、item-visual-compatibility 扩充图标 3 tests 全绿。
+- test:classic:headless 现 7 files/10 tests PASS（含既有铁器/金钻成长、木板、食物、木棍与新工具矩阵）；gameplay-content-consumers 4 + registered-content 2 + gameplay-registered-combat 19 复跑 PASS，melee 注册未破坏。
+- 生产构建 PASS：sourceSha ac377dd6f5ec59d918a33de74c5ac8d7873be7f8，sourceDigest 1bf7229485d54f6ec1751c1f9a871ef9caacad7a699eea07e07be563a81043ba，artifactDigest d45db8dd5bd051168c4ac6ab02d4a456b639394b413ee4baf87ea5befb1f9e61。coverage 将 I-258/267/272/275/276/279/283/286 标为 HEADLESS_PASS。斧/剑未做浏览器专项手势，仍非全量 Beta 附魔/合成变体等价；S3–S7 缺项继续保留。
