@@ -28,6 +28,7 @@ import { DifficultyRuntime, type DifficultyCheckpoint } from './difficulty-runti
 import { EnvironmentRuntime, type EnvironmentCheckpoint } from './environment-runtime';
 import { createProjectileRuntime, type ProjectileCheckpoint } from './projectile-runtime';
 import { validateLifeSkillsCheckpoint, type LifeSkillsCheckpoint } from './life-skills-runtime';
+import { validateVehicleCheckpoint, type VehicleCheckpoint } from './vehicle-runtime';
 
 type Position = [number, number, number];
 
@@ -69,6 +70,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   environment?: EnvironmentCheckpoint;
   projectiles?: ProjectileCheckpoint;
   lifeSkills?: LifeSkillsCheckpoint;
+  vehicles?: VehicleCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -88,6 +90,7 @@ export const createGameplaySnapshotV4 = (
   environment?: EnvironmentCheckpoint,
   projectiles?: ProjectileCheckpoint,
   lifeSkills?: LifeSkillsCheckpoint,
+  vehicles?: VehicleCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -109,6 +112,7 @@ export const createGameplaySnapshotV4 = (
       }
     : {}),
   ...(lifeSkills ? { lifeSkills: validateLifeSkillsCheckpoint(lifeSkills) } : {}),
+  ...(vehicles ? { vehicles: validateVehicleCheckpoint(vehicles) } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 
@@ -465,6 +469,8 @@ export function validateGameplaySnapshot(
             source.projectiles,
           ).checkpoint()
         : undefined,
+      source.version === 4 && source.lifeSkills ? validateLifeSkillsCheckpoint(source.lifeSkills) : undefined,
+      source.version === 4 && source.vehicles ? validateVehicleCheckpoint(source.vehicles) : undefined,
     );
     if (options.registeredNeeds && sourceVersion < 4) {
       const phase =

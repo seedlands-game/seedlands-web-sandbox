@@ -55,6 +55,9 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Cactus, '仙人掌', ['286a38', '3e8a49', '6aac59', '174e2c']],
   [FaceMaterial.Spawner, '刷怪笼', ['202629', '384348', '0d1113', '5b676c', '7b2c36']],
   [FaceMaterial.DungeonChest, '地牢战利品箱', ['61401f', '93612c', '302214', 'd29a45', 'b7c3c5']],
+  [FaceMaterial.Rail, '铁轨', ['42484a', '899194', 'bd8040', 'd5dcde']],
+  [FaceMaterial.PoweredRail, '动力铁轨', ['5d301b', 'd49228', 'f2c84b', '8e1f16']],
+  [FaceMaterial.DetectorRail, '探测铁轨', ['5f4328', 'b87832', 'd5b05a', '70321f']],
 ];
 const plantMaterials = new Set<number>([
   FaceMaterial.Sapling,
@@ -157,6 +160,10 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     if (face === FaceMaterial.DungeonChest) {
       index = y === 6 || x === 1 || x === 14 ? 3 : noise < 8 ? 2 : 1;
       if (x >= 6 && x <= 9 && y >= 5 && y <= 9) index = x === 6 || y === 9 ? 5 : 4;
+    }
+    if ([FaceMaterial.Rail, FaceMaterial.PoweredRail, FaceMaterial.DetectorRail].includes(face as 42 | 43 | 44)) {
+      index = x < 3 || x > 12 ? 2 : x === 7 || x === 8 ? 3 : 0;
+      if (face !== FaceMaterial.Rail && y % 5 === 0 && x > 3 && x < 12) index = 4;
     }
     return index;
   });

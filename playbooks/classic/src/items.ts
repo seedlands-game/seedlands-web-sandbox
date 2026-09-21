@@ -400,6 +400,21 @@ export const overworldItems: readonly ItemDefinitionInput[] = [
   { id: 'milk-bucket', name: '奶桶', itemType: 'food', stackLimit: 1, capabilities: [] },
   { id: 'egg', name: '鸡蛋', itemType: 'resource', stackLimit: 16, capabilities: [] },
   { id: 'fishing-rod', name: '钓鱼竿', itemType: 'tool', stackLimit: 1, durability: { max: 65 }, capabilities: [] },
+  { id: 'rail', name: '铁轨', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 39 }] },
+  {
+    id: 'powered-rail',
+    name: '动力铁轨',
+    itemType: 'block',
+    stackLimit: 64,
+    capabilities: [{ type: 'place', voxel: 40 }],
+  },
+  {
+    id: 'detector-rail',
+    name: '探测铁轨',
+    itemType: 'block',
+    stackLimit: 64,
+    capabilities: [{ type: 'place', voxel: 41 }],
+  },
   {
     id: 'lava-bucket',
     name: '熔岩桶',

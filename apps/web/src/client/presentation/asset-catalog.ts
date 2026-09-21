@@ -68,6 +68,9 @@ const items = [
   ['mushroom', '蘑菇'],
   ['sugar-cane', '甘蔗'],
   ['cactus', '仙人掌'],
+  ['rail', '铁轨'],
+  ['powered-rail', '动力铁轨'],
+  ['detector-rail', '探测铁轨'],
   ['leather-helmet', '皮革头盔'],
   ['leather-chestplate', '皮革胸甲'],
   ['leather-leggings', '皮革护腿'],
@@ -207,6 +210,9 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
                 'mushroom',
                 'sugar-cane',
                 'cactus',
+                'rail',
+                'powered-rail',
+                'detector-rail',
               ].includes(itemId)
             ? 'seedlands:texture/terrain/' + itemId
             : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,

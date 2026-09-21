@@ -52,10 +52,13 @@ export const Voxel = {
   Cactus: 36,
   Spawner: 37,
   DungeonChest: 38,
+  Rail: 39,
+  PoweredRail: 40,
+  DetectorRail: 41,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.DungeonChest;
+export const MAX_VOXEL_ID = Voxel.DetectorRail;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -99,6 +102,9 @@ export const FaceMaterial = {
   Cactus: 39,
   Spawner: 40,
   DungeonChest: 41,
+  Rail: 42,
+  PoweredRail: 43,
+  DetectorRail: 44,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -145,6 +151,9 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Cactus]: 'cactus',
   [FaceMaterial.Spawner]: 'spawner',
   [FaceMaterial.DungeonChest]: 'dungeon-chest',
+  [FaceMaterial.Rail]: 'rail',
+  [FaceMaterial.PoweredRail]: 'powered-rail',
+  [FaceMaterial.DetectorRail]: 'detector-rail',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -186,6 +195,9 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Cactus]: '仙人掌',
   [Voxel.Spawner]: '刷怪笼',
   [Voxel.DungeonChest]: '地牢战利品箱',
+  [Voxel.Rail]: '铁轨',
+  [Voxel.PoweredRail]: '动力铁轨',
+  [Voxel.DetectorRail]: '探测铁轨',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -227,6 +239,9 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Cactus]: [0.18, 0.55, 0.28],
   [Voxel.Spawner]: [0.18, 0.2, 0.22],
   [Voxel.DungeonChest]: [0.36, 0.24, 0.12],
+  [Voxel.Rail]: [0.5, 0.45, 0.34],
+  [Voxel.PoweredRail]: [0.72, 0.48, 0.12],
+  [Voxel.DetectorRail]: [0.62, 0.35, 0.16],
 };
 
 const nonSolid = new Set<number>([
@@ -239,6 +254,9 @@ const nonSolid = new Set<number>([
   Voxel.Flower,
   Voxel.Mushroom,
   Voxel.SugarCane,
+  Voxel.Rail,
+  Voxel.PoweredRail,
+  Voxel.DetectorRail,
 ]);
 export const isSolid = (id: number) => !nonSolid.has(id);
 export const isTargetable = (id: number) =>
@@ -292,6 +310,9 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Cactus]: FaceMaterial.Cactus,
       [Voxel.Spawner]: FaceMaterial.Spawner,
       [Voxel.DungeonChest]: FaceMaterial.DungeonChest,
+      [Voxel.Rail]: FaceMaterial.Rail,
+      [Voxel.PoweredRail]: FaceMaterial.PoweredRail,
+      [Voxel.DetectorRail]: FaceMaterial.DetectorRail,
     } as Record<number, FaceMaterialId>
   )[id];
 }

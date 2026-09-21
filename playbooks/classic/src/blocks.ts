@@ -223,6 +223,27 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
   },
   [37]: { voxel: 37, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: false },
   [38]: { voxel: 38, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: false },
+  [39]: {
+    voxel: 39,
+    hardnessSeconds: 0.7,
+    preferredTool: 'pickaxe',
+    drop: { itemId: 'rail', count: 1 },
+    replaceable: true,
+  },
+  [40]: {
+    voxel: 40,
+    hardnessSeconds: 0.7,
+    preferredTool: 'pickaxe',
+    drop: { itemId: 'powered-rail', count: 1 },
+    replaceable: true,
+  },
+  [41]: {
+    voxel: 41,
+    hardnessSeconds: 0.7,
+    preferredTool: 'pickaxe',
+    drop: { itemId: 'detector-rail', count: 1 },
+    replaceable: true,
+  },
   [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,
