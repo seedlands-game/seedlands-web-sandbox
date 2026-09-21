@@ -85,8 +85,9 @@
             <GameButton
               label={`选择世界 ${world.seedText} v${world.generatorVersion}`}
               onclick={() => {
-                application?.selectWorld(world.seedText);
+                application?.selectWorld(world.seedText, world.generatorVersion);
                 seed = world.seedText;
+                openMode = application?.selectedWorldMode ?? 'continue';
               }}
             >
               {world.seedText} <small>v{world.generatorVersion}</small>
@@ -120,6 +121,9 @@
     <label class="world-version-choice" for="world-version-mode">
       世界版本
       <select id="world-version-mode" bind:value={openMode}>
+        {#if !['continue', 'continue-v2', 'continue-v3', 'new-current'].includes(openMode)}
+          <option value={openMode}>选择的已保存版本</option>
+        {/if}
         <option value="continue">默认继续（优先已有新版）</option>
         <option value="continue-v2">明确继续旧版 v2</option>
         <option value="continue-v3">明确继续旧版 v3</option>

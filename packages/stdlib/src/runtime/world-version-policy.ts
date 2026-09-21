@@ -5,7 +5,7 @@ export type StoredWorldVersionRecord = {
   updatedAt: number;
 };
 
-export type WorldOpenMode = 'continue' | 'continue-legacy' | 'continue-v2' | 'continue-v3' | 'new-current';
+export type WorldOpenMode = 'continue' | 'continue-legacy' | `continue-v${number}` | 'new-current';
 
 export function selectWorldGeneratorVersion(
   records: readonly StoredWorldVersionRecord[],
@@ -17,8 +17,9 @@ export function selectWorldGeneratorVersion(
   const versions = records
     .filter((record) => record.seedText === seedText && Number.isInteger(record.generatorVersion))
     .map((record) => record.generatorVersion);
-  if (mode === 'continue-v2' || mode === 'continue-v3') {
-    const version = mode === 'continue-v2' ? 2 : 3;
+  if (mode.startsWith('continue-v')) {
+    const version = Number(mode.slice('continue-v'.length));
+    if (!Number.isSafeInteger(version) || version < 1) throw new Error('世界版本选择无效。');
     if (!versions.includes(version)) throw new Error(`这个 Seed 没有可继续的 v${version} 世界。`);
     return version;
   }
