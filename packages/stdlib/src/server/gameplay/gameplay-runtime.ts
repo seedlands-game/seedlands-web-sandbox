@@ -401,6 +401,7 @@ export class GameplayRuntime {
   placeVoxel(id: string, position: Position): GameplayResult<{ commit: WorldCommitResult }> {
     return (this.registeredBlocks ?? this.blocks).placeVoxel(id, position);
   }
+  useFluidContainer = (id: string, position: Position) => this.blocks.useFluidContainer(id, position);
 
   useSelectedItem(id: string): GameplayResult {
     return this.useInventoryItem(id, this.entities.actorStateAccess(id).selectedSlot);

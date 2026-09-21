@@ -40,6 +40,7 @@ export const progressionItemAssets = [
   ...pixelItemAssets('leather', '皮革', 'raw-porkchop'),
   ...pixelItemAssets('bowl', '碗', 'bowl'),
   ...pixelItemAssets('bucket', '桶', 'bucket'),
+  ...pixelItemAssets('water-bucket', '水桶', 'bucket'),
   ...pixelItemAssets('shears', '剪刀', 'shears'),
   ...pixelItemAssets('minecart', '矿车', 'minecart'),
   ...pixelItemAssets('chest-minecart', '运输矿车', 'chest-minecart'),

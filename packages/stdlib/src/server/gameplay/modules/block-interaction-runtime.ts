@@ -10,6 +10,7 @@ import type { ItemDefinitionRegistry } from '../item-registry';
 import { playerOccupiesVoxelShape } from '../player-occupancy';
 import type { PlayerState } from '../player-state';
 import type { VoxelGameplayRegistry } from '../voxel-gameplay';
+import type { FluidCell } from '../../fluid/fluid-cell';
 
 type Position = [number, number, number];
 type Failure = { success: false; reason: string };
@@ -19,6 +20,7 @@ export type BlockInteractionRuntimeOptions = Readonly<{
   player: (id: string) => PlayerState;
   entity: (id: string) => GameplayEntity | null;
   getVoxel: (position: Position) => number | undefined;
+  getFluidCell?: (position: Position) => FluidCell | null;
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
   entities: EntityStore;
   assertCanChange(): void;
@@ -94,6 +96,39 @@ export class BlockInteractionRuntime {
     if (!creative) inventory.removeFromSlot(player.selectedSlot, 1);
     const commit = this.commit(id, world, { ...components, inventory: inventory.snapshot() });
     this.options.changed(!creative);
+    return { success: true, commit };
+  }
+
+  useFluidContainer(id: string, position: Position): Result<{ commit: WorldCommitResult }> {
+    const player = this.options.player(id);
+    if (player.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
+    const entity = this.options.entity(id)!;
+    if (!positionsInRange(entity.position, voxelCenter(position), 5)) return { success: false, reason: 'out-of-range' };
+    const voxel = this.options.getVoxel(position);
+    if (voxel === undefined) return { success: false, reason: 'chunk-unavailable' };
+    const selected = player.inventory.slot(player.selectedSlot);
+    const container = selected ? this.options.items.capability(selected.itemId, 'fluid-container') : undefined;
+    if (!selected || !container) return { success: false, reason: 'not-fluid-container' };
+    let nextVoxel: number, output: string;
+    if (container.fluid === 'empty') {
+      const cell = this.options.getFluidCell?.(position);
+      if (!cell?.source || cell.level !== 8 || (voxel !== Voxel.Water && voxel !== Voxel.Lava))
+        return { success: false, reason: 'not-fluid-source' };
+      nextVoxel = Voxel.Air;
+      output = voxel === Voxel.Water ? 'water-bucket' : 'lava-bucket';
+    } else {
+      if (!this.options.voxelGameplay.require(voxel).replaceable) return { success: false, reason: 'target-occupied' };
+      nextVoxel = container.fluid === 'water' ? Voxel.Water : Voxel.Lava;
+      output = 'bucket';
+    }
+    const components = this.options.entities.actorComponentSnapshot(id);
+    const inventory = new Inventory(player.inventory.capacity, components.inventory, this.options.items);
+    if (!inventory.removeFromSlot(player.selectedSlot, 1) || !inventory.add({ itemId: output, count: 1 }))
+      return { success: false, reason: 'inventory-full' };
+    const world = this.options.prepareVoxelEdit(id, position, nextVoxel);
+    if (!world.committed) return { success: false, reason: 'world-not-changed' };
+    const commit = this.commit(id, world, { ...components, inventory: inventory.snapshot() });
+    this.options.changed(true);
     return { success: true, commit };
   }
 

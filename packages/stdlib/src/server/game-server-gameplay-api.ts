@@ -45,6 +45,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'pickupItem',
   'dropItem',
   'placeVoxel',
+  'useFluidContainer',
   'useSelectedItem',
   'attackEntity',
   'getCombatState',

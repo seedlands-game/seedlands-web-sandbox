@@ -45,6 +45,7 @@ export function createGameplayDomainAdapters(
     player: player,
     entity: (id) => entities.get(id),
     getVoxel: callbacks.getVoxel,
+    getFluidCell: callbacks.getFluidCell,
     prepareVoxelEdit: callbacks.prepareVoxelEdit,
     entities: entities,
     assertCanChange: assertCanChange,

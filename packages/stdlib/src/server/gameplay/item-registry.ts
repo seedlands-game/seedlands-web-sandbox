@@ -53,6 +53,7 @@ export type RangedItemCapability = Readonly<{
   speed: number;
   lifetimeSeconds: number;
 }>;
+export type FluidContainerItemCapability = Readonly<{ type: 'fluid-container'; fluid: 'empty' | 'water' | 'lava' }>;
 export type ItemCapability =
   | PlaceItemCapability
   | ConsumeItemCapability
@@ -60,7 +61,8 @@ export type ItemCapability =
   | MeleeItemCapability
   | TillItemCapability
   | ArmorItemCapability
-  | RangedItemCapability;
+  | RangedItemCapability
+  | FluidContainerItemCapability;
 export type ItemCapabilityType = ItemCapability['type'];
 export type ItemCapabilityOf<Type extends ItemCapabilityType> = Extract<ItemCapability, { type: Type }>;
 
@@ -120,7 +122,7 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
   }
   const seen = new Set<ItemCapabilityType>();
   const capabilities = input.capabilities.map((source) => {
-    if (!['place', 'consume', 'mine', 'melee', 'till', 'armor', 'ranged'].includes(source.type))
+    if (!['place', 'consume', 'mine', 'melee', 'till', 'armor', 'ranged', 'fluid-container'].includes(source.type))
       throw new TypeError(`Item capability is invalid: ${input.id}`);
     if (seen.has(source.type)) throw new TypeError(`Duplicate ${source.type} capability: ${input.id}`);
     seen.add(source.type);
@@ -160,6 +162,8 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
         source.lifetimeSeconds <= 0)
     )
       throw new TypeError('Ranged capability is invalid: ' + input.id);
+    if (source.type === 'fluid-container' && !['empty', 'water', 'lava'].includes(source.fluid))
+      throw new TypeError('Fluid container capability is invalid: ' + input.id);
     return Object.freeze({ ...source });
   });
   const place = capabilities.find((value): value is PlaceItemCapability => value.type === 'place');

@@ -6,11 +6,13 @@ import type { GameplayContent } from './gameplay-content';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { MeleeDefinition } from './combat-runtime';
 import type { CompositionCheckpointIdentity } from '../composition/checkpoint-identity';
+import type { FluidCell } from '../fluid/fluid-cell';
 
 type Position = [number, number, number];
 export type GameplayCallbacks = {
   getVoxel: (position: Position) => number | undefined;
   getLoadedVoxel?: (position: Position) => number | undefined;
+  getFluidCell?: (position: Position) => FluidCell | null;
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
   getWorldTime: () => number;
   platform: CorePlatformPorts;

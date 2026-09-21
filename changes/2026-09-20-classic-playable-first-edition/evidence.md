@@ -181,3 +181,4 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 续作已将 FluidTransaction 的 cell/place/suppliedLevel 参数化为 Water/Lava kind：水水平衰减1，熔岩水平衰减2，垂直流保持8；异种水平邻接时 lava source→Obsidian、flowing lava→Cobblestone。candidate validator 只允许 Air/Water/Lava/合法混合产物，world edit、chunk load 与 sidecar source/remove 均激活两种流体。
 - Rust fluid kernel 同步相同 kind/decay/reaction，并重建 scalar/SIMD artifact；含随机 lava/水邻接的 TS↔Rust 逐字段对等 1 test PASS，Water/Lava Authority 36 tests PASS，verify:static:ci PASS。全仓 rustfmt 会改动既有 codec/generation/mesh/tests，本轮仅格式化修改的 fluid.rs；这不是功能失败。
 - M10-02 仍保留 PARTIAL：传播与混合已接线，但独立较慢 cadence、桶交互、燃烧伤害和 Lava 专用液面视觉仍待后续。
+- S3d 桶续作：新增 fluid-container capability；空桶只拾取 level8+source 的 Water/Lava，换成 water-bucket/lava-bucket；满桶只在 replaceable 目标放 source 并换回空桶。BlockInteractionRuntime 复用距离校验、临时 Inventory 和 PreparedWorldEdit，双方先验证再提交。流动 level7 拒绝且世界/库存逐值不变。classic-fluid-buckets 3 tests、全仓 typecheck 与 verify:static:ci PASS。修复遗漏的 GameServer.edit/getFluidCell/chunk activation water-only 分支。

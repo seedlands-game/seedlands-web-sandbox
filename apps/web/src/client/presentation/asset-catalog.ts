@@ -36,6 +36,7 @@ const items = [
   ['leather', '皮革'],
   ['bowl', '碗'],
   ['bucket', '桶'],
+  ['water-bucket', '水桶'],
   ['shears', '剪刀'],
   ['minecart', '矿车'],
   ['chest-minecart', '运输矿车'],

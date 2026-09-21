@@ -5,7 +5,7 @@ import {
   assertStationCheckpointIntegrity,
   assertStationChunkIntegrity,
 } from './station-world-integrity';
-import { GENERATOR_VERSION, SUPPORTED_GENERATOR_VERSIONS, chunkKey, normalizeSeed, Voxel } from '../world/voxel';
+import { GENERATOR_VERSION, SUPPORTED_GENERATOR_VERSIONS, chunkKey, normalizeSeed } from '../world/voxel';
 import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayHost } from './game-server-gameplay-host';
@@ -16,7 +16,7 @@ import type { FluidCell } from './fluid/fluid-cell';
 import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
-import { hasAdjacentWater } from './fluid/fluid-cell-state';
+import { hasAdjacentFluid, isFluidVoxel } from './fluid/fluid-cell-state';
 import * as FluidSidecars from './fluid/fluid-edit-sidecars';
 import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
@@ -97,6 +97,7 @@ class GameServerWorld {
         setWorldTime: (hours) => this.setWorldTime(hours),
         readLoadedGameplayVoxel: (x, y, z) => this.readLoadedGameplayVoxel(x, y, z),
         readGameplayVoxel: (x, y, z) => this.readGameplayVoxel(x, y, z),
+        readFluidCell: (x, y, z) => this.fluidChunks.cell(x, y, z, true),
       },
     );
     installGameServerGameplayApi(this, this.gameplayHost);
@@ -374,18 +375,18 @@ class GameServerWorld {
       this.getVoxel,
     );
     const previous = this.getVoxel(x, y, z);
-    const previousFluid = previous === Voxel.Water ? this.fluidChunks.cell(x, y, z, true) : null;
+    const previousFluid = isFluidVoxel(previous) ? this.fluidChunks.cell(x, y, z, true) : null;
     const result = this.worldCommits.commitSingleEdit(actorId, x, y, z, value);
     if (result.committed) {
       this.fluidWindow.includeEditedPosition(x, y, z);
-      this.fluidChunks.write(x, y, z, value === Voxel.Water ? { level: 8, source: true } : null);
+      this.fluidChunks.write(x, y, z, isFluidVoxel(value) ? { level: 8, source: true } : null);
       if (
-        previous === Voxel.Water ||
-        value === Voxel.Water ||
-        hasAdjacentWater((...at) => this.fluidChunks.peekVoxel(...at), x, y, z)
+        isFluidVoxel(previous) ||
+        isFluidVoxel(value) ||
+        hasAdjacentFluid((...at) => this.fluidChunks.peekVoxel(...at), x, y, z)
       )
         this.fluidRuntime.activate([x, y, z], this.gameplayHost.fluidPriorityForActor(actorId));
-      if (previousFluid?.source && value !== Voxel.Water) this.fluidRuntime.removeSource([x, y, z]);
+      if (previousFluid?.source && !isFluidVoxel(value)) this.fluidRuntime.removeSource([x, y, z]);
     }
     return result;
   }
@@ -424,7 +425,7 @@ class GameServerWorld {
   }
 
   getFluidCell(x: number, y: number, z: number): FluidCell | null {
-    return this.getVoxel(x, y, z) === Voxel.Water
+    return isFluidVoxel(this.getVoxel(x, y, z))
       ? (this.fluidChunks.cell(x, y, z, true) ?? { level: 8, source: true })
       : null;
   }

@@ -32,6 +32,7 @@ import type { CharacterActorBinding, CharacterControlRequest } from '../runtime/
 import { isActorEntityType } from './gameplay/ecs-actor-state';
 import type { ActorControlSource } from './gameplay/ecs-actor-components';
 import type { KernelStateOwner } from '@seedlands/kernel/execution';
+import type { FluidCell } from './fluid/fluid-cell';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 
@@ -43,6 +44,7 @@ export type GameServerGameplayWorldPort = Readonly<{
   setWorldTime(hours: number): number;
   readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined;
   readGameplayVoxel(x: number, y: number, z: number): number | undefined;
+  readFluidCell(x: number, y: number, z: number): FluidCell | null;
 }>;
 
 export type PreparedGameplayRestore = Readonly<{
@@ -80,6 +82,7 @@ export class GameServerGameplayHost {
     return new GameplayRuntime({
       getVoxel: (position) => this.world.readGameplayVoxel(...position),
       getLoadedVoxel: (position) => this.world.readLoadedGameplayVoxel(...position),
+      getFluidCell: (position) => this.world.readFluidCell(...position),
       prepareVoxelEdit: (actorId, position, voxel) => this.world.prepareVoxelEdit(actorId, position, voxel),
       getWorldTime: () => this.world.worldTime(),
       platform: this.platform,
@@ -250,6 +253,9 @@ export class GameServerGameplayHost {
   }
   placeVoxel(id: string, position: [number, number, number]) {
     return this.gameplay.placeVoxel(id, position);
+  }
+  useFluidContainer(id: string, position: [number, number, number]) {
+    return this.gameplay.useFluidContainer(id, position);
   }
   useSelectedItem(id: string) {
     return this.gameplay.useSelectedItem(id);

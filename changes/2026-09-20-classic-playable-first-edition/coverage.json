@@ -1854,10 +1854,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Water Bucket"
+      "execution": "HEADLESS_PASS",
+      "name": "Water Bucket",
+      "note": "S3d：空桶只拾取Water source，生成水桶；水桶只向replaceable格放置source并换回空桶，流动水拒绝且世界/库存不变。浏览器手势未验。"
     },
     {
       "caseId": "I-327",
@@ -1867,7 +1868,8 @@
       "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
       "execution": "HEADLESS_PASS",
-      "name": "Lava Bucket"
+      "name": "Lava Bucket",
+      "note": "S3d：空桶只拾取Lava source，生成熔岩桶；熔岩桶只向replaceable格放置source并换回空桶，正式GameServer回归通过。"
     },
     {
       "caseId": "I-328",
@@ -4486,7 +4488,8 @@
       "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
       "execution": "HEADLESS_PASS",
-      "name": "以固定 seed/初态/输入验证：液体碰撞/浮力/窒息/燃烧与桶取放；记录正例、失败例、tick 和 owner 状态。"
+      "name": "以固定 seed/初态/输入验证：液体碰撞/浮力/窒息/燃烧与桶取放；记录正例、失败例、tick 和 owner 状态。",
+      "note": "Water浸没/浮力与水/熔岩桶拾取放置已由Headless验证；流动fluid拒绝且失败原子。窒息与熔岩燃烧伤害仍待实现。"
     },
     {
       "caseId": "M10-04",
