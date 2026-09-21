@@ -55,6 +55,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'regrowSheepWool',
   'lifeSkills',
   'vehicles',
+  'navigationItems',
   'attackEntity',
   'getCombatState',
   'applyDamage',

@@ -22,7 +22,12 @@ export type UtilitySpriteKind =
   | 'bed'
   | 'saddle'
   | 'egg'
-  | 'fishing-rod';
+  | 'fishing-rod'
+  | 'paper'
+  | 'redstone-dust'
+  | 'compass'
+  | 'clock'
+  | 'map';
 
 const utilityKinds: readonly string[] = [
   'bowl',
@@ -47,6 +52,11 @@ const utilityKinds: readonly string[] = [
   'saddle',
   'egg',
   'fishing-rod',
+  'paper',
+  'redstone-dust',
+  'compass',
+  'clock',
+  'map',
 ];
 export const isUtilitySpriteKind = (kind: string): kind is UtilitySpriteKind => utilityKinds.includes(kind);
 
@@ -282,6 +292,62 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     line(sprite, 8, 27, 24, 6, 4);
     line(sprite, 24, 6, 27, 22, 10);
     sprite.rect(25, 22, 4, 4, 16);
+    return sprite.pixels;
+  }
+  if (kind === 'paper' || kind === 'map') {
+    sprite.rect(6, 5, 20, 23, 10);
+    sprite.rect(8, 7, 16, 19, kind === 'map' ? 2 : 11);
+    if (kind === 'map') {
+      sprite.rect(11, 10, 5, 6, 18);
+      sprite.rect(17, 16, 5, 7, 1);
+    }
+    return sprite.pixels;
+  }
+  if (kind === 'redstone-dust') {
+    sprite.polygon(
+      [
+        [16, 5],
+        [21, 12],
+        [28, 16],
+        [21, 20],
+        [16, 27],
+        [11, 20],
+        [4, 16],
+        [11, 12],
+      ],
+      16,
+    );
+    sprite.rect(13, 13, 7, 7, 17);
+    return sprite.pixels;
+  }
+  if (kind === 'compass' || kind === 'clock') {
+    sprite.polygon(
+      [
+        [16, 3],
+        [25, 7],
+        [29, 16],
+        [25, 25],
+        [16, 29],
+        [7, 25],
+        [3, 16],
+        [7, 7],
+      ],
+      9,
+    );
+    sprite.polygon(
+      [
+        [16, 6],
+        [23, 9],
+        [26, 16],
+        [23, 23],
+        [16, 26],
+        [9, 23],
+        [6, 16],
+        [9, 9],
+      ],
+      kind === 'clock' ? 13 : 10,
+    );
+    line(sprite, 16, 16, kind === 'clock' ? 22 : 16, kind === 'clock' ? 16 : 7, kind === 'clock' ? 3 : 16);
     return sprite.pixels;
   }
   if (kind === 'ink-sac' || kind === 'rotten-flesh' || kind === 'gunpowder' || kind === 'slimeball') {

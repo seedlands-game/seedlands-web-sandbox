@@ -137,6 +137,31 @@ export const overworldRecipes: readonly Recipe[] = [
     outputs: [{ itemId: 'furnace-minecart', count: 1 }],
   },
   { id: 'boat', inputs: [{ itemId: 'plank', count: 5 }], outputs: [{ itemId: 'boat', count: 1 }] },
+  { id: 'paper', inputs: [{ itemId: 'sugar-cane', count: 3 }], outputs: [{ itemId: 'paper', count: 3 }] },
+  {
+    id: 'compass',
+    inputs: [
+      { itemId: 'iron-ingot', count: 4 },
+      { itemId: 'redstone-dust', count: 1 },
+    ],
+    outputs: [{ itemId: 'compass', count: 1 }],
+  },
+  {
+    id: 'clock',
+    inputs: [
+      { itemId: 'gold-ingot', count: 4 },
+      { itemId: 'redstone-dust', count: 1 },
+    ],
+    outputs: [{ itemId: 'clock', count: 1 }],
+  },
+  {
+    id: 'map',
+    inputs: [
+      { itemId: 'paper', count: 8 },
+      { itemId: 'compass', count: 1 },
+    ],
+    outputs: [{ itemId: 'map', count: 1 }],
+  },
   {
     id: 'fishing-rod',
     inputs: [

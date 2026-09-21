@@ -5,7 +5,6 @@ import type { CombatOriginRuntimeOptions } from './combat-origin';
 import type { ModuleScheduleSnapshot } from '../composition/lifecycle-contracts';
 import type { WorldRulesetV1 } from './modules/ruleset-module';
 import { AutonomyRuntime, type SimulationSnapshot } from '../simulation/autonomy-runtime';
-import { bodyConfigFor } from '../../physics/body-registry';
 import { EntityStore, type EntityStoreComponentSnapshot, type GameplayEntity } from './entity-store';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import type { CoreClone } from '../../runtime/platform-ports';
@@ -29,6 +28,10 @@ import { EnvironmentRuntime, type EnvironmentCheckpoint } from './environment-ru
 import { createProjectileRuntime, type ProjectileCheckpoint } from './projectile-runtime';
 import { validateLifeSkillsCheckpoint, type LifeSkillsCheckpoint } from './life-skills-runtime';
 import { validateVehicleCheckpoint, type VehicleCheckpoint } from './vehicle-runtime';
+import { navigationCheckpointFromSnapshot, validateNavigationItemsCheckpoint } from './navigation-items-runtime';
+import type { NavigationItemsCheckpoint } from './navigation-items-runtime';
+export { legacyPlayerPositionToFeet } from './legacy-gameplay-position';
+import { migrateLegacyEntity, migrateLegacyPlayer } from './legacy-gameplay-position';
 
 type Position = [number, number, number];
 
@@ -71,6 +74,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   projectiles?: ProjectileCheckpoint;
   lifeSkills?: LifeSkillsCheckpoint;
   vehicles?: VehicleCheckpoint;
+  navigationItems?: NavigationItemsCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -91,6 +95,7 @@ export const createGameplaySnapshotV4 = (
   projectiles?: ProjectileCheckpoint,
   lifeSkills?: LifeSkillsCheckpoint,
   vehicles?: VehicleCheckpoint,
+  navigationItems?: NavigationItemsCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -113,6 +118,7 @@ export const createGameplaySnapshotV4 = (
     : {}),
   ...(lifeSkills ? { lifeSkills: validateLifeSkillsCheckpoint(lifeSkills) } : {}),
   ...(vehicles ? { vehicles: validateVehicleCheckpoint(vehicles) } : {}),
+  ...(navigationItems ? { navigationItems: validateNavigationItemsCheckpoint(navigationItems) } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 
@@ -139,17 +145,6 @@ type GameplaySnapshotValidationOptions = {
   behaviorCapabilities?: BehaviorCapabilityRegistry;
   allowsBehaviorCapability?(actorId: string, kind: 'npc' | 'creature', capability: BehaviorCapability): boolean;
 };
-
-const LEGACY_PLAYER_EYE_TO_FEET = 1.6;
-const worldItemConfig = bodyConfigFor('world-item');
-const LEGACY_WORLD_ITEM_CENTER_TO_FEET = (worldItemConfig.localAabb.max.y - worldItemConfig.localAabb.min.y) / 2;
-const roundCoordinate = (value: number) => Math.round(value * 1_000_000) / 1_000_000;
-
-export function legacyPlayerPositionToFeet(position: Position): Position {
-  if (position.length !== 3 || !position.every(Number.isFinite))
-    throw new TypeError('Legacy player position must contain three finite coordinates.');
-  return [position[0], roundCoordinate(position[1] - LEGACY_PLAYER_EYE_TO_FEET), position[2]];
-}
 
 const emptySimulation = (): SimulationSnapshot => ({
   version: 1,
@@ -187,24 +182,6 @@ export function validateGameplaySnapshotHeader(raw: unknown): asserts raw is Gam
   )
     throw new TypeError('Gameplay snapshot header is invalid.');
 }
-
-const migrateLegacyEntity = (entity: GameplayEntity, clone: CoreClone): GameplayEntity => {
-  const offset =
-    entity.type === 'player'
-      ? LEGACY_PLAYER_EYE_TO_FEET
-      : entity.type === 'world-item'
-        ? LEGACY_WORLD_ITEM_CENTER_TO_FEET
-        : 0;
-  return {
-    ...clone(entity),
-    position: [entity.position[0], roundCoordinate(entity.position[1] - offset), entity.position[2]],
-  };
-};
-
-const migrateLegacyPlayer = (player: PlayerSnapshot, clone: CoreClone): PlayerSnapshot => ({
-  ...clone(player),
-  spawnPosition: legacyPlayerPositionToFeet(player.spawnPosition),
-});
 
 function migrateLegacyCharacterBodies(
   snapshot: SimulationSnapshot,
@@ -471,6 +448,7 @@ export function validateGameplaySnapshot(
         : undefined,
       source.version === 4 && source.lifeSkills ? validateLifeSkillsCheckpoint(source.lifeSkills) : undefined,
       source.version === 4 && source.vehicles ? validateVehicleCheckpoint(source.vehicles) : undefined,
+      navigationCheckpointFromSnapshot(source, entities),
     );
     if (options.registeredNeeds && sourceVersion < 4) {
       const phase =

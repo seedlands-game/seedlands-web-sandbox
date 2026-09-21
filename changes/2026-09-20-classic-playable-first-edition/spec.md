@@ -101,6 +101,12 @@ Classic 的鸡、牛、猪、羊、鱿鱼、狼、僵尸、骷髅、蜘蛛、苦
 
 Rail、PoweredRail、DetectorRail 使用追加稳定体素，不改变 V8 程序生成输出；连接形态只由已加载水平邻居和一格坡度决定，未知邻格不猜测。VehicleRuntime 拥有 minecart/chest-minecart/furnace-minecart/boat 的位置、速度、朝向、乘员、燃料与箱车库存，按固定步长推进并进入 gameplay checkpoint。矿车只沿解析轨道移动，动力轨补能、普通轨摩擦；船只在已加载水面移动并受水阻力。上下车验证距离、唯一乘员和安全落点；鞍猪复用 SpeciesState.saddled，玩家乘坐引用与猪实体位置同步，失败不扣鞍。
 
+## S6c 指南针、时钟与地图合同
+
+指南针、时钟和地图作为 Classic 内容注册并从铁/金、红石、甘蔗纸链合成。NavigationItemsRuntime 是每世界唯一特殊物品状态 owner：指南针按玩家当前位置指向该玩家保存的世界出生点，重合时返回稳定零角；时钟把主世界 `worldTime` 归一到 `[0, 1)` 的昼夜相位，不引入未在范围内的维度例外。
+
+玩家选中地图后才能探索；首次探索创建稳定 map id、固定中心和 0–4 缩放，之后按缩放后的有限 9×9 采样窗写入已加载体素的稳定颜色索引，未知格不猜测也不覆盖旧像素。地图状态、序列、中心、缩放和已探索像素进入 gameplay V4 checkpoint；恢复先完整校验坐标、像素范围、重复 id 与关联玩家，失败不部分安装。RED 覆盖物品/配方缺失、指南针角度、时钟环绕、地图未知格/缩放/持久化和畸形快照拒绝。
+
 ## S3d 熔岩与流体混合合同
 
 追加稳定 Voxel.Lava 与 Voxel.Obsidian，不重排旧 palette，旧 generatorVersion 字节不变。流体种类由 voxel id 表示，既有 Uint8 sidecar 继续只保存 source bit 与 level 1–8，因此旧水存档无需迁移。水与熔岩接触的候选按坐标稳定排序：熔岩源变黑曜石，流动熔岩变圆石；同一批多邻居不能重复写。传播与混合必须使用 Authority read-set/expected cell 校验，旧 epoch、stale chunk 或未知边界不提交。
