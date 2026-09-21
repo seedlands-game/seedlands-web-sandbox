@@ -1,4 +1,5 @@
-import type { Inventory, InventoryAccess } from './inventory';
+import type { Inventory, InventoryAccess, InventorySlot } from './inventory';
+import type { ArmorSlot } from './modules/armor-policy';
 import type { ItemId } from './item-registry';
 import type { BreakAction, PlayerSnapshot } from './player-state';
 import type { InventoryCursorV1 } from './modules/inventory-pointer-contract';
@@ -40,6 +41,8 @@ export type ActorComponentAccess = {
   readonly inventory: InventoryAccess;
   readonly inventoryRevision: number;
   readonly inventoryCursor: InventoryCursorV1;
+  readonly armor: Readonly<Record<ArmorSlot, InventorySlot>>;
+  replaceArmor: (armor: Readonly<Record<ArmorSlot, InventorySlot>>) => void;
   readonly controlSource: ActorControlSource;
   readonly controlRevision: number;
   readonly mode: ActorMode;
@@ -75,7 +78,11 @@ export const createActorComponents = () => ({
     revision: [] as number[],
     cursor: [] as (InventoryCursorV1 | undefined)[],
   },
-  equipment: { selectedSlot: [] as number[], hotbarSize: [] as number[] },
+  equipment: {
+    selectedSlot: [] as number[],
+    hotbarSize: [] as number[],
+    armor: [] as (Record<ArmorSlot, InventorySlot> | undefined)[],
+  },
   control: { source: [] as (ActorControlSource | undefined)[], revision: [] as number[] },
   behavior: { value: [] as (CharacterComponentStateV1 | undefined)[] },
   life: { lifecycle: [] as PlayerSnapshot['lifecycle'][] },
@@ -101,7 +108,7 @@ export type ActorComponentSnapshot = Readonly<{
   /** Added after the original V4 snapshot; omitted snapshots migrate to zero and an empty cursor. */
   inventoryRevision?: number;
   inventoryCursor?: InventoryCursorV1;
-  equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
+  equipment: Readonly<{ selectedSlot: number; hotbarSize: number; armor?: Readonly<Record<ArmorSlot, InventorySlot>> }>;
   lifecycle: PlayerSnapshot['lifecycle'];
   controlSource: ActorControlSource;
   /** Added with behavior control; omitted snapshots migrate to revision zero. */

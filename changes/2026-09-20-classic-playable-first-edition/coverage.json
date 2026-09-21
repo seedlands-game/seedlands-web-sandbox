@@ -4663,10 +4663,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：护甲减伤、各种伤害源、无敌帧/击退；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：护甲减伤、各种伤害源、无敌帧/击退；记录正例、失败例、tick 和 owner 状态。",
+      "note": "S4e：ECS四装备槽、正式穿戴交换、护甲点减伤、每次成功伤害扣耐久、破损移除及V4恢复已验证；创造免伤和死亡目标拒绝不磨损。无敌帧、击退与全部特殊伤害源仍未实现。"
     },
     {
       "caseId": "M15-03",

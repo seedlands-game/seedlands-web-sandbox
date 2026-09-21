@@ -1,5 +1,13 @@
 import { expect, it } from 'vitest';
-import { classicContent, getItemDefinition, Inventory, craftRecipe } from '../../../../fixtures/classic/content';
+import {
+  classicContent,
+  getItemDefinition,
+  Inventory,
+  craftRecipe,
+  GameplayRuntime,
+  classicOptions,
+} from '../../../../fixtures/classic/content';
+import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import {
   armorDamageReduction,
   ARMOR_MAX_POINTS,
@@ -21,6 +29,84 @@ it('护甲物品注册为可穿戴且带防护点数与耐久', () => {
     expect(armor).toMatchObject({ type: 'armor', slot: piece.slot, points: piece.points });
     expect(definition.durability?.max).toBeGreaterThan(0);
   }
+});
+
+it('正式装备槽参与伤害减免、扣耐久并随 snapshot 恢复', () => {
+  const create = () => {
+    const world = new GameplayRuntime({
+      ...classicOptions(),
+      platform: testCorePlatform,
+      getWorldTime: () => 12,
+      getVoxel: () => 0,
+      prepareVoxelEdit: () => {
+        throw new Error('unexpected');
+      },
+    });
+    world.spawnPlayer({ id: 'player', position: [0, 1, 0] });
+    world.spawnAutonomous(
+      { id: 'hostile', type: 'creature', archetype: 'zombie', position: [1, 1, 0] },
+      { archetype: 'zombie' },
+    );
+    return world;
+  };
+  const world = create();
+  world.giveItem('player', { itemId: 'iron-chestplate', count: 1, instance: { durability: 2 } });
+  expect(world.equipSelectedArmor('player')).toMatchObject({ success: true, slot: 'chestplate' });
+  expect(world.applyDamage('hostile', 'player', 10, 'combat')).toEqual({ success: true });
+  expect(world.getPlayerState('player').health).toBe(12.4);
+  expect(world.entities.actorStateAccess('player').armor.chestplate?.instance?.durability).toBe(1);
+  const restored = create();
+  restored.restoreSnapshot(world.createSnapshot());
+  expect(restored.entities.actorStateAccess('player').armor.chestplate?.itemId).toBe('iron-chestplate');
+  restored.applyDamage('hostile', 'player', 1, 'combat');
+  expect(restored.entities.actorStateAccess('player').armor.chestplate).toBeNull();
+});
+
+it('创造模式免伤不磨损护甲，非法伤害保持旧失败语义', () => {
+  const world = new GameplayRuntime({
+    ...classicOptions(),
+    platform: testCorePlatform,
+    getWorldTime: () => 12,
+    getVoxel: () => 0,
+    prepareVoxelEdit: () => {
+      throw new Error('unexpected');
+    },
+  });
+  world.spawnPlayer({ id: 'player', position: [0, 1, 0] });
+  world.giveItem('player', { itemId: 'iron-helmet', count: 1, instance: { durability: 2 } });
+  world.equipSelectedArmor('player');
+  const actor = world.entities.actorStateAccess('player');
+  actor.replaceModeComponents({
+    mode: { version: 1, value: 'creative', revision: actor.modeRevision + 1 },
+    creativeCatalog: {
+      ...actor.creativeCatalog,
+      hotbar: Array(9).fill(null),
+      revision: actor.creativeCatalog.revision + 1,
+    },
+    flight: actor.flight,
+  });
+  expect(world.applyDamage('test', 'player', 10, 'combat')).toEqual({ success: true });
+  expect(world.entities.actorStateAccess('player').armor.helmet?.instance?.durability).toBe(2);
+  expect(world.applyDamage('test', 'player', -1, 'combat')).toEqual({ success: false, reason: 'invalid-damage' });
+});
+
+it('死亡目标拒绝重复伤害且不磨损护甲', () => {
+  const world = new GameplayRuntime({
+    ...classicOptions(),
+    platform: testCorePlatform,
+    getWorldTime: () => 12,
+    getVoxel: () => 0,
+    prepareVoxelEdit: () => {
+      throw new Error('unexpected');
+    },
+  });
+  world.spawnPlayer({ id: 'player', position: [0, 1, 0] });
+  world.giveItem('player', { itemId: 'iron-helmet', count: 1, instance: { durability: 2 } });
+  world.equipSelectedArmor('player');
+  world.applyDamage('test', 'player', 100, 'test');
+  const before = world.entities.actorStateAccess('player').armor;
+  expect(world.applyDamage('test', 'player', 1, 'test')).toEqual({ success: false, reason: 'player-dead' });
+  expect(world.entities.actorStateAccess('player').armor).toEqual(before);
 });
 
 it('护甲按点数线性减伤，封顶且不为负，空护甲不减伤', () => {

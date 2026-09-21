@@ -3,6 +3,9 @@ import type { GameplayCallbacks, GameplayResult } from './gameplay-runtime-contr
 import type { PlayerState } from './player-state';
 import { setSpawnFromBed } from './bed-action';
 import { DifficultyRuntime, hostileActorsForPeaceful, type Difficulty } from './difficulty-runtime';
+import { prepareArmorDamage, equipSelectedArmor } from './armor-equipment';
+import type { ActorComponentAccess } from './ecs-actor-components';
+import type { ItemDefinitionRegistry } from './item-registry';
 
 type Position = [number, number, number];
 
@@ -16,6 +19,30 @@ export const applyDifficultyDamage = (
   const actor = simulation.getActor(actorId);
   const adjusted = actor?.disposition === 'hostile' ? difficulty.damage(amount) : amount;
   return adjusted === 0 ? { success: true as const } : apply(adjusted);
+};
+
+export const applySurvivalDamage = (
+  difficulty: DifficultyRuntime,
+  simulation: AutonomyRuntime,
+  target: ActorComponentAccess,
+  items: ItemDefinitionRegistry,
+  actorId: string,
+  amount: number,
+  apply: (amount: number) => GameplayResult,
+) => {
+  if (!Number.isFinite(amount) || amount <= 0 || target.mode !== 'survival') return apply(amount);
+  return applyDifficultyDamage(difficulty, simulation, actorId, amount, (adjusted) => {
+    const candidate = prepareArmorDamage(target, items, adjusted);
+    const result = apply(candidate.damage);
+    if (result.success) target.replaceArmor(candidate.armor);
+    return result;
+  });
+};
+
+export const equipArmor = (actor: ActorComponentAccess, items: ItemDefinitionRegistry, changed: () => void) => {
+  const result = equipSelectedArmor(actor, items);
+  if (result.success) changed();
+  return result;
 };
 
 export const changeDifficulty = (
