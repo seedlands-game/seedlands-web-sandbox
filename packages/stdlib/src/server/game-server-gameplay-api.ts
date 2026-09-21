@@ -47,6 +47,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'placeVoxel',
   'useFluidContainer',
   'useSelectedItem',
+  'fireSelectedRangedItem',
   'attackEntity',
   'getCombatState',
   'applyDamage',

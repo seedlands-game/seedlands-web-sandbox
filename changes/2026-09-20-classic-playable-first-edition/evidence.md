@@ -141,6 +141,7 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - pnpm test:classic:headless PASS：15 files / 30 tests，含有限资源成长和保存。pnpm verify:static:ci 第一次在 5 个新增文件格式检查失败；格式化后第二次触发 pixel-item-art 504>500 行边界；拆出 utility kind 判定后最终 PASS（Svelte 0 errors/warnings、ESLint 66 tests、CI selection 8 tests）。
 - 当前只记 PARTIAL_IMPLEMENTED / HEADLESS_PASS：尚未把 projectile owner 纳入 GameplayRuntime 总快照与浏览器输入/表现/音频，也未完成自然材料掉落。问题保留并继续在 S4/S7 收口。
 - 绑定提交 48be04563afd911bf66a64991c4eede50ad1d680 的 production build PASS：sourceDigest c9eabfd3bc88aa176fbf01fae3b103294d825d9545f47bf9ec287820a53ad455，artifactDigest 53e9e89220b964d70458f1a94cbd9408db7e6e398ef116f38a7125d0b3f07e9b。唯一 Chromium 回归 PASS：runId 447dee2a-8cfe-46ce-89f4-658f36447111，C0–C5 及现有玻璃/金钻资源目录场景全部通过，约 2.0 分钟；该回归证明既有生产旅程未退化，不证明弓箭浏览器操作已接入。
+- S4b owner 续作：GameplayRuntime 现持有唯一 ProjectileRuntime，正式 ECS inventory 发射成功才提交 revision；已加载体素与实体 AABB 决定最早命中，伤害复用正式 combat/vitals 路径。在途箭与 id 高水位进入 V4 可选 snapshot 字段，旧 V4 缺字段恢复为空。Classic projectiles 6 tests PASS，包含 Runtime 发射、保存、恢复、命中僵尸与弹药不重复。GameServer façade 已暴露发射方法；浏览器动作协议、准星方向和表现仍在 S7 收口前保持 PARTIAL。
 
 ## S4c 主世界物种 profile 与基础 AI（部分完成）
 

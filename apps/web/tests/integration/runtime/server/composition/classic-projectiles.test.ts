@@ -2,7 +2,15 @@ import { expect, it, vi } from 'vitest';
 import { createProjectileRuntime } from '@seedlands/stdlib/server/gameplay/projectile-runtime';
 import { fireSelectedRangedItem } from '@seedlands/stdlib/server/gameplay/ranged-action';
 import { createItemDefinitionRegistry } from '@seedlands/stdlib/server/gameplay/item-registry';
-import { getItemDefinition, Inventory, craftRecipe } from '../../../../fixtures/classic/content';
+import {
+  GameplayRuntime,
+  classicOptions,
+  getItemDefinition,
+  Inventory,
+  craftRecipe,
+} from '../../../../fixtures/classic/content';
+import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { Voxel } from '@seedlands/stdlib/world/voxel';
 
 it('弓箭材料与配方守恒，缺箭发射前可原子拒绝', () => {
   expect(getItemDefinition('bow').capabilities).toContainEqual({
@@ -147,4 +155,33 @@ it('在途箭保存恢复后继续，id 高水位不重用且寿命到期销毁'
   ).toBe(2);
   restored.advance(0.75);
   expect(restored.list()).toEqual([]);
+});
+
+it('GameplayRuntime 持有投射物并在保存恢复后通过正式伤害入口命中', () => {
+  const createWorld = () =>
+    new GameplayRuntime({
+      ...classicOptions(),
+      platform: testCorePlatform,
+      getWorldTime: () => 0,
+      getVoxel: () => Voxel.Air,
+      getLoadedVoxel: () => Voxel.Air,
+      prepareVoxelEdit: () => {
+        throw new Error('unexpected edit');
+      },
+    });
+  const source = createWorld();
+  source.spawnPlayer({ id: 'archer', position: [0, 0, 0] });
+  source.spawnAutonomous({ id: 'target', archetype: 'zombie', position: [3, 0, 0] }, { archetype: 'zombie' });
+  source.giveItem('archer', { itemId: 'bow', count: 1, instance: { durability: 2 } });
+  source.giveItem('archer', { itemId: 'arrow', count: 2 });
+  expect(source.fireSelectedRangedItem('archer', { x: 1, y: 0, z: 0 })).toMatchObject({ success: true });
+  source.projectiles.advance(0.05);
+  const snapshot = source.createSnapshot();
+  expect(snapshot.projectiles?.projectiles).toHaveLength(1);
+  const restored = createWorld();
+  restored.restoreSnapshot(snapshot);
+  restored.projectiles.advance(0.2);
+  expect(restored.getEntity('target')?.health).toBe(16);
+  expect(restored.projectiles.list()).toEqual([]);
+  expect(restored.getInventory('archer').slots.find((stack) => stack?.itemId === 'arrow')?.count).toBe(1);
 });

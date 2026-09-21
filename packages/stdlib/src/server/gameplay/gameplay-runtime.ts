@@ -4,7 +4,7 @@ import { createGameplayDomainAdapters } from './gameplay-domain-adapters';
 import type { ModuleInvocationValue } from '../composition/contracts';
 import { createGameplayRegisteredAdapters } from './gameplay-registered-adapters';
 import { BLOCK_WORLD_COMPONENT } from './modules/block-action-model';
-import type { GameplayCallbacks, GameplayResult, GameplayFailure as Failure } from './gameplay-runtime-contracts';
+import type { GameplayCallbacks, GameplayResult } from './gameplay-runtime-contracts';
 export type * from './gameplay-runtime-contracts';
 import type { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
 import type { RegisteredFeedingRuntime } from './modules/registered-feeding-runtime';
@@ -62,6 +62,8 @@ import { DifficultyRuntime, type Difficulty } from './difficulty-runtime';
 import { applySurvivalDamage, changeDifficulty, equipArmor, useSelectedBed } from './gameplay-survival-settings';
 import { EnvironmentRuntime } from './environment-runtime';
 import { advanceGameplayWithEnvironment } from './gameplay-environment-coordinator';
+import type { ProjectileVector } from './projectile-runtime';
+import { createGameplayProjectileOwner } from './gameplay-projectile-environment';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -75,6 +77,7 @@ export class GameplayRuntime {
   readonly difficulty = new DifficultyRuntime();
   readonly environment: EnvironmentRuntime;
   readonly environmentQueries: GameplayEnvironmentFacade;
+  readonly projectiles;
   private readonly players = new Map<string, PlayerState>();
   private persistedRevision = 0;
   private inventoryOperationCount = 0;
@@ -216,6 +219,16 @@ export class GameplayRuntime {
       changed: () => this.touch(),
       simulation: () => this.simulation,
     });
+    this.projectiles = createGameplayProjectileOwner({
+      entities: this.entities,
+      players: this.players,
+      simulation: () => this.simulation,
+      vitals: this.vitals,
+      content: this.content,
+      getVoxel: callbacks.getLoadedVoxel ?? callbacks.getVoxel,
+      assertCanChange: () => this.assertRevisionCapacity(),
+      changed: () => this.touch(),
+    });
     this.checkpoint = new GameplayRuntimeCheckpoint({
       callbacks,
       compositionGuard: this.compositionGuard,
@@ -232,6 +245,7 @@ export class GameplayRuntime {
       authorityState: kernel.authority,
       difficulty: this.difficulty,
       environment: this.environment,
+      projectiles: this.projectiles,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);
@@ -249,12 +263,9 @@ export class GameplayRuntime {
   getActorModeState(id: string) {
     return isActorEntityType(this.entities.get(id)?.type ?? 'world-item') ? this.modes.stateFor(id) : null;
   }
-  acknowledgeBlockCommit(value: ModuleInvocationValue) {
-    return this.registeredBlocks?.acknowledge(value);
-  }
-  bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
-    return this.modules.bind(authorizer, source);
-  }
+  acknowledgeBlockCommit = (value: ModuleInvocationValue) => this.registeredBlocks?.acknowledge(value);
+  bindModuleOperations = (authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) =>
+    this.modules.bind(authorizer, source);
   invokeModuleOperation(
     authorizer: WorldResourceAuthorizer,
     source: Omit<RegisteredActorOperationBinding, 'moduleId'>,
@@ -265,9 +276,8 @@ export class GameplayRuntime {
     if (result.ok && operationId === COMBAT_REQUEST_OPERATION) this.registeredCombat?.drain();
     return result;
   }
-  invokeActorModuleOperation(actorId: string, request: RegisteredOperationRequest) {
-    return this.modules.invokeActor(this.callbacks.moduleActorAuthority, actorId, request);
-  }
+  invokeActorModuleOperation = (actorId: string, request: RegisteredOperationRequest) =>
+    this.modules.invokeActor(this.callbacks.moduleActorAuthority, actorId, request);
   dispose = (): void => {
     RuntimeLifecycle.disposeGameplayRuntime(this.schedule, this.modules);
     this.kernelRuntime.dispose();
@@ -311,9 +321,8 @@ export class GameplayRuntime {
     });
   }
 
-  character(request: CharacterControlRequest, actorBinding?: CharacterActorBinding): CharacterControlResult {
-    return executeGameplayCharacterRequest(this, request, actorBinding);
-  }
+  character = (request: CharacterControlRequest, actorBinding?: CharacterActorBinding): CharacterControlResult =>
+    executeGameplayCharacterRequest(this, request, actorBinding);
 
   getEntity = (id: string): GameplayEntity | null => this.entities.get(id);
 
@@ -323,18 +332,14 @@ export class GameplayRuntime {
     return entity;
   }
 
-  updateEntityWithoutSnapshot(id: string, update: EntityUpdate): void {
+  updateEntityWithoutSnapshot = (id: string, update: EntityUpdate): void => {
     this.entities.updateWithoutSnapshot(id, update);
     this.touch(false);
-  }
-
-  updateEntitiesWithoutSnapshot(updates: readonly Readonly<{ id: string; update: EntityUpdate }>[]): void {
+  };
+  updateEntitiesWithoutSnapshot = (updates: readonly Readonly<{ id: string; update: EntityUpdate }>[]): void =>
     commitGameplayDynamicBatch(this.entities, this.kernelState, updates);
-  }
-
-  despawnEntity(id: string): boolean {
-    return RuntimeLifecycle.despawnGameplayEntity(id, this.simulation, this.entities, this.players, () => this.touch());
-  }
+  despawnEntity = (id: string): boolean =>
+    RuntimeLifecycle.despawnGameplayEntity(id, this.simulation, this.entities, this.players, () => this.touch());
 
   queryEntities = (filter: EntityQuery = {}): GameplayEntity[] => this.entities.query(filter);
   queryNearbyEntities = (position: Position, radius: number, filter: EntityQuery = {}): GameplayEntity[] =>
@@ -373,30 +378,18 @@ export class GameplayRuntime {
   craft = (id: string, recipeId: string) => (this.registeredInventory ?? this.inventoryActions).craft(id, recipeId);
   listCraftable = (id: string) => (this.registeredInventory ?? this.inventoryActions).listCraftable(id);
   listRecipes = () => this.content.recipes.list();
-  beginBreak(id: string, position: Position): GameplayResult<{ requiredSeconds: number; commit?: WorldCommitResult }> {
-    return (this.registeredBlocks ?? this.blocks).beginBreak(id, position);
-  }
-
-  cancelBreak(id: string): GameplayResult {
-    return (this.registeredBlocks ?? this.blocks).cancelBreak(id);
-  }
-
-  pickupItem(playerId: string, entityId: string): GameplayResult {
-    return (this.registeredInventory ?? this.inventoryActions).pickup(playerId, entityId);
-  }
-
-  dropItem(playerId: string, slot: number, count: number): GameplayResult<{ entity: GameplayEntity }> {
-    return (this.registeredInventory ?? this.inventoryActions).drop(playerId, slot, count);
-  }
-
-  placeVoxel(id: string, position: Position): GameplayResult<{ commit: WorldCommitResult }> {
-    return (this.registeredBlocks ?? this.blocks).placeVoxel(id, position);
-  }
+  beginBreak = (id: string, position: Position) => (this.registeredBlocks ?? this.blocks).beginBreak(id, position);
+  cancelBreak = (id: string): GameplayResult => (this.registeredBlocks ?? this.blocks).cancelBreak(id);
+  pickupItem = (playerId: string, entityId: string): GameplayResult =>
+    (this.registeredInventory ?? this.inventoryActions).pickup(playerId, entityId);
+  dropItem = (playerId: string, slot: number, count: number) =>
+    (this.registeredInventory ?? this.inventoryActions).drop(playerId, slot, count);
+  placeVoxel = (id: string, position: Position) => (this.registeredBlocks ?? this.blocks).placeVoxel(id, position);
   useFluidContainer = (id: string, position: Position) => this.blocks.useFluidContainer(id, position);
 
-  useSelectedItem(id: string): GameplayResult {
-    return this.useInventoryItem(id, this.entities.actorStateAccess(id).selectedSlot);
-  }
+  useSelectedItem = (id: string): GameplayResult =>
+    this.useInventoryItem(id, this.entities.actorStateAccess(id).selectedSlot);
+  fireSelectedRangedItem = (id: string, direction: ProjectileVector) => this.projectiles.fireSelected(id, direction);
 
   useInventoryItem(id: string, slot: number): GameplayResult {
     return (this.registeredInventory ?? this.inventoryActions).consume(id, slot);
@@ -414,8 +407,7 @@ export class GameplayRuntime {
     targetId: string,
   ): GameplayResult<{ actionId: string; buffered: boolean; damage?: number }> {
     const player = this.player(playerId);
-    const active = this.requireAlive(player);
-    if (active) return active;
+    if (player.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
     if (this.registeredCombat) return this.registeredCombat.request(playerId, targetId);
     return requestProfiledPlayerCombat(playerId, targetId, player, this.content, this.simulation, () => this.touch());
   }
@@ -453,7 +445,7 @@ export class GameplayRuntime {
   respawnPlayer = (playerId: string) => this.vitals.respawnPlayer(playerId);
 
   advanceRules(seconds: number): { commits: WorldCommitResult[] } {
-    return advanceGameplayWithEnvironment(seconds, {
+    const result = advanceGameplayWithEnvironment(seconds, {
       schedule: this.schedule,
       modules: this.modules,
       blocks: this.registeredBlocks,
@@ -483,6 +475,8 @@ export class GameplayRuntime {
         if (this.schedule) this.kernelState.synchronizeGameplayTime(this.kernelState.epoch, this.schedule.time);
       },
     });
+    this.projectiles.advance(seconds);
+    return result;
   }
 
   advanceCommitUpperBound(seconds: number): number {
@@ -513,10 +507,6 @@ export class GameplayRuntime {
     const player = this.players.get(id);
     if (!player) throw new RangeError(`Unknown player: ${id}`);
     return player;
-  }
-
-  private requireAlive(player: Pick<PlayerState, 'lifecycle'>): Failure | null {
-    return player.lifecycle === 'alive' ? null : { success: false, reason: 'player-dead' };
   }
 
   private assertRevisionCapacity(): void {

@@ -26,6 +26,7 @@ import {
 } from '../authority/authority-kernel-state';
 import { DifficultyRuntime, type DifficultyCheckpoint } from './difficulty-runtime';
 import { EnvironmentRuntime, type EnvironmentCheckpoint } from './environment-runtime';
+import { createProjectileRuntime, type ProjectileCheckpoint } from './projectile-runtime';
 
 type Position = [number, number, number];
 
@@ -65,6 +66,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   authoritySession?: AuthorityKernelState;
   difficulty?: DifficultyCheckpoint;
   environment?: EnvironmentCheckpoint;
+  projectiles?: ProjectileCheckpoint;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -82,6 +84,7 @@ export const createGameplaySnapshotV4 = (
   authoritySession?: AuthorityKernelState,
   difficulty?: DifficultyCheckpoint,
   environment?: EnvironmentCheckpoint,
+  projectiles?: ProjectileCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -94,6 +97,14 @@ export const createGameplaySnapshotV4 = (
     : {}),
   ...(difficulty ? { difficulty: new DifficultyRuntime(difficulty).checkpoint() } : {}),
   ...(environment ? { environment: new EnvironmentRuntime(environment.seed, environment).checkpoint() } : {}),
+  ...(projectiles
+    ? {
+        projectiles: createProjectileRuntime(
+          { firstVoxelHit: () => null, firstActorHit: () => null, applyDamage: () => undefined },
+          projectiles,
+        ).checkpoint(),
+      }
+    : {}),
   ...createGameplaySnapshotMetadata(),
 });
 
@@ -441,6 +452,15 @@ export function validateGameplaySnapshot(
         ? decodeAuthorityKernelState(source.authoritySession as import('@seedlands/kernel').KernelValue | undefined)
         : createAuthorityKernelState(),
       source.version === 4 ? new DifficultyRuntime(source.difficulty).checkpoint() : undefined,
+      source.version === 4 && source.environment
+        ? new EnvironmentRuntime(source.environment.seed, source.environment).checkpoint()
+        : undefined,
+      source.version === 4 && source.projectiles
+        ? createProjectileRuntime(
+            { firstVoxelHit: () => null, firstActorHit: () => null, applyDamage: () => undefined },
+            source.projectiles,
+          ).checkpoint()
+        : undefined,
     );
     if (options.registeredNeeds && sourceVersion < 4) {
       const phase =
