@@ -9,6 +9,7 @@
     "apps/web/tests/integration/runtime/server/composition/overworld-progression-journey.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-material-smelting.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-precious-tools.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/classic-tool-matrix.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/classic-tool-matrix.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-building-blocks.test.ts"
   ]
 }

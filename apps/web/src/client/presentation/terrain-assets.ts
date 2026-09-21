@@ -40,6 +40,8 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.IronBlock, '铁块', ['a5b3b1', 'c7d5d0', '728a89', 'e3e9dc']],
   [FaceMaterial.GoldBlock, '金块', ['c89e3f', 'e5c65f', '99702c', 'ffe59c']],
   [FaceMaterial.DiamondBlock, '钻石块', ['39a4ab', '6fced0', '20747e', 'b7efe6']],
+  [FaceMaterial.Sandstone, '砂岩', ['c9b988', 'ddd0a0', 'a89966', 'efe6c2']],
+  [FaceMaterial.StoneBricks, '石砖', ['6b7074', '858c90', '4c5155', 'a3aab0']],
 ];
 
 // First-party pixel sources are deterministic and independent of atlas layout.
@@ -109,6 +111,17 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
     }
     if ([FaceMaterial.IronBlock, FaceMaterial.GoldBlock, FaceMaterial.DiamondBlock].includes(face as 24 | 25 | 26)) {
       index = x === 0 || y === 15 ? 3 : x === 15 || y === 0 ? 4 : (x + y) % 13 === 0 ? 2 : 1;
+    }
+    if (face === FaceMaterial.Sandstone) {
+      // Layered sandstone: banded strata with a framed top and base course.
+      index = y < 2 || y > 13 ? 3 : (y - 2) % 4 === 0 ? 2 : noise < 5 ? 4 : 1;
+      if (x === 0 || x === 15) index = 3;
+    }
+    if (face === FaceMaterial.StoneBricks) {
+      // Offset brick courses with recessed mortar seams.
+      const row = Math.floor(y / 4);
+      const seam = y % 4 === 0 || (x + (row % 2) * 4) % 8 === 0;
+      index = seam ? 3 : y % 4 === 1 ? 4 : noise < 9 ? 2 : 1;
     }
     return index;
   });

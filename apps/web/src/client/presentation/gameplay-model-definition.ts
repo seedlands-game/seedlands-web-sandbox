@@ -22,6 +22,8 @@ const blockItems = new Set([
   'iron-block',
   'gold-block',
   'diamond-block',
+  'sandstone',
+  'stone-bricks',
 ]);
 
 export function itemVisualKind(itemId: string): ItemVisualKind {

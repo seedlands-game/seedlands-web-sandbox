@@ -296,10 +296,13 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Sandstone"
+      "execution": "HEADLESS_PASS",
+      "name": "Sandstone",
+      "seedlandsVoxelId": 24,
+      "source": "playbooks/classic/src/blocks.ts",
+      "note": "S2c建材：砂岩(4沙合成/voxel24)与石砖(4石合成得4/voxel25)可合成、放置、镐采并掉落自身，headless定向测试通过。非全量Beta台阶/半砖变体。"
     },
     {
       "caseId": "B-025",

@@ -57,7 +57,7 @@ describe('S4 voxel progression palette', () => {
 
   it('assigns stable IDs and complete full-cube materials to the five new voxels', () => {
     expect(GENERATOR_VERSION).toBe(5);
-    expect(MAX_VOXEL_ID).toBe(Voxel.DiamondBlock);
+    expect(MAX_VOXEL_ID).toBe(Voxel.StoneBricks);
     expect([Voxel.Workbench, Voxel.Chest, Voxel.Furnace, Voxel.CoalOre, Voxel.IronOre]).toEqual([11, 12, 13, 14, 15]);
     expect([
       FaceMaterial.Workbench,
@@ -73,9 +73,9 @@ describe('S4 voxel progression palette', () => {
       faceMaterialFor(Voxel.CoalOre, 0, false),
       faceMaterialFor(Voxel.IronOre, 1, false),
     ]).toEqual([14, 15, 16, 17, 18]);
-    expect(MATERIAL_LAYER_COUNT).toBe(26);
-    expect(terrainMaterials).toHaveLength(26);
-    expect(builtinTerrainTextures).toHaveLength(26);
+    expect(MATERIAL_LAYER_COUNT).toBe(28);
+    expect(terrainMaterials).toHaveLength(28);
+    expect(builtinTerrainTextures).toHaveLength(28);
     for (const [material, textureName] of [
       [FaceMaterial.Workbench, 'workbench'],
       [FaceMaterial.Chest, 'chest'],
@@ -114,6 +114,8 @@ describe('S4 voxel progression palette', () => {
       [Voxel.IronBlock, FaceMaterial.IronBlock],
       [Voxel.GoldBlock, FaceMaterial.GoldBlock],
       [Voxel.DiamondBlock, FaceMaterial.DiamondBlock],
+      [Voxel.Sandstone, FaceMaterial.Sandstone],
+      [Voxel.StoneBricks, FaceMaterial.StoneBricks],
     ] as const;
     for (const [voxel, material] of expected) {
       const data = new Uint16Array(32 ** 3);

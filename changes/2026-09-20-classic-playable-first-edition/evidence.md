@@ -73,3 +73,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：斧（tier2/3/1/4，multiplier4/6/12/8，耐久132/250/32/1561）由 3 材料+2 木棍工作台合成，剑（melee 分级伤害 6/7/5/8 与二段 +2）由 2 材料+1 木棍合成；工具矩阵 3 tests、item-visual-compatibility 扩充图标 3 tests 全绿。
 - test:classic:headless 现 7 files/10 tests PASS（含既有铁器/金钻成长、木板、食物、木棍与新工具矩阵）；gameplay-content-consumers 4 + registered-content 2 + gameplay-registered-combat 19 复跑 PASS，melee 注册未破坏。
 - 生产构建 PASS：sourceSha ac377dd6f5ec59d918a33de74c5ac8d7873be7f8，sourceDigest 1bf7229485d54f6ec1751c1f9a871ef9caacad7a699eea07e07be563a81043ba，artifactDigest d45db8dd5bd051168c4ac6ab02d4a456b639394b413ee4baf87ea5befb1f9e61。coverage 将 I-258/267/272/275/276/279/283/286 标为 HEADLESS_PASS。斧/剑未做浏览器专项手势，仍非全量 Beta 附魔/合成变体等价；S3–S7 缺项继续保留。
+
+## S2d 建材扩展（砂岩/石砖）
+
+- RED：classic-building-blocks.test.ts 断言 sandstone/stone-bricks 存在，`Unknown item: sandstone` 失败。
+- 实现后 GREEN：新增体素 Sandstone=24、StoneBricks=25 与材质 27/28（MATERIAL_LAYER_COUNT 28、terrainMaterials/textures 28）；4 沙→1 砂岩、4 石→4 石砖工作台合成，镐 tier1 采集掉落自身。voxel-progression、voxel-render-pipeline、wasm mesh/halo/world-kernel 逐字节一致复跑 PASS，Rust generation/mesh 指纹重建校验通过。
+- test:classic:headless 现 8 files/11 tests PASS。生产构建 PASS：sourceSha bf71b4ec262caa4387fc165881988e5e57d34dd8，sourceDigest dd8d9f81b39ba77cc2250612ea22a1c48ed2dd0f7aa921e4df241a9a2dfc8154，artifactDigest c6e08a97e6ad005ec49cab87935560263a13f6af6ff271786feeda9537a4d058。coverage 将 B-024 砂岩标 HEADLESS_PASS。石砖属新增 Seedlands 建材（Beta 无 4 石→4 石砖直合成配方），砖块 B-045（红砖/黏土链）与半砖/楼梯变体仍未实现。

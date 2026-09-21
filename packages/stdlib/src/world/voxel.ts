@@ -34,10 +34,12 @@ export const Voxel = {
   IronBlock: 21,
   GoldBlock: 22,
   DiamondBlock: 23,
+  Sandstone: 24,
+  StoneBricks: 25,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.DiamondBlock;
+export const MAX_VOXEL_ID = Voxel.StoneBricks;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -66,6 +68,8 @@ export const FaceMaterial = {
   IronBlock: 24,
   GoldBlock: 25,
   DiamondBlock: 26,
+  Sandstone: 27,
+  StoneBricks: 28,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -97,6 +101,8 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.IronBlock]: 'iron-block',
   [FaceMaterial.DiamondOre]: 'diamond-ore',
   [FaceMaterial.GoldOre]: 'gold-ore',
+  [FaceMaterial.Sandstone]: 'sandstone',
+  [FaceMaterial.StoneBricks]: 'stone-bricks',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -123,6 +129,8 @@ export const voxelNames: Record<number, string> = {
   [Voxel.IronBlock]: '铁块',
   [Voxel.DiamondOre]: '钻石矿石',
   [Voxel.GoldOre]: '金矿石',
+  [Voxel.Sandstone]: '砂岩',
+  [Voxel.StoneBricks]: '石砖',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -149,6 +157,8 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.IronBlock]: [0.75, 0.8, 0.77],
   [Voxel.DiamondOre]: [0.3, 0.68, 0.7],
   [Voxel.GoldOre]: [0.6, 0.53, 0.25],
+  [Voxel.Sandstone]: [0.83, 0.76, 0.55],
+  [Voxel.StoneBricks]: [0.5, 0.52, 0.54],
 };
 
 export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water;
@@ -186,6 +196,8 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.IronBlock]: FaceMaterial.IronBlock,
       [Voxel.DiamondOre]: FaceMaterial.DiamondOre,
       [Voxel.GoldOre]: FaceMaterial.GoldOre,
+      [Voxel.Sandstone]: FaceMaterial.Sandstone,
+      [Voxel.StoneBricks]: FaceMaterial.StoneBricks,
     } as Record<number, FaceMaterialId>
   )[id];
 }

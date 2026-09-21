@@ -174,7 +174,7 @@ describe('W04/W05 Wasm mesh descriptors', () => {
               const index = voxelIndex(x, y, z);
               if (kind === 'solid') data[index] = Voxel.Stone;
               if (kind === 'planks' && y === 4) data[index] = Voxel.Planks;
-              if (kind === 'precious' && y === 4) data[index] = [19, 20, 21, 22, 23][x % 5];
+              if (kind === 'precious' && y === 4) data[index] = [19, 20, 21, 22, 23, 24, 25][x % 7];
               if (kind === 'glass' && y === 4) data[index] = x < 16 ? Voxel.Glass : Voxel.Cobblestone;
               if (kind === 'checkerboard') data[index] = (x + y + z) % 2 ? Voxel.Stone : Voxel.Air;
               if (kind === 'water-stair' && y === 4) {

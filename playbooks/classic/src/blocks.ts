@@ -139,6 +139,22 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'diamond-block', count: 1 },
     replaceable: false,
   },
+  [24]: {
+    voxel: 24,
+    hardnessSeconds: 1.6,
+    preferredTool: 'pickaxe',
+    minimumTier: 1,
+    drop: { itemId: 'sandstone', count: 1 },
+    replaceable: false,
+  },
+  [25]: {
+    voxel: 25,
+    hardnessSeconds: 2.2,
+    preferredTool: 'pickaxe',
+    minimumTier: 1,
+    drop: { itemId: 'stone-bricks', count: 1 },
+    replaceable: false,
+  },
   [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,
