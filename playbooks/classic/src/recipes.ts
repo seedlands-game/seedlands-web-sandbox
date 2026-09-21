@@ -106,6 +106,40 @@ export const overworldRecipes: readonly Recipe[] = [
     outputs: [{ itemId: 'torch', count: 4 }],
   },
   { id: 'fence', inputs: [{ itemId: 'stick', count: 6 }], outputs: [{ itemId: 'fence', count: 2 }] },
+  { id: 'bricks', inputs: [{ itemId: 'brick', count: 4 }], outputs: [{ itemId: 'bricks', count: 1 }] },
+  {
+    id: 'bookshelf',
+    inputs: [
+      { itemId: 'plank', count: 6 },
+      { itemId: 'book', count: 3 },
+    ],
+    outputs: [{ itemId: 'bookshelf', count: 1 }],
+  },
+  {
+    id: 'note-block',
+    inputs: [
+      { itemId: 'plank', count: 8 },
+      { itemId: 'redstone-dust', count: 1 },
+    ],
+    outputs: [{ itemId: 'note-block', count: 1 }],
+  },
+  {
+    id: 'jukebox',
+    inputs: [
+      { itemId: 'plank', count: 8 },
+      { itemId: 'diamond', count: 1 },
+    ],
+    outputs: [{ itemId: 'jukebox', count: 1 }],
+  },
+  {
+    id: 'jack-o-lantern',
+    inputs: [
+      { itemId: 'pumpkin', count: 1 },
+      { itemId: 'torch', count: 1 },
+    ],
+    outputs: [{ itemId: 'jack-o-lantern', count: 1 }],
+  },
+  { id: 'trapdoor', inputs: [{ itemId: 'plank', count: 6 }], outputs: [{ itemId: 'trapdoor', count: 2 }] },
   {
     id: 'lapis-block-unpack',
     inputs: [{ itemId: 'lapis-block', count: 1 }],

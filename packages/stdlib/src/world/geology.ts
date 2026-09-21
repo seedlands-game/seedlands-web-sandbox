@@ -3,6 +3,7 @@ import type { VoxelId } from './voxel';
 import { oreHash } from './ore-generation';
 
 export const GEOLOGY_SALT = 0x47454f39;
+export const REDSTONE_SALT = 0x52454453;
 const IDS = {
   Air: 0,
   Stone: 3,
@@ -57,6 +58,10 @@ export function geologyVoxelFromColumn(
   if (waterLevel !== null && base !== IDS.Air && y > terrainHeight - 3 && hash % 5 < 3) return IDS.Clay as VoxelId;
   if (base === IDS.Stone && y >= 0 && y < 32 && terrainHeight - y >= 8 && hash % 997 < 20)
     return IDS.LapisOre as VoxelId;
+  if (generatorVersion >= 10 && base === IDS.Stone && y >= 0 && y < 24 && terrainHeight - y >= 10) {
+    const redstone = oreHash(seed, Math.floor(x / 2), Math.floor(y / 2), Math.floor(z / 2), REDSTONE_SALT);
+    if (redstone % 997 < 32) return 72 as VoxelId;
+  }
   if (base === IDS.Stone && terrainHeight - y >= 4 && (hash >>> 8) % 97 < 8) return IDS.Gravel as VoxelId;
   return base;
 }

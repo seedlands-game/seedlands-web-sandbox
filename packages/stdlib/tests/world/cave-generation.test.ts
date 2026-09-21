@@ -13,13 +13,13 @@ it('V5控制字节冻结；旧版本(2-6)保存可解析，v7拒绝', () => {
     '23048253e362d35e6375ad051512dcaf09e6aa883cec953e1fee8916aa3a997a',
   );
 
-  for (const generatorVersion of [2, 3, 4, 5, 6, 7, 8, 9])
+  for (const generatorVersion of [2, 3, 4, 5, 6, 7, 8, 9, 10])
     expect(
       decodeWorldSave(JSON.stringify({ seed: 'cave', generatorVersion, player: [0, 2, 0], changes: [] }))
         ?.generatorVersion,
     ).toBe(generatorVersion);
   expect(
-    decodeWorldSave(JSON.stringify({ seed: 'cave', generatorVersion: 10, player: [0, 2, 0], changes: [] })),
+    decodeWorldSave(JSON.stringify({ seed: 'cave', generatorVersion: 11, player: [0, 2, 0], changes: [] })),
   ).toBeNull();
 });
 

@@ -302,6 +302,36 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
       { voxel, hardnessSeconds: 0.7, preferredTool: null, drop: { itemId, count: 1 }, replaceable: false },
     ]),
   ),
+  ...Object.fromEntries(
+    (
+      [
+        [59, 'dead-bush', 0.05, null],
+        [60, 'wool-block', 0.8, null],
+        [61, 'red-flower', 0.05, null],
+        [62, 'red-mushroom', 0.05, null],
+        [63, 'bricks', 2, 'pickaxe'],
+        [64, 'bookshelf', 1.5, 'axe'],
+        [65, 'mossy-cobblestone', 2, 'pickaxe'],
+        [66, 'note-block', 1.2, 'axe'],
+        [67, 'jukebox', 2, 'axe'],
+        [68, 'pumpkin', 1, 'axe'],
+        [69, 'jack-o-lantern', 1, 'axe'],
+        [70, 'trapdoor', 1, 'axe'],
+        [71, 'furnace', 2.4, 'pickaxe'],
+        [72, 'redstone-dust', 3, 'pickaxe'],
+        [73, 'redstone-dust', 3, 'pickaxe'],
+      ] as const
+    ).map(([voxel, itemId, hardnessSeconds, preferredTool]) => [
+      voxel,
+      {
+        voxel,
+        hardnessSeconds,
+        preferredTool,
+        drop: { itemId, count: voxel >= 72 ? 4 : 1 },
+        replaceable: voxel === 59 || voxel === 61 || voxel === 62,
+      },
+    ]),
+  ),
   [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,

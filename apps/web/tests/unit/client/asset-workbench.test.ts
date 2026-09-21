@@ -13,7 +13,10 @@ describe('统一资产目录与有界适配', () => {
     );
     for (const binding of builtinItemBindings) {
       expect(binding.name).toBe(listItemDefinitions().find((item) => item.id === binding.itemId)?.name);
-      expect(builtinAssets.some((a) => a.id === binding.iconId)).toBe(true);
+      expect(
+        builtinAssets.some((a) => a.id === binding.iconId),
+        `${binding.itemId}:${binding.iconId}`,
+      ).toBe(true);
       expect(builtinAssets.some((a) => a.id === binding.modelId)).toBe(true);
       if (builtinAssets.find((a) => a.id === binding.modelId)?.type === 'extruded-pixel-model')
         expect(acceptsPixelItem(listItemDefinitions().find((item) => item.id === binding.itemId)!)).toBe(true);
