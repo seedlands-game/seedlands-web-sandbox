@@ -293,6 +293,9 @@ export class GameServerGameplayHost {
   get navigationItems() {
     return this.gameplay.navigationItems;
   }
+  get crops() {
+    return this.gameplay.crops;
+  }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
   }

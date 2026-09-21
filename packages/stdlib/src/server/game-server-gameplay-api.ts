@@ -56,6 +56,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'lifeSkills',
   'vehicles',
   'navigationItems',
+  'crops',
   'attackEntity',
   'getCombatState',
   'applyDamage',

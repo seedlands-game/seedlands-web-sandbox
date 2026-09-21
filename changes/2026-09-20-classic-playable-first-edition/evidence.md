@@ -152,6 +152,11 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - GREEN：注册纸、红石粉、指南针、时钟和地图及四条配方；指南针读取保存出生点并输出稳定归一角，时钟将主世界时间归一为昼夜相位。每世界 NavigationItemsRuntime 只在玩家选中地图时采样已加载 9×9 窗口，支持0–4缩放、稳定颜色和 map id；未知格不猜测，缩放改变清空旧比例像素。
 - 地图序列、中心、缩放和像素进入可选 Gameplay V4 checkpoint；校验 id 高水位、唯一玩家/地图、像素坐标和颜色范围，并在安装实体前验证关联玩家。特殊物品/快照/资产 3 files / 29 tests PASS；连同载具回归为4 files / 33 tests PASS。`verify:static:ci` 首次因 gameplay-snapshot 502行失败，未加豁免，抽出 legacy 坐标迁移模块后最终 PASS（snapshot 497行、Svelte 0/0、ESLint 66、CI selection 8）。动态图标与手持地图浏览器画面留待 S7。
 
+## S5d 农业运行时
+
+- RED：classic-crop-runtime 3/3 因 `world.crops` 缺失失败。GREEN 后 CropRuntime 成为每世界 owner：选中种子只在已加载耕地及上方空气种植并原子扣种；重复/未知位置零提交。seed+tick+坐标稳定抽样只推进已加载、水化作物，成熟封顶；收割先在临时背包验证全部产物容量，再提交库存并移除作物。
+- crop runtime/pure growth/snapshot migration 共3 files / 28 tests PASS，覆盖阶段7成熟、保存恢复与非法请求。checkpoint 为 V4 可选字段，旧档恢复为空。`verify:static:ci` 两次先后因 gameplay-snapshot、gameplay-runtime 增长越过500行失败；未加豁免，分别抽出 legacy 坐标迁移并压缩既有 facade，最终静态门禁 PASS。作物网格模型、自然草种掉落和浏览器手势仍留 S7。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。

@@ -21,6 +21,7 @@ import type { ProjectileRuntime } from './projectile-runtime';
 import type { LifeSkillsRuntime } from './life-skills-runtime';
 import type { VehicleRuntime } from './vehicle-runtime';
 import type { NavigationItemsRuntime } from './navigation-items-runtime';
+import type { CropRuntime } from './crop-runtime';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -42,6 +43,7 @@ type Options = Readonly<{
   lifeSkills: LifeSkillsRuntime;
   vehicles: VehicleRuntime;
   navigationItems: NavigationItemsRuntime;
+  crops: CropRuntime;
   needsPlayerLimit?: number;
   installMetadata(gameplayTime: number, revision: number): void;
 }>;
@@ -68,6 +70,7 @@ export class GameplayRuntimeCheckpoint {
       this.options.lifeSkills.checkpoint(),
       this.options.vehicles.checkpoint(),
       this.options.navigationItems.checkpoint(),
+      this.options.crops.checkpoint(),
     );
     if (this.options.compositionGuard) snapshot.composition = this.options.compositionGuard.snapshot();
     const ruleset = this.options.ruleset.snapshot();
@@ -151,6 +154,11 @@ export class GameplayRuntimeCheckpoint {
     this.options.navigationItems.restore(
       raw && typeof raw === 'object' && 'navigationItems' in raw
         ? (raw.navigationItems as import('./navigation-items-runtime').NavigationItemsCheckpoint)
+        : undefined,
+    );
+    this.options.crops.restore(
+      raw && typeof raw === 'object' && 'crops' in raw
+        ? (raw.crops as import('./crop-runtime').CropCheckpoint)
         : undefined,
     );
     installSchedule?.();

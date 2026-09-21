@@ -11,6 +11,7 @@ import { createGameplaySpeciesFacade } from './gameplay-species-facade';
 import { LifeSkillsRuntime } from './life-skills-runtime';
 import { VehicleRuntime } from './vehicle-runtime';
 import { NavigationItemsRuntime } from './navigation-items-runtime';
+import { CropRuntime } from './crop-runtime';
 
 export function createGameplayWorldSystems(
   options: Readonly<{
@@ -63,5 +64,11 @@ export function createGameplayWorldSystems(
     getLoadedVoxel: options.callbacks.getLoadedVoxel,
     changed: options.changed,
   });
-  return { projectiles, speciesInteractions, lifeSkills, vehicles, navigationItems };
+  const crops = new CropRuntime({
+    seed: options.callbacks.environmentSeed ?? 0,
+    entities: options.entities,
+    getLoadedVoxel: options.callbacks.getLoadedVoxel,
+    changed: options.changed,
+  });
+  return { projectiles, speciesInteractions, lifeSkills, vehicles, navigationItems, crops };
 }
