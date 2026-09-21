@@ -20,6 +20,8 @@
     performanceWarningOpen: application.performanceWarningOpen,
     mouseSensitivity: application.mouseSensitivity,
     difficulty: application.difficulty,
+    settingsError: application.settingsError,
+    settingsChanging: application.settingsChanging,
   });
   let view = $state(initial());
   const readAudio = () => application.audio.snapshot();
@@ -144,6 +146,7 @@
               <select
                 id="settings-difficulty"
                 value={view.difficulty.value}
+                disabled={view.settingsChanging}
                 onchange={(event) =>
                   void application.setDifficulty(
                     event.currentTarget
@@ -156,6 +159,7 @@
               </select>
             </label>
           {/if}
+          {#if view.settingsError}<p role="alert" class="start-error">{view.settingsError}</p>{/if}
         </div>
         <div class="reference-music experimental-settings" aria-label="实验性性能">
           <h3>实验性性能</h3>
@@ -224,7 +228,9 @@
             >{/if}
         </div>
         {#if audio.error}<p role="alert" class="start-error">{audio.error}</p>{/if}
-        <GameButton label="返回" onclick={() => application.closePanel()}>返回</GameButton>
+        <GameButton label="返回" disabled={view.settingsChanging} onclick={() => application.closePanel()}
+          >返回</GameButton
+        >
       {:else if view.panel === 'guide'}
         <p class="eyebrow">FIRST STEPS</p>
         <h2>操作指南</h2>

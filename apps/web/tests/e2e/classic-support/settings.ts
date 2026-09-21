@@ -14,10 +14,12 @@ export async function configureClassicSettings(page: Page): Promise<void> {
   await expect(page.locator('#mouse-sensitivity')).toHaveValue('0.25');
   await page.locator('#mouse-sensitivity').fill('0.13');
   await page.locator('#settings-difficulty').selectOption('hard');
-  await expect(page.locator('#settings-difficulty')).toHaveValue('hard');
+  await expect(page.getByRole('button', { name: '返回', exact: true })).toBeEnabled();
   await page.locator('#settings-difficulty').selectOption('normal');
+  const back = page.getByRole('button', { name: '返回', exact: true });
+  await expect(back).toBeEnabled();
   await expect(page.locator('#settings-difficulty')).toHaveValue('normal');
-  await page.getByRole('button', { name: '返回', exact: true }).click();
+  await back.click();
   await page.getByRole('button', { name: '继续游戏', exact: true }).click();
 }
 

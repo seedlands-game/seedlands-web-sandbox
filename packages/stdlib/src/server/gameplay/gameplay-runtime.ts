@@ -53,7 +53,7 @@ import {
 import { commitGameplayDynamicBatch } from './gameplay-dynamic-batch';
 import { createGameplayHotbarSelection } from './gameplay-inventory-selection';
 import { GameplayEnvironmentFacade } from './gameplay-environment-facade';
-import { collectGameplayRuntimeMetrics } from './gameplay-runtime-metrics';
+import { collectRuntimeStatistics } from './gameplay-runtime-statistics';
 import { DifficultyRuntime, type Difficulty } from './difficulty-runtime';
 import { applySurvivalDamage, changeDifficulty, equipArmor, useSelectedBed } from './gameplay-survival-settings';
 import { EnvironmentRuntime } from './environment-runtime';
@@ -95,6 +95,7 @@ export class GameplayRuntime {
   private readonly registeredFeeding: RegisteredFeedingRuntime | null;
   private readonly registeredCombat: RegisteredCombatRuntime | null;
   private readonly checkpoint: GameplayRuntimeCheckpoint;
+  // prettier-ignore -- compact declarations for world-system façades assembled below.
   readonly speciesInteractions;
   readonly lifeSkills;
   readonly vehicles;
@@ -113,7 +114,10 @@ export class GameplayRuntime {
     this.content = resolved.content;
     this.environment = new EnvironmentRuntime(callbacks.environmentSeed ?? 0);
     this.environmentQueries = new GameplayEnvironmentFacade(this, callbacks);
-    this.progress = new GameplayProgressRuntime(() => this.touch());
+    this.progress = new GameplayProgressRuntime(
+      () => this.touch(),
+      (id) => this.players.has(id),
+    );
     const kernel = createGameplayKernelRuntime(this.content, callbacks.composition, callbacks.worldId);
     this.kernelRuntime = kernel.runtime;
     this.kernelState = kernel.runtime.stateOwner;
@@ -369,6 +373,9 @@ export class GameplayRuntime {
   get persistedGameplayRevision(): number {
     return this.persistedRevision;
   }
+  get platform() {
+    return this.callbacks.platform;
+  }
 
   spawn = (input: EntitySpawn): GameplayEntity =>
     RuntimeLifecycle.spawnGameplayEntity(input, {
@@ -498,16 +505,7 @@ export class GameplayRuntime {
   advanceRules = (seconds: number): { commits: WorldCommitResult[] } => this.advanceWorldRules.advance(seconds);
   advanceCommitUpperBound = (seconds: number): number => this.advanceWorldRules.commitUpperBound(seconds);
   createSnapshot = () => this.checkpoint.create(() => this.kernelState.gameplayRevision, this.gameplayTime);
-  metrics() {
-    return collectGameplayRuntimeMetrics({
-      entities: this.entities,
-      simulation: this.simulation,
-      inventoryOperationCount: this.inventoryOperationCount,
-      gameplayEventCount: this.eventCount,
-      platform: this.callbacks.platform,
-      snapshot: this.createSnapshot,
-    });
-  }
+  metrics = () => collectRuntimeStatistics(this, this.inventoryOperationCount, this.eventCount);
   restoreSnapshot = (raw: unknown) => this.checkpoint.restore(raw);
   markPersisted = (revision: number): void =>
     void (this.persistedRevision = Math.max(this.persistedRevision, revision));

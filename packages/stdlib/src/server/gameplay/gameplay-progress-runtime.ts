@@ -64,10 +64,19 @@ export function validateGameplayProgressCheckpoint(value: GameplayProgressCheckp
 
 export class GameplayProgressRuntime {
   readonly #players = new Map<string, PlayerProgress>();
-  constructor(private readonly changed: () => void) {}
+  constructor(
+    private readonly changed: () => void,
+    private readonly playerExists: (id: string) => boolean = () => true,
+  ) {}
 
   record(playerId: string, statistic: GameplayStatistic, increment: number) {
-    if (!playerId.trim() || !statisticSet.has(statistic) || !Number.isSafeInteger(increment) || increment <= 0)
+    if (
+      !playerId.trim() ||
+      !this.playerExists(playerId) ||
+      !statisticSet.has(statistic) ||
+      !Number.isSafeInteger(increment) ||
+      increment <= 0
+    )
       return { success: false as const, reason: 'invalid-progress' };
     const current = this.snapshot(playerId);
     const previous = current.statistics[statistic] ?? 0;
@@ -100,6 +109,10 @@ export class GameplayProgressRuntime {
   restore(value?: GameplayProgressCheckpoint) {
     const checkpoint = validateGameplayProgressCheckpoint(value);
     this.#players.clear();
-    checkpoint.players.forEach((entry) => this.#players.set(entry.playerId, entry));
+    checkpoint.players.forEach((entry) => {
+      if (!this.playerExists(entry.playerId))
+        throw new TypeError(`Gameplay progress player is missing: ${entry.playerId}`);
+      this.#players.set(entry.playerId, entry);
+    });
   }
 }

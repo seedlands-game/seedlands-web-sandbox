@@ -21,6 +21,7 @@ import {
   type ClientCapabilityState,
 } from './client-capability-preflight';
 import { MELEE_SHOWCASE_SEED } from './gameplay/melee-action-showcase';
+import { GENERATOR_VERSION } from '@seedlands/stdlib/world/voxel';
 
 const QUALITY_KEY = 'seedlands.quality.v1';
 const SENSITIVITY_KEY = 'seedlands.mouse-sensitivity.v1';
@@ -46,6 +47,9 @@ export class ApplicationShell {
   latestSeed = '';
   worlds: readonly Readonly<{ worldId: string; seedText: string; generatorVersion: number; updatedAt: number }>[] = [];
   worldManagementError = '';
+  settingsError = '';
+  settingsChanging = false;
+  selectedWorldMode: WorldOpenMode = 'continue';
   panel: 'settings' | 'guide' | null = null;
   readonly appliedExperiments: ResolvedExperimentalClientOptions;
   pendingExperiments: ExperimentalClientOptions;
@@ -92,6 +96,7 @@ export class ApplicationShell {
     } catch {
       /* 使用默认。 */
     }
+    game.setMouseSensitivity(this.mouseSensitivity);
     this.controller = new ShellController({
       start: async (seed, quality, openMode) => {
         const generation = ++this.startGeneration;
@@ -244,12 +249,13 @@ export class ApplicationShell {
   }
 
   continueWorld() {
-    return this.start(this.latestSeed, this.quality);
+    return this.start(this.latestSeed, this.quality, this.selectedWorldMode);
   }
 
-  selectWorld(seed: string) {
+  selectWorld(seed: string, generatorVersion: number) {
     if (this.controller.state.phase !== 'menu') return;
     this.latestSeed = seed;
+    this.selectedWorldMode = generatorVersion === GENERATOR_VERSION ? 'continue' : `continue-v${generatorVersion}`;
     this.publish();
   }
 
@@ -301,8 +307,22 @@ export class ApplicationShell {
   }
 
   async setDifficulty(value: import('@seedlands/stdlib/server/gameplay/difficulty-runtime').Difficulty) {
-    await this.game.setDifficulty(value);
+    if (this.settingsChanging) return false;
+    this.settingsChanging = true;
     this.publish();
+    try {
+      await this.game.setDifficulty(value);
+      this.settingsError = '';
+      this.publish();
+      return true;
+    } catch (error) {
+      this.settingsError = error instanceof Error ? error.message : '难度更新失败。';
+      this.publish();
+      return false;
+    } finally {
+      this.settingsChanging = false;
+      this.publish();
+    }
   }
 
   get difficulty() {
@@ -355,6 +375,11 @@ export class ApplicationShell {
       this.worlds = await this.game.listWorlds();
       this.latestSeed =
         this.worlds[0]?.seedText ?? (await this.game.loadLatestWorldSeed()) ?? this.game.loadSavedSession()?.seed ?? '';
+      this.selectedWorldMode = this.worlds[0]
+        ? this.worlds[0].generatorVersion === GENERATOR_VERSION
+          ? 'continue'
+          : `continue-v${this.worlds[0].generatorVersion}`
+        : 'continue';
     } catch {
       this.worlds = [];
       this.latestSeed = this.game.loadSavedSession()?.seed ?? '';

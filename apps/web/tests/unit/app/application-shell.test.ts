@@ -162,7 +162,8 @@ describe('ApplicationShell experiment and capability gates', () => {
     });
     await application.initialize();
     expect(application.worlds).toHaveLength(1);
-    application.selectWorld('oak');
+    application.selectWorld('oak', 10);
+    expect(application.selectedWorldMode).toBe('continue');
     await application.deleteWorld('seedlands:g10:oak');
     expect(game.deleteWorld).toHaveBeenCalledWith('seedlands:g10:oak');
     await application.start('oak', 'medium');
@@ -183,6 +184,48 @@ describe('ApplicationShell experiment and capability gates', () => {
     await expect(application.deleteWorld('seedlands:g10:oak')).resolves.toBe(false);
     expect(application.worlds).toHaveLength(1);
     expect(application.worldManagementError).toBe('删除事务失败');
+    application.dispose();
+  });
+
+  it('选择旧版世界后继续按钮携带精确 generator，并应用已保存灵敏度', async () => {
+    storage.setItem('seedlands.mouse-sensitivity.v1', '0.21');
+    const game = createGame();
+    game.listWorlds.mockResolvedValue([
+      { worldId: 'seedlands:g8:oak', seedText: 'oak', generatorVersion: 8, updatedAt: 2 },
+    ]);
+    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
+      preflight: async () => capability(),
+    });
+    expect(game.setMouseSensitivity).toHaveBeenCalledWith(0.21);
+    await application.initialize();
+    expect(application.selectedWorldMode).toBe('continue-v8');
+    await application.continueWorld();
+    expect(game.start).toHaveBeenCalledWith('oak', null, 'medium', 'continue-v8');
+    application.dispose();
+  });
+
+  it('难度更新失败保留权威值并暴露设置错误', async () => {
+    const game = createGame();
+    game.setDifficulty.mockRejectedValueOnce(new Error('stale-revision'));
+    const application = new ApplicationShell(game, createUiBridge(), createAudio());
+    await expect(application.setDifficulty('hard')).resolves.toBe(false);
+    expect(application.difficulty?.value).toBe('normal');
+    expect(application.settingsError).toBe('stale-revision');
+    application.dispose();
+  });
+
+  it('难度请求在权威回执前串行并公开等待状态', async () => {
+    const game = createGame();
+    let finish!: () => void;
+    game.setDifficulty.mockImplementationOnce(() => new Promise<void>((resolve) => (finish = resolve)));
+    const application = new ApplicationShell(game, createUiBridge(), createAudio());
+    const first = application.setDifficulty('hard');
+    expect(application.settingsChanging).toBe(true);
+    await expect(application.setDifficulty('easy')).resolves.toBe(false);
+    expect(game.setDifficulty).toHaveBeenCalledTimes(1);
+    finish();
+    await first;
+    expect(application.settingsChanging).toBe(false);
     application.dispose();
   });
 

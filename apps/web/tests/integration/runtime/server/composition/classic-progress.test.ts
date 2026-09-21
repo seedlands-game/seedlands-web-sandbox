@@ -23,6 +23,7 @@ it('正式进度只接受有界正增量并一次性解锁里程碑', () => {
   expect(runtime.progress.record('player', 'blocks-mined', 1)).toMatchObject({ unlocked: [] });
   expect(runtime.progress.snapshot('player')).toMatchObject({ statistics: { 'blocks-mined': 2 } });
   expect(runtime.progress.record('player', 'blocks-mined', 0)).toMatchObject({ success: false });
+  expect(runtime.progress.record('missing', 'blocks-mined', 1)).toMatchObject({ success: false });
 });
 
 it('统计与成就在 Gameplay V4 checkpoint 恢复且不重复解锁', () => {
