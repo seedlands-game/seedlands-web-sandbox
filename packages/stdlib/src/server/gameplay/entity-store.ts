@@ -1,6 +1,7 @@
 import { freezePlayerInventoryLayout, type PlayerInventoryLayout } from './inventory-layout';
 import {
   EcsEntityOwner,
+  ACTOR_ARCHETYPES,
   type EcsActorArchetype,
   type EcsEntityLifecycle,
   type EcsEntityType,
@@ -496,7 +497,7 @@ export class EntityStore {
       entity.maxHealth = maxHealth;
       const archetype = input.archetype ?? (type === 'creature' ? 'grazer' : undefined);
       if (archetype) {
-        if (!['grazer', 'night-stalker', 'settler'].includes(archetype))
+        if (!ACTOR_ARCHETYPES.includes(archetype))
           throw new TypeError(`Unsupported actor archetype: ${String(archetype)}`);
         if ((type === 'npc') !== (archetype === 'settler'))
           throw new TypeError('Settlers must be NPC entities and creature archetypes must be creatures.');

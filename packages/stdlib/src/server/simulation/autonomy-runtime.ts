@@ -89,6 +89,9 @@ export class AutonomyRuntime {
       pois: this.pois,
       getVoxel: options.getVoxel,
       isPlayerAlive: options.isPlayerAlive,
+      dispositionFor: (archetype) =>
+        this.actorProfiles.require(archetype).disposition ??
+        (archetype === 'night-stalker' ? 'hostile' : archetype === 'settler' ? 'neutral' : 'passive'),
     });
     this.combat = new CombatRuntime(
       options.combat ?? {

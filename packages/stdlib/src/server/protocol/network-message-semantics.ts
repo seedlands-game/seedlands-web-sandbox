@@ -1,4 +1,5 @@
 import type { AuthorityAction } from '../protocol/authority-worker-protocol';
+import { isActorArchetype } from '../gameplay/ecs-entity-owner';
 import {
   isPlayablePublicOutboundMessage,
   type PlayablePublicOutboundMessage,
@@ -158,7 +159,7 @@ export type PublicOutboundMessage =
       entities: readonly Readonly<{
         id: string;
         type: 'player' | 'world-item' | 'creature' | 'npc';
-        archetype?: 'grazer' | 'night-stalker' | 'settler';
+        archetype?: import('../gameplay/ecs-entity-owner').EcsActorArchetype;
         position: [number, number, number];
         velocity: [number, number, number];
       }>[];
@@ -409,8 +410,7 @@ export function isPublicOutboundMessage(
         (entity) =>
           isRecord(entity) &&
           hasOnlyKeys(entity, ['id', 'type', 'archetype', 'position', 'velocity']) &&
-          (entity.archetype === undefined ||
-            ['grazer', 'night-stalker', 'settler'].includes(entity.archetype as string)) &&
+          (entity.archetype === undefined || isActorArchetype(entity.archetype)) &&
           isNonEmptyString(entity.id) &&
           ['player', 'world-item', 'creature', 'npc'].includes(entity.type as string) &&
           isPosition(entity.position) &&

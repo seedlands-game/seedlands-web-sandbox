@@ -8,7 +8,23 @@ export const CollisionLayer = Object.freeze({
   PickupSensor: 8,
 });
 
-export type BodyKind = 'player' | 'world-item' | 'grazer' | 'night-stalker' | 'settler';
+export type BodyKind =
+  | 'player'
+  | 'world-item'
+  | 'grazer'
+  | 'night-stalker'
+  | 'settler'
+  | 'chicken'
+  | 'cow'
+  | 'pig'
+  | 'sheep'
+  | 'squid'
+  | 'wolf'
+  | 'zombie'
+  | 'skeleton'
+  | 'spider'
+  | 'creeper'
+  | 'slime';
 export type BodySensorPurpose = 'attraction' | 'pickup';
 export type BodySensorConfig = Readonly<{ purpose: BodySensorPurpose; shape: 'sphere'; radius: number }>;
 
@@ -66,6 +82,17 @@ const configs: Readonly<Record<BodyKind, BodyConfig>> = Object.freeze({
   grazer: character(0.75, 1.9, 2.1),
   'night-stalker': character(0.65, 2.1, 2.8),
   settler: character(0.65, 2.35, 2.2),
+  chicken: character(0.3, 0.7, 1.8),
+  cow: character(0.7, 1.4, 2),
+  pig: character(0.55, 1, 2),
+  sheep: character(0.55, 1.3, 2),
+  squid: character(0.45, 0.9, 1.4),
+  wolf: character(0.4, 0.9, 2.4),
+  zombie: character(0.3, 1.8, 2.3),
+  skeleton: character(0.3, 1.8, 2.4),
+  spider: character(0.7, 0.9, 2.8),
+  creeper: character(0.3, 1.7, 2.3),
+  slime: character(0.5, 1, 2),
 });
 
 for (const config of Object.values(configs))
@@ -83,8 +110,8 @@ export function bodySensorsFor(kind: BodyKind): readonly BodySensorConfig[] {
 
 export function bodyKindForEntity(entity: { type: string; archetype?: string }): BodyKind {
   if (entity.type === 'player' || entity.type === 'world-item') return entity.type;
-  if (entity.type === 'creature' && (entity.archetype === 'grazer' || entity.archetype === 'night-stalker'))
-    return entity.archetype;
+  if (entity.type === 'creature' && entity.archetype !== 'settler' && Object.hasOwn(configs, entity.archetype ?? ''))
+    return entity.archetype as BodyKind;
   if (entity.type === 'npc' && entity.archetype === 'settler') return 'settler';
   throw new RangeError(`Entity has no registered body: ${entity.type}:${String(entity.archetype)}`);
 }

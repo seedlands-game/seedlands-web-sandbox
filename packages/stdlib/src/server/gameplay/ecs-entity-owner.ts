@@ -48,7 +48,25 @@ import {
 } from './ecs-entity-components';
 
 export type EcsEntityType = 'player' | 'world-item' | 'creature' | 'npc' | 'station';
-export type EcsActorArchetype = 'grazer' | 'night-stalker' | 'settler';
+export const ACTOR_ARCHETYPES = [
+  'grazer',
+  'night-stalker',
+  'settler',
+  'chicken',
+  'cow',
+  'pig',
+  'sheep',
+  'squid',
+  'wolf',
+  'zombie',
+  'skeleton',
+  'spider',
+  'creeper',
+  'slime',
+] as const;
+export type EcsActorArchetype = (typeof ACTOR_ARCHETYPES)[number];
+export const isActorArchetype = (value: unknown): value is EcsActorArchetype =>
+  typeof value === 'string' && (ACTOR_ARCHETYPES as readonly string[]).includes(value);
 export type EcsEntityLifecycle = 'active' | 'despawned';
 export type EcsPosition = [number, number, number];
 

@@ -2,6 +2,7 @@ import type { ActorAction } from './action-runtime';
 import type { ActionRuntime } from './action-runtime';
 import type { EntityStore } from '../gameplay/entity-store';
 import type { ActorState } from './actor-state';
+import { actorDisposition } from './actor-state';
 import type { NavigationPosition } from './ground-navigator';
 
 export type ActorAuthorityAction =
@@ -53,7 +54,7 @@ export function startAuthorityMovement(
   const running = context.actions.markRunning(action.id, [entity.position, target]);
   if (actor.behavior !== 'flee') {
     if (actor.archetype === 'grazer') actor.behavior = actor.hunger >= 50 ? 'seek-food' : 'wander';
-    else if (actor.archetype === 'night-stalker') actor.behavior = 'chase';
+    else if (actorDisposition(actor) === 'hostile') actor.behavior = 'chase';
     else actor.behavior = context.worldTime >= 6 && context.worldTime < 18 ? 'routine-work' : 'routine-home';
   }
   return { accepted: true, changed: true, action: running };

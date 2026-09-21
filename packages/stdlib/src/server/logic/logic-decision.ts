@@ -1,5 +1,5 @@
 import type { ActorAction } from '../simulation/action-runtime';
-import { rangeByArchetype, type ActorState } from '../simulation/actor-state';
+import { actorDisposition, rangeByArchetype, type ActorState } from '../simulation/actor-state';
 import type { Poi } from '../simulation/poi-registry';
 import {
   LOGIC_INTENT_TTL_MS,
@@ -158,13 +158,15 @@ function chooseGoal(
     entity,
     observation.entities.filter(
       (candidate) =>
-        candidate.bodyKind === 'night-stalker' &&
+        observation.decisionContext.actors.some(
+          (observed) => observed.state.entityId === candidate.id && actorDisposition(observed.state) === 'hostile',
+        ) &&
         candidate.health !== 0 &&
         distance(entity.position, candidate.position) <= perceptionRange,
     ),
     terrain,
   );
-  if (state.archetype !== 'night-stalker' && threat)
+  if (actorDisposition(state) !== 'hostile' && threat)
     return { kind: 'move', target: fleeTarget(entity, threat), targetEntityId: threat.id };
 
   if (activeMovement) return activeMovement;
@@ -189,7 +191,7 @@ function chooseGoal(
     return { kind: 'move', target: wanderTarget(state, entity) };
   }
 
-  if (state.archetype === 'night-stalker') {
+  if (actorDisposition(state) === 'hostile') {
     const isNight = observation.worldTime >= 18 || observation.worldTime < 6;
     const player = isNight
       ? visibleNearest(

@@ -38,6 +38,7 @@ type Options = {
   pois: PoiRegistry;
   getVoxel: (x: number, y: number, z: number) => number;
   isPlayerAlive: (id: string) => boolean;
+  dispositionFor?: (archetype: ActorArchetype) => 'passive' | 'neutral' | 'hostile';
 };
 
 const distance = (left: readonly number[], right: readonly number[]) =>
@@ -156,9 +157,13 @@ export class PerceptionRuntime {
   }
 
   private isThreat(observer: GameplayEntity, candidate: GameplayEntity): boolean {
-    if (observer.archetype === 'night-stalker')
+    if (observer.archetype && this.disposition(observer.archetype) === 'hostile')
       return candidate.type === 'player' && this.options.isPlayerAlive(candidate.id);
-    return candidate.archetype === 'night-stalker';
+    return Boolean(candidate.archetype && this.disposition(candidate.archetype) === 'hostile');
+  }
+
+  private disposition(archetype: ActorArchetype) {
+    return this.options.dispositionFor?.(archetype) ?? (archetype === 'night-stalker' ? 'hostile' : 'passive');
   }
 
   private isFood(observer: GameplayEntity, candidate: GameplayEntity): boolean {

@@ -1,5 +1,6 @@
 import { Voxel } from '../../world/voxel';
 import { isItemId } from '../gameplay/item-registry';
+import { isActorArchetype, type EcsActorArchetype } from '../gameplay/ecs-entity-owner';
 import type {
   CommandParseFailure,
   CommandParseResult,
@@ -51,10 +52,9 @@ function item(token: string): string {
   return normalized;
 }
 
-function actorArchetype(token: string): 'grazer' | 'night-stalker' | 'settler' {
-  if (!['grazer', 'night-stalker', 'settler'].includes(token))
-    throw new ParseProblem(`Unsupported actor archetype: ${token}.`);
-  return token as 'grazer' | 'night-stalker' | 'settler';
+function actorArchetype(token: string): EcsActorArchetype {
+  if (!isActorArchetype(token)) throw new ParseProblem(`Unsupported actor archetype: ${token}.`);
+  return token;
 }
 
 function parseTokens(tokens: string[]): ServerCommand {
@@ -146,7 +146,7 @@ function parseTokens(tokens: string[]): ServerCommand {
         position: [finite(tokens[2], 'x'), finite(tokens[3], 'y'), finite(tokens[4], 'z')],
       };
     case '/summon':
-      exact(tokens, 5, '/summon <grazer|night-stalker|settler> <x> <y> <z>');
+      exact(tokens, 5, '/summon <archetype> <x> <y> <z>');
       return {
         type: 'spawn-actor',
         archetype: actorArchetype(tokens[1].toLowerCase()),
