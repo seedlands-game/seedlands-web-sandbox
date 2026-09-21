@@ -2,11 +2,12 @@ import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
 import { oreVoxel } from './ore-generation';
 import { caveAir } from './cave-generation';
 import { vegetationAt } from './vegetation';
+import { dungeonFor, dungeonVoxel } from './dungeon-generation';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 7;
+export const GENERATOR_VERSION = 8;
 export const LEGACY_GENERATOR_VERSION = 2;
-export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7]);
+export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7, 8]);
 export const isSupportedGeneratorVersion = (value: unknown): value is number =>
   typeof value === 'number' && SUPPORTED_GENERATOR_VERSIONS.includes(value);
 export type ChunkCoord = { cx: number; cy: number; cz: number };
@@ -49,10 +50,12 @@ export const Voxel = {
   Mushroom: 34,
   SugarCane: 35,
   Cactus: 36,
+  Spawner: 37,
+  DungeonChest: 38,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.Cactus;
+export const MAX_VOXEL_ID = Voxel.DungeonChest;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -94,6 +97,8 @@ export const FaceMaterial = {
   Mushroom: 37,
   SugarCane: 38,
   Cactus: 39,
+  Spawner: 40,
+  DungeonChest: 41,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -138,6 +143,8 @@ export const faceMaterialNames: Record<number, string> = {
   [FaceMaterial.Mushroom]: 'mushroom',
   [FaceMaterial.SugarCane]: 'sugar-cane',
   [FaceMaterial.Cactus]: 'cactus',
+  [FaceMaterial.Spawner]: 'spawner',
+  [FaceMaterial.DungeonChest]: 'dungeon-chest',
 };
 
 export const voxelNames: Record<number, string> = {
@@ -177,6 +184,8 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Mushroom]: '蘑菇',
   [Voxel.SugarCane]: '甘蔗',
   [Voxel.Cactus]: '仙人掌',
+  [Voxel.Spawner]: '刷怪笼',
+  [Voxel.DungeonChest]: '地牢战利品箱',
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
@@ -216,6 +225,8 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Mushroom]: [0.45, 0.2, 0.15],
   [Voxel.SugarCane]: [0.45, 0.75, 0.3],
   [Voxel.Cactus]: [0.18, 0.55, 0.28],
+  [Voxel.Spawner]: [0.18, 0.2, 0.22],
+  [Voxel.DungeonChest]: [0.36, 0.24, 0.12],
 };
 
 const nonSolid = new Set<number>([
@@ -279,6 +290,8 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Mushroom]: FaceMaterial.Mushroom,
       [Voxel.SugarCane]: FaceMaterial.SugarCane,
       [Voxel.Cactus]: FaceMaterial.Cactus,
+      [Voxel.Spawner]: FaceMaterial.Spawner,
+      [Voxel.DungeonChest]: FaceMaterial.DungeonChest,
     } as Record<number, FaceMaterialId>
   )[id];
 }
@@ -336,6 +349,11 @@ export function baseVoxel(
 ): VoxelId {
   const h = context.terrainHeight;
   const kind = context.biome;
+  const dungeon = dungeonFor(seed, x, z, generatorVersion);
+  if (dungeon) {
+    const generated = dungeonVoxel(dungeon, x, y, z);
+    if (generated !== null) return generated as VoxelId;
+  }
   if (context.hydrology.water && context.hydrology.waterLevel !== null && y > h && y <= context.hydrology.waterLevel)
     return Voxel.Water;
   if (y <= h) {

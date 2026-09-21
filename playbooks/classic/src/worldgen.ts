@@ -5,9 +5,9 @@ import { baseVoxel } from '@seedlands/stdlib/world/voxel';
 
 export const classicWorldgenIdentity = Object.freeze({
   id: 'seedlands:classic-worldgen',
-  implementationVersion: '7.0.0',
-  configurationIdentity: 'seedlands:classic-terrain-g2-g7',
-  supportedGeneratorVersions: Object.freeze([2, 3, 4, 5, 6, 7]),
+  implementationVersion: '8.0.0',
+  configurationIdentity: 'seedlands:classic-terrain-g2-g8',
+  supportedGeneratorVersions: Object.freeze([2, 3, 4, 5, 6, 7, 8]),
   artifactIdentity: 'seedlands:overworld@1.0.0',
 });
 

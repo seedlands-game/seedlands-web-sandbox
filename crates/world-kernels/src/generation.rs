@@ -4,12 +4,63 @@ const GOLD_ORE_SALT: u32 = 0x474f_4c44;
 const DIAMOND_ORE_SALT: u32 = 0x4449_414d;
 const CAVE_SALT: u32 = 0x4341_5645;
 const VEGETATION_SALT: u32 = 0x0056_4547;
+const DUNGEON_SALT: u32 = 0x4455_4e47;
 
 #[inline(always)]
 fn hash2(seed: u32, x: i32, z: i32) -> f64 {
     let mut h = seed ^ (x as u32).wrapping_mul(374_761_393) ^ (z as u32).wrapping_mul(668_265_263);
     h = (h ^ (h >> 13)).wrapping_mul(1_274_126_177);
     ((h ^ (h >> 16)) as f64) / 4_294_967_296.0
+}
+
+#[inline(always)]
+fn dungeon_voxel(seed: u32, x: i32, y: i64, z: i32, version: u32) -> Option<u32> {
+    if version < 8 {
+        return None;
+    }
+    let rx = x.div_euclid(64);
+    let rz = z.div_euclid(64);
+    let mut h = seed
+        ^ DUNGEON_SALT
+        ^ (rx as u32).wrapping_mul(0x9e37_79b1)
+        ^ (rz as u32).wrapping_mul(0x85eb_ca77);
+    h = (h ^ (h >> 16)).wrapping_mul(0x7feb_352d);
+    h = (h ^ (h >> 15)) as u32;
+    if h % 7 != 0 {
+        return None;
+    }
+    let cx = rx * 64 + 16 + ((h >> 4) % 32) as i32;
+    let cz = rz * 64 + 16 + ((h >> 10) % 32) as i32;
+    let cy = 5 + ((h >> 16) % 18) as i64;
+    let radius_x = 3 + (h & 1) as i32;
+    let radius_z = 3 + ((h >> 1) & 1) as i32;
+    let dx = (x - cx).abs();
+    let dy = (y - cy).abs();
+    let dz = (z - cz).abs();
+    if dx > radius_x || dz > radius_z || dy > 2 {
+        return None;
+    }
+    let entrance = y == cy
+        && match (h >> 2) & 3 {
+            0 => z == cz - radius_z && dx == 0,
+            1 => z == cz + radius_z && dx == 0,
+            2 => x == cx - radius_x && dz == 0,
+            _ => x == cx + radius_x && dz == 0,
+        };
+    if entrance {
+        return Some(0);
+    }
+    if x == cx && y == cy - 1 && z == cz {
+        return Some(37);
+    }
+    if y == cy - 1 && dx == radius_x - 1 && dz == radius_z - 1 {
+        return Some(38);
+    }
+    Some(if dx == radius_x || dz == radius_z || dy == 2 {
+        17
+    } else {
+        0
+    })
 }
 
 // Frozen unsigned 32-bit mix shared byte-for-byte with game-core/ore-generation.ts.
@@ -100,6 +151,9 @@ fn column_voxel(
     let height = i64::from(columns[(column) as usize]);
     let kind = columns[(column + 1) as usize];
     let water_level = i64::from(columns[(column + 2) as usize]);
+    if let Some(voxel) = dungeon_voxel(seed, world_x, y, world_z, generator_version) {
+        return voxel;
+    }
     if y > height && y <= water_level {
         return 8;
     }

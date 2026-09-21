@@ -221,6 +221,8 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'cactus', count: 1 },
     replaceable: false,
   },
+  [37]: { voxel: 37, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: false },
+  [38]: { voxel: 38, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: false },
   [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
   [16]: {
     voxel: 16,

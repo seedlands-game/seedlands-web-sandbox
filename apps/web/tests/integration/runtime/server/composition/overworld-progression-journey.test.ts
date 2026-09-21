@@ -266,7 +266,7 @@ it('Headless 玩家从有限原料到铁器、金钻石工具和建造，并保�
     expect(await session.world.checkpoint({ kind: 'restore', snapshot: preciousSave.data.snapshot })).toMatchObject({
       ok: true,
     });
-    expect(server().generatorVersion).toBe(7);
+    expect(server().generatorVersion).toBe(8);
     expect(bag()[slot('diamond-pickaxe')]?.instance?.durability).toBe(1560);
     expect(server().getVoxel(-1, 60, 0)).toBe(Voxel.DiamondBlock);
     expect(server().getVoxel(-2, 60, 0)).toBe(Voxel.GoldBlock);

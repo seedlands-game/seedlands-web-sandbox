@@ -11,14 +11,14 @@ it('V4控制字节冻结；旧版本保存仍可解析', () => {
   expect(createHash('sha256').update(bytes).digest('hex')).toBe(
     '23048253e362d35e6375ad051512dcaf09e6aa883cec953e1fee8916aa3a997a',
   );
-  for (const generatorVersion of [2, 3, 4, 5, 6, 7]) {
+  for (const generatorVersion of [2, 3, 4, 5, 6, 7, 8]) {
     expect(
       decodeWorldSave(JSON.stringify({ seed: 'ore', generatorVersion, player: [0, 2, 0], changes: [] }))
         ?.generatorVersion,
     ).toBe(generatorVersion);
   }
   expect(
-    decodeWorldSave(JSON.stringify({ seed: 'ore', generatorVersion: 8, player: [0, 2, 0], changes: [] })),
+    decodeWorldSave(JSON.stringify({ seed: 'ore', generatorVersion: 9, player: [0, 2, 0], changes: [] })),
   ).toBeNull();
 });
 

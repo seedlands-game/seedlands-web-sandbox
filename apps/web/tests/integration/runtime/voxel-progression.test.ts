@@ -56,8 +56,8 @@ describe('S4 voxel progression palette', () => {
   });
 
   it('assigns stable IDs and complete materials to the expanded voxel palette', () => {
-    expect(GENERATOR_VERSION).toBe(7);
-    expect(MAX_VOXEL_ID).toBe(Voxel.Cactus);
+    expect(GENERATOR_VERSION).toBe(8);
+    expect(MAX_VOXEL_ID).toBe(Voxel.DungeonChest);
     expect([Voxel.Farmland, Voxel.Lava, Voxel.Obsidian, Voxel.Fire, Voxel.Tnt]).toEqual([26, 27, 28, 29, 30]);
     expect([Voxel.Workbench, Voxel.Chest, Voxel.Furnace, Voxel.CoalOre, Voxel.IronOre]).toEqual([11, 12, 13, 14, 15]);
     expect([
@@ -89,9 +89,11 @@ describe('S4 voxel progression palette', () => {
       FaceMaterial.SugarCane,
       FaceMaterial.Cactus,
     ]).toEqual([34, 35, 36, 37, 38, 39]);
-    expect(MATERIAL_LAYER_COUNT).toBe(39);
-    expect(terrainMaterials).toHaveLength(39);
-    expect(builtinTerrainTextures).toHaveLength(39);
+    expect(FaceMaterial.Spawner).toBe(40);
+    expect(FaceMaterial.DungeonChest).toBe(41);
+    expect(MATERIAL_LAYER_COUNT).toBe(41);
+    expect(terrainMaterials).toHaveLength(41);
+    expect(builtinTerrainTextures).toHaveLength(41);
     for (const [material, textureName] of [
       [FaceMaterial.Workbench, 'workbench'],
       [FaceMaterial.Chest, 'chest'],
@@ -110,7 +112,7 @@ describe('S4 voxel progression palette', () => {
   });
 
   it('keeps the staged path byte-identical for versions 2, 3, and 4', () => {
-    for (const version of [2, 3, 4, 5, 6, 7])
+    for (const version of [2, 3, 4, 5, 6, 7, 8])
       for (const [cx, cy, cz] of [
         [0, 0, 0],
         [-2, -1, 3],
@@ -132,6 +134,8 @@ describe('S4 voxel progression palette', () => {
       [Voxel.DiamondBlock, FaceMaterial.DiamondBlock],
       [Voxel.Sandstone, FaceMaterial.Sandstone],
       [Voxel.StoneBricks, FaceMaterial.StoneBricks],
+      [Voxel.Spawner, FaceMaterial.Spawner],
+      [Voxel.DungeonChest, FaceMaterial.DungeonChest],
     ] as const;
     for (const [voxel, material] of expected) {
       const data = new Uint16Array(32 ** 3);
