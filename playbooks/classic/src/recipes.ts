@@ -138,6 +138,60 @@ export const overworldRecipes: readonly Recipe[] = [
   },
   { id: 'boat', inputs: [{ itemId: 'plank', count: 5 }], outputs: [{ itemId: 'boat', count: 1 }] },
   { id: 'paper', inputs: [{ itemId: 'sugar-cane', count: 3 }], outputs: [{ itemId: 'paper', count: 3 }] },
+  { id: 'book', inputs: [{ itemId: 'paper', count: 3 }], outputs: [{ itemId: 'book', count: 1 }] },
+  { id: 'wool', inputs: [{ itemId: 'string', count: 4 }], outputs: [{ itemId: 'wool', count: 1 }] },
+  {
+    id: 'painting',
+    inputs: [
+      { itemId: 'stick', count: 8 },
+      { itemId: 'wool', count: 1 },
+    ],
+    outputs: [{ itemId: 'painting', count: 1 }],
+  },
+  {
+    id: 'golden-apple',
+    inputs: [
+      { itemId: 'apple', count: 1 },
+      { itemId: 'gold-block', count: 8 },
+    ],
+    outputs: [{ itemId: 'golden-apple', count: 1 }],
+  },
+  {
+    id: 'sign',
+    inputs: [
+      { itemId: 'plank', count: 6 },
+      { itemId: 'stick', count: 1 },
+    ],
+    outputs: [{ itemId: 'sign', count: 3 }],
+  },
+  { id: 'wooden-door', inputs: [{ itemId: 'plank', count: 6 }], outputs: [{ itemId: 'wooden-door', count: 1 }] },
+  { id: 'sugar', inputs: [{ itemId: 'sugar-cane', count: 1 }], outputs: [{ itemId: 'sugar', count: 1 }] },
+  {
+    id: 'cake',
+    inputs: [
+      { itemId: 'milk-bucket', count: 3 },
+      { itemId: 'sugar', count: 2 },
+      { itemId: 'egg', count: 1 },
+      { itemId: 'wheat', count: 3 },
+    ],
+    outputs: [{ itemId: 'cake', count: 1 }],
+  },
+  {
+    id: 'cookie',
+    inputs: [
+      { itemId: 'wheat', count: 2 },
+      { itemId: 'cocoa-beans', count: 1 },
+    ],
+    outputs: [{ itemId: 'cookie', count: 8 }],
+  },
+  {
+    id: 'flint-and-steel',
+    inputs: [
+      { itemId: 'iron-ingot', count: 1 },
+      { itemId: 'flint', count: 1 },
+    ],
+    outputs: [{ itemId: 'flint-and-steel', count: 1, instance: { durability: 65 } }],
+  },
   {
     id: 'compass',
     inputs: [
