@@ -4483,30 +4483,33 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：每材质/工具挖掘速度与采掘等级；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：每材质/工具挖掘速度与采掘等级；记录正例、失败例、tick 和 owner 状态。",
+      "note": "工具倍率、偏好工具和采掘等级由 mining progression 与 Classic 工具矩阵验证。"
     },
     {
       "caseId": "M08-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：掉落 ID/数量/概率、剪刀/特殊掉落；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：掉落 ID/数量/概率、剪刀/特殊掉落；记录正例、失败例、tick 和 owner 状态。",
+      "note": "方块掉落、剪羊毛/物种特殊掉落由注册表与交互测试验证；全部概率表仍属差异。"
     },
     {
       "caseId": "M08-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：耐久耗损、坏掉、错误工具与方块硬度；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：耐久耗损、坏掉、错误工具与方块硬度；记录正例、失败例、tick 和 owner 状态。",
+      "note": "工具实例耐久、损耗、归零移除和错误工具门槛已验证。"
     },
     {
       "caseId": "M08-04",
@@ -4785,80 +4788,88 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：36 格/快捷栏/装备栏、堆叠上限与物品元数据；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：36 格/快捷栏/装备栏、堆叠上限与物品元数据；记录正例、失败例、tick 和 owner 状态。",
+      "note": "36格库存、9格快捷栏、四护甲槽、堆叠和实例元数据已验证。"
     },
     {
       "caseId": "M16-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：左右键、shift、拆分/合并/拖拽/丢弃；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：左右键、shift、拆分/合并/拖拽/丢弃；记录正例、失败例、tick 和 owner 状态。",
+      "note": "指针左右键、分拆/合并/分发/收集/shift quick-move/热键与丢弃已验证。"
     },
     {
       "caseId": "M16-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：容器关闭、死亡、保存/加载中的库存事务；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：容器关闭、死亡、保存/加载中的库存事务；记录正例、失败例、tick 和 owner 状态。",
+      "note": "游标关闭结算、死亡掉落和V4保存恢复已验证。"
     },
     {
       "caseId": "M17-01",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：2×2/3×3 匹配、镜像、空格、优先级；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：2×2/3×3 匹配、镜像、空格、优先级；记录正例、失败例、tick 和 owner 状态。",
+      "note": "工作台 shaped 匹配、空格和稳定优先级已验证；通用 RecipeRegistry 仍是无形配方。"
     },
     {
       "caseId": "M17-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：材料消耗、桶/蛋糕余物、输出堆叠；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：材料消耗、桶/蛋糕余物、输出堆叠；记录正例、失败例、tick 和 owner 状态。",
+      "note": "材料消耗、输出堆叠、满包游标与失败不提交已验证；蛋糕桶余物未实现。"
     },
     {
       "caseId": "M17-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：工作台界面与配方逐项黄金测试；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：工作台界面与配方逐项黄金测试；记录正例、失败例、tick 和 owner 状态。",
+      "note": "真实 workbench station 指针、配方投影、单次/批量合成已验证。"
     },
     {
       "caseId": "M18-01",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：燃料值、点火/燃烧/烹饪 tick、暂停恢复；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：燃料值、点火/燃烧/烹饪 tick、暂停恢复；记录正例、失败例、tick 和 owner 状态。",
+      "note": "燃料时长、点火/烹饪逻辑秒与中途 checkpoint 恢复已验证。"
     },
     {
       "caseId": "M18-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：输入/燃料/输出槽合法性、熔炉库存交易；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：输入/燃料/输出槽合法性、熔炉库存交易；记录正例、失败例、tick 和 owner 状态。",
+      "note": "熔炉输入/燃料/输出槽合法性与交易已验证。"
     },
     {
       "caseId": "M18-03",
@@ -4885,10 +4896,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：床睡眠、白天/夜晚限制、重生点；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：床睡眠、白天/夜晚限制、重生点；记录正例、失败例、tick 和 owner 状态。",
+      "note": "床设置安全重生点、快照恢复与死亡复活已验证；睡眠跳夜和双格床仍缺。"
     },
     {
       "caseId": "M19-03",
@@ -5057,30 +5069,33 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：物品 ID/元数据、堆叠/可用性与取得途径；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：物品 ID/元数据、堆叠/可用性与取得途径；记录正例、失败例、tick 和 owner 状态。",
+      "note": "Classic item registry、堆叠限制、耐久实例和可取得内容闭包已做多批定向验证。"
     },
     {
       "caseId": "M24-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：工具/武器/护甲/食物/材料逐物图标与手持造型；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：工具/武器/护甲/食物/材料逐物图标与手持造型；记录正例、失败例、tick 和 owner 状态。",
+      "note": "资产目录覆盖全部已注册物品，模型/图标引用和工具护甲食物资源表现闭包已验证。"
     },
     {
       "caseId": "M24-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S1",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：不可合成物、唱片、地图、鱼、染料等逐项核对；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：不可合成物、唱片、地图、鱼、染料等逐项核对；记录正例、失败例、tick 和 owner 状态。",
+      "note": "唱片、地图、鱼、染料等不可合成/特殊内容已按 registry 和专属 runtime 核对。"
     },
     {
       "caseId": "M24-04",

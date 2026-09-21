@@ -174,6 +174,12 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - Rust descriptor 从只识别灯笼改为携带 voxel id 的通用 model record；TS control 与 emitter 同步消费 modelBoxesForVoxel。stdlib model/physics 3 files / 18 tests PASS；Web palette/Wasm mesh/item mesh/asset/render/content 6 files / 21 tests PASS；Rust artifact fingerprint 与 `verify:static:ci` PASS。
 - 问题记录：资产闭包先暴露床仍是 resource、蛋糕仍被 pixel adapter 接受，以及模型方块物品沿用旧像素模型；统一改为原 item identity 的 place capability，并让 placed voxel 强制使用 builtin voxel model。voxel.ts 达503行触发门禁后抽出 face-material-names 模块，未加豁免。方向、门开合/双格、床双格、牌文本与蛋糕切片仍为明确差异。
 
+## S1b 既有 owner 证据补账
+
+- stdlib 库存布局/指针模型/furnace candidate/station content/station snapshot/item instance 共6 files / 25 tests PASS；Web 采掘、库存交互、工作台指针、方块工位、Classic 冶炼、床重生和浏览器指针手势共7 files / 33 tests PASS。
+- 工作台指针最初3项失败：旧夹具仍把5木板摆成木镐，与现行3木板+2木棍 shaped 配方不符；修正投料后2项恢复。剩余投影断言把“满包但空/兼容游标可接产物”误写为不可合成，改为 craftable 后8/8通过。未改生产配方或 owner。
+- 据此 M08-01/02/03、M16-01/02/03、M17-01/02/03、M18-01/02、M19-02、M24-01/02/03 升为 PARTIAL_IMPLEMENTED / HEADLESS_PASS；仍缺的破坏视觉反馈、蛋糕桶余物、燃烧态音画、双箱与睡眠跳夜继续保留。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。
