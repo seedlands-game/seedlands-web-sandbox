@@ -10,6 +10,7 @@ import { createGameplayProjectileOwner } from './gameplay-projectile-environment
 import { createGameplaySpeciesFacade } from './gameplay-species-facade';
 import { LifeSkillsRuntime } from './life-skills-runtime';
 import { VehicleRuntime } from './vehicle-runtime';
+import { NavigationItemsRuntime } from './navigation-items-runtime';
 
 export function createGameplayWorldSystems(
   options: Readonly<{
@@ -56,5 +57,11 @@ export function createGameplayWorldSystems(
     getLoadedVoxel: options.callbacks.getLoadedVoxel,
     changed: options.changed,
   });
-  return { projectiles, speciesInteractions, lifeSkills, vehicles };
+  const navigationItems = new NavigationItemsRuntime({
+    entities: options.entities,
+    getWorldTime: options.callbacks.getWorldTime,
+    getLoadedVoxel: options.callbacks.getLoadedVoxel,
+    changed: options.changed,
+  });
+  return { projectiles, speciesInteractions, lifeSkills, vehicles, navigationItems };
 }

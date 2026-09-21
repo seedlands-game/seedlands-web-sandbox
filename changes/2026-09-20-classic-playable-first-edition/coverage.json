@@ -2052,10 +2052,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Compass"
+      "execution": "HEADLESS_PASS",
+      "name": "Compass",
+      "note": "S6c 注册与配方闭包、出生点方向投影及重合零角已通过；动态图标旋转留待 S7。"
     },
     {
       "caseId": "I-346",
@@ -2072,10 +2073,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Clock"
+      "execution": "HEADLESS_PASS",
+      "name": "Clock",
+      "note": "S6c 注册与配方闭包、主世界 24 小时相位环绕已通过；动态图标留待 S7。"
     },
     {
       "caseId": "I-348",
@@ -2187,10 +2189,11 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Map"
+      "execution": "HEADLESS_PASS",
+      "name": "Map",
+      "note": "S6c 注册与配方闭包、已加载 9×9 采样、0–4 缩放及 gameplay checkpoint 已通过；手持地图画面留待 S7。"
     },
     {
       "caseId": "I-359",
@@ -5078,30 +5081,33 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S6",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：指南针指向世界出生点/旋转表现；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：指南针指向世界出生点/旋转表现；记录正例、失败例、tick 和 owner 状态。",
+      "note": "权威出生点方向与零角/环绕已验证；浏览器动态旋转表现待 S7。"
     },
     {
       "caseId": "M27-02",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S6",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：时钟昼夜角度/非主世界例外排除；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：时钟昼夜角度/非主世界例外排除；记录正例、失败例、tick 和 owner 状态。",
+      "note": "主世界 24 小时相位环绕已验证；多维度已按范围排除，动态图标待 S7。"
     },
     {
       "caseId": "M27-03",
       "kind": "mechanism",
       "scope": "做",
       "phase": "S6",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：地图探索/像素颜色/缩放/持久化；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：地图探索/像素颜色/缩放/持久化；记录正例、失败例、tick 和 owner 状态。",
+      "note": "已加载体素颜色、0–4 缩放、有界像素及完整 checkpoint 校验通过；浏览器手持画面待 S7。"
     },
     {
       "caseId": "M28-01",

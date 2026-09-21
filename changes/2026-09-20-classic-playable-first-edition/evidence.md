@@ -146,6 +146,12 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - VehicleRuntime 保存 minecart/chest-minecart/furnace-minecart/boat 的位置、速度、方向、燃料、唯一乘员和箱车27格库存；动力轨/燃料加速、普通轨摩擦、DetectorRail 占用、船水面、上下车安全点与玩家位置同步均有确定性入口。鞍猪原子扣鞍并复用同一乘坐记录。
 - Rust source/artifact fingerprint PASS；vehicle/palette/asset/snapshot 4 files / 34 tests PASS；Wasm mesh/world 等价 2 files / 10 tests PASS；`verify:static:ci` PASS。浏览器载具模型、真实驾驶输入与碰撞反馈留待 S7，不在本段宣称视觉完成。
 
+## S6c 指南针、时钟与地图
+
+- RED：新增定向测试 3/3 失败，分别证明 paper/redstone-dust/compass/clock/map 内容与配方、NavigationItemsRuntime、地图物品均缺失。实现中曾误用不存在的 recipe `require` 和通用 actor access 读取 player state，修正为 `get` 与 player 专用 ECS access；测试把时钟推进至30后未复位触发既有快照0–24小时合同，属于夹具状态错误，已复位后保留有效断言。
+- GREEN：注册纸、红石粉、指南针、时钟和地图及四条配方；指南针读取保存出生点并输出稳定归一角，时钟将主世界时间归一为昼夜相位。每世界 NavigationItemsRuntime 只在玩家选中地图时采样已加载 9×9 窗口，支持0–4缩放、稳定颜色和 map id；未知格不猜测，缩放改变清空旧比例像素。
+- 地图序列、中心、缩放和像素进入可选 Gameplay V4 checkpoint；校验 id 高水位、唯一玩家/地图、像素坐标和颜色范围，并在安装实体前验证关联玩家。特殊物品/快照/资产 3 files / 29 tests PASS；连同载具回归为4 files / 33 tests PASS。`verify:static:ci` 首次因 gameplay-snapshot 502行失败，未加豁免，抽出 legacy 坐标迁移模块后最终 PASS（snapshot 497行、Svelte 0/0、ESLint 66、CI selection 8）。动态图标与手持地图浏览器画面留待 S7。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。

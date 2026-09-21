@@ -97,6 +97,7 @@ export class GameplayRuntime {
   readonly speciesInteractions;
   readonly lifeSkills;
   readonly vehicles;
+  readonly navigationItems;
   private readonly selectHotbar;
   private readonly requestPlayerCombat;
   private readonly advanceWorldRules;
@@ -239,6 +240,7 @@ export class GameplayRuntime {
     this.speciesInteractions = systems.speciesInteractions;
     this.lifeSkills = systems.lifeSkills;
     this.vehicles = systems.vehicles;
+    this.navigationItems = systems.navigationItems;
     this.selectHotbar = createGameplayHotbarSelection({
       state: (id) => this.getActorModeState(id),
       inventory: this.registeredInventory ?? this.inventoryActions,
@@ -311,6 +313,7 @@ export class GameplayRuntime {
       projectiles: this.projectiles,
       lifeSkills: this.lifeSkills,
       vehicles: this.vehicles,
+      navigationItems: this.navigationItems,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);

@@ -290,6 +290,9 @@ export class GameServerGameplayHost {
   get vehicles() {
     return this.gameplay.vehicles;
   }
+  get navigationItems() {
+    return this.gameplay.navigationItems;
+  }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
   }
