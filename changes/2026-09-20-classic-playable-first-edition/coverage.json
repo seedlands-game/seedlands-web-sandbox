@@ -2374,10 +2374,11 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 下落方块 FallingSand 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 下落方块 FallingSand 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "独立 falling-block ECS identity 保存携带方块/速度；源格经 editBatch 清空，逐格扫描防穿透，落地提交成功后清退实体，V4 恢复已验证。"
     },
     {
       "caseId": "E-Ghast",
@@ -2439,10 +2440,11 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 画 Painting 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 画 Painting 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "独立 painting ECS identity、选中物品消费、墙面锚点、支撑失效 prepared 掉落与 V4 恢复已验证；浏览器画面留 S7。"
     },
     {
       "caseId": "E-Pig",
@@ -2459,10 +2461,11 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 僵尸猪人 PigZombie 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 僵尸猪人 PigZombie 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "pig-zombie archetype/profile/body/速度/感知/掉落注册闭包与雷击多猪唯一 identity 转换、保存恢复已验证。"
     },
     {
       "caseId": "E-PrimedTnt",
@@ -2509,10 +2512,11 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 雪球 Snowball 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 雪球 Snowball 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "选中雪球原子消费并复用 ProjectileRuntime 零伤害弹道/checkpoint；独立击退与浏览器表现尚未验证，故保持 PARTIAL。"
     },
     {
       "caseId": "E-Spider",
@@ -2581,10 +2585,11 @@
       "kind": "entity",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "建立 闪电 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "建立 闪电 的合法生成/派生夹具，观察移动、交互、伤害、掉落和恢复。",
+      "note": "雷雨/露天/加载门禁、稳定短寿命 Environment 事件、点火、正式伤害、多猪变异与 V4 恢复已验证。"
     },
     {
       "caseId": "E-MinecartChest",
@@ -4831,10 +4836,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：闪电寻址、雷击伤害/火/猪变异；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：闪电寻址、雷击伤害/火/猪变异；记录正例、失败例、tick 和 owner 状态。",
+      "note": "雷雨露天正例、晴天/遮挡负例、玩家伤害、点火、多个猪唯一转换和 checkpoint 恢复 4 个定向用例通过。"
     },
     {
       "caseId": "M13-03",
@@ -5183,10 +5189,11 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S4",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "以固定 seed/初态/输入验证：晒伤、溺水、仙人掌、火、跌落等特殊伤害；记录正例、失败例、tick 和 owner 状态。"
+      "execution": "HEADLESS_PASS",
+      "name": "以固定 seed/初态/输入验证：晒伤、溺水、仙人掌、火、跌落等特殊伤害；记录正例、失败例、tick 和 owner 状态。",
+      "note": "五类来源和跌落阈值统一委托正式 combat/vitals damage owner；非正数和死亡目标拒绝。环境自动触发时机尚未接，故保持 PARTIAL。"
     },
     {
       "caseId": "M23-01",

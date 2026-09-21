@@ -13,6 +13,10 @@ import { VehicleRuntime } from './vehicle-runtime';
 import { NavigationItemsRuntime } from './navigation-items-runtime';
 import { CropRuntime } from './crop-runtime';
 import { StructureInteractionRuntime } from './structure-interaction-runtime';
+import { FinalEntitiesRuntime } from './final-entities-runtime';
+import { createGameplayCombatCallbacks } from './gameplay-combat-callbacks';
+import { Voxel } from '../../world/voxel';
+import { SpecialDamageRuntime } from './special-damage-runtime';
 
 export function createGameplayWorldSystems(
   options: Readonly<{
@@ -80,5 +84,59 @@ export function createGameplayWorldSystems(
     ignite: (position) => options.environment.ignite(position),
     changed: options.changed,
   });
-  return { projectiles, speciesInteractions, lifeSkills, vehicles, navigationItems, crops, structures };
+  const combat = createGameplayCombatCallbacks({
+    entities: options.entities,
+    players: options.players,
+    simulation: options.simulation,
+    vitals: options.vitals,
+    getVoxel: options.callbacks.getLoadedVoxel ?? options.callbacks.getVoxel,
+    assertCanChange: options.assertCanChange,
+    changed: options.changed,
+  });
+  const finalEntities = new FinalEntitiesRuntime({
+    entities: options.entities,
+    projectiles,
+    getLoadedVoxel: options.callbacks.getLoadedVoxel,
+    editBatch: options.callbacks.editBatch,
+    changed: options.changed,
+    canStrike: ([x, y, z]) => {
+      if (
+        options.environment.checkpoint().weather !== 'thunder' ||
+        options.callbacks.getLoadedVoxel?.([x, y, z]) === undefined
+      )
+        return false;
+      for (let above = y + 1; above < 64; above++)
+        if (options.callbacks.getLoadedVoxel?.([x, above, z]) !== Voxel.Air) return false;
+      return true;
+    },
+    strike: (position) => options.environment.strikeLightning(position),
+    damage: (source, target, amount) => void combat.applyDamage(source, target, amount),
+    convertPigs: (pigs, sequence) => {
+      options.entities.validateCreateIdentities(
+        pigs.length,
+        pigs.map(({ id }) => `lightning-${sequence}:${id}`),
+      );
+      for (const { id, position } of pigs) {
+        options.despawn(id);
+        options.spawn(
+          { id: `lightning-${sequence}:${id}`, archetype: 'pig-zombie', position },
+          { archetype: 'pig-zombie' },
+        );
+      }
+    },
+  });
+  const specialDamage = new SpecialDamageRuntime((source, target, amount) =>
+    combat.applyDamage(source, target, amount),
+  );
+  return {
+    projectiles,
+    speciesInteractions,
+    lifeSkills,
+    vehicles,
+    navigationItems,
+    crops,
+    structures,
+    finalEntities,
+    specialDamage,
+  };
 }

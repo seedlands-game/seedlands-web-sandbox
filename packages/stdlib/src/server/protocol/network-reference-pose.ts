@@ -4,7 +4,7 @@ import { canonicalReferenceInteger } from './network-reference-integer';
 import { ACTOR_ARCHETYPES } from '../gameplay/ecs-entity-owner';
 
 const MAX_ENTITY_POSES = 256;
-const ENTITY_TYPES = new Set(['player', 'world-item', 'creature', 'npc']);
+const ENTITY_TYPES = new Set(['player', 'world-item', 'creature', 'npc', 'falling-block', 'painting']);
 const ACTOR_ARCHETYPE_SET = new Set<string>(ACTOR_ARCHETYPES);
 
 type EntityPoseType = AuthoritySnapshot['entities'][number]['type'];

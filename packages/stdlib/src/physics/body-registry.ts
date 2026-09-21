@@ -11,12 +11,15 @@ export const CollisionLayer = Object.freeze({
 export type BodyKind =
   | 'player'
   | 'world-item'
+  | 'falling-block'
+  | 'painting'
   | 'grazer'
   | 'night-stalker'
   | 'settler'
   | 'chicken'
   | 'cow'
   | 'pig'
+  | 'pig-zombie'
   | 'sheep'
   | 'squid'
   | 'wolf'
@@ -79,12 +82,37 @@ const configs: Readonly<Record<BodyKind, BodyConfig>> = Object.freeze({
     fluidDrag: 7,
     maxExternalAcceleration: 60,
   },
+  'falling-block': {
+    localAabb: { min: { x: -0.49, y: 0, z: -0.49 }, max: { x: 0.49, y: 0.98, z: 0.49 } },
+    collisionLayer: CollisionLayer.Item,
+    collisionMask: CollisionLayer.World,
+    gravity: 18,
+    terminalVelocity: 24,
+    maxHorizontalSpeed: 0,
+    groundAcceleration: 0,
+    airAcceleration: 0,
+    buoyancy: 0,
+    fluidDrag: 0,
+  },
+  painting: {
+    localAabb: { min: { x: -0.5, y: 0, z: -0.05 }, max: { x: 0.5, y: 1, z: 0.05 } },
+    collisionLayer: CollisionLayer.Item,
+    collisionMask: CollisionLayer.World,
+    gravity: 0,
+    terminalVelocity: 0,
+    maxHorizontalSpeed: 0,
+    groundAcceleration: 0,
+    airAcceleration: 0,
+    buoyancy: 0,
+    fluidDrag: 0,
+  },
   grazer: character(0.75, 1.9, 2.1),
   'night-stalker': character(0.65, 2.1, 2.8),
   settler: character(0.65, 2.35, 2.2),
   chicken: character(0.3, 0.7, 1.8),
   cow: character(0.7, 1.4, 2),
   pig: character(0.55, 1, 2),
+  'pig-zombie': character(0.3, 1.8, 2.3),
   sheep: character(0.55, 1.3, 2),
   squid: character(0.45, 0.9, 1.4),
   wolf: character(0.4, 0.9, 2.4),
@@ -109,7 +137,13 @@ export function bodySensorsFor(kind: BodyKind): readonly BodySensorConfig[] {
 }
 
 export function bodyKindForEntity(entity: { type: string; archetype?: string }): BodyKind {
-  if (entity.type === 'player' || entity.type === 'world-item') return entity.type;
+  if (
+    entity.type === 'player' ||
+    entity.type === 'world-item' ||
+    entity.type === 'falling-block' ||
+    entity.type === 'painting'
+  )
+    return entity.type;
   if (entity.type === 'creature' && entity.archetype !== 'settler' && Object.hasOwn(configs, entity.archetype ?? ''))
     return entity.archetype as BodyKind;
   if (entity.type === 'npc' && entity.archetype === 'settler') return 'settler';

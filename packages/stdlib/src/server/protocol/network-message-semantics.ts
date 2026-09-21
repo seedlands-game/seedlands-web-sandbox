@@ -158,7 +158,7 @@ export type PublicOutboundMessage =
       physicsTick: number;
       entities: readonly Readonly<{
         id: string;
-        type: 'player' | 'world-item' | 'creature' | 'npc';
+        type: 'player' | 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting';
         archetype?: import('../gameplay/ecs-entity-owner').EcsActorArchetype;
         position: [number, number, number];
         velocity: [number, number, number];
@@ -412,7 +412,7 @@ export function isPublicOutboundMessage(
           hasOnlyKeys(entity, ['id', 'type', 'archetype', 'position', 'velocity']) &&
           (entity.archetype === undefined || isActorArchetype(entity.archetype)) &&
           isNonEmptyString(entity.id) &&
-          ['player', 'world-item', 'creature', 'npc'].includes(entity.type as string) &&
+          ['player', 'world-item', 'creature', 'npc', 'falling-block', 'painting'].includes(entity.type as string) &&
           isPosition(entity.position) &&
           isPosition(entity.velocity),
       )

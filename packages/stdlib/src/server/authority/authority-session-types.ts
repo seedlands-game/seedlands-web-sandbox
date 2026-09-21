@@ -7,7 +7,7 @@ import type { AuthorityResidencyDiagnostics } from './authority-residency-runtim
 
 export type AuthorityEntity = Readonly<{
   id: string;
-  type: 'player' | 'world-item' | 'creature' | 'npc';
+  type: 'player' | 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting';
   archetype?: EcsActorArchetype;
   position: [number, number, number];
   physicsVelocity?: [number, number, number];

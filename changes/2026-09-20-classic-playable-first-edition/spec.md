@@ -93,6 +93,12 @@ Classic 的鸡、牛、猪、羊、鱿鱼、狼、僵尸、骷髅、蜘蛛、苦
 
 骷髅的远程攻击复用世界唯一 ProjectileRuntime，不创建第二套弹道或绕过正式伤害结算；发射位置和方向由权威实体位置计算。苦力怕点燃后以稳定实体 identity 关联 Environment TNT，引信保存恢复，到期爆炸后清退原实体。史莱姆尺寸进入 SpeciesState；尺寸4/2的史莱姆死亡后在原位置按稳定偏移生成两个下一尺寸实体，尺寸1不再分裂。所有入口拒绝错误物种、死亡/过远目标和重复触发，失败不改变实体、投射物或环境状态。
 
+## S4h 剩余实体与特殊伤害合同
+
+雪球复用 ProjectileRuntime，发射原子扣除选中雪球，命中仅产生零伤害击退/销毁且进入既有 projectile checkpoint。Lightning 由 EnvironmentRuntime 保存稳定序列与短寿命事件；雷雨下显式 strike 验证已加载露天格，产生伤害、点火并把猪转换为 pig-zombie。
+
+FallingSand 与 Painting 使用独立稳定 entity type/archetype，不伪装为 world-item；前者保存携带 voxel 和速度，落到可支撑空气格时经 editBatch 放回方块，失败保持实体；后者保存墙面锚点并在支撑失效时掉落 painting item。溺水、仙人掌、火、跌落均经正式 applyDamage 入口，拒绝非正数与死亡目标。
+
 ## S5c 钓鱼、鸡蛋与奶桶合同
 
 钓鱼竿是有耐久的非堆叠工具；玩家只可在已加载水面投出一个鱼钩，咬钩时刻由 world seed、玩家 id 和 cast sequence 决定，推进与剩余等待进入 gameplay checkpoint。提前收杆只回收鱼钩，咬钩后收杆原子发放生鱼并扣 1 耐久；背包满时保持可收杆状态，不吞奖励。鸡蛋投掷原子扣 1 个鸡蛋并推进稳定序列，按固定 1/8 判定在目标已加载可站立位置孵化鸡；失败不扣物品。空桶对五格内存活奶牛使用时原子替换为奶桶；奶桶使用后恢复空桶。

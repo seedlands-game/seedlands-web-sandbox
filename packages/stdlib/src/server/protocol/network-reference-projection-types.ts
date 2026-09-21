@@ -71,7 +71,7 @@ export type GameplayPlayerReference = {
 import type { EcsActorArchetype } from '../gameplay/ecs-entity-owner';
 export type GameplayEntityReference = {
   id: string;
-  type: 'world-item' | 'creature' | 'npc';
+  type: 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting';
   position: [number, number, number];
   archetype?: EcsActorArchetype;
   stack?: { itemId: string; count: number };

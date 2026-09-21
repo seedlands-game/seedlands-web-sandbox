@@ -216,6 +216,10 @@ describe('server command boundary', () => {
       success: true,
       command: { type: 'fill', from: [9, -1, 9], to: [0, -10, 0], voxel: Voxel.Air },
     });
+    expect(parseSlashCommand('/setblock 1 2 3 lava')).toEqual({
+      success: true,
+      command: { type: 'set-block', position: [1, 2, 3], voxel: Voxel.Lava },
+    });
     expect(parseSlashCommand('/tp 1.5 40 -2.25')).toMatchObject({
       success: true,
       command: { type: 'teleport', position: [1.5, 40, -2.25] },
@@ -236,7 +240,7 @@ describe('server command boundary', () => {
       command: { type: 'inspect-chunk', chunk: [0, -1, 0] },
     });
 
-    for (const input of ['/unknown', '/setblock 1 2 3 lava', '/setblock 1.5 2 3 stone', '/seed extra'])
+    for (const input of ['/unknown', '/setblock 1 2 3 unknown-voxel', '/setblock 1.5 2 3 stone', '/seed extra'])
       expect(parseSlashCommand(input)).toMatchObject({
         success: false,
         error: { kind: 'parse', code: 'COMMAND_PARSE_FAILED' },

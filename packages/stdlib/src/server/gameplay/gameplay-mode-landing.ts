@@ -8,7 +8,8 @@ export function findGameplayModeLanding(
   getVoxel: (position: [number, number, number]) => number | undefined,
   revision: number,
 ) {
-  if (entity.type === 'station') throw new TypeError('Station has no actor mode landing.');
+  if (entity.type !== 'player' && entity.type !== 'creature' && entity.type !== 'npc')
+    throw new TypeError('Entity has no actor mode landing.');
   return findSafeModeLanding(
     { ...entity, type: entity.type },
     {

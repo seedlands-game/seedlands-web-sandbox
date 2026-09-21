@@ -53,6 +53,8 @@
     "./server/gameplay/navigation-items-runtime": "./src/server/gameplay/navigation-items-runtime.ts",
     "./server/gameplay/crop-runtime": "./src/server/gameplay/crop-runtime.ts",
     "./server/gameplay/structure-interaction-runtime": "./src/server/gameplay/structure-interaction-runtime.ts",
+    "./server/gameplay/final-entities-runtime": "./src/server/gameplay/final-entities-runtime.ts",
+    "./server/gameplay/special-damage-runtime": "./src/server/gameplay/special-damage-runtime.ts",
     "./server/gameplay/difficulty-runtime": "./src/server/gameplay/difficulty-runtime.ts",
     "./server/gameplay/bed-action": "./src/server/gameplay/bed-action.ts",
     "./server/gameplay/armor-equipment": "./src/server/gameplay/armor-equipment.ts",

@@ -54,6 +54,15 @@ export const overworldActorProfiles: readonly ActorProfileInput[] = [
     deathDrop: { itemId: 'raw-porkchop', count: 1 },
   },
   {
+    archetype: 'pig-zombie',
+    entityType: 'creature',
+    maxHealth: 20,
+    navigation: { speed: 2.3, perceptionRange: 12 },
+    disposition: 'neutral',
+    meleeDefinitionId: 'zombie-claw',
+    deathDrop: { itemId: 'gold-ingot', count: 1 },
+  },
+  {
     archetype: 'sheep',
     entityType: 'creature',
     maxHealth: 8,

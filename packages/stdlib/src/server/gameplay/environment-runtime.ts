@@ -19,6 +19,8 @@ export type EnvironmentCheckpoint = Readonly<{
   openedDungeonChests?: readonly string[];
   naturalSpawnSeconds?: number;
   naturalSpawnTick?: number;
+  lightning?: readonly Readonly<{ id: number; position: EnvironmentPosition; remainingSeconds: number }>[];
+  nextLightningId?: number;
 }>;
 export type EnvironmentEffects = Readonly<{
   extinguished: readonly EnvironmentPosition[];
@@ -53,6 +55,8 @@ export class EnvironmentRuntime {
   readonly #openedDungeonChests = new Set<string>();
   #naturalSpawnSeconds = 0;
   #naturalSpawnTick = 0;
+  #nextLightningId = 1;
+  readonly #lightning = new Map<number, { id: number; position: EnvironmentPosition; remainingSeconds: number }>();
   constructor(
     readonly seed: number,
     checkpoint?: EnvironmentCheckpoint,
@@ -86,6 +90,13 @@ export class EnvironmentRuntime {
       throw new TypeError('Weather is invalid.');
     this.#weather = weather;
     this.#weatherSeconds = seconds;
+  }
+  strikeLightning(at: EnvironmentPosition, seconds = 0.5) {
+    if (!Number.isFinite(seconds) || seconds <= 0) throw new TypeError('Lightning lifetime is invalid.');
+    const state = Object.freeze({ id: this.#nextLightningId++, position: position(at), remainingSeconds: seconds });
+    this.#lightning.set(state.id, state);
+    this.ignite(at, Math.max(5, seconds));
+    return state;
   }
   advanceDungeonSpawner(id: string, seconds: number, intervalSeconds = 20) {
     if (!id.trim() || ![seconds, intervalSeconds].every((value) => Number.isFinite(value) && value > 0))
@@ -127,6 +138,11 @@ export class EnvironmentRuntime {
   ): EnvironmentEffects {
     if (!Number.isFinite(seconds) || seconds <= 0) throw new TypeError('Environment advance is invalid.');
     this.#tick++;
+    for (const [id, lightning] of this.#lightning) {
+      const remainingSeconds = lightning.remainingSeconds - seconds;
+      if (remainingSeconds <= 0) this.#lightning.delete(id);
+      else this.#lightning.set(id, { ...lightning, remainingSeconds });
+    }
     this.#weatherSeconds -= seconds;
     if (this.#weatherSeconds <= 0) {
       const n = hash(this.seed, this.#tick) % 10;
@@ -206,6 +222,10 @@ export class EnvironmentRuntime {
       openedDungeonChests: Object.freeze([...this.#openedDungeonChests].sort()),
       naturalSpawnSeconds: this.#naturalSpawnSeconds,
       naturalSpawnTick: this.#naturalSpawnTick,
+      lightning: Object.freeze(
+        [...this.#lightning.values()].sort((a, b) => a.id - b.id).map((value) => Object.freeze({ ...value })),
+      ),
+      nextLightningId: this.#nextLightningId,
     });
   }
   restore(value: EnvironmentCheckpoint) {
@@ -227,6 +247,7 @@ export class EnvironmentRuntime {
     this.#tnt.clear();
     this.#dungeonSpawners.clear();
     this.#openedDungeonChests.clear();
+    this.#lightning.clear();
     if (
       value.naturalSpawnSeconds !== undefined &&
       (!Number.isFinite(value.naturalSpawnSeconds) || value.naturalSpawnSeconds < 0 || value.naturalSpawnSeconds >= 20)
@@ -239,6 +260,9 @@ export class EnvironmentRuntime {
       throw new TypeError('Natural spawn checkpoint tick is invalid.');
     this.#naturalSpawnSeconds = value.naturalSpawnSeconds ?? 0;
     this.#naturalSpawnTick = value.naturalSpawnTick ?? 0;
+    this.#nextLightningId = value.nextLightningId ?? 1;
+    if (!Number.isSafeInteger(this.#nextLightningId) || this.#nextLightningId < 1)
+      throw new TypeError('Lightning checkpoint sequence is invalid.');
     for (const fire of value.fires) this.ignite(fire.position, fire.remainingSeconds);
     for (const tnt of value.tnt) {
       if (tnt.id >= this.#nextTntId || this.#tnt.has(tnt.id))
@@ -261,6 +285,18 @@ export class EnvironmentRuntime {
       if (typeof id !== 'string' || !id.trim() || this.#openedDungeonChests.has(id))
         throw new TypeError('Dungeon chest checkpoint is invalid.');
       this.#openedDungeonChests.add(id);
+    }
+    for (const lightning of value.lightning ?? []) {
+      if (
+        !Number.isSafeInteger(lightning.id) ||
+        lightning.id < 1 ||
+        lightning.id >= this.#nextLightningId ||
+        this.#lightning.has(lightning.id) ||
+        !Number.isFinite(lightning.remainingSeconds) ||
+        lightning.remainingSeconds <= 0
+      )
+        throw new TypeError('Lightning checkpoint is invalid.');
+      this.#lightning.set(lightning.id, { ...lightning, position: position(lightning.position) });
     }
   }
 }
