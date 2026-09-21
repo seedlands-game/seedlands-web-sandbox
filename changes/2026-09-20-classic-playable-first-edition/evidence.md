@@ -87,3 +87,9 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - 实现后 GREEN：MineItemCapability.tool 与 VoxelGameplayDefinition.preferredTool 扩充 'shovel'，mining-tool-policy 与 block-rules-module 接受该工具；新增木/石/铁/金/钻石铲（tier1/2/3/1/4，倍率2/4/6/12/8，耐久60/132/250/32/1561），1 材料+2 木棍合成，原创像素铲头模型。泥土(1)/草(2)/沙(6)偏好 shovel 且徒手仍可挖（倍率1），铁铲给倍率6，铲对石类不满足门槛。
 - 定向：shovel-tools 2 + tool-matrix 3 GREEN；mining-tool-policy 20 + block-rules-definition 17 + item-visual-compatibility 3（图标扩至含 5 铲）复跑 PASS；combat 19 + content-consumers 4 无回归。
 - test:classic:headless 现 9 files/13 tests PASS。铲工具族未做浏览器专项手势，软方块采集加速纯逻辑证明；泥土/草/沙徒手可挖保持向后兼容，未改既有旅程。
+
+## S2f 食物链（熟食与冶炼）
+
+- RED：classic-food-chain.test.ts 断言苹果/面包/生熟猪排/生熟鱼存在并可消费冶炼，`Unknown item` 失败 2/2。
+- 实现后 GREEN：新增 food 物品 apple/bread/raw-porkchop/cooked-porkchop/raw-fish/cooked-fish 与 wheat 资源，healthRestore 分级（苹果4/面包5/熟猪排8/熟鱼5），受伤进食按 maxHealth 夹取、满血满饥饿拒绝；熔炉新增 cook-porkchop/cook-fish 配方（生→熟），面包由 3 小麦合成。acceptsPixelItem 扩含 'food'，新增原创像素图标（苹果/面包/肉排/鱼/小麦），raw-iron 图标改用 iron-ore 地形贴图修正缺失绑定。
+- 定向：food-chain 2、asset-workbench 4、item-visual-compatibility 3、gameplay-content-consumers 4 复跑 PASS；test:classic:headless 现 10 files/15 tests PASS。coverage 将 I-260/297/319/320/349/350 与 R-S07/R-S08 标 HEADLESS_PASS。饱食度/饥饿自然消耗仍关闭（Classic 保留），未做浏览器进食专项；金苹果/蛋糕/蘑菇煮等复合食物与农业生长链未实现。

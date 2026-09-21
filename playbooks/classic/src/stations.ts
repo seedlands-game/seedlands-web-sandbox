@@ -43,6 +43,8 @@ export const overworldStations: StationContentInput = {
     { id: 'smelt-stone', input: stack('cobblestone'), output: stack('stone-block'), durationSeconds: 10 },
     { id: 'smelt-glass', input: stack('sand-block'), output: stack('glass'), durationSeconds: 10 },
     { id: 'smelt-charcoal', input: stack('wood-block'), output: stack('charcoal'), durationSeconds: 10 },
+    { id: 'cook-porkchop', input: stack('raw-porkchop'), output: stack('cooked-porkchop'), durationSeconds: 10 },
+    { id: 'cook-fish', input: stack('raw-fish'), output: stack('cooked-fish'), durationSeconds: 10 },
   ],
   fuels: [
     { itemId: 'coal', burnSeconds: 80 },

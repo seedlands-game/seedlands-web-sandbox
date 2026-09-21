@@ -23,6 +23,12 @@ export const progressionItemAssets = [
   ...pixelItemAssets('iron-pickaxe', '铁镐', 'pickaxe', 'iron'),
   ...pixelItemAssets('coal', '煤', 'coal'),
   ...pixelItemAssets('charcoal', '木炭', 'coal'),
-  ...pixelItemAssets('raw-iron', '铁矿石', 'raw-iron'),
   ...pixelItemAssets('iron-ingot', '铁锭', 'iron-ingot'),
+  ...pixelItemAssets('apple', '苹果', 'apple'),
+  ...pixelItemAssets('bread', '面包', 'bread'),
+  ...pixelItemAssets('raw-porkchop', '生猪排', 'raw-porkchop'),
+  ...pixelItemAssets('cooked-porkchop', '熟猪排', 'cooked-porkchop'),
+  ...pixelItemAssets('raw-fish', '生鱼', 'raw-fish'),
+  ...pixelItemAssets('cooked-fish', '熟鱼', 'cooked-fish'),
+  ...pixelItemAssets('wheat', '小麦', 'wheat'),
 ];
