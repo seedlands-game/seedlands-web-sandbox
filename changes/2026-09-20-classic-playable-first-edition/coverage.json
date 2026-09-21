@@ -9,52 +9,52 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Air",
       "seedlandsVoxelId": 0,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-001",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Stone",
       "seedlandsVoxelId": 3,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-002",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Grass",
       "seedlandsVoxelId": 1,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-003",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Dirt",
       "seedlandsVoxelId": 2,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-004",
@@ -108,26 +108,26 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Water (Flowing)",
       "seedlandsVoxelId": 8,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-009",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Water (Still)",
       "seedlandsVoxelId": 8,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-010",
@@ -154,13 +154,13 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Sand",
       "seedlandsVoxelId": 6,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-013",
@@ -191,52 +191,52 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Iron Ore",
       "seedlandsVoxelId": 15,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-016",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Coal Ore",
       "seedlandsVoxelId": 14,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-017",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Log",
       "seedlandsVoxelId": 4,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-018",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Leaves",
       "seedlandsVoxelId": 5,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-019",
@@ -313,20 +313,22 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Note Block"
+      "execution": "HEADLESS_PASS",
+      "name": "Note Block",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-026",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bed"
+      "execution": "HEADLESS_PASS",
+      "name": "Bed",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-027",
@@ -387,10 +389,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Dead Bush"
+      "execution": "HEADLESS_PASS",
+      "name": "Dead Bush",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-033",
@@ -419,10 +422,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Wool"
+      "execution": "HEADLESS_PASS",
+      "name": "Wool",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-036",
@@ -440,20 +444,22 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Dandelion"
+      "execution": "HEADLESS_PASS",
+      "name": "Dandelion",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-038",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Rose"
+      "execution": "HEADLESS_PASS",
+      "name": "Rose",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-039",
@@ -470,10 +476,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Red Mushroom"
+      "execution": "HEADLESS_PASS",
+      "name": "Red Mushroom",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-041",
@@ -528,10 +535,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bricks"
+      "execution": "HEADLESS_PASS",
+      "name": "Bricks",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-046",
@@ -548,20 +556,22 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Bookshelf"
+      "execution": "HEADLESS_PASS",
+      "name": "Bookshelf",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-048",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Mossy Cobblestone"
+      "execution": "HEADLESS_PASS",
+      "name": "Mossy Cobblestone",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-049",
@@ -578,10 +588,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Torch"
+      "execution": "HEADLESS_PASS",
+      "name": "Torch",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-051",
@@ -598,10 +609,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Monster Spawner"
+      "execution": "HEADLESS_PASS",
+      "name": "Monster Spawner",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-053",
@@ -619,13 +631,13 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Chest",
       "seedlandsVoxelId": 12,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-055",
@@ -669,13 +681,13 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Crafting Table",
       "seedlandsVoxelId": 11,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-059",
@@ -706,26 +718,26 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Furnace",
       "seedlandsVoxelId": 13,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-062",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Lit Furnace",
       "seedlandsVoxelId": 13,
       "source": "playbooks/classic/src/blocks.ts",
-      "note": "存在基础原型；非原版算法/全部变体证明"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-063",
@@ -842,20 +854,22 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Redstone Ore"
+      "execution": "HEADLESS_PASS",
+      "name": "Redstone Ore",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-074",
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Lit Redstone Ore"
+      "execution": "HEADLESS_PASS",
+      "name": "Lit Redstone Ore",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-075",
@@ -895,10 +909,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Snow (Layer)"
+      "execution": "HEADLESS_PASS",
+      "name": "Snow (Layer)",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "B-079",
@@ -958,10 +973,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Jukebox"
+      "execution": "HEADLESS_PASS",
+      "name": "Jukebox",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-085",
@@ -979,10 +995,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Pumpkin"
+      "execution": "HEADLESS_PASS",
+      "name": "Pumpkin",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-087",
@@ -1033,10 +1050,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Jack'o'Lantern"
+      "execution": "HEADLESS_PASS",
+      "name": "Jack'o'Lantern",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "B-092",
@@ -1087,10 +1105,11 @@
       "kind": "block",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "Trapdoor"
+      "execution": "HEADLESS_PASS",
+      "name": "Trapdoor",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "I-256",
@@ -1108,12 +1127,13 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Iron Pickaxe",
       "seedlandsItemId": "iron-pickaxe",
-      "source": "playbooks/classic/src/items.ts"
+      "source": "playbooks/classic/src/items.ts",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "I-258",
@@ -1177,13 +1197,13 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Coal",
       "seedlandsItemId": "coal",
       "source": "playbooks/classic/src/items.ts",
-      "note": "煤与木炭均可作80秒燃料，木炭由原木烧制；材料守恒与半程恢复通过，原版元数据映射仍分离storageId。"
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "I-264",
@@ -1201,12 +1221,13 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Iron",
       "seedlandsItemId": "iron-ingot",
-      "source": "playbooks/classic/src/items.ts"
+      "source": "playbooks/classic/src/items.ts",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "I-266",
@@ -1235,12 +1256,13 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Wooden Sword",
       "seedlandsItemId": "wood-sword",
-      "source": "playbooks/classic/src/items.ts"
+      "source": "playbooks/classic/src/items.ts",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "I-269",
@@ -1258,24 +1280,26 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Wooden Pickaxe",
       "seedlandsItemId": "wood-pickaxe",
-      "source": "playbooks/classic/src/items.ts"
+      "source": "playbooks/classic/src/items.ts",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "I-271",
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Wooden Axe",
       "seedlandsItemId": "wood-axe",
-      "source": "playbooks/classic/src/items.ts"
+      "source": "playbooks/classic/src/items.ts",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "I-272",
@@ -1304,12 +1328,13 @@
       "kind": "item",
       "scope": "做",
       "phase": "S2",
-      "implementation": "PARTIAL_BASELINE",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "Stone Pickaxe",
       "seedlandsItemId": "stone-pickaxe",
-      "source": "playbooks/classic/src/items.ts"
+      "source": "playbooks/classic/src/items.ts",
+      "note": "既有 Classic 生成/采集/工位/工具 owner 已由本 change 定向和成长旅程验证；原版全部变体细节不宣称。"
     },
     {
       "caseId": "I-275",
@@ -2602,70 +2627,77 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 栅栏 ← 木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 栅栏 ← 木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D04",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 唱片机 ← 木板+钻石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 唱片机 ← 木板+钻石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D05",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 音符盒 ← 木板+红石粉；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 音符盒 ← 木板+红石粉；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D06",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 书架 ← 木板+书；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 书架 ← 木板+书；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D07",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 雪块 ← 雪球；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 雪块 ← 雪球；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D08",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 黏土块 ← 黏土球；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 黏土块 ← 黏土球；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D09",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 砖块 ← 红砖；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 砖块 ← 红砖；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D10",
@@ -2769,10 +2801,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 活板门 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 活板门 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D20",
@@ -2823,20 +2856,22 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木板 ← 原木；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木板 ← 原木；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D25",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木棍 ← 木板；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木棍 ← 木板；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D26",
@@ -2854,10 +2889,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 火把 ← 木炭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 火把 ← 木炭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D28",
@@ -2919,10 +2955,11 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 南瓜灯 ← 南瓜+火把；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 南瓜灯 ← 南瓜+火把；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-D34",
@@ -3193,250 +3230,275 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木镐 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木镐 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H02",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 石镐 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 石镐 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H03",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁镐 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁镐 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H04",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金镐 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金镐 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H05",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石镐 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石镐 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H06",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木斧 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木斧 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H07",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 石斧 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 石斧 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H08",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁斧 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁斧 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H09",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金斧 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金斧 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H10",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石斧 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石斧 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H11",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木锹 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木锹 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H12",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 石锹 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 石锹 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H13",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁锹 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁锹 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H14",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金锹 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金锹 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H15",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石锹 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石锹 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H16",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木锄 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木锄 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H17",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 石锄 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 石锄 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H18",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁锄 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁锄 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H19",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金锄 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金锄 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H20",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石锄 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石锄 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H21",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 木剑 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 木剑 ← 木板+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H22",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 石剑 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 石剑 ← 圆石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H23",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁剑 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁剑 ← 铁锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H24",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金剑 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金剑 ← 金锭+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H25",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石剑 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石剑 ← 钻石+木棍；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H26",
@@ -3465,240 +3527,264 @@
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 皮帽 ← 皮革；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 皮帽 ← 皮革；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H29",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 皮衣 ← 皮革；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 皮衣 ← 皮革；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H30",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 皮裤 ← 皮革；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 皮裤 ← 皮革；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H31",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 皮靴 ← 皮革；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 皮靴 ← 皮革；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H32",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁头盔 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁头盔 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H33",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁胸甲 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁胸甲 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H34",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁护腿 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁护腿 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H35",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁靴 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁靴 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H36",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金头盔 ← 金锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金头盔 ← 金锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H37",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金胸甲 ← 金锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金胸甲 ← 金锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H38",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金护腿 ← 金锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金护腿 ← 金锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H39",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金靴 ← 金锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金靴 ← 金锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H40",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石头盔 ← 钻石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石头盔 ← 钻石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H41",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石胸甲 ← 钻石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石胸甲 ← 钻石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H42",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石护腿 ← 钻石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石护腿 ← 钻石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H43",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石靴 ← 钻石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石靴 ← 钻石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H44",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁块 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁块 ← 铁锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H45",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 铁锭 ← 铁块；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 铁锭 ← 铁块；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H46",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金块 ← 金锭；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金块 ← 金锭；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H47",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 金锭 ← 金块；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 金锭 ← 金块；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H48",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石块 ← 钻石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石块 ← 钻石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H49",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石 ← 钻石块；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 钻石 ← 钻石块；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H50",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 青金石块 ← 青金石；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 青金石块 ← 青金石；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H51",
       "kind": "crafting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "SOURCE_CANDIDATE_REVIEW",
-      "execution": "NOT_RUN",
-      "name": "按登记输入在 2×2 或 3×3 网格合成 青金石 ← 青金石块；检查产出、消耗、镜像/平移和错误排列。"
+      "execution": "HEADLESS_PASS",
+      "name": "按登记输入在 2×2 或 3×3 网格合成 青金石 ← 青金石块；检查产出、消耗、镜像/平移和错误排列。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-H52",
@@ -4134,60 +4220,66 @@
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 铁矿石 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 铁矿石 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-S02",
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 金矿石 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 金矿石 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-S03",
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 沙子 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 沙子 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-S04",
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 圆石 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 圆石 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-S05",
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 黏土球 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 黏土球 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-S06",
       "kind": "smelting",
       "scope": "做",
       "phase": "S2",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
-      "name": "把 原木 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。"
+      "execution": "HEADLESS_PASS",
+      "name": "把 原木 放入熔炉输入槽并供给已登记燃料；检查产出、消耗、进度与恢复。",
+      "note": "S2h 或此前 Classic 内容已注册并通过配方/材质/采集闭包验证；状态化交互与有形摆位差异另记。"
     },
     {
       "caseId": "R-S07",

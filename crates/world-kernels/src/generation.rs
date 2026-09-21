@@ -6,6 +6,7 @@ const CAVE_SALT: u32 = 0x4341_5645;
 const VEGETATION_SALT: u32 = 0x0056_4547;
 const DUNGEON_SALT: u32 = 0x4455_4e47;
 const GEOLOGY_SALT: u32 = 0x4745_4f39;
+const REDSTONE_SALT: u32 = 0x5245_4453;
 
 #[inline(always)]
 fn hash2(seed: u32, x: i32, z: i32) -> f64 {
@@ -172,6 +173,18 @@ fn geology_voxel(
     }
     if base == 3 && y >= 0 && y < 32 && height - y >= 8 && hash % 997 < 20 {
         return 44;
+    }
+    if generator_version >= 10 && base == 3 && y >= 0 && y < 24 && height - y >= 10 {
+        let redstone = ore_hash(
+            seed,
+            x.div_euclid(2),
+            y.div_euclid(2) as i32,
+            z.div_euclid(2),
+            REDSTONE_SALT,
+        );
+        if redstone % 997 < 32 {
+            return 72;
+        }
     }
     if base == 3 && height - y >= 4 && (hash >> 8) % 97 < 8 {
         return 43;

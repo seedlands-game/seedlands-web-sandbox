@@ -185,6 +185,12 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - RED：classic-structure-interactions 3/3 因 StructureInteractionRuntime 缺失失败。GREEN 后门与床先验证玩家、距离、两个已加载可替换目标和自身碰撞，再经一次 editBatch 写入，成功后扣选中物品；夜间床使用写安全重生点并经注入 world-time 端口跳到清晨；白天拒绝。打火石只对已加载空气登记 Environment 火并扣一耐久。
 - structure/difficulty/environment 共3 files / 11 tests PASS；`verify:static:ci` PASS。GameplayRuntime 再次超过500行，抽出 requireGameplayPlayer 并收敛 facade 后通过，未加豁免。M09-02/03 与 M19-02 更新为 PARTIAL/HEADLESS；画/牌跨格、门开合朝向和完整 use 优先级仍未完成。
 
+## S2h 剩余主世界方块与 V10 红石矿
+
+- RED：remaining-blocks 2/2 因 dead-bush 等内容和 RedstoneOre/LitFurnace 体素缺失失败。GREEN 后追加 59–73 方块与 62–76 材质，覆盖枯灌木、羊毛、红花/红蘑菇、砖块、书架、苔石、音符盒、唱片机、南瓜/南瓜灯、活板门、燃烧熔炉、红石矿/发光红石矿；配套物品、掉落、制作配方和原创纹理闭包已接入。
+- V10 只在低层深石生成红石矿，V9 不生成；V2–V9 兼容版本继续支持。stdlib V9冻结/V10红石/洞穴/矿物/旧存档4 files / 18 tests PASS；Web TS/staged/Rust/Wasm/palette/content/asset 6 files / 22 tests PASS；Rust fingerprint 与 `verify:static:ci` PASS。
+- 问题记录：FaceMaterial 补丁曾重复键，清理后通过；wool-block 和 JackOLantern 的自动纹理名与稳定 item id 不一致，分别增加显式路由/兼容名。voxel.ts 与 items.ts 超500行后抽出 remaining-voxel-presentation 和 remaining-block-items，未加豁免。音符盒/唱片机/活板门/发光矿状态机仍只记 PARTIAL。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。

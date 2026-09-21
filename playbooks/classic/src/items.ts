@@ -1,9 +1,11 @@
 import type { ItemDefinitionInput } from '@seedlands/stdlib/mod-api';
 import { portableItems } from './portable-items';
+import { remainingBlockItems } from './remaining-block-items';
 
 /** Version 1 storage IDs and voxel palette preserve supported save inputs. */
 export const overworldItems: readonly ItemDefinitionInput[] = [
   ...portableItems,
+  ...remainingBlockItems,
   ...(
     [
       ['white', '白色'],

@@ -4,11 +4,12 @@ import { caveAir } from './cave-generation';
 import { vegetationAt } from './vegetation';
 import { dungeonFor, dungeonVoxel } from './dungeon-generation';
 import { geologyVoxel } from './geology';
+import { remainingVoxelColors, remainingVoxelNames } from './remaining-voxel-presentation';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 9;
+export const GENERATOR_VERSION = 10;
 export const LEGACY_GENERATOR_VERSION = 2;
-export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9]);
+export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9, 10]);
 export const isSupportedGeneratorVersion = (value: unknown): value is number =>
   typeof value === 'number' && SUPPORTED_GENERATOR_VERSIONS.includes(value);
 export type ChunkCoord = { cx: number; cy: number; cz: number };
@@ -73,10 +74,25 @@ export const Voxel = {
   Sign: 56,
   Fence: 57,
   Cake: 58,
+  DeadBush: 59,
+  Wool: 60,
+  RedFlower: 61,
+  RedMushroom: 62,
+  Bricks: 63,
+  Bookshelf: 64,
+  MossyCobblestone: 65,
+  NoteBlock: 66,
+  Jukebox: 67,
+  Pumpkin: 68,
+  JackOLantern: 69,
+  Trapdoor: 70,
+  LitFurnace: 71,
+  RedstoneOre: 72,
+  LitRedstoneOre: 73,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.Cake;
+export const MAX_VOXEL_ID = Voxel.LitRedstoneOre;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -140,11 +156,27 @@ export const FaceMaterial = {
   Sign: 59,
   Fence: 60,
   Cake: 61,
+  DeadBush: 62,
+  Wool: 63,
+  RedFlower: 64,
+  RedMushroom: 65,
+  Bricks: 66,
+  Bookshelf: 67,
+  MossyCobblestone: 68,
+  NoteBlock: 69,
+  Jukebox: 70,
+  Pumpkin: 71,
+  JackOLantern: 72,
+  Trapdoor: 73,
+  LitFurnace: 74,
+  RedstoneOre: 75,
+  LitRedstoneOre: 76,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
 
 export const voxelNames: Record<number, string> = {
+  ...remainingVoxelNames,
   [Voxel.Grass]: '草方块',
   [Voxel.Dirt]: '泥土',
   [Voxel.Stone]: '石头',
@@ -206,6 +238,7 @@ export const voxelNames: Record<number, string> = {
 };
 
 export const voxelColors: Record<number, [number, number, number]> = {
+  ...remainingVoxelColors,
   [Voxel.Grass]: [0.25, 0.62, 0.25],
   [Voxel.Dirt]: [0.42, 0.25, 0.12],
   [Voxel.Stone]: [0.45, 0.48, 0.52],
@@ -282,6 +315,9 @@ const nonSolid = new Set<number>([
   Voxel.Ladder,
   Voxel.Torch,
   Voxel.Sign,
+  Voxel.DeadBush,
+  Voxel.RedFlower,
+  Voxel.RedMushroom,
 ]);
 export const isSolid = (id: number) => !nonSolid.has(id);
 export const isTargetable = (id: number) =>
@@ -355,6 +391,21 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
       [Voxel.Sign]: FaceMaterial.Sign,
       [Voxel.Fence]: FaceMaterial.Fence,
       [Voxel.Cake]: FaceMaterial.Cake,
+      [Voxel.DeadBush]: FaceMaterial.DeadBush,
+      [Voxel.Wool]: FaceMaterial.Wool,
+      [Voxel.RedFlower]: FaceMaterial.RedFlower,
+      [Voxel.RedMushroom]: FaceMaterial.RedMushroom,
+      [Voxel.Bricks]: FaceMaterial.Bricks,
+      [Voxel.Bookshelf]: FaceMaterial.Bookshelf,
+      [Voxel.MossyCobblestone]: FaceMaterial.MossyCobblestone,
+      [Voxel.NoteBlock]: FaceMaterial.NoteBlock,
+      [Voxel.Jukebox]: FaceMaterial.Jukebox,
+      [Voxel.Pumpkin]: FaceMaterial.Pumpkin,
+      [Voxel.JackOLantern]: FaceMaterial.JackOLantern,
+      [Voxel.Trapdoor]: FaceMaterial.Trapdoor,
+      [Voxel.LitFurnace]: FaceMaterial.LitFurnace,
+      [Voxel.RedstoneOre]: FaceMaterial.RedstoneOre,
+      [Voxel.LitRedstoneOre]: FaceMaterial.LitRedstoneOre,
     } as Record<number, FaceMaterialId>
   )[id];
 }

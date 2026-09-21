@@ -42,3 +42,17 @@ it('V9 生成基岩、砂砾、青金石、黏土、冰与雪块且遵守位置�
     [Voxel.Bedrock, Voxel.Gravel, Voxel.LapisOre, Voxel.Clay, Voxel.Ice, Voxel.SnowBlock].sort((a, b) => a - b),
   );
 });
+
+it('V10 才生成低层红石矿且 V9 输出冻结', () => {
+  const seed = normalizeSeed('classic-redstone-v10');
+  let found = false;
+  for (let x = -96; x <= 96 && !found; x++)
+    for (let z = -96; z <= 96 && !found; z++)
+      for (let y = 2; y < 24; y++) {
+        const v9 = geologyVoxelFromColumn(seed, x, y, z, 50, 'plains', null, Voxel.Stone, 9);
+        const v10 = geologyVoxelFromColumn(seed, x, y, z, 50, 'plains', null, Voxel.Stone, 10);
+        expect(v9).not.toBe(Voxel.RedstoneOre);
+        if (v10 === Voxel.RedstoneOre) found = true;
+      }
+  expect(found).toBe(true);
+});
