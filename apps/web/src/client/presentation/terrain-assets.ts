@@ -58,6 +58,13 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Rail, '铁轨', ['42484a', '899194', 'bd8040', 'd5dcde']],
   [FaceMaterial.PoweredRail, '动力铁轨', ['5d301b', 'd49228', 'f2c84b', '8e1f16']],
   [FaceMaterial.DetectorRail, '探测铁轨', ['5f4328', 'b87832', 'd5b05a', '70321f']],
+  [FaceMaterial.Bedrock, '基岩', ['232628', '353a3c', '151719', '4b5052']],
+  [FaceMaterial.Gravel, '砂砾', ['716c67', '918a83', '514e4c', 'aaa39b']],
+  [FaceMaterial.LapisOre, '青金石矿', ['616968', '818987', '2441a1', '5371da']],
+  [FaceMaterial.Clay, '黏土', ['81909a', 'a5b0b7', '66747e', 'c2ccd1']],
+  [FaceMaterial.Ice, '冰', ['7fb4ce', 'afd7e6', '558ca9', 'd9f0f5']],
+  [FaceMaterial.SnowBlock, '雪块', ['dbe7e5', 'f4f8f4', 'bdcfcc', 'ffffff']],
+  [FaceMaterial.LapisBlock, '青金石块', ['17349a', '2854ca', '0b1d65', '5e82df']],
 ];
 const plantMaterials = new Set<number>([
   FaceMaterial.Sapling,
@@ -184,7 +191,7 @@ export const terrainMaterials: TerrainMaterial[] = sources.map(([faceMaterial, n
   renderMode:
     faceMaterial === FaceMaterial.Leaves || faceMaterial === FaceMaterial.Glass
       ? 'cutout'
-      : faceMaterial === FaceMaterial.Water
+      : faceMaterial === FaceMaterial.Water || faceMaterial === FaceMaterial.Ice
         ? 'transparent'
         : 'opaque',
   emissiveIntensity:

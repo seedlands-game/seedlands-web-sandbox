@@ -38,8 +38,15 @@ it('补齐纸书食物与装饰材料配方并保持材料守恒', () => {
     'sugar',
     'cake',
     'cookie',
+    'clay-block',
+    'snow-block',
+    'lapis-block',
+    'lapis-block-unpack',
+    'flint-and-steel',
   ])
     expect(classicContent.recipes.get(id)?.id).toBe(id);
+  for (const id of ['gravel', 'lapis-ore', 'clay-block', 'ice', 'snow-block', 'lapis-block'])
+    expect(classicContent.items.require(id).placesVoxel).toBeTypeOf('number');
   const player = createPlayerState('crafter', [0, 0, 0]);
   player.inventory.add({ itemId: 'wheat', count: 2 });
   player.inventory.add({ itemId: 'cocoa-beans', count: 1 });

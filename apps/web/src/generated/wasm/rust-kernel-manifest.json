@@ -14,9 +14,9 @@
     "crates/world-kernels/Cargo.toml": "2046dc427bc326a3e8ac5acca4a0d6e94677191efab58c1646f856046c2ffcd7",
     "crates/world-kernels/src/codec.rs": "c921ad41a9638dfd40f815099f76cdc9824dbe7cef9d05c2c807b2fddbcdeec4",
     "crates/world-kernels/src/fluid.rs": "434e1fabbc0d6542af34537471f14d2e2462aa2c9cd374c515e39d1923302e9f",
-    "crates/world-kernels/src/generation.rs": "b26bd3011558d12c3c3327dc4fb2df09721cf2b1b44089d4502fc2e6a8d8ddd8",
+    "crates/world-kernels/src/generation.rs": "93a9ec07e9855b45414272bbb9387f5fc328a4002ba85b549ba8876ca7f10fb3",
     "crates/world-kernels/src/lib.rs": "ff32bf9a94f91f0d6121121b5771cd66eb8078a1a60f57f0915b19e3efb2eb0e",
-    "crates/world-kernels/src/mesh.rs": "d524c3465f59f20e53faec0f2d251802beef6d071264082eef6e32f5b8b4285e",
+    "crates/world-kernels/src/mesh.rs": "19616f6c5bc99bdf1507e204819dca2862d2378fc3584ca9df3d002da4bd8626",
     "crates/world-kernels/src/pack.rs": "92b4a7da0b2dfaf71d6d3a3d260966a0323267c79ab3e23518ce965ef469b460",
     "crates/world-kernels/tests/data-plane.rs": "d9462b041fcc6ac1796df66301c3603cfdbaad464586e97aecaa60abfb4977b9",
     "crates/world-kernels/tests/fluid-mesh.rs": "c46e87c7ccf4ea577928b81ae460db4296a639f98f4d8d21db76609d2ed2ea71",
@@ -24,13 +24,13 @@
     "scripts/link-wasm-kernels.mjs": "8b4a17970e5bc1220f28643508a55a40c653554490a7a4836e0be530737e460e"
   },
   "scalar": {
-    "bytes": 26897,
-    "sha256": "5f1b9067bb2987893d54853be8f9bef9c1ad8527fcc3d35ff9018899f5f758f9",
+    "bytes": 28204,
+    "sha256": "c49689a00524ee94b92ed22c6468948a04303faa1957f985470b33c30bc65058",
     "flags": "-C linker=/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=-simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
   },
   "simd": {
-    "bytes": 28459,
-    "sha256": "5078a1017a0e3aa62f4457e157872bea22b9e6b1fba866968c57757849ba9f1e",
+    "bytes": 29766,
+    "sha256": "29f241ecb16f2640872359dc786e1c388ee681e7035df710d0f284e2748427e2",
     "flags": "-C linker=/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=+simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
   }
 }

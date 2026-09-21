@@ -162,6 +162,12 @@ S0与S1关键可玩闭环已取得本机证据，CI定义已恢复但远端尚�
 - RED：portable-content 2/2 因 flint-and-steel 等物品和 book 等配方缺失失败。GREEN 后补齐打火石、蘑菇煲、画、金苹果、告示牌、木门、雪球、红砖、黏土、书、糖、蛋糕、曲奇、可可豆和两张唱片；全部进入 Classic registry 与原创像素资产目录。
 - 补齐纸、书、羊毛、画、金苹果、告示牌、木门、糖、蛋糕、曲奇和打火石材料配方；cookie 实际合成验证材料扣除、8个输出和缺料不提交。portable/asset/visual 共3 files / 9 tests PASS，`verify:static:ci` PASS。首次静态检查因 items.ts 507行失败，拆出 portable-items.ts 后通过，未加豁免。RecipeRegistry 仍是无形配方，故覆盖项只记 PARTIAL/HEADLESS，不宣称原版网格摆位等价。
 
+## S3j V9 基础地质
+
+- RED：V8 固定深层区块 SHA-256 `23048253e362d35e6375ad051512dcaf09e6aa883cec953e1fee8916aa3a997a` 保持，但 V9 基岩与其余新材料均不存在，2/2 失败。首版全域逐体素扫描耗时约56秒，改为直接测试纯 geology 层的有限固定输入，避免把昂贵探测留进 CI。
+- GREEN：V9 追加 Bedrock/Gravel/LapisOre/Clay/Ice/SnowBlock/LapisBlock 稳定体素42–48与材质45–51。基岩限定最低五层；砂砾/青金石替换符合深度的石层；黏土只出现在水域浅层；寒冷水面结冰且积雪下形成雪块。V2–V8 原输出不变，Classic worldgen identity 升 `9.0.0/g2-g9`。
+- Rust source/artifact fingerprint PASS；stdlib 地质/洞穴/矿物/旧存档4 files / 16 tests PASS；Web palette、TS/staged/Rust/Wasm generation、halo、mesh 与资产6 files / 22 tests PASS；`verify:static:ci` PASS。新增基础材料均有采集规则、放置物品与原创纹理，黏土→砖、雪球→雪块、青金石块压缩/拆解配方闭包已接入。
+
 ## S4b 弓箭与权威投射物（部分完成）
 
 - RED：classic-projectiles.test.ts 首先因公开 projectile-runtime 缺失失败；只读沙箱内首次执行另有 Vitest 写 .vite-temp 的 EPERM，授权后取得有效 RED，不将环境错误算成功能证据。

@@ -33,5 +33,5 @@ export function collisionBoxesForVoxel(voxel: number): readonly LocalBox[] {
 }
 
 export function voxelOccludesFullFace(voxel: number): boolean {
-  return isSolid(voxel) && voxel !== Voxel.Lantern && voxel !== Voxel.Glass;
+  return isSolid(voxel) && voxel !== Voxel.Lantern && voxel !== Voxel.Glass && voxel !== Voxel.Ice;
 }

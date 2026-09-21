@@ -173,11 +173,11 @@ export function createProceduralMeshInput({
 const isGreedyVoxel = (voxel: number) => voxel !== Voxel.Air && modelBoxesForVoxel(voxel).length === 0;
 const isVisibleFace = (source: number, target: number) =>
   isGreedyVoxel(source) &&
-  (source === Voxel.Glass && target === Voxel.Glass
+  ((source === Voxel.Glass && target === Voxel.Glass) || (source === Voxel.Ice && target === Voxel.Ice)
     ? false
     : source === Voxel.Water
       ? target === Voxel.Air || (target !== Voxel.Water && !voxelOccludesFullFace(target))
-      : target === Voxel.Air || target === Voxel.Water || !voxelOccludesFullFace(target));
+      : target === Voxel.Air || target === Voxel.Water || target === Voxel.Ice || !voxelOccludesFullFace(target));
 
 function vertexAo(
   block: readonly number[],

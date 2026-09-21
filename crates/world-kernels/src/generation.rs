@@ -5,6 +5,7 @@ const DIAMOND_ORE_SALT: u32 = 0x4449_414d;
 const CAVE_SALT: u32 = 0x4341_5645;
 const VEGETATION_SALT: u32 = 0x0056_4547;
 const DUNGEON_SALT: u32 = 0x4455_4e47;
+const GEOLOGY_SALT: u32 = 0x4745_4f39;
 
 #[inline(always)]
 fn hash2(seed: u32, x: i32, z: i32) -> f64 {
@@ -136,6 +137,49 @@ fn ore_voxel(
 }
 
 #[inline(always)]
+fn geology_voxel(
+    seed: u32,
+    x: i32,
+    y: i64,
+    z: i32,
+    height: i64,
+    kind: i32,
+    water_level: i64,
+    base: u32,
+    generator_version: u32,
+) -> u32 {
+    if generator_version < 9 {
+        return base;
+    }
+    let hash = ore_hash(
+        seed,
+        x.div_euclid(2),
+        y.div_euclid(2) as i32,
+        z.div_euclid(2),
+        GEOLOGY_SALT,
+    );
+    if y <= 0 || (y < 5 && hash % 5 >= y as u32) {
+        return 42;
+    }
+    if kind == 4 && base == 8 && y == water_level {
+        return 46;
+    }
+    if kind == 4 && base != 0 && y == height - 1 {
+        return 47;
+    }
+    if water_level != i64::from(i32::MIN) && base != 0 && y > height - 3 && hash % 5 < 3 {
+        return 45;
+    }
+    if base == 3 && y >= 0 && y < 32 && height - y >= 8 && hash % 997 < 20 {
+        return 44;
+    }
+    if base == 3 && height - y >= 4 && (hash >> 8) % 97 < 8 {
+        return 43;
+    }
+    base
+}
+
+#[inline(always)]
 fn column_voxel(
     columns: &[i32],
     grid: i32,
@@ -155,7 +199,17 @@ fn column_voxel(
         return voxel;
     }
     if y > height && y <= water_level {
-        return 8;
+        return geology_voxel(
+            seed,
+            world_x,
+            y,
+            world_z,
+            height,
+            kind,
+            water_level,
+            8,
+            generator_version,
+        );
     }
     if y <= height {
         let base = if y == height {
@@ -179,10 +233,22 @@ fn column_voxel(
         } else {
             3
         };
-        if cave_air(seed, world_x, y, world_z, height, generator_version) {
-            return 0;
-        }
-        return ore_voxel(seed, world_x, y, world_z, height, base, generator_version);
+        let generated = if cave_air(seed, world_x, y, world_z, height, generator_version) {
+            0
+        } else {
+            ore_voxel(seed, world_x, y, world_z, height, base, generator_version)
+        };
+        return geology_voxel(
+            seed,
+            world_x,
+            y,
+            world_z,
+            height,
+            kind,
+            water_level,
+            generated,
+            generator_version,
+        );
     }
     let mut tx = x;
     while tx <= x + 6 {

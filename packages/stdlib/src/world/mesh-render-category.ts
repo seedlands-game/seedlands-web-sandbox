@@ -12,7 +12,7 @@ const cutoutMaterials = new Set<number>([
 ]);
 
 export const renderCategoryForMaterial = (material: FaceMaterialId): RenderCategory =>
-  material === FaceMaterial.Water
+  material === FaceMaterial.Water || material === FaceMaterial.Ice
     ? 'transparent'
     : cutoutMaterials.has(material)
       ? 'cutout'
