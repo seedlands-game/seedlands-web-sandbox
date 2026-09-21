@@ -53,6 +53,8 @@
     "./server/gameplay/armor-equipment": "./src/server/gameplay/armor-equipment.ts",
     "./server/gameplay/spawn-policy": "./src/server/gameplay/spawn-policy.ts",
     "./server/gameplay/environment-runtime": "./src/server/gameplay/environment-runtime.ts",
+    "./server/gameplay/light-sampler": "./src/server/gameplay/light-sampler.ts",
+    "./server/gameplay/natural-spawn-runtime": "./src/server/gameplay/natural-spawn-runtime.ts",
     "./server/fluid/fluid-reaction": "./src/server/fluid/fluid-reaction.ts",
     "./server/gameplay/recipe-registry": "./src/server/gameplay/recipe-registry.ts",
     "./server/harness/authority-world-harness": "./src/server/harness/authority-world-harness.ts",

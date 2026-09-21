@@ -46,6 +46,7 @@ export type GameServerGameplayWorldPort = Readonly<{
   readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined;
   readGameplayVoxel(x: number, y: number, z: number): number | undefined;
   readFluidCell(x: number, y: number, z: number): FluidCell | null;
+  biomeAt(x: number, z: number): string;
 }>;
 
 export type PreparedGameplayRestore = Readonly<{
@@ -87,6 +88,7 @@ export class GameServerGameplayHost {
       prepareVoxelEdit: (actorId, position, voxel) => this.world.prepareVoxelEdit(actorId, position, voxel),
       editBatch: (batch) => this.world.editBatch(batch),
       environmentSeed: this.world.seed(),
+      biomeAt: ([x, , z]) => this.world.biomeAt(x, z),
       getWorldTime: () => this.world.worldTime(),
       platform: this.platform,
       content: this.content,

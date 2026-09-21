@@ -17,6 +17,7 @@ export type GameplayCallbacks = {
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
   editBatch?: (batch: WorldEditBatch) => WorldCommitResult;
   environmentSeed?: number;
+  biomeAt?: (position: Position) => string;
   getWorldTime: () => number;
   platform: CorePlatformPorts;
   content?: GameplayContent;

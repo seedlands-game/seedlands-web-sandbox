@@ -4506,9 +4506,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：天空光初值、遮挡与高度图更新；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4516,9 +4516,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：方块光传播/衰减、相邻/跨区块增量重算；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4526,9 +4526,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：破坏/放置/流体/火后光照更新顺序；记录正例、失败例、tick 和 owner 状态。"
     },
     {
@@ -4536,9 +4536,9 @@
       "kind": "mechanism",
       "scope": "做",
       "phase": "S3",
-      "implementation": "NOT_AUDITED",
+      "implementation": "PARTIAL_IMPLEMENTED",
       "referenceStatus": "PARTIAL_REFERENCE_GAP",
-      "execution": "NOT_RUN",
+      "execution": "HEADLESS_PASS",
       "name": "以固定 seed/初态/输入验证：昼夜太阳/月亮、天色/雾色变化；记录正例、失败例、tick 和 owner 状态。"
     },
     {

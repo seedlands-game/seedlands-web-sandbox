@@ -98,3 +98,7 @@ Classic 的鸡、牛、猪、羊、鱿鱼、狼、僵尸、骷髅、蜘蛛、苦
 环境状态由每世界实例 owner 持有并随 gameplay checkpoint 保存：天气为 clear/rain/thunder、剩余秒数、revision 与逻辑 tick；转移只使用 seed+tick 哈希。火记录位置、剩余寿命与传播 tick，只有 Classic 标记的可燃方块邻位可被点燃，雨且可见天空时熄灭。TNT 记录稳定 id、位置、引信与威力；到期按坐标稳定产生有界球形方块候选和距离衰减的实体伤害/击退。
 
 环境 advance 只产候选，不直接写 Chunk；GameServer 经 editBatch/正式伤害入口提交。未知 Chunk 延迟，方块 revision 变化使候选失效，不跨过 World.edit。连续点燃/链爆有单 tick 上限，失败不部分提交。
+
+## S3f 权威光照采样合同
+
+光照查询是只读派生，不另建权威方块状态。天空光由 worldTime 的确定曲线和从目标格至世界顶的已加载遮挡计算；任何未知格返回 unknown，不能当作明亮或黑暗。方块光在有界半径内扫描 Glowstone/Lantern/Fire/Lava，按 Manhattan 距离衰减并取最大值。最终 light=max(sky,block)，范围0–15。方块提交后下一次查询立即反映新值，不保存可陈旧缓存。浏览器太阳/雾继续消费 worldTime，权威刷怪消费该采样结果。

@@ -5,7 +5,7 @@ import {
   assertStationCheckpointIntegrity,
   assertStationChunkIntegrity,
 } from './station-world-integrity';
-import { GENERATOR_VERSION, SUPPORTED_GENERATOR_VERSIONS, chunkKey, normalizeSeed } from '../world/voxel';
+import { GENERATOR_VERSION, SUPPORTED_GENERATOR_VERSIONS, biome, chunkKey, normalizeSeed } from '../world/voxel';
 import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayHost } from './game-server-gameplay-host';
@@ -91,6 +91,7 @@ class GameServerWorld {
       options,
       {
         seed: () => this.seed,
+        biomeAt: (x, z) => biome(this.seed, x, z, this.generatorVersion),
         worldTime: () => this.kernelState.worldTime,
         getVoxel: (x, y, z) => this.getVoxel(x, y, z),
         editBatch: (batch) => this.editBatch(batch),
