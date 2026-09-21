@@ -28,14 +28,16 @@ fn greedy(id: u32) -> bool {
 }
 
 fn occludes(id: u32) -> bool {
-    id != 0 && id != 8 && id != 10 && id != 18
+    !matches!(id, 0 | 8 | 10 | 18 | 27 | 29 | 31 | 32 | 33 | 34 | 35)
 }
 
 fn visible(source: u32, target: u32) -> bool {
     if !greedy(source) {
         return false;
     }
-    if source == 18 && target == 18 { return false; }
+    if source == 18 && target == 18 {
+        return false;
+    }
     if source == 8 {
         target == 0 || (target != 8 && !occludes(target))
     } else {
@@ -46,7 +48,11 @@ fn visible(source: u32, target: u32) -> bool {
 fn material(id: u32, axis: i32, positive: bool) -> u32 {
     if id == 1 {
         return if axis == 1 {
-            if positive { 1 } else { 3 }
+            if positive {
+                1
+            } else {
+                3
+            }
         } else {
             2
         };
@@ -79,6 +85,16 @@ fn material(id: u32, axis: i32, positive: bool) -> u32 {
         24 => 27,
         25 => 28,
         26 => 29,
+        27 => 30,
+        28 => 31,
+        29 => 32,
+        30 => 33,
+        31 => 34,
+        32 => 35,
+        33 => 36,
+        34 => 37,
+        35 => 38,
+        36 => 39,
         _ => 255,
     }
 }
@@ -88,7 +104,11 @@ fn water_height_code(halo: &[u16], fluid: &[u8], x: i32, y: i32, z: i32) -> u32 
         return 9;
     }
     let level = (sample_fluid(fluid, x, y, z) & 15).clamp(1, 8);
-    if level >= 7 { 8 } else { level }
+    if level >= 7 {
+        8
+    } else {
+        level
+    }
 }
 
 fn packed_ao(halo: &[u16], bx: i32, by: i32, bz: i32, axis: i32, back: bool) -> u32 {
@@ -147,7 +167,9 @@ fn packed_ao(halo: &[u16], bx: i32, by: i32, bz: i32, axis: i32, back: bool) -> 
         let level = if occupied_u && occupied_v {
             3
         } else {
-            u32::from(occupied_u) + u32::from(occupied_v) + u32::from(occludes(sample(halo, cx, cy, cz)))
+            u32::from(occupied_u)
+                + u32::from(occupied_v)
+                + u32::from(occludes(sample(halo, cx, cy, cz)))
         };
         packed |= level << (corner * 2);
     }
@@ -233,7 +255,13 @@ fn coordinates(axis: i32, slice: i32, i: i32, j: i32) -> (i32, i32, i32) {
     }
 }
 
-fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8], write: bool) -> usize {
+fn descriptor_pass(
+    halo: &[u16],
+    fluid: &[u8],
+    mask: &mut [u8],
+    output: &mut [u8],
+    write: bool,
+) -> usize {
     let mut count = 0;
     for axis in 0..3 {
         for slice in -1..32 {
@@ -256,7 +284,11 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                     };
                     let stepped = axis != 1 && a == 8 && b == 8 && ah != bh;
                     let forward = if stepped { ah > bh } else { visible(a, b) };
-                    let back = if stepped { bh > ah } else { !forward && visible(b, a) };
+                    let back = if stepped {
+                        bh > ah
+                    } else {
+                        !forward && visible(b, a)
+                    };
                     if !forward && !back {
                         clear_mask(mask, m);
                     } else {
@@ -273,7 +305,11 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                         };
                         let high = if id == 8 {
                             if stepped {
-                                if ah > bh { ah } else { bh }
+                                if ah > bh {
+                                    ah
+                                } else {
+                                    bh
+                                }
                             } else if back {
                                 bh
                             } else {
@@ -283,7 +319,11 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                             0
                         };
                         let low = if stepped {
-                            if ah < bh { ah } else { bh }
+                            if ah < bh {
+                                ah
+                            } else {
+                                bh
+                            }
                         } else {
                             0
                         };
@@ -307,14 +347,23 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                         let high = mask[offset + 4] as u32;
                         let low = mask[offset + 5] as u32;
                         let mut width = 1;
-                        while i + width < 32 && same_mask(mask, m + width, mat, back, ao, high, low) {
+                        while i + width < 32 && same_mask(mask, m + width, mat, back, ao, high, low)
+                        {
                             width += 1;
                         }
                         let mut height = 1;
                         let mut keep = true;
                         while j + height < 32 && keep {
                             for column in 0..width {
-                                if !same_mask(mask, m + column + height * 32, mat, back, ao, high, low) {
+                                if !same_mask(
+                                    mask,
+                                    m + column + height * 32,
+                                    mat,
+                                    back,
+                                    ao,
+                                    high,
+                                    low,
+                                ) {
                                     keep = false;
                                 }
                             }
@@ -325,7 +374,8 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                         let (px, py, pz) = coordinates(axis, slice + 1, i, j);
                         if write {
                             write_quad(
-                                output, count, mat, axis, back, px, py, pz, width, height, ao, high, low,
+                                output, count, mat, axis, back, px, py, pz, width, height, ao,
+                                high, low,
                             );
                         }
                         for row in 0..height {
