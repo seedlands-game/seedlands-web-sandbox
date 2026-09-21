@@ -54,13 +54,14 @@ export function columnVoxel(
   const height = columns[column];
   const kind = columns[column + 1];
   const waterLevel = columns[column + 2];
+  const biome = (['plains', 'forest', 'mountain', 'dry', 'cold', 'wet'] as const)[kind];
+  const water = waterLevel === -2147483648 ? null : waterLevel;
   const dungeon = dungeonFor(seed, worldX, worldZ, generatorVersion);
   if (dungeon) {
     const generated = dungeonVoxel(dungeon, worldX, wy, worldZ);
-    if (generated !== null) return generated;
+    if (generated !== null)
+      return geologyVoxelFromColumn(seed, worldX, wy, worldZ, height, biome, water, generated, generatorVersion);
   }
-  const biome = (['plains', 'forest', 'mountain', 'dry', 'cold', 'wet'] as const)[kind];
-  const water = waterLevel === -2147483648 ? null : waterLevel;
   if (wy > height && wy <= waterLevel)
     return geologyVoxelFromColumn(seed, worldX, wy, worldZ, height, biome, water, 8, generatorVersion);
   if (wy <= height) {
