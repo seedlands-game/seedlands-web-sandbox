@@ -7,7 +7,6 @@ import type { ActorRegistration, AutonomyRuntime } from '../simulation/autonomy-
 import { resolveProfiledActorSpawn } from './profiled-actor-spawn';
 import type { WorldCommitResult } from '../game-server-types';
 import { advanceGameplayClock, assertGameplayAdvance } from './gameplay-clock';
-import { gameplayEntityMetrics } from './gameplay-entity-metrics';
 
 type Disposable = Readonly<{ dispose(): void }>;
 type ActorRequestRuntime<Result> = Readonly<{
@@ -142,20 +141,6 @@ export const advanceGameplayPlayer = (
   if (player.lifecycle === 'alive' && !registeredBlocks) blocks.advanceBreak(player.entityId, seconds, commits);
   if (player.lifecycle === 'alive' && !schedule) vitals.advanceNeeds(player.entityId, seconds);
 };
-
-export const gameplayMetrics = (
-  entities: EntityStore,
-  inventoryOperationCount: number,
-  gameplayEventCount: number,
-  snapshotBytes: number,
-  simulation: AutonomyRuntime,
-) => ({
-  ...gameplayEntityMetrics(entities),
-  inventoryOperationCount,
-  gameplayEventCount,
-  snapshotBytes,
-  ...simulation.metrics(),
-});
 
 export function bindRegisteredActorRequest<Result>(
   runtime: ActorRequestRuntime<Result> | null,
