@@ -218,7 +218,20 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Cactus]: [0.18, 0.55, 0.28],
 };
 
-export const isSolid = (id: number) => id !== Voxel.Air && id !== Voxel.Water && id !== Voxel.Lava && id !== Voxel.Fire;
+const nonSolid = new Set<number>([
+  Voxel.Air,
+  Voxel.Water,
+  Voxel.Lava,
+  Voxel.Fire,
+  Voxel.Sapling,
+  Voxel.TallGrass,
+  Voxel.Flower,
+  Voxel.Mushroom,
+  Voxel.SugarCane,
+]);
+export const isSolid = (id: number) => !nonSolid.has(id);
+export const isTargetable = (id: number) =>
+  id !== Voxel.Air && id !== Voxel.Water && id !== Voxel.Lava && id !== Voxel.Fire;
 export const isRenderable = (id: number) => id !== Voxel.Air;
 
 export const floorDiv = (n: number, d: number) => Math.floor(n / d);

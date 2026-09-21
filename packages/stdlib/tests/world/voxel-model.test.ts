@@ -29,4 +29,12 @@ describe('模型方块注册与形状', () => {
     expect(collisionBoxesForVoxel(Voxel.Lantern)).toEqual([{ min: [0.25, 0, 0.25], max: [0.75, 0.94, 0.75] }]);
     expect(collisionBoxesForVoxel(Voxel.Glowstone)).toEqual([{ min: [0, 0, 0], max: [1, 1, 1] }]);
   });
+
+  it('植物可渲染但不产生角色碰撞，仙人掌保持实体碰撞', () => {
+    for (const voxel of [Voxel.Sapling, Voxel.TallGrass, Voxel.Flower, Voxel.Mushroom, Voxel.SugarCane]) {
+      expect(collisionBoxesForVoxel(voxel)).toEqual([]);
+      expect(voxelOccludesFullFace(voxel)).toBe(false);
+    }
+    expect(collisionBoxesForVoxel(Voxel.Cactus)).toEqual([{ min: [0, 0, 0], max: [1, 1, 1] }]);
+  });
 });
