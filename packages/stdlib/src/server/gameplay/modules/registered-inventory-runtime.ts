@@ -24,6 +24,7 @@ import {
   buildInventoryActionCandidate,
   inventoryActorAddress,
   inventoryItemAddress,
+  listCraftableInventoryRecipes,
   validateInventoryActorProjection,
   validateInventoryWorldItemProjection,
   type InventoryActionKind,
@@ -350,15 +351,7 @@ export class RegisteredInventoryRuntime {
       !this.options.composition.definitionMap.capabilities.some((entry) => entry.id === 'seedlands:inventory-actions')
     )
       return [];
-    const actor = this.actor(id);
-    return this.options.content.recipes.list().filter((recipe) => {
-      try {
-        buildInventoryActionCandidate(this.options.content, { kind: 'craft', actor, input: { recipeId: recipe.id } });
-        return true;
-      } catch {
-        return false;
-      }
-    });
+    return listCraftableInventoryRecipes(this.options.content, this.actor(id));
   }
   craft(id: string, recipeId: string) {
     const result = this.invoke(id, 'craft', { recipeId });

@@ -1,0 +1,717 @@
+diff --git a/apps/web/src/app/ui/gameplay-ui-projector.ts b/apps/web/src/app/ui/gameplay-ui-projector.ts
+index ddf1353..017e5dc 100644
+--- a/apps/web/src/app/ui/gameplay-ui-projector.ts
++++ b/apps/web/src/app/ui/gameplay-ui-projector.ts
+@@ -96,12 +96,47 @@ export type GameplayUiProjection = Readonly<{
+         result: string;
+         craftable: boolean;
+       }>[];
++      progress?: GameplayUiSource['progress'];
+     }>;
+   }>;
+ }>;
+ 
+-const equal = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
+-const reuse = <Value>(next: Value, previous?: Value): Value => (previous && equal(next, previous) ? previous : next);
++type GameplayProjection = GameplayUiProjection['shell']['gameplay'];
++type RecipePresentation = GameplayProjection['recipes'][number];
++type PlayerProgress = NonNullable<GameplayUiSource['progress']>;
++
++const defaultOxygen = Object.freeze({ value: 20, max: 20, visible: false });
++
++const sameArray = <Value>(left: readonly Value[] | undefined, right: readonly Value[]) =>
++  left?.length === right.length && left.every((value, index) => value === right[index]);
++
++const sameCombat = (left: CombatUiProjection | undefined, right: CombatUiProjection) =>
++  left?.phase === right.phase &&
++  left.label === right.label &&
++  left.remainingSeconds === right.remainingSeconds &&
++  left.progress === right.progress &&
++  left.comboStep === right.comboStep &&
++  left.hint === right.hint;
++
++const sameStructure = (left: unknown, right: unknown): boolean => {
++  if (Object.is(left, right)) return true;
++  if (!left || !right || typeof left !== 'object' || typeof right !== 'object') return false;
++  if (Array.isArray(left) || Array.isArray(right))
++    return (
++      Array.isArray(left) &&
++      Array.isArray(right) &&
++      left.length === right.length &&
++      left.every((value, index) => sameStructure(value, right[index]))
++    );
++  const leftRecord = left as Record<string, unknown>;
++  const rightRecord = right as Record<string, unknown>;
++  const leftKeys = Object.keys(leftRecord);
++  const rightKeys = Object.keys(rightRecord);
++  return (
++    leftKeys.length === rightKeys.length &&
++    leftKeys.every((key) => Object.hasOwn(rightRecord, key) && sameStructure(leftRecord[key], rightRecord[key]))
++  );
++};
+ 
+ const itemResolver = (definitions?: readonly ItemDefinition[]) => {
+   if (!definitions) return { list: listClassicItemDefinitions, require: requireClassicItemDefinition };
+@@ -116,112 +151,309 @@ const itemResolver = (definitions?: readonly ItemDefinition[]) => {
+   };
+ };
+ 
++const projectItem = (
++  stack: GameplayUiSource['player']['inventory'][number],
++  slot: number,
++  requireItem: (itemId: string) => ItemDefinition,
++  previous?: GameplayItemPresentation,
++): GameplayItemPresentation => {
++  if (!stack) {
++    if (
++      previous?.slot === slot &&
++      previous.itemId === null &&
++      previous.count === 0 &&
++      previous.name === '空槽位' &&
++      !previous.edible &&
++      previous.stackLimit === undefined &&
++      previous.durability === undefined
++    )
++      return previous;
++    return { slot, itemId: null, count: 0, name: '空槽位', edible: false };
++  }
++  const definition = requireItem(stack.itemId);
++  const durabilityCurrent = stack.instance && definition.durability ? stack.instance.durability : undefined;
++  const durabilityMax = stack.instance && definition.durability ? definition.durability.max : undefined;
++  const edible = definition.capabilities.some((capability) => capability.type === 'consume');
++  if (
++    previous?.slot === slot &&
++    previous.itemId === stack.itemId &&
++    previous.count === stack.count &&
++    previous.stackLimit === definition.stackLimit &&
++    previous.name === definition.name &&
++    previous.edible === edible &&
++    previous.durability?.current === durabilityCurrent &&
++    previous.durability?.max === durabilityMax
++  )
++    return previous;
++  return {
++    ...(durabilityCurrent !== undefined && durabilityMax !== undefined
++      ? { durability: { current: durabilityCurrent, max: durabilityMax } }
++      : {}),
++    slot,
++    itemId: stack.itemId,
++    count: stack.count,
++    stackLimit: definition.stackLimit,
++    name: definition.name,
++    edible,
++  };
++};
++
+ const projectInventory = (
+   inventory: GameplayUiSource['player']['inventory'],
+   length: number,
+   requireItem: (itemId: string) => ItemDefinition,
+-): readonly GameplayItemPresentation[] =>
+-  Array.from({ length }, (_, slot) => {
+-    const stack = inventory[slot];
+-    return stack
+-      ? {
+-          ...(stack.instance && requireItem(stack.itemId).durability
+-            ? { durability: { current: stack.instance.durability, max: requireItem(stack.itemId).durability!.max } }
+-            : {}),
+-          slot,
+-          itemId: stack.itemId,
+-          count: stack.count,
+-          stackLimit: requireItem(stack.itemId).stackLimit,
+-          name: requireItem(stack.itemId).name,
+-          edible: requireItem(stack.itemId).capabilities.some((capability) => capability.type === 'consume'),
+-        }
+-      : { slot, itemId: null, count: 0, name: '空槽位', edible: false };
+-  });
++  previous?: readonly GameplayItemPresentation[],
++): readonly GameplayItemPresentation[] => {
++  if (!previous || previous.length !== length)
++    return Array.from({ length }, (_, slot) => projectItem(inventory[slot], slot, requireItem));
++  let changed: GameplayItemPresentation[] | undefined;
++  for (let slot = 0; slot < length; slot += 1) {
++    const item = projectItem(inventory[slot], slot, requireItem, previous[slot]);
++    if (changed) changed.push(item);
++    else if (item !== previous[slot]) changed = [...previous.slice(0, slot), item];
++  }
++  return changed ?? previous;
++};
++
++const projectCreativeSlot = (
++  itemId: string | null,
++  slot: number,
++  definition: ItemDefinition | null,
++  previous?: GameplayItemPresentation,
++): GameplayItemPresentation => {
++  const name = definition?.name ?? '空槽位';
++  const edible = Boolean(definition?.capabilities.some((capability) => capability.type === 'consume'));
++  if (
++    previous?.slot === slot &&
++    previous.itemId === itemId &&
++    previous.count === 0 &&
++    previous.name === name &&
++    previous.edible === edible &&
++    previous.stackLimit === undefined &&
++    previous.durability === undefined
++  )
++    return previous;
++  return { slot, itemId, count: 0, name, edible };
++};
++
++const projectCreativeHotbar = (
++  source: GameplayUiSource,
++  hotbarSize: number,
++  requireItem: (itemId: string) => ItemDefinition,
++  previous?: readonly GameplayItemPresentation[],
++) => {
++  const length = source.player.creativeCatalog?.hotbar.length ?? hotbarSize;
++  if (!previous || previous.length !== length)
++    return Array.from({ length }, (_, slot) => {
++      const itemId = source.player.creativeCatalog?.hotbar[slot] ?? null;
++      return projectCreativeSlot(itemId, slot, itemId ? requireItem(itemId) : null);
++    });
++  let changed: GameplayItemPresentation[] | undefined;
++  for (let slot = 0; slot < length; slot += 1) {
++    const itemId = source.player.creativeCatalog?.hotbar[slot] ?? null;
++    const item = projectCreativeSlot(itemId, slot, itemId ? requireItem(itemId) : null, previous[slot]);
++    if (changed) changed.push(item);
++    else if (item !== previous[slot]) changed = [...previous.slice(0, slot), item];
++  }
++  return changed ?? previous;
++};
++
++const projectCreativeCatalog = (
++  definitions: readonly ItemDefinition[],
++  previous?: readonly GameplayItemPresentation[],
++) => {
++  if (!previous || previous.length !== definitions.length)
++    return definitions.map((definition, slot) => projectCreativeSlot(definition.id, slot, definition));
++  let changed: GameplayItemPresentation[] | undefined;
++  for (let slot = 0; slot < definitions.length; slot += 1) {
++    const definition = definitions[slot];
++    const item = projectCreativeSlot(definition.id, slot, definition, previous[slot]);
++    if (changed) changed.push(item);
++    else if (item !== previous[slot]) changed = [...previous.slice(0, slot), item];
++  }
++  return changed ?? previous;
++};
++
++const projectStrings = (source: readonly string[], previous?: readonly string[]) =>
++  previous && source.length === previous.length && source.every((value, index) => value === previous[index])
++    ? previous
++    : [...source];
++
++const projectPrefix = <Value>(source: readonly Value[], length: number, previous?: readonly Value[]) => {
++  if (previous && previous.length === length && previous.every((value, index) => value === source[index]))
++    return previous;
++  return source.slice(0, length);
++};
++
++const projectRecipes = (
++  recipes: readonly Recipe[],
++  craftableRecipeIds: readonly string[],
++  requireItem: (itemId: string) => ItemDefinition,
++  previous?: readonly RecipePresentation[],
++): readonly RecipePresentation[] => {
++  const project = (recipe: Recipe, prior?: RecipePresentation): RecipePresentation => {
++    const name = requireItem(recipe.outputs[0].itemId).name;
++    const requirements = recipe.inputs.map((stack) => `${requireItem(stack.itemId).name} × ${stack.count}`).join(' + ');
++    const result = recipe.outputs.map((stack) => `${requireItem(stack.itemId).name} × ${stack.count}`).join(' + ');
++    const craftable = craftableRecipeIds.includes(recipe.id);
++    return prior?.id === recipe.id &&
++      prior.name === name &&
++      prior.requirements === requirements &&
++      prior.result === result &&
++      prior.craftable === craftable
++      ? prior
++      : { id: recipe.id, name, requirements, result, craftable };
++  };
++  if (!previous || previous.length !== recipes.length) return recipes.map((recipe) => project(recipe));
++  let changed: RecipePresentation[] | undefined;
++  for (let index = 0; index < recipes.length; index += 1) {
++    const recipe = project(recipes[index], previous[index]);
++    if (changed) changed.push(recipe);
++    else if (recipe !== previous[index]) changed = [...previous.slice(0, index), recipe];
++  }
++  return changed ?? previous;
++};
++
++const sameProgress = (source: PlayerProgress, previous: PlayerProgress | undefined) =>
++  previous?.playerId === source.playerId &&
++  sameArray(previous.achievements, source.achievements) &&
++  Object.keys(previous.statistics).length === Object.keys(source.statistics).length &&
++  Object.entries(source.statistics).every(
++    ([key, value]) => previous.statistics[key as keyof typeof previous.statistics] === value,
++  );
++
++const projectProgress = (source: PlayerProgress | undefined, previous?: PlayerProgress) => {
++  if (!source || sameProgress(source, previous)) return source ? previous : undefined;
++  return {
++    playerId: source.playerId,
++    statistics: { ...source.statistics },
++    achievements: [...source.achievements],
++  };
++};
++
++const detachStation = (station: StationUiPresentation | null) =>
++  station?.acceptedItemIdsBySlot
++    ? { ...station, acceptedItemIdsBySlot: station.acceptedItemIdsBySlot.map((ids) => (ids ? [...ids] : null)) }
++    : station;
+ 
+ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayUiProjection): GameplayUiProjection {
+   const items = itemResolver(source.items);
+   const recipes = source.recipes ?? [];
+-  const inventory = projectInventory(source.player.inventory, source.player.inventory.length, items.require);
++  const previousGameplay = previous?.shell.gameplay;
++  const inventory = projectInventory(
++    source.player.inventory,
++    source.player.inventory.length,
++    items.require,
++    previousGameplay?.inventory,
++  );
+   const hotbarSize = source.player.hotbarSize ?? 8;
+   const mode = source.player.mode?.value ?? 'survival';
+   const flightEnabled = mode === 'creative' && Boolean(source.player.flight?.enabled);
+-  const creativeHotbar = Array.from(
+-    { length: source.player.creativeCatalog?.hotbar.length ?? hotbarSize },
+-    (_, slot) => {
+-      const itemId = source.player.creativeCatalog?.hotbar[slot] ?? null;
+-      const definition = itemId ? items.require(itemId) : null;
+-      return {
+-        slot,
+-        itemId,
+-        count: 0,
+-        name: definition?.name ?? '空槽位',
+-        edible: Boolean(definition?.capabilities.some((capability) => capability.type === 'consume')),
+-      };
+-    },
+-  );
+   const selectedHotbarSlot =
+     mode === 'creative' ? (source.player.creativeCatalog?.selectedSlot ?? 0) : source.player.selectedHotbarSlot;
+-  const hotbar = mode === 'creative' ? creativeHotbar : inventory.slice(0, hotbarSize);
+-  const hud = reuse(
+-    {
+-      combat: projectCombatUi(source.player.combat),
+-      health: { value: source.player.health, max: 20 as const },
+-      hunger: { value: source.player.hunger, max: 20 as const },
+-      armor: { value: source.armorPoints ?? 0, max: 20 as const },
+-      oxygen: source.oxygen ?? { value: 20, max: 20, visible: false },
+-      mode,
+-      flightEnabled,
+-      selectedHotbarSlot,
+-      hotbar,
+-    },
+-    previous?.hud,
+-  );
+-  const interaction = reuse(
+-    {
+-      target: source.target ? { ...source.target } : null,
+-      breaking: source.breaking ? { ...source.breaking } : null,
+-    },
+-    previous?.interaction,
+-  );
+-  const shell = reuse(
+-    {
+-      gameplay: {
+-        station: projectStationUi(
+-          source.station,
+-          source.stationRecipes ?? [],
+-          (input, length) => projectInventory(input, length, items.require),
+-          (id) => items.require(id).name,
+-        ),
+-        inventoryOpen: source.inventoryOpen,
+-        inventoryIdentity: source.inventoryIdentity ?? '',
+-        cursor: source.cursor?.stack ? projectInventory([source.cursor.stack], 1, items.require)[0] : null,
+-        lifecycle: source.player.lifecycle,
+-        mode,
+-        flightEnabled,
+-        inventory,
+-        creativeCatalog: items.list().map((definition, slot) => ({
+-          slot,
+-          itemId: definition.id,
+-          count: 0,
+-          name: definition.name,
+-          edible: definition.capabilities.some((capability) => capability.type === 'consume'),
+-        })),
+-        selectedHotbarSlot,
+-        hotbarSize,
+-        craftableRecipeIds: [...source.craftableRecipeIds],
+-        recipes: recipes.map((recipe) => ({
+-          id: recipe.id,
+-          name: items.require(recipe.outputs[0].itemId).name,
+-          requirements: recipe.inputs
+-            .map((stack) => `${items.require(stack.itemId).name} × ${stack.count}`)
+-            .join(' + '),
+-          result: recipe.outputs.map((stack) => `${items.require(stack.itemId).name} × ${stack.count}`).join(' + '),
+-          craftable: source.craftableRecipeIds.includes(recipe.id),
+-        })),
+-        ...(source.progress ? { progress: source.progress } : {}),
+-      },
+-    },
+-    previous?.shell,
++  const hotbar =
++    mode === 'creative'
++      ? projectCreativeHotbar(source, hotbarSize, items.require, previous?.hud.hotbar)
++      : projectPrefix(inventory, Math.min(source.player.inventory.length, hotbarSize), previous?.hud.hotbar);
++  const combatCandidate = projectCombatUi(source.player.combat);
++  const combat = sameCombat(previous?.hud.combat, combatCandidate) ? previous!.hud.combat : combatCandidate;
++  const health =
++    previous?.hud.health.value === source.player.health
++      ? previous.hud.health
++      : { value: source.player.health, max: 20 as const };
++  const hunger =
++    previous?.hud.hunger.value === source.player.hunger
++      ? previous.hud.hunger
++      : { value: source.player.hunger, max: 20 as const };
++  const armor =
++    previous?.hud.armor.value === (source.armorPoints ?? 0)
++      ? previous.hud.armor
++      : { value: source.armorPoints ?? 0, max: 20 as const };
++  const oxygenSource = source.oxygen ?? defaultOxygen;
++  const oxygen =
++    previous?.hud.oxygen.value === oxygenSource.value &&
++    previous.hud.oxygen.max === oxygenSource.max &&
++    previous.hud.oxygen.visible === oxygenSource.visible
++      ? previous.hud.oxygen
++      : { ...oxygenSource };
++  const hud =
++    previous?.hud.combat === combat &&
++    previous.hud.health === health &&
++    previous.hud.hunger === hunger &&
++    previous.hud.armor === armor &&
++    previous.hud.oxygen === oxygen &&
++    previous.hud.mode === mode &&
++    previous.hud.flightEnabled === flightEnabled &&
++    previous.hud.selectedHotbarSlot === selectedHotbarSlot &&
++    previous.hud.hotbar === hotbar
++      ? previous.hud
++      : { combat, health, hunger, armor, oxygen, mode, flightEnabled, selectedHotbarSlot, hotbar };
++  const target =
++    source.target && sameStructure(source.target, previous?.interaction.target)
++      ? previous!.interaction.target
++      : source.target
++        ? { ...source.target }
++        : null;
++  const breaking =
++    source.breaking && sameStructure(source.breaking, previous?.interaction.breaking)
++      ? previous!.interaction.breaking
++      : source.breaking
++        ? { ...source.breaking }
++        : null;
++  const interaction =
++    previous?.interaction.target === target && previous.interaction.breaking === breaking
++      ? previous.interaction
++      : { target, breaking };
++  const stationCandidate = detachStation(
++    projectStationUi(
++      source.station,
++      source.stationRecipes ?? [],
++      (input, length) => projectInventory(input, length, items.require),
++      (id) => items.require(id).name,
++    ),
+   );
++  const station = sameStructure(stationCandidate, previousGameplay?.station)
++    ? previousGameplay!.station
++    : stationCandidate;
++  const cursor = source.cursor?.stack
++    ? projectItem(source.cursor.stack, 0, items.require, previousGameplay?.cursor ?? undefined)
++    : null;
++  const creativeCatalog = projectCreativeCatalog(items.list(), previousGameplay?.creativeCatalog);
++  const craftableRecipeIds = projectStrings(source.craftableRecipeIds, previousGameplay?.craftableRecipeIds);
++  const projectedRecipes = projectRecipes(recipes, source.craftableRecipeIds, items.require, previousGameplay?.recipes);
++  const progress = projectProgress(source.progress, previousGameplay?.progress);
++  const gameplay =
++    previousGameplay?.station === station &&
++    previousGameplay.inventoryOpen === source.inventoryOpen &&
++    previousGameplay.inventoryIdentity === (source.inventoryIdentity ?? '') &&
++    previousGameplay.cursor === cursor &&
++    previousGameplay.lifecycle === source.player.lifecycle &&
++    previousGameplay.mode === mode &&
++    previousGameplay.flightEnabled === flightEnabled &&
++    previousGameplay.inventory === inventory &&
++    previousGameplay.creativeCatalog === creativeCatalog &&
++    previousGameplay.selectedHotbarSlot === selectedHotbarSlot &&
++    previousGameplay.hotbarSize === hotbarSize &&
++    previousGameplay.craftableRecipeIds === craftableRecipeIds &&
++    previousGameplay.recipes === projectedRecipes &&
++    previousGameplay.progress === progress
++      ? previousGameplay
++      : {
++          station,
++          inventoryOpen: source.inventoryOpen,
++          inventoryIdentity: source.inventoryIdentity ?? '',
++          cursor,
++          lifecycle: source.player.lifecycle,
++          mode,
++          flightEnabled,
++          inventory,
++          creativeCatalog,
++          selectedHotbarSlot,
++          hotbarSize,
++          craftableRecipeIds,
++          recipes: projectedRecipes,
++          ...(progress ? { progress } : {}),
++        };
++  const shell = previous?.shell.gameplay === gameplay ? previous.shell : { gameplay };
+   return { hud, interaction, shell };
+ }
+diff --git a/apps/web/tests/unit/app/gameplay-ui-projection.test.ts b/apps/web/tests/unit/app/gameplay-ui-projection.test.ts
+index 247543c..7de4bfd 100644
+--- a/apps/web/tests/unit/app/gameplay-ui-projection.test.ts
++++ b/apps/web/tests/unit/app/gameplay-ui-projection.test.ts
+@@ -1,5 +1,9 @@
+ import { describe, expect, it } from 'vitest';
+-import { projectGameplayUi } from '../../../src/app/ui/gameplay-ui-projector';
++import {
++  projectGameplayUi,
++  type GameplayUiProjection,
++  type GameplayUiSource,
++} from '../../../src/app/ui/gameplay-ui-projector';
+ import { classicContent } from '../../fixtures/classic/content';
+ 
+ const snapshot = () => ({
+@@ -72,6 +76,13 @@ describe('gameplay retained UI projection', () => {
+     expect(projected.shell.gameplay.inventory[0]).toMatchObject({ itemId: 'dirt-block', count: 5 });
+   });
+ 
++  it('does not pad a short survival inventory into the hotbar', () => {
++    const source = snapshot();
++    source.player.inventory = source.player.inventory.slice(0, 2);
++
++    expect(projectGameplayUi(source).hud.hotbar).toHaveLength(2);
++  });
++
+   it('reuses unchanged retained partitions for channel coalescing', () => {
+     const first = projectGameplayUi(snapshot());
+     const second = projectGameplayUi(snapshot(), first);
+@@ -80,4 +91,230 @@ describe('gameplay retained UI projection', () => {
+     expect(second.interaction).toBe(first.interaction);
+     expect(second.shell).toBe(first.shell);
+   });
++
++  it('keeps progress detached while propagating its nested changes', () => {
++    const source = snapshot();
++    const first = projectGameplayUi(source);
++
++    source.progress.statistics['blocks-mined'] = 4;
++    const second = projectGameplayUi(source, first);
++
++    expect(first.shell.gameplay.progress).toMatchObject({ statistics: { 'blocks-mined': 3 } });
++    expect(second.shell).not.toBe(first.shell);
++    expect(second.shell.gameplay.progress).toMatchObject({ statistics: { 'blocks-mined': 4 } });
++  });
++
++  it.each([
++    {
++      name: 'combat 的所有 HUD 字段',
++      next: (source: GameplayUiSource): GameplayUiSource => ({
++        ...source,
++        player: {
++          ...source.player,
++          combat: {
++            active: {
++              actionId: 'combat-1',
++              definitionId: 'wood-sword',
++              targetId: 'target-1',
++              comboStep: 2,
++              comboLength: 3,
++              phase: 'windup',
++              phaseElapsedSeconds: 0.5,
++              phaseDurationSeconds: 1,
++              canBuffer: true,
++              buffered: false,
++            },
++            cooldownRemainingSeconds: 1.2,
++            lastResult: null,
++          },
++        },
++      }),
++      assert: (next: GameplayUiProjection, first: GameplayUiProjection) => {
++        expect(next.hud).not.toBe(first.hud);
++        expect(next.hud.combat).toEqual({
++          phase: 'windup',
++          label: '蓄力',
++          remainingSeconds: 1.2,
++          progress: 0.5,
++          comboStep: 2,
++          hint: '现在按左键衔接',
++        });
++      },
++    },
++    {
++      name: 'oxygen',
++      next: (source: GameplayUiSource): GameplayUiSource => ({
++        ...source,
++        oxygen: { value: 3, max: 20, visible: true },
++      }),
++      assert: (next: GameplayUiProjection, first: GameplayUiProjection) => {
++        expect(next.hud).not.toBe(first.hud);
++        expect(next.hud.oxygen).toEqual({ value: 3, max: 20, visible: true });
++      },
++    },
++    {
++      name: '模式、飞行与创造栏选槽',
++      next: (source: GameplayUiSource): GameplayUiSource => ({
++        ...source,
++        player: {
++          ...source.player,
++          mode: { version: 1, value: 'creative', revision: 2 },
++          flight: { version: 1, enabled: true, revision: 2 },
++          creativeCatalog: {
++            version: 1,
++            hotbar: ['berry', null, null, null, null, null, null, null],
++            selectedSlot: 0,
++            revision: 2,
++          },
++        },
++      }),
++      assert: (next: GameplayUiProjection, first: GameplayUiProjection) => {
++        expect(next.hud).not.toBe(first.hud);
++        expect(next.shell).not.toBe(first.shell);
++        expect(next.hud).toMatchObject({ mode: 'creative', flightEnabled: true, selectedHotbarSlot: 0 });
++        expect(next.hud.hotbar[0]).toMatchObject({ itemId: 'berry' });
++      },
++    },
++    {
++      name: '库存数量和耐久',
++      next: (source: GameplayUiSource): GameplayUiSource => ({
++        ...source,
++        player: {
++          ...source.player,
++          inventory: source.player.inventory.map((stack, slot) =>
++            slot === 0
++              ? { itemId: 'dirt-block', count: 6 }
++              : slot === 2
++                ? { itemId: 'wood-axe', count: 1, instance: { durability: 58 } }
++                : stack,
++          ),
++        },
++      }),
++      assert: (next: GameplayUiProjection, first: GameplayUiProjection) => {
++        expect(next.hud).not.toBe(first.hud);
++        expect(next.shell).not.toBe(first.shell);
++        expect(next.hud.hotbar[0]).toMatchObject({ count: 6 });
++        expect(next.shell.gameplay.inventory[2].durability).toEqual({ current: 58, max: 60 });
++      },
++    },
++    {
++      name: '配方输入、输出、数量及可合成状态',
++      next: (source: GameplayUiSource): GameplayUiSource => ({
++        ...source,
++        recipes: source.recipes?.map((recipe) =>
++          recipe.id === 'planks'
++            ? { ...recipe, inputs: [{ ...recipe.inputs[0], count: 2 }], outputs: [{ ...recipe.outputs[0], count: 3 }] }
++            : recipe,
++        ),
++        craftableRecipeIds: [],
++      }),
++      assert: (next: GameplayUiProjection, first: GameplayUiProjection) => {
++        expect(next.shell).not.toBe(first.shell);
++        expect(next.shell.gameplay.recipes.find((recipe) => recipe.id === 'planks')).toMatchObject({
++          requirements: '原木 × 2',
++          result: '木板 × 3',
++          craftable: false,
++        });
++      },
++    },
++    {
++      name: '光标、目标与破坏进度',
++      next: (source: GameplayUiSource): GameplayUiSource => ({
++        ...source,
++        cursor: { stack: { itemId: 'berry', count: 2 } },
++        target: { kind: 'entity', id: 'mob-1', label: '史莱姆' },
++        breaking: { progress: 0.75, label: '史莱姆' },
++      }),
++      assert: (next: GameplayUiProjection, first: GameplayUiProjection) => {
++        expect(next.interaction).not.toBe(first.interaction);
++        expect(next.shell).not.toBe(first.shell);
++        expect(next.interaction).toMatchObject({ target: { id: 'mob-1' }, breaking: { progress: 0.75 } });
++        expect(next.shell.gameplay.cursor).toMatchObject({ itemId: 'berry', count: 2 });
++      },
++    },
++    {
++      name: 'progress 删除',
++      next: (source: GameplayUiSource): GameplayUiSource => ({ ...source, progress: undefined }),
++      assert: (next: GameplayUiProjection, first: GameplayUiProjection) => {
++        expect(next.shell).not.toBe(first.shell);
++        expect(next.shell.gameplay.progress).toBeUndefined();
++      },
++    },
++  ])('$name 变化会替换相关分区并投影新值', ({ next: update, assert }) => {
++    const source: GameplayUiSource = snapshot();
++    const first = projectGameplayUi(source);
++    assert(projectGameplayUi(update(source), first), first);
++  });
++
++  it('propagates same-array item-definition replacement, ID changes, and removals', () => {
++    const items = [...classicContent.items.list()];
++    const berryIndex = items.findIndex((item) => item.id === 'berry');
++    const source: GameplayUiSource = {
++      ...snapshot(),
++      items,
++      player: {
++        ...snapshot().player,
++        inventory: [{ itemId: 'berry', count: 2 }, ...snapshot().player.inventory.slice(1)],
++      },
++    };
++    const first = projectGameplayUi(source);
++    items[berryIndex] = { ...items[berryIndex], name: '甜莓', stackLimit: 16, capabilities: [] };
++    const second = projectGameplayUi(source, first);
++
++    expect(second.hud).not.toBe(first.hud);
++    expect(second.shell).not.toBe(first.shell);
++    expect(second.hud.hotbar[0]).toMatchObject({ name: '甜莓', edible: false, stackLimit: 16 });
++    expect(second.shell.gameplay.creativeCatalog.find((item) => item.itemId === 'berry')).toMatchObject({
++      name: '甜莓',
++      edible: false,
++    });
++
++    items[berryIndex] = { ...items[berryIndex], id: 'berry-v2' };
++    const renamedSource: GameplayUiSource = {
++      ...source,
++      player: {
++        ...source.player,
++        inventory: [{ itemId: 'berry-v2', count: 2 }, ...source.player.inventory.slice(1)],
++      },
++    };
++    const renamed = projectGameplayUi(renamedSource, second);
++    expect(renamed.hud.hotbar[0]).toMatchObject({ itemId: 'berry-v2', name: '甜莓' });
++
++    items.splice(berryIndex, 1);
++    expect(() => projectGameplayUi(renamedSource, renamed)).toThrow('Unknown world item: berry-v2');
++  });
++
++  it('propagates station progress while retaining an equivalent station presentation', () => {
++    const station = (progressSeconds: number): GameplayUiSource['station'] => ({
++      reference: { entityId: 'furnace-1', epoch: 1, lifetime: 1 },
++      position: [0, 0, 0],
++      component: {
++        version: 1,
++        entityId: 'furnace-1',
++        revision: 1,
++        kind: 'furnace',
++        voxel: 1,
++        furnace: {
++          version: 1,
++          input: null,
++          fuel: null,
++          output: null,
++          activeRecipeId: null,
++          remainingFuelSeconds: 4,
++          progressSeconds,
++        },
++      },
++      matchedRecipeIds: [],
++      craftableRecipeIds: [],
++      furnaceRecipeDuration: 8,
++    });
++    const source: GameplayUiSource = { ...snapshot(), station: station(2) };
++    const first = projectGameplayUi(source);
++    const equivalent = projectGameplayUi({ ...source, station: station(2) }, first);
++    const changed = projectGameplayUi({ ...source, station: station(4) }, equivalent);
++
++    expect(equivalent.shell).toBe(first.shell);
++    expect(changed.shell).not.toBe(equivalent.shell);
++    expect(changed.shell.gameplay.station).toMatchObject({ progress: 0.5, fuelSeconds: 4 });
++  });
+ });
