@@ -15,7 +15,7 @@
 
 ### 阶段 1：当前视觉改动闭环
 
-状态：REVIEW_PENDING。实现、缩略图、生产构建和 agent-browser 实机矩阵完成，等待冻结提交后的独立审阅。
+状态：REVIEW_FIX_VERIFY。实现、缩略图、生产构建和 agent-browser 实机矩阵完成；首轮独立审阅 0 P0 / 2 P1 / 1 P2，均已修复并取得 exact-head 证据，等待关闭性复核。
 
 完成条件：
 

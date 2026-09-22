@@ -1,6 +1,6 @@
 # 阶段 1 证据
 
-状态：实现、生产构建与主要实机矩阵完成，等待冻结提交后的独立复核。输入提交 `27249bd80e4388e2a36f61e84424b793b0f9c80a`；后续本地修改以本阶段最终提交身份为准。
+状态：实现、生产构建与主要实机矩阵完成；首轮独立复核的 2 个 P1 / 1 个 P2 已修复，等待关闭性复核。输入提交 `27249bd80e4388e2a36f61e84424b793b0f9c80a`；实现提交 `bcc30c3db2f9665c0be44e0a5ffc14bbd2436343`，审阅修复提交 `8004ff7df97a4cf4bf6406397c123c692098e831`。
 
 ## 缩略图与结构模型
 
@@ -11,13 +11,15 @@
 
 ## 生产构建
 
-`node scripts/benchmark-window.mjs -- pnpm build` PASS：
+首次 dirty-worktree 构建用于实现期检查；审阅后在 exact code head `8004ff7df97a4cf4bf6406397c123c692098e831` 重新执行 `node scripts/benchmark-window.mjs -- pnpm build`，PASS：
 
-- sourceSha：`27249bd80e4388e2a36f61e84424b793b0f9c80a`（工作树含本阶段未提交内容，精确身份以下述 sourceDigest 为准）
-- sourceDigest：`eb09e0ddf53c17e427d5fb831cd6a95b597a94bc2673f5528e57153d1df6ef2f`
-- artifactDigest：`133354db21ee3de3d5ae19fe42df45654fda64f844738f77ef6b59466132f6b5`
+- sourceSha：`8004ff7df97a4cf4bf6406397c123c692098e831`
+- sourceDigest：`d55e1a571510e174cb24cd3a9e9cd08338998402f3d78bd1fc2b5b1fd7730cd7`
+- artifactDigest：`3ed693609186c69ce56760252ce5964b1c3dd45f46d7beb8175f549607cc01d7`
 - files：274
-- builtAt：`2026-09-22T14:28:16.433Z`
+- builtAt：`2026-09-22T15:03:15.823Z`
+
+从 `apps/web/dist` 以 Vite preview 启动 `127.0.0.1:4274/?harness=1`；隔离 agent-browser 直接读取 `/harness-artifact.json`，四项 identity 与上面完全一致，`errors --json` 为空，console 仅 Tone.js 正常日志。
 
 ## agent-browser 实机证据
 
@@ -37,7 +39,7 @@
 
 ## 尚待阶段 1 复核
 
-- 独立审阅本阶段差异并处理全部 P0/P1/P2。
+- 首轮 Sol/xhigh 审阅冻结 `27249bd...bcc30c3`：0 P0、2 P1、1 P2。已为旧 terrain pack 与 AppearanceProject 增加火炬→火头兼容继承；TargetCard 改为一次方块名 + “采集中”并补 SSR 测试；exact-head 生产 identity 与浏览器读回已补齐。对应定向测试 13/13 通过，等待 reviewer 关闭性复核。
 - 完成后更新 `progress.md`、提交、push，并读回远端 SHA/PR。
 
 ## 后续阶段边界
