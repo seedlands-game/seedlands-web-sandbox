@@ -241,10 +241,16 @@ export async function lockPointer(page: Page): Promise<Locator> {
     await page.keyboard.press('F3');
     await expect(page.locator('#debug')).toBeHidden();
   }
+  const resume = page.getByRole('button', { name: '继续游戏', exact: true });
+  if (await resume.isVisible()) {
+    await resume.click();
+    await expect(resume).toBeHidden();
+  }
   const canvas = page.locator('#game');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Classic canvas is not visible.');
-  await canvas.click({ position: { x: box.width / 2, y: box.height / 2 } });
+  const alreadyLocked = await page.evaluate(() => document.pointerLockElement?.id === 'game');
+  if (!alreadyLocked) await canvas.click({ position: { x: box.width / 2, y: box.height / 2 } });
   await page.waitForFunction(() => document.pointerLockElement?.id === 'game');
   mousePositions.set(page, { x: box.x + box.width / 2, y: box.y + box.height / 2 });
   return canvas;
@@ -269,8 +275,6 @@ export async function moveMouseBy(page: Page, dx: number, dy: number): Promise<v
     // Chromium throttles rapid unlock/relock. This is browser input cooldown,
     // not a substitute for world readiness or a performance acceptance threshold.
     await page.waitForTimeout(1500);
-    const resume = page.getByRole('button', { name: '继续游戏', exact: true });
-    if (await resume.isVisible()) await resume.click();
     await lockPointer(page);
     current = mousePositions.get(page)!;
   }
