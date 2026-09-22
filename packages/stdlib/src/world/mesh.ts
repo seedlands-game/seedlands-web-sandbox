@@ -13,9 +13,9 @@ import { macroAt, type MacroContext } from './macro-world';
 import { sameMeshMaskCell, type MeshMaskCell } from './mesh-mask';
 import { shapeWaterFace, waterStepFace, waterSurfaceHeight } from './water-mesh-height';
 import { makeChunk, type WorldChange } from './chunk-generation';
-import { modelBoxesForVoxel, voxelOccludesFullFace } from './voxel-model';
+import { hasVoxelModelGeometry, voxelOccludesFullFace } from './voxel-model';
 import { renderCategoryForMaterial, type RenderCategory } from './mesh-render-category';
-import { forEachVoxelModelFace } from './voxel-model-mesh';
+import { forEachVoxelModelFace, voxelModelFaceUvs } from './voxel-model-mesh';
 import { float32ToFloat16 } from './mesh-batching';
 
 export type { RenderCategory } from './mesh-render-category';
@@ -170,7 +170,7 @@ export function createProceduralMeshInput({
   };
 }
 
-const isGreedyVoxel = (voxel: number) => voxel !== Voxel.Air && modelBoxesForVoxel(voxel).length === 0;
+const isGreedyVoxel = (voxel: number) => voxel !== Voxel.Air && !hasVoxelModelGeometry(voxel);
 const isVisibleFace = (source: number, target: number) =>
   isGreedyVoxel(source) &&
   ((source === Voxel.Glass && target === Voxel.Glass) || (source === Voxel.Ice && target === Voxel.Ice)
@@ -268,13 +268,16 @@ export function meshChunk({
     ao: readonly number[],
     fluidLevel: number,
     fluidFloorHeight: number,
+    uvs?: number[],
   ) => {
     const quad = (result[material] ??= { p: [], n: [], uv: [], c: [], i: [] });
     const start = quad.p.length / 3;
     shapeWaterFace(material, normalAxis, back, fluidLevel, fluidFloorHeight, vertices);
     quad.p.push(...vertices);
     quad.n.push(...normal, ...normal, ...normal, ...normal);
-    if (normalAxis === 0) {
+    if (uvs) {
+      quad.uv.push(...uvs);
+    } else if (normalAxis === 0) {
       // X-facing quads are built Y-first. Swap their UV axes so world Y always
       // maps to texture V, matching Z-facing quads and keeping side textures upright.
       quad.uv.push(...(back ? [0, 0, height, 0, height, width, 0, width] : [0, 0, 0, width, height, width, height, 0]));
@@ -382,6 +385,7 @@ export function meshChunk({
       [0, 0, 0, 0],
       0,
       0,
+      voxelModelFaceUvs(face),
     ),
   );
   return Object.fromEntries(

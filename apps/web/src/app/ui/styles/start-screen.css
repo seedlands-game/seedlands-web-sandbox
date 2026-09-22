@@ -3,27 +3,27 @@
   font-family: 'PingFang SC', 'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;
   --sky-top: rgb(76 143 196);
   --sky-horizon: rgb(188 221 221);
-  --ui-color-content: #f1e8d4;
-  --ui-color-content-muted: #b9b1a1;
-  --ui-color-success: #e4c47e;
-  --ui-color-error: #ffab8c;
-  --ui-color-brass: #b08b48;
-  --ui-color-brass-light: #e4c47e;
-  --ui-color-arcane: #78d6d1;
-  --ui-color-violet: #b69bdb;
-  --ui-color-danger: #de765b;
-  --ui-surface: rgb(22 24 26 / 94%);
-  --ui-surface-strong: #111618;
-  --ui-surface-raised: #242728;
-  --ui-border: rgb(176 139 72 / 55%);
-  --ui-border-quiet: rgb(221 199 153 / 18%);
-  --ui-focus: #8cdfdb;
+  --ui-color-content: #f4f4f4;
+  --ui-color-content-muted: #c0c0c0;
+  --ui-color-success: #b9d681;
+  --ui-color-error: #ff8b8b;
+  --ui-color-brass: #929292;
+  --ui-color-brass-light: #dedede;
+  --ui-color-arcane: #9ec9e6;
+  --ui-color-violet: #b9b1d8;
+  --ui-color-danger: #d96b6b;
+  --ui-surface: rgb(72 72 72 / 96%);
+  --ui-surface-strong: #4b4b4b;
+  --ui-surface-raised: #6d6d6d;
+  --ui-border: #1d1d1d;
+  --ui-border-quiet: #8f8f8f;
+  --ui-focus: #f1e95f;
   --ui-space-1: 4px;
   --ui-space-2: 8px;
   --ui-space-3: 12px;
   --ui-size-control: 42px;
-  --ui-font-body: 'PingFang SC', 'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;
-  --ui-font-display: 'Palatino Linotype', Palatino, Georgia, 'Songti SC', serif;
+  --ui-font-body: ui-monospace, 'PingFang SC', 'Microsoft YaHei', monospace;
+  --ui-font-display: ui-monospace, 'PingFang SC', 'Microsoft YaHei', monospace;
   --ui-font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --ui-radius: 2px;
   --ui-motion-instant: 60ms;
@@ -40,7 +40,7 @@
 body {
   margin: 0;
   overflow: hidden;
-  background: #07101a;
+  background: #1f1f1f;
 }
 
 #game {
@@ -68,11 +68,11 @@ body {
 }
 
 .game-panel {
-  border: 16px solid transparent;
-  border-image: url('/assets/ui/obsidian-brass-panel.png') 140 fill / 18px / 0 stretch;
+  border: 8px solid transparent;
+  border-image: url('/assets/ui/classic-panel.png') 8 fill / 8px / 0 stretch;
   border-radius: 0;
   background: var(--ui-surface-strong);
-  box-shadow: 0 14px 48px rgb(0 0 0 / 35%);
+  box-shadow: 3px 3px 0 rgb(0 0 0 / 55%);
   backdrop-filter: none;
 }
 
@@ -80,14 +80,14 @@ body {
   width: 100%;
   min-height: var(--ui-size-control);
   padding: 13px;
-  border: 1px solid var(--ui-border);
+  border: 2px solid #1f1f1f;
   border-radius: var(--ui-radius);
   background: var(--ui-surface-raised);
   color: var(--ui-color-content);
   cursor: pointer;
   font-family: var(--ui-font-body);
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 700;
+  letter-spacing: 0;
   transition:
     background-color var(--ui-motion-fast),
     border-color var(--ui-motion-fast),
@@ -96,21 +96,21 @@ body {
 }
 
 #ui button:hover:not(:disabled) {
-  border-color: var(--ui-color-brass-light);
-  background: #303332;
-  color: #fff5dc;
+  border-color: #f4f4f4;
+  background: #868686;
+  color: #fff;
   filter: none;
 }
 
 #ui button:active:not(:disabled) {
   transform: translateY(1px);
-  background: #383529;
+  background: #555;
 }
 
 #ui button:disabled {
   color: #777a76;
-  border-color: #434744;
-  background: #1a1e1e;
+  border-color: #3f3f3f;
+  background: #4b4b4b;
   cursor: not-allowed;
   opacity: 0.72;
 }
@@ -134,7 +134,7 @@ body {
   padding: 12px;
   border: 1px solid var(--ui-border-quiet);
   border-radius: var(--ui-radius);
-  background: #101719;
+  background: #303030;
   color: var(--ui-color-content);
   font: inherit;
   outline: none;
@@ -147,7 +147,7 @@ body {
 
 #ui .eyebrow {
   margin: 0 0 10px;
-  color: var(--ui-color-brass-light);
+  color: #dedede;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.24em;
@@ -155,15 +155,11 @@ body {
 
 #ui #start-card h1 {
   margin: 10px 0 18px;
-  color: #e3c586;
-  font:
-    48px/1 Georgia,
-    serif;
-  font-weight: 500;
-  letter-spacing: 0.035em;
-  text-shadow:
-    0 2px 0 #6e512f,
-    0 5px 12px #000;
+  color: #f4f4f4;
+  font: 32px/1 var(--ui-font-display);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-shadow: 3px 3px 0 #222;
 }
 
 #ui small {
@@ -198,8 +194,8 @@ body {
 
 #start-card .seedlands-mark {
   display: block;
-  width: 160px;
-  height: 62px;
+  width: 172px;
+  height: 32px;
   margin: 0 auto 8px;
   color: var(--ui-color-arcane);
   object-fit: contain;
@@ -231,36 +227,36 @@ body {
 
 #ui .game-button {
   position: relative;
-  border: 5px solid transparent;
-  border-image: url('/assets/ui/obsidian-brass-panel.png') 140 / 9px / 0 stretch;
+  border: 2px solid #1f1f1f;
+  border-image: none;
   border-radius: 0;
-  background: #171c1c;
+  background: #6d6d6d;
   box-shadow:
-    inset 0 0 0 1px #54462f,
-    inset 0 0 16px #0007;
-  color: #eadbc0;
-  font-family: Georgia, 'Songti SC', serif;
-  letter-spacing: 0.045em;
-  text-shadow: 0 1px 2px #000;
+    inset 2px 2px 0 #a7a7a7,
+    inset -2px -2px 0 #3c3c3c;
+  color: #fff;
+  font-family: var(--ui-font-body);
+  letter-spacing: 0;
+  text-shadow: 2px 2px 0 #222;
 }
 
 #ui .game-button:hover:not(:disabled) {
-  background: #233b39;
-  color: #fff1cb;
+  background: #858585;
+  color: #fff;
   box-shadow:
-    inset 0 0 0 1px #b49a5d,
-    0 0 10px #68b9ab40;
+    inset 2px 2px 0 #c7c7c7,
+    inset -2px -2px 0 #484848;
 }
 
 #ui .game-button:active:not(:disabled) {
-  background: #132b2a;
+  background: #555;
 }
 
 #ui #start-card :is(.continue-world, .game-button[aria-label='进入世界']) {
-  background: #164440;
+  background: #6d6d6d;
   box-shadow:
-    inset 0 0 0 1px #568c7e,
-    inset 0 0 18px #061e1f;
+    inset 2px 2px 0 #a7a7a7,
+    inset -2px -2px 0 #3c3c3c;
 }
 
 #start-card .continue-world {
@@ -268,7 +264,7 @@ body {
   width: 100%;
   gap: 3px;
   margin: 8px 0 14px;
-  border-color: #d4b071;
+  border-color: #f4f4f4;
 }
 
 #start-card .continue-world small {
@@ -285,13 +281,13 @@ body {
 #start-card .melee-showcase-start {
   width: 100%;
   margin-top: 10px;
-  border-color: #a64d40;
-  background: #3b1c1a;
+  border-color: #8d3f3f;
+  background: #6d4242;
 }
 
 #start-card .melee-showcase-start small {
   margin: 2px 0 0;
-  color: #e9aca3;
+  color: #f1c5c5;
 }
 
 #start-card .game-button {

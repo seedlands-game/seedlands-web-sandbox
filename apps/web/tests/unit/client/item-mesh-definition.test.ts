@@ -40,4 +40,28 @@ describe('物品静态网格定义', () => {
         expect(group.uvs.slice(face * 8, face * 8 + 8)).toEqual(expected.slice(face * 8, face * 8 + 8));
     }
   });
+
+  it.each([
+    [Voxel.Sapling, FaceMaterial.Sapling],
+    [Voxel.TallGrass, FaceMaterial.TallGrass],
+    [Voxel.Flower, FaceMaterial.Flower],
+    [Voxel.Mushroom, FaceMaterial.Mushroom],
+    [Voxel.SugarCane, FaceMaterial.SugarCane],
+    [Voxel.DeadBush, FaceMaterial.DeadBush],
+    [Voxel.RedFlower, FaceMaterial.RedFlower],
+    [Voxel.RedMushroom, FaceMaterial.RedMushroom],
+  ] as const)('植物物品 %i 复用世界交叉双面几何', (voxel, material) => {
+    const data = new Uint16Array(CHUNK_SIZE ** 3);
+    data[voxelIndex(0, 0, 0)] = voxel;
+    const world = meshChunk({ seed: 1, cx: 0, cy: 0, cz: 0, data, changes: [], outside: () => Voxel.Air })[material];
+    const item = itemMeshDefinition(voxel).groups;
+
+    expect(item).toHaveLength(1);
+    expect(item[0].material).toBe(material);
+    expect(item[0].boxCount).toBe(2);
+    expect(item[0].positions).toEqual([...world.positions]);
+    expect(new Float32Array(item[0].normals)).toEqual(world.normals);
+    expect(item[0].uvs).toEqual([...world.uvs]);
+    expect(item[0].indices).toEqual([...world.indices]);
+  });
 });

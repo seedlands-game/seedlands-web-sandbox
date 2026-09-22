@@ -334,6 +334,7 @@ export class GameplayRuntime {
       crops: this.crops,
       finalEntities: this.finalEntities,
       progress: this.progress,
+      snapshotMigration: resolved.snapshotMigration,
       needsPlayerLimit: this.needsPlayerLimit,
       installMetadata: (gameplayTime, revision) => {
         this.kernelState.restoreGameplay(gameplayTime, revision);
@@ -372,6 +373,9 @@ export class GameplayRuntime {
   }
   get persistedGameplayRevision(): number {
     return this.persistedRevision;
+  }
+  get snapshotMigrationReports() {
+    return this.checkpoint.migrationReports;
   }
   get platform() {
     return this.callbacks.platform;

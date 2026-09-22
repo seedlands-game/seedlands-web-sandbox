@@ -237,32 +237,26 @@ describe('per-world actor profile closure', () => {
     },
   );
 
-  it('keeps Overworld actor profiles and starter ecology explicit', () => {
+  it('keeps the twelve surviving Overworld actor profiles explicit without a starter ecology', () => {
     const composition = assemble(overworldPack);
     const profiles = composition.capability<ActorProfileRegistry>('seedlands:actor-profiles');
     expect(profiles.list()).toEqual(
       expect.arrayContaining(
         [
-          { archetype: 'grazer', entityType: 'creature', maxHealth: 12 },
-          {
-            archetype: 'night-stalker',
-            entityType: 'creature',
-            maxHealth: 16,
-            meleeDefinitionId: 'night-stalker-claw',
-          },
-          { archetype: 'settler', entityType: 'npc', maxHealth: 20 },
+          { archetype: 'chicken', entityType: 'creature', maxHealth: 4 },
+          { archetype: 'pig-zombie', entityType: 'creature', maxHealth: 20 },
+          { archetype: 'zombie', entityType: 'creature', meleeDefinitionId: 'zombie-claw' },
         ].map((profile) => expect.objectContaining(profile)),
       ),
     );
+    expect(profiles.list()).toHaveLength(12);
     expect(profiles.defaultPlayerMeleeDefinitionId).toBe('unarmed');
-    expect(profiles.starterEcology?.initialItem).toEqual({ itemId: 'berry', count: 1 });
+    expect(profiles.starterEcology).toBeNull();
 
     const server = new GameServer({ seedText: 'explicit-overworld', platform: testCorePlatform, composition });
-    expect(server.initializeStarterEcology([0, 34, 0])).toMatchObject({ configured: true, initialized: true });
-    expect(server.queryEntities().filter((entity) => entity.archetype)).toHaveLength(3);
-    expect(server.queryEntities({ type: 'world-item' })).toContainEqual(
-      expect.objectContaining({ stack: { itemId: 'berry', count: 1 } }),
-    );
-    expect(server.queryPois([0, 34, 0], 40, 'camp')).toHaveLength(1);
+    expect(server.initializeStarterEcology([0, 34, 0])).toMatchObject({ configured: false, initialized: false });
+    expect(server.queryEntities().filter((entity) => entity.archetype)).toEqual([]);
+    expect(server.queryEntities({ type: 'world-item' })).toEqual([]);
+    expect(server.queryPois([0, 34, 0], 40, 'camp')).toEqual([]);
   });
 });

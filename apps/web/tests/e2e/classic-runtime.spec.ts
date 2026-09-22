@@ -1,8 +1,5 @@
-import {
-  craftAndEquipBuildingPlanks,
-  placeGlassAfterRestore,
-  replaceGlassWithDiamondBlock,
-} from './classic-support/crafting';
+import { verifyVisualRebuild } from './classic-support/visual-rebuild';
+import * as crafting from './classic-support/crafting';
 import { expect, test } from '@playwright/test';
 import { expectPresentedDrop } from './classic-support/drops';
 import {
@@ -69,7 +66,7 @@ test.beforeAll(async ({ headless, launchOptions }) => {
 
 test.afterEach(async ({ page }, testInfo) => {
   if (!page.isClosed()) await page.evaluate(() => document.exitPointerLock()).catch(() => {});
-  if (evidenceWritten) return;
+  if (evidenceWritten || testInfo.title.startsWith('Classic 视觉')) return;
   const current = page.isClosed() ? null : await snapshot(page).catch(() => null);
   await attachClassicFailure(testInfo, stageResults, current, benchmarkMode, restoreEvidence, logicEvidence);
 });
@@ -212,7 +209,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       await walkTo(page, [resource.position[0] + 1.5, 0.5], { jump: true });
       await expect.poll(async () => itemCount(await playerState(page), resource.itemId)).toBeGreaterThan(countBefore);
     }
-    await craftAndEquipBuildingPlanks(page);
+    await crafting.craftAndEquipBuildingPlanks(page);
     expect(minedMeshEvidence.remeshSchedulingCount).toBeGreaterThan(baseline.remeshSchedulingCount);
     expect(minedMeshEvidence.renderPipeline.backend).toBe('webgl2');
     stageResults.C2 = {
@@ -486,8 +483,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     sampleCompletedAt = new Date().toISOString();
   });
 
-  await test.step('重开后真实创造目录放置玻璃并保留画面', () => placeGlassAfterRestore(page, testInfo));
-  await test.step('V5金钻资源目录与真实钻石块建造', () => replaceGlassWithDiamondBlock(page, testInfo));
+  await test.step('重开后真实创造目录放置玻璃并保留画面', () => crafting.placeGlassAfterRestore(page, testInfo));
+  await test.step('V5金钻资源目录与真实钻石块建造', () => crafting.replaceGlassWithDiamondBlock(page, testInfo));
 
   const final = (await snapshot(page))!;
   await settings.deleteClassicWorld(page, classicScenario.seed, classicScenario.generatorVersion);
@@ -517,3 +514,5 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   expect(pageErrors).toEqual([]);
   expect(failedResponses).toEqual([]);
 });
+
+test('Classic 视觉 v3 生产素材、连续帧与单击破坏回归', verifyVisualRebuild);

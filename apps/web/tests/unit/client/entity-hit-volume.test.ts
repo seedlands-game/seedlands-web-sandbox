@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { entityHitDistance } from '../../../src/client/presentation/entity-hit-volume';
 
 describe('脚底锚点的生物命中体积', () => {
+  it('uses each classic species body instead of a common tall fallback', () => {
+    expect(entityHitDistance([0, 0, -2], 'chicken', [0, 1, 0], [0, 0, -1], 3)).toBeNull();
+    expect(entityHitDistance([0, 0, -2], 'pig', [0, 0.5, 0], [0, 0, -1], 3)).toBeCloseTo(1.45);
+    expect(entityHitDistance([0, 0, -2], 'skeleton', [0, 1.5, 0], [0, 0, -1], 3)).toBeCloseTo(1.7);
+    expect(entityHitDistance([0, 0, -2], 'unknown', [0, 0.5, 0], [0, 0, -1], 3)).toBeNull();
+  });
   it('躯干和头部可命中，取模型前表面距离', () => {
     expect(entityHitDistance([0, 0, -2], 'night-stalker', [0, 0.9, 0], [0, 0, -1], 3)).toBeCloseTo(1.35);
     expect(entityHitDistance([0, 0, -2], 'night-stalker', [0, 1.8, 0], [0, 0, -1], 3)).not.toBeNull();

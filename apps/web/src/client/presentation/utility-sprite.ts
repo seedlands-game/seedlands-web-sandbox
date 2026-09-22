@@ -1,8 +1,14 @@
 import { Sprite } from './pixel-sprite';
+import { classicSpecialUtilitySprite, isClassicSpecialUtilityKind } from './classic-utility-sprites';
+import { cocoaBeanSprite } from './cocoa-bean-sprite';
+import { spriteLine } from './sprite-line';
 
 export type UtilitySpriteKind =
   | 'bowl'
   | 'bucket'
+  | 'water-bucket'
+  | 'milk-bucket'
+  | 'lava-bucket'
   | 'shears'
   | 'minecart'
   | 'chest-minecart'
@@ -14,6 +20,7 @@ export type UtilitySpriteKind =
   | 'feather'
   | 'flint'
   | 'wool'
+  | 'leather'
   | 'ink-sac'
   | 'rotten-flesh'
   | 'bone'
@@ -43,11 +50,21 @@ export type UtilitySpriteKind =
   | 'cookie'
   | 'cocoa-beans'
   | 'record-13'
-  | 'record-cat';
+  | 'record-cat'
+  | 'sapling'
+  | 'flower'
+  | 'mushroom'
+  | 'sugar-cane'
+  | 'dead-bush'
+  | 'red-flower'
+  | 'red-mushroom';
 
 const utilityKinds: readonly string[] = [
   'bowl',
   'bucket',
+  'water-bucket',
+  'milk-bucket',
+  'lava-bucket',
   'shears',
   'minecart',
   'chest-minecart',
@@ -59,6 +76,7 @@ const utilityKinds: readonly string[] = [
   'feather',
   'flint',
   'wool',
+  'leather',
   'ink-sac',
   'rotten-flesh',
   'bone',
@@ -89,19 +107,19 @@ const utilityKinds: readonly string[] = [
   'cocoa-beans',
   'record-13',
   'record-cat',
+  'sapling',
+  'flower',
+  'mushroom',
+  'sugar-cane',
+  'dead-bush',
+  'red-flower',
+  'red-mushroom',
 ];
 export const isUtilitySpriteKind = (kind: string): kind is UtilitySpriteKind => utilityKinds.includes(kind);
 
-function line(sprite: Sprite, x0: number, y0: number, x1: number, y1: number, color: number) {
-  const steps = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
-  for (let step = 0; step <= steps; step++) {
-    const ratio = steps === 0 ? 0 : step / steps;
-    sprite.put(Math.round(x0 + (x1 - x0) * ratio), Math.round(y0 + (y1 - y0) * ratio), color);
-  }
-}
-
 /** First-party 32px utility and transport sprites; palette indices share the item ramp. */
 export function utilitySprite(kind: UtilitySpriteKind): number[] {
+  if (isClassicSpecialUtilityKind(kind)) return classicSpecialUtilitySprite(kind);
   const sprite = new Sprite();
   if (kind === 'bowl') {
     sprite.polygon(
@@ -125,7 +143,7 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     );
     return sprite.pixels;
   }
-  if (kind === 'bucket') {
+  if (kind === 'bucket' || kind === 'water-bucket' || kind === 'milk-bucket' || kind === 'lava-bucket') {
     sprite.polygon(
       [
         [8, 8],
@@ -138,6 +156,16 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     sprite.rect(8, 8, 16, 2, 11);
     sprite.rect(10, 10, 2, 15, 10);
     sprite.rect(20, 10, 2, 15, 7);
+    if (kind !== 'bucket') {
+      const contents = kind === 'water-bucket' ? 18 : kind === 'milk-bucket' ? 10 : 16;
+      sprite.rect(12, 14, 8, 9, contents);
+      sprite.rect(12, 14, 8, 2, kind === 'lava-bucket' ? 17 : 11);
+      if (kind === 'water-bucket') sprite.rect(14, 18, 3, 2, 20);
+      if (kind === 'lava-bucket') {
+        sprite.put(14, 18, 14);
+        sprite.put(18, 21, 14);
+      }
+    }
     return sprite.pixels;
   }
   if (kind === 'shears') {
@@ -194,12 +222,12 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
       ],
       3,
     );
-    line(sprite, 8, 3, 8, 29, 10);
+    spriteLine(sprite, 8, 3, 8, 29, 10);
     return sprite.pixels;
   }
   if (kind === 'arrow') {
-    line(sprite, 6, 25, 24, 7, 3);
-    line(sprite, 7, 26, 25, 8, 4);
+    spriteLine(sprite, 6, 25, 24, 7, 3);
+    spriteLine(sprite, 7, 26, 25, 8, 4);
     sprite.polygon(
       [
         [21, 5],
@@ -219,8 +247,8 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     return sprite.pixels;
   }
   if (kind === 'string') {
-    line(sprite, 7, 7, 24, 24, 10);
-    line(sprite, 24, 7, 7, 24, 11);
+    spriteLine(sprite, 7, 7, 24, 24, 10);
+    spriteLine(sprite, 24, 7, 7, 24, 11);
     sprite.rect(13, 13, 6, 6, 9);
     return sprite.pixels;
   }
@@ -236,7 +264,7 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
       ],
       10,
     );
-    line(sprite, 8, 26, 22, 8, 11);
+    spriteLine(sprite, 8, 26, 22, 8, 11);
     return sprite.pixels;
   }
   if (kind === 'flint') {
@@ -271,8 +299,8 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     return sprite.pixels;
   }
   if (kind === 'bone') {
-    line(sprite, 8, 24, 24, 8, 10);
-    line(sprite, 9, 25, 25, 9, 11);
+    spriteLine(sprite, 8, 24, 24, 8, 10);
+    spriteLine(sprite, 9, 25, 25, 9, 11);
     sprite.rect(5, 23, 6, 5, 9);
     sprite.rect(22, 5, 6, 5, 9);
     return sprite.pixels;
@@ -320,9 +348,9 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     return sprite.pixels;
   }
   if (kind === 'fishing-rod') {
-    line(sprite, 7, 27, 23, 6, 3);
-    line(sprite, 8, 27, 24, 6, 4);
-    line(sprite, 24, 6, 27, 22, 10);
+    spriteLine(sprite, 7, 27, 23, 6, 3);
+    spriteLine(sprite, 8, 27, 24, 6, 4);
+    spriteLine(sprite, 24, 6, 27, 22, 10);
     sprite.rect(25, 22, 4, 4, 16);
     return sprite.pixels;
   }
@@ -379,11 +407,20 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
       ],
       kind === 'clock' ? 13 : 10,
     );
-    line(sprite, 16, 16, kind === 'clock' ? 22 : 16, kind === 'clock' ? 16 : 7, kind === 'clock' ? 3 : 16);
+    if (kind === 'clock') {
+      spriteLine(sprite, 16, 16, 22, 16, 3);
+      spriteLine(sprite, 16, 16, 16, 9, 16);
+      sprite.rect(15, 15, 3, 3, 14);
+    } else {
+      spriteLine(sprite, 16, 16, 16, 7, 16);
+      spriteLine(sprite, 16, 16, 12, 22, 18);
+      sprite.rect(15, 15, 3, 3, 11);
+    }
     return sprite.pixels;
   }
-  if (kind === 'snowball' || kind === 'clay' || kind === 'sugar' || kind === 'cocoa-beans') {
-    const color = kind === 'snowball' || kind === 'sugar' ? 10 : kind === 'clay' ? 9 : 3;
+  if (kind === 'cocoa-beans') return cocoaBeanSprite();
+  if (kind === 'snowball' || kind === 'clay' || kind === 'sugar') {
+    const color = kind === 'snowball' || kind === 'sugar' ? 10 : 9;
     sprite.polygon(
       [
         [16, 5],
@@ -400,9 +437,17 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     sprite.rect(11, 9, 7, 4, 11);
     return sprite.pixels;
   }
-  if (kind === 'book' || kind === 'painting' || kind === 'sign' || kind === 'wooden-door') {
+  if (kind === 'painting') {
+    sprite.rect(5, 6, 22, 21, 3);
+    sprite.rect(7, 8, 18, 17, 18);
+    sprite.rect(8, 18, 16, 6, 8);
+    sprite.rect(10, 14, 7, 5, 7);
+    sprite.rect(19, 10, 3, 3, 14);
+    return sprite.pixels;
+  }
+  if (kind === 'book' || kind === 'sign' || kind === 'wooden-door') {
     sprite.rect(6, 5, 20, 23, kind === 'book' ? 16 : 3);
-    sprite.rect(9, 8, 14, 17, kind === 'painting' ? 2 : 4);
+    sprite.rect(9, 8, 14, 17, 4);
     return sprite.pixels;
   }
   if (kind === 'record-13' || kind === 'record-cat') {
@@ -412,19 +457,13 @@ export function utilitySprite(kind: UtilitySpriteKind): number[] {
     return sprite.pixels;
   }
   if (kind === 'flint-and-steel') {
-    line(sprite, 7, 25, 23, 7, 9);
+    spriteLine(sprite, 7, 25, 23, 7, 9);
     sprite.rect(6, 20, 8, 7, 7);
     return sprite.pixels;
   }
   if (kind === 'brick') {
     sprite.rect(6, 9, 20, 15, 16);
     sprite.rect(8, 7, 16, 3, 17);
-    return sprite.pixels;
-  }
-  if (kind === 'mushroom-stew' || kind === 'cake' || kind === 'cookie' || kind === 'golden-apple') {
-    const color = kind === 'golden-apple' ? 13 : kind === 'cake' ? 10 : kind === 'cookie' ? 3 : 4;
-    sprite.rect(7, 10, 18, 15, color);
-    sprite.rect(10, 7, 12, 4, 11);
     return sprite.pixels;
   }
   if (kind === 'ink-sac' || kind === 'rotten-flesh' || kind === 'gunpowder' || kind === 'slimeball') {

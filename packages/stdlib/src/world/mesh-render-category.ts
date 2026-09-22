@@ -9,6 +9,13 @@ const cutoutMaterials = new Set<number>([
   FaceMaterial.Flower,
   FaceMaterial.Mushroom,
   FaceMaterial.SugarCane,
+  FaceMaterial.DeadBush,
+  FaceMaterial.RedFlower,
+  FaceMaterial.RedMushroom,
+  FaceMaterial.Fire,
+  FaceMaterial.Rail,
+  FaceMaterial.PoweredRail,
+  FaceMaterial.DetectorRail,
 ]);
 
 export const renderCategoryForMaterial = (material: FaceMaterialId): RenderCategory =>
@@ -16,6 +23,6 @@ export const renderCategoryForMaterial = (material: FaceMaterialId): RenderCateg
     ? 'transparent'
     : cutoutMaterials.has(material)
       ? 'cutout'
-      : material === FaceMaterial.LanternGlow || material === FaceMaterial.Lava || material === FaceMaterial.Fire
+      : material === FaceMaterial.LanternGlow || material === FaceMaterial.Lava
         ? 'emissive'
         : 'opaque';

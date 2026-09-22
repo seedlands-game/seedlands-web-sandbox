@@ -1,0 +1,6 @@
+第二轮生产 Browser：模型加载、单击破坏及目录检查均走通；末尾 console assertion 因两次 favicon 404 失败，未声明通过。
+
+sourceDigest: 286c1bcf365c28906004bce480e86ad467e87caea8f42b8d2b39883fb52369e1
+artifactDigest: cc14dec9d17ebe506cebaf35e19062b228100fcaefcb2df22f4ee03b1cb72ac2
+
+目视发现：发光表面过度橙色；植物疑似UV朝向异常。交 worker 修复后重建复验。

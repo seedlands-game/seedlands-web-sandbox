@@ -17,9 +17,9 @@
     return () => clearTimeout(timer);
   });
   const rows = $derived([
-    { name: '生命', state: hud.health, icon: 'health-heart', visible: true },
-    { name: '护甲', state: hud.armor, icon: 'health-heart', visible: hud.armor.value > 0 },
-    { name: '氧气', state: hud.oxygen, icon: 'health-heart', visible: hud.oxygen.visible },
+    { name: '生命', state: hud.health, icon: 'classic-heart', visible: true },
+    { name: '护甲', state: hud.armor, icon: 'classic-armor', visible: hud.armor.value > 0 },
+    { name: '氧气', state: hud.oxygen, icon: 'classic-bubble', visible: hud.oxygen.visible },
   ]);
 </script>
 

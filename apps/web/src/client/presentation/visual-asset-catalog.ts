@@ -4,6 +4,7 @@ import type { Asset, MaterialAsset } from './asset-types';
 import { builtinTerrainTextures, terrainMaterials } from './terrain-assets';
 import { builtinModelTextures, modelMaterialDefinitions } from './model-material-definitions';
 import { actorModelDefinitions, playerArmModelDefinition } from './actor-model-definitions';
+import { classicCreatureDefinitions } from './classic-creature-definitions';
 
 const modelMaterialAssets: MaterialAsset[] = modelMaterialDefinitions.map((definition) => ({
   id: `seedlands:material/model/${definition.id}`,
@@ -21,11 +22,12 @@ const modelMaterialAssets: MaterialAsset[] = modelMaterialDefinitions.map((defin
   },
 }));
 const images = [
-  ['ui/health-heart.png', '生命图标'],
-  ['ui/hunger-drumstick.png', '饥饿图标'],
-  ['ui/arcane-crest.png', '奥术徽记'],
-  ['ui/obsidian-brass-panel.png', '面板边框'],
-  ['ui/obsidian-hotbar-slot.png', '快捷栏底框'],
+  ['ui/classic-heart.png', '经典生命图标'],
+  ['ui/classic-armor.png', '经典护甲图标'],
+  ['ui/classic-bubble.png', '经典氧气图标'],
+  ['ui/classic-crest.png', '经典标题标记'],
+  ['ui/classic-panel.png', '经典灰色面板'],
+  ['ui/classic-hotbar-slot.png', '经典快捷栏格'],
   ['voxels/grass.png', '草方块目标图标'],
   ['voxels/leaves.png', '树叶目标图标'],
   ['voxels/snow.png', '雪目标图标'],
@@ -73,9 +75,9 @@ export const builtinVisualAssets: Asset[] = [
         payload: { voxelId, materialIds: terrainMaterials.filter((m) => faces.has(m.faceMaterial)).map((m) => m.id) },
       };
     }),
-  ...(['player', 'settler', 'grazer', 'stalker'] as const).map((kind): Asset => ({
+  ...(['player'] as const).map((kind): Asset => ({
     id: `seedlands:model/actor/${kind}`,
-    name: { player: '玩家', settler: '居民', grazer: '食草兽', stalker: '潜行兽' }[kind],
+    name: '玩家',
     revision: 1,
     source: 'builtin',
     type: 'builtin-actor-model',
@@ -84,6 +86,19 @@ export const builtinVisualAssets: Asset[] = [
       materialIds: [
         ...new Set(actorModelDefinitions[kind].parts.map((part) => `seedlands:material/model/${part.material}`)),
       ],
+    },
+  })),
+  ...classicCreatureDefinitions.map((definition): Asset => ({
+    id: definition.modelId,
+    name: definition.name,
+    revision: 1,
+    source: 'builtin',
+    type: 'glb-model',
+    payload: {
+      modelId: definition.modelId,
+      byteLength: definition.byteLength,
+      nodeCount: definition.nodeCount,
+      triangleCount: definition.triangleCount,
     },
   })),
   {

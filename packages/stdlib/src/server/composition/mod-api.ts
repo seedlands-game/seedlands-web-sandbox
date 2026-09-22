@@ -65,6 +65,15 @@ export type {
 
 export { defineInventoryModule } from '../gameplay/modules/inventory-module';
 export { defineContentModule } from '../gameplay/modules/content-module';
+export {
+  defineGameplaySnapshotMigrationModule,
+  GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY,
+} from '../gameplay/gameplay-snapshot-migration';
+export type {
+  GameplaySnapshotMigration,
+  GameplaySnapshotMigrationContext,
+  GameplaySnapshotMigrationReport,
+} from '../gameplay/gameplay-snapshot-migration';
 export { defineStandardWorldgenModule, WORLDGEN_PROVIDER_CAPABILITY } from '../worldgen/standard-worldgen-module';
 export type { StandardWorldgenProvider } from '../worldgen/standard-worldgen-module';
 export type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';

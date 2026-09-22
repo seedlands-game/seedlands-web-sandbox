@@ -155,7 +155,7 @@ describe('W04/W05 Wasm mesh descriptors', () => {
     expect(kernel.failed).toBe(false);
   }, 30_000);
 
-  it('keeps empty, solid, checkerboard, water stair and lantern material ordering exact', async () => {
+  it('keeps empty, solid, checkerboard, water stair, models and crossed-plant material ordering exact', async () => {
     const kernel = await createKernelMemory(await readFile(wasmPath));
     for (const kind of [
       'empty',
@@ -163,6 +163,7 @@ describe('W04/W05 Wasm mesh descriptors', () => {
       'checkerboard',
       'water-stair',
       'lantern',
+      'plants',
       'planks',
       'glass',
       'precious',
@@ -183,6 +184,17 @@ describe('W04/W05 Wasm mesh descriptors', () => {
               }
               if (kind === 'lantern' && x < 2 && y < 2 && z < 2)
                 data[index] = [Voxel.Lantern, Voxel.Rail, Voxel.Slab, Voxel.WoodStairs, Voxel.Fence][x + z * 2];
+              if (kind === 'plants' && x < 8 && y === 4 && z === 0)
+                data[index] = [
+                  Voxel.Sapling,
+                  Voxel.TallGrass,
+                  Voxel.Flower,
+                  Voxel.Mushroom,
+                  Voxel.SugarCane,
+                  Voxel.DeadBush,
+                  Voxel.RedFlower,
+                  Voxel.RedMushroom,
+                ][x];
             }
       });
       const actual = runMeshDescriptorKernel(kernel, input.input.window, input.input.fluidWindow);

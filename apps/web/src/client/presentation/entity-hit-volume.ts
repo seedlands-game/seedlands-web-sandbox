@@ -1,4 +1,4 @@
-import { bodyConfigFor } from '@seedlands/stdlib/physics/body-registry';
+import { bodyConfigFor, bodyKindForEntity } from '@seedlands/stdlib/physics/body-registry';
 
 type Point = readonly [number, number, number];
 
@@ -10,7 +10,13 @@ export function entityHitDistance(
   direction: Point,
   maxDistance: number,
 ): number | null {
-  const kind = archetype === 'grazer' || archetype === 'settler' ? archetype : 'night-stalker';
+  let kind;
+  try {
+    kind = bodyKindForEntity({ type: archetype === 'settler' ? 'npc' : 'creature', archetype });
+  } catch (error) {
+    if (error instanceof RangeError) return null;
+    throw error;
+  }
   const box = bodyConfigFor(kind).localAabb;
   const low = [feet[0] + box.min.x, feet[1] + box.min.y, feet[2] + box.min.z];
   const high = [feet[0] + box.max.x, feet[1] + box.max.y, feet[2] + box.max.z];

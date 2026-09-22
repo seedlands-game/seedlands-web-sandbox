@@ -28,6 +28,7 @@ const SPLIT_CONTENT_CAPABILITIES = new Set([
   'seedlands:melee-definitions',
   'seedlands:station-content',
   'seedlands:content-crafting',
+  'seedlands:gameplay-snapshot-migration',
 ]);
 
 const legacyContentDefinitionMap = (definitionMap: WorldDefinitionMap): Omit<WorldDefinitionMap, 'schemaVersion'> => {

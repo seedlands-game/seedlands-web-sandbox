@@ -271,74 +271,76 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
     iconId:
       model?.type === 'extruded-pixel-model'
         ? model.payload.textureId
-        : itemId === 'raw-iron'
-          ? 'seedlands:texture/terrain/iron-ore'
-          : itemId === 'clay-block'
-            ? 'seedlands:texture/terrain/clay'
-            : itemId === 'sandstone-slab'
-              ? 'seedlands:texture/terrain/sandstone'
-              : itemId === 'wood-slab'
-                ? 'seedlands:texture/terrain/wood-stairs'
-                : itemId === 'wool-block'
-                  ? 'seedlands:texture/terrain/wool'
-                  : itemId.endsWith('-wool')
-                    ? 'builtin:texture:wool:detail'
-                    : [
-                          'cobblestone',
-                          'glass',
-                          'gold-ore',
-                          'diamond-ore',
-                          'iron-block',
-                          'gold-block',
-                          'diamond-block',
-                          'sandstone',
-                          'stone-bricks',
-                          'obsidian',
-                          'tnt',
-                          'sapling',
-                          'flower',
-                          'mushroom',
-                          'sugar-cane',
-                          'cactus',
-                          'rail',
-                          'powered-rail',
-                          'detector-rail',
-                          'gravel',
-                          'lapis-ore',
-                          'clay-block',
-                          'ice',
-                          'snow-block',
-                          'lapis-block',
-                          'slab',
-                          'wood-stairs',
-                          'cobblestone-stairs',
-                          'wooden-door',
-                          'ladder',
-                          'torch',
-                          'bed',
-                          'sign',
-                          'fence',
-                          'cake',
-                          'dead-bush',
-                          'wool-block',
-                          'red-flower',
-                          'red-mushroom',
-                          'bricks',
-                          'bookshelf',
-                          'mossy-cobblestone',
-                          'note-block',
-                          'jukebox',
-                          'pumpkin',
-                          'jack-o-lantern',
-                          'trapdoor',
-                          'lit-furnace',
-                          'redstone-ore',
-                          'lit-redstone-ore',
-                          'sandstone-slab',
-                          'wood-slab',
-                        ].includes(itemId)
-                      ? 'seedlands:texture/terrain/' + itemId
-                      : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
+        : definition.placesVoxel !== undefined
+          ? `builtin:image:${itemId}`
+          : itemId === 'raw-iron'
+            ? 'seedlands:texture/terrain/iron-ore'
+            : itemId === 'clay-block'
+              ? 'seedlands:texture/terrain/clay'
+              : itemId === 'sandstone-slab'
+                ? 'seedlands:texture/terrain/sandstone'
+                : itemId === 'wood-slab'
+                  ? 'seedlands:texture/terrain/wood-stairs'
+                  : itemId === 'wool-block'
+                    ? 'seedlands:texture/terrain/wool'
+                    : itemId.endsWith('-wool')
+                      ? 'builtin:texture:wool:detail'
+                      : [
+                            'cobblestone',
+                            'glass',
+                            'gold-ore',
+                            'diamond-ore',
+                            'iron-block',
+                            'gold-block',
+                            'diamond-block',
+                            'sandstone',
+                            'stone-bricks',
+                            'obsidian',
+                            'tnt',
+                            'sapling',
+                            'flower',
+                            'mushroom',
+                            'sugar-cane',
+                            'cactus',
+                            'rail',
+                            'powered-rail',
+                            'detector-rail',
+                            'gravel',
+                            'lapis-ore',
+                            'clay-block',
+                            'ice',
+                            'snow-block',
+                            'lapis-block',
+                            'slab',
+                            'wood-stairs',
+                            'cobblestone-stairs',
+                            'wooden-door',
+                            'ladder',
+                            'torch',
+                            'bed',
+                            'sign',
+                            'fence',
+                            'cake',
+                            'dead-bush',
+                            'wool-block',
+                            'red-flower',
+                            'red-mushroom',
+                            'bricks',
+                            'bookshelf',
+                            'mossy-cobblestone',
+                            'note-block',
+                            'jukebox',
+                            'pumpkin',
+                            'jack-o-lantern',
+                            'trapdoor',
+                            'lit-furnace',
+                            'redstone-ore',
+                            'lit-redstone-ore',
+                            'sandstone-slab',
+                            'wood-slab',
+                          ].includes(itemId)
+                        ? 'seedlands:texture/terrain/' + itemId
+                        : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
   };
 });
 export const builtinBinding = (itemId: string) => builtinItemBindings.find((b) => b.itemId === itemId);

@@ -1,8 +1,9 @@
 import { pixelItemAssets } from './pixel-item-art';
-import { dyeItemAssets } from './dye-item-assets';
+import { dyeItemAssets, woolItemAssets } from './dye-item-assets';
 
 export const progressionItemAssets = [
   ...dyeItemAssets,
+  ...woolItemAssets,
   ...pixelItemAssets('gold-pickaxe', '金镐', 'pickaxe', 'gold'),
   ...pixelItemAssets('diamond-pickaxe', '钻石镐', 'pickaxe', 'diamond'),
   ...pixelItemAssets('stone-axe', '石斧', 'axe', 'stone'),
@@ -39,10 +40,17 @@ export const progressionItemAssets = [
   ...pixelItemAssets('cooked-fish', '熟鱼', 'cooked-fish'),
   ...pixelItemAssets('wheat', '小麦', 'wheat'),
   ...pixelItemAssets('wheat-seeds', '小麦种子', 'wheat-seeds'),
-  ...pixelItemAssets('leather', '皮革', 'raw-porkchop'),
+  ...pixelItemAssets('sapling', '树苗', 'sapling'),
+  ...pixelItemAssets('flower', '花', 'flower'),
+  ...pixelItemAssets('mushroom', '蘑菇', 'mushroom'),
+  ...pixelItemAssets('sugar-cane', '甘蔗', 'sugar-cane'),
+  ...pixelItemAssets('dead-bush', '枯灌木', 'dead-bush'),
+  ...pixelItemAssets('red-flower', '红花', 'red-flower'),
+  ...pixelItemAssets('red-mushroom', '红蘑菇', 'red-mushroom'),
+  ...pixelItemAssets('leather', '皮革', 'leather'),
   ...pixelItemAssets('bowl', '碗', 'bowl'),
   ...pixelItemAssets('bucket', '桶', 'bucket'),
-  ...pixelItemAssets('water-bucket', '水桶', 'bucket'),
+  ...pixelItemAssets('water-bucket', '水桶', 'water-bucket'),
   ...pixelItemAssets('shears', '剪刀', 'shears'),
   ...pixelItemAssets('minecart', '矿车', 'minecart'),
   ...pixelItemAssets('chest-minecart', '运输矿车', 'chest-minecart'),
@@ -60,35 +68,15 @@ export const progressionItemAssets = [
   ...pixelItemAssets('gunpowder', '火药', 'gunpowder'),
   ...pixelItemAssets('slimeball', '黏液球', 'slimeball'),
   ...pixelItemAssets('saddle', '鞍', 'saddle'),
-  ...pixelItemAssets('milk-bucket', '奶桶', 'bucket'),
+  ...pixelItemAssets('milk-bucket', '奶桶', 'milk-bucket'),
   ...pixelItemAssets('egg', '鸡蛋', 'egg'),
   ...pixelItemAssets('fishing-rod', '钓鱼竿', 'fishing-rod'),
-  ...pixelItemAssets('lava-bucket', '熔岩桶', 'bucket'),
+  ...pixelItemAssets('lava-bucket', '熔岩桶', 'lava-bucket'),
   ...pixelItemAssets('paper', '纸', 'paper'),
   ...pixelItemAssets('redstone-dust', '红石粉', 'redstone-dust'),
   ...pixelItemAssets('compass', '指南针', 'compass'),
   ...pixelItemAssets('clock', '时钟', 'clock'),
   ...pixelItemAssets('map', '地图', 'map'),
-  ...(
-    [
-      'white',
-      'orange',
-      'magenta',
-      'light-blue',
-      'yellow',
-      'lime',
-      'pink',
-      'gray',
-      'light-gray',
-      'cyan',
-      'purple',
-      'blue',
-      'brown',
-      'green',
-      'red',
-      'black',
-    ] as const
-  ).flatMap((color) => pixelItemAssets(`${color}-wool`, `${color} wool`, 'wool')),
   ...(
     [
       'flint-and-steel',

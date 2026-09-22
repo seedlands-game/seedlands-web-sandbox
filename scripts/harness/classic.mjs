@@ -8,7 +8,10 @@ import { performanceWindowContext, writeMeasurementDeclaration } from './perform
 const artifact = verifyArtifact();
 const runId = process.env.SEEDLANDS_HARNESS_RUN_ID ?? randomUUID();
 const resultPath = resolve(root, 'harness/results', runId, 'classic.json');
-const result = spawnSync('pnpm', ['exec', 'playwright', 'test', '--config', 'playwright.config.ts'], {
+const selectionArgs = process.argv.slice(2);
+if (process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1' && selectionArgs.length)
+  throw new Error('Benchmark must use the complete frozen scenario; test selection is correctness-only.');
+const result = spawnSync('pnpm', ['exec', 'playwright', 'test', '--config', 'playwright.config.ts', ...selectionArgs], {
   cwd: root,
   stdio: 'inherit',
   env: {

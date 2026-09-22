@@ -1,3 +1,4 @@
+import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
 import { BrowserInventoryPointer } from './browser-inventory-pointer';
 import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
 import { BrowserStations } from './browser-stations';
@@ -53,6 +54,7 @@ type Options = {
   executeModeCommand: BrowserModeCommandExecutor;
   onPlayerDamage?: (amount: number) => void;
   onPresentation?: (event: GameplayPresentationEvent) => void;
+  sampleBlockLight?: (position: readonly [number, number, number]) => number;
 };
 
 export class BrowserGameplay {
@@ -85,7 +87,11 @@ export class BrowserGameplay {
       succeeded: (message) => this.feedback(message, 'success'),
       failed: (message) => this.feedback(message, 'error'),
     });
-    this.presenter = new GameplayEntityPresenter(options.app, (id) => this.itemDefinition(id) ?? null);
+    this.presenter = new GameplayEntityPresenter(
+      options.app,
+      (id) => this.itemDefinition(id) ?? null,
+      options.sampleBlockLight,
+    );
     this.viewmodel = new FirstPersonViewmodel(options.app, options.camera);
     this.outline = new VoxelTargetOutline(options.app);
     this.breakOverlay = new VoxelBreakOverlay(options.app);
@@ -261,13 +267,7 @@ export class BrowserGameplay {
         label:
           entity.type === 'world-item' && entity.stack
             ? `${this.itemDefinition(entity.stack.itemId)?.name ?? entity.stack.itemId}掉落物`
-            : entity.archetype === 'grazer'
-              ? '温顺林鹿'
-              : entity.archetype === 'night-stalker'
-                ? '夜行兽'
-                : entity.archetype === 'settler'
-                  ? '营地居民'
-                  : '生物',
+            : (classicCreatureDefinition(entity.archetype ?? '')?.name ?? '生物'),
       })),
     });
   }

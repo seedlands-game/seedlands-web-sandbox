@@ -60,10 +60,7 @@ export type MaterialAsset = AssetRecord<
   }
 >;
 export type VoxelModelAsset = AssetRecord<'builtin-voxel-model', { voxelId: number; materialIds: string[] }>;
-export type ActorModelAsset = AssetRecord<
-  'builtin-actor-model',
-  { kind: 'grazer' | 'stalker' | 'settler' | 'player'; materialIds: string[] }
->;
+export type ActorModelAsset = AssetRecord<'builtin-actor-model', { kind: 'player'; materialIds: string[] }>;
 export type ArmModelAsset = AssetRecord<'builtin-arm-model', { materialIds: string[] }>;
 export type GlbAsset = AssetRecord<
   'glb-model',

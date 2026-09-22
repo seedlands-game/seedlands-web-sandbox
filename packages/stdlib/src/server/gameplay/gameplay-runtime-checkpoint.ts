@@ -24,6 +24,7 @@ import type { NavigationItemsRuntime } from './navigation-items-runtime';
 import type { CropRuntime } from './crop-runtime';
 import type { FinalEntitiesRuntime } from './final-entities-runtime';
 import type { GameplayProgressRuntime } from './gameplay-progress-runtime';
+import type { GameplaySnapshotMigration, GameplaySnapshotMigrationReport } from './gameplay-snapshot-migration';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -48,12 +49,19 @@ type Options = Readonly<{
   crops: CropRuntime;
   finalEntities: FinalEntitiesRuntime;
   progress: GameplayProgressRuntime;
+  snapshotMigration: GameplaySnapshotMigration | null;
   needsPlayerLimit?: number;
   installMetadata(gameplayTime: number, revision: number): void;
 }>;
 
 export class GameplayRuntimeCheckpoint {
+  private lastMigrationReports: readonly GameplaySnapshotMigrationReport[] = [];
+
   constructor(private readonly options: Options) {}
+
+  get migrationReports(): readonly GameplaySnapshotMigrationReport[] {
+    return this.lastMigrationReports;
+  }
 
   create(revision: () => number, gameplayTime: number): GameplaySnapshot.GameplaySnapshotV4 {
     this.options.modules.prepareSnapshot();
@@ -88,14 +96,30 @@ export class GameplayRuntimeCheckpoint {
   restore(raw: unknown): { version: 1 | 2 | 3 | 4; worldTime?: number } {
     const { callbacks } = this.options;
     GameplaySnapshot.validateGameplaySnapshotHeader(raw);
-    this.options.compositionGuard?.validateGameplay(raw);
-    this.options.ruleset.validateGameplay(raw);
-    if (!this.options.compositionGuard && raw && typeof raw === 'object' && 'composition' in raw)
+    const migrated = this.options.snapshotMigration
+      ? this.options.snapshotMigration.migrate(callbacks.platform.clone(raw), {
+          targetComposition: this.options.compositionGuard?.snapshot() ?? null,
+        })
+      : { snapshot: raw, reports: [] as const };
+    GameplaySnapshot.validateGameplaySnapshotHeader(migrated.snapshot);
+    this.options.compositionGuard?.validateGameplay(migrated.snapshot);
+    this.options.ruleset.validateGameplay(migrated.snapshot);
+    if (
+      !this.options.compositionGuard &&
+      migrated.snapshot &&
+      typeof migrated.snapshot === 'object' &&
+      'composition' in migrated.snapshot
+    )
       throw new TypeError('Gameplay composition requires a matching composed host.');
-    const installSchedule = this.options.schedule?.prepareRestore(raw);
-    if (!this.options.schedule && raw && typeof raw === 'object' && 'moduleSchedule' in raw)
+    const installSchedule = this.options.schedule?.prepareRestore(migrated.snapshot);
+    if (
+      !this.options.schedule &&
+      migrated.snapshot &&
+      typeof migrated.snapshot === 'object' &&
+      'moduleSchedule' in migrated.snapshot
+    )
       throw new TypeError('Gameplay module schedule requires a composed host.');
-    const restored = GameplaySnapshot.restoreGameplayRuntimeSnapshot(raw, {
+    const restored = GameplaySnapshot.restoreGameplayRuntimeSnapshot(migrated.snapshot, {
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: callbacks.getWorldTime,
       clone: callbacks.platform.clone,
@@ -136,48 +160,60 @@ export class GameplayRuntimeCheckpoint {
       installMetadata: this.options.installMetadata,
     });
     this.options.difficulty.restore(
-      raw && typeof raw === 'object' && 'difficulty' in raw
-        ? (raw.difficulty as import('./difficulty-runtime').DifficultyCheckpoint)
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'difficulty' in migrated.snapshot
+        ? (migrated.snapshot.difficulty as import('./difficulty-runtime').DifficultyCheckpoint)
         : undefined,
     );
-    if (raw && typeof raw === 'object' && 'environment' in raw && raw.environment)
-      this.options.environment.restore(raw.environment as import('./environment-runtime').EnvironmentCheckpoint);
+    if (
+      migrated.snapshot &&
+      typeof migrated.snapshot === 'object' &&
+      'environment' in migrated.snapshot &&
+      migrated.snapshot.environment
+    )
+      this.options.environment.restore(
+        migrated.snapshot.environment as import('./environment-runtime').EnvironmentCheckpoint,
+      );
     this.options.projectiles.restore(
-      raw && typeof raw === 'object' && 'projectiles' in raw
-        ? (raw.projectiles as import('./projectile-runtime').ProjectileCheckpoint)
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'projectiles' in migrated.snapshot
+        ? (migrated.snapshot.projectiles as import('./projectile-runtime').ProjectileCheckpoint)
         : undefined,
     );
     this.options.lifeSkills.restore(
-      raw && typeof raw === 'object' && 'lifeSkills' in raw
-        ? (raw.lifeSkills as import('./life-skills-runtime').LifeSkillsCheckpoint)
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'lifeSkills' in migrated.snapshot
+        ? (migrated.snapshot.lifeSkills as import('./life-skills-runtime').LifeSkillsCheckpoint)
         : undefined,
     );
     this.options.vehicles.restore(
-      raw && typeof raw === 'object' && 'vehicles' in raw
-        ? (raw.vehicles as import('./vehicle-runtime').VehicleCheckpoint)
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'vehicles' in migrated.snapshot
+        ? (migrated.snapshot.vehicles as import('./vehicle-runtime').VehicleCheckpoint)
         : undefined,
     );
     this.options.navigationItems.restore(
-      raw && typeof raw === 'object' && 'navigationItems' in raw
-        ? (raw.navigationItems as import('./navigation-items-runtime').NavigationItemsCheckpoint)
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'navigationItems' in migrated.snapshot
+        ? (migrated.snapshot.navigationItems as import('./navigation-items-runtime').NavigationItemsCheckpoint)
         : undefined,
     );
     this.options.crops.restore(
-      raw && typeof raw === 'object' && 'crops' in raw
-        ? (raw.crops as import('./crop-runtime').CropCheckpoint)
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'crops' in migrated.snapshot
+        ? (migrated.snapshot.crops as import('./crop-runtime').CropCheckpoint)
         : undefined,
     );
     this.options.finalEntities.restore(
-      raw && typeof raw === 'object' && 'finalEntities' in raw
-        ? (raw.finalEntities as import('./final-entities-runtime').FinalEntitiesCheckpoint)
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'finalEntities' in migrated.snapshot
+        ? (migrated.snapshot.finalEntities as import('./final-entities-runtime').FinalEntitiesCheckpoint)
         : undefined,
     );
     this.options.progress.restore(
-      raw && typeof raw === 'object' && 'progress' in raw
-        ? (raw.progress as import('./gameplay-progress-runtime').GameplayProgressCheckpoint)
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'progress' in migrated.snapshot
+        ? (migrated.snapshot.progress as import('./gameplay-progress-runtime').GameplayProgressCheckpoint)
         : undefined,
     );
     installSchedule?.();
+    this.lastMigrationReports = Object.freeze(
+      migrated.reports.map((report) =>
+        Object.freeze({ id: report.id, removedActorIds: Object.freeze([...report.removedActorIds]) }),
+      ),
+    );
     this.options.modules.clearBindings();
     this.options.registeredBlocks?.takeCommits();
     return restored;

@@ -4,7 +4,11 @@ import type { Asset, ImageTexture, MaterialAsset, NativeAsset } from './asset-ty
 import { validateNativeAssets } from './asset-package';
 import { requireClassicItemDefinition } from './classic-item-registry';
 
-export const appearanceAnimationTargets = ['grazer', 'night-stalker', 'settler'] as const;
+import { classicCreatureKinds } from './classic-creature-definitions';
+
+export const appearanceAnimationTargets = classicCreatureKinds;
+const retiredTargets = new Set(['grazer', 'night-stalker', 'settler']);
+const retiredActorModels = new Set(['grazer', 'stalker', 'settler'].map((kind) => `seedlands:model/actor/${kind}`));
 export const modelAnimationRoles = ['idle', 'move', 'attack', 'hurt'] as const;
 export type AppearanceAnimationTarget = (typeof appearanceAnimationTargets)[number];
 export type ModelAnimationRole = (typeof modelAnimationRoles)[number];
@@ -209,6 +213,7 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
   const materialBindings: Record<string, Record<string, string>> = {};
   const byId = new Map(merged.map((asset) => [asset.id, asset]));
   for (const [modelId, binding] of Object.entries(bindings)) {
+    if (retiredActorModels.has(modelId)) continue;
     const model = byId.get(id(modelId, '模型标识'));
     if (!model || !('materialIds' in model.payload)) throw new Error('材质绑定模型不存在或不支持材质槽');
     if (
@@ -231,6 +236,7 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
     project.animationBindings === undefined ? {} : object(project.animationBindings, '动画绑定');
   const animationBindings: Partial<Record<AppearanceAnimationTarget, AppearanceAnimationBinding>> = {};
   for (const [target, value] of Object.entries(rawAnimationBindings)) {
+    if (retiredTargets.has(target)) continue;
     if (!appearanceAnimationTargets.includes(target as AppearanceAnimationTarget)) throw new Error('动画绑定目标无效');
     const binding = object(value, '动画绑定');
     exactKeys(binding, ['modelId', 'clips'], '动画绑定');
@@ -250,6 +256,7 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
   const thumbnails: Record<string, string> = {};
   if (Object.keys(rawThumbnails).length > MAX_PROJECT_ASSETS) throw new Error('缩略图数量超限');
   for (const [assetId, thumbnail] of Object.entries(rawThumbnails)) {
+    if (retiredActorModels.has(assetId)) continue;
     if (!byId.has(id(assetId))) throw new Error('缩略图引用不存在的资产');
     thumbnails[assetId] = dataUrl(thumbnail, '缩略图');
   }

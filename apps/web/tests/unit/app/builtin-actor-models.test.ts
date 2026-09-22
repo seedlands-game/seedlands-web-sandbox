@@ -6,10 +6,10 @@ const parent = { addChild: vi.fn() };
 
 describe('内置角色外观绑定', () => {
   it('角色部件使用各自目录模型的私有材质绑定', () => {
-    addBuiltinActorModel({ addBox } as never, parent as never, 'grazer');
+    addBuiltinActorModel({ addBox } as never, parent as never, 'player');
 
     expect(addBox).toHaveBeenCalled();
-    expect(addBox.mock.calls.every((call) => call[5]?.modelId === 'seedlands:model/actor/grazer')).toBe(true);
+    expect(addBox.mock.calls.every((call) => call[5]?.modelId === 'seedlands:model/actor/player')).toBe(true);
   });
 
   it('第一人称手臂使用独立的目录模型绑定', () => {

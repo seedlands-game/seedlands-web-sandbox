@@ -8,6 +8,10 @@ import { gameplayContentFromComposition } from '../gameplay/modules/content-capa
 import { BLOCK_RULES_CAPABILITY } from '../gameplay/modules/block-action-model';
 import type { BlockRulesCapabilityV1 } from '../gameplay/modules/block-rules-module';
 import { createVoxelGameplayRegistry } from '../gameplay/voxel-gameplay';
+import {
+  GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY,
+  type GameplaySnapshotMigration,
+} from '../gameplay/gameplay-snapshot-migration';
 
 const contentByComposition = new WeakMap<WorldComposition, GameplayContent>();
 
@@ -69,6 +73,11 @@ export function resolveGameplayComposition(
   return {
     guard: input.composition
       ? createCompositionCheckpointGuard(input.composition, input.legacyCompositionIdentity)
+      : null,
+    snapshotMigration: input.composition?.definitionMap.capabilities.some(
+      ({ id }) => id === GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY,
+    )
+      ? input.composition.capability<GameplaySnapshotMigration>(GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY)
       : null,
     content: input.composition
       ? gameplayContentForComposition(input.composition)

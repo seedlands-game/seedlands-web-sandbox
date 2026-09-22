@@ -83,7 +83,7 @@
             ? '操作指南'
             : '暂停游戏'}
     >
-      <img class="menu-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/arcane-crest.png')} alt="" />
+      <img class="menu-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/classic-crest.png')} alt="" />
       {#if view.performanceWarningOpen}
         <p class="eyebrow">PERFORMANCE NOTICE</p>
         <h2>性能提示</h2>

@@ -127,6 +127,7 @@ export type AuthorityReady = Readonly<{
   frequencies: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
   snapshot: AuthoritySnapshot;
   gameplay: AuthorityGameplayView;
+  snapshotMigrationReports?: readonly import('../gameplay/gameplay-snapshot-migration').GameplaySnapshotMigrationReport[];
   campPosition?: [number, number, number];
 }>;
 

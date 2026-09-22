@@ -360,6 +360,25 @@ export class World {
     return this.authority.getVoxel(x, y, z);
   }
 
+  /** A block-light volume must fail closed while its collision mirror is unavailable. */
+  getVoxelIfLoaded(x: number, y: number, z: number): number | undefined {
+    const cx = floorDiv(x, CHUNK_SIZE);
+    const cy = floorDiv(y, CHUNK_SIZE);
+    const cz = floorDiv(z, CHUNK_SIZE);
+    return this.authority.getChunkRevision(cx, cy, cz) === null ? undefined : this.authority.getVoxel(x, y, z);
+  }
+
+  /** Includes residency as well as revisions, because a baseline may arrive without a world edit. */
+  blockLightRevision(origin: readonly [number, number, number], size: number): string {
+    const max = [origin[0] + size - 1, origin[1] + size - 1, origin[2] + size - 1] as const;
+    const revisions: string[] = [];
+    for (let cy = floorDiv(origin[1], CHUNK_SIZE); cy <= floorDiv(max[1], CHUNK_SIZE); cy += 1)
+      for (let cz = floorDiv(origin[2], CHUNK_SIZE); cz <= floorDiv(max[2], CHUNK_SIZE); cz += 1)
+        for (let cx = floorDiv(origin[0], CHUNK_SIZE); cx <= floorDiv(max[0], CHUNK_SIZE); cx += 1)
+          revisions.push(`${cx},${cy},${cz}:${this.authority.getChunkRevision(cx, cy, cz) ?? 'unavailable'}`);
+    return revisions.join('|');
+  }
+
   getFluidCell(x: number, y: number, z: number) {
     return this.authority.getFluidCell(x, y, z);
   }

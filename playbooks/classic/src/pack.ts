@@ -10,8 +10,6 @@ import {
   defineBlockRulesModule,
   defineModeModule,
   defineNeedsModule,
-  defineFeedingActionsModule,
-  defineFeedingRulesModule,
   defineCombatModule,
   defineCombatRulesModule,
   defineNeedsRulesModule,
@@ -24,8 +22,9 @@ import { overworldBlocks } from './blocks';
 import { overworldItems } from './items';
 import { overworldRecipes } from './recipes';
 import { overworldMeleeDefinitions } from './combat';
-import { overworldActorProfiles, overworldDefaultPlayerMeleeDefinitionId, overworldStarterEcology } from './actors';
+import { overworldActorProfiles, overworldDefaultPlayerMeleeDefinitionId } from './actors';
 import { classicWorldgenProvider } from './worldgen';
+import { classicRetiredActorsMigration } from './retired-actors-migration';
 
 const namespaceId = (id: string) => `seedlands:${id}`;
 const namespaceStack = <Stack extends Readonly<{ itemId: string }>>(stack: Stack) => ({
@@ -60,10 +59,7 @@ export const pack = definePack({
         ...(profile.deathDrop ? { deathDrop: namespaceStack(profile.deathDrop) } : {}),
       })),
       defaultPlayerMeleeDefinitionId: overworldDefaultPlayerMeleeDefinitionId,
-      starterEcology: {
-        ...overworldStarterEcology,
-        initialItem: namespaceStack(overworldStarterEcology.initialItem),
-      },
+      snapshotMigration: classicRetiredActorsMigration,
       stations: {
         ...overworldStations,
         recipes: overworldStations.recipes.map((recipe) =>
@@ -109,13 +105,6 @@ export const pack = definePack({
     defineCombatRulesModule({
       moduleId: 'seedlands:overworld-combat-rules',
       profile: { damageMultiplier: 1, immuneTargetModes: ['creative'] },
-    }),
-    defineFeedingActionsModule(),
-    defineFeedingRulesModule({
-      moduleId: 'seedlands:overworld-feeding-rules',
-      eligibleArchetypes: ['grazer'],
-      deficitThreshold: 50,
-      restore: 'full',
     }),
     defineNeedsModule(),
     defineNeedsRulesModule({

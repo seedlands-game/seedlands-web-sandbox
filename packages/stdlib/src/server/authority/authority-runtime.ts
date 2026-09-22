@@ -26,6 +26,7 @@ import type { AuthorityTransactionIdentity, AuthorityTransactionReceipt } from '
 import { AuthorityResidencyRuntime, type AuthorityResidencyDiagnostics } from './authority-residency-runtime';
 import { advanceAuthoritySession, advancePausedAuthoritySession } from './authority-session-advance';
 import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnostics';
+import { projectAuthorityReady } from './authority-ready';
 import { AuthorityMutationPreparation, unavailableWorldCommit } from './authority-mutation-preparation';
 import { applyAuthorityPlayerAction, unavailableAuthorityPlayerAction } from './authority-player-action';
 import { queueBodyRecoveriesAfterCommit } from './authority-geometry-recovery';
@@ -193,21 +194,17 @@ export class AuthorityRuntime {
   }
 
   ready(): AuthorityReady {
-    const camp = this.server.queryPois(this.initialBodyPosition, 40, 'camp')[0];
-    return {
+    return projectAuthorityReady({
+      server: this.server,
       playerId: this.playerId,
       playerBodyPosition: [...this.initialBodyPosition],
       isNew: this.newPlayer,
-      seed: this.server.seed,
       seedText: this.options.seedText,
-      generatorVersion: this.server.generatorVersion,
-      ...(this.server.worldgenProvider ? { worldgenProvider: this.server.worldgenProvider } : {}),
-      worldTime: this.server.worldTime,
       frequencies: this.frequencies,
-      snapshot: withAuthorityResidencyDiagnostics(this.session.currentSnapshot, this.residency.diagnostics),
+      snapshot: this.session.currentSnapshot,
+      residency: this.residency.diagnostics,
       gameplay: this.view(),
-      ...(camp ? { campPosition: [...camp.position] as [number, number, number] } : {}),
-    };
+    });
   }
 
   wake(nowMs: number): AuthoritySnapshot {

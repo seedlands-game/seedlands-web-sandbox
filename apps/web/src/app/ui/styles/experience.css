@@ -63,6 +63,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  image-rendering: pixelated;
 }
 .vital-empty {
   filter: grayscale(1) brightness(0.26);
@@ -73,11 +74,11 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(var(--hotbar-columns, 8), minmax(0, 1fr));
-  gap: 4px;
-  padding: 5px;
-  border-width: 5px;
-  border-image-width: 11px;
-  background: #101514ed;
+  gap: 2px;
+  padding: 4px;
+  border: 4px solid #1d1d1d;
+  border-image: none;
+  background: #888;
 }
 #hotbar li {
   display: block;
@@ -91,22 +92,21 @@
   height: var(--slot-size);
   min-height: 38px;
   min-width: 0;
-  padding: 4px;
-  border: 2px solid transparent;
+  padding: 3px;
+  border: 2px solid #202020;
   border-radius: 0;
-  background:
-    linear-gradient(#02070770, #02070770),
-    url('/assets/ui/obsidian-hotbar-slot.png') center / 100% 100%;
-  box-shadow:
-    inset 0 0 0 1px #080b0a,
-    inset 0 0 16px #0009;
+  background: url('/assets/ui/classic-hotbar-slot.png') center / 100% 100%;
+  background-color: #222;
+  image-rendering: pixelated;
+  box-shadow: none;
 }
 #ui #hotbar .game-slot.active {
-  border-color: #ffdd84;
-  background: url('/assets/ui/obsidian-hotbar-slot.png') center / 100% 100%;
+  border-color: #f5f5f5;
+  background: url('/assets/ui/classic-hotbar-slot.png') center / 100% 100%;
+  transform: none;
   box-shadow:
-    inset 0 0 0 1px #9c7335,
-    0 0 10px #eaba5480;
+    inset 0 0 0 1px #1f1f1f,
+    0 0 0 1px #1f1f1f;
 }
 #hotbar .slot-swatch {
   position: absolute;
@@ -129,17 +129,15 @@
   bottom: -3px;
   left: 50%;
   transform: translateX(-50%);
-  background: #151817;
+  background: #202020;
   padding: 1px 4px;
-  font:
-    11px Georgia,
-    serif;
-  color: #d1c7ad;
+  font: 11px var(--ui-font-mono);
+  color: #fff;
 }
 #hotbar .slot-count {
   right: 3px;
   bottom: 9px;
-  color: #fff3d4;
+  color: #fff;
   font-size: 15px;
 }
 #world-clock {
@@ -148,14 +146,11 @@
   bottom: auto;
   transform: none;
   padding: 10px 14px;
-  font:
-    12px Georgia,
-    'Songti SC',
-    serif;
+  font: 12px var(--ui-font-mono);
   border-width: 6px;
   border-color: transparent;
   border-image-width: 12px;
-  color: #dfc692;
+  color: #f4f4f4;
 }
 #target-card {
   position: absolute;
@@ -169,7 +164,7 @@
   padding: 6px 12px;
   border-width: 7px;
   border-image-width: 16px;
-  color: #f8edd5;
+  color: #f4f4f4;
 }
 #target-card .item-icon {
   width: 48px;
@@ -177,9 +172,10 @@
   object-fit: contain;
 }
 #target-card .target-crest {
-  width: 34px;
-  height: 40px;
+  width: 86px;
+  height: 16px;
   object-fit: contain;
+  image-rendering: pixelated;
 }
 .target-details {
   display: grid;
@@ -187,14 +183,11 @@
   min-width: 100px;
 }
 .target-details strong {
-  font:
-    16px Georgia,
-    'Songti SC',
-    serif;
+  font: 16px var(--ui-font-mono);
 }
 #target-card small {
   font-size: 10px;
-  color: #b4b6a5;
+  color: #ddd;
   letter-spacing: 0.05em;
 }
 #target-card #break-progress {
@@ -289,10 +282,10 @@
   min-height: auto;
 }
 #ui .pause-actions .game-button:first-child {
-  background: #164440;
+  background: #707070;
   box-shadow:
-    inset 0 0 0 1px #568c7e,
-    inset 0 0 18px #061e1f;
+    inset 2px 2px 0 #aaa,
+    inset -2px -2px 0 #3b3b3b;
 }
 #ui .map-toggle {
   position: absolute;
@@ -310,14 +303,14 @@
   min-height: 32px;
 }
 .shell-scrim {
-  background: #03060780;
-  backdrop-filter: blur(2px);
+  background: rgb(0 0 0 / 62%);
+  backdrop-filter: none;
 }
 .shell-dialog {
   border-width: 14px;
   border-image-width: 22px;
   padding: 24px 28px;
-  background: #0d1415;
+  background: #5b5b5b;
 }
 .shell-dialog[data-kind='pause'] {
   width: min(380px, 100%);
@@ -326,26 +319,22 @@
 }
 .menu-crest {
   display: block;
-  width: 160px;
-  height: 62px;
+  width: 172px;
+  height: 32px;
   object-fit: contain;
+  image-rendering: pixelated;
   margin: -6px auto 10px;
 }
 #ui .shell-dialog h2 {
-  font:
-    24px Georgia,
-    'Songti SC',
-    serif;
+  font: 24px var(--ui-font-display);
   letter-spacing: 0.12em;
-  color: #ead6aa;
+  color: #fff;
 }
 #ui .shell-dialog .eyebrow {
   text-align: center;
-  font:
-    9px Georgia,
-    serif;
+  font: 9px var(--ui-font-mono);
   letter-spacing: 0.15em;
-  color: #a38b5d;
+  color: #ddd;
 }
 .shell-dialog .pause-subtitle {
   font-size: 12px;

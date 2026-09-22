@@ -1,4 +1,5 @@
 import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
 import type { RenderCategory } from '@seedlands/stdlib/world/mesh';
 export type { RenderCategory } from '@seedlands/stdlib/world/mesh';
 
@@ -17,10 +18,7 @@ export type RenderPipelineSnapshot = Omit<typeof FINAL_RENDER_PIPELINE, 'backend
 };
 
 export function renderCategoryForFaceMaterial(material: FaceMaterialId): RenderCategory {
-  if (material === FaceMaterial.Leaves || material === FaceMaterial.Glass) return 'cutout';
-  if (material === FaceMaterial.Water || material === FaceMaterial.Ice) return 'transparent';
-  if (material === FaceMaterial.LanternGlow) return 'emissive';
-  return 'opaque';
+  return renderCategoryForMaterial(material);
 }
 
 export const shaderInventory = [

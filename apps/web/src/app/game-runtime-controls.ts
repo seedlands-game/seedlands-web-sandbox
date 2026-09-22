@@ -145,3 +145,17 @@ export function toggleCommandShell(uiBridge: UiBridge, controller: { releaseInpu
   if (open) controller?.releaseInput();
   uiBridge.publishShell({ commandOpen: open });
 }
+
+export function reportSnapshotMigration(
+  session: UiWorldSession | null,
+  sequence: number,
+  reports: readonly { removedActorIds: readonly string[] }[] | undefined,
+): void {
+  const removed = new Set(reports?.flatMap((report) => [...report.removedActorIds]) ?? []).size;
+  if (!removed) return;
+  session?.publishFeedback(sequence, {
+    message: `世界兼容迁移完成：已移除 ${removed} 个退役角色。`,
+    tone: 'info',
+    durationMs: 8_000,
+  });
+}

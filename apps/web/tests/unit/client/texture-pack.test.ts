@@ -31,4 +31,17 @@ describe('纹理源与编译合同', () => {
     texture.payload.width = 32;
     expect(() => validateTerrainTexture(texture, FaceMaterial.Dirt)).toThrow();
   });
+  it('八类Classic发光面具有独立的表面emission元数据', () => {
+    for (const face of [
+      FaceMaterial.Glowstone,
+      FaceMaterial.LanternGlow,
+      FaceMaterial.Lava,
+      FaceMaterial.Fire,
+      FaceMaterial.Torch,
+      FaceMaterial.JackOLantern,
+      FaceMaterial.LitFurnace,
+      FaceMaterial.LitRedstoneOre,
+    ])
+      expect(terrainMaterials.find((material) => material.faceMaterial === face)?.emissiveIntensity).toBeGreaterThan(0);
+  });
 });

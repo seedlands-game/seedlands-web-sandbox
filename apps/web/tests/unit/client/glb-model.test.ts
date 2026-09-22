@@ -154,7 +154,7 @@ describe('有界 GLB', () => {
   });
 
   it('接受真实 skin + clip 样例并返回可绑定片段', () => {
-    const bytes = readFileSync('apps/web/public/models/voxel-settler-animated.glb');
+    const bytes = readFileSync('apps/web/tests/fixtures/skinned-actor.glb');
     const stats = validateStaticGlb(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
     expect(stats.skinCount).toBeGreaterThan(0);
     expect(stats.animationClips.map((clip) => clip.name)).toEqual(expect.arrayContaining(['Idle', 'Walk', 'Attack']));
@@ -162,7 +162,7 @@ describe('有界 GLB', () => {
   });
 
   it('拒绝真实动画输出中的非有限浮点数', () => {
-    const bytes = readFileSync('apps/web/public/models/voxel-settler-animated.glb');
+    const bytes = readFileSync('apps/web/tests/fixtures/skinned-actor.glb');
     expect(() => validateStaticGlb(mutateFirstAnimationOutputToNaN(bytes))).toThrow(/NaN|Infinity|有限/);
   });
 
@@ -267,9 +267,9 @@ describe('有界 GLB', () => {
       validateAppearanceProject({
         ...oldProject,
         animationBindings: {
-          settler: { modelId: 'glb:settler', clips: { idle: 'Idle', move: 'Walk', attack: 'Attack' } },
+          pig: { modelId: 'glb:settler', clips: { idle: 'Idle', move: 'Walk', attack: 'Attack' } },
         },
-      }).animationBindings?.settler,
+      }).animationBindings?.pig,
     ).toEqual({ modelId: 'glb:settler', clips: { idle: 'Idle', move: 'Walk', attack: 'Attack' } });
     expect(() =>
       validateAppearanceProject({

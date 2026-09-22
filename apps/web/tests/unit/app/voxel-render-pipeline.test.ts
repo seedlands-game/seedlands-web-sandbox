@@ -10,6 +10,7 @@ describe('voxel render pipeline policy', () => {
   it('maps face materials to four stable render categories', () => {
     expect(renderCategoryForFaceMaterial(FaceMaterial.Stone)).toBe('opaque');
     expect(renderCategoryForFaceMaterial(FaceMaterial.Leaves)).toBe('cutout');
+    expect(renderCategoryForFaceMaterial(FaceMaterial.DeadBush)).toBe('cutout');
     expect(renderCategoryForFaceMaterial(FaceMaterial.Water)).toBe('transparent');
     expect(renderCategoryForFaceMaterial(FaceMaterial.Glowstone)).toBe('opaque');
     expect(renderCategoryForFaceMaterial(FaceMaterial.LanternFrame)).toBe('opaque');

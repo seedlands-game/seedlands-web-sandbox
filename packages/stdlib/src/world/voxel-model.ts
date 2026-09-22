@@ -14,6 +14,16 @@ const box = (min: LocalBox['min'], max: LocalBox['max'], material: FaceMaterialI
   max,
   material,
 });
+const crossedPlantMaterials = new Map<number, FaceMaterialId>([
+  [Voxel.Sapling, FaceMaterial.Sapling],
+  [Voxel.TallGrass, FaceMaterial.TallGrass],
+  [Voxel.Flower, FaceMaterial.Flower],
+  [Voxel.Mushroom, FaceMaterial.Mushroom],
+  [Voxel.SugarCane, FaceMaterial.SugarCane],
+  [Voxel.DeadBush, FaceMaterial.DeadBush],
+  [Voxel.RedFlower, FaceMaterial.RedFlower],
+  [Voxel.RedMushroom, FaceMaterial.RedMushroom],
+]);
 const models = new Map<number, readonly VoxelModelBox[]>([
   [Voxel.Rail, [box([0, 0, 0], [1, 0.08, 1], FaceMaterial.Rail)]],
   [Voxel.PoweredRail, [box([0, 0, 0], [1, 0.08, 1], FaceMaterial.PoweredRail)]],
@@ -62,6 +72,18 @@ export function modelBoxesForVoxel(voxel: number): readonly VoxelModelBox[] {
   return voxel === Voxel.Lantern ? lanternModel : (models.get(voxel) ?? []);
 }
 
+/**
+ * Classic foliage is rendered as crossed cutout planes rather than a collision box or a full cube.
+ * The material remains authoritative here so world, item, and Wasm descriptor consumers share IDs.
+ */
+export function crossedPlantMaterialForVoxel(voxel: number): FaceMaterialId | undefined {
+  return crossedPlantMaterials.get(voxel);
+}
+
+export function hasVoxelModelGeometry(voxel: number): boolean {
+  return modelBoxesForVoxel(voxel).length > 0 || crossedPlantMaterialForVoxel(voxel) !== undefined;
+}
+
 export function collisionBoxesForVoxel(voxel: number): readonly LocalBox[] {
   if (!isSolid(voxel)) return [];
   if (voxel === Voxel.Ladder || voxel === Voxel.Torch || voxel === Voxel.Sign) return [];
@@ -71,7 +93,5 @@ export function collisionBoxesForVoxel(voxel: number): readonly LocalBox[] {
 }
 
 export function voxelOccludesFullFace(voxel: number): boolean {
-  return (
-    isSolid(voxel) && voxel !== Voxel.Lantern && voxel !== Voxel.Glass && voxel !== Voxel.Ice && !models.has(voxel)
-  );
+  return isSolid(voxel) && voxel !== Voxel.Glass && voxel !== Voxel.Ice && !hasVoxelModelGeometry(voxel);
 }

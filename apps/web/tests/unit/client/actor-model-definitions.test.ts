@@ -11,7 +11,7 @@ import {
 
 describe('内置角色模型定义', () => {
   it('将现有生物、完整人物和第一人称手臂声明为可复用构件', () => {
-    expect(Object.keys(actorModelDefinitions).sort()).toEqual(['grazer', 'player', 'settler', 'stalker']);
+    expect(Object.keys(actorModelDefinitions).sort()).toEqual(['player']);
     expect(playerModelDefinition.parts).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: 'player-arm-right-sleeve' })]),
     );
@@ -27,9 +27,6 @@ describe('内置角色模型定义', () => {
     const head = playerModelDefinition.parts.find((part) => part.id === 'player-head')!;
     const torso = playerModelDefinition.parts.find((part) => part.id === 'player-torso')!;
     const leftLeg = playerModelDefinition.parts.find((part) => part.id === 'player-leg-left')!;
-    const settlerHead = actorModelDefinitions.settler.parts.find((part) => part.id === 'settler-head')!;
-    const settlerTorso = actorModelDefinitions.settler.parts.find((part) => part.id === 'settler-tunic')!;
-    const settlerArm = actorModelDefinitions.settler.parts.find((part) => part.id === 'arm-right-sleeve')!;
     expect(rightArm.scale).toEqual(sleeve.scale);
     expect(sleeve.position).toEqual([0, 0.1875, 0]);
     expect(hand.position).toEqual([0, -0.1875, 0]);
@@ -38,9 +35,6 @@ describe('内置角色模型定义', () => {
     expect(head).toMatchObject({ position: [0, 1.75, 0], scale: [0.5, 0.5, 0.5] });
     expect(torso).toMatchObject({ position: [0, 1.125, 0], scale: [0.5, 0.75, 0.25] });
     expect(leftLeg).toMatchObject({ position: [-0.125, 0.375, 0], scale: [0.25, 0.75, 0.25] });
-    expect(settlerHead).toMatchObject({ position: [0, 1.75, 0], scale: [0.5, 0.5, 0.5] });
-    expect(settlerTorso).toMatchObject({ position: [0, 1.125, 0], scale: [0.5, 0.75, 0.25] });
-    expect(settlerArm).toMatchObject({ position: [0.375, 1.3125, 0], scale: [0.25, 0.375, 0.25] });
   });
 });
 
